@@ -447,6 +447,7 @@ struct LLVMEmitter {
     , m_tcMM(new TCMemoryManager(areas))
     , m_valueInfo(unit.next_vr)
     , m_blocks(unit.blocks.size())
+    , m_incomingVmFp(unit.blocks.size())
     , m_unit(unit)
     , m_areas(areas)
   {
@@ -474,11 +475,12 @@ struct LLVMEmitter {
     }
 
     auto args = m_function->arg_begin();
-    m_valueInfo[Vreg(x64::rVmSp)].llval = args++;
-    m_rVmTl = m_valueInfo[Vreg(x64::rVmTl)].llval = args++;
-    m_rVmTl->setName("rVmTl");
-    m_rVmFp = m_valueInfo[Vreg(x64::rVmFp)].llval = args++;
-    m_rVmFp->setName("rVmFp");
+    args->setName("rVmSp");
+    defineValue(x64::rVmSp, args++);
+    args->setName("rVmTl");
+    defineValue(x64::rVmTl, args++);
+    args->setName("rVmFp");
+    defineValue(x64::rVmFp, args++);
 
     // Commonly used types and values.
     m_int8  = m_irb.getInt8Ty();
@@ -748,7 +750,7 @@ struct LLVMEmitter {
    */
   llvm::Value* value(Vreg tmp) const {
     auto& info = m_valueInfo.at(tmp);
-    always_assert(info.llval);
+    always_assert_flog(info.llval, "No llvm value exists for {}", show(tmp));
     return info.llval;
   }
 
@@ -1028,6 +1030,9 @@ VASM_OPCODES
   // Vlabel -> llvm::BasicBlock map
   jit::vector<llvm::BasicBlock*> m_blocks;
 
+  // Vlabel -> Value for rVmFp entering a vasm block
+  jit::vector<llvm::Value*> m_incomingVmFp;
+
   jit::hash_map<llvm::BasicBlock*, PhiInfo> m_phiInfos;
 
   // Pending Fixups that must be processed after codegen
@@ -1046,10 +1051,6 @@ VASM_OPCODES
 
   const Vunit& m_unit;
   Vasm::AreaList& m_areas;
-
-  // Special regs.
-  llvm::Value* m_rVmTl{nullptr};
-  llvm::Value* m_rVmFp{nullptr};
 
   // Faux personality for emitting landingpad.
   llvm::Function* m_personalityFunc;
@@ -1099,8 +1100,13 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     auto& b = m_unit.blocks[label];
     m_irb.SetInsertPoint(block(label));
 
-    // TODO(#5376594): before rVmFp is SSA-ified we are using the hack below.
-    m_valueInfo[Vreg(x64::rVmFp)].llval = m_rVmFp;
+    // If this isn't the first block of the unit, load the incoming value of
+    // rVmFp from our pred(s).
+    if (label != labels.front()) {
+      auto& inFp = m_incomingVmFp[label];
+      always_assert(inFp);
+      defineValue(x64::rVmFp, inFp);
+    }
 
     for (auto& inst : b.code) {
       if (traceInstrs) {
@@ -1220,7 +1226,6 @@ O(subq) \
 O(subqi) \
 O(subsd) \
 O(svcreq) \
-O(syncvmfp) \
 O(syncvmsp) \
 O(testb) \
 O(testbi) \
@@ -1306,6 +1311,22 @@ O(phidef)
         defineValue(def, inst);
       });
     }
+
+    // Since rVmFp isn't SSA in vasm code, we manually propagate its value
+    // across control flow edges.
+    for (auto label : succs(b)) {
+      auto& inFp = m_incomingVmFp[label];
+      // If this assertion fails it's either a bug in the incoming code or it
+      // just means we'll need to insert phi nodes to merge the value.
+      always_assert(inFp == nullptr || inFp == value(x64::rVmFp));
+      inFp = value(x64::rVmFp);
+    }
+
+    // Any values for these ABI registers aren't meant to last past the end of
+    // the block.
+    defineValue(x64::rVmSp, nullptr);
+    defineValue(x64::rVmFp, nullptr);
+    defineValue(x64::rStashedAR, nullptr);
   }
 
   finalize();
@@ -2387,10 +2408,6 @@ void LLVMEmitter::emit(const svcreq& inst) {
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_SR);
   call->setTailCallKind(llvm::CallInst::TCK_Tail);
   m_irb.CreateRetVoid();
-}
-
-void LLVMEmitter::emit(const syncvmfp& inst) {
-  // Nothing to do really.
 }
 
 void LLVMEmitter::emit(const syncvmsp& inst) {

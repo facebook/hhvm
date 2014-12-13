@@ -17,6 +17,7 @@
 #define incl_HPHP_JIT_SERVICE_REQUESTS_X64_H_
 
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
@@ -64,7 +65,7 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
 void emitBindCall(Vout& v, CodeBlock& frozen,
                   const Func* funcd, int numArgs);
 void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* funcd,
-                        int numArgs);
+                        int numArgs, Vreg inSp, Vreg outSp);
 
 // An intentionally funny-looking-in-core-dumps constant for uninitialized
 // instruction pointers.

@@ -330,7 +330,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(landingpad, Inone, Un, Dn)\
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
-  O(syncvmfp, Inone, U(s), Dn)\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
@@ -520,9 +519,15 @@ struct svcreq { ServiceRequest req; Vtuple args; TCA stub_block; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 struct landingpad {};
+
+/* Copy rVmSp into d. Used when reentering translated code after an ABI
+ * boundary, such as the beginning of a tracelet or right after a bindcall. */
 struct defvmsp { Vreg d; };
+
+/* Copy s into rVmSp. Used right before leaving translated code for an ABI
+ * boundary, such as bindjmp or fallbackcc. */
 struct syncvmsp { Vreg s; };
-struct syncvmfp { Vreg s; };
+
 struct srem { Vreg s0, s1, d; };
 struct sar { Vreg s0, s1, d; VregSF sf; };
 struct shl { Vreg s0, s1, d; VregSF sf; };

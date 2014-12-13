@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_VASM_REG_H_
 #define incl_HPHP_JIT_VASM_REG_H_
 
+#include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 
 namespace HPHP { namespace jit {

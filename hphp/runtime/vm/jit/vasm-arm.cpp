@@ -571,9 +571,6 @@ void lower(Vunit& unit) {
         case Vinstr::syncvmsp:
           inst = copy{inst.syncvmsp_.s, PhysReg{arm::rVmSp}};
           break;
-        case Vinstr::syncvmfp:
-          inst = copy{inst.syncvmfp_.s, PhysReg{arm::rVmFp}};
-          break;
         default:
           break;
       }

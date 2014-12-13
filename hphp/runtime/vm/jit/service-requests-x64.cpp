@@ -229,16 +229,14 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
 }
 
 void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* func,
-                        int numArgs) {
+                        int numArgs, Vreg inSp, Vreg outSp) {
   assert(isNativeImplCall(func, numArgs));
   auto retAddr = (int64_t)mcg->tx().uniqueStubs.retHelper;
-  v << store{v.cns(retAddr), rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]};
+  v << store{v.cns(retAddr), inSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]};
   assert(numArgs == func->numLocals());
   assert(func->numIterators() == 0);
-  v << lea{rVmSp[cellsToBytes(numArgs)], rVmFp};
+  v << lea{inSp[cellsToBytes(numArgs)], rVmFp};
   emitCheckSurpriseFlagsEnter(v, vc, Fixup{0, numArgs});
-  // rVmSp is already correctly adjusted, because there's no locals
-  // other than the arguments passed.
   BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
   if (false) { // typecheck
     ActRec* ar = nullptr;
@@ -254,7 +252,7 @@ void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* func,
    */
   if (mcg->fixupMap().eagerRecord(func)) {
     emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()),
-                       rVmFp, rVmSp);
+                       rVmFp, inSp);
   }
   v << vcall{CppCall::direct(builtinFuncPtr), v.makeVcallArgs({{rVmFp}}),
              v.makeTuple({}), Fixup{0, numArgs}};
@@ -289,9 +287,7 @@ void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* func,
 
   emitRB(v, Trace::RBTypeFuncExit, func->fullName()->data());
   auto adjust = safe_cast<int>(sizeof(ActRec) + cellsToBytes(nLocalCells-1));
-  if (adjust) {
-    v << addqi{adjust, rVmSp, rVmSp, v.makeReg()};
-  }
+  v << lea{inSp[adjust], outSp};
 }
 
 /*
@@ -312,7 +308,7 @@ void emitBindCall(Vout& v, CodeBlock& frozen,
     emitImmStoreq(v, kUninitializedRIP, rVmSp[off]);
   }
   v << lea{rVmSp[cellsToBytes(numArgs)], rStashedAR};
-  v << bindcall{addr, RegSet(rStashedAR)};
+  v << bindcall{addr, kCrossCallRegs};
 }
 
 }}}

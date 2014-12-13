@@ -2230,7 +2230,6 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   auto sp = srcLoc(inst, 0).reg();
   auto fp = srcLoc(inst, 1).reg();
   v << syncvmsp{sp};
-  v << syncvmfp{fp};
 
   // Return control to caller
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -2454,7 +2453,6 @@ void CodeGenerator::cgStLocNT(IRInstruction* inst) {
 
 void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
   auto& v = vmain();
-  v << syncvmfp{srcLoc(inst, 0).reg()};
   v << syncvmsp{srcLoc(inst, 1).reg()};
 }
 
@@ -3203,7 +3201,6 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   auto pc = v.cns(inst->extra<CallArray>()->pc);
   auto after = v.cns(inst->extra<CallArray>()->after);
   auto target = mcg->tx().uniqueStubs.fcallArrayHelper;
-  v << syncvmfp{srcLoc(inst, 1 /* fp */).reg()};
   v << syncvmsp{srcLoc(inst, 0 /* sp */).reg()};
   v << copy2{pc, after, argNumToRegName[0], argNumToRegName[1]};
   v << callstub{target, argSet(2) | kCrossTraceRegs,
@@ -3212,8 +3209,9 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
-  auto const rSP   = srcLoc(inst, 0).reg();
-  auto const rFP   = srcLoc(inst, 1).reg();
+  auto const rSP    = srcLoc(inst, 0).reg();
+  auto const rFP    = srcLoc(inst, 1).reg();
+  auto const rNewSP = dstLoc(inst, 0).reg();
   auto const srcKey = inst->marker().sk();
   auto const extra  = inst->extra<Call>();
   auto const callee = extra->callee;
@@ -3223,14 +3221,13 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto const ar = argc * sizeof(TypedValue);
   v << store{rFP, rSP[ar + AROFF(m_sfp)]};
   v << storeli{safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]};
-  v << syncvmfp{rFP};
-  v << syncvmsp{rSP};
   if (isNativeImplCall(callee, argc)) {
-    emitCallNativeImpl(v, vcold(), srcKey, callee, argc);
+    emitCallNativeImpl(v, vcold(), srcKey, callee, argc, rSP, rNewSP);
   } else {
+    v << syncvmsp{rSP};
     emitBindCall(v, m_state.frozen, callee, argc);
+    v << defvmsp{rNewSP};
   }
-  v << defvmsp{dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgCastStk(IRInstruction *inst) {
@@ -4012,7 +4009,6 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
   auto const rSP = srcLoc(inst, 0).reg();
   auto const baseOff = cellsToBytes(inst->extra<GuardStk>()->offset);
   auto& v = vmain();
-  v << syncvmfp{srcLoc(inst, 1).reg()};
   v << syncvmsp{srcLoc(inst, 0).reg()};
   emitTypeGuard(inst->marker(), inst->typeParam(),
                 rSP[baseOff + TVOFF(m_type)],
@@ -4033,7 +4029,6 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
   auto const rFP = srcLoc(inst, 0).reg();
   auto const baseOff = localOffset(inst->extra<GuardLoc>()->locId);
   auto& v = vmain();
-  v << syncvmfp{srcLoc(inst, 0).reg()};
   v << syncvmsp{srcLoc(inst, 1).reg()};
   emitTypeGuard(inst->marker(), inst->typeParam(),
                 rFP[baseOff + TVOFF(m_type)],
@@ -4294,12 +4289,11 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   auto& v = vmain();
   auto const sf = v.makeReg();
-  v << syncvmfp{srcLoc(inst, 5 /* fp */).reg()};
-  v << syncvmsp{srcLoc(inst, 6 /* sp */).reg()};
   emitReffinessTest(inst, sf,
     [&](Vout& v, ConditionCode cc, Vreg sfTaken) {
       auto& marker = inst->marker();
       auto dest = SrcKey(getFunc(marker), marker.bcOff(), resumed(marker));
+      v << syncvmsp{srcLoc(inst, 6 /* sp */).reg()};
       v << fallbackcc{cc, sfTaken, dest, TransFlags(), kCrossTraceRegs};
     });
 }
@@ -4964,7 +4958,6 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   auto sp = dstLoc(inst, 0).reg();
   v << load{rVmTl[RDS::kVmfpOff], fp};
   v << load{rVmTl[RDS::kVmspOff], sp};
-  v << syncvmfp{fp};
   v << syncvmsp{sp};
   emitServiceReq(v, nullptr, REQ_RESUME, {});
 }
@@ -4980,7 +4973,6 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   v << store{curFpReg, genFpReg[AROFF(m_sfp)]};
   v << storeli{returnOff, genFpReg[AROFF(m_soff)]};
   v << copy{genFpReg, curFpReg};
-  v << syncvmfp{curFpReg};
   v << syncvmsp{curSpReg};
   v << contenter{curFpReg, addrReg, kCrossTraceRegs};
   // curFpReg->m_savedRip will point here, and the next HHIR opcode must

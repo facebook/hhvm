@@ -1144,10 +1144,6 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
           inst = copy{inst.syncvmsp_.s, rVmSp};
           break;
 
-        case Vinstr::syncvmfp:
-          inst = copy{inst.syncvmfp_.s, rVmFp};
-          break;
-
         case Vinstr::ldretaddr:
           inst = pushm{inst.ldretaddr_.s};
           break;

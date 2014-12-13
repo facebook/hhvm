@@ -185,6 +185,18 @@
                     ]
                 },
                 {
+                    "name": "result",
+                    "desc": "Return the wait handle's result if it is already finished (and valid), throw an exception otherwise",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A result of the operation represented by given wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "isFinished",
                     "desc": "Check if this wait handle finished (succeeded or failed)",
                     "flags": [

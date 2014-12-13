@@ -85,7 +85,7 @@ let declare content =
                   (fst method_.Nast.m_name)
             | None -> ());
             declared_classes := SSet.add cname !declared_classes;
-            Typing_decl.class_decl c;
+            Typing_decl.class_decl nenv c;
             ()
         | _ -> ()
       end ast;

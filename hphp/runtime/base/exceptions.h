@@ -134,19 +134,6 @@ struct RequestMemoryExceededException : ResourceExceededException {
 
 //////////////////////////////////////////////////////////////////////
 
-class ParseTimeFatalException : public Exception {
-public:
-  ParseTimeFatalException(const char* file, int line,
-                          const char* msg, ...) ATTRIBUTE_PRINTF(4,5);
-  EXCEPTION_COMMON_IMPL(ParseTimeFatalException);
-
-  void setParseFatal(bool b = true) { m_parseFatal = b; }
-
-  std::string m_file;
-  int m_line;
-  bool m_parseFatal;
-};
-
 class ExitException : public ExtendedException {
 public:
   static std::atomic<int> ExitCode; // XXX should not be static

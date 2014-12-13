@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/parser/parser.h"
@@ -410,6 +411,10 @@ const Func* Class::getDeclaredCtor() const {
   return f->name() != s_86ctor.get() ? f : nullptr;
 }
 
+LowFuncPtr Class::getCachedInvoke() const {
+  assert(IMPLIES(m_invoke, !m_invoke->isStatic() || m_invoke->isClosureBody()));
+  return m_invoke;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Builtin classes.
@@ -622,44 +627,44 @@ TypedValue* Class::getSPropData(Slot index) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Property lookup and accessibility.
 
-Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
-                             bool& accessible) const {
-  Slot propInd = lookupDeclProp(key);
+Class::PropLookup<Slot> Class::getDeclPropIndex(
+  const Class* ctx,
+  const StringData* key
+) const {
+  auto const propInd = lookupDeclProp(key);
+
+  auto accessible = false;
+
   if (propInd != kInvalidSlot) {
-    Attr attrs = m_declProperties[propInd].m_attrs;
+    auto const attrs = m_declProperties[propInd].m_attrs;
     if ((attrs & (AttrProtected|AttrPrivate)) &&
         !g_context->debuggerSettings.bypassCheck) {
-      // Fetch 'baseClass', which is the class in the inheritance
-      // tree which first declared the property
-      Class* baseClass = m_declProperties[propInd].m_class;
+      // Fetch the class in the inheritance tree which first declared the
+      // property
+      auto const baseClass = m_declProperties[propInd].m_class;
       assert(baseClass);
-      // If ctx == baseClass, we know we have the right property
-      // and we can stop here.
-      if (ctx == baseClass) {
-        accessible = true;
-        return propInd;
-      }
-      // The anonymous context cannot access protected or private
-      // properties, so we can fail fast here.
-      if (ctx == nullptr) {
-        accessible = false;
-        return propInd;
-      }
+
+      // If ctx == baseClass, we have the right property and we can stop here.
+      if (ctx == baseClass) return PropLookup<Slot> { propInd, true };
+
+      // The anonymous context cannot access protected or private properties, so
+      // we can fail fast here.
+      if (ctx == nullptr) return PropLookup<Slot> { propInd, false };
+
       assert(ctx);
       if (attrs & AttrPrivate) {
         // ctx != baseClass and the property is private, so it is not
-        // accessible. We need to keep going because ctx may define a
-        // private property with this name.
+        // accessible. We need to keep going because ctx may define a private
+        // property with this name.
         accessible = false;
       } else {
         if (ctx == (Class*)-1 || ctx->classof(baseClass)) {
-          // the special ctx (Class*)-1 is used by unserialization to
+          // The special ctx (Class*)-1 is used by unserialization to
           // mean that protected properties are ok. Otherwise,
           // ctx is derived from baseClass, so we know this protected
           // property is accessible and we know ctx cannot have private
           // property with the same name, so we're done.
-          accessible = true;
-          return propInd;
+          return PropLookup<Slot> { propInd, true };
         }
         if (!baseClass->classof(ctx)) {
           // ctx is not the same, an ancestor, or a descendent of baseClass,
@@ -667,8 +672,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
           // be the same or an ancestor of this, so we don't need to check if
           // ctx declares a private property with the same name and we can
           // fail fast here.
-          accessible = false;
-          return propInd;
+          return PropLookup<Slot> { propInd, false };
         }
         // We now know this protected property is accessible, but we need to
         // keep going because ctx may define a private property with the same
@@ -682,105 +686,95 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
       accessible = true;
       // If ctx == this, we don't have to check if ctx defines a private
       // property with the same name and we can stop here.
-      if (ctx == this) {
-        return propInd;
-      }
-      // We still need to check if ctx defines a private property with the
-      // same name.
+      if (ctx == this) return PropLookup<Slot> { propInd, true };
+
+      // We still need to check if ctx defines a private property with the same
+      // name.
     }
   } else {
     // We didn't find a visible declared property in this's property map
     accessible = false;
   }
-  // If ctx is an ancestor of this, check if ctx has a private property
-  // with the same name.
+
+  // If ctx is an ancestor of this, check if ctx has a private property with the
+  // same name.
   if (ctx && ctx != (Class*)-1 && classof(ctx)) {
-    Slot ctxPropInd = ctx->lookupDeclProp(key);
+    auto const ctxPropInd = ctx->lookupDeclProp(key);
+
     if (ctxPropInd != kInvalidSlot &&
         ctx->m_declProperties[ctxPropInd].m_class == ctx &&
         (ctx->m_declProperties[ctxPropInd].m_attrs & AttrPrivate)) {
       // A private property from ctx trumps any other property we may
       // have found.
-      accessible = true;
-      return ctxPropInd;
+      return PropLookup<Slot> { ctxPropInd, true };
     }
   }
-  return propInd;
+
+  return PropLookup<Slot> { propInd, accessible };
 }
 
-Slot Class::findSProp(Class* ctx, const StringData* sPropName,
-                      bool& visible, bool& accessible) const {
-  Slot sPropInd = lookupSProp(sPropName);
-  if (sPropInd == kInvalidSlot) {
-    // Non-existent property.
-    visible = false;
-    accessible = false;
-    return kInvalidSlot;
-  }
+Class::PropLookup<Slot> Class::findSProp(
+  const Class* ctx,
+  const StringData* sPropName
+) const {
+  auto const sPropInd = lookupSProp(sPropName);
 
-  visible = true;
-  if (ctx == this) {
-    // Property access is from within a method of this class, so the property
-    // is accessible.
-    accessible = true;
-  } else {
-    Attr sPropAttrs = m_staticProperties[sPropInd].m_attrs;
-    if ((ctx != nullptr) && (classof(ctx) || ctx->classof(this))) {
+  // Non-existent property.
+  if (sPropInd == kInvalidSlot) return PropLookup<Slot> { kInvalidSlot, false };
+
+  // Property access within this Class's context.
+  if (ctx == this) return PropLookup<Slot> { sPropInd, true };
+
+  auto const sPropAttrs = m_staticProperties[sPropInd].m_attrs;
+
+  auto const accessible = [&] {
+    switch (sPropAttrs & (AttrPublic | AttrProtected | AttrPrivate)) {
+      // Public properties are always accessible.
+      case AttrPublic:
+        return true;
+
       // Property access is from within a parent class's method, which is
-      // allowed for protected/public properties.
-      switch (sPropAttrs & (AttrPublic|AttrProtected|AttrPrivate)) {
-        case AttrPublic:
-        case AttrProtected:
-          accessible = true;
-          break;
-        case AttrPrivate:
-          accessible = g_context->debuggerSettings.bypassCheck;
-          break;
-        default:
-          not_reached();
-      }
-    } else {
-      // Property access is in an effectively anonymous context, so only public
-      // properties are accessible.
-      switch (sPropAttrs & (AttrPublic|AttrProtected|AttrPrivate)) {
-        case AttrPublic:
-          accessible = true;
-          break;
-        case AttrProtected:
-        case AttrPrivate:
-          accessible = g_context->debuggerSettings.bypassCheck;
-          break;
-        default:
-          not_reached();
-      }
-    }
-  }
+      // allowed for protected properties.
+      case AttrProtected:
+        return ctx != nullptr && (classof(ctx) || ctx->classof(this));
 
-  return sPropInd;
+      // Can only access private properties via the debugger.
+      case AttrPrivate:
+        return g_context->debuggerSettings.bypassCheck;
+
+      default: break;
+    }
+    not_reached();
+  }();
+
+  return PropLookup<Slot> { sPropInd, accessible };
 }
 
-TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
-                            bool& visible, bool& accessible) const {
+Class::PropLookup<TypedValue*> Class::getSProp(
+  const Class* ctx,
+  const StringData* sPropName
+) const {
   initialize();
 
-  Slot sPropInd = findSProp(ctx, sPropName, visible, accessible);
-  if (sPropInd == kInvalidSlot) {
-    return nullptr;
+  auto const lookup = findSProp(ctx, sPropName);
+  if (lookup.prop == kInvalidSlot) {
+    return PropLookup<TypedValue*> { nullptr, false };
   }
 
-  TypedValue* sProp = getSPropData(sPropInd);
+  auto const sProp = getSPropData(lookup.prop);
   assert(sProp && sProp->m_type != KindOfUninit &&
-         "static property initialization failed to initialize a property");
-  return sProp;
+         "Static property initialization failed to initialize a property.");
+  return PropLookup<TypedValue*> { sProp, lookup.accessible };
 }
 
-RefData* Class::zGetSProp(Class* ctx, const StringData* sPropName,
-                          bool& visible, bool& accessible) const {
-  auto tv = getSProp(ctx, sPropName, visible, accessible);
-  if (tv->m_type != KindOfRef) {
-    tvBox(tv);
-  }
-  return tv->m_data.pref;
+Class::PropLookup<RefData*> Class::zGetSProp(
+  const Class* ctx,
+  const StringData* sPropName
+) const {
+  auto const lookup = getSProp(ctx, sPropName);
+  if (lookup.prop->m_type != KindOfRef) tvBox(lookup.prop);
+
+  return PropLookup<RefData*> { lookup.prop->m_data.pref, lookup.accessible };
 }
 
 bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
@@ -845,8 +839,11 @@ const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
   if (clsCnsInd == kInvalidSlot) {
     return nullptr;
   }
-  auto const ret = const_cast<Cell*>(&m_constants[clsCnsInd].m_val);
-  assert(cellIsPlausible(*ret));
+  if (m_constants[clsCnsInd].m_val.isAbstractConst()) {
+    return nullptr;
+  }
+  auto const ret = const_cast<TypedValueAux*>(&m_constants[clsCnsInd].m_val);
+  assert(tvIsPlausible(*ret));
   return ret;
 }
 
@@ -932,27 +929,39 @@ void Class::setInstanceBitsImpl() {
 // These are mostly for the class creation path.
 
 void Class::setParent() {
+  // Cache m_preClass->attrs()
+  m_attrCopy = m_preClass->attrs();
+
   // Validate the parent
   if (m_parent.get() != nullptr) {
-    Attr attrs = m_parent->attrs();
-    if (UNLIKELY(attrs & (AttrFinal | AttrInterface | AttrTrait | AttrEnum))) {
+    Attr parentAttrs = m_parent->attrs();
+    if (UNLIKELY(parentAttrs &
+                 (AttrFinal | AttrInterface | AttrTrait | AttrEnum))) {
       static StringData* sd___MockClass = makeStaticString("__MockClass");
-      if (!(attrs & AttrFinal) || (attrs & AttrEnum) ||
+      if (!(parentAttrs & AttrFinal) ||
+          (parentAttrs & AttrEnum) ||
           m_preClass->userAttributes().find(sd___MockClass) ==
           m_preClass->userAttributes().end() ||
           m_parent->isCollectionClass()) {
         raise_error("Class %s may not inherit from %s (%s)",
                     m_preClass->name()->data(),
-                    ((attrs & AttrEnum)      ? "enum" :
-                     (attrs & AttrFinal)     ? "final class" :
-                     (attrs & AttrInterface) ? "interface"   : "trait"),
+                    ((parentAttrs & AttrEnum)      ? "enum" :
+                     (parentAttrs & AttrFinal)     ? "final class" :
+                     (parentAttrs & AttrInterface) ? "interface"   : "trait"),
                     m_parent->name()->data());
+      }
+      if ((parentAttrs & AttrAbstract) &&
+          ((m_attrCopy & (AttrAbstract|AttrFinal)) != (AttrAbstract|AttrFinal))) {
+        raise_error(
+          "Class %s with %s inheriting 'abstract final' class %s"
+          " must also be 'abstract final'",
+          m_preClass->name()->data(),
+          sd___MockClass->data(),
+          m_parent->name()->data()
+        );
       }
     }
   }
-
-  // Cache m_preClass->attrs()
-  m_attrCopy = m_preClass->attrs();
 
   // Handle stuff specific to cppext classes
   if (m_preClass->instanceCtor()) {
@@ -1013,9 +1022,7 @@ void Class::setSpecial() {
    * the appropriate static context.)
    */
   m_invoke = lookupMethod(s_invoke.get());
-  if (m_invoke &&
-      (m_invoke->attrs() & AttrStatic) &&
-       !m_invoke->isClosureBody()) {
+  if (m_invoke && m_invoke->isStatic() && !m_invoke->isClosureBody()) {
     m_invoke = nullptr;
   }
 
@@ -1698,15 +1705,23 @@ void Class::setConstants() {
     for (Slot slot = 0; slot < iface->m_constants.size(); ++slot) {
       auto const iConst = iface->m_constants[slot];
 
-      // If you're inheriting a constant with the same name as an
-      // existing one, they must originate from the same place.
+      // If you're inheriting a constant with the same name as an existing
+      // one, they must originate from the same place.
       auto const existing = builder.find(iConst.m_name);
-      if (existing != builder.end() &&
-          builder[existing->second].m_class != iConst.m_class) {
+
+      if (existing == builder.end()) {
+        builder.add(iConst.m_name, iConst);
+        continue;
+      }
+
+      if (iConst.m_val.isAbstractConst()) {
+        continue;
+      }
+
+      if (builder[existing->second].m_class != iConst.m_class) {
         raise_error("Cannot inherit previously-inherited constant %s",
                     iConst.m_name->data());
       }
-
       builder.add(iConst.m_name, iConst);
     }
   }
@@ -1730,6 +1745,15 @@ void Class::setConstants() {
           }
         }
       }
+
+      if (preConst->isAbstract() &&
+          !builder[it2->second].m_val.isAbstractConst()) {
+        raise_error("Cannot re-declare as abstract previously defined "
+                    "constant %s::%s in %s",
+                    builder[it2->second].m_class->name()->data(),
+                    preConst->name()->data(),
+                    m_preClass->name()->data());
+      }
       builder[it2->second].m_class = this;
       builder[it2->second].m_val = preConst->val();
     } else {
@@ -1738,8 +1762,36 @@ void Class::setConstants() {
       constant.m_class = this;
       constant.m_name = preConst->name();
       constant.m_val = preConst->val();
-      constant.m_phpCode = preConst->phpCode();
       builder.add(preConst->name(), constant);
+    }
+  }
+
+  // If class is not abstract, all abstract constants should have been
+  // defined
+  if (!(attrs() & (AttrTrait | AttrInterface | AttrAbstract))) {
+    for (Slot i = 0; i < builder.size(); i++) {
+      const Const& constant = builder[i];
+      if (constant.m_val.isAbstractConst()) {
+        raise_error("Class %s contains abstract constant (%s) and "
+                    "must therefore be declared abstract or define "
+                    "the remaining constants",
+                    m_preClass->name()->data(),
+                    constant.m_name->data());
+      }
+    }
+  }
+
+  // If class is abstract final, its constants should not be abstract
+  else if (
+    (attrs() & (AttrAbstract | AttrFinal)) == (AttrAbstract | AttrFinal)) {
+    for (Slot i = 0; i < builder.size(); i++) {
+      const Const& constant = builder[i];
+      if (constant.m_val.isAbstractConst()) {
+        raise_error(
+          "Class %s contains abstract constant (%s) and "
+          "therefore cannot be declared 'abstract final'",
+          m_preClass->name()->data(), constant.m_name->data());
+      }
     }
   }
 
@@ -2534,6 +2586,20 @@ void Class::setNativeDataInfo() {
       break;
     }
   }
+}
+
+bool Class::hasNativePropHandler() {
+  return getNativePropHandler() != nullptr;
+}
+
+Native::NativePropHandler* Class::getNativePropHandler() {
+  for (auto cls = this; cls; cls = cls->parent()) {
+    auto propHandler = Native::getNativePropHandler(cls->name());
+    if (propHandler != nullptr) {
+      return propHandler;
+    }
+  }
+  return nullptr;
 }
 
 void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  const {

@@ -1,0 +1,2 @@
+
+Fatal error: Class MockAbsFinalClass with __MockClass inheriting 'abstract final' class AbsFinalClass must also be 'abstract final' in %s/abstract_final_mock.php on line 6

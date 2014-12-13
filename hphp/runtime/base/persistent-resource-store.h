@@ -23,10 +23,6 @@
 
 namespace HPHP {
 
-struct ResourceData;
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * The PersistentResourceStore is used to allow some extension resources
  * to last across requests.  These "persistent resources" are
@@ -38,36 +34,60 @@ struct ResourceData;
  * The resources themselves also must be allocated outside of the
  * request local heap.
  */
+template<class K, class T>
 struct PersistentResourceStore {
   PersistentResourceStore() = default;
   PersistentResourceStore(const PersistentResourceStore&) = delete;
   PersistentResourceStore& operator=(const PersistentResourceStore&) = delete;
-  ~PersistentResourceStore();
+  ~PersistentResourceStore() {
+    for (auto& e : m_objects) removeObject(e.second);
+  }
 
-  int size() const;
+  void set(K name, T obj);
+  T get(K name) { return m_objects[name]; }
+  void remove(K name);
 
-  void set(const char* type, const char* name, ResourceData* obj);
-  ResourceData* get(const char* type, const char* name);
-  void remove(const char* type, const char* name);
-
-  const std::map<std::string,ResourceData*>& getMap(const char* type);
+  const std::map<K,T>& getMap() {
+    return m_objects;
+  }
 
 private:
-  void removeObject(ResourceData* data);
+  void removeObject(T data);
 
 private:
-  std::map<std::string,std::map<std::string,ResourceData*>>
-    m_objects;
+  std::map<K,T> m_objects;
 };
 
-//////////////////////////////////////////////////////////////////////
-
-extern DECLARE_THREAD_LOCAL_NO_CHECK(PersistentResourceStore,
-                                     g_persistentResources);
-
-//////////////////////////////////////////////////////////////////////
-
+template<class K, class T>
+void PersistentResourceStore<K,T>::removeObject(T r) {
+  if (!r) return;
+  if (!decRefRes(r)) r->decPersistent();
 }
 
+template<class K, class T>
+void PersistentResourceStore<K,T>::set(K name, T resource) {
+  auto iter = m_objects.find(name);
+  if (iter != m_objects.end()) {
+    if (iter->second == resource) {
+      return; // we are setting the same object
+    }
+    removeObject(iter->second);
+    m_objects.erase(iter);
+  }
+  if (resource) {
+    resource->incRefCount();
+    resource->incPersistent();
+    m_objects[name] = resource;
+  }
+}
 
+template<class K, class T>
+void PersistentResourceStore<K,T>::remove(K name) {
+  auto iter = m_objects.find(name);
+  if (iter != m_objects.end()) {
+    removeObject(iter->second);
+    m_objects.erase(iter);
+  }
+}
+}
 #endif

@@ -321,6 +321,26 @@ function stream_select(mixed &$read,
                        int $tv_usec = 0): mixed;
 
 /**
+ * Awaitable version of stream_select()
+ *
+ * @param resource $fp - Stream resource, must be backed by a file descriptor
+ *                       such as a normal file, socket, tempfile, or stdio.
+ *                       Does not work with memory streams or user streams.
+ * @param int $events - Mix of STREAM_AWAIT_READ and/or STREAM_EVENT_WRITE
+ * @param float $timeout - Timeout in seconds
+ *
+ * @return int - Result code
+ *               STREAM_AWAIT_CLOSED: Stream is closed
+ *               STREAM_AWAIT_READY: Activity on the provided stream
+ *               STREAM_AWAIT_TIMEOUT: No activity (timeout occured)
+ *               STREAM_AWAIT_ERROR: Error
+ */
+<<__Native>>
+async function stream_await(resource $fp,
+                            int $events,
+                            float $timeout = 0.0): Awaitable<int>;
+
+/**
  * Sets blocking or non-blocking mode on a stream.  This function works for
  *   any stream that supports non-blocking mode (currently, regular files and
  *   socket streams).
@@ -413,7 +433,7 @@ function stream_socket_accept(resource $server_socket,
  *   Depending on the environment, Unix domain sockets may not be available. A
  *   list of available transports can be retrieved using
  *   stream_get_transports(). See List of Supported Socket Transports for a list
- *   of bulitin transports.
+ *   of builtin transports.
  * @param mixed $errnum - If the optional errno and errstr arguments are
  *   present they will be set to indicate the actual system level error that
  *   occurred in the system-level socket(), bind(), and listen() calls. If the

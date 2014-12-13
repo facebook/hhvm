@@ -434,7 +434,7 @@ NEOERR* hdf_set_attr (HDF *hdf, const char *name, const char *key,
 
   _walk_hdf(hdf, name, &obj);
   if (obj == NULL)
-    return nerr_raise(NERR_ASSERT, "Unable to set attribute on none existant node");
+    return nerr_raise(NERR_ASSERT, "Unable to set attribute on none existent node");
 
   if (obj->attr != NULL)
   {

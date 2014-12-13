@@ -1,75 +1,75 @@
 DOMDocument
 object(DOMDocument)#1 (35) {
-  ["recover"]=>
-  bool(false)
-  ["documentURI"]=>
-  NULL
-  ["strictErrorChecking"]=>
-  bool(true)
-  ["xmlStandalone"]=>
-  bool(true)
-  ["standalone"]=>
-  bool(true)
-  ["attributes"]=>
-  NULL
-  ["nodeValue"]=>
-  NULL
-  ["resolveExternals"]=>
-  bool(false)
-  ["childNodes"]=>
-  string(22) "(object value omitted)"
-  ["previousSibling"]=>
-  NULL
   ["nodeName"]=>
   string(9) "#document"
-  ["xmlVersion"]=>
-  string(3) "1.0"
-  ["lastChild"]=>
+  ["nodeValue"]=>
   NULL
   ["nodeType"]=>
   int(9)
-  ["formatOutput"]=>
-  bool(false)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
-  ["parentNode"]=>
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
   NULL
   ["ownerDocument"]=>
   NULL
-  ["config"]=>
+  ["namespaceURI"]=>
   NULL
   ["prefix"]=>
   string(0) ""
-  ["implementation"]=>
-  string(22) "(object value omitted)"
-  ["preserveWhiteSpace"]=>
-  bool(true)
-  ["documentElement"]=>
-  NULL
-  ["namespaceURI"]=>
+  ["localName"]=>
   NULL
   ["baseURI"]=>
   NULL
-  ["substituteEntities"]=>
-  bool(false)
   ["textContent"]=>
   string(0) ""
-  ["nextSibling"]=>
-  NULL
   ["doctype"]=>
   NULL
-  ["validateOnParse"]=>
-  bool(false)
-  ["version"]=>
-  string(3) "1.0"
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["documentElement"]=>
+  NULL
   ["actualEncoding"]=>
   NULL
   ["encoding"]=>
   NULL
-  ["localName"]=>
-  NULL
   ["xmlEncoding"]=>
   NULL
+  ["standalone"]=>
+  bool(true)
+  ["xmlStandalone"]=>
+  bool(true)
+  ["version"]=>
+  string(3) "1.0"
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["strictErrorChecking"]=>
+  bool(true)
+  ["documentURI"]=>
+  NULL
+  ["config"]=>
+  NULL
+  ["formatOutput"]=>
+  bool(false)
+  ["validateOnParse"]=>
+  bool(false)
+  ["resolveExternals"]=>
+  bool(false)
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["recover"]=>
+  bool(false)
+  ["substituteEntities"]=>
+  bool(false)
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMDocument in %s/test/quick/builtin_extensions.inc on line 8
@@ -186,76 +186,76 @@ A_DOMDocument
 object(A_DOMDocument)#2 (36) {
   ["___x"]=>
   NULL
-  ["recover"]=>
-  bool(false)
-  ["documentURI"]=>
-  NULL
-  ["strictErrorChecking"]=>
-  bool(true)
-  ["xmlStandalone"]=>
-  bool(true)
-  ["standalone"]=>
-  bool(true)
-  ["attributes"]=>
-  NULL
-  ["nodeValue"]=>
-  NULL
-  ["resolveExternals"]=>
-  bool(false)
-  ["childNodes"]=>
-  string(22) "(object value omitted)"
-  ["previousSibling"]=>
-  NULL
   ["nodeName"]=>
   string(9) "#document"
-  ["xmlVersion"]=>
-  string(3) "1.0"
-  ["lastChild"]=>
+  ["nodeValue"]=>
   NULL
   ["nodeType"]=>
   int(9)
-  ["formatOutput"]=>
-  bool(false)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
-  ["parentNode"]=>
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
   NULL
   ["ownerDocument"]=>
   NULL
-  ["config"]=>
+  ["namespaceURI"]=>
   NULL
   ["prefix"]=>
   string(0) ""
-  ["implementation"]=>
-  string(22) "(object value omitted)"
-  ["preserveWhiteSpace"]=>
-  bool(true)
-  ["documentElement"]=>
-  NULL
-  ["namespaceURI"]=>
+  ["localName"]=>
   NULL
   ["baseURI"]=>
   NULL
-  ["substituteEntities"]=>
-  bool(false)
   ["textContent"]=>
   string(0) ""
-  ["nextSibling"]=>
-  NULL
   ["doctype"]=>
   NULL
-  ["validateOnParse"]=>
-  bool(false)
-  ["version"]=>
-  string(3) "1.0"
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["documentElement"]=>
+  NULL
   ["actualEncoding"]=>
   NULL
   ["encoding"]=>
   NULL
-  ["localName"]=>
-  NULL
   ["xmlEncoding"]=>
   NULL
+  ["standalone"]=>
+  bool(true)
+  ["xmlStandalone"]=>
+  bool(true)
+  ["version"]=>
+  string(3) "1.0"
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["strictErrorChecking"]=>
+  bool(true)
+  ["documentURI"]=>
+  NULL
+  ["config"]=>
+  NULL
+  ["formatOutput"]=>
+  bool(false)
+  ["validateOnParse"]=>
+  bool(false)
+  ["resolveExternals"]=>
+  bool(false)
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["recover"]=>
+  bool(false)
+  ["substituteEntities"]=>
+  bool(false)
 }
 
 Warning: Attempted to serialize unserializable builtin class A_DOMDocument in %s/test/quick/builtin_extensions.inc on line 26

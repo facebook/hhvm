@@ -678,6 +678,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
 
 ///////////////////////////////////////////////////////////////////////////////
 const StaticString s_MEMCACHE_COMPRESSED("MEMCACHE_COMPRESSED");
+const StaticString s_MEMCACHE_HAVE_SESSION("MEMCACHE_HAVE_SESSION");
 
 class MemcacheExtension : public Extension {
   public:
@@ -710,6 +711,9 @@ class MemcacheExtension : public Extension {
     virtual void moduleInit() {
       Native::registerConstant<KindOfInt64>(
         s_MEMCACHE_COMPRESSED.get(), k_MEMCACHE_COMPRESSED
+      );
+      Native::registerConstant<KindOfBoolean>(
+        s_MEMCACHE_HAVE_SESSION.get(), true
       );
       HHVM_ME(Memcache, connect);
       HHVM_ME(Memcache, add);

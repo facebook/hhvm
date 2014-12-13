@@ -25,8 +25,6 @@
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/apc-local-array.h"
-#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/alloc.h"
@@ -35,11 +33,7 @@
 #include "hphp/util/trace.h"
 
 #include <folly/ScopeGuard.h>
-
-#include "hphp/runtime/base/proxy-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/vm/globals-array.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
 
 namespace HPHP {
 
@@ -422,9 +416,6 @@ void MemoryManager::resetAllocator() {
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
-  if (m_trackingInstances) {
-    m_instances = std::unordered_set<void*>();
-  }
 
   resetStatsImpl(true);
   resetCouldOOM();
@@ -492,7 +483,7 @@ inline void* MemoryManager::smartMalloc(size_t nbytes) {
   if (LIKELY(nbytes_padded) <= kMaxSmartSize) {
     auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
     ptr->padbytes = nbytes_padded;
-    ptr->kind = HeaderKind::Small;
+    ptr->kind = HeaderKind::SmallMalloc;
     return ptr + 1;
   }
   return smartMallocBig(nbytes);
@@ -536,181 +527,37 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
 
 namespace {
 const char* header_names[] = {
-  "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Shared",
+  "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Apc",
   "Globals", "Proxy", "String", "Object", "Resource", "Ref", "Native",
-  "Sweepable", "Small", "Big", "Free", "Hole", "Debug"
+  "Sweepable", "SmallMalloc", "BigMalloc", "BigObj", "Free", "Hole", "Debug"
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
 
-// union of all the possible header types, and some utilities
-struct Header {
-  struct DummySweepable: Sweepable, ObjectData { void sweep() {} };
-  size_t size() const;
-  bool check() const;
-  union {
-    struct {
-      uint64_t q;
-      uint8_t b[3];
-      HeaderKind kind_;
-    };
-    StringData str_;
-    ArrayData arr_;
-    MixedArray mixed_;
-    ObjectData obj_;
-    ResourceData res_;
-    RefData ref_;
-    SmallNode small_;
-    BigNode big_;
-    FreeNode free_;
-    NativeNode native_;
-    DebugHeader debug_;
-    DummySweepable sweepable_;
-  };
-};
-
-bool Header::check() const {
-  return unsigned(kind_) <= NumHeaderKinds;
-}
-
-size_t Header::size() const {
-  auto resourceSize = [](const ResourceData* r) {
-    // explicitly virtual-call ResourceData::heapSize() through a pointer
-    assert(r->heapSize());
-    return r->heapSize();
-  };
-  assert(check());
-  switch (kind_) {
-    case HeaderKind::Packed: case HeaderKind::VPacked:
-      return PackedArray::heapSize(&arr_);
-    case HeaderKind::Mixed: case HeaderKind::StrMap: case HeaderKind::IntMap:
-      return mixed_.heapSize();
-    case HeaderKind::Empty:
-      return sizeof(ArrayData);
-    case HeaderKind::Shared:
-      return sizeof(APCLocalArray);
-    case HeaderKind::Globals:
-      return sizeof(GlobalsArray);
-    case HeaderKind::Proxy:
-      return sizeof(ProxyArray);
-    case HeaderKind::String:
-      return str_.heapSize();
-    case HeaderKind::Object:
-      // [ObjectData][subclass][props]
-      return obj_.heapSize();
-    case HeaderKind::Resource:
-      // [ResourceData][subclass]
-      return resourceSize(&res_);
-    case HeaderKind::Ref:
-      return sizeof(RefData);
-    case HeaderKind::Small:
-      return small_.padbytes;
-    case HeaderKind::Big:
-      return big_.nbytes;
-    case HeaderKind::Free:
-      return free_.size;
-    case HeaderKind::Native:
-      // [NativeNode][NativeData][ObjectData][props] is one allocation.
-      return native_.obj_offset + Native::obj(&native_)->heapSize();
-    case HeaderKind::Sweepable:
-      // [Sweepable][ObjectData][subclass][props] or
-      // [Sweepable][ResourceData][subclass]
-      return sizeof(Sweepable) + sweepable_.heapSize();
-    case HeaderKind::Hole:
-      return free_.size;
-    case HeaderKind::Debug:
-      assert(debug_.allocatedMagic == DebugHeader::kAllocatedMagic);
-      return sizeof(DebugHeader);
-  }
-  return 0;
-}
-
-// Iterator for slab scanning; only knows how to parse each object's
-// size and move to the next object.
-struct Headiter {
-  explicit Headiter(void* p) : raw_((char*)p) {}
-  Headiter& operator=(void* p) {
-    raw_ = (char*)p;
-    return *this;
-  }
-  Headiter& operator++() {
-    assert(h_->size() > 0);
-    raw_ += MemoryManager::smartSizeClass(h_->size());
-    return *this;
-  }
-  Header& operator*() { return *h_; }
-  Header* operator->() { return h_; }
-  bool operator<(Headiter i) const { return raw_ < i.raw_; }
-  bool operator==(Headiter i) const { return raw_ == i.raw_; }
-private:
-  union {
-    Header* h_;
-    char* raw_;
-  };
-};
-}
-
-// Iterator over all the slabs and bigs
-struct BigHeap::iterator {
-  enum State { Slabs, Bigs };
-  using slab_iter = std::vector<MemBlock>::iterator;
-  using big_iter  = std::vector<BigNode*>::iterator;
-  explicit iterator(slab_iter slab, BigHeap& heap)
-    : m_state{Slabs}
-    , m_slab{slab}
-    , m_header{slab->ptr} // should never be at end.
-    , m_heap(heap)
-  {}
-  explicit iterator(big_iter big, BigHeap& heap)
-    : m_state{Bigs}
-    , m_big{big}
-    , m_header{big != heap.m_bigs.end() ? *big : nullptr}
-    , m_heap(heap)
-  {}
-  bool operator==(const iterator& it) const {
-    if (m_state != it.m_state) return false;
-    switch (m_state) {
-      case Slabs: return m_slab == it.m_slab && m_header == it.m_header;
-      case Bigs: return m_big == it.m_big;
-    };
-    not_reached();
-  }
-  bool operator!=(const iterator& it) const {
-    return !(*this == it);
-  }
-  iterator& operator++() {
-    switch (m_state) {
-      case Slabs: {
-        auto end = Headiter{static_cast<char*>(m_slab->ptr) + m_slab->size};
-        if (++m_header < end) {
-          return *this;
-        }
-        if (++m_slab != m_heap.m_slabs.end()) {
-          m_header = m_slab->ptr;
-          return *this;
-        }
-        m_state = Bigs;
-        m_big = m_heap.m_bigs.begin();
-        m_header = m_big != m_heap.m_bigs.end() ? *m_big : nullptr;
-        return *this;
-      }
-      case Bigs:
-        ++m_big;
-        m_header = m_big != m_heap.m_bigs.end() ? *m_big : nullptr;
-        return *this;
+// Reverse lookup table from size class index back to block size.
+struct SizeTable {
+  size_t table[kNumSmartSizes];
+  SizeTable() {
+#define SMART_SIZE(i,d,s) table[i] = s;
+    SMART_SIZES
+#undef SMART_SIZE
+    assert(table[27] == 4096 && table[28] == 0);
+    // pick up where the macros left off
+    auto i = 28;
+    auto s = 4096;
+    auto d = s/4;
+    for (; i < kNumSmartSizes; d *= 2) {
+      // each power of two size has 4 linear spaced size classes
+      table[i++] = (s += d);
+      if (i < kNumSmartSizes) table[i++] = (s += d);
+      if (i < kNumSmartSizes) table[i++] = (s += d);
+      if (i < kNumSmartSizes) table[i++] = (s += d);
     }
-    not_reached();
   }
-  Header& operator*() { return *m_header; }
-  Header* operator->() { return &*m_header; }
- private:
-  State m_state;
-  union {
-    slab_iter m_slab;
-    big_iter m_big;
-  };
-  Headiter m_header;
-  BigHeap& m_heap;
+  static_assert(LG_SMART_SIZES_PER_DOUBLING == 2, "");
 };
+SizeTable s_index2size;
+
+}
 
 // initialize a Hole header in the unused memory between m_front and m_limit
 void MemoryManager::initHole() {
@@ -721,8 +568,19 @@ void MemoryManager::initHole() {
   }
 }
 
+// initialize the FreeNode header on all freelist entries.
+void MemoryManager::initFree() {
+  for (size_t i = 0; i < kNumSmartSizes; i++) {
+    auto size = s_index2size.table[i];
+    for (auto n = m_freelists[i].head; n; n = n->next) {
+      n->kind_size = HeaderKind::Free<<24 | size<<32;
+    }
+  }
+}
+
 BigHeap::iterator MemoryManager::begin() {
   initHole();
+  initFree();
   return m_heap.begin();
 }
 
@@ -859,7 +717,7 @@ inline void MemoryManager::updateBigStats() {
 NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
-  auto block = m_heap.allocBig(nbytes);
+  auto block = m_heap.allocBig(nbytes, HeaderKind::BigMalloc);
   updateBigStats();
   return block.ptr;
 }
@@ -871,7 +729,7 @@ MemBlock MemoryManager::smartMallocSizeBig<false>(size_t);
 
 template<bool callerSavesActualSize> NEVER_INLINE
 MemBlock MemoryManager::smartMallocSizeBig(size_t bytes) {
-  auto block = m_heap.allocBig(debugAddExtra(bytes));
+  auto block = m_heap.allocBig(debugAddExtra(bytes), HeaderKind::BigObj);
   auto szOut = debugRemoveExtra(block.size);
 #ifdef USE_JEMALLOC
   // NB: We don't report the SweepNode size in the stats.
@@ -1103,20 +961,6 @@ void MemoryManager::requestShutdown() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NEVER_INLINE
-void* MemoryManager::trackSlow(void* p) {
-  m_instances.insert(p);
-  return p;
-}
-
-NEVER_INLINE
-void* MemoryManager::untrackSlow(void* p) {
-  m_instances.erase(p);
-  return p;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void BigHeap::reset() {
   TRACE(1, "BigHeap-reset: slabs %lu bigs %lu\n", m_slabs.size(),
         m_bigs.size());
@@ -1142,7 +986,14 @@ MemBlock BigHeap::allocSlab(size_t size) {
   return {slab, size};
 }
 
-MemBlock BigHeap::allocBig(size_t bytes) {
+void BigHeap::enlist(BigNode* n, HeaderKind kind, size_t size) {
+  n->nbytes = size;
+  n->kind = kind;
+  n->index = m_bigs.size();
+  m_bigs.push_back(n);
+}
+
+MemBlock BigHeap::allocBig(size_t bytes, HeaderKind kind) {
 #ifdef USE_JEMALLOC
   auto n = static_cast<BigNode*>(mallocx(bytes + sizeof(BigNode), 0));
   auto cap = sallocx(n, 0);
@@ -1150,14 +1001,14 @@ MemBlock BigHeap::allocBig(size_t bytes) {
   auto cap = bytes + sizeof(BigNode);
   auto n = static_cast<BigNode*>(safe_malloc(cap));
 #endif
-  enlist(n, cap);
+  enlist(n, kind, cap);
   return {n + 1, cap - sizeof(BigNode)};
 }
 
 MemBlock BigHeap::callocBig(size_t nbytes) {
   auto cap = nbytes + sizeof(BigNode);
   auto const n = static_cast<BigNode*>(safe_calloc(cap, 1));
-  enlist(n, cap);
+  enlist(n, HeaderKind::BigMalloc, cap);
   return {n + 1, nbytes};
 }
 
@@ -1170,13 +1021,6 @@ bool BigHeap::contains(void* ptr) const {
     }
   );
   return it != std::end(m_slabs);
-}
-
-void BigHeap::enlist(BigNode* n, size_t size) {
-  n->nbytes = size;
-  n->kind = HeaderKind::Big;
-  n->index = m_bigs.size();
-  m_bigs.push_back(n);
 }
 
 NEVER_INLINE

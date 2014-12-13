@@ -63,7 +63,7 @@ public:
   c_AsyncGeneratorWaitHandle* await(Offset resumeOffset,
                                     c_WaitableWaitHandle* child);
   c_StaticWaitHandle* yield(Offset resumeOffset,
-                            const Cell* key, const Cell& value);
+                            const Cell* key, Cell value);
   c_StaticWaitHandle* ret();
   c_StaticWaitHandle* fail(ObjectData* exception);
   void failCpp();

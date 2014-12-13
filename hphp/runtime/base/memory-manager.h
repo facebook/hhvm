@@ -110,13 +110,14 @@ template<class T> void smart_delete_array(T* t, size_t count);
 
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
-  Packed, Mixed, StrMap, IntMap, VPacked, Empty, Shared, Globals, Proxy,
+  Packed, Mixed, StrMap, IntMap, VPacked, Empty, Apc, Globals, Proxy,
   // Other ordinary refcounted heap objects
   String, Object, Resource, Ref,
   Native, // a NativeData header preceding an HNI ObjectData
   Sweepable, // a Sweepable header preceding an ObjectData ResourceData
-  Small, // small smart_malloc'd block
-  Big, // big smart_malloc'd or size-tracked block
+  SmallMalloc, // small smart_malloc'd block
+  BigMalloc, // big smart_malloc'd block
+  BigObj, // big size-tracked object (valid header follows BigNode)
   Free, // small block in a FreeList
   Hole, // wasted space not in any freelist
   Debug // a DebugHeader
@@ -154,7 +155,7 @@ struct DebugHeader {
 /*
  * Slabs are consumed via bump allocation.  The individual allocations are
  * quantized into a fixed set of size classes, the sizes of which are an
- * implementation detail documented here to shed light on the algorthms that
+ * implementation detail documented here to shed light on the algorithms that
  * compute size classes.  Request sizes are rounded up to the nearest size in
  * the relevant SMART_SIZES table; e.g. 17 is rounded up to 32.  There are
  * 2^LG_SMART_SIZES_PER_DOUBLING size classes for each doubling of size
@@ -356,7 +357,7 @@ struct BigHeap {
 
   // allocation api for big blocks. These get a BigNode header and
   // are tracked in m_bigs
-  MemBlock allocBig(size_t size);
+  MemBlock allocBig(size_t size, HeaderKind kind);
   MemBlock callocBig(size_t size);
   MemBlock resizeBig(void* p, size_t size);
   void freeBig(void*);
@@ -372,7 +373,7 @@ struct BigHeap {
   iterator end();
 
  private:
-  void enlist(BigNode*, size_t size);
+  void enlist(BigNode*, HeaderKind kind, size_t size);
 
  private:
   std::vector<MemBlock> m_slabs;
@@ -497,7 +498,6 @@ struct MemoryManager {
   void smartFreeSizeLogged(void* p, uint32_t size);
   void* objMallocLogged(size_t size);
   void objFreeLogged(void* vp, size_t size);
-  void* smartMallocSizeLoggedTracked(uint32_t size);
   template<bool callerSavesActualSize>
   MemBlock smartMallocSizeBigLogged(size_t size);
   void smartFreeSizeBigLogged(void* vp, size_t size);
@@ -616,19 +616,13 @@ struct MemoryManager {
    * It is then possible to iterate them by iterating the memory manager.
    * This entire feature is enabled/disabled by using setObjectTracking(bool).
    */
-  void* trackSlow(void* p);
-  void* untrackSlow(void* p);
-  void* track(void* p);
-  void* untrack(void* p);
   void setObjectTracking(bool val);
   bool getObjectTracking();
 
   /*
    * Iterating the memory manager tracked objects.
    */
-  typedef typename std::unordered_set<void*>::iterator iterator;
-  iterator objects_begin() { return m_instances.begin(); }
-  iterator objects_end() { return m_instances.end(); }
+  template<class Fn> void forEachObject(Fn);
 
   /////////////////////////////////////////////////////////////////////////////
   // Request profiling.
@@ -718,6 +712,7 @@ private:
 
   void checkHeap();
   void initHole();
+  void initFree();
   BigHeap::iterator begin();
   BigHeap::iterator end();
 
@@ -735,11 +730,8 @@ private:
 
   bool m_sweeping;
   bool m_trackingInstances;
-  std::unordered_set<void*> m_instances;
-
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
-
   bool m_bypassSlabAlloc;
 
   ReqProfContext m_profctx;

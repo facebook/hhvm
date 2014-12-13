@@ -1,3 +1,6 @@
+Z* 18-Dec-2014
+ - Converted objprof extension to use heap parsing
+
 "Yelawolf" 4-Dec-2014
  - Fix comparison of overflowing strings
  - Fix potential memory corruption during ArrayData::set
@@ -126,6 +129,7 @@
  - Support self parameter typehint
  - [h2tp] modify build to support h2tp
  - [hh] hh_format: understand async lambdas
+ - [hack] added support for abstract class constants
 
 "Xzibit" 20-Nov-2014
  - Fix readline request locals

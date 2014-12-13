@@ -12,6 +12,8 @@ else
   HHVM_INSTALL_LIBDIR="@CMAKE_INSTALL_LIBDIR@"
   HHVM_LIB="$HHVM_INSTALL_PREFIX/$HHVM_INSTALL_LIBDIR/hhvm"
   cp "$HHVM_LIB/hphpize/hphpize.cmake" CMakeLists.txt
+  cp "$HHVM_LIB/hphpize/run" run-test
+  chmod +x run-test
 fi
 
-echo "** hphpize complete, now run \`cmake . && make\` to build"
+echo "** hphpize complete, now run \`cmake . && make\` to build, \`make test\` to test"

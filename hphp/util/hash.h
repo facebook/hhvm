@@ -22,6 +22,14 @@
 
 #include "hphp/util/portability.h"
 
+#if defined __x86_64__
+#if (!defined USE_SSECRC) && (defined FACEBOOK)
+#define USE_SSECRC
+#endif
+#else
+#undef USE_SSECRC
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -29,11 +37,15 @@ typedef int32_t strhash_t;
 const strhash_t STRHASH_MASK = 0x7fffffff;
 const strhash_t STRHASH_MSB  = 0x80000000;
 
-/*
- * "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
- * http://www.concentric.net/~ttwang/tech/inthash.htm
- */
 inline long long hash_int64(long long key) {
+#ifdef USE_SSECRC
+  long long res = 0;
+  __asm__("crc32q %1, %0\n" : "+r" (res) : "rm" (key));
+  // Upper 32 bits are zeros here
+  return res;
+#else
+  // "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
+  // http://www.concentric.net/~ttwang/tech/inthash.htm
   key = (~key) + (key << 21); // key = (key << 21) - key - 1;
   key = key ^ ((unsigned long long)key >> 24);
   key = (key + (key << 3)) + (key << 8); // key * 265
@@ -42,6 +54,7 @@ inline long long hash_int64(long long key) {
   key = key ^ ((unsigned long long)key >> 28);
   key = key + (key << 31);
   return key < 0 ? -key : key;
+#endif
 }
 
 inline long long hash_int64_pair(long long k1, long long k2) {
@@ -236,8 +249,157 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace MurmurHash3
 
+#ifdef USE_SSECRC
+
+// Returns a 31-bit case-sensitive hash value for a string. str[count] does not
+// affect the result. The function returns nonzero when count is 0. When not
+// inlined, the generated code fits in 64 bytes. When inlined, it offers plenty
+// of flexibility on register allocation, except that %rcx will have to be used.
+// Warning: this function could read beyond [0, count). Thus it could crash if
+// the address goes to an invalid page. The following needs to hold before you
+// call this, (str + count + 7) / PAGESIZE == (str + count) / PAGESIZE.
+// Sufficient conditions include (str & 7 == 0) || (count & 7 == 0).
+inline uint32_t FOLLY_DISABLE_ADDRESS_SANITIZER
+crc8_cs_unsafe(const char* str, uint32_t count) {
+  uint64_t result = 0xffffffffu;
+  uint64_t data;
+  __asm__(
+    "test %2, %2\n\t"                   // if (count == 0)
+    "jz _hcsend%=\n"                    //   goto hashend;
+    "_hcsl8%=:\n\t"                     // while (true) {
+    "mov (%1), %3\n\t"                  //   data = *(uint64_t*)str;
+    "sub $8, %2\n\t"                    //   count -= 8;
+    "jle _hcstail%=\n\t"                //   if (count <= 0) break;
+    "addq $8, %1\n\t"                   //   str += 8;
+    "crc32q %3, %0\n"                   //   result = crc32(result, data);
+    "jmp _hcsl8%=\n"                    // }
+    "_hcstail%=:\n\t"                   // assert(-7 <= count <= 0)
+    "shl $3, %2\n\t"                    // count *= 8; // [-56, 0]
+    "neg %2\n\t"                        // count = -count;
+    "shl %%cl, %3\n\t"                  // data <<= count;
+    "crc32q %3, %0\n"                   // result = crc32(result, data);
+    "_hcsend%=:\n\t"                    // hashend:
+    : "+r" (result), "+r" (str), "+c" (count), "=r" (data)
+  );
+  return uint32_t(result) >> 1;
+}
+
+// Returns a 31-bit case-insensitive hash value for a string. str[count] does
+// not affect the result. The function returns nonzero when count is 0. When not
+// inlined, the generated code fits in 64 bytes. When inlined, it offers plenty
+// of flexibility on register allocation, except that %rcx will have to be used.
+// Warning: this function could read beyond [0, count). Thus it could crash if
+// the address goes to an invalid page. Sufficient conditions for safety
+// guarantee include (str & 7 == 0) || (count & 7 == 0).
+inline uint32_t FOLLY_DISABLE_ADDRESS_SANITIZER
+crc8_i_unsafe(const char* str, uint32_t count) {
+  uint64_t result;
+  uint64_t data;
+  // The code is carefully optimized such that HPHP::StringData::hashHelper()
+  // fits in a cache line when this function is inlined there. Currently it is
+  // exactly 64 bytes, so any increase in code size is not quite tolerable.
+  __asm__(
+    "xor %%eax, %%eax\n\t"              // result = 0;
+    "not %%eax\n\t"                     // result = 0xffffffff;
+    "test %2, %2\n\t"                   // if (count == 0)
+    "jz _hashend%=\n"                   //   goto hashend;
+    "_hload8%=:\n\t"                    // while (true) {
+    "movq $0xdfdfdfdfdfdfdfdf, %3\n\t"  //   data = MASK
+    "andq (%1), %3\n\t"                 //   data &= *(uint64_t*)str;
+    "sub $8, %2\n\t"                    //   count -= 8;
+    "jle _htail%=\n\t"                  //   if (count <= 0) break;
+    "addq $8, %1\n\t"                   //   str += 8;
+    "crc32q %3, %0\n"                   //   result = crc32(result, data);
+    "jmp _hload8%=\n"                   // }
+    "_htail%=:\n\t"                     // assert(-7 <= count <= 0)
+    "shl $3, %2\n\t"                    // count *= 8; // [-56, 0]
+    "neg %2\n\t"                        // count = -count;
+    "shl %%cl, %3\n\t"                  // data <<= count;
+    "crc32q %3, %0\n"                   // result = crc32(result, data);
+    "_hashend%=:\n\t"                   // hashend:
+    : "=a" (result), "+r" (str), "+c" (count), "=r" (data)
+  );
+  return uint32_t(result) >> 1;
+}
+
+// This is the safe version of crc8_cs_unsafe, it won't read str[count]. It is
+// slower than the unsafe version, but still fits in a 64-byte cache line when
+// not inlined. Use it when you are not sure.
+inline uint32_t crc8_cs_safe(const char* str, uint32_t count) {
+  uint64_t result = 0xffffffff;
+  uint64_t temp;
+  __asm__(
+    "_hcil8%=:\n\t"                     // while (true) {
+    "subl $8, %2\n\t"                   //   count -= 8;
+    "js _hcitail%=\n\t"                 //   if (count < 0) break;
+    "movq (%1), %3\n\t"                 //   data &= *(uint64_t*)str;
+    "addq $8, %1\n\t"                   //   str += 8;
+    "crc32q %3, %0\n"                   //   result = crc32(result, data);
+    "jmp _hcil8%=\n"                    // }
+    "_hcitail%=:\n\t"                   // assert(-8 <= count < 0);
+    "add $8, %2\n\t"                    // count += 8;
+    "jz _hciend%=\n\t"                  // if (count == 0) goto hcsend;
+    "xor %%edx, %%edx\n"                // data = 0;
+    "_hcil1%=:\n\t"                     // hcil1:
+    "movb (%1), %%dl\n\t"               // data = data | *str
+    "inc %1\n\t"                        // ++str;
+    "rorq $8, %%rdx\n\t"                // newly read byte -> MSB
+    "loop _hcil1%=\n\t"                 // if (--count != 0) goto hcil1;
+    "crc32q %3, %0\n"                   // result = crc32(result, data);
+    "_hciend%=:\n\t"                    // hciend
+    : "+r" (result), "+r" (str), "+c" (count), "=d" (temp)
+  );
+  return uint32_t(result) >> 1;
+}
+
+// This is the safe version of crc8_i_unsafe, it won't read str[count]. It is
+// slower than the unsafe version, and needs the caller to fill %rdx with the
+// case mask to get case insensitivity (you could pass uint64_t{-1LL} to get a
+// case sensitive version if you want the two versions to share code). When not
+// inlined, the code fits exactly in a cache line.
+inline uint32_t crc8_i_safe(const char* str, uint32_t count, uint64_t mask) {
+  // %rdx: data/initial mask passed in
+  // %r8: copy of mask
+  // %rsi: count
+  uint64_t result = 0xffffffff;
+  __asm__(
+    "movq %3, %%r8\n"                   // mask = data;
+    "_hcil8%=:\n\t"                     // while (true) {
+    "subl $8, %2\n\t"                   //   count -= 8;
+    "js _hcitail%=\n\t"                 //   if (count < 0) break;
+    "andq (%1), %3\n\t"                 //   data &= *(uint64_t*)str;
+    "addq $8, %1\n\t"                   //   str += 8;
+    "crc32q %3, %0\n"                   //   result = crc32(result, data);
+    "movq %%r8, %3\n\t"                 //   data = mask;
+    "jmp _hcil8%=\n"                    // }
+    "_hcitail%=:\n\t"                   // assert(-8 <= count < 0);
+    "add $8, %%esi\n\t"                 // count += 8;
+    "jz _hciend%=\n\t"                  // if (count == 0) goto hcsend;
+    "mov %%esi, %%ecx\n"                // ecx = count;
+    "xor %%edx, %%edx\n"                // data = 0;
+    "_hcil1%=:\n\t"                     // hcil1:
+    "movb (%1), %%dl\n\t"               // data = data | *str
+    "inc %1\n\t"                        // ++str;
+    "rorq $8, %%rdx\n\t"                // newly read byte -> MSB
+    "loop _hcil1%=\n\t"                 // if (--count != 0) goto hcil1;
+    "andq %%r8, %%rdx\n\t"              // data &= mask;
+    "crc32q %%rdx, %0\n"                // result = crc32(result, data);
+    "_hciend%=:\n\t"                    // hciend
+    : "+r" (result), "+r" (str), "+S" (count), "+d" (mask)
+    :
+    : "%rcx", "%r8"
+  );
+  return uint32_t(result) >> 1;
+}
+
+#endif
+
 inline strhash_t hash_string_cs(const char *arKey, int nKeyLength) {
-  if (MurmurHash3::useHash128) {
+#ifdef USE_SSECRC
+  uint32_t r = crc8_cs_safe(arKey, nKeyLength);
+  return strhash_t(r);
+#else
+   if (MurmurHash3::useHash128) {
     uint64_t h[2];
     MurmurHash3::hash128<true>(arKey, nKeyLength, 0, h);
     return strhash_t(h[0] & STRHASH_MASK);
@@ -245,12 +407,53 @@ inline strhash_t hash_string_cs(const char *arKey, int nKeyLength) {
     uint32_t h = MurmurHash3::hash32<true>(arKey, nKeyLength, 0);
     return strhash_t(h & STRHASH_MASK);
   }
+#endif
 }
 
-strhash_t hash_string_i(const char *arKey, int nKeyLength);
-strhash_t hash_string(const char *arKey, int nKeyLength);
+// Eight functions, in the form of hash_string(_i)?(_inline)?(_unsafe)?.
+// _i: whether case sensitive or not, actually in current implementation,
+// hash_string* always calls hash_string_i*.
+// _inline: whether the function should be inlined, sometimes it is not quite
+// strictly followed, in fact only one or two functions are not inlined among
+// the eight.
+// _unsafe: whether reading beyond the end is impossible or tolerable.
+// Safe version could call unsafe version after checking when using CRC.
+// Unsafe version is an alias of the safe version when not using CRC.
 
-inline strhash_t hash_string_i_inline(const char *arKey, int nKeyLength) {
+#ifdef USE_SSECRC
+strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength,
+                        uint64_t mask = 0xdfdfdfdfdfdfdfdfull);
+
+inline strhash_t hash_string(const char *arKey, uint32_t nKeyLength,
+                             uint64_t mask = 0xdfdfdfdfdfdfdfdfull){
+  return hash_string_i(arKey, nKeyLength, mask);
+}
+#else
+strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength);
+
+inline strhash_t hash_string(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i(arKey, nKeyLength);
+}
+#endif
+
+#ifdef USE_SSECRC
+// The function is not inlined when using CRC.
+strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength);
+#else
+inline strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i(arKey, nKeyLength);
+}
+#endif
+
+inline strhash_t hash_string_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_unsafe(arKey, nKeyLength);
+}
+
+inline strhash_t
+hash_string_i_inline_unsafe(const char *arKey, uint32_t nKeyLength) {
+#ifdef USE_SSECRC
+  return crc8_i_unsafe(arKey, nKeyLength);
+#else
   if (MurmurHash3::useHash128) {
     uint64_t h[2];
     MurmurHash3::hash128<false>(arKey, nKeyLength, 0, h);
@@ -259,11 +462,37 @@ inline strhash_t hash_string_i_inline(const char *arKey, int nKeyLength) {
     uint32_t h = MurmurHash3::hash32<false>(arKey, nKeyLength, 0);
     return strhash_t(h & STRHASH_MASK);
   }
+#endif
 }
 
-inline strhash_t hash_string_inline(const char *arKey, int nKeyLength) {
-  return hash_string_i(arKey, nKeyLength);
+inline strhash_t
+hash_string_inline_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_inline_unsafe(arKey, nKeyLength);
 }
+
+#ifdef USE_SSECRC
+inline strhash_t hash_string_i_inline(const char *arKey, uint32_t nKeyLength,
+                                      uint64_t mask = 0xdfdfdfdfdfdfdfdfull) {
+  return crc8_i_safe(arKey, nKeyLength, mask);
+}
+
+inline strhash_t hash_string_inline(const char *arKey, uint32_t nKeyLength,
+                                    uint64_t mask = 0xdfdfdfdfdfdfdfdfull) {
+  return hash_string_i_inline(arKey, nKeyLength);
+}
+
+#else
+inline strhash_t hash_string_i_inline(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_inline_unsafe(arKey, nKeyLength);
+}
+
+inline strhash_t hash_string_inline(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_inline(arKey, nKeyLength);
+}
+
+#endif
+
+
 
 /**
  * We probably should get rid of this, so to detect code generation errors,
@@ -273,6 +502,7 @@ inline strhash_t hash_string_inline(const char *arKey, int nKeyLength) {
 inline strhash_t hash_string(const char *arKey) {
   return hash_string(arKey, strlen(arKey));
 }
+
 inline strhash_t hash_string_i(const char *arKey) {
   return hash_string_i(arKey, strlen(arKey));
 }

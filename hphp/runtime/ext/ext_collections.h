@@ -1554,7 +1554,7 @@ class c_MapIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
  */
 class BaseSet : public HashCollection {
  public:
-  void addAllKeysOf(const Cell& container);
+  void addAllKeysOf(Cell container);
   void addAll(const Variant& t);
 
   void init(const Variant& t);
@@ -2087,11 +2087,6 @@ ObjectData* collectionDeepCopyPair(c_Pair* pair);
 ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-inline bool isOptimizableCollectionClass(const Class* klass) {
-  return klass == c_Vector::classof() || klass == c_Map::classof() ||
-    klass == c_Pair::classof();
-}
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 

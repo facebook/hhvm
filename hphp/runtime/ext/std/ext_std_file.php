@@ -37,7 +37,7 @@ function popen(string $command, string $mode): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function fclose(resource $handle): bool;
 
 /**
@@ -69,7 +69,7 @@ function pclose(mixed $handle): mixed;
  *   seeking past EOF is not considered an error.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function fseek(resource $handle, int $offset, int $whence = SEEK_SET): mixed;
 
 /**
@@ -84,7 +84,7 @@ function fseek(resource $handle, int $offset, int $whence = SEEK_SET): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function rewind(resource $handle): bool;
 
 /**
@@ -99,7 +99,7 @@ function rewind(resource $handle): bool;
  *   occurs, returns FALSE.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function ftell(resource $handle): mixed;
 
 /**
@@ -113,7 +113,7 @@ function ftell(resource $handle): mixed;
  *   occurs (including socket timeout); otherwise returns FALSE.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function feof(resource $handle): bool;
 
 /**
@@ -143,7 +143,7 @@ function fstat(resource $handle): mixed;
  * @return mixed - Returns the read string or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function fread(resource $handle, int $length): mixed;
 
 /**
@@ -161,7 +161,7 @@ function fread(resource $handle, int $length): mixed;
  *   this function.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function fgetc(resource $handle): mixed;
 
 /**
@@ -183,7 +183,7 @@ function fgetc(resource $handle): mixed;
  *   file pointed to by handle.  If an error occurs, returns FALSE.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function fgets(resource $handle, int $length = 0): mixed;
 
 /**
@@ -202,7 +202,7 @@ function fgets(resource $handle, int $length = 0): mixed;
  *   error occurs, returns FALSE.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function fgetss(resource $handle,
                 int $length = 0,
                 string $allowable_tags = ""): mixed;
@@ -263,10 +263,10 @@ function fpassthru(resource $handle): mixed;
  *   error.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function fwrite(resource $handle, string $data, int $length = 0): mixed;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function fputs(resource $handle, string $data, int $length = 0): mixed;
 
 /**
@@ -280,7 +280,7 @@ function fputs(resource $handle, string $data, int $length = 0): mixed;
  *
  */
 <<__Native>>
-function fprintf(resource $handle, string $format, ...$argv): mixed;
+function fprintf(mixed $handle, string $format, ...$argv): mixed;
 
 /**
  * Write a string produced according to format to the stream resource
@@ -308,7 +308,7 @@ function vfprintf(mixed $handle, mixed $format, mixed $args): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function fflush(resource $handle): bool;
 
 /**
@@ -323,7 +323,7 @@ function fflush(resource $handle): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function ftruncate(resource $handle, int $size): bool;
 
 /**

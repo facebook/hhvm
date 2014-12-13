@@ -113,6 +113,11 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | _, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
       let env, ty_sub = TDef.expand_typedef env r x argl in
       sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+  | _, (_, Taccess _)
+  | (_, Taccess _), _ ->
+      let env, ety_super = TUtils.expand_type_access env ety_super in
+      let env, ety_sub = TUtils.expand_type_access env ety_sub in
+        sub_type_with_uenv env (uenv_super, ety_super) (uenv_sub, ety_sub)
   | (_, Tunresolved _), (_, Tunresolved _) ->
       let env, _ =
         Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) in
@@ -391,6 +396,9 @@ and sub_string p env ty2 =
   | (_, Tabstract (_, _, Some ty))
   | (_, Tgeneric (_, Some ty)) ->
       sub_string p env ty
+  | (_, Taccess _) ->
+      let env, ety2 = TUtils.expand_type_access env ety2 in
+      sub_string p env ety2
   | (r2, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
       let env, ty2 = Typing_tdef.expand_typedef env r2 x argl in
       sub_string p env ty2

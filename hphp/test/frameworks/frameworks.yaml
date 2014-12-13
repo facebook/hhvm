@@ -29,7 +29,7 @@
 # constructors and overriding any methods you need to get your particular
 # framework to run.
 ---
-# Unless otherwise specfied, "branch" will be the latest stable release
+# Unless otherwise specified, "branch" will be the latest stable release
 # of a framework
   assetic:
     url: https://github.com/fredemmott/assetic.git
@@ -71,6 +71,9 @@
       # Assumes that calculating the current time in seconds twice will give
       # the same result. Not true if you're unlucky.
       - codeigniter/tests/codeigniter/helpers/date_helper_test.php
+      # Flakey test case. Already made a PR 
+      # at https://github.com/bcit-ci/CodeIgniter/pull/3399.
+      - codeigniter/tests/codeigniter/libraries/Session_test.php
   composer:
     url: https://github.com/composer/composer.git
     # master is the only available branch
@@ -314,11 +317,15 @@
       - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleUsernameTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
-    branch: v2.0.2
-    commit: 6e1f228ce82333b437402dafad049713eb3eeac6
+    branch: master
+    commit: 2ec9a802632da1f92cf3f47cbc4020e2df2a432d
     install_root: klein
     test_root: klein
     test_find_mode: token
+    blacklist:
+      # KleinTest::testWithUsingFileInclude fails in sandcastle
+      # but we can't reproduce this.
+      - klein/tests/Klein/Tests/KleinTest.php
   kohana:
     url: https://github.com/kohana/kohana.git
     branch: v3.3.2
@@ -523,6 +530,10 @@
       - phpbb3/tests/lock/flock_test.php
       # race condition - https://github.com/phpbb/phpbb/pull/3006
       - phpbb3/tests/wrapper/gmgetdate_test.php
+      # This flakey test is caused by assuming time functions always return the
+      # same value. Made PR https://github.com/phpbb/phpbb/pull/3222 to fix.
+      - phpbb3/tests/passwords/manager_test.php
+      - phpbb3/tests/random/gen_rand_string_test.php
   phpmyadmin:
     url: https://github.com/phpmyadmin/phpmyadmin.git
     # Stable is RELEASE_4_1_9 but we have many pull requests in master
@@ -628,18 +639,15 @@
 	  # Dependent on system language settings.
       - twig/test/Twig/Tests/CompilerTest.php
   vfsstream:
-    # We're using Graham's fork to unskip a couple of tests
-    # The latest stable is v1.3.0 - the fork is slightly ahead
-    url: https://github.com/GrahamCampbell/vfsStream.git
-    branch: hhvm
-    commit: 00f21956ccf6cdff6201f28e598ff3ab5ccbd3c6
+    # It's slightly ahead of stable release v1.4.0 to include a commit which
+    # unskips a couple of tests on HHVM
+    url: https://github.com/mikey179/vfsStream.git
+    branch: master
+    commit: 056b64e0341039eb83075ca53347f29d0bfdead0
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist
     test_find_mode: token
-    blacklist:
-      # Intermittently hangs, takes > 24h
-      - vfsstream/src/test/php/org/bovigo/vfs/vfsStreamWrapperWithoutRootTestCase.php
   yii:
     url: https://github.com/yiisoft/yii.git
     branch: master

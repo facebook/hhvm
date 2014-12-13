@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_VM_CLASS_H_
 #define incl_HPHP_VM_CLASS_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/preclass.h"
 
 #include "hphp/util/default-ptr.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 #include <boost/range/iterator_range.hpp>
 
@@ -48,7 +49,10 @@ struct Func;
 struct HhbcExtClassInfo;
 struct StringData;
 
-namespace Native { struct NativeDataInfo; }
+namespace Native {
+struct NativeDataInfo;
+struct NativePropHandler;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -138,9 +142,7 @@ struct Class : AtomicCountable {
     // Most derived class that declared this constant.
     LowClassPtr m_class;
     LowStringPtr m_name;
-    TypedValue m_val;
-    LowStringPtr m_phpCode;
-    LowStringPtr m_typeConstraint;
+    TypedValueAux m_val;
   };
 
   /*
@@ -445,6 +447,12 @@ public:
 
   static void getMethodNames(const Class* cls, const Class* ctx, Array& result);
 
+  /*
+   * Look up a class' cached __invoke function. We only cache __invoke methods
+   * if they are instance methods or if the class is a static closure.
+   */
+  LowFuncPtr getCachedInvoke() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Property metadata.                                                 [const]
   //
@@ -577,62 +585,53 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Property lookup and accessibility.                                 [const]
 
-  /*
-   * Get the slot and accessibility of the declared instance property `key' on
-   * this class from the context `ctx'.
-   *
-   * Accessibility refers to the public/protected/private attribute of the
-   * property.  The value of `accessible' is output by reference.
-   *
-   * Return kInvalidInd iff the property was not declared on this class or any
-   * ancestor.  Note that if `accessible' is true, then the property must
-   * exist.
-   */
-  Slot getDeclPropIndex(Class* ctx, const StringData* key,
-                        bool& accessible) const;
+  template <class T>
+  struct PropLookup {
+    T prop;
+    bool accessible;
+  };
 
   /*
-   * Get the slot, visibility, and accessibility of the static property
-   * `sPropName on this class from the context `ctx'.
+   * Get the slot and accessibility of a declared instance property on a class
+   * from the given context.
    *
-   * Visibility refers to whether or not the property exists at all.
    * Accessibility refers to the public/protected/private attribute of the
    * property.
    *
-   * Both `visible' and `accessible' are output by reference.
-   *
-   * Return kInvalidInd (and set `visible' to false) iff the property does not
-   * exist.  Note also that if `accessible' is true, then the property must
-   * exist.
+   * Return kInvalidInd for the property iff the property was not declared on
+   * this class or any ancestor.  Note that if the return is marked as
+   * accessible, then the property must exist.
    */
-  Slot findSProp(Class* ctx, const StringData* sPropName,
-                 bool& visible, bool& accessible) const;
+  PropLookup<Slot> getDeclPropIndex(const Class*, const StringData*) const;
+
+  /*
+   * The equivalent of getDeclPropIndex(), but for static properties.
+   */
+  PropLookup<Slot> findSProp(const Class*, const StringData*) const;
 
   /*
    * Get the request-local value of the static property `sPropName', as well as
-   * its visibility and accessibility, from the context `ctx'.
+   * its accessibility, from the given context.
    *
    * The behavior is identical to that of findSProp(), except substituting
    * nullptr for kInvalidInd.
    *
    * May perform initialization.
    */
-  TypedValue* getSProp(Class* ctx, const StringData* sPropName,
-                       bool& visible, bool& accessible) const;
+  PropLookup<TypedValue*> getSProp(const Class*, const StringData*) const;
 
   /*
    * Identical to getSProp(), but the output is boxed.
    *
    * Used by the ext_zend_compat layer.
    */
-  RefData* zGetSProp(Class* ctx, const StringData* sPropName,
-                     bool& visible, bool& accessible) const;
+  PropLookup<RefData*> zGetSProp(const Class*, const StringData*) const;
 
   /*
-   * Return whether or not the declared instance property described by `prop'
-   * is accessible from the context `ctx'.
+   * Return whether or not a declared instance property is accessible from the
+   * given context.
    */
-  static bool IsPropAccessible(const Prop& prop, Class* ctx);
+  static bool IsPropAccessible(const Prop&, Class*);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -784,6 +783,16 @@ public:
    * NativeData type declared in <<__NativeData("Type")>>.
    */
   const Native::NativeDataInfo* getNativeDataInfo() const;
+
+  /*
+   * Whether the class registered native handler of magic props.
+   */
+  bool hasNativePropHandler();
+
+  /*
+   * Returns actual native handler of magic props.
+   */
+  Native::NativePropHandler* getNativePropHandler();
 
   /*
    * Get the underlying enum base type if this is an enum.

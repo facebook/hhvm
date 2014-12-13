@@ -1,6 +1,6 @@
 Overview
 benchy.py is a harness for building, running benchmarks, processing benchmark 
-measurments, and displaying results for HHVM. The various pieces are:
+measurements, and displaying results for HHVM. The various pieces are:
 
 benchy.py: The main interaction point with the tool. It coordinates all the 
   other phases of the process (e.g. checking out branches, building, running 
@@ -16,7 +16,7 @@ platform.py: Dynamically loads a Platform object based on the .benchy config
   needs. Any file of the form *_platform.py contains an implementation of one 
   of these Platform objects.
 
-any_mean.py: Responsible for consuming the raw benchmark measurments and 
+any_mean.py: Responsible for consuming the raw benchmark measurements and 
   aggregating them into means and confidence intervals.
 
 confidence_interval.py: Generic library for calculating mean confidence 

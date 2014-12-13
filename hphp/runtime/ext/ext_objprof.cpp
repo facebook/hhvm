@@ -19,11 +19,11 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
-#include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include <signal.h>
 #include <vector>
@@ -68,7 +68,6 @@ public:
 typedef typename std::map<StringData*, ObjprofStringAgg, cmpStringData>
   ObjprofStrings;
 typedef typename std::vector<std::string> ObjprofStack;
-
 
 std::pair<int, double> tvGetSize(const TypedValue* tv, int ref_adjust);
 void tvGetStrings(
@@ -221,7 +220,6 @@ void stringsOfArray(
 
   path->pop_back();
 }
-
 
 /**
  * Measures the size of the typed value and referenced objects without going
@@ -430,7 +428,7 @@ static bool supportsToArray(ObjectData* obj) {
     return true;
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
     return true;
-  } else if (UNLIKELY(obj->instanceof(c_DateTime::classof()))) {
+  } else if (UNLIKELY(obj->instanceof(DateTimeData::getClass()))) {
     return true;
   } else {
     if (LIKELY(!obj->getAttribute(ObjectData::InstanceDtor))) {
@@ -441,11 +439,10 @@ static bool supportsToArray(ObjectData* obj) {
   }
 }
 
-
 static std::pair<int, double> getObjSize(ObjectData* obj) {
   Class* cls = obj->getVMClass();
   FTRACE(1, "Getting object size for type {} at {}\n",
-    obj->o_getClassName()->data(),
+    obj->getClassName().data(),
     obj
   );
   int size = getClassSize(cls);
@@ -462,29 +459,27 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
   }
 
   // We're increasing ref count by calling toArray, need to adjust it later
-  auto arr = obj->o_toArray(false);
+  auto arr = obj->toArray();
   bool is_packed = arr->isPacked();
 
   for (ArrayIter iter(arr); iter; ++iter) {
-    auto key = iter.first().toString();
-    auto key_tv = iter.first().asTypedValue();
-    auto val_tv = iter.second().asTypedValue();
-
-    if (key_tv->m_type == HPHP::KindOfString) {
+    TypedValue key_tv = *iter.first().asTypedValue();
+    auto val_tv = iter.secondRef().asTypedValue();
+    auto key = tvAsVariant(&key_tv).toString();
+    if (key_tv.m_type == HPHP::KindOfString) {
       // If the key begins with a NUL, it's a private or protected property.
       // Read the class name from between the two NUL bytes.
       //
       // Note: Copied from object-data.cpp
       if (!key.empty() && key[0] == '\0') {
         int subLen = key.find('\0', 1) + 1;
-        String subkey = key.substr(1, subLen - 2);
         key = key.substr(subLen);
         FTRACE(3, "Resolved private prop name: {}\n", key.c_str());
       }
     }
 
     bool is_declared =
-        key_tv->m_type == HPHP::KindOfString &&
+        key_tv.m_type == HPHP::KindOfString &&
         cls->lookupDeclProp(key.get()) != kInvalidSlot;
 
     int key_size = 0;
@@ -492,7 +487,7 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
     if (!is_declared && !is_packed) {
       FTRACE(2, "Counting string key {} because it's non-declared/packed\n",
         key.c_str());
-      auto key_size_pair = tvGetSize(key_tv, -1);
+      auto key_size_pair = tvGetSize(&key_tv, -1);
       key_size = key_size_pair.first;
       key_sized = key_size_pair.second;
     } else {
@@ -512,7 +507,7 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
    size += val_size_pair.first + key_size;
    sized += val_size_pair.second + key_sized;
   }
-  return std::make_pair(size, sized);;
+  return std::make_pair(size, sized);
 }
 
 static void getObjStrings(
@@ -523,7 +518,7 @@ static void getObjStrings(
 ) {
   Class* cls = obj->getVMClass();
   FTRACE(1, "Getting strings for type {} at {}\n",
-    obj->o_getClassName()->data(),
+    obj->getClassName().data(),
     obj
   );
 
@@ -532,13 +527,14 @@ static void getObjStrings(
   }
 
   path->push_back(std::string(cls->name()->data()));
-  auto arr = obj->o_toArray(false);
+  auto arr = obj->toArray();
   bool is_packed = arr->isPacked();
 
   for (ArrayIter iter(arr); iter; ++iter) {
-    auto key = iter.first().toString();
-    auto key_tv = iter.first().asTypedValue();
-    auto val_tv = iter.second().asTypedValue();
+    auto first = iter.first();
+    auto key = first.toString();
+    auto key_tv = first.asTypedValue();
+    auto val_tv = iter.secondRef().asTypedValue();
 
     if (key_tv->m_type == HPHP::KindOfString) {
       // If the key begins with a NUL, it's a private or protected property.
@@ -547,7 +543,6 @@ static void getObjStrings(
       // Note: Copied from object-data.cpp
       if (!key.empty() && key[0] == '\0') {
         int subLen = key.find('\0', 1) + 1;
-        String subkey = key.substr(1, subLen - 2);
         key = key.substr(subLen);
       }
     }
@@ -592,10 +587,8 @@ static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
 
   if (MM().getObjectTracking()) {
     std::set<void*> pointers;
-    for (auto ptr = MM().objects_begin(); ptr != MM().objects_end(); ++ptr) {
-      ObjectData* obj = (ObjectData*)(*ptr);
+    MM().forEachObject([&](ObjectData* obj) {
       Class* cls = obj->getVMClass();
-
       auto it = histogram.find(cls);
       if (it != histogram.end()) {
         ObjprofStack path;
@@ -604,7 +597,7 @@ static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
         // This should never happen or we're not untracking something
         FTRACE(1, "Class* not found in histogram!\n");
       }
-    }
+    });
   }
 
   // Create response
@@ -650,12 +643,9 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
     histogram[c] = empty_metrics;
   }
 
-  //auto tracker = ObjectTracker::get();
   if (MM().getObjectTracking()) {
-    for (auto ptr = MM().objects_begin(); ptr != MM().objects_end(); ++ptr) {
-      ObjectData* obj = (ObjectData*)(*ptr);
+    MM().forEachObject([&](ObjectData* obj) {
       Class* cls = obj->getVMClass();
-
       auto it = histogram.find(cls);
       if (it != histogram.end()) {
         auto objsize_pair = getObjSize(obj);
@@ -667,7 +657,7 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
 
         FTRACE(1, "...................ObjectData* at {} ({}) size={}:{}\n",
           obj,
-          obj->o_getClassName()->data(),
+          obj->getClassName().data(),
           objsize_pair.first,
           objsize_pair.second
         );
@@ -675,7 +665,7 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
         // This should never happen or we're not untracking something
         FTRACE(1, "Class* not found in histogram!\n");
       }
-    }
+    });
   }
 
   // Create response

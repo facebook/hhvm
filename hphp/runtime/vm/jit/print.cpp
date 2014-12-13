@@ -405,8 +405,10 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   if (dumpIREnabled(kExtraExtraLevel)) printOpcodeStats(os, blocks);
 
   // Print the block CFG above the actual code.
+
+  auto const backedges = findBackEdges(unit);
   os << "digraph G {\n";
-  for (Block* block : blocks) {
+  for (auto block : blocks) {
     if (block->empty()) continue;
     if (dotBodies && block->hint() != Block::Hint::Unlikely &&
         block->hint() != Block::Hint::Unused) {
@@ -426,24 +428,30 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
                           block->id(), body);
     }
 
-    auto* next = block->next();
-    auto* taken = block->taken();
+    auto next = block->nextEdge();
+    auto taken = block->takenEdge();
     if (!next && !taken) continue;
-    auto edge_color = [&] (Block* target) -> std::string {
+    auto edge_color = [&] (Edge* edge) {
+      auto const target = edge->to();
       return
         target->isCatch() ? " [color=blue]" :
         target->isExit() ? " [color=cyan]" :
+        backedges.count(edge) ? " [color=red]" :
         target->hint() == Block::Hint::Unlikely ? " [color=green]" : "";
     };
+    auto show_edge = [&] (Edge* edge) {
+      os << folly::format(
+        "B{} -> B{}{}",
+        block->id(),
+        edge->to()->id(),
+        edge_color(edge)
+      );
+    };
     if (next) {
-      os << folly::format("B{} -> B{}{}", block->id(), next->id(),
-        edge_color(next));
+      show_edge(next);
       if (taken) os << "; ";
     }
-    if (taken) {
-      os << folly::format("B{} -> B{}{}", block->id(), taken->id(),
-        edge_color(taken));
-    }
+    if (taken) show_edge(taken);
     os << "\n";
   }
   os << "}\n";

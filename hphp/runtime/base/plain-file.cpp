@@ -272,7 +272,8 @@ bool BuiltinFile::close() {
 void BuiltinFile::sweep() {
   invokeFiltersOnClose();
   // This object was just a wrapper around a FILE* or fd owned by someone else,
-  // so don't close it except in explicit calls to close().
+  // so don't close it except in explicit calls to close(). Beware this doesn't
+  // call PlainFile::sweep().
   m_stream = nullptr;
   m_fd = -1;
   m_closed = true;

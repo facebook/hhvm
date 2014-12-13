@@ -4,23 +4,28 @@
 * Run the test suites in various configurations.
 */
 
+function is_testing_dso_extension() {
+  // detecting if we're running outside of the hhvm codebase
+  return !is_file(__DIR__ . "/../../hphp/test/run");
+}
+
 function get_expect_file_and_type($test, $options) {
-  $types = ['expect', 'expectf', 'expectregex'];
+  $types = array('expect', 'expectf', 'expectregex');
   if (isset($options['repo'])) {
     foreach ($types as $type) {
       $fname = "$test.$type-repo";
       if (file_exists($fname)) {
-        return [$fname, $type];
+        return array($fname, $type);
       }
     }
   }
   foreach ($types as $type) {
     $fname = "$test.$type";
     if (file_exists($fname)) {
-      return [$fname, $type];
+      return array($fname, $type);
     }
   }
-  return [null, null];
+  return array(null, null);
 }
 
 function usage() {
@@ -89,6 +94,9 @@ function error($message) {
 }
 
 function hphp_home() {
+  if (is_testing_dso_extension()) {
+    return realpath(__DIR__);
+  }
   return realpath(__DIR__.'/../..');
 }
 
@@ -96,9 +104,21 @@ function idx($array, $key, $default = null) {
   return isset($array[$key]) ? $array[$key] : $default;
 }
 
-function idx_file($array, $key, $default = null) {
+function hhvm_path() {
+  $array = $_ENV;
+  $key = "HHVM_BIN";
+  $default = bin_root().'/hphp/hhvm/hhvm';
+
   $file = is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
   if (!is_file($file)) {
+    if (is_testing_dso_extension()) {
+      exec("which hhvm", $output);
+      if (isset($output[0]) && $output[0]) {
+        return $output[0];
+      }
+      error("You need to specify hhvm bin with env HHVM_BIN");
+    }
+
     error("$file doesn't exist. Did you forget to build first?");
   }
   return rel_path($file);
@@ -125,29 +145,29 @@ function read_file($file) {
 
 // http://stackoverflow.com/questions/2637945/
 function rel_path($to) {
-    $from     = explode('/', getcwd().'/');
-    $to       = explode('/', $to);
-    $relPath  = $to;
+  $from     = explode('/', getcwd().'/');
+  $to       = explode('/', $to);
+  $relPath  = $to;
 
-    foreach($from as $depth => $dir) {
-        // find first non-matching dir
-        if($dir === $to[$depth]) {
-            // ignore this directory
-            array_shift($relPath);
-        } else {
-            // get number of remaining dirs to $from
-            $remaining = count($from) - $depth;
-            if($remaining > 1) {
-                // add traversals up to first matching dir
-                $padLength = (count($relPath) + $remaining - 1) * -1;
-                $relPath = array_pad($relPath, $padLength, '..');
-                break;
-            } else {
-                $relPath[0] = './' . $relPath[0];
-            }
-        }
+  foreach ($from as $depth => $dir) {
+    // find first non-matching dir
+    if ($dir === $to[$depth]) {
+      // ignore this directory
+      array_shift($relPath);
+    } else {
+      // get number of remaining dirs to $from
+      $remaining = count($from) - $depth;
+      if ($remaining > 1) {
+        // add traversals up to first matching dir
+        $padLength = (count($relPath) + $remaining - 1) * -1;
+        $relPath = array_pad($relPath, $padLength, '..');
+        break;
+      } else {
+        $relPath[0] = './' . $relPath[0];
+      }
     }
-    return implode('/', $relPath);
+  }
+  return implode('/', $relPath);
 }
 
 function get_options($argv) {
@@ -239,6 +259,9 @@ function map_convenience_filename($file) {
 // Some tests have to be run together in the same test bucket, one after the
 // other in order to avoid races and collisions
 function serial_only_tests() {
+  if (is_testing_dso_extension()) {
+    return array();
+  }
   // Can be a directory or a single test
   $serial = array (
     hphp_home().'/'.'hphp/test/slow/ext_memcached/memcached-getallkeys.php',
@@ -269,7 +292,7 @@ function find_tests($files, array $options = null) {
   $files = array_map('escapeshellarg', $files);
   $files = implode(' ', $files);
   $tests = explode("\n", shell_exec(
-      "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
+    "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
   ));
   if (!$tests) {
     error(usage());
@@ -326,6 +349,7 @@ function find_file($test, $name) {
 
 function find_file_for_dir($dir, $name) {
   while (($dir !== '.' && $dir !== '/') && is_dir($dir)) {
+    $dir = realpath($dir);
     $file = "$dir/$name";
     if (is_file($file)) {
       return $file;
@@ -378,11 +402,11 @@ function extra_args($options) {
   return idx($options, 'args', '');
 }
 
-function hhvm_path() {
-  return idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm');
-}
-
-function hhvm_cmd_impl($options, $config, ...$extra_args) {
+function hhvm_cmd_impl() {
+  $args = func_get_args();
+  $options = array_shift($args);
+  $config = array_shift($args);
+  $extra_args = $args;
   $args = array(
     hhvm_path(),
     '-c',
@@ -419,7 +443,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     find_debug_config($test, 'hphpd.ini'),
     read_file(find_test_ext($test, 'opts')),
     '--file',
-    escapeshellarg($test_run),
+    escapeshellarg($test_run)
   );
 
   if (file_exists($test.'.ini')) {
@@ -530,27 +554,38 @@ class Status {
     }
   }
 
-  public static function pass($test, $detail) {
-    array_push(self::$results, array('name' => $test, 'status' => 'passed'));
+  public static function pass($test, $detail, $time, $stime, $etime) {
+    array_push(self::$results, array('name' => $test,
+                                     'status' => 'passed',
+                                     'start_time' => $stime,
+                                     'end_time' => $etime,
+                                     'time' => $time));
     $how = $detail === 'pass-server' ? self::PASS_SERVER :
       ($detail === 'skip-server' ? self::SKIP_SERVER : self::PASS_CLI);
-    self::send(self::MSG_TEST_PASS, [$test, $how]);
+    self::send(self::MSG_TEST_PASS, array($test, $how, $time, $stime, $etime));
   }
 
-  public static function skip($test, $reason = null) {
+  public static function skip($test, $reason, $time, $stime, $etime) {
     if (self::getMode() !== self::MODE_FBMAKE) {
-      array_push(self::$results, array('name' => $test, 'status' => 'skipped'));
+      array_push(self::$results, array('name' => $test,
+                                       'status' => 'skipped',
+                                       'start_time' => $stime,
+                                       'end_time' => $etime,
+                                       'time' => $time));
     }
-    self::send(self::MSG_TEST_SKIP, [$test,$reason]);
+    self::send(self::MSG_TEST_SKIP, array($test, $reason, $time, $stime, $etime));
   }
 
-  public static function fail($test) {
+  public static function fail($test, $time, $stime, $etime) {
     array_push(self::$results, array(
       'name' => $test,
       'status' => 'failed',
       'details' => self::utf8Sanitize(@file_get_contents("$test.diff")),
+      'start_time' => $stime,
+      'end_time' => $etime,
+      'time' => $time
     ));
-    self::send(self::MSG_TEST_FAIL, $test);
+    self::send(self::MSG_TEST_FAIL, array($test, $time, $stime, $etime));
   }
 
   public static function serverRestarted() {
@@ -566,7 +601,7 @@ class Status {
 
   /**
    * Takes a variable number of string arguments. If color output is enabled
-   * and any one of the arguments is preceeded by an integer (see the color
+   * and any one of the arguments is preceded by an integer (see the color
    * constants above), that argument will be given the indicated color.
    */
   public static function sayColor() {
@@ -590,9 +625,10 @@ class Status {
     }
   }
 
-  public static function sayFBMake($test, $status) {
+  public static function sayFBMake($test, $status, $stime, $etime) {
     $start = array('op' => 'start', 'test' => $test);
-    $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
+    $end = array('op' => 'test_done', 'test' => $test, 'status' => $status,
+                 'start_time' => $stime, 'end_time' => $etime);
     if ($status == 'failed') {
       $end['details'] = self::utf8Sanitize(@file_get_contents("$test.diff"));
     }
@@ -730,21 +766,25 @@ function clean_intermediate_files($test, $options) {
 
 function run($options, $tests, $bad_test_file) {
   foreach ($tests as $test) {
+    $stime = time();
+    $time = microtime(true);
     $status = run_and_lock_test($options, $test);
+    $time = microtime(true) - $time;
+    $etime = time();
     if ($status === 'skip') {
-      Status::skip($test);
+      Status::skip($test, null, $time, $stime, $etime);
       clean_intermediate_files($test, $options);
     } else if ($status === 'skip-norepo') {
-      Status::skip($test, 'norepo');
+      Status::skip($test, 'norepo', $time, $stime, $etime);
       clean_intermediate_files($test, $options);
     } else if ($status === 'skip-onlyrepo') {
-      Status::skip($test, 'onlyrepo');
+      Status::skip($test, 'onlyrepo', $time, $stime, $etime);
       clean_intermediate_files($test, $options);
     } else if ($status) {
-      Status::pass($test, $status);
+      Status::pass($test, $status, $time, $stime, $etime);
       clean_intermediate_files($test, $options);
     } else {
-      Status::fail($test);
+      Status::fail($test, $time, $stime, $etime);
     }
   }
   file_put_contents($bad_test_file, json_encode(Status::getResults()));
@@ -1287,7 +1327,7 @@ function msg_loop($num_tests, $queue) {
 
       case Status::MSG_TEST_PASS:
         $passed++;
-        list($test, $how) = $message;
+        list($test, $how, $time, $stime, $etime) = $message;
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1301,18 +1341,19 @@ function msg_loop($num_tests, $queue) {
             break;
 
           case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::GREEN, "passed\n");
+            Status::sayColor("$test ", Status::GREEN,
+                             sprintf("passed (%.2fs)\n", $time));
             break;
 
           case Status::MODE_FBMAKE:
-            Status::sayFBMake($test, 'passed');
+            Status::sayFBMake($test, 'passed', $stime, $etime);
             break;
         }
         break;
 
       case Status::MSG_TEST_SKIP:
         $skipped++;
-        list($test, $reason) = $message;
+        list($test, $reason, $time, $stime, $etime) = $message;
 
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
@@ -1327,14 +1368,14 @@ function msg_loop($num_tests, $queue) {
             if ($reason !== null) {
               Status::sayColor(" - $reason");
             }
-            Status::sayColor("\n");
+            Status::sayColor(sprintf(" (%.2fs)\n", $time));
             break;
         }
         break;
 
       case Status::MSG_TEST_FAIL:
         $failed++;
-        $test = $message;
+        list($test, $time, $stime, $etime) = $message;
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (Status::hasCursorControl()) {
@@ -1346,11 +1387,12 @@ function msg_loop($num_tests, $queue) {
             break;
 
           case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::RED, "FAILED\n");
+            Status::sayColor("$test ", Status::RED,
+                             sprintf("FAILED (%.2fs)\n", $time));
             break;
 
           case Status::MODE_FBMAKE:
-            Status::sayFBMake($test, 'failed');
+            Status::sayFBMake($test, 'failed', $stime, $etime);
             break;
         }
         break;

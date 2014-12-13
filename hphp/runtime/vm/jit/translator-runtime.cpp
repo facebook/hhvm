@@ -517,7 +517,7 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collectionContains(obj, key);
   }
-  const Array& arr = obj->o_toArray();
+  auto arr = obj->toArray();
   return ak_exist_string_impl(arr.get(), key);
 }
 
@@ -525,7 +525,7 @@ bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collectionContains(obj, key);
   }
-  const Array& arr = obj->o_toArray();
+  auto arr = obj->toArray();
   return arr.get()->exists(key);
 }
 
@@ -592,13 +592,11 @@ int32_t arrayVsize(ArrayData* ad) {
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx) {
-  bool visible, accessible;
-  TypedValue* val = cls->getSProp(ctx, name, visible, accessible);
+  auto const lookup = cls->getSProp(ctx, name);
 
-  if (UNLIKELY(!visible || !accessible)) {
-    return nullptr;
-  }
-  return val;
+  if (UNLIKELY(!lookup.prop || !lookup.accessible)) return nullptr;
+
+  return lookup.prop;
 }
 
 TypedValue* getSPropOrRaise(const Class* cls,
@@ -677,7 +675,7 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
 }
 
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
-  int64_t ival = o->o_toInt64();
+  auto const ival = o->toInt64();
   decRefObj(o);
   return switchBoundsCheck(ival, base, nTargets);
 }
@@ -903,7 +901,7 @@ void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   try {
     loadFuncContextImpl<OnFail::Fatal>(ArrNR(arr), preLiveAR, fp);
   } catch (...) {
-    arPreliveOverwriteCells(preLiveAR);
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
     throw;
   }
 }
@@ -962,7 +960,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
     inst->incRefCount();
     preLiveAR->setThis(inst);
   } catch (...) {
-    arPreliveOverwriteCells(preLiveAR);
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
     throw;
   }
 }
@@ -992,7 +990,7 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
       return fpushStringFail(sd, preLiveAR);
     }
   } catch (...) {
-    arPreliveOverwriteCells(preLiveAR);
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfString>(sd);
     throw;
   }
 }

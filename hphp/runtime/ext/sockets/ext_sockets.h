@@ -20,12 +20,10 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/network.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-extern const int64_t k_STREAM_SERVER_BIND;
-extern const int64_t k_STREAM_SERVER_LISTEN;
 
 Variant HHVM_FUNCTION(socket_create,
                       int domain,

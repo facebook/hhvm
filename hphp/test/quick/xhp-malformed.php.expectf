@@ -1,2 +1,3 @@
 
-Fatal error: syntax error, unexpected T_XHP_LABEL, expecting T_XHP_TAG_GT in %s on line 4
+Fatal error: Unexpected character in input: '/' (ASCII=47) (Line: %d, Char: %d)
+syntax error, unexpected T_XHP_LABEL, expecting T_XHP_TAG_GT in %s on line 4

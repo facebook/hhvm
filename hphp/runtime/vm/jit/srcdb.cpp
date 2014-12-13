@@ -119,13 +119,16 @@ void SrcRec::emitFallbackJump(CodeBlock& cb, ConditionCode cc /* = -1 */) {
     cb,
     cc == CC_None ? x64::kJmpLen : x64::kJmpccLen
   );
-  auto from = cb.frontier();
 
+  auto from = cb.frontier();
   TCA destAddr = getFallbackTranslation();
+  mcg->backEnd().emitSmashableJump(cb, destAddr, cc);
+  registerFallbackJump(from, cc);
+}
+
+void SrcRec::registerFallbackJump(TCA from, ConditionCode cc /* = -1 */) {
   auto incoming = cc < 0 ? IncomingBranch::jmpFrom(from)
                          : IncomingBranch::jccFrom(from);
-
-  mcg->backEnd().emitSmashableJump(cb, destAddr, cc);
 
   // We'll need to know the location of this jump later so we can
   // patch it to new translations added to the chain.

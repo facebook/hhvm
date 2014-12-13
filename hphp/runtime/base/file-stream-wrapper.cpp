@@ -23,6 +23,8 @@
 #include "hphp/system/constants.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
+
 #include <memory>
 
 namespace HPHP {

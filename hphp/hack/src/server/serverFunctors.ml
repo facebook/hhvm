@@ -132,12 +132,14 @@ end = struct
         SharedMem.load (filename^".sharedmem");
         EventLogger.load_read_end filename;
         let to_recheck =
+          List.rev_append (BuildMain.get_all_targets ()) to_recheck in
+        let paths_to_recheck =
           rev_rev_map (Relative_path.concat Relative_path.Root) to_recheck
         in
         let updates = List.fold_left
           (fun acc update -> Relative_path.Set.add update acc)
           Relative_path.Set.empty
-          to_recheck in
+          paths_to_recheck in
         let updates =
           Relative_path.Set.filter (Program.filter_update genv env) updates in
         let env = Program.recheck genv env updates in
@@ -158,7 +160,7 @@ end = struct
     *)
     Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
     let root = ServerArgs.root options in
-    EventLogger.init root;
+    EventLogger.init root (ServerArgs.start_time options);
     PidLog.init root;
     PidLog.log ~reason:(Some "main") (Unix.getpid());
     let genv = ServerEnvBuild.make_genv ~multicore:true options in
@@ -176,7 +178,7 @@ end = struct
       serve genv env socket
 
   let get_log_file root =
-    let user = Sys.getenv "USER" in
+    let user = Sys_utils.logname in
     let tmp_dir = Tmp.get_dir() in
     let root_part = Path.slash_escaped_string_of_path root in
     Printf.sprintf "%s/%s-%s.log" tmp_dir user root_part

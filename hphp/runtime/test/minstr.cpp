@@ -19,6 +19,7 @@
 #include <folly/Format.h>
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 
 namespace HPHP { namespace jit {
 

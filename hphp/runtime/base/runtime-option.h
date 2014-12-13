@@ -411,7 +411,7 @@ public:
          the runtime will throw a fatal error (this goes together
          with Option::HardReturnTypeHints). */                          \
   F(int32_t, CheckReturnTypeHints,     2)                               \
-  F(bool, SoftClosureReturnTypeHints,  true)                            \
+  F(bool, SoftClosureReturnTypeHints,  false)                           \
   /* HackArrayWarnFrequency:
      0 - no warnings
      [1-UINT32_MAX] - raise warning every X times
@@ -425,8 +425,6 @@ public:
   F(bool, PerfPidMap,                  true)                            \
   F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
-  F(bool, RuntimeTypeProfile,          false)                           \
-  F(int32_t, RuntimeTypeProfileLoggingFreq,  0)                         \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
@@ -437,9 +435,6 @@ public:
   F(uint32_t, JitMaxTranslations,      12)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(uint32_t, JitMaxRegionInstrs,      1000)                            \
-  F(string, JitProfilePath,            std::string(""))                 \
-  F(bool, JitTypePrediction,           true)                            \
-  F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \

@@ -172,7 +172,7 @@ if (!is_dir($DBDIR)) {
 try {
     $server = new MongoShellServer;
 } catch(Exception $e) {
-    echo "Does't look like the daemon is up and running.. Starting it now\n";
+    echo "Doesn't look like the daemon is up and running.. Starting it now\n";
     makeDaemon();
     try {
         $server = new MongoShellServer;

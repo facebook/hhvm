@@ -91,11 +91,13 @@ private:
   void emit(copy2& i);
   void emit(debugtrap& i) { a->Brk(0); }
   void emit(fallbackcc i);
+  void emit(fallback& i);
   void emit(hcsync& i);
   void emit(hcnocatch& i);
   void emit(hcunwind& i);
   void emit(hostcall& i);
   void emit(ldimm& i);
+  void emit(ldimmb& i);
   void emit(ldpoint& i);
   void emit(load& i);
   void emit(point& i) { points[i.p] = a->frontier(); }
@@ -125,6 +127,7 @@ private:
   void emit(loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(lslv& i) { a->lslv(X(i.d), X(i.sl), X(i.sr)); }
   void emit(movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
+  void emit(movzbq& i) { a->Uxtb(W(Vreg32(size_t(i.d))), W(i.s)); }
   void emit(mul& i) { a->Mul(X(i.d), X(i.s0), X(i.s1)); }
   void emit(neg& i) { a->Neg(X(i.d), X(i.s), vixl::SetFlags); }
   void emit(not& i) { a->Mvn(X(i.d), X(i.s)); }
@@ -370,6 +373,10 @@ void Vgen::emit(fallbackcc i) {
   }
 }
 
+void Vgen::emit(fallback& i) {
+  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags});
+}
+
 void Vgen::emit(hcsync& i) {
   assert(points[i.call]);
   mcg->recordSyncPoint(points[i.call], i.fix.pcOffset, i.fix.spOffset);
@@ -411,6 +418,11 @@ void Vgen::emit(ldimm& i) {
   } else {
     a->Mov(X(i.d), ival);
   }
+}
+
+void Vgen::emit(ldimmb& i) {
+  assert_not_implemented(i.d.isGP());
+  a->Mov(W(i.d), i.s.b());
 }
 
 void Vgen::emit(ldpoint& i) {
@@ -558,9 +570,6 @@ void lower(Vunit& unit) {
           break;
         case Vinstr::syncvmsp:
           inst = copy{inst.syncvmsp_.s, PhysReg{arm::rVmSp}};
-          break;
-        case Vinstr::syncvmfp:
-          inst = copy{inst.syncvmfp_.s, PhysReg{arm::rVmFp}};
           break;
         default:
           break;

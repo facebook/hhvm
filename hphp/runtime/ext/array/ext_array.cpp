@@ -789,7 +789,7 @@ Variant HHVM_FUNCTION(array_reverse,
   assert(cell_input.m_type == KindOfObject);
   ObjectData* obj = cell_input.m_data.pobj;
   assert(obj && obj->isCollection());
-  return ArrayUtil::Reverse(obj->o_toArray(), preserve_keys);
+  return ArrayUtil::Reverse(obj->toArray(), preserve_keys);
 }
 
 Variant HHVM_FUNCTION(array_shift,
@@ -1483,7 +1483,7 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
 ///////////////////////////////////////////////////////////////////////////////
 // diff functions
 
-static inline void addToSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
+static inline void addToSetHelper(c_Set* st, const Cell c, TypedValue* strTv,
                                   bool convertIntLikeStrs) {
   if (c.m_type == KindOfInt64) {
     st->add(c.m_data.num);
@@ -1505,7 +1505,7 @@ static inline void addToSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
   }
 }
 
-static inline bool checkSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
+static inline bool checkSetHelper(c_Set* st, const Cell c, TypedValue* strTv,
                                   bool convertIntLikeStrs) {
   if (c.m_type == KindOfInt64) {
     return st->contains(c.m_data.num);
@@ -1539,8 +1539,7 @@ static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = container.asCell()->m_type == KindOfArray;
   for (ArrayIter iter(container); iter; ++iter) {
-    auto const& c = *iter.first().asCell();
-    addToSetHelper(st, c, strTv, !isKey);
+    addToSetHelper(st, *iter.first().asCell(), strTv, !isKey);
   }
 }
 
@@ -1788,7 +1787,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
 }
 
 static inline void addToIntersectMapHelper(c_Map* mp,
-                                           const Cell& c,
+                                           const Cell c,
                                            TypedValue* intOneTv,
                                            TypedValue* strTv,
                                            bool convertIntLikeStrs) {
@@ -1813,7 +1812,7 @@ static inline void addToIntersectMapHelper(c_Map* mp,
 }
 
 static inline void updateIntersectMapHelper(c_Map* mp,
-                                            const Cell& c,
+                                            const Cell c,
                                             int pos,
                                             TypedValue* strTv,
                                             bool convertIntLikeStrs) {

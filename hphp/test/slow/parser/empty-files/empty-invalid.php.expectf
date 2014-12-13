@@ -1,2 +1,3 @@
 
-Fatal error: syntax error, unexpected T_HH_ERROR, expecting $end in %s/slow/parser/empty-files/empty-invalid.php on line 1
+Fatal error: <?php directive must be followed by whitespace, newline, or EOF (Line: %d, Char: %d)
+syntax error, unexpected T_HH_ERROR, expecting $end in %s/slow/parser/empty-files/empty-invalid.php on line 1

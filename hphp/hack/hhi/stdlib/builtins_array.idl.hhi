@@ -81,7 +81,11 @@ function array_fill_keys($keys, $value);
 function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null);
 function array_flip($trans);
 function key_exists($key, $search);
-function array_keys($input, $search_value = null, $strict = false);
+function array_keys<Tk, Tv>(
+  KeyedContainer<Tk, Tv> $input,
+  ?Tv $search_value = null,
+  bool $strict = false
+): array<Tk>;
 /**
  * array_map signature is rewritten based on the arity of the call:
  *

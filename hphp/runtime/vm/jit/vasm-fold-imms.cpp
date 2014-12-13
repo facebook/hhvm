@@ -202,7 +202,7 @@ void foldImms(Vunit& unit) {
   // figure out which Vregs are constants and stash their values.
   for (auto& entry : unit.cpool) {
     folder.valid.set(entry.second);
-    folder.vals[entry.second] = entry.first;
+    folder.vals[entry.second] = entry.first.val;
   }
   // now mutate instructions
   for (auto b : blocks) {

@@ -19,9 +19,11 @@
 
 #include <folly/Optional.h>
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 
@@ -982,6 +984,7 @@ Offset instrJumpTarget(const Op* instrs, Offset pos);
  * Returns the set of bytecode offsets for the instructions that may
  * be executed immediately after opc.
  */
+using OffsetSet = hphp_hash_set<Offset>;
 OffsetSet instrSuccOffsets(Op* opc, const Unit* unit);
 
 struct StackTransInfo {
@@ -1099,10 +1102,6 @@ inline bool isRet(Op op) {
     default:
       return false;
   }
-}
-
-inline bool isReturnish(Op op) {
-  return isRet(op) || op == Op::NativeImpl;
 }
 
 inline bool isSwitch(Op op) {

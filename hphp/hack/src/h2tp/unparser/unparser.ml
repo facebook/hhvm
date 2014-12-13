@@ -343,6 +343,8 @@ let unparser _env =
              in StrWords [ v1; v2 ])
     | ClassUse hint ->
         StrStatement [Str "use"; u_hint hint]
+    | XhpAttrUse hint ->
+        StrStatement [Str "attribute"; u_hint hint]
     | ClassTraitRequire (trait_req_kind, hint) ->
         StrStatement [
           Str "require";
@@ -354,7 +356,11 @@ let unparser _env =
         and hintStr = u_of_option u_hint hintOption
         and varStr = u_of_list_comma u_class_var classVars in
         StrStatement [kindStr; hintStr; varStr]
+    | XhpAttr _ ->
+        u_todo "XhpAttr" (fun () -> StrEmpty)
     | Method m -> u_method_ kind m
+    | TypeConst _ -> u_todo "TypeConst" (fun () -> StrEmpty)
+
   and u_class_attr =
     function
     | CA_name v2 ->
@@ -572,6 +578,7 @@ let unparser _env =
              let v1 = Str "Hshape"
              and v2 = u_of_list_spc u_shape_field v2
              in StrWords [ v1; v2 ])
+    | Haccess _ -> u_todo "Haccess" (fun () -> StrEmpty)
   and u_shape_field_name =
     function
     | SFlit v2 ->

@@ -248,7 +248,7 @@ Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
 
   char buffer[40];
   if (!inet_ntop(af, in_addr.data(), buffer, sizeof(buffer))) {
-    raise_warning("An unknown error occured");
+    raise_warning("An unknown error occurred");
     return false;
   }
   return String(buffer, CopyString);
@@ -931,8 +931,8 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
   // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad
   // for security?
   if (header.find('\n') >= 0 || header.find('\r') >= 0) {
-    raise_warning("Header may not contain more than a single header, "
-                  "new line detected");
+    raise_error("Header may not contain more than a single header, "
+                "new line detected");
     return;
   }
 

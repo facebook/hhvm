@@ -572,7 +572,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
         auto showFailure = [&]{
           std::string ret;
-          ret += show(*(mcg->tx().region())) + "\n";
+          if (auto const rd = m_unit.context().regionDesc) {
+            ret += show(*rd) + "\n";
+          }
           ret += folly::format("Unconsumed reference(s) leaving B{}\n",
                                block->id()).str();
           ret += show(m_state);
@@ -945,6 +947,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
       for (uint32_t i = 0; i < nSrcs; ++i) {
         resolveValue(m_inst->src(i));
       }
+    } else if (m_inst->is(BeginCatch)) {
+      consumeExceptional(*m_block->preds().front().inst());
     } else if (m_inst == &m_block->back() && m_block->isExit() &&
                // Make sure it's not a RetCtrl from Ret{C,V}
                (!m_inst->is(RetCtrl) ||
@@ -963,6 +967,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeAllFrames();
     } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeCurrentLocals();
+    } else if (m_inst->is(CreateCont)) {
+      always_assert(false && "CreateCont appeared in non-generator");
     } else if (m_inst->is(CreateCont, CreateAFWH)) {
       consumeInputs();
       consumeCurrentLocals();
@@ -1032,6 +1038,21 @@ struct SinkPointAnalyzer : private LocalStateHook {
       if (auto value = m_frameState.localValue(i)) {
         consumeValue(value);
       }
+    }
+  }
+
+  /*
+   * Some unusual instructions consume sources only if they ended up throwing
+   * an exception.
+   */
+  void consumeExceptional(const IRInstruction& inst) {
+    switch (inst.op()) {
+    case LookupClsMethod: consumeValueAfter(inst.src(1)); break;
+    case LdArrFuncCtx:    consumeValueAfter(inst.src(0)); break;
+    case LdArrFPushCuf:   consumeValueAfter(inst.src(0)); break;
+    case LdStrFPushCuf:   consumeValueAfter(inst.src(0)); break;
+    default:
+      break;
     }
   }
 
@@ -1228,6 +1249,15 @@ struct SinkPointAnalyzer : private LocalStateHook {
   }
   void consumeValue(SSATmp* value)          { consumeValueImpl(value, false); }
   void consumeValueEraseOnly(SSATmp* value) { consumeValueImpl(value, true); }
+
+  // Just like consumeValue, except the sync point is after the current
+  // instruction.
+  void consumeValueAfter(SSATmp* value) {
+    if (value->type().notCounted()) return;
+    auto const root = canonical(value);
+    consumeValue(root, m_state.values[root],
+                 SinkPoint(m_ids.after(m_inst), value, false));
+  }
 
   void consumeValue(SSATmp* value, Value& valState, SinkPoint sinkPoint) {
     ITRACE(3, "consuming value {}\n", *value->inst());
@@ -1744,7 +1774,7 @@ void sinkIncRefs(IRUnit& unit, const SinkPointsMap& info, const IdMap& ids) {
           // sink the IncRef to this point but we don't have access to the
           // value, probably because the SSATmp was killed by a Call. For now
           // we refuse to optimize this case, but it's possible to use this
-          // sink point as long as we've proven that doing so will eliminte the
+          // sink point as long as we've proven that doing so will eliminate the
           // Inc/Dec pair.
           ITRACE(2, "found erase-only SinkPoint; not optimizing\n");
           doSink = false;
@@ -1889,6 +1919,12 @@ void optimizeRefcounts(IRUnit& unit, FrameStateMgr&& fs) {
   fs.setLegacyReoptimize();
   Timer _t(Timer::optimize_refcountOpts);
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
+
+  auto& ctx = unit.context();
+  if (ctx.func->isGenerator() && !ctx.resumed) {
+    ITRACE(2, "Inside non-resumed generator body; refcount-opts bailing\n");
+    return;
+  }
 
   if (splitCriticalEdges(unit)) {
     printUnit(6, unit, "after splitting critical edges for refcount opts");

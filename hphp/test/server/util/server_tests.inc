@@ -181,7 +181,7 @@ function http_request($host, $port, $path, $timeout = 1200) {
   $host_name = "hphpd.debugger.".php_uname('n');
   $cmd = "curl --trace-ascii ${LOG_ROOT}_curl$test_run_id.log ".
     "--silent --connect-timeout $timeout ".
-    "--header 'Host: $host_name' --url $url";
+    "--header 'Host: $host_name' --url \"$url\"";
   tlog("Requesting page with command: $cmd");
   return exec($cmd);
 }

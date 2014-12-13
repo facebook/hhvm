@@ -151,7 +151,7 @@ public:
   bool wide{false};
   PhysReg reg;
   bool cns{false};
-  uint64_t val;
+  Vunit::Cns val;
 };
 
 typedef boost::dynamic_bitset<> LiveSet;
@@ -856,12 +856,10 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
 // Compute lifetime intervals and use positions of all intervals by walking
 // the code bottom-up once. Loops aren't handled yet.
 void Vxls::buildIntervals() {
-  if (dumpIREnabled(kRegAllocLevel)) {
-    printCfg(unit, blocks);
-  }
+  ONTRACE(kRegAllocLevel, printCfg(unit, blocks));
   livein.resize(unit.blocks.size());
   intervals.resize(unit.next_vr);
-  auto loops = false;
+  UNUSED auto loops = false;
   auto preds = computePreds(unit);
   for (auto blockIt = blocks.end(); blockIt != blocks.begin();) {
     auto b = *--blockIt;
@@ -923,10 +921,10 @@ void Vxls::buildIntervals() {
     std::reverse(ivl->uses.begin(), ivl->uses.end());
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
   }
-  if (dumpIREnabled(kRegAllocLevel)) {
+  ONTRACE(kRegAllocLevel,
     if (loops) HPHP::Trace::traceRelease("vasm-loops\n");
     print("after building intervals");
-  }
+  );
   // only constants and physical registers can be live-into the entry block.
   if (debug) {
     forEach(livein[unit.entry], [&](Vreg r) {
@@ -1245,7 +1243,7 @@ void Vxls::assignSpill(Interval* ivl) {
     }
     if (m_nextSlot > NumPreAllocatedSpillLocs) {
       // ran out of spill slots
-      if (dumpIREnabled(kRegAllocLevel)) dumpIntervals();
+      ONTRACE(kRegAllocLevel, dumpIntervals());
       TRACE(1, "vxls-punt TooManySpills\n");
       PUNT(LinearScan_TooManySpills);
     }
@@ -1304,16 +1302,14 @@ void Vxls::renameOperands() {
       pos += 2;
     }
   }
-  if (dumpIREnabled(kRegAllocLevel)) {
-    print("after renaming operands");
-  }
+  ONTRACE(kRegAllocLevel, print("after renaming operands"));
 }
 
 // Insert spills and copies that connect sub-intervals that were split
 // between instructions. Do not assume SSA; insert a spill-store
 // after every def, ignoring the interval's full live range.
 void Vxls::resolveSplits() {
-  if (dumpIREnabled(kRegAllocLevel)) dumpIntervals();
+  ONTRACE(kRegAllocLevel, dumpIntervals());
   for (auto i1 : intervals) {
     if (!i1) continue;
     auto slot = i1->slot;
@@ -1493,10 +1489,10 @@ void Vxls::insertCopies() {
       }
     }
   }
-  if (dumpIREnabled(kRegAllocLevel)) {
+  ONTRACE(kRegAllocLevel,
     dumpIntervals();
     print("after inserting copies");
-  }
+  );
 }
 
 void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
@@ -1528,14 +1524,17 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
                           unsigned pos) {
   MovePlan moves;
   jit::vector<Vinstr> loads;
-  jit::hash_map<uint64_t,uint64_t*> cpool;
   for (auto dst : copies) {
     auto ivl = copies[dst];
     if (!ivl) continue;
     if (ivl->reg != InvalidReg) {
       moves[dst] = ivl->reg;
     } else if (ivl->cns) {
-      loads.emplace_back(ldimm{ivl->val, dst, true});
+      if (ivl->val.isByte) {
+        loads.emplace_back(ldimmb{bool(ivl->val.val), dst, true});
+      } else {
+        loads.emplace_back(ldimm{ivl->val.val, dst, true});
+      }
     } else {
       assert(ivl->spilled());
       MemoryRef ptr{slots.r + slotOffset(ivl->slot)};
@@ -1619,7 +1618,7 @@ std::string Interval::toString() {
     delim = " ";
   }
   if (cns) {
-    out << delim << folly::format("#{:08x}", val);
+    out << delim << folly::format("#{:08x}", val.val);
   }
   if (slot >= 0) {
     out << delim << folly::format("[%sp+{}]", slotOffset(slot));

@@ -27,7 +27,7 @@ void hphp_process_init();
 
 void ProcessInit();
 void initialize_repo();
-
+void checkBuild();
 /*
  * This must be called before execute_program_impl in an hhvm build.
  */

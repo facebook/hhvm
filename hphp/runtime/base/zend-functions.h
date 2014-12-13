@@ -18,8 +18,9 @@
 #ifndef incl_HPHP_ZEND_FUNCTIONS_H_
 #define incl_HPHP_ZEND_FUNCTIONS_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/util/hash.h"
+#include <cstdint>
+
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/util/slice.h"
 
 namespace HPHP {

@@ -16,6 +16,8 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include <cstdint>
+#include <utility>
+#include <tuple>
 
 #include <folly/ScopeGuard.h>
 
@@ -29,6 +31,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/alias-analysis.h"
+#include "hphp/runtime/vm/jit/mutation.h"
 
 namespace HPHP { namespace jit {
 
@@ -52,7 +55,8 @@ struct TrackedLoc {
 
   /*
    * We may have a known type even without an available value, or that is more
-   * refined than knownValue->type().
+   * refined than knownValue->type().  Always at least as refined as
+   * knownValue->type(), if knownValue is not nullptr.
    */
   Type knownType{Type::Top};
 };
@@ -147,6 +151,12 @@ struct Flags {
   SSATmp* replaceable{nullptr};
 
   /*
+   * If set, the instruction was a pure load, and `replaceable' is not nullptr,
+   * this will be the best type we know for the value at this point.
+   */
+  Type knownType;
+
+  /*
    * If true, the instruction was a conditional jump that can be converted to
    * an unconditional jump to it's next() edge.
    */
@@ -170,15 +180,17 @@ TrackedLoc* find_tracked(Local& env,
                                       : nullptr;
 }
 
-SSATmp* load(Local& env, const IRInstruction& inst, AliasClass acls) {
+std::pair<SSATmp*,Type> load(Local& env,
+                             const IRInstruction& inst,
+                             AliasClass acls) {
   acls = canonicalize(acls);
   auto const meta = env.global.ainfo.find(acls);
-  if (!meta) return nullptr;
+  if (!meta) return { nullptr, Type::Gen };
   assert(meta->index < kMaxTrackedALocs);
   auto& tracked = env.state.tracked[meta->index];
 
   if (env.state.avail[meta->index]) {
-    if (tracked.knownValue) return tracked.knownValue;
+    if (tracked.knownValue) return { tracked.knownValue, tracked.knownType };
     /*
      * We didn't have a value, but we had an available type.  This can happen
      * at control flow joins right now (since we don't have support for
@@ -195,7 +207,7 @@ SSATmp* load(Local& env, const IRInstruction& inst, AliasClass acls) {
 
   FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
   FTRACE(5, "       av: {}\n", show(env.state.avail));
-  return nullptr;
+  return { nullptr, Type::Gen };
 }
 
 void store(Local& env, AliasClass acls, SSATmp* value) {
@@ -254,9 +266,12 @@ Flags analyze_inst(Local& env,
     [&] (IterEffects)       { clear_everything(env); },
     [&] (IterEffects2)      { clear_everything(env); },
 
-    [&] (PureLoad m)    { flags.replaceable = load(env, inst, m.src); },
     [&] (PureStore m)   { store(env, m.dst, m.value); },
     [&] (PureStoreNT m) { store(env, m.dst, m.value); },
+
+    [&] (PureLoad m) {
+      std::tie(flags.replaceable, flags.knownType) = load(env, inst, m.src);
+    },
 
     [&] (MayLoadStore m) {
       store(env, m.stores, nullptr);
@@ -306,15 +321,19 @@ void optimize_block(Local& env, Block* blk) {
   for (auto& inst : *blk) {
     auto const flags = analyze_inst(env, inst, [&] (Block*, const State&) {});
 
-    auto const can_replace = [&](SSATmp* what) -> bool {
-      if (!(what->type() <= inst.dst()->type())) {
+    auto const can_replace = [&] (SSATmp* what, Type knownType) -> bool {
+      if (knownType == Type::Bottom) {
+        // Unreachable code, but we're not allowed to create IR instructions
+        // with a typeParam of Bottom.
+        return false;
+      }
+      if (!(knownType <= inst.dst()->type())) {
         /*
-         * TODO(#5664026): For now we can't replace values that have types that
-         * aren't at least as narrow as the current tmp we are replacing.  If
-         * we wanted to, we could insert them as AssertType opcodes here, but
-         * codegen-x64 can't handle those kinds of assert types right now.
+         * It's possible we could assert the intersection of the types, but
+         * it's not entirely clear what situations this would happen in, so
+         * let's just not do it in this case for now.
          */
-        FTRACE(2, "      type would change too much; not right now\n");
+        FTRACE(2, "      knownType wasn't substitutable; not right now\n");
         return false;
       }
 
@@ -324,10 +343,13 @@ void optimize_block(Local& env, Block* blk) {
       return dominates(defBlock, inst.block(), env.global.idoms);
     };
 
-    if (flags.replaceable && can_replace(flags.replaceable)) {
-      FTRACE(2, "      redundant: {} = Mov {}\n", inst.dst()->toString(),
+    if (flags.replaceable && can_replace(flags.replaceable, flags.knownType)) {
+      FTRACE(2, "      redundant: {} :: {} = {}\n",
+        inst.dst()->toString(),
+        flags.knownType.toString(),
         flags.replaceable->toString());
-      env.global.unit.replace(&inst, Mov, flags.replaceable);
+      env.global.unit.replace(&inst, AssertType, flags.knownType,
+        flags.replaceable);
       continue;
     }
 
@@ -482,6 +504,8 @@ void optimizeLoads(IRUnit& unit) {
     auto env = Local { genv, genv.blockInfo[blk].stateIn };
     optimize_block(env, blk);
   }
+  FTRACE(2, "reflowing types\n");
+  reflowTypes(genv.unit);
 }
 
 //////////////////////////////////////////////////////////////////////

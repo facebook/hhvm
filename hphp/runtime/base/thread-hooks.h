@@ -52,22 +52,25 @@ constexpr int max_num_frames = 20;
 typedef void* (*start_routine_t) (void *);
 
 struct PthreadInfo {
-  int num_frames;
+  PthreadInfo(start_routine_t s, void* arg);
+  ~PthreadInfo();
+
+  int num_frames = 0;
   void* parent_bt[max_num_frames];
-  char** parent_bt_names;
+  char** parent_bt_names = nullptr;
   start_routine_t start_routine;
+  void *start_routine_arg;
   pid_t pid;
   pid_t tid;
-  char** start_name_ptr;
-  struct MemoryManager* mm;
+  char** start_name_ptr = nullptr;
+  struct MemoryManager* mm = nullptr;
 };
 
-typedef std::unordered_map<pthread_t, PthreadInfo> ThreadMap;
+typedef std::unordered_map<pthread_t, PthreadInfo*> ThreadMap;
 
 std::string get_thread_mem_usage();
 void* start_routine_wrapper(void *);
-void log_pthread_event(pthread_event event, pthread_t* thread,
-                       start_routine_t start = nullptr);
+void log_pthread_event(pthread_event event, pthread_t* thread);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -21,11 +21,78 @@
 #include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
+
+  const int64_t k_STREAM_CLIENT_CONNECT = 4;
+  const int64_t k_STREAM_CLIENT_ASYNC_CONNECT = 2;
+  const int64_t k_STREAM_CLIENT_PERSISTENT = 1;
+  const int64_t k_STREAM_META_TOUCH = 1;
+  const int64_t k_STREAM_META_OWNER_NAME = 2;
+  const int64_t k_STREAM_META_OWNER = 3;
+  const int64_t k_STREAM_META_GROUP_NAME = 4;
+  const int64_t k_STREAM_META_GROUP = 5;
+  const int64_t k_STREAM_META_ACCESS = 6;
+  const int64_t k_STREAM_BUFFER_NONE = 0;    /* unbuffered */
+  const int64_t k_STREAM_BUFFER_LINE = 1;   /* line buffered */
+  const int64_t k_STREAM_BUFFER_FULL = 2;    /* fully buffered */
+  const int64_t k_STREAM_SERVER_BIND = 4;
+  const int64_t k_STREAM_SERVER_LISTEN = 8;
+  const int64_t k_STREAM_CRYPTO_METHOD_SSLv23_CLIENT = 7;
+  const int64_t k_STREAM_CRYPTO_METHOD_SSLv23_SERVER = 6;
+  const int64_t k_STREAM_CRYPTO_METHOD_SSLv2_CLIENT = 3;
+  const int64_t k_STREAM_CRYPTO_METHOD_SSLv2_SERVER = 2;
+  const int64_t k_STREAM_CRYPTO_METHOD_SSLv3_CLIENT = 5;
+  const int64_t k_STREAM_CRYPTO_METHOD_SSLv3_SERVER = 4;
+  const int64_t k_STREAM_CRYPTO_METHOD_TLS_CLIENT = 57;
+  const int64_t k_STREAM_CRYPTO_METHOD_TLS_SERVER = 56;
+  const int64_t k_STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT = 9;
+  const int64_t k_STREAM_CRYPTO_METHOD_TLSv1_0_SERVER = 8;
+  const int64_t k_STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT = 17;
+  const int64_t k_STREAM_CRYPTO_METHOD_TLSv1_1_SERVER = 16;
+  const int64_t k_STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT = 33;
+  const int64_t k_STREAM_CRYPTO_METHOD_TLSv1_2_SERVER = 32;
+  const int64_t k_STREAM_CRYPTO_METHOD_ANY_CLIENT = 63;
+  const int64_t k_STREAM_CRYPTO_METHOD_ANY_SERVER = 62;
+  const int64_t k_STREAM_ENFORCE_SAFE_MODE = 4;
+  const int64_t k_STREAM_IGNORE_URL = 2;
+  const int64_t k_STREAM_IPPROTO_ICMP = 1;
+  const int64_t k_STREAM_IPPROTO_IP = 0;
+  const int64_t k_STREAM_IPPROTO_RAW = 255;
+  const int64_t k_STREAM_IPPROTO_TCP = 6;
+  const int64_t k_STREAM_IPPROTO_UDP = 17;
+  const int64_t k_STREAM_IS_URL = 1;
+  const int64_t k_STREAM_MKDIR_RECURSIVE = 1;
+  const int64_t k_STREAM_MUST_SEEK = 16;
+  const int64_t k_STREAM_NOTIFY_AUTH_REQUIRED = 3;
+  const int64_t k_STREAM_NOTIFY_AUTH_RESULT = 10;
+  const int64_t k_STREAM_NOTIFY_COMPLETED = 8;
+  const int64_t k_STREAM_NOTIFY_CONNECT = 2;
+  const int64_t k_STREAM_NOTIFY_FAILURE = 9;
+  const int64_t k_STREAM_NOTIFY_FILE_SIZE_IS = 5;
+  const int64_t k_STREAM_NOTIFY_MIME_TYPE_IS = 4;
+  const int64_t k_STREAM_NOTIFY_PROGRESS = 7;
+  const int64_t k_STREAM_NOTIFY_REDIRECTED = 6;
+  const int64_t k_STREAM_NOTIFY_RESOLVE = 1;
+  const int64_t k_STREAM_NOTIFY_SEVERITY_ERR = 2;
+  const int64_t k_STREAM_NOTIFY_SEVERITY_INFO = 0;
+  const int64_t k_STREAM_NOTIFY_SEVERITY_WARN = 1;
+  const int64_t k_STREAM_OOB = 1;
+  const int64_t k_STREAM_PEEK = 2;
+  const int64_t k_STREAM_PF_INET = 2;
+  const int64_t k_STREAM_PF_INET6 = 10;
+  const int64_t k_STREAM_PF_UNIX = 1;
+  const int64_t k_STREAM_REPORT_ERRORS = 8;
+  const int64_t k_STREAM_SHUT_RD = 0;
+  const int64_t k_STREAM_SHUT_RDWR = 2;
+  const int64_t k_STREAM_SHUT_WR = 1;
+  const int64_t k_STREAM_SOCK_DGRAM = 2;
+  const int64_t k_STREAM_SOCK_RAW = 3;
+  const int64_t k_STREAM_SOCK_RDM = 4;
+  const int64_t k_STREAM_SOCK_SEQPACKET = 5;
+  const int64_t k_STREAM_SOCK_STREAM = 1;
+  const int64_t k_STREAM_USE_PATH = 1;
+
 ///////////////////////////////////////////////////////////////////////////////
 // stream context
-
-extern const int64_t k_STREAM_SERVER_BIND;
-extern const int64_t k_STREAM_SERVER_LISTEN;
 
 class StreamContext : public ResourceData {
 public:
@@ -127,6 +194,11 @@ Variant HHVM_FUNCTION(stream_select,
                       VRefParam except,
                       const Variant& vtv_sec,
                       int tv_usec = 0);
+
+Object HHVM_FUNCTION(stream_await,
+                     const Resource& stream,
+                     uint16_t events,
+                     double timeout = 0.0);
 
 bool HHVM_FUNCTION(stream_set_blocking,
                    const Resource& stream,

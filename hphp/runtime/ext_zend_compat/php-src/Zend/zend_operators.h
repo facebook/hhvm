@@ -526,7 +526,7 @@ inline ZArrVal zval_get_arrval(const zval &z) {
 #define Z_STRLEN(zval)      (HPHP::zval_follow_ref(zval).m_data.pstr->size())
 #define Z_ARRVAL(zval)      (HPHP::zval_get_arrval(zval))
 #define Z_OBJVAL(zval)      (HPHP::zval_follow_ref(zval).m_data.pobj)
-#define Z_OBJ_HANDLE(zval)  (Z_OBJVAL(zval)->o_getId())
+#define Z_OBJ_HANDLE(zval)  (Z_OBJVAL(zval)->getId())
 #define Z_OBJ_HT(zval)      (bad_value<zend_object_handlers*>())
 #define Z_OBJCE(zval)       (zend_get_class_entry(&(zval) TSRMLS_CC))
 
@@ -539,7 +539,7 @@ inline ZArrVal zval_get_arrval(const zval &z) {
 // etc. will work, and which is the preferred method for updating properties in
 // Zend anyway.
 #define Z_OBJPROP(zval) \
-  ((HashTable*)HPHP::ProxyArray::Make(Z_OBJVAL((zval))->o_toArray().detach()))
+  ((HashTable*)HPHP::ProxyArray::Make(Z_OBJVAL((zval))->toArray().detach()))
 
 #define Z_OBJ_HANDLER(zval, hf)  (Z_OBJ_HT((zval))->hf)
 #define Z_RESVAL(zval)      (zval_get_resource_id(zval))

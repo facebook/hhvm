@@ -38,7 +38,6 @@ public:
   Image() : m_gdImage(nullptr) {}
   explicit Image(gdImagePtr gdImage) : m_gdImage(gdImage) {}
   ~Image();
-  void sweep() override;
   gdImagePtr get() { return m_gdImage;}
   void reset() { m_gdImage = nullptr;}
 
@@ -47,6 +46,7 @@ public:
   virtual const String& o_getClassNameHook() const { return classnameof(); }
   virtual bool isInvalid() const { return m_gdImage == nullptr; }
 
+  DECLARE_RESOURCE_ALLOCATION(Image)
 private:
   gdImagePtr m_gdImage;
 };

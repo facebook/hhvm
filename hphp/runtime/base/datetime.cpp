@@ -738,6 +738,17 @@ String DateTime::stdcFormat(const String& format) const {
     ta.tm_zone = offset->abbr;
   }
 
+  if ((ta.tm_sec < 0 || ta.tm_sec > 60) ||
+      (ta.tm_min < 0 || ta.tm_min > 59) ||
+      (ta.tm_hour < 0 || ta.tm_hour > 23) ||
+      (ta.tm_mday < 1 || ta.tm_mday > 31) ||
+      (ta.tm_mon < 0 || ta.tm_mon > 11) ||
+      (ta.tm_wday < 0 || ta.tm_wday > 6) ||
+      (ta.tm_yday < 0 || ta.tm_yday > 365)) {
+    throw_invalid_argument("argument: invalid time");
+    return String();
+  }
+
   int max_reallocs = 5;
   size_t buf_len = 256, real_len;
   char *buf = (char *)malloc(buf_len);
@@ -853,7 +864,7 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
   if (m_timestamp == -1) {
     fromTimeStamp(0);
   }
-  if (tz.get()) {
+  if (tz.get() && (input.size() <= 0 || input[0] != '@')) {
     setTimezone(tz);
   } else {
     setTimezone(TimeZone::Current());

@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/runtime/ext/ext_math.h" // f_abs
+#include "hphp/runtime/ext/std/ext_std_math.h" // HHVM_FN(abs)
 
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/cfg.h"
@@ -39,7 +39,7 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/interp-state.h"
-#include "hphp/hhbbc/type-arith.h"
+#include "hphp/hhbbc/type-ops.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
@@ -433,10 +433,7 @@ void sameImpl(ISS& env) {
   if (v1 && v2) {
     return push(env, cellSame(*v2, *v1) != Negate ? TTrue : TFalse);
   }
-  if (!t1.couldBe(t2) && !t2.couldBe(t1)) {
-    return push(env, false != Negate ? TTrue : TFalse);
-  }
-  push(env, TBool);
+  push(env, Negate ? typeNSame(t1, t2) : typeSame(t1, t2));
 }
 
 void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }
@@ -1121,7 +1118,7 @@ void in(ISS& env, const bc::SetOpL& op) {
     return;
   }
 
-  auto const resultTy = typeArithSetOp(op.subop, loc, t1);
+  auto const resultTy = typeSetOp(op.subop, loc, t1);
   setLoc(env, op.loc1, resultTy);
   push(env, resultTy);
 }
@@ -2104,7 +2101,7 @@ void in(ISS& env, const bc::Abs&) {
     constprop(env);
     auto const cell = eval_cell([&] {
       auto const cell = *v1;
-      auto const ret = f_abs(tvAsCVarRef(&cell));
+      auto const ret = HHVM_FN(abs)(tvAsCVarRef(&cell));
       assert(!IS_REFCOUNTED_TYPE(ret.asCell()->m_type));
       return *ret.asCell();
     });

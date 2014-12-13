@@ -1277,6 +1277,8 @@ def walk(filename, dest_subdir):
         test = test.replace('"*"', '__DIR__."/../../../../../../sample_dir/*"')
         test = test.replace('opendir(".")', 'opendir(__DIR__."/../../../../../../sample_dir/")')
         test = test.replace('is_dir($file)', 'is_dir(__DIR__."/../../../../../../sample_dir/".$file)')
+    if '/ext/standard/tests/file/touch_variation1.php' in full_dest_filename:
+        test = test.replace('touch.dat', 'touch_variation1.dat')
     if '/ext/standard/tests/file/bug45181.php' in full_dest_filename:
         test = test.replace('chdir("bug45181_x");', '$origdir = getcwd();\nchdir("bug45181_x");')
         test = test.replace('rmdir("bug45181_x");', 'rmdir($origdir . "/bug45181_x");')

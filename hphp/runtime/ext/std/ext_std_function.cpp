@@ -102,7 +102,7 @@ bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
 
     auto const tv_cls = clsname.asCell();
     if (tv_cls->m_type == KindOfObject) {
-      name = tv_cls->m_data.pobj->o_getClassName();
+      name = tv_cls->m_data.pobj->getClassName();
     } else if (IS_STRING_TYPE(tv_cls->m_type)) {
       name = tv_cls->m_data.pstr;
     } else {
@@ -122,7 +122,7 @@ bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
         // Hack to stop the mangled name from showing up
         name = s_Closure__invoke;
       } else {
-        name = d->o_getClassName().asString() + "::__invoke";
+        name = d->getClassName().asString() + "::__invoke";
       }
     }
     return invoke != nullptr;

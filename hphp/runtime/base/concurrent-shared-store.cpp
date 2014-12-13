@@ -706,7 +706,9 @@ std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
       entries.emplace_back(key, inMem, size, ttl, type);
     }
   }
-
+  std::sort(entries.begin(), entries.end(),
+            [] (const EntryInfo& e1, const EntryInfo& e2) {
+              return e1.key < e2.key; });
   return entries;
 }
 

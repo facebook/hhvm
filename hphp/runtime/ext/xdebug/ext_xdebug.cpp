@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -128,7 +128,7 @@ static String format_filename(String* dir,
         break;
       // Random number
       case 'r':
-        buf.printf("%lx", (uint64_t) f_rand());
+        buf.printf("%lx", (uint64_t) HHVM_FN(rand)());
         break;
       // Script name
       case 's': {

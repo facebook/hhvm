@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_JIT_CPP_CALL_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include <cstdint>
 
@@ -114,7 +115,7 @@ struct CppCall {
   /*
    * Call destructor using r as function table index
    */
-  static CppCall destruct(PhysReg r) {
+  static CppCall destruct(Vreg r) {
     return CppCall { Kind::Destructor, r };
   }
 
@@ -135,7 +136,7 @@ struct CppCall {
     assert(m_kind == Kind::Virtual);
     return m_u.vtableOffset;
   }
-  PhysReg reg() const {
+  Vreg reg() const {
     assert(m_kind == Kind::Destructor);
     return m_u.reg;
   }
@@ -148,11 +149,11 @@ private:
   union U {
     /* implicit */ U(void* fptr)       : fptr(fptr) {}
     /* implicit */ U(int vtableOffset) : vtableOffset(vtableOffset) {}
-    /* implicit */ U(PhysReg reg)      : reg(reg) {}
+    /* implicit */ U(Vreg reg)         : reg(reg) {}
 
     void* fptr;
     int vtableOffset;
-    PhysReg reg;
+    Vreg reg;
   };
 
 private:

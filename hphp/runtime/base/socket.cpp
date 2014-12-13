@@ -44,15 +44,13 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(SocketData, s_socket_data);
 // constructors and destructor
 
 Socket::Socket()
-  : File(true), m_port(0), m_type(-1), m_error(0), m_timeout(0),
-    m_timedOut(false), m_bytesSent(0) {
-}
+  : File(true), m_port(0), m_type(-1)
+{}
 
 Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
                int port /* = 0 */, double timeout /* = 0 */,
                const StaticString& streamType /* = empty_string_ref */)
-  : File(true, null_string, streamType.get()), m_port(port), m_type(type),
-    m_error(0), m_timeout(0), m_timedOut(false), m_bytesSent(0) {
+  : File(true, null_string, streamType.get()), m_port(port), m_type(type) {
   if (address) m_address = address;
   m_fd = sockfd;
 

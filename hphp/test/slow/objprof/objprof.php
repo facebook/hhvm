@@ -33,7 +33,6 @@ function getStr(int $len): string {
   return $ret;
 }
 
-
 // TEST: tracking works when enabled and not when disabled
 class EmptyClass {}
 $myClass = new EmptyClass();
@@ -47,10 +46,10 @@ objprof_start();
 
 $myClass2 = new EmptyClass();              // ++
 $objs = objprof_get_data();
-echo get_instances("EmptyClass", $objs)
-  ? "(GOOD) Tracking when enabled\n"
-  : "(BAD) Not tracking when enabled: \n".var_export($objs, true)."\n";
-$ObjSize = get_bytes("EmptyClass", $objs);
+$emptyCount = get_instances("EmptyClass", $objs);
+echo $emptyCount ? "(GOOD) Tracking when enabled\n" :
+     "(BAD) Not tracking when enabled: \n".var_export($objs, true)."\n";
+$ObjSize = get_bytes("EmptyClass", $objs) / $emptyCount;
 $objs = null;
 
 // TEST: nullifying variables removes their tracking
@@ -168,7 +167,6 @@ echo get_bytes('HH\\Set', $objs) == 48 + 78 && // SetSize+ 38 + 40 = 126
   : "(BAD) Bytes (Set) failed: ".var_export($objs, true)."\n";
 $objs = null;
 
-
 // TEST: basic ref count
 $myClass = Map {
   getStr(19) => getStr(17),
@@ -237,7 +235,6 @@ echo get_bytes_eq('NestedArrayClass', $objs) == ($ObjSize + 108)   // 140
   : "(BAD) Bytes (NestedArray) failed: ".var_export($objs, true)."\n";
 $objs = null;
 $myClass = null;
-
 
 // LAST TEST: Dont crash on custom types
 //$xml = simplexml_load_string('<root><hello>world</hello></root>');

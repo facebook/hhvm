@@ -49,7 +49,7 @@ bool TestUtil::RunTests(const std::string &which) {
 
 struct testhash {
   size_t operator()(const String& s) const {
-    return hash_string(s.data(), s.size());
+    return hash_string_unsafe(s.data(), s.size());
   }
 };
 

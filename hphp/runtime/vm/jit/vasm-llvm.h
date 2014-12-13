@@ -22,6 +22,8 @@
 
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
+#include <folly/Format.h>
+
 namespace HPHP { namespace jit {
 
 /*
@@ -29,8 +31,9 @@ namespace HPHP { namespace jit {
  */
 struct FailedLLVMCodeGen : public std::runtime_error {
  public:
-  explicit FailedLLVMCodeGen(const std::string& msg)
-    : std::runtime_error(msg)
+  template<typename... Args>
+  explicit FailedLLVMCodeGen(Args&&... args)
+    : std::runtime_error(folly::sformat(std::forward<Args>(args)...))
   {}
 };
 

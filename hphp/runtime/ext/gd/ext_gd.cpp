@@ -66,15 +66,13 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// sweep() { this->~Image(); }
+IMPLEMENT_RESOURCE_ALLOCATION(Image)
+
 Image::~Image() {
   if (m_gdImage) {
     gdImageDestroy(m_gdImage);
   }
-}
-
-void Image::sweep() {
-  // Base class version calls delete this
-  SweepableResourceData::sweep();
 }
 
 struct ImageMemoryAlloc final : RequestEventHandler {
@@ -421,7 +419,7 @@ static struct gfxinfo *php_handle_gif(const Resource& stream) {
   result->width = (unsigned int)s[0] | (((unsigned int)s[1])<<8);
   result->height = (unsigned int)s[2] | (((unsigned int)s[3])<<8);
   result->bits = s[4]&0x80 ? ((((unsigned int)s[4])&0x07) + 1) : 0;
-  result->channels = 3; /* allways */
+  result->channels = 3; /* always */
   return result;
 }
 
@@ -913,7 +911,7 @@ static struct gfxinfo *php_handle_jpc(const Resource& stream) {
 
   /* JPEG 2000 components can be vastly different from one another.
      Each component can be sampled at a different resolution, use
-     a different colour space, have a seperate colour depth, and
+     a different colour space, have a separate colour depth, and
      be compressed totally differently! This makes giving a single
      "bit depth" answer somewhat problematic. For this implementation
      we'll use the highest depth encountered. */
@@ -3167,7 +3165,7 @@ Variant HHVM_FUNCTION(imagecreatetruecolor, int64_t width, int64_t height) {
   if (!im) {
     return false;
   }
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 
 bool f_imageistruecolor(const Resource& image) {
@@ -3320,7 +3318,7 @@ Variant HHVM_FUNCTION(imagerotate, const Resource& source_image,
   gdImagePtr im_dst = gdImageRotate(im_src, angle, bgd_color,
                                     ignore_transparent);
   if (!im_dst) return false;
-  return Resource(new Image(im_dst));
+  return Resource(newres<Image>(im_dst));
 }
 
 #if HAVE_GD_IMAGESETTILE
@@ -3354,7 +3352,7 @@ Variant HHVM_FUNCTION(imagecreate, int64_t width, int64_t height) {
   if (!im) {
     return false;
   }
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 
 int64_t HHVM_FUNCTION(imagetypes) {
@@ -3459,7 +3457,7 @@ Variant HHVM_FUNCTION(imagecreatefromstring, const String& data) {
     raise_warning("Couldn't create GD Image Stream out of Data");
     return false;
   }
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 #endif
 
@@ -3470,7 +3468,7 @@ Variant HHVM_FUNCTION(imagecreatefromgif, const String& filename) {
                            PHP_GDIMG_TYPE_GIF, "GIF",
                            (gdImagePtr(*)())gdImageCreateFromGif,
                            (gdImagePtr(*)())gdImageCreateFromGifCtx);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 #endif
 
@@ -3481,7 +3479,7 @@ Variant HHVM_FUNCTION(imagecreatefromjpeg, const String& filename) {
                            PHP_GDIMG_TYPE_JPG, "JPEG",
                            (gdImagePtr(*)())gdImageCreateFromJpeg,
                            (gdImagePtr(*)())gdImageCreateFromJpegCtx);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 #endif
 
@@ -3492,7 +3490,7 @@ Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename) {
                            PHP_GDIMG_TYPE_PNG, "PNG",
                            (gdImagePtr(*)())gdImageCreateFromPng,
                            (gdImagePtr(*)())gdImageCreateFromPngCtx);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 #endif
 
@@ -3503,7 +3501,7 @@ Variant HHVM_FUNCTION(imagecreatefromwebp, const String& filename) {
                            PHP_GDIMG_TYPE_WEBP, "WEBP",
                            (gdImagePtr(*)())gdImageCreateFromWebp,
                            (gdImagePtr(*)())gdImageCreateFromWebpCtx);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 #endif
 
@@ -3514,7 +3512,7 @@ Variant HHVM_FUNCTION(imagecreatefromxbm, const String& filename) {
                            PHP_GDIMG_TYPE_XBM, "XBM",
                            (gdImagePtr(*)())gdImageCreateFromXbm,
                            (gdImagePtr(*)())NULL);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 #endif
 
@@ -3525,7 +3523,7 @@ Variant HHVM_FUNCTION(imagecreatefromxpm, const String& filename) {
                            PHP_GDIMG_TYPE_XPM, "XPM",
                            (gdImagePtr(*)())gdImageCreateFromXpm,
                            (gdImagePtr(*)())NULL);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 #endif
 
@@ -3536,7 +3534,7 @@ Variant HHVM_FUNCTION(imagecreatefromwbmp, const String& filename) {
                            PHP_GDIMG_TYPE_WBM, "WBMP",
                            (gdImagePtr(*)())gdImageCreateFromWBMP,
                            (gdImagePtr(*)())gdImageCreateFromWBMPCtx);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 #endif
 
@@ -3546,7 +3544,7 @@ Variant HHVM_FUNCTION(imagecreatefromgd, const String& filename) {
                            PHP_GDIMG_TYPE_GD, "GD",
                            (gdImagePtr(*)())gdImageCreateFromGd,
                            (gdImagePtr(*)())gdImageCreateFromGdCtx);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 
 Variant HHVM_FUNCTION(imagecreatefromgd2, const String& filename) {
@@ -3555,7 +3553,7 @@ Variant HHVM_FUNCTION(imagecreatefromgd2, const String& filename) {
                            PHP_GDIMG_TYPE_GD2, "GD2",
                            (gdImagePtr(*)())gdImageCreateFromGd2,
                            (gdImagePtr(*)())gdImageCreateFromGd2Ctx);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 
 Variant HHVM_FUNCTION(imagecreatefromgd2part,
@@ -3566,7 +3564,7 @@ Variant HHVM_FUNCTION(imagecreatefromgd2part,
                            PHP_GDIMG_TYPE_GD2PART, "GD2",
                            (gdImagePtr(*)())gdImageCreateFromGd2Part,
                            (gdImagePtr(*)())gdImageCreateFromGd2PartCtx);
-  return Resource(new Image(im));
+  return Resource(newres<Image>(im));
 }
 
 bool HHVM_FUNCTION(imagegif, const Resource& image,
@@ -6073,7 +6071,7 @@ static int exif_process_string_raw(char **result, char *value,
 /*
  * Copy a string in Exif header to a character string and return length of
    allocated buffer if any. In contrast to exif_process_string this function
-   does allways return a string buffer */
+   does always return a string buffer */
 static int exif_process_string(char **result, char *value,
                                size_t byte_count) {
   /* we cannot use strlcpy - here the problem is that we cannot use strlen to

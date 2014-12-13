@@ -20,8 +20,8 @@
 #include <type_traits>
 #include <limits>
 
-#include "hphp/runtime/vm/jit/mc-generator.h" // TODO(#5593564): temporary
-
+#include "hphp/util/overflow.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
@@ -29,8 +29,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/util/overflow.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 
 namespace HPHP { namespace jit {
 
@@ -259,8 +258,8 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   auto const cls = src->clsVal();
   if (!RDS::isPersistentHandle(cls->classHandle())) return nullptr;
 
-  auto const meth = cls->lookupMethod(s_invoke.get());
-  return meth != nullptr ? cns(env, meth) : nullptr;
+  auto const meth = cls->getCachedInvoke();
+  return meth == nullptr ? nullptr : cns(env, meth.get());
 }
 
 SSATmp* simplifyGetCtxFwdCall(State& env, const IRInstruction* inst) {
@@ -583,22 +582,19 @@ SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
 
   if (!src2->isConst()) return nullptr;
 
-  int64_t src2Val = src2->intVal();
-  auto const min = std::numeric_limits<int64_t>::min();
-
-  // refrain from generating undefined IR
-  assert(src2Val != 0);
-  // simplify const
-  if (src1->isConst()) {
-    // still don't want undefined IR
-    assert(src1->intVal() != min || src2Val != -1);
-    return cns(env, src1->intVal() % src2Val);
+  auto const src2Val = src2->intVal();
+  if (src2Val == 0 || src2Val == -1) {
+    // Undefined behavior, so we might as well constant propagate whatever we
+    // want. If we're being asked to simplify this, it better be dynamically
+    // unreachable code.
+    return cns(env, 0);
   }
-  // X % 1, X % -1 --> 0
-  if (src2Val == 1 || src2Val == -1) return cns(env, 0);
 
-  // X % LONG_MIN = X (largest magnitude possible as rhs)
-  return src2Val == min ? src1 : nullptr;
+  if (src1->isConst()) return cns(env, src1->intVal() % src2Val);
+  // X % 1 --> 0
+  if (src2Val == 1) return cns(env, 0);
+
+  return nullptr;
 }
 
 SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
@@ -1270,16 +1266,6 @@ SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  // This is trying to get some information about a bug that's in another
-  // module:
-  auto show_failure = [&]() -> std::string {
-    auto msg = std::string{};
-    msg += show(*mcg->tx().region()) + "\n";
-    msg += "ConvArrToBool issue:\n";
-    msg += env.unit.toString();
-    return msg;
-  };
-  always_assert_log(inst->src(0)->type() <= Type::Arr, show_failure);
   if (src->isConst()) {
     // const_cast is safe. We're only making use of a cell helper.
     auto arr = const_cast<ArrayData*>(src->arrVal());
@@ -1736,6 +1722,7 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
 SSATmp* simplifyCastStk(State& env, const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CastStk>()->offset);
+  if (mightRelax(env, info.value)) return nullptr;
   if (inst->typeParam() == Type::NullableObj && info.knownType <= Type::Null) {
     // If we're casting Null to NullableObj, we still need to call
     // tvCastToNullableObjectInPlace. See comment there and t3879280 for
@@ -1750,9 +1737,10 @@ SSATmp* simplifyCastStk(State& env, const IRInstruction* inst) {
 SSATmp* simplifyCoerceStk(State& env, const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CoerceStk>()->offset);
+  if (mightRelax(env, info.value)) return nullptr;
   if (info.knownType <= inst->typeParam()) {
     // No need to cast---the type was as good or better.
-    return gen(env, Nop);
+    return inst->src(0);
   }
   return nullptr;
 }
@@ -2358,7 +2346,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     {
       // Assume it's a vector instruction.  This will assert in minstrBaseIdx
       // if not.
-      auto const base = inst->src(minstrBaseIdx(inst));
+      auto const base = inst->src(minstrBaseIdx(inst->op()));
       // Currently we require that the stack address is the immediate source of
       // the base tmp.
       always_assert(base->inst()->is(LdStackAddr));
@@ -2389,18 +2377,6 @@ Type getStackInnerTypePrediction(SSATmp* sp, uint32_t offset) {
   auto t = ldRefReturn(info.predictedInner.unbox());
   ITRACE(2, "stack {} prediction: {}\n", offset, t);
   return t;
-}
-
-jit::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth) {
-  jit::vector<SSATmp*> ret;
-  ret.reserve(stackDepth);
-  for (uint32_t i = 0; i < stackDepth; ++i) {
-    auto const value = getStackValue(sp, i).value;
-    if (value) {
-      ret.push_back(value);
-    }
-  }
-  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////

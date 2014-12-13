@@ -87,7 +87,7 @@ class G extends B {
     echo "static parent method B::f4, 16 == ", B::f4(4),"\n";
     // should work
 
-    // call an non-existant method on the one object via dynamic class name
+    // call an non-existent method on the one object via dynamic class name
     //php53 if($fix249639) echo "Calling G object method 'f4bogus' 5 == ", $b::f4bogus(5); __call,
     // call existing method on the one object via dynamic class name
     //php53 if($fix249639) echo "Calling G object method 'f4missing' 5 == ", $b::f4missing(5);

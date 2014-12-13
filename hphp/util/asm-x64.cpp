@@ -441,6 +441,10 @@ bool DecodedInstruction::isCall() const {
   return ((getModRm() >> 3) & 0x6) == 2;
 }
 
+bool DecodedInstruction::isJmp() const {
+  return m_opcode == 0xe9;
+}
+
 bool DecodedInstruction::shrinkBranch() {
   assert(isBranch());
   if (m_offSz != sz::dword) return false;

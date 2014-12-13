@@ -216,7 +216,7 @@ class CompactWriter {
       lastFieldNum = 0;
 
       // Get field specification
-      const Array& spec = HHVM_FN(hphp_get_static_property)(obj->o_getClassName(),
+      const Array& spec = HHVM_FN(hphp_get_static_property)(obj->getClassName(),
                                                        "_TSPEC", false)
         .toArray();
 
@@ -236,7 +236,7 @@ class CompactWriter {
         TType fieldType = (TType)fieldSpec
           .rvalAt(PHPTransport::s_type, AccessFlags::Error_Key).toByte();
 
-        Variant fieldVal = obj->o_get(fieldName, true, obj->o_getClassName());
+        Variant fieldVal = obj->o_get(fieldName, true, obj->getClassName());
 
         if (!fieldVal.isNull()) {
           writeFieldBegin(fieldNo, fieldType);
@@ -563,7 +563,7 @@ class CompactReader {
           if (typesAreCompatible(fieldType, expectedType)) {
             readComplete = true;
             Variant fieldValue = readField(fieldSpec, fieldType);
-            dest->o_set(fieldName, fieldValue, dest->o_getClassName());
+            dest->o_set(fieldName, fieldValue, dest->getClassName());
           }
         }
 

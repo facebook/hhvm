@@ -317,6 +317,12 @@ struct ClassInfo {
   std::vector<borrowed_ptr<const ClassInfo>> declInterfaces;
 
   /*
+   * A (case-insensitive) map from interface names supported by this class to
+   * their ClassInfo structures, flattened across the hierarchy.
+   */
+  ISStringToOneT<borrowed_ptr<const ClassInfo>> implInterfaces;
+
+  /*
    * A (case-sensitive) map from class constant name to the php::Const
    * that it came from.  This map is flattened across the inheritance
    * hierarchy.
@@ -436,6 +442,16 @@ bool Class::subtypeOf(const Class& o) const {
   if (s1 || s2) return s1 == s2;
   auto c1 = val.right();
   auto c2 = o.val.right();
+
+  // If c2 is an interface, see if c1 declared it.
+  if (c2->cls->attrs & AttrInterface) {
+    if (c1->implInterfaces.count(c2->cls->name)) {
+      return true;
+    }
+    return false;
+  }
+
+  // Otherwise check for direct inheritance.
   if (c1->baseList.size() >= c2->baseList.size()) {
     return c1->baseList[c2->baseList.size() - 1] == c2;
   }
@@ -710,6 +726,13 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
   }
 
   auto const isIface = rparent->cls->attrs & AttrInterface;
+
+  /*
+   * Make a flattened table of all the interfaces implemented by the class.
+   */
+  if (isIface) {
+    rleaf->implInterfaces[rparent->cls->name] = rparent;
+  }
 
   /*
    * Make a table of all the constants on this class.
@@ -1590,7 +1613,7 @@ res::Func Index::resolve_method(Context ctx,
    * called as long, as we only do so in cases where it will fatal at
    * runtime.
    *
-   * So, in the presense of magic methods, we must handle the fact
+   * So, in the presence of magic methods, we must handle the fact
    * that attempting to call an inaccessible method will instead call
    * the magic method, if it exists.  Note that if any class derives
    * from a class and adds magic methods, it can change still change
@@ -1860,12 +1883,16 @@ Type Index::lookup_class_constant(Context ctx,
 
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
-    if (it->second->val.m_type == KindOfUninit) {
+    if (!it->second->val.hasValue()) {
+      // This is an abstract class constant.
+      return TInitCell;
+    }
+    if (it->second->val.value().m_type == KindOfUninit) {
       // This is a class constant that needs an 86cinit to run.  It
       // would be good to eventually be able to analyze these.
       return TInitCell;
     }
-    return from_cell(it->second->val);
+    return from_cell(it->second->val.value());
   }
   return TInitCell;
 }

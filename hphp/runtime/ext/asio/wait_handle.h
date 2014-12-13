@@ -90,6 +90,8 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   Object t_getwaithandle();
   void t_import();
   Variant t_join();
+  Variant t_result();
+  Variant result();
   bool t_isfinished();
   bool t_issucceeded();
   bool t_isfailed();
@@ -114,7 +116,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   bool isFinished() const { return getState() <= STATE_FAILED; }
   bool isSucceeded() const { return getState() == STATE_SUCCEEDED; }
   bool isFailed() const { return getState() == STATE_FAILED; }
-  const Cell& getResult() const {
+  Cell getResult() const {
     assert(isSucceeded());
     return m_resultOrException;
   }

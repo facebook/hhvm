@@ -14,6 +14,7 @@ endfunction()
 
 # Add an extension
 function(HHVM_EXTENSION EXTNAME)
+  set(EXTENSION_NAME ${EXTNAME} CACHE INTERNAL "")
   add_library(${EXTNAME} SHARED ${ARGN})
   set_target_properties(${EXTNAME} PROPERTIES PREFIX "")
   set_target_properties(${EXTNAME} PROPERTIES SUFFIX ".so")

@@ -80,6 +80,12 @@ struct FormatVisitor {
       str << sep() << folly::format("<virtual at 0x{:08x}>",
                                     cppcall.vtableOffset());
       break;
+    case CppCall::Kind::ArrayVirt:
+      str << sep() << folly::format("ArrayVirt({})", cppcall.arrayTable());
+      break;
+    case CppCall::Kind::Destructor:
+      str << sep() << folly::format("destructor({})", show(cppcall.reg()));
+      break;
     }
   }
   void imm(RingBufferType t) { str << sep() << ringbufferName(t); }

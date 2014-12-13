@@ -499,6 +499,18 @@ static class RedisSessionModule : public SystemlibSessionModule {
     SystemlibSessionModule("redis", "RedisSessionModule") { }
 } s_redis_session_module;
 
+static class MemcacheSessionModule : public SystemlibSessionModule {
+ public:
+  MemcacheSessionModule() :
+    SystemlibSessionModule("memcache", "MemcacheSessionModule") { }
+} s_memcache_session_module;
+
+static class MemcachedSessionModule : public SystemlibSessionModule {
+ public:
+  MemcachedSessionModule() :
+    SystemlibSessionModule("memcached", "MemcachedSessionModule") { }
+} s_memcached_session_module;
+
 //////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 
@@ -1135,8 +1147,7 @@ public:
       }
     }
 
-    string spacket = wddxPacket->packet_end();
-    return String(spacket);
+    return wddxPacket->packet_end();
   }
 
   virtual bool decode(const String& value) {
@@ -1301,7 +1312,7 @@ new_session:
   /* Read data */
   /* Question: if you create a SID here, should you also try to read data?
    * I'm not sure, but while not doing so will remove one session operation
-   * it could prove usefull for those sites which wish to have "default"
+   * it could prove useful for those sites which wish to have "default"
    * session information
    */
 

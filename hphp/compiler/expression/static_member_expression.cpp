@@ -164,7 +164,7 @@ ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
 
 unsigned StaticMemberExpression::getCanonHash() const {
   int64_t val = Expression::getCanonHash() +
-    hash_string(toLower(m_className).c_str(), m_className.size());
+    hash_string_i_unsafe(m_className.c_str(), m_className.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 

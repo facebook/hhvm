@@ -6231,7 +6231,7 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
   auto it = Option::FunctionSections.find(fullName);
   if ((it != Option::FunctionSections.end() && it->second == "hot") ||
       (RuntimeOption::EvalRandomHotFuncs &&
-       (hash_string_i(fullName.c_str()) & 8))) {
+       (hash_string_i_unsafe(fullName.c_str(), fullName.size()) & 8))) {
     attrs = attrs | AttrHot;
   }
 
@@ -7945,47 +7945,55 @@ void EmitterVisitor::emitClass(Emitter& e,
       } else if (ClassConstantPtr cc =
                  dynamic_pointer_cast<ClassConstant>((*stmts)[i])) {
 
-        if (cc->isAbstract()) {
-          continue; // FIXME: discard for now
-        }
-
         ExpressionListPtr el(cc->getConList());
-        StringData* typeConstraint = makeStaticString(
-          cc->getTypeConstraint());
+        StringData* typeConstraint =
+          makeStaticString(cc->getTypeConstraint());
         int nCons = el->getCount();
-        for (int ii = 0; ii < nCons; ii++) {
-          AssignmentExpressionPtr ae(
-            static_pointer_cast<AssignmentExpression>((*el)[ii]));
-          ConstantExpressionPtr con(
-            static_pointer_cast<ConstantExpression>(ae->getVariable()));
-          ExpressionPtr vNode(ae->getValue());
-          StringData* constName = makeStaticString(con->getName());
-          assert(vNode);
-          TypedValue tvVal;
-          if (vNode->isArray()) {
-            throw IncludeTimeFatalException(
-              cc, "Arrays are not allowed in class constants");
-          } else if (vNode->isCollection()) {
-            throw IncludeTimeFatalException(
-              cc, "Collections are not allowed in class constants");
-          } else if (vNode->isScalar()) {
-            initScalar(tvVal, vNode);
-          } else {
-            tvWriteUninit(&tvVal);
-            if (nonScalarConstVec == nullptr) {
-              nonScalarConstVec = new NonScalarVec();
-            }
-            nonScalarConstVec->push_back(NonScalarPair(constName, vNode));
+
+        if (cc->isAbstract()) {
+          for (int ii = 0; ii < nCons; ii++) {
+            ConstantExpressionPtr con(
+              static_pointer_cast<ConstantExpression>((*el)[ii]));
+            StringData* constName = makeStaticString(con->getName());
+            bool added UNUSED =
+              pce->addAbstractConstant(constName, typeConstraint);
+            assert(added);
           }
-          // Store PHP source code for constant initializer.
-          std::ostringstream os;
-          CodeGenerator cg(&os, CodeGenerator::PickledPHP);
-          AnalysisResultPtr ar(new AnalysisResult());
-          vNode->outputPHP(cg, ar);
-          bool added UNUSED = pce->addConstant(
-            constName, typeConstraint, &tvVal,
-            makeStaticString(os.str()));
-          assert(added);
+        } else {
+          for (int ii = 0; ii < nCons; ii++) {
+            AssignmentExpressionPtr ae(
+              static_pointer_cast<AssignmentExpression>((*el)[ii]));
+            ConstantExpressionPtr con(
+              static_pointer_cast<ConstantExpression>(ae->getVariable()));
+            ExpressionPtr vNode(ae->getValue());
+            StringData* constName = makeStaticString(con->getName());
+            assert(vNode);
+            TypedValue tvVal;
+            if (vNode->isArray()) {
+              throw IncludeTimeFatalException(
+                cc, "Arrays are not allowed in class constants");
+            } else if (vNode->isCollection()) {
+              throw IncludeTimeFatalException(
+                cc, "Collections are not allowed in class constants");
+            } else if (vNode->isScalar()) {
+              initScalar(tvVal, vNode);
+            } else {
+              tvWriteUninit(&tvVal);
+              if (nonScalarConstVec == nullptr) {
+                nonScalarConstVec = new NonScalarVec();
+              }
+              nonScalarConstVec->push_back(NonScalarPair(constName, vNode));
+            }
+            // Store PHP source code for constant initializer.
+            std::ostringstream os;
+            CodeGenerator cg(&os, CodeGenerator::PickledPHP);
+            AnalysisResultPtr ar(new AnalysisResult());
+            vNode->outputPHP(cg, ar);
+            bool added UNUSED = pce->addConstant(
+              constName, typeConstraint, &tvVal,
+              makeStaticString(os.str()));
+            assert(added);
+          }
         }
       } else if (UseTraitStatementPtr useStmt =
                  dynamic_pointer_cast<UseTraitStatement>((*stmts)[i])) {
@@ -9335,8 +9343,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // Do initialization when code is null; see above.
     Option::EnableHipHopSyntax = RuntimeOption::EnableHipHopSyntax;
     Option::HardReturnTypeHints =
-      (RuntimeOption::EvalCheckReturnTypeHints >= 3 &&
-       RuntimeOption::EvalSoftClosureReturnTypeHints == false);
+      (RuntimeOption::EvalCheckReturnTypeHints >= 3);
     Option::EnableZendCompat = RuntimeOption::EnableZendCompat;
     Option::JitEnableRenameFunction = RuntimeOption::EvalJitEnableRenameFunction;
     for (auto& i : RuntimeOption::DynamicInvokeFunctions) {

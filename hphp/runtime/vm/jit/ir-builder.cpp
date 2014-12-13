@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include <algorithm>
-#include <vector>
+#include <utility>
 
 #include <folly/ScopeGuard.h>
 
@@ -64,7 +64,7 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
   , m_initialMarker(initMarker)
-  , m_nextMarker(initMarker)
+  , m_curMarker(initMarker)
   , m_state(m_unit, initMarker)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
@@ -72,15 +72,9 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
 {
   m_state.setBuilding();
   if (RuntimeOption::EvalHHIRGenOpts) {
-    m_enableCse = RuntimeOption::EvalHHIRCse &&
-      !RuntimeOption::EvalHHIRBytecodeControlFlow;
+    m_enableCse = false; // CSE is disabled at gen time.
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
-
-  // Need to preemptively mark the entry block as visited. This is because we
-  // don't always call IRBuilder::startBlock when starting to emit IR, namely
-  // in selectTracelet.
-  m_state.markVisited(m_curBlock);
 }
 
 /*
@@ -123,10 +117,14 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     if (inst->is(LdRef, CheckRefInner)) {
       constrainValue(inst->src(0), DataTypeSpecific);
     }
+
+    if (inst->marker().func()->isPseudoMain() &&
+        inst->is(GuardLoc, CheckLoc)) {
+      constrainGuard(inst, DataTypeSpecific);
+    }
   }
 
-  auto defaultWhere = m_curBlock->end();
-  auto& where = m_curWhere ? *m_curWhere : defaultWhere;
+  auto where = m_curBlock->end();
 
   // If the block isn't empty, check if we need to create a new block.
   if (where != m_curBlock->begin()) {
@@ -169,8 +167,6 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
   assert(inst->marker().valid());
   if (!inst->is(Nop, DefConst)) {
-    FTRACE(3, "appendInstruction: Block {}; inst: {}\n", m_curBlock->id(),
-           inst->toString());
     where = m_curBlock->insert(where, inst);
     ++where;
   }
@@ -180,13 +176,11 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 }
 
 void IRBuilder::appendBlock(Block* block) {
-  assert(m_savedBlocks.empty()); // TODO(t2982555): Don't require this
-
   m_state.finishBlock(m_curBlock);
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
-  m_state.startBlock(block, m_nextMarker);
+  m_state.startBlock(block, m_curMarker);
   m_curBlock = block;
 }
 
@@ -669,6 +663,130 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   return cloneAndAppendOriginal();
 }
 
+void IRBuilder::prepareForNextHHBC() {
+  assert(
+    spOffset() + m_state.evalStack().size() - m_state.stackDeficit() ==
+    m_curMarker.spOff()
+  );
+  m_exnStack = ExnStackState {
+    m_state.stackDeficit(),
+    m_state.evalStack(),
+    m_state.sp()
+  };
+  m_catchCreator = nullptr;
+}
+
+void IRBuilder::exceptionStackBoundary() {
+  // If this assert fires, we're trying to put things on the stack in a catch
+  // trace that the unwinder won't be able to see.
+  assert(
+    spOffset() + m_state.evalStack().size() - m_state.stackDeficit() ==
+    m_curMarker.spOff()
+  );
+  m_exnStack.stackDeficit = m_state.stackDeficit();
+  m_exnStack.evalStack = m_state.evalStack();
+  m_exnStack.sp = m_state.sp();
+}
+
+void IRBuilder::setCatchCreator(std::function<Block* ()> fn) {
+  m_catchCreator = std::move(fn);
+}
+
+static Block* create_catch_block(IRBuilder& irb,
+                                 const ExnStackState& stack,
+                                 BCMarker marker) {
+  auto const catchBlock = irb.unit().defBlock(Block::Hint::Unused);
+
+  BlockPusher bp(irb, marker, catchBlock);
+  irb.gen(BeginCatch);
+
+  auto args = std::vector<SSATmp*>{
+    stack.sp,
+    irb.cns(int64_t{stack.stackDeficit})
+  };
+  auto idx = uint32_t{0};
+  while (auto const val = stack.evalStack.top(idx++)) {
+    // We don't constrain these values, since they're just going to memory
+    // (and off the main line of code).
+    args.push_back(val);
+  }
+  auto const spill = irb.gen(
+    SpillStack,
+    std::make_pair(args.size(), &args[0])
+  );
+  irb.clearStackDeficit();
+  irb.evalStack().clear();
+
+  irb.gen(EndCatch, irb.fp(), spill);
+
+  return catchBlock;
+}
+
+/*
+ * This is called when each instruction is generated during initial IR
+ * creation.
+ *
+ * This function inspects the instruction and prepares it for potentially being
+ * inserted to the instruction stream.  It then calls optimizeInst, which may
+ * or may not insert it depending on a variety of factors.
+ */
+SSATmp* IRBuilder::prepareInst(IRInstruction* inst) {
+  if (inst->mayRaiseError() && inst->taken()) {
+    FTRACE(1, "{}: asserting about catch block\n",
+      inst->toString());
+    /*
+     * This assertion means you manually created a catch block, but didn't put
+     * an exceptionStackBoundary after an update to the stack.  Even if you're
+     * manually creating catches we require this just to make sure you're not
+     * doing it on accident.
+     */
+    always_assert_flog(
+      m_exnStack.sp == sp(),
+      "catch block would have had a mismatched stack pointer:\n"
+      "     inst: {}\n"
+      "       sp: {}\n"
+      " expected: {}\n",
+      inst->toString(),
+      sp()->toString(),
+      m_exnStack.sp->toString()
+    );
+  }
+
+  if (inst->mayRaiseError() && !inst->taken()) {
+    FTRACE(1, "{}: creating {}catch block\n",
+      inst->toString(),
+      m_catchCreator ? "custom " : "");
+    /*
+     * If you hit this assertion, you're gen'ing an IR instruction that can
+     * throw after gen'ing one that could write to the evaluation stack.  This
+     * is usually not what HHBC opcodes do, and could be a bug.  See the
+     * documentation for exceptionStackBoundary in the header for more
+     * information.
+     */
+    always_assert_flog(
+      m_exnStack.sp == sp(),
+      "catch block would have had a mismatched stack pointer:\n"
+      "     inst: {}\n"
+      "       sp: {}\n"
+      " expected: {}\n",
+      inst->toString(),
+      sp()->toString(),
+      m_exnStack.sp->toString()
+    );
+    inst->setTaken(
+      m_catchCreator
+        ? m_catchCreator()
+        : create_catch_block(*this, m_exnStack, m_curMarker)
+    );
+  }
+
+  if (inst->mayRaiseError()) {
+    assert(inst->taken() && inst->taken()->isCatch());
+  }
+
+  return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
+}
+
 /*
  * reoptimize() runs a trace through a second pass of IRBuilder
  * optimizations, like this:
@@ -696,7 +814,6 @@ void IRBuilder::reoptimize() {
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
   always_assert(m_savedBlocks.empty());
-  always_assert(!m_curWhere);
 
   if (splitCriticalEdges(m_unit)) {
     printUnit(6, m_unit, "after splitting critical edges for reoptimize");
@@ -750,7 +867,7 @@ void IRBuilder::reoptimize() {
       // m_nextMarker to decide where they are. Use the marker from this
       // instruction.
       assert(inst->marker().valid());
-      setNextMarker(inst->marker());
+      setCurMarker(inst->marker());
 
       auto const tmp = optimizeInst(inst, CloneFlag::No, block, idoms);
       SSATmp* dst = inst->dst(0);
@@ -1098,86 +1215,13 @@ SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
   return m_state.localValue(id);
 }
 
-void IRBuilder::setNextMarker(BCMarker newMarker) {
-  if (newMarker == m_nextMarker) return;
+void IRBuilder::setCurMarker(BCMarker newMarker) {
+  if (newMarker == m_curMarker) return;
   FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
-         m_nextMarker.valid() ? m_nextMarker.show() : "<invalid>",
+         m_curMarker.valid() ? m_curMarker.show() : "<invalid>",
          newMarker.show());
   assert(newMarker.valid());
-  m_nextMarker = newMarker;
-}
-
-void IRBuilder::insertSPPhi(bool forceSpPhi, BCMarker marker) {
-  ITRACE(2, "insertSPPhi starting for B{} with {} preds, forceSpPhi = {}\n",
-         m_curBlock->id(), m_curBlock->numPreds(), forceSpPhi);
-  Trace::Indent _i;
-
-  if (m_curBlock->numPreds() < 2 && !forceSpPhi) return;
-
-  jit::hash_map<Block*,SSATmp*> blockToPhiTmpsMap;
-
-  // First, determine if we need a phi for vmsp.
-  auto sp = m_state.spLeavingBlock(m_curBlock->preds().front().from());
-  auto needSpPhi = forceSpPhi;
-  for (auto& e : m_curBlock->preds()) {
-    auto predSp = m_state.spLeavingBlock(e.from());
-    ITRACE(4, "sp for pred B{}: {}\n", e.from()->id(), *predSp->inst());
-    if (predSp != sp) needSpPhi = true;
-  }
-
-  ITRACE(3, "needSpPhi: {}\n\n", needSpPhi);
-  if (needSpPhi) {
-    for (auto& e : m_curBlock->preds()) {
-      auto const inBlock = e.from();
-      blockToPhiTmpsMap[inBlock] = m_state.spLeavingBlock(inBlock);
-    }
-  }
-
-  if (!needSpPhi) return;
-
-  // Split incoming critical edges so we can modify Jmp srcs of preds.
-repeat:
-  for (auto& e : m_curBlock->preds()) {
-    IRInstruction* branch = e.inst();
-    Block* pred = branch->block();
-    if (pred->numSuccs() > 1) {
-      auto const middle = splitEdge(m_unit, pred, m_curBlock);
-      blockToPhiTmpsMap[middle] = blockToPhiTmpsMap[pred];
-
-      // Mark the new block as visited so FrameStateMgr doesn't see an
-      // unprocessed predecessor for the join point.
-      m_state.markVisited(middle);
-
-      goto repeat;
-    }
-  }
-
-  // Modify the incoming Jmps to set the phi inputs.  Copy to a vector before
-  // modifying things---we're going to be changing the pred EdgeList (by
-  // modifying jump instructions).
-  auto pred_vec = jit::vector<Block*>{};
-  for (auto& e : m_curBlock->preds()) {
-    pred_vec.push_back(e.from());
-  }
-  for (auto const pred : pred_vec) {
-    auto& jmp = pred->back();
-    always_assert_log(
-      jmp.is(Jmp),
-      [&] {
-        return folly::format("Need Jmp to create a phi, instead got: {}",
-                             jmp.toString()).str();
-      });
-    // TODO(#4810319): this function can't handle already having a phi, but
-    // we're going to stop phi'ing stacks eventually anyway.
-    always_assert(jmp.numSrcs() == 0 && "Phi already exists for this Jmp");
-    m_unit.replace(&jmp, Jmp, jmp.taken(), blockToPhiTmpsMap[pred]);
-  }
-
-  // Create a DefLabel for the sp phi.
-  auto const label = m_unit.defLabel(1, marker, {0u});
-  assert(m_curBlock->empty());
-  appendInstruction(label);
-  retypeDests(label, &m_unit);
+  m_curMarker = newMarker;
 }
 
 bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
@@ -1204,8 +1248,7 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_curBlock = block;
 
   m_state.startBlock(m_curBlock, marker, isLoopHeader);
-  insertSPPhi(isLoopHeader, marker);
-  always_assert(sp() != nullptr);
+  if (sp() == nullptr) gen(DefSP, StackOffset{spOffset()}, fp());
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
          show(m_state));
@@ -1235,20 +1278,18 @@ void IRBuilder::setBlock(Offset offset, Block* block) {
   m_offsetToBlockMap[offset] = block;
 }
 
-void IRBuilder::pushBlock(BCMarker marker,
-                          Block* b,
-                          const folly::Optional<Block::iterator>& where) {
+void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
-         m_curBlock, m_nextMarker.show(), b, marker.show());
+         m_curBlock, m_curMarker.show(), b, marker.show());
   assert(b);
 
   m_savedBlocks.push_back(
-    BlockState{ m_curBlock, m_nextMarker, m_curWhere });
+    BlockState { m_curBlock, m_curMarker, m_exnStack, m_catchCreator }
+  );
   m_state.pauseBlock(m_curBlock);
   m_state.startBlock(b, marker);
   m_curBlock = b;
-  setNextMarker(marker);
-  m_curWhere = where ? where : b->end();
+  m_curMarker = marker;
 
   if (do_assert) {
     for (UNUSED auto const& state : m_savedBlocks) {
@@ -1258,21 +1299,18 @@ void IRBuilder::pushBlock(BCMarker marker,
   }
 }
 
-void IRBuilder::popBlock(bool pause) {
+void IRBuilder::popBlock() {
   assert(!m_savedBlocks.empty());
 
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
-         m_curBlock, m_nextMarker.show(), top.block, top.marker.show());
-  if (pause) {
-    m_state.pauseBlock(m_curBlock);
-  } else {
-    m_state.finishBlock(m_curBlock);
-  }
+         m_curBlock, m_curMarker.show(), top.block, top.marker.show());
+  m_state.finishBlock(m_curBlock);
   m_state.unpauseBlock(top.block);
   m_curBlock = top.block;
-  setNextMarker(top.marker);
-  m_curWhere = top.where;
+  m_curMarker = top.marker;
+  m_exnStack = top.exnStack;
+  m_catchCreator = top.catchCreator;
   m_savedBlocks.pop_back();
 }
 

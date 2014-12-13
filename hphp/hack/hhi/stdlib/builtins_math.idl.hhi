@@ -18,7 +18,7 @@ function max($value, ...) { }
 function abs($number) { }
 function is_finite($val) { }
 function is_infinite($val) { }
-function is_nan($val) { }
+function is_nan(float $val): bool { }
 function ceil($value) { }
 function floor($value): float { }
 function round($val, $precision = 0, $mode = 1) { }

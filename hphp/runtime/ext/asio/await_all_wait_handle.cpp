@@ -92,12 +92,11 @@ retry:
       ad = ProxyArray::innerArr(ad);
       goto retry;
 
-    case ArrayData::kSharedKind:
+    case ArrayData::kApcKind:
     case ArrayData::kGlobalsKind:
       // APC can't store WaitHandles, GlobalsArray is used only for
       // $GLOBALS, which contain non-WaitHandles.
       failArray();
-
 
     case ArrayData::kEmptyKind:
       // Handled by dependencies->size() check.
@@ -137,7 +136,6 @@ Object c_AwaitAllWaitHandle::ti_fromvector(const Variant& dependencies) {
 
   return FromVector(static_cast<BaseVector*>(dependencies.getObjectData()));
 }
-
 
 Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
   auto const start = reinterpret_cast<const TypedValue*>(dependencies + 1);

@@ -1,2 +1,3 @@
 
-Fatal error: syntax error, unexpected T_HH_ERROR, expecting $end in %s/test/slow/hack_mode/2204.php on line 2
+Fatal error: HH mode: ?> not allowed (Line: %d, Char: %d)
+syntax error, unexpected T_HH_ERROR, expecting $end in %s/test/slow/hack_mode/2204.php on line 2

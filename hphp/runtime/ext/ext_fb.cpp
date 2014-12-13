@@ -460,7 +460,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
         Object obj = var.toObject();
 
         if (obj->isCollection()) {
-          fb_compact_serialize_variant(sb, obj->o_toArray(), depth, behavior);
+          fb_compact_serialize_variant(sb, obj->toArray(), depth, behavior);
           return 0;
         }
 
@@ -468,7 +468,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
           auto msg = folly::format(
             "Cannot serialize object of type {} because it does not implement "
             "HH\\IMemoizeParam",
-            obj->o_getClassName().data()).str();
+            obj->getClassName().data()).str();
 
           Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
           throw e;

@@ -1283,7 +1283,7 @@ String string_uuencode(const char *src, int src_len) {
   const char *s, *e, *ee;
   char *dest;
 
-  /* encoded length is ~ 38% greater then the original */
+  /* encoded length is ~ 38% greater than the original */
   String ret((int)ceil(src_len * 1.38) + 45, ReserveString);
   p = dest = ret.bufferSlice().ptr;
   s = src;

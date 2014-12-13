@@ -17,23 +17,10 @@
 #ifndef incl_HPHP_TYPES_H_
 #define incl_HPHP_TYPES_H_
 
-#include <stdint.h>
-#include <atomic>
+#include <cstdint>
 #include <limits>
-#include <type_traits>
-#include <vector>
-#include <stack>
-#include <list>
-#include <map>
 
-#include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/low-ptr.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/thread-local.h"
-#include "hphp/runtime/base/attr.h"
-#include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,36 +69,11 @@ class VariableUnserializer;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef USE_LOWPTR
-constexpr bool use_lowptr = true;
-
-using LowClassPtr  = LowPtr<Class, uint32_t>;
-using LowFuncPtr   = LowPtr<Func, uint32_t>;
-using LowStringPtr = LowPtr<const StringData, uint32_t>;
-#else
-constexpr bool use_lowptr = false;
-
-using LowClassPtr  = LowPtr<Class, uintptr_t>;
-using LowFuncPtr   = LowPtr<Func, uintptr_t>;
-using LowStringPtr = LowPtr<const StringData, uintptr_t>;
-#endif
+using LowClassPtr  = LowPtr<Class>;
+using LowFuncPtr   = LowPtr<Func>;
+using LowStringPtr = LowPtr<const StringData>;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Many functions may elect to take "litstr" separately from "String" class.
- * This code specialization helps speed a lot by not instantiating a String
- * object to box an otherwise literal value. This also means, though not
- * obviously thus dangerous not to know, whenever a function takes a parameter
- * with type of "litstr", one can only pass in a literal string that has
- * a "permanent" memory address to be stored. To make this really clear, I
- * invented "litstr" as a typedef-ed name for "const char *" that expects a
- * literal string only. Therefore, throughout this entire runtime library,
- *
- *   litstr == literal string
- *   const char * == any C-string pointer
- *
- */
 
 namespace Uns {
 enum class Mode {
@@ -123,8 +85,9 @@ enum class Mode {
 }
 
 namespace Collection {
-enum Type : uint8_t { // stored in ObjectData::o_subclassData
-  // values must be contiguous integers (for ArrayIter::initFuncTable)
+
+enum Type : uint8_t { // Stored in ObjectData::o_subclassData.
+  // Values must be contiguous integers (for ArrayIter::initFuncTable).
   InvalidType = 0,
   VectorType = 1,
   MapType = 2,
@@ -134,6 +97,7 @@ enum Type : uint8_t { // stored in ObjectData::o_subclassData
   ImmMapType = 6,
   ImmSetType = 7,
 };
+
 constexpr size_t MaxNumTypes = 8;
 
 inline Type stringToType(const char* str, size_t len) {
@@ -192,17 +156,38 @@ inline bool isTypeWithPossibleIntStringKeys(Collection::Type ctype) {
 
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-typedef const char * litstr; /* literal string */
+/*
+ * Many functions may elect to take "litstr" separately from "String" class.
+ * This code specialization helps speed a lot by not instantiating a String
+ * object to box an otherwise literal value. This also means, though not
+ * obviously thus dangerous not to know, whenever a function takes a parameter
+ * with type of "litstr", one can only pass in a literal string that has
+ * a "permanent" memory address to be stored. To make this really clear, I
+ * invented "litstr" as a typedef-ed name for "const char *" that expects a
+ * literal string only. Therefore, throughout this entire runtime library,
+ *
+ *   litstr == literal string
+ *   const char * == any C-string pointer
+ *
+ * TODO(#2298051): The above comment regarding "any C-string pointer" isn't
+ * really true anymore.
+ */
+using litstr = const char*;
 
-typedef const class VRefParamValue    &VRefParam;
-typedef const class RefResultValue    &RefResult;
+///////////////////////////////////////////////////////////////////////////////
 
-inline const Variant&
-variant(RefResult v)      { return *(Variant*)&v; }
-inline const Variant&
-variant(const Variant& v)        { return v; }
+using VRefParam = const class VRefParamValue&;
+using RefResult = const class RefResultValue&;
+
+inline const Variant& variant(RefResult v)      {
+  return *(Variant*)&v;
+}
+
+inline const Variant& variant(const Variant& v) {
+  return v;
+}
 
 /**
  * ref() can be used to cause strong binding
@@ -225,12 +210,12 @@ class GlobalsArray;
 class ObjectAllocatorBase;
 class Profiler;
 class CodeCoverage;
-typedef GlobalsArray GlobalVariables;
+
+using GlobalVariables = GlobalsArray;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class AccessFlags {
-public:
+struct AccessFlags {
   enum Type {
     None = 0,
     Error = 1,
@@ -251,15 +236,15 @@ public:
  * during a given instruction it is incremented while decoding
  * immediates and may point to arbitrary bytes.
  */
-typedef const unsigned char* PC;
+using PC = const unsigned char*;
 
 /*
  * Id type for various components of a unit that have to have unique
  * identifiers.  For example, function ids, class ids, string literal
  * ids.
  */
-typedef int Id;
-const Id kInvalidId = Id(-1);
+using Id = int;
+constexpr Id kInvalidId = -1;
 
 /*
  * Translation IDs.
@@ -280,15 +265,15 @@ const Id kInvalidId = Id(-1);
 using TransID = int32_t;
 constexpr TransID kInvalidTransID = -1;
 
-inline bool isValidTransID(TransID transID) {
+constexpr bool isValidTransID(TransID transID) {
   return transID >= 0;
 }
 
-// Bytecode offsets.  Used for both absolute offsets and relative
-// offsets.
-typedef int32_t Offset;
+/*
+ * Bytecode offsets.  Used for both absolute offsets and relative offsets.
+ */
+using Offset = int32_t;
 constexpr Offset kInvalidOffset = std::numeric_limits<Offset>::max();
-typedef hphp_hash_set<Offset> OffsetSet;
 
 /*
  * Various fields in the VM's runtime have indexes that are addressed
@@ -298,25 +283,24 @@ typedef hphp_hash_set<Offset> OffsetSet;
  * No slot value greater than or equal to kInvalidSlot will actually
  * be used for one of these.
  */
-typedef uint32_t Slot;
-constexpr Slot kInvalidSlot = Slot(-1);
+using Slot = uint32_t;
+constexpr Slot kInvalidSlot = -1;
 
 /*
  * Handles into Request Data Segment.  These are offsets from
  * RDS::tl_base.  See rds.h.
  */
 namespace RDS {
-  typedef uint32_t Handle;
+  using Handle = uint32_t;
   constexpr Handle kInvalidHandle = 0;
 }
 
 /*
  * Unique identifier for a Func*.
  */
-typedef uint32_t FuncId;
-constexpr FuncId InvalidFuncId = FuncId(-1LL);
-constexpr FuncId DummyFuncId = FuncId(-2LL);
-typedef hphp_hash_set<FuncId> FuncIdSet;
+using FuncId = uint32_t;
+constexpr FuncId InvalidFuncId = -1;
+constexpr FuncId DummyFuncId = -2;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

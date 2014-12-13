@@ -68,7 +68,7 @@ char *APCFileStorage::put(const char *data, int32_t len) {
   }
   assert(m_current);
   assert(len + PaddingSize <= m_chunkRemain);
-  strhash_t h = hash_string_inline(data, len);
+  strhash_t h = hash_string_unsafe(data, len);
   *(strhash_t*)m_current = h;
   m_current += sizeof(h);
   *(int32_t*)m_current = len;
@@ -129,7 +129,7 @@ bool APCFileStorage::hashCheck() {
                       (int64_t)current - (int64_t)m_chunks[i]);
         return false;
       }
-      strhash_t h_data = hash_string_inline(current, len);
+      strhash_t h_data = hash_string(current, len);
       if (h_data != h) {
         Logger::Error("invalid hash at chunk %d offset %" PRId64, i,
                       (int64_t)current - (int64_t)m_chunks[i]);

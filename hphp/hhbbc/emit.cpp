@@ -910,12 +910,19 @@ void emit_class(EmitUnitState& state,
   }
 
   for (auto& cconst : cls.constants) {
-    pce->addConstant(
-      cconst.name,
-      cconst.typeConstraint,
-      &cconst.val,
-      cconst.phpCode
-    );
+    if (!cconst.val.hasValue()) {
+      pce->addAbstractConstant(
+        cconst.name,
+        cconst.typeConstraint
+      );
+    } else {
+      pce->addConstant(
+        cconst.name,
+        cconst.typeConstraint,
+        &cconst.val.value(),
+        cconst.phpCode
+      );
+    }
   }
 
   pce->setEnumBaseTy(cls.enumBaseTy);

@@ -18,8 +18,13 @@
 #define incl_HPHP_FIXED_STRING_MAP_H_
 
 #include <cstdint>
+#include <limits>
+#include <vector>
 
 #include "hphp/runtime/base/string-data.h"
+
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 

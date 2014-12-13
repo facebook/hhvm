@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -47,7 +47,7 @@ Object::~Object() {
 }
 
 Array Object::toArray() const {
-  return m_px ? m_px->o_toArray() : Array();
+  return m_px ? m_px->toArray() : Array();
 }
 
 String Object::toString() const {
@@ -75,8 +75,8 @@ bool Object::equal(const Object& v2) const {
     return collectionEquals(m_px, v2.get());
   }
   if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return c_DateTime::GetTimestamp(*this) ==
-        c_DateTime::GetTimestamp(v2);
+    return DateTimeData::getTimestamp(*this) ==
+        DateTimeData::getTimestamp(v2);
   }
   if (v2.get()->getVMClass() != m_px->getVMClass()) {
     return false;
@@ -95,8 +95,8 @@ bool Object::equal(const Object& v2) const {
 bool Object::less(const Object& v2) const {
   check_collection_compare(m_px, v2.get());
   if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return c_DateTime::GetTimestamp(*this) <
-        c_DateTime::GetTimestamp(v2);
+    return DateTimeData::getTimestamp(*this) <
+        DateTimeData::getTimestamp(v2);
   }
   return m_px != v2.m_px && toArray().less(v2.toArray());
 }
@@ -104,8 +104,8 @@ bool Object::less(const Object& v2) const {
 bool Object::more(const Object& v2) const {
   check_collection_compare(m_px, v2.get());
   if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return c_DateTime::GetTimestamp(*this) >
-        c_DateTime::GetTimestamp(v2);
+    return DateTimeData::getTimestamp(*this) >
+        DateTimeData::getTimestamp(v2);
   }
   return m_px != v2.m_px && toArray().more(v2.toArray());
 }
@@ -130,7 +130,7 @@ Variant Object::o_set(const String& propName, const Variant& val,
 }
 
 const char* Object::classname_cstr() const {
-  return m_px->o_getClassName().c_str();
+  return m_px->getClassName().c_str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

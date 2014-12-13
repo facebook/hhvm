@@ -56,6 +56,21 @@ and hint_ =
   | Happly of sid * hint list
   | Hshape of hint ShapeMap.t
 
+ (* This represents the use of a type const. Type consts are accessed like
+  * regular consts in Hack, i.e.
+  *
+  * Class::TypeConst
+  *
+  * Type const access can be chained such as
+  *
+  * Class::TC1::TC2::TC3
+  *
+  * This will result in the following representation
+  *
+  * Haccess ("Class", "TC1", ["TC2", "TC3"])
+  *)
+  | Haccess of sid * sid * sid list
+
 and tprim =
   | Tvoid
   | Tint
@@ -76,10 +91,12 @@ and class_ = {
   c_tparams        : tparam list      ;
   c_extends        : hint list        ;
   c_uses           : hint list        ;
+  c_xhp_attr_uses  : hint list        ;
   c_req_extends    : hint list        ;
   c_req_implements : hint list        ;
   c_implements     : hint list        ;
   c_consts         : class_const list ;
+  c_typeconsts     : class_typeconst list   ;
   c_static_vars    : class_var list   ;
   c_vars           : class_var list   ;
   c_constructor    : method_ option   ;
@@ -97,8 +114,22 @@ and enum_ = {
 and tparam = Ast.variance * sid * hint option
 
 and class_const = hint option * sid * expr
+
+(* This represents a type const definition. If a type const is abstract then
+ * then the type hint acts as a constraint. Any concrete definition of the
+ * type const must satisfy the constraint.
+ *
+ * If the type const is not abstract then a type must be specified.
+ *)
+and class_typeconst = {
+  c_tconst_abstract : bool;
+  c_tconst_name : sid;
+  c_tconst_type : hint option;
+}
+
 and class_var = {
   cv_final      : bool        ;
+  cv_is_xhp     : bool        ;
   cv_visibility : visibility  ;
   cv_type       : hint option ;
   cv_id         : sid         ;

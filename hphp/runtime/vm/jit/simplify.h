@@ -101,15 +101,6 @@ Type getStackInnerTypePrediction(SSATmp* stack, uint32_t index);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Return this list of all values that are known to be on the stack
- * given the particular depth.
- *
- * This function is used for computing available value for
- * DecRef->DecRefNZ conversions in IRBuilder.
- */
-jit::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth);
-
-/*
  * Propagate very simple copies on the given instruction.
  * Specifically, Movs.
  *

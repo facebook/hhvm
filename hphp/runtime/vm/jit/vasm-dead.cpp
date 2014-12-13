@@ -55,12 +55,16 @@ bool effectful(Vinstr& inst) {
     case Vinstr::incq:
     case Vinstr::lea:
     case Vinstr::loaddqu:
+    case Vinstr::loadb:
     case Vinstr::loadl:
     case Vinstr::loadsd:
     case Vinstr::loadzbl:
+    case Vinstr::loadzbq:
+    case Vinstr::loadzlq:
     case Vinstr::movb:
     case Vinstr::movl:
     case Vinstr::movzbl:
+    case Vinstr::movzbq:
     case Vinstr::mulsd:
     case Vinstr::neg:
     case Vinstr::not:
@@ -89,6 +93,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::xorqi:
       return false;
     case Vinstr::ldimm:
+    case Vinstr::ldimmb:
       return !inst.ldimm_.saveflags;
     default:
       return true;

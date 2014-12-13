@@ -16,6 +16,7 @@
 #ifndef _incl_HPHP_RUNTIME_VM_NATIVE_DATA_H
 #define _incl_HPHP_RUNTIME_VM_NATIVE_DATA_H
 
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP { namespace Native {

@@ -18,21 +18,16 @@
 
 namespace HPHP {
 
-ZendCustomElement::ZendCustomElement(
-    void * data_, unsigned int data_size, void ** dest, DtorFunc destructor)
+ZendCustomElement::ZendCustomElement(void* data_, unsigned data_size,
+                                     DtorFunc destructor)
   : m_destructor(destructor)
 {
   m_data = smart_malloc(data_size);
   memcpy(m_data, data_, data_size);
-  if (dest) {
-    *dest = m_data;
-  }
 }
 
 ZendCustomElement::~ZendCustomElement() {
-  if (m_destructor) {
-    m_destructor(data());
-  }
+  if (m_destructor) m_destructor(m_data);
   smart_free(m_data);
 }
 

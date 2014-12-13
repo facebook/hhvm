@@ -533,6 +533,7 @@ std::string member_tv_initializer(Cell cell) {
 }
 
 void print_constant(Output& out, const PreClass::Const* cns) {
+  if (cns->isAbstract()) { return; }
   out.fmtln(".const {} = {};", cns->name()->data(),
     member_tv_initializer(cns->val()));
 }

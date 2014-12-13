@@ -53,6 +53,10 @@ module ErrorString = struct
     | Tapply ((_, x), _) -> "an object of type "^(strip_ns x)
     | Tobject            -> "an object"
     | Tshape _           -> "a shape"
+    | Taccess ((_, root_str), id, ids) ->
+        let base_str = "a value of type " ^ root_str in
+        let idl = id :: ids in
+        List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) base_str idl
 
   and array = function
     | None, None     -> "an array"
@@ -103,7 +107,7 @@ module Suggest = struct
     | Toption ty             -> "?" ^ type_ ty
     | Tprim tp               -> prim tp
     | Tvar _                 -> "..."
-    | Tanon _ | Tfun _       -> "..."
+    | Tanon _ | Tfun _ -> "..."
     | Tapply ((_, cid), [])  -> Utils.strip_ns cid
     | Tapply ((_, cid), [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
     | Tapply ((_, cid), l)   -> (Utils.strip_ns cid)^"<"^list l^">"
@@ -112,6 +116,9 @@ module Suggest = struct
     | Tabstract ((_, cid), l, _)   -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tobject                -> "..."
     | Tshape _               -> "..."
+    | Taccess ((_, root_str), id, ids) ->
+        let idl = id :: ids in
+        List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) root_str idl
 
   and list = function
     | []      -> ""
@@ -158,6 +165,11 @@ module Full = struct
     | Tabstract ((_, s), [], _)
     | Tapply ((_, s), [])
     | Tgeneric (s, _) -> o s
+    | Taccess ((_, root_str), id, ids) ->
+        let idl = id :: ids in
+        let s =
+          List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) root_str idl in
+        o s
     | Toption x -> o "?"; k x
     | Tprim x -> prim o x
     | Tvar n when ISet.mem n st -> o "[rec]"
@@ -331,6 +343,7 @@ module PrintClass = struct
     let tc_name = c.tc_name in
     let tc_tparams = tparam_list c.tc_tparams in
     let tc_consts = class_elt_smap c.tc_consts in
+    let tc_typeconsts = class_elt_smap c.tc_typeconsts in
     let tc_cvars = class_elt_smap c.tc_cvars in
     let tc_scvars = class_elt_smap c.tc_scvars in
     let tc_methods = class_elt_smap_with_breaks c.tc_methods in
@@ -351,6 +364,7 @@ module PrintClass = struct
     "tc_name: "^tc_name^"\n"^
     "tc_tparams: "^tc_tparams^"\n"^
     "tc_consts: "^tc_consts^"\n"^
+    "tc_typeconsts: "^tc_typeconsts^"\n"^
     "tc_cvars: "^tc_cvars^"\n"^
     "tc_scvars: "^tc_scvars^"\n"^
     "tc_methods: "^tc_methods^"\n"^

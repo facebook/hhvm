@@ -143,7 +143,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         continue;
 
       case KindOfObject:
-        b = tv->m_data.pobj->o_toBoolean();
+        b = tv->m_data.pobj->toBoolean();
         tvDecRefObj(tv);
         continue;
 
@@ -199,7 +199,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         continue;
 
       case KindOfObject:
-        d = tv->m_data.pobj->o_toDouble();
+        d = tv->m_data.pobj->toDouble();
         tvDecRefObj(tv);
         continue;
 
@@ -255,7 +255,7 @@ void cellCastToInt64InPlace(Cell* cell) {
         continue;
 
       case KindOfObject:
-        i = cell->m_data.pobj->o_toInt64();
+        i = cell->m_data.pobj->toInt64();
         tvDecRefObj(cell);
         continue;
 
@@ -309,7 +309,7 @@ double tvCastToDouble(TypedValue* tv) {
       return tv->m_data.parr->empty() ? 0.0 : 1.0;
 
     case KindOfObject:
-      return tv->m_data.pobj->o_toDouble();
+      return tv->m_data.pobj->toDouble();
 
     case KindOfResource:
       return tv->m_data.pres->o_toDouble();
@@ -468,7 +468,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 
       case KindOfObject:
         // For objects, we fall back on the Variant machinery
-        tvAsVariant(tv) = tv->m_data.pobj->o_toArray();
+        tvAsVariant(tv) = tv->m_data.pobj->toArray();
         return;
 
       case KindOfResource:
@@ -692,7 +692,7 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
       return true;
 
     case KindOfObject:
-      tvAsVariant(tv) = tv->m_data.pobj->o_toArray();
+      tvAsVariant(tv) = tv->m_data.pobj->toArray();
       return true;
 
     case KindOfResource:

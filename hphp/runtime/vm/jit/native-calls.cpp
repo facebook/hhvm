@@ -18,7 +18,6 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/rds.h"
@@ -94,8 +93,6 @@ using IFaceSupportFn = bool (*)(const StringData*);
  */
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
-    {TypeProfileFunc,    profileOneArgument, DNone, SNone,
-                           {{TV,0}, extra(&TypeProfileData::param), {SSA, 1}}},
     {ConvBoolToArr,      convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
     {ConvDblToArr,       convCellToArrHelper, DSSA, SNone,
@@ -187,8 +184,6 @@ static CallMap s_callMap {
     {NewMSArray,        MixedArray::MakeReserveStrMap, DSSA, SNone, {{SSA, 0}}},
     {NewLikeArray,       MixedArray::MakeReserveLike, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
-    {NewPackedArray,     MixedArray::MakePacked, DSSA, SNone,
-                           {{extra(&PackedArrayData::size)}, {SSA, 1}}},
     {AllocPackedArray,   MixedArray::MakePackedUninitialized, DSSA, SNone,
                            {{extra(&PackedArrayData::size)}}},
     {NewCol,             newColHelper, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
@@ -272,7 +267,7 @@ static CallMap s_callMap {
     /* Async function support helpers */
     {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
-    {CreateSSWH,         &c_StaticWaitHandle::CreateSucceededVM, DSSA, SNone,
+    {CreateSSWH,         &c_StaticWaitHandle::CreateSucceeded, DSSA, SNone,
                            {{TV, 0}}},
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},

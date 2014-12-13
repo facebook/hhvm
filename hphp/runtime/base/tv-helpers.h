@@ -235,7 +235,7 @@ inline void tvCopy(const TypedValue& fr, TypedValue& to) {
  * Equivalent of tvCopy for Cells and Vars.  These functions have the
  * same effects as tvCopy, but have some added assertions.
  */
-inline void cellCopy(const Cell& fr, Cell& to) {
+inline void cellCopy(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
 }
@@ -259,7 +259,7 @@ inline void tvDup(const TypedValue& fr, TypedValue& to) {
  * m_type fields, and increments the reference count. Does not perform
  * a decRef on the value that was overwritten.
  */
-inline void cellDup(const Cell& fr, Cell& to) {
+inline void cellDup(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
   tvRefcountedIncRef(&to);
@@ -325,7 +325,7 @@ inline const Cell* tvAssertCell(const TypedValue* tv) {
  *
  * `to' must contain a live php value; use cellDup when it doesn't.
  */
-inline void tvSet(const Cell& fr, TypedValue& inTo) {
+inline void tvSet(const Cell fr, TypedValue& inTo) {
   assert(cellIsPlausible(fr));
   Cell* to = tvToCell(&inTo);
   auto const oldType = to->m_type;
@@ -368,7 +368,7 @@ inline void tvSetNull(TypedValue& to) {
  *
  * Post: `to' is a Cell.
  */
-inline void tvSetIgnoreRef(const Cell& fr, TypedValue& to) {
+inline void tvSetIgnoreRef(const Cell fr, TypedValue& to) {
   assert(cellIsPlausible(fr));
   auto const oldType = to.m_type;
   auto const oldDatum = to.m_data.num;
@@ -383,7 +383,7 @@ inline void tvSetIgnoreRef(const Cell& fr, TypedValue& to) {
  * This function has the same effects as tvSetIgnoreRef, with stronger
  * assertions on `to'.
  */
-inline void cellSet(const Cell& fr, Cell& to) {
+inline void cellSet(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   assert(cellIsPlausible(to));
   tvSetIgnoreRef(fr, to);

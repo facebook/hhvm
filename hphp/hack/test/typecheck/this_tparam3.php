@@ -9,4 +9,8 @@
  *
  */
 
-class Foo implements Awaitable<Awaitable<this>> {}
+class Foo implements Awaitable<Awaitable<this>> {
+  public function getWaitHandle(): WaitHandle<Awaitable<this>> {
+    // UNSAFE
+  }
+}

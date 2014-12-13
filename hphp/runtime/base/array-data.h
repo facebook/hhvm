@@ -42,7 +42,7 @@ struct ArrayData {
   //
   // Beware if you change the order or the numerical values, as there are
   // a few places in the code that depends on the order or the numeric
-  // values. Also, all of the values need to be continguous from 0 to =
+  // values. Also, all of the values need to be continuous from 0 to =
   // kNumKinds-1 since we use these values to index into a table.
   enum ArrayKind : uint8_t {
     kPackedKind = 0,  // PackedArray with keys in range [0..size)
@@ -51,7 +51,7 @@ struct ArrayData {
     kIntMapKind = 3,  // IntMapArray, int keys, maybe holes, like MixedArray
     kVPackedKind = 4, // PackedArray with extra warnings for certain operations
     kEmptyKind = 5,   // The singleton static empty array
-    kSharedKind = 6,  // SharedArray
+    kApcKind = 6,     // APCLocalArray
     kGlobalsKind = 7, // GlobalsArray
     kProxyKind = 8,   // ProxyArray
     kNumKinds = 9     // insert new values before kNumKinds.
@@ -199,7 +199,7 @@ public:
     return b;
   }
 
-  bool isSharedArray() const { return m_kind == kSharedKind; }
+  bool isApcArray() const { return m_kind == kApcKind; }
   bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
 
@@ -508,7 +508,7 @@ static_assert(ArrayData::kStrMapKind == uint8_t(HeaderKind::StrMap), "");
 static_assert(ArrayData::kIntMapKind == uint8_t(HeaderKind::IntMap), "");
 static_assert(ArrayData::kVPackedKind == uint8_t(HeaderKind::VPacked), "");
 static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
-static_assert(ArrayData::kSharedKind == uint8_t(HeaderKind::Shared), "");
+static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
 static_assert(ArrayData::kProxyKind == uint8_t(HeaderKind::Proxy), "");
 

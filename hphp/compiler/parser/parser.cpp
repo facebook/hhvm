@@ -163,7 +163,7 @@ StatementListPtr Parser::ParseString(const String& input, AnalysisResultPtr ar,
     return parser.m_file->getStmt();
   }
   Logger::Error("Error parsing %s: %s\n%s\n", fileName,
-                parser.getMessage().c_str(), input.data());
+                parser.getMessage(false,true).c_str(), input.data());
   return StatementListPtr();
 }
 
@@ -222,7 +222,19 @@ void Parser::error(const char* fmt, ...) {
 void Parser::parseFatal(const Location* loc, const char* msg) {
   // we can't use loc->file, as the bison parser doesn't track that in YYLTYPE
   auto file = m_file->getName().c_str();
-  auto exn = ParseTimeFatalException(file, loc->line0, "%s", msg);
+
+  // If the parser has a message, prepend it to the given message. Otherwise
+  // just use the given message.
+  std::string str = getMessage();
+  std::string strInput;
+  if (!str.empty()) {
+    strInput = str;
+    strInput += "\n";
+  }
+  strInput += msg;
+
+  auto exn = ParseTimeFatalException(file, loc->line0, "%s", strInput.c_str());
+
   exn.setParseFatal();
   throw exn;
 }
@@ -2362,7 +2374,7 @@ const hphp_string_imap<std::string>& Parser::getAutoAliasedClasses() {
 void Parser::nns(int token, const std::string& text) {
   if (m_nsState == SeenNamespaceStatement && token != ';') {
     error("No code may exist outside of namespace {}: %s",
-          getMessage().c_str());
+          getMessage(false,true).c_str());
     return;
   }
 
@@ -2376,7 +2388,7 @@ void Parser::onNamespaceStart(const std::string &ns,
                               bool file_scope /* =false */) {
   if (m_nsState == SeenNonNamespaceStatement) {
     error("Namespace declaration statement has to be the very first "
-          "statement in the script: %s", getMessage().c_str());
+          "statement in the script: %s", getMessage(false,true).c_str());
     return;
   }
   if (m_nsState != SeenNothing && file_scope != m_nsFileScope) {
@@ -2417,14 +2429,14 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
   // auto-imported and 'use' statement is trying to replace it.
   if (m_nsAliasTable.isUseType(key)) {
     error("Cannot use %s as %s because the name is already in use: %s",
-          ns.c_str(), key.c_str(), getMessage().c_str());
+          ns.c_str(), key.c_str(), getMessage(false,true).c_str());
     return;
   }
   if (m_nsAliasTable.isDefType(key)) {
     auto defName = m_nsAliasTable.getDefName(key);
     if (strcasecmp(defName.c_str(), ns.c_str())) {
       error("Cannot use %s as %s because the name is already in use: %s",
-            ns.c_str(), key.c_str(), getMessage().c_str());
+            ns.c_str(), key.c_str(), getMessage(false,true).c_str());
       return;
     }
   }
@@ -2438,7 +2450,7 @@ void Parser::onUseFunction(const std::string &fn, const std::string &as) {
   if (m_fnTable.count(key) || m_fnAliasTable.count(key)) {
     error(
       "Cannot use function %s as %s because the name is already in use in %s",
-      fn.c_str(), key.c_str(), getMessage().c_str());
+      fn.c_str(), key.c_str(), getMessage(false,true).c_str());
   }
 
   m_fnAliasTable[key] = fn;
@@ -2450,7 +2462,7 @@ void Parser::onUseConst(const std::string &cnst, const std::string &as) {
   if (m_cnstTable.count(key) || m_cnstAliasTable.count(key)) {
     error(
       "Cannot use const %s as %s because the name is already in use in %s",
-      cnst.c_str(), key.c_str(), getMessage().c_str());
+      cnst.c_str(), key.c_str(), getMessage(false,true).c_str());
   }
 
   m_cnstAliasTable[key] = cnst;
@@ -2548,7 +2560,7 @@ void Parser::registerAlias(std::string name) {
       auto useName = m_nsAliasTable.getUseName(key);
       if (strcasecmp(useName.c_str(), name.c_str())) {
         error("Cannot declare class %s because the name is already in use: %s",
-              name.c_str(), getMessage().c_str());
+              name.c_str(), getMessage(false,true).c_str());
         return;
       }
     } else {

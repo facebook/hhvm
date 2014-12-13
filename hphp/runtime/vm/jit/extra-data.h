@@ -334,17 +334,6 @@ struct ActRecInfo : IRExtraData {
 };
 
 /*
- * Parameter index for type profiling.
- */
-struct TypeProfileData : IRExtraData {
-  explicit TypeProfileData(int32_t param) : param(param) {}
-  int32_t param;
-  std::string show() const {
-    return folly::to<std::string>(param);
-  }
-};
-
-/*
  * Stack offsets.
  */
 struct StackOffset : IRExtraData {
@@ -409,15 +398,13 @@ struct PropByteOffset : IRExtraData {
 struct DefInlineFPData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
-      target->fullName()->data(), "(),", retBCOff, ',', retSPOff,
-      retTypePred < Type::Gen ? (',' + retTypePred.toString()) : ""
+      target->fullName()->data(), "(),", retBCOff, ',', retSPOff
     );
   }
 
   const Func* target;
   Offset retBCOff;
   Offset retSPOff;
-  Type retTypePred;
 };
 
 struct CallArrayData : IRExtraData {
@@ -432,8 +419,8 @@ struct CallArrayData : IRExtraData {
                                   destroyLocals ? ",destroyLocals" : "");
   }
 
-  Offset pc;                    // XXX why isn't this available in the marker?
-  Offset after;
+  Offset pc;     // XXX why isn't this available in the marker?
+  Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
   bool destroyLocals;
 };
 
@@ -458,13 +445,11 @@ struct CallData : IRExtraData {
   explicit CallData(uint32_t numParams,
                     Offset after,
                     const Func* callee,
-                    bool destroy,
-                    TCA knownPrologue)
+                    bool destroy)
     : numParams(numParams)
     , after(after)
     , callee(callee)
     , destroyLocals(destroy)
-    , knownPrologue(knownPrologue)
   {}
 
   std::string show() const {
@@ -475,16 +460,14 @@ struct CallData : IRExtraData {
       callee
         ? folly::format(",{}", callee->fullName()->data()).str()
         : std::string{},
-      destroyLocals ? ",destroyLocals" : "",
-      !!knownPrologue ? ",knownPrologue" : ""
+      destroyLocals ? ",destroyLocals" : ""
     );
   }
 
   uint32_t numParams;
-  Offset after;
+  Offset after;        // m_soff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
   bool destroyLocals;
-  TCA knownPrologue;   // nullptr if not statically known
 };
 
 struct RetCtrlData : IRExtraData {
@@ -972,16 +955,13 @@ X(SideExitJmpZero,              SideExitJccData);
 X(SideExitJmpNZero,             SideExitJccData);
 X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
-X(CheckDefinedClsEq,            CheckDefinedClsData);
 X(InterpOne,                    InterpOneData);
-X(TypeProfileFunc,              TypeProfileData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
-X(NewPackedArray,               PackedArrayData);
 X(AllocPackedArray,             PackedArrayData);
 X(InitPackedArrayLoop,          PackedArrayData);
 X(InitPackedArray,              IndexData);

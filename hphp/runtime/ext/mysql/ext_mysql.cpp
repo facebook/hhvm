@@ -1048,4 +1048,35 @@ int mysqlExtension::MaxRetryQueryOnFail = 1;
 std::string mysqlExtension::Socket = "";
 bool mysqlExtension::TypedResults = true;
 
+int mysqlExtension::debuggerSupport() {
+  return SupportInfo;
+}
+
+void mysqlExtension::debuggerInfo(InfoVec &info) {
+  auto count = MySQL::NumCachedConnections();
+  Add(info, "Persistent", FormatNumber("%" PRId64, count));
+  AddServerStats(info, "sql.conn"       );
+  AddServerStats(info, "sql.reconn_new" );
+  AddServerStats(info, "sql.reconn_ok"  );
+  AddServerStats(info, "sql.reconn_old" );
+  AddServerStats(info, "sql.query"      );
+}
+
+void mysqlExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
+  Hdf mysql = config["MySQL"];
+  Config::Bind(ReadOnly, ini, mysql["ReadOnly"], false);
+#ifdef FACEBOOK
+  Config::Bind(Localize, ini, mysql["Localize"], false);
+#endif
+  Config::Bind(ConnectTimeout, ini, mysql["ConnectTimeout"], 1000);
+  Config::Bind(ReadTimeout, ini, mysql["ReadTimeout"], 60000);
+  Config::Bind(WaitTimeout, ini, mysql["WaitTimeout"], -1);
+  Config::Bind(SlowQueryThreshold, ini, mysql["SlowQueryThreshold"], 1000);
+  Config::Bind(KillOnTimeout, ini, mysql["KillOnTimeout"], false);
+  Config::Bind(MaxRetryOpenOnFail, ini, mysql["MaxRetryOpenOnFail"], 1);
+  Config::Bind(MaxRetryQueryOnFail, ini, mysql["MaxRetryQueryOnFail"], 1);
+  Config::Bind(Socket, ini, mysql["Socket"], "");
+  Config::Bind(TypedResults, ini, mysql["TypedResults"], true);
+}
+
 }

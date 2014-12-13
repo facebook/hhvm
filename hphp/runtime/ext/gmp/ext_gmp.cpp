@@ -18,122 +18,155 @@
 #include "ext_gmp.h"
 
 #include <cstdlib>
+#include <float.h>
 
 namespace HPHP {
 
-using std::abs;
+HPHP::Class* GMP::cls = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
-// functions
-
-static bool variantToGMPData(const char* fnCaller,
-                             mpz_t gmpData,
-                             const Variant& data,
-                             int64_t base = 0,
-                             bool canBeEmptyStr = false) {
-  switch (data.getType()) {
-    case KindOfBoolean:
-    case KindOfInt64:
-      mpz_init_set_si(gmpData, data.toInt64());
-      return true;
-
-    case KindOfDouble:
-      if (data.toDouble() > DBL_MAX || data.toDouble() < DBL_MIN) {
-        raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
-        return false;
-      }
-      mpz_init_set_d(gmpData, data.toDouble());
-      return true;
-
-    case KindOfStaticString:
-    case KindOfString: {
-      String strNum = data.toString();
-      int64_t strLength = strNum.length();
-
-      if (strLength == 0) {
-        if (canBeEmptyStr) {
-          mpz_init_set_si(gmpData, 0);
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      bool isNegative;
-      String negativeSign;
-      if (strNum[0] == '-') {
-        isNegative = true;
-        negativeSign = "-";
-      } else if (strNum[0] == '+') {
-          /* Our "isNumeric" function considers '+' a valid lead to a number,
-           * php does not agree.
-           */
-          return false;
-      } else {
-        isNegative = false;
-        negativeSign = "";
-        }
-
-        /* Figure out what base to use based on the data.
-         *
-         * We can't rely on GMP's auto-base detection as it doesn't handle cases
-         * where a base is specified AND a prefix is specified. So, we strip out
-         * all prefixes and detect the bases ourselves.
-         */
-        if (strLength > (isNegative + 2) && strNum[isNegative] == '0') {
-          if ((base == 0 || base == 16)
-              && (strNum[isNegative + 1] == 'x'
-                  || strNum[isNegative + 1] == 'X')) {
-            base = 16;
-            strNum = negativeSign + strNum.substr(isNegative + 2);
-          } else if ((base == 0 || base == 2)
-                     && (strNum[isNegative + 1] == 'b'
-                         || strNum[isNegative + 1] == 'B')) {
-            base = 2;
-            strNum = negativeSign + strNum.substr(isNegative + 2);
-          } else if (base == 0 || base == 8) {
-            base = 8;
-            strNum = negativeSign + strNum.substr(isNegative + 1);
-          }
-        }
-
-      if (mpz_init_set_str(gmpData, strNum.c_str(), base) == -1) {
-        mpz_clear(gmpData);
-
-        if (base == 0 && strNum.get()->isNumeric()) {
-          mpz_init_set_si(gmpData, strNum.toInt64());
-        } else {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    case KindOfResource: {
-      auto gmpRes = data.toResource().getTyped<GMPResource>(false, true);
-      if (!gmpRes) {
-        raise_warning(cs_GMP_INVALID_RESOURCE, fnCaller);
-        return false;
-      }
-      mpz_init_set(gmpData, gmpRes->getData());
-      return true;
-    }
-
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfRef:
-      raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
-      return false;
-
-    case KindOfClass:
-      break;
+// helpers
+static String mpzToString(mpz_t gmpData, const int64_t base) {
+  int charLength = mpz_sizeinbase(gmpData, std::abs(base)) + 1;
+  if (mpz_sgn(gmpData) < 0) {
+    ++charLength;
   }
-  not_reached();
+
+  char *charStr = (char*)smart_malloc(charLength);
+  mpz_get_str(charStr, base, gmpData);
+
+  String returnValue(charStr);
+  smart_free(charStr);
+
+  return returnValue;
 }
 
 
+static Object mpzToGMPObject(mpz_t gmpData) {
+  Object ret(GMP::allocObject());
+
+  auto data = Native::data<GMPData>(ret.get());
+  data->setGMPMpz(gmpData);
+
+  return ret;
+}
+
+
+static bool setMpzFromString(mpz_t gmpData,
+                             const String& stringInput,
+                             int64_t base) {
+  String strNum(stringInput);
+  int64_t strLength = strNum.length();
+
+  if (strLength == 0) {
+    return false;
+  }
+
+  int8_t negativePad;
+  std::string negativeSign;
+  if (strNum[0] == '-') {
+    negativePad = 1;
+    negativeSign = "-";
+  } else if (strNum[0] == '+') {
+      // We don't allow leading pluses to match PHP
+      return false;
+  } else {
+    negativePad = 0;
+    negativeSign = "";
+  }
+
+  // We can't rely on GMP's auto-base detection as it doesn't handle cases
+  // where a base is specified AND a prefix is specified. So, we strip out
+  // all prefixes and detect the bases ourselves.
+  if (strLength > (negativePad + 2) && strNum[negativePad] == '0') {
+    if ((base == 0 || base == 16)
+        && (strNum[negativePad + 1] == 'x'
+            || strNum[negativePad + 1] == 'X')) {
+      base = 16;
+      strNum = negativeSign + strNum.substr(negativePad + 2);
+    } else if ((base == 0 || base == 2)
+               && (strNum[negativePad + 1] == 'b'
+                   || strNum[negativePad + 1] == 'B')) {
+      base = 2;
+      strNum = negativeSign + strNum.substr(negativePad + 2);
+    } else if (base == 0 || base == 8) {
+      base = 8;
+      strNum = negativeSign + strNum.substr(negativePad + 1);
+    }
+  }
+
+  if (mpz_init_set_str(gmpData, strNum.c_str(), base) == -1) {
+    mpz_clear(gmpData);
+    if (base == 0 && strNum.get()->isNumeric()) {
+      mpz_init_set_si(gmpData, strNum.toInt64());
+    } else {
+      return false;
+    }
+
+  }
+  return true;
+}
+
+
+static bool variantToGMPData(const char* const fnCaller,
+                             mpz_t gmpData,
+                             const Variant& data,
+                             const int64_t base = 0) {
+  switch (data.getType()) {
+
+  case KindOfObject: {
+    Object gmpObject = data.toObject();
+    if (!gmpObject.instanceof(s_GMP_GMP)) {
+      raise_warning(cs_GMP_INVALID_OBJECT, fnCaller);
+      return false;
+    }
+
+    auto gmpObjectData = Native::data<GMPData>(gmpObject.get());
+    if (!gmpObjectData) {
+      raise_warning(cs_GMP_INVALID_OBJECT, fnCaller);
+      return false;
+    }
+
+    mpz_init_set(gmpData, gmpObjectData->getGMPMpz());
+    return true;
+  }
+
+  case KindOfString:
+  case KindOfStaticString:
+    if (!setMpzFromString(gmpData, data.toString(), base)) {
+      raise_warning(cs_GMP_INVALID_STRING, fnCaller);
+      return false;
+    }
+    return true;
+
+  case KindOfInt64:
+  case KindOfBoolean:
+    mpz_init_set_si(gmpData, data.toInt64());
+    return true;
+
+  case KindOfDouble:
+    if (data.toDouble() > DBL_MAX || data.toDouble() < DBL_MIN) {
+      raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
+      return false;
+    }
+    mpz_init_set_d(gmpData, data.toDouble());
+    return true;
+
+  case KindOfUninit:
+  case KindOfNull:
+  case KindOfArray:
+  case KindOfRef:
+  case KindOfClass:
+  case KindOfResource:
+    raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
+    return false;
+  }
+
+  not_reached();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// extension functions
 static Variant HHVM_FUNCTION(gmp_abs,
                              const Variant& data) {
   mpz_t gmpReturn, gmpData;
@@ -145,7 +178,7 @@ static Variant HHVM_FUNCTION(gmp_abs,
   mpz_init(gmpReturn);
   mpz_abs(gmpReturn, gmpData);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpReturn);
   mpz_clear(gmpData);
@@ -170,7 +203,7 @@ static Variant HHVM_FUNCTION(gmp_add,
   mpz_init(gmpReturn);
   mpz_add(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -196,7 +229,7 @@ static Variant HHVM_FUNCTION(gmp_and,
   mpz_init(gmpReturn);
   mpz_and(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -216,13 +249,19 @@ static void HHVM_FUNCTION(gmp_clrbit,
     return;
   }
 
-  auto gmpRes = data.toResource().getTyped<GMPResource>(true, true);
-  if (!gmpRes) {
-    raise_warning(cs_GMP_FAILED_TO_ALTER_BIT, cs_GMP_FUNC_NAME_GMP_CLRBIT);
+  Object gmpObject = data.toObject();
+  if (!gmpObject.instanceof(s_GMP_GMP)) {
+    raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_CLRBIT);
     return;
   }
 
-  mpz_clrbit(gmpRes->getData(), index);
+  auto gmpData = Native::data<GMPData>(gmpObject.get());
+  if (!gmpData) {
+    raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_CLRBIT);
+    return;
+  }
+
+  mpz_clrbit(gmpData->getGMPMpz(), index);
 }
 
 
@@ -259,7 +298,7 @@ static Variant HHVM_FUNCTION(gmp_com,
   mpz_init(gmpReturn);
   mpz_com(gmpReturn, gmpData);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpReturn);
   mpz_clear(gmpData);
@@ -294,26 +333,27 @@ static Variant HHVM_FUNCTION(gmp_div_q,
   mpz_init(gmpReturn);
   switch (round)
   {
-    case GMP_ROUND_ZERO:
-      mpz_tdiv_q(gmpReturn, gmpDataA, gmpDataB);
-      break;
+  case GMP_ROUND_ZERO:
+    mpz_tdiv_q(gmpReturn, gmpDataA, gmpDataB);
+    break;
 
-    case GMP_ROUND_PLUSINF:
-      mpz_cdiv_q(gmpReturn, gmpDataA, gmpDataB);
-      break;
+  case GMP_ROUND_PLUSINF:
+    mpz_cdiv_q(gmpReturn, gmpDataA, gmpDataB);
+    break;
 
-    case GMP_ROUND_MINUSINF:
-      mpz_fdiv_q(gmpReturn, gmpDataA, gmpDataB);
-      break;
+  case GMP_ROUND_MINUSINF:
+    mpz_fdiv_q(gmpReturn, gmpDataA, gmpDataB);
+    break;
 
-    default:
-      mpz_clear(gmpDataA);
-      mpz_clear(gmpDataB);
-      mpz_clear(gmpReturn);
-      return null_variant;
+  default:
+    mpz_clear(gmpDataA);
+    mpz_clear(gmpDataB);
+    mpz_clear(gmpReturn);
+    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_Q);
+    return false;
   }
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -368,12 +408,13 @@ static Variant HHVM_FUNCTION(gmp_div_qr,
     mpz_clear(gmpDataB);
     mpz_clear(gmpReturnQ);
     mpz_clear(gmpReturnR);
-    return null_variant;
+    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_QR);
+    return false;
   }
 
-  ArrayInit returnArray(2, ArrayInit::Map{});
-  returnArray.set(0, newres<GMPResource>(gmpReturnQ));
-  returnArray.set(1, newres<GMPResource>(gmpReturnR));
+  PackedArrayInit returnArray(2);
+  returnArray.appendWithRef(mpzToGMPObject(gmpReturnQ));
+  returnArray.appendWithRef(mpzToGMPObject(gmpReturnR));
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -425,19 +466,14 @@ static Variant HHVM_FUNCTION(gmp_div_r,
     mpz_clear(gmpDataA);
     mpz_clear(gmpDataB);
     mpz_clear(gmpReturn);
-    return null_variant;
+    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_R);
+    return false;
   }
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
 
-  Variant ret;
-
-  if (dataB.isInteger() && dataB.getInt64() >= 0) {
-    ret = (int64_t)mpz_get_ui(gmpReturn);
-  } else {
-    ret = newres<GMPResource>(gmpReturn);
-  }
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpReturn);
 
@@ -469,7 +505,7 @@ static Variant HHVM_FUNCTION(gmp_divexact,
   mpz_init(gmpReturn);
   mpz_divexact(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -483,9 +519,9 @@ static Variant HHVM_FUNCTION(gmp_fact,
                              const Variant& data) {
   mpz_t gmpReturn;
 
-  if (data.isResource()) {
+  if (data.isObject()) {
     mpz_t gmpData;
-    if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_FACT, gmpData, data, 0, true)) {
+    if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_FACT, gmpData, data)) {
       return false;
     }
 
@@ -499,6 +535,7 @@ static Variant HHVM_FUNCTION(gmp_fact,
 
     mpz_init(gmpReturn);
     mpz_fac_ui(gmpReturn, mpz_get_ui(gmpData));
+
     mpz_clear(gmpData);
   } else {
     if (data.toInt64() < 0) {
@@ -510,7 +547,7 @@ static Variant HHVM_FUNCTION(gmp_fact,
     mpz_init(gmpReturn);
     mpz_fac_ui(gmpReturn, data.toInt64());
   }
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpReturn);
 
@@ -534,7 +571,7 @@ static Variant HHVM_FUNCTION(gmp_gcd,
   mpz_init(gmpReturn);
   mpz_gcd(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -564,9 +601,9 @@ static Variant HHVM_FUNCTION(gmp_gcdext,
   mpz_gcdext(gmpReturnG, gmpReturnS, gmpReturnT, gmpDataA, gmpDataB);
 
   ArrayInit returnArray(3, ArrayInit::Map{});
-  returnArray.set(s_gmp_g, newres<GMPResource>(gmpReturnG));
-  returnArray.set(s_gmp_s, newres<GMPResource>(gmpReturnS));
-  returnArray.set(s_gmp_t, newres<GMPResource>(gmpReturnT));
+  returnArray.set(s_GMP_g, mpzToGMPObject(gmpReturnG));
+  returnArray.set(s_GMP_s, mpzToGMPObject(gmpReturnS));
+  returnArray.set(s_GMP_t, mpzToGMPObject(gmpReturnT));
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -617,7 +654,7 @@ static Variant HHVM_FUNCTION(gmp_init,
     return false;
   }
 
-  Variant ret = newres<GMPResource>(gmpData);
+  Variant ret = mpzToGMPObject(gmpData);
 
   mpz_clear(gmpData);
 
@@ -625,20 +662,16 @@ static Variant HHVM_FUNCTION(gmp_init,
 }
 
 
-static Variant HHVM_FUNCTION(gmp_intval,
+static int64_t HHVM_FUNCTION(gmp_intval,
                              const Variant& data) {
   mpz_t gmpData;
 
-  if (data.isString() && data.toString().empty()) {
-    return 0;
-  } else if (data.isArray()) {
-    return 0;
-  } else if (data.isObject()) {
-    raise_notice(cs_GMP_INVALID_OBJECT,
-                 data.toObject()->o_getClassName()->toCppString().c_str());
-    return 1;
-  } else if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_INTVAL, gmpData, data)) {
-    return false;
+  if (data.isArray()
+      || data.isResource()
+      || (data.isString() && data.toString().empty())
+      || (data.isObject() && !data.toObject().instanceof(s_GMP_GMP))
+      || !variantToGMPData(cs_GMP_FUNC_NAME_GMP_INTVAL, gmpData, data)) {
+    return data.toInt64();
   }
 
   int64_t result = mpz_get_si(gmpData);
@@ -670,7 +703,7 @@ static Variant HHVM_FUNCTION(gmp_invert,
     return false;
   }
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -750,11 +783,7 @@ static Variant HHVM_FUNCTION(gmp_mod,
 
   Variant ret;
 
-  if (dataB.isInteger() && dataB.getInt64() >= 0) {
-    ret = (int64_t)mpz_get_ui(gmpReturn);
-  } else {
-    ret = newres<GMPResource>(gmpReturn);
-  }
+  ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -780,7 +809,7 @@ static Variant HHVM_FUNCTION(gmp_mul,
   mpz_init(gmpReturn);
   mpz_mul(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -801,7 +830,7 @@ static Variant HHVM_FUNCTION(gmp_neg,
   mpz_init(gmpReturn);
   mpz_neg(gmpReturn, gmpData);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn);
@@ -821,7 +850,7 @@ static Variant HHVM_FUNCTION(gmp_nextprime,
   mpz_init(gmpReturn);
   mpz_nextprime(gmpReturn, gmpData);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn);
@@ -846,7 +875,7 @@ static Variant HHVM_FUNCTION(gmp_or,
   mpz_init(gmpReturn);
   mpz_ior(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -905,7 +934,7 @@ static Variant HHVM_FUNCTION(gmp_pow,
   mpz_init(gmpReturn);
   mpz_pow_ui(gmpReturn, gmpData, exp);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn);
@@ -931,13 +960,21 @@ static Variant HHVM_FUNCTION(gmp_powm,
     return false;
   }
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_POWM, gmpDataA, dataA)) {
+  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_POWM, gmpDataC, dataC)) {
     mpz_clear(gmpDataB);
     return false;
   }
+  if (mpz_sgn(gmpDataC) == 0) {
+    mpz_clear(gmpDataB);
+    mpz_clear(gmpDataC);
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_POWM, gmpDataC, dataC)) {
-    mpz_clear(gmpDataA);
+    raise_warning(cs_GMP_INVALID_MODULUS_MUST_NOT_BE_ZERO,
+                  cs_GMP_FUNC_NAME_GMP_POWM);
+    return false;
+  }
+
+  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_POWM, gmpDataA, dataA)) {
+    mpz_clear(gmpDataC);
     mpz_clear(gmpDataB);
     return false;
   }
@@ -945,7 +982,7 @@ static Variant HHVM_FUNCTION(gmp_powm,
   mpz_init(gmpReturn);
   mpz_powm(gmpReturn, gmpDataA, gmpDataB, gmpDataC);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -976,6 +1013,77 @@ static Variant HHVM_FUNCTION(gmp_prob_prime,
 static void HHVM_FUNCTION(gmp_random,
                           int64_t limiter) {
   throw_not_implemented(cs_GMP_FUNC_NAME_GMP_RANDOM);
+}
+
+
+static Variant HHVM_FUNCTION(gmp_root,
+                             const Variant& data,
+                             int64_t root) {
+  if (root < 1) {
+    raise_warning(cs_GMP_INVALID_ROOT_MUST_BE_POSITIVE,
+                  cs_GMP_FUNC_NAME_GMP_ROOT);
+    return false;
+  }
+
+  mpz_t gmpData, gmpReturn;
+  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_ROOT, gmpData, data)) {
+    return false;
+  }
+
+  if (root % 2 == 0 && mpz_sgn(gmpData) < 0) {
+    mpz_clear(gmpData);
+    raise_warning(cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER,
+                  cs_GMP_FUNC_NAME_GMP_ROOT);
+    return false;
+  }
+
+  mpz_init(gmpReturn);
+  mpz_root(gmpReturn, gmpData, (uint32_t)root);
+
+  Variant ret = mpzToGMPObject(gmpReturn);
+
+  mpz_clear(gmpReturn);
+  mpz_clear(gmpData);
+
+  return ret;
+}
+
+
+static Variant HHVM_FUNCTION(gmp_rootrem,
+                             const Variant& data,
+                             int64_t root) {
+  if (root < 1) {
+    raise_warning(cs_GMP_INVALID_ROOT_MUST_BE_POSITIVE,
+                  cs_GMP_FUNC_NAME_GMP_ROOTREM);
+    return false;
+  }
+
+  mpz_t gmpData, gmpReturn0, gmpReturn1;
+  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_ROOTREM, gmpData, data)) {
+    return false;
+  }
+
+  if (root % 2 == 0 && mpz_sgn(gmpData) < 0) {
+    mpz_clear(gmpData);
+    raise_warning(cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER,
+                  cs_GMP_FUNC_NAME_GMP_ROOTREM);
+    return false;
+  }
+
+  mpz_init(gmpReturn0);
+  mpz_init(gmpReturn1);
+
+  mpz_rootrem(gmpReturn0, gmpReturn1, gmpData, (uint32_t)root);
+
+  PackedArrayInit returnArray(2);
+  returnArray.appendWithRef(mpzToGMPObject(gmpReturn0));
+  returnArray.appendWithRef(mpzToGMPObject(gmpReturn1));
+
+  mpz_clear(gmpData);
+  mpz_clear(gmpReturn0);
+  mpz_clear(gmpReturn1);
+
+  return returnArray.toVariant();
 }
 
 
@@ -1033,16 +1141,22 @@ static void HHVM_FUNCTION(gmp_setbit,
     return;
   }
 
-  auto gmpRes = data.toResource().getTyped<GMPResource>(true, true);
-  if (!gmpRes) {
-    raise_warning(cs_GMP_FAILED_TO_ALTER_BIT, cs_GMP_FUNC_NAME_GMP_SETBIT);
+  Object gmpObject = data.toObject();
+  if (!gmpObject.instanceof(s_GMP_GMP)) {
+    raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_SETBIT);
+    return;
+  }
+
+  auto gmpData = Native::data<GMPData>(gmpObject.get());
+  if (!gmpData) {
+    raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_SETBIT);
     return;
   }
 
   if (bitOn) {
-    mpz_setbit(gmpRes->getData(), index);
+    mpz_setbit(gmpData->getGMPMpz(), index);
   } else {
-    mpz_clrbit(gmpRes->getData(), index);
+    mpz_clrbit(gmpData->getGMPMpz(), index);
   }
 }
 
@@ -1072,14 +1186,15 @@ static Variant HHVM_FUNCTION(gmp_sqrt,
   }
 
   if (mpz_sgn(gmpData) < 0) {
-    raise_warning(cs_GMP_INVALID_NUMBER_IS_NEGATIVE, cs_GMP_FUNC_NAME_GMP_SQRT);
+    raise_warning(cs_GMP_INVALID_NUMBER_IS_NEGATIVE,
+                  cs_GMP_FUNC_NAME_GMP_SQRT);
     return false;
   }
 
   mpz_init(gmpReturn);
   mpz_sqrt(gmpReturn, gmpData);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn);
@@ -1107,9 +1222,9 @@ static Variant HHVM_FUNCTION(gmp_sqrtrem,
 
   mpz_sqrtrem(gmpSquareRoot, gmpRemainder, gmpData);
 
-  ArrayInit returnArray(2, ArrayInit::Map{});
-  returnArray.set(0, newres<GMPResource>(gmpSquareRoot));
-  returnArray.set(1, newres<GMPResource>(gmpRemainder));
+  PackedArrayInit returnArray(2);
+  returnArray.appendWithRef(mpzToGMPObject(gmpSquareRoot));
+  returnArray.appendWithRef(mpzToGMPObject(gmpRemainder));
 
   mpz_clear(gmpData);
   mpz_clear(gmpSquareRoot);
@@ -1120,8 +1235,8 @@ static Variant HHVM_FUNCTION(gmp_sqrtrem,
 
 
 static Variant HHVM_FUNCTION(gmp_strval,
-                            const Variant& data,
-                            const int64_t base /* = 10 */) {
+                             const Variant& data,
+                             const int64_t base /* = 10 */) {
   mpz_t gmpData;
 
   if (base < GMP_MIN_BASE || (base > -2 && base < 2) || base > GMP_MAX_BASE) {
@@ -1136,22 +1251,8 @@ static Variant HHVM_FUNCTION(gmp_strval,
     return false;
   }
 
-  int charLength = mpz_sizeinbase(gmpData, abs(base)) + 1;
-  if (mpz_sgn(gmpData) < 0) {
-    ++charLength;
-  }
+  String returnValue(mpzToString(gmpData, base));
 
-  char *charStr = (char*) smart_malloc(charLength);
-  if (!mpz_get_str(charStr, base, gmpData)) {
-    smart_free(charStr);
-    mpz_clear(gmpData);
-
-    return false;
-  }
-
-  String returnValue(charStr);
-
-  smart_free(charStr);
   mpz_clear(gmpData);
 
   return returnValue;
@@ -1174,7 +1275,7 @@ static Variant HHVM_FUNCTION(gmp_sub,
   mpz_init(gmpReturn);
   mpz_sub(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -1187,26 +1288,23 @@ static Variant HHVM_FUNCTION(gmp_sub,
 static bool HHVM_FUNCTION(gmp_testbit,
                           const Variant& data,
                           int64_t index) {
+  mpz_t gmpData;
+
   if (index < 0) {
     raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE,
                   cs_GMP_FUNC_NAME_GMP_TESTBIT);
     return false;
   }
 
-  if (data.isResource()) {
-    auto gmpRes = data.toResource().getTyped<GMPResource>();
-    return mpz_tstbit(gmpRes->getData(), index);
-  }
-
-  mpz_t gmpData;
   if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_TESTBIT, gmpData, data)) {
     return false;
   }
 
-  bool isBitSet = mpz_tstbit(gmpData, index);
+  bool ret = mpz_tstbit(gmpData, index);
+
   mpz_clear(gmpData);
 
-  return isBitSet;
+  return ret;
 }
 
 
@@ -1226,7 +1324,7 @@ static Variant HHVM_FUNCTION(gmp_xor,
   mpz_init(gmpReturn);
   mpz_xor(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = newres<GMPResource>(gmpReturn);
+  Variant ret = mpzToGMPObject(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -1235,13 +1333,100 @@ static Variant HHVM_FUNCTION(gmp_xor,
   return ret;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// extension class methods
+static String HHVM_METHOD(GMP, serialize) {
+  auto data = Native::data<GMPData>(this_);
+
+  // We first serialize our number as a string, then we need to serialize
+  // any other public properties as an array after that.
+
+  StringBuffer retBuf(SmallStringReserve);
+  VariableSerializer serializer(VariableSerializer::Type::Serialize);
+
+  Variant numValue(mpzToString(data->getGMPMpz(), 10));
+  Variant objProps(this_->toArray(true));
+
+  retBuf.append(serializer.serializeValue(numValue, true));
+  retBuf.append(serializer.serializeValue(objProps, true));
+
+  return retBuf.detach();
+}
+
+
+static void HHVM_METHOD(GMP, unserialize,
+                        const Variant& data) {
+  String serialData = data.toString();
+  VariableUnserializer unserializer(serialData.data(),
+                                    serialData.length(),
+                                    VariableUnserializer::Type::Serialize);
+
+  mpz_t gmpData;
+
+  // First value is a string (our number value)
+  Variant num = unserializer.unserialize();
+  if (!num.isString() || !setMpzFromString(gmpData, num.toString(), 10)) {
+    throw Exception(cs_GMP_COULD_NOT_UNSERIALIZE_NUMBER);
+  }
+
+  // Second value is an array of object properties optionally set by the user
+  Variant props = unserializer.unserialize();
+  if (!props.isArray()) {
+    mpz_clear(gmpData);
+    throw Exception(cs_GMP_COULD_NOT_UNSERIALIZE_PROPERTIES);
+  }
+
+  auto gmpObjectData = Native::data<GMPData>(this_);
+  gmpObjectData->setGMPMpz(gmpData);
+  this_->o_setArray(props.toArray());
+
+  mpz_clear(gmpData);
+}
+
+
+static Array HHVM_METHOD(GMP, __debugInfo,
+                         const Variant& data) {
+  auto gmpObjectData = Native::data<GMPData>(this_);
+  Array ret = this_->toArray(true);
+
+  String num = mpzToString(gmpObjectData->getGMPMpz(), 10);
+  ret.set(s_GMP_num, num);
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// GMPData class methods
+GMPData& GMPData::operator=(const GMPData& source) {
+  if (this != &source) {
+    setGMPMpz(source.m_gmpMpz);
+  }
+  return *this;
+}
+
+
+void GMPData::close() {
+  if (m_isInit) {
+    mpz_clear(m_gmpMpz);
+    m_isInit = false;
+  }
+}
+
+
+void GMPData::setGMPMpz(const mpz_t data) {
+   if (m_isInit) {
+     mpz_set(m_gmpMpz, data);
+   } else {
+     m_isInit = true;
+     mpz_init_set(m_gmpMpz, data);
+   }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension
-
 class GMPExtension : public Extension {
 public:
-  GMPExtension() : Extension("gmp", "1.0.0-hhvm") { };
+  GMPExtension() : Extension("gmp", "2.0.0-hhvm") { };
   virtual void moduleInit() {
     Native::registerConstant<KindOfInt64>(
       s_GMP_MAX_BASE.get(), GMP_MAX_BASE
@@ -1290,6 +1475,8 @@ public:
     HHVM_FE(gmp_powm);
     HHVM_FE(gmp_prob_prime);
     HHVM_FE(gmp_random);
+    HHVM_FE(gmp_root);
+    HHVM_FE(gmp_rootrem);
     HHVM_FE(gmp_scan0);
     HHVM_FE(gmp_scan1);
     HHVM_FE(gmp_setbit);
@@ -1301,10 +1488,14 @@ public:
     HHVM_FE(gmp_testbit);
     HHVM_FE(gmp_xor);
 
+    Native::registerNativeDataInfo<GMPData>(s_GMPData.get());
+    HHVM_ME(GMP, serialize);
+    HHVM_ME(GMP, unserialize);
+    HHVM_ME(GMP, __debugInfo);
+
     loadSystemlib();
   }
 } s_gmp_extension;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 }

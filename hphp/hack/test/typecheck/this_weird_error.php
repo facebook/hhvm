@@ -27,7 +27,7 @@ class A {
 /**
  * There was a weird bug in Typing_generic.rename, that was reproduced with
  * this case. It had to do with variable renaming, and this test doesn't
- * excercise much beyond that
+ * exercise much beyond that
  */
 class B {
   public function foo(MyVector<A> $a_vector): void {

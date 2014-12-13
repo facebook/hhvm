@@ -18,6 +18,10 @@ array(2) {
   ["Z"]=>
   string(10) "I::Y via Z"
 }
+array(1) {
+  ["X"]=>
+  string(1) "X"
+}
 bool(false)
 array(1) {
   ["X"]=>
@@ -31,6 +35,8 @@ array(3) {
   ["Z"]=>
   string(10) "I::Y via Z"
 }
+array(0) {
+}
 bool(true)
 array(1) {
   ["X"]=>
@@ -43,5 +49,7 @@ array(3) {
   string(4) "I::Y"
   ["Z"]=>
   string(10) "I::Y via Z"
+}
+array(0) {
 }
 bool(true)

@@ -133,29 +133,37 @@ String MySQL::GetDefaultSocket() {
   return MYSQL_UNIX_ADDR;
 }
 
-String MySQL::GetHash(const String& host, int port, const String& socket,
-                      const String& username, const String& password,
-                      int client_flags) {
+std::string MySQL::GetHash(const String& host, int port, const String& socket,
+                           const String& username, const String& password,
+                           int client_flags) {
   char buf[1024];
   snprintf(buf, sizeof(buf), "%s:%d:%s:%s:%s:%d",
            host.data(), port, socket.data(),
            username.data(), password.data(), client_flags);
-  return String(buf, CopyString);
+  return std::string(buf);
 }
 
-MySQL *MySQL::GetCachedImpl(const char *name, const String& host, int port,
+namespace {
+thread_local PersistentResourceStore<std::string,MySQL*> s_connections;
+}
+
+MySQL *MySQL::GetCachedImpl(const String& host, int port,
                             const String& socket, const String& username,
                             const String& password, int client_flags) {
-  String key = GetHash(host, port, socket, username, password, client_flags);
-  return dynamic_cast<MySQL*>(g_persistentResources->get(name, key.data()));
+  auto key = GetHash(host, port, socket, username, password, client_flags);
+  return s_connections.get(key);
 }
 
-void MySQL::SetCachedImpl(const char *name, const String& host, int port,
+void MySQL::SetCachedImpl(const String& host, int port,
                           const String& socket, const String& username,
                           const String& password, int client_flags,
                           MySQL *conn) {
-  String key = GetHash(host, port, socket, username, password, client_flags);
-  g_persistentResources->set(name, key.data(), conn);
+  auto key = GetHash(host, port, socket, username, password, client_flags);
+  s_connections.set(key, conn);
+}
+
+size_t MySQL::NumCachedConnections() {
+  return s_connections.getMap().size();
 }
 
 MySQL *MySQL::GetDefaultConn() {

@@ -194,7 +194,7 @@ emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
 }
 
 inline void emitLoadTVType(Vout& v, Vptr mem, Vreg d) {
-  v << loadzbl{mem, d};
+  v << loadzbq{mem, d};
 }
 
 template<typename SrcType, typename OpndType>

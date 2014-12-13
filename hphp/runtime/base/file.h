@@ -40,8 +40,7 @@ extern int __thread s_pcloseRet;
  * but we will have PlainFile, ZipFile and Socket derive from this base class,
  * so they can share some minimal functionalities.
  */
-class File : public SweepableResourceData {
-public:
+struct File : SweepableResourceData {
   static const int CHUNK_SIZE;
 
   static String TranslatePath(const String& filename);
@@ -58,7 +57,6 @@ public:
     return filename.find("://") == String::npos;
   }
 
-public:
   static const int USE_INCLUDE_PATH;
 
   explicit File(bool nonblocking = true,
@@ -77,7 +75,7 @@ public:
   const String& o_getResourceName() const { return s_resource_name; }
   virtual bool isInvalid() const { return m_closed; }
 
-  int fd() const { return m_fd;}
+  virtual int fd() const { return m_fd;}
   bool valid() const { return m_fd >= 0;}
   const std::string getName() const { return m_name;}
 
@@ -151,6 +149,8 @@ public:
   virtual bool lock(int operation, bool &wouldblock);
   virtual bool stat(struct stat *sb);
 
+  virtual Object await(uint16_t events, double timeout);
+
   virtual Array getMetaData();
   virtual Variant getWrapperMetaData() { return Variant(); }
   String getWrapperType() const;
@@ -190,7 +190,8 @@ public:
   /**
    * Write one line of csv record.
    */
-  int64_t writeCSV(const Array& fields, char delimiter = ',', char enclosure = '"');
+  int64_t writeCSV(const Array& fields, char delimiter = ',',
+                   char enclosure = '"');
 
   /**
    * Read one line of csv record.
@@ -203,33 +204,9 @@ public:
    */
   String getLastError();
 
-  /**
-   * Is this on the local disk?
-   */
-  bool m_isLocal;
+  bool isLocal() const { return m_isLocal; }
 
 protected:
-  int m_fd;      // file descriptor
-  bool m_closed; // whether close() was called
-  bool m_nonblocking;
-
-  // fields only useful for buffered reads
-  int64_t m_writepos; // where we have read from lower level
-  int64_t m_readpos;  // where we have given to upper level
-
-  // fields useful for both reads and writes
-  int64_t m_position; // the current cursor position
-  bool m_eof;
-
-  std::string m_name;
-  std::string m_mode;
-
-  StringData* m_wrapperType;
-  StringData* m_streamType;
-  Resource m_streamContext;
-  smart::list<Resource> m_readFilters;
-  smart::list<Resource> m_writeFilters;
-
   void invokeFiltersOnClose();
   void closeImpl();
   virtual void sweep() override;
@@ -243,14 +220,39 @@ protected:
    * call writeImpl, passing through stream filters if any.
    */
   int64_t filteredWrite(const char* buffer, int64_t length);
-private:
-  char *m_buffer;
-  int64_t m_bufferSize;
 
+private:
   template<class ResourceList>
   String applyFilters(const String& buffer,
                       ResourceList& filters,
                       bool closing);
+
+protected:
+  int m_fd;      // file descriptor
+  bool m_isLocal; // is this on the local disk?
+  bool m_closed; // whether close() was called
+  bool m_nonblocking;
+
+  // fields useful for both reads and writes
+  bool m_eof;
+  int64_t m_position; // the current cursor position
+
+  // fields only useful for buffered reads
+  int64_t m_writepos; // where we have read from lower level
+  int64_t m_readpos;  // where we have given to upper level
+
+  std::string m_name;
+  std::string m_mode;
+
+  StringData* m_wrapperType;
+  StringData* m_streamType;
+  Resource m_streamContext;
+  smart::list<Resource> m_readFilters;
+  smart::list<Resource> m_writeFilters;
+
+private:
+  char *m_buffer;
+  int64_t m_bufferSize;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

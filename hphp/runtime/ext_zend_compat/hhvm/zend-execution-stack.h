@@ -35,7 +35,7 @@ struct ZendStackEntry {
 };
 
 struct ZendExecutionStack final : RequestEventHandler {
-  static zval* getArg(int i);
+  static zval** getArg(int i);
   static int numArgs();
 
   static void push(void* z);

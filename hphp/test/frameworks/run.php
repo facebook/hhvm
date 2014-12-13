@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?hh
 /*
  * This script allows us to more easily test the key OSS PHP frameworks

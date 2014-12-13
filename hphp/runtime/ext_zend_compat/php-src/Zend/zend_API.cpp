@@ -417,7 +417,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
         if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
           *p = NULL;
         } else {
-          not_implemented();
+          *p = arg;
         }
       }
       break;
@@ -574,22 +574,14 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
         *n_varargs = num_varargs;
 
-        /* Allocate space for the args. Zend already has single pointers
-         * persistently stored, and only needs to allocate space for the double
-         * pointers, but we need to allocate space for both.
-         *
-         * We need to allocate it in such a way that a single efree(varargs)
-         * in the caller will free all relevant memory. So we allocate a single
-         * block and then split it.
+        /* Allocate space for the args. We need to allocate it in such a way
+         * that a single efree(varargs) in the caller will free all relevant
+         * memory.
          */
-        zval *** double_ptrs = (zval***)safe_emalloc(num_varargs * 2,
-                                                     sizeof(void*), 0);
-        *varargs = double_ptrs;
-        zval ** single_ptrs = (zval**)(double_ptrs + num_varargs);
+        *varargs = (zval***)safe_emalloc(num_varargs, sizeof(void*), 0);
 
         for (iv = 0; iv < num_varargs; iv++) {
-          double_ptrs[iv] = &single_ptrs[iv];
-          single_ptrs[iv] = HPHP::ZendExecutionStack::getArg(i + iv);
+          (*varargs)[iv] = HPHP::ZendExecutionStack::getArg(i + iv);
         }
 
         /* adjust how many args we have left and restart loop */
@@ -602,8 +594,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
       }
     }
 
-    auto tmp = HPHP::ZendExecutionStack::getArg(i);
-    arg = &tmp;
+    arg = HPHP::ZendExecutionStack::getArg(i);
 
     if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
       /* clean up varargs array if it was used */
@@ -1485,12 +1476,12 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
   }
 
   HPHP::String sname(name, name_length, HPHP::CopyString);
-  bool visible, accessible;
-  auto tv = cls->getSProp(cls, sname.get(), visible, accessible);
-  if (!tv) {
-    return FAILURE;
-  }
-  HPHP::tvSetZval(value, tv);
+
+  auto const lookup = cls->getSProp(cls, sname.get());
+
+  if (!lookup.prop) return FAILURE;
+
+  HPHP::tvSetZval(value, lookup.prop);
   return SUCCESS;
 }
 
@@ -1638,12 +1629,13 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
     ctx = HPHP::Unit::lookupClass(scope_name.get());
   }
 
-  bool visible, accessible, unset;
-  auto ret = Z_OBJVAL_P(object)->zGetProp(ctx, prop_name.get(), visible, accessible, unset);
-  if (!accessible || unset) {
-    return nullptr;
-  }
-  return ret;
+  auto const lookup = Z_OBJVAL_P(object)->getProp(ctx, prop_name.get());
+  auto const prop = lookup.prop;
+
+  if (!lookup.accessible || prop->m_type == HPHP::KindOfUninit) return nullptr;
+
+  tvBox(prop);
+  return prop->m_data.pref;
 }
 
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, int name_length, zend_bool silent TSRMLS_DC) {
@@ -1655,12 +1647,10 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
     return nullptr;
   }
   HPHP::String sname(name, name_length, HPHP::CopyString);
-  bool visible, accessible;
-  auto ret = cls->zGetSProp(cls, sname.get(), visible, accessible);
-  if (!accessible || !visible) {
-    return nullptr;
-  }
-  return ret;
+
+  auto const lookup = cls->zGetSProp(cls, sname.get());
+
+  return (!lookup.prop || !lookup.accessible) ? nullptr : lookup.prop;
 }
 
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC) {

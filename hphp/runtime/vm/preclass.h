@@ -48,17 +48,14 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef hphp_hash_set<LowStringPtr,
-                      string_data_hash,
-                      string_data_isame> TraitNameSet;
+using TraitNameSet = hphp_hash_set<
+  LowStringPtr,
+  string_data_hash,
+  string_data_isame
+>;
 
-#ifdef USE_LOWPTR
-using BuiltinCtorFunction = LowPtr<ObjectData*(Class*), uint32_t>;
-using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*), uint32_t>;
-#else
-using BuiltinCtorFunction = LowPtr<ObjectData*(Class*), uintptr_t>;
-using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*), uintptr_t>;
-#endif
+using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
+using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
 
 /*
  * A PreClass represents the source-level definition of a PHP class, interface,
@@ -158,21 +155,24 @@ struct PreClass : AtomicCountable {
    */
   struct Const {
     Const(const StringData* name,
-          const StringData* typeConstraint,
-          const TypedValue& val,
+          const TypedValueAux& val,
           const StringData* phpCode);
 
     void prettyPrint(std::ostream&, const PreClass*) const;
 
-    const StringData* name()           const { return m_name; }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
-    const TypedValue& val()            const { return m_val; }
-    const StringData* phpCode()        const { return m_phpCode; }
+    const StringData* name()     const { return m_name; }
+    const TypedValueAux& val()   const { return m_val; }
+    const StringData* phpCode()  const { return m_phpCode; }
+    bool isAbstract()            const { return m_val.isAbstractConst(); }
+
+    template<class SerDe> void serde(SerDe& sd);
 
   private:
     LowStringPtr m_name;
-    LowStringPtr m_typeConstraint;
-    TypedValue m_val;
+    /* m_aux.u_isAbstractConst indicates an abstract constant. A TypedValue
+     * with KindOfUninit represents a constant whose value is not
+     * statically available (e.g. "const X = self::Y + 5;") */
+    TypedValueAux m_val;
     LowStringPtr m_phpCode;
   };
 

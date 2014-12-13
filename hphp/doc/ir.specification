@@ -308,7 +308,7 @@ about to be loaded, using a separate CheckRefInner instruction.
   integer to double.
 
 
-The following instructions deal with paramater coercion (the standard type
+The following instructions deal with parameter coercion (the standard type
 conversion for arguments to HNI functions). If parameter coercion fails these
 functions will throw a TVCoercion exception. They may throw other types of
 exceptions depending on how coercion is implemented.
@@ -317,7 +317,7 @@ exceptions depending on how coercion is implemented.
 
   Returns a new StkPtr that represents the same stack as S0, but with the slot
   at offset (in cells) converted to type T. May throw an exception in the case
-  of failed paramater coercion. The callee is f, and the position of the
+  of failed parameter coercion. The callee is f, and the position of the
   argument being coerced is argNum.
 
 | CoerceCellToBool<fn,argNum>, D(Bool), S(Cell), Er
@@ -343,11 +343,6 @@ exceptions depending on how coercion is implemented.
 
   If the value at S0 + S1 (in bytes) has type Uninit, branch to block B.
 
-| CheckDefinedClsEq<className,classPtr>, ND, NA, B|E
-
-  Compare the currently defined class of name `className' with `classPtr'; if
-  they aren't equal or if `className' is not defined, branch to block B.
-
 | CheckCold<TransID>, ND, NA, B|E
 
   Check if the counter associated with translation TransID is cold (i.e. within
@@ -361,8 +356,8 @@ exceptions depending on how coercion is implemented.
     S0 - function pointer for the frame
     S1 - num params expected in the func
     S2 - first bit to check, must be a multiple of 64
-    S3 - mask to check (RefDeps::Record::m_mask entires)
-    S4 - values to check (RefDeps::Record::m_vals entires)
+    S3 - mask to check (RefDeps::Record::m_mask entries)
+    S4 - values to check (RefDeps::Record::m_vals entries)
     S5 - Pointer to the current frame
     S6 - Pointer to the current VM stack
 
@@ -376,8 +371,8 @@ exceptions depending on how coercion is implemented.
     S0 - function pointer for the frame
     S1 - num params expected in the func
     S2 - first bit to check, must be a multiple of 64
-    S3 - mask to check (RefDeps::Record::m_mask entires)
-    S4 - values to check (RefDeps::Record::m_vals entires)
+    S3 - mask to check (RefDeps::Record::m_mask entries)
+    S4 - values to check (RefDeps::Record::m_vals entries)
 
   If any of the checks fail, branch to block B.
 
@@ -421,8 +416,6 @@ exceptions depending on how coercion is implemented.
 | MulDbl, D(Dbl), S(Dbl) S(Dbl), C
 
 | DivDbl, D(Dbl), S(Dbl) S(Dbl), B|C
-
-| Mod, D(Int), S(Int) S(Int), C
 
 | Sqrt, D(Dbl), S(Dbl), C
 
@@ -473,6 +466,9 @@ exceptions depending on how coercion is implemented.
   corresponding opcodes because they're handled at the bytecode level, to
   implement short-circuiting.)
 
+| Mod, D(Int), S(Int) S(Int), C
+
+  Compute S0 mod S1. If S1 is -1 or 0 the results are undefined.
 
 3. Type conversions
 
@@ -1229,12 +1225,6 @@ generating efficient compare-and-branch instruction sequences.
   Allocate a new array in the same mode as S0 and with expected capacity S1,
   unless S1 == 0, in which case the capacity is set to S0's size.
 
-| NewPackedArray, DArrPacked, S(StkPtr), E|PRc|CRc
-
-  Allocate a new array by taking the top size elements off the stack given by
-  S0. Note that this instruction assumes it can take the values from the stack
-  without increfing them.
-
 | AllocPackedArray<size>, DArrPacked, NA, E|PRc
 
   Allocate a new uninitialized packed array with space for size elements in it.
@@ -1926,7 +1916,7 @@ generating efficient compare-and-branch instruction sequences.
 
 | CreateSSWH, D(Obj), S(Cell), CRc|PRc
 
-  Call c_StaticWaitHandle::CreateSucceededVM.
+  Call c_StaticWaitHandle::CreateSucceeded.
 
 | AFWHPrepareChild, ND, S(FramePtr) S(Obj), E|Er
 
@@ -2392,7 +2382,14 @@ fields of that struct for holding intermediate values.
 
 |STK SetElem, DSetElem, S(PtrToGen) S(Cell) S(Cell), MElem|E|PRc|Er
 
-  Set element with key S1 in S0 to S2.
+  Set element with key S1 in S0 to S2. SetElem returns a Nullptr in the common
+  case, where the logical result of the hhbc SetM is its right hand side. In
+  the case of string bases, the SetM returns a new string containing the newly
+  inserted character. So the return value of this instruction is Nullptr unless
+  SetM needed to create a new counted string.
+
+  Furthermore, in the case of "invalid offsets", SetElem may throw an
+  InvalidSetMException (see discussion above).
 
 |STK SetWithRefElem, ND,
 |                    S(PtrToGen) S(Cell) S(PtrToGen) S(PtrToMISGen),
@@ -2542,15 +2539,11 @@ fields of that struct for holding intermediate values.
   Marks the end of a catch region and returns control to the unwinder. Exact
   behavior is implementation and architecture specific.
 
-| TryEndCatch, ND, S(FramePtr) S(StkPtr), E
-
-  Marks a potential end of a catch region and might return control to the
-  unwinder. Exact behavior is implementation and architecture specific.
-
 | UnwindCheckSideExit, ND, S(FramePtr) S(StkPtr), B|E
 
-  Branches to B if the currently executing catch region should return control to
-  the unwinder rather than side exiting.
+  Branches to B if the currently executing catch region should return control
+  to the unwinder rather than side exiting.  Used to control behavior in catch
+  traces for the InvalidSetMException and TVCoercionException situations.
 
 | LdUnwinderValue<T>, DParam, NA, PRc
 
@@ -2559,14 +2552,6 @@ fields of that struct for holding intermediate values.
 | DeleteUnwinderException, ND, NA, E
 
   Deletes the current unwinder exception.
-
-| TypeProfileFunc<paramIndex,functionName>, ND,
-|                                           S(Gen) S(Func),
-|                                           E
-
-  Profiles that function's parameter/return value for a particular parameter
-  index. Calls into native c++ function.
-
 
 /* Local Variables: */
 /* fill-column: 79 */

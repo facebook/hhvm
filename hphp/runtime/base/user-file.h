@@ -33,28 +33,35 @@ public:
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
 
+  virtual int fd() const;
+
   virtual bool open(const String& filename, const String& mode) {
     return openImpl(filename, mode, 0);
   }
   bool openImpl(const String& filename, const String& mode, int options);
-  virtual bool close();
-  virtual int64_t readImpl(char *buffer, int64_t length);
-  virtual int64_t writeImpl(const char *buffer, int64_t length);
-  virtual bool seekable() { return m_StreamSeek || m_Call; }
-  virtual bool seek(int64_t offset, int whence = SEEK_SET);
-  virtual int64_t tell();
-  virtual bool eof();
-  virtual bool rewind() { return seek(0, SEEK_SET); }
-  virtual bool flush();
-  virtual bool truncate(int64_t size);
-  virtual bool lock(int operation) {
+  bool close() override;
+  int64_t readImpl(char *buffer, int64_t length) override;
+  int64_t writeImpl(const char *buffer, int64_t length) override;
+  bool seekable() override { return m_StreamSeek || m_Call; }
+  bool seek(int64_t offset, int whence = SEEK_SET) override;
+  int64_t tell() override;
+  bool eof() override;
+  bool rewind() override { return seek(0, SEEK_SET); }
+  bool flush() override;
+  bool truncate(int64_t size) override;
+  bool lock(int operation) override {
     bool wouldBlock = false;
     return lock(operation, wouldBlock);
   }
-  virtual bool lock(int operation, bool &wouldBlock);
-  virtual bool stat(struct stat* buf);
+  bool lock(int operation, bool &wouldBlock) override;
+  bool stat(struct stat* buf) override;
 
-  virtual Variant getWrapperMetaData() { return Variant(m_obj); }
+  Object await(uint16_t events, double timeout) override {
+    throw Object(SystemLib::AllocExceptionObject(
+      "Userstreams do not support awaiting"));
+  }
+
+  Variant getWrapperMetaData() override { return Variant(m_obj); }
 
   int access(const String& path, int mode);
   int lstat(const String& path, struct stat* buf);
@@ -74,6 +81,7 @@ private:
   int urlStat(const String& path, struct stat* stat_sb, int flags = 0);
   bool flushImpl(bool strict);
   bool invokeMetadata(const Array& args, const char* funcName);
+  Resource invokeCast(int castas);
 
 protected:
   const Func* m_StreamOpen;
@@ -88,6 +96,7 @@ protected:
   const Func* m_StreamLock;
   const Func* m_StreamStat;
   const Func* m_StreamMetadata;
+  const Func* m_StreamCast;
   const Func* m_UrlStat;
   const Func* m_Unlink;
   const Func* m_Rename;

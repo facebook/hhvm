@@ -24,3 +24,18 @@ type hack_ty =
   | Hnullable of hack_ty
   | Harray of hack_ty option
   | Hvariadic of hack_ty
+
+let rec to_string = function
+  | Hstring -> "string"
+  | Hint -> "int"
+  | Hfloat -> "float"
+  | Hbool -> "bool"
+  | Hnum -> "num"
+  | Hmixed -> "mixed"
+  | Hvoid -> "void"
+  | Hresource -> "resource"
+  | Hclass s -> s
+  | Hnullable ty -> "?" ^ (to_string ty)
+  | Harray None -> "array"
+  | Harray (Some ty) -> "array<" ^ (to_string ty) ^ ">"
+  | Hvariadic ty -> "..." ^ (to_string ty)

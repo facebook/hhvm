@@ -15,72 +15,6 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-class Exception {
-  protected string $message;
-  // $code should be untyped, or mixed because subclasses use it as a
-  // string, the main example being PDOException
-  protected $code;
-  protected ?Exception $previous = null;
-  protected string $file;
-  protected int $line;
-  protected array $trace;
-
-  public function __construct (string $message = "", int $code = 0,
-                               ?Exception $previous = null) {}
-  public function getMessage(): string {}
-  final public function getPrevious(): Exception {}
-  public final function setPrevious(Exception $previous): void;
-  public function getCode(): int {}
-  final public function getFile(): string {}
-  final public function getLine(): int {}
-  final public function getTrace(): array {}
-  final public function getTraceAsString(): string {}
-  public function __toString(): string {}
-  final private function __clone(): void {}
-
-  public static function getTraceOptions() {}
-  public static function setTraceOptions($opts) {}
-}
-
-class LogicException extends Exception {
-}
-
-class BadFunctionCallException extends LogicException {
-}
-
-class BadMethodCallException extends BadFunctionCallException {
-}
-
-class DomainException extends LogicException {
-}
-
-class InvalidArgumentException extends LogicException {
-}
-
-class LengthException extends LogicException {
-}
-
-class OutOfRangeException extends LogicException {
-}
-
-class RuntimeException extends Exception {
-}
-
-class OutOfBoundsException extends RuntimeException {
-}
-
-class OverflowException extends RuntimeException {
-}
-
-class RangeException extends RuntimeException {
-}
-
-class UnderflowException extends RuntimeException {
-}
-
-class UnexpectedValueException extends RuntimeException {
-}
-
 final class AsyncGenerator<Tk, Tv, Ts> implements AsyncKeyedIterator<Tk, Tv> {
   public function next(): Awaitable<?(Tk, Tv)> {}
   public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}
@@ -111,6 +45,7 @@ abstract class WaitHandle<T> implements Awaitable<T> {
   public function isFailed(): bool {}
   public function getID(): int {}
   public function getName(): string {}
+  public function result() : T {}
   public function getExceptionIfFailed(): ?Exception {}
   public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
   public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}
@@ -194,6 +129,7 @@ final class ExternalThreadEventWaitHandle<T> extends WaitableWaitHandle<T> {
 /*
  * stdClass is not really final. However, because stdClass has no
  * properties of its own and is the result of casting an array to an
- * object, it is exempt from 'property must exist' checks.
+ * object, it is exempt from 'property must exist' checks and so should not
+ * be getting extended.
  */
 final class stdClass {}

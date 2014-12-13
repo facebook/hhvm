@@ -48,7 +48,7 @@ let rec is_option env ty =
       List.exists (is_option env) tyl
   | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tvar _
     | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tobject | Tshape _) -> false
+    | Tobject | Tshape _ | Taccess (_, _, _)) -> false
 
 (*****************************************************************************)
 (* Unification error *)
@@ -199,7 +199,7 @@ let is_array_as_tuple env ty =
       )
   | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
     | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
-    | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> false
+    | Tfun _ | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _, _)) -> false
 
 (*****************************************************************************)
 (* Adds a new field to all the shapes found in a given type.
@@ -262,3 +262,52 @@ end = struct
     end
   let check ty = visitor#on_type false ty
 end
+
+let rec expand_type_access env (reason, type_) =
+  match type_ with
+    | Taccess (root, (pos, tconst), rest) ->
+      let env, class_opt =
+        get_class_from_type env (reason, Tapply (root, [])) in
+      let env, tconst_ty_opt =
+        match class_opt with
+          | Some class_ -> Env.get_typeconst_type env class_ tconst
+          | None -> env, None
+      in
+      begin match tconst_ty_opt, rest with
+        | Some (_, Tapply (new_root, _)), hd :: tail ->
+          expand_type_access env (reason, Taccess (new_root, hd, tail))
+        | Some tconst_ty, [] ->
+          env, tconst_ty
+        | _, _ ->
+          (* TODO(dreeves): improve error messages, these are placeholders *)
+          begin match class_opt with
+            | None ->
+                Errors.unbound_name_typing (fst root) (snd root)
+            | Some class_ ->
+                let class_pname = (class_.tc_pos, class_.tc_name) in
+                Errors.smember_not_found `class_typeconst pos class_pname tconst `no_hint
+          end;
+          env, (Reason.none, Tany)
+      end
+    | _ -> env, (reason, type_)
+
+(* Retrieves the class name for a given type. This is recursive because if
+ * we have a name that refers to a typedef then we will need expand the typedef.
+ * For example:
+ *
+ * class Foo {};
+ * type Bar = Foo;
+ *)
+and get_class_from_type env (reason, type_) =
+  match type_ with
+    | Tapply ((_, name), argl) when Env.is_typedef env name ->
+      let env, ty = expand_typedef env reason name argl in
+      get_class_from_type env ty
+    | Tapply ((_, class_name), _) ->
+      Env.get_class env class_name
+    | Tabstract (_, _, Some constraint_type) ->
+        get_class_from_type env constraint_type
+    | Tany | Tmixed | Tarray (_, _) | Tgeneric (_, _) | Toption _ | Tprim _
+    | Tvar _ | Tfun _ | Tabstract (_, _, _) | Ttuple _ | Taccess (_, _, _)
+    | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _ ->
+        env, None

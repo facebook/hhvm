@@ -85,6 +85,20 @@ UNSUPPORTED_FILES_UNPARSER = {
         'xhpchild_implicit_return.php',
         'xhp_colon.php',
         'xhp_disallowed.php',
+        'xhp_attr_1.php',
+        'xhp_attr_2.php',
+        'xhp_attr_3.php',
+        'xhp_attr_4.php',
+        'xhp_attr_5.php',
+        'xhp_attr_6.php',
+        'xhp_attr_7.php',
+        'xhp_attr_8.php',
+        'xhp_attr_9.php',
+        'xhp_attr_10.php',
+        'xhp_attr_11.php',
+    ],
+    "XhpAttr": [
+        'lexing_stack_fail.php',
     ],
     "Xml": [
         'attr_children.php',
@@ -104,7 +118,17 @@ UNSUPPORTED_FILES_UNPARSER = {
         'unpack_call5.php',
         'unpack_call6.php',
         'unpack_call7.php',
-    ]
+    ],
+    "TypeConst": [
+        'tconst/abstract_type_in_concrete_class.php',
+        'tconst/access_expand_error_1.php',
+        'tconst/bad_input_type.php',
+        'tconst/cannot_assign_tparam1.php',
+        'tconst/cannot_override_tconst.php',
+        'tconst/cannot_use_class_tparams.php',
+        'tconst/good_tconst_decl.php',
+        'tconst/unassigned_tconst.php',
+    ],
 }
 
 UNSUPPORTED_FILES_CONVERTER = {

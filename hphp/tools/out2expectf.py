@@ -6,6 +6,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import re
 import sys
+import os
+import inspect
+
+self = os.path.abspath(inspect.getfile(inspect.currentframe()))
+root = os.path.dirname(os.path.dirname(os.path.dirname(self)))
+root_re = re.escape(root)
 
 for test in sys.argv[1:]:
     if not test.endswith('.php'):
@@ -27,10 +33,12 @@ for test in sys.argv[1:]:
         continue
 
     # try to do relative paths
-    data = re.sub('string\(\d+\) "(#\d+) /[^ ]*/hphp', r'string(%d) "\1 %s',
+    data = re.sub('string\(\d+\) "(#\d+) ' + root_re + '(/hphp)?',
+                  r'string(%d) "\1 %s',
                   data)
-    data = re.sub('string\(\d+\) "/[^ ]*/hphp', r'string(%d) "%s', data)
-    data = re.sub('/[^ ]*/hphp', '%s', data)
+    data = re.sub('string\(\d+\) "' + root_re + '(/hphp)?',
+                  r'string(%d) "%s', data)
+    data = re.sub(root_re + '(/hphp)?', '%s', data)
 
     # The debugger prints the path given on the command line, which is often
     # relative. All such debugger tests live under something/debugger/foo.php.

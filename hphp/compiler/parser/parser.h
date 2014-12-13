@@ -30,6 +30,7 @@
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/util/logger.h"
+#include "hphp/parser/parse-time-fatal-exception.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS

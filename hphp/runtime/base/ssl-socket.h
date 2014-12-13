@@ -30,8 +30,7 @@ namespace HPHP {
 /**
  * TCP sockets running SSL protocol.
  */
-class SSLSocket : public Socket {
-public:
+struct SSLSocket : Socket {
   enum class CryptoMethod {
     ClientSSLv2,
     ClientSSLv3,
@@ -48,7 +47,6 @@ public:
   static SSLSocket *Create(int fd, int domain, const HostURL &hosturl,
                            double timeout);
 
-public:
   SSLSocket();
   SSLSocket(int sockfd, int type, const char *address = nullptr, int port = 0);
   virtual ~SSLSocket();
@@ -71,18 +69,6 @@ public:
   Array &getContext() { return m_context;}
 
 private:
-  Array m_context;
-
-  SSL *m_handle;
-  bool m_ssl_active;
-  CryptoMethod m_method;
-  bool m_client;
-
-  double m_connect_timeout;
-  bool m_enable_on_connect;
-  bool m_state_set;
-  bool m_is_blocked;
-
   bool closeImpl();
   bool handleError(int64_t nr_bytes, bool is_init);
 
@@ -92,6 +78,18 @@ private:
   SSL *createSSL(SSL_CTX *ctx);
   bool applyVerificationPolicy(X509 *peer);
 
+private:
+  bool m_ssl_active{false};
+  bool m_client{false};
+  bool m_enable_on_connect{false};
+  bool m_state_set{false};
+  bool m_is_blocked{true};
+  Array m_context;
+  SSL *m_handle{nullptr};
+  CryptoMethod m_method{(CryptoMethod)-1};
+  double m_connect_timeout{0};
+
+private:
   static Mutex s_mutex;
   static int s_ex_data_index;
 };
@@ -106,10 +104,6 @@ public:
   ~Certificate() {
     if (m_cert) X509_free(m_cert);
   }
-  void sweep() override {
-    // calls delete this
-    SweepableResourceData::sweep();
-  }
 
   X509* get() {
     return m_cert;
@@ -118,6 +112,8 @@ public:
   CLASSNAME_IS("OpenSSL X.509")
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
+
+  DECLARE_RESOURCE_ALLOCATION(Certificate)
 
   /**
    * Given a variant, coerce it into an X509 object. It can be:

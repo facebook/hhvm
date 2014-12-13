@@ -3,7 +3,6 @@
 var_dump(ini_get("hhvm.allow_hhas"));
 var_dump(ini_get("hhvm.jit_timer"));
 var_dump(ini_get("hhvm.simulate_arm"));
-var_dump(ini_get("hhvm.jit_type_prediction"));
 var_dump(ini_get("hhvm.gdb_sync_chunks"));
 var_dump(ini_get("hhvm.server.apc.ttl_limit"));
 

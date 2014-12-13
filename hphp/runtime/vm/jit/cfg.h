@@ -140,23 +140,22 @@ namespace detail {
       // printing debug information, so we want to handle invalid Blocks
       // gracefully.
       if (!block->empty()) {
-        // If we're not cold but exactly one our successors is, we visit that
-        // one first so it appears as late as possible in an RPO
-        // sort. Otherwise we visit taken first so next appears before it when
-        // RPO sorted. Note that these are just heuristics; all possible
-        // outcomes are valid post-order traversals and should not affect
-        // correctness.
+        // If we're not cold but we have two successors and exactly one of them
+        // is cold, we visit the cold one last so it appears as early as
+        // possible in an RPO sort. This causes better memory usage patterns in
+        // traces with lots of exit blocks in certain optimization passes. Note
+        // that these are just heuristics; all possible outcomes are valid
+        // post-order traversals and should not affect correctness.
 
         auto next = block->next();
         auto taken = block->taken();
-        auto coldSuccs = (next && cold(next)) + (taken && cold(taken));
-        if (!cold(block) && coldSuccs == 1) {
-          if (next && cold(next)) {
-            walk(next);
-            next = nullptr;
-          } else if (taken && cold(taken)) {
+        if (!cold(block) && next && taken && (cold(next) ^ cold(taken))) {
+          if (cold(next)) {
             walk(taken);
             taken = nullptr;
+          } else {
+            walk(next);
+            next = nullptr;
           }
         }
 

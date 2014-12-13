@@ -176,9 +176,7 @@ bool check_invariants(const FrameState& state) {
 
 }
 
-FrameStateMgr::FrameStateMgr(const IRUnit& unit, BCMarker marker)
-  : m_visited(unit.numBlocks())
-{
+FrameStateMgr::FrameStateMgr(const IRUnit& unit, BCMarker marker) {
   m_stack.push_back(FrameState{});
   cur().curFunc = marker.func();
   cur().spOffset = marker.spOff();
@@ -193,6 +191,24 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   auto changed = false;
 
   if (auto const taken = inst->taken()) {
+    /*
+     * TODO(#4323657): we should make this assertion for all non-empty blocks
+     * (exits in addition to catches).  It would fail right now for exit
+     * traces.
+     *
+     * If you hit this assertion: you've created a catch block and then
+     * modified tracked state, then generated a potentially exception-throwing
+     * instruction using that catch block as a target.  This is not allowed.
+     */
+    if (debug && m_status == Status::Building && taken->isCatch()) {
+      auto const tmp = save(taken);
+      always_assert_flog(
+        !tmp,
+        "catch block B{} had non-matching in state",
+        taken->id()
+      );
+    }
+
     // When we're building the IR, we append a conditional jump after
     // generating its target block: see emitJmpCondHelper, where we
     // call makeExit() before gen(JmpZero).  It doesn't make sense to
@@ -258,6 +274,27 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().spValue = inst->dst();
     break;
 
+  case EndCatch:
+    /*
+     * Hitting this means we've messed up with syncing the stack in a catch
+     * trace.  If the stack isn't clean or doesn't match the marker's spOffset,
+     * the unwinder won't see what we expect.
+     */
+    always_assert_flog(
+      cur().spOffset == inst->marker().spOff() &&
+      cur().stackDeficit == 0 &&
+      cur().evalStack.size() == 0,
+      "EndCatch stack didn't seem right:\n"
+      "                 spOff: {}\n"
+      "        marker's spOff: {}\n"
+      "  eval stack def, size: {}, {}\n",
+      cur().spOffset,
+      inst->marker().spOff(),
+      cur().stackDeficit,
+      cur().evalStack.size()
+    );
+    break;
+
   case SpillStack: {
     cur().spValue = inst->dst();
     // Push the spilled values but adjust for the popped values
@@ -285,13 +322,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case CheckCtxThis:
     cur().thisAvailable = true;
-    break;
-
-  case DefLabel:
-    if (inst->numDsts() > 0) {
-      auto dst0 = inst->dst(0);
-      if (dst0->isA(Type::StkPtr)) cur().spValue = dst0;
-    }
     break;
 
   default:
@@ -338,24 +368,10 @@ bool FrameStateMgr::hasStateFor(Block* block) const {
   return m_states.count(block);
 }
 
-Block* FrameStateMgr::findUnprocessedPred(Block* block) const {
-  for (auto const& edge : block->preds()) {
-    auto const pred = edge.from();
-    if (!isVisited(pred)) return pred;
-  }
-  return nullptr;
-}
-
-SSATmp* FrameStateMgr::spLeavingBlock(Block* b) const {
-  auto it = m_states.find(b);
-  assert(it != m_states.end());
-  assert(!it->second.out.empty());
-  return it->second.out.back().spValue;
-}
-
 void FrameStateMgr::startBlock(Block* block,
                                BCMarker marker,
                                bool isLoopHeader /* = false */) {
+  ITRACE(3, "FrameStateMgr::startBlock: {}\n", block->id());
   assert(m_status != Status::None);
   auto const it = m_states.find(block);
   auto const end = m_states.end();
@@ -365,18 +381,20 @@ void FrameStateMgr::startBlock(Block* block,
   assert(IMPLIES(block->numPreds() > 0, predsAllowed));
 
   if (it != end) {
+    if (m_status == Status::Building) {
+      always_assert_flog(
+        block->empty(),
+        "tried to startBlock a non-empty block while building\n"
+      );
+    }
     ITRACE(4, "Loading state for B{}: {}\n", block->id(), show(*this));
     m_stack = it->second.in;
     if (m_stack.empty()) {
-      /*
-       * TODO(#4323657): In situations like catch or exit traces, we will call
-       * startBlock after pausing whatever block we had been working on, which
-       * will leave the catch with no in state.  And in fact we don't really
-       * know what its in-state should be because we don't have any
-       * information.  But this is pretty dangerous right now, because we're
-       * starting with things like spValue as null.
-       */
-      m_stack.push_back(FrameState{});
+      always_assert_flog(0, "invalid startBlock for B{}", block->id());
+    }
+  } else {
+    if (m_status == Status::Building) {
+      if (debug) save(block);
     }
   }
   assert(!m_stack.empty());
@@ -385,39 +403,30 @@ void FrameStateMgr::startBlock(Block* block,
   // fixed-point.
   if (m_status == Status::RunningFixedPoint) return;
 
-  // Reset state if the block has an unprocessed predecessor.
-  if (isLoopHeader || findUnprocessedPred(block)) {
+  // Reset state if the block is the target of a back edge.
+  if (isLoopHeader) {
     Indent _;
-    ITRACE(4, "B{} has unprocessed predecessor, resetting state\n",
-           block->id());
+    ITRACE(4, "B{} is a loop header; resetting state\n", block->id());
     loopHeaderClear(marker);
   }
-
-  markVisited(block);
 }
 
 bool FrameStateMgr::finishBlock(Block* block) {
   assert(block->back().isTerminal() == !block->next());
-
-  auto& old = m_states[block].out;
-  const auto& snap = m_stack;
-  auto changed = old != snap;
-  old = snap;
-
+  auto changed = false;
   if (!block->back().isTerminal()) changed |= save(block->next());
-
   return changed;
 }
 
 void FrameStateMgr::pauseBlock(Block* block) {
   // Note: this can't use std::move, because pauseBlock must leave the current
-  // state alone.
-  m_states[block].out = m_stack;
+  // state alone so startBlock can use it as the in state for another block.
+  m_states[block].paused = m_stack;
 }
 
 void FrameStateMgr::unpauseBlock(Block* block) {
   assert(hasStateFor(block));
-  m_stack = m_states[block].out;
+  m_stack = *m_states[block].paused;
 }
 
 /*
@@ -458,13 +467,6 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   // ActRec being allocated.
   cur().spOffset = savedSPOff;
   cur().spValue = savedSP;
-
-  auto const stackValues = collectStackValues(cur().spValue,
-                                              cur().spOffset);
-  for (DEBUG_ONLY auto& val : stackValues) {
-    ITRACE(4, "    marking caller stack value available: {}\n",
-           val->toString());
-  }
 
   /*
    * Push a new state for the inlined callee.
@@ -507,8 +509,17 @@ bool FrameStateMgr::checkInvariants() const {
  * must be the same, so it is not cleared.
  */
 void FrameStateMgr::loopHeaderClear(BCMarker marker) {
-  cur().spValue        = nullptr;
+  /*
+   * Important note: we're setting our tracked spOffset to the marker spOffset.
+   * These two spOffsets have different meanings.  One is the offset for the
+   * last StkPtr, and one is the logical offset for the hhbc stack machine.
+   *
+   * For loops, since we're only supporting fully-sync'd stacks this is ok for
+   * now.  The distinction between the kinds of spOffsets will go away after we
+   * stop threading stack pointers.
+   */
   cur().spOffset       = marker.spOff();
+  cur().spValue        = nullptr;
   cur().curFunc        = marker.func();
   cur().stackDeficit   = 0;
   cur().evalStack      = EvalStack();
@@ -601,7 +612,8 @@ void FrameStateMgr::clearLocals() {
 void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
   always_assert(id < cur().locals.size());
   cur().locals[id].value = value;
-  cur().locals[id].type = value ? value->type() : Type::Gen;
+  auto const newType = value ? value->type() : Type::Gen;
+  cur().locals[id].type = newType;
 
   /*
    * Update the predicted type for boxed values in some special cases to
@@ -626,9 +638,16 @@ void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
     return cur().locals[id].type;  // just predict what we know
   }();
 
-  FTRACE(3, "setLocalValue setting prediction {} to {}\n",
-    id, newInnerPred);
-  cur().locals[id].predictedType = newInnerPred;
+  // We need to make sure not to violate the invariant that predictedType is
+  // always <= type.  Note that operator& can be conservative (it could just
+  // return one of the two types in situations relating to specialized types we
+  // can't represent), so it's necessary to double check.
+  auto const rawIsect = newType & newInnerPred;
+  auto const useTy = rawIsect <= newType ? rawIsect : newType;
+
+  FTRACE(3, "setLocalValue setting prediction {} based on {}, using = {}\n",
+    id, newInnerPred, useTy);
+  cur().locals[id].predictedType = useTy;
 
   cur().locals[id].typeSrcs.clear();
   if (value) {
@@ -652,10 +671,12 @@ void FrameStateMgr::refineLocalType(uint32_t id,
 void FrameStateMgr::predictLocalType(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
   auto& local = cur().locals[id];
-  always_assert(type <= local.type);
   ITRACE(2, "updating local {}'s type prediction: {} -> {}\n",
-    id, local.predictedType, type);
-  local.predictedType = type;
+    id, local.predictedType, type & local.type);
+  local.predictedType = type & local.type;
+  if (!(local.predictedType <= local.type)) {
+    local.predictedType = local.type;
+  }
 }
 
 void FrameStateMgr::setLocalType(uint32_t id, Type type) {
@@ -718,7 +739,7 @@ void FrameStateMgr::refineLocalValues(SSATmp* oldVal, SSATmp* newVal) {
       if (!local.value || canonical(local.value) != canonical(oldVal)) {
         continue;
       }
-      ITRACE(2, "refining local {}'s ({}) value: {} -> {}\n",
+      ITRACE(2, "refining local {}'s value: {} -> {}\n",
              id, *local.value, *newVal);
       local.value = newVal;
       local.type = newVal->type();
@@ -756,19 +777,6 @@ void FrameStateMgr::dropLocalRefsInnerTypes() {
       }
     }
   }
-}
-
-void FrameStateMgr::markVisited(const Block* b) {
-  // The number of blocks in the unit can change over time.
-  if (b->id() >= m_visited.size()) {
-    m_visited.resize(b->id() + 1);
-  }
-
-  m_visited.set(b->id());
-}
-
-bool FrameStateMgr::isVisited(const Block* b) const {
-  return b->id() < m_visited.size() && m_visited.test(b->id());
 }
 
 //////////////////////////////////////////////////////////////////////

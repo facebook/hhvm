@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 
 namespace HPHP { namespace jit {
 
@@ -59,6 +60,11 @@ void local_effects(const FrameStateMgr& frameState,
 
     case LdLoc:
       hook.setLocalValue(inst->extra<LdLoc>()->locId, inst->dst());
+      break;
+
+    case StLocPseudoMain:
+      hook.predictLocalType(inst->extra<LocalId>()->locId,
+                            inst->src(1)->type());
       break;
 
     case AssertLoc:

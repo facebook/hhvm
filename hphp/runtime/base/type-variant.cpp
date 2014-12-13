@@ -244,6 +244,9 @@ Variant::~Variant() {
   if (IS_REFCOUNTED_TYPE(m_type)) {
     tvDecRefHelper(m_type, uint64_t(m_data.pref));
   }
+  if (debug) {
+    memset(this, 0x7b, sizeof(*this));
+  }
 }
 
 void tvDecRefHelper(DataType type, uint64_t datum) {
@@ -430,7 +433,7 @@ bool Variant::toBooleanHelper() const {
     case KindOfStaticString:
     case KindOfString:        return m_data.pstr->toBoolean();
     case KindOfArray:         return !m_data.parr->empty();
-    case KindOfObject:        return m_data.pobj->o_toBoolean();
+    case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->o_toBoolean();
     case KindOfRef:           return m_data.pref->var()->toBoolean();
     case KindOfClass:         break;
@@ -449,7 +452,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfStaticString:
     case KindOfString:        return m_data.pstr->toInt64(base);
     case KindOfArray:         return m_data.parr->empty() ? 0 : 1;
-    case KindOfObject:        return m_data.pobj->o_toInt64();
+    case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->o_toInt64();
     case KindOfRef:           return m_data.pref->var()->toInt64(base);
     case KindOfClass:         break;
@@ -467,7 +470,7 @@ double Variant::toDoubleHelper() const {
     case KindOfStaticString:
     case KindOfString:        return m_data.pstr->toDouble();
     case KindOfArray:         return (double)toInt64();
-    case KindOfObject:        return m_data.pobj->o_toDouble();
+    case KindOfObject:        return m_data.pobj->toDouble();
     case KindOfResource:      return m_data.pres->o_toDouble();
     case KindOfRef:           return m_data.pref->var()->toDouble();
     case KindOfClass:         break;
@@ -525,7 +528,7 @@ Array Variant::toArrayHelper() const {
     case KindOfStaticString:
     case KindOfString:        return Array::Create(m_data.pstr);
     case KindOfArray:         return Array(m_data.parr);
-    case KindOfObject:        return m_data.pobj->o_toArray();
+    case KindOfObject:        return m_data.pobj->toArray();
     case KindOfResource:      return m_data.pres->o_toArray();
     case KindOfRef:           return m_data.pref->var()->toArray();
     case KindOfClass:         break;
@@ -780,16 +783,17 @@ void Variant::serialize(VariableSerializer *serializer,
   not_reached();
 }
 
-static void unserializeProp(VariableUnserializer *uns,
-                            ObjectData *obj, const String& key,
-                            Class* ctx, const String& realKey,
+static void unserializeProp(VariableUnserializer* uns,
+                            ObjectData* obj,
+                            const String& key,
+                            Class* ctx,
+                            const String& realKey,
                             int nProp) {
   // Do a two-step look up
-  bool visible, accessible, unset;
-  auto t = &tvAsVariant(obj->getProp(ctx, key.get(),
-                                     visible, accessible, unset));
-  assert(!unset);
-  if (!t || !accessible) {
+  auto const lookup = obj->getProp(ctx, key.get());
+  Variant* t;
+
+  if (!lookup.prop || !lookup.accessible) {
     // Dynamic property. If this is the first, and we're using MixedArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
@@ -797,6 +801,8 @@ static void unserializeProp(VariableUnserializer *uns,
     // TODO(#2881866): this assumption means we can't do reallocations
     // when promoting kPackedKind -> kMixedKind.
     t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
+  } else {
+    t = &tvAsVariant(lookup.prop);
   }
 
   t->unserialize(uns);
@@ -1207,7 +1213,7 @@ void Variant::unserialize(VariableUnserializer *uns,
 
       if (!obj->instanceof(SystemLib::s_SerializableClass)) {
         raise_warning("Class %s has no unserializer",
-                      obj->o_getClassName().data());
+                      obj->getClassName().data());
       } else {
         obj->o_invoke_few_args(s_unserialize, 1, serialized);
         obj.get()->clearNoDestruct();

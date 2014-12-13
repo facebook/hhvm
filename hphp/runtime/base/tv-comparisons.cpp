@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 namespace HPHP {
 
@@ -83,7 +83,7 @@ bool cellRelOp(Op op, Cell cell, int64_t val) {
     case KindOfObject:
       return cell.m_data.pobj->isCollection()
         ? op.collectionVsNonObj()
-        : op(cell.m_data.pobj->o_toInt64(), val);
+        : op(cell.m_data.pobj->toInt64(), val);
 
     case KindOfResource:
       return op(cell.m_data.pres->o_toInt64(), val);
@@ -127,7 +127,7 @@ bool cellRelOp(Op op, Cell cell, double val) {
     case KindOfObject:
       return cell.m_data.pobj->isCollection()
         ? op.collectionVsNonObj()
-        : op(cell.m_data.pobj->o_toDouble(), val);
+        : op(cell.m_data.pobj->toDouble(), val);
 
     case KindOfResource:
       return op(cell.m_data.pres->o_toDouble(), val);
@@ -245,15 +245,15 @@ bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
       return op(false, true);
 
     case KindOfBoolean:
-      return op(!!cell.m_data.num, od->o_toBoolean());
+      return op(!!cell.m_data.num, od->toBoolean());
 
     case KindOfInt64:
       return od->isCollection() ? op.collectionVsNonObj()
-                                : op(cell.m_data.num, od->o_toInt64());
+                                : op(cell.m_data.num, od->toInt64());
 
     case KindOfDouble:
       return od->isCollection() ? op.collectionVsNonObj()
-                                : op(cell.m_data.dbl, od->o_toDouble());
+                                : op(cell.m_data.dbl, od->toDouble());
 
     case KindOfStaticString:
     case KindOfString: {
@@ -394,7 +394,7 @@ struct Eq {
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return c_DateTime::GetTimestamp(od1) == c_DateTime::GetTimestamp(od2);
+      return DateTimeData::getTimestamp(od1) == DateTimeData::getTimestamp(od2);
     }
     if (od1->getVMClass() != od2->getVMClass()) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_ArrayObjectClass))) {
@@ -409,8 +409,8 @@ struct Eq {
       // First comparison already proves they are different
       return false;
     }
-    Array ar1(od1->o_toArray());
-    Array ar2(od2->o_toArray());
+    auto ar1 = od1->toArray();
+    auto ar2 = od2->toArray();
     return ar1->equal(ar2.get(), false);
   }
 
@@ -444,13 +444,13 @@ struct Lt {
     if (od1 == od2) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return c_DateTime::GetTimestamp(od1) < c_DateTime::GetTimestamp(od2);
+      return DateTimeData::getTimestamp(od1) < DateTimeData::getTimestamp(od2);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
       return false;
     }
-    Array ar1(od1->o_toArray());
-    Array ar2(od2->o_toArray());
+    auto ar1 = od1->toArray();
+    auto ar2 = od2->toArray();
     return (*this)(ar1.get(), ar2.get());
   }
 
@@ -487,13 +487,13 @@ struct Gt {
     if (od1 == od2) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return c_DateTime::GetTimestamp(od1) > c_DateTime::GetTimestamp(od2);
+      return DateTimeData::getTimestamp(od1) > DateTimeData::getTimestamp(od2);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
       return false;
     }
-    Array ar1(od1->o_toArray());
-    Array ar2(od2->o_toArray());
+    auto ar1 = od1->toArray();
+    auto ar2 = od2->toArray();
     return (*this)(ar1.get(), ar2.get());
   }
 

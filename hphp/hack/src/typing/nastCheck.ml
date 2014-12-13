@@ -269,7 +269,7 @@ and hint env (p, h) =
   hint_ env p h
 
 and hint_ env p = function
-  | Hany  | Hmixed  | Habstr _ | Hprim _ ->
+  | Hany  | Hmixed  | Habstr _ | Hprim _  | Haccess _ ->
       ()
   | Harray (ty1, ty2) ->
       maybe hint env ty1;
@@ -330,6 +330,7 @@ and class_ tenv c =
   liter hint env c.c_extends;
   liter hint env c.c_implements;
   liter class_const env c.c_consts;
+  liter typeconst (env, c.c_tparams) c.c_typeconsts;
   liter class_var env c.c_static_vars;
   liter class_var env c.c_vars;
   liter method_ (env, true) c.c_static_methods;
@@ -433,8 +434,51 @@ and class_const env (h, _, e) =
   maybe hint env h;
   expr env e
 
+and typeconst (env, class_tparams) tconst =
+  maybe hint env tconst.c_tconst_type;
+  (* need to ensure that tconst.c_tconst_type is not Habstr *)
+  maybe check_no_class_tparams class_tparams tconst.c_tconst_type
+
+(* Check to make sure we are not using class type params for type const decls *)
+and check_no_class_tparams class_tparams (pos, ty)  =
+  let check_tparams = check_no_class_tparams class_tparams in
+  let maybe_check_tparams = maybe check_no_class_tparams class_tparams in
+  let matches_class_tparam tp_name =
+    List.iter begin fun (_, (c_tp_pos, c_tp_name), _) ->
+      if c_tp_name = tp_name
+      then Errors.typeconst_depends_on_external_tparam pos c_tp_pos c_tp_name
+    end class_tparams in
+  match ty with
+    | Hany | Hmixed | Hprim _ -> ()
+    (* We have found a type parameter. Make sure its name does not match
+     * a name in class_tparams *)
+    | Habstr (tparam_name, ty_) ->
+        maybe_check_tparams ty_;
+        matches_class_tparam tparam_name
+    | Harray (ty1, ty2) ->
+        maybe_check_tparams ty1;
+        maybe_check_tparams ty2
+    | Htuple tyl -> List.iter check_tparams tyl
+    | Hoption ty_ -> check_tparams ty_
+    | Hfun (tyl, _, ty_) ->
+        List.iter check_tparams tyl;
+        check_tparams ty_
+    | Happly (_, tyl) -> List.iter check_tparams tyl
+    | Hshape fdl -> ShapeMap.iter (fun _ v -> check_tparams v) fdl
+    | Haccess ((_, root_name), _, _) ->
+        matches_class_tparam root_name
+
 and class_var env cv =
-  maybe hint env cv.cv_type;
+  let hint_env =
+    (* If this is an XHP attribute and we're in strict mode,
+       relax to partial mode to allow the use of generic
+       classes without specifying type parameters. This is
+       a temporary hack to support existing code for now. *)
+    (* Task #5815945: Get rid of this Hack *)
+    if cv.cv_is_xhp && (Typing_env.is_strict env.tenv)
+      then { env with tenv = Typing_env.set_mode env.tenv Ast.Mpartial }
+      else env in
+  maybe hint hint_env cv.cv_type;
   maybe expr env cv.cv_expr;
   ()
 

@@ -37,7 +37,7 @@ namespace HPHP {
 
 ZendPack::ZendPack() {
   int machine_endian_check = 1;
-  int i;
+  int64_t i;
 
   machine_little_endian = ((char *)&machine_endian_check)[0];
 
@@ -68,14 +68,39 @@ ZendPack::ZendPack() {
     little_endian_int32_map[1] = 1;
     little_endian_int32_map[2] = 2;
     little_endian_int32_map[3] = 3;
+
+    machine_endian_int64_map[0] = 0;
+    machine_endian_int64_map[1] = 1;
+    machine_endian_int64_map[2] = 2;
+    machine_endian_int64_map[3] = 3;
+    machine_endian_int64_map[4] = 4;
+    machine_endian_int64_map[5] = 5;
+    machine_endian_int64_map[6] = 6;
+    machine_endian_int64_map[7] = 7;
+    big_endian_int64_map[0] = 7;
+    big_endian_int64_map[1] = 6;
+    big_endian_int64_map[2] = 5;
+    big_endian_int64_map[3] = 4;
+    big_endian_int64_map[4] = 3;
+    big_endian_int64_map[5] = 2;
+    big_endian_int64_map[6] = 1;
+    big_endian_int64_map[7] = 0;
+    little_endian_int64_map[0] = 0;
+    little_endian_int64_map[1] = 1;
+    little_endian_int64_map[2] = 2;
+    little_endian_int64_map[3] = 3;
+    little_endian_int64_map[4] = 4;
+    little_endian_int64_map[5] = 5;
+    little_endian_int64_map[6] = 6;
+    little_endian_int64_map[7] = 7;
   } else {
-    int size = sizeof(int32_t);
+    int64_t size = sizeof(int64_t);
 
     /* Where to get hi to lo bytes from */
     byte_map[0] = size - 1;
 
     for (i = 0; i < (int)sizeof(int); i++) {
-      int_map[i] = size - (sizeof(int) - i);
+      int_map[i] = size - (sizeof(int64_t) - i);
     }
 
     machine_endian_short_map[0] = size - 2;
@@ -97,21 +122,47 @@ ZendPack::ZendPack() {
     little_endian_int32_map[1] = size - 2;
     little_endian_int32_map[2] = size - 3;
     little_endian_int32_map[3] = size - 4;
+
+    machine_endian_int64_map[0] = size - 8;
+    machine_endian_int64_map[1] = size - 7;
+    machine_endian_int64_map[2] = size - 6;
+    machine_endian_int64_map[3] = size - 5;
+    machine_endian_int64_map[4] = size - 4;
+    machine_endian_int64_map[5] = size - 3;
+    machine_endian_int64_map[6] = size - 2;
+    machine_endian_int64_map[7] = size - 1;
+    big_endian_int64_map[0] = size - 8;
+    big_endian_int64_map[1] = size - 7;
+    big_endian_int64_map[2] = size - 6;
+    big_endian_int64_map[3] = size - 5;
+    big_endian_int64_map[4] = size - 4;
+    big_endian_int64_map[5] = size - 3;
+    big_endian_int64_map[6] = size - 2;
+    big_endian_int64_map[7] = size - 1;
+    little_endian_int64_map[0] = size - 1;
+    little_endian_int64_map[1] = size - 2;
+    little_endian_int64_map[2] = size - 3;
+    little_endian_int64_map[3] = size - 4;
+    little_endian_int64_map[4] = size - 5;
+    little_endian_int64_map[5] = size - 6;
+    little_endian_int64_map[6] = size - 7;
+    little_endian_int64_map[7] = size - 8;
   }
 }
 
-void ZendPack::pack(const Variant& val, int size, int *map, char *output) {
-  int32_t n = val.toInt32();
+void ZendPack::pack(const Variant& val, int64_t size, int64_t *map,
+                    char *output) {
+  int64_t n = val.toInt64();
   char *v = (char*)&n;
-  for (int i = 0; i < size; i++) {
+  for (int64_t i = 0; i < size; i++) {
     *output++ = v[map[i]];
   }
 }
 
 Variant ZendPack::pack(const String& fmt, const Array& argv) {
   /* Preprocess format into formatcodes and formatargs */
-  TinyVector<char, 32> formatcodes; // up to 32 codes on the stack
-  TinyVector<int, 32> formatargs;
+  TinyVector<char, 64> formatcodes; // up to 64 codes on the stack
+  TinyVector<int, 64> formatargs;
   int argc = argv.size();
 
   const char *format = fmt.c_str();
@@ -173,6 +224,10 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
       break;
 
       /* Use as many args as specified */
+    case 'q':
+    case 'Q':
+    case 'J':
+    case 'P':
     case 'c':
     case 'C':
     case 's':
@@ -250,6 +305,12 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'N':
     case 'V':
       INC_OUTPUTPOS(arg,4);    /* 32 bit per arg */
+      break;
+    case 'q':
+    case 'Q':
+    case 'J':
+    case 'P':
+      INC_OUTPUTPOS(arg,8);    /* 64 bit per arg */
       break;
 
     case 'f':
@@ -362,7 +423,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'S':
     case 'n':
     case 'v': {
-      int *map = machine_endian_short_map;
+      int64_t *map = machine_endian_short_map;
 
       if (code == 'n') {
         map = big_endian_short_map;
@@ -389,7 +450,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'L':
     case 'N':
     case 'V': {
-      int *map = machine_endian_int32_map;
+      int64_t *map = machine_endian_int32_map;
 
       if (code == 'N') {
         map = big_endian_int32_map;
@@ -400,6 +461,24 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
       while (arg-- > 0) {
         pack(argv[currentarg++], 4, map, &output[outputpos]);
         outputpos += 4;
+      }
+      break;
+    }
+
+    case 'q':
+    case 'Q':
+    case 'J':
+    case 'P': {
+      int64_t *map = machine_endian_int64_map;
+      if (code == 'J') {
+        map = big_endian_int64_map;
+      } else if (code == 'P') {
+        map = little_endian_int64_map;
+      }
+
+      while (arg-- > 0) {
+        pack(argv[currentarg++], 8, map, &output[outputpos]);
+        outputpos += 8;
       }
       break;
     }
@@ -452,8 +531,9 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
   return s;
 }
 
-int32_t ZendPack::unpack(const char *data, int size, int issigned, int *map) {
-  int32_t result;
+int64_t ZendPack::unpack(const char *data, int64_t size, int issigned,
+                         int64_t *map) {
+  int64_t result;
   char *cresult = (char *) &result;
   int i;
 
@@ -552,7 +632,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
       size = 2;
       break;
 
-      /* Use sizeof(int) bytes of input */
+      /* Use machine dependent bytes of input */
     case 'i':
     case 'I':
       size = sizeof(int);
@@ -566,6 +646,13 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
       size = 4;
       break;
 
+      /* Use 8 bytes of input */
+    case 'q':
+    case 'Q':
+    case 'J':
+    case 'P':
+      size = 8;
+      break;
       /* Use sizeof(float) bytes of input */
     case 'f':
       size = sizeof(float);
@@ -703,7 +790,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
         case 'n':
         case 'v': {
           int issigned = 0;
-          int *map = machine_endian_short_map;
+          int64_t *map = machine_endian_short_map;
 
           if (type == 's') {
             issigned = input[inputpos + (machine_little_endian ? 1 : 0)] &
@@ -748,8 +835,8 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
         case 'N':
         case 'V': {
           int issigned = 0;
-          int *map = machine_endian_int32_map;
-          int32_t v = 0;
+          int64_t *map = machine_endian_int32_map;
+          int64_t v = 0;
 
           if (type == 'l' || type == 'L') {
             issigned = input[inputpos + (machine_little_endian ? 3 : 0)]
@@ -773,6 +860,35 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
             uint64_t u64 = uint32_t(v);
             ret.set(String(n, CopyString), u64);
           }
+          break;
+        }
+
+        case 'q':
+        case 'Q':
+        case 'J':
+        case 'P': {
+          int issigned = 0;
+          int64_t *map = machine_endian_int64_map;
+          int64_t v = 0;
+          if (type == 'q' || type == 'Q') {
+            issigned = input[inputpos + (machine_little_endian ? 7 : 0)] & 0x80;
+          } else if (type == 'J') {
+            issigned = input[inputpos] & 0x80;
+            map = big_endian_int64_map;
+          } else if (type == 'P') {
+            issigned = input[inputpos + 7] & 0x80;
+            map = little_endian_int64_map;
+          }
+
+          v = unpack(&input[inputpos], 8, issigned, map);
+
+          if (type == 'q') {
+            ret.set(String(n, CopyString), v);
+          } else {
+            uint64_t u64 = uint64_t(v);
+            ret.set(String(n, CopyString), u64);
+          }
+
           break;
         }
 

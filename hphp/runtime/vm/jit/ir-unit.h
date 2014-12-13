@@ -25,6 +25,7 @@
 #include "hphp/util/arena.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/base/memory-manager.h"
 
@@ -276,7 +277,7 @@ public:
    */
   IRInstruction* defLabel(unsigned numDst, BCMarker marker,
                           const jit::vector<uint32_t>& producedRefs);
-  Block* defBlock();
+  Block* defBlock(Block::Hint hint = Block::Hint::Neither);
 
   template<typename T> SSATmp* cns(T val) {
     return cns(Type::cns(val));

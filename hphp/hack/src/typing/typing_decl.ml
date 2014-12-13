@@ -342,7 +342,7 @@ and class_naming_and_decl class_env cid c =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
   let c = Naming.class_ class_env.nenv c in
   class_parents_decl class_env c;
-  class_decl c;
+  class_decl class_env.nenv c;
   (* It is important to add the "named" ast (nast.ml) only
    * AFTER we are done declaring the type type of the class.
    * Otherwise there is a subtle race condition.
@@ -391,7 +391,7 @@ and class_is_abstract c =
     | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
     | _ -> false
 
-and class_decl c =
+and class_decl nenv c =
   let is_abstract = class_is_abstract c in
   let cls_pos, cls_name = c.c_name in
   let env = Typing_env.empty (Pos.filename cls_pos) in
@@ -407,6 +407,9 @@ and class_decl c =
   let env, consts =
     List.fold_left (class_const_decl c) (env, consts) c.c_consts in
   let consts = SMap.add SN.Members.mClass (class_class_decl c.c_name) consts in
+  let typeconsts = inherited.Typing_inherit.ih_typeconsts in
+  let env, typeconsts =
+    List.fold_left (typeconst_decl nenv c) (env, typeconsts) c.c_typeconsts in
   let sclass_var = static_class_var_decl c in
   let scvars = inherited.Typing_inherit.ih_scvars in
   let env, scvars = List.fold_left sclass_var (env, scvars) c.c_static_vars in
@@ -495,6 +498,7 @@ and class_decl c =
     tc_pos = fst c.c_name;
     tc_tparams = tparams;
     tc_consts = consts;
+    tc_typeconsts = typeconsts;
     tc_cvars = cvars;
     tc_scvars = scvars;
     tc_methods = m;
@@ -509,10 +513,10 @@ and class_decl c =
     tc_enum_type = enum;
   } in
   if Ast.Cnormal = c.c_kind then
-    SMap.iter (method_check_trait_overrides c) m
-  else ();
-  if Ast.Cnormal = c.c_kind then
-    SMap.iter (method_check_trait_overrides c) sm
+    begin
+      SMap.iter (method_check_trait_overrides c) m;
+      SMap.iter (method_check_trait_overrides c) sm;
+    end
   else ();
   SMap.iter begin fun x _ ->
     Typing_deps.add_idep (Some class_dep) (Dep.Class x)
@@ -576,6 +580,7 @@ and build_constructor env class_ method_ =
     SMap.mem SN.UserAttributes.uaUnsafeConstruct method_.m_user_attributes in
   let cstr = {
     ce_final = method_.m_final;
+    ce_is_xhp_attr = false;
     ce_override = consist_override;
     ce_synthesized = false;
     ce_visibility = vis;
@@ -621,8 +626,9 @@ and class_const_decl c (env, acc) (h, id, e) =
       end
       | Some h -> Typing_hint.hint env h
   in
-  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
-             ce_visibility = Vpublic; ce_type = ty; ce_origin = (snd c.c_name);
+  let ce = { ce_final = true; ce_is_xhp_attr = false; ce_override = false;
+             ce_synthesized = false; ce_visibility = Vpublic; ce_type = ty;
+             ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add (snd id) ce acc in
   env, acc
@@ -634,6 +640,7 @@ and class_class_decl class_id =
   let reason = Reason.Rclass_class (pos, name) in
   {
     ce_final       = false;
+    ce_is_xhp_attr = false;
     ce_override    = false;
     ce_synthesized = true;
     ce_visibility  = Vpublic;
@@ -645,12 +652,24 @@ and class_var_decl c (env, acc) cv =
   let env, ty =
     match cv.cv_type with
       | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-      | Some ty' -> Typing_hint.hint ~ensure_instantiable:true env ty'
+      | Some ty' ->
+          (* If this is an XHP attribute and we're in strict mode,
+             relax to partial mode to allow the use of the "array"
+             annotation without specifying type parameters. Until
+             recently HHVM did not allow "array" with type parameters
+             in XHP attribute declarations, so this is a temporary
+             hack to support existing code for now. *)
+          (* Task #5815945: Get rid of this Hack *)
+          let env = if cv.cv_is_xhp && (Env.is_strict env)
+            then Env.set_mode env Ast.Mpartial
+            else env in
+          Typing_hint.hint ~ensure_instantiable:true env ty'
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
-             ce_visibility = vis; ce_type = ty; ce_origin = (snd c.c_name);
+  let ce = { ce_final = true; ce_is_xhp_attr = cv.cv_is_xhp; ce_override = false;
+             ce_synthesized = false; ce_visibility = vis; ce_type = ty;
+             ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add id ce acc in
   env, acc
@@ -661,10 +680,10 @@ and static_class_var_decl c (env, acc) cv =
     | Some ty -> Typing_hint.hint ~ensure_instantiable:true env ty in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
-             ce_visibility = vis; ce_type = ty; ce_origin = (snd c.c_name);
-           }
-  in
+  let ce = { ce_final = true; ce_is_xhp_attr = cv.cv_is_xhp; ce_override = false;
+             ce_synthesized = false; ce_visibility = vis; ce_type = ty;
+             ce_origin = (snd c.c_name);
+           } in
   let acc = SMap.add ("$"^id) ce acc in
   if cv.cv_expr = None && (c.c_mode = Ast.Mstrict || c.c_mode = Ast.Mpartial)
   then begin match cv.cv_type with
@@ -679,6 +698,83 @@ and visibility cid = function
   | Public    -> Vpublic
   | Protected -> Vprotected cid
   | Private   -> Vprivate cid
+
+and typeconst_decl nenv c (env, acc) typeconst =
+  match c.c_kind with
+  | Ast.Cinterface | Ast.Ctrait | Ast.Cenum ->
+      let kind = match c.c_kind with
+        | Ast.Cinterface -> "an interface"
+        | Ast.Ctrait -> "a trait"
+        | Ast.Cenum -> "an enum"
+        | _ -> assert false in
+      Errors.requires_non_class (fst c.c_name) (snd c.c_name) kind;
+      env, acc
+  | Ast.Cabstract | Ast.Cnormal ->
+      let pos, name = typeconst.c_tconst_name in
+      let typedef_name = typeconst_typedef_decl nenv c typeconst in
+      let reason = Reason.Rwitness pos in
+      let typedef_type = reason, Tapply ((pos, typedef_name), []) in
+      let ty =
+        if typeconst.c_tconst_abstract
+        then Reason.Rwitness pos, Tgeneric (name, Some typedef_type)
+        else typedef_type
+      in
+      let ce = {
+        ce_final = not typeconst.c_tconst_abstract;
+        ce_is_xhp_attr = false;
+        ce_override = false;
+        ce_synthesized = false;
+        ce_visibility = Vpublic;
+        ce_type = ty;
+        ce_origin = snd (c.c_name);
+      } in
+      let acc = SMap.add name ce acc in
+      env, acc
+
+ (* Every Type Const is backed by a typedef. For instance:
+  *
+  * class C { type const tc = int; }
+  *
+  * Is translated too
+  *
+  * type C::tc = int;
+  *
+  * The identifier "C::tc" is not something that can be written in user land
+  * because of the "::", so we know that "C::tc" will be a unique name for a
+  * typedef.
+  *
+  * Another thing to note is we explicitly choose to use type instead of newtype
+  * because we want this to serve as an alias.
+  *
+  * IMPORTANT:
+  *
+  *   Since we are fabricating this type def we need to also add the type def
+  *   in Parsing_service.get_defs otherwise incremental mode will not work.
+  *)
+and typeconst_typedef_decl nenv c typeconst =
+  (* make name unique by combining with class name, i.e. Class::Typeconst *)
+  let typedef_name =
+    (snd (c.c_name)) ^ "::" ^ (snd (typeconst.c_tconst_name)) in
+  let tid = fst (typeconst.c_tconst_name), typedef_name in
+  let params = [] in
+  let concrete_type = match typeconst.c_tconst_type with
+    | None ->
+        if not typeconst.c_tconst_abstract
+        then Errors.missing_assign (fst tid);
+        fst tid, Hany
+    | Some x -> x in
+  let decl = false, params, concrete_type in
+  let filename = Pos.filename (fst tid) in
+  let env = Typing_env.empty filename in
+  let env = Typing_env.set_mode env c.c_mode in
+  let env = Env.set_root env (Typing_deps.Dep.Class (snd tid)) in
+  let env, concrete_type = Typing_hint.hint env concrete_type in
+  let visibility = Env.Typedef.Public in
+  let type_constraint = None in
+  let tdecl = visibility, params, type_constraint, concrete_type, (fst tid) in
+  Env.add_typedef (snd tid) tdecl;
+  Naming_heap.TypedefHeap.add (snd tid) decl;
+  typedef_name
 
 and method_decl c env m =
   let env, arity_min, params = Typing.make_params env true 0 m.m_params in
@@ -743,8 +839,9 @@ and method_decl_acc c (env, acc) m =
       | _ -> visibility (snd c.c_name) m.m_visibility
   in
   let ce = {
-    ce_final = m.m_final; ce_override = check_override; ce_synthesized = false;
-    ce_visibility = vis; ce_type = ty; ce_origin = snd (c.c_name);
+    ce_final = m.m_final; ce_is_xhp_attr = false; ce_override = check_override;
+    ce_synthesized = false; ce_visibility = vis; ce_type = ty;
+    ce_origin = snd (c.c_name);
   } in
   let acc = SMap.add id ce acc in
   env, acc

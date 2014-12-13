@@ -386,7 +386,7 @@ void binary_deserialize_spec(const Object& zthis, PHPInputTransport& transport,
 
       if (ttypes_are_compatible(ttype, expected_ttype)) {
         Variant rv = binary_deserialize(ttype, transport, fieldspec);
-        zthis->o_set(varname, rv, zthis->o_getClassName());
+        zthis->o_set(varname, rv, zthis->getClassName());
       } else {
         skip_element(ttype, transport);
       }
@@ -411,7 +411,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       }
       binary_serialize_spec(value.toObject(), transport,
                             HHVM_FN(hphp_get_static_property)(value.toObject()->
-                                                       o_getClassName(),
+                                                       getClassName(),
                                                        s_TSPEC,
                                                        false).toArray());
     } return;
@@ -524,7 +524,7 @@ void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport,
     int8_t ttype = fieldspec.rvalAt(PHPTransport::s_type,
                                     AccessFlags::Error_Key).toByte();
 
-    Variant prop = zthis->o_get(varname, true, zthis->o_getClassName());
+    Variant prop = zthis->o_get(varname, true, zthis->getClassName());
     if (!prop.isNull()) {
       transport.writeI8(ttype);
       transport.writeI16(fieldno);
@@ -558,7 +558,7 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
 
   const Object& obj_request_struct = request_struct.toObject();
   Variant spec = HHVM_FN(hphp_get_static_property)(
-    obj_request_struct->o_getClassName(),
+    obj_request_struct->getClassName(),
     s_TSPEC,
     false);
   binary_serialize_spec(obj_request_struct, transport, spec.toArray());

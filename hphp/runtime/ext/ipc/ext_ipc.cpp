@@ -307,10 +307,7 @@ bool HHVM_FUNCTION(msg_receive,
 
   int result = msgrcv(q->id, buffer, maxsize, desiredmsgtype, realflags);
   if (result < 0) {
-    int err = errno;
-    raise_warning("Unable to receive message: %s",
-                    folly::errnoStr(err).c_str());
-    errorcode = err;
+    errorcode = errno;
     return false;
   }
 
@@ -364,8 +361,7 @@ union semun {
   struct seminfo *__buf;    /* buffer for IPC_INFO */
 };
 
-class Semaphore : public SweepableResourceData {
-public:
+struct Semaphore : SweepableResourceData {
   int key;          // For error reporting.
   int semid;        // Returned by semget()
   int count;        // Acquire count for auto-release.
@@ -402,10 +398,6 @@ public:
   }
 
   ~Semaphore() {
-    Semaphore::sweep();
-  }
-
-  void sweep() override {
     /*
      * if count == -1, semaphore has been removed
      * Need better way to handle this
@@ -432,7 +424,10 @@ public:
 
     semop(semid, sop, opcount);
   }
+  DECLARE_RESOURCE_ALLOCATION(Semaphore);
 };
+
+IMPLEMENT_RESOURCE_ALLOCATION(Semaphore)
 
 bool HHVM_FUNCTION(sem_acquire,
                    const Resource& sem_identifier) {
@@ -527,7 +522,7 @@ Variant HHVM_FUNCTION(sem_get,
     }
   }
 
-  Semaphore *sem_ptr = new Semaphore();
+  auto sem_ptr = newres<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
   sem_ptr->count = 0;
@@ -683,7 +678,7 @@ Variant HHVM_FUNCTION(shm_attach,
   long shm_id;
 
   if (shm_size < 1) {
-    raise_warning("Segment size must be greater then zero.");
+    raise_warning("Segment size must be greater than zero.");
     return false;
   }
 

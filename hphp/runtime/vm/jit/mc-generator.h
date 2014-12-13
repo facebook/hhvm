@@ -49,6 +49,7 @@ struct TReqInfo;
 struct Label;
 struct MCGenerator;
 struct AsmInfo;
+struct HTS;
 
 extern MCGenerator* mcg;
 extern void* interpOneEntryPoints[];
@@ -143,7 +144,7 @@ struct RelocationInfo {
   RangeVec m_srcRanges;
   RangeVec m_dstRanges;
   /*
-   * maps from src address, to range of destination addresse
+   * maps from src address, to range of destination address
    * This is because we could insert nops before the instruction
    * corresponding to src. Most things want the address of the
    * instruction corresponding to the src instruction; but eg
@@ -279,7 +280,7 @@ public:
   bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  void traceCodeGen();
+  void traceCodeGen(HTS&);
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
 
   /*
@@ -409,6 +410,8 @@ extern void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
 
 void emitServiceReq(Vout& v, TCA stub_block, ServiceRequest req,
                     const ServiceReqArgVec& argv);
+
+bool shouldPGOFunc(const Func& func);
 
 }}
 

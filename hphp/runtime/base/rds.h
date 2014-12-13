@@ -58,7 +58,7 @@ namespace HPHP { namespace RDS {
  * per-thread RDS base.  The normal              +-------------+
  * region is perhaps analogous to .bss,          |             |
  * while the persistent region is                |  Normal     |
- * analagous to .rodata, and the local region    |    region   |
+ * analogous to .rodata, and the local region    |    region   |
  * is similar to .data.                          |             | growing higher
  *                                               +-------------+  vvv
  * When we're running in C++, the base of RDS    | \ \ \ \ \ \ |

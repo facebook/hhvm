@@ -69,8 +69,8 @@ function test($prefix) {
 
   set_error_handler(
     function(
-      HH\int $errno,
-      HH\string $errstr
+      $errno,
+      $errstr
     ) {
       echo "Catchable fatal error ($errno): $errstr\n";
       // ON ERROR RESUME NEXT;

@@ -941,15 +941,12 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
     data = (const char *)transport->getPostData(size);
   }
 
-  code = 0; // HTTP status of curl or 0 for "no server response code"
   std::vector<String> responseHeaders;
   HttpClient http;
-  if (data && size) {
-    code = http.post(url.c_str(), data, size, response, &requestHeaders,
-                     &responseHeaders);
-  } else {
-    code = http.get(url.c_str(), response, &requestHeaders, &responseHeaders);
-  }
+  code = http.request(transport->getMethodName(),
+                      url.c_str(), data, size, response, &requestHeaders,
+                      &responseHeaders);
+
   if (code == 0) {
     if (!force) return false; // so we can retry
     Logger::Error("Unable to proxy %s: %s", url.c_str(),

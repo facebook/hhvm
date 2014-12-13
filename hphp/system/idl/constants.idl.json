@@ -2851,74 +2851,6 @@
             "value": 13
         },
         {
-            "name": "M_1_PI",
-            "value": 0.31830988618379067154
-        },
-        {
-            "name": "M_2_PI",
-            "value": 0.63661977236758134308
-        },
-        {
-            "name": "M_2_SQRTPI",
-            "value": 1.12837916709551257390
-        },
-        {
-            "name": "M_E",
-            "value": 2.7182818284590452354
-        },
-        {
-            "name": "M_EULER",
-            "value": 0.57721566490153286061
-        },
-        {
-            "name": "M_LN10",
-            "value": 2.30258509299404568402
-        },
-        {
-            "name": "M_LN2",
-            "value": 0.69314718055994530942
-        },
-        {
-            "name": "M_LNPI",
-            "value": 1.14472988584940017414
-        },
-        {
-            "name": "M_LOG10E",
-            "value": 0.43429448190325182765
-        },
-        {
-            "name": "M_LOG2E",
-            "value": 1.4426950408889634074
-        },
-        {
-            "name": "M_PI",
-            "value": 3.14159265358979323846
-        },
-        {
-            "name": "M_PI_2",
-            "value": 1.57079632679489661923
-        },
-        {
-            "name": "M_PI_4",
-            "value": 0.78539816339744830962
-        },
-        {
-            "name": "M_SQRT1_2",
-            "value": 0.70710678118654752440
-        },
-        {
-            "name": "M_SQRT2",
-            "value": 1.41421356237309504880
-        },
-        {
-            "name": "M_SQRT3",
-            "value": 1.73205080756887729352
-        },
-        {
-            "name": "M_SQRTPI",
-            "value": 1.77245385090551602729
-        },
-        {
             "name": "NIL",
             "value": 0
         },
@@ -3034,6 +2966,10 @@
         {
             "name": "PHP_INT_MAX",
             "value": 9223372036854775807
+        },
+        {
+            "name": "PHP_INT_MIN",
+            "value": -9223372036854775808
         },
         {
             "name": "PHP_INT_SIZE",
@@ -4025,210 +3961,6 @@
             "value": 9
         },
         {
-            "name": "STREAM_CLIENT_ASYNC_CONNECT",
-            "value": 2
-        },
-        {
-            "name": "STREAM_CLIENT_CONNECT",
-            "value": 4
-        },
-        {
-            "name": "STREAM_CLIENT_PERSISTENT",
-            "value": 1
-        },
-        {
-            "name": "STREAM_CRYPTO_METHOD_SSLv23_CLIENT",
-            "value": 2
-        },
-        {
-            "name": "STREAM_CRYPTO_METHOD_SSLv23_SERVER",
-            "value": 6
-        },
-        {
-            "name": "STREAM_CRYPTO_METHOD_SSLv2_CLIENT",
-            "value": 0
-        },
-        {
-            "name": "STREAM_CRYPTO_METHOD_SSLv2_SERVER",
-            "value": 4
-        },
-        {
-            "name": "STREAM_CRYPTO_METHOD_SSLv3_CLIENT",
-            "value": 1
-        },
-        {
-            "name": "STREAM_CRYPTO_METHOD_SSLv3_SERVER",
-            "value": 5
-        },
-        {
-            "name": "STREAM_CRYPTO_METHOD_TLS_CLIENT",
-            "value": 3
-        },
-        {
-            "name": "STREAM_CRYPTO_METHOD_TLS_SERVER",
-            "value": 7
-        },
-        {
-            "name": "STREAM_ENFORCE_SAFE_MODE",
-            "value": 4
-        },
-        {
-            "name": "STREAM_IGNORE_URL",
-            "value": 2
-        },
-        {
-            "name": "STREAM_IPPROTO_ICMP",
-            "value": 1
-        },
-        {
-            "name": "STREAM_IPPROTO_IP",
-            "value": 0
-        },
-        {
-            "name": "STREAM_IPPROTO_RAW",
-            "value": 255
-        },
-        {
-            "name": "STREAM_IPPROTO_TCP",
-            "value": 6
-        },
-        {
-            "name": "STREAM_IPPROTO_UDP",
-            "value": 17
-        },
-        {
-            "name": "STREAM_IS_URL",
-            "value": 1
-        },
-        {
-            "name": "STREAM_MKDIR_RECURSIVE",
-            "value": 1
-        },
-        {
-            "name": "STREAM_MUST_SEEK",
-            "value": 16
-        },
-        {
-            "name": "STREAM_NOTIFY_AUTH_REQUIRED",
-            "value": 3
-        },
-        {
-            "name": "STREAM_NOTIFY_AUTH_RESULT",
-            "value": 10
-        },
-        {
-            "name": "STREAM_NOTIFY_COMPLETED",
-            "value": 8
-        },
-        {
-            "name": "STREAM_NOTIFY_CONNECT",
-            "value": 2
-        },
-        {
-            "name": "STREAM_NOTIFY_FAILURE",
-            "value": 9
-        },
-        {
-            "name": "STREAM_NOTIFY_FILE_SIZE_IS",
-            "value": 5
-        },
-        {
-            "name": "STREAM_NOTIFY_MIME_TYPE_IS",
-            "value": 4
-        },
-        {
-            "name": "STREAM_NOTIFY_PROGRESS",
-            "value": 7
-        },
-        {
-            "name": "STREAM_NOTIFY_REDIRECTED",
-            "value": 6
-        },
-        {
-            "name": "STREAM_NOTIFY_RESOLVE",
-            "value": 1
-        },
-        {
-            "name": "STREAM_NOTIFY_SEVERITY_ERR",
-            "value": 2
-        },
-        {
-            "name": "STREAM_NOTIFY_SEVERITY_INFO",
-            "value": 0
-        },
-        {
-            "name": "STREAM_NOTIFY_SEVERITY_WARN",
-            "value": 1
-        },
-        {
-            "name": "STREAM_OOB",
-            "value": 1
-        },
-        {
-            "name": "STREAM_PEEK",
-            "value": 2
-        },
-        {
-            "name": "STREAM_PF_INET",
-            "value": 2
-        },
-        {
-            "name": "STREAM_PF_INET6",
-            "value": 10
-        },
-        {
-            "name": "STREAM_PF_UNIX",
-            "value": 1
-        },
-        {
-            "name": "STREAM_REPORT_ERRORS",
-            "value": 8
-        },
-        {
-            "name": "STREAM_SERVER_BIND",
-            "value": 4
-        },
-        {
-            "name": "STREAM_SERVER_LISTEN",
-            "value": 8
-        },
-        {
-            "name": "STREAM_SHUT_RD",
-            "value": 0
-        },
-        {
-            "name": "STREAM_SHUT_RDWR",
-            "value": 2
-        },
-        {
-            "name": "STREAM_SHUT_WR",
-            "value": 1
-        },
-        {
-            "name": "STREAM_SOCK_DGRAM",
-            "value": 2
-        },
-        {
-            "name": "STREAM_SOCK_RAW",
-            "value": 3
-        },
-        {
-            "name": "STREAM_SOCK_RDM",
-            "value": 4
-        },
-        {
-            "name": "STREAM_SOCK_SEQPACKET",
-            "value": 5
-        },
-        {
-            "name": "STREAM_SOCK_STREAM",
-            "value": 1
-        },
-        {
-            "name": "STREAM_USE_PATH",
-            "value": 1
-        },
-        {
             "name": "STR_PAD_BOTH",
             "value": 2
         },
@@ -5207,14 +4939,6 @@
         {
             "name": "U_MULTIPLE_CURSORS",
             "value": 65550
-        },
-        {
-            "name": "U_MULTIPLE_DECIMAL_SEPARATORS",
-            "value": 65793
-        },
-        {
-            "name": "U_MULTIPLE_DECIMAL_SEPERATORS",
-            "value": 65793
         },
         {
             "name": "U_MULTIPLE_EXPONENTIAL_SYMBOLS",

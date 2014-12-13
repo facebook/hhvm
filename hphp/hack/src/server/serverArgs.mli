@@ -20,6 +20,7 @@ type options = {
     convert          : Path.path option;
     load_save_opt    : env_store_action option;
     version          : bool;
+    start_time       : float;
   }
 
 and env_store_action =
@@ -44,3 +45,4 @@ val root          : options -> Path.path
 val should_detach : options -> bool
 val convert       : options -> Path.path option
 val load_save_opt : options -> env_store_action option
+val start_time    : options -> float

@@ -726,3 +726,162 @@ function memcache_add_server(Memcache $memcache,
                               $retry_interval, $status, $failure_callback,
                               $timeoutms);
 }
+
+class MemcacheSessionModule implements SessionHandlerInterface {
+
+  const UNIX_PREFIX = 'unix://';
+  const FILE_PREFIX = 'file://';
+
+  const SCHEME_FILE = 'file';
+  const SCHEME_TCP = 'tcp';
+
+  const ZERO_PORT = ':0';
+
+  private $memcache;
+
+  public function close() {
+    $this->memcache->close();
+    $this->memcache = null;
+    return true;
+  }
+
+  public function destroy($sessionId) {
+    // Memcache will return false if the session key doesn't exist
+    // so we return true no matter the result (matches redis module)
+    $this->memcache->delete($sessionId);
+    return true;
+  }
+
+  public function gc($maxLifetime) {
+    return true;
+  }
+
+  public function open($savePath, $name) {
+    $serverList = self::parseSavePath($savePath);
+    if (!$serverList) {
+      return false;
+    }
+
+    $this->memcache = new Memcache;
+    foreach ($serverList as $serverInfo) {
+      $this->memcache->addServer($serverInfo['host'],
+                                 $serverInfo['port'],
+                                 $serverInfo['persistent'],
+                                 $serverInfo['weight'],
+                                 $serverInfo['timeout'],
+                                 $serverInfo['retry_interval']);
+    }
+
+    return true;
+  }
+
+  public function read($sessionId) {
+    $data = $this->memcache->get($sessionId);
+    if (!$data) {
+      // Return an empty string instead of false for new sessions as
+      // false values cause sessions to fail to init
+      return '';
+    }
+    return $data;
+  }
+
+  public function write($sessionId, $data) {
+    return $this->memcache->set($sessionId,
+                                $data,
+                                MEMCACHE_COMPRESSED,
+                                ini_get('session.gc_maxlifetime'));
+  }
+
+  private static function parseSavePath($savePath) {
+    $savePath = trim($savePath);
+    if (empty($savePath)) {
+      trigger_error("Failed to parse session.save_path (empty save_path)",
+                    E_WARNING);
+      return false;
+    }
+
+    $serverList = explode(',', $savePath);
+
+    $return = array();
+    foreach ($serverList as $url) {
+      $url = trim($url);
+
+      // white-space only / empty keys are skipped
+      if (empty($url)) {
+        continue;
+      }
+
+      // Swap unix:// to file:// for parse_url usage like pecl does, if found
+      if (strncasecmp($url,
+                      self::UNIX_PREFIX,
+                      strlen(self::UNIX_PREFIX)) === 0) {
+        $url = self::FILE_PREFIX . substr($url, strlen(self::UNIX_PREFIX));
+      }
+
+      $parsedUrlData = parse_url($url);
+      if (!$parsedUrlData) {
+        trigger_error("Failed to parse session.save_path " .
+                      "(unable to parse url, url was '" . $url . "')",
+                      E_WARNING);
+        return false;
+      }
+
+      // Init optional values to default values
+      $serverInfo = array(
+        'persistent' => true,
+        'weight' => 1,
+        'timeout' => 1,
+        'retry_interval' => 15
+      );
+
+      switch ($parsedUrlData['scheme']) {
+        case self::SCHEME_FILE:
+          // Remove a zero port, if found
+          if (substr($parsedUrlData['path'], -2) === self::ZERO_PORT) {
+            $parsedUrlData['path'] = substr($parsedUrlData['path'], 0, -2);
+          }
+          // Return url back to a unix:// prefix instead of file://
+          $serverInfo['host'] = self::UNIX_PREFIX . $parsedUrlData['path'];
+          $serverInfo['port'] = 0;
+          break;
+        case self::SCHEME_TCP:
+          // We don't give TCP connections a tcp:// prefix
+          $serverInfo['host'] = $parsedUrlData['host'];
+          if (array_key_exists('port', $parsedUrlData)) {
+            $serverInfo['port'] = $parsedUrlData['port'];
+          } else {
+            $serverInfo['port'] = (int)ini_get('memcache.default_port');
+          }
+          break;
+        default:
+          trigger_error("Failed to parse session.save_path " .
+                        "(unknown protocol, url was '" . $url . "')",
+                        E_WARNING);
+          return false;
+      }
+
+      if (array_key_exists('query', $parsedUrlData)) {
+        $optionList = array();
+        parse_str($parsedUrlData['query'], $optionList);
+        if (count($optionList) > 0) {
+          foreach ($optionList as $key => $value) {
+            switch ($key) {
+              case 'persistent':
+                $serverInfo[$key] = (bool)$value;
+                break;
+              case 'weight':
+              case 'timeout':
+              case 'retry_interval':
+                $serverInfo[$key] = (int)$value;
+                break;
+            }
+          }
+        }
+      }
+
+      $return[] = $serverInfo;
+    }
+
+    return $return;
+  }
+}

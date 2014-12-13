@@ -61,7 +61,6 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/constants.h"
@@ -81,7 +80,7 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/program_options/parsers.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <libgen.h>
 #include <oniguruma.h>
 #include <signal.h>
@@ -411,6 +410,16 @@ static void handle_exception_helper(bool& ret,
                                     ContextOfException where,
                                     bool& error,
                                     bool richErrorMsg) {
+  // Clear oom/timeout while handling exception and restore them afterwards.
+  auto& data = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto flags = data.getConditionFlags();
+  auto origFlags = flags->load() & RequestInjectionData::ResourceFlags;
+  flags->fetch_and(~RequestInjectionData::ResourceFlags);
+
+  SCOPE_EXIT {
+    flags->fetch_or(origFlags);
+  };
+
   try {
     bump_counter_and_rethrow(false /* isPsp */);
   } catch (const Eval::DebuggerException &e) {
@@ -1105,6 +1114,26 @@ static void set_stack_size() {
   }
 }
 
+#if defined(BOOST_VERSION) && BOOST_VERSION <= 105400
+std::string get_right_option_name(const basic_parsed_options<char>& opts,
+                                  std::string& wrong_name) {
+  // Remove any - from the wrong name for better comparing
+  // since it will probably come prepended with --
+  wrong_name.erase(
+    std::remove(wrong_name.begin(), wrong_name.end(), '-'), wrong_name.end());
+  for (basic_option<char> opt : opts.options) {
+    std::string s_opt = opt.string_key;
+    // We are only dealing with options that have a - in them.
+    if (s_opt.find("-") != std::string::npos) {
+      if (s_opt.find(wrong_name) != std::string::npos) {
+        return s_opt;
+      }
+    }
+  }
+  return "";
+}
+#endif
+
 static int execute_program_impl(int argc, char** argv) {
   string usage = "Usage:\n\n   ";
   usage += argv[0];
@@ -1192,7 +1221,8 @@ static int execute_program_impl(int argc, char** argv) {
   // is necessary so that the boost command line parser doesn't choke on
   // args intended for the PHP application.
   int hhvm_argc = compute_hhvm_argc(desc, argc, argv);
-
+  // Need to have a parent try for opts so I can use opts in the catch of
+  // one of the sub-tries below.
   try {
     // Invoke the boost command line parser to parse the args for HHVM.
     auto opts = command_line_parser(hhvm_argc, argv)
@@ -1205,61 +1235,86 @@ static int execute_program_impl(int argc, char** argv) {
              ~command_line_style::allow_sticky &
              ~command_line_style::long_allow_adjacent)
       .run();
-    // Manually append the args for the PHP application.
-    int pos = 0;
-    for (unsigned m = 0; m < opts.options.size(); ++m) {
-      const auto& bo = opts.options[m];
-      if (bo.string_key == "arg") {
-        ++pos;
+    try {
+      // Manually append the args for the PHP application.
+      int pos = 0;
+      for (unsigned m = 0; m < opts.options.size(); ++m) {
+        const auto& bo = opts.options[m];
+        if (bo.string_key == "arg") {
+          ++pos;
+        }
       }
-    }
-    for (unsigned m = hhvm_argc; m < argc; ++m) {
-      string str = argv[m];
-      basic_option<char> bo;
-      bo.string_key = "arg";
-      bo.position_key = pos++;
-      bo.value.push_back(str);
-      bo.original_tokens.push_back(str);
-      bo.unregistered = false;
-      bo.case_insensitive = false;
-      opts.options.push_back(bo);
-    }
-    // Process the options
-    store(opts, vm);
-    notify(vm);
-    if (vm.count("interactive") /* or -a */) {
-      po.mode = "debug";
-    }
-    if (po.mode == "d") po.mode = "debug";
-    if (po.mode == "s") po.mode = "server";
-    if (po.mode == "t") po.mode = "translate";
-    if (po.mode == "")  po.mode = "run";
-    if (po.mode == "daemon" || po.mode == "server" || po.mode == "replay" ||
-        po.mode == "run" || po.mode == "debug"|| po.mode == "translate") {
-      set_execution_mode(po.mode);
-    } else {
-      Logger::Error("Error in command line: invalid mode: %s", po.mode.c_str());
+      for (unsigned m = hhvm_argc; m < argc; ++m) {
+        string str = argv[m];
+        basic_option<char> bo;
+        bo.string_key = "arg";
+        bo.position_key = pos++;
+        bo.value.push_back(str);
+        bo.original_tokens.push_back(str);
+        bo.unregistered = false;
+        bo.case_insensitive = false;
+        opts.options.push_back(bo);
+      }
+      // Process the options
+      store(opts, vm);
+      notify(vm);
+      if (vm.count("interactive") /* or -a */) {
+        po.mode = "debug";
+      }
+      if (po.mode == "d") po.mode = "debug";
+      if (po.mode == "s") po.mode = "server";
+      if (po.mode == "t") po.mode = "translate";
+      if (po.mode == "")  po.mode = "run";
+      if (po.mode == "daemon" || po.mode == "server" || po.mode == "replay" ||
+          po.mode == "run" || po.mode == "debug"|| po.mode == "translate") {
+        set_execution_mode(po.mode);
+      } else {
+        Logger::Error("Error in command line: invalid mode: %s",
+                      po.mode.c_str());
+        cout << desc << "\n";
+        return -1;
+      }
+      if (po.config.empty() && !vm.count("no-config")) {
+        auto default_config_file = "/etc/hhvm/php.ini";
+        if (access(default_config_file, R_OK) != -1) {
+          Logger::Verbose("Using default config file: %s", default_config_file);
+          po.config.push_back(default_config_file);
+        }
+        default_config_file = "/etc/hhvm/config.hdf";
+        if (access(default_config_file, R_OK) != -1) {
+          Logger::Verbose("Using default config file: %s", default_config_file);
+          po.config.push_back(default_config_file);
+        }
+      }
+// When we upgrade boost, we can remove this and also get rid of the parent
+// try statement and move opts back into the original try block
+#if defined(BOOST_VERSION) && BOOST_VERSION >= 105000 && BOOST_VERSION <= 105400
+    } catch (const error_with_option_name &e) {
+      std::string wrong_name = e.get_option_name();
+      std::string right_name = get_right_option_name(opts, wrong_name);
+      std::string message = e.what();
+      if (right_name != "") {
+        boost::replace_all(message, wrong_name, right_name);
+      }
+      Logger::Error("Error in command line: %s", message.c_str());
+      cout << desc << "\n";
+      return -1;
+#endif
+    } catch (const error &e) {
+      Logger::Error("Error in command line: %s", e.what());
+      cout << desc << "\n";
+      return -1;
+    } catch (...) {
+      Logger::Error("Error in command line.");
       cout << desc << "\n";
       return -1;
     }
-    if (po.config.empty() && !vm.count("no-config")) {
-      auto default_config_file = "/etc/hhvm/php.ini";
-      if (access(default_config_file, R_OK) != -1) {
-        Logger::Verbose("Using default config file: %s", default_config_file);
-        po.config.push_back(default_config_file);
-      }
-      default_config_file = "/etc/hhvm/config.hdf";
-      if (access(default_config_file, R_OK) != -1) {
-        Logger::Verbose("Using default config file: %s", default_config_file);
-        po.config.push_back(default_config_file);
-      }
-    }
-  } catch (error &e) {
+  } catch (const error &e) {
     Logger::Error("Error in command line: %s", e.what());
     cout << desc << "\n";
     return -1;
   } catch (...) {
-    Logger::Error("Error in command line.");
+    Logger::Error("Error in command line parsing.");
     cout << desc << "\n";
     return -1;
   }
@@ -1322,9 +1377,6 @@ static int execute_program_impl(int argc, char** argv) {
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
-  }
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    HPHP::initTypeProfileStructure();
   }
   vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
@@ -1799,6 +1851,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   }
 
   MM().resetCouldOOM(isStandardRequest());
+  ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.resetTimer();
 
   LitstrTable::get().setReading();
 

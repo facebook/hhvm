@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/parser/parser.h"
 
@@ -95,7 +94,6 @@ const StaticString
   s___invoke("__invoke"),
   s_return_type("return_type"),
   s_type_hint("type_hint"),
-  s_type_profiling("type_profiling"),
   s_accessible("accessible"),
   s_reflectionexception("ReflectionException");
 
@@ -387,55 +385,56 @@ void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
 Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
                                                 const String& prop,
                                                 bool force) {
-  StringData* sd = cls.get();
-  Class* class_ = Unit::lookupClass(sd);
+  auto const sd = cls.get();
+  auto const class_ = Unit::lookupClass(sd);
   if (!class_) {
     raise_error("Non-existent class %s", sd->data());
   }
   VMRegAnchor _;
-  bool visible, accessible;
-  TypedValue* tv = class_->getSProp(
+
+  auto const lookup = class_->getSProp(
     force ? class_ : arGetContextClass(vmfp()),
-    prop.get(), visible, accessible
+    prop.get()
   );
-  if (tv == nullptr) {
+  if (!lookup.prop) {
     raise_error("Class %s does not have a property named %s",
                 sd->data(), prop.get()->data());
   }
-  if (!visible || !accessible) {
+  if (!lookup.accessible) {
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
   }
-  return tvAsVariant(tv);
+  return tvAsVariant(lookup.prop);
 }
 
 void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
-                                             const String& prop, const Variant& value,
+                                             const String& prop,
+                                             const Variant& value,
                                              bool force) {
   if (RuntimeOption::EvalAuthoritativeMode) {
     raise_error("Setting static properties through reflection is not "
       "allowed in RepoAuthoritative mode");
   }
-  StringData* sd = cls.get();
-  Class* class_ = Unit::lookupClass(sd);
-  if (!class_) {
-    raise_error("Non-existent class %s", sd->data());
-  }
+  auto const sd = cls.get();
+  auto const class_ = Unit::lookupClass(sd);
+
+  if (!class_) raise_error("Non-existent class %s", sd->data());
+
   VMRegAnchor _;
-  bool visible, accessible;
-  TypedValue* tv = class_->getSProp(
+
+  auto const lookup = class_->getSProp(
     force ? class_ : arGetContextClass(vmfp()),
-    prop.get(), visible, accessible
+    prop.get()
   );
-  if (tv == nullptr) {
+  if (!lookup.prop) {
     raise_error("Class %s does not have a property named %s",
                 cls.get()->data(), prop.get()->data());
   }
-  if (!visible || !accessible) {
+  if (!lookup.accessible) {
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
   }
-  tvAsVariant(tv) = value;
+  tvAsVariant(lookup.prop) = value;
 }
 
 String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
@@ -1175,7 +1174,7 @@ static void addClassConstantNames(const Class* cls, c_Set* st, size_t limit) {
 
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].m_class == cls) {
+    if (consts[i].m_class == cls && !consts[i].m_val.isAbstractConst()) {
       st->add(const_cast<StringData*>(consts[i].m_name.get()));
     }
   }
@@ -1214,6 +1213,30 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
     ai.add(constName, cellAsCVarRef(value));
   }
   return ai.toArray();
+}
+
+// helper for getAbstractConstantNames
+static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+
+  size_t numConsts = cls->numConstants();
+  if (!numConsts) {
+    return Array::Create();
+  }
+
+  c_Set* st;
+  Object o = st = newobj<c_Set>();
+  st->reserve(numConsts);
+
+  const Class::Const* consts = cls->constants();
+  for (size_t i = 0; i < numConsts; i++) {
+    if (consts[i].m_val.isAbstractConst()) {
+      st->add(const_cast<StringData*>(consts[i].m_name.get()));
+    }
+  }
+
+  assert(st->size() <= numConsts);
+  return st->t_toarray();
 }
 
 static Array HHVM_METHOD(ReflectionClass, getAttributes) {
@@ -1438,6 +1461,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionClass, hasConstant);
     HHVM_ME(ReflectionClass, getConstant);
     HHVM_ME(ReflectionClass, getOrderedConstants);
+    HHVM_ME(ReflectionClass, getOrderedAbstractConstants);
 
     HHVM_ME(ReflectionClass, getAttributes);
     HHVM_ME(ReflectionClass, getAttributesRecursive);
@@ -1536,9 +1560,6 @@ static void set_debugger_reflection_function_info(Array& ret,
 
 static void set_debugger_reflection_method_info(Array& ret, const Func* func,
                                                 const Class* cls) {
-  if (RuntimeOption::EvalRuntimeTypeProfile && !ret.exists(s_type_profiling)) {
-    ret.set(s_type_profiling, Array());
-  }
   ret.set(s_name, VarNR(func->name()));
   set_attrs(ret, get_modifiers(func->attrs(), false));
 
@@ -1560,28 +1581,12 @@ static void set_debugger_reflection_method_info(Array& ret, const Func* func,
   set_debugger_reflection_method_prototype_info(ret, resolved_func);
 }
 
-static void set_debugger_type_profiling_info(Array& info, const Class* cls,
-                                             const Func* method) {
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    VMRegAnchor _;
-    if (cls) {
-      Func* objMethod = cls->lookupMethod(method->fullName());
-      info.set(s_type_profiling, getPercentParamInfoArray(objMethod));
-    } else {
-      info.set(s_type_profiling, getPercentParamInfoArray(method));
-    }
-  }
-}
-
 Array get_function_info(const String& name) {
   Array ret;
   if (name.get() == nullptr) return ret;
   const Func* func = Unit::loadFunc(name.get());
   if (!func) return ret;
   ret.set(s_name,       VarNR(func->name()));
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    ret.set(s_type_profiling, getPercentParamInfoArray(func));
-  }
 
   // setting parameters and static variables
   set_debugger_reflection_function_info(ret, func);
@@ -1672,9 +1677,6 @@ Array get_class_info(const String& name) {
 
       auto lowerName = HHVM_FN(strtolower)(m->nameStr());
       Array info = Array::Create();
-      if (RuntimeOption::EvalRuntimeTypeProfile) {
-        set_debugger_type_profiling_info(info, cls, m);
-      }
       set_debugger_reflection_method_info(info, m, cls);
       arr.set(lowerName, VarNR(info));
     }

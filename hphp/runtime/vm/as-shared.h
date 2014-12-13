@@ -18,7 +18,8 @@
 
 #include <string>
 #include <folly/Optional.h>
-#include "hphp/runtime/base/types.h"
+
+#include "hphp/runtime/base/attr.h"
 
 namespace HPHP {
 

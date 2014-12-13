@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 
 #include <vector>
 
@@ -666,9 +667,10 @@ Type Type::combine(bits_t newBits, Ptr newPtrKind, Type a, Type b) {
     auto const specType = a.isSpecialized() ? a.specializedType()
                                             : b.specializedType();
 
-    // If the specialized type doesn't exist in newBits, drop the
-    // specialization.
-    if (newBits & specType.m_bits) {
+    // If the specialized type doesn't exist in newBits, or newBits can be
+    // specialized as an object or as an array, then drop the specialization.
+    auto const either = (newBits & kAnyObj) && (newBits & kAnyArr);
+    if ((newBits & specType.m_bits) && !either) {
       return Type(newBits, newPtrKind, specType.m_extra);
     }
     return Type(newBits, newPtrKind);
@@ -938,7 +940,7 @@ namespace {
 
 Type setElemReturn(const IRInstruction* inst) {
   assert(inst->op() == SetElem || inst->op() == SetElemStk);
-  auto baseType = inst->src(minstrBaseIdx(inst))->type().strip();
+  auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
 
   // If the base is a Str, the result will always be a CountedStr (or
   // an exception). If the base might be a str, the result wil be

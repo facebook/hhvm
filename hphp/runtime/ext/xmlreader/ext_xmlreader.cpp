@@ -238,7 +238,7 @@ bool HHVM_METHOD(XMLReader, read) {
   if (data->m_ptr) {
     int ret = xmlTextReaderRead(data->m_ptr);
     if (ret == -1) {
-      raise_warning("An Error Occured while reading");
+      raise_warning("An Error Occurred while reading");
       return false;
     } else {
       return ret;
@@ -265,7 +265,7 @@ bool HHVM_METHOD(XMLReader, next,
       ret = xmlTextReaderNext(data->m_ptr);
     }
     if (ret == -1) {
-      raise_warning("An Error Occured while reading");
+      raise_warning("An Error Occurred while reading");
       return false;
     } else {
       return ret;

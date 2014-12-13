@@ -85,7 +85,7 @@ Variant HHVM_FUNCTION(fputs,
                       const String& data,
                       int64_t length = 0);
 Variant HHVM_FUNCTION(fprintf,
-                      const Resource& handle,
+                      const Variant& handle,
                       const String& format,
                       const Array& args = null_array);
 Variant HHVM_FUNCTION(vfprintf,

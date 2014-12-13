@@ -240,7 +240,6 @@ public:
   // This is special and doesn't use DECLARE_RESOURCE_ALLOCATION because it has
   // to live across requests. It is also the weirdest SweepableResourceData
   // as it can't use any PHP objects and deletes itself during sweep().
-  static const char *PersistentKey;
 
   enum SupportedMethod {
     MethodCloser,
@@ -354,7 +353,7 @@ public:
   /* when set, convert int/floats to strings */
   unsigned stringify:1;
 
-  /* the sum of the number of bits here and the bit fields preceeding should
+  /* the sum of the number of bits here and the bit fields preceding should
    * equal 32 */
   unsigned _reserved_flags:21;
 

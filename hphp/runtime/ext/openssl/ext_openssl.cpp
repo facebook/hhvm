@@ -163,14 +163,12 @@ public:
   ~Key() {
     if (m_key) EVP_PKEY_free(m_key);
   }
-  void sweep() override {
-    // Base class calls delete this, which should work.
-    SweepableResourceData::sweep();
-  }
 
   CLASSNAME_IS("OpenSSL key");
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
+
+  DECLARE_RESOURCE_ALLOCATION(Key)
 
   bool isPrivate() {
     assert(m_key);
@@ -297,12 +295,14 @@ public:
     }
 
     if (key) {
-      return Resource(new Key(key));
+      return Resource(newres<Key>(key));
     }
     // Is it okay to return a "null" resource?
     return Resource();
   }
 };
+
+IMPLEMENT_RESOURCE_ALLOCATION(Key)
 
 /**
  * Certificate Signing Request
@@ -320,14 +320,11 @@ public:
     X509_REQ_free(m_csr);
   }
 
-  void sweep() override {
-    // Base class calls delete this, which should work.
-    SweepableResourceData::sweep();
-  }
-
   CLASSNAME_IS("OpenSSL X.509 CSR");
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
+
+  DECLARE_RESOURCE_ALLOCATION(CSRequest)
 
   static X509_REQ *Get(const Variant& var, Resource &ocsr) {
     ocsr = Get(var);
@@ -350,12 +347,14 @@ public:
       X509_REQ *csr = PEM_read_bio_X509_REQ(in, NULL,NULL,NULL);
       BIO_free(in);
       if (csr) {
-        return Resource(new CSRequest(csr));
+        return Resource(newres<CSRequest>(csr));
       }
     }
     return Resource();
   }
 };
+
+IMPLEMENT_RESOURCE_ALLOCATION(CSRequest)
 
 class php_x509_request {
 public:
@@ -997,7 +996,7 @@ Variant HHVM_FUNCTION(openssl_csr_get_public_key, const Variant& csr) {
   X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
   if (pcsr == NULL) return false;
 
-  return Resource(new Key(X509_REQ_get_pubkey(pcsr)));
+  return Resource(newres<Key>(X509_REQ_get_pubkey(pcsr)));
 }
 
 Variant HHVM_FUNCTION(openssl_csr_get_subject, const Variant& csr,
@@ -1034,7 +1033,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
     if (req.priv_key == NULL) {
       req.generatePrivateKey();
       if (req.priv_key) {
-        okey = Resource(new Key(req.priv_key));
+        okey = Resource(newres<Key>(req.priv_key));
       }
     }
     if (req.priv_key == NULL) {
@@ -1056,7 +1055,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
         } else {
           ret = true;
           if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
-            ret = Resource(new CSRequest(csr));
+            ret = Resource(newres<CSRequest>(csr));
             csr = NULL;
           } else {
             raise_warning("Error signing request");
@@ -1140,7 +1139,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
     raise_warning("No memory");
     goto cleanup;
   }
-  onewcert = Resource(new Certificate(new_cert));
+  onewcert = Resource(newres<Certificate>(new_cert));
   /* Version 3 cert */
   if (!X509_set_version(new_cert, 2)) {
     goto cleanup;
@@ -1911,7 +1910,7 @@ Resource HHVM_FUNCTION(openssl_pkey_new,
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings) &&
       req.generatePrivateKey()) {
-    ret = Resource(new Key(req.priv_key));
+    ret = Resource(newres<Key>(req.priv_key));
   }
 
   php_openssl_dispose_config(&req);

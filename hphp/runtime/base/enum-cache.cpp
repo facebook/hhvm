@@ -71,6 +71,9 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
   Array names;
   auto const consts = klass->constants();
   for (size_t i = 0; i < numConstants; i++) {
+    if (consts[i].m_val.isAbstractConst()) {
+      continue;
+    }
     if (consts[i].m_class == klass) foundOnClass++;
     else if (!recurse) continue;
     Cell value = consts[i].m_val;

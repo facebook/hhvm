@@ -477,7 +477,7 @@ class mysqli {
    *
    * @param array $read - List of connections to check for outstanding
    *   results that can be read.
-   * @param array $error - List of connections on which an error occured,
+   * @param array $error - List of connections on which an error occurred,
    *   for example, query failure or lost connection.
    * @param array $reject - List of connections rejected because no
    *   asynchronous query has been run on for which the function could poll
@@ -2119,7 +2119,7 @@ function mysqli_ping(mysqli $link): ?bool {
  *
  * @param array $read - List of connections to check for outstanding
  *   results that can be read.
- * @param array $error - List of connections on which an error occured,
+ * @param array $error - List of connections on which an error occurred,
  *   for example, query failure or lost connection.
  * @param array $reject - List of connections rejected because no
  *   asynchronous query has been run on for which the function could poll

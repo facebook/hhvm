@@ -191,6 +191,11 @@ let rec debug stack env (r, ty) =
       Printf.printf "App %s" (snd x);
       o "<"; List.iter (fun x -> debug stack env x; o ", ") argl;
       o ">"
+  | Taccess ((_, root_str), id, ids) ->
+      let idl = id :: ids in
+      let str =
+        List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) root_str idl in
+      o str;
   | Tany -> o "X"
   | Tanon _ -> o "anonymous"
   | Tfun ft ->
@@ -349,6 +354,10 @@ let get_const env class_ mid =
   let dep = Dep.Const (class_.tc_name, mid) in
   Typing_deps.add_idep env.genv.droot dep;
   env, SMap.get mid class_.tc_consts
+
+let get_typeconst_type env class_ typeconst_name =
+  let tconst_opt = SMap.get typeconst_name class_.tc_typeconsts in
+  env, opt_map (fun tc -> tc.ce_type) tconst_opt
 
 (* Used to access "global constants". That is constants that were
  * introduced with "const X = ...;" at topelevel, or "define('X', ...);"

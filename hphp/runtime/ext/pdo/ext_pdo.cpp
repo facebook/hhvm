@@ -928,6 +928,10 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
 ///////////////////////////////////////////////////////////////////////////////
 // PDO
 
+namespace {
+thread_local PersistentResourceStore<std::string,PDOConnection*> s_connections;
+}
+
 const StaticString s_PDO("PDO");
 
 static void HHVM_METHOD(PDO, __construct, const String& dsn,
@@ -1009,9 +1013,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
     if (is_persistent) {
       shashkey = hashkey.detach();
       /* let's see if we have one cached.... */
-      data->m_dbh = dynamic_cast<PDOConnection*>
-        (g_persistentResources->get(PDOConnection::PersistentKey,
-                                  shashkey.data()));
+      data->m_dbh = s_connections.get(shashkey.toCppString());
 
       if (data->m_dbh.get()) {
         data->m_dbh->persistentRestore();
@@ -1067,8 +1069,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
   } else if (data->m_dbh.get()) {
     if (is_persistent) {
       assert(!shashkey.empty());
-      g_persistentResources->set(PDOConnection::PersistentKey, shashkey.data(),
-                                 data->m_dbh.get());
+      s_connections.set(shashkey.toCppString(), data->m_dbh.get());
       s_pdo_request_data->m_persistent_connections.insert(data->m_dbh.get());
     }
 
@@ -1309,7 +1310,7 @@ static Variant HHVM_METHOD(PDO, getattribute, int64_t attribute) {
   strcpy(data->m_dbh->error_code, PDO_ERR_NONE);
   data->m_dbh->query_stmt = nullptr;
 
-  /* handle generic PDO-level atributes */
+  /* handle generic PDO-level attributes */
   switch (attribute) {
   case PDO_ATTR_PERSISTENT:
     return (bool)data->m_dbh->is_persistent;
@@ -1739,6 +1740,9 @@ static bool really_register_bound_param(PDOBoundParam *param,
 
 static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
                                int *type_override) {
+  if (colno < 0 || colno >= stmt->column_count) {
+    return;
+  }
   PDOColumn *col = stmt->columns[colno].toResource().getTyped<PDOColumn>();
   int type = PDO_PARAM_TYPE(col->param_type);
   int new_type = type_override ? PDO_PARAM_TYPE(*type_override) : type;

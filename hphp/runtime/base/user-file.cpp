@@ -38,6 +38,16 @@ namespace HPHP {
 #define PHP_LOCK_UN 3
 #define PHP_LOCK_NB 4
 
+/* coerce the stream into some other form */
+  /* cast as a stdio FILE * */
+#define PHP_STREAM_AS_STDIO         0
+  /* cast as a POSIX fd or socketd */
+#define PHP_STREAM_AS_FD            1
+  /* cast as a socketd */
+#define PHP_STREAM_AS_SOCKETD       2
+  /* cast as fd/socket for select purposes */
+#define PHP_STREAM_AS_FD_FOR_SELECT 3
+
 StaticString s_stream_open("stream_open");
 StaticString s_stream_close("stream_close");
 StaticString s_stream_read("stream_read");
@@ -50,6 +60,7 @@ StaticString s_stream_truncate("stream_truncate");
 StaticString s_stream_lock("stream_lock");
 StaticString s_stream_stat("stream_stat");
 StaticString s_stream_metadata("stream_metadata");
+StaticString s_stream_cast("stream_cast");
 StaticString s_url_stat("url_stat");
 StaticString s_unlink("unlink");
 StaticString s_rename("rename");
@@ -76,6 +87,7 @@ UserFile::UserFile(Class *cls, const Variant& context /*= null */) : UserFSNode(
   m_Mkdir       = lookupMethod(s_mkdir.get());
   m_Rmdir       = lookupMethod(s_rmdir.get());
   m_StreamMetadata = lookupMethod(s_stream_metadata.get());
+  m_StreamCast  = lookupMethod(s_stream_cast.get());
 
   m_isLocal = true;
 
@@ -97,6 +109,57 @@ void UserFile::sweep() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+Resource UserFile::invokeCast(int castas) {
+  bool invoked = false;
+  Variant ret = invoke(
+    m_StreamCast,
+    s_stream_cast,
+    PackedArrayInit(1)
+      .append(castas)
+      .toArray(),
+    invoked
+  );
+
+  if (!invoked) {
+    raise_warning(
+      "%s::stream_cast is not implemented!",
+      m_cls->name()->data()
+    );
+    return Resource();
+  }
+  if (ret.toBoolean() == false) {
+    return Resource();
+  }
+  Resource handle = ret.toResource();
+  File *f = handle.getTyped<File>(true, true);
+  if (!f) {
+    raise_warning(
+      "%s::stream_cast must return a stream resource",
+      m_cls->name()->data()
+    );
+    return Resource();
+  }
+  if (f == this) {
+    raise_warning(
+      "%s::stream_cast must not return itself",
+      m_cls->name()->data()
+    );
+    return Resource();
+  }
+
+  return handle;
+}
+
+int UserFile::fd() const {
+  Resource handle = const_cast<UserFile*>(this)->invokeCast(
+    PHP_STREAM_AS_FD_FOR_SELECT);
+  if (handle.isNull()) {
+    return -1;
+  }
+  File *f = handle.getTyped<File>();
+  return f->fd();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

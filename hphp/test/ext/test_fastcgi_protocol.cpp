@@ -281,7 +281,7 @@ bool TestFastCGIProtocol::VerifyExchange(const TestMessageExchange& mx,
             int request_id = it->m_args.at("request_id").toInt32();
             bool result = it->m_args.at("result").toBoolean();
             if (session.testTransactionExists(request_id) != result) {
-              printf("Transaction %d existance test failure, "
+              printf("Transaction %d existence test failure, "
                      "expected=%d\n", request_id, (int) result);
               return false;
             }

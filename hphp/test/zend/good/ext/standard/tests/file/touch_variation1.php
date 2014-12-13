@@ -1,6 +1,6 @@
 <?php
 
-$filename = dirname(__FILE__)."/touch.dat";
+$filename = dirname(__FILE__)."/touch_variation1.dat";
 
 
 var_dump(touch($filename, 101));

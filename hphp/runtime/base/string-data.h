@@ -22,10 +22,12 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/word-mem.h"
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

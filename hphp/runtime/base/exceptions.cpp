@@ -74,12 +74,6 @@ void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
 
 //////////////////////////////////////////////////////////////////////
 
-ParseTimeFatalException::ParseTimeFatalException(const char* file, int line,
-                                                 const char* msg, ...)
-  : m_file(file), m_line(line) {
-  va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
-}
-
 FatalErrorException::FatalErrorException(int, const char *msg, ...) {
   va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
 }

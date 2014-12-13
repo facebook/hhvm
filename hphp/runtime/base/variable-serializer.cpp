@@ -566,8 +566,8 @@ void VariableSerializer::write(const Object& v) {
         }
         m_buf->append("{}");
       } else {
-        Array props = v->o_toArray(true);
-        pushObjectInfo(v->o_getClassName(), v->o_getId(), 'O');
+        auto props = v->toArray(true);
+        pushObjectInfo(v->getClassName(), v->getId(), 'O');
         props.serialize(this);
         popObjectInfo();
       }

@@ -58,10 +58,10 @@ namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Block;
-struct InliningDecider;
 struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
+struct HTS;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -117,6 +117,12 @@ struct TransContext {
   Offset initSpOffset;
   bool resumed;
   const Func* func;
+
+  /*
+   * If available, the RegionDesc that we're compiling.  Might be
+   * nullptr---only used for debug output.
+   */
+  const RegionDesc* regionDesc;
 };
 
 /*
@@ -187,65 +193,7 @@ struct Translator {
   Translator();
 
   /////////////////////////////////////////////////////////////////////////////
-  // Types.
-
-  enum TranslateResult {
-    Failure,
-    Retry,
-    Success
-  };
-
-  /*
-   * Data used by translateRegion() to pass information between retries.
-   */
-  struct RetryContext {
-    // Instructions that must be interpreted.
-    ProfSrcKeySet toInterp;
-
-    // Inlined regions.
-    std::unordered_map<ProfSrcKey,
-                       RegionDescPtr,
-                       ProfSrcKey::Hasher> inlines;
-  };
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Main translation API.
-
-  /*
-   * Start, end, or free a trace of code to be translated.
-   */
-  void traceStart(TransContext context);
-  void traceEnd();
-  void traceFree();
-
-  /*
-   * Translate `region'.
-   *
-   * The caller is expected to continue calling translateRegion() until either
-   * Success or Failure is returned.  Otherwise, Retry is returned, and the
-   * caller is responsible for threading the same RetryContext through to
-   * the retried translations.
-   */
-  TranslateResult translateRegion(const RegionDesc& region,
-                                  RetryContext& retry,
-                                  TransFlags trflags);
-
-  /*
-   * Stringify a TranslateResult.
-   */
-  static const char* ResultName(TranslateResult r);
-
-
-  /////////////////////////////////////////////////////////////////////////////
   // Accessors.
-
-  /*
-   * Get the IRTranslator for the current translation.
-   *
-   * This is reset whenever traceStart() is called.
-   */
-  IRTranslator* irTrans() const;
 
   /*
    * Get the Translator's ProfData.
@@ -266,10 +214,6 @@ struct Translator {
    */
   SrcRec* getSrcRec(SrcKey sk);
 
-  /*
-   * Current region being translated, if any.
-   */
-  const RegionDesc* region() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Configuration.
@@ -380,31 +324,6 @@ struct Translator {
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Other methods.
-
-public:
-  static bool liveFrameIsPseudoMain();
-
-private:
-  TranslateResult translateRegionImpl(const RegionDesc& region,
-                                      RetryContext& retry,
-                                      TransFlags trflags,
-                                      InliningDecider& inl,
-                                      const NormalizedInstruction* fcall);
-
-  void createBlockMap(const RegionDesc&    region,
-                      BlockIdToIRBlockMap& blockIdToIRBlock);
-
-  void setSuccIRBlocks(const RegionDesc&          region,
-                       RegionDesc::BlockId        srcBlockId,
-                       const BlockIdToIRBlockMap& blockIdToIRBlock);
-
-  void setIRBlock(RegionDesc::BlockId        blockId,
-                  const RegionDesc&          region,
-                  const BlockIdToIRBlockMap& blockIdToIRBlock);
-
-
-  /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 public:
@@ -414,11 +333,9 @@ private:
   int64_t m_createdTime;
 
   TransKind m_mode;
-  const RegionDesc* m_region{nullptr};
   std::unique_ptr<ProfData> m_profData;
   bool m_useAHot;
 
-  std::unique_ptr<IRTranslator> m_irTrans;
   SrcDB m_srcDB;
 
   // Translation DB.
@@ -571,7 +488,6 @@ enum OutTypeConstraints {
   OutFDesc,             // Blows away the current function desc
 
   OutUnknown,           // Not known at tracelet compile-time
-  OutPred,              // Unknown, but give prediction a whirl.
   OutPredBool,          // Boolean value predicted to be True or False
   OutCns,               // Constant; may be known at compile-time
   OutVUnknown,          // type is V(unknown)
@@ -656,13 +572,6 @@ struct InstrInfo {
 const InstrInfo& getInstrInfo(Op op);
 
 /*
- * Is the output of `inst' predicted?
- *
- * Flags on `inst' may be updated.
- */
-bool outputIsPredicted(NormalizedInstruction& inst);
-
-/*
  * If this returns true, we dont generate guards for any of the inputs to this
  * instruction.
  *
@@ -690,7 +599,8 @@ struct PropInfo {
 };
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
-                           Class* ctx, const Class*& baseClass,
+                           const Class* ctx,
+                           const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd);
 
@@ -706,13 +616,6 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
 * stack flavor safety).
  */
 bool isAlwaysNop(Op op);
-
-/*
- * Return true if we have absolutely no JIT support for `inst'.
- *
- * Always returns true if JitAlwaysInterpOne is set.
- */
-bool instrMustInterp(const NormalizedInstruction& inst);
 
 /*
  * Could `inst' clobber the locals in the environment of `caller'?
@@ -749,7 +652,7 @@ bool builtinFuncDestroysLocals(const Func* callee);
  */
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup,
-                                  Class* ctx);
+                                  const Class* ctx);
 
 /*
  * Return true if type is passed in/out of C++ as String&/Array&/Object&.
@@ -775,6 +678,12 @@ inline bool isNativeImplCall(const Func* funcd, int numArgs) {
  * in a non-default `f'.
  */
 int locPhysicalOffset(Location l, const Func* f = nullptr);
+
+/*
+ * Take a NormalizedInstruction and turn it into a call to the appropriate ht
+ * functions.  Updates the bytecode marker, handles interp one flags, etc.
+ */
+void translateInstr(HTS&, const NormalizedInstruction&);
 
 extern bool tc_dump();
 

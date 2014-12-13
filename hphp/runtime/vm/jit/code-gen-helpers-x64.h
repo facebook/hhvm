@@ -217,7 +217,7 @@ inline MemoryRef lookupDestructor(X64Assembler& a, PhysReg typeReg) {
   return baseless(typeReg*8 + table);
 }
 
-inline MemoryRef lookupDestructor(Vout& v, PhysReg typeReg) {
+inline Vptr lookupDestructor(Vout& v, Vreg typeReg) {
   auto const table = reinterpret_cast<intptr_t>(g_destructors);
   always_assert_flog(deltaFits(table, sz::dword),
     "Destructor function table is expected to be in the data "
@@ -229,8 +229,9 @@ inline MemoryRef lookupDestructor(Vout& v, PhysReg typeReg) {
                 (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
                 (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
                 "lookup of destructors depends on KindOf* values");
-  v << shrli{kShiftDataTypeToDestrIndex, typeReg, typeReg, v.makeReg()};
-  return baseless(typeReg*8 + table);
+  auto shiftedType = v.makeReg();
+  v << shrli{kShiftDataTypeToDestrIndex, typeReg, shiftedType, v.makeReg()};
+  return Vptr{Vreg{}, shiftedType, 8, safe_cast<int>(table)};
 }
 
 //////////////////////////////////////////////////////////////////////

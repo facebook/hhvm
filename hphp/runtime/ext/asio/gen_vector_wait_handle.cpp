@@ -68,13 +68,14 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
   Object exception;
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
 
-    Cell* current = tvAssertCell(deps->at(iter_pos));
+    auto current = tvAssertCell(deps->at(iter_pos));
     assert(current->m_type == KindOfObject);
     assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      deps->set(iter_pos, &child->getResult());
+      auto result = child->getResult();
+      deps->set(iter_pos, &result);
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
@@ -132,7 +133,8 @@ void c_GenVectorWaitHandle::onUnblocked() {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      m_deps->set(m_iterPos, &child->getResult());
+      auto result = child->getResult();
+      m_deps->set(m_iterPos, &result);
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {

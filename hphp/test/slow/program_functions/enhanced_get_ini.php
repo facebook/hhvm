@@ -3,7 +3,7 @@
 // arrays
 
 // Interp mode testing will make sure we aren't always using the optimized
-// version of ini_get (HPHP::JIT::HhbcTranslator::optimizedCallIniGet())
+// version of ini_get (optimizedCallIniGet())
 
 // First make sure we are working on normal primitive based bindings, where
 // something easily convertible to string is returned

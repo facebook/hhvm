@@ -1,0 +1,6 @@
+File "bad_input_type.php", line 10, characters 7-8:
+Invalid argument (Typing[4110])
+File "bad_input_type.php", line 4, characters 21-21:
+This is an int
+File "bad_input_type.php", line 10, characters 7-8:
+It is incompatible with a string

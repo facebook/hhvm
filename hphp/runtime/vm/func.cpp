@@ -728,24 +728,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Other methods.
-
-bool Func::shouldPGO() const {
-  if (!RuntimeOption::EvalJitPGO) return false;
-
-  // Non-cloned closures simply contain prologues that redispacth to
-  // cloned closures.  They don't contain a translation for the
-  // function entry, which is what triggers an Optimize retranslation.
-  // So don't generate profiling translations for them -- there's not
-  // much to do with PGO anyway here, since they just have prologues.
-  if (isClosureBody() && !isClonedClosure()) return false;
-
-  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
-  return attrs() & AttrHot;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // SharedData.
 
 Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,

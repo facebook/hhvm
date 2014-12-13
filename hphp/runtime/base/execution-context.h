@@ -236,6 +236,7 @@ public:
   bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
   void recordLastError(const Exception &e, int errnum = 0);
+  void clearLastError();
   bool onFatalError(const Exception &e); // returns handled
   bool onUnhandledException(Object e);
   ErrorState getErrorState() const { return m_errorState; }
@@ -359,7 +360,7 @@ OPCODES
 #undef O
 
   void contEnterImpl(IOP_ARGS);
-  void yield(IOP_ARGS, const Cell* key, const Cell& value);
+  void yield(IOP_ARGS, const Cell* key, Cell value);
   void asyncSuspendE(IOP_ARGS, int32_t iters);
   void asyncSuspendR(IOP_ARGS);
   void ret(IOP_ARGS);
@@ -409,7 +410,7 @@ public:
   Cell lookupClsCns(const StringData* cls,
                     const StringData* cns);
 
-  // Get the next outermost VM frame, even accross re-entry
+  // Get the next outermost VM frame, even across re-entry
   ActRec* getOuterVMFrame(const ActRec* ar);
 
   std::string prettyStack(const std::string& prefix) const;
@@ -551,7 +552,7 @@ public:
                   ctx.invName, argc, argv);
   }
   void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,
-                       const Cell& awaitResult);
+                       Cell awaitResult);
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 

@@ -65,7 +65,6 @@
 #include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -73,7 +72,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/resumable.h"
-#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
@@ -86,6 +84,7 @@
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/stats.h"
@@ -426,6 +425,14 @@ Array VarEnv::getDefinedVariables() const {
       ret.add(StrNR(sd).asString(), tvAsCVarRef(tv));
     }
   }
+  // ksort the array, result is independent of the hashtable implementation.
+  ArrayData* sorted = ret.get()->escalateForSort();
+  sorted->incRefCount();
+  sorted->ksort(0, true);
+  if (sorted != ret.get()) {
+    ret = sorted;
+  }
+  sorted->decRefCount();
 
   return ret;
 }
@@ -683,7 +690,7 @@ static std::string toStringElm(const TypedValue* tv) {
       os << tv->m_data.pobj;
       print_count();
       os << ":Object("
-         << tv->m_data.pobj->o_getClassName().get()->data()
+         << tv->m_data.pobj->getClassName().get()->data()
          << ")";
       continue;
     case KindOfResource:
@@ -1489,7 +1496,7 @@ static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
   stack.popAR();
 }
 
-static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell&args,
+static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
                                                Stack& stack, int nregular) {
   assert(ar != nullptr && ar->hasInvName());
   assert(!cellIsNull(&args));
@@ -1561,7 +1568,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell&args,
 // contents of args are to be added; for call_user_func_array, this is
 // always 0; for unpacked arguments, it may be greater if normally passed
 // params precede the unpack.
-static bool prepareArrayArgs(ActRec* ar, const Cell& args,
+static bool prepareArrayArgs(ActRec* ar, const Cell args,
                              Stack& stack,
                              int nregular,
                              bool doCufRefParamChecks,
@@ -2220,7 +2227,7 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
 
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
                                        ObjectData* freeObj,
-                                       const Cell& awaitResult) {
+                                       const Cell awaitResult) {
   assert(tl_regState == VMRegState::CLEAN);
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
@@ -2451,6 +2458,13 @@ void ExecutionContext::recordLastError(const Exception &e, int errnum) {
   m_lastErrorNum = errnum;
   m_lastErrorPath = String::attach(getContainingFileName());
   m_lastErrorLine = getLine();
+}
+
+void ExecutionContext::clearLastError() {
+  m_lastError = String();
+  m_lastErrorNum = 0;
+  m_lastErrorPath = staticEmptyString();
+  m_lastErrorLine = 0;
 }
 
 /*
@@ -2869,8 +2883,13 @@ static inline void lookup_sprop(ActRec* fp,
                                 bool& accessible) {
   assert(clsRef->m_type == KindOfClass);
   name = lookup_name(key);
-  Class* ctx = arGetContextClass(fp);
-  val = clsRef->m_data.pcls->getSProp(ctx, name, visible, accessible);
+  auto const ctx = arGetContextClass(fp);
+
+  auto const lookup = clsRef->m_data.pcls->getSProp(ctx, name);
+
+  val = lookup.prop;
+  visible = lookup.prop != nullptr;
+  accessible = lookup.accessible;
 }
 
 static inline void lookupClsRef(TypedValue* input,
@@ -3141,12 +3160,12 @@ OPTBLD_INLINE bool ExecutionContext::memberHelperPre(
     goto lcodeSprop;
 
   lcodeSprop: {
-    bool visible, accessible;
     assert(cref->m_type == KindOfClass);
-    const Class* class_ = cref->m_data.pcls;
-    StringData* name = lookup_name(pname);
-    loc = class_->getSProp(ctx, name, visible, accessible);
-    if (!(visible && accessible)) {
+    auto const class_ = cref->m_data.pcls;
+    auto const name = lookup_name(pname);
+    auto const lookup = class_->getSProp(ctx, name);
+    loc = lookup.prop;
+    if (!lookup.prop || !lookup.accessible) {
       raise_error("Invalid static property access: %s::%s",
                   class_->name()->data(),
                   name->data());
@@ -3790,7 +3809,7 @@ OPTBLD_INLINE void ExecutionContext::iopAbs(IOP_ARGS) {
   NEXT();
   auto c1 = vmStack().topC();
 
-  tvAsVariant(c1) = f_abs(tvAsCVarRef(c1));
+  tvAsVariant(c1) = HHVM_FN(abs)(tvAsCVarRef(c1));
 }
 
 template<class Op>
@@ -3930,9 +3949,9 @@ OPTBLD_INLINE void ExecutionContext::iopSqrt(IOP_ARGS) {
 
   if (c1->m_type == KindOfInt64) {
     c1->m_type = KindOfDouble;
-    c1->m_data.dbl = f_sqrt(c1->m_data.num);
+    c1->m_data.dbl = HHVM_FN(sqrt)(c1->m_data.num);
   } else if (c1->m_type == KindOfDouble) {
-    c1->m_data.dbl = f_sqrt(c1->m_data.dbl);
+    c1->m_data.dbl = HHVM_FN(sqrt)(c1->m_data.dbl);
   }
 
   if (c1->m_type != KindOfDouble) {
@@ -4311,7 +4330,7 @@ OPTBLD_INLINE void ExecutionContext::iopSwitch(IOP_ARGS) {
           return;
 
         case KindOfObject:
-          intval = val->m_data.pobj->o_toInt64();
+          intval = val->m_data.pobj->toInt64();
           tvDecRef(val);
           return;
 
@@ -4391,18 +4410,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   }
 
   if (isProfileRequest()) {
-    auto const f = vmfp()->func();
-    profileIncrementFuncCounter(f);
-    if (!(f->isPseudoMain() || f->isClosureBody() || f->isMagic() ||
-          Func::isSpecial(f->name()))) {
-      recordType(TypeProfileKey(TypeProfileKey::MethodName, f->name()),
-                 retval.m_type);
-    }
-  }
-
-  // Type profile return value.
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    profileOneArgument(retval, -1, vmfp()->func());
+    profileIncrementFuncCounter(vmfp()->func());
   }
 
   // Grab caller info from ActRec.
@@ -4637,26 +4645,14 @@ OPTBLD_INLINE void ExecutionContext::iopCGetG(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopCGetS(IOP_ARGS) {
   StringData* name;
   GETS(false);
-  if (isProfileRequest() && name && name->isStatic()) {
-    recordType(TypeProfileKey(TypeProfileKey::StaticPropName, name),
-               vmStack().top()->m_type);
-  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopCGetM(IOP_ARGS) {
-  PC oldPC = pc;
   NEXT();
   DECLARE_GETHELPER_ARGS
   getHelper(GETHELPER_ARGS);
   if (tvRet->m_type == KindOfRef) {
     tvUnbox(tvRet);
-  }
-  assert(hasImmVector(*reinterpret_cast<const Op*>(oldPC)));
-  const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
-  StringData* name;
-  MemberCode mc;
-  if (immVec.decodeLastMember(vmfp()->unit(), name, mc)) {
-    recordType(TypeProfileKey(mc, name), vmStack().top()->m_type);
   }
 }
 
@@ -6122,9 +6118,6 @@ OPTBLD_INLINE void ExecutionContext::iopFCall(IOP_ARGS) {
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    profileAllArguments(ar);
-  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
@@ -6143,9 +6136,6 @@ OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    profileAllArguments(ar);
-  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
@@ -6899,6 +6889,12 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   assert(!fp->resumed());
   assert(func->isGenerator());
 
+  /*
+   * We must call the FunctionSuspend hook /before/ allocating the generator,
+   * so it doesn't have to decref it.
+   */
+  EventHook::FunctionSuspend(fp, false);
+
   // Create the {Async,}Generator object. Create takes care of copying local
   // variables and iterators.
   auto const gen = func->isAsync()
@@ -6906,12 +6902,6 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
         c_AsyncGenerator::Create(fp, numSlots, nullptr, resumeOffset))
     : static_cast<BaseGenerator*>(
         c_Generator::Create<false>(fp, numSlots, nullptr, resumeOffset));
-
-  // Call the FunctionSuspend hook. Keep the generator on the stack so that
-  // the unwinder could free it if the hook fails.
-  vmStack().pushObjectNoRc(gen);
-  EventHook::FunctionSuspend(gen->actRec(), false);
-  vmStack().discard();
 
   // Grab caller info from ActRec.
   ActRec* sfp = fp->sfp();
@@ -6974,12 +6964,14 @@ OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::yield(IOP_ARGS,
                                            const Cell* key,
-                                           const Cell& value) {
+                                           const Cell value) {
   auto const fp = vmfp();
   auto const func = fp->func();
   auto const resumeOffset = func->unit()->offsetOf(pc);
   assert(fp->resumed());
   assert(func->isGenerator());
+
+  EventHook::FunctionSuspend(fp, true);
 
   if (!func->isAsync()) {
     // Non-async generator.
@@ -7001,8 +6993,6 @@ OPTBLD_INLINE void ExecutionContext::yield(IOP_ARGS,
       assert(!fp->sfp());
     }
   }
-
-  EventHook::FunctionSuspend(fp, true);
 
   // Grab caller info from ActRec.
   ActRec* sfp = fp->sfp();
@@ -7535,24 +7525,28 @@ void ExecutionContext::pushVMState(Cell* savedSP) {
     return;
   }
 
-  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP, vmMInstrState() };
   TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), vmFirstAR(), savedSP);
+  auto& savedVM = m_nestedVMs.alloc_back();
+  savedVM.pc = vmpc();
+  savedVM.fp = vmfp();
+  savedVM.firstAR = vmFirstAR();
+  savedVM.sp = savedSP;
+  savedVM.mInstrState = vmMInstrState();
+  m_nesting++;
 
   if (debug && savedVM.fp &&
       savedVM.fp->m_func &&
       savedVM.fp->m_func->unit()) {
     // Some asserts and tracing.
     const Func* func = savedVM.fp->m_func;
-    (void) /* bound-check asserts in offsetOf */
-      func->unit()->offsetOf(savedVM.pc);
+    /* bound-check asserts in offsetOf */
+    func->unit()->offsetOf(savedVM.pc);
     TRACE(3, "pushVMState: saving frame %s pc %p off %d fp %p\n",
           func->name()->data(),
           savedVM.pc,
           func->unit()->offsetOf(savedVM.pc),
           savedVM.fp);
   }
-  m_nestedVMs.push_back(savedVM);
-  m_nesting++;
 }
 
 void ExecutionContext::popVMState() {
@@ -7672,6 +7666,10 @@ void ExecutionContext::requestExit() {
   if (m_globalVarEnv) {
     smart_delete(m_globalVarEnv);
     m_globalVarEnv = 0;
+  }
+
+  if (!m_lastError.isNull()) {
+    clearLastError();
   }
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr, nullptr);

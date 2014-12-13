@@ -251,12 +251,6 @@ struct FrameStateMgr final : private LocalStateHook {
   bool hasStateFor(Block*) const;
 
   /*
-   * Return an unprocessed predecessor of the given block, or nullptr if none
-   * exists.
-   */
-  Block* findUnprocessedPred(Block*) const;
-
-  /*
    * Starts tracking state for a block and reloads any previously saved
    * state. Can set local values to null if hitting a block with an
    * unprocessed predecessor, so we pass in an optional LocalStateHook. The
@@ -325,23 +319,6 @@ struct FrameStateMgr final : private LocalStateHook {
   TypeSourceSet localTypeSources(uint32_t id) const;
 
   /*
-   * Info about state leaving a block. The block must have already been
-   * processed.
-   *
-   * TODO(#5428663, #4810319): this function returns incorrect state for blocks
-   * that end with CheckStk.  It's only used for insertSPPhi, which will be
-   * removed when StkPtrs aren't threaded around anymore; but do not add new
-   * uses.
-   */
-  SSATmp* spLeavingBlock(Block*) const;
-
-  /*
-   * Marks a block as visited in the current iteration.
-   * FrameStateMgr::startBlock does this automatically.
-   */
-  void markVisited(const Block*);
-
-  /*
    * Call a function with const access to the LocalState& for each local we're
    * tracking.
    */
@@ -358,7 +335,7 @@ struct FrameStateMgr final : private LocalStateHook {
 private:
   struct BlockState {
     jit::vector<FrameState> in;
-    jit::vector<FrameState> out;
+    folly::Optional<jit::vector<FrameState>> paused;
   };
 
   enum class Status : uint8_t {
@@ -395,7 +372,6 @@ private:
 private:
   bool checkInvariants() const;
   bool save(Block*);
-  bool isVisited(const Block*) const;
   jit::vector<LocalState>& locals(unsigned inlineIdx);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
@@ -436,11 +412,6 @@ private:
    * Saved snapshots of the incoming and outgoing state of blocks.
    */
   jit::hash_map<Block*,BlockState> m_states;
-
-  /*
-   * Set of visited blocks during the traversal of the unit.
-   */
-  boost::dynamic_bitset<> m_visited;
 };
 
 //////////////////////////////////////////////////////////////////////

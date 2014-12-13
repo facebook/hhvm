@@ -67,6 +67,9 @@ public:
 
   ~SmartPtr() {
     decRefPtr(m_px);
+    if (debug) {
+      m_px = reinterpret_cast<T*>(0xdeadbeeffaceb004);
+    }
   }
 
   /**

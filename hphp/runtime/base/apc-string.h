@@ -67,11 +67,11 @@ struct APCString {
   }
 
   StringData* getStringData() {
-    return &m_data;
+    return &m_str;
   }
 
   const StringData* getStringData() const {
-    return &m_data;
+    return &m_str;
   }
 
 private:
@@ -96,7 +96,7 @@ private:
 private:
   APCHandle m_handle;
   union {
-    StringData m_data;
+    StringData m_str;
     uintptr_t dummy[sizeof(StringData) / sizeof(uintptr_t)];
   };
 };

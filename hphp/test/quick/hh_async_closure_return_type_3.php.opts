@@ -1,1 +1,1 @@
--vEval.CheckReturnTypeHints=3 -vEval.SoftClosureReturnTypeHints=false
+-vEval.CheckReturnTypeHints=3

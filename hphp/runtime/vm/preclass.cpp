@@ -160,25 +160,28 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
 // PreClass::Const.
 
 PreClass::Const::Const(const StringData* name,
-                       const StringData* typeConstraint,
-                       const TypedValue& val,
+                       const TypedValueAux& val,
                        const StringData* phpCode)
   : m_name(name)
-  , m_typeConstraint(typeConstraint)
   , m_val(val)
   , m_phpCode(phpCode)
 {}
 
 void PreClass::Const::prettyPrint(std::ostream& out,
                                   const PreClass* preClass) const {
-  out << "Constant " << preClass->name()->data() << "::" << m_name->data()
-      << " = ";
+  if (isAbstract()) {
+    out << "Constant (abstract) "
+        << preClass->name()->data() << "::" << m_name->data()
+        << std::endl;
+    return;
+  }
+  out << "Constant " << preClass->name()->data() << "::" << m_name->data();
   if (m_val.m_type == KindOfUninit) {
-    out << "<non-scalar>";
+    out << " = " << "<non-scalar>";
   } else {
     std::stringstream ss;
     staticStreamer(&m_val, ss);
-    out << ss.str();
+    out << " = " << ss.str();
   }
   out << std::endl;
 }

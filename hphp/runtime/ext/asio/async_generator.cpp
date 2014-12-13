@@ -96,7 +96,7 @@ c_AsyncGenerator::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
 
 c_StaticWaitHandle*
 c_AsyncGenerator::yield(Offset resumeOffset,
-                        const Cell* key, const Cell& value) {
+                        const Cell* key, const Cell value) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
   setState(State::Started);

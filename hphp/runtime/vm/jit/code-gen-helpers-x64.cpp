@@ -331,10 +331,11 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
     return;
   }
   case CppCall::Kind::Destructor:
-    // this movzbl is only needed because callers aren't
-    // required to zero-extend the type.
-    v << movzbl{target.reg(), target.reg()};
-    auto dtor_ptr = lookupDestructor(v, target.reg());
+    // this movzbq is only needed because callers aren't required to
+    // zero-extend the type.
+    auto zextType = v.makeReg();
+    v << movzbq{target.reg(), zextType};
+    auto dtor_ptr = lookupDestructor(v, zextType);
     v << callm{dtor_ptr, args};
     return;
   }
@@ -415,10 +416,12 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Fixup fixup) {
   auto const sf = emitTestSurpriseFlags(v);
   v << jcc{CC_NZ, sf, {done, cold}};
 
+  auto helper = (void(*)())mcg->tx().uniqueStubs.functionEnterHelper;
   vcold = cold;
-  vcold << copy{rVmFp, argNumToRegName[0]};
-  vcold << call{mcg->tx().uniqueStubs.functionEnterHelper, argSet(1)};
-  vcold << syncpoint{Fixup{fixup.pcOffset, fixup.spOffset}};
+  vcold << vcall{CppCall::direct(helper),
+                 v.makeVcallArgs({{rVmFp}}),
+                 v.makeTuple({}),
+                 Fixup{fixup.pcOffset, fixup.spOffset}};
   vcold << jmp{done};
   v = done;
 }
@@ -470,16 +473,16 @@ void copyTV(Vout& v, Vloc src, Vloc dst) {
   auto src_arity = src.numAllocated();
   auto dst_arity = dst.numAllocated();
   if (dst_arity == 2) {
-    assert(src_arity == 2);
+    always_assert(src_arity == 2);
     v << copy2{src.reg(0), src.reg(1), dst.reg(0), dst.reg(1)};
     return;
   }
-  assert(dst_arity == 1);
+  always_assert(dst_arity == 1);
   if (src_arity == 2 && dst.isFullSIMD()) {
     pack2(v, src.reg(0), src.reg(1), dst.reg(0));
     return;
   }
-  assert(src_arity >= 1);
+  always_assert(src_arity >= 1);
   v << copy{src.reg(0), dst.reg(0)};
 }
 
@@ -495,9 +498,8 @@ void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
 Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
   if (!src->isA(Type::Bool)) return reg;
   // zero-extend the bool from a byte to a quad
-  // note: movzbl actually extends the value to 64 bits.
   auto extended = v.makeReg();
-  v << movzbl{reg, extended};
+  v << movzbq{reg, extended};
   return extended;
 }
 

@@ -26,8 +26,8 @@
 #include <locale.h>
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-protocol.h"
-#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include <folly/Unicode.h>
 #include "hphp/runtime/base/request-event-handler.h"
@@ -360,7 +360,7 @@ String HHVM_FUNCTION(str_shuffle,
   int left   = ret.size();
 
   while (--left) {
-    int idx = f_rand(0, left);
+    int idx = HHVM_FN(rand)(0, left);
     if (idx != left) {
       char temp = buf[left];
       buf[left] = buf[idx];

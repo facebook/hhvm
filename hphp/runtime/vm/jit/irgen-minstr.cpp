@@ -1199,7 +1199,8 @@ void emitMPre(MTS& env) {
     // If we're using an MInstrState, all the default-created catch blocks for
     // exception paths from here out will need to clean up the tvRef{,2}
     // storage, so install a custom catch creator.
-    env.irb.setCatchCreator([&] { return makeMISCatch(env); });
+    auto const penv = &env;
+    env.irb.setCatchCreator([penv] { return makeMISCatch(*penv); });
   }
 
   /*

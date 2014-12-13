@@ -136,8 +136,8 @@ static String HHVM_STATIC_METHOD(Phar, running, bool retphar = true) {
   CallerFrame cf;
   const ActRec* ar = cf.actRecForArgs();
   const std::string filepath = ar->m_func->unit()->filepath()->toCppString();
-  constexpr char * const kPharScheme = "phar://";
-  constexpr char * const kPharExt = ".phar";
+  constexpr const char * const kPharScheme = "phar://";
+  constexpr const char * const kPharExt = ".phar";
   if(filepath.length() > std::strlen(kPharScheme)) {
     if(filepath.compare(0, std::strlen(kPharScheme), kPharScheme) == 0) {
       std::size_t pharExtPos = filepath.find(kPharExt);

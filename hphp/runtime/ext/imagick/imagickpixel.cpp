@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/imagick/ext_imagick.h"
+#include "hphp/runtime/base/array-init.h"
 
 #include <utility>
 

@@ -32,6 +32,7 @@
 
 #include <folly/String.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file.h"
 
 namespace HPHP {

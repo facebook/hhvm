@@ -19,6 +19,7 @@
 
 #include <vector>
 
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
 using std::pair;

@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include <algorithm>
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"

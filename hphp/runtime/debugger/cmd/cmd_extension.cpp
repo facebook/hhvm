@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_extension.h"
 #include <set>
 #include <vector>
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/util/text-art.h"
 

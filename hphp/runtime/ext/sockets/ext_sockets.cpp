@@ -35,6 +35,8 @@
 #include <folly/SocketAddress.h>
 
 #include "hphp/util/network.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/server/server-stats.h"

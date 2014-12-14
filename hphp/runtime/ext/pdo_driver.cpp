@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/pdo_sqlite.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -273,4 +274,3 @@ bool PDOStatement::cursorCloser() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -19,6 +19,8 @@
 
 #include <map>
 
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/ext/ext_simplexml.h"

@@ -18,7 +18,9 @@
 #include "hphp/runtime/ext/filter/ext_filter.h"
 #include "hphp/runtime/ext/filter/logical_filters.h"
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/php-globals.h"
 
 namespace HPHP {

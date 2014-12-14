@@ -20,6 +20,7 @@
 
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/system/systemlib.h"

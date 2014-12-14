@@ -15,14 +15,16 @@
 */
 
 #include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/transport.h"
-#include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/base/tv-arith.h"
-#include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/base/config.h"
 
 using std::map;
 

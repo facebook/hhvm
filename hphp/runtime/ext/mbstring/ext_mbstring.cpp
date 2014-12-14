@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/process/ext_process.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/ini-setting.h"

@@ -19,6 +19,8 @@
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 

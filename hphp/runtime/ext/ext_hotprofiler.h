@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_HOTPROFILER_H_
 
 #include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/base/request-local.h"
 
 #ifdef __FreeBSD__
 #include <sys/param.h>

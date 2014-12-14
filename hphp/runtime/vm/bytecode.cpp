@@ -31,6 +31,8 @@
 
 #include <folly/String.h>
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-arith.h"

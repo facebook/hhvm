@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include <hphp/runtime/ext/asio/static_wait_handle.h>
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 

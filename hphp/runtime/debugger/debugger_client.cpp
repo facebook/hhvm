@@ -20,6 +20,8 @@
 
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/debugger/cmd/all.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/string-util.h"

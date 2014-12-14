@@ -16,7 +16,9 @@
 */
 #include "hphp/runtime/ext/array/ext_array.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"

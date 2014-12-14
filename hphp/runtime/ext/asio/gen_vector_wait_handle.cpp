@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
 
+#include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio_blockable.h"

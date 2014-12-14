@@ -17,7 +17,10 @@
 
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/system/constants.h"

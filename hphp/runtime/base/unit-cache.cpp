@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"

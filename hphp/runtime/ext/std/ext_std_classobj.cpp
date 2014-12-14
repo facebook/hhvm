@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

@@ -18,6 +18,7 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <sys/param.h>
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"

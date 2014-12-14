@@ -17,11 +17,13 @@
 
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 

@@ -339,6 +339,8 @@ static void outputClassMap(const fbstring &invocation_trace,
   brandOutputFile(out, "gen-class-map.cpp", invocation_trace);
 
   out << "#include \"hphp/runtime/base/base-includes.h\"\n"
+      << "#include \"hphp/runtime/base/externals.h\"\n"
+      << "#include \"hphp/runtime/base/plain-file.h\"\n"
       << "#include \"hphp/system/constants.h\"\n"
       << "#include \"hphp/runtime/ext/ext.h\"\n"
       << "namespace HPHP {\n";

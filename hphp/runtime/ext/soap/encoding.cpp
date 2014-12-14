@@ -25,7 +25,11 @@
 #include "hphp/runtime/ext/soap/ext_soap.h"
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {

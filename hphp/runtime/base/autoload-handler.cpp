@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/ext/string/ext_string.h"

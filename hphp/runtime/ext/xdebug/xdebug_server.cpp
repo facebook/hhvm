@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/timer.h"

@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/async_generator.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/ext/asio/asio_session.h"

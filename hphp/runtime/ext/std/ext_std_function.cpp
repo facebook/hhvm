@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_closure.h"

@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/base/zend-math.h"

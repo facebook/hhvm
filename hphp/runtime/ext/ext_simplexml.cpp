@@ -17,7 +17,9 @@
 
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include <vector>
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/domdocument/ext_domdocument.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"

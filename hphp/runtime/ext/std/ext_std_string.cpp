@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/std/ext_std_string.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-printf.h"
 
 namespace HPHP {

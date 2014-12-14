@@ -15,7 +15,9 @@
 */
 
 #include "hphp/test/ext/test.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/apc-file-storage.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/compiler/option.h"
 
 using namespace HPHP;

@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/ext/zlib/zip-file.h"

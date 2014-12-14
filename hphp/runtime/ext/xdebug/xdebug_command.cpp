@@ -21,7 +21,9 @@
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
 #include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"

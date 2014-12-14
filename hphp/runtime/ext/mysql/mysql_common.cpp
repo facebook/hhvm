@@ -31,6 +31,8 @@
 #include "hphp/util/db-mysql.h"
 #include "hphp/util/text-util.h"
 
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"

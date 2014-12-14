@@ -19,6 +19,9 @@
 
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/plain-file.h"

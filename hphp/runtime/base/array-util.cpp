@@ -16,8 +16,10 @@
 
 #include "hphp/runtime/base/array-util.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"

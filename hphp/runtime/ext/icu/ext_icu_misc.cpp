@@ -1,5 +1,7 @@
 #include "hphp/runtime/ext/icu/icu.h"
 
+#include "hphp/runtime/base/array-init.h"
+
 #include <unicode/uidna.h>
 #include <unicode/parseerr.h>
 

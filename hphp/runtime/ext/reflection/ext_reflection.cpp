@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"

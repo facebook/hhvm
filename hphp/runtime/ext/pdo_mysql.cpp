@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/network.h"
 #include "mysql.h"

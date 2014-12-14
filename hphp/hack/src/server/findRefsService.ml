@@ -38,7 +38,8 @@ let get_child_classes_files workers files_info class_name =
     let cid = snd class_.Nast.c_name in
     let cid_hash = Typing_deps.Dep.make (Typing_deps.Dep.Class cid) in
     let extend_deps =
-        Typing_compare.get_extend_deps cid_hash (ISet.singleton cid_hash)
+      Typing_compare.get_extend_deps cid_hash
+        (Typing_deps.DepSet.singleton cid_hash)
     in
     Typing_deps.get_files extend_deps
   | _ ->

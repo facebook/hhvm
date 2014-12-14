@@ -16,13 +16,14 @@
  * work to do. We need calculate what must be re-checked.
  *)
 (*****************************************************************************)
+open Typing_deps
 open Utils
 
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)
 (*****************************************************************************)
 let otf_neutral =  [], Relative_path.Set.empty
-let compute_deps_neutral = ISet.empty, ISet.empty
+let compute_deps_neutral = DepSet.empty, DepSet.empty
 
 (*****************************************************************************)
 (* This is the place where we are going to put everything necessary for
@@ -87,8 +88,8 @@ let compute_classes_deps old_classes new_classes acc classes =
   let rdd, rdc = 
     Typing_compare.get_classes_deps old_classes new_classes classes
   in
-  let to_redecl = ISet.union rdd to_redecl in
-  let to_recheck = ISet.union rdc to_recheck in
+  let to_redecl = DepSet.union rdd to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
   to_redecl, to_recheck
 
 (*****************************************************************************)
@@ -99,8 +100,8 @@ let compute_classes_deps old_classes new_classes acc classes =
 
 let compute_funs_deps old_funs (to_redecl, to_recheck) funs =
   let rdd, rdc = Typing_compare.get_funs_deps old_funs funs in
-  let to_redecl = ISet.union rdd to_redecl in
-  let to_recheck = ISet.union rdc to_recheck in
+  let to_redecl = DepSet.union rdd to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
   to_redecl, to_recheck
 
 (*****************************************************************************)
@@ -111,8 +112,8 @@ let compute_funs_deps old_funs (to_redecl, to_recheck) funs =
 
 let compute_types_deps old_types (to_redecl, to_recheck) types =
   let rdc = Typing_compare.get_types_deps old_types types in
-  let to_redecl = ISet.union rdc to_redecl in
-  let to_recheck = ISet.union rdc to_recheck in
+  let to_redecl = DepSet.union rdc to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
   to_redecl, to_recheck
 
 (*****************************************************************************)
@@ -123,8 +124,8 @@ let compute_types_deps old_types (to_redecl, to_recheck) types =
 
 let compute_gconsts_deps old_gconsts (to_redecl, to_recheck) gconsts =
   let rdd, rdc = Typing_compare.get_gconsts_deps old_gconsts gconsts in
-  let to_redecl = ISet.union rdd to_redecl in
-  let to_recheck = ISet.union rdc to_recheck in
+  let to_redecl = DepSet.union rdd to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
   to_redecl, to_recheck
 
 (*****************************************************************************)
@@ -184,7 +185,7 @@ let compute_deps ~update_pos nenv fast filel =
   let infol = List.map (fun fn -> Relative_path.Map.find_unsafe fn fast) filel in
   let names = List.fold_left FileInfo.merge_names FileInfo.empty_names infol in
   let { FileInfo.n_classes; n_funs; n_types; n_consts } = names in
-  let acc = ISet.empty, ISet.empty in
+  let acc = DepSet.empty, DepSet.empty in
   (* Fetching everything at once is faster *)
   let old_funs = Typing_env.Funs.get_old_batch n_funs in
   let acc = compute_funs_deps old_funs acc n_funs in
@@ -236,7 +237,7 @@ let merge_on_the_fly (errorl1, failed1) (errorl2, failed2) =
   errorl1 @ errorl2, Relative_path.Set.union failed1 failed2
 
 let merge_compute_deps (to_redecl1, to_recheck1) (to_redecl2, to_recheck2) =
-  ISet.union to_redecl1 to_redecl2, ISet.union to_recheck1 to_recheck2
+  DepSet.union to_redecl1 to_redecl2, DepSet.union to_recheck1 to_recheck2
 
 (*****************************************************************************)
 (* The parallel worker *)

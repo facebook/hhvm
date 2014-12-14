@@ -284,10 +284,10 @@ module Program : Server.SERVER_PROGRAM = struct
   let parse_options = ServerArgs.parse_options
 
   let marshal chan =
-    Marshal.to_channel chan !Typing_deps.ifiles [];
+    Typing_deps.marshal chan;
     HackSearchService.SS.MasterApi.marshal chan
 
   let unmarshal chan =
-    Typing_deps.ifiles := Marshal.from_channel chan;
+    Typing_deps.unmarshal chan;
     HackSearchService.SS.MasterApi.unmarshal chan
 end

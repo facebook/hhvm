@@ -127,9 +127,6 @@ let rec main args retries =
       let command = ServerMsg.IDENTIFY_FUNCTION (content, line, char) in
       ServerMsg.cmd_to_channel oc command;
       print_all ic
-    | MODE_SHOW_TYPES file ->
-        Printf.printf "option disabled (sorry!)";
-        exit 0
     | MODE_TYPE_AT_POS arg ->
       let tpos = Str.split (Str.regexp ":") arg in
       let fn, line, char =

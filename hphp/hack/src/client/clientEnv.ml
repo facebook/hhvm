@@ -11,7 +11,6 @@
 
 type client_mode =
 | MODE_LIST_FILES
-| MODE_SHOW_TYPES of string
 | MODE_TYPE_AT_POS of string
 | MODE_AUTO_COMPLETE
 | MODE_STATUS

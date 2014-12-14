@@ -219,7 +219,7 @@ and instantiate_ p subst env = function
           env, Fvariadic (min, (name, var_ty))
         | _ -> env, ft.ft_arity
       in
-      let env, ret  = instantiate subst env ft.ft_ret in
+      let env, ret = instantiate subst env ft.ft_ret in
       let params = List.map2 (fun x y -> x, y) names params in
       env, Tfun { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
   | Tabstract (x, tyl, tcstr) ->

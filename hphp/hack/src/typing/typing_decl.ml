@@ -150,7 +150,8 @@ let get_class_parents_and_traits env class_nast =
     List.fold_left (get_class_parent_or_trait class_nast) acc class_nast.c_xhp_attr_uses in
   env, parents, is_complete
 
-let merge_single_req req_name env subst inc_req_ty existing_req_opt incoming_pos =
+let merge_single_req req_name env subst inc_req_ty existing_req_opt
+    incoming_pos =
   match existing_req_opt with
     | Some ex_req_ty ->
       (* If multiple uses/impls require the *exact same* ancestor, ... *)
@@ -258,7 +259,7 @@ let declared_class_req class_nast impls (env, requirements, req_extends) hint =
       (* since the req is declared on this class, we should
        * emphatically *not* substitute: a require extends Foo<T> is
        * going to be this class's <T> *)
-      let subst = SMap.empty in
+      let subst = Inst.make_subst [] [] in
       let ex_ty_opt = SMap.get req_name requirements in
       let env, merged = merge_single_req req_name env subst
         req_ty ex_ty_opt req_pos in

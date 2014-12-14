@@ -7,7 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open Utils
 open Typing_defs
 
 module Reason = Typing_reason
@@ -40,21 +39,18 @@ let rec expand_typedef_ ?force_expand:(force_expand=false) seen env r x argl =
     let n = string_of_int n in
     Errors.type_param_arity pos x n
   end;
-  let subst = ref SMap.empty in
-  Utils.iter2_shortest begin fun (_, (_, param), _) ty ->
-    subst := SMap.add param ty !subst
-  end tparaml argl;
+  let subst = Inst.make_subst tparaml argl in
   let env, expanded_ty =
     if should_expand
     then begin
-      Inst.instantiate !subst env expanded_ty
+      Inst.instantiate subst env expanded_ty
     end
     else begin
       let env, tcstr =
         match tcstr with
         | None -> env, None
         | Some tcstr ->
-            let env, tcstr = Inst.instantiate !subst env tcstr in
+            let env, tcstr = Inst.instantiate subst env tcstr in
             env, Some tcstr
       in
       env, (r, Tabstract ((pos, x), argl, tcstr))

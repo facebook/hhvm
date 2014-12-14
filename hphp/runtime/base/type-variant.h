@@ -149,9 +149,7 @@ struct Variant : private TypedValue {
   Variant(const Variant& v, CellDup) {
     m_type = v.m_type;
     m_data = v.m_data;
-    if (IS_REFCOUNTED_TYPE(m_type)) {
-      m_data.pstr->incRefCount();
-    }
+    tvRefcountedIncRef(asTypedValue());
   }
 
   Variant(StrongBind, Variant& v) { constructRefHelper(v); }
@@ -842,9 +840,7 @@ struct Variant : private TypedValue {
       self->m_type = KindOfNull;
     } else {
       const Value odata = other->m_data;
-      if (IS_REFCOUNTED_TYPE(otype)) {
-        odata.pstr->incRefCount();
-      }
+      tvRefcountedIncRef(other);
       self->m_data = odata;
       self->m_type = otype;
     }
@@ -892,9 +888,7 @@ public:
     const Variant *other =
       UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
     assert(this != other);
-    if (IS_REFCOUNTED_TYPE(other->m_type)) {
-      other->m_data.pstr->incRefCount();
-    }
+    tvRefcountedIncRef(other);
     m_type = other->m_type != KindOfUninit ? other->m_type : KindOfNull;
     m_data = other->m_data;
   }
@@ -905,9 +899,7 @@ public:
     assert(v.m_type == KindOfRef);
     m_type = v.m_data.pref->tv()->m_type; // Can't be KindOfUninit.
     m_data = v.m_data.pref->tv()->m_data;
-    if (IS_REFCOUNTED_TYPE(m_type)) {
-      m_data.pstr->incRefCount();
-    }
+    tvRefcountedIncRef(asTypedValue());
     decRefRef(v.m_data.pref);
     v.m_type = KindOfNull;
   }
@@ -921,11 +913,7 @@ public:
     const Variant& rhs =
       v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
         ? *v.m_data.pref->var() : v;
-    if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
-      assert(rhs.m_data.pstr);
-      rhs.m_data.pstr->incRefCount();
-    }
-
+    tvRefcountedIncRef(rhs.asTypedValue());
     auto const d = m_data.num;
     auto const t = m_type;
     m_type = rhs.m_type;

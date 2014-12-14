@@ -3032,12 +3032,9 @@ retry:
   assert(p);
   if (validPos(*p)) {
     auto& e = *fetchElm(data(), *p);
-    DataType oldType = e.data.m_type;
-    uint64_t oldDatum = e.data.m_data.num;
+    TypedValue old = e.data;
     cellDup(*val, e.data);
-    if (IS_REFCOUNTED_TYPE(oldType)) {
-      tvDecRefHelper(oldType, oldDatum);
-    }
+    tvRefcountedDecRef(old);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -3066,12 +3063,9 @@ retry:
   assert(p);
   if (validPos(*p)) {
     auto& e = *fetchElm(data(), *p);
-    DataType oldType = e.data.m_type;
-    uint64_t oldDatum = e.data.m_data.num;
+    TypedValue old = e.data;
     cellDup(*val, e.data);
-    if (IS_REFCOUNTED_TYPE(oldType)) {
-      tvDecRefHelper(oldType, oldDatum);
-    }
+    tvRefcountedDecRef(old);
     return;
   }
   if (UNLIKELY(isFull())) {

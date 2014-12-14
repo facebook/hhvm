@@ -627,7 +627,7 @@ public:
   void popC() {
     assert(m_top != m_base);
     assert(cellIsPlausible(*m_top));
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     tvDebugTrash(m_top);
     m_top++;
   }
@@ -888,7 +888,7 @@ public:
   void replaceC(const Cell c) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     *m_top = c;
   }
 
@@ -897,7 +897,7 @@ public:
   void replaceC() {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     *m_top = make_tv<DT>();
   }
 
@@ -906,7 +906,7 @@ public:
   void replaceC(T value) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     *m_top = make_tv<DT>(value);
   }
 

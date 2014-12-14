@@ -694,7 +694,7 @@ inline void SetElemScalar(Cell* value) {
   if (!setResult) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
-  tvRefcountedDecRefCell((TypedValue*)value);
+  tvRefcountedDecRef((TypedValue*)value);
   tvWriteNull((TypedValue*)value);
 }
 
@@ -1012,7 +1012,7 @@ inline void SetNewElemScalar(Cell* value) {
   if (!setResult) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
-  tvRefcountedDecRefCell((TypedValue*)value);
+  tvRefcountedDecRef((TypedValue*)value);
   tvWriteNull((TypedValue*)value);
 }
 
@@ -1910,7 +1910,7 @@ template <bool setResult>
 inline void SetPropNull(Cell* val) {
   raise_warning("Cannot access property on non-object");
   if (setResult) {
-    tvRefcountedDecRefCell(val);
+    tvRefcountedDecRef(val);
     tvWriteNull(val);
   } else {
     throw InvalidSetMException(make_tv<KindOfNull>());

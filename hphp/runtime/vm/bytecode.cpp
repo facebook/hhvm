@@ -3820,7 +3820,7 @@ OPTBLD_INLINE void ExecutionContext::implCellBinOp(IOP_ARGS, Op op) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const result = op(*c2, *c1);
-  tvRefcountedDecRefCell(c2);
+  tvRefcountedDecRef(c2);
   *c2 = result;
   vmStack().popC();
 }
@@ -3831,7 +3831,7 @@ OPTBLD_INLINE void ExecutionContext::implCellBinOpBool(IOP_ARGS, Op op) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   bool const result = op(*c2, *c1);
-  tvRefcountedDecRefCell(c2);
+  tvRefcountedDecRef(c2);
   *c2 = make_tv<KindOfBoolean>(result);
   vmStack().popC();
 }
@@ -3963,7 +3963,7 @@ OPTBLD_INLINE void ExecutionContext::iopSqrt(IOP_ARGS) {
       KindOfDouble,
       c1->m_type
     );
-    tvRefcountedDecRefCell(c1);
+    tvRefcountedDecRef(c1);
     c1->m_type = KindOfNull;
   }
 }
@@ -4580,10 +4580,10 @@ OPTBLD_INLINE void ExecutionContext::iopCGetN(IOP_ARGS) {
   lookup_var(vmfp(), name, to, fr);
   if (fr == nullptr || fr->m_type == KindOfUninit) {
     raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-    tvRefcountedDecRefCell(to);
+    tvRefcountedDecRef(to);
     tvWriteNull(to);
   } else {
-    tvRefcountedDecRefCell(to);
+    tvRefcountedDecRef(to);
     cgetl_inner_body(fr, to);
   }
   decRefStr(name); // TODO(#1146727): leaks during exceptions
@@ -4599,14 +4599,14 @@ OPTBLD_INLINE void ExecutionContext::iopCGetG(IOP_ARGS) {
     if (MoreWarnings) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
-    tvRefcountedDecRefCell(to);
+    tvRefcountedDecRef(to);
     tvWriteNull(to);
   } else if (fr->m_type == KindOfUninit) {
     raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-    tvRefcountedDecRefCell(to);
+    tvRefcountedDecRef(to);
     tvWriteNull(to);
   } else {
-    tvRefcountedDecRefCell(to);
+    tvRefcountedDecRef(to);
     cgetl_inner_body(fr, to);
   }
   decRefStr(name); // TODO(#1146727): leaks during exceptions
@@ -4680,7 +4680,7 @@ OPTBLD_INLINE void ExecutionContext::iopVGetN(IOP_ARGS) {
   TypedValue* fr = nullptr;
   lookupd_var(vmfp(), name, to, fr);
   assert(fr != nullptr);
-  tvRefcountedDecRefCell(to);
+  tvRefcountedDecRef(to);
   vgetl_body(fr, to);
   decRefStr(name);
 }
@@ -4692,7 +4692,7 @@ OPTBLD_INLINE void ExecutionContext::iopVGetG(IOP_ARGS) {
   TypedValue* fr = nullptr;
   lookupd_gbl(vmfp(), name, to, fr);
   assert(fr != nullptr);
-  tvRefcountedDecRefCell(to);
+  tvRefcountedDecRef(to);
   vgetl_body(fr, to);
   decRefStr(name);
 }
@@ -4846,7 +4846,7 @@ OPTBLD_INLINE void ExecutionContext::iopIsTypeC(IOP_ARGS) {
   TypedValue* topTv = vmStack().topTV();
   assert(topTv->m_type != KindOfRef);
   bool ret = isTypeHelper(topTv, op);
-  tvRefcountedDecRefCell(topTv);
+  tvRefcountedDecRef(topTv);
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;
 }
@@ -5046,7 +5046,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetS(IOP_ARGS) {
                 name->data());
   }
   tvSet(*tv1, *val);
-  tvRefcountedDecRefCell(propn);
+  tvRefcountedDecRef(propn);
   memcpy(output, tv1, sizeof(TypedValue));
   vmStack().ndiscard(2);
   decRefStr(name);
@@ -5069,7 +5069,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetM(IOP_ARGS) {
       case MEI: {
         StringData* result = SetElem<true>(base, *curMember, c1);
         if (result) {
-          tvRefcountedDecRefCell(c1);
+          tvRefcountedDecRef(c1);
           c1->m_type = KindOfString;
           c1->m_data.pstr = result;
         }
@@ -5122,7 +5122,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetOpL(IOP_ARGS) {
   Cell* fr = vmStack().topC();
   Cell* to = tvToCell(frame_local(vmfp(), local));
   SETOP_BODY_CELL(to, op, fr);
-  tvRefcountedDecRefCell(fr);
+  tvRefcountedDecRef(fr);
   cellDup(*to, *fr);
 }
 
@@ -5179,7 +5179,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetOpS(IOP_ARGS) {
                 name->data());
   }
   SETOP_BODY(val, op, fr);
-  tvRefcountedDecRefCell(propn);
+  tvRefcountedDecRef(propn);
   tvRefcountedDecRef(fr);
   cellDup(*tvToCell(val), *output);
   vmStack().ndiscard(2);
@@ -5275,7 +5275,7 @@ OPTBLD_INLINE void ExecutionContext::iopIncDecS(IOP_ARGS) {
                 clsref->m_data.pcls->name()->data(),
                 name->data());
   }
-  tvRefcountedDecRefCell(nameCell);
+  tvRefcountedDecRef(nameCell);
   IncDecBody<true>(op, tvToCell(val), output);
   vmStack().discard();
   SPROP_OP_POSTLUDE
@@ -5368,7 +5368,7 @@ OPTBLD_INLINE void ExecutionContext::iopBindS(IOP_ARGS) {
                 name->data());
   }
   tvBind(fr, val);
-  tvRefcountedDecRefCell(propn);
+  tvRefcountedDecRef(propn);
   memcpy(output, fr, sizeof(TypedValue));
   vmStack().ndiscard(2);
   decRefStr(name);

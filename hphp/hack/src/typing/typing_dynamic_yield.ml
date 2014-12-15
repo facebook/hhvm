@@ -152,7 +152,7 @@ let clean_dynamic_yield env methods =
   end methods
 
 let method_def env name hret =
-  let env, class_ = Env.get_class env (Env.get_self_id env) in
+  let class_ = Env.get_class env (Env.get_self_id env) in
   match class_, parse_yield_name (snd name) with
     | None, _
     | _, None -> env
@@ -167,7 +167,7 @@ let check_yield_visibility env c =
       | (_, Happly ((pos, name), _)) -> begin
           (* Either you directly use DynamicYield, or something you directly
            * use itself uses DynamicYield. *)
-          is_dynamic_yield name || match snd (Env.get_class_dep env name) with
+          is_dynamic_yield name || match Env.get_class_dep env name with
             | Some parent_type -> contains_dynamic_yield parent_type.tc_extends
             | None -> false
           end

@@ -208,18 +208,19 @@ and hint_ p env = function
       env, Tany
   | Happly (((p, c) as id), argl) ->
       Find_refs.process_class_ref p c None;
-      let env = Env.add_wclass env c in
+      Env.add_wclass env c;
       let env, argl = lfold hint env argl in
       env, Tapply (id, argl)
   | Haccess (root, id, ids) ->
-      let env, root = match root with
-        | CIstatic -> env, Some SCIstatic
+      let root = match root with
+        | CIstatic -> Some SCIstatic
         | CI (pos, class_) ->
             Find_refs.process_class_ref pos class_ None;
-            Env.add_wclass env class_, Some (SCI (pos, class_))
+            Env.add_wclass env class_;
+            Some (SCI (pos, class_))
         | CIparent ->
             Errors.unbound_name_typing p "parent";
-            env, None
+            None
         (* These should be stripped out earlier *)
         | CIself | CIvar _ ->
             assert false;

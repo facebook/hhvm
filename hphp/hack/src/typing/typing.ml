@@ -873,7 +873,7 @@ and expr_ in_cond is_lvalue env (p, e) =
     (* meth_caller('X', 'foo') desugars to:
      * $x ==> $x->foo()
      *)
-    let env, class_ = Env.get_class env class_name in
+    let class_ = Env.get_class env class_name in
     (match class_ with
     | None -> unbound_name env pos_cname
     | Some class_ ->
@@ -921,13 +921,13 @@ and expr_ in_cond is_lvalue env (p, e) =
      * Typing this is pretty simple, we just need to check that c::meth is public+static
      * and then return its type.
      *)
-    let env, class_ = Env.get_class env (snd c) in
+    let class_ = Env.get_class env (snd c) in
     (match class_ with
     | None ->
       (* The class given as a static string was not found. *)
       unbound_name env c
     | Some class_ ->
-      let env, smethod = Env.get_static_member true env class_ (snd meth) in
+      let smethod = Env.get_static_member true env class_ (snd meth) in
       (match smethod with
       | None -> (* The static method wasn't found. *)
         smember_not_found p ~is_const:false ~is_method:true env class_ (snd meth);
@@ -1578,7 +1578,7 @@ and call_parent_construct pos env el uel =
       let default = env, (Reason.Rnone, Tany) in
       match Env.get_self env with
         | _, Tapply ((_, self), _) ->
-          (match snd (Env.get_class env self) with
+          (match Env.get_class env self with
             | Some ({tc_kind = Ast.Ctrait; tc_req_ancestors ; tc_name; _}
                        as trait) ->
               (match trait_most_concrete_req_class trait env with
@@ -1828,8 +1828,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       (* Directly call get_fun so that we can muck with the type before
        * instantiation -- much easier to work in terms of Tgeneric Tk/Tv than
        * trying to figure out which Tvar is which. *)
-      let env, fty = Env.get_fun env (snd id) in
-      let fty = match fty with
+      let fty = match Env.get_fun env (snd id) with
         | Some fty -> fty
         | None -> assert false in
       let param1, (name2, (r2, _)), (name3, (r3, _)) = match fty.ft_params with
@@ -1940,9 +1939,8 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
 
 and fun_type_of_id env x =
   Find_refs.process_find_refs None (snd x) (fst x);
-  let env, fty = Env.get_fun env (snd x) in
   let env, fty =
-    match fty with
+    match Env.get_fun env (snd x) with
     | None -> unbound_name env x
     | Some fty ->
         let env, fty = Inst.instantiate_ft env fty in
@@ -2222,12 +2220,11 @@ and class_contains_smethod env cty (p, mid) =
   match cty with
   | _, Tgeneric (_, Some (_, Tapply ((_, c), paraml)))
   | _, Tapply ((_, c), paraml) ->
-      let env, class_ = Env.get_class env c in
+      let class_ = Env.get_class env c in
       (match class_ with
       | None -> None
       | Some class_ ->
-          let env, smethod = Env.get_static_member true env class_ mid in
-          smethod
+          Env.get_static_member true env class_ mid
       )
   | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric (_,_) | Toption _ | Tprim _
     | Tvar _ | Tfun _ | Tabstract (_, _, _) | Ttuple _ | Tanon (_, _)
@@ -2248,27 +2245,27 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
       class_get_ ~is_method ~is_const env cty (p, mid) cid
   | _, Tgeneric (_, Some (_, Tapply ((_, c), paraml)))
   | _, Tapply ((_, c), paraml) ->
-      let env, class_ = Env.get_class env c in
+      let class_ = Env.get_class env c in
       (match class_ with
       | None -> env, (Reason.Rnone, Tany)
       | Some class_ ->
-          let env, smethod =
+          let smethod =
             if is_const
             then Env.get_const env class_ mid
             else Env.get_static_member is_method env class_ mid in
-            if !Typing_defs.accumulate_method_calls then
-              Typing_defs.accumulate_method_calls_result :=
-                  (p, (class_.tc_name^"::"^mid)) ::
-                      !Typing_defs.accumulate_method_calls_result;
+          if !Typing_defs.accumulate_method_calls then
+            Typing_defs.accumulate_method_calls_result :=
+                (p, (class_.tc_name^"::"^mid)) ::
+                    !Typing_defs.accumulate_method_calls_result;
           Find_refs.process_find_refs (Some class_.tc_name) mid p;
           Typing_hooks.dispatch_smethod_hook class_ (p, mid) env (Some cid);
           (match smethod with
           | None ->
             (match Env.get_static_member is_method env class_ SN.Members.__callStatic with
-              | env, None ->
+              | None ->
                 smember_not_found p ~is_const ~is_method env class_ mid;
                 env, (Reason.Rnone, Tany)
-              | env, Some {ce_visibility = vis; ce_type = (r, Tfun ft); _} ->
+              | Some {ce_visibility = vis; ce_type = (r, Tfun ft); _} ->
                 check_visibility p env (Reason.to_pos r, vis) (Some cid);
                 (* xxx: is there a need to subst in SN.Typehints.this *)
                 let subst = Inst.make_subst class_.tc_tparams paraml in
@@ -2407,7 +2404,7 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
     | Tobject | Tshape _) -> k begin match snd ety1 with
     | Tgeneric (_, Some (_, Tapply (x, paraml)))
     | Tapply (x, paraml) ->
-        let env, class_ = Env.get_class env (snd x) in
+        let class_ = Env.get_class env (snd x) in
         (match class_ with
           | None ->
             env, (Reason.Rnone, Tany), None
@@ -2420,7 +2417,7 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
               then List.map (fun _ -> Reason.Rwitness p, Tany) class_.tc_tparams
               else paraml
             in
-            let env, method_ = Env.get_member is_method env class_ s in
+            let method_ = Env.get_member is_method env class_ s in
             if !Typing_defs.accumulate_method_calls then
               Typing_defs.accumulate_method_calls_result :=
                 (p, (class_.tc_name^"::"^s)) ::
@@ -2430,12 +2427,10 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
             (match method_ with
               | None ->
                 (match Env.get_member is_method env class_ SN.Members.__call with
-                  | env, None ->
+                  | None ->
                     member_not_found p ~is_method env class_ s x;
                     env, (Reason.Rnone, Tany), None
-                  | env, Some {ce_visibility = vis;
-                               ce_type = (r, Tfun ft);
-                               _}  ->
+                  | Some {ce_visibility = vis; ce_type = (r, Tfun ft); _}  ->
                     let meth_pos = Reason.to_pos r in
                     check_visibility p env (meth_pos, vis) None;
                     let new_name = "alpha_varied_this" in
@@ -2531,14 +2526,14 @@ and class_id p env cid =
   match obj with
     | _, Tgeneric (this, Some (_, Tapply ((_, cid as c), _)))
       when this = SN.Typehints.this ->
-      let env, class_ = Env.get_class env cid in
+      let class_ = Env.get_class env cid in
       (match class_ with
         | None -> env, None
         | Some class_ ->
           env, Some (c, class_)
       )
     | _, Tapply ((_, cid as c), _) ->
-      let env, class_ = Env.get_class env cid in
+      let class_ = Env.get_class env cid in
       (match class_ with
         | None -> env, None
         | Some class_ ->
@@ -2560,7 +2555,7 @@ and trait_most_concrete_req_class trait env =
     in
     if keep then acc
     else
-      let env, class_ = Env.get_class env name in
+      let class_ = Env.get_class env name in
       (match class_ with
         | None
         | Some { tc_kind = Ast.Cinterface; _ } -> acc
@@ -2586,7 +2581,7 @@ and static_class_id p env = function
   | CIparent ->
     (match Env.get_self env with
       | _, Tapply ((self_pos, self), _) ->
-        (match snd (Env.get_class env self) with
+        (match Env.get_class env self with
           | Some (
             {tc_kind = Ast.Ctrait; tc_req_ancestors ; tc_name; _}
               as trait) ->
@@ -2626,7 +2621,7 @@ and static_class_id p env = function
       Tgeneric (SN.Typehints.this, Some (Env.get_self env)))
   | CIself -> env, (Reason.Rwitness p, snd (Env.get_self env))
   | CI c ->
-    let env, class_ = Env.get_class env (snd c) in
+    let class_ = Env.get_class env (snd c) in
     (match class_ with
       | None -> env, (Reason.Rnone, Tany) (* Tobject *)
       | Some class_ ->
@@ -2652,7 +2647,7 @@ and static_class_id p env = function
       in env, ty
 
 and call_construct p env class_ params el uel =
-  let env, cstr = Env.get_construct env class_ in
+  let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
   Find_refs.process_find_refs (Some class_.tc_name) SN.Members.__construct p;
   match (fst cstr) with
@@ -2682,7 +2677,7 @@ and is_visible env vis cid =
   | Vprivate x ->
     (match cid with
       | Some CIstatic ->
-          let env, my_class = Env.get_class env self_id in
+          let my_class = Env.get_class env self_id in
           begin match my_class with
             | Some {tc_final = true; _} -> None
             | _ -> Some (
@@ -2698,7 +2693,7 @@ and is_visible env vis cid =
       | Some CIself -> None
       | Some (CI (_, called_ci)) when x <> self_id ->
           (match Env.get_class env called_ci with
-          | _, Some {tc_kind = Ast.Ctrait; _} ->
+          | Some {tc_kind = Ast.Ctrait; _} ->
               Some ("You cannot access private members"
               ^" using the trait's name (did you mean to use self::?)",
               "This member is private")
@@ -2711,7 +2706,7 @@ and is_visible env vis cid =
             | _, Tgeneric (_, Some (_, Tapply ((_, c), _)))
             | _, Tapply ((_, c), _) ->
                 (match Env.get_class env c with
-                | _, Some {tc_final = true; _} -> None
+                | Some {tc_final = true; _} -> None
                 | _ -> Some (
                   ("Private members cannot be accessed dynamically. "
                      ^"Did you mean to use 'self::'?"),
@@ -2729,8 +2724,8 @@ and is_visible env vis cid =
   | Vprotected _ when self_id = "" ->
     Some ("You cannot access this member", "This member is protected")
   | Vprotected x ->
-    let env, my_class = Env.get_class env self_id in
-    let env, their_class = Env.get_class env x in
+    let my_class = Env.get_class env self_id in
+    let their_class = Env.get_class env x in
     match cid, their_class with
       | Some CI _, Some {tc_kind = Ast.Ctrait; _} ->
         Some ("You cannot access protected members"
@@ -3182,7 +3177,7 @@ and condition env tparamet =
               let env = Env.set_local env x obj_ty in
               env
             | _, Tapply ((_, cid as _c), _) ->
-              let env, class_ = Env.get_class env cid in
+              let class_ = Env.get_class env cid in
               (match class_ with
                 | None -> Env.set_local env x (Reason.Rwitness p, Tobject)
                 | Some class_ ->
@@ -3289,7 +3284,7 @@ and get_implements ~with_checks ~this (env: Typing_env.env) ht =
   let env, ht = Typing_hint.hint env ht in
   match ht with
   | _, Tapply ((p, c), paraml) ->
-      let env, class_ = Env.get_class_dep env c in
+      let class_ = Env.get_class_dep env c in
       (match class_ with
       | None ->
           (* The class lives in PHP land *)
@@ -3337,7 +3332,7 @@ and get_implements ~with_checks ~this (env: Typing_env.env) ht =
 and class_def_parent env class_def class_type =
   match class_def.c_extends with
   | (_, Happly ((_, x), _) as parent_ty) :: _ ->
-      let env, parent_type = Env.get_class_dep env x in
+      let parent_type = Env.get_class_dep env x in
       (match parent_type with
       | Some parent_type -> check_parent env class_def class_type parent_type
       | None -> ());
@@ -3380,7 +3375,7 @@ and class_def env_up _ c =
       NastInitCheck.class_ env_up c;
     end;
     let env_tmp = Env.set_root env_up (Dep.Class (snd c.c_name)) in
-    let _, tc = Env.get_class env_tmp (snd c.c_name) in
+    let tc = Env.get_class env_tmp (snd c.c_name) in
     match tc with
     | None ->
         (* This can happen if there was an error during the declaration

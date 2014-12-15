@@ -74,7 +74,7 @@ module Env = struct
   let add_parent_construct c tenv cvars parent_hint =
     match parent_hint with
       | (_, Happly ((_, parent), _)) ->
-        let _, class_ = Typing_env.get_class tenv parent in
+        let class_ = Typing_env.get_class tenv parent in
         (match class_ with
           | Some class_ when
               class_.Typing_defs.tc_need_init && c.c_constructor <> None
@@ -120,7 +120,7 @@ module Env = struct
   and parent_cvars tenv acc c =
     List.fold_left begin fun acc parent ->
       match parent with _, Happly ((_, parent), _) ->
-        let _, tc = Typing_env.get_class tenv parent in
+        let tc = Typing_env.get_class tenv parent in
         (match tc with
           | None -> acc
           | Some { tc_members_init = members; _ } -> SSet.union members acc)

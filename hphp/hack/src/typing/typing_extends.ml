@@ -257,8 +257,8 @@ let open_class_hint = function
 let check_implements env parent_type type_ =
   let parent_pos, parent_name, parent_tparaml = open_class_hint parent_type in
   let pos, name, tparaml = open_class_hint type_ in
-  let env, parent_class = Env.get_class env (snd parent_name) in
-  let env, class_ = Env.get_class env (snd name) in
+  let parent_class = Env.get_class env (snd parent_name) in
+  let class_ = Env.get_class env (snd name) in
   match parent_class, class_ with
   | None, _ | _, None -> ()
   | Some parent_class, Some class_ ->

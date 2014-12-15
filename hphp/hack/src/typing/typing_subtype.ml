@@ -221,8 +221,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
     if cid_super = cid_sub then
       if tyl_super <> [] && List.length tyl_super = List.length tyl_sub
       then
-        let env, c = Env.get_class env cid_super in
-        match c with
+        match Env.get_class env cid_super with
         | None -> fst (Unify.unify env ety_super ety_sub)
         | Some { tc_tparams; _} ->
             let variancel =
@@ -231,7 +230,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
             subtype_tparams env variancel tyl_super tyl_sub
       else fst (Unify.unify env ety_super ety_sub)
     else begin
-      let env, class_ = Env.get_class env cid_sub in
+      let class_ = Env.get_class env cid_sub in
       (match class_ with
         | None -> env
         | Some class_ ->
@@ -353,7 +352,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tabstract ((_, name_super), tyl_super, _)),
       (_, Tabstract ((_, name_sub), tyl_sub, _))
     when name_super = name_sub ->
-      let env, td = Env.get_typedef env name_super in
+      let td = Env.get_typedef env name_super in
       (match td with
       | Some (Env.Typedef.Ok (_, tparams, _, _, _)) ->
           let variancel =
@@ -404,7 +403,7 @@ and sub_string p env ty2 =
       let env, ty2 = Typing_tdef.expand_typedef env r2 x argl in
       sub_string p env ty2
   | (r2, Tapply (x, _)) ->
-      let env, class_ = Env.get_class env (snd x) in
+      let class_ = Env.get_class env (snd x) in
       (match class_ with
       | None -> env
       | Some tc

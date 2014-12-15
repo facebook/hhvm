@@ -123,7 +123,7 @@ let add_grand_parents_or_traits parent_pos class_nast acc parent_type =
 let get_class_parent_or_trait class_nast (env, parents, is_complete, is_trait) hint =
   let parent_pos, parent, _ = desugar_class_hint hint in
   let parents = SSet.add parent parents in
-  let env, parent_type = Env.get_class_dep env parent in
+  let parent_type = Env.get_class_dep env parent in
   match parent_type with
   | None ->
       (* The class lives in PHP *)
@@ -182,7 +182,7 @@ let merge_parent_class_reqs class_nast impls
     (env, req_ancestors, req_ancestors_extends) parent_hint =
   let parent_pos, parent_name, parent_params = desugar_class_hint parent_hint in
   let env, parent_params = lfold Typing_hint.hint env parent_params in
-  let env, parent_type = Env.get_class_dep env parent_name in
+  let parent_type = Env.get_class_dep env parent_name in
 
   match parent_type with
     | None ->
@@ -228,7 +228,7 @@ let declared_class_req class_nast impls (env, requirements, req_extends) hint =
   let env, req_ty = Typing_hint.hint env hint in
   let req_pos, req_name, req_params = desugar_class_hint hint in
   let env, req_params = lfold Typing_hint.hint env req_params in
-  let env, req_type = Env.get_class_dep env req_name in
+  let req_type = Env.get_class_dep env req_name in
 
   (* for concrete classes, check required ancestors against actual
    * ancestors; for traits and interfaces, the required extends classes
@@ -249,7 +249,6 @@ let declared_class_req class_nast impls (env, requirements, req_extends) hint =
   in
 
   let req_extends = SSet.add req_name req_extends in
-  let env, req_type = Env.get_class_dep env req_name in
   match req_type with
     | None -> (* The class lives in PHP : error?? *)
       let requirements = SMap.add req_name req_ty requirements in
@@ -535,7 +534,7 @@ and class_decl nenv c =
 and trait_exists env acc trait =
   match trait with
     | (_, Happly ((p2, trait), _)) ->
-      let env, class_ = Env.get_class_dep env trait in
+      let class_ = Env.get_class_dep env trait in
       (match class_ with
         | None -> false
         | Some class_ -> acc

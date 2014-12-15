@@ -183,7 +183,7 @@ and unify_ env r1 ty1 r2 ty2 =
       let env, ty = unify env ty1 ty2 in
       env, Tgeneric (x1, Some ty)
   | Tgeneric ("this", Some ((_, Tapply ((_, x) as id, _) as ty))), _ ->
-      let env, class_ = Env.get_class env x in
+      let class_ = Env.get_class env x in
       (* For final class C, there is no difference between this<X> and X *)
       (match class_ with
       | Some {tc_final = true; _} ->

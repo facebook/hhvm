@@ -21,7 +21,7 @@ module TAccess = Typing_taccess
 
 let rec expand_typedef_ ?force_expand:(force_expand=false) seen env r x argl =
   let pos = Reason.to_pos r in
-  let env, tdef = Typing_env.get_typedef env x in
+  let tdef = Typing_env.get_typedef env x in
   let tdef = match tdef with None -> assert false | Some x -> x in
   match tdef with
     | Env.Typedef.Error -> env, (r, Tany), pos

@@ -75,24 +75,23 @@ val is_enum : Classes.key -> bool
 val get_enum_constraint : Classes.key -> ty option
 val add_typedef_error : Typedefs.key -> unit
 val add_fun : Funs.key -> Funs.t -> unit
-val add_wclass : env -> string -> env
+val add_wclass : env -> string -> unit
 val fresh_tenv : env -> (env -> unit) -> unit
-val get_class : env -> Classes.key -> env * Classes.t option
-val get_typedef : env -> Typedefs.key -> env * Typedefs.t option
+val get_class : env -> Classes.key -> Classes.t option
+val get_typedef : env -> Typedefs.key -> Typedefs.t option
 val class_exists : Classes.key -> bool
 val add_extends_dependency : env -> string -> unit
-val get_class_dep : env -> Classes.key -> env * Classes.t option
-val get_const : env -> class_type -> string -> env * class_elt option
-val get_typeconst_type : env -> class_type -> string -> env * ty option
+val get_class_dep : env -> Classes.key -> Classes.t option
+val get_const : env -> class_type -> string -> class_elt option
+val get_typeconst_type : env -> class_type -> string -> ty option
 val get_gconst : env -> GConsts.key -> GConsts.t option
-val get_static_member :
-  bool -> env -> class_type -> string -> env * class_elt option
+val get_static_member : bool -> env -> class_type -> string -> class_elt option
 val suggest_static_member :
   bool -> class_type -> string -> (Pos.t * string) option
 val method_exists : class_type -> string -> bool
-val get_member : bool -> env -> class_type -> string -> env * class_elt option
+val get_member : bool -> env -> class_type -> string -> class_elt option
 val suggest_member : bool -> class_type -> string -> (Pos.t * string) option
-val get_construct : env -> class_type -> env * (class_elt option * bool)
+val get_construct : env -> class_type -> class_elt option * bool
 val get_todo : env -> tfun list
 val get_return : env -> ty
 val set_return : env -> ty -> env
@@ -104,7 +103,7 @@ val get_self_id : env -> string
 val get_parent : env -> ty
 val get_fn_kind : env -> Nast.fun_kind
 val get_file : env -> Relative_path.t
-val get_fun : env -> Funs.key -> env * Funs.t option
+val get_fun : env -> Funs.key -> Funs.t option
 val set_allow_null_as_void : ?allow:bool -> env -> env
 val set_fn_kind : env -> Nast.fun_kind -> env
 val add_todo : env -> tfun -> env
@@ -130,7 +129,6 @@ module FakeMembers :
     val is_invalid : env -> Nast.expr -> string -> bool
     val get_static : env -> Nast.class_id -> string -> int option
     val is_static_invalid : env -> Nast.class_id -> string -> bool
-    val add_member : env -> SSet.elt -> env
     val make : Pos.t -> env -> Nast.expr -> string -> env * int
     val make_static : Pos.t -> env -> Nast.class_id -> string -> env * int
   end

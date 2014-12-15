@@ -68,10 +68,10 @@ and expand_ env (reason, type_) static =
         in
         let root_type = reason, Tapply (root_id, []) in
         let env, class_ = get_class_from_type env root_type static in
-        let env, tconst_ty =
+        let tconst_ty =
           match Env.get_typeconst_type env class_ tconst with
-          | _, None -> raise (TypeConstNotFound (tconst_pos, class_, tconst))
-          | env, Some tc -> env, tc
+          | None -> raise (TypeConstNotFound (tconst_pos, class_, tconst))
+          | Some tc -> tc
         in
         begin
           match tconst_ty, rest with
@@ -147,10 +147,10 @@ and get_class_from_type env (reason, type_) static =
         let env, ty = TUtils.expand_typedef env reason name argl in
         get_class_from_type env ty static
     | Tapply ((_, class_name), _) ->
-        begin
+        env, begin
           match Env.get_class env class_name with
-          | _, None -> raise (RootClassNotFound (pos, class_name))
-          | env, Some class_ -> env, class_
+          | None -> raise (RootClassNotFound (pos, class_name))
+          | Some class_ -> class_
         end
     | Tabstract (_, _, Some constraint_type) ->
         get_class_from_type env constraint_type static

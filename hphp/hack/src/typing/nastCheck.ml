@@ -290,8 +290,7 @@ and hint_ env p = function
       in
       check_params env p x params hl
   | Happly ((_, x), hl) ->
-      let _, class_ = Env.get_class env.tenv x in
-      (match class_ with
+      (match Env.get_class env.tenv x with
       | None -> ()
       | Some class_ ->
           check_params env p x class_.tc_tparams hl
@@ -346,8 +345,7 @@ and class_ tenv c =
 and check_is_interface (env, error_verb) (x : hint) =
   match (snd x) with
     | Happly (id, _) ->
-      let _, class_ = Env.get_class env.tenv (snd id) in
-      (match class_ with
+      (match Env.get_class env.tenv (snd id) with
         | None ->
           (* in partial mode, we can fail to find the class if it's
              defined in PHP. *)
@@ -364,8 +362,7 @@ and check_is_interface (env, error_verb) (x : hint) =
 and check_is_class env (x : hint) =
   match (snd x) with
     | Happly (id, _) ->
-      let _, class_ = Env.get_class env.tenv (snd id) in
-      (match class_ with
+      (match Env.get_class env.tenv (snd id) with
         | None ->
           (* in partial mode, we can fail to find the class if it's
              defined in PHP. *)
@@ -390,7 +387,7 @@ and check_is_trait env (h : hint) =
   (* do not care about at this time *)
   | Happly (pos_and_name, _) ->
     (* Env.get_class will get the type info associated with the name *)
-    let _, type_info = Env.get_class env.tenv (snd pos_and_name) in
+    let type_info = Env.get_class env.tenv (snd pos_and_name) in
     (match type_info with
       (* in partial mode, it's possible to not find the trait, because the *)
       (* trait may live in PHP land. In strict mode, we catch the unknown *)

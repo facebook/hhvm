@@ -58,6 +58,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/hphp-system.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

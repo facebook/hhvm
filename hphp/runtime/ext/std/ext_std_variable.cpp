@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/server/http-protocol.h"
 

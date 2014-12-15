@@ -22,6 +22,7 @@
 #include "hphp/zend/zend-string.h"
 #include "hphp/zend/zend-html.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/parser/parse-time-fatal-exception.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -743,6 +744,70 @@ std::string Scanner::escape(const char *str, int len, char quote_type) const {
                 output += ch;
                 output += str[i];
               }
+              break;
+            }
+            case 'u': {
+              // Unicode escape sequence
+              //   "\u{123456}"
+              if (str[i+1] != '{') {
+                // BC for "\u1234" passthrough
+                output += ch;
+                output += str[i];
+                break;
+              }
+
+              bool valid = true;
+              auto start = str + i + 2;
+              auto closebrace = strchr(start, '}');
+              if (closebrace > start) {
+                for (auto p = start; p < closebrace; ++p) {
+                  if (!isxdigit(*p)) {
+                    valid = false;
+                    break;
+                  }
+                }
+              } else {
+                valid = false;
+              }
+
+              auto fatal = [this](const char *msg) {
+                auto loc = getLocation();
+                return ParseTimeFatalException(
+                  loc->file,
+                  loc->line0,
+                  "%s", msg);
+              };
+              if (!valid) {
+                throw fatal("Invalid UTF-8 codepoint escape sequence");
+              }
+
+              std::string codepoint(start, closebrace - start);
+              char *end = nullptr;
+              int32_t uchar = strtol(codepoint.c_str(), &end, 16);
+              if ((end && *end) || (uchar > 0x10FFFF)) {
+                throw fatal(
+                  "Invalid UTF-8 codepoint escape sequence: "
+                  "Codepoint too large");
+              }
+              if (uchar <= 0x0007F) {
+                output += (char)uchar;
+              } else if (uchar <= 0x007FF) {
+                output += (char)(0xC0 | ( uchar >> 6         ));
+                output += (char)(0x80 | ( uchar        & 0x3F));
+              } else if (uchar <= 0x00FFFF) {
+                output += (char)(0xE0 | ( uchar >> 12        ));
+                output += (char)(0x80 | ((uchar >>  6) & 0x3F));
+                output += (char)(0x80 | ( uchar        & 0x3F));
+              } else if (uchar <= 0x10FFFF) {
+                output += (char)(0xF0 | ( uchar >> 18        ));
+                output += (char)(0x80 | ((uchar >> 12) & 0x3F));
+                output += (char)(0x80 | ((uchar >>  6) & 0x3F));
+                output += (char)(0x80 | ( uchar        & 0x3F));
+              } else {
+                not_reached();
+                assert(false);
+              }
+              i += codepoint.size() + 2 /* strlen("{}") */;
               break;
             }
             default: {

@@ -40,7 +40,7 @@ class c_StaticWaitHandle final : public c_WaitHandle {
   {}
   ~c_StaticWaitHandle() {
     assert(isFinished());
-    tvRefcountedDecRefCell(&m_resultOrException);
+    tvRefcountedDecRef(&m_resultOrException);
   }
 
   void t___construct();

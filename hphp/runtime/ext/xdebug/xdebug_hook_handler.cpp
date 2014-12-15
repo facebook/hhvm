@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 

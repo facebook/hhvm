@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_ASIO_SESSION_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/ext_closure.h"

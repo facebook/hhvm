@@ -1448,7 +1448,17 @@ and optional_modifier_list env =
 
 and modifier_word env = function
   | "final"     -> Some Final
-  | "static"    -> Some Static
+  | "static"    ->
+      (* We need to look ahead to make sure we are not looking at a type access
+       *
+       * class C {
+       *   public static $x; // a static var
+       *   public static::T $y; // an instance var with type static::T
+       * }
+       *)
+      if peek env = Tcolcol
+      then None
+      else Some Static
   | "abstract"  -> Some Abstract
   | "private"   -> Some Private
   | "public"    -> Some Public

@@ -28,23 +28,25 @@
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
-#include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/process.h"
-#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

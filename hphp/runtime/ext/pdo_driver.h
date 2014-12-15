@@ -19,6 +19,7 @@
 #define incl_HPHP_PDO_DRIVER_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/smart-object.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

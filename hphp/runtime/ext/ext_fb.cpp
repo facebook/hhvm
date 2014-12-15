@@ -30,8 +30,12 @@
 #include <folly/String.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime-option.h"

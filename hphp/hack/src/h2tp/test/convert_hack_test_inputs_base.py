@@ -127,6 +127,8 @@ UNSUPPORTED_FILES_UNPARSER = {
         'tconst/cannot_override_tconst.php',
         'tconst/cannot_use_class_tparams.php',
         'tconst/good_tconst_decl.php',
+        'tconst/nested_type_access.php',
+        'tconst/tconst_with_static.php',
         'tconst/unassigned_tconst.php',
     ],
 }

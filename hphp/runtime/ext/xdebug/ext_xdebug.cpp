@@ -16,16 +16,18 @@
 */
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
-#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
-#include "hphp/runtime/ext/xdebug/xdebug_server.h"
 
 #include "hphp/runtime/base/array-util.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
+#include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/timer.h"

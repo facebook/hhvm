@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_hotprofiler.h"
 #include "hphp/runtime/vm/vm-regs.h"

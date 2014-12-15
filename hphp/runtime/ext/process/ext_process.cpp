@@ -34,11 +34,13 @@
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"

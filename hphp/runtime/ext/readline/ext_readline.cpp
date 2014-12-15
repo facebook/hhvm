@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"

@@ -241,9 +241,7 @@ const RawDestructor g_destructors[] = {
 };
 
 Variant::~Variant() {
-  if (IS_REFCOUNTED_TYPE(m_type)) {
-    tvDecRefHelper(m_type, uint64_t(m_data.pref));
-  }
+  tvRefcountedDecRef(asTypedValue());
   if (debug) {
     memset(this, 0x7b, sizeof(*this));
   }

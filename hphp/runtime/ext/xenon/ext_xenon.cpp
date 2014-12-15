@@ -18,8 +18,10 @@
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/vm/vm-regs.h"

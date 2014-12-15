@@ -22,6 +22,7 @@
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/thread-info.h"

@@ -14,7 +14,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/enum-cache.h"
 
 namespace HPHP {

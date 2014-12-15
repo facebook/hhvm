@@ -85,14 +85,6 @@ inline bool tvDecRefWillCallHelper(TypedValue* tv) {
     !tv->m_data.pstr->hasMultipleRefs();
 }
 
-// Assumes 'tv' is live
-inline void tvRefcountedDecRefCell(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-    tvDecRefHelper(tv->m_type, tv->m_data.num);
-  }
-}
-
 inline void tvDecRefStr(TypedValue* tv) {
   assert(tv->m_type == KindOfString);
   decRefStr(tv->m_data.pstr);

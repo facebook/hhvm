@@ -70,8 +70,11 @@ bool merge_into(LocalState& dst, const LocalState& src) {
     changed = true;
   }
 
+  if (merge_util(dst.type, Type::unionOf(dst.type, src.type))) {
+    changed = true;
+  }
+
   return
-    merge_util(dst.type, Type::unionOf(dst.type, src.type)) ||
     merge_util(dst.predictedType,
                Type::unionOf(dst.predictedType, src.predictedType)) ||
     changed;

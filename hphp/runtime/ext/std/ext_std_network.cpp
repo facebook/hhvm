@@ -26,6 +26,7 @@
 #include <folly/IPAddress.h>
 #include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"

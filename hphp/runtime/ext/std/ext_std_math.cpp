@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/std/ext_std_math.h"
 
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/base/zend-multiply.h"
 #include "hphp/runtime/base/container-functions.h"

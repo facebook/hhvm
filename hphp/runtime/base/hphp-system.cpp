@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/system/constants.h"
 
 namespace HPHP {

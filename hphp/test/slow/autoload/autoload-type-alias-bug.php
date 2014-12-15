@@ -2,7 +2,7 @@
 function autoload_miss($str1, $str2) {
   echo "Failure handler called: $str1 $str2\n";
 }
-fb_autoload_map(
+HH\autoload_set_paths(
   array(
     'class' => array(),
     'constant' => array(),

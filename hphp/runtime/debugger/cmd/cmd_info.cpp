@@ -23,6 +23,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/logger.h"
 

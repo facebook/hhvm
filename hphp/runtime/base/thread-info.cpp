@@ -26,7 +26,6 @@
 #include <set>
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"

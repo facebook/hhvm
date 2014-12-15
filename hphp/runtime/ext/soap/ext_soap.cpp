@@ -22,6 +22,9 @@
 
 #include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/server/http-protocol.h"

@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -101,6 +102,9 @@ void VariableSerializer::popObjectInfo() {
   m_objectInfos.pop_back();
 }
 
+__thread int64_t VariableSerializer::serializationSizeLimit =
+  StringData::MaxSize;
+
 void VariableSerializer::popResourceInfo() {
   popObjectInfo();
 }
@@ -110,7 +114,7 @@ String VariableSerializer::serialize(const Variant& v, bool ret,
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {
-    buf.setOutputLimit(RuntimeOption::SerializationSizeLimit);
+    buf.setOutputLimit(serializationSizeLimit);
   } else {
     buf.setOutputLimit(StringData::MaxSize);
   }
@@ -129,7 +133,7 @@ String VariableSerializer::serializeValue(const Variant& v, bool limit) {
   StringBuffer buf;
   m_buf = &buf;
   if (limit) {
-    buf.setOutputLimit(RuntimeOption::SerializationSizeLimit);
+    buf.setOutputLimit(serializationSizeLimit);
   }
   m_valueCount = 1;
   write(v);
@@ -144,9 +148,9 @@ String VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
   }
   StringBuffer buf;
   m_buf = &buf;
-  if (RuntimeOption::SerializationSizeLimit > 0 &&
-      (limit <= 0 || limit > RuntimeOption::SerializationSizeLimit)) {
-    limit = RuntimeOption::SerializationSizeLimit;
+  if (serializationSizeLimit > 0 &&
+      (limit <= 0 || limit > serializationSizeLimit)) {
+    limit = serializationSizeLimit;
   }
   buf.setOutputLimit(limit);
   //Does not need m_valueCount, which is only useful with the unsupported types

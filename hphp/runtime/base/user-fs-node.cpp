@@ -16,8 +16,8 @@
 
 #include "hphp/runtime/base/user-fs-node.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/type-array.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-util.h"
@@ -25,6 +26,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/variable-serializer.h"

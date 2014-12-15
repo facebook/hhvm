@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/bz2/bz2-file.h"
+#include "hphp/runtime/base/array-init.h"
 
 namespace HPHP {
 

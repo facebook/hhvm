@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/url-file.h"
 #include <vector>
-#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"

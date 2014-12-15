@@ -178,6 +178,14 @@ bool MCGenerator::profileSrcKey(SrcKey sk) const {
   if (!shouldPGOFunc(*sk.func())) return false;
   if (m_tx.profData()->optimized(sk.getFuncId())) return false;
   if (m_tx.profData()->profiling(sk.getFuncId())) return true;
+
+  // Don't start profiling new functions if the size of either main or
+  // prof is already above Eval.JitAMaxUsage.
+  auto tcUsage = std::max(code.mainUsed(), code.profUsed());
+  if (tcUsage >= RuntimeOption::EvalJitAMaxUsage) {
+    return false;
+  }
+
   return requestCount() <= RuntimeOption::EvalJitProfileRequests;
 }
 

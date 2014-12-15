@@ -16,8 +16,8 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -410,7 +410,7 @@ void IniSetting::ParserCallback::makeArray(Variant& hash,
                                            const std::string& offset,
                                            const std::string& value) {
   assert(!offset.empty());
-  Variant val(hash, Variant::StrongBind{});
+  Variant val(Variant::StrongBind{}, hash);
   auto start = offset.c_str();
   auto p = start;
   bool last = false;

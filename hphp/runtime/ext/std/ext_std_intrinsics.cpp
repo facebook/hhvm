@@ -16,6 +16,7 @@
 */
 #include "hphp/runtime/ext/std/ext_std_intrinsics.h"
 
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/vm-regs.h"
 

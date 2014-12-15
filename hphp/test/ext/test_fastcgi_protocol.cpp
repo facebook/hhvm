@@ -23,6 +23,7 @@
 #include "hphp/test/ext/test_fastcgi.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/runtime/server/fastcgi/protocol-session-handler.h"
+#include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/shared-string.h"
@@ -507,4 +508,3 @@ bool TestFastCGIProtocol::TestInvalidType() {
   EXCHANGE(mx, 50);
   return Count(true);
 }
-

@@ -21,7 +21,9 @@
 #include <folly/Likely.h>
 #include <folly/Format.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/backtrace.h"

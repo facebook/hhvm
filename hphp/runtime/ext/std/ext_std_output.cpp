@@ -18,6 +18,8 @@
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/vm/vm-regs.h"

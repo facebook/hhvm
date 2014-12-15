@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"

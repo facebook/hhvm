@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/ext_collections.h"

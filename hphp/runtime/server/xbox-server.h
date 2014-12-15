@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/server-task-event.h"
+#include "hphp/runtime/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

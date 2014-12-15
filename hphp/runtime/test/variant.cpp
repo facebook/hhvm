@@ -35,7 +35,7 @@ TEST(Variant, References) {
   }
   {
     Variant v1("original");
-    Variant v2(v1, Variant::StrongBind{});
+    Variant v2(Variant::StrongBind{}, v1);
     v2 = String("changed");
     EXPECT_TRUE(equal(v1, String("changed")));
   }

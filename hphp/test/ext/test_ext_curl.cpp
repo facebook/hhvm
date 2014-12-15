@@ -18,6 +18,8 @@
 
 #include <folly/Conv.h>
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
@@ -337,4 +339,3 @@ bool TestExtCurl::test_curl_multi_close() {
   HHVM_FN(curl_multi_close)(mh);
   return Count(true);
 }
-

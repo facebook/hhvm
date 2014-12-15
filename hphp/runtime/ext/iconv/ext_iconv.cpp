@@ -15,7 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-local.h"
@@ -72,7 +75,7 @@ typedef enum _php_iconv_err_t {
 } php_iconv_err_t;
 
 static void _php_iconv_show_error(const char *func, php_iconv_err_t &err,
-                                  const char *out_charset, 
+                                  const char *out_charset,
                                   const char *in_charset) {
   switch (err) {
   case PHP_ICONV_ERR_SUCCESS:
@@ -1777,7 +1780,7 @@ static Variant HHVM_FUNCTION(iconv, const String& in_charset,
   php_iconv_err_t err =
     php_iconv_string(str.data(), str.size(), &out_buffer, &out_len,
                      out_charset.data(), in_charset.data());
-  _php_iconv_show_error(__FUNCTION__+2, err, 
+  _php_iconv_show_error(__FUNCTION__+2, err,
                         out_charset.data(), in_charset.data());
   if (err == PHP_ICONV_ERR_SUCCESS && out_buffer != nullptr) {
     return String(out_buffer, out_len, AttachString);

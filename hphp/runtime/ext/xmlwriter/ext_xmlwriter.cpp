@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/vm/native-data.h"
 
 #include <libxml/tree.h>

@@ -33,6 +33,8 @@
 #include "hphp/util/timer.h"
 
 #include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/builtin-functions.h"

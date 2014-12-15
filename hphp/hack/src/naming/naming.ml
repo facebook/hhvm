@@ -31,8 +31,6 @@ type typedef_set = Utils.SSet.t
 type const_set = Utils.SSet.t
 type decl_set = fun_set * class_set * typedef_set * const_set
 
-type class_cache = Nast.class_ option Utils.SMap.t ref
-
 (* We want to keep the positions of names that have been
  * replaced by identifiers.
  *)
@@ -180,7 +178,6 @@ let predef_fun x =
   predef_funs := SMap.add x var !predef_funs;
   x
 
-let anon      = predef_fun "?anon"
 let is_int    = predef_fun SN.StdlibFunctions.is_int
 let is_bool   = predef_fun SN.StdlibFunctions.is_bool
 let is_array  = predef_fun SN.StdlibFunctions.is_array
@@ -493,8 +490,6 @@ module Env = struct
     end else
       get_name genv genv_sect fq_x
 
-  let const (genv, env) x  = get_name genv env.consts x
-
   let global_const (genv, env) x  =
     elaborate_and_get_name_with_fallback
       (* Same idea as Dep.FunName, see below. *)
@@ -707,12 +702,36 @@ and hint_ ~allow_this is_static_var p env x =
   | Hfun (hl, opt, h) -> N.Hfun (List.map (hint env) hl, opt, hint env h)
   | Happly ((_, x) as id, hl) -> hint_id ~allow_this env is_static_var id hl
   | Haccess (root_id, id, ids) ->
-    let root_hint = hint_id ~allow_this env is_static_var root_id [] in
-    (match root_hint with
-      | N.Happly (class_id, _) -> N.Haccess (class_id, id, ids)
-      | _ ->
-        Errors.invalid_type_access_root root_id;
-        N.Hany)
+    let genv, _ = env in
+    let class_id = make_class_id ~allow_typedef:true env root_id in
+    let class_id = match class_id with
+      | N.CI cid ->
+          (* Checks that the cid is a valid hint id *)
+          let cid =
+            match hint_id ~allow_this env is_static_var root_id [] with
+            | N.Happly (class_id, _) -> class_id
+            | _ ->
+                Errors.invalid_type_access_root root_id;
+                fst root_id, SN.Classes.cUnknown
+          in
+          N.CI cid
+      (* At this point we can resolve the "self" class id to the current class
+       * we are naming.
+       *)
+      | N.CIself ->
+          begin match genv.cclass with
+          | Some class_ ->
+              N.CI (p, snd class_.c_name)
+          | None ->
+              Errors.static_outside_class p;
+              N.CI (fst root_id, SN.Classes.cUnknown)
+          end
+      (* "static" is resolved later at two places, Paritially during
+       * Typing_instantiate, the remainder during Typing_taccess.
+       *)
+      | N.CIparent | N.CIstatic | N.CIvar _ -> class_id
+    in
+    N.Haccess (class_id, id, ids)
   | Hshape fdl -> N.Hshape
     begin
       List.fold_left begin fun fdm (pname, h) ->
@@ -868,6 +887,28 @@ and get_constraint env tparam =
   env, gen_constraint
 
 and hintl ~allow_this env l = List.map (hint ~allow_this env) l
+
+and make_class_id ?(allow_typedef=false) env (p, x as cid) =
+  if not allow_typedef then no_typedef env cid;
+  match x with
+    | x when x = SN.Classes.cParent ->
+      if (fst env).cclass = None then
+        let () = Errors.parent_outside_class p in
+        N.CI (p, SN.Classes.cUnknown)
+      else N.CIparent
+    | x when x = SN.Classes.cSelf ->
+      if (fst env).cclass = None then
+        let () = Errors.self_outside_class p in
+        N.CI (p, SN.Classes.cUnknown)
+      else N.CIself
+    | x when x = SN.Classes.cStatic -> if (fst env).cclass = None then
+        let () = Errors.static_outside_class p in
+        N.CI (p, SN.Classes.cUnknown)
+      else N.CIstatic
+    | x when x = "$this" -> N.CIvar (p, N.This)
+    | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))
+    | _ -> N.CI (Env.class_name env cid)
+
 
 (*****************************************************************************)
 (* All the methods and static methods of an interface are "implicitely"
@@ -2023,27 +2064,6 @@ and expr_lambda env f =
     f_fun_kind = f_kind;
   }
 
-and make_class_id env (p, x as cid) =
-  no_typedef env cid;
-  match x with
-    | x when x = SN.Classes.cParent ->
-      if (fst env).cclass = None then
-        let () = Errors.parent_outside_class p in
-        N.CI (p, SN.Classes.cUnknown)
-      else N.CIparent
-    | x when x = SN.Classes.cSelf ->
-      if (fst env).cclass = None then
-        let () = Errors.self_outside_class p in
-        N.CI (p, SN.Classes.cUnknown)
-      else N.CIself
-    | x when x = SN.Classes.cStatic -> if (fst env).cclass = None then
-        let () = Errors.static_outside_class p in
-        N.CI (p, SN.Classes.cUnknown)
-      else N.CIstatic
-    | x when x = "$this" -> N.CIvar (p, N.This)
-    | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))
-    | _ -> N.CI (Env.class_name env cid)
-
 and casel env l =
   lfold (case env) SMap.empty l
 
@@ -2066,9 +2086,6 @@ and catch env acc (x1, x2, b) =
   let all_locals, b = branch env b in
   let acc = SMap.union all_locals acc in
   acc, (Env.class_name env x1, x2, b)
-
-and fieldl env l = List.map (field env) l
-and field env (e1, e2) = (expr env e1, expr env e2)
 
 and afield env = function
   | AFvalue e -> N.AFvalue (expr env e)

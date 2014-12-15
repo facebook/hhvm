@@ -20,6 +20,10 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/file.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

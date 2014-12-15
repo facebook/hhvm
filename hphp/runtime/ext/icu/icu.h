@@ -23,6 +23,7 @@
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////

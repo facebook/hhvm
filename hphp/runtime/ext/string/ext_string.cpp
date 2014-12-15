@@ -16,23 +16,27 @@
 */
 
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/base/bstring.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/base/zend-scanf.h"
-#include "hphp/runtime/base/bstring.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/util/lock.h"
-#include <locale.h>
-#include "hphp/runtime/server/http-request-handler.h"
-#include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include <folly/Unicode.h>
-#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/util/lock.h"
 #include "hphp/zend/html-table.h"
-#include "hphp/runtime/base/container-functions.h"
+
+#include <folly/Unicode.h>
+#include <locale.h>
 
 namespace HPHP {
 

@@ -15,10 +15,11 @@
 */
 
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,4 +128,3 @@ ALLOC_OBJECT_STUB(PDOException);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

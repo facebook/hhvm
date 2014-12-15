@@ -136,14 +136,16 @@ static String HHVM_STATIC_METHOD(Phar, running, bool retphar = true) {
   RuntimeOption::EvalJit = useJit;
   CallerFrame cf;
   const ActRec* ar = cf.actRecForArgs();
-  const std::string filepath = ar->m_func->unit()->filepath()->toCppString();
-  constexpr const char * const kPharScheme = "phar://";
-  constexpr const char * const kPharExt = ".phar";
+  const std::string filepath =
+    ar->m_func->unit()->filepath()->toCppString();
+  constexpr auto kPharScheme = "phar://";
+  constexpr auto kPharExt = ".phar";
   if(filepath.length() > std::strlen(kPharScheme)) {
     if(filepath.compare(0, std::strlen(kPharScheme), kPharScheme) == 0) {
       std::size_t pharExtPos = filepath.find(kPharExt);
       if(pharExtPos != std::string::npos) {
-        const std::string pharpath = filepath.substr(0, pharExtPos + std::strlen(kPharExt));
+        const std::string pharpath =
+          filepath.substr(0, pharExtPos + std::strlen(kPharExt));
         if(retphar) {
           return pharpath;
         }

@@ -68,7 +68,7 @@ let rec instantiate_fun env fty el =
       let env, ft = instantiate_ft env ft in
       let fty = r, Tfun ft in
       env, fty
-  | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+  | r, Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, fty = TUtils.expand_typedef env r x argl in
       instantiate_fun env fty el
   | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _

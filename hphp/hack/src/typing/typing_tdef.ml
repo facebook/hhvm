@@ -30,7 +30,7 @@ let rec expand_typedef_ ?force_expand:(force_expand=false) seen env r x argl =
   let should_expand = force_expand ||
     match visibility with
     | Env.Typedef.Private ->
-        Pos.filename tdef_pos = env.Env.genv.Env.file
+        Pos.filename tdef_pos = Env.get_file env
     | Env.Typedef.Public -> true
   in
   if List.length tparaml <> List.length argl
@@ -86,7 +86,7 @@ and check_typedef seen env (r, t) =
       ()
   | Tfun fty ->
       check_fun_typedef seen env fty
-  | Tapply ((p, x), argl) when Typing_env.is_typedef env x ->
+  | Tapply ((p, x), argl) when Typing_env.is_typedef x ->
       if seen = x
       then Errors.cyclic_typedef p
       else
@@ -140,7 +140,7 @@ let expand_typedef env r x argl =
 (* Expand a typedef, smashing abstraction and collecting a trail
  * of where the typedefs come from. *)
 let rec force_expand_typedef_ trail env = function
-  | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+  | r, Tapply ((_, x), argl) when Typing_env.is_typedef x ->
     let env, t, pos = expand_typedef_ ~force_expand:true x env r x argl in
     (* We need to keep expanding until we hit something that isn't a typedef *)
     force_expand_typedef_ (pos::trail) env t

@@ -158,7 +158,7 @@ let has_type env x =
   let env, x = get_var env x in
   IMap.mem x env.tenv
 
-let make_ft env p params ret_ty =
+let make_ft p params ret_ty =
   let arity = List.length params in
   {
     ft_pos      = p;
@@ -288,19 +288,19 @@ let add_class x y =
 let add_typedef x y =
   Typedefs.add x (Typedef.Ok y)
 
-let is_typedef env x =
+let is_typedef x =
   match Typedefs.get x with
   | None -> false
   | Some _ -> true
 
-let get_enum env x =
+let get_enum x =
   match Classes.get x with
-    | Some tc when tc.tc_enum_type <> None -> Some tc
-    | _ -> None
+  | Some tc when tc.tc_enum_type <> None -> Some tc
+  | _ -> None
 
-let is_enum env x = get_enum env x <> None
+let is_enum x = get_enum x <> None
 
-let get_enum_constraint env x =
+let get_enum_constraint x =
   match Classes.get x with
   | None -> None
   | Some tc ->
@@ -437,6 +437,8 @@ let get_self_id env = env.genv.self_id
 let get_parent env = env.genv.parent
 
 let get_fn_kind env = env.genv.fun_kind
+
+let get_file env = env.genv.file
 
 let get_fun env x =
   let dep = Dep.Fun x in
@@ -618,7 +620,7 @@ module FakeMembers = struct
  let make_static p env class_name member_name =
    let my_fake_local_id = make_static_id class_name member_name in
    let env = add_member env my_fake_local_id in
-    env, Hashtbl.hash my_fake_local_id
+   env, Hashtbl.hash my_fake_local_id
 
 end
 

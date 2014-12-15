@@ -104,7 +104,7 @@ and expand_ env (reason, type_) static =
            * then when we later expand the type def we will have "static::TC"
            * and we no longer have enough context to properly resolve "static".
            *)
-          | (r, Tapply ((_, tdef), [])), [] when Env.is_typedef env tdef
+          | (r, Tapply ((_, tdef), [])), [] when Env.is_typedef tdef
             && has_double_colon tdef ->
               let env, ty = TUtils.expand_typedef env r tdef [] in
               (* See the [NOTE] above that explains why we need to pass in
@@ -143,7 +143,7 @@ and has_double_colon str =
 and get_class_from_type env (reason, type_) static =
   let pos = Reason.to_pos reason in
   match type_ with
-    | Tapply ((_, name), argl) when Env.is_typedef env name ->
+    | Tapply ((_, name), argl) when Env.is_typedef name ->
         let env, ty = TUtils.expand_typedef env reason name argl in
         get_class_from_type env ty static
     | Tapply ((_, class_name), _) ->

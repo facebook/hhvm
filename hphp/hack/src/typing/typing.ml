@@ -79,7 +79,7 @@ let check_consistent_fields x l =
 let is_array = function _, Tarray _ -> true | _ -> false
 
 let unbound_name env (pos, name)=
-  (match env.Env.genv.Env.mode with
+  (match Env.get_mode env with
   | Ast.Mstrict ->
       Errors.unbound_name_typing pos name
   | Ast.Mdecl | Ast.Mpartial ->
@@ -577,12 +577,12 @@ and check_exhaustiveness env pos ty caselist =
       List.fold_left begin fun env ty ->
         check_exhaustiveness env pos ty caselist
       end env tyl
-    | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+    | Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, ty = Typing_tdef.expand_typedef env r x argl in
       check_exhaustiveness env pos ty caselist
 
     | Tapply ((_, id), _) ->
-      (match Typing_env.get_enum env id with
+      (match Typing_env.get_enum id with
         | Some tc -> Typing_enum.check_enum_exhaustiveness env pos tc caselist
         | None -> ());
       env
@@ -1411,7 +1411,7 @@ and assign p env e1 ty2 =
       | _, Taccess (_, _, _) ->
           let env, ty2 = TAccess.expand env folded_ety2 in
           assign p env e1 ty2
-      | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+      | r, Tapply ((_, x), argl) when Typing_env.is_typedef x ->
           let env, ty2 = Typing_tdef.expand_typedef env r x argl in
           assign p env e1 ty2
       | r, Tapply ((_, x), [elt_type])
@@ -2130,7 +2130,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       if Env.is_strict env
       then error_array env p ety1
       else env, (Reason.Rnone, Tany)
-  | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+  | Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       let env, ety1 = Env.expand_type env ty1 in
       array_get is_lvalue p env ty1 ety1 e2 ty2
@@ -2165,7 +2165,7 @@ and array_append is_lvalue p env ty1 =
       if Env.is_strict env
       then error_array_append env p ety1
       else env, (Reason.Rnone, Tany)
-  | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+  | Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       array_append is_lvalue p env ty1
   | Taccess (_, _, _) ->
@@ -2240,7 +2240,7 @@ and class_get ~is_method ~is_const env cty (p, mid) cid =
 
 and class_get_ ~is_method ~is_const env cty (p, mid) cid =
   match cty with
-  | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+  | r, Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, cty = Typing_tdef.expand_typedef env r x argl in
       class_get_ ~is_method ~is_const env cty (p, mid) cid
   | _, Taccess (_, _, _) ->
@@ -2287,7 +2287,7 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
               env, method_)
       )
   | _, Tany ->
-      (match env.Env.genv.Env.mode with
+      (match Env.get_mode env with
       | Ast.Mstrict -> Errors.expected_class p
       | Ast.Mdecl | Ast.Mpartial -> ()
       );
@@ -2379,7 +2379,7 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
   | p, Tgeneric (x, Some ty) ->
       let k_lhs' ty = k_lhs (p, Tgeneric (x, Some ty)) in
       obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty id k k_lhs'
-  | p, Tapply ((_, x) as c, argl) when Typing_env.is_typedef env x ->
+  | p, Tapply ((_, x) as c, argl) when Typing_env.is_typedef x ->
       let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       let k_lhs' ty = k_lhs (p, Tapply (c, argl)) in
       obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 id k k_lhs'
@@ -2505,7 +2505,7 @@ and type_could_be_null env ty1 =
   let env, ety1 = Env.expand_type env ty1 in
   match (snd ety1) with
   | Tgeneric (x, Some ty) -> type_could_be_null env ty
-  | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+  | Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, ty = Typing_tdef.expand_typedef env (fst ety1) x argl in
       type_could_be_null env ty
   | Taccess _ ->
@@ -2646,14 +2646,14 @@ and static_class_id p env = function
           | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _, _) | Ttuple _
           | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
           | Taccess (_, _, _)) ->
-            if env.Env.genv.Env.mode = Ast.Mstrict
+            if Env.get_mode env = Ast.Mstrict
             then Errors.dynamic_class p;
             Reason.Rnone, Tany
       in env, ty
 
 and call_construct p env class_ params el uel =
   let env, cstr = Env.get_construct env class_ in
-  let mode = env.Env.genv.Env.mode in
+  let mode = Env.get_mode env in
   Find_refs.process_find_refs (Some class_.tc_name) SN.Members.__construct p;
   match (fst cstr) with
     | None ->
@@ -2796,7 +2796,7 @@ and unpack_expr env e =
 and call_ pos env fty el uel =
   let env, efty = Env.expand_type env fty in
   (match efty with
-  | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+  | r, Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, fty = Typing_tdef.expand_typedef env r x argl in
       call_ pos env fty el uel
   | _, (Tany | Tunresolved []) ->
@@ -3047,7 +3047,7 @@ and non_null env ty =
         | x -> x :: tyl
       end tyl [] in
       env, (r, Tunresolved tyl)
-  | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+  | r, Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, ty = Typing_tdef.expand_typedef env r x argl in
       non_null env ty
   | _, Taccess (_, _, _) ->

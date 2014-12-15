@@ -281,7 +281,7 @@ and hint_ env p = function
       List.iter (hint env) hl;
       hint env h;
       ()
-  | Happly ((_, x), hl) when Typing_env.is_typedef env.tenv x ->
+  | Happly ((_, x), hl) when Typing_env.is_typedef x ->
       let tdef = Typing_env.Typedefs.find_unsafe x in
       let params =
         match tdef with

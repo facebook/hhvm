@@ -74,10 +74,10 @@ and unify_with_uenv env (uenv1, ty1) (uenv2, ty2) =
    * if both sides are a Tapply the "when" guard will only check ty1, so if ty2
    * is a typedef it won't get expanded. So we need an explicit check for both.
    *)
-  | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef env x ->
+  | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef x ->
       let env, ty1 = TDef.expand_typedef env r x argl in
       unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
-  | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
+  | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef x ->
       let env, ty1 = TDef.expand_typedef env r x argl in
       unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | (_, Taccess _), _

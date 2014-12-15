@@ -97,13 +97,13 @@ module Naming                               = struct
   let add_a_typehint                        = 2001 (* DONT MODIFY!!!! *)
   let typeparam_alok                        = 2002 (* DONT MODIFY!!!! *)
   let assert_arity                          = 2003 (* DONT MODIFY!!!! *)
-  let boolean_instead_of_bool               = 2004 (* DONT MODIFY!!!! *)
+  let primitive_invalid_alias               = 2004 (* DONT MODIFY!!!! *)
   let cyclic_constraint                     = 2005 (* DONT MODIFY!!!! *)
   let did_you_mean_naming                   = 2006 (* DONT MODIFY!!!! *)
   let different_scope                       = 2007 (* DONT MODIFY!!!! *)
   let disallowed_xhp_type                   = 2008 (* DONT MODIFY!!!! *)
-  let double_instead_of_float               = 2009 (* DONT MODIFY!!!! *)
-  (* DEPRECATED: let dynamic_class          = 2010 *)
+  (* DEPRECATED let double_instead_of_float = 2009 *)
+  (* DEPRECATED let dynamic_class           = 2010 *)
   let dynamic_method_call                   = 2011 (* DONT MODIFY!!!! *)
   let error_name_already_bound              = 2012 (* DONT MODIFY!!!! *)
   let expected_collection                   = 2013 (* DONT MODIFY!!!! *)
@@ -121,7 +121,7 @@ module Naming                               = struct
   let illegal_inst_meth                     = 2025 (* DONT MODIFY!!!! *)
   let illegal_meth_caller                   = 2026 (* DONT MODIFY!!!! *)
   let illegal_meth_fun                      = 2027 (* DONT MODIFY!!!! *)
-  let integer_instead_of_int                = 2028 (* DONT MODIFY!!!! *)
+  (* DEPRECATED integer_instead_of_int      = 2028 *)
   let invalid_req_extends                   = 2029 (* DONT MODIFY!!!! *)
   let invalid_req_implements                = 2030 (* DONT MODIFY!!!! *)
   let local_const                           = 2031 (* DONT MODIFY!!!! *)
@@ -133,7 +133,7 @@ module Naming                               = struct
   let naming_too_few_arguments              = 2037 (* DONT MODIFY!!!! *)
   let naming_too_many_arguments             = 2038 (* DONT MODIFY!!!! *)
   let primitive_toplevel                    = 2039 (* DONT MODIFY!!!! *)
-  let real_instead_of_float                 = 2040 (* DONT MODIFY!!!! *)
+  (* DEPRECATED let real_instead_of_float   = 2040 *)
   let shadowed_type_param                   = 2041 (* DONT MODIFY!!!! *)
   let start_with_T                          = 2042 (* DONT MODIFY!!!! *)
   let this_must_be_return                   = 2043 (* DONT MODIFY!!!! *)
@@ -448,29 +448,11 @@ let primitive_toplevel pos =
     longer be referred to in the toplevel namespace."
 )
 
-let integer_instead_of_int pos =
-  add Naming.integer_instead_of_int pos
-    "Invalid Hack type. Using \"integer\" in Hack is considered \
-    an error. Use \"int\" instead, to keep the codebase \
-    consistent."
-
-let boolean_instead_of_bool pos =
-  add Naming.boolean_instead_of_bool pos
-    "Invalid Hack type. Using \"boolean\" in Hack is considered \
-    an error. Use \"bool\" instead, to keep the codebase \
-    consistent."
-
-let double_instead_of_float pos =
-  add Naming.double_instead_of_float pos
-    "Invalid Hack type. Using \"double\" in Hack is considered \
-    an error. Use \"float\" instead. They are equivalent data types \
-    and the codebase remains consistent."
-
-let real_instead_of_float pos =
-  add Naming.real_instead_of_float pos
-    "Invalid Hack type. Using \"real\" in Hack is considered \
-    an error. Use \"float\" instead. They are equivalent data types and \
-    the codebase remains consistent."
+let primitive_invalid_alias pos used valid =
+  add Naming.primitive_invalid_alias pos
+    ("Invalid Hack type. Using '"^used^"' in Hack is considered \
+    an error. Use '"^valid^"' instead, to keep the codebase \
+    consistent.")
 
 let shape_typehint pos =
   add Naming.shape_typehint pos

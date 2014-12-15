@@ -847,36 +847,40 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       N.Happly (name, hintl ~allow_this env hl)
   end
 
-(* Hints that are valid both as casts and type annotations.  Neither casts nor
- * annotations are a strict subset of the other: For instance, 'object' is not
- * a valid annotation.  Thus callers will have to handle the remaining cases. *)
+(* Hints that are valid both as casts and type annotations.  Neither
+ * casts nor annotations are a strict subset of the other: For
+ * instance, 'object' is not a valid annotation.  Thus callers will
+ * have to handle the remaining cases. *)
 and try_castable_hint ?(allow_this=false) env p x hl =
   let hint = hint ~allow_this in
-  match x with
-  | x when x = SN.Typehints.int    -> Some (N.Hprim N.Tint)
-  | x when x = SN.Typehints.bool   -> Some (N.Hprim N.Tbool)
-  | x when x = SN.Typehints.float  -> Some (N.Hprim N.Tfloat)
-  | x when x = SN.Typehints.string -> Some (N.Hprim N.Tstring)
-  | x when x = SN.Typehints.array  ->
+  let canon = String.lowercase x in
+  let opt_hint = match canon with
+    | nm when nm = SN.Typehints.int    -> Some (N.Hprim N.Tint)
+    | nm when nm = SN.Typehints.bool   -> Some (N.Hprim N.Tbool)
+    | nm when nm = SN.Typehints.float  -> Some (N.Hprim N.Tfloat)
+    | nm when nm = SN.Typehints.string -> Some (N.Hprim N.Tstring)
+    | nm when nm = SN.Typehints.array  ->
       Some (match hl with
-      | [] -> N.Harray (None, None)
-      | [x] -> N.Harray (Some (hint env x), None)
-      | [x; y] -> N.Harray (Some (hint env x), Some (hint env y))
-      | _ -> Errors.naming_too_many_arguments p; N.Hany
+        | [] -> N.Harray (None, None)
+        | [val_] -> N.Harray (Some (hint env val_), None)
+        | [key_; val_] -> N.Harray (Some (hint env key_), Some (hint env val_))
+        | _ -> Errors.naming_too_many_arguments p; N.Hany
       )
-  | x when x = SN.Typehints.integer ->
-      Errors.integer_instead_of_int p;
+    | nm when nm = SN.Typehints.integer ->
+      Errors.primitive_invalid_alias p nm SN.Typehints.int;
       Some (N.Hprim N.Tint)
-  | x when x = SN.Typehints.boolean ->
-      Errors.boolean_instead_of_bool p;
+    | nm when nm = SN.Typehints.boolean ->
+      Errors.primitive_invalid_alias p nm SN.Typehints.bool;
       Some (N.Hprim N.Tbool)
-  | x when x = SN.Typehints.double ->
-      Errors.double_instead_of_float p;
+    | nm when nm = SN.Typehints.double || nm = SN.Typehints.real ->
+      Errors.primitive_invalid_alias p nm SN.Typehints.float;
       Some (N.Hprim N.Tfloat)
-  | x when x = SN.Typehints.real ->
-      Errors.real_instead_of_float p;
-      Some (N.Hprim N.Tfloat)
-  | _ -> None
+    | _ -> None
+  in
+  let () = match opt_hint with
+    | Some _ when canon <> x -> Errors.primitive_invalid_alias p x canon
+    | _ -> ()
+  in opt_hint
 
 and get_constraint env tparam =
   let params = (fst env).type_params in

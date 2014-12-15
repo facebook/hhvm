@@ -272,7 +272,8 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  function getTransitions(): array;
+  function getTransitions(int $timestamp_begin = PHP_INT_MIN,
+                          int $timestamp_end = PHP_INT_MAX): array;
 
   /**
    * @return array - Returns array on success or FALSE on failure.
@@ -890,8 +891,10 @@ function timezone_open(string $timezone): DateTimeZone {
   return new DateTimeZone($timezone);
 }
 
-function timezone_transitions_get(DateTimeZone $timezone): array {
-  return $timezone->getTransitions();
+function timezone_transitions_get(DateTimeZone $timezone,
+                                  int $timestamp_begin = PHP_INT_MIN,
+                                  int $timestamp_end = PHP_INT_MAX): array {
+  return $timezone->getTransitions($timestamp_begin, $timestamp_end);
 }
 
 <<__Native>>

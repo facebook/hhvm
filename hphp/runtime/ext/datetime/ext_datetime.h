@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timezone.h"
 #include "hphp/runtime/base/dateinterval.h"
+#include "hphp/system/constants.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,7 +160,9 @@ Array HHVM_METHOD(DateTimeZone, getLocation);
 String HHVM_METHOD(DateTimeZone, getName);
 int64_t HHVM_METHOD(DateTimeZone, getOffset,
                     const Object& datetime);
-Array HHVM_METHOD(DateTimeZone, getTransitions);
+Array HHVM_METHOD(DateTimeZone, getTransitions,
+                  int64_t timestamp_begin = k_PHP_INT_MIN,
+                  int64_t timestamp_end = k_PHP_INT_MAX);
 Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations);
 Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
                            int64_t what,

@@ -385,9 +385,11 @@ int64_t HHVM_METHOD(DateTimeZone, getOffset,
   return data->m_tz->offset(ts);
 }
 
-Array HHVM_METHOD(DateTimeZone, getTransitions) {
+Array HHVM_METHOD(DateTimeZone, getTransitions,
+                  int64_t timestamp_begin, /*=k_PHP_INT_MIN*/
+                  int64_t timestamp_end /*=k_PHP_INT_MAX*/) {
   DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
-  return data->m_tz->transitions();
+  return data->m_tz->transitions(timestamp_begin, timestamp_end);
 }
 
 Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations) {

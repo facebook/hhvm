@@ -54,7 +54,9 @@ function timezone_name_from_abbr($abbr, $gmtoffset = -1, $isdst = true) { }
 function timezone_name_get($object) { }
 function timezone_offset_get($object, $dt) { }
 function timezone_open($timezone) { }
-function timezone_transitions_get($object) { }
+function timezone_transitions_get(DateTimeZone $object,
+                                  int $timestamp_begin = PHP_INT_MIN,
+                                  int $timestamp_end = PHP_INT_MAX) { }
 function timezone_version_get() { }
 class DateTime {
   const ATOM = '';
@@ -104,7 +106,8 @@ class DateTimeZone {
   public function getLocation() { }
   public function getName() { }
   public function getOffset($datetime) { }
-  public function getTransitions() { }
+  public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
+                                 int $timestamp_end = PHP_INT_MAX) { }
   static public function listAbbreviations() { }
   static public function listIdentifiers() { }
 }

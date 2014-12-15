@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/system/constants.h"
 
 extern "C" {
 #include <timelib.h>
@@ -95,7 +96,8 @@ public:
   /**
    * Query transition times for DST.
    */
-  Array transitions() const;
+  Array transitions(int64_t timestamp_begin = k_PHP_INT_MIN,
+                    int64_t timestamp_end = k_PHP_INT_MAX) const;
 
   /**
    * Get information about a timezone

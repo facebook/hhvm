@@ -284,23 +284,38 @@ bool TimeZone::dst(int64_t timestamp) const {
   return ret;
 }
 
-Array TimeZone::transitions() const {
+Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
+                            int64_t timestamp_end /* = k_PHP_INT_MAX */) const {
   Array ret;
   if (m_tzi) {
-    for (unsigned int i = 0; i < m_tzi->timecnt; ++i) {
-      int index = m_tzi->trans_idx[i];
-      int timestamp = m_tzi->trans[i];
-      DateTime dt(timestamp);
-      ttinfo &offset = m_tzi->type[index];
-      const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
-
+    // If explicitly provided add the beginning timestamp to the ret array
+    if (timestamp_begin > k_PHP_INT_MIN) {
+      DateTime dt(timestamp_begin);
       ret.append(make_map_array(
-        s_ts, timestamp,
-        s_time, dt.toString(DateTime::DateFormat::ISO8601),
-        s_offset, offset.offset,
-        s_isdst, (bool)offset.isdst,
-        s_abbr, String(abbr, CopyString)
-      ));
+            s_ts, timestamp_begin,
+            s_time, dt.toString(DateTime::DateFormat::ISO8601),
+            s_offset, m_tzi->type[0].offset,
+            s_isdst, (bool)m_tzi->type[0].isdst,
+            s_abbr, String(m_tzi->timezone_abbr + m_tzi->type[0].abbr_idx,
+                           CopyString)
+          ));
+    }
+    for (unsigned int i = 0; i < m_tzi->timecnt; ++i) {
+      int timestamp = m_tzi->trans[i];
+      if (timestamp > timestamp_begin && timestamp <= timestamp_end) {
+        int index = m_tzi->trans_idx[i];
+        DateTime dt(timestamp);
+        ttinfo &offset = m_tzi->type[index];
+        const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
+
+        ret.append(make_map_array(
+          s_ts, timestamp,
+          s_time, dt.toString(DateTime::DateFormat::ISO8601),
+          s_offset, offset.offset,
+          s_isdst, (bool)offset.isdst,
+          s_abbr, String(abbr, CopyString)
+        ));
+      }
     }
   }
   return ret;

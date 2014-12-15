@@ -24,8 +24,6 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/directory.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -128,45 +126,11 @@ static class PharStreamWrapper : public Stream::Wrapper {
 
 } s_phar_stream_wrapper;
 
-static String HHVM_STATIC_METHOD(Phar, running, bool retphar = true) {
-  //We need to walk up a stack frame and retrieve the value of __FILE__
-  //and then pass that onto the php impl
-  //FIXME: Why do I need this?
-  bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
-  RuntimeOption::EvalJit = useJit;
-  CallerFrame cf;
-  const ActRec* ar = cf.actRecForArgs();
-  const std::string filepath =
-    ar->m_func->unit()->filepath()->toCppString();
-  constexpr auto kPharScheme = "phar://";
-  constexpr auto kPharExt = ".phar";
-  if(filepath.length() > std::strlen(kPharScheme)) {
-    if(filepath.compare(0, std::strlen(kPharScheme), kPharScheme) == 0) {
-      std::size_t pharExtPos = filepath.find(kPharExt);
-      if(pharExtPos != std::string::npos) {
-        const std::string pharpath =
-          filepath.substr(0, pharExtPos + std::strlen(kPharExt));
-        if(retphar) {
-          return pharpath;
-        }
-        else {
-          return pharpath.substr(std::strlen(kPharScheme));
-        }
-      }
-    }
-  }
-  return "";
-}
-
 class pharExtension : public Extension {
  public:
   pharExtension() : Extension("phar") {}
   virtual void moduleInit() {
     s_phar_stream_wrapper.registerAs("phar");
-  }
-
-  virtual void moduleLoad(const IniSetting::Map& Ini, Hdf config) {
-    HHVM_STATIC_ME(Phar, running);
   }
 } s_phar_extension;
 

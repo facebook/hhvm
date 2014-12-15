@@ -31,8 +31,6 @@ type typedef_set = Utils.SSet.t
 type const_set = Utils.SSet.t
 type decl_set = fun_set * class_set * typedef_set * const_set
 
-type class_cache = Nast.class_ option Utils.SMap.t ref
-
 (* We want to keep the positions of names that have been
  * replaced by identifiers.
  *)
@@ -180,7 +178,6 @@ let predef_fun x =
   predef_funs := SMap.add x var !predef_funs;
   x
 
-let anon      = predef_fun "?anon"
 let is_int    = predef_fun SN.StdlibFunctions.is_int
 let is_bool   = predef_fun SN.StdlibFunctions.is_bool
 let is_array  = predef_fun SN.StdlibFunctions.is_array
@@ -492,8 +489,6 @@ module Env = struct
       | false, false -> get_name genv genv_sect fq_x
     end else
       get_name genv genv_sect fq_x
-
-  let const (genv, env) x  = get_name genv env.consts x
 
   let global_const (genv, env) x  =
     elaborate_and_get_name_with_fallback
@@ -2091,9 +2086,6 @@ and catch env acc (x1, x2, b) =
   let all_locals, b = branch env b in
   let acc = SMap.union all_locals acc in
   acc, (Env.class_name env x1, x2, b)
-
-and fieldl env l = List.map (field env) l
-and field env (e1, e2) = (expr env e1, expr env e2)
 
 and afield env = function
   | AFvalue e -> N.AFvalue (expr env e)

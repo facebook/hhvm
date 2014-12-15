@@ -144,6 +144,10 @@ let get_class_parents_and_traits env class_nast =
   let acc = env, parents, is_complete, true in
   let env, parents, is_complete, _ =
     List.fold_left (get_class_parent_or_trait class_nast) acc class_nast.c_uses in
+  (* XHP classes whose attributes were imported via "attribute :foo;" syntax *)
+  let acc = env, parents, is_complete, true in
+  let env, parents, is_complete, _ =
+    List.fold_left (get_class_parent_or_trait class_nast) acc class_nast.c_xhp_attr_uses in
   env, parents, is_complete
 
 let merge_single_req req_name env subst inc_req_ty existing_req_opt incoming_pos =
@@ -368,6 +372,7 @@ and class_parents_decl class_env c =
   List.iter class_hint c.c_extends;
   List.iter class_hint c.c_implements;
   List.iter class_hint c.c_uses;
+  List.iter class_hint c.c_xhp_attr_uses;
   List.iter class_hint c.c_req_extends;
   List.iter class_hint c.c_req_implements;
   ()

@@ -35,6 +35,7 @@
 namespace HPHP {
 struct APCLocalArray;
 struct MemoryManager;
+struct ObjectData;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -112,7 +113,8 @@ enum class HeaderKind : uint8_t {
   // ArrayKind aliases
   Packed, Mixed, StrMap, IntMap, VPacked, Empty, Apc, Globals, Proxy,
   // Other ordinary refcounted heap objects
-  String, Object, Resource, Ref,
+  String, Object, ResumableObj, Resource, Ref,
+  Resumable, // ResumableNode followed by Frame, Resumable, ObjectData
   Native, // a NativeData header preceding an HNI ObjectData
   Sweepable, // a Sweepable header preceding an ObjectData ResourceData
   SmallMalloc, // small smart_malloc'd block
@@ -330,9 +332,16 @@ struct FreeNode {
 // for details about memory layout.
 struct NativeNode {
   uint32_t sweep_index; // index in MM::m_natives
-  uint32_t obj_offset;
+  uint32_t obj_offset; // byte offset from this to ObjectData*
   char pad[3];
   HeaderKind kind;
+};
+
+// header for Resumable objects. See layout comment in resumable.h
+struct ResumableNode {
+  size_t framesize;
+  char pad[3];
+  HeaderKind kind; // Resumable
 };
 
 // POD type for tracking arbitrary memory ranges

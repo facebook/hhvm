@@ -29,7 +29,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class BaseGenerator
 
-class BaseGenerator : public ExtObjectDataFlags<ObjectData::HasClone> {
+class BaseGenerator : public
+      ExtObjectDataFlags<ObjectData::HasClone> {
 public:
   enum class State : uint8_t {
     Created = 0,  // generator was created but never iterated
@@ -52,7 +53,9 @@ public:
     return whStateOffset();
   }
 
-  explicit BaseGenerator(Class* cls) : ExtObjectDataFlags(cls) {}
+  explicit BaseGenerator(Class* cls)
+    : ExtObjectDataFlags(cls, HeaderKind::ResumableObj)
+  {}
 
   Resumable* resumable() const {
     return reinterpret_cast<Resumable*>(
@@ -131,6 +134,7 @@ public:
 class c_Generator : public c_Continuation {
 public:
   DECLARE_CLASS_NO_SWEEP(Generator)
+  ~c_Generator();
 
   void t___construct();
   Variant t_current();
@@ -166,8 +170,6 @@ public:
 
 private:
   explicit c_Generator(Class* cls = c_Generator::classof());
-  ~c_Generator();
-
   void copyVars(ActRec *fp);
   void done();
 

@@ -528,8 +528,9 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
 namespace {
 const char* header_names[] = {
   "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Apc",
-  "Globals", "Proxy", "String", "Object", "Resource", "Ref", "Native",
-  "Sweepable", "SmallMalloc", "BigMalloc", "BigObj", "Free", "Hole", "Debug"
+  "Globals", "Proxy", "String", "Object", "ResumableObj", "Resource", "Ref",
+  "Resumable", "Native", "Sweepable", "SmallMalloc", "BigMalloc", "BigObj",
+  "Free", "Hole", "Debug"
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
 

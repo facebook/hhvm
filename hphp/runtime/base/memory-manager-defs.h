@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/vm/globals-array.h"
+#include "hphp/runtime/vm/resumable.h"
 
 namespace HPHP {
 
@@ -49,10 +50,20 @@ struct Header {
     SmallNode small_;
     BigNode big_;
     FreeNode free_;
+    ResumableNode resumable_;
     NativeNode native_;
     DebugHeader debug_;
     DummySweepable sweepable_;
   };
+
+  Resumable* resumable() const {
+    return reinterpret_cast<Resumable*>(
+      (char*)this + sizeof(ResumableNode) + resumable_.framesize
+    );
+  }
+  ObjectData* resumableObj() const {
+    return reinterpret_cast<ObjectData*>(resumable() + 1);
+  }
 };
 
 inline size_t Header::size() const {
@@ -77,6 +88,7 @@ inline size_t Header::size() const {
     case HeaderKind::String:
       return str_.heapSize();
     case HeaderKind::Object:
+    case HeaderKind::ResumableObj:
       // [ObjectData][subclass][props]
       return obj_.heapSize();
     case HeaderKind::Resource:
@@ -93,6 +105,9 @@ inline size_t Header::size() const {
       return big_.nbytes;
     case HeaderKind::Free:
       return free_.size;
+    case HeaderKind::Resumable:
+      // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
+      return resumable()->size();
     case HeaderKind::Native:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
       return native_.obj_offset + Native::obj(&native_)->heapSize();
@@ -199,7 +214,11 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   for (auto i = begin(), lim = end(); i != lim; ++i) {
     switch (i->kind()) {
       case HeaderKind::Object:
+      case HeaderKind::ResumableObj:
         ptrs.push_back(&i->obj_);
+        break;
+      case HeaderKind::Resumable:
+        ptrs.push_back(i->resumableObj());
         break;
       case HeaderKind::Native:
         ptrs.push_back(Native::obj(&i->native_));

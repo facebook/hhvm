@@ -77,8 +77,9 @@ struct ObjectData {
     IsCollection  = 0x2000, // it's a collection (and the specific type is
                             // stored in o_subclass_u8)
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
+    HasNativePropHandler    // class has native magic props handler
+                  = 0x8000,
     InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
-    HasNativePropHandler = 0x8000, // class has native magic props handler
   };
 
   enum {
@@ -103,7 +104,7 @@ struct ObjectData {
   ObjectData& operator=(const ObjectData&) = delete;
 
  protected:
-  explicit ObjectData(Class*, uint16_t flags);
+  explicit ObjectData(Class*, uint16_t flags, HeaderKind = HeaderKind::Object);
 
  private:
   enum class NoInit {};
@@ -414,8 +415,9 @@ inline ObjectData* instanceFromTv(TypedValue* tv) {
 
 template<uint16_t Flags>
 struct ExtObjectDataFlags : ObjectData {
-  explicit ExtObjectDataFlags(HPHP::Class* cb)
-    : ObjectData(cb, Flags | ObjectData::IsCppBuiltin)
+  explicit ExtObjectDataFlags(HPHP::Class* cb,
+                              HeaderKind kind = HeaderKind::Object)
+    : ObjectData(cb, Flags | ObjectData::IsCppBuiltin, kind)
   {
     assert(!getVMClass()->callsCustomInstanceInit());
   }

@@ -41,11 +41,13 @@ inline ObjectData::ObjectData(Class* cls)
   instanceInit(cls);
 }
 
-inline ObjectData::ObjectData(Class* cls, uint16_t flags)
+inline ObjectData::ObjectData(Class* cls, uint16_t flags,
+                              HeaderKind kind)
   : m_cls(cls)
-  , m_attr_kind_count(flags | HeaderKind::Object << 24)
+  , m_attr_kind_count(flags | kind << 24)
 {
-  assert(o_attribute == flags && m_kind == HeaderKind::Object && !m_count);
+  assert(o_attribute == flags && !m_count);
+  assert(m_kind == HeaderKind::Object || m_kind == HeaderKind::ResumableObj);
   assert(uintptr_t(this) % sizeof(TypedValue) == 0);
   if (cls->needInitialization()) {
     // Needs to happen before we assign this object an o_id.

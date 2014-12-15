@@ -78,8 +78,9 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     ExternalThreadEvent,
   };
 
-  explicit c_WaitHandle(Class* cls = c_WaitHandle::classof())
-    : ExtObjectDataFlags(cls)
+  explicit c_WaitHandle(Class* cls = c_WaitHandle::classof(),
+                        HeaderKind kind = HeaderKind::Object)
+    : ExtObjectDataFlags(cls, kind)
   {}
   ~c_WaitHandle() {}
 

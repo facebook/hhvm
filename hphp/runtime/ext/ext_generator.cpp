@@ -28,11 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void delete_Generator(ObjectData* od, const Class*) {
-  auto const cont = static_cast<c_Generator*>(od);
-  auto const size = cont->resumable()->size();
-  auto const base = (char*)(cont + 1) - size;
-  cont->~c_Generator();
-  smart_free(base);
+  Resumable::Destroy(static_cast<c_Generator*>(od));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

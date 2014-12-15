@@ -33,11 +33,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void delete_AsyncGenerator(ObjectData* od, const Class*) {
-  auto const gen = static_cast<c_AsyncGenerator*>(od);
-  auto const size = gen->resumable()->size();
-  auto const base = (char*)(gen + 1) - size;
-  gen->~c_AsyncGenerator();
-  smart_free(base);
+  Resumable::Destroy(static_cast<c_AsyncGenerator*>(od));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

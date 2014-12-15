@@ -35,9 +35,9 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(BlockableWaitHandle)
 
-  explicit c_BlockableWaitHandle(Class* cls =
-      c_BlockableWaitHandle::classof())
-    : c_WaitableWaitHandle(cls)
+  explicit c_BlockableWaitHandle(Class* cls = c_BlockableWaitHandle::classof(),
+                                 HeaderKind kind = HeaderKind::Object)
+    : c_WaitableWaitHandle(cls, kind)
   {}
   ~c_BlockableWaitHandle() {}
 

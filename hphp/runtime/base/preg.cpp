@@ -77,14 +77,13 @@ private:
           LRUCacheKey::HashCompare> LRUCache;
   typedef ThreadSafeScalableCache<LRUCacheKey, EntryPtr,
           LRUCacheKey::HashCompare> ScalableCache;
-  typedef std::pair<const StringData*, const pcre_cache_entry*>
-          StaticCachePair;
+  typedef StaticCache::value_type StaticCachePair;
 
 public:
   class Accessor {
   public:
     Accessor()
-      : m_kind(AccessorKind::Ptr), m_ptr((pcre_cache_entry*)nullptr)
+      : m_kind(AccessorKind::Ptr), m_ptr(nullptr)
     {}
 
     // No assignment from LRUCache::ConstAccessor since it is non-copyable
@@ -116,8 +115,7 @@ public:
         case AccessorKind::Accessor:
           return m_accessor.get()->get();
       }
-      not_reached();
-      return nullptr;
+      always_assert(false);
     }
   private:
     enum class AccessorKind {
@@ -144,24 +142,24 @@ public:
 
   void reinit(CacheKind kind);
   bool find(Accessor& accessor, const String& key,
-      TempKeyCache& keyCache);
+            TempKeyCache& keyCache);
   void insert(Accessor& accessor, const String& regex,
-      TempKeyCache& keyCache, const pcre_cache_entry* ent);
+              TempKeyCache& keyCache, const pcre_cache_entry* ent);
   void dump(const std::string& filename);
   size_t size() const;
 
 private:
+  void clearStatic();
+
+  static void DestroyStatic(StaticCache* cache);
+  static StaticCache* CreateStatic();
+
   CacheKind m_kind;
   std::atomic<StaticCache*> m_staticCache;
   std::unique_ptr<LRUCache> m_lruCache;
   std::unique_ptr<ScalableCache> m_scalableCache;
   std::atomic<time_t> m_expire;
   std::mutex m_clearMutex;
-
-  void clearStatic();
-
-  static void DestroyStatic(StaticCache* cache);
-  StaticCache* CreateStatic();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -219,6 +217,7 @@ void PCRECache::reinit(CacheKind kind) {
       break;
     case CacheKind::Scalable:
       m_scalableCache.reset();
+      break;
   }
   m_kind = kind;
 
@@ -232,6 +231,7 @@ void PCRECache::reinit(CacheKind kind) {
       break;
     case CacheKind::Scalable:
       m_scalableCache.reset(new ScalableCache(RuntimeOption::EvalPCRETableSize));
+      break;
   }
 }
 
@@ -266,8 +266,7 @@ bool PCRECache::find(Accessor& accessor,
         return found;
       }
   }
-  not_reached();
-  return false;
+  always_assert(false);
 }
 
 void PCRECache::clearStatic() {
@@ -285,10 +284,11 @@ void PCRECache::clearStatic() {
    });
 }
 
-void PCRECache::insert(Accessor& accessor,
-    const String& regex,
-    TempKeyCache& keyCache,
-    const pcre_cache_entry* ent)
+void PCRECache::insert(
+  Accessor& accessor,
+  const String& regex,
+  TempKeyCache& keyCache,
+  const pcre_cache_entry* ent)
 {
   switch (m_kind) {
     case CacheKind::Static:
@@ -326,8 +326,6 @@ void PCRECache::insert(Accessor& accessor,
         }
       }
       break;
-    default:
-      not_reached();
   }
 }
 
@@ -353,8 +351,6 @@ void PCRECache::dump(const std::string& filename) {
         }
       }
       break;
-    default:
-      not_reached();
   }
   out.close();
 }
@@ -362,14 +358,13 @@ void PCRECache::dump(const std::string& filename) {
 size_t PCRECache::size() const {
   switch (m_kind) {
     case CacheKind::Static:
-      return (size_t)m_staticCache.load(std::memory_order_acquire)->size();
+      return m_staticCache.load(std::memory_order_acquire)->size();
     case CacheKind::Lru:
       return m_lruCache->size();
     case CacheKind::Scalable:
      return m_scalableCache->size();
   }
-  not_reached();
-  return 0;
+  always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -385,7 +380,7 @@ void pcre_reinit() {
     kind = PCRECache::CacheKind::Scalable;
   } else {
     Logger::Warning("Eval.PCRECacheType should be either static, "
-       "lru or scalable");
+                    "lru or scalable");
     kind = PCRECache::CacheKind::Scalable;
   }
   s_pcreCache.reinit(kind);
@@ -660,7 +655,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   }
 
   /* Store the compiled pattern and extra info in the cache. */
-  pcre_cache_entry * new_entry = new pcre_cache_entry();
+  pcre_cache_entry* new_entry = new pcre_cache_entry();
   new_entry->re = re;
   new_entry->extra = extra;
 
@@ -680,7 +675,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   return true;
 }
 
-static int *create_offset_array(const pcre_cache_entry* pce,
+static int* create_offset_array(const pcre_cache_entry* pce,
                                 int& size_offsets) {
   /* Allocate memory for the offsets array */
   size_offsets = pce->num_subpats * 3;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef incl_HPHP_STRING_KEY_H
-#define incl_HPHP_STRING_KEY_H
+#ifndef incl_HPHP_UTIL_LRU_CACHE_KEY_H
+#define incl_HPHP_UTIL_LRU_CACHE_KEY_H
 
 #include <atomic>
 #include <cstring>
@@ -61,7 +61,7 @@ public:
     }
 
     size_t hash(const LRUCacheKey& k) const {
-      return (size_t)k.hash();
+      return k.hash();
     }
   };
 

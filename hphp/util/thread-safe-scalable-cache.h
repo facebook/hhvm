@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef incl_HPHP_SCALABLE_CACHE_H
-#define incl_HPHP_SCALABLE_CACHE_H
+#ifndef incl_HPHP_UTIL_SCALABLE_CACHE_H
+#define incl_HPHP_UTIL_SCALABLE_CACHE_H
 
 #include "hphp/util/thread-safe-lru-cache.h"
 #include "hphp/util/lru-cache-key.h"
@@ -34,7 +34,7 @@ namespace HPHP {
  * deferred until all ConstAccessor objects are destroyed.
  * 
  * Since the hash value of each key is requested multiple times, you should use
- * a key with a memoized hash function. ThreadSafeStringCache is provided for
+ * a key with a memoized hash function. LRUCacheKey is provided for
  * this purpose.
  */
 template <class TKey, class TValue, class THash = tbb::tbb_hash_compare<TKey>>
@@ -133,7 +133,7 @@ ThreadSafeScalableCache(size_t maxSize, size_t numShards)
     if (i == 0) {
       s += maxSize % m_numShards;
     }
-    m_shards.push_back(ShardPtr(new Shard(s)));
+    m_shards.emplace_back(std::make_shared<Shard>(s));
   }
 }
 

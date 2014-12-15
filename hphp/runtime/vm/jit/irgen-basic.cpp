@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/strings.h"
 
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -361,4 +362,3 @@ void emitBreakTraceHint(HTS&)     {}
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

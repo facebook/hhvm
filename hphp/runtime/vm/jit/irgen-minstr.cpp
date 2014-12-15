@@ -13,8 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include <type_traits>
 #include <sstream>
+
+#include "hphp/runtime/base/strings.h"
 
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"

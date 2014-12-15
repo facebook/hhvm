@@ -15,29 +15,32 @@
 */
 
 #include "hphp/runtime/vm/event-hook.h"
+
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/func.h"
+
+#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
+#include "hphp/runtime/ext/ext_hotprofiler.h"
+
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/ext_hotprofiler.h"
+#include "hphp/runtime/vm/func.h"
+
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_args("args");
-static StaticString s_enter("enter");
-static StaticString s_exit("exit");
-static StaticString s_exception("exception");
-static StaticString s_name("name");
-static StaticString s_return("return");
+const StaticString s_args("args");
+const StaticString s_enter("enter");
+const StaticString s_exit("exit");
+const StaticString s_exception("exception");
+const StaticString s_name("name");
+const StaticString s_return("return");
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p,

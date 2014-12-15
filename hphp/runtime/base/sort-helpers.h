@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/zend-functions.h"

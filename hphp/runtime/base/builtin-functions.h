@@ -17,18 +17,12 @@
 #ifndef incl_HPHP_BUILTIN_FUNCTIONS_H_
 #define incl_HPHP_BUILTIN_FUNCTIONS_H_
 
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/util/functional.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/util/functional.h"
 
 #if defined(__APPLE__) || defined(__USE_BSD)
 /**

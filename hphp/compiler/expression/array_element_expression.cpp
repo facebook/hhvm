@@ -24,8 +24,9 @@
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/parser/hphp.tab.hpp"
+
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/execution-context.h"
 
 using namespace HPHP;
 

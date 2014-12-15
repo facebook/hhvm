@@ -13,15 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/server/virtual-host.h"
 
 #include <stdexcept>
 
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/text-util.h"
 

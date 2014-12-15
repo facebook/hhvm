@@ -181,12 +181,6 @@ bool checkCfg(const IRUnit& unit) {
 }
 
 bool checkTmpsSpanningCalls(const IRUnit& unit) {
-  // CallBuiltin is ok because it is not a php-level call.  (It will
-  // call a C++ helper and we can push/pop around it normally.)
-  auto isCall = [&] (Opcode op) {
-    return op == Call || op == CallArray || op == ContEnter;
-  };
-
   auto ignoreSrc = [&](IRInstruction& inst, SSATmp* src) {
     /*
      * ReDefSP, TakeStack, and FramePtr/StkPtr-typed tmps are used
@@ -218,7 +212,7 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
       for (auto& dst : inst.dsts()) {
         live.erase(dst);
       }
-      if (isCall(inst.op())) {
+      if (isCallOp(inst.op())) {
         live.forEach([&](uint32_t tmp) {
           auto msg = folly::format("checkTmpsSpanningCalls failed\n"
                                    "  instruction: {}\n"

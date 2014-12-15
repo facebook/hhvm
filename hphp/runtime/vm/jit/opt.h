@@ -34,6 +34,7 @@ struct FrameStateMgr;
  */
 void optimizeRefcounts(IRUnit&, FrameStateMgr&&);
 void optimizePredictions(IRUnit&);
+void gvn(IRUnit&);
 void optimizeLoads(IRUnit&);
 void optimizeStores(IRUnit&);
 void optimizeJumps(IRUnit&);

@@ -100,6 +100,7 @@ namespace Trace {
       TM(fixup)         \
       TM(fr)            \
       TM(gc)            \
+      TM(gvn)           \
       TM(heap)          \
       TM(hhas)          \
       TM(hhbbc)         \

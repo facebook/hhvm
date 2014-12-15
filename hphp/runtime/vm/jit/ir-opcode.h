@@ -139,6 +139,11 @@ size_t constexpr kNumOpcodes = IR_OPCODES;
 #undef O
 
 /*
+ * Returns true for instructions that perform calls.
+ */
+bool isCallOp(Opcode opc);
+
+/*
  * Returns true for instructions that refine the types of values with
  * a runtime check.
  */

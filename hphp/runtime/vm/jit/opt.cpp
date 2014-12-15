@@ -170,6 +170,11 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     dce("reoptimize");
   }
 
+  if (RuntimeOption::EvalHHIRGlobalValueNumbering) {
+    doPass(gvn);
+    dce("gvn");
+  }
+
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
     doPass(optimizeLoads);
     dce("loadelim");

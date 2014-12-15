@@ -1040,8 +1040,8 @@ template<class T> void assert_opcode_extra_same(Opcode opc) {
 #undef O
 }
 
-size_t cseHashExtra(Opcode opc, IRExtraData* data);
-bool cseEqualsExtra(Opcode opc, IRExtraData* a, IRExtraData* b);
+size_t cseHashExtra(Opcode opc, const IRExtraData* data);
+bool cseEqualsExtra(Opcode opc, const IRExtraData* a, const IRExtraData* b);
 IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a);
 std::string showExtra(Opcode opc, const IRExtraData* data);
 

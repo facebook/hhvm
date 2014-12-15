@@ -453,7 +453,7 @@ public:
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitPseudomain,               jitPseudomainDefault())          \
   F(bool, HHIRBytecodeControlFlow,     controlFlowDefault())            \
-  F(bool, HHIRCse,                     true)                            \
+  F(bool, HHIRCse,                     false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRJumpOpts,                true)                            \
@@ -472,6 +472,7 @@ public:
   F(uint32_t, HHIRGenerateAsserts,     debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
   F(bool, HHIRDeadCodeElim,            true)                            \
+  F(bool, HHIRGlobalValueNumbering,    true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \

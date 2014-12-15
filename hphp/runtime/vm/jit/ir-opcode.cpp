@@ -152,6 +152,19 @@ const StringData* findClassName(SSATmp* cls) {
   return nullptr;
 }
 
+bool isCallOp(Opcode opc) {
+  // CallBuiltin doesn't count because it is not a php-level call.  (It will
+  // call a C++ helper and we can push/pop around it normally.)
+  switch (opc) {
+  case Call:
+  case CallArray:
+  case ContEnter:
+    return true;
+  default:
+    return false;
+  }
+}
+
 bool isGuardOp(Opcode opc) {
   switch (opc) {
     case GuardLoc:

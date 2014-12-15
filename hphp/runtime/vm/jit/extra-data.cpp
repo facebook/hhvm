@@ -154,12 +154,18 @@ MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl);
 
 //////////////////////////////////////////////////////////////////////
 
-size_t cseHashExtra(Opcode opc, IRExtraData* data) {
-  return dispatchExtra<size_t,HashDispatcher>(opc, data);
+size_t cseHashExtra(Opcode opc, const IRExtraData* data) {
+  return dispatchExtra<size_t,HashDispatcher>(
+    opc, const_cast<IRExtraData*>(data));
 }
 
-bool cseEqualsExtra(Opcode opc, IRExtraData* data, IRExtraData* other) {
-  return dispatchExtra<bool,EqualsDispatcher>(opc, data, other);
+bool cseEqualsExtra(
+  Opcode opc,
+  const IRExtraData* data,
+  const IRExtraData* other
+) {
+  return dispatchExtra<bool,EqualsDispatcher>(
+    opc, const_cast<IRExtraData*>(data), const_cast<IRExtraData*>(other));
 }
 
 IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a) {

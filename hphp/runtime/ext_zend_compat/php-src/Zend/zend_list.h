@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -31,35 +31,44 @@ BEGIN_EXTERN_C()
 #define ZEND_RESOURCE_LIST_TYPE_EX  2
 
 #ifdef HHVM
+
 namespace HPHP {
-  class ZendResourceData : public ResourceData {
-    public:
-      ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
-      ZendResourceData() {}
-      ~ZendResourceData();
-      const String& o_getClassNameHook() const;
-      void* ptr;
-      int type;
-      int refcount;
-      int id;
+  struct ZendResourceData : ResourceData {
+    ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
+    ZendResourceData() {}
+    ~ZendResourceData();
+
+    const String& o_getClassNameHook() const;
+
+    void* ptr;
+    int type;
+    int refcount;
+    int id;
   };
-  class ZendNormalResourceDataHolder : public ZendResourceData {
-    public:
-      explicit ZendNormalResourceDataHolder(ResourceData* rd) :
-          ZendResourceData(nullptr, -1), m_rd(rd) {}
-      ~ZendNormalResourceDataHolder() {}
-      ResourceData* getResourceData() { return m_rd; }
-    private:
-      ResourceData* m_rd;
+
+  struct ZendNormalResourceDataHolder : ZendResourceData {
+    explicit ZendNormalResourceDataHolder(ResourceData* rd) :
+        ZendResourceData(nullptr, -1), m_rd(rd) {}
+    ~ZendNormalResourceDataHolder() {}
+
+    DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZendNormalResourceDataHolder)
+
+    ResourceData* getResourceData() { return m_rd; }
+
+    ResourceData* m_rd;
   };
 };
+
 typedef HPHP::ZendResourceData zend_rsrc_list_entry;
+
 #else
+
 typedef struct _zend_rsrc_list_entry {
   void *ptr;
   int type;
   int refcount;
 } zend_rsrc_list_entry;
+
 #endif
 
 typedef void (*rsrc_dtor_func_t)(zend_rsrc_list_entry *rsrc TSRMLS_DC);
@@ -131,14 +140,14 @@ int zval_get_resource_id(const zval &z);
 #define ZEND_FETCH_RESOURCE(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type)  \
   rsrc = (rsrc_type) zend_fetch_resource(passed_id TSRMLS_CC, default_id, resource_type_name, NULL, 1, resource_type);  \
   ZEND_VERIFY_RESOURCE(rsrc);
-  
+
 #define ZEND_FETCH_RESOURCE_NO_RETURN(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type)  \
   (rsrc = (rsrc_type) zend_fetch_resource(passed_id TSRMLS_CC, default_id, resource_type_name, NULL, 1, resource_type))
 
 #define ZEND_FETCH_RESOURCE2(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type1, resource_type2)  \
   rsrc = (rsrc_type) zend_fetch_resource(passed_id TSRMLS_CC, default_id, resource_type_name, NULL, 2, resource_type1, resource_type2);  \
   ZEND_VERIFY_RESOURCE(rsrc);
-  
+
 #define ZEND_FETCH_RESOURCE2_NO_RETURN(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type1, resource_type2)  \
   (rsrc = (rsrc_type) zend_fetch_resource(passed_id TSRMLS_CC, default_id, resource_type_name, NULL, 2, resource_type1, resource_type2))
 

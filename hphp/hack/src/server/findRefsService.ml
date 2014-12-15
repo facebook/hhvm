@@ -70,11 +70,11 @@ let get_deps_set_function f_name =
     Relative_path.Set.add fn files
   with Not_found -> Relative_path.Set.empty
 
-let find_refs target_classes target_method acc file_names =
+let find_refs target_classes target_method acc fileinfo_l =
   Find_refs.find_refs_class_name := target_classes;
   Find_refs.find_refs_method_name := target_method;
   Find_refs.find_refs_results := Pos.Map.empty;
-  ServerIdeUtils.recheck file_names;
+  ServerIdeUtils.recheck fileinfo_l;
   let result = !Find_refs.find_refs_results in
   Find_refs.find_refs_class_name := None;
   Find_refs.find_refs_method_name := None;
@@ -83,13 +83,13 @@ let find_refs target_classes target_method acc file_names =
     (str, p) :: acc
   end result []
 
-let parallel_find_refs workers files target_classes target_method =
+let parallel_find_refs workers fileinfo_l target_classes target_method =
   MultiWorker.call
     workers
     ~job:(find_refs target_classes target_method)
     ~neutral:([])
     ~merge:(List.rev_append)
-    ~next:(Bucket.make files)
+    ~next:(Bucket.make fileinfo_l)
 
 let get_definitions target_classes target_method =
   match target_classes, target_method with
@@ -123,12 +123,17 @@ let get_definitions target_classes target_method =
       end
   | None, None -> []
 
-let find_references workers target_classes target_method include_defs file_list =
+let find_references workers target_classes target_method include_defs
+    files_info files =
+  let fileinfo_l = Relative_path.Set.fold (fun fn acc ->
+    match Relative_path.Map.get fn files_info with
+    | Some fi -> fi :: acc
+    | None -> acc) files [] in
   let results =
-    if List.length file_list < 10 then
-      find_refs target_classes target_method [] file_list
+    if List.length fileinfo_l < 10 then
+      find_refs target_classes target_method [] fileinfo_l
     else
-      parallel_find_refs workers file_list target_classes target_method
+      parallel_find_refs workers fileinfo_l target_classes target_method
     in
   if include_defs then
     let defs = get_definitions target_classes target_method in

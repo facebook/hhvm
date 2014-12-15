@@ -72,9 +72,9 @@ module Program : Server.SERVER_PROGRAM = struct
     let _, oc = client in
     match msg with
     | ServerMsg.ERROR_OUT_OF_DATE -> incorrect_hash oc
-    | ServerMsg.PRINT_COVERAGE_LEVELS fn -> ServerColorFile.go fn oc
+    | ServerMsg.PRINT_COVERAGE_LEVELS fn -> ServerColorFile.go env fn oc
     | ServerMsg.INFER_TYPE (fn, line, char) ->
-        infer (fn, line, char) oc
+        infer env (fn, line, char) oc
     | ServerMsg.SUGGEST (files) -> suggest files oc
     | ServerMsg.STATUS client_root -> print_status genv env client_root oc
     | ServerMsg.LIST_FILES    -> ServerEnv.list_files env oc

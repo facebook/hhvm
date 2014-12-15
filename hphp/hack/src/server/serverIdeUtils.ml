@@ -137,21 +137,26 @@ let check_def = function
   | Ast.Namespace _
   | Ast.NamespaceUse _ -> assert false
 
-let recheck file_names =
+let check_defs {FileInfo.funs; classes; types; _} =
+  List.iter (fun (_, x) -> Typing_check_service.type_fun x) funs;
+  List.iter (fun (_, x) -> Typing_check_service.type_class x) classes;
+  List.iter (fun (_, x) -> Typing_check_service.check_typedef x) types;
+  ()
+
+let recheck fileinfo_l =
   SharedMem.invalidate_caches();
   Errors.ignore_ begin fun () ->
-    List.iter begin fun fn ->
-      match Parser_heap.ParserHeap.get fn with
-      | None -> ()
-      | Some defs -> List.iter check_def defs
-    end file_names
+    List.iter check_defs fileinfo_l
   end
 
-let check_file_input fi =
+let check_file_input files_info fi =
   match fi with
-    | ServerMsg.FileContent content ->
-        let funs, classes = declare content in
-        fix_file_and_def content;
-        revive funs classes;
-    | ServerMsg.FileName fn ->
-        recheck [Relative_path.create Relative_path.Root fn];
+  | ServerMsg.FileContent content ->
+      let funs, classes = declare content in
+      fix_file_and_def content;
+      revive funs classes;
+  | ServerMsg.FileName fn ->
+      let path = Relative_path.create Relative_path.Root fn in
+      match Relative_path.Map.get path files_info with
+      | Some fileinfo -> recheck [fileinfo]
+      | None -> ()

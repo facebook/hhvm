@@ -17,7 +17,7 @@ module type SERVER_PROGRAM = sig
   val run_once_and_exit : genv -> env -> unit
   val filter_update : genv -> env -> Relative_path.t -> bool
   val recheck: genv -> env -> Relative_path.Set.t -> env
-  val infer: (ServerMsg.file_input * int * int) -> out_channel -> unit
+  val infer: env -> (ServerMsg.file_input * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
   val name: string

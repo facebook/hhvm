@@ -191,7 +191,7 @@ and fun_type = {
   ft_ret       : ty              ;
 }
 
-(* Arity informaton for a fun_type; indicating the minimum number of
+(* Arity information for a fun_type; indicating the minimum number of
  * args expected by the function and the maximum number of args for
  * standard, non-variadic functions or the type of variadic argument taken *)
 and fun_arity =

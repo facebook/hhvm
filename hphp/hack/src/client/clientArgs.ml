@@ -185,8 +185,6 @@ let parse_check_args cmd =
       " (deprecated) equivalent to --from arc_land";
     "--from-check-trunk", Arg.Unit (set_from "check_trunk"),
       " (deprecated) equivalent to --from check_trunk";
-    "--save-state", Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
-      " <file> debug mode (do not use)";
   ] in
   let args = parse_without_command options usage "check" in
 

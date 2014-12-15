@@ -86,11 +86,6 @@ module Program : Server.SERVER_PROGRAM = struct
         ServerFileOutline.go content oc
     | ServerMsg.METHOD_JUMP (class_, find_children) ->
         ServerMethodJumps.go class_ find_children env genv oc
-    | ServerMsg.SAVE_STATE filename ->
-        let dump = ServerSign.dump_state env genv in
-        let status = ServerSign.save dump filename in
-        output_string oc (status^"\n");
-        flush oc
     | ServerMsg.SHOW name ->
         output_string oc "starting\n";
         SharedMem.invalidate_caches();

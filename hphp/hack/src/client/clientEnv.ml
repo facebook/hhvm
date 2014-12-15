@@ -16,7 +16,6 @@ type client_mode =
 | MODE_STATUS
 | MODE_UNSPECIFIED
 | MODE_VERSION
-| MODE_SAVE_STATE of string
 | MODE_SHOW of string
 | MODE_COLORING of string
 | MODE_COVERAGE of string

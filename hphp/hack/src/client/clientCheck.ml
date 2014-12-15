@@ -198,12 +198,6 @@ let rec main args retries =
     | MODE_STATUS -> ClientCheckStatus.check_status connect args
     | MODE_VERSION ->
       Printf.printf "%s\n" (Build_id.build_id_ohai);
-    | MODE_SAVE_STATE filename ->
-        let ic, oc = connect args in
-        ServerMsg.cmd_to_channel oc (ServerMsg.SAVE_STATE filename);
-        let response = input_line ic in
-        Printf.printf "%s\n" response;
-        flush stdout
     | MODE_SHOW classname ->
         let ic, oc = connect args in
         ServerMsg.cmd_to_channel oc (ServerMsg.SHOW classname);

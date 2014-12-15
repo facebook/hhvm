@@ -67,7 +67,6 @@ type command =
 | STATUS of Path.path
 | LIST_FILES
 | AUTOCOMPLETE of string
-| SAVE_STATE of string
 | SHOW of string
 | KILL
 | PING

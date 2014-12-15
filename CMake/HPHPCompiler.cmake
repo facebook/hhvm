@@ -74,8 +74,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   endif()
 
   # No optimizations for debug builds.
-  set(CMAKE_C_FLAGS_DEBUG    "-O0 -ggdb")
-  set(CMAKE_CXX_FLAGS_DEBUG  "-O0 -ggdb")
+  set(CMAKE_C_FLAGS_DEBUG    "-Og")
+  set(CMAKE_CXX_FLAGS_DEBUG  "-Og")
 
   # Generic GCC flags and Optional flags
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")

@@ -355,7 +355,7 @@ let get_const env class_ mid =
   Typing_deps.add_idep env.genv.droot dep;
   SMap.get mid class_.tc_consts
 
-let get_typeconst_type env class_ typeconst_name =
+let get_typeconst_type _ class_ typeconst_name =
   let tconst_opt = SMap.get typeconst_name class_.tc_typeconsts in
   opt_map (fun tc -> tc.ce_type) tconst_opt
 
@@ -607,12 +607,12 @@ module FakeMembers = struct
     let fake_members = { fake_members with valid = valid } in
     { env with lenv = fake_members, locals }
 
-  let make p env obj_name member_name =
+  let make _ env obj_name member_name =
     let my_fake_local_id = make_id obj_name member_name in
     let env = add_member env my_fake_local_id in
     env, Hashtbl.hash my_fake_local_id
 
- let make_static p env class_name member_name =
+ let make_static _ env class_name member_name =
    let my_fake_local_id = make_static_id class_name member_name in
    let env = add_member env my_fake_local_id in
    env, Hashtbl.hash my_fake_local_id

@@ -44,7 +44,7 @@ end
 
 class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
 
-  method on_hint acc (p, h) = this#on_hint_ acc h
+  method on_hint acc (_, h) = this#on_hint_ acc h
 
   method on_hint_ acc h = match h with
     | Hany                  -> this#on_any    acc
@@ -64,7 +64,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
   method on_tuple acc hl =
     List.fold_left this#on_hint acc (hl:Nast.hint list)
 
-  method on_abstr acc s hopt =
+  method on_abstr acc _ hopt =
     match hopt with
       | None -> acc
       | Some h -> this#on_hint acc h
@@ -80,16 +80,16 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     in
     acc
 
-  method on_prim acc p = acc
+  method on_prim acc _ = acc
 
   method on_option acc h = this#on_hint acc h
 
-  method on_fun acc hl b h =
+  method on_fun acc hl _ h =
     let acc = List.fold_left this#on_hint acc hl in
     let acc = this#on_hint acc h in
     acc
 
-  method on_apply acc id (hl:Nast.hint list) =
+  method on_apply acc _ (hl:Nast.hint list) =
     let acc = List.fold_left this#on_hint acc hl in
     acc
 
@@ -99,7 +99,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
       acc
     end hm acc
 
-  method on_access acc id1 id2 idl = acc
+  method on_access acc _ _ _ = acc
 
 end
 
@@ -113,7 +113,7 @@ module CheckInstantiability = struct
   object(this)
     inherit [Env.env] hint_visitor
 
-    method on_apply env (usage_pos, n) hl =
+    method! on_apply env (usage_pos, n) hl =
       let () = (match Naming_heap.ClassHeap.get n with
         | Some {c_kind = Ast.Cabstract; c_final = true;
                 c_name = (decl_pos, decl_name); _}
@@ -123,7 +123,7 @@ module CheckInstantiability = struct
       let env = List.fold_left this#on_hint env hl in
       env
 
-    method on_abstr env s hopt =
+    method! on_abstr env _ _ =
         (* there should be no need to descend into abstract params, as
          * the necessary param checks happen on the declaration of the
          * constraint *)

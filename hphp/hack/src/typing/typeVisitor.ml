@@ -47,18 +47,18 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     let tparams = List.map thd3 ft_tparams in
     let acc = List.fold_left (opt_fold_left this#on_type) acc tparams in
     this#on_type acc ft_ret
-  method on_tabstract acc s tyl ty_opt =
+  method on_tabstract acc _ tyl ty_opt =
     let acc = List.fold_left this#on_type acc tyl in
     let acc = opt_fold_left this#on_type acc ty_opt in
     acc
-  method on_tapply acc s tyl = List.fold_left this#on_type acc tyl
-  method on_taccess acc root id ids = acc
+  method on_tapply acc _ tyl = List.fold_left this#on_type acc tyl
+  method on_taccess acc _ _id _ids = acc
   method on_ttuple acc tyl = List.fold_left this#on_type acc tyl
-  method on_tanon acc arity id = acc
+  method on_tanon acc _ _ = acc
   method on_tunresolved acc tyl = List.fold_left this#on_type acc tyl
   method on_tobject acc = acc
   method on_tshape acc fdm =
-    let f k v acc = this#on_type acc v in
+    let f _ v acc = this#on_type acc v in
     Nast.ShapeMap.fold f fdm acc
   method on_type acc = function
     | _, Tany -> this#on_tany acc

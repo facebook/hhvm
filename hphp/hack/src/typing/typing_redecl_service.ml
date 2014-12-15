@@ -48,7 +48,7 @@ end)
 let on_the_fly_decl_file nenv all_classes (errors, failed) fn =
   let decl_errors, () = Errors.do_
     begin fun () ->
-    (* We start "recording" dependencies. 
+    (* We start "recording" dependencies.
      * Whenever we are type-checking or declaring types, the checker
      * records all the dependencies in a global (cf Typing_deps).
      * At any given time, all the workers must be aware of all the
@@ -211,9 +211,9 @@ let compute_deps ~update_pos nenv fast filel =
 (* Load the environment and then redeclare *)
 (*****************************************************************************)
 
-let load_and_otf_decl_files acc filel =
+let load_and_otf_decl_files _ filel =
   try
-    let nenv, all_classes, fast = OnTheFlyStore.load() in
+    let nenv, all_classes, _ = OnTheFlyStore.load() in
     otf_decl_files nenv all_classes filel
   with e ->
     Printf.printf "Error: %s\n" (Printexc.to_string e);

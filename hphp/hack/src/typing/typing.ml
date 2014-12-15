@@ -76,8 +76,6 @@ let compare_field_kinds x y =
 let check_consistent_fields x l =
   List.iter (compare_field_kinds x) l
 
-let is_array = function _, Tarray _ -> true | _ -> false
-
 let unbound_name env (pos, name)=
   (match Env.get_mode env with
   | Ast.Mstrict ->

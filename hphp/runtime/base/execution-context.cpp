@@ -103,6 +103,9 @@ ExecutionContext::ExecutionContext()
     ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.
       setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
   }
+
+  VariableSerializer::serializationSizeLimit =
+    RuntimeOption::SerializationSizeLimit;
 }
 
 template<> void ThreadLocalNoCheck<ExecutionContext>::destroy() {

@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -37,6 +38,7 @@ VirtualHost &VirtualHost::GetDefault() {
 
 void VirtualHost::SetCurrent(VirtualHost *vhost) {
   g_context->setVirtualHost(vhost ? vhost : &VirtualHost::GetDefault());
+  UpdateSerializationSizeLimit();
 }
 
 const VirtualHost *VirtualHost::GetCurrent() {
@@ -61,6 +63,15 @@ int64_t VirtualHost::GetUploadMaxFileSize() {
     return vh->m_runtimeOption.uploadMaxFileSize;
   }
   return RuntimeOption::UploadMaxFileSize;
+}
+
+void VirtualHost::UpdateSerializationSizeLimit() {
+  const VirtualHost *vh = GetCurrent();
+  assert(vh);
+  if (vh->m_runtimeOption.serializationSizeLimit != StringData::MaxSize) {
+    VariableSerializer::serializationSizeLimit =
+      vh->m_runtimeOption.serializationSizeLimit;
+  }
 }
 
 const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {
@@ -115,10 +126,19 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, Hdf overwrite) {
   int64_t uploadMaxFileSize =
     Config::GetInt32(ini, overwrite["Server.Upload.UploadMaxFileSize"], -1);
   if (uploadMaxFileSize != -1) uploadMaxFileSize *= (1LL << 20);
-  Config::Get(ini, overwrite["Server.AllowedDirectories"], m_runtimeOption.allowedDirectories);
+  int64_t serializationSizeLimit =
+    Config::GetInt32(
+      ini,
+      overwrite["ResourceLimit.SerializationSizeLimit"],
+      StringData::MaxSize);
+  Config::Get(
+    ini,
+    overwrite["Server.AllowedDirectories"],
+    m_runtimeOption.allowedDirectories);
   m_runtimeOption.requestTimeoutSeconds = requestTimeoutSeconds;
   m_runtimeOption.maxPostSize = maxPostSize;
   m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
+  m_runtimeOption.serializationSizeLimit = serializationSizeLimit;
 
   m_documentRoot = RuntimeOption::SourceRoot + m_pathTranslation;
   if (!m_documentRoot.empty() &&

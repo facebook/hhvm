@@ -2,7 +2,7 @@
 function autoload_miss($str1, $str2) {
   echo "Failure handler called: $str1 $str2\n";
 }
-HH\autoload_set_paths(
+fb_autoload_map(
   array(
     'class' => array('foo' => 'autoload-enum-hint-2.inc',
                      'bar' => 'autoload-enum-hint-3.inc',

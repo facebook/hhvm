@@ -251,7 +251,8 @@ function mb_encode_mimeheader(string $str,
 <<__Native>>
 function mb_encode_numericentity(string $str,
                                  mixed $convmap,
-                                 ?string $encoding = null): mixed;
+                                 ?string $encoding = null,
+                                 bool $is_hex = false): mixed;
 
 /**
  * A regular expression match for a multibyte string

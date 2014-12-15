@@ -1472,8 +1472,10 @@ Variant HHVM_FUNCTION(mb_decode_mimeheader,
   return false;
 }
 
-static Variant php_mb_numericentity_exec(const String& str, const Variant& convmap,
-                                         const String& encoding, int type) {
+static Variant php_mb_numericentity_exec(const String& str,
+                                         const Variant& convmap,
+                                         const String& encoding,
+                                         bool is_hex, int type) {
   int mapsize=0;
   mbfl_string string, result, *ret;
   mbfl_no_encoding no_encoding;
@@ -1483,6 +1485,10 @@ static Variant php_mb_numericentity_exec(const String& str, const Variant& convm
   string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
   string.val = (unsigned char *)str.data();
   string.len = str.size();
+
+  if (type == 0 && is_hex) {
+    type = 2; /* output in hex format */
+  }
 
   /* encoding */
   if (!encoding.empty()) {
@@ -1526,7 +1532,7 @@ Variant HHVM_FUNCTION(mb_decode_numericentity,
                       const Variant& convmap,
                       const Variant& opt_encoding) {
   const String encoding = convertArg(opt_encoding);
-  return php_mb_numericentity_exec(str, convmap, encoding, 1);
+  return php_mb_numericentity_exec(str, convmap, encoding, false, 1);
 }
 
 Variant HHVM_FUNCTION(mb_detect_encoding,
@@ -1662,9 +1668,10 @@ Variant HHVM_FUNCTION(mb_encode_mimeheader,
 Variant HHVM_FUNCTION(mb_encode_numericentity,
                       const String& str,
                       const Variant& convmap,
-                      const Variant& opt_encoding) {
+                      const Variant& opt_encoding /* = null_variant */,
+                      bool is_hex /* = false */) {
   const String encoding = convertArg(opt_encoding);
-  return php_mb_numericentity_exec(str, convmap, encoding, 0);
+  return php_mb_numericentity_exec(str, convmap, encoding, is_hex, 0);
 }
 
 const StaticString

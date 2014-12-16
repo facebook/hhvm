@@ -769,16 +769,6 @@ Class::PropLookup<TypedValue*> Class::getSProp(
   return PropLookup<TypedValue*> { sProp, lookup.accessible };
 }
 
-Class::PropLookup<RefData*> Class::zGetSProp(
-  const Class* ctx,
-  const StringData* sPropName
-) const {
-  auto const lookup = getSProp(ctx, sPropName);
-  if (lookup.prop->m_type != KindOfRef) tvBox(lookup.prop);
-
-  return PropLookup<RefData*> { lookup.prop->m_data.pref, lookup.accessible };
-}
-
 bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
   if (prop.m_attrs & AttrPublic) return true;
   if (prop.m_attrs & AttrPrivate) return prop.m_class == ctx;

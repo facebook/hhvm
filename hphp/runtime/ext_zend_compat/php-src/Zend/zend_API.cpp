@@ -1639,7 +1639,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 }
 
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, int name_length, zend_bool silent TSRMLS_DC) {
-  HPHP::Class * cls = HPHP::zend_hphp_class_entry_to_class(scope);
+  auto const cls = HPHP::zend_hphp_class_entry_to_class(scope);
   if (!cls) {
     // You can't call this function from MINIT, sorry
     HPHP::raise_error("cannot read property of class %s. "
@@ -1648,9 +1648,16 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
   }
   HPHP::String sname(name, name_length, HPHP::CopyString);
 
-  auto const lookup = cls->zGetSProp(cls, sname.get());
+  auto const lookup = cls->getSProp(cls, sname.get());
+  auto const prop = lookup.prop;
 
-  return (!lookup.prop || !lookup.accessible) ? nullptr : lookup.prop;
+  // Static properties should never be Uninit.
+  assert(!prop || prop->m_type != HPHP::KindOfUninit);
+
+  if (!prop || !lookup.accessible) return nullptr;
+
+  if (prop->m_type != HPHP::KindOfRef) tvBox(prop);
+  return prop->m_data.pref;
 }
 
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC) {

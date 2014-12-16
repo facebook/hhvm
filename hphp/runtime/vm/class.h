@@ -619,13 +619,6 @@ public:
   PropLookup<TypedValue*> getSProp(const Class*, const StringData*) const;
 
   /*
-   * Identical to getSProp(), but the output is boxed.
-   *
-   * Used by the ext_zend_compat layer.
-   */
-  PropLookup<RefData*> zGetSProp(const Class*, const StringData*) const;
-
-  /*
    * Return whether or not a declared instance property is accessible from the
    * given context.
    */

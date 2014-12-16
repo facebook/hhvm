@@ -1198,7 +1198,7 @@ void emitMPre(MTS& env) {
     // exception paths from here out will need to clean up the tvRef{,2}
     // storage, so install a custom catch creator.
     auto const penv = &env;
-    env.irb.setCatchCreator([penv] { return makeMISCatch(*penv); });
+    env.hts.catchCreator = [penv] { return makeMISCatch(*penv); };
   }
 
   /*
@@ -1844,7 +1844,8 @@ void emitFinalMOp(MTS& env) {
 void cleanTvRefs(MTS& env) {
   constexpr ptrdiff_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
-    env.irb.gen(
+    gen(
+      env,
       DecRefMem,
       Type::Gen,
       env.misBase,

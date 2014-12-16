@@ -21,6 +21,7 @@
 #include <stack>
 #include <utility>
 #include <string>
+#include <functional>
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
@@ -104,6 +105,15 @@ struct HTS {
    * Toggles some behavior based on runtime flags.
    */
   IRGenMode mode{IRGenMode::Trace};
+
+  /*
+   * The function to use to create catch blocks when instructions that can
+   * throw are created with no catch block.  The default (when this function is
+   * null) is to spill the stack and then leave.  We allow a non-default
+   * basically for an minstr use case.  This is reset every time we
+   * prepareForNextHHBC.
+   */
+  std::function<Block* ()> catchCreator;
 };
 
 //////////////////////////////////////////////////////////////////////

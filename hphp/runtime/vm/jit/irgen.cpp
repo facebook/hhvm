@@ -22,6 +22,101 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+Block* create_catch_block(HTS& env) {
+  auto const catchBlock = env.irb->unit().defBlock(Block::Hint::Unused);
+  BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
+
+  // Install the exception stack state so that spillStack and other stuff
+  // behaves appropriately.  We've already asserted that sp(env) was the same
+  // as the exception state version.
+  auto const& exnState = env.irb->exceptionStackState();
+  env.irb->evalStack() = exnState.evalStack;
+  env.irb->setStackDeficit(exnState.stackDeficit);
+
+  gen(env, BeginCatch);
+  spillStack(env);
+  gen(env, EndCatch, fp(env), sp(env));
+  return catchBlock;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * This is called when each instruction is generated during initial IR
+ * creation.
+ *
+ * This function inspects the instruction and prepares it for potentially being
+ * inserted to the instruction stream.  It then calls IRBuilder optimizeInst,
+ * which may or may not insert it depending on a variety of factors.
+ */
+namespace detail {
+SSATmp* genInstruction(HTS& env, IRInstruction* inst) {
+  if (inst->mayRaiseError() && inst->taken()) {
+    FTRACE(1, "{}: asserting about catch block\n",
+      inst->toString());
+    /*
+     * This assertion means you manually created a catch block, but didn't put
+     * an exceptionStackBoundary after an update to the stack.  Even if you're
+     * manually creating catches we require this just to make sure you're not
+     * doing it on accident.
+     */
+    always_assert_flog(
+      env.irb->exceptionStackState().sp == sp(env),
+      "catch block would have had a mismatched stack pointer:\n"
+      "     inst: {}\n"
+      "       sp: {}\n"
+      " expected: {}\n",
+      inst->toString(),
+      sp(env)->toString(),
+      env.irb->exceptionStackState().sp->toString()
+    );
+  }
+
+  if (inst->mayRaiseError() && !inst->taken()) {
+    FTRACE(1, "{}: creating {}catch block\n",
+      inst->toString(),
+      env.catchCreator ? "custom " : "");
+    /*
+     * If you hit this assertion, you're gen'ing an IR instruction that can
+     * throw after gen'ing one that could write to the evaluation stack.  This
+     * is usually not what HHBC opcodes do, and could be a bug.  See the
+     * documentation for exceptionStackBoundary in the header for more
+     * information.
+     */
+    always_assert_flog(
+      env.irb->exceptionStackState().sp == sp(env),
+      "catch block would have had a mismatched stack pointer:\n"
+      "     inst: {}\n"
+      "       sp: {}\n"
+      " expected: {}\n",
+      inst->toString(),
+      sp(env)->toString(),
+      env.irb->exceptionStackState().sp->toString()
+    );
+    inst->setTaken(
+      env.catchCreator
+        ? env.catchCreator()
+        : create_catch_block(env)
+    );
+  }
+
+  if (inst->mayRaiseError()) {
+    assert(inst->taken() && inst->taken()->isCatch());
+  }
+
+  return env.irb->optimizeInst(inst, IRBuilder::CloneFlag::Yes, nullptr,
+    folly::none);
+}
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void incTransCounter(HTS& env) { gen(env, IncTransCounter); }
@@ -139,6 +234,7 @@ void prepareForNextHHBC(HTS& env,
   env.bcStateStack.back().setOffset(newOff);
   updateMarker(env);
   env.lastBcOff = lastBcOff;
+  env.catchCreator = nullptr;
   env.irb->prepareForNextHHBC();
 }
 

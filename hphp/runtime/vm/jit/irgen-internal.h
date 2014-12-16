@@ -95,19 +95,6 @@ inline void updateMarker(HTS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// IR instruction creation functions
-
-template<class... Args>
-SSATmp* cns(HTS& env, Args&&... args) {
-  return env.unit.cns(std::forward<Args>(args)...);
-}
-
-template<class... Args>
-SSATmp* gen(HTS& env, Args&&... args) {
-  return env.irb->gen(std::forward<Args>(args)...);
-}
-
-//////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
 inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {

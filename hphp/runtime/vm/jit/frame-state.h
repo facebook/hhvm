@@ -311,6 +311,7 @@ struct FrameStateMgr final : private LocalStateHook {
   uint32_t stackDeficit() const { return cur().stackDeficit; }
   void incStackDeficit() { cur().stackDeficit++; }
   void clearStackDeficit() { cur().stackDeficit = 0; }
+  void setStackDeficit(uint32_t d) { cur().stackDeficit = d; }
   EvalStack& evalStack() { return cur().evalStack; }
 
   Type localType(uint32_t id) const;

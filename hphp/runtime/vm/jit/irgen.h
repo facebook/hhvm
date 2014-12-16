@@ -51,6 +51,31 @@ namespace irgen {
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * The main function for generating new IRInstructions.  Attempts to append an
+ * IRInstruction at the end of the current Block.
+ *
+ * Uses the same argument list format as IRUnit::gen.
+ */
+namespace detail { SSATmp* genInstruction(HTS& env, IRInstruction*); }
+template<class... Args>
+SSATmp* gen(HTS& env, Opcode op, Args&&... args) {
+  return makeInstruction(
+    [&] (IRInstruction* inst) { return detail::genInstruction(env, inst); },
+    op,
+    env.irb->curMarker(),
+    std::forward<Args>(args)...
+  );
+}
+
+/*
+ * Create constant-valued SSATmps inside the IRUnit we're creating.
+ */
+template<class... Args>
+SSATmp* cns(HTS& env, Args&&... args) {
+  return env.unit.cns(std::forward<Args>(args)...);
+}
+
+/*
  * Guards, checks and type assertions.  Guards and checks are the same thing,
  * except that guards must happen at the first bytecode offset in the region.
  *

@@ -114,7 +114,7 @@ struct IRBuilder {
    * state to clean up during unwinding.
    */
   void exceptionStackBoundary();
-  void setCatchCreator(std::function<Block* ()>);
+  const ExnStackState& exceptionStackState() const { return m_exnStack; }
 
   /*
    * The following functions are an abstraction layer we probably don't need.
@@ -129,6 +129,7 @@ struct IRBuilder {
   uint32_t stackDeficit() const { return m_state.stackDeficit(); }
   void incStackDeficit() { m_state.incStackDeficit(); }
   void clearStackDeficit() { m_state.clearStackDeficit(); }
+  void setStackDeficit(uint32_t d) { m_state.setStackDeficit(d); }
   EvalStack& evalStack() { return m_state.evalStack(); }
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
@@ -214,21 +215,14 @@ public:
   void reoptimize();
 
   /*
-   * Create an IRInstruction at the end of the current Block, and allocate a
-   * destination SSATmp for it.  Uses the same argument list format as
-   * IRUnit::gen.
+   * Conditionally-append a new instruction to the current Block, depending on
+   * what some optimizations have to say about it.
    */
-  template<class... Args>
-  SSATmp* gen(Opcode op, Args&&... args) {
-    return makeInstruction(
-      [this] (IRInstruction* inst) {
-        return prepareInst(inst);
-      },
-      op,
-      m_curMarker,
-      std::forward<Args>(args)...
-    );
-  }
+  enum class CloneFlag { Yes, No };
+  SSATmp* optimizeInst(IRInstruction* inst,
+                       CloneFlag doClone,
+                       Block* srcBlock,
+                       const folly::Optional<IdomVector>&);
 
   //////////////////////////////////////////////////////////////////////
   // constants
@@ -433,6 +427,21 @@ private:
   };
 
 private:
+  // Helper for cond() and such.  We should move them out of IRBuilder so they
+  // can just use irgen::gen.
+  template<class... Args>
+  SSATmp* gen(Opcode op, Args&&... args) {
+    return makeInstruction(
+      [this] (IRInstruction* inst) {
+        return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
+      },
+      op,
+      m_curMarker,
+      std::forward<Args>(args)...
+    );
+  }
+
+private:
   using ConstrainBoxedFunc = std::function<SSATmp*(Type)>;
   SSATmp*   preOptimizeCheckTypeOp(IRInstruction* inst,
                                    Type oldType,
@@ -465,12 +474,6 @@ private:
                            const std::string& why);
 
 private:
-  enum class CloneFlag { Yes, No };
-  SSATmp* optimizeInst(IRInstruction* inst,
-                       CloneFlag doClone,
-                       Block* srcBlock,
-                       const folly::Optional<IdomVector>&);
-  SSATmp* prepareInst(IRInstruction*);
   void appendInstruction(IRInstruction* inst);
   void appendBlock(Block* block);
   SSATmp* cseLookup(const IRInstruction&,
@@ -497,7 +500,6 @@ private:
   jit::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
   ExnStackState m_exnStack{0, EvalStack{}, nullptr};
-  std::function<Block* ()> m_catchCreator;
 
   bool m_enableSimplification;
   bool m_constrainGuards;

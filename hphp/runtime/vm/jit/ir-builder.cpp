@@ -673,7 +673,6 @@ void IRBuilder::prepareForNextHHBC() {
     m_state.evalStack(),
     m_state.sp()
   };
-  m_catchCreator = nullptr;
 }
 
 void IRBuilder::exceptionStackBoundary() {
@@ -686,105 +685,6 @@ void IRBuilder::exceptionStackBoundary() {
   m_exnStack.stackDeficit = m_state.stackDeficit();
   m_exnStack.evalStack = m_state.evalStack();
   m_exnStack.sp = m_state.sp();
-}
-
-void IRBuilder::setCatchCreator(std::function<Block* ()> fn) {
-  m_catchCreator = std::move(fn);
-}
-
-static Block* create_catch_block(IRBuilder& irb,
-                                 const ExnStackState& stack,
-                                 BCMarker marker) {
-  auto const catchBlock = irb.unit().defBlock(Block::Hint::Unused);
-
-  BlockPusher bp(irb, marker, catchBlock);
-  irb.gen(BeginCatch);
-
-  auto args = std::vector<SSATmp*>{
-    stack.sp,
-    irb.cns(int64_t{stack.stackDeficit})
-  };
-  auto idx = uint32_t{0};
-  while (auto const val = stack.evalStack.top(idx++)) {
-    // We don't constrain these values, since they're just going to memory
-    // (and off the main line of code).
-    args.push_back(val);
-  }
-  auto const spill = irb.gen(
-    SpillStack,
-    std::make_pair(args.size(), &args[0])
-  );
-  irb.clearStackDeficit();
-  irb.evalStack().clear();
-
-  irb.gen(EndCatch, irb.fp(), spill);
-
-  return catchBlock;
-}
-
-/*
- * This is called when each instruction is generated during initial IR
- * creation.
- *
- * This function inspects the instruction and prepares it for potentially being
- * inserted to the instruction stream.  It then calls optimizeInst, which may
- * or may not insert it depending on a variety of factors.
- */
-SSATmp* IRBuilder::prepareInst(IRInstruction* inst) {
-  if (inst->mayRaiseError() && inst->taken()) {
-    FTRACE(1, "{}: asserting about catch block\n",
-      inst->toString());
-    /*
-     * This assertion means you manually created a catch block, but didn't put
-     * an exceptionStackBoundary after an update to the stack.  Even if you're
-     * manually creating catches we require this just to make sure you're not
-     * doing it on accident.
-     */
-    always_assert_flog(
-      m_exnStack.sp == sp(),
-      "catch block would have had a mismatched stack pointer:\n"
-      "     inst: {}\n"
-      "       sp: {}\n"
-      " expected: {}\n",
-      inst->toString(),
-      sp()->toString(),
-      m_exnStack.sp->toString()
-    );
-  }
-
-  if (inst->mayRaiseError() && !inst->taken()) {
-    FTRACE(1, "{}: creating {}catch block\n",
-      inst->toString(),
-      m_catchCreator ? "custom " : "");
-    /*
-     * If you hit this assertion, you're gen'ing an IR instruction that can
-     * throw after gen'ing one that could write to the evaluation stack.  This
-     * is usually not what HHBC opcodes do, and could be a bug.  See the
-     * documentation for exceptionStackBoundary in the header for more
-     * information.
-     */
-    always_assert_flog(
-      m_exnStack.sp == sp(),
-      "catch block would have had a mismatched stack pointer:\n"
-      "     inst: {}\n"
-      "       sp: {}\n"
-      " expected: {}\n",
-      inst->toString(),
-      sp()->toString(),
-      m_exnStack.sp->toString()
-    );
-    inst->setTaken(
-      m_catchCreator
-        ? m_catchCreator()
-        : create_catch_block(*this, m_exnStack, m_curMarker)
-    );
-  }
-
-  if (inst->mayRaiseError()) {
-    assert(inst->taken() && inst->taken()->isCatch());
-  }
-
-  return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
 }
 
 /*
@@ -1284,7 +1184,7 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   assert(b);
 
   m_savedBlocks.push_back(
-    BlockState { m_curBlock, m_curMarker, m_exnStack, m_catchCreator }
+    BlockState { m_curBlock, m_curMarker, m_exnStack }
   );
   m_state.pauseBlock(m_curBlock);
   m_state.startBlock(b, marker);
@@ -1310,7 +1210,6 @@ void IRBuilder::popBlock() {
   m_curBlock = top.block;
   m_curMarker = top.marker;
   m_exnStack = top.exnStack;
-  m_catchCreator = top.catchCreator;
   m_savedBlocks.pop_back();
 }
 

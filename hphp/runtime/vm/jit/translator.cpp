@@ -1640,7 +1640,7 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
   irgen::emitIncStat(hts, Stats::Instr_TC, 1);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
-    hts.irb->gen(DbgAssertRetAddr);
+    irgen::gen(hts, DbgAssertRetAddr);
   }
 
   if (isAlwaysNop(ni.op())) {
@@ -1683,7 +1683,7 @@ TranslateResult translateRegion(HTS& hts,
     auto const irBlock = blockIdToIRBlock[region.entry()->id()];
     always_assert(irBlock != entry);
 
-    irb.gen(Jmp, irBlock);
+    irgen::gen(hts, Jmp, irBlock);
   }
 
   RegionDesc::BlockIdSet processedBlocks;
@@ -1763,7 +1763,7 @@ TranslateResult translateRegion(HTS& hts,
 
       // Finish emitting guards, and emit profiling counters.
       if (useGuards) {
-        irb.gen(EndGuards);
+        irgen::gen(hts, EndGuards);
         if (RuntimeOption::EvalJitTransCounters) {
           irgen::incTransCounter(hts);
         }

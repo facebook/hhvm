@@ -280,7 +280,7 @@ class ReflectionParameter implements Reflector {
       return null;
     }
     if ($ltype === "self" && !empty($this->info['class'])) {
-      return getDeclaringClass();
+      return $this->getDeclaringClass();
     }
     return new ReflectionClass($this->info['type']);
   }

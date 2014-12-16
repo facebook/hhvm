@@ -1,27 +1,29 @@
 #########################################
-#                                       #
 # Generic Dependency Installer Script   #
-#                                       #
 #########################################
 
 # Current Script details
-SCRIPT="$(readlink -f $0)"
-SCRIPT_DIR="$(dirname $SCRIPT)"
-PWD=$(readlink -f `pwd`)
+SCRIPT="$(basename $0)"
+pushd "$(dirname $0)" >/dev/null
+SCRIPT_DIR="$(pwd -P)"
+popd >/dev/null
+PWD="$(pwd -P)"
 
 # Make sure the script is run from its proper path.
 # OR Since we know the path, why don't we do it ourselves ?
 if [ $PWD != $SCRIPT_DIR ]
 then
-    echo "Run the script from the hiphop-php directory like:"
+    echo "Run the script from the HHVM directory like:"
     echo "cd $SCRIPT_DIR && ./$SCRIPT"
     exit 1
 fi
 
-# Identify the Distro
+# Identify the Distro, determine the CPUs irrespective of Travis Mode
 OS_TYPE=$(uname)
 if [ "x$OS_TYPE" = "xLinux" ];then
     DISTRO_NAME=$(head -1 /etc/issue)
+    CPUS=$(egrep '(^CPU|processor.*:.*)' /proc/cpuinfo|wc -l)
+    FREE_MEM=$(free)
     if grep -i fedora /etc/issue >/dev/null 2>&1; then
         DISTRO=fedora
     elif grep -i ubuntu /etc/issue >/dev/null 2>&1;then
@@ -29,8 +31,13 @@ if [ "x$OS_TYPE" = "xLinux" ];then
     else
         DISTRO=unknown
     fi
+elif [ "x$OS_TYPE" = "xDarwin" ];then
+    DISTRO=osx
+    FREE_MEM=$(top -l 1|head -n 10|grep PhysMem)
+    DISTRO_NAME="$(sw_vers -productName) $(sw_vers -productVersion)"
+    CPUS=$(sysctl -n hw.ncpu)
 else
-    echo "Linux is the only supported Operating system right now."
+    echo "Linux and Darwin are the only supported Operating systems right now."
     echo "Please submit a PR when this script is enhanced to support"
     echo "other operating systems"
     echo ""
@@ -43,20 +50,16 @@ fi
 echo "Date/Time      : $(date)"
 echo "Current Distro : $DISTRO_NAME"
 
-# Determine the CPUs irrespective of Travis Mode
-CPUS=`cat /proc/cpuinfo | grep -E '^processor' | tail -1 | cut -d : -f 2`
-CPUS=`expr ${CPUS} + 1`
-
 # For travis
 if [ "x${TRAVIS}" != "x" ]; then
   # Collect some stats for use in tuning build later on
-  free
-  echo "Travis Mode    : YES"
-  echo "# CPUs         : ${CPUS}"
+  echo $FREE_MEM
+  echo "Travis Mode  : YES"
+  echo "# CPUs       : ${CPUS}"
   echo ""
 else
-  echo "Travis Mode    : NO"
-  echo "# CPUs         : ${CPUS}"
+  echo "Travis Mode  : NO"
+  echo "# CPUs       : ${CPUS}"
   echo ""
 fi
 
@@ -111,6 +114,30 @@ case $DISTRO in
         svn checkout http://google-glog.googlecode.com/svn/trunk/ google-glog --quiet &
         wget -nc http://www.canonware.com/download/jemalloc/jemalloc-3.6.0.tar.bz2 --quiet &
         ;;
+    osx)
+        # Force GCC-LLVM to GCC-4.8
+        if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$CC" = "gcc" ]; then
+            export CC=gcc-4.8
+            export CXX=g++-4.8
+            export CPP=cpp-4.8
+            export LD=gcc-4.8
+            export HOMEBREW_CC=gcc-4.8
+            export HOMEBREW_CXX=g++-4.8
+        fi
+
+        brew update >/dev/null
+        brew tap mcuadros/homebrew-hhvm
+
+        # install the actual dependencies
+        #brew install memcached redis
+        brew install binutilsfb curl freetype gd gettext git icu4c imagemagick \
+                     imap-uw jemallocfb libdwarf libelf libevent libmemcached \
+                     libpng libssh2 libvpx libxslt libzip lz4 mcrypt mysql \
+                     mysql-connector-c++ objective-caml oniguruma openssl pcre \
+                     re2c sqlite tbb unixodbc
+
+        brew install boost gflags glog --build-from-source --cc=gcc-4.8
+        ;;
     *)
         echo "Unknown distribution. Please update packages in this section."
         exit 1
@@ -152,23 +179,25 @@ if [[ "x$DISTRO" == "xubuntu" ]];then
     sudo update-alternatives --set gcc /usr/bin/gcc-${GCC_VER}
 fi
 
-# libevent
-cd libevent
-git checkout release-1.4.14b-stable
-cat ../third-party/libevent-1.4.14.fb-changes.diff | patch -p1
-./autogen.sh
-./configure --prefix=$CMAKE_PREFIX_PATH
-make -j $CPUS
-make install
-cd ..
+if [[ "x$OS_TYPE" = "xLinux" ]];then
+    # libevent
+    cd libevent
+    git checkout release-1.4.14b-stable
+    cat ../third-party/libevent-1.4.14.fb-changes.diff | patch -p1
+    ./autogen.sh
+    ./configure --prefix=$CMAKE_PREFIX_PATH
+    make -j $CPUS
+    make install
+    cd ..
 
-# curl
-cd curl
-./buildconf
-./configure --prefix=$CMAKE_PREFIX_PATH
-make -j $CPUS
-make install
-cd ..
+    # curl
+    cd curl
+    ./buildconf
+    ./configure --prefix=$CMAKE_PREFIX_PATH
+    make -j $CPUS
+    make install
+    cd ..
+fi
 
 if [[ "x$DISTRO" == "xubuntu" ]];then
     # glog
@@ -194,7 +223,48 @@ fi
 rm -rf libevent curl
 
 # hphp
-cmake "$@" .
+if [[ "x$OS_TYPE" = "xLinux" ]];then
+    cmake "$@" .
+elif [ "x$OS_TYPE" = "xDarwin" ];then
+    # hard setup osx deps
+    OPT=$(brew --prefix)/opt
+    cmake "$@" \
+      -DCMAKE_INCLUDE_PATH="/usr/local/include:/usr/include" \
+      -DCMAKE_LIBRARY_PATH="/usr/local/lib:/usr/lib" \
+      -DBOOST_INCLUDEDIR=$OPT/boost/include -DBOOST_LIBRARYDIR=$OPT/boost/lib -DBoost_USE_STATIC_LIBS=ON \
+      -DCCLIENT_INCLUDE_PATH=$OPT/imap-uw/include/imap \
+      -DCURL_INCLUDE_DIR=$OPT/curl/include -DCURL_LIBRARY=$OPT/curl/lib/libcurl.dylib \
+      -DFREETYPE_INCLUDE_DIRS=$OPT/freetype/include/freetype2 -DFREETYPE_LIBRARIES=$OPT/freetype/lib/libfreetype.dylib \
+      -DICU_DATA_LIBRARY=$OPT/icu4c/lib/libicudata.dylib -DICU_I18N_LIBRARY=$OPT/icu4c/lib/libicui18n.dylib -DICU_INCLUDE_DIR=$OPT/icu4c/include -DICU_LIBRARY=$OPT/icu4c/lib/libicuuc.dylib \
+      -DJEMALLOC_INCLUDE_DIR=$OPT/jemallocfb/include -DJEMALLOC_LIB=$OPT/jemallocfb/lib/libjemalloc.dylib \
+      -DLBER_LIBRARIES=/usr/lib/liblber.dylib \
+      -DLDAP_INCLUDE_DIR=/usr/include -DLDAP_LIBRARIES=/usr/lib/libldap.dylib \
+      -DLIBDWARF_INCLUDE_DIRS=$OPT/libdwarf/include -DLIBDWARF_LIBRARIES=$OPT/libdwarf/lib/libdwarf.3.dylib \
+      -DLIBELF_INCLUDE_DIRS=$OPT/libelf/include/libelf \
+      -DLIBEVENT_INCLUDE_DIR=$OPT/libevent/include -DLIBEVENT_LIB=$OPT/libevent/lib/libevent.dylib \
+      -DLIBGLOG_INCLUDE_DIR=$OPT/glog/include \
+      -DLIBINTL_INCLUDE_DIR=$OPT/gettext/include -DLIBINTL_LIBRARIES=$OPT/gettext/lib/libintl.dylib \
+      -DLIBJPEG_INCLUDE_DIRS=$OPT/jpeg/include \
+      -DLIBMAGICKWAND_INCLUDE_DIRS=$OPT/imagemagick/include/ImageMagick-6 -DLIBMAGICKWAND_LIBRARIES=$OPT/imagemagick/lib/libMagickWand-6.Q16.dylib \
+      -DLIBMEMCACHED_INCLUDE_DIR=$OPT/libmemcached/include \
+      -DLIBODBC_INCLUDE_DIRS=$OPT/unixodbc/include \
+      -DLIBPNG_INCLUDE_DIRS=$OPT/libpng/include \
+      -DLIBSQLITE3_INCLUDE_DIR=$OPT/sqlite/include -DLIBSQLITE3_LIBRARY=$OPT/sqlite/lib/libsqlite3.0.dylib \
+      -DLIBVPX_INCLUDE_DIRS=$OPT/libvpx/include -DLIBVPX_LIBRARIES=$OPT/libvpx/lib/libvpx.a \
+      -DLIBZIP_INCLUDE_DIR_ZIP=$OPT/libzip/include -DLIBZIP_INCLUDE_DIR_ZIPCONF=$OPT/libzip/lib/libzip/include -DLIBZIP_LIBRARY=$OPT/libzip/lib/libzip.dylib \
+      -DLZ4_INCLUDE_DIR=$OPT/lz4/include -DLZ4_LIBRARY=$OPT/lz4/lib/liblz4.dylib \
+      -DMcrypt_INCLUDE_DIR=$OPT/mcrypt/include \
+      -DOCAMLC_EXECUTABLE=$OPT/objective-caml/bin/ocamlc -DOCAMLC_OPT_EXECUTABLE=$OPT/objective-caml/bin/ocamlc.opt \
+      -DONIGURUMA_INCLUDE_DIR=$OPT/oniguruma/include \
+      -DPCRE_INCLUDE_DIR=$OPT/pcre/include -DPCRE_LIBRARY=$OPT/pcre/lib/libpcre.dylib -DSYSTEM_PCRE_INCLUDE_DIR=$OPT/pcre/include -DSYSTEM_PCRE_LIBRARY=$OPT/pcre/lib/libpcre.dylib \
+      -DREADLINE_INCLUDE_DIR=$OPT/readline/include -DREADLINE_LIBRARY=$OPT/readline/lib/libreadline.dylib \
+      -DTBB_INCLUDE_DIRS=$OPT/tbb/include -DTEST_TBB_INCLUDE_DIR=$OPT/tbb/include \
+      -DCMAKE_INCLUDE_PATH=$OPT/binutilsfb/include -DLIBIBERTY_LIB=$OPT/binutilsfb/lib/x86_64/libiberty.a -DBFD_LIB=$OPT/binutilsfb/lib/libbfd.a \
+      -DCMAKE_BUILD_TYPE=MinSizeRel \
+      -DMYSQL_INCLUDE_DIR=$OPT/mysql/include/mysql -DMYSQL_LIB_DIR=$OPT/mysql/lib \
+      -DOPENSSL_SSL_LIBRARY=$OPT/openssl/lib/libssl.dylib -DOPENSSL_INCLUDE_DIR=$OPT/openssl/include -DOPENSSL_CRYPTO_LIBRARY=$OPT/openssl/lib/libcrypto.dylib \
+      .
+fi
 
 # all set
 echo "-------------------------------------------------------------------------"

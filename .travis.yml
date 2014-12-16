@@ -1,13 +1,15 @@
 language: cpp
 
-# This doesn't work - travis defaults to plain gcc if unknown
-# http://github.com/travis-ci/travis-ci/issues/979
-# http://llvm.org/apt/
+os:
+  - linux
+  - osx
+osx_image: xcode61
+
+# Travis defaults to plain gcc: http://git.io/ySBGKw
+# LLVM: http://llvm.org/apt/
 compiler:
   - gcc
-#  - gcc-4.8
-#  - clang-3.4
-#  - clang-3.5
+  - clang
 
 cache:
   - apt
@@ -19,10 +21,10 @@ services:
 # Commands before installing prerequisites
 before_script:
 # we can't compile with this system version
-  - time sudo apt-get remove libsqlite3-dev
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then time sudo apt-get remove libsqlite3-dev; fi
   - time TRAVIS=1 ./configure_generic.sh -DENABLE_COTIRE=ON
 # for some tests
-  - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR; fi
   - time make -j 6
 # mysql configuration for unit-tests
   - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'
@@ -58,3 +60,12 @@ notifications:
 
 matrix:
   fast_finish: true
+  exclude:
+    - os: osx
+      compiler: clang
+    - os: linux
+      compiler: clang
+  allow_failures:
+    - os: osx
+    - os: linux
+      compiler: clang

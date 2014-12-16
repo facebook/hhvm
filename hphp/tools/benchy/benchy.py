@@ -38,21 +38,6 @@ def _unique_id():
 _unique_id.next_id = 1
 
 
-def verbose():
-    """Returns the current verbosity level.
-
-    """
-    return verbose.level
-verbose.level = 0
-
-
-def set_verbose_level(level):
-    """Sets the verbosity level for debugging.
-
-    """
-    verbose.level = level
-
-
 class Branch(object):
     """A branch within a repository, i.e. the basic unit of comparison."""
     def __init__(self, name, env='', vm_path=None):
@@ -175,7 +160,7 @@ def run_benchmarks(suites, benchmarks, run_perf, inner, outer, branches):
                                perf=perf_str,
                                inner=inner_str,
                                outer=outer_str,
-                               branch=branch_str), verbose=verbose() > 0)
+                               branch=branch_str))
 
 
 def process_results(branches, output_mode):
@@ -194,15 +179,14 @@ def process_results(branches, output_mode):
         with open(result_path, 'w') as result_file:
             cmd = "{anymean} --geomean {runlog}"
             utils.run_command(cmd.format(anymean=anymean, runlog=runlog),
-                        stdout=result_file, verbose=verbose() > 0)
+                        stdout=result_file)
         result_paths.append(result_path)
 
     cmd = "{significance} --{output_mode} {results}"
     utils.run_command(cmd.format(significance=significance,
                                  output_mode=output_mode,
                                  results=' '.join(result_paths)),
-                      stdout=sys.stdout,
-                      verbose=verbose() > 0)
+                      stdout=sys.stdout)
 
 
 def main():
@@ -254,7 +238,7 @@ def main():
     if included_benchmarks is None:
         included_benchmarks = []
 
-    set_verbose_level(args.verbose)
+    config.set_verbose_level(args.verbose)
     inner = args.inner
     outer = args.outer
     should_build = not (args.no_build or args.re_print)

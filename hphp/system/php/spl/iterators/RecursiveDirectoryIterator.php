@@ -54,7 +54,7 @@ class RecursiveDirectoryIterator extends FilesystemIterator
     if ($this->isDot()) {
       return false;
     }
-    if (is_link($this->getFilename()) &&
+    if (is_link($this->getPathname()) &&
         !($this->flags & self::FOLLOW_SYMLINKS)) {
       return false;
     }

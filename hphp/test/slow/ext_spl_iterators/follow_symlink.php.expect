@@ -1,0 +1,7 @@
+DONT FOLLOW SYMLINKS
+test/dir2/dir1
+test/dir2/file2.txt
+FOLLOW SYMLINKS
+test/dir2/dir1
+test/dir2/dir1/file1.txt
+test/dir2/file2.txt

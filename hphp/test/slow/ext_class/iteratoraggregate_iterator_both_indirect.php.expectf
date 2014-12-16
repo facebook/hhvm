@@ -1,0 +1,2 @@
+
+Fatal error: Class Fatal cannot implement both Iterator and IteratorAggregate at the same time in %s/ext_class/iteratoraggregate_iterator_both_indirect.php on line %s

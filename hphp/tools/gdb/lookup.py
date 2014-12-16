@@ -27,6 +27,12 @@ LookupCommand()
 #------------------------------------------------------------------------------
 # `lookup func' command.
 
+def lookup_func(val):
+    funcid = val.cast(T('HPHP::FuncId'))
+    func_vec = V('HPHP::s_funcVec')['m_vals']['_M_t']['_M_head_impl']
+    return func_vec[funcid]['_M_b']['_M_p']
+
+
 class LookupFuncCommand(gdb.Command):
     """Lookup a Func* by its FuncId."""
 
@@ -41,13 +47,19 @@ class LookupFuncCommand(gdb.Command):
             print('Usage: lookup func <FuncId>')
             return
 
-        funcid = argv[0].cast(T('HPHP::FuncId'))
-        func_vec = V('HPHP::s_funcVec')['m_vals']['_M_t']['_M_head_impl']
+        gdbprint(lookup_func(argv[0]))
 
-        func = func_vec[funcid]['_M_b']['_M_p']
-        gdbprint(func)
+
+class LookupFuncFunction(gdb.Function):
+    def __init__(self):
+        super(LookupFuncFunction, self).__init__('lookup_func')
+
+    def invoke(self, val):
+        return lookup_func(val)
+
 
 LookupFuncCommand()
+LookupFuncFunction()
 
 
 #------------------------------------------------------------------------------

@@ -60,7 +60,10 @@ def vstr(value):
 
         pp.enabled = False
 
-    ret = unicode(value)
+    try:
+        ret = unicode(value)
+    except:
+        ret = str(value)
 
     for pp in gdb.pretty_printers:
         pp.enabled = pp.saved

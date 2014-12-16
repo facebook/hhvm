@@ -396,8 +396,6 @@ end
 
 module PrintFun = struct
 
-  let bool = string_of_bool
-  let int = string_of_int
   let tenv = PrintClass.tenv
 
   let fparam (sopt, ty) =
@@ -417,8 +415,8 @@ module PrintFun = struct
 
   let fun_type f =
     let ft_pos = PrintClass.pos f.ft_pos in
-    let ft_unsafe = bool f.ft_unsafe in
-    let ft_abstract = bool f.ft_abstract in
+    let ft_unsafe = string_of_bool f.ft_unsafe in
+    let ft_abstract = string_of_bool f.ft_abstract in
     let ft_arity = farity f.ft_arity in
     let ft_tparams = PrintClass.tparam_list f.ft_tparams in
     let ft_params = fparams f.ft_params in

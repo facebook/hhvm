@@ -916,8 +916,8 @@ and expr_ in_cond is_lvalue env (p, e) =
     (* Smethod_id is used when creating a "method pointer" using the magic
      * class_meth function.
      *
-     * Typing this is pretty simple, we just need to check that c::meth is public+static
-     * and then return its type.
+     * Typing this is pretty simple, we just need to check that c::meth is
+     * public+static and then return its type.
      *)
     let class_ = Env.get_class env (snd c) in
     (match class_ with
@@ -1582,7 +1582,6 @@ and call_parent_construct pos env el uel =
               (match trait_most_concrete_req_class trait env with
                 | None -> Errors.parent_in_trait pos; default
                 | Some (tc_parent, parent_ty) ->
-                  (* let r = Reason.Rwitness pos in *)
                   check_parent_construct pos env el uel parent_ty
               )
             | Some self_tc ->
@@ -2188,27 +2187,6 @@ and error_const_mutation env p (r, ty) =
   Errors.const_mutation p (Reason.to_pos r) (Typing_print.error ty);
   env, (Reason.Rwitness p, Tany)
 
-and deref_tuple p env tyl = function
-  | p, Int (_, s) ->
-      let n = safe_ios p s in
-      (match n with
-      | None ->
-          Errors.static_overflow p;
-          env, (Reason.Rwitness p, Tany)
-      | Some n when n < 0 ->
-          Errors.negative_tuple_index p;
-          env, (Reason.Rwitness p, Tany)
-      | Some n when n >= List.length tyl ->
-          Errors.tuple_index_too_large p;
-          env, (Reason.Rwitness p, Tany)
-      | Some n ->
-          let res = List.nth tyl n in
-          env, res
-      )
-  | _ ->
-      Errors.expected_static_int p;
-      env, (Reason.Rwitness p, Tany)
-
 (**
  * Checks if a class (given by cty) contains a given static method.
  *
@@ -2566,15 +2544,6 @@ and trait_most_concrete_req_class trait env =
       )
   ) trait.tc_req_ancestors None
 
-and trait_fake_parent_ty pos parent_tc env =
-  let self_ty = Env.get_self env in
-  match self_ty with
-    | (_, Tapply (_, tyl)) ->
-      (* FIXME: fake parent type copies the typelist *)
-      Tapply ((pos, parent_tc.tc_name), tyl)
-    | _ -> failwith ("Internal error; expected to find self as "
-                     ^parent_tc.tc_name)
-
 and static_class_id p env = function
   | CIparent ->
     (match Env.get_self env with
@@ -2860,13 +2829,6 @@ and call_param todos env (name, x) (pos, arg) =
 
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
-
-and expr_list env el =
-  List.fold_right (
-  fun e (env, acc) ->
-    let env, e = expr env e in
-    env, e :: acc
- ) el (env, [])
 
 and unop p env uop ty =
   match uop with

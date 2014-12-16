@@ -144,23 +144,27 @@ let compute_gconsts_deps old_gconsts (to_redecl, to_recheck) gconsts =
 (*****************************************************************************)
 
 (*
+ * XXX UNUSED: Position substitution has been disabled for now, but we're
+ * leaving the code in to minimize bitrot
+ *)
 let update_positions classes to_update =
   (* First compute the substitution *)
   let position_subst, is_empty = 
     let old_classes = Typing_env.Classes.get_old_batch classes in
-    let new_classes = Typing_env.Classes.find_batch classes in
+    let new_classes = Typing_env.Classes.get_batch classes in
     Typing_compare.get_classes_psubst old_classes new_classes classes
   in
   if is_empty 
   then ()
   else begin
-    (* Now apply the sustitution in parallel on all the data nodes *)
+    (* Now apply the substitution in parallel on all the data nodes *)
+    (*
     Typing_env.Classes.apply_batch to_update begin fun class_ ->
       Typing_compare.SubstPos.class_type position_subst class_
     end;
+    *)
   end;
   ()
-*)
 
 (*****************************************************************************)
 (* Redeclares a list of files 

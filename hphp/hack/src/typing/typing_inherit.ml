@@ -48,14 +48,6 @@ let empty = {
   ih_smethods = SMap.empty;
 }
 
-let desugar ih =
-  ih.ih_cstr,
-  ih.ih_consts,
-  ih.ih_cvars,
-  ih.ih_scvars,
-  ih.ih_methods,
-  ih.ih_smethods
-
 (*****************************************************************************)
 (* Functions used to merge an additional inherited class to the types
  * we already inherited.

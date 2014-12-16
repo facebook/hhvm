@@ -45,7 +45,7 @@ module CompareTypes = struct
 
   type result = (Pos.t * Pos.t) list * bool
 
-  let default = [], false
+  let default : result = [], false
 
   let string_id (subst, same) (p1, s1) (p2, s2) =
     if s1 <> s2
@@ -433,15 +433,6 @@ end
  *)
 (*****************************************************************************)
 module ClassDiff = struct
-
-  type t = {
-      consts   : SSet.t ;
-      cvars    : SSet.t ;
-      methods  : SSet.t ;
-      smethods : SSet.t ;
-      typeconsts : SSet.t;
-      cstr     : bool   ;
-    }
 
   let smap_left s1 s2 =
     SMap.fold begin fun x ty1 diff ->

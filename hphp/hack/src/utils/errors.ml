@@ -220,7 +220,7 @@ module Typing                               = struct
   let enum_type_typedef_mixed               = 4025 (* DONT MODIFY!!!! *)
   let expected_class                        = 4026 (* DONT MODIFY!!!! *)
   let expected_literal_string               = 4027 (* DONT MODIFY!!!! *)
-  let expected_static_int                   = 4028 (* DONT MODIFY!!!! *)
+  (* DEPRECATED expected_static_int         = 4028 *)
   let expected_tparam                       = 4029 (* DONT MODIFY!!!! *)
   let expecting_return_type_hint            = 4030 (* DONT MODIFY!!!! *)
   let expecting_return_type_hint_suggest    = 4031 (* DONT MODIFY!!!! *)
@@ -249,7 +249,7 @@ module Typing                               = struct
   let missing_assign                        = 4055 (* DONT MODIFY!!!! *)
   let missing_constructor                   = 4056 (* DONT MODIFY!!!! *)
   let missing_field                         = 4057 (* DONT MODIFY!!!! *)
-  let negative_tuple_index                  = 4058 (* DONT MODIFY!!!! *)
+  (* DEPRECATED negative_tuple_index        = 4058 *)
   let self_outside_class                    = 4059 (* DONT MODIFY!!!! *)
   let new_static_inconsistent               = 4060 (* DONT MODIFY!!!! *)
   let static_outside_class                  = 4061 (* DONT MODIFY!!!! *)
@@ -283,13 +283,13 @@ module Typing                               = struct
   let sketchy_null_check_primitive          = 4089 (* DONT MODIFY!!!! *)
   let smember_not_found                     = 4090 (* DONT MODIFY!!!! *)
   let static_dynamic                        = 4091 (* DONT MODIFY!!!! *)
-  let static_overflow                       = 4092 (* DONT MODIFY!!!! *)
+  (* DEPRECATED let static_overflow         = 4092 *)
   let this_in_static                        = 4094 (* DONT MODIFY!!!! *)
   let this_var_outside_class                = 4095 (* DONT MODIFY!!!! *)
   let trait_final                           = 4096 (* DONT MODIFY!!!! *)
   let tuple_arity                           = 4097 (* DONT MODIFY!!!! *)
   let tuple_arity_mismatch                  = 4098 (* DONT MODIFY!!!! *)
-  let tuple_index_too_large                 = 4099 (* DONT MODIFY!!!! *)
+  (* DEPRECATED tuple_index_too_large       = 4099 *)
   let tuple_syntax                          = 4100 (* DONT MODIFY!!!! *)
   let type_arity_mismatch                   = 4101 (* DONT MODIFY!!!! *)
   let type_param_arity                      = 4102 (* DONT MODIFY!!!! *)
@@ -1112,10 +1112,6 @@ let array_get_arity pos1 name pos2 =
   pos2, "It is missing its type parameters"
 ]
 
-let static_overflow pos =
-  add Typing.static_overflow pos
-    "Static integer overflow"
-
 let typing_error pos msg =
   add Typing.generic_unify pos msg
 
@@ -1144,18 +1140,6 @@ let const_mutation pos1 pos2 ty =
      if pos2 != Pos.none
      then [(pos2, "This is " ^ ty)]
      else [])
-
-let negative_tuple_index pos =
-  add Typing.negative_tuple_index pos
-    "You cannot use a negative value here"
-
-let tuple_index_too_large pos =
-  add Typing.tuple_index_too_large pos
-    "Cannot access this field"
-
-let expected_static_int pos =
-  add Typing.expected_static_int pos
-    "Please use a static integer"
 
 let expected_class pos =
   add Typing.expected_class pos

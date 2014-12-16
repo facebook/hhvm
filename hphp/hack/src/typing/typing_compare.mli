@@ -23,3 +23,14 @@ val get_funs_deps : fun_type option SMap.t -> SSet.t -> DepSet.t * DepSet.t
 val get_types_deps : Typedef.tdef_or_error option SMap.t -> SSet.t -> DepSet.t
 
 val get_gconsts_deps : GConsts.t option SMap.t -> SSet.t -> DepSet.t * DepSet.t
+
+(*
+ * XXX UNUSED: Position substition has been disabled for now, but we're
+ * leaving the code in to minimize bitrot
+ *)
+val get_classes_psubst : class_type option SMap.t ->
+  class_type option SMap.t -> SSet.t -> (Pos.t, Pos.t) Hashtbl.t * bool
+
+module SubstPos : sig
+  val class_type : (Pos.t, Pos.t) Hashtbl.t -> class_type -> class_type
+end

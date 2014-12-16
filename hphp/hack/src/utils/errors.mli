@@ -122,16 +122,12 @@ val parent_outside_class : Pos.t -> unit
 val parent_abstract_call : string -> Pos.t -> Pos.t -> unit
 val isset_empty_unset_in_strict : Pos.t -> string -> unit
 val array_get_arity : Pos.t -> string -> Pos.t -> unit
-val static_overflow : Pos.t -> unit
 val typing_error : Pos.t -> string -> unit
 val typing_error_l : error -> unit
 val undefined_field : Pos.t -> string -> unit
 val array_access : Pos.t -> Pos.t -> string -> unit
 val array_append : Pos.t -> Pos.t -> string -> unit
 val const_mutation : Pos.t -> Pos.t -> string -> unit
-val negative_tuple_index : Pos.t -> unit
-val tuple_index_too_large : Pos.t -> unit
-val expected_static_int : Pos.t -> unit
 val expected_class : Pos.t -> unit
 val smember_not_found :
   [< `class_constant | `class_variable | `static_method | `class_typeconst] ->

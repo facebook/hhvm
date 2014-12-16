@@ -2,6 +2,8 @@
 GDB commands for various HHVM ID lookups.
 """
 # @lint-avoid-python-3-compatibility-imports
+# @lint-avoid-pyflakes3
+# @lint-avoid-pyflakes2
 
 import gdb
 import idx

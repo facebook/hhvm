@@ -2,6 +2,8 @@
 GDB command for printing the names of various objects.
 """
 # @lint-avoid-python-3-compatibility-imports
+# @lint-avoid-pyflakes3
+# @lint-avoid-pyflakes2
 
 import gdb
 from gdbutils import *

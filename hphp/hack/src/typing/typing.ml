@@ -2980,18 +2980,18 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
   | Ast.Eq _ ->
       assert false
 
-and non_null env ty =
-  let env, ty = Env.expand_type env ty in
+and non_null ?expanded:(expanded=ISet.empty) env ty =
+  let env, expanded, ty = Env.expand_type_recorded env expanded ty in
   match ty with
   | _, Toption ty ->
-      let env, ty = Env.expand_type env ty in
+      let env, expanded, ty = Env.expand_type_recorded env expanded ty in
       (* When "??T" appears in the typing environment due to implicit
        * typing, the recursion here ensures that it's treated as
        * isomorphic to "?T"; that is, all nulls are created equal.
        *)
-      non_null env ty
+      non_null ~expanded env ty
   | r, Tunresolved tyl ->
-      let env, tyl = lfold non_null env tyl in
+      let env, tyl = lfold (non_null ~expanded) env tyl in
       (* We need to flatten the unresolved types, otherwise we could
        * end up with "Tunresolved[Tunresolved _]" which is not supposed
        * to happen.
@@ -3004,12 +3004,12 @@ and non_null env ty =
       env, (r, Tunresolved tyl)
   | r, Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, ty = Typing_tdef.expand_typedef env r x argl in
-      non_null env ty
+      non_null ~expanded env ty
   | _, Taccess (_, _, _) ->
       let env, ty = TAccess.expand env ty in
-      non_null env ty
+      non_null ~expanded env ty
   | r, Tgeneric (x, Some ty) ->
-      let env, ty = non_null env ty in
+      let env, ty = non_null ~expanded env ty in
       env, (r, Tgeneric (x, Some ty))
   | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tvar _
     | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _

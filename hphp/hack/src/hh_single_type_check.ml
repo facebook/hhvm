@@ -51,10 +51,13 @@ let builtins = "<?hh // decl\n"^
   "  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;\n"^
   "  public function filter((function(Tv): bool) $callback): Vector<Tv>;\n"^
   "  public function reserve(int $sz): void;"^
+  "  public function add(Tv $value): Vector<Tv>;"^
+  "  public function addAll(?Traversable<Tv> $it): Vector<Tv>;"^
   "}\n"^
   "final class ImmVector<Tv> implements ConstVector<Tv> {}\n"^
   "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {"^
   "  public function map<Tu>((function(Tv): Tu) $callback): Map<Tk, Tu>;"^
+  "  public function contains(Tk $k): bool;"^
   "}\n"^
   "final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>{}\n"^
   "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {}\n"^

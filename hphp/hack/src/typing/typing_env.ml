@@ -154,6 +154,15 @@ let expand_type env x =
   | _, Tvar x -> get_type env x
   | x -> env, x
 
+let expand_type_recorded env set ty =
+  match ty with
+  | _, Tvar x -> begin
+    let env, ty = if ISet.mem x set then env, ty else expand_type env ty in
+    let set = ISet.add x set in
+    env, set, ty
+  end
+  | x -> env, set, x
+
 let has_type env x =
   let env, x = get_var env x in
   IMap.mem x env.tenv

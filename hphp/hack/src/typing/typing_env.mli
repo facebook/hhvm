@@ -59,6 +59,7 @@ val add : env -> int -> ty -> env
 val get_type : env -> int -> env * ty
 val get_type_unsafe : env -> int -> env * ty
 val expand_type : env -> ty -> env * ty
+val expand_type_recorded : env -> ISet.t -> ty -> env * ISet.t * ty
 val has_type : env -> int -> bool
 val make_ft : Pos.t -> fun_params -> ty -> fun_type
 val get_shape_field_name : Nast.shape_field_name -> string

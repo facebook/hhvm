@@ -27,6 +27,16 @@ const char* cc_names[] = {
   "S", "NS", "P", "NP", "L", "GE", "LE", "G"
 };
 
+const char* show(RoundDirection rd) {
+  switch (rd) {
+    case RoundDirection::nearest:  return "nearest";
+    case RoundDirection::floor:    return "floor";
+    case RoundDirection::ceil:     return "ceil";
+    case RoundDirection::truncate: return "truncate";
+  }
+  not_reached();
+}
+
 void DecodedInstruction::decode(uint8_t* ip) {
   m_ip = ip;
   m_flagsVal = 0;

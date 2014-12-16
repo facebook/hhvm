@@ -116,6 +116,9 @@ struct FormatVisitor {
   void imm(RIPRelativeRef r) {
     str << sep() << folly::format("ip[{:#x}]", r.r.disp);
   }
+  void imm(RoundDirection rd) {
+    str << sep() << show(rd);
+  }
 
   template<class R> void across(R r) { print(r); }
   template<class R> void use(R r) { print(r); }

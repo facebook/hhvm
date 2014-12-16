@@ -241,7 +241,7 @@ private:
   void emit(lea& i);
   void emit(leap& i) { a->lea(i.s, i.d); }
   void emit(loaddqu& i) { a->movdqu(i.s, i.d); }
-  void emit(loadb& i) { a->loadb(i.s, i.d); }
+  void emit(loadtqb& i) { a->loadb(i.s, i.d); }
   void emit(loadl& i) { a->loadl(i.s, i.d); }
   void emit(loadqp& i) { a->loadq(i.s, i.d); }
   void emit(loadsd& i) { a->movsd(i.s, i.d); }

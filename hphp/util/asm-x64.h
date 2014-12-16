@@ -626,6 +626,8 @@ enum class RoundDirection : ssize_t {
   truncate = 3,
 };
 
+const char* show(RoundDirection);
+
 enum class ComparisonPred : uint8_t {
   // True if...
   eq_ord = 0,    // ...operands are ordered AND equal

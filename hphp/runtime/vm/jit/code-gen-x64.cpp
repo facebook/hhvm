@@ -3631,7 +3631,7 @@ void CodeGenerator::emitLoad(SSATmp* dst, Vloc dstLoc, Vptr base) {
   }
   auto const dstReg = dstLoc.reg();
   if (type <= Type::Bool) {
-    vmain() << loadb{refTVData(base), dstReg};
+    vmain() << loadtqb{refTVData(base), dstReg};
   } else {
     vmain() << load{refTVData(base), dstReg};
   }

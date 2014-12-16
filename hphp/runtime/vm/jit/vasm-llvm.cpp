@@ -307,6 +307,16 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     llvm::StringRef SectionName, bool IsReadOnly
   ) override {
     assert_not_implemented(Alignment <= 8);
+
+    if (SectionName.startswith(".rodata")) {
+      // This needs to be allocated somewhere persistent since code might
+      // reference it.
+      auto ret = mcg->globalData().alloc<uint8_t>(Alignment, Size);
+      FTRACE(1, "Allocate rodata section `{}' of size {} @ {}\n",
+             SectionName.str(), Size, ret);
+      return ret;
+    }
+
     // Some of the data sections will use 32-bit relocations to reference
     // code, thus we have to make sure they are allocated close to code.
     std::unique_ptr<uint8_t[], LowMallocDeleter>
@@ -416,7 +426,7 @@ struct VasmAnnotationWriter : llvm::AssemblyAnnotationWriter {
     if (dbg.isUnknown() || m_curId == dbg.getLine()) return;
 
     m_curId = dbg.getLine();
-    os << m_prefix << m_strs[m_curId] << "\n";
+    os << m_prefix << "; " << m_strs[m_curId] << "\n";
   }
 
  private:
@@ -577,6 +587,7 @@ struct LLVMEmitter {
       .setOptLevel(llvm::CodeGenOpt::Aggressive)
       .setRelocationModel(llvm::Reloc::Static)
       .setCodeModel(llvm::CodeModel::Small)
+      .setMAttrs(std::vector<const char*>{"+sse4.1"})
       .setVerifyModules(true)
       .create());
     always_assert_flog(ee, "ExecutionEngine creation failed: {}\n", errStr);
@@ -1187,7 +1198,7 @@ O(ldimm) \
 O(lea) \
 O(loaddqu) \
 O(load) \
-O(loadb) \
+O(loadtqb) \
 O(loadl) \
 O(loadsd) \
 O(loadzbl) \
@@ -1584,10 +1595,21 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
 
   std::vector<llvm::Type*> argTypes = { m_int64 };
   std::vector<llvm::Value*> args = { value(x64::rVmFp) };
-  auto doArgs = [&] (const VregList& srcs) {
+  auto doArgs = [&] (const VregList& srcs, bool isDbl = false) {
     for(int i = 0; i < srcs.size(); ++i) {
-      args.push_back(value(srcs[i]));
-      argTypes.push_back(value(srcs[i])->getType());
+      auto arg = value(srcs[i]);
+      if (isDbl) {
+        // When the helper expects a double, make sure it's properly typed so
+        // it ends up in an xmm register.
+        arg = asDbl(arg);
+      } else if (arg->getType()->isDoubleTy()) {
+        // This case can happen when we're passing m_data in a KindOfDouble
+        // TypedValue: the llvm value is a double but it needs to be passed in
+        // a GP register.
+        arg = m_irb.CreateBitCast(arg, intNType(64));
+      }
+      args.push_back(arg);
+      argTypes.push_back(arg->getType());
     }
   };
   doArgs(vargs.args);
@@ -1600,7 +1622,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     args.push_back(m_int64Undef);
     argTypes.push_back(m_int64);
   }
-  doArgs(vargs.simdArgs);
+  doArgs(vargs.simdArgs, true);
   doArgs(vargs.stkArgs);
 
   auto const funcType = llvm::FunctionType::get(returnType, argTypes, false);
@@ -2062,8 +2084,9 @@ void LLVMEmitter::emit(const load& inst) {
   defineValue(inst.d, m_irb.CreateLoad(emitPtr(inst.s, 64)));
 }
 
-void LLVMEmitter::emit(const loadb& inst) {
-  defineValue(inst.d, m_irb.CreateLoad(emitPtr(inst.s, 8)));
+void LLVMEmitter::emit(const loadtqb& inst) {
+  auto quad = m_irb.CreateLoad(emitPtr(inst.s, 64));
+  defineValue(inst.d, m_irb.CreateZExtOrTrunc(quad, m_int8));
 }
 
 void LLVMEmitter::emit(const loadl& inst) {
@@ -2271,8 +2294,12 @@ void LLVMEmitter::emit(const roundsd& inst) {
     not_reached();
   }();
 
-  auto func = llvm::Intrinsic::getDeclaration(m_module.get(), roundID);
-  defineValue(inst.d, m_irb.CreateCall(func, value(inst.s)));
+  auto func = llvm::Intrinsic::getDeclaration(
+    m_module.get(),
+    roundID,
+    std::vector<llvm::Type*>{m_irb.getDoubleTy()}
+  );
+  defineValue(inst.d, m_irb.CreateCall(func, asDbl(value(inst.s))));
 }
 
 void LLVMEmitter::emit(const srem& inst) {
@@ -2313,9 +2340,12 @@ void LLVMEmitter::emit(const shrqi& inst) {
 }
 
 void LLVMEmitter::emit(const sqrtsd& inst) {
-  auto sqrtFunc = llvm::Intrinsic::getDeclaration(m_module.get(),
-                                                  llvm::Intrinsic::sqrt);
-  defineValue(inst.d, m_irb.CreateCall(sqrtFunc, value(inst.s)));
+  auto sqrtFunc = llvm::Intrinsic::getDeclaration(
+    m_module.get(),
+    llvm::Intrinsic::sqrt,
+    std::vector<llvm::Type*>{m_irb.getDoubleTy()}
+  );
+  defineValue(inst.d, m_irb.CreateCall(sqrtFunc, asDbl(value(inst.s))));
 }
 
 void LLVMEmitter::emit(const store& inst) {

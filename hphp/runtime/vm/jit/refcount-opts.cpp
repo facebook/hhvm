@@ -949,6 +949,11 @@ struct SinkPointAnalyzer : private LocalStateHook {
       }
     } else if (m_inst->is(BeginCatch)) {
       consumeExceptional(*m_block->preds().front().inst());
+    } else if (m_inst->is(SyncABIRegs)) {
+      // Nothing should appear between SyncABIRegs and the exit following it,
+      // so don't sink anything past it.
+      resolveAllLocals();
+      resolveAllFrames();
     } else if (m_inst == &m_block->back() && m_block->isExit() &&
                // Make sure it's not a RetCtrl from Ret{C,V}
                (!m_inst->is(RetCtrl) ||
@@ -1024,6 +1029,19 @@ struct SinkPointAnalyzer : private LocalStateHook {
     m_frameState.forEachLocalValue(
       [&](SSATmp* value) {
         consumeValue(value);
+      }
+    );
+  }
+
+  /*
+   * Resolves all local values, including those in callers if we're inlined.
+   */
+  void resolveAllLocals() {
+    ITRACE(3, "resolving all locals\n");
+    Indent _i;
+    m_frameState.forEachLocalValue(
+      [&](SSATmp* value) {
+        resolveValue(value);
       }
     );
   }

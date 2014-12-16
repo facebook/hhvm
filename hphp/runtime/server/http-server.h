@@ -73,7 +73,6 @@ private:
 
   bool startServer(bool pageServer);
   void onServerShutdown();
-  void abortServers();
   void waitForServers();
 
   // pid file functions

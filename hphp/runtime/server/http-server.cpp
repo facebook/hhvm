@@ -384,18 +384,6 @@ void HttpServer::stop(const char* stopReason) {
   notify();
 }
 
-void HttpServer::abortServers() {
-  for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    m_satellites[i]->stop();
-  }
-  if (RuntimeOption::AdminServerPort) {
-    m_adminServer->stop();
-  }
-  if (RuntimeOption::ServerPort) {
-    m_pageServer->stop();
-  }
-}
-
 void HttpServer::stopOnSignal(int sig) {
   // Signal to the main server thread to exit immediately if
   // we want to die on SIGTERM

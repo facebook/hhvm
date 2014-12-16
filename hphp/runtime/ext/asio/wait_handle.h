@@ -51,16 +51,16 @@ namespace HPHP {
  * asynchronously (such as using await mechanism of async function or
  * passed as an array member of GenArrayWaitHandle).
  */
-FORWARD_DECLARE_CLASS(WaitHandle);
-FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
-FORWARD_DECLARE_CLASS(AsyncGeneratorWaitHandle);
-FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
-FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
-FORWARD_DECLARE_CLASS(GenMapWaitHandle);
-FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
-FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
-FORWARD_DECLARE_CLASS(SleepWaitHandle);
-FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
+
+class c_AsyncFunctionWaitHandle;
+class c_AsyncGeneratorWaitHandle;
+class c_AwaitAllWaitHandle;
+class c_GenArrayWaitHandle;
+class c_GenMapWaitHandle;
+class c_GenVectorWaitHandle;
+class c_RescheduleWaitHandle;
+class c_SleepWaitHandle;
+class c_ExternalThreadEventWaitHandle;
 class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitHandle)

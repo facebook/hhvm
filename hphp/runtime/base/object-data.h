@@ -434,10 +434,6 @@ template<class T, class... Args> T* newobj(Args&&... args) {
   }
 }
 
-#define FORWARD_DECLARE_CLASS(cls)              \
-  class c_##cls;                                \
-  typedef SmartObject<c_##cls> p_##cls;         \
-
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
   static void typeCheck() {                                             \
     static_assert(std::is_base_of<ObjectData,T>::value, "");            \

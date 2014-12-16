@@ -32,8 +32,7 @@ namespace HPHP {
  * preserves the keys of the original map. If one of the wait handles failed,
  * the exception is propagated by failure.
  */
-FORWARD_DECLARE_CLASS(GenMapWaitHandle);
-FORWARD_DECLARE_CLASS(Map);
+class c_Map;
 class c_GenMapWaitHandle final : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenMapWaitHandle)
@@ -58,7 +57,7 @@ class c_GenMapWaitHandle final : public c_BlockableWaitHandle {
                   ssize_t iter_pos, c_WaitableWaitHandle* child);
 
   Object m_exception;
-  p_Map m_deps;
+  SmartObject<c_Map> m_deps;
   ssize_t m_iterPos;
 };
 

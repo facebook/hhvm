@@ -33,7 +33,7 @@ namespace HPHP {
  */
 class AsioBlockable;
 class AsioContext;
-FORWARD_DECLARE_CLASS(WaitableWaitHandle);
+
 class c_WaitableWaitHandle : public c_WaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitableWaitHandle)

@@ -31,7 +31,6 @@ namespace HPHP {
  * See asio_external_thread_event.h for more details.
  */
 class AsioExternalThreadEvent;
-FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 class c_ExternalThreadEventWaitHandle final
   : public c_WaitableWaitHandle, public Sweepable {
  public:

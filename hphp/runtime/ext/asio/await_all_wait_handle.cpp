@@ -151,7 +151,7 @@ Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  p_AwaitAllWaitHandle result = Alloc(cnt);
+  SmartObject<c_AwaitAllWaitHandle> result(Alloc(cnt));
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
@@ -182,7 +182,7 @@ Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  p_AwaitAllWaitHandle result = Alloc(cnt);
+  SmartObject<c_AwaitAllWaitHandle> result(Alloc(cnt));
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
@@ -213,7 +213,7 @@ Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  p_AwaitAllWaitHandle result = Alloc(cnt);
+  SmartObject<c_AwaitAllWaitHandle> result(Alloc(cnt));
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter != stop; iter = BaseMap::nextElm(iter, stop)) {
@@ -243,7 +243,7 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  p_AwaitAllWaitHandle result = Alloc(cnt);
+  SmartObject<c_AwaitAllWaitHandle> result(Alloc(cnt));
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
@@ -273,7 +273,7 @@ void c_AwaitAllWaitHandle::initialize() {
   assert(m_cur >= 0);
 
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreateCallback())) {
-    p_Vector vector = newobj<c_Vector>();
+    SmartObject<c_Vector> vector(newobj<c_Vector>());
     for (int32_t idx = m_cur; idx >= 0; --idx) {
       TypedValue child = make_tv<KindOfObject>(m_children[idx]);
       vector->add(&child);

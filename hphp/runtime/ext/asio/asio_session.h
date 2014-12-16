@@ -28,12 +28,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ActRec;
-FORWARD_DECLARE_CLASS(WaitHandle);
-FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
-FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
-FORWARD_DECLARE_CLASS(GenMapWaitHandle);
-FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
-FORWARD_DECLARE_CLASS(ResumableWaitHandle);
+class c_WaitHandle;
+class c_AwaitAllWaitHandle;
+class c_GenArrayWaitHandle;
+class c_GenMapWaitHandle;
+class c_GenVectorWaitHandle;
+class c_ResumableWaitHandle;
 
 class AsioSession final {
   public:

@@ -473,7 +473,6 @@ class BaseVector : public ExtCollectionObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class Vector
 
-FORWARD_DECLARE_CLASS(Vector);
 class c_Vector : public BaseVector {
  public:
   DECLARE_CLASS_NO_SWEEP(Vector)
@@ -558,7 +557,6 @@ class c_Vector : public BaseVector {
 ///////////////////////////////////////////////////////////////////////////////
 // class VectorIterator
 
-FORWARD_DECLARE_CLASS(VectorIterator);
 class c_VectorIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
                                                    ObjectData::HasClone> {
  public:
@@ -586,7 +584,6 @@ class c_VectorIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmVector
 
-FORWARD_DECLARE_CLASS(ImmVector);
 class c_ImmVector : public BaseVector {
  public:
   DECLARE_CLASS_NO_SWEEP(ImmVector)
@@ -1440,7 +1437,6 @@ class BaseMap : public HashCollection {
 ///////////////////////////////////////////////////////////////////////////////
 // class Map
 
-FORWARD_DECLARE_CLASS(Map);
 class c_Map : public BaseMap {
  public:
   DECLARE_CLASS_NO_SWEEP(Map)
@@ -1489,7 +1485,6 @@ class c_Map : public BaseMap {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmMap
 
-FORWARD_DECLARE_CLASS(ImmMap);
 class c_ImmMap : public BaseMap {
  public:
   DECLARE_CLASS_NO_SWEEP(ImmMap)
@@ -1525,7 +1520,6 @@ class c_ImmMap : public BaseMap {
 ///////////////////////////////////////////////////////////////////////////////
 // class MapIterator
 
-FORWARD_DECLARE_CLASS(MapIterator);
 class c_MapIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
                                                 ObjectData::HasClone> {
  public:
@@ -1766,7 +1760,6 @@ class BaseSet : public HashCollection {
 ///////////////////////////////////////////////////////////////////////////////
 // class Set
 
-FORWARD_DECLARE_CLASS(Set);
 class c_Set : public BaseSet {
  public:
   DECLARE_CLASS_NO_SWEEP(Set)
@@ -1819,7 +1812,6 @@ class c_Set : public BaseSet {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmSet
 
-FORWARD_DECLARE_CLASS(ImmSet);
 class c_ImmSet : public BaseSet {
  public:
   DECLARE_CLASS_NO_SWEEP(ImmSet)
@@ -1862,7 +1854,6 @@ class c_ImmSet : public BaseSet {
 ///////////////////////////////////////////////////////////////////////////////
 // class SetIterator
 
-FORWARD_DECLARE_CLASS(SetIterator);
 class c_SetIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
                                                 ObjectData::HasClone> {
  public:
@@ -1890,7 +1881,6 @@ class c_SetIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
 ///////////////////////////////////////////////////////////////////////////////
 // class Pair
 
-FORWARD_DECLARE_CLASS(Pair);
 class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
                                          ObjectData::UseGet|
                                          ObjectData::UseSet|
@@ -2033,7 +2023,6 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
 ///////////////////////////////////////////////////////////////////////////////
 // class PairIterator
 
-FORWARD_DECLARE_CLASS(PairIterator);
 class c_PairIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
                                                  ObjectData::HasClone> {
  public:

@@ -30,7 +30,6 @@ namespace HPHP {
  * of the operation is always available and waiting for the wait handle finishes
  * immediately.
  */
-FORWARD_DECLARE_CLASS(StaticWaitHandle);
 class c_StaticWaitHandle final : public c_WaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(StaticWaitHandle)

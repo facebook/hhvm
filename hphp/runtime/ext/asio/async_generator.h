@@ -28,10 +28,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncGenerator
 
-FORWARD_DECLARE_CLASS(AsyncGenerator);
-FORWARD_DECLARE_CLASS(AsyncGeneratorWaitHandle);
-FORWARD_DECLARE_CLASS(StaticWaitHandle);
-FORWARD_DECLARE_CLASS(WaitableWaitHandle);
+class c_AsyncGeneratorWaitHandle;
+class c_StaticWaitHandle;
+class c_WaitableWaitHandle;
 class c_AsyncGenerator final : public BaseGenerator {
 public:
   DECLARE_CLASS_NO_SWEEP(AsyncGenerator)

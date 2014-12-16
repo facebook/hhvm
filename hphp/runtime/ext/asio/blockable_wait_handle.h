@@ -31,7 +31,6 @@ namespace HPHP {
  * wait handle it is waiting for. Once a wait handle blocking this wait handle
  * is finished, a notification is received and the operation can be resumed.
  */
-FORWARD_DECLARE_CLASS(BlockableWaitHandle);
 class c_BlockableWaitHandle : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(BlockableWaitHandle)

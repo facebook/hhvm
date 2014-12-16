@@ -55,7 +55,7 @@ public:
   /* implicit */ Object(const Object& src) : ObjectBase(src.m_px) { }
 
   // Move ctor
-  Object(Object&& src) : ObjectBase(std::move(src)) { }
+  Object(Object&& src) noexcept : ObjectBase(std::move(src)) { }
 
   // Regular assign
   Object& operator=(const Object& src) {

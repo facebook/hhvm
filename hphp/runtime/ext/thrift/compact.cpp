@@ -899,7 +899,7 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        p_Set set_ret = newobj<c_Set>();
+        SmartObject<c_Set> set_ret(newobj<c_Set>());
         if (size) set_ret->reserve(size);
 
         for (uint32_t i = 0; i < size; i++) {

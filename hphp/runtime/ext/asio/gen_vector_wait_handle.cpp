@@ -55,7 +55,8 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
     throw e;
   }
   assert(dependencies.getObjectData()->instanceof(c_Vector::classof()));
-  auto deps = p_Vector::attach(c_Vector::Clone(dependencies.getObjectData()));
+  auto deps = SmartObject<c_Vector>::attach(
+    c_Vector::Clone(dependencies.getObjectData()));
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
     Cell* current = deps->at(iter_pos);
 
@@ -83,7 +84,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
       assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      p_GenVectorWaitHandle my_wh = newobj<c_GenVectorWaitHandle>();
+      SmartObject<c_GenVectorWaitHandle> my_wh(newobj<c_GenVectorWaitHandle>());
       my_wh->initialize(exception, deps.get(), iter_pos, child_wh);
       AsioSession* session = AsioSession::Get();
       if (UNLIKELY(session->hasOnGenVectorCreateCallback())) {

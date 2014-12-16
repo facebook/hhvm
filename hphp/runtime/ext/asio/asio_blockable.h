@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FORWARD_DECLARE_CLASS(BlockableWaitHandle);
+class c_BlockableWaitHandle;
 
 class AsioBlockable final {
   public:

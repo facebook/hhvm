@@ -401,8 +401,8 @@ struct Eq {
       // Compare the whole object, not just the array representation
       Array ar1(ArrayData::Create());
       Array ar2(ArrayData::Create());
-      od1->o_getArray(ar1, false);
-      od2->o_getArray(ar2, false);
+      od1->o_getArray(ar1);
+      od2->o_getArray(ar2);
       return ar1->equal(ar2.get(), false);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {

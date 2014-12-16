@@ -431,7 +431,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
 namespace {
 
 size_t getPropertyIfAccessible(ObjectData* obj,
-                               Class* ctx,
+                               const Class* ctx,
                                const StringData* key,
                                bool getRef,
                                Array& properties,
@@ -1090,7 +1090,7 @@ Slot ObjectData::declPropInd(TypedValue* prop) const {
 }
 
 ObjectData::PropLookup<TypedValue*> ObjectData::getProp(
-  Class* ctx,
+  const Class* ctx,
   const StringData* key
 ) {
   auto const lookup = m_cls->getDeclPropIndex(ctx, key);
@@ -1130,7 +1130,7 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getProp(
 }
 
 ObjectData::PropLookup<const TypedValue*> ObjectData::getProp(
-  Class* ctx,
+  const Class* ctx,
   const StringData* key
 ) const {
   auto const lookup = const_cast<ObjectData*>(this)->getProp(ctx, key);

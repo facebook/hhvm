@@ -171,7 +171,10 @@ struct ObjectData {
 
   Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
 
-  // Type conversions.
+  /*
+   * Type conversions. Some subclasses of ObjectData have custom conversions.
+   * (e.g. SimpleXMLElement -> bool)
+   */
   bool toBoolean() const;
   int64_t toInt64() const;
   double toDouble() const;
@@ -279,8 +282,8 @@ struct ObjectData {
     bool accessible;
   };
 
-  PropLookup<TypedValue*> getProp(Class*, const StringData*);
-  PropLookup<const TypedValue*> getProp(Class*, const StringData*) const;
+  PropLookup<TypedValue*> getProp(const Class*, const StringData*);
+  PropLookup<const TypedValue*> getProp(const Class*, const StringData*) const;
 
  private:
   template <bool warn, bool define>

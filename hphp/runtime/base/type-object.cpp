@@ -85,8 +85,8 @@ bool Object::equal(const Object& v2) const {
     // Compare the whole object, not just the array representation
     Array ar1(ArrayData::Create());
     Array ar2(ArrayData::Create());
-    m_px->o_getArray(ar1, false);
-    v2->o_getArray(ar2, false);
+    m_px->o_getArray(ar1);
+    v2->o_getArray(ar2);
     return ar1->equal(ar2.get(), false);
   }
   return toArray().equal(v2.toArray());

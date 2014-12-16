@@ -1230,6 +1230,7 @@ O(syncvmsp) \
 O(testb) \
 O(testbi) \
 O(testbim) \
+O(testwim) \
 O(testl) \
 O(testli) \
 O(testlim) \
@@ -1982,6 +1983,9 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
              cmp.op == Vinstr::testbim) {
     lhs = flagTmp(sf);
     rhs = m_int8Zero;
+  } else if (cmp.op == Vinstr::testwim) {
+    lhs = flagTmp(sf);
+    rhs = m_int16Zero;
   } else if (cmp.op == Vinstr::testl ||
              cmp.op == Vinstr::testli ||
              cmp.op == Vinstr::testlim) {
@@ -2428,6 +2432,11 @@ void LLVMEmitter::emit(const testbi& inst) {
 void LLVMEmitter::emit(const testbim& inst) {
   auto lhs = m_irb.CreateLoad(emitPtr(inst.s1, 8));
   defineFlagTmp(inst.sf, m_irb.CreateAnd(lhs, inst.s0.b()));
+}
+
+void LLVMEmitter::emit(const testwim& inst) {
+  auto lhs = m_irb.CreateLoad(emitPtr(inst.s1, 16));
+  defineFlagTmp(inst.sf, m_irb.CreateAnd(lhs, inst.s0.w()));
 }
 
 void LLVMEmitter::emit(const testl& inst) {

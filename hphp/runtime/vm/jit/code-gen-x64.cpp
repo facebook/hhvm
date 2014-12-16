@@ -1896,27 +1896,6 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
   );
 }
 
-/*
- * emit something equivalent to testl(val, mr),
- * but with a shorter encoding (eg testb(val, mr))
- * if possible.
- */
-static Vreg testimm(Vout& v, uint32_t val, Vptr mr) {
-  int off = 0;
-  auto val2 = val;
-  while (val2 > 0xff && !(val2 & 0xff)) {
-    off++;
-    val2 >>= 8;
-  }
-  auto const sf = v.makeReg();
-  if (val2 > 0xff) {
-    v << testlim{(int32_t)val, mr, sf};
-  } else {
-    v << testbim{(int8_t)val2, mr + off, sf};
-  }
-  return sf;
-}
-
 void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
   DEBUG_ONLY auto const ty = inst->src(0)->type();
   assert(ty < Type::Obj &&
@@ -1944,12 +1923,13 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   auto const rsrc = srcLoc(inst, 0).reg();
   auto& v = vmain();
 
-  auto const sf = testimm(v, ObjectData::CallToImpl,
-                          rsrc[ObjectData::attributeOff()]);
+  auto const sf = v.makeReg();
+  v << testwim{ObjectData::CallToImpl, rsrc[ObjectData::attributeOff()], sf};
   unlikelyCond(v, vcold(), CC_NZ, sf, rdst,
     [&] (Vout& v) {
-      auto const sf = testimm(v, ObjectData::IsCollection,
-                              rsrc[ObjectData::attributeOff()]);
+      auto const sf = v.makeReg();
+      v << testwim{ObjectData::IsCollection, rsrc[ObjectData::attributeOff()],
+                   sf};
       return cond(v, CC_NZ, sf, v.makeReg(),
         [&] (Vout& v) { // rsrc points to native collection
           auto dst2 = v.makeReg();
@@ -4892,7 +4872,7 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
       v << incwm{rVmTl[profile.handle() + offsetof_release], v.makeReg()};
     }
     auto const sf = v.makeReg();
-    v << testlim{ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)], sf};
+    v << testqim{ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)], sf};
     emitFwdJcc(v, CC_Z, sf, label);
     cgCallHelper(
       v,
@@ -5219,7 +5199,7 @@ void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
   );
   auto& v = vmain();
   auto const sf = v.makeReg();
-  v << testbim{ObjectData::IsWaitHandle, robj[ObjectData::attributeOff()], sf};
+  v << testwim{ObjectData::IsWaitHandle, robj[ObjectData::attributeOff()], sf};
   v << setcc{CC_NZ, sf, rdst};
 }
 

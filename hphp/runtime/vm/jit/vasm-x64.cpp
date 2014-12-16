@@ -293,13 +293,14 @@ private:
   void emit(subsd& i) { noncommute(i); a->subsd(i.s0, i.d); }
   void emit(testb& i) { a->testb(i.s0, i.s1); }
   void emit(testbi& i) { a->testb(i.s0, i.s1); }
-  void emit(testbim& i) { a->testb(i.s0, i.s1); }
+  void emit(testbim i) { a->testb(i.s0, i.s1); }
+  void emit(testwim& i);
   void emit(testl& i) { a->testl(i.s0, i.s1); }
   void emit(testli& i) { a->testl(i.s0, i.s1); }
-  void emit(testlim& i) { a->testl(i.s0, i.s1); }
+  void emit(testlim i);
   void emit(testq& i) { a->testq(i.s0, i.s1); }
   void emit(testqm& i) { a->testq(i.s0, i.s1); }
-  void emit(testqim& i) { a->testq(i.s0, i.s1); }
+  void emit(testqim& i);
   void emit(ucomisd& i) { a->ucomisd(i.s0, i.s1); }
   void emit(ud2& i) { a->ud2(); }
   void emit(unpcklpd& i) { noncommute(i); a->unpcklpd(i.s0, i.d); }
@@ -640,6 +641,37 @@ void Vgen::emit(syncpoint i) {
          i.fix.pcOffset, i.fix.spOffset);
   mcg->recordSyncPoint(a->frontier(), i.fix.pcOffset,
                        i.fix.spOffset);
+}
+
+void Vgen::emit(testwim& i) {
+  // If there's only 1 byte of meaningful bits in the mask, we can adjust the
+  // pointer offset and use testbim instead.
+  int off = 0;
+  uint16_t newMask = i.s0.w();
+  while (newMask > 0xff && !(newMask & 0xff)) {
+    off++;
+    newMask >>= 8;
+  }
+
+  if (newMask > 0xff) {
+    a->testw(i.s0, i.s1);
+  } else {
+    emit(testbim{int8_t(newMask), i.s1 + off, i.sf});
+  }
+}
+
+void Vgen::emit(testlim i) {
+  a->testl(i.s0, i.s1);
+}
+
+void Vgen::emit(testqim& i) {
+  // The immediate is 32 bits, sign-extended to 64. If the sign bit isn't set,
+  // we can get the same results by emitting a testlim.
+  if (i.s0.l() < 0) {
+    a->testq(i.s0, i.s1);
+  } else {
+    emit(testlim{i.s0, i.s1, i.sf});
+  }
 }
 
 void Vgen::emit(nothrow& i) {

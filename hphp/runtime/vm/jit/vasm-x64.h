@@ -456,6 +456,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(testb, Inone, U(s0) U(s1), D(sf))\
   O(testbi, I(s0), U(s1), D(sf))\
   O(testbim, I(s0), U(s1), D(sf))\
+  O(testwim, I(s0), U(s1), D(sf))\
   O(testl, Inone, U(s0) U(s1), D(sf))\
   O(testli, I(s0), U(s1), D(sf))\
   O(testlim, I(s0), U(s1), D(sf))\
@@ -668,6 +669,7 @@ struct subsd { VregDbl s0, s1, d; };
 struct testb { Vreg8 s0, s1; VregSF sf; };
 struct testbi { Immed s0; Vreg8 s1; VregSF sf; };
 struct testbim { Immed s0; Vptr s1; VregSF sf; };
+struct testwim { Immed s0; Vptr s1; VregSF sf; };
 struct testl { Vreg32 s0, s1; VregSF sf; };
 struct testli { Immed s0; Vreg32 s1; VregSF sf; };
 struct testlim { Immed s0; Vptr s1; VregSF sf; };

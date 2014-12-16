@@ -137,8 +137,7 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
             print('idx: Element not found.')
             return
 
-        gdb.execute('print (%s)%s' % (
-            str(value.type.pointer()), value.address))
+        gdbprint(value.address, value.type.pointer())
 
         print(vstr(value))
 

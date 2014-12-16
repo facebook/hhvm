@@ -43,7 +43,7 @@ class LookupFuncCommand(gdb.Command):
         func_vec = V('HPHP::s_funcVec')['m_vals']['_M_t']['_M_head_impl']
 
         func = func_vec[funcid]['_M_b']['_M_p']
-        gdb.execute('print (%s)%s' % (str(func.type), str(func)))
+        gdbprint(func)
 
 LookupFuncCommand()
 
@@ -88,6 +88,6 @@ If no Unit is given, the current unit (set by `unit') is used.
         litstr_id = argv[1].cast(T('HPHP::Id'))
 
         litstr = lookup_litstr(litstr_id, u)
-        gdb.execute('print (%s)%s' % (str(litstr.type), str(litstr)))
+        gdbprint(litstr)
 
 LookupLitstrCommand()

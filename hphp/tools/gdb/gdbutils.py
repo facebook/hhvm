@@ -33,6 +33,12 @@ def parse_argv(args):
     return [gdb.parse_and_eval(arg) for arg in gdb.string_to_argv(args)]
 
 
+def gdbprint(val, ty=None):
+    if ty is None:
+        ty = val.type
+    gdb.execute('print (%s)%s' % (str(ty), str(val)))
+
+
 #------------------------------------------------------------------------------
 # String helpers.
 

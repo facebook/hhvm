@@ -54,7 +54,7 @@ class TypedValuePrinter:
         if t == V('HPHP::KindOfUninit') or t == V('HPHP::KindOfNull'):
             pass
 
-        if t == V('HPHP::KindOfBoolean'):
+        elif t == V('HPHP::KindOfBoolean'):
             if data['num'] == 0:
                 val = False
             elif data['num'] == 1:

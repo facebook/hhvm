@@ -2,7 +2,7 @@
 
 #if defined(__x86_64__) && !defined(__APPLE__)
 	.file	"memcpy-x64.S"
-	.text
+        ETCH_SECTION(memcpy)
 	.globl	ETCH_NAME(memcpy)
 	.type	ETCH_NAME(memcpy), @function
 ETCH_NAME(memcpy):
@@ -28,8 +28,8 @@ ETCH_LABEL(5):
 	.quad	ETCH_LABEL(9)
 	.quad	ETCH_LABEL(10)
 	.quad	ETCH_LABEL(11)
-	
-	.text
+
+        ETCH_SECTION(memcpy)
 	ETCH_ALIGN8
 	ETCH_ALIGN4
 ETCH_LABEL(11):
@@ -95,7 +95,7 @@ ETCH_LABEL(14):
 	.quad	ETCH_LABEL(18)
 	.quad	ETCH_LABEL(19)
 	.quad	ETCH_LABEL(20)
-	.text
+        ETCH_SECTION(memcpy)
 ETCH_LABEL(20):
 	movq	48(%rsi), %r8
 	movq	%r8, 48(%rcx)

@@ -68,6 +68,14 @@ class HHBC:
     """
 
     @staticmethod
+    def op_name(op):
+        """Return the name of HPHP::Op `op'."""
+
+        table_name = 'HPHP::opcodeToName(HPHP::Op)::namesArr'
+        table_type = T('char').pointer().pointer()
+        return op_table(table_name).cast(table_type)[as_idx(op)]
+
+    @staticmethod
     def num_imms(op):
         """Return the number of immediates for HPHP::Op `op'."""
 
@@ -216,12 +224,9 @@ remains where it left off after the previous call.
 
         bcstart = self.bcpos - self.bcoff
 
-        op_names = gdb.parse_and_eval(
-            "(char **)*(uint32_t*)('HPHP::opcodeToName(HPHP::Op)' + 10)")
-
         for i in xrange(0, self.count):
             instr = HHBC.instr_info(self.bcpos)
-            name = op_names[as_idx(self.bcpos.dereference())].string()
+            name = HHBC.op_name(self.bcpos.dereference()).string()
 
             out = "%s+%d: %s" % (str(bcstart), self.bcoff, name)
             for imm in instr['imms']:

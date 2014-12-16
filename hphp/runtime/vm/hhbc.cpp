@@ -1069,7 +1069,7 @@ OPCODES
 }
 
 const char* opcodeToName(Op op) {
-  const char* namesArr[] = {
+  static const char* namesArr[] = {
 #define O(name, imm, inputs, outputs, flags) \
     #name ,
     OPCODES

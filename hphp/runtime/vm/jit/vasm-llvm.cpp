@@ -407,6 +407,15 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     return m_codeSkew;
   }
 
+  /*
+   * Since all of our callees will be within 2GB reach, we can safely tell
+   * LLVM to not reserve space for stubs. Otherwise it will create gaps
+   * betweeen tracelets.
+   */
+  virtual bool allowStubAllocation() const override {
+    return false;
+  }
+
 private:
   Vasm::AreaList& m_areas;
 

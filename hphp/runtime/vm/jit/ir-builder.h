@@ -220,17 +220,12 @@ public:
    */
   template<class... Args>
   SSATmp* gen(Opcode op, Args&&... args) {
-    return gen(op, m_curMarker, std::forward<Args>(args)...);
-  }
-
-  template<class... Args>
-  SSATmp* gen(Opcode op, BCMarker marker, Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) {
         return prepareInst(inst);
       },
       op,
-      marker,
+      m_curMarker,
       std::forward<Args>(args)...
     );
   }

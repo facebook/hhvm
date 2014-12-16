@@ -74,7 +74,6 @@ struct MTS {
     , irb(*hts.irb)
     , unit(hts.unit)
     , mii(getMInstrInfo(effectiveOp))
-    , marker(makeMarker(hts, bcOff(hts)))
     , iInd(mii.valCount())
   {}
   /* implicit */ operator HTS&() { return hts; }
@@ -88,7 +87,6 @@ struct MTS {
   IRBuilder& irb;
   IRUnit& unit;
   MInstrInfo mii;
-  BCMarker marker;
 
   hphp_hash_map<unsigned,unsigned> stackInputs;
 
@@ -1848,7 +1846,6 @@ void cleanTvRefs(MTS& env) {
   for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
     env.irb.gen(
       DecRefMem,
-      env.marker,
       Type::Gen,
       env.misBase,
       cns(env, refOffs[env.failedSetBlock ? 1 - i : i])
@@ -1908,7 +1905,7 @@ void handleStrTestResult(MTS& env) {
 
 Block* makeMISCatch(MTS& env) {
   auto const exit = env.unit.defBlock(Block::Hint::Unused);
-  BlockPusher bp(env.irb, env.marker, exit);
+  BlockPusher bp(env.irb, makeMarker(env, bcOff(env)), exit);
   gen(env, BeginCatch);
   cleanTvRefs(env);
   spillStack(env);
@@ -1922,7 +1919,7 @@ Block* makeCatchSet(MTS& env) {
   const bool isSetWithRef = env.op == Op::SetWithRefLM ||
                             env.op == Op::SetWithRefRM;
 
-  BlockPusher bp(env.irb, env.marker, env.failedSetBlock);
+  BlockPusher bp(env.irb, makeMarker(env, bcOff(env)), env.failedSetBlock);
   gen(env, BeginCatch);
   spillStack(env);
 

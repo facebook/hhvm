@@ -285,7 +285,7 @@ include_directories(${Mcrypt_INCLUDE_DIR})
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
-# reSSL explicitly refuses to support RAND_egd()
+# LibreSSL explicitly refuses to support RAND_egd()
 SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("#include <openssl/rand.h>

@@ -533,7 +533,12 @@ macro(hphp_link target)
     target_link_libraries(${target} pcre)
   endif()
 
-  target_link_libraries(${target} fastlz)
+  if (LIBFASTLZ_LIBRARY)
+    target_link_libraries(${target} ${LIBFASTIZ_LIBRARY})
+  else()
+    target_link_libraries(${target} fastlz)
+  endif()
+
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
 

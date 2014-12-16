@@ -176,6 +176,11 @@ static int statSyscall(
   auto canUseFileCache = useFileCache && isFileStream;
   if (isRelative && !pathIndex) {
     auto fullpath = g_context->getCwd() + String::FromChar('/') + path;
+    if (!ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess() &&
+        !canUseFileCache) {
+      if (strlen(fullpath.data()) != fullpath.size()) return ENOENT;
+      return ::stat(fullpath.data(), buf);
+    }
     std::string realpath = StatCache::realpath(fullpath.data());
     // realpath will return an empty string for nonexistent files
     if (realpath.empty()) {
@@ -1081,7 +1086,7 @@ bool HHVM_FUNCTION(is_dir,
   }
 
   struct stat sb;
-  CHECK_SYSTEM_SILENT(statSyscall(filename, &sb));
+  CHECK_SYSTEM_SILENT(statSyscall(filename, &sb, false));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 

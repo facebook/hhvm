@@ -592,6 +592,12 @@ void HHVM_METHOD(Memcached, __construct,
   }
 }
 
+bool HHVM_METHOD(Memcached, quit) {
+  auto data = Native::data<MemcachedData>(this_);
+  memcached_quit(&data->m_impl->memcached);
+  return true;
+}
+
 Variant HHVM_METHOD(Memcached, getallkeys) {
   auto data = Native::data<MemcachedData>(this_);
   memcached_dump_fn callbacks[] = {
@@ -1299,6 +1305,7 @@ class MemcachedExtension : public Extension {
 
   virtual void moduleInit() {
     HHVM_ME(Memcached, __construct);
+    HHVM_ME(Memcached, quit);
     HHVM_ME(Memcached, getallkeys);
     HHVM_ME(Memcached, getbykey);
     HHVM_ME(Memcached, getmultibykey);

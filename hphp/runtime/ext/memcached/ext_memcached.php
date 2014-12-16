@@ -537,6 +537,13 @@ class Memcached {
                                string $value): bool;
 
   /**
+   * Memcached::quit() closes any open connections to the memcache servers. 
+   * @return bool TRUE on success or FALSE on failure
+  */
+  <<__Native>>
+  public function quit(): bool;
+
+  /**
    * Replace the item under an existing key
    *
    * @param string $key -

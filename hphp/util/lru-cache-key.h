@@ -26,8 +26,7 @@
 
 namespace HPHP {
 
-class LRUCacheKey {
-public:
+struct LRUCacheKey {
   LRUCacheKey(const char* data, size_t size)
     : m_storage(new Storage(data, size))
   {}

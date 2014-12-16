@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_UTIL_SCALABLE_CACHE_H
 #define incl_HPHP_UTIL_SCALABLE_CACHE_H
 
-#include "hphp/util/thread-safe-lru-cache.h"
+#include "hphp/util/concurrent-lru-cache.h"
 #include "hphp/util/lru-cache-key.h"
 #include <limits>
 #include <memory>
@@ -25,7 +25,7 @@
 namespace HPHP {
 
 /**
- * ThreadSafeScalableCache is a thread-safe sharded hashtable with limited
+ * ConcurrentScalableCache is a thread-safe sharded hashtable with limited
  * size. When it is full, it evicts a rough approximation to the least recently
  * used item.
  *
@@ -38,9 +38,8 @@ namespace HPHP {
  * this purpose.
  */
 template <class TKey, class TValue, class THash = tbb::tbb_hash_compare<TKey>>
-class ThreadSafeScalableCache {
-public:
-  using Shard = ThreadSafeLRUCache<TKey, TValue, THash>;
+struct ConcurrentScalableCache {
+  using Shard = ConcurrentLRUCache<TKey, TValue, THash>;
   typedef typename Shard::ConstAccessor ConstAccessor;
 
   /**
@@ -50,10 +49,10 @@ public:
    *     "hardware concurrency" will be used (typically the logical processor
    *     count).
    */
-  explicit ThreadSafeScalableCache(size_t maxSize, size_t numShards = 0);
+  explicit ConcurrentScalableCache(size_t maxSize, size_t numShards = 0);
 
-  ThreadSafeScalableCache(const ThreadSafeScalableCache&) = delete;
-  ThreadSafeScalableCache& operator=(const ThreadSafeScalableCache&) = delete;
+  ConcurrentScalableCache(const ConcurrentScalableCache&) = delete;
+  ConcurrentScalableCache& operator=(const ConcurrentScalableCache&) = delete;
 
   /**
    * Find a value by key, and return it by filling the ConstAccessor, which
@@ -113,16 +112,16 @@ private:
 };
 
 /**
- * A specialisation of ThreadSafeScalableCache providing a cache with efficient
+ * A specialisation of ConcurrentScalableCache providing a cache with efficient
  * string keys.
  */
 template <class TValue>
-using ThreadSafeStringCache = ThreadSafeScalableCache<
+using ThreadSafeStringCache = ConcurrentScalableCache<
     LRUCacheKey, TValue, LRUCacheKey::HashCompare>;
 
 template <class TKey, class TValue, class THash>
-ThreadSafeScalableCache<TKey, TValue, THash>::
-ThreadSafeScalableCache(size_t maxSize, size_t numShards)
+ConcurrentScalableCache<TKey, TValue, THash>::
+ConcurrentScalableCache(size_t maxSize, size_t numShards)
   : m_maxSize(maxSize), m_numShards(numShards)
 {
   if (m_numShards == 0) {
@@ -138,8 +137,8 @@ ThreadSafeScalableCache(size_t maxSize, size_t numShards)
 }
 
 template <class TKey, class TValue, class THash>
-typename ThreadSafeScalableCache<TKey, TValue, THash>::Shard&
-ThreadSafeScalableCache<TKey, TValue, THash>::
+typename ConcurrentScalableCache<TKey, TValue, THash>::Shard&
+ConcurrentScalableCache<TKey, TValue, THash>::
 getShard(const TKey& key) {
   THash hashObj;
   constexpr int shift = std::numeric_limits<size_t>::digits - 16;
@@ -148,19 +147,19 @@ getShard(const TKey& key) {
 }
 
 template <class TKey, class TValue, class THash>
-bool ThreadSafeScalableCache<TKey, TValue, THash>::
+bool ConcurrentScalableCache<TKey, TValue, THash>::
 find(ConstAccessor& ac, const TKey& key) {
   return getShard(key).find(ac, key);
 }
 
 template <class TKey, class TValue, class THash>
-bool ThreadSafeScalableCache<TKey, TValue, THash>::
+bool ConcurrentScalableCache<TKey, TValue, THash>::
 insert(const TKey& key, const TValue& value) {
   return getShard(key).insert(key, value);
 }
 
 template <class TKey, class TValue, class THash>
-void ThreadSafeScalableCache<TKey, TValue, THash>::
+void ConcurrentScalableCache<TKey, TValue, THash>::
 clear() {
   for (size_t i = 0; i < m_numShards; i++) {
     m_shards[i]->clear();
@@ -168,7 +167,7 @@ clear() {
 }
 
 template <class TKey, class TValue, class THash>
-void ThreadSafeScalableCache<TKey, TValue, THash>::
+void ConcurrentScalableCache<TKey, TValue, THash>::
 snapshotKeys(std::vector<TKey>& keys) {
   for (size_t i = 0; i < m_numShards; i++) {
     m_shards[i]->snapshotKeys(keys);
@@ -176,7 +175,7 @@ snapshotKeys(std::vector<TKey>& keys) {
 }
 
 template <class TKey, class TValue, class THash>
-size_t ThreadSafeScalableCache<TKey, TValue, THash>::
+size_t ConcurrentScalableCache<TKey, TValue, THash>::
 size() const {
   size_t size;
   for (size_t i = 0; i < m_numShards; i++) {

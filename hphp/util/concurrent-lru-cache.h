@@ -27,7 +27,7 @@
 namespace HPHP {
 
 /**
- * ThreadSafeLRUCache is a thread-safe hashtable with a limited size. When
+ * ConcurrentLRUCache is a thread-safe hashtable with a limited size. When
  * it is full, insert() evicts the least recently used item from the cache.
  *
  * The find() operation fills a ConstAccessor object, which is a smart pointer
@@ -47,10 +47,10 @@ namespace HPHP {
  * Insert performance was observed to degrade rapidly when there is a heavy
  * concurrent insert/evict load, mostly due to locks in the underlying
  * TBB::CHM. So if that is a possibility for your workload,
- * ThreadSafeScalableCache is recommended instead.
+ * ConcurrentScalableCache is recommended instead.
  */
 template <class TKey, class TValue, class THash = tbb::tbb_hash_compare<TKey>>
-class ThreadSafeLRUCache {
+class ConcurrentLRUCache {
   /**
    * The LRU list node.
    *
@@ -108,8 +108,7 @@ public:
    * the user's value by dereferencing, thus hiding our implementation
    * details.
    */
-  class ConstAccessor {
-  public:
+  struct ConstAccessor {
     ConstAccessor() {}
 
     const TValue& operator*() const {
@@ -129,19 +128,19 @@ public:
     }
 
   private:
-    friend class ThreadSafeLRUCache;
+    friend class ConcurrentLRUCache;
     HashMapConstAccessor m_hashAccessor;
   };
 
   /**
    * Create a container with a given maximum size
    */
-  explicit ThreadSafeLRUCache(size_t maxSize);
+  explicit ConcurrentLRUCache(size_t maxSize);
 
-  ThreadSafeLRUCache(const ThreadSafeLRUCache& other) = delete;
-  ThreadSafeLRUCache& operator=(const ThreadSafeLRUCache&) = delete;
+  ConcurrentLRUCache(const ConcurrentLRUCache& other) = delete;
+  ConcurrentLRUCache& operator=(const ConcurrentLRUCache&) = delete;
 
-  ~ThreadSafeLRUCache() {
+  ~ConcurrentLRUCache() {
     clear();
   }
 
@@ -234,12 +233,12 @@ private:
 };
 
 template <class TKey, class TValue, class THash>
-typename ThreadSafeLRUCache<TKey, TValue, THash>::ListNode* const
-ThreadSafeLRUCache<TKey, TValue, THash>::OutOfListMarker = (ListNode*)-1;
+typename ConcurrentLRUCache<TKey, TValue, THash>::ListNode* const
+ConcurrentLRUCache<TKey, TValue, THash>::OutOfListMarker = (ListNode*)-1;
 
 template <class TKey, class TValue, class THash>
-ThreadSafeLRUCache<TKey, TValue, THash>::
-ThreadSafeLRUCache(size_t maxSize)
+ConcurrentLRUCache<TKey, TValue, THash>::
+ConcurrentLRUCache(size_t maxSize)
   : m_maxSize(maxSize), m_size(0),
   m_map(std::thread::hardware_concurrency() * 4) // it will automatically grow
 {
@@ -249,7 +248,7 @@ ThreadSafeLRUCache(size_t maxSize)
 }
 
 template <class TKey, class TValue, class THash>
-bool ThreadSafeLRUCache<TKey, TValue, THash>::
+bool ConcurrentLRUCache<TKey, TValue, THash>::
 find(ConstAccessor& ac, const TKey& key) {
   HashMapConstAccessor& hashAccessor = ac.m_hashAccessor;
   if (!m_map.find(hashAccessor, key)) {
@@ -273,7 +272,7 @@ find(ConstAccessor& ac, const TKey& key) {
 }
 
 template <class TKey, class TValue, class THash>
-bool ThreadSafeLRUCache<TKey, TValue, THash>::
+bool ConcurrentLRUCache<TKey, TValue, THash>::
 insert(const TKey& key, const TValue& value) {
   // Insert into the CHM
   ListNode* node = new ListNode(key);
@@ -323,7 +322,7 @@ insert(const TKey& key, const TValue& value) {
 }
 
 template <class TKey, class TValue, class THash>
-void ThreadSafeLRUCache<TKey, TValue, THash>::
+void ConcurrentLRUCache<TKey, TValue, THash>::
 clear() {
   m_map.clear();
   ListNode* node = m_head.m_next;
@@ -339,7 +338,7 @@ clear() {
 }
 
 template <class TKey, class TValue, class THash>
-void ThreadSafeLRUCache<TKey, TValue, THash>::
+void ConcurrentLRUCache<TKey, TValue, THash>::
 snapshotKeys(std::vector<TKey>& keys) {
   keys.reserve(keys.size() + m_size.load());
   std::lock_guard<ListMutex> lock(m_listMutex);
@@ -349,7 +348,7 @@ snapshotKeys(std::vector<TKey>& keys) {
 }
 
 template <class TKey, class TValue, class THash>
-inline void ThreadSafeLRUCache<TKey, TValue, THash>::
+inline void ConcurrentLRUCache<TKey, TValue, THash>::
 delink(ListNode* node) {
   ListNode* prev = node->m_prev;
   ListNode* next = node->m_next;
@@ -359,7 +358,7 @@ delink(ListNode* node) {
 }
 
 template <class TKey, class TValue, class THash>
-inline void ThreadSafeLRUCache<TKey, TValue, THash>::
+inline void ConcurrentLRUCache<TKey, TValue, THash>::
 pushFront(ListNode* node) {
   ListNode* oldRealHead = m_head.m_next;
   node->m_prev = &m_head;
@@ -369,7 +368,7 @@ pushFront(ListNode* node) {
 }
 
 template <class TKey, class TValue, class THash>
-void ThreadSafeLRUCache<TKey, TValue, THash>::
+void ConcurrentLRUCache<TKey, TValue, THash>::
 evict() {
   std::unique_lock<ListMutex> lock(m_listMutex);
   ListNode* moribund = m_tail.m_prev;

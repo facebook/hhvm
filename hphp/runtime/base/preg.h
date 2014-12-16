@@ -67,8 +67,7 @@ public:
   mutable std::atomic<char**> subpat_names;
 };
 
-class PCREglobals {
-public:
+struct PCREglobals {
   // pcre ini_settings
   int64_t m_preg_backtrace_limit;
   int64_t m_preg_recursion_limit;

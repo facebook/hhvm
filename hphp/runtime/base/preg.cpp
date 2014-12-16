@@ -40,7 +40,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/thread-safe-scalable-cache.h"
+#include "hphp/util/concurrent-scalable-cache.h"
 
 /* Only defined in pcre >= 8.32 */
 #ifndef PCRE_STUDY_JIT_COMPILE
@@ -52,8 +52,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // PCRECache definition
 
-class PCRECache {
-public:
+struct PCRECache {
   typedef std::shared_ptr<const pcre_cache_entry> EntryPtr;
   typedef std::unique_ptr<LRUCacheKey> TempKeyCache;
 
@@ -73,15 +72,14 @@ private:
 
   typedef folly::AtomicHashArray<const StringData*, const pcre_cache_entry*,
           string_data_hash, ahm_string_data_same> StaticCache;
-  typedef ThreadSafeLRUCache<LRUCacheKey, EntryPtr,
+  typedef ConcurrentLRUCache<LRUCacheKey, EntryPtr,
           LRUCacheKey::HashCompare> LRUCache;
-  typedef ThreadSafeScalableCache<LRUCacheKey, EntryPtr,
+  typedef ConcurrentScalableCache<LRUCacheKey, EntryPtr,
           LRUCacheKey::HashCompare> ScalableCache;
   typedef StaticCache::value_type StaticCachePair;
 
 public:
-  class Accessor {
-  public:
+  struct Accessor {
     Accessor()
       : m_kind(AccessorKind::Ptr), m_ptr(nullptr)
     {}

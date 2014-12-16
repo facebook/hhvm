@@ -643,7 +643,7 @@
     # unskips a couple of tests on HHVM
     url: https://github.com/mikey179/vfsStream.git
     branch: master
-    commit: 056b64e0341039eb83075ca53347f29d0bfdead0
+    commit: 2d5131709917b80a315a83c08a56516d867ba59f
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist

@@ -1704,8 +1704,13 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
   auto& v = vmain();
 
   auto call_classof = [&](Vreg dst) {
-    cgCallHelper(v, CppCall::method(&Class::classof),
-    callDest(dst), SyncOptions::kNoSyncPoint, argGroup(inst).ssa(0).ssa(1));
+    cgCallHelper(
+      v,
+      CppCall::method(&Class::classof),
+      {DestType::Byte, dst},
+      SyncOptions::kNoSyncPoint,
+      argGroup(inst).ssa(0).ssa(1)
+    );
     return dst;
   };
 
@@ -1721,8 +1726,8 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
   cond(v, CC_NZ, sf, destReg, [&](Vout& v) {
     return call_classof(v.makeReg());
   }, [&](Vout& v) {
-    // testReg == 0, set dest to false (0)
-    return testReg;
+    // testReg == 0, set dest to false
+    return v.cns(false);
   });
 }
 
@@ -1756,7 +1761,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
       v << setcc{CC_E, sf, b};
       return b;
     }, [&](Vout& v) {
-      return v.cns(0);
+      return v.cns(false);
     });
   };
 
@@ -1778,7 +1783,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   }
 
   cond(v, CC_E, sf, rdst, [&](Vout& v) {
-    return v.cns(1);
+    return v.cns(true);
   }, [&](Vout& v) {
     return check_strict_subclass(v.makeReg());
   });
@@ -3677,8 +3682,10 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   auto idxReg = srcLoc(inst, 1).reg();
   auto dstReg = dstLoc(inst, 0).reg();
   auto& v = vmain();
+  auto const idxTrunc = v.makeReg();
+  v << movtql{idxReg, idxTrunc};
   auto const sf = v.makeReg();
-  v << cmplm{idxReg, strReg[StringData::sizeOff()], sf};
+  v << cmplm{idxTrunc, strReg[StringData::sizeOff()], sf};
   v << setcc{CC_NBE, sf, dstReg};
 }
 

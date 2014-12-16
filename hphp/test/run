@@ -188,6 +188,8 @@ function get_options($argv) {
     'log' => 'l',
     'failure-file:' => '',
     'arm' => '',
+    'llvm' => '',
+    'force-llvm' => '',
     'bccf' => '',
     'hhas-round-trip' => '',
     'color' => 'c',
@@ -415,6 +417,8 @@ function hhvm_cmd_impl() {
     '-vEval.EnableIntrinsicsExtension=true',
     mode_cmd($options),
     isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
+    isset($options['llvm']) ? '-vEval.JitLLVM=2' : '',
+    isset($options['require-llvm']) ? '-vEval.JitLLVM=3' : '',
     isset($options['bccf']) ? '-vEval.HHIRBytecodeControlFlow=1' : '',
     extra_args($options),
   );

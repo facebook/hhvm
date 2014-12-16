@@ -64,7 +64,7 @@ inline unsigned Class::classVecLen() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Ancestry.
 
-inline uint64_t Class::classof(const Class* cls) const {
+inline bool Class::classof(const Class* cls) const {
   // If `cls' is an interface, we can simply check to see if cls is in
   // this->m_interfaces.  Otherwise, if `this' is not an interface, the
   // classVec check will determine whether it's an instance of cls (including

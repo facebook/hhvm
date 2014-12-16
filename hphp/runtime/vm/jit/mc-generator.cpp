@@ -1640,8 +1640,11 @@ MCGenerator::translateWork(const TranslArgs& args) {
   UndoMarker undoGlobalData(code.data());
 
   setUseLLVM(
-    RuntimeOption::EvalJitLLVM > 1 ||
-    (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize)
+    // HHIRBytecodeControlFlow causes vmsp stack manipulations we can't handle
+    // right now: t4810319
+    !RuntimeOption::EvalHHIRBytecodeControlFlow &&
+    (RuntimeOption::EvalJitLLVM > 1 ||
+     (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize))
   );
   SCOPE_EXIT {
     setUseLLVM(false);

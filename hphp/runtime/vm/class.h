@@ -301,10 +301,8 @@ public:
 
   /*
    * Determine if this represents a non-strict subtype of `cls'.
-   *
-   * Returns uint64_t instead of bool because it's called directly from the TC.
    */
-  uint64_t classof(const Class* cls) const;
+  bool classof(const Class* cls) const;
 
   /*
    * Whether this class implements an interface called `name'.

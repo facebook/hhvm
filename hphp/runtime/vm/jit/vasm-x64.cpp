@@ -1176,6 +1176,10 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
           inst = copy{inst.syncvmsp_.s, rVmSp};
           break;
 
+        case Vinstr::movtql:
+          inst = copy{inst.movtql_.s, inst.movtql_.d};
+          break;
+
         case Vinstr::ldretaddr:
           inst = pushm{inst.ldretaddr_.s};
           break;

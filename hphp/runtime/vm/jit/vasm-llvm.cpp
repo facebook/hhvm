@@ -257,6 +257,27 @@ struct LLVMErrorInit {
 };
 static LLVMErrorInit s_llvmErrorInit;
 
+std::string showNewCode(const Vasm::AreaList& areas) DEBUG_ONLY;
+std::string showNewCode(const Vasm::AreaList& areas) {
+  std::ostringstream str;
+  Disasm disasm(Disasm::Options().indent(2));
+
+  for (unsigned i = 0, n = areas.size(); i < n; ++i) {
+    auto& area = areas[i];
+    auto const start = area.start;
+    auto const end = area.code.frontier();
+
+    if (start != end) {
+      str << folly::format("emitted {} bytes of code into area {}:\n",
+                           end - start, i);
+      disasm.disasm(str, start, end);
+      str << '\n';
+    }
+  }
+
+  return str.str();
+}
+
 /*
  * TCMemoryManager allows llvm to emit code into the appropriate places in the
  * TC. Currently all code goes into the Main code block.
@@ -639,6 +660,8 @@ struct LLVMEmitter {
     uint8_t* funcStart =
       static_cast<uint8_t*>(ee->getPointerToFunction(m_function));
     FTRACE(2, "LLVM function address: {}\n", funcStart);
+    FTRACE(3, "\n{:-^80}\n{}\n",
+           " x64 after LLVM codegen ", showNewCode(m_areas));
 
     if (auto secLocRecs = tcMM->getDataSection(".llvm_locrecs")) {
       auto const recs = parseLocRecs(secLocRecs->data.get(),
@@ -676,7 +699,8 @@ struct LLVMEmitter {
           DecodedInstruction di(ip);
           if (di.isCall()) return ip + di.size();
         }
-        always_assert(false && "call instruction cannot be found");
+        always_assert_flog(
+          false, "Couldn't find call instruction for locrec {}", fix.id);
       }();
 
       FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
@@ -686,20 +710,22 @@ struct LLVMEmitter {
 
   void processSvcReqs(const LocRecs::FunctionRecord& funcRec,
                       uint8_t* funcStart) {
-    auto findJmp = [&](const jit::vector<LocRecs::LocationRecord>& records) {
+    auto findJmp = [&](const jit::vector<LocRecs::LocationRecord>& records,
+                       uint16_t id) {
       for (auto& record : records) {
         auto ip = funcStart + record.offset;
         DecodedInstruction di(ip);
         if (di.isJmp()) return ip;
       }
-      always_assert(false && "jmp instruction cannot be found");
+      always_assert_flog(
+        false, "Couldn't find jmp instruction for locrec {}", id);
     };
 
     for (auto& req : m_bindjmps) {
       auto it = funcRec.records.find(req.id);
       if (it == funcRec.records.end()) continue;
 
-      auto jmpIp = findJmp(it->second);
+      auto jmpIp = findJmp(it->second, req.id);
       FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
       mcg->cgFixups().m_alignFixups.emplace(
@@ -720,7 +746,7 @@ struct LLVMEmitter {
       if (it == funcRec.records.end()) continue;
 
       auto destSR = mcg->tx().getSrcRec(req.dest);
-      destSR->registerFallbackJump(findJmp(it->second));
+      destSR->registerFallbackJump(findJmp(it->second, req.id));
     }
   }
 
@@ -842,12 +868,19 @@ struct LLVMEmitter {
   }
 
   /*
-   * Assuming val is already an integer type, zero-extend or truncate it to the
-   * given size integer type.
+   * Truncate val to i<bits>
    */
-  llvm::Value* asInt(llvm::Value* val, size_t bits) {
+  llvm::Value* narrow(llvm::Value* val, size_t bits) {
     assert(val->getType()->isIntegerTy());
-    return m_irb.CreateZExtOrTrunc(val, intNType(bits));
+    return m_irb.CreateTrunc(val, intNType(bits));
+  }
+
+  /*
+   * Zero-extend val to i<bits>
+   */
+  llvm::Value* zext(llvm::Value* val, size_t bits) {
+    assert(val->getType()->isIntegerTy());
+    return m_irb.CreateZExt(val, intNType(bits));
   }
 
   /*
@@ -1210,6 +1243,7 @@ O(movb) \
 O(movl) \
 O(movzbl) \
 O(movzbq) \
+O(movtql) \
 O(mulsd) \
 O(mul) \
 O(neg) \
@@ -1312,6 +1346,18 @@ O(phidef)
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
 
+      // Not yet implemented opcodes:
+      case Vinstr::bindcall:
+      case Vinstr::callstub:
+      case Vinstr::contenter:
+      case Vinstr::kpcall:
+      case Vinstr::ldpoint:
+      case Vinstr::mccall:
+      case Vinstr::mcprep:
+      case Vinstr::point:
+      case Vinstr::cmpsd:
+      case Vinstr::ucomisd:
+      case Vinstr::unpcklpd:
       // ARM opcodes:
       case Vinstr::asrv:
       case Vinstr::brk:
@@ -1322,8 +1368,6 @@ O(phidef)
       case Vinstr::hostcall:
       case Vinstr::lslv:
       case Vinstr::tbcc:
-      // Fallthrough. Eventually we won't have a default case.
-      default:
         throw FailedLLVMCodeGen("Unsupported opcode in B{}: {}",
                                 size_t(label), show(m_unit, inst));
       }
@@ -1400,7 +1444,8 @@ void LLVMEmitter::emit(const andb& inst) {
 }
 
 void LLVMEmitter::emit(const andbi& inst) {
-  defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.b()), value(inst.s1)));
+  defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.b()),
+                                      narrow(value(inst.s1), 8)));
 }
 
 void LLVMEmitter::emit(const andbim& inst) {
@@ -1415,7 +1460,8 @@ void LLVMEmitter::emit(const andl& inst) {
 }
 
 void LLVMEmitter::emit(const andli& inst) {
-  defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.l()), value(inst.s1)));
+  defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.l()),
+                                      value(inst.s1)));
 }
 
 void LLVMEmitter::emit(const andq& inst) {
@@ -1476,6 +1522,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   call->setSmashable();
 
   auto id = m_nextLocRec++;
+  FTRACE(2, "Adding bindjmp locrec {} for {}\n", id, llshow(call));
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(id)));
   m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp});
@@ -1643,8 +1690,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     case CppCall::Kind::Destructor: {
       assert(vargs.args.size() == 1);
       llvm::Value* type = value(call.reg());
-      type = m_irb.CreateLShr(asInt(type, 64),
-                              kShiftDataTypeToDestrIndex, "typeIdx");
+      type = m_irb.CreateLShr(type, kShiftDataTypeToDestrIndex, "typeIdx");
 
       auto destructors = getGlobal("g_destructors", uint64_t(g_destructors),
                                    llvm::VectorType::get(ptrType(funcType),
@@ -1674,7 +1720,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   if (fixup.isValid()) {
     auto id = m_nextLocRec++;
     m_fixups.emplace_back(LLVMFixup{id, fixup});
-    FTRACE(2, "Adding fixup id {} for {}\n", id, llshow(callInst));
+    FTRACE(2, "Adding fixup locrec {} for {}\n", id, llshow(callInst));
     callInst->setMetadata(llvm::LLVMContext::MD_locrec,
                           llvm::MDNode::get(m_context, cns(id)));
   }
@@ -1695,12 +1741,12 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     assert(dests.size() == 2);
     if (packed_tv) {
       defineValue(dests[0], m_irb.CreateExtractValue(callInst, 2)); // m_data
-      defineValue(dests[1],
-                  asInt(m_irb.CreateExtractValue(callInst, 1), 64)); // m_type
+      auto type = m_irb.CreateExtractValue(callInst, 1);
+      defineValue(dests[1], zext(type, 64)); // m_type
     } else {
       defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
-      defineValue(dests[1],
-                  asInt(m_irb.CreateExtractValue(callInst, 1), 64)); // m_type
+      auto type = m_irb.CreateExtractValue(callInst, 1);
+      defineValue(dests[1], zext(type, 64)); // m_type
     }
     break;
   }
@@ -1854,6 +1900,7 @@ void LLVMEmitter::emit(const fallback& inst) {
   call->setSmashable();
 
   LLVMFallback req{m_nextLocRec++, inst.dest};
+  FTRACE(2, "Adding fallback locrec {} for {}\n", req.id, llshow(call));
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(req.id)));
   m_fallbacks.emplace_back(req);
@@ -1936,55 +1983,55 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
   llvm::Value* rhs = nullptr;
 
   if (cmp.op == Vinstr::addq) {
-    lhs = asInt(value(cmp.addq_.d), 64);
+    lhs = value(cmp.addq_.d);
     rhs = m_int64Zero;
   } else if (cmp.op == Vinstr::addqi) {
-    lhs = asInt(value(cmp.addqi_.d), 64);
+    lhs = value(cmp.addqi_.d);
     rhs = m_int64Zero;
   } else if (cmp.op == Vinstr::addqim) {
     lhs = flagTmp(sf);
     rhs = m_int64Zero;
   } else if (cmp.op == Vinstr::cmpb) {
-    lhs = asInt(value(cmp.cmpb_.s1), 8);
-    rhs = asInt(value(cmp.cmpb_.s0), 8);
+    lhs = narrow(value(cmp.cmpb_.s1), 8);
+    rhs = narrow(value(cmp.cmpb_.s0), 8);
   } else if (cmp.op == Vinstr::cmpbi) {
-    lhs = asInt(value(cmp.cmpbi_.s1), 8);
+    lhs = narrow(value(cmp.cmpbi_.s1), 8);
     rhs = cns(cmp.cmpbi_.s0.b());
   } else if (cmp.op == Vinstr::cmpbim) {
     lhs = flagTmp(sf);
     rhs = cns(cmp.cmpbim_.s0.b());
   } else if (cmp.op == Vinstr::cmpl) {
-    lhs = asInt(value(cmp.cmpl_.s1), 32);
-    rhs = asInt(value(cmp.cmpl_.s0), 32);
+    lhs = value(cmp.cmpl_.s1);
+    rhs = value(cmp.cmpl_.s0);
   } else if (cmp.op == Vinstr::cmpli) {
-    lhs = asInt(value(cmp.cmpli_.s1), 32);
+    lhs = value(cmp.cmpli_.s1);
     rhs = cns(cmp.cmpli_.s0.l());
   } else if (cmp.op == Vinstr::cmplim) {
     lhs = flagTmp(sf);
     rhs = cns(cmp.cmplim_.s0.l());
   } else if (cmp.op == Vinstr::cmplm) {
     lhs = flagTmp(sf);
-    rhs = asInt(value(cmp.cmplm_.s0), 32);
+    rhs = value(cmp.cmplm_.s0);
   } else if (cmp.op == Vinstr::cmpq) {
-    lhs = asInt(value(cmp.cmpq_.s1), 64);
-    rhs = asInt(value(cmp.cmpq_.s0), 64);
+    lhs = value(cmp.cmpq_.s1);
+    rhs = value(cmp.cmpq_.s0);
   } else if (cmp.op == Vinstr::cmpqi) {
-    lhs = asInt(value(cmp.cmpqi_.s1), 64);
+    lhs = value(cmp.cmpqi_.s1);
     rhs = cns(cmp.cmpqi_.s0.q());
   } else if (cmp.op == Vinstr::cmpqim) {
     lhs = flagTmp(sf);
     rhs = cns(cmp.cmpqim_.s0.q());
   } else if (cmp.op == Vinstr::cmpqm) {
     lhs = flagTmp(sf);
-    rhs = asInt(value(cmp.cmpqm_.s0), 64);
+    rhs = value(cmp.cmpqm_.s0);
   } else if (cmp.op == Vinstr::decl) {
-    lhs = asInt(value(cmp.decl_.d), 32);
+    lhs = value(cmp.decl_.d);
     rhs = m_int32Zero;
   } else if (cmp.op == Vinstr::declm) {
     lhs = flagTmp(sf);
     rhs = m_int32Zero;
   } else if (cmp.op == Vinstr::decq) {
-    lhs = asInt(value(cmp.decq_.d), 64);
+    lhs = value(cmp.decq_.d);
     rhs = m_int64Zero;
   } else if (cmp.op == Vinstr::decqm) {
     lhs = flagTmp(sf);
@@ -1996,19 +2043,19 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
     lhs = flagTmp(sf);
     rhs = m_int16Zero;
   } else if (cmp.op == Vinstr::subbi) {
-    lhs = asInt(value(cmp.subbi_.d), 8);
+    lhs = narrow(value(cmp.subbi_.d), 8);
     rhs = m_int8Zero;
   } else if (cmp.op == Vinstr::subl) {
-    lhs = asInt(value(cmp.subl_.d), 32);
+    lhs = value(cmp.subl_.d);
     rhs = m_int32Zero;
   } else if (cmp.op == Vinstr::subli) {
-    lhs = asInt(value(cmp.subli_.d), 32);
+    lhs = value(cmp.subli_.d);
     rhs = m_int32Zero;
   } else if (cmp.op == Vinstr::subq) {
-    lhs = asInt(value(cmp.subq_.d), 64);
+    lhs = value(cmp.subq_.d);
     rhs = m_int64Zero;
   } else if (cmp.op == Vinstr::subqi) {
-    lhs = asInt(value(cmp.subqi_.d), 64);
+    lhs = value(cmp.subqi_.d);
     rhs = m_int64Zero;
   } else if (cmp.op == Vinstr::testb ||
              cmp.op == Vinstr::testbi ||
@@ -2086,7 +2133,7 @@ void LLVMEmitter::emit(const load& inst) {
 
 void LLVMEmitter::emit(const loadtqb& inst) {
   auto quad = m_irb.CreateLoad(emitPtr(inst.s, 64));
-  defineValue(inst.d, m_irb.CreateZExtOrTrunc(quad, m_int8));
+  defineValue(inst.d, narrow(quad, 8));
 }
 
 void LLVMEmitter::emit(const loadl& inst) {
@@ -2100,17 +2147,17 @@ void LLVMEmitter::emit(const loadsd& inst) {
 
 void LLVMEmitter::emit(const loadzbl& inst) {
   auto byteVal = m_irb.CreateLoad(emitPtr(inst.s, 8));
-  defineValue(inst.d, m_irb.CreateZExt(byteVal, m_int32));
+  defineValue(inst.d, zext(byteVal, 32));
 }
 
 void LLVMEmitter::emit(const loadzbq& inst) {
   auto byteVal = m_irb.CreateLoad(emitPtr(inst.s, 8));
-  defineValue(inst.d, m_irb.CreateZExt(byteVal, m_int64));
+  defineValue(inst.d, zext(byteVal, 64));
 }
 
 void LLVMEmitter::emit(const loadzlq& inst) {
   auto val = m_irb.CreateLoad(emitPtr(inst.s, 32));
-  defineValue(inst.d, m_irb.CreateZExt(val, m_int64));
+  defineValue(inst.d, zext(val, 64));
 }
 
 // loadqp/leap are intended to be rip-relative instructions, but that's not
@@ -2134,11 +2181,15 @@ void LLVMEmitter::emit(const movl& inst) {
 }
 
 void LLVMEmitter::emit(const movzbl& inst) {
-  defineValue(inst.d, m_irb.CreateZExt(value(inst.s), m_int32));
+  defineValue(inst.d, zext(value(inst.s), 32));
 }
 
 void LLVMEmitter::emit(const movzbq& inst) {
-  defineValue(inst.d, m_irb.CreateZExt(value(inst.s), m_int64));
+  defineValue(inst.d, zext(value(inst.s), 64));
+}
+
+void LLVMEmitter::emit(const movtql& inst) {
+  defineValue(inst.d, narrow(value(inst.s), 32));
 }
 
 void LLVMEmitter::emit(const mulsd& inst) {
@@ -2315,8 +2366,7 @@ void LLVMEmitter::emit(const sarqi& inst) {
 }
 
 void LLVMEmitter::emit(const setcc& inst) {
-  defineValue(inst.d,
-              m_irb.CreateZExt(emitCmpForCC(inst.sf, inst.cc), m_int8));
+  defineValue(inst.d, zext(emitCmpForCC(inst.sf, inst.cc), 8));
 }
 
 void LLVMEmitter::emit(const shlli& inst) {
@@ -2355,8 +2405,7 @@ void LLVMEmitter::emit(const store& inst) {
 }
 
 void LLVMEmitter::emit(const storeb& inst) {
-  m_irb.CreateStore(m_irb.CreateZExtOrTrunc(value(inst.s), m_int8),
-                    emitPtr(inst.m, 8));
+  m_irb.CreateStore(narrow(value(inst.s), 8), emitPtr(inst.m, 8));
 }
 
 void LLVMEmitter::emit(const storebi& inst) {
@@ -2395,7 +2444,7 @@ void LLVMEmitter::emit(const storewi& inst) {
 }
 
 void LLVMEmitter::emit(const subbi& inst) {
-  defineValue(inst.d, m_irb.CreateSub(asInt(value(inst.s1), 8),
+  defineValue(inst.d, m_irb.CreateSub(narrow(value(inst.s1), 8),
                                       cns(inst.s0.b())));
 }
 
@@ -2459,13 +2508,13 @@ void LLVMEmitter::emit(const syncvmsp& inst) {
 }
 
 void LLVMEmitter::emit(const testb& inst) {
-  auto result = m_irb.CreateAnd(asInt(value(inst.s1), 8),
-                                asInt(value(inst.s0), 8));
+  auto result = m_irb.CreateAnd(narrow(value(inst.s1), 8),
+                                narrow(value(inst.s0), 8));
   defineFlagTmp(inst.sf, result);
 }
 
 void LLVMEmitter::emit(const testbi& inst) {
-  auto result = m_irb.CreateAnd(asInt(value(inst.s1), 8), inst.s0.b());
+  auto result = m_irb.CreateAnd(narrow(value(inst.s1), 8), inst.s0.b());
   defineFlagTmp(inst.sf, result);
 }
 
@@ -2545,10 +2594,10 @@ llvm::Value* LLVMEmitter::emitPtr(const Vptr s, llvm::Type* ptrTy) {
     llvm::cast<llvm::PointerType>(ptrTy)->getAddressSpace() == kFSAddressSpace;
   always_assert(s.base != reg::rsp);
 
-  auto ptr = s.base.isValid() ? asInt(value(s.base), 64) : cns(int64_t{0});
+  auto ptr = s.base.isValid() ? zext(value(s.base), 64) : cns(int64_t{0});
   auto disp = cns(int64_t{s.disp});
   if (s.index.isValid()) {
-    auto scaledIdx = m_irb.CreateMul(asInt(value(s.index), 64),
+    auto scaledIdx = m_irb.CreateMul(zext(value(s.index), 64),
                                      cns(int64_t{s.scale}),
                                      "mul");
     disp = m_irb.CreateAdd(disp, scaledIdx, "add");
@@ -2591,27 +2640,6 @@ llvm::Type* LLVMEmitter::ptrIntNType(size_t bits, bool inFS) const {
   }
 }
 
-std::string showNewCode(const Vasm::AreaList& areas) DEBUG_ONLY;
-std::string showNewCode(const Vasm::AreaList& areas) {
-  std::ostringstream str;
-  Disasm disasm(Disasm::Options().indent(2));
-
-  for (unsigned i = 0, n = areas.size(); i < n; ++i) {
-    auto& area = areas[i];
-    auto const start = area.start;
-    auto const end = area.code.frontier();
-
-    if (start != end) {
-      str << folly::format("emitted {} bytes of code into area {}:\n",
-                           end - start, i);
-      disasm.disasm(str, start, end);
-      str << '\n';
-    }
-  }
-
-  return str.str();
-}
-
 } // unnamed namespace
 
 void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
@@ -2626,8 +2654,6 @@ void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
 
   try {
     LLVMEmitter(unit, areas).emit(labels);
-    FTRACE(3, "\n{:-^80}\n{}\n",
-           " x64 after LLVM codegen ", showNewCode(areas));
   } catch (const FailedLLVMCodeGen& e) {
     always_assert_flog(
       RuntimeOption::EvalJitLLVM < 3,

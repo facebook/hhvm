@@ -593,7 +593,7 @@ int64_t HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
     raise_warning("Iv size incorrect; supplied length: %d, needed: %d",
                     iv.size(), iv_size);
   }
-  memcpy(iv_s, iv.data(), iv_size);
+  memcpy(iv_s, iv.data(), std::min(iv_size, iv.size()));
 
   mcrypt_generic_deinit(pm->m_td);
   int result = mcrypt_generic_init(pm->m_td, key_s, key_size, iv_s);
@@ -614,8 +614,10 @@ int64_t HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
       raise_warning("Unknown error");
       break;
     }
+  } else {
+    pm->m_init = true;
   }
-  pm->m_init = true;
+
   free(iv_s);
   free(key_s);
   return result;

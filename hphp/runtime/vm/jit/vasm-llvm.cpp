@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/reserved-stack.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
@@ -606,15 +607,21 @@ struct LLVMEmitter {
     m_module->addModuleFlag(llvm::Module::Error, "code_skew",
                             tcMM->computeCodeSkew(x64::kCacheLineSize));
 
-    for (auto it = m_module->begin(); it != m_module->end(); ++it) {
-      fpm->run(*it);
+    {
+      Timer _t(Timer::llvm_optimize);
+      for (auto it = m_module->begin(); it != m_module->end(); ++it) {
+        fpm->run(*it);
+      }
     }
     FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ", showModule());
 
     m_module.release(); // ee took ownership of the module.
 
-    ee->setProcessAllSections(true);
-    ee->finalizeObject();
+    {
+      Timer _t(Timer::llvm_codegen);
+      ee->setProcessAllSections(true);
+      ee->finalizeObject();
+    }
 
     // Now that codegen is done, we need to parse location records and
     // gcc_except_table sections and update our own metadata.
@@ -1087,6 +1094,8 @@ VASM_OPCODES
 };
 
 void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
+  Timer _t(Timer::llvm_irGeneration);
+
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
   // first.
@@ -1330,6 +1339,7 @@ O(phidef)
     defineValue(x64::rStashedAR, nullptr);
   }
 
+  _t.end();
   finalize();
 }
 
@@ -2576,6 +2586,7 @@ std::string showNewCode(const Vasm::AreaList& areas) {
 
 void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
                  const jit::vector<Vlabel>& labels) {
+  Timer _t(Timer::llvm);
   FTRACE(2, "\nTrying to emit LLVM IR for Vunit:\n{}\n", show(unit));
 
   jit::vector<UndoMarker> undoAll = {UndoMarker(mcg->globalData())};

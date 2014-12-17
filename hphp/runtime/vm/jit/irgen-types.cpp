@@ -312,10 +312,8 @@ folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
       return ty;
     }
 
-  // We always know this at JIT time right now.
-  case T::Cell:
-  case T::Ref:
-    return folly::none;
+  case T::Cell:       return Type::Cell;
+  case T::Ref:        return Type::BoxedCell;
 
   case T::InitGen:
     // Should ideally be able to remove Uninit here.

@@ -141,10 +141,7 @@ void SrcRec::emitFallbackJumpCustom(CodeBlock& cb, CodeBlock& frozen,
   // Another platform dependency (the same one as above). TODO(2990497)
   auto toSmash = x64::emitRetranslate(cb, frozen, cc, sk, trflags);
 
-  auto incoming = cc < 0 ? IncomingBranch::jmpFrom(toSmash)
-                         : IncomingBranch::jccFrom(toSmash);
-
-  mcg->cgFixups().m_inProgressTailJumps.push_back(incoming);
+  registerFallbackJump(toSmash, cc);
 }
 
 void SrcRec::newTranslation(TCA newStart,

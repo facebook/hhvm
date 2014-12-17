@@ -1899,13 +1899,21 @@ void LLVMEmitter::emit(const imul& inst) {
 }
 
 void LLVMEmitter::emit(const fallback& inst) {
-  assert_not_implemented(inst.trflags.packed == 0);
+  TCA stub;
+  if (inst.trflags.packed == 0) {
+    stub = mcg->tx().getSrcRec(inst.dest)->getFallbackTranslation();
+  } else {
+    // Emit a custom REQ_RETRANSLATE
+    auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+    ServiceReqArgVec args;
+    packServiceReqArgs(args, inst.dest.offset(), inst.trflags.packed);
+    stub = mcg->backEnd().emitServiceReqWork(
+      frozen, frozen.frontier(), SRFlags::Persist, REQ_RETRANSLATE, args);
+  }
 
-  auto destSR = mcg->tx().getSrcRec(inst.dest);
-  auto fallback = destSR->getFallbackTranslation();
-  auto func = emitFuncPtr(folly::sformat("reqRetranslate_{}", fallback),
+  auto func = emitFuncPtr(folly::sformat("reqRetranslate_{}", stub),
                           m_traceletFnTy,
-                          uint64_t(destSR->getFallbackTranslation()));
+                          uint64_t(stub));
   auto call = emitTraceletTailCall(func);
   call->setSmashable();
 

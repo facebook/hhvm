@@ -209,7 +209,7 @@ remains where it left off after the previous call.
             self.bcoff = 0
             self.count = int(argv[1])
 
-        bctype = gdb.lookup_type('HPHP::Op').const().pointer()
+        bctype = T('HPHP::Op').const().pointer()
         self.bcpos = self.bcpos.cast(bctype)
 
         bcstart = self.bcpos - self.bcoff

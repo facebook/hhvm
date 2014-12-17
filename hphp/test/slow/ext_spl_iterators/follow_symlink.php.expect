@@ -1,7 +1,6 @@
 DONT FOLLOW SYMLINKS
-test/dir2/dir1
-test/dir2/file2.txt
+/tmp/recursivedirectoryiterator_followsymlink_test/test/dir2/dir1
+/tmp/recursivedirectoryiterator_followsymlink_test/test/dir2/file2.txt
 FOLLOW SYMLINKS
-test/dir2/dir1
-test/dir2/dir1/file1.txt
-test/dir2/file2.txt
+/tmp/recursivedirectoryiterator_followsymlink_test/test/dir2/dir1
+/tmp/recursivedirectoryiterator_followsymlink_test/test/dir2/file2.txt

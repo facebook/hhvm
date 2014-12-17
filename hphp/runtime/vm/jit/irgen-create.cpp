@@ -43,16 +43,6 @@ void initProps(HTS& env, const Class* cls) {
   );
 }
 
-SSATmp* touchArgsSpillStackAndPopArgs(HTS& env, int numArgs) {
-  // Before the spillStack() we touch all of the incoming stack
-  // arguments so that they are available to later optimizations via
-  // getStackValue().
-  for (int i = 0; i < numArgs; i++) topC(env, i, DataTypeGeneric);
-  auto const stack = spillStack(env );
-  for (int i = 0; i < numArgs; i++) popC(env, DataTypeGeneric);
-  return stack;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -248,8 +238,9 @@ void emitNewPackedArray(HTS& env, int32_t numArgs) {
   auto const array = gen(env, AllocPackedArray, extra);
   static constexpr auto kMaxUnrolledInitArray = 8;
   if (numArgs > kMaxUnrolledInitArray) {
-    auto const stack = touchArgsSpillStackAndPopArgs(env, numArgs);
-    gen(env, InitPackedArrayLoop, extra, array, stack);
+    spillStack(env);
+    gen(env, InitPackedArrayLoop, extra, array, sp(env));
+    discard(env, numArgs);
     push(env, array);
     return;
   }

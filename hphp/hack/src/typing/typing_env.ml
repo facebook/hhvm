@@ -141,7 +141,6 @@ let get_type env x =
   | None -> env, (Reason.none, Tany)
   | Some ty -> env, ty
 
-
 let get_type_unsafe env x =
   let ty = IMap.get x env.tenv in
   match ty with

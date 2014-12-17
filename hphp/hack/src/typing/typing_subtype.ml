@@ -24,7 +24,8 @@ module TAccess = Typing_taccess
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super *)
-let rec subtype_funs_generic ~check_return env r_super ft_super r_sub orig_ft_sub =
+let rec subtype_funs_generic ~check_return env r_super ft_super r_sub
+    orig_ft_sub =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
   let env, ft_sub = Inst.instantiate_ft env orig_ft_sub in

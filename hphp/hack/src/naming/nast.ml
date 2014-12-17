@@ -23,7 +23,6 @@ type call_type =
   | Cnormal    (* when the call looks like f() *)
   | Cuser_func (* when the call looks like call_user_func(...) *)
 
-
 type shape_field_name =
   | SFlit of pstring
   | SFclass_const of sid * pstring

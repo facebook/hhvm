@@ -1651,52 +1651,6 @@ void CodeGenerator::cgNInstanceOfBitmask(IRInstruction* inst) {
   v << setcc{CC_Z, sf, dstLoc(inst, 0).reg()};
 }
 
-void CodeGenerator::cgJmpInstanceOfBitmask(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = emitInstanceBitmaskCheck(v, inst);
-  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgJmpNInstanceOfBitmask(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = emitInstanceBitmaskCheck(v, inst);
-  v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgReqBindJmpInstanceOfBitmask(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = emitInstanceBitmaskCheck(v, inst);
-  emitReqBindJcc(v, opToConditionCode(inst->op()), sf,
-                 inst->extra<ReqBindJccData>());
-}
-
-void CodeGenerator::cgReqBindJmpNInstanceOfBitmask(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = emitInstanceBitmaskCheck(v, inst);
-  emitReqBindJcc(v, opToConditionCode(inst->op()), sf,
-                 inst->extra<ReqBindJccData>());
-}
-
-void CodeGenerator::cgSideExitJmpInstanceOfBitmask(IRInstruction* inst) {
-  auto const extra = inst->extra<SideExitJccData>();
-  auto const& marker = inst->marker();
-  auto const sk = SrcKey(getFunc(marker), extra->taken, resumed(marker));
-  auto& v = vmain();
-  auto const sf = emitInstanceBitmaskCheck(v, inst);
-  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags,
-                kCrossTraceRegs};
-}
-
-void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
-  auto const extra = inst->extra<SideExitJccData>();
-  auto const& marker = inst->marker();
-  auto const sk = SrcKey(getFunc(marker), extra->taken, resumed(marker));
-  auto& v = vmain();
-  auto const sf = emitInstanceBitmaskCheck(v, inst);
-  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags,
-                kCrossTraceRegs};
-}
-
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
   auto test = inst->src(1);
   auto testReg = srcLoc(inst, 1).reg();

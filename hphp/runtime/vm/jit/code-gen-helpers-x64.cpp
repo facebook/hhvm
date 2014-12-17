@@ -519,8 +519,6 @@ ConditionCode opToConditionCode(Opcode opc) {
   case JmpNeqInt:             return CC_NE;
   case JmpSame:               return CC_E;
   case JmpNSame:              return CC_NE;
-  case JmpInstanceOfBitmask:  return CC_NZ;
-  case JmpNInstanceOfBitmask: return CC_Z;
   case JmpZero:               return CC_Z;
   case JmpNZero:              return CC_NZ;
   case ReqBindJmpGt:                 return CC_G;
@@ -537,8 +535,6 @@ ConditionCode opToConditionCode(Opcode opc) {
   case ReqBindJmpNeqInt:             return CC_NE;
   case ReqBindJmpSame:               return CC_E;
   case ReqBindJmpNSame:              return CC_NE;
-  case ReqBindJmpInstanceOfBitmask:  return CC_NZ;
-  case ReqBindJmpNInstanceOfBitmask: return CC_Z;
   case ReqBindJmpZero:               return CC_Z;
   case ReqBindJmpNZero:              return CC_NZ;
   case SideExitJmpGt:                 return CC_G;
@@ -555,8 +551,6 @@ ConditionCode opToConditionCode(Opcode opc) {
   case SideExitJmpNeqInt:             return CC_NE;
   case SideExitJmpSame:               return CC_E;
   case SideExitJmpNSame:              return CC_NE;
-  case SideExitJmpInstanceOfBitmask:  return CC_NZ;
-  case SideExitJmpNInstanceOfBitmask: return CC_Z;
   case SideExitJmpZero:               return CC_Z;
   case SideExitJmpNZero:              return CC_NZ;
   default:

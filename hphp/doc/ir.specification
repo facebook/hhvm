@@ -726,10 +726,6 @@ generating efficient compare-and-branch instruction sequences.
 
 | JmpNeqInt,                        ND, S(Int) S(Int),                   B|E
 
-| JmpInstanceOfBitmask,             ND, S(Cls) CStr,                     B|E
-
-| JmpNInstanceOfBitmask,            ND, S(Cls) CStr,                     B|E
-
   Fused jump instructions. These all operate exactly as their corresponding
   query op, but also take a label to jump to when the condition is true.
 
@@ -1516,10 +1512,6 @@ generating efficient compare-and-branch instruction sequences.
 
 | ReqBindJmpNSame,                  ND, S(Gen) S(Gen),                   T|E
 
-| ReqBindJmpInstanceOfBitmask,      ND, S(Cls) CStr,                     T|E
-
-| ReqBindJmpNInstanceOfBitmask,     ND, S(Cls) CStr,                     T|E
-
 | ReqBindJmpZero,                   ND, S(Int,Bool),                     T|E
 
 | ReqBindJmpNZero,                  ND, S(Int,Bool),                     T|E
@@ -1554,10 +1546,6 @@ generating efficient compare-and-branch instruction sequences.
 | SideExitJmpSame,                  ND, S(Int) S(Int),                     E
 
 | SideExitJmpNSame,                 ND, S(Int) S(Int),                     E
-
-| SideExitJmpInstanceOfBitmask,     ND, S(Cls) CStr,                       E
-
-| SideExitJmpNInstanceOfBitmask,    ND, S(Cls) CStr,                       E
 
 | SideExitJmpZero,                  ND, S(Int,Bool),                       E
 

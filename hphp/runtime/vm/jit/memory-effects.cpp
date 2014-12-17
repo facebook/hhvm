@@ -86,14 +86,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReqBindJmpGte:
   case ReqBindJmpGteInt:
   case ReqBindJmpGtInt:
-  case ReqBindJmpInstanceOfBitmask:
   case ReqBindJmpLt:
   case ReqBindJmpLte:
   case ReqBindJmpLteInt:
   case ReqBindJmpLtInt:
   case ReqBindJmpNeq:
   case ReqBindJmpNeqInt:
-  case ReqBindJmpNInstanceOfBitmask:
   case ReqBindJmpNSame:
   case ReqBindJmpNZero:
   case ReqBindJmpSame:
@@ -108,12 +106,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SideExitJmpGtInt:
   case SideExitJmpGte:
   case SideExitJmpGteInt:
-  case SideExitJmpInstanceOfBitmask:
   case SideExitJmpLt:
   case SideExitJmpLtInt:
   case SideExitJmpLte:
   case SideExitJmpLteInt:
-  case SideExitJmpNInstanceOfBitmask:
   case SideExitJmpNSame:
   case SideExitJmpNZero:
   case SideExitJmpNeq:
@@ -641,9 +637,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StAsyncArSucceeded:
   case InstanceOf:
   case InstanceOfBitmask:
-  case JmpInstanceOfBitmask:
   case NInstanceOfBitmask:
-  case JmpNInstanceOfBitmask:
   case InstanceOfIface:
   case InterfaceSupportsArr:
   case InterfaceSupportsDbl:

@@ -1,74 +1,106 @@
 """
-Python GDB macros for inspecting hhvm data types.
-
-To use, add this to your .gdbinit:
-
-   source path/to/hhvm/repo/tools/gdb/hhvm.py
-
-Then just use "p foo" and "x foo" as normal, and if it's one of the
-supported types it'll be prettier.  If the macros go off the rails,
-you can use "p/r foo" to get back to raw printing.
+GDB pretty printers for HHVM types.
 """
 # @lint-avoid-python-3-compatibility-imports
+
 import gdb
 import re
+from gdbutils import *
+from nameof import nameof
 
-def string_data_val(val):
-    return val['m_data'].string("utf-8", 'ignore', val['m_len'])
 
-class TypedValuePrinter:
-    RECOGNIZE = '^HPHP::(TypedValue|VM::Cell|Variant|VarNR)$'
-    def __init__(self, val):
-        tv = gdb.lookup_type('HPHP::TypedValue')
-        self.val = val.cast(tv)
+#------------------------------------------------------------------------------
+# Legacy iteration.
 
-    def to_string(self):
-        itype = gdb.lookup_type('int')
-        v = self.val['m_type'].cast(itype)
+class _BaseIterator:
+    """Base iterator for Python 2 compatibility (in Python 3, next() is renamed
+    to __next__()).  See http://legacy.python.org/dev/peps/pep-3114/.
+    """
+    def next(self):
+        return self.__next__()
 
-        # values from runtime/base/datatype.h
-        if v == 0x00:
-            return "Uninit"
-        elif v == 0x08:
-            return "Null"
-        elif v == 0x09:
-            if self.val['m_data']['num'] == 0:
-                return "Tv: false"
-            else:
-                return "Tv: true"
-        elif v == 0x0a:
-            return "Tv: %d" % self.val['m_data']['num']
-        elif v == 0x0b:
-            return "Tv: %g" % self.val['m_data']['dbl']
-        elif v == 0x0c or v == 0x14:
-            return "Tv: '%s'" % string_data_val(self.val['m_data']['pstr'].
-                                            dereference())
-        elif v == 0x20:
-            return "Tv: %s" % self.val['m_data']['parr'].dereference()
-        elif v == 0x30:
-            return "Tv: %s" % self.val['m_data']['pobj'].dereference()
-        elif v == 0x40:
-            return "Tv: %s" % self.val['m_data']['pres'].dereference()
-        elif v == 0x50:
-            return "Tv: %s" % self.val['m_data']['pref'].dereference()
-        else:
-            return "Type %d" % v
+
+#------------------------------------------------------------------------------
+# StringData.
 
 class StringDataPrinter:
     RECOGNIZE = '^HPHP::StringData$'
+
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
-        return "Str: '%s'" % string_data_val(self.val)
+        return string_data_val(self.val)
 
-class _BaseIterator:
-    """
-    Base iterator for Python 2 compatibility (in Python 3, next() is renamed
-    to __next__()). See http://legacy.python.org/dev/peps/pep-3114/
-    """
-    def next(self):
-        return self.__next__()
+    def display_hint(self):
+        return 'string'
+
+
+#------------------------------------------------------------------------------
+# TypedValue.
+
+class TypedValuePrinter:
+    RECOGNIZE = '^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$'
+
+    def __init__(self, val):
+        self.val = val.cast(T('HPHP::TypedValue'))
+
+    def to_string(self):
+        data = self.val['m_data']
+        t = self.val['m_type']
+        val = None
+        name = None
+
+        if t == V('HPHP::KindOfUninit') or t == V('HPHP::KindOfNull'):
+            pass
+
+        if t == V('HPHP::KindOfBoolean'):
+            if data['num'] == 0:
+                val = False
+            elif data['num'] == 1:
+                val = True
+            else:
+                val = data['num']
+
+        elif t == V('HPHP::KindOfInt64'):
+            val = data['num']
+
+        elif t == V('HPHP::KindOfDouble'):
+            val = data['dbl']
+
+        elif (t == V('HPHP::KindOfString') or
+              t == V('HPHP::KindOfStaticString')):
+            val = data['pstr'].dereference()
+
+        elif t == V('HPHP::KindOfArray'):
+            val = data['parr']
+
+        elif t == V('HPHP::KindOfObject'):
+            val = data['pobj']
+            name = nameof(val)
+
+        elif t == V('HPHP::KindOfResource'):
+            val = data['pres']
+
+        elif t == V('HPHP::KindOfRef'):
+            val = data['pref'].dereference()
+
+        else:
+            t = "Invalid(%d)" % t.cast(T('int8_t'))
+            val = "0x%x" % data['num']
+
+        if val is None:
+            out = "{ %s }" % t
+        elif name is None:
+            out = "{ %s, %s }" % (t, str(val))
+        else:
+            out = "{ %s, %s (%s) }" % (t, str(val), name)
+
+        return out
+
+
+#------------------------------------------------------------------------------
+# ArrayData.
 
 class ArrayDataPrinter:
     RECOGNIZE = '^HPHP::(ArrayData|MixedArray)$'
@@ -292,6 +324,10 @@ class ClassPrinter:
     def to_string(self):
         ls = LowStringPtrPrinter(self.val['m_preClass']['m_px']['m_name'])
         return "Class %s" % string_data_val(ls.to_string_data())
+
+
+#------------------------------------------------------------------------------
+# Lookup function.
 
 printer_classes = [
     TypedValuePrinter,

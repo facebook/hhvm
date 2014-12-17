@@ -256,6 +256,7 @@ private:
   void emit(neg& i) { unary(i); a->neg(i.d); }
   void emit(nop& i) { a->nop(); }
   void emit(not& i) { unary(i); a->not(i.d); }
+  void emit(orwim& i) { a->orw(i.s0, i.m); }
   void emit(orq& i) { commuteSF(i); a->orq(i.s0, i.d); }
   void emit(orqi& i) { binary(i); a->orq(i.s0, i.d); }
   void emit(orqim& i) { a->orq(i.s0, i.m); }

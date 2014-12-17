@@ -3137,9 +3137,10 @@ void CodeGenerator::cgInitObjProps(IRInstruction* inst) {
   // Set the attributes, if any
   int odAttrs = cls->getODAttrs();
   if (odAttrs) {
-    // o_attribute is 16 bits but the fact that we're or-ing a mask makes it ok
+    static_assert(sizeof(ObjectData::Attribute) == 2,
+                  "Codegen expects 2-byte ObjectData attributes");
     assert(!(odAttrs & 0xffff0000));
-    v << orqim{odAttrs, srcReg[ObjectData::attributeOff()], v.makeReg()};
+    v << orwim{odAttrs, srcReg[ObjectData::attributeOff()], v.makeReg()};
   }
 
   // Initialize the properties

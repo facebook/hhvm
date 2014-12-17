@@ -1935,6 +1935,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       call p env fty el uel
 
 and fun_type_of_id env x =
+  Typing_hooks.dispatch_fun_id_hook x;
   Find_refs.process_find_refs None (snd x) (fst x);
   let env, fty =
     match Env.get_fun env (snd x) with
@@ -2616,6 +2617,7 @@ and static_class_id p env = function
 and call_construct p env class_ params el uel =
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
+  Typing_hooks.dispatch_constructor_hook class_ env p;
   Find_refs.process_find_refs (Some class_.tc_name) SN.Members.__construct p;
   match (fst cstr) with
     | None ->

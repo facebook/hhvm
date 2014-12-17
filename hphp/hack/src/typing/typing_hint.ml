@@ -208,6 +208,7 @@ and hint_ p env = function
       env, Tany
   | Happly (((p, c) as id), argl) ->
       Find_refs.process_class_ref p c None;
+      Typing_hooks.dispatch_class_id_hook id None;
       Env.add_wclass env c;
       let env, argl = lfold hint env argl in
       env, Tapply (id, argl)
@@ -216,6 +217,7 @@ and hint_ p env = function
         | CIstatic -> Some SCIstatic
         | CI (pos, class_) ->
             Find_refs.process_class_ref pos class_ None;
+            Typing_hooks.dispatch_class_id_hook id None;
             Env.add_wclass env class_;
             Some (SCI (pos, class_))
         | CIparent ->

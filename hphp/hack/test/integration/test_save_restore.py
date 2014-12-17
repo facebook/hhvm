@@ -351,6 +351,11 @@ class TestSaveRestore(unittest.TestCase):
             ], options=['--find-refs', 'h'])
 
         self.check_cmd([
+            'File "{root}foo_3.php", line 10, characters 13-21: Foo::__construct',
+            '1 total results'
+            ], options=['--find-refs', 'Foo::__construct'])
+
+        self.check_cmd([
             'File "{root}foo_3.php", line 10, characters 17-19: Foo::__construct',
             '1 total results'
             ], options=['--find-class-refs', 'Foo'])

@@ -385,6 +385,12 @@ class TestSaveRestore(unittest.TestCase):
             options=['--auto-complete', '--json'],
             stdin='<?hh function f() { some_AUTO332\n')
 
+        self.check_cmd([
+            'Foo::bar'
+            ],
+            options=['--identify-function', '1:51'],
+            stdin='<?hh class Foo { private function bar() { $this->bar() }}')
+
     def test_options_cmd(self):
         """
         Make sure we are invoking the server_options_cmd with the right flags

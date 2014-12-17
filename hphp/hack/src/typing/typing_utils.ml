@@ -64,7 +64,6 @@ let process_static_find_ref cid mid =
   match cid with
   | Nast.CI c ->
     Typing_hooks.dispatch_class_id_hook c (Some mid);
-    Find_refs.process_class_ref (fst c) (snd c) (Some (snd mid))
   | _ -> ()
 
 (*****************************************************************************)

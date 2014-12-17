@@ -1936,7 +1936,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
 
 and fun_type_of_id env x =
   Typing_hooks.dispatch_fun_id_hook x;
-  Find_refs.process_find_refs None (snd x) (fst x);
   let env, fty =
     match Env.get_fun env (snd x) with
     | None -> unbound_name env x
@@ -2234,7 +2233,6 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
             Typing_defs.accumulate_method_calls_result :=
                 (p, (class_.tc_name^"::"^mid)) ::
                     !Typing_defs.accumulate_method_calls_result;
-          Find_refs.process_find_refs (Some class_.tc_name) mid p;
           Typing_hooks.dispatch_smethod_hook class_ (p, mid) env (Some cid);
           (match smethod with
           | None ->
@@ -2399,7 +2397,6 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
               Typing_defs.accumulate_method_calls_result :=
                 (p, (class_.tc_name^"::"^s)) ::
                 !Typing_defs.accumulate_method_calls_result;
-            Find_refs.process_find_refs (Some class_.tc_name) s p;
             Typing_hooks.dispatch_cmethod_hook class_ (p, s) env None;
             (match method_ with
               | None ->
@@ -2618,7 +2615,6 @@ and call_construct p env class_ params el uel =
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
   Typing_hooks.dispatch_constructor_hook class_ env p;
-  Find_refs.process_find_refs (Some class_.tc_name) SN.Members.__construct p;
   match (fst cstr) with
     | None ->
       if el <> [] &&

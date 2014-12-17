@@ -229,10 +229,10 @@ let hh_auto_complete fn =
                         ])
 
 let hh_get_method_at_position fn line char =
-  Find_refs.find_method_at_cursor_result := None;
   Autocomplete.auto_complete := false;
-  Find_refs.find_method_at_cursor_target := Some (line, char);
   let fn = Relative_path.create Relative_path.Root fn in
+  let result = ref None in
+  IdentifySymbolService.attach_hooks result line char;
   try
     let ast = Parser_heap.ParserHeap.find_unsafe fn in
     Errors.ignore_ begin fun () ->
@@ -242,56 +242,36 @@ let hh_get_method_at_position fn line char =
             let nenv = Naming.empty in
             let tenv = Typing_env.empty fn in
             let f = Naming.fun_ nenv f in
-            Find_refs.process_find_refs None
-                (snd f.Nast.f_name) (fst f.Nast.f_name);
             Typing.fun_def tenv (snd f.Nast.f_name) f
         | Ast.Class c ->
             let nenv = Naming.empty in
             let tenv = Typing_env.empty fn in
             let c = Naming.class_ nenv c in
-            if !Find_refs.find_method_at_cursor_target <> None
-            then begin
-              Find_refs.process_class_ref (fst c.Nast.c_name)
-                (snd c.Nast.c_name) None
-            end;
-            let all_methods = c.Nast.c_methods @ c.Nast.c_static_methods in
-            List.iter begin fun method_ ->
-              Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                (snd method_.Nast.m_name) (fst method_.Nast.m_name)
-            end all_methods;
-            (match c.Nast.c_constructor with
-            | None -> ()
-            | Some method_ ->
-              Find_refs.process_find_refs
-                (Some (snd c.Nast.c_name))
-                Naming_special_names.Members.__construct
-                (fst method_.Nast.m_name)
-            );
             let res = Typing.class_def tenv (snd c.Nast.c_name) c in
             res
         | _ -> ()
       end ast;
     end;
+    IdentifySymbolService.detach_hooks ();
     let result =
-      match !Find_refs.find_method_at_cursor_result with
+      match !result with
       | Some res ->
           let result_type =
-            match res.Find_refs.type_ with
-            | Find_refs.Class -> "class"
-            | Find_refs.Method -> "method"
-            | Find_refs.Function -> "function"
-            | Find_refs.LocalVar -> "local" in
-          JAssoc [ "name",           JString res.Find_refs.name;
+            match res.IdentifySymbolService.type_ with
+            | IdentifySymbolService.Class -> "class"
+            | IdentifySymbolService.Method -> "method"
+            | IdentifySymbolService.Function -> "function"
+            | IdentifySymbolService.LocalVar -> "local" in
+          JAssoc [ "name",           JString res.IdentifySymbolService.name;
                    "result_type",    JString result_type;
-                   "pos",            Pos.json (Pos.to_absolute res.Find_refs.pos);
+                   "pos",            Pos.json (Pos.to_absolute res.IdentifySymbolService.pos);
                    "internal_error", JBool false;
                  ]
       | _ -> JAssoc [ "internal_error", JBool false;
                     ] in
-    Find_refs.find_method_at_cursor_target := None;
     to_js_object result
   with _ ->
-    Find_refs.find_method_at_cursor_target := None;
+    IdentifySymbolService.detach_hooks ();
     to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 

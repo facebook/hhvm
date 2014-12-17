@@ -377,7 +377,6 @@ module Env = struct
 
   (* Saves the position of local variables if we're in find refs mode*)
   let save_ref x p lenv =
-    Find_refs.process_var_ref p x;
     (* If we've already located the target and name of this var is
        the same, add it to the result list *)
     (match !(lenv.find_refs_target_name) with
@@ -1013,28 +1012,32 @@ and class_ genv c =
   check_tparams_shadow class_tparam_names methods;
   check_name_collision smethods;
   check_tparams_shadow class_tparam_names smethods;
-  { N.c_mode           = c.c_mode;
-    N.c_final          = c.c_final;
-    N.c_is_xhp         = c.c_is_xhp;
-    N.c_kind           = c.c_kind;
-    N.c_name           = name;
-    N.c_tparams        = tparam_l;
-    N.c_extends        = parents;
-    N.c_uses           = uses;
-    N.c_xhp_attr_uses  = xhp_attr_uses;
-    N.c_req_extends    = req_extends;
-    N.c_req_implements = req_implements;
-    N.c_implements     = implements;
-    N.c_consts         = consts;
-    N.c_typeconsts     = typeconsts;
-    N.c_static_vars    = svars;
-    N.c_vars           = vars;
-    N.c_constructor    = constructor;
-    N.c_static_methods = smethods;
-    N.c_methods        = methods;
-    N.c_user_attributes = c.c_user_attributes;
-    N.c_enum           = enum
-  }
+  let named_class =
+    { N.c_mode           = c.c_mode;
+      N.c_final          = c.c_final;
+      N.c_is_xhp         = c.c_is_xhp;
+      N.c_kind           = c.c_kind;
+      N.c_name           = name;
+      N.c_tparams        = tparam_l;
+      N.c_extends        = parents;
+      N.c_uses           = uses;
+      N.c_xhp_attr_uses  = xhp_attr_uses;
+      N.c_req_extends    = req_extends;
+      N.c_req_implements = req_implements;
+      N.c_implements     = implements;
+      N.c_consts         = consts;
+      N.c_typeconsts     = typeconsts;
+      N.c_static_vars    = svars;
+      N.c_vars           = vars;
+      N.c_constructor    = constructor;
+      N.c_static_methods = smethods;
+      N.c_methods        = methods;
+      N.c_user_attributes = c.c_user_attributes;
+      N.c_enum           = enum
+    }
+  in
+  Naming_hooks.dispatch_class_named_hook named_class;
+  named_class
 
 and enum_ env e =
   { N.e_base       = hint env e.e_base;
@@ -1505,17 +1508,21 @@ and fun_ genv f =
   (* ... and don't forget that fun_kind (generators) and unsafe
    * both depend upon the processing of the unnamed ast *)
   let kind = fun_kind env f.f_fun_kind in
-  {
-    N.f_unsafe = unsafe;
-    f_mode = f.f_mode;
-    f_ret = h;
-    f_name = x;
-    f_tparams = f_tparams;
-    f_params = paraml;
-    f_body = body;
-    f_variadic = variadicity;
-    f_fun_kind = kind;
-  }
+  let named_fun =
+    {
+      N.f_unsafe = unsafe;
+      f_mode = f.f_mode;
+      f_ret = h;
+      f_name = x;
+      f_tparams = f_tparams;
+      f_params = paraml;
+      f_body = body;
+      f_variadic = variadicity;
+      f_fun_kind = kind;
+    }
+  in
+  Naming_hooks.dispatch_fun_named_hook named_fun;
+  named_fun
 
 and cut_and_flatten ?(replacement=Noop) = function
   | [] -> []

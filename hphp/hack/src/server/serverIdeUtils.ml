@@ -59,31 +59,13 @@ let declare content =
         | Ast.Fun f ->
             let nenv = Naming.empty in
             let f = Naming.fun_ nenv f in
-            if !Find_refs.find_method_at_cursor_target <> None then
-              Find_refs.process_find_refs None
-                (snd f.Nast.f_name) (fst f.Nast.f_name);
             let fname = (snd f.Nast.f_name) in
             Typing.fun_decl f;
             declared_funs := SSet.add fname !declared_funs;
         | Ast.Class c ->
             let nenv = Naming.empty in
             let c = Naming.class_ nenv c in
-            if !Find_refs.find_method_at_cursor_target <> None then
-              Find_refs.process_class_ref (fst c.Nast.c_name)
-                (snd c.Nast.c_name) None;
             let cname = snd c.Nast.c_name in
-            let all_methods = c.Nast.c_methods @ c.Nast.c_static_methods in
-            if !Find_refs.find_method_at_cursor_target <> None then
-            List.iter begin fun method_ ->
-              Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                (snd method_.Nast.m_name) (fst method_.Nast.m_name)
-            end all_methods;
-            (match c.Nast.c_constructor with
-            | Some method_ ->
-                Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                  Naming_special_names.Members.__construct
-                  (fst method_.Nast.m_name)
-            | None -> ());
             declared_classes := SSet.add cname !declared_classes;
             Typing_decl.class_decl nenv c;
             ()

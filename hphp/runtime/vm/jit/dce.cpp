@@ -178,14 +178,6 @@ bool findWeakActRecUses(const BlockList& blocks,
     }
   };
 
-  /*
-   * Maintain a list of the Calls depending on each DefInlineFP.
-   * Calls can count as weak uses as long as there is only one right
-   * now.  The limit to 1 is just because we have tested or
-   * investigated the more-than-one case.
-   */
-  jit::flat_map<const IRInstruction*,uint32_t> callCounts;
-
   forEachInst(blocks, [&] (IRInstruction* inst) {
     if (state[inst].isDead()) return;
 
@@ -213,39 +205,6 @@ bool findWeakActRecUses(const BlockList& blocks,
           state[fp].incWeakUse();
         }
       }
-      break;
-
-    /*
-     * Calls can count as weak frame uses with some restrictions:
-     *
-     *   o We must statically know what we're calling.
-     *
-     *   o The call itself is not protected by an EH region.
-     *
-     *   o We're not calling a native function.
-     *
-     *   o The callee must already have a translation for the prologue
-     *     we need.
-     *
-     *   o There's only one Call instruction depending on this frame.
-     *
-     * The reason it is limited to a known prologue is that otherwise
-     * the REQ_BIND_CALL service request could need to enter the
-     * interpreter at the FCall instruction, which means it needs the
-     * ActRec for the function containing that instruction to be on
-     * the stack.  To know this also implies the first requirement.
-     *
-     * Similarly, we can't eliminate the outer frame if we may need it
-     * to enter a catch block that is in the calling function.
-     *
-     * The other limits are just conservative while this was being
-     * developed.
-     *
-     * Important: Right now all of this is disabled
-     * because the knownPrologue mechanism was buggy.
-     * So we'll never have a known prologue here.  TODO(#4357498).
-     */
-    case Call:
       break;
 
     case InlineReturn:
@@ -359,17 +318,6 @@ void performActRecFixups(const BlockList& blocks,
             inst.extra<ReDefSP>()->spOffset +=
               fp->extra<DefInlineFP>()->retSPOff + kNumActRecCells -
               fp->extra<DefInlineFP>()->target->numSlotsInFrame();
-          }
-        }
-        break;
-
-      case Call:
-        {
-          auto const fp = inst.src(1)->inst();
-          if (state[fp].isDead()) {
-            assert(fp->is(DefInlineFP));
-            inst.setSrc(1, fp->src(2));
-            inst.extra<Call>()->after = fp->extra<DefInlineFP>()->retBCOff;
           }
         }
         break;

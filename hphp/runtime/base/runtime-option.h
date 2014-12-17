@@ -525,6 +525,7 @@ public:
                         kDefaultInitialStaticStringTableSize)           \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \
+  F(string, PCRECacheType, std::string("static"))                       \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   /* */

@@ -784,6 +784,27 @@ disabled by setting TypedResults to false.
    RecursionLimit = 100000
   }
 
+- Eval.PCRETableSize
+
+The number of patterns which can be stored in the PCRE cache.
+
+- Eval.PCRECacheType
+
+May be "static", for a very fast cache which never evicts, "lru", for a cache
+which evicts the least-recently used item when full, or "scalable" for a cache
+which is slightly slower than "lru" at low concurrency but much faster for a
+high-concurrency tight-loop workload.
+
+Default: scalable.
+
+- Eval.PCREExpireInterval
+
+If Eval.PCRECacheType is set to "static", then setting this to an integer
+number of seconds will cause the cache to be regularly cleared after the
+specified number of seconds.
+
+For "lru" and "scalable" type caches, this is not necessary and not supported.
+
 =  Tier overwrites
 
   Tiers {

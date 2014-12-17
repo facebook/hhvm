@@ -1158,6 +1158,30 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
+  if (src2->isA(Type::Nullptr)) return cns(env, false);
+
+  if (!src1->isConst() || !src2->isConst()) return nullptr;
+
+  return cns(env, src1->clsVal()->classof(src2->clsVal()));
+}
+
+SSATmp* simplifyExtendsClass(State& env, const IRInstruction* i) {
+  return simplifyInstanceOf(env, i);
+}
+
+SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
+  if (!src1->isConst() || !src2->isConst()) return nullptr;
+
+  return cns(env, src1->clsVal()->ifaceofDirect(src2->strVal()));
+}
+
 SSATmp* simplifyIsType(State& env, const IRInstruction* i) {
   return isTypeImpl(env, i);
 }
@@ -2019,10 +2043,13 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(DecRefNZ)
   X(DecRefStack)
   X(DivDbl)
+  X(ExtendsClass)
   X(Floor)
   X(GetCtxFwdCall)
   X(IncRef)
   X(IncRefCtx)
+  X(InstanceOf)
+  X(InstanceOfIface)
   X(IsNType)
   X(IsScalarType)
   X(IsType)

@@ -534,7 +534,7 @@ macro(hphp_link target)
   endif()
 
   if (LIBFASTLZ_LIBRARY)
-    target_link_libraries(${target} ${LIBFASTIZ_LIBRARY})
+    target_link_libraries(${target} ${LIBFASTLZ_LIBRARY})
   else()
     target_link_libraries(${target} fastlz)
   endif()

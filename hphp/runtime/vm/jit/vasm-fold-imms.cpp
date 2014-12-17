@@ -200,7 +200,7 @@ void foldImms(Vunit& unit) {
   folder.vals.resize(unit.next_vr);
   folder.valid.resize(unit.next_vr);
   // figure out which Vregs are constants and stash their values.
-  for (auto& entry : unit.cpool) {
+  for (auto& entry : unit.constants) {
     folder.valid.set(entry.second);
     folder.vals[entry.second] = entry.first.val;
   }

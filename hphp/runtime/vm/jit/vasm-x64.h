@@ -836,28 +836,17 @@ struct Vunit {
   Vlabel entry;
   jit::vector<Vblock> blocks;
 
-  /*
-   * Vasm constant: 1 or 8 byte unsigned value.
-   */
+  // Vasm constant: 1 or 8 byte unsigned value.
   struct Cns {
     struct Hash {
       size_t operator()(Cns c) const {
         return std::hash<uint64_t>()(c.val) ^ c.isByte;
       }
     };
-
-    Cns()
-      : val(0), isByte(false)
-    {}
-
-    /* implicit */ Cns(bool b)
-      : val(b), isByte(true) {}
-
-    /* implicit */ Cns(uint8_t b)
-      : val(b), isByte(true) {}
-
-    /* implicit */ Cns(uint64_t i)
-      : val(i), isByte(false) {}
+    Cns() : val(0), isByte(false) {}
+    /* implicit */ Cns(bool b) : val(b), isByte(true) {}
+    /* implicit */ Cns(uint8_t b) : val(b), isByte(true) {}
+    /* implicit */ Cns(uint64_t i) : val(i), isByte(false) {}
 
     bool operator==(Cns other) const {
       return val == other.val && isByte == other.isByte;
@@ -867,7 +856,7 @@ struct Vunit {
     bool isByte;
   };
 
-  jit::hash_map<Cns,Vreg,Cns::Hash> cpool;
+  jit::hash_map<Cns,Vreg,Cns::Hash> constants;
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
 };

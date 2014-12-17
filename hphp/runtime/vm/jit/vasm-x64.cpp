@@ -67,15 +67,15 @@ void Vunit::freeScratchBlock(Vlabel l) {
 }
 
 Vreg Vunit::makeConst(uint64_t v) {
-  auto it = cpool.find(v);
-  if (it != cpool.end()) return it->second;
-  return cpool[v] = makeReg();
+  auto it = constants.find(v);
+  if (it != constants.end()) return it->second;
+  return constants[v] = makeReg();
 }
 
 Vreg Vunit::makeConst(bool b) {
-  auto it = cpool.find(b);
-  if (it != cpool.end()) return it->second;
-  return cpool[b] = makeReg();
+  auto it = constants.find(b);
+  if (it != constants.end()) return it->second;
+  return constants[b] = makeReg();
 }
 
 Vreg Vunit::makeConst(double d) {
@@ -346,7 +346,7 @@ private:
   jit::vector<CodeAddress> addrs, points;
   jit::vector<LabelPatch> jccs, jmps, calls, catches;
   jit::vector<PointPatch> ldpoints;
-  jit::hash_map<uint64_t,uint64_t*> cpool;
+  jit::hash_map<uint64_t,uint64_t*> constants;
 };
 
 // prepare a binary op that is not commutative.  s0 must be a different
@@ -1213,7 +1213,7 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   SCOPE_EXIT { busy = false; };
   lowerForX64(m_unit, abi);
 
-  if (!m_unit.cpool.empty()) {
+  if (!m_unit.constants.empty()) {
     foldImms<x64::ImmFolder>(m_unit);
   }
   if (m_unit.needsRegAlloc()) {

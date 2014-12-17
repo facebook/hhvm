@@ -117,7 +117,7 @@ struct Interval {
     : parent(parent)
     , vreg(parent->vreg)
     , wide(parent->wide)
-    , cns(parent->cns)
+    , constant(parent->constant)
     , val(parent->val)
   {}
   // accessors
@@ -150,7 +150,7 @@ public:
   int slot{-1};
   bool wide{false};
   PhysReg reg;
-  bool cns{false};
+  bool constant{false};
   Vunit::Cns val;
 };
 
@@ -907,10 +907,10 @@ void Vxls::buildIntervals() {
     }
   }
   // finish processing live ranges for constants
-  for (auto& c : unit.cpool) {
+  for (auto& c : unit.constants) {
     if (auto ivl = intervals[c.second]) {
       ivl->ranges.back().start = 0;
-      ivl->cns = true;
+      ivl->constant = true;
       ivl->val = c.first;
     }
   }
@@ -929,7 +929,7 @@ void Vxls::buildIntervals() {
   if (debug) {
     forEach(livein[unit.entry], [&](Vreg r) {
       UNUSED auto ivl = intervals[r];
-      assert(ivl->cns || ivl->fixed());
+      assert(ivl->constant || ivl->fixed());
     });
     for (auto ivl : intervals) {
       if (!ivl) continue;
@@ -949,7 +949,7 @@ void Vxls::walkIntervals() {
     if (!ivl) continue;
     if (ivl->fixed()) {
       assignReg(ivl, ivl->vreg);
-    } else if (ivl->cns) {
+    } else if (ivl->constant) {
       spill(ivl);
     } else {
       pending.push(ivl);
@@ -1198,7 +1198,7 @@ void Vxls::spill(Interval* ivl) {
   }
   assert(ivl->uses.empty());
   ivl->reg = InvalidReg;
-  if (!ivl->cns) assignSpill(ivl);
+  if (!ivl->constant) assignSpill(ivl);
 }
 
 // Split and spill other intervals that conflict with current for
@@ -1529,7 +1529,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
     if (!ivl) continue;
     if (ivl->reg != InvalidReg) {
       moves[dst] = ivl->reg;
-    } else if (ivl->cns) {
+    } else if (ivl->constant) {
       if (ivl->val.isByte) {
         loads.emplace_back(ldimmb{bool(ivl->val.val), dst, true});
       } else {
@@ -1617,7 +1617,7 @@ std::string Interval::toString() {
     out << show(reg);
     delim = " ";
   }
-  if (cns) {
+  if (constant) {
     out << delim << folly::format("#{:08x}", val.val);
   }
   if (slot >= 0) {

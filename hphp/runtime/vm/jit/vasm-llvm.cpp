@@ -509,7 +509,7 @@ struct LLVMEmitter {
     m_blocks[unit.entry] = m_irb.GetInsertBlock();
 
     // Register all unit's constants.
-    for (auto const& pair : unit.cpool) {
+    for (auto const& pair : unit.constants) {
       auto val = pair.first.isByte ? cns(uint8_t(pair.first.val))
                                    : cns(pair.first.val);
       defineValue(pair.second, val);

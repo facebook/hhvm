@@ -352,6 +352,23 @@ void Parser::onClassAbstractConstant(Token &out, Token *exprs, Token &var) {
   onVariable(out, exprs, var, nullptr, true, m_scanner.detachDocComment());
 }
 
+void Parser::onClassTypeConstant(Token &out, Token &var, Token &value) {
+  Token typeConst;
+  bool isAbstract = value.typeAnnotationName() == "";
+
+  if (isAbstract) {
+    onClassAbstractConstant(typeConst, nullptr, var);
+  } else {
+    value.setText(value.typeAnnotationName());
+    Token typeConstValue;
+    onScalar(typeConstValue, T_STRING, value);
+
+    onClassConstant(typeConst, nullptr, var, typeConstValue);
+  }
+
+  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract);
+}
+
 void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
                         bool constant /* = false */,
                         const std::string &docComment /* = "" */) {
@@ -2111,6 +2128,9 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
       break;
     case 'x':
       type.typeAnnotation->setXHP();
+      break;
+    case 'a':
+      type.typeAnnotation->setTypeAccess();
       break;
     }
   }

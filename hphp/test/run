@@ -350,8 +350,13 @@ function find_file($test, $name) {
 }
 
 function find_file_for_dir($dir, $name) {
-  while (($dir !== '.' && $dir !== '/') && is_dir($dir)) {
-    $dir = realpath($dir);
+  // Handle the case where the $dir might come in as '.' because you
+  // are running the test runner on a file from the same directory as
+  // the test e.g., './mytest.php'. dirname() will give you the '.' when
+  // you actually have a lot of path to traverse upwards like
+  // /home/you/code/tests/mytest.php. Use realpath() to get that.
+  $dir = realpath($dir);
+  while ($dir !== '/' && is_dir($dir)) {
     $file = "$dir/$name";
     if (is_file($file)) {
       return $file;

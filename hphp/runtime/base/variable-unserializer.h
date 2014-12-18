@@ -55,13 +55,6 @@ struct VariableUnserializer {
   Variant unserialize();
 
   /*
-   * Unserialize an object for use as an array key.  The only difference from
-   * unserialize() is that no ref is pushed internally, since keys can't be
-   * referred to later in the serialized string.
-   */
-  Variant unserializeKey();
-
-  /*
    * Read the appropriate data type from buffer.
    */
   int64_t readInt();

@@ -38,12 +38,6 @@ Variant VariableUnserializer::unserialize() {
   return v;
 }
 
-Variant VariableUnserializer::unserializeKey() {
-  Variant v;
-  v.unserialize(this, Uns::Mode::Key);
-  return v;
-}
-
 static std::pair<int64_t,const char*> hh_strtoll_base10(const char* p) {
   int64_t x = 0;
   bool neg = false;

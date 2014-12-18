@@ -1112,7 +1112,9 @@ void Variant::unserialize(VariableUnserializer *uns,
             see getVariantPtr
           */
           for (int64_t i = size; i--; ) {
-            String key = uns->unserializeKey().toString();
+            Variant v;
+            v.unserialize(uns, Uns::Mode::Key);
+            String key = v.toString();
             int ksize = key.size();
             const char *kdata = key.data();
             int subLen = 0;

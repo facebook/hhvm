@@ -742,6 +742,9 @@ bool f_shm_has_var(int64_t shm_identifier, int64_t variable_key) {
 
 bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key,
                    const Variant& variable) {
+  /* setup string-variable and serialize */
+  String serialized = HHVM_FN(serialize)(variable);
+
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -750,11 +753,8 @@ bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key,
                   shm_identifier);
     return false;
   }
+
   sysvshm_shm *shm_list_ptr = *iter;
-
-  /* setup string-variable and serialize */
-  String serialized = HHVM_FN(serialize)(variable);
-
   /* insert serialized variable into shared memory */
   int ret = put_shm_data(shm_list_ptr->ptr, variable_key,
                          (char*)serialized.data(), serialized.size());

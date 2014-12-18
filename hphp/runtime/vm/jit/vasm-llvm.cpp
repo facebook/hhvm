@@ -58,6 +58,7 @@
 #include <llvm/Support/ErrorHandling.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/FormattedStream.h>
+#include <llvm/Support/Host.h>
 #include <llvm/Support/Path.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/TargetSelect.h>
@@ -608,16 +609,18 @@ struct LLVMEmitter {
     verifyModule();
 
     auto tcMM = m_tcMM.release();
+    auto cpu = llvm::sys::getHostCPUName();
+    FTRACE(1, "Creating ExecutionEngine with CPU '{}'\n", cpu.str());
     std::string errStr;
     std::unique_ptr<llvm::ExecutionEngine> ee(
       llvm::EngineBuilder(m_module.get())
+      .setMCPU(cpu)
       .setErrorStr(&errStr)
       .setUseMCJIT(true)
       .setMCJITMemoryManager(tcMM)
       .setOptLevel(llvm::CodeGenOpt::Aggressive)
       .setRelocationModel(llvm::Reloc::Static)
       .setCodeModel(llvm::CodeModel::Small)
-      .setMAttrs(std::vector<const char*>{"+sse4.1"})
       .setVerifyModules(true)
       .create());
     always_assert_flog(ee, "ExecutionEngine creation failed: {}\n", errStr);

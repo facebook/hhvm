@@ -18,7 +18,7 @@
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_SOCKET_CONNECTION_H_
 
 #include <folly/io/IOBuf.h>
-#include <folly/experimental/wangle/ManagedConnection.h>
+#include <folly/wangle/acceptor/ManagedConnection.h>
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
 #include <folly/SocketAddress.h>
 #include "thrift/lib/cpp/transport/TTransportException.h"

@@ -430,7 +430,7 @@ void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
   if (size == 8) {
     v << load{mem, reg};
   } else if (size == 4) {
-    v << loadl{mem, reg};
+    v << loadzlq{mem, reg};
   } else {
     not_implemented();
   }
@@ -441,7 +441,9 @@ void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem) {
   if (size == 8) {
     v << cmpqm{v.cns(c), mem, sf};
   } else if (size == 4) {
-    v << cmplm{v.cns(c), mem, sf};
+    auto lowCns = v.makeReg();
+    v << movtql{v.cns(c), lowCns};
+    v << cmplm{lowCns, mem, sf};
   } else {
     not_implemented();
   }
@@ -452,7 +454,9 @@ void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
   if (size == 8) {
     v << cmpqm{reg, mem, sf};
   } else if (size == 4) {
-    v << cmplm{reg, mem, sf};
+    auto lowCls = v.makeReg();
+    v << movtql{reg, lowCls};
+    v << cmplm{lowCls, mem, sf};
   } else {
     not_implemented();
   }

@@ -23,11 +23,16 @@
 #include "hphp/util/portability.h"
 
 #if defined __x86_64__
-#if (!defined USE_SSECRC) && (defined FACEBOOK)
-#define USE_SSECRC
-#endif
+#  if (!defined USE_SSECRC) && (defined FACEBOOK)
+#    define USE_SSECRC
+#  endif
 #else
-#undef USE_SSECRC
+#  undef USE_SSECRC
+#endif
+
+// Killswitch
+#if NO_SSECRC
+#  undef USE_SSECRC
 #endif
 
 namespace HPHP {

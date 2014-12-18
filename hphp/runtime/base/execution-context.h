@@ -628,7 +628,7 @@ public:
   // destroying the context, so C++ order of destruction is not an issue.
   smart::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
   VarEnv* m_globalVarEnv;
-  smart::hash_map<StringData*,Unit*,string_data_hash,string_data_same>
+  smart::hash_map<const StringData*,Unit*,string_data_hash,string_data_same>
     m_evaledFiles;
   smart::vector<const StringData*> m_evaledFilesOrder;
   smart::vector<Unit*> m_createdFuncs;

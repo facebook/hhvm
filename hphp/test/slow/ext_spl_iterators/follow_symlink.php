@@ -7,7 +7,7 @@ mkdir($p . "test/dir1");
 touch($p . "test/dir1/file1.txt");
 mkdir($p . "test/dir2");
 touch($p . "test/dir2/file2.txt");
-symlink($p . "../dir1", $p . "test/dir2/dir1");
+symlink($p . "test/dir1", $p . "test/dir2/dir1");
 
 // Don't follow
 $iterator = new RecursiveDirectoryIterator($p . 'test/dir2', 

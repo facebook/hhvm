@@ -3,4 +3,5 @@ DONT FOLLOW SYMLINKS
 /tmp/recursivedirectoryiterator_followsymlink_test/test/dir2/file2.txt
 FOLLOW SYMLINKS
 /tmp/recursivedirectoryiterator_followsymlink_test/test/dir2/dir1
+/tmp/recursivedirectoryiterator_followsymlink_test/test/dir2/dir1/file1.txt
 /tmp/recursivedirectoryiterator_followsymlink_test/test/dir2/file2.txt

@@ -576,7 +576,7 @@ void CodeGenerator::cgHintStkInner(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAssertType(IRInstruction* inst) {
-  copyTV(vmain(), srcLoc(inst, 0), dstLoc(inst, 0));
+  copyTV(vmain(), srcLoc(inst, 0), dstLoc(inst, 0), inst->dst()->type());
 }
 
 void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
@@ -896,12 +896,7 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
   always_assert(inst->src(0)->numWords() == inst->dst(0)->numWords());
-  auto& v = vmain();
-  if (srcLoc(inst, 0).hasReg(1)) {
-    copyTV(v, srcLoc(inst, 0), dstLoc(inst, 0));
-  } else {
-    v << copy{srcLoc(inst, 0).reg(), dstLoc(inst, 0).reg()};
-  }
+  copyTV(vmain(), srcLoc(inst, 0), dstLoc(inst, 0), inst->dst()->type());
 }
 
 void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
@@ -4045,6 +4040,7 @@ void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const src   = inst->src(0);
+  auto const dst   = inst->dst();
   auto const rData = srcLoc(inst, 0).reg(0);
   auto const rType = srcLoc(inst, 0).reg(1);
   auto& v = vmain();
@@ -4055,7 +4051,11 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto doMov = [&]() {
     auto const valDst = dstLoc(inst, 0).reg(0);
     auto const typeDst = dstLoc(inst, 0).reg(1);
-    v << copy{rData, valDst};
+    if (dst->isA(Type::Bool) && !src->isA(Type::Bool)) {
+      v << movtqb{rData, valDst};
+    } else {
+      v << copy{rData, valDst};
+    }
     if (typeDst != InvalidReg) {
       if (rType != InvalidReg) v << copy{rType, typeDst};
       else v << ldimm{src->type().toDataType(), typeDst};

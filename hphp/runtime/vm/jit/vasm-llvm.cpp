@@ -1254,6 +1254,7 @@ O(movb) \
 O(movl) \
 O(movzbl) \
 O(movzbq) \
+O(movtqb) \
 O(movtql) \
 O(mulsd) \
 O(mul) \
@@ -2206,6 +2207,10 @@ void LLVMEmitter::emit(const movzbl& inst) {
 
 void LLVMEmitter::emit(const movzbq& inst) {
   defineValue(inst.d, zext(value(inst.s), 64));
+}
+
+void LLVMEmitter::emit(const movtqb& inst) {
+  defineValue(inst.d, narrow(value(inst.s), 8));
 }
 
 void LLVMEmitter::emit(const movtql& inst) {

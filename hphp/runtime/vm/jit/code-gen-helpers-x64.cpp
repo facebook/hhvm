@@ -469,7 +469,7 @@ void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
   }
 }
 
-void copyTV(Vout& v, Vloc src, Vloc dst) {
+void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   auto src_arity = src.numAllocated();
   auto dst_arity = dst.numAllocated();
   if (dst_arity == 2) {
@@ -483,7 +483,11 @@ void copyTV(Vout& v, Vloc src, Vloc dst) {
     return;
   }
   always_assert(src_arity >= 1);
-  v << copy{src.reg(0), dst.reg(0)};
+  if (src_arity == 2 && destType <= Type::Bool) {
+    v << movtqb{src.reg(0), dst.reg(0)};
+  } else {
+    v << copy{src.reg(0), dst.reg(0)};
+  }
 }
 
 // move 2 gpr to 1 xmm

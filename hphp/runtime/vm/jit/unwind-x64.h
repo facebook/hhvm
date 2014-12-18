@@ -44,14 +44,14 @@ typedef TreadHashMap<CTCA, TCA, ctca_identity_hash> CatchTraceMap;
  * it.  Used to pass values between unwinder code and catch traces.
  */
 struct UnwindRDS {
-  int64_t unwinderScratch;
+  _Unwind_Exception* exn;
   TypedValue unwinderTv;
   bool doSideExit;
 };
 extern RDS::Link<UnwindRDS> unwindRdsInfo;
 
-inline ptrdiff_t unwinderScratchOff() {
-  return unwindRdsInfo.handle() + offsetof(UnwindRDS, unwinderScratch);
+inline ptrdiff_t unwinderExnOff() {
+  return unwindRdsInfo.handle() + offsetof(UnwindRDS, exn);
 }
 
 inline ptrdiff_t unwinderSideExitOff() {

@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -1262,9 +1263,9 @@ void registerLiveObj(ObjectData* obj) {
   g_context->m_liveBCObjs.insert(obj);
 }
 
-void unwindResumeHelper(_Unwind_Exception* data) {
+void unwindResumeHelper() {
   tl_regState = VMRegState::CLEAN;
-  _Unwind_Resume(data);
+  _Unwind_Resume(unwindRdsInfo->exn);
 }
 
 namespace MInstrHelpers {

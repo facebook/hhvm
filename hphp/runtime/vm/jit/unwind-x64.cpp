@@ -131,7 +131,7 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // RDS. This also simplifies the handler code because it doesn't
   // have to worry about saving its arguments somewhere while
   // executing the exit trace.
-  unwindRdsInfo->unwinderScratch = (int64_t)exn;
+  unwindRdsInfo->exn = exn;
   unwindRdsInfo->doSideExit = do_side_exit;
   if (do_side_exit) {
     unwindRdsInfo->unwinderTv = unwinder_tv;

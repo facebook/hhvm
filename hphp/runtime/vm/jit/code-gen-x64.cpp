@@ -590,16 +590,11 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   emitIncStat(v, Stats::TC_CatchTrace);
 }
 
-static void callUnwindResumeHelper(Vout& v) {
-  auto exnReg = v.makeReg();
-  v << load{rVmTl[unwinderScratchOff()], exnReg};
-  v << vcall{CppCall::direct(unwindResumeHelper), v.makeVcallArgs({{exnReg}}),
+void CodeGenerator::cgEndCatch(IRInstruction* inst) {
+  auto v = vmain();
+  v << vcall{CppCall::direct(unwindResumeHelper), v.makeVcallArgs({{}}),
              v.makeTuple({})};
   v << ud2{};
-}
-
-void CodeGenerator::cgEndCatch(IRInstruction* inst) {
-  callUnwindResumeHelper(vmain());
 }
 
 void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
@@ -617,10 +612,10 @@ void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
 
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
   auto& v = vmain();
-  auto exnReg = v.makeReg();
-  v << load{rVmTl[unwinderScratchOff()], exnReg};
+  auto exn = v.makeReg();
+  v << load{rVmTl[unwinderExnOff()], exn};
   v << vcall{CppCall::direct(_Unwind_DeleteException),
-             v.makeVcallArgs({{exnReg}}), v.makeTuple({})};
+             v.makeVcallArgs({{exn}}), v.makeTuple({})};
 }
 
 void CodeGenerator::cgJcc(IRInstruction* inst) {

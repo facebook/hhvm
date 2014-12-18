@@ -221,9 +221,9 @@ RDS::Handle lookupClsRDSHandle(const StringData* name);
 void registerLiveObj(ObjectData* obj);
 
 /*
- * Set tl_regState to DIRTY and call _Unwind_Resume.
+ * Set tl_regState to CLEAN and call _Unwind_Resume.
  */
-void unwindResumeHelper(_Unwind_Exception* data);
+void unwindResumeHelper();
 
 namespace MInstrHelpers {
 StringData* stringGetI(StringData*, uint64_t);

@@ -1445,14 +1445,8 @@ function msg_loop($num_tests, $queue) {
 }
 
 function print_success($tests, $results, $options) {
-  $ran_tests = false;
-  foreach ($results as $result) {
-    if ($result['status'] == 'passed') {
-      $ran_tests = true;
-      break;
-    }
-  }
-  if (!$tests || !$ran_tests) {
+  // We didn't run any tests, not even skipped. Clowntown!
+  if (!$tests) {
     print "\nCLOWNTOWN: No tests!\n";
     if (empty($options['no-fun'])) {
       print <<<CLOWN
@@ -1472,6 +1466,46 @@ CLOWN
 
     /* Emacs' syntax highlighting gets confused by that clown and this comment
      * resets whatever state got messed up. */
+    return;
+  }
+  $ran_tests = false;
+  foreach ($results as $result) {
+    // The result here will either be skipped or passed (since failed is
+    // handled in print_failure
+    if ($result['status'] == 'passed') {
+      $ran_tests = true;
+      break;
+    }
+  }
+  // We just had skipped tests
+  if (!$ran_tests) {
+    print "\nSKIP-ALOO: Only skipped tests!\n";
+    if (empty($options['no-fun'])) {
+      print <<<SKIPPER
+                        .".
+                         /  |
+                        /  /
+                       / ,"
+           .-------.--- /
+          "._ __.-/ o. o\
+             "   (    Y  )
+                  )     /
+                 /     (
+                /       Y
+            .-"         |
+           /  _     \    \
+          /    `. ". ) /' )
+         Y       )( / /(,/
+        ,|      /     )
+       ( |     /     /
+        " \_  (__   (__
+            "-._,)--._,)
+SKIPPER
+        ."\n\n";
+    }
+
+    /* Emacs' syntax highlighting may get confused by the skipper and this
+     * rcomment esets whatever state got messed up. */
     return;
   }
   print "\nAll tests passed.\n";

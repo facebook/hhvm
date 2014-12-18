@@ -327,17 +327,17 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     uintptr_t Size, unsigned Alignment, unsigned SectionID,
     llvm::StringRef SectionName, bool IsReadOnly
   ) override {
-    assert_not_implemented(Alignment <= 8);
-
     if (SectionName.startswith(".rodata")) {
       // This needs to be allocated somewhere persistent since code might
       // reference it.
       auto ret = mcg->globalData().alloc<uint8_t>(Alignment, Size);
-      FTRACE(1, "Allocate rodata section `{}' of size {} @ {}\n",
-             SectionName.str(), Size, ret);
+      FTRACE(1, "Allocate rodata section '{}' id={} at addr={}, size={},"
+             " alignment={}\n",
+             SectionName.str(), SectionID, ret, Size, Alignment);
       return ret;
     }
 
+    assert_not_implemented(Alignment <= 8);
     // Some of the data sections will use 32-bit relocations to reference
     // code, thus we have to make sure they are allocated close to code.
     std::unique_ptr<uint8_t[], LowMallocDeleter>
@@ -692,25 +692,25 @@ struct LLVMEmitter {
   /*
    * For each entry in m_fixups, find its corresponding locrec entry, find
    * the actual call instruction, and register the fixup.
+   *
+   * NB: LLVM may optimize away call instructions.
    */
   void processFixups(const LocRecs::FunctionRecord& funcRec,
                      uint8_t* funcStart) {
     for (auto& fix : m_fixups) {
       auto it = funcRec.records.find(fix.id);
-      if (it == funcRec.records.end()) {
-        // The call was optimized away.
-        continue;
-      }
+      if (it == funcRec.records.end()) continue;
 
-      auto afterCall = [&] {
+      auto afterCall = [&]() -> unsigned char* {
         for (auto& record : it->second) {
           auto ip = funcStart + record.offset;
           DecodedInstruction di(ip);
           if (di.isCall()) return ip + di.size();
         }
-        always_assert_flog(
-          false, "Couldn't find call instruction for locrec {}", fix.id);
+        FTRACE(1, "Couldn't find call instruction for locrec {}\n", fix.id);
+        return nullptr;
       }();
+      if (!afterCall) continue;
 
       FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
       mcg->recordSyncPoint(afterCall, fix.fixup.pcOffset, fix.fixup.spOffset);
@@ -720,14 +720,14 @@ struct LLVMEmitter {
   void processSvcReqs(const LocRecs::FunctionRecord& funcRec,
                       uint8_t* funcStart) {
     auto findJmp = [&](const jit::vector<LocRecs::LocationRecord>& records,
-                       uint16_t id) {
+                       uint16_t id) -> unsigned char* {
       for (auto& record : records) {
         auto ip = funcStart + record.offset;
         DecodedInstruction di(ip);
         if (di.isJmp()) return ip;
       }
-      always_assert_flog(
-        false, "Couldn't find jmp instruction for locrec {}", id);
+      FTRACE(1, "Couldn't find jmp instruction for locrec {}\n", id);
+      return nullptr;
     };
 
     for (auto& req : m_bindjmps) {
@@ -735,6 +735,8 @@ struct LLVMEmitter {
       if (it == funcRec.records.end()) continue;
 
       auto jmpIp = findJmp(it->second, req.id);
+      if (!jmpIp) continue;
+
       FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
       mcg->cgFixups().m_alignFixups.emplace(

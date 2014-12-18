@@ -92,6 +92,12 @@ const int64_t q_Memcached$$DISTRIBUTION_MODULA
           = MEMCACHED_DISTRIBUTION_MODULA;
 const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT
           = MEMCACHED_DISTRIBUTION_CONSISTENT;
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT_KETAMA
+          = MEMCACHED_DISTRIBUTION_CONSISTENT_KETAMA;
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT_WEIGHTED
+          = MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED;
+#endif
 const int64_t q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
           = MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED;
 const int64_t q_Memcached$$OPT_BUFFER_WRITES
@@ -1143,12 +1149,14 @@ bool HHVM_METHOD(Memcached, setoption, int option, const Variant& value) {
        * options on false case, like it does for MEMCACHED_BEHAVIOR_KETAMA
        * (non-weighted) case. We have to clean up ourselves.
        */
-      memcached_behavior_set_key_hash(&data->m_impl->memcached,
-                                      MEMCACHED_HASH_DEFAULT);
-      memcached_behavior_set_distribution_hash(&data->m_impl->memcached,
-                                               MEMCACHED_HASH_DEFAULT);
-      memcached_behavior_set_distribution(&data->m_impl->memcached,
-                                          MEMCACHED_DISTRIBUTION_MODULA);
+      if (!lValue) {
+        memcached_behavior_set_key_hash(&data->m_impl->memcached,
+                                        MEMCACHED_HASH_DEFAULT);
+        memcached_behavior_set_distribution_hash(&data->m_impl->memcached,
+                                                 MEMCACHED_HASH_DEFAULT);
+        memcached_behavior_set_distribution(&data->m_impl->memcached,
+                                            MEMCACHED_DISTRIBUTION_MODULA);
+      }
       break;
     }
 
@@ -1209,6 +1217,10 @@ IMPLEMENT_THREAD_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
 
 const StaticString s_Memcached("Memcached");
 const StaticString s_DISTRIBUTION_CONSISTENT("DISTRIBUTION_CONSISTENT");
+const StaticString s_DISTRIBUTION_CONSISTENT_KETAMA("DISTRIBUTION_CONSISTENT_KETAMA");
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+const StaticString s_DISTRIBUTION_CONSISTENT_WEIGHTED("DISTRIBUTION_CONSISTENT_WEIGHTED");
+#endif
 const StaticString s_DISTRIBUTION_MODULA("DISTRIBUTION_MODULA");
 const StaticString s_GET_PRESERVE_ORDER("GET_PRESERVE_ORDER");
 const StaticString s_HASH_CRC("HASH_CRC");
@@ -1341,6 +1353,16 @@ class MemcachedExtension : public Extension {
       s_Memcached.get(), s_DISTRIBUTION_CONSISTENT.get(),
       q_Memcached$$DISTRIBUTION_CONSISTENT
     );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_CONSISTENT_KETAMA.get(),
+      q_Memcached$$DISTRIBUTION_CONSISTENT_KETAMA
+    );
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_CONSISTENT_WEIGHTED.get(),
+      q_Memcached$$DISTRIBUTION_CONSISTENT_WEIGHTED
+    );
+#endif
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_DISTRIBUTION_MODULA.get(),
       q_Memcached$$DISTRIBUTION_MODULA

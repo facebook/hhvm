@@ -186,7 +186,7 @@ class Redis {
     if ($by !== 1) {
       return $this->decrBy($key, $by);
     }
-    $this->processCommand("DECR", $this->prefix($key));
+    $this->processCommand("DECR", $this->_prefix($key));
     return $this->processLongResponse();
   }
 
@@ -194,7 +194,7 @@ class Redis {
     if ($by === 1) {
       return $this->decr($key);
     }
-    $this->processCommand("DECRBY", $this->prefix($key), (int)$by);
+    $this->processCommand("DECRBY", $this->_prefix($key), (int)$by);
     return $this->processLongResponse();
   }
 
@@ -202,7 +202,7 @@ class Redis {
     if ($by !== 1) {
       return $this->incrBy($key, $by);
     }
-    $this->processCommand("INCR", $this->prefix($key));
+    $this->processCommand("INCR", $this->_prefix($key));
     return $this->processLongResponse();
   }
 
@@ -210,19 +210,19 @@ class Redis {
     if ($by === 1) {
       return $this->incr($key);
     }
-    $this->processCommand("INCRBY", $this->prefix($key), (int)$by);
+    $this->processCommand("INCRBY", $this->_prefix($key), (int)$by);
     return $this->processLongResponse();
   }
 
   public function incrByFloat($key, $by) {
-    $this->processCommand("INCRBYFLOAT", $this->prefix($key),
+    $this->processCommand("INCRBYFLOAT", $this->_prefix($key),
                                                (float)$by);
     return $this->processDoubleResponse();
   }
 
   public function set($key, $value, $optionArrayOrExpiration = -1) {
-    $key = $this->prefix($key);
-    $value = $this->serialize($value);
+    $key = $this->_prefix($key);
+    $value = $this->_serialize($value);
     if (is_array($optionArrayOrExpiration) &&
         count($optionArrayOrExpiration) > 0) {
       $ex = array_key_exists('ex', $optionArrayOrExpiration);
@@ -339,7 +339,7 @@ class Redis {
   }
 
   public function object($info, $key) {
-    $this->processCommand('OBJECT', $info, $this->prefix($key));
+    $this->processCommand('OBJECT', $info, $this->_prefix($key));
     switch ($info) {
       case 'refcount': return $this->processLongResponse();
       case 'encoding': return $this->processStringResponse();
@@ -351,16 +351,16 @@ class Redis {
 
   public function hMGet($key, array $members) {
     $members = array_values($members);
-    $args = array_merge([$this->prefix($key)], $members);
+    $args = array_merge([$this->_prefix($key)], $members);
     $this->processArrayCommand('HMGET', $args);
     return $this->processAssocResponse($members);
   }
 
   public function hMSet($key, array $pairs) {
-    $args = [$this->prefix($key)];
+    $args = [$this->_prefix($key)];
     foreach ($pairs as $k => $v) {
       $args[] = $k;
-      $args[] = $this->serialize($v);
+      $args[] = $this->_serialize($v);
     }
     $this->processArrayCommand('HMSET', $args);
     return $this->processBooleanResponse();
@@ -369,7 +369,7 @@ class Redis {
   /* Sets ---------------------------------------------------------------- */
 
   public function sRandMember($key, $count = null) {
-    $args = [$this->prefix($key)];
+    $args = [$this->_prefix($key)];
     if ($count !== null) {
        $args[] = $count;
     }
@@ -388,10 +388,10 @@ class Redis {
     if (($count - 1) % 2) {
       return false;
     }
-    $args[0] = $this->prefix($args[0]);
+    $args[0] = $this->_prefix($args[0]);
     for ($i = 1; $i < $count; $i += 2) {
       $args[$i  ] = (double)$args[$i];
-      $args[$i+1] = $this->serialize($args[$i+1]);
+      $args[$i+1] = $this->_serialize($args[$i+1]);
     }
     $this->processArrayCommand('ZADD', $args);
     return $this->processLongResponse();
@@ -402,9 +402,9 @@ class Redis {
                                       array $keys,
                                       array $weights = null,
                                       $op = '') {
-    $args = [ $this->prefix($key), count($keys) ];
+    $args = [ $this->_prefix($key), count($keys) ];
     foreach ($keys as $k) {
-      $args[] = $this->prefix($k);
+      $args[] = $this->_prefix($k);
     }
 
     if ($weights) {
@@ -445,7 +445,7 @@ class Redis {
 
   public function zRange($key, $start, $end, $withscores = false) {
     $args = [
-      $this->prefix($key),
+      $this->_prefix($key),
       (int)$start,
       (int)$end,
     ];
@@ -464,7 +464,7 @@ class Redis {
                                        $start,
                                        $end,
                                        array $opts = null) {
-    $args = [$this->prefix($key), (int)$start, (int)$end];
+    $args = [$this->_prefix($key), (int)$start, (int)$end];
     if (isset($opts['limit']) AND
         is_array($opts['limit']) AND
         (count($opts['limit']) == 2)) {
@@ -495,7 +495,7 @@ class Redis {
 
   public function zRevRange($key, $start, $end, $withscores = false) {
     $args = [
-      $this->prefix($key),
+      $this->_prefix($key),
       (int)$start,
       (int)$end,
     ];
@@ -573,10 +573,10 @@ class Redis {
     return $this;
   }
 
-  public function watch($key, /* ... */) {
-    $args = array_map([$this, 'prefix'], func_get_args());
+  public function watch($key/* ... */) {
+    $args = array_map([$this, '_prefix'], func_get_args());
     $this->processArrayCommand("WATCH", $args);
-    return $this->processBooleanResponse();;
+    return $this->processBooleanResponse();
   }
 
   /* Batch --------------------------------------------------------------- */
@@ -584,8 +584,8 @@ class Redis {
   protected function processMSetCommand($cmd, array $data) {
     $args = [];
     foreach ($data as $key => $val) {
-      $args[] = $this->prefix($key);
-      $args[] = $this->serialize($val);
+      $args[] = $this->_prefix($key);
+      $args[] = $this->_serialize($val);
     }
     $this->processArrayCommand($cmd, $args);
   }
@@ -606,7 +606,7 @@ class Redis {
     $keyCount = $numKeys;
     foreach($args as &$arg) {
       if ($keyCount-- <= 0) break;
-      $arg = $this->prefix($arg);
+      $arg = $this->_prefix($arg);
     }
     array_unshift($args, $numKeys);
     array_unshift($args, $script);
@@ -890,11 +890,6 @@ class Redis {
     'unsubscribe' => false,
     'punsubscribe' => false,
 
-    // Introspection
-    '_prefix' => [ 'alias' => 'prefix' ],
-    '_serialize' => [ 'alias' => 'serialize' ],
-    '_unserialize' => [ 'alias' => 'unserialize' ],
-
     // Batch Ops
     'mget' => [ 'vararg' => self::VAR_KEY_ALL,
                 'return' => 'Vector', 'retargs' => [1] ],
@@ -1068,9 +1063,9 @@ class Redis {
         if (( $first AND ($varkey == self::VAR_KEY_FIRST)) OR
             (!$first AND ($varkey == self::VAR_KEY_NOT_FIRST)) OR
                          ($varkey == self::VAR_KEY_ALL)) {
-          $arg = $this->prefix($arg);
+          $arg = $this->_prefix($arg);
         } else if ($flags & self::VAR_SERIALIZE) {
-          $arg = $this->serialize($arg);
+          $arg = $this->_serialize($arg);
         }
         $first = false;
       }
@@ -1122,13 +1117,13 @@ class Redis {
     return (bool)fwrite($this->connection, $cmd);
   }
 
-  protected function processCommand($cmd, /* ... */) {
+  protected function processCommand($cmd/* ... */) {
     $args = func_get_args();
     array_shift($args);
     return $this->processArrayCommand($cmd, $args);
   }
 
-  protected function serialize($str) {
+  public function _serialize($str) {
     switch ($this->serializer) {
       case self::SERIALIZER_NONE:
         return $str;
@@ -1140,7 +1135,7 @@ class Redis {
     }
   }
 
-  protected function unserialize($str) {
+  public function _unserialize($str) {
     switch ($this->serializer) {
       case self::SERIALIZER_NONE:
         return $str;
@@ -1223,7 +1218,7 @@ class Redis {
         return false;
       }
       return (($type === self::TYPE_LINE) OR ($type === self::TYPE_BULK))
-             ? $this->unserialize($resp) : false;
+             ? $this->_unserialize($resp) : false;
     }
     $this->multiHandler[] = [ 'cb' => [$this,'processSerializedResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
@@ -1307,7 +1302,7 @@ class Redis {
       $lineNo++;
       $val = $this->sockReadData($type);
       if ($unser AND (($lineNo % $unser) == 0)) {
-        $val = $this->unserialize($val);
+        $val = $this->_unserialize($val);
       }
       $ret[] = $val !== null ? $val : false;
     }
@@ -1334,11 +1329,11 @@ class Redis {
     while($count > 1) {
       $key = $this->sockReadData($type);
       if ($unser_key) {
-        $key = $this->unserialize($key);
+        $key = $this->_unserialize($key);
       }
       $val = $this->sockReadData($type);
       if ($unser_val) {
-        $val = $this->unserialize($val);
+        $val = $this->_unserialize($val);
       }
       $ret[$key] = $val;
       $count -= 2;
@@ -1370,7 +1365,7 @@ class Redis {
       $key = array_shift($keys);
       $val = $this->sockReadData($type);
       if ($unser_val) {
-        $val = $this->unserialize($val);
+        $val = $this->_unserialize($val);
       }
       $ret[$key] = $val !== null ? $val : false;
     }
@@ -1457,7 +1452,7 @@ class Redis {
     return ($type === self::TYPE_LINE) AND ($resp === 'QUEUED');
   }
 
-  protected function prefix($key) {
+  public function _prefix($key) {
     return $this->prefix . $key;
   }
 
@@ -1526,8 +1521,8 @@ class Redis {
         }
       }
       switch ($format[$i]) {
-        case 'k': $args[$i] = $this->prefix($args[$i]); break;
-        case 'v': $args[$i] = $this->serialize($args[$i]); break;
+        case 'k': $args[$i] = $this->_prefix($args[$i]); break;
+        case 'v': $args[$i] = $this->_serialize($args[$i]); break;
         case 's': $args[$i] = (string)$args[$i]; break;
         case 'l': $args[$i] = (int)$args[$i]; break;
         case 'd': $args[$i] = (float)$args[$i]; break;

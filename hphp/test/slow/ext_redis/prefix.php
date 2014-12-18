@@ -5,6 +5,7 @@ include (__DIR__ . '/redis.inc');
 $r = NewRedisTestInstance();
 $key = GetTestKeyName(__FILE__);
 
+var_dump(method_exists($r, '_prefix'));
 var_dump($r->setOption(Redis::OPT_PREFIX, "{$key}:"));
 var_dump($r->set("foo", "bar{$key}baz"));
 var_dump($r->setOption(Redis::OPT_PREFIX, ""));

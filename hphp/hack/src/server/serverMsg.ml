@@ -34,6 +34,7 @@ type build_opts = {
   clean: bool; (* when true just clean all generated files *)
   is_push: bool; (* for push builds *)
   incremental: bool; (* for incremental build *)
+  wait: bool; (* when true, wait forever for server initialization *)
   verbose: bool;
 }
 

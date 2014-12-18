@@ -327,6 +327,7 @@ let parse_build_args () =
   let clean_before_build = ref true in
   let incremental = ref false in
   let run_scripts = ref true in
+  let wait = ref false in
   let options = [
     "--steps", Arg.String (fun x ->
       steps := Some (Str.split (Str.regexp ",") x)),
@@ -354,6 +355,8 @@ let parse_build_args () =
     " do not erase previously generated files before building";
     (* Don't document --incremental option for now *)
     "--incremental", Arg.Set incremental, "";
+    "--wait", Arg.Set wait,
+    " wait forever for hh_server intialization (default: false)";
     "--verbose", Arg.Set verbose,
     " guess what";
   ] in
@@ -380,6 +383,7 @@ let parse_build_args () =
       check = !check;
       incremental = !incremental;
       verbose = !verbose;
+      wait = !wait;
     }
   }
 

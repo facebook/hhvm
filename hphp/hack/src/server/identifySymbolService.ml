@@ -62,7 +62,7 @@ let process_fun_id result_ref is_target_fun id =
            }
   end
 
-let process_lvar_id result_ref is_target_fun id _ =
+let process_lvar_id result_ref is_target_fun _ id _ =
   if is_target_fun (fst id)
   then begin
     result_ref := Some { name  = snd id;

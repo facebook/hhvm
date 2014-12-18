@@ -147,7 +147,7 @@ let autocomplete_smethod = autocomplete_method true
 
 let autocomplete_cmethod = autocomplete_method false
 
-let autocomplete_lvar_naming id locals =
+let autocomplete_lvar_naming _ id locals =
   if is_auto_complete (snd id)
   then begin
     Autocomplete.argument_global_type := Some Autocomplete.Acvar;

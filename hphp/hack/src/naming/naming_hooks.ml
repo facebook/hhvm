@@ -12,7 +12,8 @@ open Utils
 
 let (hint_hooks: (Pos.t * string -> unit) list ref) = ref []
 
-let (lvar_hooks: (Pos.t * string -> (Pos.t * Ident.t) SMap.t -> unit) list ref) = ref []
+let (lvar_hooks: (Ident.t -> Pos.t * string ->
+                  (Pos.t * Ident.t) SMap.t -> unit) list ref) = ref []
 
 let (class_named_hooks: (Nast.class_ -> unit) list ref) = ref []
 
@@ -33,8 +34,8 @@ let attach_fun_named_hook hook =
 let dispatch_hint_hook id =
   List.iter begin fun hook -> hook id end !hint_hooks
 
-let dispatch_lvar_hook id locals =
-  List.iter begin fun hook -> hook id locals end !lvar_hooks
+let dispatch_lvar_hook ident id locals =
+  List.iter begin fun hook -> hook ident id locals end !lvar_hooks
 
 let dispatch_class_named_hook class_ =
   List.iter begin fun hook -> hook class_ end !class_named_hooks

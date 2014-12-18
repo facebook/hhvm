@@ -103,14 +103,6 @@ type lenv = {
     (* The set of constants *)
     consts: map ref;
 
-    (* A map of variable names to a list of previous references.
-       Only used in find refs mode *)
-    references: (Pos.t list) SMap.t ref;
-
-    (* Variable name of the target we're finding references for,
-       if we've found it *)
-    find_refs_target_name: string option ref;
-
     (* We keep all the locals, even if we are in a different scope
      * to provide better error messages.
      * if you write:
@@ -208,9 +200,7 @@ module Env = struct
     locals     = ref SMap.empty;
     consts     = ref SMap.empty;
     all_locals = ref SMap.empty;
-    references = ref SMap.empty;
     pending_locals = ref SMap.empty;
-    find_refs_target_name = ref None;
     unbound_mode = UBMErr;
     has_yield = ref false;
   }
@@ -375,55 +365,23 @@ module Env = struct
   let add_lvar (_, lenv) (_, name) (p, x) =
     lenv.locals := SMap.add name (p, x) !(lenv.locals)
 
-  (* Saves the position of local variables if we're in find refs mode*)
-  let save_ref x p lenv =
-    (* If we've already located the target and name of this var is
-       the same, add it to the result list *)
-    (match !(lenv.find_refs_target_name) with
-     | Some target ->
-       if target = x then
-         Find_refs.find_refs_result := p :: !Find_refs.find_refs_result;
-     | None -> ()
-    );
-    (* If we haven't found the target yet: *)
-    match !Find_refs.find_refs_target with
-    | None -> ()
-    | Some (line, char_pos) ->
-        (* store the location of this reference for later *)
-        lenv.references := (match SMap.get x !(lenv.references) with
-        | None -> SMap.add x (p :: []) !(lenv.references)
-        | Some lst -> SMap.add x (p :: lst) !(lenv.references));
-
-        let l, start, end_ = Pos.info_pos p in
-        if l = line && start <= char_pos && char_pos <= end_
-        then begin
-          (* This is the target, so stop looking for it,
-             save the target name, and copy the current references
-             to this target to the result list *)
-          Find_refs.find_refs_target := None;
-          lenv.find_refs_target_name := Some x;
-          Find_refs.find_refs_result :=
-            (match SMap.get x !(lenv.references) with
-            | None -> []
-            | Some lst -> lst
-            );
-        end;
-    ()
-
   (* Defines a new local variable *)
   let new_lvar (_, lenv) (p, x) =
     let lcl = SMap.get x !(lenv.locals) in
-    match lcl with
-    | Some lcl -> p, snd lcl
-    | None ->
-        save_ref x p lenv;
-        let ident = match SMap.get x !(lenv.pending_locals) with
-          | Some (_, ident) -> ident
-          | None -> Ident.make x in
-        let y = p, ident in
-        lenv.all_locals := SMap.add x p !(lenv.all_locals);
-        lenv.locals := SMap.add x y !(lenv.locals);
-        y
+    let p, ident =
+      match lcl with
+      | Some lcl -> p, snd lcl
+      | None ->
+          let ident = match SMap.get x !(lenv.pending_locals) with
+            | Some (_, ident) -> ident
+            | None -> Ident.make x in
+          let y = p, ident in
+          lenv.all_locals := SMap.add x p !(lenv.all_locals);
+          lenv.locals := SMap.add x y !(lenv.locals);
+          y
+    in
+    Naming_hooks.dispatch_lvar_hook ident (p, x) !(lenv.locals);
+    p, ident
 
   let new_pending_lvar (_, lenv) (p, x) =
     match SMap.get x !(lenv.locals), SMap.get x !(lenv.pending_locals) with
@@ -445,17 +403,21 @@ module Env = struct
 
   (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
-    if is_superglobal x && genv.in_mode = Ast.Mpartial
-    then p, Ident.tmp()
-    else
-      let lcl = SMap.get x !(env.locals) in
-      match lcl with
-      | Some lcl -> (if fst lcl != p then save_ref x p env); p, snd lcl
-      | None when not !Autocomplete.auto_complete ->
-          if SMap.mem x !(env.all_locals)
-          then bad_style env (p, x);
-          handle_undefined_variable (genv, env) (p, x)
-      | None -> p, Ident.tmp()
+    let p, ident =
+      if is_superglobal x && genv.in_mode = Ast.Mpartial
+      then p, Ident.tmp()
+      else
+        let lcl = SMap.get x !(env.locals) in
+        match lcl with
+        | Some lcl -> p, snd lcl
+        | None when not !Autocomplete.auto_complete ->
+            if SMap.mem x !(env.all_locals)
+            then bad_style env (p, x);
+            handle_undefined_variable (genv, env) (p, x)
+        | None -> p, Ident.tmp()
+    in
+    Naming_hooks.dispatch_lvar_hook ident (p, x) !(env.locals);
+    p, ident
 
   let get_name genv namespace x =
     ignore (lookup genv namespace x); x
@@ -1770,7 +1732,6 @@ and expr_ env = function
       )
   | Lvar (_, "$this") -> N.This
   | Lvar x ->
-      Naming_hooks.dispatch_lvar_hook x !((snd env).locals);
       N.Lvar (Env.lvar env x)
   | Obj_get (e1, (p, _ as e2), nullsafe) ->
       (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"

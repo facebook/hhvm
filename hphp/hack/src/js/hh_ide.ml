@@ -326,13 +326,8 @@ let infer_at_pos file line char =
 
 let hh_find_lvar_refs file line char =
   let file = Relative_path.create Relative_path.Root file in
-  let clean() =
-    Find_refs.find_refs_target := None;
-    Find_refs.find_refs_result := [];
-  in
   try
-    clean();
-    Find_refs.find_refs_target := Some (line, char);
+    let get_result = FindLocalsService.attach_hooks line char in
     let ast = Parser_heap.ParserHeap.find_unsafe file in
     Errors.ignore_ begin fun () ->
       (* We only need to name to find references to locals *)
@@ -349,14 +344,14 @@ let hh_find_lvar_refs file line char =
         | _ -> ()
       end ast;
     end;
+    FindLocalsService.detach_hooks ();
     let res_list =
-      List.map (compose Pos.json Pos.to_absolute) !Find_refs.find_refs_result in
-    clean();
+      List.map (compose Pos.json Pos.to_absolute) (get_result ()) in
     to_js_object (JAssoc [ "positions",      JList res_list;
                           "internal_error", JBool false;
                         ])
   with _ ->
-    clean();
+    FindLocalsService.detach_hooks ();
     to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 

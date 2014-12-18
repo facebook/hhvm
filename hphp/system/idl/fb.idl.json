@@ -53,7 +53,7 @@
     "funcs": [
         {
             "name": "fb_serialize",
-            "desc": "Seriailize data into a compact format that can be unserialized by fb_unserialize().",
+            "desc": "Serialize data into a compact format that can be unserialized by fb_unserialize().",
             "flags": [
                 "HipHopSpecific"
             ],
@@ -71,7 +71,7 @@
         },
         {
             "name": "fb_unserialize",
-            "desc": "Unserialize a previously fb_thrift_serialize()-ed data.",
+            "desc": "Unserialize previously fb_serialize()-ed data.",
             "flags": [
                 "HipHopSpecific"
             ],

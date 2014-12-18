@@ -1,0 +1,57 @@
+---------------- start -------------------
+
+Inside Point::__construct, (0,1), point count = 1
+
+---------------- after $av1 init -------------------
+---------------- after $sv1 decl -------------------
+
+Inside Point::__construct, (0,2), point count = 2
+
+---------------- after $sv1 init -------------------
+---------------- Inside function_A -------------------
+
+Inside Point::__construct, (1,1), point count = 3
+
+---------------- after $av2 init -------------------
+---------------- after $sv2 decl -------------------
+
+Inside Point::__construct, (1,2), point count = 4
+
+---------------- after $sv2 init -------------------
+---------------- Inside if TRUE -------------------
+
+Inside Point::__construct, (2,1), point count = 5
+
+---------------- after $av3 init -------------------
+---------------- after $sv3 decl -------------------
+
+Inside Point::__construct, (2,2), point count = 6
+
+---------------- after $sv3 init -------------------
+
+Inside Point::__construct, (2,3), point count = 7
+
+---------------- after $av1 reinit -------------------
+
+Inside Point::__destruct, (%d,%d), point count = 6
+
+
+Inside Point::__destruct, (%d,%d), point count = 5
+
+
+Inside Point::__destruct, (%d,%d), point count = 4
+
+---------------- after call to func -------------------
+$result = 3628800
+---------------- end -------------------
+
+Inside Point::__destruct, (%d,%d), point count = 3
+
+
+Inside Point::__destruct, (%d,%d), point count = 2
+
+
+Inside Point::__destruct, (%d,%d), point count = 1
+
+
+Inside Point::__destruct, (%d,%d), point count = 0

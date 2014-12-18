@@ -1,0 +1,22 @@
+--------- TRUE -------------
+bool(true)
+--------- NULL -------------
+bool(false)
+--------- TRUE, 12.3, NULL -------------
+bool(false)
+--------- undefined parameter -------------
+
+Warning: %s
+
+Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_isset.php on line 30
+NULL
+bool(false)
+NULL
+bool(false)
+int(10)
+bool(true)
+---------- dynamic property ------------
+bool(false)
+bool(true)
+Inside X2::__isset with $name m
+bool(false)

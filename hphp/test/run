@@ -57,6 +57,9 @@ Examples:
   # Slow tests in interp mode:
   % $argv[0] -m interp test/slow
 
+  # PHP specificaion tests in JIT mode:
+  % $argv[0] test/spec
+
   # Slow closure tests in JIT mode:
   % $argv[0] test/slow/closure
 
@@ -239,6 +242,7 @@ function map_convenience_filename($file) {
   $mappage = array(
     'quick'      => 'hphp/test/quick',
     'slow'       => 'hphp/test/slow',
+    'spec'       => 'hphp/test/spec',
     'debugger'   => 'hphp/test/server/debugger/tests',
     'http'       => 'hphp/test/server/http/tests',
     'fastcgi'    => 'hphp/test/server/fastcgi/tests',
@@ -281,7 +285,7 @@ function find_tests($files, array $options = null) {
     $files = array('quick');
   }
   if ($files == array('all')) {
-    $files = array('quick', 'slow', 'zend', 'fastcgi');
+    $files = array('quick', 'slow', 'spec', 'zend', 'fastcgi');
   }
   foreach ($files as &$file) {
     $file = map_convenience_filename($file);
@@ -822,7 +826,7 @@ function skip_test($options, $test) {
     2 => array("pipe", "w"),
   );
   $pipes = null;
-  $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes);
+  $process = proc_open("$hhvm $test 2>&1", $descriptorspec, $pipes);
   if (!is_resource($process)) {
     // This is weird. We can't run HHVM but we probably shouldn't skip the test
     // since on a broken build everything will show up as skipped and give you a

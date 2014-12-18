@@ -1,0 +1,163 @@
+----------------- closure with no parameters ----------------------
+--
+string(6) "object"
+--
+object(Closure%S)#1 (0) {
+}
+--
+bool(true)
+--
+Inside function >>{closure}<<
+Inside method >>{closure}<<
+----------------- closure with 4 parameters ----------------------
+object(Closure%S)#2 (1) {
+  ["parameter"]=>
+  array(5) {
+    ["$p1"]=>
+    string(10) "<required>"
+    ["$p2"]=>
+    string(10) "<required>"
+    ["$p3"]=>
+    string(10) "<required>"
+    ["$p4"]=>
+    string(10) "<required>"
+    ["$p5"]=>
+    string(10) "<required>"
+  }
+}
+--
+string(6) "object"
+--
+object(Closure%S)#2 (1) {
+  ["parameter"]=>
+  array(5) {
+    ["$p1"]=>
+    string(10) "<required>"
+    ["$p2"]=>
+    string(10) "<required>"
+    ["$p3"]=>
+    string(10) "<required>"
+    ["$p4"]=>
+    string(10) "<required>"
+    ["$p5"]=>
+    string(10) "<required>"
+  }
+}
+--
+bool(true)
+--
+Inside function >>{closure}<<
+Inside method >>{closure}<<
+----------------- passing a callable to a function ----------------------
+string(6) "double"
+Result of calling doit using function double = 20
+-------
+string(6) "square"
+Result of calling doit using function square = 100
+-------
+object(Closure%S)#3 (1) {
+  ["parameter"]=>
+  array(1) {
+    ["$p"]=>
+    string(10) "<required>"
+  }
+}
+Result of calling doit using double closure = 10
+-------
+object(Closure%S)#3 (1) {
+  ["parameter"]=>
+  array(1) {
+    ["$p"]=>
+    string(10) "<required>"
+  }
+}
+Result of calling doit using square closure = 25
+-------
+----------------- using a use clause, #1 ----------------------
+Inside method >>{closure}<<
+$count = 1
+Inside method >>{closure}<<
+$count = 2
+----------------- using a use clause, #2 (instance method) ----------------------
+--
+string(6) "object"
+--
+object(Closure%S)#4 (3) {
+  ["static"]=>
+  array(2) {
+    ["count"]=>
+    &int(0)
+    ["values"]=>
+    array(2) {
+      ["red"]=>
+      int(3)
+      [0]=>
+      int(10)
+    }
+  }
+  ["this"]=>
+  object(D)#3 (0) {
+  }
+  ["parameter"]=>
+  array(2) {
+    ["$p1"]=>
+    string(10) "<required>"
+    ["$p2"]=>
+    string(10) "<required>"
+  }
+}
+--
+bool(true)
+--
+Inside method >>D::{closure}<<
+Inside method >>D::f<<
+$count = 1
+Inside method >>D::{closure}<<
+Inside method >>D::f<<
+$count = 2
+--
+string(6) "object"
+--
+object(Closure%S)#5 (1) {
+  ["this"]=>
+  object(D)#3 (0) {
+  }
+}
+--
+bool(true)
+--
+Inside method >>D::{closure}<<
+----------------- using a use clause, #3 (static method) ----------------------
+--
+string(6) "object"
+--
+object(Closure%S)#5 (2) {
+  ["static"]=>
+  array(2) {
+    ["count"]=>
+    &int(0)
+    ["values"]=>
+    array(2) {
+      ["red"]=>
+      int(3)
+      [0]=>
+      int(10)
+    }
+  }
+  ["parameter"]=>
+  array(2) {
+    ["$p1"]=>
+    string(10) "<required>"
+    ["$p2"]=>
+    string(10) "<required>"
+  }
+}
+--
+bool(true)
+--
+Inside method >>D::{closure}<<
+$count = 1
+Inside method >>D::{closure}<<
+$count = 2
+----------------- Misc. Stuff ----------------------
+Hi

@@ -15,9 +15,10 @@
  *
  **/
 
-function find_bad_encoding_files(string $start_dir): Set<string> {
+function find_bad_encoding_files(string $start_dir,
+                                 string $which_tests): Set<string> {
   $bad_files = Set {};
-  $rdit = new RecursiveDirectoryIterator(__DIR__ . "/../zend/");
+  $rdit = new RecursiveDirectoryIterator(__DIR__ . "/../".$which_tests."/");
   foreach (new RecursiveIteratorIterator($rdit) as $file) {
     $contents = file_get_contents($file);
     $encoding = mb_detect_encoding($contents);
@@ -40,15 +41,16 @@ function add_to_git_attributes(string $git_attr_file, string $filename): void {
   }
 }
 
-function main(): void {
-  $zend_dir = __DIR__ . "../zend/";
-  $bad_files = find_bad_encoding_files($zend_dir);
-  $git_attr_file = __DIR__ . "/../zend/.gitattributes";
+function main($argv): void {
+  $which_tests = $argv[1];
+  $code_dir = __DIR__ . "../".$which_tests."/";
+  $bad_files = find_bad_encoding_files($code_dir, $which_tests);
+  $git_attr_file = __DIR__ . "/../".$which_tests."/.gitattributes";
   foreach ($bad_files as $filename) {
-    // Remove the part of the filename up to and including "test/zend/"
-    $filename = substr_replace($filename, "", 0, strlen($zend_dir) + 1);
+    // Remove the part of the filename up to and including "test/$which_tests/"
+    $filename = substr_replace($filename, "", 0, strlen($code_dir) + 1);
     add_to_git_attributes($git_attr_file, $filename);
   }
 }
 
-main();
+main($argv);

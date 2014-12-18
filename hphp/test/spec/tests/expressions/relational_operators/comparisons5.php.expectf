@@ -1,0 +1,219 @@
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(true)
+---
+Array >=       Array  result: bool(true)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(false)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(true)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(true)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(true)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(true)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(true)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(true)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(true)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(true)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(true)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(true)
+=======
+-------------------------------------
+Array >        Array  result: bool(true)
+Array <=       Array  result: bool(true)
+---
+Array >=       Array  result: bool(true)
+Array <        Array  result: bool(true)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(false)
+---
+Array <=       Array  result: bool(false)
+Array >        Array  result: bool(false)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(true)
+---
+Array >=       Array  result: bool(true)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(false)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(true)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(true)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(true)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(true)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(false)
+---
+Array <=       Array  result: bool(false)
+Array >        Array  result: bool(false)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(false)
+---
+Array <=       Array  result: bool(false)
+Array >        Array  result: bool(false)
+=======
+-------------------------------------
+Array >        Array  result: bool(true)
+Array <=       Array  result: bool(true)
+---
+Array >=       Array  result: bool(true)
+Array <        Array  result: bool(true)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(false)
+---
+Array <=       Array  result: bool(false)
+Array >        Array  result: bool(false)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(false)
+---
+Array <=       Array  result: bool(false)
+Array >        Array  result: bool(false)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(true)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(true)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(false)
+---
+Array >=       Array  result: bool(false)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(false)
+---
+Array <=       Array  result: bool(false)
+Array >        Array  result: bool(false)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(true)
+---
+Array >=       Array  result: bool(true)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(false)
+=======
+Array >        Array  result: bool(false)
+Array <=       Array  result: bool(true)
+---
+Array >=       Array  result: bool(true)
+Array <        Array  result: bool(false)
+---
+Array <        Array  result: bool(false)
+Array >=       Array  result: bool(true)
+---
+Array <=       Array  result: bool(true)
+Array >        Array  result: bool(false)
+=======
+-------------------------------------

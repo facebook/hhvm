@@ -8,6 +8,8 @@ all sub-suites.
   sure, your test doesn't belong here.
 * slow - Slower full featured tests. Grouped into sub-suites. By default put
   your test here.
+* spec - Tests associated with the official PHP language specification.
+  https://github.com/php/php-langspec/
 * zend/good - Passing tests from Zend's suite.
 * zend/bad - Failing tests from Zend. Fix these and move them to zend/good.
 * zend/flakey - Tests which mostly pass but have race conditions or can't be
@@ -23,6 +25,9 @@ all sub-suites.
 
 * Slow tests with the JIT in PGO mode -
 `test/run test/slow -m pgo`
+
+* PHP Specification tests with JIT
+`test/run test/spec`
 
 * Run everything that is supposed to pass -
 `test/run all`

@@ -1,0 +1,35 @@
+-5 is odd
+-4 is even
+-3 is odd
+-2 is even
+-1 is odd
+0 is even
+1 is odd
+2 is even
+3 is odd
+4 is even
+5 is odd
+int(100)
+string(5) "Hello"
+int(10)
+string(5) "Hello"
+int(5)
+int(6)
+int(9223372036854775807)
+float(9.2233720368548E+18)
+inside f(6)
+inside f(2)
+$v = 10, int(100)
+$v = -100, int(100)
+$v = 0, string(5) "Hello"
+$v = 1.234, int(100)
+$v = 0, string(5) "Hello"
+$v = 1, int(100)
+$v = , string(5) "Hello"
+$v = , string(5) "Hello"
+$v = 123, int(100)
+$v = xx, int(100)
+$v = , string(5) "Hello"
+int(10)
+int(10)
+int(-1)

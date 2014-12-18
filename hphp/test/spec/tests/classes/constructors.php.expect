@@ -1,0 +1,5 @@
+In D1 constructor, 1
+int(123)
+In D2 constructor, 1, 2
+In D3 constructor, 1, 2, 3
+In D4 constructor

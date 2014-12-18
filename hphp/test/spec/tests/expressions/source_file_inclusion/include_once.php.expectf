@@ -1,0 +1,19 @@
+Warning: %a
+bool(false)
+----------------------------------
+int(1)
+bool(true)
+int(3)
+int(1)
+----------------------------------
+int(1)
+----------------------------------
+int(1)
+----------------------------------
+Array
+(
+    [0] => %s/expressions/source_file_inclusion/include_once.php
+    [1] => %s/expressions/source_file_inclusion/Positions.inc
+    [2] => %s/expressions/source_file_inclusion/Point.inc
+    [3] => %s/expressions/source_file_inclusion/Circle.inc
+)

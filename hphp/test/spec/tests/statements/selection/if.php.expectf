@@ -1,0 +1,34 @@
+Inside processTransaction
+Inside postMessage
+Line 2
+>10< is TRUE	int(10)
+>-100< is TRUE	int(-100)
+>0< is FALSE	int(0)
+>1.234< is TRUE	float(1.234)
+>0< is FALSE	float(0)
+>1< is TRUE	bool(true)
+>< is FALSE	bool(false)
+>< is FALSE	NULL
+>xx< is TRUE	string(2) "xx"
+>< is FALSE	string(0) ""
+
+Notice: Array to string conversion in %s/statements/selection/if.php on line 41
+>Array< is TRUE	array(3) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "white"
+  [2]=>
+  string(4) "blue"
+}
+object(Name)#1 (2) {
+  ["firstName"]=>
+  NULL
+  ["lastName"]=>
+  NULL
+}
+>$aName< is TRUE
+TRUE path
+Path 1
+Path 3
+Path 1

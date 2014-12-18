@@ -1,0 +1,34 @@
+---------------- Local constants -------------------
+Inside localConst
+COEFFICIENT_1 = 2.345
+COEFFICIENT_1 = 2.345
+FAILURE = 1
+COEFFICIENT_1 = 2.345
+FAILURE = 1
+---------------- Local variables -------------------
+---------------- Array elements -------------------
+---------------- Function statics -------------------
+NULL
+$lv = 1, $fs = 1
+$fs3 = 99
+NULL
+$lv = 1, $fs = 2
+$fs3 = 100
+NULL
+$lv = 1, $fs = 3
+$fs3 = 101
+---------------- recursive function example -------------------
+$result = 3628800
+---------------- Global Constants -------------------
+MAX_HEIGHT2 = 10.5
+Inside globalConst
+MAX_HEIGHT2 = 10.5
+COEFFICIENT_2 = 2.345
+---------------- Global Variables using names directly -------------------
+$average = 55
+$result = 3.456
+---------------- Global Variables using $GLOBALS -------------------
+bool(false)
+$average = 55
+$result = 3.456
+---------------- instance/static properties & constants -------------------

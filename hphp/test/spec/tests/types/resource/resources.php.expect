@@ -1,0 +1,9 @@
+resource(1) of type (stream)
+bool(true)
+string(6) "stream"
+resource(2) of type (stream)
+bool(true)
+string(6) "stream"
+resource(3) of type (stream)
+bool(true)
+string(6) "stream"

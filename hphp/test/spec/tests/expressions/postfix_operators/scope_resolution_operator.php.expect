@@ -1,0 +1,102 @@
+string(3) "red"
+string(3) "red"
+int(-333)
+float(3.14)
+float(3.14)
+-----------------------------
+int(123)
+int(999)
+float(3.14159)
+float(3.14159)
+-----------------------------
+Accessing self:
+psf returns 123
+psProp = 999
+MYPI   = 3.14159
+Accessing parent(s)
+psf returns red
+psProp = -333
+MYPI   = 3.14
+-----------------------------
+Inside instance P::__construct
+Inside instance P::gi
+object(P)#3 (3) {
+  ["prop":"P":private]=>
+  int(1000)
+  ["prop2":"P":private]=>
+  int(543)
+  ["prop3":"P":private]=>
+  int(-222)
+}
+Inside instance P::gi
+object(P)#3 (3) {
+  ["prop":"P":private]=>
+  int(1000)
+  ["prop2":"P":private]=>
+  int(543)
+  ["prop3":"P":private]=>
+  int(-222)
+}
+Inside instance P::gi
+object(P)#3 (3) {
+  ["prop":"P":private]=>
+  int(1000)
+  ["prop2":"P":private]=>
+  int(543)
+  ["prop3":"P":private]=>
+  int(-222)
+}
+Inside static P::gs
+Inside static P::gs
+Inside static P::gs
+-----------------------------
+  self::$psf returns red
+static::$psf returns red
+  self::$psProp is   -333
+static::$psProp is   -333
+  self::$MYPI is     3.14
+static::$MYPI is     3.14
+  self::$b2 --- Inside M::b2
+static::$b2 --- Inside M::b2
+-----------------------------
+  self::$psf returns red
+static::$psf returns red
+  self::$psProp is   -333
+static::$psProp is   -333
+  self::$MYPI is     3.14
+static::$MYPI is     3.14
+  self::$b2 --- Inside M::b2
+static::$b2 --- Inside N::b2
+-----------------------------
+  self::$psf returns red
+static::$psf returns 123
+  self::$psProp is   -333
+static::$psProp is   999
+  self::$MYPI is     3.14
+static::$MYPI is     3.14159
+  self::$b2 --- Inside M::b2
+static::$b2 --- Inside P::b2
+-----------------------------
+Inside Base::f
+The static context here is Base
+Inside Derived::f
+The static context here is Derived
+-----------------------------
+int(123)
+int(123)
+int(123)
+int(123)
+-----------------------------
+object(W2)#6 (1) {
+  ["prop1":"W2":private]=>
+  int(123)
+}
+inside W2::M
+object(W2)#6 (1) {
+  ["prop1":"W2":private]=>
+  int(123)
+}
+string(2) "W2"
+string(2) "W1"
+string(2) "W2"
+string(2) "W2"

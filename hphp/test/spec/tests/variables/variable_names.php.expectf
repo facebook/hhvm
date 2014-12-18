@@ -1,0 +1,34 @@
+int(99)
+int(100)
+int(101)
+
+Notice: Use of undefined constant total - assumed 'total' in %s/variables/variable_names.php on line 25
+array(12) {
+  [""]=>
+  int(106)
+  ["1.2"]=>
+  int(102)
+  ["3.5"]=>
+  int(1000)
+  ["abc"]=>
+  int(103)
+  ["abxy"]=>
+  int(1000)
+  ["argc"]=>
+  int(1)
+  ["argv"]=>
+  array(1) {
+    [0]=>
+    string(%d) "%s"
+  }
+  ["total"]=>
+  int(1000)
+  ["v"]=>
+  int(10)
+  [1]=>
+  int(104)
+  [10]=>
+  int(101)
+  [14]=>
+  int(1000)
+}

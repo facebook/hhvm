@@ -1,0 +1,10 @@
+------------------- labels & goto ---------------------
+Skipping echo
+At label2 inside function f1
+At label2 inside function f1
+At label3
+At labelA
+------------------- switch/case labels ---------------------
+Case 10 outer
+Default inner
+------------------- xxx ---------------------

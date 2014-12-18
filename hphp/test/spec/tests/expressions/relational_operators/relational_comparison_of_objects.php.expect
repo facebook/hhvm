@@ -1,0 +1,35 @@
+
+===== compare instances of different object types =====
+
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+===== compare instances of the same (empty) object type =====
+
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+
+===== compare instances of the same object type with same values =====
+
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+
+===== compare instances of the same object type with diff values =====
+
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+===== compare instances of the same object type with a pair of diff values =====
+
+bool(true)
+bool(true)
+bool(false)
+bool(false)

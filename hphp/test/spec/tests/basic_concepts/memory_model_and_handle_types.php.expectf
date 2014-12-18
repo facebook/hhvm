@@ -1,0 +1,120 @@
+----------------- simple assignment of handle types ----------------------
+
+Inside Point::__construct, (1,3), point count = 1
+
+After '$a = new Point(1, 3)', $a is (1,3)
+After '$b = $a', $b is (1,3)
+
+Inside Point::__clone, (1,3), point count = 2
+
+After '$d = clone $b', $d is (1,3)
+After '$b->move(4, 6)', $d is (1,3), $b is (4,6), and $a is (4,6)
+
+Inside Point::__construct, (2,1), point count = 3
+
+After '$a = new Point(2, 1)', $d is (1,3), $b is (4,6), and $a is (2,1)
+
+Inside Point::__destruct, (2,1), point count = 2
+
+
+Inside Point::__destruct, (4,6), point count = 1
+
+
+Inside Point::__destruct, (1,3), point count = 0
+
+Done
+----------------- byRef assignment of handle types ----------------------
+
+Inside Point::__construct, (1,3), point count = 1
+
+After '$a = new Point(1, 3)', $a is (1,3)
+After '$c =& $a', $c is (1,3), and $a is (1,3)
+After '$a->move(4, 6)', $c is (4,6), and $a is (4,6)
+
+Inside Point::__construct, (2,1), point count = 2
+
+
+Inside Point::__destruct, (4,6), point count = 1
+
+After '$a = new Point(2, 1)', $c is (2,1), and $a is (2,1)
+After 'unset($a)', $c is (2,1)
+
+Inside Point::__destruct, (2,1), point count = 0
+
+Done
+----------------- value argument passing of handle types ----------------------
+
+Inside Point::__construct, (1,3), point count = 1
+
+After '$a = new Point(1, 3)', $a is (1,3)
+	Inside function f1, $b is (1,3)
+After '$b->move(4, 6)', $b is (4,6)
+
+Inside Point::__construct, (5,7), point count = 2
+
+After 'new Point(5, 7)', $b is (5,7)
+
+Inside Point::__destruct, (5,7), point count = 1
+
+After 'f1($a)', $a is (4,6)
+
+Inside Point::__destruct, (4,6), point count = 0
+
+Done
+----------------- byRef argument passing of handle types ----------------------
+
+Inside Point::__construct, (1,3), point count = 1
+
+After '$a = new Point(1, 3)', $a is (1,3)
+	Inside function g1, $b is (1,3)
+After '$b->move(4, 6)', $b is (4,6)
+
+Inside Point::__construct, (5,7), point count = 2
+
+
+Inside Point::__destruct, (4,6), point count = 1
+
+After 'new Point(5, 7)', $b is (5,7)
+After 'g1($a)', $a is (5,7)
+
+Inside Point::__destruct, (5,7), point count = 0
+
+Done
+----------------- value returning of handle types ----------------------
+
+Inside Point::__construct, (5,7), point count = 1
+
+After 'new Point(5, 7)', $b is (5,7)
+After '$a = f2()', $a is (5,7)
+
+Inside Point::__destruct, (5,7), point count = 0
+
+Done
+----------------- byRef returning of handle types ----------------------
+
+Inside Point::__construct, (5,7), point count = 1
+
+After 'new Point(5, 7)', $b is (5,7)
+After '$a = f2()', $a is (5,7)
+
+Inside Point::__destruct, (5,7), point count = 0
+
+Done
+----------------- unsetting properties ----------------------
+at start, $c is object(C)#%d (2) {
+  ["prop1"]=>
+  NULL
+  ["prop2"]=>
+  NULL
+}
+after unset($c->prop1), $c is object(C)#%d (1) {
+  ["prop2"]=>
+  NULL
+}
+after unset($c->prop2), $c is object(C)#%d (0) {
+}
+
+Inside C::__destruct
+
+after unset($c), $c is undefined
+Done

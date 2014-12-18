@@ -1,0 +1,38 @@
+int(10)
+bool(true)
+float(2.345)
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  bool(true)
+  [2]=>
+  float(2.345)
+}
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  NULL
+  [2]=>
+  float(2.345)
+}
+bool(true)
+array(3) {
+  [0]=>
+  &int(10)
+  [1]=>
+  &bool(true)
+  [2]=>
+  &float(2.345)
+}
+array(3) {
+  [0]=>
+  &int(10)
+  [1]=>
+  &NULL
+  [2]=>
+  &float(2.345)
+}
+NULL
+int(10)

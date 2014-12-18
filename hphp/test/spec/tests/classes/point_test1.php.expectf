@@ -1,0 +1,36 @@
+object(Point)#1 (2) {
+  ["x":"Point":private]=>
+  int(0)
+  ["y":"Point":private]=>
+  int(0)
+}
+object(Point)#2 (2) {
+  ["x":"Point":private]=>
+  int(0)
+  ["y":"Point":private]=>
+  int(0)
+}
+object(Point)#%d (2) {
+  ["x":"Point":private]=>
+  int(100)
+  ["y":"Point":private]=>
+  int(0)
+}
+object(Point)#%d (2) {
+  ["x":"Point":private]=>
+  int(-1)
+  ["y":"Point":private]=>
+  int(1)
+}
+object(Point)#%d (2) {
+  ["x":"Point":private]=>
+  int(20)
+  ["y":"Point":private]=>
+  int(30)
+}
+int(20)
+int(30)
+(-3,10)
+(-3,10)
+(-5,7)
+(-4,8)

@@ -210,16 +210,7 @@ bool IRInstruction::killsSource(int idx) const {
     case DecRef:
     case ConvObjToArr:
     case ConvCellToArr:
-    case ConvCellToBool:
-    case ConvObjToDbl:
-    case ConvStrToDbl:
-    case ConvCellToDbl:
-    case ConvObjToInt:
-    case ConvCellToInt:
     case ConvCellToObj:
-    case ConvObjToStr:
-    case ConvResToStr:
-    case ConvCellToStr:
       assert(idx == 0);
       return true;
     case ArraySet:

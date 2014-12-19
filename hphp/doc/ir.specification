@@ -526,11 +526,11 @@ To int conversions:
 
 | ConvDblToInt,                 D(Int), S(Dbl),                            C
 
-| ConvObjToInt,                 D(Int), S(Obj),                         Er|K
+| ConvObjToInt,                 D(Int), S(Obj),                           Er
 
 | ConvStrToInt,                 D(Int), S(Str),                           NF
 
-| ConvCellToInt,                D(Int), S(Cell),                        Er|K
+| ConvCellToInt,                D(Int), S(Cell),                          Er
 
 
 To object conversions:

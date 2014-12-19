@@ -1,0 +1,4 @@
+<?php
+if (ini_get('hhvm.disable_smart_allocator') === '1') {
+   die("memory_get_usage behaves differently with the smart allocator off.");
+}

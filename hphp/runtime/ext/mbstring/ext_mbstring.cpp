@@ -571,7 +571,7 @@ static int php_mb_parse_encoding_list(const char *value, int value_length,
     }
     size = n + identify_list_size;
     /* make list */
-    list = (mbfl_encoding **)calloc(size, sizeof(int));
+    list = (mbfl_encoding **)calloc(size, sizeof(mbfl_encoding*));
     if (list != nullptr) {
       entry = list;
       n = 0;
@@ -829,7 +829,7 @@ static int php_mb_parse_encoding_array(const Array& array,
   int identify_list_size = MBSTRG(default_detect_order_list_size);
 
   size = array.size() + identify_list_size;
-  list = (mbfl_encoding **)calloc(size, sizeof(int));
+  list = (mbfl_encoding **)calloc(size, sizeof(mbfl_encoding*));
   if (list != nullptr) {
     entry = list;
     bauto = 0;

@@ -402,8 +402,8 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
   int domain = AF_UNSPEC;
   int type = SOCK_STREAM;
   auto const& scheme = hosturl.getScheme();
-  Socket* sock = nullptr;
-  SSLSocket *sslsock = nullptr;
+  std::unique_ptr<Socket> sock;
+  SSLSocket* sslsock = nullptr;
   std::string sockerr;
   int error;
 
@@ -420,11 +420,12 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
     size_t sa_size;
 
     fd = socket(domain, type, 0);
+    sock = folly::make_unique<Socket>(fd, domain, hosturl.getHost().c_str(),
+                                      hosturl.getPort());
 
-    sock = new Socket(fd, domain, hosturl.getHost().c_str(), hosturl.getPort());
-
-    if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
+    if (!set_sockaddr(sa_storage, sock.get(), hosturl.getHost().c_str(),
                       hosturl.getPort(), sa_ptr, sa_size)) {
+      // set_sockaddr raises its own warning on failure
       return false;
     }
     if (connect_with_timeout(fd, sa_ptr, sa_size, timeout,
@@ -432,11 +433,10 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
       SOCKET_ERROR(sock, sockerr.c_str(), error);
       errnum = sock->getLastError();
       errstr = HHVM_FN(socket_strerror)(sock->getLastError());
-      delete sock;
       return false;
     }
   } else {
-    struct addrinfo  hints;
+    struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family   = domain;
     hints.ai_socktype = type;
@@ -463,15 +463,16 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
                                hosturl, sockerr, error) == 0) {
         break;
       }
+      close(fd);
       fd = -1;
     }
 
     sslsock = SSLSocket::Create(fd, domain, hosturl, timeout);
     if (sslsock) {
-      sock = sslsock;
+      sock = std::unique_ptr<Socket>(sslsock);
     } else {
-      sock = new Socket(fd, domain,
-                        hosturl.getHost().c_str(), hosturl.getPort());
+      sock = folly::make_unique<Socket>(fd, domain, hosturl.getHost().c_str(),
+                                        hosturl.getPort());
     }
   }
 
@@ -480,17 +481,15 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
         sockerr.empty() ? "unable to create socket" : sockerr.c_str(), error);
     errnum = sock->getLastError();
     errstr = HHVM_FN(socket_strerror)(sock->getLastError());
-    delete sock;
     return false;
   }
 
   if (sslsock && !sslsock->onConnect()) {
     raise_warning("Failed to enable crypto");
-    delete sslsock;
     return false;
   }
 
-  return Resource(sock);
+  return Resource(sock.release());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

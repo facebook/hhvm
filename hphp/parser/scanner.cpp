@@ -247,6 +247,7 @@ bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
 
 bool Scanner::tryParseNonEmptyLambdaParams(TokenStore::iterator& pos) {
   for (;; nextLookahead(pos)) {
+    if (pos->t == ')' || pos->t == T_LAMBDA_CP) return true;
     if (pos->t != T_VARIABLE) {
       if (pos->t == T_ELLIPSIS) {
         nextLookahead(pos);

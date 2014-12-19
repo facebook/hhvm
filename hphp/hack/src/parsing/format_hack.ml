@@ -681,6 +681,11 @@ and comment_loop env =
   | Teof -> ()
   | Tclose_comment ->
       last_token env;
+  | Tstarstar ->
+    last_token env;
+    (match token env with
+      | Tslash -> last_token env
+      | _ -> comment_loop env)
   | Tnewline ->
       newline env;
       skip_spaces env;

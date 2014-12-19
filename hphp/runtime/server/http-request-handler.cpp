@@ -465,7 +465,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     }
   } else {
     code = 404;
-    transport->sendString("Not Found", 404);
+    transport->sendString("RequestInitDocument Not Found", 404);
   }
 
   if (RuntimeOption::EnableDebugger) {

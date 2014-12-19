@@ -972,6 +972,7 @@ let rec preserve_nl_space env =
       while is_empty_line env do
         ignore (empty_line env)
       done;
+      back env;
       force_nl env;
   | _ ->
       back env

@@ -4708,6 +4708,7 @@ void CodeGenerator::cgJmp(IRInstruction* inst) {
     v << jmp{target};
     return;
   }
+
   auto& def = inst->taken()->front();
   always_assert(arity == def.numDsts());
   VregList args;
@@ -4717,7 +4718,12 @@ void CodeGenerator::cgJmp(IRInstruction* inst) {
     auto dloc = m_state.locs[def.dst(i)];
     always_assert(sloc.numAllocated() <= dloc.numAllocated());
     always_assert(dloc.numAllocated() >= 1);
-    args.push_back(sloc.reg(0)); // handle value
+    auto valReg = sloc.reg(0);
+    if (src->isA(Type::Bool) && !def.dst(i)->isA(Type::Bool)) {
+      valReg = v.makeReg();
+      v << movzbq{sloc.reg(0), valReg};
+    }
+    args.push_back(valReg); // handle value
     if (dloc.numAllocated() == 2) { // handle type
       auto type = sloc.numAllocated() == 2 ? sloc.reg(1) :
                   v.cns(src->type().toDataType());

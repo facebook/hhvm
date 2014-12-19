@@ -12,6 +12,15 @@ open Utils
 open ServerEnv
 
 module type SERVER_PROGRAM = sig
+  module EventLogger : sig
+    val init: Path.path -> float -> unit
+    val init_done: unit -> unit
+    val load_read_end: string -> unit
+    val load_recheck_end: unit -> unit
+    val lock_lost: Path.path -> string -> unit
+    val lock_stolen: Path.path -> string -> unit
+  end
+
   val preinit : unit -> unit
   val init : genv -> env -> env
   val run_once_and_exit : genv -> env -> unit
@@ -93,11 +102,11 @@ end = struct
     while true do
       if not (Lock.check root "lock") then begin
         Printf.printf "Lost %s lock; reacquiring.\n" Program.name;
-        EventLogger.lock_lost root "lock";
+        Program.EventLogger.lock_lost root "lock";
         if not (Lock.grab root "lock")
         then
           Printf.printf "Failed to reacquire lock; terminating.\n";
-          EventLogger.lock_stolen root "lock";
+          Program.EventLogger.lock_stolen root "lock";
           die()
       end;
       ServerHealth.check();
@@ -130,7 +139,7 @@ end = struct
         Program.unmarshal chan;
         close_in_no_fail filename chan;
         SharedMem.load (filename^".sharedmem");
-        EventLogger.load_read_end filename;
+        Program.EventLogger.load_read_end filename;
         let to_recheck =
           List.rev_append (BuildMain.get_all_targets ()) to_recheck in
         let paths_to_recheck =
@@ -143,7 +152,7 @@ end = struct
         let updates =
           Relative_path.Set.filter (Program.filter_update genv env) updates in
         let env = Program.recheck genv env updates in
-        EventLogger.load_recheck_end ();
+        Program.EventLogger.load_recheck_end ();
         env
 
   (* The main entry point of the daemon
@@ -160,7 +169,7 @@ end = struct
     *)
     Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
     let root = ServerArgs.root options in
-    EventLogger.init root (ServerArgs.start_time options);
+    Program.EventLogger.init root (ServerArgs.start_time options);
     PidLog.init root;
     PidLog.log ~reason:(Some "main") (Unix.getpid());
     let genv = ServerEnvBuild.make_genv ~multicore:true options in
@@ -174,7 +183,7 @@ end = struct
     else
       let env = MainInit.go root program_init in
       let socket = Socket.init_unix_socket root in
-      EventLogger.init_done ();
+      Program.EventLogger.init_done ();
       serve genv env socket
 
   let get_log_file root =

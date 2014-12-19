@@ -14,6 +14,8 @@ open ServerEnv
 module Server = ServerFunctors
 
 module Program : Server.SERVER_PROGRAM = struct
+  module EventLogger = EventLogger
+
   let name = "hh_server"
 
   let get_errors env = env.errorl

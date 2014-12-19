@@ -1461,7 +1461,8 @@ and class_element_word env = function
   | "require" ->
       seq env [last_token; space; class_extends; semi_colon]
   | "use" ->
-      seq env [last_token; space; hint_list; semi_colon; newline]
+      seq env
+        [last_token; space; hint_list ~trailing:false; semi_colon; newline]
   | "category" ->
       seq env [last_token; xhp_category; semi_colon]
   | "attribute" ->

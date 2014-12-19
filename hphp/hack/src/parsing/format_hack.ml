@@ -1276,13 +1276,13 @@ end
 and hint_parameter env = wrap env begin function
   | Tlt ->
       last_token env;
-      hint_list env;
+      hint_list ~trailing:false env;
       expect ">" env
   | _ -> back env
 end
 
-and hint_list env =
-  list_comma hint env
+and hint_list ?(trailing=true) env =
+  list_comma ~trailing:trailing hint env
 
 (*****************************************************************************)
 (* Functions *)

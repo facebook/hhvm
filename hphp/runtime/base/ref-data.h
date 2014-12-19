@@ -252,15 +252,7 @@ private:
   }
 
 private:
-#if defined(PACKED_TV)
-  UNUSED uint8_t m_padding[9];
-  mutable uint8_t m_cow;
-  mutable uint8_t m_z;
-  HeaderKind m_kind;
-  mutable RefCount m_count;
-  TypedValue m_tv;
-#else
-  // count overlaps TypedValue.m_aux
+  // count and kind overlap TypedValue.m_aux
   union {
     TypedValue m_tv;
     struct {
@@ -272,7 +264,6 @@ private:
       mutable RefCount m_count; // refcount field
     };
   };
-#endif
 };
 
 ALWAYS_INLINE void decRefRef(RefData* ref) {

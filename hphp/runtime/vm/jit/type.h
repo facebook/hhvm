@@ -1082,17 +1082,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-const int kTypeWordOffset = offsetof(TypedValue, m_type) % 8;
-const int kTypeShiftBits = kTypeWordOffset * CHAR_BIT;
-
-// left shift an immediate DataType, for type, to the correct position
-// within one of the registers used to pass a TypedValue by value.
-inline uint64_t toDataTypeForCall(Type type) {
-  return uint64_t(type.toDataType()) << kTypeShiftBits;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }}
 
 #define incl_HPHP_JIT_TYPE_INL_H_

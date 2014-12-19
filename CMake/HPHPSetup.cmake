@@ -200,11 +200,6 @@ if(ENABLE_AVX2)
   add_definitions(-DENABLE_AVX2=1)
 endif()
 
-if(PACKED_TV)
-  # Allows a packed tv build
-  add_definitions(-DPACKED_TV=1)
-endif()
-
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)
 

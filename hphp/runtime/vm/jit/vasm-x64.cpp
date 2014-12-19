@@ -1081,25 +1081,19 @@ static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
     case DestType::TV: {
       // rax contains m_type and m_aux but we're expecting just the type in
       // the lower bits, so shift the type result register.
-      auto rval = packed_tv ? reg::rdx : reg::rax;
-      auto rtyp = packed_tv ? reg::rax : reg::rdx;
-      if (kTypeShiftBits > 0) {
-        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
-      }
+      static_assert(offsetof(TypedValue, m_data) == 0, "");
+      static_assert(offsetof(TypedValue, m_type) == 8, "");
       assert(dests.size() == 2);
-      v << copy2{rval, rtyp, dests[0], dests[1]};
+      v << copy2{reg::rax, reg::rdx, dests[0], dests[1]};
       break;
     }
     case DestType::SIMD: {
       // rax contains m_type and m_aux but we're expecting just the type in
       // the lower bits, so shift the type result register.
-      auto rval = packed_tv ? reg::rdx : reg::rax;
-      auto rtyp = packed_tv ? reg::rax : reg::rdx;
-      if (kTypeShiftBits > 0) {
-        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
-      }
+      static_assert(offsetof(TypedValue, m_data) == 0, "");
+      static_assert(offsetof(TypedValue, m_type) == 8, "");
       assert(dests.size() == 1);
-      pack2(v, rval, rtyp, dests[0]);
+      pack2(v, reg::rax, reg::rdx, dests[0]);
       break;
     }
     case DestType::SSA:

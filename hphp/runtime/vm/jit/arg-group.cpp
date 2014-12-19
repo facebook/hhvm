@@ -39,7 +39,8 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
     if (val) {
       m_imm64 = tmp->rawVal();
     } else {
-      m_imm64 = toDataTypeForCall(tmp->type());
+      static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
+      m_imm64 = uint64_t(tmp->type().toDataType());
     }
     m_kind = Kind::Imm;
     return;
@@ -63,7 +64,8 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
     return;
   }
   // arg is the (constant) type of a known-typed value.
-  m_imm64 = toDataTypeForCall(tmp->type());
+  static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
+  m_imm64 = uint64_t(tmp->type().toDataType());
   m_kind = Kind::Imm;
 }
 

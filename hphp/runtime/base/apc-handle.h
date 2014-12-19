@@ -218,17 +218,10 @@ private:
   void deleteShared();
 
 private:
-#if PACKED_TV
-  std::atomic<uint8_t> m_obj_attempted{false};
-  DataType m_type;
-  uint8_t m_flags{0};
-  mutable std::atomic<uint32_t> m_count{1};
-#else
   DataType m_type;
   std::atomic<uint8_t> m_obj_attempted{false};
   uint8_t m_flags{0};
   mutable std::atomic<uint32_t> m_count{1};
-#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////

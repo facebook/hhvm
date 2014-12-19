@@ -32,7 +32,6 @@
 
 // future work
 //  - #3098509 streamline code, vectors vs linked lists, etc
-//  - #3409409 Enable use of SIMD at least for doubles, for packed_tv
 //  - #3098685 Optimize lifetime splitting
 //  - #3098712 reuse spill slots
 //  - #3098739 new features now possible with XLS

@@ -84,23 +84,6 @@ union AuxUnion {
  * of m_data.  m_aux is described above, and must only be read or written
  * in specialized contexts.
  */
-#ifdef PACKED_TV
-// This TypedValue layout is a subset of the full 7pack format.  Client
-// code should not mess with the _t0 or _tags padding fields.
-struct TypedValue {
-  union {
-    uint8_t _tags[8];
-    struct {
-      uint8_t _t0;
-      DataType m_type;
-      AuxUnion m_aux;
-    };
-  };
-  Value m_data;
-
-  std::string pretty() const;
-};
-#else
 struct TypedValue {
   Value m_data;
   DataType m_type;
@@ -108,7 +91,6 @@ struct TypedValue {
 
   std::string pretty() const; // debug formatting. see trace.h
 };
-#endif
 
 // Check that TypedValue's size is a power of 2 (16bytes currently)
 static_assert((sizeof(TypedValue) & (sizeof(TypedValue)-1)) == 0,

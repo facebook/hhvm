@@ -892,16 +892,9 @@ static void shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
         }
       }
     } else if (kind == ArgDesc::Kind::TypeReg) {
-      if (kTypeShiftBits > 0) {
-        if (src.isVirt()) {
-          v << shlqi{kTypeShiftBits, src, dst, v.makeReg()};
-        } else {
-          v << shlqi{kTypeShiftBits, dst, dst, v.makeReg()};
-        }
-      } else {
-        if (src.isVirt()) {
-          v << copy{src, dst};
-        }
+      static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
+      if (src.isVirt()) {
+        v << copy{src, dst};
       }
     } else if (kind == ArgDesc::Kind::Addr) {
       if (src.isVirt()) {

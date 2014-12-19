@@ -703,13 +703,8 @@ static void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
     }
 
     case ArgDesc::Kind::TypeReg:
-      if (kTypeShiftBits > 0) {
-        auto tmp = v.makeReg();
-        v << shlqi{kTypeShiftBits, arg.srcReg(), tmp, v.makeReg()};
-        vargs.push_back(tmp);
-      } else {
-        vargs.push_back(arg.srcReg());
-      }
+      static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
+      vargs.push_back(arg.srcReg());
       break;
 
     case ArgDesc::Kind::Imm: {

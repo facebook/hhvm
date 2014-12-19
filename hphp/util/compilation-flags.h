@@ -39,14 +39,6 @@ const bool debug =
 #endif
   ;
 
-const bool packed_tv =
-#ifdef PACKED_TV
-  true
-#else
-  false
-#endif
-  ;
-
 const bool memory_profiling =
 #ifdef MEMORY_PROFILING
   true

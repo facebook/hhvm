@@ -183,7 +183,9 @@ struct ArgGroup {
     if (m_gpArgs.size() == x64::kNumRegisterArgs - 1) {
       m_override = &m_stkArgs;
     }
-    packed_tv ? type(i).ssa(i) : ssa(i).type(i);
+    static_assert(offsetof(TypedValue, m_data) == 0, "");
+    static_assert(offsetof(TypedValue, m_type) == 8, "");
+    ssa(i).type(i);
     m_override = nullptr;
     return *this;
   }

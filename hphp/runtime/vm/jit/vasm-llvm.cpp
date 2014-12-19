@@ -576,14 +576,10 @@ struct LLVMEmitter {
       false
     );
 
+    static_assert(offsetof(TypedValue, m_data) == 0, "");
+    static_assert(offsetof(TypedValue, m_type) == 8, "");
     m_typedValueType = llvm::StructType::get(
-        m_context,
-        packed_tv
-          ? std::vector<llvm::Type*>({m_int8,   // padding
-                                      m_int8,   // m_type
-                                      m_int64}) // m_data
-          : std::vector<llvm::Type*>({m_int64,  // m_data
-                                      m_int8}), // m_type
+        m_context, std::vector<llvm::Type*>({m_int64, m_int8}),
         /*isPacked*/ false);
   }
 
@@ -1765,15 +1761,11 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     break;
   case DestType::TV: {
     assert(dests.size() == 2);
-    if (packed_tv) {
-      defineValue(dests[0], m_irb.CreateExtractValue(callInst, 2)); // m_data
-      auto type = m_irb.CreateExtractValue(callInst, 1);
-      defineValue(dests[1], zext(type, 64)); // m_type
-    } else {
-      defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
-      auto type = m_irb.CreateExtractValue(callInst, 1);
-      defineValue(dests[1], zext(type, 64)); // m_type
-    }
+    static_assert(offsetof(TypedValue, m_data) == 0, "");
+    static_assert(offsetof(TypedValue, m_type) == 8, "");
+    defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
+    auto type = m_irb.CreateExtractValue(callInst, 1);
+    defineValue(dests[1], zext(type, 64)); // m_type
     break;
   }
   case DestType::SIMD: {

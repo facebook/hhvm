@@ -92,7 +92,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
 void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
                 const BlockList& blocks, BackEnd* backend) {
   // visit instructions to find tmps eligible to use SIMD registers
-  auto const try_wide = !packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs;
+  auto const try_wide = RuntimeOption::EvalHHIRAllocSIMDRegs;
   boost::dynamic_bitset<> not_wide(unit.numTmps());
   StateVector<SSATmp,SSATmp*> tmps(unit, nullptr);
   for (auto block : blocks) {

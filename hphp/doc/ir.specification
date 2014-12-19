@@ -1320,7 +1320,7 @@ generating efficient compare-and-branch instruction sequences.
 
   Unlinks a frame constructed by DefInlineFP.
 
-| CallArray, D(StkPtr), S(StkPtr) S(FramePtr), E|CRc
+| CallArray, D(StkPtr), S(StkPtr) S(FramePtr), E
 
   Invoke function corresponding to the current FPI with array args. S0 points
   to the stack resulting after the ActRec for the function and the array of its

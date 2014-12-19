@@ -609,8 +609,9 @@ struct LLVMEmitter {
     verifyModule();
 
     auto tcMM = m_tcMM.release();
-    auto cpu = llvm::sys::getHostCPUName();
-    FTRACE(1, "Creating ExecutionEngine with CPU '{}'\n", cpu.str());
+    auto cpu = RuntimeOption::EvalJitCPU;
+    if (cpu == "native") cpu = llvm::sys::getHostCPUName();
+    FTRACE(1, "Creating ExecutionEngine with CPU '{}'\n", cpu);
     std::string errStr;
     std::unique_ptr<llvm::ExecutionEngine> ee(
       llvm::EngineBuilder(m_module.get())

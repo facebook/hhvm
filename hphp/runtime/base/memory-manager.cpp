@@ -637,7 +637,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
     refreshStats();
   }
   initHole(); // enable parsing the leftover space in the old slab
-  if (debug) checkHeap();
+  if (debug && RuntimeOption::EvalCheckHeapOnAlloc) checkHeap();
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmartSizeAlignMask) == 0);
   m_stats.borrow(slab.size);

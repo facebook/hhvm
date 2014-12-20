@@ -760,8 +760,11 @@ struct LLVMEmitter {
       auto it = funcRec.records.find(req.id);
       if (it == funcRec.records.end()) continue;
 
+      auto jmpIp = findJmp(it->second, req.id);
+      if (!jmpIp) continue;
+
       auto destSR = mcg->tx().getSrcRec(req.dest);
-      destSR->registerFallbackJump(findJmp(it->second, req.id));
+      destSR->registerFallbackJump(jmpIp);
     }
   }
 
@@ -1524,15 +1527,13 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   // emitter, so that's what we do here.
 
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
-  auto stub = mcg->getFreeStub(frozen, &mcg->cgFixups());
-  ServiceReqArgVec args;
-  packServiceReqArgs(args,
-                     RipRelative(mcg->code.base()),
-                     inst.target.toAtomicInt(),
-                     inst.trflags.packed);
-  auto reqIp = mcg->backEnd().emitServiceReqWork(
-    frozen, stub, SRFlags::None, REQ_BIND_JMP, args);
-
+  auto reqIp = emitEphemeralServiceReq(frozen,
+                                       mcg->getFreeStub(frozen,
+                                                        &mcg->cgFixups()),
+                                       REQ_BIND_JMP,
+                                       RipRelative(mcg->code.base()),
+                                       inst.target.toAtomicInt(),
+                                       inst.trflags.packed);
   auto stubName = folly::sformat("bindjmpStub_{}", reqIp);
   auto stubFunc = emitFuncPtr(stubName, m_traceletFnTy, uint64_t(reqIp));
   auto call = emitTraceletTailCall(stubFunc);

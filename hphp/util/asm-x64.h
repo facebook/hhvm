@@ -2207,9 +2207,8 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
  *   a.patchJmp(...);
  */
 inline CodeBlock& codeBlockChoose(CodeAddress addr) {
-  assert(false && "addr was not part of any known code block");
-  not_reached();
-  return *static_cast<CodeBlock*>(nullptr);
+  always_assert_flog(false,
+                     "address {} was not part of any known code block", addr);
 }
 template<class... Blocks>
 CodeBlock& codeBlockChoose(CodeAddress addr, CodeBlock& a, Blocks&... as) {

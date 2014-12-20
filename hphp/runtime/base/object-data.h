@@ -385,7 +385,7 @@ private:
   };
   int o_id; // Numeric identifier of this object (used for var_dump())
 #endif
-} __attribute__((__aligned__(16)));
+};
 
 typedef GlobalsArray GlobalVariables;
 

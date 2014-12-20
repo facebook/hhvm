@@ -32,7 +32,6 @@ inline ObjectData::ObjectData(Class* cls)
   , m_attr_kind_count(HeaderKind::Object << 24)
 {
   assert(!o_attribute && m_kind == HeaderKind::Object && !m_count);
-  assert(uintptr_t(this) % sizeof(TypedValue) == 0);
   if (cls->needInitialization()) {
     // Needs to happen before we assign this object an o_id.
     cls->initialize();
@@ -48,7 +47,6 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags,
 {
   assert(o_attribute == flags && !m_count);
   assert(m_kind == HeaderKind::Object || m_kind == HeaderKind::ResumableObj);
-  assert(uintptr_t(this) % sizeof(TypedValue) == 0);
   if (cls->needInitialization()) {
     // Needs to happen before we assign this object an o_id.
     cls->initialize();
@@ -62,7 +60,6 @@ inline ObjectData::ObjectData(Class* cls, NoInit)
   , m_attr_kind_count(HeaderKind::Object << 24)
 {
   assert(!o_attribute && m_kind == HeaderKind::Object && !m_count);
-  assert(uintptr_t(this) % sizeof(TypedValue) == 0);
   o_id = ++os_max_id;
 }
 
@@ -233,9 +230,7 @@ inline const Func* ObjectData::methodNamed(const StringData* sd) const {
 }
 
 inline size_t ObjectData::sizeForNProps(Slot nProps) {
-  size_t sz = sizeof(ObjectData) + (sizeof(TypedValue) * nProps);
-  assert((sz & (sizeof(TypedValue) - 1)) == 0);
-  return sz;
+  return sizeof(ObjectData) + sizeof(TypedValue) * nProps;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -389,15 +389,16 @@ private:
 
 typedef GlobalsArray GlobalVariables;
 
-inline
-CountableHelper::CountableHelper(ObjectData* object) : m_object(object) {
-  object->incRefCount();
-}
-
-inline
-CountableHelper::~CountableHelper() {
-  m_object->decRefCount();
-}
+struct CountableHelper : private boost::noncopyable {
+  explicit CountableHelper(ObjectData* object) : m_object(object) {
+    object->incRefCount();
+  }
+  ~CountableHelper() {
+    m_object->decRefCount();
+  }
+private:
+  ObjectData *m_object;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 

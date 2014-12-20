@@ -14,6 +14,29 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/countable.h"
+#ifndef incl_HPHP_ATOMIC_COUNTABLE_H_
+#define incl_HPHP_ATOMIC_COUNTABLE_H_
 
-///////////////////////////////////////////////////////////////////////////////
+#include <atomic>
+#include <cstdint>
+
+namespace HPHP {
+
+/**
+ * If an object may be shared by multiple threads but we want to reclaim it
+ * when all threads are finished using it, we need to allocate it with the C++
+ * new operator (instead of SmartAllocator) and we need to use AtomicSmartPtr
+ * instead of SmartPtr.
+ */
+struct AtomicCountable {
+  using RefCount = int32_t;
+  AtomicCountable() : m_count(0) {}
+  RefCount getCount() const { return m_count; }
+  void incAtomicCount() const { ++m_count; }
+  RefCount decAtomicCount() const { return --m_count; }
+ protected:
+  mutable std::atomic<RefCount> m_count;
+};
+
+}
+#endif

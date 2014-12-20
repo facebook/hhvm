@@ -26,7 +26,6 @@
 #include "mysql.h"
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/smart-containers.h"
 

@@ -2656,9 +2656,6 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
   }
 
   auto static_check_and_decl = [&](Vout& v) {
-    static_assert(UncountedValue == UNCOUNTED, "");
-    static_assert(StaticValue == STATIC, "");
-
     if (type.needsStaticBitCheck()) {
       auto next = v.makeBlock();
       assert(sf!= InvalidReg);

@@ -19,11 +19,11 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
-#include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
 

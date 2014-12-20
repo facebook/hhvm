@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/countable.h"
+#include "hphp/util/compilation-flags.h"
 #include <utility>
 #include <algorithm>
 

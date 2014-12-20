@@ -683,13 +683,13 @@ static std::string toStringElm(const TypedValue* tv) {
       }
       continue;
     case KindOfArray:
-      assert_refcount_realistic_nz(tv->m_data.parr->getCount());
+      assert(check_refcount_nz(tv->m_data.parr->getCount()));
       os << tv->m_data.parr;
       print_count();
       os << ":Array";
       continue;
     case KindOfObject:
-      assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
+      assert(check_refcount_nz(tv->m_data.pobj->getCount()));
       os << tv->m_data.pobj;
       print_count();
       os << ":Object("
@@ -697,7 +697,7 @@ static std::string toStringElm(const TypedValue* tv) {
          << ")";
       continue;
     case KindOfResource:
-      assert_refcount_realistic_nz(tv->m_data.pres->getCount());
+      assert(check_refcount_nz(tv->m_data.pres->getCount()));
       os << tv->m_data.pres;
       print_count();
       os << ":Resource("
@@ -3766,7 +3766,7 @@ OPTBLD_INLINE void ExecutionContext::iopConcat(IOP_ARGS) {
 
   cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
                               cellAsCVarRef(*c1).toString());
-  assert_refcount_realistic_nz(c2->m_data.pstr->getCount());
+  assert(check_refcount_nz(c2->m_data.pstr->getCount()));
   vmStack().popC();
 }
 
@@ -3780,13 +3780,13 @@ OPTBLD_INLINE void ExecutionContext::iopConcatN(IOP_ARGS) {
   if (n == 2) {
     cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
                                 cellAsCVarRef(*c1).toString());
-    assert_refcount_realistic_nz(c2->m_data.pstr->getCount());
+    assert(check_refcount_nz(c2->m_data.pstr->getCount()));
   } else if (n == 3) {
     Cell* c3 = vmStack().indC(2);
     cellAsVariant(*c3) = concat3(cellAsVariant(*c3).toString(),
                                  cellAsCVarRef(*c2).toString(),
                                  cellAsCVarRef(*c1).toString());
-    assert_refcount_realistic_nz(c3->m_data.pstr->getCount());
+    assert(check_refcount_nz(c3->m_data.pstr->getCount()));
   } else /* n == 4 */ {
     Cell* c3 = vmStack().indC(2);
     Cell* c4 = vmStack().indC(3);
@@ -3794,7 +3794,7 @@ OPTBLD_INLINE void ExecutionContext::iopConcatN(IOP_ARGS) {
                                  cellAsCVarRef(*c3).toString(),
                                  cellAsCVarRef(*c2).toString(),
                                  cellAsCVarRef(*c1).toString());
-    assert_refcount_realistic_nz(c4->m_data.pstr->getCount());
+    assert(check_refcount_nz(c4->m_data.pstr->getCount()));
   }
 
   for (int i = 1; i < n; ++i) {

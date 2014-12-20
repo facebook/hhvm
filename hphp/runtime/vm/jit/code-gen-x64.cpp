@@ -3518,11 +3518,8 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   emitStore(rdSrc[RefData::tvOffset()], inst->src(1), srcLoc(inst, 1),
             Width::Full);
   v << inclm{rdSrc[FAST_REFCOUNT_OFFSET], v.makeReg()};
-  if (debug) {
-    static_assert(sizeof(RefData::Magic::kMagic) == sizeof(uint64_t), "");
-    emitImmStoreq(v, static_cast<int64_t>(RefData::Magic::kMagic),
-                  rdSrc[RefData::magicOffset()]);
-  }
+  v << storebi{uint8_t(HeaderKind::Ref), rdSrc[HeaderKindOffset]};
+  static_assert(sizeof(HeaderKind) == 1, "");
 }
 
 void CodeGenerator::emitStoreTypedValue(Vptr dst, SSATmp* src, Vloc loc) {

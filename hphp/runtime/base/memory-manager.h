@@ -32,6 +32,11 @@
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
+// used for mmapping contiguous heap space
+// If used, anonymous pages are not cleared when mapped with mmap. It is not
+// enabled by default and should be checked before use
+#define       MAP_UNINITIALIZED 0x4000000 /* XXX Fragile. */
+
 namespace HPHP {
 struct APCLocalArray;
 struct MemoryManager;
@@ -381,15 +386,50 @@ struct BigHeap {
   iterator begin();
   iterator end();
 
- private:
+ protected:
   void enlist(BigNode*, HeaderKind kind, size_t size);
 
- private:
+ protected:
   std::vector<MemBlock> m_slabs;
   std::vector<BigNode*> m_bigs;
 };
 
-//////////////////////////////////////////////////////////////////////
+// Contiguous Heap handles allocations and provides a contiguous address space
+// for requests. To turn on build with CONTIGUOUS_HEAP = 1
+struct ContiguousHeap : BigHeap {
+  bool contains(void* ptr) const;
+
+  MemBlock allocSlab(size_t size);
+
+  MemBlock allocBig(size_t size, HeaderKind kind);
+  MemBlock callocBig(size_t size);
+  MemBlock resizeBig(void* p, size_t size);
+  void freeBig(void*);
+
+  void reset();
+
+  void flush();
+
+  ~ContiguousHeap();
+ private:
+  // Contiguous Heap Pointers
+  char* m_base = nullptr;
+  char* m_used;
+  char* m_end;
+  char* m_peak;
+  char* m_OOMMarker;
+  FreeNode m_freeList;
+
+  // Contiguous Heap Counters
+  uint32_t m_requestCount;
+  size_t m_heapUsage;
+  size_t m_contiguousHeapSize;
+
+ private:
+  void* heapAlloc(size_t nbytes, size_t &cap);
+  void  createRequestHeap();
+};
+
 
 struct MemoryManager {
   /*
@@ -734,7 +774,11 @@ private:
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
   MemoryUsageStats m_stats;
+#if CONTIGUOUS_HEAP
+  ContiguousHeap m_heap;
+#else
   BigHeap m_heap;
+#endif
   std::vector<NativeNode*> m_natives;
 
   bool m_sweeping;

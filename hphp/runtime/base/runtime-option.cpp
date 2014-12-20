@@ -348,6 +348,12 @@ std::map<std::string, std::string> RuntimeOption::EnvVariables;
 std::string RuntimeOption::LightProcessFilePrefix = "./lightprocess";
 int RuntimeOption::LightProcessCount = 0;
 
+int64_t RuntimeOption::HeapSizeMB = 4096; // 4gb
+int64_t RuntimeOption::HeapResetCountBase = 1;
+int64_t RuntimeOption::HeapResetCountMultiple = 2;
+int64_t RuntimeOption::HeapLowWaterMark = 16;
+int64_t RuntimeOption::HeapHighWaterMark = 1024;
+
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
 #else
@@ -889,6 +895,20 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                  StringData::MaxSize);
     Config::Bind(StringOffsetLimit, ini, rlimit["StringOffsetLimit"],
                  10 * 1024 * 1024);
+    Config::Bind(HeapSizeMB, ini, rlimit["HeapSizeMB"],
+                 HeapSizeMB);
+    Config::Bind(HeapResetCountBase, ini,
+                 rlimit["HeapResetCountBase"],
+                 HeapResetCountBase);
+    Config::Bind(HeapResetCountMultiple, ini,
+                 rlimit["HeapResetCountMultiple"],
+                 HeapResetCountMultiple);
+    Config::Bind(HeapLowWaterMark , ini,
+                 rlimit["HeapLowWaterMark"],
+                 HeapLowWaterMark);
+    Config::Bind(HeapHighWaterMark , ini,
+                 rlimit["HeapHighWaterMark"],
+                 HeapHighWaterMark);
   }
   {
     Hdf repo = config["Repo"];

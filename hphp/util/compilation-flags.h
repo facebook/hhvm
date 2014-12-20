@@ -55,6 +55,13 @@ const bool memory_profiling =
 #endif
   ;
 
+const bool contiguous_heap =
+#if CONTIGUOUS_HEAP
+  true
+#else
+  false
+#endif
+  ;
 //////////////////////////////////////////////////////////////////////
 
 }

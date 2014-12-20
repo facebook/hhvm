@@ -355,6 +355,12 @@ public:
   static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
 
+  static int64_t HeapSizeMB;
+  static int64_t HeapResetCountBase;
+  static int64_t HeapResetCountMultiple;
+  static int64_t HeapLowWaterMark;
+  static int64_t HeapHighWaterMark;
+
   static int GetScannerType();
 
   static bool GetServerCustomBoolSetting(const std::string &settingName,

@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <limits>
+#include <sys/mman.h>
+#include <unistd.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/memory-profile.h"
@@ -43,6 +45,24 @@ TRACE_SET_MOD(smartalloc);
 
 std::atomic<MemoryManager::ReqProfContext*>
   MemoryManager::s_trigger{nullptr};
+
+// generate mmap flags for contiguous heap
+uint32_t getRequestHeapFlags() {
+  struct stat buf;
+
+  // check if MAP_UNITIALIZED is supported
+  auto mapUninitializedSupported =
+    (stat("/sys/kernel/debug/fb_map_uninitialized", &buf) == 0);
+  auto mmapFlags = MAP_NORESERVE | MAP_ANON | MAP_PRIVATE;
+
+  /* Check whether mmap(2) supports the MAP_UNINITIALIZED flag. */
+ if (mapUninitializedSupported) {
+    mmapFlags |= MAP_UNINITIALIZED;
+  }
+ return mmapFlags;
+}
+
+static auto s_mmapFlags = getRequestHeapFlags();
 
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
@@ -307,14 +327,6 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     assert(jeDeallocated >= 0 &&
            jeDeallocated <= std::numeric_limits<int64_t>::max());
 
-    // Since these deltas potentially include memory allocated from another
-    // thread but deallocated on this one, it is possible for these nubmers to
-    // go negative.
-    int64_t jeDeltaAllocated =
-      int64_t(jeAllocated) - int64_t(jeDeallocated);
-    int64_t mmDeltaAllocated =
-      int64_t(m_prevAllocated) - int64_t(m_prevDeallocated);
-
     // This is the delta between the current and the previous jemalloc reading.
     int64_t jeMMDeltaAllocated =
       int64_t(jeAllocated) - int64_t(m_prevAllocated);
@@ -324,17 +336,27 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       jeAllocated, m_prevAllocated, jeAllocated - m_prevAllocated);
     FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
       jeDeallocated, m_prevDeallocated, jeDeallocated - m_prevDeallocated);
-    FTRACE(1, "je delta:\ncurrent: {}\nprevious: {}\n",
-      jeDeltaAllocated, mmDeltaAllocated);
     FTRACE(1, "usage: {}\ntotal (je) alloc: {}\nje debt: {}\n",
       stats.usage, stats.totalAlloc, stats.jemallocDebt);
 
-    // Subtract the old jemalloc adjustment (delta0) and add the current one
-    // (delta) to arrive at the new combined usage number.
-    stats.usage += jeDeltaAllocated - mmDeltaAllocated;
-    // Remove the "debt" accrued from allocating the slabs so we don't double
-    // count the slab-based allocations.
-    stats.usage -= stats.jemallocDebt;
+    if (!contiguous_heap) {
+      // Since these deltas potentially include memory allocated from another
+      // thread but deallocated on this one, it is possible for these nubmers to
+      // go negative.
+      int64_t jeDeltaAllocated =
+        int64_t(jeAllocated) - int64_t(jeDeallocated);
+      int64_t mmDeltaAllocated =
+        int64_t(m_prevAllocated) - int64_t(m_prevDeallocated);
+      FTRACE(1, "je delta:\ncurrent: {}\nprevious: {}\n",
+          jeDeltaAllocated, mmDeltaAllocated);
+
+      // Subtract the old jemalloc adjustment (delta0) and add the current one
+      // (delta) to arrive at the new combined usage number.
+      stats.usage += jeDeltaAllocated - mmDeltaAllocated;
+      // Remove the "debt" accrued from allocating the slabs so we don't double
+      // count the slab-based allocations.
+      stats.usage -= stats.jemallocDebt;
+    }
 
     stats.jemallocDebt = 0;
     // We need to do the calculation instead of just setting it to jeAllocated
@@ -348,7 +370,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     FTRACE(1, "After stats sync:\n");
     FTRACE(1, "usage: {}\ntotal (je) alloc: {}\n\n",
       stats.usage, stats.totalAlloc);
-  }
+}
 #endif
   if (stats.usage > stats.peakUsage) {
     // NOTE: the peak memory usage monotonically increases, so there cannot
@@ -493,6 +515,7 @@ union MallocNode {
   BigNode big;
   SmallNode small;
 };
+
 static_assert(sizeof(SmallNode) == sizeof(BigNode), "");
 
 inline void MemoryManager::smartFree(void* ptr) {
@@ -613,14 +636,18 @@ void MemoryManager::checkHeap() {
       free_blocks.insert(&h->free_);
     }
   }
-  // make sure everything in a free list was scanned exactly once.
-  for (size_t i = 0; i < kNumSmartSizes; i++) {
-    for (auto n = m_freelists[i].head; n; n = n->next) {
-      assert(free_blocks.find(n) != free_blocks.end());
-      free_blocks.erase(n);
+
+  if (!contiguous_heap) {
+    // make sure everything in a free list was scanned exactly once.
+    for (size_t i = 0; i < kNumSmartSizes; i++) {
+      for (auto n = m_freelists[i].head; n; n = n->next) {
+        assert(free_blocks.find(n) != free_blocks.end());
+        free_blocks.erase(n);
+      }
     }
+    assert(free_blocks.empty());
   }
-  assert(free_blocks.empty());
+
   TRACE(1, "checkHeap: %lu objects %lu bytes\n", hdrs.size(), bytes);
   TRACE(1, "checkHeap-types: ");
   for (unsigned i = 0; i < NumHeaderKinds; ++i) {
@@ -1057,4 +1084,237 @@ BigHeap::iterator BigHeap::end() {
   return iterator{m_bigs.end(), *this};
 }
 
+/////////////////////////////////////////////////////////////////////////
+//Contiguous Heap
+
+void ContiguousHeap::reset() {
+  m_requestCount++;
+
+  // if there is a new peak, store it
+  if (m_peak < m_used) {
+    m_peak = m_used;
+    // convert usage to MB.. used later for comparison with water marks
+    m_heapUsage = ((uintptr_t)m_peak - (uintptr_t) m_base) >> 20;
+  }
+
+  // should me reset?
+  bool resetHeap = false;
+
+  // check if we are above low water mark
+  if (m_heapUsage > RuntimeOption::HeapLowWaterMark) {
+    // check if we are above below water mark
+    if (m_heapUsage > RuntimeOption::HeapHighWaterMark) {
+      // we are above high water mark... always reset
+      resetHeap = true;
+    } else {
+      // if between watermarks, free based on request count and usage
+      int requestCount = RuntimeOption::HeapResetCountBase;
+
+      // Assumption : low and high water mark are power of 2 aligned
+      for( auto resetStep = RuntimeOption::HeapHighWaterMark / 2 ;
+           resetStep > m_heapUsage ;
+           resetStep /= 2 ) {
+        requestCount *= RuntimeOption::HeapResetCountMultiple;
+      }
+      if (requestCount <= m_requestCount) {
+        resetHeap = true;
+      }
+    }
+  }
+
+
+  if (resetHeap) {
+    auto oldPeak = m_peak;
+    m_peak -= ((m_peak - m_base) / 2);
+    m_peak = (char*)((uintptr_t)m_peak & ~(s_pageSize - 1));
+    if (madvise(m_peak,
+                (uintptr_t)oldPeak - (uintptr_t)m_peak,
+                MADV_DONTNEED) == 0)
+    {
+      m_requestCount = 0;
+      TRACE(1, "ContiguousHeap-reset: bytes %lu\n",
+            (uintptr_t)m_end - (uintptr_t)m_peak);
+    } else {
+      TRACE(1,
+          "ContiguousHeap-reset: madvise failed, trying again next request");
+    }
+  } else {
+    TRACE(1, "ContiguousHeap-reset: nothing release");
+  }
+  m_used = m_base;
+  m_freeList.next = nullptr;
+  m_freeList.size = 0;
+  always_assert(m_base);
+  m_slabs.clear();
+  m_bigs.clear();
+}
+
+void ContiguousHeap::flush() {
+  madvise(m_base, m_peak-m_base, MADV_DONTNEED);
+  m_used = m_peak = m_base;
+  m_freeList.size = 0;
+  m_freeList.next = nullptr;
+  m_slabs = std::vector<MemBlock>{};
+  m_bigs = std::vector<BigNode*>{};
+}
+
+MemBlock ContiguousHeap::allocSlab(size_t size) {
+  size_t cap;
+  void* slab = heapAlloc(size, cap);
+  m_slabs.push_back({slab, size});
+  return {slab, cap};
+}
+
+MemBlock ContiguousHeap::allocBig(size_t bytes, HeaderKind kind) {
+  size_t cap;
+  auto n = static_cast<BigNode*>(heapAlloc(bytes + sizeof(BigNode), cap));
+  enlist(n, kind, cap);
+  return {n + 1, cap - sizeof(BigNode)};
+}
+
+MemBlock ContiguousHeap::callocBig(size_t nbytes) {
+  size_t cap;
+  auto const n = static_cast<BigNode*>(
+        heapAlloc(nbytes + sizeof(BigNode), cap));
+  memset(n, 0, cap);
+  enlist(n, HeaderKind::BigMalloc, cap);
+  return {n + 1, cap - sizeof(BigNode)};
+}
+
+bool ContiguousHeap::contains(void* ptr) const {
+  auto const ptrInt = reinterpret_cast<uintptr_t>(ptr);
+  return ptrInt >= reinterpret_cast<uintptr_t>(m_base) &&
+         ptrInt <  reinterpret_cast<uintptr_t>(m_used);
+}
+
+NEVER_INLINE
+void ContiguousHeap::freeBig(void* ptr) {
+  // remove from big list
+  auto n = static_cast<BigNode*>(ptr) - 1;
+  auto i = n->index;
+  auto last = m_bigs.back();
+  auto size = n->nbytes;
+  last->index = i;
+  m_bigs[i] = last;
+  m_bigs.pop_back();
+
+  // free heap space
+  // freed nodes are stored in address ordered freelist
+  auto free = &m_freeList;
+  auto node = reinterpret_cast<FreeNode*>(n);
+  node->size = size;
+  while (free->next != nullptr && free->next < node) {
+    free = free->next;
+  }
+  // Coalesce Nodes if possible with adjacent free nodes
+  if ((uintptr_t)free + free->size + node->size == (uintptr_t)free->next) {
+    free->size += node->size + free->next->size;
+    free->next = free->next->next;
+  } else if ((uintptr_t)free + free->size == (uintptr_t)ptr) {
+    free->size += node->size;
+  } else if ((uintptr_t)node + node->size == (uintptr_t)free->next){
+    node->next = free->next->next;
+    node->size += free->next->size;
+    free->next = node;
+  } else {
+    node->next = free->next;
+    free->next = node;
+  }
+}
+
+MemBlock ContiguousHeap::resizeBig(void* ptr, size_t newsize) {
+  // Since we don't know how big it is (i.e. how much data we should memcpy),
+  // we have no choice but to ask malloc to realloc for us.
+  auto const n = static_cast<BigNode*>(ptr) - 1;
+  size_t cap = 0;
+  BigNode* newNode = nullptr;
+  if (n->nbytes >= newsize + sizeof(BigNode)) {
+    newNode = n;
+  } else {
+    newNode = static_cast<BigNode*>(
+      heapAlloc(newsize + sizeof(BigNode),cap)
+    );
+    memcpy(newNode, ptr, n->nbytes);
+    newNode->nbytes = cap;
+  }
+  if (newNode != n) {
+    m_bigs[newNode->index] = newNode;
+    freeBig(n);
+  }
+  return {newNode + 1, n->nbytes - sizeof(BigNode)};
+}
+
+void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {
+  if (UNLIKELY(!m_base)) {
+    // Lazy allocation of heap
+    createRequestHeap();
+  }
+
+  void* ptr = nullptr;
+  auto alignedSize = (nbytes + s_pageSize - 1) & ~(s_pageSize - 1);
+
+  // freeList is address ordered first fit
+  auto prev = &m_freeList;
+  auto cur = m_freeList.next;
+  while (cur != nullptr ) {
+    if (cur->size >= alignedSize &&
+        cur->size < alignedSize + kMaxSmartSize) {
+      // found freed heap node that fits allocation and doesn't need to split
+      ptr = cur;
+      prev->next = cur->next;
+      cap = cur->size;
+      return ptr;
+    }
+    if (cur->size > alignedSize) {
+      // split free heap node
+      prev->next = reinterpret_cast<FreeNode*>(((char*)cur) + alignedSize);
+      prev->next->next = cur->next;
+      prev->next->size = cur->size - alignedSize;
+      ptr = cur;
+      cap = alignedSize;
+      return ptr;
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+  ptr = (void*)m_used;
+  m_used += alignedSize;
+  cap = alignedSize;
+  if (UNLIKELY(m_used > m_end)) {
+    always_assert_flog(0,
+        "Heap address space exhausted\nbase:{}\nend:{}\nused{}",
+        m_base, m_end, m_used);
+    // Throw exception when t4840214 is fixed
+    // throw FatalErrorException("Request heap out of memory");
+  } else if (UNLIKELY(m_used > m_OOMMarker)) {
+    ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+    info->m_reqInjectionData.setMemExceededFlag();
+  }
+  return ptr;
+}
+
+void ContiguousHeap::createRequestHeap() {
+  // convert to bytes
+  m_contiguousHeapSize = RuntimeOption::HeapSizeMB * 1024 * 1024;
+
+  if (( m_base = (char*)mmap(NULL,
+                            m_contiguousHeapSize,
+                            PROT_WRITE | PROT_READ,
+                            s_mmapFlags,
+                            -1,
+                            0)) != MAP_FAILED) {
+    m_used = m_base;
+  } else {
+    always_assert_flog(0, "Heap Creation Failed");
+  }
+  m_end = m_base + m_contiguousHeapSize;
+  m_peak = m_base;
+  m_OOMMarker = m_end - (m_contiguousHeapSize/2);
+  m_freeList.next = nullptr;
+  m_freeList.size = 0;
+}
+
+ContiguousHeap::~ContiguousHeap(){
+  flush();
+}
 }

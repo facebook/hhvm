@@ -157,10 +157,7 @@ void implRet(HTS& env, Type type) {
 
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
-  auto const retval = pop(env, type,
-    curFunc(env)->isGenerator() ? DataTypeSpecific
-                                : DataTypeGeneric);
-
+  auto const retval = pop(env, type, DataTypeGeneric);
   freeLocalsAndThis(env);
   retSurpriseCheck(env, fp(env), retval);
 

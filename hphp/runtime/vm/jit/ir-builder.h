@@ -294,7 +294,6 @@ public:
   SSATmp* cond(unsigned producedRefs, Branch branch, Next next, Taken taken) {
     Block* taken_block = m_unit.defBlock();
     Block* done_block = m_unit.defBlock();
-    DisableCseGuard guard(*this);
 
     typedef decltype(branch(taken_block)) T;
     SSATmp* v1 = BranchImpl<T>::go(branch, taken_block, next);
@@ -320,7 +319,6 @@ public:
   void ifThenElse(Branch branch, Next next, Taken taken) {
     Block* taken_block = m_unit.defBlock();
     Block* done_block = m_unit.defBlock();
-    DisableCseGuard guard(*this);
     branch(taken_block);
     next();
     // patch the last block added by the Next lambda to jump to
@@ -353,7 +351,6 @@ public:
   void ifThen(Branch branch, Taken taken) {
     Block* taken_block = m_unit.defBlock();
     Block* done_block = m_unit.defBlock();
-    DisableCseGuard guard(*this);
     branch(taken_block);
     Block* last = m_curBlock;
     if (last->empty() || !last->back().isBlockEnd()) {
@@ -383,7 +380,6 @@ public:
   template <class Branch, class Next>
   void ifElse(Branch branch, Next next) {
     Block* done_block = m_unit.defBlock();
-    DisableCseGuard guard(*this);
     branch(done_block);
     next();
     // patch the last block added by the Next lambda to jump to
@@ -403,27 +399,6 @@ private:
     BCMarker marker;
     ExnStackState exnStack;
     std::function<Block* ()> catchCreator;
-  };
-
-private:
-  // RAII disable of CSE; only restores if it used to be on.  Used for
-  // control flow, where we currently don't allow CSE.
-  struct DisableCseGuard {
-    explicit DisableCseGuard(IRBuilder& irb)
-      : m_irb(irb)
-      , m_oldEnable(irb.m_enableCse)
-    {
-      m_irb.m_enableCse = false;
-    }
-    ~DisableCseGuard() {
-      m_irb.m_enableCse = m_oldEnable;
-    }
-    DisableCseGuard(const DisableCseGuard&) = delete;
-    DisableCseGuard& operator=(const DisableCseGuard&) = delete;
-
-  private:
-    IRBuilder& m_irb;
-    bool m_oldEnable;
   };
 
 private:

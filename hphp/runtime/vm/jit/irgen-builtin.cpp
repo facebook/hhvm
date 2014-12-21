@@ -402,7 +402,8 @@ struct CatchMaker {
 
     // Determine whether we're dealing with a TVCoercionException or a php
     // exception.  If it's a php-exception, we'll go to the taken block.
-    env.irb->ifThen(
+    ifThen(
+      env,
       [&] (Block* taken) {
         gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
       },
@@ -813,7 +814,8 @@ SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
     return gen(env, ClsNeq, ClsNeqData { testCls }, cls);
   };
 
-  return env.irb->cond(
+  return cond(
+    env,
     0, // references produced
     [&] (Block* taken) {
       auto isObj = gen(env, IsType, Type::Obj, src);

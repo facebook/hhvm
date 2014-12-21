@@ -193,8 +193,9 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     auto const isInstance = haveBit
       ? gen(env, InstanceOfBitmask, objClass, cns(env, clsName))
       : gen(env, ExtendsClass, objClass, constraint);
-    env.irb->ifThen(
-      [&](Block* taken) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
         gen(env, JmpZero, taken, isInstance);
       },
       [&] { // taken: the param type does not match

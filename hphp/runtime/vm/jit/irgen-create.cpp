@@ -32,8 +32,9 @@ const StaticString s_uuinvoke("__invoke");
 
 void initProps(HTS& env, const Class* cls) {
   cls->initPropHandle();
-  env.irb->ifThen(
-    [&](Block* taken) {
+  ifThen(
+    env,
+    [&] (Block* taken) {
       gen(env, CheckInitProps, taken, ClassData(cls));
     },
     [&] {
@@ -52,8 +53,9 @@ void initProps(HTS& env, const Class* cls) {
 void initSProps(HTS& env, const Class* cls) {
   cls->initSPropHandles();
   if (RDS::isPersistentHandle(cls->sPropInitHandle())) return;
-  env.irb->ifThen(
-    [&](Block* taken) {
+  ifThen(
+    env,
+    [&] (Block* taken) {
       gen(env, CheckInitSProps, taken, ClassData(cls));
     },
     [&] {
@@ -375,7 +377,8 @@ void emitStaticLocInit(HTS& env, int32_t locId, const StringData* name) {
 
     auto const cachedBox =
       gen(env, LdStaticLocCached, StaticLocName { curFunc(env), name });
-    env.irb->ifThen(
+    ifThen(
+      env,
       [&] (Block* taken) {
         gen(env, CheckStaticLocInit, taken, cachedBox);
       },
@@ -404,7 +407,8 @@ void emitStaticLoc(HTS& env, int32_t locId, const StringData* name) {
              cns(env, name), fp(env), cns(env, Type::Uninit)) :
     gen(env, LdStaticLocCached, StaticLocName { curFunc(env), name });
 
-  auto const res = env.irb->cond(
+  auto const res = cond(
+    env,
     0,
     [&] (Block* taken) {
       gen(env, CheckStaticLocInit, taken, box);

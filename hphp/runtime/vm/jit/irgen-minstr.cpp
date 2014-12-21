@@ -768,7 +768,8 @@ SSATmp* checkInitProp(MTS& env,
 
   if (!needsCheck) return propAddr;
 
-  return env.irb.cond(
+  return cond(
+    env,
     0,
     [&] (Block* taken) {
       gen(env, CheckInitMem, taken, propAddr, cns(env, 0));
@@ -842,7 +843,8 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
    * otherwise we just give out a pointer to the init_null_variant (after
    * raising the appropriate warnings).
    */
-  auto const newBase = env.irb.cond(
+  auto const newBase = cond(
+    env,
     0,
     [&] (Block* taken) {
       gen(env, CheckTypeMem, Type::Obj, taken, env.base.value);
@@ -1119,7 +1121,8 @@ void emitRatchetRefs(MTS& env) {
     return;
   }
 
-  setBase(env, env.irb.cond(
+  setBase(env, cond(
+    env,
     0,
     [&] (Block* taken) {
       gen(env, CheckInitMem, taken, env.misBase, cns(env, MISOFF(tvRef)));
@@ -1251,7 +1254,8 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
     return doLdElem();
   }
 
-  return env.irb.cond(
+  return cond(
+    env,
     1,
     [&] (Block* taken) {
       gen(env, CheckPackedArrayBounds, taken, base, key);
@@ -1354,7 +1358,8 @@ void emitPairGet(MTS& env, SSATmp* key) {
 void emitPackedArrayIsset(MTS& env) {
   assert(env.base.type.getArrayKind() == ArrayData::kPackedKind);
   auto const key = getKey(env);
-  env.result = env.irb.cond(
+  env.result = cond(
+    env,
     0,
     [&] (Block* taken) {
       gen(env, CheckPackedArrayBounds, taken, env.base.value, key);
@@ -1422,8 +1427,9 @@ void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
   auto const size = gen(env, LdVectorSize, env.base.value);
   gen(env, CheckBounds, key, size);
 
-  env.irb.ifThen(
-    [&](Block* taken) {
+  ifThen(
+    env,
+    [&] (Block* taken) {
       gen(env, VectorHasImmCopy, taken, env.base.value);
     },
     [&] {
@@ -1869,7 +1875,8 @@ void handleStrTestResult(MTS& env) {
   // We expected SetElem's base to not be a Str but might be wrong. Make an
   // exit trace to side exit to the next instruction, replacing our guess
   // with the correct stack output.
-  env.irb.ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, CheckNullptr, taken, env.strTestResult);
     },
@@ -1905,7 +1912,8 @@ Block* makeCatchSet(MTS& env) {
   gen(env, BeginCatch);
   spillStack(env);
 
-  env.irb.ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
     },

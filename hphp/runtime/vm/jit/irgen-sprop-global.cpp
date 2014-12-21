@@ -167,7 +167,8 @@ void emitIssetS(HTS& env) {
   }
   auto const ssaCls = popA(env);
 
-  auto const ret = env.irb->cond(
+  auto const ret = cond(
+    env,
     0,
     [&] (Block* taken) {
       auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
@@ -192,7 +193,8 @@ void emitEmptyS(HTS& env) {
   }
 
   auto const ssaCls = popA(env);
-  auto const ret = env.irb->cond(
+  auto const ret = cond(
+    env,
     0,
     [&] (Block* taken) {
       auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
@@ -259,7 +261,8 @@ void emitIssetG(HTS& env) {
   auto const name = topC(env, 0);
   if (!name->isA(Type::Str)) PUNT(IssetG-NameNotStr);
 
-  auto const ret = env.irb->cond(
+  auto const ret = cond(
+    env,
     0,
     [&] (Block* taken) {
       return gen(env, LdGblAddr, taken, name);
@@ -279,7 +282,8 @@ void emitEmptyG(HTS& env) {
   auto const name = topC(env);
   if (!name->isA(Type::Str)) PUNT(EmptyG-NameNotStr);
 
-  auto const ret = env.irb->cond(
+  auto const ret = cond(
+    env,
     0,
     [&] (Block* taken) {
       return gen(env, LdGblAddr, taken, name);

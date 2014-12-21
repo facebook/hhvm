@@ -32,7 +32,8 @@ namespace {
 
 void suspendHookImpl(HTS& env, SSATmp* frame, SSATmp* other, bool eager) {
   ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, CheckSurpriseFlags, taken);
     },
@@ -177,7 +178,8 @@ void emitAwait(HTS& env, int32_t numIters) {
   auto const failed = gen(env, EqInt, state, cns(env, kFailed));
   gen(env, JmpNZero, exitSlow, failed);
 
-  env.irb->ifThenElse(
+  ifThenElse(
+    env,
     [&] (Block* taken) {
       auto const succeeded = gen(env, EqInt, state, cns(env, kSucceeded));
       gen(env, JmpNZero, taken, succeeded);

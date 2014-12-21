@@ -201,6 +201,16 @@ public:
    */
   void setBlock(Offset offset, Block* block);
 
+  /*
+   * Get the block that we're currently emitting code to.
+   */
+  Block* curBlock() { return m_curBlock; }
+
+  /*
+   * Append a new block to the unit.
+   */
+  void appendBlock(Block* block);
+
 public:
   /*
    * To emit code to a block other than the current block, call pushBlock(),
@@ -233,161 +243,6 @@ public:
                        Block* srcBlock,
                        const folly::Optional<IdomVector>&);
 
-
-  //////////////////////////////////////////////////////////////////////
-  // control flow
-
-  Block* curBlock() { return m_curBlock; }
-
-private:
-  template<typename T> struct BranchImpl;
-public:
-  /*
-   * cond() generates if-then-else blocks within a trace.  The caller supplies
-   * lambdas to create the branch, next-body, and taken-body.  The next and
-   * taken lambdas must return one SSATmp* value; cond() returns the SSATmp for
-   * the merged value.
-   *
-   * If branch returns void, next must take zero arguments. If branch returns
-   * SSATmp*, next must take one SSATmp* argument. This allows branch to return
-   * an SSATmp* that is only defined in the next branch, without letting it
-   * escape into the caller's scope (most commonly used with things like
-   * LdMem).
-   *
-   * The producedRefs argument is needed for the refcount optimizations in
-   * refcount-opts.cpp. It should be the number of unconsumed references
-   * forwarded from each Jmp src to the DefLabel's dst (for a description of
-   * reference producers and consumers, read the "Refcount Optimizations"
-   * section in hphp/doc/hackers-guide/jit-optimizations.md). As an example,
-   * code that looks like the following should pass 1 for producedRefs, since
-   * LdCns and LookupCns each produce a reference that should then be forwarded
-   * to t2, the dest of the DefLabel:
-   *
-   * B0:
-   *   t0:FramePtr = DefFP
-   *   t1:Cell = LdCns "foo"        // produce reference to t1
-   *   CheckInit t1:Cell -> B3<Unlikely>
-   *  -> B1
-   *
-   * B1 (preds B0):
-   *   Jmp t1:Cell -> B2            // forward t1's unconsumed ref to t2
-   *
-   * B2 (preds B1, B3):
-   *   t2:Cell = DefLabel           // produce reference to t2, from t1 and t4
-   *   StLoc<1> t0:FramePtr t2:Cell // consume reference to t2
-   *   Halt
-   *
-   * B3<Unlikely> (preds B0):
-   *   t3:Uninit = AssertType<Uninit> t1:Cell // consume reference to t1
-   *   t4:Cell = LookupCns "foo"    // produce reference to t4
-   *   Jmp t4:Cell -> B2            // forward t4's unconsumed ref to t2
-   *
-   * A sufficiently advanced analysis pass could deduce this value from the
-   * structure of the IR, but it would require traversing all possible control
-   * flow paths, causing an explosion of required CPU time and/or memory.
-   */
-  template <class Branch, class Next, class Taken>
-  SSATmp* cond(unsigned producedRefs, Branch branch, Next next, Taken taken) {
-    Block* taken_block = m_unit.defBlock();
-    Block* done_block = m_unit.defBlock();
-
-    typedef decltype(branch(taken_block)) T;
-    SSATmp* v1 = BranchImpl<T>::go(branch, taken_block, next);
-    gen(Jmp, done_block, v1);
-    appendBlock(taken_block);
-    SSATmp* v2 = taken();
-    gen(Jmp, done_block, v2);
-
-    appendBlock(done_block);
-    IRInstruction* label = m_unit.defLabel(1, m_curMarker, {producedRefs});
-    done_block->push_back(label);
-    SSATmp* result = label->dst(0);
-    result->setType(Type::unionOf(v1->type(), v2->type()));
-    return result;
-  }
-
-  /*
-   * ifThenElse() generates if-then-else blocks within a trace that do not
-   * produce values. Code emitted in the {next,taken} lambda will be executed
-   * iff the branch emitted in the branch lambda is {not,} taken.
-   */
-  template <class Branch, class Next, class Taken>
-  void ifThenElse(Branch branch, Next next, Taken taken) {
-    Block* taken_block = m_unit.defBlock();
-    Block* done_block = m_unit.defBlock();
-    branch(taken_block);
-    next();
-    // patch the last block added by the Next lambda to jump to
-    // the done block.  Note that last might not be taken_block.
-    Block* last = m_curBlock;
-    if (last->empty() || !last->back().isBlockEnd()) {
-      gen(Jmp, done_block);
-    } else if (!last->back().isTerminal()) {
-      last->back().setNext(done_block);
-    }
-    appendBlock(taken_block);
-    taken();
-    // patch the last block added by the Taken lambda to jump to
-    // the done block.  Note that last might not be taken_block.
-    last = m_curBlock;
-    if (last->empty() || !last->back().isBlockEnd()) {
-      gen(Jmp, done_block);
-    } else if (!last->back().isTerminal()) {
-      last->back().setNext(done_block);
-    }
-    appendBlock(done_block);
-  }
-
-  /*
-   * ifThen generates if-then blocks within a trace that do not
-   * produce values. Code emitted in the taken lambda will be executed
-   * iff the branch emitted in the branch lambda is taken.
-   */
-  template <class Branch, class Taken>
-  void ifThen(Branch branch, Taken taken) {
-    Block* taken_block = m_unit.defBlock();
-    Block* done_block = m_unit.defBlock();
-    branch(taken_block);
-    Block* last = m_curBlock;
-    if (last->empty() || !last->back().isBlockEnd()) {
-      gen(Jmp, done_block);
-    } else if (!last->back().isTerminal()) {
-      last->back().setNext(done_block);
-    }
-    appendBlock(taken_block);
-    taken();
-    // patch the last block added by the Taken lambda to jump to
-    // the done block.  Note that last might not be taken_block.
-    last = m_curBlock;
-    if (last->empty() || !last->back().isBlockEnd()) {
-      gen(Jmp, done_block);
-    } else if (!last->back().isTerminal()) {
-      last->back().setNext(done_block);
-    }
-    appendBlock(done_block);
-  }
-
-  /*
-   * ifElse generates if-then-else blocks with an empty 'then' block
-   * that do not produce values. Code emitted in the next lambda will
-   * be executed iff the branch emitted in the branch lambda is not
-   * taken.
-   */
-  template <class Branch, class Next>
-  void ifElse(Branch branch, Next next) {
-    Block* done_block = m_unit.defBlock();
-    branch(done_block);
-    next();
-    // patch the last block added by the Next lambda to jump to
-    // the done block.
-    auto last = m_curBlock;
-    if (last->empty() || !last->back().isBlockEnd()) {
-      gen(Jmp, done_block);
-    } else if (!last->back().isTerminal()) {
-      last->back().setNext(done_block);
-    }
-    appendBlock(done_block);
-  }
 
 private:
   struct BlockState {
@@ -445,7 +300,6 @@ private:
 
 private:
   void appendInstruction(IRInstruction* inst);
-  void appendBlock(Block* block);
   SSATmp* cseLookup(const IRInstruction&,
                     const Block*,
                     const folly::Optional<IdomVector>&) const;
@@ -485,25 +339,6 @@ private:
   // TODO(t3730559): Offset is used here since it's passed from
   // emitJmp*, but SrcKey might be better in case of inlining.
   jit::flat_map<Offset,Block*> m_offsetToBlockMap;
-};
-
-/*
- * BranchImpl is used by IRBuilder::cond to support branch and next lambdas
- * with different signatures. See cond for details.
- */
-template<> struct IRBuilder::BranchImpl<void> {
-  template<typename Branch, typename Next>
-  static SSATmp* go(Branch branch, Block* taken, Next next) {
-    branch(taken);
-    return next();
-  }
-};
-
-template<> struct IRBuilder::BranchImpl<SSATmp*> {
-  template<typename Branch, typename Next>
-  static SSATmp* go(Branch branch, Block* taken, Next next) {
-    return next(branch(taken));
-  }
 };
 
 //////////////////////////////////////////////////////////////////////

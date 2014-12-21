@@ -31,7 +31,8 @@ namespace {
 
 void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
   ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, CheckSurpriseFlags, taken);
     },

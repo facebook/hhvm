@@ -618,7 +618,8 @@ void emitFPushClsMethodD(HTS& env,
 
   // Look up the Func* in the targetcache. If it's not there, try the slow
   // path. If that fails, slow exit.
-  auto const func = env.irb->cond(
+  auto const func = cond(
+    env,
     0,
     [&] (Block* taken) {
       auto const mcFunc = gen(env, LdClsMethodCacheFunc, data);
@@ -737,7 +738,8 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
   }
 
   auto const data = ClsMethodData{cls->name(), methName};
-  auto const funcTmp = env.irb->cond(
+  auto const funcTmp = cond(
+    env,
     0,
     [&](Block* taken) {
       auto const fcacheFunc = gen(env, LdClsMethodFCacheFunc, data);

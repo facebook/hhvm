@@ -37,7 +37,8 @@ void implAGet(HTS& env, SSATmp* classSrc) {
 }
 
 void checkThis(HTS& env, SSATmp* ctx) {
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, CheckCtxThis, taken, ctx);
     },

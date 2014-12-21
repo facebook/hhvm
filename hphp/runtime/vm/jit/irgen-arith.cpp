@@ -587,7 +587,8 @@ void emitDiv(HTS& env) {
   dividend = make_double(popC(env));
 
   SSATmp* divVal = nullptr;  // edge-defined value
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       divVal = gen(env, DivDbl, taken, dividend, divisor);
     },
@@ -612,7 +613,8 @@ void emitMod(HTS& env) {
   auto const tl = gen(env, ConvCellToInt, btl);
 
   // Generate an exit for the rare case that r is zero.
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, JmpZero, taken, tr);
     },
@@ -637,7 +639,8 @@ void emitMod(HTS& env) {
 
   // Check for -1.  The Mod IR instruction has undefined behavior for -1, but
   // php semantics are to return zero.
-  auto const res = env.irb->cond(
+  auto const res = cond(
+    env,
     0,
     [&] (Block* taken) {
       auto const negone = gen(env, Eq, tr, cns(env, -1));

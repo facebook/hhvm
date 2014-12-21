@@ -75,7 +75,8 @@ void implCns(HTS& env,
     }
   } else {
     auto const c1 = gen(env, LdCns, cnsNameTmp);
-    result = env.irb->cond(
+    result = cond(
+      env,
       1,
       [&] (Block* taken) { // branch
         gen(env, CheckInit, taken, c1);
@@ -157,7 +158,8 @@ void emitClsCnsD(HTS& env,
   );
   auto const guardType = Type::UncountedInit;
 
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, CheckTypeMem, guardType, taken, prds);
     },

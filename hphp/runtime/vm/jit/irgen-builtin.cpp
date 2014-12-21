@@ -690,10 +690,13 @@ void builtinCall(HTS& env,
   // ReDefSP type stuff and possibly also spilled the stack.
   env.irb->exceptionStackBoundary();
 
-  auto const retType = [&] {
+  auto const retType = [&]() -> Type {
     auto const retDT = callee->returnType();
     auto const ret = retDT ? Type(*retDT) : Type::Cell;
-    return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
+    if (callee->attrs() & ClassInfo::IsReference) {
+      return ret.box() & Type::BoxedInitCell;
+    }
+    return ret;
   }();
 
   // Make the actual call.

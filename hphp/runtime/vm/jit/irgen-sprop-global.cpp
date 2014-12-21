@@ -138,7 +138,7 @@ void emitVGetS(HTS& env) {
   auto const val = gen(
     env,
     LdMem,
-    Type::BoxedCell,
+    Type::BoxedInitCell,
     gen(env, BoxPtr, propAddr),
     cns(env, 0)
   );
@@ -235,7 +235,7 @@ void emitVGetG(HTS& env) {
   destroyName(env, name);
   pushIncRef(
     env,
-    gen(env, LdMem, Type::BoxedCell, gen(env, BoxPtr, ptr), cns(env, 0))
+    gen(env, LdMem, Type::BoxedInitCell, gen(env, BoxPtr, ptr), cns(env, 0))
   );
 }
 

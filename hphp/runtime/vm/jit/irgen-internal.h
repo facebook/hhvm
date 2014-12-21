@@ -330,7 +330,7 @@ inline SSATmp* popC(HTS& env, TypeConstraint tc = DataTypeSpecific) {
 }
 
 inline SSATmp* popA(HTS& env) { return pop(env, Type::Cls); }
-inline SSATmp* popV(HTS& env) { return pop(env, Type::BoxedCell); }
+inline SSATmp* popV(HTS& env) { return pop(env, Type::BoxedInitCell); }
 inline SSATmp* popR(HTS& env) { return pop(env, Type::Gen); }
 inline SSATmp* popF(HTS& env) { return pop(env, Type::Gen); }
 
@@ -432,7 +432,7 @@ inline SSATmp* topF(HTS& env,
 }
 
 inline SSATmp* topV(HTS& env, uint32_t i = 0) {
-  return top(env, Type::BoxedCell, i);
+  return top(env, Type::BoxedInitCell, i);
 }
 
 inline SSATmp* topR(HTS& env, uint32_t i = 0) {

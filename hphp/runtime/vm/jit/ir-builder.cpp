@@ -184,19 +184,8 @@ void IRBuilder::appendBlock(Block* block) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst,
-                                          Type oldType,
-                                          ConstrainBoxedFunc constrainBoxed) {
+SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType) {
   auto const typeParam = inst->typeParam();
-
-  if (oldType.isBoxed() && typeParam.isBoxed() &&
-      (oldType.not(typeParam) || typeParam < oldType)) {
-    // TODO(#2939547): this used to update inner type predictions, but now it's
-    // really just serving to change BoxedCell into BoxedInitCell in some
-    // cases.  We should make sure all boxed values are BoxedInitCell subtypes
-    // and then remove this code.
-    return constrainBoxed(typeParam);
-  }
 
   if (oldType.not(typeParam)) {
     /* This check will always fail. It's probably due to an incorrect
@@ -219,14 +208,7 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst,
 }
 
 SSATmp* IRBuilder::preOptimizeCheckType(IRInstruction* inst) {
-  auto* src = inst->src(0);
-
-  return preOptimizeCheckTypeOp(
-    inst, src->type(),
-    [&](Type newType){
-      constrainValue(src, DataTypeCountness);
-      return gen(AssertType, newType, src);
-    });
+  return preOptimizeCheckTypeOp(inst, inst->src(0)->type());
 }
 
 SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
@@ -240,13 +222,7 @@ SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
 
   return preOptimizeCheckTypeOp(
     inst,
-    stackType(offset, DataTypeGeneric),
-    [&](Type newType) {
-      // TODO(#5868892): The return of a no-dest gen() here is also in the
-      // CheckLoc version, and is probably a bug.
-      constrainStack(offset, DataTypeCountness);
-      return gen(AssertStk, newType, StackOffset { offset }, inst->src(0));
-    }
+    stackType(offset, DataTypeGeneric)
   );
 }
 
@@ -260,12 +236,9 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   }
 
   return preOptimizeCheckTypeOp(
-    inst, localType(locId, DataTypeGeneric),
-    [&](Type newType) {
-      // TODO(#5868892)
-      constrainLocal(locId, DataTypeCountness, "preOptimizeCheckLoc");
-      return gen(AssertLoc, newType, LocalId(locId), inst->src(0));
-    });
+    inst,
+    localType(locId, DataTypeGeneric)
+  );
 }
 
 SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
@@ -482,7 +455,7 @@ SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
    */
   auto knownType = localType(locId, DataTypeGeneric);
   if (knownType.isBoxed()) {
-    knownType = Type::BoxedCell;
+    knownType = Type::BoxedInitCell;
   }
 
   /*
@@ -633,7 +606,7 @@ SSATmp* IRBuilder::preOptimizeDecRefStack(IRInstruction* inst) {
    */
   auto knownType = stackType(offset, DataTypeGeneric);
   if (knownType.isBoxed()) {
-    knownType = Type::BoxedCell;
+    knownType = Type::BoxedInitCell;
   }
 
   /*

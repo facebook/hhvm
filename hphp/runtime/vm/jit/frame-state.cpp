@@ -854,9 +854,8 @@ void FrameStateMgr::setStackType(int32_t offset, Type type) {
 void FrameStateMgr::setBoxedStkPrediction(int32_t offset, Type type) {
   auto& state = stackState(offset);
   always_assert_flog(
-    state.type == Type::BoxedInitCell ||
-      state.type == Type::Gen,
-    "HintStkInner with base type {}",
+    state.type.maybe(Type::BoxedCell),
+    "HintStkInner {} with base type {}",
     offset,
     state.type
   );
@@ -985,8 +984,7 @@ void FrameStateMgr::setBoxedLocalPrediction(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
   always_assert(type <= Type::BoxedCell);
   always_assert_flog(
-    cur().locals[id].type == Type::BoxedInitCell ||
-    cur().locals[id].type == Type::Gen,
+    cur().locals[id].type.maybe(Type::BoxedCell),
     "HintLocInner {} with base type {}",
     id,
     cur().locals[id].type

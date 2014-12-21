@@ -1611,7 +1611,7 @@ static Type flavorToType(FlavorDesc f) {
 
     case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
     case UV: return Type::Uninit;
-    case VV: return Type::BoxedCell;
+    case VV: return Type::BoxedInitCell;
     case AV: return Type::Cls;
     case RV: case FV: case CVV: case CVUV: return Type::Gen;
   }

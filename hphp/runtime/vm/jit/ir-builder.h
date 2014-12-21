@@ -268,35 +268,30 @@ private:
   }
 
 private:
-  using ConstrainBoxedFunc = std::function<SSATmp*(Type)>;
-  SSATmp*   preOptimizeCheckTypeOp(IRInstruction* inst,
-                                   Type oldType,
-                                   ConstrainBoxedFunc func);
-  SSATmp*   preOptimizeCheckType(IRInstruction*);
-  SSATmp*   preOptimizeCheckStk(IRInstruction*);
-  SSATmp*   preOptimizeCheckLoc(IRInstruction*);
-  SSATmp*   preOptimizeHintLocInner(IRInstruction*);
-
-  SSATmp*   preOptimizeAssertTypeOp(IRInstruction* inst,
-                                    Type oldType,
-                                    SSATmp* oldVal,
-                                    const IRInstruction* typeSrc);
-  SSATmp*   preOptimizeAssertType(IRInstruction*);
-  SSATmp*   preOptimizeAssertStk(IRInstruction*);
-  SSATmp*   preOptimizeAssertLoc(IRInstruction*);
-
-  SSATmp*   preOptimizeCheckCtxThis(IRInstruction*);
-  SSATmp*   preOptimizeLdCtx(IRInstruction*);
-  SSATmp*   preOptimizeDecRefThis(IRInstruction*);
-  SSATmp*   preOptimizeDecRefLoc(IRInstruction*);
-  SSATmp*   preOptimizeLdLocPseudoMain(IRInstruction*);
-  SSATmp*   preOptimizeLdLoc(IRInstruction*);
-  SSATmp*   preOptimizeStLoc(IRInstruction*);
-  SSATmp*   preOptimizeCastStk(IRInstruction*);
-  SSATmp*   preOptimizeCoerceStk(IRInstruction*);
-  SSATmp*   preOptimizeLdStack(IRInstruction*);
-  SSATmp*   preOptimizeDecRefStack(IRInstruction*);
-  SSATmp*   preOptimize(IRInstruction* inst);
+  SSATmp* preOptimizeCheckTypeOp(IRInstruction*, Type);
+  SSATmp* preOptimizeCheckType(IRInstruction*);
+  SSATmp* preOptimizeCheckStk(IRInstruction*);
+  SSATmp* preOptimizeCheckLoc(IRInstruction*);
+  SSATmp* preOptimizeHintLocInner(IRInstruction*);
+  SSATmp* preOptimizeAssertTypeOp(IRInstruction* inst,
+                                  Type oldType,
+                                  SSATmp* oldVal,
+                                  const IRInstruction* typeSrc);
+  SSATmp* preOptimizeAssertType(IRInstruction*);
+  SSATmp* preOptimizeAssertStk(IRInstruction*);
+  SSATmp* preOptimizeAssertLoc(IRInstruction*);
+  SSATmp* preOptimizeCheckCtxThis(IRInstruction*);
+  SSATmp* preOptimizeLdCtx(IRInstruction*);
+  SSATmp* preOptimizeDecRefThis(IRInstruction*);
+  SSATmp* preOptimizeDecRefLoc(IRInstruction*);
+  SSATmp* preOptimizeLdLocPseudoMain(IRInstruction*);
+  SSATmp* preOptimizeLdLoc(IRInstruction*);
+  SSATmp* preOptimizeStLoc(IRInstruction*);
+  SSATmp* preOptimizeCastStk(IRInstruction*);
+  SSATmp* preOptimizeCoerceStk(IRInstruction*);
+  SSATmp* preOptimizeLdStack(IRInstruction*);
+  SSATmp* preOptimizeDecRefStack(IRInstruction*);
+  SSATmp* preOptimize(IRInstruction*);
 
 private:
   void appendInstruction(IRInstruction* inst);

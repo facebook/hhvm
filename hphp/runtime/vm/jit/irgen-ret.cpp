@@ -192,9 +192,9 @@ void emitRetV(HTS& env) {
   assert(!resumed(env));
   assert(!curFunc(env)->isResumable());
   if (isInlining(env)) {
-    retFromInlined(env, Type::BoxedCell);
+    retFromInlined(env, Type::BoxedInitCell);
   } else {
-    implRet(env, Type::BoxedCell);
+    implRet(env, Type::BoxedInitCell);
   }
 }
 

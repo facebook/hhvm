@@ -1029,7 +1029,9 @@ Type unboxPtr(Type t) {
 }
 
 Type boxPtr(Type t) {
-  return t.deref().unbox().box().ptr(remove_ref(t.ptrKind()));
+  auto const rawBoxed = t.deref().unbox().box();
+  auto const noNull = rawBoxed - Type::BoxedUninit;
+  return noNull.ptr(remove_ref(t.ptrKind()));
 }
 
 }
@@ -1092,7 +1094,7 @@ Type convertToType(RepoAuthType ty) {
   case T::Obj:            return Type::Obj;
 
   case T::Cell:           return Type::Cell;
-  case T::Ref:            return Type::BoxedCell;
+  case T::Ref:            return Type::BoxedInitCell;
   case T::InitUnc:        return Type::UncountedInit;
   case T::Unc:            return Type::Uncounted;
   case T::InitCell:       return Type::InitCell;

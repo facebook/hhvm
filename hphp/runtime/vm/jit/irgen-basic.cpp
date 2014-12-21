@@ -130,7 +130,7 @@ void emitUnsetL(HTS& env, int32_t id) {
 
 void emitBindL(HTS& env, int32_t id) {
   if (curFunc(env)->isPseudoMain()) {
-    interpOne(env, Type::BoxedCell, 1);
+    interpOne(env, Type::BoxedInitCell, 1);
     return;
   }
 
@@ -329,7 +329,9 @@ void emitIncStat(HTS& env, int32_t counter, int32_t value) {
 
 void emitPopA(HTS& env) { popA(env); }
 void emitPopC(HTS& env) { popDecRef(env, Type::Cell, DataTypeGeneric); }
-void emitPopV(HTS& env) { popDecRef(env, Type::BoxedCell, DataTypeGeneric); }
+void emitPopV(HTS& env) { popDecRef(env,
+                                    Type::BoxedInitCell,
+                                    DataTypeGeneric); }
 void emitPopR(HTS& env) { popDecRef(env, Type::Gen, DataTypeGeneric); }
 
 void emitDir(HTS& env)  { push(env, cns(env, curUnit(env)->dirpath())); }

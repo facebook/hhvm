@@ -217,10 +217,9 @@ enum class Ptr : uint8_t {
   IRT(StkPtr,      1ULL << 50) /* Stack pointer */                      \
   IRT(FramePtr,    1ULL << 51) /* Frame pointer */                      \
   IRT(TCA,         1ULL << 52)                                          \
-  IRT(ActRec,      1ULL << 53)                                          \
+  IRT(ABC,         1ULL << 53) /* AsioBlockableChain */                 \
   IRT(RDSHandle,   1ULL << 54) /* RDS::Handle */                        \
   IRT(Nullptr,     1ULL << 55)                                          \
-  IRT(ABC,         1ULL << 56) /* AsioBlockableChain */
   /* bits 58-62 are pointer kind */
 
 #define IRT_UNIONS                                                      \
@@ -313,7 +312,7 @@ struct ConstCctx {
  * represents a set of types, with Type::Top being a superset of all Types and
  * Type::Bottom being a subset of all Types. The elements forming these sets of
  * types come from the types of PHP-visible values (Str, Obj, Int, ...) and
- * runtime-internal types (Func, TCA, ActRec, ...).
+ * runtime-internal types (Func, TCA, ...).
  *
  * Types can be constructed from the predefined constants or by composing
  * existing Types in various ways. Unions, intersections, and subtractions are

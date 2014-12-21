@@ -262,7 +262,7 @@ void ifElse(HTS& env, Branch branch, Next next) {
 
 inline BCMarker makeMarker(HTS& env, Offset bcOff) {
   int32_t stackOff = env.irb->syncedSpLevel() +
-    env.irb->evalStack().numCells() - env.irb->stackDeficit();
+    env.irb->evalStack().size() - env.irb->stackDeficit();
 
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff, curFunc(env)->fullName()->data());
@@ -285,7 +285,7 @@ inline void updateMarker(HTS& env) {
 // (positive is higher on the stack) to offsets that are relative to the
 // currently defined StkPtr.
 inline int32_t offsetFromSP(const HTS& env, int32_t offsetFromInstr) {
-  int32_t const virtDelta = env.irb->evalStack().numCells() -
+  int32_t const virtDelta = env.irb->evalStack().size() -
     env.irb->stackDeficit();
   auto const curSPTop = env.irb->syncedSpLevel() + virtDelta;
   auto const absSPOff = curSPTop - offsetFromInstr;
@@ -773,7 +773,7 @@ inline SSATmp* ldLocAddr(HTS& env, uint32_t locId) {
 inline SSATmp* ldStackAddr(HTS& env, int32_t relOffset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in irb->evalStack().
-  assert(relOffset >= static_cast<int32_t>(env.irb->evalStack().numCells()));
+  assert(relOffset >= static_cast<int32_t>(env.irb->evalStack().size()));
   auto const offset = offsetFromSP(env, relOffset);
   env.irb->constrainStack(offset, DataTypeSpecific);
   return gen(

@@ -35,8 +35,10 @@ namespace {
 int typeNeededWords(Type t) {
   assert(!t.equals(Type::Bottom));
 
-  if (t.subtypeOfAny(Type::Uninit, Type::InitNull,
-                     Type::ActRec, Type::RetAddr, Type::Nullptr)) {
+  if (t.subtypeOfAny(Type::Uninit,
+                     Type::InitNull,
+                     Type::RetAddr,
+                     Type::Nullptr)) {
     // These don't need a register because their values are static or unused.
     //
     // RetAddr doesn't take any register because currently we only target x86,

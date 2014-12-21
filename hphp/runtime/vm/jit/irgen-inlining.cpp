@@ -183,7 +183,7 @@ void endInlinedCommon(HTS& env) {
    * The push of the return value in the caller of this function is not yet
    * materialized.
    */
-  assert(env.irb->evalStack().numCells() == 0);
+  assert(env.irb->evalStack().empty());
   env.irb->clearStackDeficit();
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());

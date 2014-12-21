@@ -1351,14 +1351,14 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (!po.show.empty()) {
-    PlainFile f;
-    f.open(po.show, "r");
-    if (!f.valid()) {
+    SmartPtr<PlainFile> f(newres<PlainFile>());
+    f->open(po.show, "r");
+    if (!f->valid()) {
       Logger::Error("Unable to open file %s", po.show.c_str());
       return 1;
     }
-    f.print();
-    f.close();
+    f->print();
+    f->close();
     return 0;
   }
 

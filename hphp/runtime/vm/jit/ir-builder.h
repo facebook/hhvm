@@ -236,9 +236,6 @@ public:
   //////////////////////////////////////////////////////////////////////
   // constants
 
-  SSATmp* genPtrToInitNull();
-  SSATmp* genPtrToUninit();
-
   template<class... Args>
   SSATmp* cns(Args&&... args) {
     return m_unit.cns(std::forward<Args>(args)...);

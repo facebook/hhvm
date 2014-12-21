@@ -211,6 +211,18 @@ SSATmp* misPtr(MTS& env) {
   return cns(env, Type::cns(nullptr, Type::PtrToMISUninit));
 }
 
+SSATmp* ptrToInitNull(HTS& env) {
+  // Nothing is allowed to write anything to the init null variant, so this
+  // inner type is always true.
+  return cns(env, Type::cns(&init_null_variant, Type::PtrToMembInitNull));
+}
+
+SSATmp* ptrToUninit(HTS& env) {
+  // Nothing can write to the uninit null variant either, so the inner type
+  // here is also always true.
+  return cns(env, Type::cns(&null_variant, Type::PtrToMembUninit));
+}
+
 bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
                               PropInfo propInfo) {
   if (convertToType(propInfo.repoAuthType).not(Type::Uninit)) {
@@ -781,7 +793,7 @@ SSATmp* checkInitProp(MTS& env,
         );
         return propAddr;
       }
-      return env.irb.genPtrToInitNull();
+      return ptrToInitNull(env);
     }
   );
 }
@@ -791,7 +803,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
   const bool doWarn   = mia & MIA_warn;
   const bool doDefine = mia & MIA_define || mia & MIA_unset;
 
-  auto const initNull = env.irb.genPtrToInitNull();
+  auto const initNull = ptrToInitNull(env);
 
   SCOPE_EXIT {
     // After this function, m_base is either a pointer to init_null_variant or
@@ -897,7 +909,7 @@ void emitPropGeneric(MTS& env) {
 
   if ((mia & MIA_unset) && env.base.type.strip().not(Type::Obj)) {
     constrainBase(env, DataTypeSpecific);
-    setBase(env, env.irb.genPtrToInitNull());
+    setBase(env, ptrToInitNull(env));
     return;
   }
 
@@ -961,7 +973,7 @@ void emitElem(MTS& env) {
 
   assert(!(define && unset));
   if (unset) {
-    auto const uninit = env.irb.genPtrToUninit();
+    auto const uninit = ptrToUninit(env);
     auto const baseType = env.base.type.strip();
     constrainBase(env, DataTypeSpecific);
     if (baseType <= Type::Str) {

@@ -36,7 +36,7 @@ void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
       gen(env, CheckSurpriseFlags, taken);
     },
     [&] {
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       gen(env, ReturnHook, frame, retVal);
     }
   );

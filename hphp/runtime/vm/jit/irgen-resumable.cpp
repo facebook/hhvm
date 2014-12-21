@@ -37,7 +37,7 @@ void suspendHookImpl(HTS& env, SSATmp* frame, SSATmp* other, bool eager) {
       gen(env, CheckSurpriseFlags, taken);
     },
     [&] {
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       gen(env, eager ? SuspendHookE : SuspendHookR, frame, other);
     }
   );

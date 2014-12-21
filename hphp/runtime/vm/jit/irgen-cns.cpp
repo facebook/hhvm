@@ -84,7 +84,7 @@ void implCns(HTS& env,
         return c1;
       },
       [&] { // Taken: miss in TC, do lookup & init
-        env.irb->hint(Block::Hint::Unlikely);
+        hint(env, Block::Hint::Unlikely);
         // We know that c1 is Uninit in this branch but we have to encode this
         // in the IR.
         gen(env, AssertType, Type::Uninit, c1);
@@ -164,7 +164,7 @@ void emitClsCnsD(HTS& env,
     [&] {
       // Make progress through this instruction before side-exiting to the next
       // instruction, by doing a slower lookup.
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const val = gen(env, LookupClsCns, clsCnsName);
       push(env, val);
       gen(env, Jmp, makeExit(env, nextBcOff(env)));

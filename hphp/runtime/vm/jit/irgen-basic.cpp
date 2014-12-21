@@ -42,7 +42,7 @@ void checkThis(HTS& env, SSATmp* ctx) {
       gen(env, CheckCtxThis, taken, ctx);
     },
     [&] {
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const err = cns(env, makeStaticString(Strings::FATAL_NULL_THIS));
       gen(env, RaiseError, err);
     }

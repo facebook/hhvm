@@ -407,7 +407,7 @@ struct CatchMaker {
         gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
       },
       [&] {
-        env.irb->hint(Block::Hint::Unused);
+        hint(env, Block::Hint::Unused);
         decRefForUnwind();
         prepareForCatch();
         gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env),
@@ -418,7 +418,7 @@ struct CatchMaker {
     // From here on we're on the side-exit path, due to a failure to coerce.
     // We need to push the unwinder value and then side-exit to the next
     // instruction.
-    env.irb->hint(Block::Hint::Unlikely);
+    hint(env, Block::Hint::Unlikely);
     decRefForSideExit();
     if (m_params.thiz) gen(env, DecRef, m_params.thiz);
 

@@ -47,5 +47,4 @@ void implCondJmp(HTS&, Offset taken, bool negate, SSATmp*);
 
 }}}
 
-
 #endif

@@ -198,7 +198,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
         gen(env, JmpZero, taken, isInstance);
       },
       [&] { // taken: the param type does not match
-        env.irb->hint(Block::Hint::Unlikely);
+        hint(env, Block::Hint::Unlikely);
         if (isReturnType) {
           gen(env, VerifyRetFail, val);
         } else {

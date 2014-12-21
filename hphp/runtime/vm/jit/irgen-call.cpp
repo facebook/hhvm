@@ -628,7 +628,7 @@ void emitFPushClsMethodD(HTS& env,
       return func;
     },
     [&] { // taken
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const result = gen(env, LookupClsMethodCache, data, fp(env));
       return gen(env, CheckNonNull, slowExit, result);
     }
@@ -747,7 +747,7 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
       return func;
     },
     [&] { // taken
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const result = gen(
         env,
         LookupClsMethodFCache,

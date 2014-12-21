@@ -37,7 +37,7 @@ void initProps(HTS& env, const Class* cls) {
       gen(env, CheckInitProps, taken, ClassData(cls));
     },
     [&] {
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       gen(env, InitProps, ClassData(cls));
     }
   );
@@ -57,7 +57,7 @@ void initSProps(HTS& env, const Class* cls) {
       gen(env, CheckInitSProps, taken, ClassData(cls));
     },
     [&] {
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       gen(env, InitSProps, ClassData(cls));
     }
   );
@@ -380,7 +380,7 @@ void emitStaticLocInit(HTS& env, int32_t locId, const StringData* name) {
         gen(env, CheckStaticLocInit, taken, cachedBox);
       },
       [&] {
-        env.irb->hint(Block::Hint::Unlikely);
+        hint(env, Block::Hint::Unlikely);
         gen(env, StaticLocInitCached, cachedBox, value);
       }
     );

@@ -779,7 +779,7 @@ SSATmp* checkInitProp(MTS& env,
     [&] { // Taken: Property is Uninit. Raise a warning and return
           // a pointer to InitNull, either in the object or
           // init_null_variant.
-      env.irb.hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       if (doWarn && wantPropSpecializedWarnings()) {
         gen(env, RaiseUndefProp, baseAsObj, key);
       }
@@ -866,7 +866,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
       return checkInitProp(env, obj, propAddr, propInfo, doWarn, doDefine);
     },
     [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
-      env.irb.hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       if (doWarn) {
         gen(env, WarnNonObjProp);
       }
@@ -1260,7 +1260,7 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
       return doLdElem();
     },
     [&] { // Taken:
-      env.irb.hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       gen(env, RaiseArrayIndexNotice, key);
       return cns(env, Type::InitNull);
     }
@@ -1427,7 +1427,7 @@ void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
       gen(env, VectorHasImmCopy, taken, env.base.value);
     },
     [&] {
-      env.irb.hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       gen(env, VectorDoCow, env.base.value);
     }
   );
@@ -1874,7 +1874,7 @@ void handleStrTestResult(MTS& env) {
       gen(env, CheckNullptr, taken, env.strTestResult);
     },
     [&] {
-      env.irb.hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const str = gen(env, AssertNonNull, env.strTestResult);
       gen(env, DecRef, env.result);
       auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromMain);
@@ -1910,13 +1910,13 @@ Block* makeCatchSet(MTS& env) {
       gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
     },
     [&] {
-      env.irb.hint(Block::Hint::Unused);
+      hint(env, Block::Hint::Unused);
       cleanTvRefs(env);
       gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env),
         sp(env));
     }
   );
-  env.irb.hint(Block::Hint::Unused);
+  hint(env, Block::Hint::Unused);
 
   /*
    * Fallthrough from here on is side-exiting due to an InvalidSetMException.

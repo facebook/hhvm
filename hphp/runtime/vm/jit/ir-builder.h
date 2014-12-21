@@ -237,11 +237,6 @@ public:
   //////////////////////////////////////////////////////////////////////
   // control flow
 
-  // hint the execution frequency of the current block
-  void hint(Block::Hint h) const {
-    m_curBlock->setHint(h);
-  }
-
   Block* curBlock() { return m_curBlock; }
 
 private:

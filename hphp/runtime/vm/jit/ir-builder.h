@@ -233,13 +233,6 @@ public:
                        Block* srcBlock,
                        const folly::Optional<IdomVector>&);
 
-  //////////////////////////////////////////////////////////////////////
-  // constants
-
-  template<class... Args>
-  SSATmp* cns(Args&&... args) {
-    return m_unit.cns(std::forward<Args>(args)...);
-  }
 
   //////////////////////////////////////////////////////////////////////
   // control flow

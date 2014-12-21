@@ -423,7 +423,7 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
         auto const cls = sf->src(2);
         if (cls->isConst(Type::Cls)) {
           inst->convertToNop();
-          return cns(ConstCctx::cctx(cls->clsVal()));
+          return m_unit.cns(ConstCctx::cctx(cls->clsVal()));
         }
       }
     }

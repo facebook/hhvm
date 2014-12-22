@@ -2,7 +2,7 @@ Program %s/print-datetime.php loaded. Type '[r]un' or '[c]ontinue' to go.
 =new DateTime('9/18/2014 11:00:00 America/Los_Angeles');
 DateTime Object
 (
-    [date] => "2014-09-18 11:00:00.000000"
+    [date] => "2014-09-18 11:00:00"
     [timezone_type] => 3
     [timezone] => "America/Los_Angeles"
 )

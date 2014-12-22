@@ -36,6 +36,9 @@ and load_info = {
 val parse_options: unit -> options
 val default_options: root:string -> options
 
+(* useful for logging *)
+val string_of_init_type: env_store_action option -> string
+
 (*****************************************************************************)
 (* Accessors *)
 (*****************************************************************************)

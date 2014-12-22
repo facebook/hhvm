@@ -14,7 +14,7 @@ open ServerEnv
 module type SERVER_PROGRAM = sig
   module EventLogger : sig
     val init: Path.path -> float -> unit
-    val init_done: unit -> unit
+    val init_done: string -> unit
     val load_read_end: string -> unit
     val load_recheck_end: unit -> unit
     val lock_lost: Path.path -> string -> unit
@@ -183,7 +183,8 @@ end = struct
     else
       let env = MainInit.go root program_init in
       let socket = Socket.init_unix_socket root in
-      Program.EventLogger.init_done ();
+      let init_type = ServerArgs.load_save_opt genv.options in
+      Program.EventLogger.init_done (ServerArgs.string_of_init_type init_type);
       serve genv env socket
 
   let get_log_file root =

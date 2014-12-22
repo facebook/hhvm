@@ -171,6 +171,12 @@ let default_options ~root =
   gc_control = ServerConfig.gc_control;
 }
 
+(* useful for logging *)
+let string_of_init_type = function
+  | Some (Load _) -> "load"
+  | Some (Save _) -> "save"
+  | None -> "fresh"
+
 (*****************************************************************************)
 (* Accessors *)
 (*****************************************************************************)

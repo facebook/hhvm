@@ -1,4 +1,5 @@
 language: cpp
+sudo: false
 
 # This doesn't work - travis defaults to plain gcc if unknown
 # http://github.com/travis-ci/travis-ci/issues/979
@@ -19,10 +20,10 @@ services:
 # Commands before installing prerequisites
 before_script:
 # we can't compile with this system version
-  - time sudo apt-get remove libsqlite3-dev
+  - time apt-get remove libsqlite3-dev
   - time TRAVIS=1 ./configure_generic.sh -DENABLE_COTIRE=ON
 # for some tests
-  - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
+  - time locale-gen de_DE && locale-gen zh_CN.utf8 && locale-gen fr_FR
   - time make -j 6
 # mysql configuration for unit-tests
   - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'

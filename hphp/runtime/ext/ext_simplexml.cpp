@@ -1200,14 +1200,9 @@ Variant f_simplexml_load_file(const String& filename,
 // SimpleXMLElement
 
 c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::UseIsset|
-                       ObjectData::UseUnset|
-                       ObjectData::CallToImpl|
-                       ObjectData::HasClone|
-                       ObjectData::HasPropEmpty>(cb),
-      document(nullptr), node(nullptr), xpath(nullptr) {
+  SweepableObj<SimpleXMLElementBase>(Sweep, cb),
+  document(nullptr), node(nullptr), xpath(nullptr)
+{
   iter.name     = nullptr;
   iter.nsprefix = nullptr;
   iter.isprefix = false;
@@ -1232,6 +1227,10 @@ void c_SimpleXMLElement::sweep() {
     xmlXPathFreeContext(xpath);
     xpath = nullptr;
   }
+}
+
+void c_SimpleXMLElement::Sweep(ObjectData* p) {
+  static_cast<c_SimpleXMLElement*>(p)->sweep();
 }
 
 void c_SimpleXMLElement::t___construct(const String& data,

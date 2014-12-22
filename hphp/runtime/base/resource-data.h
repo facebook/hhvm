@@ -175,7 +175,7 @@ class ResourceData {
  *       HANDLE ptr; // raw pointers that need to be free-d somehow
  *       String str; // smart-allocated objects are fine
  *
- *       DECLARE_OBJECT_ALLOCATION(T);
+ *       DECLARE_RESOURCE_ALLOCATION(T);
  *    };
  *    void MixedSmartAllocated::sweep() {
  *       delete stdstr;
@@ -183,10 +183,6 @@ class ResourceData {
  *       close_handle(ptr);
  *       // without doing anything with Strings, Arrays, or Objects
  *    }
- *
- * 4. If a ResourceData may be persistent, it cannot use object allocation. It
- *    then has to derive from SweepableResourceData, because a new-ed pointer
- *    can only be collected/deleted by sweep().
  *
  */
 class SweepableResourceData : public ResourceData, public Sweepable {

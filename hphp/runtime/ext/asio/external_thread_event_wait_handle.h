@@ -31,16 +31,19 @@ namespace HPHP {
  * See asio_external_thread_event.h for more details.
  */
 class AsioExternalThreadEvent;
-class c_ExternalThreadEventWaitHandle final
-  : public c_WaitableWaitHandle, public Sweepable {
- public:
-  DECLARE_CLASS(ExternalThreadEventWaitHandle)
+struct c_ExternalThreadEventWaitHandle final
+  : SweepableObj<c_WaitableWaitHandle> {
+  DECLARE_CLASS_NO_SWEEP(ExternalThreadEventWaitHandle)
+  static void Sweep(ObjectData*);
+  void sweep();
 
   explicit c_ExternalThreadEventWaitHandle(Class* cls =
       c_ExternalThreadEventWaitHandle::classof())
-    : c_WaitableWaitHandle(cls)
+    : SweepableObj<c_WaitableWaitHandle>(Sweep, cls)
   {}
+
   ~c_ExternalThreadEventWaitHandle() {}
+
   static void ti_setoncreatecallback(const Variant& callback);
   static void ti_setonsuccesscallback(const Variant& callback);
   static void ti_setonfailcallback(const Variant& callback);

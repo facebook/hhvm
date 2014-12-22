@@ -45,10 +45,8 @@ public:
     void init();
   };
   static unsigned SweepAll();
-  static void InitSweepableList();
-
-public:
-  explicit Sweepable(HeaderKind kind = HeaderKind::Sweepable);
+  static void InitList();
+  static void FlushList();
 
   /*
    * There is no default behavior. Make sure this function frees all
@@ -63,16 +61,31 @@ public:
   void unregister();
 
 protected:
+  Sweepable();
   ~Sweepable();
 
 private:
-  union {
-    struct {
-      UNUSED char m_pad[3];
-      UNUSED const HeaderKind m_kind;
-    };
-  };
   Node m_sweepNode;
+};
+
+using Sweeper = void (*)(ObjectData*);
+void registerSweepableObj(ObjectData* obj, Sweeper);
+void unregisterSweepableObj(ObjectData* obj);
+
+/*
+ * Nonvirtual sweepable mixin for use with ObjectData. State is managed
+ * completely in a thread-local hashtable.
+ */
+template<class Base> struct SweepableObj: Base {
+protected:
+  template<class... Args>
+  explicit SweepableObj(Sweeper f, Args&&... args)
+    : Base(std::forward<Args>(args)...) {
+    registerSweepableObj(this, f);
+    static_assert(sizeof(*this) == sizeof(Base), "");
+  }
+  ~SweepableObj() { unregister(); }
+  void unregister() { unregisterSweepableObj(this); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

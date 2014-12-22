@@ -119,6 +119,11 @@ public:
   }
 
   /**
+   * Safe bool cast.
+   */
+  explicit operator bool() const { return m_px != nullptr; }
+
+  /**
    * Magic delegation.
    */
   T* operator->() const {

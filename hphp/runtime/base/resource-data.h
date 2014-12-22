@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/classname-is.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 #include "hphp/util/thread-local.h"
 
@@ -224,6 +225,14 @@ template<class T, class... Args> T* newres(Args&&... args) {
 #define IMPLEMENT_RESOURCE_ALLOCATION(T) \
   static_assert(std::is_base_of<ResourceData,T>::value, ""); \
   void HPHP::T::sweep() { this->~T(); }
+
+template<class T, class... Args>
+typename std::enable_if<
+  std::is_convertible<T*, ResourceData*>::value,
+  SmartPtr<T>
+>::type makeSmartPtr(Args&&... args) {
+  return SmartPtr<T>(newres<T>(std::forward<Args>(args)...));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

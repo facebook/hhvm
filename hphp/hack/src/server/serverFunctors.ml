@@ -17,6 +17,7 @@ module type SERVER_PROGRAM = sig
     val init_done: string -> unit
     val load_read_end: string -> unit
     val load_recheck_end: unit -> unit
+    val load_failed: string -> unit
     val lock_lost: Path.path -> string -> unit
     val lock_stolen: Path.path -> string -> unit
   end
@@ -119,6 +120,28 @@ end = struct
       if has_client then Program.handle_connection genv !env socket;
     done
 
+  let load genv { ServerArgs.filename; ServerArgs.to_recheck } =
+      let chan = open_in filename in
+      let env = Marshal.from_channel chan in
+      Program.unmarshal chan;
+      close_in chan;
+      SharedMem.load (filename^".sharedmem");
+      Program.EventLogger.load_read_end filename;
+      let to_recheck =
+        List.rev_append (BuildMain.get_all_targets ()) to_recheck in
+      let paths_to_recheck =
+        rev_rev_map (Relative_path.concat Relative_path.Root) to_recheck
+      in
+      let updates = List.fold_left
+        (fun acc update -> Relative_path.Set.add update acc)
+        Relative_path.Set.empty
+        paths_to_recheck in
+      let updates =
+        Relative_path.Set.filter (Program.filter_update genv env) updates in
+      let env = Program.recheck genv env updates in
+      Program.EventLogger.load_recheck_end ();
+      env
+
   let create_program_init genv env = fun () ->
     match ServerArgs.load_save_opt genv.options with
     | None -> Program.init genv env
@@ -133,27 +156,14 @@ end = struct
          * a separate ".sharedmem" file. *)
         SharedMem.save (fn^".sharedmem");
         env
-    | Some (ServerArgs.Load { ServerArgs.filename; ServerArgs.to_recheck }) ->
-        let chan = open_in_no_fail filename in
-        let env = Marshal.from_channel chan in
-        Program.unmarshal chan;
-        close_in_no_fail filename chan;
-        SharedMem.load (filename^".sharedmem");
-        Program.EventLogger.load_read_end filename;
-        let to_recheck =
-          List.rev_append (BuildMain.get_all_targets ()) to_recheck in
-        let paths_to_recheck =
-          rev_rev_map (Relative_path.concat Relative_path.Root) to_recheck
-        in
-        let updates = List.fold_left
-          (fun acc update -> Relative_path.Set.add update acc)
-          Relative_path.Set.empty
-          paths_to_recheck in
-        let updates =
-          Relative_path.Set.filter (Program.filter_update genv env) updates in
-        let env = Program.recheck genv env updates in
-        Program.EventLogger.load_recheck_end ();
-        env
+    | Some (ServerArgs.Load load_info) ->
+        try load genv load_info
+        with e ->
+          let msg = Printexc.to_string e in
+          Printf.fprintf stderr "Load error: %s\n%!" msg;
+          Printf.fprintf stderr "Starting from fresh state instead...\n%!";
+          Program.EventLogger.load_failed msg;
+          Program.init genv env
 
   (* The main entry point of the daemon
   * the only trick to understand here, is that env.modified is the set

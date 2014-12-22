@@ -122,8 +122,8 @@ StringData** precompute_chars() {
 
 StringData** precomputed_chars = precompute_chars();
 
-StringData* insertStaticString(StringData* sd) {
-  auto pair = s_stringDataMap->insert(
+StringData* insertStaticString(StringData* sd, StringDataMap* map) {
+  auto pair = map->insert(
     make_intern_key(sd),
     RDS::Link<TypedValue>(RDS::kInvalidHandle)
   );
@@ -139,22 +139,29 @@ StringData* insertStaticString(StringData* sd) {
   return const_cast<StringData*>(to_sdata(pair.first->first));
 }
 
-inline StringData* insertStaticStringSlice(StringSlice slice) {
-  return insertStaticString(StringData::MakeStatic(slice));
+inline StringData* insertStaticStringSlice(StringSlice slice,
+                                           StringDataMap* map) {
+  return insertStaticString(StringData::MakeStatic(slice), map);
 }
 
-void create_string_data_map() {
+void create_string_data_map(StringDataMap*& map) {
   StringDataMap::Config config;
   config.growthFactor = 1;
   MemoryStats::GetInstance()->ResetStaticStringSize();
 
-  s_stringDataMap =
-    new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
-                      config);
-  insertStaticString(StringData::MakeEmpty());
+  map = new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
+                          config);
+  insertStaticString(StringData::MakeEmpty(), map);
 }
 
 }
+
+struct StaticStringData {
+  static DECLARE_THREAD_LOCAL(StringDataMap*, s_localStringDataMap);
+};
+
+IMPLEMENT_THREAD_LOCAL(bool, StaticStringConfig::s_useLocalMap);
+IMPLEMENT_THREAD_LOCAL(StringDataMap*, StaticStringData::s_localStringDataMap);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -165,7 +172,9 @@ size_t makeStaticStringCount() {
 
 StringData* makeStaticString(const StringData* str) {
   if (UNLIKELY(!s_stringDataMap)) {
-    create_string_data_map();
+    create_string_data_map(s_stringDataMap);
+    *StaticStringConfig::s_useLocalMap = false;
+    *StaticStringData::s_localStringDataMap = nullptr;
   }
   if (str->isStatic()) {
     assert(checkStaticStr(str));
@@ -175,18 +184,42 @@ StringData* makeStaticString(const StringData* str) {
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
-  return insertStaticStringSlice(str->slice());
+  if (UNLIKELY(*StaticStringConfig::s_useLocalMap)) {
+    StringDataMap*& localMap = *StaticStringData::s_localStringDataMap;
+    if (UNLIKELY(!localMap)) {
+      create_string_data_map(localMap);
+    }
+    auto const value = localMap->find(make_intern_key(str));
+    if (value != localMap->end()) {
+      return const_cast<StringData*>(to_sdata(value->first));
+    }
+    return insertStaticStringSlice(str->slice(), localMap);
+  }
+  return insertStaticStringSlice(str->slice(), s_stringDataMap);
 }
 
 StringData* makeStaticString(StringSlice slice) {
   if (UNLIKELY(!s_stringDataMap)) {
-    create_string_data_map();
+    create_string_data_map(s_stringDataMap);
+    *StaticStringConfig::s_useLocalMap = false;
+    *StaticStringData::s_localStringDataMap = nullptr;
   }
   auto const it = s_stringDataMap->find(make_intern_key(&slice));
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
-  return insertStaticStringSlice(slice);
+  if (UNLIKELY(*StaticStringConfig::s_useLocalMap)) {
+    StringDataMap*& localMap = *StaticStringData::s_localStringDataMap;
+    if (UNLIKELY(!localMap)) {
+      create_string_data_map(localMap);
+    }
+    auto const value = localMap->find(make_intern_key(&slice));
+    if (value != localMap->end()) {
+      return const_cast<StringData*>(to_sdata(value->first));
+    }
+    return insertStaticStringSlice(slice, localMap);
+  }
+  return insertStaticStringSlice(slice, s_stringDataMap);
 }
 
 StringData* lookupStaticString(const StringData *str) {
@@ -307,12 +340,40 @@ void refineStaticStringTableSize() {
   if (!oldStringTable) return;
 
   s_stringDataMap = nullptr;
-  create_string_data_map();
+  create_string_data_map(s_stringDataMap);
   SCOPE_EXIT { delete oldStringTable; };
 
   for (auto& kv : *oldStringTable) {
     s_stringDataMap->insert(kv.first, kv.second);
   }
+}
+
+void clearThreadLocalStaticStringMap() {
+  StringDataMap* localMap = *StaticStringData::s_localStringDataMap;
+  if (!localMap) return;
+
+  // Avoid clearing the map to improve performance if it's not used.
+  if (localMap->size() == 1 &&
+      to_sdata(localMap->begin()->first) == staticEmptyString())
+    return;
+
+  for (auto& kv : *localMap) {
+    const StringData* str = to_sdata(kv.first);
+    // Skip the empty string.
+    if (str == staticEmptyString())
+      continue;
+    const_cast<StringData*>(str)->destructStatic();
+  }
+  localMap->clear();
+  insertStaticString(StringData::MakeEmpty(), localMap);
+}
+
+void freeThreadLocalStaticStringMap() {
+  StringDataMap*& localMap = *StaticStringData::s_localStringDataMap;
+  if (!localMap) return;
+
+  delete localMap;
+  localMap = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/slice.h"
+#include "hphp/util/thread-local.h"
 
 #include <string>
 
@@ -117,6 +118,19 @@ Array lookupDefinedConstants(bool categorize = false);
  * still be in a single-threaded environment.
  */
 void refineStaticStringTableSize();
+
+/*
+ * Store static strings that are created by php scripts on a thread local map,
+ * such as create_function().
+ *
+ * The memory of these strings will be freed when the script finishes.
+ */
+struct StaticStringConfig {
+  static DECLARE_THREAD_LOCAL(bool, s_useLocalMap);
+};
+
+void clearThreadLocalStaticStringMap();
+void freeThreadLocalStaticStringMap();
 
 //////////////////////////////////////////////////////////////////////
 

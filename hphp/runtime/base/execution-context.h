@@ -297,6 +297,7 @@ public:
     LeaveLast
   };
   void cleanup();
+  void clearCreatedFunctions();
 
   template <bool setMember, bool warn, bool define, bool unset, bool reffy,
             unsigned mdepth, VectorLeaveCode mleave, bool saveResult>

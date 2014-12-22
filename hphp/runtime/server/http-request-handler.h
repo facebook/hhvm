@@ -42,6 +42,7 @@ public:
 
 public:
   explicit HttpRequestHandler(int timeout);
+  ~HttpRequestHandler();
 
   // implementing RequestHandler
   void setupRequest(Transport* transport) override;

@@ -1,4 +1,5 @@
 language: cpp
+sudo: false
 
 # This doesn't work - travis defaults to plain gcc if unknown
 # http://github.com/travis-ci/travis-ci/issues/979

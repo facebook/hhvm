@@ -726,9 +726,9 @@ void IRBuilder::reoptimize() {
   if (!m_enableCse && !m_enableSimplification) return;
   setConstrainGuards(false);
 
-  // This is a work in progress that we want committed, but that has some
-  // issues still.
-  auto const use_fixed_point = false;
+  // We need to use fixed-point for loops, otherwise legacy reoptimize will not
+  // handle the CFG's back-edges correctly.
+  auto const use_fixed_point = RuntimeOption::EvalJitLoops;
 
   auto blocksIds = rpoSortCfgWithIds(m_unit);
   auto const idoms = findDominators(m_unit, blocksIds);

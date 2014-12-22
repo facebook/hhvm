@@ -134,7 +134,10 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   auto const doReoptimize = RuntimeOption::EvalHHIRExtraOptPass &&
     (RuntimeOption::EvalHHIRCse || RuntimeOption::EvalHHIRSimplification);
 
-  if (shouldHHIRRelaxGuards()) {
+  auto const hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(unit);
+
+  // TODO(#5792564): Guard relaxation doesn't work with loops.
+  if (shouldHHIRRelaxGuards() && !hasLoop) {
     Timer _t(Timer::optimize_relaxGuards);
     const bool simple = kind == TransKind::Profile &&
                         (RuntimeOption::EvalJitRegionSelector == "tracelet" ||

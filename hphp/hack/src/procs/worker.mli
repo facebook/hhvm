@@ -33,7 +33,7 @@ type t
 type 'a handle
 
 (* Creates a worker *)
-val make: int -> t list
+val make: int -> Gc.control -> t list
 
 (* Call in a sub-process (CAREFUL, GLOBALS ARE COPIED) *)
 val call: t -> ('a -> 'b) -> 'a -> 'b handle

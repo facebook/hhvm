@@ -21,6 +21,7 @@ type options = {
     load_save_opt    : env_store_action option;
     version          : bool;
     start_time       : float;
+    gc_control       : Gc.control; (* configures only the workers *)
   }
 
 and env_store_action =
@@ -46,3 +47,4 @@ val should_detach : options -> bool
 val convert       : options -> Path.path option
 val load_save_opt : options -> env_store_action option
 val start_time    : options -> float
+val gc_control    : options -> Gc.control

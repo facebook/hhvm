@@ -143,8 +143,8 @@ and instantiate subst env (r, ty) =
               env, (r, Tgeneric (x, Some ty))
       )
   | Tany | Tmixed | Tarray (_, _) | Tprim _ | Toption _ | Tvar _
-    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _, _) ->
+  | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
+  | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _, _) ->
       let p = Reason.to_pos r in
       let env, ty = instantiate_ p subst env ty in
       env, (r, ty)

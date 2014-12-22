@@ -459,8 +459,34 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     return it->second;
   }
 
+  // We didn't find it, so try the realpath.
+  auto const alreadyResolved =
+    RuntimeOption::RepoAuthoritative ||
+    (!RuntimeOption::CheckSymLink && (spath[0] == '/'));
+  bool hasRealpath = false;
+  String rpath;
+  if (!alreadyResolved) {
+    std::string rp = StatCache::realpath(spath.data());
+    if (rp.size() != 0) {
+      rpath = StringData::Make(rp.data(), rp.size(), CopyString);
+      if (!rpath.same(spath)) {
+        hasRealpath = true;
+        it = eContext->m_evaledFiles.find(rpath.get());
+        if (it != eContext->m_evaledFiles.end()) {
+          // We found it! Update the mapping for spath and return the
+          // unit.
+          auto const unit = it->second;
+          spath.get()->incRefCount();
+          eContext->m_evaledFiles[spath.get()] = unit;
+          initial = false;
+          return unit;
+        }
+      }
+    }
+  }
+
   // This file hasn't been included yet, so we need to parse the file
-  auto const cunit = checkoutFile(spath.get(), s);
+  auto const cunit = checkoutFile(hasRealpath ? rpath.get() : spath.get(), s);
   if (cunit.unit && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
@@ -472,8 +498,9 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     eContext->m_evaledFilesOrder.push_back(cunit.unit->filepath());
     eContext->m_evaledFiles[spath.get()] = cunit.unit;
     spath.get()->incRefCount();
-    if (!cunit.unit->filepath()->same(spath.get())) {
-      eContext->m_evaledFiles[cunit.unit->filepath()] = cunit.unit;
+    if (hasRealpath) {
+      eContext->m_evaledFiles[rpath.get()] = cunit.unit;
+      rpath.get()->incRefCount();
     }
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
   }

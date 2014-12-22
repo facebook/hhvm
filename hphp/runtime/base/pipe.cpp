@@ -34,14 +34,14 @@ Pipe::~Pipe() {
 
 bool Pipe::open(const String& filename, const String& mode) {
   assert(m_stream == nullptr);
-  assert(m_fd == -1);
+  assert(getFd() == -1);
 
   FILE *f = LightProcess::popen(filename.data(), mode.data());
   if (!f) {
     return false;
   }
   m_stream = f;
-  m_fd = fileno(f);
+  setFd(fileno(f));
   return true;
 }
 
@@ -59,7 +59,7 @@ bool Pipe::closeImpl() {
     if (WIFEXITED(pcloseRet)) pcloseRet = WEXITSTATUS(pcloseRet);
     s_pcloseRet = pcloseRet;
     ret = (pcloseRet == 0);
-    m_closed = true;
+    setIsClosed(true);
     m_stream = nullptr;
   }
   File::closeImpl();

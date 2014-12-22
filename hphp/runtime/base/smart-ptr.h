@@ -145,6 +145,9 @@ public:
   }
 
 protected:
+  // For templatized SmartPtr<Y> move constructor.
+  template <typename Y> friend class SmartPtr;
+
   T* m_px;  // raw pointer
 
 private:
@@ -228,6 +231,11 @@ struct AtomicSmartPtr {
     }
     return *this;
   }
+
+  /**
+   * Safe bool cast.
+   */
+  explicit operator bool() const { return m_px != nullptr; }
 
   /**
    * Magic delegation.

@@ -48,7 +48,7 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
   m_maxRedirect = maxRedirect;
   m_timeout = timeout;
   m_ignoreErrors = ignoreErrors;
-  m_isLocal = false;
+  setIsLocal(false);
 }
 
 void UrlFile::sweep() {
@@ -133,7 +133,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
    * shouldn't ignore other errors.
    */
   if (code == 200 || (m_ignoreErrors && code != 0)) {
-    m_name = (std::string) url;
+    setName(url.toCppString());
     m_data = const_cast<char*>(m_response.data());
     m_len = m_response.size();
     return true;
@@ -146,13 +146,13 @@ bool UrlFile::open(const String& input_url, const String& mode) {
 int64_t UrlFile::writeImpl(const char *buffer, int64_t length) {
   assert(m_len != -1);
   throw FatalErrorException((std::string("cannot write a url stream: ") +
-                             m_name).c_str());
+                             getName()).c_str());
 }
 
 bool UrlFile::flush() {
   assert(m_len != -1);
   throw FatalErrorException((std::string("cannot flush a url stream: ") +
-                             m_name).c_str());
+                             getName()).c_str());
 }
 
 String UrlFile::getLastError() {

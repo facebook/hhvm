@@ -337,7 +337,7 @@ void DebuggerClient::LoadCodeColor(CodeColor index, const IniSetting::Map& ini,
 
 SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
   TRACE(2, "DebuggerClient::Start\n");
-  SmartPtr<Socket> ret = getStaticDebuggerClient().connectLocal();
+  auto ret = getStaticDebuggerClient().connectLocal();
   getStaticDebuggerClient().start(options);
   return ret;
 }
@@ -548,8 +548,8 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
     throw Exception("unable to create socket pair for local debugging");
   }
-  SmartPtr<Socket> socket1(new Socket(fds[0], AF_UNIX));
-  SmartPtr<Socket> socket2(new Socket(fds[1], AF_UNIX));
+  auto socket1 = makeSocket(fds[0], AF_UNIX);
+  auto socket2 = makeSocket(fds[1], AF_UNIX);
 
   socket1->unregister();
   socket2->unregister();
@@ -619,11 +619,14 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   /* try possible families (v4, v6) until we get a connection */
   struct addrinfo *cur;
   for (cur = ai; cur; cur = ai->ai_next) {
-    Socket *sock = new Socket(socket(cur->ai_family, cur->ai_socktype, 0),
-                              cur->ai_family, cur->ai_addr->sa_data, port);
+    auto sock = makeSocket(
+      socket(cur->ai_family, cur->ai_socktype, 0),
+      cur->ai_family,
+      cur->ai_addr->sa_data,
+      port
+    );
     sock->unregister();
-    Resource obj(sock); // Destroy sock if we don't connect.
-    if (HHVM_FN(socket_connect)(sock, String(host), port)) {
+    if (HHVM_FN(socket_connect)(Resource(sock), String(host), port)) {
       if (clearmachines) {
         for (unsigned int i = 0; i < m_machines.size(); i++) {
           if (m_machines[i] == m_machine) {
@@ -635,7 +638,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
       auto machine = std::make_shared<DMachineInfo>();
       machine->m_name = host;
       machine->m_port = port;
-      machine->m_thrift.create(SmartPtr<Socket>(sock));
+      machine->m_thrift.create(sock);
       m_machines.push_back(machine);
       switchMachine(machine);
       return true;

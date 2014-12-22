@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_SSL_SOCKET_H_
 #define incl_HPHP_SSL_SOCKET_H_
 
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/network.h"
@@ -26,6 +27,8 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+struct SSLSocketData;
 
 /**
  * TCP sockets running SSL protocol.
@@ -44,13 +47,13 @@ struct SSLSocket : Socket {
   };
 
   static int GetSSLExDataIndex();
-  static SSLSocket *Create(int fd, int domain, const HostURL &hosturl,
-                           double timeout);
+  static SmartPtr<SSLSocket> Create(int fd, int domain, const HostURL &hosturl,
+                                    double timeout);
 
   SSLSocket();
   SSLSocket(int sockfd, int type, const char *address = nullptr, int port = 0);
   virtual ~SSLSocket();
-  void sweep() override;
+  DECLARE_RESOURCE_ALLOCATION(SSLSocket);
 
   // will setup and enable crypto
   bool onConnect();
@@ -58,18 +61,13 @@ struct SSLSocket : Socket {
 
   CLASSNAME_IS("SSLSocket")
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
-  // overriding Socket
-  virtual bool close();
-  virtual int64_t readImpl(char *buffer, int64_t length);
-  virtual int64_t writeImpl(const char *buffer, int64_t length);
-  virtual bool checkLiveness();
-
-  Array &getContext() { return m_context;}
+  virtual int64_t readImpl(char *buffer, int64_t length) override;
+  virtual int64_t writeImpl(const char *buffer, int64_t length) override;
+  virtual bool checkLiveness() override;
 
 private:
-  bool closeImpl();
   bool handleError(int64_t nr_bytes, bool is_init);
 
   bool setupCrypto(SSLSocket *session = nullptr);
@@ -78,20 +76,30 @@ private:
   SSL *createSSL(SSL_CTX *ctx);
   bool applyVerificationPolicy(X509 *peer);
 
+  static int verifyCallback(int preverify_ok, X509_STORE_CTX *ctx);
+  static int passwdCallback(char *buf, int num, int verify, void *data);
+
 private:
+  Array m_context;
+  SSLSocketData* m_data;
+  static Mutex s_mutex;
+  static int s_ex_data_index;
+};
+
+struct SSLSocketData : SocketData {
+  SSLSocketData() { }
+  virtual bool closeImpl();
+  ~SSLSocketData();
+private:
+  friend class SSLSocket;
   bool m_ssl_active{false};
   bool m_client{false};
   bool m_enable_on_connect{false};
   bool m_state_set{false};
   bool m_is_blocked{true};
-  Array m_context;
   SSL *m_handle{nullptr};
-  CryptoMethod m_method{(CryptoMethod)-1};
+  SSLSocket::CryptoMethod m_method{(SSLSocket::CryptoMethod)-1};
   double m_connect_timeout{0};
-
-private:
-  static Mutex s_mutex;
-  static int s_ex_data_index;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

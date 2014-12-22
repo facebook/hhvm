@@ -40,7 +40,6 @@
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/base/persistent-resource-store.h"
 #include "hphp/runtime/base/zend-php-config.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/util/logger.h"
@@ -320,9 +319,11 @@ static int php_read(Socket *sock, void *buf, int maxlen, int flags) {
   return n;
 }
 
-static bool create_new_socket(const HostURL &hosturl,
-                              Variant &errnum, Variant &errstr, Resource &ret,
-                              Socket *&sock) {
+static SmartPtr<Socket> create_new_socket(
+  const HostURL &hosturl,
+  Variant &errnum,
+  Variant &errstr
+) {
   int domain = hosturl.isIPv6() ? AF_INET6 : AF_INET;
   int type = SOCK_STREAM;
   const std::string scheme = hosturl.getScheme();
@@ -333,16 +334,20 @@ static bool create_new_socket(const HostURL &hosturl,
     domain = AF_UNIX;
   }
 
-  sock = new Socket(socket(domain, type, 0), domain,
-                    hosturl.getHost().c_str(), hosturl.getPort());
-  ret = Resource(sock);
+  auto sock = makeSocket(
+    socket(domain, type, 0),
+    domain,
+    hosturl.getHost().c_str(),
+    hosturl.getPort()
+  );
+
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create socket", errno);
     errnum = sock->getError();
     errstr = HHVM_FN(socket_strerror)(sock->getError());
-    return false;
+    sock.reset();
   }
-  return true;
+  return sock;
 }
 
 static int connect_with_timeout(int fd, struct sockaddr *sa_ptr,
@@ -402,8 +407,8 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
   int domain = AF_UNSPEC;
   int type = SOCK_STREAM;
   auto const& scheme = hosturl.getScheme();
-  std::unique_ptr<Socket> sock;
-  SSLSocket* sslsock = nullptr;
+  SmartPtr<Socket> sock;
+  SmartPtr<SSLSocket> sslsock;
   std::string sockerr;
   int error;
 
@@ -420,8 +425,7 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
     size_t sa_size;
 
     fd = socket(domain, type, 0);
-    sock = folly::make_unique<Socket>(fd, domain, hosturl.getHost().c_str(),
-                                      hosturl.getPort());
+    sock = makeSocket(fd, domain, hosturl.getHost().c_str(), hosturl.getPort());
 
     if (!set_sockaddr(sa_storage, sock.get(), hosturl.getHost().c_str(),
                       hosturl.getPort(), sa_ptr, sa_size)) {
@@ -469,10 +473,12 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
 
     sslsock = SSLSocket::Create(fd, domain, hosturl, timeout);
     if (sslsock) {
-      sock = std::unique_ptr<Socket>(sslsock);
+      sock = sslsock;
     } else {
-      sock = folly::make_unique<Socket>(fd, domain, hosturl.getHost().c_str(),
-                                        hosturl.getPort());
+      sock = makeSocket(fd,
+                        domain,
+                        hosturl.getHost().c_str(),
+                        hosturl.getPort());
     }
   }
 
@@ -489,7 +495,7 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
     return false;
   }
 
-  return Resource(sock.release());
+  return Resource(std::move(sock));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -505,9 +511,7 @@ Variant HHVM_FUNCTION(socket_create,
     SOCKET_ERROR((&dummySock), "Unable to create socket", errno);
     return false;
   }
-  Socket *sock = new Socket(socketId, domain);
-  Resource ret(sock);
-  return ret;
+  return Resource(makeSocket(socketId, domain));
 }
 
 Variant HHVM_FUNCTION(socket_create_listen,
@@ -524,9 +528,9 @@ Variant HHVM_FUNCTION(socket_create_listen,
   la.sin_family = result.hostbuf.h_addrtype;
   la.sin_port = htons((unsigned short)port);
 
-  Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
-                            "0.0.0.0", port);
-  Resource ret(sock);
+  auto sock = makeSocket(
+    socket(PF_INET, SOCK_STREAM, 0), PF_INET, "0.0.0.0", port);
+
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create listening socket", errno);
     return false;
@@ -542,7 +546,7 @@ Variant HHVM_FUNCTION(socket_create_listen,
     return false;
   }
 
-  return ret;
+  return Resource(std::move(sock));
 }
 
 const StaticString
@@ -563,9 +567,9 @@ bool HHVM_FUNCTION(socket_create_pair,
   }
 
   fd = make_packed_array(
-    Resource(new Socket(fds_array[0], domain, nullptr, 0, 0.0,
+    Resource(makeSocket(fds_array[0], domain, nullptr, 0, 0.0,
                         s_socktype_generic)),
-    Resource(new Socket(fds_array[1], domain, nullptr, 0, 0.0,
+    Resource(makeSocket(fds_array[1], domain, nullptr, 0, 0.0,
                         s_socktype_generic))
   );
   return true;
@@ -927,23 +931,23 @@ Variant HHVM_FUNCTION(socket_server,
                             errnum, errstr);
 }
 
-Variant socket_server_impl(const HostURL &hosturl,
-                           int flags, /* = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN */
-                           VRefParam errnum /* = null */,
-                           VRefParam errstr /* = null */) {
-  Resource ret;
-  Socket *sock = NULL;
+Variant socket_server_impl(
+  const HostURL &hosturl,
+  int flags, /* = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN */
+  VRefParam errnum /* = null */,
+  VRefParam errstr /* = null */
+) {
   errnum = 0;
   errstr = empty_string();
-  if (!create_new_socket(hosturl, errnum, errstr, ret, sock)) {
+  auto sock = create_new_socket(hosturl, errnum, errstr);
+  if (!sock) {
     return false;
   }
-  assert(ret.get() && sock);
 
   sockaddr_storage sa_storage;
   struct sockaddr *sa_ptr;
   size_t sa_size;
-  if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
+  if (!set_sockaddr(sa_storage, sock.get(), hosturl.getHost().c_str(),
                     hosturl.getPort(), sa_ptr, sa_size)) {
     return false;
   }
@@ -959,7 +963,7 @@ Variant socket_server_impl(const HostURL &hosturl,
     return false;
   }
 
-  return ret;
+  return Resource(std::move(sock));
 }
 
 Variant HHVM_FUNCTION(socket_accept,
@@ -967,14 +971,12 @@ Variant HHVM_FUNCTION(socket_accept,
   Socket *sock = socket.getTyped<Socket>();
   struct sockaddr sa;
   socklen_t salen = sizeof(sa);
-  Socket *new_sock = new Socket(accept(sock->fd(), &sa, &salen),
-                                sock->getType());
+  auto new_sock = makeSocket(accept(sock->fd(), &sa, &salen), sock->getType());
   if (!new_sock->valid()) {
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);
-    delete new_sock;
     return false;
   }
-  return Resource(new_sock);
+  return Resource(std::move(new_sock));
 }
 
 Variant HHVM_FUNCTION(socket_read,
@@ -1324,7 +1326,12 @@ void HHVM_FUNCTION(socket_clear_error,
 // fsock: treating sockets as "file"
 
 namespace {
-PersistentResourceStore<std::string,Socket*> s_sockets;
+
+thread_local std::unordered_map<
+  std::string,
+  std::shared_ptr<SocketData>
+> s_sockets;
+
 }
 
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
@@ -1335,16 +1342,18 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   if (persistent) {
     key = hosturl.getHostURL() + ":" +
           folly::to<std::string>(hosturl.getPort());
-    Socket *sock = s_sockets.get(key);
-    if (sock) {
+    auto sockItr = s_sockets.find(key);
+    if (sockItr != s_sockets.end()) {
+      auto sock = makeSocket(sockItr->second);
+
       if (sock->getError() == 0 && sock->checkLiveness()) {
-        return Resource(sock);
+        return Variant(sock);
       }
 
       // socket had an error earlier, we need to close it, remove it from
       // persistent storage, and create a new one (in that order)
       sock->close();
-      s_sockets.remove(key);
+      s_sockets.erase(sockItr);
     }
   }
 
@@ -1362,7 +1371,8 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
 
   if (persistent) {
     assert(!key.empty());
-    s_sockets.set(key, ret.getTyped<Socket>());
+    s_sockets[key] = ret.getTyped<Socket>()->getData();
+    assert(s_sockets[key]);
   }
 
   return ret;

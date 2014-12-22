@@ -24,12 +24,12 @@ namespace HPHP {
 BZ2File::BZ2File(): m_bzFile(nullptr) {
   m_innerFile = newres<PlainFile>();
   m_innerFile->unregister();
-  m_isLocal = m_innerFile->isLocal();
+  setIsLocal(m_innerFile->isLocal());
 }
 
 BZ2File::BZ2File(PlainFile* innerFile): m_bzFile(nullptr) {
   m_innerFile = innerFile;
-  m_isLocal = m_innerFile->isLocal();
+  setIsLocal(m_innerFile->isLocal());
 }
 
 BZ2File::~BZ2File() {
@@ -97,7 +97,7 @@ int64_t BZ2File::readImpl(char * buf, int64_t length) {
    * the file - so, only set EOF after a failed read. This matches PHP5.
    */
   if (len == 0) {
-    m_eof = true;
+    setEof(true);
   }
   return len;
 }
@@ -112,16 +112,16 @@ bool BZ2File::closeImpl() {
   bool ret = true;
   BZ2_bzclose(m_bzFile);
   m_bzFile = nullptr;
-  m_closed = true;
+  setIsClosed(true);
   m_innerFile->close();
   File::closeImpl();
-  m_eof = false;
+  setEof(false);
   return ret;
 }
 
 bool BZ2File::eof() {
   assert(m_bzFile);
-  return m_eof;
+  return getEof();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

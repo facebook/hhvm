@@ -34,6 +34,52 @@ class StreamContext;
 
 extern int __thread s_pcloseRet;
 
+// This structure holds the non-smart allocated data members of File.  The
+// purpose of the class is to allow File (and subclasses) to be managed by
+// the smart allocator while also allowing them to be persisted beyond the
+// lifetime of a request.  The FileData is stored in a shared_ptr and managed
+// by new/delete, so it is safe to store in an object whose lifetime is longer
+// than a request.  A File (or subclass) can be reconstructed using a shared_ptr
+// to a FileData.  Note that subclasses of File that need to be persisted must
+// subclass FileData to add any persistent data members, e.g. see Socket.
+// Classes in the FileData hierarchy may not contain smart allocated data.
+struct FileData {
+  static const int CHUNK_SIZE;
+
+  FileData() { }
+  explicit FileData(bool nonblocking);
+  virtual bool closeImpl();
+  virtual ~FileData();
+
+ protected:
+  bool valid() const { return m_fd >= 0;}
+  bool isClosed() const { return m_closed; }
+  void setIsClosed(bool closed) { m_closed = closed; }
+  void setFd(int fd) { m_fd = fd; }
+  int getFd() { return m_fd; }
+
+ private:
+  friend class File;
+  int m_fd{-1};      // file descriptor
+  bool m_isLocal{false}; // is this on the local disk?
+  bool m_closed{false}; // whether close() was called
+  const bool m_nonblocking{true};
+
+  // fields useful for both reads and writes
+  bool m_eof{false};
+  int64_t m_position{0}; // the current cursor position
+
+  // fields only useful for buffered reads
+  int64_t m_writepos{0}; // where we have read from lower level
+  int64_t m_readpos{0};  // where we have given to upper level
+
+  std::string m_name;
+  std::string m_mode;
+
+  char *m_buffer{nullptr};
+  int64_t m_bufferSize{CHUNK_SIZE};
+};
+
 /**
  * This is PHP's "stream", base class of plain file, gzipped file, directory
  * and sockets. We are not going to structure directories this way at all,
@@ -73,11 +119,11 @@ struct File : SweepableResourceData {
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
   const String& o_getResourceName() const { return s_resource_name; }
-  virtual bool isInvalid() const { return m_closed; }
+  virtual bool isInvalid() const { return m_data->m_closed; }
 
-  virtual int fd() const { return m_fd;}
-  bool valid() const { return m_fd >= 0;}
-  const std::string getName() const { return m_name;}
+  virtual int fd() const { return m_data->m_fd;}
+  bool valid() const { return m_data && m_data->m_fd >= 0; }
+  std::string getName() const { return m_data->m_name;}
 
   /**
    * How to open this type of file.
@@ -92,7 +138,7 @@ struct File : SweepableResourceData {
    * and clean up.
    */
   virtual bool close() = 0;
-  virtual bool isClosed() const { return m_closed;}
+  virtual bool isClosed() const { return !m_data || m_data->m_closed; }
 
   /* Use:
    * - read() when fetching data to return to PHP
@@ -163,9 +209,9 @@ struct File : SweepableResourceData {
   void prependWriteFilter(Resource &filter);
   bool removeFilter(Resource &filter);
 
-  int64_t bufferedLen() { return m_writepos - m_readpos; }
+  int64_t bufferedLen() { return m_data->m_writepos - m_data->m_readpos; }
 
-  std::string getMode() { return m_mode; }
+  std::string getMode() { return m_data->m_mode; }
 
   /**
    * Read one line a time. Returns a null string on failure or eof.
@@ -204,12 +250,38 @@ struct File : SweepableResourceData {
    */
   String getLastError();
 
-  bool isLocal() const { return m_isLocal; }
+  bool isLocal() const { return m_data->m_isLocal; }
+
+  std::shared_ptr<FileData> getData() const { return m_data; }
 
 protected:
   void invokeFiltersOnClose();
-  void closeImpl();
+  bool closeImpl();
   virtual void sweep() override;
+
+  void setIsLocal(bool isLocal) { m_data->m_isLocal = isLocal; }
+  void setIsClosed(bool closed) { m_data->m_closed = closed; }
+
+  bool getEof() const { return m_data->m_eof; }
+  void setEof(bool eof) { m_data->m_eof = eof; }
+
+  int64_t getPosition() const { return m_data->m_position; }
+  void setPosition(int64_t pos) { m_data->m_position = pos; }
+
+  int64_t getWritePosition() const { return m_data->m_writepos; }
+  void setWritePosition(int64_t wpos) { m_data->m_writepos = wpos; }
+
+  int64_t getReadPosition() const { return m_data->m_readpos; }
+  void setReadPosition(int64_t rpos) { m_data->m_readpos = rpos; }
+
+  int getFd() const { return m_data->m_fd; }
+  void setFd(int fd) { m_data->m_fd = fd; }
+
+  void setName(std::string name) { m_data->m_name = name; }
+
+  void setStreamType(const StaticString& streamType) {
+    m_streamType = streamType.get();
+  }
 
   /**
    * call readImpl(m_buffer, CHUNK_SIZE), passing through stream filters if any.
@@ -221,38 +293,26 @@ protected:
    */
   int64_t filteredWrite(const char* buffer, int64_t length);
 
+  FileData* getFileData() { return m_data.get(); }
+  const FileData* getFileData() const { return m_data.get(); }
+
+protected:
+  explicit File(std::shared_ptr<FileData> data,
+                const String& wrapper_type = null_string,
+                const String& stream_type = empty_string_ref);
+
 private:
   template<class ResourceList>
   String applyFilters(const String& buffer,
                       ResourceList& filters,
                       bool closing);
 
-protected:
-  int m_fd;      // file descriptor
-  bool m_isLocal; // is this on the local disk?
-  bool m_closed; // whether close() was called
-  bool m_nonblocking;
-
-  // fields useful for both reads and writes
-  bool m_eof;
-  int64_t m_position; // the current cursor position
-
-  // fields only useful for buffered reads
-  int64_t m_writepos; // where we have read from lower level
-  int64_t m_readpos;  // where we have given to upper level
-
-  std::string m_name;
-  std::string m_mode;
-
+  std::shared_ptr<FileData> m_data;
   StringData* m_wrapperType;
   StringData* m_streamType;
   Resource m_streamContext;
   smart::list<Resource> m_readFilters;
   smart::list<Resource> m_writeFilters;
-
-private:
-  char *m_buffer;
-  int64_t m_bufferSize;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

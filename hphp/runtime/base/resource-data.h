@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_RESOURCE_DATA_H_
 #define incl_HPHP_RESOURCE_DATA_H_
 
+#include <iostream>
+
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/classname-is.h"
@@ -57,7 +59,9 @@ class ResourceData {
 
   virtual ~ResourceData(); // all PHP resources need vtables
 
-  void operator delete(void* p) { ::operator delete(p); }
+  void operator delete(void* p) {
+    ::operator delete(p);
+  }
   virtual size_t heapSize() const {
     always_assert(false); // better not be in the smart-heap
     not_reached();

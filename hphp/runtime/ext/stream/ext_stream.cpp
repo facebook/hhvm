@@ -30,6 +30,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-await.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/user-stream-wrapper.h"
@@ -562,15 +563,17 @@ bool HHVM_FUNCTION(stream_wrapper_unregister,
 ///////////////////////////////////////////////////////////////////////////////
 // stream socket functions
 
-static Socket *socket_accept_impl(const Resource& socket, struct sockaddr *addr,
-                                  socklen_t *addrlen) {
+static SmartPtr<Socket> socket_accept_impl(
+  const Resource& socket,
+  struct sockaddr *addr,
+  socklen_t *addrlen
+) {
   Socket *sock = socket.getTyped<Socket>();
-  Socket *new_sock = new Socket(accept(sock->fd(), addr, addrlen),
-                                sock->getType());
+  auto new_sock = makeSocket(
+    accept(sock->fd(), addr, addrlen), sock->getType());
   if (!new_sock->valid()) {
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);
-    delete new_sock;
-    return NULL;
+    new_sock.reset();
   }
   return new_sock;
 }
@@ -650,7 +653,7 @@ Variant HHVM_FUNCTION(stream_socket_accept,
   if (n > 0) {
     struct sockaddr sa;
     socklen_t salen = sizeof(sa);
-    Socket *new_sock = socket_accept_impl(server_socket, &sa, &salen);
+    auto new_sock = socket_accept_impl(server_socket, &sa, &salen);
     peername = get_sockaddr_name(&sa, salen);
     if (new_sock) return Resource(new_sock);
   } else if (n < 0) {

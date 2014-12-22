@@ -104,6 +104,9 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(ResourceData *v);
   /* implicit */ Variant(RefData *r);
 
+  template <typename T>
+  explicit Variant(const SmartPtr<T>& ptr) : Variant(ptr.get()) { }
+
   /*
    * Creation constructor from ArrayInit that avoids a null check.
    */

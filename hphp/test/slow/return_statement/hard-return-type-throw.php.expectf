@@ -1,0 +1,7 @@
+about to return
+
+Fatal error: Uncaught exception 'Exception' with message 'nooo' in %s:4
+Stack trace:
+#0 %s(14): error_handler()
+#1 %s(18): crash()
+#2 {main}

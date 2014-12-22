@@ -1374,18 +1374,21 @@ void EmitterVisitor::emitReturn(Emitter& e, char sym, bool hasConstraint,
     auto& t = r->m_returnTargets[sym].target;
     if (r->m_parent == nullptr) {
       // At the top of the hierarchy, no more finally blocks to run.
-      // Free the pending iterators and perform the actual return.
-      emitIterFree(e, iters);
+      // Check return type, free pending iterators and actually return.
       if (sym == StackSym::C) {
         if (hasConstraint) {
           e.VerifyRetTypeC();
         }
+        // IterFree must come after VerifyRetType, because VerifyRetType may
+        // throw, in which case any Iters will be freed by the fault funclet.
+        emitIterFree(e, iters);
         e.RetC();
       } else {
         assert(sym == StackSym::V);
         if (hasConstraint) {
           e.VerifyRetTypeV();
         }
+        emitIterFree(e, iters);
         e.RetV();
       }
       return;

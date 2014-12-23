@@ -19,21 +19,6 @@ foreach ($iterator as $path => $dir) {
     echo $path, PHP_EOL;
 }
 
-// Follow
-$iterator = new RecursiveDirectoryIterator(
-              $p . 'test/dir2',
-              FilesystemIterator::SKIP_DOTS | 
-              FilesystemIterator::FOLLOW_SYMLINKS
-            );
-$iterator = new RecursiveIteratorIterator($iterator,
-              RecursiveIteratorIterator::SELF_FIRST);
-
-echo "FOLLOW SYMLINKS", PHP_EOL;
-
-foreach ($iterator as $path => $dir) {
-    echo $path, PHP_EOL;
-}
-
 
 // Clean up
 unlink($p . "test/dir2/dir1");

@@ -1,0 +1,7 @@
+DONT FOLLOW SYMLINKS
+%s/recursivedirectoryiterator_followsymlink_test/test/dir2/dir1
+%s/recursivedirectoryiterator_followsymlink_test/test/dir2/file2.txt
+FOLLOW SYMLINKS
+%s/recursivedirectoryiterator_followsymlink_test/test/dir2/dir1
+%s/recursivedirectoryiterator_followsymlink_test/test/dir2/dir1/file1.txt
+%s/recursivedirectoryiterator_followsymlink_test/test/dir2/file2.txt

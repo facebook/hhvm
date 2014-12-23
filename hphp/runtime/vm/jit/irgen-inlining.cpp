@@ -94,12 +94,15 @@ void beginInlining(HTS& env,
     *calleeSP->inst(), env.irb->unit()
   );
 
+  auto const sframe = env.fpiStack.top().spillFrame;
+
   DefInlineFPData data;
-  data.target      = target;
-  data.retBCOff    = returnBcOffset;
-  data.spillFrame  = env.fpiStack.top().spillFrame;
-  data.retSPOff    = prevSPOff;
-  data.spOffset    = offsetFromSP(env, 0);
+  data.target        = target;
+  data.retBCOff      = returnBcOffset;
+  data.fromFPushCtor = sframe->extra<ActRecInfo>()->isFromFPushCtor();
+  data.ctx           = sframe->src(2);
+  data.retSPOff      = prevSPOff;
+  data.spOffset      = offsetFromSP(env, 0);
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.

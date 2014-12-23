@@ -393,6 +393,7 @@ struct DefInlineFPData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
       target->fullName()->data(), "(),",
+      fromFPushCtor ? "ctor," : "",
       retBCOff, ',',
       retSPOff, ',',
       spOffset
@@ -400,7 +401,8 @@ struct DefInlineFPData : IRExtraData {
   }
 
   const Func* target;
-  IRInstruction* spillFrame;  // TODO(#5868797): remove this
+  bool fromFPushCtor;
+  SSATmp* ctx;       // Ctx, Cls or Nullptr.
   Offset retBCOff;
   Offset retSPOff;
   int32_t spOffset;  // offset from caller SP to callee SP

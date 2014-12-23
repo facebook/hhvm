@@ -743,13 +743,8 @@ void nativeImplInlined(HTS& env) {
   auto const callee = curFunc(env);
   assert(callee->nativeFuncPtr());
 
-  // Figure out if this inlined function was for an FPushCtor.  We'll
-  // need this creating the unwind block blow.
-  auto const wasInliningConstructor = [&]() -> bool {
-    auto const sframe = fp(env)->inst()->extra<DefInlineFP>()->spillFrame;
-    assert(sframe);
-    return sframe->extra<ActRecInfo>()->isFromFPushCtor();
-  }();
+  auto const wasInliningConstructor =
+    fp(env)->inst()->extra<DefInlineFP>()->fromFPushCtor;
 
   bool const instanceMethod = callee->isMethod() &&
                                 !(callee->attrs() & AttrStatic);

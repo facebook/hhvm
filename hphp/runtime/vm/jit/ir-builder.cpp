@@ -392,12 +392,10 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   auto const func = inst->marker().func();
   if (func->isStatic()) {
     if (fpInst->is(DefInlineFP)) {
-      if (auto const sf = fpInst->extra<DefInlineFP>()->spillFrame) {
-        auto const cls = sf->src(2);
-        if (cls->isConst(Type::Cls)) {
-          inst->convertToNop();
-          return m_unit.cns(ConstCctx::cctx(cls->clsVal()));
-        }
+      auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
+      if (ctx->isConst(Type::Cls)) {
+        inst->convertToNop();
+        return m_unit.cns(ConstCctx::cctx(ctx->clsVal()));
       }
     }
 
@@ -413,12 +411,8 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
     // opts right now.
     // check that we haven't nuked the SSATmp
     if (!m_state.frameMaySpanCall()) {
-      auto const spInst = fpInst->extra<DefInlineFP>()->spillFrame;
-      // In an inlined call, we should always be able to find our SpillFrame.
-      always_assert(spInst && spInst->src(0) == fpInst->src(1));
-      if (spInst->src(2)->isA(Type::Obj)) {
-        return spInst->src(2);
-      }
+      auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
+      if (ctx->isA(Type::Obj)) return ctx;
     }
   }
   return nullptr;

@@ -1,10 +1,10 @@
-string(25) "2014-09-19T20:30:00-04:00"
+string(25) "2014-09-19T20:30:00-07:00"
 object(DateTime)#2 (3) {
   ["date"]=>
   string(19) "2012-06-26 11:00:00"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
-  string(16) "America/New_York"
+  string(%d) "%s"
 }
 string(10) "2012-06-26"

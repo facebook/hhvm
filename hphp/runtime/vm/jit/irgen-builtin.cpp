@@ -458,9 +458,7 @@ private:
      * which is trying to detect failure to do this properly.
      */
     spillStack(env);
-    // TODO(#5868782): kill SyncABIRegs
-    gen(env, SyncABIRegs, StackOffset { offsetFromSP(env, 0) },
-      fp(env), sp(env));
+    gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
     gen(env, EagerSyncVMRegs, fp(env), sp(env));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
   }

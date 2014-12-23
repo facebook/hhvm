@@ -419,7 +419,6 @@ PUNT_OPCODE(DecRefNZ)
 PUNT_OPCODE(DefInlineFP)
 PUNT_OPCODE(InlineReturn)
 PUNT_OPCODE(ReDefSP)
-PUNT_OPCODE(AdjustSP)
 PUNT_OPCODE(VerifyParamCls)
 PUNT_OPCODE(VerifyRetCls)
 PUNT_OPCODE(ConcatCellCell)
@@ -1129,16 +1128,15 @@ void CodeGenerator::cgStStk(IRInstruction* inst) {
   emitStore(vmain(), spReg, offset, inst->src(1), srcLoc(1));
 }
 
-void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sync_sp = dstLoc(0).reg();
-  auto const offset = cellsToBytes(inst->extra<SyncABIRegs>()->offset);
-  v << lea{srcLoc(1).reg()[offset], sync_sp};
-  v << copy{srcLoc(0).reg(), PhysReg(rVmFp)};
-  v << copy{sync_sp, PhysReg(rVmSp)};
+void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
+  auto const rsrc = srcLoc(0).reg();
+  auto const rdst = dstLoc(0).reg();
+  auto const off  = inst->extra<AdjustSP>()->offset;
+  vmain() << lea{rsrc[cellsToBytes(off)], rdst};
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
+  vmain() << copy{srcLoc(0).reg(), PhysReg(rVmSp)};
   auto to = SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset, resumed());
   vmain() << bindjmp{to};
 }

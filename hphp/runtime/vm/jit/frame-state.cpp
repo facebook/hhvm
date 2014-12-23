@@ -338,15 +338,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().fpValue = inst->dst();
     break;
 
-  // TODO(#5868782): kill SyncABIRegs.
-  case SyncABIRegs:
-    cur().spValue = inst->dst();
-    cur().spOffset += -inst->extra<SyncABIRegs>()->offset;
-    if (cur().memoryStack.size() < cur().spOffset) {
-      cur().memoryStack.resize(cur().spOffset);
-    }
-    break;
-
   case RetAdjustStack:
     cur().spValue = inst->dst();
     cur().spOffset = -2;

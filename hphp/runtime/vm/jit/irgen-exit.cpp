@@ -39,9 +39,9 @@ void exitRequest(HTS& env, TransFlags flags, Offset targetBcOff) {
   if (!isInlining(env) &&
       curBcOff == env.context.initBcOffset &&
       targetBcOff == curBcOff) {
-    gen(env, ReqRetranslate, ReqRetranslateData { flags });
+    gen(env, ReqRetranslate, ReqRetranslateData { flags }, sp(env));
   } else {
-    gen(env, ReqBindJmp, ReqBindJmpData { targetBcOff, flags });
+    gen(env, ReqBindJmp, ReqBindJmpData { targetBcOff, flags }, sp(env));
   }
 }
 
@@ -50,8 +50,7 @@ Block* implMakeExit(HTS& env, TransFlags trflags, Offset targetBcOff) {
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
   spillStack(env);
-  gen(env, SyncABIRegs, StackOffset { offsetFromSP(env, 0) }, fp(env),
-    sp(env));
+  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
   exitRequest(env, trflags, targetBcOff);
   return exit;
 }
@@ -91,9 +90,11 @@ Block* makeExitOpt(HTS& env, TransID transId) {
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);
   spillStack(env);
-  gen(env, SyncABIRegs, StackOffset { offsetFromSP(env, 0) }, fp(env),
-    sp(env));
-  gen(env, ReqRetranslateOpt, ReqRetransOptData(transId, targetBcOff));
+  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env,
+      ReqRetranslateOpt,
+      ReqRetransOptData { transId, targetBcOff },
+      sp(env));
   return exit;
 }
 

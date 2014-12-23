@@ -998,7 +998,6 @@ X(IncDecElem,                   IncDecData);
 X(StAsyncArResume,              ResumeOffset);
 X(StContArResume,               ResumeOffset);
 X(StContArState,                GeneratorState);
-X(SyncABIRegs,                  StackOffset);
 X(ContEnter,                    ContEnterData);
 X(LdARFuncPtr,                  StackOffset);
 X(EndCatch,                     StackOffset);

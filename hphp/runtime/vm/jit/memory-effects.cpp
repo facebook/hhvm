@@ -504,7 +504,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Ceil:
   case Floor:
   case DefLabel:
-  case SyncABIRegs:
   case DecRefNZ:
   case CheckInit:
   case Nop:

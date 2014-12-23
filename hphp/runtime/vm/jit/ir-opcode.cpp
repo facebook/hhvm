@@ -227,24 +227,6 @@ bool isDblQueryOp(Opcode opc) {
   }
 }
 
-bool isQueryJmpOp(Opcode opc) {
-  switch (opc) {
-  case JmpZero:
-  case JmpNZero:
-    return true;
-  default:
-    return false;
-  }
-}
-
-Opcode jmpToReqBindJmp(Opcode opc) {
-  switch (opc) {
-  case JmpZero:               return ReqBindJmpZero;
-  case JmpNZero:              return ReqBindJmpNZero;
-  default:                    always_assert(0);
-  }
-}
-
 Opcode negateQueryOp(Opcode opc) {
   assert(isQueryOp(opc));
   switch (opc) {

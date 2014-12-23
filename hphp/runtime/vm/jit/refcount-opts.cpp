@@ -949,11 +949,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
       }
     } else if (m_inst->is(BeginCatch)) {
       consumeExceptional(*m_block->preds().front().inst());
-    } else if (m_inst->is(SyncABIRegs)) {
-      // Nothing should appear between SyncABIRegs and the exit following it,
-      // so don't sink anything past it.
-      resolveAllLocals();
-      resolveAllFrames();
     } else if (m_inst == &m_block->back() && m_block->isExit() &&
                // Make sure it's not a RetCtrl from Ret{C,V}
                (!m_inst->is(RetCtrl) ||

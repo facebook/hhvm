@@ -171,9 +171,8 @@ void endRegion(HTS& env, Offset nextPc) {
   }
   prepareForNextHHBC(env, nullptr, nextPc, true);
   spillStack(env);
-  gen(env, SyncABIRegs, StackOffset { offsetFromSP(env, 0) }, fp(env),
-    sp(env));
-  gen(env, ReqBindJmp, ReqBindJmpData(nextPc));
+  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env, ReqBindJmp, ReqBindJmpData { nextPc }, sp(env));
 }
 
 // All accesses to the stack and locals in this function use DataTypeGeneric so

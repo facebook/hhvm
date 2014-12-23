@@ -66,14 +66,29 @@ private:
  * the next tracelet.
  */
 bool isNormalExit(Block* block) {
-  return BlockMatcher(block).match(SyncABIRegs, ReqBindJmp);
+  return BlockMatcher(block).match(ReqBindJmp);
+}
+
+/*
+ * An "adjusted" normal exit adjusts rVmSp before doing a ReqBindJmp.
+ */
+int32_t isAdjustedNormalExit(Block* block) {
+  return BlockMatcher(block).match(AdjustSP, ReqBindJmp);
 }
 
 /*
  * Returns whether `opc' is a within-tracelet conditional jump that
  * can be folded into a ReqBindJmpFoo instruction.
  */
-bool jccCanBeDirectExit(Opcode opc) { return isQueryJmpOp(opc); }
+bool jccCanBeDirectExit(Opcode opc) {
+  switch (opc) {
+  case JmpZero:
+  case JmpNZero:
+    return true;
+  default:
+    return false;
+  }
+}
 
 /*
  * Return true if jccInst is a conditional jump with no side effects
@@ -81,12 +96,35 @@ bool jccCanBeDirectExit(Opcode opc) { return isQueryJmpOp(opc); }
  */
 bool isCondTraceExit(IRInstruction* jccInst, Block* jccExitBlock) {
   auto mainExit = jccInst->next();
-  return jccCanBeDirectExit(jccInst->op()) &&
-         mainExit &&
-         mainExit->isExit() &&
-         isNormalExit(mainExit) &&
-         mainExit->numPreds() == 1 &&
-         isNormalExit(jccExitBlock);
+  if (!(jccCanBeDirectExit(jccInst->op()) &&
+        mainExit &&
+        mainExit->isExit() &&
+        mainExit->numPreds() == 1)) {
+    return false;
+  }
+  if (isNormalExit(mainExit) && isNormalExit(jccExitBlock)) {
+    return true;
+  }
+  if (isAdjustedNormalExit(mainExit) && isAdjustedNormalExit(jccExitBlock)) {
+    // Adjusted exits need to make the same adjustment (to the same stack
+    // pointer) or we can't do the optimization.
+    auto& mainAdju = *std::prev(mainExit->backIter());
+    auto& jccAdju  = *std::prev(jccExitBlock->backIter());
+    assert(mainAdju.op() == AdjustSP && jccAdju.op() == AdjustSP);
+    return
+      mainAdju.extra<AdjustSP>()->offset ==
+        jccAdju.extra<AdjustSP>()->offset &&
+      mainAdju.src(0) == jccAdju.src(0);
+  }
+  return false;
+}
+
+Opcode jmpToReqBindJmp(Opcode opc) {
+  switch (opc) {
+  case JmpZero:               return ReqBindJmpZero;
+  case JmpNZero:              return ReqBindJmpNZero;
+  default:                    always_assert(0);
+  }
 }
 
 /*
@@ -110,23 +148,24 @@ void optimizeCondTraceExit(IRUnit& unit, IRInstruction* jccInst,
   auto mainExit = jccInst->next();
   auto it = mainExit->backIter();
   auto& reqBindJmp = *(it--);
-  auto& syncAbi = *it;
-  assert(syncAbi.op() == SyncABIRegs);
 
   auto const newOpcode = jmpToReqBindJmp(jccInst->op());
   ReqBindJccData data;
   data.taken = jccExitBlock->back().extra<ReqBindJmp>()->offset;
   data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
 
+  auto argVec = jit::vector<SSATmp*>(jccInst->srcs().begin(),
+                                     jccInst->srcs().end());
+  argVec.push_back(reqBindJmp.src(0));
+
   FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
   unit.replace(
     &reqBindJmp,
     newOpcode,
     data,
-    std::make_pair(jccInst->numSrcs(), jccInst->srcs().begin())
+    std::make_pair(argVec.size(), &argVec[0])
   );
 
-  syncAbi.setMarker(jccInst->marker());
   reqBindJmp.setMarker(jccInst->marker());
   unit.replace(jccInst, Jmp, mainExit);
 }

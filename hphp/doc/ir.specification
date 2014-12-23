@@ -677,14 +677,14 @@ To string conversions:
 
   Conditionally jump to based on S0.
 
-| JmpSSwitchDest, ND, S(TCA), T
+| JmpSSwitchDest, ND, S(TCA) S(StkPtr), T
 
-  Jump to the target of a sswitch statement, leaving the tracelet, where the
+  Jump to the target of a sswitch statement, leaving the region, where the
   target TCA is S0.
 
-| JmpSwitchDest, ND, S(Int), T
+| JmpSwitchDest, ND, S(Int) S(StkPtr), T
 
-  Jump to the target of a switch statement, leaving the tracelet, using table
+  Jump to the target of a switch statement, leaving the region, using table
   metadata <JmpSwitchData> and index S0.
 
 | CheckSurpriseFlags, ND, NA, B
@@ -1390,20 +1390,15 @@ To string conversions:
 11. Trace exits
 
 
-| SyncABIRegs<offset>, D(StkPtr), S(FramePtr) S(StkPtr), NF
-
-  Ensures the cross-tracelet ABI registers are in a consistent state in
-  preparation for an instruction that may leave the trace.
-
 | EagerSyncVMRegs, ND, S(FramePtr) S(StkPtr), NF
 
   Sync the given vmfp and vmsp to their in-memory locations.
 
-| ReqBindJmp<bcOff,transFlags>, ND, NA, T
+| ReqBindJmp<bcOff,transFlags>, ND, S(StkPtr), T
 
   Emit a jump to a REQ_BIND_JMP service request to the target offset bcOff.
 
-| ReqRetranslate<transFlags>, ND, NA, T
+| ReqRetranslate<transFlags>, ND, S(StkPtr), T
 
   Emit a jump to a service request that will chain to a retranslation of this
   tracelet.
@@ -1411,15 +1406,15 @@ To string conversions:
   This instruction is used in exit traces for a type prediction that occurs at
   the first bytecode offset of a tracelet.
 
-| ReqRetranslateOpt<transId,bcOff>, ND, NA, T
+| ReqRetranslateOpt<transId,bcOff>, ND, S(StkPtr), T
 
   Emit a service request to retranslate, with a higher optimization gear,
   translation transID, which starts at bcOff. This instruction is used in exit
   traces that trigger profile-guided optimizations.
 
-| ReqBindJmpZero,                   ND, S(Int,Bool),                     T
+| ReqBindJmpZero,                   ND, S(Int,Bool) S(StkPtr),           T
 
-| ReqBindJmpNZero,                  ND, S(Int,Bool),                     T
+| ReqBindJmpNZero,                  ND, S(Int,Bool) S(StkPtr),           T
 
   Test the condition based on the Jmp* op of similar name, and then emit a pair
   of smashable jumps to a REQ_BIND_JMPCC_FIRST service request.

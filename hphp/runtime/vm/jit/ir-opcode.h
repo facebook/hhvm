@@ -167,20 +167,6 @@ bool isDblQueryOp(Opcode opc);
 Opcode queryToDblQueryOp(Opcode opc);
 
 /*
- * A "query jump op" is a conditional jump instruction that
- * corresponds to one of the fusable query op instructions.
- */
-bool isQueryJmpOp(Opcode opc);
-
-/*
- * Convert a jump operation to its corresponding conditional
- * ReqBindJmp.
- *
- * Pre: opc is a conditional jump.
- */
-Opcode jmpToReqBindJmp(Opcode opc);
-
-/*
  * Return the opcode that corresponds to negation of opc.
  */
 Opcode negateQueryOp(Opcode opc);

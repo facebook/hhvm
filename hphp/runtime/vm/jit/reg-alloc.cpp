@@ -45,7 +45,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
       opc == DefSP ||
       opc == ReDefSP ||
       opc == AdjustSP ||
-      opc == SyncABIRegs ||
       opc == Call ||
       opc == CallArray ||
       opc == ContEnter ||

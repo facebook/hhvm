@@ -567,7 +567,9 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
-  auto v = vmain();
+  auto& v = vmain();
+  // NB: syncing rVmSp is not necessary at EndCatch, because the unwinder
+  // ignores it.
   v << vcall{CppCall::direct(unwindResumeHelper), v.makeVcallArgs({{}}),
              v.makeTuple({})};
   v << ud2{};
@@ -2149,11 +2151,13 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
-  JmpSwitchData* data = inst->extra<JmpSwitchDest>();
-  SSATmp* index       = inst->src(0);
+  auto const data     = inst->extra<JmpSwitchDest>();
+  auto const index    = inst->src(0);
   auto const& marker  = inst->marker();
-  auto indexReg       = srcLoc(inst, 0).reg();
+  auto const indexReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
+
+  v << syncvmsp{srcLoc(inst, 1).reg()};
 
   if (!index->isConst()) {
     auto idx = indexReg;
@@ -2175,20 +2179,21 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     }
     v << leap{rip[(intptr_t)table], t};
     v << jmpm{t[idx*8], kCrossTraceRegs};
-  } else {
-    int64_t indexVal = index->intVal();
-    if (data->bounded) {
-      indexVal -= data->base;
-      if (indexVal >= data->cases - 2 || indexVal < 0) {
-        auto dest = SrcKey(getFunc(marker), data->defaultOff, resumed(marker));
-        v << bindjmp{dest, TransFlags(), kCrossTraceRegs};
-        return;
-      }
-    }
-    auto dest = SrcKey(getFunc(marker), data->targets[indexVal],
-                       resumed(marker));
-    v << bindjmp{dest, TransFlags(), kCrossTraceRegs};
+    return;
   }
+
+  int64_t indexVal = index->intVal();
+  if (data->bounded) {
+    indexVal -= data->base;
+    if (indexVal >= data->cases - 2 || indexVal < 0) {
+      auto dest = SrcKey(getFunc(marker), data->defaultOff, resumed(marker));
+      v << bindjmp{dest, TransFlags(), kCrossTraceRegs};
+      return;
+    }
+  }
+  auto dest = SrcKey(getFunc(marker), data->targets[indexVal],
+                     resumed(marker));
+  v << bindjmp{dest, TransFlags(), kCrossTraceRegs};
 }
 
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
@@ -2347,18 +2352,6 @@ void CodeGenerator::cgStLocNT(IRInstruction* inst) {
   emitStore(ptr[off], inst->src(1), srcLoc(inst, 1), Width::Value);
 }
 
-/*
- * TODO(#5868782): this instruction makes non-SSA-visible updates to rbx right
- * now.  We want to remove it.
- */
-void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sync_sp = dstLoc(inst, 0).reg();
-  auto const offset = cellsToBytes(inst->extra<SyncABIRegs>()->offset);
-  v << lea{srcLoc(inst, 1).reg()[offset], sync_sp};
-  v << syncvmsp{sync_sp};
-}
-
 void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
   auto& v = vmain();
   emitEagerSyncPoint(v, reinterpret_cast<const Op*>(inst->marker().sk().pc()),
@@ -2369,8 +2362,10 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   auto offset  = inst->extra<ReqBindJmp>()->offset;
   auto trflags = inst->extra<ReqBindJmp>()->trflags;
   auto marker  = inst->marker();
-  auto dest = SrcKey(getFunc(marker), offset, resumed(marker));
-  vmain() << bindjmp{dest, trflags, kCrossTraceRegs};
+  auto dest    = SrcKey(getFunc(marker), offset, resumed(marker));
+  auto& v      = vmain();
+  v << syncvmsp{srcLoc(inst, 0).reg()};
+  v << bindjmp{dest, trflags, kCrossTraceRegs};
 }
 
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
@@ -2378,6 +2373,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto const& marker = inst->marker();
   auto sk = SrcKey(getFunc(marker), extra->offset, resumed(marker));
   auto& v = vmain();
+  v << syncvmsp{srcLoc(inst, 0).reg()};
   emitServiceReq(v, nullptr, REQ_RETRANSLATE_OPT, {
     {ServiceReqArgInfo::Immediate, {sk.toAtomicInt()}},
     {ServiceReqArgInfo::Immediate, {static_cast<uint64_t>(extra->transId)}}
@@ -2391,6 +2387,7 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
                              resumed(marker));
   auto trflags = inst->extra<ReqRetranslate>()->trflags;
   auto& v = vmain();
+  v << syncvmsp{srcLoc(inst, 0).reg()};
   v << fallback{destSK, trflags, kCrossTraceRegs};
 }
 
@@ -4608,6 +4605,7 @@ void CodeGenerator::cgJmpNZero(IRInstruction* inst) {
 void CodeGenerator::cgReqBindJmpZero(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
   auto& v = vmain();
+  v << syncvmsp{srcLoc(inst, 1).reg()};
   auto const sf = emitTestZero(v, inst->src(0), srcLoc(inst, 0));
   emitReqBindJcc(v, CC_Z, sf, inst->extra<ReqBindJmpZero>());
 }
@@ -4615,6 +4613,7 @@ void CodeGenerator::cgReqBindJmpZero(IRInstruction* inst) {
 void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
   auto& v = vmain();
+  v << syncvmsp{srcLoc(inst, 1).reg()};
   auto const sf = emitTestZero(v, inst->src(0), srcLoc(inst, 0));
   emitReqBindJcc(v, CC_NZ, sf, inst->extra<ReqBindJmpNZero>());
 }
@@ -4671,6 +4670,7 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
 
 void CodeGenerator::cgJmpSSwitchDest(IRInstruction* inst) {
   auto& v = vmain();
+  v << syncvmsp{srcLoc(inst, 1).reg()};
   v << jmpr{srcLoc(inst, 0).reg(), kCrossTraceRegs};
 }
 

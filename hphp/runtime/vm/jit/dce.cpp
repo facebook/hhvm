@@ -312,7 +312,6 @@ bool canDCE(IRInstruction* inst) {
   case StLocNT:
   case StLocPseudoMain:
   case StRef:
-  case SyncABIRegs:
   case EagerSyncVMRegs:
   case ReqBindJmp:
   case ReqRetranslate:

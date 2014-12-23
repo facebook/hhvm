@@ -34,7 +34,7 @@
 #include "hphp/util/default-ptr.h"
 #include "hphp/util/hash-map-typedefs.h"
 
-#include <boost/range/iterator_range.hpp>
+#include <folly/Range.h>
 
 #include <list>
 #include <memory>
@@ -681,7 +681,7 @@ public:
   /*
    * Interfaces this class declared in its "implements" clause.
    */
-  boost::iterator_range<const ClassPtr*> declInterfaces() const;
+  folly::Range<const ClassPtr*> declInterfaces() const;
 
   /*
    * All interfaces implemented by this class, including those declared in

@@ -284,8 +284,8 @@ inline bool Class::hasConstant(const StringData* clsCnsName) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Interfaces and traits.
 
-inline boost::iterator_range<const ClassPtr*> Class::declInterfaces() const {
-  return boost::make_iterator_range(
+inline folly::Range<const ClassPtr*> Class::declInterfaces() const {
+  return folly::range(
     m_declInterfaces.get(),
     m_declInterfaces.get() + m_numDeclInterfaces
   );

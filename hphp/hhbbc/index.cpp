@@ -27,15 +27,15 @@
 #include <vector>
 #include <utility>
 
-#include <boost/range/iterator_range.hpp>
 #include <tbb/concurrent_hash_map.h>
 
-#include <folly/String.h>
 #include <folly/Format.h>
 #include <folly/Hash.h>
+#include <folly/Lazy.h>
 #include <folly/Memory.h>
 #include <folly/Optional.h>
-#include <folly/Lazy.h>
+#include <folly/Range.h>
+#include <folly/String.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/match.h"
@@ -106,10 +106,10 @@ template<class T> using ISStringToOne = ISStringToOneT<borrowed_ptr<T>>;
 using G = std::lock_guard<std::mutex>;
 
 template<class MultiMap>
-boost::iterator_range<typename MultiMap::const_iterator>
+folly::Range<typename MultiMap::const_iterator>
 find_range(const MultiMap& map, typename MultiMap::key_type key) {
   auto const pair = map.equal_range(key);
-  return boost::make_iterator_range(pair.first, pair.second);
+  return folly::range(pair.first, pair.second);
 }
 
 // Like find_range, but copy them into a temporary buffer instead of

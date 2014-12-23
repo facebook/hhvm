@@ -98,7 +98,8 @@ std::string show(const HTS& hts) {
                        stackDepth).str());
   for (unsigned i = 0; i < hts.irb->evalStack().size(); ++i) {
     while (checkFpi());
-    auto const value = irgen::top(const_cast<HTS&>(hts), i, DataTypeGeneric);
+    auto const value = irgen::top(const_cast<HTS&>(hts),
+      Type::StackElem, i, DataTypeGeneric);
     elem(value->inst()->toString());
   }
 

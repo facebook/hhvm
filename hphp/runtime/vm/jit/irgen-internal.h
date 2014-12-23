@@ -375,23 +375,6 @@ inline SSATmp* pushIncRef(HTS& env,
   return push(env, tmp);
 }
 
-inline SSATmp* top(HTS& env,
-                   uint32_t offset = 0,
-                   TypeConstraint tc = DataTypeSpecific) {
-  auto const tmp = env.irb->evalStack().top(offset);
-  if (!tmp) return nullptr;
-  env.irb->constrainValue(tmp, tc);
-  return tmp;
-}
-
-/*
- * We don't know what type description to expect for the stack locations before
- * index, so we use a generic type when popping the intermediate values.  If it
- * ends up creating a new LdStack, refineType during a later pop() or top()
- * will fix up the type to the known type.
- *
- * TODO(#4810319): the above comment is definitely not true anymore.
- */
 inline void extendStack(HTS& env, uint32_t index, Type type) {
   // DataTypeGeneric is used in here because nobody's actually looking at the
   // values, we're just inserting LdStacks into the eval stack to be consumed
@@ -410,12 +393,13 @@ inline SSATmp* top(HTS& env,
                    Type type,
                    uint32_t index = 0,
                    TypeConstraint tc = DataTypeSpecific) {
-  auto tmp = top(env, index, tc);
+  auto tmp = env.irb->evalStack().top(index);
   if (!tmp) {
     extendStack(env, index, type);
-    tmp = top(env, index, tc);
-    assert(tmp);
+    tmp = env.irb->evalStack().top(index);
   }
+  assert(tmp);
+  env.irb->constrainValue(tmp, tc);
   return tmp;
 }
 
@@ -444,7 +428,9 @@ inline Type topType(HTS& env,
                     TypeConstraint constraint = DataTypeSpecific) {
   FTRACE(5, "Asking for type of stack elem {}\n", idx);
   if (idx < env.irb->evalStack().size()) {
-    return top(env, idx, constraint)->type();
+    auto const tmp = env.irb->evalStack().top(idx);
+    env.irb->constrainValue(tmp, constraint);
+    return tmp->type();
   }
   return env.irb->stackType(offsetFromSP(env, idx), constraint);
 }

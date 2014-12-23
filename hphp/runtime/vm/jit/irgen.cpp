@@ -185,7 +185,7 @@ Type predictedTypeFromLocation(HTS& env, const Location& loc) {
       auto i = loc.offset;
       assert(i >= 0);
       if (i < env.irb->evalStack().size()) {
-        return top(env, i, DataTypeGeneric)->type();
+        return topType(env, i, DataTypeGeneric);
       } else {
         auto stackTy = env.irb->stackType(
           offsetFromSP(env, i),

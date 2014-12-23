@@ -267,7 +267,7 @@ void assertTypeLocal(HTS& env, uint32_t locId, Type type) {
 void assertTypeStack(HTS& env, uint32_t idx, Type type) {
   if (idx < env.irb->evalStack().size()) {
     // We're asserting a new type so we don't care about the previous type.
-    auto const tmp = top(env, idx, DataTypeGeneric);
+    auto const tmp = top(env, Type::StackElem, idx, DataTypeGeneric);
     assert(tmp);
     env.irb->evalStack().replace(idx, gen(env, AssertType, type, tmp));
   } else {
@@ -298,7 +298,7 @@ void checkTypeStack(HTS& env, uint32_t idx, Type type, Offset dest) {
            idx, type.toString());
     // CheckType only cares about its input type if the simplifier does
     // something with it and that's handled if and when it happens.
-    auto const tmp = top(env, idx, DataTypeGeneric);
+    auto const tmp = top(env, Type::StackElem, idx, DataTypeGeneric);
     assert(tmp);
     env.irb->evalStack().replace(idx, gen(env, CheckType, type, exit, tmp));
     return;

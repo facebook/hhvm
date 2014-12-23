@@ -315,12 +315,9 @@ void checkMIState(MTS& env) {
     // We don't need to bother with weird base types.
     return;
   }
-
-  // Type::unbox() is a little dangerous since it can be more specific than
-  // what LdRef actually returns, but in all cases where the base value comes
-  // from a LdRef, m_base will be the dest of that LdRef and unbox() will be a
-  // no-op here.
-  baseType = baseType.unbox();
+  if (baseType.isBoxed()) {
+    baseType = ldRefReturn(baseType.unbox());
+  }
 
   // CGetM or SetM with no unknown property offsets
   const bool simpleProp = !unknownOffsets && (isCGetM || isSetM);

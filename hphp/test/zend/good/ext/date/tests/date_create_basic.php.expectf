@@ -15,7 +15,7 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(3) "GMT"
 }
-object(DateTime)#1 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(19) "2005-07-14 22:30:41"
   ["timezone_type"]=>
@@ -23,7 +23,7 @@ object(DateTime)#1 (3) {
   ["timezone"]=>
   string(13) "Europe/London"
 }
-object(DateTime)#1 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(19) "2005-07-14 22:30:41"
   ["timezone_type"]=>

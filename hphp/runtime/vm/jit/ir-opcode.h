@@ -105,7 +105,6 @@ struct FrameStateMgr;
  *
  *      NF    no flags
  *      C     canCSE
- *      E     isEssential
  *      Er    mayRaiseError
  *      PRc   producesRC
  *      CRc   consumesRC
@@ -236,20 +235,19 @@ enum OpcodeFlag : uint64_t {
   NoFlags          = 0,
   HasDest          = 1ULL <<  0,
   CanCSE           = 1ULL <<  1,
-  Essential        = 1ULL <<  2,
-  Branch           = 1ULL <<  3,
-  HasStackVersion  = 1ULL <<  4,
-  ConsumesRC       = 1ULL <<  5,
-  ProducesRC       = 1ULL <<  6,
-  MInstrProp       = 1ULL <<  7,
-  MInstrElem       = 1ULL <<  8,
-  MayRaiseError    = 1ULL <<  9,
-  Terminal         = 1ULL << 10, // has no next instruction
-  NaryDest         = 1ULL << 11, // has 0 or more destinations
-  HasExtra         = 1ULL << 12,
-  Passthrough      = 1ULL << 13,
-  KillsSources     = 1ULL << 14,
-  ModifiesStack    = 1ULL << 15,
+  Branch           = 1ULL <<  2,
+  HasStackVersion  = 1ULL <<  3,
+  ConsumesRC       = 1ULL <<  4,
+  ProducesRC       = 1ULL <<  5,
+  MInstrProp       = 1ULL <<  6,
+  MInstrElem       = 1ULL <<  7,
+  MayRaiseError    = 1ULL <<  8,
+  Terminal         = 1ULL <<  9, // has no next instruction
+  NaryDest         = 1ULL << 10, // has 0 or more destinations
+  HasExtra         = 1ULL << 11,
+  Passthrough      = 1ULL << 12,
+  KillsSources     = 1ULL << 13,
+  ModifiesStack    = 1ULL << 14,
 };
 
 bool hasEdges(Opcode opc);

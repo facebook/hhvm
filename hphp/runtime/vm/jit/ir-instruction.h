@@ -285,7 +285,6 @@ struct IRInstruction {
   bool consumesReference(int srcNo) const;
   bool producesReference(int dstNo) const;
   bool mayRaiseError() const;
-  bool isEssential() const;
   bool isTerminal() const;
   bool hasEdges() const { return jit::hasEdges(op()); }
   bool isPassthrough() const;

@@ -156,11 +156,6 @@ bool IRInstruction::mayRaiseError() const {
   return opcodeHasFlags(op(), MayRaiseError);
 }
 
-bool IRInstruction::isEssential() const {
-  return isControlFlow() ||
-         opcodeHasFlags(op(), Essential);
-}
-
 bool IRInstruction::isTerminal() const {
   return opcodeHasFlags(op(), Terminal);
 }

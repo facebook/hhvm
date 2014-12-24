@@ -127,14 +127,6 @@ CanCSE
 
   The instruction is safe to elide through common subexpression elimination.
 
-Essential
-
-  Whether the instruction is essential indicates whether it can be elided
-  through certain types of optimizations.
-
-  Currently this is just used to flag whether we are allowed to do dead code
-  elimination on it.
-
 CallsNative
 
   Indicates that the instruction will call a native helper.
@@ -213,25 +205,25 @@ is boxed, and they ignore the type of the value inside the box (the inner
 type). The inner type is normally checked when the value within the box is
 about to be loaded, using a separate CheckRefInner instruction.
 
-| CheckType<T>, DRefineS(0), S(Gen), B|E|P
+| CheckType<T>, DRefineS(0), S(Gen), B|P
 
   Check that the type of the src S0 is T, and if so copy it to D. If S0 is not
   type T, branch to block B.
 
-| CheckNullptr, ND, S(CountedStr,Nullptr), B|E|CRc
+| CheckNullptr, ND, S(CountedStr,Nullptr), B|CRc
 
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
 
-| AssertType, DRefineS(0), S(Gen,Cls), C|E|P
+| AssertType, DRefineS(0), S(Gen,Cls), C|P
 
   Assert that the type of S0 is T, copying it to D.
 
-| CheckTypeMem<T>, ND, S(PtrToGen), B|E
+| CheckTypeMem<T>, ND, S(PtrToGen), B
 
   If the value pointed to by S0 is not type T, branch to the block B.
 
-| GuardLoc<T,localId>, ND, S(FramePtr) S(StkPtr), E
+| GuardLoc<T,localId>, ND, S(FramePtr) S(StkPtr), NF
 
   Guard that type of the given localId on the frame S0 is a subtype of the type
   T; if not, make a fallback jump. (A jump to a service request that chains to
@@ -240,13 +232,13 @@ about to be loaded, using a separate CheckRefInner instruction.
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the guarded local has type T.
 
-| HintLocInner<T,localId>, ND, S(FramePtr), E
+| HintLocInner<T,localId>, ND, S(FramePtr), NF
 
   Hint that the inner type of a BoxedCell in localId is likely type T, where T
   is a subtype of BoxedCell. The type must be guarded on before it is known to
   be true (via LdRef).
 
-| CheckLoc<T,localId>, ND, S(FramePtr), B|E
+| CheckLoc<T,localId>, ND, S(FramePtr), B
 
   Check that type of the given localId on the frame S0 is T; if not, branch to
   block B.
@@ -254,7 +246,7 @@ about to be loaded, using a separate CheckRefInner instruction.
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the checked local has type T.
 
-| AssertLoc<T,localId>, ND, S(FramePtr), E
+| AssertLoc<T,localId>, ND, S(FramePtr), NF
 
   Asserts that type of the supplied local on the frame S0 is T. This is used
   for local type information, and is similar to GuardLoc except it doesn't
@@ -264,7 +256,7 @@ about to be loaded, using a separate CheckRefInner instruction.
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the asserted local has type T.
 
-| GuardStk<T,offset>, D(StkPtr), S(StkPtr) S(FramePtr), E
+| GuardStk<T,offset>, D(StkPtr), S(StkPtr) S(FramePtr), NF
 
   Guard that the type of the cell on the stack pointed to by S0 at offset (in
   cells) is T. If not, make a fallback jump. (A jump to a service request that
@@ -273,7 +265,7 @@ about to be loaded, using a separate CheckRefInner instruction.
   Returns a new StkPtr that represents the same stack but with the knowledge
   that the slot at the index S1 has type T.
 
-| HintStkInner<T,offset>, D(StkPtr), S(StkPtr), E
+| HintStkInner<T,offset>, D(StkPtr), S(StkPtr), NF
 
   Hint that the inner type of the BoxedInitCell on the stack pointed to by S0
   at offset (in cells) is T. The type must be guarded on before it is known to
@@ -282,7 +274,7 @@ about to be loaded, using a separate CheckRefInner instruction.
   Returns a new StkPtr that represents the same stack but with the prediction
   information.
 
-| CheckStk<T,offset>, D(StkPtr), S(StkPtr), B|E
+| CheckStk<T,offset>, D(StkPtr), S(StkPtr), B
 
   Check that the type of the cell on the stack pointed to by S0 at offset (in
   cells) is T; if not, branch to block B.
@@ -290,7 +282,7 @@ about to be loaded, using a separate CheckRefInner instruction.
   Returns a new StkPtr that represents the same stack but with the knowledge
   that the slot at the index S1 has type T.
 
-| AssertStk<T,offset>, D(StkPtr), S(StkPtr), E
+| AssertStk<T,offset>, D(StkPtr), S(StkPtr), NF
 
   Returns a new StkPtr that represents the same stack as S0, but with the
   knowledge that the slot at offset (in cells) has type T. This is similar to a
@@ -302,7 +294,7 @@ about to be loaded, using a separate CheckRefInner instruction.
   Returns a new StkPtr that represents the same stack as S0, but with the slot
   at offset (in cells) converted to type T.
 
-| CastStkIntToDbl<offset>, D(StkPtr), S(StkPtr), E
+| CastStkIntToDbl<offset>, D(StkPtr), S(StkPtr), NF
 
   Returns a new StkPtr where the slot at offset has been converted from an
   integer to double.
@@ -343,13 +335,13 @@ exceptions depending on how coercion is implemented.
 
   If the value at S0 + S1 (in bytes) has type Uninit, branch to block B.
 
-| CheckCold<TransID>, ND, NA, B|E
+| CheckCold<TransID>, ND, NA, B
 
   Check if the counter associated with translation TransID is cold (i.e. within
   a fixed threshold). If it's not (i.e. such translation has reached the
   "hotness threshold"), then branch to block B.
 
-| GuardRefs, ND, S(Func) S(Int) C(Int) S(Int) S(Int) S(FramePtr) S(StkPtr), E
+| GuardRefs, ND, S(Func) S(Int) C(Int) S(Int) S(Int) S(FramePtr) S(StkPtr), NF
 
   Perform reffiness guard checks. Operands:
 
@@ -364,7 +356,7 @@ exceptions depending on how coercion is implemented.
   If any of the checks fail, make a fallback jump. (Jump to a service request
   that will chain to a retranslation of this tracelet.)
 
-| CheckRefs, ND, S(Func) S(Int) C(Int) S(Int) S(Int), B|E
+| CheckRefs, ND, S(Func) S(Int) C(Int) S(Int) S(Int), B
 
   Perform reffiness guard checks. Operands:
 
@@ -376,7 +368,7 @@ exceptions depending on how coercion is implemented.
 
   If any of the checks fail, branch to block B.
 
-| EndGuards, ND, NA, E
+| EndGuards, ND, NA, NF
 
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
@@ -698,84 +690,84 @@ There is a conditional branch instruction for each predicate above, to enable
 generating efficient compare-and-branch instruction sequences.
 
 
-| JmpGt,                            ND, S(Gen) S(Gen),                   B|E
+| JmpGt,                            ND, S(Gen) S(Gen),                   B
 
-| JmpGte,                           ND, S(Gen) S(Gen),                   B|E
+| JmpGte,                           ND, S(Gen) S(Gen),                   B
 
-| JmpLt,                            ND, S(Gen) S(Gen),                   B|E
+| JmpLt,                            ND, S(Gen) S(Gen),                   B
 
-| JmpLte,                           ND, S(Gen) S(Gen),                   B|E
+| JmpLte,                           ND, S(Gen) S(Gen),                   B
 
-| JmpEq,                            ND, S(Gen) S(Gen),                   B|E
+| JmpEq,                            ND, S(Gen) S(Gen),                   B
 
-| JmpNeq,                           ND, S(Gen) S(Gen),                   B|E
+| JmpNeq,                           ND, S(Gen) S(Gen),                   B
 
-| JmpSame,                          ND, S(Gen) S(Gen),                   B|E
+| JmpSame,                          ND, S(Gen) S(Gen),                   B
 
-| JmpNSame,                         ND, S(Gen) S(Gen),                   B|E
+| JmpNSame,                         ND, S(Gen) S(Gen),                   B
 
-| JmpGtInt,                         ND, S(Int) S(Int),                   B|E
+| JmpGtInt,                         ND, S(Int) S(Int),                   B
 
-| JmpGteInt,                        ND, S(Int) S(Int),                   B|E
+| JmpGteInt,                        ND, S(Int) S(Int),                   B
 
-| JmpLtInt,                         ND, S(Int) S(Int),                   B|E
+| JmpLtInt,                         ND, S(Int) S(Int),                   B
 
-| JmpLteInt,                        ND, S(Int) S(Int),                   B|E
+| JmpLteInt,                        ND, S(Int) S(Int),                   B
 
-| JmpEqInt,                         ND, S(Int) S(Int),                   B|E
+| JmpEqInt,                         ND, S(Int) S(Int),                   B
 
-| JmpNeqInt,                        ND, S(Int) S(Int),                   B|E
+| JmpNeqInt,                        ND, S(Int) S(Int),                   B
 
   Fused jump instructions. These all operate exactly as their corresponding
   query op, but also take a label to jump to when the condition is true.
 
-| JmpZero,                          ND, S(Int,Bool),                     B|E
+| JmpZero,                          ND, S(Int,Bool),                     B
 
-| JmpNZero,                         ND, S(Int,Bool),                     B|E
+| JmpNZero,                         ND, S(Int,Bool),                     B
 
   Conditionally jump to based on S0.
 
-| JmpSSwitchDest, ND, S(TCA), T|E
+| JmpSSwitchDest, ND, S(TCA), T
 
   Jump to the target of a sswitch statement, leaving the tracelet, where the
   target TCA is S0.
 
-| JmpSwitchDest, ND, S(Int), T|E
+| JmpSwitchDest, ND, S(Int), T
 
   Jump to the target of a switch statement, leaving the tracelet, using table
   metadata <JmpSwitchData> and index S0.
 
-| CheckSurpriseFlags, ND, NA, B|E
+| CheckSurpriseFlags, ND, NA, B
 
   Tests the implementation-specific surprise flags. If they're true, branches
   to block B.
 
-| ReturnHook, ND, S(FramePtr) S(Gen), Er|E
+| ReturnHook, ND, S(FramePtr) S(Gen), Er
 
   Suprise flag hook for function returns.
 
-| SuspendHookE, ND, S(FramePtr) S(FramePtr), Er|E
+| SuspendHookE, ND, S(FramePtr) S(FramePtr), Er
 
   Suprise flag hook for suspending eagerly executing async functions or
   generators.
 
-| SuspendHookR, ND, S(FramePtr) S(Obj|Nullptr), Er|E
+| SuspendHookR, ND, S(FramePtr) S(Obj|Nullptr), Er
 
   Suprise flag hook for suspending resumed async functions or generators.  For
   generators, the second parameter should be Nullptr.
 
-| Halt, ND, NA, T|E
+| Halt, ND, NA, T
 
   Halt execution. Used only in tests, as a terminal instruction that does not
   require any inputs or any successors.
 
-| Jmp, ND, SVar(Top), B|T|E
+| Jmp, ND, SVar(Top), B|T
 
   Unconditional jump to block B. In the second form, the target block must
   start with a DefLabel with the same number of destinations as Jmp's number of
   sources. Jmp parallel-copies its sources to the DefLabel destinations.
 
-| DefLabel, DMulti, NA, E
+| DefLabel, DMulti, NA, NF
 
   DefLabel defines variables received from a previous Jmp. A DefLabel with zero
   destinations is a no-op, and the predecessor blocks may not necessarily end
@@ -791,7 +783,7 @@ generating efficient compare-and-branch instruction sequences.
 6. Reference manipulation
 
 
-| Box, DBox(0), S(Gen), E|CRc|PRc
+| Box, DBox(0), S(Gen), CRc|PRc
 
   Box S0 if it is unboxed, and put the resulting BoxedCell in D.
 
@@ -816,7 +808,7 @@ generating efficient compare-and-branch instruction sequences.
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.
 
-| TakeStack, ND, S(StackElem), E
+| TakeStack, ND, S(StackElem), NF
 
   Does nothing at runtime. Acts as a hint to the optimizer that the code is
   taking ownership of a reference to S0.
@@ -848,9 +840,9 @@ generating efficient compare-and-branch instruction sequences.
   Load the address of a Gen that lives at the specified RDS handle. The type
   param must be a subtype of PtrToGen.
 
-| LdVectorBase, D(PtrToMembCell), S(Obj), E
+| LdVectorBase, D(PtrToMembCell), S(Obj), NF
 
-| LdPairBase, D(PtrToMembCell), S(Obj), E
+| LdPairBase, D(PtrToMembCell), S(Obj), NF
 
   Loads the base pointer to an array of Cells from the given collection
   instance in S0.
@@ -869,7 +861,7 @@ generating efficient compare-and-branch instruction sequences.
   Loads the element at index S1 from the base pointer in S0. The index in S1 is
   the number of bytes from the base in S0.
 
-| CheckRefInner<T>, ND, S(BoxedCell), B|E
+| CheckRefInner<T>, ND, S(BoxedCell), B
 
   TODO(#2939547): this should take BoxedInitCell
 
@@ -890,7 +882,7 @@ generating efficient compare-and-branch instruction sequences.
   which must be a frame for the function in the LdCtx's Marker. The result
   could be either an object representing the this pointer or a class context.
 
-| CheckCtxThis, ND, S(Ctx), B|E
+| CheckCtxThis, ND, S(Ctx), B
 
   Check that the context (m_this or m_cls) in S0 is a non-null $this
   pointer. If not, branch to B.
@@ -932,7 +924,7 @@ generating efficient compare-and-branch instruction sequences.
   Define a value of type T. This instruction aborts at runtime; it is meant to
   be used in tests or code that is known to be unreachable.
 
-| LdCls, D(Cls), S(Str) C(Cls), C|E|Er
+| LdCls, D(Cls), S(Str) C(Cls), C|Er
 
   Loads the class named S0 in the context of the class S1. Invokes autoload and
   may raise an error if the class is not defined. The explicit context
@@ -940,7 +932,7 @@ generating efficient compare-and-branch instruction sequences.
   some cases. If S0 is constant, this instruction may be simplified to a
   LdClsCached.
 
-| LdClsCached, D(Cls), CStr, C|E|Er
+| LdClsCached, D(Cls), CStr, C|Er
 
   Loads the class named S0 via the RDS. Invokes autoload and may raise an error
   if the class is not defined.
@@ -966,20 +958,20 @@ generating efficient compare-and-branch instruction sequences.
 
   Load the constant named S0.
 
-| LookupCns<T,constName>,   DCns, CStr, E|Er|PRc
+| LookupCns<T,constName>,   DCns, CStr, Er|PRc
 
-| LookupCnsE<T,constName>,  DCns, CStr, E|Er|PRc
+| LookupCnsE<T,constName>,  DCns, CStr, Er|PRc
 
   Load a constant via the RDS. Raises an undefined constant notice if the
   constant cannot be defined. The E variant will instead throw a fatal error if
   it cannot define the constant.
 
-| LookupCnsU<T,constName,fallbackName>, DCns, CStr CStr, E|Er|PRc
+| LookupCnsU<T,constName,fallbackName>, DCns, CStr CStr, Er|PRc
 
   Load an unqualified constant via the RDS, first by trying constName, then by
   trying fallbackName. Raises a notice if neither can be found.
 
-| LookupClsCns<T,className,constName>, DCns, NA, E|Er|PRc
+| LookupClsCns<T,className,constName>, DCns, NA, Er|PRc
 
   Load a class constant for a class via the RDS, invoking autoload if it is not
   defined. This instruction may raise an undefined constant error if autoload
@@ -993,7 +985,7 @@ generating efficient compare-and-branch instruction sequences.
 
 | LookupClsMethodFCache<clsName,methodName>,
 |    D(Func|Nullptr), C(Cls) S(FramePtr),
-|    E|Er
+|    Er
 
   Lookup clsName::methodName in the forwarding class method cache. S0 should be
   the Class named by clsName and S1 should be the current vm frame pointer. May
@@ -1028,7 +1020,7 @@ generating efficient compare-and-branch instruction sequences.
 
 | LookupClsMethodCache<clsName,methodName>, D(Func|Nullptr),
 |                                           S(FramePtr),
-|                                           E|Er
+|                                           Er
 
   Lookup a function in the class method targetcache. The class name and method
   name are clsName and methodName, respectively. S0 is the current vm frame
@@ -1041,7 +1033,7 @@ generating efficient compare-and-branch instruction sequences.
   Load a Func* off of the class method table for S0, at offset S1 (in method
   slots).
 
-| LookupClsMethod, ND, S(Cls) S(Str) S(StkPtr) S(FramePtr), E|Er
+| LookupClsMethod, ND, S(Cls) S(Str) S(StkPtr) S(FramePtr), Er
 
   Store a pointer to a class method into an activation record. S0 points to the
   class, S1 is the method name, S2 points to the activation record, and S3 is a
@@ -1058,28 +1050,28 @@ generating efficient compare-and-branch instruction sequences.
   Loads a pointer to a global. S0 is the global's name. Branches to B if the
   global is not defined.
 
-| LdGblAddrDef, D(PtrToGblGen), S(Str), E
+| LdGblAddrDef, D(PtrToGblGen), S(Str), NF
 
   Loads a pointer to a global. S0 is the global's name. Defines the global if
   it is not already defined.
 
 | LdClsPropAddrOrNull, D(PtrToSPropGen|Nullptr),
 |                      S(Cls) S(Str) C(Cls),
-|                      C|E|Er
+|                      C|Er
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, then nullptr is returned.
 
-| LdClsPropAddrOrRaise, D(PtrToSPropGen), S(Cls) S(Str) C(Cls), C|E|Er
+| LdClsPropAddrOrRaise, D(PtrToSPropGen), S(Cls) S(Str) C(Cls), C|Er
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, throw a fatal error.
 
-| LdObjMethod<methodName,fatal>, ND, S(Cls) S(StkPtr), E|Er
+| LdObjMethod<methodName,fatal>, ND, S(Cls) S(StkPtr), Er
 
   Stores a pointer to an object's method into an activation record. S0 points
   to the object's class, S1 points to the pre-live activation record.  Caches
@@ -1094,15 +1086,15 @@ generating efficient compare-and-branch instruction sequences.
   Try to load a cached non-static __invoke Func from the Class in S0, or branch
   to block B if it is not present.
 
-| LdArrFuncCtx, ND, S(Arr) S(StkPtr) S(FramePtr), E|Er
+| LdArrFuncCtx, ND, S(Arr) S(StkPtr) S(FramePtr), Er
 
   Try to load an array as a function context. This is for use translating
   FPushFunc when the callee is an array. This instruction attempts to populate
   a partially created ActRec pointed to by S1.
 
-| LdArrFPushCuf, ND, S(Arr) S(StkPtr) S(FramePtr), E|Er
+| LdArrFPushCuf, ND, S(Arr) S(StkPtr) S(FramePtr), Er
 
-| LdStrFPushCuf, ND, S(Str) S(StkPtr) S(FramePtr), E|Er
+| LdStrFPushCuf, ND, S(Str) S(StkPtr) S(FramePtr), Er
 
   Try to resolve a method target for FPushCuf when the callee is an Arr or Str,
   respectively. These instructions mutate a partially created ActRec pointed to
@@ -1116,12 +1108,12 @@ generating efficient compare-and-branch instruction sequences.
 
   Load the name of the Class* in S0.
 
-| LdFunc, D(Func), S(Str), E|CRc|Er
+| LdFunc, D(Func), S(Str), CRc|Er
 
   Loads the Func whose name is S0. Fatal if the named function is not defined,
   and the function autoloader fails to define it.
 
-| LdFuncCached<funcName>, D(Func), NA, E|Er
+| LdFuncCached<funcName>, D(Func), NA, Er
 
   Loads the Func whose name is funcName from the RDS, invoking autoload if it
   not defined yet. Fatal if function autoloader fails to define it.
@@ -1131,7 +1123,7 @@ generating efficient compare-and-branch instruction sequences.
   Try to load the Func named funcName from the RDS. If the function is not
   defined, returns a null pointer.
 
-| LdFuncCachedU<funcName,fallbackName>, D(Func), NA, E|Er
+| LdFuncCachedU<funcName,fallbackName>, D(Func), NA, Er
 
   Try to load a Func named funcName from the RDS, if it isn't defined, try to
   load a Func named fallbackName. If that also isn't defined, invoke autoload.
@@ -1163,25 +1155,25 @@ generating efficient compare-and-branch instruction sequences.
 
   Allocates a new object of class S1.
 
-| RegisterLiveObj, ND, S(Obj), E
+| RegisterLiveObj, ND, S(Obj), NF
 
   When EnableObjDestructCall is on, we need to keep track of objects to be able
   to call their destructors when a request exists.  This instruction is
   conditionally emitted to implement that.
 
-| CheckInitProps<class>, ND, NA, B|E
+| CheckInitProps<class>, ND, NA, B
 
   Check if the properties for class are initialized and branches if not.
 
-| InitProps<class>, ND, NA, E|Er
+| InitProps<class>, ND, NA, Er
 
   Calls the property initializer function (86pinit) for class.  May throw.
 
-| CheckInitSProps<class>, ND, NA, B|E
+| CheckInitSProps<class>, ND, NA, B
 
   Check if static properties for class are initialized and branches if not.
 
-| InitSProps<class>, ND, NA, E|Er
+| InitSProps<class>, ND, NA, Er
 
   Calls the static property initializer function (86sinit) for class. May
   throw.
@@ -1190,7 +1182,7 @@ generating efficient compare-and-branch instruction sequences.
 
   Allocates an instance of class.
 
-| InitObjProps<class>, ND, S(Obj), E
+| InitObjProps<class>, ND, S(Obj), NF
 
   Initializes properties of object S0.
 
@@ -1227,26 +1219,26 @@ generating efficient compare-and-branch instruction sequences.
   Allocate a new array in the same mode as S0 and with expected capacity S1,
   unless S1 == 0, in which case the capacity is set to S0's size.
 
-| AllocPackedArray<size>, DArrPacked, NA, E|PRc
+| AllocPackedArray<size>, DArrPacked, NA, PRc
 
   Allocate a new uninitialized packed array with space for size elements in it.
   The array will be initialized with values using either InitPackedArray or
   InitPackedArrayLoop.
 
-| InitPackedArray<index>, ND, S(Arr) S(Gen), E|CRc
+| InitPackedArray<index>, ND, S(Arr) S(Gen), CRc
 
   Store the S1 into the slot at index in array S0. This instruction assumes
   that it doesn't have to incref the value being stored. Used to initialize an
   array allocated with AllocPackedArray.
 
-| InitPackedArrayLoop<size>, ND, S(Arr) S(StkPtr), E|CRc
+| InitPackedArrayLoop<size>, ND, S(Arr) S(StkPtr), CRc
 
   Store the top size elements on the stack given by S1 into the array S0.
   Assumes that the first element on the stack is the last element in the array.
   Used to initialize an array allocated with AllocPackedArray that was too big
   to use a series of InitPackedArray instructions.
 
-| NewStructArray<keys...>, D(Arr), S(StkPtr), E|PRc|CRc
+| NewStructArray<keys...>, D(Arr), S(StkPtr), PRc|CRc
 
   Allocate a new key/value array, given N immediate keys and taking the top N
   elements off the stack given by S0. This instruction assumes it can take the
@@ -1256,7 +1248,7 @@ generating efficient compare-and-branch instruction sequences.
 
   Create a new collection, with type S0 and size S1.
 
-| Clone, D(Obj), S(Obj), E|PRc|Er
+| Clone, D(Obj), S(Obj), PRc|Er
 
   Allocate an object by cloning S0.
 
@@ -1316,11 +1308,11 @@ generating efficient compare-and-branch instruction sequences.
   The caller frame pointer is passed as S2. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
 
-| InlineReturn, ND, S(FramePtr), E
+| InlineReturn, ND, S(FramePtr), NF
 
   Unlinks a frame constructed by DefInlineFP.
 
-| CallArray, D(StkPtr), S(StkPtr) S(FramePtr), E
+| CallArray, D(StkPtr), S(StkPtr) S(FramePtr), NF
 
   Invoke function corresponding to the current FPI with array args. S0 points
   to the stack resulting after the ActRec for the function and the array of its
@@ -1329,19 +1321,19 @@ generating efficient compare-and-branch instruction sequences.
 
 | Call<numParams,returnOff,funcd,destroyLocals>, D(StkPtr),
 |                                                S(StkPtr) S(FramePtr),
-|                                                E
+|                                                NF
 
   Transfer control to a callee, based on the pre-live activation record and set
   of args on the stack pointed to by S0. S1 is the current caller frame
   pointer. The `funcd' in the extra data is a Func* for the callee if we know
   the callee statically.
 
-| NativeImpl<func>, ND, S(FramePtr) S(StkPtr), E
+| NativeImpl<func>, ND, S(FramePtr) S(StkPtr), NF
 
   Execute a call to the native builtin specified by the current function. S0
   and S1 should be the current vmfp and vmsp, respectively.
 
-| CallBuiltin<T>, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen), E|Er|PRc
+| CallBuiltin<T>, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen), Er|PRc
 
   Call builtin function with N arguments. S0 and S1 should be the current vmfp
   and vmsp, respectively.
@@ -1371,28 +1363,28 @@ generating efficient compare-and-branch instruction sequences.
   RetCtrl, a FreeActRec is normally emitted to free the activation record S0.
   This is the reason why LdRetAddr is a separate instruction from RetCtrl.
 
-| RetCtrl, ND, S(StkPtr) S(FramePtr) S(RetAddr), T|E
+| RetCtrl, ND, S(StkPtr) S(FramePtr) S(RetAddr), T
 
   Ensure that S0 is stored in rVmSp and S1 is stored in rVmFp and then execute
   a hardware procedure-return using the return address specified by S2.
 
-| StRetVal, ND, S(FramePtr) S(Gen), E|CRc
+| StRetVal, ND, S(FramePtr) S(Gen), CRc
 
   Writes the value in S1 to the return value slot on the activation record
   pointed to by S0.
 
-| RetAdjustStack, D(StkPtr), S(FramePtr), E
+| RetAdjustStack, D(StkPtr), S(FramePtr), NF
 
   Loads the new VM stack pointer into the destination. S0 is a pointer to the
   current activation record.
 
-| ReleaseVVOrExit, ND, S(FramePtr), B|E
+| ReleaseVVOrExit, ND, S(FramePtr), B
 
   Loads the VarEnv slot off the ActRec pointed to by S0. If it is null, does
   nothing. If it is an ExtraArgs, deallocates the ExtraArgs structure.
   Otherwise jumps to block B.
 
-| GenericRetDecRefs, ND, S(FramePtr), E
+| GenericRetDecRefs, ND, S(FramePtr), NF
 
   Does decrefs of all the current function's locals, where S0 is a pointer to
   the relevant activation record.
@@ -1403,35 +1395,35 @@ generating efficient compare-and-branch instruction sequences.
 10. Stores
 
 
-| StMem, ND, S(PtrToGen) C(Int) S(Gen), E|CRc
+| StMem, ND, S(PtrToGen) C(Int) S(Gen), CRc
 
   Store S2 into the location S0 + S1 (in bytes).
 
-| StProp, ND, S(Obj) C(Int) S(Gen), E|CRc
+| StProp, ND, S(Obj) C(Int) S(Gen), CRc
 
   Store S2 into the location S0 + S1 (in bytes).
 
-| StElem, ND, S(PtrToCell) S(Int) S(Cell), E|CRc
+| StElem, ND, S(PtrToCell) S(Int) S(Cell), CRc
 
   Store S2 into the location given by the index S1 from base pointer S0. The
   index in S1 is the number of bytes from the base in S0.
 
-| StLoc<localId>, ND, S(FramePtr) S(Gen), E|CRc
+| StLoc<localId>, ND, S(FramePtr) S(Gen), CRc
 
   Store S1 to local number localId on the frame pointed to by S0.
 
-| StLocNT<localId>, ND, S(FramePtr) S(Gen), E|CRc
+| StLocNT<localId>, ND, S(FramePtr) S(Gen), CRc
 
   Store S1 to local number localId on the frame pointed to by S0, without
   storing the type.
 
-| StLocPseudoMain<localId>, ND, S(FramePtr) S(Gen), E|CRc
+| StLocPseudoMain<localId>, ND, S(FramePtr) S(Gen), CRc
 
   Behaves just like StLoc, except the hard requirement that it is only emitted
   for pseudo-mains. We don't optimize StGbl the same way as StLoc, as we need
   intraprocedural analysis to know whether the store is truly dead.
 
-| StRef, ND, S(BoxedCell) S(Cell), E|CRc
+| StRef, ND, S(BoxedCell) S(Cell), CRc
 
   Store the value in S1 into the RefData pointed to by S0. Stores the
   RefData::m_type also.
@@ -1452,7 +1444,7 @@ generating efficient compare-and-branch instruction sequences.
                cells. A temp with type None means to keep the previous value on
                the stack.
 
-| ExceptionBarrier, D(StkPtr), S(StkPtr), E
+| ExceptionBarrier, D(StkPtr), S(StkPtr), NF
 
   An essential instruciton that consumes and produces a stack.  This is used in
   places that need to ensure the stack goes to memory and cannot be DCE'd.
@@ -1463,20 +1455,20 @@ generating efficient compare-and-branch instruction sequences.
 11. Trace exits
 
 
-| SyncABIRegs, ND, S(FramePtr) S(StkPtr), E
+| SyncABIRegs, ND, S(FramePtr) S(StkPtr), NF
 
   Ensures the cross-tracelet ABI registers are in a consistent state in
   preparation for an instruction that may leave the trace.
 
-| EagerSyncVMRegs, ND, S(FramePtr) S(StkPtr), E
+| EagerSyncVMRegs, ND, S(FramePtr) S(StkPtr), NF
 
   Sync the given vmfp and vmsp to their in-memory locations.
 
-| ReqBindJmp<bcOff,transFlags>, ND, NA, T|E
+| ReqBindJmp<bcOff,transFlags>, ND, NA, T
 
   Emit a jump to a REQ_BIND_JMP service request to the target offset bcOff.
 
-| ReqRetranslate<transFlags>, ND, NA, T|E
+| ReqRetranslate<transFlags>, ND, NA, T
 
   Emit a jump to a service request that will chain to a retranslation of this
   tracelet.
@@ -1484,88 +1476,88 @@ generating efficient compare-and-branch instruction sequences.
   This instruction is used in exit traces for a type prediction that occurs at
   the first bytecode offset of a tracelet.
 
-| ReqRetranslateOpt<transId,bcOff>, ND, NA, T|E
+| ReqRetranslateOpt<transId,bcOff>, ND, NA, T
 
   Emit a service request to retranslate, with a higher optimization gear,
   translation transID, which starts at bcOff. This instruction is used in exit
   traces that trigger profile-guided optimizations.
 
-| ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T|E
+| ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T
 
-| ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T|E
+| ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T
 
-| ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T|E
+| ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T
 
-| ReqBindJmpLte,                    ND, S(Gen) S(Gen),                   T|E
+| ReqBindJmpLte,                    ND, S(Gen) S(Gen),                   T
 
-| ReqBindJmpEq,                     ND, S(Gen) S(Gen),                   T|E
+| ReqBindJmpEq,                     ND, S(Gen) S(Gen),                   T
 
-| ReqBindJmpNeq,                    ND, S(Gen) S(Gen),                   T|E
+| ReqBindJmpNeq,                    ND, S(Gen) S(Gen),                   T
 
-| ReqBindJmpGtInt,                  ND, S(Int) S(Int),                   T|E
+| ReqBindJmpGtInt,                  ND, S(Int) S(Int),                   T
 
-| ReqBindJmpGteInt,                 ND, S(Int) S(Int),                   T|E
+| ReqBindJmpGteInt,                 ND, S(Int) S(Int),                   T
 
-| ReqBindJmpLtInt,                  ND, S(Int) S(Int),                   T|E
+| ReqBindJmpLtInt,                  ND, S(Int) S(Int),                   T
 
-| ReqBindJmpLteInt,                 ND, S(Int) S(Int),                   T|E
+| ReqBindJmpLteInt,                 ND, S(Int) S(Int),                   T
 
-| ReqBindJmpEqInt,                  ND, S(Int) S(Int),                   T|E
+| ReqBindJmpEqInt,                  ND, S(Int) S(Int),                   T
 
-| ReqBindJmpNeqInt,                 ND, S(Int) S(Int),                   T|E
+| ReqBindJmpNeqInt,                 ND, S(Int) S(Int),                   T
 
-| ReqBindJmpSame,                   ND, S(Gen) S(Gen),                   T|E
+| ReqBindJmpSame,                   ND, S(Gen) S(Gen),                   T
 
-| ReqBindJmpNSame,                  ND, S(Gen) S(Gen),                   T|E
+| ReqBindJmpNSame,                  ND, S(Gen) S(Gen),                   T
 
-| ReqBindJmpZero,                   ND, S(Int,Bool),                     T|E
+| ReqBindJmpZero,                   ND, S(Int,Bool),                     T
 
-| ReqBindJmpNZero,                  ND, S(Int,Bool),                     T|E
+| ReqBindJmpNZero,                  ND, S(Int,Bool),                     T
 
   Test the condition based on the Jmp* op of similar name, and then emit a pair
   of smashable jumps to a REQ_BIND_JMPCC_FIRST service request.
 
-| SideExitJmpGt,                    ND, S(Gen) S(Gen),                     E
+| SideExitJmpGt,                    ND, S(Gen) S(Gen),                     NF
 
-| SideExitJmpGte,                   ND, S(Gen) S(Gen),                     E
+| SideExitJmpGte,                   ND, S(Gen) S(Gen),                     NF
 
-| SideExitJmpLt,                    ND, S(Gen) S(Gen),                     E
+| SideExitJmpLt,                    ND, S(Gen) S(Gen),                     NF
 
-| SideExitJmpLte,                   ND, S(Gen) S(Gen),                     E
+| SideExitJmpLte,                   ND, S(Gen) S(Gen),                     NF
 
-| SideExitJmpEq,                    ND, S(Gen) S(Gen),                     E
+| SideExitJmpEq,                    ND, S(Gen) S(Gen),                     NF
 
-| SideExitJmpNeq,                   ND, S(Gen) S(Gen),                     E
+| SideExitJmpNeq,                   ND, S(Gen) S(Gen),                     NF
 
-| SideExitJmpGtInt,                 ND, S(Int) S(Int),                     E
+| SideExitJmpGtInt,                 ND, S(Int) S(Int),                     NF
 
-| SideExitJmpGteInt,                ND, S(Int) S(Int),                     E
+| SideExitJmpGteInt,                ND, S(Int) S(Int),                     NF
 
-| SideExitJmpLtInt,                 ND, S(Int) S(Int),                     E
+| SideExitJmpLtInt,                 ND, S(Int) S(Int),                     NF
 
-| SideExitJmpLteInt,                ND, S(Int) S(Int),                     E
+| SideExitJmpLteInt,                ND, S(Int) S(Int),                     NF
 
-| SideExitJmpEqInt,                 ND, S(Int) S(Int),                     E
+| SideExitJmpEqInt,                 ND, S(Int) S(Int),                     NF
 
-| SideExitJmpNeqInt,                ND, S(Int) S(Int),                     E
+| SideExitJmpNeqInt,                ND, S(Int) S(Int),                     NF
 
-| SideExitJmpSame,                  ND, S(Int) S(Int),                     E
+| SideExitJmpSame,                  ND, S(Int) S(Int),                     NF
 
-| SideExitJmpNSame,                 ND, S(Int) S(Int),                     E
+| SideExitJmpNSame,                 ND, S(Int) S(Int),                     NF
 
-| SideExitJmpZero,                  ND, S(Int,Bool),                       E
+| SideExitJmpZero,                  ND, S(Int,Bool),                       NF
 
-| SideExitJmpNZero,                 ND, S(Int,Bool),                       E
+| SideExitJmpNZero,                 ND, S(Int,Bool),                       NF
 
   Test the condition based on the Jmp* op of similar name, and then emit a
   smashable jump to a REQ_BIND_SIDE_EXIT service request.
 
-| SideExitGuardLoc<T,locId,takenOff>, ND, S(FramePtr), E
+| SideExitGuardLoc<T,locId,takenOff>, ND, S(FramePtr), NF
 
   Test the type of a local, and if it fails jump to a side exit service
   request.
 
-| SideExitGuardStk<T,stackOff,takenOff>, D(StkPtr), S(StkPtr), E
+| SideExitGuardStk<T,stackOff,takenOff>, D(StkPtr), S(StkPtr), NF
 
   Test the type of a stack cell, and if it fails jump to a side exit service
   request.
@@ -1579,28 +1571,28 @@ generating efficient compare-and-branch instruction sequences.
   Defines D as S0. May imply register-to-register moves at code generation
   time. Does not imply an incref or any other manipulation of S0.
 
-| IncRef, ND, S(Gen), E
+| IncRef, ND, S(Gen), NF
 
   If S0 is a refcounted type, increment its refcount.
 
-| IncRefCtx, ND, S(Ctx), E
+| IncRefCtx, ND, S(Ctx), NF
 
   If the Ctx in S0 is a $this pointer, IncRef it.
 
-| DecRefLoc<localId>, ND, S(FramePtr), E
+| DecRefLoc<localId>, ND, S(FramePtr), NF
 
   DecRef the local given by localId on the frame S0.
 
-| DecRefStack<T,offset>, ND, S(StkPtr), E
+| DecRefStack<T,offset>, ND, S(StkPtr), NF
 
   DecRef a value of type T at offset on the stack pointed to by S0.
 
-| DecRefThis, ND, S(FramePtr), E
+| DecRefThis, ND, S(FramePtr), NF
 
   DecRef the $this pointer in the ActRec S0, if it had one. Does nothing if
   there was a class context or null $this on the ActRec.
 
-| DecRef, ND, S(Gen), E|K|CRc
+| DecRef, ND, S(Gen), K|CRc
 
   Decrease the reference count of S0 by one, and call a destructor for types
   that require it if it goes to zero.
@@ -1611,12 +1603,12 @@ generating efficient compare-and-branch instruction sequences.
   strict subtype of BoxedCell, the DecRef must just decref it as if it were a
   BoxedCell.
 
-| DecRefMem, ND, S(PtrToGen) C(Int), E|CRc
+| DecRefMem, ND, S(PtrToGen) C(Int), CRc
 
   Decref the value pointed to by S0 at offset S1 (in bytes), calling any
   appropriate destructor if the refcount goes to zero.
 
-| DecRefNZ, ND, S(Gen), E|CRc
+| DecRefNZ, ND, S(Gen), CRc
 
   Decrease the reference count of S0 by one, do not check if it goes to zero.
   This instruction can be used for more efficient code when it is provable that
@@ -1631,11 +1623,11 @@ generating efficient compare-and-branch instruction sequences.
 13. Misc
 
 
-| DefFP, D(FramePtr), NA, E
+| DefFP, D(FramePtr), NA, NF
 
   Creates a temporary D representing the current vm frame pointer.
 
-| DefSP<stackOff>, D(StkPtr), S(FramePtr), E
+| DefSP<stackOff>, D(StkPtr), S(FramePtr), NF
 
   Creates a temporary D representing the current vm stack pointer. S0 is a
   pointer to the current frame. The 'stackOff' is the logical offset between S0
@@ -1689,79 +1681,79 @@ generating efficient compare-and-branch instruction sequences.
 14. Runtime helpers
 
 
-| VerifyParamCls, ND, S(Cls) S(Cls|Nullptr) C(Int) C(Int), E|Er
+| VerifyParamCls, ND, S(Cls) S(Cls|Nullptr) C(Int) C(Int), Er
 
   Verify parameter type for classes or traits. If S0 does not extend (if S1 is
   a class) or implement (if S1 is an interface) S1, this instruction will raise
   a recoverable fatal error describing the type mismatch.
 
-| VerifyParamCallable, ND, S(Gen) C(Int), E|Er
+| VerifyParamCallable, ND, S(Gen) C(Int), Er
 
   If S0 is not callable, as defined by the php function is_callable, this
   instruction will raise a recoverable fatal error describing the type
   mismatch.
 
-| VerifyParamFail, ND, C(Int), E|Er
+| VerifyParamFail, ND, C(Int), Er
 
   Assumes that parameter number S0 in the current function has failed its
   typehint and raises a recoverable fatal error describing the type mismatch.
 
-| VerifyRetCallable, ND, S(Gen), E|Er
+| VerifyRetCallable, ND, S(Gen), Er
 
   Verify a return type hint.
 
-| VerifyRetCls, ND, S(Cls) S(Cls|Nullptr) C(Int) S(Cell), E|Er
+| VerifyRetCls, ND, S(Cls) S(Cls|Nullptr) C(Int) S(Cell), Er
 
   Verify a return type hint.
 
-| VerifyRetFail, ND, S(Gen), E|Er
+| VerifyRetFail, ND, S(Gen), Er
 
   Failure to verify a return type hint.
 
-| RaiseUninitLoc<localId>, ND, S(Str), E|Er
+| RaiseUninitLoc<localId>, ND, S(Str), Er
 
   Raise a notice for an uninitialized local variable.
 
-| WarnNonObjProp, ND, NA, E|Er
+| WarnNonObjProp, ND, NA, Er
 
   Raise a warning for property access on a non-object base.
 
-| RaiseUndefProp, ND, S(Obj) CStr, E|Er
+| RaiseUndefProp, ND, S(Obj) CStr, Er
 
   Raise a notice for an undefined property named S1 on the class of S0.
 
-| RaiseError, ND, S(Str), E|T|Er
+| RaiseError, ND, S(Str), T|Er
 
   Raises a fatal error with the text in S0 as its message.
 
-| RaiseWarning, ND, S(Str), E|Er
+| RaiseWarning, ND, S(Str), Er
 
   Raises a warning with the text in S0 as its message.
 
-| RaiseNotice, ND, S(Str), E|Er
+| RaiseNotice, ND, S(Str), Er
 
   Raises a notice with the text in S0 as its message.
 
-| RaiseArrayIndexNotice, ND, S(Int), E|Er
+| RaiseArrayIndexNotice, ND, S(Int), Er
 
   Raises a notice that S0 is an undefined index for an array.
 
-| ClosureStaticLocInit, D(BoxedCell), CStr S(FramePtr) S(Cell), E
+| ClosureStaticLocInit, D(BoxedCell), CStr S(FramePtr) S(Cell), NF
 
   Get boxed value to initialize static local named S0 in frame S1, where S1
   must be either a closure or generatorFromClosure function. If the static
   local has not yet been initialized, its value will be set to S2.
 
-| StaticLocInitCached, ND, S(BoxedCell) S(Cell), E
+| StaticLocInitCached, ND, S(BoxedCell) S(Cell), NF
 
   Assuming S0 is an uninitialized static local RDS slot, initialize it by
   setting it to the value of S1.
 
-| PrintStr,  ND, S(Str),  E|Er|CRc
+| PrintStr,  ND, S(Str),  Er|CRc
 
-| PrintInt,  ND, S(Int),  E|Er|CRc
+| PrintInt,  ND, S(Int),  Er|CRc
 
-| PrintBool, ND, S(Bool), E|Er|CRc
+| PrintBool, ND, S(Bool), Er|CRc
 
   Print for various types.
 
@@ -1814,7 +1806,7 @@ generating efficient compare-and-branch instruction sequences.
   Has the effects of array_key_exists(S0, S1). Note that S0 does not need to be
   an array---if it is an Obj the ArrayAccess API will be used, etc.
 
-| ArrayIdx, D(Cell), S(Arr) S(Int,Str) S(Cell), E|PRc
+| ArrayIdx, D(Cell), S(Arr) S(Int,Str) S(Cell), PRc
 
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
   S2 is returned.
@@ -1825,7 +1817,7 @@ generating efficient compare-and-branch instruction sequences.
   for the input include all basic types, arrays and collections, and objects
   that implement IMemozieParam. Any other type will cause GetMemoKey to throw.
 
-| GenericIdx, D(Cell), S(Cell) S(Cell) S(Cell), E|PRc|Er
+| GenericIdx, D(Cell), S(Cell) S(Cell) S(Cell), PRc|Er
 
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
   S2 is returned. If S0 does not support array or indexed access S2 is
@@ -1852,13 +1844,13 @@ generating efficient compare-and-branch instruction sequences.
 
 | LdSSwitchDestFast, D(TCA), S(Gen), NF
 
-| LdSSwitchDestSlow, D(TCA), S(Gen), E|Er
+| LdSSwitchDestSlow, D(TCA), S(Gen), Er
 
   Load string switch destinations (two different compilation strategies).
 
 | InterpOne<T,bcOff,numPopped,numPushed>, D(StkPtr),
 |                                         S(StkPtr) S(FramePtr),
-|                                         E|Er
+|                                         Er
 
   Call the interpreter implementation function for one opcode. S0 and S1 are,
   respectively, the VM stack and frame pointers before this instruction. T is
@@ -1870,11 +1862,11 @@ generating efficient compare-and-branch instruction sequences.
 
 | InterpOneCF<T,bcOff,numPopped,numPushed>, D(StkPtr),
 |                                           S(StkPtr) S(FramePtr),
-|                                           T|E|Er
+|                                           T|Er
 
   Similar to InterpOne, but for instructions that may modify vmpc.
 
-| OODeclExists<kind>, D(Bool), S(Str) S(Bool), E|Er
+| OODeclExists<kind>, D(Bool), S(Str) S(Bool), Er
 
   Returns a bool indicating whether the class, interface, or trait named by S0
   exists. Invokes autoload if S1 is true.
@@ -1883,23 +1875,23 @@ generating efficient compare-and-branch instruction sequences.
 15. Generators & Closures
 
 
-| StClosureCtx, ND, S(Obj) S(Ctx,Nullptr), CRc|E
+| StClosureCtx, ND, S(Obj) S(Ctx,Nullptr), CRc
 
   Store the context represented by S1 into the closure object S0. S1 may be a
   Nullptr when there is no context (i.e. the closure is being used in a
   non-method).
 
-| StClosureFunc<func>, ND, S(Obj), E
+| StClosureFunc<func>, ND, S(Obj), NF
 
   Store the Func* clone that should be used for calling this closure into the
   closure object S0.
 
-| StClosureArg<offsetBytes>, ND, S(Obj) S(Gen), CRc|E
+| StClosureArg<offsetBytes>, ND, S(Obj) S(Gen), CRc
 
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.
 
-| CreateCont, D(Obj), S(FramePtr) C(Int) S(TCA,Nullptr) C(Int), E|PRc
+| CreateCont, D(Obj), S(FramePtr) C(Int) S(TCA,Nullptr) C(Int), PRc
 
   Create a Generator object and suspend the ActRec provided by S0 into its
   embedded ActRec, allocating S1 slots for locals/iterators. Set the native
@@ -1907,7 +1899,7 @@ generating efficient compare-and-branch instruction sequences.
 
 | CreateAFWH, D(Obj),
 |             S(FramePtr) C(Int) S(TCA,Nullptr) C(Int) S(Obj),
-|             E|Er|CRc|PRc
+|             Er|CRc|PRc
 
   Create an AsyncFunctionWaitHandle object and suspend the ActRec provided by
   S0 into its embedded ActRec, allocating S1 slots for locals/iterators.  Set
@@ -1918,7 +1910,7 @@ generating efficient compare-and-branch instruction sequences.
 
   Call c_StaticWaitHandle::CreateSucceeded.
 
-| AFWHPrepareChild, ND, S(FramePtr) S(Obj), E|Er
+| AFWHPrepareChild, ND, S(FramePtr) S(Obj), Er
 
   Prepare unfinished WaitableWaitHandle object specified by S1 for getting
   awaited by an AsyncFunctionWaitHandle object specified by its ActRec
@@ -1930,7 +1922,7 @@ generating efficient compare-and-branch instruction sequences.
 
 | ContEnter, D(StkPtr),
 |            S(StkPtr) S(FramePtr) S(FramePtr) S(TCA) C(Int),
-|            E
+|            NF
 
   Enters a generator body. S0 is the current stack pointer pointing to fully
   spilled stack, S1 is the current frame pointer, S2 is the generator frame
@@ -1938,34 +1930,34 @@ generating efficient compare-and-branch instruction sequences.
   and S4 is the bytecode offset in the caller to return to when the generator
   suspends or returns.
 
-| ContPreNext, ND, S(Obj) C(Bool), B|E
+| ContPreNext, ND, S(Obj) C(Bool), B
 
   Performs operations needed for the next() method of Generator object S0.
   If the generator is already running or finished, or it was not started yet
   and the S1 check-started flag is set, the branch B is taken. Otherwise,
   the generator is marked as running.
 
-| ContStartedCheck, ND, S(Obj), B|E
+| ContStartedCheck, ND, S(Obj), B
 
   Checks if the Generator object S0 has started, and if not branches to
   block B.
 
-| ContValid, D(Bool), S(Obj), E
+| ContValid, D(Bool), S(Obj), NF
 
   Return true if a generator is not done, false otherwise.
 
-| ContArIncKey, ND, S(FramePtr), E
+| ContArIncKey, ND, S(FramePtr), NF
 
   Special-case key update for generator, ActRec of which is S0, which
   increments the key of a generator if that generator's key is an Int.
   This will cause undefined behavior if the generator's key is not an Int.
 
-| ContArIncIdx, D(Int), S(FramePtr), E
+| ContArIncIdx, D(Int), S(FramePtr), NF
 
   Increment the internal index in the Generator in S0, and return the new index
   value.
 
-| ContArUpdateIdx, ND, S(FramePtr) S(Int), E
+| ContArUpdateIdx, ND, S(FramePtr) S(Int), NF
 
   Updates the internal index of generator with S1 if necessary, i.e. if S1
   is larger than the index. S0 is the pointer to the embedded ActRec.
@@ -1975,15 +1967,15 @@ generating efficient compare-and-branch instruction sequences.
   Loads the Generator object's ActRec, given a pointer to the generator
   object in S0.
 
-| LdContResumeAddr, D(TCA), S(Obj), E
+| LdContResumeAddr, D(TCA), S(Obj), NF
 
   Load the resume addr from the Generator in S0.
 
-| StContArState<state>, ND, S(FramePtr), E
+| StContArState<state>, ND, S(FramePtr), NF
 
   Change the state of the Generator object which has frame pointer S0.
 
-| StContArResume<offset>, ND, S(FramePtr) S(TCA), E
+| StContArResume<offset>, ND, S(FramePtr) S(TCA), NF
 
   Store the resume address S1 into the Generator whose ActRec is given by S0,
   marking the offset to resume at as `offset'.
@@ -1992,7 +1984,7 @@ generating efficient compare-and-branch instruction sequences.
 
   Loads 'value' from the Generator object ActRec of which is S0.
 
-| StContArValue, ND, S(FramePtr) S(Cell), E|CRc
+| StContArValue, ND, S(FramePtr) S(Cell), CRc
 
   Stores 'value' into the Generator object ActRec of which is S0. S1 is the
   new value.
@@ -2001,22 +1993,22 @@ generating efficient compare-and-branch instruction sequences.
 
   Loads 'key' from the Generator object ActRec of which is S0.
 
-| StContArKey, ND, S(FramePtr) S(Gen), E|CRc
+| StContArKey, ND, S(FramePtr) S(Gen), CRc
 
   Stores 'key' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-| StAsyncArSucceeded, ND, S(FramePtr), E
+| StAsyncArSucceeded, ND, S(FramePtr), NF
 
   Mark the AsyncFunctionWaitHandle object whose ActRec is given by S0 as
   STATE_SUCCEEDED.
 
-| StAsyncArResume<offset>, ND, S(FramePtr) S(TCA), E
+| StAsyncArResume<offset>, ND, S(FramePtr) S(TCA), NF
 
   Store the resume address S1 into the AsyncFunctionWaitHandle whose ActRec is
   given by S0, marking the offset to resume at as `offset'.
 
-| StAsyncArResult, ND, S(FramePtr) S(Cell), E|CRc
+| StAsyncArResult, ND, S(FramePtr) S(Cell), CRc
 
   Stores result into the AsyncFunctionWaitHandle object ActRec of which is S0.
   S1 is the value.
@@ -2026,12 +2018,12 @@ generating efficient compare-and-branch instruction sequences.
   Loads the first parent of the AsyncFunctionWaitHandle object ActRec of which
   is S0.
 
-| AFWHBlockOn, ND, S(FramePtr) S(Obj), E|CRc
+| AFWHBlockOn, ND, S(FramePtr) S(Obj), CRc
 
   Establish dependency between parent AsyncFunctionWaitHandle object, whose
   ActRec is given by S0, and child WaitableWaitHandle object referenced by S1.
 
-| ABCUnblock, ND, S(ABC), E
+| ABCUnblock, ND, S(ABC), NF
 
   Calls AsioBlockableChain::Unblock.
 
@@ -2058,56 +2050,56 @@ generating efficient compare-and-branch instruction sequences.
 
 16. Debugging, instrumentation, and profiling
 
-| IncStat, ND, C(Int) C(Int) C(Bool), E
+| IncStat, ND, C(Int) C(Int) C(Bool), NF
 
   Increment stat counter. S0 is the implementation defined stat counter index,
   S1 is the amount to increment the counter (may be negative), and S2 is a
   'force' flag. This opcode becomes a noop iff (force == false and runtime
   stats are not enabled) at translation time.
 
-| IncTransCounter, ND, NA, E
+| IncTransCounter, ND, NA, NF
 
   Increment a translation counter.  This is probably something related to TC
   print.
 
-| IncStatGrouped, ND, CStr CStr C(Int), E
+| IncStatGrouped, ND, CStr CStr C(Int), NF
 
   Adds the value S2 to the counter named S1, in the category S0.
 
-| IncProfCounter<TransID>, ND, NA, E
+| IncProfCounter<TransID>, ND, NA, NF
 
   Increment the profiling counter associated with translation TransID.
 
-| DbgAssertRefCount, ND, S(Counted,StaticStr,StaticArr), E
+| DbgAssertRefCount, ND, S(Counted,StaticStr,StaticArr), NF
 
   Assert that S0 has a valid refcount. S0 must be a type with a valid (counted
   or static) _count field. If S0's count is implausible then execute a hardware
   trap instruction (int3 on x64).
 
-| DbgAssertPtr, ND, S(PtrToGen), E
+| DbgAssertPtr, ND, S(PtrToGen), NF
 
   Assert that S0 points to plausible TypedValue. If the TypedValue is a type
   with a _count field, check that the count field is plausible using the same
   logic as DbgAssertRefCount. Internally this uses always_assert(); failures
   cause an abort (whatever always_assert does).
 
-| DbgAssertType<T>, ND, S(Cell), E
+| DbgAssertType<T>, ND, S(Cell), NF
 
   Assert that S0 is of type T at runtime. If the assertion fails, execution is
   aborted via a hardware exception.
 
-| DbgAssertRetAddr, ND, NA, E
+| DbgAssertRetAddr, ND, NA, NF
 
   Assert that the current hardware return address is the expected value. If the
   assertion fails, execution is aborted via a hardware exception.
 
-| RBTrace, ND, NA, E
+| RBTrace, ND, NA, NF
 
   Ring buffer tracing.
 
-| ZeroErrorLevel, D(Int), NA, E
+| ZeroErrorLevel, D(Int), NA, NF
 
-| RestoreErrorLevel, ND, S(Int), E
+| RestoreErrorLevel, ND, S(Int), NF
 
   Helper instructions for fast implementation of the PHP error silencing
   operator (@foo()).
@@ -2116,17 +2108,17 @@ generating efficient compare-and-branch instruction sequences.
 17. Iterators
 
 
-| IterInit<IterData>,   D(Bool), S(Arr,Obj) S(FramePtr), Er|E|CRc
+| IterInit<IterData>,   D(Bool), S(Arr,Obj) S(FramePtr), Er|CRc
 
-| IterInitK<IterData>,  D(Bool), S(Arr,Obj) S(FramePtr), Er|E|CRc
+| IterInitK<IterData>,  D(Bool), S(Arr,Obj) S(FramePtr), Er|CRc
 
-| WIterInit<IterData>,  D(Bool), S(Arr,Obj) S(FramePtr), Er|E|CRc
+| WIterInit<IterData>,  D(Bool), S(Arr,Obj) S(FramePtr), Er|CRc
 
-| WIterInitK<IterData>, D(Bool), S(Arr,Obj) S(FramePtr), Er|E|CRc
+| WIterInitK<IterData>, D(Bool), S(Arr,Obj) S(FramePtr), Er|CRc
 
-| MIterInit<T,IterData>,  D(Bool), S(BoxedCell) S(FramePtr), Er|E
+| MIterInit<T,IterData>,  D(Bool), S(BoxedCell) S(FramePtr), Er
 
-| MIterInitK<T,IterData>, D(Bool), S(BoxedCell) S(FramePtr), Er|E
+| MIterInitK<T,IterData>, D(Bool), S(BoxedCell) S(FramePtr), Er
 
   <IterData> consists of three indices, iterId, keyId and valId. iterId is
   the index of the iterator variable, keyId and valId are indices of local
@@ -2159,17 +2151,17 @@ generating efficient compare-and-branch instruction sequences.
   This instruction has the ConsumesRC property because it either decrements the
   reference count of S0 or stores a reference to S0 into the new iterator.
 
-| IterNext<IterData>,   D(Bool), S(FramePtr), Er|E
+| IterNext<IterData>,   D(Bool), S(FramePtr), Er
 
-| IterNextK<IterData>,  D(Bool), S(FramePtr), Er|E
+| IterNextK<IterData>,  D(Bool), S(FramePtr), Er
 
-| WIterNext<IterData>,  D(Bool), S(FramePtr), Er|E
+| WIterNext<IterData>,  D(Bool), S(FramePtr), Er
 
-| WIterNextK<IterData>, D(Bool), S(FramePtr), Er|E
+| WIterNextK<IterData>, D(Bool), S(FramePtr), Er
 
-| MIterNext<IterData>,  D(Bool), S(FramePtr), E
+| MIterNext<IterData>,  D(Bool), S(FramePtr), NF
 
-| MIterNextK<IterData>, D(Bool), S(FramePtr), E
+| MIterNextK<IterData>, D(Bool), S(FramePtr), NF
 
   <IterData> consists of three indices, iterId, keyId and valId. iterId is
   the index of the iterator variable, keyId and valId are indices of local
@@ -2189,20 +2181,20 @@ generating efficient compare-and-branch instruction sequences.
   MIterNext and MIterNextK instructions always copy the array element by
   reference.
 
-| IterFree,  ND, S(FramePtr), E
+| IterFree,  ND, S(FramePtr), NF
 
-| MIterFree, ND, S(FramePtr), E
+| MIterFree, ND, S(FramePtr), NF
 
   Free the iterator variable whose index is given by S1 in the stack frame
   pointed to by S0.
 
-| DecodeCufIter<iterId>, D(Bool), S(Arr,Obj,Str)  S(FramePtr), Er|E
+| DecodeCufIter<iterId>, D(Bool), S(Arr,Obj,Str)  S(FramePtr), Er
 
   Decode S0 as a callable, and write the decoded values to the iterator
   specified by IterId. Returns true iff it successfully decoded the callable.
   Does not raise warnings, or throw exceptions.
 
-| CIterFree<iterId>, ND, S(FramePtr), E
+| CIterFree<iterId>, ND, S(FramePtr), NF
 
   Free the iterator variable whose index is given by IterId in the stack frame
   pointed to by S0.
@@ -2257,7 +2249,7 @@ SetProp will fail if the base is not a subtype of {Obj|Null}.
 Any instructions that take a pointer to an MInstrState struct use the various
 fields of that struct for holding intermediate values.
 
-| BaseG, D(PtrToRMembCell), S(Str), E|Er
+| BaseG, D(PtrToRMembCell), S(Str), Er
 
   Get a base from global named S0.
 
@@ -2266,77 +2258,77 @@ fields of that struct for holding intermediate values.
   calls.)  If it is not a defining BaseG it can also return the
   init_null_variant, so for now it returns a PtrToRMembCell.
 
-| PropX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), E|Er
+| PropX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), Er
 
   Lookup intermediate property in S0, with key S1.
 
-|STK PropDX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), MProp|E|Er
+|STK PropDX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), MProp|Er
 
   Like PropX, but used for intermediate element lookups that may modify the
   base.
 
-| CGetProp, D(Cell), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), E|PRc|Er
+| CGetProp, D(Cell), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), PRc|Er
 
   Get property with key S1 from S0.
 
 |STK VGetProp, D(BoxedCell),
 |              S(Obj,PtrToGen) S(Cell) S(PtrToMISGen),
-|              MProp|E|PRc|Er
+|              MProp|PRc|Er
 
   Get property with key S1 from base S0 as a reference.
 
 |STK BindProp, ND,
 |              S(Obj,PtrToGen) S(Cell) S(BoxedCell) S(PtrToMISGen),
-|              MProp|E|Er
+|              MProp|Er
 
   Bind property with key S1 in base S0 to the reference in S2.
 
-|STK SetProp, ND, S(Obj,PtrToGen) S(Cell) S(Cell), MProp|E|Er
+|STK SetProp, ND, S(Obj,PtrToGen) S(Cell) S(Cell), MProp|Er
 
   Set property with key S1 in S0 to S2.
 
-| UnsetProp, ND, S(Obj,PtrToGen) S(Cell), E|Er
+| UnsetProp, ND, S(Obj,PtrToGen) S(Cell), Er
 
   Unset an object property.
 
 |STK SetOpProp<op>, D(Cell),
 |                   S(Obj,PtrToGen) S(Cell) S(Cell) S(PtrToMISGen),
-|                   MProp|E|PRc|Er
+|                   MProp|PRc|Er
 
   Set op propery with key S1 in base S0, using S2 as the right hand side.
 
 |STK IncDecProp<op>, D(Cell),
 |                    S(Obj,PtrToGen) S(Cell) S(PtrToMISGen),
-|                    MProp|E|PRc|Er
+|                    MProp|PRc|Er
 
   Increment/decrement property with key S1 in base S0.
 
-| EmptyProp, D(Bool), S(Obj,PtrToGen) S(Cell), E|Er
+| EmptyProp, D(Bool), S(Obj,PtrToGen) S(Cell), Er
 
   Returns true iff the property with key S1 in base S0 is empty.
 
-| IssetProp, D(Bool), S(Obj,PtrToGen) S(Cell), E|Er
+| IssetProp, D(Bool), S(Obj,PtrToGen) S(Cell), Er
 
   Returns true iff the property with key S1 in base S0 is set.
 
-| ElemX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), E|Er
+| ElemX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), Er
 
   Get intermediate element with key S1 from base S0. The base will not be
   modified.
 
-| ElemArray, D(PtrToMemGen), S(PtrToGen) S(Int,Str), E|Er
+| ElemArray, D(PtrToMemGen), S(PtrToGen) S(Int,Str), Er
 
-| ElemArrayW, D(PtrToMemGen), S(PtrToGen) S(Int,Str), E|Er
+| ElemArrayW, D(PtrToMemGen), S(PtrToGen) S(Int,Str), Er
 
   Similar to ElemX, but assumes the base S0 is an array and the key S1 is an
   int/str.  The ElemArrayW version is for Warn member instrs.
 
-|STK ElemDX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|E|Er
+|STK ElemDX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base.
 
-|STK ElemUX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|E|Er
+|STK ElemUX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
@@ -2349,38 +2341,38 @@ fields of that struct for holding intermediate values.
 
   Get string representing character at position S1 from base string S0.
 
-| MapGet, D(Cell), S(Obj) S(Int,Str), E|PRc|Er
+| MapGet, D(Cell), S(Obj) S(Int,Str), PRc|Er
 
   Get element with key S1 from base S0.
 
-| CGetElem, D(Cell), S(PtrToGen) S(Cell) S(PtrToMISGen), E|PRc|Er
+| CGetElem, D(Cell), S(PtrToGen) S(Cell) S(PtrToMISGen), PRc|Er
 
   Get element with key S1 from S0.
 
-|STK VGetElem, D(BoxedCell), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|E|PRc|Er
+|STK VGetElem, D(BoxedCell), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|PRc|Er
 
   Get element with key S1 from base S0 as a reference.
 
-|STK BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell) S(PtrToMISGen), MElem|E|Er
+|STK BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell) S(PtrToMISGen), MElem|Er
 
   Bind element with key S1 in base S0 to the reference S2.
 
-| ArraySet, D(Arr), S(Arr) S(Int,Str) S(Cell), E|PRc|CRc|K|Er
+| ArraySet, D(Arr), S(Arr) S(Int,Str) S(Cell), PRc|CRc|K|Er
 
   Set element with key S1 in S0 to S2. The dest will be a new Array that should
   replace S0.
 
-| ArraySetRef, ND, S(Arr) S(Int,Str) S(Cell) S(BoxedCell), E|CRc|K|Er
+| ArraySetRef, ND, S(Arr) S(Int,Str) S(Cell) S(BoxedCell), CRc|K|Er
 
   Like ArraySet, but for binding operations on the array. The parameter in S3
   must point to a RefData with an array type when this instruction is executed,
   and it must be the same array that is in S0.
 
-| MapSet, ND, S(Obj) S(Int,Str) S(Cell), E|Er
+| MapSet, ND, S(Obj) S(Int,Str) S(Cell), Er
 
   Set element with key S1 in S0 to S2.
 
-|STK SetElem, DSetElem, S(PtrToGen) S(Cell) S(Cell), MElem|E|PRc|Er
+|STK SetElem, DSetElem, S(PtrToGen) S(Cell) S(Cell), MElem|PRc|Er
 
   Set element with key S1 in S0 to S2. SetElem returns a Nullptr in the common
   case, where the logical result of the hhbc SetM is its right hand side. In
@@ -2393,47 +2385,47 @@ fields of that struct for holding intermediate values.
 
 |STK SetWithRefElem, ND,
 |                    S(PtrToGen) S(Cell) S(PtrToGen) S(PtrToMISGen),
-|                    MElem|E|Er
+|                    MElem|Er
 
   Set element with key S1 in S0 to S2.
 
-|STK UnsetElem, ND, S(PtrToGen) S(Cell), MElem|E|Er
+|STK UnsetElem, ND, S(PtrToGen) S(Cell), MElem|Er
 
   Unsets the element at key S1 in the base S0.
 
 |STK SetOpElem<op>, D(Cell),
 |                   S(PtrToGen) S(Cell) S(Cell) S(PtrToMISGen),
-|                   MElem|E|PRc|Er
+|                   MElem|PRc|Er
 
   Set op elem with key S1 in base S0, using S2 as the right hand side.
 
 |STK IncDecElem, D(Cell),
 |                S(PtrToGen) S(Cell) S(PtrToMISGen),
-|                MElem|E|PRc|Er
+|                MElem|PRc|Er
 
   Increment/decrement element with key S1 in base S0.
 
-|STK SetNewElem, ND, S(PtrToGen) S(Cell), MElem|E|Er
+|STK SetNewElem, ND, S(PtrToGen) S(Cell), MElem|Er
 
   Append the value in S1 to S0.
 
-|STK SetNewElemArray, ND, S(PtrToGen) S(Cell), MElem|E|Er
+|STK SetNewElemArray, ND, S(PtrToGen) S(Cell), MElem|Er
 
   Append the value in S1 to S0, where S0 must be a pointer to an array.
 
 |STK SetWithRefNewElem, ND,
 |                       S(PtrToGen) S(PtrToGen) S(PtrToMISGen),
-|                       MElem|E|Er
+|                       MElem|Er
 
   AppendWithRef the value in S1 to S0.
 
 |STK BindNewElem, ND,
 |                 S(PtrToGen) S(BoxedCell) S(PtrToMISGen),
-|                 MElem|E|Er
+|                 MElem|Er
 
   Append the reference in S1 to S0.
 
-| ArrayIsset, D(Bool), S(Arr) S(Int,Str), E|Er
+| ArrayIsset, D(Bool), S(Arr) S(Int,Str), Er
 
   Returns true iff the element at key S1 in the base S0 is set.
 
@@ -2441,66 +2433,66 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the string S0 has a character at position S1.
 
-| VectorIsset, D(Bool), S(Obj) S(Int), E
+| VectorIsset, D(Bool), S(Obj) S(Int), NF
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| PairIsset, D(Bool), S(Obj) S(Int), E
+| PairIsset, D(Bool), S(Obj) S(Int), NF
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| MapIsset, D(Bool), S(Obj) S(Int,Str), E
+| MapIsset, D(Bool), S(Obj) S(Int,Str), NF
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| IssetElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToMISGen), E|Er
+| IssetElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToMISGen), Er
 
   Returns true iff the element at key S1 in S0 is set.
 
-| EmptyElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToMISGen), E|Er
+| EmptyElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToMISGen), Er
 
   Returns true iff the element at key S1 in S0 is set and not equal (as defined
   by the hhbc Eq instruction) to false.
 
-| CheckBounds, ND, S(Int) S(Int), E|Er
+| CheckBounds, ND, S(Int) S(Int), Er
 
   Checks that the index in S0 is between 0 (included) and the values in S1
   (excluded). Throws if out of bounds.
 
-| ProfileArray, ND, S(Arr), E
+| ProfileArray, ND, S(Arr), NF
 
   Profile type of array S0 (i.e. whether it is packed or mixed).
 
-| ProfileStr<key>, ND, S(PtrToGen), E
+| ProfileStr<key>, ND, S(PtrToGen), NF
 
   Profile exact type of the value pointed to by S0, which must be known to
   point to a string at the time this instruction runs.
 
-| CheckPackedArrayBounds, ND, AK(Packed) S(Int), B|E
+| CheckPackedArrayBounds, ND, AK(Packed) S(Int), B
 
   Checks that the index in S1 is within the bounds of the packed array in S0.
   Branches to B if the index is out of bounds.
 
-| CheckTypePackedArrayElem<T>, ND, AK(Packed) S(Int), B|E
+| CheckTypePackedArrayElem<T>, ND, AK(Packed) S(Int), B
 
   If the array element at S0[S1] is not type T, take the branch.
 
-| IsPackedArrayElemNull, D(Bool), AK(Packed) S(Int), E
+| IsPackedArrayElemNull, D(Bool), AK(Packed) S(Int), NF
 
   Returns true if the element at index S1 of the packed array in S0 is not
   null.
 
-| LdPackedArrayElem<T>, DArrElem, AK(Packed) S(Int), E
+| LdPackedArrayElem<T>, DArrElem, AK(Packed) S(Int), NF
 
   Loads the element of the packed array in S0 at index S1. If the type param T
   is specified, the destination type intersects it with whatever we'd know from
   the type of S0.
 
-| LdVectorSize, D(Int), S(Obj), E
+| LdVectorSize, D(Int), S(Obj), NF
 
   Returns the size of the given Vector in S0.
 
-| VectorDoCow, ND, S(Obj), E
+| VectorDoCow, ND, S(Obj), NF
 
   Triggers a copy on write for a Vector that has a live ImmVector sharing
   the same copy of the elements.
@@ -2529,17 +2521,17 @@ fields of that struct for holding intermediate values.
 
 19. Exception/unwinding support
 
-| BeginCatch, ND, NA, E
+| BeginCatch, ND, NA, NF
 
   Marks the beginning of a catch region. Exact behavior is implementation and
   architecture specific.
 
-| EndCatch, ND, S(FramePtr) S(StkPtr), E|T
+| EndCatch, ND, S(FramePtr) S(StkPtr), T
 
   Marks the end of a catch region and returns control to the unwinder. Exact
   behavior is implementation and architecture specific.
 
-| UnwindCheckSideExit, ND, S(FramePtr) S(StkPtr), B|E
+| UnwindCheckSideExit, ND, S(FramePtr) S(StkPtr), B
 
   Branches to B if the currently executing catch region should return control
   to the unwinder rather than side exiting.  Used to control behavior in catch
@@ -2549,7 +2541,7 @@ fields of that struct for holding intermediate values.
 
   Loads the value contained by the current unwinder exception.
 
-| DeleteUnwinderException, ND, NA, E
+| DeleteUnwinderException, ND, NA, NF
 
   Deletes the current unwinder exception.
 

@@ -44,7 +44,6 @@ TRACE_SET_MOD(hhir);
 
 #define NF     0
 #define C      CanCSE
-#define E      Essential
 #define Er     MayRaiseError
 #define PRc    ProducesRC
 #define CRc    ConsumesRC

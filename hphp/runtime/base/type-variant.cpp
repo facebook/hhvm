@@ -288,7 +288,7 @@ const RawDestructor g_destructors[] = {
 Variant::~Variant() {
   tvRefcountedDecRef(asTypedValue());
   if (debug) {
-    memset(this, 0x7b, sizeof(*this));
+    memset(this, kTVTrashFill2, sizeof(*this));
   }
 }
 

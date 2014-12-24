@@ -475,10 +475,11 @@ bool canDCE(IRInstruction* inst) {
   case UnwindCheckSideExit:
   case DeleteUnwinderException:
   case CountBytecode:
+  case DbgTrashStk:
+  case DbgTrashFrame:
     return false;
   }
   not_reached();
-  return false;
 }
 
 /* DceFlags tracks the state of one instruction during dead code analysis. */

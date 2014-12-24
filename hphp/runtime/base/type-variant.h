@@ -1058,7 +1058,7 @@ public:
   ~VarNR() {
     if (debug) {
       checkRefCount();
-      memset(this, 0x7b, sizeof(*this));
+      memset(this, kTVTrashFill2, sizeof(*this));
     }
   }
 

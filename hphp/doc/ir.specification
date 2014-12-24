@@ -1389,6 +1389,16 @@ To string conversions:
 
   Store S1 to the stack pointed to by S0, at a given offset (in cells).
 
+| DbgTrashStk<offset>, ND, S(StkPtr), NF
+
+  For debugging purposes.  Store kTVTrashFillStk to the stack slot pointed to
+  by S0, at a given offset (in cells).
+
+| DbgTrashFrame<offset>, ND, S(StkPtr), NF
+
+  For debugging purposes.  Store kTVTrashFillFrame to kNumActRecCells stack
+  slots starting at the offset (in cells), and going toward higher memory
+  addresses.
 
 11. Trace exits
 

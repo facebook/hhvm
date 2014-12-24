@@ -262,6 +262,8 @@ PUNT_OPCODE(ArrayIdx)
 PUNT_OPCODE(CountArray)
 PUNT_OPCODE(LdColArray)
 
+PUNT_OPCODE(DbgTrashStk)
+PUNT_OPCODE(DbgTrashFrame)
 PUNT_OPCODE(ProfileStr)
 PUNT_OPCODE(ConvArrToBool)
 PUNT_OPCODE(ConvDblToBool)

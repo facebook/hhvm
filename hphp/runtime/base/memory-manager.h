@@ -291,8 +291,11 @@ constexpr size_t kSmartPreallocBytesLimit = size_t{1} << 9;
  * debugging.  There's also 0x7a for junk-filling some cases of
  * ex-TypedValue memory (evaluation stack).
  */
-constexpr char kSmartFreeFill = 0x6a;
-constexpr char kTVTrashFill = 0x7a;
+constexpr char kSmartFreeFill   = 0x6a;
+constexpr char kTVTrashFill     = 0x7a; // used by interpreter
+constexpr char kTVTrashFill2    = 0x7b; // used by smart pointer dtors
+constexpr char kTVTrashJITStk   = 0x7c; // used by the JIT for stack slots
+constexpr char kTVTrashJITFrame = 0x7d; // used by the JIT for stack frames
 constexpr uintptr_t kSmartFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 

@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ALOCATION_ANALYSIS_H_
-#define incl_HPHP_ALOCATION_ANALYSIS_H_
+#ifndef incl_HPHP_ALIAS_ANALYSIS_H_
+#define incl_HPHP_ALIAS_ANALYSIS_H_
 
 #include <bitset>
 #include <string>
@@ -72,6 +72,12 @@ struct AliasAnalysis {
   jit::vector<ALocMeta> locations_inv;
 
   /*
+   * Some pure store or load instructions affect ranges of stack slots.  If
+   * we've assigned all of them ids, they'll have an entry in this map.
+   */
+  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stack_ranges;
+
+  /*
    * Short-hand to find an alias class in the locations map, or get folly::none
    * if the alias class wasn't assigned an ALocMeta structure.
    */
@@ -84,6 +90,15 @@ struct AliasAnalysis {
   ALocBits all_props;
   ALocBits all_elemIs;
   ALocBits all_frame;
+  ALocBits all_stack;
+
+  /*
+   * Sets of alias classes that are used by must_alias.
+   *
+   * Note: right now this is only populated for stack locations.  You will have
+   * to add more to collect_aliases if you have a new use case.
+   */
+  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> must_alias_map;
 
   /*
    * Return a set of locations that we've assigned ids to that may be affected
@@ -98,12 +113,19 @@ struct AliasAnalysis {
    * to determine what it may alias.
    *
    * The precondition is just because you should generally be using the
-   * conflict set in ALocMeta if we have one for `loc'---it'll be much less
+   * conflict set in ALocMeta if we have one for `acls'---it'll be much less
    * conservative.
    *
    * Pre: find(acls) == folly::none
    */
   ALocBits may_alias(AliasClass acls) const;
+
+  /*
+   * Return a set of locations that we've assigned ids to that must be
+   * contained in `acls'.  This function will conservatively return an empty
+   * set.
+   */
+  ALocBits must_alias(AliasClass acls) const;
 
   /*
    * Map from frame SSATmp ids to the location bits for all of the frame's
@@ -143,6 +165,5 @@ std::string show(ALocBits);
 //////////////////////////////////////////////////////////////////////
 
 }}
-
 
 #endif

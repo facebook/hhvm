@@ -32,9 +32,19 @@ struct IRInstruction;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Has the effect of possibly loading from a location, and possibly storing to
- * another.  Either may be empty locations, we don't know the value potentially
- * stored, and the instruction may have other non-pure side effects.
+ * Has the effects of possibly loading from one alias class, possibly storing
+ * to another.  The instruction may also have other side-effects, and generally
+ * can't be either removed or moved based on load-store analysis only.
+ *
+ * A note about instructions that can re-enter the VM:
+ *
+ *   If an instruction can re-enter, it can both read and write to the eval
+ *   stack below some depth.  However, it can only legally read those slots if
+ *   it writes them first, so we only need to include them in the may-store
+ *   set, not the may-load set.  This is sufficient to ensure those stack
+ *   locations don't have upward-exposed uses through a potentially re-entering
+ *   instruction, and also to ensure we don't consider those locations
+ *   available for load elimination after the instruction.
  */
 struct MayLoadStore   { AliasClass loads; AliasClass stores; };
 
@@ -58,31 +68,71 @@ struct PureStore    { AliasClass dst; SSATmp* value; };
 struct PureStoreNT  { AliasClass dst; SSATmp* value; };
 
 /*
- * Iterator instructions are special enough that they just have their own
- * top-level memory effect type.  In general, they can both read and write to
- * the relevant locals, and can read and write anything non-local.
+ * Spilling pre-live ActRecs are somewhat unusual, but effectively still just
+ * pure stores.  They store to a range of stack slots, and don't store a PHP
+ * value, so they get their own branch of the union.
  */
-struct IterEffects    { SSATmp* fp; uint32_t id; };
-struct IterEffects2   { SSATmp* fp; uint32_t id1; uint32_t id2; };
+struct PureSpillFrame { AliasClass dst; };
 
 /*
- * Calls are somewhat special enough that they get a top-level effect.  The
- * destroys_locals flag indicates whether the call can change locals in the
- * calling frame (e.g. extract() or parse_str().)
+ * Iterator instructions are special enough that they just have their own
+ * top-level memory effect type.  In general, they can both read and write to
+ * the relevant locals, and can re-enter the VM and read and write anything on
+ * the heap.  The `killed' set is an AliasClass that is killed by virtue of the
+ * potential VM re-entry (i.e. the eval stack below some depth).
  */
-struct CallEffects    { bool destroys_locals; };
+struct IterEffects    { SSATmp* fp; uint32_t id; AliasClass killed; };
+struct IterEffects2   { SSATmp* fp;
+                        uint32_t id1;
+                        uint32_t id2;
+                        AliasClass killed; };
+
+/*
+ * Calls are somewhat special enough that they get a top-level effect.
+ *
+ * The `destroys_locals' flag indicates whether the call can change locals in
+ * the calling frame (e.g. extract() or parse_str().)
+ *
+ * The `killed' set are locations that cannot be read by this instruction
+ * unless it writes to them first, and which it generlaly may write to.  (This
+ * is used for killing stack slots below the call depth.)
+ */
+struct CallEffects    { bool destroys_locals; AliasClass killed; };
 
 /*
  * ReturnEffects is a real return from the php function.  It does not cover
  * things like suspending a resumable or "returning" from an inlined function.
+ * But it may cover returning from a suspended resumable.
+ *
+ * All locals may be considered dead after ReturnEffects.  However, the stack
+ * is a little more complicated.  The `killed' set is an additional alias class
+ * of locations that cannot be read after the return, which is used to provide
+ * the range of stack that can be considered dead.  In normal functions it will
+ * effectively be AStackAny, but in generators a return may still leave part of
+ * the eval stack alive for the caller.
  */
-struct ReturnEffects  {};
+struct ReturnEffects  { AliasClass killed; };
+
+/*
+ * ExitEffects contains two sets of alias classes, representing locations that
+ * are considered live exiting the region, and locations that will never be
+ * read (unless written again) after exiting the region (`kill').  Various
+ * instructions that exit regions populate these in different ways.
+ *
+ * If there is an overlap between `live' and `kill', then `kill' takes
+ * precedence for locations that are contained in both (i.e. those locations
+ * should be treated as actually killed).
+ */
+struct ExitEffects    { AliasClass live; AliasClass kill; };
 
 /*
  * InterpOne instructions carry a bunch of information about how they may
  * affect locals.  It's special enough that we just pass it through.
+ *
+ * We don't make use of it in consumers of this module yet, except that the
+ * `killed' set can't have upward exposed uses.
  */
-struct InterpOneEffects {};
+struct InterpOneEffects { AliasClass killed; };
 
 /*
  * An instruction that does KillFrameLocals prevents any upward exposed uses of
@@ -109,11 +159,13 @@ using MemEffects = boost::variant< MayLoadStore
                                  , PureLoad
                                  , PureStore
                                  , PureStoreNT
+                                 , PureSpillFrame
                                  , KillFrameLocals
                                  , IterEffects
                                  , IterEffects2
                                  , CallEffects
                                  , ReturnEffects
+                                 , ExitEffects
                                  , InterpOneEffects
                                  , IrrelevantEffects
                                  , UnknownEffects

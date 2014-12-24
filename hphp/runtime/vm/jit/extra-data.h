@@ -987,6 +987,8 @@ X(ContEnter,                    ContEnterData);
 X(LdARFuncPtr,                  StackOffset);
 X(EndCatch,                     StackOffset);
 X(AdjustSP,                     StackOffset);
+X(DbgTrashStk,                  StackOffset);
+X(DbgTrashFrame,                StackOffset);
 
 #undef X
 

@@ -78,6 +78,7 @@ private:
   enum class Width { Value, Full };
   void emitStore(Vptr dst, SSATmp* src, Vloc src_loc, Width);
   void emitStoreTypedValue(Vptr dst, SSATmp* src, Vloc src_loc);
+  void emitTrashTV(Vreg, int32_t, char fillByte);
 
   void emitLoad(SSATmp* dst, Vloc dstLoc, Vptr base);
   void emitLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref);

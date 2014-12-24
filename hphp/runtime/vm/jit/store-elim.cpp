@@ -36,7 +36,7 @@
 
 namespace HPHP { namespace jit {
 
-TRACE_SET_MOD(hhir_meme);
+TRACE_SET_MOD(hhir_store);
 
 namespace {
 
@@ -57,7 +57,6 @@ struct Global {
     , poBlockList(poSortCfg(unit))
     , ainfo(collect_aliases(unit, poBlockList))
     , blockStates(unit, BlockState{})
-    , mainFp{unit.entry()->begin()->dst()}
   {}
 
   IRUnit& unit;
@@ -67,10 +66,6 @@ struct Global {
   // Block states are indexed by block->id().  These are only meaningful after
   // we do dataflow.
   StateVector<Block,BlockState> blockStates;
-
-  // Keep the main FP so we can easily find killed locals on it for
-  // ReturnEffects.
-  const SSATmp* const mainFp;
 };
 
 // Block-local environment.
@@ -88,8 +83,37 @@ bool isDead(Local& env, folly::Optional<uint32_t> bit) {
   return bit && !env.live[*bit];
 }
 
+bool isDeadSet(Local& env, const ALocBits& bits) {
+  return (env.live & bits).none();
+}
+
 void removeDead(Local& env, IRInstruction& inst) {
   FTRACE(4, "      dead (removed)\n");
+
+  const bool debug_store_removal = debug;
+  if (debug_store_removal) {
+    switch (inst.op()) {
+    case StStk:
+      env.global.unit.replace(
+        &inst,
+        DbgTrashStk,
+        StackOffset { inst.extra<StStk>()->offset },
+        inst.src(0)
+      );
+      return;
+    case SpillFrame:
+      env.global.unit.replace(
+        &inst,
+        DbgTrashFrame,
+        StackOffset { inst.extra<SpillFrame>()->spOffset },
+        inst.src(0)
+      );
+      return;
+    default:
+      break;
+    }
+  }
+
   inst.block()->erase(&inst);
 }
 
@@ -122,18 +146,23 @@ void addKill(Local& env, folly::Optional<uint32_t> bit) {
   env.live[*bit] = 0;
 }
 
+void addKillSet(Local& env, const ALocBits& bits) {
+  FTRACE(4, "      kill: {}\n", show(bits));
+  env.kill |= bits;
+  env.gen  &= ~bits;
+  env.live &= ~bits;
+}
+
 void killFrame(Local& env, const SSATmp* fp) {
   auto const killSet = env.global.ainfo.per_frame_bits[fp];
-  FTRACE(4, "      kill: {}\n", show(killSet));
-  env.kill |= killSet;
-  env.gen  &= ~killSet;
-  env.live &= ~killSet;
+  addKillSet(env, killSet);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void load(Local& env, AliasClass acls) {
-  if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
+  acls = canonicalize(acls);
+  if (auto const meta = env.global.ainfo.find(acls)) {
     addGen(env, meta->index);
     addGenSet(env, meta->conflicts);
     return;
@@ -156,16 +185,26 @@ void visit(Local& env, IRInstruction& inst) {
     effects,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { addAllGen(env); },
-    [&] (InterpOneEffects)  { addAllGen(env); },
     [&] (PureLoad l)        { load(env, l.src); },
-    [&] (MayLoadStore l)    { load(env, l.loads); },
     [&] (KillFrameLocals l) { killFrame(env, l.fp); },
+    [&] (MayLoadStore l)    { load(env, l.loads); },
 
-    [&] (ReturnEffects) {
-      // Locations other than the frame (e.g. object properties and whatnot)
-      // are live on a function return.
+    [&] (InterpOneEffects m) {
       addAllGen(env);
-      killFrame(env, env.global.mainFp);
+      addKillSet(env, env.global.ainfo.must_alias(canonicalize(m.killed)));
+    },
+
+    [&] (ReturnEffects l) {
+      // Locations other than the frame and stack (e.g. object properties and
+      // whatnot) are live on a function return.
+      addAllGen(env);
+      addKillSet(env, env.global.ainfo.all_frame);
+      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.killed)));
+    },
+
+    [&] (ExitEffects l) {
+      load(env, l.live);
+      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.kill)));
     },
 
     /*
@@ -174,18 +213,21 @@ void visit(Local& env, IRInstruction& inst) {
      * reading any local, on any frame---if it enters the unwinder it could
      * read them.
      */
-    [&] (CallEffects) { addAllGen(env); },
+    [&] (CallEffects l) {
+      addAllGen(env);
+      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.killed)));
+    },
 
-    // Iterator effects can possibly redefine the local, but don't definitely
-    // do so, so they add to GEN but not KILL.
     [&] (IterEffects l) {
       load(env, AFrame { l.fp, l.id });
-      load(env, ANonFrame);
+      load(env, AHeapAny);
+      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.killed)));
     },
     [&] (IterEffects2 l) {
       load(env, AFrame { l.fp, l.id1 });
       load(env, AFrame { l.fp, l.id2 });
-      load(env, ANonFrame);
+      load(env, AHeapAny);
+      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.killed)));
     },
 
     [&] (PureStore l) {
@@ -194,6 +236,18 @@ void visit(Local& env, IRInstruction& inst) {
         removeDead(env, inst);
       }
       addKill(env, bit);
+    },
+
+    [&] (PureSpillFrame l) {
+      auto const it = env.global.ainfo.stack_ranges.find(canonicalize(l.dst));
+      if (it == end(env.global.ainfo.stack_ranges)) return;
+      // If all the bits corresponding to the stack range are dead, we can
+      // eliminate this instruction.  We can also count all of them as
+      // redefined.
+      if (isDeadSet(env, it->second)) {
+        removeDead(env, inst);
+      }
+      addKillSet(env, it->second);
     },
 
     /*
@@ -264,7 +318,7 @@ void optimizeStores(IRUnit& unit) {
     // to argument locals.
     return;
   }
-  PassTracer tracer{&unit, Trace::hhir_meme, "optimizeStores"};
+  PassTracer tracer{&unit, Trace::hhir_store, "optimizeStores"};
 
   // This isn't required for correctness, but it may allow removing stores that
   // otherwise we would leave alone.

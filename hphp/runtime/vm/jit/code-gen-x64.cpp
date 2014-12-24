@@ -3362,6 +3362,35 @@ void CodeGenerator::cgStStk(IRInstruction* inst) {
   emitStore(spReg[offset], inst->src(1), srcLoc(inst, 1), Width::Full);
 }
 
+// Fill the entire 16-byte space for a TypedValue with trash.  Note: it will
+// clobber the Aux area of a TypedValueAux.
+void CodeGenerator::emitTrashTV(Vreg ptr, int32_t offset, char fillByte) {
+  auto& v = vmain();
+  int32_t trash32;
+  memset(&trash32, fillByte, sizeof trash32);
+  static_assert(sizeof(TypedValue) == 16, "");
+  v << storeli{trash32, ptr[offset + 0x0]};
+  v << storeli{trash32, ptr[offset + 0x4]};
+  v << storeli{trash32, ptr[offset + 0x8]};
+  v << storeli{trash32, ptr[offset + 0xc]};
+}
+
+void CodeGenerator::cgDbgTrashStk(IRInstruction* inst) {
+  emitTrashTV(
+    srcLoc(inst, 0).reg(),
+    cellsToBytes(inst->extra<DbgTrashStk>()->offset),
+    kTVTrashJITStk
+  );
+}
+
+void CodeGenerator::cgDbgTrashFrame(IRInstruction* inst) {
+  auto const reg = srcLoc(inst, 0).reg();
+  auto const offset = cellsToBytes(inst->extra<DbgTrashFrame>()->offset);
+  for (auto i = 0; i < kNumActRecCells; ++i) {
+    emitTrashTV(reg, offset + cellsToBytes(i), kTVTrashJITFrame);
+  }
+}
+
 void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   auto const func = getFunc(inst->marker());
   auto const builtinFuncPtr = func->builtinFuncPtr();

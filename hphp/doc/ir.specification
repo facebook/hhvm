@@ -1517,51 +1517,6 @@ generating efficient compare-and-branch instruction sequences.
   Test the condition based on the Jmp* op of similar name, and then emit a pair
   of smashable jumps to a REQ_BIND_JMPCC_FIRST service request.
 
-| SideExitJmpGt,                    ND, S(Gen) S(Gen),                     NF
-
-| SideExitJmpGte,                   ND, S(Gen) S(Gen),                     NF
-
-| SideExitJmpLt,                    ND, S(Gen) S(Gen),                     NF
-
-| SideExitJmpLte,                   ND, S(Gen) S(Gen),                     NF
-
-| SideExitJmpEq,                    ND, S(Gen) S(Gen),                     NF
-
-| SideExitJmpNeq,                   ND, S(Gen) S(Gen),                     NF
-
-| SideExitJmpGtInt,                 ND, S(Int) S(Int),                     NF
-
-| SideExitJmpGteInt,                ND, S(Int) S(Int),                     NF
-
-| SideExitJmpLtInt,                 ND, S(Int) S(Int),                     NF
-
-| SideExitJmpLteInt,                ND, S(Int) S(Int),                     NF
-
-| SideExitJmpEqInt,                 ND, S(Int) S(Int),                     NF
-
-| SideExitJmpNeqInt,                ND, S(Int) S(Int),                     NF
-
-| SideExitJmpSame,                  ND, S(Int) S(Int),                     NF
-
-| SideExitJmpNSame,                 ND, S(Int) S(Int),                     NF
-
-| SideExitJmpZero,                  ND, S(Int,Bool),                       NF
-
-| SideExitJmpNZero,                 ND, S(Int,Bool),                       NF
-
-  Test the condition based on the Jmp* op of similar name, and then emit a
-  smashable jump to a REQ_BIND_SIDE_EXIT service request.
-
-| SideExitGuardLoc<T,locId,takenOff>, ND, S(FramePtr), NF
-
-  Test the type of a local, and if it fails jump to a side exit service
-  request.
-
-| SideExitGuardStk<T,stackOff,takenOff>, D(StkPtr), S(StkPtr), NF
-
-  Test the type of a stack cell, and if it fails jump to a side exit service
-  request.
-
 
 12. Refcounting and copies
 

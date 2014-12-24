@@ -69,6 +69,7 @@ enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
 
 // passes
 void allocateRegisters(Vunit&, const Abi&);
+void optimizeExits(Vunit&);
 void optimizeJmps(Vunit&);
 void removeDeadCode(Vunit&);
 template<typename Folder> void foldImms(Vunit&);

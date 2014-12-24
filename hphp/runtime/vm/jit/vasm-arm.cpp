@@ -581,6 +581,7 @@ void lower(Vunit& unit) {
 }
 
 void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
+  optimizeExits(m_unit);
   lower(m_unit);
   if (!m_unit.constants.empty()) {
     foldImms<arm::ImmFolder>(m_unit);

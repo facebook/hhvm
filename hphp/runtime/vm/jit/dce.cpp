@@ -348,24 +348,6 @@ bool canDCE(IRInstruction* inst) {
   case ReqBindJmpNSame:
   case ReqBindJmpZero:
   case ReqBindJmpNZero:
-  case SideExitJmpGt:
-  case SideExitJmpGte:
-  case SideExitJmpLt:
-  case SideExitJmpLte:
-  case SideExitJmpEq:
-  case SideExitJmpNeq:
-  case SideExitJmpGtInt:
-  case SideExitJmpGteInt:
-  case SideExitJmpLtInt:
-  case SideExitJmpLteInt:
-  case SideExitJmpEqInt:
-  case SideExitJmpNeqInt:
-  case SideExitJmpSame:
-  case SideExitJmpNSame:
-  case SideExitJmpZero:
-  case SideExitJmpNZero:
-  case SideExitGuardLoc:
-  case SideExitGuardStk:
   case IncRef:
   case IncRefCtx:
   case DecRefLoc:

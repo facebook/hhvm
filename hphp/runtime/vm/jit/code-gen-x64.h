@@ -123,9 +123,6 @@ private:
                    int64_t (*obj_cmp_int)(ObjectData*, int64_t),
                    int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
-  template<class Loc>
-  void emitSideExitGuard(const IRInstruction* inst, Type type, Loc typeLoc,
-                         Loc dataLoc, Offset taken);
   void emitReqBindJcc(Vout& v, ConditionCode cc, Vreg sf,
                       const ReqBindJccData*);
 

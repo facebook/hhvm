@@ -61,7 +61,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
       opc == CastStk ||
       opc == CastStkIntToDbl ||
       opc == CoerceStk ||
-      opc == SideExitGuardStk  ||
       opc == DefLabel ||
       opc == HintStkInner ||
       MInstrEffects::supported(opc),

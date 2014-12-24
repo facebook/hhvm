@@ -98,24 +98,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReqBindJmpZero:
   case ReqRetranslate:
   case ReqRetranslateOpt:
-  case SideExitGuardLoc:
-  case SideExitGuardStk:
-  case SideExitJmpEq:
-  case SideExitJmpEqInt:
-  case SideExitJmpGt:
-  case SideExitJmpGtInt:
-  case SideExitJmpGte:
-  case SideExitJmpGteInt:
-  case SideExitJmpLt:
-  case SideExitJmpLtInt:
-  case SideExitJmpLte:
-  case SideExitJmpLteInt:
-  case SideExitJmpNSame:
-  case SideExitJmpNZero:
-  case SideExitJmpNeq:
-  case SideExitJmpNeqInt:
-  case SideExitJmpSame:
-  case SideExitJmpZero:
   case JmpSwitchDest:
   case JmpSSwitchDest:
     return UnknownEffects {};

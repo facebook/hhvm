@@ -667,15 +667,6 @@ void CodeGenerator::cgReqBindJmpNeq(IRInstruction* i)   { cgReqBindJcc(i); }
 void CodeGenerator::cgReqBindJmpSame(IRInstruction* i)  { cgReqBindJcc(i); }
 void CodeGenerator::cgReqBindJmpNSame(IRInstruction* i) { cgReqBindJcc(i); }
 
-void CodeGenerator::cgSideExitJmpGt(IRInstruction* i)    { cgExitJcc(i); }
-void CodeGenerator::cgSideExitJmpGte(IRInstruction* i)   { cgExitJcc(i); }
-void CodeGenerator::cgSideExitJmpLt(IRInstruction* i)    { cgExitJcc(i); }
-void CodeGenerator::cgSideExitJmpLte(IRInstruction* i)   { cgExitJcc(i); }
-void CodeGenerator::cgSideExitJmpEq(IRInstruction* i)    { cgExitJcc(i); }
-void CodeGenerator::cgSideExitJmpNeq(IRInstruction* i)   { cgExitJcc(i); }
-void CodeGenerator::cgSideExitJmpSame(IRInstruction* i)  { cgExitJcc(i); }
-void CodeGenerator::cgSideExitJmpNSame(IRInstruction* i) { cgExitJcc(i); }
-
 void CodeGenerator::cgJmpGtInt(IRInstruction* i)    { cgJccInt(i); }
 void CodeGenerator::cgJmpGteInt(IRInstruction* i)   { cgJccInt(i); }
 void CodeGenerator::cgJmpLtInt(IRInstruction* i)    { cgJccInt(i); }
@@ -689,13 +680,6 @@ void CodeGenerator::cgReqBindJmpLtInt(IRInstruction* i)  { cgReqBindJccInt(i); }
 void CodeGenerator::cgReqBindJmpLteInt(IRInstruction* i) { cgReqBindJccInt(i); }
 void CodeGenerator::cgReqBindJmpEqInt(IRInstruction* i)  { cgReqBindJccInt(i); }
 void CodeGenerator::cgReqBindJmpNeqInt(IRInstruction* i) { cgReqBindJccInt(i); }
-
-void CodeGenerator::cgSideExitJmpGtInt(IRInstruction* i)  { cgExitJccInt(i); }
-void CodeGenerator::cgSideExitJmpGteInt(IRInstruction* i) { cgExitJccInt(i); }
-void CodeGenerator::cgSideExitJmpLtInt(IRInstruction* i)  { cgExitJccInt(i); }
-void CodeGenerator::cgSideExitJmpLteInt(IRInstruction* i) { cgExitJccInt(i); }
-void CodeGenerator::cgSideExitJmpEqInt(IRInstruction* i)  { cgExitJccInt(i); }
-void CodeGenerator::cgSideExitJmpNeqInt(IRInstruction* i) { cgExitJccInt(i); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -3971,55 +3955,12 @@ void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
                 rbase[baseOff + TVOFF(m_data)], inst->taken());
 }
 
-template<class Loc>
-void CodeGenerator::emitSideExitGuard(const IRInstruction* inst, Type type,
-                                      Loc typeSrc, Loc dataSrc, Offset taken) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitTypeTest(type, typeSrc, dataSrc, sf,
-    [&](ConditionCode cc, Vreg sfTaken) {
-      auto const& marker = inst->marker();
-      auto const sk = SrcKey(getFunc(marker), taken, resumed(marker));
-      v << bindexit{ccNegate(cc), sfTaken, sk, TransFlags(), kCrossTraceRegs};
-    });
-}
-
-void CodeGenerator::cgSideExitGuardLoc(IRInstruction* inst) {
-  auto const fp    = srcLoc(inst, 0).reg();
-  auto const extra = inst->extra<SideExitGuardLoc>();
-  emitSideExitGuard(inst, inst->typeParam(),
-                    fp[localOffset(extra->checkedSlot) + TVOFF(m_type)],
-                    fp[localOffset(extra->checkedSlot) + TVOFF(m_data)],
-                    extra->taken);
-}
-
-void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
-  auto const sp    = srcLoc(inst, 0).reg();
-  auto const extra = inst->extra<SideExitGuardStk>();
-
-  emitSideExitGuard(inst, inst->typeParam(),
-                    sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)],
-                    sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
-                    extra->taken);
-  vmain() << copy{sp, dstLoc(inst, 0).reg()};
-}
-
 void CodeGenerator::cgExitJcc(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const& marker = inst->marker();
   auto const sk = SrcKey(getFunc(marker), extra->taken, resumed(marker));
   auto& v = vmain();
   auto const sf = emitCompare(v, inst);
-  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags,
-                kCrossTraceRegs};
-}
-
-void CodeGenerator::cgExitJccInt(IRInstruction* inst) {
-  auto const extra = inst->extra<SideExitJccData>();
-  auto const& marker = inst->marker();
-  auto const sk = SrcKey(getFunc(marker), extra->taken, resumed(marker));
-  auto& v = vmain();
-  auto const sf = emitCompareInt(v, inst);
   v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags,
                 kCrossTraceRegs};
 }
@@ -4673,26 +4614,6 @@ void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
   auto& v = vmain();
   auto const sf = emitTestZero(v, inst->src(0), srcLoc(inst, 0));
   emitReqBindJcc(v, CC_NZ, sf, inst->extra<ReqBindJmpNZero>());
-}
-
-void CodeGenerator::cgSideExitJmpZero(IRInstruction* inst) {
-  auto const extra = inst->extra<SideExitJccData>();
-  auto const& marker = inst->marker();
-  auto const sk = SrcKey(getFunc(marker), extra->taken, resumed(marker));
-  auto& v = vmain();
-  auto const sf = emitTestZero(v, inst->src(0), srcLoc(inst, 0));
-  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags,
-                kCrossTraceRegs};
-}
-
-void CodeGenerator::cgSideExitJmpNZero(IRInstruction* inst) {
-  auto const extra = inst->extra<SideExitJccData>();
-  auto const& marker = inst->marker();
-  auto const sk = SrcKey(getFunc(marker), extra->taken, resumed(marker));
-  auto& v = vmain();
-  auto const sf = emitTestZero(v, inst->src(0), srcLoc(inst, 0));
-  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags,
-                kCrossTraceRegs};
 }
 
 void CodeGenerator::cgJmp(IRInstruction* inst) {

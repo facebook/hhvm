@@ -309,28 +309,6 @@ Opcode queryJmpToQueryOp(Opcode opc) {
   }
 }
 
-Opcode jmpToSideExitJmp(Opcode opc) {
-  switch (opc) {
-  case JmpGt:                 return SideExitJmpGt;
-  case JmpGte:                return SideExitJmpGte;
-  case JmpLt:                 return SideExitJmpLt;
-  case JmpLte:                return SideExitJmpLte;
-  case JmpEq:                 return SideExitJmpEq;
-  case JmpNeq:                return SideExitJmpNeq;
-  case JmpGtInt:              return SideExitJmpGtInt;
-  case JmpGteInt:             return SideExitJmpGteInt;
-  case JmpLtInt:              return SideExitJmpLtInt;
-  case JmpLteInt:             return SideExitJmpLteInt;
-  case JmpEqInt:              return SideExitJmpEqInt;
-  case JmpNeqInt:             return SideExitJmpNeqInt;
-  case JmpSame:               return SideExitJmpSame;
-  case JmpNSame:              return SideExitJmpNSame;
-  case JmpZero:               return SideExitJmpZero;
-  case JmpNZero:              return SideExitJmpNZero;
-  default:                    always_assert(0);
-  }
-}
-
 Opcode jmpToReqBindJmp(Opcode opc) {
   switch (opc) {
   case JmpGt:                 return ReqBindJmpGt;
@@ -435,12 +413,6 @@ Opcode queryToIntQueryOp(Opcode opc) {
   case JmpLte:   return JmpLteInt;
   case JmpEq:    return JmpEqInt;
   case JmpNeq:   return JmpNeqInt;
-  case SideExitJmpGt:   return SideExitJmpGtInt;
-  case SideExitJmpGte:  return SideExitJmpGteInt;
-  case SideExitJmpLt:   return SideExitJmpLtInt;
-  case SideExitJmpLte:  return SideExitJmpLteInt;
-  case SideExitJmpEq:   return SideExitJmpEqInt;
-  case SideExitJmpNeq:  return SideExitJmpNeqInt;
   case ReqBindJmpGt:    return ReqBindJmpGtInt;
   case ReqBindJmpGte:   return ReqBindJmpGteInt;
   case ReqBindJmpLt:    return ReqBindJmpLtInt;

@@ -43,6 +43,45 @@ bool isBranch(const Vinstr& inst) {
          inst.op == Vinstr::cbcc;
 }
 
+void optimizeExits(Vunit& unit) {
+  auto isNormalExit = [&](Vlabel b) {
+    auto& code = unit.blocks[b].code;
+    if (code.size() != 2) return false;
+    if (code[0].op != Vinstr::syncvmsp) return false;
+    if (code[1].op != Vinstr::bindjmp) return false;
+    return true;
+  };
+
+  PostorderWalker{unit}.dfs([&](Vlabel b) {
+    auto& block = unit.blocks[b];
+    auto& code = block.code;
+    assert(!code.empty());
+    auto ss = succs(block);
+    if (code.back().op == Vinstr::jcc) {
+      if (ss[0] == ss[1]) return;
+      auto jcc_i = code.back().jcc_;
+      // Normalize branches so that targets[1] is the exit path.
+      if (isNormalExit(jcc_i.targets[0])) {
+        jcc_i = jcc{ccNegate(jcc_i.cc), jcc_i.sf,
+          {jcc_i.targets[1], jcc_i.targets[0]}};
+      }
+      if (!isNormalExit(jcc_i.targets[1])) return;
+
+      // Replace jcc to normal exit with bindexit followed by jmp.
+      const auto& sync = unit.blocks[jcc_i.targets[1]].code[0].syncvmsp_;
+      const auto& bj = unit.blocks[jcc_i.targets[1]].code[1].bindjmp_;
+      const auto t0 = jcc_i.targets[0];
+      const auto jcc_origin = code.back().origin;
+      code.back() = sync;
+      code.emplace_back(bindexit{jcc_i.cc, jcc_i.sf,
+        bj.target, bj.trflags, bj.args});
+      code.back().origin = jcc_origin;
+      code.emplace_back(jmp{t0});
+      code.back().origin = jcc_origin;
+    }
+  });
+}
+
 void optimizeJmps(Vunit& unit) {
   auto isEmpty = [&](Vlabel b, Vinstr::Opcode op) {
     auto& code = unit.blocks[b].code;
@@ -74,7 +113,7 @@ void optimizeJmps(Vunit& unit) {
           code.back() = jmp{ss[0]};
           changed = true;
         } else {
-          auto& jcc_i = code.back().jcc_;
+          auto jcc_i = code.back().jcc_;
           if (isEmpty(jcc_i.targets[0], Vinstr::fallback)) {
             jcc_i = jcc{ccNegate(jcc_i.cc), jcc_i.sf,
                         {jcc_i.targets[1], jcc_i.targets[0]}};

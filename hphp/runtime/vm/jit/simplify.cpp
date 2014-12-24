@@ -2207,12 +2207,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case Mov:
     return getStackValue(inst->src(0), index);
 
-  case SideExitGuardStk:
-    if (inst->extra<SideExitGuardData>()->checkedSlot == index) {
-      return StackValueInfo { inst, inst->typeParam() };
-    }
-    return getStackValue(inst->src(0), index);
-
   case CastStk:
   case CastStkIntToDbl:
     // fallthrough

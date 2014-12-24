@@ -299,19 +299,6 @@ struct SideExitJccData : IRExtraData {
 };
 
 /*
- * Information for a conditional side exit based on a type check of a
- * local or stack cell.
- */
-struct SideExitGuardData : IRExtraData {
-  uint32_t checkedSlot;
-  Offset taken;
-
-  std::string show() const {
-    return folly::to<std::string>(checkedSlot, ',', taken);
-  }
-};
-
-/*
  * Compile-time metadata about an ActRec allocation.
  */
 struct ActRecInfo : IRExtraData {
@@ -933,24 +920,6 @@ X(ReqBindJmpSame,               ReqBindJccData);
 X(ReqBindJmpNSame,              ReqBindJccData);
 X(ReqBindJmpZero,               ReqBindJccData);
 X(ReqBindJmpNZero,              ReqBindJccData);
-X(SideExitJmpGt,                SideExitJccData);
-X(SideExitJmpGte,               SideExitJccData);
-X(SideExitJmpLt,                SideExitJccData);
-X(SideExitJmpLte,               SideExitJccData);
-X(SideExitJmpEq,                SideExitJccData);
-X(SideExitJmpNeq,               SideExitJccData);
-X(SideExitJmpGtInt,             SideExitJccData);
-X(SideExitJmpGteInt,            SideExitJccData);
-X(SideExitJmpLtInt,             SideExitJccData);
-X(SideExitJmpLteInt,            SideExitJccData);
-X(SideExitJmpEqInt,             SideExitJccData);
-X(SideExitJmpNeqInt,            SideExitJccData);
-X(SideExitJmpSame,              SideExitJccData);
-X(SideExitJmpNSame,             SideExitJccData);
-X(SideExitJmpZero,              SideExitJccData);
-X(SideExitJmpNZero,             SideExitJccData);
-X(SideExitGuardLoc,             SideExitGuardData);
-X(SideExitGuardStk,             SideExitGuardData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);

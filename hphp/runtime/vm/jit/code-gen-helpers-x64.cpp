@@ -545,22 +545,6 @@ ConditionCode opToConditionCode(Opcode opc) {
   case ReqBindJmpNSame:              return CC_NE;
   case ReqBindJmpZero:               return CC_Z;
   case ReqBindJmpNZero:              return CC_NZ;
-  case SideExitJmpGt:                 return CC_G;
-  case SideExitJmpGte:                return CC_GE;
-  case SideExitJmpLt:                 return CC_L;
-  case SideExitJmpLte:                return CC_LE;
-  case SideExitJmpEq:                 return CC_E;
-  case SideExitJmpNeq:                return CC_NE;
-  case SideExitJmpGtInt:              return CC_G;
-  case SideExitJmpGteInt:             return CC_GE;
-  case SideExitJmpLtInt:              return CC_L;
-  case SideExitJmpLteInt:             return CC_LE;
-  case SideExitJmpEqInt:              return CC_E;
-  case SideExitJmpNeqInt:             return CC_NE;
-  case SideExitJmpSame:               return CC_E;
-  case SideExitJmpNSame:              return CC_NE;
-  case SideExitJmpZero:               return CC_Z;
-  case SideExitJmpNZero:              return CC_NZ;
   default:
     always_assert(0);
   }

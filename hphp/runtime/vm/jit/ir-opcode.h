@@ -202,11 +202,6 @@ Opcode queryToJmpOp(Opcode opc);
 Opcode queryJmpToQueryOp(Opcode opc);
 
 /*
- * Convert a jump to its corresponding side exit.
- */
-Opcode jmpToSideExitJmp(Opcode opc);
-
-/*
  * Convert a jump operation to its corresponding conditional
  * ReqBindJmp.
  *

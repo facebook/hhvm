@@ -234,7 +234,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AFrame { inst.src(0), inst.extra<LocalId>()->locId } };
 
   case CheckLoc:
-  case DecRefLoc:
   case GuardLoc:
   case LdLocPseudoMain:
     return MayLoadStore {
@@ -454,7 +453,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckStk:
   case CastStkIntToDbl:
   case CufIterSpillFrame:
-  case DecRefStack:
   case LdStack:
     return IrrelevantEffects {};
 
@@ -772,6 +770,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArraySetRef:    // kVPackedKind warnings
   case GetMemoKey:  // re-enters to call getInstanceKey() in some cases
     return MayLoadStore { ANonFrame, ANonFrame };
+
+  case DecRefStack:  // Note: also reads a stack slot
+    return MayLoadStore { ANonFrame, ANonFrame };
+
+  case DecRefLoc:
+    return MayLoadStore {
+      ANonFrame | AFrame { inst.src(0), inst.extra<LocalId>()->locId },
+      ANonFrame
+    };
 
   //////////////////////////////////////////////////////////////////////
 

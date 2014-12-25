@@ -108,7 +108,7 @@ class ResourceData {
   // Numeric identifier of resource object (used by var_dump() and other
   // output functions)
   int32_t o_id;
-} __attribute__((__aligned__(16)));
+};
 
 /**
  * Rules to avoid memory problems/leaks from ResourceData classes

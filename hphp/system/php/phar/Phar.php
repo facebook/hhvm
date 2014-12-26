@@ -933,6 +933,40 @@ class Phar extends RecursiveDirectoryIterator
     // Not supported (yet) but most phars call it, so don't throw
   }
 
+  /**
+  *
+  * ( excerpt from http://docs.hhvm/com/manual/en/phar.running.php )
+  * Returns the full path to the running phar archive. This is intended
+  * for use much like the __FILE__ magic constant, and only has effect
+  * inside an executing phar archive.
+  *
+  * Inside the stub of an archive, function Phar::running() returns "".
+  * Simply use __FILE__ to access the current running phar inside a stub
+  *
+  * @retphar   boolean if FALSE, the full path on disk to the phar archive
+  *                    is returned. If TRUE, a full phar URL is returned
+  * @return    string  Returns the filename if valid, empty string otherwise
+  */
+  final public static function running(bool $retphar = true) {
+    $filename = debug_backtrace()[0]['file'];
+    $pharScheme = "phar://";
+    $pharExt = ".phar";
+    if(substr($filename, 0, strlen($pharScheme)) == $pharScheme) {
+      $pharExtPos = strrpos($filename, $pharExt);
+      if($pharExtPos) {
+        $endPos = $pharExtPos + strlen($pharExt);
+        if($retphar) {
+          return substr($filename, 0, $endPos);
+        }
+        else {
+          return substr($filename, strlen($pharScheme),
+            $endPos - strlen($pharScheme));
+        }
+      }
+    }
+    return "";
+  }
+
   final public static function webPhar(
       $alias,
       $index = "index.php",

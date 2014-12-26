@@ -2,10 +2,10 @@ Memcached
 object(Memcached)#1 (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class Memcached in %s/test/quick/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class Memcached in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(43) {
+array(44) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -77,20 +77,22 @@ array(43) {
   [34]=>
   string(12) "prependByKey"
   [35]=>
-  string(7) "replace"
+  string(4) "quit"
   [36]=>
-  string(12) "replaceByKey"
+  string(7) "replace"
   [37]=>
-  string(3) "set"
+  string(12) "replaceByKey"
   [38]=>
-  string(8) "setByKey"
+  string(3) "set"
   [39]=>
-  string(8) "setMulti"
+  string(8) "setByKey"
   [40]=>
-  string(13) "setMultiByKey"
+  string(8) "setMulti"
   [41]=>
-  string(9) "setOption"
+  string(13) "setMultiByKey"
   [42]=>
+  string(9) "setOption"
+  [43]=>
   string(10) "setOptions"
 }
 ================
@@ -100,10 +102,10 @@ object(A_Memcached)#2 (1) {
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/test/quick/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(43) {
+array(44) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -175,19 +177,21 @@ array(43) {
   [34]=>
   string(12) "prependByKey"
   [35]=>
-  string(7) "replace"
+  string(4) "quit"
   [36]=>
-  string(12) "replaceByKey"
+  string(7) "replace"
   [37]=>
-  string(3) "set"
+  string(12) "replaceByKey"
   [38]=>
-  string(8) "setByKey"
+  string(3) "set"
   [39]=>
-  string(8) "setMulti"
+  string(8) "setByKey"
   [40]=>
-  string(13) "setMultiByKey"
+  string(8) "setMulti"
   [41]=>
-  string(9) "setOption"
+  string(13) "setMultiByKey"
   [42]=>
+  string(9) "setOption"
+  [43]=>
   string(10) "setOptions"
 }

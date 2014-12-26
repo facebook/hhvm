@@ -175,31 +175,10 @@ bool isDblQueryOp(Opcode opc);
 Opcode queryToDblQueryOp(Opcode opc);
 
 /*
- * A "fusable query op" is any instruction returning Type::Bool that
- * has a corresponding "query jump op" for branch fusion.
- */
-bool isFusableQueryOp(Opcode opc);
-
-/*
  * A "query jump op" is a conditional jump instruction that
  * corresponds to one of the fusable query op instructions.
  */
 bool isQueryJmpOp(Opcode opc);
-
-/*
- * Translate a query op into a conditional jump that does the same
- * test (a "query jump op").
- *
- * Pre: isFusableQueryOp(opc)
- */
-Opcode queryToJmpOp(Opcode opc);
-
-/*
- * Translate a "query jump op" to a query op.
- *
- * Pre: isQueryJmpOp(opc);
- */
-Opcode queryJmpToQueryOp(Opcode opc);
 
 /*
  * Convert a jump operation to its corresponding conditional

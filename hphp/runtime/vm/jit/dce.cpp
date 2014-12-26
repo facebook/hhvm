@@ -241,20 +241,6 @@ bool canDCE(IRInstruction* inst) {
   case LteX:
   case EqX:
   case NeqX:
-  case JmpGt:
-  case JmpGte:
-  case JmpLt:
-  case JmpLte:
-  case JmpEq:
-  case JmpNeq:
-  case JmpSame:
-  case JmpNSame:
-  case JmpGtInt:
-  case JmpGteInt:
-  case JmpLtInt:
-  case JmpLteInt:
-  case JmpEqInt:
-  case JmpNeqInt:
   case JmpZero:
   case JmpNZero:
   case JmpSSwitchDest:
@@ -332,20 +318,6 @@ bool canDCE(IRInstruction* inst) {
   case ReqBindJmp:
   case ReqRetranslate:
   case ReqRetranslateOpt:
-  case ReqBindJmpGt:
-  case ReqBindJmpGte:
-  case ReqBindJmpLt:
-  case ReqBindJmpLte:
-  case ReqBindJmpEq:
-  case ReqBindJmpNeq:
-  case ReqBindJmpGtInt:
-  case ReqBindJmpGteInt:
-  case ReqBindJmpLtInt:
-  case ReqBindJmpLteInt:
-  case ReqBindJmpEqInt:
-  case ReqBindJmpNeqInt:
-  case ReqBindJmpSame:
-  case ReqBindJmpNSame:
   case ReqBindJmpZero:
   case ReqBindJmpNZero:
   case IncRef:

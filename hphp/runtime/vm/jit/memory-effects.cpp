@@ -80,21 +80,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // that could read or write anything as far as we know (including frame
   // locals).
   case ReqBindJmp:
-  case ReqBindJmpEq:
-  case ReqBindJmpEqInt:
-  case ReqBindJmpGt:
-  case ReqBindJmpGte:
-  case ReqBindJmpGteInt:
-  case ReqBindJmpGtInt:
-  case ReqBindJmpLt:
-  case ReqBindJmpLte:
-  case ReqBindJmpLteInt:
-  case ReqBindJmpLtInt:
-  case ReqBindJmpNeq:
-  case ReqBindJmpNeqInt:
-  case ReqBindJmpNSame:
   case ReqBindJmpNZero:
-  case ReqBindJmpSame:
   case ReqBindJmpZero:
   case ReqRetranslate:
   case ReqRetranslateOpt:
@@ -520,12 +506,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Ceil:
   case Floor:
   case DefLabel:
-  case JmpNeqInt:
-  case JmpGteInt:
-  case JmpGtInt:
-  case JmpLteInt:
-  case JmpLtInt:
-  case JmpEqInt:
   case ExceptionBarrier:
   case SyncABIRegs:
   case DecRefNZ:
@@ -632,8 +612,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgAssertRetAddr:
   case NSame:
   case Same:
-  case JmpNSame:
-  case JmpSame:
   case Gt:
   case Gte:
   case Eq:
@@ -642,12 +620,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Neq:
   case IncTransCounter:
   case LdBindAddr:
-  case JmpEq:
-  case JmpGt:
-  case JmpGte:
-  case JmpLt:
-  case JmpLte:
-  case JmpNeq:
   case LdClsCtor:
   case LdAsyncArParentChain:
   case GuardRefs:

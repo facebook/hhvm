@@ -171,11 +171,13 @@ void emitAwait(HTS& env, int32_t numIters) {
   auto const kFailed    = c_WaitHandle::STATE_FAILED;
 
   auto const state = gen(env, LdWHState, child);
-  gen(env, JmpEqInt, exitSlow, state, cns(env, kFailed));
+  auto const failed = gen(env, EqInt, state, cns(env, kFailed));
+  gen(env, JmpNZero, exitSlow, failed);
 
   env.irb->ifThenElse(
     [&] (Block* taken) {
-      gen(env, JmpEqInt, taken, state, cns(env, kSucceeded));
+      auto const succeeded = gen(env, EqInt, state, cns(env, kSucceeded));
+      gen(env, JmpNZero, taken, succeeded);
     },
     [&] { // Next: the wait handle is not finished, we need to suspend
       if (resumed(env)) {

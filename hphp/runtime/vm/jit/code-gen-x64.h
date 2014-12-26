@@ -106,12 +106,6 @@ private:
   Vreg emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
                                     RDS::Handle ch);
 
-  void cgJcc(IRInstruction* inst);          // helper
-  void cgReqBindJcc(IRInstruction* inst);   // helper
-  void cgExitJcc(IRInstruction* inst);      // helper
-  void cgJccInt(IRInstruction* inst);         // helper
-  void cgReqBindJccInt(IRInstruction* inst);  // helper
-  void cgExitJccInt(IRInstruction* inst); // helper
   void emitCmpInt(IRInstruction* inst, ConditionCode cc);
   void emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred);
   void emitCmpRelDbl(IRInstruction* inst, ConditionCode cc, bool flipOperands);
@@ -127,7 +121,6 @@ private:
                       const ReqBindJccData*);
 
   Vreg emitCompare(Vout& v, IRInstruction* inst);
-  Vreg emitCompareInt(Vout& v, IRInstruction* inst);
   Vreg emitTestZero(Vout& v, SSATmp* src, Vloc srcLoc);
   template<class Inst>
   bool emitIncDec(Vout& v, Vloc dst, SSATmp* src0, Vloc loc0,

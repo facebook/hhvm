@@ -506,36 +506,8 @@ Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
 
 ConditionCode opToConditionCode(Opcode opc) {
   switch (opc) {
-  case JmpGt:                 return CC_G;
-  case JmpGte:                return CC_GE;
-  case JmpLt:                 return CC_L;
-  case JmpLte:                return CC_LE;
-  case JmpEq:                 return CC_E;
-  case JmpNeq:                return CC_NE;
-  case JmpGtInt:              return CC_G;
-  case JmpGteInt:             return CC_GE;
-  case JmpLtInt:              return CC_L;
-  case JmpLteInt:             return CC_LE;
-  case JmpEqInt:              return CC_E;
-  case JmpNeqInt:             return CC_NE;
-  case JmpSame:               return CC_E;
-  case JmpNSame:              return CC_NE;
   case JmpZero:               return CC_Z;
   case JmpNZero:              return CC_NZ;
-  case ReqBindJmpGt:                 return CC_G;
-  case ReqBindJmpGte:                return CC_GE;
-  case ReqBindJmpLt:                 return CC_L;
-  case ReqBindJmpLte:                return CC_LE;
-  case ReqBindJmpEq:                 return CC_E;
-  case ReqBindJmpNeq:                return CC_NE;
-  case ReqBindJmpGtInt:              return CC_G;
-  case ReqBindJmpGteInt:             return CC_GE;
-  case ReqBindJmpLtInt:              return CC_L;
-  case ReqBindJmpLteInt:             return CC_LE;
-  case ReqBindJmpEqInt:              return CC_E;
-  case ReqBindJmpNeqInt:             return CC_NE;
-  case ReqBindJmpSame:               return CC_E;
-  case ReqBindJmpNSame:              return CC_NE;
   case ReqBindJmpZero:               return CC_Z;
   case ReqBindJmpNZero:              return CC_NZ;
   default:

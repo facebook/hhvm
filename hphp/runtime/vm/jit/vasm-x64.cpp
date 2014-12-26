@@ -1217,6 +1217,7 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   always_assert(!busy);
   busy = true;
   SCOPE_EXIT { busy = false; };
+  fuseBranches(m_unit);
   optimizeExits(m_unit);
   lowerForX64(m_unit, abi);
 

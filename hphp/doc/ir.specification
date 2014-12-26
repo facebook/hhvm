@@ -686,41 +686,6 @@ To string conversions:
 5. Branches
 
 
-There is a conditional branch instruction for each predicate above, to enable
-generating efficient compare-and-branch instruction sequences.
-
-
-| JmpGt,                            ND, S(Gen) S(Gen),                   B
-
-| JmpGte,                           ND, S(Gen) S(Gen),                   B
-
-| JmpLt,                            ND, S(Gen) S(Gen),                   B
-
-| JmpLte,                           ND, S(Gen) S(Gen),                   B
-
-| JmpEq,                            ND, S(Gen) S(Gen),                   B
-
-| JmpNeq,                           ND, S(Gen) S(Gen),                   B
-
-| JmpSame,                          ND, S(Gen) S(Gen),                   B
-
-| JmpNSame,                         ND, S(Gen) S(Gen),                   B
-
-| JmpGtInt,                         ND, S(Int) S(Int),                   B
-
-| JmpGteInt,                        ND, S(Int) S(Int),                   B
-
-| JmpLtInt,                         ND, S(Int) S(Int),                   B
-
-| JmpLteInt,                        ND, S(Int) S(Int),                   B
-
-| JmpEqInt,                         ND, S(Int) S(Int),                   B
-
-| JmpNeqInt,                        ND, S(Int) S(Int),                   B
-
-  Fused jump instructions. These all operate exactly as their corresponding
-  query op, but also take a label to jump to when the condition is true.
-
 | JmpZero,                          ND, S(Int,Bool),                     B
 
 | JmpNZero,                         ND, S(Int,Bool),                     B
@@ -1481,34 +1446,6 @@ generating efficient compare-and-branch instruction sequences.
   Emit a service request to retranslate, with a higher optimization gear,
   translation transID, which starts at bcOff. This instruction is used in exit
   traces that trigger profile-guided optimizations.
-
-| ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T
-
-| ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T
-
-| ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T
-
-| ReqBindJmpLte,                    ND, S(Gen) S(Gen),                   T
-
-| ReqBindJmpEq,                     ND, S(Gen) S(Gen),                   T
-
-| ReqBindJmpNeq,                    ND, S(Gen) S(Gen),                   T
-
-| ReqBindJmpGtInt,                  ND, S(Int) S(Int),                   T
-
-| ReqBindJmpGteInt,                 ND, S(Int) S(Int),                   T
-
-| ReqBindJmpLtInt,                  ND, S(Int) S(Int),                   T
-
-| ReqBindJmpLteInt,                 ND, S(Int) S(Int),                   T
-
-| ReqBindJmpEqInt,                  ND, S(Int) S(Int),                   T
-
-| ReqBindJmpNeqInt,                 ND, S(Int) S(Int),                   T
-
-| ReqBindJmpSame,                   ND, S(Gen) S(Gen),                   T
-
-| ReqBindJmpNSame,                  ND, S(Gen) S(Gen),                   T
 
 | ReqBindJmpZero,                   ND, S(Int,Bool),                     T
 

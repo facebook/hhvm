@@ -1084,46 +1084,6 @@ X(NSame)
 
 #undef X
 
-SSATmp* queryJmpImpl(State& env, const IRInstruction* inst) {
-  auto const src1 = inst->src(0);
-  auto const src2 = inst->src(1);
-  auto const opc = inst->op();
-  // reuse the logic in cmpImpl
-  auto const newCmp = cmpImpl(
-    env,
-    queryJmpToQueryOp(opc),
-    nullptr,
-    src1,
-    src2
-  );
-  if (!newCmp) return nullptr;
-
-  // Become an equivalent conditional jump and reuse that logic.
-  return gen(env, JmpNZero, inst->taken(), newCmp);
-}
-
-#define X(x)                                                \
-  SSATmp* simplify##x(State& env, const IRInstruction* i) { \
-    return queryJmpImpl(env, i);                            \
-  }
-
-X(JmpGt)
-X(JmpGte)
-X(JmpLt)
-X(JmpLte)
-X(JmpEq)
-X(JmpNeq)
-X(JmpGtInt)
-X(JmpGteInt)
-X(JmpLtInt)
-X(JmpLteInt)
-X(JmpEqInt)
-X(JmpNeqInt)
-X(JmpSame)
-X(JmpNSame)
-
-#undef X
-
 SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   bool const trueSense = inst->op() == IsType;
   auto const type      = inst->typeParam();
@@ -1714,25 +1674,6 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
     // We can just check the int or ptr directly. Borrow the Conv's src.
     return gen(env, inst->op(), inst->taken(), srcInst->src(0));
   }
-
-  auto canCompareFused = [&]() {
-    auto src1Type = srcInst->src(0)->type();
-    auto src2Type = srcInst->src(1)->type();
-    return ((src1Type <= Type::Int && src2Type <= Type::Int) ||
-            (src1Type <= Type::Bool && src2Type <= Type::Bool) ||
-            (src1Type <= Type::Cls && src2Type <= Type::Cls));
-  };
-
-  // Fuse jumps with query operators.
-  if (isFusableQueryOp(srcOpcode) && canCompareFused()) {
-    auto opc = queryToJmpOp(inst->op() == JmpZero
-                            ? negateQueryOp(srcOpcode) : srcOpcode);
-    SrcRange ssas = srcInst->srcs();
-
-    return gen(env, opc, inst->maybeTypeParam(), inst->taken(),
-               std::make_pair(ssas.size(), ssas.begin()));
-  }
-
   return nullptr;
 }
 
@@ -2067,20 +2008,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(SpillStack)
   X(TakeStack)
   X(UnboxPtr)
-  X(JmpGt)
-  X(JmpGte)
-  X(JmpLt)
-  X(JmpLte)
-  X(JmpEq)
-  X(JmpNeq)
-  X(JmpGtInt)
-  X(JmpGteInt)
-  X(JmpLtInt)
-  X(JmpLteInt)
-  X(JmpEqInt)
-  X(JmpNeqInt)
-  X(JmpSame)
-  X(JmpNSame)
   X(JmpZero)
   X(JmpNZero)
   X(OrInt)

@@ -497,16 +497,6 @@ Vreg CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
   return sf;
 }
 
-Vreg CodeGenerator::emitCompareInt(Vout& v, IRInstruction* inst) {
-  auto srcReg0 = srcLoc(inst, 0).reg();
-  auto srcReg1 = srcLoc(inst, 1).reg();
-  auto const sf = v.makeReg();
-  // Note the reverse syntax in the assembler.
-  // This cmp will compute srcReg0 - srcReg1
-  v << cmpq{srcReg1, srcReg0, sf};
-  return sf;
-}
-
 void CodeGenerator::emitReqBindJcc(Vout& v, ConditionCode cc, Vreg sf,
                                    const ReqBindJccData* extra) {
   v << bindjcc1st{cc, sf, {extra->notTaken, extra->taken}, kCrossTraceRegs};
@@ -618,68 +608,6 @@ void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
   v << vcall{CppCall::direct(_Unwind_DeleteException),
              v.makeVcallArgs({{exn}}), v.makeTuple({})};
 }
-
-void CodeGenerator::cgJcc(IRInstruction* inst) {
-  auto& v = vmain();
-  auto cc = opToConditionCode(inst->op());
-  auto const sf = emitCompare(v, inst);
-  v << jcc{cc, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgJccInt(IRInstruction* inst) {
-  auto& v = vmain();
-  auto cc = opToConditionCode(inst->op());
-  auto const sf = emitCompareInt(v, inst);
-  v << jcc{cc, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
-  // TODO(#2404427): prepareForTestAndSmash?
-  auto& v = vmain();
-  auto const sf = emitCompare(v, inst);
-  emitReqBindJcc(v, opToConditionCode(inst->op()), sf,
-                 inst->extra<ReqBindJccData>());
-}
-
-void CodeGenerator::cgReqBindJccInt(IRInstruction* inst) {
-  // TODO(#2404427): prepareForTestAndSmash?
-  auto& v = vmain();
-  auto const sf = emitCompareInt(v, inst);
-  emitReqBindJcc(v, opToConditionCode(inst->op()), sf,
-                 inst->extra<ReqBindJccData>());
-}
-
-void CodeGenerator::cgJmpGt(IRInstruction* i)    { cgJcc(i); }
-void CodeGenerator::cgJmpGte(IRInstruction* i)   { cgJcc(i); }
-void CodeGenerator::cgJmpLt(IRInstruction* i)    { cgJcc(i); }
-void CodeGenerator::cgJmpLte(IRInstruction* i)   { cgJcc(i); }
-void CodeGenerator::cgJmpEq(IRInstruction* i)    { cgJcc(i); }
-void CodeGenerator::cgJmpNeq(IRInstruction* i)   { cgJcc(i); }
-void CodeGenerator::cgJmpSame(IRInstruction* i)  { cgJcc(i); }
-void CodeGenerator::cgJmpNSame(IRInstruction* i) { cgJcc(i); }
-
-void CodeGenerator::cgReqBindJmpGt(IRInstruction* i)    { cgReqBindJcc(i); }
-void CodeGenerator::cgReqBindJmpGte(IRInstruction* i)   { cgReqBindJcc(i); }
-void CodeGenerator::cgReqBindJmpLt(IRInstruction* i)    { cgReqBindJcc(i); }
-void CodeGenerator::cgReqBindJmpLte(IRInstruction* i)   { cgReqBindJcc(i); }
-void CodeGenerator::cgReqBindJmpEq(IRInstruction* i)    { cgReqBindJcc(i); }
-void CodeGenerator::cgReqBindJmpNeq(IRInstruction* i)   { cgReqBindJcc(i); }
-void CodeGenerator::cgReqBindJmpSame(IRInstruction* i)  { cgReqBindJcc(i); }
-void CodeGenerator::cgReqBindJmpNSame(IRInstruction* i) { cgReqBindJcc(i); }
-
-void CodeGenerator::cgJmpGtInt(IRInstruction* i)    { cgJccInt(i); }
-void CodeGenerator::cgJmpGteInt(IRInstruction* i)   { cgJccInt(i); }
-void CodeGenerator::cgJmpLtInt(IRInstruction* i)    { cgJccInt(i); }
-void CodeGenerator::cgJmpLteInt(IRInstruction* i)   { cgJccInt(i); }
-void CodeGenerator::cgJmpEqInt(IRInstruction* i)    { cgJccInt(i); }
-void CodeGenerator::cgJmpNeqInt(IRInstruction* i)   { cgJccInt(i); }
-
-void CodeGenerator::cgReqBindJmpGtInt(IRInstruction* i)  { cgReqBindJccInt(i); }
-void CodeGenerator::cgReqBindJmpGteInt(IRInstruction* i) { cgReqBindJccInt(i); }
-void CodeGenerator::cgReqBindJmpLtInt(IRInstruction* i)  { cgReqBindJccInt(i); }
-void CodeGenerator::cgReqBindJmpLteInt(IRInstruction* i) { cgReqBindJccInt(i); }
-void CodeGenerator::cgReqBindJmpEqInt(IRInstruction* i)  { cgReqBindJccInt(i); }
-void CodeGenerator::cgReqBindJmpNeqInt(IRInstruction* i) { cgReqBindJccInt(i); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1297,10 +1225,14 @@ void CodeGenerator::cgGteX(IRInstruction* inst) {
 }
 
 void CodeGenerator::emitCmpInt(IRInstruction* inst, ConditionCode cc) {
-  auto dstReg = dstLoc(inst, 0).reg();
+  auto dst = dstLoc(inst, 0).reg();
+  auto src0 = srcLoc(inst, 0).reg();
+  auto src1 = srcLoc(inst, 1).reg();
   auto& v = vmain();
-  auto const sf = emitCompareInt(v, inst);
-  v << setcc{cc, sf, dstReg};
+  auto sf = v.makeReg();
+  // Note the reverse syntax in the assembler: will compute src0 - src1
+  v << cmpq{src1, src0, sf};
+  v << setcc{cc, sf, dst};
 }
 
 void CodeGenerator::cgEqInt(IRInstruction* inst)  { emitCmpInt(inst, CC_E); }
@@ -3953,16 +3885,6 @@ void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
   auto const baseOff = localOffset(inst->extra<CheckLoc>()->locId);
   emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
                 rbase[baseOff + TVOFF(m_data)], inst->taken());
-}
-
-void CodeGenerator::cgExitJcc(IRInstruction* inst) {
-  auto const extra = inst->extra<SideExitJccData>();
-  auto const& marker = inst->marker();
-  auto const sk = SrcKey(getFunc(marker), extra->taken, resumed(marker));
-  auto& v = vmain();
-  auto const sf = emitCompare(v, inst);
-  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags,
-                kCrossTraceRegs};
 }
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {

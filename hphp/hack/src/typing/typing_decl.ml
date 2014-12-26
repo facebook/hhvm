@@ -654,28 +654,30 @@ and class_class_decl class_id =
   }
 
 and class_var_decl c (env, acc) cv =
-  let env, ty =
-    match cv.cv_type with
-      | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-      | Some ty' ->
-          (* If this is an XHP attribute and we're in strict mode,
-             relax to partial mode to allow the use of the "array"
-             annotation without specifying type parameters. Until
-             recently HHVM did not allow "array" with type parameters
-             in XHP attribute declarations, so this is a temporary
-             hack to support existing code for now. *)
-          (* Task #5815945: Get rid of this Hack *)
-          let env = if cv.cv_is_xhp && (Env.is_strict env)
-            then Env.set_mode env Ast.Mpartial
-            else env in
-          Typing_hint.hint ~ensure_instantiable:true env ty'
+  let env, ty = match cv.cv_type with
+    | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
+    | Some ty' when cv.cv_is_xhp ->
+      (* If this is an XHP attribute and we're in strict mode,
+         relax to partial mode to allow the use of the "array"
+         annotation without specifying type parameters. Until
+         recently HHVM did not allow "array" with type parameters
+         in XHP attribute declarations, so this is a temporary
+         hack to support existing code for now. *)
+      (* Task #5815945: Get rid of this Hack *)
+      let env = if (Env.is_strict env)
+        then Env.set_mode env Ast.Mpartial
+        else env
+      in
+      Typing_hint.hint ~ensure_instantiable:true env ty'
+    | Some ty' -> Typing_hint.hint ~ensure_instantiable:true env ty'
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_is_xhp_attr = cv.cv_is_xhp; ce_override = false;
-             ce_synthesized = false; ce_visibility = vis; ce_type = ty;
-             ce_origin = (snd c.c_name);
-           } in
+  let ce = {
+    ce_final = true; ce_is_xhp_attr = cv.cv_is_xhp; ce_override = false;
+    ce_synthesized = false; ce_visibility = vis; ce_type = ty;
+    ce_origin = (snd c.c_name);
+  } in
   let acc = SMap.add id ce acc in
   env, acc
 

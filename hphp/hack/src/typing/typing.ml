@@ -1054,7 +1054,7 @@ and expr_ in_cond is_lvalue env (p, e) =
         ) in
       let env, ty1 = expr env e1 in
       let env, result =
-        obj_get ~is_method:false ~nullsafe:nullsafe env ty1 m (fun x -> x) in
+        obj_get ~is_method:false ~nullsafe env ty1 m (fun x -> x) in
       let has_lost_info = Env.FakeMembers.is_invalid env e1 (snd m) in
       if has_lost_info
       then
@@ -1920,7 +1920,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
           (Reason.to_string
            "This is what makes me believe it cannot be null"
            r));
-      obj_get ~is_method:is_method ~nullsafe:nullsafe env ty1 m fn
+      obj_get ~is_method ~nullsafe env ty1 m fn
   | Fun_id x
   | Id x ->
       Typing_hooks.dispatch_id_hook x env;
@@ -2314,17 +2314,16 @@ and member_not_found pos ~is_method env class_ member_name class_name =
     | Some (def_pos, v) ->
         error (`did_you_mean (def_pos, v))
 
-and obj_get ~is_method:is_method ~nullsafe:nullsafe env ty1 id k =
+and obj_get ~is_method ~nullsafe env ty1 id k =
   let env, method_, _ =
-    obj_get_with_visibility ~is_method:is_method ~nullsafe:nullsafe env ty1
-                            id k in
+    obj_get_with_visibility ~is_method ~nullsafe env ty1 id k in
   env, method_
 
-and obj_get_with_visibility ~is_method:is_method ~nullsafe:nullsafe env ty1
+and obj_get_with_visibility ~is_method ~nullsafe env ty1
                             (p, s as id) k =
-  obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 id k (fun ty -> ty)
+  obj_get_ ~is_method ~nullsafe env ty1 id k (fun ty -> ty)
 
-and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
+and obj_get_ ~is_method ~nullsafe env ty1 (p, s as id)
              k k_lhs =
   let env, ety1 = Env.expand_type env ty1 in
   match ety1 with
@@ -2333,8 +2332,7 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
         lfold
           (fun (env, vis) ty ->
             let env, ty, vis' =
-              obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty id
-                       k k_lhs in
+              obj_get_ ~is_method ~nullsafe env ty id k k_lhs in
             (* There is one special case where we need to expose the
              * visibility outside of obj_get (checkout inst_meth special
              * function).
@@ -2350,14 +2348,14 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
       env, method_, vis
   | p, Tgeneric (x, Some ty) ->
       let k_lhs' ty = k_lhs (p, Tgeneric (x, Some ty)) in
-      obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty id k k_lhs'
+      obj_get_ ~is_method ~nullsafe env ty id k k_lhs'
   | p, Tapply ((_, x) as c, argl) when Typing_env.is_typedef x ->
       let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       let k_lhs' ty = k_lhs (p, Tapply (c, argl)) in
-      obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 id k k_lhs'
+      obj_get_ ~is_method ~nullsafe env ty1 id k k_lhs'
   | _, Taccess (_, _, _) ->
       let env, ty1 = TAccess.expand env ety1 in
-      obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 id k k_lhs
+      obj_get_ ~is_method ~nullsafe env ty1 id k k_lhs
   | _, Toption ty -> begin match nullsafe with
     | Some p1 ->
         let k' (env, fty, x) = begin
@@ -2365,7 +2363,7 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
           let env, method_ = non_null env method_ in
           env, (Reason.Rwitness p1, Toption method_), x
         end in
-        obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty id k' k_lhs
+        obj_get_ ~is_method ~nullsafe env ty id k' k_lhs
     | None ->
         Errors.null_member s p
           (Reason.to_string
@@ -2376,9 +2374,10 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
     end
   | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric (_,_) | Tprim _ | Tvar _
     | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
-    | Tobject | Tshape _) -> k begin match snd ety1 with
-    | Tgeneric (_, Some (_, Tapply (x, paraml)))
-    | Tapply (x, paraml) ->
+    | Tobject | Tshape _) -> k begin
+    match snd ety1 with
+      | Tgeneric (_, Some (_, Tapply (x, paraml)))
+      | Tapply (x, paraml) ->
         let class_ = Env.get_class env (snd x) in
         (match class_ with
           | None ->
@@ -2392,21 +2391,24 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
               then List.map (fun _ -> Reason.Rwitness p, Tany) class_.tc_tparams
               else paraml
             in
-            let method_ = Env.get_member is_method env class_ s in
+            let member_ = Env.get_member is_method env class_ s in
             if !Typing_defs.accumulate_method_calls then
               Typing_defs.accumulate_method_calls_result :=
                 (p, (class_.tc_name^"::"^s)) ::
                 !Typing_defs.accumulate_method_calls_result;
             Typing_hooks.dispatch_cmethod_hook class_ (p, s) env None;
-            (match method_ with
+            (match member_ with
+              | None when not is_method ->
+                member_not_found p ~is_method env class_ s x;
+                env, (Reason.Rnone, Tany), None
               | None ->
                 (match Env.get_member is_method env class_ SN.Members.__call with
                   | None ->
                     member_not_found p ~is_method env class_ s x;
                     env, (Reason.Rnone, Tany), None
                   | Some {ce_visibility = vis; ce_type = (r, Tfun ft); _}  ->
-                    let meth_pos = Reason.to_pos r in
-                    check_visibility p env (meth_pos, vis) None;
+                    let mem_pos = Reason.to_pos r in
+                    check_visibility p env (mem_pos, vis) None;
                     let new_name = "alpha_varied_this" in
 
                     let env, paraml = alpha_this ~new_name env paraml in
@@ -2428,14 +2430,15 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
                       ft_tparams = []; ft_params = [];
                       ft_ret = ft_ret;
                     } in
-                    let env, method_ = Typing_generic.rename env new_name
+                    let env, member_ = Typing_generic.rename env new_name
                       SN.Typehints.this (r, Tfun ft) in
-                    env, method_, Some (meth_pos, vis)
+                    env, member_, Some (mem_pos, vis)
                   | _ -> assert false
                 )
-              | Some {ce_visibility = vis; ce_type = method_; _} ->
-                let meth_pos = Reason.to_pos (fst method_) in
-                check_visibility p env (meth_pos, vis) None;
+              | Some ({ce_visibility = vis; ce_type = member_; ce_is_xhp_attr ; _} as member_ce) ->
+                let mem_pos = Reason.to_pos (fst member_) in
+                check_visibility p env (mem_pos, vis) None;
+                let member_ = Typing_enum.member_type env member_ce in
                 let new_name = "alpha_varied_this" in
                 (* Since a paraml member might include a SN.Typehints.this type,
                  * let's alpha vary all the SN.Typehints.this types in the
@@ -2443,7 +2446,7 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
                 let env, paraml = alpha_this ~new_name env paraml in
 
                 let subst = Inst.make_subst class_.tc_tparams paraml in
-                let env, method_ = Inst.instantiate subst env method_ in
+                let env, member_ = Inst.instantiate subst env member_ in
 
                 (* We must substitute out the this types separately
                  * from when the method is instantiated with its type
@@ -2452,22 +2455,22 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
                  * T. We don't want to substitute SN.Typehints.this for T and
                  * then replace that SN.Typehints.this with Vector<this>. *)
                 let this_ty = k_lhs ety1 in
-                let env, method_ = Inst.instantiate_this env method_ this_ty in
+                let env, member_ = Inst.instantiate_this env member_ this_ty in
 
                 (* Now this has been substituted, we can de-alpha-vary *)
-                let env, method_ =
-                  Typing_generic.rename env new_name SN.Typehints.this method_ in
-                env, method_, Some (meth_pos, vis)
+                let env, member_ =
+                  Typing_generic.rename env new_name SN.Typehints.this member_ in
+                env, member_, Some (mem_pos, vis)
             )
         )
-    | Tobject
-    | Tany -> env, (fst ety1, Tany), None
-    | (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
-      | Tvar _ | Tabstract (_, _, _) | Ttuple _ | Tanon (_, _)
-      | Tfun _ | Tunresolved _ | Tshape _ | Taccess (_, _, _)) as ty ->
-      Errors.non_object_member
+      | Tobject
+      | Tany -> env, (fst ety1, Tany), None
+      | (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+            | Tvar _ | Tabstract (_, _, _) | Ttuple _ | Tanon (_, _)
+            | Tfun _ | Tunresolved _ | Tshape _ | Taccess (_, _, _)) as ty ->
+        Errors.non_object_member
           s p (Typing_print.error ty) (Reason.to_pos (fst ety1));
-      env, (fst ety1, Tany), None
+        env, (fst ety1, Tany), None
   end
 
 and type_could_be_null env ty1 =
@@ -3480,10 +3483,11 @@ and class_var_def env is_static c cv =
            hack to support existing code for now. *)
         (* Task #5815945: Get rid of this Hack *)
         if cv.cv_is_xhp && (Env.is_strict env)
-          then Env.set_mode env Ast.Mpartial
-          else env in
+        then Env.set_mode env Ast.Mpartial
+        else env in
       let env, cty = Typing_hint.hint env cty in
-      let _ = Type.sub_type p Reason.URhint env cty ty in ()
+      let _ = Type.sub_type p Reason.URhint env cty ty in
+      ()
 
 and method_def env m =
   let env = { env with Env.lenv = Env.empty_local } in

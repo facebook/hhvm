@@ -782,6 +782,34 @@ struct VcallArgs {
   VregList args, simdArgs, stkArgs;
 };
 
+// Vasm constant: 1 or 8 byte unsigned value, or the disp32 part of a
+// thread-local address of an immutable constant that varies by thread.
+struct Vconst {
+  enum Kind { Quad, Byte, ThreadLocal };
+  struct Hash {
+    size_t operator()(Vconst c) const {
+      return std::hash<uint64_t>()(c.val) ^ std::hash<int>()(c.kind);
+    }
+  };
+  Vconst() : kind(Quad), val(0) {}
+  /* implicit */ Vconst(bool b) : kind(Byte), val(b) {}
+  /* implicit */ Vconst(uint8_t b) : kind(Byte), val(b) {}
+  /* implicit */ Vconst(uint64_t i) : kind(Quad), val(i) {}
+  /* implicit */ Vconst(Vptr tl) : kind(ThreadLocal), disp(tl.disp) {
+    assert(!tl.base.isValid() && !tl.index.isValid() && tl.seg == Vptr::FS);
+  }
+
+  bool operator==(Vconst other) const {
+    return kind == other.kind && val == other.val;
+  }
+
+  Kind kind;
+  union {
+    uint64_t val;
+    int64_t disp; // really, int32 offset from %fs
+  };
+};
+
 /*
  * A Vunit contains all the assets that make up a vasm compilation unit. It is
  * responsible for allocating new blocks, Vregs, and tuples.
@@ -813,6 +841,7 @@ struct Vunit {
   Vreg makeConst(bool);
   Vreg makeConst(uint64_t);
   Vreg makeConst(double);
+  Vreg makeConst(Vptr);
   Vreg makeConst(const void* p) { return makeConst(uint64_t(p)); }
   Vreg makeConst(uint32_t v) { return makeConst(uint64_t(v)); }
   Vreg makeConst(int64_t v) { return makeConst(uint64_t(v)); }
@@ -836,27 +865,7 @@ struct Vunit {
   Vlabel entry;
   jit::vector<Vblock> blocks;
 
-  // Vasm constant: 1 or 8 byte unsigned value.
-  struct Cns {
-    struct Hash {
-      size_t operator()(Cns c) const {
-        return std::hash<uint64_t>()(c.val) ^ c.isByte;
-      }
-    };
-    Cns() : val(0), isByte(false) {}
-    /* implicit */ Cns(bool b) : val(b), isByte(true) {}
-    /* implicit */ Cns(uint8_t b) : val(b), isByte(true) {}
-    /* implicit */ Cns(uint64_t i) : val(i), isByte(false) {}
-
-    bool operator==(Cns other) const {
-      return val == other.val && isByte == other.isByte;
-    }
-
-    uint64_t val;
-    bool isByte;
-  };
-
-  jit::hash_map<Cns,Vreg,Cns::Hash> constants;
+  jit::hash_map<Vconst,Vreg,Vconst::Hash> constants;
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
 };

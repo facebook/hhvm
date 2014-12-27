@@ -511,9 +511,17 @@ struct LLVMEmitter {
 
     // Register all unit's constants.
     for (auto const& pair : unit.constants) {
-      auto val = pair.first.isByte ? cns(uint8_t(pair.first.val))
-                                   : cns(pair.first.val);
-      defineValue(pair.second, val);
+      switch (pair.first.kind) {
+        case Vconst::Quad:
+          defineValue(pair.second, cns(pair.first.val));
+          break;
+        case Vconst::Byte:
+          defineValue(pair.second, cns(uint8_t(pair.first.val)));
+          break;
+        case Vconst::ThreadLocal:
+          always_assert(false);
+          break;
+      }
     }
 
     auto args = m_function->arg_begin();

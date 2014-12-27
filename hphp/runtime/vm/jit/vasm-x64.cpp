@@ -84,6 +84,12 @@ Vreg Vunit::makeConst(double d) {
   return makeConst(u.i);
 }
 
+Vreg Vunit::makeConst(Vptr p) {
+  auto it = constants.find(p);
+  if (it != constants.end()) return it->second;
+  return constants[p] = makeReg();
+}
+
 Vtuple Vunit::makeTuple(VregList&& regs) {
   auto i = tuples.size();
   tuples.emplace_back(std::move(regs));

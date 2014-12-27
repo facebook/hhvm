@@ -151,7 +151,7 @@ public:
   bool wide{false};
   PhysReg reg;
   bool constant{false};
-  Vunit::Cns val;
+  Vconst val;
 };
 
 typedef boost::dynamic_bitset<> LiveSet;
@@ -1530,10 +1530,18 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
     if (ivl->reg != InvalidReg) {
       moves[dst] = ivl->reg;
     } else if (ivl->constant) {
-      if (ivl->val.isByte) {
-        loads.emplace_back(ldimmb{bool(ivl->val.val), dst, true});
-      } else {
-        loads.emplace_back(ldimm{ivl->val.val, dst, true});
+      switch (ivl->val.kind) {
+        case Vconst::Quad:
+          loads.emplace_back(ldimm{ivl->val.val, dst, true});
+          break;
+        case Vconst::Byte:
+          loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst, true});
+          break;
+        case Vconst::ThreadLocal:
+          loads.emplace_back(
+            load{Vptr{baseless(ivl->val.disp), Vptr::FS}, dst}
+          );
+          break;
       }
     } else {
       assert(ivl->spilled());

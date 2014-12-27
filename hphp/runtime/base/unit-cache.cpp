@@ -217,7 +217,7 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
   return createUnitFromString(requestedPath->data(), sb.detach());
 }
 
-CachedUnit createUnitFromFile(StringData* const path) {
+CachedUnit createUnitFromFile(const StringData* const path) {
   auto const contents = readFileAsString(path);
   return contents ? createUnitFromString(path->data(), *contents)
                   : CachedUnit{};
@@ -275,7 +275,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
      * expected to be low contention).
      */
 
-    auto const cu = createUnitFromFile(path);
+    auto const cu = createUnitFromFile(rpath);
     rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
     rpathAcc->second.mtime      = statInfo.st_mtim;
     rpathAcc->second.ino        = statInfo.st_ino;

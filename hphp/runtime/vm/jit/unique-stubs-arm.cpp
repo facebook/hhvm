@@ -86,7 +86,7 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   // The VM-reg-save helper will read the current BC offset out of argReg(0).
   a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
 
-  emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
+  emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
   emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
 
   us.add("stackOverflowHelper", us.stackOverflowHelper);

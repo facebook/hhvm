@@ -65,7 +65,7 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
 void emitBindCall(Vout& v, CodeBlock& frozen,
                   const Func* funcd, int numArgs);
 void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* funcd,
-                        int numArgs, Vreg inSp, Vreg outSp);
+                        int numArgs, Vreg inSp, Vreg outSp, Vreg rds);
 
 // An intentionally funny-looking-in-core-dumps constant for uninitialized
 // instruction pointers.

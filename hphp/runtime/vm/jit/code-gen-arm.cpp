@@ -1343,8 +1343,9 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   v << storel{v.cns(extra->after), rSP[ar + AROFF(m_soff)]};
   if (isNativeImplCall(func, argc)) {
     // emitCallNativeImpl will adjust rVmSp
-    assert(dstLoc(0).reg() == PhysReg(rVmSp));
-    emitCallNativeImpl(v, vcold(), srcKey, func, argc);
+    assert(dstLoc(0).reg() == PhysReg{rVmSp});
+    emitCallNativeImpl(v, vcold(), srcKey, func, argc, rSP, rFP,
+                       PhysReg{rVmTl});
   } else {
     emitBindCall(v, m_state.frozen, func, argc);
   }

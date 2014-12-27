@@ -51,10 +51,9 @@ constexpr size_t kJmpTargetAlign = 16;
 
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
-void emitEagerSyncPoint(Asm& as, const Op* pc, PhysReg vmfp, PhysReg vmsp);
-void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg vmfp, Vreg vmsp);
-void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
-void emitEagerVMRegSave(Vout& as, RegSaveFlags flags);
+void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp);
+void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags);
+void emitEagerVMRegSave(Vout& as, Vreg rds, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 void emitGetGContext(Vout& as, Vreg dest);
 
@@ -92,12 +91,13 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff);
  * Tests the surprise flags for the current thread. Should be used
  * before a jnz to surprise handling code.
  */
-void emitTestSurpriseFlags(Asm& as);
-Vreg emitTestSurpriseFlags(Vout&);
+void emitTestSurpriseFlags(Asm& as, PhysReg rds);
+Vreg emitTestSurpriseFlags(Vout& v, Vreg rds);
 
-void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Fixup fixup);
-void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
+void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Vreg rds,
                                  Fixup fixup);
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
+                                 PhysReg rds, Fixup fixup);
 
 #ifdef USE_GCC_FAST_TLS
 

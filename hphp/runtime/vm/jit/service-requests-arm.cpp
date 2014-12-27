@@ -139,19 +139,19 @@ void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
 //////////////////////////////////////////////////////////////////////
 
 void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey,
-                        const Func* func, int numArgs) {
+                        const Func* func, int numArgs,
+                        Vreg sp, Vreg fp, Vreg rds) {
   assert(isNativeImplCall(func, numArgs));
 
   // We need to store the return address into the AR, but we don't know it
   // yet. Use ldpoint, and point{} below, to get the address.
-  PhysReg sp{rVmSp}, fp{rVmFp}, rds{rVmTl};
   auto ret_point = v.makePoint();
   auto ret_addr = v.makeReg();
   v << ldpoint{ret_point, ret_addr};
   v << store{ret_addr, sp[cellsToBytes(numArgs) + AROFF(m_savedRip)]};
 
   v << lea{sp[cellsToBytes(numArgs)], fp};
-  emitCheckSurpriseFlagsEnter(v, vc, Fixup(0, numArgs));
+  emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup(0, numArgs));
   // rVmSp is already correctly adjusted, because there's no locals other than
   // the arguments passed.
 

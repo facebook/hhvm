@@ -128,7 +128,7 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   a.    loadq  (rax[Func::sharedOff()], rax);
   a.    loadl  (rax[Func::sharedBaseOff()], eax);
   a.    addl   (eax, edi);
-  emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
+  emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
   emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
 
   uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);

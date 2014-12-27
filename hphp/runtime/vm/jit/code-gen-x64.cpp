@@ -2375,7 +2375,7 @@ void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
 void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
   auto& v = vmain();
   emitEagerSyncPoint(v, reinterpret_cast<const Op*>(inst->marker().sk().pc()),
-                     srcLoc(inst, 0).reg(), srcLoc(inst, 1).reg());
+                     rVmTl, srcLoc(inst, 0).reg(), srcLoc(inst, 1).reg());
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
@@ -3136,7 +3136,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   v << store{rFP, rSP[ar + AROFF(m_sfp)]};
   v << storeli{safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]};
   if (isNativeImplCall(callee, argc)) {
-    emitCallNativeImpl(v, vcold(), srcKey, callee, argc, rSP, rNewSP);
+    emitCallNativeImpl(v, vcold(), srcKey, callee, argc, rSP, rNewSP, rVmTl);
   } else {
     v << syncvmsp{rSP};
     emitBindCall(v, m_state.frozen, callee, argc);
@@ -3271,7 +3271,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     auto const pc = getUnit(marker)->entry() + marker.bcOff();
     // we have spilled all args to stack, so spDiff is 0
     emitEagerSyncPoint(v, reinterpret_cast<const Op*>(pc),
-                       srcLoc(inst, 0).reg(), srcLoc(inst, 1).reg());
+                       rVmTl, srcLoc(inst, 0).reg(), srcLoc(inst, 1).reg());
   }
   // The MInstrState we need to use is at a constant offset from the base of the
   // RDS header.
@@ -3392,7 +3392,7 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
 
   if (FixupMap::eagerRecord(func)) {
     emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()),
-                       fp, sp);
+                       rVmTl, fp, sp);
   }
   v << vcall{
     CppCall::direct(builtinFuncPtr),
@@ -4704,7 +4704,7 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
   auto&v = vmain();
-  auto const sf = emitTestSurpriseFlags(v);
+  auto const sf = emitTestSurpriseFlags(v, rVmTl);
   v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 

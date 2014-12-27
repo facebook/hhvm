@@ -152,12 +152,12 @@ emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
     }
   }
   if (persist) {
-    as.  emitImmReg(0, jit::x64::rAsm);
+    as.  emitImmReg(0, rAsm);
   } else {
-    as.  lea(rip[(int64_t)stub.base()], jit::x64::rAsm);
+    as.  lea(rip[(int64_t)stub.base()], rAsm);
   }
   TRACE(3, ")\n");
-  as.    emitImmReg(req, jit::reg::rdi);
+  as.    emitImmReg(req, reg::rdi);
 
   /*
    * Weird hand-shaking with enterTC: reverse-call a service routine.
@@ -168,8 +168,8 @@ emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
    * SRJmpInsteadOfRet indicates to fake the return.
    */
   if (flags & SRFlags::JmpInsteadOfRet) {
-    as.  pop(jit::reg::rax);
-    as.  jmp(jit::reg::rax);
+    as.  pop(reg::rax);
+    as.  jmp(reg::rax);
   } else {
     as.  ret();
   }
@@ -229,14 +229,14 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
 }
 
 void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* func,
-                        int numArgs, Vreg inSp, Vreg outSp) {
+                        int numArgs, Vreg inSp, Vreg outSp, Vreg rds) {
   assert(isNativeImplCall(func, numArgs));
   auto retAddr = (int64_t)mcg->tx().uniqueStubs.retHelper;
   v << store{v.cns(retAddr), inSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]};
   assert(numArgs == func->numLocals());
   assert(func->numIterators() == 0);
   v << lea{inSp[cellsToBytes(numArgs)], rVmFp};
-  emitCheckSurpriseFlagsEnter(v, vc, Fixup{0, numArgs});
+  emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup{0, numArgs});
   BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
   if (false) { // typecheck
     ActRec* ar = nullptr;
@@ -252,7 +252,7 @@ void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* func,
    */
   if (mcg->fixupMap().eagerRecord(func)) {
     emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()),
-                       rVmFp, inSp);
+                       rds, rVmFp, inSp);
   }
   v << vcall{CppCall::direct(builtinFuncPtr), v.makeVcallArgs({{rVmFp}}),
              v.makeTuple({}), Fixup{0, numArgs}};

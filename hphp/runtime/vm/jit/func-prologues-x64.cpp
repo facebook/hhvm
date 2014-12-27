@@ -326,7 +326,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), rVmTl, fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams

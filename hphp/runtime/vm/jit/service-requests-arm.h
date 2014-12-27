@@ -34,7 +34,8 @@ void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
 void emitBindCall(Vout& v, CodeBlock& frozen,
                   const Func* funcd, int numArgs);
 void emitCallNativeImpl(Vout& v, Vout& vcold, SrcKey srcKey,
-                        const Func* funcd, int numArgs);
+                        const Func* funcd, int numArgs,
+                        Vreg sp, Vreg fp, Vreg rds);
 
 }}}
 

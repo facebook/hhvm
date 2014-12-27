@@ -69,24 +69,17 @@ void moveToAlign(CodeBlock& cb,
   }
 }
 
-void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg vmfp, Vreg vmsp) {
-  v << store{vmfp, rVmTl[RDS::kVmfpOff]};
-  v << store{vmsp, rVmTl[RDS::kVmspOff]};
-  emitImmStoreq(v, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
-}
-
-void emitEagerSyncPoint(Asm& as, const Op* pc, PhysReg vmfp, PhysReg vmsp) {
-  // keep this in sync with vasm code above.
-  as.  storeq(vmfp, rVmTl[RDS::kVmfpOff]);
-  as.  storeq(vmsp, rVmTl[RDS::kVmspOff]);
-  emitImmStoreq(as, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
+void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
+  v << store{vmfp, rds[RDS::kVmfpOff]};
+  v << store{vmsp, rds[RDS::kVmspOff]};
+  emitImmStoreq(v, intptr_t(pc), rds[RDS::kVmpcOff]);
 }
 
 // emitEagerVMRegSave --
 //   Inline. Saves regs in-place in the TC. This is an unusual need;
 //   you probably want to lazily save these regs via recordCall and
 //   its ilk.
-void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
+void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags) {
   bool saveFP = bool(flags & RegSaveFlags::SaveFP);
   bool savePC = bool(flags & RegSaveFlags::SavePC);
   assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
@@ -95,7 +88,7 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
   Reg64 pcReg = rdi;
   assert(!kCrossCallRegs.contains(rdi));
 
-  as.   storeq (rVmSp, rVmTl[RDS::kVmspOff]);
+  as.   storeq (rVmSp, rds[RDS::kVmspOff]);
   if (savePC) {
     // We're going to temporarily abuse rVmSp to hold the current unit.
     Reg64 rBC = rVmSp;
@@ -105,17 +98,17 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
     as. loadq  (rBC[Func::unitOff()], rBC);
     as. loadq  (rBC[Unit::bcOff()], rBC);
     as. addq   (rBC, pcReg);
-    as. storeq (pcReg, rVmTl[RDS::kVmpcOff]);
+    as. storeq (pcReg, rds[RDS::kVmpcOff]);
     as. pop    (rBC);
   }
   if (saveFP) {
-    as. storeq (rVmFp, rVmTl[RDS::kVmfpOff]);
+    as. storeq (rVmFp, rds[RDS::kVmfpOff]);
   }
 }
 
 // Save vmsp, and optionally vmfp and vmpc. If saving vmpc,
 // the bytecode offset is expected to be in rdi and is clobbered
-void emitEagerVMRegSave(Vout& v, RegSaveFlags flags) {
+void emitEagerVMRegSave(Vout& v, Vreg rds, RegSaveFlags flags) {
   bool saveFP = bool(flags & RegSaveFlags::SaveFP);
   bool savePC = bool(flags & RegSaveFlags::SavePC);
   assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
@@ -123,7 +116,7 @@ void emitEagerVMRegSave(Vout& v, RegSaveFlags flags) {
 
   assert(!kCrossCallRegs.contains(rdi));
 
-  v << store{rVmSp, rVmTl[RDS::kVmspOff]};
+  v << store{rVmSp, rds[RDS::kVmspOff]};
   if (savePC) {
     PhysReg pc{rdi};
     auto func = v.makeReg();
@@ -134,10 +127,10 @@ void emitEagerVMRegSave(Vout& v, RegSaveFlags flags) {
     v << load{func[Func::unitOff()], unit};
     v << load{unit[Unit::bcOff()], bc};
     v << addq{bc, pc, pc, v.makeReg()};
-    v << store{pc, rVmTl[RDS::kVmpcOff]};
+    v << store{pc, rds[RDS::kVmpcOff]};
   }
   if (saveFP) {
-    v << store{rVmFp, rVmTl[RDS::kVmfpOff]};
+    v << store{rVmFp, rds[RDS::kVmfpOff]};
   }
 }
 
@@ -381,26 +374,26 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff) {
            RegSet().add(rcx).add(rdi).add(rsi).add(rdx));
 }
 
-void emitTestSurpriseFlags(Asm& a) {
+void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  a.testl(-1, rVmTl[RDS::kConditionFlagsOff]);
+  a.testl(-1, rds[RDS::kConditionFlagsOff]);
 }
 
-Vreg emitTestSurpriseFlags(Vout& v) {
+Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
   auto const sf = v.makeReg();
-  v << testlim{-1, rVmTl[RDS::kConditionFlagsOff], sf};
+  v << testlim{-1, rds[RDS::kConditionFlagsOff], sf};
   return sf;
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
-                                 Fixup fixup) {
+                                 PhysReg rds, Fixup fixup) {
   // warning: keep this in sync with the vasm version below.
   Asm a{mainCode}, acold{coldCode};
 
-  emitTestSurpriseFlags(a);
+  emitTestSurpriseFlags(a, rds);
   a.  jnz(coldCode.frontier());
 
   acold.  movq  (rVmFp, argNumToRegName[0]);
@@ -409,11 +402,11 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   acold.  jmp   (a.frontier());
 }
 
-void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Fixup fixup) {
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg rds, Fixup fixup) {
   // warning: keep this in sync with the x64 version above.
   auto cold = vcold.makeBlock();
   auto done = v.makeBlock();
-  auto const sf = emitTestSurpriseFlags(v);
+  auto const sf = emitTestSurpriseFlags(v, rds);
   v << jcc{CC_NZ, sf, {done, cold}};
 
   auto helper = (void(*)())mcg->tx().uniqueStubs.functionEnterHelper;

@@ -291,7 +291,9 @@ let rec main args retries =
         Unix.sleep(1);
         main args (retries-1)
       end else begin
-        Printf.fprintf stderr "Error: hh_server disconnected or crashed, giving up!\n";
+        prerr_string
+          ("Error: hh_server disconnected or crashed, giving up!\n"^
+          "Server may have entered a bad state: Try `hh restart`\n");
         flush stderr;
         exit 5;
       end

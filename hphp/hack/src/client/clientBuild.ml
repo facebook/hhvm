@@ -72,7 +72,13 @@ let rec main_ env retries =
   };
   let ic, oc = connect env retries in
   ServerMsg.cmd_to_channel oc (ServerMsg.BUILD env.build_opts);
-  let response = ServerMsg.response_from_channel ic in
+  let response =
+    try ServerMsg.response_from_channel ic
+    with End_of_file ->
+      prerr_string "Server disconnected or crashed. Try `hh restart`\n";
+      flush stderr;
+      exit 1
+  in
   match response with
   | ServerMsg.SERVER_OUT_OF_DATE ->
     Printf.printf

@@ -184,23 +184,25 @@ module Program : Server.SERVER_PROGRAM = struct
 
   let handle_connection_ genv env socket =
     let cli, _ = Unix.accept socket in
-    let ic = Unix.in_channel_of_descr cli in
-    let oc = Unix.out_channel_of_descr cli in
-    let client = ic, oc in
-    let msg = ServerMsg.cmd_from_channel ic in
-    let finished, _, _ = Unix.select [cli] [] [] 0.0 in
-    if finished <> [] then () else begin
-      ServerPeriodical.stamp_connection();
-      match msg with
-      | ServerMsg.BUILD _ ->
-        (* The build step is special. It closes the socket itself. *)
-        respond genv env ~client ~msg
-      | _ ->
-        respond genv env ~client ~msg;
-        (try Unix.close cli with e ->
-          Printf.fprintf stderr "Error: %s\n" (Printexc.to_string e);
-          flush stderr);
-    end
+    try
+      let ic = Unix.in_channel_of_descr cli in
+      let oc = Unix.out_channel_of_descr cli in
+      let client = ic, oc in
+      let msg = ServerMsg.cmd_from_channel ic in
+      let finished, _, _ = Unix.select [cli] [] [] 0.0 in
+      if finished <> [] then () else begin
+        ServerPeriodical.stamp_connection();
+        match msg with
+        | ServerMsg.BUILD _ ->
+          (* The build step is special. It closes the socket itself. *)
+          respond genv env ~client ~msg
+        | _ ->
+          respond genv env ~client ~msg;
+          Unix.close cli
+      end
+    with e ->
+      Printf.fprintf stderr "Error: %s\n%!" (Printexc.to_string e);
+      Unix.close cli
 
   let handle_connection genv env socket =
     try handle_connection_ genv env socket

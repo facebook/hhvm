@@ -1300,19 +1300,48 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto const rSP   = srcLoc(0).reg();
   auto const rFP   = srcLoc(1).reg();
   auto const ar = extra->numParams * sizeof(TypedValue);
-  auto const srcKey = m_curInst->marker().sk();
   auto const argc = extra->numParams;
   auto const func = extra->callee;
+  auto const rds = PhysReg{rVmTl};
   auto& v = vmain();
+  auto& vc = vcold();
+
   v << store{rFP, rSP[ar + AROFF(m_sfp)]};
   v << storel{v.cns(extra->after), rSP[ar + AROFF(m_soff)]};
   if (isNativeImplCall(func, argc)) {
     // emitCallNativeImpl will adjust rVmSp
     assert(dstLoc(0).reg() == PhysReg{rVmSp});
-    emitCallNativeImpl(v, vcold(), srcKey, func, argc, rSP, rFP,
-                       PhysReg{rVmTl});
+    // We need to store the return address into the AR, but we don't know it
+    // yet. Use ldpoint, and point{} below, to get the address.
+    auto ret_point = v.makePoint();
+    auto ret_addr = v.makeReg();
+    v << ldpoint{ret_point, ret_addr};
+    v << store{ret_addr, rSP[cellsToBytes(argc) + AROFF(m_savedRip)]};
+    v << lea{rSP[cellsToBytes(argc)], rFP};
+    emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup(0, argc));
+    // rVmSp is already correctly adjusted, because there's no locals other
+    // than the arguments passed.
+    BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
+    v << copy{rFP, PhysReg{argReg(0)}};
+    if (mcg->fixupMap().eagerRecord(func)) {
+      v << store{v.cns(func->getEntry()), rds[RDS::kVmpcOff]};
+      v << store{rFP, rds[RDS::kVmfpOff]};
+      v << store{rSP, rds[RDS::kVmspOff]};
+    }
+    auto syncPoint = emitCall(v, CppCall::direct(builtinFuncPtr), argSet(1));
+    Offset stackOff = func->numLocals();
+    v << hcsync{Fixup(0, stackOff), syncPoint};
+    v << load{rFP[AROFF(m_sfp)], rFP};
+    v << point{ret_point};
+    int adjust = sizeof(ActRec) + cellsToBytes(func->numSlotsInFrame() - 1);
+    v << lea{rSP[adjust], rSP};
   } else {
-    emitBindCall(v, m_state.frozen, func, argc);
+    // not calling a native method; use bindcall{}
+    auto& us = mcg->tx().uniqueStubs;
+    auto stub = func ? us.immutableBindCallStub : us.bindCallStub;
+    PhysReg new_fp{rStashedAR}, vmsp{arm::rVmSp};
+    v << lea{vmsp[cellsToBytes(argc)], new_fp};
+    v << bindcall{stub, RegSet(new_fp)};
   }
 }
 

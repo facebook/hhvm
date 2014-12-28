@@ -68,7 +68,6 @@
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 #include "hphp/runtime/vm/runtime.h"
 
-
 #define rVmSp DontUseRVmSpInThisFile
 
 using HPHP::jit::TCA;
@@ -3053,20 +3052,62 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto const rSP    = srcLoc(inst, 0).reg();
   auto const rFP    = srcLoc(inst, 1).reg();
   auto const rNewSP = dstLoc(inst, 0).reg();
-  auto const srcKey = inst->marker().sk();
   auto const extra  = inst->extra<Call>();
   auto const callee = extra->callee;
   auto const argc = extra->numParams;
+  auto const rds = rVmTl;
   auto& v = vmain();
+  auto& vc = vcold();
 
   auto const ar = argc * sizeof(TypedValue);
   v << store{rFP, rSP[ar + AROFF(m_sfp)]};
   v << storeli{safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]};
   if (isNativeImplCall(callee, argc)) {
-    emitCallNativeImpl(v, vcold(), srcKey, callee, argc, rSP, rNewSP, rVmTl);
+    // The assumption here is that for builtins, the generated func contains
+    // only a single opcode (NativeImpl), and there are no non-argument locals.
+    assert(argc == callee->numLocals() && callee->numIterators() == 0);
+    assert(*reinterpret_cast<const Op*>(callee->getEntry()) == Op::NativeImpl);
+    assert(instrLen((Op*)callee->getEntry()) == callee->past()-callee->base());
+    auto retAddr = (int64_t)mcg->tx().uniqueStubs.retHelper;
+    v << store{v.cns(retAddr), rSP[cellsToBytes(argc) + AROFF(m_savedRip)]};
+    v << lea{rSP[cellsToBytes(argc)], rVmFp};
+    emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup(0, argc));
+    BuiltinFunction builtinFuncPtr = callee->builtinFuncPtr();
+    TRACE(2, "calling builtin preClass %p func %p\n", callee->preClass(),
+          builtinFuncPtr);
+    // We sometimes call this while curFunc() isn't really the builtin, so
+    // make sure to record the sync point as if we are inside the builtin.
+    if (mcg->fixupMap().eagerRecord(callee)) {
+      emitEagerSyncPoint(v, reinterpret_cast<const Op*>(callee->getEntry()),
+                         rds, rVmFp, rSP);
+    }
+    // Call the native implementation. This will free the locals for us in the
+    // normal case. In the case where an exception is thrown, the VM unwinder
+    // will handle it for us.
+    v << vcall{CppCall::direct(builtinFuncPtr), v.makeVcallArgs({{rVmFp}}),
+               v.makeTuple({}), Fixup(0, argc)};
+    // The native implementation already put the return value on the stack for
+    // us, and handled cleaning up the arguments.  We have to update the frame
+    // pointer and the stack pointer, and load the return value into the return
+    // register so the trace we are returning to has it where it expects.
+    // TODO(#1273094): we should probably modify the actual builtins to return
+    // values via registers using the C ABI and do a reg-to-reg move.
+    int nLocalCells = callee->numSlotsInFrame();
+    v << load{rVmFp[AROFF(m_sfp)], rVmFp};
+    emitRB(v, Trace::RBTypeFuncExit, callee->fullName()->data());
+    auto adjust = safe_cast<int>(sizeof(ActRec) + cellsToBytes(nLocalCells-1));
+    v << lea{rSP[adjust], rNewSP};
   } else {
+    // Emit a smashable call that initially calls a recyclable service request
+    // stub. The stub and the eventual targets take rStashedAR as an argument.
+    auto& us = mcg->tx().uniqueStubs;
+    auto addr = callee ? us.immutableBindCallStub : us.bindCallStub;
     v << syncvmsp{rSP};
-    emitBindCall(v, m_state.frozen, callee, argc);
+    v << lea{rSP[cellsToBytes(argc)], rStashedAR};
+    if (debug && RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitImmStoreq(v, kUninitializedRIP, rStashedAR[AROFF(m_savedRip)]);
+    }
+    v << bindcall{addr, kCrossCallRegs};
     v << defvmsp{rNewSP};
   }
 }

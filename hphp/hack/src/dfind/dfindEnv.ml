@@ -13,8 +13,7 @@
 (* The environment shared by everyone *)
 (*****************************************************************************)
 
-module SSet = Set.Make(String)
-module SMap = Map.Make(String)
+open Utils
 
 module Time = struct
   type t = int

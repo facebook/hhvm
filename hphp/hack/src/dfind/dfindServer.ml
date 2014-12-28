@@ -14,6 +14,7 @@
 (*****************************************************************************)
 
 open DfindEnv
+open Utils
 
 (*****************************************************************************)
 (* Processing an fsnotify event *)
@@ -33,10 +34,10 @@ let (process_fsnotify_event:
     *)
   let dirty =
     if SMap.mem path env.dirs
-    then SSet.union dirty (SMap.find path env.dirs)
+    then SSet.union dirty (SMap.find_unsafe path env.dirs)
     else begin
       let dir_content =
-        try SMap.find wpath env.dirs
+        try SMap.find_unsafe wpath env.dirs
         with Not_found -> SSet.empty
       in
       env.dirs <- SMap.add wpath (SSet.add path dir_content) env.dirs;

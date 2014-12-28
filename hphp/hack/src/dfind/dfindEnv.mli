@@ -8,13 +8,11 @@
  *
  *)
 
-
 (*****************************************************************************)
 (* The environment shared by everyone *)
 (*****************************************************************************)
 
-module SSet: Set.S with type elt = String.t
-module SMap: Map.S with type key = String.t
+open Utils
 
 (* This is in fact a fake time module, we don't want to use the "real"
  * unix timestamps, because we would run into atomicity problems.

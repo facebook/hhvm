@@ -169,7 +169,7 @@ module MakeWorker = struct
       pipe_descr_out = descr_parent_sends;
       pipe_fout = parent_sends_task;
     } = pipe_parent_sends_child_reads in
-    match Fork.fork ~reason:(Some "worker") () with
+    match Fork.fork ~reason:"worker" () with
     | -1 ->
         failwith "Could not create process"
     | 0 ->

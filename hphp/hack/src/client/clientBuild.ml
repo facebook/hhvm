@@ -36,9 +36,9 @@ let rec connect env retries =
     end
     else exit 2
   | ClientExceptions.Server_initializing ->
-     let wait_msg = if env.build_opts.ServerMsg.wait
-                    then Printf.sprintf "will wait forever due to --wait option, have waited %d seconds" (num_build_retries - retries)
-                    else Printf.sprintf "will wait %d more seconds" retries in
+    let wait_msg = if env.build_opts.ServerMsg.wait
+                   then Printf.sprintf "will wait forever due to --wait option, have waited %d seconds" (num_build_retries - retries)
+                   else Printf.sprintf "will wait %d more seconds" retries in
     Printf.printf
       (* This extra space before the \r is here to erase the spinner
          when the length of this line decreases (but by at most 1!) as

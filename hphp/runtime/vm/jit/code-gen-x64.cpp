@@ -4360,14 +4360,10 @@ void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
 
 void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {
   auto const dreg = dstLoc(inst, 0).reg();
-  auto const ch   = inst->src(0);
+  auto const ch   = srcLoc(inst, 0).reg();
   const Vreg rds = rVmTl;
   auto& v = vmain();
-  if (ch->isConst()) {
-    v << load{rds[ch->rdsHandleVal()], dreg};
-  } else {
-    v << load{rds[srcLoc(inst, 0).reg()], dreg};
-  }
+  v << load{rds[ch], dreg};
 }
 
 void CodeGenerator::cgLdCls(IRInstruction* inst) {

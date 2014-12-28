@@ -110,6 +110,15 @@ struct ImmFolder {
       vals[in.d] = vals[in.s];
     }
   }
+  void fold(load& in, Vinstr& out) {
+    int val;
+    if (in.s.index.isValid() && in.s.scale == 1 && match_int(in.s.index, val) &&
+        deltaFits(int64_t(in.s.disp) + val, sz::dword)) {
+      // index is const: [base+disp+index*1] => [base+(disp+index)]
+      in.s.index = Vreg{};
+      in.s.disp += val;
+    }
+  }
 };
 } // namespace x64
 

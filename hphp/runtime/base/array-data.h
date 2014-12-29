@@ -203,6 +203,7 @@ public:
   bool isApcArray() const { return m_kind == kApcKind; }
   bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
+  bool isEmptyArray() const { return m_kind == kEmptyKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.

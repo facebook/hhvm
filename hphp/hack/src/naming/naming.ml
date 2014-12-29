@@ -871,7 +871,7 @@ and make_class_id ?(allow_typedef=false) env (p, x as cid) =
         N.CI (p, SN.Classes.cUnknown)
       else N.CIstatic
     | x when x = "$this" -> N.CIvar (p, N.This)
-    | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))
+    | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.lvar env cid))
     | _ -> N.CI (Env.class_name env cid)
 
 

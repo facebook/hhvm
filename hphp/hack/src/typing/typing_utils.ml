@@ -66,22 +66,6 @@ let process_static_find_ref cid mid =
     Typing_hooks.dispatch_class_id_hook c (Some mid);
   | _ -> ()
 
-(*****************************************************************************)
-(* Adding an inferred type *)
-(*****************************************************************************)
-
-(* Remember (when we care) the type found at a position *)
-let save_infer env pos ty =
-  match !infer_target with
-  | None -> ()
-  | Some (line, char_pos) ->
-      if Pos.inside pos line char_pos && !infer_type = None
-      then begin
-        infer_type := Some (Typing_print.full_strip_ns env ty);
-        infer_pos := Some (Reason.to_pos (fst ty));
-      end
-      else ()
-
 (* Find the first defined position in a list of types *)
 let rec find_pos p_default tyl =
   match tyl with

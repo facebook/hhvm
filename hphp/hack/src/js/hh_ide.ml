@@ -307,21 +307,13 @@ let hh_get_deps =
                         ])
 
 let infer_at_pos file line char =
-  let clean() =
-    Typing_defs.infer_type := None;
-    Typing_defs.infer_target := None;
-    Typing_defs.infer_pos := None;
-  in
   try
-    clean();
-    Typing_defs.infer_target := Some (line, char);
+    let get_result = InferAtPosService.attach_hooks line char in
     ignore (hh_check file);
-    let ty = !Typing_defs.infer_type in
-    let pos = !Typing_defs.infer_pos in
-    clean();
-    pos, ty
+    InferAtPosService.detach_hooks ();
+    get_result ()
   with _ ->
-    clean();
+    InferAtPosService.detach_hooks ();
     None, None
 
 let hh_find_lvar_refs file line char =

@@ -267,7 +267,7 @@ and make_param_type_ ~for_body default env param =
       Reason.Rvar_param param_pos, t
     | x -> x
   in
-  TUtils.save_infer env param_pos ty;
+  Typing_hooks.dispatch_infer_ty_hook ty param_pos env;
   env, (Some param.param_name, ty)
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
@@ -730,7 +730,7 @@ and raw_expr in_cond env e =
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
-  TUtils.save_infer env (fst e) ty;
+  Typing_hooks.dispatch_infer_ty_hook ty (fst e) env;
   env, ty
 
 and lvalue env e =

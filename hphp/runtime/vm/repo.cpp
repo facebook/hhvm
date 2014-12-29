@@ -716,10 +716,9 @@ void Repo::getIntPragma(int repoId, const char* name, int& val) {
   ssPragma << "PRAGMA " << dbName(repoId) << "." << name << ";";
   RepoStmt stmt(*this);
   stmt.prepare(ssPragma.str());
-  RepoTxnQuery query(txn, stmt);
+  RepoQuery query(stmt);
   query.step();
   query.getInt(0, val);
-  txn.commit();
 }
 
 void Repo::setIntPragma(int repoId, const char* name, int val) {
@@ -745,12 +744,11 @@ void Repo::getTextPragma(int repoId, const char* name, std::string& val) {
   ssPragma << "PRAGMA " << dbName(repoId) << "." << name << ";";
   RepoStmt stmt(*this);
   stmt.prepare(ssPragma.str());
-  RepoTxnQuery query(txn, stmt);
+  RepoQuery query(stmt);
   const char* s;
   query.step();
   query.getText(0, s);
   val = s;
-  txn.commit();
 }
 
 void Repo::setTextPragma(int repoId, const char* name, const char* val) {

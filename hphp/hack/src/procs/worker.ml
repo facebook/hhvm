@@ -238,7 +238,9 @@ module MakeWorker = struct
             | End_of_file ->
                 exit 1
             | e ->
-                Printf.printf "Exception: %s\n" (Printexc.to_string e);
+                let e_str = Printexc.to_string e in
+                Printf.printf "Exception: %s\n" e_str;
+                EventLogger.worker_exception e_str;
                 print_endline "Potential backtrace:";
                 Printexc.print_backtrace stdout;
                 exit 2

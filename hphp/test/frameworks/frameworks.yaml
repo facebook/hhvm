@@ -345,15 +345,9 @@
       - laravel/tests/Database/DatabaseEloquentRelationTest.php
       - laravel/tests/Database/DatabaseEloquentModelTest.php
   lessphp:
-    # Until pull request for phpunit.xml is accepted. The original repository
-    # is commented out below.
-    url: https://github.com/cgcai/lessphp
-    # url: https://github.com/leafo/lessphp.git
-    branch: master
-    # Version 0.4.0 (Forked) The original v0.4.0 commit is commented out
-    # below.
-    commit: 119d94329581e6d6f41627f22faf0cee0b21eb0f
-    # commit: 51f3f06f0fe78a722dabfd14578444bdd078d9de
+    url: https://github.com/leafo/lessphp.git
+    branch: v0.4.0
+    commit: 51f3f06f0fe78a722dabfd14578444bdd078d9de
     install_root: lessphp
     test_root: lessphp
   magento2:

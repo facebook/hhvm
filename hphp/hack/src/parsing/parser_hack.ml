@@ -756,7 +756,7 @@ and class_ ~attr ~final ~kind env =
   let cname       = identifier env in
   let is_xhp      = (snd cname).[0] = ':' in
   let tparams     = class_params env in
-  let cextends    = class_extends env in
+  let cextends    = class_extends ~single:(kind <> Cinterface) env in
   let cimplements = class_implements env in
   let cbody       = class_body env in
   let result =
@@ -836,11 +836,11 @@ and enum_defs env =
 (* Extends/Implements *)
 (*****************************************************************************)
 
-and class_extends env =
+and class_extends ~single env =
   match L.token env.file env.lb with
   | Tword ->
       (match Lexing.lexeme env.lb with
-      | "extends" -> class_extends_list env
+      | "extends" -> if single then [class_hint env] else class_extends_list env
       | "implements" -> L.back env.lb; []
       | s -> error env ("Expected: extends; Got: "^s); []
       )

@@ -160,7 +160,13 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (PureLoad l)        { load(env, l.src); },
     [&] (MayLoadStore l)    { load(env, l.loads); },
     [&] (KillFrameLocals l) { killFrame(env, l.fp); },
-    [&] (ReturnEffects)     { killFrame(env, env.global.mainFp); },
+
+    [&] (ReturnEffects) {
+      // Locations other than the frame (e.g. object properties and whatnot)
+      // are live on a function return.
+      addAllGen(env);
+      killFrame(env, env.global.mainFp);
+    },
 
     /*
      * Call instructions potentially throw, even though we don't (yet) have
@@ -278,8 +284,13 @@ void optimizeStores(IRUnit& unit) {
   FTRACE(1, "\nLocations:\n{}\n", show(genv.ainfo));
 
   /*
-   * Initialize the block state structures, and collect information about
-   * memory locations.
+   * Initialize the block state structures.
+   *
+   * Important note: every block starts with an empty liveOut set, including
+   * blocks that are exiting the region.  When an HHIR region is exited,
+   * there's always some instruction we can use to indicate via memory_effects
+   * what may be read (e.g. EndCatch, RetCtrl, ReqBindJmp, etc).  When we start
+   * iterating, we'll appropriately add things to GEN based on these.
    */
   for (auto poId = uint32_t{0}; poId < poBlockList.size(); ++poId) {
     genv.blockStates[poBlockList[poId]->id()].id = poId;

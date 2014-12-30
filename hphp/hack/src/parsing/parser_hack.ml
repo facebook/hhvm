@@ -756,7 +756,9 @@ and class_ ~attr ~final ~kind env =
   let cname       = identifier env in
   let is_xhp      = (snd cname).[0] = ':' in
   let tparams     = class_params env in
-  let cextends    = class_extends ~single:(kind <> Cinterface) env in
+  let cextends    =
+    if kind = Ctrait then []
+    else class_extends ~single:(kind <> Cinterface) env in
   let cimplements = class_implements env in
   let cbody       = class_body env in
   let result =

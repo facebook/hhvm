@@ -42,7 +42,7 @@ let type_class x =
 
 let check_typedef x =
   try
-    let _, args, hint as typedef = Naming_heap.TypedefHeap.find_unsafe x in
+    let _, _, hint as typedef = Naming_heap.TypedefHeap.find_unsafe x in
     let filename = Pos.filename (fst hint) in
     let tenv = Typing_env.empty filename in
     (* Mode for typedefs themselves doesn't really matter right now, but

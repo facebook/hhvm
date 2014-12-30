@@ -480,7 +480,6 @@ and class_decl nenv c =
     then SMap.fold SMap.add self_dimpl dimpl
     else dimpl
   in
-  let env = Typing_hint.check_tparams_instantiable env c.c_tparams in
   let env, tparams = lfold Typing.type_param env c.c_tparams in
   let env, enum = match c.c_enum with
     | None -> env, None
@@ -668,8 +667,8 @@ and class_var_decl c (env, acc) cv =
         then Env.set_mode env Ast.Mpartial
         else env
       in
-      Typing_hint.hint ~ensure_instantiable:true env ty'
-    | Some ty' -> Typing_hint.hint ~ensure_instantiable:true env ty'
+      Typing_hint.hint env ty'
+    | Some ty' -> Typing_hint.hint env ty'
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
@@ -684,7 +683,7 @@ and class_var_decl c (env, acc) cv =
 and static_class_var_decl c (env, acc) cv =
   let env, ty = match cv.cv_type with
     | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-    | Some ty -> Typing_hint.hint ~ensure_instantiable:true env ty in
+    | Some ty -> Typing_hint.hint env ty in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
   let ce = { ce_final = true; ce_is_xhp_attr = cv.cv_is_xhp; ce_override = false;
@@ -770,7 +769,7 @@ and typeconst_typedef_decl nenv c typeconst =
         then Errors.missing_assign (fst tid);
         fst tid, Hany
     | Some x -> x in
-  let decl = false, params, concrete_type in
+  let decl = params, None, concrete_type in
   let filename = Pos.filename (fst tid) in
   let env = Typing_env.empty filename in
   let env = Typing_env.set_mode env c.c_mode in
@@ -876,21 +875,18 @@ and type_typedef_naming_and_decl nenv tdef =
     | Ast.Alias x -> false
     | Ast.NewType x -> true
   in
-  let (params, tcstr, concrete_type) = Naming.typedef nenv tdef in
-  let decl = is_abstract, params, concrete_type in
+  let params, tcstr, concrete_type as decl = Naming.typedef nenv tdef in
   let filename = Pos.filename pos in
   let env = Typing_env.empty filename in
   let env = Typing_env.set_mode env tdef.Ast.t_mode in
   let env = Env.set_root env (Typing_deps.Dep.Class tid) in
   let env, params = lfold Typing.type_param env params in
-  let env, concrete_type =
-    Typing_hint.hint ~ensure_instantiable:true env concrete_type in
+  let env, concrete_type = Typing_hint.hint env concrete_type in
   let env, tcstr =
     match tcstr with
     | None -> env, None
     | Some constraint_type ->
-      let env, constraint_type =
-        Typing_hint.hint ~ensure_instantiable:true env constraint_type in
+      let env, constraint_type = Typing_hint.hint env constraint_type in
       let sub_type = Typing_ops.sub_type pos Reason.URnewtype_cstr in
       let env = sub_type env constraint_type concrete_type in
       env, Some constraint_type

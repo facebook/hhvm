@@ -730,11 +730,9 @@ and attribute env (_, e) =
   expr env e;
   ()
 
-let typedef tenv name (_, _, h) =
+let typedef tenv (_, _, h) =
   let env = { t_is_finally = ref false;
               class_name = None; class_kind = None;
               imm_ctrl_ctx = Toplevel;
               tenv = tenv } in
-  hint env h;
-  let tenv, ty = Typing_hint.hint tenv h in
-  Typing_tdef.check_typedef name tenv ty
+  hint env h

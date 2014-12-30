@@ -1,4 +1,4 @@
-File "typedef4.php", line 14, characters 18-18:
-A is uninstantiable (Typing[4002])
-File "typedef4.php", line 12, characters 7-7:
-Declaration is here
+File "typedef4.php", line 17, characters 7-15:
+Unexpected typedef (Naming[2052])
+File "typedef4.php", line 14, characters 6-14:
+Definition is here

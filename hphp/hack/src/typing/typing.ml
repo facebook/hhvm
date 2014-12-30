@@ -3361,6 +3361,7 @@ and class_def_ env_up c tc =
   let env = Env.set_root env (Dep.Class (snd c.c_name)) in
   let pc, cid = c.c_name in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
+  let env = Typing_hint.check_tparams_instantiable env c.c_tparams in
   let self = get_self_from_c env c in
   let env, impl_dimpl =
     lfold (get_implements ~with_checks:true ~this:self) env impl in
@@ -3483,9 +3484,9 @@ and class_var_def env is_static c cv =
            hack to support existing code for now. *)
         (* Task #5815945: Get rid of this Hack *)
         if cv.cv_is_xhp && (Env.is_strict env)
-        then Env.set_mode env Ast.Mpartial
-        else env in
-      let env, cty = Typing_hint.hint env cty in
+          then Env.set_mode env Ast.Mpartial
+          else env in
+      let env, cty = Typing_hint.hint ~ensure_instantiable:true env cty in
       let _ = Type.sub_type p Reason.URhint env cty ty in
       ()
 
@@ -3521,8 +3522,12 @@ and method_def env m =
     | Some _ -> ()
 
 and typedef_def env_up x typedef =
-  NastCheck.typedef env_up x typedef;
-  match typedef with
-    | _, _, (pos, Hshape fdm) ->
-      ignore (check_shape_keys_validity env_up pos (ShapeMap.keys fdm))
-    | _ -> ()
+  NastCheck.typedef env_up typedef;
+  let _, tcstr, hint = typedef in
+  let tenv, ty = Typing_hint.hint ~ensure_instantiable:true env_up hint in
+  Typing_tdef.check_typedef x tenv ty;
+  ignore (opt_map (Typing_hint.check_instantiable env_up) tcstr);
+  match hint with
+  | pos, Hshape fdm ->
+    ignore (check_shape_keys_validity env_up pos (ShapeMap.keys fdm))
+  | _ -> ()

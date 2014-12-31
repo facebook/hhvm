@@ -109,8 +109,8 @@ end
 module CheckInstantiability = struct
 
   let visitor =
-  object(this)
-    inherit [Env.env] hint_visitor
+  object
+    inherit [Env.env] hint_visitor as super
 
     method! on_apply env (usage_pos, n) hl =
       let () = (match Typing_env.Classes.get n with
@@ -119,14 +119,13 @@ module CheckInstantiability = struct
         | Some {tc_kind = Ast.Ctrait; tc_name; tc_pos; _} ->
           Errors.uninstantiable_class usage_pos tc_pos tc_name
         | _ -> ()) in
-      let env = List.fold_left this#on_hint env hl in
-      env
+      super#on_apply env (usage_pos, n) hl
 
-    method! on_abstr env _ _ =
+    method! on_abstr _env _ _ =
         (* there should be no need to descend into abstract params, as
          * the necessary param checks happen on the declaration of the
          * constraint *)
-      env
+      _env
 
   end
 
@@ -206,7 +205,7 @@ and hint_ p env = function
   | Happly ((p, "\\tuple"), _) ->
       Errors.tuple_syntax p;
       env, Tany
-  | Happly (((p, c) as id), argl) ->
+  | Happly (((_p, c) as id), argl) ->
       Typing_hooks.dispatch_class_id_hook id None;
       Env.add_wclass env c;
       let env, argl = lfold hint env argl in

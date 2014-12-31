@@ -166,7 +166,7 @@ let get_constant tc (seen, has_default) = function
     Errors.enum_switch_not_const pos;
     (seen, has_default)
 
-let check_enum_exhaustiveness env pos tc caselist =
+let check_enum_exhaustiveness pos tc caselist =
   let (seen, has_default) =
     List.fold_left (get_constant tc) (SMap.empty, false) caselist in
   let consts = SMap.remove SN.Members.mClass tc.tc_consts in

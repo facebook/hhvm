@@ -345,7 +345,7 @@ let from_trait c (env, acc) uses =
   let env, inherited = from_class c env uses in
   env, add_inherited inherited acc
 
-let from_xhp_attr_use c (env, acc) uses =
+let from_xhp_attr_use (env, acc) uses =
   let env, inherited = from_class_xhp_attrs_only env uses in
   env, add_inherited inherited acc
 
@@ -363,7 +363,7 @@ let make env c =
   let acc = List.fold_left (from_requirements c) acc c.c_req_extends in
   (* ... are overridden with those inherited from used traits *)
   let acc = List.fold_left (from_trait c) acc c.c_uses in
-  let acc = List.fold_left (from_xhp_attr_use c) acc c.c_xhp_attr_uses in
+  let acc = List.fold_left from_xhp_attr_use acc c.c_xhp_attr_uses in
   (* todo: what about the same constant defined in different interfaces
    * we implement? We should forbid and say "constant already defined".
    * to julien: where is the logic that check for duplicated things?

@@ -124,7 +124,7 @@ module CheckFunctionType = struct
         liter expr2 f_type fdl;
         ()
     | _, Clone e -> expr f_type e; ()
-    | _, Obj_get (e, (_, Id s), _) ->
+    | _, Obj_get (e, (_, Id _s), _) ->
         expr f_type e;
         ()
     | _, Obj_get (e1, e2, _) ->
@@ -173,7 +173,7 @@ module CheckFunctionType = struct
     | _, Cast (_, e) ->
         expr f_type e;
         ()
-    | _, Efun (f, _) -> ()
+    | _, Efun _ -> ()
 
     | FGenerator, Yield_break
     | FAsyncGenerator, Yield_break -> ()
@@ -321,7 +321,7 @@ and class_ tenv c =
               tenv = tenv } in
   let env = { env with tenv = Env.set_mode env.tenv c.c_mode } in
   if c.c_kind = Ast.Cinterface then begin
-    interface env c;
+    interface c;
   end
   else begin
     maybe method_ (env, true) c.c_constructor;
@@ -404,16 +404,16 @@ and check_is_trait env (h : hint) =
   | _ -> failwith "assertion failure: trait isn't an Happly"
   )
 
-and interface env c =
+and interface c =
   (* make sure that interfaces only have empty public methods *)
-  liter begin fun env m ->
+  List.iter begin fun m ->
     if m.m_body <> (UnnamedBody []) && m.m_body <> (NamedBody [])
     then Errors.abstract_body (fst m.m_name)
     else ();
     if m.m_visibility <> Public
     then Errors.not_public_interface (fst m.m_name)
     else ()
-  end env (c.c_static_methods @ c.c_methods);
+  end (c.c_static_methods @ c.c_methods);
   (* make sure that interfaces don't have any member variables *)
   match c.c_vars with
   | hd::_ ->

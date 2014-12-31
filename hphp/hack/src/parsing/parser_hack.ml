@@ -1292,25 +1292,9 @@ and class_use_list env =
   | Tcomma ->
       if !(env.errors) != error_state
       then [cst]
-      else cst :: class_use_list_remain env
+      else cst :: class_use_list env
   | _ ->
       error_expect env ";"; [cst]
-
-and class_use_list_remain env =
-  match L.token env.file env.lb with
-  | Tsc -> []
-  | _ ->
-      L.back env.lb;
-      let error_state = !(env.errors) in
-      let cst = ClassUse (class_hint env) in
-      match L.token env.file env.lb with
-      | Tsc ->
-          [cst]
-      | Tcomma ->
-          if !(env.errors) != error_state
-          then [cst]
-          else cst :: class_use_list_remain env
-      | _ -> error_expect env ";"; [cst]
 
 and trait_require env =
   match L.token env.file env.lb with

@@ -20,7 +20,7 @@
 #include <pthread.h>
 #include "hphp/util/exception.h"
 #include <errno.h>
-#include "folly/String.h"
+#include <folly/String.h>
 #include <type_traits>
 
 namespace HPHP {
@@ -237,6 +237,8 @@ struct ThreadLocalNoCheck {
   }
 
   ThreadLocalNode<T> m_node;
+private:
+  void setNull() { m_node.m_p = nullptr; }
 };
 
 template<typename T>
@@ -485,6 +487,7 @@ public:
   }
 
 public:
+  void setNull() { ThreadLocalSetValue(m_key, nullptr); }
   pthread_key_t m_key;
 };
 

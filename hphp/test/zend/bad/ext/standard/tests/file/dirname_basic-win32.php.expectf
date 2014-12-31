@@ -26,7 +26,7 @@ string(18) "   /usr/lib/locale"
 string(15) "/usr/lib/locale"
 string(18) "   /usr/lib/locale"
 string(1) "."
-string(14) "		c:\test\adir"
+string(14) "%r\x09\x09%rc:\test\adir"
 string(1) "\"
 string(1) "\"
 ===DONE===

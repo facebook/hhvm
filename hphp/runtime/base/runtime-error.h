@@ -66,7 +66,10 @@ public:
         COMPILE_ERROR | COMPILE_WARNING | USER_ERROR | USER_WARNING |
         USER_NOTICE | RECOVERABLE_ERROR | PHP_DEPRECATED | USER_DEPRECATED,
 
-    HPHP_ALL = PHP_ALL | FATAL_ERROR
+    HPHP_ALL = PHP_ALL | FATAL_ERROR,
+
+    // Errors that can be upgraded to E_USER_ERROR
+    UPGRADEABLE_ERROR = WARNING | USER_WARNING | NOTICE | USER_NOTICE
   };
 };
 
@@ -110,11 +113,18 @@ void raise_hack_strict(HackStrictOption option, const char *ini_setting,
                        const char *fmt, ...);
 
 /*
- * Raise typehint error is the same as raise_recoverable_error, except
- * when compiled in RepoAuthoritative mode with HardTypeHints the
- * error handler is not allowed to recover.
+ * raise_typehint_error() is the same as raise_recoverable_error(), except
+ * when compiled in RepoAuthoritative mode with HardTypeHints the error
+ * handler is not allowed to recover.
  */
 void raise_typehint_error(const std::string& msg);
+
+/*
+ * raise_return_typehint_error() is the same as raise_recoverable_error(),
+ * except when compiled in RepoAuthoritative mode with HardReturnTypeHints
+ * the error handler is not allowed to recover.
+ */
+void raise_return_typehint_error(const std::string& msg);
 
 void raise_disallowed_dynamic_call(const std::string& msg);
 

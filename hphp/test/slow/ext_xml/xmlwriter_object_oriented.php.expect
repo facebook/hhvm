@@ -1,0 +1,76 @@
+object(XMLWriter)#1 (0) {
+}
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+string(705) "<?xml version="1.0" encoding="UTF-8"?>
+<node name="value" name2="">
+  <subnode>some text</subnode>
+</node>
+<fb:node fb:attr="value" fb:attr2="" xmlns:fb="http://www.facebook.com/">
+  <prefix:name xmlns:prefix="http://some.url/">1337</prefix:name>
+  <node></node>
+</fb:node>
+<node><![CDATA[Raw text]]></node>
+<node><![CDATA[More CDATA]]></node>
+<!--Comments-->
+<!--More comments-->
+<?lol?>
+<?php print 'Hello world!';?>
+<node>Raw XML</node><!DOCTYPE name
+PUBLIC "publicID"
+       "systemID" [subset]>
+<!DOCTYPE name
+PUBLIC "publicID"
+       "systemID">
+<!ELEMENT name>
+<!ELEMENT name content>
+<!ATTLIST name>
+<!ATTLIST name content>
+<!ENTITY name>
+<!ENTITY name PUBLIC "publicid" "systemid" NDATA ndataid>
+"
+string(0) ""

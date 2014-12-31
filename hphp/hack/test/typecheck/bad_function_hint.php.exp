@@ -1,0 +1,2 @@
+File "bad_function_hint.php", line 12, characters 15-28:
+Function hints must be parenthesized (Parsing[1002])

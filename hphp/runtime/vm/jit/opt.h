@@ -16,25 +16,32 @@
 #ifndef incl_HPHP_HHIR_OPT_H_
 #define incl_HPHP_HHIR_OPT_H_
 
-#include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-class IRBuilder;
-class IRUnit;
-class IRInstruction;
+struct IRBuilder;
+struct IRUnit;
+struct IRInstruction;
+struct FrameStateMgr;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * The main optimization passes, in the order they run.
  */
-void optimizeRefcounts(IRUnit&, FrameState&&);
+void optimizeRefcounts(IRUnit&, FrameStateMgr&&);
 void optimizePredictions(IRUnit&);
+void gvn(IRUnit&);
+void optimizeLoads(IRUnit&);
+void optimizeStores(IRUnit&);
 void optimizeJumps(IRUnit&);
+
+/*
+ * DCE runs in between various passes.
+ */
 void eliminateDeadCode(IRUnit&);
 
 /*

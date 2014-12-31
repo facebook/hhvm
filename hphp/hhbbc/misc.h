@@ -58,7 +58,7 @@ using SArray  = const ArrayData*;
 /*
  * HHBC evaluation stack flavors.
  */
-enum class Flavor { C, V, A, R, F, U };
+enum class Flavor { C, V, A, R, F, U, CVU };
 
 /*
  * Types of parameter preparation (or unknown).
@@ -75,11 +75,17 @@ enum class PrepKind { Ref, Val, Unknown };
 constexpr int kSystemLibBump = 10;
 
 /*
+ * Functions listed in the --trace functions list get trace level bumped by
+ * this amount.
+ */
+constexpr int kTraceFuncBump = -2;
+
+/*
  * We may run the interpreter collecting stats and when trace is on
  * the amount of noise is unbearable. This is to keep tracing out
  * of stats collection.
  */
-constexpr int kTraceBump = 50;
+constexpr int kStatsBump = 50;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -124,69 +130,6 @@ private:
   const char* what;
   time_point start;
 };
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * A smart pointer that does deep copies when you copy construct it.
- */
-template<class T>
-struct copy_ptr {
-  copy_ptr() noexcept : m_p(nullptr) {}
-  explicit copy_ptr(T* t) noexcept : m_p(t) {}
-
-  copy_ptr(const copy_ptr& o) : m_p(o.m_p ? new T(*o.m_p) : nullptr) {}
-
-  copy_ptr(copy_ptr&& o) noexcept
-    : m_p(o.m_p)
-  {
-    o.m_p = nullptr;
-  }
-
-  copy_ptr& operator=(const copy_ptr& o) {
-    if (!m_p) {
-      m_p = o.m_p ? new T(*o.m_p) : nullptr;
-      return *this;
-    }
-
-    if (o.m_p) {
-      *m_p = *o.m_p;
-      return *this;
-    }
-
-    delete m_p;
-    m_p = nullptr;
-    return *this;
-  }
-
-  copy_ptr& operator=(copy_ptr&& o) noexcept {
-    delete m_p;
-    m_p = o.m_p;
-    o.m_p = nullptr;
-    return *this;
-  }
-
-  ~copy_ptr() {
-    delete m_p;
-#ifdef DEBUG
-    m_p = nullptr;
-#endif
-  }
-
-  explicit operator bool() const { return !!m_p; }
-
-  T& operator*() const { return *m_p; }
-  T* operator->() const { return m_p; }
-  T* get() const { return m_p; }
-
-private:
-  T* m_p;
-};
-
-template<class T, class... Args>
-copy_ptr<T> make_copy_ptr(Args&&... t) {
-  return copy_ptr<T>(new T(std::forward<Args>(t)...));
-}
 
 //////////////////////////////////////////////////////////////////////
 

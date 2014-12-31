@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -68,24 +68,19 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   assert(kScratchCrossTraceRegs.contains(rdx));
 
   auto funcImm = Immed64(func);
-  const int kAlignMask = kCacheLineMask;
-  int loBits = uintptr_t(a.frontier()) & kAlignMask;
-  int delta, size;
+  int nBytes, offset;
 
   // Ensure the immediate is safely smashable
   // the immediate must not cross a qword boundary,
   if (!funcImm.fits(sz::dword)) {
-    size = 8;
-    delta = loBits + kFuncMovImm;
+    nBytes = kFuncGuardLen;
+    offset = kFuncMovImm;
   } else {
-    size = 4;
-    delta = loBits + kFuncCmpImm;
+    nBytes = kFuncGuardShortLen;
+    offset = kFuncCmpImm;
   }
 
-  delta = (delta + size - 1) & kAlignMask;
-  if (delta < size - 1) {
-    a.emitNop(size - 1 - delta);
-  }
+  mcg->backEnd().prepareForSmash(a.code(), nBytes, offset);
 
   TCA aStart DEBUG_ONLY = a.frontier();
   if (!funcImm.fits(sz::dword)) {
@@ -131,7 +126,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   Asm a { mcg->code.main() };
 
   if (mcg->tx().mode() == TransKind::Proflogue) {
-    assert(func->shouldPGO());
+    assert(shouldPGOFunc(*func));
     TransID transId  = mcg->tx().profData()->curTransID();
     auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
     a.movq(counterAddr, rAsm);
@@ -147,22 +142,23 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     // Too many args; a weird case, so call out to an appropriate helper.
     // Stash ar somewhere callee-saved.
     if (false) { // typecheck
-      JIT::shuffleExtraArgsMayUseVV((ActRec*)nullptr);
-      JIT::shuffleExtraArgsVariadicAndVV((ActRec*)nullptr);
-      JIT::shuffleExtraArgsVariadic((ActRec*)nullptr);
-      JIT::trimExtraArgs((ActRec*)nullptr);
+      jit::shuffleExtraArgsMayUseVV((ActRec*)nullptr);
+      jit::shuffleExtraArgsVariadicAndVV((ActRec*)nullptr);
+      jit::shuffleExtraArgsVariadic((ActRec*)nullptr);
+      jit::trimExtraArgs((ActRec*)nullptr);
     }
     a.    movq   (rStashedAR, argNumToRegName[0]);
 
     if (LIKELY(func->discardExtraArgs())) {
-      emitCall(a, TCA(JIT::trimExtraArgs));
+      emitCall(a, TCA(jit::trimExtraArgs), argSet(1));
     } else if (func->attrs() & AttrMayUseVV) {
       emitCall(a, func->hasVariadicCaptureParam()
-               ? TCA(JIT::shuffleExtraArgsVariadicAndVV)
-               : TCA(JIT::shuffleExtraArgsMayUseVV));
+               ? TCA(jit::shuffleExtraArgsVariadicAndVV)
+               : TCA(jit::shuffleExtraArgsMayUseVV),
+               argSet(1));
     } else {
       assert(func->hasVariadicCaptureParam());
-      emitCall(a, TCA(JIT::shuffleExtraArgsVariadic));
+      emitCall(a, TCA(jit::shuffleExtraArgsVariadic), argSet(1));
     }
     // We'll fix rVmSp below.
   } else if (nPassed < numNonVariadicParams) {
@@ -316,12 +312,12 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     for (int i = nPassed; i < numNonVariadicParams; ++i) {
       if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
         if (false) { // typecheck
-          JIT::raiseMissingArgument((const Func*) nullptr, 0);
+          jit::raiseMissingArgument((const Func*) nullptr, 0);
         }
         a.  emitImmReg((intptr_t)func, argNumToRegName[0]);
         a.  emitImmReg(nPassed, argNumToRegName[1]);
-        emitCall(a, TCA(JIT::raiseMissingArgument));
-        mcg->recordSyncPoint(a.frontier(), fixup.m_pcOffset, fixup.m_spOffset);
+        emitCall(a, TCA(jit::raiseMissingArgument), argSet(2));
+        mcg->recordSyncPoint(a.frontier(), fixup.pcOffset, fixup.spOffset);
         break;
       }
     }
@@ -330,7 +326,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), rVmTl, fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams
@@ -395,7 +391,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   Asm a { mcg->code.main() };
   Label not_magic_call;
   auto const rInvName = r13;
-  assert(!kSpecialCrossTraceRegs.contains(r13));
+  assert(!kCrossCallRegs.contains(r13));
 
   auto skFuncBody = SrcKey {};
   auto callFixup  = TCA { nullptr };
@@ -447,7 +443,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     a.  shrq   (0x4, argNumToRegName[0]);
     a.  movq   (rVmSp, argNumToRegName[1]);
     emitCall(a, reinterpret_cast<CodeAddress>(
-      MkPacked{MixedArray::MakePacked}));
+      MkPacked{MixedArray::MakePacked}), argSet(2));
     callFixup = a.frontier();
   }
   if (nPassed != 2) {

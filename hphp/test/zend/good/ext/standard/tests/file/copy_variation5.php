@@ -65,6 +65,7 @@ foreach($dest_files as $dest_file) {
 echo "*** Done ***\n";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__)."/copy_variation5.tmp");
 ?>

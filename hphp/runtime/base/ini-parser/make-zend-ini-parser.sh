@@ -6,6 +6,7 @@ if [ ! -x "$SED" ]; then
   exit 1
 fi
 
+unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 if [ -z "${INSTALL_DIR}" ]; then
@@ -25,18 +26,16 @@ else
   OUTFILE=${INSTALL_DIR}/zend-ini.tab.cpp
   OUTHEADER=${INSTALL_DIR}/zend-ini.tab.hpp
 
-  EXTERNAL_TOOLS_ROOT=`readlink -f ${FBCODE_DIR}/third-party/centos5.2-native/`
-  BISON_DIR=${EXTERNAL_TOOLS_ROOT}/bison/bison-2.4.1/da39a3e/
+  BISON=$(readlink -f $(ls -t ${FBCODE_DIR}/third-party2/bison/2.4.1/centos5.2-native/*/bin/bison | head -1))
+  BISON_DIR=$(dirname $(dirname $BISON))
   export BISON_PKGDATADIR=${BISON_DIR}/share/bison
-
-  BISON=${BISON_DIR}/bin/bison
 fi
 
 $BISON -pini_ --verbose --locations --defines=${OUTHEADER} -o${OUTFILE} ${INFILE}
 if [ $? -ne 0 ] ; then
   exit 1
 fi
-     
+
 # Renaming some stuff in the cpp file
 $SED -i \
   -e "s/\".*zend-ini.tab.cpp\"/\"zend-ini.tab.cpp\"/" \

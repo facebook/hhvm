@@ -22,10 +22,10 @@
 #include <memory>
 #include <type_traits>
 
-#include "folly/gen/Base.h"
-#include "folly/Conv.h"
-#include "folly/Optional.h"
-#include "folly/Memory.h"
+#include <folly/gen/Base.h>
+#include <folly/Conv.h>
+#include <folly/Optional.h>
+#include <folly/Memory.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
@@ -466,7 +466,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     for (auto& inst : b->hhbcs) emit_inst(inst);
 
     if (b->fallthrough) {
-      if (boost::next(blockIt) == endBlockIt || blockIt[1] != b->fallthrough) {
+      if (std::next(blockIt) == endBlockIt || blockIt[1] != b->fallthrough) {
         if (b->fallthroughNS) {
           emit_inst(bc::JmpNS { b->fallthrough });
         } else {
@@ -882,8 +882,15 @@ void emit_class(EmitUnitState& state,
   auto const privateStatics = state.index.lookup_private_statics(&cls);
   for (auto& prop : cls.properties) {
     auto const repoTy = [&] (const PropState& ps) -> RepoAuthType {
-      // TODO(#3599292): we don't currently infer closure use var types.
+      /*
+       * Skip closures, because the types of their used vars can be
+       * communicated via assert opcodes right now.  At the time of this
+       * writing there was nothing to gain by including RAT's for the
+       * properties, since closure properties are only used internally by the
+       * runtime, not directly via opcodes like CGetM.
+       */
       if (is_closure(cls)) return RepoAuthType{};
+
       auto it = ps.find(prop.name);
       if (it == end(ps)) return RepoAuthType{};
       auto const rat = make_repo_type(*state.index.array_table_builder(),
@@ -903,12 +910,19 @@ void emit_class(EmitUnitState& state,
   }
 
   for (auto& cconst : cls.constants) {
-    pce->addConstant(
-      cconst.name,
-      cconst.typeConstraint,
-      &cconst.val,
-      cconst.phpCode
-    );
+    if (!cconst.val.hasValue()) {
+      pce->addAbstractConstant(
+        cconst.name,
+        cconst.typeConstraint
+      );
+    } else {
+      pce->addConstant(
+        cconst.name,
+        cconst.typeConstraint,
+        &cconst.val.value(),
+        cconst.phpCode
+      );
+    }
   }
 
   pce->setEnumBaseTy(cls.enumBaseTy);
@@ -926,6 +940,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   auto ue = folly::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_filepath = unit.filename;
+  ue->m_preloadPriority = unit.preloadPriority;
 
   EmitUnitState state { index };
   state.defClsMap.resize(unit.classes.size(), kInvalidOffset);

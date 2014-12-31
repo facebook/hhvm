@@ -8,6 +8,8 @@
  *
  *)
 
+type result = ServerMsg.patch list
+
 let go action genv env oc =
   let find_refs_action, new_name = match action with
     | ServerMsg.ClassRename (old_name, new_name) ->
@@ -19,12 +21,12 @@ let go action genv env oc =
   
   let refs = ServerFindRefs.get_refs_with_defs find_refs_action genv env in
   let changes = List.fold_left begin fun acc x ->
-    let replacement = { 
-                        ServerMsg.pos  = (snd x);
+    let replacement = {
+                        ServerMsg.pos  = Pos.to_absolute (snd x);
                         ServerMsg.text = new_name;
                       } in
     let patch = ServerMsg.Replace replacement in            
     patch :: acc
   end [] refs in
-  Marshal.to_channel oc changes [];
+  Marshal.to_channel oc (changes : result) [];
   flush oc

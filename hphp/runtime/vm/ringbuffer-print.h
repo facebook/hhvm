@@ -20,7 +20,7 @@
 
 namespace HPHP { namespace Trace {
 
-void dumpRingBuffer(int numEntries);
+void dumpRingBuffer(int numEntries, uint32_t threadId);
 
 } }
 

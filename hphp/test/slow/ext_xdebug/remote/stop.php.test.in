@@ -1,0 +1,3 @@
+step_over -i 0
+stop -i 0
+run -i 0

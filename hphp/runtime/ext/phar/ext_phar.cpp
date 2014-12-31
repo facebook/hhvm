@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -59,7 +60,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     );
     String contents = ret.toString();
 
-    MemFile* file = NEWOBJ(MemFile)(contents.data(), contents.size());
+    MemFile* file = newres<MemFile>(contents.data(), contents.size());
     return file;
   }
 
@@ -106,7 +107,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
       raise_warning("No such file or directory");
       return nullptr;
     }
-    return NEWOBJ(ArrayDirectory)(files);
+    return newres<ArrayDirectory>(files);
   }
 
  private:

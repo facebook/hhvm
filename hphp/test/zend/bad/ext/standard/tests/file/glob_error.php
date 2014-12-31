@@ -23,6 +23,7 @@ var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", "string") );
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 // temp file deleted
 unlink(dirname(__FILE__)."/glob_error/wonder12345");

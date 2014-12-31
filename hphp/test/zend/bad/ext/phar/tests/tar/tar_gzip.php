@@ -28,6 +28,7 @@ var_dump($b->isFileFormat(Phar::TAR));
 var_dump($b->isCompressed() == Phar::GZ);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/tar_gzip.phar');
 @unlink(dirname(__FILE__) . '/tar_gzip.phar.tar');

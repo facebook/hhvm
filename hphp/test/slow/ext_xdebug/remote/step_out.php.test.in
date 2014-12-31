@@ -1,0 +1,16 @@
+breakpoint_set -i 0 -t line -f step_out.php.test -n 4
+breakpoint_set -i 1 -t line -f step_out.php.test -n 12
+breakpoint_set -i 2 -t call -m fail
+run -i 3
+run -i 4
+step_out -i 5
+step_out -i 6
+step_out -i 7
+step_out -i 8
+step_out -i 9
+run -i 10
+step_out -i 11
+step_out -i 12
+step_out -i 13
+run -i 14
+run -i 15

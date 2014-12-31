@@ -14,22 +14,31 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module TDef = Typing_tdef
 module Inst = Typing_instantiate
+module TUEnv = Typing_unification_env
+module TAccess = Typing_taccess
 
+(* Most code -- notably the cases in unify_ -- do *not* need to thread through
+ * the uenv, since for example just because we know an array<foo, bar> can't
+ * itself be null, that doesn't mean that foo and bar can't be null. *)
 let rec unify env ty1 ty2 =
+  unify_with_uenv env (TUEnv.empty, ty1) (TUEnv.empty, ty2)
+
+and unify_with_uenv env (uenv1, ty1) (uenv2, ty2) =
   if ty1 == ty2 then env, ty1 else
   match ty1, ty2 with
   | (_, Tany), ty | ty, (_, Tany) -> env, ty
-  | (r1, Tvar n1), (r2, Tvar n2) -> unify_var env r1 n1 r2 n2
+  | (r1, Tvar n1), (r2, Tvar n2) -> unify_var env (r1, uenv1, n1) (r2, uenv2, n2)
   | (r, Tvar n), ty2
   | ty2, (r, Tvar n) ->
       let env, ty1 = Env.get_type env n in
       let n' = Env.fresh() in
       let env = Env.rename env n n' in
-      let env, ty = unify env ty1 ty2 in
+      let env, ty = unify_with_uenv env (uenv1, ty1) (uenv2, ty2) in
       let env = Env.add env n ty in
       env, (r, Tvar n')
   | (r1, Tunresolved tyl1), (r2, Tunresolved tyl2) ->
       let r = unify_reason r1 r2 in
+      (* TODO this should probably pass through the uenv *)
       let env, tyl = TUtils.normalize_inter env tyl1 tyl2 in
       env, (r, Tunresolved tyl)
   | (r, Tunresolved tyl), (_, ty_ as ty)
@@ -39,38 +48,49 @@ let rec unify env ty1 ty2 =
       let r = Reason.Rcoerced (p1, env.Env.pos, str_ty) in
       let env = List.fold_left (fun env x -> TUtils.sub_type env ty x) env tyl in
       env, (r, ty_)
+  | (_, Toption ty1), _ when uenv1.TUEnv.non_null ->
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
+  | _, (_, Toption ty2) when uenv2.TUEnv.non_null ->
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | (r1, Toption ty1), (r2, Toption ty2) ->
       let r = unify_reason r1 r2 in
-      let env, ty = unify env ty1 ty2 in
+      let uenv1 = { uenv1 with TUEnv.non_null = true } in
+      let uenv2 = { uenv2 with TUEnv.non_null = true } in
+      let env, ty = unify_with_uenv env (uenv1, ty1) (uenv2, ty2) in
       env, (r, Toption ty)
   (* Mixed is nullable and we want it to unify with both ?T and T at
    * the same time. If we try to unify mixed with an option,
    * we peel of the ? and unify mixed with the underlying type. *)
   | (r2, Tmixed), (_, Toption ty1)
   | (_, Toption ty1), (r2, Tmixed) ->
-    unify env ty1 (r2, Tmixed)
+    unify_with_uenv env (TUEnv.empty, ty1) (TUEnv.empty, (r2, Tmixed))
   | (r1, (Tprim Nast.Tvoid as ty1')), (r2, (Toption ty as ty2')) ->
      (* When we are in async functions, we allow people to write Awaitable<void>
       * and then do yield result(null) *)
       if Env.allow_null_as_void env
-      then unify env ty1 ty
+      then unify_with_uenv env (uenv1, ty1) (uenv2, ty)
       else (TUtils.uerror r1 ty1' r2 ty2'; env, (r1, ty1'))
   (* It might look like you can combine the next two cases, but you can't --
    * if both sides are a Tapply the "when" guard will only check ty1, so if ty2
    * is a typedef it won't get expanded. So we need an explicit check for both.
    *)
-  | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef env x ->
+  | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef x ->
       let env, ty1 = TDef.expand_typedef env r x argl in
-      unify env ty1 ty2
-  | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
+  | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef x ->
       let env, ty1 = TDef.expand_typedef env r x argl in
-      unify env ty1 ty2
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
+  | (_, Taccess _), _
+  | _, (_, Taccess _) ->
+      let env, ty1 = TAccess.expand env ty1 in
+      let env, ty2 = TAccess.expand env ty2 in
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | (r1, ty1), (r2, ty2) ->
       let r = unify_reason r1 r2 in
       let env, ty = unify_ env r1 ty1 r2 ty2 in
       env, (r, ty)
 
-and unify_var env r1 n1 r2 n2 =
+and unify_var env (r1, uenv1, n1) (r2, uenv2, n2) =
   let r = unify_reason r1 r2 in
   let env, n1 = Env.get_var env n1 in
   let env, n2 = Env.get_var env n2 in
@@ -80,7 +100,7 @@ and unify_var env r1 n1 r2 n2 =
   let n' = Env.fresh() in
   let env = Env.rename env n1 n' in
   let env = Env.rename env n2 n' in
-  let env, ty = unify env ty1 ty2 in
+  let env, ty = unify_with_uenv env (uenv1, ty1) (uenv2, ty2) in
   (* I ALWAYS FORGET THIS! ALWAYS!!! *)
   (* The type of n' could have changed because of recursive types *)
   (* We need one more round *)
@@ -99,18 +119,16 @@ and unify_ env r1 ty1 r2 ty2 =
           TUtils.uerror r1 ty1 r2 ty2;
           env, Tany
       )
-  | Tarray (_, None, None), (Tarray _ as ty)
-  | (Tarray _ as ty), Tarray (_, None, None) ->
+  | Tarray (None, None), (Tarray _ as ty)
+  | (Tarray _ as ty), Tarray (None, None) ->
       env, ty
-  | Tarray (b1, Some ty1, None), Tarray (b2, Some ty2, None) ->
-      let is_local = b1 && b2 in
+  | Tarray (Some ty1, None), Tarray (Some ty2, None) ->
       let env, ty = unify env ty1 ty2 in
-      env, Tarray (is_local, Some ty, None)
-  | Tarray (b1, Some ty1, Some ty2), Tarray (b2, Some ty3, Some ty4) ->
-      let is_local = b1 && b2 in
+      env, Tarray (Some ty, None)
+  | Tarray (Some ty1, Some ty2), Tarray (Some ty3, Some ty4) ->
       let env, ty1 = unify env ty1 ty3 in
       let env, ty2 = unify env ty2 ty4 in
-      env, Tarray (is_local, Some ty1, Some ty2)
+      env, Tarray (Some ty1, Some ty2)
   | Tfun ft1, Tfun ft2 ->
       let env, ft1 = Inst.instantiate_ft env ft1 in
       let env, ft2 = Inst.instantiate_ft env ft2 in
@@ -165,7 +183,7 @@ and unify_ env r1 ty1 r2 ty2 =
       let env, ty = unify env ty1 ty2 in
       env, Tgeneric (x1, Some ty)
   | Tgeneric ("this", Some ((_, Tapply ((_, x) as id, _) as ty))), _ ->
-      let env, class_ = Env.get_class env x in
+      let class_ = Env.get_class env x in
       (* For final class C, there is no difference between this<X> and X *)
       (match class_ with
       | Some {tc_final = true; _} ->
@@ -177,16 +195,19 @@ and unify_ env r1 ty1 r2 ty2 =
              ~when_: begin fun () ->
                match ty2 with
                | Tapply ((_, y), _) -> y = x
-               | _ -> false
+               | Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
+                | Toption _ | Tvar _ | Tabstract (_, _, _) | Ttuple _
+                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
+                | Tshape _ | Taccess (_, _, _) -> false
              end
              ~do_:(fun error -> Errors.this_final id (Reason.to_pos r1) error)
           );
           env, Tany
         )
-  | _, Tgeneric ("this", Some (_, Tapply ((_, x), _))) ->
+  | _, Tgeneric ("this", Some (_, Tapply _)) ->
       unify_ env r2 ty2 r1 ty1
-  | (Ttuple _ as ty), Tarray (_, None, None)
-  | Tarray (_, None, None), (Ttuple _ as ty) ->
+  | (Ttuple _ as ty), Tarray (None, None)
+  | Tarray (None, None), (Ttuple _ as ty) ->
       env, ty
   | Ttuple tyl1, Ttuple tyl2 ->
       let size1 = List.length tyl1 in
@@ -207,13 +228,11 @@ and unify_ env r1 ty1 r2 ty2 =
   | Tanon _, Tanon _ -> env, Tunresolved [r1, ty1; r2, ty2]
   | Tfun ft, Tanon (anon_arity, id)
   | Tanon (anon_arity, id), Tfun ft ->
-      if not (IMap.mem id env.Env.genv.Env.anons)
-      then begin
+      (match Env.get_anonymous env id with
+      | None ->
         Errors.anonymous_recursive_call (Reason.to_pos r1);
         env, Tany
-      end
-      else
-        let anon = IMap.find_unsafe id env.Env.genv.Env.anons in
+      | Some anon ->
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
         if not (unify_arities ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
@@ -221,7 +240,7 @@ and unify_ env r1 ty1 r2 ty2 =
         let env, ft = Inst.instantiate_ft env ft in
         let env, ret = anon env ft.ft_params in
         let env, _ = unify env ft.ft_ret ret in
-        env, Tfun ft
+        env, Tfun ft)
   | Tobject, Tobject
   | Tobject, Tapply _
   | Tapply _, Tobject -> env, Tobject
@@ -231,9 +250,16 @@ and unify_ env r1 ty1 r2 ty2 =
       let env = TUtils.apply_shape ~f env (r1, fdm1) (r2, fdm2) in
       let env = TUtils.apply_shape ~f env (r2, fdm2) (r1, fdm1) in
       env, Tshape fdm1
-  | _ ->
-      TUtils.uerror r1 ty1 r2 ty2;
-      env, Tany
+  | Taccess _, _ | _, Taccess _ ->
+      let env, fty1 = TAccess.expand env (r1, ty1) in
+      let env, fty2 = TAccess.expand env (r2, ty2) in
+      let env, fty = unify env fty1 fty2 in
+      env, snd fty
+  | (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+      | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+      | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
+        TUtils.uerror r1 ty1 r2 ty2;
+        env, Tany
 
 and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
   match anon_arity, func_arity with
@@ -271,7 +297,7 @@ and unify_funs env r1 ft1 r2 ft2 =
     | Fvariadic (_, (n1, var_ty1)), Fvariadic (min, (_n2, var_ty2)) ->
       let env, var = unify env var_ty1 var_ty2 in
       env, Some (n1, var), Fvariadic (min, (n1, var))
-    | ar1, ar2 ->
+    | ar1, _ar2 ->
       env, None, ar1
   in
   let env, params = unify_params env ft1.ft_params ft2.ft_params var_opt in
@@ -298,16 +324,6 @@ and unify_params env l1 l2 var1_opt =
     let env, _ = unify env x2 x1 in
     let env, rl = unify_params env rl1 rl2 var1_opt in
     env, (name, x2) :: rl
-
-let unify_nofail env ty1 ty2 =
-  Errors.try_
-    (fun () -> unify env ty1 ty2)
-    (fun _ ->
-      let res = Env.fresh_type() in
-      (* TODO: this can produce an unresolved of unresolved *)
-      let env, res = unify env res (fst ty1, Tunresolved [ty1; ty2]) in
-      env, res
-    )
 
 (*****************************************************************************)
 (* Exporting *)

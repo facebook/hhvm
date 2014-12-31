@@ -35,6 +35,6 @@ let auto_complete env content oc =
   let result = AutocompleteService.get_results fun_names class_names in
   ServerIdeUtils.revive funs classes;
   Printf.printf "Auto-complete\n"; flush stdout;
-  Marshal.to_channel oc result [];
+  Marshal.to_channel oc (result : AutocompleteService.result) [];
   flush oc;
   AutocompleteService.detach_hooks()

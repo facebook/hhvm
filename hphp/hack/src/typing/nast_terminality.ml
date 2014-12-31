@@ -32,13 +32,13 @@ end = struct
             AE_assert (_, False) |
             AE_invariant ((_, False), _, _) |
             AE_invariant_violation _))
-    | Expr (_, Call (Cnormal, (_, Id (_, "exit")), _)) -> raise Exit
+    | Expr (_, Call (Cnormal, (_, Id (_, "\\exit")), _, _)) -> raise Exit
     | If (_, b1, b2) ->
       (try terminal inside_case b1; () with Exit ->
         terminal inside_case b2)
     | Switch (_, cl) ->
       terminal_cl cl
-    | Try (b, catch_list, fb) ->
+    | Try (b, catch_list, _) ->
       (* Note: return inside a finally block is allowed in PHP and
        * overrides any return in try or catch. It is an error in <?hh,
        * however. The only way that a finally block can thus be
@@ -48,6 +48,10 @@ end = struct
        *)
       (try terminal inside_case b; () with Exit ->
         terminal_catchl inside_case catch_list)
+    | While ((_, True), b)
+    | Do (b, (_, True))
+    | For ((_, Expr_list []), (_, Expr_list []), (_, Expr_list []), b) ->
+        if not (NastVisitor.HasBreak.block b) then raise Exit
     | Do _
     | While _
     | For _
@@ -113,15 +117,15 @@ end = struct
             AE_assert (_, False) |
             AE_invariant ((_, False), _, _) |
             AE_invariant_violation _))
-    | Expr (_, Call (Cnormal, (_, Id (_, "exit")), _)) -> raise Exit
+    | Expr (_, Call (Cnormal, (_, Id (_, "exit")), _, _)) -> raise Exit
     | If (_, b1, b2) ->
       (try terminal b1; () with Exit ->
         terminal b2)
     | Switch (_, cl) ->
       terminal_cl cl
-    | Try (b, catches, fb) ->
-      (* NOTE: contents of fb are not executed in normal flow, so they
-       * cannot contribute to terminality *)
+    | Try (b, catches, _) ->
+      (* NOTE: contents of finally block are not executed in normal flow, so
+       * they cannot contribute to terminality *)
       (try terminal b; () with Exit -> terminal_catchl catches)
     | Do _
     | While _

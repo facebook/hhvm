@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_MYSQL_H_
 #define incl_HPHP_EXT_MYSQL_H_
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/base-includes.h"
 #include "mysql.h"
@@ -40,19 +40,8 @@ public:
   mysqlExtension() : Extension("mysql", "1.0") {}
 
   // implementing IDebuggable
-  virtual int  debuggerSupport() {
-    return SupportInfo;
-  }
-  virtual void debuggerInfo(InfoVec &info) {
-    int count = g_persistentResources->getMap("mysql::persistent_conns").size();
-    Add(info, "Persistent", FormatNumber("%" PRId64, count));
-
-    AddServerStats(info, "sql.conn"       );
-    AddServerStats(info, "sql.reconn_new" );
-    AddServerStats(info, "sql.reconn_ok"  );
-    AddServerStats(info, "sql.reconn_old" );
-    AddServerStats(info, "sql.query"      );
-  }
+  virtual int debuggerSupport();
+  virtual void debuggerInfo(InfoVec &info);
 
   static bool ReadOnly;
 #ifdef FACEBOOK
@@ -68,25 +57,7 @@ public:
   static std::string Socket;
   static bool TypedResults;
 
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
-    Hdf mysql = config["MySQL"];
-    ReadOnly = Config::GetBool(ini, mysql["ReadOnly"]);
-#ifdef FACEBOOK
-    Localize = Config::GetBool(ini, mysql["Localize"]);
-#endif
-    ConnectTimeout = Config::GetInt32(ini, mysql["ConnectTimeout"], 1000);
-    ReadTimeout = Config::GetInt32(ini, mysql["ReadTimeout"], 60000);
-    WaitTimeout = Config::GetInt32(ini, mysql["WaitTimeout"], -1);
-    SlowQueryThreshold = Config::GetInt32(ini, mysql["SlowQueryThreshold"], 1000);
-    KillOnTimeout = Config::GetBool(ini, mysql["KillOnTimeout"]);
-    MaxRetryOpenOnFail = Config::GetInt32(ini, mysql["MaxRetryOpenOnFail"], 1);
-    MaxRetryQueryOnFail = Config::GetInt32(ini, mysql["MaxRetryQueryOnFail"], 1);
-    Socket = Config::GetString(ini, mysql["Socket"]);
-    TypedResults = Config::GetBool(ini, mysql["TypedResults"], true);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                     "hhvm.mysql.typed_results", &TypedResults);
-  }
-
+  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config);
   void moduleInit();
 };
 

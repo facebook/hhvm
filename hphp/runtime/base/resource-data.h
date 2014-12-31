@@ -17,8 +17,12 @@
 #ifndef incl_HPHP_RESOURCE_DATA_H_
 #define incl_HPHP_RESOURCE_DATA_H_
 
+#include <iostream>
+
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/classname-is.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 #include "hphp/util/thread-local.h"
 
@@ -55,7 +59,13 @@ class ResourceData {
 
   virtual ~ResourceData(); // all PHP resources need vtables
 
-  void operator delete(void* p) { ::operator delete(p); }
+  void operator delete(void* p) {
+    ::operator delete(p);
+  }
+  virtual size_t heapSize() const {
+    always_assert(false); // better not be in the smart-heap
+    not_reached();
+  }
 
   void release() {
     assert(!hasMultipleRefs());
@@ -82,17 +92,23 @@ class ResourceData {
  private:
   static void compileTimeAssertions();
 
+ private:
   //============================================================================
   // ResourceData fields
+  union {
+    struct {
+      UNUSED char m_pad[3];
+      UNUSED HeaderKind m_kind;
+      mutable RefCount m_count;
+    };
+    uint64_t m_kind_count;
+  };
 
  protected:
   // Numeric identifier of resource object (used by var_dump() and other
   // output functions)
   int32_t o_id;
-  // Counter to keep track of the number of references to this resource
-  // (i.e. the resource's "refcount")
-  mutable RefCount m_count;
-} __attribute__((__aligned__(16)));
+};
 
 /**
  * Rules to avoid memory problems/leaks from ResourceData classes
@@ -131,8 +147,8 @@ class ResourceData {
  *    When deriving from SweepableResourceData, either "new" or "NEW" can
  *    be used, but we prefer people use NEW with these macros:
  *
- *       DECLARE_OBJECT_ALLOCATION(T);
- *       IMPLEMENT_OBJECT_ALLOCATION(T);
+ *       DECLARE_RESOURCE_ALLOCATION(T);
+ *       IMPLEMENT_RESOURCE_ALLOCATION(T);
  *
  * 3. If a ResourceData is a mix of smart allocated data members and non-
  *    smart allocated data members, sweep() has to be overwritten to only
@@ -172,7 +188,7 @@ class ResourceData {
  */
 class SweepableResourceData : public ResourceData, public Sweepable {
 protected:
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     // ResourceData objects are non-smart allocated by default (see
     // operator delete in ResourceData), so sweeping will destroy the
     // object and deallocate its seat as well.
@@ -184,6 +200,42 @@ protected:
 
 ALWAYS_INLINE bool decRefRes(ResourceData* res) {
   return res->decRefAndRelease();
+}
+
+template<class T, class... Args> T* newres(Args&&... args) {
+  static_assert(std::is_convertible<T*,ResourceData*>::value, "");
+  auto const mem = MM().smartMallocSizeLogged(sizeof(T));
+  try {
+    return new (mem) T(std::forward<Args>(args)...);
+  } catch (...) {
+    MM().smartFreeSizeLogged(mem, sizeof(T));
+    throw;
+  }
+}
+
+#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
+  public:                                                               \
+  ALWAYS_INLINE void operator delete(void* p) {                         \
+    static_assert(std::is_base_of<ResourceData,T>::value, "");          \
+    assert(sizeof(T) <= kMaxSmartSize);                                 \
+    MM().smartFreeSizeLogged(p, sizeof(T));                             \
+  }\
+  virtual size_t heapSize() const { return sizeof(T); }
+
+#define DECLARE_RESOURCE_ALLOCATION(T)                                  \
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \
+  void sweep() override;
+
+#define IMPLEMENT_RESOURCE_ALLOCATION(T) \
+  static_assert(std::is_base_of<ResourceData,T>::value, ""); \
+  void HPHP::T::sweep() { this->~T(); }
+
+template<class T, class... Args>
+typename std::enable_if<
+  std::is_convertible<T*, ResourceData*>::value,
+  SmartPtr<T>
+>::type makeSmartPtr(Args&&... args) {
+  return SmartPtr<T>(newres<T>(std::forward<Args>(args)...));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

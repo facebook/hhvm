@@ -172,13 +172,12 @@ using LineTable      = std::vector<LineEntry>;
 using SourceLocTable = std::vector<SourceLocEntry>;
 using FuncTable      = std::vector<FuncEntry>;
 
-using LineToOffsetRangeVecMap = std::map<int, OffsetRangeVec>;
-
 /*
  * Get the line number or SourceLoc for Offset `pc' in `table'.
  */
 int getLineNumber(const LineTable& table, Offset pc);
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
+void stashLineTable(const Unit* unit, LineTable table);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -193,7 +192,6 @@ bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 struct Unit {
   friend class UnitEmitter;
   friend class UnitRepoProxy;
-  friend class FuncDict;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -781,11 +779,7 @@ public:
   // Internal methods.
 
 private:
-  SourceLocTable getSourceLocTable() const;
-  LineToOffsetRangeVecMap getLineToOffsetRangeVecMap() const;
-
   void initialMerge();
-
   template<bool debugger>
   void mergeImpl(void* tcbase, MergeInfo* mi);
 
@@ -795,26 +789,23 @@ private:
   //
   // These are organized in reverse order of frequency of use.  Do not re-order
   // without checking perf!
-
-public:
-  static Mutex s_classesMutex;
-
 private:
   unsigned char const* m_bc{nullptr};
-  size_t m_bclen{0};
-  const StringData* m_filepath{nullptr};
-  LineTable m_lineTable;
+  Offset m_bclen{0};
+  LowStringPtr m_filepath{nullptr};
   MergeInfo* m_mergeInfo{nullptr};
-  int8_t m_repoId{-1};
 
+  int8_t m_repoId{-1};
   /*
    * m_mergeState is read without a lock, but only written to under
    * unitInitLock (see unit.cpp).
    */
   uint8_t m_mergeState{MergeState::Unmerged};
+  bool m_mergeOnly: 1;
+  bool m_interpretOnly : 1;
+  bool m_isHHFile : 1;
+  LowStringPtr m_dirpath{nullptr};
 
-  bool m_mergeOnly{false};
-  bool m_interpretOnly;
   TypedValue m_mainReturn;
   std::vector<PreClassPtr> m_preClasses;
   FixedVector<TypeAlias> m_typeAliases;
@@ -823,24 +814,10 @@ private:
    * The remaining fields are cold, and arbitrarily ordered.
    */
 
-  int64_t m_sn{-1};
-  const StringData* m_dirpath{nullptr};
+  int64_t m_sn{-1};             // Note: could be 32-bit
   MD5 m_md5;
   NamedEntityPairTable m_namedInfo;
-  std::vector<const ArrayData*> m_arrays;
-  SourceLocTable m_sourceLocTable;
-  bool m_isHHFile{false};
-
-  /*
-   * Map from source lines to a collection of all the bytecode ranges the line
-   * encompasses.
-   *
-   * The value type of the map is a list of offset ranges, so a single line
-   * with several sub-statements may correspond to the bytecodes of all of the
-   * sub-statements.
-   */
-  LineToOffsetRangeVecMap m_lineToOffsetRangeVecMap;
-
+  FixedVector<const ArrayData*> m_arrays;
   FuncTable m_funcTable;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
 };
@@ -921,6 +898,18 @@ public:
   AllClasses();
   bool empty() const;
   Class* front() const;
+  Class* popFront();
+};
+
+
+class AllCachedClasses {
+  NamedEntity::Map::iterator m_next, m_end;
+  void skip();
+
+public:
+  AllCachedClasses();
+  bool empty() const;
+  Class* front();
   Class* popFront();
 };
 

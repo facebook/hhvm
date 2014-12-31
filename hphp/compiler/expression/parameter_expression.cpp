@@ -24,6 +24,7 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/type-constraint.h"
 
 using namespace HPHP;
 
@@ -90,7 +91,9 @@ const std::string ParameterExpression::getTypeHintDisplayName() const {
       case 4: strip = !strcasecmp(stripped, "bool"); break;
       case 5: strip = !strcasecmp(stripped, "float"); break;
       case 6: strip = !strcasecmp(stripped, "string"); break;
-      case 8: strip = !strcasecmp(stripped, "resource"); break;
+      case 8: strip = (!strcasecmp(stripped, "resource") ||
+                       !strcasecmp(stripped, "arraykey"));
+              break;
       default:
         break;
     }
@@ -228,36 +231,22 @@ TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
   return ret;
 }
 
-TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                        bool coerce) {
-  assert(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
-  TypePtr ret = getTypeSpec(ar, true);
-
-  VariableTablePtr variables = getScope()->getVariables();
-  // Functions that can be called dynamically have to have
-  // variant parameters, even if they have a type hint
-  if ((Option::AllDynamic || getFunctionScope()->isDynamic()) ||
-      getFunctionScope()->isRedeclaring() ||
-      getFunctionScope()->isVirtual()) {
-    if (!Option::HardTypeHints || !ret->isExactType()) {
-      variables->forceVariant(ar, m_name, VariableTable::AnyVars);
-      ret = Type::Variant;
-    }
+static bool useHackTypeHintErrorMessage(const char* hint) {
+  String typeName(hint);
+  MaybeDataType dt = TypeConstraint::typeNameToMaybeDataType(typeName.get());
+  if (!dt.hasValue()) {
+    return false;
   }
-
-  if (m_defaultValue && !m_ref) {
-    TypePtr r = m_defaultValue->inferAndCheck(ar, Type::Some, false);
-    if (!m_defaultValue->is(KindOfConstantExpression) ||
-        !static_pointer_cast<ConstantExpression>(m_defaultValue)->isNull()) {
-      ret = Type::Coerce(ar, r, ret);
-    }
+  switch (*dt) {
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfString:
+    case KindOfResource:
+      return true;
+    default:
+      return false;
   }
-
-  // parameters are like variables, but we need to remember these are
-  // parameters so when variable table is generated, they are not generated
-  // as declared variables.
-  return variables->addParamLike(m_name, ret, ar, shared_from_this(),
-                                 getScope()->isFirstPass());
 }
 
 void ParameterExpression::compatibleDefault() {
@@ -276,70 +265,75 @@ void ParameterExpression::compatibleDefault() {
     }
   }
 
-  const char* msg = "Default value for parameter %s with type %s "
-                    "needs to have the same type as the type hint %s";
-  if (m_hhType) {
-    // Normally a named type like 'int' is compatable with Int but not integer
-    // Since the default value's type is inferred from the value itself it is
-    // ok to compare against the lower case version of the type hint in hint
-    const char* hint = getTypeHint().c_str();
-    switch(defaultType) {
-    case KindOfBoolean:
-      compat = !strcasecmp(hint, "HH\\bool");
-      break;
-    case KindOfInt64:
-      compat = (!strcasecmp(hint, "HH\\int") ||
-                !strcasecmp(hint, "HH\\num") ||
-                interface_supports_int(hint));
-      break;
-    case KindOfDouble:
-      compat = (!strcasecmp(hint, "HH\\float") ||
-                !strcasecmp(hint, "HH\\num") ||
-                interface_supports_double(hint));
-      break;
-    case KindOfString:  /* fall through */
-    case KindOfStaticString:
-      compat = (!strcasecmp(hint, "HH\\string") ||
-                interface_supports_string(hint));
-      break;
-    case KindOfArray:
-      compat = (!strcasecmp(hint, "array") ||
-                interface_supports_array(hint));
-      break;
-    case KindOfUninit:  /* fall through */
-    case KindOfNull:
-      compat = true;
-      break;
-    /* KindOfClass is an hhvm internal type, cannot occur here */
-    case KindOfObject:  /* fall through */
-    case KindOfResource: /* fall through */
-    case KindOfRef:
-      assert(false /* likely parser bug */);
-    default:
-      compat = false;
-      break;
+  // Normally a named type like 'int' is compatible with Int but not integer
+  // Since the default value's type is inferred from the value itself it is
+  // ok to compare against the lower case version of the type hint in hint
+  const char* hint = getTypeHint().c_str();
+  [&] {
+    switch (defaultType) {
+      case KindOfUninit:
+        compat = m_hhType;
+        return;
+      case KindOfNull:
+        compat = true;
+        return;
+
+      case KindOfBoolean:
+        compat = !strcasecmp(hint, "HH\\bool");
+        return;
+
+      case KindOfInt64:
+        compat = (!strcasecmp(hint, "HH\\int") ||
+                  !strcasecmp(hint, "HH\\num") ||
+                  !strcasecmp(hint, "HH\\arraykey") ||
+                  (m_hhType && interface_supports_int(hint)));
+        return;
+
+      case KindOfDouble:
+        compat = (!strcasecmp(hint, "HH\\float") ||
+                  !strcasecmp(hint, "HH\\num") ||
+                  (m_hhType && interface_supports_double(hint)));
+        return;
+
+      case KindOfStaticString:
+      case KindOfString:
+        compat = (!strcasecmp(hint, "HH\\string") ||
+                  !strcasecmp(hint, "HH\\arraykey") ||
+                  (m_hhType && interface_supports_string(hint)));
+        return;
+
+      case KindOfArray:
+        compat = (!strcasecmp(hint, "array") ||
+                  (m_hhType && interface_supports_array(hint)));
+        return;
+
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+        if (!m_hhType) {
+          compat = false;
+          return;
+        }
+      /* fall through */
+      case KindOfClass:
+        break;
     }
-  } else {
-    msg = "Default value for parameter %s with a class type hint "
-          "can only be NULL";
-    switch(defaultType) {
-    case KindOfNull:
-      compat = true;
-      break;
-    case KindOfArray:
-      compat = !strcasecmp(getTypeHint().c_str(), "array");
-      break;
-    default:
-      compat = false;
-      if (!strcasecmp(getTypeHint().c_str(), "array")) {
-        msg = "Default value for parameter %s with array type hint "
-              "can only be an array or NULL";
-      }
-      break;
-    }
-  }
+    always_assert(false /* likely parser bug */);
+  }();
 
   if (!compat) {
+    const char* msg = "Default value for parameter %s with type %s "
+                      "needs to have the same type as the type hint %s";
+    if (!m_hhType) {
+      if (!strcasecmp(hint, "array")) {
+        msg = "Default value for parameter %s with array type hint "
+              "can only be an array or NULL";
+      } else if (!useHackTypeHintErrorMessage(hint)) {
+        msg = "Default value for parameter %s with a class type hint "
+              "can only be NULL";
+       }
+    }
+
     string name = getName();
     string tdefault = HPHP::tname(defaultType);
     parseTimeFatal(Compiler::BadDefaultValueType, msg,

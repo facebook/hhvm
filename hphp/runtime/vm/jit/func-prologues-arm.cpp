@@ -17,6 +17,7 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
@@ -24,7 +25,7 @@
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 
 //////////////////////////////////////////////////////////////////////
@@ -94,12 +95,12 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     void (*helper)(ActRec*);
     if (func->attrs() & AttrMayUseVV) {
       helper = func->hasVariadicCaptureParam()
-        ? JIT::shuffleExtraArgsVariadicAndVV
-        : JIT::shuffleExtraArgsMayUseVV;
+        ? jit::shuffleExtraArgsVariadicAndVV
+        : jit::shuffleExtraArgsMayUseVV;
     } else if (func->hasVariadicCaptureParam()) {
-      helper = JIT::shuffleExtraArgsVariadic;
+      helper = jit::shuffleExtraArgsVariadic;
     } else {
-      helper = JIT::trimExtraArgs;
+      helper = jit::trimExtraArgs;
     }
     a.  Mov    (argReg(0), rStashedAR);
     emitCall(a, CppCall::direct(helper));
@@ -202,8 +203,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     numLocals += numUseVars + 1;
   }
 
+  assert(func->numLocals() >= numLocals);
   auto numUninitLocals = func->numLocals() - numLocals;
-  assert(numUninitLocals >= 0);
   if (numUninitLocals > 0) {
     if (numUninitLocals > kLocalsToInitializeInline) {
       auto const& loopReg = rAsm2;
@@ -252,8 +253,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  Mov  (argReg(0), func);
         a.  Mov  (argReg(1), nPassed);
         auto fixupAddr = emitCall(a,
-          CppCall::direct(JIT::raiseMissingArgument));
-        mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);
+          CppCall::direct(jit::raiseMissingArgument));
+        mcg->recordSyncPoint(fixupAddr, fixup.pcOffset, fixup.spOffset);
         break;
       }
     }
@@ -262,7 +263,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), rVmTl, fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams
@@ -346,6 +347,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
                 SrcKey(func, dvs[i].second, false));
   }
   emitBindJmp(mainCode, frozenCode, SrcKey(func, func->base(), false));
+  mcg->cgFixups().process(nullptr);
   return start;
 }
 

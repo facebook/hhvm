@@ -1,0 +1,6 @@
+42
+string(2) "42"
+int(42)
+float(42)
+
+Catchable fatal error: %s

@@ -57,6 +57,7 @@ echo 'fseek($fp, 3, SEEK_CUR)';var_dump(fseek($fp, 3, SEEK_CUR));
 var_dump(ftell($fp));
 fclose($fp);
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php');
 exit(0);

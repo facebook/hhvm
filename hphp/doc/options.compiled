@@ -9,20 +9,24 @@ node's purpose. Listed values are defaults, unless examples.
   Log {
     Level = None (default) | Error | Warning | Info | Verbose
     NoSilencer = false
-    AlwaysLogUnhandledExceptions = true
+    AlwaysLogUnhandledExceptions = false
     RuntimeErrorReportingLevel = 8191
+    ForceErrorReportingLevel = 0
     Header = false
     HeaderMangle = 0
     NativeStackTrace = true
     MaxMessagesPerRequest = -1
 
-- Level, NoSilencer, AlwaysLogUnhandledExceptions, RuntimeErrorReportingLevel
+- Level, NoSilencer, AlwaysLogUnhandledExceptions, RuntimeErrorReportingLevel,
+  ForceErrorReportingLevel
 
 These settings control different logging levels. NoSilencer means even when
 silencer operator @ is used, still output errors. Unhandled exceptions are
 PHP fatal errors, and AlwaysLogUnhandledExceptions will make sure they get
 logged even if a user's error handler is installed for them. We also provided
-RuntimeErrorReportingLevel for compatibility with PHP.
+RuntimeErrorReportingLevel for compatibility with PHP. ForceErrorReportingLevel
+is a bitmask that will be ORed with RuntimeErrorReportingLevel to determine the
+actual error reporting level.
 
 - Header, NativeStackTrace
 
@@ -78,7 +82,10 @@ flood error logs.
 = Error Handling
 
   ErrorHandling {
-    CallUserHandlerOnFatals = true
+    # Bitmask of error constants to upgrade to E_USER_ERROR. Only E_WARNING,
+    # E_USER_WARNING, E_NOTICE, and E_USER_NOTICE are supported.
+    UpgradeLevel = 0 (default)
+    CallUserHandlerOnFatals = false
     MaxLoopCount = 0
     NoInfiniteRecursionDetection = false
     WarnTooManyArguments = false
@@ -92,12 +99,12 @@ flood error logs.
 = Resource Limits
 
   ResourceLimit {
-    CoreFileSize = 0          # in bytes
+    CoreFileSize = 0           # in bytes
     MaxSocket = 0
-    SocketDefaultTimeout = 5  # in seconds
+    SocketDefaultTimeout = 60  # in seconds
     MaxRSS = 0
-    MaxRSSPollingCycle = 0    # in seconds, how often to check max memory
-    DropCacheCycle = 0        # in seconds, how often to drop disk cache
+    MaxRSSPollingCycle = 0     # in seconds, how often to check max memory
+    DropCacheCycle = 0         # in seconds, how often to drop disk cache
     MaxSQLRowCount = 0
     SerializationSizeLimit = 0
     StringOffsetLimit = 10 * 1024 * 1024
@@ -152,7 +159,7 @@ flood error logs.
 
     # Forcing $_SERVER['SERVER_NAME'] to come from request header
     ForceServerNameToHeader = false
-    
+
     # Print file paths traversed onto the 404 page
     PathDebug = false
 
@@ -197,7 +204,6 @@ How long to wait for dangling server to respond.
       Cookie =      # if this cookie is present: "name" or "name=value"
       Param =       # if this parameter in query string is present
     }
-    EnableMagicQuotesGpc = false
     EnableKeepAlive = true
     EnableOutputBuffering = false
     OutputHandler =

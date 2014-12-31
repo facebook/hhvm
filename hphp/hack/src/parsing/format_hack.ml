@@ -39,6 +39,21 @@ type char_kind =
   (* Everything else *)
   | Other
 
+(* Absolute character position in the input file. *)
+type char_pos = int
+
+type source_tag =
+  (* Line number in the input file *)
+  | Line of int
+
+  (* Beginning of an indivisible formatting block *)
+  | Block
+
+(* Meta-data to be able to reconcile the input file and the
+ * formatted output (useful for Format_diff)
+ *)
+type source_pos = char_pos * source_tag
+
 type env = {
     (* The number of spaces for the margin *)
     margin     : int ref              ;
@@ -58,6 +73,9 @@ type env = {
 
     (* The output buffer *)
     buffer     : Buffer.t             ;
+
+    (* The path of the current file *)
+    file       : Relative_path.t      ;
 
     (* The state of the lexer *)
     lexbuf     : Lexing.lexbuf        ;
@@ -122,6 +140,40 @@ type env = {
 
     (* The end of the region we are trying to format. *)
     to_        : int                  ;
+
+    (* When the "keep_source_pos" option is turned on,
+     * the formatter outputs extra tags in the field source_pos.
+     * There are 2 kinds of tags 'Line and 'Block'
+     * (these tags are used by Format_diff).
+     *
+     * The tags of the form 'Line' should be read as: at this
+     * point in the text, the input line number was LINE_NUMBER
+     * (useful to reconcile input/output line numbers).
+     *
+     * The tags of the form 'Block' should be read as: we have reached the
+     * beginning or the end of an indivisible block.
+     *
+     * This information is useful to know which pieces can be formatted
+     * separately. For example, let's consider the following diff:
+     *  $x = array(
+     * -  1,
+     * +  23,
+     *    2,
+     *  );
+     * It doesn't make sense to only format the line that changed.
+     * The formatter is probably going to regroup the entire array on
+     * one line (because it fits).
+     * Thanks to these extra tags, we know that we have to treat the entire
+     * array as an indivisible entity.
+     *)
+    keep_source_pos : bool             ;
+    source_pos_l : source_pos list ref ;
+
+    (* When no_trailing_commas is false (default), multiline comma separated items
+      include a trailing comma, when it is false, we omit trailing commas. The
+      standard php parser does not support trailing commas, but hhvm does.
+    *)
+    no_trailing_commas : bool             ;
   }
 
 (*****************************************************************************)
@@ -143,44 +195,49 @@ type saved_env = {
     sv_failed     : int                  ;
     sv_spaces     : int                  ;
     sv_silent     : bool                 ;
+    sv_source_pos_l  : source_pos list     ;
   }
 
-let empty lexbuf from to_ = {
-  margin     = ref 0             ;
-  last       = ref Newline       ;
-  last_token = ref Terror        ;
-  last_str   = ref ""            ;
-  last_out   = ref ""            ;
-  buffer     = Buffer.create 256 ;
-  lexbuf     = lexbuf            ;
-  lb_line    = ref 1             ;
-  priority   = 0                 ;
-  char_pos   = ref 0             ;
-  abs_pos    = ref 0             ;
-  char_size  = 80                ;
-  char_break = 80                ;
-  break_on   = max_int           ;
-  line       = ref 0             ;
-  report_fit = false             ;
-  failed     = ref 0             ;
-  try_depth  = 0                 ;
-  one_line   = false             ;
-  in_attr    = false             ;
-  spaces     = ref 0             ;
-  stop       = max_int           ;
-  silent     = ref false         ;
-  from                           ;
-  to_                            ;
+let empty file lexbuf from to_ keep_source_pos no_trailing_commas = {
+  margin     = ref 0                          ;
+  last       = ref Newline                    ;
+  last_token = ref Terror                     ;
+  last_str   = ref ""                         ;
+  last_out   = ref ""                         ;
+  buffer     = Buffer.create 256              ;
+  file       = file                           ;
+  lexbuf     = lexbuf                         ;
+  lb_line    = ref 1                          ;
+  priority   = 0                              ;
+  char_pos   = ref 0                          ;
+  abs_pos    = ref 0                          ;
+  char_size  = 80                             ;
+  char_break = 80                             ;
+  break_on   = max_int                        ;
+  line       = ref 0                          ;
+  report_fit = false                          ;
+  failed     = ref 0                          ;
+  try_depth  = 0                              ;
+  one_line   = false                          ;
+  in_attr    = false                          ;
+  spaces     = ref 0                          ;
+  stop       = max_int                        ;
+  silent     = ref false                      ;
+  from                                        ;
+  to_                                         ;
+  keep_source_pos                             ;
+  source_pos_l  = ref []                      ;
+  no_trailing_commas = no_trailing_commas     ;
 }
 
 (* Saves all the references of the environment *)
 let save_env env =
-  let { margin; last; last_token; buffer; lexbuf; lb_line;
+  let { margin; last; last_token; buffer; file; lexbuf; lb_line;
         priority; char_pos; abs_pos; char_break;
         char_size; silent; one_line;
-        last_str; last_out;
+        last_str; last_out; keep_source_pos; source_pos_l;
         break_on; line; failed; try_depth; spaces;
-        report_fit; in_attr; stop; from; to_} = env in
+        report_fit; in_attr; stop; from; to_; no_trailing_commas} = env in
   { sv_margin = !margin;
     sv_last = !last;
     sv_buffer = env.buffer;
@@ -195,6 +252,7 @@ let save_env env =
     sv_failed = !failed;
     sv_spaces = !spaces;
     sv_silent = !silent;
+    sv_source_pos_l = !source_pos_l;
   }
 
 let restore_env env saved_env =
@@ -211,6 +269,7 @@ let restore_env env saved_env =
   env.failed := saved_env.sv_failed;
   env.spaces := saved_env.sv_spaces;
   env.silent := saved_env.sv_silent;
+  env.source_pos_l := saved_env.sv_source_pos_l;
   { env with buffer = saved_env.sv_buffer }
 
 (*****************************************************************************)
@@ -256,7 +315,7 @@ let make_tokenizer next_token env =
   else env.last_out := str_value;
   (match tok with
   | Tnewline ->
-      env.lb_line := !(env.lb_line) + 1;
+      env.lb_line := !(env.lb_line) + 1
   | _ -> ()
   );
   tok
@@ -487,7 +546,11 @@ end = struct
     env.last := Newline;
     env.line := !(env.line) + 1;
     env.spaces := 0;
-    add_char env '\n'
+    add_char env '\n';
+    if env.keep_source_pos then begin
+      let source_pos = !(env.abs_pos), Line !(env.lb_line) in
+      env.source_pos_l := source_pos :: !(env.source_pos_l)
+    end
 
   let newline env =
     if env.one_line then raise One_line;
@@ -583,6 +646,24 @@ let with_priority env op f =
   f env
 
 (*****************************************************************************)
+(* Add block tag.
+ * We don't have to worry about Opening or Closing blocks, because the logic
+ * is: whatever is in between 2 blocks is indivisible.
+ * Why is that? Because the place where we add the block tag are the places
+ * where we know it's acceptable to break the indentation.
+ * Think of it this way: block tags tell us where we can break the formatting
+ * given that, whatever is in between two block tags is indivisible.
+ *)
+(*****************************************************************************)
+
+let add_block_tag env =
+  assert (!(env.last) = Newline);
+  if env.keep_source_pos then begin
+    let source_pos = !(env.abs_pos), Block in
+    env.source_pos_l := source_pos :: !(env.source_pos_l)
+  end
+
+(*****************************************************************************)
 (* Comments *)
 (*****************************************************************************)
 
@@ -600,6 +681,11 @@ and comment_loop env =
   | Teof -> ()
   | Tclose_comment ->
       last_token env;
+  | Tstarstar ->
+    last_token env;
+    (match token env with
+      | Tslash -> last_token env
+      | _ -> comment_loop env)
   | Tnewline ->
       newline env;
       skip_spaces env;
@@ -651,7 +737,8 @@ let rec keep_comment env =
       if !(env.last) <> Newline then space env;
       last_token env;
       line_comment_loop env;
-      newline env
+      newline env;
+      add_block_tag env
   | _ -> back env
 
 let rec generic_nsc env =
@@ -670,7 +757,8 @@ let rec generic_nsc env =
       then space env;
       last_token env;
       line_comment_loop env;
-      newline env
+      newline env;
+      add_block_tag env
   | Tspace
   | Tnewline ->
       ignore (token env);
@@ -803,7 +891,7 @@ let print_error tok_str env =
     else buffer
   in
   let error =
-    (Pos.string (Pos.make env.lexbuf))^"\n"^
+    (Pos.string (Pos.to_absolute (Pos.make env.file env.lexbuf)))^"\n"^
     (Printf.sprintf "Expected: %s, found: '%s'\n" tok_str !(env.last_str))^
     buffer^"\n"
   in
@@ -824,7 +912,8 @@ let expect_xhp tok_str env = wrap_xhp env begin fun _ ->
   then last_token env
   else begin
     if debug then begin
-      output_string stderr (Pos.string (Pos.make env.lexbuf));
+      output_string stderr (Pos.string (Pos.to_absolute
+        (Pos.make env.file env.lexbuf)));
       flush stderr
     end;
     raise Format_error
@@ -883,6 +972,7 @@ let rec preserve_nl_space env =
       while is_empty_line env do
         ignore (empty_line env)
       done;
+      back env;
       force_nl env;
   | _ ->
       back env
@@ -897,6 +987,7 @@ let rec preserve_nl env f =
   | Topen_comment ->
       generic_nsc env;
       newline env;
+      add_block_tag env;
       preserve_nl env f
   | Tspace when is_empty_line env ->
       preserve_nl_space env;
@@ -918,7 +1009,7 @@ let rec preserve_nl env f =
 
 let rec list env element = preserve_nl env begin fun env ->
   if has_consumed env element
-  then (newline env; list env element)
+  then (newline env; add_block_tag env; list env element)
 end
 
 (*****************************************************************************)
@@ -1013,11 +1104,13 @@ let list_comma_multi_nl ~trailing element env =
   newline env
 
 let list_comma ?(trailing=true) element env =
+  let trailing = if trailing then not env.no_trailing_commas else trailing in
   Try.one_line env
     (list_comma_single element)
     (list_comma_multi ~trailing element)
 
 let list_comma_nl ?(trailing=true) element env =
+  let trailing = if trailing then not env.no_trailing_commas else trailing in
   Try.one_line env
     (list_comma_single element)
     (list_comma_multi_nl ~trailing element)
@@ -1035,24 +1128,25 @@ let semi_colon env =
 (* The entry point *)
 (*****************************************************************************)
 
-type return =
+type 'a return =
   | Php_or_decl
   | Parsing_error of Errors.error list
   | Internal_error
-  | Success of string
+  | Success of 'a
 
-let rec entry from to_ content =
+let rec entry ~keep_source_metadata ~no_trailing_commas
+    file from to_ content k =
   let errorl, () = Errors.do_ begin fun () ->
-    let _ = Parser_hack.program content in
+    let _ = Parser_hack.program file content in
     ()
   end in
   if errorl <> []
   then Parsing_error errorl
   else try
     let lb = Lexing.from_string content in
-    let env = empty lb from to_ in
+    let env = empty file lb from to_ keep_source_metadata no_trailing_commas in
     header env;
-    Success (Buffer.contents env.buffer)
+    Success (k env)
   with
   | PHP -> Php_or_decl
   | _ -> Internal_error
@@ -1110,7 +1204,7 @@ and typedef env = wrap env begin function
   | Tword when !(env.last_str) = "shape" ->
       last_token env;
       expect "(" env;
-      right env (list_comma_multi_nl ~trailing:true shape_type_elt);
+      right env (list_comma_multi_nl ~trailing:(not env.no_trailing_commas) shape_type_elt);
       expect ")" env
   | _ ->
       back env;
@@ -1146,10 +1240,10 @@ and hint_list_paren env =
   expect ")" env
 
 and hint env = wrap env begin function
-  | Tqm | Tat ->
+  | Tplus | Tminus | Tqm | Tat | Tbslash ->
       last_token env;
       hint env
-  | Tpercent | Tcolon | Tminus ->
+  | Tpercent | Tcolon ->
       last_token env;
       name_loop env;
       hint_parameter env
@@ -1182,13 +1276,13 @@ end
 and hint_parameter env = wrap env begin function
   | Tlt ->
       last_token env;
-      hint_list env;
+      hint_list ~trailing:false env;
       expect ">" env
   | _ -> back env
 end
 
-and hint_list env =
-  list_comma hint env
+and hint_list ?(trailing=true) env =
+  list_comma ~trailing:trailing hint env
 
 (*****************************************************************************)
 (* Functions *)
@@ -1225,7 +1319,7 @@ and fun_signature_multi env =
   seq env [opt_tok Tamp; name; hint_parameter; expect "("; newline];
   if next_token env = Trp
   then right env (fun env -> wrap env (fun _ -> back env))
-  else right env (list_comma_multi ~trailing:true fun_param);
+  else right env (list_comma_multi ~trailing:(not env.no_trailing_commas) fun_param);
   seq env [newline; expect ")"; return_type; use]
 
 and fun_param env =
@@ -1329,6 +1423,7 @@ and class_body env =
   then expect "}" env
   else begin
     newline env;
+    add_block_tag env;
     right env begin fun env ->
       list env class_element;
     end;
@@ -1366,7 +1461,8 @@ and class_element_word env = function
   | "require" ->
       seq env [last_token; space; class_extends; semi_colon]
   | "use" ->
-      seq env [last_token; space; hint_list; semi_colon; newline]
+      seq env
+        [last_token; space; hint_list ~trailing:false; semi_colon; newline]
   | "category" ->
       seq env [last_token; xhp_category; semi_colon]
   | "attribute" ->
@@ -1703,6 +1799,7 @@ and stmt ~is_toplevel env = wrap env begin function
       stmt_word ~is_toplevel env word
   | Tlcb ->
       seq env [last_token; space; keep_comment; newline];
+      add_block_tag env;
       right env (stmt_list ~is_toplevel);
       expect "}" env;
   | Tsc ->
@@ -1781,9 +1878,10 @@ and stmt_toplevel_word env = function
       last_token env;
       namespace env
   | "use" ->
-      seq env [last_token; space; name; semi_colon]
+      last_token env;
+      namespace_use env;
   | _ ->
-      back env;
+      back env
 
 and stmt_list ~is_toplevel env =
   let env = { env with char_break = env.char_break - 1 } in
@@ -1792,6 +1890,7 @@ and stmt_list ~is_toplevel env =
 and block ?(is_toplevel=false) env = wrap env begin function
   | Tlcb ->
       seq env [space; last_token; space; keep_comment; newline];
+      add_block_tag env;
       right env (stmt_list ~is_toplevel);
       expect "}" env
   | _ ->
@@ -1843,12 +1942,19 @@ and namespace env =
   wrap env begin function
     | Tsc -> back env; semi_colon env;
     | Tlcb ->
-        space env; last_token env;
+        space env; last_token env; newline env;
         right env (stmt_list ~is_toplevel:true);
         expect "}" env
     | _ ->
         expect ";" env
   end
+
+and namespace_use env =
+  seq env [space; name;];
+  let rem = match (next_token_str env) with
+    | "as" -> [space; expect "as"; space; name; semi_colon;]
+    | _ -> [semi_colon] in
+  seq env rem
 
 (*****************************************************************************)
 (* Foreach loop *)
@@ -1887,6 +1993,7 @@ and for_loop env =
 and switch env =
   seq env  [space; expr_paren; space];
   line env [expect "{"];
+  add_block_tag env;
   case_list env;
   line env [expect "}"]
 
@@ -2043,8 +2150,8 @@ and expr_binop lowest str_op op env =
     expr_remain_loop lowest env
   end
 
-and expr_binop_arrow lowest str_op env =
-  with_priority env Tarrow begin fun env ->
+and expr_binop_arrow lowest str_op tok env =
+  with_priority env tok begin fun env ->
     if env.priority = env.break_on
     then begin
       newline env;
@@ -2095,7 +2202,7 @@ and expr_remain lowest env =
       expr_remain lowest env
   | Tnewline | Tspace  ->
       expr_remain lowest env
-  | Tplus | Tminus | Tstar | Tslash
+  | Tplus | Tminus | Tstar | Tslash | Tstarstar
   | Teqeqeq | Tpercent
   | Teqeq | Tampamp | Tbarbar
   | Tdiff | Tlt | Tdiff2 | Tgte
@@ -2104,8 +2211,8 @@ and expr_remain lowest env =
       expr_binop lowest tok_str op env
   | Tdot ->
       expr_binop_dot lowest tok_str env
-  | Tarrow ->
-      expr_binop_arrow lowest tok_str env
+  | Tarrow | Tnsarrow ->
+      expr_binop_arrow lowest tok_str tok env
   | Tgt when env.in_attr ->
       back env;
       lowest
@@ -2202,8 +2309,11 @@ and expr_atomic env =
   | Tlvar ->
       last_token env;
       (match next_token env with
-      | Tarrow ->
-          expect "->" env;
+      | Tarrow | Tnsarrow as tok ->
+          (match tok with
+          | Tarrow -> expect "->" env
+          | Tnsarrow -> expect "?->" env
+          | _ -> assert false);
           wrap env begin function
             | Tword ->
                 last_token env
@@ -2308,12 +2418,9 @@ and expr_atomic_word env last_tok = function
       expr env;
   | "async" ->
       last_token env;
-      if next_token_str env = "function"
-      then begin
-        space env;
-        expr_atomic env
-      end
-  | "function" when last_tok <> Tarrow ->
+      space env;
+      expr_atomic env
+  | "function" when last_tok <> Tarrow && last_tok <> Tnsarrow ->
       last_token env;
       space env;
       fun_ env
@@ -2324,7 +2431,7 @@ and expr_atomic_word env last_tok = function
   | "yield" ->
       last_token env;
       space env;
-      with_priority env Tyield expr
+      with_priority env Tyield array_element_single
   | "clone" ->
       last_token env;
       space env;
@@ -2440,7 +2547,7 @@ and array_one_line env =
   list_comma_single array_element_single env
 
 and array_multi_line env =
-  list_comma_multi_nl ~trailing:true array_element_multi env
+  list_comma_multi_nl ~trailing:(not env.no_trailing_commas) array_element_multi env
 
 and array_element_single env =
   expr env;
@@ -2468,8 +2575,19 @@ and arrow_opt env =
 (* The outside API *)
 (*****************************************************************************)
 
-let region ~start ~end_ content =
-  entry start end_ content
+let region file ~start ~end_ content =
+  entry ~keep_source_metadata:false file start end_ content
+    ~no_trailing_commas:false
+    (fun env -> Buffer.contents env.buffer)
 
-let program content =
-  entry 0 max_int content
+let program ?no_trailing_commas:(no_trailing_commas = false) file content =
+  entry ~keep_source_metadata:false file 0 max_int content
+    ~no_trailing_commas:no_trailing_commas
+    (fun env -> Buffer.contents env.buffer)
+
+let program_with_source_metadata file content =
+  entry ~keep_source_metadata:true file 0 max_int content
+    ~no_trailing_commas:false begin
+    fun env ->
+      Buffer.contents env.buffer, List.rev !(env.source_pos_l)
+  end

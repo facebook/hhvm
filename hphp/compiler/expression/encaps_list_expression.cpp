@@ -103,16 +103,6 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-TypePtr EncapsListExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                         bool coerce) {
-  if (m_exps) {
-    for (int i = 0; i < m_exps->getCount(); i++) {
-      (*m_exps)[i]->inferAndCheck(ar, Type::String, false);
-    }
-  }
-  return Type::String;
-}
-
 bool EncapsListExpression::canonCompare(ExpressionPtr e) const {
   if (!Expression::canonCompare(e)) return false;
   EncapsListExpressionPtr el = static_pointer_cast<EncapsListExpression>(e);

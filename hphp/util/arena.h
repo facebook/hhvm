@@ -22,6 +22,7 @@
 
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/pointer-list.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -114,6 +115,7 @@ class ArenaImpl {
   Frame m_frame;
   TinyVector<char*> m_ptrs; // inlines 1 pointer, may not be optimal
   PointerList<char> m_externalPtrs;
+  bool m_bypassSlabAlloc;
 #ifdef DEBUG
   size_t m_externalAllocSize;
 #endif

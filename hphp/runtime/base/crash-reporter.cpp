@@ -33,17 +33,15 @@ bool IsCrashing = false;
 static void bt_handler(int sig) {
   // In case we crash again in the signal hander or something
   signal(sig, SIG_DFL);
-
   IsCrashing = true;
-  // Generating a stack dumps significant time, try to stop threads
-  // from flushing bad data or generating more faults meanwhile
-  if (sig==SIGQUIT || sig==SIGILL || sig==SIGSEGV || sig==SIGBUS) {
-    LightProcess::Close();
-    // leave running for SIGTERM SIGFPE SIGABRT
-  }
+
+  // Make a stacktrace file to prove we were crashing. Do this before anything
+  // else has a chance to deadlock us.
+  int fd = ::open(RuntimeOption::StackTraceFilename.c_str(),
+                  O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 
   if (RuntimeOption::EvalDumpRingBufferOnCrash) {
-    Trace::dumpRingBuffer(RuntimeOption::EvalDumpRingBufferOnCrash);
+    Trace::dumpRingBuffer(RuntimeOption::EvalDumpRingBufferOnCrash, 0);
   }
 
   if (RuntimeOption::EvalSpinOnCrash) {
@@ -55,6 +53,12 @@ static void bt_handler(int sig) {
     for (;;) sleep(1);
   }
 
+  if (fd < 0) {
+    // Nothing to do if we can't write the file
+    raise(sig);
+    return;
+  }
+
   // Turn on stack traces for coredumps
   StackTrace::Enabled = true;
   static const char* s_newBlacklist[] =
@@ -63,19 +67,14 @@ static void bt_handler(int sig) {
   StackTrace::FunctionBlacklistCount = 3;
   StackTraceNoHeap st;
 
-  char pid[sizeof(Process::GetProcessId())*3+2]; // '-' and \0
-  sprintf(pid,"%u",Process::GetProcessId());
-  char tracefn[RuntimeOption::CoreDumpReportDirectory.length()
-               + strlen("/stacktrace..log") + strlen(pid) + 1];
-  sprintf(tracefn, "%s/stacktrace.%s.log",
-          RuntimeOption::CoreDumpReportDirectory.c_str(), pid);
-
   int debuggerCount = RuntimeOption::EnableDebugger ?
     Eval::Debugger::CountConnectedProxy() : 0;
 
-  st.log(strsignal(sig), tracefn, pid, kCompilerId, debuggerCount);
+  st.log(strsignal(sig), fd, kCompilerId, debuggerCount);
 
-  int fd = ::open(tracefn, O_APPEND|O_WRONLY, S_IRUSR|S_IWUSR);
+  // flush so if php crashes us we still have this output so far
+  ::fsync(fd);
+
   if (fd >= 0) {
     if (!g_context.isNull()) {
       dprintf(fd, "\nPHP Stacktrace:\n\n%s",
@@ -86,10 +85,11 @@ static void bt_handler(int sig) {
 
   if (!RuntimeOption::CoreDumpEmail.empty()) {
     char format [] = "cat %s | mail -s \"Stack Trace from %s\" '%s'";
-    char cmdline[strlen(format)+strlen(tracefn)
+    char cmdline[strlen(format)+RuntimeOption::StackTraceFilename.length()
                  +strlen(Process::GetAppName().c_str())
                  +strlen(RuntimeOption::CoreDumpEmail.c_str())+1];
-    sprintf(cmdline, format, tracefn, Process::GetAppName().c_str(),
+    sprintf(cmdline, format, RuntimeOption::StackTraceFilename.c_str(),
+            Process::GetAppName().c_str(),
             RuntimeOption::CoreDumpEmail.c_str());
     FileUtil::ssystem(cmdline);
   }
@@ -99,6 +99,7 @@ static void bt_handler(int sig) {
   // Do it last just in case
 
   Logger::Error("Core dumped: %s", strsignal(sig));
+  Logger::Error("Stack trace in %s", RuntimeOption::StackTraceFilename.c_str());
 
   // Give the debugger a chance to do extra logging if there are any attached
   // debugger clients.

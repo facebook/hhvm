@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/libmemcached_portability.h"
@@ -48,6 +49,10 @@ namespace HPHP {
 #define MEMC_VAL_COMPRESSION_FASTLZ (1<<6)
 
 #define MEMC_COMPRESS_THRESHOLD 100
+
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX < 0x00052000
+#  define MEMCACHED_SERVER_TEMPORARILY_DISABLED (1024 << 2)
+#endif
 
 // Class options
 const int64_t q_Memcached$$OPT_COMPRESSION = -1001;
@@ -87,6 +92,12 @@ const int64_t q_Memcached$$DISTRIBUTION_MODULA
           = MEMCACHED_DISTRIBUTION_MODULA;
 const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT
           = MEMCACHED_DISTRIBUTION_CONSISTENT;
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT_KETAMA
+          = MEMCACHED_DISTRIBUTION_CONSISTENT_KETAMA;
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT_WEIGHTED
+          = MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED;
+#endif
 const int64_t q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
           = MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED;
 const int64_t q_Memcached$$OPT_BUFFER_WRITES
@@ -115,6 +126,14 @@ const int64_t q_Memcached$$OPT_CACHE_LOOKUPS
           = MEMCACHED_BEHAVIOR_CACHE_LOOKUPS;
 const int64_t q_Memcached$$OPT_SERVER_FAILURE_LIMIT
           = MEMCACHED_BEHAVIOR_SERVER_FAILURE_LIMIT;
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000003
+const int64_t q_Memcached$$OPT_DEAD_TIMEOUT
+          = MEMCACHED_BEHAVIOR_DEAD_TIMEOUT;
+#endif
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
+const int64_t q_Memcached$$OPT_REMOVE_FAILED_SERVERS
+          = MEMCACHED_BEHAVIOR_REMOVE_FAILED_SERVERS;
+#endif
 
 // libmemcached result codes
 const int64_t q_Memcached$$RES_SUCCESS
@@ -161,6 +180,14 @@ const int64_t q_Memcached$$RES_NOT_SUPPORTED
           = MEMCACHED_NOT_SUPPORTED;
 const int64_t q_Memcached$$RES_INVALID_HOST_PROTOCOL
           = MEMCACHED_INVALID_HOST_PROTOCOL;
+const int64_t q_Memcached$$OPT_VERIFY_KEY
+          = MEMCACHED_BEHAVIOR_VERIFY_KEY;
+const int64_t q_Memcached$$OPT_SORT_HOSTS
+          = MEMCACHED_BEHAVIOR_SORT_HOSTS;
+const int64_t q_Memcached$$RES_SERVER_MARKED_DEAD
+          = MEMCACHED_SERVER_MARKED_DEAD;
+const int64_t q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
+          = MEMCACHED_SERVER_TEMPORARILY_DISABLED;
 
 // Our result codes
 const int64_t q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
@@ -178,6 +205,13 @@ const StaticString
   s_key("key"),
   s_value("value"),
   s_cas("cas");
+
+// INI settings
+struct MEMCACHEDGlobals final {
+  std::string sess_prefix;
+};
+static __thread MEMCACHEDGlobals* s_memcached_globals;
+#define MEMCACHEDG(name) s_memcached_globals->name
 
 namespace {
 class MemcachedResultWrapper {
@@ -377,9 +411,9 @@ class MemcachedData {
     }
     return true;
   }
-  memcached_return doCacheCallback(const Variant& callback, const String& key,
-                                   Variant& value) {
-    Array params(PackedArrayInit(3).append(Variant(this))
+  memcached_return doCacheCallback(const Variant& callback, ObjectData* this_,
+                                   const String& key, Variant& value) {
+    Array params(PackedArrayInit(3).append(Variant(this_))
                                    .append(key)
                                    .appendRef(value).toArray());
     if (!vm_call_user_func(callback, params).toBoolean()) {
@@ -461,15 +495,12 @@ class MemcachedData {
                           myServerKey.length(), key.c_str(), key.length(),
                           payload.data(), payload.size(), expiration, flags));
   }
-  typedef memcached_return_t (*IncDecOperation)(memcached_st *, const char *,
-      size_t, const char *, size_t, uint64_t, uint64_t, time_t, uint64_t *);
-  Variant incDecOperationImpl(IncDecOperation op, const String& server_key,
-                                                  const String& key,
-                                                  int64_t offset,
-                                                  int64_t inital_value,
-                                                  int64_t expiry) {
+
+  Variant incDecOp(bool isInc,
+                   const StringData* server_key, const StringData* key,
+                   int64_t offset, int64_t initial_value, int64_t expiry) {
     m_impl->rescode = q_Memcached$$RES_SUCCESS;
-    if (key.empty()) {
+    if (key->empty() || strchr(key->data(), ' ')) {
       m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
       return false;
     }
@@ -478,15 +509,75 @@ class MemcachedData {
       return false;
     }
 
+    // Dispatch to the correct memcached_* function depending on initial_value,
+    // server_key, and isInc.
     uint64_t value;
-    const String& myServerKey = server_key.empty() ? key : server_key;
-    if (!handleError(op(&m_impl->memcached, myServerKey.c_str(),
-                        myServerKey.length(), key.c_str(), key.length(),
-                        (uint32_t)offset, (uint32_t)inital_value,
-                        (uint32_t)expiry, &value))) {
-      return false;
+    memcached_return_t status;
+
+    // XXX(#3862): use_initial should really depend on the number of arguments
+    // passed to the function but this isn't currently supported by HNI.
+    bool use_initial = isBinaryProtocol();
+    auto mc = &m_impl->memcached;
+    if (use_initial) {
+      if (!isBinaryProtocol()) {
+        raise_warning("Initial value is only supported with binary protocol");
+        return false;
+      }
+
+      if (server_key) {
+        if (isInc) {
+          status = memcached_increment_with_initial_by_key(
+            mc,
+            server_key->data(), server_key->size(), key->data(), key->size(),
+            offset, initial_value, expiry, &value);
+        } else {
+          status = memcached_decrement_with_initial_by_key(
+            mc,
+            server_key->data(), server_key->size(), key->data(), key->size(),
+            offset, initial_value, expiry, &value);
+        }
+      } else {
+        if (isInc) {
+          status = memcached_increment_with_initial(
+            mc, key->data(), key->size(),
+            offset, initial_value, expiry, &value);
+        } else {
+          status = memcached_decrement_with_initial(
+            mc, key->data(), key->size(),
+            offset, initial_value, expiry, &value);
+        }
+      }
+    } else {
+      if (server_key) {
+        if (isInc) {
+          status = memcached_increment_by_key(
+            mc,
+            server_key->data(), server_key->size(), key->data(), key->size(),
+            offset, &value);
+        } else {
+          status = memcached_decrement_by_key(
+            mc,
+            server_key->data(), server_key->size(), key->data(), key->size(),
+            offset, &value);
+        }
+      } else {
+        if (isInc) {
+          status = memcached_increment(
+            mc, key->data(), key->size(), offset, &value);
+        } else {
+          status = memcached_decrement(
+            mc, key->data(), key->size(), offset, &value);
+        }
+      }
     }
+
+    if (!handleError(status)) return false;
     return (int64_t)value;
+  }
+
+  bool isBinaryProtocol() {
+    return memcached_behavior_get(&m_impl->memcached,
+                                  MEMCACHED_BEHAVIOR_BINARY_PROTOCOL);
   }
 
   typedef std::map<std::string, ImplPtr> ImplMap;
@@ -505,6 +596,12 @@ void HHVM_METHOD(Memcached, __construct,
     if (!impl) impl.reset(new MemcachedData::Impl);
     data->m_impl = impl;
   }
+}
+
+bool HHVM_METHOD(Memcached, quit) {
+  auto data = Native::data<MemcachedData>(this_);
+  memcached_quit(&data->m_impl->memcached);
+  return true;
 }
 
 Variant HHVM_METHOD(Memcached, getallkeys) {
@@ -553,7 +650,7 @@ Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
                               &result.value, &status)) {
     if (status == MEMCACHED_END) status = MEMCACHED_NOTFOUND;
     if (status == MEMCACHED_NOTFOUND && !cache_cb.isNull()) {
-      status = data->doCacheCallback(cache_cb, key, returnValue);
+      status = data->doCacheCallback(cache_cb, this_, key, returnValue);
       if (!data->handleError(status)) return false;
       if (cas_token.isReferenced()) cas_token = 0.0;
       return returnValue;
@@ -741,24 +838,42 @@ bool HHVM_METHOD(Memcached, deletebykey, const String& server_key,
                      key.c_str(), key.length(), time));
 }
 
-Variant HHVM_METHOD(Memcached, incrementbykey, const String& server_key,
-                                               const String& key,
-                                               int64_t offset /*= 1*/,
-                                               int64_t inital_value /*= 0*/,
-                                               int64_t expiry /*= 0*/) {
-  auto data = Native::data<MemcachedData>(this_);
-  return data->incDecOperationImpl(memcached_increment_with_initial_by_key,
-                                server_key, key, offset, inital_value, expiry);
+Variant HHVM_METHOD(Memcached, increment,
+                    const String& key,
+                    int64_t offset /* = 1 */,
+                    int64_t initial_value /* = 0 */,
+                    int64_t expiry /* = 0 */) {
+  return Native::data<MemcachedData>(this_)->incDecOp(
+    true, nullptr, key.get(), offset, initial_value, expiry);
 }
 
-Variant HHVM_METHOD(Memcached, decrementbykey, const String& server_key,
-                                               const String& key,
-                                               int64_t offset /*= 1*/,
-                                               int64_t inital_value /*= 0*/,
-                                               int64_t expiry /*= 0*/) {
-  auto data = Native::data<MemcachedData>(this_);
-  return data->incDecOperationImpl(memcached_decrement_with_initial_by_key,
-                                server_key, key, offset, inital_value, expiry);
+Variant HHVM_METHOD(Memcached, incrementbykey,
+                    const String& server_key,
+                    const String& key,
+                    int64_t offset /* = 1 */,
+                    int64_t initial_value /* = 0 */,
+                    int64_t expiry /* = 0 */) {
+  return Native::data<MemcachedData>(this_)->incDecOp(
+    true, server_key.get(), key.get(), offset, initial_value, expiry);
+}
+
+Variant HHVM_METHOD(Memcached, decrement,
+                    const String& key,
+                    int64_t offset /* = 1 */,
+                    int64_t initial_value /* = 0 */,
+                    int64_t expiry /* = 0 */) {
+  return Native::data<MemcachedData>(this_)->incDecOp(
+    false, nullptr, key.get(), offset, initial_value, expiry);
+}
+
+Variant HHVM_METHOD(Memcached, decrementbykey,
+                    const String& server_key,
+                    const String& key,
+                    int64_t offset /* = 1 */,
+                    int64_t initial_value /* = 0 */,
+                    int64_t expiry /* = 0 */) {
+  return Native::data<MemcachedData>(this_)->incDecOp(
+    false, server_key.get(), key.get(), offset, initial_value, expiry);
 }
 
 bool HHVM_METHOD(Memcached, addserver, const String& host, int port,
@@ -805,6 +920,12 @@ Array HHVM_METHOD(Memcached, getserverlist) {
   memcached_server_function callbacks[] = { doServerListCallback };
   memcached_server_cursor(&data->m_impl->memcached, callbacks, &returnValue, 1);
   return returnValue;
+}
+
+bool HHVM_METHOD(Memcached, resetserverlist) {
+  auto data = Native::data<MemcachedData>(this_);
+  memcached_servers_reset(&data->m_impl->memcached);
+  return true;
 }
 
 Variant HHVM_METHOD(Memcached, getserverbykey, const String& server_key) {
@@ -1034,12 +1155,14 @@ bool HHVM_METHOD(Memcached, setoption, int option, const Variant& value) {
        * options on false case, like it does for MEMCACHED_BEHAVIOR_KETAMA
        * (non-weighted) case. We have to clean up ourselves.
        */
-      memcached_behavior_set_key_hash(&data->m_impl->memcached,
-                                      MEMCACHED_HASH_DEFAULT);
-      memcached_behavior_set_distribution_hash(&data->m_impl->memcached,
-                                               MEMCACHED_HASH_DEFAULT);
-      memcached_behavior_set_distribution(&data->m_impl->memcached,
-                                          MEMCACHED_DISTRIBUTION_MODULA);
+      if (!lValue) {
+        memcached_behavior_set_key_hash(&data->m_impl->memcached,
+                                        MEMCACHED_HASH_DEFAULT);
+        memcached_behavior_set_distribution_hash(&data->m_impl->memcached,
+                                                 MEMCACHED_HASH_DEFAULT);
+        memcached_behavior_set_distribution(&data->m_impl->memcached,
+                                            MEMCACHED_DISTRIBUTION_MODULA);
+      }
       break;
     }
 
@@ -1100,6 +1223,10 @@ IMPLEMENT_THREAD_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
 
 const StaticString s_Memcached("Memcached");
 const StaticString s_DISTRIBUTION_CONSISTENT("DISTRIBUTION_CONSISTENT");
+const StaticString s_DISTRIBUTION_CONSISTENT_KETAMA("DISTRIBUTION_CONSISTENT_KETAMA");
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+const StaticString s_DISTRIBUTION_CONSISTENT_WEIGHTED("DISTRIBUTION_CONSISTENT_WEIGHTED");
+#endif
 const StaticString s_DISTRIBUTION_MODULA("DISTRIBUTION_MODULA");
 const StaticString s_GET_PRESERVE_ORDER("GET_PRESERVE_ORDER");
 const StaticString s_HASH_CRC("HASH_CRC");
@@ -1118,6 +1245,9 @@ const StaticString s_OPT_BUFFER_WRITES("OPT_BUFFER_WRITES");
 const StaticString s_OPT_CACHE_LOOKUPS("OPT_CACHE_LOOKUPS");
 const StaticString s_OPT_COMPRESSION("OPT_COMPRESSION");
 const StaticString s_OPT_CONNECT_TIMEOUT("OPT_CONNECT_TIMEOUT");
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000003
+const StaticString s_OPT_DEAD_TIMEOUT("OPT_DEAD_TIMEOUT");
+#endif
 const StaticString s_OPT_DISTRIBUTION("OPT_DISTRIBUTION");
 const StaticString s_OPT_HASH("OPT_HASH");
 const StaticString s_OPT_LIBKETAMA_COMPATIBLE("OPT_LIBKETAMA_COMPATIBLE");
@@ -1125,13 +1255,18 @@ const StaticString s_OPT_NO_BLOCK("OPT_NO_BLOCK");
 const StaticString s_OPT_POLL_TIMEOUT("OPT_POLL_TIMEOUT");
 const StaticString s_OPT_PREFIX_KEY("OPT_PREFIX_KEY");
 const StaticString s_OPT_RECV_TIMEOUT("OPT_RECV_TIMEOUT");
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
+const StaticString s_OPT_REMOVE_FAILED_SERVERS("OPT_REMOVE_FAILED_SERVERS");
+#endif
 const StaticString s_OPT_RETRY_TIMEOUT("OPT_RETRY_TIMEOUT");
 const StaticString s_OPT_SEND_TIMEOUT("OPT_SEND_TIMEOUT");
 const StaticString s_OPT_SERIALIZER("OPT_SERIALIZER");
 const StaticString s_OPT_SERVER_FAILURE_LIMIT("OPT_SERVER_FAILURE_LIMIT");
 const StaticString s_OPT_SOCKET_RECV_SIZE("OPT_SOCKET_RECV_SIZE");
 const StaticString s_OPT_SOCKET_SEND_SIZE("OPT_SOCKET_SEND_SIZE");
+const StaticString s_OPT_SORT_HOSTS("OPT_SORT_HOSTS");
 const StaticString s_OPT_TCP_NODELAY("OPT_TCP_NODELAY");
+const StaticString s_OPT_VERIFY_KEY("OPT_VERIFY_KEY");
 const StaticString s_RES_BAD_KEY_PROVIDED("RES_BAD_KEY_PROVIDED");
 const StaticString s_RES_BUFFERED("RES_BUFFERED");
 const StaticString s_RES_CLIENT_ERROR("RES_CLIENT_ERROR");
@@ -1151,6 +1286,9 @@ const StaticString s_RES_PARTIAL_READ("RES_PARTIAL_READ");
 const StaticString s_RES_PAYLOAD_FAILURE("RES_PAYLOAD_FAILURE");
 const StaticString s_RES_PROTOCOL_ERROR("RES_PROTOCOL_ERROR");
 const StaticString s_RES_SERVER_ERROR("RES_SERVER_ERROR");
+const StaticString s_RES_SERVER_MARKED_DEAD("RES_SERVER_MARKED_DEAD");
+const StaticString
+ s_RES_SERVER_TEMPORARILY_DISABLED("RES_SERVER_TEMPORARILY_DISABLED");
 const StaticString s_RES_SOME_ERRORS("RES_SOME_ERRORS");
 const StaticString s_RES_SUCCESS("RES_SUCCESS");
 const StaticString s_RES_TIMEOUT("RES_TIMEOUT");
@@ -1163,9 +1301,23 @@ const StaticString s_SERIALIZER_PHP("SERIALIZER_PHP");
 class MemcachedExtension : public Extension {
  public:
   MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
+  void threadInit() override {
+    if (s_memcached_globals) {
+      return;
+    }
+    s_memcached_globals = new MEMCACHEDGlobals;
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "memcached.sess_prefix", &MEMCACHEDG(sess_prefix));
+  }
+
+  void threadShutdown() override {
+    delete s_memcached_globals;
+    s_memcached_globals = nullptr;
+  }
 
   virtual void moduleInit() {
     HHVM_ME(Memcached, __construct);
+    HHVM_ME(Memcached, quit);
     HHVM_ME(Memcached, getallkeys);
     HHVM_ME(Memcached, getbykey);
     HHVM_ME(Memcached, getmultibykey);
@@ -1179,10 +1331,13 @@ class MemcachedExtension : public Extension {
     HHVM_ME(Memcached, replacebykey);
     HHVM_ME(Memcached, casbykey);
     HHVM_ME(Memcached, deletebykey);
+    HHVM_ME(Memcached, increment);
     HHVM_ME(Memcached, incrementbykey);
+    HHVM_ME(Memcached, decrement);
     HHVM_ME(Memcached, decrementbykey);
     HHVM_ME(Memcached, addserver);
     HHVM_ME(Memcached, getserverlist);
+    HHVM_ME(Memcached, resetserverlist);
     HHVM_ME(Memcached, getserverbykey);
     HHVM_ME(Memcached, getstats);
     HHVM_ME(Memcached, getversion);
@@ -1205,6 +1360,16 @@ class MemcachedExtension : public Extension {
       s_Memcached.get(), s_DISTRIBUTION_CONSISTENT.get(),
       q_Memcached$$DISTRIBUTION_CONSISTENT
     );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_CONSISTENT_KETAMA.get(),
+      q_Memcached$$DISTRIBUTION_CONSISTENT_KETAMA
+    );
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_CONSISTENT_WEIGHTED.get(),
+      q_Memcached$$DISTRIBUTION_CONSISTENT_WEIGHTED
+    );
+#endif
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_DISTRIBUTION_MODULA.get(),
       q_Memcached$$DISTRIBUTION_MODULA
@@ -1394,6 +1559,33 @@ class MemcachedExtension : public Extension {
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_SERIALIZER_PHP.get(), q_Memcached$$SERIALIZER_PHP
     );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_VERIFY_KEY.get(), q_Memcached$$OPT_VERIFY_KEY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_SORT_HOSTS.get(), q_Memcached$$OPT_SORT_HOSTS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_SERVER_MARKED_DEAD.get(),
+      q_Memcached$$RES_SERVER_MARKED_DEAD
+    );
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_REMOVE_FAILED_SERVERS.get(),
+      q_Memcached$$OPT_REMOVE_FAILED_SERVERS
+    );
+#endif
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000003
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_DEAD_TIMEOUT.get(),
+      q_Memcached$$OPT_DEAD_TIMEOUT
+    );
+#endif
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_SERVER_TEMPORARILY_DISABLED.get(),
+      q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
+    );
+
 
     loadSystemlib();
   }

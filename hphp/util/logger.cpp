@@ -219,7 +219,7 @@ std::string Logger::GetHeader() {
   time_t now = time(nullptr);
   char snow[64];
   ctime_r(&now, snow);
-  // Eliminate trailing newilne from ctime_r.
+  // Eliminate trailing newline from ctime_r.
   snow[24] = '\0';
 
   char header[128];

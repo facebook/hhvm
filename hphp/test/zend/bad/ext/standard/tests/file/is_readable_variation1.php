@@ -50,6 +50,7 @@ foreach($files_arr as $file) {
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__)."/is_readable_variation1/bar.tmp");
 rmdir(dirname(__FILE__)."/is_readable_variation1/");

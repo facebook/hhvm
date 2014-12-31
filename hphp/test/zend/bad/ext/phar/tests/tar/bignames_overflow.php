@@ -20,6 +20,7 @@ echo $p1[str_repeat('a', 155) . '/' . str_repeat('a', 100)]->getContent() . "\n"
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.tar');

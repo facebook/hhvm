@@ -8,6 +8,15 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+const HTML_SPECIALCHARS = 0;
+const HTML_ENTITIES = 1;
+const ENT_COMPAT = 2;
+const ENT_QUOTES = 3;
+const ENT_NOQUOTES = 0;
+const ENT_IGNORE = 4;
+const STR_PAD_LEFT = 0;
+const STR_PAD_RIGHT = 1;
+const STR_PAD_BOTH = 2;
 function addcslashes($str, $charlist) { }
 function stripcslashes($str) { }
 function addslashes($str) { }
@@ -27,11 +36,10 @@ function trim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function ltrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function rtrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function chop($str, $charlist = HPHP_TRIM_CHARLIST) { }
-function explode($delimiter, $str, $limit = 0x7FFFFFFF) { }
-function join($glue, $pieces = null_variant) { }
+function join($glue, $pieces = null) { }
 function str_split($str, $split_length = 1) { }
 function chunk_split($body, $chunklen = 76, $end = "\r\n") { }
-function strtok($str, $token = null_variant) { }
+function strtok($str, $token = null) { }
 function str_replace($search, $replace, $subject, &$count = null) { }
 function str_ireplace($search, $replace, $subject, &$count = null) { }
 function substr_replace($str, $replacement, $start, $length = 0x7FFFFFFF) { }
@@ -43,7 +51,6 @@ function html_entity_decode($str, $quote_style = ENT_COMPAT, $charset = "ISO-885
 function htmlentities($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $double_encode = true) { }
 function htmlspecialchars_decode($str, $quote_style = ENT_COMPAT) { }
 function htmlspecialchars($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $double_encode = true) { }
-function fb_htmlspecialchars($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $extra = array()) { }
 function quoted_printable_encode($str) { }
 function quoted_printable_decode($str) { }
 function convert_uudecode($data) { }
@@ -53,7 +60,7 @@ function crc32($str) { }
 function crypt($str, $salt = "") { }
 function md5($str, $raw_output = false) { }
 function sha1($str, $raw_output = false) { }
-function strtr($str, $from, $to = null_variant) { }
+function strtr($str, $from, $to = null) { }
 function convert_cyr_string($str, $from, $to) { }
 function get_html_translation_table($table = 0, $quote_style = ENT_COMPAT) { }
 function hebrev($hebrew_text, $max_chars_per_line = 0) { }
@@ -86,7 +93,7 @@ function strripos($haystack, $needle, $offset = 0) { }
 function substr_count($haystack, $needle, $offset = 0, $length = 0x7FFFFFFF) { }
 function strspn($str1, $str2, $start = 0, $length = 0x7FFFFFFF) { }
 function strcspn($str1, $str2, $start = 0, $length = 0x7FFFFFFF) { }
-function strlen($vstr) { }
+function strlen($vstr): int { }
 function count_chars($str, $mode = 0) { }
 function str_word_count($str, $format = 0, $charlist = "") { }
 function levenshtein($str1, $str2, $cost_ins = 1, $cost_rep = 1, $cost_del = 1) { }

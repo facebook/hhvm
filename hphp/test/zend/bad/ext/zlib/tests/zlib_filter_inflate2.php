@@ -24,6 +24,7 @@ echo fread($fp, 2000);
 fclose($fp);
 
 ?>
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/test.txt.gz');
 ?>

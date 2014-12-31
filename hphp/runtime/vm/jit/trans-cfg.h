@@ -24,8 +24,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 /**
  * A dynamic control-flow graph of single-block translations.

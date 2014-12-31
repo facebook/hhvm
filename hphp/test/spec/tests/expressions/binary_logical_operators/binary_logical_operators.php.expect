@@ -1,0 +1,13 @@
+$month 6 is in-bounds
+$month 14 is out-of-bounds
+$month 6 is in-bounds
+$month 14 is out-of-bounds
+inside f(5)
+inside g(6)
+bool(false)
+inside g(0)
+inside f(1)
+bool(true)
+inside f(5)
+inside g(6)
+bool(true)

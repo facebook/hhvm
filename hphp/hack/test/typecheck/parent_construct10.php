@@ -25,7 +25,7 @@ abstract class A {
 class B extends A {
 
   public function __construct() {
-    if(true) {
+    if (true) {
       parent::__construct();
       return;
     }
@@ -33,4 +33,3 @@ class B extends A {
   }
 
 }
-

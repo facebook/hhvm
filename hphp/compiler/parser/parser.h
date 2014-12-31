@@ -30,6 +30,7 @@
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/util/logger.h"
+#include "hphp/parser/parse-time-fatal-exception.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
@@ -140,9 +141,10 @@ public:
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassVariableModifer(Token &mod) {}
   void onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                            Token *type);
+                            Token *type, bool abstract = false);
   void onClassVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassConstant(Token &out, Token *exprs, Token &var, Token &value);
+  void onClassAbstractConstant(Token &out, Token *exprs, Token &var);
   void onSimpleVariable(Token &out, Token &var);
   void onSynthesizedVariable(Token &out, Token &var) {
     onSimpleVariable(out, var);
@@ -157,15 +159,18 @@ public:
   void onEncapsList(Token &out, int type, Token &list);
   void addEncap(Token &out, Token *list, Token &expr, int type);
   void encapRefDim(Token &out, Token &var, Token &offset);
-  void encapObjProp(Token &out, Token &var, Token &name);
+  void encapObjProp(Token &out, Token &var, bool nullsafe, Token &name);
   void encapArray(Token &out, Token &var, Token &expr);
   void onConst(Token &out, Token &name, Token &value);
   void onConstantValue(Token &out, Token &constant);
   void onScalar(Token &out, int type, Token &scalar);
   void onExprListElem(Token &out, Token *exprs, Token &expr);
 
-  void onObjectProperty(Token &out, Token &base, Token &prop);
-  void onObjectMethodCall(Token &out, Token &base, Token &prop, Token &params);
+  void onObjectProperty(Token &out, Token &base, bool nullsafe, Token &prop);
+  void onObjectMethodCall(Token &out, Token &base, bool nullsafe, Token &prop,
+                          Token &params);
+
+  void checkAllowedInWriteContext(ExpressionPtr e);
 
   void onListAssignment(Token &out, Token &vars, Token *expr,
                         bool rhsFirst = false);
@@ -240,13 +245,14 @@ public:
   void onCase(Token &out, Token &cases, Token *cond, Token &stmt);
   void onBreakContinue(Token &out, bool isBreak, Token *expr);
   void onReturn(Token &out, Token *expr);
-  void onYield(Token &out, Token &expr);
-  void onYieldPair(Token &out, Token &key, Token &val);
+  void onYield(Token &out, Token *expr);
+  void onYieldPair(Token &out, Token *key, Token *val);
   void onYieldBreak(Token &out);
   void onAwait(Token &out, Token &expr);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
   void onStatic(Token &out, Token &expr);
+  void onHashBang(Token &out, Token &text);
   void onEcho(Token &out, Token &expr, bool html);
   void onUnset(Token &out, Token &expr);
   void onExpStatement(Token &out, Token &expr);
@@ -267,7 +273,8 @@ public:
                   Token& ref,
                   Token& params,
                   Token& cparams,
-                  Token& stmts);
+                  Token& stmts,
+                  Token& ret);
   Token onExprForLambda(const Token& expr);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
 
@@ -424,7 +431,13 @@ private:
 
   bool hasType(Token &type);
 
+  void checkAssignThis(string var);
+
   void checkAssignThis(Token &var);
+
+  void checkAssignThis(ExpressionPtr e);
+
+  void checkAssignThis(ExpressionListPtr params);
 
   void addStatement(StatementPtr stmt, StatementPtr new_stmt);
 
@@ -483,6 +496,7 @@ private:
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
   AliasTable m_nsAliasTable;
+  std::vector<uint32_t> m_nsStack;
 
   // Function aliases
   hphp_string_iset m_fnTable;

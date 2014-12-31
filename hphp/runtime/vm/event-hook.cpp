@@ -15,28 +15,32 @@
 */
 
 #include "hphp/runtime/vm/event-hook.h"
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/func.h"
+
+#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
+#include "hphp/runtime/ext/ext_hotprofiler.h"
+
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_hotprofiler.h"
+#include "hphp/runtime/vm/func.h"
+
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_xenon.h"
-#include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_args("args");
-static StaticString s_enter("enter");
-static StaticString s_exit("exit");
-static StaticString s_exception("exception");
-static StaticString s_name("name");
-static StaticString s_return("return");
+const StaticString s_args("args");
+const StaticString s_enter("enter");
+const StaticString s_exit("exit");
+const StaticString s_exception("exception");
+const StaticString s_name("name");
+const StaticString s_return("return");
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p,
@@ -237,7 +241,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
   if (doneFlag.toBoolean()) {
     Offset pcOff;
-    ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
+    ActRec* outer = g_context->getPrevVMStateUNSAFE(ar, &pcOff);
 
     frame_free_locals_inl_no_hook<true>(ar, ar->func()->numLocals());
     Stack& stack = vmStack();
@@ -316,7 +320,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // Inlined calls normally skip the function enter and exit events. If we
   // side exit in an inlined callee, we short-circuit here in order to skip
   // exit events that could unbalance the call stack.
-  if ((JIT::TCA) ar->m_savedRip == JIT::mcg->tx().uniqueStubs.retInlHelper) {
+  if ((jit::TCA) ar->m_savedRip == jit::mcg->tx().uniqueStubs.retInlHelper) {
     return;
   }
 
@@ -368,25 +372,61 @@ void EventHook::onFunctionResume(const ActRec* ar) {
   onFunctionEnter(ar, EventHook::NormalFunc, flags);
 }
 
-void EventHook::onFunctionSuspend(const ActRec* ar, bool suspendingResumed) {
-  // TODO(#2329497) can't CheckSurprise() yet, unwinder frees suspended locals
-  ssize_t flags = GetConditionFlags();
-  onFunctionExit(ar, nullptr, nullptr, flags);
+// Child is the AFWH we're going to block on, nullptr iff this is a suspending
+// generator.
+void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
+  ssize_t flags = CheckSurprise();
+  onFunctionExit(suspending, nullptr, nullptr, flags);
 
-  // Async profiler
   if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
-      ar->func()->isAsyncFunction()) {
-    assert(ar->resumed());
-    auto afwh = frame_afwh(ar);
-    auto session = AsioSession::Get();
-    // Blocking await @ eager execution => AsyncFunctionWaitHandle created.
-    if (!suspendingResumed && session->hasOnResumableCreateCallback()) {
-      session->onResumableCreate(afwh, afwh->getChild());
+      suspending->func()->isAsyncFunction()) {
+    assert(child != nullptr);  // This isn't a generator
+    assert(child->instanceof(c_WaitableWaitHandle::classof()));
+    assert(suspending->resumed());
+    auto const afwh = frame_afwh(suspending);
+    auto const session = AsioSession::Get();
+    if (session->hasOnResumableAwaitCallback()) {
+      session->onResumableAwait(
+        afwh,
+        static_cast<c_WaitableWaitHandle*>(child)
+      );
     }
-    // Blocking await @ resumed execution => AsyncFunctionWaitHandle awaiting.
-    if (suspendingResumed && session->hasOnResumableAwaitCallback()) {
-      session->onResumableAwait(afwh, afwh->getChild());
+  }
+}
+
+void EventHook::onFunctionSuspendE(ActRec* suspending,
+                                   const ActRec* resumableAR) {
+  // When we're suspending an eagerly executing resumable, we've already
+  // teleported the ActRec from suspending over to resumableAR, so we need to
+  // make sure the unwinder knows not to touch the locals, $this, or
+  // VarEnv/ExtraArgs.
+  suspending->setThisOrClassAllowNull(nullptr);
+  suspending->setLocalsDecRefd();
+  suspending->setVarEnv(nullptr);
+
+  try {
+    ssize_t flags = CheckSurprise();
+    onFunctionExit(resumableAR, nullptr, nullptr, flags);
+
+    if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+        resumableAR->func()->isAsyncFunction()) {
+      assert(resumableAR->resumed());
+      auto const afwh = frame_afwh(resumableAR);
+      auto const session = AsioSession::Get();
+      if (session->hasOnResumableCreateCallback()) {
+        session->onResumableCreate(afwh, afwh->getChild());
+      }
     }
+  } catch (...) {
+    auto const resumableObj = [&]() -> ObjectData* {
+      if (resumableAR->func()->isAsyncFunction()) {
+        return frame_afwh(resumableAR);
+      }
+      assert(resumableAR->func()->isGenerator());
+      return frame_base_generator(resumableAR);
+    }();
+    decRefObj(resumableObj);
+    throw;
   }
 }
 
@@ -398,6 +438,8 @@ void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
   // The locals are already gone. Mark them as decref'd so that if this hook
   // fails and unwinder kicks in, it won't try to decref them again.
   ar->setLocalsDecRefd();
+
+  // TODO(#5758054): does this need setVarEnv(nullptr) ?
 
   ssize_t flags = CheckSurprise();
   onFunctionExit(ar, &retval, nullptr, flags);

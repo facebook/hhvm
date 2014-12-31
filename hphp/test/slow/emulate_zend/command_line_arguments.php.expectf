@@ -1,0 +1,4 @@
+string(%s) "%s --php -n -d foo=bar %s/command_line_arguments.inc"
+string(12) "Hello world!"
+string(%s) "%s --php -n < %s/command_line_arguments.inc"
+string(12) "Hello world!"

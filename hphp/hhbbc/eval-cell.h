@@ -19,7 +19,12 @@
 #include <stdexcept>
 #include <exception>
 
+#include <folly/ScopeGuard.h>
+#include <folly/Optional.h>
+
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/vm/repo.h"
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/type-system.h"
@@ -37,13 +42,20 @@ namespace HPHP { namespace HHBBC {
  * an exception it returns TInitCell.
  */
 template<class Pred>
-Type eval_cell(Pred p) {
+folly::Optional<Type> eval_cell(Pred p) {
   try {
+    g_context->setThrowAllErrors(true);
+    SCOPE_EXIT { g_context->setThrowAllErrors(false); };
+
     Cell c = p();
     if (IS_REFCOUNTED_TYPE(c.m_type)) {
       switch (c.m_type) {
       case KindOfString:
         {
+          if (c.m_data.pstr->size() > Repo::get().stringLengthLimit()) {
+            tvDecRef(&c);
+            return TStr;
+          }
           auto const sstr = makeStaticString(c.m_data.pstr);
           tvDecRef(&c);
           c = make_tv<KindOfStaticString>(sstr);
@@ -75,14 +87,9 @@ Type eval_cell(Pred p) {
     auto const t = from_cell(c);
     return options.ConstantProp ? t : loosen_statics(t);
   } catch (const std::exception&) {
-    /*
-     * Not currently trying to set the nothrow() flag based on whether
-     * or not this catch block is hit.  To do it correctly, it will
-     * require checking whether the non-exceptioning cases above
-     * possibly entered the error handler by running a raise_notice or
-     * similar.
-     */
-    return TInitCell;
+    return folly::none;
+  } catch (...) {
+    always_assert_flog(0, "a non-std::exception was thrown in eval_cell");
   }
 }
 

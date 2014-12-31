@@ -217,7 +217,7 @@ class HHVMDocExtension {
     if (!file_exists($this->root.'/en/reference') ||
         !is_dir($this->root.'/en/reference')) {
       throw new Exception("{$this->root} does not appear to be ".
-                          "a phpdoc checkout.  See http://php.net/svn ".
+                          "a phpdoc checkout.  See http://php.net/git.php ".
                           "for instructions on how to checkout phpdoc-en.");
     }
   }

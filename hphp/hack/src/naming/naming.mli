@@ -22,6 +22,7 @@ open Utils
  * mapped here in ifuns to a freshly created unique integer identifier.
  *)
 type env = {
+  iassume_php : bool;
   iclasses  : ((Pos.t * Ident.t) SMap.t) * (String.t SMap.t);
   ifuns     : (Pos.t * Ident.t) SMap.t;
   itypedefs : (Pos.t * Ident.t) SMap.t;
@@ -50,6 +51,11 @@ val make_env:
 
 (* Solves the local names within a function *)
 val fun_: env -> Ast.fun_ -> Nast.fun_
+
+(* Uses a default empty environment to extract the use list
+  of a lambda expression. This exists only for the sake of
+  the dehackificator and is not meant for general use. *)
+val uselist_lambda: Ast.fun_ -> string list
 
 (* Solves the local names of a class *)
 val class_: env -> Ast.class_ -> Nast.class_
@@ -86,6 +92,6 @@ val is_null:   string
 val is_resource:  string
 
 val ndecl_file:
-  string -> FileInfo.t ->
-  Errors.t * SSet.t * env ->
-  Errors.t * SSet.t * env
+  Relative_path.t -> FileInfo.t ->
+  Errors.t * Relative_path.Set.t * env ->
+  Errors.t * Relative_path.Set.t * env

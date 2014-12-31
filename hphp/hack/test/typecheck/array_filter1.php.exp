@@ -1,0 +1,6 @@
+File "array_filter1.php", line 9, characters 16-16:
+Invalid argument (Typing[4110])
+File "array_filter1.php", line 4, characters 3-11:
+This is an object of type Container
+File "array_filter1.php", line 9, characters 16-16:
+It is incompatible with an int

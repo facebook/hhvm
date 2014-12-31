@@ -89,6 +89,11 @@ StringData* lookupStaticString(const StringData* str);
 size_t makeStaticStringCount();
 
 /*
+ * Return total size of static strings in bytes
+ */
+size_t makeStaticStringSize();
+
+/*
  * Functions mapping constants to RDS handles to their values in a
  * given request.
  */

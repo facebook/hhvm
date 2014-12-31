@@ -20,11 +20,11 @@
 #include <climits>
 #include <vector>
 
-#include "folly/Likely.h"
+#include <folly/Likely.h>
 
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -43,7 +43,7 @@ struct ArrayData {
   //
   // Beware if you change the order or the numerical values, as there are
   // a few places in the code that depends on the order or the numeric
-  // values. Also, all of the values need to be continguous from 0 to =
+  // values. Also, all of the values need to be continuous from 0 to =
   // kNumKinds-1 since we use these values to index into a table.
   enum ArrayKind : uint8_t {
     kPackedKind = 0,  // PackedArray with keys in range [0..size)
@@ -52,8 +52,8 @@ struct ArrayData {
     kIntMapKind = 3,  // IntMapArray, int keys, maybe holes, like MixedArray
     kVPackedKind = 4, // PackedArray with extra warnings for certain operations
     kEmptyKind = 5,   // The singleton static empty array
-    kSharedKind = 6,  // SharedArray
-    kNvtwKind = 7,    // NameValueTableWrapper
+    kApcKind = 6,     // APCLocalArray
+    kGlobalsKind = 7, // GlobalsArray
     kProxyKind = 8,   // ProxyArray
     kNumKinds = 9     // insert new values before kNumKinds.
   };
@@ -64,11 +64,13 @@ protected:
    * it, change the MixedArray::Make functions as appropriate.
    */
   explicit ArrayData(ArrayKind kind)
-    : m_kind(kind)
-    , m_size(-1)
-    , m_pos(0)
-    , m_count(0)
-  {}
+    : m_sizeAndPos(uint32_t(-1))
+    , m_kindAndCount(kind << 24) {
+    assert(m_size == -1);
+    assert(m_pos == 0);
+    assert(m_kind == kind);
+    assert(m_count == 0);
+  }
 
   /*
    * NOTE: MixedArray no longer calls this destructor.  If you need to
@@ -123,7 +125,7 @@ public:
 
   // unlike ArrayData::size(), this functions doesn't delegate
   // to the vsize() function, so its more efficient to use this when
-  // you know you don't have a NameValueTableWrapper.
+  // you know you don't have a GlobalsArray or ProxyArray
   size_t getSize() const {
     return m_size;
   }
@@ -198,8 +200,8 @@ public:
     return b;
   }
 
-  bool isSharedArray() const { return m_kind == kSharedKind; }
-  bool isNameValueTableWrapper() const { return m_kind == kNvtwKind; }
+  bool isApcArray() const { return m_kind == kApcKind; }
+  bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
 
   /*
@@ -443,6 +445,7 @@ private:
   void serializeImpl(VariableSerializer *serializer) const;
   friend size_t getMemSize(const ArrayData*);
   static void compileTimeAssertions() {
+    static_assert(offsetof(ArrayData, m_kind) == HeaderKindOffset, "");
     static_assert(offsetof(ArrayData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
@@ -475,6 +478,13 @@ protected:
   // this on its own.)
   union {
     struct {
+      uint32_t m_size;
+      int32_t m_pos;
+    };
+    uint64_t m_sizeAndPos; // careful, m_pos is signed
+  };
+  union {
+    struct {
       union {
         struct {
           UNUSED uint16_t m_unused1;
@@ -487,18 +497,21 @@ protected:
         // encoding see the definition of packedCapToCode().
         uint32_t m_packedCapCode;
       };
-      uint32_t m_size;
-    };
-    uint64_t m_kindAndSize;
-  };
-  union {
-    struct {
-      int32_t m_pos;
       mutable RefCount m_count;
     };
-    uint64_t m_posAndCount;   // be careful, m_pos is signed
+    uint64_t m_kindAndCount;
   };
 };
+
+static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
+static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
+static_assert(ArrayData::kStrMapKind == uint8_t(HeaderKind::StrMap), "");
+static_assert(ArrayData::kIntMapKind == uint8_t(HeaderKind::IntMap), "");
+static_assert(ArrayData::kVPackedKind == uint8_t(HeaderKind::VPacked), "");
+static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
+static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
+static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
+static_assert(ArrayData::kProxyKind == uint8_t(HeaderKind::Proxy), "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -587,7 +600,8 @@ struct ArrayFunctions {
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v, int64_t* key_ptr);
 };
 
-extern const ArrayFunctions g_array_funcs;
+extern ArrayFunctions g_array_funcs;
+extern const ArrayFunctions g_array_funcs_unmodified;
 
 ALWAYS_INLINE
 void decRefArr(ArrayData* arr) {

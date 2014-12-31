@@ -24,6 +24,7 @@ clearstatcache();
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__)."/perm.tmp");
 rmdir(dirname(__FILE__)."/perm");

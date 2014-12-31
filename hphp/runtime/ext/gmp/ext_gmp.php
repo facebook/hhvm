@@ -77,11 +77,11 @@ function gmp_hamdist(mixed $a,
 
 <<__Native>>
 function gmp_init(mixed $number,
-                  int $base = -1): mixed;
+                  int $base = 0): mixed;
 
 
 <<__Native>>
-function gmp_intval(mixed $gmpnumber): mixed;
+function gmp_intval(mixed $gmpnumber): int;
 
 
 <<__Native>>
@@ -152,6 +152,14 @@ function gmp_random(int $limiter = 20): void;
 
 
 <<__Native>>
+function gmp_root(mixed $a, int $root): mixed;
+
+
+<<__Native>>
+function gmp_rootrem(mixed $a, int $root): mixed;
+
+
+<<__Native>>
 function gmp_scan0(mixed $a,
                    int $start): mixed;
 
@@ -162,7 +170,7 @@ function gmp_scan1(mixed $a,
 
 
 <<__Native>>
-function gmp_setbit(mixed &$a,
+function gmp_setbit(mixed $a,
                     int $index,
                     bool $bit_on = true): void;
 
@@ -181,7 +189,7 @@ function gmp_sqrtrem(mixed $a): mixed;
 
 <<__Native>>
 function gmp_strval(mixed $a,
-                    int $base = 10): string;
+                    int $base = 10): mixed;
 
 
 <<__Native>>
@@ -197,3 +205,19 @@ function gmp_testbit(mixed $a,
 <<__Native>>
 function gmp_xor(mixed $a,
                  mixed $b): mixed;
+
+
+<<__NativeData("GMPData")>>
+class GMP implements Serializable {
+  <<__Native>>
+  public function serialize() : string;
+
+
+  <<__Native>>
+  public function unserialize(mixed $data) : void;
+
+
+  <<__Native>>
+  public function __debugInfo() : array;
+
+}

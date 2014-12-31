@@ -8,13 +8,11 @@
  *
  *)
 
-
 (*****************************************************************************)
 (* The environment shared by everyone *)
 (*****************************************************************************)
 
-module SSet: Set.S with type elt = String.t
-module SMap: Map.S with type key = String.t
+open Utils
 
 (* This is in fact a fake time module, we don't want to use the "real"
  * unix timestamps, because we would run into atomicity problems.
@@ -120,13 +118,7 @@ val get_clients: t -> client list
 val make: string -> t
 
 (*****************************************************************************)
-(* The environment variable containing the pattern we want to skip *)
-(*****************************************************************************)
-
-val skip_var: string
-
-(*****************************************************************************)
-(* Outputing *)
+(* Output *)
 (*****************************************************************************)
 
 val add_output: t -> close: bool -> Unix.file_descr -> SSet.t -> unit

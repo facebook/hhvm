@@ -19,10 +19,10 @@
 
 #include <type_traits>
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,7 @@ namespace HPHP { namespace JIT {
  */
 template<class Key, class Info>
 struct StateVector {
-  typedef smart::vector<Info> InfoVector;
+  typedef jit::vector<Info> InfoVector;
   typedef typename InfoVector::iterator iterator;
   typedef typename InfoVector::const_iterator const_iterator;
   typedef typename InfoVector::reference reference;

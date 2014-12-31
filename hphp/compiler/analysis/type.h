@@ -17,12 +17,13 @@
 #ifndef incl_HPHP_TYPE_H_
 #define incl_HPHP_TYPE_H_
 
-#include "hphp/compiler/hphp.h"
 #include <map>
-#include "hphp/compiler/json.h"
-#include "hphp/util/functional.h"
-#include "hphp/runtime/base/types.h"
 
+#include "hphp/compiler/hphp.h"
+#include "hphp/compiler/json.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/functional.h"
 
 class TestCodeRun;
 class TestCodeError;
@@ -69,6 +70,7 @@ public:
 
   static const KindOf KindOfInteger = (KindOf)(KindOfInt64 | KindOfInt32);
   static const KindOf KindOfNumeric = (KindOf)(KindOfDouble | KindOfInteger);
+  static const KindOf KindOfArrayKey = (KindOf)(KindOfString | KindOfInteger);
   static const KindOf KindOfPrimitive = (KindOf)(KindOfNumeric | KindOfString);
   static const KindOf KindOfPlusOperand = (KindOf)(KindOfNumeric | KindOfArray);
   static const KindOf KindOfSequence = (KindOf)(KindOfString | KindOfArray);
@@ -97,6 +99,7 @@ public:
   static TypePtr PlusOperand;
   static TypePtr Primitive;
   static TypePtr Sequence;
+  static TypePtr ArrayKey;
 
   static TypePtr AutoSequence;
   static TypePtr AutoObject;
@@ -122,8 +125,9 @@ public:
   /**
    * Map Runtime DataType to analysis Type
    */
-  static TypePtr FromDataType(DataType dt, TypePtr unknown) {
-    switch (dt) {
+  static TypePtr FromDataType(MaybeDataType dt, TypePtr unknown) {
+    if (!dt) return unknown;
+    switch (*dt) {
       case DataType::KindOfNull:     return Type::Null;
       case DataType::KindOfBoolean:  return Type::Boolean;
       case DataType::KindOfInt64:    return Type::Int64;
@@ -133,9 +137,13 @@ public:
       case DataType::KindOfArray:    return Type::Array;
       case DataType::KindOfObject:   return Type::Object;
       case DataType::KindOfResource: return Type::Resource;
-      default:
+
+      case DataType::KindOfUninit:
+      case DataType::KindOfRef:
+      case DataType::KindOfClass:
         return unknown;
     }
+    not_reached();
   }
 
   /**
@@ -246,9 +254,6 @@ public:
 
   ClassScopePtr getClass(AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) const;
-
-  DataType getDataType() const;
-  DataType getHhvmDataType() const;
 
   /**
    * Type hint names in PHP.

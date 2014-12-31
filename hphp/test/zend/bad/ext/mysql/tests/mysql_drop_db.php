@@ -30,6 +30,7 @@ mysql_close($link);
 
 print "done!\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once('connect.inc');
 if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket))

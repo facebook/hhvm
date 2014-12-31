@@ -29,7 +29,7 @@
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 
 using namespace HPHP;
 
@@ -102,8 +102,8 @@ bool ConstantExpression::getScalarValue(Variant &value) {
 }
 
 unsigned ConstantExpression::getCanonHash() const {
-  int64_t val = hash_string(toLower(m_name).c_str(), m_name.size());
-  return ~unsigned(val) ^ unsigned(val >> 32);
+  strhash_t val = hash_string_i_unsafe(m_name.c_str(), m_name.size());
+  return static_cast<unsigned>(val);
 }
 
 bool ConstantExpression::canonCompare(ExpressionPtr e) const {
@@ -201,77 +201,6 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
   }
 
   return ExpressionPtr();
-}
-
-TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                       bool coerce) {
-  if (m_context & LValue) return type; // ClassConstantExpression statement
-
-  // special cases: STDIN, STDOUT, STDERR
-  if (m_name == "STDIN" || m_name == "STDOUT" || m_name == "STDERR") {
-    m_valid = true;
-    return Type::Variant;
-  }
-
-  if (m_name == "INF" || m_name == "NAN") {
-    m_valid = true;
-    return Type::Double;
-  }
-
-  string lower = toLower(m_name);
-  TypePtr actualType;
-  ConstructPtr self = shared_from_this();
-  if (lower == "true" || lower == "false") {
-    m_valid = true;
-    actualType = Type::Boolean;
-  } else if (lower == "null") {
-    actualType = Type::Variant;
-    m_valid = true;
-  } else {
-    BlockScopePtr scope;
-    {
-      Lock lock(ar->getMutex());
-      scope = ar->findConstantDeclarer(m_name);
-      if (!scope) {
-        scope = getFileScope();
-        // guarded by ar lock
-        getFileScope()->declareConstant(ar, m_name);
-      }
-    }
-    assert(scope);
-    assert(scope->is(BlockScope::ProgramScope) ||
-           scope->is(BlockScope::FileScope));
-    ConstantTablePtr constants = scope->getConstants();
-
-    ConstructPtr value;
-    bool isDynamic;
-    {
-      Lock lock(scope->getMutex()); // since not class/function scope
-      // read value and dynamic-ness together + check() atomically
-      value = constants->getValue(m_name);
-      isDynamic = constants->isDynamic(m_name);
-      BlockScope *defScope = nullptr;
-      std::vector<std::string> bases;
-      actualType = constants->check(getScope(), m_name, type, coerce,
-                                    ar, self, bases, defScope);
-    }
-
-    if (!m_valid) {
-      if (ar->isSystemConstant(m_name) || value) {
-        m_valid = true;
-      }
-    }
-    if (!m_dynamic && isDynamic) {
-      m_dynamic = true;
-      actualType = Type::Variant;
-    }
-    if (m_dynamic) {
-      getScope()->getVariables()->
-        setAttribute(VariableTable::NeedGlobalPointer);
-    }
-  }
-
-  return actualType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

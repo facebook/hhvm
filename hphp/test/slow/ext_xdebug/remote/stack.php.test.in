@@ -1,0 +1,7 @@
+breakpoint_set -i 0 -t line -f stack.php.test.helper -n 6
+run -i 0
+stack_depth -i 0
+stack_get -i 0
+stack_get -i 0 -d 1
+run -i 0
+run -i 0

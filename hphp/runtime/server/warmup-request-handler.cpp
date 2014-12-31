@@ -16,12 +16,23 @@
 
 #include "hphp/runtime/server/warmup-request-handler.h"
 
-#include "folly/Memory.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/program-functions.h"
+
+#include <folly/Memory.h>
 
 using folly::make_unique;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+void WarmupRequestHandler::setupRequest(Transport* transport) {
+  m_reqHandler.setupRequest(transport);
+}
+
+void WarmupRequestHandler::teardownRequest(Transport* transport) noexcept {
+  m_reqHandler.teardownRequest(transport);
+}
 
 void WarmupRequestHandler::handleRequest(Transport *transport) {
   // There is one WarmupRequestHandler per-thread, but we want to track request

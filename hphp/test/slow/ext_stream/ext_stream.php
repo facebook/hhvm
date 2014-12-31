@@ -221,6 +221,15 @@ function test_stream_socket_shutdown() {
   VERIFY(stream_socket_shutdown($server, 0));
 }
 
+// Verify that the stream constants have been registered correctly
+// by checking some of them
+function test_stream_constants() {
+  VS(STREAM_CLIENT_CONNECT, 4);
+  VS(STREAM_SERVER_LISTEN, 8);
+  VS(STREAM_IPPROTO_RAW, 255);
+  VS(STREAM_SOCK_SEQPACKET, 5);
+}
+
 test_stream_copy_to_stream();
 test_stream_get_contents();
 test_stream_get_line();
@@ -235,3 +244,4 @@ test_stream_socket_recvfrom_udp6();
 test_stream_socket_recvfrom_unix();
 test_stream_socket_sendto_issue324();
 test_stream_socket_shutdown();
+test_stream_constants();

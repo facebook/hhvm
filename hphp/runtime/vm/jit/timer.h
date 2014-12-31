@@ -45,8 +45,13 @@
   TIMER_NAME(vasm_xls)                          \
   TIMER_NAME(vasm_jumps)                        \
   TIMER_NAME(vasm_gen)                          \
+  TIMER_NAME(vasm_lower)                        \
+  TIMER_NAME(llvm)                              \
+  TIMER_NAME(llvm_irGeneration)                 \
+  TIMER_NAME(llvm_optimize)                     \
+  TIMER_NAME(llvm_codegen)                      \
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * Timer is used to track how much CPU time we spend in the different stages of

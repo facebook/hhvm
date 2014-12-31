@@ -13,6 +13,7 @@ unset($fo);
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file = __DIR__ . '/SplFileObject_fputcsv_variation14.csv';
 unlink($file);

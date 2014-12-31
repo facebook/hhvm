@@ -51,16 +51,16 @@ namespace HPHP {
  * asynchronously (such as using await mechanism of async function or
  * passed as an array member of GenArrayWaitHandle).
  */
-FORWARD_DECLARE_CLASS(WaitHandle);
-FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
-FORWARD_DECLARE_CLASS(AsyncGeneratorWaitHandle);
-FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
-FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
-FORWARD_DECLARE_CLASS(GenMapWaitHandle);
-FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
-FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
-FORWARD_DECLARE_CLASS(SleepWaitHandle);
-FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
+
+class c_AsyncFunctionWaitHandle;
+class c_AsyncGeneratorWaitHandle;
+class c_AwaitAllWaitHandle;
+class c_GenArrayWaitHandle;
+class c_GenMapWaitHandle;
+class c_GenVectorWaitHandle;
+class c_RescheduleWaitHandle;
+class c_SleepWaitHandle;
+class c_ExternalThreadEventWaitHandle;
 class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitHandle)
@@ -78,8 +78,9 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     ExternalThreadEvent,
   };
 
-  explicit c_WaitHandle(Class* cls = c_WaitHandle::classof())
-    : ExtObjectDataFlags(cls)
+  explicit c_WaitHandle(Class* cls = c_WaitHandle::classof(),
+                        HeaderKind kind = HeaderKind::Object)
+    : ExtObjectDataFlags(cls, kind)
   {}
   ~c_WaitHandle() {}
 
@@ -90,6 +91,8 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   Object t_getwaithandle();
   void t_import();
   Variant t_join();
+  Variant t_result();
+  Variant result();
   bool t_isfinished();
   bool t_issucceeded();
   bool t_isfailed();
@@ -99,7 +102,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
 
  public:
   static constexpr ptrdiff_t stateOff() {
-    return offsetof(c_WaitHandle, o_subclassData.u8[0]);
+    return whStateOffset();
   }
   static constexpr ptrdiff_t resultOff() {
     return offsetof(c_WaitHandle, m_resultOrException);
@@ -114,7 +117,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   bool isFinished() const { return getState() <= STATE_FAILED; }
   bool isSucceeded() const { return getState() == STATE_SUCCEEDED; }
   bool isFailed() const { return getState() == STATE_FAILED; }
-  const Cell& getResult() const {
+  Cell getResult() const {
     assert(isSucceeded());
     return m_resultOrException;
   }
@@ -123,14 +126,14 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     return m_resultOrException.m_data.pobj;
   }
 
-  Kind getKind() const { return static_cast<Kind>(o_subclassData.u8[0] >> 4); }
-  uint8_t getState() const { return o_subclassData.u8[0] & 0x0F; }
+  Kind getKind() const { return static_cast<Kind>(subclass_u8() >> 4); }
+  uint8_t getState() const { return subclass_u8() & 0x0F; }
   static uint8_t toKindState(Kind kind, uint8_t state) {
     assert((uint8_t)kind < 0x10 && state < 0x10);
     return ((uint8_t)kind << 4) | state;
   }
   void setKindState(Kind kind, uint8_t state) {
-    o_subclassData.u8[0] = toKindState(kind, state);
+    subclass_u8() = toKindState(kind, state);
   }
   void setContextVectorIndex(uint32_t idx) {
     m_ctxVecIndex = idx;

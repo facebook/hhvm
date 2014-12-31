@@ -47,9 +47,8 @@ bool HHVM_FUNCTION(settype, VRefParam var, const String& type);
 
 Variant HHVM_FUNCTION(print_r, const Variant& expression, bool ret = false);
 Variant HHVM_FUNCTION(var_export, const Variant& expression, bool ret = false);
-void f_var_dump(const Variant& v);
-void f_var_dump(int _argc, const Variant& expression,
-                const Array& _argv /* = null_array */);
+void HHVM_FUNCTION(var_dump,
+                   const Variant& v, const Array& _argv = null_array);
 void HHVM_FUNCTION(debug_zval_dump, const Variant& variable);
 String HHVM_FUNCTION(serialize, const Variant& value);
 Variant HHVM_FUNCTION(unserialize, const String& str,

@@ -27,12 +27,15 @@
 #include <utility>
 #include <vector>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
-#include "hphp/util/db-conn.h"
 #include "hphp/util/logger.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -40,7 +43,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/FBSerialize.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
@@ -68,6 +71,13 @@ const int64_t k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE =
   FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
 const int64_t k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
   FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
+
+///////////////////////////////////////////////////////////////////////////////
+// static strings
+
+const StaticString
+  s_IMemoizeParam("HH\\IMemoizeParam"),
+  s_getInstanceKey("getInstanceKey");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -239,8 +249,14 @@ enum FbCompactSerializeCode {
   FB_CS_STOP       = 12,
   FB_CS_SKIP       = 13,
   FB_CS_VECTOR     = 14,
-  FB_CS_MAX_CODE   = 15,
+  FB_CS_OBJ        = 15,
+  FB_CS_MAX_CODE   = 16,
 };
+
+static_assert(FB_CS_MAX_CODE <= '0',
+  "FB_CS_MAX_CODE must be less than ASCII '0' or fb_compact_serialize() could "
+  "produce strings that when used as array keys could collide with integer "
+  "array keys. Assumption relevant to fb_compact_serialize_code() below");
 
 // 1 byte: 0<7 bits>
 const uint64_t kInt7Mask            = 0x7f;
@@ -354,14 +370,15 @@ static bool fb_compact_serialize_is_list(const Array& arr, int64_t& index_limit)
 }
 
 static int fb_compact_serialize_variant(StringBuffer& sd,
-  const Variant& var, int depth);
+  const Variant& var, int depth, FBCompactSerializeBehavior behavior);
 
 static void fb_compact_serialize_array_as_list_map(
-    StringBuffer& sb, const Array& arr, int64_t index_limit, int depth) {
+    StringBuffer& sb, const Array& arr, int64_t index_limit, int depth,
+    FBCompactSerializeBehavior behavior) {
   fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
   for (int64_t i = 0; i < index_limit; ++i) {
     if (arr.exists(i)) {
-      fb_compact_serialize_variant(sb, arr[i], depth + 1);
+      fb_compact_serialize_variant(sb, arr[i], depth + 1, behavior);
     } else {
       fb_compact_serialize_code(sb, FB_CS_SKIP);
     }
@@ -370,7 +387,8 @@ static void fb_compact_serialize_array_as_list_map(
 }
 
 static void fb_compact_serialize_array_as_map(
-    StringBuffer& sb, const Array& arr, int depth) {
+    StringBuffer& sb, const Array& arr, int depth,
+    FBCompactSerializeBehavior behavior) {
   fb_compact_serialize_code(sb, FB_CS_MAP);
   for (ArrayIter it(arr); it; ++it) {
     Variant key = it.first();
@@ -379,15 +397,23 @@ static void fb_compact_serialize_array_as_map(
     } else {
       fb_compact_serialize_string(sb, key.toString());
     }
-    fb_compact_serialize_variant(sb, it.second(), depth + 1);
+    fb_compact_serialize_variant(sb, it.second(), depth + 1, behavior);
   }
   fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
 
-static int fb_compact_serialize_variant(
-    StringBuffer& sb, const Variant& var, int depth) {
+static int fb_compact_serialize_variant(StringBuffer& sb,
+                                        const Variant& var,
+                                        int depth,
+                                        FBCompactSerializeBehavior behavior) {
   if (depth > 256) {
+    if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Array depth exceeded"));
+      throw e;
+    }
+
     return 1;
   }
 
@@ -395,7 +421,7 @@ static int fb_compact_serialize_variant(
     case KindOfUninit:
     case KindOfNull:
       fb_compact_serialize_code(sb, FB_CS_NULL);
-      break;
+      return 0;
 
     case KindOfBoolean:
       if (var.toInt64()) {
@@ -403,45 +429,83 @@ static int fb_compact_serialize_variant(
       } else {
         fb_compact_serialize_code(sb, FB_CS_FALSE);
       }
-      break;
+      return 0;
 
     case KindOfInt64:
       fb_compact_serialize_int64(sb, var.toInt64());
-      break;
+      return 0;
 
-    case KindOfDouble:
-    {
+    case KindOfDouble: {
       fb_compact_serialize_code(sb, FB_CS_DOUBLE);
       double d = var.toDouble();
       sb.append(reinterpret_cast<char*>(&d), 8);
-      break;
+      return 0;
     }
 
     case KindOfStaticString:
     case KindOfString:
       fb_compact_serialize_string(sb, var.toString());
-      break;
+      return 0;
 
-    case KindOfArray:
-    {
+    case KindOfArray: {
       Array arr = var.toArray();
       int64_t index_limit;
       if (fb_compact_serialize_is_list(arr, index_limit)) {
-        fb_compact_serialize_array_as_list_map(sb, arr, index_limit, depth);
+        fb_compact_serialize_array_as_list_map(sb, arr, index_limit, depth,
+                                               behavior);
       } else {
-        fb_compact_serialize_array_as_map(sb, arr, depth);
+        fb_compact_serialize_array_as_map(sb, arr, depth, behavior);
       }
-      break;
+      return 0;
     }
 
-    default:
-      return 1;
+    case KindOfObject: {
+      if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
+        Object obj = var.toObject();
+
+        if (obj->isCollection()) {
+          fb_compact_serialize_variant(sb, obj->toArray(), depth, behavior);
+          return 0;
+        }
+
+        if (!obj.instanceof(s_IMemoizeParam)) {
+          auto msg = folly::format(
+            "Cannot serialize object of type {} because it does not implement "
+            "HH\\IMemoizeParam",
+            obj->getClassName().data()).str();
+
+          Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
+          throw e;
+        }
+
+        // Marker that shows that this was an obj so it doesn't collide with
+        // strings
+        fb_compact_serialize_code(sb, FB_CS_OBJ);
+
+        Variant ser = obj->o_invoke_few_args(s_getInstanceKey, 0);
+        fb_compact_serialize_string(sb, ser.toString());
+        return 0;
+      }
+    }
+    // If not FBCompactSerializeBehavior::MemoizeParam fall-through to default
+
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
 
-  return 0;
+  if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
+    auto msg = folly::format(
+      "Cannot Serialize unexpected type {}", tname(var.getType()).c_str());
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg.str()));
+    throw e;
+  }
+  return 1;
 }
 
-Variant f_fb_compact_serialize(const Variant& thing) {
+String fb_compact_serialize(const Variant& thing,
+                            FBCompactSerializeBehavior behavior) {
   /**
    * If thing is a single int value [0, 127] normally we would serialize
    * it as a single byte (7 bit unsigned int).
@@ -462,11 +526,15 @@ Variant f_fb_compact_serialize(const Variant& thing) {
   }
 
   StringBuffer sb;
-  if (fb_compact_serialize_variant(sb, thing, 0)) {
+  if (fb_compact_serialize_variant(sb, thing, 0, behavior)) {
     return init_null();
   }
 
   return sb.detach();
+}
+
+Variant f_fb_compact_serialize(const Variant& thing) {
+  return fb_compact_serialize(thing, FBCompactSerializeBehavior::Base);
 }
 
 /* Check if there are enough bytes left in the buffer */
@@ -922,6 +990,8 @@ bool f_fb_intercept(const String& name, const Variant& handler,
 
 const StaticString s_extract("extract");
 const StaticString s_extract_sl("__SystemLib\\extract");
+const StaticString s_assert("assert");
+const StaticString s_assert_sl("__SystemLib\\assert");
 const StaticString s_parse_str("parse_str");
 const StaticString s_parse_str_sl("__SystemLib\\parse_str");
 const StaticString s_compact("compact");
@@ -933,6 +1003,8 @@ bool is_dangerous_varenv_function(const StringData* name) {
   return
     name->isame(s_extract.get()) ||
     name->isame(s_extract_sl.get()) ||
+    name->isame(s_assert.get()) ||
+    name->isame(s_assert_sl.get()) ||
     name->isame(s_parse_str.get()) ||
     name->isame(s_parse_str_sl.get()) ||
     name->isame(s_compact.get()) ||
@@ -987,14 +1059,14 @@ Array f_fb_call_user_func_safe(int _argc, const Variant& function,
 Variant f_fb_call_user_func_safe_return(int _argc, const Variant& function,
                                         const Variant& def,
                                         const Array& _argv /* = null_array */) {
-  if (f_is_callable(function)) {
+  if (HHVM_FN(is_callable)(function)) {
     return vm_call_user_func(function, _argv);
   }
   return def;
 }
 
 Array f_fb_call_user_func_array_safe(const Variant& function, const Array& params) {
-  if (f_is_callable(function)) {
+  if (HHVM_FN(is_callable)(function)) {
     return make_packed_array(true, vm_call_user_func(function, params));
   }
   return make_packed_array(false, uninit_null());

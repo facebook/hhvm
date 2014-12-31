@@ -10,4 +10,4 @@ sqOTOnMoezkbSmVVMuwz9flvnqHGmQvmug==
 -----END EC PRIVATE KEY-----';
 $key = openssl_pkey_get_private($pkey);
 $res = openssl_sign($data ='alpha', $sign, $key, 'ecdsa-with-SHA1');
-var_dump($res);
+var_dump($res);

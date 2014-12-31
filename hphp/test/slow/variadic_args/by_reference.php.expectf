@@ -1,2 +1,2 @@
 
-Fatal error: syntax error, unexpected ..., expecting T_VARIABLE in %s/variadic_args/by_reference.php on line 3
+Fatal error: Parameter $args is both variadic and by reference; this is unsupported in %s/variadic_args/by_reference.php on line 3

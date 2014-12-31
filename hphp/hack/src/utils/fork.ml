@@ -8,7 +8,7 @@
  *
  *)
 
-let fork ?reason:(reason=None) () =
+let fork ?reason () =
   let result = Unix.fork() in
   (match result with
   | -1 | 0 -> ()

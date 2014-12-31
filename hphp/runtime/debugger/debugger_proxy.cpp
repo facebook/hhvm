@@ -15,11 +15,12 @@
 */
 #include "hphp/runtime/debugger/debugger_proxy.h"
 
-#include <boost/lexical_cast.hpp>
 #include <exception>
 #include <map>
 #include <stack>
 #include <vector>
+
+#include <folly/Conv.h>
 
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
@@ -29,7 +30,7 @@
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/process.h"
@@ -487,7 +488,7 @@ void DebuggerProxy::pollSignal() {
 bool DebuggerProxy::getClientConnectionInfo(VRefParam address,
                                             VRefParam port) {
   Resource s(m_thrift.getSocket().get());
-  return f_socket_getpeername(s, address, port);
+  return HHVM_FN(socket_getpeername)(s, address, port);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -694,7 +695,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     if (res) {
       TRACE_RB(2, "Proxy got cmd type %d\n", res->getType());
       Debugger::UsageLog("server", getSandboxId(),
-                         boost::lexical_cast<std::string>(res->getType()));
+                         folly::to<std::string>(res->getType()));
       // Any control flow command gets installed here and we continue execution.
       m_flow = std::dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {
@@ -810,7 +811,7 @@ int DebuggerProxy::getRealStackDepth() {
   if (!fp) return 0;
 
   while (fp != nullptr) {
-    fp = context->getPrevVMState(fp, nullptr, nullptr);
+    fp = context->getPrevVMStateUNSAFE(fp, nullptr, nullptr);
     depth++;
   }
   return depth;

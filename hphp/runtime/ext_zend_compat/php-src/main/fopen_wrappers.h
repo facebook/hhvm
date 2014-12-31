@@ -21,10 +21,10 @@
 #ifndef FOPEN_WRAPPERS_H
 #define FOPEN_WRAPPERS_H
 
-BEGIN_EXTERN_C()
 #include "php_globals.h"
 #include "php_ini.h"
 
+BEGIN_EXTERN_C()
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC);
 PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC);
 PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len TSRMLS_DC);

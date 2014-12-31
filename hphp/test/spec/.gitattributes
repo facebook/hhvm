@@ -1,0 +1,9 @@
+php-langspec-master.zip binary
+tests/classes/dynamic_properties2.php binary
+tests/classes/overloading_2.php binary
+tests/classes/overloading_properties2.php binary
+tests/lexical_structure/tokens/string_literals.php.expectf binary
+tests/variables/variable_kinds.php binary
+tests/expressions/postfix_operators/post-increment_and_decrement.php.expect binary
+tests/expressions/unary_operators/pre-increment_and_decrement.php.expect binary
+tests/expressions/assignment_operators/assignment.php.expect binary

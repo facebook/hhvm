@@ -31,8 +31,6 @@ module SS = SearchService.Make(struct
     (type_num a) - (type_num b)
 end)
 
-module SUtils = SS.SUtils
-
 module WorkerApi = struct
   (* cleans off namespace and colon at the start of xhp name because the
    * user will want to search for xhp classes without typing a : at
@@ -116,7 +114,7 @@ module MasterApi = struct
 
   let update_search_index files php_files =
     let files = List.fold_left begin fun acc file ->
-      SSet.add file acc
+      Relative_path.Set.add file acc
     end php_files files in
     SS.MasterApi.update_search_index files
 end

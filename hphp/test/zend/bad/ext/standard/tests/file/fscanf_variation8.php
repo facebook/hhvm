@@ -89,6 +89,7 @@ foreach($float_formats as $float_format) {
 
 echo "\n*** Done ***";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation8.tmp";

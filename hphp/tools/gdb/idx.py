@@ -2,6 +2,8 @@
 Helpers for accessing C++ STL containers in GDB.
 """
 # @lint-avoid-python-3-compatibility-imports
+# @lint-avoid-pyflakes3
+# @lint-avoid-pyflakes2
 
 import gdb
 import re
@@ -83,14 +85,43 @@ def thm_at(thm, key):
 
 
 #------------------------------------------------------------------------------
-# Helpers.
-
-def template_type(t):
-    return str(t).split('<')[0]
-
-
-#------------------------------------------------------------------------------
 # `idx' command.
+
+@memoized
+def idx_accessors():
+    return {
+        'std::vector':          vector_at,
+        'std::unordered_map':   unordered_map_at,
+        'HPHP::FixedVector':    fixed_vector_at,
+        'HPHP::TreadHashMap':   thm_at,
+    }
+
+
+def idx(container, index):
+    value = None
+
+    container_type = template_type(container.type)
+    true_type = template_type(container.type.strip_typedefs())
+
+    accessors = idx_accessors()
+
+    if container_type in accessors:
+        value = accessors[container_type](container, index)
+    elif true_type in accessors:
+        value = accessors[true_type](container, index)
+    else:
+        try:
+            value = container[index]
+        except:
+            print('idx: Unrecognized container.')
+            return None
+
+    if value is None:
+        print('idx: Element not found.')
+        return None
+
+    return value
+
 
 class IdxCommand(gdb.Command):
     """Index into an arbitrary container.
@@ -108,13 +139,6 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
     def __init__(self):
         super(IdxCommand, self).__init__('idx', gdb.COMMAND_DATA)
 
-        self.accessors = {
-            'std::vector':          vector_at,
-            'std::unordered_map':   unordered_map_at,
-            'HPHP::FixedVector':    fixed_vector_at,
-            'HPHP::TreadHashMap':   thm_at,
-        }
-
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 
@@ -122,31 +146,19 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
             print('Usage: idx <container> <index>')
             return
 
-        container = argv[0]
-        idx = argv[1]
-        value = None
+        value = idx(argv[0], argv[1])
 
-        container_type = template_type(argv[0].type)
-        true_type = template_type(argv[0].type.strip_typedefs())
-
-        if container_type in self.accessors:
-            value = self.accessors[container_type](container, idx)
-        elif true_type in self.accessors:
-            value = self.accessors[true_type](container, idx)
-        else:
-            try:
-                value = container[idx]
-            except:
-                print('idx: Unrecognized container.')
-                return
-
-        if value is None:
-            print('idx: Element not found.')
-            return
-
-        gdb.execute('print (%s)%s' % (
-            str(value.type.pointer()), value.address))
-
+        gdbprint(value.address, value.type.pointer())
         print(vstr(value))
 
+
+class IdxFunction(gdb.Function):
+    def __init__(self):
+        super(IdxFunction, self).__init__('idx')
+
+    def invoke(self, container, val):
+        return idx(container, val)
+
+
 IdxCommand()
+IdxFunction()

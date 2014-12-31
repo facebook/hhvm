@@ -16,7 +16,13 @@
 */
 
 #include "hphp/runtime/ext/curl/ext_curl.h"
+#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
+#include "hphp/runtime/ext/asio/socket-event.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -537,7 +543,7 @@ public:
               (&first, &last,
                CURLFORM_COPYNAME, key.data(),
                CURLFORM_NAMELENGTH, (long)key.size(),
-               CURLFORM_FILENAME, s_postname.empty()
+               CURLFORM_FILENAME, postname.empty()
                                   ? name.c_str()
                                   : postname.c_str(),
                CURLFORM_CONTENTTYPE, mime.empty()
@@ -558,7 +564,7 @@ public:
                *   curl_formadd
                * - Revert changes to postval at the end
                */
-              char* mutablePostval = const_cast<char*>(postval);
+              char* mutablePostval = const_cast<char*>(postval) + 1;
               char* type = strstr(mutablePostval, ";type=");
               char* filename = strstr(mutablePostval, ";filename=");
 
@@ -569,10 +575,11 @@ public:
                 *filename = '\0';
               }
 
+              String localName = File::TranslatePath(mutablePostval);
+
               /* The arguments after _NAMELENGTH and _CONTENTSLENGTH
                * must be explicitly cast to long in curl_formadd
                * use since curl needs a long not an int. */
-              ++postval;
               m_error_no = (CURLcode)curl_formadd
                 (&first, &last,
                  CURLFORM_COPYNAME, key.data(),
@@ -583,7 +590,7 @@ public:
                  CURLFORM_CONTENTTYPE, type
                                        ? type + sizeof(";type=") - 1
                                        : "application/octet-stream",
-                 CURLFORM_FILE, postval,
+                 CURLFORM_FILE, localName.c_str(),
                  CURLFORM_END);
 
               if (type) {
@@ -995,15 +1002,15 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
 
 Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   if (url.isNull()) {
-    return NEWOBJ(CurlResource)(null_string);
+    return newres<CurlResource>(null_string);
   } else {
-    return NEWOBJ(CurlResource)(url.toString());
+    return newres<CurlResource>(url.toString());
   }
 }
 
 Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch) {
   CHECK_RESOURCE(curl);
-  return NEWOBJ(CurlResource)(curl);
+  return newres<CurlResource>(curl);
 }
 
 const StaticString
@@ -1349,6 +1356,10 @@ public:
     return m_multi;
   }
 
+  const Array& getEasyHandles() const {
+    return m_easyh;
+  }
+
 private:
   CURLM *m_multi;
   Array m_easyh;
@@ -1362,15 +1373,30 @@ void CurlMultiResource::sweep() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#define CURLM_ARG_WARNING "expects parameter 1 to be cURL multi resource"
+
 #define CHECK_MULTI_RESOURCE(curlm)                                      \
   CurlMultiResource *curlm = mh.getTyped<CurlMultiResource>(true, true); \
-  if (curlm == nullptr) {                                                \
-    raise_warning("expects parameter 1 to be cURL multi resource");      \
+  if (!curlm || curlm->isInvalid()) {                                    \
+    raise_warning(CURLM_ARG_WARNING);                                    \
     return init_null();                                                  \
-  }                                                                      \
+  }
+
+#define CHECK_MULTI_RESOURCE_RETURN_VOID(curlm) \
+  CurlMultiResource *curlm = mh.getTyped<CurlMultiResource>(true, true); \
+  if (!curlm || curlm->isInvalid()) {                                    \
+    raise_warning(CURLM_ARG_WARNING);                                    \
+    return;                                                              \
+  }
+
+#define CHECK_MULTI_RESOURCE_THROW(curlm)                                \
+  CurlMultiResource *curlm = mh.getTyped<CurlMultiResource>(true, true); \
+  if (!curlm || curlm->isInvalid()) {                                    \
+    throw Object(SystemLib::AllocExceptionObject(CURLM_ARG_WARNING));    \
+  }
 
 Resource HHVM_FUNCTION(curl_multi_init) {
-  return NEWOBJ(CurlMultiResource)();
+  return newres<CurlMultiResource>();
 }
 
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
@@ -1453,6 +1479,160 @@ Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh,
   return ret;
 }
 
+class CurlMultiAwait;
+
+class CurlEventHandler : public AsioEventHandler {
+ public:
+  CurlEventHandler(AsioEventBase* base, int fd, CurlMultiAwait* cma):
+    AsioEventHandler(base, fd), m_curlMultiAwait(cma), m_fd(fd) {}
+
+  void handlerReady(uint16_t events) noexcept override;
+ private:
+  CurlMultiAwait* m_curlMultiAwait;
+  int m_fd;
+};
+
+class CurlTimeoutHandler : public AsioTimeoutHandler {
+ public:
+  CurlTimeoutHandler(AsioEventBase* base, CurlMultiAwait* cma):
+    AsioTimeoutHandler(base), m_curlMultiAwait(cma) {}
+
+  void timeoutExpired() noexcept override;
+ private:
+  CurlMultiAwait* m_curlMultiAwait;
+};
+
+class CurlMultiAwait : public AsioExternalThreadEvent {
+ public:
+  CurlMultiAwait(CurlMultiResource* multi, double timeout) {
+    if ((addLowHandles(multi) + addHighHandles(multi)) == 0) {
+      // Nothing to do
+      markAsFinished();
+      return;
+    }
+
+    // Add optional timeout
+    int64_t timeout_ms = timeout * 1000;
+    if (timeout_ms > 0) {
+      m_timeout = std::shared_ptr<CurlTimeoutHandler>
+        (new CurlTimeoutHandler(s_asio_event_base.get(), this));
+      s_asio_event_base->runInEventBaseThread([this, timeout_ms]{
+        m_timeout->scheduleTimeout(timeout_ms);
+      });
+    }
+  }
+
+  ~CurlMultiAwait() {
+    for (auto handler : m_handlers) {
+      handler->unregisterHandler();
+    }
+    if (m_timeout) {
+      std::shared_ptr<CurlTimeoutHandler> to = m_timeout;
+      s_asio_event_base->runInEventBaseThread([to]{
+        to.get()->cancelTimeout();
+      });
+      m_timeout.reset();
+    }
+    m_handlers.clear();
+  }
+
+  void unserialize(Cell& c) {
+    c.m_type = KindOfInt64;
+    c.m_data.num = m_result;
+  }
+
+  void setFinished(int fd) {
+    if (m_result < fd) {
+      m_result = fd;
+    }
+    if (!m_finished) {
+      markAsFinished();
+      m_finished = true;
+    }
+  }
+
+ private:
+  void addHandle(int fd, int events) {
+    auto handler =
+      std::make_shared<CurlEventHandler>(s_asio_event_base.get(), fd, this);
+    handler->registerHandler(events);
+    m_handlers.push_back(handler);
+  }
+
+  // Ask curl_multi for its handles directly
+  // This is preferable as we get to know which
+  // are blocking on reads, and which on writes.
+  int addLowHandles(CurlMultiResource* multi) {
+    fd_set read_fds, write_fds;
+    int max_fd = -1, count = 0;
+    FD_ZERO(&read_fds); FD_ZERO(&write_fds);
+    if ((CURLM_OK != curl_multi_fdset(multi->get(), &read_fds, &write_fds,
+                                      nullptr, &max_fd)) ||
+        (max_fd < 0)) {
+      return count;
+    }
+    for (int i = 0 ; i <= max_fd; ++i) {
+      int events = 0;
+      if (FD_ISSET(i, &read_fds))  events |= AsioEventHandler::READ;
+      if (FD_ISSET(i, &write_fds)) events |= AsioEventHandler::WRITE;
+      if (events) {
+        addHandle(i, events);
+        ++count;
+      }
+    }
+    return count;
+  }
+
+  // Check for file descriptors >= FD_SETSIZE
+  // which can't be returned in an fdset
+  // This is a little hacky, but necessary given cURL's APIs
+  int addHighHandles(CurlMultiResource* multi) {
+    int count = 0;
+    auto easy_handles = multi->getEasyHandles();
+    for (ArrayIter iter(easy_handles); iter; ++iter) {
+      Variant easy_handle = iter.second();
+      auto easy = easy_handle.toResource().getTyped<CurlResource>(true, true);
+      if (!easy) continue;
+      long sock;
+      if ((curl_easy_getinfo(easy->get(),
+                             CURLINFO_LASTSOCKET, &sock) != CURLE_OK) ||
+          (sock < FD_SETSIZE)) {
+        continue;
+      }
+      // No idea which type of event it needs, ask for everything
+      addHandle(sock, AsioEventHandler::READ_WRITE);
+      ++count;
+    }
+    return count;
+  }
+
+  std::shared_ptr<CurlTimeoutHandler> m_timeout;
+  std::vector<std::shared_ptr<CurlEventHandler>> m_handlers;
+  int m_result{-1};
+  bool m_finished{false};
+};
+
+void CurlEventHandler::handlerReady(uint16_t events) noexcept {
+  m_curlMultiAwait->setFinished(m_fd);
+}
+
+void CurlTimeoutHandler::timeoutExpired() noexcept {
+  m_curlMultiAwait->setFinished(-1);
+}
+
+Object HHVM_FUNCTION(curl_multi_await, const Resource& mh,
+                                       double timeout /*=1.0*/) {
+  CHECK_MULTI_RESOURCE_THROW(curlm);
+  auto ev = new CurlMultiAwait(curlm, timeout);
+  try {
+    return ev->getWaitHandle();
+  } catch (...) {
+    assert(false);
+    ev->abandon();
+    throw;
+  }
+}
+
 Variant HHVM_FUNCTION(curl_multi_getcontent, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->getContents();
@@ -1462,7 +1642,7 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   Array ret = Array::Create();
   for (int i=0; i<=max_fd; i++) {
     if (FD_ISSET(i, fd)) {
-      BuiltinFile *file = NEWOBJ(BuiltinFile)(i);
+      BuiltinFile *file = newres<BuiltinFile>(i);
       ret.append(file);
     }
   }
@@ -2793,6 +2973,7 @@ class CurlExtension : public Extension {
     HHVM_FE(curl_multi_remove_handle);
     HHVM_FE(curl_multi_exec);
     HHVM_FE(curl_multi_select);
+    HHVM_FE(curl_multi_await);
     HHVM_FE(curl_multi_getcontent);
     HHVM_FE(fb_curl_multi_fdset);
     HHVM_FE(curl_multi_info_read);

@@ -29,3 +29,13 @@ string(87) "{
         "d": 42
     }
 }"
+string(13) "{"foo":"bar"}"
+string(61) "{"a":{"foo":"bar"},"b":{"foo":"bar"},"c":{"d":{"foo":"bar"}}}"
+bool(false)
+string(18) "Recursion detected"
+string(20) "{"foo":{"foo":null}}"
+string(18) "Recursion detected"
+string(102) "{"Recursion":{"across":{"multiple":{"levels":{"Recursion":{"across":{"multiple":{"levels":null}}}}}}}}"
+string(18) "Recursion detected"
+string(4) "null"
+string(18) "Recursion detected"

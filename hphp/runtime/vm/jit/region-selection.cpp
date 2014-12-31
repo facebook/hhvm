@@ -21,9 +21,9 @@
 #include <utility>
 #include <iostream>
 
-#include "folly/Memory.h"
-#include "folly/Conv.h"
-#include "folly/String.h"
+#include <folly/Memory.h>
+#include <folly/Conv.h>
+#include <folly/String.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/map-walker.h"
@@ -34,7 +34,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(region);
 
@@ -112,6 +112,14 @@ SrcKey RegionDesc::start() const {
   return m_blocks[0]->start();
 }
 
+uint32_t RegionDesc::instrSize() const {
+  uint32_t size = 0;
+  for (auto& b : m_blocks) {
+    size += b->length();
+  }
+  return size;
+}
+
 RegionDesc::Block* RegionDesc::addBlock(SrcKey sk,
                                         int    length,
                                         Offset spOffset) {
@@ -148,8 +156,8 @@ bool RegionDesc::hasBlock(BlockId id) const {
   return m_data.count(id);
 }
 
-RegionDesc::BlockPtr RegionDesc::block(BlockId id) {
-  return data(id).block;
+RegionDesc::BlockPtr RegionDesc::block(BlockId id) const {
+  return const_cast<RegionDesc*>(this)->data(id).block;
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::succs(BlockId id) const {
@@ -245,10 +253,16 @@ std::string RegionDesc::toString() const {
 
 //////////////////////////////////////////////////////////////////////
 
-RegionDesc::BlockId RegionDesc::Block::s_nextId = -1;
+/*
+ * We assign unique negative ID's to all new blocks---these correspond to
+ * invalid TransIDs.  To maintain this property, we have to start one past
+ * the sentinel kInvalidTransID, which is -1.
+ */
+RegionDesc::BlockId RegionDesc::Block::s_nextId = -2;
 
 TransID getTransId(RegionDesc::BlockId blockId) {
-  return blockId >= 0 ? blockId : kInvalidTransID;
+  assert(TransID(blockId) != kInvalidTransID);
+  return TransID(blockId);
 }
 
 bool hasTransId(RegionDesc::BlockId blockId) {
@@ -461,6 +475,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
 
   if (region) {
     FTRACE(3, "{}", show(*region));
+    always_assert(region->instrSize() <= RuntimeOption::EvalJitMaxRegionInstrs);
   } else {
     FTRACE(1, "no region selectable; using tracelet compiler\n");
   }
@@ -505,6 +520,8 @@ RegionDescPtr selectHotRegion(TransID transId,
            region ? show(*region) : std::string("empty region"));
   }
 
+  always_assert(region->instrSize() <= RuntimeOption::EvalJitMaxRegionInstrs);
+
   return region;
 }
 
@@ -535,30 +552,193 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
 
 bool breaksRegion(Op opc) {
   switch (opc) {
-    case OpMIterNext:
-    case OpMIterNextK:
-    case OpSwitch:
-    case OpSSwitch:
-    case OpCreateCont:
-    case OpYield:
-    case OpYieldK:
-    case OpRetC:
-    case OpRetV:
-    case OpExit:
-    case OpFatal:
-    case OpMIterInit:
-    case OpMIterInitK:
-    case OpIterBreak:
-    case OpDecodeCufIter:
-    case OpThrow:
-    case OpUnwind:
-    case OpEval:
-    case OpNativeImpl:
+    case Op::MIterNext:
+    case Op::MIterNextK:
+    case Op::Switch:
+    case Op::SSwitch:
+    case Op::CreateCont:
+    case Op::Yield:
+    case Op::YieldK:
+    case Op::Await:
+    case Op::RetC:
+    case Op::RetV:
+    case Op::Exit:
+    case Op::Fatal:
+    case Op::MIterInit:
+    case Op::MIterInitK:
+    case Op::IterBreak:
+    case Op::DecodeCufIter:
+    case Op::Throw:
+    case Op::Unwind:
+    case Op::Eval:
+    case Op::NativeImpl:
       return true;
 
     default:
-      return false;
+      return RuntimeOption::EvalJitLLVM &&
+        opcodeControlFlowInfo(opc) == ControlFlowInfo::ChangesPC;
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+struct DFSChecker {
+
+  explicit DFSChecker(const RegionDesc& region)
+    : m_region(region) { }
+
+  bool check(RegionDesc::BlockId id) {
+    if (m_visiting.count(id) > 0) {
+      // Found a loop. This is only valid if EvalJitLoops is enabled.
+      return RuntimeOption::EvalJitLoops;
+    }
+    if (m_visited.count(id) > 0) return true;
+    m_visited.insert(id);
+    m_visiting.insert(id);
+    for (auto succ : m_region.succs(id)) {
+      if (!check(succ)) return false;
+    }
+    m_visiting.erase(id);
+    return true;
+  }
+
+  size_t numVisited() const { return m_visited.size(); }
+
+ private:
+  const RegionDesc&      m_region;
+  RegionDesc::BlockIdSet m_visited;
+  RegionDesc::BlockIdSet m_visiting;
+};
+
+}
+
+/*
+ * Checks if the given region is well-formed, which entails the
+ * following properties:
+ *
+ *   1) The region has at least one block.
+ *
+ *   2) Each block in the region has a different id.
+ *
+ *   3) All arcs involve blocks within the region.
+ *
+ *   4) For each arc, the bytecode offset of the dst block must
+ *      possibly follow the execution of the src block.
+ *
+ *   5) Each block contains at most one successor corresponding to a
+ *      given SrcKey.
+ *
+ *   6) The region doesn't contain any loops, unless JitLoops is
+ *      enabled.
+ *
+ *   7) All blocks are reachable from the entry block.
+ *
+ *   8) For each block, there must be a path from the entry to it that
+ *      includes only earlier blocks in the region.
+ *
+ *   9) The region is topologically sorted unless loops are enabled.
+ *
+ */
+bool check(const RegionDesc& region, std::string& error) {
+
+  auto bad = [&](const std::string& errorMsg) {
+    error = errorMsg;
+    return false;
+  };
+
+  // 1) The region has at least one block.
+  if (region.empty()) return bad("empty region");
+
+  RegionDesc::BlockIdSet blockSet;
+  for (auto b : region.blocks()) {
+    auto bid = b->id();
+    // 2) Each block in the region has a different id.
+    if (blockSet.count(bid)) {
+      return bad(folly::format("many blocks with id {}", bid).str());
+    }
+    blockSet.insert(bid);
+  }
+
+  for (auto b : region.blocks()) {
+    auto bid = b->id();
+    SrcKey    lastSk = region.block(bid)->last();
+    OffsetSet validSuccOffsets = lastSk.succOffsets();
+    OffsetSet succOffsets;
+
+    for (auto succ : region.succs(bid)) {
+      SrcKey succSk = region.block(succ)->start();
+      Offset succOffset = succSk.offset();
+
+      // 3) All arcs involve blocks within the region.
+      if (blockSet.count(succ) == 0) {
+        return bad(folly::format("arc with dst not in the region: {} -> {}",
+                                 bid, succ).str());
+      }
+
+      // Checks 4) and 5) below don't make sense for arcs corresponding
+      // to inlined calls and returns, so skip them in such cases.
+      // This won't be possible once task #4076399 is done.
+      if (lastSk.func() != succSk.func()) continue;
+
+      // 4) For each arc, the bytecode offset of the dst block must
+      //    possibly follow the execution of the src block.
+      if (validSuccOffsets.count(succOffset) == 0) {
+        return bad(folly::format("arc with impossible control flow: {} -> {}",
+                                 bid, succ).str());
+      }
+
+      // 5) Each block contains at most one successor corresponding to a
+      //    given SrcKey.
+      if (succOffsets.count(succOffset) > 0) {
+        return bad(folly::format("block {} has multiple successors with SK {}",
+                                 bid, show(succSk)).str());
+      }
+      succOffsets.insert(succOffset);
+    }
+    for (auto pred : region.preds(bid)) {
+      if (blockSet.count(pred) == 0) {
+        return bad(folly::format("arc with src not in the region: {} -> {}",
+                                 pred, bid).str());
+      }
+    }
+  }
+
+  // 6) is checked by dfsCheck.
+  DFSChecker dfsCheck(region);
+  if (!dfsCheck.check(region.entry()->id())) {
+    return bad("region is cyclic");
+  }
+
+  // 7) All blocks are reachable from the entry (first) block.
+  if (dfsCheck.numVisited() != blockSet.size()) {
+    return bad("region has unreachable blocks");
+  }
+
+  // 8) and 9) are checked below.
+  RegionDesc::BlockIdSet visited;
+  auto& blocks = region.blocks();
+  for (unsigned i = 0; i < blocks.size(); i++) {
+    auto bid = blocks[i]->id();
+    unsigned nVisited = 0;
+    for (auto pred : region.preds(bid)) {
+      nVisited += visited.count(pred);
+    }
+    // 8) For each block, there must be a path from the entry to it that
+    //    includes only earlier blocks in the region.
+    if (nVisited == 0 && i != 0) {
+      return bad(folly::format("block {} appears before all its predecessors",
+                               bid).str());
+    }
+    // 9) The region is topologically sorted unless loops are enabled.
+    if (!RuntimeOption::EvalJitLoops && nVisited != region.preds(bid).size()) {
+      return bad(folly::format("non-topological order (bid: {})", bid).str());
+    }
+    visited.insert(bid);
+  }
+
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

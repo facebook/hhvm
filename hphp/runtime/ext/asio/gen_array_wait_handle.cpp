@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include <hphp/runtime/ext/asio/static_wait_handle.h>
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 
@@ -57,7 +58,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
   Array depCopy(inputDependencies->copy());
   if (UNLIKELY(depCopy->kind() > ArrayData::kEmptyKind)) {
     // The only array kind that can return a non-k{Packed,Mixed,Empty}Kind
-    // from ->copy() is NameValueTableWrapper, which returns itself.
+    // from ->copy() is GlobalsArray, which returns itself.
     // This is only for $GLOBALS, which is about to throw anyway since it
     // will fail the WaitHandle checks below.
     fail();
@@ -111,7 +112,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
 
     assert(child->instanceof(c_WaitableWaitHandle::classof()));
     auto const child_wh = static_cast<c_WaitableWaitHandle*>(child);
-    p_GenArrayWaitHandle my_wh = NEWOBJ(c_GenArrayWaitHandle)();
+    SmartObject<c_GenArrayWaitHandle> my_wh(newobj<c_GenArrayWaitHandle>());
     my_wh->initialize(exception, depCopy, current_pos, child_wh);
 
     auto const session = AsioSession::Get();

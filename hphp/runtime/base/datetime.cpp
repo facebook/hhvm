@@ -100,7 +100,7 @@ bool DateTime::IsValid(int y, int m, int d) {
 }
 
 SmartResource<DateTime> DateTime::Current(bool utc /* = false */) {
-  return NEWOBJ(DateTime)(time(0), utc);
+  return newres<DateTime>(time(0), utc);
 }
 
 const StaticString
@@ -274,6 +274,11 @@ DateTime::DateTime(int64_t timestamp, bool utc /* = false */) {
   fromTimeStamp(timestamp, utc);
 }
 
+DateTime::DateTime(int64_t timestamp, SmartResource<TimeZone> tz): m_tz(tz) {
+  fromTimeStamp(timestamp);
+}
+
+
 void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
   m_timestamp = timestamp;
   m_timestampSet = true;
@@ -438,11 +443,37 @@ void DateTime::modify(const String& diff) {
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
                                              nullptr, TimeZone::GetDatabase(),
                                              TimeZone::GetTimeZoneInfoRaw);
-  internalModify(&(tmp_time->relative), tmp_time->have_relative, 1);
+  internalModify(tmp_time);
   timelib_time_dtor(tmp_time);
 }
 
-void DateTime::internalModify(timelib_rel_time *rel,
+void DateTime::internalModify(timelib_time *t) {
+  // TIMELIB_UNSET (and other constants) defined in timelib.h
+  // (see hhvm-third-party)
+  if (t->y != TIMELIB_UNSET) {
+    m_time->y = t->y;
+  }
+  if (t->m != TIMELIB_UNSET) {
+    m_time->m = t->m;
+  }
+  if (t->d != TIMELIB_UNSET) {
+    m_time->d = t->d;
+  }
+  if (t->h != TIMELIB_UNSET) {
+    m_time->h = t->h;
+    m_time->i = 0;
+    m_time->s = 0;
+    if (t->i != TIMELIB_UNSET) {
+      m_time->i = t->i;
+      if (t->s != TIMELIB_UNSET) {
+        m_time->s = t->s;
+      }
+    }
+  }
+  internalModifyRelative(&(t->relative), t->have_relative, 1);
+}
+
+void DateTime::internalModifyRelative(timelib_rel_time *rel,
                               bool have_relative, char bias) {
   m_time->relative.y = rel->y * bias;
   m_time->relative.m = rel->m * bias;
@@ -453,6 +484,8 @@ void DateTime::internalModify(timelib_rel_time *rel,
   m_time->relative.weekday = rel->weekday;
   m_time->have_relative = have_relative;
 #ifdef TIMELIB_HAVE_INTERVAL
+  m_time->relative.special = rel->special;
+  m_time->relative.have_special_relative = rel->have_special_relative;
   m_time->relative.have_weekday_relative = rel->have_weekday_relative;
   m_time->relative.weekday_behavior = rel->weekday_behavior;
 #endif
@@ -463,12 +496,12 @@ void DateTime::internalModify(timelib_rel_time *rel,
 
 void DateTime::add(const SmartResource<DateInterval> &interval) {
   timelib_rel_time *rel = interval->get();
-  internalModify(rel, true, TIMELIB_REL_INVERT(rel) ? -1 :  1);
+  internalModifyRelative(rel, true, TIMELIB_REL_INVERT(rel) ? -1 :  1);
 }
 
 void DateTime::sub(const SmartResource<DateInterval> &interval) {
   timelib_rel_time *rel = interval->get();
-  internalModify(rel, true, TIMELIB_REL_INVERT(rel) ?  1 : -1);
+  internalModifyRelative(rel, true, TIMELIB_REL_INVERT(rel) ?  1 : -1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -705,6 +738,17 @@ String DateTime::stdcFormat(const String& format) const {
     ta.tm_zone = offset->abbr;
   }
 
+  if ((ta.tm_sec < 0 || ta.tm_sec > 60) ||
+      (ta.tm_min < 0 || ta.tm_min > 59) ||
+      (ta.tm_hour < 0 || ta.tm_hour > 23) ||
+      (ta.tm_mday < 1 || ta.tm_mday > 31) ||
+      (ta.tm_mon < 0 || ta.tm_mon > 11) ||
+      (ta.tm_wday < 0 || ta.tm_wday > 6) ||
+      (ta.tm_yday < 0 || ta.tm_yday > 365)) {
+    throw_invalid_argument("argument: invalid time");
+    return String();
+  }
+
   int max_reallocs = 5;
   size_t buf_len = 256, real_len;
   char *buf = (char *)malloc(buf_len);
@@ -729,54 +773,56 @@ String DateTime::stdcFormat(const String& format) const {
 }
 
 Array DateTime::toArray(ArrayFormat format) const {
-  Array ret;
   bool error;
   switch (format) {
   case ArrayFormat::TimeMap:
-    ret.set(s_seconds, second());
-    ret.set(s_minutes, minute());
-    ret.set(s_hours,   hour());
-    ret.set(s_mday,    day());
-    ret.set(s_wday,    dow());
-    ret.set(s_mon,     month());
-    ret.set(s_year,    year());
-    ret.set(s_yday,    doy());
-    ret.set(s_weekday, weekdayName());
-    ret.set(s_month,   monthName());
-    ret.set(0,         toTimeStamp(error));
-    break;
+    return make_map_array(
+      s_seconds, second(),
+      s_minutes, minute(),
+      s_hours,   hour(),
+      s_mday,    day(),
+      s_wday,    dow(),
+      s_mon,     month(),
+      s_year,    year(),
+      s_yday,    doy(),
+      s_weekday, weekdayName(),
+      s_month,   monthName(),
+      0,         toTimeStamp(error)
+    );
   case ArrayFormat::TmMap:
     {
       struct tm tm;
       toTm(tm);
-      ret.set(s_tm_sec,   tm.tm_sec);
-      ret.set(s_tm_min,   tm.tm_min);
-      ret.set(s_tm_hour,  tm.tm_hour);
-      ret.set(s_tm_mday,  tm.tm_mday);
-      ret.set(s_tm_mon,   tm.tm_mon);
-      ret.set(s_tm_year,  tm.tm_year);
-      ret.set(s_tm_wday,  tm.tm_wday);
-      ret.set(s_tm_yday,  tm.tm_yday);
-      ret.set(s_tm_isdst, tm.tm_isdst);
+      return make_map_array(
+        s_tm_sec,   tm.tm_sec,
+        s_tm_min,   tm.tm_min,
+        s_tm_hour,  tm.tm_hour,
+        s_tm_mday,  tm.tm_mday,
+        s_tm_mon,   tm.tm_mon,
+        s_tm_year,  tm.tm_year,
+        s_tm_wday,  tm.tm_wday,
+        s_tm_yday,  tm.tm_yday,
+        s_tm_isdst, tm.tm_isdst
+      );
     }
-    break;
   case ArrayFormat::TmVector:
     {
       struct tm tm;
       toTm(tm);
-      ret.append(tm.tm_sec);
-      ret.append(tm.tm_min);
-      ret.append(tm.tm_hour);
-      ret.append(tm.tm_mday);
-      ret.append(tm.tm_mon);
-      ret.append(tm.tm_year);
-      ret.append(tm.tm_wday);
-      ret.append(tm.tm_yday);
-      ret.append(tm.tm_isdst);
+      return make_packed_array(
+        tm.tm_sec,
+        tm.tm_min,
+        tm.tm_hour,
+        tm.tm_mday,
+        tm.tm_mon,
+        tm.tm_year,
+        tm.tm_wday,
+        tm.tm_yday,
+        tm.tm_isdst
+      );
     }
-    break;
   }
-  return ret;
+  return empty_array();
 }
 
 bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
@@ -818,7 +864,7 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
   if (m_timestamp == -1) {
     fromTimeStamp(0);
   }
-  if (tz.get()) {
+  if (tz.get() && (input.size() <= 0 || input[0] != '@')) {
     setTimezone(tz);
   } else {
     setTimezone(TimeZone::Current());
@@ -838,14 +884,14 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
 
   m_time = TimePtr(t, time_deleter());
   if (t->tz_info != m_tz->get()) {
-    m_tz = NEWOBJ(TimeZone)(timelib_tzinfo_clone(t->tz_info));
+    m_tz = newres<TimeZone>(t->tz_info);
   }
   return true;
 }
 
 SmartResource<DateTime> DateTime::cloneDateTime() const {
   bool err;
-  SmartResource<DateTime> ret(NEWOBJ(DateTime)(toTimeStamp(err), true));
+  SmartResource<DateTime> ret(newres<DateTime>(toTimeStamp(err), true));
   ret->setTimezone(m_tz);
   return ret;
 }
@@ -860,7 +906,7 @@ DateTime::diff(SmartResource<DateTime> datetime2, bool absolute) {
   if (absolute) {
     TIMELIB_REL_INVERT_SET(rel, 0);
   }
-  SmartResource<DateInterval> di(NEWOBJ(DateInterval)(rel));
+  SmartResource<DateInterval> di(newres<DateInterval>(rel));
   return di;
 #else
   throw_not_implemented("timelib version too old");

@@ -1,2 +1,2 @@
 File "closing_tag.php", line 14, characters 1-2:
-Parsing[1002] Hack does not allow the closing ?> tag
+Hack does not allow the closing ?> tag (Parsing[1002])

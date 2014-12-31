@@ -20,15 +20,17 @@
 
 #include <pcre.h>
 
-#include "hphp/runtime/ext/ext_mb.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/mbstring/ext_mbstring.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+static int s_pcre_has_jit = 0;
 
 Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
                                  int flags /* = 0 */) {
@@ -73,7 +75,7 @@ Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern, const Varia
                                              const Variant& subject,
                                              int limit /* = -1 */,
                                              VRefParam count /* = null */) {
-  if (!f_is_callable(callback)) {
+  if (!HHVM_FN(is_callable)(callback)) {
     raise_warning("Not a valid callback function %s",
         callback.toString().data());
     return empty_string_variant();
@@ -117,23 +119,23 @@ int64_t HHVM_FUNCTION(preg_last_error) {
 String HHVM_FUNCTION(ereg_replace, const String& pattern,
                                    const String& replacement,
                                    const String& str) {
-  return f_mb_ereg_replace(pattern, replacement, str);
+  return HHVM_FN(mb_ereg_replace)(pattern, replacement, str);
 }
 
 String HHVM_FUNCTION(eregi_replace, const String& pattern,
                                     const String& replacement,
                                     const String& str) {
-  return f_mb_eregi_replace(pattern, replacement, str);
+  return HHVM_FN(mb_eregi_replace)(pattern, replacement, str);
 }
 
 Variant HHVM_FUNCTION(ereg, const String& pattern, const String& str,
                             VRefParam regs /* = null */) {
-  return f_mb_ereg(pattern, str, ref(regs));
+  return HHVM_FN(mb_ereg)(pattern, str, ref(regs));
 }
 
 Variant HHVM_FUNCTION(eregi, const String& pattern, const String& str,
                              VRefParam regs /* = null */) {
-  return f_mb_eregi(pattern, str, ref(regs));
+  return HHVM_FN(mb_eregi)(pattern, str, ref(regs));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -221,6 +223,11 @@ public:
     HHVM_FE(sql_regcase);
 
     loadSystemlib();
+
+    pcre_config(PCRE_CONFIG_JIT, &s_pcre_has_jit);
+    IniSetting::Bind(this, IniSetting::PHP_INI_ONLY,
+                     "hhvm.pcre.jit",
+                     &s_pcre_has_jit);
   }
 
   virtual void threadInit() {

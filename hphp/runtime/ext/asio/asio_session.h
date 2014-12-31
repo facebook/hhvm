@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_ASIO_SESSION_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -27,14 +28,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ActRec;
-FORWARD_DECLARE_CLASS(WaitHandle);
-FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
-FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
-FORWARD_DECLARE_CLASS(GenMapWaitHandle);
-FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
-FORWARD_DECLARE_CLASS(ResumableWaitHandle);
+class c_WaitHandle;
+class c_AwaitAllWaitHandle;
+class c_GenArrayWaitHandle;
+class c_GenMapWaitHandle;
+class c_GenVectorWaitHandle;
+class c_ResumableWaitHandle;
 
-class AsioSession {
+class AsioSession final {
   public:
     static void Init();
     static AsioSession* Get() { return s_current.get(); }
@@ -73,9 +74,18 @@ class AsioSession {
     // Meager time abstractions.
     typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
 
+    // The latest time we will wait for an I/O operation to complete.  If this
+    // time is exceeded, onIOWaitExit will throw after checking surprise.
     static TimePoint getLatestWakeTime() {
-      // Don't wait for over nine thousand hours.
-      return std::chrono::steady_clock::now() + std::chrono::hours(9000);
+      auto now = std::chrono::steady_clock::now();
+      auto info = ThreadInfo::s_threadInfo.getNoCheck();
+      auto& data = info->m_reqInjectionData;
+      if (!data.getTimeout()) {
+        // Don't wait for over nine thousand hours.
+        return now + std::chrono::hours(9000);
+      }
+      auto remaining = int64_t(data.getRemainingTime());
+      return now + std::chrono::seconds(remaining);
     }
 
     // Sleep event management.

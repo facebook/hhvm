@@ -1,0 +1,48 @@
+================== simple cases ====================
+$color = red
+$red = 123
+int(123)
+================== multiple expansion ====================
+$xy = Hello
+$xy = Hello
+$xy = Hello
+string(2) "ab"
+string(2) "fg"
+string(2) "xy"
+string(5) "Hello"
+================== Using non-variable operands to $ ====================
+================== Use various scalar types as $'s operand ====================
+$abc = $v1 = 'abc'
+string(11) "$v1 = 'abc'"
+string(7) "$v2 = 3"
+string(7) "$v2 = 3"
+string(7) "$v2 = 3"
+string(11) "$v3 = 9.543"
+string(10) "$v4 = TRUE"
+string(11) "$v5 = FALSE"
+string(10) "$v6 = NULL"
+$abc = $v11 = 'abc'
+string(12) "$v11 = 'abc'"
+string(8) "$v12 = 3"
+================== complex cases, [] ====================
+int(5)
+int(5)
+array(2) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(20)
+}
+================== complex cases, :: ====================
+string(1) "v"
+int(5)
+================== complex cases, -> ====================
+string(1) "v"
+object(C1)#1 (1) {
+  ["pr2"]=>
+  string(1) "v"
+}
+
+Warning: Creating default object from empty value in %s/variables/variable_variables.php on line 183
+----------------------
+$xxx = 777

@@ -44,6 +44,7 @@ var_dump(compare_stats($old_stat, $new_stat, $affected_members, ">"));
 echo "\n--- Done ---";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $dirname = "$file_path/lstat_stat_variation9";

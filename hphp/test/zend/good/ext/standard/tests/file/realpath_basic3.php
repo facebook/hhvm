@@ -45,6 +45,7 @@ foreach($filenames as $file) {
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $name_prefix = dirname(__FILE__)."/realpath_basic3";
 unlink("$name_prefix/home/test/realpath_basic3.tmp");

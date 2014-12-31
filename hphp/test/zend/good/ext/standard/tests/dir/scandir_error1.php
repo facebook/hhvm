@@ -24,6 +24,7 @@ $extra_arg = 10;
 var_dump( scandir($dir, $sorting_order, $context, $extra_arg) );
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $directory = dirname(__FILE__) . '/scandir_error';
 rmdir($directory);

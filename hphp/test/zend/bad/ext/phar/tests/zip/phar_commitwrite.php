@@ -28,6 +28,7 @@ var_dump($p->getStub());
 var_dump($p->isFileFormat(Phar::ZIP));
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/brandnewphar.phar.zip');
 ?>

@@ -17,10 +17,12 @@
 #ifndef incl_HPHP_JIT_MUTATION_H_
 #define incl_HPHP_JIT_MUTATION_H_
 
-#include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/block.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
+
+struct IRInstruction;
+struct IRUnit;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -51,7 +53,6 @@ void cloneToBlock(const BlockList& blocks,
                   Block::iterator last,
                   Block* target);
 
-
 /*
  * Move a range of IRInstructions to the front of a target block
  * (immediately after its DefLabel, but before its Marker).
@@ -70,7 +71,9 @@ void moveToBlock(Block::iterator first,
  * from their inputs.
  *
  * The new types of any changed SSATmps must be related to their old
- * types.
+ * types.  However, notice that the new types may result in
+ * inconsistent operand types for instructions that are unreachable
+ * (but not yet removed from the IR unit).
  */
 void reflowTypes(IRUnit&);
 

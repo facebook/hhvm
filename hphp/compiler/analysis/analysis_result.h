@@ -36,6 +36,7 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include <functional>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,12 +64,6 @@ public:
 
     // pre-optimize
     FirstPreOptimize,
-
-    // inferTypes
-    FirstInference,
-
-    // post-optimize
-    PostOptimize,
 
     CodeGen,
   };
@@ -126,6 +121,7 @@ public:
 
 public:
   AnalysisResult();
+  ~AnalysisResult();
   Locker lock() const { return Locker(this); }
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
@@ -134,6 +130,10 @@ public:
     assert(m_package && !m_parseOnDemand);
     m_parseOnDemandDirs = dirs;
   }
+  void setFinish(std::function<void(AnalysisResultPtr)>&& fn) {
+    m_finish = std::move(fn);
+  }
+  void finish();
 
   /**
    * create_function() generates extra PHP code that defines the lambda.
@@ -171,8 +171,6 @@ public:
   void getScopesSet(BlockScopeRawPtrQueue &v);
 
   void preOptimize();
-  void inferTypes();
-  void postOptimize();
 
   /**
    * Force all class variables to be variants, since l-val or reference
@@ -316,6 +314,7 @@ public:
   void addInteger(int64_t n);
 
 private:
+  std::function<void(AnalysisResultPtr)> m_finish;
   Package *m_package;
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;
@@ -464,14 +463,6 @@ public:
     AnalysisResult::s_currentScopeThreadLocal.destroy();
   }
 };
-
-#define IMPLEMENT_INFER_AND_CHECK_ASSERT(scope) \
-  do { \
-    assert(AnalysisResult::s_currentScopeThreadLocal->get()); \
-    assert(AnalysisResult::s_currentScopeThreadLocal->get() == \
-           (scope).get()); \
-    (scope)->getInferTypesMutex().assertOwnedBySelf(); \
-  } while (0)
 
 #ifdef HPHP_INSTRUMENT_TYPE_INF
 typedef std::pair < const char *, int > LEntry;

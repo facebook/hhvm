@@ -15,19 +15,20 @@
 */
 #include "hphp/runtime/debugger/debugger_client.h"
 
-#include <boost/lexical_cast.hpp>
 #include <signal.h>
 #include <fstream>
 
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/debugger/cmd/all.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-art.h"
 #include "hphp/util/logger.h"
@@ -35,6 +36,7 @@
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/config.h"
 #include <boost/scoped_ptr.hpp>
+#include <folly/Conv.h>
 
 #define USE_VARARGS
 #define PREFER_STDARG
@@ -335,7 +337,7 @@ void DebuggerClient::LoadCodeColor(CodeColor index, const IniSetting::Map& ini,
 
 SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
   TRACE(2, "DebuggerClient::Start\n");
-  SmartPtr<Socket> ret = getStaticDebuggerClient().connectLocal();
+  auto ret = getStaticDebuggerClient().connectLocal();
   getStaticDebuggerClient().start(options);
   return ret;
 }
@@ -431,7 +433,7 @@ String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
 
 String DebuggerClient::FormatTitle(const char *title) {
   TRACE(2, "DebuggerClient::FormatTitle\n");
-  String dash = f_str_repeat(BOX_H, (LineWidth - strlen(title)) / 2 - 4);
+  String dash = HHVM_FN(str_repeat)(BOX_H, (LineWidth - strlen(title)) / 2 - 4);
 
   StringBuffer sb;
   sb.append("\n");
@@ -546,8 +548,8 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
     throw Exception("unable to create socket pair for local debugging");
   }
-  SmartPtr<Socket> socket1(new Socket(fds[0], AF_UNIX));
-  SmartPtr<Socket> socket2(new Socket(fds[1], AF_UNIX));
+  auto socket1 = makeSocket(fds[0], AF_UNIX);
+  auto socket2 = makeSocket(fds[1], AF_UNIX);
 
   socket1->unregister();
   socket2->unregister();
@@ -617,11 +619,14 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   /* try possible families (v4, v6) until we get a connection */
   struct addrinfo *cur;
   for (cur = ai; cur; cur = ai->ai_next) {
-    Socket *sock = new Socket(socket(cur->ai_family, cur->ai_socktype, 0),
-                              cur->ai_family, cur->ai_addr->sa_data, port);
+    auto sock = makeSocket(
+      socket(cur->ai_family, cur->ai_socktype, 0),
+      cur->ai_family,
+      cur->ai_addr->sa_data,
+      port
+    );
     sock->unregister();
-    Resource obj(sock); // Destroy sock if we don't connect.
-    if (f_socket_connect(sock, String(host), port)) {
+    if (HHVM_FN(socket_connect)(Resource(sock), String(host), port)) {
       if (clearmachines) {
         for (unsigned int i = 0; i < m_machines.size(); i++) {
           if (m_machines[i] == m_machine) {
@@ -633,7 +638,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
       auto machine = std::make_shared<DMachineInfo>();
       machine->m_name = host;
       machine->m_port = port;
-      machine->m_thrift.create(SmartPtr<Socket>(sock));
+      machine->m_thrift.create(sock);
       m_machines.push_back(machine);
       switchMachine(machine);
       return true;
@@ -1091,7 +1096,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
           cmd->is((DebuggerCommand::Type)expectedCmd)) {
         // For the nested cases, the caller has sent a cmd to the server and is
         // expecting a specific response. When we get it, return it.
-        usageLogEvent("command done", boost::lexical_cast<string>(expectedCmd));
+        usageLogEvent("command done", folly::to<string>(expectedCmd));
         m_machine->m_interrupting = true; // Machine is stopped
         m_inputState = TakingCommand;
         return cmd;
@@ -1465,7 +1470,7 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
       line.append("  ");
       line.append(lines2[n].toString());
 
-      sb.append(f_rtrim(line.detach()));
+      sb.append(HHVM_FN(rtrim)(line.detach()));
       sb.append("\n");
     }
   }
@@ -1495,15 +1500,15 @@ void DebuggerClient::tutorial(const char *text) {
 
   StringBuffer sb;
   String header = "  Tutorial - '[h]elp [t]utorial off|auto' to turn off  ";
-  String hr = f_str_repeat(BOX_H, LineWidth - 2);
+  String hr = HHVM_FN(str_repeat)(BOX_H, LineWidth - 2);
 
   sb.append(BOX_UL); sb.append(hr); sb.append(BOX_UR); sb.append("\n");
 
   int wh = (LineWidth - 2 - header.size()) / 2;
   sb.append(BOX_V);
-  sb.append(f_str_repeat(" ", wh));
+  sb.append(HHVM_FN(str_repeat)(" ", wh));
   sb.append(header);
-  sb.append(f_str_repeat(" ", wh));
+  sb.append(HHVM_FN(str_repeat)(" ", wh));
   sb.append(BOX_V);
   sb.append("\n");
 
@@ -1633,7 +1638,7 @@ do {                                         \
 
 // Parses the current command string. If invalid return false.
 // Otherwise, carry out the command and return true.
-// NB: the command may throw a variety of exceptions derrived from
+// NB: the command may throw a variety of exceptions derived from
 // DebuggerClientException.
 bool DebuggerClient::process() {
   TRACE(2, "DebuggerClient::process\n");
@@ -2320,22 +2325,22 @@ void DebuggerClient::loadConfig() {
 
   m_neverSaveConfigOverride = true; // Prevent saving config while reading it
 
-  s_use_utf8 = Config::GetBool(ini, config["UTF8"], true);
+  Config::Bind(s_use_utf8, ini, config["UTF8"], true);
   config["UTF8"] = s_use_utf8; // for starter
   BIND(utf8, &s_use_utf8);
 
   Hdf color = config["Color"];
-  UseColor = Config::GetBool(ini, color, true);
+  Config::Bind(UseColor, ini, color, true);
   color = UseColor; // for starter
   BIND(color, &UseColor);
   if (UseColor && RuntimeOption::EnableDebuggerColor) {
     LoadColors(ini, color);
   }
 
-  m_tutorial = Config::GetInt32(ini, config["Tutorial"], 0);
+  Config::Bind(m_tutorial, ini, config["Tutorial"], 0);
   BIND(tutorial, &m_tutorial);
 
-  m_scriptMode = Config::GetBool(ini, config["ScriptMode"]);
+  Config::Bind(m_scriptMode, ini, config["ScriptMode"]);
   BIND(script_mode, &m_scriptMode);
 
   setDebuggerClientSmallStep(Config::GetBool(ini, config["SmallStep"]));
@@ -2434,18 +2439,20 @@ void DebuggerClient::loadConfig() {
     }
   ));
 
-  m_sourceRoot = Config::GetString(ini, config["SourceRoot"]);
+  Config::Bind(m_sourceRoot, ini, config["SourceRoot"]);
   BIND(source_root, &m_sourceRoot);
 
-  m_zendExe = Config::GetString(ini, config["ZendExecutable"], "php");
+  Config::Bind(m_zendExe, ini, config["ZendExecutable"], "php");
   BIND(zend_executable, &m_zendExe);
 
-  m_neverSaveConfig = Config::GetBool(ini, config["NeverSaveConfig"], false);
+  Config::Bind(m_neverSaveConfig, ini, config["NeverSaveConfig"], false);
   BIND(never_save_config, &m_neverSaveConfig);
 
   IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 
-  process_ini_file(m_configFileName);
+  // We are guaranteed to have an ini file given how m_configFileName is set
+  // above
+  Config::ParseIniFile(m_configFileName);
 
   // Do this after the ini processing so we don't accidentally save the config
   // when we change one of the options

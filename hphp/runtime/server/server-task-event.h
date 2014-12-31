@@ -31,7 +31,7 @@ namespace HPHP {
  * interface.
  */
 template<class TServer, class TTransport>
-class ServerTaskEvent : public AsioExternalThreadEvent {
+class ServerTaskEvent final : public AsioExternalThreadEvent {
  public:
   ServerTaskEvent() {}
 
@@ -49,7 +49,7 @@ class ServerTaskEvent : public AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) {
+  void unserialize(Cell& result) override final {
     if (UNLIKELY(!m_job)) {
       throw Object(SystemLib::AllocInvalidOperationExceptionObject(
         "The async operation was incorrectly initialized."));

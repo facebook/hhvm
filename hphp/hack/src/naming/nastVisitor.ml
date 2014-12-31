@@ -60,7 +60,7 @@ class type ['a] nast_visitor_type = object
   method on_array_get : 'a -> expr -> expr option -> 'a
   method on_class_get : 'a -> class_id -> pstring -> 'a
   method on_class_const : 'a -> class_id -> pstring -> 'a
-  method on_call : 'a -> call_type -> expr -> expr list -> 'a
+  method on_call : 'a -> call_type -> expr -> expr list -> expr list -> 'a
   method on_true : 'a -> 'a
   method on_false : 'a -> 'a
   method on_int : 'a -> pstring -> 'a
@@ -80,7 +80,7 @@ class type ['a] nast_visitor_type = object
   method on_binop : 'a -> Ast.bop -> expr -> expr -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
   method on_instanceOf : 'a -> expr -> expr -> 'a
-  method on_new : 'a -> class_id -> expr list -> 'a
+  method on_new : 'a -> class_id -> expr list -> expr list -> 'a
   method on_efun : 'a -> fun_ -> id list -> 'a
   method on_xml : 'a -> sid -> (pstring * expr) list -> expr list -> 'a
   method on_assert : 'a -> assert_expr -> 'a
@@ -223,11 +223,11 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
    | Clone e     -> this#on_clone acc e
    | Expr_list el    -> this#on_expr_list acc el
    | Special_func sf -> this#on_special_func acc sf
-   | Obj_get     (e1, e2)    -> this#on_obj_get acc e1 e2
+   | Obj_get     (e1, e2, _) -> this#on_obj_get acc e1 e2
    | Array_get   (e1, e2)    -> this#on_array_get acc e1 e2
    | Class_get   (cid, id)   -> this#on_class_get acc cid id
    | Class_const (cid, id)   -> this#on_class_const acc cid id
-   | Call        (ct, e, el) -> this#on_call acc ct e el
+   | Call        (ct, e, el, uel) -> this#on_call acc ct e el uel
    | String2     (el, s)     -> this#on_string2 acc el s
    | Pair        (e1, e2)    -> this#on_pair acc e1 e2
    | Cast        (hint, e)   -> this#on_cast acc hint e
@@ -235,7 +235,7 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
    | Binop       (bop, e1, e2)    -> this#on_binop acc bop e1 e2
    | Eif         (e1, e2, e3)     -> this#on_eif acc e1 e2 e3
    | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
-   | New         (cid, el)        -> this#on_new acc cid el
+   | New         (cid, el, uel)   -> this#on_new acc cid el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (sid, attrl, el) -> this#on_xml acc sid attrl el
    | ValCollection    (s, el)     ->
@@ -283,9 +283,10 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
   method on_class_get acc _ _ = acc
   method on_class_const acc _ _ = acc
 
-  method on_call acc _ e el =
+  method on_call acc _ e el uel =
     let acc = this#on_expr acc e in
     let acc = List.fold_left this#on_expr acc el in
+    let acc = List.fold_left this#on_expr acc uel in
     acc
 
   method on_true acc = acc
@@ -342,10 +343,15 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
     let acc = this#on_expr acc e2 in
     acc
 
-  method on_new acc _ el =
-    List.fold_left this#on_expr acc el
+  method on_new acc _ el uel =
+    let acc = List.fold_left this#on_expr acc el in
+    let acc = List.fold_left this#on_expr acc uel in
+    acc
 
-  method on_efun acc f _ = this#on_block acc f.f_body
+  method on_efun acc f _ = match f.f_body with
+    | UnnamedBody _ -> acc
+    | NamedBody block -> this#on_block acc block
+
   method on_xml acc _ attrl el =
     let acc = List.fold_left begin fun acc (_, e) ->
       this#on_expr acc e
@@ -391,13 +397,28 @@ end = struct
   let visitor =
     object
       inherit [bool] nast_visitor
-      method on_expr acc _ = acc
-      method on_return _ _ _ = true
+      method! on_expr acc _ = acc
+      method! on_return _ _ _ = true
     end
 
   let block b = visitor#on_block false b
 
 end
+
+(* Used by HasBreak and HasContinue. Does not traverse nested loops, since the
+ * breaks / continues in those loops do not affect the control flow of the
+ * outermost loop. *)
+
+class loop_visitor =
+  object
+    inherit [bool] nast_visitor
+    method! on_expr acc _ = acc
+    method! on_for acc _ _ _ _ = acc
+    method! on_foreach acc _ _ _ = acc
+    method! on_do acc _ _ = acc
+    method! on_while acc _ _ = acc
+    method! on_switch acc _ _ = acc
+  end
 
 (*****************************************************************************)
 (* Returns true if a block has a continue statement.
@@ -417,9 +438,28 @@ end = struct
 
   let visitor =
     object
-      inherit [bool] nast_visitor
-      method on_expr acc _ = acc
-      method on_continue _ _ = true
+      inherit loop_visitor
+      method! on_continue _ _ = true
+    end
+
+  let block b = visitor#on_block false b
+
+end
+
+(*****************************************************************************)
+(* Returns true if a block has a continue statement.
+ * Useful for checking if a while(true) {...} loop is non-terminating.
+ *)
+(*****************************************************************************)
+
+module HasBreak: sig
+  val block: block -> bool
+end = struct
+
+  let visitor =
+    object
+      inherit loop_visitor
+      method! on_break _ _ = true
     end
 
   let block b = visitor#on_block false b

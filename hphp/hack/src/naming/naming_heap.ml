@@ -22,22 +22,24 @@
  * concurrently.
  *)
 
-module ClassHeap = SharedMem.NoCache(struct
+open Utils
+
+module ClassHeap = SharedMem.NoCache (String) (struct
   type t = Nast.class_
   let prefix = Prefix.make()
 end)
 
-module FunHeap = SharedMem.NoCache(struct
+module FunHeap = SharedMem.NoCache (String) (struct
   type t = Nast.fun_
   let prefix = Prefix.make()
 end)
 
-module TypedefHeap = SharedMem.NoCache(struct
-  type t = (bool * Nast.tparam list * Nast.hint)
+module TypedefHeap = SharedMem.NoCache (String) (struct
+  type t = Nast.typedef
   let prefix = Prefix.make()
 end)
 
-module ConstHeap = SharedMem.NoCache(struct
+module ConstHeap = SharedMem.NoCache (String) (struct
   type t = Nast.gconst
   let prefix = Prefix.make()
 end)

@@ -20,8 +20,8 @@
 #include <atomic>
 #include <tbb/concurrent_hash_map.h>
 
-#include "folly/ScopeGuard.h"
-#include "folly/MapUtil.h"
+#include <folly/ScopeGuard.h>
+#include <folly/MapUtil.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
@@ -78,7 +78,7 @@ void profile(const StringData* name) {
 }
 
 void init() {
-  assert(JIT::Translator::WriteLease().amOwner());
+  assert(jit::Translator::WriteLease().amOwner());
   if (initFlag.load(std::memory_order_acquire)) return;
 
   s_currentlyInitializing = true;

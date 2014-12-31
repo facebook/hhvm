@@ -115,7 +115,7 @@ public:
     ERROR_EVALUATING_CODE = 206,
     ERROR_INVALID_EXPRESSION = 207,
 
-    ERROR_PROPERTY_NON_EXISTANT = 300,
+    ERROR_PROPERTY_NON_EXISTENT = 300,
     ERROR_STACK_DEPTH_INVALID = 301,
     ERROR_CONTEXT_INVALID = 302,
 
@@ -143,15 +143,18 @@ public:
   // Adds the passed command to the given node
   void addCommand(xdebug_xml_node& node, const XDebugCommand& cmd);
 
+  // Send the given stream of information to the client
+  void sendStream(const char* name, const char* bytes, int len);
+
+  // Sends the passed xml message to the client
+  void sendMessage(xdebug_xml_node& xml);
+
 private:
   // Adds the xdebug xmlns to the node
-  void addXmnls(xdebug_xml_node& node);
+  void addXmlns(xdebug_xml_node& node);
 
   // Add the error with the passed error code to the given node
   void addError(xdebug_xml_node& node, ErrorCode code);
-
-  // Sends the passed xml messaeg to the client
-  void sendMessage(xdebug_xml_node& xml);
 
 /////////////////////////////////////////////////////////////////////////////
 // Commands
@@ -186,7 +189,7 @@ private:
 
   // Parses the input from the buffer and returns an instance of the
   // corresponding command. Throws an ErrorCode on failure.
-  const XDebugCommand* parseCommand();
+  XDebugCommand* parseCommand();
 
   // Valid states of the input parsing state machine
   enum class ParseState {

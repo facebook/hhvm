@@ -39,6 +39,31 @@ ExpressionList::ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
     m_kind(kind) {
 }
 
+/*
+ * We can end up with chains of canonPtrs keeping the
+ * elements of an ExpressionList alive, with the result
+ * that when they are finally destroyed, they are destroyed
+ * one by one, recursively.
+ * This proactively clears them.
+ */
+static void clearCanonPtrs(ExpressionPtr e) {
+  e->setCanonPtr(ExpressionPtr{});
+  for (int i = e->getKidCount(); i--; ) {
+    ExpressionPtr kid = e->getNthExpr(i);
+    if (kid && !kid->is(Expression::KindOfExpressionList)) {
+      clearCanonPtrs(kid);
+    }
+  }
+}
+
+ExpressionList::~ExpressionList() {
+  for (auto e : m_exps) {
+    if (e) {
+      clearCanonPtrs(e);
+    }
+  }
+}
+
 ExpressionPtr ExpressionList::clone() {
   ExpressionListPtr exp(new ExpressionList(*this));
   Expression::deepCopy(exp);
@@ -390,7 +415,8 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
     }
   } else {
     bool isUnset = hasContext(UnsetContext) &&
-      ar->getPhase() >= AnalysisResult::PostOptimize;
+      // This used to be gated on ar->getPhase() >= PostOptimize
+      false;
     int isGlobal = -1;
     while (i--) {
       ExpressionPtr &e = m_exps[i];
@@ -428,36 +454,6 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
 ExpressionPtr ExpressionList::preOptimize(AnalysisResultConstPtr ar) {
   optimize(ar);
   return ExpressionPtr();
-}
-
-ExpressionPtr ExpressionList::postOptimize(AnalysisResultConstPtr ar) {
-  optimize(ar);
-  return ExpressionPtr();
-}
-
-TypePtr ExpressionList::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                   bool coerce) {
-  size_t size = m_exps.size();
-  bool commaList = size && (m_kind != ListKindParam);
-  size_t ix = m_kind == ListKindLeft ? 0 : size - 1;
-  TypePtr tmp = commaList ? Type::Some : type;
-  TypePtr ret = type;
-  for (size_t i = 0; i < size; i++) {
-    TypePtr t = i != ix ? tmp : type;
-    bool c = coerce && (!commaList || i == ix);
-    if (ExpressionPtr e = m_exps[i]) {
-      e->inferAndCheck(ar, t, c);
-      if (commaList && i == ix) {
-        e->setExpectedType(TypePtr());
-        ret = e->getActualType();
-        if (e->getImplementedType()) {
-          m_implementedType = e->getImplementedType();
-        }
-        if (!ret) ret = Type::Variant;
-      }
-    }
-  }
-  return ret;
 }
 
 bool ExpressionList::canonCompare(ExpressionPtr e) const {

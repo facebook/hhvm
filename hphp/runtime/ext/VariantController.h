@@ -17,6 +17,7 @@
 #ifndef VARIANTCONTROLLER_H
 #define VARIANTCONTROLLER_H
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
 #include <algorithm>
 
@@ -43,10 +44,14 @@ struct VariantController {
       case KindOfStaticString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
-      default:
+      case KindOfResource:
+      case KindOfRef:
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
+      case KindOfClass:
+        break;
     }
+    not_reached();
   }
   static int64_t asInt64(const VariantType& obj) { return obj.toInt64(); }
   static bool asBool(const VariantType& obj) { return obj.toInt64() != 0; }
@@ -72,7 +77,7 @@ struct VariantController {
     return map.toArray();
   }
   static ArrayInit reserveMap(size_t n) {
-    ArrayInit res(n, ArrayInit::Map{});
+    ArrayInit res(n, ArrayInit::Map{}, CheckAllocation{});
     return res;
   }
   static MapType getStaticEmptyMap() {
@@ -82,8 +87,8 @@ struct VariantController {
     return type(k);
   }
   static int64_t mapKeyAsInt64(const Variant& k) { return k.toInt64(); }
-  static const String& mapKeyAsString(const Variant& k) {
-    return k.toCStrRef();
+  static String mapKeyAsString(const Variant& k) {
+    return k.toString();
   }
   template <typename Key>
   static void mapSet(MapType& map, Key&& k, VariantType&& v) {

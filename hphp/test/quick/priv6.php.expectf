@@ -2,4 +2,4 @@ C1::bar
 C2::bar
 C3::bar
 
-Fatal error: Call to private method A4::bar from context B4 in %s on line 45
+Fatal error: Call to private method A4::bar() from context 'B4' in %s on line 45

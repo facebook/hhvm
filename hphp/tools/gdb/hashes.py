@@ -2,6 +2,8 @@
 Hash functions for use with container accessors.
 """
 # @lint-avoid-python-3-compatibility-imports
+# @lint-avoid-pyflakes3
+# @lint-avoid-pyflakes2
 
 import gdb
 from gdbutils import *
@@ -18,7 +20,7 @@ def hash_ctca(ctca):
 # Hash dispatcher.
 
 hashes = {
-    'HPHP::JIT::CTCA':  hash_ctca,
+    'HPHP::jit::CTCA': hash_ctca,
 }
 
 def hash_of(value):

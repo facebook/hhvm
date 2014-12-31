@@ -18,7 +18,7 @@
 handler:
   String "Received exception:  "
   Catch
-  FPushObjMethodD 0 "getMessage"
+  FPushObjMethodD 0 "getMessage" NullThrows
   FCall 0
   UnboxR
   Concat
@@ -76,6 +76,14 @@ handler:
     FPassL 0 $id
   FCall 1
   PopR
+  RetC
+}
+
+# We do this in a separate scope to avoid
+# having the $k_* locals in test_unwind_dirty_stack_regs()
+# getting caught in the $context parameter to handler()
+.function get_undefined_var() {
+  CGetL $k_99  # undefined variable
   RetC
 }
 
@@ -209,8 +217,9 @@ handler:
   CGetL $k_13
   CGetL $k_14
 
-  CGetL $k_99  # undefined variable
-  PopC
+  FPushFuncD 0 "get_undefined_var"
+  FCall 0
+  PopR
 
   # This code isn't reached---but let's Pop this junk just so
   # theoretically we could pass verification some day.

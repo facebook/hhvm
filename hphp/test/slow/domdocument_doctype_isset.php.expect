@@ -1,0 +1,49 @@
+bool(false)
+NULL
+bool(true)
+object(DOMDocumentType)#3 (22) {
+  ["nodeName"]=>
+  string(5) "graph"
+  ["nodeValue"]=>
+  NULL
+  ["nodeType"]=>
+  int(10)
+  ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["childNodes"]=>
+  NULL
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["name"]=>
+  string(5) "graph"
+  ["entities"]=>
+  string(22) "(object value omitted)"
+  ["notations"]=>
+  string(22) "(object value omitted)"
+  ["publicId"]=>
+  string(0) ""
+  ["systemId"]=>
+  string(9) "graph.dtd"
+  ["internalSubset"]=>
+  string(35) "<!DOCTYPE graph SYSTEM "graph.dtd">"
+}

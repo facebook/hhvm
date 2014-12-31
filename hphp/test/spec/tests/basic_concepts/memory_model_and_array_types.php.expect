@@ -1,0 +1,332 @@
+----------------- simple assignment of array types ----------------------
+
+Inside Point::__construct, (1,3), point count = 1
+
+After '$a = array(...)', $a is array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After '$b = $a', $a is array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+$b is array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After '++$b[0]', $a is array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+$b is array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After '$a[0] = 99', $a is array(3) {
+  [0]=>
+  int(99)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+$b is array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After '--$x', $a is array(3) {
+  [0]=>
+  int(99)
+  [1]=>
+  &int(122)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+$b is array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  &int(122)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After 'unset($a)', $a is undefined, $b is array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  &int(122)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+
+Inside Point::__destruct, (1,3), point count = 0
+
+After 'unset($b)', $b is undefined
+----------------- byRef assignment of array types ----------------------
+
+Inside Point::__construct, (1,3), point count = 1
+
+After '$a = array(...)', $a is array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After '$c =& $a', $a is array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+$c is array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After '++$c[0]', $a is array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+$c is array(3) {
+  [0]=>
+  int(11)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After '$a[0] = 99', $a is array(3) {
+  [0]=>
+  int(99)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+$c is array(3) {
+  [0]=>
+  int(99)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After '--$x', $a is array(3) {
+  [0]=>
+  int(99)
+  [1]=>
+  &int(122)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+$c is array(3) {
+  [0]=>
+  int(99)
+  [1]=>
+  &int(122)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+After 'unset($a)', $a is undefined, $c is array(3) {
+  [0]=>
+  int(99)
+  [1]=>
+  &int(122)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+
+Inside Point::__destruct, (1,3), point count = 0
+
+End
+----------------- unsetting array elements ----------------------
+
+Inside Point::__construct, (1,3), point count = 1
+
+at start, $x is 123, $a is array(4) {
+  [0]=>
+  int(10)
+  ["M"]=>
+  bool(true)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+after unset($a[0]), $x is 123, $a is array(3) {
+  ["M"]=>
+  bool(true)
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+after unset($a['M']), $x is 123, $a is array(2) {
+  [1]=>
+  &int(123)
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+after unset($a[1]), $x is 123, $a is array(1) {
+  ["B"]=>
+  object(Point)#1 (2) {
+    ["x":"Point":private]=>
+    int(1)
+    ["y":"Point":private]=>
+    int(3)
+  }
+}
+
+Inside Point::__destruct, (1,3), point count = 0
+
+after unset($a), $x is 123, $a is undefined

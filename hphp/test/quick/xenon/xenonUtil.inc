@@ -1,6 +1,6 @@
 <?hh
 
-function dumpFrame($frame, $name) {
+function dumpFrame($frame, $name): void {
   if ($frame) {
     echo $name . "Frame \n";
     foreach ($frame as $f) {
@@ -12,12 +12,10 @@ function dumpFrame($frame, $name) {
   }
 }
 
-function xenonDump($stacks) {
+function xenonDump($stacks): void {
   foreach ($stacks as $k => $v) {
     $ioWaitSample = ($v["ioWaitSample"]) ? "ioWaitSample" : "";
     echo "Frame " . $k . "  " . $ioWaitSample . "\n";
-    $frame = $v["asyncStack"];
-    dumpFrame($v["asyncStack"], "async");
     dumpFrame($v["phpStack"], "php");
     echo "\n";
   }
@@ -25,8 +23,7 @@ function xenonDump($stacks) {
 
 // get the Xenon data then verify that there are no unknown functions
 // and that all of the functions in this file are in the stack
-function verifyTestRun($stacks, $functionList, $requiredFunctions,
-    $asyncList, $requiredAsync) {
+function verifyTestRun($stacks, $functionList, $requiredFunctions): void {
   echo "Verifying PHP Stack\n";
   foreach ($stacks as $k => $v) {
     if (is_numeric($k)) {
@@ -53,30 +50,6 @@ function verifyTestRun($stacks, $functionList, $requiredFunctions,
   if ($requiredFunctions) {
     echo "Functions missing from stacks:  ";
     var_dump($requiredFunctions);
-  }
-
-  echo "Verifying Async Stack\n";
-  foreach ($stacks as $k => $v) {
-    if (is_numeric($k)) {
-      $frame = $v["asyncStack"];
-      if ($frame) {
-        foreach ($frame as $f) {
-          $function = idx($f, "function", "");
-          $file = idx($f, "file", "");
-          $line = idx($f, "line", 0);
-          if (in_array($function, $asyncList)) {
-            $foundFunction = idx($requiredAsync, $function, "");
-            if ($foundFunction) {
-              unset($requiredAsync[$function]);
-            }
-          } // else meaningless line, skip it
-        } // foreach
-      } // if ($frame)
-    } // if is_numeric
-  }
-  if ($requiredAsync) {
-    echo "Functions missing from stacks:  ";
-    var_dump($requiredAsync);
   }
 
   echo "Finished verfying stacks\n";

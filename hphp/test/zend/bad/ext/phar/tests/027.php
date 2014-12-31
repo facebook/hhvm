@@ -48,4 +48,5 @@ var_dump(opendir("phar://"));
 var_dump(opendir("phar://foo.phar/hi"));
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>

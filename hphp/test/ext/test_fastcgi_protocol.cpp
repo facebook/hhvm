@@ -23,15 +23,16 @@
 #include "hphp/test/ext/test_fastcgi.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/runtime/server/fastcgi/protocol-session-handler.h"
+#include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/logger.h"
-#include "folly/io/IOBuf.h"
-#include "folly/io/IOBufQueue.h"
-#include "folly/io/Cursor.h"
+#include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
+#include <folly/io/Cursor.h>
 
 #define LOAD_JSON(mx, s)     if (!Count(LoadExchangeFromJson( \
                                         std::string("test/ext/fastcgi/") + s, \
@@ -281,7 +282,7 @@ bool TestFastCGIProtocol::VerifyExchange(const TestMessageExchange& mx,
             int request_id = it->m_args.at("request_id").toInt32();
             bool result = it->m_args.at("result").toBoolean();
             if (session.testTransactionExists(request_id) != result) {
-              printf("Transaction %d existance test failure, "
+              printf("Transaction %d existence test failure, "
                      "expected=%d\n", request_id, (int) result);
               return false;
             }
@@ -507,4 +508,3 @@ bool TestFastCGIProtocol::TestInvalidType() {
   EXCHANGE(mx, 50);
   return Count(true);
 }
-

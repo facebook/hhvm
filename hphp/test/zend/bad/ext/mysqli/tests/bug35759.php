@@ -44,4 +44,5 @@
 
 	echo "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php $test_table_name = 'test_bug35759_table_1'; require("clean_table.inc"); ?>

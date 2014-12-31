@@ -26,20 +26,20 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /**
- * Header of the resumable frame used by async functions and generators.
+ * Header of the resumable frame used by async functions and generators:
  *
- * The memory is lay out as follows:
- *
+ * Header*     -> +-------------------------+ low address
+ *                | ResumableNode           |
+ *                +-------------------------+
+ *                | Function locals and     |
+ *                | iterators               |
+ * Resumable*  -> +-------------------------+
+ *                | ActRec in Resumable     |
+ *                +-------------------------+
+ *                | Rest of Resumable       |
+ * ObjectData* -> +-------------------------+
+ *                | Parent object           |
  *                +-------------------------+ high address
- *                |      Parent object      |
- *                +-------------------------+
- *                |    Rest of Resumable    |
- *                +-------------------------+
- *                |   ActRec in Resumable   |
- *                +-------------------------+
- *                |   Function locals and   |
- *                |   iterators             |
- * malloc ptr ->  +-------------------------+ low address
  */
 struct Resumable {
   static constexpr ptrdiff_t arOff() {
@@ -55,10 +55,11 @@ struct Resumable {
     return sizeof(Resumable);
   }
 
-  template <bool clone>
-  static void* Create(const ActRec* fp, size_t numSlots, JIT::TCA resumeAddr,
+  template<bool clone>
+  static void* Create(const ActRec* fp, size_t numSlots, jit::TCA resumeAddr,
                       Offset resumeOffset, size_t objSize) {
     assert(fp);
+    assert(fp->resumed() == clone);
     DEBUG_ONLY auto const func = fp->func();
     assert(func);
     assert(func->isResumable());
@@ -66,15 +67,23 @@ struct Resumable {
 
     // Allocate memory.
     size_t frameSize = numSlots * sizeof(TypedValue);
-    size_t totalSize = frameSize + sizeof(Resumable) + objSize;
-    void* mem = MM().objMallocLogged(totalSize);
-    auto resumable = (Resumable*)((char*)mem + frameSize);
+    size_t totalSize = sizeof(ResumableNode) + frameSize +
+                       sizeof(Resumable) + objSize;
+    auto node = reinterpret_cast<ResumableNode*>(MM().objMalloc(totalSize));
+    auto frame = reinterpret_cast<char*>(node + 1);
+    auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
     auto actRec = resumable->actRec();
+
+    node->framesize = frameSize;
+    node->kind = HeaderKind::Resumable;
 
     if (!clone) {
       // Copy ActRec, locals and iterators
       auto src = (void *)((uintptr_t)fp - frameSize);
-      memcpy(mem, src, frameSize + sizeof(ActRec));
+      memcpy(frame, src, frameSize + sizeof(ActRec));
+
+      // Set resumed flag.
+      actRec->setResumed();
 
       // Suspend VarEnv if needed
       if (UNLIKELY(fp->hasVarEnv())) {
@@ -86,47 +95,44 @@ struct Resumable {
       memcpy(actRec, fp, sizeof(ActRec));
     }
 
-    // Set resumed flag.
-    actRec->setResumed();
-
     // Populate Resumable.
     resumable->m_resumeAddr = resumeAddr;
     resumable->m_resumeOffset = resumeOffset;
     resumable->m_size = totalSize;
 
-    // Return pointer to the parent object.
+    // Return pointer to the inline-allocated object.
     return resumable + 1;
   }
 
+  template<class T> static void Destroy(T* obj) {
+    auto const size = obj->resumable()->m_size;
+    auto const base = (char*)(obj + 1) - size;
+    obj->~T();
+    MM().objFree(base, size);
+  }
+
   ActRec* actRec() { return &m_actRec; }
-  JIT::TCA resumeAddr() const { return m_resumeAddr; }
+  jit::TCA resumeAddr() const { return m_resumeAddr; }
   Offset resumeOffset() const {
     assert(m_actRec.func()->contains(m_resumeOffset));
     return m_resumeOffset;
   }
   size_t size() const { return m_size; }
 
-  void setResumeAddr(JIT::TCA resumeAddr, Offset resumeOffset) {
+  void setResumeAddr(jit::TCA resumeAddr, Offset resumeOffset) {
     assert(m_actRec.func()->contains(resumeOffset));
     m_resumeAddr = resumeAddr;
     m_resumeOffset = resumeOffset;
   }
 
 private:
-  static ptrdiff_t sizeForFunc(const Func* func) {
-    assert(func->isResumable());
-    return sizeof(Iter) * func->numIterators() +
-           sizeof(TypedValue) * func->numLocals() +
-           sizeof(Resumable);
-  }
-
   // ActRec of the resumed frame.
   ActRec m_actRec;
 
   // Resume address.
-  JIT::TCA m_resumeAddr;
+  jit::TCA m_resumeAddr;
 
-  // Resume offset.
+  // Resume offset: bytecode offset from start of Unit's bytecode.
   Offset m_resumeOffset;
 
   // Size of the smart allocated memory that includes this resumable.

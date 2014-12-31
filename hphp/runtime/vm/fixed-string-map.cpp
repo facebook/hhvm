@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/macros.h"
 
 namespace HPHP {
 
@@ -98,6 +97,4 @@ template class FixedStringMap<unsigned char* /* TCA */,true,int32_t>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
- }
-
- // Temporary edit to kick contbuild.  Will remove before commit.
+}

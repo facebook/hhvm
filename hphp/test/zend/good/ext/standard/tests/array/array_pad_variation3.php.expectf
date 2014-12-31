@@ -599,21 +599,21 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  string(25) "Hello	 world!! 
+  string(25) "%r\x0b\x0c%rHello%r\x09%r world!! 
 string
 "
   [3]=>
-  string(25) "Hello	 world!! 
+  string(25) "%r\x0b\x0c%rHello%r\x09%r world!! 
 string
 "
 }
 array(4) {
   [0]=>
-  string(25) "Hello	 world!! 
+  string(25) "%r\x0b\x0c%rHello%r\x09%r world!! 
 string
 "
   [1]=>
-  string(25) "Hello	 world!! 
+  string(25) "%r\x0b\x0c%rHello%r\x09%r world!! 
 string
 "
   [2]=>

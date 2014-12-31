@@ -23,6 +23,7 @@
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -110,6 +111,7 @@ class IntlExtension : public Extension {
     initTimeZone();
     initIterator();
     initDateFormatter();
+    initDatePatternGenerator();
     initCalendar();
     initGrapheme();
     initBreakIterator(); // Must come after initIterator()
@@ -127,7 +129,7 @@ class IntlExtension : public Extension {
   void threadInit() override {
     bindIniSettings();
   }
-
+  void threadShutdown() override;
  private:
   void bindIniSettings();
   void bindConstants();
@@ -137,6 +139,7 @@ class IntlExtension : public Extension {
   void initTimeZone();
   void initIterator();
   void initDateFormatter();
+  void initDatePatternGenerator();
   void initCalendar();
   void initGrapheme();
   void initBreakIterator();

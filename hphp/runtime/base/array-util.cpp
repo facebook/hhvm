@@ -16,15 +16,18 @@
 
 #include "hphp/runtime/base/array-util.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/thread-info.h"
 
-#include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include <set>
 #include <utility>
@@ -155,6 +158,24 @@ Variant ArrayUtil::Range(unsigned char low, unsigned char high,
 
 #define DOUBLE_DRIFT_FIX 0.000000000000001
 
+namespace {
+// Some inputs can cause us to allocate gigantic arrays, so we have to make sure
+// we're not exceeding the memory limit.
+void rangeCheckAlloc(double estNumSteps) {
+  // An array can hold at most INT_MAX elements
+  if (estNumSteps > std::numeric_limits<int32_t>::max()) {
+    MM().forceOOM();
+    check_request_surprise_unlikely();
+    return;
+  }
+
+  int32_t numElms = static_cast<int32_t>(estNumSteps);
+  if (MM().preAllocOOM(MixedArray::computeAllocBytesFromMaxElms(numElms))) {
+    check_request_surprise_unlikely();
+  }
+}
+}
+
 Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
   Array ret;
   if (low > high) { // Negative steps
@@ -162,6 +183,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
+    rangeCheckAlloc((low - high) / step);
     for (; low >= (high - DOUBLE_DRIFT_FIX); low -= step) {
       ret.append(low);
     }
@@ -170,6 +192,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
+    rangeCheckAlloc((high - low) / step);
     for (; low <= (high + DOUBLE_DRIFT_FIX); low += step) {
       ret.append(low);
     }
@@ -186,6 +209,7 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
+    rangeCheckAlloc((low - high) / step);
     for (; low >= high; low -= step) {
       ret.append((int64_t)low);
     }
@@ -194,6 +218,7 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
+    rangeCheckAlloc((high - low) / step);
     for (; low <= high; low += step) {
       ret.append((int64_t)low);
     }
@@ -205,102 +230,6 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // information and calculations
-
-DataType ArrayUtil::Sum(const Array& input, int64_t *isum, double *dsum) {
-  int64_t i = 0;
-  ArrayIter iter(input);
-  for (; iter; ++iter) {
-    const Variant& entry(iter.secondRef());
-    switch (entry.getType()) {
-    case KindOfDouble: {
-      goto DOUBLE;
-    }
-    case KindOfStaticString:
-    case KindOfString: {
-      int64_t ti;
-      double td;
-      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
-          KindOfInt64) {
-        i += ti;
-        break;
-      } else {
-        goto DOUBLE;
-      }
-    }
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource: {
-      break;
-    }
-    default: {
-      i += entry.toInt64();
-      break;
-    }
-    }
-  }
-  *isum = i;
-  return KindOfInt64;
-
-DOUBLE:
-  double d = i;
-  for (; iter; ++iter) {
-    const Variant& entry(iter.secondRef());
-    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
-        !entry.is(KindOfResource)) {
-      d += entry.toDouble();
-    }
-  }
-  *dsum = d;
-  return KindOfDouble;
-}
-
-DataType ArrayUtil::Product(const Array& input, int64_t *iprod, double *dprod) {
-  int64_t i = 1;
-  ArrayIter iter(input);
-  for (; iter; ++iter) {
-    const Variant& entry(iter.secondRef());
-    switch (entry.getType()) {
-    case KindOfDouble: {
-      goto DOUBLE;
-    }
-    case KindOfStaticString:
-    case KindOfString: {
-      int64_t ti;
-      double td;
-      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
-          KindOfInt64) {
-        i *= ti;
-        break;
-      } else {
-        goto DOUBLE;
-      }
-    }
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource: {
-      break;
-    }
-    default: {
-      i *= entry.toInt64();
-      break;
-    }
-    }
-  }
-  *iprod = i;
-  return KindOfInt64;
-
-DOUBLE:
-  double d = i;
-  for (; iter; ++iter) {
-    const Variant& entry(iter.secondRef());
-    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
-        !entry.is(KindOfResource)) {
-      d *= entry.toDouble();
-    }
-  }
-  *dprod = d;
-  return KindOfDouble;
-}
 
 Variant ArrayUtil::CountValues(const Array& input) {
   Array ret = Array::Create();
@@ -328,9 +257,9 @@ Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
     Variant key(iter.first());
     if (key.isString()) {
       if (lower) {
-        ret.set(f_strtolower(key.toString()), iter.secondRef());
+        ret.set(HHVM_FN(strtolower)(key.toString()), iter.secondRef());
       } else {
-        ret.set(f_strtoupper(key.toString()), iter.secondRef());
+        ret.set(HHVM_FN(strtoupper)(key.toString()), iter.secondRef());
       }
     } else {
       ret.set(key, iter.secondRef());
@@ -363,7 +292,7 @@ static void php_array_data_shuffle(std::vector<ssize_t> &indices) {
   if (n_elems > 1) {
     int n_left = n_elems;
     while (--n_left) {
-      int rnd_idx = f_rand(0, n_left);
+      int rnd_idx = HHVM_FN(rand)(0, n_left);
       if (rnd_idx != n_left) {
         ssize_t temp = indices[n_left];
         indices[n_left] = indices[rnd_idx];
@@ -410,7 +339,7 @@ Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
     // but necessary for this code to be agnostic to the array's internal
     // representation.  Assuming uniform distribution, we'll expect to
     // iterate through half of the array's data.
-    ssize_t index = f_rand(0, count-1);
+    ssize_t index = HHVM_FN(rand)(0, count-1);
     ssize_t pos = input->iter_begin();
     while (index--) {
       pos = input->iter_advance(pos);
@@ -478,6 +407,7 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
   std::vector<int> indices;
   Array::SortImpl(indices, input, opaque, Array::SortRegularAscending, false);
 
+  int duplicates_count = 0;
   std::vector<bool> duplicates(indices.size(), false);
   int lastIdx = indices[0];
   Variant last = input->getValue(opaque.positions[lastIdx]);
@@ -485,6 +415,7 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
     int currentIdx = indices[i];
     Variant current = input->getValue(opaque.positions[currentIdx]);
     if (equal(current, last)) {
+      ++duplicates_count;
       if (currentIdx > lastIdx) {
         duplicates[currentIdx] = true;
         continue;
@@ -495,12 +426,12 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
     last = current;
   }
 
-  Array ret = Array::Create();
+  ArrayInit ret(indices.size() - duplicates_count, ArrayInit::Map{});
   int i = 0;
   for (ArrayIter iter(input); iter; ++iter, ++i) {
     if (!duplicates[i]) ret.set(iter.first(), iter.secondRef());
   }
-  return ret;
+  return ret.toVariant();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -8,10 +8,48 @@
  *
  *)
 
-module ParserHeap = SharedMem.NoCache(struct
-  type t = Ast.program
+(*****************************************************************************)
+(* Table containing all the HH_FIXMEs found in the source code.
+ * Associates: filename => line_number, error_node_number map
+ *)
+(*****************************************************************************)
+
+module HH_FIXMES = SharedMem.WithCache (Relative_path.S) (struct
+  type t = Pos.t Utils.IMap.t Utils.IMap.t
   let prefix = Prefix.make()
 end)
+
+(*****************************************************************************)
+(* We register the function that can look up a position and determine if
+ * a given position is affected by an HH_FIXME. We use a reference to avoid
+ * a cyclic dependency: everything depends on the Errors module (the module
+ * defining all the errors), because of that making the Errors module call
+ * into anything that isn't in the standard library is very unwise, because
+ * that code won't be able to add errors.
+ *)
+(*****************************************************************************)
+
+let () =
+  Errors.is_hh_fixme := begin fun pos err_code ->
+    let filename = pos.Pos.pos_file in
+    let line = pos.Pos.pos_start.Lexing.pos_lnum in
+    match HH_FIXMES.get filename with
+    | None -> false
+    | Some fixme_map ->
+        match Utils.IMap.get line fixme_map with
+        | None -> false
+        | Some code_map ->
+            Utils.IMap.mem err_code code_map
+  end
+
+(*****************************************************************************)
+(* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)
+(*****************************************************************************)
+
+module ParserHeap = SharedMem.NoCache (Relative_path.S) (struct
+    type t = Ast.program
+    let prefix = Prefix.make()
+  end)
 
 let find_class_in_file file_name class_name =
   match ParserHeap.get file_name with
@@ -22,4 +60,3 @@ let find_class_in_file file_name class_name =
         | Ast.Class c when snd c.Ast.c_name = class_name -> Some c
         | _ -> acc
       end None defs
-

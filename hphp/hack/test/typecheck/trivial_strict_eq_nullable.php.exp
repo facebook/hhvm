@@ -1,0 +1,6 @@
+File "trivial_strict_eq_nullable.php", line 13, characters 10-18:
+This expression is always false (Typing[4118])
+File "trivial_strict_eq_nullable.php", line 13, characters 10-11:
+This is a string
+File "trivial_strict_eq_nullable.php", line 12, characters 16-18:
+This is an int

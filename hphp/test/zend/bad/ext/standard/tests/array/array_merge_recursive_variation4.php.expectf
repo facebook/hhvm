@@ -214,14 +214,14 @@ array(7) {
 -- Iteration 6 --
 -- With default argument --
 array(3) {
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   array(2) {
     [0]=>
     string(5) "hello"
     [1]=>
     string(5) "world"
   }
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
   ["pen
 "]=>
@@ -229,14 +229,14 @@ array(3) {
 }
 -- With more arguments --
 array(7) {
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   array(2) {
     [0]=>
     string(5) "hello"
     [1]=>
     string(5) "world"
   }
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
   ["pen
 "]=>

@@ -49,6 +49,7 @@ clearstatcache();
 
 echo "*** Done ***\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/filesize_variation2/filesize_variation2_sub/filesize_variation2.tmp");

@@ -24,17 +24,18 @@ XML
 	}
 }
 
-var_dump(mkdir('test_bug_61367'));
-var_dump(mkdir('test_bug_61367/base'));
-var_dump(file_put_contents('test_bug_61367/bad', 'blah'));
-var_dump(chdir('test_bug_61367/base'));
+var_dump(mkdir('test_bug_61367-read'));
+var_dump(mkdir('test_bug_61367-read/base'));
+var_dump(file_put_contents('test_bug_61367-read/bad', 'blah'));
+var_dump(chdir('test_bug_61367-read/base'));
 
 stream_wrapper_register( 'exploit', 'StreamExploiter' );
 $s = fopen( 'exploit://', 'r' );
 
 ?>
+<?php error_reporting(0); ?>
 <?php
-unlink('test_bug_61367/bad');
-rmdir('test_bug_61367/base');
-rmdir('test_bug_61367');
+unlink('test_bug_61367-read/bad');
+rmdir('test_bug_61367-read/base');
+rmdir('test_bug_61367-read');
 ?>

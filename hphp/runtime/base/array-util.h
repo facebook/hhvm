@@ -29,7 +29,7 @@ class Array;
 /**
  * Utility array functions.
  */
-class ArrayUtil {
+class ArrayUtil final {
 public:
   /////////////////////////////////////////////////////////////////////////////
   // Compositions.
@@ -58,16 +58,6 @@ public:
 
   /////////////////////////////////////////////////////////////////////////////
   // Information and calculations.
-
-  /**
-   * Computes the sum of the array entries as int64 or double.
-   */
-  static DataType Sum(const Array& input, int64_t *isum, double *dsum);
-
-  /**
-   * Computes the product of the array entries as int64 or double.
-   */
-  static DataType Product(const Array& input, int64_t *iprod, double *dprod);
 
   /**
    * Return the value as key and the frequency of that value in input

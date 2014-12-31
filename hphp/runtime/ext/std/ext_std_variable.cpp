@@ -16,12 +16,13 @@
 */
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
-#include "folly/Likely.h"
+#include <folly/Likely.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/server/http-protocol.h"
 
@@ -159,20 +160,23 @@ Variant HHVM_FUNCTION(var_export, const Variant& expression,
   return res;
 }
 
-void f_var_dump(const Variant& v) {
-  VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
+static ALWAYS_INLINE void do_var_dump(VariableSerializer vs,
+                                      const Variant& expression) {
   // manipulate maxCount to match PHP behavior
-  if (!v.isObject()) {
+  if (!expression.isObject()) {
     vs.incMaxCount();
   }
-  vs.serialize(v, false);
+  vs.serialize(expression, false);
 }
 
-void f_var_dump(int _argc, const Variant& expression,
-                const Array& _argv /* = null_array */) {
-  f_var_dump(expression);
-  for (int i = 0; i < _argv.size(); i++) {
-    f_var_dump(_argv[i]);
+void HHVM_FUNCTION(var_dump, const Variant& expression,
+                             const Array& _argv /*=null_array */) {
+  VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
+  do_var_dump(vs, expression);
+
+  auto sz = _argv.size();
+  for (int i = 0; i < sz; i++) {
+    do_var_dump(vs, _argv[i]);
   }
 }
 
@@ -183,45 +187,46 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
 
 String HHVM_FUNCTION(serialize, const Variant& value) {
   switch (value.getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    return "N;";
-  case KindOfBoolean:
-    return value.getBoolean() ? "b:1;" : "b:0;";
-  case KindOfInt64: {
-    StringBuffer sb;
-    sb.append("i:");
-    sb.append(value.getInt64());
-    sb.append(';');
-    return sb.detach();
+    case KindOfUninit:
+    case KindOfNull:
+      return "N;";
+    case KindOfBoolean:
+      return value.getBoolean() ? "b:1;" : "b:0;";
+    case KindOfInt64: {
+      StringBuffer sb;
+      sb.append("i:");
+      sb.append(value.getInt64());
+      sb.append(';');
+      return sb.detach();
+    }
+    case KindOfStaticString:
+    case KindOfString: {
+      StringData *str = value.getStringData();
+      StringBuffer sb;
+      sb.append("s:");
+      sb.append(str->size());
+      sb.append(":\"");
+      sb.append(str->data(), str->size());
+      sb.append("\";");
+      return sb.detach();
+    }
+    case KindOfResource:
+      return "i:0;";
+    case KindOfArray: {
+      ArrayData *arr = value.getArrayData();
+      if (arr->empty()) return "a:0:{}";
+      // fall-through
+    }
+    case KindOfDouble:
+    case KindOfObject: {
+      VariableSerializer vs(VariableSerializer::Type::Serialize);
+      return vs.serialize(value, true);
+    }
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  case KindOfStaticString:
-  case KindOfString: {
-    StringData *str = value.getStringData();
-    StringBuffer sb;
-    sb.append("s:");
-    sb.append(str->size());
-    sb.append(":\"");
-    sb.append(str->data(), str->size());
-    sb.append("\";");
-    return sb.detach();
-  }
-  case KindOfArray: {
-    ArrayData *arr = value.getArrayData();
-    if (arr->empty()) return "a:0:{}";
-    // fall-through
-  }
-  case KindOfObject:
-  case KindOfResource:
-  case KindOfDouble: {
-    VariableSerializer vs(VariableSerializer::Type::Serialize);
-    return vs.serialize(value, true);
-  }
-  default:
-    assert(false);
-    break;
-  }
-  return empty_string();
+  not_reached();
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
@@ -248,6 +253,29 @@ Array HHVM_FUNCTION(SystemLib_get_defined_vars) {
   return get_defined_vars();
 }
 
+const StaticString
+  s_GLOBALS("GLOBALS"),
+  s_this("this");
+
+static const Func* arGetContextFunc(const ActRec* ar) {
+  if (ar == nullptr) {
+    return nullptr;
+  }
+  if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
+    // Pseudomains inherit the context of their caller
+    auto const context = g_context.getNoCheck();
+    ar = context->getPrevVMStateUNSAFE(ar);
+    while (ar != nullptr &&
+             (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
+      ar = context->getPrevVMStateUNSAFE(ar);
+    }
+    if (ar == nullptr) {
+      return nullptr;
+    }
+  }
+  return ar->m_func;
+}
+
 static bool modify_extract_name(VarEnv* v,
                                 String& name,
                                 int64_t extract_type,
@@ -261,11 +289,15 @@ static bool modify_extract_name(VarEnv* v,
   case EXTR_IF_EXISTS:
     if (v->lookup(name.get()) == nullptr) {
       return false;
+    } else {
+      goto namechecks;
     }
     break;
   case EXTR_PREFIX_SAME:
     if (v->lookup(name.get()) != nullptr) {
       name = prefix + "_" + name;
+    } else {
+      goto namechecks;
     }
     break;
   case EXTR_PREFIX_ALL:
@@ -274,6 +306,8 @@ static bool modify_extract_name(VarEnv* v,
   case EXTR_PREFIX_INVALID:
     if (!is_valid_var_name(name.get()->data(), name.size())) {
       name = prefix + "_" + name;
+    } else {
+      goto namechecks;
     }
     break;
   case EXTR_PREFIX_IF_EXISTS:
@@ -282,6 +316,21 @@ static bool modify_extract_name(VarEnv* v,
     }
     name = prefix + "_" + name;
     break;
+  case EXTR_OVERWRITE:
+    namechecks:
+    if (name == s_GLOBALS) {
+      return false;
+    }
+    if (name == s_this) {
+      // Only disallow $this when inside a non-static method, or a static method
+      // that has defined $this (matches Zend)
+      CallerFrame cf;
+      const Func* func = arGetContextFunc(cf());
+
+      if (func && func->isMethod() && v->lookup(s_this.get()) != nullptr) {
+        return false;
+      }
+    }
   default:
     break;
   }
@@ -406,6 +455,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(print_r);
   HHVM_FE(var_export);
   HHVM_FE(debug_zval_dump);
+  HHVM_FE(var_dump);
   HHVM_FE(serialize);
   HHVM_FE(unserialize);
   HHVM_FE(get_defined_vars);

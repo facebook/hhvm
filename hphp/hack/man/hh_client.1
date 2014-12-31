@@ -68,7 +68,7 @@ The default
 .I MODE
 if none is specified. With no
 .I OPTIONS
-specified, it prints a list of type errors on standard out, or prints
+specified, it prints a list of type errors on standard output, or prints
 "No errors!" if there were none.
 
 Many
@@ -78,7 +78,7 @@ affect the output of
 mode, sometimes causing it to do completely different things. (Those can be
 considered "sub-modes" of
 .B check
-mode.) Many of these options are underdoing considerable revision and so are not
+mode.) Many of these options are undergoing considerable revision and so are not
 documented here; read the source for a full list.
 
 Widely-useful
@@ -109,8 +109,8 @@ page.
 
 .TP
 .BI \-\-from " EDITOR"
-Print output in the format expected by a specific editor. Valid values of
-.I EDTIOR
+Prints output in the format expected by a specific editor. Valid values of
+.I EDITOR
 are
 .B emacs
 and
@@ -121,7 +121,7 @@ instead.
 
 .TP
 .B \-\-json
-Print output in a JSON format intended for machine consumption, instead of the
+Prints output in a JSON format intended for machine consumption, instead of the
 output intended for human consumption that is output by default.
 
 .TP
@@ -148,6 +148,12 @@ options.
 .B \-\-version
 Prints the current client version, including build ID and build date, and
 then exits.
+
+.TP
+.B \-\-auto-complete
+Autocompletes text on STDIN where the cursor is replaced with
+.I AUTO332.
+Returns a newline-separated list.
 
 
 .SS start
@@ -194,7 +200,7 @@ change.
 Used in combination with the path to the project root in order to locate the
 socket for communicating with the running
 .BR hh_server (1)
-daemon. Normally set by your login enviornment, but may be unset in some
+daemon. Normally set by your login environment, but may be unset in some
 nonstandard setups.
 
 .SH FILES
@@ -221,7 +227,7 @@ project root.
 .SH BUGS
 The Hack language is part of the HHVM project. Known bugs can be found at that
 tracker, and new ones should be reported there as well:
-.IR https://github.com/facebook/hhvm/issues
+.I https://github.com/facebook/hhvm/issues
 
 .SH SEE ALSO
 .BR hh_server (1), \ hackificator (1), \ hack_remove_soft_types (1).

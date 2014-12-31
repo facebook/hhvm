@@ -55,6 +55,7 @@ unlink($sym_linkname);
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $dirname = dirname(__FILE__)."/symlink_link_linkinfo_is_link_basic2";
 rmdir($dirname);

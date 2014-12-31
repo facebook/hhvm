@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 namespace HPHP {
 
@@ -56,32 +56,41 @@ bool cellRelOp(Op op, Cell cell, int64_t val) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
-  case KindOfUninit:
-  case KindOfNull:           return op(false, !!val);
-  case KindOfBoolean:        return op(!!cell.m_data.num, val != 0);
-  case KindOfInt64:          return op(cell.m_data.num, val);
-  case KindOfDouble:         return op(cell.m_data.dbl, val);
-  case KindOfArray:          return op(true, false);
+    case KindOfUninit:
+    case KindOfNull:
+      return op(false, !!val);
 
-  case KindOfObject:
-    return cell.m_data.pobj->isCollection()
-      ? op.collectionVsNonObj()
-      : op(cell.m_data.pobj->o_toInt64(), val);
+    case KindOfBoolean:
+      return op(!!cell.m_data.num, val != 0);
 
-  case KindOfResource:
-    return op(cell.m_data.pres->o_toInt64(), val);
+    case KindOfInt64:
+      return op(cell.m_data.num, val);
 
-  case KindOfStaticString:
-  case KindOfString:
-    {
+    case KindOfDouble:
+      return op(cell.m_data.dbl, val);
+
+    case KindOfStaticString:
+    case KindOfString: {
       auto const num = stringToNumeric(cell.m_data.pstr);
       return num.m_type == KindOfInt64  ? op(num.m_data.num, val) :
              num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
              op(0, val);
     }
 
-  default:
-    break;
+    case KindOfArray:
+      return op(true, false);
+
+    case KindOfObject:
+      return cell.m_data.pobj->isCollection()
+        ? op.collectionVsNonObj()
+        : op(cell.m_data.pobj->toInt64(), val);
+
+    case KindOfResource:
+      return op(cell.m_data.pres->o_toInt64(), val);
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
   not_reached();
 }
@@ -91,27 +100,41 @@ bool cellRelOp(Op op, Cell cell, double val) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
-  case KindOfUninit:
-  case KindOfNull:            return op(false, val != 0);
-  case KindOfBoolean:         return op(!!cell.m_data.num, val != 0);
-  case KindOfInt64:           return op(cell.m_data.num, val);
-  case KindOfDouble:          return op(cell.m_data.dbl, val);
-  case KindOfArray:           return op(true, false);
+    case KindOfUninit:
+    case KindOfNull:
+      return op(false, val != 0);
 
-  case KindOfObject:
-    return cell.m_data.pobj->isCollection()
-      ? op.collectionVsNonObj()
-      : op(cell.m_data.pobj->o_toDouble(), val);
+    case KindOfBoolean:
+      return op(!!cell.m_data.num, val != 0);
 
-  case KindOfResource:
-    return op(cell.m_data.pres->o_toDouble(), val);
+    case KindOfInt64:
+      return op(cell.m_data.num, val);
 
-  case KindOfStaticString:
-  case KindOfString:
-    return op(toDouble(cell.m_data.pstr), val);
+    case KindOfDouble:
+      return op(cell.m_data.dbl, val);
 
-  default:
-    break;
+    case KindOfStaticString:
+    case KindOfString: {
+      auto const num = stringToNumeric(cell.m_data.pstr);
+      return num.m_type == KindOfInt64  ? op(num.m_data.num, val) :
+             num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
+             op(0, val);
+    }
+
+    case KindOfArray:
+      return op(true, false);
+
+    case KindOfObject:
+      return cell.m_data.pobj->isCollection()
+        ? op.collectionVsNonObj()
+        : op(cell.m_data.pobj->toDouble(), val);
+
+    case KindOfResource:
+      return op(cell.m_data.pres->o_toDouble(), val);
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
   not_reached();
 }
@@ -121,24 +144,34 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
-  case KindOfUninit:
-  case KindOfNull:         return op(staticEmptyString(), val);
-  case KindOfBoolean:      return op(!!cell.m_data.num, toBoolean(val));
-  case KindOfDouble:       return op(cell.m_data.dbl, val->toDouble());
-  case KindOfArray:        return op(true, false);
-  case KindOfString:
-  case KindOfStaticString: return op(cell.m_data.pstr, val);
+    case KindOfUninit:
+    case KindOfNull:
+      return op(staticEmptyString(), val);
 
-  case KindOfInt64:
-    {
+    case KindOfInt64: {
       auto const num = stringToNumeric(val);
       return num.m_type == KindOfInt64  ? op(cell.m_data.num, num.m_data.num) :
              num.m_type == KindOfDouble ? op(cell.m_data.num, num.m_data.dbl) :
              op(cell.m_data.num, 0);
     }
+    case KindOfBoolean:
+      return op(!!cell.m_data.num, toBoolean(val));
 
-  case KindOfObject:
-    {
+    case KindOfDouble: {
+      auto const num = stringToNumeric(val);
+      return num.m_type == KindOfInt64  ? op(cell.m_data.dbl, num.m_data.num) :
+             num.m_type == KindOfDouble ? op(cell.m_data.dbl, num.m_data.dbl) :
+             op(cell.m_data.dbl, 0);
+    }
+
+    case KindOfStaticString:
+    case KindOfString:
+      return op(cell.m_data.pstr, val);
+
+    case KindOfArray:
+      return op(true, false);
+
+    case KindOfObject: {
       auto od = cell.m_data.pobj;
       if (od->isCollection()) return op.collectionVsNonObj();
       if (od->hasToString()) {
@@ -148,14 +181,14 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
       return op(true, false);
     }
 
-  case KindOfResource:
-    {
+    case KindOfResource: {
       auto const rd = cell.m_data.pres;
       return op(rd->o_toDouble(), val->toDouble());
     }
 
-  default:
-    break;
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
   not_reached();
 }
@@ -165,26 +198,40 @@ bool cellRelOp(Op op, Cell cell, const ArrayData* ad) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
-  case KindOfUninit:
-  case KindOfNull:         return op(false, !ad->empty());
-  case KindOfBoolean:      return op(cell.m_data.num, !ad->empty());
-  case KindOfInt64:        return op(false, true);
-  case KindOfDouble:       return op(false, true);
-  case KindOfArray:        return op(cell.m_data.parr, ad);
-  case KindOfStaticString:
-  case KindOfString:       return op(false, true);
-  case KindOfObject:
-    {
+    case KindOfUninit:
+    case KindOfNull:
+      return op(false, !ad->empty());
+
+    case KindOfBoolean:
+      return op(cell.m_data.num, !ad->empty());
+
+    case KindOfInt64:
+      return op(false, true);
+
+    case KindOfDouble:
+      return op(false, true);
+
+    case KindOfStaticString:
+    case KindOfString:
+      return op(false, true);
+
+    case KindOfArray:
+      return op(cell.m_data.parr, ad);
+
+    case KindOfObject: {
       auto const od = cell.m_data.pobj;
       return od->isCollection()
         ? op.collectionVsNonObj()
         : op(true, false);
     }
-  case KindOfResource:     return op(false, true);
-  default:
-    break;
-  }
 
+    case KindOfResource:
+      return op(false, true);
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
+  }
   not_reached();
 }
 
@@ -193,35 +240,45 @@ bool cellRelOp(Op op, Cell cell, const ObjectData* od) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
-  case KindOfUninit:
-  case KindOfNull:        return op(false, true);
-  case KindOfBoolean:     return op(!!cell.m_data.num, od->o_toBoolean());
-  case KindOfInt64:
-    return od->isCollection() ? op.collectionVsNonObj()
-                              : op(cell.m_data.num, od->o_toInt64());
-  case KindOfDouble:
-    return od->isCollection() ? op.collectionVsNonObj()
-                              : op(cell.m_data.dbl, od->o_toDouble());
-  case KindOfArray:
-      return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
-  case KindOfString:
-  case KindOfStaticString: {
-    auto obj = const_cast<ObjectData*>(od);
-    if (obj->isCollection()) return op.collectionVsNonObj();
-    if (obj->hasToString()) {
-      String str(obj->invokeToString());
-      return op(cell.m_data.pstr, str.get());
-    }
-    return op(false, true);
-  }
-  case KindOfObject:
-    return op(cell.m_data.pobj, od);
-  case KindOfResource:
-    return op(false, true);
-  default:
-    break;
-  }
+    case KindOfUninit:
+    case KindOfNull:
+      return op(false, true);
 
+    case KindOfBoolean:
+      return op(!!cell.m_data.num, od->toBoolean());
+
+    case KindOfInt64:
+      return od->isCollection() ? op.collectionVsNonObj()
+                                : op(cell.m_data.num, od->toInt64());
+
+    case KindOfDouble:
+      return od->isCollection() ? op.collectionVsNonObj()
+                                : op(cell.m_data.dbl, od->toDouble());
+
+    case KindOfStaticString:
+    case KindOfString: {
+      auto obj = const_cast<ObjectData*>(od);
+      if (obj->isCollection()) return op.collectionVsNonObj();
+      if (obj->hasToString()) {
+        String str(obj->invokeToString());
+        return op(cell.m_data.pstr, str.get());
+      }
+      return op(false, true);
+    }
+
+    case KindOfArray:
+        return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
+
+    case KindOfObject:
+      return op(cell.m_data.pobj, od);
+
+    case KindOfResource:
+      return op(false, true);
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
+  }
   not_reached();
 }
 
@@ -230,29 +287,38 @@ bool cellRelOp(Op op, Cell cell, const ResourceData* rd) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
-  case KindOfUninit:
-  case KindOfNull:        return op(false, true);
-  case KindOfBoolean:     return op(!!cell.m_data.num, rd->o_toBoolean());
-  case KindOfInt64:
-    return op(cell.m_data.num, rd->o_toInt64());
-  case KindOfDouble:
-    return op(cell.m_data.dbl, rd->o_toDouble());
-  case KindOfArray:
-    return op(true, false);
-  case KindOfString:
-  case KindOfStaticString:
-    {
+    case KindOfUninit:
+    case KindOfNull:
+      return op(false, true);
+
+    case KindOfBoolean:
+      return op(!!cell.m_data.num, rd->o_toBoolean());
+
+    case KindOfInt64:
+      return op(cell.m_data.num, rd->o_toInt64());
+
+    case KindOfDouble:
+      return op(cell.m_data.dbl, rd->o_toDouble());
+
+    case KindOfStaticString:
+    case KindOfString: {
       auto const str = cell.m_data.pstr;
       return op(str->toDouble(), rd->o_toDouble());
     }
-  case KindOfObject:
-    return op(true, false);
-  case KindOfResource:
-    return op(cell.m_data.pres, rd);
-  default:
-    break;
-  }
 
+    case KindOfArray:
+      return op(true, false);
+
+    case KindOfObject:
+      return op(true, false);
+
+    case KindOfResource:
+      return op(cell.m_data.pres, rd);
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
+  }
   not_reached();
 }
 
@@ -267,6 +333,7 @@ bool cellRelOp(Op op, Cell c1, Cell c2) {
     return IS_STRING_TYPE(c1.m_type) ? op(c1.m_data.pstr, staticEmptyString()) :
            c1.m_type == KindOfObject ? op(true, false) :
            cellRelOp(op, c1, false);
+
   case KindOfInt64:        return cellRelOp(op, c1, c2.m_data.num);
   case KindOfBoolean:      return cellRelOp(op, c1, !!c2.m_data.num);
   case KindOfDouble:       return cellRelOp(op, c1, c2.m_data.dbl);
@@ -275,7 +342,9 @@ bool cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfArray:        return cellRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return cellRelOp(op, c1, c2.m_data.pobj);
   case KindOfResource:     return cellRelOp(op, c1, c2.m_data.pres);
-  default:
+
+  case KindOfRef:
+  case KindOfClass:
     break;
   }
   not_reached();
@@ -325,23 +394,23 @@ struct Eq {
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return c_DateTime::GetTimestamp(od1) == c_DateTime::GetTimestamp(od2);
+      return DateTimeData::getTimestamp(od1) == DateTimeData::getTimestamp(od2);
     }
     if (od1->getVMClass() != od2->getVMClass()) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_ArrayObjectClass))) {
       // Compare the whole object, not just the array representation
       Array ar1(ArrayData::Create());
       Array ar2(ArrayData::Create());
-      od1->o_getArray(ar1, false);
-      od2->o_getArray(ar2, false);
+      od1->o_getArray(ar1);
+      od2->o_getArray(ar2);
       return ar1->equal(ar2.get(), false);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
       // First comparison already proves they are different
       return false;
     }
-    Array ar1(od1->o_toArray());
-    Array ar2(od2->o_toArray());
+    auto ar1 = od1->toArray();
+    auto ar2 = od2->toArray();
     return ar1->equal(ar2.get(), false);
   }
 
@@ -375,13 +444,13 @@ struct Lt {
     if (od1 == od2) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return c_DateTime::GetTimestamp(od1) < c_DateTime::GetTimestamp(od2);
+      return DateTimeData::getTimestamp(od1) < DateTimeData::getTimestamp(od2);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
       return false;
     }
-    Array ar1(od1->o_toArray());
-    Array ar2(od2->o_toArray());
+    auto ar1 = od1->toArray();
+    auto ar2 = od2->toArray();
     return (*this)(ar1.get(), ar2.get());
   }
 
@@ -418,13 +487,13 @@ struct Gt {
     if (od1 == od2) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return c_DateTime::GetTimestamp(od1) > c_DateTime::GetTimestamp(od2);
+      return DateTimeData::getTimestamp(od1) > DateTimeData::getTimestamp(od2);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
       return false;
     }
-    Array ar1(od1->o_toArray());
-    Array ar2(od2->o_toArray());
+    auto ar1 = od1->toArray();
+    auto ar2 = od2->toArray();
     return (*this)(ar1.get(), ar2.get());
   }
 
@@ -452,33 +521,37 @@ bool cellSame(Cell c1, Cell c2) {
   if (null1 || null2) return false;
 
   switch (c1.m_type) {
-  case KindOfInt64:
-  case KindOfBoolean:
-    if (c2.m_type != c1.m_type) return false;
-    return c1.m_data.num == c2.m_data.num;
-  case KindOfDouble:
-    if (c2.m_type != c1.m_type) return false;
-    return c1.m_data.dbl == c2.m_data.dbl;
+    case KindOfBoolean:
+    case KindOfInt64:
+      if (c2.m_type != c1.m_type) return false;
+      return c1.m_data.num == c2.m_data.num;
 
-  case KindOfStaticString:
-  case KindOfString:
-    if (!IS_STRING_TYPE(c2.m_type)) return false;
-    return c1.m_data.pstr->same(c2.m_data.pstr);
+    case KindOfDouble:
+      if (c2.m_type != c1.m_type) return false;
+      return c1.m_data.dbl == c2.m_data.dbl;
 
-  case KindOfArray:
-    if (c2.m_type != KindOfArray) return false;
-    return c1.m_data.parr->equal(c2.m_data.parr, true);
+    case KindOfStaticString:
+    case KindOfString:
+      if (!IS_STRING_TYPE(c2.m_type)) return false;
+      return c1.m_data.pstr->same(c2.m_data.pstr);
 
-  case KindOfObject:
-    return c2.m_type == KindOfObject &&
-      c1.m_data.pobj == c2.m_data.pobj;
+    case KindOfArray:
+      if (c2.m_type != KindOfArray) return false;
+      return c1.m_data.parr->equal(c2.m_data.parr, true);
 
-  case KindOfResource:
-    return c2.m_type == KindOfResource &&
-      c1.m_data.pres == c2.m_data.pres;
+    case KindOfObject:
+      return c2.m_type == KindOfObject &&
+        c1.m_data.pobj == c2.m_data.pobj;
 
-  default:
-    break;
+    case KindOfResource:
+      return c2.m_type == KindOfResource &&
+        c1.m_data.pres == c2.m_data.pres;
+
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
   not_reached();
 }

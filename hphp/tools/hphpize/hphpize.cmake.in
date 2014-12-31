@@ -1,17 +1,27 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5 FATAL_ERROR)
 PROJECT(hphp C CXX ASM)
 
-set(HHVM_INCLUDE_DIRS "@HHVM_INCLUDE_DIRS@")
 set(HHVM_DEFINITIONS "@HHVM_DEFINITIONS@")
 set(HHVM_API_VERSION "@HHVM_API_VERSION@")
 set(CMAKE_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
 set(CMAKE_INSTALL_LIBDIR "@CMAKE_INSTALL_LIBDIR@")
-set(CMAKE_MODULE_PATH
-  "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/CMake"
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_MODULE_PATH})
 set(CMAKE_BUILD_TYPE "@CMAKE_BUILD_TYPE@")
 set(ENABLE_ZEND_COMPAT "@ENABLE_ZEND_COMPAT@")
+
+option(HHVM_DSO_TEST_MODE "Build against source headers, not installed ones" Off)
+if (HHVM_DSO_TEST_MODE)
+  set(HHVM_INCLUDE_DIRS "@SOURCE_INCLUDE_DIRS@")
+  set(CMAKE_MODULE_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    "@HPHP_HOME@/CMake" "@HPHP_HOME@/hphp/public_tld/CMake"
+    ${CMAKE_MODULE_PATH})
+else()
+  set(HHVM_INCLUDE_DIRS "@HHVM_INCLUDE_DIRS@")
+  set(CMAKE_MODULE_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/CMake"
+    ${CMAKE_MODULE_PATH})
+endif()
 
 message(STATUS "Configuring for HHVM API version ${HHVM_API_VERSION}")
 
@@ -28,3 +38,9 @@ add_definitions("-DHHVM_BUILD_DSO")
 foreach (def ${HHVM_DEFINITIONS})
   add_definitions("-D${def}")
 endforeach()
+
+add_custom_target(test COMMAND
+                       HHVM_BIN=${CMAKE_INSTALL_PREFIX}/bin/hhvm
+                       ${CMAKE_CURRENT_SOURCE_DIR}/run-test
+                       -a "-vDynamicExtensions.99=${EXTENSION_NAME}.so" test
+                       DEPENDS ${EXTENSION_NAME})

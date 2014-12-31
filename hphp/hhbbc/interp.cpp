@@ -20,7 +20,7 @@
 #include <string>
 #include <iterator>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/runtime/ext/ext_math.h" // f_abs
+#include "hphp/runtime/ext/std/ext_std_math.h" // HHVM_FN(abs)
 
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/cfg.h"
@@ -39,7 +39,7 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/interp-state.h"
-#include "hphp/hhbbc/type-arith.h"
+#include "hphp/hhbbc/type-ops.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
@@ -55,6 +55,8 @@ namespace HPHP { namespace HHBBC {
 MINSTRS
 #undef MII
 
+void builtin(ISS&, const bc::FCallBuiltin&);
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -65,6 +67,9 @@ const StaticString s_Exception("Exception");
 const StaticString s_empty("");
 const StaticString s_construct("__construct");
 const StaticString s_86ctor("86ctor");
+const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
+const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
+const StaticString s_getInstanceKey("getInstanceKey");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -194,6 +199,8 @@ void in(ISS& env, const bc::UnboxR&) {
   push(env, TInitCell);
 }
 
+void in(ISS& env, const bc::RGetCNop&) { nothrow(env); }
+
 void in(ISS& env, const bc::UnboxRNop&) {
   nothrow(env);
   constprop(env);
@@ -317,7 +324,7 @@ void in(ISS& env, const bc::CnsU&) { push(env, TInitCell); }
 
 void in(ISS& env, const bc::ClsCns& op) {
   auto const t1 = topA(env);
-  if (t1.strictSubtypeOf(TCls)) {
+  if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     if (dcls.type == DCls::Exact) {
       return reduce(env, bc::PopA {},
@@ -329,10 +336,9 @@ void in(ISS& env, const bc::ClsCns& op) {
 }
 
 void in(ISS& env, const bc::ClsCnsD& op) {
-  if (!options.HardConstProp) return push(env, TInitCell);
   if (auto const rcls = env.index.resolve_class(env.ctx, op.str2)) {
     auto const t = env.index.lookup_class_constant(env.ctx, *rcls, op.str1);
-    constprop(env);
+    if (options.HardConstProp) constprop(env);
     push(env, t);
     return;
   }
@@ -357,11 +363,11 @@ void in(ISS& env, const bc::Concat& op) {
     if (v1->m_type == KindOfStaticString &&
         v2->m_type == KindOfStaticString) {
       constprop(env);
-      return push(env, eval_cell([&] {
-        String s(StringData::Make(v2->m_data.pstr,
-                                  v1->m_data.pstr->slice()));
+      auto const cell = eval_cell([&] {
+        String s(StringData::Make(v2->m_data.pstr, v1->m_data.pstr->slice()));
         return make_tv<KindOfString>(s.detach());
-      }));
+      });
+      return push(env, cell ? *cell : TInitCell);
     }
   }
   // Not nothrow even if both are strings: can throw for strings
@@ -408,11 +414,12 @@ void in(ISS& env, const bc::BitNot& op) {
   auto const v = tv(t);
   if (v) {
     constprop(env);
-    return push(env, eval_cell([&] {
+    auto const cell = eval_cell([&] {
       auto c = *v;
       cellBitNot(c);
       return c;
-    }));
+    });
+    return push(env, cell ? *cell : TInitCell);
   }
   push(env, TInitCell);
 }
@@ -428,10 +435,7 @@ void sameImpl(ISS& env) {
   if (v1 && v2) {
     return push(env, cellSame(*v2, *v1) != Negate ? TTrue : TFalse);
   }
-  if (!t1.couldBe(t2) && !t2.couldBe(t1)) {
-    return push(env, false != Negate ? TTrue : TFalse);
-  }
-  push(env, TBool);
+  push(env, Negate ? typeNSame(t1, t2) : typeSame(t1, t2));
 }
 
 void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }
@@ -475,13 +479,20 @@ void in(ISS& env, const bc::Xor&) {
 void castBoolImpl(ISS& env, bool negate) {
   nothrow(env);
   constprop(env);
+
   auto const t = popC(env);
   auto const v = tv(t);
   if (v) {
-    return push(env, eval_cell([&] {
+    auto const cell = eval_cell([&] {
       return make_tv<KindOfBoolean>(cellToBool(*v) != negate);
-    }));
+    });
+    always_assert_flog(!!cell, "cellToBool should never throw");
+    return push(env, *cell);
   }
+
+  if (t.subtypeOf(TArrE)) return push(env, negate ? TTrue : TFalse);
+  if (t.subtypeOf(TArrN)) return push(env, negate ? TFalse : TTrue);
+
   push(env, TBool);
 }
 
@@ -503,9 +514,10 @@ void in(ISS& env, const bc::CastInt&) {
   // Objects can raise a warning about converting to int.
   if (!t.couldBe(TObj)) nothrow(env);
   if (auto const v = tv(t)) {
-    return push(env, eval_cell([&] {
+    auto const cell = eval_cell([&] {
       return make_tv<KindOfInt64>(cellToInt(*v));
-    }));
+    });
+    return push(env, cell ? *cell : TInitCell);
   }
   push(env, TInt);
 }
@@ -552,10 +564,10 @@ void jmpImpl(ISS& env, const Op& op) {
   if (v1) {
     auto const taken = !cellToBool(*v1) != Negate;
     if (taken) {
-      nofallthrough(env);
+      jmp_nofallthrough(env);
       env.propagate(*op.target, env.state);
     } else {
-      never_taken(env);
+      jmp_nevertaken(env);
     }
     return;
   }
@@ -663,8 +675,9 @@ void group(ISS& env,
   auto const obj = locAsCell(env, cgetl.loc1);
   impl(env, cgetl, fpush);
   if (!is_specialized_obj(obj)) {
-    setLoc(env, cgetl.loc1, TObj);
-  } else if (is_opt(obj)) {
+    setLoc(env, cgetl.loc1,
+           fpush.subop == ObjMethodOp::NullThrows ? TObj : TOptObj);
+  } else if (is_opt(obj) && fpush.subop == ObjMethodOp::NullThrows) {
     setLoc(env, cgetl.loc1, unopt(obj));
   }
 }
@@ -779,6 +792,20 @@ void in(ISS& env, const bc::CGetS&) {
     }
   }
 
+  auto const indexTy = env.index.lookup_public_static(tcls, tname);
+  if (indexTy.subtypeOf(TInitCell)) {
+    /*
+     * Constant propagation here can change when we invoke autoload, so it's
+     * considered HardConstProp.  It's safe not to check anything about private
+     * or protected static properties, because you can't override a public
+     * static property with a private or protected one---if the index gave us
+     * back a constant type, it's because it found a public static and it must
+     * be the property this would have read dynamically.
+     */
+    if (options.HardConstProp) constprop(env);
+    return push(env, indexTy);
+  }
+
   push(env, TInitCell);
 }
 
@@ -809,6 +836,7 @@ void in(ISS& env, const bc::VGetS&) {
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
+
   if (!self || tcls.couldBe(*self)) {
     if (vname && vname->m_type == KindOfStaticString) {
       boxSelfProp(env, vname->m_data.pstr);
@@ -816,6 +844,11 @@ void in(ISS& env, const bc::VGetS&) {
       killSelfProps(env);
     }
   }
+
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, TRef);
+  }
+
   push(env, TRef);
 }
 
@@ -850,6 +883,31 @@ void in(ISS& env, const bc::AKExists& op) {
   push(env, TBool);
 }
 
+void in(ISS& env, const bc::GetMemoKey& op) {
+  auto const tyIMemoizeParam =
+    subObj(env.index.builtin_class(s_IMemoizeParam.get()));
+  auto const t = topC(env);
+
+  if (t.subtypeOf(TInt) || t.subtypeOf(TStr) || t.subtypeOf(TOptInt)) {
+    return reduce(env, bc::Nop {});
+  }
+  if (t.subtypeOf(TBool)) {
+    return reduce(env, bc::CastInt {});
+  }
+  if (t.subtypeOf(tyIMemoizeParam)) {
+    return reduce(
+      env,
+      bc::FPushObjMethodD { 0, s_getInstanceKey.get(),
+                            ObjMethodOp::NullThrows },
+      bc::FCall { 0 },
+      bc::UnboxR {}
+    );
+  }
+
+  popC(env);
+  push(env, TInitCell);
+}
+
 void in(ISS& env, const bc::IssetL& op) {
   nothrow(env);
   constprop(env);
@@ -881,6 +939,7 @@ void in(ISS& env, const bc::IssetS&) {
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
+
   if (self && tcls.subtypeOf(*self) &&
       vname && vname->m_type == KindOfStaticString) {
     if (auto const t = selfPropAsCell(env, vname->m_data.pstr)) {
@@ -888,6 +947,15 @@ void in(ISS& env, const bc::IssetS&) {
       if (!t->couldBe(TNull))   { constprop(env); return push(env, TTrue); }
     }
   }
+
+  auto const indexTy = env.index.lookup_public_static(tcls, tname);
+  if (indexTy.subtypeOf(TInitCell)) {
+    // See the comments in CGetS about constprop for public statics.
+    if (options.HardConstProp) constprop(env);
+    if (indexTy.subtypeOf(TNull))  { return push(env, TFalse); }
+    if (!indexTy.couldBe(TNull))   { return push(env, TTrue); }
+  }
+
   push(env, TBool);
 }
 
@@ -919,24 +987,37 @@ void isTypeImpl(ISS& env, Type locOrCell, Type test) {
   push(env, TBool);
 }
 
+void isTypeObj(ISS& env, const Type& ty) {
+  if (!ty.couldBe(TObj)) return push(env, TFalse);
+  if (ty.subtypeOf(TObj)) {
+    auto const incompl = objExact(
+      env.index.builtin_class(s_PHP_Incomplete_Class.get()));
+    if (!ty.couldBe(incompl))  return push(env, TTrue);
+    if (ty.subtypeOf(incompl)) return push(env, TFalse);
+  }
+  push(env, TBool);
+}
+
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
   if (!locCouldBeUninit(env, op.loc1)) { nothrow(env); constprop(env); }
   auto const loc = locAsCell(env, op.loc1);
-  if (op.subop == IsTypeOp::Scalar) {
-    return push(env, TBool);
+  switch (op.subop) {
+  case IsTypeOp::Scalar: return push(env, TBool);
+  case IsTypeOp::Obj: return isTypeObj(env, loc);
+  default: return isTypeImpl(env, loc, type_of_istype(op.subop));
   }
-  isTypeImpl(env, loc, type_of_istype(op.subop));
 }
 
 template<class Op>
 void isTypeCImpl(ISS& env, const Op& op) {
   nothrow(env);
   auto const t1 = popC(env);
-  if (op.subop == IsTypeOp::Scalar) {
-    return push(env, TBool);
+  switch (op.subop) {
+  case IsTypeOp::Scalar: return push(env, TBool);
+  case IsTypeOp::Obj: return isTypeObj(env, t1);
+  default: return isTypeImpl(env, t1, type_of_istype(op.subop));
   }
-  isTypeImpl(env, t1, type_of_istype(op.subop));
 }
 
 void in(ISS& env, const bc::IsTypeC& op) { isTypeCImpl(env, op); }
@@ -964,7 +1045,7 @@ void in(ISS& env, const bc::InstanceOf& op) {
                        bc::InstanceOfD { v1->m_data.pstr });
   }
 
-  if (t1.strictSubtypeOf(TObj)) {
+  if (t1.subtypeOf(TObj) && is_specialized_obj(t1)) {
     auto const dobj = dobj_of(t1);
     switch (dobj.type) {
     case DObj::Sub:
@@ -1020,6 +1101,7 @@ void in(ISS& env, const bc::SetS&) {
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
+
   if (!self || tcls.couldBe(*self)) {
     if (vname && vname->m_type == KindOfStaticString) {
       nothrow(env);
@@ -1028,6 +1110,11 @@ void in(ISS& env, const bc::SetS&) {
       mergeEachSelfPropRaw(env, [&] (Type) { return t1; });
     }
   }
+
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, t1);
+  }
+
   push(env, t1);
 }
 
@@ -1045,19 +1132,20 @@ void in(ISS& env, const bc::SetOpL& op) {
       SETOP_BODY_CELL(&c, op.subop, &rhs);
       return c;
     });
+    if (!resultTy) resultTy = TInitCell;
 
     // We may have inferred a TSStr or TSArr with a value here, but
     // at runtime it will not be static.  For now just throw that
     // away.  TODO(#3696042): should be able to loosen_statics here.
-    if (resultTy.subtypeOf(TStr))      resultTy = TStr;
-    else if (resultTy.subtypeOf(TArr)) resultTy = TArr;
+    if (resultTy->subtypeOf(TStr))      resultTy = TStr;
+    else if (resultTy->subtypeOf(TArr)) resultTy = TArr;
 
-    setLoc(env, op.loc1, resultTy);
-    push(env, resultTy);
+    setLoc(env, op.loc1, *resultTy);
+    push(env, *resultTy);
     return;
   }
 
-  auto const resultTy = typeArithSetOp(op.subop, loc, t1);
+  auto const resultTy = typeSetOp(op.subop, loc, t1);
   setLoc(env, op.loc1, resultTy);
   push(env, resultTy);
 }
@@ -1087,6 +1175,10 @@ void in(ISS& env, const bc::SetOpS&) {
     } else {
       loseNonRefSelfPropTypes(env);
     }
+  }
+
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, TInitCell);
   }
 
   push(env, TInitCell);
@@ -1138,6 +1230,11 @@ void in(ISS& env, const bc::IncDecS&) {
       loseNonRefSelfPropTypes(env);
     }
   }
+
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, TInitCell);
+  }
+
   push(env, TInitCell);
 }
 
@@ -1183,6 +1280,10 @@ void in(ISS& env, const bc::BindS&) {
     } else {
       killSelfProps(env);
     }
+  }
+
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, TRef);
   }
 
   push(env, TRef);
@@ -1254,10 +1355,12 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto t1 = popC(env);
-  if (is_opt(t1)) t1 = unopt(t1);
-  auto const clsTy = t1.strictSubtypeOf(TObj) ? objcls(t1) : TCls;
+  if (is_opt(t1) && op.subop == ObjMethodOp::NullThrows) {
+    t1 = unopt(t1);
+  }
+  auto const clsTy = objcls(t1);
   auto const rcls = [&]() -> folly::Optional<res::Class> {
-    if (clsTy.strictSubtypeOf(TCls)) return dcls_of(clsTy).cls;
+    if (is_specialized_cls(clsTy)) return dcls_of(clsTy).cls;
     return folly::none;
   }();
 
@@ -1272,8 +1375,11 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
   if (v1 && v1->m_type == KindOfStaticString) {
-    return reduce(env, bc::PopC {},
-                       bc::FPushObjMethodD { op.arg1, v1->m_data.pstr });
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushObjMethodD { op.arg1, v1->m_data.pstr, op.subop }
+    );
   }
   popC(env);
   popC(env);
@@ -1300,7 +1406,7 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
     rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
   }
   folly::Optional<res::Class> rcls;
-  if (t1.strictSubtypeOf(TCls)) rcls = dcls_of(t1).cls;
+  if (is_specialized_cls(t1)) rcls = dcls_of(t1).cls;
   fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc });
 }
 
@@ -1320,7 +1426,7 @@ void in(ISS& env, const bc::FPushCtorD& op) {
 
 void in(ISS& env, const bc::FPushCtor& op) {
   auto const t1 = topA(env);
-  if (t1.strictSubtypeOf(TCls)) {
+  if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     if (dcls.type == DCls::Exact) {
       return reduce(env, bc::PopA {},
@@ -1409,6 +1515,9 @@ void in(ISS& env, const bc::FPassS& op) {
         } else {
           killSelfProps(env);
         }
+      }
+      if (auto c = env.collect.publicStatics) {
+        c->merge(tcls, tname, TInitGen);
       }
     }
     return push(env, TInitGen);
@@ -1506,14 +1615,8 @@ void in(ISS& env, const bc::FPassM& op) {
 
 void pushCallReturnType(ISS& env, const Type& ty) {
   if (ty == TBottom) {
-    // The callee function never returns.  It might throw, or loop
-    // forever.
-    calledNoReturn(env);
-    // Right now we need to continue in some semi-sane state in
-    // case we are in the middle of an FPI region or something
-    // that must finish.  But we can't push a TBottom (there are
-    // no values in that set), so we push something meaningless.
-    return push(env, TInitGen);
+    // The callee function never returns.  It might throw, or loop forever.
+    unreachable(env);
   }
   return push(env, ty);
 }
@@ -1609,11 +1712,7 @@ void in(ISS& env, const bc::FCallUnpack& op) {
   fcallArrayImpl(env);
 }
 
-void in(ISS& env, const bc::FCallBuiltin& op) {
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
-  specialFunctionEffects(env, op.str3);
-  push(env, TInitGen);
-}
+void in(ISS& env, const bc::FCallBuiltin& op) { builtin(env, op); }
 
 void in(ISS& env, const bc::CufSafeArray&) {
   popR(env); popC(env); popC(env);
@@ -1636,7 +1735,7 @@ void in(ISS& env, const bc::IterInit& op) {
   env.propagate(*op.target, env.state);
   if (t1.subtypeOf(TArrE)) {
     nothrow(env);
-    nofallthrough(env);
+    jmp_nofallthrough(env);
     return;
   }
   auto ity = iter_types(t1);
@@ -1656,7 +1755,7 @@ void in(ISS& env, const bc::IterInitK& op) {
   env.propagate(*op.target, env.state);
   if (t1.subtypeOf(TArrE)) {
     nothrow(env);
-    nofallthrough(env);
+    jmp_nofallthrough(env);
     return;
   }
   auto ity = iter_types(t1);
@@ -1764,9 +1863,14 @@ void in(ISS& env, const bc::IterBreak& op) {
   env.propagate(*op.target, env.state);
 }
 
+/*
+ * Any include/require (or eval) op kills all locals, and private properties.
+ *
+ * We don't need to do anything for collect.publicStatics because we'll analyze
+ * the included pseudo-main separately and see any effects it may have on
+ * public statics.
+ */
 void inclOpImpl(ISS& env) {
-  // Any include/require (or eval) op kills all locals, and private
-  // properties.
   popC(env);
   killLocals(env);
   killThisProps(env);
@@ -1882,8 +1986,46 @@ void in(ISS& env, const bc::VerifyParamType& op) {
     setLoc(env, op.loc1, env.index.lookup_constraint(env.ctx, constraint));
   }
 }
+
 void in(ISS& env, const bc::VerifyRetTypeV& op) {}
-void in(ISS& env, const bc::VerifyRetTypeC& op) {}
+
+void in(ISS& env, const bc::VerifyRetTypeC& op) {
+  auto const constraint = env.ctx.func->retTypeConstraint;
+  auto const stackT = topC(env);
+
+  // If there is no return type constraint, or if the return type
+  // constraint is a typevar, or if the top of stack is the same
+  // or a subtype of the type constraint, then this is a no-op.
+  if (env.index.satisfies_constraint(env.ctx, stackT, constraint)) {
+    reduce(env, bc::Nop {});
+    return;
+  }
+
+  // If HardReturnTypeHints is false OR if the constraint is soft,
+  // then there are no optimizations we can safely do here, so
+  // just leave the top of stack as is.
+  if (!options.HardReturnTypeHints || constraint.isSoft()) {
+    return;
+  }
+
+  // If we reach here, then HardReturnTypeHints is true AND the constraint
+  // is not soft.  We can safely assume that either VerifyRetTypeC will
+  // throw or it will produce a value whose type is compatible with the
+  // return type constraint.
+  auto const tcT =
+    remove_uninit(env.index.lookup_constraint(env.ctx, constraint));
+  // If stackT is a subtype of tcT, use stackT. Otherwise, if tc is an opt
+  // type and stackT cannot be InitNull, then we can safely use unopt(tcT).
+  // In all other cases, use tcT.
+  // TODO(4441939): We could do better here if we had an intersect_of()
+  // function that provided a formal way to compute the intersection of
+  // two Types.
+  auto const retT = stackT.subtypeOf(tcT) ? stackT :
+                    is_opt(tcT) && !TInitNull.subtypeOf(stackT) ? unopt(tcT) :
+                    tcT;
+  popC(env);
+  push(env, retT);
+}
 
 // These only occur in traits, so we don't need to do better than
 // this.
@@ -1944,15 +2086,23 @@ void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 void in(ISS& env, const bc::Await&) {
   auto const t = popC(env);
 
-  // The next opcode is reachable via suspend-resume.
-  if (!is_specialized_wait_handle(t) || is_opt(t) ||
-      wait_handle_inner(t).subtypeOf(TBottom)) {
-    // Uninferred garbage?
-    // TODO(#4205450): Mark next opcode as unreachable if inner is TBottom.
-    push(env, TInitCell);
-  } else {
-    push(env, wait_handle_inner(t));
+  // If the thing we're awaiting isn't a wait handle, there's nothing we can
+  // infer here.  (This can happen if a user declares a class with a
+  // getWaitHandle method that returns non-WaitHandle garbage.)
+  if (!t.subtypeOf(TObj) || !is_specialized_wait_handle(t)) {
+    return push(env, TInitCell);
   }
+
+  auto const inner = wait_handle_inner(t);
+  if (inner.subtypeOf(TBottom)) {
+    // If it's a WaitH<Bottom>, we know it's going to throw an exception, and
+    // the fallthrough code is not reachable.
+    push(env, TBottom);
+    unreachable(env);
+    return;
+  }
+
+  push(env, inner);
 }
 
 void in(ISS& env, const bc::Strlen&) {
@@ -1976,12 +2126,13 @@ void in(ISS& env, const bc::Abs&) {
   auto const v1 = tv(t1);
   if (v1) {
     constprop(env);
-    return push(env, eval_cell([&] {
+    auto const cell = eval_cell([&] {
       auto const cell = *v1;
-      auto const ret = f_abs(tvAsCVarRef(&cell));
+      auto const ret = HHVM_FN(abs)(tvAsCVarRef(&cell));
       assert(!IS_REFCOUNTED_TYPE(ret.asCell()->m_type));
       return *ret.asCell();
-    }));
+    });
+    return push(env, cell ? *cell : TInitCell);
   }
   if (t1.subtypeOf(TInt)) return push(env, TInt);
   if (t1.subtypeOf(TDbl)) return push(env, TDbl);
@@ -2020,11 +2171,17 @@ void in(ISS& env, const bc::Ceil&)  { floatFnImpl(env, ceil, TDbl); }
 void in(ISS& env, const bc::Sqrt&)  { floatFnImpl(env, sqrt, TInitUnc); }
 
 void in(ISS& env, const bc::CheckProp&) { push(env, TBool); }
+
 void in(ISS& env, const bc::InitProp& op) {
   auto const t = popC(env);
   switch (op.subop) {
   case InitPropOp::Static:
     mergeSelfProp(env, op.str1, t);
+    if (auto c = env.collect.publicStatics) {
+      auto const cls = selfClsExact(env);
+      always_assert(!!cls);
+      c->merge(*cls, sval(op.str1), t);
+    }
     break;
   case InitPropOp::NonStatic:
     mergeThisProp(env, op.str1, t);
@@ -2167,10 +2324,16 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
   auto iter       = begin(interp.blk->hhbcs);
   while (iter != stop) {
     auto const flags = interpOps(interp, iter, stop, propagate);
-    if (flags.calledNoReturn) {
-      FTRACE(2, "  <called function that never returns>\n");
+    if (interp.state.unreachable) {
+      FTRACE(2, "  <bytecode fallthrough is unreachable>\n");
+      if (interp.state.fpiStack.empty()) {
+        // We have no reason to continue running the interpreter if there's no
+        // FPI region active.
+        return RunFlags {};
+      }
       continue;
     }
+
     switch (flags.jmpFlag) {
     case StepFlags::JmpFlags::Taken:
       FTRACE(2, "  <took branch; no fallthrough>\n");

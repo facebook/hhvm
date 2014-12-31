@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TransRec::TransRec(SrcKey                      _src,
                    TransKind                   _kind,

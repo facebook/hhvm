@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 std::string BCMarker::show() const {
   assert(valid());

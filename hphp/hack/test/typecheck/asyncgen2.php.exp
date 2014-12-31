@@ -3,7 +3,7 @@ X
 X
 X
 File "asyncgen2.php", line 13, characters 12-14:
-Typing[4110] Invalid foreach
+Invalid foreach (Typing[4110])
 File "asyncgen2.php", line 13, characters 12-14:
 This is an object of type KeyedTraversable because this is used in a foreach statement
 File "asyncgen2.php", line 7, characters 21-34:

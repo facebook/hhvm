@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
                            const vixl::Register& dstReg,
@@ -51,13 +51,6 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
     a. Ldr  (rHostCallReg, argReg(0)[0]);
     a. Ldr  (rHostCallReg, rHostCallReg[call.vtableOffset()]);
     break;
-  case CppCall::Kind::IndirectReg:
-  case CppCall::Kind::IndirectVreg:
-    // call indirect currently not implemented. It'll be somthing like
-    // a.Br(x2a(call.getReg()))
-    not_implemented();
-    always_assert(0);
-    break;
   case CppCall::Kind::ArrayVirt:
   case CppCall::Kind::Destructor:
     not_implemented();
@@ -75,6 +68,30 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   // will still be pointing to the HostCall; it's not advanced past it until the
   // host call returns. In the native case, by contrast, we'll be looking at
   // return addresses, which point after the call.
+  return fixupAddr;
+}
+
+Vpoint emitCall(Vout& v, CppCall call, RegSet args) {
+  PhysReg arg0(argReg(0));
+  PhysReg rHostCall(rHostCallReg);
+  switch (call.kind()) {
+  case CppCall::Kind::Direct:
+    v << ldimm{reinterpret_cast<intptr_t>(call.address()), rHostCall};
+    break;
+  case CppCall::Kind::Virtual:
+    v << load{arg0[0], rHostCall};
+    v << load{rHostCall[call.vtableOffset()], rHostCall};
+    break;
+  case CppCall::Kind::ArrayVirt:
+  case CppCall::Kind::Destructor:
+    not_implemented();
+    always_assert(0);
+    break;
+  }
+  uint8_t argc = args.size();
+  args.add(rHostCall);
+  auto fixupAddr = v.makePoint();
+  v << hostcall{args, argc, fixupAddr};
   return fixupAddr;
 }
 
@@ -113,35 +130,66 @@ void emitRegRegMove(vixl::MacroAssembler& a, const vixl::CPURegister& dst,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
+void emitTestSurpriseFlags(vixl::MacroAssembler& a, PhysReg rds) {
+  // Keep this in sync with vasm version below
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  a.  Ldrh  (rAsm, rVmTl[RDS::kConditionFlagsOff]);
-  a.  Tst   (rAsm, 0xffffffff);
+  a.  Ldr   (rAsm.W(), vixl::Register(rds)[RDS::kConditionFlagsOff]);
+  a.  Tst   (rAsm.W(), rAsm.W());
+}
+
+Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
+  // Keep this in sync with arm version above
+  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
+                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  auto flags = v.makeReg();
+  auto sf = v.makeReg();
+  v << loadl{rds[RDS::kConditionFlagsOff], flags};
+  v << testl{flags, flags, sf};
+  return sf;
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
-                                 JIT::Fixup fixup) {
+                                 PhysReg rds, jit::Fixup fixup) {
+  // keep this in sync with vasm version below
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler acold { coldCode };
 
-  emitTestSurpriseFlags(a);
+  emitTestSurpriseFlags(a, rds);
   mcg->backEnd().emitSmashableJump(mainCode, coldCode.frontier(), CC_NZ);
 
   acold.  Mov  (argReg(0), rVmFp);
 
   auto fixupAddr =
       emitCallWithinTC(acold, mcg->tx().uniqueStubs.functionEnterHelper);
-  mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);
+  mcg->recordSyncPoint(fixupAddr, fixup.pcOffset, fixup.spOffset);
   mcg->backEnd().emitSmashableJump(coldCode, mainCode.frontier(), CC_None);
+}
+
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, Vreg rds,
+                                 jit::Fixup fixup) {
+  // keep this in sync with arm version above
+  PhysReg fp{rVmFp}, arg0{argReg(0)};
+  auto surprise = vc.makeBlock();
+  auto done = v.makeBlock();
+  auto sf = emitTestSurpriseFlags(v, rds);
+  v << jcc{CC_NZ, sf, {done, surprise}};
+
+  vc = surprise;
+  vc << copy{fp, arg0};
+  vc << callr{vc.cns(mcg->tx().uniqueStubs.functionEnterHelper), argSet(1)};
+  vc << syncpoint{fixup};
+  vc << jmp{done};
+  v = done;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
-  a.    Str  (rVmSp, rVmTl[RDS::kVmspOff]);
+void emitEagerVMRegSave(vixl::MacroAssembler& a, vixl::Register rds,
+                        RegSaveFlags flags) {
+  a.    Str  (rVmSp, rds[RDS::kVmspOff]);
   if ((bool)(flags & RegSaveFlags::SaveFP)) {
-    a.  Str  (rVmFp, rVmTl[RDS::kVmfpOff]);
+    a.  Str  (rVmFp, rds[RDS::kVmfpOff]);
   }
 
   if ((bool)(flags & RegSaveFlags::SavePC)) {
@@ -150,7 +198,7 @@ void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
     a.  Ldr  (rAsm, rAsm[Func::unitOff()]);
     a.  Ldr  (rAsm, rAsm[Unit::bcOff()]);
     a.  Add  (rAsm, rAsm, vixl::Operand(argReg(0), vixl::UXTW));
-    a.  Str  (rAsm, rVmTl[RDS::kVmpcOff]);
+    a.  Str  (rAsm, rds[RDS::kVmpcOff]);
   }
 }
 

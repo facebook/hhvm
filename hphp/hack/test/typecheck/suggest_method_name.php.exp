@@ -1,4 +1,6 @@
 File "suggest_method_name.php", line 17, characters 6-13:
-Typing[4090] Could not find static method mymethod
+Could not find static method mymethod in type X (Typing[4090])
 File "suggest_method_name.php", line 13, characters 19-26:
 The closest thing is myMethod but it's not a static method
+File "suggest_method_name.php", line 12, characters 7-7:
+Declaration of X is here

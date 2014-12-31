@@ -18,7 +18,6 @@
 #ifndef incl_HPHP_DUMMY_RESOURCE_H_
 #define incl_HPHP_DUMMY_RESOURCE_H_
 
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-string.h"
 
@@ -46,4 +45,4 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PHP_MAILPARSE_MIME_H_
+#endif

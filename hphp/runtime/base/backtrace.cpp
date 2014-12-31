@@ -34,6 +34,7 @@ const StaticString s_class("class");
 const StaticString s_object("object");
 const StaticString s_type("type");
 const StaticString s_include("include");
+const StaticString s_main("{main}");
 
 static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
   ActRec* prevFp;
@@ -67,7 +68,7 @@ static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
     *prevPc = 0;
     return AsioSession::Get()->getContext(contextIdx)->getSavedFP();
   }
-  return g_context->getPrevVMState(fp, prevPc);
+  return g_context->getPrevVMStateUNSAFE(fp, prevPc);
 }
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
@@ -171,7 +172,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto const opAtPrevPc =
         *reinterpret_cast<const Op*>(prevUnit->at(prevPc));
       Offset pcAdjust = 0;
-      if (opAtPrevPc == OpPopR || opAtPrevPc == OpUnboxR) {
+      if (opAtPrevPc == Op::PopR ||
+          opAtPrevPc == Op::UnboxR ||
+          opAtPrevPc == Op::UnboxRNop) {
         pcAdjust = 1;
       }
       frame.set(s_line,
@@ -188,8 +191,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
     // check for pseudomain
     if (funcname.empty()) {
-      if (!prevFp) continue;
-      funcname = s_include;
+      if (!prevFp && !btArgs.m_withPseudoMain) continue;
+      else if (!prevFp) funcname = s_main;
+      else funcname = s_include;
     }
 
     frame.set(s_function, funcname);
@@ -211,7 +215,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     Array args = Array::Create();
-    if (btArgs.m_ignoreArgs) {
+    bool withNames = btArgs.m_withArgNames;
+    bool withValues = btArgs.m_withArgValues;
+    if (!btArgs.m_withArgNames && !btArgs.m_withArgValues) {
       // do nothing
     } else if (funcname.same(s_include)) {
       if (depth) {
@@ -232,13 +238,31 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         auto varEnv = fp->getVarEnv();
         auto func = fp->func();
         for (int i = 0; i < nformals; i++) {
-          TypedValue *arg = varEnv->lookup(func->localVarName(i));
-          args.append(tvAsVariant(arg));
+          const StringData* argname = func->localVarName(i);
+          TypedValue* tv = varEnv->lookup(argname);
+
+          Variant val;
+          if (tv != nullptr) { // the variable hasn't been unset
+            val = withValues ? tvAsVariant(tv) : "";
+          }
+
+          if (withNames) {
+            args.set(String(argname->data(), CopyString), val);
+          } else {
+            args.append(val);
+          }
         }
       } else {
         for (int i = 0; i < nformals; i++) {
-          TypedValue *arg = frame_local(fp, i);
-          args.append(tvAsVariant(arg));
+          const StringData* argname = withNames ? fp->func()->localVarName(i)
+                                                : nullptr;
+          Variant val = withValues ? tvAsVariant(frame_local(fp, i)) : "";
+
+          if (withNames) {
+            args.set(String(argname->data(), CopyString), val);
+          } else {
+            args.append(val);
+          }
         }
       }
 

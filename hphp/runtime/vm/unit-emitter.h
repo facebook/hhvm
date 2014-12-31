@@ -17,6 +17,12 @@
 #ifndef incl_HPHP_VM_UNIT_EMITTER_H_
 #define incl_HPHP_VM_UNIT_EMITTER_H_
 
+#include <list>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "hphp/parser/location.h"
 
 #include "hphp/runtime/base/types.h"
@@ -30,12 +36,6 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/md5.h"
-
-#include <list>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,9 @@ struct UnitEmitter {
   /*
    * Instatiate a runtime Unit*.
    */
-  Unit* create();
+  std::unique_ptr<Unit> create();
+
+  template<class SerDe> void serdeMetaData(SerDe&);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -348,6 +350,7 @@ public:
   bool m_mergeOnly{false};
   bool m_isHHFile{false};
   bool m_returnSeen{false};
+  int m_preloadPriority{0};
   TypedValue m_mainReturn;
 
 private:
@@ -437,9 +440,64 @@ struct UnitRepoProxy : public RepoProxy {
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
-  Unit* load(const std::string& name, const MD5& md5);
+  std::unique_ptr<Unit> load(const std::string& name, const MD5& md5);
   std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
                                            const MD5& md5);
+
+  void insertUnitLineTable(int repoId, RepoTxn& txn, int64_t unitSn,
+                           LineTable& lineTable);
+  void getUnitLineTable(int repoId, int64_t unitSn, LineTable& lineTable);
+
+  struct InsertUnitStmt : public RepoProxy::Stmt {
+    InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(const UnitEmitter& ue,
+                RepoTxn& txn,
+                int64_t& unitSn,
+                const MD5& md5,
+                const unsigned char* bc,
+                size_t bclen);
+  };
+  struct GetUnitStmt : public RepoProxy::Stmt {
+    GetUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    bool get(UnitEmitter& ue, const MD5& md5);
+  };
+  struct InsertUnitLitstrStmt : public RepoProxy::Stmt {
+    InsertUnitLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn, int64_t unitSn, Id litstrId,
+                const StringData* litstr);
+  };
+  struct GetUnitLitstrsStmt : public RepoProxy::Stmt {
+    GetUnitLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(UnitEmitter& ue);
+  };
+  struct InsertUnitArrayStmt : public RepoProxy::Stmt {
+    InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
+                const std::string& array);
+  };
+  struct GetUnitArraysStmt : public RepoProxy::Stmt {
+    GetUnitArraysStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(UnitEmitter& ue);
+  };
+  struct InsertUnitMergeableStmt : public RepoProxy::Stmt {
+    InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn, int64_t unitSn,
+                int ix, Unit::MergeKind kind,
+                Id id, TypedValue* value);
+  };
+  struct GetUnitMergeablesStmt : public RepoProxy::Stmt {
+    GetUnitMergeablesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(UnitEmitter& ue);
+  };
+  struct InsertUnitSourceLocStmt : public RepoProxy::Stmt {
+    InsertUnitSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset, int line0,
+                int char0, int line1, int char1);
+  };
+  struct GetSourceLocTabStmt : public RepoProxy::Stmt {
+    GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    bool get(int64_t unitSn, SourceLocTable& sourceLocTab);
+  };
 
 #define URP_IOP(o) URP_OP(Insert##o, insert##o)
 #define URP_GOP(o) URP_OP(Get##o, get##o)
@@ -453,114 +511,15 @@ struct UnitRepoProxy : public RepoProxy {
   URP_IOP(UnitMergeable) \
   URP_GOP(UnitMergeables) \
   URP_IOP(UnitSourceLoc) \
-  URP_GOP(SourceLoc) \
-  URP_GOP(SourceLocTab) \
-  URP_GOP(SourceLocPastOffsets) \
-  URP_GOP(SourceLocBaseOffset) \
-  URP_GOP(BaseOffsetAtPCLoc) \
-  URP_GOP(BaseOffsetAfterPCLoc)
-  class InsertUnitStmt : public RepoProxy::Stmt {
-   public:
-    InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn,
-                int64_t& unitSn,
-                const MD5& md5,
-                const unsigned char* bc,
-                size_t bclen,
-                const TypedValue* mainReturn,
-                bool mergeOnly,
-                bool isHHFile,
-                const LineTable& lines,
-                const std::vector<TypeAlias>&);
-  };
-  class GetUnitStmt : public RepoProxy::Stmt {
-   public:
-    GetUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(UnitEmitter& ue, const MD5& md5);
-  };
-  class InsertUnitLitstrStmt : public RepoProxy::Stmt {
-   public:
-    InsertUnitLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn, Id litstrId,
-                const StringData* litstr);
-  };
-  class GetUnitLitstrsStmt : public RepoProxy::Stmt {
-   public:
-    GetUnitLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
-  };
-  class InsertUnitArrayStmt : public RepoProxy::Stmt {
-   public:
-    InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                const std::string& array);
-  };
-  class GetUnitArraysStmt : public RepoProxy::Stmt {
-   public:
-    GetUnitArraysStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
-  };
-  class InsertUnitMergeableStmt : public RepoProxy::Stmt {
-   public:
-    InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn,
-                int ix, Unit::MergeKind kind,
-                Id id, TypedValue* value);
-  };
-  class GetUnitMergeablesStmt : public RepoProxy::Stmt {
-   public:
-    GetUnitMergeablesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
-  };
-  class InsertUnitSourceLocStmt : public RepoProxy::Stmt {
-   public:
-    InsertUnitSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset, int line0,
-                int char0, int line1, int char1);
-  };
-  class GetSourceLocStmt : public RepoProxy::Stmt {
-   public:
-    GetSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, Offset pc, SourceLoc& sLoc);
-  };
-  class GetSourceLocTabStmt : public RepoProxy::Stmt {
-   public:
-    GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, SourceLocTable& sourceLocTab);
-  };
-  class GetSourceLocPastOffsetsStmt : public RepoProxy::Stmt {
-   public:
-    GetSourceLocPastOffsetsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, int line, OffsetRangeVec& ranges);
-  };
-  class GetSourceLocBaseOffsetStmt : public RepoProxy::Stmt {
-   public:
-    GetSourceLocBaseOffsetStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, OffsetRange& range);
-  };
-  class GetBaseOffsetAtPCLocStmt : public RepoProxy::Stmt {
-   public:
-    GetBaseOffsetAtPCLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, Offset pc, Offset& offset);
-  };
-  class GetBaseOffsetAfterPCLocStmt : public RepoProxy::Stmt {
-   public:
-    GetBaseOffsetAfterPCLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, Offset pc, Offset& offset);
-  };
+  URP_GOP(SourceLocTab)
+
+#define URP_OP(c, o) \
+  c##Stmt o[RepoIdCount];
+  URP_OPS
+#undef URP_OP
 
 private:
   bool loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
-
-#define URP_OP(c, o) \
- public: \
-  c##Stmt& o(int repoId) { return *m_##o[repoId]; } \
- private: \
-  c##Stmt m_##o##Local; \
-  c##Stmt m_##o##Central; \
-  c##Stmt* m_##o[RepoIdCount];
-  URP_OPS
-#undef URP_OP
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,3 @@
+
+Fatal error: Call to private method someClass1::someMethod() from context 'someClass2' in %s on line %d
+

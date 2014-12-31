@@ -125,6 +125,10 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
     return m_resumed;
   }
 
+  OffsetSet succOffsets() const {
+    return instrSuccOffsets((Op*)pc(), unit());
+  }
+
   /*
    * Advance the SrcKey to the next instruction.
    *

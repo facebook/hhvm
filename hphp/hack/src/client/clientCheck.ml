@@ -72,16 +72,24 @@ let rec main args retries =
             let file = expand_path file in
             ServerMsg.FileName file
         in
-        let command = ServerMsg.PRINT_TYPES file_input in
+        let command = ServerMsg.PRINT_COVERAGE_LEVELS file_input in
         ServerMsg.cmd_to_channel oc command;
-        let pos_type_l = Marshal.from_channel ic in
-        ClientColorFile.go file_input args.output_json pos_type_l;
+        let pos_level_l : ServerColorFile.result = Marshal.from_channel ic in
+        ClientColorFile.go file_input args.output_json pos_level_l;
+        exit 0
+    | MODE_COVERAGE file ->
+        let ic, oc = connect args in
+        let command = ServerMsg.CALC_COVERAGE (expand_path file) in
+        ServerMsg.cmd_to_channel oc command;
+        let counts_opt : ServerCoverageMetric.result =
+          Marshal.from_channel ic in
+        ClientCoverageMetric.go args.output_json counts_opt;
         exit 0
     | MODE_FIND_CLASS_REFS name ->
         let ic, oc = connect args in
         let command = ServerMsg.FIND_REFS (ServerMsg.Class name) in
         ServerMsg.cmd_to_channel oc command;
-        let results = Marshal.from_channel ic in
+        let results : ServerFindRefs.result = Marshal.from_channel ic in
         ClientFindRefs.go results args.output_json;
         exit 0
     | MODE_FIND_REFS name ->
@@ -97,7 +105,7 @@ let rec main args retries =
           with _ -> Printf.fprintf stderr "Invalid input\n"; exit 1 in
         let command = ServerMsg.FIND_REFS action in
         ServerMsg.cmd_to_channel oc command;
-        let results = Marshal.from_channel ic in
+        let results : ServerFindRefs.result = Marshal.from_channel ic in
         ClientFindRefs.go results args.output_json;
         exit 0
     | MODE_REFACTOR ->
@@ -119,9 +127,6 @@ let rec main args retries =
       let command = ServerMsg.IDENTIFY_FUNCTION (content, line, char) in
       ServerMsg.cmd_to_channel oc command;
       print_all ic
-    | MODE_SHOW_TYPES file ->
-        Printf.printf "option disabled (sorry!)";
-        exit 0
     | MODE_TYPE_AT_POS arg ->
       let tpos = Str.split (Str.regexp ":") arg in
       let fn, line, char =
@@ -139,7 +144,7 @@ let rec main args retries =
       in
       let ic, oc = connect args in
       ServerMsg.cmd_to_channel oc (ServerMsg.INFER_TYPE (fn, line, char));
-      let (pos, ty) = Marshal.from_channel ic in
+      let ((pos, ty) : ServerInferType.result) = Marshal.from_channel ic in
       ClientTypeAtPos.go pos ty args.output_json;
       exit 0
     | MODE_ARGUMENT_INFO arg ->
@@ -157,7 +162,7 @@ let rec main args retries =
       let content = ClientUtils.read_stdin_to_string () in
       ServerMsg.cmd_to_channel oc
           (ServerMsg.ARGUMENT_INFO (content, line, char));
-      let results = Marshal.from_channel ic in
+      let results : ServerArgumentInfo.result = Marshal.from_channel ic in
       ClientArgumentInfo.go results args.output_json;
       exit 0
     | MODE_AUTO_COMPLETE ->
@@ -165,7 +170,7 @@ let rec main args retries =
       let content = ClientUtils.read_stdin_to_string () in
       let command = ServerMsg.AUTOCOMPLETE content in
       ServerMsg.cmd_to_channel oc command;
-      let results = Marshal.from_channel ic in
+      let results : AutocompleteService.result = Marshal.from_channel ic in
       ClientAutocomplete.go results args.output_json;
       exit 0
     | MODE_OUTLINE ->
@@ -173,32 +178,26 @@ let rec main args retries =
       let ic, oc = connect args in
       let command = ServerMsg.OUTLINE content in
       ServerMsg.cmd_to_channel oc command;
-      let results = Marshal.from_channel ic in
+      let results : ServerFileOutline.result = Marshal.from_channel ic in
       ClientOutline.go results args.output_json;
       exit 0
     | MODE_METHOD_JUMP_CHILDREN class_ ->
       let ic, oc = connect args in
       let command = ServerMsg.METHOD_JUMP (class_, true) in
       ServerMsg.cmd_to_channel oc command;
-      let results = Marshal.from_channel ic in
+      let results : MethodJumps.result list = Marshal.from_channel ic in
       ClientMethodJumps.go results true args.output_json;
       exit 0
     | MODE_METHOD_JUMP_ANCESTORS class_ ->
       let ic, oc = connect args in
       let command = ServerMsg.METHOD_JUMP (class_, false) in
       ServerMsg.cmd_to_channel oc command;
-      let results = Marshal.from_channel ic in
+      let results : MethodJumps.result list = Marshal.from_channel ic in
       ClientMethodJumps.go results false args.output_json;
       exit 0
     | MODE_STATUS -> ClientCheckStatus.check_status connect args
     | MODE_VERSION ->
       Printf.printf "%s\n" (Build_id.build_id_ohai);
-    | MODE_SAVE_STATE filename ->
-        let ic, oc = connect args in
-        ServerMsg.cmd_to_channel oc (ServerMsg.SAVE_STATE filename);
-        let response = input_line ic in
-        Printf.printf "%s\n" response;
-        flush stdout
     | MODE_SHOW classname ->
         let ic, oc = connect args in
         ServerMsg.cmd_to_channel oc (ServerMsg.SHOW classname);
@@ -206,7 +205,7 @@ let rec main args retries =
     | MODE_SEARCH (query, type_) ->
         let ic, oc = connect args in
         ServerMsg.cmd_to_channel oc (ServerMsg.SEARCH (query, type_));
-        let results = Marshal.from_channel ic in
+        let results : ServerSearch.result = Marshal.from_channel ic in
         ClientSearch.go results args.output_json;
         exit 0
     | MODE_UNSPECIFIED -> assert false
@@ -251,19 +250,15 @@ let rec main args retries =
         exit 4;
       end
   | Server_missing ->
-      if args.autostart
+      if retries > 1
       then begin
-        if retries > 1
-        then begin
-          Unix.sleep(3);
-          main args (retries-1)
-        end else begin
-          Printf.fprintf stderr "The server will be ready in a few seconds (a couple of minutes if your files are cold)!\n";
-          flush stderr;
-          exit 6;
-        end
+        Unix.sleep(3);
+        main args (retries-1)
       end else begin
-        Printf.fprintf stderr "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n%!";
+        if args.autostart
+        then Printf.fprintf stderr "The server will be ready in a few seconds (a couple of minutes if your files are cold)!\n"
+        else Printf.fprintf stderr "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n%!";
+        flush stderr;
         exit 6;
       end
   | Server_out_of_date ->
@@ -296,7 +291,9 @@ let rec main args retries =
         Unix.sleep(1);
         main args (retries-1)
       end else begin
-        Printf.fprintf stderr "Error: hh_server disconnected or crashed, giving up!\n";
+        prerr_string
+          ("Error: hh_server disconnected or crashed, giving up!\n"^
+          "Server may have entered a bad state: Try `hh restart`\n");
         flush stderr;
         exit 5;
       end

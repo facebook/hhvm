@@ -20,8 +20,10 @@
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/util/timer.h"
 #include "hphp/util/network.h"
 
 #include <fcntl.h>
@@ -74,7 +76,7 @@ static const char* getXDebugErrorString(XDebugServer::ErrorCode error) {
       return "error evaluating code";
     case XDebugServer::ERROR_INVALID_EXPRESSION:
       return "invalid expression";
-    case XDebugServer::ERROR_PROPERTY_NON_EXISTANT:
+    case XDebugServer::ERROR_PROPERTY_NON_EXISTENT:
       return "can not get property";
     case XDebugServer::ERROR_STACK_DEPTH_INVALID:
       return "stack depth invalid";
@@ -105,7 +107,7 @@ const char* getXDebugStatusString(XDebugServer::Status status) {
     case XDebugServer::Status::BREAK:
       return "break";
     case XDebugServer::Status::DETACHED:
-      return nullptr;
+      return "detached";
     default:
       throw Exception("Invalid xdebug server status");
   }
@@ -352,9 +354,13 @@ void XDebugServer::onRequestInit() {
     String sess_start = sess_start_var.toString();
     cookie.set(s_SESSION,  sess_start);
     if (transport != nullptr) {
-      transport->setCookie(s_SESSION,
-                           sess_start,
-                           XDEBUG_GLOBAL(RemoteCookieExpireTime));
+      int64_t expire = XDEBUG_GLOBAL(RemoteCookieExpireTime);
+      if (expire > 0) {
+        timespec ts;
+        Timer::GetRealtimeTime(ts);
+        expire += ts.tv_sec;
+      }
+      transport->setCookie(s_SESSION, sess_start, expire);
     }
   }
 }
@@ -399,10 +405,11 @@ void XDebugServer::detach() {
 // Header for sent messages
 #define XML_MSG_HEADER "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n"
 
-// Needed $_SERVER variables
-static const StaticString s_SCRIPT_FILENAME("SCRIPT_FILENAME");
+static const StaticString
+  s_SCRIPT_FILENAME("SCRIPT_FILENAME"), // Needed $_SERVER variable
+  s_DBGP_COOKIE("DBGP_COOKIE"); // Needed $_ENV variable
 
-void XDebugServer::addXmnls(xdebug_xml_node& node) {
+void XDebugServer::addXmlns(xdebug_xml_node& node) {
   xdebug_xml_add_attribute(&node, "xmlns", "urn:debugger_protocol_v1");
   xdebug_xml_add_attribute(&node, "xmlns:xdebug",
                            "http://xdebug.org/dbgp/xdebug");
@@ -415,32 +422,41 @@ void XDebugServer::addCommand(xdebug_xml_node& node, const XDebugCommand& cmd) {
 
   // We can't assume the passed command will stick around before the node is
   // sent
-  char* command = xdstrdup(cmd_str.data());
-  char* trans = xdstrdup(trans_str.data());
-  xdebug_xml_add_attribute_ex(&node, "command", command, 0, 1);
-  xdebug_xml_add_attribute_ex(&node, "transaction_id", trans, 0, 1);
+  xdebug_xml_add_attribute_dup(&node, "command", cmd_str.data());
+  xdebug_xml_add_attribute_dup(&node, "transaction_id", trans_str.data());
 }
 
 void XDebugServer::addStatus(xdebug_xml_node& node) {
-  // TODO(#4489053) Change this when xml api is changed
-  char* status = const_cast<char*>(getXDebugStatusString(m_status));
-  char* reason = const_cast<char*>(getXDebugReasonString(m_reason));
-  xdebug_xml_add_attribute_ex(&node, "status", status, 0, 0);
-  xdebug_xml_add_attribute_ex(&node, "reason", reason, 0, 0);
+  const char* status = getXDebugStatusString(m_status);
+  const char* reason = getXDebugReasonString(m_reason);
+  xdebug_xml_add_attribute(&node, "status", status);
+  xdebug_xml_add_attribute(&node, "reason", reason);
 }
 
 void XDebugServer::addError(xdebug_xml_node& node, ErrorCode code) {
   // Create the error node
   xdebug_xml_node* error = xdebug_xml_node_init("error");
-  xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", code), 0, 1);
+  xdebug_xml_add_attribute(error, "code", code);
   xdebug_xml_add_child(&node, error);
 
   // Add the error code's error message
-  // TODO(#4489053) Change this when xml api is changed
   xdebug_xml_node* message = xdebug_xml_node_init("message");
-  char* error_str = const_cast<char*>(getXDebugErrorString(code));
-  xdebug_xml_add_text_ex(message, error_str, strlen(error_str), 0, 0);
+  xdebug_xml_add_text(message,
+                      const_cast<char*>(getXDebugErrorString(code)), 0);
   xdebug_xml_add_child(error, message);
+}
+
+void XDebugServer::sendStream(const char* name, const char* bytes, int len) {
+  // Casts are necessary due to xml api
+  char* name_str = const_cast<char*>(name);
+  char* bytes_str = const_cast<char*>(bytes);
+
+  xdebug_xml_node* message = xdebug_xml_node_init("stream");
+  addXmlns(*message);
+  xdebug_xml_add_attribute(message, "type", name_str);
+  xdebug_xml_add_text_ex(message, bytes_str, len, 0, 1);
+  sendMessage(*message);
+  xdebug_xml_node_dtor(message);
 }
 
 bool XDebugServer::initDbgp() {
@@ -455,7 +471,7 @@ bool XDebugServer::initDbgp() {
   }
   // Create the response
   xdebug_xml_node* response = xdebug_xml_node_init("init");
-  addXmnls(*response);
+  addXmlns(*response);
 
   // Add the engine info
   xdebug_xml_node* child = xdebug_xml_node_init("engine");
@@ -485,28 +501,21 @@ bool XDebugServer::initDbgp() {
   char* scriptname = scriptname_var.toString().get()->mutableData();
   char* fileuri = XDebugUtils::pathToUrl(scriptname);
 
-  // Grab the app id (pid)
-  // TODO(#4489053) Specification mentions the parent app id as well, xdebug
-  //                doesn't include it.
-  char* appid = xdebug_sprintf("%d", getpid());
-
   // Add attributes to the root init node
   xdebug_xml_add_attribute_ex(response, "fileuri", fileuri, 0, 1);
-  xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
-  xdebug_xml_add_attribute_ex(response, "protocol_version", DBGP_VERSION, 0, 0);
-  xdebug_xml_add_attribute_ex(response, "appid", appid, 0, 1);
+  xdebug_xml_add_attribute(response, "language", "PHP");
+  xdebug_xml_add_attribute(response, "protocol_version", DBGP_VERSION);
+  xdebug_xml_add_attribute(response, "appid", getpid());
 
   // Add the DBGP_COOKIE environment variable
-  char* dbgp_cookie = getenv("DBGP_COOKIE");
-  if (dbgp_cookie != nullptr) {
-    xdebug_xml_add_attribute_ex(response, "session", dbgp_cookie, 0, 0);
+  const String dbgp_cookie = g_context->getenv(s_DBGP_COOKIE);
+  if (!dbgp_cookie.empty()) {
+    xdebug_xml_add_attribute(response, "session", dbgp_cookie.data());
   }
 
   // Add the idekey
   if (XDEBUG_GLOBAL(IdeKey).size() > 0) {
-    // TODO(#4489053) Change this when xml api is changed
-    char* idekey = const_cast<char*>(XDEBUG_GLOBAL(IdeKey).c_str());
-    xdebug_xml_add_attribute_ex(response, "idekey", idekey, 0, 0);
+    xdebug_xml_add_attribute(response, "idekey", XDEBUG_GLOBAL(IdeKey).c_str());
   }
 
   // Sent the response
@@ -518,21 +527,24 @@ bool XDebugServer::initDbgp() {
 }
 
 void XDebugServer::deinitDbgp() {
-  setStatus(Status::STOPPING, Reason::OK);
+  // Unless we've already stopped, send the shutdown message
+  if (m_status != Status::STOPPED) {
+    setStatus(Status::STOPPING, Reason::OK);
 
-  // Send the xml shutdown response
-  xdebug_xml_node* response = xdebug_xml_node_init("response");
-  addXmnls(*response);
-  addStatus(*response);
-  if (m_lastCommand != nullptr) {
-    addCommand(*response, *m_lastCommand);
+    // Send the xml shutdown response
+    xdebug_xml_node* response = xdebug_xml_node_init("response");
+    addXmlns(*response);
+    addStatus(*response);
+    if (m_lastCommand != nullptr) {
+      addCommand(*response, *m_lastCommand);
+    }
+    sendMessage(*response);
+    xdebug_xml_node_dtor(response);
+
+    // Wait for a response from the client. Regardless of the command loop
+    // result, we exit.
+    doCommandLoop();
   }
-  sendMessage(*response);
-  xdebug_xml_node_dtor(response);
-
-  // Wait for a response from the client. Regardless of the command loop result,
-  // we exit.
-  doCommandLoop();
 
   // Free the input buffer & the last command
   smart_free(m_buffer);
@@ -580,7 +592,7 @@ bool XDebugServer::breakpoint(const Variant& filename,
 
   // Initialize the response node
   xdebug_xml_node* response = xdebug_xml_node_init("response");
-  addXmnls(*response);
+  addXmlns(*response);
   addStatus(*response);
   if (m_lastCommand != nullptr) {
     addCommand(*response, *m_lastCommand);
@@ -599,10 +611,11 @@ bool XDebugServer::breakpoint(const Variant& filename,
   xdebug_xml_node* msg = xdebug_xml_node_init("xdebug:message");
   xdebug_xml_add_attribute_ex(msg, "lineno", line_str, 0, 1);
   if (filename_str != nullptr) {
-    xdebug_xml_add_attribute_ex(msg, "filename", filename_str, 0, 0);
+    filename_str = XDebugUtils::pathToUrl(filename_str); // output file format
+    xdebug_xml_add_attribute_ex(msg, "filename", filename_str, 0, 1);
   }
   if (exception_str != nullptr) {
-    xdebug_xml_add_attribute_ex(msg, "exception", exception_str, 0, 0);
+    xdebug_xml_add_attribute(msg, "exception", exception_str);
   }
   if (message_str != nullptr) {
     xdebug_xml_add_text(msg, message_str, 0);
@@ -619,8 +632,14 @@ bool XDebugServer::breakpoint(const Variant& filename,
 
 bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
                               const Variant& message) {
+  // If we are detached, short circuit
+  Status status; Reason reason;
+  getStatus(status, reason);
+  if (status == Status::DETACHED) {
+    return true;
+  }
+
   // Initialize the breakpoint message node
-  // TODO(#4489053) Check if file is evaled
   switch (bp.type) {
     // Add the file/line # for line breakpoints
     case XDebugBreakpoint::Type::LINE:
@@ -648,6 +667,11 @@ bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
 bool XDebugServer::doCommandLoop() {
   bool should_continue = false;
   do {
+    // If we are detached, short circuit
+    if (m_status == Status::DETACHED) {
+      return true;
+    }
+
     // Read from socket, store into m_buffer. On failure, return.
     if (!readInput()) {
       return false;
@@ -655,11 +679,11 @@ bool XDebugServer::doCommandLoop() {
 
     // Initialize the response
     xdebug_xml_node* response = xdebug_xml_node_init("response");
-    addXmnls(*response);
+    addXmlns(*response);
 
     try {
       // Parse the command and store it as the last command
-      const XDebugCommand* cmd = parseCommand();
+      XDebugCommand* cmd = parseCommand();
       if (m_lastCommand != nullptr) {
         delete m_lastCommand;
       }
@@ -704,7 +728,7 @@ bool XDebugServer::readInput() {
   return true;
 }
 
-const XDebugCommand* XDebugServer::parseCommand() {
+XDebugCommand* XDebugServer::parseCommand() {
   // Log the passed in command
   log("<- %s\n", m_buffer);
   logFlush();
@@ -809,7 +833,7 @@ void XDebugServer::parseInput(String& cmd, Array& args) {
         if (args[opt].isNull()) {
           size_t size = ptr - value;
           StringData* val_data = StringData::Make(value, size, CopyString);
-          args.set(opt, f_stripcslashes(String(val_data)));
+          args.set(opt, HHVM_FN(stripcslashes)(String(val_data)));
           state = ParseState::SKIP_CHAR;
         } else {
           throw ERROR_DUP_ARG;

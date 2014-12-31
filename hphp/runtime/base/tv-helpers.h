@@ -85,14 +85,6 @@ inline bool tvDecRefWillCallHelper(TypedValue* tv) {
     !tv->m_data.pstr->hasMultipleRefs();
 }
 
-// Assumes 'tv' is live
-inline void tvRefcountedDecRefCell(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-    tvDecRefHelper(tv->m_type, tv->m_data.num);
-  }
-}
-
 inline void tvDecRefStr(TypedValue* tv) {
   assert(tv->m_type == KindOfString);
   decRefStr(tv->m_data.pstr);
@@ -235,11 +227,11 @@ inline void tvCopy(const TypedValue& fr, TypedValue& to) {
  * Equivalent of tvCopy for Cells and Vars.  These functions have the
  * same effects as tvCopy, but have some added assertions.
  */
-inline void cellCopy(const Cell& fr, Cell& to) {
+inline void cellCopy(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
 }
-inline void refCopy(const Ref& fr, Ref& to) {
+inline void refCopy(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
   tvCopy(fr, to);
 }
@@ -259,7 +251,7 @@ inline void tvDup(const TypedValue& fr, TypedValue& to) {
  * m_type fields, and increments the reference count. Does not perform
  * a decRef on the value that was overwritten.
  */
-inline void cellDup(const Cell& fr, Cell& to) {
+inline void cellDup(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
   tvRefcountedIncRef(&to);
@@ -270,7 +262,7 @@ inline void cellDup(const Cell& fr, Cell& to) {
  * m_type fields and increments the reference count. Does not perform
  * as decRef on the value that was overwritten.
  */
-inline void refDup(const Ref& fr, Ref& to) {
+inline void refDup(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
   to.m_data.num = fr.m_data.num;
   to.m_type = KindOfRef;
@@ -325,7 +317,7 @@ inline const Cell* tvAssertCell(const TypedValue* tv) {
  *
  * `to' must contain a live php value; use cellDup when it doesn't.
  */
-inline void tvSet(const Cell& fr, TypedValue& inTo) {
+inline void tvSet(const Cell fr, TypedValue& inTo) {
   assert(cellIsPlausible(fr));
   Cell* to = tvToCell(&inTo);
   auto const oldType = to->m_type;
@@ -368,7 +360,7 @@ inline void tvSetNull(TypedValue& to) {
  *
  * Post: `to' is a Cell.
  */
-inline void tvSetIgnoreRef(const Cell& fr, TypedValue& to) {
+inline void tvSetIgnoreRef(const Cell fr, TypedValue& to) {
   assert(cellIsPlausible(fr));
   auto const oldType = to.m_type;
   auto const oldDatum = to.m_data.num;
@@ -383,7 +375,7 @@ inline void tvSetIgnoreRef(const Cell& fr, TypedValue& to) {
  * This function has the same effects as tvSetIgnoreRef, with stronger
  * assertions on `to'.
  */
-inline void cellSet(const Cell& fr, Cell& to) {
+inline void cellSet(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   assert(cellIsPlausible(to));
   tvSetIgnoreRef(fr, to);
@@ -444,7 +436,7 @@ inline void tvUnset(TypedValue * to) {
 inline bool tvIsStatic(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   return !IS_REFCOUNTED_TYPE(tv->m_type) ||
-    tv->m_data.pref->m_count == StaticValue;
+         tv->m_data.parr->isStatic();
 }
 
 /**
@@ -550,28 +542,34 @@ inline void tvUnboxIfNeeded(TypedValue* tv) {
 /*
  * TypedValue conversions that update the tv in place (decrefing and
  * old value, if necessary).
+ *
+ * CastInPlace will forcibly change the value to the new type
+ *   and will not fail. (Though the results may be silly)
+ * CoerceInPlace will attempt to convert the type and
+ *   return false on failure
+ * CoerceOrThrow will attempt to convert the type and
+ *   both raise a warning and throw a TVCoercionException on failure
  */
-void tvCastToBooleanInPlace(TypedValue* tv);
-void tvCastToInt64InPlace(TypedValue* tv);
 void cellCastToInt64InPlace(Cell*);
-void tvCastToDoubleInPlace(TypedValue* tv);
 double tvCastToDouble(TypedValue* tv);
-void tvCastToStringInPlace(TypedValue* tv);
 StringData* tvCastToString(const TypedValue* tv);
-void tvCastToArrayInPlace(TypedValue* tv);
-void tvCastToObjectInPlace(TypedValue* tv);
-void tvCastToNullableObjectInPlace(TypedValue* tv);
-void tvCastToResourceInPlace(TypedValue* tv);
-
 bool tvCanBeCoercedToNumber(TypedValue* tv);
-bool tvCoerceParamToBooleanInPlace(TypedValue* tv);
-bool tvCoerceParamToInt64InPlace(TypedValue* tv);
-bool tvCoerceParamToDoubleInPlace(TypedValue* tv);
-bool tvCoerceParamToStringInPlace(TypedValue* tv);
-bool tvCoerceParamToArrayInPlace(TypedValue* tv);
-bool tvCoerceParamToObjectInPlace(TypedValue* tv);
-bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv);
-bool tvCoerceParamToResourceInPlace(TypedValue* tv);
+
+#define X(kind) \
+void tvCastTo##kind##InPlace(TypedValue* tv); \
+bool tvCoerceParamTo##kind##InPlace(TypedValue* tv); \
+void tvCoerceParamTo##kind##OrThrow(TypedValue* tv, \
+                                    const Func* callee, \
+                                    unsigned int arg_num);
+X(Boolean)
+X(Int64)
+X(Double)
+X(String)
+X(Array)
+X(Object)
+X(NullableObject)
+X(Resource)
+#undef X
 
 typedef void(*RawDestructor)(void*);
 extern const RawDestructor g_destructors[kDestrTableSize];
@@ -603,6 +601,19 @@ inline bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
 #undef X
   not_reached();
 }
+
+/*
+ * TVCoercionException is thrown to indicate that a parameter could not be
+ * coerced when calling an HNI builtin function.
+ */
+struct TVCoercionException : public std::runtime_error {
+  TVCoercionException(const Func* func, int arg_num,
+                      DataType actual, DataType expected);
+
+  TypedValue tv() const { return m_tv; }
+private:
+  TypedValue m_tv;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

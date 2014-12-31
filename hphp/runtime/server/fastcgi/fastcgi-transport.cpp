@@ -19,14 +19,14 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "folly/io/IOBuf.h"
-#include "folly/io/IOBufQueue.h"
+#include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
 #include "thrift/lib/cpp/async/TAsyncTimeout.h" // @nolint
-#include "thrift/lib/cpp/transport/TSocketAddress.h" // @nolint
+#include <folly/SocketAddress.h>
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
-#include "folly/MoveWrapper.h"
+#include <folly/MoveWrapper.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -62,6 +62,14 @@ const std::string FastCGITransport::getScriptFilename() {
 
 const std::string FastCGITransport::getPathTranslated() {
   return m_pathTranslated;
+}
+
+const std::string FastCGITransport::getPathInfo() {
+  return m_pathInfo;
+}
+
+bool FastCGITransport::isPathInfoSet() {
+  return m_pathInfoSet;
 }
 
 const std::string FastCGITransport::getDocumentRoot() {
@@ -171,6 +179,18 @@ const char *FastCGITransport::getServerObject() {
 }
 
 std::string FastCGITransport::unmangleHeader(const std::string& name) {
+  if (name == "Authorization") {
+    return name; // Already unmangled
+  }
+
+  if (name == "CONTENT_LENGTH") {
+    return "Content-Length";
+  }
+
+  if (name == "CONTENT_TYPE") {
+    return "Content-Type";
+  }
+
   if (!boost::istarts_with(name, "HTTP_")) {
     return "";
   }
@@ -202,6 +222,7 @@ std::string FastCGITransport::mangleHeader(const std::string& name) {
 }
 
 static const std::string
+  s_authorization("Authorization"),
   s_contentLength("CONTENT_LENGTH"),
   s_contentType("CONTENT_TYPE");
 
@@ -212,6 +233,9 @@ std::string FastCGITransport::getHeader(const char *name) {
   auto *header = getRawHeaderPtr(mangleHeader(name));
   if (header) {
     return *header;
+  }
+  if (strcasecmp(name, "Authorization") == 0) {
+    return getRawHeader(s_authorization); // No HTTP_ prefix for Authorization
   }
   if (strcasecmp(name, "Content-Length") == 0) {
     return getRawHeader(s_contentLength); // No HTTP_ prefix for CONTENT_LENGTH
@@ -231,7 +255,6 @@ std::string FastCGITransport::getRawHeader(const std::string& name) {
 }
 
 std::string* FastCGITransport::getRawHeaderPtr(const std::string& name) {
-  assert(boost::to_upper_copy(name) == name);
   auto it = m_requestHeaders.find(name);
   return (it == m_requestHeaders.end()) ? nullptr : &it->second;
 }
@@ -389,6 +412,7 @@ static const std::string
   s_scriptFilename("SCRIPT_FILENAME"),
   s_queryString("QUERY_STRING"),
   s_https("HTTPS"),
+  s_pathInfo("PATH_INFO"),
   s_slash("/"),
   s_modProxy("proxy:"),
   s_modProxySearch("://"),
@@ -406,6 +430,10 @@ void FastCGITransport::onHeadersComplete() {
   m_serverObject = getRawHeader(s_scriptName);
   m_scriptFilename = getRawHeader(s_scriptFilename);
   m_pathTranslated = getRawHeader(s_pathTranslated);
+  if (getRawHeaderPtr(s_pathInfo) != nullptr) {
+    m_pathInfoSet = true;
+  }
+  m_pathInfo = getRawHeader(s_pathInfo);
   m_documentRoot = getRawHeader(s_documentRoot);
   if (!m_documentRoot.empty() &&
       m_documentRoot[m_documentRoot.length() - 1] != '/') {
@@ -482,6 +510,7 @@ void FastCGITransport::onHeadersComplete() {
       m_pathTranslated = m_pathTranslated.substr(m_documentRoot.length());
     }
   }
+
   if (!m_scriptFilename.empty()) {
     if (m_scriptFilename.find(m_documentRoot) == 0) {
       m_scriptFilename = m_scriptFilename.substr(m_documentRoot.length());
@@ -501,4 +530,3 @@ void FastCGITransport::onHeadersComplete() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -18,8 +18,11 @@
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/hardware-counter.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -34,11 +37,17 @@ const int64_t k_PHP_OUTPUT_HANDLER_CLEAN = 2;
 const int64_t k_PHP_OUTPUT_HANDLER_FLUSH = 4;
 const int64_t k_PHP_OUTPUT_HANDLER_END = 8;
 const int64_t k_PHP_OUTPUT_HANDLER_FINAL = 8;
+const int64_t k_PHP_OUTPUT_HANDLER_CLEANABLE = 16;
+const int64_t k_PHP_OUTPUT_HANDLER_FLUSHABLE = 32;
+const int64_t k_PHP_OUTPUT_HANDLER_REMOVABLE = 64;
+const int64_t k_PHP_OUTPUT_HANDLER_STDFLAGS =
+  k_PHP_OUTPUT_HANDLER_CLEANABLE | k_PHP_OUTPUT_HANDLER_FLUSHABLE |
+  k_PHP_OUTPUT_HANDLER_REMOVABLE;
 
 bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
                              int chunk_size /* = 0 */,
-                             bool erase /* = true */) {
-  // ignoring chunk_size and erase
+                             int flags /* = k_PHP_OUTPUT_HANDLER_STDFLAGS */) {
+  // ignoring flags for now
 
   if (!callback.isNull()) {
     CallCtx ctx;
@@ -47,7 +56,7 @@ bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
       return false;
     }
   }
-  g_context->obStart(callback);
+  g_context->obStart(callback, chunk_size);
   return true;
 }
 void HHVM_FUNCTION(ob_clean) {
@@ -222,6 +231,19 @@ void HHVM_FUNCTION(hphp_clear_hardware_events) {
   HardwareCounter::ClearPerfEvents();
 }
 
+// __SystemLib\print_hashbang
+void HHVM_FUNCTION(SystemLib_print_hashbang, const String& hashbang) {
+  CallerFrame cf;
+  auto ar = cf();
+
+  if (ar->m_func->name()->empty() && RuntimeOption::ClientExecutionMode()) {
+    // If run in cli mode, print nothing in the lowest pseudomain
+    if (!g_context->getPrevFunc(ar)) return;
+  }
+
+  g_context->write(hashbang);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initOutput() {
@@ -253,6 +275,7 @@ void StandardExtension::initOutput() {
   HHVM_FE(hphp_get_hardware_counters);
   HHVM_FE(hphp_set_hardware_events);
   HHVM_FE(hphp_clear_hardware_events);
+  HHVM_FALIAS(__SystemLib\\print_hashbang, SystemLib_print_hashbang);
 
 #define INTCONST(v) Native::registerConstant<KindOfInt64> \
                   (makeStaticString(#v), k_##v);
@@ -263,6 +286,10 @@ void StandardExtension::initOutput() {
   INTCONST(PHP_OUTPUT_HANDLER_FLUSH);
   INTCONST(PHP_OUTPUT_HANDLER_END);
   INTCONST(PHP_OUTPUT_HANDLER_FINAL);
+  INTCONST(PHP_OUTPUT_HANDLER_CLEANABLE);
+  INTCONST(PHP_OUTPUT_HANDLER_FLUSHABLE);
+  INTCONST(PHP_OUTPUT_HANDLER_REMOVABLE);
+  INTCONST(PHP_OUTPUT_HANDLER_STDFLAGS);
 #undef INTCONST
 
   loadSystemlib("std_output");

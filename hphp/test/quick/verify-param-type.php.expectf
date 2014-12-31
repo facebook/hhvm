@@ -8,7 +8,9 @@ array(6) {
   [3]=>
   int(16)
   [4]=>
-  array(0) {
+  array(1) {
+    ["foo"]=>
+    float(0)
   }
   [5]=>
   array(2) {

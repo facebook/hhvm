@@ -43,5 +43,6 @@ Phar::mount($pname . '/testit2', $pname . '/testit1');
 echo substr($a['testit2']->getContent(),0, 50),"\n";
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar'); ?>

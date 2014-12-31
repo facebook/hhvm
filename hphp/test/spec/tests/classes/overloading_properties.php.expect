@@ -1,0 +1,66 @@
+----------------------
+int(-100)
+Point::__get(DUMmy)
+NULL
+dummy: 
+Point::__get(dummy)
+dynamic dummy: 
+Point::__set(dummy, xx)
+dummy: 987
+Point::__get(dummy)
+dynamic dummy: 456
+----------------------
+bool(true)
+Point::__isset(dummy)
+bool(true)
+----------------------
+Point::__get(x)
+NULL
+----------------------
+Point::__isset(x)
+bool(false)
+Point::__isset(x)
+bool(false)
+Point::__set(x, xx)
+Point::__get(x)
+int(200)
+Point::__isset(x)
+bool(true)
+Point::__isset(x)
+bool(true)
+----------------------
+Point::__set(color, xx)
+Point::__get(color)
+color: red
+----------------------
+Point::__isset(color)
+bool(true)
+----------------------
+$v: 555, dummy: 555
+Point::__set(color, xx)
+Point::__get(color)
+$v: White, color: White
+----------------------
+bool(true)
+Point::__isset(dummy)
+bool(true)
+Point::__unset(dummy)
+bool(true)
+Point::__isset(dummy)
+bool(false)
+Point::__unset(abc)
+Point::__unset(x)
+bool(true)
+Point::__isset(dummy)
+bool(false)
+Point::__isset(color)
+bool(true)
+Point::__unset(color)
+Point::__isset(color)
+bool(false)
+----------------------
+Point::__set(thing, xx)
+Point::__get(thing)
+object(X)#2 (0) {
+}
+X::__destruct

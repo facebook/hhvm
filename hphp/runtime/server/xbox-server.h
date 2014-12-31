@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/server-task-event.h"
+#include "hphp/runtime/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,6 +102,11 @@ public:
   virtual const char *getUrl();
   virtual const char *getRemoteHost() { return "127.0.0.1"; }
   virtual uint16_t getRemotePort() { return 0; }
+  virtual const char *getServerAddr() {
+    return RuntimeOption::ServerPrimaryIPv4.empty() ?
+      RuntimeOption::ServerPrimaryIPv6.c_str() :
+      RuntimeOption::ServerPrimaryIPv4.c_str();
+  }
 
   /**
    * Request data.

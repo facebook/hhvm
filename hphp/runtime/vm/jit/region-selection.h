@@ -22,23 +22,19 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
-#include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 struct MCGenerator;
 struct ProfData;
 struct TransCFG;
-
-using boost::container::flat_map;
-using boost::container::flat_multimap;
-using boost::container::flat_set;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -60,7 +56,7 @@ struct RegionDesc {
   struct TypePred;
   struct ReffinessPred;
   typedef std::shared_ptr<Block> BlockPtr;
-  typedef int32_t BlockId;
+  typedef TransID BlockId;
   // BlockId Encoding:
   //   - Non-negative numbers are blocks that correspond
   //     to the start of a TransProfile translation, and therefore can
@@ -68,13 +64,14 @@ struct RegionDesc {
   //   - Negative numbers are used for other blocks, which correspond
   //     to blocks created by inlining and which don't correspond to
   //     the beginning of a profiling translation.
-  typedef flat_set<BlockId>     BlockIdSet;
+  typedef boost::container::flat_set<BlockId> BlockIdSet;
   typedef std::vector<BlockPtr> BlockVec;
 
   bool              empty() const;
   SrcKey            start() const;
   BlockPtr          entry() const;
   const BlockVec&   blocks() const;
+  BlockPtr          block(BlockId id) const;
   const BlockIdSet& succs(BlockId bid) const;
   const BlockIdSet& preds(BlockId bid) const;
   const BlockIdSet& sideExitingBlocks() const;
@@ -87,6 +84,7 @@ struct RegionDesc {
   bool              isSideExitingBlock(BlockId bid) const;
   void              append(const RegionDesc&  other);
   void              prepend(const RegionDesc& other);
+  uint32_t          instrSize() const;
   std::string       toString() const;
 
   template<class Work>
@@ -100,7 +98,6 @@ struct RegionDesc {
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
   };
 
-  BlockPtr   block(BlockId id);
   bool       hasBlock(BlockId id) const;
   BlockData& data(BlockId id);
   void       copyBlocksFrom(const RegionDesc& other,
@@ -235,10 +232,10 @@ inline bool operator==(const RegionDesc::ReffinessPred& a,
  * at various execution points, including at entry to the block.
  */
 class RegionDesc::Block {
-  typedef flat_multimap<SrcKey, TypePred> TypePredMap;
-  typedef flat_map<SrcKey, bool> ParamByRefMap;
-  typedef flat_multimap<SrcKey, ReffinessPred> RefPredMap;
-  typedef flat_map<SrcKey, const Func*> KnownFuncMap;
+  typedef boost::container::flat_multimap<SrcKey, TypePred> TypePredMap;
+  typedef boost::container::flat_map<SrcKey, bool> ParamByRefMap;
+  typedef boost::container::flat_multimap<SrcKey, ReffinessPred> RefPredMap;
+  typedef boost::container::flat_map<SrcKey, const Func*> KnownFuncMap;
 
 public:
   explicit Block(const Func* func, bool resumed, Offset start, int length,
@@ -265,6 +262,7 @@ public:
   void setId(BlockId id) {
     m_id = id;
   }
+  void setInitialSpOffset(int32_t sp) { m_initialSpOffset = sp; }
 
   /*
    * Set and get whether or not this block ends with an inlined FCall. Inlined
@@ -372,8 +370,8 @@ struct RegionContext {
   Offset bcOffset;
   Offset spOffset;
   bool resumed;
-  smart::vector<LiveType> liveTypes;
-  smart::vector<PreLiveAR> preLiveARs;
+  jit::vector<LiveType> liveTypes;
+  jit::vector<PreLiveAR> preLiveARs;
 };
 
 /*
@@ -494,6 +492,11 @@ void regionizeFunc(const Func*  func,
  */
 bool    hasTransId(RegionDesc::BlockId blockId);
 TransID getTransId(RegionDesc::BlockId blockId);
+
+/*
+ * Checks if the given region is well-formed.
+ */
+bool check(const RegionDesc& region, std::string& error);
 
 /*
  * Debug stringification for various things.

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/minstr-state.h"
 
 namespace HPHP {
 
@@ -44,6 +45,9 @@ struct VMRegs {
    * bytecode instruction. */
   PC pc;
 
+  /* Scratch space for use by member instructions. */
+  MInstrState mInstrState;
+
   /* First ActRec of this VM instance. */
   ActRec* firstAR;
 };
@@ -64,8 +68,6 @@ struct Header {
   VMRegs vmRegs;
 };
 
-static_assert(sizeof(Header) <= 64, "RDS::Header should fit in one cache line");
-
 /*
  * Access to the statically layed out header.
  */
@@ -80,7 +82,17 @@ constexpr ptrdiff_t kVmspOff           = kVmRegsOff + offsetof(VMRegs, stack) +
 constexpr ptrdiff_t kVmfpOff           = kVmRegsOff + offsetof(VMRegs, fp);
 constexpr ptrdiff_t kVmpcOff           = kVmRegsOff + offsetof(VMRegs, pc);
 constexpr ptrdiff_t kVmFirstAROff      = kVmRegsOff + offsetof(VMRegs, firstAR);
+constexpr ptrdiff_t kVmMInstrStateOff  = kVmRegsOff +
+                                           offsetof(VMRegs, mInstrState);
+
+static_assert((kVmMInstrStateOff % 16) == 0,
+              "MInstrState should be 16-byte aligned in RDS::Header");
+static_assert(kVmspOff == 16, "Eager vm-reg save in translator-asm-helpers.S");
+static_assert(kVmfpOff == 32, "Eager vm-reg save in translator-asm-helpers.S");
 
 } }
+
+/* MInstrState is stored in VMRegs, at a constant offset from RDS::header(). */
+#define MISOFF(nm) (RDS::kVmMInstrStateOff + offsetof(MInstrState, nm))
 
 #endif

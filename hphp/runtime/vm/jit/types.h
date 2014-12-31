@@ -24,7 +24,7 @@
 
 #include "hphp/runtime/base/types.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * Core types.
@@ -104,6 +104,25 @@ struct TransFlags {
 };
 
 static_assert(sizeof(TransFlags) <= sizeof(uint64_t), "Too many TransFlags!");
+
+// Enumeration representing the various areas that we emit code.
+enum class AreaIndex : unsigned { Main, Cold, Frozen, Max };
+
+inline std::string areaAsString(AreaIndex area) {
+  switch (area) {
+  case AreaIndex::Main:
+    return "Main";
+  case AreaIndex::Cold:
+    return "Cold";
+  case AreaIndex::Frozen:
+    return "Frozen";
+  case AreaIndex::Max:
+    not_reached();
+    return "";
+  }
+  not_reached();
+  return "";
+}
 
 }}
 

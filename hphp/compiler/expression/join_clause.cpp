@@ -90,14 +90,6 @@ void JoinClause::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr JoinClause::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                  bool coerce) {
-  m_coll->inferAndCheck(ar, Type::Some, false);
-  m_left->inferAndCheck(ar, Type::Some, false);
-  m_right->inferAndCheck(ar, Type::Some, false);
-  return Type::Object;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void JoinClause::outputCodeModel(CodeGenerator &cg) {

@@ -31,11 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void delete_AsyncFunctionWaitHandle(ObjectData* od, const Class*) {
-  auto const waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(od);
-  auto const size = waitHandle->resumable()->size();
-  auto const base = (char*)(waitHandle + 1) - size;
-  waitHandle->~c_AsyncFunctionWaitHandle();
-  MM().objFreeLogged(base, size);
+  Resumable::Destroy(static_cast<c_AsyncFunctionWaitHandle*>(od));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +67,7 @@ void checkCreateErrors(c_WaitableWaitHandle* child) {
 c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   size_t numSlots,
-                                  JIT::TCA resumeAddr,
+                                  jit::TCA resumeAddr,
                                   Offset resumeOffset,
                                   c_WaitableWaitHandle* child) {
   assert(fp);

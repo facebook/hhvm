@@ -54,6 +54,7 @@ unlink($obj2->linkname);
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $name_prefix = dirname(__FILE__)."/readlink_realpath_variation1";
 unlink("$name_prefix/home/tests/link/readlink_realpath_variation1.tmp");

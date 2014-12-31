@@ -26,6 +26,7 @@ var_dump(readlink($symlink));
 
 test_open_basedir_after("readlink");
 ?>
+<?php error_reporting(0); ?>
 <?php
 chdir(__DIR__);
 require_once "open_basedir.inc";

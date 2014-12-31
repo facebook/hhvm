@@ -22,11 +22,11 @@ and terminal_ in_try = function
   | Throw _ when not in_try -> raise Exit
   | Throw _ -> ()
   | Continue _
-  | Expr (_, (Call ((_, Id (_, "assert")), [_, False])
-  | Call ((_, Id (_, "invariant")), (_, False) :: _ :: _)
-  | Call ((_, Id (_, "invariant_violation")), _ :: _)))
+  | Expr (_, (Call ((_, Id (_, "assert")), [_, False], [])
+                 | Call ((_, Id (_, "invariant")), (_, False) :: _ :: _, [])
+                 | Call ((_, Id (_, "invariant_violation")), _ :: _, [])))
   | Return _
-  | Expr (_, Call ((_, Id (_, "exit")), _)) -> raise Exit
+  | Expr (_, Call ((_, Id (_, "exit")), _, _)) -> raise Exit
   | If (_, b1, b2) ->
       (try terminal in_try b1; () with Exit ->
         terminal in_try b2)
@@ -65,7 +65,6 @@ and terminal_cl in_try = function
 
 let is_terminal stl = try terminal false stl; false with Exit -> true
 
-
 (* Module calculating the locals for a statement
 * This is useful when someone uses $x on both sides
 * of an If statement, for example:
@@ -80,6 +79,8 @@ module GetLocals = struct
   let rec lvalue acc = function
     | (p, Lvar (_, x)) -> SMap.add x p acc
     | _, List lv -> List.fold_left lvalue acc lv
+    (* Ref forms a local inside a foreach *)
+    | (_, Ref (p, Lvar (_, x))) ->  SMap.add x p acc
     | _ -> acc
 
   let rec stmt acc st =
@@ -163,10 +164,12 @@ module HintCycle = struct
         hintl stack params hl
     | Hshape l ->
         List.iter (fun (_, x) -> hint stack params x) l
+    (* do we need to do anything here? probably when we add type params *)
+    | Haccess (_, _, _) -> ()
 
   and hintl stack params l = List.iter (hint stack params) l
 
-  let check_constraint cstrs (_, hopt) =
+  let check_constraint cstrs (_, _, hopt) =
     match hopt with
     | None -> ()
     | Some h -> hint SSet.empty cstrs h

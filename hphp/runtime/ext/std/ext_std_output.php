@@ -9,7 +9,7 @@
  * Alternatively, ob_end_clean() will silently discard the buffer contents.
  * Warning  Some web servers (e.g. Apache) change the working directory of a
  * script when calling the callback function. You can change it back by e.g.
- * chdir(dirname($_SERVER['SCRIPT_FILENAME'])) in the callback function. 
+ * chdir(dirname($_SERVER['SCRIPT_FILENAME'])) in the callback function.
  * Output buffers are stackable, that is, you may call ob_start() while
  * another ob_start() is active. Just make sure that you call ob_end_flush()
  * the appropriate number of times. If multiple output callback functions are
@@ -53,7 +53,7 @@
 <<__Native>>
 function ob_start(mixed $output_callback = null,
                   int $chunk_size = 0,
-                  bool $erase = true): bool;
+                  int $flags = PHP_OUTPUT_HANDLER_STDFLAGS): bool;
 
 /* This function discards the contents of the output buffer.  This function
  * does not destroy the output buffer like ob_end_clean() does.
@@ -106,7 +106,7 @@ function ob_end_flush(): bool;
  * servers, especially on Win32, will still buffer the output from your script
  * until it terminates before transmitting the results to the browser.  Server
  * modules for Apache like mod_gzip may do buffering of their own that will
- * cause flush() to not result in data being sent immediately to the client. 
+ * cause flush() to not result in data being sent immediately to the client.
  * Even the browser may buffer its input before displaying it. Netscape, for
  * example, buffers text until it receives an end-of-line or the beginning of
  * a tag, and it won't render tables until the </table> tag of the outermost
@@ -118,7 +118,7 @@ function ob_end_flush(): bool;
 <<__Native>>
 function flush(): void;
 
-/* Gets the current buffer contents and delete current output buffer. 
+/* Gets the current buffer contents and delete current output buffer.
  * ob_get_clean() essentially executes both ob_get_contents() and
  * ob_end_clean().
  * @return mixed - Returns the contents of the output buffer and end output
@@ -291,3 +291,12 @@ function hphp_set_hardware_events(string $events = null): bool;
 
 <<__HipHopSpecific, __Native("NoInjection")>>
 function hphp_clear_hardware_events(): void;
+
+namespace __SystemLib {
+  /* Print a hashbang if not run from the first source file executed. Otherwise
+   * do nothing.
+   * @param string $hashBang - the hashbang to print
+   */
+  <<__HipHopSpecific, __Native("NoInjection")>>
+  function print_hashbang(string $hashBang): void;
+}

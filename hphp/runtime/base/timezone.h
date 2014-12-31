@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/system/constants.h"
 
 extern "C" {
 #include <timelib.h>
@@ -31,8 +32,6 @@ namespace HPHP {
 class Array;
 template <typename T> class SmartResource;
 
-typedef std::shared_ptr<timelib_tzinfo> TimeZoneInfo;
-typedef std::map<std::string, TimeZoneInfo> MapStringToTimeZoneInfo;
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -87,17 +86,18 @@ public:
   /**
    * Get offset from UTC at the specified timestamp under this timezone.
    */
-  int offset(int timestamp) const;
+  int offset(int64_t timestamp) const;
 
   /**
    * Test whether it was running under DST at specified timestamp.
    */
-  bool dst(int timestamp) const;
+  bool dst(int64_t timestamp) const;
 
   /**
    * Query transition times for DST.
    */
-  Array transitions() const;
+  Array transitions(int64_t timestamp_begin = k_PHP_INT_MIN,
+                    int64_t timestamp_end = k_PHP_INT_MAX) const;
 
   /**
    * Get information about a timezone
@@ -125,30 +125,22 @@ protected:
   /**
    * Returns raw pointer. For internal use only.
    */
-  timelib_tzinfo *get() const { return m_tzi.get();}
+  timelib_tzinfo *get() const { return m_tzi; }
 
 private:
-  struct tzinfo_deleter {
-    void operator()(timelib_tzinfo *tzi) {
-      if (tzi) {
-        timelib_tzinfo_dtor(tzi);
-      }
-    }
-  };
-
   static const timelib_tzdb *GetDatabase();
 
   /**
    * Look up cache and if found return it, otherwise, read it from database.
    */
-  static TimeZoneInfo GetTimeZoneInfo(char* name, const timelib_tzdb* db);
-  /**
-   * only for timelib, don't use it unless you are passing to a timelib func
-   */
   static timelib_tzinfo* GetTimeZoneInfoRaw(char* name, const timelib_tzdb* db);
 
-  TimeZoneInfo m_tzi; // raw pointer
+  timelib_tzinfo* m_tzi;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+void timezone_init();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

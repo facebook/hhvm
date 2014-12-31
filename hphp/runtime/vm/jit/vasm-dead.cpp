@@ -14,19 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
-#include <boost/dynamic_bitset.hpp>
+
 #include <algorithm>
+#include <boost/dynamic_bitset.hpp>
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(vasm);
 
-namespace HPHP { namespace JIT {
-using namespace X64;
-using smart::vector;
-using boost::dynamic_bitset;
+namespace HPHP { namespace jit {
 
 namespace {
-typedef dynamic_bitset<> LiveSet;
+typedef boost::dynamic_bitset<> LiveSet;
 bool effectful(Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::copy:
@@ -35,71 +34,67 @@ bool effectful(Vinstr& inst) {
     case Vinstr::ldpoint:
     case Vinstr::load:
     case Vinstr::nop:
-    //case Vinstr::andb:
-    //case Vinstr::andbi:
-    //case Vinstr::andl:
-    //case Vinstr::andli:
-    //case Vinstr::andq:
-    //case Vinstr::andqi:
-    //case Vinstr::addq:
-    //case Vinstr::addqi:
+    case Vinstr::andb:
+    case Vinstr::andbi:
+    case Vinstr::andl:
+    case Vinstr::andli:
+    case Vinstr::andq:
+    case Vinstr::andqi:
+    case Vinstr::addq:
+    case Vinstr::addqi:
     case Vinstr::addsd:
     case Vinstr::cloadq:
     case Vinstr::cmovq:
     case Vinstr::cvttsd2siq:
     case Vinstr::cvtsi2sd:
-    //case Vinstr::decl:
-    //case Vinstr::decq:
+    case Vinstr::decl:
+    case Vinstr::decq:
     case Vinstr::divsd:
-    //case Vinstr::imul:
-    //case Vinstr::incl:
-    //case Vinstr::incq:
+    case Vinstr::imul:
+    case Vinstr::incl:
+    case Vinstr::incq:
     case Vinstr::lea:
     case Vinstr::loaddqu:
+    case Vinstr::loadtqb:
     case Vinstr::loadl:
-    case Vinstr::loadq:
     case Vinstr::loadsd:
     case Vinstr::loadzbl:
+    case Vinstr::loadzbq:
+    case Vinstr::loadzlq:
     case Vinstr::movb:
-    case Vinstr::movbi:
-    case Vinstr::movdqa:
     case Vinstr::movl:
-    case Vinstr::movq:
-    case Vinstr::movsbl:
     case Vinstr::movzbl:
+    case Vinstr::movzbq:
     case Vinstr::mulsd:
-    //case Vinstr::neg:
-    case Vinstr::not: // suprisingly, x86 not doesn't modify flags
-    //case Vinstr::orq:
-    //case Vinstr::orqi:
+    case Vinstr::neg:
+    case Vinstr::not:
+    case Vinstr::orq:
+    case Vinstr::orqi:
     case Vinstr::psllq:
     case Vinstr::psrlq:
-    //case Vinstr::rorqi:
     case Vinstr::roundsd:
-    //case Vinstr::sarq:
-    //case Vinstr::sarqi:
-    //case Vinstr::sbbl:
-    case Vinstr::setcc: // setcc reads flags but doesn't modify them.
-    //case Vinstr::shlli:
-    //case Vinstr::shlq:
-    //case Vinstr::shlqi:
-    //case Vinstr::shrli:
-    //case Vinstr::shrqi:
+    case Vinstr::sarq:
+    case Vinstr::sarqi:
+    case Vinstr::setcc:
+    case Vinstr::shlli:
+    case Vinstr::shlq:
+    case Vinstr::shlqi:
+    case Vinstr::shrli:
+    case Vinstr::shrqi:
     case Vinstr::sqrtsd:
-    //case Vinstr::subli:
-    //case Vinstr::subq:
-    //case Vinstr::subqi:
+    case Vinstr::subli:
+    case Vinstr::subq:
+    case Vinstr::subqi:
     case Vinstr::subsd:
     case Vinstr::unpcklpd:
-    //case Vinstr::xorb:
-    //case Vinstr::xorbi:
-    //case Vinstr::xorq:
-    //case Vinstr::xorqi:
+    case Vinstr::xorb:
+    case Vinstr::xorbi:
+    case Vinstr::xorq:
+    case Vinstr::xorqi:
       return false;
     case Vinstr::ldimm:
+    case Vinstr::ldimmb:
       return !inst.ldimm_.saveflags;
-    case Vinstr::incstat:
-      return inst.incstat_.force || Stats::enabled();
     default:
       return true;
   }
@@ -107,20 +102,22 @@ bool effectful(Vinstr& inst) {
 }
 
 // Remove dead instructions by doing a traditional liveness analysis.
-// instructions that mutate memory, physical registers, or condition
-// codes are considered useful. All branches are considered useful.
+// instructions that mutate memory, physical registers, or status flags
+// are considered useful. All branches are considered useful.
 //
-// If the input is SSA, there's a faster sparse version of this algorithm
-// that marks useful instructions in one pass, then transitively marks
-// pure instructions that define inputs to useful instructions.
+// Given SSA, there's a faster sparse version of this algorithm that marks
+// useful instructions in one pass, then transitively marks pure instructions
+// that define inputs to useful instructions. However it requires a mapping
+// from vreg numbers to the instruction that defines them, and a way to address
+// individual instructions.
 //
-// we could remove useless branches by computing the post-dom tree and
-// RDF(b) for each block; then a branch is only useful if it controls
-// whether or not a useful block executes, and useless branches can
-// be forwarded to the nearest useful post-dominator.
+// We could remove useless branches by computing the post-dominator tree and
+// RDF(b) for each block; then a branch is only useful if it controls whether
+// or not a useful block executes, and useless branches can be forwarded to
+// the nearest useful post-dominator.
 void removeDeadCode(Vunit& unit) {
   auto blocks = sortBlocks(unit);
-  vector<LiveSet> livein(unit.blocks.size());
+  jit::vector<LiveSet> livein(unit.blocks.size());
   LiveSet live(unit.next_vr);
   auto pass = [&](bool mutate) {
     bool changed = false;
@@ -173,7 +170,7 @@ void removeDeadCode(Vunit& unit) {
       });
       code.erase(end, code.end());
     }
-    printUnit("after vasm-dead", unit);
+    printUnit(kVasmDCELevel, "after vasm-dead", unit);
   }
 }
 

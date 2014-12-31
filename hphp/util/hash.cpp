@@ -18,12 +18,24 @@
 
 namespace HPHP {
 
-strhash_t hash_string_i(const char *arKey, int nKeyLength) {
+#ifdef USE_SSECRC
+NEVER_INLINE
+strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return crc8_i_unsafe(arKey, nKeyLength);
+}
+
+NEVER_INLINE
+strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength, uint64_t mask) {
+  return hash_string_i_inline(arKey, nKeyLength, mask);
+}
+
+#else
+NEVER_INLINE
+strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength) {
   return hash_string_i_inline(arKey, nKeyLength);
 }
 
-strhash_t hash_string(const char *arKey, int nKeyLength) {
-  return hash_string_i_inline(arKey, nKeyLength);
-}
+#endif
+
 
 }

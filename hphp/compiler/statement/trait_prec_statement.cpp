@@ -106,9 +106,6 @@ void TraitPrecStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void TraitPrecStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void TraitPrecStatement::outputCodeModel(CodeGenerator &cg) {

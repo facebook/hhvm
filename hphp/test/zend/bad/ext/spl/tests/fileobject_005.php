@@ -20,6 +20,7 @@ var_dump($fo->ftruncate());
 
 ?>
 ==DONE==
+<?php error_reporting(0); ?>
 <?php
 $path = dirname(__FILE__).DIRECTORY_SEPARATOR.'fileobject_005.txt';
 unlink($path);

@@ -1,4 +1,4 @@
 File "new_static3.php", line 21, characters 10-21:
-Typing[4060] Can't use new static() for B; __construct arguments are not guaranteed to be consistent in child classes
+Can't use new static() for B; __construct arguments are not guaranteed to be consistent in child classes (Typing[4060])
 File "new_static3.php", line 19, characters 7-7:
-This declaration neither defines an abstract/final __construct nor uses <<ConsistentConstruct>> attribute
+This declaration neither defines an abstract/final __construct nor uses <<__ConsistentConstruct>> attribute

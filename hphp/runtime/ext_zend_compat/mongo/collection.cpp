@@ -346,7 +346,7 @@ static zval* append_getlasterror(zval *coll, buffer *buf, zval *options, mongo_c
 		}
 	}
 
-	/* fsync forces "w" to be atleast 1, so don't touch it if it's
+	/* fsync forces "w" to be at least 1, so don't touch it if it's
 	 * already set to something else above while parsing "w" (and
 	 * "safe") */
 	if (fsync && w == 0) {

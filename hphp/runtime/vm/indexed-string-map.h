@@ -17,11 +17,10 @@
 #ifndef incl_HPHP_VM_INDEXED_STRING_MAP_H_
 #define incl_HPHP_VM_INDEXED_STRING_MAP_H_
 
-#include <boost/mpl/if.hpp>
-#include <boost/utility/enable_if.hpp>
-
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
+
+#include <folly/Range.h>
 
 namespace HPHP {
 
@@ -117,7 +116,11 @@ struct IndexedStringMap {
     return (*const_cast<IndexedStringMap*>(this))[index];
   }
 
-  static ptrdiff_t vecOff() {
+  folly::Range<const T*> range() const {
+    return folly::range(accessList(), accessList() + size());
+  }
+
+  static constexpr ptrdiff_t vecOff() {
     return offsetof(IndexedStringMap, m_map) +
       FixedStringMap<Index,CaseSensitive,Index>::tableOff();
   }
@@ -136,13 +139,18 @@ private:
  */
 template<class T, bool CaseSensitive, class Index, Index InvalidIndex>
 class IndexedStringMap<T,CaseSensitive,Index,InvalidIndex>::Builder {
-  typedef typename boost::mpl::if_c<
+  using EqObject = typename std::conditional<
     CaseSensitive,
     string_data_same,
     string_data_isame
-  >::type EqObject;
-  typedef hphp_hash_map<const StringData*,Index,
-    string_data_hash,EqObject> Map;
+  >::type;
+
+  using Map = hphp_hash_map<
+    const StringData*,
+    Index,
+    string_data_hash,
+    EqObject
+  >;
 
 public:
   typedef typename Map::const_iterator const_iterator;

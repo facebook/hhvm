@@ -65,5 +65,6 @@ var_dump(Phar::isValidPharFilename('dir.phar.php', false));
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 rmdir(dirname(__FILE__) . '/.phar');

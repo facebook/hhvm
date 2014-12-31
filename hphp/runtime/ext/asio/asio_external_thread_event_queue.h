@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
+class c_ExternalThreadEventWaitHandle;
 
 /* This is not an optimal solution
  * This value is in principle a constexp, but the integer-to-pointer cast would
@@ -34,7 +34,7 @@ FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
  */
 #define K_CONSUMER_WAITING (static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L))
 
-class AsioExternalThreadEventQueue {
+class AsioExternalThreadEventQueue final {
   public:
     AsioExternalThreadEventQueue();
 

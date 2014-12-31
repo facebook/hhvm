@@ -294,7 +294,7 @@ size_t FBSerializer<V>::serializedSizeMap(const Map& map, size_t depth) {
 template <class V>
 template <typename Vector>
 size_t FBSerializer<V>::serializedSizeVector(const Vector& vec, size_t depth) {
-  // Vector code + stop code
+  // Map code + stop code
   size_t ret = CODE_SIZE + CODE_SIZE;
 
   size_t index = 0;
@@ -463,6 +463,22 @@ inline typename V::MapType FBUnserializer<V>::unserializeMap() {
 }
 
 template <class V>
+inline typename V::VectorType FBUnserializer<V>::unserializeVector() {
+  p_ += CODE_SIZE;
+
+  typename V::VectorType ret = V::createVector();
+
+  size_t code = nextCode();
+  while (code != FB_SERIALIZE_STOP) {
+    V::vectorAppend(ret, unserializeThing());
+    code = nextCode();
+  }
+  p_ += CODE_SIZE;
+  return ret;
+}
+
+
+template <class V>
 inline folly::StringPiece FBUnserializer<V>::getSerializedMap() {
   const char* head = p_;
   p_ += CODE_SIZE;
@@ -539,6 +555,8 @@ inline typename V::VariantType FBUnserializer<V>::unserializeThing() {
       return V::fromDouble(unserializeDouble());
     case FB_SERIALIZE_BOOLEAN:
       return V::fromBool(unserializeBoolean());
+    case FB_SERIALIZE_VECTOR:
+      return V::fromVector(unserializeVector());
     default:
       throw UnserializeError("Invalid code: " + folly::to<std::string>(code)
                              + " at location " + folly::to<std::string>(p_));

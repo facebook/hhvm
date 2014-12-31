@@ -26,7 +26,7 @@
 namespace HPHP {
 namespace Stats {
 
-using namespace HPHP::JIT;
+using namespace HPHP::jit;
 
 TRACE_SET_MOD(stats);
 

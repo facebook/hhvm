@@ -26,7 +26,7 @@ type func_details_result = {
 
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
-    res_pos      : Pos.t;
+    res_pos      : Pos.absolute;
     res_ty       : string;
     res_name     : string;
     expected_ty  : bool;
@@ -40,6 +40,9 @@ type autocomplete_result = {
     name : string;
     desc : string option
   }
+
+(* The type returned to the client *)
+type result = complete_autocomplete_result list
 
 let ac_env = ref None
 let ac_type = ref None
@@ -144,7 +147,7 @@ let autocomplete_smethod = autocomplete_method true
 
 let autocomplete_cmethod = autocomplete_method false
 
-let autocomplete_lvar_naming id locals =
+let autocomplete_lvar_naming _ id locals =
   if is_auto_complete (snd id)
   then begin
     Autocomplete.argument_global_type := Some Autocomplete.Acvar;
@@ -157,6 +160,9 @@ let autocomplete_lvar_naming id locals =
 let autocomplete_lvar_typing id env =
   if Some (fst id)= !(Autocomplete.auto_complete_pos)
   then begin
+    (* The typechecker might call this hook more than once (loops) so we
+     * need to clear the list of results first or we could have repeat locals *)
+    autocomplete_results := [];
     ac_env := Some env;
     Autocomplete.auto_complete_pos := Some (fst id);
     (* Get the types of all the variables in scope at this point *)
@@ -181,7 +187,7 @@ let should_complete_class completion_type class_kind =
 let should_complete_fun completion_type =
   completion_type=Some Autocomplete.Acid
 
-let get_constructor_ty c env =
+let get_constructor_ty c =
   let pos = c.Typing_defs.tc_pos in
   let reason = Typing_reason.Rwitness pos in
   let return_ty = reason, Typing_defs.Tapply ((pos, c.Typing_defs.tc_name), []) in
@@ -197,7 +203,7 @@ let get_constructor_ty c env =
         end
     | None ->
         (* Nothing defined, so we need to fake the entire constructor *)
-      reason, Typing_defs.Tfun (Typing_env.make_ft env pos [] return_ty)
+      reason, Typing_defs.Tfun (Typing_env.make_ft pos [] return_ty)
 
 let compute_complete_global funs classes =
   let completion_type = !Autocomplete.argument_global_type in
@@ -216,8 +222,8 @@ let compute_complete_global funs classes =
             incr result_count;
             let s = Utils.strip_ns name in
             (match !ac_env with
-              | Some env when completion_type=Some Autocomplete.Acnew ->
-                  add_result s (get_constructor_ty c env)
+              | Some _env when completion_type=Some Autocomplete.Acnew ->
+                  add_result s (get_constructor_ty c)
               | _ ->
                   let desc = match c.Typing_defs.tc_kind with
                     | Ast.Cabstract -> "abstract class"
@@ -313,11 +319,14 @@ let get_results funs classes =
      completion_type = Some Autocomplete.Actype
   then compute_complete_global funs classes;
   let results = !autocomplete_results in
-  let fake_env = Typing_env.empty "" in
+  let env = match !ac_env with
+    | Some e -> e
+    | None -> Typing_env.empty Relative_path.default
+  in
   let results = List.map begin fun x ->
     let desc_string = match x.desc with
       | Some s -> s
-      | None -> Typing_print.full_strip_ns fake_env (x.ty)
+      | None -> Typing_print.full_strip_ns env (x.ty)
     in
     let func_details = match x.ty with
       | (_, Tfun ft) ->
@@ -326,12 +335,12 @@ let get_results funs classes =
             param_name     = (match name with
                                | Some n -> n
                                | None -> "");
-            param_ty       = Typing_print.full_strip_ns fake_env pty;
+            param_ty       = Typing_print.full_strip_ns env pty;
             param_variadic = is_variadic;
           }
         in
         Some {
-          return_ty = Typing_print.full_strip_ns fake_env ft.ft_ret;
+          return_ty = Typing_print.full_strip_ns env ft.ft_ret;
           min_arity = arity_min ft.ft_arity;
           params    = List.map param_to_record ft.ft_params @
             (match ft.ft_arity with
@@ -345,7 +354,7 @@ let get_results funs classes =
     let expected_ty = result_matches_expected_ty x.ty in
     let pos = Typing_reason.to_pos (fst x.ty) in
     {
-      res_pos      = pos;
+      res_pos      = Pos.to_absolute pos;
       res_ty       = desc_string;
       res_name     = x.name;
       expected_ty  = expected_ty;

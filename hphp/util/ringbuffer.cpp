@@ -22,7 +22,7 @@
 #include <cstring>
 #include <unistd.h>
 
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 
 #include "hphp/util/assertions.h"
 

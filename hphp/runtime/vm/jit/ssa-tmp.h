@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 class IRInstruction;
 class IRUnit;
@@ -55,6 +55,7 @@ public:
   const ArrayData*   arrVal() const       { return type().arrVal(); }
   const Func*        funcVal() const      { return type().funcVal(); }
   const Class*       clsVal() const       { return type().clsVal(); }
+  ConstCctx          cctxVal() const      { return type().cctxVal(); }
   RDS::Handle        rdsHandleVal() const { return type().rdsHandleVal(); }
   TCA                tcaVal() const       { return type().tcaVal(); }
   Variant            variantVal() const;

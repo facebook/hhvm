@@ -19,6 +19,7 @@ chdir($directory);
 var_dump(getcwd());
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $directory = dirname(__FILE__) . "/getcwd_basic";
 rmdir($directory);

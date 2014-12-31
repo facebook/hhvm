@@ -34,4 +34,5 @@ var_dump(file_exists($pname . '/b/b/x'));
 var_dump(file_exists($pname . '/b/c'));
 var_dump(file_exists($pname . '/b/c/'.basename(__FILE__)));
 ?>
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>

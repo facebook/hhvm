@@ -1,0 +1,4 @@
+File "access_expand_error_1.php", line 5, characters 10-10:
+Wrong type hint (Typing[4107])
+File "access_expand_error_1.php", line 5, characters 10-10:
+Unbound name, Typing: int

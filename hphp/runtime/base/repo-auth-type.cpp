@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "folly/Hash.h"
+#include <folly/Hash.h>
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -28,7 +28,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-static_assert(sizeof(RepoAuthType) == sizeof(CompactSizedPtr<void>), "");
+static_assert(sizeof(RepoAuthType) == sizeof(CompactTaggedPtr<void>), "");
 
 //////////////////////////////////////////////////////////////////////
 

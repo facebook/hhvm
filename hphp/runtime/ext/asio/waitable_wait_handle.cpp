@@ -35,8 +35,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb)
-    : c_WaitHandle(cb) {
+c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind)
+    : c_WaitHandle(cb, kind) {
   setContextIdx(AsioSession::Get()->getCurrentContextIdx());
   m_parentChain.init();
 }
@@ -44,7 +44,7 @@ c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb)
 c_WaitableWaitHandle::~c_WaitableWaitHandle() {
   switch (getState()) {
     case STATE_SUCCEEDED:
-      tvRefcountedDecRefCell(&m_resultOrException);
+      tvRefcountedDecRef(&m_resultOrException);
       break;
 
     case STATE_FAILED:

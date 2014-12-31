@@ -7,8 +7,8 @@ class Pear extends Framework {
     parent::__construct($name, null, null, null, false, TestFindModes::PHPT);
   }
 
-  protected function install(): void {
-    parent::install();
+  <<Override>>
+  protected function extraPostComposer(): void {
     verbose("Creating a bootstrap.php for running the pear tests.\n");
     $bootstrap_php = <<<BOOTSTRAP
 <?hh
@@ -28,6 +28,7 @@ XML;
     file_put_contents($this->getTestPath()."/phpunit.xml", $phpunit_xml);
   }
 
+  <<Override>>
   protected function isInstalled(): bool {
     $extra_files = Set {
       $this->getTestPath()."/phpunit.xml",

@@ -79,13 +79,13 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 
-#include "folly/String.h"
-#include "folly/Range.h"
+#include <folly/Conv.h>
+#include <folly/Range.h>
+#include <folly/String.h>
 
 #include "hphp/util/md5.h"
 
@@ -360,7 +360,7 @@ struct Input {
 private:
   struct is_bareword {
     bool operator()(int i) const {
-      return isalnum(i) || i == '_' || i == '.' || i == '$';
+      return isalnum(i) || i == '_' || i == '.' || i == '$' || i == '\\';
     }
   };
 
@@ -827,8 +827,8 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
     as.error("expected opcode or directive argument");
   }
   try {
-    return boost::lexical_cast<Target>(strVal);
-  } catch (boost::bad_lexical_cast&) {
+    return folly::to<Target>(strVal);
+  } catch (std::range_error&) {
     as.error("couldn't convert input argument (" + strVal + ") to "
              "proper type");
     not_reached();
@@ -1438,7 +1438,7 @@ void parse_fault(AsmState& as, int nestLevel) {
   as.in.expectWs('{');
   parse_function_body(as, nestLevel + 1);
 
-  EHEnt& eh = as.fe->addEHEnt();
+  auto& eh = as.fe->addEHEnt();
   eh.m_type = EHEnt::Type::Fault;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
@@ -1481,7 +1481,7 @@ void parse_catch(AsmState& as, int nestLevel) {
   as.in.expect('{');
   parse_function_body(as, nestLevel + 1);
 
-  EHEnt& eh = as.fe->addEHEnt();
+  auto& eh = as.fe->addEHEnt();
   eh.m_type = EHEnt::Type::Catch;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/util/exception.h"
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -98,6 +99,9 @@ public:
   virtual void requestInit() {}
   virtual void requestShutdown() {}
 
+  // override this to control extension_loaded() return value
+  virtual bool moduleEnabled() const { return true; }
+
   typedef std::set<std::string> DependencySet;
   typedef std::map<Extension*, DependencySet> DependencySetMap;
   virtual const DependencySet getDeps() const {
@@ -125,7 +129,7 @@ private:
   std::string m_dsoName;
 };
 
-#define HHVM_API_VERSION 20140702L
+#define HHVM_API_VERSION 20140829L
 
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \
@@ -158,9 +162,8 @@ TypedValue* getArg(ActRec *ar, unsigned arg) {
 /**
  * Get numbered arg (zero based) as a Variant
  */
-template <DataType DType>
-typename std::enable_if<DType == KindOfAny, Variant>::type
-getArg(ActRec *ar, unsigned arg, Variant def = uninit_null()) {
+inline Variant getArgVariant(ActRec *ar, unsigned arg,
+                             Variant def = uninit_null()) {
   auto tv = getArg(ar, arg);
   return tv ? tvAsVariant(tv) : def;
 }
@@ -190,7 +193,7 @@ getArg(ActRec *ar, unsigned arg) {
  * Throws warning and returns 0/nullptr if arg not passed
  */
 template <DataType DType>
-typename std::enable_if<(DType != KindOfAny) && (DType != KindOfRef),
+typename std::enable_if<DType != KindOfRef,
   typename DataTypeCPPType<DType>::type>::type
 getArg(ActRec *ar, unsigned arg) {
   auto tv = getArg(ar, arg);
@@ -229,13 +232,57 @@ getArg(ActRec *ar, unsigned arg,
   return unpack_tv<DType>(tv);
 }
 
+struct IncoercibleArgumentException : Exception {};
+
 /**
- * Reports the arg typed as passed
+ * Get numbered arg (zero based) and return data (coerce if needed)
+ *
+ * e.g.: double dval = getArg<KindOfDouble>(ar, 0);
+ *
+ * Raise warning and throw IncoercibleArgumentException if argument
+ * is not provided/not coercible
  */
-inline
-DataType getArgType(ActRec *ar, unsigned arg) {
+template <DataType DType>
+typename std::enable_if<DType != KindOfRef,
+  typename DataTypeCPPType<DType>::type>::type
+getArgStrict(ActRec *ar, unsigned arg) {
+  auto tv = getArg(ar, arg);
+  if (!tv) {
+    raise_warning("Required parameter %d not passed", (int)arg);
+    throw IncoercibleArgumentException();
+  }
+  if (!tvCoerceParamInPlace(tv, DType)) {
+    raise_param_type_warning(ar->func()->name()->data(),
+                             arg + 1, DType, tv->m_type);
+    throw IncoercibleArgumentException();
+  }
+  return unpack_tv<DType>(tv);
+}
+
+/**
+ * Get numbered arg (zero based) and return data (coerce if needed)
+ *
+ * e.g. int64_t lval = getArg<KindOfInt64>(ar, 1, 42);
+ *
+ * Raise warning and throw IncoercibleArgumentException if argument
+ * is not coercible
+ *
+ * Returns default value (42 in example) if arg not passed
+ */
+template <DataType DType>
+typename DataTypeCPPType<DType>::type
+getArgStrict(ActRec *ar, unsigned arg,
+       typename DataTypeCPPType<DType>::type def) {
   TypedValue *tv = getArg(ar, arg);
-  return tv ? tv->m_type : KindOfUnknown;
+  if (!tv) {
+    return def;
+  }
+  if (!tvCoerceParamInPlace(tv, DType)) {
+    raise_param_type_warning(ar->func()->name()->data(),
+                             arg + 1, DType, tv->m_type);
+    throw IncoercibleArgumentException();
+  }
+  return unpack_tv<DType>(tv);
 }
 
 /**

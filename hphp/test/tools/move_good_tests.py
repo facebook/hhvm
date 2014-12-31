@@ -89,6 +89,12 @@ parser.add_argument(
     action="store_true"
 )
 
+parser.add_argument(
+    "--skip-repo",
+    help="Don't test in repo mode.",
+    action="store_true"
+)
+
 args = parser.parse_args()
 
 print "Searching in ", os.path.realpath(args.folder)
@@ -96,7 +102,8 @@ print "Searching in ", os.path.realpath(args.folder)
 
 results = getResults("", [args.folder])
 good_tests = getGoodTests(results)
-good_tests = runGoodTestsRepo(good_tests)
+if not args.skip_repo:
+    good_tests = runGoodTestsRepo(good_tests)
 
 
 if args.verbose or args.no_move:

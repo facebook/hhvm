@@ -20,13 +20,13 @@
 #include <memory>
 #include <vector>
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct DynLocation;
@@ -44,7 +44,6 @@ struct NormalizedInstruction {
   const Unit* m_unit;
 
   std::vector<DynLocation*> inputs;
-  Type outPred;
   ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
@@ -56,9 +55,7 @@ struct NormalizedInstruction {
                      // this is the offset of the next instruction in the trace*
   bool endsRegion:1;
   bool nextIsMerge:1;
-  bool changesPC:1;
   bool preppedByRef:1;
-  bool outputPredicted:1;
   bool ignoreInnerType:1;
 
   /*
@@ -66,12 +63,6 @@ struct NormalizedInstruction {
    * to translate it has failed.
    */
   bool interp:1;
-
-  /*
-   * Indicates that a RetC/RetV should generate inlined return code
-   * rather than calling the shared stub.
-   */
-  bool inlineReturn:1;
 
   Op op() const;
   Op mInstrOp() const;
@@ -92,12 +83,12 @@ struct NormalizedInstruction {
   template<typename... Args>
   DynLocation* newDynLoc(Args&&... args) {
     m_dynLocs.push_back(
-      smart::make_unique<DynLocation>(std::forward<Args>(args)...));
+      jit::make_unique<DynLocation>(std::forward<Args>(args)...));
     return m_dynLocs.back().get();
   }
 
  private:
-  smart::vector<smart::unique_ptr<DynLocation>> m_dynLocs;
+  jit::vector<jit::unique_ptr<DynLocation>> m_dynLocs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

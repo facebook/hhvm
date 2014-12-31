@@ -2,12 +2,13 @@
 
 class APCIterator implements Iterator{
 
-
   private $initialized = false;
-  private $index = -1; // Gets increased in ctor
+  private $constructed = false;
+  private $index = -1; // Gets increased when inited
   private $totals = null;
   private $format;
   private $search;
+  private $info;
 
 
   // Only formats available: type, key, value, memsize, ttl
@@ -65,18 +66,22 @@ class APCIterator implements Iterator{
 
     $this->search = $search;
     $this->format = $format;
-    $this->initialized = true;
-    $this->next(); // for regex
+    $this->initialized = false;  // will be initialized upon first access
+    $this->constructed = true;
   }
 
 
   public function valid() {
-    if (!$this->initialized) return false;
+    if (!$this->constructed) {
+      return false;
+    }
     return count($this->getInfo()) > $this->index;
   }
 
   public function next() {
-    if (!$this->valid()) return false;
+    if (!$this->valid()) {
+      return false;
+    }
     ++$this->index;
     if ($this->search !== null) {
       if (is_array($this->search)) {
@@ -94,13 +99,16 @@ class APCIterator implements Iterator{
   }
 
   public function rewind() {
-    if (!$this->initialized) return false;
-    $this->index = -1;
-    $this->next();
+    if (!$this->constructed) {
+      return false;
+    }
+    $this->init();
   }
 
   public function key() {
-    if (!$this->valid()) return false;
+    if (!$this->valid()) {
+      return false;
+    }
     return $this->getInfo()[$this->index]['entry_name'];
   }
 
@@ -127,7 +135,12 @@ class APCIterator implements Iterator{
   }
 
   public function getTotalCount() {
-    if (!$this->initialized) return false;
+    if (!$this->constructed) {
+      return false;
+    }
+    if (!$this->initialized) {
+      $this->init();
+    }
     if (!$this->totals) {
       $this->getTotals();
     }
@@ -135,7 +148,12 @@ class APCIterator implements Iterator{
   }
 
   public function getTotalHits() {
-    if (!$this->initialized) return false;
+    if (!$this->constructed) {
+      return false;
+    }
+    if (!$this->initialized) {
+      $this->init();
+    }
     if (!$this->totals) {
       $this->getTotals();
     }
@@ -143,7 +161,12 @@ class APCIterator implements Iterator{
   }
 
   public function getTotalSize() {
-    if (!$this->initialized) return false;
+    if (!$this->constructed) {
+      return false;
+    }
+    if (!$this->initialized) {
+      $this->init();
+    }
     if (!$this->totals) {
       $this->getTotals();
     }
@@ -180,15 +203,31 @@ class APCIterator implements Iterator{
     $this->totals['count'] = count($info);
   }
 
+  private function init() {
+    $this->info = apc_cache_info()['cache_list'];
+    // Order defined by ksort
+    ksort($this->info);
+    $this->initialized = true;
+    $this->index = -1;
+    $this->next();
+  }
+
   private function getInfo() {
-    return apc_cache_info()['cache_list'];
+    if (!$this->initialized) {
+      $this->init();
+    }
+    return $this->info;
   }
 
   // Used for apc_delete(APCIterator);
   private function delete() {
-    if (!$this->initialized) return false;
-    $info = $this->getInfo();
-    foreach ($info as $key) {
+    if (!$this->constructed) {
+      return false;
+    }
+    if (!$this->initialized) {
+      $this->init();
+    }
+    foreach ($this->info as $key) {
       if ($this->search !== null) {
         if (is_array($this->search)) {
           while (!$this->preg_match_recursive($this->search,

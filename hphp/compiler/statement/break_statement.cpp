@@ -73,9 +73,6 @@ StatementPtr BreakStatement::preOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-void BreakStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void BreakStatement::outputCodeModel(CodeGenerator &cg) {

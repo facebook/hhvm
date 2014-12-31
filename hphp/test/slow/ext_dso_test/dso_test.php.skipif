@@ -1,0 +1,4 @@
+<?php
+if (!file_exists("./runtime/ext_zend_compat/dso_test/dso_test.so")) {
+  echo "skip";
+}

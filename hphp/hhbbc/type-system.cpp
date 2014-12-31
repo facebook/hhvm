@@ -20,9 +20,9 @@
 #include <algorithm>
 #include <iterator>
 
-#include "folly/Optional.h"
-#include "folly/Traits.h"
-#include "folly/Hash.h"
+#include <folly/Optional.h>
+#include <folly/Traits.h>
+#include <folly/Hash.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
@@ -37,7 +37,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_WaitHandle("WaitHandle");
+const StaticString s_WaitHandle("HH\\WaitHandle");
 const StaticString s_empty("");
 
 //////////////////////////////////////////////////////////////////////
@@ -248,10 +248,10 @@ bool canBeOptional(trep bits) {
 }
 
 /*
- * Combine array bits.  Our type system currently avoids arbitrary
- * unions (see rationale above), so we don't have predefined types
- * like CArr|SArrN, or SArrN|CArrE.  This function checks a few cases
- * to ensure combining array type bits leaves it predefined.
+ * Combine array bits.  Our type system currently avoids arbitrary unions (see
+ * rationale above), so we don't have predefined types like CArr|SArrN, or
+ * SArrN|CArrE.  This function checks a few cases to ensure combining array
+ * type bits leaves it predefined.
  */
 trep combine_arr_bits(trep a, trep b) {
   assert((a & BArr) == a || (a & BOptArr) == a);
@@ -403,9 +403,9 @@ Type packed_values(const DArrPacked& a) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Helper for dealing with disjointDataFn's---most of them are
- * commutative.  This shuffles values to the right in a canonical
- * order to need less overloads.
+ * Helper for dealing with disjointDataFn's---most of them are commutative.
+ * This shuffles values to the right in a canonical order to need less
+ * overloads.
  */
 template<class InnerFn>
 struct Commute : InnerFn {
@@ -565,12 +565,11 @@ struct ArrUnionImpl {
     };
 
     /*
-     * With the current meaning of structs, if the keys are different,
-     * we can't do anything better than going to a map type.  The
-     * reason for this is that our struct types currently are implying
-     * the presense of all the keys in the struct (it might be worth
-     * adding some more types for struct subtyping to handle this
-     * better.)
+     * With the current meaning of structs, if the keys are different, we can't
+     * do anything better than going to a map type.  The reason for this is
+     * that our struct types currently are implying the presence of all the
+     * keys in the struct (it might be worth adding some more types for struct
+     * subtyping to handle this better.)
      */
     if (a.map.size() != b.map.size()) return to_map();
 
@@ -1506,14 +1505,16 @@ bool is_opt(Type t) {
   return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
 }
 
-bool is_specialized_obj(Type t) {
-  return t.strictSubtypeOf(TObj) ||
-    (is_opt(t) && unopt(t).strictSubtypeOf(TObj));
+bool is_specialized_obj(const Type& t) {
+  return t.m_dataTag == DataTag::Obj;
 }
 
-Type objcls(Type t) {
-  assert(t.subtypeOf(TObj));
-  if (t.strictSubtypeOf(TObj)) {
+bool is_specialized_cls(const Type& t) {
+  return t.m_dataTag == DataTag::Cls;
+}
+
+Type objcls(const Type& t) {
+  if (t.subtypeOf(TObj) && is_specialized_obj(t)) {
     auto const d = dobj_of(t);
     return d.type == DObj::Exact ? clsExact(d.cls) : subCls(d.cls);
   }
@@ -1586,8 +1587,7 @@ DObj dobj_of(const Type& t) {
 
 DCls dcls_of(Type t) {
   assert(t.checkInvariants());
-  assert(t.strictSubtypeOf(TCls));
-  assert(t.m_dataTag == DataTag::Cls);
+  assert(is_specialized_cls(t));
   return t.m_data.dcls;
 }
 
@@ -1658,8 +1658,8 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
   if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
 
-  // It might be an object, or we might want to support type aliases
-  // in HNI at some point.  For now just be conservative.
+  // It might be an object, or we might want to support type aliases in HNI at
+  // some point.  For now just be conservative.
   return TGen;
 }
 
@@ -1729,10 +1729,9 @@ Type union_of(Type a, Type b) {
   if (b.subtypeOf(a)) return a;
 
   /*
-   * We need to check this before specialized objects, including the
-   * case where one of them was TInitNull, because otherwise we'll go
-   * down the is_specialized_obj paths and lose the wait handle
-   * information.
+   * We need to check this before specialized objects, including the case where
+   * one of them was TInitNull, because otherwise we'll go down the
+   * is_specialized_obj paths and lose the wait handle information.
    */
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
@@ -1813,9 +1812,9 @@ Type union_of(Type a, Type b) {
   X(TArr)
 
   /*
-   * Merging option types tries to preserve subtype information where
-   * it's possible.  E.g. if you union InitNull and Obj<=Foo, we want
-   * OptObj<=Foo to be the result.
+   * Merging option types tries to preserve subtype information where it's
+   * possible.  E.g. if you union InitNull and Obj<=Foo, we want OptObj<=Foo to
+   * be the result.
    */
   if (a == TInitNull && canBeOptional(b.m_bits)) return opt(b);
   if (b == TInitNull && canBeOptional(a.m_bits)) return opt(a);
@@ -1847,6 +1846,28 @@ Type union_of(Type a, Type b) {
 #undef X
 
   return TTop;
+}
+
+Type promote_emptyish(Type a, Type b) {
+  if (is_opt(a)) a = unopt(a);
+  if (a.subtypeOf(sempty())) {
+    return b;
+  }
+  auto t = trep(a.m_bits & ~(BNull | BFalse));
+  if (!isPredefined(t)) {
+    if (trep(t & BInitPrim) == t) {
+      t = BInitPrim;
+    } else if (trep(t & BInitUnc) == t) {
+      t = BInitUnc;
+    } else if (trep(t & BInitCell) == t) {
+      t = BInitCell;
+    } else {
+      t = BInitGen;
+    }
+    return union_of(Type { t }, b);
+  }
+  a.m_bits = t;
+  return union_of(a, b);
 }
 
 Type widening_union(const Type& a, const Type& b) {
@@ -2070,17 +2091,16 @@ Type array_elem(const Type& arr, const Type& undisectedKey) {
 }
 
 /*
- * Note: for now we're merging counted arrays into whatever type it
- * used to have in the following set functions, and returning arr_*'s
- * in some cases where we could know it was a carr_*.
+ * Note: for now we're merging counted arrays into whatever type it used to
+ * have in the following set functions, and returning arr_*'s in some cases
+ * where we could know it was a carr_*.
  *
- * To be able to assume it is actually counted it if used to be
- * static, we need to add code checking for keys that are one of the
- * "illegal offset type" of keys.
+ * To be able to assume it is actually counted it if used to be static, we need
+ * to add code checking for keys that are one of the "illegal offset type" of
+ * keys.
  *
- * A similar issue applies if you want to take out emptiness when a
- * set occurs.  If the key could be an illegal key type, the array may
- * remain empty.
+ * A similar issue applies if you want to take out emptiness when a set occurs.
+ * If the key could be an illegal key type, the array may remain empty.
  */
 
 // Do the effects of array_set but without handling possibly emptiness
@@ -2394,6 +2414,7 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
 
 RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   assert(!t.couldBe(TCls));
+  assert(!t.subtypeOf(TBottom));
   using T = RepoAuthType::Tag;
 
   if (t.strictSubtypeOf(TObj) || (is_opt(t) && t.strictSubtypeOf(TOptObj))) {

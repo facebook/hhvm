@@ -84,6 +84,8 @@ String resolveVmInclude(StringData* path,
                         struct stat* s,  // out
                         bool allow_dir = false);
 
+void preloadRepo();
+
 //////////////////////////////////////////////////////////////////////
 
 }

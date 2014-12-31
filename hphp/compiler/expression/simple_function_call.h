@@ -25,8 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
-class SimpleFunctionCall : public FunctionCall {
-public:
+struct SimpleFunctionCall final : FunctionCall {
   static void InitFunctionTypeMap();
 
 public:
@@ -36,7 +35,6 @@ public:
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   void deepCopy(SimpleFunctionCallPtr exp);
 
   bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
@@ -53,8 +51,6 @@ public:
 
   // define(<literal-string>, <scalar>);
   bool isSimpleDefine(StringData **name, TypedValue *value) const;
-  virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                bool coerce);
 
   virtual int getLocalEffects() const;
 
@@ -100,6 +96,7 @@ protected:
     Create,
     VariableArgument,
     Extract,
+    Assert,
     Compact,
     StaticCompact, // compact() with statically known variable names
     ShellExec,
@@ -143,7 +140,6 @@ private:
   void mungeIfSpecialFunction(AnalysisResultConstPtr ar, FileScopePtr fs);
 
   std::string m_localThis;
-  void *m_extra; // e.g., raw pointer to the symbol defined
 };
 
 SimpleFunctionCallPtr NewSimpleFunctionCall(

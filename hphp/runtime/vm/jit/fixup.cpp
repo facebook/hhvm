@@ -23,8 +23,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/data-block.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 bool
 FixupMap::getFrameRegs(const ActRec* ar, const ActRec* prevAr,
@@ -91,12 +90,12 @@ FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
       VMRegs regs;
       if (getFrameRegs(rbp, prevRbp, &regs)) {
         TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
-              regs.m_fp->m_func->name()->data(),
-              regs.m_fp, regs.m_sp, regs.m_pc);
+              regs.fp->m_func->name()->data(),
+              regs.fp, regs.sp, regs.pc);
         auto& vmRegs = vmRegsUnsafe();
-        vmRegs.fp = const_cast<ActRec*>(regs.m_fp);
-        vmRegs.pc = reinterpret_cast<PC>(regs.m_pc);
-        vmRegs.stack.top() = regs.m_sp;
+        vmRegs.fp = const_cast<ActRec*>(regs.fp);
+        vmRegs.pc = reinterpret_cast<PC>(regs.pc);
+        vmRegs.stack.top() = regs.sp;
         return;
       }
     }
@@ -129,7 +128,7 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   // uniqueStub.
   for (int i = ec->m_activeSims.size() - 1; i >= 0; --i) {
     auto const* sim = ec->m_activeSims[i];
-    auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(JIT::ARM::rVmFp.code()));
+    auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(jit::arm::rVmFp.code()));
     auto tca = reinterpret_cast<TCA>(sim->pc());
     TRACE(2, "considering frame %p, %p\n", rbp, tca);
 
@@ -152,12 +151,12 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
     VMRegs regs;
     regsFromActRec(tca, rbp, ent->fixup, &regs);
     TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\b",
-          regs.m_fp->m_func->name()->data(),
-          regs.m_fp, regs.m_sp, regs.m_pc);
+          regs.fp->m_func->name()->data(),
+          regs.fp, regs.sp, regs.pc);
     auto& vmRegs = vmRegsUnsafe();
-    vmRegs.fp = const_cast<ActRec*>(regs.m_fp);
-    vmRegs.pc = reinterpret_cast<PC>(regs.m_pc);
-    vmRegs.stack.top() = regs.m_sp;
+    vmRegs.fp = const_cast<ActRec*>(regs.fp);
+    vmRegs.pc = reinterpret_cast<PC>(regs.pc);
+    vmRegs.stack.top() = regs.sp;
     return;
   }
 
@@ -195,18 +194,13 @@ FixupMap::eagerRecord(const Func* func) {
     "__SystemLib\\func_slice_args",
   };
 
-  for (int i = 0; i < sizeof(list)/sizeof(list[0]); i++) {
-    if (!strcmp(func->name()->data(), list[i])) {
-      return true;
-    }
+  for (auto str : list) {
+    if (!strcmp(func->name()->data(), str)) return true;
   }
-  if (func->cls() && !strcmp(func->cls()->name()->data(), "WaitHandle")
-      && !strcmp(func->name()->data(), "join")) {
-    return true;
-  }
-  return false;
+
+  return func->cls() &&
+    !strcmp(func->cls()->name()->data(), "HH\\WaitHandle") &&
+    !strcmp(func->name()->data(), "join");
 }
 
-} // HPHP::JIT
-
-} // HPHP
+}}

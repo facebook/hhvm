@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/replay-transport.h"
@@ -35,14 +34,12 @@
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 
-#include "hphp/util/db-conn.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
 
+#include <folly/Conv.h>
 #include <folly/Format.h>
-
-#include <boost/lexical_cast.hpp>
 
 #include <sys/types.h>
 #include <signal.h>
@@ -50,7 +47,6 @@
 namespace HPHP {
 extern InitFiniNode *extra_server_init, *extra_server_exit;
 
-using boost::lexical_cast;
 using std::string;
 
 
@@ -144,7 +140,7 @@ HttpServer::HttpServer()
   }
 
   if (RuntimeOption::XboxServerPort != 0) {
-    std::shared_ptr<SatelliteServerInfo> xboxInfo(new XboxServerInfo());
+    auto xboxInfo = std::make_shared<XboxServerInfo>();
     auto satellite = SatelliteServer::Create(xboxInfo);
     if (satellite) {
       m_satellites.push_back(std::move(satellite));
@@ -167,7 +163,7 @@ HttpServer::HttpServer()
     ReplayTransport rt;
     rt.replayInput(hdf);
     HttpRequestHandler handler(0);
-    handler.handleRequest(&rt);
+    handler.run(&rt);
     int code = rt.getResponseCode();
     if (code == 200) {
       Logger::Info("StartupDocument %s returned 200 OK: %s",
@@ -233,6 +229,11 @@ void HttpServer::serverStopped(HPHP::Server* server) {
   Logger::Info("Page server stopped");
   assert(server == m_pageServer.get());
   removePid();
+
+  auto sockFile = RuntimeOption::ServerFileSocket;
+  if (!sockFile.empty()) {
+    unlink(sockFile.c_str());
+  }
 }
 
 HttpServer::~HttpServer() {
@@ -347,8 +348,8 @@ void HttpServer::runOrExitProcess() {
   }
 
   waitForServers();
-  hphp_process_exit();
   m_watchDog.waitForEnd();
+  hphp_process_exit();
   Logger::Info("all servers stopped");
 }
 
@@ -383,18 +384,6 @@ void HttpServer::stop(const char* stopReason) {
   notify();
 }
 
-void HttpServer::abortServers() {
-  for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    m_satellites[i]->stop();
-  }
-  if (RuntimeOption::AdminServerPort) {
-    m_adminServer->stop();
-  }
-  if (RuntimeOption::ServerPort) {
-    m_pageServer->stop();
-  }
-}
-
 void HttpServer::stopOnSignal(int sig) {
   // Signal to the main server thread to exit immediately if
   // we want to die on SIGTERM
@@ -419,6 +408,8 @@ void HttpServer::stopOnSignal(int sig) {
   if (m_adminServer) {
     m_adminServer->stop();
   }
+
+  waitForServers();
 }
 
 void HttpServer::createPid() {
@@ -556,7 +547,7 @@ bool HttpServer::startServer(bool pageServer) {
         RuntimeOption::ServerIP;
       url += serverIp;
       url += ":";
-      url += boost::lexical_cast<std::string>(RuntimeOption::AdminServerPort);
+      url += folly::to<std::string>(RuntimeOption::AdminServerPort);
       url += "/stop";
       std::string auth;
 
@@ -647,7 +638,7 @@ bool HttpServer::startServer(bool pageServer) {
           }
 
           std::string cmd = "lsof -t -i :";
-          cmd += lexical_cast<std::string>(port);
+          cmd += folly::to<std::string>(port);
           cmd += " | xargs kill -9";
           FileUtil::ssystem(cmd.c_str());
         }

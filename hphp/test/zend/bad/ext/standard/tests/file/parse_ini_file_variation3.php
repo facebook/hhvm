@@ -49,6 +49,7 @@ var_dump(parse_ini_file($iniFile));
 
 ?>
 ===Done===
+<?php error_reporting(0); ?>
 <?php
 
 $pwd = getcwd();

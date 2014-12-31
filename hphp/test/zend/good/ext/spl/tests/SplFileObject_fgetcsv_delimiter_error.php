@@ -1,5 +1,5 @@
 <?php
-$fp = fopen('SplFileObject_fgetcsv_delimiter_error.csv', 'w+');
+$fp = fopen('SplFileObject__fgetcsv3.csv', 'w+');
 fputcsv($fp, array(
 	'field1',
 	'field2',
@@ -8,9 +8,10 @@ fputcsv($fp, array(
 ), '|');
 fclose($fp);
 
-$fo = new SplFileObject('SplFileObject_fgetcsv_delimiter_error.csv');
+$fo = new SplFileObject('SplFileObject__fgetcsv3.csv');
 var_dump($fo->fgetcsv('invalid'));
 ?>
+<?php error_reporting(0); ?>
 <?php
-unlink('SplFileObject_fgetcsv_delimiter_error.csv');
+unlink('SplFileObject__fgetcsv3.csv');
 ?>

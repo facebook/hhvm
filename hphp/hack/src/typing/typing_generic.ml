@@ -30,9 +30,9 @@ end = struct
   and ty_ = function
     | Tgeneric ("this", ty) -> ty_opt ty
     | Tgeneric (x, _) -> raise (Found x)
-    | Tanon _
+    | Tanon _ | Taccess _
     | Tany | Tmixed | Tprim _ -> ()
-    | Tarray (_, ty1, ty2) ->
+    | Tarray (ty1, ty2) ->
         ty_opt ty1; ty_opt ty2
     | Tvar _ -> () (* Expansion got rid of Tvars ... *)
     | Toption x -> ty x
@@ -65,10 +65,10 @@ let rename env old_name new_name ty_to_rename =
         env, (r, Tgeneric (name, ty))
     | Tanon _
     | Tany | Tmixed | Tprim _-> env, (r, t)
-    | Tarray (local, ty1, ty2) ->
+    | Tarray (ty1, ty2) ->
         let env, ty1 = ty_opt env ty1 in
         let env, ty2 = ty_opt env ty2 in
-        env, (r, Tarray (local, ty1, ty2))
+        env, (r, Tarray (ty1, ty2))
     | Tvar n ->
         let env, t = Env.get_type env n in
         let n' = Env.fresh() in
@@ -97,12 +97,13 @@ let rename env old_name new_name ty_to_rename =
           ft_ret = ret;
         })
     | Tabstract (id, l, x) ->
-        let env, tyl = tyl env l in
+        let env, l = tyl env l in
         let env, x = ty_opt env x in
         env, (r, Tabstract (id, l, x))
     | Tapply (id, l) ->
         let env, l = tyl env l in
         env, (r, Tapply(id, l))
+    | Taccess (_, _, _) as x -> env, (r, x)
     | Ttuple l ->
         let env, l = tyl env l in
         env, (r, Ttuple l)

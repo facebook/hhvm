@@ -21,6 +21,7 @@ var_dump( is_bool( is_dir("/no/such/dir") ) );
 
 echo "*** Done ***";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $dir_name = $file_path."/is_dir_basic";

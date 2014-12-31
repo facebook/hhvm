@@ -13,8 +13,6 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
     hphp_runtime_ext
    )
 
-add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
-
 if (ENABLE_ZEND_COMPAT)
   add_definitions("-DENABLE_ZEND_COMPAT=1")
   list(APPEND HHVM_WHOLE_ARCHIVE_LIBRARIES hphp_ext_zend_compat)
@@ -24,6 +22,7 @@ if (APPLE)
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
     -Wl,-u,_register_fastcgi_server
+    -Wl,-segaddr,__text,0
     -Wl,-all_load ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 elseif (IS_AARCH64)
   set(HHVM_ANCHOR_SYMS
@@ -39,8 +38,15 @@ else()
     -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 endif()
 
+if (LINUX)
+  set(HHVM_WRAP_SYMS -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
+else ()
+  set(HHVM_WRAP_SYMS)
+endif ()
+
 set(HHVM_LINK_LIBRARIES
   ${HHVM_ANCHOR_SYMS}
+  ${HHVM_WRAP_SYMS}
   hphp_analysis
   ext_hhvm_static
   hphp_system
@@ -131,13 +137,13 @@ if(MSVC OR CYGWIN OR MINGW)
   add_definitions(-DWIN32_LEAN_AND_MEAN)
 endif()
 
-if(${CMAKE_BUILD_TYPE} MATCHES "Release")
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+  add_definitions(-DDEBUG)
+  message("Generating DEBUG build")
+else()
   add_definitions(-DRELEASE=1)
   add_definitions(-DNDEBUG)
   message("Generating Release build")
-else()
-  add_definitions(-DDEBUG)
-  message("Generating DEBUG build")
 endif()
 
 if(DEBUG_MEMORY_LEAK)
@@ -190,9 +196,8 @@ if(DISABLE_HARDWARE_COUNTERS)
   add_definitions(-DNO_HARDWARE_COUNTERS=1)
 endif ()
 
-if(PACKED_TV)
-  # Allows a packed tv build
-  add_definitions(-DPACKED_TV=1)
+if(ENABLE_AVX2)
+  add_definitions(-DENABLE_AVX2=1)
 endif()
 
 # enable the OSS options if we have any
@@ -201,7 +206,7 @@ add_definitions(-DHPHP_OSS=1)
 # later versions of binutils don't play well without automake
 add_definitions(-DPACKAGE=hhvm -DPACKAGE_VERSION=Release)
 
-if (NOT LIBSQLITE3_LIBRARY)
+if (NOT LIBSQLITE3_INCLUDE_DIR)
   include_directories("${TP_DIR}/libsqlite3")
 endif()
 
@@ -217,13 +222,19 @@ if (NOT LIBZIP_INCLUDE_DIR_ZIP)
   include_directories("${TP_DIR}/libzip")
 endif()
 
+if (NOT PCRE_LIBRARY)
+  include_directories("${TP_DIR}/pcre")
+endif()
+
 include_directories("${TP_DIR}/fastlz")
 include_directories("${TP_DIR}/timelib")
 include_directories("${TP_DIR}/libafdt/src")
 include_directories("${TP_DIR}/libmbfl")
 include_directories("${TP_DIR}/libmbfl/mbfl")
 include_directories("${TP_DIR}/libmbfl/filter")
+add_definitions(-DNO_LIB_GFLAGS)
 include_directories("${TP_DIR}/folly")
+include_directories("${TP_DIR}/thrift")
 include_directories(${TP_DIR})
 
 include_directories(${HPHP_HOME}/hphp)

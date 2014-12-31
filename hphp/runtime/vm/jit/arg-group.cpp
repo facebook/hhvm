@@ -17,55 +17,30 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
-namespace X64 {
-ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val) {
-  if (tmp->isConst()) {
-    // tmp is a constant
-    if (val) {
-      m_imm64 = tmp->type() <= Type::Null ? 0 : tmp->rawVal();
-    } else {
-      m_imm64 = toDataTypeForCall(tmp->type());
-    }
-    m_kind = Kind::Imm;
-    return;
+const char* destTypeName(DestType dt) {
+  switch (dt) {
+    case DestType::None: return "None";
+    case DestType::SSA:  return "SSA";
+    case DestType::Byte: return "Byte";
+    case DestType::TV:   return "TV";
+    case DestType::Dbl:  return "Dbl";
+    case DestType::SIMD: return "SIMD";
   }
-  if (val) {
-    assert(loc.reg(0) != InvalidReg);
-    m_srcReg = loc.reg(0);
-    m_kind = Kind::Reg;
-    // zero extend any boolean value that we pass to the helper in case
-    // the helper expects it (e.g., as TypedValue)
-    if (tmp->isA(Type::Bool)) m_zeroExtend = true;
-    return;
-  }
-  if (tmp->numWords() > 1) {
-    assert(loc.reg(1) != InvalidReg);
-    m_srcReg = loc.reg(1);
-    // Since val is false then we're passing tmp's type. TypeReg lets
-    // CodeGenerator know that the value might require some massaging
-    // to be in the right format for the call.
-    m_kind = Kind::TypeReg;
-    return;
-  }
-  // arg is the (constant) type of a known-typed value.
-  m_imm64 = toDataTypeForCall(tmp->type());
-  m_kind = Kind::Imm;
+  not_reached();
 }
-} // X64
 
-namespace ARM {
-ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val) {
+ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
   if (tmp->isConst()) {
     // tmp is a constant
-    m_srcReg = InvalidReg;
     if (val) {
-      m_imm64 = tmp->type().hasRawVal() ? tmp->rawVal() : 0;
+      m_imm64 = tmp->rawVal();
     } else {
-      m_imm64 = toDataTypeForCall(tmp->type());
+      static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
+      m_imm64 = uint64_t(tmp->type().toDataType());
     }
     m_kind = Kind::Imm;
     return;
@@ -89,10 +64,9 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val) {
     return;
   }
   // arg is the (constant) type of a known-typed value.
-  m_srcReg = InvalidReg;
-  m_imm64 = toDataTypeForCall(tmp->type());
+  static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
+  m_imm64 = uint64_t(tmp->type().toDataType());
   m_kind = Kind::Imm;
-}
 }
 
 }}

@@ -1,0 +1,290 @@
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+
+ >        0  result: bool(false)
+ >  (bool)0  result: bool(false)
+0 <=         result: bool(true)
+0 <= (bool)  result: bool(true)
+---
+ >=       0  result: bool(true)
+ >= (bool)0  result: bool(true)
+0 <          result: bool(false)
+0 <  (bool)  result: bool(false)
+---
+ <        0  result: bool(false)
+ <  (bool)0  result: bool(false)
+0 >=         result: bool(true)
+0 >= (bool)  result: bool(true)
+---
+ <=       0  result: bool(true)
+ <= (bool)0  result: bool(true)
+0 >          result: bool(false)
+0 >  (bool)  result: bool(false)
+=======
+ >        100  result: bool(false)
+ >  (bool)100  result: bool(false)
+100 <=         result: bool(false)
+100 <= (bool)  result: bool(false)
+---
+ >=       100  result: bool(false)
+ >= (bool)100  result: bool(false)
+100 <          result: bool(false)
+100 <  (bool)  result: bool(false)
+---
+ <        100  result: bool(true)
+ <  (bool)100  result: bool(true)
+100 >=         result: bool(true)
+100 >= (bool)  result: bool(true)
+---
+ <=       100  result: bool(true)
+ <= (bool)100  result: bool(true)
+100 >          result: bool(true)
+100 >  (bool)  result: bool(true)
+=======
+ >        -3.4  result: bool(false)
+ >  (bool)-3.4  result: bool(false)
+-3.4 <=         result: bool(false)
+-3.4 <= (bool)  result: bool(false)
+---
+ >=       -3.4  result: bool(false)
+ >= (bool)-3.4  result: bool(false)
+-3.4 <          result: bool(false)
+-3.4 <  (bool)  result: bool(false)
+---
+ <        -3.4  result: bool(true)
+ <  (bool)-3.4  result: bool(true)
+-3.4 >=         result: bool(true)
+-3.4 >= (bool)  result: bool(true)
+---
+ <=       -3.4  result: bool(true)
+ <= (bool)-3.4  result: bool(true)
+-3.4 >          result: bool(true)
+-3.4 >  (bool)  result: bool(true)
+=======
+ >        1  result: bool(false)
+ >  (bool)1  result: bool(false)
+1 <=         result: bool(false)
+1 <= (bool)  result: bool(false)
+---
+ >=       1  result: bool(false)
+ >= (bool)1  result: bool(false)
+1 <          result: bool(false)
+1 <  (bool)  result: bool(false)
+---
+ <        1  result: bool(true)
+ <  (bool)1  result: bool(true)
+1 >=         result: bool(true)
+1 >= (bool)  result: bool(true)
+---
+ <=       1  result: bool(true)
+ <= (bool)1  result: bool(true)
+1 >          result: bool(true)
+1 >  (bool)  result: bool(true)
+=======
+ >          result: bool(false)
+ >  (bool)  result: bool(false)
+ <=         result: bool(true)
+ <= (bool)  result: bool(true)
+---
+ >=         result: bool(true)
+ >= (bool)  result: bool(true)
+ <          result: bool(false)
+ <  (bool)  result: bool(false)
+---
+ <          result: bool(false)
+ <  (bool)  result: bool(false)
+ >=         result: bool(true)
+ >= (bool)  result: bool(true)
+---
+ <=         result: bool(true)
+ <= (bool)  result: bool(true)
+ >          result: bool(false)
+ >  (bool)  result: bool(false)
+=======
+ >          result: bool(false)
+ >  (bool)  result: bool(false)
+ <=         result: bool(true)
+ <= (bool)  result: bool(true)
+---
+ >=         result: bool(true)
+ >= (bool)  result: bool(true)
+ <          result: bool(false)
+ <  (bool)  result: bool(false)
+---
+ <          result: bool(false)
+ <  (bool)  result: bool(false)
+ >=         result: bool(true)
+ >= (bool)  result: bool(true)
+---
+ <=         result: bool(true)
+ <= (bool)  result: bool(true)
+ >          result: bool(false)
+ >  (bool)  result: bool(false)
+=======
+ >          result: bool(false)
+ >  (bool)  result: bool(false)
+ <=         result: bool(true)
+ <= (bool)  result: bool(true)
+---
+ >=         result: bool(true)
+ >= (bool)  result: bool(true)
+ <          result: bool(false)
+ <  (bool)  result: bool(false)
+---
+ <          result: bool(false)
+ <  (bool)  result: bool(false)
+ >=         result: bool(true)
+ >= (bool)  result: bool(true)
+---
+ <=         result: bool(true)
+ <= (bool)  result: bool(true)
+ >          result: bool(false)
+ >  (bool)  result: bool(false)
+=======
+ >        123  result: bool(false)
+ >  (bool)123  result: bool(false)
+123 <=         result: bool(false)
+123 <= (bool)  result: bool(false)
+---
+ >=       123  result: bool(false)
+ >= (bool)123  result: bool(false)
+123 <          result: bool(false)
+123 <  (bool)  result: bool(false)
+---
+ <        123  result: bool(true)
+ <  (bool)123  result: bool(true)
+123 >=         result: bool(true)
+123 >= (bool)  result: bool(true)
+---
+ <=       123  result: bool(true)
+ <= (bool)123  result: bool(true)
+123 >          result: bool(true)
+123 >  (bool)  result: bool(true)
+=======
+ >        abc  result: bool(false)
+ >  (bool)abc  result: bool(false)
+abc <=         result: bool(false)
+abc <= (bool)  result: bool(false)
+---
+ >=       abc  result: bool(false)
+ >= (bool)abc  result: bool(false)
+abc <          result: bool(false)
+abc <  (bool)  result: bool(false)
+---
+ <        abc  result: bool(true)
+ <  (bool)abc  result: bool(true)
+abc >=         result: bool(true)
+abc >= (bool)  result: bool(true)
+---
+ <=       abc  result: bool(true)
+ <= (bool)abc  result: bool(true)
+abc >          result: bool(true)
+abc >  (bool)  result: bool(true)
+=======
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 36
+ >        Array  result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 37
+ >  (bool)Array  result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 38
+Array <=         result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 39
+Array <= (bool)  result: bool(true)
+---
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 41
+ >=       Array  result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 42
+ >= (bool)Array  result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 43
+Array <          result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 44
+Array <  (bool)  result: bool(false)
+---
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 46
+ <        Array  result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 47
+ <  (bool)Array  result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 48
+Array >=         result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 49
+Array >= (bool)  result: bool(true)
+---
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 51
+ <=       Array  result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 52
+ <= (bool)Array  result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 53
+Array >          result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 54
+Array >  (bool)  result: bool(false)
+=======
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 36
+ >        Array  result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 37
+ >  (bool)Array  result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 38
+Array <=         result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 39
+Array <= (bool)  result: bool(false)
+---
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 41
+ >=       Array  result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 42
+ >= (bool)Array  result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 43
+Array <          result: bool(false)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 44
+Array <  (bool)  result: bool(false)
+---
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 46
+ <        Array  result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 47
+ <  (bool)Array  result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 48
+Array >=         result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 49
+Array >= (bool)  result: bool(true)
+---
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 51
+ <=       Array  result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 52
+ <= (bool)Array  result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 53
+Array >          result: bool(true)
+
+Notice: Array to string conversion in %s/expressions/relational_operators/comparisons1.php on line 54
+Array >  (bool)  result: bool(true)
+=======
+-------------------------------------

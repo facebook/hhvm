@@ -2,6 +2,8 @@
 GDB commands related to the HHVM stack.
 """
 # @lint-avoid-python-3-compatibility-imports
+# @lint-avoid-pyflakes3
+# @lint-avoid-pyflakes2
 
 import os
 import gdb
@@ -52,7 +54,7 @@ Filename and line number information is only included for C++ functions.
         sp_type = T('uintptr_t').pointer()
         sp = gdb.parse_and_eval('$rbp').cast(sp_type)
         if len(argv) >= 1:
-            sp = argv[0].cast(ptr_type)
+            sp = argv[0].cast(sp_type)
 
         # Set rip = $rip.
         rip_type = T('uintptr_t')
@@ -61,7 +63,7 @@ Filename and line number information is only included for C++ functions.
             rip = argv[1].cast(rip_type)
 
         try:
-            mcg = V('HPHP::JIT::mcg')
+            mcg = V('HPHP::jit::mcg')
             tc_base = mcg['code']['m_base']
             tc_end = tc_base + mcg['code']['m_codeSize']
         except:
@@ -106,7 +108,7 @@ Filename and line number information is only included for C++ functions.
                     if len(name):
                         func = '[PHP] ' + name + '()'
                     else:
-                        func = '[PHP] <psuedomain>'
+                        func = '[PHP] <pseudomain>'
                 except:
                     if mcg is None:
                         skip_tc = True

@@ -16,7 +16,7 @@
 */
 #include "hphp/runtime/ext/icu/ext_icu_timezone.h"
 #include "hphp/runtime/ext/icu/ext_icu_iterator.h"
-#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include <unicode/locid.h>
 
@@ -53,8 +53,9 @@ icu::TimeZone* IntlTimeZone::ParseArg(const Variant& arg,
         ((cls == IntlTimeZone_Class) || cls->classof(IntlTimeZone_Class))) {
       return IntlTimeZone::Get(objarg.get())->timezone()->clone();
     }
-    if (auto dtz = objarg.getTyped<c_DateTimeZone>(true, true)) {
-      tzstr = dtz->t_getname();
+    if (objarg.instanceof(DateTimeZoneData::getClass())) {
+      auto* dtz = Native::data<DateTimeZoneData>(objarg.get());
+      tzstr = dtz->getName();
     } else {
       tzstr = arg.toString();
     }

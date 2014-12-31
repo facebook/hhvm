@@ -55,6 +55,6 @@ Size of destination file => int(3500)
 Size of source file => int(3500)
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name is => %s/copy_variation16/copy_variation16_sub/copy variation6/copy_copy_variation16.tmp
+Destination file name is => %s/copy_variation16/copy_variation16_sub/copy variation16/copy_copy_variation16.tmp
 Size of destination file => int(3500)
 *** Done ***

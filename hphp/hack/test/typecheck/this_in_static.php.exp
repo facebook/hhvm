@@ -1,2 +1,2 @@
 File "this_in_static.php", line 14, characters 12-16:
-Typing[4094] Don't use $this in a static method
+Don't use $this in a static method (Typing[4094])

@@ -1,0 +1,4 @@
+step_over -i 0
+xcmd_profiler_name_get -i 0
+run -i 0
+run -i 0

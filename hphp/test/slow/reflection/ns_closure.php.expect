@@ -1,0 +1,3 @@
+bool(true)
+string(3) "foo"
+string(13) "foo\{closure}"

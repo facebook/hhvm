@@ -1,2 +1,2 @@
 File "fc_enum_4.php", line 4, characters 12-15:
-Typing[4024] Enums must have int, string, or mixed type, not a bool
+Enums must be int or string, not a bool (Typing[4024])

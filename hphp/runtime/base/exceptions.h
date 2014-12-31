@@ -22,7 +22,7 @@
 #include <atomic>
 #include <utility>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/portability.h"
 #include "hphp/util/exception.h"
@@ -90,42 +90,49 @@ struct FatalErrorException : ExtendedException {
     : ExtendedException("%s", msg)
   {}
   FatalErrorException(int, const char *msg, ...) ATTRIBUTE_PRINTF(3,4);
-  FatalErrorException(const std::string&, const Array& backtrace);
+  FatalErrorException(const std::string&, const Array& backtrace,
+                      bool isRecoverable = false);
 
   EXCEPTION_COMMON_IMPL(FatalErrorException);
+
+  bool isRecoverable() const { return m_recoverable; }
+
+private:
+  bool m_recoverable{false};
 };
 
 //////////////////////////////////////////////////////////////////////
 
-struct RequestTimeoutException : FatalErrorException {
-  RequestTimeoutException(const std::string& msg, const Array& backtrace)
+struct ResourceExceededException : FatalErrorException {
+  ResourceExceededException(const std::string& msg, const Array& backtrace)
     : FatalErrorException(msg, backtrace)
+  {}
+  EXCEPTION_COMMON_IMPL(ResourceExceededException);
+};
+
+struct RequestTimeoutException : ResourceExceededException {
+  RequestTimeoutException(const std::string& msg, const Array& backtrace)
+    : ResourceExceededException(msg, backtrace)
   {}
   EXCEPTION_COMMON_IMPL(RequestTimeoutException);
 };
 
-struct RequestMemoryExceededException : FatalErrorException {
+struct RequestCPUTimeoutException : ResourceExceededException {
+  RequestCPUTimeoutException(const std::string& msg, const Array& backtrace)
+    : ResourceExceededException(msg, backtrace)
+  {}
+  EXCEPTION_COMMON_IMPL(RequestCPUTimeoutException);
+};
+
+struct RequestMemoryExceededException : ResourceExceededException {
   RequestMemoryExceededException(const std::string& msg,
                                  const Array& backtrace)
-    : FatalErrorException(msg, backtrace)
+    : ResourceExceededException(msg, backtrace)
   {}
   EXCEPTION_COMMON_IMPL(RequestMemoryExceededException);
 };
 
 //////////////////////////////////////////////////////////////////////
-
-class ParseTimeFatalException : public Exception {
-public:
-  ParseTimeFatalException(const char* file, int line,
-                          const char* msg, ...) ATTRIBUTE_PRINTF(4,5);
-  EXCEPTION_COMMON_IMPL(ParseTimeFatalException);
-
-  void setParseFatal(bool b = true) { m_parseFatal = b; }
-
-  std::string m_file;
-  int m_line;
-  bool m_parseFatal;
-};
 
 class ExitException : public ExtendedException {
 public:

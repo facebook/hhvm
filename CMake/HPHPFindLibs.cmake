@@ -17,8 +17,6 @@
 
 include(CheckFunctionExists)
 
-add_definitions("-DHAVE_QUICKLZ")
-
 # libdl
 find_package(LibDL)
 if (LIBDL_INCLUDE_DIRS)
@@ -78,10 +76,11 @@ if (LIBMEMCACHED_VERSION VERSION_LESS "0.39")
   message(FATAL_ERROR "libmemcache is too old, found ${LIBMEMCACHED_VERSION} and we need 0.39")
 endif ()
 include_directories(${LIBMEMCACHED_INCLUDE_DIR})
+link_directories(${LIBMEMCACHED_LIBRARY_DIRS})
 
 # pcre checks
-find_package(PCRE REQUIRED)
-include_directories(${PCRE_INCLUDE_DIRS})
+find_package(PCRE)
+include_directories(${PCRE_INCLUDE_DIR})
 
 # libevent checks
 find_package(LibEvent REQUIRED)
@@ -187,7 +186,7 @@ if (USE_GOOGLE_HEAP_PROFILER OR USE_GOOGLE_CPU_PROFILER)
   FIND_LIBRARY(GOOGLE_PROFILER_LIB profiler)
   FIND_PATH(GOOGLE_PROFILER_INCLUDE_DIR NAMES google/profiler.h)
   if (GOOGLE_PROFILER_INCLUDE_DIR)
-    include_directories(${GOOGLE_PROFILER_INCLUDE_DIR}) 
+    include_directories(${GOOGLE_PROFILER_INCLUDE_DIR})
   endif()
   if (GOOGLE_PROFILER_LIB)
     message(STATUS "Found Google profiler: ${GOOGLE_PROFILER_LIB}")
@@ -221,15 +220,17 @@ if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
     INCLUDE(CheckCXXSourceCompiles)
     CHECK_CXX_SOURCE_COMPILES("
 #include <jemalloc/jemalloc.h>
-int main(void) {
-#if !defined(JEMALLOC_VERSION_MAJOR) || (JEMALLOC_VERSION_MAJOR < 3)
-# error \"jemalloc version >= 3.0.0 required\"
+
+#define JEMALLOC_VERSION_NUMERIC ((JEMALLOC_VERSION_MAJOR << 24) | (JEMALLOC_VERSION_MINOR << 16) | (JEMALLOC_VERSION_BUGFIX << 8) | JEMALLOC_VERSION_NDEV)
+
+#if JEMALLOC_VERSION_NUMERIC < 0x03050100
+# error jemalloc version >= 3.5.1 required
 #endif
-  return 0;
-}" JEMALLOC_VERSION_3)
+
+int main(void) { return 0; }" JEMALLOC_VERSION_MINIMUM)
     set (CMAKE_REQUIRED_INCLUDES)
 
-    if (JEMALLOC_VERSION_3)
+    if (JEMALLOC_VERSION_MINIMUM)
       message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
       set(JEMALLOC_ENABLED 1)
     else()
@@ -284,6 +285,18 @@ include_directories(${Mcrypt_INCLUDE_DIR})
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
+# LibreSSL explicitly refuses to support RAND_egd()
+SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("#include <openssl/rand.h>
+int main() {
+  return RAND_egd(\"/dev/null\");
+}" OPENSSL_HAVE_RAND_EGD)
+if (NOT OPENSSL_HAVE_RAND_EGD)
+  add_definitions("-DOPENSSL_NO_RAND_EGD")
+endif()
+
+
 # ZLIB
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIR})
@@ -336,12 +349,12 @@ if (PAM_INCLUDE_PATH)
   include_directories(${PAM_INCLUDE_PATH})
 endif()
 
-# LLVM
-find_package(LLVM)
-if (LIBLLVM_INCLUDE_DIR)
-  include_directories(LIBLLVM_INCLUDE_DIR)
-  add_definitions("-DUSE_LLVM")
-endif()
+# LLVM. Disabled in OSS for now: t5056266
+# find_package(LLVM)
+# if (LIBLLVM_INCLUDE_DIR)
+#   include_directories(LIBLLVM_INCLUDE_DIR)
+#   add_definitions("-DUSE_LLVM")
+# endif()
 
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
@@ -478,7 +491,7 @@ macro(hphp_link target)
   if (LIBUODBC_LIBRARIES)
     target_link_libraries(${target} ${LIBUODBC_LIBRARIES})
   endif()
- 
+
   target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})
 
@@ -490,15 +503,15 @@ macro(hphp_link target)
     target_link_libraries(${target} ${RT_LIB})
   endif()
 
-  if (LIBSQLITE3_LIBRARY)
+  if (LIBSQLITE3_FOUND AND LIBSQLITE3_LIBRARY)
     target_link_libraries(${target} ${LIBSQLITE3_LIBRARY})
   else()
     target_link_libraries(${target} sqlite3)
   endif()
-  
+
   if (DOUBLE_CONVERSION_LIBRARY)
     target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
-  else() 
+  else()
     target_link_libraries(${target} double-conversion)
   endif()
 
@@ -507,14 +520,25 @@ macro(hphp_link target)
   else()
     target_link_libraries(${target} lz4)
   endif()
-  
+
   if (LIBZIP_LIBRARY)
     target_link_libraries(${target} ${LIBZIP_LIBRARY})
   else()
     target_link_libraries(${target} zip_static)
   endif()
 
-  target_link_libraries(${target} fastlz)
+  if (PCRE_LIBRARY)
+    target_link_libraries(${target} ${PCRE_LIBRARY})
+  else()
+    target_link_libraries(${target} pcre)
+  endif()
+
+  if (LIBFASTLZ_LIBRARY)
+    target_link_libraries(${target} ${LIBFASTLZ_LIBRARY})
+  else()
+    target_link_libraries(${target} fastlz)
+  endif()
+
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
 
@@ -536,5 +560,9 @@ macro(hphp_link target)
 
   if (LIBLLVM_LIBRARY)
     target_link_libraries(${target} ${LIBLLVM_LIBRARY})
+  endif()
+
+  if (LINUX)
+    target_link_libraries(${target} -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
   endif()
 endmacro()

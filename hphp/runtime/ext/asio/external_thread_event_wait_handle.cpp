@@ -62,7 +62,7 @@ void c_ExternalThreadEventWaitHandle::sweep() {
 }
 
 c_ExternalThreadEventWaitHandle* c_ExternalThreadEventWaitHandle::Create(AsioExternalThreadEvent* event, ObjectData* priv_data) {
-  c_ExternalThreadEventWaitHandle* wh = NEWOBJ(c_ExternalThreadEventWaitHandle);
+  auto wh = newobj<c_ExternalThreadEventWaitHandle>();
   wh->initialize(event, priv_data);
   return wh;
 }

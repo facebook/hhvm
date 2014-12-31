@@ -1,2 +1,2 @@
 File "parse_xhp_format_infinite_loop2.php", line 5, characters 1-0:
-Parsing[1002] Expected end of XHP category/attribute/children declaration
+Expected type (Parsing[1002])

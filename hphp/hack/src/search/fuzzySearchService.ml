@@ -12,8 +12,7 @@ open Utils
 
 module Make(S : SearchUtils.Searchable) = struct
 
-module SUtils = SearchUtils.Make(S)
-open SUtils
+open SearchUtils
 
 type search_result_type = S.t
 
@@ -24,7 +23,7 @@ module TMap = MyMap(struct
   let compare = S.compare_result_type
 end)
 
-type type_to_key_to_term_list = term list SMap.t TMap.t
+type type_to_key_to_term_list = (Pos.t, S.t) term list SMap.t TMap.t
 type type_to_keyset = SSet.t TMap.t
 
 (* Note only shared memory is modified within workers - and the keys are files
@@ -44,7 +43,7 @@ type type_to_keyset = SSet.t TMap.t
  *   }
  * }
  *)
-module SearchKeys = SharedMem.NoCache(struct
+module SearchKeys = SharedMem.NoCache (Relative_path.S) (struct
   type t = type_to_keyset
   let prefix = Prefix.make()
 end)
@@ -67,7 +66,7 @@ end)
  *   }
  * }
  *)
-module SearchKeyToTermMap = SharedMem.WithCache(struct
+module SearchKeyToTermMap = SharedMem.WithCache (Relative_path.S) (struct
   type t = type_to_key_to_term_list
   let prefix = Prefix.make()
 end)
@@ -92,7 +91,7 @@ let term_indexes = ref TMap.empty
  * This is never modified in a worker, it's built in the main process using the
  * results from the worker processes.
  *)
-let old_search_terms = Hashtbl.create 160000
+let old_search_terms = ref (Hashtbl.create 160000)
 
 (* Allows us to lookup by term name to find the files it is in - it's a reverse
  * map of SearchKeys.  It's not worth adding a type layer, since we only use
@@ -110,7 +109,17 @@ let old_search_terms = Hashtbl.create 160000
  *   ...
  * }
  *)
-let term_lookup = Hashtbl.create 250000
+let term_lookup = ref (Hashtbl.create 250000)
+
+let marshal chan =
+  Marshal.to_channel chan !term_indexes [];
+  Marshal.to_channel chan !old_search_terms [];
+  Marshal.to_channel chan !term_lookup []
+
+let unmarshal chan =
+  term_indexes := Marshal.from_channel chan;
+  old_search_terms := Marshal.from_channel chan;
+  term_lookup := Marshal.from_channel chan
 
 (* We take out special characters from the string for the query - they aren't
  * useful during searches *)
@@ -174,6 +183,15 @@ let rec is_cs ?ni:(ni=0) ?hi:(hi=0) ?score:(score=0) needle haystack =
       else is_cs ~ni:(ni) ~hi:(hi+1) ~score:(score+2) needle haystack
   end
 
+(* Checks if `needle` is a case-insensitive substring of `haystack` and returns
+ * the location where it occurs, or -1 if not found. *)
+let is_substring needle haystack =
+  let needle = String.lowercase needle in
+  let haystack = String.lowercase haystack in
+  let re = Str.regexp_string needle in
+  try Str.search_forward re haystack 0
+  with Not_found -> -1
+
 (* Indexes the given word at the given letter with a check that it's not already
  * indexed there. *)
 let add_letter_to_index letter word used type_ =
@@ -234,17 +252,17 @@ let remove_terms_from_index type_ terms =
 let update_term_lookup file add_terms remove_terms =
   SSet.iter begin fun term ->
     let old_val =
-      try Hashtbl.find term_lookup term
-      with Not_found -> SSet.empty
+      try Hashtbl.find !term_lookup term
+      with Not_found -> Relative_path.Set.empty
     in
-    Hashtbl.replace term_lookup term (SSet.remove file old_val);
+    Hashtbl.replace !term_lookup term (Relative_path.Set.remove file old_val);
   end remove_terms;
   SSet.iter begin fun term ->
     let old_val =
-      try Hashtbl.find term_lookup term
-      with Not_found -> SSet.empty
+      try Hashtbl.find !term_lookup term
+      with Not_found -> Relative_path.Set.empty
     in
-    Hashtbl.replace term_lookup term (SSet.add file old_val);
+    Hashtbl.replace !term_lookup term (Relative_path.Set.add file old_val);
   end add_terms
 
 (* Updates the keylist and defmap for a file (will be used to populate
@@ -286,12 +304,12 @@ let index_files files =
       TMap.add x (Hashtbl.create 30) acc
     end TMap.empty all_types
   end;
-  SSet.iter begin fun file ->
+  Relative_path.Set.iter begin fun file ->
     let new_terms = try SearchKeys.find_unsafe file
     with Not_found -> TMap.empty in
-    let old_terms = try Hashtbl.find old_search_terms file
+    let old_terms = try Hashtbl.find !old_search_terms file
     with Not_found -> TMap.empty in
-    Hashtbl.replace old_search_terms file new_terms;
+    Hashtbl.replace !old_search_terms file new_terms;
 
     TMap.iter begin fun type_ new_terms ->
       let old_terms =
@@ -338,15 +356,15 @@ let get_terms needle type_ =
   with Invalid_argument _ -> [] (* Catches if the query is an empty string *)
 
 (* Looks up the actual `term` objects based on the given strings
- * i.e. use the preivously built `term_lookup` table so we can return
+ * i.e. use the previously built `term_lookup` table so we can return
  * `term` objects instead of just relevant strings *)
 let get_terms_from_string_and_type strings =
   List.fold_left begin fun acc ((str, type_), score) ->
     let files =
-      try Hashtbl.find term_lookup str
-      with Not_found -> SSet.empty
+      try Hashtbl.find !term_lookup str
+      with Not_found -> Relative_path.Set.empty
     in
-    SSet.fold begin fun file acc ->
+    Relative_path.Set.fold begin fun file acc ->
       let defmap =
         try SearchKeyToTermMap.find_unsafe file
         with Not_found -> TMap.empty
@@ -372,11 +390,24 @@ let query needle type_ =
     if check_if_matches_uppercase_chars needle term then
       ((term, type_), 0) :: acc
     else
-      let cs = is_cs needle term in
-      if fst cs then
-        ((term, type_), (snd cs)) :: acc
+      let sub = is_substring needle term in
+      if sub <> -1 && (String.length needle) < (String.length term) then
+        (* We add the length of the term so we can be ranked alongside the
+         * scores generated by `is_cs` which also factors in the length.
+         * This way when you search for `EdisonController`,
+         * EdisonController scores 0
+         * EdixxsonController scores 42 (from `is_cs` scoring)
+         * SomethingBlahBlahEdisonController scores 50 from substring scoring
+         * EdiASDFsonController scores 53 (from `is_cs` scoring)
+         * WebDecisionController scores 57 (from `is_cs` scoring)
+         *)
+        ((term, type_), sub + String.length term) :: acc
       else
-        acc
+        let cs = is_cs needle term in
+        if fst cs then
+          ((term, type_), (snd cs)) :: acc
+        else
+          acc
   end [] terms in
   let terms = List.sort begin fun a b ->
     (snd a) - (snd b)

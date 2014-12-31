@@ -20,22 +20,22 @@
 #include <map>
 #include <cstdio>
 #include <cstdlib>
-
-#include <boost/next_prior.hpp>
-#include <boost/range/iterator_range.hpp>
-#include <tbb/concurrent_hash_map.h>
-#include <tbb/concurrent_unordered_map.h>
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <unordered_set>
 #include <vector>
+#include <utility>
 
-#include "folly/String.h"
-#include "folly/Format.h"
-#include "folly/Hash.h"
-#include "folly/Memory.h"
-#include "folly/Optional.h"
-#include "folly/Lazy.h"
+#include <tbb/concurrent_hash_map.h>
+
+#include <folly/Format.h>
+#include <folly/Hash.h>
+#include <folly/Lazy.h>
+#include <folly/Memory.h>
+#include <folly/Optional.h>
+#include <folly/Range.h>
+#include <folly/String.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/match.h"
@@ -49,6 +49,7 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/analyze.h"
 
 namespace HPHP { namespace HHBBC {
@@ -64,6 +65,9 @@ namespace {
 const StaticString s_construct("__construct");
 const StaticString s_call("__call");
 const StaticString s_get("__get");
+const StaticString s_set("__set");
+const StaticString s_isset("__isset");
+const StaticString s_unset("__unset");
 const StaticString s_callStatic("__callStatic");
 const StaticString s_86ctor("86ctor");
 
@@ -102,10 +106,10 @@ template<class T> using ISStringToOne = ISStringToOneT<borrowed_ptr<T>>;
 using G = std::lock_guard<std::mutex>;
 
 template<class MultiMap>
-boost::iterator_range<typename MultiMap::const_iterator>
+folly::Range<typename MultiMap::const_iterator>
 find_range(const MultiMap& map, typename MultiMap::key_type key) {
   auto const pair = map.equal_range(key);
-  return boost::make_iterator_range(pair.first, pair.second);
+  return folly::range(pair.first, pair.second);
 }
 
 // Like find_range, but copy them into a temporary buffer instead of
@@ -144,6 +148,23 @@ using DepMap =
   >;
 
 //////////////////////////////////////////////////////////////////////
+
+enum class PublicSPropState {
+  Unrefined,    // refine_public_statics never called
+  Invalid,      // analyzed, but we know nothing (m_everything_bad case)
+  Valid,
+};
+
+/*
+ * Each ClassInfo has a table of public static properties with these entries.
+ * The `initializerType' is for use during refine_public_statics, and
+ * inferredType will always be a supertype of initializerType.
+ */
+struct PublicSPropEntry {
+  Type inferredType;
+  Type initializerType;
+  bool everModified;
+};
 
 /*
  * Entries in the ClassInfo method table need to track some additional
@@ -296,6 +317,12 @@ struct ClassInfo {
   std::vector<borrowed_ptr<const ClassInfo>> declInterfaces;
 
   /*
+   * A (case-insensitive) map from interface names supported by this class to
+   * their ClassInfo structures, flattened across the hierarchy.
+   */
+  ISStringToOneT<borrowed_ptr<const ClassInfo>> implInterfaces;
+
+  /*
    * A (case-sensitive) map from class constant name to the php::Const
    * that it came from.  This map is flattened across the inheritance
    * hierarchy.
@@ -346,17 +373,51 @@ struct ClassInfo {
   std::vector<borrowed_ptr<ClassInfo>> baseList;
 
   /*
+   * Property types for public static properties, declared on this exact class
+   * (i.e. not flattened in the hierarchy).
+   *
+   * These maps always have an entry for each public static property declared
+   * in this class, so it can also be used to check if this class declares a
+   * public static property of a given name.
+   *
+   * Note: the effective type we can assume a given static property may hold is
+   * not just the value in these maps.  To handle mutations of public statics
+   * where the name is known, but not which class was affected, these always
+   * need to be unioned with values from IndexData::unknownClassSProps.
+   */
+  std::unordered_map<SString,PublicSPropEntry> publicStaticProps;
+
+  /*
    * Flags about the existence of various magic methods, or whether
    * any derived classes may have those methods.  The non-derived
    * flags imply the derived flags, even if the class is final, so you
    * don't need to check both in those situations.
    */
-  bool hasMagicCall              = false;
-  bool hasMagicCallStatic        = false;
-  bool hasMagicGet               = false;
-  bool derivedHasMagicCall       = false;
-  bool derivedHasMagicCallStatic = false;
-  bool derivedHasMagicGet        = false;
+  struct MagicFnInfo {
+    bool thisHas{false};
+    bool derivedHas{false};
+  };
+  MagicFnInfo
+    magicCall,
+    magicCallStatic,
+    magicGet,
+    magicSet,
+    magicIsset,
+    magicUnset;
+};
+
+using MagicMapInfo = struct {
+  ClassInfo::MagicFnInfo (ClassInfo::*pmem);
+  Attr attrBit;
+};
+
+const std::vector<std::pair<SString,MagicMapInfo>> magicMethodMap {
+  { s_call.get(),       { &ClassInfo::magicCall,       AttrNone } },
+  { s_callStatic.get(), { &ClassInfo::magicCallStatic, AttrNone } },
+  { s_get.get(),        { &ClassInfo::magicGet,   AttrNoOverrideMagicGet } },
+  { s_set.get(),        { &ClassInfo::magicSet,   AttrNoOverrideMagicSet } },
+  { s_isset.get(),      { &ClassInfo::magicIsset, AttrNoOverrideMagicIsset } },
+  { s_unset.get(),      { &ClassInfo::magicUnset, AttrNoOverrideMagicUnset } }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -381,6 +442,16 @@ bool Class::subtypeOf(const Class& o) const {
   if (s1 || s2) return s1 == s2;
   auto c1 = val.right();
   auto c2 = o.val.right();
+
+  // If c2 is an interface, see if c1 declared it.
+  if (c2->cls->attrs & AttrInterface) {
+    if (c1->implInterfaces.count(c2->cls->name)) {
+      return true;
+    }
+    return false;
+  }
+
+  // Otherwise check for direct inheritance.
   if (c1->baseList.size() >= c2->baseList.size()) {
     return c1->baseList[c2->baseList.size() - 1] == c2;
   }
@@ -428,7 +499,7 @@ bool Class::couldHaveMagicGet() const {
   return val.match(
     [] (SString) { return true; },
     [] (borrowed_ptr<ClassInfo> cinfo) {
-      return cinfo->derivedHasMagicGet;
+      return cinfo->magicGet.derivedHas;
     }
   );
 }
@@ -535,6 +606,7 @@ struct IndexData {
   ISStringToMany<const php::Func>      methods;
   ISStringToMany<const php::Func>      funcs;
   ISStringToMany<const php::TypeAlias> typeAliases;
+  ISStringToMany<const php::Class>     enums;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -571,6 +643,23 @@ struct IndexData {
     borrowed_ptr<const php::Class>,
     PropState
   > privateStaticPropInfo;
+
+  /*
+   * Public static property information.
+   *
+   * We have state for whether any of it is valid (before we've analyzed for
+   * it, or if the program contains /any/ modifications of static properties
+   * where both the name and class are unknown).
+   *
+   * Each ClassInfo has a map of known largest static property types, valid if
+   * PublicSPropState is true, but we also have information here about types
+   * that may exist in static properties by name, when we didn't know the
+   * class.  The Type we're allowed to assume any static property contains is
+   * the union of the ClassInfo-specific type with the unknown class type for
+   * that property name that's stored here.
+   */
+  PublicSPropState publicSPropState;
+  PropState unknownClassSProps;
 
   std::unordered_map<
     borrowed_ptr<const php::Class>,
@@ -637,6 +726,13 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
   }
 
   auto const isIface = rparent->cls->attrs & AttrInterface;
+
+  /*
+   * Make a flattened table of all the interfaces implemented by the class.
+   */
+  if (isIface) {
+    rleaf->implInterfaces[rparent->cls->name] = rparent;
+  }
 
   /*
    * Make a table of all the constants on this class.
@@ -737,43 +833,42 @@ borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
  */
 bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
   if (!build_cls_info_rec(cinfo, cinfo)) return false;
+
   cinfo->ctor = find_constructor(cinfo);
+
+  for (auto& prop : cinfo->cls->properties) {
+    if (!(prop.attrs & AttrPublic) || !(prop.attrs & AttrStatic)) {
+      continue;
+    }
+
+    /*
+     * If the initializer type is TUninit, it means an 86sinit provides the
+     * actual initialization type.  So we don't want to include the Uninit
+     * (which isn't really a user-visible type for the property) or by the time
+     * we union things in we'll have inferred nothing much.
+     */
+    auto const tyRaw = from_cell(prop.val);
+    auto const ty = tyRaw.subtypeOf(TUninit) ? TBottom : tyRaw;
+    cinfo->publicStaticProps[prop.name] = PublicSPropEntry { ty, ty, false };
+  }
+
   return true;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-using InterceptableMethodMap = std::map<
-  std::string,
-  std::set<std::string,stdltistr>,
-  stdltistr
->;
-
-InterceptableMethodMap make_interceptable_method_map() {
-  auto ret = InterceptableMethodMap{};
-  for (auto& str : options.InterceptableFunctions) {
-    std::vector<std::string> parts;
-    folly::split("::", str, parts);
-    if (parts.size() != 2) continue;
-    ret[parts[0]].insert(parts[1]);
-  }
-  return ret;
-}
-
-void add_unit_to_index(IndexData& index,
-                       const InterceptableMethodMap& imethodMap,
-                       const php::Unit& unit) {
+void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   for (auto& c : unit.classes) {
-    index.classes.insert({c->name, borrow(c)});
+    if (c->attrs & AttrEnum) {
+      index.enums.insert({c->name, borrow(c)});
+    }
 
-    auto const imethIt = imethodMap.find(c->name->data());
+    index.classes.insert({c->name, borrow(c)});
 
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
 
-      if (options.AllFuncsInterceptable ||
-          (imethIt != end(imethodMap) &&
-           imethIt->second.count(m->name->data()))) {
+      if (is_interceptable_function(borrow(c), borrow(m))) {
         m->attrs = m->attrs | AttrInterceptable;
       }
     }
@@ -784,8 +879,7 @@ void add_unit_to_index(IndexData& index,
   }
 
   for (auto& f : unit.funcs) {
-    if (options.AllFuncsInterceptable ||
-        options.InterceptableFunctions.count(f->name->data())) {
+    if (is_interceptable_function(nullptr, borrow(f))) {
       f->attrs = f->attrs | AttrInterceptable;
     }
     index.funcs.insert({f->name, borrow(f)});
@@ -970,31 +1064,25 @@ void define_func_families(IndexData& index) {
   }
 }
 
-void mark_magic_on_parents(ClassInfo& cinfo,
-                           bool call,
-                           bool callStatic,
-                           bool get) {
-  if (call)       cinfo.derivedHasMagicCall = true;
-  if (callStatic) cinfo.derivedHasMagicCallStatic = true;
-  if (get)        cinfo.derivedHasMagicGet = true;
-  if (cinfo.parent) {
-    mark_magic_on_parents(*cinfo.parent, call, callStatic, get);
+void mark_magic_on_parents(ClassInfo& cinfo, ClassInfo& derived) {
+  for (auto& kv : magicMethodMap) {
+    if ((derived.*kv.second.pmem).thisHas) {
+      (cinfo.*kv.second.pmem).derivedHas = true;
+    }
   }
+  if (cinfo.parent) return mark_magic_on_parents(*cinfo.parent, derived);
 }
 
 void find_magic_methods(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     auto& methods         = cinfo->methods;
-    auto const call       = methods.find(s_call.get()) != end(methods);
-    auto const callStatic = methods.find(s_callStatic.get()) != end(methods);
-    auto const get        = methods.find(s_get.get()) != end(methods);
-
-    cinfo->hasMagicCall       = call;
-    cinfo->hasMagicCallStatic = callStatic;
-    cinfo->hasMagicGet        = get;
-    if (call || callStatic || get) {
-      mark_magic_on_parents(*cinfo, call, callStatic, get);
+    bool any = false;
+    for (auto& kv : magicMethodMap) {
+      bool const found = methods.find(kv.first) != end(methods);
+      any = any || found;
+      (cinfo.get()->*kv.second.pmem).thisHas = found;
     }
+    if (any) mark_magic_on_parents(*cinfo, *cinfo);
   }
 }
 
@@ -1021,6 +1109,16 @@ void mark_no_override_classes(IndexData& index) {
         FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name->data());
       }
       add_attribute(cinfo->cls, AttrNoOverride);
+    }
+
+    for (auto& kv : magicMethodMap) {
+      if (kv.second.attrBit == AttrNone) continue;
+      if (!(cinfo.get()->*kv.second.pmem).derivedHas) {
+        FTRACE(2, "Adding no-override of {} to {}\n",
+          kv.first->data(),
+          cinfo->cls->name->data());
+        add_attribute(cinfo->cls, kv.second.attrBit);
+      }
     }
   }
 }
@@ -1099,20 +1197,17 @@ void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
   always_assert(!cinfo->baseList.empty());
   always_assert(cinfo->baseList.back() == cinfo);
 
-  // Magic method flags should be consistent with the method table.
-  always_assert(
-    cinfo->hasMagicCall ==
-      (cinfo->methods.find(s_call.get()) != end(cinfo->methods))
-  );
-  always_assert(
-    cinfo->hasMagicCallStatic ==
-      (cinfo->methods.find(s_callStatic.get()) != end(cinfo->methods))
-  );
+  for (auto& kv : magicMethodMap) {
+    auto& info = cinfo->*kv.second.pmem;
 
-  // Non-'derived' flags about magic methods imply the derived ones.
-  always_assert(!cinfo->hasMagicCallStatic ||
-                cinfo->derivedHasMagicCallStatic);
-  always_assert(!cinfo->hasMagicCall || cinfo->derivedHasMagicCall);
+    // Magic method flags should be consistent with the method table.
+    always_assert(info.thisHas ==
+      (cinfo->methods.find(kv.first) != end(cinfo->methods)));
+
+    // Non-'derived' flags (thisHas) about magic methods imply the derived
+    // ones.
+    always_assert(!info.thisHas || info.derivedHas);
+  }
 }
 
 void check_invariants(IndexData& data) {
@@ -1129,7 +1224,7 @@ void check_invariants(IndexData& data) {
 
     auto const range = find_range(data.classInfo, name);
     if (begin(range) != end(range)) {
-      always_assert(boost::next(begin(range)) == end(range));
+      always_assert(std::next(begin(range)) == end(range));
     }
   }
 
@@ -1317,9 +1412,8 @@ Index::Index(borrowed_ptr<php::Program> program)
 
   m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
 
-  auto const imethodMap = make_interceptable_method_map();
   for (auto& u : program->units) {
-    add_unit_to_index(*m_data, imethodMap, *u);
+    add_unit_to_index(*m_data, *u);
   }
 
   NamingEnv env;
@@ -1367,15 +1461,17 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   clsName = normalizeNS(clsName);
 
   auto name_only = [&] () -> folly::Optional<res::Class> {
-    // We know it has to name a class only if there's no type alias
-    // with this name.
+    // We know it has to name a class only if there's no type alias with this
+    // name.  We also refuse to have name-only resolutions of enums, so that
+    // all name only resolutions can be treated as objects.
     //
     // TODO(#3519401): when we start unfolding type aliases, we could
     // look at whether it is an alias for a specific class here.
     // (Note this might need to split into a different API: type
     // aliases aren't allowed everywhere we're doing resolve_class
     // calls.)
-    if (!m_data->typeAliases.count(clsName)) {
+    if (!m_data->typeAliases.count(clsName) &&
+        !m_data->enums.count(clsName)) {
       return res::Class { this, clsName };
     }
     return folly::none;
@@ -1389,8 +1485,8 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   auto const classes = find_range(m_data->classInfo, clsName);
   for (auto it = begin(classes); it != end(classes); ++it) {
     auto const cinfo = it->second;
-    if ((cinfo->cls->attrs & AttrUnique) || boost::next(it) == end(classes)) {
-      if (debug && boost::next(it) != end(classes)) {
+    if ((cinfo->cls->attrs & AttrUnique) || std::next(it) == end(classes)) {
+      if (debug && std::next(it) != end(classes)) {
         std::fprintf(stderr, "non unique \"unique\" class: %s\n",
           cinfo->cls->name->data());
         for (; it != end(classes); ++it) {
@@ -1443,7 +1539,7 @@ res::Func Index::resolve_method(Context ctx,
     return res::Func { this, res::Func::MethodName { name } };
   };
 
-  if (!clsType.strictSubtypeOf(TCls)) {
+  if (!is_specialized_cls(clsType)) {
     return name_only();
   }
   auto const dcls  = dcls_of(clsType);
@@ -1517,7 +1613,7 @@ res::Func Index::resolve_method(Context ctx,
    * called as long, as we only do so in cases where it will fatal at
    * runtime.
    *
-   * So, in the presense of magic methods, we must handle the fact
+   * So, in the presence of magic methods, we must handle the fact
    * that attempting to call an inaccessible method will instead call
    * the magic method, if it exists.  Note that if any class derives
    * from a class and adds magic methods, it can change still change
@@ -1568,12 +1664,12 @@ res::Func Index::resolve_method(Context ctx,
 
   switch (dcls.type) {
   case DCls::Exact:
-    if (cinfo->hasMagicCall || cinfo->hasMagicCallStatic) {
+    if (cinfo->magicCall.thisHas || cinfo->magicCallStatic.thisHas) {
       if (couldBeInaccessible()) return name_only();
     }
     return do_resolve(ftarget);
   case DCls::Sub:
-    if (cinfo->derivedHasMagicCall || cinfo->derivedHasMagicCallStatic) {
+    if (cinfo->magicCall.derivedHas || cinfo->magicCallStatic.derivedHas) {
       if (couldBeInaccessible()) return name_only();
     }
     if (ftarget->attrs & AttrNoOverride) {
@@ -1611,7 +1707,7 @@ Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
   };
 
   if (begin(funcs) == end(funcs))              return name_only();
-  if (boost::next(begin(funcs)) != end(funcs)) return name_only();
+  if (std::next(begin(funcs)) != end(funcs))   return name_only();
   auto const func = begin(funcs)->second;
   if (!(func->attrs & AttrUnique))             return name_only();
   if (func->attrs & AttrInterceptable)         return name_only();
@@ -1665,31 +1761,44 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   case TypeConstraint::MetaType::Precise:
     {
       auto const mainType = [&]() -> const Type {
-        switch (tc.underlyingDataType()) {
+        auto const dt = tc.underlyingDataType();
+        if (!dt) return TInitCell;
+
+        switch (*dt) {
+        case KindOfBoolean:      return TBool;
+        case KindOfInt64:        return TInt;
+        case KindOfDouble:       return TDbl;
         case KindOfString:       return TStr;
         case KindOfStaticString: return TStr;
         case KindOfArray:        return TArr;
-        case KindOfInt64:        return TInt;
-        case KindOfBoolean:      return TBool;
-        case KindOfDouble:       return TDbl;
         case KindOfResource:     return TRes;
         case KindOfObject:
           /*
-           * Type constraints only imply an object of a particular
-           * type for unique classes.
+           * If we can resolve the class, we'll give an object of a type
+           * according to that resolution.  Some classes in hhvm can be
+           * "enums", which we need to handle as non-object types.  A name-only
+           * resolution is guaranteed to be some kind of non-enum,
+           * non-type-alias object (see resolve_class).
            */
           if (auto const rcls = resolve_class(ctx, tc.typeName())) {
+            if (auto const cinfo = rcls->val.right()) {
+              if (cinfo->cls->attrs & AttrEnum) {
+                return lookup_constraint(ctx, cinfo->cls->enumBaseTy);
+              }
+            }
             return interface_supports_non_objects(rcls->name())
               ? TInitCell // none of these interfaces support Uninits
               : subObj(*rcls);
           }
           return TInitCell;
         default:
+          always_assert_flog(false, "Unexpected DataType");
           break;
         }
         return TInitCell;
       }();
-      return mainType == TInitCell || !tc.isNullable() ? mainType
+
+      return (mainType == TInitCell || !tc.isNullable()) ? mainType
         : opt(mainType);
     }
   case TypeConstraint::MetaType::Self:
@@ -1697,10 +1806,73 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   case TypeConstraint::MetaType::Callable:
     break;
   case TypeConstraint::MetaType::Number:
-    return TNum;
+    return tc.isNullable() ? TOptNum : TNum;
+  case TypeConstraint::MetaType::ArrayKey:
+    // TODO(3774082): Support TInt | TStr type constraint
+    return TInitCell;
   }
 
   return TCell;
+}
+
+bool Index::satisfies_constraint(Context ctx, const Type t,
+                                 const TypeConstraint& tc) const {
+  return t.subtypeOf(satisfies_constraint_helper(ctx, tc));
+}
+
+Type Index::satisfies_constraint_helper(Context ctx,
+                                        const TypeConstraint& tc) const {
+  if (!tc.hasConstraint() || tc.isTypeVar()) {
+    return TGen;
+  }
+
+  switch (tc.metaType()) {
+  case TypeConstraint::MetaType::Precise:
+    {
+      auto const mainType = [&]() -> const Type {
+        auto const dt = tc.underlyingDataType();
+        if (!dt) return TBottom;
+
+        switch (*dt) {
+        case KindOfBoolean:      return TBool;
+        case KindOfInt64:        return TInt;
+        case KindOfDouble:       return TDbl;
+        case KindOfString:       return TStr;
+        case KindOfStaticString: return TStr;
+        case KindOfArray:        return TArr;
+        case KindOfResource:     return TRes;
+        case KindOfObject:
+          if (auto const rcls = resolve_class(ctx, tc.typeName())) {
+            if (auto const cinfo = rcls->val.right()) {
+              if (cinfo->cls->attrs & AttrEnum) {
+                return
+                  satisfies_constraint_helper(ctx, cinfo->cls->enumBaseTy);
+              }
+            }
+            return subObj(*rcls);
+          }
+          return TBottom;
+        default:
+          always_assert_flog(false, "Unexpected DataType");
+          break;
+        }
+        return TBottom;
+      }();
+
+      return (mainType == TBottom || !tc.isNullable()) ? mainType
+        : opt(mainType);
+    }
+  case TypeConstraint::MetaType::Self:
+  case TypeConstraint::MetaType::Parent:
+  case TypeConstraint::MetaType::Callable:
+    break;
+  case TypeConstraint::MetaType::Number:
+    return tc.isNullable() ? TOptNum : TNum;
+  case TypeConstraint::MetaType::ArrayKey:
+    // TODO(3774082): Support TInt | TStr type constraint
+    break;
+  }
+  return TBottom;
 }
 
 Type Index::lookup_class_constant(Context ctx,
@@ -1711,12 +1883,16 @@ Type Index::lookup_class_constant(Context ctx,
 
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
-    if (it->second->val.m_type == KindOfUninit) {
+    if (!it->second->val.hasValue()) {
+      // This is an abstract class constant.
+      return TInitCell;
+    }
+    if (it->second->val.value().m_type == KindOfUninit) {
       // This is a class constant that needs an 86cinit to run.  It
       // would be good to eventually be able to analyze these.
       return TInitCell;
     }
-    return from_cell(it->second->val);
+    return from_cell(it->second->val.value());
   }
   return TInitCell;
 }
@@ -1849,6 +2025,76 @@ Index::lookup_private_statics(borrowed_ptr<const php::Class> cls) const {
   );
 }
 
+Type Index::lookup_public_static(Type cls, Type name) const {
+  if (m_data->publicSPropState != PublicSPropState::Valid) {
+    return TInitGen;
+  }
+
+  auto const cinfo = [&] () -> borrowed_ptr<const ClassInfo> {
+    if (!is_specialized_cls(cls)) {
+      return nullptr;
+    }
+    auto const dcls = dcls_of(cls);
+    switch (dcls.type) {
+    case DCls::Sub:   return nullptr;
+    case DCls::Exact: return dcls.cls.val.right();
+    }
+    not_reached();
+  }();
+  if (!cinfo) return TInitGen;
+
+  auto const vname = tv(name);
+  if (!vname || (vname && vname->m_type != KindOfStaticString)) {
+    return TInitGen;
+  }
+  auto const sname = vname->m_data.pstr;
+
+  auto const knownClsPart = [&] {
+    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
+      auto const it = ci->publicStaticProps.find(sname);
+      if (it != end(ci->publicStaticProps)) {
+        return it->second.inferredType;
+      }
+    }
+    return TInitGen;
+  }();
+  auto const unkPart = [&]() -> Type {
+    auto unkIt = m_data->unknownClassSProps.find(sname);
+    if (unkIt != end(m_data->unknownClassSProps)) {
+      return unkIt->second;
+    }
+    return TBottom;
+  }();
+
+  always_assert_flog(
+    !knownClsPart.subtypeOf(TBottom),
+    "A public static property had type TBottom; probably "
+    "was marked uninit but didn't show up in the class 86sinit."
+  );
+
+  return union_of(unkPart, knownClsPart);
+}
+
+bool Index::lookup_public_static_immutable(borrowed_ptr<const php::Class> cls,
+                                           SString name) const {
+  if (m_data->publicSPropState != PublicSPropState::Valid) {
+    return false;
+  }
+  if (m_data->unknownClassSProps.count(name)) return false;
+  auto const classes = find_range(m_data->classInfo, cls->name);
+  if (begin(classes) == end(classes) ||
+      std::next(begin(classes)) != end(classes)) {
+    return false;
+  }
+  auto const cinfo = begin(classes)->second;
+  auto const it = cinfo->publicStaticProps.find(name);
+  if (it == end(cinfo->publicStaticProps)) {
+    // Presumably protected or private.
+    return false;
+  }
+  return !it->second.everModified;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::vector<Context>
@@ -1934,6 +2180,92 @@ void Index::refine_private_statics(borrowed_ptr<const php::Class> cls,
   refine_propstate(m_data->privateStaticPropInfo, cls, state);
 }
 
+/*
+ * Note: this routine is implemented to support refining the public static
+ * types repeatedly (we could get plausibly better types for them sometimes by
+ * doing that), but currently the tradeoff with compile time is probably not
+ * worth it, and we're only doing one pass (see whole-program.cpp).  If we add
+ * other 'whole program' passes that want to iterate, iterating this one at the
+ * same time would probably be mostly free, so we can consider that later.
+ */
+void Index::refine_public_statics(const PublicSPropIndexer& indexer) {
+  if (indexer.m_everything_bad ||
+      m_data->publicSPropState == PublicSPropState::Invalid) {
+    m_data->publicSPropState = PublicSPropState::Invalid;
+    return;
+  }
+  auto const firstRefinement =
+    m_data->publicSPropState == PublicSPropState::Unrefined;
+  m_data->publicSPropState = PublicSPropState::Valid;
+
+  for (auto& kv : indexer.m_unknown) {
+    auto it = m_data->unknownClassSProps.find(kv.first);
+    if (it == end(m_data->unknownClassSProps)) {
+      m_data->unknownClassSProps.emplace(kv.first, kv.second);
+      continue;
+    }
+
+    assert(!firstRefinement);
+    always_assert_flog(
+      kv.second.subtypeOf(it->second),
+      "Static property index invariant violated for name {}:\n"
+      "  {} was not a subtype of {}",
+      kv.first->data(),
+      show(kv.second),
+      show(it->second)
+    );
+
+    it->second = kv.second;
+  }
+
+  for (auto& knownInfo : indexer.m_known) {
+    auto const cinfo   = knownInfo.first.cinfo;
+    auto const name    = knownInfo.first.prop;
+    auto const newType = knownInfo.second;
+    auto const it      = cinfo->publicStaticProps.find(name);
+
+    FTRACE(2, "refine_public_statics: {} {} <-- {}\n",
+      cinfo->cls->name->data(),
+      name->data(),
+      show(newType));
+
+    // Cases where it's not public should've already been filtered out in the
+    // indexer.
+    always_assert_flog(
+      it != end(cinfo->publicStaticProps),
+      "Attempt to merge a public static property ({}) that wasn't declared "
+      "on class {}",
+      name->data(),
+      cinfo->cls->name->data()
+    );
+
+    // The type from the indexer doesn't contain the in-class initializer
+    // types.  Add that here.
+    auto const effectiveType = union_of(newType, it->second.initializerType);
+
+    /*
+     * If refine_public_statics is called more than once, the subsequent calls
+     * may only shrink the types we recorded for each property.  (If a property
+     * type ever grows, the interpreter could infer something incorrect at some
+     * step.)
+     */
+    if (!firstRefinement) {
+      always_assert_flog(
+        effectiveType.subtypeOf(it->second.inferredType),
+        "Static property index invariant violated on {}::{}:\n"
+        "  {} is not a subtype of {}",
+        cinfo->cls->name->data(),
+        name->data(),
+        show(newType),
+        show(it->second.inferredType)
+      );
+    }
+
+    it->second.inferredType = effectiveType;
+    it->second.everModified = true;
+  }
+}
+
 bool Index::frozen() const {
   return m_data->frozen;
 }
@@ -1987,6 +2319,115 @@ Index::could_be_related(borrowed_ptr<const php::Class> cls,
     }
   }
   return false;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
+  auto const vname = tv(name);
+
+  FTRACE(2, "merge_public_static: {} {} {}\n",
+    show(tcls), show(name), show(val));
+
+  // Figure out which class this can affect.  If we have a DCls::Sub we assume
+  // it could affect any class (we could chase the inheritance hierarchy
+  // downward to try to limit it, but don't currently).
+  auto const cinfo = [&]() -> borrowed_ptr<ClassInfo> {
+    if (!is_specialized_cls(tcls)) {
+      return nullptr;
+    }
+    auto const dcls = dcls_of(tcls);
+    switch (dcls.type) {
+    case DCls::Exact:
+      return dcls.cls.val.right();
+    case DCls::Sub:
+      return nullptr;
+    }
+    not_reached();
+  }();
+
+  bool const unknownName = !vname ||
+    (vname && vname->m_type != KindOfStaticString);
+
+  if (!cinfo) {
+    if (unknownName) {
+      /*
+       * We have a case here where we know neither the class nor the static
+       * property name.  This means we have to pessimize public static property
+       * types for the entire program.
+       *
+       * We could limit it to pessimizing them by merging the `val' type, but
+       * instead we just throw everything away---this optimization is not
+       * expected to be particularly useful on programs that contain any
+       * instances of this situation.
+       */
+      std::fprintf(
+        stderr,
+        "NOTE: had to mark everything unknown for public static "
+        "property types due to dynamic code.  -fanalyze-public-statics "
+        "will not help for this program.\n"
+      );
+      m_everything_bad = true;
+      return;
+    }
+
+    UnknownMap::accessor acc;
+    if (m_unknown.insert(acc, vname->m_data.pstr)) {
+      acc->second = val;
+    } else {
+      acc->second = union_of(acc->second, val);
+    }
+    return;
+  }
+
+  /*
+   * We don't know the name, but we know something about the class.  We need to
+   * merge the type for every property in the class hierarchy.
+   */
+  if (unknownName) {
+    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
+      for (auto& kv : ci->publicStaticProps) {
+        merge(tcls, sval(kv.first), val);
+      }
+    }
+    return;
+  }
+
+  /*
+   * Here we know both the ClassInfo and the static property name, but it may
+   * not actually be on this ClassInfo.  In php, you can access base class
+   * static properties through derived class names, and the access affects the
+   * property with that name on the most-recently-inherited-from base class.
+   *
+   * If the property is not found as a public property anywhere in the
+   * hierarchy, we don't want to merge this type.  Note we don't have to worry
+   * about the case that there is a protected property in between, because this
+   * is a fatal at class declaration time (you can't redeclare a public static
+   * property with narrower access in a subclass).
+   */
+  auto const affectedCInfo = [&]() -> borrowed_ptr<ClassInfo> {
+    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
+      if (ci->publicStaticProps.count(vname->m_data.pstr)) {
+        return ci;
+      }
+    }
+    return nullptr;
+  }();
+
+  if (!affectedCInfo) {
+    // Either this was a mutation that's going to fatal (property doesn't
+    // exist), or it's a private static or a protected static.  We aren't in
+    // that business here, so we don't need to record anything.
+    return;
+  }
+
+  // Merge the property type.
+  KnownMap::accessor acc;
+  if (m_known.insert(acc, KnownKey { affectedCInfo, vname->m_data.pstr })) {
+    acc->second = val;
+  } else {
+    acc->second = union_of(acc->second, val);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

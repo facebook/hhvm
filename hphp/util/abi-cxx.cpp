@@ -32,7 +32,7 @@
 # include <execinfo.h>
 #endif
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/util/functional.h"
 #include "hphp/util/compatibility.h"
@@ -64,7 +64,7 @@ std::string getNativeFunctionName(void* codeAddr) {
   SYMBOL_INFO *symbol;
   DWORD64 addr_disp = 0;
 
-  // symintialize and symcleanup should really be once per process
+  // syminitialize and symcleanup should really be once per process
   SymInitialize(process, nullptr, TRUE);
 
   symbol = (SYMBOL_INFO *)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
@@ -97,7 +97,7 @@ std::string getNativeFunctionName(void* codeAddr) {
     // _ZN4HPHP2VM6Transl17interpOneIterInitEv
     //
     // and then pass this to abi::__cxa_demangle to get the demanged name:
-    // HPHP::JIT::interpOneIterInit()
+    // HPHP::jit::interpOneIterInit()
     //
     // Sometimes, though, backtrace_symbols can't find the function name
     // and ends up giving us a blank managled name, like this:

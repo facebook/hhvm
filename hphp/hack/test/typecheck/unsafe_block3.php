@@ -1,6 +1,6 @@
 <?hh
 
-function f(): Continuation<int> {
+function f(): Generator<int, int, void> {
   {
     // UNSAFE
   }

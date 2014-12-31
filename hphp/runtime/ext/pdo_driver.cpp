@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/pdo_sqlite.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,8 @@ PDODriverMap PDODriver::s_drivers;
 // We will have to list them all here for proper static initialization.
 static PDOSqlite s_sqlite_driver;
 static PDOMySql s_mysql_driver;
+
+const StaticString s_general_error_code("HY000");
 
 PDODriver::PDODriver(const char *name) : m_name(name) {
   s_drivers[name] = this;
@@ -49,7 +52,13 @@ PDOConnection *PDODriver::createConnection(const String& datasource,
   }
 
   if (!conn->create(options)) {
+    Array err;
+    bool hasError = conn->fetchErr(nullptr, err);
     delete conn;
+    if (hasError && !err.empty()) {
+      throw_pdo_exception(s_general_error_code, uninit_null(), "[%ld]: %s",
+                          err[0].toInt64(), err[1].toString().data());
+    }
     return NULL;
   }
   return conn;
@@ -57,8 +66,6 @@ PDOConnection *PDODriver::createConnection(const String& datasource,
 
 ///////////////////////////////////////////////////////////////////////////////
 // PDOConnection
-
-const char *PDOConnection::PersistentKey = "pdo_connection";
 
 PDOConnection::PDOConnection()
     : is_persistent(0), auto_commit(0), is_closed(0), alloc_own_columns(0),
@@ -267,4 +274,3 @@ bool PDOStatement::cursorCloser() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

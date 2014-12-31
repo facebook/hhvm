@@ -46,6 +46,7 @@ clearstatcache();
 echo "*** Done ***\n";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/copy_copy_variation7_symlink.tmp");

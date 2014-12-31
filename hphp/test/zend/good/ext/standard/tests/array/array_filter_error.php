@@ -25,7 +25,7 @@ $extra_arg = 10;
 
 // with one more than the expected number of arguments
 echo "-- Testing array_filter() function with more than expected no. of arguments --";
-var_dump( array_filter($input, "odd", $extra_arg) );
+var_dump( array_filter($input, "odd", $extra_arg, $extra_arg) );
 
 // with incorrect callback function
 echo "-- Testing array_filter() function with incorrect callback --";

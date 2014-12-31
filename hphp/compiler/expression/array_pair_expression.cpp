@@ -106,15 +106,6 @@ void ArrayPairExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr ArrayPairExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                        bool coerce) {
-  if (m_name) {
-    m_name->inferAndCheck(ar, Type::Some, false);
-  }
-  m_value->inferAndCheck(ar, Type::Some, false);
-  return type;
-}
-
 bool ArrayPairExpression::canonCompare(ExpressionPtr e) const {
   if (!Expression::canonCompare(e)) return false;
   ArrayPairExpressionPtr a =

@@ -10,6 +10,7 @@
 
 open ClientCommand
 open ClientEnv
+open Utils
 
 let rec guess_root config start recursion_limit : Path.path option =
   let fs_root = Path.mk_path "/" in
@@ -39,20 +40,18 @@ let parse_without_command options usage command =
   | args -> args
 
 let get_root ?(config=".hhconfig") path_opt =
-  let root =
-    match path_opt with
-    | None ->
-      (match guess_root config (Path.mk_path ".") 50 with
-      | Some path -> path
-      | None ->
-        Printf.fprintf stderr
-        "Error: could not find a valid root containing %s in this directory or any of the parent directories: %s\n"
-        config
-        (Path.string_of_path (Path.mk_path "."));
-        exit 1;)
-    | Some p -> Path.mk_path p
-  in Wwwroot.assert_www_directory ~config root;
+  let start_str = match path_opt with
+    | None -> "."
+    | Some s -> s in
+  let start_path = Path.mk_path start_str in
+  let root = match guess_root config start_path 50 with
+    | None -> start_path
+    | Some r -> r in
+  Wwwroot.assert_www_directory ~config root;
   root
+
+let get_config ?(config=".hhconfig") root =
+  Config_file.parse (Path.string_of_path (Path.concat root config))
 
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/src/man/hh_client.1 --
@@ -112,8 +111,6 @@ let parse_check_args cmd =
     (* modes *)
     "--status", Arg.Unit (set_mode MODE_STATUS),
       " (mode) show a human readable list of errors (default)";
-    "--types", Arg.String (fun x -> set_mode (MODE_SHOW_TYPES x) ()),
-      " (mode) show the types for file specified";
     "--type-at-pos", Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
       " (mode) show type at a given position in file [line:character]";
     "--args-at-pos", Arg.String (fun x -> set_mode (MODE_ARGUMENT_INFO x) ()),
@@ -124,6 +121,8 @@ let parse_check_args cmd =
       " (mode) auto-completes the text on stdin";
     "--color", Arg.String (fun x -> set_mode (MODE_COLORING x) ()),
       " (mode) pretty prints the file content showing what is checked (give '-' for stdin)";
+    "--coverage", Arg.String (fun x -> set_mode (MODE_COVERAGE x) ()),
+      " (mode) calculates the extent of typing of a given file or directory";
     "--find-refs", Arg.String (fun x -> set_mode (MODE_FIND_REFS x) ()),
       " (mode) finds references of the provided method name";
     "--find-class-refs", Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
@@ -186,8 +185,6 @@ let parse_check_args cmd =
       " (deprecated) equivalent to --from arc_land";
     "--from-check-trunk", Arg.Unit (set_from "check_trunk"),
       " (deprecated) equivalent to --from check_trunk";
-    "--save-state", Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
-      " <file> debug mode (do not use)";
   ] in
   let args = parse_without_command options usage "check" in
 
@@ -201,6 +198,7 @@ let parse_check_args cmd =
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1;
   in
+  let config = get_config root in
   let () = if (!from) = "emacs" then
       Printf.fprintf stdout "-*- mode: compilation -*-\n%!"
   in
@@ -213,6 +211,7 @@ let parse_check_args cmd =
     retries = !retries;
     timeout = !timeout;
     autostart = !autostart;
+    server_options_cmd = SMap.get "server_options_cmd" config;
   }
 
 let parse_start_args () =
@@ -234,8 +233,13 @@ let parse_start_args () =
     | [x] -> get_root (Some x)
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
-        exit 1
-  in CStart {ClientStart.root = root; ClientStart.wait = !wait}
+        exit 1 in
+  let config = get_config root in
+  CStart { ClientStart.
+    root = root;
+    wait = !wait;
+    server_options_cmd = SMap.get "server_options_cmd" config;
+  }
 
 let parse_stop_args () =
   let usage =
@@ -274,8 +278,13 @@ let parse_restart_args () =
     | [x] -> get_root (Some x)
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
-        exit 1
-  in CRestart {ClientRestart.root = root; ClientRestart.wait = !wait;}
+        exit 1 in
+  let config = get_config root in
+  CRestart { ClientStart.
+    root = root;
+    wait = !wait;
+    server_options_cmd = SMap.get "server_options_cmd" config;
+  }
 
 let parse_status_args () =
   let usage =
@@ -311,12 +320,14 @@ let parse_build_args () =
   let serial = ref false in
   let test_dir = ref None in
   let grade = ref true in
-  let list_classes = ref false in
   let check = ref false in
+  let is_push = ref false in
   let clean = ref false in
   (* todo: for now better to default to true here, but this is temporary! *)
   let clean_before_build = ref true in
+  let incremental = ref false in
   let run_scripts = ref true in
+  let wait = ref false in
   let options = [
     "--steps", Arg.String (fun x ->
       steps := Some (Str.split (Str.regexp ",") x)),
@@ -332,16 +343,20 @@ let parse_build_args () =
     " <dir> generates into <dir> and compares with root";
     "--no-grade", Arg.Clear grade,
     " skip full comparison with root";
-    "--list-classes", Arg.Set list_classes,
-    " generate files listing subclasses used in analysis";
     "--check", Arg.Set check,
     " run some sanity checks on the server state";
+    "--push", Arg.Set is_push,
+    " run steps appropriate for push build";
     "--clean", Arg.Set clean,
     " erase all previously generated files";
     "--clean-before-build", Arg.Set clean_before_build,
     " erase previously generated files before building (default)";
     "--no-clean-before-build", Arg.Clear clean_before_build,
     " do not erase previously generated files before building";
+    (* Don't document --incremental option for now *)
+    "--incremental", Arg.Set incremental, "";
+    "--wait", Arg.Set wait,
+    " wait forever for hh_server intialization (default: false)";
     "--verbose", Arg.Set verbose,
     " guess what";
   ] in
@@ -351,20 +366,26 @@ let parse_build_args () =
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
-  CBuild { ServerMsg.
-           root = root;
-           steps = !steps;
-           no_steps = !no_steps;
-           run_scripts = !run_scripts;
-           serial = !serial;
-           test_dir = !test_dir;
-           grade = !grade;
-           list_classes = !list_classes;
-           clean = !clean;
-           clean_before_build = !clean_before_build;
-           check = !check;
-           verbose = !verbose;
-         }
+  let config = get_config root in
+  CBuild { ClientBuild.
+    root = root;
+    server_options_cmd = SMap.get "server_options_cmd" config;
+    build_opts = { ServerMsg.
+      steps = !steps;
+      no_steps = !no_steps;
+      run_scripts = !run_scripts;
+      serial = !serial;
+      test_dir = !test_dir;
+      grade = !grade;
+      is_push = !is_push;
+      clean = !clean;
+      clean_before_build = !clean_before_build;
+      check = !check;
+      incremental = !incremental;
+      verbose = !verbose;
+      wait = !wait;
+    }
+  }
 
 let parse_prolog_args () =
   let usage =
@@ -372,18 +393,18 @@ let parse_prolog_args () =
       "Usage: %s prolog [WWW-ROOT]\n\
       run prolog interpreter on code database\n"
       Sys.argv.(0) in
-  let options = [
-  ] in
+  let options = [] in
   let args = parse_without_command options usage "prolog" in
   let root =
     match args with
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
+  let config = get_config root in
   CProlog { ClientProlog.
-           root;
-         }
-
+    root = root;
+    server_options_cmd = SMap.get "server_options_cmd" config;
+  }
 
 let parse_args () =
   match parse_command () with

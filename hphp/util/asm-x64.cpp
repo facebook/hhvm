@@ -16,9 +16,9 @@
 
 #include "asm-x64.h"
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 // These are in order according to the binary encoding of the X64
 // condition codes.
@@ -27,9 +27,24 @@ const char* cc_names[] = {
   "S", "NS", "P", "NP", "L", "GE", "LE", "G"
 };
 
+const char* show(RoundDirection rd) {
+  switch (rd) {
+    case RoundDirection::nearest:  return "nearest";
+    case RoundDirection::floor:    return "floor";
+    case RoundDirection::ceil:     return "ceil";
+    case RoundDirection::truncate: return "truncate";
+  }
+  not_reached();
+}
+
 void DecodedInstruction::decode(uint8_t* ip) {
   m_ip = ip;
   m_flagsVal = 0;
+  m_map_select = 0;
+  m_xtra_op = 0;
+  m_immSz = sz::nosize;
+  m_offSz = sz::nosize;
+
   while (decodePrefix(ip)) {
     ++ip;
   }
@@ -75,29 +90,48 @@ int DecodedInstruction::decodeRexVexXop(uint8_t* ip) {
   int sz = 0;
   switch (*ip) {
     case 0xc4:
+    case 0x8f:
+      if (*ip == 0xc4) {
+        m_flags.vex = 1;
+      } else {
+        // 0x8f is both a valid one-byte opcode and the first byte of the
+        // 3-byte XOP prefix. Figure out which one we have here by inspecting
+        // the next byte.
+        if (ip[1] & 0x18) {
+          m_flags.xop = 1;
+        } else {
+          return 0;
+        }
+      }
+
       sz = 3;
       m_flags.r = ip[1] & 0x80 ? 0 : 1;
       m_flags.x = ip[1] & 0x40 ? 0 : 1;
       m_flags.b = ip[1] & 0x20 ? 0 : 1;
       m_map_select = ip[1] & 0x1f;
-      assert(m_map_select >= 1 && m_map_select <= 3);
+      assert(m_map_select >= 1 && (m_flags.xop || m_map_select <= 3));
       m_flags.w = ip[2] & 0x80 ? 1 : 0;
-      ++ip;
-      goto final_byte;
+      ip += 2;
+      break;
     case 0xc5:
       sz = 2;
-      m_flags.r = ip[1] & 0x80 ? 0 : 1;
-    final_byte:
       m_flags.vex = 1;
-      m_xtra_op = (~ip[1] >> 3) & 0x0f;
-      m_flags.l = ip[1] & 0x04 ? 1 : 0;
-      switch (ip[1] & 3) {
-        case 0: break;
-        case 1: m_flags.opndSzOvr = 1; break;
-        case 2: m_flags.rep = 1; break;
-        case 3: m_flags.repNE = 1; break;
-      }
+      m_flags.r = ip[1] & 0x80 ? 0 : 1;
+      m_map_select = 1;
+      ip++;
       break;
+    default:
+      return 0;
+  }
+
+  // The final 7 bits of all VEX/XOP prefixes are the same:
+  m_xtra_op = (~ip[0] >> 3) & 0x0f;
+  m_flags.l = ip[0] & 0x04 ? 1 : 0;
+  switch (ip[0] & 3) {
+    case 0: break;
+    case 1: m_flags.opndSzOvr = 1; break;
+    case 2: m_flags.rep = 1; break;
+    case 3: m_flags.repNE = 1; break;
   }
   return sz;
 }
@@ -122,9 +156,9 @@ int DecodedInstruction::decodeOpcode(uint8_t* ip) {
   m_opcode = *ip;
   switch (m_map_select) {
     case 0: determineOperandsMap0(ip); break;
-    case 1: determineOperandsMap1(ip);    break;
-    case 2: determineOperandsMap2(ip);  break;
-    case 3: determineOperandsMap3(ip);  break;
+    case 1: determineOperandsMap1(ip); break;
+    case 2: determineOperandsMap2(ip); break;
+    case 3: determineOperandsMap3(ip); break;
     default: assert(false);
   }
   return sz;
@@ -348,7 +382,7 @@ std::string DecodedInstruction::toString() {
                            (uint64_t)m_ip,
                            m_opcode).str();
   if (m_flags.hasModRm) {
-    auto modRm = m_ip[m_size - m_immSz - m_offSz - m_flags.hasSib - 1];
+    auto modRm = getModRm();
     str += folly::format(" ModRM({:02b} {} {})",
                          modRm >> 6,
                          (modRm >> 3) & 7,
@@ -413,20 +447,31 @@ bool DecodedInstruction::isNop() const {
   return m_opcode == 0x1f && m_map_select == 1;
 }
 
-bool DecodedInstruction::isBranch() const {
+bool DecodedInstruction::isBranch(bool allowCond /* = true */) const {
   if (!m_flags.picOff) return false;
   if (m_map_select == 0) {
     // The one-byte opcode map
     return
-      (m_opcode & 0xf0) == 0x70 /* 8-bit conditional branch */ ||
+      ((m_opcode & 0xf0) == 0x70 && allowCond) /* 8-bit conditional branch */ ||
       m_opcode == 0xe9 /* 32-bit unconditional branch */ ||
       m_opcode == 0xeb /* 8-bit unconditional branch */;
   }
-  if (m_map_select == 1) {
+  if (m_map_select == 1 && allowCond) {
     // The two-byte opcode map (first byte is 0x0f)
     return (m_opcode & 0xf0) == 0x80 /* 32-bit conditional branch */;
   }
   return false;
+}
+
+bool DecodedInstruction::isCall() const {
+  if (m_map_select != 0) return false;
+  if (m_opcode == 0xe8) return true;
+  if (m_opcode != 0xff) return false;
+  return ((getModRm() >> 3) & 0x6) == 2;
+}
+
+bool DecodedInstruction::isJmp() const {
+  return m_opcode == 0xe9;
 }
 
 bool DecodedInstruction::shrinkBranch() {
@@ -446,7 +491,6 @@ bool DecodedInstruction::shrinkBranch() {
     if (-128 > delta || delta > 127) return false;
     addr[-2] = 0x70 | (m_opcode & 0x0f); // make it an 8 bit conditional branch
     addr[-1] = delta;
-    m_size -= 4;
   } else {
     assert(m_opcode == 0xe9); // must be a 32-bit unconditional branch
     /*
@@ -457,11 +501,31 @@ bool DecodedInstruction::shrinkBranch() {
     if (-128 > delta || delta > 127) return false;
     addr[-1] = 0xeb;
     addr[0] = delta;
-    m_size -= 3;
   }
-  m_offSz = sz::byte;
-  m_opcode = m_ip[m_size - 2];
+  decode(m_ip);
+  assert(isBranch() && m_offSz == 1);
   return true;
+}
+
+void DecodedInstruction::widenBranch() {
+  assert(m_offSz == 1 && isBranch());
+  auto addr = m_ip + m_size - m_offSz;
+  auto delta = readValue(addr, 1);
+  if (m_opcode == 0xeb) {
+    addr[-1] = 0xe9;
+    writeValue(addr, 4, delta + 3);
+  } else {
+    addr[-1] = 0x0f;
+    addr[0] = 0x80 | (m_opcode & 0xf);
+    writeValue(addr + 1, 4, delta + 4);
+  }
+  decode(m_ip);
+  assert(isBranch() && m_offSz == 4);
+}
+
+uint8_t DecodedInstruction::getModRm() const {
+  assert(m_flags.hasModRm);
+  return m_ip[m_size - m_immSz - m_offSz - m_flags.hasSib - 1];
 }
 
 } }

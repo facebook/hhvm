@@ -31,5 +31,8 @@ NULL
 
 Warning: %s
 bool(false)
-resource(%d) of type (GMP integer)
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(1) "1"
+}
 Done

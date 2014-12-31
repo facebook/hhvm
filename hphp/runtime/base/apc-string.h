@@ -34,21 +34,27 @@ struct APCString {
   static APCHandle* MakeShared(DataType type, StringData* s, size_t& size);
 
   // Return the PHP string from the APC one
-  static Variant MakeString(APCHandle* handle) {
-    assert(handle->getType() == KindOfString);
-    if (handle->getUncounted()) {
+  static Variant MakeString(const APCHandle* handle) {
+    assert(handle->type() == KindOfString);
+    if (handle->isUncounted()) {
       return APCTypedValue::fromHandle(handle)->getStringData();
     }
     return StringData::Make(APCString::fromHandle(handle));
   }
 
   static APCString* fromHandle(APCHandle* handle) {
-    assert(offsetof(APCString, m_handle) == 0);
+    static_assert(
+      offsetof(APCString, m_handle) == 0,
+      "m_handle must appear first in APCString"
+    );
     return reinterpret_cast<APCString*>(handle);
   }
 
   static const APCString* fromHandle(const APCHandle* handle) {
-    assert(offsetof(APCString, m_handle) == 0);
+    static_assert(
+      offsetof(APCString, m_handle) == 0,
+      "m_handle must appear first in APCString"
+    );
     return reinterpret_cast<const APCString*>(handle);
   }
 
@@ -61,11 +67,11 @@ struct APCString {
   }
 
   StringData* getStringData() {
-    return &m_data;
+    return &m_str;
   }
 
   const StringData* getStringData() const {
-    return &m_data;
+    return &m_str;
   }
 
 private:
@@ -90,7 +96,7 @@ private:
 private:
   APCHandle m_handle;
   union {
-    StringData m_data;
+    StringData m_str;
     uintptr_t dummy[sizeof(StringData) / sizeof(uintptr_t)];
   };
 };

@@ -1,0 +1,10 @@
+array
+array<Tstring>
+array<Tarraykey, Tstring>
+X
+X
+array
+array<option(Tstring)>
+X
+X
+No errors

@@ -3,7 +3,7 @@ Tstring
 Tint
 Tstring
 File "asyncgen5.php", line 8, characters 3-7:
-Typing[4110] Invalid yield
+Invalid yield (Typing[4110])
 File "asyncgen5.php", line 7, characters 15-28:
 This is an object of type AsyncGenerator
 File "asyncgen5.php", line 8, characters 3-7:

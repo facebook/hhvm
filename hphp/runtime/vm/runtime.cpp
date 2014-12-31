@@ -30,7 +30,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 
 namespace HPHP {
 
@@ -189,7 +189,7 @@ Unit* compile_string(const char* s,
                      const char* fname /* = nullptr */) {
   auto md5string = string_md5(s, sz);
   MD5 md5(md5string.c_str());
-  Unit* u = Repo::get().loadUnit(fname ? fname : "", md5);
+  Unit* u = Repo::get().loadUnit(fname ? fname : "", md5).release();
   if (u != nullptr) {
     return u;
   }
@@ -207,8 +207,8 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
     if (Repo::get().findFile(systemName.data(),
                              SourceRootInfo::GetCurrentSourceRoot(),
                              md5)) {
-      if (auto const u = Repo::get().loadUnit(fname, md5)) {
-        return u;
+      if (auto u = Repo::get().loadUnit(fname, md5)) {
+        return u.release();
       }
     }
   }
@@ -223,7 +223,7 @@ int init_closure(ActRec* ar, TypedValue* sp) {
   c_Closure* closure = static_cast<c_Closure*>(ar->getThis());
 
   // Swap in the $this or late bound class or null if it is ony from a plain
-  // function or psuedomain
+  // function or pseudomain
   ar->setThisOrClassAllowNull(closure->getThisOrClass());
 
   if (ar->hasThis()) {

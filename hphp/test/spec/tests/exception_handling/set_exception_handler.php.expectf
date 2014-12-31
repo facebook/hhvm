@@ -1,0 +1,44 @@
+NULL
+NULL
+About to call f
+In try-block
+In finally-block
+In MyDefExHandler
+$e = >exception 'Exception' with message 'Watson, come here!' in %s/exception_handling/set_exception_handler.php:73
+Stack trace:
+#0 %s/exception_handling/set_exception_handler.php(90): f(10, true)
+#1 {main}<
+getMessage:       >Watson, come here!<
+getCode:          >1234<
+getPrevious:      ><
+getFile:          >%s/exception_handling/set_exception_handler.php<
+getLine:          >73<
+getTraceAsString: >#0 %s/exception_handling/set_exception_handler.php(90): f(10, true)
+#1 {main}<
+array(1) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/exception_handling/set_exception_handler.php"
+    ["line"]=>
+    int(90)
+    ["function"]=>
+    string(1) "f"
+    ["args"]=>
+    array(2) {
+      [0]=>
+      int(10)
+      [1]=>
+      bool(true)
+    }
+  }
+}
+Trace Info:
+Key[0]:
+  Key[file] => >%s/exception_handling/set_exception_handler.php<
+  Key[line] => >90<
+  Key[function] => >f<
+  Key[args]:
+    Key[0] => >10<
+    Key[1] => >1<
+Leaving MyDefExHandler

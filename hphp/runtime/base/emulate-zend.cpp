@@ -43,7 +43,7 @@ bool check_option(const char *option) {
 
 static int get_tempfile_if_not_exists(int ini_fd, char ini_path[]) {
   if (ini_fd == -1) {
-     ini_fd = mkstemp(ini_path);
+     ini_fd = mkstemps(ini_path, 4); // keep the .ini suffix
      if (ini_fd == -1) {
        fprintf(stderr, "Error: unable to open temporary file");
        exit(EXIT_FAILURE);
@@ -61,7 +61,7 @@ int emulate_zend(int argc, char** argv) {
   bool show = false;
   bool need_file = true;
   int ini_fd = -1;
-  char ini_path[] = "/tmp/php-ini-XXXXXX";
+  char ini_path[] = "/tmp/php-ini-XXXXXX.ini";
   std::string ini_section = "";
   const char* program = nullptr;
 
@@ -124,6 +124,9 @@ int emulate_zend(int argc, char** argv) {
     }
     if (strcmp(argv[cnt], "-n") == 0) {
       ignore_default_configs = true;
+      cnt++;
+      newargv.push_back("--no-config");
+      continue;
     }
     if (strcmp(argv[cnt], "-c")  == 0) {
       if (cnt + 1 < argc && argv[cnt + 1][0] != '-') {
@@ -161,15 +164,6 @@ int emulate_zend(int argc, char** argv) {
       write(ini_fd, "\n", 1);
       cnt += 2;
       continue;
-    }
-    if (strcmp(argv[cnt], "-c")  == 0) {
-      cnt++;
-      newargv.push_back("-c");
-      newargv.push_back(argv[cnt++]);
-    }
-    if (strcmp(argv[cnt], "-n")  == 0) {
-      cnt++;
-      newargv.push_back("--no-config");
     }
     if (argv[cnt][0] != '-') {
       if (show) {
@@ -235,12 +229,12 @@ int emulate_zend(int argc, char** argv) {
 
     // If the -c option is specified without a -n, php behavior is to
     // load the default ini/hdf
-    auto default_config_file = INSTALL_PREFIX "/etc/hhvm/php.ini";
+    auto default_config_file = "/etc/hhvm/php.ini";
     if (access(default_config_file, R_OK) != -1) {
       newargv.push_back("-c");
       newargv.push_back(default_config_file);
     }
-    default_config_file = INSTALL_PREFIX "/etc/hhvm/config.hdf";
+    default_config_file = "/etc/hhvm/config.hdf";
     if (access(default_config_file, R_OK) != -1) {
       newargv.push_back("-c");
       newargv.push_back(default_config_file);

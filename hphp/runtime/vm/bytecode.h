@@ -211,11 +211,8 @@ struct ActRec {
     // dependency.
     TypedValue _dummyA;
     struct {
-      union {
-        ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
-        uint64_t m_savedRbp;   // TODO: Remove. Used by debugger macros.
-      };
-      uint64_t m_savedRip;     // In-TC address to return to.
+      ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
+      uint64_t m_savedRip;   // In-TC address to return to.
     };
   };
   union {
@@ -478,8 +475,12 @@ inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
   return arAtOffset(sp, offset);
 }
 
-inline TypedValue* arReturn(ActRec* ar, const Variant& value) {
+void frame_free_locals_no_hook(ActRec* fp);
+
+inline TypedValue* arReturn(ActRec* ar, Variant&& value) {
+  frame_free_locals_no_hook(ar);
   ar->m_r = *value.asTypedValue();
+  tvWriteNull(value.asTypedValue());
   return &ar->m_r;
 }
 
@@ -570,6 +571,7 @@ class Stack {
                       // m_elms.
 
 public:
+  bool isAllocated() { return m_elms != nullptr; }
   void* getStackLowAddress() const { return m_elms; }
   void* getStackHighAddress() const { return m_base; }
   bool isValidAddress(uintptr_t v) {
@@ -578,12 +580,6 @@ public:
   void requestInit();
   void requestExit();
 
-private:
-  void toStringFrame(std::ostream& os, const ActRec* fp,
-                     int offset, const TypedValue* ftop,
-                     const std::string& prefix) const;
-
-public:
   static const int sSurprisePageSize;
   static const unsigned sMinStackElms;
   static void ValidateStackSize();
@@ -631,7 +627,7 @@ public:
   void popC() {
     assert(m_top != m_base);
     assert(cellIsPlausible(*m_top));
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     tvDebugTrash(m_top);
     m_top++;
   }
@@ -889,10 +885,10 @@ public:
   }
 
   ALWAYS_INLINE
-  void replaceC(const Cell& c) {
+  void replaceC(const Cell c) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     *m_top = c;
   }
 
@@ -901,7 +897,7 @@ public:
   void replaceC() {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     *m_top = make_tv<DT>();
   }
 
@@ -910,7 +906,7 @@ public:
   void replaceC(T value) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     *m_top = make_tv<DT>(value);
   }
 

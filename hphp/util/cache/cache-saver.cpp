@@ -23,8 +23,8 @@
 #include <string>
 #include <vector>
 
-#include "folly/FileUtil.h"
-#include "folly/Format.h"
+#include <folly/FileUtil.h>
+#include <folly/Format.h>
 #include "hphp/util/cache/magic-numbers.h"
 #include "hphp/util/logger.h"
 

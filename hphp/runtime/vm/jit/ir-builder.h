@@ -17,25 +17,32 @@
 #ifndef incl_HPHP_VM_IRBUILDER_H_
 #define incl_HPHP_VM_IRBUILDER_H_
 
-#include <boost/scoped_ptr.hpp>
-#include <vector>
+#include <functional>
 
-#include "folly/ScopeGuard.h"
-#include "folly/Optional.h"
+#include <folly/ScopeGuard.h>
+#include <folly/Optional.h>
 
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
+
+struct ExnStackState {
+  uint32_t stackDeficit;
+  EvalStack evalStack;
+  SSATmp* sp;
+};
 
 /*
  * This module provides the basic utilities for generating the IR instructions
@@ -64,7 +71,7 @@ namespace HPHP {  namespace JIT {
  *
  *      After the preOptimize pass, IRBuilder calls out to
  *      Simplifier to perform state-independent optimizations, like
- *      copy propagation and strength reduction.  (See simplifier.h.)
+ *      copy propagation and strength reduction.  (See simplify.h.)
  *
  *
  * After all the instructions are linked into the trace, this module can also
@@ -72,65 +79,97 @@ namespace HPHP {  namespace JIT {
  * reoptimize() entry point.
  */
 struct IRBuilder {
-  IRBuilder(Offset initialSpOffsetFromFp, IRUnit&, const Func*);
-  ~IRBuilder();
-
-  void setEnableSimplification(bool val) { m_enableSimplification = val; }
-  bool typeMightRelax(SSATmp* val = nullptr) const;
-
-  IRUnit& unit() const { return m_unit; }
-  BCMarker marker() const { return m_state.marker(); }
-  const Func* curFunc() const { return m_state.func(); }
-  int32_t spOffset() { return m_state.spOffset(); }
-  SSATmp* sp() const { return m_state.sp(); }
-  SSATmp* fp() const { return m_state.fp(); }
-  const GuardConstraints* guards() const { return &m_constraints; }
-  uint32_t stackDeficit() const { return m_state.stackDeficit(); }
-  void incStackDeficit() { m_state.incStackDeficit(); }
-  void clearStackDeficit() { m_state.clearStackDeficit(); }
-  EvalStack& evalStack() { return m_state.evalStack(); }
-  bool thisAvailable() const { return m_state.thisAvailable(); }
-  void setThisAvailable() { m_state.setThisAvailable(); }
-
-  /*
-   * Support for guard relaxation. Whenever the semantics of an hhir operation
-   * depends on the type of one of its input values, that value's type must be
-   * constrained using one of these methods. This happens automatically for
-   * most values, when obtained through HhbcTranslator::popC (and friends).
-   */
-  void setConstrainGuards(bool constrain) { m_constrainGuards = constrain; }
-  bool shouldConstrainGuards()      const { return m_constrainGuards; }
-  bool constrainGuard(IRInstruction* inst, TypeConstraint tc);
-  bool constrainValue(SSATmp* const val, TypeConstraint tc);
-  bool constrainLocal(uint32_t id, TypeConstraint tc,
-                      const std::string& why);
-  bool constrainLocal(uint32_t id, SSATmp* valSrc, TypeConstraint tc,
-                      const std::string& why);
-  bool constrainStack(int32_t offset, TypeConstraint tc);
-  bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
-
-  Type localType(uint32_t id, TypeConstraint tc);
-  SSATmp* localValue(uint32_t id, TypeConstraint tc);
-  SSATmp* localTypeSource(uint32_t id) const {
-    return m_state.localTypeSource(id);
-  }
-  bool inlinedFrameSpansCall() const { return m_state.frameSpansCall(); }
+  IRBuilder(IRUnit&, BCMarker);
 
   /*
    * Updates the marker used for instructions generated without one
    * supplied.
    */
-  void setMarker(BCMarker marker);
+  void setCurMarker(BCMarker);
 
- public:
+  /*
+   * Called before we start lowering each bytecode instruction.  Right now all
+   * this does is cause an implicit exceptionStackBoundary.  See below.
+   */
+  void prepareForNextHHBC();
+
+  /*
+   * Exception handling and IRBuilder.
+   *
+   * Normally HHBC opcodes that throw don't have any effects before they throw.
+   * By default, when you gen() instructions that could throw, IRBuilder
+   * automatically creates catch blocks that take the current frame-state
+   * information, except spill the stack as if the instruction has not yet
+   * started.
+   *
+   * There are some exceptions, and so there are two ways to modify this
+   * behavior.  If an HHBC opcode should have some effects on the stack prior
+   * to throwing, the lowering function can call exceptionStackBoundary after
+   * doing this to inform IRBuilder that it's not a bug---in this case the
+   * automatically created catch blocks will spill the stack as of the last
+   * boundary.
+   *
+   * The other way is to set a custom catch creator function.  This is
+   * basically for the minstr instructions, which has various temporary stack
+   * state to clean up during unwinding.
+   */
+  void exceptionStackBoundary();
+  const ExnStackState& exceptionStackState() const { return m_exnStack; }
+
+  /*
+   * The following functions are an abstraction layer we probably don't need.
+   * You can keep using them until we find time to remove them.
+   */
+  IRUnit& unit() const { return m_unit; }
+  BCMarker curMarker() const { return m_curMarker; }
+  const Func* curFunc() const { return m_state.func(); }
+  int32_t spOffset() { return m_state.spOffset(); }
+  SSATmp* sp() const { return m_state.sp(); }
+  SSATmp* fp() const { return m_state.fp(); }
+  uint32_t stackDeficit() const { return m_state.stackDeficit(); }
+  void incStackDeficit() { m_state.incStackDeficit(); }
+  void clearStackDeficit() { m_state.clearStackDeficit(); }
+  void setStackDeficit(uint32_t d) { m_state.setStackDeficit(d); }
+  EvalStack& evalStack() { return m_state.evalStack(); }
+  bool thisAvailable() const { return m_state.thisAvailable(); }
+  void setThisAvailable() { m_state.setThisAvailable(); }
+  Type localType(uint32_t id, TypeConstraint tc);
+  Type predictedInnerType(uint32_t id);
+  Type predictedLocalType(uint32_t id);
+  SSATmp* localValue(uint32_t id, TypeConstraint tc);
+  TypeSourceSet localTypeSources(uint32_t id) const {
+    return m_state.localTypeSources(id);
+  }
+  bool frameMaySpanCall() const { return m_state.frameMaySpanCall(); }
+
+  /*
+   * Support for guard relaxation.
+   *
+   * Whenever the semantics of an hhir operation depends on the type of one of
+   * its input values, that value's type must be constrained using one of these
+   * methods. This happens automatically for most values, when obtained through
+   * irgen-internal functions like popC (and friends).
+   */
+  void setConstrainGuards(bool constrain) { m_constrainGuards = constrain; }
+  bool shouldConstrainGuards()      const { return m_constrainGuards; }
+  bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
+  bool constrainValue(SSATmp* const val, TypeConstraint tc);
+  bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
+  bool constrainStack(int32_t offset, TypeConstraint tc);
+  bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
+  bool typeMightRelax(SSATmp* val = nullptr) const;
+  const GuardConstraints* guards() const { return &m_constraints; }
+
+public:
   /*
    * API for managing state when building IR with bytecode-level control flow.
    */
 
   /*
-   * Start the given block.
+   * Start the given block.  Returns whether or not it succeeded.  A failure
+   * may occur in case the block turned out to be unreachable.
    */
-  void startBlock(Block* block, const BCMarker& marker);
+  bool startBlock(Block* block, const BCMarker& marker, bool isLoopHeader);
 
   /*
    * Create a new block corresponding to bytecode control flow.
@@ -153,12 +192,7 @@ struct IRBuilder {
    */
   void setBlock(Offset offset, Block* block);
 
-  /*
-   * Clear the state associated with the given block.
-   */
-  void clearBlockState(Block* block);
-
- public:
+public:
   /*
    * To emit code to a block other than the current block, call pushBlock(),
    * emit instructions as usual with gen(...), then call popBlock(). This is
@@ -166,16 +200,12 @@ struct IRBuilder {
    *
    * gen(CodeForMainBlock, ...);
    * {
-   *   BlockPusher bp(m_irb, marker, exitBlock);
+   *   BlockPusher<PauseExit> bp(m_irb, marker, exitBlock);
    *   gen(CodeForExitBlock, ...);
    * }
    * gen(CodeForMainBlock, ...);
-   *
-   * Where may be supplied to emit code to a specific location in the block,
-   * otherwise code will be appended to the block.
    */
-  void pushBlock(BCMarker marker, Block* b,
-                 const folly::Optional<Block::iterator>& where);
+  void pushBlock(BCMarker marker, Block* b);
   void popBlock();
 
   /*
@@ -185,34 +215,14 @@ struct IRBuilder {
   void reoptimize();
 
   /*
-   * Create an IRInstruction at the end of the current Block, and allocate a
-   * destination SSATmp for it.  Uses the same argument list format as
-   * IRUnit::gen.
+   * Conditionally-append a new instruction to the current Block, depending on
+   * what some optimizations have to say about it.
    */
-  template<class... Args>
-  SSATmp* gen(Opcode op, Args&&... args) {
-    return gen(op, m_state.marker(), std::forward<Args>(args)...);
-  }
-
-  template<class... Args>
-  SSATmp* gen(Opcode op, BCMarker marker, Args&&... args) {
-    return makeInstruction(
-      [this] (IRInstruction* inst) {
-        return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
-      },
-      op,
-      marker,
-      std::forward<Args>(args)...
-    );
-  }
-
-  /*
-   * Add an already created instruction, running it through the normal
-   * optimization passes and updating tracked state.
-   */
-  SSATmp* add(IRInstruction* inst) {
-    return optimizeInst(inst, CloneFlag::No, nullptr, folly::none);
-  }
+  enum class CloneFlag { Yes, No };
+  SSATmp* optimizeInst(IRInstruction* inst,
+                       CloneFlag doClone,
+                       Block* srcBlock,
+                       const folly::Optional<IdomVector>&);
 
   //////////////////////////////////////////////////////////////////////
   // constants
@@ -233,9 +243,9 @@ struct IRBuilder {
     m_curBlock->setHint(h);
   }
 
- private:
+private:
   template<typename T> struct BranchImpl;
- public:
+public:
   /*
    * cond() generates if-then-else blocks within a trace.  The caller supplies
    * lambdas to create the branch, next-body, and taken-body.  The next and
@@ -294,7 +304,7 @@ struct IRBuilder {
     gen(Jmp, done_block, v2);
 
     appendBlock(done_block);
-    IRInstruction* label = m_unit.defLabel(1, m_state.marker(), {producedRefs});
+    IRInstruction* label = m_unit.defLabel(1, m_curMarker, {producedRefs});
     done_block->push_back(label);
     SSATmp* result = label->dst(0);
     result->setType(Type::unionOf(v1->type(), v2->type()));
@@ -387,89 +397,109 @@ struct IRBuilder {
     appendBlock(done_block);
   }
 
-  /*
-   * Create a new "exit block". This is a Block that is assumed to be
-   * a cold path, which always exits the tracelet without control flow
-   * rejoining the main line.
-   */
-  Block* makeExit(Block::Hint hint = Block::Hint::Unlikely) {
-    auto* exit = m_unit.defBlock();
-    exit->setHint(hint);
-    return exit;
-  }
+private:
+  struct BlockState {
+    Block* block;
+    BCMarker marker;
+    ExnStackState exnStack;
+    std::function<Block* ()> catchCreator;
+  };
 
 private:
   // RAII disable of CSE; only restores if it used to be on.  Used for
   // control flow, where we currently don't allow CSE.
   struct DisableCseGuard {
     explicit DisableCseGuard(IRBuilder& irb)
-      : m_state(irb.m_state)
-      , m_oldEnable(m_state.enableCse())
+      : m_irb(irb)
+      , m_oldEnable(irb.m_enableCse)
     {
-      m_state.setEnableCse(false);
+      m_irb.m_enableCse = false;
     }
     ~DisableCseGuard() {
-      m_state.setEnableCse(m_oldEnable);
+      m_irb.m_enableCse = m_oldEnable;
     }
+    DisableCseGuard(const DisableCseGuard&) = delete;
+    DisableCseGuard& operator=(const DisableCseGuard&) = delete;
 
-   private:
-    FrameState& m_state;
+  private:
+    IRBuilder& m_irb;
     bool m_oldEnable;
   };
 
 private:
+  // Helper for cond() and such.  We should move them out of IRBuilder so they
+  // can just use irgen::gen.
+  template<class... Args>
+  SSATmp* gen(Opcode op, Args&&... args) {
+    return makeInstruction(
+      [this] (IRInstruction* inst) {
+        return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
+      },
+      op,
+      m_curMarker,
+      std::forward<Args>(args)...
+    );
+  }
+
+private:
   using ConstrainBoxedFunc = std::function<SSATmp*(Type)>;
-  SSATmp*   preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType,
+  SSATmp*   preOptimizeCheckTypeOp(IRInstruction* inst,
+                                   Type oldType,
                                    ConstrainBoxedFunc func);
   SSATmp*   preOptimizeCheckType(IRInstruction*);
   SSATmp*   preOptimizeCheckStk(IRInstruction*);
   SSATmp*   preOptimizeCheckLoc(IRInstruction*);
+  SSATmp*   preOptimizeHintLocInner(IRInstruction*);
 
-  SSATmp*   preOptimizeAssertTypeOp(IRInstruction* inst, Type oldType,
-                                    SSATmp* oldVal, IRInstruction* typeSrc);
+  SSATmp*   preOptimizeAssertTypeOp(IRInstruction* inst,
+                                    Type oldType,
+                                    SSATmp* oldVal,
+                                    const IRInstruction* typeSrc);
   SSATmp*   preOptimizeAssertType(IRInstruction*);
   SSATmp*   preOptimizeAssertStk(IRInstruction*);
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);
 
-  SSATmp*   preOptimizeLdThis(IRInstruction*);
+  SSATmp*   preOptimizeCheckCtxThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
   SSATmp*   preOptimizeDecRefThis(IRInstruction*);
   SSATmp*   preOptimizeDecRefLoc(IRInstruction*);
-  SSATmp*   preOptimizeLdGbl(IRInstruction*);
+  SSATmp*   preOptimizeLdLocPseudoMain(IRInstruction*);
   SSATmp*   preOptimizeLdLoc(IRInstruction*);
-  SSATmp*   preOptimizeLdLocAddr(IRInstruction*);
   SSATmp*   preOptimizeStLoc(IRInstruction*);
   SSATmp*   preOptimize(IRInstruction* inst);
 
-  enum class CloneFlag { Yes, No };
-  SSATmp*   optimizeInst(IRInstruction* inst,
-                         CloneFlag doClone,
-                         Block* srcBlock,
-                         const folly::Optional<IdomVector>& idoms);
+  bool      constrainLocal(uint32_t id,
+                           TypeSource typeSrc,
+                           TypeConstraint tc,
+                           const std::string& why);
 
 private:
-  void      appendInstruction(IRInstruction* inst);
-  void      appendBlock(Block* block);
-  void      insertLocalPhis();
+  void appendInstruction(IRInstruction* inst);
+  void appendBlock(Block* block);
+  SSATmp* cseLookup(const IRInstruction&,
+                    const Block*,
+                    const folly::Optional<IdomVector>&) const;
+  void clearCse();
+  const CSEHash& cseHashTable(const IRInstruction& inst) const;
+  CSEHash& cseHashTable(const IRInstruction& inst);
+  void cseUpdate(const IRInstruction& inst);
 
 private:
   IRUnit& m_unit;
-  Simplifier m_simplifier;
-  FrameState m_state;
+  BCMarker m_initialMarker;
+  BCMarker m_curMarker;
+  FrameStateMgr m_state;
+  CSEHash m_cseHash;
+  bool m_enableCse{false};
 
   /*
    * m_savedBlocks will be nonempty iff we're emitting code to a block other
-   * than the main block. m_curMarker, m_curBlock, m_curWhere are
-   * all set from the most recent call to pushBlock() or popBlock().
+   * than the main block. m_curMarker, and m_curBlock are all set from the
+   * most recent call to pushBlock() or popBlock().
    */
-  struct BlockState {
-    Block* block;
-    BCMarker marker;
-    folly::Optional<Block::iterator> where;
-  };
-  smart::vector<BlockState> m_savedBlocks;
+  jit::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
-  folly::Optional<Block::iterator> m_curWhere;
+  ExnStackState m_exnStack{0, EvalStack{}, nullptr};
 
   bool m_enableSimplification;
   bool m_constrainGuards;
@@ -480,7 +510,7 @@ private:
   //
   // TODO(t3730559): Offset is used here since it's passed from
   // emitJmp*, but SrcKey might be better in case of inlining.
-  smart::flat_map<Offset,Block*> m_offsetToBlockMap;
+  jit::flat_map<Offset,Block*> m_offsetToBlockMap;
 };
 
 /*
@@ -505,15 +535,14 @@ template<> struct IRBuilder::BranchImpl<SSATmp*> {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * RAII helper for emitting code to exit traces. See IRBuilder::pushTrace
+ * RAII helper for emitting code to exit traces. See IRBuilder::pushBlock
  * for usage.
  */
 struct BlockPusher {
-  BlockPusher(IRBuilder& irb, BCMarker marker, Block* block,
-              const folly::Optional<Block::iterator>& where = folly::none)
+  BlockPusher(IRBuilder& irb, BCMarker marker, Block* block)
     : m_irb(irb)
   {
-    irb.pushBlock(marker, block, where);
+    irb.pushBlock(marker, block);
   }
 
   ~BlockPusher() {
@@ -523,6 +552,8 @@ struct BlockPusher {
  private:
   IRBuilder& m_irb;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

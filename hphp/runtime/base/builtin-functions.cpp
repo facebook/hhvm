@@ -26,11 +26,10 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/process/ext_process.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/vm/repo.h"
@@ -40,7 +39,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
-#include "folly/Format.h"
+#include <folly/Format.h>
 #include "hphp/util/text-util.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/file-util.h"
@@ -431,10 +430,6 @@ void NEVER_INLINE throw_null_get_object_prop() {
   raise_error("Trying to get property of non-object");
 }
 
-void NEVER_INLINE throw_null_object_prop() {
-  raise_error("Trying to set property of non-object");
-}
-
 void NEVER_INLINE throw_invalid_property_name(const String& name) {
   if (!name.size()) {
     raise_error("Cannot access empty property");
@@ -628,32 +623,6 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
   return uninit_null();
 }
 
-Exception* generate_request_timeout_exception() {
-  Exception* ret = nullptr;
-  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
-  RequestInjectionData &data = info->m_reqInjectionData;
-
-  bool cli = RuntimeOption::ClientExecutionMode();
-  std::string exceptionMsg = cli ?
-    "Maximum execution time of " :
-    "entire web request took longer than ";
-  exceptionMsg += folly::to<std::string>(data.getTimeout());
-  exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
-  ret = new RequestTimeoutException(exceptionMsg, exceptionStack);
-  return ret;
-}
-
-Exception* generate_memory_exceeded_exception() {
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
-  return new RequestMemoryExceededException(
-    "request has exceeded memory limit", exceptionStack);
-}
-
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
                        const Array& class_whitelist /* = null_array */) {
@@ -823,8 +792,9 @@ String resolve_include(const String& file, const char* currentDir,
     for (int i = 0; i < (int)path_count; i++) {
       String path("");
       String includePath(includePaths[i]);
+      bool is_stream_wrapper = (includePath.find("://") > 0);
 
-      if (includePath[0] != '/') {
+      if (!is_stream_wrapper && includePath[0] != '/') {
         path += (g_context->getCwd() + "/");
       }
 
@@ -835,7 +805,13 @@ String resolve_include(const String& file, const char* currentDir,
       }
 
       path += file;
-      String can_path = FileUtil::canonicalize(path);
+
+      String can_path;
+      if (!is_stream_wrapper) {
+        can_path = FileUtil::canonicalize(path);
+      } else {
+        can_path = String(path.c_str());
+      }
 
       if (tryFile(can_path, ctx)) {
         return can_path;

@@ -5,4 +5,4 @@ object(bar)#%d (0) {
 object(baz)#%d (0) {
 }
 
-Fatal error: %s
+Catchable fatal error: %s

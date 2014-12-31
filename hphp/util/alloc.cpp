@@ -17,6 +17,8 @@
 
 #include <atomic>
 
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/mman.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -26,10 +28,11 @@
 #include <numa.h>
 #endif
 
-#include "folly/Bits.h"
-#include "folly/Format.h"
+#include <folly/Bits.h>
+#include <folly/Format.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/util/async-func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,6 +74,7 @@ static NEVER_INLINE uintptr_t get_stack_top() {
 void init_stack_limits(pthread_attr_t* attr) {
   size_t stacksize, guardsize;
   void *stackaddr;
+  struct rlimit rlim;
 
 #ifndef __APPLE__
   if (pthread_attr_getstack(attr, &stackaddr, &stacksize) != 0) {
@@ -86,7 +90,7 @@ void init_stack_limits(pthread_attr_t* attr) {
   // On OSX 10.9, we are lied to about the main thread's stack size.
   // Set it to the minimum stack size, which is set earlier by
   // execute_program_impl.
-  const size_t stackSizeMinimum = 8 * 1024 * 1024;
+  const size_t stackSizeMinimum = AsyncFuncImpl::kStackSizeMinimum;
   if (pthread_main_np() == 1) {
     if (s_stackSize < stackSizeMinimum) {
       char osRelease[256];
@@ -115,6 +119,17 @@ void init_stack_limits(pthread_attr_t* attr) {
   assert(stacksize >= PTHREAD_STACK_MIN);
   s_stackLimit = uintptr_t(stackaddr) + guardsize;
   s_stackSize = stacksize - guardsize;
+
+  // The main thread's native stack may be larger than desired if
+  // set_stack_size() failed.  Make sure that even if the native stack is
+  // extremely large (in which case anonymous mmap() could map some of the
+  // "stack space"), we can differentiate between the part of the native stack
+  // that could conceivably be used in practice and all anonymous mmap() memory.
+  if (getrlimit(RLIMIT_STACK, &rlim) == 0 && rlim.rlim_cur == RLIM_INFINITY &&
+      s_stackSize > AsyncFuncImpl::kStackSizeMinimum) {
+    s_stackLimit += s_stackSize - AsyncFuncImpl::kStackSizeMinimum;
+    s_stackSize = AsyncFuncImpl::kStackSizeMinimum;
+  }
 }
 
 void flush_thread_stack() {
@@ -414,12 +429,7 @@ static void low_malloc_hugify(void* ptr) {
 }
 
 void* low_malloc_impl(size_t size) {
-#ifdef USE_JEMALLOC_MALLOCX
   void* ptr = mallocx(size, MALLOCX_ARENA(low_arena));
-#else
-  void* ptr = nullptr;
-  allocm(&ptr, nullptr, size, ALLOCM_ARENA(low_arena));
-#endif
   low_malloc_hugify((char*)ptr + size - 1);
   return ptr;
 }

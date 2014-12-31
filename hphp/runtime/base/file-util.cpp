@@ -26,7 +26,7 @@
 #include <fcntl.h>
 #include <libgen.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -445,7 +445,7 @@ String FileUtil::relativePath(const std::string& fromDir,
 
   // Ensure the result is null-terminated after the strcpy
   assert(to_start - to_file <= toFile.size());
-  assert(path_end - path + strlen(to_start) < ret.get()->capacity());
+  assert(path_end - path + strlen(to_start) <= ret.capacity());
 
   strcpy(path_end, to_start);
   return ret.setSize(strlen(path));
@@ -477,7 +477,7 @@ String FileUtil::canonicalize(const std::string &path) {
 
 String FileUtil::canonicalize(const char *addpath, size_t addlen,
                               bool collapse_slashes /* = true */) {
-  assert(strlen(addpath) == addlen);
+  assert(strlen(addpath) <= addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null
   size_t maxlen = addlen + 4;

@@ -151,7 +151,7 @@ struct NamedEntity {
   /*
    * Add or remove Classes from the list.
    *
-   * Should be called while holding Unit::s_classesMutex.
+   * Should be called while holding g_classesMutex.
    */
   void pushClass(Class* cls);
   void removeClass(Class* goner);

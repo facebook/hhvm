@@ -1,0 +1,7 @@
+Notice: Test notice in %s/test/slow/ext_xdebug/halt_level.php on line 3
+
+Deprecated: Test deprecated in %s/test/slow/ext_xdebug/halt_level.php on line 4
+
+Deprecated: Test deprecated in %s/test/slow/ext_xdebug/halt_level.php on line 6
+
+Fatal error: Test notice in %s/test/slow/ext_xdebug/halt_level.php on line 7

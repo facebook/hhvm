@@ -23,8 +23,10 @@
 #include <map>
 
 #include <boost/variant.hpp>
+#include <tbb/concurrent_hash_map.h>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
+#include <folly/Hash.h>
 
 #include "hphp/util/either.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -40,6 +42,7 @@ namespace HPHP { namespace HHBBC {
 
 struct Type;
 struct Index;
+struct PublicSPropIndexer;
 
 namespace php {
 struct Class;
@@ -191,6 +194,7 @@ private:
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;
+  friend struct ::HPHP::HHBBC::PublicSPropIndexer;
   borrowed_ptr<const Index> index;
   Either<SString,borrowed_ptr<ClassInfo>> val;
 };
@@ -412,8 +416,20 @@ struct Index {
    * This function returns a subtype of Cell, although TypeConstraints
    * at runtime can match reference parameters.  The caller should
    * make sure to handle that case.
+   *
+   * For soft constraints (@), this function returns Cell.
+   *
+   * For some non-soft constraints (such as "Stringish"), this
+   * function may return a Type that is a strict supertype of the
+   * constraint's type.
    */
   Type lookup_constraint(Context, const TypeConstraint&) const;
+
+  /*
+   * If this function returns true, it is safe to assume that Type t
+   * will always satisfy TypeConstraint tc at run time.
+   */
+  bool satisfies_constraint(Context, Type t, const TypeConstraint& tc) const;
 
   /*
    * Lookup what the best known Type for a class constant would be,
@@ -489,6 +505,23 @@ struct Index {
   PropState lookup_private_statics(borrowed_ptr<const php::Class>) const;
 
   /*
+   * Lookup the best known type for a public static property, with a given
+   * class type and name type.
+   *
+   * This function will always return TInitGen before refine_public_statics has
+   * been called, or if the AnalyzePublicStatics option is off.
+   */
+  Type lookup_public_static(Type cls, Type name) const;
+
+  /*
+   * Returns whether a public static property is known to be immutable.  This
+   * is used to add AttrPersistent flags to static properties, and relies on
+   * AnalyzePublicStatics (without this flag it will always return false).
+   */
+  bool lookup_public_static_immutable(borrowed_ptr<const php::Class>,
+                                      SString name) const;
+
+  /*
    * Refine the return type for a function, based on a round of
    * analysis.
    *
@@ -532,6 +565,15 @@ struct Index {
   void refine_private_statics(borrowed_ptr<const php::Class> cls,
                               const PropState&);
 
+  /*
+   * After a whole program pass using PublicSPropIndexer, the types can be
+   * reflected into the index for use during another type inference pass.
+   *
+   * No other threads should be calling functions on this Index or on the
+   * provided PublicSPropIndexer when this function is called.
+   */
+  void refine_public_statics(const PublicSPropIndexer&);
+
 private:
   Index(const Index&) = delete;
   Index& operator=(Index&&) = delete;
@@ -544,9 +586,57 @@ private:
                             borrowed_ptr<const php::Class>) const;
   bool could_be_related(borrowed_ptr<const php::Class>,
                         borrowed_ptr<const php::Class>) const;
+  Type satisfies_constraint_helper(Context, const TypeConstraint&) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Indexer object used for collecting information about public static property
+ * types.  See analyze_public_statics in whole-program.cpp for details about
+ * how it is used.
+ */
+struct PublicSPropIndexer {
+  /*
+   * Called by the interpreter during analyze_func_collect when a
+   * PublicSPropIndexer is active.  This function must be called anywhere the
+   * interpreter does something that could change the type of public static
+   * properties named `name' on classes of type `cls' to `val'.
+   *
+   * Note that if cls and name are both too generic this object will have to
+   * give up all information it knows about any public static properties.
+   *
+   * This routine may be safely called concurrently by multiple analysis
+   * threads.
+   */
+  void merge(Type cls, Type name, Type val);
+
+private:
+  friend struct Index;
+
+  struct KnownKey {
+    bool operator==(KnownKey o) const {
+      return cinfo == o.cinfo && prop == o.prop;
+    }
+
+    friend size_t tbb_hasher(KnownKey k) {
+      return folly::hash::hash_combine(k.cinfo, k.prop);
+    }
+
+    borrowed_ptr<ClassInfo> cinfo;
+    SString prop;
+  };
+
+  using UnknownMap = tbb::concurrent_hash_map<SString,Type>;
+  using KnownMap = tbb::concurrent_hash_map<KnownKey,Type>;
+
+private:
+  std::atomic<bool> m_everything_bad{false};
+  UnknownMap m_unknown;
+  KnownMap m_known;
 };
 
 //////////////////////////////////////////////////////////////////////

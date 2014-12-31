@@ -14,23 +14,6 @@ foreach ($v as $key => $val) {
   echo $key . ' ' . $val . "\n";
 }
 echo "------------------------\n";
-$s = new StableMap;
-$s['w'] = 2;
-$s['v'] = 4;
-$s['y'] = 3;
-$s['x'] = 5;
-$s['z'] = 1;
-uksort($s, 'cmp');
-foreach ($s as $key => $val) {
-  echo $key . ' ' . $val . "\n";
-}
-echo "------------------------\n";
-uasort($s, 'cmp');
-foreach ($s as $key => $val) {
-  echo $key . ' ' . $val . "\n";
-}
-
-echo "------------------------\n";
 $m = new Map;
 $m['w'] = 2;
 $m['v'] = 4;

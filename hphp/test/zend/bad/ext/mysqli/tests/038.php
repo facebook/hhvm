@@ -24,6 +24,7 @@
 	mysqli_query($link, "DROP TABLE IF EXISTS test_038_table_1");
 	mysqli_close($link);
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once("connect.inc");
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))

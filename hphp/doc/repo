@@ -91,5 +91,7 @@ can be used to control repo behavior:
   not consult filesystem to check for existence of file or parse it.
   Otherwise, fall back to parsing file from filesystem if unit
   is not found in Repo.
+* Repo.Preload: true or false (*Repo.Authoritative)
+  If true, preload all units from the repo in parallel during startup.
 * The environment variable $HHVM_RUNTIME_REPO_SCHEMA will override the schema
   id.

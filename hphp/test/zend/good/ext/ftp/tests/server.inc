@@ -5,7 +5,7 @@ $errno = 0;
 $context = stream_context_create(array('ssl' => array('local_cert' => dirname(__FILE__).'/cert.pem', 'passphrase' => 'pass')));
 
 for ($i=0; $i<100 && !$socket; ++$i) {
-	$port = rand(50000, 65535);
+	$port = rand(1025, 65535);
 	
 	$socket = @stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 }

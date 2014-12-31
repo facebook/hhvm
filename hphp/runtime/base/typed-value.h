@@ -60,6 +60,7 @@ union AuxUnion {
   VarNrFlag u_varNrFlag; // magic number for asserts in VarNR
   bool u_deepInit;       // used by Class::initPropsImpl for deep init
   int32_t u_rdsHandle;   // used by unit.cpp to squirrel away rds handles TODO type
+  bool u_isAbstractConst; // used by Class::Const
 };
 
 /*
@@ -83,23 +84,6 @@ union AuxUnion {
  * of m_data.  m_aux is described above, and must only be read or written
  * in specialized contexts.
  */
-#ifdef PACKED_TV
-// This TypedValue layout is a subset of the full 7pack format.  Client
-// code should not mess with the _t0 or _tags padding fields.
-struct TypedValue {
-  union {
-    uint8_t _tags[8];
-    struct {
-      uint8_t _t0;
-      DataType m_type;
-      AuxUnion m_aux;
-    };
-  };
-  Value m_data;
-
-  std::string pretty() const;
-};
-#else
 struct TypedValue {
   Value m_data;
   DataType m_type;
@@ -107,13 +91,12 @@ struct TypedValue {
 
   std::string pretty() const; // debug formatting. see trace.h
 };
-#endif
 
 // Check that TypedValue's size is a power of 2 (16bytes currently)
 static_assert((sizeof(TypedValue) & (sizeof(TypedValue)-1)) == 0,
               "TypedValue's size is expected to be a power of 2");
-const size_t kTypedValueAlignMask = sizeof(TypedValue) - 1;
-inline size_t alignTypedValue(size_t sz) {
+constexpr size_t kTypedValueAlignMask = sizeof(TypedValue) - 1;
+constexpr size_t alignTypedValue(size_t sz) {
   return (sz + kTypedValueAlignMask) & ~kTypedValueAlignMask;
 }
 
@@ -124,7 +107,7 @@ inline size_t alignTypedValue(size_t sz) {
  * TODO: t1100154 phase this out completely.
  */
 struct TypedValueAux : TypedValue {
-  static const size_t auxOffset = offsetof(TypedValue, m_aux);
+  static constexpr size_t auxOffset = offsetof(TypedValue, m_aux);
   static const size_t auxSize = sizeof(m_aux);
   int32_t& hash() { return m_aux.u_hash; }
   const int32_t& hash() const { return m_aux.u_hash; }
@@ -132,6 +115,8 @@ struct TypedValueAux : TypedValue {
   const int32_t& rdsHandle() const { return m_aux.u_rdsHandle; }
   bool& deepInit() { return m_aux.u_deepInit; }
   const bool& deepInit() const { return m_aux.u_deepInit; }
+  bool& isAbstractConst() { return m_aux.u_isAbstractConst; }
+  const bool& isAbstractConst() const { return m_aux.u_isAbstractConst; }
   VarNrFlag& varNrFlag() { return m_aux.u_varNrFlag; }
   const VarNrFlag& varNrFlag() const { return m_aux.u_varNrFlag; }
 

@@ -37,9 +37,9 @@ TempFile::TempFile(bool autoDelete /* = true */,
     raise_warning("Unable to open temporary file");
     return;
   }
-  m_fd = fd;
+  setFd(fd);
   m_stream = fdopen(fd, "r+");
-  m_name = std::string(path);
+  setName(path);
   m_rawName = std::string(path);
 }
 
@@ -56,7 +56,7 @@ void TempFile::sweep() {
 
 bool TempFile::open(const String& filename, const String& mode) {
   throw FatalErrorException((std::string("cannot open a temp file ") +
-                             m_name).c_str());
+                             getName()).c_str());
 }
 
 bool TempFile::close() {
@@ -66,14 +66,14 @@ bool TempFile::close() {
 
 bool TempFile::closeImpl() {
   bool ret = true;
-  s_file_data->m_pcloseRet = 0;
-  if (!m_closed) {
+  s_pcloseRet = 0;
+  if (!isClosed()) {
     assert(valid());
-    s_file_data->m_pcloseRet = ::fclose(m_stream);
-    ret = (s_file_data->m_pcloseRet == 0);
-    m_closed = true;
+    s_pcloseRet = ::fclose(m_stream);
+    ret = (s_pcloseRet == 0);
+    setIsClosed(true);
     m_stream = nullptr;
-    m_fd = -1;
+    setFd(-1);
   }
   if (!m_rawName.empty()) {
     if (m_autoDelete) {

@@ -8,7 +8,11 @@
  *
  *)
 
-let go (fn, line, char) oc =
+open Utils
+
+type result = Pos.absolute option * string option
+
+let go env (fn, line, char) oc =
   let clean () =
     Typing_defs.infer_type := None;
     Typing_defs.infer_target := None;
@@ -16,9 +20,9 @@ let go (fn, line, char) oc =
   in
   clean ();
   Typing_defs.infer_target := Some (line, char);
-  ServerIdeUtils.check_file_input fn;
-  let pos = !Typing_defs.infer_pos in
+  ServerIdeUtils.check_file_input env.ServerEnv.files_info fn;
+  let pos = opt_map Pos.to_absolute !Typing_defs.infer_pos in
   let ty = !Typing_defs.infer_type in
   clean ();
-  Marshal.to_channel oc (pos, ty) [];
+  Marshal.to_channel oc ((pos, ty) : result) [];
   flush oc

@@ -1,0 +1,35 @@
+breakpoint_set -i 0 -t line -f eval.php.test -n 45
+run -i 0
+# 5 + 5 
+eval -i 0 -- NSs1
+# #$l[@#$@ (Syntax Error)
+eval -i 0 -- IyRsW0AjJEA=
+# print 4 
+eval -i 0 -- cHJpbnQgNA==
+# $foo 
+eval -i 0 -- JGZvbw==
+# $bar 
+eval -i 0 -- JGJhcg==
+# $baz
+eval -i 0 -- JGJheg==
+# $longstring 
+eval -i 0 -- JGxvbmdzdHJpbmc=
+feature_set -i 0 -n max_children -v 2
+feature_set -i 0 -n max_data -v 2
+# $foo
+eval -i 0 -- JGZvbw==
+# $bar
+eval -i 0 -- JGJhcg==
+# $bar page 1
+eval -i 0 -p 1 -- JGJhcg==
+# $foo page 2
+eval -i 0 -p 2 -- JGZvbw==
+# $longstring
+eval -i 0 -- JGxvbmdzdHJpbmc=
+feature_set -i 0 -n max_depth -v 1
+# $foo
+eval -i 0 -- JGZvbw==
+# thrower("hello from eval"); 
+eval -i 0 -- dGhyb3dlcigiaGVsbG8gZnJvbSBldmFsIik7
+run -i 0
+run -i 0

@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/string-vsnprintf.h"
-#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include <unicode/uloc.h>
 
@@ -37,6 +37,8 @@ void IntlError::setError(UErrorCode code, const char *format, ...) {
     va_start(args, format);
     string_vsnprintf(m_errorMessage, format, args);
     va_end(args);
+  } else {
+    m_errorMessage.clear();
   }
 
   if (this != s_intl_error.get()) {
@@ -58,34 +60,34 @@ void IntlError::clearError(bool clearGlobalError /*= true */) {
 /////////////////////////////////////////////////////////////////////////////
 // INI Setting
 
-/* gcc 4.7 doesn't support thread_locale storage
- * required for dynamic initializers (like std::string)
- * So wrap it up in a RequestEventHandler until we set
- * gcc 4.8 as our minimum version
- */
-struct DefaultLocale final : RequestEventHandler {
-  void requestInit() override {}
-  void requestShutdown() override {}
-  std::string m_defaultLocale;
-};
-IMPLEMENT_STATIC_REQUEST_LOCAL(DefaultLocale, s_default_locale);
+static __thread std::string* s_defaultLocale;
 
 void IntlExtension::bindIniSettings() {
+  // TODO: t5226715 We shouldn't need to check s_defaultLocale here,
+  // but right now this is called for every request.
+  if (s_defaultLocale) return;
+  s_defaultLocale = new std::string;
   IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                    "intl.default_locale", "",
-                   &s_default_locale->m_defaultLocale);
+                   s_defaultLocale);
+}
+
+void IntlExtension::threadShutdown() {
+  delete s_defaultLocale;
+  s_defaultLocale = nullptr;
 }
 
 const String GetDefaultLocale() {
-  String locale(s_default_locale->m_defaultLocale);
-  if (locale.empty()) {
-    locale = String(uloc_getDefault(), CopyString);
+  assert(s_defaultLocale);
+  if (s_defaultLocale->empty()) {
+    return String(uloc_getDefault(), CopyString);
   }
-  return locale;
+  return *s_defaultLocale;
 }
 
 bool SetDefaultLocale(const String& locale) {
-  s_default_locale->m_defaultLocale = locale.toCppString();
+  assert(s_defaultLocale);
+  *s_defaultLocale = locale.toCppString();
   return true;
 }
 
@@ -172,7 +174,7 @@ double VariantToMilliseconds(const Variant& arg) {
   if (arg.isObject() &&
       arg.toObject()->instanceof(SystemLib::s_DateTimeInterfaceClass)) {
     return U_MILLIS_PER_SECOND *
-           (double) c_DateTime::GetTimestamp(arg.toObject());
+           (double) DateTimeData::getTimestamp(arg.toObject());
   }
   // TODO: Handle object IntlCalendar
   return NAN;

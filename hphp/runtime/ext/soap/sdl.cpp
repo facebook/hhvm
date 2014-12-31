@@ -17,15 +17,21 @@
 #include "hphp/runtime/ext/soap/sdl.h"
 
 #include <string>
-
-#include <boost/lexical_cast.hpp>
 #include <memory>
+
+#include <folly/Conv.h>
 
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+sdlCtx::~sdlCtx() {
+  for (auto const& doc : docs) {
+    xmlFreeDoc(doc.second);
+  }
+}
 
 encodePtr get_encoder_from_prefix(sdl *sdl, xmlNodePtr node,
                                   const xmlChar *type) {
@@ -974,7 +980,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
           std::string tmp = toLower(function->functionName);
           sdlFunctionMap::iterator iter = ctx.sdl->functions.find(tmp);
           if (iter != ctx.sdl->functions.end()) {
-            ctx.sdl->functions[boost::lexical_cast<std::string>
+            ctx.sdl->functions[folly::to<std::string>
                                (ctx.sdl->functions.size())] = function;
           } else {
             ctx.sdl->functions[tmp] = function;

@@ -1,0 +1,24 @@
+string(8) "function"
+string(17) "Method - instance"
+string(15) "Method - static"
+string(6) "Lambda"
+array(1) {
+  [0]=>
+  int(123)
+}
+array(2) {
+  [0]=>
+  array(1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+  [1]=>
+  int(123)
+}
+array(1) {
+  [0]=>
+  object(stdClass)#%d (1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+}

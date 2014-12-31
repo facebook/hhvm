@@ -17,13 +17,14 @@
 #ifndef incl_HPHP_VM_BLOCK_H_
 #define incl_HPHP_VM_BLOCK_H_
 
-#include "hphp/runtime/base/smart-containers.h"
 #include <algorithm>
-#include "hphp/runtime/vm/jit/ir.h"
+
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * A Block refers to a basic block: single-entry, single-exit, list of
@@ -71,7 +72,7 @@ struct Block : boost::noncopyable {
     , m_hint(Hint::Neither)
   {}
 
-  uint32_t    id() const           { return m_id; }
+  unsigned    id() const           { return m_id; }
   Hint        hint() const         { return m_hint; }
   void        setHint(Hint hint)   { m_hint = hint; }
 
@@ -121,10 +122,7 @@ struct Block : boost::noncopyable {
   EdgeList& preds()             { return m_preds; }
   const EdgeList& preds() const { return m_preds; }
 
-  size_t numPreds() const {
-    // NB: The entry block has an invisible predecessor.
-    return m_preds.size() + safe_cast<size_t>(isEntry());
-  }
+  size_t numPreds() const { return m_preds.size(); }
 
   // Remove edge from its destination's predecessor list and insert it in
   // new_to's predecessor list.
@@ -144,6 +142,8 @@ struct Block : boost::noncopyable {
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
   InstructionList& instrs()      { return m_instrs; }
+  const InstructionList&
+                   instrs() const{ return m_instrs; }
   bool             empty() const { return m_instrs.empty(); }
   iterator         begin()       { return m_instrs.begin(); }
   iterator         end()         { return m_instrs.end(); }
@@ -177,7 +177,8 @@ struct Block : boost::noncopyable {
   Hint m_hint;              // execution frequency hint
 };
 
-typedef smart::vector<Block*> BlockList;
+using BlockList = jit::vector<Block*>;
+using BlockSet = jit::flat_set<Block*>;
 
 inline Block::reference Block::front() {
   assert(!m_instrs.empty());
@@ -295,8 +296,8 @@ inline void Block::push_back(IRInstruction* inst) {
   return m_instrs.push_back(*inst);
 }
 
-template <class Predicate> inline
-void Block::remove_if(Predicate p) {
+template <class Predicate>
+inline void Block::remove_if(Predicate p) {
   m_instrs.remove_if(p);
 }
 
@@ -323,6 +324,10 @@ inline BCMarker Block::catchMarker() const {
 // defined here to avoid circular dependencies
 inline void Edge::setTo(Block* to) {
   m_to = Block::updatePreds(this, to);
+}
+
+inline Block* Edge::from() const {
+  return inst() != nullptr ? inst()->block() : nullptr;
 }
 
 }}

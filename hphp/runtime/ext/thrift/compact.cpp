@@ -15,11 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
-#include "hphp/runtime/ext/ext_thrift.h"
+#include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
 #include <stack>
@@ -216,7 +217,7 @@ class CompactWriter {
       lastFieldNum = 0;
 
       // Get field specification
-      const Array& spec = HHVM_FN(hphp_get_static_property)(obj->o_getClassName(),
+      const Array& spec = HHVM_FN(hphp_get_static_property)(obj->getClassName(),
                                                        "_TSPEC", false)
         .toArray();
 
@@ -236,7 +237,7 @@ class CompactWriter {
         TType fieldType = (TType)fieldSpec
           .rvalAt(PHPTransport::s_type, AccessFlags::Error_Key).toByte();
 
-        Variant fieldVal = obj->o_get(fieldName, true, obj->o_getClassName());
+        Variant fieldVal = obj->o_get(fieldName, true, obj->getClassName());
 
         if (!fieldVal.isNull()) {
           writeFieldBegin(fieldNo, fieldType);
@@ -538,15 +539,6 @@ class CompactReader {
       }
     }
 
-  private:
-    PHPInputTransport transport;
-    uint8_t version;
-    CState state;
-    uint16_t lastFieldNum;
-    bool boolValue;
-    std::stack<std::pair<CState, uint16_t> > structHistory;
-    std::stack<CState> containerHistory;
-
     void readStruct(const Object& dest, const Array& spec) {
       readStructBegin();
 
@@ -572,7 +564,7 @@ class CompactReader {
           if (typesAreCompatible(fieldType, expectedType)) {
             readComplete = true;
             Variant fieldValue = readField(fieldSpec, fieldType);
-            dest->o_set(fieldName, fieldValue, dest->o_getClassName());
+            dest->o_set(fieldName, fieldValue, dest->getClassName());
           }
         }
 
@@ -585,6 +577,15 @@ class CompactReader {
 
       readStructEnd();
     }
+
+  private:
+    PHPInputTransport transport;
+    uint8_t version;
+    CState state;
+    uint16_t lastFieldNum;
+    bool boolValue;
+    std::stack<std::pair<CState, uint16_t> > structHistory;
+    std::stack<CState> containerHistory;
 
     void readStructBegin(void) {
       structHistory.push(std::make_pair(state, lastFieldNum));
@@ -835,7 +836,7 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        ret = NEWOBJ(c_Map)();
+        ret = newobj<c_Map>();
         auto const data = ret.getObjectData();
         if (size) static_cast<BaseMap*>(data)->reserve(size);
         for (uint32_t i = 0; i < size; i++) {
@@ -868,7 +869,7 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        auto const pvec = NEWOBJ(c_Vector)();
+        auto const pvec = newobj<c_Vector>();
         ret = pvec;
         if (size) pvec->reserve(size);
         for (uint32_t i = 0; i < size; i++) {
@@ -898,7 +899,7 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        p_Set set_ret = NEWOBJ(c_Set)();
+        SmartObject<c_Set> set_ret(newobj<c_Set>());
         if (size) set_ret->reserve(size);
 
         for (uint32_t i = 0; i < size; i++) {
@@ -1016,24 +1017,26 @@ class CompactReader {
 
 };
 
-int f_thrift_protocol_set_compact_version(int version) {
+int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version,
+                      int version) {
   int result = s_compact_request_data->version;
   s_compact_request_data->version = (uint8_t)version;
   return result;
 }
 
-void f_thrift_protocol_write_compact(const Object& transportobj,
-                                     const String& method_name,
-                                     int64_t msgtype,
-                                     const Object& request_struct,
-                                     int seqid,
-                                     bool oneway) {
-  PHPOutputTransport transport(transportobj);
+void HHVM_FUNCTION(thrift_protocol_write_compact,
+                   const Variant& transportobj,
+                   const String& method_name,
+                   int64_t msgtype,
+                   const Variant& request_struct,
+                   int seqid,
+                   bool oneway) {
+  PHPOutputTransport transport(transportobj.toObject());
 
   CompactWriter writer(&transport);
   writer.setWriteVersion(s_compact_request_data->version);
   writer.writeHeader(method_name, (uint8_t)msgtype, (uint32_t)seqid);
-  writer.write(request_struct);
+  writer.write(request_struct.toObject());
 
   if (oneway) {
     transport.onewayFlush();
@@ -1042,10 +1045,22 @@ void f_thrift_protocol_write_compact(const Object& transportobj,
   }
 }
 
-Variant f_thrift_protocol_read_compact(const Object& transportobj,
-                                       const String& obj_typename) {
-  CompactReader reader(transportobj);
+Variant HHVM_FUNCTION(thrift_protocol_read_compact,
+                      const Variant& transportobj,
+                      const String& obj_typename) {
+  CompactReader reader(transportobj.toObject());
   return reader.read(obj_typename);
+}
+
+Variant HHVM_FUNCTION(thrift_protocol_read_compact_struct,
+                      const Variant& transportobj,
+                      const String& obj_typename) {
+  CompactReader reader(transportobj.toObject());
+  Object ret = create_object(obj_typename, Array());
+  Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename,
+                                                   "_TSPEC", false);
+  reader.readStruct(ret, spec.toArray());
+  return ret;
 }
 
 }

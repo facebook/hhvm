@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/user-stream-wrapper.h"
 #include "hphp/system/constants.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +33,7 @@ UserStreamWrapper::UserStreamWrapper(const String& name,
 
 File* UserStreamWrapper::open(const String& filename, const String& mode,
                               int options, const Variant& context) {
-  auto file = NEWOBJ(UserFile)(m_cls, context);
+  auto file = newres<UserFile>(m_cls, context);
   Resource wrapper(file);
   auto ret = file->openImpl(filename, mode, options);
   if (!ret) {
@@ -45,43 +46,43 @@ File* UserStreamWrapper::open(const String& filename, const String& mode,
 }
 
 int UserStreamWrapper::access(const String& path, int mode) {
-  auto file = NEWOBJ(UserFile)(m_cls);
+  auto file = newres<UserFile>(m_cls);
   Resource wrapper(file);
   return file->access(path, mode);
 }
 int UserStreamWrapper::lstat(const String& path, struct stat* buf) {
-  auto file = NEWOBJ(UserFile)(m_cls);
+  auto file = newres<UserFile>(m_cls);
   Resource wrapper(file);
   return file->lstat(path, buf);
 }
 int UserStreamWrapper::stat(const String& path, struct stat* buf) {
-  auto file = NEWOBJ(UserFile)(m_cls);
+  auto file = newres<UserFile>(m_cls);
   Resource wrapper(file);
   return file->stat(path, buf);
 }
 int UserStreamWrapper::unlink(const String& path) {
-  auto file = NEWOBJ(UserFile)(m_cls);
+  auto file = newres<UserFile>(m_cls);
   Resource wrapper(file);
   return file->unlink(path) ? 0 : -1;
 }
 int UserStreamWrapper::rename(const String& oldname, const String& newname) {
-  auto file = NEWOBJ(UserFile)(m_cls);
+  auto file = newres<UserFile>(m_cls);
   Resource wrapper(file);
   return file->rename(oldname, newname) ? 0 : -1;
 }
 int UserStreamWrapper::mkdir(const String& path, int mode, int options) {
-  auto file = NEWOBJ(UserFile)(m_cls);
+  auto file = newres<UserFile>(m_cls);
   Resource wrapper(file);
   return file->mkdir(path, mode, options) ? 0 : -1;
 }
 int UserStreamWrapper::rmdir(const String& path, int options) {
-  auto file = NEWOBJ(UserFile)(m_cls);
+  auto file = newres<UserFile>(m_cls);
   Resource wrapper(file);
   return file->rmdir(path, options) ? 0 : -1;
 }
 
 Directory* UserStreamWrapper::opendir(const String& path) {
-  auto dir = NEWOBJ(UserDirectory)(m_cls);
+  auto dir = newres<UserDirectory>(m_cls);
   Resource wrapper(dir);
   auto ret = dir->open(path);
   if (!ret) {
@@ -90,6 +91,43 @@ Directory* UserStreamWrapper::opendir(const String& path) {
   DEBUG_ONLY auto tmp = wrapper.detach();
   assert(tmp == dir);
   return dir;
+}
+
+bool UserStreamWrapper::touch(const String& path,
+                              int64_t mtime, int64_t atime) {
+  auto file = newres<UserFile>(m_cls);
+  Resource wrapper(file);
+  return file->touch(path, mtime, atime);
+}
+
+bool UserStreamWrapper::chmod(const String& path, int64_t mode) {
+  auto file = newres<UserFile>(m_cls);
+  Resource wrapper(file);
+  return file->chmod(path, mode);
+}
+
+bool UserStreamWrapper::chown(const String& path, int64_t uid) {
+  auto file = newres<UserFile>(m_cls);
+  Resource wrapper(file);
+  return file->chown(path, uid);
+}
+
+bool UserStreamWrapper::chown(const String& path, const String& uid) {
+  auto file = newres<UserFile>(m_cls);
+  Resource wrapper(file);
+  return file->chown(path, uid);
+}
+
+bool UserStreamWrapper::chgrp(const String& path, int64_t gid) {
+  auto file = newres<UserFile>(m_cls);
+  Resource wrapper(file);
+  return file->chgrp(path, gid);
+}
+
+bool UserStreamWrapper::chgrp(const String& path, const String& gid) {
+  auto file = newres<UserFile>(m_cls);
+  Resource wrapper(file);
+  return file->chgrp(path, gid);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -4,9 +4,6 @@ Vector::set throws
 Map::get throws
 Map::isset: bool(false)
 Map::set throws
-StableMap::get throws
-StableMap::isset: bool(false)
-StableMap::set throws
 Set::get throws
 Set::isset: bool(false)
 Set::set throws

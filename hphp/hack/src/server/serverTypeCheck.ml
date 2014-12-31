@@ -56,7 +56,7 @@ let set_of_idl l =
  * File foo.php was defining the class A.
  * The user gets rid of class A (in foo.php)
  * In general, the type-checker determines what must be re-declared or
- * re-chechecked, by comparing the old and the new type-definitions.
+ * re-typechecked, by comparing the old and the new type-definitions.
  * That's why we are adding the 'old' definitions to the file.
  * In this case, the redecl phase (typing/typing_redecl_service.ml) is going
  * to compare the 'old' definition of A with the new one. It will realize that
@@ -69,14 +69,14 @@ let set_of_idl l =
 (*****************************************************************************)
 
 let add_old_decls old_files_info fast =
-  SMap.fold begin fun filename info_names acc ->
-    match SMap.get filename old_files_info with
+  Relative_path.Map.fold begin fun filename info_names acc ->
+    match Relative_path.Map.get filename old_files_info with
     | Some {FileInfo.consider_names_just_for_autoload = true; _}
     | None -> acc
     | Some old_info ->
       let old_info_names = FileInfo.simplify old_info in
       let info_names = FileInfo.merge_names old_info_names info_names in
-      SMap.add filename info_names acc
+      Relative_path.Map.add filename info_names acc
   end fast fast
 
 (*****************************************************************************)
@@ -93,32 +93,18 @@ let add_old_decls old_files_info fast =
 (*****************************************************************************)
 
 let reparse fast files_info additional_files =
-  SSet.fold begin fun x acc ->
-    match SMap.get x fast with
+  Relative_path.Set.fold begin fun x acc ->
+    match Relative_path.Map.get x fast with
     | None ->
         (try
-           let info = SMap.find_unsafe x files_info in
+           let info = Relative_path.Map.find_unsafe x files_info in
            if info.FileInfo.consider_names_just_for_autoload then acc else
            let info_names = FileInfo.simplify info in
-           SMap.add x info_names acc
+           Relative_path.Map.add x info_names acc
          with Not_found ->
            acc)
     | Some _ -> acc
   end additional_files fast
-
-(* The version with the definitions + their position *)
-let reparse_with_pos fast files_info additional_files =
-  SSet.fold (
-  fun x acc ->
-    match SMap.get x fast with
-    | None ->
-        (try
-          let info = SMap.find_unsafe x files_info in
-          SMap.add x info acc
-        with Not_found ->
-          acc)
-    | Some _ -> acc
- ) additional_files fast
 
 (*****************************************************************************)
 (* Removes the names that were defined in the files *)
@@ -127,8 +113,8 @@ let reparse_with_pos fast files_info additional_files =
 let remove_decls env fast_parsed =
   let nenv = env.nenv in
   let nenv =
-    SMap.fold begin fun fn _ nenv ->
-      match SMap.get fn env.files_info with
+    Relative_path.Map.fold begin fun fn _ nenv ->
+      match Relative_path.Map.get fn env.files_info with
       | Some {FileInfo.consider_names_just_for_autoload = true; _}
       | None -> nenv
       | Some {FileInfo.
@@ -154,7 +140,7 @@ let remove_decls env fast_parsed =
 (*****************************************************************************)
 
 let remove_failed fast failed =
-  SSet.fold SMap.remove failed fast
+  Relative_path.Set.fold Relative_path.Map.remove failed fast
 
 (*****************************************************************************)
 (* Parses the set of modified files *)
@@ -162,10 +148,11 @@ let remove_failed fast failed =
 
 let parsing genv env =
   Parser_heap.ParserHeap.remove_batch env.failed_parsing;
+  Parser_heap.HH_FIXMES.remove_batch env.failed_parsing;
   HackSearchService.MasterApi.clear_shared_memory env.failed_parsing;
   SharedMem.collect();
-  let get_next = Bucket.make (SSet.elements env.failed_parsing) in
-  Parsing_service.go genv.workers false env.files_info ~get_next
+  let get_next = Bucket.make (Relative_path.Set.elements env.failed_parsing) in
+  Parsing_service.go genv.workers ~get_next
 
 (*****************************************************************************)
 (* At any given point in time, we want to know what each file defines.
@@ -174,9 +161,10 @@ let parsing genv env =
  *)
 (*****************************************************************************)
 
-let update_file_info genv env fast_parsed =
-  Typing_deps.update_files genv.workers fast_parsed;
-  let files_info = SMap.fold SMap.add fast_parsed env.files_info in
+let update_file_info env fast_parsed =
+  Typing_deps.update_files fast_parsed;
+  let files_info =
+    Relative_path.Map.fold Relative_path.Map.add fast_parsed env.files_info in
   files_info
 
 (*****************************************************************************)
@@ -188,7 +176,8 @@ let update_file_info genv env fast_parsed =
 let declare_names env files_info fast_parsed =
   let env = remove_decls env fast_parsed in
   let errorl, failed_naming, nenv =
-    SMap.fold Naming.ndecl_file fast_parsed ([], SSet.empty, env.nenv) in
+    Relative_path.Map.fold
+      Naming.ndecl_file fast_parsed ([], Relative_path.Set.empty, env.nenv) in
   let fast = remove_failed fast_parsed failed_naming in
   let fast = FileInfo.simplify_fast fast in
   let env = { env with nenv = nenv } in
@@ -207,17 +196,19 @@ let hook_after_parsing = ref (fun _ _ -> ())
 let type_check genv env =
 
   Printf.printf "******************************************\n";
-  Printf.printf "Files to recompute: %d\n" (SSet.cardinal env.failed_parsing);
+  Printf.printf "Files to recompute: %d\n"
+    (Relative_path.Set.cardinal env.failed_parsing);
   flush stdout;
   (* PARSING *)
-  let t = Unix.gettimeofday() in
+  let start_t = Unix.gettimeofday() in
+  let t = start_t in
   let fast_parsed, errorl, failed_parsing = parsing genv env in
   let t2 = Unix.gettimeofday() in
-  Printf.printf "Parsing: %f\n" (t2 -. t); flush stdout;
+  Printf.printf "Parsing: %f\n%!" (t2 -. t);
   let t = t2 in
 
   (* UPDATE FILE INFO *)
-  let files_info = update_file_info genv env fast_parsed in
+  let files_info = update_file_info env fast_parsed in
 
   (* BUILDING AUTOLOADMAP *)
   !hook_after_parsing genv { env with files_info };
@@ -233,14 +224,14 @@ let type_check genv env =
   let fast = add_old_decls env.files_info fast in
 
   let t2 = Unix.gettimeofday() in
-  Printf.printf "Naming: %f\n" (t2 -. t); flush stdout;
+  Printf.printf "Naming: %f\n%!" (t2 -. t);
   let t = t2 in
 
   let _, _, to_redecl_phase2, to_recheck1 =
     Typing_redecl_service.redo_type_decl
       ~update_pos:true genv.workers nenv fast in
   let t2 = Unix.gettimeofday() in
-  Printf.printf "Determining changes: %f\n" (t2 -. t); flush stdout;
+  Printf.printf "Determining changes: %f\n%!" (t2 -. t);
   let t = t2 in
 
   let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2 in
@@ -254,33 +245,36 @@ let type_check genv env =
       ~update_pos:false genv.workers nenv fast_redecl_phase2 in
 
   let t2 = Unix.gettimeofday() in
-  Printf.printf "Type-decl: %f\n" (t2 -. t); flush stdout;
+  Printf.printf "Type-decl: %f\n%!" (t2 -. t);
   let t = t2 in
 
   let errorl = List.rev_append errorl' errorl in
   let to_recheck2 = Typing_deps.get_files to_recheck2 in
 
   (* DECLARING TYPES: merging results of the 2 phases *)
-  let fast = SMap.fold SMap.add fast fast_redecl_phase2 in
-  let to_recheck = SSet.union env.failed_decl to_redecl_phase2 in
-  let to_recheck = SSet.union to_recheck1 to_recheck in
-  let to_recheck = SSet.union to_recheck2 to_recheck in
+  let fast =
+    Relative_path.Map.fold Relative_path.Map.add fast fast_redecl_phase2 in
+  let to_recheck = Relative_path.Set.union env.failed_decl to_redecl_phase2 in
+  let to_recheck = Relative_path.Set.union to_recheck1 to_recheck in
+  let to_recheck = Relative_path.Set.union to_recheck2 to_recheck in
 
   (* TYPE CHECKING *)
-  let to_recheck = SSet.union to_recheck env.failed_check in
+  let to_recheck = Relative_path.Set.union to_recheck env.failed_check in
   let fast = reparse fast files_info to_recheck in
   let errorl', failed_check = Typing_check_service.go genv.workers fast in
 
   let errorl = List.rev (List.rev_append errorl' errorl) in
 
   let t2 = Unix.gettimeofday() in
-  Printf.printf "Type-check: %f\n" (t2 -. t); flush stdout;
+  Printf.printf "Type-check: %f\n%!" (t2 -. t);
+
+  Printf.printf "Total: %f\n%!" (t2 -. start_t);
 
   (* Done, that's the new environment *)
   { files_info = files_info;
     nenv = nenv;
     errorl = errorl;
-    failed_parsing = SSet.union failed_naming failed_parsing;
+    failed_parsing = Relative_path.Set.union failed_naming failed_parsing;
     failed_decl = failed_decl;
     failed_check = failed_check;
   }
@@ -296,4 +290,3 @@ let check genv env =
     flush stdout;
   end;
   type_check genv env
-

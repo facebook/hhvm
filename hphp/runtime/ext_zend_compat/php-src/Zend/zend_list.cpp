@@ -231,7 +231,7 @@ int zval_get_resource_id(const zval &z) {
   }
 
   // Make a zend_rsrc_list_entry and return that
-  le = new HPHP::ZendNormalResourceDataHolder(z.tv()->m_data.pres);
+  le = HPHP::newres<HPHP::ZendNormalResourceDataHolder>(z.tv()->m_data.pres);
   RL().push_back(le);
   int id = RL().size() - 1;
   le->id = id;

@@ -21,7 +21,7 @@
 #include <algorithm>
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ namespace HPHP { namespace JIT {
  * IdSet implements a bitset over the range of Key's ids, optimized for
  * a relatively low number of bits.  If we only need one word of storage,
  * this doesn't allocate any extra memory.  Otherwise allocate an array
- * of words using smart_malloc.
+ * of words.
  */
 template<class Key>
 struct IdSet {
@@ -47,7 +47,7 @@ struct IdSet {
   }
 
   ~IdSet() {
-    if (m_cap > 1) smart_free(m_bitsptr);
+    if (m_cap > 1) free(m_bitsptr);
   }
 
   // Add an id to the bitset
@@ -114,11 +114,11 @@ private:
     if (n <= m_cap * kBits) return bits();
     auto cap = (n + kBits - 1) / kBits;
     if (m_cap == 1) {
-      auto ptr = (size_t*)smart_malloc(cap * sizeof(size_t));
+      auto ptr = (size_t*)malloc(cap * sizeof(size_t));
       ptr[0] = m_bits;
       m_bitsptr = ptr;
     } else {
-      m_bitsptr = (size_t*)smart_realloc(m_bitsptr, cap * sizeof(size_t));
+      m_bitsptr = (size_t*)realloc(m_bitsptr, cap * sizeof(size_t));
     }
     for (size_t i = m_cap; i < cap; ++i) m_bitsptr[i] = 0;
     m_cap = cap;

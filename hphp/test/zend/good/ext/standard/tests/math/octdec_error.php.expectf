@@ -8,4 +8,4 @@ Warning: %s
 
 -- Incorrect input --
 
-Fatal error: %s
+Catchable fatal error: %s

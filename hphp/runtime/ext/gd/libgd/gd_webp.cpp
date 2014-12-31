@@ -72,7 +72,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	gdImagePtr im;
 
 	do {
-		temp = (unsigned uint8*) gdRealloc(filedata, size+GD_WEBP_ALLOC_STEP);
+		temp = (unsigned char*) gdRealloc(filedata, size+GD_WEBP_ALLOC_STEP);
 		if (temp) {
 			filedata = temp;
 			read = temp + size;

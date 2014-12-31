@@ -1,0 +1,30 @@
+<?php
+// Test non-main file line breaks
+require('breakpoint_set_helper.inc');
+
+// Large-line line breakpoints
+var_dump(bar(new Foo()));
+
+// Test call breakpoints
+call();
+
+// Test method breakpoints
+(new Foo())->method();
+(new Foo())->method2();
+
+// Test return breakpoints
+var_dump(ret(10));
+var_dump(ret(10));
+
+// Test hit conitions
+for ($i = 0; $i < 10; $i++) {
+  var_dump($i + 1);
+} 
+
+// Test exception breakpoints
+try {
+  echo "About to throw an exception\n";
+  throw new Exception("Hello world!");
+} catch (Exception $e) {
+  echo "Caught the exception!\n";
+}

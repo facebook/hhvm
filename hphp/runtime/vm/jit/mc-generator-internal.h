@@ -23,14 +23,11 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP {
-namespace JIT {
-
-static const DataType BitwiseKindOfString = KindOfString;
+namespace HPHP { namespace jit {
 
 // Generate an if-then block into a.  thenBlock is executed if cc is true.
 template <class Then>
-void ifThen(JIT::X64Assembler& a, ConditionCode cc, Then thenBlock) {
+void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
   Label done;
   a.jcc8(ccNegate(cc), done);
   thenBlock(a);
@@ -38,11 +35,10 @@ void ifThen(JIT::X64Assembler& a, ConditionCode cc, Then thenBlock) {
 }
 
 template <class Then>
-void ifThen(X64::Vout& v, ConditionCode cc, Then thenBlock) {
-  using namespace X64;
+void ifThen(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock) {
   auto then = v.makeBlock();
   auto done = v.makeBlock();
-  v << jcc{cc, {done, then}};
+  v << jcc{cc, sf, {done, then}};
   v = then;
   thenBlock(v);
   if (!v.closed()) v << jmp{done};
@@ -146,7 +142,7 @@ locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
                           l.space == Location::Local ||
                           l.space == Location::Iter));
   *outdisp = cellsToBytes(locPhysicalOffset(l, f));
-  *outbase = l.space == Location::Stack ? X64::rVmSp : X64::rVmFp;
+  *outbase = l.space == Location::Stack ? x64::rVmSp : x64::rVmFp;
 }
 
 // Common code emission patterns.
@@ -182,12 +178,12 @@ void emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  testb(src, toByte(tvOp));
 }
 
-inline void emitTestTVType(X64::Vout& v, Immed s0, X64::Vreg s1) {
-  v << X64::testbi{s0, s1};
+inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
+  v << testbi{s0, s1, sf};
 }
 
-inline void emitTestTVType(X64::Vout& v, Immed s0, X64::Vptr s1) {
-  v << X64::testbim{s0, s1};
+inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
+  v << testbim{s0, s1, sf};
 }
 
 template<typename SrcType, typename OpndType>
@@ -197,8 +193,8 @@ emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  loadzbl(src, toReg32(tvOp));
 }
 
-inline void emitLoadTVType(X64::Vout& v, X64::Vptr mem, X64::Vreg d) {
-  v << X64::loadzbl{mem, d};
+inline void emitLoadTVType(Vout& v, Vptr mem, Vreg d) {
+  v << loadzbq{mem, d};
 }
 
 template<typename SrcType, typename OpndType>
@@ -206,12 +202,12 @@ void emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  cmpb(src, toByte(tvOp));
 }
 
-inline void emitCmpTVType(X64::Vout& v, Immed s0, X64::Vptr s1) {
-  v << X64::cmpbim{s0, s1};
+inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
+  v << cmpbim{s0, s1, sf};
 }
 
-inline void emitCmpTVType(X64::Vout& v, Immed s0, X64::Vreg s1) {
-  v << X64::cmpbi{s0, s1};
+inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
+  v << cmpbi{s0, s1, sf};
 }
 
 template<typename DestType, typename OpndType>
@@ -219,13 +215,13 @@ void emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
   a.  storeb(toByte(tvOp), dest);
 }
 
-inline void emitStoreTVType(X64::Vout& v, X64::Vreg src, X64::Vptr dest) {
-  v << X64::storeb{src, dest};
+inline void emitStoreTVType(Vout& v, Vreg src, Vptr dest) {
+  v << storeb{src, dest};
 }
 
 inline void
-emitStoreTVType(X64::Vout& v, DataType src, X64::Vptr dest) {
-  v << X64::storebim{src, dest};
+emitStoreTVType(Vout& v, DataType src, Vptr dest) {
+  v << storebi{src, dest};
 }
 
 // emitDeref --
@@ -240,18 +236,6 @@ static inline void
 emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
   // src is a RefData, dest will be m_data field of inner gizmoom.
   a.    loadq (src[TVOFF(m_data)], dest);
-}
-
-inline void emitDerefIfVariant(X64::Vout& v, X64::Vreg reg) {
-  emitCmpTVType(v, KindOfRef, reg[TVOFF(m_type)]);
-  if (RefData::tvOffset() == 0) {
-    v << X64::cloadq{CC_E, reg[TVOFF(m_data)], reg};
-  } else {
-    ifThen(v, CC_E, [&](X64::Vout& v) {
-      v << X64::loadq{reg[TVOFF(m_data)], reg};
-      v << X64::addqi{RefData::tvOffset(), reg, reg};
-    });
-  }
 }
 
 // NB: leaves count field unmodified. Does not store to m_data if type
@@ -294,7 +278,7 @@ emitCopyTo(X64Assembler& a,
 // Pops the return address pushed by fcall and stores it into the
 // actrec in rStashedAR.
 inline void emitPopRetIntoActRec(X64Assembler& a) {
-  a.    pop  (X64::rStashedAR[AROFF(m_savedRip)]);
+  a.    pop  (x64::rStashedAR[AROFF(m_savedRip)]);
 }
 
 }}

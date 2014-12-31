@@ -19,12 +19,12 @@
 #define incl_HPHP_EXT_ZLIB_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP {
 
-extern const long k_FORCE_GZIP;
-extern const long k_FORCE_DEFLATE;
+extern const int64_t k_FORCE_GZIP;
+extern const int64_t k_FORCE_DEFLATE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // zlib functions

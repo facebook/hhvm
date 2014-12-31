@@ -8,6 +8,8 @@
  *
  *)
 
+type result = int * (string option * string) list
+
 let go genv env oc content line char =
   ArgumentInfoService.attach_hooks (line, char);
   let funs, classes = ServerIdeUtils.declare content in
@@ -19,5 +21,5 @@ let go genv env oc content line char =
   in
   ArgumentInfoService.detach_hooks();
   ServerIdeUtils.revive funs classes;
-  Marshal.to_channel oc (pos, expected) [];
+  Marshal.to_channel oc ((pos, expected) : result) [];
   flush oc

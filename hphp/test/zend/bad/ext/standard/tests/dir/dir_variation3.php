@@ -65,6 +65,7 @@ for($count = 0; $count < count($permission_values); $count++) {
 
 echo "Done";
 ?>
+<?php error_reporting(0); ?>
 <?php
 // deleting temporary directory
 $file_path = dirname(__FILE__);

@@ -18,11 +18,10 @@
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/util/text-util.h"
@@ -73,7 +72,7 @@ static void safe_php_register_variable(char *var, const Variant& val,
 #define MAX_SIZE_ANONNAME 33
 
 /* Errors */
-#define UPLOAD_ERROR_OK   0  /* File upload succesful */
+#define UPLOAD_ERROR_OK   0  /* File upload successful */
 #define UPLOAD_ERROR_A    1  /* Uploaded file exceeded upload_max_filesize */
 #define UPLOAD_ERROR_B    2  /* Uploaded file exceeded MAX_FILE_SIZE */
 #define UPLOAD_ERROR_C    3  /* Partially uploaded */
@@ -711,6 +710,7 @@ void rfc1867PostHandler(Transport* transport,
   int fd=-1;
   void *event_extra_data = nullptr;
   unsigned int llen = 0;
+  int upload_count = RuntimeOption::MaxFileUploads;
 
   /* Initialize the buffer */
   if (!(mbuff = multipart_buffer_new(transport,
@@ -799,7 +799,7 @@ void rfc1867PostHandler(Transport* transport,
         new_val_len = value_len;
         if (php_rfc1867_callback != nullptr) {
           multipart_event_formdata event_formdata;
-          size_t newlength = 0;
+          size_t newlength = new_val_len;
 
           event_formdata.post_bytes_processed = mbuff->read_post_bytes;
           event_formdata.name = param;
@@ -830,6 +830,11 @@ void rfc1867PostHandler(Transport* transport,
 
       /* If file_uploads=off, skip the file part */
       if (!RuntimeOption::EnableFileUploads) {
+        skip_upload = 1;
+      } else if (upload_count <= 0) {
+        Logger::Warning(
+          "Maximum number of allowable file uploads has been exceeded"
+        );
         skip_upload = 1;
       }
 
@@ -880,6 +885,7 @@ void rfc1867PostHandler(Transport* transport,
         snprintf(path, sizeof(path), "%s/XXXXXX",
                  RuntimeOption::UploadTmpDir.c_str());
         fd = mkstemp(path);
+        upload_count--;
         if (fd == -1) {
           Logger::Warning("Unable to open temporary file");
           Logger::Warning("File upload error - unable to create a "

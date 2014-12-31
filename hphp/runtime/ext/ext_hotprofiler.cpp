@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_hotprofiler.h"
 
 #include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-math.h"
@@ -29,7 +30,7 @@
 #include "hphp/util/vdso.h"
 #include "hphp/util/cycles.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
@@ -349,18 +350,28 @@ const StaticString
 /**
  * Maintain profiles of a running stack.
  */
-Profiler::Profiler() : m_successful(true), m_stack(nullptr),
-               m_frame_free_list(nullptr) {
+Profiler::Profiler(bool needCPUAffinity) : m_successful(true),
+                                           m_stack(nullptr),
+                                           m_frame_free_list(nullptr) {
     if (!s_rand_initialized) {
       s_rand_initialized = true;
       srand(math_generate_seed());
     }
 
-    // bind to a random cpu so that we can use rdtsc instruction.
-    int cur_cpu_id = rand() % s_machine.m_cpu_num;
-    GET_AFFINITY(0, sizeof(cpu_set_t), &m_prev_mask);
-    MachineInfo::BindToCPU(cur_cpu_id);
-    m_MHz = s_machine.m_cpu_frequencies[cur_cpu_id];
+    if (needCPUAffinity) {
+      //
+      // Bind to a random cpu so that we can use rdtsc instruction.
+      //
+      int cur_cpu_id = rand() % s_machine.m_cpu_num;
+      GET_AFFINITY(0, sizeof(cpu_set_t), &m_prev_mask);
+      MachineInfo::BindToCPU(cur_cpu_id);
+      m_MHz = s_machine.m_cpu_frequencies[cur_cpu_id];
+    } else {
+      //
+      // Take cpu0's speed as a proxy for all cpus.
+      //
+      m_MHz = s_machine.m_cpu_frequencies[0];
+    }
 
     memset(m_func_hash_counters, 0, sizeof(m_func_hash_counters));
 }
@@ -372,7 +383,7 @@ Profiler::~Profiler() {
     for (Frame *p = m_frame_free_list; p;) {
       Frame *cur = p;
       p = p->m_parent;
-      free(cur);
+      delete cur;
     }
 }
 
@@ -483,53 +494,71 @@ private:
     int64_t memory;
     int64_t peak_memory;
   };
+
+  class HierarchicalProfilerFrame : public Frame {
+  public:
+    virtual ~HierarchicalProfilerFrame() {
+    }
+
+    uint64_t        m_tsc_start;   // start value for TSC counter
+    int64_t         m_mu_start;    // memory usage
+    int64_t         m_pmu_start;   // peak memory usage
+    int64_t         m_vtsc_start;  // user/sys time start
+  };
+
   typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
 
 public:
+  explicit HierarchicalProfiler(int flags) : Profiler(true), m_flags(flags) {
+  }
 
-public:
-  explicit HierarchicalProfiler(int flags) : m_flags(flags) {
+  virtual Frame *allocateFrame() override {
+    return new HierarchicalProfilerFrame();
   }
 
   virtual void beginFrameEx(const char *symbol) override {
-    m_stack->m_tsc_start = cpuCycles();
+    HierarchicalProfilerFrame *frame =
+      dynamic_cast<HierarchicalProfilerFrame *>(m_stack);
+    frame->m_tsc_start = cpuCycles();
 
     if (m_flags & TrackCPU) {
-      m_stack->m_vtsc_start = cpuTime(m_MHz);
+      frame->m_vtsc_start = cpuTime(m_MHz);
     }
 
     if (m_flags & TrackMemory) {
       auto const& stats = MM().getStats();
-      m_stack->m_mu_start  = stats.usage;
-      m_stack->m_pmu_start = stats.peakUsage;
+      frame->m_mu_start  = stats.usage;
+      frame->m_pmu_start = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {
-      m_stack->m_mu_start = get_allocs();
-      m_stack->m_pmu_start = get_frees();
+      frame->m_mu_start = get_allocs();
+      frame->m_pmu_start = get_frees();
     }
   }
 
   virtual void endFrameEx(const TypedValue *retval,
                           const char *given_symbol) override {
     char symbol[512];
-    m_stack->getStack(2, symbol, sizeof(symbol));
+    HierarchicalProfilerFrame *frame =
+      dynamic_cast<HierarchicalProfilerFrame *>(m_stack);
+    frame->getStack(2, symbol, sizeof(symbol));
     CountMap &counts = m_stats[symbol];
     counts.count++;
-    counts.wall_time += cpuCycles() - m_stack->m_tsc_start;
+    counts.wall_time += cpuCycles() - frame->m_tsc_start;
 
     if (m_flags & TrackCPU) {
-      counts.cpu += cpuTime(m_MHz) - m_stack->m_vtsc_start;
+      counts.cpu += cpuTime(m_MHz) - frame->m_vtsc_start;
     }
 
     if (m_flags & TrackMemory) {
       auto const& stats = MM().getStats();
       int64_t mu_end = stats.usage;
       int64_t pmu_end = stats.peakUsage;
-      counts.memory += mu_end - m_stack->m_mu_start;
-      counts.peak_memory += pmu_end - m_stack->m_pmu_start;
+      counts.memory += mu_end - frame->m_mu_start;
+      counts.peak_memory += pmu_end - frame->m_pmu_start;
     } else if (m_flags & TrackMalloc) {
-      counts.memory += get_allocs() - m_stack->m_mu_start;
-      counts.peak_memory += get_frees() - m_stack->m_pmu_start;
+      counts.memory += get_allocs() - frame->m_mu_start;
+      counts.peak_memory += get_frees() - frame->m_pmu_start;
     }
   }
 
@@ -727,7 +756,8 @@ class TraceWalker {
 class TraceProfiler : public Profiler {
  public:
   explicit TraceProfiler(int flags)
-    : m_traceBuffer(nullptr)
+    : Profiler(true)
+    , m_traceBuffer(nullptr)
     , m_traceBufferSize(0)
     , m_nextTraceEntry(0)
     , m_traceBufferFilled(false)
@@ -976,7 +1006,7 @@ private:
   SampleVec m_samples; // outcome
 
 public:
-  SampleProfiler() {
+  SampleProfiler() : Profiler(true) {
     struct timeval  now;
     uint64_t truncated_us;
     uint64_t truncated_tsc;
@@ -1099,7 +1129,7 @@ private:
 
 class MemoProfiler : public Profiler {
  public:
-  explicit MemoProfiler(int flags) {}
+  explicit MemoProfiler(int flags) : Profiler(true) {}
 
   ~MemoProfiler() {
   }

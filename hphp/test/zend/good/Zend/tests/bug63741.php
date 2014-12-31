@@ -40,4 +40,5 @@ EOT
 
 include dirname(__FILE__)."/bug63741.tmp.php";
 ?>
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__)."/bug63741.tmp.php"); ?>

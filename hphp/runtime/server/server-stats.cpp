@@ -22,11 +22,11 @@
 #include <list>
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
-
-#include "folly/json.h"
-#include "folly/Range.h"
-#include "folly/String.h"
+#include <folly/json.h>
+#include <folly/Conv.h>
+#include <folly/FBVector.h>
+#include <folly/Range.h>
+#include <folly/String.h>
 
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -50,7 +50,6 @@ using std::set;
 using std::map;
 using std::ostream;
 using std::string;
-using boost::lexical_cast;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -60,23 +59,21 @@ void ServerStats::GetLogger() {
 }
 
 void ServerStats::Merge(CounterMap &dest, const CounterMap &src) {
-  for (CounterMap::const_iterator iter = src.begin();
-       iter != src.end(); ++iter) {
-    dest[iter->first] += iter->second;
+  for (auto const& iter : src) {
+    dest[iter.first] += iter.second;
   }
 }
 
 void ServerStats::Merge(PageStatsMap &dest, const PageStatsMap &src) {
-  for (PageStatsMap::const_iterator iter = src.begin();
-       iter != src.end(); ++iter) {
-    const SharedString &key = iter->first;
-    const PageStats &s = iter->second;
+  for (auto const& iter : src) {
+    auto const& key = iter.first;
+    auto const& s = iter.second;
 
-    PageStatsMap::iterator diter = dest.find(key);
+    auto diter = dest.find(key);
     if (diter == dest.end()) {
       dest[key] = s;
     } else {
-      PageStats &d = diter->second;
+      auto& d = diter->second;
       assert(d.m_url == s.m_url);
       assert(d.m_code == s.m_code);
       d.m_hit += s.m_hit;
@@ -86,13 +83,10 @@ void ServerStats::Merge(PageStatsMap &dest, const PageStatsMap &src) {
 }
 
 void ServerStats::Merge(list<TimeSlot*> &dest, const list<TimeSlot*> &src) {
-  list<TimeSlot*>::iterator diter = dest.begin();
-  for (list<TimeSlot*>::const_iterator iter = src.begin();
-       iter != src.end(); ++iter) {
-    TimeSlot *s = *iter;
-
+  auto diter = dest.begin();
+  for (auto const& s : src) {
     for (; diter != dest.end(); ++diter) {
-      TimeSlot *d = *diter;
+      auto d = *diter;
       if (d->m_time > s->m_time) {
         TimeSlot *c = new TimeSlot();
         *c = *s;
@@ -116,14 +110,10 @@ void ServerStats::Merge(list<TimeSlot*> &dest, const list<TimeSlot*> &src) {
 
 void ServerStats::GetAllKeys(std::set<std::string> &allKeys,
                              const std::list<TimeSlot*> &slots) {
-  for (auto iter = slots.begin(); iter != slots.end(); ++iter) {
-    TimeSlot *s = *iter;
-    for (PageStatsMap::const_iterator piter = s->m_pages.begin();
-         piter != s->m_pages.end(); ++piter) {
-      const PageStats &ps = piter->second;
-      for (CounterMap::const_iterator viter =
-             ps.m_values.begin(); viter != ps.m_values.end(); ++viter) {
-        allKeys.insert(viter->first->getString());
+  for (auto& slot : slots) {
+    for (auto const& page : slot->m_pages) {
+      for (auto const& kvpair : page.second.m_values) {
+        allKeys.insert(kvpair.first->getString());
       }
     }
   }
@@ -140,14 +130,14 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
                          const std::string &url, int code,
                          std::map<std::string, int> &wantedKeys) {
   if (!keys.empty()) {
-    std::vector<std::string> rules0;
+    folly::fbvector<std::string> rules0;
     split(',', keys.c_str(), rules0, true);
     if (!rules0.empty()) {
 
       // prepare rules
       std::map<std::string, int> rules;
       for (unsigned int i = 0; i < rules0.size(); i++) {
-        std::string &rule = rules0[i];
+        auto const& rule = rules0[i];
         assert(!rule.empty());
         int len = rule.length();
         std::string suffix;
@@ -169,20 +159,18 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
       GetAllKeys(allKeys, slots);
 
       // prepare wantedKeys
-      for (auto iter = allKeys.begin(); iter != allKeys.end(); ++iter) {
-        const string &key = *iter;
-        for (map<string, int>::const_iterator riter = rules.begin();
-             riter != rules.end(); ++riter) {
-          const string &rule = riter->first;
+      for (auto const& key : allKeys) {
+        for (auto const& riter : rules) {
+          const string &rule = riter.first;
           if (rule[0] == ':') {
             Variant ret = preg_match(String(rule.c_str(), rule.size(),
                   CopyString),
                 String(key.c_str(), key.size(), CopyString));
             if (!same(ret, false) && more(ret, 0)) {
-              wantedKeys[key] |= riter->second;
+              wantedKeys[key] |= riter.second;
             }
           } else if (rule == key) {
-            wantedKeys[key] |= riter->second;
+            wantedKeys[key] |= riter.second;
           }
         }
       }
@@ -191,25 +179,21 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
 
   bool urlEmpty = url.empty();
   bool keysEmpty = keys.empty();
-  for (list<TimeSlot*>::const_iterator iter = slots.begin();
-       iter != slots.end(); ++iter) {
-    TimeSlot *s = *iter;
-    for (PageStatsMap::iterator piter = s->m_pages.begin();
-         piter != s->m_pages.end();) {
-      PageStats &ps = piter->second;
+  for (auto const& s : slots) {
+    for (auto piter = s->m_pages.begin(); piter != s->m_pages.end();) {
+      auto &ps = piter->second;
       if ((code && ps.m_code != code) || (!urlEmpty && ps.m_url != url)) {
-        PageStatsMap::iterator piterTemp = piter;
+        auto piterTemp = piter;
         ++piter;
         s->m_pages.erase(piterTemp);
         continue;
       }
 
       if (!keysEmpty) {
-        CounterMap &values = ps.m_values;
-        for (CounterMap::iterator viter =
-               values.begin(); viter != values.end();) {
+        auto &values = ps.m_values;
+        for (auto viter = values.begin(); viter != values.end();) {
           if (wantedKeys.find(viter->first->getString()) == wantedKeys.end()) {
-            CounterMap::iterator iterTemp = viter;
+            auto iterTemp = viter;
             ++viter;
             values.erase(iterTemp);
           } else {
@@ -227,14 +211,11 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
   int slotCount = slots.size();
 
   if (!agg.empty()) {
-    TimeSlot *ts = new TimeSlot();
+    auto const ts = new TimeSlot();
     ts->m_time = 0;
-    for (list<TimeSlot*>::const_iterator iter = slots.begin();
-         iter != slots.end(); ++iter) {
-      TimeSlot *s = *iter;
-      for (PageStatsMap::const_iterator piter = s->m_pages.begin();
-           piter != s->m_pages.end(); ++piter) {
-        const PageStats &ps = piter->second;
+    for (auto const& s : slots) {
+      for (auto const& page : s->m_pages) {
+        auto const& ps = page.second;
         string url = ps.m_url;
         int code = ps.m_code;
         if (agg != "url") {
@@ -243,7 +224,7 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
         if (agg != "code") {
           code = 0;
         }
-        PageStats &psDest = ts->m_pages[url + lexical_cast<string>(code)];
+        auto &psDest = ts->m_pages[url + folly::to<string>(code)];
         psDest.m_hit += ps.m_hit;
         psDest.m_url = url;
         psDest.m_code = code;
@@ -255,10 +236,9 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
   }
 
   std::map<std::string, int> udfKeys;
-  for (std::map<std::string, int>::const_iterator iter = wantedKeys.begin();
-       iter != wantedKeys.end(); ++iter) {
-    if (iter->second != UDF_NONE) {
-      udfKeys[iter->first] = iter->second;
+  for (auto const& iter : wantedKeys) {
+    if (iter.second != UDF_NONE) {
+      udfKeys[iter.first] = iter.second;
     }
   }
 
@@ -268,15 +248,12 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
   int queued = HttpServer::Server->getPageServer()->getQueuedJobs();
   int health_level = (int)ServerStats::m_ServerHealthLevel;
 
-  for (list<TimeSlot*>::const_iterator iter = slots.begin();
-       iter != slots.end(); ++iter) {
-    TimeSlot *s = *iter;
+  for (auto const& s : slots) {
     int sec = (s->m_time == 0 ? slotCount : 1) *
       RuntimeOption::StatsSlotDuration;
-    for (PageStatsMap::iterator piter = s->m_pages.begin();
-         piter != s->m_pages.end(); ++piter) {
-      PageStats &ps = piter->second;
-      CounterMap &values = ps.m_values;
+    for (auto &page : s->m_pages) {
+      auto &ps = page.second;
+      auto &values = ps.m_values;
 
       // special keys
       if (wantedKeys.find("hit") != wantedKeys.end()) {
@@ -296,11 +273,10 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
         values["health_level"] = health_level;
       }
 
-      for (map<string, int>::const_iterator iter = udfKeys.begin();
-           iter != udfKeys.end(); ++iter) {
-        const string &key = iter->first;
-        int udf = iter->second;
-        CounterMap::iterator viter = values.find(key);
+      for (auto const& iter : udfKeys) {
+        const string &key = iter.first;
+        int udf = iter.second;
+        auto viter = values.find(key);
         if (viter != values.end()) {
           if ((udf & UDF_HIT) && ps.m_hit) {
             values[key + "/hit"] = viter->second * PRECISION / ps.m_hit;
@@ -318,9 +294,8 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
 }
 
 void ServerStats::FreeSlots(list<TimeSlot*> &slots) {
-  for (list<TimeSlot*>::const_iterator iter = slots.begin();
-       iter != slots.end(); ++iter) {
-    delete *iter;
+  for (auto const& slot : slots) {
+    delete slot;
   }
   slots.clear();
 }
@@ -416,9 +391,8 @@ void ServerStats::GetKeys(string &out, int64_t from, int64_t to) {
   CollectSlots(slots, from, to);
   set<string> allKeys;
   GetAllKeys(allKeys, slots);
-  for (set<string>::const_iterator iter = allKeys.begin();
-       iter != allKeys.end(); ++iter) {
-    out += *iter;
+  for (auto const& iter : allKeys) {
+    out += iter;
     out += "\n";
   }
 }
@@ -443,43 +417,39 @@ void ServerStats::Report(string &output, Writer::Format format,
   std::ostringstream out;
   if (format == Writer::Format::KVP) {
     bool first = true;
-    for (list<TimeSlot*>::const_iterator iter = slots.begin();
-         iter != slots.end(); ++iter) {
+    for (auto const& s : slots) {
       if (first) {
         first = false;
       } else {
         out << ",\n";
       }
-      TimeSlot *s = *iter;
       if (s->m_time) {
         out << s->m_time << ": ";
       }
       out << "{";
-      for (PageStatsMap::const_iterator piter = s->m_pages.begin();
-           piter != s->m_pages.end(); ++piter) {
-        const PageStats &ps = piter->second;
+      for (auto const& page : s->m_pages) {
+        auto const& ps = page.second;
         string key = prefix;
         if (!ps.m_url.empty()) {
           key += ps.m_url;
         }
         if (ps.m_code) {
           key += "$";
-          key += lexical_cast<string>(ps.m_code);
+          key += folly::to<string>(ps.m_code);
         }
         if (!key.empty()) {
           key += ".";
         }
         bool firstKey = true;
-        for (CounterMap::const_iterator viter =
-               ps.m_values.begin(); viter != ps.m_values.end(); ++viter) {
+        for (auto const& kvpair : ps.m_values) {
           if (firstKey) {
             firstKey = false;
           } else {
             out << ", ";
           }
           out << Writer::escape_for_json(
-                  (key + viter->first->getString()).c_str())
-              << ": " << viter->second;
+                  (key + kvpair.first->getString()).c_str())
+              << ": " << kvpair.second;
         }
       }
       out << "}\n";
@@ -498,36 +468,20 @@ void ServerStats::Report(string &output, Writer::Format format,
 
     w->writeFileHeader();
     w->beginObject("stats");
-    for (list<TimeSlot*>::const_iterator iter = slots.begin();
-         iter != slots.end(); ++iter) {
-      TimeSlot *s = *iter;
-      if (s->m_time) {
-        w->beginObject("slot");
-        w->writeEntry("time", s->m_time * RuntimeOption::StatsSlotDuration);
-      }
-      w->beginList("pages");
-      for (PageStatsMap::const_iterator piter = s->m_pages.begin();
-           piter != s->m_pages.end(); ++piter) {
-        const PageStats &ps = piter->second;
-        w->beginObject("page");
-        w->writeEntry("url", ps.m_url);
-        w->writeEntry("code", ps.m_code);
-        w->writeEntry("hit", ps.m_hit);
 
-        w->beginObject("details");
-        for (CounterMap::const_iterator viter =
-               ps.m_values.begin(); viter != ps.m_values.end(); ++viter) {
-          w->writeEntry(viter->first->getString().c_str(), viter->second);
-        }
-        w->endObject("details");
-
-        w->endObject("page");
-      }
-      w->endList("pages");
-      if (s->m_time) {
-        w->endObject("slot");
-      }
+    if (format != Writer::Format::JSON) {
+      // In JSON, this would create multiple entries with the same 'slot' key.
+      // This isn't valid, and most implementations can't read it.
+      //   https://github.com/facebook/hhvm/issues/3331
+      ReportSlots(w, slots);
+    } else {
+      assert(format == Writer::Format::JSON);
+      // Create a list instead :)
+      w->beginList("slots");
+      ReportSlots(w, slots);
+      w->endList("slots");
     }
+
     w->endObject("stats");
     w->writeFileFooter();
 
@@ -535,6 +489,35 @@ void ServerStats::Report(string &output, Writer::Format format,
   }
 
   output = out.str();
+}
+
+void ServerStats::ReportSlots(Writer* w, const std::list<TimeSlot*> &slots) {
+  for (auto const& s : slots) {
+    if (s->m_time) {
+      w->beginObject("slot");
+      w->writeEntry("time", s->m_time * RuntimeOption::StatsSlotDuration);
+    }
+    w->beginList("pages");
+    for (auto const& page : s->m_pages) {
+      auto const& ps = page.second;
+      w->beginObject("page");
+      w->writeEntry("url", ps.m_url);
+      w->writeEntry("code", ps.m_code);
+      w->writeEntry("hit", ps.m_hit);
+
+      w->beginObject("details");
+      for (auto const& kvpair : ps.m_values) {
+        w->writeEntry(kvpair.first->getString().c_str(), kvpair.second);
+      }
+      w->endObject("details");
+
+      w->endObject("page");
+    }
+    w->endList("pages");
+    if (s->m_time) {
+      w->endObject("slot");
+    }
+  }
 }
 
 static std::string format_duration(timeval &duration) {
@@ -546,18 +529,15 @@ static std::string format_duration(timeval &duration) {
     int hours = minutes / 60;
     minutes = minutes % 60;
     if (hours) {
-      ret += lexical_cast<string>(hours) + " hour";
+      ret += folly::to<string>(hours) + " hour";
       ret += (hours == 1) ? " " : "s ";
     }
     if (minutes || (hours && seconds)) {
-      ret += lexical_cast<string>(minutes) + " minute";
+      ret += folly::to<string>(minutes) + " minute";
       ret += (minutes == 1) ? " " : "s ";
     }
     if (seconds || minutes || hours) {
-      char buf[7];
-      snprintf(buf, sizeof(buf), "%.3f", seconds);
-      buf[sizeof(buf) - 1] = '\0';
-      ret += lexical_cast<string>(buf) + " second";
+      ret += folly::stringPrintf("%.3f", seconds);
       ret += (seconds == 1) ? "" : "s";
     }
   } else {
@@ -700,11 +680,10 @@ Array ServerStats::EndNetworkProfile() {
     Lock lock(ss->m_lock, false);
 
     IOStatusMap &status = ss->m_ioProfiles;
-    for (IOStatusMap::const_iterator iter = status.begin();
-         iter != status.end(); ++iter) {
-      ret.set(String(iter->first),
-              make_map_array(s_ct, iter->second.count,
-                             s_wt, iter->second.wall_time));
+    for (auto const& iter : status) {
+      ret.set(String(iter.first),
+              make_map_array(s_ct, iter.second.count,
+                             s_wt, iter.second.wall_time));
     }
     status.clear();
   }
@@ -782,7 +761,7 @@ void ServerStats::logPage(const string &url, int code) {
         break; // we have cleared all slots, good enough
       }
     }
-    TimeSlot &ts = m_slots[slot];
+    auto &ts = m_slots[slot];
     if (ts.m_time != now) {
       if (ts.m_time && m_min <= ts.m_time) {
         m_min = ts.m_time + 1;
@@ -790,7 +769,7 @@ void ServerStats::logPage(const string &url, int code) {
       ts.m_time = now;
       ts.m_pages.clear();
     }
-    PageStats &ps = ts.m_pages[url + lexical_cast<string>(code)];
+    auto &ps = ts.m_pages[url + folly::to<string>(code)];
     ps.m_url = url;
     ps.m_code = code;
     ps.m_hit++;
@@ -847,7 +826,7 @@ void ServerStats::logBytes(int64_t bytes) {
 static void safe_copy(char *dest, const char *src, int max) {
   int len = strlen(src) + 1;
   dest[--max] = '\0';
-  mempcpy(dest, src, len > max ? max : len);
+  memcpy(dest, src, len > max ? max : len);
 }
 
 void ServerStats::startRequest(const char *url, const char *clientIP,
@@ -951,16 +930,15 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
 }
 
 Array ServerStats::getThreadIOStatuses() {
-  Array ret;
   IOStatusMap &status = m_threadStatus.m_ioStatuses;
-  for (IOStatusMap::const_iterator iter = status.begin();
-       iter != status.end(); ++iter) {
-    ret.set(String(iter->first),
-            make_map_array(s_ct, iter->second.count,
-                           s_wt, iter->second.wall_time));
+  ArrayInit ret(status.size(), ArrayInit::Map{});
+  for (auto const& iter : status) {
+    ret.set(String(iter.first),
+            make_map_array(s_ct, iter.second.count,
+                           s_wt, iter.second.wall_time));
   }
   status.clear();
-  return ret;
+  return ret.toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1032,7 +1010,7 @@ IOStatusHelper::IOStatusHelper(const char *name,
     }
     if (port) {
       msg += ":";
-      msg += boost::lexical_cast<std::string>(port);
+      msg += folly::to<std::string>(port);
     }
     ServerStats::SetThreadIOStatus(name, msg.c_str());
   }
@@ -1066,10 +1044,9 @@ void set_curl_statuses(CURL *cp, const char *url) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void server_stats_log_mutex(const std::string &stack, int64_t elapsed_us) {
-  char buf[128];
-  snprintf(buf, sizeof(buf), "mutex.%s.", stack.c_str());
-  ServerStats::Log(string(buf) + "hit", 1);
-  ServerStats::Log(string(buf) + "time", elapsed_us);
+  auto const prefix = folly::to<string>("mutex.", stack);
+  ServerStats::Log(prefix + ".hit", 1);
+  ServerStats::Log(prefix + ".time", elapsed_us);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

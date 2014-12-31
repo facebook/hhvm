@@ -60,12 +60,20 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
   $long_to_default   = Map {};
   $long_supports_arg = Map {};
   $long_requires_arg = Map {};
+  $long_set_arg      = Map {};
   $all_longs         = Map {};
 
   foreach ($optmap as $k => $v) {
     $m = null;
-    if (preg_match('/^([^:]*)(:(:(.*))?)?/', $k, $m)) {
-      assert($m !== null);
+    if (preg_match('/^([^:]*)(\[\])/', $k, $m)) {
+      invariant($m !== null);
+      $k = $m[1];
+      $all_longs[$k] = true;
+      $long_supports_arg[$k] = true;
+      $long_requires_arg[$k] = true;
+      $long_set_arg[$k] = true;
+    } else if (preg_match('/^([^:]*)(:(:(.*))?)?/', $k, $m)) {
+      invariant($m !== null);
       $k = $m[1];
       $all_longs[$k] = true;
       $long_supports_arg[$k] = isset($m[2]);
@@ -75,6 +83,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
       } else {
         $long_to_default[$k] = false;
       }
+      $long_set_arg[$k] = false;
 
       if ($v[0] != '') {
         $short_to_long[$v[0]] = $k;
@@ -99,9 +108,10 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
     $read_argument = function($long) use (&$argv,
                                            $long_supports_arg,
                                            $long_requires_arg,
-                                           $long_to_default) {
+                                           $long_to_default,
+                                           $long_set_arg) {
       if (!$long_supports_arg[$long]) error("precondition");
-      if ($long_requires_arg[$long]) {
+      if ($long_requires_arg[$long] || $long_set_arg[$long]) {
         array_shift($argv);
         if (count($argv) == 0) {
           error("option --$long requires an argument");
@@ -142,7 +152,14 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
         $val = $read_argument($long);
       }
 
-      $ret[$long] = $val;
+      if ($long_set_arg[$long]) {
+        if (!$ret->containsKey($long)) {
+          $ret[$long] = new Set();
+        }
+        $ret[$long][] = $val;
+      } else {
+        $ret[$long] = $val;
+      }
       array_shift($argv);
       continue;
     }

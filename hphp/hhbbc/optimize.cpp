@@ -22,7 +22,7 @@
 #include <cassert>
 #include <bitset>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"
@@ -94,6 +94,8 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
                             std::bitset<kMaxTrackedLocals> mayReadLocalSet,
                             bool lastStackOutputObvious,
                             Gen gen) {
+  if (state.unreachable) return;
+
   for (size_t i = 0; i < state.locals.size(); ++i) {
     if (options.FilterAssertions) {
       if (i < mayReadLocalSet.size() && !mayReadLocalSet.test(i)) {
@@ -241,17 +243,18 @@ bool hasObviousStackOutput(Op op) {
 }
 
 void insert_assertions(const Index& index,
-                       const Context ctx,
+                       const FuncAnalysis& ainfo,
                        borrowed_ptr<php::Block> const blk,
                        State state) {
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
   auto& arrTable = *index.array_table_builder();
+  auto const ctx = ainfo.ctx;
 
   auto lastStackOutputObvious = false;
 
-  CollectedInfo collect { index, ctx, nullptr };
+  CollectedInfo collect { index, ctx, nullptr, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
@@ -310,6 +313,12 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       break;
     case Flavor::F:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
+    case Flavor::CVU:
+      // Note that we only support C's for CVU so far (this only comes up with
+      // FCallBuiltin)---we'll fail the verifier if something changes to send
+      // V's or U's through here.
+      gen(bc::PopC {});
+      break;
     }
   }
 
@@ -351,6 +360,15 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       // We should only ever const prop for FPassL right now.
       always_assert(numPush == 1 && op.op == Op::FPassL);
       gen(bc::FPassC { op.FPassL.arg1 });
+      continue;
+    }
+
+    // Similar special case for FCallBuiltin.  We need to turn things into R
+    // flavors since opcode that followed the call are going to expect that
+    // flavor.
+    if (op.op == Op::FCallBuiltin) {
+      gen(bc::RGetCNop {});
+      continue;
     }
   }
 
@@ -359,29 +377,56 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Create a block similar to another block (but with no bytecode in it yet).
+ */
+borrowed_ptr<php::Block> make_block(FuncAnalysis& ainfo,
+                                    borrowed_ptr<const php::Block> srcBlk,
+                                    const State& state) {
+  FTRACE(1, " ++ new block {}\n", ainfo.ctx.func->nextBlockId);
+  assert(ainfo.bdata.size() == ainfo.ctx.func->nextBlockId);
+
+  auto newBlk           = folly::make_unique<php::Block>();
+  newBlk->id            = ainfo.ctx.func->nextBlockId++;
+  newBlk->section       = srcBlk->section;
+  newBlk->exnNode       = srcBlk->exnNode;
+  newBlk->factoredExits = srcBlk->factoredExits;
+  auto const blk        = borrow(newBlk);
+  ainfo.ctx.func->blocks.push_back(std::move(newBlk));
+
+  ainfo.rpoBlocks.push_back(blk);
+  ainfo.bdata.push_back(FuncAnalysis::BlockData {
+    static_cast<uint32_t>(ainfo.rpoBlocks.size() - 1),
+    state
+  });
+
+  return blk;
+}
+
 void first_pass(const Index& index,
-                const Context ctx,
+                FuncAnalysis& ainfo,
                 borrowed_ptr<php::Block> const blk,
                 State state) {
+  auto const ctx = ainfo.ctx;
+
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
-  BytecodeAccumulator accumulator(newBCs);
-
-  CollectedInfo collect { index, ctx, nullptr };
+  CollectedInfo collect { index, ctx, nullptr, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
 
+  auto peephole = make_peephole(newBCs);
   std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);
 
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
 
-    auto gen = [&, state, srcStack] (const Bytecode& newBC) {
+    auto const stateIn = state; // Peephole expects input eval state.
+    auto gen = [&,srcStack] (const Bytecode& newBC) {
       const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
       FTRACE(2, "   + {}\n", show(newBC));
-      // The accumulator expects input eval state.
       if (options.Peephole) {
-        accumulator.append(newBC, state, srcStack);
+        peephole.append(newBC, stateIn, srcStack);
       } else {
         newBCs.push_back(newBC);
       }
@@ -390,21 +435,35 @@ void first_pass(const Index& index,
     auto const flags = step(interp, op);
     srcStack.resize(state.stack.size(), op.op);
 
-    if (flags.calledNoReturn) {
+    /*
+     * We only try to remove mid-block unreachable code if we're not in an FPI
+     * region, because it's the easiest way to maintain FPI region invariants
+     * in the emitted bytecode.
+     */
+    if (state.unreachable) {
       gen(op);
-      gen(bc::BreakTraceHint {}); // The rest of this code is going to
-                                  // be unreachable.
-      // It would be nice to put a fatal here, but we can't because it
-      // will mess up the bytecode invariant about blocks
-      // not-reachable via fallthrough if the stack depth is non-zero.
-      // It can also mess up FPI regions.
+      if (!stateIn.unreachable) {
+        gen(bc::BreakTraceHint {});
+      }
+      if (state.fpiStack.empty()) {
+        if (!blk->fallthrough ||
+            ainfo.bdata[blk->fallthrough->id].stateIn.initialized) {
+          auto const fatal = make_block(ainfo, blk, state);
+          fatal->hhbcs = {
+            bc_with_loc(op.srcLoc, bc::String { s_unreachable.get() }),
+            bc_with_loc(op.srcLoc, bc::Fatal { FatalOp::Runtime })
+          };
+          blk->fallthrough = fatal;
+        }
+        break;
+      }
       continue;
     }
 
     if (options.RemoveDeadBlocks &&
         flags.jmpFlag != StepFlags::JmpFlags::Either) {
       always_assert(!flags.wasPEI);
-      switch(flags.jmpFlag) {
+      switch (flags.jmpFlag) {
       case StepFlags::JmpFlags::Taken:
         switch (op.op) {
         case Op::JmpNZ:     blk->fallthrough = op.JmpNZ.target;     break;
@@ -443,20 +502,21 @@ void first_pass(const Index& index,
   }
 
   if (options.Peephole) {
-    accumulator.finalize();
+    peephole.finalize();
   }
   blk->hhbcs = std::move(newBCs);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Fun>
-void visit_blocks(const char* what,
-                  const Index& index,
-                  const FuncAnalysis& ainfo,
-                  Fun fun) {
+template<class BlockContainer, class AInfo, class Fun>
+void visit_blocks_impl(const char* what,
+                       const Index& index,
+                       AInfo& ainfo,
+                       const BlockContainer& rpoBlocks,
+                       Fun fun) {
   FTRACE(1, "|---- {}\n", what);
-  for (auto& blk : ainfo.rpoBlocks) {
+  for (auto& blk : rpoBlocks) {
     FTRACE(2, "block #{}\n", blk->id);
     auto const& state = ainfo.bdata[blk->id].stateIn;
     if (!state.initialized) {
@@ -466,9 +526,27 @@ void visit_blocks(const char* what,
     // TODO(#3732260): this should probably spend an extra interp pass
     // in debug builds to check that no transformation to the bytecode
     // was made that changes the block output state.
-    fun(index, ainfo.ctx, blk, state);
+    fun(index, ainfo, blk, state);
   }
   assert(check(*ainfo.ctx.func));
+}
+
+template<class Fun>
+void visit_blocks_mutable(const char* what,
+                          const Index& index,
+                          FuncAnalysis& ainfo,
+                          Fun fun) {
+  // Make a copy of the block list so it can be mutated by the visitor.
+  auto const blocksCopy = ainfo.rpoBlocks;
+  visit_blocks_impl(what, index, ainfo, blocksCopy, fun);
+}
+
+template<class Fun>
+void visit_blocks(const char* what,
+                  const Index& index,
+                  const FuncAnalysis& ainfo,
+                  Fun fun) {
+  visit_blocks_impl(what, index, ainfo, ainfo.rpoBlocks, fun);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -476,11 +554,11 @@ void visit_blocks(const char* what,
 void do_optimize(const Index& index, FuncAnalysis ainfo) {
   FTRACE(2, "{:-^70}\n", "Optimize Func");
 
-  visit_blocks("first pass", index, ainfo, first_pass);
+  visit_blocks_mutable("first pass", index, ainfo, first_pass);
 
   /*
-   * Note, it's useful to do dead block removal before DCE, so it can
-   * remove code relating to the branch to the dead block.
+   * Note: it's useful to do dead block removal before DCE, so it can remove
+   * code relating to the branch to the dead block.
    */
   remove_unreachable_blocks(index, ainfo);
 
@@ -491,11 +569,10 @@ void do_optimize(const Index& index, FuncAnalysis ainfo) {
     global_dce(index, ainfo);
     assert(check(*ainfo.ctx.func));
     /*
-     * Global DCE can change types of locals across blocks.  See
-     * dce.cpp for an explanation.
+     * Global DCE can change types of locals across blocks.  See dce.cpp for an
+     * explanation.
      *
-     * We need to perform a final type analysis before we do anything
-     * else.
+     * We need to perform a final type analysis before we do anything else.
      */
     ainfo = analyze_func(index, ainfo.ctx);
   }

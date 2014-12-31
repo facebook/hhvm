@@ -3,33 +3,33 @@
 namespace {
 /* Finds whether the given variable is a boolean.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_bool(mixed $var): bool;
 
 /* Finds whether the type of the given variable is integer.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_int(mixed $var): bool;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_integer(mixed $var): bool;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_long(mixed $var): bool;
 
 /* Finds whether the type of the given variable is float.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_float(mixed $var): bool;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_double(mixed $var): bool;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_real(mixed $var): bool;
 
 /* Finds whether the given variable is numeric. Numeric strings consist of
@@ -43,7 +43,7 @@ function is_numeric(mixed $var): bool;
 
 /* Finds whether the type given variable is string.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_string(mixed $var): bool;
 
 /* Finds whether the given variable is a scalar.  Scalar variables are those
@@ -58,22 +58,22 @@ function is_scalar(mixed $var): bool;
 
 /* Finds whether the given variable is an array.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_array(mixed $var): bool;
 
 /* Finds whether the given variable is an object.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_object(mixed $var): bool;
 
 /* Finds whether the given variable is a resource.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_resource(mixed $var): bool;
 
 /* Finds whether the given variable is NULL.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function is_null(mixed $var): bool;
 
 /* Returns the type of the PHP variable var. Warning Never use gettype() to
@@ -131,8 +131,19 @@ function print_r(mixed $expression,
 function var_export(mixed $expression,
                     bool $ret = false): mixed;
 
+/* Dumps information about a variable
+ *
+ * This function displays structured information about one or more expressions
+ * that includes its type and value. Arrays and objects are explored
+ * recursively with values indented to show structure.
+ *
+ * @param mixed $var - Variable to dump
+ */
 /* Dumps a string representation of an internal zend value to output.
  */
+<<__Native>>
+function var_dump(mixed $arg1, ...$argv): void;
+
 <<__Native>>
 function debug_zval_dump(mixed $variable): void;
 

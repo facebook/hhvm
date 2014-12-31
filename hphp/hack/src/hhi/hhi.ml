@@ -8,6 +8,8 @@
  *
  *)
 
+open Utils
+
 external get_embedded_hhi_data : string -> string option =
   "get_embedded_hhi_data"
 
@@ -15,8 +17,8 @@ external get_embedded_hhi_data : string -> string option =
 let root = ref None
 
 let touch_root r =
-  let r = Path.string_of_path r in
-  ignore (Unix.system ("find \"" ^ r ^ "\" -name *.hhi -exec touch '{}' ';'"))
+  let r = Filename.quote (Path.string_of_path r) in
+  ignore (Unix.system ("find " ^ r ^ " -name *.hhi -exec touch '{}' ';'"))
 
 let touch () =
   match !root with
@@ -39,6 +41,9 @@ let extract data =
 let extract_embedded () =
   Utils.opt_map extract (get_embedded_hhi_data Sys.executable_name)
 
+(* Look for the hhi.tar.gz in the place where it normally resides, so that we
+ * support debugging binaries that don't have the section embedded, such as
+ * bytecode builds. *)
 let extract_external () =
   let path = (Filename.dirname Sys.executable_name) ^ "/../hhi.tar.gz" in
   if Sys.file_exists path then Some (extract (Utils.cat path)) else None
@@ -57,7 +62,12 @@ let get_hhi_root () =
   | None ->
       let r = get_hhi_root_impl () in
       root := Some r;
+      (* TODO(jezng) refactor this ugliness *)
+      Relative_path.set_path_prefix
+        Relative_path.Hhi
+        (Path.string_of_path (unsafe_opt r));
       r
 
 let set_hhi_root_for_unit_test dir =
-  root := Some (Some dir)
+  root := Some (Some dir);
+  Relative_path.set_path_prefix Relative_path.Hhi (Path.string_of_path dir)

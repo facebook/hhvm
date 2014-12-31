@@ -438,6 +438,12 @@ struct ArrNR {
     m_px = a.m_px;
   }
 
+  ~ArrNR() {
+    if (debug) {
+      m_px = reinterpret_cast<ArrayData*>(0xdeadbeeffaceb004);
+    }
+  }
+
   operator const Array&() const { return asArray(); }
 
   Array& asArray() {

@@ -21,4 +21,5 @@ ini_set('phar.readonly', 1);
 include $fname2;
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.php'); ?>

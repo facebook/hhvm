@@ -17,7 +17,7 @@
 
 #include <set>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -96,7 +96,7 @@ private:
 
     if (dynamic_pointer_cast<MethodStatement>(node)) {
       // Don't descend into nested non-closure functions, or functions
-      // in the psuedo-main.
+      // in the pseudo-main.
       return;
     }
 

@@ -15,8 +15,9 @@
 */
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 
-#include <boost/lexical_cast.hpp>
 #include <vector>
+
+#include <folly/Conv.h>
 
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
@@ -51,7 +52,7 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
     if (e.isNull()) {
       thrift.write("");
     } else if (e.isObject()) {
-      thrift.write(e.toObject()->o_getClassName());
+      thrift.write(e.toObject()->getClassName());
     } else {
       String ex(BreakPointInfo::ErrorClassName);
       thrift.write(ex);
@@ -306,7 +307,7 @@ std::string CmdInterrupt::getFileLine() const {
     if (m_site->getFile()) {
       ret = m_site->getFile();
     }
-    ret += ":" + boost::lexical_cast<std::string>(m_site->getLine0());
+    ret += ":" + folly::to<std::string>(m_site->getLine0());
   }
   return ret;
 }

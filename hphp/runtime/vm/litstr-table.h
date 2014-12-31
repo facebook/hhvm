@@ -19,6 +19,9 @@
 
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/mutex.h"
 
 #include <vector>
 
@@ -33,7 +36,7 @@ struct StringData;
 /*
  * Global litstr Id's are all above this mark.
  */
-const int kGlobalLitstrOffset = 0x40000000;
+constexpr int kGlobalLitstrOffset = 0x40000000;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -77,6 +80,11 @@ struct LitstrTable {
   StringData* lookupLitstrId(Id id) const;
   const NamedEntity* lookupNamedEntityId(Id id) const;
   const NamedEntityPair& lookupNamedEntityPairId(Id id) const;
+
+  /*
+   * Set up the named info table.  Not thread-safe.
+   */
+  void setNamedEntityPairTable(NamedEntityPairTable&& namedInfo);
 
   /*
    * Add an entry for `litstr' to the table.
@@ -124,10 +132,12 @@ private:
 private:
   static LitstrTable* s_litstrTable;
 
-  typedef hphp_hash_map<const StringData*,
-                        Id,
-                        string_data_hash,
-                        string_data_same> LitstrMap;
+  using LitstrMap = hphp_hash_map<
+    const StringData*,
+    Id,
+    string_data_hash,
+    string_data_same
+  >;
 
   NamedEntityPairTable m_namedInfo;
   LitstrMap m_litstr2id;

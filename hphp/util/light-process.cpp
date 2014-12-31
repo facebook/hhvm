@@ -32,7 +32,7 @@
 #include <pwd.h>
 #include <signal.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/process.h"
 #include "hphp/util/logger.h"
@@ -242,7 +242,7 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
     } else {
       execl("/bin/sh", "sh", "-c", cmd.c_str(), nullptr);
     }
-    _exit(127);
+    _Exit(HPHP_EXIT_FAILURE);
   } else if (child > 0) {
     // successfully created the child process
     lwp_write(fout, "success");
@@ -414,14 +414,14 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
     pid_t sid = setsid();
     if (sid < 0) {
       Logger::Warning("Unable to setsid");
-      exit(-1);
+      exit(HPHP_EXIT_FAILURE);
     }
     m_afdt_fd = afdt_connect(m_afdtFilename.c_str(), &err);
     if (m_afdt_fd < 0) {
       Logger::Warning("Unable to afdt_connect, filename %s: %d %s",
                       m_afdtFilename.c_str(),
                       errno, folly::errnoStr(errno).c_str());
-      exit(-1);
+      exit(HPHP_EXIT_FAILURE);
     }
     int fd1 = p1.detachOut();
     int fd2 = p2.detachIn();
@@ -581,7 +581,7 @@ FILE *LightProcess::HeavyPopenImpl(const char *cmd, const char *type,
       }
       FILE *f = ::popen(cmd, type);
       if (chdir(old_cwd.c_str())) {
-        // error occured changing cwd back
+        // error occurred changing cwd back
       }
       return f;
     }
@@ -701,7 +701,8 @@ pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
     }
     return -1;
   }
-  always_assert(buf == "success");
+  always_assert_flog(buf == "success",
+                     "Unexpected message from light process: `{}'", buf);
   int64_t pid = -1;
   lwp_read_int64(fin, pid);
   always_assert(pid);

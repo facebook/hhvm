@@ -36,7 +36,9 @@ void ZendObject::registerNativeData() {
         nativeDataCtor,
         nativeDataCopy,
         nativeDataDtor,
-        nullptr /* sweep */);
+        nullptr /* sweep */,
+        nullptr /* sleep */,
+        nullptr /* wakeup */);
   }
 }
 

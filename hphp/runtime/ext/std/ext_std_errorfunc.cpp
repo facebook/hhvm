@@ -18,11 +18,16 @@
 
 #include <iostream>
 
+#include <folly/Likely.h>
+#include <folly/Format.h>
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -171,13 +176,13 @@ bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
   }
   case 3:
   {
-    Variant outfile = f_fopen(destination, "a"); // open for append only
+    Variant outfile = HHVM_FN(fopen)(destination, "a"); // open for append only
     if (outfile.isNull()) {
       Logger::Error("can't open error_log file!\n");
       return false;
     }
-    f_fwrite(outfile.toResource(), message);
-    f_fclose(outfile.toResource());
+    HHVM_FN(fwrite)(outfile.toResource(), message);
+    HHVM_FN(fclose)(outfile.toResource());
     return true;
   }
   case 2: // not used per PHP
@@ -234,7 +239,9 @@ void HHVM_FUNCTION(hphp_clear_unflushed) {
 bool HHVM_FUNCTION(trigger_error, const String& error_msg,
                                   int error_type /* = k_E_USER_NOTICE */) {
   std::string msg = error_msg.data();
-  if (g_context->getThrowAllErrors()) throw error_type;
+  if (UNLIKELY(g_context->getThrowAllErrors())) {
+    throw Exception(folly::sformat("throwAllErrors: {}", error_type));
+  }
   if (error_type == k_E_USER_ERROR) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::IfUnhandled,

@@ -18,7 +18,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 SSATmp::SSATmp(uint32_t opndId, IRInstruction* i, int dstId /* = 0 */)
   : m_id(opndId)
@@ -74,24 +74,28 @@ int SSATmp::numWords() const {
 
 Variant SSATmp::variantVal() const {
   switch (type().toDataType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    // Upon return both will converted to KindOfNull anyway.
-    return init_null();
-  case KindOfBoolean:
-    return boolVal();
-  case KindOfInt64:
-    return intVal();
-  case KindOfDouble:
-    return dblVal();
-  case KindOfString:
-  case KindOfStaticString:
-    return Variant(const_cast<StringData*>(strVal()));
-  case KindOfArray:
-    return const_cast<ArrayData*>(arrVal());
-  default:
-    always_assert(false);
+    case KindOfUninit:
+    case KindOfNull:
+      // Upon return both will converted to KindOfNull anyway.
+      return init_null();
+    case KindOfBoolean:
+      return boolVal();
+    case KindOfInt64:
+      return intVal();
+    case KindOfDouble:
+      return dblVal();
+    case KindOfStaticString:
+    case KindOfString:
+      return Variant(const_cast<StringData*>(strVal()));
+    case KindOfArray:
+      return const_cast<ArrayData*>(arrVal());
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 std::string SSATmp::toString() const {

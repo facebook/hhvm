@@ -6,4 +6,4 @@ Warning: %s
 NULL
 bool(false)
 
-Fatal error: %s
+Catchable fatal error: %s

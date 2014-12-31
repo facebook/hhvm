@@ -19,17 +19,17 @@
 
 #include <vector>
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 // Compute a sequence of moves and swaps that will fill the dest registers in
 // the moves map with their correct source values, even if some sources are
 // also destinations. The moves map provides one source for each dest.  rTmp
 // will be used when necessary to break copy-cycles, so it is illegal to
-// specify a source for rTmp (rTmp cannot be a desination).  However, it
+// specify a source for rTmp (rTmp cannot be a destination).  However, it
 // is legal for rTmp to be a source for some other destination. Since rTmp
 // cannot be a destination, it cannot be in a copy-cycle, so its value will
 // be read before we deal with cycles.
@@ -37,7 +37,7 @@ namespace HPHP { namespace JIT {
 struct VMoveInfo {
   enum class Kind { Move, Xchg };
   Kind m_kind;
-  X64::Vreg m_src, m_dst;
+  Vreg m_src, m_dst;
 };
 
 struct MoveInfo {
@@ -47,8 +47,8 @@ struct MoveInfo {
 };
 
 typedef PhysReg::Map<PhysReg> MovePlan;
-smart::vector<VMoveInfo> doVregMoves(X64::Vunit&, MovePlan& moves);
-smart::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
+jit::vector<VMoveInfo> doVregMoves(Vunit&, MovePlan& moves);
+jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
 
 }}
 

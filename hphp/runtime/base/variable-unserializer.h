@@ -17,135 +17,112 @@
 #ifndef incl_HPHP_VARIABLE_UNSERIALIZER_H_
 #define incl_HPHP_VARIABLE_UNSERIALIZER_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
-class VariableUnserializer {
-public:
-  /**
-   * Supported formats.
+struct VariableUnserializer {
+
+  /*
+   * Supported unserialization formats.
    */
   enum class Type {
     Serialize,
     APCSerialize,
+    DebuggerSerialize
   };
 
-public:
-  /**
-   * Be aware that the default class_whitelist is null_array instead of
-   * empty_array here because we do not limit the unserialization of arbitrary
-   * class for hphp internal use
+  /*
+   * Construct an unserializer, with an optional whitelist of classes to
+   * allow. In the whitelist, empty_array means "allow no classes", while
+   * null_array means allow any classes.  We default to null_array since
+   * serialization is not limited inside the VM.
    */
-  VariableUnserializer(const char *str, size_t len, Type type,
-                       bool allowUnknownSerializableClass = false,
-                       const Array& class_whitelist = null_array)
-      : m_type(type), m_buf(str), m_end(str + len),
-        m_unknownSerializable(allowUnknownSerializableClass),
-        m_classWhiteList(class_whitelist) {}
-  VariableUnserializer(const char *str, const char *end, Type type,
-                       bool allowUnknownSerializableClass = false,
-                       const Array& class_whitelist = null_array)
-      : m_type(type), m_buf(str), m_end(end),
-        m_unknownSerializable(allowUnknownSerializableClass),
-        m_classWhiteList(class_whitelist) {}
+  VariableUnserializer(
+    const char* str,
+    size_t len,
+    Type type,
+    bool allowUnknownSerializableClass = false,
+    const Array& classWhitelist = null_array);
 
-  void set(const char *buf, const char *end);
-  Type getType() const { return m_type;}
-  bool allowUnknownSerializableClass() const { return m_unknownSerializable;}
-  bool isWhitelistedClass(const String& cls_name) const;
-
+  /*
+   * Main API; unserialize the buffer and return as a Variant.
+   */
   Variant unserialize();
-  Variant unserializeKey();
-  void add(Variant* v, Uns::Mode mode) {
-    if (mode == Uns::Mode::Value) {
-      m_refs.emplace_back(RefInfo(v));
-    } else if (mode == Uns::Mode::Key) {
-      // do nothing
-    } else if (mode == Uns::Mode::ColValue) {
-      m_refs.emplace_back(RefInfo::makeNonRefable(v));
-    } else {
-      assert(mode == Uns::Mode::ColKey);
-      // We don't currently support using the 'r' encoding to refer
-      // to collection keys, but eventually we'll need to make this
-      // work to allow objects as keys. For now we encode collections
-      // keys in m_refs using a null pointer.
-      m_refs.emplace_back(RefInfo(nullptr));
-    }
-  }
-  // getByVal() is used to resolve the 'r' encoding
-  Variant* getByVal(int id) {
-    if (id <= 0 || id > (int)m_refs.size()) return nullptr;
-    Variant* ret = m_refs[id-1].var();
-    if (!ret) {
-      throw Exception("Referring to collection keys using the 'r' encoding "
-                      "is not supported");
-    }
-    return ret;
-  }
-  // getByVal() is used to resolve the 'R' encoding
-  Variant* getByRef(int id) {
-    if (id <= 0 || id > (int)m_refs.size()) return nullptr;
-    if (!m_refs[id-1].canBeReferenced()) {
-      // If the low bit is set, that means the value cannot
-      // be taken by reference
-      throw Exception("Collection values cannot be taken by reference");
-    }
-    Variant* ret = m_refs[id-1].var();
-    if (!ret) {
-      throw Exception("Collection keys cannot be taken by reference");
-    }
-    return ret;
-  }
+
+  /*
+   * Read the appropriate data type from buffer.
+   */
   int64_t readInt();
   double readDouble();
-  char readChar() {
-    check();
-    return *(m_buf++);
-  }
-  void read(char *buf, uint n);
-  char peek() {
-    check();
-    return *m_buf;
-  }
-  const char *head() { return m_buf; }
-  Variant &addVar();
+  char readChar();
+  void read(char* buf, unsigned n);
 
- private:
+  /*
+   * Accessors.
+   */
+  Type type() const;
+  bool allowUnknownSerializableClass() const;
+  const char* head() const;
+  char peek() const;
+
+  /*
+   * True if clsName is allowed to be unserialized.
+   */
+  bool isWhitelistedClass(const String& clsName) const;
+
+  /*
+   * Set the beginning and end of internal buffer.
+   */
+  void set(const char* buf, const char* end);
+
+  /*
+   * Push v onto the vector of refs for future reference.
+   */
+  void add(Variant* v, Uns::Mode mode);
+
+  /*
+   * Used by the 'r' encoding to get a reference.
+   */
+  Variant* getByVal(int id);
+
+  /*
+   * Used by the 'R' encoding to get a reference.
+   */
+  Variant* getByRef(int id);
+
+private:
+  /*
+   * Hold references to previously-unserialized data, along with bits telling
+   * whether it is legal to reference them later.
+   */
   struct RefInfo {
-    explicit RefInfo(Variant* v) : m_data(reinterpret_cast<uintptr_t>(v)) {}
-    static RefInfo makeNonRefable(Variant* v) {
-      RefInfo r(v);
-      r.m_data |= 1;
-      return r;
-    }
-    Variant* var() const {
-      return reinterpret_cast<Variant*>(m_data & ~1);
-    }
-    bool canBeReferenced() const { return !(m_data & 1); }
+    explicit RefInfo(Variant* v);
+    static RefInfo makeNonRefable(Variant* v);
+    Variant* var() const;
+    bool canBeReferenced() const;
   private:
     uintptr_t m_data;
   };
 
+  void check() const;
+
   Type m_type;
-  const char *m_buf;
-  const char *m_end;
+  const char* m_buf;
+  const char* m_end;
   smart::vector<RefInfo> m_refs;
-  smart::list<Variant> m_vars;
   bool m_unknownSerializable;
   const Array& m_classWhiteList;    // classes allowed to be unserialized
-
-  void check() {
-    if (m_buf >= m_end) {
-      throw Exception("Unexpected end of buffer during unserialization");
-    }
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }
+
+#include "hphp/runtime/base/variable-unserializer-inl.h"
 
 #endif // incl_HPHP_VARIABLE_UNSERIALIZER_H_

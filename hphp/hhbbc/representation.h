@@ -204,10 +204,10 @@ struct Param {
 
   /*
    * The type of the arguments for builtin functions, or for HNI
-   * functions with a native implementation.  KindOfInvalid for
+   * functions with a native implementation.  folly::none for
    * non-builtins.
    */
-  DataType builtinType;
+  folly::Optional<DataType> builtinType;
 
   /*
    * Whether this parameter is passed by reference.
@@ -250,9 +250,10 @@ struct StaticLocalInfo {
  */
 struct NativeInfo {
   /*
-   * Return type from the C++ implementation function, as a DataType.
+   * Return type from the C++ implementation function, as an optional DataType;
+   * folly::none stands for a Variant return.
    */
-  DataType returnType;
+  folly::Optional<DataType> returnType;
 };
 
 /*
@@ -419,8 +420,10 @@ struct Const {
   /*
    * The value will be KindOfUninit if the class constant is defined
    * using an 86cinit method.
+   *
+   * The lack of a value represents an abstract class constant.
    */
-  Cell val;
+  folly::Optional<Cell> val;
 
   /*
    * We pass through eval'able php code and a string type constraint,
@@ -524,6 +527,7 @@ using TypeAlias = ::HPHP::TypeAlias;
 struct Unit {
   MD5 md5;
   SString filename;
+  int preloadPriority{0};
   std::unique_ptr<Func> pseudomain;
   std::vector<std::unique_ptr<Func>> funcs;
   std::vector<std::unique_ptr<Class>> classes;

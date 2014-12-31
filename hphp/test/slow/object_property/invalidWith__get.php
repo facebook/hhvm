@@ -28,7 +28,7 @@ var_dump($object->$attribute);
 $attribute = array();
 var_dump($object->$attribute);
 $attribute = "\0key";
-var_dump($object->$attribute);
+var_dump(bin2hex($object->$attribute));
 $attribute = new bar;
 var_dump($object->$attribute);
 $attribute = new stdclass;

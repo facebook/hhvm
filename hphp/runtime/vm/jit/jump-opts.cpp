@@ -14,17 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
+#include <iterator>
 #include <utility>
 
-#include <boost/next_prior.hpp>
-
-#include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/opt.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
@@ -129,98 +128,7 @@ void optimizeCondTraceExit(IRUnit& unit, IRInstruction* jccInst,
 
   syncAbi.setMarker(jccInst->marker());
   reqBindJmp.setMarker(jccInst->marker());
-  jccInst->convertToJmp(mainExit);
-}
-
-/*
- * Return true if inst is a CheckStk/CheckLoc instruction that branches
- * to a normal exit.
- */
-bool isSideExitCheck(IRInstruction* inst, Block* exit) {
-  return (inst->op() == CheckStk || inst->op() == CheckLoc) &&
-         isNormalExit(exit);
-}
-
-/*
- * Convert a CheckStk/CheckLoc instruction into a corresponding SideExitGuard*
- * instruction that can be patched in place.
- */
-void optimizeSideExitCheck(IRUnit& unit, IRInstruction* inst,
-                           Block* exitBlock) {
-  assert(isSideExitCheck(inst, exitBlock));
-  FTRACE(5, "SideExit:vvvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(5, "SideExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
-
-  auto const syncABI = &*boost::prior(exitBlock->backIter());
-  assert(syncABI->op() == SyncABIRegs);
-
-  FTRACE(5, "converting jump ({}) to side exit\n",
-         inst->id());
-
-  auto const isStack = inst->op() == CheckStk;
-  auto const fp      = syncABI->src(0);
-  auto const sp      = syncABI->src(1);
-
-  SideExitGuardData data;
-  data.checkedSlot = isStack
-    ? inst->extra<CheckStk>()->offset
-    : inst->extra<CheckLoc>()->locId;
-  data.taken = exitBlock->back().extra<ReqBindJmp>()->offset;
-
-  auto const block = inst->block();
-  block->insert(block->iteratorTo(inst),
-                unit.cloneInstruction(syncABI));
-
-  auto next = inst->next();
-  unit.replace(
-    inst,
-    isStack ? SideExitGuardStk : SideExitGuardLoc,
-    inst->typeParam(),
-    data,
-    isStack ? sp : fp
-  );
-  block->push_back(unit.gen(Jmp, inst->marker(), next));
-}
-
-// Return true if branch is a conditional branch to a normal exit.
-bool isSideExitJcc(IRInstruction* branch, Block* exit) {
-  return jccCanBeDirectExit(branch->op()) && isNormalExit(exit);
-}
-
-/*
- * Branch is a conditional branch to a normal exit.  Convert it
- * into a SideExitJcc instruction that can be patched in place.
- */
-void optimizeSideExitJcc(IRUnit& unit, IRInstruction* inst, Block* exitBlock) {
-  assert(isSideExitJcc(inst, exitBlock));
-  FTRACE(5, "SideExitJcc:vvvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(5, "SideExitJcc:^^^^^^^^^^^^^^^^^^^^^\n"); };
-
-  auto it = exitBlock->backIter();
-  auto& reqBindJmp = *(it--);
-  auto& syncABI = *it;
-  assert(syncABI.op() == SyncABIRegs);
-
-  FTRACE(5, "converting jcc ({}) to side exit\n",
-         inst->id());
-
-  auto const newOpcode = jmpToSideExitJmp(inst->op());
-  SideExitJccData data;
-  data.taken = reqBindJmp.extra<ReqBindJmp>()->offset;
-  data.trflags = reqBindJmp.extra<ReqBindJmp>()->trflags;
-
-  auto const block = inst->block();
-  block->insert(block->iteratorTo(inst),
-                unit.cloneInstruction(&syncABI));
-
-  auto next = inst->next();
-  unit.replace(
-    inst,
-    newOpcode,
-    data,
-    std::make_pair(inst->numSrcs(), inst->srcs().begin())
-  );
-  block->push_back(unit.gen(Jmp, inst->marker(), next));
+  unit.replace(jccInst, Jmp, mainExit);
 }
 
 // Return true if this block ends with a trivial Jmp: a Jmp
@@ -264,10 +172,6 @@ void optimizeJumps(IRUnit& unit) {
       auto taken = branch->taken();
       if (isCondTraceExit(branch, taken)) {
         optimizeCondTraceExit(unit, branch, taken);
-      } else if (isSideExitCheck(branch, taken)) {
-        optimizeSideExitCheck(unit, branch, taken);
-      } else if (isSideExitJcc(branch, taken)) {
-        optimizeSideExitJcc(unit, branch, taken);
       }
     }
     auto branch = &b->back();

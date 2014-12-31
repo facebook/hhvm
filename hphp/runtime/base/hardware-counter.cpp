@@ -18,7 +18,7 @@
 
 #ifndef NO_HARDWARE_COUNTERS
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/util/logger.h"
 
@@ -39,7 +39,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "folly/String.h"
+#include <folly/String.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -381,7 +381,7 @@ bool HardwareCounter::setPerfEvents(const String& events) {
   while (s) {
     int len = strlen(s);
     String event = url_decode(s, len);
-    bool isPseudoEvent = JIT::MCGenerator::isPseudoEvent(event.data());
+    bool isPseudoEvent = jit::MCGenerator::isPseudoEvent(event.data());
     if (!isPseudoEvent && !eventExists(event.data()) && !addPerfEvent(event)) {
       return false;
     }
@@ -419,7 +419,7 @@ void HardwareCounter::getPerfEvents(Array& ret) {
   for (unsigned i = 0; i < m_counters.size(); i++) {
     ret.set(m_counters[i]->m_desc, m_counters[i]->read());
   }
-  JIT::mcg->getPerfCounters(ret);
+  jit::mcg->getPerfCounters(ret);
 }
 
 void HardwareCounter::GetPerfEvents(Array& ret) {

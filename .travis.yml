@@ -9,6 +9,9 @@ compiler:
 #  - clang-3.4
 #  - clang-3.5
 
+cache:
+  - apt
+
 services:
   - memcached
   - redis-server
@@ -32,60 +35,17 @@ before_script:
 # For redis tests
   - export REDIS_TEST_HOST="localhost"
 
-# The larger test suites (slow, zend) take longer than 50 minutes to run. Since
-# we have no way to change the timeout, we subdivide the jit/interp repo/normal
-# matrix and then further split the large suites using an experimental cut
-# which divides the number of tests in each sub-run roughly in two.
+# Sadly, travis only gives up 50 minutes to compile and run our tests. The
+# compilation machines usually have a bunch of CPUs but very little RAM so gcc
+# dies trying to compile some of our files if we do more than -j 6. So, with -j
+# 6 that takes ~40 minutes, leaving only 10 minutes to test. The only thing we
+# can fit in that time is the quick tests in no-repo mode. So basically this is
+# a smoke test (did it compile and not segfault immediately) instead of a real
+# test run. Please check out the attached phabricator to your PR for full unit
+# test coverage.
 env:
-  # non-repo
   - TEST_RUN_MODE="-m jit       quick"
   - TEST_RUN_MODE="-m interp    quick"
-  - TEST_RUN_MODE="-m jit       slow -I '#^hphp/test/slow/[a-df-nw-x].*#'"
-  - TEST_RUN_MODE="-m jit       slow -E '#^hphp/test/slow/[a-df-nw-x].*#'"
-  - TEST_RUN_MODE="-m interp    slow -I '#^hphp/test/slow/[a-df-nw-x].*#'"
-  - TEST_RUN_MODE="-m interp    slow -E '#^hphp/test/slow/[a-df-nw-x].*#'"
-  - TEST_RUN_MODE="-m jit       zend -I '#^hphp/test/zend/good/(ext/[a-ru-zA-Z0-9]|[Z]).*#'"
-  - TEST_RUN_MODE="-m jit       zend -E '#^hphp/test/zend/good/(ext/[a-ru-zA-Z0-9]|[Z]).*#'"
-  - TEST_RUN_MODE="-m interp    zend -I '#^hphp/test/zend/good/(ext/[a-ru-zA-Z0-9]|[Z]).*#'"
-  - TEST_RUN_MODE="-m interp    zend -E '#^hphp/test/zend/good/(ext/[a-ru-zA-Z0-9]|[Z]).*#'"
-
-  # quick repo
-  - TEST_RUN_MODE="-m jit    -r quick"
-  - TEST_RUN_MODE="-m interp -r quick -I '#^hphp/test/quick/[a-h].*#'"
-  - TEST_RUN_MODE="-m interp -r quick -I '#^hphp/test/quick/[i-zA-Z0-9].*#'"
-
-  # slow repo
-  - TEST_RUN_MODE="-m jit    -r slow -I '#^hphp/test/slow/[a-b].*#'"
-  - TEST_RUN_MODE="-m jit    -r slow -I '#^hphp/test/slow/[df-h].*#'"
-  - TEST_RUN_MODE="-m jit    -r slow -I '#^hphp/test/slow/[ci-nw-x].*#'"
-  - TEST_RUN_MODE="-m jit    -r slow -I '#^hphp/test/slow/[eo-p].*#'"
-  - TEST_RUN_MODE="-m jit    -r slow -I '#^hphp/test/slow/[q-vy-zA-Z0-9].*#'"
-  - TEST_RUN_MODE="-m interp -r slow -I '#^hphp/test/slow/a.*#'"
-  - TEST_RUN_MODE="-m interp -r slow -I '#^hphp/test/slow/[bd].*#'"
-  - TEST_RUN_MODE="-m interp -r slow -I '#^hphp/test/slow/c.*#'"
-  - TEST_RUN_MODE="-m interp -r slow -I '#^hphp/test/slow/[f-nw-x].*#'"
-  - TEST_RUN_MODE="-m interp -r slow -I '#^hphp/test/slow/[eo-p].*#'"
-  - TEST_RUN_MODE="-m interp -r slow -I '#^hphp/test/slow/[q-s].*#'"
-  - TEST_RUN_MODE="-m interp -r slow -I '#^hphp/test/slow/[t-vy-zA-Z0-9].*#'"
-
-  # zend repo
-  - TEST_RUN_MODE="-m jit    -r zend -I '#^hphp/test/zend/good/ext/[a-e].*#'"
-  - TEST_RUN_MODE="-m jit    -r zend -I '#^hphp/test/zend/good/ext/[f-l].*#'"
-  - TEST_RUN_MODE="-m jit    -r zend -I '#^hphp/test/zend/good/ext/[m-rt-zA-Z0-9].*#'"
-  - TEST_RUN_MODE="-m jit    -r zend -I '#^hphp/test/zend/good/ext/s[^t].*#'"
-  - TEST_RUN_MODE="-m jit    -r zend -I '#^hphp/test/zend/good/ext/standard/tests/a.*#'"
-  - TEST_RUN_MODE="-m jit    -r zend -I '#^hphp/test/zend/good/ext/standard/tests/[b-f].*#'"
-  - TEST_RUN_MODE="-m jit    -r zend -I '#^hphp/test/zend/good/ext/standard/tests/[g-zA-Z0-9].*#'"  
-  - TEST_RUN_MODE="-m jit    -r zend -I '#^hphp/test/zend/good/t.*#'"
-  - TEST_RUN_MODE="-m jit    -r zend -I '#^hphp/test/zend/good/Z.*#'"
-  - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/ext/[a-i].*#'"
-  - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/ext/[j-m].*#'"
-  - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/ext/[n-rt-zA-Z0-9].*#'"
-  - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/ext/s[^t].*#'"
-  - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/ext/standard/tests/[a-f].*#'"
-  - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/ext/standard/tests/[g-zA-Z0-9].*#'"
-  - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/t.*#'"
-  - TEST_RUN_MODE="-m interp -r zend -I '#^hphp/test/zend/good/Z.*#'"
 
 # Main test script
 script: time hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
@@ -95,28 +55,6 @@ script: time hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 # Adding other notifiers (like IRC) does not disable the email one
 notifications:
   email: false
-  irc:
-    channels:   "chat.freenode.net#hhvm-dev"
-    on_success: always
-    on_failure: always
-    use_notice: true
 
 matrix:
   fast_finish: true
-#  include:
-#    - compiler: clang
-#      env: CC=clang-3.4 CXX=clang++-3.4  PACKAGE=clang-3.4
-#    - compiler: clang
-#      env: CC=clang-3.5 CXX=clang++-3.5  PACKAGE=clang-3.5
-#    - compiler: gcc
-#      env: CC=gcc-4.8   CXX=g++-4.8  PACKAGE=g++-4.8
-# http://www.ubuntuupdates.org/package/core/trusty/main/base/gcc-4.9-base
-#    - compiler: gcc
-#      env: CC=gcc-4.9   CXX=g++-4.9  PACKAGE=g++-4.9
-
-# everything that was pushed was already on 'master', except
-# http://docs.travis-ci.com/user/build-configuration/#Using-regular-expressions
-#branches:
-#  only:
-#    - master
-#    - /^HHVM-.*$/

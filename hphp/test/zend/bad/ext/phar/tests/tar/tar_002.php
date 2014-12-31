@@ -16,6 +16,7 @@ try {
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/tar_002.phar.tar');
 ?>

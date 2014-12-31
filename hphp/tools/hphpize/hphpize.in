@@ -1,14 +1,19 @@
 #!/bin/sh
 
-HHVM_INSTALL_PREFIX="@CMAKE_INSTALL_PREFIX@"
-HHVM_INSTALL_LIBDIR="@CMAKE_INSTALL_LIBDIR@"
-HHVM_LIB="$HHVM_INSTALL_PREFIX/$HHVM_INSTALL_LIBDIR/hhvm"
-
 if [ ! -f "config.cmake" ]; then
   echo "config.cmake not found" >&2
   exit 1
 fi
 
-cp "$HHVM_LIB/hphpize/hphpize.cmake" CMakeLists.txt
+if [ -f "$HHVM_HPHPIZE_CMAKE" ]; then
+  cp $HHVM_HPHPIZE_CMAKE CMakeLists.txt
+else
+  HHVM_INSTALL_PREFIX="@CMAKE_INSTALL_PREFIX@"
+  HHVM_INSTALL_LIBDIR="@CMAKE_INSTALL_LIBDIR@"
+  HHVM_LIB="$HHVM_INSTALL_PREFIX/$HHVM_INSTALL_LIBDIR/hhvm"
+  cp "$HHVM_LIB/hphpize/hphpize.cmake" CMakeLists.txt
+  cp "$HHVM_LIB/hphpize/run" run-test
+  chmod +x run-test
+fi
 
-echo "** hphpize complete, now run \`cmake . && make\` to build"
+echo "** hphpize complete, now run \`cmake . && make\` to build, \`make test\` to test"

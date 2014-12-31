@@ -1,0 +1,10 @@
+step_over -i 0
+stdout -i 0 -c 1 
+step_over -i 0
+stdout -i 0 -c 2
+step_over -i 0
+stdout -i 0 -c 0 
+# php5 xdebug doesn't implement stderr
+stderr -i 0
+run -i 0
+run -i 0

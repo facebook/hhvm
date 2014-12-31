@@ -19,4 +19,4 @@ Warning: %s
 Warning: %s
 bool(false)
 
-Fatal error: %s
+Catchable fatal error: %s

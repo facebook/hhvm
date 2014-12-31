@@ -30,9 +30,14 @@ extern const int64_t k_PHP_OUTPUT_HANDLER_CLEAN;
 extern const int64_t k_PHP_OUTPUT_HANDLER_FLUSH;
 extern const int64_t k_PHP_OUTPUT_HANDLER_END;
 extern const int64_t k_PHP_OUTPUT_HANDLER_FINAL;
+extern const int64_t k_PHP_OUTPUT_HANDLER_CLEANABLE;
+extern const int64_t k_PHP_OUTPUT_HANDLER_FLUSHABLE;
+extern const int64_t k_PHP_OUTPUT_HANDLER_REMOVABLE;
+extern const int64_t k_PHP_OUTPUT_HANDLER_STDFLAGS;
 
 bool HHVM_FUNCTION(ob_start, const Variant& output_callback = uninit_null(),
-                             int chunk_size = 0, bool erase = true);
+                             int chunk_size = 0,
+                             int flags = k_PHP_OUTPUT_HANDLER_STDFLAGS);
 void HHVM_FUNCTION(ob_clean);
 void HHVM_FUNCTION(ob_flush);
 bool HHVM_FUNCTION(ob_end_clean);

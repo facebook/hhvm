@@ -1,0 +1,12 @@
+default case: $v is 10
+case 10
+case 30
+case 10
+case 30
+case 30-2
+case 30.0
+case 10
+case 10
+default case: $v is white
+case TRUE
+case 10 + 12

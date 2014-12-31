@@ -32,8 +32,6 @@ hphp.log
 /hphp/runtime/tmp/libtest.so
 
 /hphp/hhvm/gen
-/hphp/hhvm/hhvm
-/hphp/hhvm/php
 
 *.ext_hhvm.cpp
 *.ext_hhvm.h
@@ -87,3 +85,6 @@ CPackSourceConfig.cmake
 # windows files
 *.exe
 *.rc
+
+# python scripts
+*.pyc

@@ -1,0 +1,2 @@
+File "illegal_construct_definition.php", line 12, characters 10-20:
+Illegal function name: __construct (NastCheck[3025])

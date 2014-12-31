@@ -9,7 +9,11 @@
  *
  */
 
-class Preparable implements Awaitable<this> {}
+class Preparable implements Awaitable<this> {
+  public function getWaitHandle(): WaitHandle<this> {
+    // UNSAFE
+  }
+}
 
 class MyPreparable extends Preparable {}
 

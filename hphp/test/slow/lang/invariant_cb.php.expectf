@@ -7,6 +7,5 @@ array(2) {
 
 Fatal error: Uncaught exception 'HH\InvariantException' with message 'a' in :
 Stack trace:
-#0 (): HH\invariant_violation()
-#1 %s/test/slow/lang/invariant_cb.php(6): HH\invariant()
-#2 {main}
+#0 %s/test/slow/lang/invariant_cb.php(6): HH\invariant_violation()
+#1 {main}

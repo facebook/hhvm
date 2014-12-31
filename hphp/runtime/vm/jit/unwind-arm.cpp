@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 vixl::Instruction* simulatorExceptionHook(vixl::Simulator* sim,
                                           std::exception_ptr exn) {

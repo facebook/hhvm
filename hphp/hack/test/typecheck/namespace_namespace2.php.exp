@@ -1,6 +1,6 @@
 Tint
 File "namespace_namespace2.php", line 7, characters 12-13:
-Typing[4110] Invalid return type
+Invalid return type (Typing[4110])
 File "namespace_namespace2.php", line 4, characters 17-22:
 This is a string
 File "namespace_namespace2.php", line 12, characters 17-19:

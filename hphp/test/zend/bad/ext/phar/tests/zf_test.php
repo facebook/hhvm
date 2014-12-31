@@ -26,6 +26,7 @@ foreach(new RecursiveIteratorIterator($phar) as $path) {
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__) . '/zfapp.tgz');
 unlink(dirname(__FILE__) . '/zfapp.phar.tar.gz');

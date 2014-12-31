@@ -227,12 +227,6 @@ BlockScope::setModifiers(ModifierExpressionPtr modifiers) {
   return oldModifiers;
 }
 
-void BlockScope::inferTypes(AnalysisResultPtr ar) {
-  if (m_stmt) {
-    m_stmt->inferTypes(ar);
-  }
-}
-
 void BlockScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_constants->outputPHP(cg, ar);
   m_variables->outputPHP(cg, ar);

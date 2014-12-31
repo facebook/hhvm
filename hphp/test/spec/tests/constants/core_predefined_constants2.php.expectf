@@ -1,0 +1,43 @@
+PHP_VERSION: string(%d) "%s"
+PHP_MAJOR_VERSION: int(%d)
+PHP_MINOR_VERSION: int(%d)
+PHP_RELEASE_VERSION: int(%d)
+PHP_VERSION_ID: int(%d)
+PHP_EXTRA_VERSION: string(%d) "%S"
+PHP_DEBUG: %s
+PHP_MAXPATHLEN: int(%d)
+PHP_OS: string(%d) "%s"
+PHP_SAPI: string(3) "cli"
+PHP_EOL: string(1) "
+"
+DEFAULT_INCLUDE_PATH: string(%d) "%S"
+PEAR_INSTALL_DIR: string(%d) "%S"
+PEAR_EXTENSION_DIR: string(%d) "%S"
+PHP_EXTENSION_DIR: string(%d) "%S"
+PHP_PREFIX: string(%d) "%S"
+PHP_BINDIR: string(%d) "%S"
+PHP_LIBDIR: string(%d) "%S"
+PHP_DATADIR: string(%d) "%S"
+PHP_SYSCONFDIR: string(%d) "%S"
+PHP_CONFIG_FILE_PATH: string(%d) "%S"
+PHP_CONFIG_FILE_SCAN_DIR: string(%d) "%S"
+PHP_SHLIB_SUFFIX: string(2) "so"
+E_ERROR: int(1)
+E_WARNING: int(2)
+E_PARSE: int(4)
+E_NOTICE: int(8)
+E_CORE_ERROR: int(16)
+E_CORE_WARNING: int(32)
+E_COMPILE_ERROR: int(64)
+E_COMPILE_WARNING: int(128)
+E_USER_ERROR: int(256)
+E_USER_WARNING: int(512)
+E_USER_NOTICE: int(1024)
+E_DEPRECATED: int(8192)
+E_USER_DEPRECATED: int(16384)
+E_ALL: int(32767)
+E_STRICT: int(2048)
+%a
+TRUE: bool(true)
+FALSE: bool(false)
+NULL: NULL

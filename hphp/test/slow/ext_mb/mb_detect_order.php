@@ -18,3 +18,4 @@ var_dump(mb_detect_encoding($str));
 var_dump(implode(", ", mb_detect_order()));
 
 var_dump(!empty(mb_get_info()['detect_order']));
+var_dump(!empty(mb_get_info('all')['detect_order']));

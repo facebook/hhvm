@@ -28,8 +28,19 @@ if(NOT HAVE_CUSTOM_LIBEVENT)
   endforeach(file ${CXX_SOURES})
 endif()
 
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/ir-opcode-generated.h"
+  COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../doc/generate-ir-opcodes.sh"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../doc/ir.specification"
+          "${CMAKE_CURRENT_SOURCE_DIR}/../doc/generate-ir-opcodes.pl"
+          "${CMAKE_CURRENT_SOURCE_DIR}/../doc/generate-ir-opcodes.sh"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMENT "Generating HHIR opcode table"
+  VERBATIM)
+
 ADD_LIBRARY(hphp_runtime_static STATIC
-            ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
+            ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES}
+            "ir-opcode-generated.h")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES PREFIX "lib")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)

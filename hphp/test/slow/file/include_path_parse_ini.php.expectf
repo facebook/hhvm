@@ -1,0 +1,25 @@
+Warning: Invalid argument: Filename cannot be empty! in %s/test/slow/file/include_path_parse_ini.php on line 13
+bool(false)
+array(1) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+}
+
+Warning: No such file or directory in %s/test/slow/file/include_path_parse_ini.php on line 19
+bool(false)
+array(1) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+}
+array(1) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+}
+array(1) {
+  ["include_path_parse_nested_dir"]=>
+  string(1) "1"
+}
+array(1) {
+  ["include_path_parse_nested_dir"]=>
+  string(1) "1"
+}

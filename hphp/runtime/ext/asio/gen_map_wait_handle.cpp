@@ -54,7 +54,8 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
     throw e;
   }
   assert(dependencies.getObjectData()->instanceof(c_Map::classof()));
-  auto deps = p_Map::attach(c_Map::Clone(dependencies.getObjectData()));
+  auto deps = SmartObject<c_Map>::attach(
+    c_Map::Clone(dependencies.getObjectData()));
   for (ssize_t iter_pos = deps->iter_begin();
        deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {
@@ -79,14 +80,15 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
 
     if (child->isSucceeded()) {
       auto k = deps->iter_key(iter_pos);
-      deps->set(k.asCell(), &child->getResult());
+      auto result = child->getResult();
+      deps->set(k.asCell(), &result);
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
       assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      p_GenMapWaitHandle my_wh = NEWOBJ(c_GenMapWaitHandle)();
+      SmartObject<c_GenMapWaitHandle> my_wh(newobj<c_GenMapWaitHandle>());
       my_wh->initialize(exception, deps.get(), iter_pos, child_wh);
 
       AsioSession* session = AsioSession::Get();
@@ -142,7 +144,8 @@ void c_GenMapWaitHandle::onUnblocked() {
 
     if (child->isSucceeded()) {
       auto k = m_deps->iter_key(m_iterPos);
-      m_deps->set(k.asCell(), &child->getResult());
+      auto result = child->getResult();
+      m_deps->set(k.asCell(), &result);
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {

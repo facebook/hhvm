@@ -27,7 +27,7 @@ rmdir($thisTestDir);
 function runtest() {
     global $dir1;
        
-    $extraDir = "extraDir";
+    $extraDir = "extraDir16";
 
     mkdir($dir1.'/'.$extraDir);
     mkdir($extraDir);

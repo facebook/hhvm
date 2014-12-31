@@ -26,8 +26,8 @@ function memcache_get_server_status($memcache, $host, $port = 0) { }
 function memcache_set_compress_threshold($memcache, $threshold, $min_savings = 0.2) { }
 function memcache_get_stats($memcache, $type = null, $slabid = 0, $limit = 100) { }
 function memcache_get_extended_stats($memcache, $type = null, $slabid = 0, $limit = 100) { }
-function memcache_set_server_params($memcache, $host, $port = 11211, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null_variant) { }
-function memcache_add_server($memcache, $host, $port = 11211, $persistent = false, $weight = 0, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null_variant, $timeoutms = 0) { }
+function memcache_set_server_params($memcache, $host, $port = 11211, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null) { }
+function memcache_add_server($memcache, $host, $port = 11211, $persistent = false, $weight = 0, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null, $timeoutms = 0) { }
 class Memcache {
   public function __construct() { }
   public function connect($host, $port = 0, $timeout = 0, $timeoutms = 0) { }
@@ -47,7 +47,7 @@ class Memcache {
   public function setcompressthreshold($threshold, $min_savings = 0.2) { }
   public function getstats($type = null, $slabid = 0, $limit = 100) { }
   public function getextendedstats($type = null, $slabid = 0, $limit = 100) { }
-  public function setserverparams($host, $port = 11211, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null_variant) { }
-  public function addserver($host, $port = 11211, $persistent = false, $weight = 0, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null_variant, $timeoutms = 0) { }
+  public function setserverparams($host, $port = 11211, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null) { }
+  public function addserver($host, $port = 11211, $persistent = false, $weight = 0, $timeout = 0, $retry_interval = 0, $status = true, $failure_callback = null, $timeoutms = 0) { }
   public function __destruct() { }
 }

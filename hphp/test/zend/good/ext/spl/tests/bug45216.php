@@ -7,6 +7,7 @@ $object = new SplFileObject($file);
 var_dump($object->fgetss());
 var_dump(fgetss($handle));
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__) . '/foo.html');
 ?>

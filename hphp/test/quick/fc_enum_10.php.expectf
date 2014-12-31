@@ -1,0 +1,2 @@
+
+Fatal error: Class C may not inherit from enum (Foo) in %s/fc_enum_10.php on line %d

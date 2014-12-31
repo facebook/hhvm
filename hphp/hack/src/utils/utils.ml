@@ -28,6 +28,11 @@ let dn s =
     flush stdout;
   end
 
+module String = struct
+  include String
+  let to_string x = x
+end
+
 module type MapSig = sig
   type +'a t
   type key
@@ -133,6 +138,9 @@ end : HashSetSig)
 
 let spf = Printf.sprintf
 
+let fst3 = function x, _, _ -> x
+let snd3 = function _, x, _ -> x
+let thd3 = function _, _, x -> x
 
 let internal_error s =
   Printf.fprintf stderr
@@ -147,10 +155,20 @@ let opt_map f = function
   | None -> None
   | Some x -> Some (f x)
 
-let default x y f =
+let opt_map_default f default x =
+  match x with
+  | None -> default
+  | Some x -> f x
+
+let opt_fold_left f x y =
   match y with
   | None -> x
-  | Some y -> f y
+  | Some y -> f x y
+
+let rec cat_opts = function
+  | [] -> []
+  | Some x :: xs -> x :: cat_opts xs
+  | None :: xs -> cat_opts xs
 
 let rec lmap f env l =
   match l with
@@ -254,9 +272,13 @@ let maybe f env = function
   | None -> ()
   | Some x -> f env x
 
-let unsafe_opt = function
-  | None -> assert false
+(* Since OCaml usually runs w/o backtraces enabled, the note makes errors
+ * easier to debug. *)
+let unsafe_opt_note note = function
+  | None -> raise (Invalid_argument note)
   | Some x -> x
+
+let unsafe_opt x = unsafe_opt_note "unsafe_opt got None" x
 
 let liter f env l = List.iter (f env) l
 
@@ -350,3 +372,16 @@ let rec iter2_shortest f l1 l2 =
 (* We may want to replace this with a tail-recursive map at some point,
  * factoring here so we have a clean way to grep. *)
 let rev_rev_map f l = List.rev (List.rev_map f l)
+
+let fold_fun_list acc fl =
+  List.fold_left (|>) acc fl
+
+let compose f g x = f (g x)
+
+let with_context ~enter ~exit ~do_ =
+  enter ();
+  let result = try do_ () with e ->
+    exit ();
+    raise e in
+  exit ();
+  result

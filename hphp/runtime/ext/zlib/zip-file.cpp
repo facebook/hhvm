@@ -26,8 +26,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 ZipFile::ZipFile() : m_gzFile(nullptr) {
-  m_isLocal = true;
-  m_eof = false;
+  setIsLocal(true);
+  setEof(false);
 }
 
 ZipFile::~ZipFile() {
@@ -56,7 +56,7 @@ bool ZipFile::open(const String& filename, const String& mode) {
       return false;
     }
     auto buffer = m_innerFile.getTyped<MemFile>();
-    auto file = NEWOBJ(TempFile);
+    auto file = newres<TempFile>();
     while (!buffer->eof()) {
       file->write(buffer->read(File::CHUNK_SIZE));
     }
@@ -79,14 +79,14 @@ bool ZipFile::close() {
 
 bool ZipFile::closeImpl() {
   bool ret = true;
-  s_file_data->m_pcloseRet = 0;
-  if (!m_closed) {
+  s_pcloseRet = 0;
+  if (!isClosed()) {
     if (m_gzFile) {
-      s_file_data->m_pcloseRet = gzclose(m_gzFile);
-      ret = (s_file_data->m_pcloseRet == 0);
+      s_pcloseRet = gzclose(m_gzFile);
+      ret = (s_pcloseRet == 0);
       m_gzFile = nullptr;
     }
-    m_closed = true;
+    setIsClosed(true);
     if (m_innerFile.is<File>()) {
       m_innerFile.getTyped<File>()->close();
     }
@@ -105,12 +105,12 @@ int64_t ZipFile::readImpl(char *buffer, int64_t length) {
   assert(m_gzFile);
   int64_t nread = gzread(m_gzFile, buffer, length);
   if (nread == 0 || gzeof(m_gzFile)) {
-    m_eof = true;
+    setEof(true);
   } else {
     errno = 0;
     gzerror(m_gzFile, &errno);
     if (errno == 1) { // Z_STREAM_END = 1
-      m_eof = true;
+      setEof(true);
     }
   }
   return (nread < 0) ? 0 : nread;
@@ -127,45 +127,45 @@ bool ZipFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   if (whence == SEEK_CUR) {
     off_t result = gzseek(m_gzFile, 0, SEEK_CUR);
     if (result != (off_t)-1) {
-      offset += result - (m_writepos - m_readpos + m_position);
+      offset += result - (bufferedLen() + getPosition());
     }
-    if (offset > 0 && offset < m_writepos - m_readpos) {
-      m_readpos += offset;
-      m_position += offset;
+    if (offset > 0 && offset < bufferedLen()) {
+      setReadPosition(getReadPosition() + offset);
+      setPosition(getPosition() + offset);
       return true;
     }
-    offset += m_position;
+    offset += getPosition();
     whence = SEEK_SET;
   }
 
   // invalidate the current buffer
-  m_writepos = 0;
-  m_readpos = 0;
-  m_eof = false;
+  setWritePosition(0);
+  setReadPosition(0);
+  setEof(false);
   flush();
   off_t result = gzseek(m_gzFile, offset, whence);
-  m_position = result;
+  setPosition(result);
   return result != (off_t)-1;
 }
 
 int64_t ZipFile::tell() {
   assert(m_gzFile);
-  return m_position;
+  return getPosition();
 }
 
 bool ZipFile::eof() {
   assert(m_gzFile);
-  int64_t avail = m_writepos - m_readpos;
-  return avail > 0 ? false : m_eof;
+  int64_t avail = bufferedLen();
+  return avail > 0 ? false : getEof();
 }
 
 bool ZipFile::rewind() {
   assert(m_gzFile);
   seek(0);
-  m_writepos = 0;
-  m_readpos = 0;
-  m_position = 0;
-  m_eof = false;
+  setWritePosition(0);
+  setReadPosition(0);
+  setPosition(0);
+  setEof(false);
   gzrewind(m_gzFile);
   return true;
 }

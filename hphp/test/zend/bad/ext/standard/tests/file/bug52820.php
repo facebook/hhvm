@@ -23,4 +23,4 @@ leak_variable(do_stuff("php://temp"), true);
 echo "\nmemory stream (leak):\n";
 leak_variable(do_stuff("php://memory"), true);
 
-echo "\nDone.\n";
+echo "\nDone.\n";

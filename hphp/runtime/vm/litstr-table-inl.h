@@ -56,6 +56,11 @@ const NamedEntityPair& LitstrTable::lookupNamedEntityPairId(Id id) const {
   return m_namedInfo.lookupNamedEntityPair(id);
 }
 
+inline
+void LitstrTable::setNamedEntityPairTable(NamedEntityPairTable&& namedInfo) {
+  m_namedInfo = std::move(namedInfo);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Concurrency control.
 

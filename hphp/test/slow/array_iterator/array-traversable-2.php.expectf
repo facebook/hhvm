@@ -20,4 +20,4 @@ Indexish
 array(0) {
 }
 
-Fatal error: Argument 1 passed to ifoo() must implement interface IFoo, array given in %s/test/slow/array_iterator/array-traversable-2.php on line 28
+Catchable fatal error: Argument 1 passed to ifoo() must implement interface IFoo, array given in %s/test/slow/array_iterator/array-traversable-2.php on line 28

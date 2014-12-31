@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/mailparse/mime.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/runtime-error.h"
 
@@ -620,7 +622,7 @@ bool MimePart::parse(const char *buf, int bufsize) {
 }
 
 MimePart *MimePart::createChild(int startpos, bool inherit) {
-  MimePart *child = NEWOBJ(MimePart)();
+  MimePart *child = newres<MimePart>();
   m_parsedata.lastpart = child;
   child->m_parent = this;
 
@@ -916,7 +918,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
   } else {
     /* filename is the actual data */
     String data = filename.toString();
-    f = NEWOBJ(MemFile)(data.data(), data.size());
+    f = newres<MemFile>(data.data(), data.size());
     file = Resource(f);
   }
 
@@ -942,7 +944,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
       return m_extract_context;
     }
     if (callbackfunc.isResource()) {
-      return f_stream_get_contents(callbackfunc.toResource());
+      return HHVM_FN(stream_get_contents)(callbackfunc.toResource());
     }
     return true;
   }

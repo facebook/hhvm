@@ -16,8 +16,8 @@ class Yii extends Framework {
     }
   }
 
-  protected function install(): void {
-    parent::install();
+  <<Override>>
+  protected function extraPostComposer(): void {
     verbose("Creating a new phpunit.xml for running the yii tests.\n");
     $phpunit_xml = <<<XML
 <phpunit bootstrap="bootstrap.php"

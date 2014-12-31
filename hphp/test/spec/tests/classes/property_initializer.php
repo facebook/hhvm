@@ -1,0 +1,69 @@
+<?php
+
+/*
+   +-------------------------------------------------------------+
+   | Copyright (c) 2014 Facebook, Inc. (http://www.facebook.com) |
+   +-------------------------------------------------------------+
+*/
+
+error_reporting(-1);
+
+///*
+class Point
+{
+    public $x = -10;    // gets applied before constructor runs
+    public $y = 10;     // gets applied before constructor runs
+
+    public function __construct($x = 0, $y = 0)
+    {
+        $this->x = $x;
+        $this->y = $y;
+    }
+
+    public function __toString()
+    {
+        return '(' . $this->x . ',' . $this->y . ')';
+    }   
+}
+
+$p = new Point;
+echo $p . "\n";
+
+$p = new Point();
+echo $p . "\n";
+
+$p = new Point(100);
+echo $p . "\n";
+
+$p = new Point(1000, 2000);
+echo $p . "\n";
+//*/
+
+echo "--------------------\n";
+
+function f() { return 10; }
+
+class X
+{
+//  const Cprop1 = 10 + 12 - 5.6;       // invalid
+//  const Cprop2 = f();                 // invalid
+//  const Cprop10 = array();            // Arrays are not allowed in class constants
+//  const Cprop11 = array(10, "red", TRUE);
+//  const Cprop12 = array(10, "red", TRUE, f());
+//  const Cprop13 = array(10, "red", array(2.3, NULL, array(12, FALSE, "zzz")));
+
+//  private $prop1 = 10 + 12 - 5.6;     // invalid
+//  private $prop2 = f();               // invalid
+    private $prop10 = array();
+    private $prop11 = array(10, "red", TRUE);
+//  private $prop12 = array(10, "red", TRUE, f());  // invalid
+    private $prop13 = array(10, "red", array(2.3, NULL, array(12, FALSE, "zzz")));
+
+
+    public $q1;         // take on NULL by default
+    public static $q2;  // take on NULL by default
+}
+
+$x = new X;
+var_dump($x->q1);
+var_dump(X::$q2);

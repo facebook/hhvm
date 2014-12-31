@@ -29,7 +29,7 @@ struct Class;
 struct NamedEntity;
 }
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 

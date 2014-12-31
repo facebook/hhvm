@@ -15,22 +15,32 @@
 */
 
 #include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/base/complex-types.h"
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/util/exception.h"
 #include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/array-util.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/zend-qsort.h"
 #include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/base/array-util.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/zend-qsort.h"
+#include "hphp/runtime/base/zend-string.h"
+
+#include "hphp/parser/hphp.tab.hpp"
+
+#include "hphp/util/exception.h"
+
 #include <unicode/coll.h> // icu
 #include <vector>
-#include "hphp/parser/hphp.tab.hpp"
 
 namespace HPHP {
 
@@ -472,53 +482,57 @@ Variant Array::rvalAt(const String& key, ACCESSPARAMS_IMPL) const {
 const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
   if (!m_px) return null_variant;
   switch (key.getRawType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    return m_px->get(staticEmptyString(), flags & AccessFlags::Error);
-  case KindOfBoolean:
-  case KindOfInt64:
-    return m_px->get(key.asTypedValue()->m_data.num,
-      flags & AccessFlags::Error);
-  case KindOfDouble:
-    return m_px->get((int64_t)key.asTypedValue()->m_data.dbl,
-      flags & AccessFlags::Error);
-  case KindOfStaticString:
-  case KindOfString:
-    {
-      int64_t n;
-      if (!(flags & AccessFlags::Key) &&
-          key.asTypedValue()->m_data.pstr->isStrictlyInteger(n)) {
-        if (UNLIKELY(m_px->isVPackedArrayOrIntMapArray())) {
-          if (m_px->isVPackedArray()) {
-            PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-          } else {
-            MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                                  ArrayData::kIntMapKind);
-          }
-        }
+    case KindOfUninit:
+    case KindOfNull:
+      return m_px->get(staticEmptyString(), flags & AccessFlags::Error);
 
-        return m_px->get(n, flags & AccessFlags::Error);
+    case KindOfBoolean:
+    case KindOfInt64:
+      return m_px->get(key.asTypedValue()->m_data.num,
+                       flags & AccessFlags::Error);
+
+    case KindOfDouble:
+      return m_px->get((int64_t)key.asTypedValue()->m_data.dbl,
+                       flags & AccessFlags::Error);
+
+    case KindOfStaticString:
+    case KindOfString:
+      {
+        int64_t n;
+        if (!(flags & AccessFlags::Key) &&
+            key.asTypedValue()->m_data.pstr->isStrictlyInteger(n)) {
+          if (UNLIKELY(m_px->isVPackedArrayOrIntMapArray())) {
+            if (m_px->isVPackedArray()) {
+              PackedArray::warnUsage(PackedArray::Reason::kGetStr);
+            } else {
+              MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                                    ArrayData::kIntMapKind);
+            }
+          }
+
+          return m_px->get(n, flags & AccessFlags::Error);
+        }
       }
-    }
-    if (UNLIKELY(m_px->isVPackedArray())) {
-      PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-    }
-    return m_px->get(key.asCStrRef(), flags & AccessFlags::Error);
-  case KindOfArray:
-    throw_bad_type_exception("Invalid type used as key");
-    break;
-  case KindOfObject:
-    throw_bad_type_exception("Invalid type used as key");
-    break;
-  case KindOfResource:
-    return m_px->get(key.toInt64(), flags & AccessFlags::Error);
-  case KindOfRef:
-    return rvalAtRef(*(key.asTypedValue()->m_data.pref->var()), flags);
-  default:
-    assert(false);
-    break;
+      if (UNLIKELY(m_px->isVPackedArray())) {
+        PackedArray::warnUsage(PackedArray::Reason::kGetStr);
+      }
+      return m_px->get(key.asCStrRef(), flags & AccessFlags::Error);
+
+    case KindOfArray:
+    case KindOfObject:
+      throw_bad_type_exception("Invalid type used as key");
+      return null_variant;
+
+    case KindOfResource:
+      return m_px->get(key.toInt64(), flags & AccessFlags::Error);
+
+    case KindOfRef:
+      return rvalAtRef(*(key.asTypedValue()->m_data.pref->var()), flags);
+
+    case KindOfClass:
+      break;
   }
-  return null_variant;
+  not_reached();
 }
 
 Variant Array::rvalAt(const Variant& key, ACCESSPARAMS_IMPL) const {
@@ -661,12 +675,9 @@ bool Array::exists(const String& key, bool isKey /* = false */) const {
 }
 
 bool Array::exists(const Variant& key, bool isKey /* = false */) const {
-  switch(key.getType()) {
-  case KindOfBoolean:
-  case KindOfInt64:
+  if (IS_BOOL_TYPE(key.getType()) ||
+      IS_INT_TYPE(key.getType())) {
     return existsImpl(key.toInt64());
-  default:
-    break;
   }
   if (isKey) return existsImpl(key);
   VarNR k(key.toKey());
@@ -685,13 +696,10 @@ void Array::remove(const String& key, bool isString /* = false */) {
 }
 
 void Array::remove(const Variant& key) {
-  switch(key.getType()) {
-  case KindOfBoolean:
-  case KindOfInt64:
+  if (IS_BOOL_TYPE(key.getType()) ||
+      IS_INT_TYPE(key.getType())) {
     removeImpl(key.toInt64());
     return;
-  default:
-    break;
   }
   VarNR k(key.toKey());
   if (!k.isNull()) {
@@ -779,21 +787,32 @@ void Array::unserialize(VariableUnserializer *uns) {
   if (size == 0) {
     operator=(Create());
   } else {
-    // Pre-allocate an ArrayData of the given size, to avoid escalation in
-    // the middle, which breaks references.
+    auto const cmret = computeCapAndMask(size);
+    auto const allocsz = computeAllocBytes(cmret.first, cmret.second);
+
+    // For large arrays, do a naive pre-check for OOM.
+    if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {
+      check_request_surprise_unlikely();
+    }
+
+    // Pre-allocate an ArrayData of the given size, to avoid escalation in the
+    // middle, which breaks references.
     operator=(ArrayInit(size, ArrayInit::Mixed{}).toArray());
     for (int64_t i = 0; i < size; i++) {
-      Variant key(uns->unserializeKey());
+      Variant key;
+      key.unserialize(uns, Uns::Mode::Key);
       if (!key.isString() && !key.isInteger()) {
         throw Exception("Invalid key");
       }
       // for apc, we know the key can't exist, but ignore that optimization
-      assert(uns->getType() != VariableUnserializer::Type::APCSerialize ||
+      assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
              !exists(key, true));
       Variant &value = lvalAt(key, AccessFlags::Key);
       value.unserialize(uns);
     }
   }
+
+  check_request_surprise_unlikely();
 
   sep = uns->readChar();
   if (sep != '}') {
@@ -945,7 +964,9 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
         sorted.set(k, arr->getValueRef(pos));
       }
     }
-    *opaque.original = sorted;
+    if (opaque.original->getRawType() == KindOfRef) {
+      *opaque.original->getRefData() = sorted;
+    }
   }
 
   free(indices);

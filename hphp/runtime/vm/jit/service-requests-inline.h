@@ -19,9 +19,9 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
-inline ServiceReqArgInfo ccServiceReqArgInfo(JIT::ConditionCode cc) {
+inline ServiceReqArgInfo ccServiceReqArgInfo(jit::ConditionCode cc) {
   return ServiceReqArgInfo{ServiceReqArgInfo::CondCode, { uint64_t(cc) }};
 }
 
@@ -96,8 +96,8 @@ TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
 
 namespace std {
 
-template<> struct hash<HPHP::JIT::ServiceRequest> {
-  size_t operator()(const HPHP::JIT::ServiceRequest& sr) const {
+template<> struct hash<HPHP::jit::ServiceRequest> {
+  size_t operator()(const HPHP::jit::ServiceRequest& sr) const {
     return sr;
   }
 };

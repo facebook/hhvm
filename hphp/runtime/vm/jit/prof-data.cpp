@@ -19,14 +19,14 @@
 #include <vector>
 #include <algorithm>
 
-#include "folly/MapUtil.h"
+#include <folly/MapUtil.h>
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/verifier/cfg.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(pgo);
 
@@ -98,7 +98,7 @@ TransID PrologueToTransMap::get(FuncId funcId, int numArgs) const {
 ProfTransRec::ProfTransRec(TransID       id,
                            TransKind     kind,
                            Offset        lastBcOff,
-                           const SrcKey& sk,
+                           SrcKey sk,
                            RegionDescPtr region)
     : m_id(id)
     , m_kind(kind)
@@ -110,7 +110,7 @@ ProfTransRec::ProfTransRec(TransID       id,
 
 ProfTransRec::ProfTransRec(TransID       id,
                            TransKind     kind,
-                           const SrcKey& sk)
+                           SrcKey sk)
     : m_id(id)
     , m_kind(kind)
     , m_lastBcOff(-1)
@@ -122,7 +122,7 @@ ProfTransRec::ProfTransRec(TransID       id,
 
 ProfTransRec::ProfTransRec(TransID       id,
                            TransKind     kind,
-                           const SrcKey& sk,
+                           SrcKey sk,
                            int           nArgs)
     : m_id(id)
     , m_kind(kind)
@@ -146,6 +146,11 @@ TransKind ProfTransRec::kind() const {
 
 SrcKey ProfTransRec::srcKey() const {
   return m_sk;
+}
+
+SrcKey ProfTransRec::lastSrcKey() const {
+  assert(m_kind == TransKind::Profile);
+  return SrcKey(m_sk.func(), m_lastBcOff, m_sk.resumed());
 }
 
 Offset ProfTransRec::startBcOff() const {
@@ -193,7 +198,7 @@ uint32_t ProfData::numTrans() const {
 }
 
 TransID ProfData::curTransID() const {
-  return numTrans();
+  return static_cast<TransID>(numTrans());
 }
 
 bool ProfData::hasTransRec(TransID id) const {
@@ -203,6 +208,11 @@ bool ProfData::hasTransRec(TransID id) const {
 SrcKey ProfData::transSrcKey(TransID id) const {
   assert(id < m_transRecs.size());
   return m_transRecs[id]->srcKey();
+}
+
+SrcKey ProfData::transLastSrcKey(TransID id) const {
+  assert(id < m_transRecs.size());
+  return m_transRecs[id]->lastSrcKey();
 }
 
 Offset ProfData::transStartBcOff(TransID id) const {
@@ -248,6 +258,13 @@ TransKind ProfData::transKind(TransID id) const {
   return m_transRecs[id]->kind();
 }
 
+bool ProfData::isKindProfile(TransID id) const {
+  assert(id < m_numTrans);
+  // we don't keep ProfTransRecs for non-profile translations
+  if (m_transRecs[id] == nullptr) return false;
+  return m_transRecs[id]->kind() == TransKind::Profile;
+}
+
 int64_t ProfData::transCounter(TransID id) const {
   assert(id < m_numTrans);
   return m_counters.get(id);
@@ -282,7 +299,7 @@ int ProfData::prologueArgs(TransID id) const {
   return m_transRecs[id]->prologueArgs();
 }
 
-bool ProfData::optimized(const SrcKey& sk) const {
+bool ProfData::optimized(SrcKey sk) const {
   return m_optimizedSKs.count(sk);
 }
 
@@ -290,7 +307,7 @@ bool ProfData::optimized(FuncId funcId) const {
   return m_optimizedFuncs.count(funcId);
 }
 
-void ProfData::setOptimized(const SrcKey& sk) {
+void ProfData::setOptimized(SrcKey sk) {
   m_optimizedSKs.insert(sk);
 }
 
@@ -372,7 +389,7 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
   return transId;
 }
 
-TransID ProfData::addTransPrologue(TransKind kind, const SrcKey& sk,
+TransID ProfData::addTransPrologue(TransKind kind, SrcKey sk,
                                    int nArgs) {
   assert(kind == TransKind::Prologue || kind == TransKind::Proflogue);
   TransID transId = m_numTrans++;
@@ -384,7 +401,7 @@ TransID ProfData::addTransPrologue(TransKind kind, const SrcKey& sk,
   return transId;
 }
 
-TransID ProfData::addTransNonProf(TransKind kind, const SrcKey& sk) {
+TransID ProfData::addTransNonProf(TransKind kind, SrcKey sk) {
   assert(kind == TransKind::Anchor || kind == TransKind::Interp ||
          kind == TransKind::Live   || kind == TransKind::Optimize);
   TransID transId = m_numTrans++;
@@ -433,6 +450,32 @@ void ProfData::freeFuncData(FuncId funcId) {
       m_transRecs[tid].reset();
     }
   }
+
+  // We don't need the cached block offsets anymore.  They are only used when
+  // generating profiling translations.
+  m_blockEndOffsets.erase(funcId);
+}
+
+bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
+  auto const mapIt = m_blockEndOffsets.find(func->getFuncId());
+  if (mapIt != end(m_blockEndOffsets)) {
+    return mapIt->second.count(offset);
+  }
+
+  using namespace Verifier;
+
+  Arena arena;
+  GraphBuilder builder{arena, func};
+  Graph* cfg = builder.build();
+
+  auto& offsets = m_blockEndOffsets[func->getFuncId()];
+
+  for (LinearBlocks blocks = linearBlocks(cfg); !blocks.empty(); ) {
+    auto last = blocks.popFront()->last - func->unit()->entry();
+    offsets.insert(last);
+  }
+
+  return offsets.count(offset);
 }
 
 } }

@@ -29,7 +29,7 @@ function make_tree(int $n): ?Node<int> {
   }
 }
 
-function gen(?Node<int> $tree): Continuation<int> {
+function gen(?Node<int> $tree): Generator<int, int, void> {
 
   if ($tree === null) {
 
@@ -53,7 +53,7 @@ function gen(?Node<int> $tree): Continuation<int> {
   }
 }
 
-function nat(): Continuation<int> {
+function nat(): Generator<int, int, void> {
   for($i = 0; $i < 10000; $i++) {
     yield $i;
   }
@@ -73,7 +73,7 @@ function testArray(): void {
   }
 }
 
-function gen2(int $n): Continuation<int> {
+function gen2(int $n): Generator<int, int, void> {
   if($n <= 0) {
     yield 0;
     yield 1;
@@ -120,5 +120,5 @@ function main(): void {
   else {
     echo 'Failure: test_yield_erling.1';
   }
-  
+
 }

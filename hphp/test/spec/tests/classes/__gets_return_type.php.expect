@@ -1,0 +1,17 @@
+__get foo
+object(C)#1 (1) {
+  ["a"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+========
+__get foo
+object(C)#2 (1) {
+  ["a"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}

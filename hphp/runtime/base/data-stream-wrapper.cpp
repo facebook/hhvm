@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -129,7 +129,7 @@ File* DataStreamWrapper::open(const String& filename, const String& mode,
     decoded = url_decode(data, data_len);
   }
   file =
-    std::unique_ptr<MemFile>(NEWOBJ(MemFile)(decoded.data(), decoded.size()));
+    std::unique_ptr<MemFile>(newres<MemFile>(decoded.data(), decoded.size()));
   return file.release();
 }
 

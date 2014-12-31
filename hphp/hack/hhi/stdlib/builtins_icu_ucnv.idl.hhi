@@ -63,7 +63,7 @@ class UConverter {
   public function fromUCallback($reason, $source, $codepoint, &$error) { }
   public function toUCallback($reason, $source, $codeunits, &$error) { }
   public function convert($str, $reverse = false) { }
-  static public function transcode($str, $toEncoding, $fromEncoding, $options = null_variant) { }
+  static public function transcode($str, $toEncoding, $fromEncoding, $options = null) { }
   public function getErrorCode() { }
   public function getErrorMessage() { }
   static public function reasonText($reason) { }

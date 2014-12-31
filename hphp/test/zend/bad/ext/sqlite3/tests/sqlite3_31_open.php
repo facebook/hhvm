@@ -8,4 +8,5 @@ try {
 }
 
 ?>
+<?php error_reporting(0); ?>
 <?php @unlink(__DIR__ . '/db1.db'); ?>

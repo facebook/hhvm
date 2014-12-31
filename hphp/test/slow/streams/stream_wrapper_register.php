@@ -159,12 +159,10 @@ $fp = fopen("abc://b", "rw");
 feof($fp);
 fread($fp, 1);
 
-/** We don't have anything like stream_cast
 $r = array($fp);
 $w = null;
 $e = null;
 stream_select($r, $w, $e, 0);
-*/
 
 fflush($fp);
 flock($fp, LOCK_SH);
@@ -182,7 +180,11 @@ chmod('abc://c', 0123);
 unlink('abc://d');
 is_file('abc://e');
 is_link('abc://f');
+
 touch('abc://g');
+touch('abc://g', 15);
+touch('abc://g', 15, 25);
+
 mkdir('abc://dir', 0755, true);
 rmdir('abc://dir');
 rename('abc://dir', 'abc://dir2');

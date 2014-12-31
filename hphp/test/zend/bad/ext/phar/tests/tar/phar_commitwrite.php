@@ -28,6 +28,7 @@ var_dump($p->getStub());
 var_dump($p->isFileFormat(Phar::TAR));
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/brandnewphar.phar.tar');
 ?>

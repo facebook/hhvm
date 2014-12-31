@@ -2,4 +2,4 @@ object(foo\test)#%d (0) {
 }
 NULL
 
-Fatal error: %s
+Catchable fatal error: %s

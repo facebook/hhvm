@@ -1,0 +1,8 @@
+bool\(true\)
+string\(0\) \"\"
+string\(0\) \"\"
+string\(0\) \"\"
+bool\(true\)
+string\([0-9]*\) \"phar\:\/\/.*\.phar\"
+string\([0-9]*\) \"phar\:\/\/.*\.phar\"
+string\([0-9]*\) \".*\.phar\"

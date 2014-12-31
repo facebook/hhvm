@@ -18,8 +18,9 @@
 #include <sys/param.h>
 #include "hphp/compiler/option.h"
 #include "hphp/test/ext/test.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,8 +54,8 @@ bool TestBase::VerifySame(const char *exp1, const char *exp2,
                           const Variant& v1, const Variant& v2) {
   if (!same(v1, v2)) {
     g_context->obEndAll();
-    printf("%s = \n", exp1); f_var_dump(v1);
-    printf("%s = \n", exp2); f_var_dump(v2);
+    printf("%s = \n", exp1); HHVM_FN(var_dump)(v1);
+    printf("%s = \n", exp2); HHVM_FN(var_dump)(v2);
     return false;
   }
   return true;
@@ -65,17 +66,17 @@ bool TestBase::VerifyClose(const char *exp1, const char *exp2,
   double diff = v1 > v2 ? v1 - v2 : v2 - v1;
   if (diff > 0.00001) {
     g_context->obEndAll();
-    printf("%s = \n", exp1); f_var_dump(v1);
-    printf("%s = \n", exp2); f_var_dump(v2);
+    printf("%s = \n", exp1); HHVM_FN(var_dump)(v1);
+    printf("%s = \n", exp2); HHVM_FN(var_dump)(v2);
     return false;
   }
   return true;
 }
 
 bool TestBase::array_value_exists(const Variant& var, const Variant& value) {
-  bool found = !same(f_array_search(value, var.toArray()), false);
+  bool found = !same(HHVM_FN(array_search)(value, var.toArray()), false);
   if (!found) {
-    f_var_dump(var);
+    HHVM_FN(var_dump)(var);
   }
   return found;
 }

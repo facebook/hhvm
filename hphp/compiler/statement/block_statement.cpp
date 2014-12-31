@@ -89,10 +89,6 @@ void BlockStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void BlockStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_stmts) m_stmts->inferTypes(ar);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void BlockStatement::outputCodeModel(CodeGenerator &cg) {

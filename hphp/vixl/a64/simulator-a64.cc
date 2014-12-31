@@ -27,7 +27,7 @@
 #include "hphp/vixl/a64/simulator-a64.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/compilation-flags.h"
-#include "folly/Format.h"
+#include <folly/Format.h>
 #include <math.h>
 
 namespace vixl {

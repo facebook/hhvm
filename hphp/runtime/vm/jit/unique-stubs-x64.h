@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 
 //////////////////////////////////////////////////////////////////////
 

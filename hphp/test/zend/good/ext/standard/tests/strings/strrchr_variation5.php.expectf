@@ -1,22 +1,22 @@
 *** Testing strrchr() function: with heredoc strings ***
-string(32) "	 st
+string(32) "%r\x09%r st
 
 ch
  using
-scape \seque
+%r\x1b%rscape \seque
 ce"
 string(9) "\seque
 ce"
 string(24) "
  using
-scape \seque
+%r\x1b%rscape \seque
 ce"
 string(9) "\seque
 ce"
-string(32) "	 st
+string(32) "%r\x09%r st
 
 ch
  using
-scape \seque
+%r\x1b%rscape \seque
 ce"
 *** Done ***

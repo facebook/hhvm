@@ -16,12 +16,13 @@
 */
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/util/logger.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/thread-info.h"
-
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/logger.h"
 
 #include <c-client.h> /* includes mail.h and rfc822.h */
 #define namespace namespace_
@@ -67,7 +68,7 @@ public:
   int64_t m_flag;
 };
 
-IMPLEMENT_OBJECT_ALLOCATION(ImapStream);
+IMPLEMENT_RESOURCE_ALLOCATION(ImapStream);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1332,7 +1333,7 @@ static Variant HHVM_FUNCTION(imap_open, const String& mailbox,
     return false;
   }
 
-  return NEWOBJ(ImapStream)(stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL);
+  return newres<ImapStream>(stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL);
 }
 
 static bool HHVM_FUNCTION(imap_ping, const Resource& imap_stream) {

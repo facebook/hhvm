@@ -16,7 +16,9 @@
 #ifndef incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
 #define incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit {
+struct Vout;
+namespace arm {
 
 /*
  * See service-requests-x64.h for interface documentation.
@@ -25,13 +27,15 @@ namespace HPHP { namespace JIT { namespace ARM {
 TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
 void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest);
-void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                  SrcKey dest);
 void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
-                      JIT::ConditionCode cc);
-int32_t emitBindCall(CodeBlock& cb, CodeBlock& cold,
-                     CodeBlock& frozen, SrcKey srcKey,
-                     const Func* funcd, int numArgs);
+                      jit::ConditionCode cc);
+void emitBindCall(Vout& v, CodeBlock& frozen,
+                  const Func* funcd, int numArgs);
+void emitCallNativeImpl(Vout& v, Vout& vcold, SrcKey srcKey,
+                        const Func* funcd, int numArgs,
+                        Vreg sp, Vreg fp, Vreg rds);
 
 }}}
 

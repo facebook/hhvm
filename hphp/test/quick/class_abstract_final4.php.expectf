@@ -1,0 +1,1 @@
+Fatal error: Class Utils contains non-static property declaration and therefore cannot be declared 'abstract final' in %s/class_abstract_final4.php on line %d

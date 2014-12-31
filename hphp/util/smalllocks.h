@@ -27,7 +27,8 @@
 
 namespace HPHP {
 
-namespace {
+//////////////////////////////////////////////////////////////////////
+
 #ifdef __linux__
 
 inline int futex(int* uaddr, int op, int val, const timespec* timeout,
@@ -46,29 +47,30 @@ inline void futex_wake(std::atomic<int>* value, int nwake) {
 }
 
 #else
+
 // On non-linux OSs we do nothing for futexes. They essentially turn into spin
-// locks. If this becomes a perf issue, it's
-void futex_wait(std::atomic<int>* value, int expected) {
+// locks. If this becomes a perf issue, it's <space intentionally left blank>
+inline void futex_wait(std::atomic<int>* value, int expected) {
 }
 
-void futex_wake(std::atomic<int>* value, int nwake) {
+inline void futex_wake(std::atomic<int>* value, int nwake) {
 }
+
 #endif
-}
 
-// A lock the size of a 4 byte int
-// TODO:
-// (1) This could be made 1 byte (or even 2 bits). We'd have to pass an aligned
-//     address to futex wait and read the rest of the 4 bytes, making them part
-//     of the expected value.
-// (2) For performance, we could add spinning.
-// (3) un-inline the slow path
-class SmallLock {
-public:
+//////////////////////////////////////////////////////////////////////
 
-  SmallLock() : lock_data(0) {}
-
-  // this is roughly based on http://www.akkadia.org/drepper/futex.pdf
+/*
+ * A lock the size of a 4 byte int, using futex_wait when it needs to block.
+ *
+ * This structure is a standard layout class so it can be put in unions without
+ * declaring custom union constructors.  Zeroing its storage is guaranteed to
+ * put it in the unlocked state, and unlocking it is guaranteed to put it back
+ * to all bits zero.
+ *
+ * This is roughly based on http://www.akkadia.org/drepper/futex.pdf.
+ */
+struct SmallLock {
   void lock() {
     int c = 0;
     if (lock_data.compare_exchange_strong(c, 1, std::memory_order_acquire)) {
@@ -95,5 +97,9 @@ public:
 private:
   std::atomic<int> lock_data;
 };
+
+//////////////////////////////////////////////////////////////////////
+
 }
+
 #endif

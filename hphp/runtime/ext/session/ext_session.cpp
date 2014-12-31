@@ -26,7 +26,7 @@
 #include <dirent.h>
 #include <vector>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -34,7 +34,9 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/request-local.h"
@@ -43,9 +45,9 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/zend-math.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
-#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/wddx/ext_wddx.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -137,23 +139,19 @@ const int64_t k_PHP_SESSION_NONE     = Session::None;
 const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
 const StaticString s_session_ext_name("session");
 
-struct SessionRequestData final : RequestEventHandler, Session {
+struct SessionRequestData final : Session {
   SessionRequestData() {}
+
+  void init() {
+    m_id.detach();
+    m_session_status = Session::None;
+    m_ps_session_handler = nullptr;
+  }
 
   void destroy() {
     m_id.reset();
     m_session_status = Session::None;
     m_ps_session_handler = nullptr;
-  }
-
-  void requestInit() override {
-    destroy();
-  }
-
-  void requestShutdown() override {
-    // We don't actually want to do our requestShutdownImpl here---it
-    // is run explicitly from the execution context, because it could
-    // run user code.
   }
 
   void requestShutdownImpl();
@@ -162,7 +160,7 @@ public:
   String m_id;
 
 };
-IMPLEMENT_STATIC_REQUEST_LOCAL(SessionRequestData, s_session);
+static __thread SessionRequestData* s_session;
 #define PS(name) s_session->m_ ## name
 
 void SessionRequestData::requestShutdownImpl() {
@@ -502,6 +500,18 @@ static class RedisSessionModule : public SystemlibSessionModule {
   RedisSessionModule() :
     SystemlibSessionModule("redis", "RedisSessionModule") { }
 } s_redis_session_module;
+
+static class MemcacheSessionModule : public SystemlibSessionModule {
+ public:
+  MemcacheSessionModule() :
+    SystemlibSessionModule("memcache", "MemcacheSessionModule") { }
+} s_memcache_session_module;
+
+static class MemcachedSessionModule : public SystemlibSessionModule {
+ public:
+  MemcachedSessionModule() :
+    SystemlibSessionModule("memcached", "MemcachedSessionModule") { }
+} s_memcached_session_module;
 
 //////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
@@ -871,28 +881,28 @@ static FileSessionModule s_file_session_module;
 // UserSessionModule
 
 class UserSessionModule : public SessionModule {
-public:
+ public:
   UserSessionModule() : SessionModule("user") {}
 
-  virtual bool open(const char *save_path, const char *session_name) {
+  bool open(const char *save_path, const char *session_name) override {
     auto func = make_packed_array(Object(PS(ps_session_handler)), s_open);
     auto args = make_packed_array(String(save_path), String(session_name));
 
     auto res = vm_call_user_func(func, args);
     PS(mod_user_implemented) = true;
-    return res.toBoolean();
+    return handleReturnValue(res);
   }
 
-  virtual bool close() {
+  bool close() override {
     auto func = make_packed_array(Object(PS(ps_session_handler)), s_close);
     auto args = Array::Create();
 
     auto res = vm_call_user_func(func, args);
     PS(mod_user_implemented) = false;
-    return res.toBoolean();
+    return handleReturnValue(res);
   }
 
-  virtual bool read(const char *key, String &value) {
+  bool read(const char *key, String &value) override {
     Variant ret = vm_call_user_func(
        make_packed_array(Object(PS(ps_session_handler)), s_read),
        make_packed_array(String(key))
@@ -904,25 +914,40 @@ public:
     return false;
   }
 
-  virtual bool write(const char *key, const String& value) {
-    return vm_call_user_func(
+  bool write(const char *key, const String& value) override {
+    return handleReturnValue(vm_call_user_func(
        make_packed_array(Object(PS(ps_session_handler)), s_write),
        make_packed_array(String(key, CopyString), value)
-    ).toBoolean();
+    ));
   }
 
-  virtual bool destroy(const char *key) {
-    return vm_call_user_func(
+  bool destroy(const char *key) override {
+    return handleReturnValue(vm_call_user_func(
        make_packed_array(Object(PS(ps_session_handler)), s_destroy),
        make_packed_array(String(key))
-    ).toBoolean();
+    ));
   }
 
-  virtual bool gc(int maxlifetime, int *nrdels) {
-    return vm_call_user_func(
+  bool gc(int maxlifetime, int *nrdels) override {
+    return handleReturnValue(vm_call_user_func(
        make_packed_array(Object(PS(ps_session_handler)), s_gc),
        make_packed_array((int64_t)maxlifetime)
-    ).toBoolean();
+    ));
+  }
+
+ private:
+  bool handleReturnValue(const Variant& ret) {
+    if (ret.isBoolean()) {
+      return ret.toBoolean();
+    }
+    if (ret.isInteger()) {
+      // BC fallbacks for values which work in PHP5 & PHP7
+      auto i = ret.toInt64();
+      if (i == -1) return false;
+      if (i ==  0) return true;
+    }
+    raise_warning("Session callback expects true/false return value");
+    return false;
   }
 };
 static UserSessionModule s_user_session_module;
@@ -989,8 +1014,7 @@ public:
 
   virtual bool decode(const String& value) {
     const char *endptr = value.data() + value.size();
-    VariableUnserializer vu(nullptr, nullptr,
-                            VariableUnserializer::Type::Serialize);
+    VariableUnserializer vu(nullptr, 0, VariableUnserializer::Type::Serialize);
     for (const char *p = value.data(); p < endptr; ) {
       int namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
       if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -1007,8 +1031,9 @@ public:
           forceToArray(sess).set(key, vu.unserialize());
           php_global_set(s__SESSION, std::move(sess));
           p = vu.head();
-        } catch (Exception &e) {
-        }
+        } catch (const ResourceExceededException&) {
+          throw;
+        } catch (const Exception&) {}
       }
     }
     return true;
@@ -1047,8 +1072,7 @@ public:
   virtual bool decode(const String& value) {
     const char *p = value.data();
     const char *endptr = value.data() + value.size();
-    VariableUnserializer vu(nullptr, nullptr,
-                            VariableUnserializer::Type::Serialize);
+    VariableUnserializer vu(nullptr, 0, VariableUnserializer::Type::Serialize);
     while (p < endptr) {
       const char *q = p;
       while (*q != PS_DELIMITER) {
@@ -1071,8 +1095,9 @@ public:
           forceToArray(sess).set(key, vu.unserialize());
           php_global_set(s__SESSION, std::move(sess));
           q = vu.head();
-        } catch (Exception &e) {
-        }
+        } catch (const ResourceExceededException&) {
+          throw;
+        } catch (const Exception&) {}
       }
       p = q;
     }
@@ -1081,12 +1106,37 @@ public:
 };
 static PhpSessionSerializer s_php_session_serializer;
 
+class PhpSerializeSessionSerializer : public SessionSerializer {
+public:
+  PhpSerializeSessionSerializer() : SessionSerializer("php_serialize") {}
+
+  virtual String encode() {
+    VariableSerializer vs(VariableSerializer::Type::Serialize);
+    return vs.serialize(php_global(s__SESSION).toArray(), true, true);
+  }
+
+  virtual bool decode(const String& value) {
+    VariableUnserializer vu(value.data(), value.size(),
+                            VariableUnserializer::Type::Serialize);
+
+    try {
+      auto sess = vu.unserialize();
+      php_global_set(s__SESSION, std::move(sess.toArray()));
+    } catch (const ResourceExceededException&) {
+      throw;
+    } catch (const Exception&) {}
+
+    return true;
+  }
+};
+static PhpSerializeSessionSerializer s_php_serialize_session_serializer;
+
 class WddxSessionSerializer : public SessionSerializer {
 public:
   WddxSessionSerializer() : SessionSerializer("wddx") {}
 
   virtual String encode() {
-    WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string_variant_ref,
+    WddxPacket* wddxPacket = newres<WddxPacket>(empty_string_variant_ref,
                                                 true, true);
     for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
@@ -1097,8 +1147,7 @@ public:
       }
     }
 
-    string spacket = wddxPacket->packet_end();
-    return String(spacket);
+    return wddxPacket->packet_end();
   }
 
   virtual bool decode(const String& value) {
@@ -1263,7 +1312,7 @@ new_session:
   /* Read data */
   /* Question: if you create a SID here, should you also try to read data?
    * I'm not sure, but while not doing so will remove one session operation
-   * it could prove usefull for those sites which wish to have "default"
+   * it could prove useful for those sites which wish to have "default"
    * session information
    */
 
@@ -1562,7 +1611,7 @@ static bool HHVM_FUNCTION(session_set_save_handler,
   g_context->removeShutdownFunction(s_session_write_close,
                                     ExecutionContext::ShutDown);
   if (register_shutdown) {
-    f_register_shutdown_function(1, s_session_write_close);
+    HHVM_FN(register_shutdown_function)(s_session_write_close);
   }
 
   if (ini_get_save_handler() != "user") {
@@ -1745,7 +1794,7 @@ static bool HHVM_FUNCTION(session_start) {
 
   php_session_cache_limiter();
 
-  if (mod_is_open() && PS(gc_probability) > 1) {
+  if (mod_is_open() && PS(gc_probability) > 0) {
     int nrdels = -1;
 
     int nrand = (int) ((float) PS(gc_divisor) * math_combined_lcg());
@@ -1878,6 +1927,10 @@ static class SessionExtension : public Extension {
   }
 
   virtual void threadInit() {
+    // TODO: t5226715 We shouldn't need to check s_session here, but right now
+    // this is called for every request.
+    if (s_session) return;
+    s_session = new SessionRequestData;
     Extension* ext = Extension::GetExtension(s_session_ext_name);
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
@@ -1961,10 +2014,19 @@ static class SessionExtension : public Extension {
                      &PS(hash_bits_per_character));
   }
 
-  virtual void requestInit() {
-    // warm up the session data
-    s_session->requestInit();
+  virtual void threadShutdown() override {
+    delete s_session;
+    s_session = nullptr;
   }
+
+  virtual void requestInit() override {
+    s_session->init();
+  }
+
+  /*
+    No need for requestShutdown; its handled explicitly by a call to
+    ext_session_request_shutdown()
+  */
 } s_session_extension;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -24,20 +24,7 @@ object(HH\Map)#6 (4) {
   }
 }
 ========
-object(HH\Map)#9 (4) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  object(stdClass)#10 (0) {
-  }
-  [33]=>
-  string(3) "foo"
-  [44]=>
-  object(stdClass)#10 (0) {
-  }
-}
-========
-object(HH\Set)#12 (2) {
+object(HH\Set)#9 (2) {
   int(1)
   string(3) "foo"
 }

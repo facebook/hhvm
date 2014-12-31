@@ -16,11 +16,12 @@
 */
 
 #include "hphp/runtime/ext/thrift/transport.h"
-#include "hphp/runtime/ext/ext_thrift.h"
+#include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/util/logger.h"
 
 #include <sys/types.h>
@@ -47,8 +48,6 @@ StaticString PHPTransport::s_vtype("vtype");
 StaticString PHPTransport::s_etype("etype");
 StaticString PHPTransport::s_format("format");
 StaticString PHPTransport::s_collection("collection");
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(thrift_protocol, NO_EXTENSION_VERSION_YET);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -195,7 +194,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       String format = fieldspec.rvalAt(PHPTransport::s_format,
                                        AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        ret = NEWOBJ(c_Map)();
+        ret = newobj<c_Map>();
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(types[0], transport, keyspec);
           Variant value = binary_deserialize(types[1], transport, valspec);
@@ -221,7 +220,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
                                        AccessFlags::None).toString();
 
       if (format.equal(PHPTransport::s_collection)) {
-        auto const pvec = NEWOBJ(c_Vector)();
+        auto const pvec = newobj<c_Vector>();
         ret = pvec;
         for (uint32_t s = 0; s < size; ++s) {
           Variant value = binary_deserialize(type, transport, elemspec);
@@ -249,7 +248,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       String format = fieldspec.rvalAt(PHPTransport::s_format,
                                        AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        p_Set set_ret = NEWOBJ(c_Set)();
+        SmartObject<c_Set> set_ret(newobj<c_Set>());
 
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);
@@ -388,7 +387,7 @@ void binary_deserialize_spec(const Object& zthis, PHPInputTransport& transport,
 
       if (ttypes_are_compatible(ttype, expected_ttype)) {
         Variant rv = binary_deserialize(ttype, transport, fieldspec);
-        zthis->o_set(varname, rv, zthis->o_getClassName());
+        zthis->o_set(varname, rv, zthis->getClassName());
       } else {
         skip_element(ttype, transport);
       }
@@ -413,7 +412,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       }
       binary_serialize_spec(value.toObject(), transport,
                             HHVM_FN(hphp_get_static_property)(value.toObject()->
-                                                       o_getClassName(),
+                                                       getClassName(),
                                                        s_TSPEC,
                                                        false).toArray());
     } return;
@@ -526,7 +525,7 @@ void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport,
     int8_t ttype = fieldspec.rvalAt(PHPTransport::s_type,
                                     AccessFlags::Error_Key).toByte();
 
-    Variant prop = zthis->o_get(varname, true, zthis->o_getClassName());
+    Variant prop = zthis->o_get(varname, true, zthis->getClassName());
     if (!prop.isNull()) {
       transport.writeI8(ttype);
       transport.writeI16(fieldno);
@@ -536,11 +535,16 @@ void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport,
   transport.writeI8(T_STOP); // struct end
 }
 
-void f_thrift_protocol_write_binary(const Object& transportobj, const String& method_name,
-                                    int64_t msgtype, const Object& request_struct,
-                                    int seqid, bool strict_write, bool oneway) {
+void HHVM_FUNCTION(thrift_protocol_write_binary,
+                   const Variant& transportobj,
+                   const String& method_name,
+                   int64_t msgtype,
+                   const Variant& request_struct,
+                   int seqid,
+                   bool strict_write,
+                   bool oneway) {
 
-  PHPOutputTransport transport(transportobj);
+  PHPOutputTransport transport(transportobj.toObject());
 
   if (strict_write) {
     int32_t version = VERSION_1 | msgtype;
@@ -553,11 +557,12 @@ void f_thrift_protocol_write_binary(const Object& transportobj, const String& me
     transport.writeI32(seqid);
   }
 
+  const Object& obj_request_struct = request_struct.toObject();
   Variant spec = HHVM_FN(hphp_get_static_property)(
-                                            request_struct->o_getClassName(),
-                                            s_TSPEC,
-                                            false);
-  binary_serialize_spec(request_struct, transport, spec.toArray());
+    obj_request_struct->getClassName(),
+    s_TSPEC,
+    false);
+  binary_serialize_spec(obj_request_struct, transport, spec.toArray());
 
   if (oneway) {
     transport.onewayFlush();
@@ -566,10 +571,11 @@ void f_thrift_protocol_write_binary(const Object& transportobj, const String& me
   }
 }
 
-Variant f_thrift_protocol_read_binary(const Object& transportobj,
-                                      const String& obj_typename,
-                                      bool strict_read) {
-  PHPInputTransport transport(transportobj);
+Variant HHVM_FUNCTION(thrift_protocol_read_binary,
+                      const Variant& transportobj,
+                      const String& obj_typename,
+                      bool strict_read) {
+  PHPInputTransport transport(transportobj.toObject());
   int8_t messageType = 0;
   int32_t sz = transport.readI32();
 
@@ -605,6 +611,18 @@ Variant f_thrift_protocol_read_binary(const Object& transportobj,
     binary_deserialize_spec(ex, transport, spec.toArray());
     throw ex;
   }
+
+  Object ret_val = createObject(obj_typename);
+  Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename, s_TSPEC,
+                                                   false);
+  binary_deserialize_spec(ret_val, transport, spec.toArray());
+  return ret_val;
+}
+
+Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
+                      const Variant& transportobj,
+                      const String& obj_typename) {
+  PHPInputTransport transport(transportobj.toObject());
 
   Object ret_val = createObject(obj_typename);
   Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename, s_TSPEC,

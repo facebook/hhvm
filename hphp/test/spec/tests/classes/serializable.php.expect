@@ -1,0 +1,54 @@
+---------------- create, serialize, and unserialize a Point -------------------
+
+Inside Point::__construct, ID:1(2,5)
+
+Point $p = ID:1(2,5)
+
+Inside Point::serialize, ID:1(2,5)
+
+string(47) "C:5:"Point":30:{a:2:{s:1:"y";i:5;s:1:"x";i:2;}}"
+------
+
+Inside Point::unserialize, ID:2(2,5)
+
+object(Point)#2 (3) {
+  ["x":"Point":private]=>
+  int(2)
+  ["y":"Point":private]=>
+  int(5)
+  ["id":"Point":private]=>
+  int(2)
+}
+------
+---------------- Serialize ColoredPoint -------------------
+
+Inside Point::__construct, ID:3(9,8)
+
+
+Inside ColoredPoint::__construct, ID:3(9,8)2
+
+ColoredPoint $cp = ID:3(9,8)2
+
+Inside ColoredPoint::serialize, ID:3(9,8)2
+
+
+Inside Point::serialize, ID:3(9,8)2
+
+string(100) "C:12:"ColoredPoint":75:{a:2:{s:5:"color";i:2;s:8:"baseData";s:30:"a:2:{s:1:"y";i:8;s:1:"x";i:9;}";}}"
+
+Inside Point::unserialize, ID:4(9,8)2
+
+
+Inside ColoredPoint::unserialize, ID:4(9,8)2
+
+object(ColoredPoint)#4 (4) {
+  ["color":"ColoredPoint":private]=>
+  int(2)
+  ["x":"Point":private]=>
+  int(9)
+  ["y":"Point":private]=>
+  int(8)
+  ["id":"Point":private]=>
+  int(4)
+}
+---------------- end -------------------

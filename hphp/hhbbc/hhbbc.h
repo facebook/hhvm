@@ -19,8 +19,9 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <set>
 #include <utility>
+#include <map>
+#include <set>
 
 #include "hphp/util/functional.h"
 
@@ -37,20 +38,39 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+using MethodMap = std::map<
+  std::string,
+  std::set<std::string,stdltistr>,
+  stdltistr
+>;
+
+// Create a method map for the options structure from a SinglePassReadableRange
+// containing a list of Class::methodName strings.
+template<class SinglePassReadableRange>
+MethodMap make_method_map(SinglePassReadableRange&);
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Publically-settable options that control compilation.
  */
 struct Options {
   /*
-   * Functions that we should assume may be used with fb_intercept.
-   * Functions that aren't named in this list may be optimized with
-   * the assumption they aren't intercepted, in whole_program mode.
+   * Functions that we should assume may be used with fb_intercept.  Functions
+   * that aren't named in this list may be optimized with the assumption they
+   * aren't intercepted, in whole_program mode.
    *
    * If AllFuncsInterceptable, it's as if this list contains every function in
    * the program.
    */
-  std::set<std::string,stdltistr> InterceptableFunctions;
+  MethodMap InterceptableFunctions;
   bool AllFuncsInterceptable = false;
+
+  /*
+   * When debugging, it can be useful to ask for certain functions to be traced
+   * at a higher level than the rest of the program.
+   */
+  MethodMap TraceFunctions;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -101,61 +121,61 @@ struct Options {
    *
    * Note, this is disabled by default because of the need to have an
    * intersection operation in the type system to maintain index
-   * invariants---it doesn't quite work yet.  See comments in
-   * index.cpp.
+   * invariants---it doesn't quite work yet.  See comments in index.cpp.
    */
   bool ContextSensitiveInterp = false;
 
   /*
-   * If true, completely remove jumps to blocks that are inferred to
-   * be dead.  When false, dead blocks are replaced with Fatal
-   * bytecodes.
+   * If true, completely remove jumps to blocks that are inferred to be dead.
+   * When false, dead blocks are replaced with Fatal bytecodes.
    */
   bool RemoveDeadBlocks = true;
 
   /*
-   * Whether to propagate constant values by replacing instructions
-   * which are known to always produce a constant with instructions
-   * that produce that constant.
+   * Whether to propagate constant values by replacing instructions which are
+   * known to always produce a constant with instructions that produce that
+   * constant.
    */
   bool ConstantProp = true;
 
   /*
-   * Whether to perform local or global dead code elimination.  This
-   * removes unnecessary instructions within a single block, or across
-   * blocks, respectively.
-   *
-   * Note: GlobalDCE is off for now because it is a bit of a work in
-   * progress (needs more testing).
+   * Whether we should evaluate side-effect free builtins at compile time when
+   * they have compile-time constant arguments.
+   */
+  bool ConstantFoldBuiltins = true;
+
+  /*
+   * Whether to perform local or global dead code elimination.  This removes
+   * unnecessary instructions within a single block, or across blocks,
+   * respectively.
    */
   bool LocalDCE = true;
-  bool GlobalDCE = false;
+  bool GlobalDCE = true;
 
   /*
-   * Whether to remove completely unused local variables.  This
-   * requires GlobalDCE.
+   * Whether to remove completely unused local variables.  This requires
+   * GlobalDCE.
    */
-  bool RemoveUnusedLocals = false;
+  bool RemoveUnusedLocals = true;
 
   /*
-   * If true, insert opcodes that assert inferred types, so we can
-   * assume them at runtime.
+   * If true, insert opcodes that assert inferred types, so we can assume them
+   * at runtime.
    */
   bool InsertAssertions = true;
   bool InsertStackAssertions = true;
 
   /*
-   * If true, try to filter asserts out that are "obvious" (this is a
-   * code size optimization).  It can be useful to turn this option
-   * off for debugging.
+   * If true, try to filter asserts out that are "obvious" (this is a code size
+   * optimization).  It can be useful to turn this option off for debugging.
    *
    * Has no effect if !InsertStackAssertions.
    */
   bool FilterAssertions = true;
 
   /*
-   * Whether to replace bytecode with less expensive bytecodes when we
-   * can.  E.g. InstanceOf -> InstanceOfD or FPushFunc -> FPushFuncD.
+   * Whether to replace bytecode with less expensive bytecodes when we can.
+   * E.g. InstanceOf -> InstanceOfD or FPushFunc -> FPushFuncD.
    */
   bool StrengthReduce = true;
 
@@ -173,16 +193,30 @@ struct Options {
    */
   bool FuncFamilies = true;
 
+  /*
+   * Whether or not hhbbc should attempt to do anything intelligent to
+   * pseudomains.
+   */
+  bool AnalyzePseudomains = true;
+
+  /*
+   * Should we do an extra whole-program pass to try to determine the types of
+   * public static properties.  This will not yield any useful information for
+   * programs that contain any sets to static properties with both a dynamic
+   * property name and an unknown class type.
+   */
+  bool AnalyzePublicStatics = true;
+
   //////////////////////////////////////////////////////////////////////
   // Flags below this line perform optimizations that intentionally
   // may have user-visible changes to program behavior.
   //////////////////////////////////////////////////////////////////////
 
   /*
-   * If true, we'll propagate global constants and class constants
-   * "unsoundly".  I.e., it is visible to the user that we may not
-   * invoke autoload at places where we would have without this
-   * optimization.
+   * If true, we'll propagate global defined constants, class constants, and
+   * constant static class properties "unsoundly".  I.e., it is visible to the
+   * user that we may not invoke autoload at places where we would have without
+   * this optimization.
    */
   bool HardConstProp = true;
 
@@ -197,6 +231,17 @@ struct Options {
    * situation.
    */
   bool HardTypeHints = true;
+
+  /*
+   * Whether or not to assume that VerifyRetType* instructions must
+   * throw if the parameter does not match the associated type
+   * constraint.
+   *
+   * This changes program behavior because return type hint validation
+   * is normally a recoverable fatal.  When this option is on, hhvm will
+   * fatal if the error handler tries to recover in this situation.
+   */
+  bool HardReturnTypeHints = false;
 
   /*
    * If true, we'll try to infer the types of declared private class
@@ -247,5 +292,7 @@ int main(int argc, char** argv);
 //////////////////////////////////////////////////////////////////////
 
 }}
+
+#include "hphp/hhbbc/hhbbc-inl.h"
 
 #endif

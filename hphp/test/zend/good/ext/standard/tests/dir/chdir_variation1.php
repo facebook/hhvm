@@ -101,6 +101,7 @@ fclose($fp);
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $dir_path = $file_path."/chdir_basic";

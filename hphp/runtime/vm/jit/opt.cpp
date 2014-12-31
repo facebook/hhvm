@@ -24,8 +24,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 // insert inst after the point dst is defined
 static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
@@ -64,11 +63,11 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRUnit& unit) {
   for (unsigned i = 0, n = vals.size(); i < n; ++i) {
     Type t = vals[i]->type();
     if (t <= Type::Gen) {
-      IRInstruction* addr = unit.gen(LdStackAddr,
-                                     inst.marker(),
-                                     Type::PtrToGen,
-                                     StackOffset(i),
-                                     sp);
+      auto const addr = unit.gen(LdStackAddr,
+                                 inst.marker(),
+                                 Type::PtrToStkGen,
+                                 StackOffset(i),
+                                 sp);
       block->insert(pos, addr);
       IRInstruction* check = unit.gen(DbgAssertPtr, inst.marker(), addr->dst());
       block->insert(pos, check);
@@ -91,11 +90,11 @@ static void insertAsserts(IRUnit& unit) {
         }
         if (inst.op() == Call) {
           SSATmp* sp = inst.dst();
-          IRInstruction* addr = unit.gen(LdStackAddr,
-                                         inst.marker(),
-                                         Type::PtrToGen,
-                                         StackOffset(0),
-                                         sp);
+          auto const addr = unit.gen(LdStackAddr,
+                                     inst.marker(),
+                                     Type::PtrToStkGen,
+                                     StackOffset(0),
+                                     sp);
           insertAfter(&inst, addr);
           insertAfter(addr, unit.gen(DbgAssertPtr, inst.marker(), addr->dst()));
           continue;
@@ -109,16 +108,19 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   Timer _t(Timer::optimize);
 
   auto finishPass = [&](const char* msg) {
-    printUnit(6, unit, folly::format("after {}", msg).str().c_str());
+    if (msg) {
+      printUnit(6, unit, folly::format("after {}", msg).str().c_str());
+    }
     assert(checkCfg(unit));
     assert(checkTmpsSpanningCalls(unit));
-    forEachInst(rpoSortCfg(unit),
-                [&](IRInstruction* inst) {
-                  assertOperandTypes(inst, &unit);
-                });
+    if (debug) {
+      forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
+        assert(checkOperandTypes(inst, &unit));
+      });
+    }
   };
 
-  auto doPass = [&](void (*fn)(IRUnit&), const char* msg) {
+  auto doPass = [&](void (*fn)(IRUnit&), const char* msg = nullptr) {
     fn(unit);
     finishPass(msg);
   };
@@ -132,38 +134,30 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   auto const doReoptimize = RuntimeOption::EvalHHIRExtraOptPass &&
     (RuntimeOption::EvalHHIRCse || RuntimeOption::EvalHHIRSimplification);
 
-  if (shouldHHIRRelaxGuards()) {
-    /*
-     * In TransProfile mode, we can only relax the guards in tracelet
-     * region mode.  If the region came from analyze() and we relax the
-     * guards here, then the RegionDesc's TypePreds in ProfData won't
-     * accurately reflect the generated guards.  This can result in a
-     * TransOptimze region to be formed with types that are incompatible,
-     * e.g.:
-     *    B1: TypePred: Loc0: Bool      // but this gets relaxed to Uncounted
-     *        PostCond: Loc0: Uncounted // post-conds are accurate
-     *    B2: TypePred: Loc0: Int       // this will always fail
-     */
-    const bool relax = kind != TransKind::Profile ||
-                       RuntimeOption::EvalJitRegionSelector == "tracelet";
-    if (relax) {
-      Timer _t(Timer::optimize_relaxGuards);
-      const bool simple = kind == TransKind::Profile &&
-                          RuntimeOption::EvalJitRegionSelector == "tracelet";
-      RelaxGuardsFlags flags = (RelaxGuardsFlags)
-        (RelaxReflow | (simple ? RelaxSimple : RelaxNormal));
-      auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
-      if (changed) finishPass("guard relaxation");
+  auto const hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(unit);
 
-      if (doReoptimize) {
-        irBuilder.reoptimize();
-        finishPass("guard relaxation reoptimize");
-      }
+  // TODO(#5792564): Guard relaxation doesn't work with loops.
+  if (shouldHHIRRelaxGuards() && !hasLoop) {
+    Timer _t(Timer::optimize_relaxGuards);
+    const bool simple = kind == TransKind::Profile &&
+                        (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
+                         RuntimeOption::EvalJitRegionSelector == "method");
+    RelaxGuardsFlags flags = (RelaxGuardsFlags)
+      (RelaxReflow | (simple ? RelaxSimple : RelaxNormal));
+    auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
+    if (changed) finishPass("guard relaxation");
+
+    if (doReoptimize) {
+      irBuilder.reoptimize();
+      finishPass("guard relaxation reoptimize");
     }
   }
 
   if (RuntimeOption::EvalHHIRRefcountOpts) {
-    optimizeRefcounts(unit, FrameState{unit, unit.entry()->front().marker()});
+    optimizeRefcounts(
+      unit,
+      FrameStateMgr{unit, unit.entry()->front().marker()}
+    );
     finishPass("refcount opts");
   }
 
@@ -176,10 +170,31 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   if (doReoptimize) {
     irBuilder.reoptimize();
     finishPass("reoptimize");
-    // Cleanup any dead code left around by CSE/Simplification
-    // Ideally, this would be controlled by a flag returned
-    // by optimizeTrace indicating whether DCE is necessary
     dce("reoptimize");
+  }
+
+  if (RuntimeOption::EvalHHIRGlobalValueNumbering) {
+    doPass(gvn);
+    dce("gvn");
+  }
+
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+    doPass(optimizeLoads);
+    dce("loadelim");
+  }
+
+  /*
+   * Note: doing this pass this late might not be ideal, in particular because
+   * we've already turned some StLoc instructions into StLocNT.
+   *
+   * But right now there are assumptions preventing us from doing it before
+   * refcount opts.  (Refcount opts needs to see all the StLocs explicitly
+   * because it makes assumptions about whether references are consumed based
+   * on that.)
+   */
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+    doPass(optimizeStores);
+    dce("storeelim");
   }
 
   if (RuntimeOption::EvalHHIRJumpOpts) {

@@ -23,8 +23,7 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/util/safe-cast.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 // Location --
 //   A user-program-visible, and bytecode ISA addressable place for a PHP
@@ -126,8 +125,8 @@ struct Location {
     return space == Iter;
   }
 
-  JIT::RegionDesc::Location toLocation(Offset spOffsetFromFp) const {
-    typedef JIT::RegionDesc::Location L;
+  jit::RegionDesc::Location toLocation(Offset spOffsetFromFp) const {
+    typedef jit::RegionDesc::Location L;
     switch (space) {
       case Stack: {
         auto offsetFromSp = safe_cast<uint32_t>(offset);

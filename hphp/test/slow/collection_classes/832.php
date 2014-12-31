@@ -23,10 +23,3 @@ $mp = Map {
 foreach ($mp->items()->map($mapFn) as $t) {
   var_dump($t[0], $t[1]);
 }
-echo "------------------------\n";
-$smp = StableMap {
-2 => 'a', 4 => 'b', 6 => 'c', 8 => 'd'}
-;
-foreach ($smp->items()->map($mapFn) as $t) {
-  var_dump($t[0], $t[1]);
-}

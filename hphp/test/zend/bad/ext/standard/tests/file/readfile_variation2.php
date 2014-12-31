@@ -50,6 +50,7 @@ unlink($linkname);
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/readfile_variation2.tmp");

@@ -33,12 +33,13 @@ namespace HPHP {
  */
 class AsioBlockable;
 class AsioContext;
-FORWARD_DECLARE_CLASS(WaitableWaitHandle);
+
 class c_WaitableWaitHandle : public c_WaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitableWaitHandle)
 
-  explicit c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof());
+  explicit c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof(),
+                                HeaderKind kind = HeaderKind::Object);
   ~c_WaitableWaitHandle();
 
   int t_getcontextidx();
@@ -51,7 +52,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
     return offsetof(c_WaitableWaitHandle, m_parentChain);
   }
 
-  context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
+  context_idx_t getContextIdx() { return m_context_idx; }
   AsioContext* getContext() {
     assert(isInContext());
     return AsioSession::Get()->getContext(getContextIdx());
@@ -64,13 +65,16 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   String getName();
 
  protected:
-  void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
+  void setContextIdx(context_idx_t ctx_idx) { m_context_idx = ctx_idx; }
 
   bool isInContext() { return getContextIdx(); }
 
   c_WaitableWaitHandle* getChild();
   bool isDescendantOf(c_WaitableWaitHandle* wait_handle) const;
   void enterContextImpl(context_idx_t ctx_idx);
+
+ private:
+  context_idx_t m_context_idx;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

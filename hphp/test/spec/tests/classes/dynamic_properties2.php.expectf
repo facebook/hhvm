@@ -1,0 +1,4 @@
+bool(false)
+
+Notice: Undefined property: Point::$color in %s/classes/dynamic_properties2.php on line 9
+NULL

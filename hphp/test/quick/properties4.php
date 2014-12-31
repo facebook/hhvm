@@ -12,7 +12,7 @@ $o = new C;
 $o->dump_vars();
 
 class D {
-  public $x = NonExistantClass::FOO;
+  public $x = NonExistentClass::FOO;
 }
 class E extends D {
   public $x = 123;
@@ -29,7 +29,7 @@ function __autoload($cls) {
 }
 
 class G {
-  public static $x = NonExistantClass::FOO;
+  public static $x = NonExistentClass::FOO;
 }
 
 class H extends G {

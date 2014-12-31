@@ -43,7 +43,6 @@ public:
   virtual int getKidCount() const;
 
   virtual ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  virtual ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   const std::string &getName() const { return m_name; }
   const std::string &getOriginalName() const { return m_origName; }
@@ -111,10 +110,6 @@ protected:
    * a function call.
    */
   void reset();
-
-  TypePtr checkParamsAndReturn(AnalysisResultPtr ar, TypePtr type,
-                               bool coerce, FunctionScopePtr func,
-                               bool arrayParams);
 
   ExpressionPtr inliner(AnalysisResultConstPtr ar,
                         ExpressionPtr obj, std::string localThis);

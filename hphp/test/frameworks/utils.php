@@ -8,7 +8,7 @@ class TimeoutException extends Exception {
 # There's an outer timeout of 300s; this number must be less than that (with
 # fudge factor)
 const INSTALL_TIMEOUT_SECS = 240;
-const NETWORK_RETRIES = 3;
+const NETWORK_RETRIES = 1;
 
 // For determining number of processes
 function num_cpus() {
@@ -134,10 +134,6 @@ function find_all_files_containing_text(
   }
 
   return $files;
-}
-
-function idx(array $array, mixed $key, mixed $default = null): mixed {
-  return isset($array[$key]) ? $array[$key] : $default;
 }
 
 function command_exists(string $cmd): bool {
@@ -310,7 +306,10 @@ function get_runtime_build(bool $use_php = false): string {
   return nullthrows($command);
 }
 
-function error_and_exit(string $message): void {
+function error_and_exit(
+  string $message,
+  string $fbmake_action = 'skipped',
+): void {
   if (Options::$output_format === OutputFormat::FBMAKE) {
     fprintf(
       STDERR,
@@ -319,7 +318,7 @@ function error_and_exit(string $message): void {
         [
           'op' => 'test_done',
           'test' => 'framework test setup',
-          'status' => 'skipped',
+          'status' => $fbmake_action,
           'details' => 'ERROR: '.$message,
         ],
         /* assoc array = */ true,
@@ -343,14 +342,13 @@ function include_all_php($folder){
 function run_install(
   string $proc,
   string $path,
-  ?Map $env,
+  ?Map $env = null,
   int $retries = NETWORK_RETRIES
 ): ?int {
-  $tries = 0;
   // We need to output something every once in a while - if we go quiet, fbmake
   // kills us.
   for ($try = 1; $try <= $retries; ++$try) {
-    $test_name = $proc.' - attempt '.++$try;
+    $test_name = $proc.' - attempt '.$try;
     try {
       fbmake_json(Map {'op' => 'start', 'test' => $test_name});
       $result = run_install_impl($proc, $path, $env);
@@ -404,8 +402,13 @@ function run_install_impl(string $proc, string $path, ?Map $env): ?int
     $write = [];
     $except = $read;
     $ready = null;
-    while (true) {
-      $ready = stream_select($read, $write, $except, INSTALL_TIMEOUT_SECS);
+    $done_by = time() + INSTALL_TIMEOUT_SECS;
+    while ($done_by > time()) {
+      $remaining = $done_by - time();
+      $ready = stream_select(
+        $read, $write, $except,
+        $remaining > 0 ? $remaining : 1
+      );
       if ($ready === 0) {
         proc_terminate($process);
         throw new TimeoutException("Hit timeout reading from proc: ".$proc);

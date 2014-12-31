@@ -64,7 +64,7 @@ inline unsigned Class::classVecLen() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Ancestry.
 
-inline uint64_t Class::classof(const Class* cls) const {
+inline bool Class::classof(const Class* cls) const {
   // If `cls' is an interface, we can simply check to see if cls is in
   // this->m_interfaces.  Otherwise, if `this' is not an interface, the
   // classVec check will determine whether it's an instance of cls (including
@@ -146,19 +146,19 @@ inline bool Class::isBuiltin() const {
 }
 
 inline const ClassInfo* Class::clsInfo() const {
-  return m_clsInfo;
+  return m_extra->m_clsInfo;
 }
 
 inline BuiltinCtorFunction Class::instanceCtor() const {
-  return m_instanceCtor;
+  return m_extra->m_instanceCtor;
 }
 
 inline BuiltinDtorFunction Class::instanceDtor() const {
-  return m_instanceDtor;
+  return m_extra->m_instanceDtor;
 }
 
 inline int32_t Class::builtinODTailSize() const {
-  return m_builtinODTailSize;
+  return m_extra->m_builtinODTailSize;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -169,12 +169,12 @@ inline size_t Class::numMethods() const {
 }
 
 inline Func* Class::getMethod(Slot idx) const {
-  Func** funcVec = (Func**)this;
+  auto funcVec = (LowFuncPtr*)this;
   return funcVec[-((int32_t)idx + 1)];
 }
 
 inline void Class::setMethod(Slot idx, Func* func) {
-  Func** funcVec = (Func**)this;
+  auto funcVec = (LowFuncPtr*)this;
   funcVec[-((int32_t)idx + 1)] = func;
 }
 
@@ -238,7 +238,7 @@ inline const Class::PropInitVec& Class::declPropInit() const {
   return m_declPropInit;
 }
 
-inline const std::vector<const Func*>& Class::pinitVec() const {
+inline const FixedVector<const Func*>& Class::pinitVec() const {
   return m_pinitVec;
 }
 
@@ -275,14 +275,17 @@ inline const Class::Const* Class::constants() const {
 }
 
 inline bool Class::hasConstant(const StringData* clsCnsName) const {
-  return m_constants.contains(clsCnsName);
+  // m_constants.contains(clsCnsName) returns abstract constants
+  auto clsCnsInd = m_constants.findIndex(clsCnsName);
+  return (clsCnsInd != kInvalidSlot) &&
+    !m_constants[clsCnsInd].m_val.isAbstractConst();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Interfaces and traits.
 
-inline boost::iterator_range<const ClassPtr*> Class::declInterfaces() const {
-  return boost::make_iterator_range(
+inline folly::Range<const ClassPtr*> Class::declInterfaces() const {
+  return folly::range(
     m_declInterfaces.get(),
     m_declInterfaces.get() + m_numDeclInterfaces
   );
@@ -293,15 +296,19 @@ inline const Class::InterfaceMap& Class::allInterfaces() const {
 }
 
 inline Slot Class::traitsBeginIdx() const {
-  return m_traitsBeginIdx;
+  return m_extra->m_traitsBeginIdx;
 }
 
 inline Slot Class::traitsEndIdx() const   {
-  return m_traitsEndIdx;
+  return m_extra->m_traitsEndIdx;
 }
 
 inline const std::vector<ClassPtr>& Class::usedTraitClasses() const {
-  return m_usedTraits;
+  return m_extra->m_usedTraits;
+}
+
+inline const Class::TraitAliasVec& Class::traitAliases() const {
+  return m_extra->m_traitAliases;
 }
 
 inline const Class::RequirementMap& Class::allRequirements() const {
@@ -336,11 +343,20 @@ inline void Class::setCached() {
 }
 
 inline const Native::NativeDataInfo* Class::getNativeDataInfo() const {
-  return m_nativeDataInfo;
+  return m_extra->m_nativeDataInfo;
 }
 
-inline DataType Class::enumBaseTy() const {
+inline MaybeDataType Class::enumBaseTy() const {
   return m_enumBaseTy;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ExtraData.
+
+inline void Class::allocExtraData() {
+  if (!m_extra) {
+    m_extra = new ExtraData();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -363,6 +379,10 @@ inline bool isInterface(const Class* cls) {
 
 inline bool isNormalClass(const Class* cls ) {
   return !(cls->attrs() & (AttrTrait | AttrInterface | AttrEnum));
+}
+
+inline bool isAbstract(const Class* cls) {
+  return cls->attrs() & AttrAbstract;
 }
 
 inline bool classHasPersistentRDS(const Class* cls) {

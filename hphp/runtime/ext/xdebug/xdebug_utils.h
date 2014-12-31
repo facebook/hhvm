@@ -19,8 +19,9 @@
 #define incl_HPHP_XDEBUG_UTILS_H_
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
+#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
 
-#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,7 +45,15 @@ public:
 
   // Translated from xdebug.
   // xdebug desc: fake URI's per IETF RFC 1738 and 2396 format
-  static char* pathToUrl(char* fileurl);
+  static char* pathToUrl(const char* fileurl);
+
+  // HHVM interface for pathToUrl
+  static String pathToUrl(const String& fileurl) {
+    char* url = pathToUrl(const_cast<char*>(fileurl.data()));
+    String url_str = String(url, CopyString);
+    xdfree(url); // xdfree needed since allocated with xdmalloc
+    return url_str;
+  }
 
   // Decodes the given url into a file path. Translated from php5 xdebug
   static String pathFromUrl(const String& fileurl);

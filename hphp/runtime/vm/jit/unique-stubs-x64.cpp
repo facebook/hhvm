@@ -29,11 +29,11 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/runtime.h"
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace JIT::reg;
+using namespace jit::reg;
 using boost::implicit_cast;
 
 TRACE_SET_MOD(ustubs);
@@ -128,7 +128,7 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   a.    loadq  (rax[Func::sharedOff()], rax);
   a.    loadl  (rax[Func::sharedBaseOff()], eax);
   a.    addl   (eax, edi);
-  emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
+  emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
   emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
 
   uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
@@ -140,11 +140,11 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   Label loopHead;
 
   /*
-   * Note: the IR currently requires that we preserve r13 across
-   * calls to these free locals helpers.  These helpers assume the
-   * stack is balanced (rsp%16 == 0) on entry, unlike normal ABI calls
-   * where the stack was balanced before the call, and now has the
-   * return address on the stack (rsp%16 == 8).
+   * Note: the IR currently requires that we preserve r13 across calls to these
+   * free locals helpers.  These helpers assume the stack is balanced (rsp%16
+   * == 0) on entry, unlike normal ABI calls where the stack was balanced
+   * before the call, and now has the return address on the stack (rsp%16 ==
+   * 8).
    */
   auto const rIter     = r14;
   auto const rFinished = r15;
@@ -152,8 +152,10 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   auto const rData     = rdi;
   int const tvSize     = sizeof(TypedValue);
 
-  Asm a { mcg->code.main() };
-  moveToAlign(mcg->code.main(), kNonFallthroughAlign);
+  auto& cb = mcg->code.hot().available() > 512 ?
+    const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
+  Asm a { cb };
+  moveToAlign(cb, kNonFallthroughAlign);
   auto stubBegin = a.frontier();
 
 asm_label(a, release);
@@ -167,9 +169,9 @@ asm_label(a, release);
 asm_label(a, doRelease);
   a.    jmp    (lookupDestructor(a, PhysReg(rType)));
 
-  moveToAlign(mcg->code.main(), kJmpTargetAlign);
+  moveToAlign(cb, kJmpTargetAlign);
   uniqueStubs.freeManyLocalsHelper = a.frontier();
-  a.    lea    (rVmFp[-(JIT::kNumFreeLocalsHelpers * sizeof(Cell))],
+  a.    lea    (rVmFp[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
                 rFinished);
 
   auto emitDecLocal = [&] {
@@ -183,8 +185,7 @@ asm_label(a, doRelease);
   asm_label(a, skipDecRef);
   };
 
-  // Loop for the first few locals, but unroll the final
-  // kNumFreeLocalsHelpers.
+  // Loop for the first few locals, but unroll the final kNumFreeLocalsHelpers.
 asm_label(a, loopHead);
   emitDecLocal();
   a.    addq   (tvSize, rIter);
@@ -208,9 +209,11 @@ asm_label(a, loopHead);
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.main() };
+  auto& cb = mcg->code.hot().available() > 512 ?
+    const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
+  Asm a { cb };
 
-  moveToAlign(mcg->code.main());
+  moveToAlign(cb);
   uniqueStubs.funcPrologueRedispatch = a.frontier();
 
   assert(kScratchCrossTraceRegs.contains(rax));
@@ -256,9 +259,11 @@ asm_label(a, numParamsCheck);
 }
 
 void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.main() };
+  auto& cb = mcg->code.hot().available() > 512 ?
+    const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
+  Asm a { cb };
 
-  moveToAlign(mcg->code.main(), kNonFallthroughAlign);
+  moveToAlign(cb, kNonFallthroughAlign);
   uniqueStubs.fcallArrayHelper = a.frontier();
 
   /*
@@ -346,7 +351,7 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   a.    movq   (rVmSp, argNumToRegName[1]);
   a.    cmpq   (rStashedAR, rVmFp);
   a.    jne8   (popAndXchg);
-  emitCall(a, CppCall::direct(helper));
+  emitCall(a, CppCall::direct(helper), argSet(2));
   a.    jmp    (rax);
   // The ud2 is a hint to the processor that the fall-through path of the
   // indirect jump (which it statically predicts as most likely) is not
@@ -366,7 +371,7 @@ asm_label(a, popAndXchg);
   // frames, however, so switch it into rbp in case fcallHelper throws.
   a.    pop    (rStashedAR[AROFF(m_savedRip)]);
   a.    xchgq  (rStashedAR, rVmFp);
-  emitCall(a, CppCall::direct(helper));
+  emitCall(a, CppCall::direct(helper), argSet(2));
   a.    testq  (rax, rax);
   a.    js8    (skip);
   a.    xchgq  (rStashedAR, rVmFp);
@@ -395,7 +400,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   // fcallArrayHelper). So the stack parity is already correct.
   a.    movq   (rVmFp, argNumToRegName[0]);
   a.    movq   (rVmSp, argNumToRegName[1]);
-  emitCall(a, CppCall::direct(helper));
+  emitCall(a, CppCall::direct(helper), argSet(2));
   a.    jmp    (rax);
   a.    ud2    ();
 
@@ -418,7 +423,7 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   a.   push    (ar[AROFF(m_savedRip)]);
   a.   push    (ar[AROFF(m_sfp)]);
   a.   movq    (EventHook::NormalFunc, argNumToRegName[1]);
-  emitCall(a, CppCall::direct(helper));
+  emitCall(a, CppCall::direct(helper), argSet(2));
   a.   testb   (al, al);
   a.   je8     (skip);
   a.   addq    (16, rsp);
@@ -441,6 +446,26 @@ asm_label(a, skip);
   uniqueStubs.add("functionEnterHelper", uniqueStubs.functionEnterHelper);
 }
 
+void emitBindCallStubs(UniqueStubs& uniqueStubs) {
+  for (int i = 0; i < 2; i++) {
+    auto& cb = mcg->code.cold();
+    if (!i) {
+      uniqueStubs.bindCallStub = cb.frontier();
+    } else {
+      uniqueStubs.immutableBindCallStub = cb.frontier();
+    }
+    Vauto vasm(cb);
+    auto& vf = vasm.main();
+    // Pop the return address into the actrec in rStashedAR.
+    vf << popm{rStashedAR[AROFF(m_savedRip)]};
+    ServiceReqArgVec argv;
+    packServiceReqArgs(argv, (int64_t)i);
+    emitServiceReq(vf, nullptr, jit::REQ_BIND_CALL, argv);
+  }
+  uniqueStubs.add("bindCallStub", uniqueStubs.bindCallStub);
+  uniqueStubs.add("immutableBindCallStub", uniqueStubs.immutableBindCallStub);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -458,6 +483,7 @@ UniqueStubs emitUniqueStubs() {
     emitFCallHelperThunk,
     emitFuncBodyHelperThunk,
     emitFunctionEnterHelper,
+    emitBindCallStubs,
   };
   for (auto& f : functions) f(us);
   return us;

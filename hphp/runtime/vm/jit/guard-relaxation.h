@@ -18,16 +18,16 @@
 #define incl_HPHP_RUNTIME_VM_JIT_GUARD_RELAXATION_H_
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/block.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
-struct SSATmp;
+struct GuardConstraints;
 struct IRUnit;
+struct SSATmp;
 
 enum RelaxGuardsFlags {
   RelaxNormal =      0,
@@ -35,7 +35,6 @@ enum RelaxGuardsFlags {
   RelaxReflow = 1 << 1,
 };
 
-IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp);
 bool shouldHHIRRelaxGuards();
 
 /*
@@ -50,9 +49,14 @@ bool relaxGuards(IRUnit&, const GuardConstraints& guards,
 typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
 void visitGuards(IRUnit&, const VisitGuardFn& func);
 
+/*
+ * Returns true iff `t' is specific enough to fit `cat', meaning a consumer
+ * constraining a value with `cat' would be satisfied with `t' as the value's
+ * type after relaxation.
+ */
 bool typeFitsConstraint(Type t, TypeConstraint cat);
+
 Type relaxType(Type t, TypeConstraint cat);
-void incCategory(DataTypeCategory& c);
 TypeConstraint relaxConstraint(const TypeConstraint origTc,
                                const Type knownType, const Type toRelax);
 TypeConstraint applyConstraint(TypeConstraint origTc, TypeConstraint newTc);

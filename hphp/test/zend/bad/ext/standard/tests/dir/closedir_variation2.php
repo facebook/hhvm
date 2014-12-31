@@ -28,6 +28,7 @@ echo "Directory Handle: ";
 var_dump($dh);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $directory = dirname(__FILE__) . "/closedir_variation2";
 rmdir($directory);

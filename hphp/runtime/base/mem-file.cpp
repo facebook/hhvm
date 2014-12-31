@@ -29,7 +29,7 @@ namespace HPHP {
 MemFile::MemFile(const String& wrapper, const String& stream)
   : File(false, wrapper, stream), m_data(nullptr), m_len(-1), m_cursor(0),
     m_malloced(false) {
-  m_isLocal = true;
+  setIsLocal(true);
 }
 
 MemFile::MemFile(const char *data, int64_t len,
@@ -41,7 +41,7 @@ MemFile::MemFile(const char *data, int64_t len,
     memcpy(m_data, data, len);
   }
   m_data[len] = '\0';
-  m_isLocal = true;
+  setIsLocal(true);
 }
 
 MemFile::~MemFile() {
@@ -78,7 +78,7 @@ bool MemFile::open(const String& filename, const String& mode) {
       m_len = len;
       return true;
     }
-    m_name = (std::string) filename;
+    setName(filename.toCppString());
     m_data = data;
     m_len = len;
     return true;
@@ -96,8 +96,8 @@ bool MemFile::close() {
 }
 
 bool MemFile::closeImpl() {
-  s_file_data->m_pcloseRet = 0;
-  m_closed = true;
+  s_pcloseRet = 0;
+  setIsClosed(true);
   if (m_malloced && m_data) {
     free(m_data);
     m_data = nullptr;
@@ -128,36 +128,36 @@ int MemFile::getc() {
 bool MemFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assert(m_len != -1);
   if (whence == SEEK_CUR) {
-    if (offset > 0 && offset < m_writepos - m_readpos) {
-      m_readpos += offset;
-      m_position += offset;
+    if (offset > 0 && offset < bufferedLen()) {
+      setReadPosition(getReadPosition() + offset);
+      setPosition(getPosition() + offset);
       return true;
     }
-    offset += m_position;
+    offset += getPosition();
     whence = SEEK_SET;
   }
 
   // invalidate the current buffer
-  m_writepos = 0;
-  m_readpos = 0;
+  setWritePosition(0);
+  setReadPosition(0);
   if (whence == SEEK_SET) {
     m_cursor = offset;
   } else {
     assert(whence == SEEK_END);
     m_cursor = m_len + offset;
   }
-  m_position = m_cursor;
+  setPosition(m_cursor);
   return true;
 }
 
 int64_t MemFile::tell() {
   assert(m_len != -1);
-  return m_position;
+  return getPosition();
 }
 
 bool MemFile::eof() {
   assert(m_len != -1);
-  int64_t avail = m_writepos - m_readpos;
+  int64_t avail = bufferedLen();
   if (avail > 0) {
     return false;
   }
@@ -167,20 +167,20 @@ bool MemFile::eof() {
 bool MemFile::rewind() {
   assert(m_len != -1);
   m_cursor = 0;
-  m_writepos = 0;
-  m_readpos = 0;
-  m_position = 0;
+  setWritePosition(0);
+  setReadPosition(0);
+  setPosition(0);
   return true;
 }
 
 int64_t MemFile::writeImpl(const char *buffer, int64_t length) {
   throw FatalErrorException((std::string("cannot write a mem stream: ") +
-                             m_name).c_str());
+                             getName()).c_str());
 }
 
 bool MemFile::flush() {
   throw FatalErrorException((std::string("cannot flush a mem stream: ") +
-                             m_name).c_str());
+                             getName()).c_str());
 }
 
 const StaticString s_unread_bytes("unread_bytes");
@@ -202,7 +202,7 @@ void MemFile::unzip() {
   char *data = gzdecode(m_data, len);
   if (data == nullptr) {
     throw FatalErrorException((std::string("cannot unzip mem stream: ") +
-                               m_name).c_str());
+                               getName()).c_str());
   }
   m_data = data;
   m_malloced = true;

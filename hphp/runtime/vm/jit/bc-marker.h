@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * BCMarker holds the location of a specific bytecode instruction,
@@ -55,12 +55,12 @@ struct BCMarker {
     assert(valid());
   }
 
-  bool operator==(BCMarker b) const {
+  bool operator==(const BCMarker& b) const {
     return b.m_sk == m_sk &&
            b.m_spOff == m_spOff &&
            b.m_profTransID == m_profTransID;
   }
-  bool operator!=(BCMarker b) const { return !operator==(b); }
+  bool operator!=(const BCMarker& b) const { return !operator==(b); }
 
   std::string show() const;
   bool valid() const;

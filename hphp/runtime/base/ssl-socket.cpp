@@ -17,13 +17,30 @@
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/string-util.h"
-#include "folly/String.h"
+#include <folly/String.h>
 #include <poll.h>
 #include <sys/time.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+bool SSLSocketData::closeImpl() {
+  if (m_ssl_active) {
+    SSL_shutdown(m_handle);
+    m_ssl_active = false;
+  }
+  if (m_handle) {
+    SSL_free(m_handle);
+    m_handle = nullptr;
+  }
+  return SocketData::closeImpl();
+}
+
+SSLSocketData::~SSLSocketData() {
+  SSLSocketData::closeImpl();
+}
 
 Mutex SSLSocket::s_mutex;
 int SSLSocket::s_ex_data_index = -1;
@@ -44,7 +61,7 @@ const StaticString
   s_allow_self_signed("allow_self_signed"),
   s_verify_depth("verify_depth");
 
-static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
+int SSLSocket::verifyCallback(int preverify_ok, X509_STORE_CTX *ctx) {
   int ret = preverify_ok;
 
   /* determine the status for the current cert */
@@ -60,12 +77,12 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
 
   /* if allow_self_signed is set, make sure that verification succeeds */
   if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT &&
-      stream->getContext()[s_allow_self_signed].toBoolean()) {
+      stream->m_context[s_allow_self_signed].toBoolean()) {
     ret = 1;
   }
 
   /* check the depth */
-  Variant vdepth = stream->getContext()[s_verify_depth];
+  Variant vdepth = stream->m_context[s_verify_depth];
   if (vdepth.toBoolean() && depth > vdepth.toInt64()) {
     ret = 0;
     X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
@@ -76,10 +93,10 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
 
 const StaticString s_passphrase("passphrase");
 
-static int passwd_callback(char *buf, int num, int verify, void *data) {
+int SSLSocket::passwdCallback(char *buf, int num, int verify, void *data) {
   /* TODO: could expand this to make a callback into PHP user-space */
   SSLSocket *stream = (SSLSocket *)data;
-  String passphrase = stream->getContext()[s_passphrase].toString();
+  String passphrase = stream->m_context[s_passphrase].toString();
   if (!passphrase.empty() && passphrase.size() < num - 1) {
     memcpy(buf, passphrase.data(), passphrase.size() + 1);
     return passphrase.size();
@@ -100,7 +117,7 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
   /* look at options in the stream and set appropriate verification flags */
   if (m_context[s_verify_peer].toBoolean()) {
     /* turn on verification callback */
-    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verifyCallback);
 
     /* CA stuff */
     String cafile = m_context[s_cafile].toString();
@@ -125,7 +142,7 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
   /* callback for the passphrase (for localcert) */
   if (!m_context[s_passphrase].toString().empty()) {
     SSL_CTX_set_default_passwd_cb_userdata(ctx, this);
-    SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
+    SSL_CTX_set_default_passwd_cb(ctx, passwdCallback);
   }
 
   String cipherlist = m_context[s_ciphers].toString();
@@ -180,27 +197,22 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
 // constructors and destructor
 
 SSLSocket::SSLSocket()
-    : m_handle(nullptr), m_ssl_active(false), m_method((CryptoMethod)-1),
-      m_client(false), m_connect_timeout(0), m_enable_on_connect(false),
-      m_state_set(false), m_is_blocked(true) {
-}
+: Socket(std::make_shared<SSLSocketData>()),
+  m_data(static_cast<SSLSocketData*>(getSocketData()))
+{}
 
 SSLSocket::SSLSocket(int sockfd, int type, const char *address /* = NULL */,
                      int port /* = 0 */)
-    : Socket(sockfd, type, address, port),
-      m_handle(nullptr), m_ssl_active(false), m_method((CryptoMethod)-1),
-      m_client(false), m_connect_timeout(0), m_enable_on_connect(false),
-      m_state_set(false), m_is_blocked(true) {
-}
+: Socket(std::make_shared<SSLSocketData>(), sockfd, type, address, port),
+  m_data(static_cast<SSLSocketData*>(getSocketData()))
+{}
 
-SSLSocket::~SSLSocket() {
-  SSLSocket::closeImpl();
-}
+SSLSocket::~SSLSocket() { }
 
 void SSLSocket::sweep() {
   SSLSocket::closeImpl();
   File::sweep();
-  SSLSocket::operator delete(this);
+  m_data = nullptr;
 }
 
 bool SSLSocket::onConnect() {
@@ -208,19 +220,19 @@ bool SSLSocket::onConnect() {
 }
 
 bool SSLSocket::onAccept() {
-  if (m_fd >= 0 && m_enable_on_connect) {
-    switch (m_method) {
+  if (getFd() >= 0 && m_data->m_enable_on_connect) {
+    switch (m_data->m_method) {
     case CryptoMethod::ClientSSLv23:
-      m_method = CryptoMethod::ServerSSLv23;
+      m_data->m_method = CryptoMethod::ServerSSLv23;
       break;
     case CryptoMethod::ClientSSLv2:
-      m_method = CryptoMethod::ServerSSLv2;
+      m_data->m_method = CryptoMethod::ServerSSLv2;
       break;
     case CryptoMethod::ClientSSLv3:
-      m_method = CryptoMethod::ServerSSLv3;
+      m_data->m_method = CryptoMethod::ServerSSLv3;
       break;
     case CryptoMethod::ClientTLS:
-      m_method = CryptoMethod::ServerTLS;
+      m_data->m_method = CryptoMethod::ServerTLS;
       break;
     default:
       assert(false);
@@ -244,7 +256,7 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
   unsigned long ecode;
 
   bool retry = true;
-  int err = SSL_get_error(m_handle, nr_bytes);
+  int err = SSL_get_error(m_data->m_handle, nr_bytes);
   switch (err) {
   case SSL_ERROR_ZERO_RETURN:
     /* SSL terminated (but socket may still be active) */
@@ -255,7 +267,7 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
     /* re-negotiation, or perhaps the SSL layer needs more
      * packets: retry in next iteration */
     errno = EAGAIN;
-    retry = (is_init || m_is_blocked);
+    retry = (is_init || m_data->m_is_blocked);
     break;
   case SSL_ERROR_SYSCALL:
     if (ERR_peek_error() == 0) {
@@ -263,8 +275,9 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
         if (ERR_get_error()) {
           raise_warning("SSL: fatal protocol error");
         }
-        SSL_set_shutdown(m_handle, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
-        m_eof = true;
+        SSL_set_shutdown(m_data->m_handle,
+                         SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
+        setEof(true);
         retry = false;
       } else {
         raise_warning("SSL: %s", folly::errnoStr(errno).c_str());
@@ -309,7 +322,8 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SSLSocket *SSLSocket::Create(const HostURL &hosturl, double timeout) {
+SmartPtr<SSLSocket> SSLSocket::Create(
+  int fd, int domain, const HostURL &hosturl, double timeout) {
   CryptoMethod method;
   const std::string scheme = hosturl.getScheme();
 
@@ -322,54 +336,36 @@ SSLSocket *SSLSocket::Create(const HostURL &hosturl, double timeout) {
   } else if (scheme == "tls") {
     method = CryptoMethod::ClientTLS;
   } else {
-    return nullptr;
+    return SmartPtr<SSLSocket>();
   }
 
-  int domain = hosturl.isIPv6() ? AF_INET6 : AF_INET;
-  int type = SOCK_STREAM;
-  SSLSocket *sock = new SSLSocket(socket(domain, type, 0), domain,
-                                  hosturl.getHost().c_str(),
-                                  hosturl.getPort());
-  sock->m_method = method;
-  sock->m_connect_timeout = timeout;
-  sock->m_enable_on_connect = true;
+  auto sock = SmartPtr<SSLSocket>(
+    newres<SSLSocket>(
+      fd, domain, hosturl.getHost().c_str(), hosturl.getPort()));
+
+  sock->m_data->m_method = method;
+  sock->m_data->m_connect_timeout = timeout;
+  sock->m_data->m_enable_on_connect = true;
 
   return sock;
 }
 
-bool SSLSocket::close() {
-  invokeFiltersOnClose();
-  return closeImpl();
-}
-
-bool SSLSocket::closeImpl() {
-  if (m_ssl_active) {
-    SSL_shutdown(m_handle);
-    m_ssl_active = false;
-  }
-  if (m_handle) {
-    SSL_free(m_handle);
-    m_handle = nullptr;
-  }
-  return Socket::closeImpl();
-}
-
 int64_t SSLSocket::readImpl(char *buffer, int64_t length) {
   int64_t nr_bytes = 0;
-  if (m_ssl_active) {
+  if (m_data->m_ssl_active) {
     bool retry = true;
     do {
-      if (m_is_blocked) {
+      if (m_data->m_is_blocked) {
         Socket::waitForData();
-        if (m_timedOut) {
+        if (timedOut()) {
           break;
         }
         // could get here and we only have parts of an SSL packet
       }
-      nr_bytes = SSL_read(m_handle, buffer, length);
+      nr_bytes = SSL_read(m_data->m_handle, buffer, length);
       if (nr_bytes > 0) break; /* we got the data */
       retry = handleError(nr_bytes, false);
-      m_eof = (!retry && errno != EAGAIN && !SSL_pending(m_handle));
+      setEof(!retry && errno != EAGAIN && !SSL_pending(m_data->m_handle));
     } while (retry);
   } else {
     nr_bytes = Socket::readImpl(buffer, length);
@@ -379,10 +375,10 @@ int64_t SSLSocket::readImpl(char *buffer, int64_t length) {
 
 int64_t SSLSocket::writeImpl(const char *buffer, int64_t length) {
   int didwrite;
-  if (m_ssl_active) {
+  if (m_data->m_ssl_active) {
     bool retry = true;
     do {
-      didwrite = SSL_write(m_handle, buffer, length);
+      didwrite = SSL_write(m_data->m_handle, buffer, length);
       if (didwrite > 0) break;
       retry = handleError(didwrite, false);
     } while (retry);
@@ -393,7 +389,7 @@ int64_t SSLSocket::writeImpl(const char *buffer, int64_t length) {
 }
 
 bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
-  if (m_handle) {
+  if (m_data->m_handle) {
     raise_warning("SSL/TLS already set-up for this stream");
     return false;
   }
@@ -405,36 +401,36 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
 #else
   const SSL_METHOD *smethod;
 #endif
-  switch (m_method) {
+  switch (m_data->m_method) {
   case CryptoMethod::ClientSSLv23:
-    m_client = true;
+    m_data->m_client = true;
     smethod = SSLv23_client_method();
     break;
   case CryptoMethod::ClientSSLv3:
-    m_client = true;
+    m_data->m_client = true;
     smethod = SSLv3_client_method();
     break;
   case CryptoMethod::ClientTLS:
-    m_client = true;
+    m_data->m_client = true;
     smethod = TLSv1_client_method();
     break;
   case CryptoMethod::ServerSSLv23:
-    m_client = false;
+    m_data->m_client = false;
     smethod = SSLv23_server_method();
     break;
   case CryptoMethod::ServerSSLv3:
-    m_client = false;
+    m_data->m_client = false;
     smethod = SSLv3_server_method();
     break;
 
   /* SSLv2 protocol might be disabled in the OpenSSL library */
 #ifndef OPENSSL_NO_SSL2
   case CryptoMethod::ClientSSLv2:
-    m_client = true;
+    m_data->m_client = true;
     smethod = SSLv2_client_method();
     break;
   case CryptoMethod::ServerSSLv2:
-    m_client = false;
+    m_data->m_client = false;
     smethod = SSLv2_server_method();
     break;
 #else
@@ -446,7 +442,7 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
 #endif
 
   case CryptoMethod::ServerTLS:
-    m_client = false;
+    m_data->m_client = false;
     smethod = TLSv1_server_method();
     break;
   default:
@@ -460,18 +456,18 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
   }
 
   SSL_CTX_set_options(ctx, SSL_OP_ALL);
-  m_handle = createSSL(ctx);
-  if (m_handle == nullptr) {
+  m_data->m_handle = createSSL(ctx);
+  if (m_data->m_handle == nullptr) {
     raise_warning("failed to create an SSL handle");
     SSL_CTX_free(ctx);
     return false;
   }
 
-  if (!SSL_set_fd(m_handle, m_fd)) {
+  if (!SSL_set_fd(m_data->m_handle, getFd())) {
     handleError(0, true);
   }
   if (session) {
-    SSL_copy_session_id(m_handle, session->m_handle);
+    SSL_copy_session_id(m_data->m_handle, session->m_data->m_handle);
   }
   return true;
 }
@@ -489,7 +485,7 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
     return false;
   }
 
-  int err = SSL_get_verify_result(m_handle);
+  int err = SSL_get_verify_result(m_data->m_handle);
   switch (err) {
   case X509_V_OK:
     /* fine */
@@ -552,31 +548,31 @@ const StaticString
   s_peer_certificate_chain("peer_certificate_chain");
 
 bool SSLSocket::enableCrypto(bool activate /* = true */) {
-  if (activate && !m_ssl_active) {
-    double timeout = m_connect_timeout;
-    bool blocked = m_is_blocked;
-    if (!m_state_set) {
-      if (m_client) {
-        SSL_set_connect_state(m_handle);
+  if (activate && !m_data->m_ssl_active) {
+    double timeout = m_data->m_connect_timeout;
+    bool blocked = m_data->m_is_blocked;
+    if (!m_data->m_state_set) {
+      if (m_data->m_client) {
+        SSL_set_connect_state(m_data->m_handle);
       } else {
-        SSL_set_accept_state(m_handle);
+        SSL_set_accept_state(m_data->m_handle);
       }
-      m_state_set = true;
+      m_data->m_state_set = true;
     }
 
-    if (m_client && setBlocking(false)) {
-      m_is_blocked = false;
+    if (m_data->m_client && setBlocking(false)) {
+      m_data->m_is_blocked = false;
     }
 
     int n;
     bool retry = true;
     do {
-      if (m_client) {
+      if (m_data->m_client) {
         struct timeval tvs, tve;
         struct timezone tz;
 
         gettimeofday(&tvs, &tz);
-        n = SSL_connect(m_handle);
+        n = SSL_connect(m_data->m_handle);
         gettimeofday(&tve, &tz);
 
         timeout -= (tve.tv_sec + (double) tve.tv_usec / 1000000) -
@@ -586,7 +582,7 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
           return -1;
         }
       } else {
-        n = SSL_accept(m_handle);
+        n = SSL_accept(m_data->m_handle);
       }
 
       if (n <= 0) {
@@ -596,32 +592,34 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
       }
     } while (retry);
 
-    if (m_client && m_is_blocked != blocked && setBlocking(blocked)) {
-      m_is_blocked = blocked;
+    if (m_data->m_client &&
+        m_data->m_is_blocked != blocked &&
+        setBlocking(blocked)) {
+      m_data->m_is_blocked = blocked;
     }
 
     if (n == 1) {
-      X509 *peer_cert = SSL_get_peer_certificate(m_handle);
+      X509 *peer_cert = SSL_get_peer_certificate(m_data->m_handle);
       if (!applyVerificationPolicy(peer_cert)) {
-        SSL_shutdown(m_handle);
+        SSL_shutdown(m_data->m_handle);
       } else {
-        m_ssl_active = true;
+        m_data->m_ssl_active = true;
 
         /* allow the script to capture the peer cert
          * and/or the certificate chain */
         if (m_context[s_capture_peer_cert].toBoolean()) {
-          Resource cert(new Certificate(peer_cert));
+          Resource cert(newres<Certificate>(peer_cert));
           m_context.set(s_peer_certificate, cert);
           peer_cert = nullptr;
         }
 
         if (m_context[s_capture_peer_cert_chain].toBoolean()) {
           Array arr;
-          STACK_OF(X509) *chain = SSL_get_peer_cert_chain(m_handle);
+          STACK_OF(X509) *chain = SSL_get_peer_cert_chain(m_data->m_handle);
           if (chain) {
             for (int i = 0; i < sk_X509_num(chain); i++) {
               X509 *mycert = X509_dup(sk_X509_value(chain, i));
-              arr.append(Resource(new Certificate(mycert)));
+              arr.append(Resource(newres<Certificate>(mycert)));
             }
           }
           m_context.set(s_peer_certificate_chain, arr);
@@ -637,30 +635,30 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
 
     return n >= 0;
 
-  } else if (!activate && m_ssl_active) {
+  } else if (!activate && m_data->m_ssl_active) {
     /* deactivate - common for server/client */
-    SSL_shutdown(m_handle);
-    m_ssl_active = false;
+    SSL_shutdown(m_data->m_handle);
+    m_data->m_ssl_active = false;
   }
   return true;
 }
 
 bool SSLSocket::checkLiveness() {
-  if (m_fd == -1) {
+  if (getFd() == -1) {
     return false;
   }
 
   pollfd p;
-  p.fd = m_fd;
+  p.fd = getFd();
   p.events = POLLIN | POLLERR | POLLHUP | POLLPRI;
   p.revents = 0;
   if (poll(&p, 1, 0) > 0 && p.revents > 0) {
     char buf;
-    if (m_ssl_active) {
+    if (m_data->m_ssl_active) {
       while (true) {
-        int n = SSL_peek(m_handle, &buf, sizeof(buf));
+        int n = SSL_peek(m_data->m_handle, &buf, sizeof(buf));
         if (n <= 0) {
-          int err = SSL_get_error(m_handle, n);
+          int err = SSL_get_error(m_data->m_handle, n);
           if (err == SSL_ERROR_SYSCALL) {
             return errno == EAGAIN;
           }
@@ -677,7 +675,7 @@ bool SSLSocket::checkLiveness() {
          * have set the alive flag appropriately */
         break;
       }
-    } else if (0 == recv(m_fd, &buf, sizeof(buf), MSG_PEEK) &&
+    } else if (0 == recv(getFd(), &buf, sizeof(buf), MSG_PEEK) &&
                errno != EAGAIN) {
       return false;
     }
@@ -687,6 +685,8 @@ bool SSLSocket::checkLiveness() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Certificate
+
+IMPLEMENT_RESOURCE_ALLOCATION(Certificate)
 
 BIO *Certificate::ReadData(const Variant& var, bool *file /* = NULL */) {
   if (var.isString() || var.isObject()) {
@@ -733,7 +733,7 @@ Resource Certificate::Get(const Variant& var) {
     cert = PEM_read_bio_X509(in, nullptr, nullptr, nullptr);
     BIO_free(in);
     if (cert) {
-      return Resource(new Certificate(cert));
+      return Resource(newres<Certificate>(cert));
     }
   }
   return Resource();

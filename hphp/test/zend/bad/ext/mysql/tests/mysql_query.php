@@ -84,6 +84,7 @@ if (false !== ($tmp = mysql_query("SELECT id FROM test", $link)))
 
 print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once('connect.inc');
 

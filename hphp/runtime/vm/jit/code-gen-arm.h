@@ -20,132 +20,97 @@
 #include <vector>
 
 #include "hphp/util/data-block.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
-struct CodeGenerator : public JIT::CodeGenerator {
+struct CodeGenerator {
+  CodeGenerator(CodegenState& state, Vout& main, Vout& cold)
+    : m_xcg{state, main, cold}
+    , m_state(state)
+    , m_vmain(main)
+    , m_vcold(cold)
+  {}
 
-  CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& coldCode,
-                CodeBlock& frozenCode, CodegenState& state)
-      : m_unit(unit)
-      , m_mainCode(mainCode)
-      , m_coldCode(coldCode)
-      , m_frozenCode(frozenCode)
-      , m_as(mainCode)
-      , m_acold(coldCode)
-      , m_state(state)
-      , m_curInst(nullptr)
-    {
-    }
-
-  virtual ~CodeGenerator() {
-  }
-
-  void cgInst(IRInstruction* inst) override;
+  void cgInst(IRInstruction* inst);
 
  private:
-  template<class Then>
-  void ifThen(vixl::MacroAssembler& a, vixl::Condition cc, Then thenBlock) {
-    vixl::Label done;
-    a.  B   (&done, InvertCondition(cc));
-    thenBlock();
-    a.  bind(&done);
-  }
-
-  template<class Then, class Else>
-  void ifThenElse(vixl::MacroAssembler& a, vixl::Condition cc, Then thenBlock,
-                  Else elseBlock) {
-    vixl::Label elseLabel, done;
-    a.  B   (&elseLabel, InvertCondition(cc));
-    thenBlock();
-    a.  B   (&done);
-    a.  bind(&elseLabel);
-    elseBlock();
-    a.  bind(&done);
-  }
-
   const Func* curFunc() const { return m_curInst->marker().func(); }
   bool resumed() const { return m_curInst->marker().resumed(); }
 
-  void emitCompareInt(IRInstruction* inst);
-  void emitCompareIntAndSet(IRInstruction* inst,
-                            vixl::Condition cond);
+  Vreg emitCompareInt(IRInstruction* inst);
+  void emitCompareIntAndSet(IRInstruction* inst, ConditionCode cond);
 
-
-  CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
+  CallDest callDest(Vreg reg0) const;
+  CallDest callDest(Vreg reg0, Vreg reg1) const;
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;
   CallDest callDestDbl(const IRInstruction*) const;
 
-  void cgCallNative(vixl::MacroAssembler& as, IRInstruction* inst);
-  void cgCallHelper(vixl::MacroAssembler& a,
-                    CppCall call,
-                    const CallDest& dstInfo,
-                    SyncOptions sync,
-                    ArgGroup& args,
-                    RegSet toSave);
-  void cgCallHelper(vixl::MacroAssembler& a,
+  void cgCallNative(Vout&, IRInstruction* inst);
+  void cgCallHelper(Vout&,
                     CppCall call,
                     const CallDest& dstInfo,
                     SyncOptions sync,
                     ArgGroup& args);
 
-  void emitDecRefDynamicType(vixl::Register baseReg, int offset);
+  void emitDecRefDynamicType(Vout& v, Vreg base, int offset);
 
   void cgStLocWork(IRInstruction* inst);
 
-  void emitDecRefStaticType(Type type, vixl::Register reg);
-  void emitDecRefMem(Type type, vixl::Register baseReg, int offset);
+  void emitDecRefStaticType(Vout&, Type type, Vreg data);
+  void emitDecRefMem(Vout&, Type type, Vreg base, int offset);
+
+  template <class JmpFn>
+  void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
 
   template<class Loc, class JmpFn>
-  void emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
-                    JmpFn doJcc);
+  void emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc, JmpFn doJcc);
 
-  void emitLoadTypedValue(PhysLoc dst, vixl::Register base, ptrdiff_t offset,
+  void emitLoadTypedValue(Vout&, Vloc dst, Vreg base, ptrdiff_t offset,
                           Block* label);
-  void emitStoreTypedValue(vixl::Register base, ptrdiff_t offset, PhysLoc src);
-  void emitLoad(Type dstType, PhysLoc dstLoc, vixl::Register base,
+  void emitStoreTypedValue(Vout&, Vreg base, ptrdiff_t offset, Vloc src);
+  void emitLoad(Vout&, Type type, Vloc dst, Vreg base,
                 ptrdiff_t offset, Block* label = nullptr);
-  void emitStore(vixl::Register base,
-                 ptrdiff_t offset,
-                 SSATmp* src, PhysLoc srcLoc,
+  void emitStore(Vout&, Vreg base, ptrdiff_t offset,
+                 SSATmp* src, Vloc srcLoc,
                  bool genStoreType = true);
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
 
-  const PhysLoc srcLoc(unsigned i) const {
-    return m_state.regs[m_curInst].src(i);
-  }
-  const PhysLoc dstLoc(unsigned i) const {
-    return m_state.regs[m_curInst].dst(i);
-  }
-  ArgGroup argGroup() const {
-    return ArgGroup(m_curInst, m_state.regs[m_curInst]);
-  }
+  Vloc srcLoc(unsigned i) const;
+  Vloc dstLoc(unsigned i) const;
+  ArgGroup argGroup() const;
+  Vlabel label(Block*);
 
-  void recordHostCallSyncPoint(vixl::MacroAssembler& as, JIT::TCA tca);
+  void recordHostCallSyncPoint(Vout&, Vpoint p);
   void cgInterpOneCommon(IRInstruction* inst);
 
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);
   IR_OPCODES
 #undef O
 
-  const IRUnit&               m_unit;
-  CodeBlock&                  m_mainCode;
-  CodeBlock&                  m_coldCode;
-  CodeBlock&                  m_frozenCode;
-  vixl::MacroAssembler        m_as;
-  vixl::MacroAssembler        m_acold;
-  CodegenState&               m_state;
-  IRInstruction*              m_curInst;
-};
+  Vout& vmain() { return m_vmain; }
+  Vout& vcold() { return m_vcold; }
 
-void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc,
-                     CodegenState& state);
+ private:
+  /*
+   * TODO(4894527): this is a temporary measure while we merge the two
+   * CodeGenerator implementations. We call through to the x64 CodeGenerator for
+   * opcodes where the two platforms can use identical vasm implementations.
+   */
+  x64::CodeGenerator    m_xcg;
+
+  CodegenState&         m_state;
+  Vout&                 m_vmain;
+  Vout&                 m_vcold;
+  IRInstruction*        m_curInst{nullptr};
+  jit::vector<Vloc>     m_slocs, m_dlocs;
+};
 
 }}}
 

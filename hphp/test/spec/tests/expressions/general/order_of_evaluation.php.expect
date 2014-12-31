@@ -1,0 +1,117 @@
+$i = 10: $i++ + $i = 21		$i = 11
+$i = 10: $i - $i-- = -1		$i = 9
+$i = 10: $++i * $i = 121	$i = 11
+$i = 10: $i / --$i = 1		$i = 9
+float(1.1111111111111)
+
+initially, $i = 3
+  finally, $i = 4
+0 1 2 3 4 5 6 
+
+initially, $i = 3
+  finally, $i = 4
+0 1 2 3 3 5 6 
+
+initially, $i = 3
+Inside f: $a = 3, $b = 4
+  finally, $i = 4
+0 1 2 3 22 5 6 
+
+initially, $i = 3
+Inside f: $a = 3, $b = 4
+  finally, $i = 4
+0 1 2 3 88 5 6 
+
+initially, $i = 3
+Inside f: $a = 3, $b = 4
+Inside g: $a = 5
+  finally, $i = 5
+0 1 2 3 4 32 6 
+
+initially, $i = 3
+Inside f: $a = 3, $b = 4
+Inside g: $a = 5
+  finally, $i = 5
+0 1 2 3 4 12 6 
+
+initially, $i = 3
+Inside f: $a = 3, $b = 4
+Inside g: $a = 5
+Inside f: $a = 4, $b = 4
+  finally, $i = 4
+0 1 2 3 -19.8 5 6 
+
+initially, $i = 3
+Inside f: $a = 3, $b = 4
+Inside g: $a = 5
+Inside f: $a = 4, $b = 4
+  finally, $i = 5
+0 1 2 3 4 59 6 
+Inside f: $a = 10, $b = 12
+Inside g: $a = 15
+f(10, 12) + g(15) = 32
+Inside f: $a = 10, $b = 12
+Inside g: $a = 15
+f(10, 12) - g(15) = 12
+Inside f: $a = 10, $b = 12
+Inside g: $a = 15
+f(10, 12) * g(15) = 220
+Inside f: $a = 10, $b = 12
+Inside g: $a = 15
+f(10, 12) / g(15) = 2.2
+array(7) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(4)
+  [5]=>
+  int(5)
+  [6]=>
+  int(6)
+}
+Inside f1
+Inside f2
+Inside f3
+Inside f4
+array(7) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(6)
+  [3]=>
+  int(3)
+  [4]=>
+  int(4)
+  [5]=>
+  int(5)
+  [6]=>
+  int(6)
+}
+Inside f1
+Inside f2
+Inside f3
+Inside f4
+array(7) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(2)
+  [4]=>
+  int(4)
+  [5]=>
+  int(5)
+  [6]=>
+  int(6)
+}

@@ -14,7 +14,7 @@ mkdir($base_dir);
 $sub_dir = $base_dir."/copy_variation16_sub";
 mkdir($sub_dir);
 
-$dirname_with_blank = $sub_dir."/copy variation6";
+$dirname_with_blank = $sub_dir."/copy variation16";
 mkdir($dirname_with_blank);
 
 $src_file_name = dirname(__FILE__)."/copy_variation16.tmp";

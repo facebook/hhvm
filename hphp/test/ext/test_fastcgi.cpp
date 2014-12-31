@@ -22,10 +22,10 @@
 #include "hphp/util/process.h"
 #include "hphp/compiler/option.h"
 #include "hphp/util/async-func.h"
-#include "hphp/runtime/ext/std/ext_std_network.h"
-#include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
+#include "hphp/runtime/ext/std/ext_std_network.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -37,6 +37,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <iterator>
+#include <folly/Conv.h>
 
 using namespace HPHP;
 
@@ -282,7 +283,7 @@ bool TestFastCGIServer::AddFile(const std::string& path,
                                 int line) {
   String source("test/ext/fastcgi/" + path);
   String dest("runtime/tmp/" + path);
-  if (!f_copy(source, dest)) {
+  if (!HHVM_FN(copy)(source, dest)) {
     printf("Unable to copy file from source: %s "
            "to destination: %s. Run this test from hphp/.\n",
            source.data(),
@@ -297,7 +298,7 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
                                        const char* file,
                                        int line) {
 
-  Variant cwd = f_getcwd();
+  Variant cwd = HHVM_FN(getcwd)();
   CHECK(cwd.isString());
 
   CHECK(!mx.m_messages.empty());
@@ -327,14 +328,14 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
       printf("Invalid return value from getprotobyname");
       result = false;
     } else {
-      socket = f_socket_create(AF_INET,
+      socket = HHVM_FN(socket_create)(AF_INET,
                                SOCK_STREAM,
                                tcp_proto.toInt32());
     }
     if (!socket.isResource()) {
       printf("Unable to initialize a socket\n");
       result = false;
-    } else if (!f_socket_connect(socket.asCResRef(),
+    } else if (!HHVM_FN(socket_connect)(socket.asCResRef(),
                                  "localhost",
                                  m_serverPort)) {
       printf("Unable to connect to server.\n");
@@ -354,10 +355,10 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
               reinterpret_cast<const char*>(it->m_body.data()),
               len,
               CopyString);
-          Variant sent_len = f_socket_send(socket.asCResRef(),
-                                           body_buffer,
-                                           len,
-                                           0);
+          Variant sent_len = HHVM_FN(socket_send)(socket.asCResRef(),
+                                                  body_buffer,
+                                                  len,
+                                                  0);
           int usecs = rand() % 50000;
           usleep(usecs); // Waiting on Nade's algorithm
           if (!sent_len.isInteger()) {
@@ -379,7 +380,7 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
         case TestMessage::Command::RECV: {
           printf("Receiving a message\n");
           VRefParamValue actual_body;
-          Variant recv_len = f_socket_recv(socket.asCResRef(),
+          Variant recv_len = HHVM_FN(socket_recv)(socket.asCResRef(),
                                            actual_body,
                                            len,
                                            0);
@@ -416,8 +417,8 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
 
         case TestMessage::Command::RECV_CLOSE: {
           VRefParamValue actual_body;
-          Variant recv_len = f_socket_recv(socket.asResRef(),
-                                           actual_body, 1, 0);
+          Variant recv_len = HHVM_FN(socket_recv)(socket.asResRef(),
+                                                  actual_body, 1, 0);
           if (recv_len.isInteger()) {
             printf("Connection not closed by the remote side\n");
             result = false;
@@ -432,7 +433,7 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
     }
 
     if (socket.isResource()) {
-      f_socket_close(socket.asCResRef());
+      HHVM_FN(socket_close)(socket.asCResRef());
       socket = false;
     }
 
@@ -445,12 +446,12 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
 
 void TestFastCGIServer::RunServer() {
   string out, err;
-  string portConfig = "-vServer.Port=" + lexical_cast<string>(m_serverPort);
+  string portConfig = "-vServer.Port=" + folly::to<string>(m_serverPort);
   string adminConfig = "-vAdminServer.Port=" +
-    lexical_cast<string>(m_adminPort);
+    folly::to<string>(m_adminPort);
   string rpcConfig = "-vSatellites.rpc.Port=" +
-    lexical_cast<string>(m_rpcPort);
-  string fd = lexical_cast<string>(m_inheritFd);
+    folly::to<string>(m_rpcPort);
+  string fd = folly::to<string>(m_inheritFd);
 
   const char *argv[] = {
     "", "--mode=server", "--config=test/ext/config-server.hdf",
@@ -483,11 +484,11 @@ void TestFastCGIServer::StopServer() {
     Variant tcp_proto = f_getprotobyname(String("tcp"));
 
     if (socket.isResource()) {
-      f_socket_close(socket.asCResRef());
+      HHVM_FN(socket_close)(socket.asCResRef());
       socket = false;
     }
     if (admin_socket.isResource()) {
-      f_socket_close(admin_socket.asCResRef());
+      HHVM_FN(socket_close)(admin_socket.asCResRef());
       admin_socket = false;
     }
 
@@ -495,14 +496,14 @@ void TestFastCGIServer::StopServer() {
       printf("Invalid return value from getprotobyname");
       continue;
     } else {
-      socket = f_socket_create(AF_INET,
+      socket = HHVM_FN(socket_create)(AF_INET,
                                SOCK_STREAM,
                                tcp_proto.toInt32());
     }
     if (!socket.isResource()) {
       printf("Unable to initialize a socket\n");
       continue;
-    } else if (!f_socket_connect(socket.asCResRef(),
+    } else if (!HHVM_FN(socket_connect)(socket.asCResRef(),
                                  "localhost",
                                  m_adminPort)) {
       printf("Unable to connect to admin server.\n");
@@ -520,10 +521,10 @@ void TestFastCGIServer::StopServer() {
         reinterpret_cast<const char*>(it->m_body.data()),
         len,
         CopyString);
-      Variant sent_len = f_socket_send(socket.asCResRef(),
-                                       body_buffer,
-                                       body_buffer.size(),
-                                       0);
+      Variant sent_len = HHVM_FN(socket_send)(socket.asCResRef(),
+                                              body_buffer,
+                                              body_buffer.size(),
+                                              0);
 
       if (!sent_len.isInteger()) {
           printf("Error while sending payload\n");
@@ -542,7 +543,7 @@ void TestFastCGIServer::StopServer() {
     WaitForClosedPort("127.0.0.1", m_serverPort);
     usleep(500000); // To be sure.
 
-    admin_socket = f_socket_create(AF_INET,
+    admin_socket = HHVM_FN(socket_create)(AF_INET,
                                    SOCK_STREAM,
                                    tcp_proto.toInt32());
 
@@ -550,7 +551,7 @@ void TestFastCGIServer::StopServer() {
       printf("Unable to initialize a socket\n");
       continue;
     }
-    if (!f_socket_connect(admin_socket.asCResRef(),
+    if (!HHVM_FN(socket_connect)(admin_socket.asCResRef(),
                           "localhost",
                           m_serverPort)) {
       break;
@@ -558,10 +559,10 @@ void TestFastCGIServer::StopServer() {
   }
 
   if (socket.isResource()) {
-    f_socket_close(socket.asCResRef());
+    HHVM_FN(socket_close)(socket.asCResRef());
   }
   if (admin_socket.isResource()) {
-    f_socket_close(admin_socket.asCResRef());
+    HHVM_FN(socket_close)(admin_socket.asCResRef());
   }
 }
 
@@ -572,7 +573,7 @@ void TestFastCGIServer::WaitForClosedPort(const char* host,
     if (!result.isResource()) {
       return;
     }
-    f_socket_close(result.asCResRef());
+    HHVM_FN(socket_close)(result.asCResRef());
     usleep(100000); // 100 ms
   }
   throw std::runtime_error("Waiting for closed port failed!");
@@ -583,7 +584,7 @@ void TestFastCGIServer::WaitForOpenPort(const char* host,
   for (int i = 0; i < 100; ++i) {
     Variant result = f_fsockopen(host, port);
     if (result.isResource()) {
-      f_socket_close(result.asCResRef());
+      HHVM_FN(socket_close)(result.asCResRef());
       return;
     }
     usleep(100000); // 100 ms

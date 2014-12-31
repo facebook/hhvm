@@ -1,0 +1,17 @@
+(GOOD) Not tracking when disabled
+(GOOD) Tracking when enabled
+(GOOD) Tracking works
+(GOOD) Untracking works
+(GOOD) Bytes (props) works
+(GOOD) Bytes (arrays) works
+(GOOD) Bytes (dynamic) works
+(GOOD) Bytes (Async) works
+(GOOD) Bytes (Mixed Map) works
+(GOOD) Bytes (Vector) works
+(GOOD) Bytes (Set) works
+(GOOD) Bytes (RefCount) works
+(GOOD) Bytes (SharedString) works
+(GOOD) Bytes (SharedArray) works
+(GOOD) Bytes (NestedArray) works
+(GOOD) Got here without crashing
+

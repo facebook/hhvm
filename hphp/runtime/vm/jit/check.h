@@ -17,8 +17,7 @@
 #ifndef incl_HPHP_VM_CHECK_H_
 #define incl_HPHP_VM_CHECK_H_
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 class IRUnit;
 struct RegAllocInfo;
@@ -37,18 +36,6 @@ bool checkCfg(const IRUnit&);
  * spill these because all translations share the spill space.
  */
 bool checkTmpsSpanningCalls(const IRUnit&);
-
-/*
- * Make sure there's no shuffle instructions. (called right before register
- * allocation.
- */
-bool checkNoShuffles(const IRUnit&);
-
-/*
- * Check register and spill slot assignments; registers and spill slots must
- * contain the correct SSATmp value at every point of use.
- */
-bool checkRegisters(const IRUnit&, const RegAllocInfo&);
 
 }}
 

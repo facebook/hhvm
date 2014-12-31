@@ -24,6 +24,7 @@
 		printf("[004] [%d] %s\n", $link->errno, $link->error);
 	}
 ?>
+<?php error_reporting(0); ?>
 <?php
 	$test_table_name = 'test_bug45289_table_1'; require_once("clean_table.inc");
 ?>

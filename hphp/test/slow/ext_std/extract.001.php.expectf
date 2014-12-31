@@ -1,0 +1,7 @@
+int(0)
+array(%d) {
+  %A
+}
+int(0)
+object(Test)#%d (0) {
+}

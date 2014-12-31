@@ -1,0 +1,15 @@
+<?php 
+
+function foo() {
+  var_dump("Hello World");
+}
+
+foo();
+foo();
+
+for ($i = 0; $i < 10; $i++) {
+  var_dump($i);
+}
+for ($i = 0; $i < 5; $i++) {
+  var_dump($i);
+}

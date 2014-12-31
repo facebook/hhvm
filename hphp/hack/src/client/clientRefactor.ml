@@ -156,7 +156,7 @@ let go args =
     let ic, oc = connect args.root in
     let command = ServerMsg.REFACTOR command in
     ServerMsg.cmd_to_channel oc command;
-    let patches = Marshal.from_channel ic in
+    let patches : ServerRefactor.result = Marshal.from_channel ic in
     let file_map = List.fold_left map_patches_to_filename SMap.empty patches in
     if args.output_json
     then print_patches_json file_map

@@ -17,7 +17,7 @@
 
 #include <limits>
 
-#include "folly/Memory.h"
+#include <folly/Memory.h>
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/repo.h"
@@ -130,6 +130,17 @@ PreClassEmitter::lookupProp(const StringData* propName) const {
   return m_propMap[idx];
 }
 
+bool PreClassEmitter::addAbstractConstant(const StringData* n,
+                                          const StringData* typeConstraint) {
+  auto it = m_constMap.find(n);
+  if (it != m_constMap.end()) {
+    return false;
+  }
+  PreClassEmitter::Const const_(n, typeConstraint, nullptr, nullptr);
+  m_constMap.add(const_.name(), const_);
+  return true;
+}
+
 bool PreClassEmitter::addConstant(const StringData* n,
                                   const StringData* typeConstraint,
                                   const TypedValue* val,
@@ -166,7 +177,7 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
   PreClassRepoProxy& pcrp = repo.pcrp();
   int repoId = m_ue.m_repoId;
   int64_t usn = m_ue.m_sn;
-  pcrp.insertPreClass(repoId)
+  pcrp.insertPreClass[repoId]
       .insert(*this, txn, usn, m_id, m_name, m_hoistable);
 
   for (MethodVec::const_iterator it = m_methods.begin();
@@ -271,19 +282,25 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   PreClass::ConstMap::Builder constBuild;
   for (unsigned i = 0; i < m_constMap.size(); ++i) {
     const Const& const_ = m_constMap[i];
-    constBuild.add(const_.name(), PreClass::Const(pc.get(),
-                                                  const_.name(),
-                                                  const_.typeConstraint(),
-                                                  const_.val(),
+    TypedValueAux tvaux;
+    if (const_.isAbstract()) {
+      tvWriteUninit(&tvaux);
+      tvaux.isAbstractConst() = true;
+    } else {
+      tvCopy(const_.val(), tvaux);
+      tvaux.isAbstractConst() = false;
+    }
+    constBuild.add(const_.name(), PreClass::Const(const_.name(),
+                                                  tvaux,
                                                   const_.phpCode()));
   }
   if (auto nativeConsts = Native::getClassConstants(m_name)) {
     for (auto cnsMap : *nativeConsts) {
-      auto tv = cnsMap.second;
-      constBuild.add(cnsMap.first, PreClass::Const(pc.get(),
-                                                   cnsMap.first,
-                                                   staticEmptyString(),
-                                                   tv,
+      TypedValueAux tvaux;
+      tvCopy(cnsMap.second, tvaux);
+      tvaux.isAbstractConst() = false;
+      constBuild.add(cnsMap.first, PreClass::Const(cnsMap.first,
+                                                   tvaux,
                                                    staticEmptyString()));
     }
   }
@@ -318,18 +335,10 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
 // PreClassRepoProxy.
 
 PreClassRepoProxy::PreClassRepoProxy(Repo& repo)
-  : RepoProxy(repo)
-#define PCRP_OP(c, o) \
-  , m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral)
-    PCRP_OPS
-#undef PCRP_OP
-{
-#define PCRP_OP(c, o) \
-  m_##o[RepoIdLocal] = &m_##o##Local; \
-  m_##o[RepoIdCentral] = &m_##o##Central;
-  PCRP_OPS
-#undef PCRP_OP
-}
+    : RepoProxy(repo),
+      insertPreClass{InsertPreClassStmt(repo, 0), InsertPreClassStmt(repo, 1)},
+      getPreClasses{GetPreClassesStmt(repo, 0), GetPreClassesStmt(repo, 1)}
+{}
 
 PreClassRepoProxy::~PreClassRepoProxy() {
 }

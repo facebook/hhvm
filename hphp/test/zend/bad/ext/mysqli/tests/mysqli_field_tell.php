@@ -33,6 +33,7 @@
 
 	print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 	$test_table_name = 'test_mysqli_field_tell_table_1'; require_once("clean_table.inc");
 ?>

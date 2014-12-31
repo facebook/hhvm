@@ -30,6 +30,7 @@ foreach( $buffer_types as $type) {
 
 echo "--- Done ---";
 ?>
+<?php error_reporting(0); ?>
 <?php
 //Deleting the temporary file 
 

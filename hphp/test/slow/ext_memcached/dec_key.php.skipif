@@ -1,0 +1,9 @@
+<?php
+
+$memc = new Memcached();
+$memc->addServer('localhost', '11211');
+$memc->addServer('localhost', '11212');
+$version = $memc->getVersion();
+if (!is_array($version) || count($version) !== 2) {
+  echo "SKIP Need two Memcached servers running (port 11211 and 11212)";
+}

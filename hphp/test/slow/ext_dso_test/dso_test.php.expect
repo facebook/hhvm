@@ -1,0 +1,11 @@
+int(17)
+string(11) "Hello World"
+int(1)
+int(2)
+int(3)
+float(3.1415926535)
+bool(true)
+NULL
+int(2)
+int(1)
+int(0)

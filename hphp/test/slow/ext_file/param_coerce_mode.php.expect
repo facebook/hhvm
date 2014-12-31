@@ -1,0 +1,50 @@
+string(6) "fclose"
+bool(false)
+string(6) "pclose"
+bool(false)
+string(5) "fseek"
+bool(false)
+string(6) "rewind"
+bool(false)
+string(5) "ftell"
+bool(false)
+string(4) "feof"
+bool(false)
+string(5) "fstat"
+bool(false)
+string(5) "fread"
+bool(false)
+string(5) "fgetc"
+bool(false)
+string(5) "fgets"
+bool(false)
+string(6) "fgetss"
+bool(false)
+string(6) "fscanf"
+bool(false)
+string(9) "fpassthru"
+bool(false)
+string(6) "fwrite"
+bool(false)
+string(5) "fputs"
+bool(false)
+string(7) "fprintf"
+bool(false)
+string(8) "vfprintf"
+bool(false)
+string(6) "fflush"
+bool(false)
+string(9) "ftruncate"
+bool(false)
+string(7) "fputcsv"
+NULL
+string(7) "fgetcsv"
+NULL
+string(5) "flock"
+NULL
+string(7) "readdir"
+NULL
+string(9) "rewinddir"
+NULL
+string(8) "closedir"
+NULL

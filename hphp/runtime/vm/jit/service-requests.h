@@ -16,13 +16,13 @@
 #ifndef incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 #define SERVICE_REQUESTS \
   /*
@@ -145,15 +145,6 @@ inline SRFlags operator|(SRFlags a, SRFlags b) {
  * to it at callout-time.
  */
 
-// REQ_BIND_CALL
-struct ReqBindCall {
-  SrcKey m_sourceInstr;
-  JIT::TCA m_toSmash;
-  int m_nArgs;
-  bool m_isImmutable; // call was to known func.
-};
-
-
 struct ServiceReqArgInfo {
   enum {
     Immediate,
@@ -162,7 +153,7 @@ struct ServiceReqArgInfo {
   } m_kind;
   union {
     uint64_t m_imm;
-    JIT::ConditionCode m_cc;
+    jit::ConditionCode m_cc;
   };
 };
 
@@ -173,7 +164,7 @@ inline ServiceReqArgInfo RipRelative(TCA addr) {
   };
 }
 
-typedef smart::vector<ServiceReqArgInfo> ServiceReqArgVec;
+typedef jit::vector<ServiceReqArgInfo> ServiceReqArgVec;
 
 }}
 

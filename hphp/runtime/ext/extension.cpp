@@ -20,9 +20,9 @@
 
 #include "hphp/util/exception.h"
 #include "hphp/util/assertions.h"
-#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/apache/ext_apache.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
@@ -328,23 +328,10 @@ void Extension::ShutdownModules() {
   s_extensions_sorted = false;
 }
 
-const StaticString
-  s_apache("apache"),
-  s_apc("apc"),
-  s_xhp("xhp");
-
 bool Extension::IsLoaded(const String& name) {
-  if (name == s_apache) {
-    return ApacheExtension::Enable;
-  }
-  if (name == s_apc) {
-    return apcExtension::Enable;
-  } else if (name == s_xhp) {
-    return RuntimeOption::EnableXHP;
-  }
   assert(s_registered_extensions);
-  return s_registered_extensions->find(name.data()) !=
-    s_registered_extensions->end();
+  auto it = s_registered_extensions->find(name.data());
+  return (it != s_registered_extensions->end()) && it->second->moduleEnabled();
 }
 
 const static std::string
@@ -369,13 +356,9 @@ Array Extension::GetLoadedExtensions() {
   assert(s_registered_extensions);
   Array ret = Array::Create();
   for (auto& kv : *s_registered_extensions) {
-    if (!apcExtension::Enable && kv.second->m_name == s_apc.toCppString()) {
-      continue;
+    if (kv.second->moduleEnabled()) {
+      ret.append(String(kv.second->m_name));
     }
-    if (!RuntimeOption::EnableXHP && kv.second->m_name == s_xhp.toCppString()) {
-      continue;
-    }
-    ret.append(String(kv.second->m_name));
   }
   return ret;
 }
@@ -421,7 +404,7 @@ void Extension::loadSystemlib(const std::string& name) {
   std::string n = name.empty() ?
     std::string(m_name.data(), m_name.size()) : name;
   std::string section("ext.");
-  section += f_md5(n, false).substr(0, 12).data();
+  section += HHVM_FN(md5)(n, false).substr(0, 12).data();
   std::string hhas;
   std::string slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {
@@ -455,16 +438,19 @@ static void countArgs(const char *format, unsigned &min, unsigned &max) {
 
 static const char *argTypeName(DataType dt) {
   switch (dt) {
-    case KindOfNull: return "null";
-    case KindOfBoolean: return "boolean";
-    case KindOfInt64: return "integer";
-    case KindOfDouble: return "double";
-    case KindOfString:
-    case KindOfStaticString: return "string";
-    case KindOfArray: return "array";
-    case KindOfObject: return "object";
-    case KindOfResource: return "resource";
-    default: return "unknown";
+    case KindOfNull:          return "null";
+    case KindOfBoolean:       return "boolean";
+    case KindOfInt64:         return "integer";
+    case KindOfDouble:        return "double";
+    case KindOfStaticString:
+    case KindOfString:        return "string";
+    case KindOfArray:         return "array";
+    case KindOfObject:        return "object";
+    case KindOfResource:      return "resource";
+
+    case KindOfUninit:
+    case KindOfRef:
+    case KindOfClass:         return "unknown";
   }
   not_reached();
 }
@@ -516,8 +502,9 @@ bool parseArgPointer(TypedValue *tv,
 bool parseArgs(ActRec *ar, const char *format, ...) {
   unsigned min, max, count = ar->numArgs();
   countArgs(format, min, max);
-  if (count < min) {
-    throw_wrong_arguments_nr(ar->func()->name()->data(), count, min, max);
+  if (count < min || max < count) {
+    throw_wrong_arguments_nr(Native::getInvokeName(ar)->data(),
+                             count, min, max);
     return false;
   }
 
@@ -619,11 +606,11 @@ bool parseArgs(ActRec *ar, const char *format, ...) {
           return false;
         }
         /* fallthrough */
-      case 'v': // KindOfAny (Variant)
+      case 'v': // Variant
         *va_arg(va, Variant*) = tv ? tvAsVariant(tv) : uninit_null();
         break;
 
-      case 'V': // KindOfAny (TypedValue*)
+      case 'V': // TypedValue*
         *va_arg(va, TypedValue**) = tv;
 
       default:

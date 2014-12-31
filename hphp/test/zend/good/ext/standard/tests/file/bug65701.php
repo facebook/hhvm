@@ -11,6 +11,7 @@ file_put_contents($src, "Hello World");
 copy($src, $dst);
 var_dump(filesize($dst));
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__) . "/bug65701/";
 foreach (scandir($file_path) as $file) {

@@ -45,6 +45,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/text-util.h"
 
+#include <folly/Conv.h>
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <map>
@@ -94,7 +95,8 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
   : BlockScope(name, "", StatementPtr(), BlockScope::ClassScope),
     m_parent(parent), m_bases(bases),
     m_attribute(0), m_redeclaring(-1),
-    m_kindOf(KindOfObjectClass), m_derivesFromRedeclaring(Derivation::Normal),
+    m_kindOf(KindOf::ObjectClass),
+    m_derivesFromRedeclaring(Derivation::Normal),
     m_traitStatus(NOT_FLATTENED), m_dynamic(false),
     m_volatile(false), m_persistent(false),
     m_derivedByDynamic(false), m_needsCppCtor(false),
@@ -131,8 +133,7 @@ std::string ClassScope::getDocName() const {
   if (m_redeclaring < 0) {
     return name;
   }
-  return name + Option::IdPrefix +
-    boost::lexical_cast<std::string>(m_redeclaring);
+  return name + Option::IdPrefix + folly::to<std::string>(m_redeclaring);
 }
 
 bool ClassScope::NeedStaticArray(ClassScopePtr cls, FunctionScopePtr func) {
@@ -464,7 +465,9 @@ void ClassScope::addImportTraitMethod(const TraitMethod &traitMethod,
 
 void ClassScope::addClassRequirement(const string &requiredName,
                                      bool isExtends) {
-  assert(isTrait() || (isInterface() && isExtends));
+  assert(isTrait() || (isInterface() && isExtends)
+         // when flattening traits, their requirements get flattened
+         || Option::WholeProgram);
   if (isExtends) {
     m_requiredExtends.insert(requiredName);
   } else {
@@ -551,38 +554,13 @@ void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
 
 void ClassScope::importClassRequirements(AnalysisResultPtr ar,
                                          ClassScopePtr trait) {
-  if (isTrait()) {
-    for (auto const& req : trait->getClassRequiredExtends()) {
-      addClassRequirement(req, true);
-    }
-    for (auto const& req : trait->getClassRequiredImplements()) {
-      addClassRequirement(req, false);
-    }
-  } else {
-    for (auto const& req : trait->getClassRequiredExtends()) {
-      if (!derivesFrom(ar, req, true, false)) {
-        getStmt()->analysisTimeFatal(
-          Compiler::InvalidDerivation,
-          Strings::TRAIT_REQ_EXTENDS,
-          m_originalName.c_str(),
-          req.c_str(),
-          trait->getOriginalName().c_str(),
-          "use"
-        );
-      }
-    }
-    for (auto const& req : trait->getClassRequiredImplements()) {
-      if (!derivesFrom(ar, req, true, false)) {
-        getStmt()->analysisTimeFatal(
-          Compiler::InvalidDerivation,
-          Strings::TRAIT_REQ_IMPLEMENTS,
-          m_originalName.c_str(),
-          req.c_str(),
-          trait->getOriginalName().c_str(),
-          "use"
-        );
-      }
-    }
+  /* Defer enforcement of requirements until the creation of the class
+   * happens at runtime. */
+  for (auto const& req : trait->getClassRequiredExtends()) {
+    addClassRequirement(req, true);
+  }
+  for (auto const& req : trait->getClassRequiredImplements()) {
+    addClassRequirement(req, false);
   }
 }
 
@@ -859,13 +837,8 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     findTraitMethodsToImport(ar, tCls);
 
     // Import any interfaces implemented
-    tCls->getInterfaces(ar, m_bases, false);
-  }
-  for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
-    // Requirements must be checked in a separate loop because the
-    // interfaces required by one trait may be implemented by another trait
-    // whose "use" appears later in the class' scope
-    ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
+    tCls->getInterfaces(ar, m_bases, /* recursive */ false);
+
     importClassRequirements(ar, tCls);
   }
 
@@ -1285,7 +1258,7 @@ void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
 
   // What's a mod again?
   ms.add("attributes", m_attribute)
-    .add("kind", m_kindOf)
+    .add("kind", (int) m_kindOf)
     .add("parent", m_parent)
     .add("bases", m_bases)
     .add("properties", propMap)
@@ -1361,11 +1334,18 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.add("interfaces", origIfaces);
 
   int mods = 0;
-  // TODO: you should really only get one of these, we should assert this
-  if (m_kindOf == KindOfAbstractClass) mods |= ClassInfo::IsAbstract;
-  if (m_kindOf == KindOfFinalClass)    mods |= ClassInfo::IsFinal;
-  if (m_kindOf == KindOfInterface)     mods |= ClassInfo::IsInterface;
-  if (m_kindOf == KindOfTrait)         mods |= ClassInfo::IsTrait;
+  switch (m_kindOf) {
+    case KindOf::AbstractClass: mods |= ClassInfo::IsAbstract; break;
+    case KindOf::Enum:
+    case KindOf::FinalClass:
+      mods |= ClassInfo::IsFinal; break;
+    case KindOf::UtilClass:
+      mods |= ClassInfo::IsFinal | ClassInfo::IsAbstract; break;
+    case KindOf::Interface:     mods |= ClassInfo::IsInterface; break;
+    case KindOf::Trait:         mods |= ClassInfo::IsTrait; break;
+    case KindOf::ObjectClass:
+      break;
+  }
   ms.add("modifiers", mods);
 
   FunctionScopePtrVec funcs;

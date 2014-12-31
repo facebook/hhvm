@@ -1,13 +1,11 @@
-#
-# $Id$
-#
-# - Find libmemcached
 # Find libmemcached
 #
 #  LIBMEMCACHED_INCLUDE_DIR - where to find libmemcached/memcached.h, etc.
 #  LIBMEMCACHED_LIBRARY     - List of libraries when using libmemcached.
 #  LIBMEMCACHED_FOUND       - True if libmemcached found.
 
+find_package(PkgConfig)
+pkg_check_modules(LIBMEMCACHED QUIET libmemcached)
 
 IF (LIBMEMCACHED_INCLUDE_DIR)
   # Already in cache, be silent
@@ -18,8 +16,8 @@ FIND_PATH(LIBMEMCACHED_INCLUDE_DIR libmemcached/memcached.h)
 
 FIND_LIBRARY(LIBMEMCACHED_LIBRARY memcached)
 
-# handle the QUIETLY and REQUIRED arguments and set Libmemcached_FOUND to TRUE if
-# all listed variables are TRUE
+# handle the QUIETLY and REQUIRED arguments and set Libmemcached_FOUND to TRUE 
+# if all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBMEMCACHED DEFAULT_MSG LIBMEMCACHED_LIBRARY LIBMEMCACHED_INCLUDE_DIR)
 

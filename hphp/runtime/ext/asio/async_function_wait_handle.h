@@ -33,14 +33,13 @@ namespace HPHP {
  * execution. A dependency on another wait handle is set up by awaiting such
  * wait handle, giving control of the execution back to the asio framework.
  */
-FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
-class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
+class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
 
   explicit c_AsyncFunctionWaitHandle(Class* cls =
       c_AsyncFunctionWaitHandle::classof())
-    : c_ResumableWaitHandle(cls)
+    : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj)
   {}
   ~c_AsyncFunctionWaitHandle();
   void t___construct();
@@ -61,7 +60,7 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
   }
   static c_AsyncFunctionWaitHandle* Create(const ActRec* origFp,
                                            size_t numSlots,
-                                           JIT::TCA resumeAddr,
+                                           jit::TCA resumeAddr,
                                            Offset resumeOffset,
                                            c_WaitableWaitHandle* child);
   static void PrepareChild(const ActRec* fp, c_WaitableWaitHandle* child);

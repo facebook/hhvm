@@ -8,15 +8,9 @@
  *
  *)
 
-type env = {
-  root: Path.path;
-  wait: bool;
-}
-
 let main env =
-  if ClientUtils.server_exists env.root
-  then begin
-    HackClientStop.kill_server env.root;
-    ClientStart.start_server ~wait:env.wait env.root
-  end else Printf.fprintf stderr "Error: no server to restart for %s\n%!"
-    (Path.string_of_path env.root)
+  if ClientUtils.server_exists env.ClientStart.root
+  then HackClientStop.kill_server env.ClientStart.root
+  else Printf.fprintf stderr "Warning: no server to restart for %s\n%!"
+    (Path.string_of_path env.ClientStart.root);
+  ClientStart.start_server env

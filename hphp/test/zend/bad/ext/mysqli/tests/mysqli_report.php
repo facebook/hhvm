@@ -30,8 +30,6 @@
 
 	mysqli_multi_query($link, "BAR; FOO;");
 	mysqli_query($link, "FOO");
-	/* This might work if you accept anonymous users in your setup */
-	mysqli_change_user($link, "0123456789-10-456789-20-456789-30-456789-40-456789-50-456789-60-456789-70-456789-80-456789-90-456789", "password", $db);
 	mysqli_kill($link, -1);
 
 	// mysqli_ping() cannot be tested, because one would need to cause an error inside the C function to test it
@@ -48,7 +46,6 @@
 
 	mysqli_multi_query($link, "BAR; FOO;");
 	mysqli_query($link, "FOO");
-	mysqli_change_user($link, "This might work if you accept anonymous users in your setup", "password", $db);
 	mysqli_kill($link, -1);
 	mysqli_prepare($link, "FOO");
 	mysqli_real_query($link, "FOO");
@@ -269,6 +266,7 @@
 	mysqli_close($link);
 	print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 	$test_table_name = 'test_mysqli_report_table_1'; require_once("clean_table.inc");
 ?>

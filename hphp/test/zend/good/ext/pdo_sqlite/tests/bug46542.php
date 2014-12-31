@@ -8,6 +8,7 @@ $a->truc();
 $a->TRUC();
 
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(__DIR__ . '/dummy.db');
 ?>

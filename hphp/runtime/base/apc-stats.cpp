@@ -18,12 +18,13 @@
 
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,32 +50,32 @@ size_t getMemSize(const TypedValue* tv) {
 }
 
 size_t getMemSize(const APCHandle* handle) {
-  auto t = handle->getType();
+  auto t = handle->type();
   if (!IS_REFCOUNTED_TYPE(t)) {
     return sizeof(APCHandle);
   }
   if (t == KindOfString) {
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getStringData());
     }
     return getMemSize(APCString::fromHandle(handle));
   }
   if (t == KindOfArray) {
-    if (handle->getSerializedArray()) {
+    if (handle->isSerializedArray()) {
       return getMemSize(APCString::fromHandle(handle));
     }
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getArrayData());
     }
     return getMemSize(APCArray::fromHandle(handle));
   }
   if (t == KindOfObject) {
-    if (handle->getIsObj()) {
-      return getMemSize(APCObject::fromHandle(handle));
+    if (handle->isSerializedObj()) {
+      return getMemSize(APCString::fromHandle(handle));
     }
-    return getMemSize(APCString::fromHandle(handle));
+    return getMemSize(APCObject::fromHandle(handle));
   }
 
   assert(!"Unsupported APCHandle Type in getMemSize");
@@ -394,81 +395,95 @@ void APCDetailedStats::removeAPCValue(APCHandle* handle, bool expired) {
 }
 
 void APCDetailedStats::addType(APCHandle* handle) {
-  DataType type = handle->getType();
+  DataType type = handle->type();
   assert(!IS_REFCOUNTED_TYPE(type) ||
          type == KindOfString ||
          type == KindOfArray ||
          type == KindOfObject);
-  if (!IS_REFCOUNTED_TYPE(type)) {
-    m_uncounted->increment();
-    return;
-  }
+
   switch (type) {
-  case KindOfString:
-    if (handle->getUncounted()) {
-      m_uncString->increment();
-    } else {
-      m_apcString->increment();
-    }
-    return;
-  case KindOfArray:
-    if (handle->getUncounted()) {
-      m_uncArray->increment();
-    } else if (handle->getSerializedArray()) {
-      m_serArray->increment();
-    } else {
-      m_apcArray->increment();
-    }
-    return;
-  case KindOfObject:
-    if (handle->getIsObj()) {
-      m_apcObject->increment();
-    } else {
-      m_serObject->increment();
-    }
-    return;
-  default:
-    return;
+    DT_UNCOUNTED_CASE:
+      m_uncounted->increment();
+      return;
+
+    case KindOfString:
+      if (handle->isUncounted()) {
+        m_uncString->increment();
+      } else {
+        m_apcString->increment();
+      }
+      return;
+
+    case KindOfArray:
+      if (handle->isUncounted()) {
+        m_uncArray->increment();
+      } else if (handle->isSerializedArray()) {
+        m_serArray->increment();
+      } else {
+        m_apcArray->increment();
+      }
+      return;
+
+    case KindOfObject:
+      if (handle->isSerializedObj()) {
+        m_serObject->increment();
+      } else {
+        m_apcObject->increment();
+      }
+      return;
+
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 void APCDetailedStats::removeType(APCHandle* handle) {
-  DataType type = handle->getType();
+  DataType type = handle->type();
   assert(!IS_REFCOUNTED_TYPE(type) ||
          type == KindOfString ||
          type == KindOfArray ||
          type == KindOfObject);
-  if (!IS_REFCOUNTED_TYPE(type)) {
-    m_uncounted->decrement();
-    return;
-  }
+
   switch (type) {
-  case KindOfString:
-    if (handle->getUncounted()) {
-      m_uncString->decrement();
-    } else {
-      m_apcString->decrement();
-    }
-    return;
-  case KindOfArray:
-    if (handle->getUncounted()) {
-      m_uncArray->decrement();
-    } else if (handle->getSerializedArray()) {
-      m_serArray->decrement();
-    } else {
-      m_apcArray->decrement();
-    }
-    return;
-  case KindOfObject:
-    if (handle->getIsObj()) {
-      m_apcObject->decrement();
-    } else {
-      m_serObject->decrement();
-    }
-    return;
-  default:
-    return;
+    DT_UNCOUNTED_CASE:
+      m_uncounted->decrement();
+      return;
+
+    case KindOfString:
+      if (handle->isUncounted()) {
+        m_uncString->decrement();
+      } else {
+        m_apcString->decrement();
+      }
+      return;
+
+    case KindOfArray:
+      if (handle->isUncounted()) {
+        m_uncArray->decrement();
+      } else if (handle->isSerializedArray()) {
+        m_serArray->decrement();
+      } else {
+        m_apcArray->decrement();
+      }
+      return;
+
+    case KindOfObject:
+      if (handle->isSerializedObj()) {
+        m_serObject->decrement();
+      } else {
+        m_apcObject->decrement();
+      }
+      return;
+
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,11 @@
+<?php
+$memcache = new Memcache;
+$memcache->addServer('localhost', 11211);
+$version = $memcache->getVersion();
+if (!$version) {
+  echo "SKIP No Memcached running";
+}
+
+if (!defined('MEMCACHE_HAVE_SESSION') || !MEMCACHE_HAVE_SESSION) {
+  echo 'SKIP Memcache not compiled with session support';
+}

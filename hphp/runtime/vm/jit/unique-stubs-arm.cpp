@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 namespace {
 
@@ -86,7 +86,7 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   // The VM-reg-save helper will read the current BC offset out of argReg(0).
   a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
 
-  emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
+  emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
   emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
 
   us.add("stackOverflowHelper", us.stackOverflowHelper);
@@ -248,6 +248,26 @@ void emitFunctionEnterHelper(UniqueStubs& us) {
   us.add("functionEnterHelper", us.functionEnterHelper);
 }
 
+void emitBindCallStubs(UniqueStubs& uniqueStubs) {
+  for (int i = 0; i < 2; i++) {
+    auto& cb = mcg->code.cold();
+    if (!i) {
+      uniqueStubs.bindCallStub = cb.frontier();
+    } else {
+      uniqueStubs.immutableBindCallStub = cb.frontier();
+    }
+    Vauto vasm(cb);
+    auto& vf = vasm.main();
+    // Pop the return address into the actrec in rStashedAR.
+    vf << store{PhysReg{rLinkReg}, PhysReg{rStashedAR}[AROFF(m_savedRip)]};
+    ServiceReqArgVec argv;
+    packServiceReqArgs(argv, (int64_t)i);
+    emitServiceReq(vf, nullptr, jit::REQ_BIND_CALL, argv);
+  }
+  uniqueStubs.add("bindCallStub", uniqueStubs.bindCallStub);
+  uniqueStubs.add("immutableBindCallStub", uniqueStubs.immutableBindCallStub);
+}
+
 } // anonymous namespace
 
 UniqueStubs emitUniqueStubs() {
@@ -263,6 +283,7 @@ UniqueStubs emitUniqueStubs() {
     emitFCallHelperThunk,
     emitFuncBodyHelperThunk,
     emitFunctionEnterHelper,
+    emitBindCallStubs,
   };
   for (auto& f : functions) f(us);
   return us;

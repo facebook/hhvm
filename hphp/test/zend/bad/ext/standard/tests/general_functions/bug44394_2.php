@@ -17,6 +17,7 @@ ob_flush();
 ob_end_clean();
 
 ?>
+<?php error_reporting(0); ?>
 <?php
 foreach (glob(__DIR__ . '/sess_*') as $filename) {
   unlink($filename);

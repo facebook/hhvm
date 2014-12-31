@@ -30,91 +30,11 @@ namespace Stats {
 #define STATS \
   STAT(Instr_TC) \
   OPCODES \
-  STAT(TgtCache_SPropHit) \
-  STAT(TgtCache_SPropMiss) \
-  STAT(TgtCache_StaticHit) \
-  STAT(TgtCache_StaticMiss) \
-  STAT(TgtCache_ClsCnsHit) \
-  STAT(TgtCache_ClsCnsMiss) \
-  STAT(TgtCache_FuncDHit) \
-  STAT(TgtCache_FuncDMiss) \
-  STAT(TgtCache_CtorDHit) \
-  STAT(TgtCache_CtorDMiss) \
-  STAT(TgtCache_CallHit) \
-  STAT(TgtCache_CallMiss) \
-  STAT(TgtCache_FixedCallHit) \
-  STAT(TgtCache_FixedCallMiss) \
-  STAT(TgtCache_MethodHit) \
-  STAT(TgtCache_MethodMiss) \
-  STAT(TgtCache_MethodFast) \
-  STAT(TgtCache_MethodBypass) \
-  STAT(TgtCache_GlobalHit) \
-  STAT(TgtCache_GlobalMiss) \
   STAT(TgtCache_StaticMethodHit) \
   STAT(TgtCache_StaticMethodMiss) \
-  STAT(TgtCache_StaticMethodBypass) \
   STAT(TgtCache_StaticMethodFHit) \
   STAT(TgtCache_StaticMethodFMiss) \
-  STAT(TgtCache_StaticMethodFBypass) \
   STAT(TgtCache_StaticMethodFFill) \
-  STAT(TgtCache_ClassExistsHit) \
-  STAT(TgtCache_ClassExistsMiss) \
-  STAT(MCG_FusedTypeCheck) \
-  STAT(MCG_UnfusedTypeCheck) \
-  STAT(MCG_VerifyParamTypeSlow) \
-  STAT(MCG_VerifyParamTypeFast) \
-  STAT(MCG_VerifyParamTypeBit) \
-  STAT(MCG_VerifyParamTypeSlowShortcut) \
-  STAT(MCG_VerifyParamTypePass) \
-  STAT(MCG_VerifyParamTypeEqual) \
-  STAT(MCG_InstanceOfDFused) \
-  STAT(MCG_InstanceOfDBypass) \
-  STAT(MCG_InstanceOfDInterface) \
-  STAT(MCG_InstanceOfDSlow) \
-  STAT(MCG_InstanceOfDFast) \
-  STAT(MCG_InstanceOfDBit) \
-  STAT(MCG_InstanceOfDEqual) \
-  STAT(MCG_InstanceOfDFinalTrue) \
-  STAT(MCG_InstanceOfDFinalFalse) \
-  STAT(MCG_CGetMLEE) \
-  STAT(MCG_CGetMGE) \
-  STAT(MCG_CGetMArray) \
-  STAT(MCG_CGetMGeneric) \
-  STAT(MCG_MLitKey) \
-  STAT(MCG_MRegKey) \
-  STAT(MCG_MTVKey) \
-  STAT(MCG_CnsFast) \
-  STAT(MCG_CnsSlow) \
-  STAT(MCG_ContCreateFast) \
-  STAT(MCG_ContCreateSlow) \
-  STAT(MCG_ContUnpackFast) \
-  STAT(MCG_ContUnpackSlow) \
-  STAT(MCG_ContPackFast) \
-  STAT(MCG_ContPackSlow) \
-  STAT(MCG_Spill) \
-  STAT(MCG_SpillHome) \
-  STAT(MCG_ClassExistsFast) \
-  STAT(MCG_ClassExistsSlow) \
-  STAT(MCG_StaticLocFast) \
-  STAT(MCG_StaticLocSlow) \
-  STAT(MCG_OneGuardShort) \
-  STAT(MCG_OneGuardLong) \
-  STAT(MCG_SideExit) \
-  STAT(MCG_SideExitClean) \
-  STAT(MCG_NewInstancePropCheck) \
-  STAT(MCG_NewInstancePropInit) \
-  STAT(MCG_NewInstanceSPropCheck) \
-  STAT(MCG_NewInstanceSPropInit) \
-  STAT(MCG_NewInstanceNoCtorFast) \
-  STAT(MCG_NewInstanceNoCtor) \
-  STAT(MCG_NewInstanceFast) \
-  STAT(MCG_NewInstanceGeneric) \
-  STAT(MCG_StringSwitchSlow) \
-  STAT(MCG_StringSwitchFast) \
-  STAT(MCG_StringSwitchHit) \
-  STAT(MCG_StringSwitchChain) \
-  STAT(MCG_StringSwitchFailFast) \
-  STAT(MCG_StringSwitchFailSlow) \
   /* Type prediction stats */ \
   STAT(TypePred_Insert) \
   STAT(TypePred_Evict) \
@@ -123,19 +43,10 @@ namespace Stats {
   STAT(TypePred_MissTooFew) \
   STAT(TypePred_MissTooWeak) \
   /* Translation cache statistics */ \
-  STAT(TC_MissPMain) \
-  STAT(TC_MissWriteLease) \
-  STAT(TC_Hit) \
   STAT(TC_Sync) \
   STAT(TC_SyncUnwind) \
-  STAT(TC_TypePredHit) \
-  STAT(TC_TypePredMiss) \
-  STAT(TC_TypePredUnneeded) \
-  STAT(TC_TypePredOverridden) \
   STAT(TC_CatchTrace) \
   STAT(TC_CatchSideExit) \
-  STAT(TC_SetMStrGuess_Hit) \
-  STAT(TC_SetMStrGuess_Miss) \
   STAT(TC_DecRef_NZ) \
   STAT(TC_DecRef_Normal_Decl) \
   STAT(TC_DecRef_Normal_Destroy) \
@@ -143,9 +54,6 @@ namespace Stats {
   STAT(TC_DecRef_Likely_Destroy) \
   STAT(TC_DecRef_Profiled_100) \
   STAT(TC_DecRef_Profiled_0) \
-  /* Fixup */ \
-  STAT(Fixup_Find) \
-  STAT(Fixup_Probe) \
   /* Execute pseudomain */ \
   STAT(PseudoMain_Reentered) \
   STAT(PseudoMain_Executed) \
@@ -153,9 +61,6 @@ namespace Stats {
   STAT(PseudoMain_SkipDeep) \
   STAT(PseudoMain_Guarded) \
   STAT(VMEnter) \
-  STAT(TraceletGuard_enter) \
-  STAT(TraceletGuard_branch) \
-  STAT(TraceletGuard_execute) \
   /* Unit merging stats */ \
   STAT(UnitMerge_hoistable) \
   STAT(UnitMerge_hoistable_persistent) \
@@ -171,10 +76,6 @@ namespace Stats {
   STAT(UnitMerge_mergeable_class) \
   STAT(UnitMerge_mergeable_require) \
   STAT(UnitMerge_redo_hoistable) \
-  /* property getter stats */ \
-  STAT(PropAsm_Generic) \
-  STAT(PropAsm_Specialized) \
-  STAT(PropAsm_GenFinal) \
   /* stub reuse stats */ \
   STAT(Astub_New) \
   STAT(Astub_Reused) \

@@ -17,7 +17,9 @@
 
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/network.h"
 #include "mysql.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
@@ -240,9 +242,11 @@ PDOMySqlConnection::~PDOMySqlConnection() {
   }
 }
 
+const StaticString s_localhost("localhost");
+
 bool PDOMySqlConnection::create(const Array& options) {
   int i, ret = 0;
-  char *host = NULL, *unix_socket = NULL;
+  char *unix_socket = nullptr;
   unsigned int port = 3306;
   char *dbname;
   char *charset = nullptr;
@@ -263,6 +267,24 @@ bool PDOMySqlConnection::create(const Array& options) {
     ;
 
   php_pdo_parse_data_source(data_source.data(), data_source.size(), vars, 5);
+
+  dbname = vars[1].optval;
+
+  // Extract port number from a host in case it's inlined.
+  String host(vars[2].optval, CopyString);
+  if (!host.same(s_localhost)) {
+    HostURL hosturl(host.toCppString(), port);
+    if (hosturl.isValid()) {
+      host = String(hosturl.getHost().c_str(), CopyString);
+      port = hosturl.getPort();
+    }
+  }
+
+  // Explicit port param overrides the
+  // implicit one from host.
+  if (vars[3].optval) {
+    port = atoi(vars[3].optval);
+  }
 
   /* handle for the server */
   if (!(m_server = mysql_init(NULL))) {
@@ -360,17 +382,12 @@ bool PDOMySqlConnection::create(const Array& options) {
     }
   }
 
-  dbname = vars[1].optval;
-  host = vars[2].optval;
-  if (vars[3].optval) {
-    port = atoi(vars[3].optval);
-  }
-  if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
+  if (host.empty() || host.same(s_localhost)) {
     unix_socket = vars[4].optval;
   }
 
-  /* TODO: - Check zval cache + ZTS */
-  if (mysql_real_connect(m_server, host, username.c_str(), password.c_str(),
+  if (mysql_real_connect(m_server, host.c_str(),
+                         username.c_str(), password.c_str(),
                          dbname, port, unix_socket, connect_opts) == NULL) {
     handleError(__FILE__, __LINE__);
     goto cleanup;
@@ -481,7 +498,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
 
 bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                   const Variant& options) {
-  PDOMySqlStatement *s = NEWOBJ(PDOMySqlStatement)(this, m_server);
+  PDOMySqlStatement *s = newres<PDOMySqlStatement>(this, m_server);
   *stmt = s;
 
   if (m_emulate_prepare) {
@@ -944,7 +961,7 @@ bool PDOMySqlStatement::executer() {
 
   my_ulonglong affected_count = mysql_affected_rows(m_server);
   if (affected_count == (my_ulonglong)-1) {
-    /* we either have a query that returned a result set or an error occured
+    /* we either have a query that returned a result set or an error occurred
        lets see if we have access to a result set */
     if (!m_conn->buffered()) {
       m_result = mysql_use_result(m_server);
@@ -1012,7 +1029,7 @@ bool PDOMySqlStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Resource(NEWOBJ(PDOColumn)));
+      columns.set(i, Resource(newres<PDOColumn>()));
     }
   }
 
@@ -1121,7 +1138,8 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
         return false;
       case PDO_PARAM_LOB:
         if (param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter.toResource());
+          Variant buf = HHVM_FN(stream_get_contents)(
+                        param->parameter.toResource());
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {
@@ -1287,7 +1305,7 @@ PDOMySql::PDOMySql() : PDODriver("mysql") {
 }
 
 PDOConnection *PDOMySql::createConnectionObject() {
-  // Doesn't use NEWOBJ because PDOConnection is malloced
+  // Doesn't use newres<> because PDOConnection is malloced
   return new PDOMySqlConnection();
 }
 

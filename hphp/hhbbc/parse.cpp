@@ -21,18 +21,18 @@
 #include <map>
 
 #include <boost/variant.hpp>
-#include <boost/next_prior.hpp>
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <set>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include "folly/gen/Base.h"
-#include "folly/gen/String.h"
-#include "folly/ScopeGuard.h"
-#include "folly/Memory.h"
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
+#include <folly/ScopeGuard.h>
+#include <folly/Memory.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
@@ -173,7 +173,7 @@ struct ExnTreeInfo {
    * Map from EHEnt to the ExnNode that will represent exception
    * behavior in that region.
    */
-  std::map<const EHEnt*,borrowed_ptr<php::ExnNode>> ehMap;
+  std::map<const EHEntEmitter*,borrowed_ptr<php::ExnNode>> ehMap;
 
   /*
    * Fault funclets don't actually fall in the EHEnt region for all of
@@ -312,9 +312,9 @@ void find_fault_funclets(ExnTreeInfo& tinfo,
   auto sectionId = uint32_t{1};
 
   for (auto funcletStartIt = begin(tinfo.faultFuncletStarts);
-      boost::next(funcletStartIt) != end(tinfo.faultFuncletStarts);
+      std::next(funcletStartIt) != end(tinfo.faultFuncletStarts);
       ++funcletStartIt, ++sectionId) {
-    auto const nextFunclet = *boost::next(funcletStartIt);
+    auto const nextFunclet = *std::next(funcletStartIt);
 
     auto offIt = blockStarts.find(*funcletStartIt);
     assert(offIt != end(blockStarts));
@@ -664,11 +664,11 @@ void build_cfg(ParseUnitState& puState,
   auto exnTreeInfo = build_exn_tree(fe, func, findBlock);
 
   for (auto it = begin(blockStarts);
-      boost::next(it) != end(blockStarts);
+      std::next(it) != end(blockStarts);
       ++it) {
     auto const block   = findBlock(*it);
     auto const bcStart = bc + *it;
-    auto const bcStop  = bc + *boost::next(it);
+    auto const bcStop  = bc + *std::next(it);
 
     if (auto const eh = findEH(fe.ehtab, *it)) {
       auto it = exnTreeInfo.ehMap.find(eh);
@@ -759,8 +759,8 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
   /*
    * Builtin functions get some extra information.  The returnType flag is only
-   * non-KindOfInvalid for these, but note that something may be a builtin and
-   * still have a KindOfInvalid return type.
+   * non-folly::none for these, but note that something may be a builtin and
+   * still have a folly::none return type.
    */
   if (fe.attrs & AttrBuiltin) {
     ret->nativeInfo             = folly::make_unique<php::NativeInfo>();
@@ -832,7 +832,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
       php::Const {
         cconst.name(),
         borrow(ret),
-        cconst.val(),
+        cconst.valOption(),
         cconst.phpCode(),
         cconst.typeConstraint()
       }
@@ -916,6 +916,7 @@ std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
   auto ret      = folly::make_unique<php::Unit>();
   ret->md5      = ue.md5();
   ret->filename = ue.m_filepath;
+  ret->preloadPriority = ue.m_preloadPriority;
 
   ParseUnitState puState;
   if (ue.hasSourceLocInfo()) {

@@ -36,13 +36,12 @@ public:
 
   explicit ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                           ListKind kind = ListKindParam);
-
+  ~ExpressionList();
   // change case to lower so to make it case insensitive
   void toLower();
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   virtual void setContext(Context context);
   void setListKind(ListKind kind) { m_kind = kind; }

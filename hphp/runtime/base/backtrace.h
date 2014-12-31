@@ -58,7 +58,8 @@ struct BacktraceArgs {
    * Do not return function arguments for frames on the stack.
    */
   BacktraceArgs& ignoreArgs(bool ignoreArgs = true) {
-    m_ignoreArgs = ignoreArgs;
+    m_withArgNames = m_withArgNames && !ignoreArgs;
+    m_withArgValues = m_withArgValues && !ignoreArgs;
     return *this;
   }
 
@@ -79,11 +80,37 @@ struct BacktraceArgs {
     return *this;
   }
 
+  /**
+   * Include the pseudo main in the backtrace.
+   */
+  BacktraceArgs& withPseudoMain(bool withPseudoMain = true) {
+    m_withPseudoMain = withPseudoMain;
+    return *this;
+  }
+
+  /**
+   * Include argument values in backtrace.
+   */
+  BacktraceArgs& withArgValues(bool withValues = true) {
+    m_withArgValues = withValues;
+    return *this;
+  }
+
+  /**
+   * Include argument names in backtrace.
+   */
+  BacktraceArgs& withArgNames(bool withNames = true) {
+    m_withArgNames = withNames;
+    return *this;
+  }
+
 private:
   bool m_skipTop = false;
   bool m_withSelf = false;
   bool m_withThis = false;
-  bool m_ignoreArgs = false;
+  bool m_withPseudoMain = false;
+  bool m_withArgValues = true;
+  bool m_withArgNames = false;
   int m_limit = 0;
   VMParserFrame* m_parserFrame = nullptr;
 };

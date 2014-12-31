@@ -59,13 +59,14 @@ class ClassScope : public BlockScope, public FunctionContainer,
                    public JSON::DocTarget::ISerializable {
 
 public:
-  enum KindOf {
-    KindOfObjectClass,
-    KindOfAbstractClass,
-    KindOfFinalClass,
-    KindOfEnum,
-    KindOfInterface,
-    KindOfTrait
+  enum class KindOf : int {
+    ObjectClass,
+    AbstractClass,
+    FinalClass,
+    UtilClass,
+    Enum,
+    Interface,
+    Trait,
   };
 
 #define DECLARE_MAGIC(prefix, prev)                                     \
@@ -339,13 +340,17 @@ public:
   void serialize(JSON::CodeError::OutputStream &out) const;
   void serialize(JSON::DocTarget::OutputStream &out) const;
 
-  bool isInterface() const { return m_kindOf == KindOfInterface; }
-  bool isFinal() const { return m_kindOf == KindOfFinalClass ||
-                                m_kindOf == KindOfTrait; }
-  bool isAbstract() const { return m_kindOf == KindOfAbstractClass ||
-                                   m_kindOf == KindOfTrait; }
-  bool isTrait() const { return m_kindOf == KindOfTrait; }
-  bool isEnum() const { return m_kindOf == KindOfEnum; }
+  bool isInterface() const { return m_kindOf == KindOf::Interface; }
+  bool isFinal() const { return m_kindOf == KindOf::FinalClass ||
+                                m_kindOf == KindOf::Trait ||
+                                m_kindOf == KindOf::UtilClass ||
+                                m_kindOf == KindOf::Enum; }
+  bool isAbstract() const { return m_kindOf == KindOf::AbstractClass ||
+                                   m_kindOf == KindOf::Trait ||
+                                   m_kindOf == KindOf::UtilClass; }
+  bool isTrait() const { return m_kindOf == KindOf::Trait; }
+  bool isEnum() const { return m_kindOf == KindOf::Enum; }
+  bool isStaticUtil() const { return m_kindOf == KindOf::UtilClass; }
   bool hasProperty(const std::string &name) const;
   bool hasConst(const std::string &name) const;
 

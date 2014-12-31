@@ -27,7 +27,7 @@ VMRegAnchor::VMRegAnchor()
   : m_old(tl_regState)
 {
   assert_native_stack_aligned();
-  JIT::mcg->sync();
+  jit::mcg->sync();
 }
 
 VMRegAnchor::VMRegAnchor(ActRec* ar)

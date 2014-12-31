@@ -18,7 +18,7 @@ function max($value, ...) { }
 function abs($number) { }
 function is_finite($val) { }
 function is_infinite($val) { }
-function is_nan($val) { }
+function is_nan(float $val): bool { }
 function ceil($value) { }
 function floor($value): float { }
 function round($val, $precision = 0, $mode = 1) { }
@@ -53,9 +53,9 @@ function hypot($x, $y) { }
 function fmod($x, $y) { }
 function sqrt($arg) { }
 function getrandmax() { }
-function srand($seed = null_variant) { }
+function srand($seed = null) { }
 function rand($min = 0, $max = RAND_MAX) { }
 function mt_getrandmax() { }
-function mt_srand($seed = null_variant) { }
+function mt_srand($seed = null) { }
 function mt_rand($min = 0, $max = RAND_MAX) { }
 function lcg_value() { }

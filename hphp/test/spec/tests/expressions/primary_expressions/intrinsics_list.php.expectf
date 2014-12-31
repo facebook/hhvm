@@ -1,0 +1,168 @@
+--------- test with full and omitted LHS vars -------------
+$min: 0, $max: 100, $avg: 67
+Array
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)
+$min: 0, $max: 100, $avg: 67
+Array
+(
+    [2] => 67
+    [1] => 100
+    [0] => 0
+)
+$min: 0, , $avg: 67
+, $max: 100, $avg: 67
+, , $avg: 67
+$min: 0, $max: 100,
+$min: 0, $max: 100
+$min: 0, ,
+$min: 0
+--------- test with more array elements than variables -------------
+$min: 0, $max: 100, $avg: 67
+Array
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+    [3] => 22
+    [4] => 33
+)
+--------- test with fewer array elements than variables -------------
+bool(true)
+int(0)
+bool(true)
+int(100)
+bool(true)
+int(67)
+
+Notice: Undefined %s: 2 in %s/expressions/primary_expressions/intrinsics_list.php on line 57
+$min: 100, $max: 500, $avg: 
+Array
+(
+    [0] => 100
+    [1] => 500
+)
+bool(true)
+int(100)
+bool(true)
+int(500)
+bool(false)
+NULL
+--------- test with sufficient array elements but not consecutive keys -------------
+
+Notice: Undefined %s: 1 in %s/expressions/primary_expressions/intrinsics_list.php on line 70
+$min: 0, $max: , $avg: 100
+Array
+(
+    [0] => 0
+    [2] => 100
+    [4] => 67
+)
+bool(true)
+int(0)
+bool(false)
+NULL
+bool(true)
+int(100)
+--------- test with NULL rather than array -------------
+bool(false)
+--------- test with mixed array -------------
+$min: 10, $max: 30, $avg: 50
+Array
+(
+    [0] => 10
+    [a] => 20
+    [1] => 30
+    [b] => 40
+    [2] => 50
+)
+--------- test with non-numeric array -------------
+
+Notice: Undefined %s: 2 in %s/expressions/primary_expressions/intrinsics_list.php on line 96
+
+Notice: Undefined %s: 1 in %s/expressions/primary_expressions/intrinsics_list.php on line 96
+
+Notice: Undefined %s: 0 in %s/expressions/primary_expressions/intrinsics_list.php on line 96
+$min: , $max: , $avg: 
+Array
+(
+    [x] => 10
+    [a] => 20
+    [y] => 30
+)
+bool(false)
+bool(false)
+bool(false)
+--------- test with array element being an array -------------
+
+Notice: Undefined %s: 2 in %s/expressions/primary_expressions/intrinsics_list.php on line 107
+Array
+(
+    [0] => 0
+    [1] => Array
+        (
+            [0] => 100
+            [1] => 67
+        )
+
+)
+bool(true)
+int(0)
+bool(true)
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(67)
+}
+bool(false)
+NULL
+--------- test with nested lists -------------
+$min: 0, $max: 100, $avg: 67
+Array
+(
+    [0] => 0
+    [1] => Array
+        (
+            [1] => 67
+            [2] => 99
+            [0] => 100
+        )
+
+    [2] => 33
+)
+--------- test with target vars being array elements -------------
+Array
+(
+    [4] => 67
+    [2] => 100
+    [0] => 0
+)
+Array
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)
+--------- test with no variables -------------
+Array
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)
+Array
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)
+Array
+(
+    [0] => 0
+    [1] => 100
+    [2] => 67
+)

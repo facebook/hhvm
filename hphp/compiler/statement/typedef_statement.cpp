@@ -54,8 +54,6 @@ void TypedefStatement::setNthKid(int n, ConstructPtr cp) {
 
 void TypedefStatement::analyzeProgram(AnalysisResultPtr) {}
 
-void TypedefStatement::inferTypes(AnalysisResultPtr) {}
-
 void TypedefStatement::outputCodeModel(CodeGenerator& cg) {
   cg.printObjectHeader("TypedefStatement", 3);
   cg.printPropertyHeader("name");

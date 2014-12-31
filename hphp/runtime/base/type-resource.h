@@ -52,9 +52,13 @@ public:
    */
   /* implicit */ Resource(ResourceData *data) : ResourceBase(data) { }
   /* implicit */ Resource(const Resource& src) : ResourceBase(src.m_px) { }
+  template <typename T>
+  explicit Resource(SmartPtr<T>&& src) : ResourceBase(std::move(src)) { }
+  template <typename T>
+  explicit Resource(const SmartPtr<T>& src) : ResourceBase(src) { }
 
   // Move ctor
-  Resource(Resource&& src) : ResourceBase(std::move(src)) { }
+  Resource(Resource&& src) noexcept : ResourceBase(std::move(src)) { }
 
   // Regular assign
   Resource& operator=(const Resource& src) {

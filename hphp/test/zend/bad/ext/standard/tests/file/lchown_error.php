@@ -31,6 +31,7 @@ var_dump( lchown( $filename, -5 ) );
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 
 $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown.txt';

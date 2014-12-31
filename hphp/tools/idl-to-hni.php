@@ -115,6 +115,7 @@ function output_function($fp, $func, $indent = '') {
   $modifiers = [];
   $nativea = (count($func['args']) > 32) ? ['"ActRec"'] : [];
   $ua = [];
+  $variadic = false;
   if (isset($func['flags'])) {
     foreach($func['flags'] as $flag) {
       switch (strtolower($flag)) {
@@ -122,10 +123,15 @@ function output_function($fp, $func, $indent = '') {
         case 'isprotected':    if ($indent) $modifiers[] = 'protected'; break;
         case 'isprivate':      if ($indent) $modifiers[] = 'private'; break;
         case 'isstatic':       if ($indent) $modifiers[] = 'static'; break;
+        case 'functionisfoldable':
         case 'isfoldable':     $ua[] = '__IsFoldable'; break;
         case 'hiphopspecific': $ua[] = '__HipHopSpecific'; break;
         case 'noinjection':    $nativea[] = '"NoInjection"'; break;
         case 'paramcoercemodefalse': $ua[] = '__ParamCoerceModeFalse'; break;
+        case 'paramcoercemodenull': $ua[] = '__ParamCoerceModeNull'; break;
+        case 'variablearguments':
+        case 'refvariablearguments':
+        case 'mixedvariablearguments': $variadic = true; break;
         default: fwrite(STDERR, "Unknown Flag: $flag\n");
       }
     }
@@ -148,6 +154,12 @@ function output_function($fp, $func, $indent = '') {
     if (isset($arg['value'])) {
       fwrite($fp, ' = ' . defaultValue($arg['value']));
     }
+  }
+  if ($variadic) {
+    if ($func['args']) {
+      fwrite($fp, ",\n" . str_repeat(' ', strlen($funcproto)));
+    }
+    fwrite($fp, '...$argv');
   }
   fwrite($fp, "): " . phpType($func['return']['type']) . ";\n");
 }

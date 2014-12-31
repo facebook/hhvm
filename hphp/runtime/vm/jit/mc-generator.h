@@ -27,18 +27,19 @@
 #include "hphp/util/ringbuffer.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 typedef X64Assembler Asm;
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
@@ -48,6 +49,7 @@ struct TReqInfo;
 struct Label;
 struct MCGenerator;
 struct AsmInfo;
+struct HTS;
 
 extern MCGenerator* mcg;
 extern void* interpOneEntryPoints[];
@@ -105,7 +107,11 @@ struct CodeGenFixups {
     m_tletFrozen = frozen;
   }
 
-  void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  void process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
+    process_only(inProgressTailBranches);
+    clear();
+  }
   bool empty() const;
   void clear();
 };
@@ -124,21 +130,36 @@ struct RelocationInfo {
   CTCA adjustedAddressBefore(CTCA addr) const {
     return adjustedAddressBefore(const_cast<TCA>(addr));
   }
+  void rewind(TCA start, TCA end);
+  void markAddressImmediates(const std::set<TCA>& ai) {
+    m_addressImmediates.insert(ai.begin(), ai.end());
+  }
+  bool isAddressImmediate(TCA ip) {
+    return m_addressImmediates.count(ip);
+  }
   typedef std::vector<std::pair<TCA,TCA>> RangeVec;
-  RangeVec::iterator begin() { return m_dstRanges.begin(); }
-  RangeVec::iterator end() { return m_dstRanges.end(); }
+  const RangeVec& srcRanges() { return m_srcRanges; }
+  const RangeVec& dstRanges() { return m_dstRanges; }
  private:
   RangeVec m_srcRanges;
   RangeVec m_dstRanges;
   /*
-   * maps from src address, to range of destination addresse
+   * maps from src address, to range of destination address
    * This is because we could insert nops before the instruction
    * corresponding to src. Most things want the address of the
    * instruction corresponding to the src instruction; but eg
    * the fixup map would want the address of the nop.
    */
-  std::map<TCA,std::pair<TCA,int>> m_adjustedAddresses;
+  std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
+  std::set<TCA> m_addressImmediates;
 };
+
+struct UsageInfo {
+  std::string m_name;
+  size_t m_used;
+  size_t m_capacity;
+  bool m_global;
+} ;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -158,7 +179,7 @@ struct MCGenerator : private boost::noncopyable {
     return !mcg || Translator::WriteLease().amOwner();
   }
 
-  static JIT::CppCall getDtorCall(DataType type);
+  static CppCall getDtorCall(DataType type);
   static bool isPseudoEvent(const char* event);
 
 public:
@@ -190,7 +211,7 @@ public:
    * Handlers for function prologues.
    */
   TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
-                      bool ignoreTCLimit = false);
+                      bool forRegeneratePrologue = false);
   TCA getCallArrayPrologue(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
 
@@ -256,11 +277,22 @@ public:
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   TCA getTranslatedCaller() const;
   void setJmpTransID(TCA jmp);
-  bool profileSrcKey(const SrcKey& sk) const;
+  bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  void traceCodeGen();
+  void traceCodeGen(HTS&);
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
+
+  /*
+   * Set/get if we're going to try using LLVM as the codegen backend for the
+   * current translation.
+   */
+  void setUseLLVM(bool llvm) {
+    m_useLLVM = llvm;
+  }
+  bool useLLVM() const {
+    return m_useLLVM;
+  }
 
   /*
    * Dump translation cache.  True if successful.
@@ -270,8 +302,9 @@ public:
   /*
    * Return cache usage information as a string
    */
-  std::string getUsage();
+  std::string getUsageString();
   std::string getTCAddrs();
+  std::vector<UsageInfo> getUsageInfo();
 
   /*
    * Returns the total size of the TC now and at the beginning of this request,
@@ -302,9 +335,8 @@ private:
                       bool& smashed);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
-  bool shouldTranslate() const {
-    return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage;
-  }
+  bool shouldTranslate(const Func*) const;
+  bool shouldTranslateNoSizeLimit(const Func*) const;
 
   TCA getTopTranslation(SrcKey sk) {
     return m_tx.getSrcRec(sk)->getTopTranslation();
@@ -316,7 +348,7 @@ private:
   TCA createTranslation(const TranslArgs& args);
   TCA retranslate(const TranslArgs& args);
   TCA translate(const TranslArgs& args);
-  void translateWork(const TranslArgs& args);
+  TCA translateWork(const TranslArgs& args);
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
@@ -343,10 +375,11 @@ private:
 private:
   std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
+  bool               m_useLLVM{false};
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;
-  uint64_t           m_numHHIRTrans;
+  uint64_t           m_numTrans;
   FixupMap           m_fixupMap;
   UnwindInfoHandle   m_unwindRegistrar;
   CatchTraceMap      m_catchTraceMap;
@@ -366,10 +399,19 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 // Both emitIncStat()s push/pop flags but don't clobber any registers.
 extern void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
                         int n = 1, bool force = false);
+
 inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
                         bool force = false) {
   emitIncStat(cb, &Stats::tl_counters[0], stat, n, force);
 }
+
+extern void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
+                        bool force = false);
+
+void emitServiceReq(Vout& v, TCA stub_block, ServiceRequest req,
+                    const ServiceReqArgVec& argv);
+
+bool shouldPGOFunc(const Func& func);
 
 }}
 

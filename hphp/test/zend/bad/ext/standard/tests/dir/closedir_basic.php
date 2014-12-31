@@ -32,6 +32,7 @@ echo "-- Check Directory Handle: --\n";
 var_dump($dh2);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $base_dir = dirname(__FILE__);
 $dir_path = $base_dir . '/closedir_basic';

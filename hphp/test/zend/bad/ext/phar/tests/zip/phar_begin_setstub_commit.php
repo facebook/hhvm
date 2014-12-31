@@ -33,6 +33,7 @@ var_dump($p->getStub());
 fclose($a);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/brandnewphar.phar.zip');
 unlink(dirname(__FILE__) . '/myfakestub.php');

@@ -157,7 +157,6 @@ struct SymbolicStack {
   enum MetaType {
     META_NONE,
     META_LITSTR,
-    META_DATA_TYPE
   };
 
 private:
@@ -180,9 +179,6 @@ private:
     explicit SymEntry(char s = 0)
       : sym(s)
       , metaType(META_NONE)
-      , notRef(false)
-      , notNull(false)
-      , dtPredicted(false)
       , className(nullptr)
       , intval(-1)
       , unnamedLocalStart(InvalidAbsoluteOffset)
@@ -190,12 +186,8 @@ private:
     {}
     char sym;
     MetaType metaType;
-    bool notRef:1;
-    bool notNull:1;
-    bool dtPredicted:1;
     union {
       const StringData* name;   // META_LITSTR
-      DataType dt;              // META_DATA_TYPE
     }   metaData;
     const StringData* className;
     int64_t intval; // used for L and I symbolic flavors
@@ -238,11 +230,7 @@ public:
   void setInt(int64_t v);
   void setString(const StringData* s);
   void setKnownCls(const StringData* s, bool nonNull);
-  void setNotRef();
-  bool getNotRef() const;
-  void setKnownType(DataType dt, bool predicted = false);
   void cleanTopMeta();
-  DataType getKnownType(int index = -1, bool noRef = true) const;
   void setClsBaseType(ClassBaseType);
   void setUnnamedLocal(int index, int localId, Offset startOffset);
   void pop();
@@ -714,14 +702,14 @@ public:
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
   void emitFPass(Emitter& e, int paramID, PassByRefKind passByRefKind);
-  void emitVirtualLocal(int localId, DataType dt = KindOfUnknown);
+  void emitVirtualLocal(int localId);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
   void emitResolveClsBase(Emitter& e, int pos);
   void emitClsIfSPropBase(Emitter& e);
   Id emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp);
   Id emitSetUnnamedL(Emitter& e);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
-  DataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
+  MaybeDataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
   void emitIntegerSwitch(Emitter& e, SwitchStatementPtr s,
                          std::vector<Label>& caseLabels, Label& done,
                          const SwitchState& state);
@@ -759,13 +747,12 @@ public:
                              bool coerce_params = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
-  void emitMemoizeProp(Emitter &e, MethodStatementPtr meth,
-                       const StringData *propName, int localID);
-  void emitMemoizeMethod(MethodStatementPtr meth, const StringData *methName,
-                         const StringData *propName);
+  void emitMemoizeProp(Emitter& e, MethodStatementPtr meth, Id localID,
+                       const std::vector<Id>& paramIDs, uint numParams);
+  void addMemoizeProp(MethodStatementPtr meth);
+  void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName);
   void emitConstMethodCallNoParams(Emitter& e, string name);
-  void emitCreateStaticWaitHandle(Emitter& e, std::string cls,
-                                  std::function<void()> emitParam);
+  bool emitHHInvariant(Emitter& e, SimpleFunctionCallPtr);
   void emitMethodDVInitializers(Emitter& e,
                                 MethodStatementPtr& meth,
                                 Label& topOfBody);
@@ -796,7 +783,8 @@ public:
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
-  void emitBuiltinDefaultArg(Emitter& e, Variant& v, DataType t, int paramId);
+  void emitBuiltinDefaultArg(Emitter& e, Variant& v,
+                             MaybeDataType t, int paramId);
   void emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
   void emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitForeachListAssignment(Emitter& e,
@@ -913,7 +901,7 @@ public:
                                 StringData* name, bool alloc);
 };
 
-void emitAllHHBC(AnalysisResultPtr ar);
+void emitAllHHBC(AnalysisResultPtr&& ar);
 
 
 extern "C" {

@@ -12,6 +12,7 @@ var_dump(ini_set("error_log", $initdir."/test/ok/ok.txt"));
 
 test_open_basedir_after("error_log");
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once "open_basedir.inc";
 delete_directories();

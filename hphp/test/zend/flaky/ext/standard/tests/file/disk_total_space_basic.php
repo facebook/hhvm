@@ -26,6 +26,7 @@ var_dump( disk_total_space($file_path.$dir) );
 
 echo"\n-- Done --";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/disk_total_space/disk_total_space.tmp");

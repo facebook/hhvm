@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/countable.h"
+#include "hphp/util/compilation-flags.h"
 #include <utility>
 #include <algorithm>
 
@@ -51,7 +52,7 @@ public:
   }
 
   // Move ctor
-  SmartPtr(SmartPtr&& src) : m_px(src.get()) {
+  SmartPtr(SmartPtr&& src) noexcept : m_px(src.get()) {
     src.m_px = nullptr;
   }
 
@@ -67,6 +68,9 @@ public:
 
   ~SmartPtr() {
     decRefPtr(m_px);
+    if (debug) {
+      m_px = reinterpret_cast<T*>(0xdeadbeeffaceb004);
+    }
   }
 
   /**
@@ -115,11 +119,15 @@ public:
   }
 
   /**
+   * Safe bool cast.
+   */
+  explicit operator bool() const { return m_px != nullptr; }
+
+  /**
    * Magic delegation.
    */
   T* operator->() const {
-    if (UNLIKELY(!m_px)) throw_null_pointer_exception();
-    return m_px;
+    return m_px; // intentionally skip nullptr check.
   }
 
   /**
@@ -137,6 +145,9 @@ public:
   }
 
 protected:
+  // For templatized SmartPtr<Y> move constructor.
+  template <typename Y> friend class SmartPtr;
+
   T* m_px;  // raw pointer
 
 private:
@@ -222,6 +233,11 @@ struct AtomicSmartPtr {
   }
 
   /**
+   * Safe bool cast.
+   */
+  explicit operator bool() const { return m_px != nullptr; }
+
+  /**
    * Magic delegation.
    */
   T* operator->() const {
@@ -238,8 +254,8 @@ struct AtomicSmartPtr {
   /**
    * Reset the raw pointer.
    */
-  void reset() {
-    operator=((T*)nullptr);
+  void reset(T* p = nullptr) {
+    operator=(p);
   }
 
 protected:

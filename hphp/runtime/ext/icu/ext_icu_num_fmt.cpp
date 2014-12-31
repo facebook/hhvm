@@ -16,7 +16,7 @@
 */
 #include "hphp/runtime/ext/icu/ext_icu_num_fmt.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 
 namespace HPHP { namespace Intl {
 //////////////////////////////////////////////////////////////////////////////
@@ -291,9 +291,9 @@ static Variant HHVM_METHOD(NumberFormatter, format, const Variant& value,
   }
 
   if (type == UNUM(TYPE_DEFAULT)) {
-    if (value.isInteger()) {
+    if (num.isInteger()) {
       type = UNUM(TYPE_INT64);
-    } else if (value.isDouble()) {
+    } else if (num.isDouble()) {
       type = UNUM(TYPE_DOUBLE);
     }
   }

@@ -27,6 +27,7 @@ var_dump( fileowner($dir_name) );
 echo "*** Done ***\n";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $file_name = $file_path."/fileowner_basic.tmp";

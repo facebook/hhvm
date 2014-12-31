@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_HOTPROFILER_H_
 
 #include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/base/request-local.h"
 
 #ifdef __FreeBSD__
 #include <sys/param.h>
@@ -67,19 +68,20 @@ namespace HPHP {
 // classes
 
 /**
- * All information we collect about a frame.
+ * Information every Profiler collects about a frame.
+ * Subclasses of Profiler may subclass this as well,
+ * in case they need additional information,
+ * and then override allocateFrame().
  */
 class Frame {
 public:
-  Frame          *m_parent;      // ptr to parent frame
-  const char     *m_name;        // function name
-  uint8_t           m_hash_code;   // hash_code for the function name
-  int             m_recursion;   // recursion level for function
+  Frame          *m_parent;        // pointer to parent frame
+  const char     *m_name;          // function name
+  uint8_t         m_hash_code;     // hash_code for the function name
+  int             m_recursion;     // recursion level for function
 
-  uint64_t          m_tsc_start;   // start value for TSC counter
-  int64_t           m_mu_start;    // memory usage
-  int64_t           m_pmu_start;   // peak memory usage
-  int64_t           m_vtsc_start;    // user/sys time start
+  virtual ~Frame() {
+  }
 
   /**
    * Returns formatted function name
@@ -133,7 +135,7 @@ enum Flag {
  */
 class Profiler {
 public:
-  Profiler();
+  explicit Profiler(bool needCPUAffinity);
   virtual ~Profiler();
 
   /**
@@ -217,20 +219,28 @@ public:
 
   /**
    * Fast allocate a Frame structure. Picks one from the
-   * free list if available, else does an actual allocate.
+   * free list if available, else calls allocateFrame
+   * for an actual allocate.
    */
   Frame *createFrame(const char *symbol) {
     Frame *p = m_frame_free_list;
     if (p) {
       m_frame_free_list = p->m_parent;
     } else {
-      p = (Frame*)malloc(sizeof(Frame));
+      p = allocateFrame ();
     }
     p->m_parent = m_stack;
     p->m_name = symbol;
     p->m_hash_code = hprof_inline_hash(symbol);
     m_stack = p;
     return p;
+  }
+
+  /**
+   * Allocate a Frame structure suitable for this class' needs.
+   */
+  virtual Frame *allocateFrame() {
+    return new Frame();
   }
 
   /**

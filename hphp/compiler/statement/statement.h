@@ -33,7 +33,6 @@
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual StatementPtr clone();                                         \
-  virtual void inferTypes(AnalysisResultPtr ar);                        \
   virtual void outputCodeModel(CodeGenerator &cg);                      \
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 #define DECLARE_STATEMENT_VIRTUAL_FUNCTIONS                             \
@@ -130,18 +129,6 @@ public:
   virtual StatementPtr preOptimize(AnalysisResultConstPtr ar) {
     return StatementPtr();
   }
-
-  /**
-   * Called after type inference.
-   */
-  virtual StatementPtr postOptimize(AnalysisResultConstPtr ar) {
-    return StatementPtr();
-  }
-
-  /**
-   * Called when types need to be inferred inside this statement.
-   */
-  virtual void inferTypes(AnalysisResultPtr ar) = 0;
 
   bool hasReachableLabel() const;
 

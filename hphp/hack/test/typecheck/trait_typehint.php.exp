@@ -1,0 +1,4 @@
+File "trait_typehint.php", line 31, characters 26-33:
+KidTrait is uninstantiable (Typing[4002])
+File "trait_typehint.php", line 17, characters 7-14:
+Declaration is here

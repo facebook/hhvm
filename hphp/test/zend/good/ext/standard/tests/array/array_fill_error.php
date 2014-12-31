@@ -29,9 +29,5 @@ var_dump( array_fill($start_key,$num) );
 $num = -1;
 var_dump( array_fill($start_key,$num,$val) );
 
-//callin array_fill with 'num' equal to zero value
-$num = 0;
-var_dump( array_fill($start_key,$num,$val) );
-
 echo "Done";
 ?>

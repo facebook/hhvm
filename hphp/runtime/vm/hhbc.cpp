@@ -382,6 +382,34 @@ Offset instrJumpTarget(const Op* instrs, Offset pos) {
   }
 }
 
+OffsetSet instrSuccOffsets(Op* opc, const Unit* unit) {
+  OffsetSet succBcOffs;
+  Op* bcStart = (Op*)(unit->entry());
+
+  if (!instrIsControlFlow(*opc)) {
+    Offset succOff = opc + instrLen(opc) - bcStart;
+    succBcOffs.insert(succOff);
+    return succBcOffs;
+  }
+
+  if (instrAllowsFallThru(*opc)) {
+    Offset succOff = opc + instrLen(opc) - bcStart;
+    succBcOffs.insert(succOff);
+  }
+
+  if (isSwitch(*opc)) {
+    foreachSwitchTarget(opc, [&](Offset& offset) {
+        succBcOffs.insert(offset);
+      });
+  } else {
+    Offset target = instrJumpTarget(bcStart, opc - bcStart);
+    if (target != InvalidAbsoluteOffset) {
+      succBcOffs.insert(target);
+    }
+  }
+  return succBcOffs;
+}
+
 /**
  * Return the number of successor-edges including fall-through paths but not
  * implicit exception paths.
@@ -636,9 +664,8 @@ StackTransInfo instrStackTransInfo(const Op* opcode) {
     ret.numPushes = 0;
     ret.pos = peekPokeType[uint8_t(*opcode)];
     return ret;
-  default:
-    not_reached();
   }
+  not_reached();
 }
 
 bool pushesActRec(Op opcode) {
@@ -674,57 +701,56 @@ void staticArrayStreamer(ArrayData* ad, std::ostream& out) {
         comma = true;
       }
       Variant key = it.first();
+
       // Key.
-      switch (key.getType()) {
-      case KindOfInt64: {
+      if (IS_INT_TYPE(key.getType())) {
         out << *key.getInt64Data();
-        break;
-      }
-      case KindOfStaticString:
-      case KindOfString: {
+      } else if (IS_STRING_TYPE(key.getType())) {
         out << "\""
             << escapeStringForCPP(key.getStringData()->data(),
                                   key.getStringData()->size())
             << "\"";
-        break;
+      } else {
+        assert(false);
       }
-      default: assert(false);
-      }
+
       out << "=>";
-      // Value.
+
       Variant val = it.second();
-      switch (val.getType()) {
-      case KindOfUninit:
-      case KindOfNull: {
-        out << "null";
-        break;
-      }
-      case KindOfBoolean: {
-        out << (val.toBoolean() ? "true" : "false");
-        break;
-      }
-      case KindOfStaticString:
-      case KindOfString: {
-        out << "\""
-            << escapeStringForCPP(val.getStringData()->data(),
-                                  val.getStringData()->size())
-            << "\"";
-        break;
-      }
-      case KindOfInt64: {
-        out << *val.getInt64Data();
-        break;
-      }
-      case KindOfDouble: {
-        out << *val.getDoubleData();
-        break;
-      }
-      case KindOfArray: {
-        staticArrayStreamer(val.getArrayData(), out);
-        break;
-      }
-      default: assert(false);
-      }
+
+      // Value.
+      [&] {
+        switch (val.getType()) {
+          case KindOfUninit:
+          case KindOfNull:
+            out << "null";
+            return;
+          case KindOfBoolean:
+            out << (val.toBoolean() ? "true" : "false");
+            return;
+          case KindOfInt64:
+            out << *val.getInt64Data();
+            return;
+          case KindOfDouble:
+            out << *val.getDoubleData();
+            return;
+          case KindOfStaticString:
+          case KindOfString:
+            out << "\""
+                << escapeStringForCPP(val.getStringData()->data(),
+                                      val.getStringData()->size())
+                << "\"";
+            return;
+          case KindOfArray:
+            staticArrayStreamer(val.getArrayData(), out);
+            return;
+          case KindOfObject:
+          case KindOfResource:
+          case KindOfRef:
+          case KindOfClass:
+            not_reached();
+        }
+      }();
     }
   }
   out << ")";
@@ -732,34 +758,33 @@ void staticArrayStreamer(ArrayData* ad, std::ostream& out) {
 
 void staticStreamer(const TypedValue* tv, std::stringstream& out) {
   switch (tv->m_type) {
-  case KindOfUninit:
-  case KindOfNull: {
-    out << "null";
-    break;
+    case KindOfUninit:
+    case KindOfNull:
+      out << "null";
+      return;
+    case KindOfBoolean:
+      out << (tv->m_data.num ? "true" : "false");
+      return;
+    case KindOfInt64:
+      out << tv->m_data.num;
+      return;
+    case KindOfDouble:
+      out << tv->m_data.dbl;
+      return;
+    case KindOfStaticString:
+    case KindOfString:
+      out << "\"" << tv->m_data.pstr->data() << "\"";
+      return;
+    case KindOfArray:
+      staticArrayStreamer(tv->m_data.parr, out);
+      return;
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  case KindOfBoolean: {
-    out << (tv->m_data.num ? "true" : "false");
-    break;
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    out << "\"" << tv->m_data.pstr->data() << "\"";
-    break;
-  }
-  case KindOfInt64: {
-    out << tv->m_data.num;
-    break;
-  }
-  case KindOfDouble: {
-    out << tv->m_data.dbl;
-    break;
-  }
-  case KindOfArray: {
-    staticArrayStreamer(tv->m_data.parr, out);
-    break;
-  }
-  default: assert(false);
-  }
+  not_reached();
 }
 
 const char* const locationNames[] = { "L", "C", "H",
@@ -1044,7 +1069,7 @@ OPCODES
 }
 
 const char* opcodeToName(Op op) {
-  const char* namesArr[] = {
+  static const char* namesArr[] = {
 #define O(name, imm, inputs, outputs, flags) \
     #name ,
     OPCODES
@@ -1106,6 +1131,12 @@ static const char* OODeclExistsOp_names[] = {
 #undef OO_DECL_EXISTS_OP
 };
 
+static const char* ObjMethodOp_names[] = {
+#define OBJMETHOD_OP(x) #x,
+  OBJMETHOD_OPS
+#undef OBJMETHOD_OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
   static_assert(
@@ -1154,6 +1185,7 @@ X(IncDecOp)
 X(BareThisOp)
 X(SilenceOp)
 X(OODeclExistsOp)
+X(ObjMethodOp)
 
 #undef X
 

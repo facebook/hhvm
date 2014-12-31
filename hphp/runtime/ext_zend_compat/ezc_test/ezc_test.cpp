@@ -178,7 +178,7 @@ PHP_FUNCTION(ezc_set_global)
 }
 /* }}} */
 
-/* {{{ proto mixed ezc_call(mixed function_name [, mixed parmeter] [, mixed ...])
+/* {{{ proto mixed ezc_call(mixed function_name [, mixed parameter] [, mixed ...])
  * Call a function, like call_user_func() */
 PHP_FUNCTION(ezc_call)
 {
@@ -204,7 +204,7 @@ PHP_FUNCTION(ezc_call)
 }
 /* }}} */
 
-/* {{{ proto mixed ezc_try_call(mixed function_name [, mixed parmeter] [, mixed ...])
+/* {{{ proto mixed ezc_try_call(mixed function_name [, mixed parameter] [, mixed ...])
  * Call a function. If it throws an exception, catch it and return the exception
  * object. Otherwise, return the return value. */
 PHP_FUNCTION(ezc_try_call)
@@ -551,8 +551,8 @@ PHP_FUNCTION(ezc_get_error_reporting)
  */
 PHP_FUNCTION(ezc_set_error_reporting)
 {
-  int old_error_reporting = EG(error_reporting);
-  int new_error_reporting = 0;
+  long old_error_reporting = EG(error_reporting);
+  long new_error_reporting = 0;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_error_reporting) == FAILURE) {
     RETURN_FALSE;

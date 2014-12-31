@@ -25,10 +25,11 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "folly/gen/Base.h"
-#include "folly/gen/String.h"
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include "hphp/util/trace.h"
+#include "hphp/util/dataflow-worklist.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/analyze.h"
@@ -162,12 +163,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_unreachable("static analysis error: supposedly "
-                                 "unreachable code was reached");
-
-
-//////////////////////////////////////////////////////////////////////
-
 // Returns whether decrefing a type could run a destructor.
 bool couldRunDestructor(const Type& t) {
   // We could check for specialized objects to see if they don't
@@ -182,25 +177,40 @@ bool setCouldHaveSideEffects(const Type& t) {
   return t.couldBe(TObj) || t.couldBe(TCArr) || t.couldBe(TRef);
 }
 
+// Some reads could raise warnings and run arbitrary code.
+bool readCouldHaveSideEffects(const Type& t) {
+  return t.couldBe(TUninit);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Uses for a stack cell.
- *
- * 'Not' indicates that the cell is (unconditionally) not used.
- * 'Used' indicates that the cell is (possibly) used.
- * 'UsedIfLastRef' incates that the cell is only used if it was the
- * last reference alive. For instance, a PopC will call the destructor
- * of the top-of-stack cell if it was the last reference alive, and
- * this counts as an example of 'UsedIfLastRef'.
- *
- * If the producer of the cell knows that it is not the last reference,
- * then it can treat Use::UsedIfLastRef as being equivalent to Use::Not.
+ * Use information of a stack cell.
  */
-enum class Use { Not, Used, UsedIfLastRef };
+enum class Use {
+  // Indicates that the cell is (unconditionally) not used.
+  Not,
+
+  // Indicates that the cell is (possibly) used.
+  Used,
+
+  /*
+   * Indicates that the cell is only used if it was the last reference alive.
+   * For instance, a PopC will call the destructor of the top-of-stack object
+   * if it was the last reference alive, and this counts as an example of
+   * 'UsedIfLastRef'.
+   *
+   * If the producer of the cell knows that it is not the last reference, then
+   * it can treat Use::UsedIfLastRef as being equivalent to Use::Not.
+   */
+  UsedIfLastRef,
+};
+
 using InstrId    = size_t;
 using InstrIdSet = std::set<InstrId>;
 using UseInfo    = std::pair<Use,InstrIdSet>;
+
+//////////////////////////////////////////////////////////////////////
 
 struct DceState {
   borrowed_ptr<const php::Func> func;
@@ -291,292 +301,328 @@ std::string bits_string(borrowed_ptr<const php::Func> func,
 
 //////////////////////////////////////////////////////////////////////
 
-struct DceVisitor : boost::static_visitor<void> {
-  DceVisitor(DceState& dceState,
-             InstrId id,
-             const State& stateBefore,
-             const StepFlags& flags)
-    : m_dceState(dceState)
-    , m_id(id)
-    , m_stateBefore(stateBefore)
-    , m_flags(flags)
-  {}
-
-  void operator()(const bc::PopC&)       { discardNonDtors(); }
-  // For PopV and PopR currently we never know if can't run a
-  // destructor.
-  void operator()(const bc::PopA&)       { discard(); }
-  void operator()(const bc::Int&)        { pushRemovable(); }
-  void operator()(const bc::String&)     { pushRemovable(); }
-  void operator()(const bc::Array&)      { pushRemovable(); }
-  void operator()(const bc::Double&)     { pushRemovable(); }
-  void operator()(const bc::True&)       { pushRemovable(); }
-  void operator()(const bc::False&)      { pushRemovable(); }
-  void operator()(const bc::Null&)       { pushRemovable(); }
-  void operator()(const bc::NullUninit&) { pushRemovable(); }
-  void operator()(const bc::File&)       { pushRemovable(); }
-  void operator()(const bc::Dir&)        { pushRemovable(); }
-  void operator()(const bc::NameA&)      { popCond(push()); }
-  void operator()(const bc::NewArray&)   { pushRemovable(); }
-  void operator()(const bc::NewCol&)     { pushRemovable(); }
-  void operator()(const bc::AGetC&)      { popCond(push()); }
-
-  /*
-   * Note that these instructions with popConds are relying on the
-   * consumer of the values they push to check whether lifetime
-   * changes can have side-effects.
-   *
-   * For example, in bytecode like this, assuming $x is an object with
-   * a destructor:
-   *
-   *   CGetL $x
-   *   UnsetL $x
-   *   // ...
-   *   PopC $x // dtor should be here.
-   *
-   * The PopC will decide it can't be eliminated, which prevents us
-   * from eliminating the CGetL.
-   */
-
-  void operator()(const bc::Dup&) {
-    auto const u1 = push();
-    auto const u2 = push();
-    // Dup pushes a cell that is guaranteed to be not the last reference.
-    // So, it can be eliminated if the cell it pushes is used as either
-    // Use::Not or Use::UsedIfLastRef.
-    // The cell it pops can be marked Use::Not only if Dup itself
-    // can be eliminated.
-    switch (u1.first) {
-    case Use::Not:
-    case Use::UsedIfLastRef:
-      //  It is ok to eliminate the Dup even if its second output u2
-      //  is used, because eliminating the Dup still leaves the second
-      //  output u2 on stack.
-      markSetDead(u1.second);
-      switch (u2.first) {
-      case Use::Not:
-        pop(Use::Not, u2.second);
-        break;
-      case Use::Used:
-      case Use::UsedIfLastRef:
-        pop(Use::Used, InstrIdSet{});
-        break;
-      }
-      break;
-    case Use::Used:
-      pop(Use::Used, InstrIdSet{});
-      break;
-    }
-  }
-
-  void operator()(const bc::CGetL& op) {
-    addGen(op.loc1->id);
-    pushRemovable();
-  }
-
-  void operator()(const bc::CGetL2& op) {
-    addGen(op.loc1->id);
-    auto const u1 = push();
-    auto const u2 = push();
-    popCond(u1, u2);
-  }
-
-  void operator()(const bc::CGetL3& op) {
-    addGen(op.loc1->id);
-    auto const u1 = push();
-    auto const u2 = push();
-    auto const u3 = push();
-    popCond(u1, u2, u3);
-    popCond(u1, u2, u3);
-  }
-
-  void operator()(const bc::RetC&)  {         pop(); readDtorLocs(); }
-  void operator()(const bc::Throw&) {         pop(); readDtorLocs(); }
-  void operator()(const bc::Fatal&) {         pop(); readDtorLocs(); }
-  void operator()(const bc::Exit&)  { push(); pop(); readDtorLocs(); }
-
-  void operator()(const bc::SetL& op) {
-    auto const oldTy   = locRaw(op.loc1);
-    auto const effects = setCouldHaveSideEffects(oldTy);
-    if (!isLive(op.loc1->id) && !effects) return markDead();
-    push();
-    pop();
-    if (!effects) addKill(op.loc1->id);
-    if (effects)  addGen(op.loc1->id);
-  }
-
-  /*
-   * Default implementation is conservative: assume we use all of our
-   * inputs, and can't be removed even if our output is unused.
-   *
-   * We also assume all the locals in the mayReadLocalSet must be
-   * added to the live local set, and don't remove anything from it.
-   */
-  template<class Op>
-  void operator()(const Op& op) {
-    addGenSet(m_flags.mayReadLocalSet);
-    m_dceState.liveLocals |= m_flags.mayReadLocalSet;
-    for (auto i = uint32_t{0}; i < op.numPush(); ++i) {
-      push();
-    }
-    for (auto i = uint32_t{0}; i < op.numPop(); ++i) {
-      pop(Use::Used, InstrIdSet{});
-    }
-  }
-
-private: // eval stack
-  void pop() { pop(Use::Used, InstrIdSet{}); }
-  void pop(Use u, InstrIdSet set) {
-    FTRACE(2, "      pop({})\n", show(u));
-    m_dceState.stack.emplace_back(u, std::move(set));
-  }
-
-  void discard() {
-    pop(Use::Not, InstrIdSet{m_id});
-  }
-
-  bool allUnused() { return true; }
-  template<class... Args>
-  bool allUnused(const UseInfo& ui, Args&&... args) {
-    return ui.first == Use::Not &&
-      allUnused(std::forward<Args>(args)...);
-  }
-
-  void combineSets(InstrIdSet&) {}
-  template<class... Args>
-  void combineSets(InstrIdSet& accum, const UseInfo& ui, Args&&... args) {
-    accum.insert(begin(ui.second), end(ui.second));
-    combineSets(accum, std::forward<Args>(args)...);
-  }
-
-  // If all the supplied UseInfos represent unused stack slots, make a
-  // pop that is considered unused.  Otherwise pop as a Use::Used.
-  template<class... Args>
-  void popCond(Args&&... args) {
-    bool unused = allUnused(std::forward<Args>(args)...);
-    if (!unused) return pop(Use::Used, InstrIdSet{});
-    auto accum = InstrIdSet{m_id};
-    combineSets(accum, std::forward<Args>(args)...);
-    pop(Use::Not, accum);
-  }
-
-  /*
-   * It may be ok to remove pops on objects with destructors in some
-   * scenarios (where it won't change the observable point at which a
-   * destructor runs).  We could also look at the object type and see
-   * if it is known that it can't have a user-defined destructor.
-   *
-   * For now, we mark the cell popped with a Use::UsedIfLastRef. This indicates
-   * to the producer of the cell that the it is considered used if
-   * it could be the last reference alive (in which case the destructor
-   * would be run on Pop). If the producer knows that the cell is
-   * not the last reference (e.g. if it is a Dup), then Use:UsedIfLastRef
-   * is equivalent to Use::Not.
-   */
-  void discardNonDtors() {
-    auto const t = topC();
-    if (couldRunDestructor(t)) {
-      return pop(Use::UsedIfLastRef, InstrIdSet{m_id});
-    }
-    discard();
-  }
-
-  UseInfo push() {
-    always_assert(!m_dceState.stack.empty());
-    auto ret = m_dceState.stack.back();
-    m_dceState.stack.pop_back();
-    FTRACE(2, "      {}@{} = push()\n", show(ret.first), show(ret.second));
-    return ret;
-  }
-
-  void pushRemovable() {
-    auto const ui = push();
-    switch (ui.first) {
-    case Use::Not:
-      markSetDead(ui.second);
-      break;
-    case Use::Used:
-    case Use::UsedIfLastRef:
-      break;
-    }
-  }
-
-  Type topT(uint32_t idx = 0) {
-    assert(idx < m_stateBefore.stack.size());
-    return m_stateBefore.stack[m_stateBefore.stack.size() - idx - 1];
-  }
-
-  Type topC(uint32_t idx = 0) {
-    auto const t = topT(idx);
-    assert(t.subtypeOf(TInitCell));
-    return t;
-  }
-
-private: // locals
-  void addGenSet(std::bitset<kMaxTrackedLocals> locs) {
-    FTRACE(4, "      conservative: {}\n", bits_string(m_dceState.func, locs));
-    m_dceState.liveLocals |= locs;
-    m_dceState.gen |= locs;
-    m_dceState.kill &= ~locs;
-    m_dceState.killBeforePEI &= ~locs;
-  }
-
-  void addGen(uint32_t id) {
-    FTRACE(2, "      gen: {}\n", id);
-    if (id >= kMaxTrackedLocals) return;
-    m_dceState.liveLocals[id] = 1;
-    m_dceState.gen[id] = 1;
-    m_dceState.kill[id] = 0;
-    m_dceState.killBeforePEI[id] = 0;
-  }
-
-  void addKill(uint32_t id) {
-    FTRACE(2, "     kill: {}\n", id);
-    if (id >= kMaxTrackedLocals) return;
-    m_dceState.liveLocals[id] = 0;
-    m_dceState.gen[id] = 0;
-    m_dceState.kill[id] = 1;
-    m_dceState.killBeforePEI[id] = 1;
-  }
-
-  bool isLive(uint32_t id) {
-    if (id >= kMaxTrackedLocals) {
-      // Conservatively assume it's potentially live.
-      return true;
-    }
-    return m_dceState.liveLocals[id];
-  }
-
-  Type locRaw(borrowed_ptr<php::Local> loc) {
-    return m_stateBefore.locals[loc->id];
-  }
-
-  void readDtorLocs() {
-    for (auto i = size_t{0}; i < m_stateBefore.locals.size(); ++i) {
-      if (couldRunDestructor(m_stateBefore.locals[i])) {
-        addGen(i);
-      }
-    }
-  }
-
-private:
-  void markSetDead(const InstrIdSet& set) {
-    m_dceState.markedDead[m_id] = 1;
-    FTRACE(2, "    marking {} {}\n", m_id, show(set));
-    for (auto& i : set) m_dceState.markedDead[i] = 1;
-  }
-
-  void markDead() {
-    m_dceState.markedDead[m_id] = 1;
-    FTRACE(2, "    marking {}\n", m_id);
-  }
-
-private:
-  DceState& m_dceState;
-  InstrId m_id;
-  const State& m_stateBefore;
-  const StepFlags& m_flags;
+struct Env {
+  DceState& dceState;
+  InstrId id;
+  const State& stateBefore;
+  const StepFlags& flags;
 };
+
+void markSetDead(Env& env, const InstrIdSet& set) {
+  env.dceState.markedDead[env.id] = 1;
+  FTRACE(2, "     marking {} {}\n", env.id, show(set));
+  for (auto& i : set) env.dceState.markedDead[i] = 1;
+}
+
+void markDead(Env& env) {
+  env.dceState.markedDead[env.id] = 1;
+  FTRACE(2, "     marking {}\n", env.id);
+}
+
+//////////////////////////////////////////////////////////////////////
+// eval stack
+
+void pop(Env& env, Use u, InstrIdSet set) {
+  FTRACE(2, "      pop({})\n", show(u));
+  env.dceState.stack.emplace_back(u, std::move(set));
+}
+void pop(Env& env) { pop(env, Use::Used, InstrIdSet{}); }
+
+Type topT(Env& env, uint32_t idx = 0) {
+  assert(idx < env.stateBefore.stack.size());
+  return env.stateBefore.stack[env.stateBefore.stack.size() - idx - 1];
+}
+
+Type topC(Env& env, uint32_t idx = 0) {
+  auto const t = topT(env, idx);
+  assert(t.subtypeOf(TInitCell));
+  return t;
+}
+
+void discard(Env& env) {
+  pop(env, Use::Not, InstrIdSet{env.id});
+}
+
+bool allUnused() { return true; }
+template<class... Args>
+bool allUnused(const UseInfo& ui, Args&&... args) {
+  return ui.first == Use::Not &&
+    allUnused(std::forward<Args>(args)...);
+}
+
+void combineSets(InstrIdSet&) {}
+template<class... Args>
+void combineSets(InstrIdSet& accum, const UseInfo& ui, Args&&... args) {
+  accum.insert(begin(ui.second), end(ui.second));
+  combineSets(accum, std::forward<Args>(args)...);
+}
+
+// If all the supplied UseInfos represent unused stack slots, make a
+// pop that is considered unused.  Otherwise pop as a Use::Used.
+template<class... Args>
+void popCond(Env& env, Args&&... args) {
+  bool unused = allUnused(std::forward<Args>(args)...);
+  if (!unused) return pop(env, Use::Used, InstrIdSet{});
+  auto accum = InstrIdSet{env.id};
+  combineSets(accum, std::forward<Args>(args)...);
+  pop(env, Use::Not, accum);
+}
+
+/*
+ * It may be ok to remove pops on objects with destructors in some scenarios
+ * (where it won't change the observable point at which a destructor runs).  We
+ * could also look at the object type and see if it is known that it can't have
+ * a user-defined destructor.
+ *
+ * For now, we mark the cell popped with a Use::UsedIfLastRef. This indicates
+ * to the producer of the cell that the it is considered used if it could be
+ * the last reference alive (in which case the destructor would be run on
+ * Pop). If the producer knows that the cell is not the last reference (e.g. if
+ * it is a Dup), then Use:UsedIfLastRef is equivalent to Use::Not.
+ */
+void discardNonDtors(Env& env) {
+  auto const t = topC(env);
+  if (couldRunDestructor(t)) {
+    return pop(env, Use::UsedIfLastRef, InstrIdSet{env.id});
+  }
+  discard(env);
+}
+
+UseInfo push(Env& env) {
+  always_assert(!env.dceState.stack.empty());
+  auto ret = env.dceState.stack.back();
+  env.dceState.stack.pop_back();
+  FTRACE(2, "      {}@{} = push()\n", show(ret.first), show(ret.second));
+  return ret;
+}
+
+void pushRemovable(Env& env) {
+  auto const ui = push(env);
+  switch (ui.first) {
+  case Use::Not:
+    markSetDead(env, ui.second);
+    break;
+  case Use::Used:
+  case Use::UsedIfLastRef:
+    break;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+// locals
+
+void addGenSet(Env& env, std::bitset<kMaxTrackedLocals> locs) {
+  FTRACE(4, "      conservative: {}\n", bits_string(env.dceState.func, locs));
+  env.dceState.liveLocals |= locs;
+  env.dceState.gen |= locs;
+  env.dceState.kill &= ~locs;
+  env.dceState.killBeforePEI &= ~locs;
+}
+
+void addGen(Env& env, uint32_t id) {
+  FTRACE(2, "      gen: {}\n", id);
+  if (id >= kMaxTrackedLocals) return;
+  env.dceState.liveLocals[id] = 1;
+  env.dceState.gen[id] = 1;
+  env.dceState.kill[id] = 0;
+  env.dceState.killBeforePEI[id] = 0;
+}
+
+void addKill(Env& env, uint32_t id) {
+  FTRACE(2, "     kill: {}\n", id);
+  if (id >= kMaxTrackedLocals) return;
+  env.dceState.liveLocals[id] = 0;
+  env.dceState.gen[id] = 0;
+  env.dceState.kill[id] = 1;
+  env.dceState.killBeforePEI[id] = 1;
+}
+
+bool isLive(Env& env, uint32_t id) {
+  if (id >= kMaxTrackedLocals) {
+    // Conservatively assume it's potentially live.
+    return true;
+  }
+  return env.dceState.liveLocals[id];
+}
+
+Type locRaw(Env& env, borrowed_ptr<php::Local> loc) {
+  return env.stateBefore.locals[loc->id];
+}
+
+void readDtorLocs(Env& env) {
+  for (auto i = size_t{0}; i < env.stateBefore.locals.size(); ++i) {
+    if (couldRunDestructor(env.stateBefore.locals[i])) {
+      addGen(env, i);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Note that the instructions with popConds are relying on the consumer of the
+ * values they push to check whether lifetime changes can have side-effects.
+ *
+ * For example, in bytecode like this, assuming $x is an object with a
+ * destructor:
+ *
+ *   CGetL $x
+ *   UnsetL $x
+ *   // ...
+ *   PopC $x // dtor should be here.
+ *
+ * The PopC will decide it can't be eliminated, which prevents us from
+ * eliminating the CGetL.
+ */
+
+void dce(Env& env, const bc::PopC&)       { discardNonDtors(env); }
+// For PopV and PopR currently we never know if can't run a
+// destructor.
+void dce(Env& env, const bc::PopA&)       { discard(env); }
+void dce(Env& env, const bc::Int&)        { pushRemovable(env); }
+void dce(Env& env, const bc::String&)     { pushRemovable(env); }
+void dce(Env& env, const bc::Array&)      { pushRemovable(env); }
+void dce(Env& env, const bc::Double&)     { pushRemovable(env); }
+void dce(Env& env, const bc::True&)       { pushRemovable(env); }
+void dce(Env& env, const bc::False&)      { pushRemovable(env); }
+void dce(Env& env, const bc::Null&)       { pushRemovable(env); }
+void dce(Env& env, const bc::NullUninit&) { pushRemovable(env); }
+void dce(Env& env, const bc::File&)       { pushRemovable(env); }
+void dce(Env& env, const bc::Dir&)        { pushRemovable(env); }
+void dce(Env& env, const bc::NameA&)      { popCond(env, push(env)); }
+void dce(Env& env, const bc::NewArray&)   { pushRemovable(env); }
+void dce(Env& env, const bc::NewCol&)     { pushRemovable(env); }
+void dce(Env& env, const bc::AGetC&)      { popCond(env, push(env)); }
+
+void dce(Env& env, const bc::Dup&) {
+  auto const u1 = push(env);
+  auto const u2 = push(env);
+  // Dup pushes a cell that is guaranteed to be not the last reference.
+  // So, it can be eliminated if the cell it pushes is used as either
+  // Use::Not or Use::UsedIfLastRef.
+  // The cell it pops can be marked Use::Not only if Dup itself
+  // can be eliminated.
+  switch (u1.first) {
+  case Use::Not:
+  case Use::UsedIfLastRef:
+    // It is ok to eliminate the Dup even if its second output u2
+    // is used, because eliminating the Dup still leaves the second
+    // output u2 on stack.
+    markSetDead(env, u1.second);
+    switch (u2.first) {
+    case Use::Not:
+      pop(env, Use::Not, u2.second);
+      break;
+    case Use::Used:
+    case Use::UsedIfLastRef:
+      pop(env, Use::Used, InstrIdSet{});
+      break;
+    }
+    break;
+  case Use::Used:
+    pop(env, Use::Used, InstrIdSet{});
+    break;
+  }
+}
+
+void dce(Env& env, const bc::CGetL& op) {
+  addGen(env, op.loc1->id);
+  pushRemovable(env);
+}
+
+void dce(Env& env, const bc::CGetL2& op) {
+  addGen(env, op.loc1->id);
+  auto const u1 = push(env);
+  auto const u2 = push(env);
+  popCond(env, u1, u2);
+}
+
+void dce(Env& env, const bc::CGetL3& op) {
+  addGen(env, op.loc1->id);
+  auto const u1 = push(env);
+  auto const u2 = push(env);
+  auto const u3 = push(env);
+  popCond(env, u1, u2, u3);
+  popCond(env, u1, u2, u3);
+}
+
+void dce(Env& env, const bc::RetC&)  { pop(env); readDtorLocs(env); }
+void dce(Env& env, const bc::Throw&) { pop(env); readDtorLocs(env); }
+void dce(Env& env, const bc::Fatal&) { pop(env); readDtorLocs(env); }
+void dce(Env& env, const bc::Exit&)  { push(env); pop(env); readDtorLocs(env); }
+
+void dce(Env& env, const bc::SetL& op) {
+  auto const oldTy   = locRaw(env, op.loc1);
+  auto const effects = setCouldHaveSideEffects(oldTy);
+  if (!isLive(env, op.loc1->id) && !effects) return markDead(env);
+  push(env);
+  pop(env);
+  if (!effects) addKill(env, op.loc1->id);
+  if (effects)  addGen(env, op.loc1->id);
+}
+
+/*
+ * IncDecL is a read-modify-write: can be removed if the local isn't live, the
+ * set can't have side effects, and no one reads the value it pushes.  If the
+ * instruction is not dead, always add the local to the set of upward exposed
+ * uses.
+ */
+void dce(Env& env, const bc::IncDecL& op) {
+  auto const oldTy   = locRaw(env, op.loc1);
+  auto const effects = setCouldHaveSideEffects(oldTy) ||
+                         readCouldHaveSideEffects(oldTy);
+  auto const u1      = push(env);
+  if (!isLive(env, op.loc1->id) && !effects && allUnused(u1)) {
+    return markSetDead(env, u1.second);
+  }
+  addGen(env, op.loc1->id);
+}
+
+/*
+ * SetOpL is like IncDecL, but with the complication that we don't know if we
+ * can mark it dead when visiting it, because it is going to pop an input but
+ * unlike SetL doesn't push the value it popped.  For the current scheme we
+ * just add the local to gen even if we're doing a removable push, which is
+ * correct but could definitely fail to eliminate some earlier stores.
+ */
+void dce(Env& env, const bc::SetOpL& op) {
+  auto const oldTy   = locRaw(env, op.loc1);
+  auto const effects = setCouldHaveSideEffects(oldTy) ||
+                         readCouldHaveSideEffects(oldTy);
+  if (!isLive(env, op.loc1->id) && !effects) {
+    popCond(env, push(env));
+  } else {
+    push(env);
+    pop(env);
+  }
+  addGen(env, op.loc1->id);
+}
+
+/*
+ * Default implementation is conservative: assume we use all of our
+ * inputs, and can't be removed even if our output is unused.
+ *
+ * We also assume all the locals in the mayReadLocalSet must be
+ * added to the live local set, and don't remove anything from it.
+ */
+template<class Op>
+void dce(Env& env, const Op& op) {
+  addGenSet(env, env.flags.mayReadLocalSet);
+  env.dceState.liveLocals |= env.flags.mayReadLocalSet;
+  for (auto i = uint32_t{0}; i < op.numPush(); ++i) {
+    push(env);
+  }
+  for (auto i = uint32_t{0}; i < op.numPop(); ++i) {
+    pop(env, Use::Used, InstrIdSet{});
+  }
+}
+
+void dispatch_dce(Env& env, const Bytecode& op) {
+#define O(opcode, ...) case Op::opcode: dce(env, op.opcode); return;
+  switch (op.op) { OPCODES }
+#undef O
+  not_reached();
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -617,13 +663,13 @@ dce_visit(const Index& index,
 
     FTRACE(2, "  == #{} {}\n", idx, show(op));
 
-    auto visitor = DceVisitor {
+    auto visit_env = Env {
       dceState,
       idx,
       states[idx].first,
       states[idx].second
     };
-    visit(op, visitor);
+    dispatch_dce(visit_env, op);
 
     /*
      * When we see a PEI, we need to start over on the killBeforePEI
@@ -715,6 +761,8 @@ optimize_dce(const Index& index,
   return dceState->usedLocals;
 }
 
+//////////////////////////////////////////////////////////////////////
+
 void remove_unused_locals(Context const ctx,
                           std::bitset<kMaxTrackedLocals> usedLocals) {
   if (!options.RemoveUnusedLocals) return;
@@ -733,10 +781,10 @@ void remove_unused_locals(Context const ctx,
 
   func->locals.erase(
     std::remove_if(
-      begin(func->locals),
+      begin(func->locals) + func->params.size(),
       end(func->locals),
       [&] (const std::unique_ptr<php::Local>& l) {
-        if (!usedLocals.test(l->id)) {
+        if (l->id < kMaxTrackedLocals && !usedLocals.test(l->id)) {
           FTRACE(2, "  removing: {}\n", local_string(borrow(l)));
           return true;
         }
@@ -757,17 +805,17 @@ void remove_unused_locals(Context const ctx,
 }
 
 void local_dce(const Index& index,
-               Context const ctx,
+               const FuncAnalysis& ainfo,
                borrowed_ptr<php::Block> const blk,
                const State& stateIn) {
   Trace::Bump bumper{Trace::hhbbc_dce, kSystemLibBump,
-    is_systemlib_part(*ctx.unit)};
+    is_systemlib_part(*ainfo.ctx.unit)};
 
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
   auto allLive = std::bitset<kMaxTrackedLocals>();
   allLive.set();
-  optimize_dce(index, ctx, blk, stateIn, allLive, allLive);
+  optimize_dce(index, ainfo.ctx, blk, stateIn, allLive, allLive);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -835,10 +883,10 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * Every block must be visited at least once, so we throw them all
    * in to start.
    */
-  std::set<uint32_t,std::greater<uint32_t>> incompleteQ;
-  for (auto& b : ai.rpoBlocks) {
-    incompleteQ.insert(rpoId(b));
-  }
+  auto incompleteQ = dataflow_worklist<uint32_t,std::less<uint32_t>>(
+    ai.rpoBlocks.size()
+  );
+  for (auto& b : ai.rpoBlocks) incompleteQ.push(rpoId(b));
 
   auto const normalPreds   = computeNormalPreds(ai.rpoBlocks);
   auto const factoredPreds = computeFactoredPreds(ai.rpoBlocks);
@@ -852,8 +900,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * block has factored exits.
    */
   while (!incompleteQ.empty()) {
-    auto const blk = ai.rpoBlocks[*begin(incompleteQ)];
-    incompleteQ.erase(begin(incompleteQ));
+    auto const blk = ai.rpoBlocks[incompleteQ.pop()];
 
     FTRACE(2, "block #{}\n", blk->id);
 
@@ -884,7 +931,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       auto const oldPredState = predState;
       predState |= liveIn;
       if (predState != oldPredState) {
-        incompleteQ.insert(rpoId(pred));
+        incompleteQ.push(rpoId(pred));
       }
     }
 
@@ -897,7 +944,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       auto const oldPredState = predState;
       predState |= liveIn;
       if (predState != oldPredState) {
-        incompleteQ.insert(rpoId(pred));
+        incompleteQ.push(rpoId(pred));
       }
     }
   }

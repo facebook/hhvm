@@ -18,22 +18,23 @@
 #define incl_HPHP_JIT_VASM_H_
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/util/safe-cast.h"
+
 #include <folly/Range.h>
 #include <iosfwd>
 
-namespace HPHP { namespace JIT {
-namespace X64 {
+namespace HPHP { namespace jit {
 struct Vunit;
 struct Vinstr;
 struct Vblock;
-}
+struct Vreg;
 struct Abi;
 
 // Vlabel wraps a block number
 struct Vlabel {
   Vlabel() : n(0xffffffff) {}
-  explicit Vlabel(size_t n) : n(static_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { return n; }
+  explicit Vlabel(size_t n) : n(safe_cast<unsigned>(n)) {}
+  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
 private:
   unsigned n; // index in Vunit::blocks
 };
@@ -41,50 +42,55 @@ private:
 // Vpoint is a handle to record or retreive a code address
 struct Vpoint {
   Vpoint(){}
-  explicit Vpoint(size_t n) : n(static_cast<unsigned>(n)) {}
+  explicit Vpoint(size_t n) : n(safe_cast<unsigned>(n)) {}
   /* implicit */ operator size_t() const { return n; }
 private:
-  unsigned n; // index in Vmeta::points
+  unsigned n;
 };
 
 // Vtuple is an index to a tuple in Vunit::tuples
 struct Vtuple {
   Vtuple() : n(0xffffffff) {}
-  explicit Vtuple(size_t n) : n(static_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { return n; }
+  explicit Vtuple(size_t n) : n(safe_cast<unsigned>(n)) {}
+  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
 private:
-  unsigned n; // index in Vunit::reglists
+  unsigned n; // index in Vunit::tuples
 };
 
-enum class VregKind : uint8_t { Any, Gpr, Simd };
-
-// holds information generated while assembling final code;
-// designed to outlive instances of Vunit and Vasm.
-struct Vmeta {
-  Vpoint makePoint() {
-    auto next = points.size();
-    points.push_back(nullptr);
-    return Vpoint{next};
-  }
-  smart::vector<CodeAddress> points;
+// VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs
+struct VcallArgsId {
+  explicit VcallArgsId(size_t n) : n(safe_cast<unsigned>(n)) {}
+  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
+private:
+  unsigned n; // index in Vunit::vcallArgs
 };
 
-void allocateRegisters(X64::Vunit&, const Abi&);
-void optimizeJmps(X64::Vunit&);
-void removeDeadCode(X64::Vunit&);
-folly::Range<Vlabel*> succs(X64::Vinstr& inst);
-folly::Range<Vlabel*> succs(X64::Vblock& block);
-smart::vector<Vlabel> sortBlocks(X64::Vunit& unit);
-std::string formatInstr(X64::Vunit& unit, X64::Vinstr& inst);
-void printBlock(std::ostream& out, X64::Vunit& unit, Vlabel b);
+enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
 
-// print a dot-compatible digraph of the blocks (without contents)
-void printCfg(X64::Vunit& unit, smart::vector<Vlabel>& blocks);
-void printCfg(std::ostream& out, X64::Vunit& unit,
-              smart::vector<Vlabel>& blocks);
+// passes
+void allocateRegisters(Vunit&, const Abi&);
+void optimizeExits(Vunit&);
+void optimizeJmps(Vunit&);
+void fuseBranches(Vunit&);
+void removeDeadCode(Vunit&);
+template<typename Folder> void foldImms(Vunit&);
+void lowerForARM(Vunit&);
 
-// print the cfg digraph followed by a code listing
-void printUnit(std::string caption, X64::Vunit& unit);
+/*
+ * Get the successors of a block or instruction. If given a non-const
+ * reference, the resulting Range will allow mutation of the Vlabels.
+ */
+folly::Range<Vlabel*> succs(Vinstr& inst);
+folly::Range<Vlabel*> succs(Vblock& block);
+folly::Range<const Vlabel*> succs(const Vinstr& inst);
+folly::Range<const Vlabel*> succs(const Vblock& block);
+
+// Sort blocks in reverse-postorder starting from unit.entry
+jit::vector<Vlabel> sortBlocks(const Vunit& unit);
+
+// Group blocks into main, cold, and frozen while preserving relative
+// order with each section.
+jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
 
 }}
 #endif

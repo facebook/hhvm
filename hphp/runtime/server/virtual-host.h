@@ -33,6 +33,7 @@ public:
   static const VirtualHost *GetCurrent();
   static int64_t GetMaxPostSize();
   static int64_t GetUploadMaxFileSize();
+  static void UpdateSerializationSizeLimit();
   static const std::vector<std::string> &GetAllowedDirectories();
   static void SortAllowedDirectories(std::vector<std::string>& dirs);
 public:
@@ -102,6 +103,7 @@ private:
     int64_t maxPostSize = -1;
     int64_t uploadMaxFileSize = -1;
     std::vector<std::string> allowedDirectories;
+    int64_t serializationSizeLimit = StringData::MaxSize;
   };
 
   void initRuntimeOption(const IniSetting::Map& ini, Hdf overwrite);

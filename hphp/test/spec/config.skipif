@@ -1,0 +1,28 @@
+<?php
+
+$need_fix = array(
+  "./tests/expressions/multiplicative_operators/multiplication_division_modulus.php", // we use +0 instead of -0 in float situations (http://3v4l.org/OdO04), amongst other things.
+  "./tests/expressions/unary_operators/cast.php", // we cast INF to int differently. PHP is also inconsistent between PHP 5.x and PHP 7 too. (http://3v4l.org/ZoHVJ)
+  "./tests/constants/constants.php", // we have to decide whether we want to support case-insensitive constants via a runtime option and also how we want to handle cases like define("TRUE", 999). We throw a notice; php-src does not.
+  "./tests/expressions/unary_operators/pre-increment_and_decrement.php", // we just do certain things differently when it comes to pre and post inc and dec than PHP 5.x. Period.
+  "./tests/expressions/postfix_operators/post-increment_and_decrement.php", // We are incrementing and decrementing strings differently than PHP 5.x
+  "./tests/classes/__php_incomplete_class.php", // print_r differences from php-src
+  "./tests/exception_handling/exception_class.php", //don't provide the parameters passed to a function in our exception trace
+  "./tests/exception_handling/exception_class_experiment_1.php", // don't provide the parameters passed to a function in our exception trace
+  "./tests/expressions/postfix_operators/subscripting.php", // we warn on using scalar value as an array. PHP 5.x does not.
+  "./tests/exception_handling/exception_class_from_within_a_class.php", // don't provide the parameters passed to a function in our exception trace
+  "./tests/expressions/postfix_operators/subscripting_2.php", // No notice like: "Notice: Indirect modification of overloaded element of C10 has no effect"
+  "./tests/functions/anonymous_functions.php", // The way we deal with parameters that look optional but are really required is different than with PHP 5.x  (http://3v4l.org/rvBtd)
+  "./tests/exception_handling/exception_class_using_conditional_functions.php", // don't provide the parameters passed to a function in our exception trace
+  "./tests/expressions/primary_expressions/intrinsics_empty.php", // empty on a non-existent intrinsic is returning false (php-src returns true)
+  "./tests/exception_handling/set_exception_handler.php", // don't provide the parameters passed to a function in our exception trace
+  "./tests/expressions/assignment_operators/assignment.php", // we use +0 instead of -0 in float situations (http://3v4l.org/OdO04), amongst other things.
+  "./tests/expressions/coalesce_operator/coalesce.php", //we don't support that operator yet. Only PHP7 does now
+  "./tests/types/string/numeric_like_strings.php", // We don't handle operations with numeric like strings the same (http://3v4l.org/DsFTd)
+  "./tests/classes/sleep_and_wakeup.php", // php-src destructs one more object than HHVM
+  "./tests/variables/variable_names.php", // Ordering, but this might be an ok difference with php-src. Could be an easy fix
+);
+$test = "./" . substr($argv[1], strrpos($argv[1], "tests/"));
+if (in_array($test, $need_fix)) {
+  echo "skip";
+}

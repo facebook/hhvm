@@ -94,6 +94,12 @@ class ReflectionClassHandle {
     return *this;
   }
   ~ReflectionClassHandle() {}
+  String init(const String& name) {
+    auto const cls = Unit::loadClass(name.get());
+    if (!cls) return empty_string();
+    setClass(cls);
+    return cls->nameStr();
+  }
 
   static ReflectionClassHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionClassHandle>(obj);
@@ -103,12 +109,18 @@ class ReflectionClassHandle {
     return Native::data<ReflectionClassHandle>(obj)->getClass();
   }
 
-  const Class* getClass() { return m_cls; }
+  const Class* getClass() const { return m_cls; }
   void setClass(const Class* cls) {
     assert(cls != nullptr);
     assert(m_cls == nullptr);
     m_cls = cls;
   }
+
+  Variant sleep() const {
+    return String(getClass()->nameStr());
+  }
+
+  void wakeup(const Variant& content, ObjectData* obj);
 
  private:
   const Class* m_cls{nullptr};

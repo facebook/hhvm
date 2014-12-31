@@ -18,8 +18,13 @@
 #define incl_HPHP_FIXED_STRING_MAP_H_
 
 #include <cstdint>
+#include <limits>
+#include <vector>
 
 #include "hphp/runtime/base/string-data.h"
+
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 
@@ -44,7 +49,9 @@ struct FixedStringMap {
   ExtraType& extra() { return m_extra; }
   const ExtraType& extra() const { return m_extra; }
 
-  static ptrdiff_t tableOff() { return offsetof(FixedStringMap, m_table); }
+  static constexpr ptrdiff_t tableOff() {
+    return offsetof(FixedStringMap, m_table);
+  }
   ExtraType size() const { return m_extra; }
 
 private:
@@ -66,14 +73,14 @@ private:
 
 template<class T, class V, bool case_sensitive, class ExtraType = int32_t>
 struct FixedStringMapBuilder {
-  typedef typename boost::mpl::if_c<
+  using EqObject = typename std::conditional<
     case_sensitive,
     string_data_same,
     string_data_isame
-  >::type EqObject;
-  typedef hphp_hash_map<const StringData*,V,
-    string_data_hash,EqObject> Map;
-  typedef FixedStringMap<V, case_sensitive, ExtraType> FSMap;
+  >::type;
+
+  using Map = hphp_hash_map<const StringData*, V, string_data_hash, EqObject>;
+  using FSMap = FixedStringMap<V, case_sensitive, ExtraType>;
 
   typedef typename Map::const_iterator const_iterator;
   typedef typename Map::iterator iterator;

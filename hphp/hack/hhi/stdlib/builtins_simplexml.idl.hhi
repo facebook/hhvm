@@ -13,7 +13,7 @@ function simplexml_load_file($filename, $class_name = "SimpleXMLElement", $optio
 function libxml_get_errors() { }
 function libxml_get_last_error() { }
 function libxml_clear_errors() { }
-function libxml_use_internal_errors($use_errors = null_variant) { }
+function libxml_use_internal_errors($use_errors = null) { }
 function libxml_set_streams_context($streams_context) { }
 function libxml_disable_entity_loader($disable = true) { }
 class SimpleXMLElement {

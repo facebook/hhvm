@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_constant.h"
 #include "hphp/runtime/base/class-info.h"
-#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ void CmdConstant::onClient(DebuggerClient &client) {
 
     {
       Variant forSort(cmd->m_constants);
-      f_ksort(ref(forSort));
+      HHVM_FN(ksort)(ref(forSort));
       assert(forSort.is(KindOfArray));
       m_constants = forSort.asCell()->m_data.parr;
     }

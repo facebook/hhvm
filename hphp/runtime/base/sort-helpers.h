@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -291,10 +292,12 @@ struct ElmUCompare {
     }
     if (ret.isString()) {
       int64_t lval; double dval;
-      switch (ret.getStringData()->isNumericWithVal(lval, dval, 0)) {
-        case KindOfInt64: return lval > 0;
-        case KindOfDouble: return dval > 0;
-        default: /* fall through */ break;
+      auto dt = ret.getStringData()->isNumericWithVal(lval, dval, 0);
+
+      if (IS_INT_TYPE(dt)) {
+        return lval > 0;
+      } else if (IS_DOUBLE_TYPE(dt)) {
+        return dval > 0;
       }
     }
     if (ret.isBoolean()) {

@@ -15,4 +15,5 @@ var_dump(parse_ini_file($ini_location, false, INI_SCANNER_RAW));
 var_dump(parse_ini_file($ini_location, false, INI_SCANNER_NORMAL));
 
 ?>
+<?php error_reporting(0); ?>
 <?php @unlink(dirname(__FILE__) . '/bug48768.tmp'); ?>

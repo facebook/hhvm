@@ -15,10 +15,11 @@
 */
 
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -93,11 +94,6 @@ ObjectData* SystemLib::AllocInvalidOperationExceptionObject(const Variant& messa
   CREATE_AND_CONSTRUCT(InvalidOperationException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocDOMDocumentObject(const String& version,
-                                              const String& encoding) {
-  CREATE_AND_CONSTRUCT(DOMDocument, make_packed_array(version, encoding));
-}
-
 ObjectData* SystemLib::AllocDOMExceptionObject(const Variant& message, const Variant& code) {
   CREATE_AND_CONSTRUCT(DOMException, make_packed_array(message, code));
 }
@@ -132,4 +128,3 @@ ALLOC_OBJECT_STUB(PDOException);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -10,6 +10,7 @@ fclose($fp);
 fclose($gp);
 var_dump(file_get_contents(dirname(__FILE__) . '/test.other'));
 ?>
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/test.other');
 ?>

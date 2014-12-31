@@ -83,15 +83,6 @@ void YieldExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr YieldExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                    bool coerce) {
-  if (m_keyExp) {
-    m_keyExp->inferAndCheck(ar, Type::Some, false);
-  }
-  m_valExp->inferAndCheck(ar, Type::Some, false);
-  return Type::Variant;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void YieldExpression::outputCodeModel(CodeGenerator &cg) {

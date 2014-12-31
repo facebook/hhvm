@@ -21,6 +21,10 @@ Break at cls::pub() on line 13 of %s/flow.php
 
 variable
 $x = 1
+$this = cls Object
+(
+)
+
 next
 in pri:1
 foo:1
@@ -74,6 +78,10 @@ variable
 $x = 2
 $y = 5
 $z = 10
+$this = cls Object
+(
+)
+
 step
 Break at foo() on line 6 of %s/flow.php
    5 function foo($a, $b) {

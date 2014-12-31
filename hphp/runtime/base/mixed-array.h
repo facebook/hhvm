@@ -62,7 +62,7 @@ public:
     // We store values here, but also some information local to this array:
     // data.m_aux.u_hash contains either 0 (for an int key) or a string
     // hashcode; the high bit is the int/string key descriminator.
-    // data.m_type == KindOfInvalid if this is an empty slot in the
+    // data.m_type == kInvalidDataType if this is an empty slot in the
     // array (e.g. after a key is deleted).
     TypedValueAux data;
 
@@ -149,6 +149,7 @@ public:
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
   static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
+  static ArrayData* MakePackedUninitialized(uint32_t size);
 
   /*
    * Allocate a new, empty, request-local array in int map/string map mode, with
@@ -339,11 +340,11 @@ private:
   MixedArray* copyMixedAndResizeIfNeededSlow() const;
 
 public:
-  // Elm's data.m_type == KindOfInvalid for deleted slots.
+  // Elm's data.m_type == kInvalidDataType for deleted slots.
   static bool isTombstone(DataType t) {
-    assert(IS_REAL_TYPE(t) || t == KindOfInvalid);
+    assert(IS_REAL_TYPE(t) || t == kInvalidDataType);
     return t < KindOfUninit;
-    static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
+    static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
   }
 
   // Element index, with special values < 0 used for hash tables.
@@ -380,8 +381,10 @@ public:
   bool isTombstone(ssize_t pos) const;
 
   size_t hashSize() const;
+  size_t heapSize() const;
   static size_t computeMaxElms(uint32_t tableMask);
   static size_t computeDataSize(uint32_t tableMask);
+  static size_t computeAllocBytesFromMaxElms(uint32_t maxElms);
 
 private:
   friend struct ArrayInit;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Test prototype of builtin classes
 
 function outputPrototype($rf) {
@@ -21,9 +21,9 @@ class BlockableWaitHandleSubClass extends BlockableWaitHandle {
 
 function main() {
   $tests = array(
-    array("WaitHandle", "getWaitHandle"),
+    array(WaitHandle::class, "getWaitHandle"),
     array("Generator", "next"),
-    array("BlockableWaitHandle", "getContextIdx"),
+    array(BlockableWaitHandle::class, "getContextIdx"),
     array("BlockableWaitHandleSubClass", "getWaitHandle"),
     array("BlockableWaitHandleSubClass", "getContextIdx"),
   );

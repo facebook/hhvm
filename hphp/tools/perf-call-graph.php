@@ -157,19 +157,19 @@ function main($argv) {
   } else {
     $functions = Set {
       'MCGenerator::translate',
-      'JIT::selectTracelet(',
+      'jit::selectTracelet(',
       'Translator::translateRegion(',
-      'JIT::optimizeRefcounts(',
-      'JIT::optimize(',
-      'JIT::allocateRegs(',
-      'JIT::genCode(',
+      'jit::optimizeRefcounts(',
+      'jit::optimize(',
+      'jit::allocateRegs(',
+      'jit::genCode(',
       'getStackValue(',
       'IRBuilder::constrain',
       'relaxGuards(',
       'MCGenerator::retranslateOpt(',
       'IRTranslator::translateInstr(',
       'Type::subtypeOf(',
-      'JIT::regionizeFunc',
+      'jit::regionizeFunc',
     };
   }
 

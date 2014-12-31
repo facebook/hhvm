@@ -1,5 +1,5 @@
 File "fc_enum_5.php", line 5, characters 3-5:
-Typing[4110] Constant does not match the type of the enum it is in
+Constant does not match the type of the enum it is in (Typing[4110])
 File "fc_enum_5.php", line 4, characters 12-14:
 This is an int
 File "fc_enum_5.php", line 5, characters 9-13:

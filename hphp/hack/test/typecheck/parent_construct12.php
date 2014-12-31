@@ -25,13 +25,11 @@ abstract class A {
 class B extends A {
 
   public function __construct() {
-    if(true) {
+    if (true) {
       return;
-    }
-    else {
+    } else {
       parent::__construct();
     }
   }
 
 }
-

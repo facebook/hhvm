@@ -1,0 +1,10 @@
+Deprecated: fb_autoload_map(): Use HH\autoload_set_paths() instead. in %s/test/slow/autoload/autoload-enum-hint-deprecated.php on line 16
+int(12)
+
+Warning: Argument 1 to foo() must be of type @Foo, string given in %s/test/slow/autoload/autoload-enum-hint-1.inc on line 6
+string(2) "hi"
+string(3) "bar"
+int(100)
+
+Warning: Argument 1 to quux() must be of type @Quux, string given in %s/test/slow/autoload/autoload-enum-hint-1.inc on line 19
+string(2) "hi"

@@ -477,7 +477,7 @@ class mysqli {
    *
    * @param array $read - List of connections to check for outstanding
    *   results that can be read.
-   * @param array $error - List of connections on which an error occured,
+   * @param array $error - List of connections on which an error occurred,
    *   for example, query failure or lost connection.
    * @param array $reject - List of connections rejected because no
    *   asynchronous query has been run on for which the function could poll
@@ -974,7 +974,12 @@ class mysqli_driver {
  */
 class mysqli_result {
 
-  private ?resource $__result = null;
+  // Not typing this since we are setting it as a mixed to comply with
+  // GitHub issue 2082. As it is, even with invariants and various ifs
+  // to guarantee the type, HHHBC is not able to infer the property type.
+  // Anyway, the typehint is currently only for optimization purposes at this
+  // point in time. See D1663326
+  private $__result = null;
   private ?int $__resulttype = null;
   private bool $__done = false;
 
@@ -1006,11 +1011,23 @@ class mysqli_result {
   }
 
   <<__Native>>
+  private function get_mysqli_conn_resource(mysqli $connection): ?resource;
+
+  <<__Native>>
   private function hh_field_tell(): mixed;
 
-  public function __construct(resource $result,
+  public function __construct(mixed $result,
                               int $resulttype = MYSQLI_STORE_RESULT) {
-    $this->__result = $result;
+    if (!is_resource($result) && !($result instanceof mysqli)) {
+      $msg = "Argument to mysqli_result::__construct must be of type "
+           . "resource or mysqli";
+      throw new Exception($msg);
+    }
+   if ($result instanceof mysqli) {
+      $this->__result = $this->get_mysqli_conn_resource($result);
+    } else {
+      $this->__result = is_resource($result) ? $result : null;
+    }
     $this->__resulttype = $resulttype;
   }
 
@@ -2102,7 +2119,7 @@ function mysqli_ping(mysqli $link): ?bool {
  *
  * @param array $read - List of connections to check for outstanding
  *   results that can be read.
- * @param array $error - List of connections on which an error occured,
+ * @param array $error - List of connections on which an error occurred,
  *   for example, query failure or lost connection.
  * @param array $reject - List of connections rejected because no
  *   asynchronous query has been run on for which the function could poll

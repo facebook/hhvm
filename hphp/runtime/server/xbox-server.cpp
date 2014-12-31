@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
@@ -125,7 +127,7 @@ struct XboxWorker
       *s_xbox_prev_req_init_doc = reqInitDoc;
 
       job->onRequestStart(job->getStartTimer());
-      createRequestHandler()->handleRequest(job);
+      createRequestHandler()->run(job);
       destroyRequestHandler();
       job->decRefCount();
     } catch (...) {
@@ -346,7 +348,7 @@ public:
 private:
   XboxTransport *m_job;
 };
-IMPLEMENT_OBJECT_ALLOCATION(XboxTask)
+IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -359,7 +361,7 @@ Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = 
          RuntimeOption::XboxServerThreadCount ||
          s_dispatcher->getQueuedJobs() <
          RuntimeOption::XboxServerMaxQueueLength)) {
-      XboxTask *task = NEWOBJ(XboxTask)(msg, reqInitDoc);
+      XboxTask *task = newres<XboxTask>(msg, reqInitDoc);
       Resource ret(task);
       XboxTransport *job = task->getJob();
       job->incRefCount(); // paired with worker's decRefCount()

@@ -20,6 +20,8 @@
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
+#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
+
 #include "hphp/runtime/vm/debugger-hook.h"
 
 namespace HPHP {
@@ -54,19 +56,25 @@ struct XDebugBreakpoint {
 
   // A line breakpoint requires a filename and a line number. It has an
   // optional condition represented by the given unit where the pseud-main is
-  // called when over the given file/line. IT should returns true if we should
+  // called when over the given file/line. It should returns true if we should
   // break, false otherwise.  Note that php5 xdebug doesn't distinguish
   // internally between this and a conditional breakpoint (which is in the spec)
+  // The encoded condition is kept around for display purposes. The unit is
+  // updated to the matched unit once the breakpoint has been matched.
   String fileName;
   int line = -1;
   Unit* conditionUnit = nullptr;
+  String condition;
+  const Unit* unit = nullptr;
 
   // A call or return breakpoint occurs when the function in the given class
   // with the given name is called/returns. The class name and function name
-  // are kept around for listing breakpoint info.
+  // are kept around for listing breakpoint info. The function id is added
+  // once the breakpoint has been matched with a function
   Variant className = init_null(); // optional
   String funcName;
   String fullFuncName;
+  int funcId = -1;
 
   // An exception breakpoint occurs when an exception with a given name is
   // thrown.
@@ -79,10 +87,27 @@ struct XDebugBreakpoint {
 struct XDebugThreadBreakpoints {
   // Adding a breakpoint. Returns a unique id for the breakpoint. Throws an
   // XDebugServer::ErrorCode on failure.
-  int addBreakpoint(const XDebugBreakpoint& bp);
+  int addBreakpoint(XDebugBreakpoint& bp);
 
-  // Removing a breakpoint with the given id.
+  // Removing a breakpoint with the given id. If the id does not exit, does
+  // nothing
   void removeBreakpoint(int id);
+
+  // Gets the breakpoint with the given id. Returns nullptr if the breakpoint
+  // does not exist
+  inline const XDebugBreakpoint* getBreakpoint(int id) {
+    auto iter = m_breakMap.find(id);
+    return iter != m_breakMap.end() ? &iter->second : nullptr;
+  }
+
+  // Breakpoint update methods. Some of these modify internal state, so it's
+  // better to use these to update breakpoints. There could be more update
+  // methods, but these are the only ones needed by the xdebug commmands right
+  // now. These return true on success, false on failure.
+  bool updateBreakpointLine(int id, int newLine);
+  bool updateBreakpointState(int id, bool enabled);
+  bool updateBreakpointHitCondition(int id, XDebugBreakpoint::HitCondition con);
+  bool updateBreakpointHitValue(int id, int hitValue);
 
   // Map from id => breakpoint. This where breakpoints are stored
   hphp_hash_map<int, XDebugBreakpoint> m_breakMap;
@@ -109,17 +134,21 @@ struct XDebugThreadBreakpoints {
 
 extern DECLARE_THREAD_LOCAL(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 
-// Add/remove breakpoint entrypoints for other files
+// Breakpoint entrypoints for other files
 #define XDEBUG_ADD_BREAKPOINT(bp) \
   (s_xdebug_breakpoints->addBreakpoint(bp));
 #define XDEBUG_REMOVE_BREAKPOINT(id) \
   (s_xdebug_breakpoints->removeBreakpoint(id))
+#define XDEBUG_GET_BREAKPOINT(id) \
+  (s_xdebug_breakpoints->getBreakpoint(id))
+#define XDEBUG_BREAKPOINTS \
+  (s_xdebug_breakpoints->m_breakMap)
 
 ////////////////////////////////////////////////////////////////////////////////
 // XDebugHookHandler
 
-class XDebugHookHandler : public DebugHookHandler {
-public:
+struct XDebugHookHandler : DebugHookHandler {
+  static DebugHookHandler* GetInstance();
   // Starting the server on request init
   void onRequestInit() override {
     if (XDebugServer::isNeeded()) {
@@ -143,8 +172,11 @@ public:
       const Unit* unit;
       int line;
     };
-    // Exception breakpoint
-    ObjectData* exception;
+    // Exception breakpoint (for both errors and exceptions)
+    struct {
+      const StringData* name;
+      const StringData* message;
+    };
   };
 
   // Generic breakpoint handling routine. Most of the break handling
@@ -171,7 +203,9 @@ public:
     onBreak<XDebugBreakpoint::Type::LINE>(bi);
   }
 
-  void onExceptionThrown(ObjectData* exception) override {
+  // Helper for errors and exceptions that potentially starts the debug server
+  // if needed
+  void onExceptionBreak(const StringData* name, const StringData* msg) {
     // Potentially start the debug server if it hasn't been started
     if (XDEBUG_GLOBAL(RemoteEnable) &&
         !XDebugServer::isAttached() &&
@@ -181,8 +215,18 @@ public:
 
     // Handle the exception
     BreakInfo bi;
-    bi.exception = exception;
+    bi.name = name;
+    bi.message = msg;
     onBreak<XDebugBreakpoint::Type::EXCEPTION>(bi);
+  }
+
+  void onExceptionThrown(ObjectData* exception) override;
+  void onError(const ExtendedException& ee,
+               int errnum,
+               const string& message) override {
+    const String name = xdebug_error_type(errnum);
+    const String msg = String(message);
+    onExceptionBreak(name.get(), msg.get());
   }
 
   // Flow control. Each break type just calls the generic onFlowBreak
@@ -201,6 +245,9 @@ public:
   void onFileLoad(Unit* efile) override;
   void onDefClass(const Class* cls) override;
   void onDefFunc(const Func* func) override;
+ private:
+  XDebugHookHandler() {}
+  ~XDebugHookHandler() override {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

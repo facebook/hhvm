@@ -1,0 +1,79 @@
+int(10)
+int(10)
+
+int(11)
+int(11)
+
+int(-12)
+int(-12)
+
+string(3) "abc"
+string(3) "abc"
+
+string(3) "abc"
+int(-100)
+int(-100)
+
+string(3) "abc"
+int(1234)
+int(1234)
+
+int(1234)
+
+Notice: Undefined variable: c in %s/functions/byrefs.php on line 53
+NULL
+
+
+Notice: Undefined variable: a in %s/functions/byrefs.php on line 65
+NULL
+object(C)#1 (1) {
+  ["m"]=>
+  NULL
+}
+object(C)#1 (1) {
+  ["m"]=>
+  string(3) "abc"
+}
+
+object(C)#1 (1) {
+  ["m"]=>
+  string(3) "abc"
+}
+object(C)#1 (1) {
+  ["m"]=>
+  string(3) "abc"
+}
+
+object(C)#1 (1) {
+  ["m"]=>
+  string(3) "xyz"
+}
+object(C)#1 (1) {
+  ["m"]=>
+  string(3) "xyz"
+}
+
+
+Notice: Undefined variable: a in %s/functions/byrefs.php on line 84
+NULL
+object(C)#1 (1) {
+  ["m"]=>
+  string(3) "xyz"
+}
+int(10)
+$p is set
+f In:  $p: 10
+f Out: $p: 200
+
+int(200)
+int(10)
+$p is set
+g1 In:  $p: 10
+g1 Out: $p: 200
+
+int(200)
+int(200)
+int(-12)
+int(-12)
+g2 In:
+string(5) "local"

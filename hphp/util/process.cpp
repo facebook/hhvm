@@ -15,17 +15,17 @@
 */
 #include "hphp/util/process.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <pwd.h>
 #include <poll.h>
 #include <unistd.h>
+#include <stdlib.h>
 
-#include "folly/ScopeGuard.h"
-#include "folly/String.h"
+#include <folly/Conv.h>
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
@@ -41,7 +41,7 @@ static void swap_fd(const string &filename, FILE *fdesc) {
   FILE *f = fopen(filename.c_str(), "a");
   if (f == nullptr || dup2(fileno(f), fileno(fdesc)) < 0) {
     if (f) fclose(f);
-    _exit(-1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
 }
 
@@ -205,7 +205,7 @@ int Process::Exec(const std::string &cmd, const std::string &outf,
 
     execvp(argv[0], argv);
     Logger::Error("Failed to exec `%s'\n", cmd.c_str());
-    _exit(-1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
   int status = -1;
   wait(&status);
@@ -227,7 +227,7 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
   }
   if (pid == 0) {
     /**
-     * I don't know why, but things work alot better if this process ignores
+     * I don't know why, but things work a lot better if this process ignores
      * the tstp signal (ctrl-Z). If not, it locks up if you hit ctrl-Z then
      * "bg" the program.
      */
@@ -241,7 +241,7 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
       execvp(path, const_cast<char**>(argv ? argv : argvnull));
     }
     Logger::Error("Failed to exec `%s'\n", path);
-    _exit(-1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
   if (fdout) *fdout = pipeout.detachOut();
   if (fderr) *fderr = pipeerr.detachOut();
@@ -252,8 +252,6 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
 /**
  * Copied from http://www-theorie.physik.unizh.ch/~dpotter/howto/daemonize
  */
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
 void Process::Daemonize(const char *stdoutFile /* = "/dev/null" */,
                         const char *stderrFile /* = "/dev/null" */) {
   pid_t pid, sid;
@@ -372,7 +370,7 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
 }
 
 std::string Process::GetCommandLine(pid_t pid) {
-  string name = "/proc/" + boost::lexical_cast<string>(pid) + "/cmdline";
+  string name = "/proc/" + folly::to<string>(pid) + "/cmdline";
 
   string cmdline;
   FILE * f = fopen(name.c_str(), "r");
@@ -405,7 +403,7 @@ bool Process::IsUnderGDB() {
 }
 
 int64_t Process::GetProcessRSS(pid_t pid) {
-  string name = "/proc/" + boost::lexical_cast<string>(pid) + "/status";
+  string name = "/proc/" + folly::to<string>(pid) + "/status";
 
   string status;
   FILE * f = fopen(name.c_str(), "r");
@@ -448,7 +446,7 @@ size_t Process::GetCodeFootprint(pid_t pid) {
   //
   // Return (share + text), under the assumption that share consists only of
   // shared libraries.
-  string name = "/proc/" + boost::lexical_cast<string>(pid) + "/statm";
+  string name = "/proc/" + folly::to<string>(pid) + "/statm";
 
   string statm;
   FILE * f = fopen(name.c_str(), "r");

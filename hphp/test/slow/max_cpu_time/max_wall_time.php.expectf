@@ -1,0 +1,3 @@
+string(1) "1"
+
+Fatal error: Maximum execution time of 1 seconds exceeded in %s/max_wall_time.php on line %d

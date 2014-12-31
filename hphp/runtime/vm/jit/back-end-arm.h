@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/back-end.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 const TCA kEndOfTargetChain = reinterpret_cast<TCA>(0xf00ffeeffaaff11f);
 

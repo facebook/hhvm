@@ -1,0 +1,39 @@
+float(1.23E+27)
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  bool(true)
+  [2]=>
+  NULL
+}
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  bool(true)
+  [2]=>
+  NULL
+}
+float(1.23E+27)
+int(10)
+$p is set
+f In:  $p: 10
+f Out: $p: 200
+int(200)
+int(200)
+
+Warning: %s
+$p is not set
+
+Notice: Undefined variable: p in %s/functions/passing_by_reference.php on line 34
+f In:  $p: 
+f Out: $p: 200
+$p is set
+g In:  $p: red
+g Out: $p: 200
+int(10)
+$p is set
+g In:  $p: 10
+g Out: $p: 200
+int(200)

@@ -18,6 +18,7 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/datetime.h"
@@ -26,6 +27,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/server/access-log.h"
+#include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/compression.h"
@@ -35,7 +37,8 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/hardware-counter.h"
-#include "folly/String.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+#include <folly/String.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -327,9 +330,7 @@ bool Transport::splitHeader(const String& header, String &name, const char *&val
       if (pos2 == String::npos) pos2 = header.size();
       if (pos2 - pos1 > 1) {
         setResponse(atoi(header.data() + pos1),
-                    getResponseInfo().empty() ? "splitHeader"
-                                              : getResponseInfo().c_str()
-                   );
+                    header.size() - pos2 > 1 ? header.data() + pos2 : nullptr);
         return false;
       }
     }
@@ -364,7 +365,7 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
       setResponse(302);
     }
     */
-    setResponse(302, "forced.302");
+    setResponse(302);
   }
 }
 
@@ -514,6 +515,11 @@ bool Transport::decideCompression() {
   return false;
 }
 
+void Transport::setResponse(int code, const char *info) {
+  m_responseCode = code;
+  m_responseCodeInfo = info ? info : HttpProtocol::GetReasonString(code);
+}
+
 std::string Transport::getHTTPVersion() const {
   return "1.1";
 }
@@ -533,23 +539,32 @@ String Transport::getMimeType() {
 ///////////////////////////////////////////////////////////////////////////////
 // cookies
 
+namespace {
+
+// Make sure a component (name, path, value) of a cookie does not
+// contain any illegal characters.  Throw a fatal exception if it
+// does.
+void validateCookieString(const String& str, const char* component) {
+  if(!str.empty() && strpbrk(str.data(), "=,; \t\r\n\013\014")) {
+    raise_error("Cookie %s can not contain any of the following "
+                "'=,; \\t\\r\\n\\013\\014'", component);
+  }
+}
+
+}
+
 bool Transport::setCookie(const String& name, const String& value, int64_t expire /* = 0 */,
                           const String& path /* = "" */, const String& domain /* = "" */,
                           bool secure /* = false */,
                           bool httponly /* = false */,
                           bool encode_url /* = true */) {
-  if (!name.empty() && strpbrk(name.data(), "=,; \t\r\n\013\014")) {
-    Logger::Warning("Cookie names can not contain any of the following "
-                    "'=,; \\t\\r\\n\\013\\014'");
-    return false;
+  validateCookieString(name, "names");
+
+  if (!encode_url) {
+    validateCookieString(value, "values");
   }
 
-  if (!encode_url &&
-      !value.empty() && strpbrk(value.data(), ",; \t\r\n\013\014")) {
-    Logger::Warning("Cookie values can not contain any of the following "
-                    "',; \\t\\r\\n\\013\\014'");
-    return false;
-  }
+  validateCookieString(path, "paths");
 
   String encoded_value;
   int len = 0;
@@ -768,13 +783,28 @@ StringHolder Transport::prepareResponse(const void *data, int size,
     return std::move(response);
   }
 
+  String compression;
+  int compressionLevel = RuntimeOption::GzipCompressionLevel;
+  IniSetting::Get("zlib.output_compression", compression);
+  String on = makeStaticString("on");
+  if (HHVM_FN(strtolower)(compression) == on) {
+    String compressionLevelStr;
+    IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
+    int level = compressionLevelStr.toInt64();
+    if (level > compressionLevel
+        && level <= RuntimeOption::GzipMaxCompressionLevel) {
+      compressionLevel = level;
+    }
+  }
+
+
   // There isn't that much need to gzip response, when it can fit into one
   // Ethernet packet (1500 bytes), unless we are doing chunked encoding,
   // where we don't really know if next chunk will benefit from compresseion.
   if (m_chunkedEncoding || size > 1000 ||
       m_compressionDecision == CompressionDecision::HasTo) {
     if (m_compressor == nullptr) {
-      m_compressor = new StreamCompressor(RuntimeOption::GzipCompressionLevel,
+      m_compressor = new StreamCompressor(compressionLevel,
                                           CODING_GZIP, true);
     }
     int len = size;
@@ -789,7 +819,7 @@ StringHolder Transport::prepareResponse(const void *data, int size,
       }
     } else {
       Logger::Error("Unable to compress response: level=%d len=%d",
-                    RuntimeOption::GzipCompressionLevel, len);
+                    compressionLevel, len);
     }
   }
 
@@ -808,7 +838,7 @@ bool Transport::setHeaderCallback(const Variant& callback) {
 void Transport::sendRaw(void *data, int size, int code /* = 200 */,
                         bool compressed /* = false */,
                         bool chunked /* = false */,
-                        const char *codeInfo /* = "" */
+                        const char *codeInfo /* = nullptr */
                        ) {
   // There are post-send functions that can run. Any output from them should
   // be ignored as it doesn't make sense to try and send data after the
@@ -841,7 +871,7 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
 void Transport::sendRawInternal(const void *data, int size,
                                 int code /* = 200 */,
                                 bool compressed /* = false */,
-                                const char *codeInfo /* = "" */
+                                const char *codeInfo /* = nullptr */
                                ) {
 
   bool chunked = m_chunkedEncoding;
@@ -865,8 +895,7 @@ void Transport::sendRawInternal(const void *data, int size,
   StringHolder response = prepareResponse(data, size, compressed, !chunked);
 
   if (m_responseCode < 0) {
-    m_responseCode = code;
-    m_responseCodeInfo = codeInfo ? codeInfo: "";
+    setResponse(code, codeInfo);
   }
 
   // HTTP header handling
@@ -907,7 +936,7 @@ void Transport::onSendEnd() {
 }
 
 void Transport::redirect(const char *location, int code /* = 302 */,
-                         const char *info) {
+                         const char *info /* = nullptr */) {
   addHeaderImpl("Location", location);
   setResponse(code, info);
   sendString("Moved", code);

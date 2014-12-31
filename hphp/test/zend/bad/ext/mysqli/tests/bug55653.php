@@ -23,4 +23,4 @@
 		printf("[005] Wrong result: '%s'\n", $in_and_out);
 
 	echo "done!";
-?>
+?>

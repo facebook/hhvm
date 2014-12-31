@@ -62,12 +62,12 @@ public:
     NoEffect                 = 0x0100, // does not side effect
     HelperFunction           = 0x0200, // runtime helper function
     ContainsGetDefinedVars   = 0x0400, // need VariableTable with getDefinedVars
-    MixedVariableArgument    = 0x0800, // variable args, may or may not be ref'd
     IsFoldable               = 0x01000,// function can be constant folded
     NoFCallBuiltin           = 0x02000,// function should not use FCallBuiltin
     AllowOverride            = 0x04000,// allow override of systemlib or builtin
     NeedsFinallyLocals       = 0x08000,
     VariadicArgumentParam    = 0x10000,// ...$ capture of variable arguments
+    ContainsAssert           = 0x20000,// contains call to assert()
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;
@@ -182,6 +182,9 @@ public:
   void setHHFile();
   bool isHHFile() const { return m_isHHFile; }
 
+  void setPreloadPriority(int p) { m_preloadPriority = p; }
+  int preloadPriority() const { return m_preloadPriority; }
+
   void analyzeProgram(AnalysisResultPtr ar);
   void analyzeIncludes(AnalysisResultPtr ar);
   void analyzeIncludesHelper(AnalysisResultPtr ar);
@@ -213,6 +216,7 @@ private:
   unsigned m_includeState : 2;
   unsigned m_system : 1;
   unsigned m_isHHFile : 1;
+  int m_preloadPriority;
 
   std::vector<int> m_attributes;
   std::string m_fileName;

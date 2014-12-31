@@ -30,6 +30,7 @@ unlink($file_path."/file_put_contents_error.tmp");
 
 echo "\n*** Done ***\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 if(file_exists($file_path."/file_put_contents_error.tmp")) {

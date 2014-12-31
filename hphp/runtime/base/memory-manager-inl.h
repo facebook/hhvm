@@ -36,18 +36,18 @@ static_assert(
 inline MemoryManager& MM() { return *MemoryManager::TlsWrapper::getNoCheck(); }
 
 template<class T, class... Args> T* smart_new(Args&&... args) {
-  auto const mem = MM().smartMallocSize(sizeof(T));
+  auto const mem = smart_malloc(sizeof(T));
   try {
     return new (mem) T(std::forward<Args>(args)...);
   } catch (...) {
-    MM().smartFreeSize(mem, sizeof(T));
+    smart_free(mem);
     throw;
   }
 }
 
 template<class T> void smart_delete(T* t) {
   t->~T();
-  MM().smartFreeSize(t, sizeof *t);
+  smart_free(t);
 }
 
 template<class T> T* smart_new_array(size_t count) {
@@ -109,15 +109,32 @@ private:
   MemoryManager& m_mm;
 };
 
+struct MemoryManager::SuppressOOM {
+  explicit SuppressOOM(MemoryManager& mm)
+      : m_mm(mm)
+      , m_savedCouldOOM(mm.m_couldOOM) {
+    FTRACE(1, "SuppressOOM() [couldOOM was {}]\n", m_savedCouldOOM);
+    m_mm.m_couldOOM = false;
+  }
+
+  ~SuppressOOM() {
+    FTRACE(1, "~SuppressOOM() [couldOOM is {}]\n", m_savedCouldOOM);
+    m_mm.m_couldOOM = m_savedCouldOOM;
+  }
+
+  SuppressOOM(const SuppressOOM&) = delete;
+  SuppressOOM& operator=(const SuppressOOM&) = delete;
+
+private:
+  MemoryManager& m_mm;
+  bool m_savedCouldOOM;
+};
+
 //////////////////////////////////////////////////////////////////////
 
-struct MemoryManager::SmallNode {
-  size_t padbytes;  // <= kMaxSmartSize means small block
-};
-
-struct MemoryManager::FreeList::Node {
-  Node* next;
-};
+inline int operator<<(HeaderKind k, int bits) {
+  return int(k) << bits;
+}
 
 inline void* MemoryManager::FreeList::maybePop() {
   auto ret = head;
@@ -125,9 +142,14 @@ inline void* MemoryManager::FreeList::maybePop() {
   return ret;
 }
 
-inline void MemoryManager::FreeList::push(void* val) {
-  auto const node = static_cast<Node*>(val);
+inline void MemoryManager::FreeList::push(void* val, size_t size) {
+  auto constexpr kMaxFreeSize = std::numeric_limits<uint32_t>::max();
+  static_assert(kMaxSmartSize <= kMaxFreeSize, "");
+  assert(size > 0 && size <= kMaxFreeSize);
+  auto const node = static_cast<FreeNode*>(val);
   node->next = head;
+  // The extra store to initialize a free header here is expensive.
+  // Instead, initFree() initializes all free headers just before iterating
   head = node;
 }
 
@@ -238,12 +260,13 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   unsigned i = smartSize2Index(bytes);
   void* p = m_freelists[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
-    p = slabAlloc(debugAddExtra(MemoryManager::smartSizeClass(bytes)), i);
+    p = slabAlloc(bytes, i);
+    p = ((char*)p + kDebugExtraSize);
   }
+  p = ((char*)p - kDebugExtraSize);
   assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
-
   FTRACE(3, "smartMallocSize: {} -> {}\n", bytes, p);
-  return debugPostAllocate(p, bytes, bytes);
+  return debugPostAllocate(p, bytes, debug ? smartSizeClass(bytes) : bytes);
 }
 
 inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
@@ -251,30 +274,15 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   assert(bytes <= kMaxSmartSize + kDebugExtraSize);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmartSizeAlignMask) == 0);
 
+  if (UNLIKELY(m_bypassSlabAlloc)) {
+    return smartFreeSizeBig(ptr, bytes);
+  }
   unsigned i = smartSize2Index(bytes);
-  m_freelists[i].push(debugPreFree(ptr, bytes, bytes));
+  debugPreFree(ptr, bytes, bytes);
+  m_freelists[i].push(ptr, bytes);
   m_stats.usage -= bytes;
 
   FTRACE(3, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);
-}
-
-template<bool callerSavesActualSize>
-ALWAYS_INLINE
-std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
-#ifdef USE_JEMALLOC
-  void* ptr;
-  size_t sz;
-  auto const retptr =
-    smartMallocSizeBigHelper<callerSavesActualSize>(ptr, sz, bytes);
-  FTRACE(3, "smartMallocBig: {} ({} requested, {} usable)\n",
-         retptr, bytes, sz);
-  return std::make_pair(retptr, sz);
-#else
-  m_stats.usage += bytes;
-  auto const ret = smartMallocBig(debugAddExtra(bytes));
-  FTRACE(3, "smartMallocBig: {} ({} bytes)\n", ret, bytes);
-  return std::make_pair(debugPostAllocate(ret, bytes, bytes), bytes);
-#endif
 }
 
 ALWAYS_INLINE
@@ -282,9 +290,9 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   m_stats.usage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
-  JEMALLOC_STATS_ADJUST(&m_stats, -bytes);
-  FTRACE(3, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
-  smartFreeBig(static_cast<SweepNode*>(debugPreFree(vp, bytes, 0)) - 1);
+  m_stats.borrow(-bytes);
+  FTRACE(3, "smartFreeSizeBig: {} ({} bytes)\n", vp, bytes);
+  m_heap.freeBig(debugPreFree(vp, bytes, 0));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -292,7 +300,7 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
   if (LIKELY(size <= kMaxSmartSize)) return smartMallocSize(size);
-  return smartMallocSizeBig<false>(size).first;
+  return smartMallocSizeBig<false>(size).ptr;
 }
 
 ALWAYS_INLINE
@@ -316,12 +324,11 @@ void MemoryManager::smartFreeSizeLogged(void* p, uint32_t size) {
   smartFreeSize(p, size);
 }
 
-template<bool callerSavesActualSize>
-ALWAYS_INLINE
-std::pair<void*,size_t> MemoryManager::smartMallocSizeBigLogged(size_t size) {
-  auto const retptr = smartMallocSizeBig<callerSavesActualSize>(size);
-  if (memory_profiling) { logAllocation(retptr.first, size); }
-  return retptr;
+template<bool callerSavesActualSize> ALWAYS_INLINE
+MemBlock MemoryManager::smartMallocSizeBigLogged(size_t size) {
+  auto const block = smartMallocSizeBig<callerSavesActualSize>(size);
+  if (memory_profiling) { logAllocation(block.ptr, size); }
+  return block;
 }
 
 ALWAYS_INLINE
@@ -398,126 +405,33 @@ inline bool MemoryManager::stopStatsInterval() {
   return ret;
 }
 
-/*
- * Refresh stats to reflect directly malloc()ed memory, and determine
- * whether the request memory limit has been exceeded.
- *
- * The stats parameter allows the updates to be applied to either
- * m_stats as in refreshStats() or to a separate MemoryUsageStats
- * struct as in getStatsSafe().
- *
- * The template variable live controls whether or not MemoryManager
- * member variables are updated and whether or not to call helper
- * methods in response to memory anomalies.
- */
-template<bool live>
-void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
-#ifdef USE_JEMALLOC
-  // Incrementally incorporate the difference between the previous and current
-  // deltas into the memory usage statistic.  For reference, the total
-  // malloced memory usage could be calculated as such, if delta0 were
-  // recorded in resetStatsImpl():
-  //
-  //   int64 musage = delta - delta0;
-  //
-  // Note however, that SmartAllocator adds to m_stats.jemallocDebt
-  // when it calls malloc(), so that this function can avoid
-  // double-counting the malloced memory. Thus musage in the example
-  // code may well substantially exceed m_stats.usage.
-  if (m_enableStatsSync) {
-    uint64_t jeDeallocated = *m_deallocated;
-    uint64_t jeAllocated = *m_allocated;
-
-    // We can't currently handle wrapping so make sure this isn't happening.
-    assert(jeAllocated >= 0 &&
-           jeAllocated <= std::numeric_limits<int64_t>::max());
-    assert(jeDeallocated >= 0 &&
-           jeDeallocated <= std::numeric_limits<int64_t>::max());
-
-    // Since these deltas potentially include memory allocated from another
-    // thread but deallocated on this one, it is possible for these nubmers to
-    // go negative.
-    int64_t jeDeltaAllocated =
-      int64_t(jeAllocated) - int64_t(jeDeallocated);
-    int64_t mmDeltaAllocated =
-      int64_t(m_prevAllocated) - int64_t(m_prevDeallocated);
-
-    // This is the delta between the current and the previous jemalloc reading.
-    int64_t jeMMDeltaAllocated =
-      int64_t(jeAllocated) - int64_t(m_prevAllocated);
-
-    FTRACE(1, "Before stats sync:\n");
-    FTRACE(1, "je alloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
-      jeAllocated, m_prevAllocated, jeAllocated - m_prevAllocated);
-    FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
-      jeDeallocated, m_prevDeallocated, jeDeallocated - m_prevDeallocated);
-    FTRACE(1, "je delta:\ncurrent: {}\nprevious: {}\n",
-      jeDeltaAllocated, mmDeltaAllocated);
-    FTRACE(1, "usage: {}\ntotal (je) alloc: {}\nje debt: {}\n",
-      stats.usage, stats.totalAlloc, stats.jemallocDebt);
-
-    // Subtract the old jemalloc adjustment (delta0) and add the current one
-    // (delta) to arrive at the new combined usage number.
-    stats.usage += jeDeltaAllocated - mmDeltaAllocated;
-    // Remove the "debt" accrued from allocating the slabs so we don't double
-    // count the slab-based allocations.
-    stats.usage -= stats.jemallocDebt;
-
-    stats.jemallocDebt = 0;
-    // We need to do the calculation instead of just setting it to jeAllocated
-    // because of the MaskAlloc capability.
-    stats.totalAlloc += jeMMDeltaAllocated;
-    if (live) {
-      m_prevAllocated = jeAllocated;
-      m_prevDeallocated = jeDeallocated;
-    }
-
-    FTRACE(1, "After stats sync:\n");
-    FTRACE(1, "usage: {}\ntotal (je) alloc: {}\n\n",
-      stats.usage, stats.totalAlloc);
+inline bool MemoryManager::preAllocOOM(int64_t size) {
+  if (m_couldOOM && m_stats.usage + size > m_stats.maxBytes) {
+    refreshStatsHelperExceeded();
+    return true;
   }
-#endif
-  if (stats.usage > stats.peakUsage) {
-    // NOTE: the peak memory usage monotonically increases, so there cannot
-    // be a second OOM exception in one request.
-    assert(stats.maxBytes > 0);
-    if (live && m_couldOOM && stats.usage > stats.maxBytes) {
-      refreshStatsHelperExceeded();
-    }
-    // Check whether the process's active memory limit has been exceeded, and
-    // if so, stop the server.
-    //
-    // Only check whether the total memory limit was exceeded if this request
-    // is at a new high water mark.  This check could be performed regardless
-    // of this request's current memory usage (because other request threads
-    // could be to blame for the increased memory usage), but doing so would
-    // measurably increase computation for little benefit.
-#ifdef USE_JEMALLOC
-    // (*m_cactive) consistency is achieved via atomic operations.  The fact
-    // that we do not use an atomic operation here means that we could get a
-    // stale read, but in practice that poses no problems for how we are
-    // using the value.
-    if (live && s_statsEnabled && *m_cactive > m_cactiveLimit) {
-      refreshStatsHelperStop();
-    }
-#endif
-    stats.peakUsage = stats.usage;
-  }
-  if (live && m_statsIntervalActive) {
-    if (stats.usage > stats.peakIntervalUsage) {
-      stats.peakIntervalUsage = stats.usage;
-    }
-    if (stats.alloc > stats.peakIntervalAlloc) {
-      stats.peakIntervalAlloc = stats.alloc;
-    }
-  }
+  return false;
 }
 
-inline void MemoryManager::resetCouldOOM() { m_couldOOM = true; }
+inline void MemoryManager::forceOOM() {
+  if (m_couldOOM) {
+    refreshStatsHelperExceeded();
+  }
+}
 
 inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 //////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE
+void MemoryManager::setObjectTracking(bool val) {
+  m_trackingInstances = val;
+}
+
+ALWAYS_INLINE
+bool MemoryManager::getObjectTracking() {
+  return m_trackingInstances;
+}
 
 }
 

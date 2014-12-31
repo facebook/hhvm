@@ -265,7 +265,7 @@ public:
     bool has;
     read(has);
     if (has) {
-      data = std::shared_ptr<T>(new T());
+      data = std::make_shared<T>();
       data->recvImpl(*this);
     }
   }

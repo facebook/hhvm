@@ -15,6 +15,7 @@ var_dump(copy("ok.txt", "copy.txt"));
 var_dump(unlink("copy.txt"));
 test_open_basedir_after("copy");
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once "open_basedir.inc";
 delete_directories();

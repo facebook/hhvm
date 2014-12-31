@@ -9,6 +9,6 @@
  *
  */
 
-function foo(): Continuation<void> {
+function foo(): Generator<int, void, void> {
   yield null;
 }

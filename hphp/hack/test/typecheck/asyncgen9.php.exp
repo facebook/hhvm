@@ -1,2 +1,2 @@
 File "asyncgen9.php", line 4, characters 16-20:
-NastCheck[3003] await can only be used inside async functions
+await can only be used inside async functions (NastCheck[3003])

@@ -60,8 +60,8 @@ void AsyncFuncImpl::start() {
   pthread_attr_init(&m_attr);
 
   if (getrlimit(RLIMIT_STACK, &rlim) != 0 || rlim.rlim_cur == RLIM_INFINITY ||
-      rlim.rlim_cur < m_stackSizeMinimum) {
-    rlim.rlim_cur = m_stackSizeMinimum;
+      rlim.rlim_cur < kStackSizeMinimum) {
+    rlim.rlim_cur = kStackSizeMinimum;
   }
 
   // On Success use the allocated memory for the thread's stack

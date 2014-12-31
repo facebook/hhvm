@@ -23,6 +23,7 @@
 #include <unicode/translit.h>
 #include <unicode/uregex.h>
 #include <unicode/ustring.h>
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/icu/LifeEventTokenizer.h"
 #include "hphp/runtime/ext/icu/ICUMatcher.h"
 #include "hphp/runtime/ext/icu/ICUTransliterator.h"
@@ -154,6 +155,7 @@ public:
   }
 
   void transliterate(UnicodeString& u_str) {
+    std::lock_guard<std::mutex> lock(m_mutex);
     if (m_tl) {
       m_tl->transliterate(u_str);
     } else {
@@ -162,6 +164,7 @@ public:
   }
 
   void transliterate_with_accents(UnicodeString& u_str) {
+    std::lock_guard<std::mutex> lock(m_mutex);
     if (m_tl_accent) {
       m_tl_accent->transliterate(u_str);
     } else {
@@ -172,17 +175,18 @@ public:
 private:
   Transliterator* m_tl;
   Transliterator* m_tl_accent;
+  std::mutex m_mutex;
 };
 
-IMPLEMENT_THREAD_LOCAL(TransliteratorWrapper, s_transliterator);
+static TransliteratorWrapper s_transliterator;
 
 static String HHVM_FUNCTION(icu_transliterate, const String& str,
                                                bool remove_accents) {
   UnicodeString u_str = UnicodeString::fromUTF8(str.data());
   if (remove_accents) {
-    s_transliterator->transliterate(u_str);
+    s_transliterator.transliterate(u_str);
   } else {
-    s_transliterator->transliterate_with_accents(u_str);
+    s_transliterator.transliterate_with_accents(u_str);
   }
 
   // Convert UnicodeString back to UTF-8.

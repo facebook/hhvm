@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
 
+#include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio_blockable.h"
@@ -54,7 +55,8 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
     throw e;
   }
   assert(dependencies.getObjectData()->instanceof(c_Vector::classof()));
-  auto deps = p_Vector::attach(c_Vector::Clone(dependencies.getObjectData()));
+  auto deps = SmartObject<c_Vector>::attach(
+    c_Vector::Clone(dependencies.getObjectData()));
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
     Cell* current = deps->at(iter_pos);
 
@@ -68,20 +70,21 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
   Object exception;
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
 
-    Cell* current = tvAssertCell(deps->at(iter_pos));
+    auto current = tvAssertCell(deps->at(iter_pos));
     assert(current->m_type == KindOfObject);
     assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      deps->set(iter_pos, &child->getResult());
+      auto result = child->getResult();
+      deps->set(iter_pos, &result);
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
       assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      p_GenVectorWaitHandle my_wh = NEWOBJ(c_GenVectorWaitHandle)();
+      SmartObject<c_GenVectorWaitHandle> my_wh(newobj<c_GenVectorWaitHandle>());
       my_wh->initialize(exception, deps.get(), iter_pos, child_wh);
       AsioSession* session = AsioSession::Get();
       if (UNLIKELY(session->hasOnGenVectorCreateCallback())) {
@@ -132,7 +135,8 @@ void c_GenVectorWaitHandle::onUnblocked() {
     auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
 
     if (child->isSucceeded()) {
-      m_deps->set(m_iterPos, &child->getResult());
+      auto result = child->getResult();
+      m_deps->set(m_iterPos, &result);
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {

@@ -1,29 +1,29 @@
-<?hh
+<?php
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 // Add code snippets here
 // Call them from MeasureBasicOps.php to collect relative CPU time stats
 
-function function_call(int $i) {
+function function_call($i) {
     return ($i + 1);
 }
 
 class MethodCall {
-  public static function callStaticMethod(int $i) {
+  public static function callStaticMethod($i) {
     return ($i + 1);
   }
 
-  public function callInstanceMethod(int $i) {
+  public function callInstanceMethod($i) {
     return ($i + 1);
   }
 }
 
 interface ITest0 {
-  public function callInterfaceMethod(int $i);
+  public function callInterfaceMethod($i);
 }
 
 class Class0 implements ITest0 {
-  public function callInterfaceMethod (int $i) {
+  public function callInterfaceMethod ($i) {
     return ($i + 1);
   }
 }
@@ -94,6 +94,13 @@ class Y {
 
   public static final function isY() {
     return (Y::$y ? 1 : 0);
+  }
+}
+
+// HHVM has idx() built in, but PHP5 doesn't
+if (!function_exists('idx')) {
+  function idx($arr, $key, $def = null) {
+    return (isset($arr[$key]) ? $arr[$key] : $def);
   }
 }
 
@@ -286,12 +293,12 @@ class ItTestClassArray {
 }
 
 class IteratorTestArray {
-  private array $intArray10 = array();
-  private array $stringArray10 = array();
-  private array $objectArray10 = array();
-  private array $intArray100 = array();
-  private array $stringArray100 = array();
-  private array $objectArray100 = array();
+  private $intArray10 = array();
+  private $stringArray10 = array();
+  private $objectArray10 = array();
+  private $intArray100 = array();
+  private $stringArray100 = array();
+  private $objectArray100 = array();
 
   public function __construct() {
     $this->initIntArray10();
@@ -709,7 +716,7 @@ class ReflectionTestClass {
   }
 
   public static function emptyStatic5Arg (
-  int $one, int $two, int $three, int $four, int $five) {
+    $one, $two, $three, $four, $five) {
     return 1;
   }
 

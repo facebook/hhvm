@@ -36,7 +36,6 @@ public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
-  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   virtual bool isRefable(bool checkError = false) const { return true;}
 
   virtual void setContext(Context context);

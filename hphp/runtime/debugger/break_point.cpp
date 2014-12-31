@@ -15,8 +15,9 @@
 */
 #include "hphp/runtime/debugger/break_point.h"
 
-#include <boost/lexical_cast.hpp>
 #include <vector>
+
+#include <folly/Conv.h>
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
@@ -32,7 +33,6 @@
 namespace HPHP { namespace Eval {
 
 using std::string;
-using boost::lexical_cast;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -72,7 +72,7 @@ std::string InterruptSite::desc() const {
   string file = getFile();
   int line0 = getLine0();
   if (line0) {
-    ret += " on line " + boost::lexical_cast<std::string>(line0);
+    ret += " on line " + folly::to<std::string>(line0);
     if (!file.empty()) {
       ret += " of " + file;
     }
@@ -98,7 +98,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, const Variant& error)
   if (hardBreakPoint && fp->skipFrame()) {
     // for hard breakpoint, the fp is for an extension function,
     // so we need to construct the site on the caller
-    fp = context->getPrevVMState(fp, &m_offset);
+    fp = context->getPrevVMStateUNSAFE(fp, &m_offset);
   } else {
     auto const *pc = vmpc();
     auto f = fp->m_func;
@@ -165,7 +165,7 @@ const InterruptSite *InterruptSite::getCallingSite() const {
   if (m_callingSite != nullptr) return m_callingSite.get();
   auto const context = g_context.getNoCheck();
   Offset parentOffset;
-  auto parentFp = context->getPrevVMState(m_activationRecord, &parentOffset);
+  auto parentFp = context->getPrevVMStateUNSAFE(m_activationRecord, &parentOffset);
   if (parentFp == nullptr) return nullptr;
   m_callingSite.reset(new InterruptSite(parentFp, parentOffset, m_error));
   return m_callingSite.get();
@@ -502,7 +502,7 @@ std::string BreakPointInfo::site() const {
       preposition = "";
     }
     if (m_line1) {
-      ret += "on line " + lexical_cast<string>(m_line1);
+      ret += "on line " + folly::to<string>(m_line1);
       if (!m_file.empty()) {
         ret += " of " + m_file;
       }
@@ -528,12 +528,12 @@ std::string BreakPointInfo::descBreakPointReached() const {
     }
     if (m_line1 || m_line2) {
       if (m_line1 == m_line2) {
-        ret += "on line " + lexical_cast<string>(m_line1);
+        ret += "on line " + folly::to<string>(m_line1);
       } else if (m_line2 == -1) {
-        ret += "between line " + lexical_cast<string>(m_line1) + " and end";
+        ret += "between line " + folly::to<string>(m_line1) + " and end";
       } else {
-        ret += "between line " + lexical_cast<string>(m_line1) +
-          " and line " + lexical_cast<string>(m_line2);
+        ret += "between line " + folly::to<string>(m_line1) +
+          " and line " + folly::to<string>(m_line2);
       }
       if (!m_file.empty()) {
         ret += " of " + regex(m_file);
@@ -1008,9 +1008,9 @@ bool BreakPointInfo::checkExceptionOrError(const Variant& e) {
   if (e.isObject()) {
     if (m_regex) {
       return Match(m_class.c_str(), m_class.size(),
-                   e.toObject()->o_getClassName().data(), true, false);
+                   e.toObject()->getClassName().data(), true, false);
     }
-    return e.getObjectData()->o_instanceof(m_class.c_str());
+    return e.getObjectData()->instanceof(m_class);
   }
   return Match(m_class.c_str(), m_class.size(), ErrorClassName, m_regex,
                false);

@@ -626,8 +626,14 @@ String string_chunk_split(const char *src, int srclen, const char *end,
   int chunks = srclen / chunklen; // complete chunks!
   int restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
-  int out_len = (chunks + 1) * endlen + srclen;
-  String ret(out_len, ReserveString);
+  String ret(
+    safe_address(
+      chunks + 1,
+      endlen,
+      srclen
+    ),
+    ReserveString
+  );
   char *dest = ret.bufferSlice().ptr;
 
   const char *p; char *q;
@@ -1277,7 +1283,7 @@ String string_uuencode(const char *src, int src_len) {
   const char *s, *e, *ee;
   char *dest;
 
-  /* encoded length is ~ 38% greater then the original */
+  /* encoded length is ~ 38% greater than the original */
   String ret((int)ceil(src_len * 1.38) + 45, ReserveString);
   p = dest = ret.bufferSlice().ptr;
   s = src;
@@ -1773,11 +1779,20 @@ String string_number_format(double d, int dec,
   // departure from PHP: we got rid of dependencies on spprintf() here.
   String tmpstr(63, ReserveString);
   tmpbuf = tmpstr.bufferSlice().ptr;
-  snprintf(tmpbuf, 64, "%.*F", dec, d);
-  tmplen = strlen(tmpbuf);
+  tmplen = snprintf(tmpbuf, 64, "%.*F", dec, d);
   if (tmpbuf == nullptr || !isdigit((int)tmpbuf[0])) {
     tmpstr.setSize(tmplen);
     return tmpstr;
+  }
+  if (tmplen >= 64) {
+    // Uncommon, asked for more than 64 chars worth of precision
+    tmpstr = String(tmplen, ReserveString);
+    tmpbuf = tmpstr.bufferSlice().ptr;
+    tmplen = snprintf(tmpbuf, tmplen + 1, "%.*F", dec, d);
+    if (tmpbuf == nullptr || !isdigit((int)tmpbuf[0])) {
+      tmpstr.setSize(tmplen);
+      return tmpstr;
+    }
   }
 
   /* find decimal point, if expected */

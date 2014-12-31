@@ -8,6 +8,7 @@
  *
  *)
 
+open Coverage_level
 open Utils
 open Hh_json
 
@@ -17,19 +18,14 @@ open Hh_json
 
 let () = Ide.is_ide_mode := true
 
-let (files: (string, string) Hashtbl.t) = Hashtbl.create 23
+let (files: (Relative_path.t, string) Hashtbl.t) = Hashtbl.create 23
 
 let globals = Hashtbl.create 23
+let parse_errors = Hashtbl.create 23
 
 (*****************************************************************************)
 (* helpers *)
 (*****************************************************************************)
-
-(* Javascript function that turns a Mlstring object into a javscript string *)
-external to_byte_jsstring: string -> Js.js_string Js.t = "caml_js_from_byte_string"
-
-let output_json json =
-  to_byte_jsstring (json_to_string json)
 
 let error el =
   let res =
@@ -39,13 +35,13 @@ let error el =
                "internal_error", JBool false;
              ]
     else
-      let errors_json = List.map Errors.to_json el in
-      JAssoc [ "passed",         JBool false;
-               "errors",         JList errors_json;
-               "internal_error", JBool false;
-             ]
+      let errors_json = List.map (compose Errors.to_json Errors.to_absolute) el
+      in JAssoc [ "passed",         JBool false;
+                  "errors",         JList errors_json;
+                  "internal_error", JBool false;
+                ]
   in
-  output_json res
+  to_js_object res
 
 (*****************************************************************************)
 
@@ -105,27 +101,26 @@ let declare_file fn content =
     Typing_env.Classes.remove cname;
   end old_classes;
   try
-    Pos.file := fn ;
     Autocomplete.auto_complete := false;
     let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
+      Parser_hack.program fn content
     in
     let is_php = not is_hh_file in
+    Parser_heap.ParserHeap.add fn ast;
     if is_hh_file
     then begin
-      Parser_heap.ParserHeap.add fn ast;
       let funs, classes, typedefs, consts = make_funs_classes ast in
       Hashtbl.replace globals fn (is_php, funs, classes);
       let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
       let all_classes = List.fold_right begin fun (_, cname) acc ->
-        SMap.add cname (SSet.singleton fn) acc
+        SMap.add cname (Relative_path.Set.singleton fn) acc
       end classes SMap.empty in
       Typing_decl.make_env nenv all_classes fn;
       let sub_classes = get_sub_classes all_classes in
       SSet.iter begin fun cname ->
         match Naming_heap.ClassHeap.get cname with
         | None -> ()
-        | Some c -> Typing_decl.class_decl c
+        | Some c -> Typing_decl.class_decl nenv c
       end sub_classes
     end
     else Hashtbl.replace globals fn (false, [], [])
@@ -133,63 +128,84 @@ let declare_file fn content =
     Hashtbl.replace globals fn (true, [], []);
     ()
 
+let rec last_error errors =
+  match errors with
+    | [] -> None
+    | [e] -> Some e
+    | _ :: tail -> last_error tail
+
 let hh_add_file fn content =
+  let fn = Relative_path.create Relative_path.Root fn in
   Hashtbl.replace files fn content;
   try
-    declare_file fn content
+    let errors, _ = Errors.do_ begin fun () ->
+      declare_file fn content
+    end in
+    Hashtbl.replace parse_errors fn (last_error errors)
   with e ->
     ()
 
-let hh_check ?(check_mode=true) fn =
-  declare_file fn (Hashtbl.find files fn);
-  Pos.file := fn;
-  Autocomplete.auto_complete := false;
-  let content = Hashtbl.find files fn in
-  Errors.try_
-    begin fun () ->
-(*    let builtins = Parser.program lexer (Lexing.from_string Ast.builtins) in *)
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
-    in
-    let ast = (*builtins @ *) ast in
-    Parser_heap.ParserHeap.add fn ast;
-    let funs, classes, typedefs, consts = make_funs_classes ast in
-    let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
-    let all_classes = List.fold_right begin fun (_, cname) acc ->
-      SMap.add cname (SSet.singleton fn) acc
-    end classes SMap.empty in
-    Typing_decl.make_env nenv all_classes fn;
-    List.iter (fun (_, fname) -> type_fun fname fn) funs;
-    List.iter (fun (_, cname) -> type_class cname fn) classes;
-    error []
+let hh_add_dep fn content =
+  let fn = Relative_path.create Relative_path.Root fn in
+  Typing_deps.is_dep := true;
+  (try
+    Errors.ignore_ begin fun () ->
+      declare_file fn content;
+      Parser_heap.ParserHeap.remove fn
     end
-    begin fun l ->
-      error [l]
-    end
+  with e ->
+    ()
+  );
+  Typing_deps.is_dep := false
+
+let hh_check fn =
+  let fn = Relative_path.create Relative_path.Root fn in
+  match Hashtbl.find parse_errors fn with
+    | Some e -> error [e]
+    | None ->
+      Autocomplete.auto_complete := false;
+      Errors.try_
+        begin fun () ->
+        let ast = Parser_heap.ParserHeap.find_unsafe fn in
+        let funs, classes, typedefs, consts = make_funs_classes ast in
+        let nenv =
+          Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts
+        in
+        let all_classes = List.fold_right begin fun (_, cname) acc ->
+          SMap.add cname (Relative_path.Set.singleton fn) acc
+        end classes SMap.empty in
+        Typing_decl.make_env nenv all_classes fn;
+        List.iter (fun (_, fname) -> type_fun fname fn) funs;
+        List.iter (fun (_, cname) -> type_class cname fn) classes;
+        error []
+        end
+        begin fun l ->
+          error [l]
+        end
 
 let hh_auto_complete fn =
+  let fn = Relative_path.create Relative_path.Root fn in
   AutocompleteService.attach_hooks();
-  let content = Hashtbl.find files fn in
   try
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
-    in
-    List.iter begin fun def ->
-      match def with
-      | Ast.Fun f ->
-          let nenv = Naming.empty in
-          let tenv = Typing_env.empty fn in
-          let f = Naming.fun_ nenv f in
-          Typing.fun_def tenv (snd f.Nast.f_name) f
-      | Ast.Class c ->
-          let nenv = Naming.empty in
-          let tenv = Typing_env.empty fn in
-          let c = Naming.class_ nenv c in
-          Typing_decl.class_decl c;
-          let res = Typing.class_def tenv (snd c.Nast.c_name) c in
-          res
-      | _ -> ()
-    end ast;
+    let ast = Parser_heap.ParserHeap.find_unsafe fn in
+    Errors.ignore_ begin fun () ->
+      List.iter begin fun def ->
+        match def with
+        | Ast.Fun f ->
+            let nenv = Naming.empty in
+            let tenv = Typing_env.empty fn in
+            let f = Naming.fun_ nenv f in
+            Typing.fun_def tenv (snd f.Nast.f_name) f
+        | Ast.Class c ->
+            let nenv = Naming.empty in
+            let tenv = Typing_env.empty fn in
+            let c = Naming.class_ nenv c in
+            Typing_decl.class_decl nenv c;
+            let res = Typing.class_def tenv (snd c.Nast.c_name) c in
+            res
+        | _ -> ()
+      end ast;
+    end;
     let completion_type_str =
       match !Autocomplete.argument_global_type with
       | Some Autocomplete.Acid -> "id"
@@ -203,77 +219,60 @@ let hh_auto_complete fn =
       List.map AutocompleteService.autocomplete_result_to_json result
     in
     AutocompleteService.detach_hooks();
-    output_json (JAssoc [ "completions",     JList result;
+    to_js_object (JAssoc [ "completions",     JList result;
                           "completion_type", JString completion_type_str;
                           "internal_error",  JBool false;
                         ])
   with _ ->
     AutocompleteService.detach_hooks();
-    output_json (JAssoc [ "internal_error", JBool true;
+    to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_get_method_at_position fn line char =
-  Find_refs.find_method_at_cursor_result := None;
   Autocomplete.auto_complete := false;
-  Find_refs.find_method_at_cursor_target := Some (line, char);
-  let content = Hashtbl.find files fn in
+  let fn = Relative_path.create Relative_path.Root fn in
+  let result = ref None in
+  IdentifySymbolService.attach_hooks result line char;
   try
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
-    in
-    List.iter begin fun def ->
-      match def with
-      | Ast.Fun f ->
-          let nenv = Naming.empty in
-          let tenv = Typing_env.empty fn in
-          let f = Naming.fun_ nenv f in
-          Find_refs.process_find_refs None
-              (snd f.Nast.f_name) (fst f.Nast.f_name);
-          Typing.fun_def tenv (snd f.Nast.f_name) f
-      | Ast.Class c ->
-          let nenv = Naming.empty in
-          let tenv = Typing_env.empty fn in
-          let c = Naming.class_ nenv c in
-          if !Find_refs.find_method_at_cursor_target <> None
-          then begin
-            Find_refs.process_class_ref (fst c.Nast.c_name)
-              (snd c.Nast.c_name) None
-          end;
-          let all_methods = c.Nast.c_methods @ c.Nast.c_static_methods in
-          List.iter begin fun method_ ->
-            Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-              (snd method_.Nast.m_name) (fst method_.Nast.m_name)
-          end all_methods;
-          (match c.Nast.c_constructor with
-          | None -> ()
-          | Some method_ ->
-              Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                  "__construct" (fst method_.Nast.m_name));
-          let res = Typing.class_def tenv (snd c.Nast.c_name) c in
-          res
-      | _ -> ()
-    end ast;
+    let ast = Parser_heap.ParserHeap.find_unsafe fn in
+    Errors.ignore_ begin fun () ->
+      List.iter begin fun def ->
+        match def with
+        | Ast.Fun f ->
+            let nenv = Naming.empty in
+            let tenv = Typing_env.empty fn in
+            let f = Naming.fun_ nenv f in
+            Typing.fun_def tenv (snd f.Nast.f_name) f
+        | Ast.Class c ->
+            let nenv = Naming.empty in
+            let tenv = Typing_env.empty fn in
+            let c = Naming.class_ nenv c in
+            let res = Typing.class_def tenv (snd c.Nast.c_name) c in
+            res
+        | _ -> ()
+      end ast;
+    end;
+    IdentifySymbolService.detach_hooks ();
     let result =
-      match !Find_refs.find_method_at_cursor_result with
+      match !result with
       | Some res ->
           let result_type =
-            match res.Find_refs.type_ with
-            | Find_refs.Class -> "class"
-            | Find_refs.Method -> "method"
-            | Find_refs.Function -> "function"
-            | Find_refs.LocalVar -> "local" in
-          JAssoc [ "name",           JString res.Find_refs.name;
+            match res.IdentifySymbolService.type_ with
+            | IdentifySymbolService.Class -> "class"
+            | IdentifySymbolService.Method -> "method"
+            | IdentifySymbolService.Function -> "function"
+            | IdentifySymbolService.LocalVar -> "local" in
+          JAssoc [ "name",           JString res.IdentifySymbolService.name;
                    "result_type",    JString result_type;
-                   "pos",            Pos.json res.Find_refs.pos;
+                   "pos",            Pos.json (Pos.to_absolute res.IdentifySymbolService.pos);
                    "internal_error", JBool false;
                  ]
       | _ -> JAssoc [ "internal_error", JBool false;
                     ] in
-    Find_refs.find_method_at_cursor_target := None;
-    output_json result
+    to_js_object result
   with _ ->
-    Find_refs.find_method_at_cursor_target := None;
-    output_json (JAssoc [ "internal_error", JBool true;
+    IdentifySymbolService.detach_hooks ();
+    to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_get_deps =
@@ -303,7 +302,7 @@ let hh_get_deps =
           )
       end
     end deps;
-    output_json (JAssoc [ "deps",           JList !result;
+    to_js_object (JAssoc [ "deps",           JList !result;
                           "internal_error", JBool false;
                         ])
 
@@ -316,7 +315,7 @@ let infer_at_pos file line char =
   try
     clean();
     Typing_defs.infer_target := Some (line, char);
-    ignore (hh_check ~check_mode:false file);
+    ignore (hh_check file);
     let ty = !Typing_defs.infer_type in
     let pos = !Typing_defs.infer_pos in
     clean();
@@ -326,22 +325,34 @@ let infer_at_pos file line char =
     None, None
 
 let hh_find_lvar_refs file line char =
-  let clean() =
-    Find_refs.find_refs_target := None;
-    Find_refs.find_refs_result := [];
-  in
+  let file = Relative_path.create Relative_path.Root file in
   try
-    clean();
-    Find_refs.find_refs_target := Some (line, char);
-    ignore (hh_check ~check_mode:false file);
-    let res_list = List.map Pos.json !Find_refs.find_refs_result in
-    clean();
-    output_json (JAssoc [ "positions",      JList res_list;
+    let get_result = FindLocalsService.attach_hooks line char in
+    let ast = Parser_heap.ParserHeap.find_unsafe file in
+    Errors.ignore_ begin fun () ->
+      (* We only need to name to find references to locals *)
+      List.iter begin fun def ->
+        match def with
+        | Ast.Fun f ->
+            let nenv = Naming.empty in
+            let _ = Naming.fun_ nenv f in
+            ()
+        | Ast.Class c ->
+            let nenv = Naming.empty in
+            let _ = Naming.class_ nenv c in
+            ()
+        | _ -> ()
+      end ast;
+    end;
+    FindLocalsService.detach_hooks ();
+    let res_list =
+      List.map (compose Pos.json Pos.to_absolute) (get_result ()) in
+    to_js_object (JAssoc [ "positions",      JList res_list;
                           "internal_error", JBool false;
                         ])
   with _ ->
-    clean();
-    output_json (JAssoc [ "internal_error", JBool true;
+    FindLocalsService.detach_hooks ();
+    to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_infer_type file line char =
@@ -353,78 +364,92 @@ let hh_infer_type file line char =
   | None -> JAssoc [ "internal_error", JBool false;
                    ]
   in
-  output_json output
+  to_js_object output
 
 let hh_infer_pos file line char =
   let pos, _ = infer_at_pos file line char in
   let output = match pos with
-  | Some pos -> JAssoc [ "pos",            Pos.json pos;
+  | Some pos -> JAssoc [ "pos",            Pos.json (Pos.to_absolute pos);
                          "internal_error", JBool false;
                        ]
   | None -> JAssoc [ "internal_error", JBool false;
                    ]
   in
-  output_json output
+  to_js_object output
 
 let hh_file_summary fn =
+  let fn = Relative_path.create Relative_path.Root fn in
   try
-    let content = Hashtbl.find files fn in
-    let outline = FileOutline.outline content in
+    let ast = Parser_heap.ParserHeap.find_unsafe fn in
+    let outline = FileOutline.outline_ast ast in
     let res_list = List.map begin fun (pos, name, type_) ->
       JAssoc [ "name", JString name;
                "type", JString type_;
                "pos",  Pos.json pos;
              ]
       end outline in
-    output_json (JAssoc [ "summary",          JList res_list;
+    to_js_object (JAssoc [ "summary",          JList res_list;
                           "internal_error",   JBool false;
                         ])
   with _ ->
-    output_json (JAssoc [ "internal_error", JBool true;
+    to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_hack_coloring fn =
-  Typing_defs.accumulate_types := true;
-  ignore (hh_check ~check_mode:false fn);
-  let result = !(Typing_defs.type_acc) in
-  Typing_defs.accumulate_types := false;
-  Typing_defs.type_acc := [];
+  let type_acc = ref [] in
+  Typing.with_expr_hook (fun e ty -> type_acc := (fst e, ty) :: !type_acc)
+    (fun () -> ignore (hh_check fn));
+  let fn = Relative_path.create Relative_path.Root fn in
+  let result = mk_level_list (Some fn) !type_acc in
+  let result = rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) result in
   let result = ColorFile.go (Hashtbl.find files fn) result in
   let result = List.map (fun input ->
                         match input with
-                        | (ColorFile.Unchecked_code, str) -> ("err", str)
-                        | (ColorFile.Checked_code, str) -> ("checked", str)
-                        | (ColorFile.Keyword, str) -> ("kwd", str)
-                        | (ColorFile.Fun, str) -> ("fun", str)
-                        | (ColorFile.Default, str) -> ("default", str)
+                        | (Some lvl, str) -> (string_of_level lvl, str)
+                        | (None, str) -> ("default", str)
                         ) result in
   let result = List.map (fun (checked, text) ->
                         JAssoc [ "checked", JString checked;
                                  "text",    JString text;
                                ]) result in
-  output_json (JAssoc [ "coloring",       JList result;
+  to_js_object (JAssoc [ "coloring",       JList result;
                         "internal_error", JBool false;
                       ])
 
 let hh_get_method_calls fn =
   Typing_defs.accumulate_method_calls := true;
   Typing_defs.accumulate_method_calls_result := [];
-  ignore (hh_check ~check_mode:false fn);
+  ignore (hh_check fn);
   let results = !Typing_defs.accumulate_method_calls_result in
   let results = List.map begin fun (p, name) ->
     JAssoc [ "method_name", JString name;
-             "pos",         Pos.json p;
+             "pos",         Pos.json (Pos.to_absolute p);
            ]
     end results in
   Typing_defs.accumulate_method_calls := false;
   Typing_defs.accumulate_method_calls_result := [];
-  output_json (JAssoc [ "method_calls",   JList results;
+  to_js_object (JAssoc [ "method_calls",   JList results;
                         "internal_error", JBool false;
                       ])
 
 let hh_arg_info fn line char =
+  (* all the hooks for arg info happen in typing,
+   * so we only need to run typing*)
   ArgumentInfoService.attach_hooks (line, char);
-  ignore (hh_check ~check_mode:false fn);
+  let fn = Relative_path.create Relative_path.Root fn in
+  let _, funs, classes = Hashtbl.find globals fn in
+  Errors.ignore_ begin fun () ->
+    List.iter begin fun (_, f_name) ->
+      let tenv = Typing_env.empty fn in
+      let f = Naming_heap.FunHeap.find_unsafe f_name in
+      Typing.fun_def tenv f_name f
+    end funs;
+    List.iter begin fun (_, c_name) ->
+      let tenv = Typing_env.empty fn in
+      let c = Naming_heap.ClassHeap.find_unsafe c_name in
+      Typing.class_def tenv c_name c
+    end classes;
+  end;
   let result = ArgumentInfoService.get_result() in
   let result = match result with
     | Some result -> result
@@ -434,76 +459,50 @@ let hh_arg_info fn line char =
   let json_res =
     ("internal_error", JBool false) :: ArgumentInfoService.to_json result
   in
-  output_json (JAssoc json_res)
+  to_js_object (JAssoc json_res)
 
 let hh_format contents start end_ =
-  let result = Format_hack.region start end_ contents in
+  let result = Format_hack.region Relative_path.default start end_ contents in
   let error, result, internal_error = match result with
     | Format_hack.Php_or_decl -> "Php_or_decl", "", false
     | Format_hack.Parsing_error _ -> "Parsing_error", "", false
     | Format_hack.Internal_error -> "", "", true
     | Format_hack.Success s -> "", s, false
   in
-  output_json (JAssoc [ "error_message", JString error;
+  to_js_object (JAssoc [ "error_message", JString error;
                         "result", JString result;
                         "internal_error",   JBool internal_error;
                       ])
 
+(* Helpers to turn JavaScript strings into OCaml strings *)
+let js_wrap_string_1 func =
+  let f str = begin
+    let str = Js.to_string str in
+    func str
+  end in
+  Js.wrap_callback f
 
-let (hh_check: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_check
-let (hh_add_file: (string, string -> string -> unit) Js.meth_callback) = Js.wrap_callback hh_add_file
-let (hh_auto_complete: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_auto_complete
-let (hh_get_deps: (string, unit -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_get_deps
-let (hh_infer_type: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_infer_type
-let (hh_infer_pos: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_infer_pos
-let (hh_file_summary: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_file_summary
-let (hh_hack_coloring: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_hack_coloring
-let (hh_find_lvar_refs: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_find_lvar_refs
-let (hh_get_method_calls: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_get_method_calls
-let (hh_get_method_name: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_get_method_at_position
-let (hh_arg_info: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_arg_info
-let (hh_format: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_format
+let js_wrap_string_2 func =
+  let f str1 str2 = begin
+    let str1 = Js.to_string str1 in
+    let str2 = Js.to_string str2 in
+    func str1 str2
+  end in
+  Js.wrap_callback f
 
-
-let export_fun0 f fname =
-  Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
-  let js_def = "self."^fname^" = function(x) { return hh_ide."^fname^"[1](); };" in
-  Js.Unsafe.eval_string js_def
-
-let export_fun1 f fname farg =
-  Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
-  let js_def =
-    "self."^fname^" = function(x) { return hh_ide."^fname^"[1]("^farg^"); };" in
-  Js.Unsafe.eval_string js_def
-
-let export_fun2 f fname farg1 farg2 =
-  Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
-  let js_def =
-    "self."^fname^" = function(x, y) { return hh_ide."^fname
-    ^"[1]("^farg1^", "^farg2^"); };"
-  in
-  Js.Unsafe.eval_string js_def
-
-let export_fun3 f fname farg1 farg2 farg3 =
-  Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
-  let js_def =
-    "self."^fname^" = function(x, y, z) { return hh_ide."^fname
-    ^"[1]("^farg1^", "^farg2^", "^farg3^"); };"
-  in
-  Js.Unsafe.eval_string js_def
-
-let () = Js.Unsafe.eval_string "self.hh_ide = { };"
-let () = Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") "str" [|Js.Unsafe.inject (Js.wrap_callback Js.to_string)|]
-let () = export_fun1 hh_check "hh_check_file" "hh_ide.str[1](x)"
-let () = export_fun2 hh_add_file "hh_add_file" "hh_ide.str[1](x)" "hh_ide.str[1](y)"
-let () = export_fun1 hh_auto_complete "hh_auto_complete" "hh_ide.str[1](x)"
-let () = export_fun0 hh_get_deps "hh_get_deps"
-let () = export_fun3 hh_infer_type "hh_infer_type" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun3 hh_infer_pos "hh_infer_pos" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun1 hh_file_summary "hh_file_summary" "hh_ide.str[1](x)"
-let () = export_fun1 hh_hack_coloring "hh_hack_coloring" "hh_ide.str[1](x)"
-let () = export_fun3 hh_find_lvar_refs "hh_find_lvar_refs" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun1 hh_get_method_calls "hh_get_method_calls" "hh_ide.str[1](x)"
-let () = export_fun3 hh_get_method_name "hh_get_method_name" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun3 hh_arg_info "hh_arg_info" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun3 hh_format "hh_format" "hh_ide.str[1](x)" "y" "z"
+let () =
+  Relative_path.set_path_prefix Relative_path.Root "/";
+  Js.Unsafe.set Js.Unsafe.global "hh_check_file" (js_wrap_string_1 hh_check);
+  Js.Unsafe.set Js.Unsafe.global "hh_add_file" (js_wrap_string_2 hh_add_file);
+  Js.Unsafe.set Js.Unsafe.global "hh_add_dep" (js_wrap_string_2 hh_add_dep);
+  Js.Unsafe.set Js.Unsafe.global "hh_auto_complete" (js_wrap_string_1 hh_auto_complete);
+  Js.Unsafe.set Js.Unsafe.global "hh_get_deps" (Js.wrap_callback hh_get_deps);
+  Js.Unsafe.set Js.Unsafe.global "hh_infer_type" (js_wrap_string_1 hh_infer_type);
+  Js.Unsafe.set Js.Unsafe.global "hh_infer_pos" (js_wrap_string_1 hh_infer_pos);
+  Js.Unsafe.set Js.Unsafe.global "hh_file_summary" (js_wrap_string_1 hh_file_summary);
+  Js.Unsafe.set Js.Unsafe.global "hh_hack_coloring" (js_wrap_string_1 hh_hack_coloring);
+  Js.Unsafe.set Js.Unsafe.global "hh_find_lvar_refs" (js_wrap_string_1 hh_find_lvar_refs);
+  Js.Unsafe.set Js.Unsafe.global "hh_get_method_calls" (js_wrap_string_1 hh_get_method_calls);
+  Js.Unsafe.set Js.Unsafe.global "hh_get_method_name" (js_wrap_string_1 hh_get_method_at_position);
+  Js.Unsafe.set Js.Unsafe.global "hh_arg_info" (js_wrap_string_1 hh_arg_info);
+  Js.Unsafe.set Js.Unsafe.global "hh_format" (js_wrap_string_1 hh_format)

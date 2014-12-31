@@ -16,18 +16,22 @@
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/hh/ext_hh.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/autoload-handler.h"
 
 namespace HPHP {
 
@@ -59,7 +63,7 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
   return val->m_data.pref;
 }
 
-namespace JIT {
+namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -97,11 +101,12 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // if appropriate
   int64_t intkey;
   ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
-                      ad->setConverted(intkey, tvAsCVarRef(&value), copy) :
-                      ad->set(key, tvAsCVarRef(&value), copy);
+                  ad->setConverted(intkey, tvAsCVarRef(&value), copy) :
+                  ad->set(key, tvAsCVarRef(&value), copy);
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
+  decRefStr(key);
   tvRefcountedDecRef(&value);
   return arrayRefShuffle<false>(ad, retval, nullptr);
 }
@@ -253,27 +258,133 @@ StringData* convResToStrHelper(ResourceData* o) {
   return r;
 }
 
+TypedValue getMemoKeyHelper(TypedValue tv) {
+  auto var = HHVM_FN(serialize_memoize_param)(tvAsCVarRef(&tv));
+  auto res = var.asTypedValue();
+  tvRefcountedIncRef(res);
+  return *res;
+}
+
+inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
+                           const Func* func) {
+  raise_param_type_warning(func->name()->data(), argNum, expected, actual);
+
+  throw TVCoercionException(func, argNum, actual, expected);
+}
+
+bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
+  assert(cellIsPlausible(tv));
+
+  DataType type = tv.m_type;
+  if (type == KindOfArray || type == KindOfObject || type == KindOfResource) {
+    coerceCellFail(KindOfBoolean, type, argNum, func);
+    not_reached();
+  }
+
+  return cellToBool(tv);
+}
+
+int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
+  DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
+
+  if (type != KindOfDouble && type != KindOfInt64) {
+    coerceCellFail(KindOfDouble, KindOfString, argNum, func);
+    not_reached();
+  }
+
+  return reinterpretDblAsInt(sd->toDouble());
+}
+
+int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
+  assert(cellIsPlausible(tv));
+
+  switch (tv.m_type) {
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+      return convCellToDblHelper(tv);
+
+    case KindOfStaticString:
+    case KindOfString:
+      return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
+
+    case KindOfUninit:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
+      break;
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
+  }
+  not_reached();
+}
+
+int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
+  DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
+
+  if (type != KindOfDouble && type != KindOfInt64) {
+    coerceCellFail(KindOfInt64, KindOfString, argNum, func);
+    not_reached();
+  }
+
+  return sd->toInt64();
+}
+
+int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
+  assert(cellIsPlausible(tv));
+
+  switch (tv.m_type) {
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+      return cellToInt(tv);
+
+    case KindOfStaticString:
+    case KindOfString:
+      return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
+
+    case KindOfUninit:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
+      break;
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
+  }
+  not_reached();
+}
+
 const StaticString
   s_empty(""),
   s_1("1");
 
 StringData* convCellToStrHelper(TypedValue tv) {
   switch (tv.m_type) {
-  case KindOfUninit:
-  case KindOfNull:     return s_empty.get();
-  case KindOfBoolean:  return tv.m_data.num ? s_1.get() : s_empty.get();
-  case KindOfInt64:    return convIntToStrHelper(tv.m_data.num);
-  case KindOfDouble:   return convDblToStrHelper(tv.m_data.num);
-  case KindOfString:   tv.m_data.pstr->incRefCount();
-                       /* fallthrough */
-  case KindOfStaticString:
-                       return tv.m_data.pstr;
-  case KindOfArray:    raise_notice("Array to string conversion");
-                       return array_string.get();
-  case KindOfObject:   return convObjToStrHelper(tv.m_data.pobj);
-  case KindOfResource: return convResToStrHelper(tv.m_data.pres);
-  default:             not_reached();
+    case KindOfUninit:
+    case KindOfNull:          return s_empty.get();
+    case KindOfBoolean:       return tv.m_data.num ? s_1.get() : s_empty.get();
+    case KindOfInt64:         return convIntToStrHelper(tv.m_data.num);
+    case KindOfDouble:        return convDblToStrHelper(tv.m_data.num);
+    case KindOfString:        tv.m_data.pstr->incRefCount();
+                              /* fallthrough */
+    case KindOfStaticString:
+                              return tv.m_data.pstr;
+    case KindOfArray:         raise_notice("Array to string conversion");
+                              return array_string.get();
+    case KindOfObject:        return convObjToStrHelper(tv.m_data.pobj);
+    case KindOfResource:      return convResToStrHelper(tv.m_data.pres);
+    case KindOfRef:
+    case KindOfClass:         break;
   }
+  not_reached();
 }
 
 void raisePropertyOnNonObject() {
@@ -317,11 +428,11 @@ static bool VerifyTypeSlowImpl(const Class* cls,
       // we already know we're checking a non-null object with the
       // class `cls'.  We do however need to check for typedefs to
       // mixed.
-      if (def->kind == KindOfObject) {
+      if (def->any) {
+        return true;
+      } else if (def->kind == KindOfObject) {
         constraint = def->klass;
         if (constraint && cls->classof(constraint)) return true;
-      } else if (def->kind == KindOfAny) {
-        return true;
       }
     }
   }
@@ -338,7 +449,7 @@ void VerifyParamTypeSlow(const Class* cls,
 }
 
 void VerifyParamTypeCallable(TypedValue value, int param) {
-  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+  if (UNLIKELY(!HHVM_FN(is_callable)(tvAsCVarRef(&value)))) {
     VerifyParamTypeFail(param);
   }
 }
@@ -363,7 +474,7 @@ void VerifyRetTypeSlow(const Class* cls,
 }
 
 void VerifyRetTypeCallable(TypedValue value) {
-  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+  if (UNLIKELY(!HHVM_FN(is_callable)(tvAsCVarRef(&value)))) {
     VerifyRetTypeFail(value);
   }
 }
@@ -416,7 +527,7 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collectionContains(obj, key);
   }
-  const Array& arr = obj->o_toArray();
+  auto arr = obj->toArray();
   return ak_exist_string_impl(arr.get(), key);
 }
 
@@ -424,7 +535,7 @@ bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collectionContains(obj, key);
   }
-  const Array& arr = obj->o_toArray();
+  auto arr = obj->toArray();
   return arr.get()->exists(key);
 }
 
@@ -491,13 +602,11 @@ int32_t arrayVsize(ArrayData* ad) {
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx) {
-  bool visible, accessible;
-  TypedValue* val = cls->getSProp(ctx, name, visible, accessible);
+  auto const lookup = cls->getSProp(ctx, name);
 
-  if (UNLIKELY(!visible || !accessible)) {
-    return nullptr;
-  }
-  return val;
+  if (UNLIKELY(!lookup.prop || !lookup.accessible)) return nullptr;
+
+  return lookup.prop;
 }
 
 TypedValue* getSPropOrRaise(const Class* cls,
@@ -544,28 +653,39 @@ int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets) {
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
   int64_t ival;
   double dval;
-  switch (s->isNumericWithVal(ival, dval, 1)) {
-    case KindOfNull:
-      ival = switchBoundsCheck(0, base, nTargets);
-      break;
 
-    case KindOfDouble:
-      ival = switchBoundsCheck(dval, base, nTargets);
-      break;
+  [&] {
+    switch (s->isNumericWithVal(ival, dval, 1)) {
+      case KindOfNull:
+        ival = switchBoundsCheck(0, base, nTargets);
+        return;
+      case KindOfInt64:
+        ival = switchBoundsCheck(ival, base, nTargets);
+        return;
+      case KindOfDouble:
+        ival = switchBoundsCheck(dval, base, nTargets);
+        return;
 
-    case KindOfInt64:
-      ival = switchBoundsCheck(ival, base, nTargets);
-      break;
+      case KindOfUninit:
+      case KindOfBoolean:
+      case KindOfStaticString:
+      case KindOfString:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }();
 
-    default:
-      not_reached();
-  }
   decRefStr(s);
   return ival;
 }
 
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
-  int64_t ival = o->o_toInt64();
+  auto const ival = o->toInt64();
   decRefObj(o);
   return switchBoundsCheck(ival, base, nTargets);
 }
@@ -697,8 +817,7 @@ Cell lookupCnsUHelper(const TypedValue* tv,
       return c1;
     }
   }
-  c1.m_type = cns->m_type;
-  c1.m_data = cns->m_data;
+  tvDup(*cns, c1);
   return c1;
 }
 
@@ -792,7 +911,7 @@ void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   try {
     loadFuncContextImpl<OnFail::Fatal>(ArrNR(arr), preLiveAR, fp);
   } catch (...) {
-    arPreliveOverwriteCells(preLiveAR);
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
     throw;
   }
 }
@@ -851,7 +970,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
     inst->incRefCount();
     preLiveAR->setThis(inst);
   } catch (...) {
-    arPreliveOverwriteCells(preLiveAR);
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
     throw;
   }
 }
@@ -881,7 +1000,7 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
       return fpushStringFail(sd, preLiveAR);
     }
   } catch (...) {
-    arPreliveOverwriteCells(preLiveAR);
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfString>(sd);
     throw;
   }
 }
@@ -1137,6 +1256,68 @@ void raiseMissingArgument(const Func* func, int got) {
 
 RDS::Handle lookupClsRDSHandle(const StringData* name) {
   return NamedEntity::get(name)->getClassHandle();
+}
+
+void registerLiveObj(ObjectData* obj) {
+  assert(RuntimeOption::EnableObjDestructCall && obj->getVMClass()->getDtor());
+  g_context->m_liveBCObjs.insert(obj);
+}
+
+void unwindResumeHelper() {
+  tl_regState = VMRegState::CLEAN;
+  _Unwind_Resume(unwindRdsInfo->exn);
+}
+
+namespace MInstrHelpers {
+
+StringData* stringGetI(StringData* str, uint64_t x) {
+  if (LIKELY(x < str->size())) {
+    return str->getChar(x);
+  }
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning("Out of bounds");
+  }
+  return s_empty.get();
+}
+
+uint64_t pairIsset(c_Pair* pair, int64_t index) {
+  auto result = pair->get(index);
+  return result ? !cellIsNull(result) : false;
+}
+
+uint64_t vectorIsset(c_Vector* vec, int64_t index) {
+  auto result = vec->get(index);
+  return result ? !cellIsNull(result) : false;
+}
+
+void bindElemC(TypedValue* base, TypedValue key, RefData* val,
+               MInstrState* mis) {
+  base = HPHP::ElemD<false, true>(mis->tvScratch, mis->tvRef, base, key);
+  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+    tvBindRef(val, base);
+  }
+}
+
+void setWithRefElemC(TypedValue* base, TypedValue key, TypedValue* val,
+                     MInstrState* mis) {
+  base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, key);
+  if (base != &mis->tvScratch) {
+    tvDup(*val, *base);
+  } else {
+    assert(base->m_type == KindOfUninit);
+  }
+}
+
+void setWithRefNewElem(TypedValue* base, TypedValue* val,
+                       MInstrState* mis) {
+  base = NewElem<false>(mis->tvScratch, mis->tvRef, base);
+  if (base != &mis->tvScratch) {
+    tvDup(*val, *base);
+  } else {
+    assert(base->m_type == KindOfUninit);
+  }
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////

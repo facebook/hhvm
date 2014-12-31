@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/pdo_driver.h"
 #include <memory>
 #include <vector>
-#include "hphp/runtime/ext/ext_sqlite3.h"
+#include "hphp/runtime/ext/sqlite3/ext_sqlite3.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ public:
 private:
   sqlite3 *m_db;
   PDOSqliteError m_einfo;
-  std::vector<std::shared_ptr<c_SQLite3::UserDefinedFunc>> m_udfs;
+  std::vector<std::shared_ptr<SQLite3::UserDefinedFunc>> m_udfs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

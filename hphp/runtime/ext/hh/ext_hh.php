@@ -2,6 +2,19 @@
 
 namespace HH {
 
+/**
+  * Classes that implement this interface may be passed to
+  * serialize_memoize_param() and may be used as params on
+  * <<__Memoize>> functions
+  */
+interface IMemoizeParam {
+   /**
+   * Serialize this object to a string that can be used as a
+   * dictionary key to differentiate instances of this class.
+   */
+  public function getInstanceKey(): string;
+}
+
 /** Specify a map containing autoload data.
  *
  * The map has the form:
@@ -36,5 +49,13 @@ function autoload_set_paths(mixed $map, string $root): bool;
   */
 <<__Native>>
 function could_include(string $file) : bool;
+
+/**
+  * Takes an argument to a function marked with <<__Memoize>> and serializes it
+  * to a string usable as a unique cache key. This works with all builtin types
+  * and with objects that implement the HH\IMemoizeParam interface
+  */
+<<__Native>>
+function serialize_memoize_param(mixed $param): arraykey;
 
 }

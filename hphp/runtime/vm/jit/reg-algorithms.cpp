@@ -19,8 +19,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/util/slice.h"
 
-namespace HPHP { namespace JIT {
-using X64::Vunit;
+namespace HPHP { namespace jit {
 
 struct CycleInfo {
   PhysReg node;
@@ -37,11 +36,11 @@ bool cycleHasSIMDReg(const CycleInfo& cycle, MovePlan& moves) {
   return false;
 }
 
-smart::vector<VMoveInfo>
+jit::vector<VMoveInfo>
 doVregMoves(Vunit& unit, MovePlan& moves) {
   constexpr auto N = 64;
-  assert(std::max(X64::abi.all().size(), ARM::abi.all().size()) == N);
-  smart::vector<VMoveInfo> howTo;
+  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
+  jit::vector<VMoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);
   PhysReg::Map<int> outDegree;
@@ -132,10 +131,10 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
   return howTo;
 }
 
-smart::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
+jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   constexpr auto N = 64;
-  assert(std::max(X64::abi.all().size(), ARM::abi.all().size()) == N);
-  smart::vector<MoveInfo> howTo;
+  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
+  jit::vector<MoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);
   PhysReg::Map<int> outDegree;

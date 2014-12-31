@@ -61,6 +61,7 @@ var_dump( fwrite(@$fp,"data"));
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $filename = dirname(__FILE__)."/fwrite_error.tmp";
 unlink( $filename );

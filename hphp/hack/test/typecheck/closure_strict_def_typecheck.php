@@ -12,7 +12,8 @@
 
 class Foo {
   public function bar(): void {
-    /* Should not check this in strict mode */
+    /* Make sure we raise a type error for the nonexistent method access in the
+     * lambda below */
     $f = function() { Foo::f1(); };
   }
 }

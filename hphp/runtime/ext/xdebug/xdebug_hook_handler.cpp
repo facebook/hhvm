@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -36,22 +37,17 @@ typedef XDebugHookHandler::BreakInfo BreakInfo;
 ////////////////////////////////////////////////////////////////////////////////
 // Helpers
 
-// Helper that removes a breakpoint during the middle of iteration through the
-// unmatched set.
-static inline void remove_breakpoint_iter(hphp_hash_set<int>::iterator& iter) {
-  // TODO(#4489053) Implement. Need to remove the breakpoint and update the
-  // iterator. For now, this just disables.
-  BREAKPOINT_MAP.at(*iter).enabled = false;
-  ++iter;
-}
-
 // Helper that adds the given function breakpoint corresponding to the given
 // function and id as a breakpoint. If a duplicate breakpoint already exists,
 // it is overwritten.
 static void add_func_breakpoint(int id,
-                                const XDebugBreakpoint& bp,
+                                XDebugBreakpoint& bp,
                                 const Func* func) {
+  // Function id is added to the breakpoint once matched
   int func_id = func->getFuncId();
+  bp.funcId = func_id;
+
+  // Add the appropriate function map
   switch (bp.type) {
     case BreakType::CALL: {
       auto iter = FUNC_ENTRY.find(func_id);
@@ -76,12 +72,22 @@ static void add_func_breakpoint(int id,
   }
 }
 
+// Helper that adds the given line breakpoint that has been matched to the given
+// unit as a breakpoint. The line number is assumed to be valid in the unit.
+static void add_line_breakpoint(int id,
+                                XDebugBreakpoint& bp,
+                                const Unit* unit) {
+  string filepath = unit->filepath()->toCppString();
+  LINE_MAP[filepath].insert(std::make_pair(bp.line, id));
+  bp.unit = unit;
+}
+
 // Helper used when looping through the unmatched breakpoints. Checks if the
 // given function breakpoint matches the given function. If it does, it is
 // removed from the unmatched set using the given iterator. The passed iterator
 // reference is then modified to be the correct "next" iterator. Returns true
 // if there was a match, false otherwise.
-static bool check_func_match(const XDebugBreakpoint& bp,
+static bool check_func_match(XDebugBreakpoint& bp,
                              const Func* func,
                              hphp_hash_set<int>::iterator& iter) {
   if (func->fullName()->equal(bp.fullFuncName.get())) {
@@ -111,7 +117,7 @@ static const Unit* find_unit(String filename) {
 // XDebugThreadBreakpoints Implementation
 
 // Adding a breakpoint. Returns a unique id for the breakpoint.
-int XDebugThreadBreakpoints::addBreakpoint(const XDebugBreakpoint& bp) {
+int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
   int id = s_xdebug_breakpoints->m_nextBreakpointId;
 
   // php5 xdebug only accepts multiple breakpoints of the same type for
@@ -141,10 +147,7 @@ int XDebugThreadBreakpoints::addBreakpoint(const XDebugBreakpoint& bp) {
       if (!phpAddBreakPointLine(unit, bp.line)) {
         throw XDebugServer::ERROR_BREAKPOINT_INVALID;
       }
-
-      // Add the breakpoint to the line map
-      string filepath = unit->filepath()->toCppString();
-      LINE_MAP[filepath].insert(std::make_pair(bp.line, id));
+      add_line_breakpoint(id, bp, unit);
       break;
     }
     // Try to find the breakpoint's function
@@ -182,8 +185,109 @@ int XDebugThreadBreakpoints::addBreakpoint(const XDebugBreakpoint& bp) {
 
 // Removing a breakpoint with the given id.
 void XDebugThreadBreakpoints::removeBreakpoint(int id) {
-  // TODO(#4489053) Implement. For now, this just disables
-  BREAKPOINT_MAP.at(id).enabled = false;
+  // Try to grab the breakpoint
+  auto bp_iter = BREAKPOINT_MAP.find(id);
+  if (bp_iter == BREAKPOINT_MAP.end()) {
+    return;
+  }
+  const XDebugBreakpoint& bp = bp_iter->second;
+
+  // Remove the breakpoint from the unmatched set. This will return 0
+  // if the breakpoint is not in the set and so the breakpoint is not unmatched
+  if (UNMATCHED.erase(id) == 0) {
+    switch (bp.type) {
+      case BreakType::CALL:
+        FUNC_ENTRY.erase(bp.funcId);
+        phpRemoveBreakPointFuncEntry(Func::fromFuncId(bp.funcId));
+        break;
+      case BreakType::RETURN:
+        FUNC_EXIT.erase(bp.funcId);
+        phpRemoveBreakPointFuncExit(Func::fromFuncId(bp.funcId));
+        break;
+      case BreakType::EXCEPTION:
+        EXCEPTION_MAP.erase(bp.exceptionName.toCppString());
+        break;
+      case BreakType::LINE: {
+        string filepath = bp.unit->filepath()->toCppString();
+        auto& unit_map = LINE_MAP[filepath];
+
+        // Need to ensure we don't delete breakpoints on the same line
+        auto range = LINE_MAP[filepath].equal_range(bp.line);
+        for (auto iter = range.first; iter != range.second; ++iter) {
+          if (iter->second != id) {
+            continue;
+          }
+
+          // If this is the only breakpoint on this line, unregister the line
+          if (std::distance(range.first, range.second) == 1) {
+            phpRemoveBreakPointLine(bp.unit, bp.line);
+          }
+          unit_map.erase(iter);
+          break;
+        }
+        break;
+      }
+    }
+  }
+
+  // This deletes the breakpoint
+  BREAKPOINT_MAP.erase(id);
+}
+
+bool XDebugThreadBreakpoints::updateBreakpointLine(int id, int newLine) {
+  auto iter = BREAKPOINT_MAP.find(id);
+  if (iter == BREAKPOINT_MAP.end()) {
+    return false;
+  }
+  XDebugBreakpoint& bp = iter->second;
+
+  // Determine if we need to unregister the line
+  string filepath = bp.unit->filepath()->toCppString();
+  if (LINE_MAP[filepath].count(bp.line) == 1) {
+    phpRemoveBreakPointLine(bp.unit, bp.line);
+  }
+
+  // Register the new line
+  bp.line = newLine;
+  LINE_MAP[filepath].insert(std::make_pair(bp.line, id));
+  phpAddBreakPointLine(bp.unit, bp.line);
+  return true;
+}
+
+bool XDebugThreadBreakpoints::updateBreakpointState(int id, bool enabled) {
+  auto iter = BREAKPOINT_MAP.find(id);
+  if (iter == BREAKPOINT_MAP.end()) {
+    return false;
+  }
+
+  XDebugBreakpoint& bp = iter->second;
+  bp.enabled = enabled;
+  return true;
+}
+
+bool XDebugThreadBreakpoints::updateBreakpointHitCondition(
+  int id,
+  XDebugBreakpoint::HitCondition con
+) {
+  auto iter = BREAKPOINT_MAP.find(id);
+  if (iter == BREAKPOINT_MAP.end()) {
+    return false;
+  }
+
+  XDebugBreakpoint& bp = iter->second;
+  bp.hitCondition = con;
+  return true;
+}
+
+bool XDebugThreadBreakpoints::updateBreakpointHitValue(int id, int hitValue) {
+  auto iter = BREAKPOINT_MAP.find(id);
+  if (iter == BREAKPOINT_MAP.end()) {
+    return false;
+  }
+
+  XDebugBreakpoint& bp = iter->second;
+  bp.hitValue = hitValue;
+  return true;
 }
 
 IMPLEMENT_THREAD_LOCAL(XDebugThreadBreakpoints, s_xdebug_breakpoints);
@@ -193,8 +297,6 @@ IMPLEMENT_THREAD_LOCAL(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 
 // Helper that grabs the breakpoint ids for the given breakpoint type using the
 // given breakpoint info. Pushes the ids onto the passed vector.
-// TODO(#4489053) I know there is a way to using template magic to return a
-// generic iterator range over the values of the different types of maps.
 template<BreakType type>
 static void get_breakpoint_ids(const BreakInfo& bi, std::vector<int>& ids) {
   switch (type) {
@@ -227,8 +329,7 @@ static void get_breakpoint_ids(const BreakInfo& bi, std::vector<int>& ids) {
       }
 
       // Check if breakpoint's exception is registered.
-      const StringData* name = bi.exception->getVMClass()->name();
-      iter = EXCEPTION_MAP.find(name->toCppString());
+      iter = EXCEPTION_MAP.find(bi.name->toCppString());
       if (iter != EXCEPTION_MAP.end()) {
         ids.push_back(iter->second);
       }
@@ -280,18 +381,18 @@ static bool is_breakpoint_hit(XDebugBreakpoint& bp) {
   }
 }
 
-// getMessage method for exceptions
-static const StaticString s_GET_MESSAGE("getMessage");
-
 // Returns the message from the given breakpoint info
 template<BreakType type>
-const Variant get_breakpoint_message(const BreakInfo& bi) {
+static const Variant get_breakpoint_message(const BreakInfo& bi) {
   // In php5 xdebug, only messages have a string. But this could be extended to
   // be more useful.
-  if (type == BreakType::EXCEPTION) {
-    return bi.exception->o_invoke(s_GET_MESSAGE, init_null(), false);
-  }
-  return init_null();
+  return type == BreakType::EXCEPTION ?
+    Variant(bi.message->data()) : init_null();
+}
+
+DebugHookHandler* XDebugHookHandler::GetInstance() {
+  static DebugHookHandler* instance = new XDebugHookHandler;
+  return instance;
 }
 
 template<BreakType type>
@@ -315,6 +416,7 @@ void XDebugHookHandler::onBreak(const BreakInfo& bi) {
     }
 
     // We only break once per location
+    bool temporary = bp.temporary; // breakpoint could be deleted
     if (!have_broken) {
       have_broken = true;
 
@@ -327,10 +429,21 @@ void XDebugHookHandler::onBreak(const BreakInfo& bi) {
     }
 
     // Remove the breakpoint if it was temporary
-    if (bp.temporary) {
+    if (temporary) {
       XDEBUG_REMOVE_BREAKPOINT(id);
     }
   }
+}
+
+// Exception::getMessage method name
+static const StaticString s_GET_MESSAGE("getMessage");
+
+void XDebugHookHandler::onExceptionThrown(ObjectData* exception) {
+  // Grab the exception name and message
+  const StringData* name = exception->getVMClass()->name();
+  const Variant msg = exception->o_invoke(s_GET_MESSAGE, init_null(), false);
+  const String msg_str = msg.isNull() ? empty_string() : msg.toString();
+  onExceptionBreak(name, msg.isNull() ? nullptr : msg_str.get());
 }
 
 void XDebugHookHandler::onFlowBreak(const Unit* unit, int line) {
@@ -350,7 +463,7 @@ void XDebugHookHandler::onFileLoad(Unit* unit) {
 
   // Loop over all unmatched breakpoints
   for (auto iter = UNMATCHED.begin(); iter != UNMATCHED.end();) {
-    const XDebugBreakpoint& bp = BREAKPOINT_MAP.at(*iter);
+    XDebugBreakpoint& bp = BREAKPOINT_MAP.at(*iter);
     if (bp.type != BreakType::LINE || bp.fileName != filename) {
       ++iter;
       continue;
@@ -360,11 +473,11 @@ void XDebugHookHandler::onFileLoad(Unit* unit) {
     // in the dbgp protocol at this point. php5 xdebug doesn't do anything,
     // so we just cleanup
     if (phpAddBreakPointLine(unit, bp.line)) {
-      string filepath = unit->filepath()->toCppString();
-      LINE_MAP[filepath].insert(std::make_pair(bp.line, *iter));
+      add_line_breakpoint(*iter, bp, unit);
       iter = UNMATCHED.erase(iter);
     } else {
-      remove_breakpoint_iter(iter);
+      BREAKPOINT_MAP.erase(*iter);
+      iter = UNMATCHED.erase(iter);
     }
   }
 }
@@ -382,7 +495,7 @@ void XDebugHookHandler::onDefClass(const Class* cls) {
     // Grab the breakpoint, ignore it if it is the wrong type or the classname
     // doesn't match. Note that a classname does not have to exist as the user
     // can specify method bar on class Foo with "Foo::bar"
-    const XDebugBreakpoint& bp = BREAKPOINT_MAP.at(*iter);
+    XDebugBreakpoint& bp = BREAKPOINT_MAP.at(*iter);
     if ((bp.type != BreakType::CALL && bp.type != BreakType::RETURN) ||
         (!bp.className.isNull() &&
          !className->equal(bp.className.toString().get()))) {
@@ -402,7 +515,7 @@ void XDebugHookHandler::onDefClass(const Class* cls) {
 void XDebugHookHandler::onDefFunc(const Func* func) {
   // Loop through unmatched function breakpoints
   for (auto iter = UNMATCHED.begin(); iter != UNMATCHED.end();) {
-    const XDebugBreakpoint& bp = BREAKPOINT_MAP.at(*iter);
+    XDebugBreakpoint& bp = BREAKPOINT_MAP.at(*iter);
     if (bp.type != BreakType::CALL && bp.type != BreakType::RETURN) {
       ++iter;
       continue;

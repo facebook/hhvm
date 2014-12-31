@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(pgo);
 
@@ -242,6 +242,11 @@ void regionizeFunc(const Func* func,
 
   std::sort(nodes.begin(), nodes.end(),
             [&](TransID tid1, TransID tid2) -> bool {
+              if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg") {
+                auto bcOff1 = profData->transStartBcOff(tid1);
+                auto bcOff2 = profData->transStartBcOff(tid2);
+                if (bcOff1 != bcOff2) return bcOff1 < bcOff2;
+              }
               if (cfg.weight(tid1) != cfg.weight(tid2)) {
                 return cfg.weight(tid1) > cfg.weight(tid2);
               }
@@ -271,6 +276,8 @@ void regionizeFunc(const Func* func,
       } else if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg") {
         region = selectWholeCFG(newHead, profData, cfg, selectedSet,
                                 &selectedVec);
+      } else {
+        always_assert(0 && "Invalid value for EvalJitPGORegionSelector");
       }
       FTRACE(6, "regionizeFunc: selected region to cover node {}\n{}\n",
              newHead, show(*region));

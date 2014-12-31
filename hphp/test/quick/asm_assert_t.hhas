@@ -100,7 +100,7 @@ stuff:
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "returns_int"
+  FPushObjMethodD 0 "returns_int" NullThrows
   FCall 0
   AssertRATStk 0 Int
   UnboxR

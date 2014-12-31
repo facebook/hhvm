@@ -26,7 +26,7 @@
 namespace HPHP {
 struct Func;
 
-namespace JIT {
+namespace jit {
 
 struct NormalizedInstruction;
 
@@ -91,5 +91,5 @@ struct ActRecState {
   State currentState();
 };
 
-} } // HPHP::JIT
+} } // HPHP::jit
 #endif

@@ -90,20 +90,25 @@ protected:
     bool error = true;
     std::string errorMsg;
 
-    if (abort) {
-      m_handler->abortRequest(transport);
-      return;
-    }
+    SCOPE_EXIT { m_handler->teardownRequest(transport); };
 
     try {
+      transport->onRequestStart(job->getStartTimer());
+      m_handler->setupRequest(transport);
+
+      if (abort) {
+        m_handler->abortRequest(transport);
+        return;
+      }
       std::string cmd = transport->getCommand();
       cmd = std::string("/") + cmd;
+
       if (server->shouldHandle(cmd)) {
-        transport->onRequestStart(job->getStartTimer());
         m_handler->handleRequest(transport);
         error = false;
       } else {
         transport->sendString("Not Found", 404);
+        transport->onSendEnd();
         return;
       }
     } catch (Exception &e) {
@@ -124,6 +129,7 @@ protected:
       } else {
         transport->sendString(RuntimeOption::FatalErrorMessage, 500);
       }
+      transport->onSendEnd();
     }
   }
 

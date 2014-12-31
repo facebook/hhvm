@@ -31,8 +31,7 @@ class B extends A {
     parent::__construct('fooled');
   }
 
-  protected function setX(string $x): void{
+  protected function setX(string $x): void {
   }
-  
-}
 
+}

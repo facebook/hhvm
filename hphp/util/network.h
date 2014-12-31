@@ -22,6 +22,8 @@
 #include <sys/socket.h>
 #include <stdlib.h>
 
+#include <folly/IPAddress.h>
+
 /**
  * Network utility functions.
  */
@@ -69,13 +71,14 @@ private:
 };
 
 bool safe_gethostbyname(const char *address, HostEnt &result);
-std::string safe_inet_ntoa(struct in_addr &in);
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
  * Get local machine's primary IP address.
  */
 std::string GetPrimaryIP();
+std::string GetPrimaryIPv4();
+std::string GetPrimaryIPv6();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

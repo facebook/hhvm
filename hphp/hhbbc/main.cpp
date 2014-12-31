@@ -22,16 +22,16 @@
 #include <memory>
 #include <cstdint>
 #include <algorithm>
-
-#include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
-
 #include <unistd.h>
 #include <exception>
 #include <utility>
 #include <vector>
 
-#include "folly/ScopeGuard.h"
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
+
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/hhvm/process-init.h"
@@ -53,6 +53,7 @@ std::string output_repo;
 std::string input_repo;
 bool logging = true;
 
+
 //////////////////////////////////////////////////////////////////////
 
 void parse_options(int argc, char** argv) {
@@ -61,7 +62,8 @@ void parse_options(int argc, char** argv) {
   auto const defaultThreadCount =
     std::max<long>(sysconf(_SC_NPROCESSORS_ONLN) - 1, 1);
 
-  std::vector<std::string> interceptable;
+  std::vector<std::string> interceptable_fns;
+  std::vector<std::string> trace_fns;
   bool no_logging = false;
 
   po::options_description basic("Options");
@@ -89,8 +91,11 @@ void parse_options(int argc, char** argv) {
       po::value(&parallel::work_chunk)->default_value(120),
       "Work unit size for parallelism")
     ("interceptable",
-      po::value(&interceptable)->composing(),
+      po::value(&interceptable_fns)->composing(),
       "Add an interceptable function")
+    ("trace",
+      po::value(&trace_fns)->composing(),
+      "Add a function to increase tracing level on (for debugging)")
     ;
 
   // Some extra esoteric options that aren't exposed in --help for
@@ -108,6 +113,8 @@ void parse_options(int argc, char** argv) {
                                 po::value(&options.ContextSensitiveInterp))
     ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
     ("constant-prop",           po::value(&options.ConstantProp))
+    ("constant-fold-builtins",  po::value(&options.ConstantFoldBuiltins))
+    ("peephole",                po::value(&options.Peephole))
     ("local-dce",               po::value(&options.LocalDCE))
     ("global-dce",              po::value(&options.GlobalDCE))
     ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))
@@ -119,10 +126,13 @@ void parse_options(int argc, char** argv) {
 
     ("hard-const-prop",         po::value(&options.HardConstProp))
     ("hard-type-hints",         po::value(&options.HardTypeHints))
+    ("hard-return-type-hints",  po::value(&options.HardReturnTypeHints))
     ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
     ("disallow-dyn-var-env-funcs",
                                 po::value(&options.DisallowDynamicVarEnvFuncs))
     ("all-funcs-interceptable", po::value(&options.AllFuncsInterceptable))
+    ("analyze-pseudomains",     po::value(&options.AnalyzePseudomains))
+    ("analyze-public-statics",  po::value(&options.AnalyzePublicStatics))
     ;
 
   po::options_description all;
@@ -159,14 +169,26 @@ void parse_options(int argc, char** argv) {
     std::exit(0);
   }
 
+  options.InterceptableFunctions = make_method_map(interceptable_fns);
+  options.TraceFunctions         = make_method_map(trace_fns);
+  logging = !no_logging;
+}
+
+void validate_options() {
   if (parallel::work_chunk <= 10 || parallel::num_threads < 1) {
     std::cerr << "Invalid parallelism configuration.\n";
     std::exit(1);
   }
 
-  options.InterceptableFunctions.insert(begin(interceptable),
-                                        end(interceptable));
-  logging = !no_logging;
+  if (options.AnalyzePublicStatics && !options.AnalyzePseudomains) {
+    std::cerr << "-fanalyze-public-statics requires -fanalyze-pseudomains\n";
+    std::exit(1);
+  }
+
+  if (options.RemoveUnusedLocals && !options.GlobalDCE) {
+    std::cerr << "-fremove-unused-locals requires -fglobal-dce\n";
+    std::exit(1);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -190,7 +212,7 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   }
 
   return parallel::map(
-    Repo::get().enumerateUnits(),
+    Repo::get().enumerateUnits(RepoIdCentral, false, true),
     [&] (const std::pair<std::string,MD5>& kv) {
       return Repo::get().urp().loadEmitter(kv.first, kv.second);
     }
@@ -208,6 +230,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   auto gd                     = Repo::GlobalData{};
   gd.UsedHHBBC                = true;
   gd.HardTypeHints            = options.HardTypeHints;
+  gd.HardReturnTypeHints      = options.HardReturnTypeHints;
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;
 
@@ -251,11 +274,12 @@ int main(int argc, char** argv) try {
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
   RuntimeOption::Load(ini, config);
-  RuntimeOption::RepoLocalPath     = "/tmp/hhbbc.repo";
-  RuntimeOption::RepoCentralPath   = input_repo;
-  RuntimeOption::RepoLocalMode     = "--";
-  RuntimeOption::RepoJournal       = "memory";
-  RuntimeOption::RepoCommit        = false;
+  RuntimeOption::RepoLocalPath       = "/tmp/hhbbc.repo";
+  RuntimeOption::RepoCentralPath     = input_repo;
+  RuntimeOption::RepoLocalMode       = "--";
+  RuntimeOption::RepoJournal         = "memory";
+  RuntimeOption::RepoCommit          = false;
+  RuntimeOption::EvalJit             = false;
 
   register_process_init();
   initialize_repo();

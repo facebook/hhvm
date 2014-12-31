@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/hash.h"
 
 #include <folly/experimental/Singleton.h>
 
@@ -55,8 +56,8 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 
 void ProcessInit() {
   // Create the global mcg object
-  JIT::mcg = new JIT::MCGenerator();
-  JIT::mcg->initUniqueStubs();
+  jit::mcg = new jit::MCGenerator();
+  jit::mcg->initUniqueStubs();
 
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
@@ -175,6 +176,23 @@ void ProcessInit() {
   Option::WholeProgram = wp;
 
   folly::SingletonVault::singleton()->registrationComplete();
+}
+
+// Check if the binary is compatible with the running environment.
+void checkBuild() {
+#ifndef incl_HPHP_HASH_H_
+#error "Need to include hphp/util/hash.h to get USE_SSECRC correctly"
+#endif
+#ifdef USE_SSECRC
+  // Check for SSE4.2 support by the current processor
+  int32_t a {1}, b, c, d;
+  asm volatile ("cpuid" : "+a" (a),  "=b" (b), "=c" (c), "=d" (d));
+  if ((c & (1 << 20)) == 0) {
+    Logger::Error("SSE 4.2 is not supported in this system. "
+                 "Try rebuilding without USE_SSECRC.");
+    _exit(1);
+  }
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

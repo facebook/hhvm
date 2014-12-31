@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-util.h"
 
 #include <algorithm>
 #include <boost/dynamic_bitset.hpp>
@@ -119,6 +120,7 @@ void removeDeadCode(Vunit& unit) {
   auto blocks = sortBlocks(unit);
   jit::vector<LiveSet> livein(unit.blocks.size());
   LiveSet live(unit.next_vr);
+
   auto pass = [&](bool mutate) {
     bool changed = false;
     for (auto blockIt = blocks.end(); blockIt != blocks.begin();) {
@@ -159,18 +161,32 @@ void removeDeadCode(Vunit& unit) {
     }
     return changed;
   };
+
   // analyze until livein reaches a fixed point
   while (pass(false)) {}
-  // nop-out useless instructions
-  if (pass(true)) {
-    for (auto b : blocks) {
-      auto& code = unit.blocks[b].code;
-      auto end = std::remove_if(code.begin(), code.end(), [&](Vinstr& inst) {
-        return inst.op == Vinstr::nop;
-      });
-      code.erase(end, code.end());
-    }
+  auto const changed = pass(true);
+  removeTrivialNops(unit);
+  if (changed) {
     printUnit(kVasmDCELevel, "after vasm-dead", unit);
+  }
+}
+
+/*
+ * A very simple dead code elimination pass that just removes trivial nop
+ * instructions.  We run this before any other passes because it allows
+ * code-gen to create things like self-copies or self-lea's without affect on
+ * optimizations downstream.  (In particular early passes like optimizeExits
+ * that are looking for specific vasm sequences inside of a block.)
+ */
+void removeTrivialNops(Vunit& unit) {
+  for (auto& b : unit.blocks) {
+    b.code.erase(
+      std::remove_if(
+        begin(b.code), end(b.code),
+        is_trivial_nop
+      ),
+      end(b.code)
+    );
   }
 }
 

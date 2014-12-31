@@ -68,6 +68,7 @@ private:
 enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
 
 // passes
+void removeTrivialNops(Vunit&);
 void allocateRegisters(Vunit&, const Abi&);
 void optimizeExits(Vunit&);
 void optimizeJmps(Vunit&);

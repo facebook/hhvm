@@ -1207,6 +1207,7 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
 }
 
 void Vasm::optimizeX64() {
+  removeTrivialNops(m_unit);
   fuseBranches(m_unit);
   optimizeExits(m_unit);
 }

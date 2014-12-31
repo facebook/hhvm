@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/base/arch.h"
 #include "hphp/util/assertions.h"
@@ -450,15 +451,6 @@ Vxls::~Vxls() {
   }
 }
 
-bool is_nop(copy& i) { return i.s == i.d; }
-bool is_nop(copy2& i) { return i.s0 == i.d0 && i.s1 == i.d1; }
-
-bool is_nop(lea& i) {
-  return i.s.disp == 0 && (
-         (i.s.base == i.d && !i.s.index.isValid()) ||
-         (!i.s.base.isValid() && i.s.index == i.d && i.s.scale == 1));
-}
-
 /*
  * Extended Linear Scan is based on Wimmer & Franz "Linear Scan Register
  * Allocation on SSA Form". As currently written, it also works on non-ssa
@@ -526,12 +518,9 @@ void Vxls::allocate() {
   for (auto b : blocks) {
     auto& code = unit.blocks[b].code;
     auto end = std::remove_if(code.begin(), code.end(), [&](Vinstr& inst) {
-      return (inst.op == Vinstr::copy && is_nop(inst.copy_)) ||
-             (inst.op == Vinstr::copy2 && is_nop(inst.copy2_)) ||
-             (inst.op == Vinstr::lea && is_nop(inst.lea_)) ||
-             (inst.op == Vinstr::copyargs) || // we lowered it
-             (inst.op == Vinstr::nop) || // we inserted it
-             (inst.op == Vinstr::phidef); // we lowered it
+      return is_trivial_nop(inst) ||
+             inst.op == Vinstr::copyargs || // we lowered it
+             inst.op == Vinstr::phidef; // we lowered it
     });
     code.erase(end, code.end());
   }

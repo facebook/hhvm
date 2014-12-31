@@ -227,9 +227,9 @@ let replace_color input =
   | (Some Partial, str) -> "<partial>"^str^"</partial>"
   | (None, str) -> str
 
-let print_colored fn =
+let print_colored fn type_acc =
   let content = cat (Relative_path.to_absolute fn) in
-  let pos_level_l = mk_level_list (Some fn) !Typing_defs.type_acc in
+  let pos_level_l = mk_level_list (Some fn) type_acc in
   let raw_level_l =
     rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) pos_level_l in
   let results = ColorFile.go content raw_level_l in
@@ -237,8 +237,8 @@ let print_colored fn =
   then Tty.print (ClientColorFile.replace_colors results)
   else print_string (List.map replace_color results |> String.concat "")
 
-let print_coverage fn =
-  let counts = ServerCoverageMetric.count_exprs fn !Typing_defs.type_acc in
+let print_coverage fn type_acc =
+  let counts = ServerCoverageMetric.count_exprs fn type_acc in
   ClientCoverageMetric.go false (Some (Leaf counts))
 
 let print_prolog funs classes typedefs consts =
@@ -275,18 +275,29 @@ let main_hack { filename; suggest; color; coverage; prolog; _ } =
         SMap.add cname (Relative_path.Set.singleton filename) acc
       end classes SMap.empty in
       Typing_decl.make_env nenv all_classes filename;
-      Typing_defs.accumulate_types := color || coverage;
-      List.iter (fun (_, fname) -> Typing_check_service.type_fun fname) funs;
-      List.iter (fun (_, cname) -> Typing_check_service.type_class cname) classes;
-      List.iter (fun (_, x) -> Typing_check_service.check_typedef x) typedefs;
-      if prolog
-      then print_prolog funs classes typedefs consts;
-      if color
-      then print_colored filename;
-      if coverage
-      then print_coverage filename;
-      if suggest
-      then suggest_and_print filename funs classes typedefs consts
+      let check () =
+        List.iter (fun (_, fname) ->
+          Typing_check_service.type_fun fname) funs;
+        List.iter (fun (_, cname) ->
+          Typing_check_service.type_class cname) classes;
+        List.iter (fun (_, x) ->
+          Typing_check_service.check_typedef x) typedefs;
+      in
+      if color || coverage then begin
+        let type_acc = ref [] in
+        Typing.with_expr_hook (fun e ty ->
+          type_acc := (fst e, ty) :: !type_acc) check;
+        if color
+        then print_colored filename !type_acc;
+        if coverage
+        then print_coverage filename !type_acc;
+      end else begin
+        check ();
+        if prolog
+        then print_prolog funs classes typedefs consts;
+        if suggest
+        then suggest_and_print filename funs classes typedefs consts
+      end
     end
   in
   if not prolog then begin

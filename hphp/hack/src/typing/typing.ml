@@ -46,6 +46,17 @@ let debug_last_pos = ref Pos.none
 let debug_print_last_pos _ = print_endline (Pos.string (Pos.to_absolute
   !debug_last_pos))
 
+(****************************************************************************)
+(* Hooks *)
+(****************************************************************************)
+
+let expr_hook = ref None
+
+let with_expr_hook hook f = with_context
+  ~enter: (fun () -> expr_hook := Some hook)
+  ~exit: (fun () -> expr_hook := None)
+  ~do_: f
+
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
@@ -715,10 +726,9 @@ and expr env e =
 and raw_expr in_cond env e =
   debug_last_pos := fst e;
   let env, ty = expr_ in_cond false env e in
-  if !accumulate_types
-  then begin
-    type_acc := (fst e, Typing_expand.fully_expand env ty) :: !type_acc
-  end;
+  let () = match !expr_hook with
+    | Some f -> f e (Typing_expand.fully_expand env ty)
+    | None -> () in
   TUtils.save_infer env (fst e) ty;
   env, ty
 

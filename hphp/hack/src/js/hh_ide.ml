@@ -396,12 +396,11 @@ let hh_file_summary fn =
                         ])
 
 let hh_hack_coloring fn =
-  Typing_defs.accumulate_types := true;
-  ignore (hh_check fn);
+  let type_acc = ref [] in
+  Typing.with_expr_hook (fun e ty -> type_acc := (fst e, ty) :: !type_acc)
+    (fun () -> ignore (hh_check fn));
   let fn = Relative_path.create Relative_path.Root fn in
-  let result = mk_level_list (Some fn) !Typing_defs.type_acc in
-  Typing_defs.accumulate_types := false;
-  Typing_defs.type_acc := [];
+  let result = mk_level_list (Some fn) !type_acc in
   let result = rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) result in
   let result = ColorFile.go (Hashtbl.find files fn) result in
   let result = List.map (fun input ->

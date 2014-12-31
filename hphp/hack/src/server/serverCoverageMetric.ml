@@ -26,19 +26,17 @@ let count_exprs fn pos_ty_m =
 (* Returns a list of (file_name, assoc list of counts) *)
 let get_coverage neutral fnl =
   SharedMem.invalidate_caches();
-  Typing_defs.accumulate_types := true;
   let files_info = FileInfoStore.load () in
   let file_counts = List.map begin fun fn ->
     match Relative_path.Map.get fn files_info with
     | None -> None
     | Some defs ->
-        assert (!Typing_defs.type_acc = []);
-        ServerIdeUtils.check_defs defs;
-        let counts = count_exprs fn !Typing_defs.type_acc in
-        Typing_defs.type_acc := [];
+        let type_acc = ref [] in
+        Typing.with_expr_hook (fun e ty -> type_acc := (fst e, ty) :: !type_acc)
+          (fun () -> ServerIdeUtils.check_defs defs);
+        let counts = count_exprs fn !type_acc in
         Some (fn, counts)
   end fnl |> cat_opts in
-  Typing_defs.accumulate_types := false;
   file_counts :: neutral
 
 (* Inserts value v into a trie with the key path_l. At each existing node with

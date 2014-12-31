@@ -290,9 +290,3 @@ let (accumulate_method_calls_result: (Pos.t * string) list ref) = ref []
 
 (* Set to true when we are trying to infer the missing type hints. *)
 let is_suggest_mode = ref false
-
-(*****************************************************************************)
-(* Print types mode *)
-(*****************************************************************************)
-let accumulate_types = ref false
-let (type_acc: (Pos.t * ty) list ref) = ref []

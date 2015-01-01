@@ -2873,12 +2873,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         Label preCond(e);
         Label& preInc = registerContinue(fs, region.get(), 1, false)->m_label;
         Label& fail = registerBreak(fs, region.get(), 1, false)->m_label;
-        if (ExpressionPtr condExp = fs->getCondExp()) {
-          Label tru;
+        ExpressionPtr condExp = fs->getCondExp();
+        auto emit_cond = [&] (Label& tru, bool truFallthrough) {
+          if (!condExp) return;
           Emitter condEmitter(condExp, m_ue, *this);
-          visitIfCondition(condExp, condEmitter, tru, fail, true);
-          if (tru.isUsed()) tru.set(e);
-        }
+          visitIfCondition(condExp, condEmitter, tru, fail, truFallthrough);
+        };
+        Label top;
+        emit_cond(top, true);
+        top.set(e);
         {
           enterRegion(region);
           SCOPE_EXIT { leaveRegion(region); };
@@ -2888,7 +2891,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         if (visit(fs->getIncExp())) {
           emitPop(e);
         }
-        e.Jmp(preCond);
+        if (!condExp) {
+          e.Jmp(top);
+        } else {
+          emit_cond(top, false);
+        }
         if (fail.isUsed()) fail.set(e);
         return false;
       }
@@ -3302,22 +3309,24 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       case Statement::KindOfWhileStatement: {
         auto region = createRegion(s, Region::Kind::LoopOrSwitch);
         WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
-        Label& preCond = registerContinue(ws, region.get(), 1, false)->m_label;
-        preCond.set(e);
+        ExpressionPtr condExp(ws->getCondExp());
+        Label& lcontinue = registerContinue(ws, region.get(), 1,
+          false)->m_label;
         Label& fail = registerBreak(ws, region.get(), 1, false)->m_label;
-        {
-          Label tru;
-          ExpressionPtr c(ws->getCondExp());
-          Emitter condEmitter(c, m_ue, *this);
-          visitIfCondition(c, condEmitter, tru, fail, true);
-          if (tru.isUsed()) tru.set(e);
-        }
+        Label top;
+        auto emit_cond = [&] (Label& tru, bool truFallthrough) {
+          Emitter condEmitter(condExp, m_ue, *this);
+          visitIfCondition(condExp, condEmitter, tru, fail, truFallthrough);
+        };
+        emit_cond(top, true);
+        top.set(e);
         {
           enterRegion(region);
           SCOPE_EXIT { leaveRegion(region); };
           visit(ws->getBody());
         }
-        e.Jmp(preCond);
+        if (lcontinue.isUsed()) lcontinue.set(e);
+        emit_cond(top, false);
         if (fail.isUsed()) fail.set(e);
         return false;
       }

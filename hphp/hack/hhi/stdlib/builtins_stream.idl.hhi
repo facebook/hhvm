@@ -33,16 +33,16 @@ function stream_register_wrapper($protocol, $classname) { }
 function stream_wrapper_register($protocol, $classname) { }
 function stream_wrapper_restore($protocol) { }
 function stream_wrapper_unregister($protocol) { }
-function stream_resolve_include_path($filename, $context = null_object) { }
+function stream_resolve_include_path($filename, $context = null) { }
 function stream_select(&$read, &$write, &$except, $vtv_sec, $tv_usec = 0) { }
 function stream_set_blocking($stream, $mode) { }
 function stream_set_timeout($stream, $seconds, $microseconds = 0) { }
 function stream_set_write_buffer($stream, $buffer) { }
 function set_file_buffer($stream, $buffer) { }
 function stream_socket_accept($server_socket, $timeout = 0.0, &$peername = null) { }
-function stream_socket_server($local_socket, &$errnum = null, &$errstr = null, $flags = 0, $context = null_object) { }
-function stream_socket_client($remote_socket, &$errnum = null, &$errstr = null, $timeout = 0.0, $flags = 0, $context = null_object) { }
-function stream_socket_enable_crypto($stream, $enable, $crypto_type = 0, $session_stream = null_object) { }
+function stream_socket_server($local_socket, &$errnum = null, &$errstr = null, $flags = 0, $context = null) { }
+function stream_socket_client($remote_socket, &$errnum = null, &$errstr = null, $timeout = 0.0, $flags = 0, $context = null) { }
+function stream_socket_enable_crypto($stream, $enable, $crypto_type = 0, $session_stream = null) { }
 function stream_socket_get_name($handle, $want_peer) { }
 function stream_socket_pair($domain, $type, $protocol) { }
 function stream_socket_recvfrom($socket, $length, $flags = 0, $address = null) { }

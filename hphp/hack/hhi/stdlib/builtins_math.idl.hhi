@@ -8,10 +8,14 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-define('PHP_ROUND_HALF_UP', 0);
-define('PHP_ROUND_HALF_DOWN', 0);
-define('PHP_ROUND_HALF_EVEN', 0);
-define('PHP_ROUND_HALF_ODD', 0);
+const PHP_ROUND_HALF_UP = 0;
+const PHP_ROUND_HALF_DOWN = 0;
+const PHP_ROUND_HALF_EVEN = 0;
+const PHP_ROUND_HALF_ODD = 0;
+
+const M_PI = 3.1415926535898;
+const M_E  = 2.718281828459;
+
 function pi() { }
 function min($value, ...) { }
 function max($value, ...) { }

@@ -8,10 +8,31 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
+const DATE_ATOM    = "Y-m-d\\TH:i:sP";
+const DATE_COOKIE  = "l, d-M-y H:i:s T";
+const DATE_ISO8601 = "Y-m-d\\TH:i:sO";
+const DATE_RFC1036 = "D, d M y H:i:s O";
+const DATE_RFC1123 = "D, d M Y H:i:s O";
+const DATE_RFC2822 = "D, d M Y H:i:s O";
+const DATE_RFC3339 = "Y-m-d\\TH:i:sP";
+const DATE_RFC822  = "D, d M y H:i:s O";
+const DATE_RFC850  = "l, d-M-y H:i:s T";
+const DATE_RSS     = "D, d M Y H:i:s O";
+const DATE_W3C     = "Y-m-d\\TH:i:sP";
+
+const DAY_1 = 131079;
+const DAY_2 = 131080;
+const DAY_3 = 131081;
+const DAY_4 = 131082;
+const DAY_5 = 131083;
+const DAY_6 = 131084;
+const DAY_7 = 131085;
+
 function checkdate($month, $day, $year) { }
 function date_add($datetime, $interval) { }
-function date_create_from_format($format, $time, $timezone = null_object) { }
-function date_create($time = null, $timezone = null_object) { }
+function date_create_from_format($format, $time, $timezone = null) { }
+function date_create($time = null, $timezone = null) { }
 function date_date_set($object, $year, $month, $day) { }
 function date_default_timezone_get() { }
 function date_default_timezone_set($name) { }
@@ -71,8 +92,8 @@ class DateTime {
   const RSS = '';
   const W3C = '';
   public function add($interval) { }
-  public function __construct($time = "now", $timezone = null_object) { }
-  static public function createFromFormat($format, $time, $timezone = null_object) { }
+  public function __construct($time = "now", $timezone = null) { }
+  static public function createFromFormat($format, $time, $timezone = null) { }
   public function diff($datetime2, $absolute = false) { }
   public function format($format) { }
   static public function getLastErrors() { }

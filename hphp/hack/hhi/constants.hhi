@@ -13,6 +13,7 @@ const string PHP_EOL = "\n";
 
 const int PHP_INT_MAX = (1 << 63) - 1;
 const int PHP_INT_MIN = -1 << 63;
+const int PHP_INT_SIZE = 8;
 
 const int E_ERROR = 1;
 const int E_WARNING = 1 << 1;
@@ -25,6 +26,7 @@ const int E_COMPILE_WARNING = 1 << 7;
 const int E_USER_ERROR = 1 << 8;
 const int E_USER_WARNING = 1 << 9;
 const int E_USER_NOTICE = 1 << 10;
+const int E_RECOVERABLE_ERROR = 1 << 12;
 const int E_DEPRECATED = 1 << 13;
 const int E_USER_DEPRECATED = 1 << 14;
 const int E_ALL = (1 << 15) - 1;

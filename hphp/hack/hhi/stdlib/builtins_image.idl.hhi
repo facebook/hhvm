@@ -8,6 +8,28 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
+const IMAGETYPE_BMP = 6;
+const IMAGETYPE_COUNT = 18;
+const IMAGETYPE_GIF = 1;
+const IMAGETYPE_IFF = 14;
+const IMAGETYPE_JB2 = 12;
+const IMAGETYPE_JP2 = 10;
+const IMAGETYPE_JPC = 9;
+const IMAGETYPE_JPEG = 2;
+const IMAGETYPE_JPEG2000 = 9;
+const IMAGETYPE_JPX = 11;
+const IMAGETYPE_PNG = 3;
+const IMAGETYPE_PSD = 5;
+const IMAGETYPE_SWC = 13;
+const IMAGETYPE_SWF = 4;
+const IMAGETYPE_TIFF_II = 7;
+const IMAGETYPE_TIFF_MM = 8;
+const IMAGETYPE_UNKNOWN = 0;
+const IMAGETYPE_WBMP = 15;
+const IMAGETYPE_XBM = 16;
+const IMAGETYPE_ICO = 17;
+
 function gd_info() { }
 function getimagesize($filename, &$imageinfo = null) { }
 function image_type_to_extension($imagetype, $include_dot = true) { }

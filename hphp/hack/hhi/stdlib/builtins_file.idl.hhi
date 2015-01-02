@@ -11,12 +11,40 @@
 const STDIN = 0;
 const STDOUT = 0;
 const STDERR = 0;
+
 const PATHINFO_DIRNAME = 0;
 const PATHINFO_BASENAME = 0;
 const PATHINFO_EXTENSION = 0;
 const PATHINFO_FILENAME = 0;
 const DIRECTORY_SEPARATOR = "/";
 const PATH_SEPARATOR = ":";
+
+const UPLOAD_ERR_OK = 0;
+const UPLOAD_ERR_INI_SIZE = 1;
+const UPLOAD_ERR_FORM_SIZE = 2;
+const UPLOAD_ERR_PARTIAL = 3;
+const UPLOAD_ERR_NO_FILE = 4;
+const UPLOAD_ERR_NO_TMP_DIR = 6;
+const UPLOAD_ERR_CANT_WRITE = 7;
+const UPLOAD_ERR_EXTENSION = 8;
+
+const FILE_APPEND = 0;
+const FILE_USE_INCLUDE_PATH = 0;
+const FILE_IGNORE_NEW_LINES = 0;
+const FILE_NO_DEFAULT_CONTEXT = 0;
+const FILE_SKIP_EMPTY_LINES = 0;
+
+const LOCK_EX = 0;
+const LOCK_SH = 0;
+const LOCK_UN = 0;
+
+const SEEK_SET = 0;
+const SEEK_CUR = 0;
+const SEEK_END = 0;
+
+const INI_SCANNER_NORMAL = 0;
+const INT_SCANNER_RAW = 0;
+
 function fopen($filename, $mode, $use_include_path = false, $context = null) { }
 function popen($command, $mode) { }
 function fclose($handle) { }

@@ -184,6 +184,6 @@ function socket_recvfrom($socket, &$buf, $len, $flags, &$name, &$port = 0) { }
 function socket_shutdown($socket, $how = 0) { }
 function socket_close($socket) { }
 function socket_strerror($errnum) { }
-function socket_last_error($socket = null_object) { }
-function socket_clear_error($socket = null_object) { }
+function socket_last_error($socket = null) { }
+function socket_clear_error($socket = null) { }
 function getaddrinfo($host, $port, $family = 0, $socktype = 0, $protocol = 0, $flags = 0) { }

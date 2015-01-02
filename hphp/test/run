@@ -718,7 +718,7 @@ class Status {
                 ((ord($str[$pos+1]) & 0xC0) == 0x80) &&
                 ((ord($str[$pos+2]) & 0xC0) == 0x80)) {
         // U+0800 - U+FFFF Upper Basic Multilingual Plane
-        $ret .= substr($std, $pos, 3);
+        $ret .= substr($str, $pos, 3);
         $pos += 3;
       } elseif ((($co & 0xF8) == 0xF0) &&
                 (($len - $pos) > 3) &&

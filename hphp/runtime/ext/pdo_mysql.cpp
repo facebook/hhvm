@@ -482,7 +482,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
   }
 
   if (stmt && stmt->stmt()) {
-    pdo_raise_impl_error(stmt->dbh, NULL, pdo_err[0], einfo->errmsg);
+    pdo_raise_impl_error(stmt->dbh, nullptr, pdo_err[0], einfo->errmsg);
   } else {
     Array info = Array::Create();
     info.append(String(*pdo_err, CopyString));
@@ -1143,8 +1143,11 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {
-            pdo_raise_impl_error(m_conn, this, "HY105",
-                                 "Expected a stream resource");
+            pdo_raise_impl_error(
+              sp_PDOConnection(m_conn),
+              this,
+              "HY105",
+              "Expected a stream resource");
             return false;
           }
         }

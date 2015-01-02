@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include <hphp/runtime/ext/asio/static_wait_handle.h>
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/smart-object.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 
@@ -112,7 +112,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
 
     assert(child->instanceof(c_WaitableWaitHandle::classof()));
     auto const child_wh = static_cast<c_WaitableWaitHandle*>(child);
-    SmartObject<c_GenArrayWaitHandle> my_wh(newobj<c_GenArrayWaitHandle>());
+    SmartPtr<c_GenArrayWaitHandle> my_wh(newobj<c_GenArrayWaitHandle>());
     my_wh->initialize(exception, depCopy, current_pos, child_wh);
 
     auto const session = AsioSession::Get();
@@ -120,7 +120,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
       session->onGenArrayCreate(my_wh.get(), inputDependencies);
     }
 
-    return my_wh;
+    return Object(std::move(my_wh));
   }
 
   // Down here, everything was finished.  If there's an exception,

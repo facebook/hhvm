@@ -19,7 +19,7 @@
 #define incl_HPHP_PDO_DRIVER_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/base/smart-object.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -233,7 +233,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 class PDOStatement;
-typedef SmartResource<PDOStatement> sp_PDOStatement;
+typedef SmartPtr<PDOStatement> sp_PDOStatement;
 
 /* represents a connection to a database */
 class PDOConnection : public SweepableResourceData {
@@ -387,7 +387,7 @@ public:
   /* defaults for fetches */
   PDOFetchType default_fetch_type;
 };
-typedef SmartResource<PDOConnection> sp_PDOConnection;
+typedef SmartPtr<PDOConnection> sp_PDOConnection;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -443,7 +443,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 class c_pdo;
-typedef SmartObject<c_pdo> sp_pdo;
+typedef SmartPtr<c_pdo> sp_pdo;
 
 /* represents a prepared statement */
 class PDOStatement : public SweepableResourceData {
@@ -613,6 +613,8 @@ public:
 
 int pdo_parse_params(PDOStatement *stmt, const String& in, String &out);
 void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
+                          const char *sqlstate, const char *supp);
+void pdo_raise_impl_error(sp_PDOConnection dbh, PDOStatement* stmt,
                           const char *sqlstate, const char *supp);
 void throw_pdo_exception(const Variant& code, const Variant& info,
                          const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);

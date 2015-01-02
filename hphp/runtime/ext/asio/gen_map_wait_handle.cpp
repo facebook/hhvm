@@ -54,7 +54,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
     throw e;
   }
   assert(dependencies.getObjectData()->instanceof(c_Map::classof()));
-  auto deps = SmartObject<c_Map>::attach(
+  auto deps = SmartPtr<c_Map>::attach(
     c_Map::Clone(dependencies.getObjectData()));
   for (ssize_t iter_pos = deps->iter_begin();
        deps->iter_valid(iter_pos);
@@ -88,7 +88,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
       assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      SmartObject<c_GenMapWaitHandle> my_wh(newobj<c_GenMapWaitHandle>());
+      SmartPtr<c_GenMapWaitHandle> my_wh(newobj<c_GenMapWaitHandle>());
       my_wh->initialize(exception, deps.get(), iter_pos, child_wh);
 
       AsioSession* session = AsioSession::Get();
@@ -96,7 +96,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
         session->onGenMapCreate(my_wh.get(), dependencies);
       }
 
-      return my_wh;
+      return Object(std::move(my_wh));
     }
   }
 

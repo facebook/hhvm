@@ -138,10 +138,33 @@ public:
   }
 
   /**
-   * Reset the raw pointer.
+   * Reset the raw pointer.  This will increment the ref count on ptr
+   * (when it is non-null) and decrement the ref count on the old pointer
+   * being replaced.
    */
-  void reset() {
-    operator=((T*)nullptr);
+  void reset(T* ptr = nullptr) {
+    operator=(ptr);
+  }
+
+  /**
+   * Release the raw pointer.
+   * Note: be careful when using this.  It does not decrement the
+   * ref count on m_px.
+   */
+  T* detach() {
+    T* ptr = m_px;
+    m_px = nullptr;
+    return ptr;
+  }
+
+  /**
+   * Take ownership of a pointer without touching the ref count.
+   */
+  template <typename Y>
+  static SmartPtr<Y> attach(Y* ptr) {
+    SmartPtr<Y> sp;
+    sp.m_px = ptr;
+    return sp;
   }
 
 protected:

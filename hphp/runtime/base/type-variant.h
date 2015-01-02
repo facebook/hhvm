@@ -106,6 +106,8 @@ struct Variant : private TypedValue {
 
   template <typename T>
   explicit Variant(const SmartPtr<T>& ptr) : Variant(ptr.get()) { }
+  template <typename T>
+  explicit Variant(SmartPtr<T>&& ptr) : Variant(ptr.detach()) { }
 
   /*
    * Creation constructor from ArrayInit that avoids a null check.
@@ -606,7 +608,6 @@ struct Variant : private TypedValue {
   /* implicit */ operator String () const = delete;
   /* implicit */ operator Array  () const = delete;
   /* implicit */ operator Object () const = delete;
-  template<typename T> /* implicit */ operator SmartObject<T>() const = delete;
 
   /**
    * Explicit type conversions
@@ -818,12 +819,7 @@ struct Variant : private TypedValue {
   void set(const Resource& v) { return set(v.get()); }
 
   template<typename T>
-  void set(const SmartObject<T> &v) {
-    return set(v.get());
-  }
-
-  template<typename T>
-  void set(const SmartResource<T> &v) {
+  void set(const SmartPtr<T> &v) {
     return set(v.get());
   }
 

@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
 
-#include "hphp/runtime/base/smart-object.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio_blockable.h"
@@ -55,7 +55,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
     throw e;
   }
   assert(dependencies.getObjectData()->instanceof(c_Vector::classof()));
-  auto deps = SmartObject<c_Vector>::attach(
+  auto deps = SmartPtr<c_Vector>::attach(
     c_Vector::Clone(dependencies.getObjectData()));
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
     Cell* current = deps->at(iter_pos);
@@ -84,13 +84,13 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
       assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      SmartObject<c_GenVectorWaitHandle> my_wh(newobj<c_GenVectorWaitHandle>());
+      SmartPtr<c_GenVectorWaitHandle> my_wh(newobj<c_GenVectorWaitHandle>());
       my_wh->initialize(exception, deps.get(), iter_pos, child_wh);
       AsioSession* session = AsioSession::Get();
       if (UNLIKELY(session->hasOnGenVectorCreateCallback())) {
         session->onGenVectorCreate(my_wh.get(), dependencies);
       }
-      return my_wh;
+      return Object(std::move(my_wh));
     }
   }
 

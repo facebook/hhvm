@@ -74,7 +74,7 @@ int64_t TimeStamp::Get(bool &error, int hou, int min, int sec, int mon, int day,
                    int yea, bool gmt) {
   DateTime dt(Current());
   if (gmt) {
-    dt.setTimezone(SmartResource<TimeZone>(newres<TimeZone>("UTC")));
+    dt.setTimezone(SmartPtr<TimeZone>(newres<TimeZone>("UTC")));
   }
   dt.set(hou, min, sec, mon, day, yea);
   return dt.toTimeStamp(error);

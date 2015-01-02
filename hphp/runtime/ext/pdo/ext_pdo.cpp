@@ -489,10 +489,10 @@ void throw_pdo_exception(const Variant& code, const Variant& info,
   throw Object(obj);
 }
 
-void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
+void pdo_raise_impl_error(sp_PDOConnection dbh, PDOStatement* stmt,
                           const char *sqlstate, const char *supp) {
   PDOErrorType *pdo_err = &dbh->error_code;
-  if (stmt.get()) {
+  if (stmt) {
     pdo_err = &stmt->error_code;
   }
   strcpy(*pdo_err, sqlstate);
@@ -513,12 +513,19 @@ void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
   }
 }
 
-static void pdo_handle_error(sp_PDOConnection dbh, sp_PDOStatement stmt) {
+void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
+                          const char *sqlstate, const char *supp) {
+  pdo_raise_impl_error(dbh, stmt.get(), sqlstate, supp);
+}
+
+namespace {
+
+void pdo_handle_error(sp_PDOConnection dbh, PDOStatement* stmt) {
   if (dbh->error_mode == PDO_ERRMODE_SILENT) {
     return;
   }
   PDOErrorType *pdo_err = &dbh->error_code;
-  if (stmt.get()) {
+  if (stmt) {
     pdo_err = &stmt->error_code;
   }
 
@@ -531,7 +538,7 @@ static void pdo_handle_error(sp_PDOConnection dbh, sp_PDOStatement stmt) {
   if (dbh->support(PDOConnection::MethodFetchErr)) {
     info = Array::Create();
     info.append(String(*pdo_err, CopyString));
-    if (dbh->fetchErr(stmt.get(), info)) {
+    if (dbh->fetchErr(stmt, info)) {
       if (info.exists(1)) {
         native_code = info[1].toInt64();
       }
@@ -552,6 +559,12 @@ static void pdo_handle_error(sp_PDOConnection dbh, sp_PDOStatement stmt) {
   } else {
     throw_pdo_exception(String(*pdo_err, CopyString), info, "%s", err.c_str());
   }
+}
+
+void pdo_handle_error(sp_PDOConnection dbh, sp_PDOStatement stmt) {
+  pdo_handle_error(dbh, stmt.get());
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1115,7 +1128,7 @@ static Variant HHVM_METHOD(PDO, prepare, const String& statement,
   PDOStatementData *pdostmt = Native::data<PDOStatementData>(ret.get());
 
   if (data->m_dbh->preparer(statement, &pdostmt->m_stmt, options)) {
-    PDOStatement *stmt = pdostmt->m_stmt.get();
+    auto stmt = pdostmt->m_stmt;
     assert(stmt);
 
     /* unconditionally keep this for later reference */
@@ -1477,7 +1490,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
   PDOStatementData *pdostmt = Native::data<PDOStatementData>(ret.get());
 
   if (data->m_dbh->preparer(sql, &pdostmt->m_stmt, Array())) {
-    PDOStatement *stmt = pdostmt->m_stmt.get();
+    auto stmt = pdostmt->m_stmt;
     assert(stmt);
 
     /* unconditionally keep this for later reference */
@@ -1513,7 +1526,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
       }
     }
     /* something broke */
-    data->m_dbh->query_stmt = stmt;
+    data->m_dbh->query_stmt = stmt.get();
     PDO_HANDLE_STMT_ERR(stmt);
   } else {
     PDO_HANDLE_DBH_ERR(data->m_dbh);
@@ -2104,7 +2117,7 @@ static int register_bound_param(const Variant& paramno, VRefParam param,
                                 int64_t type, int64_t max_value_len,
                                 const Variant& driver_params,
                                 sp_PDOStatement stmt, bool is_param) {
-  SmartResource<PDOBoundParam> p(newres<PDOBoundParam>());
+  SmartPtr<PDOBoundParam> p(newres<PDOBoundParam>());
   // need to make sure this is NULL, in case a fatal errors occurs before it's
   // set inside really_register_bound_param
   p->stmt = NULL;
@@ -2744,7 +2757,7 @@ static Variant HHVM_METHOD(PDOStatement, execute,
   if (!params.empty()) {
     data->m_stmt->bound_params.reset();
     for (ArrayIter iter(params); iter; ++iter) {
-      SmartResource<PDOBoundParam> param(newres<PDOBoundParam>());
+      SmartPtr<PDOBoundParam> param(newres<PDOBoundParam>());
       param->param_type = PDO_PARAM_STR;
       param->parameter = iter.second();
       param->stmt = NULL;

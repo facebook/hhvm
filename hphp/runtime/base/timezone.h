@@ -30,7 +30,6 @@ extern "C" {
 namespace HPHP {
 
 class Array;
-template <typename T> class SmartResource;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -45,7 +44,7 @@ public:
    * Get/set current timezone that controls how local time is interpreted.
    */
   static String CurrentName();            // current timezone's name
-  static SmartResource<TimeZone> Current(); // current timezone
+  static SmartPtr<TimeZone> Current(); // current timezone
   static bool SetCurrent(const String& name);   // returns false if invalid
 
   /**
@@ -115,7 +114,7 @@ public:
   /**
    * Make a copy of this timezone object, so it can be changed independently.
    */
-  SmartResource<TimeZone> cloneTimeZone() const;
+  SmartPtr<TimeZone> cloneTimeZone() const;
 
 protected:
   friend class DateTime;

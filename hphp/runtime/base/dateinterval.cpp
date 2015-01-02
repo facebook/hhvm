@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -165,9 +166,10 @@ String DateInterval::format(const String& format_spec) {
   return s.detach();
 }
 
-SmartResource<DateInterval> DateInterval::cloneDateInterval() const {
-  if (!m_di) return newres<DateInterval>();
-  return newres<DateInterval>(timelib_rel_time_clone(m_di.get()));
+SmartPtr<DateInterval> DateInterval::cloneDateInterval() const {
+  if (!m_di) return SmartPtr<DateInterval>(newres<DateInterval>());
+  return SmartPtr<DateInterval>(
+    newres<DateInterval>(timelib_rel_time_clone(m_di.get())));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -329,7 +329,9 @@ module Env = struct
     match v with
     | None ->
       (match genv.in_mode with
-        | Ast.Mstrict -> Errors.unbound_name p x
+        | Ast.Mstrict -> Errors.unbound_name p x `const
+        | Ast.Mpartial | Ast.Mdecl when not genv.assume_php ->
+          Errors.unbound_name p x `const
         | Ast.Mdecl | Ast.Mpartial -> ()
       );
       p, Ident.make x
@@ -342,7 +344,7 @@ module Env = struct
     if List.mem name tparaml then Errors.generic_at_runtime p;
     ()
 
-  let canonicalize genv env_and_names (p, name) =
+  let canonicalize genv env_and_names (p, name) kind =
     let env, canon_names = !env_and_names in
     if SMap.mem name env then (p, name)
     else (
@@ -358,8 +360,8 @@ module Env = struct
           (match genv.in_mode with
             | Ast.Mpartial | Ast.Mdecl
                 when genv.assume_php || name = SN.Classes.cUnknown -> ()
-            | Ast.Mstrict -> Errors.unbound_name p name
-            | Ast.Mpartial | Ast.Mdecl -> Errors.unbound_name p name
+            | Ast.Mstrict -> Errors.unbound_name p name kind
+            | Ast.Mpartial | Ast.Mdecl -> Errors.unbound_name p name kind
           );
           p, name
     )
@@ -494,16 +496,16 @@ module Env = struct
       let mem (_, nm) = SMap.mem (canon_key nm) (canon_map) in
       match mem fq_x, mem global_x with
       | true, _ -> (* Found in the current namespace *)
-        let fq_x = canonicalize genv genv_sect fq_x in
+        let fq_x = canonicalize genv genv_sect fq_x `func in
         get_name genv pos_map fq_x
       | _, true -> (* Found in the global namespace *)
-        let global_x = canonicalize genv genv_sect global_x in
+        let global_x = canonicalize genv genv_sect global_x `func in
         get_name genv pos_map global_x
       | false, false ->
         (* Not found. Pick the more specific one to error on. *)
         get_name genv pos_map fq_x
     end else
-      let fq_x = canonicalize genv genv_sect fq_x in
+      let fq_x = canonicalize genv genv_sect fq_x `func in
       get_name genv pos_map fq_x
 
   let global_const (genv, env) x  =
@@ -518,7 +520,7 @@ module Env = struct
     (* Generic names are not allowed to shadow class names *)
     check_no_runtime_generic genv x;
     let x = Namespaces.elaborate_id genv.namespace x in
-    let pos, name = canonicalize genv genv.classes x in
+    let pos, name = canonicalize genv genv.classes x `cls in
     (* Don't let people use strictly internal classes
      * (except when they are being declared in .hhi files) *)
     if name = SN.Classes.cHH_BuiltinEnum &&

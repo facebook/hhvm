@@ -19,7 +19,6 @@ type options = {
   should_detach    : bool;
   convert          : Path.path option;
   load_save_opt    : env_store_action option;
-  version          : bool;
   start_time       : float;
   gc_control       : Gc.control; (* configures only the workers *)
   assume_php       : bool;

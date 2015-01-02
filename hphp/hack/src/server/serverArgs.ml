@@ -25,7 +25,6 @@ type options = {
   should_detach    : bool;
   convert          : Path.path option;
   load_save_opt    : env_store_action option;
-  version          : bool;
   start_time       : float;
   (* Configures only the workers. Workers can have more relaxed GC configs as
    * they are short-lived processes *)
@@ -138,6 +137,10 @@ let parse_options () =
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
+  if !version then begin
+    print_string Build_id.build_id_ohai;
+    exit 0
+  end;
   (* json implies check *)
   let check_mode = !check_mode || !json_mode; in
   (* Conversion mode implies check *)
@@ -158,7 +161,6 @@ let parse_options () =
     should_detach = !should_detach;
     convert       = convert;
     load_save_opt = !load_save_opt;
-    version       = !version;
     start_time    = !start_time;
     gc_control    = make_gc_control config;
     assume_php    = config_assume_php config;
@@ -172,7 +174,6 @@ let default_options ~root = {
   should_detach = false;
   convert = None;
   load_save_opt = None;
-  version = false;
   start_time = Unix.time ();
   gc_control = ServerConfig.gc_control;
   assume_php = true;

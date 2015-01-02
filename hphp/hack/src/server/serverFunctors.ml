@@ -232,10 +232,6 @@ end = struct
 
   let start () =
     let options = Program.parse_options() in
-    if options.ServerArgs.version then begin
-      print_string Build_id.build_id_ohai;
-      exit 0
-    end;
     try
       if ServerArgs.should_detach options
       then daemonize options;

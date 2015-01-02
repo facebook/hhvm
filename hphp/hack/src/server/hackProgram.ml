@@ -201,7 +201,9 @@ module Program : Server.SERVER_PROGRAM = struct
           Unix.close cli
       end
     with e ->
-      Printf.fprintf stderr "Error: %s\n%!" (Printexc.to_string e);
+      let msg = Printexc.to_string e in
+      EventLogger.master_exception msg;
+      Printf.fprintf stderr "Error: %s\n%!" msg;
       Unix.close cli
 
   let handle_connection genv env socket =

@@ -2271,7 +2271,7 @@ and parameter_default env =
 (*****************************************************************************)
 
 and expr env =
-  let e1 = expr_atomic env in
+  let e1 = expr_atomic ~allow_class:false ~class_const:false env in
   let e2 = expr_remain env e1 in
   e2
 
@@ -2532,7 +2532,7 @@ and try_xhp_enum_hint env =
 (* Expressions *)
 (*****************************************************************************)
 
-and expr_atomic ?(allow_class=false) env =
+and expr_atomic ~allow_class ~class_const env =
   let tok = L.token env.file env.lb in
   let pos = Pos.make env.file env.lb in
   match tok with
@@ -2565,7 +2565,7 @@ and expr_atomic ?(allow_class=false) env =
       with_priority env Tat expr
   | Tword ->
       let word = Lexing.lexeme env.lb in
-      expr_atomic_word ~allow_class env pos word
+      expr_atomic_word ~allow_class ~class_const env pos word
   | Tlp ->
       (match try_short_lambda env with
       | None ->
@@ -2597,18 +2597,18 @@ and expr_atomic ?(allow_class=false) env =
       error_expect env "expression";
       pos, Null
 
-and expr_atomic_word ~allow_class env pos = function
+and expr_atomic_word ~allow_class ~class_const env pos = function
   | "class" when not allow_class ->
       error_expect env "expression";
       pos, Null
   | "final" | "abstract" | "interface" | "trait" ->
       error_expect env "expression";
       pos, Null
-  | "true"  ->
+  | "true" when not class_const ->
       pos, True
-  | "false" ->
+  | "false" when not class_const ->
       pos, False
-  | "null"  ->
+  | "null" when not class_const ->
       pos, Null
   | "array" ->
       expr_array env pos
@@ -2637,6 +2637,14 @@ and expr_atomic_word ~allow_class env pos = function
           ("Parse error: "^r^" is supported only as a toplevel "^
           "declaration");
       expr_import r env pos
+  | x when not class_const && String.lowercase x = "true" ->
+      pos, True
+  | x when not class_const && String.lowercase x = "false" ->
+      pos, False
+  | x when not class_const && String.lowercase x = "null" ->
+      pos, Null
+  | x when String.lowercase x = "array" ->
+      expr_array env pos
   | x ->
       pos, Id (pos, x)
 
@@ -2713,7 +2721,7 @@ and expr_colcol env e1 =
   end
 
 and expr_colcol_remain ~allow_class env e1 cname =
-  match expr_atomic env ~allow_class with
+  match expr_atomic env ~allow_class ~class_const:true with
   | _, Lvar x ->
       btw e1 x, Class_get (cname, x)
   | _, Id x ->

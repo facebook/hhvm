@@ -687,3 +687,9 @@
     install_root: twital
     test_root: twital
     test_find_mode: token
+  yii2:
+    url: https://github.com/yiisoft/yii2.git
+    branch: "master"
+    commit: 84b42abad0b447bd25415ac707cef9d56012c9e2
+    install_root: yii2
+    test_root: yii2

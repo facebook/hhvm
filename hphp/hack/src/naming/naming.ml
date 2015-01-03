@@ -71,7 +71,7 @@ type genv = {
   classes: (map * canon_names_map) ref;
 
   (* Set of function names defined, and their positions *)
-  funs: map ref;
+  funs: (map * canon_names_map) ref;
 
   (* Set of typedef names defined, and their position *)
   typedefs: map ref;
@@ -153,7 +153,7 @@ type lenv = {
 type env = {
   iassume_php: bool;
   iclasses: map * canon_names_map;
-  ifuns: map;
+  ifuns: map * canon_names_map;
   itypedefs: map;
   iconsts: map;
 }
@@ -171,9 +171,12 @@ let get_classes env =
 (*****************************************************************************)
 
 let predef_funs = ref SMap.empty
+let predef_funnames = ref SMap.empty
 let predef_fun x =
   let var = Pos.none, Ident.make x in
+  let canon_x = canon_key x in
   predef_funs := SMap.add x var !predef_funs;
+  predef_funnames := SMap.add canon_x x !predef_funnames;
   x
 
 let is_int    = predef_fun SN.StdlibFunctions.is_int
@@ -195,7 +198,7 @@ let predef_tests = List.fold_right SSet.add predef_tests_list SSet.empty
 let empty = {
   iassume_php = true;
   iclasses  = SMap.empty, SMap.empty;
-  ifuns     = !predef_funs;
+  ifuns     = !predef_funs, !predef_funnames;
   itypedefs = SMap.empty;
   iconsts   = SMap.empty;
 }
@@ -322,7 +325,7 @@ module Env = struct
     y
 
   let lookup genv env (p, x) =
-    let v = SMap.get x !env in
+    let v = SMap.get x env in
     match v with
     | None ->
       (match genv.in_mode with
@@ -437,12 +440,44 @@ module Env = struct
   let get_name genv namespace x =
     ignore (lookup genv namespace x); x
 
-  (* For dealing with namespace fallback on functions and constants. *)
+  (* For dealing with namespace fallback on constants *)
   let elaborate_and_get_name_with_fallback mk_dep genv genv_sect x =
     let fq_x = Namespaces.elaborate_id genv.namespace x in
     let need_fallback =
       genv.namespace.Namespace_env.ns_name <> None &&
       not (String.contains (snd x) '\\') in
+    let pos_map = !(genv_sect) in
+    if need_fallback then begin
+      let global_x = (fst x, "\\" ^ (snd x)) in
+      (* Explicitly add dependencies on both of the consts we could be
+       * referring to here. Normally naming doesn't have to deal with
+       * deps at all -- they are added during typechecking just by the
+       * nature of looking up a class or function name. However, we're
+       * flattening namespaces here, and the fallback behavior of
+       * consts means that we might suddenly be referring to a
+       * different const without any change to the callsite at
+       * all. Adding both dependencies explicitly captures this
+       * action-at-a-distance. *)
+      Typing_deps.add_idep genv.droot (mk_dep (snd fq_x));
+      Typing_deps.add_idep genv.droot (mk_dep (snd global_x));
+      let mem (_, s) = SMap.mem s pos_map in
+      match mem fq_x, mem global_x with
+      (* Found in the current namespace *)
+      | true, _ -> get_name genv pos_map fq_x
+      (* Found in the global namespace *)
+      | _, true -> get_name genv pos_map global_x
+      (* Not found. Pick the more specific one to error on. *)
+      | false, false -> get_name genv pos_map fq_x
+    end else
+      get_name genv pos_map fq_x
+
+  (* For dealing with namespace fallback on functions *)
+  let elaborate_and_get_name_with_canonicalized_fallback mk_dep genv genv_sect x =
+    let fq_x = Namespaces.elaborate_id genv.namespace x in
+    let need_fallback =
+      genv.namespace.Namespace_env.ns_name <> None &&
+      not (String.contains (snd x) '\\') in
+    let pos_map, canon_map = !(genv_sect) in
     if need_fallback then begin
       let global_x = (fst x, "\\" ^ (snd x)) in
       (* Explicitly add dependencies on both of the functions we could be
@@ -455,16 +490,21 @@ module Env = struct
        * captures this action-at-a-distance. *)
       Typing_deps.add_idep genv.droot (mk_dep (snd fq_x));
       Typing_deps.add_idep genv.droot (mk_dep (snd global_x));
-      let mem (_, s) = SMap.mem s !(genv_sect) in
+      (* canonicalize the names being searched *)
+      let mem (_, nm) = SMap.mem (canon_key nm) (canon_map) in
       match mem fq_x, mem global_x with
-      (* Found in the current namespace *)
-      | true, _ -> get_name genv genv_sect fq_x
-      (* Found in the global namespace *)
-      | _, true -> get_name genv genv_sect global_x
-      (* Not found. Pick the more specific one to error on. *)
-      | false, false -> get_name genv genv_sect fq_x
+      | true, _ -> (* Found in the current namespace *)
+        let fq_x = canonicalize genv genv_sect fq_x in
+        get_name genv pos_map fq_x
+      | _, true -> (* Found in the global namespace *)
+        let global_x = canonicalize genv genv_sect global_x in
+        get_name genv pos_map global_x
+      | false, false ->
+        (* Not found. Pick the more specific one to error on. *)
+        get_name genv pos_map fq_x
     end else
-      get_name genv genv_sect fq_x
+      let fq_x = canonicalize genv genv_sect fq_x in
+      get_name genv pos_map fq_x
 
   let global_const (genv, env) x  =
     elaborate_and_get_name_with_fallback
@@ -487,7 +527,7 @@ module Env = struct
     pos, name
 
   let fun_id (genv, _) x =
-    elaborate_and_get_name_with_fallback
+    elaborate_and_get_name_with_canonicalized_fallback
       (* Not just Dep.Fun, but Dep.FunName. This forces an incremental full
        * redeclaration of this class if the name changes, not just a
        * retypecheck -- the name that is referred to here actually changes as
@@ -538,7 +578,7 @@ module Env = struct
 
   let new_fun_id genv x =
     if SMap.mem (snd x) !predef_funs then () else
-    ignore (resilient_new_var genv.funs x)
+    ignore (resilient_new_canon_var genv.funs x)
 
   let new_class_id genv x =
     ignore (resilient_new_canon_var genv.classes x)
@@ -570,13 +610,12 @@ end
 (*****************************************************************************)
 (* Updating the environment *)
 (*****************************************************************************)
-
 let remove_decls env (funs, classes, typedefs, consts) =
   let funs = SSet.diff funs predef_tests in
-  let ifuns = SSet.fold SMap.remove funs env.ifuns in
   let canonicalize_set = (fun elt acc -> SSet.add (canon_key elt) acc) in
   let class_namekeys = SSet.fold canonicalize_set classes SSet.empty in
   let typedef_namekeys = SSet.fold canonicalize_set typedefs SSet.empty in
+  let fun_namekeys = SSet.fold canonicalize_set funs SSet.empty in
   let iclassmap, iclassnames = env.iclasses in
   let iclassmap, iclassnames =
     SSet.fold SMap.remove classes iclassmap,
@@ -586,10 +625,15 @@ let remove_decls env (funs, classes, typedefs, consts) =
     SSet.fold SMap.remove typedefs iclassmap,
     SSet.fold SMap.remove typedef_namekeys iclassnames
   in
+  let ifunmap, ifunnames = env.ifuns in
+  let ifunmap, ifunnames =
+    SSet.fold SMap.remove funs ifunmap,
+    SSet.fold SMap.remove fun_namekeys ifunnames
+  in
   let itypedefs = SSet.fold SMap.remove typedefs env.itypedefs in
   let iconsts = SSet.fold SMap.remove consts env.iconsts in
   { env with
-    ifuns     = ifuns;
+    ifuns     = ifunmap, ifunnames;
     iclasses  = iclassmap, iclassnames;
     itypedefs = itypedefs;
     iconsts   = iconsts;
@@ -2208,7 +2252,7 @@ let ndecl_file fn
    * This way, when the user removes foo.php, A.php and B.php are recomputed
    * and the naming environment is in a sane state.
    *)
-  let failed = add_files_to_rename nenv failed funs nenv.ifuns in
+  let failed = add_files_to_rename nenv failed funs (fst nenv.ifuns) in
   let failed = add_files_to_rename nenv failed classes (fst nenv.iclasses) in
   let failed = add_files_to_rename nenv failed typedefs nenv.itypedefs in
   let failed = add_files_to_rename nenv failed consts nenv.iconsts in

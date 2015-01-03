@@ -687,3 +687,9 @@
     install_root: twital
     test_root: twital
     test_find_mode: token
+  silex:
+    url: https://github.com/silexphp/Silex.git
+    branch: "1.2.0"
+    commit: f64ac7b8c859a9f4df572c0cd0e4348097475002
+    install_root: silex
+    test_root: silex

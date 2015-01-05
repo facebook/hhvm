@@ -687,7 +687,7 @@
     install_root: twital
     test_root: twital
     test_find_mode: token
-  yii2:
+  yii2: # Checking out bd57514 [2.0.1-dev] instead of 84b42ab [2.0.1], Because it produces a fatal error in composer
     url: https://github.com/yiisoft/yii2.git
     branch: "master"
     commit: bd5751425e1c267c0b2b9dbf6f705b1f436439a4

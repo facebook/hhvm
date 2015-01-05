@@ -2310,6 +2310,14 @@ void Class::setInitializers() {
   m_callsCustomInstanceInit = method && method->isBuiltin();
 }
 
+void Class::checkInterfaceConstraints() {
+  if (UNLIKELY(m_interfaces.contains(String("Iterator").get()) &&
+      m_interfaces.contains(String("IteratorAggregate").get()))) {
+    raise_error("Class %s cannot implement both IteratorAggregate and Iterator"
+                " at the same time", name()->data());
+  }
+}
+
 // Checks if interface methods are OK:
 //  - there's no requirement if this is a trait, interface, or abstract class
 //  - a non-abstract class must implement all methods from interfaces it
@@ -2443,6 +2451,7 @@ void Class::setInterfaces() {
   }
 
   m_interfaces.create(interfacesBuilder);
+  checkInterfaceConstraints();
   checkInterfaceMethods();
 }
 

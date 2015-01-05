@@ -1,4 +1,59 @@
-NEXT
+"Austin" 15-Jan-2014
+ - [asio] Introduce ConditionWaitHandle
+ - [hack] `hh_server --version` should not require a root
+ - [hack] Log exceptions thrown in the master process.
+ - [hack] Enable unused var warnings under typing/
+ - [hh] typechecker: unbound name errors in partial/decl mode
+ - [hack] Disallow trailing comma in used trait list
+ - [hack] Have coverage / coloring use a hook
+ - [hack] Create lock file if it doesn't exist
+ - Fix std::terminate when debugger is not attached during unwind
+ - [hack] Make `trait ... extends ...` into a parse error
+ - [hack] Make multiple inheritance a parse error
+ - [hh] typechecker: support Enum in xhp attribute declarations
+ - [hack] Raise type errors on undefined static polymorphism lookups.
+ - Fix realpath lookup
+ - [hack] Let any user write to the saved state dir.
+ - [hack] Don't have an optional param that's an option type
+ - RequestInitDocument   404  friendly reminder
+ - Implement Phar::running()
+ - Make Redis utility methods public
+ - Contiguous Heap Prototype
+ - [hh_format] Don't add trailing commas in used trait lists
+ - [hh_format] Don't add trailing commas in template parameter lists
+ - [hh_format] Fix bug with hh_format --diff duplicating some lines.
+ - [hh_format] Don't destroy whitespace in files with "**/" in comments
+ - fix for iconv_mime_decode_headers function skipping headers
+ - Add CPU option for JIT (EvalJitCPU). Defaults to 'native'.
+ - Limit glob flags to only ones supported by php
+ - make recursion limit for unserialize
+ - Allow trailing commas in short-lamba expressions
+ - Fix some leaks in new_socket_connect
+ - fixed decoding utf8 strings so they correctly return '?' on invalid sequences
+ - Actually get the realpath first thing when searching for a file.
+ - Faster UnitCache
+ - Simple speedup for is_dir
+ - [hh] typechecker: demand consistent casing for primitive typehints
+ - Support timestamp begins and ends for getTransitions()
+ - Add global value numbering pass
+ - Support \u escape sequences in double-quoted strings
+ - ResourceLimit.SerializationSizeLimit can be overwriten from the vhost config
+ - Check Eval.JitAMaxUsage when deciding whether to start profiling a function
+ - Allow hex in mb_encode_numericentity
+ - [hhvm] Work around leak in boost flat_set
+ - Add stream_await() for async stream "blocking"
+ - [typechecker] Add support for reading XHP attributes via "->:"
+ - Modify rpoSortCfg to reduce memory usage in refcount-opts
+ - Fix #4380, making get code and get message final
+ - Add PHP_INT_MIN
+ - Disable PGO for pseudo-mains
+ - Mock date/time functions in Isolation.php
+ - Fix error_get_last() not cleared when error handle function entered
+ - [hhvm] RFC: Native Property Handlers
+ - [hack] Define proper constants for CURLOPT and friends
+ - Make newlines in http headers a fatal error.
+ - Add Hack typing to array_keys
+ - Use a custom implementation of strtoll for unserialize
  - [hack] control whether unseen <?php code is assumed via .hhconfig
 
 Z* 18-Dec-2014

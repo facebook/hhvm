@@ -74,8 +74,6 @@ end
 *)
 (*****************************************************************************)
 
-let arg x = Arg.Unit (fun () -> x := true)
-
 let make_gc_control config =
   let minor_heap_size = match SMap.get "gc_minor_heap_size" config with
     | Some s -> int_of_string s
@@ -121,18 +119,18 @@ let parse_options () =
     | _ -> raise (Invalid_argument "--load takes at most 2 arguments")
   in
   let options =
-    ["--debug"         , arg debug         , Messages.debug;
-     "--check"         , arg check_mode    , Messages.check;
-     "--json"          , arg json_mode     , Messages.json; (* CAREFUL!!! *)
-     "--daemon"        , arg should_detach , Messages.daemon;
-     "-d"              , arg should_detach , Messages.daemon;
-     "--from-vim"      , arg from_vim      , Messages.from_vim;
-     "--from-emacs"    , arg from_emacs    , Messages.from_emacs;
-     "--from-hhclient" , arg from_hhclient , Messages.from_hhclient;
-     "--convert"       , Arg.String cdir   , Messages.convert;
-     "--save"          , Arg.String save   , Messages.save;
-     "--load"          , Arg.String load   , Messages.load;
-     "--version"       , arg version       , "";
+    ["--debug"         , Arg.Set debug         , Messages.debug;
+     "--check"         , Arg.Set check_mode    , Messages.check;
+     "--json"          , Arg.Set json_mode     , Messages.json; (* CAREFUL!!! *)
+     "--daemon"        , Arg.Set should_detach , Messages.daemon;
+     "-d"              , Arg.Set should_detach , Messages.daemon;
+     "--from-vim"      , Arg.Set from_vim      , Messages.from_vim;
+     "--from-emacs"    , Arg.Set from_emacs    , Messages.from_emacs;
+     "--from-hhclient" , Arg.Set from_hhclient , Messages.from_hhclient;
+     "--convert"       , Arg.String cdir       , Messages.convert;
+     "--save"          , Arg.String save       , Messages.save;
+     "--load"          , Arg.String load       , Messages.load;
+     "--version"       , Arg.Set version       , "";
      "--start-time"    , Arg.Set_float start_time, "";
     ] in
   let options = Arg.align options in

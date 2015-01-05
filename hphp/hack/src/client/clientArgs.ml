@@ -223,7 +223,7 @@ let parse_start_args () =
       WWW-ROOT is assumed to be current directory if unspecified\n"
       Sys.argv.(0) in
   let options = [
-    "--wait", Arg.Unit (fun () -> wait := true ),
+    "--wait", Arg.Set wait,
     " wait for the server to finish initializing"
   ] in
   let args = parse_without_command options usage "start" in
@@ -268,7 +268,7 @@ let parse_restart_args () =
       Sys.argv.(0) in
   let wait = ref false in
   let options = [
-    "--wait", Arg.Unit (fun () -> wait := true ),
+    "--wait", Arg.Set wait,
     " wait for the new server to finish initializing"
   ] in
   let args = parse_without_command options usage "restart" in

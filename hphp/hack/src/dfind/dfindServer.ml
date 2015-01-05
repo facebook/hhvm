@@ -30,8 +30,8 @@ let (process_fsnotify_event:
   (* Tell everybody that this file has changed *)
   let dirty = SSet.add path dirty in
   (* Is it a directory? Be conservative, everything we know about this
-    * directory is now "dirty"
-    *)
+   * directory is now "dirty"
+   *)
   let dirty =
     if SMap.mem path env.dirs
     then SSet.union dirty (SMap.find_unsafe path env.dirs)

@@ -7,15 +7,18 @@
 DIFF=`command -v colordiff` || diff
 
 for f in $@; do
-  cat $f
+  nl --body-numbering=a $f
   if [ -e "$f.exp" ]; then
     EXP="$f.exp"
   else
     EXP=/dev/null
   fi
   $DIFF $EXP "$f.out"
-  read -p "Copy .out to .exp? (y|n)" -n 1 -r
+  read -p "Copy .out to .exp? (y|n|q)" -n 1 -r
+  echo ""
   if [ "$REPLY" = "y" ]; then
     cp "$f.out" "$f.exp"
+  elif [ "$REPLY" = "q" ]; then
+    exit 0
   fi
 done

@@ -54,7 +54,7 @@ let get_config ?(config=".hhconfig") root =
   Config_file.parse (Path.string_of_path (Path.concat root config))
 
 (* *** *** NB *** *** ***
- * Commonly-used options are documented in hphp/hack/src/man/hh_client.1 --
+ * Commonly-used options are documented in hphp/hack/man/hh_client.1 --
  * if you are making significant changes you need to update the manpage as
  * well. Experimental or otherwise volatile options need not be documented
  * there, but keep what's there up to date please. *)

@@ -1932,10 +1932,10 @@ and expr_ env = function
            * primitive. But we should probably just disallow object casts
            * altogether. *)
           p, N.Hany
-      | x when x = SN.Typehints.void  ->
+      | x when x = SN.Typehints.void ->
           Errors.void_cast p;
           p, N.Hany
-      | x when x = SN.Typehints.unset_cast  ->
+      | x when x = SN.Typehints.unset_cast ->
           Errors.unset_cast p;
           p, N.Hany
       | _       ->

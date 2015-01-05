@@ -690,6 +690,6 @@
   yii2:
     url: https://github.com/yiisoft/yii2.git
     branch: "master"
-    commit: 84b42abad0b447bd25415ac707cef9d56012c9e2
+    commit: bd5751425e1c267c0b2b9dbf6f705b1f436439a4
     install_root: yii2
     test_root: yii2

@@ -298,7 +298,10 @@ public:
 
   /**
    * Will stop profiling if currently profiling, regardless of how it was
-   * started.
+   * started.  The Variant returned contains profile information.
+   * Some consumers of the return value may json_encode and then var_dump
+   * the returned value, and may choose to skip that step if the return value
+   * is a null Variant.
    */
   Variant stop();
 

@@ -33,7 +33,7 @@ let dfind_pid = ref None
 
 let dfind_init root =
   let proc, pid = DfindLib.start (Path.string_of_path root) in
-  PidLog.log ~reason:(Some "dfind") pid;
+  PidLog.log ~reason:"dfind" pid;
   dfind_proc := Some proc;
   dfind_pid := Some pid
 

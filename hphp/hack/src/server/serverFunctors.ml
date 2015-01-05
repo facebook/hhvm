@@ -181,7 +181,7 @@ end = struct
     let root = ServerArgs.root options in
     Program.EventLogger.init root (ServerArgs.start_time options);
     PidLog.init root;
-    PidLog.log ~reason:(Some "main") (Unix.getpid());
+    PidLog.log ~reason:"main" (Unix.getpid());
     let genv = ServerEnvBuild.make_genv ~multicore:true options in
     let env = ServerEnvBuild.make_env options in
     let program_init = create_program_init genv env in

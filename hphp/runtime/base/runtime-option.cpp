@@ -90,9 +90,9 @@ bool RuntimeOption::IntsOverflowToInts = false;
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
 int RuntimeOption::LogHeaderMangle = 0;
-bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions =
   RuntimeOption::EnableHipHopSyntax;
+bool RuntimeOption::AlwaysEscapeLog = true;
 bool RuntimeOption::NoSilencer = false;
 int RuntimeOption::ErrorUpgradeLevel = 0;
 bool RuntimeOption::CallUserHandlerOnFatals = false;
@@ -806,7 +806,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     }
     Config::Bind(LogFileFlusher::DropCacheChunkSize, ini,
                  logger["DropCacheChunkSize"], 1 << 20);
-    Config::Bind(AlwaysEscapeLog, ini, logger["AlwaysEscapeLog"], false);
+    Config::Bind(Logger::AlwaysEscapeLog, ini, logger["AlwaysEscapeLog"], true);
     Config::Bind(RuntimeOption::LogHeaderMangle, ini, logger["HeaderMangle"],
                  0);
 

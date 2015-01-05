@@ -46,6 +46,7 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool Logger::AlwaysEscapeLog = true;
 bool Logger::UseSyslog = false;
 bool Logger::UseLogFile = true;
 bool Logger::UseRequestLog = false;
@@ -139,7 +140,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
                  const StackTrace *stackTrace,
                  bool escape /* = false */, bool escapeMore /* = false */) {
 
-  if (Logger::Escape) {
+  if (Logger::AlwaysEscapeLog && Logger::Escape) {
     escape = true;
   }
   assert(!escapeMore || escape);

@@ -131,12 +131,7 @@ static HashEngineMapInitializer s_engine_initializer;
 ///////////////////////////////////////////////////////////////////////////////
 // hash context
 
-class HashContext : public SweepableResourceData {
-public:
-  CLASSNAME_IS("Hash Context")
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
-
+struct HashContext : SweepableResourceData {
   HashContext(HashEnginePtr ops_, void *context_, int options_)
     : ops(ops_), context(context_), options(options_), key(nullptr) {
   }
@@ -168,11 +163,19 @@ public:
     free(key);
   }
 
+  CLASSNAME_IS("Hash Context")
+  DECLARE_RESOURCE_ALLOCATION(HashContext)
+
+  // overriding ResourceData
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
+
   HashEnginePtr ops;
   void *context;
   int options;
   char *key;
 };
+
+IMPLEMENT_RESOURCE_ALLOCATION(HashContext)
 
 ///////////////////////////////////////////////////////////////////////////////
 // hash functions
@@ -310,7 +313,7 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
   void *context = malloc(ops->context_size);
   ops->hash_init(context);
 
-  const auto hash = new HashContext(ops, context, options);
+  const auto hash = newres<HashContext>(ops, context, options);
   if (options & k_HASH_HMAC) {
     hash->key = prepare_hmac_key(ops, context, key);
   }
@@ -354,7 +357,7 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
 
 Resource HHVM_FUNCTION(hash_copy, const Resource& context) {
   HashContext *oldhash = context.getTyped<HashContext>();
-  auto const hash = new HashContext(oldhash);
+  auto const hash = newres<HashContext>(oldhash);
   return Resource(hash);
 }
 

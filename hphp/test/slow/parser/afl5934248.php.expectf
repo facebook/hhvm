@@ -1,0 +1,2 @@
+Fatal error: Unexpected character in input: '' (ASCII=5) (Line: 2, Char: 19)
+syntax error, unexpected '(' in %s/hphp/test/slow/parser/afl5934248.php on line 2

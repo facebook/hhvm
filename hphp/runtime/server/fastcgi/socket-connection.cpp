@@ -34,7 +34,7 @@ using apache::thrift::transport::TTransportException;
 ///////////////////////////////////////////////////////////////////////////////
 
 SocketConnection::SocketConnection(
-  TAsyncTransport::UniquePtr sock,
+  folly::AsyncSocket::UniquePtr sock,
   const SocketAddress& localAddr,
   const SocketAddress& peerAddr)
   : m_localAddr(localAddr),

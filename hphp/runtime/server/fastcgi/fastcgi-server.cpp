@@ -23,7 +23,6 @@
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBaseManager.h> // @nolint
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
-#include "proxygen/lib/services/Acceptor.h" // @nolint
 
 namespace HPHP {
 
@@ -40,23 +39,21 @@ using apache::thrift::transport::TTransportException;
 const int FastCGIAcceptor::k_maxConns = 50;
 const int FastCGIAcceptor::k_maxRequests = 1000;
 
-const apache::thrift::transport::TSocketAddress
+const folly::SocketAddress
 FastCGIAcceptor::s_unknownSocketAddress("127.0.0.1", 0);
 
-bool FastCGIAcceptor::canAccept(
-  const apache::thrift::transport::TSocketAddress& address) {
-
+bool FastCGIAcceptor::canAccept(const folly::SocketAddress& address) {
   // TODO: Support server IP whitelist.
   return m_server->canAccept();
 }
 
 void FastCGIAcceptor::onNewConnection(
-    apache::thrift::async::TAsyncSocket::UniquePtr sock,
-    const apache::thrift::transport::TSocketAddress* peerAddress,
-    const std::string& nextProtocolName,
-    const ::proxygen::TransportInfo& tinfo)
+  folly::AsyncSocket::UniquePtr sock,
+  const folly::SocketAddress* peerAddress,
+  const std::string& nextProtocolName,
+  const ::folly::TransportInfo& tinfo)
 {
-  apache::thrift::transport::TSocketAddress localAddress;
+  folly::SocketAddress localAddress;
   try {
     sock->getLocalAddress(&localAddress);
   } catch (...) {
@@ -82,14 +79,14 @@ void FastCGIAcceptor::onConnectionsDrained() {
 
 FastCGIConnection::FastCGIConnection(
   FastCGIServer* server,
-  TAsyncTransport::UniquePtr sock,
-  const apache::thrift::transport::TSocketAddress& localAddr,
-  const apache::thrift::transport::TSocketAddress& peerAddr)
+  folly::AsyncSocket::UniquePtr sock,
+  const folly::SocketAddress& localAddr,
+  const folly::SocketAddress& peerAddr)
   : SocketConnection(std::move(sock), localAddr, peerAddr),
     m_server(server) {
   m_eventBase = m_server->getEventBaseManager()->getExistingEventBase();
   assert(m_eventBase != nullptr);
-  m_sock->setReadCallback(this);
+  m_sock->setReadCB(this);
   m_session.setCallback(this);
 }
 
@@ -199,7 +196,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
                  RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
                  RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
                  RequestPriority::k_numPriorities) {
-  apache::thrift::transport::TSocketAddress sock_addr;
+  folly::SocketAddress sock_addr;
   if (useFileSocket) {
     sock_addr.setFromPath(address);
   } else if (address.empty()) {

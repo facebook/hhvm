@@ -30,7 +30,7 @@ namespace HPHP {
 class SocketConnection : public ::folly::wangle::ManagedConnection {
 public:
   SocketConnection(
-    apache::thrift::async::TAsyncTransport::UniquePtr sock,
+    folly::AsyncSocket::UniquePtr sock,
     const folly::SocketAddress& localAddr,
     const folly::SocketAddress& peerAddr);
   virtual ~SocketConnection();
@@ -51,7 +51,7 @@ protected:
   folly::SocketAddress m_localAddr;
   folly::SocketAddress m_peerAddr;
 
-  apache::thrift::async::TAsyncTransport::UniquePtr m_sock;
+  folly::AsyncSocket::UniquePtr m_sock;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

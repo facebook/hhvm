@@ -732,6 +732,10 @@ bool HHVM_FUNCTION(socket_set_option,
         tv.tv_sec += tv.tv_usec / 1000000;
         tv.tv_usec %= 1000000;
       }
+      if (tv.tv_sec < 0) {
+        tv.tv_sec = ThreadInfo::s_threadInfo.getNoCheck()->
+        m_reqInjectionData.getSocketDefaultTimeout();
+      }
       optlen = sizeof(tv);
       opt_ptr = &tv;
       sock->setTimeout(tv);

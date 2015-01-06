@@ -290,18 +290,6 @@ struct ReqBindJccData : IRExtraData {
 };
 
 /*
- * Information for REQ_BIND_SIDE_EXIT stubs created from a conditional jump.
- */
-struct SideExitJccData : IRExtraData {
-  Offset taken;
-  TransFlags trflags;
-
-  std::string show() const {
-    return folly::to<std::string>(taken, ',', trflags.packed);
-  }
-};
-
-/*
  * Compile-time metadata about an ActRec allocation.
  */
 struct ActRecInfo : IRExtraData {

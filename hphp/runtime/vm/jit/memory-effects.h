@@ -175,13 +175,13 @@ using MemEffects = boost::variant< MayLoadStore
 
 /*
  * Return information about the kinds of memory effects an instruction may
- * have.
+ * have.  See the above branches of MemEffects for more information.
  *
- * This is used for eliminating redundant stores, so it can be conservative in
- * the direction of claiming more reads than there are, or fewer writes than
- * there are.  It must not erroneously claim that a memory location is being
- * redefined, and it must not fail to say a memory location is potentially
- * read.
+ * Important note: right now, some of the branches of MemEffects are relatively
+ * specific (e.g. IterEffects) because of instructions that have odd shapes.
+ * This may eventually go away, but for now this means it's very important that
+ * users of this module be aware of potentially "suprising" effects of some of
+ * those instructions when runtime flags like EnableArgsInBacktraces are set.
  */
 MemEffects memory_effects(const IRInstruction&);
 

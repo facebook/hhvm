@@ -475,11 +475,6 @@ void analyze(Global& genv) {
  *      proved the memory location must hold that type.
  */
 void optimizeLoads(IRUnit& unit) {
-  if (RuntimeOption::EnableArgsInBacktraces) {
-    // We want to be able to run this pass with this flag on, but need to teach
-    // memory_effects about it first.
-    return;
-  }
   PassTracer tracer{&unit, Trace::hhir_load, "optimizeLoads"};
 
   auto genv = Global { unit, rpoSortCfgWithIds(unit) };

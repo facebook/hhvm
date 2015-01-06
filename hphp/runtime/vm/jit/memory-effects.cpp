@@ -88,6 +88,25 @@ bool call_destroys_locals(const IRInstruction& inst) {
   always_assert(0);
 }
 
+/*
+ * Returns an AliasClass that must be unioned into the may-load set of any
+ * instruction that can re-enter the VM.  This set is empty if
+ * EnableArgsInBacktraces is off---when it's on, in general re-entry could lead
+ * to a call to debug_backtrace which could read the argument locals of any
+ * activation in the callstack.
+ *
+ * We don't try to limit the effects to argument locals, though, and just union
+ * in all the locals.
+ *
+ * This is unioned in in general when an instruction can re-enter because it
+ * also makes that somewhat more obvious.
+ */
+AliasClass reentry_extra() {
+  return RuntimeOption::EnableArgsInBacktraces ? AFrameAny : AEmpty;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 MemEffects memory_effects_impl(const IRInstruction& inst) {
   switch (inst.op()) {
 
@@ -124,7 +143,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // to frame locals.
   case SuspendHookE:
   case SuspendHookR:
-    return MayLoadStore { AUnknown, ANonFrame };
+    // TODO: may-load here probably doesn't need to include AFrameAny normally.
+    return MayLoadStore { AUnknown | reentry_extra(), ANonFrame };
 
   /*
    * If we're returning from a function, it's ReturnEffects.  The RetCtrl
@@ -193,7 +213,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyRetCallable:
   case VerifyRetCls:
   case VerifyRetFail:
-    return MayLoadStore { AHeapAny, ANonFrame };
+    return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
 
   case Call:
     return CallEffects {
@@ -217,7 +237,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // This re-enters to call extension-defined instance constructors.
   case ConstructInstance:
-    return MayLoadStore { AHeapAny, ANonFrame };
+    return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
 
   //////////////////////////////////////////////////////////////////////
   // Iterator instructions
@@ -323,7 +343,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return MayLoadStore {
       // DecRefMem can re-enter to run a destructor.  We also need to union in
       // the pointee because it may point to a non-heap location.
-      pointee(inst.src(0)) | AHeapAny,
+      pointee(inst.src(0)) | AHeapAny | reentry_extra(),
       ANonFrame
     };
 
@@ -444,7 +464,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // re-entry rules, since they can raise warnings and re-enter.
     assert(inst.src(0)->type() <= Type::PtrToGen);
     return MayLoadStore {
-      AHeapAny | pointee(inst.src(0)),
+      AHeapAny | pointee(inst.src(0)) | reentry_extra(),
       ANonFrame | pointee(inst.src(0))
     };
 
@@ -467,11 +487,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VGetProp:
     if (inst.src(0)->type() <= Type::PtrToGen) {
       return MayLoadStore {
-        AHeapAny | pointee(inst.src(0)),
+        AHeapAny | pointee(inst.src(0)) | reentry_extra(),
         ANonFrame | pointee(inst.src(0))
       };
     }
-    return MayLoadStore { AHeapAny, ANonFrame };
+    return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
 
   /*
    * Collection accessors can read from their inner array buffer, but stores
@@ -511,7 +531,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return IrrelevantEffects {};
 
   case AllocObj:  // AllocObj re-enters to call constructors.
-    return MayLoadStore { AHeapAny, ANonFrame };
+    return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that explicitly manipulate the stack.
@@ -551,7 +571,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // The following may re-enter, and also deal with a stack slot.
   case CastStk:
   case CoerceStk:
-    return MayLoadStore { ANonFrame, ANonFrame };
+    return MayLoadStore { ANonFrame | reentry_extra(), ANonFrame };
 
   case GuardRefs:
     // We're not bothering with being exact about where on the stack this
@@ -825,17 +845,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case DecRefThis:
   case DecRef:
-    return MayLoadStore { AHeapAny, ANonFrame };
+    return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
 
   case DecRefStack:
     return MayLoadStore {
-      AHeapAny | AStack { inst.src(0), inst.extra<DecRefStack>()->offset, 1 },
+      AHeapAny | AStack { inst.src(0), inst.extra<DecRefStack>()->offset, 1 }
+               | reentry_extra(),
       ANonFrame
     };
 
   case DecRefLoc:
     return MayLoadStore {
-      AHeapAny | AFrame { inst.src(0), inst.extra<LocalId>()->locId },
+      AHeapAny | AFrame { inst.src(0), inst.extra<LocalId>()->locId }
+               | reentry_extra(),
       ANonFrame
     };
 
@@ -853,7 +875,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      * region exit following it it doesn't help us eliminate anything for now,
      * so we just pretend it can read anything on the stack.
      */
-    return MayLoadStore { ANonFrame, ANonFrame };
+    return MayLoadStore { ANonFrame | reentry_extra(), ANonFrame };
 
   case BaseG:
   case Clone:
@@ -914,7 +936,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArraySet:       // kVPackedKind warnings
   case ArraySetRef:    // kVPackedKind warnings
   case GetMemoKey:  // re-enters to call getInstanceKey() in some cases
-    return MayLoadStore { AHeapAny, ANonFrame };
+    return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
 
   //////////////////////////////////////////////////////////////////////
   // The following instructions are used for debugging memory optimizations, so
@@ -933,25 +955,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-MemEffects memory_effects(const IRInstruction& inst) {
-  always_assert_flog(
-    !RuntimeOption::EnableArgsInBacktraces,
-    "memory_effects currently doesn't report some possible "
-    "loads for EnableArgsInBacktraces, so you must not call it from "
-    "passes that run if that flag is on"
-  );
-
-  auto const ret = memory_effects_impl(inst);
-  if (!debug) return ret;
-
+bool check_effects(const IRInstruction& inst, MemEffects me) {
   auto check_fp = [&] (SSATmp* fp) {
     always_assert_flog(
       fp->type() <= Type::FramePtr,
       "Non frame pointer in memory effects:\n  inst: {}\n  effects: {}",
       inst.toString(),
-      show(ret)
+      show(me)
     );
   };
 
@@ -962,7 +972,7 @@ MemEffects memory_effects(const IRInstruction& inst) {
       obj->type() <= Type::Obj,
       "Non obj pointer in memory effects:\n  inst: {}\n  effects: {}",
       inst.toString(),
-      show(ret)
+      show(me)
     );
   };
 
@@ -979,7 +989,7 @@ MemEffects memory_effects(const IRInstruction& inst) {
   // In debug let's do some type checking in case people move instruction
   // argument numbers.
   match<void>(
-    ret,
+    me,
     [&] (MayLoadStore m)    { check(m.loads); check(m.stores); },
     [&] (PureLoad m)        { check(m.src); },
     [&] (PureStore m)       { check(m.dst); },
@@ -996,6 +1006,16 @@ MemEffects memory_effects(const IRInstruction& inst) {
     [&] (ReturnEffects m)   { check(m.killed); }
   );
 
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+MemEffects memory_effects(const IRInstruction& inst) {
+  auto const ret = memory_effects_impl(inst);
+  assert(check_effects(inst, ret));
   return ret;
 }
 

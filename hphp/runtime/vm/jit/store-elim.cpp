@@ -219,11 +219,17 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     [&] (IterEffects l) {
+      if (RuntimeOption::EnableArgsInBacktraces) {
+        load(env, AFrameAny);
+      }
       load(env, AFrame { l.fp, l.id });
       load(env, AHeapAny);
       addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.killed)));
     },
     [&] (IterEffects2 l) {
+      if (RuntimeOption::EnableArgsInBacktraces) {
+        load(env, AFrameAny);
+      }
       load(env, AFrame { l.fp, l.id1 });
       load(env, AFrame { l.fp, l.id2 });
       load(env, AHeapAny);
@@ -313,11 +319,6 @@ void optimize_block(Global& genv, Block* block) {
 }
 
 void optimizeStores(IRUnit& unit) {
-  if (RuntimeOption::EnableArgsInBacktraces) {
-    // We don't run this pass if this is enabled, because it could omit stores
-    // to argument locals.
-    return;
-  }
   PassTracer tracer{&unit, Trace::hhir_store, "optimizeStores"};
 
   // This isn't required for correctness, but it may allow removing stores that

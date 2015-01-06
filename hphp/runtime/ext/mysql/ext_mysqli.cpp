@@ -634,6 +634,18 @@ static Variant HHVM_METHOD(mysqli_stmt, send_long_data, int64_t param_nr,
   return getStmt(this_)->send_long_data(param_nr, data);
 }
 
+static void HHVM_METHOD(mysqli_stmt, __destruct) {
+  auto res = this_->o_realProp(
+    s_stmt,
+    ObjectData::RealPropUnchecked,
+    s_mysqli_stmt.get()
+  );
+  if (res->isInitialized() && res->isResource()) {
+    auto stmt = res->asResRef().getTyped<MySQLStmt>(false, false);
+    delete stmt;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // class mysqli_warning
 
@@ -743,6 +755,7 @@ class mysqliExtension final : public Extension {
     HHVM_ME(mysqli_stmt, reset);
     HHVM_ME(mysqli_stmt, result_metadata);
     HHVM_ME(mysqli_stmt, send_long_data);
+    HHVM_ME(mysqli_stmt, __destruct);
 
     HHVM_FE(mysqli_get_client_version);
     //HHVM_FE(mysqli_get_client_stats);

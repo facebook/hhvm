@@ -16,8 +16,10 @@ $iterator = new RecursiveIteratorIterator($iterator,
 echo "DONT FOLLOW SYMLINKS", PHP_EOL;
 
 foreach ($iterator as $path => $dir) {
-    echo $path, PHP_EOL;
+    echo ".";
 }
+
+echo PHP_EOL;
 
 // Follow
 $iterator = new RecursiveDirectoryIterator(
@@ -31,8 +33,10 @@ $iterator = new RecursiveIteratorIterator($iterator,
 echo "FOLLOW SYMLINKS", PHP_EOL;
 
 foreach ($iterator as $path => $dir) {
-    echo $path, PHP_EOL;
+    echo ".";
 }
+
+echo PHP_EOL;
 
 
 // Clean up

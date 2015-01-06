@@ -59,15 +59,18 @@ const char* destTypeName(DestType);
 template<class Reg, VregKind Kind, int Bits> struct Vr {
   static constexpr auto bits = Bits;
   static constexpr auto kind = Kind;
+  static bool allowable(Vreg r) {
+    switch (Kind) {
+      case VregKind::Any: return true;
+      case VregKind::Gpr: return r.isVirt() || r.isGP();
+      case VregKind::Simd: return r.isVirt() || r.isSIMD();
+      case VregKind::Sf: return r.isVirt() || r.isSF();
+    }
+    not_reached();
+  };
   explicit Vr(size_t rn) : rn(rn) {}
   /* implicit */ Vr(Vreg r) : rn(size_t(r)) {
-    if (kind == VregKind::Gpr) {
-      assert(!r.isValid() || r.isVirt() || r.isGP());
-    } else if (kind == VregKind::Simd) {
-      assert(!r.isValid() || r.isVirt() || r.isSIMD());
-    } else if (kind == VregKind::Sf) {
-      assert(!r.isValid() || r.isVirt() || r.isSF());
-    }
+    assert(allowable(r) || !r.isValid());
   }
   /* implicit */ Vr(Reg r) : Vr{Vreg(r)} {}
   /* implicit */ Vr(PhysReg pr) : Vr{Vreg(pr)} {}

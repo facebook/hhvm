@@ -274,11 +274,9 @@ Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {
   return dstReg;
 }
 
-Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
-  auto t = v.makeReg();
-  v << copy{srcReg, t};
-  v << decq{t, dstReg, v.makeReg()};
-  return dstReg;
+Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg dst) {
+  v << decq{src, dst, v.makeReg()};
+  return dst;
 }
 
 void emitCall(Asm& a, TCA dest, RegSet args) {
@@ -487,13 +485,16 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   }
 }
 
-// move 2 gpr to 1 xmm
+// copy 2 64-bit values into one 128-bit value
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
-  auto t0 = v.makeReg();
-  auto t1 = v.makeReg();
-  v << copy{s0, t0};
-  v << copy{s1, t1};
-  v << unpcklpd{t1, t0, d0}; // s0,s1 -> d0[0],d0[1]
+  auto prep = [&](Vreg r) {
+    if (VregDbl::allowable(r)) return r;
+    auto t = v.makeReg();
+    v << copy{r, t};
+    return t;
+  };
+  // s0 and s1 must be valid VregDbl registers; prep() takes care of it.
+  v << unpcklpd{prep(s1), prep(s0), d0}; // s0,s1 -> d0[0],d0[1]
 }
 
 Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {

@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
@@ -936,27 +937,24 @@ void emitNativeImpl(HTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitArrayIdx(HTS& env) {
+// Helper for doing array-style Idx translations, even if we're dealing with a
+// collection.  The stack will still contain the collection in that case, and
+// loaded_collection_array will be non-nullptr.  If we're really doing
+// ArrayIdx, it's nullptr.
+void implArrayIdx(HTS& env, SSATmp* loaded_collection_array) {
   // These types are just used to decide what to do; once we know what we're
   // actually doing we constrain the values with the popC()s later on in this
   // function.
   auto const keyType = topC(env, 1, DataTypeGeneric)->type();
-  auto const arrType = topC(env, 2, DataTypeGeneric)->type();
-
-  if (!(arrType <= Type::Arr)) {
-    // raise fatal
-    interpOne(env, Type::Cell, 3);
-    return;
-  }
 
   if (keyType <= Type::Null) {
     auto const def = popC(env, DataTypeGeneric);
     auto const key = popC(env);
-    auto const arr = popC(env);
+    auto const stack_base = popC(env);
 
     // if the key is null it will not be found so just return the default
     push(env, def);
-    gen(env, DecRef, arr);
+    gen(env, DecRef, stack_base);
     gen(env, DecRef, key);
     return;
   }
@@ -969,25 +967,18 @@ void emitArrayIdx(HTS& env) {
                                                // the translated code doesn't
                                                // care about the type
   auto const key = popC(env);
-  auto const arr = popC(env);
-
-  push(env, gen(env, ArrayIdx, arr, key, def));
-  gen(env, DecRef, arr);
+  auto const stack_base = popC(env);
+  auto const use_base = loaded_collection_array
+    ? loaded_collection_array
+    : stack_base;
+  auto const value = gen(env, ArrayIdx, use_base, key, def);
+  push(env, value);
+  gen(env, DecRef, stack_base);
   gen(env, DecRef, key);
   gen(env, DecRef, def);
 }
 
-void emitIdx(HTS& env) {
-  auto const keyType  = topC(env, 1, DataTypeGeneric)->type();
-  auto const base     = topC(env, 2, DataTypeGeneric);
-  auto const baseType = base->type();
-
-  if (baseType <= Type::Arr &&
-      (keyType <= Type::Int || keyType <= Type::Str)) {
-    emitArrayIdx(env);
-    return;
-  }
-
+void implGenericIdx(HTS& env) {
   auto const def = popC(env, DataTypeSpecific);
   auto const key = popC(env, DataTypeSpecific);
   auto const arr = popC(env, DataTypeSpecific);
@@ -995,6 +986,59 @@ void emitIdx(HTS& env) {
   gen(env, DecRef, arr);
   gen(env, DecRef, key);
   gen(env, DecRef, def);
+}
+
+void emitArrayIdx(HTS& env) {
+  auto const arrType = topC(env, 2, DataTypeGeneric)->type();
+  if (!(arrType <= Type::Arr)) {
+    // raise fatal
+    interpOne(env, Type::Cell, 3);
+    return;
+  }
+
+  implArrayIdx(env, nullptr);
+}
+
+void emitIdx(HTS& env) {
+  auto const key      = topC(env, 1, DataTypeGeneric);
+  auto const base     = topC(env, 2, DataTypeGeneric);
+  auto const keyType  = key->type();
+  auto const baseType = base->type();
+
+  auto const simple_key =
+    keyType <= Type::Int || keyType <= Type::Str;
+
+  if (simple_key) {
+    if (baseType <= Type::Arr) {
+      emitArrayIdx(env);
+      return;
+    }
+
+    if (baseType < Type::Obj && baseType.isSpecialized()) {
+      // We must require either constant keys or known integer keys for Map,
+      // because integer-like strings behave differently.
+      auto const okMap = baseType.getClass() == c_Map::classof() &&
+                           (keyType.isConst() || keyType <= Type::Int);
+      // Similarly, Vector is only usable with int keys, so we can only do this
+      // for Vector if it's an Int.
+      auto const okVector = baseType.getClass() == c_Vector::classof() &&
+                              keyType <= Type::Int;
+
+      auto const optimizableCollection = okMap || okVector;
+      if (optimizableCollection) {
+        env.irb->constrainValue(
+          base,
+          TypeConstraint(baseType.getClass())
+        );
+        env.irb->constrainValue(key, DataTypeSpecific);
+        auto const arr = gen(env, LdColArray, base);
+        implArrayIdx(env, arr);
+        return;
+      }
+    }
+  }
+
+  implGenericIdx(env);
 }
 
 void emitAKExists(HTS& env) {

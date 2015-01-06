@@ -809,6 +809,11 @@ To string conversions:
   Loads the element at index S1 from the base pointer in S0. The index in S1 is
   the number of bytes from the base in S0.
 
+| LdColArray, D(Arr), S(Obj), NF
+
+  Load the array backing a collection instance in S0, which must be a Vector or
+  Map, and that specific object type must be known at compile time.
+
 | CheckRefInner<T>, ND, S(BoxedCell), B
 
   TODO(#2939547): this should take BoxedInitCell

@@ -877,8 +877,8 @@ class HashCollection : public ExtCollectionObjectData {
     return b;
   }
 
-  static constexpr uint32_t sizeOffset() {
-    return offsetof(HashCollection, m_size);
+  static constexpr ptrdiff_t dataOffset() {
+    return offsetof(HashCollection, m_data);
   }
 
   static bool validPos(ssize_t pos) {

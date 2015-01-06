@@ -187,6 +187,7 @@ bool canDCE(IRInstruction* inst) {
   case ColIsEmpty:
   case ColIsNEmpty:
   case LdUnwinderValue:
+  case LdColArray:
     assert(!inst->isControlFlow());
     return true;
 

@@ -44,6 +44,8 @@ MixedArray::Elm* mixedData(const MixedArray* arr) {
 
 ALWAYS_INLINE
 MixedArray* getArrayFromMixedData(const MixedArray::Elm* elms) {
+  // Note: changes to this scheme will require changes in the JIT for
+  // LdColArray.
   auto* a = const_cast<MixedArray*>(
     reinterpret_cast<const MixedArray*>(elms) - 1
   );

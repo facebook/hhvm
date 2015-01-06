@@ -3793,6 +3793,31 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   vmain() << load{vecReg[c_Vector::dataOffset()], dstReg};
 }
 
+void CodeGenerator::cgLdColArray(IRInstruction* inst) {
+  auto const src = inst->src(0);
+  auto const cls = src->type().getClass();
+  auto const rsrc = srcLoc(inst, 0).reg();
+  auto const rdst = dstLoc(inst, 0).reg();
+  auto& v = vmain();
+
+  if (cls == c_Vector::classof()) {
+    auto const rdata = v.makeReg();
+    v << load{rsrc[c_Vector::dataOffset()], rdata};
+    v << lea{rdata[-int32_t{sizeof(ArrayData)}], rdst};
+    return;
+  }
+
+  if (cls == c_Map::classof()) {
+    auto const rdata = v.makeReg();
+    v << load{rsrc[HashCollection::dataOffset()], rdata};
+    v << lea{rdata[-int32_t{sizeof(MixedArray)}], rdst};
+    return;
+  }
+
+  always_assert_flog(0, "LdColArray received an unsupported type: {}\n",
+    src->type().toString());
+}
+
 void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(inst, 0).reg();

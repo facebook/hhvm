@@ -260,6 +260,7 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
 //////////////////////////////////////////////////////////////////////
 PUNT_OPCODE(ArrayIdx)
 PUNT_OPCODE(CountArray)
+PUNT_OPCODE(LdColArray)
 
 PUNT_OPCODE(ProfileStr)
 PUNT_OPCODE(ConvArrToBool)

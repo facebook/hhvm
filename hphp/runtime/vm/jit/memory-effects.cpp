@@ -699,6 +699,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsPropAddrOrRaise:
   case VectorHasImmCopy:
   case CheckPackedArrayBounds:
+  case LdColArray:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////

@@ -50,7 +50,7 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (InterpOneEffects x)  { visit(x.killed); },
         [&] (ReturnEffects x)     { visit(x.killed); },
         [&] (KillFrameLocals)     {},
-        [&] (CallEffects x)       { visit(x.killed); },
+        [&] (CallEffects x)       { visit(x.killed); visit(x.stack); },
         [&] (IterEffects x)       { visit(x.killed); },
         [&] (IterEffects2 x)      { visit(x.killed); },
         [&] (MayLoadStore x)      { visit(x.loads); visit(x.stores); },

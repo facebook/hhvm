@@ -77,17 +77,6 @@ AliasClass stack_below(SSATmp* base, int32_t offset) {
   return AStack { base, offset, std::numeric_limits<int32_t>::max() };
 }
 
-bool call_destroys_locals(const IRInstruction& inst) {
-  switch (inst.op()) {
-  case Call:         return inst.extra<Call>()->destroyLocals;
-  case CallArray:    return inst.extra<CallArray>()->destroyLocals;
-  case CallBuiltin:  return inst.extra<CallBuiltin>()->destroyLocals;
-  case ContEnter:    return false;
-  default:           break;
-  }
-  always_assert(0);
-}
-
 /*
  * Returns an AliasClass that must be unioned into the may-load set of any
  * instruction that can re-enter the VM.  This set is empty if
@@ -170,21 +159,42 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   /*
-   * This has to act as a use of the locals for the outer frame, but really
-   * only because of how we deal with FramePtrs in the JIT.
+   * DefInlineFP has some special treatment here.
    *
-   * Since the frame is going to get allocated rbp, we can't push local stores
-   * into inlined callees, since their FramePtr isn't available anymore.  We'd
-   * be willing to do so without this, since there's no other constraint saying
-   * the caller's locals have to be in memory at this point.
+   * It's logically `publishing' a pointer to a pre-live ActRec, making it
+   * live.  It doesn't actually load from this ActRec, but after it's done this
+   * the set of things that can load from it is large enough that the easiest
+   * way to model this is to consider `publishing' it the load.  This works
+   * because once it's publish, it's an activation record, and doesn't get
+   * written to as if it were a stack slot anymore (we've effectively converted
+   * AStack locations into a frame until the InlineReturn).
+   *
+   * TODO(#3634984): Additionally, DefInlineFP is marking may-load on all the
+   * locals of the outer frame.  This is probably not necessary anymore, but we
+   * added it originally because a store sinking prototype needed to know it
+   * can't push StLocs past a DefInlineFP, because of reserved registers.
+   * Right now it's just here because we need to think about and test it before
+   * removing that set.
    */
   case DefInlineFP:
-    /*
-     * TODO(#3634984): this is an unfortunate pessimization---we can still
-     * eliminate those stores if nothing reads them, we just can't move them
-     * past this point.  Reserved registers must die.
-     */
-    return MayLoadStore { AFrameAny, AEmpty };
+    return MayLoadStore {
+      AFrameAny |
+        AStack {
+          inst.src(0),
+          inst.extra<DefInlineFP>()->spOffset + int32_t{kNumActRecCells} - 1,
+          int32_t{kNumActRecCells}
+        },
+     /*
+      * Note that although DefInlineFP is going to store some things into the
+      * memory for the new frame (m_soff, etc), it's as part of converting it
+      * from a pre-live frame to a live frame.  We don't need to report those
+      * effects on memory because they are logically to a 'different location
+      * class' (i.e. an activation record for the callee) than the AStack
+      * locations that represented the pre-live ActRec, even though they are at
+      * the same physical addresses in memory.
+      */
+      AEmpty
+    };
 
   case InlineReturn:
     return KillFrameLocals { inst.src(0) };
@@ -192,6 +202,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterpOne:
   case InterpOneCF:
     return InterpOneEffects {
+      // We could be more precise about which stack locations (or which locals)
+      // an InterpOne may read (this information is in its extra data), but
+      // this hasn't been implemented.
       stack_below(inst.src(1), -inst.marker().spOff() - 1)
     };
 
@@ -215,19 +228,54 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyRetFail:
     return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
 
-  case Call:
-    return CallEffects {
-      call_destroys_locals(inst),
-      stack_below(inst.src(0), inst.extra<Call>()->spOffset - 1)
-    };
   case CallArray:
-  case CallBuiltin:
-    // Note: CallBuiltin can have PtrToStkGen args that it writes/reads.  Right
-    // now we don't need to explicitly handle this because we treat it as
-    // may-load and may-store anything in both store-elim and load-elim,
-    // respectively.
+    return CallEffects {
+      inst.extra<CallArray>()->destroyLocals,
+      AEmpty,
+      // The AStackAny on this is more conservative than it could be; see Call
+      // and CallBuiltin.
+      AStackAny
+    };
   case ContEnter:
-    return CallEffects { call_destroys_locals(inst), AEmpty };
+    return CallEffects { false, AEmpty, AStackAny };
+
+  case Call:
+    {
+      auto const extra = inst.extra<Call>();
+      return CallEffects {
+        extra->destroyLocals,
+        stack_below(inst.src(0), extra->spOffset - 1), // kill
+        // We might side-exit inside the callee, and interpret a return.  So we
+        // can read anything anywhere on the eval stack above the call's entry
+        // depth here.
+        AStackAny
+      };
+    }
+
+  /*
+   * CallBuiltin takes args either as php values (subtypes of Gen) or as
+   * PtrToStkGen args that it writes/reads.  The `stack' set for its call
+   * effects need only contain those portions of the stack.  See DefInlineFP
+   * for discussion of how live ActRecs for inlined calls fit into that.
+   */
+  case CallBuiltin:
+    {
+      auto const extra = inst.extra<CallBuiltin>();
+      AliasClass stk = AEmpty;
+      for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
+        if (inst.src(i)->type() <= Type::PtrToGen) {
+          auto const cls = pointee(inst.src(i));
+          if (cls.maybe(AStackAny)) {
+            stk = stk | cls;
+          }
+        }
+      }
+      return CallEffects {
+        extra->destroyLocals,
+        stack_below(inst.src(1), extra->spOffset - 1),
+        stk
+      };
+    }
 
   // Resumable suspension takes everything from the frame and moves it into the
   // heap.
@@ -570,8 +618,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // The following may re-enter, and also deal with a stack slot.
   case CastStk:
+    return MayLoadStore {
+      AHeapAny | reentry_extra()
+               | AStack { inst.src(0), inst.extra<CastStk>()->offset, 1 },
+      ANonFrame
+    };
   case CoerceStk:
-    return MayLoadStore { ANonFrame | reentry_extra(), ANonFrame };
+    return MayLoadStore {
+      AHeapAny | reentry_extra()
+               | AStack { inst.src(0), inst.extra<CoerceStk>()->offset, 1 },
+      ANonFrame
+    };
 
   case GuardRefs:
     // We're not bothering with being exact about where on the stack this
@@ -985,20 +1042,20 @@ bool check_effects(const IRInstruction& inst, MemEffects me) {
   // argument numbers.
   match<void>(
     me,
-    [&] (MayLoadStore m)    { check(m.loads); check(m.stores); },
-    [&] (PureLoad m)        { check(m.src); },
-    [&] (PureStore m)       { check(m.dst); },
-    [&] (PureStoreNT m)     { check(m.dst); },
-    [&] (PureSpillFrame m)  { check(m.dst); },
-    [&] (IterEffects m)     { check_fp(m.fp); check(m.killed); },
-    [&] (IterEffects2 m)    { check_fp(m.fp); check(m.killed); },
-    [&] (KillFrameLocals m) { check_fp(m.fp); },
-    [&] (ExitEffects m)     { check(m.live); check(m.kill); },
+    [&] (MayLoadStore x)    { check(x.loads); check(x.stores); },
+    [&] (PureLoad x)        { check(x.src); },
+    [&] (PureStore x)       { check(x.dst); },
+    [&] (PureStoreNT x)     { check(x.dst); },
+    [&] (PureSpillFrame x)  { check(x.dst); },
+    [&] (IterEffects x)     { check_fp(x.fp); check(x.killed); },
+    [&] (IterEffects2 x)    { check_fp(x.fp); check(x.killed); },
+    [&] (KillFrameLocals x) { check_fp(x.fp); },
+    [&] (ExitEffects x)     { check(x.live); check(x.kill); },
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    {},
-    [&] (InterpOneEffects m){ check(m.killed); },
-    [&] (CallEffects m)     { check(m.killed); },
-    [&] (ReturnEffects m)   { check(m.killed); }
+    [&] (InterpOneEffects x){ check(x.killed); },
+    [&] (CallEffects x)     { check(x.killed); check(x.stack); },
+    [&] (ReturnEffects x)   { check(x.killed); }
   );
 
   return true;
@@ -1020,42 +1077,46 @@ MemEffects canonicalize(MemEffects me) {
   using R = MemEffects;
   return match<R>(
     me,
-    [&] (MayLoadStore l) -> R {
-      return MayLoadStore { canonicalize(l.loads), canonicalize(l.stores) };
+    [&] (MayLoadStore x) -> R {
+      return MayLoadStore { canonicalize(x.loads), canonicalize(x.stores) };
     },
-    [&] (PureLoad l) -> R {
-      return PureLoad { canonicalize(l.src) };
+    [&] (PureLoad x) -> R {
+      return PureLoad { canonicalize(x.src) };
     },
-    [&] (PureStore l) -> R {
-      return PureStore { canonicalize(l.dst), l.value };
+    [&] (PureStore x) -> R {
+      return PureStore { canonicalize(x.dst), x.value };
     },
-    [&] (PureStoreNT l) -> R {
-      return PureStoreNT { canonicalize(l.dst), l.value };
+    [&] (PureStoreNT x) -> R {
+      return PureStoreNT { canonicalize(x.dst), x.value };
     },
-    [&] (PureSpillFrame l) -> R {
-      return PureSpillFrame { canonicalize(l.dst) };
+    [&] (PureSpillFrame x) -> R {
+      return PureSpillFrame { canonicalize(x.dst) };
     },
-    [&] (ExitEffects l) -> R {
-      return ExitEffects { canonicalize(l.live), canonicalize(l.kill) };
+    [&] (ExitEffects x) -> R {
+      return ExitEffects { canonicalize(x.live), canonicalize(x.kill) };
     },
-    [&] (CallEffects l) -> R {
-      return CallEffects { l.destroys_locals, canonicalize(l.killed) };
+    [&] (CallEffects x) -> R {
+      return CallEffects {
+        x.destroys_locals,
+        canonicalize(x.killed),
+        canonicalize(x.stack)
+      };
     },
-    [&] (ReturnEffects l) -> R {
-      return ReturnEffects { canonicalize(l.killed) };
+    [&] (ReturnEffects x) -> R {
+      return ReturnEffects { canonicalize(x.killed) };
     },
-    [&] (IterEffects l) -> R {
-      return IterEffects { l.fp, l.id, canonicalize(l.killed) };
+    [&] (IterEffects x) -> R {
+      return IterEffects { x.fp, x.id, canonicalize(x.killed) };
     },
-    [&] (IterEffects2 l) -> R {
-      return IterEffects2 { l.fp, l.id1, l.id2, canonicalize(l.killed) };
+    [&] (IterEffects2 x) -> R {
+      return IterEffects2 { x.fp, x.id1, x.id2, canonicalize(x.killed) };
     },
-    [&] (InterpOneEffects l) -> R {
-      return InterpOneEffects { canonicalize(l.killed) };
+    [&] (InterpOneEffects x) -> R {
+      return InterpOneEffects { canonicalize(x.killed) };
     },
-    [&] (KillFrameLocals l)   -> R { return l; },
-    [&] (IrrelevantEffects l) -> R { return l; },
-    [&] (UnknownEffects l)    -> R { return l; }
+    [&] (KillFrameLocals x)   -> R { return x; },
+    [&] (IrrelevantEffects x) -> R { return x; },
+    [&] (UnknownEffects x)    -> R { return x; }
   );
 }
 
@@ -1065,23 +1126,23 @@ std::string show(MemEffects effects) {
   using folly::sformat;
   return match<std::string>(
     effects,
-    [&] (MayLoadStore m) {
-      return sformat("mls({} ; {})", show(m.loads), show(m.stores));
+    [&] (MayLoadStore x) {
+      return sformat("mls({} ; {})", show(x.loads), show(x.stores));
     },
-    [&] (ExitEffects m) {
-      return sformat("exit({} ; {})", show(m.live), show(m.kill));
+    [&] (ExitEffects x) {
+      return sformat("exit({} ; {})", show(x.live), show(x.kill));
     },
-    [&] (CallEffects m) {
-      return sformat("call({})", show(m.killed));
+    [&] (CallEffects x) {
+      return sformat("call({} ; {})", show(x.killed), show(x.stack));
     },
-    [&] (InterpOneEffects m) {
-      return sformat("interp({})", show(m.killed));
+    [&] (InterpOneEffects x) {
+      return sformat("interp({})", show(x.killed));
     },
-    [&] (PureLoad m)        { return sformat("ld({})", show(m.src)); },
-    [&] (PureStore m)       { return sformat("st({})", show(m.dst)); },
-    [&] (PureStoreNT m)     { return sformat("stNT({})", show(m.dst)); },
-    [&] (PureSpillFrame m)  { return sformat("stFrame({})", show(m.dst)); },
-    [&] (ReturnEffects m)   { return sformat("return({})", show(m.killed)); },
+    [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
+    [&] (PureStore x)       { return sformat("st({})", show(x.dst)); },
+    [&] (PureStoreNT x)     { return sformat("stNT({})", show(x.dst)); },
+    [&] (PureSpillFrame x)  { return sformat("stFrame({})", show(x.dst)); },
+    [&] (ReturnEffects x)   { return sformat("return({})", show(x.killed)); },
     [&] (IterEffects)       { return "IterEffects"; },
     [&] (IterEffects2)      { return "IterEffects2"; },
     [&] (KillFrameLocals)   { return "KillFrameLocals"; },

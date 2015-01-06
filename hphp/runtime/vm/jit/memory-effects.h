@@ -94,10 +94,18 @@ struct IterEffects2   { SSATmp* fp;
  * the calling frame (e.g. extract() or parse_str().)
  *
  * The `killed' set are locations that cannot be read by this instruction
- * unless it writes to them first, and which it generlaly may write to.  (This
+ * unless it writes to them first, and which it generally may write to.  (This
  * is used for killing stack slots below the call depth.)
+ *
+ * The `stack' set contains stack locations the call will read as arguments, as
+ * well as stack locations it may read or write via other means
+ * (e.g. debug_backtrace, or pointers to stack slots to a CallBuiltin).
+ * Locations in any intersection between `stack' and `killed' may be assumed to
+ * be killed.
  */
-struct CallEffects    { bool destroys_locals; AliasClass killed; };
+struct CallEffects    { bool destroys_locals;
+                        AliasClass killed;
+                        AliasClass stack; };
 
 /*
  * ReturnEffects is a real return from the php function.  It does not cover

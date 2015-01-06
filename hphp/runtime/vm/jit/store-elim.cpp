@@ -171,6 +171,10 @@ void load(Local& env, AliasClass acls) {
   addGenSet(env, env.global.ainfo.may_alias(acls));
 }
 
+void kill(Local& env, AliasClass acls) {
+  addKillSet(env, env.global.ainfo.must_alias(canonicalize(acls)));
+}
+
 folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
   if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
     return meta->index;
@@ -191,7 +195,7 @@ void visit(Local& env, IRInstruction& inst) {
 
     [&] (InterpOneEffects m) {
       addAllGen(env);
-      addKillSet(env, env.global.ainfo.must_alias(canonicalize(m.killed)));
+      kill(env, m.killed);
     },
 
     [&] (ReturnEffects l) {
@@ -199,12 +203,12 @@ void visit(Local& env, IRInstruction& inst) {
       // whatnot) are live on a function return.
       addAllGen(env);
       addKillSet(env, env.global.ainfo.all_frame);
-      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.killed)));
+      kill(env, l.killed);
     },
 
     [&] (ExitEffects l) {
       load(env, l.live);
-      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.kill)));
+      kill(env, l.kill);
     },
 
     /*
@@ -214,8 +218,11 @@ void visit(Local& env, IRInstruction& inst) {
      * read them.
      */
     [&] (CallEffects l) {
-      addAllGen(env);
-      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.killed)));
+      load(env, AHeapAny);
+      load(env, AFrameAny);  // Not necessary for some builtin calls, but it
+                             // depends which builtin...
+      load(env, l.stack);
+      kill(env, l.killed);
     },
 
     [&] (IterEffects l) {
@@ -224,7 +231,7 @@ void visit(Local& env, IRInstruction& inst) {
       }
       load(env, AFrame { l.fp, l.id });
       load(env, AHeapAny);
-      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.killed)));
+      kill(env, l.killed);
     },
     [&] (IterEffects2 l) {
       if (RuntimeOption::EnableArgsInBacktraces) {
@@ -233,7 +240,7 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, AFrame { l.fp, l.id1 });
       load(env, AFrame { l.fp, l.id2 });
       load(env, AHeapAny);
-      addKillSet(env, env.global.ainfo.must_alias(canonicalize(l.killed)));
+      kill(env, l.killed);
     },
 
     [&] (PureStore l) {

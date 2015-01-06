@@ -688,8 +688,12 @@
     test_root: twital
     test_find_mode: token
   silex:
+    # There are currently some broken tests and warnings caused by
+    # vendors deprecating some classes. An issue has been opened in github
+    # at https://github.com/silexphp/Silex/issues/1085 and is currently 
+    # waiting for a decision on what the proper fix should be
     url: https://github.com/silexphp/Silex.git
-    branch: "1.2"
-    commit: f64ac7b8c859a9f4df572c0cd0e4348097475002
+    branch: "v1.2.2"
+    commit: 8c5e86eb97f3eee633729b22e950082fb5591328
     install_root: silex
     test_root: silex

@@ -75,7 +75,7 @@ let rec main_ env retries =
   let response =
     try ServerMsg.response_from_channel ic
     with End_of_file ->
-      prerr_string "Server disconnected or crashed. Try `hh restart`\n";
+      prerr_string "Server disconnected or crashed. Try `hh_client restart`\n";
       flush stderr;
       exit 1
   in

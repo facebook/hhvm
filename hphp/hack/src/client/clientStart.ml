@@ -132,7 +132,7 @@ let main env =
     Printf.fprintf
       stderr
       "Error: Server already exists for %s\n\
-      Use hh restart if you want to kill it and start a new one\n%!"
+      Use hh_client restart if you want to kill it and start a new one\n%!"
       (Path.string_of_path env.root);
     exit 77
   end

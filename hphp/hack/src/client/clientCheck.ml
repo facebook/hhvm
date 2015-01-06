@@ -293,7 +293,7 @@ let rec main args retries =
       end else begin
         prerr_string
           ("Error: hh_server disconnected or crashed, giving up!\n"^
-          "Server may have entered a bad state: Try `hh restart`\n");
+          "Server may have entered a bad state: Try `hh_client restart`\n");
         flush stderr;
         exit 5;
       end

@@ -153,6 +153,17 @@ let merge_parse
   Relative_path.Set.union pfiles1 pfiles2
 
 let parse_files acc fnl =
+  let parse =
+    if !Utils.profile
+    then (fun acc fn ->
+      let t = Unix.gettimeofday () in
+      let result = parse acc fn in
+      let t' = Unix.gettimeofday () in
+      let msg =
+        Printf.sprintf "%f %s [parsing]" (t' -. t) (Relative_path.suffix fn) in
+      !Utils.log msg;
+      result)
+    else parse in
   List.fold_left parse acc fnl
 
 let parse_parallel workers get_next =

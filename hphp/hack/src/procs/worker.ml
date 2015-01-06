@@ -180,6 +180,11 @@ module MakeWorker = struct
         hh_worker_init();
         Gc.set gc_control;
         close_parent descr_parent_reads descr_parent_sends acc;
+        if !Utils.profile
+        then begin
+          let f = open_out (string_of_int (Unix.getpid ())^".log") in
+          Utils.log := (fun s -> Printf.fprintf f "%s\n" s)
+        end;
         (* And now start the daemon worker *)
         start_worker descr_child_reads child_reads_task child_sends_result
     | pid ->

@@ -36,7 +36,7 @@ let revive funs classes =
   Typing_env.Classes.revive_batch classes;
   ()
 
-let declare content =
+let declare path content =
   Autocomplete.auto_complete := false;
   Autocomplete.auto_complete_for_global := "";
   let declared_funs = ref SSet.empty in
@@ -44,7 +44,7 @@ let declare content =
   try
     Errors.ignore_ begin fun () ->
       let {Parser_hack.is_hh_file; comments; ast} =
-        Parser_hack.program Relative_path.default content
+        Parser_hack.program path content
       in
       let funs, classes = List.fold_left begin fun (funs, classes) def ->
         match def with
@@ -77,10 +77,10 @@ let declare content =
     report_error e;
     SSet.empty, SSet.empty
 
-let fix_file_and_def content = try
+let fix_file_and_def path content = try
   Errors.ignore_ begin fun () ->
     let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program Relative_path.default content in
+      Parser_hack.program path content in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -119,11 +119,14 @@ let recheck fileinfo_l =
 let check_file_input files_info fi =
   match fi with
   | ServerMsg.FileContent content ->
-      let funs, classes = declare content in
-      fix_file_and_def content;
+      let path = Relative_path.default in
+      let funs, classes = declare path content in
+      fix_file_and_def path content;
       revive funs classes;
+      path
   | ServerMsg.FileName fn ->
       let path = Relative_path.create Relative_path.Root fn in
-      match Relative_path.Map.get path files_info with
+      let () = match Relative_path.Map.get path files_info with
       | Some fileinfo -> recheck [fileinfo]
-      | None -> ()
+      | None -> () in
+      path

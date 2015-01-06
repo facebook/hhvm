@@ -19,7 +19,7 @@ end)
 
 (* Count the number of expressions of each kind of Coverage_level. *)
 let count_exprs fn pos_ty_m =
-  let pos_level_l = mk_level_list (Some fn) pos_ty_m in
+  let pos_level_l = mk_level_list fn pos_ty_m in
   List.fold_left (fun c (_, lvl) -> incr_counter lvl c)
             empty_counter pos_level_l
 

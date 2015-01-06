@@ -10,7 +10,7 @@
 open Utils
 
 val with_expr_hook:
-  (Nast.expr -> Typing_defs.ty -> unit) -> (unit -> unit) -> unit
+  (Nast.expr -> Typing_defs.ty -> unit) -> (unit -> 'a) -> 'a
 
 val debug_print_last_pos:
   'a -> unit

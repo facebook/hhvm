@@ -46,35 +46,32 @@ type 'a trie =
   | Leaf of 'a
   | Node of 'a * 'a trie SMap.t
 
+let level_of_type fixme_map (p, ty) =
+  let lvl = match ty with
+    | _, Typing_defs.Tany -> Unchecked
+    | ty when TUtils.HasTany.check ty -> Partial
+    | _ -> Checked in
+  let line = p.Pos.pos_start.Lexing.pos_lnum in
+  (* If the line has a HH_FIXME, then mark it as (at most) partially checked *)
+  match lvl with
+  | Checked when IMap.mem line fixme_map ->
+      Partial
+  | Unchecked | Partial | Checked -> lvl
+
+let level_of_type_mapper fn =
+  let fixme_map = Parser_heap.HH_FIXMES.find_unsafe fn in
+  level_of_type fixme_map
+
 (* Converts types to coverage levels, and also dedups multiple types at the
  * same position, favoring the most recently added type. Duplicates can occur
  * when we take multiple passes to determine an expression's type, and we want
  * to use the last result as it is usually the most specific type. *)
-let mk_level_list fn_opt pos_ty_l =
+let mk_level_list fn pos_ty_l =
   let seen = HashSet.create 997 in
-  let pos_lvl_l = List.fold_left (fun acc (p, ty) ->
+  let level_of_type = level_of_type_mapper fn in
+  List.fold_left (fun acc (p, ty) ->
     if HashSet.mem seen p then acc
     else begin
       HashSet.add seen p;
-      let lvl = match ty with
-        | _, Typing_defs.Tany -> Unchecked
-        | ty when TUtils.HasTany.check ty -> Partial
-        | _ -> Checked in
-      (p, lvl) :: acc
+      (p, level_of_type (p, ty)) :: acc
     end) [] pos_ty_l
-  in
-  (* If the line has a HH_FIXME, then mark it as (at most) partially checked *)
-  (* NOTE(jez): can we monadize this? *)
-  match fn_opt with
-  | None -> pos_lvl_l
-  | Some fn ->
-    match Parser_heap.HH_FIXMES.get fn with
-    | None -> pos_lvl_l
-    | Some fixme_map ->
-        rev_rev_map (fun (p, lvl) ->
-          let line = p.Pos.pos_start.Lexing.pos_lnum in
-          p, match lvl with
-          | Checked when IMap.mem line fixme_map ->
-              Partial
-          | Unchecked | Partial | Checked -> lvl
-        ) pos_lvl_l

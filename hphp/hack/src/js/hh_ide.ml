@@ -392,7 +392,7 @@ let hh_hack_coloring fn =
   Typing.with_expr_hook (fun e ty -> type_acc := (fst e, ty) :: !type_acc)
     (fun () -> ignore (hh_check fn));
   let fn = Relative_path.create Relative_path.Root fn in
-  let result = mk_level_list (Some fn) !type_acc in
+  let result = mk_level_list fn !type_acc in
   let result = rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) result in
   let result = ColorFile.go (Hashtbl.find files fn) result in
   let result = List.map (fun input ->

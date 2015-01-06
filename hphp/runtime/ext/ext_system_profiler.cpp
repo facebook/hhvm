@@ -19,6 +19,6 @@
 
 namespace HPHP {
 
-SystemProfiler *g_system_profiler = 0;
+SystemProfiler *g_system_profiler = nullptr;
 
 }

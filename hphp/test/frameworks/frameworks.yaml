@@ -236,6 +236,8 @@
       - joomla-framework/src/Joomla/Filesystem/Tests/JFileTest.php
       - joomla-framework/src/Joomla/Log/Tests/Logger/FormattedtextTest.php
       - joomla-framework/src/Joomla/Log/Tests/Logger/W3cTest.php
+      - joomla-framework/src/Joomla/Archive/Tests/TarTest.php
+      - joomla-framework/src/Joomla/Archive/Tests/ZipTest.php
       # Assumes that getting the current time twice in a row will get
       # the same result
       - joomla-framework/src/Joomla/Log/Tests/LogEntryTest.php

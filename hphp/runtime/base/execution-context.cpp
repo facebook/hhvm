@@ -724,12 +724,13 @@ void ExecutionContext::handleError(const std::string& msg,
     throw exn;
   }
   if (!handled) {
-    if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasTrackErrors()) {
+    VMRegAnchor _;
+    auto fp = vmfp();
+
+    if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasTrackErrors() && fp) {
       // Set $php_errormsg in the parent scope
       Variant varFrom(ee.getMessage());
       const auto tvFrom(varFrom.asTypedValue());
-      VMRegAnchor _;
-      auto fp = vmfp();
       if (fp->func()->isBuiltin()) {
         fp = getPrevVMStateUNSAFE(fp);
       }

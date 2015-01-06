@@ -1565,13 +1565,13 @@ String HHVM_FUNCTION(ldap_escape,
                      int flags /* = 0 */) {
   char esc[256] = {};
 
-  if (flags & k_LDAP_ESCAPE_FILTER) {
-    esc['*'] = esc['('] = esc[')'] = esc['\0'] = esc['\\'] = 1;
+  if (flags & k_LDAP_ESCAPE_FILTER) { // llvm.org/bugs/show_bug.cgi?id=18389
+    esc['*'*1u] = esc['('*1u] = esc[')'*1u] = esc['\0'*1u] = esc['\\'*1u] = 1;
   }
 
   if (flags & k_LDAP_ESCAPE_DN) {
-    esc[','] = esc['='] = esc['+'] = esc['<'] = esc['\\'] = 1;
-    esc['>'] = esc[';'] = esc['"'] = esc['#'] = 1;
+    esc[','*1u] = esc['='*1u] = esc['+'*1u] = esc['<'*1u] = esc['\\'*1u] = 1;
+    esc['>'*1u] = esc[';'*1u] = esc['"'*1u] = esc['#'*1u] = 1;
   }
 
   if (!flags) {

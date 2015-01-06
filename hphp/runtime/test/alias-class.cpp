@@ -39,6 +39,7 @@ std::vector<AliasClass> generic_classes() {
     ANonStack,
     AStackAny,
     AElemIAny,
+    AElemSAny,
     AElemAny,
   };
 }
@@ -184,6 +185,104 @@ TEST(AliasClass, StackBasics) {
     EXPECT_TRUE(stk5 <= stk3);
     EXPECT_FALSE(stk5.maybe(stk4));
     EXPECT_FALSE(stk5 <= stk4);
+  }
+}
+
+TEST(AliasClass, SpecializedUnions) {
+  IRUnit unit{test_context};
+  auto const marker = BCMarker::Dummy();
+  auto const FP = unit.gen(DefFP, marker)->dst();
+
+  AliasClass const stk = AStack { FP, -10, 3 };
+  AliasClass const unrelated_stk = AStack { FP, -14, 1 };
+  AliasClass const related_stk = AStack { FP, -11, 2 };
+
+  auto const stk_and_frame = stk | AFrameAny;
+  EXPECT_TRUE(!stk_and_frame.is_stack());
+  EXPECT_TRUE(AFrameAny <= stk_and_frame);
+  EXPECT_TRUE(stk <= stk_and_frame);
+  EXPECT_TRUE(AStackAny.maybe(stk_and_frame));
+  EXPECT_TRUE(AFrameAny.maybe(stk_and_frame));
+  EXPECT_FALSE(unrelated_stk <= stk_and_frame);
+  EXPECT_FALSE(stk_and_frame.maybe(unrelated_stk));
+
+  auto const stk_and_prop = stk | APropAny;
+  EXPECT_TRUE(stk_and_prop.maybe(stk_and_frame));
+  EXPECT_TRUE(stk_and_frame.maybe(stk_and_prop));
+  EXPECT_FALSE(stk_and_prop <= stk_and_frame);
+  EXPECT_FALSE(stk_and_frame <= stk_and_prop);
+  EXPECT_TRUE(APropAny.maybe(stk_and_prop));
+  EXPECT_TRUE(AStackAny.maybe(stk_and_prop));
+
+  auto const unrelated_stk_and_prop = unrelated_stk | APropAny;
+  EXPECT_FALSE(stk_and_frame.maybe(unrelated_stk_and_prop));
+  EXPECT_FALSE(unrelated_stk_and_prop.maybe(stk_and_frame));
+  EXPECT_TRUE(unrelated_stk_and_prop.maybe(stk_and_prop)); // because of prop
+  EXPECT_FALSE(unrelated_stk_and_prop <= stk_and_prop);
+  EXPECT_FALSE(stk_and_prop <= unrelated_stk_and_prop);
+  EXPECT_FALSE(unrelated_stk_and_prop <= stk_and_frame);
+  EXPECT_FALSE(stk_and_frame <= unrelated_stk_and_prop);
+
+  EXPECT_FALSE(stk_and_prop <= AHeapAny);
+  EXPECT_TRUE(stk_and_prop.maybe(AHeapAny));
+  EXPECT_FALSE(stk_and_frame <= AHeapAny);
+  EXPECT_FALSE(stk_and_frame.maybe(AHeapAny));
+
+  auto const rel_stk_and_frame = related_stk | AFrameAny;
+  EXPECT_TRUE(stk_and_frame.maybe(rel_stk_and_frame));
+  EXPECT_TRUE(rel_stk_and_frame.maybe(stk_and_frame));
+  EXPECT_TRUE(related_stk <= stk);
+  EXPECT_TRUE(rel_stk_and_frame <= stk_and_frame);
+  EXPECT_FALSE(stk_and_frame <= rel_stk_and_frame);
+  EXPECT_TRUE(rel_stk_and_frame.maybe(stk_and_prop));
+  EXPECT_TRUE(stk_and_prop.maybe(rel_stk_and_frame));
+  EXPECT_FALSE(rel_stk_and_frame <= stk_and_prop);
+}
+
+TEST(AliasClass, StackUnions) {
+  IRUnit unit{test_context};
+  auto const marker = BCMarker::Dummy();
+  auto const FP = unit.gen(DefFP, marker)->dst();
+  auto const SP = unit.gen(DefSP, marker, StackOffset { 1 }, FP)->dst();
+
+  {
+    AliasClass const stk1  = AStack { FP, -3, 1 };
+    AliasClass const stk2  = AStack { FP, -4, 1 };
+    AliasClass const stk3  = AStack { FP, -5, 1 };
+    AliasClass const stk12 = AStack { FP, -3, 2 };
+    AliasClass const stk23 = AStack { FP, -4, 2 };
+    AliasClass const stk13 = AStack { FP, -3, 3 };
+    EXPECT_EQ(stk1 | stk2, stk12);
+    EXPECT_EQ(stk2 | stk3, stk23);
+    EXPECT_EQ(stk1 | stk3, stk13);
+  }
+
+  // Same as above but with some other bits.
+  {
+    AliasClass const stk1  = AHeapAny | AStack { FP, -3, 1 };
+    AliasClass const stk2  = AHeapAny | AStack { FP, -4, 1 };
+    AliasClass const stk3  = AHeapAny | AStack { FP, -5, 1 };
+    AliasClass const stk12 = AHeapAny | AStack { FP, -3, 2 };
+    AliasClass const stk23 = AHeapAny | AStack { FP, -4, 2 };
+    AliasClass const stk13 = AHeapAny | AStack { FP, -3, 3 };
+    EXPECT_EQ(stk1 | stk2, stk12);
+    EXPECT_EQ(stk2 | stk3, stk23);
+    EXPECT_EQ(stk1 | stk3, stk13);
+  }
+
+  {
+    AliasClass const stk1 = AStack { FP, -1, 1 };
+    AliasClass const stk2 = AStack { SP, -2, 1 };
+    AliasClass const true_union = AStack { FP, -1, 3 };
+    EXPECT_EQ(stk1 | stk2, AStackAny);
+    EXPECT_EQ(stk1 | canonicalize(stk2), true_union);
+  }
+
+  {
+    auto const imax = std::numeric_limits<int32_t>::max();
+    AliasClass const deep_stk1 = AStack { FP, -10, imax };
+    AliasClass const deep_stk2 = AStack { FP, -14, imax };
+    EXPECT_EQ(deep_stk1 | deep_stk2, deep_stk1);
   }
 }
 

@@ -160,7 +160,7 @@ struct AliasClass {
 
   /*
    * Create an alias class that is at least as big as the true union of this
-   * alias class and another one.
+   * alias class and another one.  Guaranteed to be commutative.
    */
   AliasClass operator|(AliasClass) const;
 
@@ -177,14 +177,29 @@ struct AliasClass {
   bool maybe(AliasClass) const;
 
   /*
-   * Conditionally access specific known information of various kinds.  Return
-   * folly::none if this alias class is not specialized in that way.
+   * Conditionally access specific known information of various kinds.
+   *
+   * Returns folly::none if this alias class has no specialization in that way.
    */
   folly::Optional<AFrame> frame() const;
-  folly::Optional<AProp> prop() const;
+  folly::Optional<AProp>  prop() const;
   folly::Optional<AElemI> elemI() const;
   folly::Optional<AElemS> elemS() const;
   folly::Optional<AStack> stack() const;
+
+  /*
+   * Conditionally access specific known information, but also checking that
+   * that is the only major category contained in this AliasClass.
+   *
+   * I.e., cls.is_foo() is semantically equivalent to:
+   *
+   *   cls <= AFooAny ? cls.foo() : folly::none
+   */
+  folly::Optional<AFrame> is_frame() const;
+  folly::Optional<AProp>  is_prop() const;
+  folly::Optional<AElemI> is_elemI() const;
+  folly::Optional<AElemS> is_elemS() const;
+  folly::Optional<AStack> is_stack() const;
 
 private:
   enum class STag {
@@ -198,12 +213,13 @@ private:
 
 private:
   friend std::string show(AliasClass);
+  friend AliasClass canonicalize(AliasClass);
   bool checkInvariants() const;
   bool equivData(AliasClass) const;
   bool subclassData(AliasClass) const;
-  bool subclassDataDisjoint(AliasClass) const;
   bool maybeData(AliasClass) const;
-  bool maybeDataDisjoint(AliasClass) const;
+  static AliasClass unionData(rep newBits, AliasClass, AliasClass);
+  static rep stagBit(STag tag);
 
 private:
   rep m_bits;
@@ -227,6 +243,7 @@ auto const ANonFrame = AliasClass{AliasClass::BNonFrame};
 auto const ANonStack = AliasClass{AliasClass::BNonStack};
 auto const AStackAny = AliasClass{AliasClass::BStack};
 auto const AElemIAny = AliasClass{AliasClass::BElemI};
+auto const AElemSAny = AliasClass{AliasClass::BElemS};
 auto const AElemAny  = AliasClass{AliasClass::BElem};
 auto const AUnknown  = AliasClass{AliasClass::BUnknown};
 

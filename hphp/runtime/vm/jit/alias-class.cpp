@@ -17,10 +17,10 @@
 
 #include <limits>
 #include <algorithm>
+#include <bitset>
 
 #include <folly/Hash.h>
 #include <folly/Format.h>
-#include <folly/Bits.h>
 
 #include "hphp/util/safe-cast.h"
 
@@ -121,6 +121,46 @@ int32_t lowest_offset(AStack stk) {
   return safe_cast<int32_t>(std::max(low, i32min));
 }
 
+std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
+  using A = AliasClass;
+
+  switch (bits) {
+  case A::BEmpty:    return "Empty";
+  case A::BNonFrame: return "!Fr";
+  case A::BNonStack: return "!St";
+  case A::BHeap:     return "Heap";
+  case A::BUnknown:  return "Unk";
+  case A::BElem:     return "Elem";
+  case A::BFrame:    break;
+  case A::BProp:     break;
+  case A::BElemI:    break;
+  case A::BElemS:    break;
+  case A::BStack:    break;
+  }
+
+  auto ret = std::string{};
+  auto const bset = std::bitset<32>{bits};
+  for (auto i = 0; i < 32; ++i) {
+    if (!bset.test(i)) continue;
+    if (1ul << i == skip) continue;
+    switch (1ul << i) {
+    case A::BEmpty:
+    case A::BNonFrame:
+    case A::BNonStack:
+    case A::BHeap:
+    case A::BUnknown:
+    case A::BElem:
+      always_assert(0);
+    case A::BFrame:  ret += "Fr"; break;
+    case A::BProp:   ret += "Pr"; break;
+    case A::BElemI:  ret += "Ei"; break;
+    case A::BElemS:  ret += "Es"; break;
+    case A::BStack:  ret += "St"; break;
+    }
+  }
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -161,18 +201,23 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
 
 //////////////////////////////////////////////////////////////////////
 
-#define X(What, what)                                 \
-  AliasClass::AliasClass(A##What x)                   \
-    : m_bits(B##What)                                 \
-    , m_stag(STag::What)                              \
-    , m_##what(x)                                     \
-  {                                                   \
-    assert(checkInvariants());                        \
-  }                                                   \
-                                                      \
-  folly::Optional<A##What> AliasClass::what() const { \
-    if (m_stag == STag::What) return m_##what;        \
-    return folly::none;                               \
+#define X(What, what)                                       \
+  AliasClass::AliasClass(A##What x)                         \
+    : m_bits(B##What)                                       \
+    , m_stag(STag::What)                                    \
+    , m_##what(x)                                           \
+  {                                                         \
+    assert(checkInvariants());                              \
+  }                                                         \
+                                                            \
+  folly::Optional<A##What> AliasClass::what() const {       \
+    if (m_stag == STag::What) return m_##what;              \
+    return folly::none;                                     \
+  }                                                         \
+                                                            \
+  folly::Optional<A##What> AliasClass::is_##what() const {  \
+    if (*this <= A##What##Any) return what();               \
+    return folly::none;                                     \
   }
 
 X(Frame, frame)
@@ -183,13 +228,19 @@ X(Stack, stack)
 
 #undef X
 
-bool AliasClass::checkInvariants() const {
-  // For now we only allow stags when there is only a single bit set in the
-  // class.  Note: operator<= is making use of this invariant.
-  if (m_stag != STag::None) {
-    assert(folly::popcount(uint32_t{m_bits}) == 1);
+AliasClass::rep AliasClass::stagBit(STag tag) {
+  switch (tag) {
+  case STag::None:    return BEmpty;
+  case STag::Frame:   return BFrame;
+  case STag::Prop:    return BProp;
+  case STag::ElemI:   return BElemI;
+  case STag::ElemS:   return BElemS;
+  case STag::Stack:   return BStack;
   }
+  always_assert(0);
+}
 
+bool AliasClass::checkInvariants() const {
   switch (m_stag) {
   case STag::None:    break;
   case STag::Frame:   break;
@@ -205,6 +256,9 @@ bool AliasClass::checkInvariants() const {
     assert(m_elemS.key->isStatic());
     break;
   }
+
+  assert(m_bits & stagBit(m_stag));
+
   return true;
 }
 
@@ -233,19 +287,79 @@ bool AliasClass::operator==(AliasClass o) const {
          equivData(o);
 }
 
+AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
+  assert(a.m_stag == b.m_stag);
+  switch (a.m_stag) {
+  case STag::None:
+    break;
+  case STag::Frame:
+  case STag::Prop:
+  case STag::ElemI:
+  case STag::ElemS:
+    assert(!a.equivData(b));
+    break;
+
+  case STag::Stack:
+    {
+      auto const stkA = a.m_stack;
+      auto const stkB = b.m_stack;
+
+      // If two AStack have different bases, we can't union them any better
+      // than AStackAny, since we don't know where they are relative to each
+      // other.  We know two AStacks with different FramePtr bases can't alias,
+      // but that doesn't help us represent a union of them.
+      if (stkA.base != stkB.base) return AliasClass{newBits};
+
+      // Make a stack range big enough to contain both of them.
+      auto const highest = std::max(stkA.offset, stkB.offset);
+      auto const lowest = std::min(lowest_offset(stkA), lowest_offset(stkB));
+      auto const newStack = AStack {
+        stkA.base,
+        highest,
+        highest - lowest
+      };
+      auto ret = AliasClass{newBits};
+      new (&ret.m_stack) AStack(newStack);
+      ret.m_stag = STag::Stack;
+      assert(ret.checkInvariants());
+      assert(a <= ret && b <= ret);
+      return ret;
+    }
+  }
+
+  return AliasClass{newBits};
+}
+
 AliasClass AliasClass::operator|(AliasClass o) const {
   if (o <= *this) return *this;
   if (*this <= o) return o;
-#define X(x) if (o <= x && *this <= x) return x;
-  X(AStackAny)
-  X(AElemIAny)
-  X(AElemAny)
-  X(APropAny)
-  X(AHeapAny)
-  X(ANonFrame)
-  X(ANonStack)
-#undef X
-  return AUnknown;
+
+  auto const unioned = static_cast<rep>(m_bits | o.m_bits);
+
+  // Note: union operations are guaranteed to be commutative, so if there are
+  // two non-None stags, we have to consistently choose between them.  For now
+  // we throw both away in any case where they differ, and try to merge them
+  // with unionData if they are the same.
+  auto const stag1 = m_stag;
+  auto const stag2 = o.m_stag;
+  if (stag1 == stag2) return unionData(unioned, *this, o);
+  if (stag1 != STag::None && stag2 != STag::None) {
+    return AliasClass{unioned};
+  }
+  if (stag2 != STag::None) return o | *this;
+
+  auto ret = AliasClass{unioned};
+  switch (stag1) {
+  case STag::None:
+    break;
+  case STag::Frame:  new (&ret.m_frame) AFrame(m_frame); break;
+  case STag::Prop:   new (&ret.m_prop) AProp(m_prop); break;
+  case STag::ElemI:  new (&ret.m_elemI) AElemI(m_elemI); break;
+  case STag::ElemS:  new (&ret.m_elemS) AElemS(m_elemS); break;
+  case STag::Stack:  new (&ret.m_stack) AStack(m_stack); break;
+  }
+  ret.m_stag = stag1;
+  return ret;
 }
 
 bool AliasClass::subclassData(AliasClass o) const {
@@ -264,20 +378,35 @@ bool AliasClass::subclassData(AliasClass o) const {
   not_reached();
 }
 
-bool AliasClass::subclassDataDisjoint(AliasClass o) const {
-  if (o.m_stag == STag::None) return true;
-  return false;
-}
-
 bool AliasClass::operator<=(AliasClass o) const {
   if (m_bits == BEmpty) return true;
 
   auto const isect = static_cast<rep>(m_bits & o.m_bits);
   if (isect != m_bits) return false;
-  if (folly::popcount(uint32_t{o.m_bits}) == 1) {
-    if (m_stag != o.m_stag) return subclassDataDisjoint(o);
-    return subclassData(o);
-  }
+
+  // If they have the same specialized tag, then since isect is equal to
+  // m_bits, the stagBit must be part of the intersection or be BEmpty.  This
+  // means they can only be in a subclass relationship if that specialized data
+  // is.
+  if (m_stag == o.m_stag) return subclassData(o);
+
+  /*
+   * Disjoint stags.  The stagBit for m_stag must be part of the intersection
+   * (or be BEmpty), since isect == m_bits above.  This breaks down into the
+   * following cases:
+   *
+   * If the osbit is part of the intersection, then this can't be a subclass of
+   * `o', because this has only generic information for that bit but it is set
+   * in isect.  If the osbit is BEmpty, osbit & isect is zero, which avoids
+   * this case.
+   *
+   * The remaining situations are that m_stag is STag::None, in which case it
+   * is a subclass since osbit wasn't in the intersection.  Or that m_stag has
+   * a bit that is in the isect (since m_bits == isect), and that bit is set in
+   * o.m_bits.  In either case this is a subclass, so we can just return true.
+   */
+  auto const osbit = stagBit(o.m_stag);
+  if (osbit & isect) return false;
   return true;
 }
 
@@ -337,89 +466,99 @@ bool AliasClass::maybeData(AliasClass o) const {
   not_reached();
 }
 
-bool AliasClass::maybeDataDisjoint(AliasClass o) const {
-  assert(m_stag != o.m_stag);
-  if (m_stag == STag::None || o.m_stag == STag::None) return true;
-
-  switch (m_stag) {
-  case STag::None:
-    not_reached();
-  case STag::Frame:
-  case STag::Prop:
-  case STag::Stack:
-    return false;
-  case STag::ElemI:
-  case STag::ElemS:
-    /*
-     * TODO(#2884927): we probably need to be aware of possibly-integer-like
-     * string keys here before we can start using ElemS for anything.  (Or else
-     * ensure that we never use ElemS with an integer-like string.)
-     */
-    return false;
-  }
-
-  not_reached();
-}
-
+/*
+ * TODO(#2884927): we probably need to be aware of possibly-integer-like string
+ * keys here before we can start using ElemS for anything.  (Or else ensure
+ * that we never use ElemS with an integer-like string.)
+ */
 bool AliasClass::maybe(AliasClass o) const {
   auto const isect = static_cast<rep>(m_bits & o.m_bits);
   if (isect == 0) return false;
   if (*this <= o || o <= *this) return true;
-  if (folly::popcount(uint32_t{o.m_bits}) == 1) {
-    if (m_stag != o.m_stag) return maybeDataDisjoint(o);
-    return maybeData(o);
+
+  /*
+   * If we have the same stag, then the cases are either the stag is in the
+   * intersection or not.  If it's not (including if it was BEmpty), we already
+   * know the intersection is non-empty and return true.
+   *
+   * If it is in the intersection, and it is not the only relevant bit, then we
+   * still have a non-empty intersection.
+   *
+   * Finally if it's in the intersection and the only isect bit, then we need
+   * to see if the data is in a maybe relationship.
+   */
+  if (m_stag == o.m_stag) {
+    auto const bit = stagBit(m_stag);
+    assert(isect != 0);
+    if ((bit & isect) == isect) return maybeData(o);
+    return true;
   }
+
+  /*
+   * The stags are different.  However, since isect is non-empty, there are
+   * three cases:
+   *
+   *    o One of the stag bits is not in the intersection, and thus not
+   *      relevant.  Since the other stag bit is in the intersection, but
+   *      didn't have specialized information from one of the intersectees, the
+   *      intersection is non-empty and we should return true.
+   *
+   *    o Both of the stag bits are not in the intersection, and thus not
+   *      relevant.  Some other bit was set, since we already checked that
+   *      isect was non-zero, so we should return true.
+   *
+   *    o Both of the stag bits are in the intersection.  But each intersectee
+   *      therefore had only generic information for the bit of the other, so
+   *      the intersection is non-empty, and we should return true.
+   *
+   * All of these cases are handled by the following statement:
+   */
   return true;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 AliasClass canonicalize(AliasClass a) {
-  if (auto const x = a.prop())  return AProp { canonical(x->obj), x->offset };
-  if (auto const x = a.elemI()) return AElemI { canonical(x->arr), x->idx };
-  if (auto const x = a.elemS()) return AElemS { canonical(x->arr), x->key };
-  if (auto const x = a.stack()) return canonicalize_stk(*x);
-  return a;
+  using T = AliasClass::STag;
+  switch (a.m_stag) {
+  case T::None:  return a;
+  case T::Frame: return a;
+  case T::Prop:  a.m_prop.obj = canonical(a.m_prop.obj);   return a;
+  case T::ElemI: a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
+  case T::ElemS: a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
+  case T::Stack: a.m_stack = canonicalize_stk(a.m_stack);  return a;
+  }
+  always_assert(0);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 std::string show(AliasClass acls) {
-  auto ret = std::string{};
   using A  = AliasClass;
 
-  switch (acls.m_bits) {
-  case A::BEmpty:     ret = "empty";    break;
-  case A::BNonFrame:  ret = "nonframe"; break;
-  case A::BNonStack:  ret = "nonstack"; break;
-  case A::BHeap:      ret = "heap";     break;
-  case A::BUnknown:   ret = "unk";      break;
-  case A::BFrame:     ret = "frame";    break;
-  case A::BProp:      ret = "prop";     break;
-  case A::BElemI:     ret = "elemI";    break;
-  case A::BElemS:     ret = "elemS";    break;
-  case A::BElem:      ret = "elem";     break;
-  case A::BStack:     ret = "stk";      break;
+  auto ret = bit_str(acls.m_bits, A::stagBit(acls.m_stag));
+  if (!ret.empty() && acls.m_stag != A::STag::None) {
+    ret += ' ';
   }
 
   switch (acls.m_stag) {
   case A::STag::None:
     break;
   case A::STag::Frame:
-    folly::format(&ret, " t{}:{}", acls.m_frame.fp->id(), acls.m_frame.id);
+    folly::format(&ret, "Fr t{}:{}", acls.m_frame.fp->id(), acls.m_frame.id);
     break;
   case A::STag::Prop:
-    folly::format(&ret, " t{}:{}", acls.m_prop.obj->id(), acls.m_prop.offset);
+    folly::format(&ret, "Pr t{}:{}", acls.m_prop.obj->id(), acls.m_prop.offset);
     break;
   case A::STag::ElemI:
-    folly::format(&ret, " t{}:{}", acls.m_elemI.arr->id(), acls.m_elemI.idx);
+    folly::format(&ret, "Ei t{}:{}", acls.m_elemI.arr->id(), acls.m_elemI.idx);
     break;
   case A::STag::ElemS:
-    folly::format(&ret, " t{}:{.10}", acls.m_elemS.arr->id(),
+    folly::format(&ret, "Es t{}:{.10}", acls.m_elemS.arr->id(),
       acls.m_elemS.key);
     break;
   case A::STag::Stack:
-    folly::format(&ret, " t{}:{}{}",
+    folly::format(&ret, "St t{}:{}{}",
       acls.m_stack.base->id(),
       acls.m_stack.offset,
       acls.m_stack.size == std::numeric_limits<int32_t>::max()

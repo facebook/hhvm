@@ -93,18 +93,27 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   auto ret = ALocBits{};
 
   // We may have some special may-alias sets for multi-slot stack ranges.  If
-  // one of these is present, we can just use that.
+  // one of these is present, we can use that for the stack portion.
+  // Otherwise, we need to merge all_stack, because we didn't track which stack
+  // locations it can alias earlier.
   if (auto const stk = acls.stack()) {
     if (stk->size > 1) {
       auto const it = stack_ranges.find(*stk);
-      if (it != end(stack_ranges)) return it->second;
+      ret |= it != end(stack_ranges) ? it->second : all_stack;
+    } else {
+      if (auto const slot = find(*stk)) {
+        ret.set(slot->index);
+      } else {
+        ret |= all_stack;
+      }
     }
+  } else if (acls.maybe(AStackAny)) {
+    ret |= all_stack;
   }
 
   if (acls.maybe(APropAny))   ret |= all_props;
   if (acls.maybe(AElemIAny))  ret |= all_elemIs;
   if (acls.maybe(AFrameAny))  ret |= all_frame;
-  if (acls.maybe(AStackAny))  ret |= all_stack;
 
   return ret;
 }
@@ -145,21 +154,38 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
   visit_locations(blocks, [&] (AliasClass acls) {
     if (blocks.size() >= kMaxTrackedALocs) return;
 
-    if (auto const prop = acls.prop()) {
+    if (auto const prop = acls.is_prop()) {
       conflict_prop_offset[prop->offset].set(add_class(ret, acls));
       return;
     }
 
-    if (auto const elemI = acls.elemI()) {
+    if (auto const elemI = acls.is_elemI()) {
       conflict_array_index[elemI->idx].set(add_class(ret, acls));
       return;
     }
 
-    if (auto const frame = acls.frame()) {
+    if (auto const frame = acls.is_frame()) {
       add_class(ret, acls);
       return;
     }
 
+    /*
+     * Note that unlike the above we're going to assign location ids to the
+     * individual stack slots in AStack portions of AliasClasses that are
+     * unions of AStack ranges with other classes.  (I.e. basically we're using
+     * stack() instead of is_stack() here, so it will match things that are
+     * only partially stacks.)
+     *
+     * The reason for this is that many instructions can have effects like
+     * that, when they can re-enter and do things to the stack in some range
+     * (below the re-entry depth, for example), but also affect some other type
+     * of memory (DecRefMem, for example).  In particular this means we want
+     * that AliasClass to have an entry in the must_alias_map, so we'll
+     * populate it later.  Currently most of these situations should probably
+     * bail at kMaxExpandedStackRange, although there are some situations that
+     * won't (e.g. instructions like CoerceStk, or DecRefStk, which will have
+     * an AHeapAny (from re-entry) unioned with a single stack slot).
+     */
     if (auto const stk = acls.stack()) {
       if (stk->size > 1) {
         ret.must_alias_map[acls];
@@ -188,24 +214,24 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
   }
 
   auto make_conflict_set = [&] (AliasClass acls, ALocMeta& meta) {
-    if (auto const prop = acls.prop()) {
+    if (auto const prop = acls.is_prop()) {
       meta.conflicts = conflict_prop_offset[prop->offset];
       meta.conflicts.reset(meta.index);
       ret.all_props.set(meta.index);
       return;
     }
-    if (auto const elemI = acls.elemI()) {
+    if (auto const elemI = acls.is_elemI()) {
       meta.conflicts = conflict_array_index[elemI->idx];
       meta.conflicts.reset(meta.index);
       ret.all_elemIs.set(meta.index);
       return;
     }
-    if (auto const frame = acls.frame()) {
+    if (auto const frame = acls.is_frame()) {
       ret.all_frame.set(meta.index);
       ret.per_frame_bits[frame->fp].set(meta.index);
       return;
     }
-    if (auto const stk = acls.stack()) {
+    if (auto const stk = acls.is_stack()) {
       ret.all_stack.set(meta.index);
       for (auto& kv : conflict_stkptrs) {
         if (kv.first != stk->base) {
@@ -215,7 +241,10 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
           }
         }
       }
+      return;
     }
+    always_assert_flog(0, "AliasAnalysis assigned an AliasClass an id "
+      "but it didn't match a situation we undestood: {}\n", show(acls));
   };
 
   ret.locations_inv.resize(ret.locations.size());
@@ -231,7 +260,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      * is probably ok for now---but if we remove the limit we may need to
      * revisit this so it can't blow up.
      */
-    if (kv.first.stack()) {
+    if (kv.first.is_stack()) {
       for (auto& maEnt : ret.must_alias_map) {
         if (kv.first <= maEnt.first) {
           FTRACE(2, "  ({}) {} must_alias {}\n",

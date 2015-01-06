@@ -977,13 +977,8 @@ bool check_effects(const IRInstruction& inst, MemEffects me) {
   };
 
   auto check = [&] (AliasClass a) {
-    if (auto const fr = a.frame()) {
-      check_fp(fr->fp);
-      return;
-    }
-    if (auto const pr = a.prop()) {
-      check_obj(pr->obj);
-    }
+    if (auto const fr = a.frame()) check_fp(fr->fp);
+    if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 
   // In debug let's do some type checking in case people move instruction

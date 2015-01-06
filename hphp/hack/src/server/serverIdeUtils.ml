@@ -103,11 +103,11 @@ with e ->
   report_error e;
   ()
 
-let check_defs {FileInfo.funs; classes; types; _} =
+let check_defs {FileInfo.funs; classes; typedefs; _} =
   fst (Errors.do_ (fun () ->
     List.iter (fun (_, x) -> Typing_check_service.type_fun x) funs;
     List.iter (fun (_, x) -> Typing_check_service.type_class x) classes;
-    List.iter (fun (_, x) -> Typing_check_service.check_typedef x) types;
+    List.iter (fun (_, x) -> Typing_check_service.check_typedef x) typedefs;
   ))
 
 let recheck fileinfo_l =

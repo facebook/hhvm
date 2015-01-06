@@ -151,12 +151,12 @@ let parse_options () =
     rest = !rest_options;
   }
 
-let suggest_and_print fn { FileInfo.funs; classes; types; consts; _ } =
+let suggest_and_print fn { FileInfo.funs; classes; typedefs; consts; _ } =
   let make_set =
     List.fold_left (fun acc (_, x) -> SSet.add x acc) SSet.empty in
   let n_funs = make_set funs in
   let n_classes = make_set classes in
-  let n_types = make_set types in
+  let n_types = make_set typedefs in
   let n_consts = make_set consts in
   let names = { FileInfo.n_funs; n_classes; n_types; n_consts } in
   let fast = Relative_path.Map.add fn names Relative_path.Map.empty in
@@ -238,8 +238,8 @@ let print_coverage fn type_acc =
   let counts = ServerCoverageMetric.count_exprs fn type_acc in
   ClientCoverageMetric.go ~json:false (Some (Leaf counts))
 
-let print_prolog { FileInfo.funs; classes; types; consts; _ } =
-  let facts = Prolog.facts_of_defs [] funs classes types consts in
+let print_prolog { FileInfo.funs; classes; typedefs; consts; _ } =
+  let facts = Prolog.facts_of_defs [] funs classes typedefs consts in
   PrologMain.output_facts stdout facts
 
 (*****************************************************************************)
@@ -274,7 +274,7 @@ let main_hack { filename; suggest; color; coverage; prolog; _ } =
       end classes SMap.empty in
       Typing_decl.make_env nenv all_classes filename;
       { FileInfo.
-        funs; classes; types = typedefs; consts; comments;
+        funs; classes; typedefs; consts; comments;
         consider_names_just_for_autoload = false }
     end in
   if color then

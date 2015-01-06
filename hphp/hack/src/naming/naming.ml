@@ -2158,13 +2158,13 @@ let add_files_to_rename nenv failed defl defs_in_env =
 
 let ndecl_file fn
     {FileInfo.funs;
-     classes; types; consts; consider_names_just_for_autoload; comments}
+     classes; typedefs; consts; consider_names_just_for_autoload; comments}
     (errorl, failed, nenv) =
   let errors, nenv = Errors.do_ begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
     if consider_names_just_for_autoload
     then nenv
-    else make_env nenv ~funs ~classes ~typedefs:types ~consts
+    else make_env nenv ~funs ~classes ~typedefs ~consts
   end
   in
   match errors with
@@ -2199,6 +2199,6 @@ let ndecl_file fn
    *)
   let failed = add_files_to_rename nenv failed funs nenv.ifuns in
   let failed = add_files_to_rename nenv failed classes (fst nenv.iclasses) in
-  let failed = add_files_to_rename nenv failed types nenv.itypedefs in
+  let failed = add_files_to_rename nenv failed typedefs nenv.itypedefs in
   let failed = add_files_to_rename nenv failed consts nenv.iconsts in
   List.rev_append l errorl, Relative_path.Set.add fn failed, nenv

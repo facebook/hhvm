@@ -65,7 +65,7 @@ let neutral = (
 let empty_file_info : FileInfo.t = {
   FileInfo.funs = [];
   classes = [];
-  types = [];
+  typedefs = [];
   consts = [];
   comments = [];
   consider_names_just_for_autoload = false;
@@ -118,10 +118,10 @@ let parse (acc, errorl, error_files, php_files) fn =
   Parsing_hooks.dispatch_file_parsed_hook fn ast;
   if is_hh_file then begin
     AddDeps.program ast;
-    let funs, classes, types, consts = get_defs ast in
+    let funs, classes, typedefs, consts = get_defs ast in
     Parser_heap.ParserHeap.add fn ast;
     let defs =
-      {FileInfo.funs; classes; types; consts; comments;
+      {FileInfo.funs; classes; typedefs; consts; comments;
        consider_names_just_for_autoload = false}
     in
     let acc = Relative_path.Map.add fn defs acc in

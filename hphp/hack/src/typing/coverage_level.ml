@@ -37,6 +37,13 @@ let empty_counter =
 let incr_counter k c =
   CLMap.add k (1 + CLMap.find_unsafe k c) c
 
+let merge_and_sum cs1 cs2 =
+  let merged = CLMap.merge (fun _ c1 c2 ->
+    match c1, c2 with
+    | Some c1, Some c2 -> Some (c1 + c2)
+    | _ -> assert false) cs1 cs2 in
+  merged
+
 (* An assoc list that counts the number of expressions at each coverage level *)
 type level_counts = int CLMap.t
 

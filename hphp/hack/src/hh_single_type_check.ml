@@ -239,7 +239,7 @@ let print_colored fn type_acc =
 
 let print_coverage fn type_acc =
   let counts = ServerCoverageMetric.count_exprs fn type_acc in
-  ClientCoverageMetric.go false (Some (Leaf counts))
+  ClientCoverageMetric.go ~json:false (Some (Leaf counts))
 
 let print_prolog funs classes typedefs consts =
   let facts = Prolog.facts_of_defs [] funs classes typedefs consts in
@@ -283,15 +283,18 @@ let main_hack { filename; suggest; color; coverage; prolog; _ } =
         List.iter (fun (_, x) ->
           Typing_check_service.check_typedef x) typedefs;
       in
-      if color || coverage then begin
+      if color then
         let type_acc = ref [] in
         Typing.with_expr_hook (fun e ty ->
           type_acc := (fst e, ty) :: !type_acc) check;
-        if color
-        then print_colored filename !type_acc;
-        if coverage
-        then print_coverage filename !type_acc;
-      end else begin
+        print_colored filename !type_acc;
+      else if coverage then
+        let fileinfo = { FileInfo.
+          funs; classes; types = typedefs; consts; comments;
+          consider_names_just_for_autoload = false } in
+        let type_acc = ServerCoverageMetric.accumulate_types fileinfo in
+        print_coverage filename type_acc;
+      else begin
         check ();
         if prolog
         then print_prolog funs classes typedefs consts;

@@ -83,7 +83,7 @@ let rec main args retries =
         ServerMsg.cmd_to_channel oc command;
         let counts_opt : ServerCoverageMetric.result =
           Marshal.from_channel ic in
-        ClientCoverageMetric.go args.output_json counts_opt;
+        ClientCoverageMetric.go ~json:args.output_json counts_opt;
         exit 0
     | MODE_FIND_CLASS_REFS name ->
         let ic, oc = connect args in

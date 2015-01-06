@@ -104,17 +104,15 @@ with e ->
   ()
 
 let check_defs {FileInfo.funs; classes; types; _} =
-  Errors.ignore_ (fun () ->
+  fst (Errors.do_ (fun () ->
     List.iter (fun (_, x) -> Typing_check_service.type_fun x) funs;
     List.iter (fun (_, x) -> Typing_check_service.type_class x) classes;
     List.iter (fun (_, x) -> Typing_check_service.check_typedef x) types;
-  )
+  ))
 
 let recheck fileinfo_l =
   SharedMem.invalidate_caches();
-  Errors.ignore_ begin fun () ->
-    List.iter check_defs fileinfo_l
-  end
+  List.iter (fun defs -> ignore (check_defs defs)) fileinfo_l
 
 let check_file_input files_info fi =
   match fi with

@@ -388,12 +388,14 @@ let hh_file_summary fn =
                         ])
 
 let hh_hack_coloring fn =
-  let type_acc = ref [] in
-  Typing.with_expr_hook (fun e ty -> type_acc := (fst e, ty) :: !type_acc)
+  let type_acc = Hashtbl.create 0 in
+  Typing.with_expr_hook
+    (fun (p, _) ty -> Hashtbl.replace type_acc p ty)
     (fun () -> ignore (hh_check fn));
   let fn = Relative_path.create Relative_path.Root fn in
-  let result = mk_level_list fn !type_acc in
-  let result = rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) result in
+  let level_of_type = Coverage_level.level_of_type_mapper fn in
+  let result = Hashtbl.fold (fun p ty xs ->
+    (Pos.info_raw p, level_of_type (p, ty)) :: xs) type_acc [] in
   let result = ColorFile.go (Hashtbl.find files fn) result in
   let result = List.map (fun input ->
                         match input with

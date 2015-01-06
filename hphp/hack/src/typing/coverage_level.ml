@@ -68,17 +68,3 @@ let level_of_type fixme_map (p, ty) =
 let level_of_type_mapper fn =
   let fixme_map = Parser_heap.HH_FIXMES.find_unsafe fn in
   level_of_type fixme_map
-
-(* Converts types to coverage levels, and also dedups multiple types at the
- * same position, favoring the most recently added type. Duplicates can occur
- * when we take multiple passes to determine an expression's type, and we want
- * to use the last result as it is usually the most specific type. *)
-let mk_level_list fn pos_ty_l =
-  let seen = HashSet.create 997 in
-  let level_of_type = level_of_type_mapper fn in
-  List.fold_left (fun acc (p, ty) ->
-    if HashSet.mem seen p then acc
-    else begin
-      HashSet.add seen p;
-      (p, level_of_type (p, ty)) :: acc
-    end) [] pos_ty_l

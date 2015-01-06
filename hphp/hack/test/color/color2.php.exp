@@ -13,4 +13,3 @@ class F {
 function f() {
   return <checked>(new F())</checked><unchecked>->g()</unchecked>;
 }
-No errors

@@ -8,18 +8,20 @@
  *
  *)
 
-open Utils
-
 type result = ((int * int) * Coverage_level.level) list
 
-let go env f_in oc =
-  let type_acc = ref [] in
+let get_level_list check =
+  let type_acc = Hashtbl.create 0 in
   let fn = Typing.with_expr_hook
-    (fun e ty -> type_acc := (fst e, ty) :: !type_acc)
-    (fun () ->
-      ServerIdeUtils.check_file_input env.ServerEnv.files_info f_in
-    ) in
-  let result = Coverage_level.mk_level_list fn !type_acc in
-  let result = rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) result in
+    (fun (p, _) ty -> Hashtbl.replace type_acc p ty) check in
+  let level_of_type = Coverage_level.level_of_type_mapper fn in
+  let result = Hashtbl.fold (fun p ty xs ->
+    (Pos.info_raw p, level_of_type (p, ty)) :: xs) type_acc [] in
+  result
+
+let go env f_in oc =
+  let result = get_level_list (fun () ->
+    ServerIdeUtils.check_file_input env.ServerEnv.files_info f_in
+  ) in
   Marshal.to_channel oc (result : result) [];
   flush oc

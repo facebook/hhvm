@@ -931,6 +931,7 @@ struct Vasm {
     m_areas.reserve(size_t(AreaIndex::Max));
   }
 
+  void optimizeX64();
   void finishX64(const Abi&, AsmInfo* asmInfo);
   void finishARM(const Abi&, AsmInfo* asmInfo);
 

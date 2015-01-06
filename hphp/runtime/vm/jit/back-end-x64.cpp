@@ -936,6 +936,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assert(check(vunit));
 
+    vasm.optimizeX64();
     if (useLLVM) {
       try {
         genCodeLLVM(vunit, vasm.areas(), sortBlocks(vunit));

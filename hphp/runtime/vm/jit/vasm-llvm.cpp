@@ -64,6 +64,8 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetMachine.h>
+#include <llvm/Transforms/IPO.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <llvm/Transforms/Scalar.h>
 
 TRACE_SET_MOD(llvm);
@@ -612,6 +614,9 @@ struct LLVMEmitter {
     FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ", showModule());
     verifyModule();
 
+    llvm::TargetOptions targetOptions;
+    targetOptions.EnableFastISel = RuntimeOption::EvalJitLLVMFastISel;
+
     auto tcMM = m_tcMM.release();
     auto cpu = RuntimeOption::EvalJitCPU;
     if (cpu == "native") cpu = llvm::sys::getHostCPUName();
@@ -627,6 +632,7 @@ struct LLVMEmitter {
       .setRelocationModel(llvm::Reloc::Static)
       .setCodeModel(llvm::CodeModel::Small)
       .setVerifyModules(true)
+      .setTargetOptions(targetOptions)
       .create());
     always_assert_flog(ee, "ExecutionEngine creation failed: {}\n", errStr);
 
@@ -635,32 +641,34 @@ struct LLVMEmitter {
     llvm::LLVMTargetMachine* targetMachine =
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
 
-    auto fpm = folly::make_unique<llvm::FunctionPassManager>(m_module.get());
-    fpm->add(new llvm::DataLayoutPass(m_module.get()));
-    targetMachine->addAnalysisPasses(*fpm);
-
-    fpm->add(llvm::createBasicAliasAnalysisPass());
-    fpm->add(llvm::createVerifierPass(true));
-    fpm->add(llvm::createDebugInfoVerifierPass(false));
-    fpm->add(llvm::createLoopSimplifyPass());
-    fpm->add(llvm::createGCLoweringPass());
-    fpm->add(llvm::createUnreachableBlockEliminationPass());
-    fpm->add(llvm::createPromoteMemoryToRegisterPass());
-    fpm->add(llvm::createInstructionCombiningPass());
-    fpm->add(llvm::createReassociatePass());
-    fpm->add(llvm::createGVNPass());
-    fpm->add(llvm::createCFGSimplificationPass());
-    fpm->add(llvm::createTailCallEliminationPass());
-    fpm->doInitialization();
-
     m_module->addModuleFlag(llvm::Module::Error, "code_skew",
                             tcMM->computeCodeSkew(x64::kCacheLineSize));
 
+    auto fpm = folly::make_unique<llvm::FunctionPassManager>(m_module.get());
+    fpm->add(new llvm::DataLayoutPass(m_module.get()));
+    if (RuntimeOption::EvalJitLLVMBasicOpt) {
+      targetMachine->addAnalysisPasses(*fpm);
+      fpm->add(llvm::createBasicAliasAnalysisPass());
+      fpm->add(llvm::createUnreachableBlockEliminationPass());
+      fpm->add(llvm::createPromoteMemoryToRegisterPass());
+      fpm->add(llvm::createInstructionCombiningPass());
+      fpm->add(llvm::createReassociatePass());
+      fpm->add(llvm::createGVNPass());
+      fpm->add(llvm::createCFGSimplificationPass());
+    } else {
+      llvm::PassManagerBuilder PM;
+      PM.OptLevel = RuntimeOption::EvalJitLLVMOptLevel;
+      PM.SizeLevel = RuntimeOption::EvalJitLLVMSizeLevel;
+      PM.populateFunctionPassManager(*fpm);
+    }
+
     {
       Timer _t(Timer::llvm_optimize);
+      fpm->doInitialization();
       for (auto it = m_module->begin(); it != m_module->end(); ++it) {
         fpm->run(*it);
       }
+      fpm->doFinalization();
     }
     FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ", showModule());
 
@@ -748,7 +756,7 @@ struct LLVMEmitter {
       FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
       mcg->cgFixups().m_alignFixups.emplace(
-        jmpIp, std::make_pair(x64::kJmpLen, kX64CacheLineSize));
+        jmpIp, std::make_pair(x64::kJmpLen, 0));
       mcg->setJmpTransID(jmpIp);
 
       // Patch the rip-relative lea in the stub to point at the jmp.
@@ -1165,7 +1173,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
   // first.
-  for (auto label : labels) {
+  for (auto label : layoutBlocks(m_unit)) {
     block(label);
   }
 
@@ -1531,13 +1539,15 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   // emitter, so that's what we do here.
 
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
-  auto reqIp = emitEphemeralServiceReq(frozen,
-                                       mcg->getFreeStub(frozen,
-                                                        &mcg->cgFixups()),
-                                       REQ_BIND_JMP,
-                                       RipRelative(mcg->code.base()),
-                                       inst.target.toAtomicInt(),
-                                       inst.trflags.packed);
+  ServiceReqArgVec argv;
+  packServiceReqArgs(argv,
+                     RipRelative(mcg->code.base()),
+                     inst.target.toAtomicInt(),
+                     inst.trflags.packed);
+  // TODO(#5931620): emit non-persistent stubs once the bug is fixed.
+  auto reqIp =  mcg->backEnd().emitServiceReqWork(
+    frozen, mcg->getFreeStub(frozen, &mcg->cgFixups()), SRFlags::Persist,
+    REQ_BIND_JMP, argv);
   auto stubName = folly::sformat("bindjmpStub_{}", reqIp);
   auto stubFunc = emitFuncPtr(stubName, m_traceletFnTy, uint64_t(reqIp));
   auto call = emitTraceletTailCall(stubFunc);

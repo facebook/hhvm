@@ -1206,13 +1206,16 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
   printUnit(kVasmLowerLevel, "after lower for X64", unit);
 }
 
+void Vasm::optimizeX64() {
+  fuseBranches(m_unit);
+  optimizeExits(m_unit);
+}
+
 void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   static thread_local bool busy;
   always_assert(!busy);
   busy = true;
   SCOPE_EXIT { busy = false; };
-  fuseBranches(m_unit);
-  optimizeExits(m_unit);
   lowerForX64(m_unit, abi);
 
   if (!m_unit.constants.empty()) {
@@ -1254,7 +1257,7 @@ Vauto::~Vauto() {
       assert(areas.size() < 3 || frozen().empty() || frozen().closed());
       Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
       switch (arch()) {
-        case Arch::X64: finishX64(vauto_abi, nullptr); break;
+        case Arch::X64: optimizeX64(); finishX64(vauto_abi, nullptr); break;
         case Arch::ARM: finishARM(vauto_abi, nullptr); break;
       }
       return;

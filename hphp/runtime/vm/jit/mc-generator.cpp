@@ -1379,7 +1379,7 @@ void FreeStubList::push(TCA stub) {
    * threads execute the service request before it is freed. We detect
    * duplicates by marking freed stubs
    */
-  StubNode* n = (StubNode *)stub;
+  StubNode* n = reinterpret_cast<StubNode*>(stub);
   if (n->m_freed == kStubFree) {
     TRACE(1, "already freed stub %p\n", stub);
     return;

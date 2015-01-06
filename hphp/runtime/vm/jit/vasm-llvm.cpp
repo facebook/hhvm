@@ -617,13 +617,14 @@ struct LLVMEmitter {
     llvm::TargetOptions targetOptions;
     targetOptions.EnableFastISel = RuntimeOption::EvalJitLLVMFastISel;
 
+    auto module = m_module.release();
     auto tcMM = m_tcMM.release();
     auto cpu = RuntimeOption::EvalJitCPU;
     if (cpu == "native") cpu = llvm::sys::getHostCPUName();
     FTRACE(1, "Creating ExecutionEngine with CPU '{}'\n", cpu);
     std::string errStr;
     std::unique_ptr<llvm::ExecutionEngine> ee(
-      llvm::EngineBuilder(m_module.get())
+      llvm::EngineBuilder(module)
       .setMCPU(cpu)
       .setErrorStr(&errStr)
       .setUseMCJIT(true)
@@ -636,16 +637,14 @@ struct LLVMEmitter {
       .create());
     always_assert_flog(ee, "ExecutionEngine creation failed: {}\n", errStr);
 
-    assert(m_module != nullptr);
-
     llvm::LLVMTargetMachine* targetMachine =
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
 
-    m_module->addModuleFlag(llvm::Module::Error, "code_skew",
+    module->addModuleFlag(llvm::Module::Error, "code_skew",
                             tcMM->computeCodeSkew(x64::kCacheLineSize));
 
-    auto fpm = folly::make_unique<llvm::FunctionPassManager>(m_module.get());
-    fpm->add(new llvm::DataLayoutPass(m_module.get()));
+    auto fpm = folly::make_unique<llvm::FunctionPassManager>(module);
+    fpm->add(new llvm::DataLayoutPass(module));
     if (RuntimeOption::EvalJitLLVMBasicOpt) {
       targetMachine->addAnalysisPasses(*fpm);
       fpm->add(llvm::createBasicAliasAnalysisPass());
@@ -665,14 +664,12 @@ struct LLVMEmitter {
     {
       Timer _t(Timer::llvm_optimize);
       fpm->doInitialization();
-      for (auto it = m_module->begin(); it != m_module->end(); ++it) {
+      for (auto it = module->begin(); it != module->end(); ++it) {
         fpm->run(*it);
       }
       fpm->doFinalization();
     }
     FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ", showModule());
-
-    m_module.release(); // ee took ownership of the module.
 
     {
       Timer _t(Timer::llvm_codegen);
@@ -717,66 +714,94 @@ struct LLVMEmitter {
       auto it = funcRec.records.find(fix.id);
       if (it == funcRec.records.end()) continue;
 
-      auto afterCall = [&]() -> unsigned char* {
-        for (auto& record : it->second) {
-          auto ip = funcStart + record.offset;
-          DecodedInstruction di(ip);
-          if (di.isCall()) return ip + di.size();
+      for (auto& record : it->second) {
+        auto ip = funcStart + record.offset;
+        DecodedInstruction di(ip);
+        if (di.isCall()) {
+          auto afterCall = ip + di.size();
+          FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
+          mcg->recordSyncPoint(afterCall,
+                               fix.fixup.pcOffset, fix.fixup.spOffset);
         }
-        FTRACE(1, "Couldn't find call instruction for locrec {}\n", fix.id);
-        return nullptr;
-      }();
-      if (!afterCall) continue;
+      }
+    }
+  }
 
-      FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
-      mcg->recordSyncPoint(afterCall, fix.fixup.pcOffset, fix.fixup.spOffset);
+  template<typename L>
+  void visitJmps(uint8_t* funcStart,
+                 const jit::vector<LocRecs::LocationRecord>& records,
+                 uint16_t id,
+                 L body) {
+    for (auto& record : records) {
+      auto ip = funcStart + record.offset;
+      DecodedInstruction di(ip);
+      if (di.isJmp()) body(ip);
     }
   }
 
   void processSvcReqs(const LocRecs::FunctionRecord& funcRec,
                       uint8_t* funcStart) {
-    auto findJmp = [&](const jit::vector<LocRecs::LocationRecord>& records,
-                       uint16_t id) -> unsigned char* {
-      for (auto& record : records) {
-        auto ip = funcStart + record.offset;
-        DecodedInstruction di(ip);
-        if (di.isJmp()) return ip;
-      }
-      FTRACE(1, "Couldn't find jmp instruction for locrec {}\n", id);
-      return nullptr;
-    };
-
     for (auto& req : m_bindjmps) {
       auto it = funcRec.records.find(req.id);
-      if (it == funcRec.records.end()) continue;
+      if (it == funcRec.records.end()) {
+        // The code was optimized out. Free the stub.
+        mcg->freeRequestStub(req.stub);
+        continue;
+      }
 
-      auto jmpIp = findJmp(it->second, req.id);
-      if (!jmpIp) continue;
+      bool found = false;
+      auto doBindJmp = [&] (uint8_t* jmpIp) {
+        FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
-      FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
+        mcg->cgFixups().m_alignFixups.emplace(
+          jmpIp, std::make_pair(x64::kJmpLen, 0));
+        mcg->setJmpTransID(jmpIp);
 
-      mcg->cgFixups().m_alignFixups.emplace(
-        jmpIp, std::make_pair(x64::kJmpLen, 0));
-      mcg->setJmpTransID(jmpIp);
+        if (found) {
+          // If LLVM duplicated the tail call into more than one jmp
+          // instruction, we have to create new stubs for the duplicates to
+          // avoid reusing the ephemeral stubs before they're done.
+          auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+          auto newStub = emitEphemeralServiceReq(
+            frozen,
+            mcg->getFreeStub(frozen, &mcg->cgFixups()),
+            REQ_BIND_JMP,
+            RipRelative(jmpIp),
+            req.target.toAtomicInt(),
+            req.trflags.packed
+          );
+          FTRACE(2, "Patching tail call at {} to point to {}\n",
+                 jmpIp, newStub);
 
-      // Patch the rip-relative lea in the stub to point at the jmp.
-      auto leaIp = req.stub;
-      always_assert((leaIp[0] & 0x48) == 0x48); // REX.W
-      always_assert(leaIp[1] == 0x8d); // lea
-      auto afterLea = leaIp + x64::kRipLeaLen;
-      auto delta = safe_cast<int32_t>(jmpIp - afterLea);
-      memcpy(afterLea - sizeof(delta), &delta, sizeof(delta));
+          // Patch the jmp to point to the new stub.
+          auto afterJmp = jmpIp + x64::kJmpLen;
+          auto delta = safe_cast<int32_t>(newStub - afterJmp);
+          memcpy(afterJmp - sizeof(delta), &delta, sizeof(delta));
+        } else {
+          found = true;
+          // Patch the rip-relative lea in the stub to point at the jmp.
+          auto leaIp = req.stub;
+          always_assert((leaIp[0] & 0x48) == 0x48); // REX.W
+          always_assert(leaIp[1] == 0x8d); // lea
+          auto afterLea = leaIp + x64::kRipLeaLen;
+          auto delta = safe_cast<int32_t>(jmpIp - afterLea);
+          memcpy(afterLea - sizeof(delta), &delta, sizeof(delta));
+        }
+      };
+
+      visitJmps(funcStart, it->second, req.id, doBindJmp);
     }
 
     for (auto& req : m_fallbacks) {
       auto it = funcRec.records.find(req.id);
       if (it == funcRec.records.end()) continue;
 
-      auto jmpIp = findJmp(it->second, req.id);
-      if (!jmpIp) continue;
+      auto doFallback = [&] (uint8_t* jmpIp) {
+        auto destSR = mcg->tx().getSrcRec(req.dest);
+        destSR->registerFallbackJump(jmpIp);
+      };
 
-      auto destSR = mcg->tx().getSrcRec(req.dest);
-      destSR->registerFallbackJump(jmpIp);
+      visitJmps(funcStart, it->second, req.id, doFallback);
     }
   }
 
@@ -974,6 +999,8 @@ private:
   struct LLVMBindJmp {
     uint32_t id;
     TCA stub;
+    SrcKey target;
+    TransFlags trflags;
   };
 
   struct LLVMFallback {
@@ -1539,15 +1566,14 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   // emitter, so that's what we do here.
 
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
-  ServiceReqArgVec argv;
-  packServiceReqArgs(argv,
-                     RipRelative(mcg->code.base()),
-                     inst.target.toAtomicInt(),
-                     inst.trflags.packed);
-  // TODO(#5931620): emit non-persistent stubs once the bug is fixed.
-  auto reqIp =  mcg->backEnd().emitServiceReqWork(
-    frozen, mcg->getFreeStub(frozen, &mcg->cgFixups()), SRFlags::Persist,
-    REQ_BIND_JMP, argv);
+  auto reqIp = emitEphemeralServiceReq(
+    frozen,
+    mcg->getFreeStub(frozen, &mcg->cgFixups()),
+    REQ_BIND_JMP,
+    RipRelative(mcg->code.base()),
+    inst.target.toAtomicInt(),
+    inst.trflags.packed
+  );
   auto stubName = folly::sformat("bindjmpStub_{}", reqIp);
   auto stubFunc = emitFuncPtr(stubName, m_traceletFnTy, uint64_t(reqIp));
   auto call = emitTraceletTailCall(stubFunc);
@@ -1557,7 +1583,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   FTRACE(2, "Adding bindjmp locrec {} for {}\n", id, llshow(call));
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(id)));
-  m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp});
+  m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp, inst.target, inst.trflags});
 }
 
 // Emitting a real REQ_BIND_SIDE_EXIT or REQ_BIND_JMPCC_(FIRST|SECOND) only

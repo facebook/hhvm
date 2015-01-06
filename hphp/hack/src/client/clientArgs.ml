@@ -214,32 +214,39 @@ let parse_check_args cmd =
     server_options_cmd = SMap.get "server_options_cmd" config;
   }
 
-let parse_start_args () =
-  let wait = ref false in
+let parse_start_env command =
   let usage =
     Printf.sprintf
-      "Usage: %s start [OPTION]... [WWW-ROOT]\n\
-      Start a Hack server\n\n\
+      "Usage: %s %s [OPTION]... [WWW-ROOT]\n\
+      %s a Hack server\n\n\
       WWW-ROOT is assumed to be current directory if unspecified\n"
-      Sys.argv.(0) in
+      Sys.argv.(0) command (String.capitalize command) in
+  let wait = ref false in
   let options = [
     "--wait", Arg.Set wait,
-    " wait for the server to finish initializing"
+    " wait for the server to finish initializing (default: false)"
   ] in
-  let args = parse_without_command options usage "start" in
+  let args = parse_without_command options usage command in
   let root =
     match args with
     | [] -> get_root None
     | [x] -> get_root (Some x)
     | _ ->
-        Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
+        Printf.fprintf stderr
+          "Error: please provide at most one www directory\n%!";
         exit 1 in
   let config = get_config root in
-  CStart { ClientStart.
+  { ClientStart.
     root = root;
     wait = !wait;
     server_options_cmd = SMap.get "server_options_cmd" config;
   }
+
+let parse_start_args () =
+  CStart (parse_start_env "start")
+
+let parse_restart_args () =
+  CRestart (parse_start_env "restart")
 
 let parse_stop_args () =
   let usage =
@@ -258,33 +265,6 @@ let parse_stop_args () =
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1
   in CStop {ClientStop.root = root}
-
-let parse_restart_args () =
-  let usage =
-    Printf.sprintf
-      "Usage: %s restart [OPTION]... [WWW-ROOT]\n\
-      Restart a hack server\n\n\
-      WWW-ROOT is assumed to be current directory if unspecified\n"
-      Sys.argv.(0) in
-  let wait = ref false in
-  let options = [
-    "--wait", Arg.Set wait,
-    " wait for the new server to finish initializing"
-  ] in
-  let args = parse_without_command options usage "restart" in
-  let root =
-    match args with
-    | [] -> get_root None
-    | [x] -> get_root (Some x)
-    | _ ->
-        Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
-        exit 1 in
-  let config = get_config root in
-  CRestart { ClientStart.
-    root = root;
-    wait = !wait;
-    server_options_cmd = SMap.get "server_options_cmd" config;
-  }
 
 let parse_status_args () =
   let usage =

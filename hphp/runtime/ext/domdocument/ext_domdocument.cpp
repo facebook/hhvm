@@ -1541,6 +1541,54 @@ struct cmpdpa {
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Base native property handler class, that is reused
+ * by derived DOM classes with the similar handling.
+ */
+template <class Derived>
+struct DOMPropHandler {
+  static Variant getProp(ObjectData* this_, const StringData* name) {
+    return guardedPropertyResult(name, [&]() {
+      return Derived::map.getter(VarNR(name))(this_);
+    });
+  }
+
+  static Variant setProp(ObjectData* this_,
+                         const StringData* name,
+                         Variant& value) {
+    return guardedPropertyResult(name, [&]() {
+      Derived::map.setter(VarNR(name))(this_, value);
+      return true;
+    });
+  }
+
+  static Variant issetProp(ObjectData* this_, const StringData* name) {
+    return guardedPropertyResult(name, [&]() {
+      return Derived::map.isset(this_, StrNR(name));
+    });
+  }
+
+  static Variant unsetProp(ObjectData* this_, const StringData* name) {
+    return Native::prop_not_handled();
+  }
+
+private:
+  // If the property is not supported, returns sigil
+  // Native::prop_not_handled(), otherwise - the result from accessor.
+  static Variant guardedPropertyResult(const StringData* name,
+                                       std::function<Variant()> onHandle) {
+    if (Derived::map.isPropertySupported(VarNR(name))) {
+      return onHandle();
+    }
+
+    return Native::prop_not_handled();
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 class DOMPropertyAccessorMap :
       private hphp_hash_set<DOMPropertyAccessor*, hashdpa, cmpdpa> {
 public:
@@ -2936,6 +2984,10 @@ static DOMPropertyAccessorMap domtext_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct DOMTextPropHandler : public DOMPropHandler<DOMTextPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domtext_properties_map;
+};
+
 void HHVM_METHOD(DOMText, __construct,
                  const Variant& value /* = null_string */) {
   auto* data = Native::data<DOMText>(this_);
@@ -4066,43 +4118,8 @@ static DOMPropertyAccessorMap domelement_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct DOMElementPropHandler {
-  static Variant getProp(ObjectData* this_, const StringData* name) {
-    return guardedPropertyResult(name, [&]() {
-      return domelement_properties_map.getter(VarNR(name))(this_);
-    });
-  }
-
-  static Variant setProp(ObjectData* this_,
-                         const StringData* name,
-                         Variant& value) {
-    return guardedPropertyResult(name, [&]() {
-      domelement_properties_map.setter(VarNR(name))(this_, value);
-      return true;
-    });
-  }
-
-  static Variant issetProp(ObjectData* this_, const StringData* name) {
-    return guardedPropertyResult(name, [&]() {
-      return domelement_properties_map.isset(this_, StrNR(name));
-    });
-  }
-
-  static Variant unsetProp(ObjectData* this_, const StringData* name) {
-    return Native::prop_not_handled();
-  }
-
-private:
-  // If the property is not supported, returns sigil
-  // Native::prop_not_handled(), otherwise - the result from accessor.
-  static Variant guardedPropertyResult(const StringData* name,
-                                       std::function<Variant()> onHandle) {
-    if (domelement_properties_map.isPropertySupported(VarNR(name))) {
-      return onHandle();
-    }
-
-    return Native::prop_not_handled();
-  }
+struct DOMElementPropHandler : public DOMPropHandler<DOMElementPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domelement_properties_map;
 };
 
 void HHVM_METHOD(DOMElement, __construct,
@@ -6008,6 +6025,8 @@ public:
     HHVM_ME(DOMText, __debuginfo);
     Native::registerNativeDataInfo<DOMText>(DOMText::c_ClassName.get(),
                                             Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMTextPropHandler>(
+      DOMText::c_ClassName.get());
 
     HHVM_ME(DOMCdataSection, __construct);
     Native::registerNativeDataInfo<DOMCdataSection>(

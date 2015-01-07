@@ -1410,13 +1410,6 @@ To string conversions:
   translation transID, which starts at bcOff. This instruction is used in exit
   traces that trigger profile-guided optimizations.
 
-| ReqBindJmpZero,                   ND, S(Int,Bool) S(StkPtr),           T
-
-| ReqBindJmpNZero,                  ND, S(Int,Bool) S(StkPtr),           T
-
-  Test the condition based on the Jmp* op of similar name, and then emit a pair
-  of smashable jumps to a REQ_BIND_JMPCC_FIRST service request.
-
 
 12. Refcounting and copies
 

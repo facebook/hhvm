@@ -496,11 +496,6 @@ Vreg CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
   return sf;
 }
 
-void CodeGenerator::emitReqBindJcc(Vout& v, ConditionCode cc, Vreg sf,
-                                   const ReqBindJccData* extra) {
-  v << bindjcc1st{cc, sf, {extra->notTaken, extra->taken}, kCrossTraceRegs};
-}
-
 void CodeGenerator::cgDefSP(IRInstruction* inst) {
   auto sp = dstLoc(inst, 0).reg();
   auto& v = vmain();
@@ -4603,22 +4598,6 @@ void CodeGenerator::cgJmpNZero(IRInstruction* inst) {
   auto& v = vmain();
   auto const sf = emitTestZero(v, inst->src(0), srcLoc(inst, 0));
   v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-void CodeGenerator::cgReqBindJmpZero(IRInstruction* inst) {
-  // TODO(#2404427): prepareForTestAndSmash?
-  auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 1).reg()};
-  auto const sf = emitTestZero(v, inst->src(0), srcLoc(inst, 0));
-  emitReqBindJcc(v, CC_Z, sf, inst->extra<ReqBindJmpZero>());
-}
-
-void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
-  // TODO(#2404427): prepareForTestAndSmash?
-  auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 1).reg()};
-  auto const sf = emitTestZero(v, inst->src(0), srcLoc(inst, 0));
-  emitReqBindJcc(v, CC_NZ, sf, inst->extra<ReqBindJmpNZero>());
 }
 
 void CodeGenerator::cgJmp(IRInstruction* inst) {

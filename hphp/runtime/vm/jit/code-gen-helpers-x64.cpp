@@ -504,15 +504,4 @@ Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
   return extended;
 }
 
-ConditionCode opToConditionCode(Opcode opc) {
-  switch (opc) {
-  case JmpZero:               return CC_Z;
-  case JmpNZero:              return CC_NZ;
-  case ReqBindJmpZero:               return CC_Z;
-  case ReqBindJmpNZero:              return CC_NZ;
-  default:
-    always_assert(0);
-  }
-}
-
 }}}

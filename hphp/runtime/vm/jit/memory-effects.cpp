@@ -80,8 +80,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // that could read or write anything as far as we know (including frame
   // locals).
   case ReqBindJmp:
-  case ReqBindJmpNZero:
-  case ReqBindJmpZero:
   case ReqRetranslate:
   case ReqRetranslateOpt:
   case JmpSwitchDest:

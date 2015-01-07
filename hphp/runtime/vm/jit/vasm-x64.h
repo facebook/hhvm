@@ -120,8 +120,9 @@ inline Reg64 r64(Vreg64 r) { return r; }
 // index is optional
 struct Vptr {
   enum Segment: uint8_t { DS, FS };
+  Vptr() : base(Vreg{}), index(Vreg{}), disp(0) {}
   template<class Base> Vptr(Base b, int d)
-    : base(b), index(0xffffffff), scale(1), disp(d)
+    : base(b), index(Vreg{}), scale(1), disp(d)
   {}
   template<class Base, class Index> Vptr(Base b, Index i, int s, int d)
     : base(b), index(i), scale(s), disp(d)
@@ -142,6 +143,17 @@ struct Vptr {
   /* implicit */ operator MemoryRef() const {
     assert(seg == DS);
     return mr();
+  }
+
+  bool operator==(const Vptr& other) const {
+    return base == other.base &&
+           index == other.index &&
+           (!index.isValid() || scale == other.scale) &&
+           seg == other.seg &&
+           disp == other.disp;
+  }
+  bool operator!=(const Vptr& other) const {
+    return !(*this == other);
   }
 
   Vreg64 base; // optional, for baseless mode

@@ -185,8 +185,6 @@ void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0);
 
 Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg);
 
-ConditionCode opToConditionCode(Opcode opc);
-
 template<ConditionCode Jcc, class Lambda>
 void jccBlock(Asm& a, Lambda body) {
   Label exit;

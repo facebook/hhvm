@@ -117,9 +117,6 @@ private:
                    int64_t (*obj_cmp_int)(ObjectData*, int64_t),
                    int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
-  void emitReqBindJcc(Vout& v, ConditionCode cc, Vreg sf,
-                      const ReqBindJccData*);
-
   Vreg emitCompare(Vout& v, IRInstruction* inst);
   Vreg emitTestZero(Vout& v, SSATmp* src, Vloc srcLoc);
   template<class Inst>

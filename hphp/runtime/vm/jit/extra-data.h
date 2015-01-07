@@ -277,19 +277,6 @@ struct ReqBindJmpData : IRExtraData {
 };
 
 /*
- * Information for the REQ_BIND_JMPCC stubs we create when a tracelet
- * ends with conditional jumps.
- */
-struct ReqBindJccData : IRExtraData {
-  SrcKey taken;
-  SrcKey notTaken;
-
-  std::string show() const {
-    return folly::to<std::string>(taken.offset(), ',', notTaken.offset());
-  }
-};
-
-/*
  * Compile-time metadata about an ActRec allocation.
  */
 struct ActRecInfo : IRExtraData {
@@ -968,8 +955,6 @@ X(LdFuncCached,                 LdFuncCachedData);
 X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
-X(ReqBindJmpZero,               ReqBindJccData);
-X(ReqBindJmpNZero,              ReqBindJccData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);

@@ -42,8 +42,8 @@ AliasClass pointee(const SSATmp* ptr) {
 
   if (ptr->type() <= Type::PtrToStkGen) {
     auto const sinst = canonical(ptr)->inst();
-    if (sinst->is(LdStackAddr)) {
-      return AStack { sinst->src(0), sinst->extra<LdStackAddr>()->offset, 1 };
+    if (sinst->is(LdStkAddr)) {
+      return AStack { sinst->src(0), sinst->extra<LdStkAddr>()->offset, 1 };
     }
     return AStackAny;
   }
@@ -584,9 +584,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Instructions that explicitly manipulate the stack.
 
-  case LdStack:
+  case LdStk:
     return PureLoad {
-      AStack { inst.src(0), inst.extra<LdStack>()->offset, 1 }
+      AStack { inst.src(0), inst.extra<LdStk>()->offset, 1 }
     };
 
   case StStk:
@@ -674,7 +674,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case JmpNZero:
   case JmpZero:
   case LdPropAddr:
-  case LdStackAddr:
+  case LdStkAddr:
   case LteDbl:
   case LteInt:
   case LtInt:
@@ -707,7 +707,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ClsNeq:
   case Mod:
   case TakeRef:
-  case TakeStack:
+  case TakeStk:
   case Conjure:
   case DefMIStateBase:
   case Halt:
@@ -751,7 +751,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IncRefCtx:
   case LdRetAddr:
   case RegisterLiveObj:
-  case RetAdjustStack:
+  case RetAdjustStk:
   case StClosureArg:
   case StClosureCtx:
   case StClosureFunc:
@@ -904,9 +904,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DecRef:
     return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
 
-  case DecRefStack:
+  case DecRefStk:
     return MayLoadStore {
-      AHeapAny | AStack { inst.src(0), inst.extra<DecRefStack>()->offset, 1 }
+      AHeapAny | AStack { inst.src(0), inst.extra<DecRefStk>()->offset, 1 }
                | reentry_extra(),
       ANonFrame
     };

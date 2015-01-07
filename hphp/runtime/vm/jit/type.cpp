@@ -369,7 +369,7 @@ Type Type::unionOf(Type t1, Type t2) {
 #   undef IRTP
     Gen,
     Cls,
-    StackElem,
+    StkElem,
     PtrToGen,
   };
   Type t12 = t1 | t2;

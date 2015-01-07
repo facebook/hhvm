@@ -50,7 +50,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
       opc == Call ||
       opc == CallArray ||
       opc == ContEnter ||
-      opc == RetAdjustStack ||
+      opc == RetAdjustStk ||
       opc == Mov,
       "unexpected StkPtr dest from {}",
       opcodeName(opc)

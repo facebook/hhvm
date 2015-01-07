@@ -95,7 +95,7 @@ void emitPushL(HTS& env, int32_t id) {
 void emitCGetL2(HTS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const oldTop = pop(env, Type::StackElem);
+  auto const oldTop = pop(env, Type::StkElem);
   auto const val = ldLocInnerWarn(
     env,
     id,

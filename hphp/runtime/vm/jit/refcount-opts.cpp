@@ -142,13 +142,13 @@ struct Value {
    * B1:
    *       IncRef t1
    *       SpillStack t1
-   *       TakeStack t1
+   *       TakeStk t1
    *       DecRef t1
    * B2:
    *       ...
    *
    * The count of t1 at B2 will be 1 if coming from B0, and 0 if coming from
-   * B1, due to the SpillStack.  However, the TakeStack marks t1 as fromLoad,
+   * B1, due to the SpillStack.  However, the TakeStk marks t1 as fromLoad,
    * which lets us know that there's at least one surviving reference, so we
    * can move forward assuming the max of the two.
    *
@@ -933,9 +933,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
         }
         ITRACE(3, "{}\n", show(m_state.values[canonical(src)]));
       }
-    } else if (m_inst->is(TakeStack)) {
-      // TakeStack is used to indicate that we've logically popped a value off
-      // the stack, in place of a LdStack.
+    } else if (m_inst->is(TakeStk)) {
+      // TakeStk is used to indicate that we've logically popped a value off
+      // the stack, in place of a LdStk.
       auto* src = m_inst->src(0);
       if (src->type().maybeCounted()) {
         m_state.values[canonical(src)].fromLoad = true;
@@ -1119,7 +1119,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(InlineReturn)) {
       FTRACE(3, "{}", show(m_state));
       m_state.frames.popInline(m_inst->src(0)->inst());
-    } else if (m_inst->is(RetAdjustStack)) {
+    } else if (m_inst->is(RetAdjustStk)) {
       m_state.frames.pop();
     } else if (m_inst->is(Call, CallArray)) {
       resolveAllFrames();
@@ -1897,12 +1897,12 @@ void eliminateRefcounts(IRUnit& unit, const SinkPointsMap& info,
   ITRACE(2, "\n");
 }
 
-/* After this pass completes, we don't need the TakeStack/TakeRef instructions
+/* After this pass completes, we don't need the TakeStk/TakeRef instructions
  * anymore. This pass converts them to Nop, and dce removes them. */
 void eliminateTakes(const BlockList& blocks) {
   for (auto b : blocks) {
     for (auto& inst : *b) {
-      if (inst.is(TakeStack, TakeRef)) {
+      if (inst.is(TakeStk, TakeRef)) {
         inst.convertToNop();
       }
     }

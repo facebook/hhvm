@@ -563,7 +563,7 @@ private:
       if (m_params[i].throughStack) {
         --stackIdx;
         gen(env,
-            DecRefStack,
+            DecRefStk,
             StackOffset { offsetFromSP(env, stackIdx) },
             Type::Gen,
             sp(env));
@@ -707,7 +707,7 @@ jit::vector<SSATmp*> realize_params(HTS& env,
     if (params[paramIdx].needsConversion) {
       coerce_stack(env, callee, paramIdx, offset, maker);
     }
-    ret[argIdx++] = ldStackAddr(env, offset);
+    ret[argIdx++] = ldStkAddr(env, offset);
     ++stackIdx;
   }
 
@@ -740,7 +740,7 @@ void builtinCall(HTS& env,
         push(env, params[i].value);
       }
     }
-    // We're going to do ldStackAddrs on these, so the stack must be
+    // We're going to do ldStkAddrs on these, so the stack must be
     // materialized:
     spillStack(env);
     /*
@@ -929,7 +929,7 @@ void emitNativeImpl(HTS& env) {
   if (isInlining(env)) return nativeImplInlined(env);
 
   gen(env, NativeImpl, fp(env), sp(env));
-  auto const stack   = gen(env, RetAdjustStack, fp(env));
+  auto const stack   = gen(env, RetAdjustStk, fp(env));
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const frame   = gen(env, FreeActRec, fp(env));
   gen(env, RetCtrl, RetCtrlData(0, false), stack, frame, retAddr);

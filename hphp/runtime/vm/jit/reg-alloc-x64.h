@@ -38,7 +38,7 @@ namespace x64 {
  */
 bool loadsCell(Opcode op) {
   switch (op) {
-    case LdStack:
+    case LdStk:
     case LdLoc:
     case LdMem:
     case LdContField:

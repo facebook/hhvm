@@ -164,7 +164,7 @@ void IRUnit::collectPostConditions() {
       auto const fpRelative    = spOffset - instRelative;
       int32_t const spRelative = physSPOff - fpRelative;
       auto const t = state.stackType(spRelative);
-      if (!t.equals(Type::StackElem)) {
+      if (!t.equals(Type::StkElem)) {
         FTRACE(1, "Stack({}, {}): {}\n", instRelative, fpRelative, t);
         m_postConds.push_back({
           RegionDesc::Location::Stack{instRelative, fpRelative},

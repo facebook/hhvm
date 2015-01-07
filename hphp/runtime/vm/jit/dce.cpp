@@ -114,9 +114,9 @@ bool canDCE(IRInstruction* inst) {
   case ClsNeq:
   case UnboxPtr:
   case BoxPtr:
-  case LdStack:
+  case LdStk:
   case LdLoc:
-  case LdStackAddr:
+  case LdStkAddr:
   case LdLocAddr:
   case LdRDSAddr:
   case LdMem:
@@ -254,7 +254,7 @@ bool canDCE(IRInstruction* inst) {
   case Jmp:
   case DefLabel:
   case Box:
-  case TakeStack:
+  case TakeStk:
   case LdLocPseudoMain:
   case LdVectorBase:
   case LdPairBase:
@@ -303,7 +303,7 @@ bool canDCE(IRInstruction* inst) {
   case CallBuiltin:
   case RetCtrl:
   case StRetVal:
-  case RetAdjustStack:
+  case RetAdjustStk:
   case ReleaseVVOrExit:
   case GenericRetDecRefs:
   case StMem:
@@ -320,7 +320,7 @@ bool canDCE(IRInstruction* inst) {
   case IncRef:
   case IncRefCtx:
   case DecRefLoc:
-  case DecRefStack:
+  case DecRefStk:
   case DecRefThis:
   case DecRef:
   case DecRefMem:
@@ -723,7 +723,7 @@ void performActRecFixups(const BlockList& blocks,
        */
       case DecRef:
       case DecRefLoc:
-      case DecRefStack:
+      case DecRefStk:
       case DecRefMem:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);

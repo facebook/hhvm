@@ -70,7 +70,7 @@ void profiledGuard(HTS& env,
       return ldLocAddr(env, id);
     case ProfGuard::CheckStk:
     case ProfGuard::GuardStk:
-      return ldStackAddr(env, id);
+      return ldStkAddr(env, id);
     }
     not_reached();
   };
@@ -141,7 +141,7 @@ void guardTypeStack(HTS& env, uint32_t stackIndex, Type type, bool outerOnly) {
   gen(env, HintStkInner, type & Type::BoxedInitCell, stackOff, sp(env));
 
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
-    auto stk = gen(env, LdStack, Type::BoxedInitCell, stackOff, sp(env));
+    auto stk = gen(env, LdStk, Type::BoxedInitCell, stackOff, sp(env));
     gen(env,
         CheckRefInner,
         env.irb->stackInnerTypePrediction(stackOff.offset),
@@ -267,7 +267,7 @@ void assertTypeLocal(HTS& env, uint32_t locId, Type type) {
 void assertTypeStack(HTS& env, uint32_t idx, Type type) {
   if (idx < env.irb->evalStack().size()) {
     // We're asserting a new type so we don't care about the previous type.
-    auto const tmp = top(env, Type::StackElem, idx, DataTypeGeneric);
+    auto const tmp = top(env, Type::StkElem, idx, DataTypeGeneric);
     assert(tmp);
     env.irb->evalStack().replace(idx, gen(env, AssertType, type, tmp));
   } else {
@@ -298,7 +298,7 @@ void checkTypeStack(HTS& env, uint32_t idx, Type type, Offset dest) {
            idx, type.toString());
     // CheckType only cares about its input type if the simplifier does
     // something with it and that's handled if and when it happens.
-    auto const tmp = top(env, Type::StackElem, idx, DataTypeGeneric);
+    auto const tmp = top(env, Type::StkElem, idx, DataTypeGeneric);
     assert(tmp);
     env.irb->evalStack().replace(idx, gen(env, CheckType, type, exit, tmp));
     return;
@@ -312,7 +312,7 @@ void checkTypeStack(HTS& env, uint32_t idx, Type type, Offset dest) {
 //////////////////////////////////////////////////////////////////////
 
 void assertTypeLocation(HTS& env, const RegionDesc::Location& loc, Type type) {
-  assert(type <= Type::StackElem);
+  assert(type <= Type::StkElem);
   using T = RegionDesc::Location::Tag;
   switch (loc.tag()) {
   case T::Stack: assertTypeStack(env, loc.stackOffset(), type); break;

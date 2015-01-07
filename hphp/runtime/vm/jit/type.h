@@ -237,7 +237,7 @@ enum class Ptr : uint8_t {
   IRT(Counted,      kCountedStr|kCountedArr|kObj|kRes|kBoxedCell) \
   IRT(PtrToCounted, kCounted << kPtrShift)                        \
   IRT(Gen,          kCell|kBoxedCell)                             \
-  IRT(StackElem,    kGen|kCls)                                    \
+  IRT(StkElem,      kGen|kCls)                                    \
   IRT(Init,         kGen & ~kUninit)                              \
   IRT(PtrToGen,     kGen << kPtrShift)                            \
   IRT(PtrToInit,    kInit << kPtrShift)                           \
@@ -550,7 +550,7 @@ public:
    * Return true iff there exists a DataType in the range [KindOfUninit,
    * KindOfRef] that represents a non-strict supertype of this type.
    *
-   * @requires: subtypeOf(StackElem)
+   * @requires: subtypeOf(StkElem)
    */
   bool isKnownDataType() const;
 

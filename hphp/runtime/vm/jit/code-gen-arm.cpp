@@ -52,7 +52,7 @@ NOOP_OPCODE(DefFP)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
-NOOP_OPCODE(TakeStack)
+NOOP_OPCODE(TakeStk)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
 NOOP_OPCODE(HintLocInner)
@@ -408,7 +408,7 @@ PUNT_OPCODE(CallArray)
 PUNT_OPCODE(NativeImpl)
 PUNT_OPCODE(RetCtrl)
 PUNT_OPCODE(StRetVal)
-PUNT_OPCODE(RetAdjustStack)
+PUNT_OPCODE(RetAdjustStk)
 PUNT_OPCODE(StMem)
 PUNT_OPCODE(StProp)
 PUNT_OPCODE(StLocNT)
@@ -761,10 +761,10 @@ void CodeGenerator::emitDecRefMem(Vout& v, Type type, Vreg base, int offset) {
   }
 }
 
-void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
+void CodeGenerator::cgDecRefStk(IRInstruction* inst) {
   emitDecRefMem(vmain(), inst->typeParam(),
                 srcLoc(0).reg(),
-                cellsToBytes(inst->extra<DecRefStack>()->offset));
+                cellsToBytes(inst->extra<DecRefStk>()->offset));
 }
 
 void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
@@ -1355,10 +1355,10 @@ void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
   cgStLocWork(inst);
 }
 
-void CodeGenerator::cgLdStack(IRInstruction* inst) {
+void CodeGenerator::cgLdStk(IRInstruction* inst) {
   assert(inst->taken() == nullptr);
   auto src = srcLoc(0).reg();
-  auto offset = cellsToBytes(inst->extra<LdStack>()->offset);
+  auto offset = cellsToBytes(inst->extra<LdStk>()->offset);
   emitLoad(vmain(), inst->dst()->type(), dstLoc(0), src, offset);
 }
 
@@ -1405,10 +1405,10 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   });
 }
 
-void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
+void CodeGenerator::cgLdStkAddr(IRInstruction* inst) {
   auto const dst     = dstLoc(0).reg();
   auto const base    = srcLoc(0).reg();
-  auto const offset  = cellsToBytes(inst->extra<LdStackAddr>()->offset);
+  auto const offset  = cellsToBytes(inst->extra<LdStkAddr>()->offset);
   vmain() << lea{base[offset], dst};
 }
 

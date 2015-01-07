@@ -172,18 +172,6 @@ Passthrough
   variable, or some other property that doesn't affect the value of the
   variable itself.
 
-ModifiesStack
-
-  The instruction modifies the in-memory evaluation stack in the process of
-  performing its primary work. It will have a StkPtr destination in addition to
-  its primary destination.
-
-HasStackVersion
-
-  This instruction has a counterpart that returns a StkPtr in addition to any
-  primary destination. The behavior of the stack-modifying version is otherwise
-  identical.
-
 MInstrProp
 
   The instruction may affect the type and/or value of its base operand,
@@ -753,11 +741,11 @@ To string conversions:
 7. Loads
 
 
-| LdStack<T,offset>, DParamMayRelax, S(StkPtr), NF
+| LdStk<T,offset>, DParamMayRelax, S(StkPtr), NF
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.
 
-| TakeStack, ND, S(StackElem), NF
+| TakeStk, ND, S(StkElem), NF
 
   Does nothing at runtime. Acts as a hint to the optimizer that the code is
   taking ownership of a reference to S0.
@@ -774,7 +762,7 @@ To string conversions:
   instruction is used for loading locals in pseudo-mains, where they can alias
   globals.
 
-| LdStackAddr<T,offset>, DParamPtr(Stk), S(StkPtr), C
+| LdStkAddr<T,offset>, DParamPtr(Stk), S(StkPtr), C
 
   Loads the address of the stack slot given by the pointer in S0 at the offset
   (in cells). T must be a subtype of PtrToStkGen.
@@ -1331,7 +1319,7 @@ To string conversions:
   Writes the value in S1 to the return value slot on the activation record
   pointed to by S0.
 
-| RetAdjustStack, D(StkPtr), S(FramePtr), NF
+| RetAdjustStk, D(StkPtr), S(FramePtr), NF
 
   Loads the new VM stack pointer into the destination. S0 is a pointer to the
   current activation record.
@@ -1386,7 +1374,7 @@ To string conversions:
   Store the value in S1 into the RefData pointed to by S0. Stores the
   RefData::m_type also.
 
-| StStk<offset>, ND, S(StkPtr) S(StackElem), CRc
+| StStk<offset>, ND, S(StkPtr) S(StkElem), CRc
 
   Store S1 to the stack pointed to by S0, at a given offset (in cells).
 
@@ -1447,7 +1435,7 @@ To string conversions:
 
   DecRef the local given by localId on the frame S0.
 
-| DecRefStack<T,offset>, ND, S(StkPtr), NF
+| DecRefStk<T,offset>, ND, S(StkPtr), NF
 
   DecRef a value of type T at offset on the stack pointed to by S0.
 

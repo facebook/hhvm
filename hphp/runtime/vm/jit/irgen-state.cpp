@@ -99,7 +99,7 @@ std::string show(const HTS& hts) {
   for (unsigned i = 0; i < hts.irb->evalStack().size(); ++i) {
     while (checkFpi());
     auto const value = irgen::top(const_cast<HTS&>(hts),
-      Type::StackElem, i, DataTypeGeneric);
+      Type::StkElem, i, DataTypeGeneric);
     elem(value->inst()->toString());
   }
 
@@ -121,7 +121,7 @@ std::string show(const HTS& hts) {
     );
 
     std::ostringstream elemStr;
-    if (stkTy == Type::StackElem) {
+    if (stkTy == Type::StkElem) {
       elem("unknown");
     } else if (stkVal) {
       elem(stkVal->inst()->toString());

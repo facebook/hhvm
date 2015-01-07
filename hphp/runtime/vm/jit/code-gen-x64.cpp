@@ -309,7 +309,7 @@ NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(Nop)
-NOOP_OPCODE(TakeStack)
+NOOP_OPCODE(TakeStk)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
 NOOP_OPCODE(HintLocInner)
@@ -2068,7 +2068,7 @@ void CodeGenerator::cgStRetVal(IRInstruction* inst) {
   emitStore(rFp[AROFF(m_r)], val, srcLoc(inst, 1), Width::Full);
 }
 
-void CodeGenerator::cgRetAdjustStack(IRInstruction* inst) {
+void CodeGenerator::cgRetAdjustStk(IRInstruction* inst) {
   auto const rFp   = srcLoc(inst, 0).reg();
   auto const dstSp = dstLoc(inst, 0).reg();
   vmain() << lea{rFp[AROFF(m_r)], dstSp};
@@ -2397,10 +2397,10 @@ void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
   ifThen(v, CC_Z, sf, [&](Vout& v) { emitIncRef(v, src); });
 }
 
-void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
+void CodeGenerator::cgDecRefStk(IRInstruction* inst) {
   cgDecRefMem(inst, inst->typeParam(),
               srcLoc(inst, 0).reg(),
-              cellsToBytes(inst->extra<DecRefStack>()->offset));
+              cellsToBytes(inst->extra<DecRefStk>()->offset));
 }
 
 void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
@@ -2482,7 +2482,7 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
   // more complex things like "this is the 3rd DecRef in this bytecode".
   const int32_t profileId =
     inst->is(DecRefLoc) ? inst->extra<DecRefLoc>()->locId
-  : inst->is(DecRefStack) ? inst->extra<DecRefStack>()->offset
+  : inst->is(DecRefStk) ? inst->extra<DecRefStk>()->offset
   : 0;
   auto const profileKey =
     makeStaticString(folly::to<std::string>("DecRefProfile-",
@@ -3971,19 +3971,19 @@ void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
   emitStore(ptr[off], inst->src(1), srcLoc(inst, 1), Width::Full);
 }
 
-void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
+void CodeGenerator::cgLdStkAddr(IRInstruction* inst) {
   auto const base   = srcLoc(inst, 0).reg();
-  auto const offset = cellsToBytes(inst->extra<LdStackAddr>()->offset);
+  auto const offset = cellsToBytes(inst->extra<LdStkAddr>()->offset);
   auto const dst    = dstLoc(inst, 0).reg();
   vmain() << lea{base[offset], dst};
 }
 
-void CodeGenerator::cgLdStack(IRInstruction* inst) {
+void CodeGenerator::cgLdStk(IRInstruction* inst) {
   assert(inst->taken() == nullptr);
   emitLoad(
     inst->dst(),
     dstLoc(inst, 0),
-    srcLoc(inst, 0).reg()[cellsToBytes(inst->extra<LdStack>()->offset)]
+    srcLoc(inst, 0).reg()[cellsToBytes(inst->extra<LdStk>()->offset)]
   );
 }
 

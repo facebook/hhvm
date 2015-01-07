@@ -172,7 +172,7 @@ be on the VM evaluation stack: all PHP-visible types plus the runtime-internal
 
   Type          | HHVM representation
   --------------|--------------------
-  StackElem     | `{Gen+Cls}`
+  StkElem       | `{Gen+Cls}`
 
 ### Values, Instructions, and Blocks
 

@@ -72,7 +72,7 @@ void freeLocalsAndThis(HTS& env) {
 
 void normalReturn(HTS& env, SSATmp* retval) {
   gen(env, StRetVal, fp(env), retval);
-  gen(env, RetAdjustStack, fp(env));
+  gen(env, RetAdjustStk, fp(env));
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   gen(env, FreeActRec, fp(env));
   gen(env, RetCtrl, RetCtrlData { 0, false }, sp(env), fp(env), retAddr);

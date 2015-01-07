@@ -166,7 +166,7 @@ bool IRInstruction::isRawLoad() const {
   switch (m_op) {
     case LdMem:
     case LdRef:
-    case LdStack:
+    case LdStk:
     case LdElem:
     case LdContField:
     case LdPackedArrayElem:

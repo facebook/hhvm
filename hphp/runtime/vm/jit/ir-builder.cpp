@@ -99,7 +99,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
         m_constraints.prevTypes[inst] = localType(locId, DataTypeGeneric);
       }
     }
-    if (inst->is(AssertStk, CheckStk, LdStack)) {
+    if (inst->is(AssertStk, CheckStk, LdStk)) {
       auto const offset = inst->extra<StackOffset>()->offset;
       m_constraints.typeSrcs[inst] = stackTypeSources(offset);
       if (inst->is(AssertStk, CheckStk)) {
@@ -575,10 +575,10 @@ SSATmp* IRBuilder::preOptimizeCoerceStk(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdStack(IRInstruction* inst) {
-  auto const offset = inst->extra<LdStack>()->offset;
+SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
+  auto const offset = inst->extra<LdStk>()->offset;
   if (auto tmp = stackValue(offset, DataTypeGeneric)) {
-    gen(TakeStack, tmp);
+    gen(TakeStk, tmp);
     return tmp;
   }
   // The types may not be compatible in the presence of unreachable code.
@@ -596,8 +596,8 @@ SSATmp* IRBuilder::preOptimizeLdStack(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeDecRefStack(IRInstruction* inst) {
-  auto const offset = inst->extra<DecRefStack>()->offset;
+SSATmp* IRBuilder::preOptimizeDecRefStk(IRInstruction* inst) {
+  auto const offset = inst->extra<DecRefStk>()->offset;
 
   /*
    * Refine the type if we can.
@@ -620,7 +620,7 @@ SSATmp* IRBuilder::preOptimizeDecRefStack(IRInstruction* inst) {
    * memory.
    */
   if (auto tmp = stackValue(offset, DataTypeGeneric)) {
-    gen(TakeStack, tmp);
+    gen(TakeStk, tmp);
     gen(DecRef, tmp);
     inst->convertToNop();
     return nullptr;
@@ -655,8 +655,8 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(StLoc)
   X(CastStk)
   X(CoerceStk)
-  X(LdStack)
-  X(DecRefStack)
+  X(LdStk)
+  X(DecRefStk)
   default: break;
   }
 #undef X
@@ -976,7 +976,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   Indent _i;
 
   auto inst = val->inst();
-  if (inst->is(LdLoc, LdStack)) {
+  if (inst->is(LdLoc, LdStk)) {
     // If the value's type source is non-null and not a FramePtr, it's a real
     // value that was killed by a Call. The value won't be live but it's ok to
     // use it to track down the guard.
@@ -993,8 +993,8 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
           changed = constrainSlot(inst->extra<LdLoc>()->locId, typeSrc, tc,
                                   "constrainValueLoc") || changed;
         } else {
-          assert(inst->is(LdStack));
-          changed = constrainSlot(inst->extra<LdStack>()->offset, typeSrc, tc,
+          assert(inst->is(LdStk));
+          changed = constrainSlot(inst->extra<LdStk>()->offset, typeSrc, tc,
                                   "constrainValueStk") || changed;
         }
       } else {

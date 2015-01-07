@@ -401,7 +401,7 @@ SSATmp* getInput(MTS& env, unsigned i, TypeConstraint tc) {
   assert(!!env.stackInputs.count(i) == (l.space == Location::Stack));
   switch (l.space) {
     case Location::Stack:
-      return top(env, Type::StackElem, env.stackInputs[i], tc);
+      return top(env, Type::StkElem, env.stackInputs[i], tc);
 
     case Location::Local:
       // N.B. Exit block for LdLocPseudoMain is nullptr because we always
@@ -468,7 +468,7 @@ SSATmp* getValAddr(MTS& env) {
   assert(env.stackInputs.count(0));
   spillStack(env);
   env.irb.exceptionStackBoundary();
-  return ldStackAddr(env, env.stackInputs[0]);
+  return ldStkAddr(env, env.stackInputs[0]);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -658,7 +658,7 @@ void emitBaseLCR(MTS& env) {
                         DataTypeGeneric);
     setBase(
       env,
-      ldStackAddr(env, env.stackInputs[env.iInd]),
+      ldStkAddr(env, env.stackInputs[env.iInd]),
       stkType.ptr(Ptr::Stk)
     );
   }
@@ -1955,7 +1955,7 @@ uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
     case DecRefStyle::FromCatch:
       if (topType(env, i, DataTypeGeneric) <= Type::Gen) {
         gen(env,
-            DecRefStack,
+            DecRefStk,
             StackOffset { offsetFromSP(env, i) },
             Type::Gen,
             sp(env));
@@ -1963,7 +1963,7 @@ uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
       break;
     case DecRefStyle::FromMain:
       {
-        auto const input = top(env, Type::StackElem, i, DataTypeSpecific);
+        auto const input = top(env, Type::StkElem, i, DataTypeSpecific);
         if (input->type() <= Type::Gen) {
           gen(env, DecRef, input);
         }
@@ -2037,7 +2037,7 @@ Block* makeCatchSet(MTS& env) {
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
   if (!isSetWithRef) {
-    gen(env, DecRefStack, StackOffset { offsetFromSP(env, 0) }, Type::Cell,
+    gen(env, DecRefStk, StackOffset { offsetFromSP(env, 0) }, Type::Cell,
       sp(env));
   }
   auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromCatch);

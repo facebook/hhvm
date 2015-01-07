@@ -111,7 +111,7 @@ void MInstrEffects::get(const IRInstruction* inst,
   // Right now we require that the address of any affected local is the
   // immediate source of the base tmp.  This isn't actually specified in the ir
   // spec right now but will intend to make it more general soon.  There is an
-  // analagous problem in frame-state.cpp for LdStackAddr.
+  // analagous problem in frame-state.cpp for LdStkAddr.
   if (locInstr->op() != LdLocAddr) return;
 
   auto const locId = locInstr->extra<LdLocAddr>()->locId;

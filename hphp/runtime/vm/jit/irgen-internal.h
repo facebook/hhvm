@@ -311,7 +311,7 @@ inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
     env.irb->constrainStack(offsetFromSP(env, 0), tc);
     auto value = gen(
       env,
-      LdStack,
+      LdStk,
       type,
       StackOffset { offsetFromSP(env, 0) },
       sp(env)
@@ -336,7 +336,7 @@ inline SSATmp* popF(HTS& env) { return pop(env, Type::Gen); }
 
 inline void discard(HTS& env, uint32_t n) {
   for (auto i = uint32_t{0}; i < n; ++i) {
-    pop(env, Type::StackElem, DataTypeGeneric); // don't care about the values
+    pop(env, Type::StkElem, DataTypeGeneric); // don't care about the values
   }
 }
 
@@ -353,7 +353,7 @@ inline void popDecRef(HTS& env,
   env.irb->constrainStack(offset, tc);
   gen(
     env,
-    DecRefStack,
+    DecRefStk,
     StackOffset { offset },
     type,
     sp(env)
@@ -377,14 +377,14 @@ inline SSATmp* pushIncRef(HTS& env,
 
 inline void extendStack(HTS& env, uint32_t index, Type type) {
   // DataTypeGeneric is used in here because nobody's actually looking at the
-  // values, we're just inserting LdStacks into the eval stack to be consumed
+  // values, we're just inserting LdStks into the eval stack to be consumed
   // elsewhere.
   if (index == 0) {
     push(env, pop(env, type, DataTypeGeneric));
     return;
   }
 
-  auto const tmp = pop(env, Type::StackElem, DataTypeGeneric);
+  auto const tmp = pop(env, Type::StkElem, DataTypeGeneric);
   extendStack(env, index - 1, type);
   push(env, tmp);
 }
@@ -756,7 +756,7 @@ inline SSATmp* ldLocAddr(HTS& env, uint32_t locId) {
   return gen(env, LdLocAddr, Type::PtrToFrameGen, LocalId(locId), fp(env));
 }
 
-inline SSATmp* ldStackAddr(HTS& env, int32_t relOffset) {
+inline SSATmp* ldStkAddr(HTS& env, int32_t relOffset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in irb->evalStack().
   assert(relOffset >= static_cast<int32_t>(env.irb->evalStack().size()));
@@ -764,7 +764,7 @@ inline SSATmp* ldStackAddr(HTS& env, int32_t relOffset) {
   env.irb->constrainStack(offset, DataTypeSpecific);
   return gen(
     env,
-    LdStackAddr,
+    LdStkAddr,
     Type::PtrToStkGen,
     StackOffset { offset },
     sp(env)

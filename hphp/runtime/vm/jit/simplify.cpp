@@ -120,7 +120,7 @@ bool validate(const State& env,
   // Certain opcodes that read stack locations have valid simplification
   // rules (we know values are available because they are on the eval
   // stack) that are not easy to double check here.
-  if (origInst->op() == LdStack || origInst->op() == DecRefStack) {
+  if (origInst->op() == LdStk || origInst->op() == DecRefStk) {
     return true;
   }
 
@@ -1650,7 +1650,7 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
   return condJmpImpl(env, i);
 }
 
-SSATmp* simplifyTakeStack(State& env, const IRInstruction* inst) {
+SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
   if (inst->src(0)->type().notCounted() &&
       !mightRelax(env, inst->src(0))) {
     return gen(env, Nop);
@@ -1881,7 +1881,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdObjInvoke)
   X(LdPackedArrayElem)
   X(Mov)
-  X(TakeStack)
+  X(TakeStk)
   X(UnboxPtr)
   X(JmpZero)
   X(JmpNZero)

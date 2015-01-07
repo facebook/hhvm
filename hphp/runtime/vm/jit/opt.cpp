@@ -55,7 +55,7 @@ void insertRefCountAsserts(IRInstruction& inst, IRUnit& unit) {
 void insertStStkAssert(IRInstruction& inst, IRUnit& unit) {
   if (!(inst.src(1)->type() <= Type::Gen)) return;
   auto const addr = unit.gen(
-    LdStackAddr,
+    LdStkAddr,
     inst.marker(),
     Type::PtrToStkGen,
     StackOffset { inst.extra<StStk>()->offset },
@@ -72,7 +72,7 @@ void insertStStkAssert(IRInstruction& inst, IRUnit& unit) {
 void insertCallAssert(IRInstruction& inst, IRUnit& unit) {
   auto const sp = inst.dst();
   auto const addr = unit.gen(
-    LdStackAddr,
+    LdStkAddr,
     inst.marker(),
     Type::PtrToStkGen,
     StackOffset { 0 },

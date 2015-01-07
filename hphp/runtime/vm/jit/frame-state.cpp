@@ -339,7 +339,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().fpValue = inst->dst();
     break;
 
-  case RetAdjustStack:
+  case RetAdjustStk:
     cur().spValue = inst->dst();
     cur().spOffset = -2;
     cur().memoryStack.clear();
@@ -472,8 +472,8 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       // stack address as an immediate source.  This isn't actually specified
       // in the ir.spec but we intend to make it more general soon.  There is
       // an analagous problem in local-effects.cpp for LdLocAddr.
-      if (base->inst()->is(LdStackAddr)) {
-        auto const offset = base->inst()->extra<LdStackAddr>()->offset;
+      if (base->inst()->is(LdStkAddr)) {
+        auto const offset = base->inst()->extra<LdStkAddr>()->offset;
         auto const prevTy = stackType(offset);
         MInstrEffects effects(inst->op(), prevTy.ptr(Ptr::Stk));
         if (effects.baseTypeChanged || effects.baseValChanged) {
@@ -826,7 +826,7 @@ void FrameStateMgr::setStackValue(int32_t offset, SSATmp* value) {
   FTRACE(2, "stk[{}] := {}\n", offset,
     value ? value->toString() : std::string("<>"));
   stk.value         = value;
-  stk.type          = value ? value->type() : Type::StackElem;
+  stk.type          = value ? value->type() : Type::StkElem;
   stk.predictedType = stk.type;
   stk.typeSrcs.clear();
   if (value) {

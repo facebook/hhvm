@@ -102,7 +102,7 @@ struct SlotState {
    * calls, for example, or at some joint points where we couldn't find the
    * same available value for all incoming edges.
    */
-  Type type{Stack ? Type::StackElem : Type::Gen};
+  Type type{Stack ? Type::StkElem : Type::Gen};
 
   /*
    * Prediction for the type of a local or stack slot, if it's boxed or if
@@ -111,7 +111,7 @@ struct SlotState {
    * Invariants:
    *   always a subtype of `type'
    */
-  Type predictedType{Stack ? Type::StackElem : Type::Gen};
+  Type predictedType{Stack ? Type::StkElem : Type::Gen};
 
   /*
    * The sources of the currently known type. They may be values. If the value

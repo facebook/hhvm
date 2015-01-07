@@ -86,7 +86,7 @@ void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   // and return control to the caller.
   gen(env, StRetVal, fp(env), waitHandle);
   auto const retAddr = gen(env, LdRetAddr, fp(env));
-  auto const stack = gen(env, RetAdjustStack, fp(env));
+  auto const stack = gen(env, RetAdjustStk, fp(env));
   auto const frame = gen(env, FreeActRec, fp(env));
   gen(env, RetCtrl, RetCtrlData(0, false), stack, frame, retAddr);
 }
@@ -230,7 +230,7 @@ void emitCreateCont(HTS& env) {
   // and return control to the caller.
   gen(env, StRetVal, fp(env), cont);
   auto const retAddr = gen(env, LdRetAddr, fp(env));
-  auto const stack = gen(env, RetAdjustStack, fp(env));
+  auto const stack = gen(env, RetAdjustStk, fp(env));
   auto const frame = gen(env, FreeActRec, fp(env));
   gen(env, RetCtrl, RetCtrlData(0, false), stack, frame, retAddr);
 }

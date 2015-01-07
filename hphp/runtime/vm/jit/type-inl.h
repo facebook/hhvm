@@ -203,7 +203,7 @@ inline bool Type::isUnion() const {
 }
 
 inline bool Type::isKnownDataType() const {
-  assert(subtypeOf(StackElem));
+  assert(subtypeOf(StkElem));
 
   // Some unions correspond to single KindOfs.
   return subtypeOfAny(Str, Arr, BoxedCell) || !isUnion();
@@ -214,7 +214,7 @@ inline bool Type::isKnownUnboxedDataType() const {
 }
 
 inline bool Type::needsReg() const {
-  return subtypeOf(StackElem) && !isKnownDataType();
+  return subtypeOf(StkElem) && !isKnownDataType();
 }
 
 inline bool Type::needsValueReg() const {

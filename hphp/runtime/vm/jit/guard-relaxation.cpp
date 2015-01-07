@@ -130,7 +130,7 @@ void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
       break;
     }
 
-    case LdStack: {
+    case LdStk: {
       auto idx = inst->extra<StackOffset>()->offset;
       auto newType = state.stackType(idx);
       retypeLoad(inst, newType);

@@ -17,7 +17,7 @@ OS=$(shell uname -s)
 ROOT=$(shell pwd)
 
 ifeq ($(OS), Linux)
-  INOTIFY=inotify
+  INOTIFY=third-party/inotify
   FSNOTIFY=fsnotify_linux
   ELF=elf
   FRAMEWORKS=
@@ -51,19 +51,19 @@ MODULES=\
   search\
   hhi\
   dfind\
-  avl\
   h2tp/common\
   h2tp/mapper\
   h2tp/unparser\
   h2tp/test\
   h2tp\
+  third-party/avl\
   $(INOTIFY)\
   $(FSNOTIFY)
 
 NATIVE_OBJECT_FILES=\
   heap/hh_shared.o\
   utils/realpath.o\
-  $(INOTIFY)/$(INOTIFY)_stubs.o\
+  $(INOTIFY)/$(notdir $(INOTIFY))_stubs.o\
   utils/nproc.o\
   hhi/hhi_elf.o\
   utils/get_build_id.gen.o\

@@ -142,6 +142,7 @@ bool ZipFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   setWritePosition(0);
   setReadPosition(0);
   setEof(false);
+  gzclearerr(m_gzFile);
   flush();
   off_t result = gzseek(m_gzFile, offset, whence);
   setPosition(result);

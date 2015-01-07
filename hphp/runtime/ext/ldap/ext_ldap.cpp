@@ -33,10 +33,23 @@
 
 namespace HPHP {
 
+const int64_t
+  k_LDAP_ESCAPE_FILTER  = 1<<0,
+  k_LDAP_ESCAPE_DN      = 1<<1;
+
+const StaticString
+  s_LDAP_ESCAPE_FILTER("LDAP_ESCAPE_FILTER"),
+  s_LDAP_ESCAPE_DN("LDAP_ESCAPE_DN");
+
 static class LdapExtension final : public Extension {
 public:
   LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
+    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_FILTER.get(),
+                                          k_LDAP_ESCAPE_FILTER);
+    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_DN.get(),
+                                          k_LDAP_ESCAPE_DN);
+
     HHVM_FE(ldap_connect);
     HHVM_FE(ldap_explode_dn);
     HHVM_FE(ldap_dn2ufn);
@@ -79,6 +92,7 @@ public:
     HHVM_FE(ldap_get_values);
     HHVM_FE(ldap_control_paged_result);
     HHVM_FE(ldap_control_paged_result_response);
+    HHVM_FE(ldap_escape);
 
     loadSystemlib();
   }
@@ -1543,6 +1557,49 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
 
   ber_memfree(lcookie.bv_val);
   return true;
+}
+
+String HHVM_FUNCTION(ldap_escape,
+                     const String& value,
+                     const String& ignores /* = "" */,
+                     int flags /* = 0 */) {
+  char esc[256] = {};
+
+  if (flags & k_LDAP_ESCAPE_FILTER) { // llvm.org/bugs/show_bug.cgi?id=18389
+    esc['*'*1u] = esc['('*1u] = esc[')'*1u] = esc['\0'*1u] = esc['\\'*1u] = 1;
+  }
+
+  if (flags & k_LDAP_ESCAPE_DN) {
+    esc[','*1u] = esc['='*1u] = esc['+'*1u] = esc['<'*1u] = esc['\\'*1u] = 1;
+    esc['>'*1u] = esc[';'*1u] = esc['"'*1u] = esc['#'*1u] = 1;
+  }
+
+  if (!flags) {
+    memset(esc, 1, sizeof(esc));
+  }
+
+  for (int i = 0; i < ignores.size(); i++) {
+    esc[(unsigned char)ignores[i]] = 0;
+  }
+
+  char hex[] = "0123456789abcdef";
+
+  String result(3 * value.size(), ReserveString);
+  char *rdata = result.get()->mutableData(), *r = rdata;
+
+  for (int i = 0; i < value.size(); i++) {
+    auto c = (unsigned char)value[i];
+    if (esc[c]) {
+      *r++ = '\\';
+      *r++ = hex[c >> 4];
+      *r++ = hex[c & 0xf];
+    } else {
+      *r++ = c;
+    }
+  }
+
+  result.setSize(r - rdata);
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

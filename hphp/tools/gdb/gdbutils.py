@@ -114,7 +114,7 @@ def deref(val):
 
         name = template_type(t)
 
-        if name == "HPHP::LowPtr":
+        if name == "HPHP::LowPtr" or name == "HPHP::LowPtrImpl":
             inner = t.template_argument(0)
             val = val['m_raw'].cast(inner.pointer()).dereference()
             continue

@@ -102,6 +102,71 @@ class TypedValuePrinter:
 
 
 #------------------------------------------------------------------------------
+# Pointers.
+
+class PtrPrinter:
+    class _iterator(_BaseIterator):
+        """Pretty printer `children()` iterator for pointer ranges."""
+        def __init__(self, begin, end):
+            self.cur = begin
+            self.end = end
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            if self.cur == self.end:
+                raise StopIteration
+            key = self.cur
+            elt = self.cur.dereference()
+            self.cur = self.cur + 1
+            return ("0x%x" % key.cast(T('long')), elt)
+
+    def _string(self):
+        inner = self._pointer().dereference()
+        inner_type = inner.type.unqualified().strip_typedefs()
+
+        if inner_type.tag == 'HPHP::StringData':
+            return string_data_val(inner)
+        return None
+
+    def to_string(self):
+        s = self._string()
+
+        if s is not None:
+            return '0x%s "%s"' % (str(self._pointer()), s)
+        return self._pointer()
+
+    def children(self):
+        ptr = self._pointer()
+        s = self._string()
+
+        if ptr and s is None:
+            return self._iterator(ptr, ptr + 1)
+        return self._iterator(0, 0)
+
+
+class SmartPtrPrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::(SmartPtr<.*>|(Static)?String|Array|Object)$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def _pointer(self):
+        return self.val['m_px']
+
+class LowPtrPrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::(LowPtr<.*>|LowPtrImpl<.*>)$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def _pointer(self):
+        inner = self.val.type.template_argument(0)
+        return self.val['m_raw'].cast(inner.pointer())
+
+
+#------------------------------------------------------------------------------
 # ArrayData.
 
 class ArrayDataPrinter:
@@ -176,6 +241,10 @@ class ArrayDataPrinter:
     def mixedKind(self):
         return gdb.lookup_global_symbol('HPHP::ArrayData::kMixedKind').value()
 
+
+#------------------------------------------------------------------------------
+# ObjectData.
+
 objectDataCount = 100
 
 class ObjectDataPrinter:
@@ -235,73 +304,6 @@ class ObjectDataPrinter:
             string_data_val(ls.to_string_data()),
             self.val.address)
 
-class SmartPtrPrinter:
-    RECOGNIZE = '^HPHP::((Static)?String|Array|Object|SmartPtr<.*>)$'
-
-    class _iterator(_BaseIterator):
-        def __init__(self, begin, end):
-            self.cur = begin
-            self.end = end
-
-        def __iter__(self):
-            return self
-
-        def __next__(self):
-            if self.cur == self.end:
-                raise StopIteration
-            key = self.cur
-            elt = self.cur.dereference()
-            self.cur = self.cur + 1
-            return ("0x%x" % key.cast(gdb.lookup_type('long')), elt)
-
-    def __init__(self, val):
-        self.val = val
-
-    def children(self):
-        if self._pointer():
-            return self._iterator(self._pointer(), self._pointer() + 1)
-        return self._iterator(0, 0)
-
-    def _pointer(self):
-        return self.val['m_px']
-
-    def to_string(self):
-        tag = self._pointer().dereference().type.tag
-        if self._pointer():
-            return "SmartPtr<%s>" % tag
-        return "SmartPtr<%s>(Null)" % tag
-
-class LowStringPtrPrinter:
-    RECOGNIZE = '^HPHP::(LowPtr<HPHP::StringData.*>|LowStringPtr)$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def to_string(self):
-        ptr = self.to_string_data()
-        if ptr:
-            return "LowStringPtr '%s'@%s" % (string_data_val(ptr), ptr)
-        else:
-            return "LowStringPtr(Null)"
-
-    def to_string_data(self):
-        return self.val['m_raw'].cast(gdb.lookup_type('HPHP::StringData').pointer())
-
-class LowClassPtrPrinter:
-    RECOGNIZE = '^HPHP::(LowPtr<HPHP::Class.*>|LowClassPtr)$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def to_string(self):
-        ptr = self.to_class()
-        if ptr:
-            return "LowClassPtr '%s'" % ptr
-        return "LowClassPtr(Null)"
-
-    def to_class(self):
-        return self.val['m_raw'].cast(gdb.lookup_type('HPHP::Class').pointer())
-
 class RefDataPrinter:
     RECOGNIZE = '^HPHP::RefData$'
     def __init__(self, val):
@@ -316,32 +318,30 @@ class RefDataPrinter:
 
 printer_classes = [
     TypedValuePrinter,
+    SmartPtrPrinter,
+    LowPtrPrinter,
     StringDataPrinter,
     ArrayDataPrinter,
     ObjectDataPrinter,
-    SmartPtrPrinter,
-    LowStringPtrPrinter,
-    LowClassPtrPrinter,
     RefDataPrinter,
 ]
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
-                     for cls in printer_classes}
+                  for cls in printer_classes}
 
 def lookup_function(val):
-    type = val.type
-    if type.code == gdb.TYPE_CODE_REF:
-        type = type.target ()
+    t = val.type
+    if t.code == gdb.TYPE_CODE_REF:
+        t = t.target()
 
-    type = type.unqualified ().strip_typedefs ()
+    t = t.unqualified().strip_typedefs()
 
     # Get the type name.
-    typename = type.tag
+    typename = t.tag
     if typename == None:
         return None
 
-    # Iterate over local dict of types to determine if a printer is
-    # registered for that type.  Return an instantiation of the
-    # printer if found.
+    # Iterate over local dict of types to determine if a printer is registered
+    # for that type.  Return an instantiation of the printer if found.
     for recognizer_regex, func in type_printers:
         if recognizer_regex.search(typename):
             return func(val)

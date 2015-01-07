@@ -88,7 +88,7 @@ struct strintern_hash {
       return to_sdata(k)->hash();
     }
     auto const slice = *to_sslice(k);
-    return hash_string(slice.ptr, slice.len);
+    return hash_string_unaligned(slice.ptr, slice.len);
   }
 };
 

@@ -35,7 +35,7 @@ std::string ParserBase::newClosureName(
     const std::string &funcName) {
   // Closure names must be globally unique.  The easiest way to do
   // this is include a hash of the filename.
-  int64_t hash = hash_string_cs(m_fileName, strlen(m_fileName));
+  int64_t hash = hash_string_cs_unaligned(m_fileName, strlen(m_fileName));
 
   std::string name = "Closure$";
   if (!className.empty()) {

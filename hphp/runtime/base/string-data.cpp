@@ -787,7 +787,7 @@ void StringData::incrementHelper() {
 
 void StringData::preCompute() const {
   StringSlice s = slice();
-  m_hash = hash_string_unsafe(s.ptr, s.len);
+  m_hash = hash_string(s.ptr, s.len);
   assert(m_hash >= 0);
   if (s.len > 0 &&
       (is_numeric_string(s.ptr, s.len, nullptr, nullptr,
@@ -971,17 +971,6 @@ int StringData::compare(const StringData *v2) const {
     return len < len1 ? 1 : -1;
   }
   return ret;
-}
-
-strhash_t StringData::hashHelper() const {
-  assert(!isShared());
-  // Use the inlined unsafe version here, as StringData is 8-byte
-  // aligned. The generated code for the entire method should be exactly 64
-  // bytes with g++ optimization.
-  strhash_t h = hash_string_inline_unsafe(m_data, m_len);
-  assert(h >= 0);
-  m_hash |= h;
-  return h;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

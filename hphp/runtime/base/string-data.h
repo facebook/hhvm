@@ -458,7 +458,7 @@ private:
   void enlist();
   void delist();
   void incrementHelper();
-  strhash_t hashHelper() const NEVER_INLINE;
+  strhash_t hashHelper() const;
   bool checkSane() const;
   void preCompute() const;
   void setStatic() const;

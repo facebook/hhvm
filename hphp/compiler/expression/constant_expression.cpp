@@ -102,7 +102,7 @@ bool ConstantExpression::getScalarValue(Variant &value) {
 }
 
 unsigned ConstantExpression::getCanonHash() const {
-  strhash_t val = hash_string_i_unsafe(m_name.c_str(), m_name.size());
+  strhash_t val = hash_string_i(m_name.c_str(), m_name.size());
   return static_cast<unsigned>(val);
 }
 

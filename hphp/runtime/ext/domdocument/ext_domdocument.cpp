@@ -1531,7 +1531,7 @@ const StaticString s_object_value_omitted("(object value omitted)");
 
 struct hashdpa {
   size_t operator()(const DOMPropertyAccessor* da) const {
-    return hash_string_i(da->name, strlen(da->name));
+    return hash_string_i_unaligned(da->name, strlen(da->name));
   }
 };
 struct cmpdpa {

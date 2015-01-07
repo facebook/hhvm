@@ -34,7 +34,7 @@ namespace HPHP {
 
 struct cstr_hash {
   size_t operator()(const char* s) const {
-    return hash_string_cs(s, strlen(s));
+    return hash_string_cs_unaligned(s, strlen(s));
   }
 };
 
@@ -76,7 +76,7 @@ struct stringHashCompare {
     return s1 == s2;
   }
   size_t hash(const std::string &s) const {
-    return hash_string_unsafe(s.c_str(), s.size());
+    return hash_string(s.c_str(), s.size());
   }
 };
 
@@ -124,7 +124,7 @@ struct smart_pointer_hash {
 
 struct hashi {
   size_t operator()(const char *s) const {
-    return hash_string_i(s, strlen(s));
+    return hash_string_i_unaligned(s, strlen(s));
   }
 };
 struct eqstri {
@@ -135,7 +135,7 @@ struct eqstri {
 
 struct string_hashi {
   size_t operator()(const std::string &s) const {
-    return hash_string_i_unsafe(s.data(), s.size());
+    return hash_string_i(s.data(), s.size());
   }
 };
 

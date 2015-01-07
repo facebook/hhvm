@@ -756,6 +756,11 @@ hugifyText(char* from, char* to) {
   // Needs the attribute((optimize("2")) to prevent
   // g++ from turning this back into memcpy(!)
   wordcpy((uint64_t*)from, (uint64_t*)mem, sz / sizeof(uint64_t));
+  // When supported, string hash functions using SSE 4.2 CRC32 instruction will
+  // be used, so we don't have to check every time.
+  if (IsSSEHashSupported()) {
+    copyHashFuncs();
+  }
   mprotect(from, sz, PROT_READ | PROT_EXEC);
   free(mem);
   mlock(from, to - from);

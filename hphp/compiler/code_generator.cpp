@@ -194,7 +194,7 @@ std::string CodeGenerator::getFormattedName(const std::string &file) {
   }
   string formatted = fn;
   free(fn);
-  int hash = hash_string_unsafe(file.data(), file.size());
+  int hash = hash_string(file.data(), file.size());
   formatted += boost::str(boost::format("%08x") % hash);
   return formatted;
 }

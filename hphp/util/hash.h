@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <cstring>
+#include <folly/CpuId.h>
 
 #include "hphp/util/portability.h"
 
@@ -36,6 +37,18 @@
 #endif
 
 namespace HPHP {
+
+inline bool IsSSEHashSupported() {
+#ifdef USE_SSECRC
+  // Use a static variable to check cpuid only once, as instruction can be
+  // pretty slow.
+  static folly::CpuId cpuid;
+  return LIKELY(cpuid.sse42());
+#else
+  return false;
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef int32_t strhash_t;
@@ -43,12 +56,12 @@ const strhash_t STRHASH_MASK = 0x7fffffff;
 const strhash_t STRHASH_MSB  = 0x80000000;
 
 inline long long hash_int64(long long key) {
-#ifdef USE_SSECRC
-  long long res = 0;
-  __asm__("crc32q %1, %0\n" : "+r" (res) : "rm" (key));
-  // Upper 32 bits are zeros here
-  return res;
-#else
+  if (IsSSEHashSupported()) {
+    long long res = 0;
+    __asm__("crc32q %1, %0\n" : "+r" (res) : "rm" (key));
+    // Note that the upper 32 bits are zero here.
+    return res;
+  }
   // "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
   // http://www.concentric.net/~ttwang/tech/inthash.htm
   key = (~key) + (key << 21); // key = (key << 21) - key - 1;
@@ -59,7 +72,6 @@ inline long long hash_int64(long long key) {
   key = key ^ ((unsigned long long)key >> 28);
   key = key + (key << 31);
   return key < 0 ? -key : key;
-#endif
 }
 
 inline long long hash_int64_pair(long long k1, long long k2) {
@@ -362,7 +374,8 @@ inline uint32_t crc8_cs_safe(const char* str, uint32_t count) {
 // case mask to get case insensitivity (you could pass uint64_t{-1LL} to get a
 // case sensitive version if you want the two versions to share code). When not
 // inlined, the code fits exactly in a cache line.
-inline uint32_t crc8_i_safe(const char* str, uint32_t count, uint64_t mask) {
+inline uint32_t crc8_i_safe(const char* str, uint32_t count,
+                            uint64_t mask = 0xdfdfdfdfdfdfdfdf) {
   // %rdx: data/initial mask passed in
   // %r8: copy of mask
   // %rsi: count
@@ -399,105 +412,65 @@ inline uint32_t crc8_i_safe(const char* str, uint32_t count, uint64_t mask) {
 
 #endif
 
-inline strhash_t hash_string_cs(const char *arKey, int nKeyLength) {
-#ifdef USE_SSECRC
-  uint32_t r = crc8_cs_safe(arKey, nKeyLength);
-  return strhash_t(r);
-#else
-   if (MurmurHash3::useHash128) {
-    uint64_t h[2];
-    MurmurHash3::hash128<true>(arKey, nKeyLength, 0, h);
-    return strhash_t(h[0] & STRHASH_MASK);
-  } else {
-    uint32_t h = MurmurHash3::hash32<true>(arKey, nKeyLength, 0);
-    return strhash_t(h & STRHASH_MASK);
-  }
-#endif
-}
+// Four functions for hashing: hash_string_(cs|i)(_unaligned)?.
+//   cs: case-sensitive;
+//   i: case-insensitive;
+//   aligned: starting address of string aligned at 8-byte boundary;
+//   unaligned: no restrictions.
 
-// Eight functions, in the form of hash_string(_i)?(_inline)?(_unsafe)?.
-// _i: whether case sensitive or not, actually in current implementation,
-// hash_string* always calls hash_string_i*.
-// _inline: whether the function should be inlined, sometimes it is not quite
-// strictly followed, in fact only one or two functions are not inlined among
-// the eight.
-// _unsafe: whether reading beyond the end is impossible or tolerable.
-// Safe version could call unsafe version after checking when using CRC.
-// Unsafe version is an alias of the safe version when not using CRC.
+// Fallback versions uses CRC hash when supported, and use MurmurHash otherwise.
+strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength);
 
 #ifdef USE_SSECRC
-strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength,
-                        uint64_t mask = 0xdfdfdfdfdfdfdfdfull);
 
-inline strhash_t hash_string(const char *arKey, uint32_t nKeyLength,
-                             uint64_t mask = 0xdfdfdfdfdfdfdfdfull){
-  return hash_string_i(arKey, nKeyLength, mask);
-}
-#else
+strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength);
 strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_cs_unaligned(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_i_unaligned(const char *arKey, uint32_t nKeyLength);
+
+// The underlying implementation using CRC32
+strhash_t hash_string_cs_crc(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_i_crc(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_cs_unaligned_crc(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_i_unaligned_crc(const char *arKey, uint32_t nKeyLength);
+
+// Copy the CRC code to the hash_string* text. mprotect needs to be called
+// before and after calling this function to make the permissions right.
+void copyHashFuncs();
+
+#else
+// When not using CRC hash, there is no difference between the aligned
+// and unaligned versions, and they are both aliases of the corresponding
+// fallback version.
+
+inline strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_cs_fallback(arKey, nKeyLength);
+}
+
+inline
+strhash_t hash_string_cs_unaligned(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_cs_fallback(arKey, nKeyLength);
+}
+
+inline strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_fallback(arKey, nKeyLength);
+}
+
+inline
+strhash_t hash_string_i_unaligned(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_fallback(arKey, nKeyLength);
+}
+
+#endif
 
 inline strhash_t hash_string(const char *arKey, uint32_t nKeyLength) {
   return hash_string_i(arKey, nKeyLength);
 }
-#endif
 
-#ifdef USE_SSECRC
-// The function is not inlined when using CRC.
-strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength);
-#else
-inline strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i(arKey, nKeyLength);
+inline strhash_t hash_string_unaligned(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_unaligned(arKey, nKeyLength);
 }
-#endif
-
-inline strhash_t hash_string_unsafe(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_unsafe(arKey, nKeyLength);
-}
-
-inline strhash_t
-hash_string_i_inline_unsafe(const char *arKey, uint32_t nKeyLength) {
-#ifdef USE_SSECRC
-  return crc8_i_unsafe(arKey, nKeyLength);
-#else
-  if (MurmurHash3::useHash128) {
-    uint64_t h[2];
-    MurmurHash3::hash128<false>(arKey, nKeyLength, 0, h);
-    return strhash_t(h[0] & STRHASH_MASK);
-  } else {
-    uint32_t h = MurmurHash3::hash32<false>(arKey, nKeyLength, 0);
-    return strhash_t(h & STRHASH_MASK);
-  }
-#endif
-}
-
-inline strhash_t
-hash_string_inline_unsafe(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_inline_unsafe(arKey, nKeyLength);
-}
-
-#ifdef USE_SSECRC
-inline strhash_t hash_string_i_inline(const char *arKey, uint32_t nKeyLength,
-                                      uint64_t mask = 0xdfdfdfdfdfdfdfdfull) {
-  return crc8_i_safe(arKey, nKeyLength, mask);
-}
-
-inline strhash_t hash_string_inline(const char *arKey, uint32_t nKeyLength,
-                                    uint64_t mask = 0xdfdfdfdfdfdfdfdfull) {
-  return hash_string_i_inline(arKey, nKeyLength);
-}
-
-#else
-inline strhash_t hash_string_i_inline(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_inline_unsafe(arKey, nKeyLength);
-}
-
-inline strhash_t hash_string_inline(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_inline(arKey, nKeyLength);
-}
-
-#endif
-
-
 
 /**
  * We probably should get rid of this, so to detect code generation errors,
@@ -505,11 +478,11 @@ inline strhash_t hash_string_inline(const char *arKey, uint32_t nKeyLength) {
  * allow binary strings as array keys or symbol names?
  */
 inline strhash_t hash_string(const char *arKey) {
-  return hash_string(arKey, strlen(arKey));
+  return hash_string_unaligned(arKey, strlen(arKey));
 }
 
 inline strhash_t hash_string_i(const char *arKey) {
-  return hash_string_i(arKey, strlen(arKey));
+  return hash_string_i_unaligned(arKey, strlen(arKey));
 }
 
 // This function returns true and sets the res parameter if arKey

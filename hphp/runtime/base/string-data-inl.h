@@ -176,6 +176,14 @@ inline bool StringData::isame(const StringData* s) const {
   return bstrcaseeq(data(), s->data(), m_len);
 }
 
+inline strhash_t StringData::hashHelper() const {
+  assert(!isShared());
+  strhash_t h = hash_string(m_data, m_len);
+  assert(h >= 0);
+  m_hash |= h;
+  return h;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 inline const void* StringData::voidPayload() const { return this + 1; }

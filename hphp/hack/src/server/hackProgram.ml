@@ -149,15 +149,19 @@ module Program : Server.SERVER_PROGRAM = struct
       let build_hook = BuildMain.go build_opts genv env oc in
       ServerTypeCheck.hook_after_parsing := begin fun genv env ->
         (* subtle: an exception there (such as writing on a closed pipe)
-         * will not be catched by handle_connection() because
+         * will not be caught by handle_connection() because
          * we have already returned from handle_connection(), hence
          * this additional try.
          *)
         (try
-           build_hook genv env;
-           close_out oc;
+          with_context
+            ~enter:(fun () -> ())
+            ~exit:(fun () -> close_out oc)
+            ~do_:(fun () -> build_hook genv env);
         with exn ->
-          Printf.printf "Exn in build_hook: %s" (Printexc.to_string exn);
+          let msg = Printexc.to_string exn in
+          Printf.printf "Exn in build_hook: %s" msg;
+          EventLogger.master_exception msg;
         );
         ServerTypeCheck.hook_after_parsing := (fun _ _ -> ())
       end

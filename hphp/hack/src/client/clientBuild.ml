@@ -87,6 +87,7 @@ let rec main_ env retries =
     main_ env (retries - 1)
   | ServerMsg.PONG -> (* successful case *)
     begin
+      let finished = ref false in
       let exit_code = ref 0 in
       EventLogger.client_begin_work (ClientLogCommand.LCBuild
         (env.root, env.build_opts.ServerMsg.incremental));
@@ -96,8 +97,14 @@ let rec main_ env retries =
           match line with
           | ServerMsg.BUILD_PROGRESS s -> print_endline s
           | ServerMsg.BUILD_ERROR s -> exit_code := 2; print_endline s
+          | ServerMsg.BUILD_FINISHED -> finished := true
         done
       with End_of_file ->
+        if not !finished then begin
+          Printf.fprintf stderr ("Build unexpectedly terminated! "^^
+            "You may need to do `hh_client restart`.\n");
+          exit 1
+        end;
         if !exit_code = 0
         then ()
         else exit (!exit_code)

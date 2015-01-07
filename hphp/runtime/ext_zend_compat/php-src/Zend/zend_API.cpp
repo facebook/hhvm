@@ -1634,7 +1634,9 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 
   if (!lookup.accessible || prop->m_type == HPHP::KindOfUninit) return nullptr;
 
-  tvBox(prop);
+  if (prop->m_type != HPHP::KindOfRef) {
+    tvBox(prop);
+  }
   return prop->m_data.pref;
 }
 
@@ -1656,7 +1658,9 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 
   if (!prop || !lookup.accessible) return nullptr;
 
-  if (prop->m_type != HPHP::KindOfRef) tvBox(prop);
+  if (prop->m_type != HPHP::KindOfRef) {
+    tvBox(prop);
+  }
   return prop->m_data.pref;
 }
 

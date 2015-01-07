@@ -70,9 +70,7 @@ private:
     struct {
       UNUSED char m_pad[3];
       UNUSED const HeaderKind m_kind;
-      unsigned m_persist;
     };
-    uint64_t m_kind_persist;
   };
   Node m_sweepNode;
 };

@@ -166,7 +166,7 @@ String TimeZone::CurrentName() {
 }
 
 SmartPtr<TimeZone> TimeZone::Current() {
-  return SmartPtr<TimeZone>(newres<TimeZone>(CurrentName()));
+  return makeSmartPtr<TimeZone>(CurrentName());
 }
 
 bool TimeZone::SetCurrent(const String& zone) {
@@ -251,7 +251,7 @@ TimeZone::TimeZone(timelib_tzinfo *tzi) {
 }
 
 SmartPtr<TimeZone> TimeZone::cloneTimeZone() const {
-  return SmartPtr<TimeZone>(newres<TimeZone>(m_tzi));
+  return makeSmartPtr<TimeZone>(m_tzi);
 }
 
 String TimeZone::name() const {

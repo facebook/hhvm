@@ -49,7 +49,6 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
     return nullptr;
   }
 
-  std::unique_ptr<UrlFile> file;
   StreamContext *ctx = !context.isResource() ? nullptr :
                         context.toResource().getTyped<StreamContext>();
   Array headers;
@@ -102,9 +101,9 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
       headers.set(s_User_Agent, default_user_agent);
     }
   }
-  file = std::unique_ptr<UrlFile>(newres<UrlFile>(method.data(), headers,
-                                                  post_data, max_redirs,
-                                                  timeout, ignore_errors));
+  std::unique_ptr<UrlFile> file(newres<UrlFile>(method.data(), headers,
+                                                post_data, max_redirs,
+                                                timeout, ignore_errors));
   bool ret = file->open(filename, mode);
   if (!ret) {
     raise_warning("Failed to open %s (%s)", filename.data(),

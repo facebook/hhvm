@@ -49,7 +49,7 @@ private:
   static DebuggerServer s_debugger_server;
 
   SmartPtr<Socket> nthSocket(unsigned int i) const {
-    return makeSocket(m_socks[i]);
+    return makeSmartPtr<Socket>(m_socks[i]);
   }
 
   AsyncFunc<DebuggerServer> m_serverThread;

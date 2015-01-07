@@ -569,7 +569,7 @@ static SmartPtr<Socket> socket_accept_impl(
   socklen_t *addrlen
 ) {
   Socket *sock = socket.getTyped<Socket>();
-  auto new_sock = makeSocket(
+  auto new_sock = makeSmartPtr<Socket>(
     accept(sock->fd(), addr, addrlen), sock->getType());
   if (!new_sock->valid()) {
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);

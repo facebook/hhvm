@@ -84,7 +84,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
       assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      SmartPtr<c_GenVectorWaitHandle> my_wh(newobj<c_GenVectorWaitHandle>());
+      auto my_wh = makeSmartPtr<c_GenVectorWaitHandle>();
       my_wh->initialize(exception, deps.get(), iter_pos, child_wh);
       AsioSession* session = AsioSession::Get();
       if (UNLIKELY(session->hasOnGenVectorCreateCallback())) {

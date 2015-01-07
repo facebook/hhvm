@@ -100,7 +100,7 @@ bool DateTime::IsValid(int y, int m, int d) {
 }
 
 SmartPtr<DateTime> DateTime::Current(bool utc /* = false */) {
-  return SmartPtr<DateTime>(newres<DateTime>(time(0), utc));
+  return makeSmartPtr<DateTime>(time(0), utc);
 }
 
 const StaticString
@@ -891,7 +891,7 @@ bool DateTime::fromString(const String& input, SmartPtr<TimeZone> tz,
 
 SmartPtr<DateTime> DateTime::cloneDateTime() const {
   bool err;
-  SmartPtr<DateTime> ret(newres<DateTime>(toTimeStamp(err), true));
+  auto ret = makeSmartPtr<DateTime>(toTimeStamp(err), true);
   ret->setTimezone(m_tz);
   return ret;
 }
@@ -906,7 +906,7 @@ DateTime::diff(SmartPtr<DateTime> datetime2, bool absolute) {
   if (absolute) {
     TIMELIB_REL_INVERT_SET(rel, 0);
   }
-  return SmartPtr<DateInterval>(newres<DateInterval>(rel));
+  return makeSmartPtr<DateInterval>(rel);
 #else
   throw_not_implemented("timelib version too old");
 #endif

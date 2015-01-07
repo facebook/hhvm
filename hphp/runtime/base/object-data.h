@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/classname-is.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -472,6 +473,14 @@ template<class T, class... Args> T* newobj(Args&&... args) {
 
 #define IMPLEMENT_CLASS(cls)                    \
   IMPLEMENT_OBJECT_ALLOCATION(c_##cls)
+
+template<class T, class... Args>
+typename std::enable_if<
+  std::is_convertible<T*, ObjectData*>::value,
+  SmartPtr<T>
+>::type makeSmartPtr(Args&&... args) {
+  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

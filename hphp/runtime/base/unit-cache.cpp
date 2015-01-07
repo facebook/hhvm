@@ -190,7 +190,7 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
 folly::Optional<String> readFileAsString(const StringData* path) {
   auto const fd = open(path->data(), O_RDONLY);
   if (!fd) return folly::none;
-  SmartPtr<PlainFile> file(newres<PlainFile>(fd));
+  auto file = makeSmartPtr<PlainFile>(fd);
   return file->read();
 }
 

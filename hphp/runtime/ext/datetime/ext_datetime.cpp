@@ -558,8 +558,7 @@ Variant HHVM_METHOD(DateInterval, __set,
 
 Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
                           const String& time) {
-  SmartPtr<DateInterval> di(newres<DateInterval>(time, true));
-  return DateIntervalData::wrap(di);
+  return DateIntervalData::wrap(makeSmartPtr<DateInterval>(time, true));
 }
 
 String HHVM_METHOD(DateInterval, format,

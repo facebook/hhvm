@@ -112,7 +112,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
 
     assert(child->instanceof(c_WaitableWaitHandle::classof()));
     auto const child_wh = static_cast<c_WaitableWaitHandle*>(child);
-    SmartPtr<c_GenArrayWaitHandle> my_wh(newobj<c_GenArrayWaitHandle>());
+    auto my_wh = makeSmartPtr<c_GenArrayWaitHandle>();
     my_wh->initialize(exception, depCopy, current_pos, child_wh);
 
     auto const session = AsioSession::Get();

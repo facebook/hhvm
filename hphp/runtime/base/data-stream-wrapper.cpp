@@ -116,7 +116,6 @@ File* DataStreamWrapper::open(const String& filename, const String& mode,
   }
   data = comma + 1;
   data_len -= 1;
-  std::unique_ptr<MemFile> file;
   String decoded;
 
   if (base64) {
@@ -128,9 +127,7 @@ File* DataStreamWrapper::open(const String& filename, const String& mode,
   } else {
     decoded = url_decode(data, data_len);
   }
-  file =
-    std::unique_ptr<MemFile>(newres<MemFile>(decoded.data(), decoded.size()));
-  return file.release();
+  return newres<MemFile>(decoded.data(), decoded.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

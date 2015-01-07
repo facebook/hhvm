@@ -167,9 +167,8 @@ String DateInterval::format(const String& format_spec) {
 }
 
 SmartPtr<DateInterval> DateInterval::cloneDateInterval() const {
-  if (!m_di) return SmartPtr<DateInterval>(newres<DateInterval>());
-  return SmartPtr<DateInterval>(
-    newres<DateInterval>(timelib_rel_time_clone(m_di.get())));
+  if (!m_di) return makeSmartPtr<DateInterval>();
+  return makeSmartPtr<DateInterval>(timelib_rel_time_clone(m_di.get()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

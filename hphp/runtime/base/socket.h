@@ -116,12 +116,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-template<class... Args>
-SmartPtr<Socket> makeSocket(Args&&... args) {
-  return SmartPtr<Socket>(newres<Socket>(std::forward<Args>(args)...));
-}
-
 }
 
 #endif // incl_HPHP_SOCKET_H_

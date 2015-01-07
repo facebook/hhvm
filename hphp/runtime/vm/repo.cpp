@@ -756,7 +756,8 @@ void Repo::setTextPragma(int repoId, const char* name, const char* val) {
   // Pragma writes must be executed outside transactions, since they may change
   // transaction behavior.
   std::stringstream ssPragma;
-  ssPragma << "PRAGMA " << dbName(repoId) << "." << name << " = " << val << ";";
+  ssPragma <<
+    "PRAGMA " << dbName(repoId) << "." << name << " = '" << val << "';";
   exec(ssPragma.str());
   if (debug) {
     // Verify that the pragma had the desired effect.

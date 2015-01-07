@@ -775,14 +775,8 @@ void Array::serialize(VariableSerializer *serializer,
 
 void Array::unserialize(VariableUnserializer *uns) {
   int64_t size = uns->readInt();
-  char sep = uns->readChar();
-  if (sep != ':') {
-    throw Exception("Expected ':' but got '%c'", sep);
-  }
-  sep = uns->readChar();
-  if (sep != '{') {
-    throw Exception("Expected '{' but got '%c'", sep);
-  }
+  uns->expectChar(':');
+  uns->expectChar('{');
 
   if (size == 0) {
     operator=(Create());
@@ -814,10 +808,7 @@ void Array::unserialize(VariableUnserializer *uns) {
 
   check_request_surprise_unlikely();
 
-  sep = uns->readChar();
-  if (sep != '}') {
-    throw Exception("Expected '}' but got '%c'", sep);
-  }
+  uns->expectChar('}');
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -63,6 +63,12 @@ struct VariableUnserializer {
   void read(char* buf, unsigned n);
 
   /*
+   * Read a character and throw if it differs from expected.
+   */
+  void expectChar(char expected);
+  void throwUnexpected(char expected, char got);
+
+  /*
    * Accessors.
    */
   Type type() const;

@@ -76,6 +76,13 @@ inline char VariableUnserializer::readChar() {
   return *(m_buf++);
 }
 
+inline void VariableUnserializer::expectChar(char expected) {
+  char ch = readChar();
+  if (UNLIKELY(ch != expected)) {
+    throwUnexpected(expected, ch);
+  }
+}
+
 inline void VariableUnserializer::add(Variant* v, Uns::Mode mode) {
   if (mode == Uns::Mode::Value) {
     m_refs.emplace_back(RefInfo(v));

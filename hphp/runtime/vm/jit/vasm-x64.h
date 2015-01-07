@@ -586,6 +586,7 @@ struct callm { Vptr target; RegSet args; };
 struct callr { Vreg64 target; RegSet args; };
 struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr t; Vreg64 d; };
 struct cmovq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
+// compares are att-style: s1-s0 => sf
 struct cmpb  { Vreg8  s0; Vreg8  s1; VregSF sf; };
 struct cmpbi { Immed  s0; Vreg8  s1; VregSF sf; };
 struct cmpbim { Immed s0; Vptr s1; VregSF sf; };
@@ -645,15 +646,16 @@ struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct orqim { Immed s0; Vptr m; VregSF sf; };
 struct pop { Vreg64 d; };
 struct popm { Vptr m; };
-struct psllq { Immed s0; VregDbl s1, d; };
-struct psrlq { Immed s0; VregDbl s1, d; };
 struct push { Vreg64 s; };
 struct pushm { Vptr s; };
 struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
+struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
+// shifts are att-style: s1<<{s0|ecx} => d,sf
+struct psllq { Immed s0; VregDbl s1, d; };
+struct psrlq { Immed s0; VregDbl s1, d; };
 struct sarq { Vreg64 s, d; VregSF sf; }; // uses rcx
 struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
 struct shlli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct shlq { Vreg64 s, d; VregSF sf; }; // uses rcx
 struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; };
@@ -669,6 +671,7 @@ struct storeqi { Immed s; Vptr m; };
 struct storesd { VregDbl s; Vptr m; };
 struct storew { Vreg16 s; Vptr m; };
 struct storewi { Immed s; Vptr m; };
+// sub is att-style: s1-s0 => d,sf
 struct subbi { Immed s0; Vreg8 s1, d; VregSF sf; };
 struct subl { Vreg32 s0, s1, d; VregSF sf; };
 struct subli { Immed s0; Vreg32 s1, d; VregSF sf; };
@@ -685,6 +688,7 @@ struct testlim { Immed s0; Vptr s1; VregSF sf; };
 struct testq { Vreg64 s0, s1; VregSF sf; };
 struct testqm { Vreg64 s0; Vptr s1; VregSF sf; };
 struct testqim { Immed s0; Vptr s1; VregSF sf; };
+// compare is att-style: s1-s0 => sf
 struct ucomisd { VregDbl s0, s1; VregSF sf; };
 struct ud2 {};
 struct unpcklpd { VregDbl s0, s1; Vreg128 d; };

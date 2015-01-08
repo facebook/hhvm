@@ -320,15 +320,6 @@ let from_parent env c =
     match c.c_kind with
       | Ast.Cabstract -> c.c_implements @ c.c_extends
       | Ast.Ctrait -> c.c_implements @ c.c_extends @ c.c_req_implements
-      (* Make enums implicitly extend the BuiltinEnum class in order to
-       * provide utility methods. *)
-      | Ast.Cenum ->
-        let pos = fst c.c_name in
-        let enum_type = pos, Happly (c.c_name, []) in
-        let parent =
-          pos, Happly ((pos, Naming_special_names.Classes.cHH_BuiltinEnum),
-                       [enum_type]) in
-        [parent]
       | _ -> c.c_extends
   in
   let env, inherited_l = lfold (from_class c) env extends in

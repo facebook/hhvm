@@ -132,23 +132,23 @@ let parse_check_args cmd =
     "--refactor", Arg.Unit (set_mode MODE_REFACTOR),
       "";
     "--search", Arg.String (fun x -> set_mode (MODE_SEARCH (x, "")) ()),
-      "";
+      " (mode) fuzzy search symbol definitions";
     "--search-class",
       Arg.String (fun x -> set_mode
           (MODE_SEARCH (x, "class")) ()),
-      "";
+      " (mode) fuzzy search class definitions";
     "--search-function",
       Arg.String (fun x -> set_mode
           (MODE_SEARCH (x, "function")) ()),
-      "";
+      " (mode) fuzzy search function definitions";
     "--search-typedef",
       Arg.String (fun x -> set_mode
           (MODE_SEARCH (x, "typedef")) ()),
-      "";
+      " (mode) fuzzy search typedef definitions";
     "--search-constant",
       Arg.String (fun x -> set_mode
           (MODE_SEARCH (x, "constant")) ()),
-      "";
+      " (mode) fuzzy search constant definitions";
     "--outline", Arg.Unit (set_mode MODE_OUTLINE),
       " (mode) prints an outline of the text on stdin";
     "--inheritance-children", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_CHILDREN x) ()),

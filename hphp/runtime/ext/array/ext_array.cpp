@@ -2567,9 +2567,11 @@ Variant HHVM_FUNCTION(hphp_array_idx,
 static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   switch (sort_flags) {
   case SORT_NATURAL:
-    return Array::SortNatural;
+    return ascending ?
+      Array::SortNaturalAscending : Array::SortNaturalDescending;
   case SORT_NATURAL_CASE:
-    return Array::SortNaturalCase;
+    return ascending ?
+      Array::SortNaturalCaseAscending: Array::SortNaturalCaseDescending;
   case SORT_NUMERIC:
     return ascending ?
       Array::SortNumericAscending : Array::SortNumericDescending;

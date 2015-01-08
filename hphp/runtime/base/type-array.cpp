@@ -1039,16 +1039,28 @@ int Array::SortLocaleStringDescending(const Variant& v1, const Variant& v2,
   return strcoll(s2.data(), s1.data());
 }
 
-int Array::SortNatural(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNaturalAscending(const Variant& v1, const Variant& v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 0);
 }
 
-int Array::SortNaturalCase(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNaturalDescending(const Variant& v1, const Variant& v2, const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return string_natural_cmp(s2.data(), s2.size(), s1.data(), s1.size(), 0);
+}
+
+int Array::SortNaturalCaseAscending(const Variant& v1, const Variant& v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 1);
+}
+
+int Array::SortNaturalCaseDescending(const Variant& v1, const Variant& v2, const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return string_natural_cmp(s2.data(), s2.size(), s1.data(), s1.size(), 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

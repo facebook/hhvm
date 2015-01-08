@@ -212,8 +212,10 @@ public:
   static int SortLocaleStringDescending(const Variant& v1, const Variant& v2,
                                         const void* data);
 
-  static int SortNatural(const Variant& v1, const Variant& v2, const void* data);
-  static int SortNaturalCase(const Variant& v1, const Variant& v2, const void* data);
+  static int SortNaturalAscending(const Variant& v1, const Variant& v2, const void* data);
+  static int SortNaturalDescending(const Variant& v1, const Variant& v2, const void* data);
+  static int SortNaturalCaseAscending(const Variant& v1, const Variant& v2, const void* data);
+  static int SortNaturalCaseDescending(const Variant& v1, const Variant& v2, const void* data);
 
   void sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
             const void* data = nullptr);

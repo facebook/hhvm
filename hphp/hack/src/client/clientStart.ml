@@ -43,6 +43,8 @@ let start_server env =
   let start_time = Unix.time () in
   let server_options = match env.server_options_cmd with
     | Some cmd ->
+      let root = Path.string_of_path env.root in
+      let cmd = if Filename.is_relative cmd then root^"/"^cmd else cmd in
       let cmd = Printf.sprintf "%s %s %s" cmd
         (Filename.quote (Path.string_of_path env.root))
         (Filename.quote Build_id.build_id_ohai) in

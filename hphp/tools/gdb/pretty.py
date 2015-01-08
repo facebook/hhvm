@@ -310,23 +310,6 @@ class RefDataPrinter:
     def to_string(self):
         return "Ref: %s" % self.val['m_tv']
 
-class ResourceDataPrinter:
-    RECOGNIZE = '^HPHP::ResourceData$'
-    def __init__(self, val):
-        self.val = val
-
-    def to_string(self):
-        return "Res #%d" % self.val['o_id']
-
-class ClassPrinter:
-    RECOGNIZE = '^HPHP::Class$'
-    def __init__(self, val):
-        self.val = val
-
-    def to_string(self):
-        ls = LowStringPtrPrinter(self.val['m_preClass']['m_px']['m_name'])
-        return "Class %s" % string_data_val(ls.to_string_data())
-
 
 #------------------------------------------------------------------------------
 # Lookup function.
@@ -340,8 +323,6 @@ printer_classes = [
     LowStringPtrPrinter,
     LowClassPtrPrinter,
     RefDataPrinter,
-    ResourceDataPrinter,
-    ClassPrinter,
 ]
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
                      for cls in printer_classes}

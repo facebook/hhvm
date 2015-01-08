@@ -21,6 +21,9 @@ class _BaseIterator:
     def next(self):
         return self.__next__()
 
+    def __iter__(self):
+        return self
+
 
 #------------------------------------------------------------------------------
 # StringData.
@@ -111,9 +114,6 @@ class PtrPrinter:
             self.cur = begin
             self.end = end
 
-        def __iter__(self):
-            return self
-
         def __next__(self):
             if self.cur == self.end:
                 raise StopIteration
@@ -170,76 +170,90 @@ class LowPtrPrinter(PtrPrinter):
 # ArrayData.
 
 class ArrayDataPrinter:
-    RECOGNIZE = '^HPHP::(ArrayData|MixedArray)$'
+    RECOGNIZE = '^HPHP::(ArrayData|MixedArray|ProxyArray)$'
 
-    class _iterator(_BaseIterator):
-        def __init__(self, kind, begin, end):
-            self.kind = kind
+    class _packed_iterator(_BaseIterator):
+        def __init__(self, begin, end):
             self.cur = begin
             self.end = end
             self.count = 0
 
-        def __iter__(self):
-            return self
-
         def __next__(self):
             if self.cur == self.end:
                 raise StopIteration
+
             elt = self.cur
-            packed = gdb.lookup_global_symbol('HPHP::ArrayData::kPackedKind') \
-                .value()
-            if self.kind == packed:
-                data = elt.dereference()
-            else:
-                data = elt['data']
-            if self.kind == packed:
-                key = '%d' % self.count
-            elif data['m_aux']['u_hash'] == 0:
-                key = '%d' % elt['ikey']
-            else:
-                key = '"%s"' % string_data_val(elt['skey'].dereference())
+            key = '%d' % self.count
+            data = elt.dereference()
+
             self.cur = self.cur + 1
             self.count = self.count + 1
             return (key, data)
 
+    class _mixed_iterator(_BaseIterator):
+        def __init__(self, begin, end):
+            self.cur = begin
+            self.end = end
+
+        def __next__(self):
+            if self.cur == self.end:
+                raise StopIteration
+
+            elt = self.cur
+
+            if elt['data']['m_aux']['u_hash'] == 0:
+                key = '%d' % elt['ikey']
+            else:
+                key = '"%s"' % string_data_val(elt['skey'].dereference())
+
+            data = elt['data'].cast(T('HPHP::TypedValue'))
+
+            self.cur = self.cur + 1
+            return (key, data)
+
+
     def __init__(self, val):
         self.kind = val['m_kind']
-        if self.kind == self.mixedKind():
-            self.val = val.cast(gdb.lookup_type('HPHP::MixedArray'))
-        elif self.kind == self.proxyKind():
-            self.val = val.cast(gdb.lookup_type('HPHP::ProxyArray'))
+
+        if self.kind == self._kind('Mixed'):
+            self.val = val.cast(T('HPHP::MixedArray'))
+        elif self.kind == self._kind('Proxy'):
+            self.val = val.cast(T('HPHP::ProxyArray'))
         else:
             self.val = val
 
-    def children(self):
-        if self.kind == self.packedKind():
-            data = self.val.address.cast(gdb.lookup_type('char').pointer()) + \
-                   self.val.type.sizeof
-            pval = data.cast(gdb.lookup_type('HPHP::TypedValue').pointer())
-            return self._iterator(self.kind, pval, pval + self.val['m_size'])
-        elif self.kind == self.mixedKind():
-            data = self.val.address.cast(gdb.lookup_type('char').pointer()) + \
-                self.val.type.sizeof
-            pelm = data.cast(gdb.lookup_type('HPHP::MixedArray::Elm').pointer())
-            return self._iterator(self.kind, pelm, pelm + self.val['m_size'])
-        return self._iterator(0, 0, 0)
-
     def to_string(self):
-        if self.kind == self.proxyKind():
-            return "ProxyArr: %s" % (
+        kind_int = int(self.kind.cast(T('uint8_t')))
+
+        if kind_int > 9:
+            return 'Invalid ArrayData (kind=%d)' % kind_int
+
+        if self.kind == self._kind('Proxy'):
+            return 'ProxyArray { %s }' % (
                 self.val['m_ref'].dereference()['m_tv']
                         ['m_data']['parr'].dereference())
+
+        kind = str(self.kind)[len('HPHP::ArrayData::'):]
+
+        return "ArrayData[%s]: %d element(s)" % (kind, self.val['m_size'])
+
+    def children(self):
+        data = self.val.address.cast(T('char').pointer()) + \
+               self.val.type.sizeof
+
+        if self.kind == self._kind('Packed'):
+            pelm = data.cast(T('HPHP::TypedValue').pointer())
+            iter_class = self._packed_iterator
+        elif self.kind == self._kind('Mixed'):
+            pelm = data.cast(T('HPHP::MixedArray::Elm').pointer())
+            iter_class = self._mixed_iterator
         else:
-            return "%d elements (kind==%d)" % (self.val['m_size'], self.kind)
+            return self._packed_iterator(0, 0)
 
-    def proxyKind(self):
-        return gdb.lookup_global_symbol('HPHP::ArrayData::kProxyKind').value()
+        return iter_class(pelm, pelm + self.val['m_size'])
 
-    def packedKind(self):
-        return gdb.lookup_global_symbol('HPHP::ArrayData::kPackedKind').value()
-
-    def mixedKind(self):
-        return gdb.lookup_global_symbol('HPHP::ArrayData::kMixedKind').value()
+    def _kind(self, kind):
+        return K('HPHP::ArrayData::k' + kind + 'Kind')
 
 
 #------------------------------------------------------------------------------
@@ -258,9 +272,6 @@ class ObjectDataPrinter:
                 addr = val.address.cast(gdb.lookup_type('char').pointer())
                 addr = addr + val.type.sizeof + cls['m_builtinODTailSize']
                 self.addr = addr.cast(gdb.lookup_type('HPHP::TypedValue').pointer())
-
-        def __iter__(self):
-            return self
 
         def __next__(self):
             if self.cur == self.end:
@@ -303,6 +314,10 @@ class ObjectDataPrinter:
         return "Object of class %s @ 0x%x" % (
             string_data_val(ls.to_string_data()),
             self.val.address)
+
+
+#------------------------------------------------------------------------------
+# RefData.
 
 class RefDataPrinter:
     RECOGNIZE = '^HPHP::RefData$'

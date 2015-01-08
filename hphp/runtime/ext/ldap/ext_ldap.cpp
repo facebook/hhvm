@@ -588,8 +588,9 @@ static void get_attributes(Array &ret, LDAP *ldap,
     }
     ldap_value_free_len(ldap_value);
 
-    String sAttribute(attribute, CopyString);
-    ret.set(to_lower ? String(toLower(attribute)) : sAttribute, tmp);
+    String sAttribute = to_lower ? String(toLower(attribute))
+                                 : String(attribute, CopyString);
+    ret.set(sAttribute, tmp);
     ret.set(num_attrib, sAttribute);
 
     num_attrib++;

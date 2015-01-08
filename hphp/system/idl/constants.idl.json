@@ -1223,6 +1223,10 @@
             "value": 51
         },
         {
+            "name": "LDAP_OPT_NETWORK_TIMEOUT",
+            "value": 20485
+        },
+        {
             "name": "LDAP_OPT_PROTOCOL_VERSION",
             "value": 17
         },

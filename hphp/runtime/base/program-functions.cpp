@@ -601,7 +601,11 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
 
-  {
+  auto variablesOrder = ThreadInfo::s_threadInfo.getNoCheck()
+    ->m_reqInjectionData.getVariablesOrder();
+
+  if (variablesOrder.find('e') != std::string::npos ||
+      variablesOrder.find('E') != std::string::npos) {
     Array envArr(Array::Create());
     process_env_variables(envArr);
     envArr.set(s_HPHP, 1);
@@ -622,7 +626,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
 
   process_cmd_arguments(argc, argv);
 
-  {
+  if (variablesOrder.find('s') != std::string::npos ||
+      variablesOrder.find('S') != std::string::npos) {
     Array serverArr(Array::Create());
     process_env_variables(serverArr);
     time_t now;

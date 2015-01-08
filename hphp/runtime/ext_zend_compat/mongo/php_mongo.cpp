@@ -224,7 +224,7 @@ static PHP_GINIT_FUNCTION(mongo)
 	 * will fill in the first 256 chars of hostname even if the actual
 	 * hostname is longer. If you can't get a unique character in the first
 	 * 256 chars of your hostname, you're doing it wrong. */
-	int len, win_max = 256;
+	int len;
 	char *hostname, host_start[256];
 	register ulong hash;
 
@@ -239,14 +239,15 @@ static PHP_GINIT_FUNCTION(mongo)
 
 	mongo_globals->pool_size = -1;
 
-	hostname = host_start;
 	/* from the gnu manual:
 	 *     gethostname stores the beginning of the host name in name even if the
 	 *     host name won't entirely fit. For some purposes, a truncated host name
 	 *     is good enough. If it is, you can ignore the error code.
 	 * So we'll ignore the error code.
 	 * Returns 0-terminated hostname. */
-	gethostname(hostname, win_max);
+	gethostname(host_start, sizeof(host_start));
+ 	host_start[sizeof(host_start) - 1] = '\0';
+	hostname = host_start;
 	len = strlen(hostname);
 
 	hash = 5381;

@@ -40,9 +40,9 @@ bool TestLogger::initializeRun() {
     return true;
 
   char buf[100];
-  std::string hostname;
   gethostname(buf, sizeof(buf));
-  hostname = buf;
+  buf[sizeof(buf) - 1] = '\0';
+  std::string hostname = buf;
 
   ArrayInit data(8, ArrayInit::Map{});
   data.set(String("startedTime"),  time(nullptr));

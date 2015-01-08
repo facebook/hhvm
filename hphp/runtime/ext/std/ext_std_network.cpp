@@ -125,11 +125,13 @@ IMPLEMENT_THREAD_LOCAL(ResolverInit, ResolverInit::s_res);
 Variant HHVM_FUNCTION(gethostname) {
   char h_name[HOST_NAME_MAX];
 
-  if (gethostname(h_name, HOST_NAME_MAX) != 0) {
+  if (gethostname(h_name, sizeof(h_name)) != 0) {
     raise_warning(
         "gethostname() failed with errorno=%d: %s", errno, strerror(errno));
     return false;
   }
+  // gethostname may not null-terminate
+  h_name[sizeof(h_name) - 1] = '\0';
 
   return String(h_name, CopyString);
 }

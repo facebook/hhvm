@@ -462,6 +462,8 @@ strhash_t hash_string_i_unaligned(const char *arKey, uint32_t nKeyLength) {
   return hash_string_i_fallback(arKey, nKeyLength);
 }
 
+void copyHashFuncs();
+
 #endif
 
 inline strhash_t hash_string(const char *arKey, uint32_t nKeyLength) {

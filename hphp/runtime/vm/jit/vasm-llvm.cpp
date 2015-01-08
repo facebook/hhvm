@@ -583,6 +583,19 @@ struct LLVMEmitter {
     m_typedValueType = llvm::StructType::get(
         m_context, std::vector<llvm::Type*>({m_int64, m_int8}),
         /*isPacked*/ false);
+
+    // The hacky way of tuning LLVM command-line parameters. This has to live
+    // till a better debug option control library is implemented.
+    static bool isCLSet = false;
+    if (!isCLSet) {
+      const char* pseudoCL[] = {
+        "hhvm",
+        "-disable-block-placement"
+      };
+      constexpr size_t numArgs = sizeof(pseudoCL) / sizeof(*pseudoCL);
+      llvm::cl::ParseCommandLineOptions(numArgs, pseudoCL, "");
+      isCLSet = true;
+    }
   }
 
   ~LLVMEmitter() {

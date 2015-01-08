@@ -517,6 +517,9 @@ struct LLVMEmitter {
         case Vconst::Quad:
           defineValue(pair.second, cns(pair.first.val));
           break;
+        case Vconst::Long:
+          defineValue(pair.second, cns(int32_t(pair.first.val)));
+          break;
         case Vconst::Byte:
           defineValue(pair.second, cns(uint8_t(pair.first.val)));
           break;
@@ -1297,7 +1300,8 @@ O(jmp) \
 O(jmpr) \
 O(jmpm) \
 O(ldimmb) \
-O(ldimm) \
+O(ldimml) \
+O(ldimmq) \
 O(lea) \
 O(loaddqu) \
 O(load) \
@@ -2185,7 +2189,11 @@ void LLVMEmitter::emit(const ldimmb& inst) {
   defineValue(inst.d, cns(inst.s.b()));
 }
 
-void LLVMEmitter::emit(const ldimm& inst) {
+void LLVMEmitter::emit(const ldimml& inst) {
+  defineValue(inst.d, cns(inst.s.l()));
+}
+
+void LLVMEmitter::emit(const ldimmq& inst) {
   assert(inst.d.isVirt());
   defineValue(inst.d, cns(inst.s.q()));
 }

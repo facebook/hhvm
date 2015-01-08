@@ -3993,7 +3993,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     }
     if (typeDst != InvalidReg) {
       if (rType != InvalidReg) v << copy{rType, typeDst};
-      else v << ldimm{src->type().toDataType(), typeDst};
+      else v << ldimmq{src->type().toDataType(), typeDst};
     }
   };
 
@@ -4547,7 +4547,7 @@ void CodeGenerator::cgAKExists(IRInstruction* inst) {
                    SyncOptions::kNoSyncPoint,
                    argGroup(inst).ssa(0/*arr*/).immPtr(staticEmptyString()));
     } else {
-      v << ldimm{0, dstLoc(inst, 0).reg()};
+      v << ldimmq{0, dstLoc(inst, 0).reg()};
     }
     return;
   }

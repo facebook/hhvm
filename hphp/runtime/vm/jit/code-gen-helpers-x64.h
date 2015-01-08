@@ -141,12 +141,12 @@ template<typename T>
 inline void
 emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
   PhysRegSaver(v, kGPCallerSaved); // we don't know for sure what's alive
-  v << ldimm{datum.m_key, argNumToRegName[0]};
+  v << ldimmq{datum.m_key, argNumToRegName[0]};
   const CodeAddress addr = (CodeAddress)pthread_getspecific;
   if (deltaFits((uintptr_t)addr, sz::dword)) {
     v << call{addr, argSet(1)};
   } else {
-    v << ldimm{addr, reg::rax};
+    v << ldimmq{addr, reg::rax};
     v << callr{reg::rax, argSet(1)};
   }
   if (dest != Vreg(reg::rax)) {

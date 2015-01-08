@@ -432,9 +432,8 @@ void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem) {
   if (size == 8) {
     v << cmpqm{v.cns(c), mem, sf};
   } else if (size == 4) {
-    auto lowCns = v.makeReg();
-    v << movtql{v.cns(c), lowCns};
-    v << cmplm{lowCns, mem, sf};
+    v << cmplm{v.cns(safe_cast<uint32_t>(reinterpret_cast<intptr_t>(c))),
+               mem, sf};
   } else {
     not_implemented();
   }

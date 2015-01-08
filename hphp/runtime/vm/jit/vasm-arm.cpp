@@ -96,7 +96,7 @@ private:
   void emit(hcnocatch& i);
   void emit(hcunwind& i);
   void emit(hostcall& i);
-  void emit(ldimm& i);
+  void emit(ldimmq& i);
   void emit(ldimmb& i);
   void emit(ldpoint& i);
   void emit(load& i);
@@ -397,7 +397,7 @@ void Vgen::emit(hostcall& i) {
   a->HostCall(i.argc);
 }
 
-void Vgen::emit(ldimm& i) {
+void Vgen::emit(ldimmq& i) {
   union { double dval; int64_t ival; };
   ival = i.s.q();
   if (i.d.isSIMD()) {
@@ -537,9 +537,9 @@ static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   if (svcreq.stub_block) {
     always_assert(false && "use rip-rel addr to get ephemeral stub addr");
   } else {
-    v << ldimm{0, PhysReg{arm::rAsm}}; // because persist flag
+    v << ldimmq{0, PhysReg{arm::rAsm}}; // because persist flag
   }
-  v << ldimm{svcreq.req, PhysReg{argReg(0)}};
+  v << ldimmq{svcreq.req, PhysReg{argReg(0)}};
   arg_regs |= arm::rAsm | argReg(0);
 
   // Weird hand-shaking with enterTC: reverse-call a service routine.

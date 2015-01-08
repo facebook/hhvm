@@ -29,76 +29,193 @@ namespace {
 typedef boost::dynamic_bitset<> LiveSet;
 bool effectful(Vinstr& inst) {
   switch (inst.op) {
-    case Vinstr::copy:
-    case Vinstr::copy2:
-    case Vinstr::copyargs:
-    case Vinstr::ldpoint:
-    case Vinstr::load:
-    case Vinstr::nop:
+    case Vinstr::absdbl:
+    case Vinstr::addli:
+    case Vinstr::addq:
+    case Vinstr::addqi:
+    case Vinstr::addsd:
     case Vinstr::andb:
     case Vinstr::andbi:
     case Vinstr::andl:
     case Vinstr::andli:
     case Vinstr::andq:
     case Vinstr::andqi:
-    case Vinstr::addq:
-    case Vinstr::addqi:
-    case Vinstr::addsd:
+    case Vinstr::asrv:
     case Vinstr::cloadq:
     case Vinstr::cmovq:
-    case Vinstr::cvttsd2siq:
+    case Vinstr::cmpb:
+    case Vinstr::cmpbi:
+    case Vinstr::cmpbim:
+    case Vinstr::cmpl:
+    case Vinstr::cmpli:
+    case Vinstr::cmplim:
+    case Vinstr::cmplm:
+    case Vinstr::cmpq:
+    case Vinstr::cmpqi:
+    case Vinstr::cmpqim:
+    case Vinstr::cmpqm:
+    case Vinstr::cmpsd:
+    case Vinstr::copy2:
+    case Vinstr::copy:
+    case Vinstr::copyargs:
     case Vinstr::cvtsi2sd:
+    case Vinstr::cvtsi2sdm:
+    case Vinstr::cvttsd2siq:
     case Vinstr::decl:
     case Vinstr::decq:
+    case Vinstr::defvmsp:
     case Vinstr::divsd:
     case Vinstr::imul:
     case Vinstr::incl:
     case Vinstr::incq:
+    case Vinstr::ldpoint:
+    case Vinstr::ldretaddr:
     case Vinstr::lea:
+    case Vinstr::leap:
+    case Vinstr::load:
     case Vinstr::loaddqu:
-    case Vinstr::loadtqb:
     case Vinstr::loadl:
+    case Vinstr::loadqp:
     case Vinstr::loadsd:
+    case Vinstr::loadtqb:
     case Vinstr::loadzbl:
     case Vinstr::loadzbq:
     case Vinstr::loadzlq:
+    case Vinstr::lslv:
     case Vinstr::movb:
     case Vinstr::movl:
+    case Vinstr::movretaddr:
+    case Vinstr::movtqb:
+    case Vinstr::movtql:
     case Vinstr::movzbl:
     case Vinstr::movzbq:
+    case Vinstr::mul:
     case Vinstr::mulsd:
     case Vinstr::neg:
+    case Vinstr::nop:
     case Vinstr::not:
     case Vinstr::orq:
     case Vinstr::orqi:
     case Vinstr::psllq:
     case Vinstr::psrlq:
     case Vinstr::roundsd:
+    case Vinstr::sar:
     case Vinstr::sarq:
     case Vinstr::sarqi:
     case Vinstr::setcc:
+    case Vinstr::shl:
     case Vinstr::shlli:
     case Vinstr::shlq:
     case Vinstr::shlqi:
     case Vinstr::shrli:
     case Vinstr::shrqi:
     case Vinstr::sqrtsd:
+    case Vinstr::srem:
+    case Vinstr::subbi:
+    case Vinstr::subl:
     case Vinstr::subli:
     case Vinstr::subq:
     case Vinstr::subqi:
     case Vinstr::subsd:
+    case Vinstr::testb:
+    case Vinstr::testbi:
+    case Vinstr::testbim:
+    case Vinstr::testl:
+    case Vinstr::testli:
+    case Vinstr::testlim:
+    case Vinstr::testq:
+    case Vinstr::testqim:
+    case Vinstr::testqm:
+    case Vinstr::testwim:
+    case Vinstr::ucomisd:
     case Vinstr::unpcklpd:
     case Vinstr::xorb:
     case Vinstr::xorbi:
     case Vinstr::xorq:
     case Vinstr::xorqi:
       return false;
-    case Vinstr::ldimm:
+
+    case Vinstr::ldimmq:
+      return !inst.ldimmq_.saveflags;
+    case Vinstr::ldimml:
+      return !inst.ldimml_.saveflags;
     case Vinstr::ldimmb:
-      return !inst.ldimm_.saveflags;
-    default:
+      return !inst.ldimmb_.saveflags;
+
+    case Vinstr::addlm:
+    case Vinstr::addqim:
+    case Vinstr::andbim:
+    case Vinstr::bindaddr:
+    case Vinstr::bindcall:
+    case Vinstr::bindexit:
+    case Vinstr::bindjcc1st:
+    case Vinstr::bindjcc2nd:
+    case Vinstr::bindjmp:
+    case Vinstr::brk:
+    case Vinstr::call:
+    case Vinstr::callm:
+    case Vinstr::callr:
+    case Vinstr::callstub:
+    case Vinstr::cbcc:
+    case Vinstr::contenter:
+    case Vinstr::cqo:
+    case Vinstr::debugtrap:
+    case Vinstr::declm:
+    case Vinstr::decqm:
+    case Vinstr::fallback:
+    case Vinstr::fallbackcc:
+    case Vinstr::fallthru:
+    case Vinstr::hcnocatch:
+    case Vinstr::hcsync:
+    case Vinstr::hcunwind:
+    case Vinstr::hostcall:
+    case Vinstr::idiv:
+    case Vinstr::inclm:
+    case Vinstr::incqm:
+    case Vinstr::incqmlock:
+    case Vinstr::incwm:
+    case Vinstr::jcc:
+    case Vinstr::jmp:
+    case Vinstr::jmpm:
+    case Vinstr::jmpr:
+    case Vinstr::kpcall:
+    case Vinstr::landingpad:
+    case Vinstr::mccall:
+    case Vinstr::mcprep:
+    case Vinstr::nothrow:
+    case Vinstr::orqim:
+    case Vinstr::orwim:
+    case Vinstr::phidef:
+    case Vinstr::phijcc:
+    case Vinstr::phijmp:
+    case Vinstr::point:
+    case Vinstr::pop:
+    case Vinstr::popm:
+    case Vinstr::push:
+    case Vinstr::pushm:
+    case Vinstr::ret:
+    case Vinstr::retctrl:
+    case Vinstr::store:
+    case Vinstr::storeb:
+    case Vinstr::storebi:
+    case Vinstr::storedqu:
+    case Vinstr::storel:
+    case Vinstr::storeli:
+    case Vinstr::storeqi:
+    case Vinstr::storesd:
+    case Vinstr::storew:
+    case Vinstr::storewi:
+    case Vinstr::svcreq:
+    case Vinstr::syncpoint:
+    case Vinstr::syncvmsp:
+    case Vinstr::tbcc:
+    case Vinstr::ud2:
+    case Vinstr::unwind:
+    case Vinstr::vcall:
+    case Vinstr::vinvoke:
       return true;
   }
+  always_assert(false);
 }
 }
 

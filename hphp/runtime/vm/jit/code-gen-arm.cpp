@@ -862,7 +862,7 @@ static void shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
     auto src = arg.srcReg();
     auto dst = arg.dstReg();
     if (kind == ArgDesc::Kind::Imm) {
-      v << ldimm{arg.imm().q(), dst};
+      v << ldimmq{arg.imm().q(), dst};
     } else if (kind == ArgDesc::Kind::Reg) {
       if (arg.isZeroExtend()) {
         if (src.isVirt()) {

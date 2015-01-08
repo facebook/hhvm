@@ -72,6 +72,12 @@ Vreg Vunit::makeConst(uint64_t v) {
   return constants[v] = makeReg();
 }
 
+Vreg Vunit::makeConst(uint32_t v) {
+  auto it = constants.find(v);
+  if (it != constants.end()) return it->second;
+  return constants[v] = makeReg();
+}
+
 Vreg Vunit::makeConst(bool b) {
   auto it = constants.find(b);
   if (it != constants.end()) return it->second;
@@ -177,7 +183,7 @@ private:
   void emit(debugtrap& i) { a->int3(); }
   void emit(fallthru& i) {}
   void emit(ldimmb& i);
-  void emit(ldimm& i);
+  void emit(ldimmq& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
   void emit(kpcall& i);
@@ -572,7 +578,7 @@ void Vgen::emit(ldimmb& i) {
   }
 }
 
-void Vgen::emit(ldimm& i) {
+void Vgen::emit(ldimmq& i) {
   auto val = i.s.q();
   if (i.d.isGP()) {
     if (val == 0) {
@@ -950,9 +956,9 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   if (svcreq.stub_block) {
     v << leap{rip[(int64_t)svcreq.stub_block], rAsm};
   } else {
-    v << ldimm{0, rAsm}; // because persist flag
+    v << ldimmq{0, rAsm}; // because persist flag
   }
-  v << ldimm{svcreq.req, rdi};
+  v << ldimmq{svcreq.req, rdi};
   arg_regs |= rAsm | rdi | rVmFp | rVmSp;
 
   // Weird hand-shaking with enterTC: reverse-call a service routine.

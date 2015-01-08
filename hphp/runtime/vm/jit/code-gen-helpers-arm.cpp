@@ -76,7 +76,7 @@ Vpoint emitCall(Vout& v, CppCall call, RegSet args) {
   PhysReg rHostCall(rHostCallReg);
   switch (call.kind()) {
   case CppCall::Kind::Direct:
-    v << ldimm{reinterpret_cast<intptr_t>(call.address()), rHostCall};
+    v << ldimmq{reinterpret_cast<intptr_t>(call.address()), rHostCall};
     break;
   case CppCall::Kind::Virtual:
     v << load{arg0[0], rHostCall};

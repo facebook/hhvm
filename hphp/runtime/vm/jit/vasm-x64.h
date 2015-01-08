@@ -311,7 +311,8 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(debugtrap, Inone, Un, Dn)\
   O(fallthru, Inone, Un, Dn)\
   O(ldimmb, I(s) I(saveflags), Un, D(d))\
-  O(ldimm, I(s) I(saveflags), Un, D(d))\
+  O(ldimml, I(s) I(saveflags), Un, D(d))\
+  O(ldimmq, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), U(args), Dn)\
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
   O(kpcall, I(target) I(callee) I(prologIndex), U(args), Dn)\
@@ -506,7 +507,8 @@ struct absdbl { Vreg s, d; };
 struct fallthru {};
 
 struct ldimmb { Immed s; Vreg8 d; bool saveflags; };
-struct ldimm  { Immed64 s; Vreg d; bool saveflags; };
+struct ldimml { Immed s; Vreg32 d; bool saveflags; };
+struct ldimmq { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
                     TransFlags trflags; RegSet args; };
@@ -632,10 +634,15 @@ struct loadzbq { Vptr s; Vreg64 d; };
 struct loadzlq { Vptr s; Vreg64 d; };
 struct movb { Vreg8 s, d; };
 struct movl { Vreg32 s, d; };
+
+/* Move zero-extended s to d. */
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct movzbq { Vreg8 s; Vreg64 d; };
+
+/* Move truncated s to d. */
 struct movtqb { Vreg64 s; Vreg8 d; };
 struct movtql { Vreg64 s; Vreg32 d; };
+
 struct mulsd  { VregDbl s0, s1, d; };
 struct neg { Vreg64 s, d; VregSF sf; };
 struct nop {};
@@ -789,10 +796,10 @@ struct VcallArgs {
   VregList args, simdArgs, stkArgs;
 };
 
-// Vasm constant: 1 or 8 byte unsigned value, or the disp32 part of a
+// Vasm constant: 1, 4, or 8 byte unsigned value, or the disp32 part of a
 // thread-local address of an immutable constant that varies by thread.
 struct Vconst {
-  enum Kind { Quad, Byte, ThreadLocal };
+  enum Kind { Quad, Long, Byte, ThreadLocal };
   struct Hash {
     size_t operator()(Vconst c) const {
       return std::hash<uint64_t>()(c.val) ^ std::hash<int>()(c.kind);
@@ -801,6 +808,7 @@ struct Vconst {
   Vconst() : kind(Quad), val(0) {}
   /* implicit */ Vconst(bool b) : kind(Byte), val(b) {}
   /* implicit */ Vconst(uint8_t b) : kind(Byte), val(b) {}
+  /* implicit */ Vconst(uint32_t i) : kind(Long), val(i) {}
   /* implicit */ Vconst(uint64_t i) : kind(Quad), val(i) {}
   /* implicit */ Vconst(Vptr tl) : kind(ThreadLocal), disp(tl.disp) {
     assert(!tl.base.isValid() && !tl.index.isValid() && tl.seg == Vptr::FS);
@@ -846,11 +854,11 @@ struct Vunit {
   VcallArgsId makeVcallArgs(VcallArgs&& args);
 
   Vreg makeConst(bool);
+  Vreg makeConst(uint32_t);
   Vreg makeConst(uint64_t);
   Vreg makeConst(double);
   Vreg makeConst(Vptr);
   Vreg makeConst(const void* p) { return makeConst(uint64_t(p)); }
-  Vreg makeConst(uint32_t v) { return makeConst(uint64_t(v)); }
   Vreg makeConst(int64_t v) { return makeConst(uint64_t(v)); }
   Vreg makeConst(int32_t v) { return makeConst(int64_t(v)); }
   Vreg makeConst(DataType t) { return makeConst(uint64_t(t)); }

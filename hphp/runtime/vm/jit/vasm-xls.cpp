@@ -1520,7 +1520,10 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
     } else if (ivl->constant) {
       switch (ivl->val.kind) {
         case Vconst::Quad:
-          loads.emplace_back(ldimm{ivl->val.val, dst, true});
+          loads.emplace_back(ldimmq{ivl->val.val, dst, true});
+          break;
+        case Vconst::Long:
+          loads.emplace_back(ldimml{int32_t(ivl->val.val), dst, true});
           break;
         case Vconst::Byte:
           loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst, true});

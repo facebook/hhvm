@@ -316,7 +316,8 @@ PHP_METHOD(MongoId, getHostname)
 {
 	char hostname[256];
 
-	gethostname(hostname, 256);
+	gethostname(hostname, sizeof(hostname));
+	hostname[sizeof(hostname) - 1] = '\0';
 	RETURN_STRING(hostname, 1);
 }
 /* }}} */

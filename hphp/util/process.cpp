@@ -534,8 +534,8 @@ std::string Process::GetAppName() {
 std::string Process::GetHostName() {
   char hostbuf[128];
   hostbuf[0] = '\0'; // for cleaner valgrind output when gethostname() fails
-  gethostname(hostbuf, 127);
-  hostbuf[127] = '\0';
+  gethostname(hostbuf, sizeof(hostbuf));
+  hostbuf[sizeof(hostbuf) - 1] = '\0';
   return hostbuf;
 }
 

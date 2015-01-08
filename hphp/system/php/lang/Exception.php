@@ -245,7 +245,7 @@ class Exception {
   }
 
   final private function __clone() {
-    trigger_error("Trying to clone an uncloneable object of class Exception",
-                  E_USER_ERROR);
+    trigger_error("Trying to clone an uncloneable object of class " .
+                  get_class($this), E_USER_ERROR);
   }
 }

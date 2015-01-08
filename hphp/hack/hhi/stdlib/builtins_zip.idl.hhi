@@ -130,3 +130,60 @@ class ZipArchive {
   public function unchangeName(string $name): bool;
 
 }
+
+/**
+ * Close a ZIP file archive
+ */
+function zip_close(resource $zip): void;
+
+/**
+ * Close a directory entry
+ */
+function zip_entry_close(resource $zip_entry): bool;
+
+/**
+ * Retrieve the compressed size of a directory entry
+ */
+function zip_entry_compressedsize(resource $zip_entry): int;
+
+/**
+ * Retrieve the compression method of a directory entry
+ */
+function zip_entry_compressionmethod(resource $zip_entry): string;
+
+/**
+ * Retrieve the actual file size of a directory entry
+ */
+function zip_entry_filesize(resource $zip_entry): int;
+
+/**
+ * Retrieve the name of a directory entry
+ */
+function zip_entry_name(resource $zip_entry): string;
+
+/**
+ * Open a directory entry for reading
+ */
+function zip_entry_open(
+  resource $zip,
+  resource $zip_entry,
+  string $mode,
+): bool;
+
+/**
+ * Read from an open directory entry
+ */
+function zip_entry_read(
+  resource $zip_entry,
+  int $length = 1024,
+): string;
+
+/**
+ * Open a ZIP file archive
+ */
+function zip_open(string $filename): mixed; // resource or false
+
+/**
+ * Read next entry in a ZIP file archive
+ */
+function zip_read(resource $zip); // resource or false

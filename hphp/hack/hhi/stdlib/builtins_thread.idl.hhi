@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,7 +8,5 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-function hphp_thread_is_warmup_enabled() { }
-function hphp_thread_set_warmup_enabled() { }
-function hphp_get_thread_id() { }
-function hphp_gettid() { }
+function hphp_get_thread_id(): int;
+function hphp_gettid(): int;

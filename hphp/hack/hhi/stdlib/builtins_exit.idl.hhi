@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh // decl   /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,4 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-function exit($status = 0) { }
+
+// exit and die terminate the request
+function exit($exit_code_or_message = 0): void; // really "noreturn"
+function die($exit_code_or_message = 0): void; // really "noreturn"

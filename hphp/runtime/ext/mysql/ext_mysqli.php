@@ -1334,6 +1334,9 @@ class mysqli_stmt {
     }
   }
 
+  <<__Native>>
+  public function __destruct(): void;
+
   public function __clone(): void {
     throw new Exception(
       'Trying to clone an uncloneable object of class mysqli_stmt'

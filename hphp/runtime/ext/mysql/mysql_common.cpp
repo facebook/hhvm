@@ -808,6 +808,13 @@ MySQLStmtVariables::MySQLStmtVariables(std::vector<Variant*> arr): m_arr(arr) {
 }
 
 MySQLStmtVariables::~MySQLStmtVariables() {
+  for (int i = 0; i < m_arr.size(); i++) {
+    MYSQL_BIND *b = &m_vars[i];
+    if (b->buffer_length > 0) {
+      free(b->buffer);
+    }
+  }
+
   free(m_vars);
   free(m_null);
   free(m_length);

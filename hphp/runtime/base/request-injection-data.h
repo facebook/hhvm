@@ -153,6 +153,8 @@ private:
   std::string m_maxMemory;
   std::string m_argSeparatorOutput;
   std::string m_argSeparatorInput;
+  std::string m_variablesOrder;
+  std::string m_requestOrder;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
   std::string m_gzipCompressionLevel = "-1";
@@ -269,6 +271,14 @@ private:
   std::string getDefaultIncludePath();
   int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
   void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
+  std::string getVariablesOrder() const { return m_variablesOrder; }
+  void setVariablesOrder(std::string variablesOrder) {
+    m_variablesOrder = variablesOrder;
+  }
+  std::string getRequestOrder() const { return m_requestOrder; }
+  void setRequestOrder(std::string requestOrder) {
+    m_requestOrder = requestOrder;
+  }
   int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
   std::string getUserAgent() { return m_userAgent; }
   void setUserAgent(std::string userAgent) { m_userAgent = userAgent; }

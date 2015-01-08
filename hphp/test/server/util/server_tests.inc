@@ -127,20 +127,20 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
     $serverProc = proc_open($cmd, array(), $pipes);
     if (!is_resource($serverProc)) {
       tlog('Failed to start a shell process for the server');
-    } else if (waitForServerToGetGoing($serverPort)) {
+    } else if (waitForServerToGetGoing($adminPort)) {
       return $serverProc;
     }
   }
   dumpLogFilesToStdoutAndDie();
 }
 
-function waitForServerToGetGoing($serverPort) {
+function waitForServerToGetGoing($adminPort) {
   $host = php_uname('n');
   $r = "";
   for ($i = 1; $i <= 20; $i++) {
     sleep(1);
-    $r = request($host, $serverPort, "hello.php");
-    if ($r === "Hello, World!") return true;
+    $r = request($host, $adminPort, "/");
+    if ($r && strpos($r, "/status") !== false) return true;
     tlog('Server replied: '.$r);
   }
 
@@ -183,7 +183,10 @@ function http_request($host, $port, $path, $timeout = 1200) {
     "--silent --connect-timeout $timeout ".
     "--header 'Host: $host_name' --url \"$url\"";
   tlog("Requesting page with command: $cmd");
-  return exec($cmd);
+  $output = array();
+  exec($cmd, $output);
+
+  return implode("\n", $output);
 }
 
 function requestAll(array $requests, $customArgs = '') {

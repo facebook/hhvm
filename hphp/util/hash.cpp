@@ -136,5 +136,9 @@ void copyHashFuncs() {
 #endif
 }
 
+#else
+
+void copyHashFuncs() {}
+
 #endif // USE_SSECRC
 }

@@ -398,12 +398,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Object/Ref loads/stores
 
-  case StProp:
-    return PureStore {
-      AProp { inst.src(0), safe_cast<uint32_t>(inst.src(1)->intVal()) },
-      inst.src(2)
-    };
-
   case CheckRefInner:
     // We don't have AliasClass support for refs yet, so it's a load from an
     // unknown heap location.

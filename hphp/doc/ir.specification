@@ -1345,10 +1345,6 @@ To string conversions:
 
   Store S2 into the location S0 + S1 (in bytes).
 
-| StProp, ND, S(Obj) C(Int) S(Gen), CRc
-
-  Store S2 into the location S0 + S1 (in bytes).
-
 | StElem, ND, S(PtrToCell) S(Int) S(Cell), CRc
 
   Store S2 into the location given by the index S1 from base pointer S0. The

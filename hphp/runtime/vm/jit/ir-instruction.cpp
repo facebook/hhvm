@@ -105,9 +105,8 @@ bool IRInstruction::consumesReference(int srcNo) const {
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
 
-    case StProp:
     case StMem:
-      // StProp|StMem <base>, <offset>, <value>
+      // StMem <base>, <offset>, <value>
       return srcNo == 2;
 
     case ArraySet:

@@ -307,7 +307,6 @@ bool canDCE(IRInstruction* inst) {
   case ReleaseVVOrExit:
   case GenericRetDecRefs:
   case StMem:
-  case StProp:
   case StElem:
   case StLoc:
   case StLocNT:

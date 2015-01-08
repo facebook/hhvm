@@ -2284,12 +2284,6 @@ void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
   vmain() << load{ptr[off], dst};
 }
 
-void CodeGenerator::cgStProp(IRInstruction* inst) {
-  auto objReg = srcLoc(inst, 0).reg();
-  auto propOff  = inst->src(1)->intVal();
-  emitStore(objReg[propOff], inst->src(2), srcLoc(inst, 2), Width::Full);
-}
-
 void CodeGenerator::cgStMem(IRInstruction* inst) {
   auto ptr = srcLoc(inst, 0).reg();
   auto offset = inst->src(1)->intVal();

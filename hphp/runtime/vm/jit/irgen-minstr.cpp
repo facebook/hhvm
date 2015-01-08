@@ -773,7 +773,6 @@ PropInfo getCurrentPropertyOffset(MTS& env, const Class*& knownCls) {
 SSATmp* checkInitProp(MTS& env,
                       SSATmp* baseAsObj,
                       SSATmp* propAddr,
-                      PropInfo propInfo,
                       bool doWarn,
                       bool doDefine) {
   auto const key = getKey(env);
@@ -806,13 +805,7 @@ SSATmp* checkInitProp(MTS& env,
         gen(env, RaiseUndefProp, baseAsObj, key);
       }
       if (doDefine) {
-        gen(
-          env,
-          StProp,
-          baseAsObj,
-          cns(env, propInfo.offset),
-          cns(env, Type::InitNull)
-        );
+        gen(env, StMem, propAddr, cns(env, 0), cns(env, Type::InitNull));
         return propAddr;
       }
       return ptrToInitNull(env);
@@ -849,7 +842,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
     );
     setBase(
       env,
-      checkInitProp(env, env.base.value, propAddr, propInfo, doWarn, doDefine)
+      checkInitProp(env, env.base.value, propAddr, doWarn, doDefine)
     );
     return;
   }
@@ -886,7 +879,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
         obj,
         cns(env, propInfo.offset)
       );
-      return checkInitProp(env, obj, propAddr, propInfo, doWarn, doDefine);
+      return checkInitProp(env, obj, propAddr, doWarn, doDefine);
     },
     [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
       hint(env, Block::Hint::Unlikely);

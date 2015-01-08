@@ -6,7 +6,7 @@ File "test_foreach.php", line 12, characters 19-21:
 It is incompatible with an int
 File "builtins.hhi", line 21, characters 45-46:
   via this generic Tk
-File "builtins.hhi", line 15, characters 50-51:
+File "builtins.hhi", line 15, characters 51-52:
   via this generic Tk
 File "builtins.hhi", line 10, characters 58-59:
   via this generic Tk

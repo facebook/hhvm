@@ -39,11 +39,11 @@ let builtins = "<?hh // decl\n"^
   "  public function getWaitHandle(): WaitHandle<T>;"^
   "}\n"^
   "interface WaitHandle<T> extends Awaitable<T> {}\n"^
-  "interface ConstVector<Tv> extends KeyedIterable<int, Tv>, Indexish<int, Tv>{"^
+  "interface ConstVector<+Tv> extends KeyedIterable<int, Tv>, Indexish<int, Tv>{"^
   "  public function map<Tu>((function(Tv): Tu) $callback): ConstVector<Tu>;"^
   "}\n"^
-  "interface ConstSet<Tv> extends KeyedIterable<mixed, Tv>, Container<Tv>{}\n"^
-  "interface ConstMap<Tk, Tv> extends KeyedIterable<Tk, Tv>, Indexish<Tk, Tv>{"^
+  "interface ConstSet<+Tv> extends KeyedIterable<mixed, Tv>, Container<Tv>{}\n"^
+  "interface ConstMap<Tk, +Tv> extends KeyedIterable<Tk, Tv>, Indexish<Tk, Tv>{"^
   "  public function map<Tu>((function(Tv): Tu) $callback): ConstMap<Tk, Tu>;"^
   "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): ConstMap<Tk, Tu>;"^
   "}\n"^

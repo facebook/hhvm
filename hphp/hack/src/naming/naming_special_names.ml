@@ -60,10 +60,8 @@ module Collections = struct
   let cIndexish         = "\\Indexish"
 
   let cCollection       = "\\Collection"
-  let cConstCollection  = "\\ConstCollection"
   let cConstVector      = "\\ConstVector"
   let cConstMap         = "\\ConstMap"
-  let cConstSet         = "\\ConstSet"
 
 end
 

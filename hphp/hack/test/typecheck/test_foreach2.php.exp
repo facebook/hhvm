@@ -6,7 +6,7 @@ File "test_foreach2.php", line 12, characters 24-29:
 It is incompatible with a string
 File "builtins.hhi", line 21, characters 49-50:
   via this generic Tv
-File "builtins.hhi", line 15, characters 54-55:
+File "builtins.hhi", line 15, characters 55-56:
   via this generic Tv
 File "builtins.hhi", line 10, characters 62-63:
   via this generic Tv

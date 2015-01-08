@@ -259,60 +259,16 @@ class ArrayDataPrinter:
 #------------------------------------------------------------------------------
 # ObjectData.
 
-objectDataCount = 100
-
 class ObjectDataPrinter:
-    RECOGNIZE = '^HPHP::(ObjectData|Instance)$'
-
-    class _iterator(_BaseIterator):
-        def __init__(self, val, cls, begin, end):
-            self.cur = begin
-            self.end = end
-            if self.cur != self.end:
-                addr = val.address.cast(gdb.lookup_type('char').pointer())
-                addr = addr + val.type.sizeof + cls['m_builtinODTailSize']
-                self.addr = addr.cast(gdb.lookup_type('HPHP::TypedValue').pointer())
-
-        def __next__(self):
-            if self.cur == self.end:
-                raise StopIteration
-
-            elt = self.cur
-            tv = self.addr
-            global objectDataCount
-            if objectDataCount > 0:
-                objectDataCount = objectDataCount - 1
-                tv = tv.dereference()
-
-            self.addr = self.addr + 1
-            self.cur = self.cur + 1
-            return (string_data_val(elt['m_name']), tv)
+    RECOGNIZE = '^HPHP::(ObjectData)$'
 
     def __init__(self, val):
-        self.dtype = val.dynamic_type
-        self.val = val.cast(self.dtype)
-
-        clstype = gdb.lookup_type('HPHP::Class').pointer()
-        self.cls = val['m_cls']['m_raw'].cast(clstype)
-
-    def children(self):
-        dp = self.cls['m_declProperties']
-        if not dp:
-            return self._iterator(0,0,0,0)
-
-        # FIXME: dp['m_vec'] no longer exists
-        return self._iterator(0,0,0,0)
-
-#        mv = dp['m_vec']
-#        if not mv:
-#            return self._iterator(0,0,0,0)
-#
-#        return self._iterator(self.val, self.cls, mv, mv + dp['m_map']['m_extra'])
+        self.val = val.cast(val.dynamic_type)
+        self.cls = deref(val['m_cls'])
 
     def to_string(self):
-        ls = LowStringPtrPrinter(self.cls['m_preClass']['m_px']['m_name'])
         return "Object of class %s @ 0x%x" % (
-            string_data_val(ls.to_string_data()),
+            nameof(self.cls),
             self.val.address)
 
 
@@ -321,11 +277,12 @@ class ObjectDataPrinter:
 
 class RefDataPrinter:
     RECOGNIZE = '^HPHP::RefData$'
+
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
-        return "Ref: %s" % self.val['m_tv']
+        return "RefData { %s }" % self.val['m_tv']
 
 
 #------------------------------------------------------------------------------

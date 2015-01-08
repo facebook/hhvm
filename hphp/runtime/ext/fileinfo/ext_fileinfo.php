@@ -19,7 +19,7 @@ class finfo {
    *   empty string will be equivalent to the default value.
    */
   public function finfo(int $options = FILEINFO_NONE,
-                        ?string $magic_file = NULL): finfo {
+                        ?string $magic_file = NULL) {
     $this->resource = finfo_open($options, $magic_file);
 
     $this->options = $options;

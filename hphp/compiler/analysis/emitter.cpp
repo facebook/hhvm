@@ -1363,8 +1363,7 @@ void EmitterVisitor::emitJump(Emitter& e, IterVec& iters, Label& target) {
   }
 }
 
-void EmitterVisitor::emitReturn(Emitter& e, char sym, bool hasConstraint,
-                                StatementPtr s) {
+void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
   Region* region = m_regions.back().get();
   registerReturn(s, region, sym);
   assert(getEvalStack().size() == 1);
@@ -1376,7 +1375,7 @@ void EmitterVisitor::emitReturn(Emitter& e, char sym, bool hasConstraint,
       // At the top of the hierarchy, no more finally blocks to run.
       // Check return type, free pending iterators and actually return.
       if (sym == StackSym::C) {
-        if (hasConstraint) {
+        if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeC();
         }
         // IterFree must come after VerifyRetType, because VerifyRetType may
@@ -1385,7 +1384,7 @@ void EmitterVisitor::emitReturn(Emitter& e, char sym, bool hasConstraint,
         e.RetC();
       } else {
         assert(sym == StackSym::V);
-        if (hasConstraint) {
+        if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeV();
         }
         emitIterFree(e, iters);
@@ -1614,11 +1613,6 @@ void EmitterVisitor::emitReturnTrampoline(Emitter& e,
   auto& t = region->m_returnTargets[sym].target;
   cases[t->m_state]->set(e);
 
-  bool hasConstraint = m_curFunc->retTypeConstraint.hasConstraint();
-  if (m_curFunc->isGenerator) {
-    // Suppress return type checking for generators
-    hasConstraint = false;
-  }
   IterVec iters;
   // We are emitting a case in a finally epilogue, therefore skip
   // the current try region and start from its parent
@@ -1636,14 +1630,14 @@ void EmitterVisitor::emitReturnTrampoline(Emitter& e,
       emitVirtualLocal(retLocal);
       if (sym == StackSym::C) {
         e.CGetL(retLocal);
-        if (hasConstraint) {
+        if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeC();
         }
         e.RetC();
       } else {
         assert(sym == StackSym::V);
         e.VGetL(retLocal);
-        if (hasConstraint) {
+        if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeV();
         }
         e.RetV();
@@ -1786,6 +1780,11 @@ void EmitterVisitor::emitContinueTrampoline(Emitter& e, Region* region,
     }
     --depth;
   }
+}
+
+bool EmitterVisitor::shouldEmitVerifyRetType() {
+  return (m_curFunc->retTypeConstraint.hasConstraint() &&
+          !m_curFunc->isGenerator);
 }
 
 int Region::getMaxBreakContinueDepth() {
@@ -3000,14 +2999,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         assert(m_evalStack.size() == 1);
         assert(IMPLIES(m_curFunc->isAsync || m_curFunc->isGenerator,
                        retSym == StackSym::C));
-
-        bool hasConstraint = m_curFunc->retTypeConstraint.hasConstraint();
-        if (m_curFunc->isGenerator) {
-          // Suppress return type checking for generators
-          hasConstraint = false;
-        }
-
-        emitReturn(e, retSym, hasConstraint, r);
+        emitReturn(e, retSym, r);
         return false;
       }
 
@@ -6812,6 +6804,9 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
     loc->char0 = loc->char1-1;
     e.setTempLocation(loc);
     e.Null();
+    if (shouldEmitVerifyRetType()) {
+      e.VerifyRetTypeC();
+    }
     e.RetC();
     e.setTempLocation(LocationPtr());
   }

@@ -805,7 +805,7 @@ public:
   // These methods handle the return, break, continue, and goto operations.
   // These methods are aware of try/finally blocks and foreach blocks and
   // will free iterators and jump to finally epilogues as appropriate.
-  void emitReturn(Emitter& e, char sym, bool hasConstraint, StatementPtr s);
+  void emitReturn(Emitter& e, char sym, StatementPtr s);
   void emitBreak(Emitter& e, int depth, StatementPtr s);
   void emitContinue(Emitter& e, int depth, StatementPtr s);
   void emitGoto(Emitter& e, StringData* name, StatementPtr s);
@@ -828,6 +828,10 @@ public:
                               std::vector<Label*>& cases, int depth);
   void emitGotoTrampoline(Emitter& e, Region* entry,
                           std::vector<Label*>& cases, StringData* name);
+
+  // Returns true if VerifyRetType should be emitted before Ret for
+  // the current function.
+  bool shouldEmitVerifyRetType();
 
   Funclet* addFunclet(Thunklet* body);
   Funclet* addFunclet(StatementPtr stmt,

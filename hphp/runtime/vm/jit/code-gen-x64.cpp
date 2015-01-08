@@ -797,40 +797,20 @@ void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
 }
 
 Vreg CodeGenerator::emitAddInt(Vout& v, IRInstruction* inst) {
-  SSATmp* src0 = inst->src(0);
-  SSATmp* src1 = inst->src(1);
   auto s0 = srcLoc(inst, 0).reg();
   auto s1 = srcLoc(inst, 1).reg();
   auto d = dstLoc(inst, 0).reg();
   auto const sf = v.makeReg();
-
-  // Special cases: x = y + 1, x = 1 + y
-  if (src1->isConst(1)) {
-    v << incq{s0, d, sf};
-  } else if (src0->isConst(1)) {
-    v << incq{s1, d, sf};
-  } else {
-    v << addq{s1, s0, d, sf};
-  }
+  v << addq{s1, s0, d, sf};
   return sf;
 }
 
 Vreg CodeGenerator::emitSubInt(Vout& v, IRInstruction* inst) {
-  auto src0 = inst->src(0);
-  auto src1 = inst->src(1);
   auto s0 = srcLoc(inst, 0).reg();
   auto s1 = srcLoc(inst, 1).reg();
   auto d = dstLoc(inst, 0).reg();
   auto const sf = v.makeReg();
-
-  if (src0->isConst(0)) {
-    // There is no unary negate HHIR instruction, so handle that here.
-    v << neg{s1, d, sf};
-  } else if (src1->isConst(1)) {
-    v << decq{s0, d, sf};
-  } else {
-    v << subq{s1, s0, d, sf};
-  }
+  v << subq{s1, s0, d, sf};
   return sf;
 }
 
@@ -946,11 +926,7 @@ void CodeGenerator::cgXorInt(IRInstruction* inst) {
   auto s1 = srcLoc(inst, 1).reg();
   auto d = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  if (inst->src(1)->isConst(-1)) {
-    v << not{s0, d};
-  } else {
-    v << xorq{s1, s0, d, v.makeReg()};
-  }
+  v << xorq{s1, s0, d, v.makeReg()};
 }
 
 void CodeGenerator::cgXorBool(IRInstruction* inst) {

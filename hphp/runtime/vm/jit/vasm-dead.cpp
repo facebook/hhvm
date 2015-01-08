@@ -94,6 +94,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::neg:
     case Vinstr::nop:
     case Vinstr::not:
+    case Vinstr::notb:
     case Vinstr::orq:
     case Vinstr::orqi:
     case Vinstr::psllq:

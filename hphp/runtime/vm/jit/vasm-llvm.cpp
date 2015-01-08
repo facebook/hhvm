@@ -1324,6 +1324,7 @@ O(mul) \
 O(neg) \
 O(nop) \
 O(not) \
+O(notb) \
 O(orwim) \
 O(orq) \
 O(orqi) \
@@ -2298,6 +2299,10 @@ void LLVMEmitter::emit(const nop& inst) {
 
 void LLVMEmitter::emit(const not& inst) {
   defineValue(inst.d, m_irb.CreateXor(value(inst.s), cns(int64_t{-1})));
+}
+
+void LLVMEmitter::emit(const notb& inst) {
+  defineValue(inst.d, m_irb.CreateXor(value(inst.s), cns(int8_t{-1})));
 }
 
 void LLVMEmitter::emit(const orwim& inst) {

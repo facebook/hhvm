@@ -424,6 +424,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
   O(nop, Inone, Un, Dn)\
   O(not, Inone, UH(s,d), DH(d,s))\
+  O(notb, Inone, UH(s,d), DH(d,s))\
   O(orwim, I(s0), U(m), D(sf))\
   O(orq, Inone, U(s0) U(s1), D(d) D(sf))\
   O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -647,6 +648,7 @@ struct mulsd  { VregDbl s0, s1, d; };
 struct neg { Vreg64 s, d; VregSF sf; };
 struct nop {};
 struct not { Vreg64 s, d; };
+struct notb { Vreg8 s, d; };
 struct orwim { Immed s0; Vptr m; VregSF sf; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };

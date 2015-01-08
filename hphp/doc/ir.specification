@@ -302,9 +302,9 @@ exceptions depending on how coercion is implemented.
 
   If S0's type is Uninit, branch to block B.
 
-| CheckInitMem, ND, S(PtrToGen) C(Int), B
+| CheckInitMem, ND, S(PtrToGen), B
 
-  If the value at S0 + S1 (in bytes) has type Uninit, branch to block B.
+  If the value pointed to by S0 has type Uninit, branch to block B.
 
 | CheckCold<TransID>, ND, NA, B
 
@@ -784,9 +784,9 @@ To string conversions:
   Loads the base pointer to an array of Cells from the given collection
   instance in S0.
 
-| LdMem<T>, DParam, S(PtrToGen) C(Int), NF
+| LdMem<T>, DParam, S(PtrToGen), NF
 
-  Loads from S0 + S1 (in bytes) and puts the value in D.
+  Loads from S0 and puts the value in D.
 
 | LdContField<T>, DParam, S(Obj) C(Int), NF
 
@@ -982,10 +982,10 @@ To string conversions:
   record to modify at `offset', and S3 is a pointer to the current frame (used
   to get the context). May throw or fatal if method is not accessible.
 
-| LdPropAddr<T>, DParamPtr(Prop), S(Obj) C(Int), C
+| LdPropAddr<T,offset>, DParamPtr(Prop), S(Obj), C
 
-  Load the address of the object property for S0 at offset S1 (in bytes) into
-  D.  T must be a subtype of PtrToPropGen.
+  Load the address of the object property for S0 + `offset' (in bytes).  T must
+  be a subtype of PtrToPropGen.
 
 | LdGblAddr, D(PtrToGblGen), S(Str), B
 
@@ -1341,9 +1341,9 @@ To string conversions:
 10. Stores
 
 
-| StMem, ND, S(PtrToGen) C(Int) S(Gen), CRc
+| StMem, ND, S(PtrToGen) S(Gen), CRc
 
-  Store S2 into the location S0 + S1 (in bytes).
+  Store S2 into the location pointed to by S0.
 
 | StElem, ND, S(PtrToCell) S(Int) S(Cell), CRc
 
@@ -1384,6 +1384,11 @@ To string conversions:
   For debugging purposes.  Store kTVTrashFillFrame to kNumActRecCells stack
   slots starting at the offset (in cells), and going toward higher memory
   addresses.
+
+| DbgTrashMem, ND, S(PtrToGen), NF
+
+  For debugging purposes.  Store kTVTrashFillHeap to a heap slot pointed to by
+  S0.
 
 11. Trace exits
 
@@ -1451,9 +1456,9 @@ To string conversions:
   strict subtype of BoxedCell, the DecRef must just decref it as if it were a
   BoxedCell.
 
-| DecRefMem, ND, S(PtrToGen) C(Int), CRc
+| DecRefMem<offset>, ND, S(PtrToGen), CRc
 
-  Decref the value pointed to by S0 at offset S1 (in bytes), calling any
+  Decref the value pointed to by S0 + offset (in bytes), calling any
   appropriate destructor if the refcount goes to zero.
 
 | DecRefNZ, ND, S(Gen), CRc

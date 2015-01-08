@@ -173,7 +173,7 @@ void emitClsCnsD(HTS& env,
     }
   );
 
-  auto const val = gen(env, LdMem, guardType, prds, cns(env, 0));
+  auto const val = gen(env, LdMem, guardType, prds);
   push(env, val);
 }
 

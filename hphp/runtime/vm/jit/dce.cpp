@@ -476,6 +476,7 @@ bool canDCE(IRInstruction* inst) {
   case CountBytecode:
   case DbgTrashStk:
   case DbgTrashFrame:
+  case DbgTrashMem:
     return false;
   }
   not_reached();

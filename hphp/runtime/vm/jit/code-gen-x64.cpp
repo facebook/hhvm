@@ -2285,9 +2285,12 @@ void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStMem(IRInstruction* inst) {
-  auto ptr = srcLoc(inst, 0).reg();
-  auto offset = inst->src(1)->intVal();
-  emitStore(ptr[offset], inst->src(2), srcLoc(inst, 2), Width::Full);
+  emitStore(
+    srcLoc(inst, 0).reg()[0],
+    inst->src(1),
+    srcLoc(inst, 1),
+    Width::Full
+  );
 }
 
 void CodeGenerator::cgStRef(IRInstruction* inst) {
@@ -2755,10 +2758,9 @@ void CodeGenerator::cgDecRefMem(const IRInstruction* inst, Type type,
 }
 
 void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
-  assert(inst->src(0)->type().isPtr());
   cgDecRefMem(inst, inst->typeParam(),
               srcLoc(inst, 0).reg(),
-              inst->src(1)->intVal());
+              0);
 }
 
 void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
@@ -3385,6 +3387,10 @@ void CodeGenerator::cgDbgTrashFrame(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgDbgTrashMem(IRInstruction* inst) {
+  emitTrashTV(srcLoc(inst, 0).reg(), 0, kTVTrashJITHeap);
+}
+
 void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   auto const func = getFunc(inst->marker());
   auto const builtinFuncPtr = func->builtinFuncPtr();
@@ -3586,8 +3592,7 @@ void CodeGenerator::cgLdContField(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdMem(IRInstruction* inst) {
-  emitLoad(inst->dst(), dstLoc(inst, 0),
-           srcLoc(inst, 0).reg()[inst->src(1)->intVal()]);
+  emitLoad(inst->dst(), dstLoc(inst, 0), srcLoc(inst, 0).reg()[0]);
 }
 
 void CodeGenerator::cgLdRef(IRInstruction* inst) {
@@ -4235,9 +4240,7 @@ void CodeGenerator::cgCheckRefs(IRInstruction* inst)  {
 void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
   auto const dstReg = dstLoc(inst, 0).reg();
   auto const objReg = srcLoc(inst, 0).reg();
-  auto const prop = inst->src(1);
-  auto& v = vmain();
-  v << lea{objReg[prop->intVal()], dstReg};
+  vmain() << lea{objReg[inst->extra<LdPropAddr>()->offsetBytes], dstReg};
 }
 
 void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
@@ -4725,13 +4728,12 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
   Block* taken = inst->taken();
   assert(taken);
   SSATmp* base = inst->src(0);
-  int64_t offset = inst->src(1)->intVal();
   Type t = base->type().deref();
   if (t.not(Type::Uninit)) return;
   auto basereg = srcLoc(inst, 0).reg();
   auto& v = vmain();
   auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfUninit, basereg[offset + TVOFF(m_type)]);
+  emitCmpTVType(v, sf, KindOfUninit, basereg[TVOFF(m_type)]);
   v << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
 }
 

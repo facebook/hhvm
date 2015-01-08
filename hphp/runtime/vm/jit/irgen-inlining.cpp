@@ -254,8 +254,7 @@ void inlSingletonSProp(HTS& env,
   // Look up the static property.
   auto const sprop   = ldClsPropAddrKnown(env, cls, propName);
   auto const unboxed = gen(env, UnboxPtr, sprop);
-  auto const value   = gen(env, LdMem, unboxed->type().deref(),
-                         unboxed, cns(env, 0));
+  auto const value   = gen(env, LdMem, unboxed->type().deref(), unboxed);
 
   // Side exit if the static property is null.
   auto isnull = gen(env, IsType, Type::Null, value);

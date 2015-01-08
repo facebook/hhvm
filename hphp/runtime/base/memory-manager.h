@@ -296,6 +296,7 @@ constexpr char kTVTrashFill     = 0x7a; // used by interpreter
 constexpr char kTVTrashFill2    = 0x7b; // used by smart pointer dtors
 constexpr char kTVTrashJITStk   = 0x7c; // used by the JIT for stack slots
 constexpr char kTVTrashJITFrame = 0x7d; // used by the JIT for stack frames
+constexpr char kTVTrashJITHeap  = 0x7e; // used by the JIT for heap
 constexpr uintptr_t kSmartFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 

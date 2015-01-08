@@ -264,6 +264,7 @@ PUNT_OPCODE(LdColArray)
 
 PUNT_OPCODE(DbgTrashStk)
 PUNT_OPCODE(DbgTrashFrame)
+PUNT_OPCODE(DbgTrashMem)
 PUNT_OPCODE(ProfileStr)
 PUNT_OPCODE(ConvArrToBool)
 PUNT_OPCODE(ConvDblToBool)
@@ -775,7 +776,7 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
   emitDecRefMem(vmain(), inst->typeParam(),
                 srcLoc(0).reg(),
-                inst->src(1)->intVal());
+                0);
 }
 
 //////////////////////////////////////////////////////////////////////

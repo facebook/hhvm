@@ -302,9 +302,6 @@ struct ActRecInfo : IRExtraData {
   }
 };
 
-/*
- * Stack offsets.
- */
 struct StackOffset : IRExtraData {
   explicit StackOffset(int32_t offset) : offset(offset) {}
 
@@ -314,6 +311,16 @@ struct StackOffset : IRExtraData {
   size_t cseHash() const { return std::hash<int32_t>()(offset); }
 
   int32_t offset;
+};
+
+struct PropOffset : IRExtraData {
+  explicit PropOffset(int32_t offset) : offsetBytes(offset) {}
+
+  std::string show() const { return folly::to<std::string>(offsetBytes); }
+  bool cseEquals(PropOffset o) const { return offsetBytes == o.offsetBytes; }
+  size_t cseHash() const { return std::hash<int32_t>()(offsetBytes); }
+
+  int32_t offsetBytes;
 };
 
 struct ProfileStrData : IRExtraData {
@@ -989,6 +996,7 @@ X(EndCatch,                     StackOffset);
 X(AdjustSP,                     StackOffset);
 X(DbgTrashStk,                  StackOffset);
 X(DbgTrashFrame,                StackOffset);
+X(LdPropAddr,                   PropOffset);
 
 #undef X
 

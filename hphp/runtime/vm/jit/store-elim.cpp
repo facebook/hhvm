@@ -90,8 +90,7 @@ bool isDeadSet(Local& env, const ALocBits& bits) {
 void removeDead(Local& env, IRInstruction& inst) {
   FTRACE(4, "      dead (removed)\n");
 
-  const bool debug_store_removal = debug;
-  if (debug_store_removal) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
     switch (inst.op()) {
     case StStk:
       env.global.unit.replace(
@@ -108,6 +107,9 @@ void removeDead(Local& env, IRInstruction& inst) {
         StackOffset { inst.extra<SpillFrame>()->spOffset },
         inst.src(0)
       );
+      return;
+    case StMem:
+      env.global.unit.replace(&inst, DbgTrashMem, inst.src(0));
       return;
     default:
       break;

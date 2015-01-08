@@ -53,7 +53,7 @@ AliasClass pointee(const SSATmp* ptr) {
     if (sinst->is(LdPropAddr)) {
       return AProp {
         sinst->src(0),
-        safe_cast<uint32_t>(sinst->src(1)->intVal())
+        safe_cast<uint32_t>(sinst->extra<LdPropAddr>()->offsetBytes)
       };
     }
     return APropAny;
@@ -364,13 +364,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Pointer-based loads and stores
 
-  case LdElem:
   case LdMem:
     return PureLoad { pointee(inst.src(0)) };
-
-  case StElem:
   case StMem:
-    return PureStore { pointee(inst.src(0)), inst.src(2) };
+    return PureStore { pointee(inst.src(0)), inst.src(1) };
+
+  // TODO(#5962341): These take non-constant offset arguments, and are
+  // currently only used for collections and class property inits, so we aren't
+  // hooked up yet.
+  case StElem:
+  case LdElem:
+    if (inst.src(0)->type() <= Type::PtrToMembCell) {
+      return MayLoadStore { AHeapAny, AEmpty };
+    }
+    return MayLoadStore { AUnknown, AEmpty };
 
   case BoxPtr:
   case UnboxPtr:
@@ -379,12 +386,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return MayLoadStore { mem, mem };
     }
 
-  case CheckInitMem:
-  case CheckTypeMem:
-  case DbgAssertPtr:
   case IsNTypeMem:
   case IsTypeMem:
+  case CheckTypeMem:
+  case DbgAssertPtr:
   case ProfileStr:
+    return MayLoadStore { pointee(inst.src(0)), AEmpty };
+
+  case CheckInitMem:
     return MayLoadStore { pointee(inst.src(0)), AEmpty };
 
   case DecRefMem:
@@ -995,6 +1004,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case DbgTrashStk:
   case DbgTrashFrame:
+  case DbgTrashMem:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////

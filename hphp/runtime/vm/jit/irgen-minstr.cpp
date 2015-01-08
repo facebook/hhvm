@@ -221,6 +221,14 @@ SSATmp* misPtr(MTS& env) {
   return cns(env, Type::cns(nullptr, Type::PtrToMISUninit));
 }
 
+// Returns a pointer to a particular field in the MInstrState structure.  Must
+// not be called if !env.needsMIS.
+SSATmp* misLea(MTS& env, ptrdiff_t offset) {
+  assert(env.needMIS);
+  return gen(env, LdMIStateAddr, env.misBase,
+    cns(env, safe_cast<int32_t>(offset)));
+}
+
 SSATmp* ptrToInitNull(HTS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
@@ -792,7 +800,7 @@ SSATmp* checkInitProp(MTS& env,
     env,
     0,
     [&] (Block* taken) {
-      gen(env, CheckInitMem, taken, propAddr, cns(env, 0));
+      gen(env, CheckInitMem, taken, propAddr);
     },
     [&] { // Next: Property isn't Uninit. Do nothing.
       return propAddr;
@@ -805,7 +813,7 @@ SSATmp* checkInitProp(MTS& env,
         gen(env, RaiseUndefProp, baseAsObj, key);
       }
       if (doDefine) {
-        gen(env, StMem, propAddr, cns(env, 0), cns(env, Type::InitNull));
+        gen(env, StMem, propAddr, cns(env, Type::InitNull));
         return propAddr;
       }
       return ptrToInitNull(env);
@@ -836,9 +844,9 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
     auto const propAddr = gen(
       env,
       LdPropAddr,
+      PropOffset { propInfo.offset },
       convertToType(propInfo.repoAuthType).ptr(Ptr::Prop),
-      env.base.value,
-      cns(env, propInfo.offset)
+      env.base.value
     );
     setBase(
       env,
@@ -869,15 +877,14 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
         env,
         LdMem,
         env.base.type.deref() & Type::Obj,
-        env.base.value,
-        cns(env, 0)
+        env.base.value
       );
       auto const propAddr = gen(
         env,
         LdPropAddr,
+        PropOffset { propInfo.offset },
         convertToType(propInfo.repoAuthType).ptr(Ptr::Prop),
-        obj,
-        cns(env, propInfo.offset)
+        obj
       );
       return checkInitProp(env, obj, propAddr, doWarn, doDefine);
     },
@@ -1135,34 +1142,29 @@ void emitRatchetRefs(MTS& env) {
     return;
   }
 
+  auto const misRefAddr = misLea(env, MISOFF(tvRef));
+
   setBase(env, cond(
     env,
     0,
     [&] (Block* taken) {
-      gen(env, CheckInitMem, taken, env.misBase, cns(env, MISOFF(tvRef)));
+      gen(env, CheckInitMem, taken, misRefAddr);
     },
     [&] { // Next: tvRef isn't Uninit. Ratchet the refs
+      auto const misRef2Addr = misLea(env, MISOFF(tvRef2));
       // Clean up tvRef2 before overwriting it.
       if (ratchetInd(env) > 0) {
-        gen(env, DecRefMem, Type::Gen, env.misBase, cns(env, MISOFF(tvRef2)));
+        gen(env, DecRefMem, Type::Gen, misRef2Addr);
       }
       // Copy tvRef to tvRef2.
-      auto const tvRef = gen(
-        env,
-        LdMem,
-        Type::Gen,
-        env.misBase,
-        cns(env, MISOFF(tvRef))
-      );
-      gen(env, StMem, env.misBase, cns(env, MISOFF(tvRef2)), tvRef);
-
+      auto const tvRef = gen(env, LdMem, Type::Gen, misRefAddr);
+      gen(env, StMem, misRef2Addr, tvRef);
       // Reset tvRef.
-      gen(env, StMem, env.misBase, cns(env, MISOFF(tvRef)),
-        cns(env, Type::Uninit));
+      gen(env, StMem, misRefAddr, cns(env, Type::Uninit));
 
       // Adjust base pointer.
       assert(env.base.type.isPtr());
-      return gen(env, LdMIStateAddr, env.misBase, cns(env, MISOFF(tvRef2)));
+      return misRef2Addr;
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
       return env.base.value;
@@ -1188,8 +1190,8 @@ void emitMPre(MTS& env) {
     env.misBase = gen(env, DefMIStateBase);
     auto const uninit = cns(env, Type::Uninit);
     if (nLogicalRatchets(env) > 0) {
-      gen(env, StMem, env.misBase, cns(env, MISOFF(tvRef)), uninit);
-      gen(env, StMem, env.misBase, cns(env, MISOFF(tvRef2)), uninit);
+      gen(env, StMem, misLea(env, MISOFF(tvRef)), uninit);
+      gen(env, StMem, misLea(env, MISOFF(tvRef2)), uninit);
     }
 
     // If we're using an MInstrState, all the default-created catch blocks for
@@ -1550,7 +1552,7 @@ void emitCGetProp(MTS& env) {
 
     if (!RuntimeOption::RepoAuthoritative) {
       auto const cellPtr = gen(env, UnboxPtr, env.base.value);
-      env.result = gen(env, LdMem, Type::Cell, cellPtr, cns(env, 0));
+      env.result = gen(env, LdMem, Type::Cell, cellPtr);
       gen(env, IncRef, env.result);
       return;
     }
@@ -1558,7 +1560,7 @@ void emitCGetProp(MTS& env) {
     auto const ty      = env.base.type.deref();
     auto const cellPtr = ty.maybeBoxed() ? gen(env, UnboxPtr, env.base.value)
                                          : env.base.value;
-    env.result = gen(env, LdMem, ty.unbox(), cellPtr, cns(env, 0));
+    env.result = gen(env, LdMem, ty.unbox(), cellPtr);
     gen(env, IncRef, env.result);
     return;
   }
@@ -1603,10 +1605,10 @@ void emitSetProp(MTS& env) {
     auto const cellTy  = propTy.maybeBoxed() ? propTy.unbox() : propTy;
     auto const cellPtr = propTy.maybeBoxed() ? gen(env, UnboxPtr, env.base.value)
                                              : env.base.value;
-    auto const oldVal  = gen(env, LdMem, cellTy, cellPtr, cns(env, 0));
+    auto const oldVal  = gen(env, LdMem, cellTy, cellPtr);
 
     gen(env, IncRef, value);
-    gen(env, StMem, cellPtr, cns(env, 0), value);
+    gen(env, StMem, cellPtr, value);
     gen(env, DecRef, oldVal);
     env.result = value;
     return;
@@ -1928,13 +1930,8 @@ void emitFinalMOp(MTS& env) {
 void cleanTvRefs(MTS& env) {
   constexpr ptrdiff_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
-    gen(
-      env,
-      DecRefMem,
-      Type::Gen,
-      env.misBase,
-      cns(env, refOffs[env.failedSetBlock ? 1 - i : i])
-    );
+    auto const addr = misLea(env, refOffs[env.failedSetBlock ? 1 - i : i]);
+    gen(env, DecRefMem, Type::Gen, addr);
   }
 }
 

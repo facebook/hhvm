@@ -106,8 +106,8 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 1;
 
     case StMem:
-      // StMem <base>, <offset>, <value>
-      return srcNo == 2;
+      // StMem <base>, <value>
+      return srcNo == 1;
 
     case ArraySet:
     case ArraySetRef:

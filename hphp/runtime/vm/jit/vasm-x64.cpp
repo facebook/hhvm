@@ -517,8 +517,8 @@ void Vgen::emit(bindjcc1st& i) {
                             mcg->getFreeStub(frozen(), &mcg->cgFixups()),
                             REQ_BIND_JMPCC_FIRST,
                             RipRelative(patchAddr),
-                            i.targets[1],
-                            i.targets[0],
+                            i.targets[1].toAtomicInt(),
+                            i.targets[0].toAtomicInt(),
                             i.cc,
                             ccServiceReqArgInfo(i.cc));
 
@@ -535,7 +535,7 @@ void Vgen::emit(bindjcc2nd& i) {
                                                       &mcg->cgFixups()),
                                      REQ_BIND_JMPCC_SECOND,
                                      RipRelative(a->frontier()),
-                                     i.target, i.cc);
+                                     i.target.toAtomicInt(), i.cc);
   mcg->setJmpTransID(a->frontier());
   a->jcc(i.cc, def);
 }

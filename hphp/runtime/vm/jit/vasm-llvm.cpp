@@ -1100,8 +1100,6 @@ VASM_OPCODES
                          llvm::Type* type);
   void emitTrap();
   void emitCall(const Vinstr& instr);
-  void emit(const bindjcc1st&, SrcKey);
-  void emit(const bindjcc2nd&, SrcKey);
   llvm::Value* emitCmpForCC(Vreg sf, ConditionCode cc);
 
   llvm::Value* emitFuncPtr(const std::string& name,
@@ -1257,6 +1255,8 @@ O(andl) \
 O(andli) \
 O(andq) \
 O(andqi) \
+O(bindjcc1st) \
+O(bindjcc2nd) \
 O(bindjmp) \
 O(bindexit) \
 O(bindaddr) \
@@ -1389,14 +1389,6 @@ O(phidef)
       case Vinstr::vcall:
       case Vinstr::vinvoke:
         emitCall(inst);
-        break;
-
-      case Vinstr::bindjcc1st:
-        emit(inst.bindjcc1st_, inst.origin->marker().sk());
-        break;
-
-      case Vinstr::bindjcc2nd:
-        emit(inst.bindjcc2nd_, inst.origin->marker().sk());
         break;
 
       // These instructions are intentionally unsupported for a variety of
@@ -1616,22 +1608,22 @@ void LLVMEmitter::emit(const bindexit& inst) {
   );
 }
 
-void LLVMEmitter::emit(const bindjcc1st& inst, SrcKey instSk) {
+void LLVMEmitter::emit(const bindjcc1st& inst) {
   emitJcc(
     inst.sf, inst.cc, "jcc1",
     [&] {
-      emit(bindjmp{{instSk.func(), inst.targets[1], instSk.resumed()}});
+      emit(bindjmp{inst.targets[1]});
     }
   );
 
-  emit(bindjmp{{instSk.func(), inst.targets[0], instSk.resumed()}});
+  emit(bindjmp{inst.targets[0]});
 }
 
-void LLVMEmitter::emit(const bindjcc2nd& inst, SrcKey instSk) {
+void LLVMEmitter::emit(const bindjcc2nd& inst) {
   emitJcc(
     inst.sf, inst.cc, "jcc2",
     [&] {
-      emit(bindjmp{{instSk.func(), inst.target, instSk.resumed()}});
+      emit(bindjmp{inst.target});
     }
   );
 }

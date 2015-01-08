@@ -83,7 +83,7 @@ struct LdBindAddrData : IRExtraData {
 struct LdSSwitchData : IRExtraData {
   struct Elm {
     const StringData* str;
-    Offset            dest;
+    SrcKey            dest;
   };
 
   explicit LdSSwitchData() = default;
@@ -93,7 +93,7 @@ struct LdSSwitchData : IRExtraData {
   LdSSwitchData* clone(Arena& arena) const {
     LdSSwitchData* target = new (arena) LdSSwitchData;
     target->numCases   = numCases;
-    target->defaultOff = defaultOff;
+    target->defaultSk  = defaultSk;
     target->cases      = new (arena) Elm[numCases];
     std::copy(cases, cases + numCases, const_cast<Elm*>(target->cases));
     return target;
@@ -101,7 +101,7 @@ struct LdSSwitchData : IRExtraData {
 
   int64_t     numCases;
   const Elm*  cases;
-  Offset      defaultOff;
+  SrcKey      defaultSk;
 };
 
 struct JmpSwitchData : IRExtraData {
@@ -110,17 +110,17 @@ struct JmpSwitchData : IRExtraData {
     sd->base       = base;
     sd->bounded    = bounded;
     sd->cases      = cases;
-    sd->defaultOff = defaultOff;
-    sd->targets    = new (arena) Offset[cases];
-    std::copy(targets, targets + cases, const_cast<Offset*>(sd->targets));
+    sd->defaultSk  = defaultSk;
+    sd->targets    = new (arena) SrcKey[cases];
+    std::copy(targets, targets + cases, const_cast<SrcKey*>(sd->targets));
     return sd;
   }
 
   int64_t base;        // base of switch case
   bool    bounded;     // whether switch is bounded or not
   int32_t cases;       // number of cases
-  Offset  defaultOff;  // offset of default case
-  Offset* targets;     // offsets for all targets
+  SrcKey  defaultSk;   // srckey of default case
+  SrcKey* targets;     // srckeys for all targets
 };
 
 struct LocalId : IRExtraData {
@@ -262,17 +262,17 @@ struct ReqRetranslateData : IRExtraData {
  * Information for REQ_BIND_JMP stubs.
  */
 struct ReqBindJmpData : IRExtraData {
-  Offset offset;
+  SrcKey dest;
   TransFlags trflags;
 
-  explicit ReqBindJmpData(const Offset& offset,
+  explicit ReqBindJmpData(const SrcKey& dest,
                           TransFlags trflags = TransFlags{})
-    : offset(offset)
+    : dest(dest)
     , trflags(trflags)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(offset, ',', trflags.packed);
+    return folly::to<std::string>(dest.offset(), ',', trflags.packed);
   }
 };
 
@@ -281,11 +281,11 @@ struct ReqBindJmpData : IRExtraData {
  * ends with conditional jumps.
  */
 struct ReqBindJccData : IRExtraData {
-  Offset taken;
-  Offset notTaken;
+  SrcKey taken;
+  SrcKey notTaken;
 
   std::string show() const {
-    return folly::to<std::string>(taken, ',', notTaken);
+    return folly::to<std::string>(taken.offset(), ',', notTaken.offset());
   }
 };
 
@@ -352,14 +352,13 @@ struct TransIDData : IRExtraData {
  * Information needed to generate a REQ_RETRANSLATE_OPT service request.
  */
 struct ReqRetransOptData : IRExtraData {
-  explicit ReqRetransOptData(TransID transId, Offset offset)
-      : transId(transId)
-      , offset(offset) {}
+  explicit ReqRetransOptData(TransID transId, SrcKey sk)
+      : transId(transId), sk(sk) {}
   std::string show() const {
-    return folly::to<std::string>(transId, ',', offset);
+    return folly::to<std::string>(transId, ',', sk.offset());
   }
   TransID transId;
-  Offset offset;
+  SrcKey sk;
 };
 
 /*

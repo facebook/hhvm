@@ -1140,8 +1140,7 @@ void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   vmain() << copy{srcLoc(0).reg(), PhysReg(rVmSp)};
-  auto to = SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset, resumed());
-  vmain() << bindjmp{to};
+  vmain() << bindjmp{inst->extra<ReqBindJmp>()->dest};
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {

@@ -151,8 +151,8 @@ void optimizeCondTraceExit(IRUnit& unit, IRInstruction* jccInst,
 
   auto const newOpcode = jmpToReqBindJmp(jccInst->op());
   ReqBindJccData data;
-  data.taken = jccExitBlock->back().extra<ReqBindJmp>()->offset;
-  data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
+  data.taken = jccExitBlock->back().extra<ReqBindJmp>()->dest;
+  data.notTaken = reqBindJmp.extra<ReqBindJmp>()->dest;
 
   auto argVec = jit::vector<SSATmp*>(jccInst->srcs().begin(),
                                      jccInst->srcs().end());

@@ -2137,7 +2137,6 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   auto const data     = inst->extra<JmpSwitchDest>();
   auto const index    = inst->src(0);
-  auto const& marker  = inst->marker();
   auto const indexReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
 
@@ -2152,14 +2151,13 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       }
       auto const sf = v.makeReg();
       v << cmpqi{data->cases - 2, idx, sf};
-      v << bindjcc2nd{CC_AE, sf, data->defaultOff, kCrossTraceRegs};
+      v << bindjcc2nd{CC_AE, sf, data->defaultSk, kCrossTraceRegs};
     }
 
     TCA* table = mcg->allocData<TCA>(sizeof(TCA), data->cases);
     auto t = v.makeReg();
     for (int i = 0; i < data->cases; i++) {
-      auto sk = SrcKey(getFunc(marker), data->targets[i], resumed(marker));
-      v << bindaddr{&table[i], sk};
+      v << bindaddr{&table[i], data->targets[i]};
     }
     v << leap{rip[(intptr_t)table], t};
     v << jmpm{t[idx*8], kCrossTraceRegs};
@@ -2170,18 +2168,14 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   if (data->bounded) {
     indexVal -= data->base;
     if (indexVal >= data->cases - 2 || indexVal < 0) {
-      auto dest = SrcKey(getFunc(marker), data->defaultOff, resumed(marker));
-      v << bindjmp{dest, TransFlags(), kCrossTraceRegs};
+      v << bindjmp{data->defaultSk, TransFlags(), kCrossTraceRegs};
       return;
     }
   }
-  auto dest = SrcKey(getFunc(marker), data->targets[indexVal],
-                     resumed(marker));
-  v << bindjmp{dest, TransFlags(), kCrossTraceRegs};
+  v << bindjmp{data->targets[indexVal], TransFlags(), kCrossTraceRegs};
 }
 
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
-  auto const& marker = inst->marker();
   auto data = inst->extra<LdSSwitchDestFast>();
 
   auto table = mcg->allocData<SSwitchMap>(64);
@@ -2191,12 +2185,10 @@ void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
   for (int64_t i = 0; i < data->numCases; ++i) {
     table->add(data->cases[i].str, nullptr);
     TCA* addr = table->find(data->cases[i].str);
-    auto sk = SrcKey(getFunc(marker), data->cases[i].dest, resumed(marker));
-    v << bindaddr{addr, sk};
+    v << bindaddr{addr, data->cases[i].dest};
   }
   TCA* def = mcg->allocData<TCA>(sizeof(TCA), 1);
-  auto sk = SrcKey(getFunc(marker), data->defaultOff, resumed(marker));
-  v << bindaddr{def, sk};
+  v << bindaddr{def, data->defaultSk};
   cgCallHelper(v,
                CppCall::direct(sswitchHelperFast),
                callDest(inst),
@@ -2219,7 +2211,6 @@ static TCA sswitchHelperSlow(TypedValue typedVal,
 }
 
 void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
-  auto const& marker = inst->marker();
   auto data = inst->extra<LdSSwitchDestSlow>();
 
   auto strtab = mcg->allocData<const StringData*>(
@@ -2229,11 +2220,9 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
 
   for (int i = 0; i < data->numCases; ++i) {
     strtab[i] = data->cases[i].str;
-    auto sk = SrcKey(getFunc(marker), data->cases[i].dest, resumed(marker));
-    v << bindaddr{&jmptab[i], sk};
+    v << bindaddr{&jmptab[i], data->cases[i].dest};
   }
-  auto sk = SrcKey(getFunc(marker), data->defaultOff, resumed(marker));
-  v << bindaddr{&jmptab[data->numCases], sk};
+  v << bindaddr{&jmptab[data->numCases], data->defaultSk};
   cgCallHelper(v,
                CppCall::direct(sswitchHelperSlow),
                callDest(inst),
@@ -2343,10 +2332,8 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
-  auto offset  = inst->extra<ReqBindJmp>()->offset;
+  auto dest    = inst->extra<ReqBindJmp>()->dest;
   auto trflags = inst->extra<ReqBindJmp>()->trflags;
-  auto marker  = inst->marker();
-  auto dest    = SrcKey(getFunc(marker), offset, resumed(marker));
   auto& v      = vmain();
   v << syncvmsp{srcLoc(inst, 0).reg()};
   v << bindjmp{dest, trflags, kCrossTraceRegs};
@@ -2354,21 +2341,16 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto const extra = inst->extra<ReqRetranslateOpt>();
-  auto const& marker = inst->marker();
-  auto sk = SrcKey(getFunc(marker), extra->offset, resumed(marker));
   auto& v = vmain();
   v << syncvmsp{srcLoc(inst, 0).reg()};
   emitServiceReq(v, nullptr, REQ_RETRANSLATE_OPT, {
-    {ServiceReqArgInfo::Immediate, {sk.toAtomicInt()}},
+    {ServiceReqArgInfo::Immediate, {extra->sk.toAtomicInt()}},
     {ServiceReqArgInfo::Immediate, {static_cast<uint64_t>(extra->transId)}}
   });
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  assert(m_state.unit.bcOff() == inst->marker().bcOff());
-  auto const& marker = inst->marker();
-  auto const destSK = SrcKey(getFunc(marker), m_state.unit.bcOff(),
-                             resumed(marker));
+  auto const destSK = m_state.unit.initSrcKey();
   auto trflags = inst->extra<ReqRetranslate>()->trflags;
   auto& v = vmain();
   v << syncvmsp{srcLoc(inst, 0).reg()};

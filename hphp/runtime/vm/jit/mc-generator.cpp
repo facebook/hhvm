@@ -901,19 +901,18 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
  */
 TCA
 MCGenerator::bindJmpccFirst(TCA toSmash,
-                            Offset offTaken, Offset offNotTaken,
+                            SrcKey skTaken, SrcKey skNotTaken,
                             bool taken,
                             ConditionCode cc,
                             bool& smashed) {
-  const Func* f = liveFunc();
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return nullptr;
-  Offset offWillExplore = taken ? offTaken : offNotTaken;
-  Offset offWillDefer = taken ? offNotTaken : offTaken;
-  SrcKey dest(f, offWillExplore, liveResumed());
+  auto skWillExplore = taken ? skTaken : skNotTaken;
+  auto skWillDefer = taken ? skNotTaken : skTaken;
+  auto dest = skWillExplore;
   TRACE(3, "bindJmpccFirst: explored %d, will defer %d; overwriting cc%02x "
         "taken %d\n",
-        offWillExplore, offWillDefer, cc, taken);
+        skWillExplore.offset(), skWillDefer.offset(), cc, taken);
 
   // We want the branch to point to whichever side has not been explored
   // yet.
@@ -953,7 +952,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
                                                  &mcg->cgFixups()),
                                      REQ_BIND_JMPCC_SECOND,
                                      RipRelative(toSmash),
-                                     offWillDefer, cc);
+                                     skWillDefer.toAtomicInt(), cc);
 
   mcg->cgFixups().process(nullptr);
   smashed = true;
@@ -980,10 +979,8 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
 
 // smashes a jcc to point to a new destination
 TCA
-MCGenerator::bindJmpccSecond(TCA toSmash, const Offset off,
+MCGenerator::bindJmpccSecond(TCA toSmash, const SrcKey dest,
                              ConditionCode cc, bool& smashed) {
-  const Func* f = liveFunc();
-  SrcKey dest(f, off, liveResumed());
   TCA branch = getTranslation(TranslArgs(dest, true));
   if (branch) {
     LeaseHolder writer(Translator::WriteLease());
@@ -1239,22 +1236,29 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
 
   case REQ_BIND_JMPCC_FIRST: {
     TCA toSmash = (TCA)args[0];
-    Offset offTaken = (Offset)args[1];
-    Offset offNotTaken = (Offset)args[2];
+    auto skTaken = SrcKey::fromAtomicInt(args[1]);
+    auto skNotTaken = SrcKey::fromAtomicInt(args[2]);
     ConditionCode cc = ConditionCode(args[3]);
     bool taken = int64_t(args[4]) & 1;
-    start = bindJmpccFirst(toSmash, offTaken, offNotTaken,
+    // Make sure we're only branching within the same function
+    always_assert(skTaken.getFuncId() == skNotTaken.getFuncId() &&
+                  skTaken.resumed() == skNotTaken.resumed());
+    always_assert(skTaken.func() == liveFunc() &&
+                  skTaken.resumed() == liveResumed());
+    start = bindJmpccFirst(toSmash, skTaken, skNotTaken,
                            taken, cc, smashed);
     // SrcKey: we basically need to emulate the fail
-    sk = SrcKey(liveFunc(), taken ? offTaken : offNotTaken, liveResumed());
+    sk = taken ? skTaken : skNotTaken;
   } break;
 
   case REQ_BIND_JMPCC_SECOND: {
     TCA toSmash = (TCA)args[0];
-    Offset off = (Offset)args[1];
+    auto targetSk = SrcKey::fromAtomicInt(args[1]);
     ConditionCode cc = ConditionCode(args[2]);
-    start = bindJmpccSecond(toSmash, off, cc, smashed);
-    sk = SrcKey(liveFunc(), off, liveResumed());
+    start = bindJmpccSecond(toSmash, targetSk, cc, smashed);
+    always_assert(targetSk.func() == liveFunc() &&
+                  targetSk.resumed() == liveResumed());
+    sk = targetSk;
   } break;
 
   case REQ_RETRANSLATE_OPT: {

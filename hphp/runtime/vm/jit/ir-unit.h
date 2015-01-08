@@ -290,6 +290,7 @@ public:
   uint32_t numInsts() const           { return m_nextInstId; }
   CSEHash& constTable()               { return m_constTable; }
   uint32_t bcOff() const              { return m_context.initBcOffset; }
+  SrcKey   initSrcKey() const         { return m_context.srcKey(); }
 
   // This should return a const Block*. t3538578
   Block*   entry() const         { return m_entry; }

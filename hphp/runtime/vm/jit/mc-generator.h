@@ -326,11 +326,11 @@ private:
   TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req,
               TransFlags trflags, bool& smashed);
   TCA bindJmpccFirst(TCA toSmash,
-                     Offset offTrue, Offset offFalse,
+                     SrcKey skTrue, SrcKey skFalse,
                      bool toTake,
                      ConditionCode cc,
                      bool& smashed);
-  TCA bindJmpccSecond(TCA toSmash, const Offset off,
+  TCA bindJmpccSecond(TCA toSmash, SrcKey dest,
                       ConditionCode cc,
                       bool& smashed);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);

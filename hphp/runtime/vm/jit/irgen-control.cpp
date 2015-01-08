@@ -206,16 +206,16 @@ void emitSwitch(HTS& env,
     PUNT(Switch-UnknownType);
   }
 
-  std::vector<Offset> targets(iv.size());
+  std::vector<SrcKey> targets(iv.size());
   for (int i = 0; i < iv.size(); i++) {
-    targets[i] = bcOff(env) + iv.vec32()[i];
+    targets[i] = SrcKey{curSrcKey(env), bcOff(env) + iv.vec32()[i]};
   }
 
   JmpSwitchData data;
   data.base        = base;
   data.bounded     = bounded;
   data.cases       = iv.size();
-  data.defaultOff  = defaultOff;
+  data.defaultSk   = {curSrcKey(env), defaultOff};
   data.targets     = &targets[0];
 
   spillStack(env);
@@ -247,13 +247,14 @@ void emitSSwitch(HTS& env, const ImmVector& iv) {
   for (int i = 0; i < numCases; ++i) {
     auto const& kv = iv.strvec()[i];
     cases[i].str  = curUnit(env)->lookupLitstrId(kv.str);
-    cases[i].dest = bcOff(env) + kv.dest;
+    cases[i].dest = SrcKey{curSrcKey(env), bcOff(env) + kv.dest};
   }
 
   LdSSwitchData data;
   data.numCases   = numCases;
   data.cases      = &cases[0];
-  data.defaultOff = bcOff(env) + iv.strvec()[iv.size() - 1].dest;
+  data.defaultSk  = SrcKey{curSrcKey(env),
+                           bcOff(env) + iv.strvec()[iv.size() - 1].dest};
 
   auto const dest = gen(env,
                         fastPath ? LdSSwitchDestFast

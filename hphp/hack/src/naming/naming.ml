@@ -970,6 +970,17 @@ and class_ genv c =
   let sm_names = List.map (fun x -> snd x.N.m_name) smethods in
   let sm_names = List.fold_right SSet.add sm_names SSet.empty in
   let parents  = List.map (hint ~allow_this:true env) c.c_extends in
+  let parents  = match c.c_kind with
+    (* Make enums implicitly extend the BuiltinEnum class in order to provide
+     * utility methods. *)
+    | Cenum ->
+        let pos = fst name in
+        let enum_type = pos, N.Happly (name, []) in
+        let parent =
+          pos, N.Happly ((pos, Naming_special_names.Classes.cHH_BuiltinEnum),
+                         [enum_type]) in
+        parent::parents
+    | _ -> parents in
   let fmethod  = class_method env sm_names v_names in
   let methods  = List.fold_right fmethod c.c_body [] in
   let uses     = List.fold_right (class_use env) c.c_body [] in

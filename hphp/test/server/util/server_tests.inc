@@ -200,7 +200,10 @@ function http_request($host, $port, $path, $timeout = 1200) {
     "--silent --connect-timeout $timeout ".
     "--header 'Host: $host_name' --url \"$url\"";
   tlog("Requesting page with command: $cmd");
-  return exec($cmd);
+  $output = array();
+  if (exec($cmd, $output) === null) return null;
+
+  return implode("\n", $output);
 }
 
 function requestAll(array $requests, $customArgs = '') {

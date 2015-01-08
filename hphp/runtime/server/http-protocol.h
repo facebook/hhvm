@@ -36,11 +36,8 @@ struct HttpProtocol {
   static void PrepareRequestVariables(Array& request,
                                       Array& get,
                                       Array& post,
-                                      Variant& raw_post,
-                                      Array& files,
                                       Array& cookie,
-                                      Transport *transport,
-                                      const RequestURI &r);
+                                      const std::string& requestOrder);
   static void PrepareGetVariable(Array& get,
                                  const RequestURI &r);
   static void PreparePostVariables(Array& post,

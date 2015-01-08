@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_EXECUTION_CONTEXT_H_
 #define incl_HPHP_EXECUTION_CONTEXT_H_
 
@@ -128,11 +129,11 @@ public:
   ~ExecutionContext();
   void sweep();
 
-  void* operator new(size_t s)  { return smart_malloc(s); }
-  void* operator new(size_t s, void* p) { return p; }
-  void operator delete(void* p) { smart_free(p); }
+  void* operator new(size_t s);
+  void* operator new(size_t s, void* p);
+  void operator delete(void* p);
 
-  // For RPCRequestHandler
+  // For RPCRequestHandler.
   void backupSession();
   void restoreSession();
 
@@ -147,31 +148,31 @@ public:
   /**
    * System settings.
    */
-  Transport* getTransport() { return m_transport; }
-  void setTransport(Transport* transport) { m_transport = transport; }
+  Transport* getTransport();
+  void setTransport(Transport*);
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
-  String getCwd() const { return m_cwd; }
-  void setCwd(const String& cwd) { m_cwd = cwd; }
+  String getCwd() const;
+  void setCwd(const String&);
 
   /**
    * Write to output.
    */
-  void write(const String& s);
+  void write(const String&);
   void write(const char* s, int len);
-  void write(const char* s) { write(s, strlen(s)); }
+  void write(const char*);
+
   void writeStdout(const char* s, int len);
   size_t getStdoutBytesWritten() const;
 
-  typedef void (*PFUNC_STDOUT)(const char* s, int len, void* data);
+  using PFUNC_STDOUT = void (*)(const char* s, int len, void* data);
   void setStdout(PFUNC_STDOUT func, void* data);
 
   /**
    * Output buffering.
    */
-  void obStart(const Variant& handler = uninit_null(),
-               int chunk_size = 0);
+  void obStart(const Variant& handler = uninit_null(), int chunk_size = 0);
   String obCopyContents();
   String obDetachContents();
   int obGetContentLength();
@@ -186,23 +187,9 @@ public:
   Array obGetHandlers();
   void obProtect(bool on); // making sure obEnd() never passes current level
   void flush();
-  StringBuffer* swapOutputBuffer(StringBuffer* sb) {
-    // If we are swapping output buffers (currently done by the debugger)
-    // then any current chunking is off the table
-    if (m_out != nullptr) {
-      if (sb != &m_out->oss) {
-        m_remember_chunk =  m_out->chunk_size;
-        m_out->chunk_size = 0;
-      } else if (sb == &m_out->oss) { // pointing to same thing,swapping back in
-        m_out->chunk_size = m_remember_chunk;
-      }
-    }
-    auto current = m_sb;
-    m_sb = sb;
-    return current;
-  }
-  String getRawPostData() const { return m_rawPostData; }
-  void setRawPostData(String& pd) { m_rawPostData = pd; }
+  StringBuffer* swapOutputBuffer(StringBuffer*);
+  String getRawPostData() const;
+  void setRawPostData(const String& pd);
 
   /**
    * Request sequences and program execution hooks.
@@ -239,12 +226,14 @@ public:
   void clearLastError();
   bool onFatalError(const Exception &e); // returns handled
   bool onUnhandledException(Object e);
-  ErrorState getErrorState() const { return m_errorState; }
-  void setErrorState(ErrorState state) { m_errorState = state; }
-  String getLastError() const { return m_lastError; }
-  int getLastErrorNumber() const { return m_lastErrorNum; }
-  String getErrorPage() const { return m_errorPage; }
-  void setErrorPage(const String& page) { m_errorPage = page; }
+  ErrorState getErrorState() const;
+  void setErrorState(ErrorState);
+  String getLastError() const;
+  int getLastErrorNumber() const;
+  String getErrorPage() const;
+  void setErrorPage(const String&);
+  String getLastErrorPath() const;
+  int getLastErrorLine() const;
 
   /**
    * Misc. settings
@@ -252,32 +241,33 @@ public:
   String getenv(const String& name) const;
   void setenv(const String& name, const String& value);
   void unsetenv(const String& name);
-  Array getEnvs() const { return m_envs; }
+  Array getEnvs() const;
 
-  String getTimeZone() const { return m_timezone; }
-  void setTimeZone(const String& timezone) { m_timezone = timezone; }
-  String getDefaultTimeZone() const { return m_timezoneDefault; }
-  void setDefaultTimeZone(const String& s) { m_timezoneDefault = s; }
-  void setThrowAllErrors(bool f) { m_throwAllErrors = f; }
-  bool getThrowAllErrors() const { return m_throwAllErrors; }
-  void setExitCallback(Variant f) { m_exitCallback = f; }
-  Variant getExitCallback() { return m_exitCallback; }
+  String getTimeZone() const;
+  void setTimeZone(const String&);
 
-  void setStreamContext(Resource &context) { m_streamContext = context; }
-  Resource &getStreamContext() { return m_streamContext; }
+  String getDefaultTimeZone() const;
+  void setDefaultTimeZone(const String&);
 
-  int getPageletTasksStarted() const { return m_pageletTasksStarted; }
-  void incrPageletTasksStarted() { ++m_pageletTasksStarted; }
+  bool getThrowAllErrors() const;
+  void setThrowAllErrors(bool);
 
-  const VirtualHost* getVirtualHost() const { return m_vhost; }
-  void setVirtualHost(const VirtualHost* vhost) { m_vhost = vhost; }
+  Variant getExitCallback();
+  void setExitCallback(Variant);
 
-  const String& getSandboxId() const { return m_sandboxId; }
-  void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
+  void setStreamContext(Resource&);
+  Resource& getStreamContext();
 
-  bool hasRequestEventHandlers() const {
-    return !m_requestEventHandlers.empty();
-  }
+  int getPageletTasksStarted() const;
+  void incrPageletTasksStarted();
+
+  const VirtualHost* getVirtualHost() const;
+  void setVirtualHost(const VirtualHost*);
+
+  const String& getSandboxId() const;
+  void setSandboxId(const String&);
+
+  bool hasRequestEventHandlers() const;
 
 private:
   struct OutputBuffer {
@@ -451,18 +441,15 @@ public:
 
   /**
    * If you call this, you might break some assumption that the JIT made.
-   * Ask a JIT expert if your use is ok. The most common use is coverted by
+   * Ask a JIT expert if your use is ok. The most common use is covered by
    * getPrevFunc so use that if you only want the Func*. That's safe.
    */
   ActRec* getPrevVMStateUNSAFE(const ActRec* fp,
                                Offset* prevPc = nullptr,
                                TypedValue** prevSp = nullptr,
                                bool* fromVMEntry = nullptr);
-  const Func* getPrevFunc(const ActRec* fp) {
-    auto state = getPrevVMStateUNSAFE(fp, nullptr, nullptr, nullptr);
-    if (!state) return nullptr;
-    return state->func();
-  }
+
+  const Func* getPrevFunc(const ActRec*);
 
   VarEnv* getVarEnv(int frame = 0);
   void setVar(StringData* name, const TypedValue* v);
@@ -472,8 +459,6 @@ public:
   bool doFCallArrayTC(PC pc);
   const Variant& getEvaledArg(const StringData* val,
                               const String& namespacedName);
-  String getLastErrorPath() const { return m_lastErrorPath; }
-  int getLastErrorLine() const { return m_lastErrorLine; }
 
 private:
   enum class CallArrOnInvalidContainer {
@@ -510,11 +495,13 @@ private:
 public:
   void resetCoverageCounters();
   void syncGdbState();
+
   enum InvokeFlags {
-    InvokeNormal = 0,
-    InvokeCuf = 1,
-    InvokePseudoMain = 2
+    InvokeNormal,
+    InvokeCuf,
+    InvokePseudoMain
   };
+
   void invokeFunc(TypedValue* retval,
                   const Func* f,
                   const Variant& args_ = init_null_variant,
@@ -523,41 +510,41 @@ public:
                   VarEnv* varEnv = nullptr,
                   StringData* invName = nullptr,
                   InvokeFlags flags = InvokeNormal);
+
   void invokeFunc(TypedValue* retval,
                   const CallCtx& ctx,
                   const Variant& args_,
-                  VarEnv* varEnv = nullptr) {
-    invokeFunc(retval, ctx.func, args_, ctx.this_, ctx.cls, varEnv,
-               ctx.invName);
-  }
+                  VarEnv* varEnv = nullptr);
+
   void invokeFuncFew(TypedValue* retval,
                      const Func* f,
                      void* thisOrCls,
                      StringData* invName,
                      int argc,
                      const TypedValue* argv);
+
   void invokeFuncFew(TypedValue* retval,
                      const Func* f,
                      void* thisOrCls,
-                     StringData* invName = nullptr) {
-    invokeFuncFew(retval, f, thisOrCls, invName, 0, nullptr);
-  }
+                     StringData* invName = nullptr);
+
   void invokeFuncFew(TypedValue* retval,
                      const CallCtx& ctx,
                      int argc,
-                     const TypedValue* argv) {
-    invokeFuncFew(retval, ctx.func,
-                  ctx.this_ ? (void*)ctx.this_ :
-                  ctx.cls ? (char*)ctx.cls + 1 : nullptr,
-                  ctx.invName, argc, argv);
-  }
+                     const TypedValue* argv);
+
   void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,
                        Cell awaitResult);
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
-  template<typename T> using SmartStringIMap =
-    smart::hash_map<String, T, hphp_string_hash, hphp_string_isame>;
+  template<typename T>
+  using SmartStringIMap = smart::hash_map<
+    String,
+    T,
+    hphp_string_hash,
+    hphp_string_isame
+  >;
 
   // The op*() methods implement individual opcode handlers.
 #define O(name, imm, pusph, pop, flags)                                       \
@@ -657,5 +644,7 @@ extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/base/execution-context-inl.h"
 
 #endif

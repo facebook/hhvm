@@ -1902,34 +1902,28 @@ end
 (*****************************************************************************)
 
 and if_ ~is_toplevel env =
-  seq env [space; expr_paren; block ~is_toplevel];
-  (match next_token_str env with
+  seq env [space; expr_paren; block ~is_toplevel; else_ ~is_toplevel]
+
+and else_ ~is_toplevel env =
+  match next_token_str env with
   | "else" | "elseif" ->
-      space env; else_ ~is_toplevel env
-  | _ -> newline env)
-
-and else_ ~is_toplevel env = wrap env begin function
-  | Tword ->
-      else_word ~is_toplevel env !(env.last_str)
-  | _ ->
-      back env
-end
-
-and else_word ~is_toplevel env = function
-  | "else" ->
-      last_token env;
       space env;
-      stmt ~is_toplevel env;
-      newline env
+      else_word ~is_toplevel env;
+      else_ ~is_toplevel env
+  | _ -> newline env
+
+and else_word ~is_toplevel env = wrap_word env begin function
+  | "else" ->
+      seq env [last_token; space];
+      wrap_word env (function
+        | "if" -> seq env [last_token; space; expr_paren; space]
+        | _ -> back env);
+      seq env [block ~is_toplevel];
   | "elseif" ->
       seq env [last_token; space; expr_paren; space];
-      stmt ~is_toplevel env;
-      (match next_token_str env with
-      | "else" | "elseif" ->
-          space env; else_ ~is_toplevel env
-      | _ -> newline env)
-  | _ ->
-      back env
+      block ~is_toplevel env;
+  | _ -> assert false
+end
 
 (*****************************************************************************)
 (* Namespaces *)

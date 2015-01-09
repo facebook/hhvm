@@ -636,7 +636,10 @@ void PackedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   out->m_type = KindOfInt64;
 }
 
-size_t PackedArray::Vsize(const ArrayData*) { not_reached(); }
+size_t PackedArray::Vsize(const ArrayData*) {
+  // PackedArray always has a valid m_size so it's an error to get here.
+  always_assert(false);
+}
 
 const Variant& PackedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   assert(checkInvariants(ad));

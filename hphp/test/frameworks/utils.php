@@ -358,6 +358,7 @@ function run_install(
       return $result;
     } catch (TimeoutException $e) {
       verbose((string) $e);
+      remove_dir_recursive(nullthrows($path));
       fbmake_json(
         Map {'op' => 'test_done', 'test' => $test_name, 'status' => 'skipped' }
       );

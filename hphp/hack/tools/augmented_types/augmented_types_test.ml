@@ -118,7 +118,7 @@ let test_integration () =
     let outfile = PC2.filename_of_dbe (dir, base, "out") in
     let errfile = PC2.filename_of_dbe (dir, base, "err") in
 
-    let outopt, errl = Convert.convert testfile in
+    let outopt, errl = Convert.convert C.Loose testfile in
     let out = match outopt with
       | Some out -> out
       | None -> "" in

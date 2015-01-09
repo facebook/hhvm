@@ -15,4 +15,4 @@ byte:
 # fix it.
 DIR=hphp/hack/tools/augmented_types
 test: byte
-	cd `/bin/pwd`/../../../.. && $(DIR)/augmented_types_test.byte $(DIR)/tests
+	cd `/bin/pwd`/../../../.. && $(DIR)/_build/augmented_types_test.byte $(DIR)/tests

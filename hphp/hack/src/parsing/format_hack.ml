@@ -1465,8 +1465,7 @@ and class_element_word env = function
       seq env [last_token; xhp_category; semi_colon]
   | "attribute" ->
       last_token env;
-      right env xhp_attribute_format;
-      semi_colon env
+      class_members_list xhp_attribute_format_elt env
   | "children" ->
       last_token env;
       space env;
@@ -1512,19 +1511,21 @@ and after_modifier env = wrap env begin function
       class_members env
 end
 
-and class_members env =
+and class_members env = class_members_list class_member env
+
+and class_members_list member_handler env =
   Try.one_line env
-    class_member_list_single
-    (fun env -> right env class_member_list_multi);
+    (class_member_list_single member_handler)
+    (fun env -> right env (class_member_list_multi member_handler));
   semi_colon env
 
-and class_member_list_single env =
+and class_member_list_single member_handler env =
   space env;
-  list_comma_single class_member env
+  list_comma_single member_handler env
 
-and class_member_list_multi env =
+and class_member_list_multi member_handler env =
   newline env;
-  list_comma_multi ~trailing:false class_member env
+  list_comma_multi ~trailing:false member_handler env
 
 and class_member env = wrap env begin function
   | Tword (* In case we are dealing with a constant *)
@@ -1570,10 +1571,6 @@ end
 
 and xhp_category env =
   space env; list_comma ~trailing:false name env
-
-and xhp_attribute_format env =
-  newline env;
-  list_comma_multi ~trailing:false xhp_attribute_format_elt env
 
 and xhp_attribute_format_elt env =
   let curr_pos = !(env.abs_pos) in

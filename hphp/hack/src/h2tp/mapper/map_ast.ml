@@ -305,17 +305,20 @@ let mk_mapper = fun m_in ->
   and
     map_typeconst c_kind typeconst =
       let k {
-          tconst_kind = v_tconst_kind;
+          tconst_abstract = v_tconst_abstract;
           tconst_name = v_tconst_name;
-          tconst_type = v_tconst_type
+          tconst_constraint = v_tconst_constraint;
+          tconst_type = v_tconst_type;
         } =
-      let v_tconst_kind = map_of_list map_kind v_tconst_kind in
+      let v_tconst_abstract = map_of_bool v_tconst_abstract in
       let v_tconst_name = map_id v_tconst_name in
+      let v_tconst_constraint = map_hint_option v_tconst_constraint in
       let v_tconst_type = map_hint_option v_tconst_type
       in
         {
-          tconst_kind = v_tconst_kind;
+          tconst_abstract = v_tconst_abstract;
           tconst_name = v_tconst_name;
+          tconst_constraint = v_tconst_constraint;
           tconst_type = v_tconst_type;
         }
     in m_in.k_typeconst (k, all_mappers) c_kind typeconst

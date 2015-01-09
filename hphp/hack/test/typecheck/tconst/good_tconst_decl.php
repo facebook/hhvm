@@ -1,7 +1,7 @@
 <?hh
 
 abstract class A {
-  abstract public type const abs_class_by_class = arraykey;
+  abstract const type abs_class_by_class as arraykey;
 
   public static::abs_class_by_class $id;
 
@@ -17,11 +17,11 @@ abstract class A {
 }
 
 class Aint extends A {
-  public type const abs_class_by_class = int;
-  public type const me = Aint;
-  public type const Aint = self::hop;
-  public type const hop = int;
-  public type const vec = ConstVector<int>;
+  const type abs_class_by_class = int;
+  const type me as Aint = Aint;
+  const type Aint = self::hop;
+  const type hop = int;
+  const type vec = ConstVector<int>;
 
   public function __construct(
     int $id,
@@ -39,7 +39,7 @@ class Aint extends A {
 }
 
 class Astr extends A {
-  public type const abs_class_by_class = string;
+  const type abs_class_by_class = string;
   public function __construct(
     string $id,
   ) {
@@ -48,19 +48,19 @@ class Astr extends A {
 }
 
 abstract class B {
-  abstract public type const AType = A;
+  abstract const type AType = A;
   abstract public static function getAID(): static::AType::abs_class_by_class;
 }
 
 class Bint extends B {
-  public type const AType = Aint;
+  const type AType = Aint;
   public static function getAID(): static::AType::abs_class_by_class {
     return 0;
   }
 }
 
 class Bstr extends B {
-  public type const AType = Astr;
+  const type AType = Astr;
   public static function getAID(): static::AType::abs_class_by_class {
     return '';
   }

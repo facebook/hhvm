@@ -1,7 +1,7 @@
 <?hh // strict
 
 abstract class AbstractClassWithAbstract {
-  abstract protected type const abstract_type = int;
+  abstract const type abstract_type as int;
 }
 
 class ClassWithAbstractType extends AbstractClassWithAbstract {

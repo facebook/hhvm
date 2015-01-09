@@ -1,7 +1,7 @@
 <?hh // strict
 
 class C {
-  public type const T = int;
+  const type T = int;
 }
 
 function foo(C::T $x): void {}

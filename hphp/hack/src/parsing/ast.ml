@@ -173,8 +173,9 @@ and method_ = {
 }
 
 and typeconst = {
-  tconst_kind: kind list;
+  tconst_abstract: bool;
   tconst_name: id;
+  tconst_constraint: hint option;
   tconst_type: hint option;
 }
 

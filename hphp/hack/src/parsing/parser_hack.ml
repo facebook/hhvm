@@ -114,6 +114,13 @@ let peek env =
   restore_lexbuf_state env.lb saved;
   ret
 
+(* Checks if the next token matches a given word without updating lexer state*)
+let peek_check_word env word =
+  let saved = save_lexbuf_state env.lb in
+  let ret = L.token env.file env.lb = Tword && Lexing.lexeme env.lb = word in
+  restore_lexbuf_state env.lb saved;
+  ret
+
 (* Drop the next token unconditionally *)
 let drop (env : env) : unit = match L.token env.file env.lb with _ -> ()
 
@@ -203,11 +210,6 @@ let check_modifiers env pos l =
 let check_not_final env pos modifiers =
   if List.exists (function Final -> true | _ -> false) modifiers
   then error_at env pos "class variable cannot be final";
-  ()
-
-let tc_check_not_static env pos modifiers =
-  if List.exists (function Static -> true | _ -> false) modifiers
-  then error_at env pos "type constant cannot be static";
   ()
 
 let check_toplevel env pos =
@@ -1229,7 +1231,10 @@ and class_toplevel_word env word =
       class_defs env
   | "const" ->
       let error_state = !(env.errors) in
-      let def = class_const_def env in
+      let def =
+        if peek_check_word env "type"
+        then (drop env; TypeConst (typeconst_def env ~is_abstract:false))
+        else class_const_def env in
       if !(env.errors) != error_state
       then [def]
       else def :: class_defs env
@@ -1272,8 +1277,8 @@ and look_for_next_method previous_pos env =
   | Trcb -> ()
   | Tword ->
       (match Lexing.lexeme env.lb with
-      | "abstract" | "public" | "protected"
-      | "private" | "final" | "static" ->
+      | "abstract"| "public" | "protected"
+      | "private" | "final" | "static" when not (peek_check_word env "const") ->
           let pos = Pos.make env.file env.lb in
           if Pos.compare pos previous_pos = 0
           then (* we are stuck in a circle *)
@@ -1291,6 +1296,7 @@ and look_for_next_method previous_pos env =
 and class_use_list env =
   let error_state = !(env.errors) in
   let cst = ClassUse (class_hint env) in
+
   match L.token env.file env.lb with
   | Tsc ->
       [cst]
@@ -1356,11 +1362,15 @@ and xhp_format env =
 and try_abstract_const env =
     try_parse env begin fun env ->
       match L.token env.file env.lb with
+        | Tword when Lexing.lexeme env.lb = "const"
+          && peek_check_word env "type" ->
+            drop env;
+            Some (TypeConst (typeconst_def env ~is_abstract:true))
         | Tword when Lexing.lexeme env.lb = "const" ->
-          let h = class_const_hint env in
-          let id = identifier env in
-          expect env Tsc;
-          Some (AbsConst (h, id))
+            let h = class_const_hint env in
+            let id = identifier env in
+            expect env Tsc;
+            Some (AbsConst (h, id))
         | _ -> None
     end
 
@@ -1494,11 +1504,10 @@ and class_member_def env =
       ClassVars (modifiers, None, cvars)
   | Tword ->
       let word = Lexing.lexeme env.lb in
-      if word = "type"
-      then tc_check_not_static env modifier_pos modifiers;
       class_member_word env ~modifiers ~attrs word
   | _ ->
       L.back env.lb;
+      check_visibility env modifier_pos modifiers;
       check_not_final env modifier_pos modifiers;
       let h = hint env in
       let cvars = class_var_list env in
@@ -1591,7 +1600,7 @@ and xhp_attr_list_remain env =
   | _ -> error_expect env ";"; []
 
 (*****************************************************************************)
-(* Methods | Typeconst *)
+(* Methods *)
 (*
  *  within a class body -->
  *    modifier_list async function ...
@@ -1600,11 +1609,6 @@ and xhp_attr_list_remain env =
 (*****************************************************************************)
 
 and class_member_word env ~attrs ~modifiers = function
-  | "type" ->
-      expect_word env "const";
-      let type_name = identifier env in
-      let typeconst = typeconst env ~modifiers ~attrs type_name in
-      TypeConst typeconst
   | "async" ->
       expect_word env "function";
       let is_ref = ref_opt env in
@@ -1632,14 +1636,17 @@ and class_member_word env ~attrs ~modifiers = function
         | _ -> L.back env.lb; class_var_list env
       in ClassVars (modifiers, Some h, cvars)
 
-and typeconst env ~modifiers ~attrs pname =
+and typeconst_def env ~is_abstract =
+  let pname = identifier env in
+  let constr = typedef_constraint env in
   let type_ = match L.token env.file env.lb with
     | Teq -> Some (hint env)
     | _ -> L.back env.lb; None
   in
   expect env Tsc;
-  { tconst_kind = modifiers;
+  { tconst_abstract = is_abstract;
     tconst_name = pname;
+    tconst_constraint = constr;
     tconst_type = type_;
   }
 

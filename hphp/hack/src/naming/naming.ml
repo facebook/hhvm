@@ -1396,26 +1396,15 @@ and fill_cvar kl ty x =
  ) x kl
 
 and typeconst env t =
-  let genv, lenv = env in
   (* We use the same namespace as constants within the class so we cannot have
    * a const and type const with the same name
    *)
   let name = Env.new_const env t.tconst_name in
-  (* if a typeconst is declared in an interface without an assigned type it is
-   * implicitly treated as abstract i.e.
-   *
-   * interface Foo { type const Bar;}
-   *
-   *  is the same as
-   * interface Foo { abstract type const Bar;}
-   *)
-  let abstract = match genv.cclass with
-    | Some {c_kind = Ast.Cinterface; _ } when t.tconst_type = None -> true
-    | _ -> List.mem Abstract t.tconst_kind in
+  let constr = opt_map (hint env) t.tconst_constraint in
   let type_ = opt_map (hint env) t.tconst_type in
-  N.({ c_tconst_abstract = abstract;
+  N.({ c_tconst_abstract = t.tconst_abstract;
        c_tconst_name = name;
-       c_tconst_type = type_;
+       c_tconst_type = if type_ <> None then type_ else constr;
      })
 
 and fun_kind env ft =

@@ -51,9 +51,7 @@ function boolean_statements($c) {
     if ($i > 3) {
       break;
     }
-  }
-  while(\hacklib_cast_as_boolean($c))
-  ;
+  } while (\hacklib_cast_as_boolean($c));
   echo ("Do Loop Iterations : $i\n");
   $i = 0;
   while (\hacklib_cast_as_boolean($c)) {

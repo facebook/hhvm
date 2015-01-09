@@ -1839,8 +1839,8 @@ and stmt_word ~is_toplevel env word =
       last_token env;
       if_ ~is_toplevel env
   | "do" ->
-      line env [last_token; block];
-      seq env  [expect "while"; expr_paren]
+      seq env [last_token; block];
+      seq env  [space; expect "while"; space; expr_paren; opt_tok Tsc]
   | "while" ->
       seq env [last_token; space; expr_paren; block; newline]
   | "for" ->

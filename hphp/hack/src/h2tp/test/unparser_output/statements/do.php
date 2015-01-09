@@ -4,21 +4,15 @@ class Foo {
     $i = 0;
     do {
       echo ($i."\n");
-    }
-    while($i > 0)
-    ;
+    } while ($i > 0);
     do {
       break;
       echo ("should never occur\n");
-    }
-    while(0)
-    ;
+    } while (0);
     do {
       $i++;
       echo ($i."\n");
-    }
-    while($i < 2)
-    ;
+    } while ($i < 2);
   }
 }
 Foo::bar();

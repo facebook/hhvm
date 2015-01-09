@@ -1,0 +1,4 @@
+T_OPEN_TAG => string(5) "<?hh "
+T_HH_ERROR => string(7) "// ?>\n"
+T_OPEN_TAG => string(5) "<?hh "
+T_HH_ERROR => string(5) "// ?>"

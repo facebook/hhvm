@@ -934,49 +934,30 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         RETSTEP(T_WHITESPACE);
 }
 
-<ST_IN_SCRIPTING,ST_XHP_IN_TAG>"#"|"//" {
-        yy_push_state(ST_ONE_LINE_COMMENT, yyscanner);
-        yymore();
-}
-
-<ST_ONE_LINE_COMMENT>"?"|"%"|">" {
-        yymore();
-}
-
-<ST_ONE_LINE_COMMENT>[^\n\r?%>]*{ANY_CHAR} {
-        switch (yytext[yyleng-1]) {
-        case '?':
-        case '%':
-        case '>':
-                yyless(yyleng-1);
-                yymore();
-                break;
-        default:
-                STEPPOS(T_COMMENT);
-                yy_pop_state(yyscanner);
-                return T_COMMENT;
+<ST_IN_SCRIPTING,ST_XHP_IN_TAG>("#"|"//").*{NEWLINE}? {
+        const char* asptag = nullptr;
+        if (_scanner->aspTags()) {
+                asptag = static_cast<const char*>(
+                  memmem(yytext, yyleng, "%>", 2)
+                );
         }
-}
-
-<ST_ONE_LINE_COMMENT>{NEWLINE} {
-        STEPPOS(T_COMMENT);
-        yy_pop_state(yyscanner);
-        return T_COMMENT;
-}
-
-<ST_ONE_LINE_COMMENT>"?>"|"%>" {
-        if (_scanner->isHHFile()) {
-          _scanner->error("HH mode: ?> not allowed");
-          return T_HH_ERROR;
+        auto phptag = static_cast<const char*>(
+          memmem(yytext, yyleng, "?>", 2)
+        );
+        if (asptag && (!phptag || (asptag < phptag))) {
+                if (_scanner->isHHFile()) {
+                        _scanner->error("HH mode: %%> not allowed");
+                        RETTOKEN(T_HH_ERROR);
+                }
+                yyless(asptag - yytext);
+        } else if (phptag) {
+                if (_scanner->isHHFile()) {
+                        _scanner->error("HH mode: ?> not allowed");
+                        RETTOKEN(T_HH_ERROR);
+                }
+                yyless(phptag - yytext);
         }
-        if (_scanner->aspTags() || yytext[yyleng-2] != '%') {
-          _scanner->setToken(yytext, yyleng-2, yytext, yyleng-2, T_COMMENT);
-                yyless(yyleng-2);
-                yy_pop_state(yyscanner);
-                return T_COMMENT;
-        } else {
-                yymore();
-        }
+        RETTOKEN(T_COMMENT);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>"/**"{WHITESPACE} {

@@ -1080,14 +1080,8 @@ void Variant::unserialize(VariableUnserializer *uns,
         if (type == 'O') {
           // Collections are not allowed
           if (obj->isCollection()) {
-            if (size > 0) {
-              throw Exception("%s does not support the 'O' serialization "
-                              "format", clsName.data());
-            }
-            // Be lax and tolerate the 'O' serialization format for collection
-            // classes if there are 0 properties.
-            raise_warning("%s does not support the 'O' serialization "
-                          "format", clsName.data());
+            throw Exception("%s does not support the 'O' serialization "
+                            "format", clsName.data());
           }
 
           Variant serializedNativeData = init_null();

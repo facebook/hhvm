@@ -662,7 +662,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodCacheCls:
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
-  case ProfileArray:
+  case ProfilePackedArray:
+  case ProfileStructArray:
   case LdFuncCachedSafe:
   case LdFuncNumParams:
   case LdGblAddr:

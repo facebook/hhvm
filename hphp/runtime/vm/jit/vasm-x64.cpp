@@ -183,6 +183,7 @@ private:
   void emit(debugtrap& i) { a->int3(); }
   void emit(fallthru& i) {}
   void emit(ldimmb& i);
+  void emit(ldimml& i);
   void emit(ldimmq& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
@@ -576,6 +577,16 @@ void Vgen::emit(ldimmb& i) {
     a->xorb(i.d, i.d);
   } else {
     a->movb(val, i.d);
+  }
+}
+
+void Vgen::emit(ldimml& i) {
+  auto val = i.s.l();
+  assert_not_implemented(i.d.isGP());
+  if (val == 0 && !i.saveflags) {
+    a->xorl(i.d, i.d);
+  } else {
+    a->movl(val, i.d);
   }
 }
 

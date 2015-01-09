@@ -458,7 +458,8 @@ bool canDCE(IRInstruction* inst) {
   case IssetElem:
   case EmptyElem:
   case CheckBounds:
-  case ProfileArray:
+  case ProfilePackedArray:
+  case ProfileStructArray:
   case ProfileStr:
   case CheckPackedArrayBounds:
   case CheckTypePackedArrayElem:

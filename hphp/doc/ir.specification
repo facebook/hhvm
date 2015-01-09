@@ -2324,9 +2324,14 @@ fields of that struct for holding intermediate values.
   Checks that the index in S0 is between 0 (included) and the values in S1
   (excluded). Throws if out of bounds.
 
-| ProfileArray, ND, S(Arr), NF
+| ProfilePackedArray, ND, S(Arr), NF
 
-  Profile type of array S0 (i.e. whether it is packed or mixed).
+  Profile type of array S0 (i.e. whether it is packed or ).
+
+| ProfileStructArray, ND, S(Arr), NF
+
+  Profile type of array S0 (i.e. whether it is a StructArray or some other kind
+  and if it is a StructArray what Shapes it saw).
 
 | ProfileStr<key>, ND, S(PtrToGen), NF
 

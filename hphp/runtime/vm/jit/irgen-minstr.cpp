@@ -36,6 +36,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_PackedArray("PackedArray");
+const StaticString s_StructArray("StructArray");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -49,7 +50,8 @@ bool wantPropSpecializedWarnings() {
 enum class SimpleOp {
   None,
   Array,
-  ProfiledArray,
+  ProfiledPackedArray,
+  ProfiledStructArray,
   PackedArray,
   StructArray,
   String,
@@ -167,7 +169,8 @@ bool constrainCollectionOpBase(MTS& env) {
       return false;
 
     case SimpleOp::Array:
-    case SimpleOp::ProfiledArray:
+    case SimpleOp::ProfiledPackedArray:
+    case SimpleOp::ProfiledStructArray:
     case SimpleOp::String:
       env.irb.constrainValue(env.base.value, DataTypeSpecific);
       return true;
@@ -510,10 +513,12 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
           if (readInst) {
             if (key->isA(Type::Int)) {
               return isPacked ? SimpleOp::PackedArray
-                              : SimpleOp::ProfiledArray;
+                              : SimpleOp::ProfiledPackedArray;
             } else if (key->isConst(Type::StaticStr)) {
-              return isStruct ? SimpleOp::StructArray
-                              : SimpleOp::Array;
+              if (!isStruct || !baseType.getArrayShape()) {
+                return SimpleOp::ProfiledStructArray;
+              }
+              return SimpleOp::StructArray;
             }
           }
           return SimpleOp::Array;
@@ -1312,12 +1317,14 @@ SSATmp* emitArrayGet(MTS& env, SSATmp* key) {
   return gen(env, ArrayGet, env.base.value, key);
 }
 
-void emitProfiledArrayGet(MTS& env, SSATmp* key) {
+void emitProfiledPackedArrayGet(MTS& env, SSATmp* key) {
   TargetProfile<NonPackedArrayProfile> prof(env.hts.context,
                                             env.irb.curMarker(),
                                             s_PackedArray.get());
   if (prof.profiling()) {
-    gen(env, ProfileArray, RDSHandleData { prof.handle() }, env.base.value);
+    gen(env, ProfilePackedArray,
+      RDSHandleData { prof.handle() }, env.base.value
+    );
     env.result = emitArrayGet(env, key);
     return;
   }
@@ -1343,6 +1350,56 @@ void emitProfiledArrayGet(MTS& env, SSATmp* key) {
       );
       env.result = emitPackedArrayGet(env, env.base.value, key);
       return;
+    }
+  }
+
+  // Fall back to a generic array get.
+  env.result = emitArrayGet(env, key);
+}
+
+void emitProfiledStructArrayGet(MTS& env, SSATmp* key) {
+  TargetProfile<StructArrayProfile> prof(env.hts.context,
+                                         env.irb.curMarker(),
+                                         s_StructArray.get());
+  if (prof.profiling()) {
+    gen(env, ProfileStructArray,
+      RDSHandleData { prof.handle() }, env.base.value
+    );
+    env.result = emitArrayGet(env, key);
+    return;
+  }
+
+  if (prof.optimizing()) {
+    auto const data = prof.data(StructArrayProfile::reduce);
+    // StructArrayProfile data counts how many times a non-struct array was
+    // observed.  Zero means it was monomorphic (or never executed).
+    //
+    // It also records how many Shapes it saw. The possible values are:
+    //  0 (never executed)
+    //  1 (monomorphic)
+    //  many (polymorphic)
+    //
+    // If we never executed then we fall back to generic get. If we're
+    // monomorphic, we'll emit a check for that specific Shape. If we're
+    // polymorphic, we'll also fall back to generic get. Eventually we'd like
+    // to emit an inline cache, which should be faster than calling out of line.
+    auto typeStructArr = Type::Arr.specialize(ArrayData::kStructKind);
+    if (env.base.type.maybe(typeStructArr)) {
+      if (data.nonStructCount == 0 && data.isMonomorphic()) {
+        typeStructArr = Type::Arr.specialize(data.getShape());
+        // It's safe to side-exit still because we only do these profiled array
+        // gets on the first element, with simple bases and single-element dims.
+        // See computeSimpleCollectionOp.
+        auto const exit = makeExit(env);
+        setBase(env,
+          gen(env, CheckType, typeStructArr, exit, env.base.value));
+        env.irb.constrainValue(
+          env.base.value,
+          TypeConstraint(DataTypeSpecialized).setWantArrayShape()
+        );
+        env.result = emitStructArrayGet(env, env.base.value, key);
+        return;
+      }
     }
   }
 
@@ -1612,8 +1669,11 @@ void emitCGetElem(MTS& env) {
   case SimpleOp::StructArray:
     env.result = emitStructArrayGet(env, env.base.value, key);
     break;
-  case SimpleOp::ProfiledArray:
-    emitProfiledArrayGet(env, key);
+  case SimpleOp::ProfiledPackedArray:
+    emitProfiledPackedArrayGet(env, key);
+    break;
+  case SimpleOp::ProfiledStructArray:
+    emitProfiledStructArrayGet(env, key);
     break;
   case SimpleOp::String:
     emitStringGet(env, key);
@@ -1642,7 +1702,8 @@ void emitIssetElem(MTS& env) {
   switch (env.simpleOp) {
   case SimpleOp::Array:
   case SimpleOp::StructArray:
-  case SimpleOp::ProfiledArray:
+  case SimpleOp::ProfiledPackedArray:
+  case SimpleOp::ProfiledStructArray:
     env.result = gen(env, ArrayIsset, env.base.value, getKey(env));
     break;
   case SimpleOp::PackedArray:
@@ -1705,7 +1766,8 @@ void emitSetElem(MTS& env) {
 
   switch (env.simpleOp) {
   case SimpleOp::Array:
-  case SimpleOp::ProfiledArray:
+  case SimpleOp::ProfiledPackedArray:
+  case SimpleOp::ProfiledStructArray:
     emitArraySet(env, key, value);
     break;
   case SimpleOp::PackedArray:

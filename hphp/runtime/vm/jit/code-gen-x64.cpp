@@ -3614,9 +3614,9 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   v << setcc{CC_NBE, sf, dstReg};
 }
 
-void CodeGenerator::cgProfileArray(IRInstruction* inst) {
+void CodeGenerator::cgProfilePackedArray(IRInstruction* inst) {
   auto baseReg = srcLoc(inst, 0).reg();
-  auto handle  = inst->extra<ProfileArray>()->handle;
+  auto handle  = inst->extra<ProfilePackedArray>()->handle;
   auto& v = vmain();
 
   // If kPackedKind changes to a value that is not 0, change
@@ -3627,6 +3627,43 @@ void CodeGenerator::cgProfileArray(IRInstruction* inst) {
   v << loadzbl{baseReg[ArrayData::offsetofKind()], tmp_kind};
   v << addlm{tmp_kind, rVmTl[handle + offsetof(NonPackedArrayProfile, count)],
              sf};
+}
+
+void CodeGenerator::cgProfileStructArray(IRInstruction* inst) {
+  auto baseReg = srcLoc(inst, 0).reg();
+  auto handle  = inst->extra<ProfileStructArray>()->handle;
+  auto& v = vmain();
+
+  auto isStruct = v.makeBlock();
+  auto shapeIsDifferent = v.makeBlock();
+  auto notStruct = v.makeBlock();
+  auto done = v.makeBlock();
+
+  auto const sf0 = v.makeReg();
+  v << cmpbim{ArrayData::kStructKind, baseReg[ArrayData::offsetofKind()], sf0};
+  v << jcc{CC_E, sf0, {notStruct, isStruct}};
+
+  auto const shape = v.makeReg();
+  auto const sf1 = v.makeReg();
+  v = isStruct;
+  v << load{baseReg[StructArray::shapeOffset()], shape};
+  v << cmpqm{shape, rVmTl[handle + offsetof(StructArrayProfile, shape)], sf1};
+  v << jcc{CC_E, sf1, {shapeIsDifferent, done}};
+
+  v = shapeIsDifferent;
+  v << addlm{v.cns(uint32_t{1}),
+             rVmTl[handle + offsetof(StructArrayProfile, numShapesSeen)],
+             v.makeReg()};
+  v << store{shape, rVmTl[handle + offsetof(StructArrayProfile, shape)]};
+  v << jmp{done};
+
+  v = notStruct;
+  v << addlm{v.cns(uint32_t{1}),
+             rVmTl[handle + offsetof(StructArrayProfile, nonStructCount)],
+             v.makeReg()};
+  v << jmp{done};
+
+  v = done;
 }
 
 void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {

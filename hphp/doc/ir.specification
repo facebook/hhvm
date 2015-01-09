@@ -275,15 +275,13 @@ about to be loaded, using a separate CheckRefInner instruction.
 
 | AssertStk<T,offset>, ND, S(StkPtr), NF
 
-  Returns a new StkPtr that represents the same stack as S0, but with the
-  knowledge that the slot at offset (in cells) has type T. This is similar to a
-  GuardStk except that it does not imply a runtime check and cannot cause
-  control flow.
+  Assert that stack element at `offset' (in cells) from S0 has type T. This is
+  similar to a GuardStk except that it does not imply a runtime check and
+  cannot cause control flow.
 
 | CastStk<T,offset>, ND, S(StkPtr), Er
 
-  Returns a new StkPtr that represents the same stack as S0, but with the slot
-  at offset (in cells) converted to type T.
+  Cast the stack element at `offset' (in cells) from S0 to type T.
 
 The following instructions deal with parameter coercion (the standard type
 conversion for arguments to HNI functions). If parameter coercion fails these
@@ -1316,7 +1314,7 @@ To string conversions:
 
 | RetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr) S(RetAddr), T
 
-  Ensure that S0 + offset (in cells) is stored in rVmSp and S1 is stored in
+  Ensure that S0 + `spOff' (in cells) is stored in rVmSp and S1 is stored in
   rVmFp and then execute a hardware procedure-return using the return address
   specified by S2.  `suspendingResumed' indicates whether this instruction is
   actually returning from a function or suspending a resumable (as in a yield
@@ -1508,7 +1506,7 @@ To string conversions:
 
 | AdjustSP<offset>, D(StkPtr), S(StkPtr), NF
 
-  Define a new StkPtr by adding `offset' cells to it.  Note that because of
+  Define a new StkPtr by adding `offset' cells to S0.  Note that because of
   HHIR's not-yet-removed use of "reserved registers" for StkPtrs, AdjustSP
   instructions are not "pure", and cannot be DCE'd just based on whether their
   destinations are used.
@@ -1718,7 +1716,7 @@ To string conversions:
 |                                               S(StkPtr) S(FramePtr),
 |                                               Er
 
-  Call the interpreter implementation function for one opcode. S0 + offset (in
+  Call the interpreter implementation function for one opcode. S0 + `spOff' (in
   cells) and S1 are, respectively, the VM stack and frame pointers before this
   instruction. T is only present if the instruction pushes to the stack, in
   which case it is the type of the top stack element after the call. `bcOff' is
@@ -1790,10 +1788,11 @@ To string conversions:
 |                                     S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
 |                                     NF
 
-  Enters a generator body. S0 + offset (in cells) is a pointer to the stack, S1
-  is the current frame pointer, S2 is the generator frame pointer embedded in
-  the Generator object, and S3 is the address to jump to. The `returnBCOffset'
-  will be stored to the m_soff field of the pre-live ActRec on the stack.
+  Enters a generator body. S0 + `spOffset' (in cells) is a pointer to the
+  stack, S1 is the current frame pointer, S2 is the generator frame pointer
+  embedded in the Generator object, and S3 is the address to jump to. The
+  `returnBCOffset' will be stored to the m_soff field of the pre-live ActRec on
+  the stack.
 
 | ContPreNext, ND, S(Obj) C(Bool), B
 

@@ -73,7 +73,7 @@ Examples:
   % $argv[0] $ztestexample
 
   # Quick tests in JIT mode with some extra runtime options:
-  % $argv[0] test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRJumpOpts=0'
+  % $argv[0] test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
 
   # All quick tests except debugger
   % $argv[0] -e debugger test/quick

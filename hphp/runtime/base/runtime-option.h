@@ -466,7 +466,6 @@ public:
   F(bool, HHIRCse,                     false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
-  F(bool, HHIRJumpOpts,                true)                            \
   F(bool, HHIRRefcountOpts,            refcountOptsDefault())           \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \

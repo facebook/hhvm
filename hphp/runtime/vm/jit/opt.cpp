@@ -30,14 +30,11 @@ namespace HPHP { namespace jit {
 
 namespace {
 
-// insert inst after the point dst is defined
+// insert inst after definer
 void insertAfter(IRInstruction* definer, IRInstruction* inst) {
   assert(!definer->isBlockEnd());
   Block* block = definer->block();
   auto pos = block->iteratorTo(definer);
-  if (pos->op() == DefLabel) {
-    ++pos;
-  }
   block->insert(++pos, inst);
 }
 
@@ -88,7 +85,7 @@ void insertCallAssert(IRInstruction& inst, IRUnit& unit) {
 
 void insertAsserts(IRUnit& unit) {
   postorderWalk(unit, [&](Block* block) {
-    for (auto it = block->begin(), end = block->end(); it != end; ) {
+    for (auto it = block->begin(); it != block->end();) {
       auto& inst = *it;
       ++it;
       if (inst.op() == StStk) {
@@ -201,11 +198,6 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
     doPass(optimizeStores);
     dce("storeelim");
-  }
-
-  if (RuntimeOption::EvalHHIRJumpOpts) {
-    doPass(optimizeJumps, "jumpopts");
-    dce("jump opts");
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {

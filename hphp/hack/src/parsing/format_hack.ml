@@ -1263,8 +1263,6 @@ and hint env = wrap env begin function
           end;
           hint_parameter env
       )
-  | Tellipsis ->
-      last_token env
   | Tlp ->
       last_token env;
       hint_list env;

@@ -261,7 +261,7 @@ module MakeWorker = struct
                 raise End_of_file
             | Unix.WSIGNALED x ->
                 let sig_str = PrintSignal.string_of_signal x in
-                Printf.printf "Worker interruped with signal: %s\n" sig_str;
+                Printf.printf "Worker interrupted with signal: %s\n" sig_str;
                 exit 2
             | Unix.WSTOPPED x ->
                 Printf.printf "Worker stopped with signal: %d\n" x;

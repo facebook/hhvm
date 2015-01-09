@@ -1918,7 +1918,7 @@ and else_word ~is_toplevel env = wrap_word env begin function
       wrap_word env (function
         | "if" -> seq env [last_token; space; expr_paren; space]
         | _ -> back env);
-      seq env [block ~is_toplevel];
+      block ~is_toplevel env;
   | "elseif" ->
       seq env [last_token; space; expr_paren; space];
       block ~is_toplevel env;

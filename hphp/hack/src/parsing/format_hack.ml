@@ -2014,7 +2014,10 @@ and catch_list env = wrap_word env begin function
   | "catch" ->
       last_token env;
       catch_remain env;
-      list env catch_opt
+      (match next_token_str env with
+      | "catch" | "finally" ->
+          space env; catch_list env
+      | _ -> newline env)
   | "finally" ->
       last_token env;
       block env;
@@ -2023,16 +2026,7 @@ and catch_list env = wrap_word env begin function
 end
 
 and catch_remain env =
-  seq env [space; expect "("; fun_param; expect ")"; block; newline]
-
-and catch_opt env = wrap_word env begin function
-  | "catch" ->
-      seq env [space; last_token; space];
-      catch_remain env
-  | "finally" ->
-      seq env [space; last_token; block; newline]
-  | _ -> back env
-end
+  seq env [space; expect "("; fun_param; expect ")"; block]
 
 (*****************************************************************************)
 (* Expressions *)

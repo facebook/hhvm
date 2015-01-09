@@ -10,14 +10,12 @@ class Foo {
       } catch (MyException $e) {
         echo ('Caught MyException: '.$e->getMessage()."\n");
         throw $e;
-      }
- catch (Exception $e) {
+      } catch (Exception $e) {
         echo ('Will not execute');
       }
     } catch (Exception $e) {
       echo ('Caught Exception: '.$e->getMessage()."\n");
-    }
- finally {
+    } finally {
       echo ("This always executes\n");
     }
   }

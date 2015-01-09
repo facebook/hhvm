@@ -2163,9 +2163,18 @@ and array_append is_lvalue p env ty1 =
   | Tapply ((_, n), [ty])
       when n = SN.Collections.cVector || n = SN.Collections.cSet ->
       env, ty
+  | Tapply ((_, n), [])
+      when n = SN.Collections.cVector || n = SN.Collections.cSet ->
+      (* Handle the case where "Vector" or "Set" was used as a typehint
+         without type parameters *)
+      env, (Reason.Rnone, Tany)
   | Tapply ((_, n), [tkey; tvalue]) when n = SN.Collections.cMap ->
       (* You can append a pair to a map *)
       env, (Reason.Rmap_append p, Tapply ((p, SN.Collections.cPair), [tkey; tvalue]))
+  | Tapply ((_, n), []) when n = SN.Collections.cMap ->
+      (* Handle the case where "Map" was used as a typehint without
+         type parameters *)
+      env, (Reason.Rmap_append p, Tapply ((p, SN.Collections.cPair), []))
   | Tarray (Some ty, None) ->
       env, ty
   | Tobject ->

@@ -1,0 +1,6 @@
+File "map_array_append_1.php", line 13, characters 3-16:
+Invalid assignment (Typing[4110])
+File "map_array_append_1.php", line 13, characters 3-8:
+This is an object of type Pair because you can only append a Pair<Tkey, Tvalue> to an Map<Tkey, Tvalue>
+File "map_array_append_1.php", line 13, characters 12-16:
+It is incompatible with a string

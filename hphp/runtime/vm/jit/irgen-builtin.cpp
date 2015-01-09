@@ -38,12 +38,13 @@ const StaticString
   s_in_array("in_array"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class"),
-  s_is_object("is_object"),
   s_empty("");
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* optimizedCallIsA(HTS& env) {
+SSATmp* opt_is_a(HTS& env, uint32_t numArgs) {
+  if (numArgs != 3) return nullptr;
+
   // The last param of is_a has a default argument of false, which makes it
   // behave the same as instanceof (which doesn't allow a string as the tested
   // object). Don't do the conversion if we're not sure this arg is false.
@@ -77,8 +78,10 @@ SSATmp* optimizedCallIsA(HTS& env) {
   return nullptr;
 }
 
-SSATmp* optimizedCallCount(HTS& env) {
-  auto const mode = top(env, Type::Int, 0);
+SSATmp* opt_count(HTS& env, uint32_t numArgs) {
+  if (numArgs != 2) return nullptr;
+
+  auto const mode = topC(env, 0);
   auto const val = topC(env, 1);
 
   // Bail if we're trying to do a recursive count()
@@ -87,7 +90,9 @@ SSATmp* optimizedCallCount(HTS& env) {
   return gen(env, Count, val);
 }
 
-SSATmp* optimizedCallIniGet(HTS& env) {
+SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+
   // Only generate the optimized version if the argument passed in is a
   // static string with a constant literal value so we can get the string value
   // at JIT time.
@@ -120,7 +125,9 @@ SSATmp* optimizedCallIniGet(HTS& env) {
  * Transforms in_array with a static haystack argument into an AKExists with the
  * haystack flipped.
  */
-SSATmp* optimizedCallInArray(HTS& env) {
+SSATmp* opt_in_array(HTS& env, uint32_t numArgs) {
+  if (numArgs != 3) return nullptr;
+
   // We will restrict this optimization to needles that are strings, and
   // haystacks that have only non-numeric string keys. This avoids a bunch of
   // complication around numeric-string array-index semantics.
@@ -160,34 +167,37 @@ SSATmp* optimizedCallInArray(HTS& env) {
     flipped.set(key.asCStrRef(), init_null_variant);
   }
 
-  auto needle = topC(env, 2);
-  auto array = flipped.toArray();
-  return gen(env,
-             AKExists,
-             cns(env, ArrayData::GetScalarArray(array.get())),
-             needle);
+  auto const needle = topC(env, 2);
+  auto const array = flipped.toArray();
+  return gen(
+    env,
+    AKExists,
+    cns(env, ArrayData::GetScalarArray(array.get())),
+    needle
+  );
 }
 
-SSATmp* optimizedCallGetClass(HTS& env, uint32_t numNonDefault) {
+SSATmp* opt_get_class(HTS& env, uint32_t numArgs) {
   auto const curCls = curClass(env);
   auto const curName = [&] {
     return curCls != nullptr ? cns(env, curCls->name()) : nullptr;
   };
-
-  if (numNonDefault == 0) return curName();
-  assert(numNonDefault == 1);
+  if (numArgs == 0) return curName();
+  if (numArgs != 1) return nullptr;
 
   auto const val = topC(env, 0);
-  if (val->isA(Type::Null)) return curName();
-
-  if (val->isA(Type::Obj)) {
-    return gen(env, LdClsName, gen(env, LdObjClass, val));
+  auto const ty  = val->type();
+  if (ty <= Type::Null) return curName();
+  if (ty <= Type::Obj) {
+    auto const cls = gen(env, LdObjClass, val);
+    return gen(env, LdClsName, cls);
   }
 
   return nullptr;
 }
 
-SSATmp* optimizedCallGetCalledClass(HTS& env) {
+SSATmp* opt_get_called_class(HTS& env, uint32_t numArgs) {
+  if (numArgs != 0) return nullptr;
   if (!curClass(env)) return nullptr;
   auto const ctx = ldCtx(env);
   auto const cls = gen(env, LdClsCtx, ctx);
@@ -200,37 +210,24 @@ bool optimizedFCallBuiltin(HTS& env,
                            const Func* func,
                            uint32_t numArgs,
                            uint32_t numNonDefault) {
-  SSATmp* res = nullptr;
-  switch (numArgs) {
-  case 0:
-    if (func->name()->isame(s_get_called_class.get())) {
-      res = optimizedCallGetCalledClass(env);
-    }
-    break;
-  case 1:
-    if (func->name()->isame(s_ini_get.get())) {
-      res = optimizedCallIniGet(env);
-    } else if (func->name()->isame(s_get_class.get())) {
-      res = optimizedCallGetClass(env, numNonDefault);
-    }
-    break;
-  case 2:
-    if (func->name()->isame(s_count.get())) {
-      res = optimizedCallCount(env);
-    }
-    break;
-  case 3:
-    if (func->name()->isame(s_is_a.get())) {
-      res = optimizedCallIsA(env);
-    } else if (func->name()->isame(s_in_array.get())) {
-      res = optimizedCallInArray(env);
-    }
-    break;
-  default:
-    break;
-  }
+  auto const result = [&]() -> SSATmp* {
 
-  if (res == nullptr) return false;
+#define X(x) \
+    if (func->name()->isame(s_##x.get())) return opt_##x(env, numArgs);
+
+    X(get_called_class);
+    X(get_class);
+    X(in_array);
+    X(ini_get);
+    X(count);
+    X(is_a);
+
+#undef X
+
+    return nullptr;
+  }();
+
+  if (result == nullptr) return false;
 
   // Decref and free args
   for (int i = 0; i < numArgs; i++) {
@@ -240,7 +237,7 @@ bool optimizedFCallBuiltin(HTS& env,
     }
   }
 
-  push(env, res);
+  push(env, result);
   return true;
 }
 

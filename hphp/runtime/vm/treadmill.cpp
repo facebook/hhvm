@@ -146,10 +146,19 @@ void refreshStats() {
 
 }
 
-typedef std::list<std::unique_ptr<WorkItem>> PendingTriggers;
-static PendingTriggers s_tq;
+struct PendingTriggers : std::list<std::unique_ptr<WorkItem>> {
+  ~PendingTriggers() {
+    s_destroyed = true;
+  }
+  static bool s_destroyed;
+};
 
+static PendingTriggers s_tq;
+bool PendingTriggers::s_destroyed = false;
 void enqueueInternal(std::unique_ptr<WorkItem> gt) {
+  if (PendingTriggers::s_destroyed) {
+    return;
+  }
   GenCount time = getTime();
   {
     GenCountGuard g;

@@ -1750,7 +1750,7 @@ and xhp_body env =
       k env
 
 and xhp_text env buf = function
-  | Tnewline | Tspace | Tlt | Tlcb | Teof ->
+  | Tnewline | Tspace | Tlt | Tlcb | Teof | Tclose_xhp_comment ->
       back env;
       Buffer.contents buf
   | _ ->

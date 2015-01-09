@@ -45,6 +45,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -5318,6 +5319,21 @@ void CodeGenerator::cgCIterFree(IRInstruction* inst) {
 
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   auto const data = inst->extra<NewStructData>();
+  if (auto shape = Shape::create(data->keys, data->numKeys)) {
+    StructArray* (*f)(uint32_t, const TypedValue*, Shape*) =
+      &MixedArray::MakeStructArray;
+    cgCallHelper(vmain(),
+      CppCall::direct(f),
+      callDest(inst),
+      SyncOptions::kNoSyncPoint,
+      argGroup(inst)
+        .imm(data->numKeys)
+        .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset))
+        .imm(shape)
+    );
+    return;
+  }
+
   StringData** table = mcg->allocData<StringData*>(sizeof(StringData*),
                                                       data->numKeys);
   memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));

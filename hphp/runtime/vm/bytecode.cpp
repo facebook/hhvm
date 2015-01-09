@@ -55,6 +55,8 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/shape.h"
+#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/apc-typed-value.h"
@@ -3576,16 +3578,21 @@ OPTBLD_INLINE void ExecutionContext::iopNewPackedArray(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopNewStructArray(IOP_ARGS) {
   NEXT();
   DECODE(uint32_t, n); // number of keys and elements
-  assert(n > 0 && n <= MixedArray::MaxMakeSize);
-  StringData* names[MixedArray::MaxMakeSize];
+  assert(n > 0 && n <= StructArray::MaxMakeSize);
+  StringData* names[n];
   for (size_t i = 0; i < n; i++) {
     DECODE_LITSTR(s);
     names[i] = s;
   }
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = MixedArray::MakeStruct(n, names, vmStack().topC());
+  ArrayData* a;
+  if (auto shape = Shape::create(names, n)) {
+    a = MixedArray::MakeStructArray(n, vmStack().topC(), shape);
+  } else {
+    a = MixedArray::MakeStruct(n, names, vmStack().topC())->asArrayData();
+  }
   vmStack().ndiscard(n);
-  vmStack().pushArrayNoRc(a->asArrayData());
+  vmStack().pushArrayNoRc(a);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopAddElemC(IOP_ARGS) {

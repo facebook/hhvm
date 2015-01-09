@@ -63,7 +63,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
     // will fail the WaitHandle checks below.
     fail();
   }
-  assert(depCopy->isPacked() || depCopy->isMixed() ||
+  assert(depCopy->isPacked() || depCopy->isMixed() || depCopy->isStruct() ||
          depCopy->kind() == ArrayData::kEmptyKind);
 
   if (depCopy->kind() == ArrayData::kEmptyKind) {

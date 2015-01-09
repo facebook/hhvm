@@ -75,6 +75,8 @@ inline size_t Header::size() const {
   switch (kind()) {
     case HeaderKind::Packed: case HeaderKind::VPacked:
       return PackedArray::heapSize(&arr_);
+    case HeaderKind::Struct:
+      return StructArray::heapSize(&arr_);
     case HeaderKind::Mixed: case HeaderKind::StrMap: case HeaderKind::IntMap:
       return mixed_.heapSize();
     case HeaderKind::Empty:
@@ -232,6 +234,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
         continue;
       }
       case HeaderKind::Packed:
+      case HeaderKind::Struct:
       case HeaderKind::Mixed:
       case HeaderKind::StrMap:
       case HeaderKind::IntMap:

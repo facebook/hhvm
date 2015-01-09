@@ -86,6 +86,7 @@ retry:
     case ArrayData::kMixedKind:
     case ArrayData::kIntMapKind:
     case ArrayData::kStrMapKind:
+    case ArrayData::kStructKind:
       return FromMixedArray(MixedArray::asMixed(ad));
 
     case ArrayData::kProxyKind:

@@ -72,11 +72,13 @@ void array_tracer_dump(const std::string& filename) {
              : g_array_funcs.entry[7]),                 \
   (kind == 8 ? ArrayFunctionsWrapper::entry<kind>       \
              : g_array_funcs.entry[8]),                 \
+  (kind == 9 ? ArrayFunctionsWrapper::entry<kind>       \
+             : g_array_funcs.entry[9]),                 \
 },
 
 template<ArrayData::ArrayKind kind>
 static void mutateArrayFunctionsForKind() {
-  static_assert(ArrayData::ArrayKind::kNumKinds == 9,
+  static_assert(ArrayData::ArrayKind::kNumKinds == 10,
                 "Implicit assumption in DISPATCH macro above");
   ArrayFunctions wrappedFuncs = {
     DISPATCH(release, kind)

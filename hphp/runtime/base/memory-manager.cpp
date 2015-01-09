@@ -550,7 +550,7 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
 
 namespace {
 const char* header_names[] = {
-  "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Apc",
+  "Packed", "Struct", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Apc",
   "Globals", "Proxy", "String", "Object", "ResumableObj", "Resource", "Ref",
   "Resumable", "Native", "Sweepable", "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole", "Debug"

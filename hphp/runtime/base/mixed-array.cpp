@@ -24,7 +24,9 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/vm/member-operations.h"
@@ -256,6 +258,21 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   return ad;
 }
 
+StructArray* MixedArray::MakeStructArray(
+  uint32_t size,
+  const TypedValue* values,
+  Shape* shape
+) {
+  assert(size > 0);
+  assert(size <= kPackedCapCodeThreshold);
+  assert(shape);
+
+  // Append values by moving -- Caller assumes we update refcount.
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  return StructArray::createReversedValues(shape, values, size);
+}
+
 // for internal use by nonSmartCopy() and copyMixed()
 template<class CopyKeyValue>
 ALWAYS_INLINE
@@ -371,9 +388,7 @@ size_t MixedArray::computeAllocBytesFromMaxElms(uint32_t maxElms) {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-Variant CreateVarForUncountedArray(const Variant& source) {
+Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
     case KindOfUninit:
@@ -397,9 +412,10 @@ Variant CreateVarForUncountedArray(const Variant& source) {
 
     case KindOfArray: {
       auto const ad = source.getArrayData();
-      return ad == staticEmptyArray() ? ad :
-             ad->isPacked() ? MixedArray::MakeUncountedPacked(ad) :
-             MixedArray::MakeUncounted(ad);
+      if (ad == staticEmptyArray()) return ad;
+      if (ad->isPacked()) return MixedArray::MakeUncountedPacked(ad);
+      if (ad->isStruct()) return StructArray::MakeUncounted(ad);
+      return MixedArray::MakeUncounted(ad);
     }
 
     case KindOfObject:
@@ -409,8 +425,6 @@ Variant CreateVarForUncountedArray(const Variant& source) {
       break;
   }
   not_reached();
-}
-
 }
 
 ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
@@ -513,7 +527,7 @@ void MixedArray::Release(ArrayData* in) {
   MM().objFreeLogged(ad, ad->heapSize());
 }
 
-static void release_unk_tv(TypedValue& tv) {
+void MixedArray::ReleaseUncountedTypedValue(TypedValue& tv) {
   if (tv.m_type == KindOfString) {
     assert(!tv.m_data.pstr->isRefCounted());
     if (tv.m_data.pstr->isUncounted()) {
@@ -527,6 +541,8 @@ static void release_unk_tv(TypedValue& tv) {
     if (!tv.m_data.parr->isStatic()) {
       if (tv.m_data.parr->isPacked()) {
         MixedArray::ReleaseUncountedPacked(tv.m_data.parr);
+      } else if (tv.m_data.parr->isStruct()) {
+        StructArray::ReleaseUncounted(tv.m_data.parr);
       } else {
         MixedArray::ReleaseUncounted(tv.m_data.parr);
       }
@@ -555,7 +571,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
         }
       }
 
-      release_unk_tv(ptr->data);
+      ReleaseUncountedTypedValue(ptr->data);
     }
 
     // We better not have strong iterators associated with uncounted
@@ -577,7 +593,7 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
   auto const data = packedData(ad);
   auto const stop = data + ad->m_size;
   for (auto ptr = data; ptr != stop; ++ptr) {
-    release_unk_tv(*ptr);
+    ReleaseUncountedTypedValue(*ptr);
   }
 
   // We better not have strong iterators associated with uncounted

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -92,6 +93,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
 
 #define DISPATCH(entry)                         \
   { PackedArray::entry,                         \
+    StructArray::entry,                         \
     MixedArray::entry,                          \
     MixedArray::entry,                          \
     MixedArray::entry,                          \
@@ -104,6 +106,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
 
 #define DISPATCH_INTMAP_SPECIALIZED(entry)      \
   { PackedArray::entry,                         \
+    StructArray::entry,                         \
     MixedArray::entry,                          \
     MixedArray::entry,                          \
     MixedArray::entry##Impl<ArrayData::kIntMapKind>, \
@@ -116,6 +119,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
 
 #define DISPATCH_STRMAP_SPECIALIZED(entry)      \
   { PackedArray::entry,                         \
+    StructArray::entry,                         \
     MixedArray::entry,                          \
     MixedArray::entry##Impl<ArrayData::kStrMapKind>, \
     MixedArray::entry,                          \
@@ -128,6 +132,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
 
 #define DISPATCH_MAP_ARRAY_SPECIALIZED(entry)   \
   { PackedArray::entry,                         \
+    StructArray::entry,                         \
     MixedArray::entry,                          \
     MixedArray::entry##Impl<ArrayData::kStrMapKind>, \
     MixedArray::entry##Impl<ArrayData::kIntMapKind>, \
@@ -197,6 +202,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    */
   {
     PackedArray::NvGetInt,
+    StructArray::NvGetInt,
     MixedArray::NvGetInt,
     MixedArray::NvGetIntImpl<ArrayData::kStrMapKind>,
     /* IntMapArray */
@@ -242,6 +248,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    */
   {
     PackedArray::SetInt,
+    StructArray::SetInt,
     MixedArray::SetInt,
     MixedArray::SetIntImpl<ArrayData::kStrMapKind>,
     /* IntMapArray */
@@ -346,6 +353,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    */
   {
     PackedArray::LvalNewRef,
+    StructArray::LvalNew,
     MixedArray::LvalNew,
     MixedArray::LvalNewImpl<ArrayData::kStrMapKind>,
     /* IntMapArray */
@@ -497,6 +505,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    */
   {
     PackedArray::Sort,
+    StructArray::Sort,
     MixedArray::Sort,
     /* StrMapArray */
     MixedArray::WarnAndSort,
@@ -536,6 +545,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    */
   {
     PackedArray::Usort,
+    StructArray::Usort,
     MixedArray::Usort,
     /* StrMapArray */
     MixedArray::WarnAndUsort,
@@ -703,6 +713,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    */
   {
     &PackedArray::ZSetInt,
+    &StructArray::ZSetInt,
     &MixedArray::ZSetInt,
     &MixedArray::ZSetInt,
     &MixedArray::ZSetInt,
@@ -715,6 +726,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
 
   {
     &PackedArray::ZSetStr,
+    &StructArray::ZSetStr,
     &MixedArray::ZSetStr,
     &MixedArray::ZSetStr,
     &MixedArray::ZSetStr,
@@ -727,6 +739,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
 
   {
     &PackedArray::ZAppend,
+    &StructArray::ZAppend,
     &MixedArray::ZAppend,
     &MixedArray::ZAppend,
     &MixedArray::ZAppend,
@@ -984,8 +997,9 @@ const Variant& ArrayData::getNotFound(const Variant& k) {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,9> names = {{
+  std::array<const char*,10> names = {{
     "PackedKind",
+    "StructKind",
     "MixedKind",
     "StrMapKind",
     "IntMapKind",

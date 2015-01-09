@@ -116,7 +116,7 @@ template<class T> void smart_delete_array(T* t, size_t count);
 
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
-  Packed, Mixed, StrMap, IntMap, VPacked, Empty, Apc, Globals, Proxy,
+  Packed, Struct, Mixed, StrMap, IntMap, VPacked, Empty, Apc, Globals, Proxy,
   // Other ordinary refcounted heap objects
   String, Object, ResumableObj, Resource, Ref,
   Resumable, // ResumableNode followed by Frame, Resumable, ObjectData

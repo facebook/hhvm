@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
@@ -102,6 +103,14 @@ std::pair<int, double> sizeOfArray(const ArrayData* props) {
   int size = 0;
   double sized = 0;
 
+  auto handle_dense_array_item = [&] () {
+    const TypedValue* val = props->getValueRef(iter).asTypedValue();
+    auto val_size_pair = tvGetSize(val, 0);
+    size += val_size_pair.first;
+    sized += val_size_pair.second;
+    FTRACE(2, "Value size for item was {}\n", val_size_pair.first);
+  };
+
   if (props->isMixed()) {
     FTRACE(2, "Iterating mixed array\n");
     while (iter != pos_limit) {
@@ -151,12 +160,14 @@ std::pair<int, double> sizeOfArray(const ArrayData* props) {
   } else if (props->isPacked()) {
     FTRACE(2, "Iterating packed array\n");
     while (iter != pos_limit) {
-      const TypedValue* val = props->getValueRef(iter).asTypedValue();
-      auto val_size_pair = tvGetSize(val, 0);
-      size += val_size_pair.first;
-      sized += val_size_pair.second;
-      FTRACE(2, "Value size for item was {}\n", val_size_pair.first);
+      handle_dense_array_item();
       iter = PackedArray::IterAdvance(props, iter);
+    }
+  } else if (props->isStruct()) {
+    FTRACE(2, "Iterating struct array\n");
+    while (iter != pos_limit) {
+      handle_dense_array_item();
+      iter = StructArray::IterAdvance(props, iter);
     }
   }
 
@@ -172,6 +183,11 @@ void stringsOfArray(
   ssize_t iter = props->iter_begin();
   auto pos_limit = props->iter_end();
   path->push_back(std::string("array()"));
+
+  auto handle_dense_array_item = [&]() {
+    const TypedValue* val = props->getValueRef(iter).asTypedValue();
+    tvGetStrings(val, metrics, path, pointers);
+  };
 
   if (props->isMixed()) {
     while (iter != pos_limit) {
@@ -211,9 +227,15 @@ void stringsOfArray(
   } else if (props->isPacked()) {
     path->push_back(std::string("[]"));
     while (iter != pos_limit) {
-      const TypedValue* val = props->getValueRef(iter).asTypedValue();
-      tvGetStrings(val, metrics, path, pointers);
+      handle_dense_array_item();
       iter = PackedArray::IterAdvance(props, iter);
+    }
+    path->pop_back();
+  } else if (props->isStruct()) {
+    path->push_back(std::string("[]"));
+    while (iter != pos_limit) {
+      handle_dense_array_item();
+      iter = StructArray::IterAdvance(props, iter);
     }
     path->pop_back();
   }

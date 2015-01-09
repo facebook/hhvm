@@ -1869,7 +1869,7 @@ and stmt_toplevel_word env = function
   | "const" ->
       const env
   | "type" | "newtype" ->
-      seq env [last_token; space; hint; space; expect "="];
+      seq env [last_token; space; hint; space; expect "="; space];
       typedef env;
       semi_colon env;
   | "namespace" ->
@@ -2229,6 +2229,7 @@ and expr_remain lowest env =
   | Tampeq | Tlshifteq | Trshifteq ->
       space env;
       last_token env;
+      space env;
       rhs_assign env;
       lowest
   | Tincr | Tdecr ->

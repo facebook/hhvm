@@ -183,6 +183,7 @@ module FB = struct
   let cGenReadApi           = "\\GenReadApi"
   let cGenReadIdxApi        = "\\GenReadIdxApi"
 
+  let cPrivacyPolicy        = "\\PrivacyPolicy"
   let cPrivacyPolicyBase    = "\\PrivacyPolicyBase"
   let cDataType             = "\\DataType"
   let cDataTypeImplProvider = "\\DataTypeImplProvider"

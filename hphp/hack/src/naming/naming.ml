@@ -812,15 +812,15 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       let (_, cname) as name = Env.class_name env id in
       let gen_read_api_covariance =
         (cname = SN.FB.cGenReadApi || cname = SN.FB.cGenReadIdxApi) in
-      let privacy_policy_base_covariance =
-        (cname = SN.FB.cPrivacyPolicyBase) in
+      let privacy_policy_contravariance =
+        (cname = SN.FB.cPrivacyPolicyBase || cname = SN.FB.cPrivacyPolicy) in
       let data_type_covariance =
         (cname = SN.FB.cDataType || cname = SN.FB.cDataTypeImplProvider) in
       let awaitable_covariance =
         (cname = SN.Classes.cAwaitable || cname = SN.Classes.cWaitHandle) in
       let allow_this = allow_this &&
         (awaitable_covariance || gen_read_api_covariance ||
-         privacy_policy_base_covariance || data_type_covariance) in
+         privacy_policy_contravariance || data_type_covariance) in
       N.Happly (name, hintl ~allow_this env hl)
   end
 

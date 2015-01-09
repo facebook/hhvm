@@ -188,15 +188,16 @@ Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname /* = nullptr */,
                      bool useLocalStaticStringMap /* = false */) {
-  if (useLocalStaticStringMap)
-    *StaticStringConfig::s_useLocalMap = true;
-
   auto md5string = string_md5(s, sz);
   MD5 md5(md5string.c_str());
   Unit* u = Repo::get().loadUnit(fname ? fname : "", md5).release();
   if (u != nullptr) {
     return u;
   }
+
+  if (useLocalStaticStringMap)
+    *StaticStringConfig::s_useLocalMap = true;
+
   // NB: fname needs to be long-lived if generating a bytecode repo because it
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.

@@ -15,7 +15,7 @@ from operator import not_
 
 verbose = False
 
-def run_typechecker(files, hh_single_type_check):
+def run_test_program(files, program):
     """
     Generate all the .out files.
     """
@@ -23,7 +23,7 @@ def run_typechecker(files, hh_single_type_check):
         with open(f + '.out', 'w') as outfile:
             test_dir, test_name = os.path.split(f)
             hh_flags = get_hh_flags(test_dir)
-            cmd = [hh_single_type_check, test_name] + hh_flags
+            cmd = [program, test_name] + hh_flags
             if verbose:
                 print('Executing', ' '.join(cmd))
             subprocess.call(cmd, stdout=outfile, stderr=outfile, cwd=test_dir)
@@ -98,28 +98,23 @@ if __name__ == '__main__':
     parser.add_argument(
             'test_path',
             help='A file or a directory. ')
-    parser.add_argument('--hh_single_type_check',
-        type=os.path.abspath,
-        default=os.path.abspath(os.path.join(
-            os.path.dirname(__file__),
-            '../../../../../src/hh_single_type_check')))
+    parser.add_argument('--program', type=os.path.abspath)
     parser.add_argument('--verbose', action='store_true')
     parser.epilog = "%s looks for a file named HH_FLAGS in the same directory" \
                     " as the test files it is executing. If found, the " \
                     "contents will be passed as arguments to " \
-                    "hh_single_type_check." % parser.prog
+                    "<program>." % parser.prog
     args = parser.parse_args()
 
     verbose = args.verbose
 
-    if not os.path.isfile(args.hh_single_type_check):
-        raise Exception('Could not find hh_single_typecheck at %s' %
-            args.hh_single_type_check)
+    if not os.path.isfile(args.program):
+        raise Exception('Could not find program at %s' % args.program)
 
     files = list_test_files(args.test_path)
 
     # The .exp files that describe expected error output hardcode the path of
     # the source files, so we chdir to ensure that they match.
-    run_typechecker(files, args.hh_single_type_check)
+    run_test_program(files, args.program)
     if not check_results(files):
         sys.exit(1)

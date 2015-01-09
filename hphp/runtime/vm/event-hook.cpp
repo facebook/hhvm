@@ -286,11 +286,6 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
 }
 
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
-  // Xenon
-  if (flags & RequestInjectionData::XenonSignalFlag) {
-    Xenon::getInstance().log(Xenon::EnterSample);
-  }
-
   // User profiler
   if (flags & RequestInjectionData::EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
@@ -364,12 +359,35 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {
     return false;
   }
+
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(Xenon::EnterSample);
+  }
+
   onFunctionEnter(ar, funcType, flags);
   return true;
 }
 
-void EventHook::onFunctionResume(const ActRec* ar) {
+void EventHook::onFunctionResumeAwait(const ActRec* ar) {
   ssize_t flags = CheckSurprise();
+
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(Xenon::ResumeAwaitSample);
+  }
+
+  onFunctionEnter(ar, EventHook::NormalFunc, flags);
+}
+
+void EventHook::onFunctionResumeYield(const ActRec* ar) {
+  ssize_t flags = CheckSurprise();
+
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(Xenon::EnterSample);
+  }
+
   onFunctionEnter(ar, EventHook::NormalFunc, flags);
 }
 

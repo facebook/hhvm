@@ -1852,7 +1852,7 @@ void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr,
   vmfp() = enterFnAr;
   vmpc() = vmfp()->func()->unit()->at(resumable->resumeOffset());
   assert(vmfp()->func()->contains(vmpc()));
-  EventHook::FunctionResume(enterFnAr);
+  EventHook::FunctionResumeAwait(enterFnAr);
 
   if (UNLIKELY(exception != nullptr)) {
     assert(exception->instanceof(SystemLib::s_ExceptionClass));
@@ -6970,7 +6970,7 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   assert(genAR->func()->contains(gen->resumable()->resumeOffset()));
   pc = genAR->func()->unit()->at(gen->resumable()->resumeOffset());
   SYNC();
-  EventHook::FunctionResume(vmfp());
+  EventHook::FunctionResumeYield(vmfp());
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContEnter(IOP_ARGS) {

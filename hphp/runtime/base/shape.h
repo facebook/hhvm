@@ -37,9 +37,9 @@ public:
   bool transitionRequiresGrowth() const;
   size_t suggestedNewCapacity() const;
 
-  uint32_t offsetFor(const StringData*);
-  bool hasOffsetFor(const StringData*);
-  const StringData* keyForOffset(uint32_t);
+  uint32_t offsetFor(const StringData*) const;
+  bool hasOffsetFor(const StringData*) const;
+  const StringData* keyForOffset(uint32_t) const;
 
 private:
   static Shape* create(); // Empty shape.
@@ -80,7 +80,6 @@ inline bool Shape::transitionRequiresGrowth() const {
 }
 
 inline size_t Shape::suggestedNewCapacity() const {
-  assert(transitionRequiresGrowth());
   // 1.5x growth
   return m_capacity ? m_capacity + (m_capacity >> 1) : 2;
 }
@@ -93,15 +92,15 @@ inline size_t Shape::capacity() const {
   return m_capacity;
 }
 
-inline const StringData* Shape::keyForOffset(uint32_t offset) {
+inline const StringData* Shape::keyForOffset(uint32_t offset) const {
   return m_table.keyForOffset(offset);
 }
 
-inline uint32_t Shape::offsetFor(const StringData* property) {
+inline uint32_t Shape::offsetFor(const StringData* property) const {
   return m_table.offsetFor(property);
 }
 
-inline bool Shape::hasOffsetFor(const StringData* property) {
+inline bool Shape::hasOffsetFor(const StringData* property) const {
   return offsetFor(property) != PropertyTable::kInvalidOffset;
 }
 
@@ -150,6 +149,8 @@ inline Shape* Shape::transition(StringData* property) {
   }
   return result.first->second;
 }
+
+std::string show(const Shape& shape);
 
 }
 

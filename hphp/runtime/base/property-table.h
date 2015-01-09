@@ -32,8 +32,8 @@ public:
   PropertyTable& operator=(const PropertyTable&) = delete;
 
   uint32_t add(const StringData*);
-  uint32_t offsetFor(const StringData*);
-  const StringData* keyForOffset(uint32_t);
+  uint32_t offsetFor(const StringData*) const;
+  const StringData* keyForOffset(uint32_t) const;
 
   static constexpr uint32_t kInvalidOffset = UINT_MAX;
 
@@ -46,9 +46,11 @@ private:
 
   static uint32_t* baseToOffsets(void* base);
   uint32_t* offsets();
+  const uint32_t* offsets() const;
 
   static Entry* baseToEntries(void* base, size_t capacity);
   Entry* entries();
+  const Entry* entries() const;
 
   enum PropertyTypeTag {
     Static,
@@ -56,9 +58,13 @@ private:
   };
 
   template<PropertyTypeTag>
-  uint32_t bucketFor(const StringData* property);
+  uint32_t bucketFor(const StringData*);
   template<PropertyTypeTag>
-  uint32_t bucketFor(const StringData* property, Entry*, size_t capacity);
+  uint32_t bucketFor(const StringData*) const;
+  template<PropertyTypeTag>
+  uint32_t bucketFor(const StringData*, const Entry*, size_t capacity);
+  template<PropertyTypeTag>
+  uint32_t bucketFor(const StringData*, const Entry*, size_t capacity) const;
 
   static size_t bytesForCapacity(size_t capacity);
   double loadFactor() const;
@@ -97,10 +103,20 @@ inline PropertyTable::Entry* PropertyTable::baseToEntries(
 }
 
 inline uint32_t* PropertyTable::offsets() {
+  return const_cast<uint32_t*>(
+    const_cast<const PropertyTable*>(this)->baseToOffsets(m_base));
+}
+
+inline const uint32_t* PropertyTable::offsets() const {
   return baseToOffsets(m_base);
 }
 
 inline PropertyTable::Entry* PropertyTable::entries() {
+  return const_cast<PropertyTable::Entry*>(
+    const_cast<const PropertyTable*>(this)->entries());
+}
+
+inline const PropertyTable::Entry* PropertyTable::entries() const {
   return baseToEntries(m_base, m_capacity);
 }
 
@@ -122,12 +138,17 @@ inline uint32_t PropertyTable::bucketFor(const StringData* property) {
   return bucketFor<propType>(property, entries(), m_capacity);
 }
 
-inline const StringData* PropertyTable::keyForOffset(uint32_t offset) {
+template<PropertyTable::PropertyTypeTag propType>
+inline uint32_t PropertyTable::bucketFor(const StringData* property) const {
+  return bucketFor<propType>(property, entries(), m_capacity);
+}
+
+inline const StringData* PropertyTable::keyForOffset(uint32_t offset) const {
   if (offset >= m_size) return nullptr;
   return entries()[offsets()[offset]].key;
 }
 
-inline uint32_t PropertyTable::offsetFor(const StringData* property) {
+inline uint32_t PropertyTable::offsetFor(const StringData* property) const {
   auto bucketIndex = property->isStatic() ? bucketFor<Static>(property)
                                           : bucketFor<NotStatic>(property);
   auto& bucket = entries()[bucketIndex];
@@ -137,9 +158,19 @@ inline uint32_t PropertyTable::offsetFor(const StringData* property) {
 template<PropertyTable::PropertyTypeTag propType>
 inline uint32_t PropertyTable::bucketFor(
   const StringData* property,
-  Entry* entries,
+  const Entry* entries,
   size_t capacity
 ) {
+  return const_cast<const PropertyTable*>(this)->bucketFor<propType>(
+    property, entries, capacity);
+}
+
+template<PropertyTable::PropertyTypeTag propType>
+inline uint32_t PropertyTable::bucketFor(
+  const StringData* property,
+  const Entry* entries,
+  size_t capacity
+) const {
   assert(propType == NotStatic || property->isStatic());
   assert(m_size < m_capacity);
   auto hash = property->hash();

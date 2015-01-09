@@ -45,4 +45,16 @@ Shape* Shape::clone(Shape* from) {
   return new Shape(*from);
 }
 
+std::string show(const Shape& shape) {
+  auto ret = std::string{};
+  ret += "{";
+  assert(shape.size() >= 1);
+  folly::format(&ret, "\"{}\"", shape.keyForOffset(0)->data());
+  for (uint32_t i = 1; i < shape.size(); ++i) {
+    folly::format(&ret, ", \"{}\"", shape.keyForOffset(i)->data());
+  }
+  ret += "}";
+  return ret;
+}
+
 }

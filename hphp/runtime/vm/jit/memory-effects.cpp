@@ -325,6 +325,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
     return PureLoad { AElemIAny };
 
+  case LdStructArrayElem:
+    assert(inst.src(1)->isConst() && inst.src(1)->strVal()->isStatic());
+    return PureLoad { AElemS { inst.src(0), inst.src(1)->strVal() } };
+
   // TODO(#5575265): replace this instruction with CheckTypeMem.
   case CheckTypePackedArrayElem:
   case IsPackedArrayElemNull:
@@ -708,6 +712,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Clone:
   case WarnNonObjProp:
   case RaiseArrayIndexNotice:
+  case RaiseArrayKeyNotice:
   case RaiseError:
   case RaiseNotice:
   case RaiseUndefProp:

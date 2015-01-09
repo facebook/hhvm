@@ -1600,6 +1600,10 @@ To string conversions:
 
   Raises a notice that S0 is an undefined index for an array.
 
+| RaiseArrayKeyNotice, ND, S(StaticStr), Er
+
+  Raises a notice that S0 is an undefined key for an array.
+
 | ClosureStaticLocInit, D(BoxedCell), CStr S(FramePtr) S(Cell), NF
 
   Get boxed value to initialize static local named S0 in frame S1, where S1
@@ -2328,6 +2332,12 @@ fields of that struct for holding intermediate values.
 
   Profile exact type of the value pointed to by S0, which must be known to
   point to a string at the time this instruction runs.
+
+| LdStructArrayElem, DArrElem, AK(Struct) S(StaticStr), NF
+
+  Loads the element of the struct array in S0 at offset S1. This instruction
+  assumes that the key for that particular offset was already present in the
+  array, which previous guards should guarantee.
 
 | CheckPackedArrayBounds, ND, AK(Packed) S(Int), B
 

@@ -262,6 +262,10 @@ void raiseArrayIndexNotice(const int64_t index) {
   raise_notice("Undefined index: %" PRId64, index);
 }
 
+void raiseArrayKeyNotice(const StringData* key) {
+  raise_notice("Undefined key: %s", key->data());
+}
+
 //////////////////////////////////////////////////////////////////////
 
 const StaticString

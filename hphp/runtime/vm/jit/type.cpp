@@ -27,6 +27,9 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/shape.h"
+#include "hphp/runtime/base/struct-array.h"
+#include "hphp/runtime/base/struct-array-defs.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -304,6 +307,9 @@ std::string Type::toString() const {
       }
       if (auto ty = getArrayType()) {
         str += folly::to<std::string>(':', show(*ty));
+      }
+      if (const auto shape = getArrayShape()) {
+        str += folly::to<std::string>(":", show(*shape));
       }
       parts.push_back(str);
       t -= AnyArr;
@@ -907,6 +913,10 @@ Type liveTVType(const TypedValue* tv) {
     return Type::Obj.specializeExact(cls);
   }
   if (tv->m_type == KindOfArray) {
+    ArrayData* ar = tv->m_data.parr;
+    if (ar->kind() == ArrayData::kStructKind) {
+      return Type::Arr.specialize(StructArray::asStructArray(ar)->shape());
+    }
     return Type::Arr.specialize(tv->m_data.parr->kind());
   }
 
@@ -998,7 +1008,7 @@ Type allocObjReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  assert(inst->op() == LdPackedArrayElem);
+  assert(inst->op() == LdPackedArrayElem || inst->op() == LdStructArrayElem);
   auto const tyParam = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
   assert(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
 
@@ -1448,6 +1458,7 @@ std::string TypeConstraint::toString() const {
 
   if (category == DataTypeSpecialized) {
     if (wantArrayKind()) ret += ",ArrayKind";
+    if (wantArrayShape()) ret += ",ArrayShape";
     if (wantClass()) {
       folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
     }

@@ -430,6 +430,11 @@ inline Type Type::specialize(const RepoAuthType::Array* array) const {
   return Type(m_bits, rawPtrKind(), makeArrayInfo(folly::none, array));
 }
 
+inline Type Type::specialize(const Shape* shape) const {
+  assert(canSpecializeArray());
+  return Type(m_bits, rawPtrKind(), makeArrayInfo(shape));
+}
+
 inline Type Type::unspecialize() const {
   return Type(m_bits, rawPtrKind());
 }
@@ -466,7 +471,18 @@ inline folly::Optional<ArrayData::ArrayKind> Type::getOptArrayKind() const {
 
 inline const RepoAuthType::Array* Type::getArrayType() const {
   assert(canSpecializeArray());
-  return m_hasConstVal ? nullptr : arrayType(m_arrayInfo);
+  if (m_hasConstVal) return nullptr;
+  if (!arrayKindValid(m_arrayInfo)) return arrayType(m_arrayInfo);
+  if (arrayKind(m_arrayInfo) == ArrayData::kStructKind) return nullptr;
+  return arrayType(m_arrayInfo);
+}
+
+inline const Shape* Type::getArrayShape() const {
+  assert(canSpecializeArray());
+  if (m_hasConstVal) return nullptr;
+  if (!arrayKindValid(m_arrayInfo)) return nullptr;
+  if (arrayKind(m_arrayInfo) != ArrayData::kStructKind) return nullptr;
+  return arrayShape(m_arrayInfo);
 }
 
 inline Type Type::specializedType() const {
@@ -578,6 +594,14 @@ Type::ArrayInfo Type::makeArrayInfo(folly::Optional<ArrayData::ArrayKind> kind,
   return static_cast<ArrayInfo>(ret);
 }
 
+inline
+Type::ArrayInfo Type::makeArrayInfo(const Shape* shape) {
+  auto ret = reinterpret_cast<uintptr_t>(shape);
+  ret |= 0x1;
+  ret |= uintptr_t{ArrayData::kStructKind} << 48;
+  return static_cast<ArrayInfo>(ret);
+}
+
 inline bool Type::arrayKindValid(Type::ArrayInfo info) {
   return static_cast<uintptr_t>(info) & 0x1;
 }
@@ -591,6 +615,12 @@ inline ArrayData::ArrayKind Type::arrayKind(Type::ArrayInfo info) {
 
 inline const RepoAuthType::Array* Type::arrayType(Type::ArrayInfo info) {
   return reinterpret_cast<const RepoAuthType::Array*>(
+    static_cast<uintptr_t>(info) & (-1ull >> 16) & ~0x1
+  );
+}
+
+inline const Shape* Type::arrayShape(Type::ArrayInfo info) {
+  return reinterpret_cast<const Shape*>(
     static_cast<uintptr_t>(info) & (-1ull >> 16) & ~0x1
   );
 }
@@ -646,6 +676,18 @@ inline TypeConstraint& TypeConstraint::setWantArrayKind() {
 
 inline bool TypeConstraint::wantArrayKind() const {
   return m_specialized & kWantArrayKind;
+}
+
+inline TypeConstraint& TypeConstraint::setWantArrayShape() {
+  assert(!wantClass());
+  assert(isSpecialized());
+  setWantArrayKind();
+  m_specialized |= kWantArrayShape;
+  return *this;
+}
+
+inline bool TypeConstraint::wantArrayShape() const {
+  return m_specialized & kWantArrayShape;
 }
 
 inline TypeConstraint& TypeConstraint::setDesiredClass(const Class* cls) {

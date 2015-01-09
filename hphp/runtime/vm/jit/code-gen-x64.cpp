@@ -400,6 +400,7 @@ CALL_OPCODE(RaiseError)
 CALL_OPCODE(RaiseWarning)
 CALL_OPCODE(RaiseNotice)
 CALL_OPCODE(RaiseArrayIndexNotice)
+CALL_OPCODE(RaiseArrayKeyNotice)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ClosureStaticLocInit)
 CALL_OPCODE(GenericIdx)
@@ -1348,6 +1349,12 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
     auto reg = getDataPtrEnregistered(v, dataSrc);
     v << cmpbim{type.getArrayKind(), reg[ArrayData::offsetofKind()], sf};
     doJcc(CC_E, sf);
+    if (type.getArrayKind() == ArrayData::kStructKind && type.getArrayShape()) {
+      auto newSf = v.makeReg();
+      auto offset = StructArray::shapeOffset();
+      v << cmpqm{v.cns(type.getArrayShape()), reg[offset], newSf};
+      doJcc(CC_E, newSf);
+    }
   }
 }
 
@@ -5630,6 +5637,18 @@ void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
 
   v = done;
   v << phidef{v.makeTuple({i3, j3})};
+}
+
+void CodeGenerator::cgLdStructArrayElem(IRInstruction* inst) {
+  auto const array = srcLoc(inst, 0).reg();
+  auto const key = inst->src(1)->strVal();
+  auto const shape = inst->src(0)->type().getArrayShape();
+  auto const offset = shape->offsetFor(key);
+  assert(offset != PropertyTable::kInvalidOffset);
+
+  auto const actualOffset = StructArray::dataOffset() +
+    sizeof(TypedValue) * offset;
+  emitLoad(inst->dst(), dstLoc(inst, 0), array[actualOffset]);
 }
 
 void CodeGenerator::print() const {

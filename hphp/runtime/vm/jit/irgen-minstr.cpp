@@ -51,6 +51,7 @@ enum class SimpleOp {
   Array,
   ProfiledArray,
   PackedArray,
+  StructArray,
   String,
   Vector, // c_Vector* or c_ImmVector*
   Map,    // c_Map*
@@ -175,6 +176,12 @@ bool constrainCollectionOpBase(MTS& env) {
       constrainBase(
         env,
         TypeConstraint(DataTypeSpecialized).setWantArrayKind()
+      );
+      return true;
+
+    case SimpleOp::StructArray:
+      constrainBase(env,
+        TypeConstraint(DataTypeSpecialized).setWantArrayShape()
       );
       return true;
 
@@ -490,16 +497,24 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
   if ((env.op == OpSetM || readInst) && isSimpleBase(env) &&
       isSingleMember(env)) {
     if (baseType <= Type::Arr) {
-      auto const isPacked =
-        baseType.isSpecialized() &&
-        baseType.hasArrayKind() &&
-        baseType.getArrayKind() == ArrayData::kPackedKind;
+      auto isPacked = false;
+      auto isStruct = false;
+      if (baseType.isSpecialized() && baseType.hasArrayKind()) {
+        isPacked = baseType.getArrayKind() == ArrayData::kPackedKind;
+        isStruct = baseType.getArrayKind() == ArrayData::kStructKind
+          && !!baseType.getArrayShape();
+      }
       if (mcodeIsElem(env.immVecM[0])) {
         SSATmp* key = getInput(env, env.mii.valCount() + 1, DataTypeGeneric);
         if (key->isA(Type::Int) || key->isA(Type::Str)) {
-          if (readInst && key->isA(Type::Int)) {
-            return isPacked ? SimpleOp::PackedArray
-                            : SimpleOp::ProfiledArray;
+          if (readInst) {
+            if (key->isA(Type::Int)) {
+              return isPacked ? SimpleOp::PackedArray
+                              : SimpleOp::ProfiledArray;
+            } else if (key->isConst(Type::StaticStr)) {
+              return isStruct ? SimpleOp::StructArray
+                              : SimpleOp::Array;
+            }
           }
           return SimpleOp::Array;
         }
@@ -1271,6 +1286,28 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
   );
 }
 
+SSATmp* emitStructArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
+  assert(base->isA(Type::Arr));
+  assert(base->type().getArrayKind() == ArrayData::kStructKind);
+  assert(base->type().getArrayShape());
+  assert(key->isConst(Type::Str));
+  assert(key->strVal()->isStatic());
+
+  const auto keyStr = key->strVal();
+  const auto shape = base->type().getArrayShape();
+  auto offset = shape->offsetFor(keyStr);
+
+  if (offset == PropertyTable::kInvalidOffset) {
+    gen(env, RaiseArrayKeyNotice, key);
+    return cns(env, Type::InitNull);
+  }
+
+  auto res = gen(env, LdStructArrayElem, base, key);
+  auto unboxed = unbox(env, res, nullptr);
+  gen(env, IncRef, unboxed);
+  return unboxed;
+}
+
 SSATmp* emitArrayGet(MTS& env, SSATmp* key) {
   return gen(env, ArrayGet, env.base.value, key);
 }
@@ -1572,6 +1609,9 @@ void emitCGetElem(MTS& env) {
   case SimpleOp::PackedArray:
     env.result = emitPackedArrayGet(env, env.base.value, key);
     break;
+  case SimpleOp::StructArray:
+    env.result = emitStructArrayGet(env, env.base.value, key);
+    break;
   case SimpleOp::ProfiledArray:
     emitProfiledArrayGet(env, key);
     break;
@@ -1601,6 +1641,7 @@ void emitVGetElem(MTS& env) {
 void emitIssetElem(MTS& env) {
   switch (env.simpleOp) {
   case SimpleOp::Array:
+  case SimpleOp::StructArray:
   case SimpleOp::ProfiledArray:
     env.result = gen(env, ArrayIsset, env.base.value, getKey(env));
     break;
@@ -1668,6 +1709,7 @@ void emitSetElem(MTS& env) {
     emitArraySet(env, key, value);
     break;
   case SimpleOp::PackedArray:
+  case SimpleOp::StructArray:
   case SimpleOp::String:
     always_assert(false && "Bad SimpleOp in emitSetElem");
     break;

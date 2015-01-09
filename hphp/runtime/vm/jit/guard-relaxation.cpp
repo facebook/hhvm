@@ -174,6 +174,7 @@ Type relaxCell(Type t, TypeConstraint tc) {
         // don't need to eliminate it here. Just make sure t actually fits the
         // constraint.
         assert(t < Type::Arr && t.hasArrayKind());
+        assert(!tc.wantArrayShape() || t.getArrayShape());
       }
 
       return t;
@@ -316,7 +317,9 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
         return tc.wantClass() && t.getClass()->classof(tc.desiredClass());
       }
       if (t < Type::Arr) {
-        return tc.wantArrayKind() && t.hasArrayKind();
+        if (tc.wantArrayShape() && !t.getArrayShape()) return false;
+        if (tc.wantArrayKind() && !t.hasArrayKind()) return false;
+        return true;
       }
       return false;
   }
@@ -379,6 +382,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
       // We need to ask for the right kind of specialization, so grab it from
       // origTc.
       if (origTc.wantArrayKind()) newTc.setWantArrayKind();
+      if (origTc.wantArrayShape()) newTc.setWantArrayShape();
       if (origTc.wantClass()) newTc.setDesiredClass(origTc.desiredClass());
     }
 
@@ -404,6 +408,7 @@ TypeConstraint applyConstraint(TypeConstraint tc, const TypeConstraint newTc) {
   tc.category = std::max(newTc.category, tc.category);
 
   if (newTc.wantArrayKind()) tc.setWantArrayKind();
+  if (newTc.wantArrayShape()) tc.setWantArrayShape();
 
   if (newTc.wantClass()) {
     if (tc.wantClass()) {

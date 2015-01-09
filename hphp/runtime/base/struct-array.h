@@ -144,6 +144,14 @@ struct StructArray : public ArrayData {
 
   static const uint32_t MaxMakeSize = 64;
 
+  static constexpr ptrdiff_t dataOffset() {
+    return sizeof(StructArray);
+  }
+
+  static constexpr ptrdiff_t shapeOffset() {
+    return offsetof(StructArray, m_shape);
+  }
+
 private:
   StructArray(uint32_t size, uint32_t pos, uint32_t count, Shape* shape);
 

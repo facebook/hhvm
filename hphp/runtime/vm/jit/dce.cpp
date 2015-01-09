@@ -342,6 +342,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseWarning:
   case RaiseNotice:
   case RaiseArrayIndexNotice:
+  case RaiseArrayKeyNotice:
   case ClosureStaticLocInit:
   case StaticLocInitCached:
   case PrintStr:
@@ -463,6 +464,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckTypePackedArrayElem:
   case IsPackedArrayElemNull:
   case LdPackedArrayElem:
+  case LdStructArrayElem:
   case LdVectorSize:
   case VectorDoCow:
   case VectorHasImmCopy:

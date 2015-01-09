@@ -35,6 +35,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Func;
+class Shape;
 
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -717,6 +718,7 @@ public:
    */
   Type specialize(ArrayData::ArrayKind arrayKind) const;
   Type specialize(const RepoAuthType::Array* array) const;
+  Type specialize(const Shape* shape) const;
 
   /*
    * Return a copy of this Type with the specialization dropped.
@@ -763,6 +765,11 @@ public:
    * Return the Type's array type specialization.
    */
   const RepoAuthType::Array* getArrayType() const;
+
+  /*
+   * Return the Type's array Shape specialization.
+   */
+  const Shape* getArrayShape() const;
 
   /*
    * Project the Type onto those types which can be specialized, e.g.:
@@ -878,6 +885,7 @@ private:
    */
   static ArrayInfo makeArrayInfo(folly::Optional<ArrayData::ArrayKind> kind,
                                  const RepoAuthType::Array* arrTy);
+  static ArrayInfo makeArrayInfo(const Shape* shape);
 
   /*
    * ArrayInfo accessors for the valid bit, kind, and RAT.
@@ -888,7 +896,7 @@ private:
   static bool arrayKindValid(ArrayInfo info);
   static ArrayData::ArrayKind arrayKind(ArrayInfo info);
   static const RepoAuthType::Array* arrayType(ArrayInfo info);
-
+  static const Shape* arrayShape(Type::ArrayInfo info);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -1025,6 +1033,7 @@ struct TypeConstraint {
   // Specialization.
 
   static constexpr uint8_t kWantArrayKind = 0x1;
+  static constexpr uint8_t kWantArrayShape = 0x2;
 
   /*
    * Is this TypeConstraint for a specialized type?
@@ -1038,6 +1047,15 @@ struct TypeConstraint {
    */
   TypeConstraint& setWantArrayKind();
   bool wantArrayKind() const;
+
+  /*
+   * Set or check the kWantArrayShape bit in 'm_specialized'. kWantArrayShape
+   * implies kWantArrayKind.
+   *
+   * @requires: isSpecialized()
+   */
+  TypeConstraint& setWantArrayShape();
+  bool wantArrayShape() const;
 
   /*
    * Set, check, or return the specialized Class.

@@ -13,15 +13,12 @@ trait FakeIterator {
   public function key() {
     return "booyah";
   }
-  public function next() {
-  }
-  public function rewind() {
-  }
+  public function next() {}
+  public function rewind() {}
   public function valid() {
     return true;
   }
-  protected static final function hacklib_initialize_statics_FakeIterator() {
-  }
+  protected static final function hacklib_initialize_statics_FakeIterator() {}
 }
 class Foo implements \HH\Iterator {
   use FakeIterator;

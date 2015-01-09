@@ -1793,9 +1793,12 @@ and stmt ~is_toplevel env = wrap env begin function
       let word = !(env.last_str) in
       stmt_word ~is_toplevel env word
   | Tlcb ->
-      seq env [last_token; space; keep_comment; newline];
-      add_block_tag env;
-      right env (stmt_list ~is_toplevel);
+      last_token env;
+      if next_token env <> Trcb then begin
+        seq env [space; keep_comment; newline];
+        add_block_tag env;
+        right env (stmt_list ~is_toplevel);
+      end;
       expect "}" env;
   | Tsc ->
       seq env [last_token; space; keep_comment; newline]

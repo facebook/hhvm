@@ -21,8 +21,7 @@ namespace {
     public function getIterator() {
       throw new Exception("not implemented");
     }
-    protected static final function hacklib_initialize_statics_IterMethods() {
-    }
+    protected static final function hacklib_initialize_statics_IterMethods() {}
   }
   class Foo implements \HH\KeyedIterable, Unrelated {
     use IterMethods;

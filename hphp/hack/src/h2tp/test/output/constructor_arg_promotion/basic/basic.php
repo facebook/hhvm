@@ -2,8 +2,7 @@
 require_once ($GLOBALS['HACKLIB_ROOT']);
 class C {
   private $bar;
-  private function foo() {
-  }
+  private function foo() {}
   protected $foo;
   public $zan;
   private $zee;

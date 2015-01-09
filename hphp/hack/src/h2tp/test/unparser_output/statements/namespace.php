@@ -1,8 +1,7 @@
 <?php
 namespace my\name {
   class MyClass {}
-  function myfunction() {
-  }
+  function myfunction() {}
   const MYCONST = 1;
   $a = new MyClass();
   $c = new \my\name\MyClass();

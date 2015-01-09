@@ -9,8 +9,7 @@ interface I {
   public function bar();
 }
 trait t {
-  protected static final function hacklib_initialize_statics_t() {
-  }
+  protected static final function hacklib_initialize_statics_t() {}
 }
 class D extends C implements I {
   use t;

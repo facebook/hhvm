@@ -1420,7 +1420,7 @@ void ObjectData::propWD(TypedValue*& retval, TypedValue& tvRef,
   propImpl<true, true>(retval, tvRef, ctx, key);
 }
 
-bool ObjectData::propIsset(Class* ctx, const StringData* key) {
+bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
   auto const lookup = getProp(ctx, key);
   auto const prop = lookup.prop;
 
@@ -1441,7 +1441,7 @@ bool ObjectData::propIsset(Class* ctx, const StringData* key) {
   return tv.m_data.num;
 }
 
-bool ObjectData::propEmptyImpl(Class* ctx, const StringData* key) {
+bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
   auto const lookup = getProp(ctx, key);
   auto const prop = lookup.prop;
 
@@ -1479,7 +1479,7 @@ bool ObjectData::propEmptyImpl(Class* ctx, const StringData* key) {
   return false;
 }
 
-bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
+bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
   if (UNLIKELY(getAttribute(HasPropEmpty))) {
     if (instanceof(c_SimpleXMLElement::classof())) {
       return c_SimpleXMLElement::PropEmpty(this, key);

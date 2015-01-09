@@ -291,7 +291,8 @@ struct ObjectData {
   template <bool warn, bool define>
   void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
                 const StringData* key);
-  bool propEmptyImpl(Class* ctx, const StringData* key);
+  bool propEmptyImpl(const Class* ctx, const StringData* key);
+
   bool invokeSet(TypedValue* retval, const StringData* key, TypedValue* val);
   bool invokeGet(TypedValue* retval, const StringData* key);
   bool invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
@@ -319,8 +320,9 @@ struct ObjectData {
              const StringData* key);
   void propWD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
               const StringData* key);
-  bool propIsset(Class* ctx, const StringData* key);
-  bool propEmpty(Class* ctx, const StringData* key);
+
+  bool propIsset(const Class* ctx, const StringData* key);
+  bool propEmpty(const Class* ctx, const StringData* key);
 
   void setProp(Class* ctx, const StringData* key, TypedValue* val,
                bool bindingAssignment = false);

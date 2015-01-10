@@ -45,6 +45,21 @@ const StaticString
 
 //////////////////////////////////////////////////////////////////////
 
+// Will turn into either an int or a double in zend_convert_scalar_to_number.
+bool type_converts_to_number(Type ty) {
+  return ty.subtypeOfAny(
+    Type::Dbl,
+    Type::Int,
+    Type::Null,
+    Type::Obj,
+    Type::Res,
+    Type::Str,
+    Type::Bool
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
 SSATmp* opt_is_a(HTS& env, uint32_t numArgs) {
   if (numArgs != 3) return nullptr;
 
@@ -224,6 +239,7 @@ SSATmp* opt_ceil(HTS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
   if (!folly::CpuId().sse41()) return nullptr;
   auto const val = topC(env);
+  if (!type_converts_to_number(val->type())) return nullptr;
   auto const dbl = gen(env, ConvCellToDbl, val);
   return gen(env, Ceil, dbl);
 }
@@ -232,6 +248,7 @@ SSATmp* opt_floor(HTS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
   if (!folly::CpuId().sse41()) return nullptr;
   auto const val = topC(env);
+  if (!type_converts_to_number(val->type())) return nullptr;
   auto const dbl = gen(env, ConvCellToDbl, val);
   return gen(env, Floor, dbl);
 }

@@ -148,7 +148,12 @@ Variant HHVM_FUNCTION(max,
   return ret;
 }
 
-/* Logic based on zend_operators.c::convert_scalar_to_number() */
+/*
+ * Logic based on zend_operators.c::convert_scalar_to_number()
+ *
+ * Note that this needs to work the same as some similar logic in the JIT for
+ * optimized versions of some of the following functions.
+ */
 static DataType zend_convert_scalar_to_number(const Variant& num,
                                               int64_t &ival,
                                               double &dval) {

@@ -1234,10 +1234,15 @@ and const env =
 (* Type hints. *)
 (*****************************************************************************)
 
-and hint_list_paren env =
+and hint_function_params env =
   expect "(" env;
-  hint_list env;
+  list_comma ~trailing:true hint_function_param env;
   expect ")" env
+
+and hint_function_param env = wrap env begin function
+  | Tellipsis -> last_token env
+  | _ -> back env; hint env
+end
 
 and hint env = wrap env begin function
   | Tplus | Tminus | Tqm | Tat | Tbslash ->
@@ -1251,7 +1256,7 @@ and hint env = wrap env begin function
       last_token env;
       (match !(env.last_str) with
       | "function" ->
-          hint_list_paren env;
+          hint_function_params env;
           return_type env
       | _ ->
           name_loop env;
@@ -2388,7 +2393,6 @@ and expr_atomic env =
   | Theredoc ->
       last_token env;
       heredoc env
-
   | _ ->
       back env
 

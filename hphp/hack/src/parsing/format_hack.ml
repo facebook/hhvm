@@ -1818,7 +1818,8 @@ and stmt_word ~is_toplevel env word =
       else back env
   | "public" | "protected" | "private" | "case" | "default" ->
       back env
-  | "print" | "echo" | "require" | "require_once" ->
+  | "print" | "echo"
+  | "require" | "require_once" | "include" | "include_once" ->
       seq env [last_token; space];
       right env (list_comma_nl ~trailing:false expr);
       semi_colon env

@@ -1260,12 +1260,7 @@ and hint env = wrap env begin function
           return_type env
       | _ ->
           name_loop env;
-          try_word env "as" begin fun env ->
-            space env;
-            last_token env;
-            space env;
-            hint env
-          end;
+          as_constraint env;
           hint_parameter env
       )
   | Tlp ->
@@ -1275,6 +1270,14 @@ and hint env = wrap env begin function
   | _ ->
       back env
 end
+
+and as_constraint env =
+  try_word env "as" begin fun env ->
+    space env;
+    last_token env;
+    space env;
+    hint env
+  end;
 
 and hint_parameter env = wrap env begin function
   | Tlt ->
@@ -1875,7 +1878,8 @@ and stmt_toplevel_word env = function
   | "const" ->
       const env
   | "type" | "newtype" ->
-      seq env [last_token; space; hint; space; expect "="; space];
+      seq env [last_token; space; hint; as_constraint; space;
+               expect "="; space];
       typedef env;
       semi_colon env;
   | "namespace" ->

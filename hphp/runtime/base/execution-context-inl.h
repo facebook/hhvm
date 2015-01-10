@@ -227,6 +227,36 @@ inline void ExecutionContext::invokeFuncFew(
   );
 }
 
+inline TypedValue ExecutionContext::invokeMethod(
+  ObjectData* obj,
+  const Func* meth,
+  InvokeArgs args
+) {
+  TypedValue ret;
+  invokeFuncFew(
+    &ret,
+    meth,
+    ActRec::encodeThis(obj),
+    nullptr /* invName */,
+    args.size(),
+    args.start()
+  );
+  return ret;
+}
+
+inline Variant ExecutionContext::invokeMethodV(
+  ObjectData* obj,
+  const Func* meth,
+  InvokeArgs args
+) {
+  auto const tv = invokeMethod(obj, meth, args);
+
+  // Construct variant without triggering incref.
+  Variant ret;
+  *ret.asTypedValue() = tv;
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

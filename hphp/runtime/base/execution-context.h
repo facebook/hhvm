@@ -101,6 +101,8 @@ struct DebuggerSettings {
   int printLevel = -1;
 };
 
+using InvokeArgs = folly::Range<const TypedValue*>;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ExecutionContext {
@@ -532,6 +534,18 @@ public:
                      const CallCtx& ctx,
                      int argc,
                      const TypedValue* argv);
+
+  TypedValue invokeMethod(
+    ObjectData* obj,
+    const Func* meth,
+    InvokeArgs args = InvokeArgs()
+  );
+
+  Variant invokeMethodV(
+    ObjectData* obj,
+    const Func* meth,
+    InvokeArgs args = InvokeArgs()
+  );
 
   void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,
                        Cell awaitResult);

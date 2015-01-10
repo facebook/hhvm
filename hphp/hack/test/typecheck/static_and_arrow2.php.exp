@@ -1,6 +1,8 @@
 File "static_and_arrow2.php", line 19, characters 11-12:
-The method f2 is undefined in an object of type Bar (Typing[4053])
+Could not find method f2 in an object of type Bar (Typing[4053])
 File "static_and_arrow2.php", line 13, characters 26-27:
 The closest thing is f2 but it's a static method
-File "static_and_arrow2.php", line 18, characters 16-18:
+File "static_and_arrow2.php", line 18, characters 12-20:
+This is why I think it is an object of type Bar
+File "static_and_arrow2.php", line 12, characters 7-9:
 Declaration of Bar is here

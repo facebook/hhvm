@@ -1175,18 +1175,17 @@ let not_found_hint = function
   | `did_you_mean (pos, v) ->
       [pos, "Did you mean: "^v]
 
-let member_not_found kind pos (cpos, type_name) member_name hint =
+let member_not_found kind pos (cpos, type_name) member_name hint reason =
   let type_name = strip_ns type_name in
   let kind =
     match kind with
-    | `method_ -> "method "
-    | `member -> "member "
+    | `method_ -> "method"
+    | `member -> "member"
   in
-  let msg = "The "^kind^member_name^" is undefined "
-    ^"in an object of type "^type_name
-  in
+  let msg = "Could not find "^kind^" "^member_name^" in an object of type "^
+    type_name in
   add_list Typing.member_not_found
-    ((pos, msg) :: (not_found_hint hint
+    ((pos, msg) :: (not_found_hint hint @ reason
                     @ [(cpos, "Declaration of "^type_name^" is here")]))
 
 let parent_in_trait pos =

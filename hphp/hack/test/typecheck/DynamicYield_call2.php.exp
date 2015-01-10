@@ -1,4 +1,6 @@
 File "DynamicYield_call2.php", line 25, characters 23-28:
-The method getBar is undefined in an object of type Bar (Typing[4053])
-File "DynamicYield_call2.php", line 25, characters 15-17:
+Could not find method getBar in an object of type Bar (Typing[4053])
+File "DynamicYield_call2.php", line 25, characters 10-20:
+This is why I think it is an object of type Bar
+File "DynamicYield_call2.php", line 21, characters 7-9:
 Declaration of Bar is here

@@ -1,4 +1,6 @@
 File "ddd.php", line 14, characters 23-25:
-The member WtF is undefined in an object of type X (Typing[4053])
+Could not find member WtF in an object of type X (Typing[4053])
+File "ddd.php", line 14, characters 16-20:
+This is why I think it is an object of type X
 File "ddd.php", line 12, characters 7-7:
 Declaration of X is here

@@ -1,4 +1,6 @@
 File "type_arguments.php", line 20, characters 31-34:
-The method haha is undefined in an object of type X (Typing[4053])
-File "type_arguments.php", line 19, characters 12-12:
+Could not find method haha in an object of type X (Typing[4053])
+File "type_arguments.php", line 19, characters 8-14:
+This is why I think it is an object of type X
+File "type_arguments.php", line 12, characters 7-7:
 Declaration of X is here

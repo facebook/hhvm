@@ -2315,11 +2315,14 @@ and smember_not_found pos ~is_const ~is_method class_ member_name =
   | Some (pos2, v) ->
       error (`did_you_mean (pos2, v))
 
-and member_not_found pos ~is_method class_ member_name class_name =
+and member_not_found pos ~is_method class_ member_name r =
   let kind = if is_method then `method_ else `member in
-  let error hint =
-    Errors.member_not_found kind pos class_name member_name hint
+  let cid = class_.tc_pos, class_.tc_name in
+  let reason = Reason.to_string
+    ("This is why I think it is an object of type "^strip_ns class_.tc_name) r
   in
+  let error hint =
+    Errors.member_not_found kind pos cid member_name hint reason in
   match Env.suggest_member is_method class_ member_name with
     | None ->
       (match Env.suggest_static_member is_method class_ member_name with
@@ -2420,12 +2423,12 @@ and obj_get_ ~is_method ~nullsafe env ty1 (p, s as id)
             Typing_hooks.dispatch_cmethod_hook class_ (p, s) env None;
             (match member_ with
               | None when not is_method ->
-                member_not_found p ~is_method class_ s x;
+                member_not_found p ~is_method class_ s (fst ety1);
                 env, (Reason.Rnone, Tany), None
               | None ->
                 (match Env.get_member is_method env class_ SN.Members.__call with
                   | None ->
-                    member_not_found p ~is_method class_ s x;
+                    member_not_found p ~is_method class_ s (fst ety1);
                     env, (Reason.Rnone, Tany), None
                   | Some {ce_visibility = vis; ce_type = (r, Tfun ft); _}  ->
                     let mem_pos = Reason.to_pos r in

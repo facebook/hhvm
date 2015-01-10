@@ -13,6 +13,7 @@ for f in $@; do
   else
     EXP=/dev/null
   fi
+  cat $EXP
   $DIFF $EXP "$f.out"
   read -p "Copy .out to .exp? (y|n|q)" -n 1 -r
   echo ""

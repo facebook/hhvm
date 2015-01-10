@@ -2365,7 +2365,7 @@ and expr_atomic env =
        margin_set (!(env.char_pos) -1) env begin fun env ->
          list_comma fun_param env
        end;
-       expect ")" env;
+       seq env [expect ")"; return_type];
      end
   | Tlt when is_xhp env ->
       if attempt env begin fun env ->

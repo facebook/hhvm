@@ -602,7 +602,7 @@ and look_for_open_cb = parse
   | _                  { look_for_open_cb lexbuf }
 
 and format_token = parse
-  | ' '                { Tspace        }
+  | [' '  '\t']        { Tspace        }
   | '\n'               { Tnewline      }
   | "/*"               { Topen_comment }
   | "*/"               { Tclose_comment }

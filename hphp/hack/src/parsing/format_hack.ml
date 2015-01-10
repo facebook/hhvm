@@ -1291,6 +1291,20 @@ and hint_list ?(trailing=true) env =
   list_comma ~trailing:trailing hint env
 
 (*****************************************************************************)
+(* Enums *)
+(*****************************************************************************)
+
+and enum_ env =
+  seq env [name; hint_parameter; space];
+  try_token env Tcolon (seq_fun
+    [last_token; space; hint; as_constraint; space]);
+  (* stmt parses any list of statements, including things like $x = 1; which
+   * are not valid in an enum body, but since we run the parser before
+   * formatting the text, we can be sure tha we only encounter valid enum body
+   * statements at this point. *)
+  stmt ~is_toplevel:false env
+
+(*****************************************************************************)
 (* Functions *)
 (*****************************************************************************)
 
@@ -1820,7 +1834,7 @@ and stmt_word ~is_toplevel env word =
   match word with
   | "type" | "newtype" | "namespace" | "use"
   | "abstract" | "final" | "interface" | "const"
-  | "class" | "trait" | "function" | "async" as word ->
+  | "class" | "trait" | "function" | "async" | "enum" as word ->
       if is_toplevel
       then stmt_toplevel_word env word
       else back env
@@ -1873,6 +1887,8 @@ and stmt_toplevel_word env = function
       seq env [last_token; space; stmt ~is_toplevel:true]
   | "interface" | "class" | "trait" ->
       seq env [last_token; space; class_]
+  | "enum" ->
+      seq env [last_token; space; enum_]
   | "function" ->
       seq env [last_token; space; fun_]
   | "const" ->

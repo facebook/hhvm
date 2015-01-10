@@ -2334,7 +2334,7 @@ and expr_atomic env =
       expr_atomic_word env last word
  | Tlb ->
      last_token env;
-     expr_list env;
+     right env array_body;
      expect "]" env
  | Tlp ->
      last_token env;

@@ -74,6 +74,9 @@ X(urldecode)
 X(urlencode)
 X(utf8_encode)
 X(version_compare)
+X(floor)
+X(ceil)
+X(sqrt)
 
 #undef X
 
@@ -159,6 +162,9 @@ folly::Optional<Type> const_fold(ISS& env, const bc::FCallBuiltin& op) {
   X(s_urlencode)
   X(s_utf8_encode)
   X(s_version_compare)
+  X(s_floor)
+  X(s_ceil)
+  X(s_sqrt)
 
   // Note serialize can only run user-defined code if its argument is an
   // object, which will never be a constant type, so this is safe.

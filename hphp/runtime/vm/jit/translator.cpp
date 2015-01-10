@@ -226,7 +226,6 @@ static const struct {
   { OpDiv,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpMod,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpPow,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
-  { OpSqrt,        {Stack1,           Stack1,       OutUnknown,        0 }},
   /* Logical ops */
   { OpXor,         {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpNot,         {Stack1,           Stack1,       OutBoolean,        0 }},
@@ -473,8 +472,6 @@ static const struct {
   { OpIncStat,     {None,             None,         OutNone,           0 }},
   { OpIdx,         {StackTop3,        Stack1,       OutUnknown,       -2 }},
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
-  { OpFloor,       {Stack1,           Stack1,       OutDouble,         0 }},
-  { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
   { OpCheckProp,   {None,             Stack1,       OutBoolean,        1 }},
   { OpInitProp,    {Stack1,           None,         OutNone,          -1 }},
   { OpSilence,     {Local|DontGuardAny,
@@ -987,7 +984,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::CastInt:
   case Op::CastObject:
   case Op::CastString:
-  case Op::Ceil:
   case Op::CheckProp:
   case Op::CheckThis:
   case Op::Clone:
@@ -1023,7 +1019,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::FPushObjMethodD:
   case Op::False:
   case Op::File:
-  case Op::Floor:
   case Op::GetMemoKey:
   case Op::Idx:
   case Op::InitThisLoc:
@@ -1067,7 +1062,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::Shl:
   case Op::Shr:
   case Op::Silence:
-  case Op::Sqrt:
   case Op::StaticLoc:
   case Op::StaticLocInit:
   case Op::String:

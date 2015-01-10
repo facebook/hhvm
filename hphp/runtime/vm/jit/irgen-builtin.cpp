@@ -38,6 +38,9 @@ const StaticString
   s_in_array("in_array"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class"),
+  s_sqrt("sqrt"),
+  s_ceil("ceil"),
+  s_floor("floor"),
   s_empty("");
 
 //////////////////////////////////////////////////////////////////////
@@ -204,6 +207,35 @@ SSATmp* opt_get_called_class(HTS& env, uint32_t numArgs) {
   return gen(env, LdClsName, cls);
 }
 
+SSATmp* opt_sqrt(HTS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+
+  auto const val = topC(env);
+  auto const ty  = val->type();
+  if (ty <= Type::Dbl) return gen(env, Sqrt, val);
+  if (ty <= Type::Int) {
+    auto const conv = gen(env, ConvIntToDbl, val);
+    return gen(env, Sqrt, conv);
+  }
+  return nullptr;
+}
+
+SSATmp* opt_ceil(HTS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+  if (!folly::CpuId().sse41()) return nullptr;
+  auto const val = topC(env);
+  auto const dbl = gen(env, ConvCellToDbl, val);
+  return gen(env, Ceil, dbl);
+}
+
+SSATmp* opt_floor(HTS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+  if (!folly::CpuId().sse41()) return nullptr;
+  auto const val = topC(env);
+  auto const dbl = gen(env, ConvCellToDbl, val);
+  return gen(env, Floor, dbl);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 bool optimizedFCallBuiltin(HTS& env,
@@ -221,6 +253,9 @@ bool optimizedFCallBuiltin(HTS& env,
     X(ini_get);
     X(count);
     X(is_a);
+    X(sqrt);
+    X(ceil);
+    X(floor);
 
 #undef X
 
@@ -951,23 +986,6 @@ void emitIdx(HTS& env) {
   gen(env, DecRef, def);
 }
 
-void emitSqrt(HTS& env) {
-  auto const srcType = topC(env)->type();
-  if (srcType <= Type::Int) {
-    auto const src = gen(env, ConvIntToDbl, popC(env));
-    push(env, gen(env, Sqrt, src));
-    return;
-  }
-
-  if (srcType <= Type::Dbl) {
-    auto const src = popC(env);
-    push(env, gen(env, Sqrt, src));
-    return;
-  }
-
-  interpOne(env, Type::UncountedInit, 1);
-}
-
 void emitAKExists(HTS& env) {
   auto const arr = popC(env);
   auto const key = popC(env);
@@ -1032,30 +1050,6 @@ void emitStrlen(HTS& env) {
   }
 
   interpOne(env, Type::Int | Type::InitNull, 1);
-}
-
-void emitFloor(HTS& env) {
-  // need SSE 4.1 support to use roundsd
-  if (!folly::CpuId().sse41()) {
-    PUNT(Floor);
-  }
-
-  auto const val = popC(env);
-  auto const dblVal = gen(env, ConvCellToDbl, val);
-  gen(env, DecRef, val);
-  push(env, gen(env, Floor, dblVal));
-}
-
-void emitCeil(HTS& env) {
-  // need SSE 4.1 support to use roundsd
-  if (!folly::CpuId().sse41()) {
-    PUNT(Ceil);
-  }
-
-  auto const val = popC(env);
-  auto const dblVal = gen(env, ConvCellToDbl, val);
-  gen(env, DecRef, val);
-  push(env, gen(env, Ceil, dblVal));
 }
 
 void emitSilence(HTS& env, Id localId, SilenceOp subop) {

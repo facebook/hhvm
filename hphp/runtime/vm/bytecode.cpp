@@ -3957,34 +3957,6 @@ OPTBLD_INLINE void iopShr(IOP_ARGS) {
   implCellBinOp(pc, cellShr);
 }
 
-OPTBLD_INLINE void iopSqrt(IOP_ARGS) {
-  pc++;
-  Cell* c1 = vmStack().topC();
-
-  if (c1->m_type == KindOfNull || c1->m_type == KindOfBoolean ||
-      (IS_STRING_TYPE(c1->m_type) && c1->m_data.pstr->isNumeric())) {
-    tvCastToDoubleInPlace(c1);
-  }
-
-  if (c1->m_type == KindOfInt64) {
-    c1->m_type = KindOfDouble;
-    c1->m_data.dbl = HHVM_FN(sqrt)(c1->m_data.num);
-  } else if (c1->m_type == KindOfDouble) {
-    c1->m_data.dbl = HHVM_FN(sqrt)(c1->m_data.dbl);
-  }
-
-  if (c1->m_type != KindOfDouble) {
-    raise_param_type_warning(
-      "sqrt",
-      1,
-      KindOfDouble,
-      c1->m_type
-    );
-    tvRefcountedDecRef(c1);
-    c1->m_type = KindOfNull;
-  }
-}
-
 OPTBLD_INLINE void iopBitNot(IOP_ARGS) {
   pc++;
   cellBitNot(*vmStack().topC());
@@ -7167,23 +7139,6 @@ OPTBLD_INLINE void iopAwait(IOP_ARGS) {
     // suspend eager execution
     asyncSuspendE(pc, iters);
   }
-}
-
-template<class Op>
-OPTBLD_INLINE void roundOpImpl(Op op) {
-  TypedValue* val = vmStack().topTV();
-  tvCastToDoubleInPlace(val);
-  val->m_data.dbl = op(val->m_data.dbl);
-}
-
-OPTBLD_INLINE void iopFloor(IOP_ARGS) {
-  pc++;
-  roundOpImpl(floor);
-}
-
-OPTBLD_INLINE void iopCeil(IOP_ARGS) {
-  pc++;
-  roundOpImpl(ceil);
 }
 
 OPTBLD_INLINE void iopCheckProp(IOP_ARGS) {

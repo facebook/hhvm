@@ -4077,30 +4077,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             e.Strlen();
             return true;
           }
-        } else if (call->isCallToFunction("floor")) {
-          if (params && params->getCount() == 1) {
-            visit((*params)[0]);
-            emitConvertToCell(e);
-            call->changeToBytecode();
-            e.Floor();
-            return true;
-          }
-        } else if (call->isCallToFunction("ceil")) {
-          if (params && params->getCount() == 1) {
-            visit((*params)[0]);
-            emitConvertToCell(e);
-            call->changeToBytecode();
-            e.Ceil();
-            return true;
-          }
-        } else if (call->isCallToFunction("sqrt")) {
-          if (params && params->getCount() == 1) {
-            visit((*params)[0]);
-            emitConvertToCell(e);
-            call->changeToBytecode();
-            e.Sqrt();
-            return true;
-          }
         } else if (call->isCallToFunction("define")) {
           if (params && params->getCount() == 2) {
             ExpressionPtr p0 = (*params)[0];

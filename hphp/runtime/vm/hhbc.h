@@ -530,7 +530,6 @@ constexpr int32_t kMaxConcatN = 4;
   O(Div,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mod,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Pow,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(Sqrt,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(Xor,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Not,             NA,               ONE(CV),         ONE(CV),    NF) \
   O(Same,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -728,8 +727,6 @@ constexpr int32_t kMaxConcatN = 4;
   O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
-  O(Floor,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(Ceil,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
   O(InitProp,        TWO(SA,                                            \
                        OA(InitPropOp)),ONE(CV),         NOV,        NF) \

@@ -225,8 +225,6 @@ bool hasObviousStackOutput(Op op) {
   case Op::IsTypeC:
   case Op::IsTypeL:
   case Op::OODeclExists:
-  case Op::Floor:
-  case Op::Ceil:
     return true;
 
   // Consider CGetL obvious because if we knew the type of the local,

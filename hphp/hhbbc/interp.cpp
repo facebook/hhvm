@@ -2152,27 +2152,6 @@ void in(ISS& env, const bc::ArrayIdx&) {
   push(env, TInitCell);
 }
 
-template<class Op>
-void floatFnImpl(ISS& env, Op op, Type nonConstType) {
-  auto const t1 = popC(env);
-  auto const v1 = tv(t1);
-  if (v1) {
-    if (v1->m_type == KindOfDouble) {
-      constprop(env);
-      return push(env, dval(op(v1->m_data.dbl)));
-    }
-    if (v1->m_type == KindOfInt64) {
-      constprop(env);
-      return push(env, dval(op(static_cast<double>(v1->m_data.num))));
-    }
-  }
-  push(env, nonConstType);
-}
-
-void in(ISS& env, const bc::Floor&) { floatFnImpl(env, floor, TDbl); }
-void in(ISS& env, const bc::Ceil&)  { floatFnImpl(env, ceil, TDbl); }
-void in(ISS& env, const bc::Sqrt&)  { floatFnImpl(env, sqrt, TInitUnc); }
-
 void in(ISS& env, const bc::CheckProp&) { push(env, TBool); }
 
 void in(ISS& env, const bc::InitProp& op) {

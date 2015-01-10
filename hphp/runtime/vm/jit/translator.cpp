@@ -214,7 +214,6 @@ static const struct {
   { OpConcat,      {StackTop2,        Stack1,       OutString,        -1 }},
   { OpConcatN,     {StackN,           Stack1,       OutString,         0 }},
   /* Arithmetic ops */
-  { OpAbs,         {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpAdd,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpSub,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},
@@ -965,7 +964,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::AGetC:
   case Op::AGetL:
   case Op::AKExists:
-  case Op::Abs:
   case Op::AddElemC:
   case Op::AddNewElemC:
   case Op::Array:

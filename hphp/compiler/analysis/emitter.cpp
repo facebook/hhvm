@@ -4112,14 +4112,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             }
           }
           // fall through
-        } else if (call->isCallToFunction("abs")) {
-          if (params && params->getCount() == 1) {
-            visit((*params)[0]);
-            emitConvertToCell(e);
-            call->changeToBytecode();
-            e.Abs();
-            return true;
-          }
         } else if ((call->isCallToFunction("class_exists") ||
                     call->isCallToFunction("interface_exists") ||
                     call->isCallToFunction("trait_exists"))

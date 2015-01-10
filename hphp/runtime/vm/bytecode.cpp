@@ -3824,13 +3824,6 @@ OPTBLD_INLINE void iopNot(IOP_ARGS) {
   cellAsVariant(*c1) = !cellAsVariant(*c1).toBoolean();
 }
 
-OPTBLD_INLINE void iopAbs(IOP_ARGS) {
-  pc++;
-  auto c1 = vmStack().topC();
-
-  tvAsVariant(c1) = HHVM_FN(abs)(tvAsCVarRef(c1));
-}
-
 template<class Op>
 OPTBLD_INLINE void implCellBinOp(PC& pc, Op op) {
   pc++;

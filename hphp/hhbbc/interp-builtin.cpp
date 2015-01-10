@@ -77,6 +77,7 @@ X(version_compare)
 X(floor)
 X(ceil)
 X(sqrt)
+X(abs)
 
 #undef X
 
@@ -165,6 +166,7 @@ folly::Optional<Type> const_fold(ISS& env, const bc::FCallBuiltin& op) {
   X(s_floor)
   X(s_ceil)
   X(s_sqrt)
+  X(s_abs)
 
   // Note serialize can only run user-defined code if its argument is an
   // object, which will never be a constant type, so this is safe.
@@ -221,10 +223,20 @@ bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
   return true;
 }
 
+bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
+  if (op.arg1 != 1) return false;
+  auto const ty = popC(env);
+  push(env, ty.subtypeOf(TInt) ? TInt :
+            ty.subtypeOf(TDbl) ? TDbl :
+            TInitUnc);
+  return true;
+}
+
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 #define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
 
   X(get_class)
+  X(abs)
 
 #undef X
 

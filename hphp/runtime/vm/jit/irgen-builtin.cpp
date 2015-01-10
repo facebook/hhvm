@@ -41,6 +41,7 @@ const StaticString
   s_sqrt("sqrt"),
   s_ceil("ceil"),
   s_floor("floor"),
+  s_abs("abs"),
   s_empty("");
 
 //////////////////////////////////////////////////////////////////////
@@ -253,6 +254,23 @@ SSATmp* opt_floor(HTS& env, uint32_t numArgs) {
   return gen(env, Floor, dbl);
 }
 
+SSATmp* opt_abs(HTS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+
+  auto const value = topC(env);
+  if (value->type() <= Type::Int) {
+    // compute integer absolute value ((src>>63) ^ src) - (src>>63)
+    auto const t1 = gen(env, Shr, value, cns(env, 63));
+    auto const t2 = gen(env, XorInt, t1, value);
+    return gen(env, SubInt, t2, t1);
+  }
+
+  if (value->type() <= Type::Dbl) return gen(env, AbsDbl, value);
+  if (value->type() <= Type::Arr) return cns(env, false);
+
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 bool optimizedFCallBuiltin(HTS& env,
@@ -273,6 +291,7 @@ bool optimizedFCallBuiltin(HTS& env,
     X(sqrt);
     X(ceil);
     X(floor);
+    X(abs);
 
 #undef X
 
@@ -916,31 +935,6 @@ void emitNativeImpl(HTS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void emitAbs(HTS& env) {
-  auto const value = popC(env);
-
-  if (value->isA(Type::Int)) {
-    // compute integer absolute value ((src>>63) ^ src) - (src>>63)
-    auto const t1 = gen(env, Shr, value, cns(env, 63));
-    auto const t2 = gen(env, XorInt, t1, value);
-    push(env, gen(env, SubInt, t2, t1));
-    return;
-  }
-
-  if (value->isA(Type::Dbl)) {
-    push(env, gen(env, AbsDbl, value));
-    return;
-  }
-
-  if (value->isA(Type::Arr)) {
-    gen(env, DecRef, value);
-    push(env, cns(env, false));
-    return;
-  }
-
-  PUNT(Abs);
-}
 
 void emitArrayIdx(HTS& env) {
   // These types are just used to decide what to do; once we know what we're

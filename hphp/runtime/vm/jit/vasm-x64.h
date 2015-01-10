@@ -32,7 +32,6 @@
 #include "hphp/util/asm-x64.h"
 
 #include <bitset>
-#include <boost/dynamic_bitset.hpp>
 #include <folly/Range.h>
 
 namespace HPHP { namespace jit {
@@ -1112,27 +1111,6 @@ visitOperands(MaybeConstVinstr& inst, Visitor& visitor) {
 #undef O
   }
 }
-
-// visit reachable blocks in postorder, calling fn on each one.
-struct PostorderWalker {
-  template<class Fn> void dfs(Vlabel b, Fn fn) {
-    if (visited.test(b)) return;
-    visited.set(b);
-    for (auto s : succs(unit.blocks[b])) {
-      dfs(s, fn);
-    }
-    fn(b);
-  }
-  template<class Fn> void dfs(Fn fn) {
-    dfs(unit.entry, fn);
-  }
-  explicit PostorderWalker(const Vunit& u)
-    : unit(u)
-    , visited(u.blocks.size())
-  {}
-  const Vunit& unit;
-  boost::dynamic_bitset<> visited;
-};
 
 extern const char* vinst_names[];
 bool isBlockEnd(Vinstr& inst);

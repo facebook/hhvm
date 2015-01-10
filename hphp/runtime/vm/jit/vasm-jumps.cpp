@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
+#include "hphp/runtime/vm/jit/vasm-dfs.h"
 
 TRACE_SET_MOD(vasm);
 

@@ -163,8 +163,15 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
 
 #define VALIDATE_CONN_CONNECTED(conn) VALIDATE_CONN(conn, MySQLState::CONNECTED)
 
+// since we allow null (e.g. nullOkay is true in the call into type-resource),
+// we have to check if the resource data is null before we try to get a
+// connection.
 #define VALIDATE_RESOURCE(res, state)                                     \
-  auto const& conn = res.getTyped<MySQLResource>(true, false)->mysql();   \
+  auto rdata = res.getTyped<MySQLResource>(true, false);                  \
+  std::shared_ptr<MySQL> conn = nullptr;                                  \
+  if (rdata) {                                                            \
+    conn = rdata->mysql();                                                \
+  }                                                                       \
   VALIDATE_CONN(conn, state)
 
 static Variant HHVM_METHOD(mysqli, autocommit, bool mode) {

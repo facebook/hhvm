@@ -162,6 +162,7 @@ bool isBlockEnd(Vinstr& inst) {
     case Vinstr::jmp:
     case Vinstr::jmpr:
     case Vinstr::jmpm:
+    case Vinstr::jmpi:
     case Vinstr::phijmp:
     case Vinstr::phijcc:
     // terminal

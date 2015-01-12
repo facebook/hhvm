@@ -309,9 +309,8 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   /* service requests, PHP-level function calls */\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
   O(bindcall, I(stub), U(args), Dn)\
-  O(bindexit, I(cc) I(target), U(sf) U(args), Dn)\
   O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf) U(args), Dn)\
-  O(bindjcc2nd, I(cc) I(target), U(sf) U(args), Dn)\
+  O(bindjcc, I(cc) I(target), U(sf) U(args), Dn)\
   O(bindjmp, I(target) I(trflags), U(args), Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
@@ -414,6 +413,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(jmp, Inone, Un, Dn)\
   O(jmpr, Inone, U(target) U(args), Dn)\
   O(jmpm, Inone, U(target) U(args), Dn)\
+  O(jmpi, I(target), U(args), Dn)\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
   O(loaddqu, Inone, U(s), D(d))\
@@ -493,11 +493,10 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 // intrinsics
 struct bindaddr { TCA* dest; SrcKey sk; };
 struct bindcall { TCA stub; RegSet args; };
-struct bindexit { ConditionCode cc; VregSF sf; SrcKey target;
-                  TransFlags trflags; RegSet args; };
 struct bindjcc1st { ConditionCode cc; VregSF sf; SrcKey targets[2];
                     RegSet args; };
-struct bindjcc2nd { ConditionCode cc; VregSF sf; SrcKey target; RegSet args; };
+struct bindjcc { ConditionCode cc; VregSF sf; SrcKey target;
+                 TransFlags trflags; RegSet args; };
 struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
 struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; RegSet args; };
@@ -634,6 +633,7 @@ struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
 struct jmp { Vlabel target; };
 struct jmpr { Vreg64 target; RegSet args; };
 struct jmpm { Vptr target; RegSet args; };
+struct jmpi { TCA target; RegSet args; };
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
 struct loaddqu { Vptr s; Vreg128 d; };
@@ -877,6 +877,9 @@ struct Vunit {
   Vreg makeConst(DataType t) { return makeConst(uint64_t(t)); }
   Vreg makeConst(Immed64 v) { return makeConst(uint64_t(v.q())); }
 
+  template<class R, class... Args>
+  Vreg makeConst(R (*fn)(Args...)) { return makeConst(CTCA(fn)); }
+
   template<class T>
   typename std::enable_if<std::is_integral<T>::value, Vreg>::type
   makeConst(T l) { return makeConst(uint64_t(l)); }
@@ -904,10 +907,18 @@ struct Vout {
     : m_unit(u), m_block(b), m_origin(origin)
   {}
 
+  Vout(Vout&&) = default;
+  Vout(const Vout&) = delete;
+
   Vout& operator=(const Vout& v) {
     assert(&v.m_unit == &m_unit);
     m_block = v.m_block;
     m_origin = v.m_origin;
+    return *this;
+  }
+
+  Vout& operator=(Vlabel b) {
+    m_block = b;
     return *this;
   }
 

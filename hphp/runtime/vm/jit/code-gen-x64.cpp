@@ -727,7 +727,6 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
     syncFixup = makeFixup(inst->marker(), sync);
   }
 
-  Vout next = v;
   Vlabel targets[2];
   bool nothrow = false;
   auto* taken = inst->taken();
@@ -749,8 +748,7 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
       inst->marker().show()
     );
 
-    next = v.makeBlock();
-    targets[0] = next;
+    targets[0] = v.makeBlock();
     targets[1] = m_state.labels[taken];
   } else if (!inst->is(Call, CallArray, ContEnter)) {
     // The current instruction doesn't have a catch block so it'd better not
@@ -774,11 +772,10 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
   if (do_catch) {
     v << vinvoke{call, argsId, dstId, {targets[0], targets[1]},
         syncFixup, dstInfo.type, sync == SyncOptions::kSmashableAndSyncPoint};
+    v = targets[0];
   } else {
     v << vcall{call, argsId, dstId, syncFixup, dstInfo.type, nothrow};
   }
-
-  v = next;
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
@@ -2146,7 +2143,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       }
       auto const sf = v.makeReg();
       v << cmpqi{data->cases - 2, idx, sf};
-      v << bindjcc2nd{CC_AE, sf, data->defaultSk, kCrossTraceRegs};
+      v << bindjcc{CC_AE, sf, data->defaultSk, TransFlags{}, kCrossTraceRegs};
     }
 
     TCA* table = mcg->allocData<TCA>(sizeof(TCA), data->cases);
@@ -5394,7 +5391,7 @@ void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
 /*
  * Defined in translator-asm-helpers.S. Used for an assert in DbgAssertRetAddr.
  */
-extern "C" void enterTCServiceReq();
+extern "C" void enterTCExit();
 
 void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
   // With the exception of FreeActRec and RetCtrl, the native return address
@@ -5403,9 +5400,9 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
   // a bytecode's translation, which should never begin with FreeActRec or
   // RetCtrl.
   always_assert(!inst->is(FreeActRec, RetCtrl));
-  auto v = vmain();
+  auto& v = vmain();
   auto const sf = v.makeReg();
-  v << cmpqm{v.cns(enterTCServiceReq), *rsp, sf};
+  v << cmpqm{v.cns(enterTCExit), *rsp, sf};
   ifThen(v, CC_NE, sf, [&](Vout& v) {
      v << ud2{};
   });

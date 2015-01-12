@@ -2234,6 +2234,7 @@ struct DecodedInstruction {
   bool isBranch(bool allowCond = true) const;
   bool isCall() const;
   bool isJmp() const;
+  ConditionCode jccCondCode() const;
   bool shrinkBranch();
   void widenBranch();
   uint8_t getModRm() const;

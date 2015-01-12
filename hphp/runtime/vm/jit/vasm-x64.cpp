@@ -172,9 +172,8 @@ private:
   // intrinsics
   void emit(bindaddr& i);
   void emit(bindcall& i);
-  void emit(bindexit& i);
   void emit(bindjcc1st& i);
-  void emit(bindjcc2nd& i);
+  void emit(bindjcc& i);
   void emit(bindjmp& i);
   void emit(callstub& i);
   void emit(contenter& i);
@@ -251,6 +250,7 @@ private:
   void emit(jmp i);
   void emit(jmpr& i) { a->jmp(i.target); }
   void emit(jmpm& i) { a->jmp(i.target); }
+  void emit(jmpi& i) { a->jmp(i.target); }
   void emit(lea& i);
   void emit(leap& i) { a->lea(i.s, i.d); }
   void emit(loaddqu& i) { a->movdqu(i.s, i.d); }
@@ -504,10 +504,6 @@ void Vgen::emit(bindcall& i) {
   a->call(i.stub);
 }
 
-void Vgen::emit(bindexit& i) {
-  emitBindSideExit(a->code(), frozen(), i.cc, i.target, i.trflags);
-}
-
 void Vgen::emit(bindjcc1st& i) {
   backend.prepareForTestAndSmash(a->code(), 0,
                                  TestAndSmashFlags::kAlignJccAndJmp);
@@ -519,7 +515,6 @@ void Vgen::emit(bindjcc1st& i) {
                             RipRelative(patchAddr),
                             i.targets[1].toAtomicInt(),
                             i.targets[0].toAtomicInt(),
-                            i.cc,
                             ccServiceReqArgInfo(i.cc));
 
   mcg->setJmpTransID(a->frontier());
@@ -528,16 +523,8 @@ void Vgen::emit(bindjcc1st& i) {
   a->jmp(jccStub);
 }
 
-void Vgen::emit(bindjcc2nd& i) {
-  backend.prepareForSmash(a->code(), kJmpccLen);
-  auto def = emitEphemeralServiceReq(frozen(),
-                                     mcg->getFreeStub(frozen(),
-                                                      &mcg->cgFixups()),
-                                     REQ_BIND_JMPCC_SECOND,
-                                     RipRelative(a->frontier()),
-                                     i.target.toAtomicInt(), i.cc);
-  mcg->setJmpTransID(a->frontier());
-  a->jcc(i.cc, def);
+void Vgen::emit(bindjcc& i) {
+  emitBindJcc(a->code(), frozen(), i.cc, i.target, i.trflags);
 }
 
 void Vgen::emit(bindjmp& i) {
@@ -900,8 +887,7 @@ void Vgen::emit(lea& i) {
 Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
   assert(size_t(area) == m_areas.size());
   auto b = m_unit.makeBlock(area);
-  Vout v{m_unit, b};
-  m_areas.push_back(Area{v, cb, cb.frontier()});
+  m_areas.emplace_back(Area{Vout{m_unit, b}, cb, cb.frontier()});
   return m_areas.back().out;
 }
 
@@ -973,12 +959,7 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   v << ldimmq{svcreq.req, rdi};
   arg_regs |= rAsm | rdi | rVmFp | rVmSp;
 
-  // Weird hand-shaking with enterTC: reverse-call a service routine.
-  // In the case of some special stubs (m_callToExit, m_retHelper), we
-  // have already unbalanced the return stack by doing a ret to
-  // something other than enterTCHelper.  In that case
-  // SRJmpInsteadOfRet indicates to fake the return.
-  v << ret{arg_regs};
+  v << jmpi{TCA(handleSRHelper), arg_regs};
 }
 
 static void lowerSrem(Vunit& unit, Vlabel b, size_t iInst) {

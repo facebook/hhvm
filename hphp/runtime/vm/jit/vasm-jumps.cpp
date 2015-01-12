@@ -147,7 +147,7 @@ void optimizeExits(Vunit& unit) {
       const auto& bj = unit.blocks[exit].code.back().bindjmp_;
       auto origin = code.back().origin;
       hoist_sync(exit);
-      code.back() = bindexit{cc, ijcc.sf, bj.target, bj.trflags, bj.args};
+      code.back() = bindjcc{cc, ijcc.sf, bj.target, bj.trflags, bj.args};
       code.emplace_back(jmp{next});
       code.back().origin = origin;
     };

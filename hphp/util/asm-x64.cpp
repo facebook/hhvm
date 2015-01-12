@@ -471,7 +471,18 @@ bool DecodedInstruction::isCall() const {
 }
 
 bool DecodedInstruction::isJmp() const {
+  if (m_map_select != 0) return false;
   return m_opcode == 0xe9;
+}
+
+ConditionCode DecodedInstruction::jccCondCode() const {
+  if (m_map_select == 0) {
+    assert((m_opcode & 0xf0) == 0x70); // 8-bit jcc
+  } else {
+    assert(m_map_select == 1);
+    assert((m_opcode & 0xf0) == 0x80); // 32-bit jcc
+  }
+  return static_cast<ConditionCode>(m_opcode & 0x0f);
 }
 
 bool DecodedInstruction::shrinkBranch() {

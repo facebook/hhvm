@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/func-prologues-x64.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/ringbuffer.h"
 
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/vm/func.h"
@@ -375,6 +376,15 @@ SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
   Asm a { mcg->code.main() };
 
   start = emitFuncGuard(a, func);
+  if (Trace::moduleEnabledRelease(Trace::ringbuffer)) {
+    auto arg = 0;
+    auto name = func->fullName()->data();
+    a.  movq   (reinterpret_cast<uintptr_t>(name), argNumToRegName[arg++]);
+    a.  movq   (strlen(name), argNumToRegName[arg++]);
+    a.  movq   (Trace::RBTypeFuncPrologue, argNumToRegName[arg++]);
+    a.  call   (TCA(Trace::ringbufferMsg));
+  }
+
   if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(a);
   a.    pop    (rStashedAR[AROFF(m_savedRip)]);
   maybeEmitStackCheck(a, func);

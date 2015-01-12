@@ -99,7 +99,7 @@ static constexpr int maxStubSpace() {
   /* max space for moving to align plus emitting args */
   return
     kJmpTargetAlign - 1 +
-    (kNumServiceReqArgRegs + kExtraRegs) * kMovSize;
+    (kNumServiceReqArgRegs + kExtraRegs) * (kMovSize + kRipLeaLen);
 }
 
 // fill remaining space in stub with ud2 or int3
@@ -160,19 +160,10 @@ emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
   as.    emitImmReg(req, reg::rdi);
 
   /*
-   * Weird hand-shaking with enterTC: reverse-call a service routine.
-   *
-   * In the case of some special stubs (m_callToExit, m_retHelper), we
-   * have already unbalanced the return stack by doing a ret to
-   * something other than enterTCHelper.  In that case
-   * SRJmpInsteadOfRet indicates to fake the return.
+   * Jump to the helper that will pack our args into a struct and call into
+   * MCGenerator::handleServiceRequest().
    */
-  if (flags & SRFlags::JmpInsteadOfRet) {
-    as.  pop(reg::rax);
-    as.  jmp(reg::rax);
-  } else {
-    as.  ret();
-  }
+  as.    jmp(TCA(handleSRHelper));
 
   if (debug || !persist) {
     /*
@@ -203,14 +194,9 @@ emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
   return ret;
 }
 
-void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-                      SrcKey dest, TransFlags trflags) {
-  emitBindJ(cb, frozen, cc, dest, REQ_BIND_SIDE_EXIT, trflags);
-}
-
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-                 SrcKey dest) {
-  emitBindJ(cb, frozen, cc, dest, REQ_BIND_JCC, TransFlags{});
+                 SrcKey dest, TransFlags trflags) {
+  emitBindJ(cb, frozen, cc, dest, REQ_BIND_JCC, trflags);
 }
 
 void emitBindJmp(CodeBlock& cb, CodeBlock& frozen,

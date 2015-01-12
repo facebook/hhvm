@@ -31,11 +31,12 @@ namespace Trace {
   RBTYPE(Msg) \
   RBTYPE(SideExit) \
   RBTYPE(EnterTC) \
+  RBTYPE(ResumeTC) \
   RBTYPE(TraceletBody) \
   RBTYPE(TraceletGuards) \
   RBTYPE(FuncEntry) \
   RBTYPE(FuncExit) \
-  RBTYPE(FuncPrologueTry) \
+  RBTYPE(FuncPrologue) \
   RBTYPE(BytecodeStart)
 
 enum RingBufferType : uint8_t {

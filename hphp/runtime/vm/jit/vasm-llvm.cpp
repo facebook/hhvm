@@ -1256,9 +1256,8 @@ O(andli) \
 O(andq) \
 O(andqi) \
 O(bindjcc1st) \
-O(bindjcc2nd) \
+O(bindjcc) \
 O(bindjmp) \
-O(bindexit) \
 O(bindaddr) \
 O(debugtrap) \
 O(defvmsp) \
@@ -1299,6 +1298,7 @@ O(jcc) \
 O(jmp) \
 O(jmpr) \
 O(jmpm) \
+O(jmpi) \
 O(ldimmb) \
 O(ldimml) \
 O(ldimmq) \
@@ -1596,18 +1596,9 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp, inst.target, inst.trflags});
 }
 
-// Emitting a real REQ_BIND_SIDE_EXIT or REQ_BIND_JMPCC_(FIRST|SECOND) only
-// makes sense if we can guarantee that llvm will emit a smashable jcc. Until
-// then, we jcc to a REQ_BIND_JMP.
-void LLVMEmitter::emit(const bindexit& inst) {
-  emitJcc(
-    inst.sf, inst.cc, "exit",
-    [&] {
-      emit(bindjmp{inst.target, inst.trflags});
-    }
-  );
-}
-
+// Emitting a real REQ_BIND_(JUMPCC_FIRST|JCC) only makes sense if we can
+// guarantee that llvm will emit a smashable jcc. Until then, we jcc to a
+// REQ_BIND_JMP.
 void LLVMEmitter::emit(const bindjcc1st& inst) {
   emitJcc(
     inst.sf, inst.cc, "jcc1",
@@ -1619,11 +1610,11 @@ void LLVMEmitter::emit(const bindjcc1st& inst) {
   emit(bindjmp{inst.targets[0]});
 }
 
-void LLVMEmitter::emit(const bindjcc2nd& inst) {
+void LLVMEmitter::emit(const bindjcc& inst) {
   emitJcc(
-    inst.sf, inst.cc, "jcc2",
+    inst.sf, inst.cc, "jcc",
     [&] {
-      emit(bindjmp{inst.target});
+      emit(bindjmp{inst.target, inst.trflags});
     }
   );
 }
@@ -2178,6 +2169,13 @@ void LLVMEmitter::emit(const jmpm& inst) {
   emitTraceletTailCall(func);
 }
 
+void LLVMEmitter::emit(const jmpi& inst) {
+  auto func = emitFuncPtr(folly::sformat("jmpi_{}", inst.target),
+                          m_traceletFnTy,
+                          reinterpret_cast<uint64_t>(inst.target));
+  emitTraceletTailCall(func);
+}
+
 void LLVMEmitter::emit(const ldimmb& inst) {
   defineValue(inst.d, cns(inst.s.b()));
 }
@@ -2560,16 +2558,6 @@ void LLVMEmitter::emit(const subsd& inst) {
                                        asDbl(value(inst.s0))));
 }
 
-/*
- * To leave the TC and perform a service request, translated code is supposed
- * to execute a ret instruction after populating the right registers. There are
- * a number of different ways to do this, but the most straightforward for now
- * is to do a tail call with the right calling convention to a stub with a
- * single ret instruction. Rather than emitting a dedicated stub for this, we
- * just reuse the ret at the end of enterTCHelper().
- */
-extern "C" void enterTCReturn();
-
 void LLVMEmitter::emit(const svcreq& inst) {
   std::vector<llvm::Value*> args{
     value(x64::rVmSp),
@@ -2584,10 +2572,10 @@ void LLVMEmitter::emit(const svcreq& inst) {
 
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
   auto funcType = llvm::FunctionType::get(m_irb.getVoidTy(), argTypes, false);
-  auto func = emitFuncPtr(folly::to<std::string>("enterTCServiceReqLLVM_",
+  auto func = emitFuncPtr(folly::to<std::string>("handleSRHelper_",
                                                  argTypes.size()),
                           funcType,
-                          uint64_t(enterTCReturn));
+                          uint64_t(handleSRHelper));
   auto call = m_irb.CreateCall(func, args);
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_SR);
   call->setTailCallKind(llvm::CallInst::TCK_Tail);

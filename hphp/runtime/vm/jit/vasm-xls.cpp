@@ -823,9 +823,8 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
       break;
     case Vinstr::bindaddr:
     case Vinstr::bindjcc1st:
-    case Vinstr::bindjcc2nd:
+    case Vinstr::bindjcc:
     case Vinstr::bindjmp:
-    case Vinstr::bindexit:
       defs = m_srkill;
       break;
     // arm instrs

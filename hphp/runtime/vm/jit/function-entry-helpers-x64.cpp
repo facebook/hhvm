@@ -96,10 +96,11 @@ TCA fcallHelper(ActRec* ar, void* sp) {
 }
 
 /*
- * This is used to generate an entry point for the entry
- * to a function, after the prologue has run.
+ * This is used to generate an entry point for the entry to a function, after
+ * the prologue has run.
  */
 TCA funcBodyHelper(ActRec* fp, void* sp) {
+  assert_native_stack_aligned();
   setupAfterPrologue(fp, sp);
   tl_regState = VMRegState::CLEAN;
   Func* func = const_cast<Func*>(fp->m_func);

@@ -85,7 +85,7 @@ private:
 
   // intrinsics
   void emit(bindcall& i);
-  void emit(bindexit& i);
+  void emit(bindjcc& i);
   void emit(bindjmp& i);
   void emit(copy& i);
   void emit(copy2& i);
@@ -327,8 +327,8 @@ void Vgen::emit(bindcall& i) {
   mcg->backEnd().emitSmashableCall(*codeBlock, i.stub);
 }
 
-void Vgen::emit(bindexit& i) {
-  emitBindSideExit(*codeBlock, frozen(), i.target, i.cc);
+void Vgen::emit(bindjcc& i) {
+  emitBindJcc(*codeBlock, frozen(), i.cc, i.target);
 }
 
 void Vgen::emit(bindjmp& i) {

@@ -45,9 +45,9 @@ using namespace reg;
 extern "C" void enterTCHelper(Cell* vm_sp,
                               ActRec* vm_fp,
                               TCA start,
-                              TReqInfo* infoPtr,
                               ActRec* firstAR,
-                              void* targetCacheBase);
+                              void* targetCacheBase,
+                              ActRec* stashedAR);
 
 namespace x64 {
 
@@ -106,16 +106,16 @@ struct BackEnd : public jit::BackEnd {
                 x64::rVmTl == r12 &&
                 x64::rStashedAR == r15,
                 "__enterTCHelper needs to be modified to use the correct ABI");
-  static_assert(REQ_BIND_CALL == 0x1,
-                "Update assembly test for REQ_BIND_CALL in __enterTCHelper");
+  static_assert(REQ_BIND_CALL == 0x0,
+                "Update assembly test for REQ_BIND_CALL in handleSRHelper");
 
-  void enterTCHelper(TCA start, TReqInfo& info) override {
+  void enterTCHelper(TCA start, ActRec* stashedAR) override {
     // We have to force C++ to spill anything that might be in a callee-saved
     // register (aside from rbp). enterTCHelper does not save them.
     CALLEE_SAVED_BARRIER();
     auto& regs = vmRegsUnsafe();
     jit::enterTCHelper(regs.stack.top(), regs.fp, start,
-                       &info, vmFirstAR(), RDS::tl_base);
+                       vmFirstAR(), RDS::tl_base, stashedAR);
     CALLEE_SAVED_BARRIER();
   }
 
@@ -766,6 +766,10 @@ struct BackEnd : public jit::BackEnd {
   TCA jccTarget(TCA jmp) override {
     if (jmp[0] != 0x0F || (jmp[1] & 0xF0) != 0x80) return nullptr;
     return jmp + 6 + ((int32_t*)(jmp + 6))[-1];
+  }
+
+  ConditionCode jccCondCode(TCA jmp) override {
+    return DecodedInstruction(jmp).jccCondCode();
   }
 
   TCA callTarget(TCA call) override {

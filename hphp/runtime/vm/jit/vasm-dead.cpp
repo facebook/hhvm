@@ -148,9 +148,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::andbim:
     case Vinstr::bindaddr:
     case Vinstr::bindcall:
-    case Vinstr::bindexit:
     case Vinstr::bindjcc1st:
-    case Vinstr::bindjcc2nd:
+    case Vinstr::bindjcc:
     case Vinstr::bindjmp:
     case Vinstr::brk:
     case Vinstr::call:
@@ -179,6 +178,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::jmp:
     case Vinstr::jmpm:
     case Vinstr::jmpr:
+    case Vinstr::jmpi:
     case Vinstr::kpcall:
     case Vinstr::landingpad:
     case Vinstr::mccall:

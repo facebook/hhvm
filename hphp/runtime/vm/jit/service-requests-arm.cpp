@@ -105,11 +105,7 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
   a.     Mov   (argReg(0), req);
 
   a.     Ldr   (rLinkReg, MemOperand(sp, 16, PostIndex));
-  if (flags & SRFlags::JmpInsteadOfRet) {
-    a.   Br    (rLinkReg);
-  } else {
-    a.   Ret   ();
-  }
+  a.     Ret   ();
   a.     Brk   (0);
 
   if (!persist) {
@@ -129,11 +125,6 @@ void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest) {
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                  SrcKey dest) {
   emitBindJ(cb, frozen, dest, cc, REQ_BIND_JCC, TransFlags{});
-}
-
-void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
-                      jit::ConditionCode cc) {
-  emitBindJ(cb, frozen, dest, cc, REQ_BIND_SIDE_EXIT, TransFlags{});
 }
 
 }}}

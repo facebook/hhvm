@@ -50,17 +50,6 @@ struct AsmInfo;
  * 3) The modified instruction does not cross a cacheline boundary
  */
 
-struct TReqInfo {
-  uintptr_t requestNum;
-  uintptr_t args[5];
-
-  // Some TC registers need to be preserved across service requests.
-  uintptr_t saved_rStashedAr;
-
-  // Stub addresses are passed back to allow us to recycle used stubs.
-  TCA stubAddr;
-};
-
 enum class TestAndSmashFlags {
   kAlignJccImmediate,
   kAlignJcc,
@@ -97,7 +86,7 @@ class BackEnd {
   virtual bool storesCell(const IRInstruction& inst, uint32_t srcIdx) = 0;
   virtual bool loadsCell(const IRInstruction& inst) = 0;
 
-  virtual void enterTCHelper(TCA start, TReqInfo& info) = 0;
+  virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
   virtual void moveToAlign(CodeBlock& cb,
                            MoveToAlignFlags alignment
                            = MoveToAlignFlags::kJmpTargetAlign) = 0;
@@ -150,6 +139,7 @@ class BackEnd {
    */
   virtual TCA jmpTarget(TCA jmp) = 0;
   virtual TCA jccTarget(TCA jmp) = 0;
+  virtual ConditionCode jccCondCode(TCA jmp) = 0;
   virtual TCA callTarget(TCA call) = 0;
 
   virtual void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,

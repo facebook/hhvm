@@ -29,8 +29,6 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
 void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest);
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                  SrcKey dest);
-void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
-                      jit::ConditionCode cc);
 
 }}}
 

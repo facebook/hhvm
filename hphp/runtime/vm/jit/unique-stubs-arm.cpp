@@ -34,12 +34,7 @@ void emitCallToExit(UniqueStubs& us) {
 
   a.   Nop   ();
   us.callToExit = a.frontier();
-  emitServiceReq(
-    mcg->code.main(),
-    SRFlags::Align | SRFlags::JmpInsteadOfRet,
-    REQ_EXIT
-  );
-
+  a.   Br    (rLinkReg);
   us.add("callToExit", us.callToExit);
 }
 

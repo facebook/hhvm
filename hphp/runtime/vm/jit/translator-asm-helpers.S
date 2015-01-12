@@ -6,9 +6,9 @@
  *   rdi / x0:  Cell* vm_sp
  *   rsi / x1:  Cell* vm_fp
  *   rdx / x2:  unsigned char* start
- *   rcx / x3:  TReqInfo* infoPtr
- *   r8  / x4:  ActRec* firstAR
- *   r9  / x5:  uint8_t* targetCacheBase
+ *   rcx / x4:  ActRec* firstAR
+ *   r8  / x5:  uint8_t* targetCacheBase
+ *   r9  / x6:  ActRec* stashedAR
  */
 
 #include "hphp/runtime/vm/jit/reserved-stack.h"
@@ -28,17 +28,27 @@ ETCH_NAME(enterTCHelper):
   CFI3C(offset, rbp, -16)    // Where to find previous value of rbp, relative to cfa
 
   // Set firstAR->m_sfp to point to this frame.
-  mov %rsp, (%r8)
-
-  // Save infoPtr
-  push %rcx
-  CFI2(adjust_cfa_offset, 8)
+  mov %rsp, (%rcx)
 
   // Set up special registers used for translated code.
   mov %rdi, %rbx          // rVmSp
-  mov %r9, %r12           // rVmTl
+  mov %r8,  %r12          // rVmTl
   mov %rsi, %rbp          // rVmFp
-  mov 0x30(%rcx), %r15    // rStashedAR saved across service requests
+
+  sub $RESERVED_STACK_TOTAL_SPACE, %rsp
+  CFI2(adjust_cfa_offset, RESERVED_STACK_TOTAL_SPACE)
+
+  /*
+   * If we're entering the TC at a function prologue, make it look like we got
+   * there via a bindcall by pushing return addresses, setting rStashedAR, then
+   * jumping to the prologue.
+   */
+  test %r9, %r9
+  jz ETCH_LABEL(enterTCHelper$callTC)
+  push $enterTCExit
+  push 0x8(%r9)
+  mov %r9, %r15
+  jmp *%rdx
 
   /*
    * The translated code we are about to enter does not follow the
@@ -47,72 +57,22 @@ ETCH_NAME(enterTCHelper):
    * that the return address being pushed will make the native stack
    * 16-byte aligned.
    */
-
-  sub $RESERVED_STACK_TOTAL_SPACE, %rsp
-  CFI2(adjust_cfa_offset, RESERVED_STACK_TOTAL_SPACE)
-
-  /*
-   * If returning from a BIND_CALL request, push the return IP saved
-   * in the ActRec pointed to by r15.  The 0x1 in the cmp instruction
-   * must be kept in sync with REQ_BIND_CALL in abi-x64.h.
-   */
-  cmpl $0x1, 0x0(%rcx)
-  jne ETCH_LABEL(enterTCHelper$jumpToTC)
-  lea ETCH_LABEL(enterTCHelper$serviceReqLabel(%rip)), %rax
-  push %rax
-  push 0x8(%r15)
-  jmp *%rdx
-ETCH_LABEL(enterTCHelper$jumpToTC):
+ETCH_LABEL(enterTCHelper$callTC):
   call *%rdx
-ETCH_LABEL(enterTCHelper$serviceReqLabel):
 
   /*
-   * enterTCServiceReq is never called directly; this exists to give the jit
+   * enterTCExit is never called directly; this exists to give the jit
    * access to the address of the expected return address while in the TC.
    */
-  .globl ETCH_NAME(enterTCServiceReq)
-  ETCH_NAME(enterTCServiceReq):
+  .globl ETCH_NAME(enterTCExit)
+ETCH_NAME(enterTCExit):
   /*
    * Eager vm-reg save. Must match values in rds-header.h
    */
-  mov %rbx, 16(%r12)
-  mov %rbp, 32(%r12)
+  mov %rbx, 0x10(%r12)
+  mov %rbp, 0x20(%r12)
   add $RESERVED_STACK_TOTAL_SPACE, %rsp
   CFI2(adjust_cfa_offset, -RESERVED_STACK_TOTAL_SPACE)
-  // Restore infoPtr into %rbx
-  pop %rbx
-  CFI2(adjust_cfa_offset, -8)
-
-  // Copy the values passed from jitted code into *infoPtr
-  mov %rdi, 0x0(%rbx)
-  test %rdi,%rdi
-  jnz ETCH_LABEL(enterTCHelper$copyReqArgs)
-  CFI(remember_state)
-  pop %rbp
-  CFI2(restore, rbp)
-  CFI2(adjust_cfa_offset, -8)
-
-  /*
-   * Like enterTCServiceReq, this is never called directly, but we need
-   * access to its address.
-   */
-  .globl ETCH_NAME(enterTCReturn)
-  ETCH_NAME(enterTCReturn):
-  ret
-
-ETCH_LABEL(enterTCHelper$copyReqArgs):
-  CFI(restore_state)
-  mov %rsi, 0x8(%rbx)
-  mov %rdx, 0x10(%rbx)
-  mov %rcx, 0x18(%rbx)
-  mov %r8,  0x20(%rbx)
-  mov %r9,  0x28(%rbx)
-
-  // Service request "callee-saved".  (Returnee-saved?)
-  mov %r15, 0x30(%rbx)
-
-  // copy stub address into infoPtr->stubAddr
-  mov %r10, 0x38(%rbx)
 
   // Epilogue
   pop %rbp
@@ -121,6 +81,57 @@ ETCH_LABEL(enterTCHelper$copyReqArgs):
   ret
   CFI(endproc)
   ETCH_SIZE(enterTCHelper)
+
+  // handleSRHelper: Translated code will jump to this stub to perform all
+  // service requests. It calls out to C++ to handle the request, then jumps
+  // to the returned address (which may be the callToExit stub).
+  ETCH_ALIGN16
+  ETCH_SECTION(handleSRHelper)
+  .globl ETCH_NAME(handleSRHelper)
+ETCH_NAME(handleSRHelper):
+  CFI(startproc)
+
+  // Sync vmsp & vmfp
+  mov %rbx, 0x10(%r12)
+  mov %rbp, 0x20(%r12)
+
+  // Push a ServiceReqInfo struct onto the stack and call handleServiceRequest.
+  push %rax // padding
+  push %r8
+  push %rcx
+  push %rdx
+  push %rsi
+  push %r15
+  push %r10
+  push %rdi
+  CFI2(adjust_cfa_offset, 0x40)
+
+  // call mcg->handleServiceRequest(%rsp)
+  mov mcg(%rip), %rdi
+  mov %rsp, %rsi
+  call MCGenerator_handleServiceRequest
+
+  // Load the service request we were processing from the ServiceReqInfo,
+  // then pop it off the stack.
+  mov (%rsp), %edi
+  add $0x40, %rsp
+  CFI2(adjust_cfa_offset, -0x40)
+
+  // rVmTl and rStashedAR were preserved by the callee but vmsp and vmfp
+  // might've changed if we interpreted anything. Reload them.
+  mov 0x10(%r12), %rbx
+  mov 0x20(%r12), %rbp
+
+  // If we're coming back from a REQ_BIND_CALL, we have to push m_savedRip
+  // from rStashedAR for the func prologue we're about to jump to.
+  cmpl $0, %edi
+  jne ETCH_LABEL(handleSRHelper$jumpToTC)
+  push 0x8(%r15)
+ETCH_LABEL(handleSRHelper$jumpToTC):
+  jmp *%rax
+  CFI(endproc)
+  ETCH_SIZE(handleSRHelper)
+
 ///////////////////////////////////////////////////////////////////////////////
 #elif defined(__AARCH64EL__)
   .globl enterTCHelper

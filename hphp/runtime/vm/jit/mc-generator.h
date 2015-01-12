@@ -45,13 +45,12 @@ typedef X64Assembler Asm;
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
 typedef hphp_hash_map<uint64_t,const uint64_t*> LiteralMap;
 
-struct TReqInfo;
 struct Label;
 struct MCGenerator;
 struct AsmInfo;
 struct HTS;
 
-extern MCGenerator* mcg;
+extern "C" MCGenerator* mcg;
 extern void* interpOneEntryPoints[];
 
 constexpr size_t kNonFallthroughAlign = 64;
@@ -231,21 +230,21 @@ public:
   const uint64_t* allocLiteral(uint64_t val);
 
   /*
-   * enterTC is the main entry point for the translator from the
-   * bytecode interpreter (see enterVMWork).  It operates on behalf of
-   * a given nested invocation of the intepreter (calling back into it
-   * as necessary for blocks that need to be interpreted).
+   * enterTC is the main entry point for the translator from the bytecode
+   * interpreter (see enterVMWork).  It operates on behalf of a given nested
+   * invocation of the intepreter (calling back into it as necessary for blocks
+   * that need to be interpreted).
    *
-   * If start is not null, data will be used to initialize rStashedAr,
-   * to enable us to run a jitted prologue;
-   * otherwise, data should be a pointer to the SrcKey to start
-   * translating from.
+   * If start is the address of a func prologue, stashedAR should be the ActRec
+   * prepared for the call to that function, otherwise it should be nullptr.
    *
-   * But don't call this directly, use one of the helpers below
+   * But don't call it directly, use one of the helpers below.
    */
-  void enterTC(TCA start, void* data);
-  void enterTCAtSrcKey(SrcKey& sk) {
-    enterTC(nullptr, &sk);
+ private:
+  void enterTC(TCA start, ActRec* stashedAR);
+ public:
+  void enterTC() {
+    enterTC(m_tx.uniqueStubs.resumeHelper, nullptr);
   }
   void enterTCAtPrologue(ActRec *ar, TCA start) {
     assert(ar);
@@ -256,6 +255,7 @@ public:
     assert(start);
     enterTC(start, nullptr);
   }
+
   /*
    * Called before entering a new PHP "world."
    */
@@ -319,6 +319,20 @@ public:
    */
   bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
+  /*
+   * This function is called by translated code to handle service requests,
+   * which usually involve some kind of jump smashing. The returned address
+   * will never be null, and indicates where the caller should resume
+   * execution. This function may call into the interpreter if necessary to
+   * make forward progress (if another thread has the write lease), and as a
+   * result it may throw exceptions.
+   *
+   * The forced symbol name is so we can call this from
+   * translator-asm-helpers.S without hardcoding a fragile mangled name.
+   */
+  TCA handleServiceRequest(ServiceReqInfo& info)
+    asm("MCGenerator_handleServiceRequest");
+
 private:
   /*
    * Service request handlers.
@@ -328,12 +342,9 @@ private:
   TCA bindJmpccFirst(TCA toSmash,
                      SrcKey skTrue, SrcKey skFalse,
                      bool toTake,
-                     ConditionCode cc,
                      bool& smashed);
-  TCA bindJmpccSecond(TCA toSmash, SrcKey dest,
-                      ConditionCode cc,
-                      bool& smashed);
-  bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
+  TCA bindCall(ActRec* calleeFrame, bool isImmutable,
+               SrcKey& sk, ServiceRequest& ret);
 
   bool shouldTranslate(const Func*) const;
   bool shouldTranslateNoSizeLimit(const Func*) const;

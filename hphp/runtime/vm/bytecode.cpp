@@ -1912,8 +1912,7 @@ void ExecutionContext::enterVMAtCurPC() {
   Stats::inc(Stats::VMEnter);
 
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
-    SrcKey sk(vmfp()->func(), vmpc(), vmfp()->resumed());
-    mcg->enterTCAtSrcKey(sk);
+    mcg->enterTC();
   } else {
     dispatch();
   }

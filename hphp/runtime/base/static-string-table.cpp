@@ -101,12 +101,27 @@ typedef folly::AtomicHashMap<
 > StringDataMap;
 StringDataMap* s_stringDataMap;
 
+struct StaticStringData {
+  static DECLARE_THREAD_LOCAL(StringDataMap*, s_localStringDataMap);
+};
+IMPLEMENT_THREAD_LOCAL(StringDataMap*, StaticStringData::s_localStringDataMap);
+
 // If a string is static it better be the one in the table.
 DEBUG_ONLY bool checkStaticStr(const StringData* s) {
+#ifdef DEBUG
   assert(s->isStatic());
+  auto localMap = *StaticStringData::s_localStringDataMap;
+  if (localMap) {
+    auto const it = localMap->find(make_intern_key(s));
+    if (it != localMap->end()) {
+      assert(to_sdata(it->first) == s);
+      return true;
+    }
+  }
   auto DEBUG_ONLY const it = s_stringDataMap->find(make_intern_key(s));
   assert(it != s_stringDataMap->end());
   assert(to_sdata(it->first) == s);
+#endif
   return true;
 }
 
@@ -156,12 +171,7 @@ void create_string_data_map(StringDataMap*& map) {
 
 }
 
-struct StaticStringData {
-  static DECLARE_THREAD_LOCAL(StringDataMap*, s_localStringDataMap);
-};
-
 IMPLEMENT_THREAD_LOCAL(bool, StaticStringConfig::s_useLocalMap);
-IMPLEMENT_THREAD_LOCAL(StringDataMap*, StaticStringData::s_localStringDataMap);
 
 //////////////////////////////////////////////////////////////////////
 

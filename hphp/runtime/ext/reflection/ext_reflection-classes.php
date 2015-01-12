@@ -85,8 +85,9 @@ class ReflectionParameter implements Reflector {
     } else if (is_array($func)) {
       $params = (new ReflectionMethod($func[0], $func[1]))->getParameters();
     } else {
-      throw new Exception(
-        "Invalid function, expected string, got ".gettype($func)
+      throw new ReflectionException(
+        "The parameter class is expected to be either a string, " .
+        "an array(class, method) or a callable object"
       );
     }
 
@@ -98,12 +99,22 @@ class ReflectionParameter implements Reflector {
           break;
         }
       }
-    } else if (is_int($param) && $param < count($params)) {
+      if ($this->info === null) {
+        throw new ReflectionException("The parameter specified by its name " .
+          "could not be found");
+      }
+    } else if (is_int($param)) {
+      if ($param < 0 || $param >= count($params)) {
+        throw new ReflectionException("The parameter specified by its offset " .
+         "could not be found");
+      }
       $p = $params[$param];
       $this->info = $p->info;
       $this->name = $p->name;
     } else {
-      throw new Exception("No param named $param found");
+      throw new ReflectionException(
+        "The parameter value is expected to be either a string or integer"
+      );
     }
   }
 

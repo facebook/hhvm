@@ -14,21 +14,22 @@ class Typo3 extends Framework {
                         false, TestFindModes::TOKEN);
   }
 
-  <<Override>>
+  <<__Override>>
   protected function extraPostComposer(): void {
+    $rootDir = nullthrows($this->getInstallRoot());
     foreach($this->additionalFolders as $folder) {
-      mkdir($this->getInstallRoot() . '/' . $folder);
+      mkdir($rootDir . '/' . $folder);
     }
     // comment out 2 methods from interfaces which couses troubles
     // because of https://github.com/facebook/hhvm/issues/2527
-    $filePath = $this->getInstallRoot() .
+    $filePath = $rootDir .
                 '/typo3/sysext/core/Resources/PHP/TYPO3.Flow/Classes/'.
                 'TYPO3/Flow/Package/PackageManagerInterface.php';
     file_put_contents($filePath,
                       str_replace('public function initialize(',
                                   '//public function initialize(',
                                   file_get_contents($filePath)));
-    $filePath = $this->getInstallRoot() .
+    $filePath = $rootDir .
                 '/typo3/sysext/core/Resources/PHP/TYPO3.Flow/Classes/'.
                 'TYPO3/Flow/Package/PackageInterface.php';
     file_put_contents($filePath,
@@ -39,13 +40,13 @@ class Typo3 extends Framework {
 
   }
 
-  <<Override>>
+  <<__Override>>
   protected function isInstalled(): bool {
     foreach($this->additionalFolders as $folder) {
       if(!file_exists($this->getInstallRoot() . '/' . $folder)) {
         if(file_exists($this->getInstallRoot())) {
 
-          remove_dir_recursive($this->getInstallRoot());
+          remove_dir_recursive(nullthrows($this->getInstallRoot()));
         }
         return false;
       }

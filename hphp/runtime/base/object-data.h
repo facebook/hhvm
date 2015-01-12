@@ -328,9 +328,15 @@ struct ObjectData {
                bool bindingAssignment = false);
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
+
   template <bool setResult>
-  void incDecProp(TypedValue& tvRef, Class* ctx, IncDecOp op,
-                  const StringData* key, TypedValue& dest);
+  void incDecProp(
+    Class* ctx,
+    IncDecOp op,
+    const StringData* key,
+    TypedValue& dest
+  );
+
   void unsetProp(Class* ctx, const StringData* key);
 
   static void raiseObjToIntNotice(const char*);

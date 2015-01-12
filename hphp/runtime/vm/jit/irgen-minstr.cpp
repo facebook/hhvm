@@ -1635,8 +1635,7 @@ void emitSetOpProp(MTS& env) {
 void emitIncDecProp(MTS& env) {
   IncDecOp op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
-  env.result = gen(env, IncDecProp, IncDecData { op },
-                   env.base.value, key, misPtr(env));
+  env.result = gen(env, IncDecProp, IncDecData { op }, env.base.value, key);
 }
 
 void emitBindProp(MTS& env) {

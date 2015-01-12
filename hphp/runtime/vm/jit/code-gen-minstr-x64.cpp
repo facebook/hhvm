@@ -180,7 +180,6 @@ void CodeGenerator::cgIncDecProp(IRInstruction* inst) {
       .immPtr(getClass(inst->marker()))
       .ssa(0)
       .typedValue(1)
-      .ssa(2)
       .imm(static_cast<int32_t>(extra->op))
   );
 }

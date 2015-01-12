@@ -5319,8 +5319,7 @@ OPTBLD_INLINE void ExecutionContext::iopIncDecM(IOP_ARGS) {
       case MPC:
       case MPT: {
         Class* ctx = arGetContextClass(vmfp());
-        IncDecProp<true>(tvScratch, *tvRef.asTypedValue(), ctx, op, base,
-                         *curMember, to);
+        IncDecProp<true>(ctx, op, base, *curMember, to);
         break;
       }
       default: assert(false);

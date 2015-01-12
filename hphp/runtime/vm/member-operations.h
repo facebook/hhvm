@@ -2103,23 +2103,27 @@ inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
 }
 
 template <bool setResult>
-inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
-                          IncDecOp op, ObjectData* base,
-                          TypedValue key, TypedValue& dest) {
-  StringData* keySD = prepareKey(key);
+inline void IncDecPropObj(Class* ctx,
+                          IncDecOp op,
+                          ObjectData* base,
+                          TypedValue key,
+                          TypedValue& dest) {
+  auto keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
-  base->incDecProp<setResult>(tvRef, ctx, op, keySD, dest);
+  base->incDecProp<setResult>(ctx, op, keySD, dest);
 }
 
 template <bool setResult, bool isObj = false>
-inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
-                       Class* ctx, IncDecOp op,
-                       TypedValue* base, TypedValue key,
-                       TypedValue& dest) {
+inline void IncDecProp(
+  Class* ctx,
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue key,
+  TypedValue& dest
+) {
   if (isObj) {
-    IncDecPropObj<setResult>(tvRef, ctx, op,
-                             reinterpret_cast<ObjectData*>(base),
-                             key, dest);
+    auto obj = reinterpret_cast<ObjectData*>(base);
+    IncDecPropObj<setResult>(ctx, op, obj, key, dest);
     return;
   }
 
@@ -2151,8 +2155,7 @@ inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
       return IncDecPropStdclass<setResult>(op, base, key, dest);
 
     case KindOfObject:
-      return IncDecPropObj<setResult>(tvRef, ctx, op, instanceFromTv(base),
-                                      key, dest);
+      return IncDecPropObj<setResult>(ctx, op, instanceFromTv(base), key, dest);
 
     case KindOfRef:
     case KindOfClass:

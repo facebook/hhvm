@@ -2155,7 +2155,7 @@ fields of that struct for holding intermediate values.
   Set op propery with key S1 in base S0, using S2 as the right hand side.
 
 | IncDecProp<op>, D(Cell),
-|                 S(Obj,PtrToGen) S(Cell) S(PtrToMISGen),
+|                 S(Obj,PtrToGen) S(Cell),
 |                 MProp|PRc|Er
 
   Increment/decrement property with key S1 in base S0.

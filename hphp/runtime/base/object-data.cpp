@@ -1647,13 +1647,16 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
 }
 
 template <bool setResult>
-void ObjectData::incDecProp(TypedValue& tvRef,
-                            Class* ctx,
-                            IncDecOp op,
-                            const StringData* key,
-                            TypedValue& dest) {
+void ObjectData::incDecProp(
+  Class* ctx,
+  IncDecOp op,
+  const StringData* key,
+  TypedValue& dest
+) {
   auto const lookup = getProp(ctx, key);
   auto prop = lookup.prop;
+
+  auto tv = make_tv<KindOfUninit>();
 
   if (prop && lookup.accessible) {
     auto tvResult = make_tv<KindOfNull>();
@@ -1684,11 +1687,11 @@ void ObjectData::incDecProp(TypedValue& tvRef,
 
   // Native accessors.
   if (getAttribute(HasNativePropHandler)) {
-    if (invokeNativeGetProp(&tvRef, key)) {
-      tvUnboxIfNeeded(&tvRef);
-      IncDecBody<setResult>(op, &tvRef, &dest);
+    if (invokeNativeGetProp(&tv, key)) {
+      tvUnboxIfNeeded(&tv);
+      IncDecBody<setResult>(op, &tv, &dest);
       TypedValue ignored;
-      if (invokeNativeSetProp(&ignored, key, &tvRef)) {
+      if (invokeNativeSetProp(&ignored, key, &tv)) {
         tvRefcountedDecRef(&ignored);
         return;
       }
@@ -1719,11 +1722,11 @@ void ObjectData::incDecProp(TypedValue& tvRef,
   }
 
   if (useGet && useSet) {
-    if (invokeGet(&tvRef, key)) {
-      tvUnboxIfNeeded(&tvRef);
-      IncDecBody<setResult>(op, &tvRef, &dest);
+    if (invokeGet(&tv, key)) {
+      tvUnboxIfNeeded(&tv);
+      IncDecBody<setResult>(op, &tv, &dest);
       TypedValue ignored;
-      if (invokeSet(&ignored, key, &tvRef)) {
+      if (invokeSet(&ignored, key, &tv)) {
         tvRefcountedDecRef(&ignored);
       }
       return;
@@ -1742,13 +1745,11 @@ void ObjectData::incDecProp(TypedValue& tvRef,
   IncDecBody<setResult>(op, prop, &dest);
 }
 
-template void ObjectData::incDecProp<true>(TypedValue&,
-                                           Class*,
+template void ObjectData::incDecProp<true>(Class*,
                                            IncDecOp,
                                            const StringData*,
                                            TypedValue&);
-template void ObjectData::incDecProp<false>(TypedValue&,
-                                            Class*,
+template void ObjectData::incDecProp<false>(Class*,
                                             IncDecOp,
                                             const StringData*,
                                             TypedValue&);

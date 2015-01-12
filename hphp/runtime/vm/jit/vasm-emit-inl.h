@@ -14,56 +14,64 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include <algorithm>
 
 namespace HPHP { namespace jit {
-///////////////////////////////////////////////////////////////////////////////
-
-#define O(name, ...)  \
-  static_assert(sizeof(name) <= 48, "vasm struct " #name " is too big");
-VASM_OPCODES
-#undef O
-static_assert(sizeof(Vinstr) <= 64, "Vinstr should be <= 64 bytes");
-
-const char* vinst_names[] = {
-#define O(name, imms, uses, defs) #name,
-  VASM_OPCODES
-#undef O
-};
 
 ///////////////////////////////////////////////////////////////////////////////
+// Vout.
 
-bool isBlockEnd(Vinstr& inst) {
-  switch (inst.op) {
-    // service request-y things
-    case Vinstr::bindjcc1st:
-    case Vinstr::bindjmp:
-    case Vinstr::fallback:
-    case Vinstr::svcreq:
-    // control flow
-    case Vinstr::jcc:
-    case Vinstr::jmp:
-    case Vinstr::jmpr:
-    case Vinstr::jmpm:
-    case Vinstr::jmpi:
-    case Vinstr::phijmp:
-    case Vinstr::phijcc:
-    // terminal
-    case Vinstr::ud2:
-    case Vinstr::unwind:
-    case Vinstr::vinvoke:
-    case Vinstr::ret:
-    case Vinstr::retctrl:
-    case Vinstr::fallthru:
-    // arm specific
-    case Vinstr::hcunwind:
-    case Vinstr::cbcc:
-    case Vinstr::tbcc:
-    case Vinstr::brk:
-      return true;
-    default:
-      return false;
-  }
+inline Vout& Vout::operator=(const Vout& v) {
+  assert(&v.m_unit == &m_unit);
+  m_block = v.m_block;
+  m_origin = v.m_origin;
+  return *this;
+}
+
+inline Vout& Vout::operator=(Vlabel b) {
+  m_block = b;
+  return *this;
+}
+
+inline Vout::operator Vlabel() const {
+  return m_block;
+}
+
+inline AreaIndex Vout::area() const {
+  return m_unit.blocks[m_block].area;
+}
+
+inline Vpoint Vout::makePoint() {
+  return Vpoint{m_unit.next_point++};
+}
+
+inline Vreg Vout::makeReg() {
+  return m_unit.makeReg();
+}
+
+inline Vtuple Vout::makeTuple(const VregList& regs) const {
+  return m_unit.makeTuple(regs);
+}
+
+inline Vtuple Vout::makeTuple(VregList&& regs) const {
+  return m_unit.makeTuple(std::move(regs));
+}
+
+inline VcallArgsId Vout::makeVcallArgs(VcallArgs&& args) const {
+  return m_unit.makeVcallArgs(std::move(args));
+}
+
+template<class T>
+inline Vreg Vout::cns(T v) {
+  return m_unit.makeConst(v);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Vasm.
+
+inline Vasm::Area& Vasm::area(AreaIndex i) {
+  assert((unsigned)i < m_areas.size());
+  return m_areas[(unsigned)i];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

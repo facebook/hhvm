@@ -20,11 +20,18 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include <folly/Format.h>
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
+
+struct Vunit;
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Thrown when the LLVM backend encounters something it doesn't support.
@@ -45,6 +52,7 @@ struct FailedLLVMCodeGen : public std::runtime_error {
 void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
                  const jit::vector<Vlabel>& labels);
 
-} }
+///////////////////////////////////////////////////////////////////////////////
+}}
 
 #endif

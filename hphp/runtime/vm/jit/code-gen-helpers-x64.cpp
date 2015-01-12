@@ -16,22 +16,24 @@
 
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 
-#include "hphp/util/asm-x64.h"
-#include "hphp/util/ringbuffer.h"
-#include "hphp/util/trace.h"
-
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/back-end.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/ringbuffer.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit { namespace x64 {
 
@@ -280,7 +282,7 @@ Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg dst) {
 }
 
 void emitCall(Asm& a, TCA dest, RegSet args) {
-  // warning: keep this in sync with vasm-x64 call{}
+  // NB: Keep this in sync with Vgen::emit(call) in vasm-x64.cpp.
   if (a.jmpDeltaFits(dest)) {
     a.call(dest);
   } else {

@@ -15,10 +15,15 @@
 */
 
 #include "hphp/runtime/vm/jit/vasm.h"
+
 #include "hphp/runtime/vm/jit/vasm-instr.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
+
 #include "hphp/vixl/a64/assembler-a64.h"
+
 #include <boost/dynamic_bitset.hpp>
 
 TRACE_SET_MOD(hhir);

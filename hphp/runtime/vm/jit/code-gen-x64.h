@@ -21,12 +21,18 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
+
+struct Vout;
 namespace NativeCalls { struct CallInfo; }
 namespace arm { struct CodeGenerator; }
+
 namespace x64 {
+///////////////////////////////////////////////////////////////////////////////
 
 // Cache alignment is required for mutable instructions to make sure
 // mutations don't "tear" on remote cpus.
@@ -267,6 +273,7 @@ inline Vptr refTVData(Vptr ref) {
   return ref + TVOFF(m_data);
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }}}
 
 #endif

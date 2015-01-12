@@ -14,46 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_DFS_H_
-#define incl_HPHP_JIT_VASM_DFS_H_
-
-#include "hphp/runtime/vm/jit/vasm-x64.h"
-#include <boost/dynamic_bitset.hpp>
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
-// visit reachable blocks calling pre and post on each one.
-struct DfsWalker {
-  explicit DfsWalker(const Vunit& u)
-    : unit(u)
-    , visited(u.blocks.size())
-  {}
-  template<class Pre, class Post> void dfs(Vlabel b, Pre pre, Post post) {
-    if (visited.test(b)) return;
-    visited.set(b);
-    pre(b);
-    for (auto s : succs(unit.blocks[b])) {
-      dfs(s, pre, post);
+PredVector computePreds(const Vunit& unit) {
+  PredVector preds(unit.blocks.size());
+  PostorderWalker walker(unit);
+  walker.dfs([&](Vlabel b) {
+    for (auto s: succs(unit.blocks[b])) {
+      preds[s].push_back(b);
     }
-    post(b);
-  }
-  template<class Pre, class Post> void dfs(Pre pre, Post post) {
-    dfs(unit.entry, pre, post);
-  }
-private:
-  const Vunit& unit;
-  boost::dynamic_bitset<> visited;
-};
+  });
+  return preds;
+}
 
-// visit reachable blocks in postorder, calling post on each one.
-struct PostorderWalker {
-  template<class Post> void dfs(Post post) {
-    m_dfs.dfs([](Vlabel){}, post);
-  }
-  explicit PostorderWalker(const Vunit& u) : m_dfs{u} {}
-private:
-  DfsWalker m_dfs;
-};
-
+///////////////////////////////////////////////////////////////////////////////
 }}
-#endif

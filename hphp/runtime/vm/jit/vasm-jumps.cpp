@@ -15,28 +15,19 @@
 */
 
 #include "hphp/runtime/vm/jit/vasm.h"
-#include "hphp/runtime/vm/jit/vasm-dfs.h"
+
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
-#include "hphp/runtime/vm/jit/vasm-util.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
+
+#include <boost/dynamic_bitset.hpp>
 
 #include <algorithm>
-#include <boost/dynamic_bitset.hpp>
 
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
-
-PredVector computePreds(const Vunit& unit) {
-  PredVector preds(unit.blocks.size());
-  PostorderWalker walker(unit);
-  walker.dfs([&](Vlabel b) {
-    for (auto s: succs(unit.blocks[b])) {
-      preds[s].push_back(b);
-    }
-  });
-  return preds;
-}
 
 namespace {
 

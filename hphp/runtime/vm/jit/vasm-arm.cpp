@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/back-end-arm.h"
@@ -26,19 +26,26 @@
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
+
 using namespace arm;
 using namespace vixl;
 
 namespace arm { struct ImmFolder; }
 
 namespace {
+///////////////////////////////////////////////////////////////////////////////
 
 vixl::Register W(Vreg32 r) {
   PhysReg pr(r.asReg());
@@ -518,7 +525,7 @@ void Vgen::emit(tbcc& i) {
 // Lower svcreq{} by making copies to abi registers explicit, saving
 // vm regs, and returning to the VM. svcreq{} is guaranteed to be
 // at the end of a block, so we can just keep appending to the same block.
-static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
+void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   auto svcreq = inst.svcreq_; // copy it
   auto origin = inst.origin;
   auto& argv = unit.tuples[svcreq.args];
@@ -581,6 +588,70 @@ void lower(Vunit& unit) {
   }
 }
 
+/*
+ * Some vasm opcodes don't have equivalent single instructions on ARM, and the
+ * equivalent instruction sequences require scratch registers.  We have to
+ * lower these to ARM-suitable vasm opcodes before register allocation.
+ */
+template<typename Inst>
+void lower(Inst& i, Vout& v) {
+  v << i;
+}
+
+void lower(cmpbim& i, Vout& v) {
+  auto scratch = v.makeReg();
+  v << loadzbl{i.s1, scratch};
+  v << cmpli{i.s0, scratch, i.sf};
+}
+
+void lower(cmplim& i, Vout& v) {
+  auto scratch = v.makeReg();
+  v << loadl{i.s1, scratch};
+  v << cmpli{i.s0, scratch, i.sf};
+}
+
+void lower(cmpqm& i, Vout& v) {
+  auto scratch = v.makeReg();
+  v << load{i.s1, scratch};
+  v << cmpq{i.s0, scratch, i.sf};
+}
+
+void lower(testbim& i, Vout& v) {
+  auto scratch = v.makeReg();
+  v << loadzbl{i.s1, scratch};
+  v << testli{i.s0, scratch, i.sf};
+}
+
+void lowerForARM(Vunit& unit) {
+  assert(check(unit));
+
+  // block order doesn't matter, but only visit reachable blocks.
+  auto blocks = sortBlocks(unit);
+
+  for (auto b : blocks) {
+    auto oldCode = std::move(unit.blocks[b].code);
+    Vout v{unit, b};
+
+    for (auto& inst : oldCode) {
+      v.setOrigin(inst.origin);
+
+      switch (inst.op) {
+#define O(nm, imm, use, def) \
+        case Vinstr::nm: \
+          lower(inst.nm##_, v); \
+          break;
+
+        VASM_OPCODES
+#undef O
+      }
+    }
+  }
+
+  assert(check(unit));
+  printUnit(kVasmARMFoldLevel, "after lowerForARM", unit);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
@@ -605,4 +676,5 @@ void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
   Vgen(m_unit, m_areas, asmInfo).emit(blocks);
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }}

@@ -21,9 +21,12 @@
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
 // Generate an if-then block into a.  thenBlock is executed if cc is true.
 template <class Then>
@@ -281,6 +284,7 @@ inline void emitPopRetIntoActRec(X64Assembler& a) {
   a.    pop  (x64::rStashedAR[AROFF(m_savedRip)]);
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }}
 
 #endif

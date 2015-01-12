@@ -18,9 +18,10 @@
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/minstr-effects.h"
+
 #include <boost/dynamic_bitset.hpp>
 
 namespace HPHP { namespace jit {

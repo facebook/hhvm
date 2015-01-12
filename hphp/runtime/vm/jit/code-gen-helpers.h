@@ -18,11 +18,14 @@
 #define incl_HPHP_VM_CODEGENHELPERS_H_
 
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+
 #include "hphp/util/abi-cxx.h"
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * SaveFP uses rVmFp, as usual. SavePC requires the caller to have
@@ -61,6 +64,7 @@ Vreg cond(Vout& v, ConditionCode cc, Vreg sf, Vreg dst, T t, F f) {
   return dst;
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }}
 
 #endif

@@ -558,6 +558,13 @@ struct Vinstr {
 #undef O
 };
 
+extern const char* vinst_names[];
+
+/*
+ * Whether `inst' is a block-terminating instruction.
+ */
+bool isBlockEnd(Vinstr& inst);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define O(name, ...)                             \
@@ -574,14 +581,6 @@ struct Vinstr {
   };
 VASM_OPCODES
 #undef O
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Check that each block has exactly one terminal instruction at the end.
- */
-bool checkBlockEnd(Vunit& v, Vlabel b);
-bool isBlockEnd(Vinstr& inst);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

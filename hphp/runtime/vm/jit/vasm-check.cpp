@@ -15,9 +15,12 @@
 */
 
 #include "hphp/runtime/vm/jit/vasm.h"
+
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/assertions.h"
 
@@ -165,6 +168,17 @@ bool check(Vunit& unit) {
   auto blocks = sortBlocks(unit);
   assert(checkSSA(unit, blocks));
   assert(checkCalls(unit, blocks));
+  return true;
+}
+
+bool checkBlockEnd(Vunit& unit, Vlabel b) {
+  assert(!unit.blocks[b].code.empty());
+  auto& block = unit.blocks[b];
+  auto n = block.code.size();
+  for (size_t i = 0; i < n - 1; ++i) {
+    assert(!isBlockEnd(block.code[i]));
+  }
+  assert(isBlockEnd(block.code[n - 1]));
   return true;
 }
 

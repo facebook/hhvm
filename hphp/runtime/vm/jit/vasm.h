@@ -34,41 +34,47 @@ struct Vblock;
 struct Vreg;
 struct Abi;
 
-// Vlabel wraps a block number
-struct Vlabel {
-  Vlabel() : n(0xffffffff) {}
-  explicit Vlabel(size_t n) : n(safe_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
-private:
-  unsigned n; // index in Vunit::blocks
-};
+///////////////////////////////////////////////////////////////////////////////
 
-// Vpoint is a handle to record or retreive a code address
-struct Vpoint {
-  Vpoint(){}
-  explicit Vpoint(size_t n) : n(safe_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { return n; }
-private:
-  unsigned n;
-};
+#define DECLARE_VNUM(Vnum, check)                         \
+struct Vnum {                                             \
+  Vnum() {}                                               \
+  explicit Vnum(size_t n) : n(safe_cast<unsigned>(n)) {}  \
+                                                          \
+  /* implicit */ operator size_t() const {                \
+    if (check) assert(n != 0xffffffff);                   \
+    return n;                                             \
+  }                                                       \
+                                                          \
+private:                                                  \
+  unsigned n{0xffffffff};                                 \
+}
 
-// Vtuple is an index to a tuple in Vunit::tuples
-struct Vtuple {
-  Vtuple() : n(0xffffffff) {}
-  explicit Vtuple(size_t n) : n(safe_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
-private:
-  unsigned n; // index in Vunit::tuples
-};
+/*
+ * Vlabel wraps a block number.
+ */
+DECLARE_VNUM(Vlabel, true);
 
-// VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs
-struct VcallArgsId {
-  explicit VcallArgsId(size_t n) : n(safe_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
-private:
-  unsigned n; // index in Vunit::vcallArgs
-};
+/*
+ * Vpoint is a handle to record or retreive a code address.
+ */
+DECLARE_VNUM(Vpoint, false);
 
+/*
+ * Vtuple is an index to a tuple in Vunit::tuples.
+ */
+DECLARE_VNUM(Vtuple, true);
+
+/*
+ * VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs.
+ */
+DECLARE_VNUM(VcallArgsId, true);
+
+#undef DECLARE_VNUM
+
+/*
+ * Vreg discriminator.
+ */
 enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,20 +85,25 @@ enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
 bool check(Vunit&);
 
 /*
- * Passes.
+ * Check that each block has exactly one terminal instruction at the end.
  */
-void removeTrivialNops(Vunit&);
-void allocateRegisters(Vunit&, const Abi&);
-void optimizeExits(Vunit&);
-void optimizeJmps(Vunit&);
-void fuseBranches(Vunit&);
-void removeDeadCode(Vunit&);
-template<typename Folder> void foldImms(Vunit&);
-
-void lowerForARM(Vunit&); // XXX
+bool checkBlockEnd(Vunit& v, Vlabel b);
 
 /*
- * Get the successors of a block or instruction. If given a non-const
+ * Passes.
+ */
+void allocateRegisters(Vunit&, const Abi&);
+void fuseBranches(Vunit&);
+void optimizeExits(Vunit&);
+void optimizeJmps(Vunit&);
+void removeDeadCode(Vunit&);
+void removeTrivialNops(Vunit&);
+template<typename Folder> void foldImms(Vunit&);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Get the successors of a block or instruction.  If given a non-const
  * reference, the resulting Range will allow mutation of the Vlabels.
  */
 folly::Range<Vlabel*> succs(Vinstr& inst);
@@ -101,7 +112,7 @@ folly::Range<const Vlabel*> succs(const Vinstr& inst);
 folly::Range<const Vlabel*> succs(const Vblock& block);
 
 /*
- * Sort blocks in reverse-postorder starting from `unit.entry`.
+ * Sort blocks in reverse-postorder starting from `unit.entry'.
  */
 jit::vector<Vlabel> sortBlocks(const Vunit& unit);
 

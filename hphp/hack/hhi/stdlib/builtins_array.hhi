@@ -132,7 +132,7 @@ function array_slice($array, $offset, $length = null, $preserve_keys = false);
 function array_splice(&$input, $offset, $length = null, $replacement = null);
 function array_unique($array, $sort_flags = 2);
 function array_unshift(&$array, $var, ...);
-function array_values($input);
+function array_values<Tv>(Container<Tv> $input): array<Tv>;
 function array_walk_recursive(&$input, $funcname, $userdata = null);
 function array_walk(&$input, $funcname, $userdata = null);
 function compact($varname, ...);

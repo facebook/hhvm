@@ -11,6 +11,7 @@ class StandardExtension final : public Extension {
   StandardExtension() : Extension("standard") {}
 
   void moduleInit() override {
+    initStandard();
     initErrorFunc();
     initClassobj();
     initNetwork();
@@ -31,6 +32,7 @@ class StandardExtension final : public Extension {
   }
 
  private:
+  void initStandard();
   void initErrorFunc();
   void initClassobj();
   void initNetwork();

@@ -118,10 +118,12 @@ strhash_t hash_string_i_unaligned(const char *arKey, uint32_t nKeyLength) {
 
 typedef strhash_t (*hash_func)(const char*, uint32_t);
 
+#ifdef __OPTIMIZE__
 NEVER_INLINE
 static void copyHashFunc(hash_func dst, hash_func src, uint32_t sz = 64) {
   wordcpy((char*)dst, (char*)src, sz);
 }
+#endif
 
 void copyHashFuncs() {
 #ifdef __OPTIMIZE__

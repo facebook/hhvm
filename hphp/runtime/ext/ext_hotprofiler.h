@@ -317,7 +317,6 @@ public:
    * Registers a Profiler to use when ProfilerKind::External is used.
    */
   void setExternalProfiler(Profiler *p) {
-    delete(m_external_profiler);
     m_external_profiler = p;
   }
   Profiler *getExternalProfiler() {

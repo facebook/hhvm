@@ -31,6 +31,7 @@
 #include "hphp/util/cycles.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/ext_system_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
@@ -1351,7 +1352,9 @@ bool ProfilerFactory::start(ProfilerKind kind,
     m_profiler = new XDebugProfiler();
     break;
   case ProfilerKind::External:
-    if (m_external_profiler) {
+    if (g_system_profiler) {
+      m_profiler = g_system_profiler->getHotProfiler();
+    } else if (m_external_profiler) {
       m_profiler = m_external_profiler;
     } else {
       throw_invalid_argument(
@@ -1363,7 +1366,7 @@ bool ProfilerFactory::start(ProfilerKind kind,
     throw_invalid_argument("level: %d", kind);
     return false;
   }
-  if (m_profiler->m_successful) {
+  if (m_profiler && m_profiler->m_successful) {
     // This will be disabled automatically when the thread completes the request
     HPHP::EventHook::Enable();
     ThreadInfo::s_threadInfo->m_profiler = m_profiler;
@@ -1486,7 +1489,6 @@ void f_xhprof_enable(int flags/* = 0 */,
     flags = 0;  /* flags are not used by MemoProfiler::MemoProfiler */
     s_profiler_factory->start(ProfilerKind::Memo, flags);
   } else if (flags & External) {
-    flags = NoTrackBuiltins;
     for (ArrayIter iter(args); iter; ++iter) {
       if (iter.first().toInt32() == 0) {
          flags = iter.second().toInt32();

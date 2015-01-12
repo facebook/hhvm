@@ -30,6 +30,7 @@
 #include "hphp/util/rank.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
+#include "hphp/runtime/ext/ext_system_profiler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/string-util.h"
@@ -473,6 +474,9 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     spath.get()->incRefCount();
     if (!cunit.unit->filepath()->same(spath.get())) {
       eContext->m_evaledFiles[cunit.unit->filepath()] = cunit.unit;
+    }
+    if (g_system_profiler) {
+      g_system_profiler->fileLoadCallBack(path->toCppString());
     }
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
   }

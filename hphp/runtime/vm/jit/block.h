@@ -77,7 +77,7 @@ struct Block : boost::noncopyable {
   void        setHint(Hint hint)   { m_hint = hint; }
 
   // Returns true if this block has no successors.
-  bool isExit() const { return !taken() && !next(); }
+  bool isExit() const { return !empty() && !taken() && !next(); }
 
   // Returns whether this block is the initial entry block for the tracelet.
   bool isEntry() const { return id() == 0; }

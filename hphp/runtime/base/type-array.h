@@ -198,22 +198,36 @@ public:
   /*
    * Sorting.
    */
-  static int SortRegularAscending(const Variant& v1, const Variant& v2, const void* data);
-  static int SortNumericAscending(const Variant& v1, const Variant& v2, const void* data);
-  static int SortStringAscending(const Variant& v1, const Variant& v2, const void* data);
-  static int SortStringAscendingCase(const Variant& v1, const Variant& v2, const void* data);
+  static int SortRegularAscending(const Variant& v1, const Variant& v2,
+                                  const void* data);
+  static int SortNumericAscending(const Variant& v1, const Variant& v2,
+                                  const void* data);
+  static int SortStringAscending(const Variant& v1, const Variant& v2,
+                                 const void* data);
+  static int SortStringAscendingCase(const Variant& v1, const Variant& v2,
+                                     const void* data);
   static int SortLocaleStringAscending(const Variant& v1, const Variant& v2,
                                        const void* data);
 
-  static int SortRegularDescending(const Variant& v1, const Variant& v2, const void* data);
-  static int SortNumericDescending(const Variant& v1, const Variant& v2, const void* data);
-  static int SortStringDescending(const Variant& v1, const Variant& v2, const void* data);
-  static int SortStringDescendingCase(const Variant& v1, const Variant& v2, const void* data);
+  static int SortRegularDescending(const Variant& v1, const Variant& v2,
+                                   const void* data);
+  static int SortNumericDescending(const Variant& v1, const Variant& v2,
+                                   const void* data);
+  static int SortStringDescending(const Variant& v1, const Variant& v2,
+                                  const void* data);
+  static int SortStringDescendingCase(const Variant& v1, const Variant& v2,
+                                      const void* data);
   static int SortLocaleStringDescending(const Variant& v1, const Variant& v2,
                                         const void* data);
 
-  static int SortNatural(const Variant& v1, const Variant& v2, const void* data);
-  static int SortNaturalCase(const Variant& v1, const Variant& v2, const void* data);
+  static int SortNaturalAscending(const Variant& v1, const Variant& v2,
+                                  const void* data);
+  static int SortNaturalDescending(const Variant& v1, const Variant& v2,
+                                   const void* data);
+  static int SortNaturalCaseAscending(const Variant& v1, const Variant& v2,
+                                      const void* data);
+  static int SortNaturalCaseDescending(const Variant& v1, const Variant& v2,
+                                       const void* data);
 
   void sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
             const void* data = nullptr);

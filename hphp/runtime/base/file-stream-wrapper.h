@@ -44,9 +44,10 @@ class Directory;
 
 class FileStreamWrapper : public Stream::Wrapper {
  public:
-  static MemFile* openFromCache(const String& filename, const String& mode);
-  virtual File* open(const String& filename, const String& mode,
-                     int options, const Variant& context);
+  static SmartPtr<MemFile> openFromCache(
+    const String& filename, const String& mode);
+  virtual SmartPtr<File> open(const String& filename, const String& mode,
+                              int options, const Variant& context);
   virtual int access(const String& path, int mode) {
     return ::access(File::TranslatePath(path).data(), mode);
   }
@@ -75,7 +76,7 @@ class FileStreamWrapper : public Stream::Wrapper {
     return ret;
   }
 
-  virtual Directory* opendir(const String& path);
+  virtual SmartPtr<Directory> opendir(const String& path);
 
  private:
   int mkdir_recursive(const String& path, int mode);

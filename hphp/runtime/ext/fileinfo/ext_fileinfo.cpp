@@ -166,8 +166,7 @@ static Variant php_finfo_get_type(
         goto clean;
       }
 
-      auto resource = File::Open(buffer, "rb");
-      auto stream = resource.getTyped<File>(true);
+      auto stream = File::Open(buffer, "rb");
       if (!stream) {
         ret_val.reset();
         goto clean;
@@ -178,7 +177,7 @@ static Variant php_finfo_get_type(
         if (st.st_mode & S_IFDIR) {
           ret_val = mime_directory;
         } else {
-          ret_val = magic_stream(magic, stream);
+          ret_val = magic_stream(magic, stream.get());
         }
       }
       break;

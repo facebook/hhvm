@@ -28,8 +28,8 @@ namespace HPHP {
 struct UserStreamWrapper final : Stream::Wrapper {
   UserStreamWrapper(const String& name, Class*, int flags);
 
-  File* open(const String& filename, const String& mode,
-             int options, const Variant& context) override;
+  SmartPtr<File> open(const String& filename, const String& mode,
+                      int options, const Variant& context) override;
   int access(const String& path, int mode) override;
   int lstat(const String& path, struct stat* buf) override;
   int stat(const String& path, struct stat* buf) override;
@@ -37,7 +37,7 @@ struct UserStreamWrapper final : Stream::Wrapper {
   int rename(const String& oldname, const String& newname) override;
   int mkdir(const String& path, int mode, int options) override;
   int rmdir(const String& path, int options) override;
-  Directory* opendir(const String& path) override;
+  SmartPtr<Directory> opendir(const String& path) override;
   bool touch(const String& path, int64_t mtime, int64_t atime);
   bool chmod(const String& path, int64_t mode);
   bool chown(const String& path, int64_t uid);

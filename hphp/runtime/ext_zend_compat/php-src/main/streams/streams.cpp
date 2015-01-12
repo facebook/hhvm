@@ -198,7 +198,7 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_conte
   }
 
   // TODO this leaks
-  php_stream *stream = HPHP::smart_new<php_stream>(dir);
+  php_stream *stream = HPHP::smart_new<php_stream>(dir.get());
   stream->hphp_dir->incRefCount();
   return stream;
 }
@@ -285,15 +285,15 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) {
   HPHP::Stream::Wrapper* w = HPHP::Stream::getWrapperFromURI(path);
   if (!w) return nullptr;
-  HPHP::File* file = w->open(path, mode, options, context);
+  auto file = w->open(path, mode, options, context);
   if (!file) {
     return nullptr;
   }
   // TODO this leaks
-  php_stream *stream = HPHP::smart_new<php_stream>(file);
+  php_stream *stream = HPHP::smart_new<php_stream>(file.get());
   stream->hphp_file->incRefCount();
 
-  if (auto urlFile = dynamic_cast<HPHP::UrlFile*>(file)) {
+  if (auto urlFile = dynamic_cast<HPHP::UrlFile*>(file.get())) {
     // Why is there no ZVAL_ARRAY?
     MAKE_STD_ZVAL(stream->wrapperdata);
     Z_TYPE_P(stream->wrapperdata) = IS_ARRAY;

@@ -27,8 +27,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-File* DataStreamWrapper::open(const String& filename, const String& mode,
-                              int options, const Variant& context) {
+SmartPtr<File>
+DataStreamWrapper::open(const String& filename, const String& mode,
+                        int options, const Variant& context) {
 
   // @todo: check allow_url_include?
 
@@ -127,7 +128,7 @@ File* DataStreamWrapper::open(const String& filename, const String& mode,
   } else {
     decoded = url_decode(data, data_len);
   }
-  return newres<MemFile>(decoded.data(), decoded.size());
+  return makeSmartPtr<MemFile>(decoded.data(), decoded.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

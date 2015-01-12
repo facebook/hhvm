@@ -37,6 +37,7 @@ template<typename T>
 class SmartPtr {
 public:
   SmartPtr() : m_px(nullptr) {}
+  /* implicit */ SmartPtr(std::nullptr_t) : m_px(nullptr) { }
   explicit SmartPtr(T* px) : m_px(px) { if (m_px) m_px->incRefCount(); }
   SmartPtr(const SmartPtr<T>& src) : m_px(src.get()) {
     if (m_px) m_px->incRefCount();
@@ -93,7 +94,7 @@ public:
   // Move assignment for derived types
   template<class Y>
   SmartPtr& operator=(SmartPtr<Y>&& src) {
-    assert(this != &src);
+    assert((void*)this != (void*)&src);
     // Update m_px before releasing the goner
     auto goner = m_px;
     m_px = src.m_px;

@@ -213,7 +213,7 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
   auto const f = w->open(StrNR(requestedPath), "r", 0, null_variant);
   if (!f) return CachedUnit{};
   StringBuffer sb;
-  sb.read(f);
+  sb.read(f.get());
   return createUnitFromString(requestedPath->data(), sb.detach());
 }
 

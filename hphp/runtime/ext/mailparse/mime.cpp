@@ -908,21 +908,18 @@ void MimePart::UpdatePositions(MimePart *part, int newendpos,
 Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, int decode,
                           bool isfile) {
   /* filename can be a filename or a stream */
-  Resource file;
-  File *f = NULL;
+  SmartPtr<File> file;
   if (filename.isResource()) {
-    f = filename.toResource().getTyped<File>();
+    file = filename.toResource().getTyped<File>();
   } else if (isfile) {
     file = File::Open(filename.toString(), "rb");
-    f = file.getTyped<File>(true);
   } else {
     /* filename is the actual data */
     String data = filename.toString();
-    f = newres<MemFile>(data.data(), data.size());
-    file = Resource(f);
+    file = makeSmartPtr<MemFile>(data.data(), data.size());
   }
 
-  if (f == NULL) {
+  if (!file) {
     return false;
   }
 
@@ -939,7 +936,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
     }
   }
 
-  if (extractImpl(decode, f)) {
+  if (extractImpl(decode, file.get())) {
     if (callbackfunc.isNull()) {
       return m_extract_context;
     }

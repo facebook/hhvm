@@ -134,7 +134,7 @@ const StaticString
 // stream wrapper. The VM state should be synced using VMRegAnchor by the
 // caller, before entering libxml2.
 
-static Resource libxml_streams_IO_open_wrapper(
+static SmartPtr<File> libxml_streams_IO_open_wrapper(
     const char *filename, const char* mode, bool read_only)
 {
   ITRACE(1, "libxml_open_wrapper({}, {}, {})\n", filename, mode, read_only);
@@ -153,7 +153,7 @@ static Resource libxml_streams_IO_open_wrapper(
                                                           &pathIndex);
     if (dynamic_cast<FileStreamWrapper*>(wrapper)) {
       if (!HHVM_FN(file_exists)(strFilename)) {
-        return Resource();
+        return nullptr;
       }
     }
   }
@@ -257,14 +257,13 @@ libxml_create_input_buffer(const char* URI, xmlCharEncoding enc) {
 
  if (tl_libxml_request_data->m_entity_loader_disabled || !URI) return nullptr;
 
-  Resource stream = libxml_streams_IO_open_wrapper(URI, "rb", true);
-  if (stream.isInvalid()) return nullptr;
+  auto stream = libxml_streams_IO_open_wrapper(URI, "rb", true);
+  if (!stream || stream->isInvalid()) return nullptr;
 
   // Allocate the Input buffer front-end.
   xmlParserInputBufferPtr ret = xmlAllocParserInputBuffer(enc);
   if (ret != nullptr) {
-    stream.get()->incRefCount();
-    ret->context = stream.get();
+    ret->context = stream.detach();
     ret->readcallback = libxml_streams_IO_read;
     ret->closecallback = libxml_streams_IO_close;
   }
@@ -286,15 +285,14 @@ libxml_create_output_buffer(const char *URI,
   }
   // PHP unescapes the URI here, but that should properly be done by the
   // wrapper.  The wrapper should expect a valid URI, e.g. file:///foo%20bar
-  Resource stream = libxml_streams_IO_open_wrapper(URI, "wb", false);
-  if (stream.isInvalid()) {
+  auto stream = libxml_streams_IO_open_wrapper(URI, "wb", false);
+  if (!stream || stream->isInvalid()) {
     return nullptr;
   }
   // Allocate the Output buffer front-end.
   xmlOutputBufferPtr ret = xmlAllocOutputBuffer(encoder);
   if (ret != nullptr) {
-    stream.get()->incRefCount();
-    ret->context = stream.get();
+    ret->context = stream.detach();
     ret->writecallback = libxml_streams_IO_write;
     ret->closecallback = libxml_streams_IO_close;
   }

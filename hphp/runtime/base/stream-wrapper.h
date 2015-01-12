@@ -19,16 +19,15 @@
 
 #include <string>
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 #include <boost/noncopyable.hpp>
 
 struct stat;
 
 namespace HPHP {
-
-class Directory;
-
 namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -37,8 +36,8 @@ class Wrapper : boost::noncopyable {
   Wrapper() : m_isLocal(true) { }
   void registerAs(const std::string &scheme);
 
-  virtual File* open(const String& filename, const String& mode,
-                     int options, const Variant& context) = 0;
+  virtual SmartPtr<File> open(const String& filename, const String& mode,
+                              int options, const Variant& context) = 0;
   virtual int access(const String& path, int mode) {
     return -1;
   }
@@ -60,7 +59,7 @@ class Wrapper : boost::noncopyable {
   virtual int rmdir(const String& path, int options) {
     return -1;
   }
-  virtual Directory* opendir(const String& path) {
+  virtual SmartPtr<Directory> opendir(const String& path) {
     return nullptr;
   }
 

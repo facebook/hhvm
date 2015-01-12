@@ -150,7 +150,7 @@ bool HHVM_METHOD(XMLReader, open,
   if (!valid_file.empty()) {
     // Manually create the IO context to support custom stream wrappers.
     auto stream = File::Open(valid_file, "rb");
-    if (!stream.isInvalid()) {
+    if (!stream->isInvalid()) {
       reader = xmlReaderForIO(libxml_streams_IO_read,
                               libxml_streams_IO_close,
                               stream.get(),

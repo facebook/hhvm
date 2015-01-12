@@ -47,8 +47,8 @@ namespace {
 
 static class ZlibStreamWrapper : public Stream::Wrapper {
  public:
-  virtual File* open(const String& filename, const String& mode,
-                     int options, const Variant& context) {
+  virtual SmartPtr<File> open(const String& filename, const String& mode,
+                              int options, const Variant& context) {
     String fname;
     static const char cz[] = "compress.zlib://";
 
@@ -57,13 +57,13 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
     } else if (!strncmp(filename.data(), cz, sizeof(cz) - 1)) {
       fname = filename.substr(sizeof(cz) - 1);
     } else {
-      return NULL;
+      return nullptr;
     }
 
     String translated;
     if (fname.find("://") == -1) {
       translated = File::TranslatePath(fname);
-      if (MemFile* file = FileStreamWrapper::openFromCache(translated, mode)) {
+      if (auto file = FileStreamWrapper::openFromCache(translated, mode)) {
         file->unzip();
         return file;
       }
@@ -71,13 +71,13 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
       translated = fname;
     }
 
-    std::unique_ptr<ZipFile> file(newres<ZipFile>());
+    auto file = makeSmartPtr<ZipFile>();
     bool ret = file->open(translated, mode);
     if (!ret) {
       raise_warning("%s", file->getLastError().c_str());
-      return NULL;
+      return nullptr;
     }
-    return file.release();
+    return file;
   }
 } s_zlib_stream_wrapper;
 

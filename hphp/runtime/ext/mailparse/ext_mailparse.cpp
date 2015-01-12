@@ -33,8 +33,7 @@ bool HHVM_FUNCTION(mailparse_msg_free, const Resource& mimemail) {
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
-  Resource resource = File::Open(filename, "rb");
-  File *f = resource.getTyped<File>(true);
+  auto f = File::Open(filename, "rb");
   if (!f) return false;
 
   MimePart *p = newres<MimePart>();

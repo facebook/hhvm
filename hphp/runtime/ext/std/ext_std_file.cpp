@@ -285,13 +285,13 @@ Variant HHVM_FUNCTION(fopen,
     return false;
   }
 
-  Resource resource = File::Open(filename, mode,
-                                 use_include_path ? File::USE_INCLUDE_PATH : 0,
-                                 context);
-  if (resource.isNull()) {
+  auto file = File::Open(filename, mode,
+                         use_include_path ? File::USE_INCLUDE_PATH : 0,
+                         context);
+  if (!file) {
     return false;
   }
-  return resource;
+  return Variant(file);
 }
 
 Variant HHVM_FUNCTION(popen,
@@ -589,23 +589,23 @@ Variant HHVM_FUNCTION(file_put_contents,
                       int flags /* = 0 */,
                       const Variant& context /* = null */) {
   CHECK_PATH(filename, 1);
-  Resource resource = File::Open(
+  auto file = File::Open(
     filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", flags, context);
-  File *f = resource.getTyped<File>(true);
-  if (!f) {
+
+  if (!file) {
     return false;
   }
 
   if (flags & LOCK_EX) {
     // Check to make sure we are dealing with a regular file
-    if (!dynamic_cast<PlainFile*>(f)) {
+    if (!dynamic_cast<PlainFile*>(file.get())) {
       raise_warning(
         "%s(): Exclusive locks may only be set for regular files",
         __FUNCTION__ + 2);
       return false;
     }
 
-    if (!f->lock(LOCK_EX)) {
+    if (!file->lock(LOCK_EX)) {
       return false;
     }
   }
@@ -624,7 +624,7 @@ Variant HHVM_FUNCTION(file_put_contents,
         int len = fsrc->readImpl(buffer, sizeof(buffer));
         if (len == 0) break;
         numbytes += len;
-        int written = f->writeImpl(buffer, len);
+        int written = file->writeImpl(buffer, len);
         if (written != len) {
           numbytes = -1;
           break;
@@ -639,7 +639,7 @@ Variant HHVM_FUNCTION(file_put_contents,
         String value = iter.second();
         if (!value.empty()) {
           numbytes += value.size();
-          int written = f->writeImpl(value.data(), value.size());
+          int written = file->writeImpl(value.data(), value.size());
           if (written != value.size()) {
             numbytes = -1;
             break;
@@ -666,7 +666,7 @@ Variant HHVM_FUNCTION(file_put_contents,
       String value = data.toString();
       if (!value.empty()) {
         numbytes += value.size();
-        int written = f->writeImpl(value.data(), value.size());
+        int written = file->writeImpl(value.data(), value.size());
         if (written != value.size()) {
           numbytes = -1;
         }
@@ -679,7 +679,7 @@ Variant HHVM_FUNCTION(file_put_contents,
   }
 
   // like fwrite(), fclose() can error when fflush()ing
-  if (numbytes < 0 || !f->close()) {
+  if (numbytes < 0 || !file->close()) {
     return false;
   }
 
@@ -1872,12 +1872,12 @@ Variant HHVM_FUNCTION(opendir,
                       const Variant& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
   if (!w) return false;
-  Directory *p = w->opendir(path);
+  auto p = w->opendir(path);
   if (!p) {
     return false;
   }
   s_directory_data->defaultDirectory = p;
-  return Resource(p);
+  return Variant(p);
 }
 
 Variant HHVM_FUNCTION(readdir,
@@ -1924,11 +1924,10 @@ Variant HHVM_FUNCTION(scandir,
   CHECK_PATH(directory, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(directory);
   if (!w) return false;
-  Directory *dir = w->opendir(directory);
+  auto dir = w->opendir(directory);
   if (!dir) {
     return false;
   }
-  Resource deleter(dir);
 
   std::vector<String> names;
   while (true) {

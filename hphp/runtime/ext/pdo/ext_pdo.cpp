@@ -987,12 +987,12 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
 
   if (!strncmp(data_source.data(), "uri:", 4)) {
     /* the specified URI holds connection details */
-    Resource resource = File::Open(data_source.substr(4), "rb");
-    if (resource.isNull()) {
+    auto file = File::Open(data_source.substr(4), "rb");
+    if (!file || file->isInvalid()) {
       throw_pdo_exception(uninit_null(), uninit_null(),
                           "invalid data source URI");
     }
-    data_source = resource.getTyped<File>()->readLine(1024);
+    data_source = file->readLine(1024);
     colon = strchr(data_source.data(), ':');
     if (!colon) {
       throw_pdo_exception(uninit_null(), uninit_null(),
@@ -3325,9 +3325,8 @@ static Variant HHVM_METHOD(PDOStatement, debugdumpparams) {
     return false;
   }
 
-  Resource resource = File::Open("php://output", "w");
-  File *f = resource.getTyped<File>(true);
-  if (!f) {
+  auto f = File::Open("php://output", "w");
+  if (!f || f->isInvalid()) {
     return false;
   }
 

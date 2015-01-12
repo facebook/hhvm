@@ -17,13 +17,20 @@
 #ifndef incl_HPHP_JIT_VASM_PRINT_H_
 #define incl_HPHP_JIT_VASM_PRINT_H_
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include <vector>
 #include <iostream>
 #include <string>
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
+
+struct Vinstr;
+struct Vunit;
+
+///////////////////////////////////////////////////////////////////////////////
 
 std::string show(Vreg r);
 std::string show(Vptr p);
@@ -55,6 +62,7 @@ void printUnit(int level,
 // main, cold, frozen
 extern const char* area_names[];
 
-} }
+///////////////////////////////////////////////////////////////////////////////
+}}
 
 #endif

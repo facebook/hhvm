@@ -18,12 +18,16 @@
 #define incl_HPHP_JIT_VASM_H_
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/containers.h"
+
 #include "hphp/util/safe-cast.h"
 
 #include <folly/Range.h>
 #include <iosfwd>
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
+
 struct Vunit;
 struct Vinstr;
 struct Vblock;
@@ -67,7 +71,16 @@ private:
 
 enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
 
-// passes
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Assert invariants on a Vunit.
+ */
+bool check(Vunit&);
+
+/*
+ * Passes.
+ */
 void removeTrivialNops(Vunit&);
 void allocateRegisters(Vunit&, const Abi&);
 void optimizeExits(Vunit&);
@@ -75,7 +88,8 @@ void optimizeJmps(Vunit&);
 void fuseBranches(Vunit&);
 void removeDeadCode(Vunit&);
 template<typename Folder> void foldImms(Vunit&);
-void lowerForARM(Vunit&);
+
+void lowerForARM(Vunit&); // XXX
 
 /*
  * Get the successors of a block or instruction. If given a non-const
@@ -86,12 +100,18 @@ folly::Range<Vlabel*> succs(Vblock& block);
 folly::Range<const Vlabel*> succs(const Vinstr& inst);
 folly::Range<const Vlabel*> succs(const Vblock& block);
 
-// Sort blocks in reverse-postorder starting from unit.entry
+/*
+ * Sort blocks in reverse-postorder starting from `unit.entry`.
+ */
 jit::vector<Vlabel> sortBlocks(const Vunit& unit);
 
-// Group blocks into main, cold, and frozen while preserving relative
-// order with each section.
+/*
+ * Group blocks into main, cold, and frozen while preserving relative order
+ * with each section.
+ */
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
 
+///////////////////////////////////////////////////////////////////////////////
 }}
+
 #endif

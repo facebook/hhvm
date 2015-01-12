@@ -640,7 +640,8 @@
     test_root: typo3/typo3/sysext/core/Build
     config_file: typo3/typo3/sysext/core/Build/UnitTests.xml
     bootstrap_file: typo3/typo3/sysext/core/Build/UnitTestsBootstrap.php
-    blacklist:
+    clowny:
+      # they make test runner FATAL
       - typo3/typo3/sysext/form/Tests/Unit/Validation/AlphabeticValidatorTest.php
       - typo3/typo3/sysext/form/Tests/Unit/Validation/AlphanumericValidatorTest.php
       - typo3/typo3/sysext/form/Tests/Unit/Validation/BetweenValidatorTest.php

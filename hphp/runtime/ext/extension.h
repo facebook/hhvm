@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/hdf.h"
+#include "hphp/runtime/version.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/bytecode.h"
 
@@ -129,7 +130,7 @@ private:
   std::string m_dsoName;
 };
 
-#define HHVM_API_VERSION 20140829L
+#define HHVM_API_VERSION 20150112L
 
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \

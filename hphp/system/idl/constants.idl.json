@@ -727,18 +727,6 @@
             "value": "\n\r\t\u000b\u0000 "
         },
         {
-            "name": "HPHP_VERSION",
-            "value": "3.5.0-dev"
-        },
-        {
-            "name": "HHVM_VERSION",
-            "value": "3.5.0-dev"
-        },
-        {
-            "name": "HHVM_VERSION_ID",
-            "value": 30500
-        },
-        {
             "name": "HTML_ENTITIES",
             "value": 1
         },

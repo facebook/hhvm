@@ -54,6 +54,7 @@ module Messages = struct
   let from_hhclient = " passed from hh_client"
   let convert       = " adds type annotations automatically"
   let save          = " save server state to file"
+  let no_load       = " don't load from a saved state"
 end
 
 
@@ -94,6 +95,7 @@ let parse_options () =
   let should_detach = ref false in
   let convert_dir   = ref None  in
   let save          = ref "" in
+  let no_load       = ref false in
   let version       = ref false in
   let cdir          = fun s -> convert_dir := Some s in
   let options =
@@ -107,6 +109,7 @@ let parse_options () =
      "--from-hhclient" , Arg.Set from_hhclient , Messages.from_hhclient;
      "--convert"       , Arg.String cdir       , Messages.convert;
      "--save"          , Arg.Set_string save   , Messages.save;
+     "--no-load"       , Arg.Set no_load       , Messages.no_load;
      "--version"       , Arg.Set version       , "";
     ] in
   let options = Arg.align options in
@@ -131,9 +134,14 @@ let parse_options () =
   let config = Config_file.parse hhconfig in
   let load_save_opt = match !save with
     | "" -> begin
-        match SMap.get "server_options_cmd" config with
+      if !no_load then None
+      else
+        match SMap.get "load_script" config with
         | None -> None
-        | Some s -> Some (Load s)
+        | Some cmd ->
+            let cmd =
+              if Filename.is_relative cmd then (!root)^"/"^cmd else cmd in
+            Some (Load cmd)
       end
     | s -> Some (Save s) in
   { json_mode     = !json_mode;

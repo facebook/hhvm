@@ -20,7 +20,7 @@ let get_hhserver () =
 type env = {
   root: Path.path;
   wait: bool;
-  server_options_cmd : string option;
+  no_load : bool;
 }
 
 let rec wait env =
@@ -40,9 +40,10 @@ let rec wait env =
   end
 
 let start_server env =
-  let hh_server = Printf.sprintf "%s -d %s"
+  let hh_server = Printf.sprintf "%s -d %s %s"
     (Filename.quote (get_hhserver ()))
-    (Filename.quote (Path.string_of_path env.root)) in
+    (Filename.quote (Path.string_of_path env.root))
+    (if env.no_load then "--no-load" else "") in
   Printf.fprintf stderr "Server launched with the following command:\n\t%s\n%!"
     hh_server;
   let () = match Unix.system hh_server with

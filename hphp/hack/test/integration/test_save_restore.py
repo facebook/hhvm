@@ -35,7 +35,7 @@ echo %s
         # be passing this command some command-line options
         f.write(r"""
 # some comment
-server_options_cmd = %s
+load_script = %s
         """ % os.path.join(repo_dir, 'server_options.sh'))
 
 class TestSaveRestore(unittest.TestCase):
@@ -415,7 +415,7 @@ echo "$2" >> {out}
         with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
             f.write(r"""
 # some comment
-server_options_cmd = %s
+load_script = %s
             """ % os.path.join(self.repo_dir, 'server_options.sh'))
 
         proc_call([

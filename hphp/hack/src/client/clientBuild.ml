@@ -16,7 +16,6 @@ let num_build_retries = 800
 type env = {
   root : Path.path;
   build_opts : ServerMsg.build_opts;
-  server_options_cmd : string option;
 }
 
 let should_retry env tries = env.build_opts.ServerMsg.wait || tries > 0
@@ -68,7 +67,7 @@ let rec main_ env retries =
   then ClientStart.start_server { ClientStart.
     root = env.root;
     wait = false;
-    server_options_cmd = env.server_options_cmd;
+    no_load = false;
   };
   let ic, oc = connect env retries in
   ServerMsg.cmd_to_channel oc (ServerMsg.BUILD env.build_opts);

@@ -50,9 +50,6 @@ let get_root ?(config=".hhconfig") path_opt =
   Wwwroot.assert_www_directory ~config root;
   root
 
-let get_config ?(config=".hhconfig") root =
-  Config_file.parse (Path.string_of_path (Path.concat root config))
-
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/man/hh_client.1 --
  * if you are making significant changes you need to update the manpage as
@@ -64,6 +61,7 @@ let parse_check_args cmd =
   let retries = ref 3 in
   let output_json = ref false in
   let retry_if_init = ref true in
+  let no_load = ref false in
   let timeout = ref None in
   let autostart = ref true in
   let from = ref "" in
@@ -165,13 +163,15 @@ let parse_check_args cmd =
       " output json for machine consumption. (default: false)";
     "--retries", Arg.Set_int retries,
       " set the number of retries. (default: 3)";
-    "--retry-if-init", Arg.Bool (fun x -> retry_if_init := x),
+    "--retry-if-init", Arg.Set retry_if_init,
       " retry if the server is initializing (default: true)";
+    "--no-load", Arg.Set no_load,
+      " start from a fresh state";
     "--from", Arg.Set_string from,
       " set this so we know who is calling hh_client";
     "--timeout",  Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
       " set the timeout in seconds (default: no timeout)";
-    "--autostart-server", Arg.Bool (fun x -> autostart := x),
+    "--autostart-server", Arg.Set autostart,
       " automatically start hh_server if it's not running (default: true)\n";
 
     (* deprecated *)
@@ -198,7 +198,6 @@ let parse_check_args cmd =
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1;
   in
-  let config = get_config root in
   let () = if (!from) = "emacs" then
       Printf.fprintf stdout "-*- mode: compilation -*-\n%!"
   in
@@ -211,7 +210,7 @@ let parse_check_args cmd =
     retries = !retries;
     timeout = !timeout;
     autostart = !autostart;
-    server_options_cmd = SMap.get "server_options_cmd" config;
+    no_load = !no_load;
   }
 
 let parse_start_env command =
@@ -222,9 +221,12 @@ let parse_start_env command =
       WWW-ROOT is assumed to be current directory if unspecified\n"
       Sys.argv.(0) command (String.capitalize command) in
   let wait = ref false in
+  let no_load = ref false in
   let options = [
     "--wait", Arg.Set wait,
-    " wait for the server to finish initializing (default: false)"
+    " wait for the server to finish initializing (default: false)";
+    "--no-load", Arg.Set no_load,
+    " start from a fresh state"
   ] in
   let args = parse_without_command options usage command in
   let root =
@@ -235,11 +237,10 @@ let parse_start_env command =
         Printf.fprintf stderr
           "Error: please provide at most one www directory\n%!";
         exit 1 in
-  let config = get_config root in
   { ClientStart.
     root = root;
     wait = !wait;
-    server_options_cmd = SMap.get "server_options_cmd" config;
+    no_load = !no_load;
   }
 
 let parse_start_args () =
@@ -346,10 +347,8 @@ let parse_build_args () =
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
-  let config = get_config root in
   CBuild { ClientBuild.
     root = root;
-    server_options_cmd = SMap.get "server_options_cmd" config;
     build_opts = { ServerMsg.
       steps = !steps;
       no_steps = !no_steps;
@@ -380,11 +379,7 @@ let parse_prolog_args () =
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
-  let config = get_config root in
-  CProlog { ClientProlog.
-    root = root;
-    server_options_cmd = SMap.get "server_options_cmd" config;
-  }
+  CProlog { ClientProlog.root = root; }
 
 let parse_args () =
   match parse_command () with

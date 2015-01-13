@@ -473,6 +473,7 @@ bool canDCE(IRInstruction* inst) {
   case EndCatch:
   case UnwindCheckSideExit:
   case DeleteUnwinderException:
+  case CountBytecode:
     return false;
   }
   not_reached();

@@ -90,6 +90,7 @@ struct Vunit;
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
   O(landingpad, Inone, Un, Dn)\
+  O(countbytecode, Inone, U(base), D(sf))\
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
   O(srem, Inone, U(s0) U(s1), D(d))\
@@ -291,6 +292,7 @@ struct vcall { CppCall call; VcallArgsId args; Vtuple d;
 struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
                  Fixup fixup; DestType destType; bool smashable; };
 struct landingpad {};
+struct countbytecode { Vreg base; VregSF sf; };
 
 /*
  * Copy rVmSp into d.

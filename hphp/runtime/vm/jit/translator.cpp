@@ -1642,6 +1642,10 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
 
   irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(hts, Stats::Instr_TC, 1);
+  if (Trace::moduleEnabledRelease(Trace::llvm, 1) ||
+      RuntimeOption::EvalJitLLVMCounters) {
+    irgen::gen(hts, CountBytecode);
+  }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
     irgen::gen(hts, DbgAssertRetAddr);

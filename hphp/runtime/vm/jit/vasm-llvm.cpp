@@ -1385,7 +1385,8 @@ O(retctrl) \
 O(absdbl) \
 O(phijmp) \
 O(phijcc) \
-O(phidef)
+O(phidef) \
+O(countbytecode)
 #define O(name) case Vinstr::name: emit(inst.name##_); break;
   SUPPORTED_OPS
 #undef O
@@ -2664,6 +2665,12 @@ void LLVMEmitter::emit(const landingpad& inst) {
   // for now.
   auto pad = m_irb.CreateLandingPad(m_typedValueType, m_personalityFunc, 0);
   pad->setCleanup(true);
+}
+
+void LLVMEmitter::emit(const countbytecode& inst) {
+  auto ptr = emitPtr(inst.base[g_bytecodesLLVM.handle()], 64);
+  auto load = m_irb.CreateLoad(ptr);
+  m_irb.CreateStore(m_irb.CreateAdd(load, m_int64One), ptr);
 }
 
 void LLVMEmitter::emitTrap() {

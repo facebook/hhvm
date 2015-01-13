@@ -1476,6 +1476,11 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
     assert(slot >= 0 && src == ivl->reg);
     MemoryRef ptr{slots.r + slotOffset(slot)};
     if (!ivl->wide) {
+      always_assert_flog(
+        !src.isSF(),
+        "Tried to spill %flags in Vunit:\n\n{}",
+        show(unit)
+      );
       stores.emplace_back(store{src, ptr});
     } else {
       assert(src.isSIMD());

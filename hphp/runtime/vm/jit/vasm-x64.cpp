@@ -1064,6 +1064,11 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
           inst = ret{kCrossTraceRegs};
           break;
 
+        case Vinstr::countbytecode:
+          inst = incqm{inst.countbytecode_.base[g_bytecodesVasm.handle()],
+                       inst.countbytecode_.sf};
+          break;
+
         default:
           break;
       }

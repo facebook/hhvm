@@ -1961,6 +1961,10 @@ To string conversions:
   Helper instructions for fast implementation of the PHP error silencing
   operator (@foo()).
 
+| CountBytecode, ND, NA, NF
+
+  Count dynamic execution of bytecodes, to compare coverage of different
+  codegen backends.
 
 17. Iterators
 

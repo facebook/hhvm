@@ -27,6 +27,11 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+RDS::Link<uint64_t> g_bytecodesLLVM{RDS::kInvalidHandle};
+RDS::Link<uint64_t> g_bytecodesVasm{RDS::kInvalidHandle};
+
+///////////////////////////////////////////////////////////////////////////////
+
 folly::Range<Vlabel*> succs(Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::jcc:       return {inst.jcc_.targets, 2};

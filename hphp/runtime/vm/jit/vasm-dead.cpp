@@ -165,6 +165,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cbcc:
     case Vinstr::contenter:
     case Vinstr::cqo:
+    case Vinstr::countbytecode:
     case Vinstr::debugtrap:
     case Vinstr::declm:
     case Vinstr::decqm:

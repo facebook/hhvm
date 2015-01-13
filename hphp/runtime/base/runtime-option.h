@@ -395,6 +395,7 @@ public:
   F(bool,     JitLLVMBasicOpt,         true)                            \
   F(uint32_t, JitLLVMOptLevel,         2)                               \
   F(uint32_t, JitLLVMSizeLevel,        0)                               \
+  F(bool,     JitLLVMCounters,         false)                           \
   F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             ahotDefault())                   \

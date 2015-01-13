@@ -1800,6 +1800,11 @@ MCGenerator::MCGenerator()
     Trace::traceRelease("TRACE=printir is set but the jit isn't on. "
                         "Did you mean to run with -vEval.Jit=1?\n");
   }
+  if (Trace::moduleEnabledRelease(Trace::llvm, 1) ||
+      RuntimeOption::EvalJitLLVMCounters) {
+    g_bytecodesVasm.bind();
+    g_bytecodesLLVM.bind();
+  }
 }
 
 void MCGenerator::initUniqueStubs() {
@@ -1854,6 +1859,15 @@ void MCGenerator::requestExit() {
     }
     Trace::traceRelease("\n");
   }
+
+  if (Trace::moduleEnabledRelease(Trace::llvm, 1)) {
+    auto llvm = *g_bytecodesLLVM;
+    auto total = llvm + *g_bytecodesVasm;
+    Trace::ftraceRelease(
+      "{:9} / {:9} bytecodes ({:6.2f}%) handled by LLVM backend for {}\n",
+      llvm, total, llvm * 100.0 / total, g_context->getRequestUrl(50)
+    );
+  }
 }
 
 bool
@@ -1880,6 +1894,11 @@ MCGenerator::getPerfCounters(Array& ret) {
     if (pair.second.total == 0 && pair.second.count == 0) continue;
 
     ret.set(String("jit_time_") + pair.first, pair.second.total);
+  }
+
+  if (RuntimeOption::EvalJitLLVMCounters) {
+    ret.set(String("jit_instr_vasm"), *g_bytecodesVasm);
+    ret.set(String("jit_instr_llvm"), *g_bytecodesLLVM);
   }
 }
 

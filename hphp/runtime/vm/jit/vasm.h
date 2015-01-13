@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_JIT_VASM_H_
 #define incl_HPHP_JIT_VASM_H_
 
+#include "hphp/runtime/base/rds.h"
+
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/containers.h"
 
@@ -33,6 +35,16 @@ struct Vinstr;
 struct Vblock;
 struct Vreg;
 struct Abi;
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * If Trace::moduleEnabled(Trace::llvm) || RuntimeOption::EvalJitLLVMCounters,
+ * these two RDS values are used to count the number of bytecodes executed by
+ * code emitted from their respective backends.
+ */
+extern RDS::Link<uint64_t> g_bytecodesLLVM;
+extern RDS::Link<uint64_t> g_bytecodesVasm;
 
 ///////////////////////////////////////////////////////////////////////////////
 

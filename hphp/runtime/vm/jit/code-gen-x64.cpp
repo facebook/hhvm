@@ -5474,6 +5474,11 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgCountBytecode(IRInstruction* inst) {
+  auto& v = vmain();
+  v << countbytecode{rVmTl, v.makeReg()};
+}
+
 void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   const Vreg rds = rVmTl;
   auto clsReg = srcLoc(inst, 0).reg();

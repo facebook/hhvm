@@ -25,7 +25,6 @@ type options = {
   should_detach    : bool;
   convert          : Path.path option;
   load_save_opt    : env_store_action option;
-  start_time       : float;
   (* Configures only the workers. Workers can have more relaxed GC configs as
    * they are short-lived processes *)
   gc_control       : Gc.control;
@@ -33,13 +32,8 @@ type options = {
 }
 
 and env_store_action =
-  | Load of load_info
+  | Load of string
   | Save of string
-
-and load_info = {
-  filename : string;
-  to_recheck : string list;
-}
 
 (*****************************************************************************)
 (* Usage code *)
@@ -60,9 +54,6 @@ module Messages = struct
   let from_hhclient = " passed from hh_client"
   let convert       = " adds type annotations automatically"
   let save          = " save server state to file"
-  let load          = " a space-separated list of files; the first file is"^
-                      " the file containing the saved state, and the rest are"^
-                      " the list of files to recheck"
 end
 
 
@@ -102,22 +93,9 @@ let parse_options () =
   let json_mode     = ref false in
   let should_detach = ref false in
   let convert_dir   = ref None  in
-  let load_save_opt = ref None  in
+  let save          = ref "" in
   let version       = ref false in
-  let start_time    = ref (Unix.time ()) in
   let cdir          = fun s -> convert_dir := Some s in
-  let save          = fun s -> load_save_opt := Some (Save s) in
-  let load          = fun s ->
-    let arg_l       = Str.split (Str.regexp " +") s in
-    match arg_l with
-    | [] -> raise (Invalid_argument "--load needs at least one argument")
-    | [filename] ->
-        load_save_opt := Some (Load { filename; to_recheck = [] })
-    | [filename; recheck_fn] ->
-        let to_recheck = cat recheck_fn |> Str.split (Str.regexp "\n") in
-        load_save_opt := Some (Load { filename; to_recheck; })
-    | _ -> raise (Invalid_argument "--load takes at most 2 arguments")
-  in
   let options =
     ["--debug"         , Arg.Set debug         , Messages.debug;
      "--check"         , Arg.Set check_mode    , Messages.check;
@@ -128,10 +106,8 @@ let parse_options () =
      "--from-emacs"    , Arg.Set from_emacs    , Messages.from_emacs;
      "--from-hhclient" , Arg.Set from_hhclient , Messages.from_hhclient;
      "--convert"       , Arg.String cdir       , Messages.convert;
-     "--save"          , Arg.String save       , Messages.save;
-     "--load"          , Arg.String load       , Messages.load;
+     "--save"          , Arg.Set_string save   , Messages.save;
      "--version"       , Arg.Set version       , "";
-     "--start-time"    , Arg.Set_float start_time, "";
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -153,13 +129,19 @@ let parse_options () =
   Wwwroot.assert_www_directory root_path;
   let hhconfig = Path.string_of_path (Path.concat root_path ".hhconfig") in
   let config = Config_file.parse hhconfig in
+  let load_save_opt = match !save with
+    | "" -> begin
+        match SMap.get "server_options_cmd" config with
+        | None -> None
+        | Some s -> Some (Load s)
+      end
+    | s -> Some (Save s) in
   { json_mode     = !json_mode;
     check_mode    = check_mode;
     root          = root_path;
     should_detach = !should_detach;
     convert       = convert;
-    load_save_opt = !load_save_opt;
-    start_time    = !start_time;
+    load_save_opt = load_save_opt;
     gc_control    = make_gc_control config;
     assume_php    = config_assume_php config;
   }
@@ -172,16 +154,9 @@ let default_options ~root = {
   should_detach = false;
   convert = None;
   load_save_opt = None;
-  start_time = Unix.time ();
   gc_control = ServerConfig.gc_control;
   assume_php = true;
 }
-
-(* useful for logging *)
-let string_of_init_type = function
-  | Some (Load _) -> "load"
-  | Some (Save _) -> "save"
-  | None -> "fresh"
 
 (*****************************************************************************)
 (* Accessors *)
@@ -193,6 +168,5 @@ let root options = options.root
 let should_detach options = options.should_detach
 let convert options = options.convert
 let load_save_opt options = options.load_save_opt
-let start_time options = options.start_time
 let gc_control options = options.gc_control
 let assume_php options = options.assume_php

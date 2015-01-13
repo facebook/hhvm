@@ -40,30 +40,9 @@ let rec wait env =
   end
 
 let start_server env =
-  let start_time = Unix.time () in
-  let server_options = match env.server_options_cmd with
-    | Some cmd ->
-      let root = Path.string_of_path env.root in
-      let cmd = if Filename.is_relative cmd then root^"/"^cmd else cmd in
-      let cmd = Printf.sprintf "%s %s %s" cmd
-        (Filename.quote (Path.string_of_path env.root))
-        (Filename.quote Build_id.build_id_ohai) in
-      (try Utils.exec_read cmd with
-      | End_of_file -> ""
-      | e ->
-        prerr_endline (Printexc.to_string e);
-        Printexc.print_backtrace stderr;
-        "")
-    | None -> "" in
-  (* We care about how long it takes to return a typecheck result from the
-   * moment that the user hits `hh_client`. Since the server options script can
-   * take a while to run, we want to include that time in our hh_server logs.
-   * Thus we pass the client's start time to the server via the --start-time
-   * flag. *)
-  let hh_server = Printf.sprintf "%s -d %s %s --start-time %f"
+  let hh_server = Printf.sprintf "%s -d %s"
     (Filename.quote (get_hhserver ()))
-    (Filename.quote (Path.string_of_path env.root))
-    server_options start_time in
+    (Filename.quote (Path.string_of_path env.root)) in
   Printf.fprintf stderr "Server launched with the following command:\n\t%s\n%!"
     hh_server;
   let () = match Unix.system hh_server with

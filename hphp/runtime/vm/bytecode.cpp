@@ -1615,7 +1615,6 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
             // uninitialized value(s) at the top of the eval stack so that the
             // unwinder doesn't choke
             stack.discard();
-            cleanupParamsAndActRec(stack, ar, nullptr, &i);
             if (retval) { tvWriteNull(retval); }
             throw;
           }

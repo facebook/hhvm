@@ -634,6 +634,37 @@
     clowns:
 	  # Dependent on system language settings.
       - twig/test/Twig/Tests/CompilerTest.php
+  typo3:
+    url: git://github.com/TYPO3/TYPO3.CMS.git
+    branch: TYPO3_6-2
+    commit: 32462f96f9fd5441db92b082abc39b403e366616
+    install_root: typo3
+    test_root: typo3/typo3/sysext/core/Build
+    config_file: typo3/typo3/sysext/core/Build/UnitTests.xml
+    bootstrap_file: typo3/typo3/sysext/core/Build/UnitTestsBootstrap.php
+    blacklist:
+      # they make test runner FATAL
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/AlphabeticValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/AlphanumericValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/BetweenValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/DateValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/DigitValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/EmailValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/EqualsValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/FileAllowedTypesValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/FileMaximumSizeValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/FileMinimumSizeValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/FloatValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/GreaterThanValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/Helper.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/InArrayValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/IntegerValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/IpValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/LengthValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/LessThanValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/RegExpValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/RequiredValidatorTest.php
+      - typo3/typo3/sysext/form/Tests/Unit/Validation/UriValidatorTest.php
   vfsstream:
     # It's slightly ahead of stable release v1.4.0 to include a commit which
     # unskips a couple of tests on HHVM

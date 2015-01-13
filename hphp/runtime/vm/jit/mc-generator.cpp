@@ -1725,7 +1725,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
               start,           code.main().frontier()       - start,
               realColdStart,   code.realCold().frontier()   - realColdStart,
               realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
-              region, m_fixups.m_bcMap);
+              region, m_fixups.m_bcMap,
+              useLLVM());
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);

@@ -947,6 +947,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       } catch (const FailedLLVMCodeGen& e) {
         FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
                e.what());
+        mcg->setUseLLVM(false);
         vasm.finishX64(vasm_abi, state.asmInfo);
       }
     } else {

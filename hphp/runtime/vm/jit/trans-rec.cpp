@@ -29,7 +29,8 @@ TransRec::TransRec(SrcKey                      _src,
                    TCA                         _afrozenStart,
                    uint32_t                    _afrozenLen,
                    RegionDescPtr               region,
-                   std::vector<TransBCMapping> _bcMapping)
+                   std::vector<TransBCMapping> _bcMapping,
+                   bool                        _isLLVM)
   : bcMapping(_bcMapping)
   , funcName(_src.func()->fullName()->data())
   , src(_src)
@@ -43,6 +44,7 @@ TransRec::TransRec(SrcKey                      _src,
   , bcStart(_src.offset())
   , id(0)
   , kind(_kind)
+  , isLLVM(_isLLVM)
 {
   if (funcName.empty()) funcName = "Pseudo-main";
 
@@ -100,6 +102,7 @@ TransRec::print(uint64_t profCount) const {
   folly::format(
     &ret,
     "  kind = {} ({})\n"
+    "  isLLVM = {:d}\n"
     "  aStart = {}\n"
     "  aLen = {:#x}\n"
     "  coldStart = {}\n"
@@ -107,6 +110,7 @@ TransRec::print(uint64_t profCount) const {
     "  frozenStart = {}\n"
     "  frozenLen = {:#x}\n",
     static_cast<uint32_t>(kind), show(kind),
+    isLLVM,
     aStart, aLen,
     acoldStart, acoldLen,
     afrozenStart, afrozenLen);

@@ -1709,6 +1709,11 @@ function get_num_threads($options, $tests) {
 }
 
 function main($argv) {
+  if (empty($_SERVER) || empty($_ENV)) {
+    error('$_SERVER/$_ENV variables not available, please make sure ' .
+          'ini setting: variables_order include both "E" & "S"');
+  }
+
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
   list($options, $files) = get_options($argv);

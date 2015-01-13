@@ -2900,6 +2900,10 @@ and expr_anon_async env pos =
       let ret = hint_return_opt env in
       expect env Tlambda;
       pos, lambda_body env param_list ret ~sync:FAsync
+  | Tlcb -> (* async { ... } *)
+      L.back env.lb;
+      let lambda = pos, lambda_body env [] None ~sync:FAsync in
+      pos, Call (lambda, [], [])
   | _ ->
       L.back env.lb;
       pos, Id (pos, "async")

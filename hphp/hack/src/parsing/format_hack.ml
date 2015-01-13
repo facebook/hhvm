@@ -2431,7 +2431,10 @@ and expr_atomic_word env last_tok = function
   | "async" ->
       last_token env;
       space env;
-      expr_atomic env
+      begin match next_token env with
+      | Tlcb -> stmt ~is_toplevel:false env
+      | _ -> expr_atomic env
+      end
   | "function" when last_tok <> Tarrow && last_tok <> Tnsarrow ->
       last_token env;
       space env;

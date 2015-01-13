@@ -45,7 +45,7 @@ namespace HPHP {
 Mutex LightProcess::s_mutex;
 
 static bool send_fd(int afdt_fd, int fd) {
-  afdt_error_t err;
+  afdt_error_t err = AFDT_ERROR_T_INIT;
   errno = 0;
   int ret = afdt_send_fd_msg(afdt_fd, 0, 0, fd, &err);
   if (ret < 0 && errno == 0) {
@@ -57,7 +57,7 @@ static bool send_fd(int afdt_fd, int fd) {
 
 static int recv_fd(int afdt_fd) {
   int fd;
-  afdt_error_t err;
+  afdt_error_t err = AFDT_ERROR_T_INIT;
   uint8_t afdt_buf[AFDT_MSGLEN];
   uint32_t afdt_len;
   errno = 0;
@@ -319,8 +319,7 @@ static bool s_handlerInited = false;
 static LightProcess::LostChildHandler s_lostChildHandler;
 
 LightProcess::LightProcess()
-: m_shadowProcess(0), m_fin(nullptr), m_fout(nullptr), m_afdt_fd(-1),
-  m_afdt_lfd(-1) { }
+  : m_shadowProcess(0), m_fin(nullptr), m_fout(nullptr), m_afdt_fd(-1) { }
 
 LightProcess::~LightProcess() {
 }
@@ -357,8 +356,27 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   g_procs.reset(new LightProcess[count]);
   g_procsCount = count;
 
+  auto afdt_filename = folly::sformat("{}.{}", prefix, getpid());
+
+  // remove the possible leftover
+  remove(afdt_filename.c_str());
+
+  afdt_error_t err = AFDT_ERROR_T_INIT;
+  auto afdt_lid = afdt_listen(afdt_filename.c_str(), &err);
+  if (afdt_lid < 0) {
+    Logger::Warning("Unable to afdt_listen to %s: %d %s",
+                    afdt_filename.c_str(),
+                    errno, folly::errnoStr(errno).c_str());
+    return;
+  }
+
+  SCOPE_EXIT {
+    ::close(afdt_lid);
+    remove(afdt_filename.c_str());
+  };
+
   for (int i = 0; i < count; i++) {
-    if (!g_procs[i].initShadow(prefix, i, inherited_fds)) {
+    if (!g_procs[i].initShadow(afdt_lid, afdt_filename, i, inherited_fds)) {
       for (int j = 0; j < i; j++) {
         g_procs[j].closeShadow();
       }
@@ -381,25 +399,10 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   }
 }
 
-bool LightProcess::initShadow(const std::string &prefix, int id,
+bool LightProcess::initShadow(int afdt_lid,
+                              const std::string &afdt_filename, int id,
                               const std::vector<int> &inherited_fds) {
   Lock lock(m_procMutex);
-
-  std::ostringstream os;
-  os << prefix << "." << getpid() << "." << id;
-  m_afdtFilename = os.str();
-
-  // remove the possible leftover
-  remove(m_afdtFilename.c_str());
-
-  afdt_error_t err;
-  m_afdt_lfd = afdt_listen(m_afdtFilename.c_str(), &err);
-  if (m_afdt_lfd < 0) {
-    Logger::Warning("Unable to afdt_listen to %s: %d %s",
-                    m_afdtFilename.c_str(),
-                    errno, folly::errnoStr(errno).c_str());
-    return false;
-  }
 
   CPipe p1, p2;
   if (!p1.open() || !p2.open()) {
@@ -416,10 +419,11 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
       Logger::Warning("Unable to setsid");
       exit(HPHP_EXIT_FAILURE);
     }
-    m_afdt_fd = afdt_connect(m_afdtFilename.c_str(), &err);
+    afdt_error_t err = AFDT_ERROR_T_INIT;
+    m_afdt_fd = afdt_connect(afdt_filename.c_str(), &err);
     if (m_afdt_fd < 0) {
       Logger::Warning("Unable to afdt_connect, filename %s: %d %s",
-                      m_afdtFilename.c_str(),
+                      afdt_filename.c_str(),
                       errno, folly::errnoStr(errno).c_str());
       exit(HPHP_EXIT_FAILURE);
     }
@@ -434,7 +438,7 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
       g_procs[i].closeFiles();
     }
     close_fds(inherited_fds);
-    ::close(m_afdt_lfd);
+    ::close(afdt_lid);
 
     runShadow(fd1, fd2);
   } else if (child < 0) {
@@ -450,7 +454,7 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
 
     sockaddr addr;
     socklen_t addrlen = sizeof(addr);
-    m_afdt_fd = accept(m_afdt_lfd, &addr, &addrlen);
+    m_afdt_fd = accept(afdt_lid, &addr, &addrlen);
     if (m_afdt_fd < 0) {
       Logger::Warning("Unable to establish afdt connection: %d %s",
                       errno, folly::errnoStr(errno).c_str());
@@ -483,9 +487,6 @@ void LightProcess::closeShadow() {
     // removes the "zombie" process, so not to interfere with later waits
     ::waitpid(m_shadowProcess, nullptr, 0);
   }
-  if (!m_afdtFilename.empty()) {
-    remove(m_afdtFilename.c_str());
-  }
   if (m_afdt_fd >= 0) {
     ::close(m_afdt_fd);
     m_afdt_fd = -1;
@@ -497,7 +498,6 @@ void LightProcess::closeFiles() {
   fclose(m_fin);
   fclose(m_fout);
   ::close(m_afdt_fd);
-  ::close(m_afdt_lfd);
 }
 
 bool LightProcess::Available() {
@@ -546,7 +546,6 @@ void LightProcess::runShadow(int fdin, int fdout) {
   fclose(fin);
   fclose(fout);
   ::close(m_afdt_fd);
-  remove(m_afdtFilename.c_str());
   _Exit(0);
 }
 

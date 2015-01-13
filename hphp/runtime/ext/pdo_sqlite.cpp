@@ -205,7 +205,7 @@ bool PDOSqliteConnection::quoter(const String& input, String &quoted,
                                  PDOParamType paramtype) {
   int len = 2 * input.size() + 3;
   String s(len, ReserveString);
-  char *buf = s.bufferSlice().ptr;
+  char *buf = s.mutableData();
   sqlite3_snprintf(len, buf, "'%q'", input.data());
   quoted = s.setSize(strlen(buf));
   return true;

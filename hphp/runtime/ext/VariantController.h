@@ -139,7 +139,7 @@ struct VariantController {
     return empty_string();
   }
   static char* getMutablePtr(StringType& s) {
-    return s.bufferSlice().ptr;
+    return s.mutableData();
   }
   static void shrinkString(String& s, size_t length) {
     s.shrink(length);

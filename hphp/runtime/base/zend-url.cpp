@@ -30,7 +30,7 @@ static void replace_controlchars(String& output, const char *str, int len) {
   unsigned char *s = (unsigned char *)str;
   unsigned char *e = (unsigned char *)str + len;
   output = String(str, len, CopyString);
-  char *outbuf = output.bufferSlice().ptr;
+  char *outbuf = output.mutableData();
   while (s < e) {
     if (iscntrl(*s)) {
       *outbuf='_';
@@ -319,7 +319,7 @@ String url_encode(const char *s, int len) {
 
   from = (unsigned char const *)s;
   end = (unsigned char const *)s + len;
-  start = to = (unsigned char *)retString.bufferSlice().ptr;
+  start = to = (unsigned char *)retString.mutableData();
 
   while (from < end) {
     c = *from++;
@@ -344,7 +344,7 @@ String url_encode(const char *s, int len) {
 
 String url_decode(const char *s, int len) {
   String retString(s, len, CopyString);
-  char *str = retString.bufferSlice().ptr;
+  char *str = retString.mutableData();
   char *dest = str;
   char *data = str;
 
@@ -423,7 +423,7 @@ int url_decode_ex(char *value, int len) {
 String url_raw_encode(const char *s, int len) {
   String retString(safe_address(len, 3, 1), ReserveString);
   register int x, y;
-  unsigned char *str = (unsigned char *)retString.bufferSlice().ptr;
+  unsigned char *str = (unsigned char *)retString.mutableData();
 
   for (x = 0, y = 0; len--; x++, y++) {
     str[y] = (unsigned char) s[x];
@@ -442,7 +442,7 @@ String url_raw_encode(const char *s, int len) {
 
 String url_raw_decode(const char *s, int len) {
   String retString(s, len, CopyString);
-  char *str = retString.bufferSlice().ptr;
+  char *str = retString.mutableData();
   char *dest = str;
   char *data = str;
 

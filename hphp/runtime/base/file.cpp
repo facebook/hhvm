@@ -284,7 +284,7 @@ String File::read(int64_t length) {
 
   auto const allocSize = length;
   String s = String(allocSize, ReserveString);
-  char *ret = s.bufferSlice().ptr;
+  char *ret = s.mutableData();
   int64_t copied = 0;
   int64_t avail = bufferedLen();
 
@@ -702,7 +702,7 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
 
   if (toread >= 0) {
     String s = String(toread, ReserveString);
-    char *buf = s.bufferSlice().ptr;
+    char *buf = s.mutableData();
     if (toread) {
       memcpy(buf, m_data->m_buffer + m_data->m_readpos, toread);
     }

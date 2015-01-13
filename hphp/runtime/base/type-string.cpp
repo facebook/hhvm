@@ -547,9 +547,8 @@ void String::unserialize(VariableUnserializer *uns,
   uns->expectChar(delimiter0);
 
   StringData *px = StringData::Make(int(size));
-  auto const buf = px->bufferSlice();
-  assert(size <= buf.len);
-  uns->read(buf.ptr, size);
+  assert(size <= px->capacity());
+  uns->read(px->mutableData(), size);
   px->setSize(size);
   if (m_px) decRefStr(m_px);
   m_px = px;

@@ -226,7 +226,7 @@ static int _xml_xmlcharlen(const XML_Char *s) {
 String xml_utf8_decode(const XML_Char *s, int len,
                        const XML_Char *encoding) {
   String str = String(len, ReserveString);
-  char *newbuf = str.bufferSlice().ptr;
+  char *newbuf = str.mutableData();
   char (*decoder)(unsigned short) = nullptr;
   xml_encoding *enc = xml_get_encoding(encoding);
 
@@ -940,7 +940,7 @@ String HHVM_FUNCTION(xml_error_string,
 String HHVM_FUNCTION(utf8_decode,
                      const String& data) {
   String str = String(data.size(), ReserveString);
-  char *newbuf = str.bufferSlice().ptr;
+  char *newbuf = str.mutableData();
   int newlen = 0;
   const char *s = data.data();
 
@@ -959,7 +959,7 @@ String HHVM_FUNCTION(utf8_encode,
                      const String& data) {
   auto const maxSize = safe_cast<size_t>(data.size()) * 4;
   String str = String(maxSize, ReserveString);
-  char *newbuf = str.bufferSlice().ptr;
+  char *newbuf = str.mutableData();
   int newlen = 0;
   const char *s = data.data();
   for (int pos = data.size(); pos > 0; pos--, s++) {

@@ -1215,7 +1215,7 @@ bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
   EVP_PKEY *pkey = okey->m_key;
 
   String s = String(sealed_data.size(), ReserveString);
-  unsigned char *buf = (unsigned char *)s.bufferSlice().ptr;
+  unsigned char *buf = (unsigned char *)s.mutableData();
 
   EVP_CIPHER_CTX ctx;
   int len1, len2;
@@ -1920,7 +1920,7 @@ bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
   EVP_PKEY *pkey = okey->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
-  unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
+  unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
   switch (pkey->type) {
@@ -1960,7 +1960,7 @@ bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
   EVP_PKEY *pkey = okey->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
-  unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
+  unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
   switch (pkey->type) {
@@ -1996,7 +1996,7 @@ bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
   EVP_PKEY *pkey = okey->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
-  unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
+  unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
   switch (pkey->type) {
@@ -2036,7 +2036,7 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
   EVP_PKEY *pkey = okey->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
-  unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
+  unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
   switch (pkey->type) {
@@ -2124,7 +2124,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
   int len1, len2;
 
   s = String(data.size() + EVP_CIPHER_CTX_block_size(&ctx), ReserveString);
-  buf = (unsigned char *)s.bufferSlice().ptr;
+  buf = (unsigned char *)s.mutableData();
   if (!EVP_SealInit(&ctx, cipher_type, eks, eksl, nullptr, pkeys, nkeys) ||
       !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data.data(),
                       data.size())) {
@@ -2201,7 +2201,7 @@ bool HHVM_FUNCTION(openssl_sign, const String& data, VRefParam signature,
   EVP_PKEY *pkey = okey->m_key;
   int siglen = EVP_PKEY_size(pkey);
   String s = String(siglen, ReserveString);
-  unsigned char *sigbuf = (unsigned char *)s.bufferSlice().ptr;
+  unsigned char *sigbuf = (unsigned char *)s.mutableData();
 
   EVP_MD_CTX md_ctx;
   EVP_SignInit(&md_ctx, mdtype);
@@ -2625,7 +2625,7 @@ Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
   unsigned char *buffer = NULL;
 
   String s = String(length, ReserveString);
-  buffer = (unsigned char *)s.bufferSlice().ptr;
+  buffer = (unsigned char *)s.mutableData();
 
   crypto_strong = false;
 
@@ -2665,7 +2665,7 @@ static String php_openssl_validate_iv(String piv, int iv_required_len) {
   }
 
   String s = String(iv_required_len, ReserveString);
-  iv_new = s.bufferSlice().ptr;
+  iv_new = s.mutableData();
   memset(iv_new, 0, iv_required_len);
 
   if (piv.size() <= 0) {
@@ -2710,7 +2710,7 @@ Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
    */
   if (keylen > password.size()) {
     String s = String(keylen, ReserveString);
-    char *keybuf = s.bufferSlice().ptr;
+    char *keybuf = s.mutableData();
     memset(keybuf, 0, keylen);
     memcpy(keybuf, password.data(), password.size());
     key = s.setSize(keylen);
@@ -2728,7 +2728,7 @@ Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
 
   int outlen = data.size() + EVP_CIPHER_block_size(cipher_type);
   String rv = String(outlen, ReserveString);
-  unsigned char *outbuf = (unsigned char*)rv.bufferSlice().ptr;
+  unsigned char *outbuf = (unsigned char*)rv.mutableData();
 
   EVP_CIPHER_CTX cipher_ctx;
 
@@ -2791,7 +2791,7 @@ Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
    */
    if (keylen > password.size()) {
     String s = String(keylen, ReserveString);
-    char *keybuf = s.bufferSlice().ptr;
+    char *keybuf = s.mutableData();
     memset(keybuf, 0, keylen);
     memcpy(keybuf, password.data(), password.size());
     key = s.setSize(keylen);
@@ -2804,7 +2804,7 @@ Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
 
   int outlen = decoded_data.size() + EVP_CIPHER_block_size(cipher_type);
   String rv = String(outlen, ReserveString);
-  unsigned char *outbuf = (unsigned char*)rv.bufferSlice().ptr;
+  unsigned char *outbuf = (unsigned char*)rv.mutableData();
 
   EVP_CIPHER_CTX cipher_ctx;
   EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
@@ -2842,7 +2842,7 @@ Variant HHVM_FUNCTION(openssl_digest, const String& data, const String& method,
   }
   int siglen = EVP_MD_size(mdtype);
   String rv = String(siglen, ReserveString);
-  unsigned char *sigbuf = (unsigned char *)rv.bufferSlice().ptr;
+  unsigned char *sigbuf = (unsigned char *)rv.mutableData();
   EVP_MD_CTX md_ctx;
 
   EVP_DigestInit(&md_ctx, mdtype);

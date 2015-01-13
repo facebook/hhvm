@@ -62,12 +62,11 @@ String stringForEach(uint32_t len, const String& str, Op action) {
   String ret = mutate ? str : String(len, ReserveString);
 
   StringSlice srcSlice = str.slice();
-  auto const dstSlice = ret.bufferSlice();
 
   const char* src = srcSlice.begin();
   const char* end = srcSlice.end();
 
-  char* dst = dstSlice.begin();
+  char* dst = ret.mutableData();
 
   for (; src != end; ++src, ++dst) {
     *dst = action(*src);
@@ -476,7 +475,7 @@ String stringTrim(String& str, const String& charlist) {
   if (str.get()->hasExactlyOneRef()) {
     int slen = end - start + 1;
     if (start) {
-      char* sdata = str.bufferSlice().ptr;
+      char* sdata = str.mutableData();
       for (int idx = 0; start < len;) sdata[idx++] = sdata[start++];
     }
     return String(str.get()->shrink(slen));
@@ -850,7 +849,7 @@ String HHVM_FUNCTION(str_repeat,
   if (input.size() == 1) {
     String ret(multiplier, ReserveString);
 
-    memset(ret.bufferSlice().ptr, *input.data(), multiplier);
+    memset(ret.mutableData(), *input.data(), multiplier);
     ret.setSize(multiplier);
     return ret;
   }
@@ -1734,7 +1733,7 @@ String HHVM_FUNCTION(sha1,
 bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
                 const char*s, int& pos, int minlen, int maxlen) {
 
-  memcpy(key.bufferSlice().ptr, s + pos, maxlen);
+  memcpy(key.mutableData(), s + pos, maxlen);
   for (int len = maxlen; len >= minlen; len--) {
     key.setSize(len);
     auto const& var = arr->get(key.toKey());

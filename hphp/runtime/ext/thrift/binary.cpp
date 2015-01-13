@@ -174,7 +174,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       uint32_t size = transport.readU32();
       if (size && (size + 1)) {
         String s = String(size, ReserveString);
-        char* strbuf = s.bufferSlice().ptr;
+        char* strbuf = s.mutableData();
         transport.readBytes(strbuf, size);
         s.setSize(size);
         return s;

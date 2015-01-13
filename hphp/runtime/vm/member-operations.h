@@ -796,7 +796,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
     }
   } else {
     StringData* sd = StringData::Make(slen);
-    char* s = sd->bufferSlice().ptr;
+    char* s = sd->mutableData();
     memcpy(s, base->m_data.pstr->data(), baseLen);
     if (x > baseLen) {
       memset(&s[baseLen], ' ', slen - baseLen - 1);

@@ -660,10 +660,10 @@ String concat3(const String& s1, const String& s2, const String& s3) {
   StringSlice r3 = s3.slice();
   int len = r1.len + r2.len + r3.len;
   StringData* str = StringData::Make(len);
-  auto const r = str->bufferSlice();
-  memcpy(r.ptr,                   r1.ptr, r1.len);
-  memcpy(r.ptr + r1.len,          r2.ptr, r2.len);
-  memcpy(r.ptr + r1.len + r2.len, r3.ptr, r3.len);
+  auto const r = str->mutableData();
+  memcpy(r,                   r1.ptr, r1.len);
+  memcpy(r + r1.len,          r2.ptr, r2.len);
+  memcpy(r + r1.len + r2.len, r3.ptr, r3.len);
   str->setSize(len);
   return str;
 }
@@ -676,11 +676,11 @@ String concat4(const String& s1, const String& s2, const String& s3,
   StringSlice r4 = s4.slice();
   int len = r1.len + r2.len + r3.len + r4.len;
   StringData* str = StringData::Make(len);
-  auto const r = str->bufferSlice();
-  memcpy(r.ptr,                            r1.ptr, r1.len);
-  memcpy(r.ptr + r1.len,                   r2.ptr, r2.len);
-  memcpy(r.ptr + r1.len + r2.len,          r3.ptr, r3.len);
-  memcpy(r.ptr + r1.len + r2.len + r3.len, r4.ptr, r4.len);
+  auto const r = str->mutableData();
+  memcpy(r,                            r1.ptr, r1.len);
+  memcpy(r + r1.len,                   r2.ptr, r2.len);
+  memcpy(r + r1.len + r2.len,          r3.ptr, r3.len);
+  memcpy(r + r1.len + r2.len + r3.len, r4.ptr, r4.len);
   str->setSize(len);
   return str;
 }

@@ -103,11 +103,11 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
   auto capacity = result.capacity() + 1;
   if (toUtf8) {
     len = uidna_nameToUnicodeUTF8(idna, domain.c_str(), domain.size(),
-                                  result.bufferSlice().ptr, capacity,
+                                  result.mutableData(), capacity,
                                   &info, &error);
   } else {
     len = uidna_nameToASCII_UTF8(idna, domain.c_str(), domain.size(),
-                                 result.bufferSlice().ptr, capacity,
+                                 result.mutableData(), capacity,
                                  &info, &error);
   }
   if (len > capacity) {

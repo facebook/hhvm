@@ -132,7 +132,7 @@ Variant f_fb_serialize(const Variant& thing) {
       HPHP::serialize::FBSerializer<VariantController>::serializedSize(thing);
     String s(len, ReserveString);
     HPHP::serialize::FBSerializer<VariantController>::serialize(
-      thing, s.bufferSlice().ptr);
+      thing, s.mutableData());
     s.setSize(len);
     return s;
   } catch (const HPHP::serialize::SerializeError&) {
@@ -519,7 +519,7 @@ String fb_compact_serialize(const Variant& thing,
     int64_t val = thing.toInt64();
     if (val >= 0 && (uint64_t)val <= kInt7Mask) {
       String s(2, ReserveString);
-      *(uint16_t*)(s.bufferSlice().ptr) = (uint16_t)htons(kInt13Prefix | val);
+      *(uint16_t*)(s.mutableData()) = (uint16_t)htons(kInt13Prefix | val);
       s.setSize(2);
       return s;
     }
@@ -818,7 +818,7 @@ bool f_fb_utf8ize(VRefParam input) {
     return false; // Too long.
   }
   String dstStr(dstMaxLenBytes, ReserveString);
-  char *dstBuf = dstStr.bufferSlice().ptr;
+  char *dstBuf = dstStr.mutableData();
 
   // Copy valid bytes found so far as one solid block.
   memcpy(dstBuf, srcBuf, srcPosBytes);
@@ -921,7 +921,7 @@ static String fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
     return empty_string(); // Too long.
   }
   String dstStr(dstMaxLenBytes, ReserveString);
-  char* dstBuf = dstStr.bufferSlice().ptr;
+  char* dstBuf = dstStr.mutableData();
   int32_t dstPosBytes = 0;
 
   // Iterate through src's codepoints; srcPosBytes is incremented by U8_NEXT.

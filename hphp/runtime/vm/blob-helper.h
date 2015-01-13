@@ -372,7 +372,7 @@ private:
     if (sz == 0) return empty_string();
 
     String s = String(sz, ReserveString);
-    char* pch = s.bufferSlice().ptr;
+    char* pch = s.mutableData();
     assert(m_last - m_p >= sz);
     std::copy(m_p, m_p + sz, pch);
     m_p += sz;

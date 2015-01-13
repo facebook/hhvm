@@ -52,7 +52,8 @@ class Exception {
    * @previous   mixed   The previous exception used for the exception
    *                     chaining.
    */
-  public function __construct($message = '', $code = 0, Exception $previous = null) {
+  public function __construct($message = '', $code = 0,
+                              Exception $previous = null) {
     $this->message = $message;
     $this->code = $code;
     $this->previous = $previous;

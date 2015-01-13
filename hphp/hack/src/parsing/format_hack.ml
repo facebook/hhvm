@@ -850,6 +850,12 @@ let try_token env tok f = wrap env begin function
       back env
 end
 
+let opt_word word env = wrap env begin function
+  | Tword when !(env.last_str) = word ->
+      last_token env
+  | _ -> back env
+end
+
 let opt_tok tok env = wrap env begin function
   | tok' when tok = tok' ->
       last_token env
@@ -1986,7 +1992,7 @@ and foreach env =
   newline env
 
 and foreach_as env =
-  seq env [expr; space; expect "as"];
+  seq env [expr; space; opt_word "await"; space; expect "as"];
   Try.outer env
     (fun env -> seq env [space; expr; arrow_opt])
     (fun env -> seq env [newline; expr; arrow_opt])

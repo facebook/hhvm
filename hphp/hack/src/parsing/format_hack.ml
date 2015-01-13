@@ -1863,7 +1863,7 @@ and stmt_word ~is_toplevel env word =
       if_ ~is_toplevel env
   | "do" ->
       seq env [last_token; block];
-      seq env  [space; expect "while"; space; expr_paren; opt_tok Tsc]
+      seq env [space; expect "while"; space; expr_paren; opt_tok Tsc]
   | "while" ->
       seq env [last_token; space; expr_paren; block; newline]
   | "for" ->
@@ -2264,7 +2264,7 @@ and expr_remain lowest env =
       out env tok_str;
       keep_comment env;
       if next_token env <> Trp
-      then right env expr_list;
+      then right env expr_call_list;
       expect ")" env;
       lowest
   | Tlb ->
@@ -2422,7 +2422,7 @@ and expr_atomic_word env last_tok = function
   | "array" | "shape" as v ->
       out env v;
       expect "(" env;
-      right env (fun env -> array_body env);
+      right env array_body;
       expect ")" env
   | "new" ->
       last_token env;
@@ -2471,6 +2471,15 @@ and expr_atomic_word env last_tok = function
         | _ ->
             back env
       end
+
+and expr_call_list env =
+  let env = { env with break_on = 0; priority = 0 } in
+  list_comma_nl ~trailing:true expr_call_elt env
+
+and expr_call_elt env = wrap env begin function
+  | Tellipsis -> seq env [last_token; expr]
+  | _ -> back env; expr env
+end
 
 (*****************************************************************************)
 (* Ternary operator ... ? ... : ... *)

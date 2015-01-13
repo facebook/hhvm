@@ -3387,13 +3387,13 @@ and shape_field env =
   let value = expr { env with priority = 0 } in
   name, value
 
- and shape_field_name env =
-   let pos, e = expr env in
-   match e with
-   | String p -> SFlit p
-   | Class_const (id, ps) -> SFclass_const (id, ps)
-   | _ -> error_expect env "string literal or class constant";
-     SFlit (pos, "")
+and shape_field_name env =
+  let pos, e = expr env in
+  match e with
+  | String p -> SFlit p
+  | Class_const (id, ps) -> SFclass_const (id, ps)
+  | _ -> error_expect env "string literal or class constant";
+    SFlit (pos, "")
 
 
 (*****************************************************************************)

@@ -1724,7 +1724,10 @@ void in(ISS& env, const bc::CufSafeReturn&) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::DecodeCufIter&) { popC(env); }
+void in(ISS& env, const bc::DecodeCufIter& op) {
+  popC(env); // func
+  env.propagate(*op.target, env.state); // before iter is modifed
+}
 
 void in(ISS& env, const bc::IterInit& op) {
   auto const t1 = popC(env);

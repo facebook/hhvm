@@ -86,122 +86,150 @@ static char **build_envp(const std::vector<std::string> &env) {
 }
 
 static void close_fds(const std::vector<int> &fds) {
-  for (unsigned int i = 0; i < fds.size(); i++) {
-    ::close(fds[i]);
+  for (auto fd : fds) {
+    ::close(fd);
   }
 }
 
-static void lwp_write(FILE *fout, const std::string &buf) {
+static void send_raw(int afdt_fd, const void* data, uint32_t len) {
+  afdt_error_t err = AFDT_ERROR_T_INIT;
+  while (len > 0) {
+    auto l = std::min<uint32_t>(len, AFDT_MSGLEN);
+    if (afdt_send_plain_msg(afdt_fd, (uint8_t*)data, l, &err) < 0) {
+      throw Exception("Failed in afdt_send: %s",
+                      err.message && err.message[0] ? err.message :
+                      folly::errnoStr(errno).c_str());
+    }
+    len -= l;
+    data = (char*)data + l;
+  }
+}
+
+static void recv_raw(int afdt_fd, void* data, uint32_t len) {
+  afdt_error_t err = AFDT_ERROR_T_INIT;
+  while (len > 0) {
+    auto l = std::min<uint32_t>(len, AFDT_MSGLEN);
+
+    if (afdt_recv_plain_msg(afdt_fd, (uint8_t*)data, &l, &err) < 0) {
+      throw Exception("Failed in afdt_recv: %s",
+                      err.message && err.message[0] ? err.message :
+                      folly::errnoStr(errno).c_str());
+    }
+    assert(l <= len);
+    len -= l;
+    data = (char*)data + l;
+  }
+}
+
+static void lwp_write(int afdt_fd, const std::string &buf) {
   size_t len = buf.length();
-  fwrite(&len, sizeof(len), 1, fout);
-  fwrite(buf.c_str(), sizeof(buf[0]), len, fout);
-  fflush(fout);
+  send_raw(afdt_fd, &len, sizeof(len));
+  send_raw(afdt_fd, buf.c_str(), len);
 }
 
-static void lwp_write_int32(FILE *fout, int32_t d) {
-  fwrite(&d, sizeof(d), 1, fout);
-  fflush(fout);
+static void lwp_write_int32(int afdt_fd, int32_t d) {
+  send_raw(afdt_fd, &d, sizeof(d));
 }
 
-static void lwp_write_int64(FILE *fout, int64_t d) {
-  fwrite(&d, sizeof(d), 1, fout);
-  fflush(fout);
+static void lwp_write_int64(int afdt_fd, int64_t d) {
+  send_raw(afdt_fd, &d, sizeof(d));
 }
 
-static void lwp_read(FILE *fin, std::string &buf) {
+static void lwp_read(int afdt_fd, std::string &buf) {
   size_t len;
-  fread(&len, sizeof(len), 1, fin);
-  char *buffer = (char *)malloc(len + 1);
-  fread(buffer, sizeof(*buffer), len, fin);
-  buffer[len] = '\0';
-  buf = std::string(buffer);
+  recv_raw(afdt_fd, &len, sizeof(len));
+  char *buffer = (char *)malloc(len);
+  recv_raw(afdt_fd, buffer, len);
+  buf.assign(buffer, len);
   free(buffer);
 }
 
-static void lwp_read_int32(FILE *fin, int32_t &d) {
-  fread(&d, sizeof(d), 1, fin);
+static void lwp_read_int32(int afdt_fd, int32_t &d) {
+  recv_raw(afdt_fd, &d, sizeof(d));
 }
 
-static void lwp_read_int64(FILE *fin, int64_t &d) {
-  fread(&d, sizeof(d), 1, fin);
+static void lwp_read_int64(int afdt_fd, int64_t &d) {
+  recv_raw(afdt_fd, &d, sizeof(d));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // shadow process tasks
 
-static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
+static void do_popen(int afdt_fd) {
   std::string buf;
   std::string cwd;
 
-  lwp_read(fin, buf);
+  lwp_read(afdt_fd, buf);
   bool read_only = (buf[0] == 'r');
 
-  lwp_read(fin, buf);
+  lwp_read(afdt_fd, buf);
 
-  std::string old_cwd = Process::GetCurrentDirectory();
-  lwp_read(fin, cwd);
+  std::string old_cwd;
+  lwp_read(afdt_fd, cwd);
 
-  if (old_cwd != cwd) {
-    if (chdir(cwd.c_str())) {
-      // Ignore chdir failures, because the compiled version might not have the
-      // directory any more.
-      Logger::Warning("Light Process failed chdir to %s.", cwd.c_str());
+  if (!cwd.empty()) {
+    old_cwd = Process::GetCurrentDirectory();
+    if (old_cwd != cwd) {
+      if (chdir(cwd.c_str())) {
+        // Ignore chdir failures, because the compiled version might not
+        // have the directory any more.
+        Logger::Warning("Light Process failed chdir to %s.", cwd.c_str());
+      }
     }
   }
 
   FILE *f = buf[0] ? ::popen(buf.c_str(), read_only ? "r" : "w") : nullptr;
 
-  if (old_cwd != cwd && chdir(old_cwd.c_str())) {
+  if (!old_cwd.empty() && chdir(old_cwd.c_str())) {
     // only here if we can't change the cwd back
   }
 
   if (f == nullptr) {
     Logger::Error("Light process failed popen: %d (%s).", errno,
                   folly::errnoStr(errno).c_str());
-    lwp_write(fout, "error");
+    lwp_write(afdt_fd, "error");
   } else {
-    lwp_write(fout, "success");
-    lwp_write_int64(fout, (int64_t)f);
+    lwp_write(afdt_fd, "success");
+    lwp_write_int64(afdt_fd, (int64_t)f);
     int fd = fileno(f);
     send_fd(afdt_fd, fd);
   }
 }
 
-static void do_pclose(FILE *fin, FILE *fout) {
+static void do_pclose(int afdt_fd) {
   int64_t fptr = 0;
-  lwp_read_int64(fin, fptr);
+  lwp_read_int64(afdt_fd, fptr);
   FILE *f = (FILE *)fptr;
   int ret = ::pclose(f);
 
-  lwp_write_int32(fout, ret);
+  lwp_write_int32(afdt_fd, ret);
   if (ret < 0) {
-    lwp_write_int32(fout, errno);
+    lwp_write_int32(afdt_fd, errno);
   }
-  fflush(fout);
 }
 
-static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
+static void do_proc_open(int afdt_fd) {
   std::string cmd;
-  lwp_read(fin, cmd);
+  lwp_read(afdt_fd, cmd);
 
   std::string cwd;
-  lwp_read(fin, cwd);
+  lwp_read(afdt_fd, cwd);
 
   std::string buf;
   int env_size = 0;
   std::vector<std::string> env;
-  lwp_read_int32(fin, env_size);
+  lwp_read_int32(afdt_fd, env_size);
   for (int i = 0; i < env_size; i++) {
-    lwp_read(fin, buf);
+    lwp_read(afdt_fd, buf);
     env.push_back(buf);
   }
 
   int pipe_size = 0;
-  lwp_read_int32(fin, pipe_size);
+  lwp_read_int32(afdt_fd, pipe_size);
   std::vector<int> pvals;
   for (int i = 0; i < pipe_size; i++) {
     int fd_value;
-    lwp_read_int32(fin, fd_value);
+    lwp_read_int32(afdt_fd, fd_value);
     pvals.push_back(fd_value);
   }
 
@@ -209,9 +237,8 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
   for (int i = 0; i < pipe_size; i++) {
     int fd = recv_fd(afdt_fd);
     if (fd < 0) {
-      lwp_write(fout, "error");
-      lwp_write_int32(fout, EPROTO);
-      fflush(fout);
+      lwp_write(afdt_fd, "error");
+      lwp_write_int32(afdt_fd, EPROTO);
       close_fds(pkeys);
       return;
     }
@@ -220,8 +247,8 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
 
   // indicate error if an empty command was received
   if (cmd.length() == 0) {
-    lwp_write(fout, "error");
-    lwp_write_int32(fout, ENOENT);
+    lwp_write(afdt_fd, "error");
+    lwp_write_int32(afdt_fd, ENOENT);
     return;
   }
 
@@ -231,7 +258,7 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
     for (int i = 0; i < pipe_size; i++) {
       dup2(pkeys[i], pvals[i]);
     }
-    if (cwd.length() > 0 && chdir(cwd.c_str())) {
+    if (!cwd.empty() && chdir(cwd.c_str())) {
       // non-zero for error
       // chdir failed, the working directory remains unchanged
     }
@@ -245,14 +272,12 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
     _Exit(HPHP_EXIT_FAILURE);
   } else if (child > 0) {
     // successfully created the child process
-    lwp_write(fout, "success");
-    lwp_write_int64(fout, (int64_t)child);
-    fflush(fout);
+    lwp_write(afdt_fd, "success");
+    lwp_write_int64(afdt_fd, (int64_t)child);
   } else {
     // failed creating the child process
-    lwp_write(fout, "error");
-    lwp_write_int32(fout, errno);
-    fflush(fout);
+    lwp_write(afdt_fd, "error");
+    lwp_write_int32(afdt_fd, errno);
   }
 
   close_fds(pkeys);
@@ -266,13 +291,13 @@ static void kill_handler(int sig) {
   }
 }
 
-static void do_waitpid(FILE *fin, FILE *fout) {
+static void do_waitpid(int afdt_fd) {
   int64_t p = -1;
   int options = 0;
   int timeout = 0;
-  lwp_read_int64(fin, p);
-  lwp_read_int32(fin, options);
-  lwp_read_int32(fin, timeout);
+  lwp_read_int64(afdt_fd, p);
+  lwp_read_int32(afdt_fd, options);
+  lwp_read_int32(afdt_fd, timeout);
 
   pid_t pid = (pid_t)p;
   int stat;
@@ -285,17 +310,16 @@ static void do_waitpid(FILE *fin, FILE *fout) {
   pid_t ret = ::waitpid(pid, &stat, options);
   alarm(0); // cancel the previous alarm if not triggered yet
   waited = 0;
-  lwp_write_int64(fout, ret);
-  lwp_write_int32(fout, stat);
+  lwp_write_int64(afdt_fd, ret);
+  lwp_write_int32(afdt_fd, stat);
   if (ret < 0) {
-    lwp_write_int32(fout, errno);
+    lwp_write_int32(afdt_fd, errno);
   }
-  fflush(fout);
 }
 
-static void do_change_user(FILE *fin, FILE *fout) {
+static void do_change_user(int afdt_fd) {
   std::string uname;
-  lwp_read(fin, uname);
+  lwp_read(afdt_fd, uname);
   if (uname.length() > 0) {
     struct passwd *pw = getpwnam(uname.c_str());
     if (pw) {
@@ -318,8 +342,7 @@ static int g_procsCount = 0;
 static bool s_handlerInited = false;
 static LightProcess::LostChildHandler s_lostChildHandler;
 
-LightProcess::LightProcess()
-  : m_shadowProcess(0), m_fin(nullptr), m_fout(nullptr), m_afdt_fd(-1) { }
+LightProcess::LightProcess() : m_shadowProcess(0), m_afdt_fd(-1) { }
 
 LightProcess::~LightProcess() {
 }
@@ -404,13 +427,6 @@ bool LightProcess::initShadow(int afdt_lid,
                               const std::vector<int> &inherited_fds) {
   Lock lock(m_procMutex);
 
-  CPipe p1, p2;
-  if (!p1.open() || !p2.open()) {
-    Logger::Warning("Unable to create pipe: %d %s", errno,
-                    folly::errnoStr(errno).c_str());
-    return false;
-  }
-
   pid_t child = fork();
   if (child == 0) {
     // child
@@ -427,10 +443,6 @@ bool LightProcess::initShadow(int afdt_lid,
                       errno, folly::errnoStr(errno).c_str());
       exit(HPHP_EXIT_FAILURE);
     }
-    int fd1 = p1.detachOut();
-    int fd2 = p2.detachIn();
-    p1.close();
-    p2.close();
 
     // don't hold on to previous light processes' pipes, inherited
     // fds, or the afdt listening socket
@@ -440,7 +452,7 @@ bool LightProcess::initShadow(int afdt_lid,
     close_fds(inherited_fds);
     ::close(afdt_lid);
 
-    runShadow(fd1, fd2);
+    runShadow();
   } else if (child < 0) {
     // failed
     Logger::Warning("Unable to fork lightly: %d %s", errno,
@@ -448,8 +460,6 @@ bool LightProcess::initShadow(int afdt_lid,
     return false;
   } else {
     // parent
-    m_fin = fdopen(p2.detachOut(), "r");
-    m_fout = fdopen(p1.detachIn(), "w");
     m_shadowProcess = child;
 
     sockaddr addr;
@@ -480,10 +490,7 @@ void LightProcess::Close() {
 void LightProcess::closeShadow() {
   Lock lock(m_procMutex);
   if (m_shadowProcess) {
-    lwp_write(m_fout, "exit");
-    fflush(m_fout);
-    fclose(m_fin);
-    fclose(m_fout);
+    lwp_write(m_afdt_fd, "exit");
     // removes the "zombie" process, so not to interfere with later waits
     ::waitpid(m_shadowProcess, nullptr, 0);
   }
@@ -495,8 +502,6 @@ void LightProcess::closeShadow() {
 }
 
 void LightProcess::closeFiles() {
-  fclose(m_fin);
-  fclose(m_fout);
   ::close(m_afdt_fd);
 }
 
@@ -504,47 +509,49 @@ bool LightProcess::Available() {
   return g_procsCount > 0;
 }
 
-void LightProcess::runShadow(int fdin, int fdout) {
-  FILE *fin = fdopen(fdin, "r");
-  FILE *fout = fdopen(fdout, "w");
-
+void LightProcess::runShadow() {
   std::string buf;
 
   pollfd pfd[1];
-  pfd[0].fd = fdin;
+  pfd[0].fd = m_afdt_fd;
   pfd[0].events = POLLIN;
-  while (true) {
-    int ret = poll(pfd, 1, -1);
-    if (ret < 0 && errno == EINTR) {
-      continue;
-    }
-    if (pfd[0].revents & POLLIN) {
-      lwp_read(fin, buf);
-      if (buf == "exit") {
-        Logger::Verbose("LightProcess exiting upon request");
-        break;
-      } else if (buf == "popen") {
-        do_popen(fin, fout, m_afdt_fd);
-      } else if (buf == "pclose") {
-        do_pclose(fin, fout);
-      } else if (buf == "proc_open") {
-        do_proc_open(fin, fout, m_afdt_fd);
-      } else if (buf == "waitpid") {
-        do_waitpid(fin, fout);
-      } else if (buf == "change_user") {
-        do_change_user(fin, fout);
-      } else if (buf[0]) {
-        Logger::Info("LightProcess got invalid command: %.20s", buf.c_str());
+  try {
+    while (true) {
+      int ret = poll(pfd, 1, -1);
+      if (ret < 0 && errno == EINTR) {
+        continue;
       }
-    } else if (pfd[0].revents & POLLHUP) {
-      // no more command can come in
-      Logger::Error("Lost parent, LightProcess exiting");
-      break;
+      if (pfd[0].revents & POLLHUP) {
+        // no more command can come in
+        Logger::Error("Lost parent, LightProcess exiting");
+        break;
+      }
+      if (pfd[0].revents & POLLIN) {
+        lwp_read(m_afdt_fd, buf);
+        if (buf == "exit") {
+          Logger::Verbose("LightProcess exiting upon request");
+          break;
+        } else if (buf == "popen") {
+          do_popen(m_afdt_fd);
+        } else if (buf == "pclose") {
+          do_pclose(m_afdt_fd);
+        } else if (buf == "proc_open") {
+          do_proc_open(m_afdt_fd);
+        } else if (buf == "waitpid") {
+          do_waitpid(m_afdt_fd);
+        } else if (buf == "change_user") {
+          do_change_user(m_afdt_fd);
+        } else if (buf[0]) {
+          Logger::Info("LightProcess got invalid command: %.20s", buf.c_str());
+        }
+      }
     }
+  } catch (const std::exception& e) {
+    Logger::Error("LightProcess exiting due to exception: %s", e.what());
+  } catch (...) {
+    Logger::Error("LightProcess exiting due to unknown exception");
   }
 
-  fclose(fin);
-  fclose(fout);
   ::close(m_afdt_fd);
   _Exit(0);
 }
@@ -593,15 +600,14 @@ FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
 
-  FILE *fout = g_procs[id].m_fout;
+  auto fout = g_procs[id].m_afdt_fd;
   lwp_write(fout, "popen");
   lwp_write(fout, type);
   lwp_write(fout, cmd);
   lwp_write(fout, cwd ? cwd : "");
-  fflush(fout);
 
   std::string buf;
-  FILE *fin = g_procs[id].m_fin;
+  auto fin = g_procs[id].m_afdt_fd;
   lwp_read(fin, buf);
   if (buf == "error") {
     return nullptr;
@@ -614,7 +620,7 @@ FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
     return nullptr;
   }
 
-  int fd = recv_fd(g_procs[id].m_afdt_fd);
+  int fd = recv_fd(fin);
   if (fd < 0) {
     Logger::Error("Light process failed to send the file descriptor.");
     return nullptr;
@@ -643,13 +649,13 @@ int LightProcess::pclose(FILE *f) {
   g_procs[id].m_popenMap.erase((int64_t)f);
   fclose(f);
 
-  lwp_write(g_procs[id].m_fout, "pclose");
-  lwp_write_int64(g_procs[id].m_fout, f2);
+  lwp_write(g_procs[id].m_afdt_fd, "pclose");
+  lwp_write_int64(g_procs[id].m_afdt_fd, f2);
 
   int ret = -1;
-  lwp_read_int32(g_procs[id].m_fin, ret);
+  lwp_read_int32(g_procs[id].m_afdt_fd, ret);
   if (ret < 0) {
-    lwp_read_int32(g_procs[id].m_fin, errno);
+    lwp_read_int32(g_procs[id].m_afdt_fd, errno);
   }
   return ret;
 }
@@ -663,7 +669,7 @@ pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
   always_assert(Available());
   always_assert(created.size() == desired.size());
 
-  FILE *fout = g_procs[id].m_fout;
+  auto fout = g_procs[id].m_afdt_fd;
   lwp_write(fout, "proc_open");
   lwp_write(fout, cmd);
   lwp_write(fout, cwd ? cwd : "");
@@ -676,7 +682,6 @@ pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
   for (unsigned int i = 0; i < desired.size(); i++) {
     lwp_write_int32(fout, desired[i]);
   }
-  fflush(fout);
 
   bool error_send = false;
   int save_errno = 0;
@@ -689,7 +694,7 @@ pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
   }
 
   std::string buf;
-  FILE *fin = g_procs[id].m_fin;
+  auto fin = g_procs[id].m_afdt_fd;
   lwp_read(fin, buf);
   if (buf == "error") {
     lwp_read_int32(fin, errno);
@@ -718,16 +723,15 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
 
-  FILE *fout = g_procs[id].m_fout;
+  auto fout = g_procs[id].m_afdt_fd;
   lwp_write(fout, "waitpid");
   lwp_write_int64(fout, (int64_t)pid);
   lwp_write_int32(fout, options);
   lwp_write_int32(fout, timeout);
-  fflush(g_procs[id].m_fout);
 
   int64_t ret;
   int stat;
-  FILE *fin = g_procs[id].m_fin;
+  auto fin = g_procs[id].m_afdt_fd;
   lwp_read_int64(fin, ret);
   lwp_read_int32(fin, stat);
 
@@ -759,10 +763,9 @@ void LightProcess::ChangeUser(const std::string &username) {
   if (username.empty()) return;
   for (int i = 0; i < g_procsCount; i++) {
     Lock lock(g_procs[i].m_procMutex);
-    FILE *fout = g_procs[i].m_fout;
+    auto fout = g_procs[i].m_afdt_fd;
     lwp_write(fout, "change_user");
     lwp_write(fout, username);
-    fflush(fout);
   }
 }
 

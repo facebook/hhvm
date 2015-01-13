@@ -116,8 +116,18 @@ bool TestExtServer::test_pagelet_server_task_result() {
     VS(expected, HHVM_FN(pagelet_server_task_result)(tasks[i], ref(headers),
                                                      ref(code), 0));
     VS(code, 200);
-    VS(headers.toArray()[1], "ResponseHeader: okay");
 
+    Array headerArray = headers.toArray();
+    bool hasResponseHeader = false;
+    String expectedHeader = String("ResponseHeader: okay");
+
+    for (int headerIdx = 0; headerIdx < headerArray.size(); headerIdx++) {
+      if (headerArray[headerIdx].toString() == expectedHeader) {
+        hasResponseHeader = true;
+        break;
+      }
+    }
+    VERIFY(hasResponseHeader);
     VS(expected, HHVM_FN(pagelet_server_task_result)(tasks[i], ref(headers),
                                                      ref(code), 1));
     VS(code, 200);

@@ -219,6 +219,8 @@ bool TestExtCurl::test_curl_error() {
   Variant err = HHVM_FN(curl_error)(c.toResource());
   VERIFY(equal(err, String("Couldn't resolve host 'www.thereisnosuchanurl'")) ||
          equal(err, String("Could not resolve host: www.thereisnosuchanurl"
+                " (Domain name not found)")) ||
+         equal(err, String("Could not resolve: www.thereisnosuchanurl"
                 " (Domain name not found)")));
   return Count(true);
 }

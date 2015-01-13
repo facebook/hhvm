@@ -1536,18 +1536,6 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
   return isMergePoint(fallthruOffset, region);
 }
 
-static bool instrIsSuspending(Op op) {
-  switch (op) {
-  case Op::CreateCont:
-  case Op::Yield:
-  case Op::YieldK:
-  case Op::Await:
-    return true;
-  default:
-    return false;
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 
 #define IMM_MA(n)      0 /* ignored, but we need something (for commas) */
@@ -1941,7 +1929,7 @@ TranslateResult translateRegion(HTS& hts,
 
       // In CFG mode, insert a fallthrough jump at the end of each block.
       if (hts.mode == IRGenMode::CFG && i == block->length() - 1) {
-        if (instrAllowsFallThru(inst.op()) && !instrIsSuspending(inst.op())) {
+        if (instrAllowsFallThru(inst.op())) {
           auto nextOffset = inst.offset() + instrLen((Op*)(inst.pc()));
           // prepareForSideExit is done later in Trace mode, but it
           // needs to happen here or else we generate the SpillStack

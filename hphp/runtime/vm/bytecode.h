@@ -40,9 +40,6 @@ namespace HPHP {
  * These macros allow us to easily change the arguments to iop*() opcode
  * implementations.
  */
-#define IOP_ARGS        PC& pc
-#define IOP_PASS_ARGS   pc
-#define IOP_PASS(pc)    pc
 
 #define EVAL_FILENAME_SUFFIX ") : eval()'d code"
 

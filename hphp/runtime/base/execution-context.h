@@ -293,73 +293,7 @@ public:
   void enqueueAPCHandle(APCHandle* handle, size_t size);
 
   void manageAPCHandle();
-
-  enum class VectorLeaveCode {
-    ConsumeAll,
-    LeaveLast
-  };
   void cleanup();
-
-  template <bool setMember, bool warn, bool define, bool unset, bool reffy,
-            unsigned mdepth, VectorLeaveCode mleave, bool saveResult>
-  bool memberHelperPre(PC& pc, unsigned& ndiscard, TypedValue*& base,
-                       TypedValue& tvScratch,
-                       TypedValue& tvLiteral,
-                       TypedValue& tvRef, TypedValue& tvRef2,
-                       MemberCode& mcode, TypedValue*& curMember);
-  template <bool warn, bool saveResult, VectorLeaveCode mleave>
-  void getHelperPre(PC& pc, unsigned& ndiscard,
-                    TypedValue*& base, TypedValue& tvScratch,
-                    TypedValue& tvLiteral,
-                    TypedValue& tvRef, TypedValue& tvRef2,
-                    MemberCode& mcode, TypedValue*& curMember);
-  template <bool saveResult>
-  void getHelperPost(unsigned ndiscard, TypedValue*& tvRet,
-                     TypedValue& tvScratch, Variant& tvRef,
-                     Variant& tvRef2);
-  void getHelper(PC& pc, unsigned& ndiscard, TypedValue*& tvRet,
-                 TypedValue*& base, TypedValue& tvScratch,
-                 TypedValue& tvLiteral,
-                 Variant& tvRef, Variant& tvRef2,
-                 MemberCode& mcode, TypedValue*& curMember);
-
-  template <bool warn, bool define, bool unset, bool reffy, unsigned mdepth,
-            VectorLeaveCode mleave>
-  bool setHelperPre(PC& pc, unsigned& ndiscard, TypedValue*& base,
-                    TypedValue& tvScratch,
-                    TypedValue& tvLiteral,
-                    TypedValue& tvRef, TypedValue& tvRef2,
-                    MemberCode& mcode, TypedValue*& curMember);
-  template <unsigned mdepth>
-  void setHelperPost(unsigned ndiscard, Variant& tvRef,
-                     Variant& tvRef2);
-  template <bool isEmpty> void isSetEmptyM(IOP_ARGS);
-  template<class Op> void implCellBinOp(IOP_ARGS, Op op);
-  template<class Op> void implCellBinOpBool(IOP_ARGS, Op op);
-  void implVerifyRetType(IOP_ARGS);
-  bool cellInstanceOf(TypedValue* c, const NamedEntity* s);
-  bool iopInstanceOfHelper(const StringData* s1, Cell* c2);
-  bool initIterator(PC& pc, PC& origPc, Iter* it,
-                    Offset offset, Cell* c1);
-  bool initIteratorM(PC& pc, PC& origPc, Iter* it,
-                     Offset offset, Ref* r1, TypedValue* val, TypedValue* key);
-  void jmpSurpriseCheck(Offset o);
-  template<Op op> void jmpOpImpl(IOP_ARGS);
-  template<class Op> void roundOpImpl(Op op);
-#define O(name, imm, pusph, pop, flags)                                       \
-  void iop##name(IOP_ARGS);
-OPCODES
-#undef O
-
-  void contEnterImpl(IOP_ARGS);
-  void yield(IOP_ARGS, const Cell* key, Cell value);
-  void asyncSuspendE(IOP_ARGS, int32_t iters);
-  void asyncSuspendR(IOP_ARGS);
-  void ret(IOP_ARGS);
-  void fPushObjMethodImpl(Class* cls, StringData* name, ObjectData* obj,
-                          int numArgs);
-  void fPushNullObjMethod(int numArgs);
-  ActRec* fPushFuncImpl(const Func* func, int numArgs);
 
 public:
   const Func* lookupMethodCtx(const Class* cls,
@@ -462,7 +396,6 @@ public:
   const Variant& getEvaledArg(const StringData* val,
                               const String& namespacedName);
 
-private:
   enum class CallArrOnInvalidContainer {
     // task #1756122: warning and returning null is what we /should/ always
     // do in call_user_func_array, but some code depends on the broken
@@ -472,6 +405,7 @@ private:
     WarnAndContinue
   };
   bool doFCallArray(PC& pc, int stkSize, CallArrOnInvalidContainer);
+private:
   enum class StackArgsState { // tells prepareFuncEntry how much work to do
     // the stack may contain more arguments than the function expects
     Untrimmed,
@@ -485,7 +419,7 @@ private:
   void enterVMAtCurPC();
   void enterVM(ActRec* ar, StackArgsState stackTrimmed,
                Resumable* resumable = nullptr, ObjectData* exception = nullptr);
-  void doFPushCuf(IOP_ARGS, bool forward, bool safe);
+  void doFPushCuf(PC& pc, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);

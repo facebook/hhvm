@@ -2,6 +2,7 @@ set(RECURSIVE_SOURCE_SUBDIRS base debugger eval server vm)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
   HHVM_SELECT_SOURCES("${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
+list(APPEND HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/version.h")
 
 if(NOT LINUX)
   add_definitions(-DNO_HARDWARE_COUNTERS)

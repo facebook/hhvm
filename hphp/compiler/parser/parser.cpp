@@ -2423,6 +2423,11 @@ void Parser::onNamespaceEnd() {
 }
 
 void Parser::onUse(const std::string &ns, const std::string &as) {
+  if (strcmp(ns.c_str(), "strict") == 0 && as.empty()) {
+    error("You seem to be trying to use a different language...");
+    return;
+  }
+
   string key = fully_qualified_name_as_alias_key(ns, as);
 
   // It's not an error if the alias already exists but is auto-imported.

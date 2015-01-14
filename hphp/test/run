@@ -1708,7 +1708,17 @@ function get_num_threads($options, $tests) {
   return min(count($tests), idx($options, 'threads', $cpus));
 }
 
+function runner_precheck() {
+  // basic checking for runner
+  if (empty($_SERVER) || empty($_ENV)) {
+    echo "Warning: \$_SERVER/\$_ENV variables not available, please check \n" .
+         "your ini setting: variables_order, it should have both 'E' and 'S'\n";
+  }
+}
+
 function main($argv) {
+  runner_precheck();
+
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
   list($options, $files) = get_options($argv);

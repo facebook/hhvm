@@ -19,6 +19,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -213,7 +214,7 @@ bool check_invariants(const FrameState& state) {
 
 }
 
-FrameStateMgr::FrameStateMgr(const IRUnit& unit, BCMarker marker) {
+FrameStateMgr::FrameStateMgr(BCMarker marker) {
   m_stack.push_back(FrameState{});
   cur().curFunc       = marker.func();
   cur().spOffset      = marker.spOff();

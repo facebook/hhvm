@@ -65,7 +65,7 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
   , m_initialMarker(initMarker)
   , m_curMarker(initMarker)
-  , m_state(m_unit, initMarker)
+  , m_state(initMarker)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
   , m_constrainGuards(shouldHHIRRelaxGuards())
@@ -830,7 +830,7 @@ void IRBuilder::reoptimize() {
     printUnit(6, m_unit, "after splitting critical edges for reoptimize");
   }
 
-  m_state = FrameStateMgr(m_unit, m_initialMarker);
+  m_state = FrameStateMgr{m_initialMarker};
   m_cseHash.clear();
   m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;

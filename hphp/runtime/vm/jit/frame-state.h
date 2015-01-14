@@ -23,7 +23,6 @@
 
 #include <folly/Optional.h>
 
-#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/type-source.h"
 #include "hphp/runtime/vm/jit/local-effects.h"
@@ -34,6 +33,7 @@ struct Func;
 
 namespace jit {
 
+struct BlocksWithIds;
 struct IRInstruction;
 struct SSATmp;
 
@@ -215,7 +215,7 @@ struct FrameState {
  *   - current function and bytecode offset
  */
 struct FrameStateMgr final : private LocalStateHook {
-  explicit FrameStateMgr(const IRUnit&, BCMarker);
+  explicit FrameStateMgr(BCMarker);
 
   FrameStateMgr(const FrameStateMgr&) = delete;
   FrameStateMgr(FrameStateMgr&&) = default;

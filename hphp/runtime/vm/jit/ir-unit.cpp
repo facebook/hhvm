@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/simplify.h"
@@ -118,7 +119,7 @@ void IRUnit::collectPostConditions() {
   Block* mainExit = nullptr;
   Block* lastMainBlock = nullptr;
 
-  FrameStateMgr state{*this, entry()->front().marker()};
+  FrameStateMgr state{entry()->front().marker()};
   // TODO(#5678127): this code is wrong for HHIRBytecodeControlFlow
   state.setLegacyReoptimize();
   ITRACE(2, "collectPostConditions starting\n");

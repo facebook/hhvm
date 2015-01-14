@@ -235,7 +235,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   if (!reflow) return true;
 
   // Make a second pass to reflow types, with some special logic for loads.
-  FrameStateMgr state{unit, unit.entry()->front().marker()};
+  FrameStateMgr state{unit.entry()->front().marker()};
   // TODO(#5678127): this code is wrong for HHIRBytecodeControlFlow
   state.setLegacyReoptimize();
 

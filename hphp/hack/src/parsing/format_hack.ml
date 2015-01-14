@@ -782,6 +782,12 @@ and is_closing_list env =
  *)
 (*****************************************************************************)
 
+let rec wrap_non_ws env f =
+  match token env with
+  | Tnewline | Tspace ->
+      wrap_non_ws env f
+  | x -> f x
+
 let rec wrap_eof env f =
   match token env with
   | Tnewline | Tspace | Tline_comment | Topen_comment ->
@@ -832,6 +838,11 @@ let next_token env =
 let next_token_str env =
   let _tok, tok_str = next_real_token_info env in
   tok_str
+
+let next_non_ws_token env =
+  attempt env begin fun env ->
+    wrap_non_ws env (fun tok -> tok)
+  end
 
 (*****************************************************************************)
 (* Helpers to look ahead. *)
@@ -1445,7 +1456,7 @@ end
 
 and class_body env =
   expect "{" env;
-  if next_token env = Trcb  (* Empty class body *)
+  if next_non_ws_token env = Trcb  (* Empty class body *)
   then expect "}" env
   else begin
     newline env;
@@ -1822,7 +1833,7 @@ and stmt ~is_toplevel env = wrap env begin function
       stmt_word ~is_toplevel env word
   | Tlcb ->
       last_token env;
-      if next_token env <> Trcb then begin
+      if next_non_ws_token env <> Trcb then begin
         seq env [space; keep_comment; newline];
         add_block_tag env;
         right env (stmt_list ~is_toplevel);

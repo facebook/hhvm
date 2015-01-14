@@ -487,6 +487,12 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   // information in the IR.
   assert(inst->typeParam() >= type);
   inst->setTypeParam(std::min(type, inst->typeParam()));
+
+  if (typeMightRelax()) return nullptr;
+  if (inst->typeParam().isConst()) {
+    return m_unit.cns(inst->typeParam());
+  }
+
   return nullptr;
 }
 
@@ -581,6 +587,12 @@ SSATmp* IRBuilder::preOptimizeLdStack(IRInstruction* inst) {
   auto const type = stackType(offset, DataTypeGeneric);
   if (type.not(inst->typeParam())) return nullptr;
   inst->setTypeParam(std::min(type, inst->typeParam()));
+
+  if (typeMightRelax()) return nullptr;
+  if (inst->typeParam().isConst()) {
+    return m_unit.cns(inst->typeParam());
+  }
+
   return nullptr;
 }
 

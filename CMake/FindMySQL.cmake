@@ -31,8 +31,6 @@
 
 #-------------- FIND MYSQL_INCLUDE_DIR ------------------
 FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
-  $ENV{MYSQL_INCLUDE_DIR}
-  $ENV{MYSQL_DIR}/include
   /usr/include/mysql
   /usr/local/include/mysql
   /opt/mysql/mysql/include
@@ -70,9 +68,6 @@ IF (WIN32)
 ELSE (WIN32)
   FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r
     PATHS
-    $ENV{MYSQL_DIR}/libmysql_r/.libs
-    $ENV{MYSQL_DIR}/lib
-    $ENV{MYSQL_DIR}/lib/mysql
     /usr/lib/mysql
     /usr/local/lib/mysql
     /usr/local/mysql/lib

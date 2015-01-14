@@ -509,7 +509,7 @@ NEVER_INLINE
 void MixedArray::Release(ArrayData* in) {
   assert(in->isRefCounted());
   auto const ad = asMixed(in);
-  if (m_count == 1) --m_count;
+  if (ad->m_count == 1) --ad->m_count;
 
   if (!ad->isZombie()) {
     auto const data = ad->data();

@@ -138,6 +138,7 @@ inline void ObjectData::instanceInit(Class* cls) {
 
 inline void ObjectData::release() {
   assert(!hasMultipleRefs());
+  if (m_count == 1) --m_count;
   if (LIKELY(destruct())) DeleteObject(this);
 }
 

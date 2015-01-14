@@ -75,8 +75,9 @@ ProxyArray* ProxyArray::Make(ArrayData* ad) {
 }
 
 void ProxyArray::Release(ArrayData*ad) {
+  // Calls decRefAndRelease() which sets m_count = 0
   decRefRef(asProxyArray(ad)->m_ref);
-  MM().objFreeLogged(ad, sizeof(ProxyArray));
+  //MM().objFreeLogged(ad, sizeof(ProxyArray));
 }
 
 void ProxyArray::reseatable(const ArrayData* oldArr, ArrayData* newArr) {

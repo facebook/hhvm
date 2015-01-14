@@ -90,17 +90,20 @@ struct RefData {
    */
   void release() {
     assert(!hasMultipleRefs());
-    if (UNLIKELY(m_cow)) {
+    //Not sure about m_cow, could conflict
+    if (m_count == 1) --m_count;
+    else if (UNLIKELY(m_cow)) {
       m_count = 1;
       m_cow = m_z = 0;
       return;
     }
+
     this->~RefData();
-    MM().smartFreeSizeLogged(this, sizeof(RefData));
+    //MM().smartFreeSizeLogged(this, sizeof(RefData));
   }
 
   void releaseMem() const {
-    MM().smartFreeSizeLogged(const_cast<RefData*>(this), sizeof(RefData));
+    //MM().smartFreeSizeLogged(const_cast<RefData*>(this), sizeof(RefData));
   }
 
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC

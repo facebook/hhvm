@@ -139,10 +139,12 @@ inline int operator<<(HeaderKind k, int bits) {
 inline void* MemoryManager::FreeList::maybePop() {
   auto ret = head;
   if (LIKELY(ret != nullptr)) head = ret->next;
+  FTRACE(4, "FreeList::maybePop(): returning {}\n", ret);
   return ret;
 }
 
 inline void MemoryManager::FreeList::push(void* val, size_t size) {
+  FTRACE(4, "FreeList::push({}, {}), prev head = {}\n", val, size, head);
   auto constexpr kMaxFreeSize = std::numeric_limits<uint32_t>::max();
   static_assert(kMaxSmartSize <= kMaxFreeSize, "");
   assert(size > 0 && size <= kMaxFreeSize);
@@ -278,6 +280,7 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
     return smartFreeSizeBig(ptr, bytes);
   }
   unsigned i = smartSize2Index(bytes);
+  FTRACE(3, "smartFreeSize({}, {}), freelist {}\n", ptr, bytes, i);
   debugPreFree(ptr, bytes, bytes);
   m_freelists[i].push(ptr, bytes);
   m_stats.usage -= bytes;

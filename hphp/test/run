@@ -1711,8 +1711,8 @@ function get_num_threads($options, $tests) {
 function runner_precheck() {
   // basic checking for runner
   if (empty($_SERVER) || empty($_ENV)) {
-    error('$_SERVER/$_ENV variables not available, please make sure ' .
-          'ini setting: variables_order include both "E" & "S"');
+    echo "Warning: \$_SERVER/\$_ENV variables not available, please check \n" .
+         "your ini setting: variables_order, it should have both 'E' and 'S'\n";
   }
 }
 

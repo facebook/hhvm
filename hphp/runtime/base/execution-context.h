@@ -432,10 +432,7 @@ private:
   void prepareFuncEntry(ActRec* ar, PC& pc, StackArgsState stk);
   void shuffleMagicArgs(ActRec* ar);
   void shuffleExtraStackArgs(ActRec* ar);
-  void recordCodeCoverage(PC pc);
-  void switchModeForDebugger();
 public:
-  void resetCoverageCounters();
   void syncGdbState();
 
   enum InvokeFlags {
@@ -500,15 +497,8 @@ public:
     hphp_string_isame
   >;
 
-  // The op*() methods implement individual opcode handlers.
-#define O(name, imm, pusph, pop, flags)                                       \
-  void op##name();
-OPCODES
-#undef O
-  template <bool breakOnCtlFlow> void dispatchImpl();
-  void dispatch();
-  // dispatchBB() exits if a control-flow instruction has been run.
-  void dispatchBB();
+  void dispatch(); // run interpreter normally.
+  void dispatchBB(); // exits if a control-flow instruction has been run.
 
 ///////////////////////////////////////////////////////////////////////////////
 // only fields past here, please.
@@ -579,8 +569,6 @@ public:
   int m_nesting;
   bool m_dbgNoBreak;
 private:
-  int m_coverPrevLine;
-  Unit* m_coverPrevUnit;
   Array m_evaledArgs;
   String m_lastErrorPath;
   int m_lastErrorLine;

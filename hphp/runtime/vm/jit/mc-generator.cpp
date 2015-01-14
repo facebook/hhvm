@@ -123,15 +123,7 @@ static const char* const kPerfCounterNames[] = {
 };
 #undef TPC
 
-#define TPC(n) tpc_ ## n,
-enum TransPerfCounter {
-  TRANS_PERF_COUNTERS
-  tpc_num_counters
-};
-#undef TPC
-static __thread int64_t s_perfCounters[tpc_num_counters];
-#define INC_TPC(n) ++s_perfCounters[tpc_ ## n];
-
+__thread int64_t s_perfCounters[tpc_num_counters];
 static __thread size_t s_initialTCSize;
 
 // The global MCGenerator object.
@@ -594,14 +586,6 @@ MCGenerator::checkCachedPrologue(const Func* func, int paramIdx,
     return true;
   }
   return false;
-}
-
-static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
-  assert(tl_regState == VMRegState::DIRTY);
-  tl_regState = VMRegState::CLEAN;
-  vmfp() = ar;
-  vmsp() = sp;
-  vmpc() = ar->unit()->at(pcOff);
 }
 
 TCA
@@ -1322,50 +1306,6 @@ TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups) {
   }
   return ret;
 }
-
-#define O(opcode, imm, pusph, pop, flags) \
-/**
- * The interpOne methods saves m_pc, m_fp, and m_sp ExecutionContext,
- * calls into the interpreter, and then return a pointer to the
- * current ExecutionContext.
- */  \
-ExecutionContext*                                                       \
-interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
-  interp_set_regs(ar, sp, pcOff);                                       \
-  SKTRACE(5, SrcKey(liveFunc(), vmpc(), liveResumed()), "%40s %p %p\n", \
-          "interpOne" #opcode " before (fp,sp)",                        \
-          vmfp(), vmsp());                                              \
-  assert(*reinterpret_cast<const Op*>(vmpc()) == Op::opcode);           \
-  auto const ec = g_context.getNoCheck();                               \
-  Stats::inc(Stats::Instr_InterpOne ## opcode);                         \
-  if (Trace::moduleEnabled(Trace::interpOne, 1)) {                      \
-    static const StringData* cat = makeStaticString("interpOne");       \
-    static const StringData* name = makeStaticString(#opcode);          \
-    Stats::incStatGrouped(cat, name, 1);                                \
-  }                                                                     \
-  INC_TPC(interp_one)                                                   \
-  /* Correct for over-counting in TC-stats. */                          \
-  Stats::inc(Stats::Instr_TC, -1);                                      \
-  ec->op##opcode();                                                     \
-  /*
-   * Only set regstate back to dirty if an exception is not
-   * propagating.  If an exception is throwing, regstate for this call
-   * is actually still correct, and we don't have information in the
-   * fixup map for interpOne calls anyway.
-   */ \
-  tl_regState = VMRegState::DIRTY;                                      \
-  return ec;                                                            \
-}
-
-OPCODES
-#undef O
-
-void* interpOneEntryPoints[] = {
-#define O(opcode, imm, pusph, pop, flags) \
-  (void*)(interpOne ## opcode),
-OPCODES
-#undef O
-};
 
 TCA MCGenerator::getTranslatedCaller() const {
   DECLARE_FRAME_POINTER(fp);

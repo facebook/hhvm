@@ -51,7 +51,6 @@ struct AsmInfo;
 struct HTS;
 
 extern "C" MCGenerator* mcg;
-extern void* interpOneEntryPoints[];
 
 constexpr size_t kNonFallthroughAlign = 64;
 constexpr int kLeaRipLen = 7;
@@ -423,6 +422,26 @@ void emitServiceReq(Vout& v, TCA stub_block, ServiceRequest req,
                     const ServiceReqArgVec& argv);
 
 bool shouldPGOFunc(const Func& func);
+
+#define TRANS_PERF_COUNTERS \
+  TPC(translate) \
+  TPC(retranslate) \
+  TPC(interp_bb) \
+  TPC(interp_instr) \
+  TPC(interp_one) \
+  TPC(max_trans) \
+  TPC(enter_tc) \
+  TPC(service_req)
+
+#define TPC(n) tpc_ ## n,
+enum TransPerfCounter {
+  TRANS_PERF_COUNTERS
+  tpc_num_counters
+};
+#undef TPC
+
+extern __thread int64_t s_perfCounters[];
+#define INC_TPC(n) ++jit::s_perfCounters[jit::tpc_##n];
 
 }}
 

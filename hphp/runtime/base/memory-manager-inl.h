@@ -122,6 +122,7 @@ struct MemoryManager::FreeList::Node {
 inline void* MemoryManager::FreeList::maybePop() {
   auto ret = head;
   if (LIKELY(ret != nullptr)) head = ret->next;
+  FTRACE(4, "FreeList::maybePop(): returning {}\n", ret);
   return ret;
 }
 

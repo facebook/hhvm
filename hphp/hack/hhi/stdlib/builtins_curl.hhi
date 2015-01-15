@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,6 +8,19 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+const int CURLAUTH_ANY = 0;
+const int CURLAUTH_ANYSAFE = 0;
+const int CURLAUTH_BASIC = 0;
+const int CURLAUTH_DIGEST = 0;
+const int CURLAUTH_GSSNEGOTIATE = 0;
+const int CURLAUTH_NTLM = 0;
+
+const int CURLCLOSEPOLICY_CALLBACK = 0;
+const int CURLCLOSEPOLICY_LEAST_RECENTLY_USED = 0;
+const int CURLCLOSEPOLICY_LEAST_TRAFFIC = 0;
+const int CURLCLOSEPOLICY_OLDEST = 0;
+const int CURLCLOSEPOLICY_SLOWEST = 0;
+
 const int CURLINFO_CONNECT_TIME = 0;
 const int CURLINFO_CONTENT_LENGTH_DOWNLOAD = 0;
 const int CURLINFO_CONTENT_LENGTH_UPLOAD = 0;
@@ -30,6 +43,9 @@ const int CURLINFO_SPEED_UPLOAD = 0;
 const int CURLINFO_SSL_VERIFYRESULT = 0;
 const int CURLINFO_STARTTRANSFER_TIME = 0;
 const int CURLINFO_TOTAL_TIME = 0;
+
+const int CURLMSG_DONE = 1;
+
 const int CURLM_BAD_EASY_HANDLE = 0;
 const int CURLM_BAD_HANDLE = 0;
 const int CURLM_CALL_MULTI_PERFORM = 0;
@@ -76,6 +92,7 @@ const int CURLOPT_CUSTOMREQUEST = 0;
 const int CURLOPT_EGDSOCKET = 0;
 const int CURLOPT_ENCODING = 0;
 const int CURLOPT_INTERFACE = 0;
+const int CURLOPT_IPRESOLVE = 0;
 const int CURLOPT_POSTFIELDS = 0;
 const int CURLOPT_RANGE = 0;
 const int CURLOPT_REFERER = 0;
@@ -198,21 +215,46 @@ const int CURLE_URL_MALFORMAT = 0;
 const int CURLE_URL_MALFORMAT_USER = 0;
 const int CURLE_WRITE_ERROR = 0;
 
-function curl_init($url = null) { }
-function curl_copy_handle($ch) { }
-function curl_version($uversion = CURLVERSION_NOW) { }
-function curl_setopt($ch, $option, $value) { }
-function curl_setopt_array($ch, $options) { }
-function curl_exec($ch) { }
-function curl_getinfo($ch, $opt = 0) { }
-function curl_errno($ch) { }
-function curl_error($ch) { }
-function curl_close($ch) { }
-function curl_multi_init() { }
-function curl_multi_add_handle($mh, $ch) { }
-function curl_multi_remove_handle($mh, $ch) { }
-function curl_multi_exec($mh, &$still_running) { }
-function curl_multi_select($mh, $timeout = 1.0) { }
-function curl_multi_getcontent($ch) { }
-function curl_multi_info_read($mh, &$msgs_in_queue = null) { }
-function curl_multi_close($mh) { }
+const int CURLVERSION_NOW = 0;
+const int CURL_VERSION_IPV6 = 0;
+const int CURL_VERSION_KERBEROS4 = 0;
+const int CURL_VERSION_LIBZ = 0;
+const int CURL_VERSION_SSL = 0;
+
+const int CURLPROXY_HTTP = 0;
+const int CURLPROXY_SOCKS5 = 0;
+
+const int CURL_HTTP_VERSION_1_0 = 0;
+const int CURL_HTTP_VERSION_1_1 = 0;
+const int CURL_HTTP_VERSION_NONE = 0;
+
+const int CURL_IPRESOLVE_V4 = 0;
+const int CURL_IPRESOLVE_V6 = 0;
+const int CURL_IPRESOLVE_WHATEVER = 0;
+
+const int CURL_NETRC_IGNORED = 0;
+const int CURL_NETRC_OPTIONAL = 0;
+const int CURL_NETRC_REQUIRED = 0;
+
+const int CURL_TIMECOND_IFMODSINCE = 0;
+const int CURL_TIMECOND_IFUNMODSINCE = 0;
+const int CURL_TIMECOND_LASTMOD = 0;
+
+function curl_init($url = null);
+function curl_copy_handle($ch);
+function curl_version($uversion = CURLVERSION_NOW);
+function curl_setopt($ch, $option, $value);
+function curl_setopt_array($ch, $options);
+function curl_exec($ch);
+function curl_getinfo($ch, $opt = 0);
+function curl_errno($ch);
+function curl_error($ch);
+function curl_close($ch);
+function curl_multi_init();
+function curl_multi_add_handle($mh, $ch);
+function curl_multi_remove_handle($mh, $ch);
+function curl_multi_exec($mh, &$still_running);
+function curl_multi_select($mh, $timeout = 1.0);
+function curl_multi_getcontent($ch);
+function curl_multi_info_read($mh, &$msgs_in_queue = null);
+function curl_multi_close($mh);

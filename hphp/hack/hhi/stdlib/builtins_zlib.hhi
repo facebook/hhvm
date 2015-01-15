@@ -8,6 +8,15 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
+const int ZLIB_ENCODING_RAW = 0;
+const int ZLIB_ENCODING_GZIP = 0;
+const int ZLIB_ENCODING_DEFLATE = 0;
+const int ZLIB_ENCODING_ANY = 0;
+
+const int FORCE_GZIP = 0;
+const int FORCE_DEFLATE = 0;
+
 function gzclose($zp);
 function gzcompress(string $data, int $level = -1): mixed;
 function gzdecode(string $data, int $length = PHP_INT_MAX): mixed;

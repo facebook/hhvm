@@ -82,3 +82,20 @@ bool(true)
 Notice: Undefined property: stdClass::$name in %s/test/slow/ext_variable/ext_variable.php on line 137
 bool(true)
 bool(true)
+string(7) "boolean"
+string(7) "boolean"
+string(7) "boolean"
+string(7) "boolean"
+string(7) "boolean"
+string(7) "integer"
+string(7) "integer"
+string(7) "integer"
+string(7) "integer"
+string(7) "integer"
+string(7) "integer"
+string(6) "double"
+string(6) "double"
+string(6) "double"
+string(6) "double"
+string(6) "double"
+string(6) "double"

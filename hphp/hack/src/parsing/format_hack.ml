@@ -649,19 +649,22 @@ let with_priority env op f =
   f env
 
 (*****************************************************************************)
-(* Add block tag.
+(* Add block tag. Used for --diff mode.
  * We don't have to worry about Opening or Closing blocks, because the logic
  * is: whatever is in between 2 blocks is indivisible.
  * Why is that? Because the place where we add the block tag are the places
  * where we know it's acceptable to break the indentation.
  * Think of it this way: block tags tell us where we can break the formatting
  * given that, whatever is in between two block tags is indivisible.
+ *
+ * Note that we only insert Block tags where the existing code has a line
+ * break. See Format_diff.TextBlocks for more details.
  *)
 (*****************************************************************************)
 
 let add_block_tag env =
   assert (!(env.last) = Newline);
-  if env.keep_source_pos then begin
+  if env.keep_source_pos && attempt env token = Tnewline then begin
     let source_pos = !(env.abs_pos), Block in
     env.source_pos_l := source_pos :: !(env.source_pos_l)
   end

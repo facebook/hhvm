@@ -164,6 +164,11 @@ end
  * we should consider the lines [3;4] as an indivisible block. In other words,
  * if we want to replace any line between 3 and 4, we would replace the
  * entire block.
+ *
+ * The formatted blocks will be interleaved with the existing code at line
+ * boundaries, so it is important that the starts and ends of these blocks
+ * line up with newlines in the original source (to avoid duplicated / missing
+ * tokens). Format_hack.add_block_tag ensures this.
  *)
 (*****************************************************************************)
 
@@ -250,7 +255,6 @@ end = struct
         let line_end = nbr in
         loop line_start line_end buffer acc next
 
-
 end
 
 (*****************************************************************************)
@@ -262,6 +266,8 @@ end
  * line 4 have been modified (cf ParseDiff module above).
  *
  * 'blocks' is the list of indivisible blocks produced by TextBlocks.
+ *
+ * A block is selected if any of the intervals overlap with it.
  *)
 (*****************************************************************************)
 

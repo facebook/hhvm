@@ -1969,7 +1969,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
    * type parameter list is admitted). Basically the "omit type parameter"
    * hole was for compatibility with certain interfaces like ArrayAccess, not
    * for collections! But it's hard to go back on now, so since we've always
-   * errored (with an inscruitable error message) when you try to actually use
+   * errored (with an inscrutable error message) when you try to actually use
    * a collection with omitted type parameters, we can continue to error and
    * give a more useful error message. *)
   let arity_error (_, name) =
@@ -2031,7 +2031,8 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
     error_const_mutation env p ety1
   | Tgeneric (_, Some (_, Tapply ((_, cn) as id, argl)))
   | Tapply ((_, cn) as id, argl)
-      when cn = SN.Collections.cIndexish ->
+      when (cn = SN.Collections.cIndexish
+           || cn = SN.Collections.cKeyedContainer) ->
       let (k, v) = match argl with
         | [k; v] -> (k, v)
         | _ ->

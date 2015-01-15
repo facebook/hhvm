@@ -4,5 +4,5 @@ File "fc_enum_9.php", line 12, characters 41-43:
 This is an int
 File "fc_enum_9.php", line 3, characters 6-8:
 It is incompatible with an object of type Foo
-File "builtins.hhi", line 48, characters 59-59:
+File "builtins.hhi", line 47, characters 59-59:
   via this generic T

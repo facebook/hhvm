@@ -20,5 +20,5 @@ function test5(array<Iterable<C>> $x): void { foo5($x); }
 function foo6(KeyedContainer<mixed, Traversable<B>> $x): void {}
 function test6(array<int, Iterable<C>> $x): void { foo6($x); }
 
-function foo7(Indexish<mixed, Traversable<B>> $x): void {}
+function foo7(KeyedContainer<mixed, Traversable<B>> $x): void {}
 function test7(array<int, Iterable<C>> $x): void { foo7($x); }

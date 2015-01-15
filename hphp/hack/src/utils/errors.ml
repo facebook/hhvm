@@ -1122,7 +1122,8 @@ let undefined_field p name =
   add Typing.undefined_field p ("The field "^name^" is undefined")
 
 let array_access pos1 pos2 ty =
-  add_list Typing.array_access ((pos1, "This is not a container, this is "^ty) ::
+  add_list Typing.array_access ((pos1,
+    "This is not an object of type KeyedContainer, this is "^ty) ::
             if pos2 != Pos.none
             then [pos2, "You might want to check this out"]
             else [])

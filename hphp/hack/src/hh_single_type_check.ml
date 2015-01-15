@@ -32,18 +32,17 @@ let builtins = "<?hh // decl\n"^
   "interface Iterable<Tv> extends Traversable<Tv> {}\n"^
   "interface KeyedTraversable<Tk, Tv> extends Traversable<Tv> {}\n"^
   "interface KeyedContainer<Tk, Tv> extends Container<Tv>, KeyedTraversable<Tk,Tv> {}\n"^
-  "interface Indexish<Tk, Tv> extends KeyedContainer<Tk, Tv> {}\n"^
   "interface KeyedIterator<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterator<Tv> {}\n"^
   "interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {}\n"^
   "interface Awaitable<T> {"^
   "  public function getWaitHandle(): WaitHandle<T>;"^
   "}\n"^
   "interface WaitHandle<T> extends Awaitable<T> {}\n"^
-  "interface ConstVector<+Tv> extends KeyedIterable<int, Tv>, Indexish<int, Tv>{"^
+  "interface ConstVector<+Tv> extends KeyedIterable<int, Tv>, KeyedContainer<int, Tv>{"^
   "  public function map<Tu>((function(Tv): Tu) $callback): ConstVector<Tu>;"^
   "}\n"^
   "interface ConstSet<+Tv> extends KeyedIterable<mixed, Tv>, Container<Tv>{}\n"^
-  "interface ConstMap<Tk, +Tv> extends KeyedIterable<Tk, Tv>, Indexish<Tk, Tv>{"^
+  "interface ConstMap<Tk, +Tv> extends KeyedIterable<Tk, Tv>, KeyedContainer<Tk, Tv>{"^
   "  public function map<Tu>((function(Tv): Tu) $callback): ConstMap<Tk, Tu>;"^
   "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): ConstMap<Tk, Tu>;"^
   "}\n"^
@@ -72,7 +71,7 @@ let builtins = "<?hh // decl\n"^
   "  public function valid(): bool;\n"^
   "  public function send(?Ts $v): void;\n"^
   "}\n"^
-  "final class Pair<Tk, Tv> extends Indexish<int,mixed> {public function isEmpty(): bool {}}\n"^
+  "final class Pair<Tk, Tv> extends KeyedContainer<int,mixed> {public function isEmpty(): bool {}}\n"^
   "interface Stringish {public function __toString(): string {}}\n"^
   "interface XHPChild {}\n"^
   "function hh_show($val) {}\n"^
@@ -98,7 +97,7 @@ let builtins = "<?hh // decl\n"^
   "}\n"^
   "}\n"^
   "function array_map($x, $y, ...);\n"^
-  "function idx<Tk, Tv>(?Indexish<Tk, Tv> $c, $i, $d = null) {}\n"^
+  "function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $c, $i, $d = null) {}\n"^
   "final class stdClass {}\n"
 
 (*****************************************************************************)

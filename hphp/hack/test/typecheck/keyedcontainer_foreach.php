@@ -9,7 +9,7 @@
  *
  */
 
-function foo1(Indexish $p) {
+function foo1(KeyedContainer $p) {
   foreach ($p as $v) {
     f2($v);
   }
@@ -17,14 +17,14 @@ function foo1(Indexish $p) {
 //  $p[10] = 'meh';
 }
 
-function foo2(Indexish $p) {
+function foo2(KeyedContainer $p) {
   foreach ($p as $k => $v) {
     f1($k);
     f2($v);
   }
 }
 
-function foo3(Indexish<int, string> $p) {
+function foo3(KeyedContainer<int, string> $p) {
   foreach ($p as $v) {
     f2($v);
   }
@@ -32,7 +32,7 @@ function foo3(Indexish<int, string> $p) {
   f2($p[10]);
 }
 
-function foo4(Indexish<int, string> $p) {
+function foo4(KeyedContainer<int, string> $p) {
   foreach ($p as $k => $v) {
     f1($k);
     f2($v);

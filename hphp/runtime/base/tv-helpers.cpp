@@ -610,11 +610,15 @@ bool tvCanBeCoercedToNumber(TypedValue* tv) {
 
     case KindOfStaticString:
     case KindOfString: {
-      StringData* s;
-      DataType type;
-      s = tv->m_data.pstr;
-      type = is_numeric_string(s->data(), s->size(), nullptr, nullptr);
-      return type == KindOfInt64 || type == KindOfDouble;
+      // Simplified version of is_numeric_string
+      // which also allows for non-numeric garbage
+      // Because PHP
+      auto p = tv->m_data.pstr->data();
+      auto l = tv->m_data.pstr->size();
+      while (l && isspace(*p)) { ++p; --l; }
+      if (l && (*p == '+' || *p == '-')) { ++p; --l; }
+      if (l && *p == '.') { ++p; --l; }
+      return l && isdigit(*p);
     }
 
     case KindOfArray:

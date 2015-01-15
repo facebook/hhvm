@@ -1,0 +1,6 @@
+File "erling_loop6.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+File "erling_loop6.php", line 3, characters 18-20:
+This is an int
+File "erling_loop6.php", line 14, characters 10-16:
+It is incompatible with a string

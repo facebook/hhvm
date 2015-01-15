@@ -489,12 +489,15 @@ and stmt env = function
       let env = block env b in
       let (env, _) = expr env e in
       let after_block = env.Env.lenv in
-      let alias_depth = Typing_alias.get_depth st in
-      let env = iter_n_acc alias_depth begin fun env ->
-        let env = condition env true e in
-        let env = block env b in
-        env
-      end env in
+      let alias_depth =
+        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+      let env = Env.in_loop env begin
+        iter_n_acc alias_depth begin fun env ->
+          let env = condition env true e in
+          let env = block env b in
+          env
+        end
+      end in
       let env =
         if NastVisitor.HasContinue.block b
         then LEnv.fully_integrate env parent_lenv
@@ -508,12 +511,15 @@ and stmt env = function
       let (env, _) = expr env e in
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
-      let alias_depth = Typing_alias.get_depth st in
-      let env = iter_n_acc alias_depth begin fun env ->
-        let env = condition env true e in
-        let env = block env b in
-        env
-      end env in
+      let alias_depth =
+        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+      let env = Env.in_loop env begin
+        iter_n_acc alias_depth begin fun env ->
+          let env = condition env true e in
+          let env = block env b in
+          env
+        end
+      end in
       let env = LEnv.fully_integrate env parent_lenv in
       condition env false e
   | For (e1, e2, e3, b) as st ->
@@ -524,13 +530,16 @@ and stmt env = function
       let (env, _) = expr env e2 in
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
-      let alias_depth = Typing_alias.get_depth st in
-      let env = iter_n_acc alias_depth begin fun env ->
-        let env = condition env true e2 in (* iteration 0 *)
-        let env = block env b in
-        let (env, _) = expr env e3 in
-        env
-      end env in
+      let alias_depth =
+        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+      let env = Env.in_loop env begin
+        iter_n_acc alias_depth begin fun env ->
+          let env = condition env true e2 in (* iteration 0 *)
+          let env = block env b in
+          let (env, _) = expr env e3 in
+          env
+        end
+      end in
       let env = LEnv.fully_integrate env parent_lenv in
       condition env false e2
   | Switch (e, cl) ->
@@ -550,12 +559,15 @@ and stmt env = function
       let env = Env.freeze_local_env env in
       let env, ty2 = as_expr env (fst e1) e2 in
       let env = Type.sub_type (fst e1) Reason.URforeach env ty2 ety1 in
-      let alias_depth = Typing_alias.get_depth st in
-      let env = iter_n_acc alias_depth begin fun env ->
-        let env = bind_as_expr env ty2 e2 in
-        let env = block env b in
-        env
-      end env in
+      let alias_depth =
+        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+      let env = Env.in_loop env begin
+        iter_n_acc alias_depth begin fun env ->
+          let env = bind_as_expr env ty2 e2 in
+          let env = block env b in
+          env
+        end
+      end in
       let env = LEnv.fully_integrate env parent_lenv in
       env
   | Try (tb, cl, fb) ->

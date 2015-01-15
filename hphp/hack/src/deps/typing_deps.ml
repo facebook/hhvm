@@ -125,7 +125,7 @@ let get_bazooka x =
 (* Module keeping track which files contain the toplevel definitions. *)
 (*****************************************************************************)
 
-let (ifiles: (int, Relative_path.Set.t) Hashtbl.t ref) = ref (Hashtbl.create 23)
+let (ifiles: (Dep.t, Relative_path.Set.t) Hashtbl.t ref) = ref (Hashtbl.create 23)
 
 let marshal chan = Marshal.to_channel chan !ifiles []
 

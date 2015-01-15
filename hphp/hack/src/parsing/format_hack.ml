@@ -501,7 +501,7 @@ let get_pos env =
 
 module Pp: sig
 
-  val out: env -> string -> unit
+  val out: string -> env -> unit
   val last_token: env -> unit
   val margin_set: int -> env -> (env -> 'a) -> 'a
   val right: env -> (env -> 'a) -> 'a
@@ -585,7 +585,7 @@ end = struct
   let right env f = right_n 2 env f
   let right_fun f = fun env -> right env f
 
-  let out env s =
+  let out s env =
     if !(env.last) = Newline then env.spaces := !(env.margin);
     for i = 0 to !(env.spaces) - 1 do
       add_char env ' '
@@ -596,7 +596,7 @@ end = struct
     ()
 
   let last_token env =
-    out env !(env.last_out)
+    out !(env.last_out) env
 
 end
 
@@ -1113,7 +1113,7 @@ let list_comma_multi ~trailing element env =
   let break = newline in
   let _size = list_comma_loop 0 ~break element env in
   if trailing && !(env.last) <> Newline
-  then (out env ","; comment_after_comma ~break env)
+  then seq env [out ","; comment_after_comma ~break]
 
 let list_comma_multi_nl ~trailing element env =
   newline env;
@@ -1781,7 +1781,7 @@ and xhp_body env =
       then ()
       else if add_space
       then space env;
-      out { env with report_fit = false } text;
+      out text { env with report_fit = false };
       env.last := Text;
       k env
 
@@ -1817,7 +1817,7 @@ and xhp_comment_body env =
       else if !(env.last) = Newline
       then ()
       else space env;
-      out env text;
+      out text env;
       env.last := Text;
       xhp_comment_body env
 
@@ -2169,7 +2169,7 @@ and expr_list ?(trailing=true) env =
 and expr_binop lowest str_op op env =
   with_priority env op begin fun env ->
     space env;
-    out env str_op;
+    out str_op env;
     if env.priority = env.break_on
     then newline env
     else space env;
@@ -2185,10 +2185,9 @@ and expr_binop_arrow lowest str_op tok env =
   with_priority env tok begin fun env ->
     if env.priority = env.break_on
     then begin
-      newline env;
-      out env str_op;
+      seq env [newline; out str_op];
     end
-    else out env str_op;
+    else out str_op env;
     wrap env begin function
       | Tword ->
           last_token env
@@ -2208,7 +2207,7 @@ and expr_binop_arrow lowest str_op tok env =
 
 and expr_binop_dot lowest str_op env =
   with_priority env Tdot begin fun env ->
-    out env str_op;
+    out str_op env;
     if env.priority = env.break_on
     then newline env;
     (match next_token env with
@@ -2272,15 +2271,15 @@ and expr_remain lowest env =
       rhs_assign env;
       lowest
   | Tincr | Tdecr ->
-      out env tok_str;
+      out tok_str env;
       lowest
   | Tcolcol ->
-      out env tok_str;
+      out tok_str env;
       expr_atomic env;
       lowest
   | Tlp ->
       let env = { env with break_on = 0 } in
-      out env tok_str;
+      out tok_str env;
       keep_comment env;
       if next_token env <> Trp
       then right env expr_call_list;
@@ -2294,17 +2293,13 @@ and expr_remain lowest env =
       );
       lowest
   | Tqm when attempt env begin fun env ->
-      wrap_eof env begin function
-        | Tcolon ->
-            token env <> Tword
-        | _ -> false
-      end
-  end ->
-      space env;
-      out env "?";
-      expect ":" env;
-      space env;
-      expr env;
+        wrap_eof env begin function
+          | Tcolon ->
+              token env <> Tword
+          | _ -> false
+        end
+    end ->
+      seq env [space; out "?"; expect ":"; space; expr];
       lowest
   | Tqm ->
       Try.one_line env
@@ -2439,7 +2434,7 @@ and expr_atomic_word env last_tok = function
   | "true" | "false" | "null" ->
       last_token env
   | "array" | "shape" as v ->
-      out env v;
+      out v env;
       expect "(" env;
       right env array_body;
       expect ")" env

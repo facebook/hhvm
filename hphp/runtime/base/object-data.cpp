@@ -1284,13 +1284,6 @@ bool ObjectData::invokeUnset(TypedValue* retval, const StringData* key) {
   );
 }
 
-bool ObjectData::invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
-                               const StringData* key) {
-  if (!invokeGet(&tvRef, key)) return false;
-  retval = &tvRef;
-  return true;
-}
-
 static bool guardedNativePropResult(TypedValue* retval, Variant result) {
   if (!Native::isPropHandled(result)) {
     return false;
@@ -1326,91 +1319,110 @@ bool ObjectData::invokeNativeUnsetProp(TypedValue* retval,
 //////////////////////////////////////////////////////////////////////
 
 template <bool warn, bool define>
-void ObjectData::propImpl(TypedValue*& retval,
-                          TypedValue& tvRef,
-                          Class* ctx,
-                          const StringData* key) {
+TypedValue* ObjectData::propImpl(
+  TypedValue* tvScratch,
+  TypedValue* tvRef,
+  Class* ctx,
+  const StringData* key
+) {
   auto const lookup = getProp(ctx, key);
   auto const prop = lookup.prop;
 
   if (prop) {
     if (lookup.accessible) {
-      if (prop->m_type == KindOfUninit) {
-        if (!getAttribute(UseGet) || !invokeGetProp(retval, tvRef, key)) {
-          if (warn) {
-            raiseUndefProp(key);
-          }
-          if (define) {
-            retval = prop;
-          } else {
-            retval = (TypedValue*)&init_null_variant;
-          }
-        }
-      } else {
-        retval = prop;
-      }
-    } else {
-      if (!getAttribute(UseGet) || !invokeGetProp(retval, tvRef, key)) {
-        // No need to check hasProp since visible is true
-        // Visibility is either protected or private since accessible is false
-        Slot propInd = m_cls->lookupDeclProp(key);
-        bool priv = m_cls->declProperties()[propInd].m_attrs & AttrPrivate;
+      // Property exists, is accessible, and is not unset.
+      if (prop->m_type != KindOfUninit) return prop;
 
-        raise_error("Cannot access %s property %s::$%s",
-                    priv ? "private" : "protected",
-                    m_cls->preClass()->name()->data(),
-                    key->data());
-      }
-    }
-  } else {
-    // First see if native getter is implemented.
-    if (getAttribute(HasNativePropHandler) &&
-        invokeNativeGetProp(retval, key)) {
-      return;
+      // Property is unset, try __get.
+      if (getAttribute(UseGet) && invokeGet(tvRef, key)) return tvRef;
+
+      if (warn) raiseUndefProp(key);
+
+      if (define) return prop;
+      return const_cast<TypedValue*>(init_null_variant.asTypedValue());
     }
 
-    // Next try calling user-level `__get` if it's used.
-    if (getAttribute(UseGet) && invokeGetProp(retval, tvRef, key)) {
-      return;
+    // Property is not accessible, try __get.
+    if (getAttribute(UseGet) && invokeGet(tvRef, key)) {
+      return tvRef;
     }
 
-    if (UNLIKELY(!*key->data())) {
-      throw_invalid_property_name(StrNR(key));
-    } else {
-      if (warn) {
-        raiseUndefProp(key);
-      }
-      if (define) {
-        retval = reinterpret_cast<TypedValue*>(
-          &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
-        );
-      } else {
-        retval = const_cast<TypedValue*>(
-          reinterpret_cast<const TypedValue*>(&init_null_variant)
-        );
-      }
-    }
+    // Property exists, but it is either protected or private since accessible
+    // is false.
+    auto const propInd = m_cls->lookupDeclProp(key);
+    auto const attrs = m_cls->declProperties()[propInd].m_attrs;
+    auto const priv = (attrs & AttrPrivate) ? "private" : "protected";
+
+    raise_error(
+      "Cannot access %s property %s::$%s",
+      priv,
+      m_cls->preClass()->name()->data(),
+      key->data()
+    );
+
+    return tvScratch;
   }
+
+  // First see if native getter is implemented.
+  if (getAttribute(HasNativePropHandler) &&
+      invokeNativeGetProp(tvScratch, key)) {
+    return tvScratch;
+  }
+
+  // Next try calling user-level `__get` if it's used.
+  if (getAttribute(UseGet) && invokeGet(tvRef, key)) {
+    return tvRef;
+  }
+
+  if (UNLIKELY(!*key->data())) {
+    throw_invalid_property_name(StrNR(key));
+    return tvScratch;
+  }
+
+  if (warn) raiseUndefProp(key);
+
+  if (define) {
+    auto& var = reserveProperties().lvalAt(StrNR(key), AccessFlags::Key);
+    return var.asTypedValue();
+  }
+
+  return const_cast<TypedValue*>(init_null_variant.asTypedValue());
 }
 
-void ObjectData::prop(TypedValue*& retval, TypedValue& tvRef,
-                      Class* ctx, const StringData* key) {
-  propImpl<false, false>(retval, tvRef, ctx, key);
+TypedValue* ObjectData::prop(
+  TypedValue* tvScratch,
+  TypedValue* tvRef,
+  Class* ctx,
+  const StringData* key
+) {
+  return propImpl<false, false>(tvScratch, tvRef, ctx, key);
 }
 
-void ObjectData::propD(TypedValue*& retval, TypedValue& tvRef,
-                       Class* ctx, const StringData* key) {
-  propImpl<false, true>(retval, tvRef, ctx, key);
+TypedValue* ObjectData::propD(
+  TypedValue* tvScratch,
+  TypedValue* tvRef,
+  Class* ctx,
+  const StringData* key
+) {
+  return propImpl<false, true>(tvScratch, tvRef, ctx, key);
 }
 
-void ObjectData::propW(TypedValue*& retval, TypedValue& tvRef,
-                       Class* ctx, const StringData* key) {
-  propImpl<true, false>(retval, tvRef, ctx, key);
+TypedValue* ObjectData::propW(
+  TypedValue* tvScratch,
+  TypedValue* tvRef,
+  Class* ctx,
+  const StringData* key
+) {
+  return propImpl<true, false>(tvScratch, tvRef, ctx, key);
 }
 
-void ObjectData::propWD(TypedValue*& retval, TypedValue& tvRef,
-                        Class* ctx, const StringData* key) {
-  propImpl<true, true>(retval, tvRef, ctx, key);
+TypedValue* ObjectData::propWD(
+  TypedValue* tvScratch,
+  TypedValue* tvRef,
+  Class* ctx,
+  const StringData* key
+) {
+  return propImpl<true, true>(tvScratch, tvRef, ctx, key);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {

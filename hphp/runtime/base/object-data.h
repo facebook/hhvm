@@ -289,14 +289,17 @@ struct ObjectData {
 
  private:
   template <bool warn, bool define>
-  void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-                const StringData* key);
+  TypedValue* propImpl(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
   bool invokeSet(TypedValue* retval, const StringData* key, TypedValue* val);
   bool invokeGet(TypedValue* retval, const StringData* key);
-  bool invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
-                     const StringData* key);
   bool invokeIsset(TypedValue* retval, const StringData* key);
   bool invokeUnset(TypedValue* retval, const StringData* key);
   bool invokeNativeGetProp(TypedValue* retval, const StringData* key);
@@ -304,6 +307,7 @@ struct ObjectData {
                            TypedValue* val);
   bool invokeNativeIssetProp(TypedValue* retval, const StringData* key);
   bool invokeNativeUnsetProp(TypedValue* retval, const StringData* key);
+
   void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
                Array& props, std::vector<bool>& inserted) const;
   void getProps(const Class* klass, bool pubOnly, const PreClass* pc,
@@ -312,14 +316,33 @@ struct ObjectData {
                      Array& props, std::vector<bool>& inserted) const;
 
  public:
-  void prop(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-            const StringData* key);
-  void propD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-             const StringData* key);
-  void propW(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-             const StringData* key);
-  void propWD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-              const StringData* key);
+  TypedValue* prop(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  TypedValue* propD(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  TypedValue* propW(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  TypedValue* propWD(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
 
   bool propIsset(const Class* ctx, const StringData* key);
   bool propEmpty(const Class* ctx, const StringData* key);

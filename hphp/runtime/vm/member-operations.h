@@ -1857,18 +1857,19 @@ inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
     instance = instanceFromTv(base);
   }
 
-  StringData* keySD = prepareKey(key);
+  auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
   // Get property.
-  result = &tvScratch;
-#define ARGS result, tvRef, ctx, keySD
-  if (!warn && !(define || unset)) instance->prop  (ARGS);
-  if (!warn &&  (define || unset)) instance->propD (ARGS);
-  if ( warn && !define           ) instance->propW (ARGS);
-  if ( warn &&  define           ) instance->propWD(ARGS);
-#undef ARGS
-  return result;
+
+  if (warn) {
+    return define ?
+      instance->propWD(&tvScratch, &tvRef, ctx, keySD) :
+      instance->propW(&tvScratch, &tvRef, ctx, keySD);
+  }
+
+  if (define || unset) return instance->propD(&tvScratch, &tvRef, ctx, keySD);
+  return instance->prop(&tvScratch, &tvRef, ctx, keySD);
 }
 
 template <bool useEmpty>

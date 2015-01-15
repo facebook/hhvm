@@ -1152,14 +1152,18 @@ LookupResult ExecutionContext::lookupCtorMethod(const Func*& f,
   return LookupResult::MethodFoundWithThis;
 }
 
+static Class* loadClass(StringData* clsName) {
+  Class* class_ = Unit::loadClass(clsName);
+  if (class_ == nullptr) {
+    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
+  }
+  return class_;
+}
+
 ObjectData* ExecutionContext::createObject(StringData* clsName,
                                            const Variant& params,
                                            bool init /* = true */) {
-  auto const class_ = Unit::loadClass(clsName);
-  if (class_ == nullptr) {
-    raise_error("unknown class %s", clsName->data());
-  }
-  return createObject(class_, params, init);
+  return createObject(loadClass(clsName), params, init);
 }
 
 ObjectData* ExecutionContext::createObject(const Class* class_,
@@ -1168,19 +1172,7 @@ ObjectData* ExecutionContext::createObject(const Class* class_,
   Object o;
   o = newInstance(const_cast<Class*>(class_));
   if (init) {
-    auto ctor = class_->getCtor();
-    if (!(ctor->attrs() & AttrPublic)) {
-      std::string msg = "Access to non-public constructor of class ";
-      msg += class_->name()->data();
-      throw Object(Reflection::AllocReflectionExceptionObject(msg));
-    }
-    // call constructor
-    if (!isContainerOrNull(params)) {
-      throw_param_is_not_container();
-    }
-    TypedValue ret;
-    invokeFunc(&ret, ctor, params, o.get());
-    tvRefcountedDecRef(&ret);
+    initObject(class_, params, o.get());
   }
 
   ObjectData* ret = o.detach();
@@ -1190,6 +1182,31 @@ ObjectData* ExecutionContext::createObject(const Class* class_,
 
 ObjectData* ExecutionContext::createObjectOnly(StringData* clsName) {
   return createObject(clsName, init_null_variant, false);
+}
+
+ObjectData* ExecutionContext::initObject(StringData* clsName,
+                                         const Variant& params,
+                                         ObjectData* o) {
+  return initObject(loadClass(clsName), params, o);
+}
+
+ObjectData* ExecutionContext::initObject(const Class* class_,
+                                         const Variant& params,
+                                         ObjectData* o) {
+  auto ctor = class_->getCtor();
+  if (!(ctor->attrs() & AttrPublic)) {
+    std::string msg = "Access to non-public constructor of class ";
+    msg += class_->name()->data();
+    throw Object(Reflection::AllocReflectionExceptionObject(msg));
+  }
+  // call constructor
+  if (!isContainerOrNull(params)) {
+    throw_param_is_not_container();
+  }
+  TypedValue ret;
+  invokeFunc(&ret, ctor, params, o);
+  tvRefcountedDecRef(&ret);
+  return o;
 }
 
 ActRec* ExecutionContext::getStackFrame() {

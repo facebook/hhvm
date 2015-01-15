@@ -321,6 +321,12 @@ public:
   ObjectData* createObject(StringData* clsName,
                            const Variant& params,
                            bool init = true);
+  ObjectData* initObject(const Class* cls,
+                         const Variant& params,
+                         ObjectData* o);
+  ObjectData* initObject(StringData* clsName,
+                         const Variant& params,
+                         ObjectData* o);
   ObjectData* createObjectOnly(StringData* clsName);
 
   /*

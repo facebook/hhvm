@@ -135,6 +135,7 @@ void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);
 Object create_object(const String& s, const Array &params, bool init = true);
+Object init_object(const String& s, const Array &params, ObjectData* o);
 
 /**
  * Argument count handling.

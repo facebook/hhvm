@@ -3,6 +3,7 @@
 // ensure legacy token name is returned
 var_dump(token_name(T_DOUBLE_COLON));
 
+// see also hphp/hack/hhi/stdlib/builtins_tokens.php
 $token_range = range(1, 1000);
 
 $undefined_tokens = array();

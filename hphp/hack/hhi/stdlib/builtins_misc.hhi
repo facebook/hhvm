@@ -31,7 +31,5 @@ function time_sleep_until($timestamp);
 function uniqid($prefix = null, $more_entropy = false);
 function unpack($format, $data);
 function sys_getloadavg();
-function token_get_all($source);
-function token_name($token);
 function hphp_process_abort($magic);
 function hphp_to_string($v);

@@ -163,6 +163,9 @@ public:
     REGISTER_CONSTANT(STREAM_AWAIT_READY, FileAwait::READY);
     REGISTER_CONSTANT(STREAM_AWAIT_CLOSED, FileAwait::CLOSED);
 
+    REGISTER_CONSTANT(STREAM_URL_STAT_LINK, k_STREAM_URL_STAT_LINK);
+    REGISTER_CONSTANT(STREAM_URL_STAT_QUIET, k_STREAM_URL_STAT_QUIET);
+
     HHVM_FE(stream_context_create);
     HHVM_FE(stream_context_get_options);
     HHVM_FE(stream_context_set_option);

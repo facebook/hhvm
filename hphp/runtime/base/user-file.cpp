@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 
 namespace HPHP {
 
@@ -442,7 +443,6 @@ static inline int simulateAccessResult(bool allowed) {
   }
 }
 
-extern const int64_t k_STREAM_URL_STAT_QUIET;
 int UserFile::access(const String& path, int mode) {
   struct stat buf;
   auto ret = urlStat(path, &buf, k_STREAM_URL_STAT_QUIET);
@@ -475,7 +475,6 @@ int UserFile::access(const String& path, int mode) {
   }
 }
 
-extern const int64_t k_STREAM_URL_STAT_LINK;
 int UserFile::lstat(const String& path, struct stat* buf) {
   return urlStat(path, buf, k_STREAM_URL_STAT_LINK);
 }

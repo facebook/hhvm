@@ -89,6 +89,8 @@ namespace HPHP {
   const int64_t k_STREAM_SOCK_RDM = 4;
   const int64_t k_STREAM_SOCK_SEQPACKET = 5;
   const int64_t k_STREAM_SOCK_STREAM = 1;
+  const int64_t k_STREAM_URL_STAT_LINK = 1;
+  const int64_t k_STREAM_URL_STAT_QUIET = 2;
   const int64_t k_STREAM_USE_PATH = 1;
 
 ///////////////////////////////////////////////////////////////////////////////

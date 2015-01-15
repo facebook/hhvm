@@ -347,10 +347,6 @@
             "value": ""
         },
         {
-            "name": "DIRECTORY_SEPARATOR",
-            "value": "\/"
-        },
-        {
             "name": "DNS_A",
             "value": 1
         },
@@ -559,50 +555,6 @@
             "value": false
         },
         {
-            "name": "FILE_APPEND",
-            "value": 8
-        },
-        {
-            "name": "FILE_IGNORE_NEW_LINES",
-            "value": 2
-        },
-        {
-            "name": "FILE_NO_DEFAULT_CONTEXT",
-            "value": 16
-        },
-        {
-            "name": "FILE_SKIP_EMPTY_LINES",
-            "value": 4
-        },
-        {
-            "name": "FILE_USE_INCLUDE_PATH",
-            "value": 1
-        },
-        {
-            "name": "FILE_TEXT",
-            "value": 0
-        },
-        {
-            "name": "FILE_BINARY",
-            "value": 0
-        },
-        {
-            "name": "FNM_CASEFOLD",
-            "value": 16
-        },
-        {
-            "name": "FNM_NOESCAPE",
-            "value": 2
-        },
-        {
-            "name": "FNM_PATHNAME",
-            "value": 1
-        },
-        {
-            "name": "FNM_PERIOD",
-            "value": 4
-        },
-        {
             "name": "FT_INTERNAL",
             "value": 8
         },
@@ -685,38 +637,6 @@
         {
             "name": "GLOBAL_SYMBOL_STATIC_VARIABLE",
             "value": 1
-        },
-        {
-            "name": "GLOB_AVAILABLE_FLAGS",
-            "value": 9303
-        },
-        {
-            "name": "GLOB_BRACE",
-            "value": 1024
-        },
-        {
-            "name": "GLOB_ERR",
-            "value": 1
-        },
-        {
-            "name": "GLOB_MARK",
-            "value": 2
-        },
-        {
-            "name": "GLOB_NOCHECK",
-            "value": 16
-        },
-        {
-            "name": "GLOB_NOESCAPE",
-            "value": 64
-        },
-        {
-            "name": "GLOB_NOSORT",
-            "value": 4
-        },
-        {
-            "name": "GLOB_ONLYDIR",
-            "value": 8192
         },
         {
             "name": "HASH_HMAC",
@@ -1253,22 +1173,6 @@
         {
             "name": "ENT_HTML5",
             "value": 48
-        },
-        {
-            "name": "LOCK_EX",
-            "value": 2
-        },
-        {
-            "name": "LOCK_NB",
-            "value": 4
-        },
-        {
-            "name": "LOCK_SH",
-            "value": 1
-        },
-        {
-            "name": "LOCK_UN",
-            "value": 3
         },
         {
             "name": "LOG_ALERT",
@@ -2915,10 +2819,6 @@
             "value": 8
         },
         {
-            "name": "PATH_SEPARATOR",
-            "value": ":"
-        },
-        {
             "name": "PEAR_EXTENSION_DIR",
             "value": ""
         },
@@ -3111,18 +3011,6 @@
         {
             "name": "SA_UNSEEN",
             "value": 4
-        },
-        {
-            "name": "SEEK_CUR",
-            "value": 1
-        },
-        {
-            "name": "SEEK_END",
-            "value": 2
-        },
-        {
-            "name": "SEEK_SET",
-            "value": 0
         },
         {
             "name": "SE_FREE",

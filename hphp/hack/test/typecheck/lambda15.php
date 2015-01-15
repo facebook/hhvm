@@ -9,14 +9,16 @@
  *
  */
 
-type F<T> = (function (): T);
+type F<T> = (function(): T);
 class Foo<T> {
   public function __construct(private T $x) {}
-  private function get(): T { return $this->x; }
+  private function get(): T {
+    return $this->x;
+  }
   public function getter(): F<T> {
     return () ==> $this->get();
   }
-  public function thisser(): (function (): this) {
+  public function thisser(): (function(): this) {
     return () ==> $this;
   }
 }

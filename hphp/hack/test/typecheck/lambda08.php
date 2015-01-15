@@ -9,12 +9,11 @@
  *
  */
 
-function blah(int $k): void {
-}
+function blah(int $k): void {}
 
 function foo(): void {
   // transitive lambda captures
-  $x = Vector { 1, 2, 3 };
+  $x = Vector {1, 2, 3};
   $a = () ==> {
     return () ==> {
       return $idx ==> $x[$idx];

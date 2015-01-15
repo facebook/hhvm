@@ -283,9 +283,9 @@ let restore_env env saved_env =
  * env.last_str.
  * Both env.last_out/env.last_str are useful:
  *   -) env.last_out is used to emit the token (that's why we use the function
- *      last_token instead of emitting a string directly
+ *      last_token instead of emitting a string directly)
  *   -) env.last_str is used for the logic of the parser (we can't use a
- *      truncated token for that.
+ *      truncated token for that)
  *)
 (*****************************************************************************)
 
@@ -1043,9 +1043,7 @@ and list_comma_loop_remain n ~break element env = wrap_eof env begin function
       let continue = wrap_would_consume env element in
       if continue
       then begin
-        last_token env;
-        comment_after_comma ~break env;
-        break env;
+        seq env [last_token; comment_after_comma ~break; break];
         list_comma_loop n ~break element env
       end
       else n

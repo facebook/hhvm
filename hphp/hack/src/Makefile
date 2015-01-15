@@ -44,6 +44,7 @@ MODULES=\
   typing\
   naming\
   parsing\
+  format\
   deps\
   heap\
   globals\

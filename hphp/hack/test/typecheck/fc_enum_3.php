@@ -12,8 +12,7 @@ function test(): Foo {
   return Foo::FOO;
 }
 
-function test2(int $x): void {
-}
+function test2(int $x): void {}
 
 function lurr(): void {
   test2(Foo::BAR);

@@ -81,20 +81,20 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant::Variant(litstr  v) {
+Variant::Variant(litstr v) {
   m_type = KindOfString;
   m_data.pstr = StringData::Make(v);
   m_data.pstr->incRefCount();
 }
 
 Variant::Variant(const String& v) {
-  m_type = KindOfString;
   StringData *s = v.get();
   if (s) {
     m_data.pstr = s;
     if (s->isStatic()) {
       m_type = KindOfStaticString;
     } else {
+      m_type = KindOfString;
       s->incRefCount();
     }
   } else {
@@ -111,9 +111,9 @@ Variant::Variant(const std::string & v) {
 }
 
 Variant::Variant(const Array& v) {
-  m_type = KindOfArray;
   ArrayData *a = v.get();
   if (a) {
+    m_type = KindOfArray;
     m_data.parr = a;
     a->incRefCount();
   } else {
@@ -122,9 +122,9 @@ Variant::Variant(const Array& v) {
 }
 
 Variant::Variant(const Object& v) {
-  m_type = KindOfObject;
   ObjectData *o = v.get();
   if (o) {
+    m_type = KindOfObject;
     m_data.pobj = o;
     o->incRefCount();
   } else {
@@ -133,9 +133,9 @@ Variant::Variant(const Object& v) {
 }
 
 Variant::Variant(const Resource& v) {
-  m_type = KindOfResource;
   ResourceData* o = v.get();
   if (o) {
+    m_type = KindOfResource;
     m_data.pres = o;
     o->incRefCount();
   } else {
@@ -167,9 +167,9 @@ Variant::Variant(const StringData* v, StaticStrInit) {
   }
 }
 
-Variant::Variant(ArrayData *v) {
-  m_type = KindOfArray;
+Variant::Variant(ArrayData* v) {
   if (v) {
+    m_type = KindOfArray;
     m_data.parr = v;
     v->incRefCount();
   } else {
@@ -177,9 +177,9 @@ Variant::Variant(ArrayData *v) {
   }
 }
 
-Variant::Variant(ObjectData *v) {
-  m_type = KindOfObject;
+Variant::Variant(ObjectData* v) {
   if (v) {
+    m_type = KindOfObject;
     m_data.pobj = v;
     v->incRefCount();
   } else {
@@ -187,9 +187,9 @@ Variant::Variant(ObjectData *v) {
   }
 }
 
-Variant::Variant(ResourceData *v) {
-  m_type = KindOfResource;
+Variant::Variant(ResourceData* v) {
   if (v) {
+    m_type = KindOfResource;
     m_data.pres = v;
     v->incRefCount();
   } else {
@@ -197,11 +197,56 @@ Variant::Variant(ResourceData *v) {
   }
 }
 
-Variant::Variant(RefData *r) {
-  m_type = KindOfRef;
+Variant::Variant(RefData* r) {
   if (r) {
+    m_type = KindOfRef;
     m_data.pref = r;
     r->incRefCount();
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(StringData* var, Attach) {
+  if (var) {
+    m_type = var->isStatic() ? KindOfStaticString : KindOfString;
+    m_data.pstr = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(ArrayData* var, Attach) {
+  if (var) {
+    m_type = KindOfArray;
+    m_data.parr = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(ObjectData* var, Attach) {
+  if (var) {
+    m_type = KindOfObject;
+    m_data.pobj = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(ResourceData* var, Attach) {
+  if (var) {
+    m_type = KindOfResource;
+    m_data.pres = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(RefData* var, Attach) {
+  if (var) {
+    m_type = KindOfRef;
+    m_data.pref = var;
   } else {
     m_type = KindOfNull;
   }

@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/dummy-resource.h"
 
 namespace HPHP {
 
@@ -38,6 +39,26 @@ TEST(Variant, References) {
     Variant v2(Variant::StrongBind{}, v1);
     v2 = String("changed");
     EXPECT_TRUE(equal(v1, String("changed")));
+  }
+}
+
+TEST(Variant, SmartPointer) {
+  {
+    auto ptr = makeSmartPtr<DummyResource>();
+    EXPECT_TRUE(ptr->hasExactlyOneRef());
+    Variant v(std::move(ptr));
+    EXPECT_TRUE(v.getRefCount() == 1);
+  }
+
+  {
+    auto ptr = makeSmartPtr<DummyResource>();
+    EXPECT_TRUE(ptr->hasExactlyOneRef());
+    {
+      Variant v(ptr);
+      EXPECT_TRUE(ptr->getCount() == 2);
+      EXPECT_TRUE(v.getRefCount() == 2);
+    }
+    EXPECT_TRUE(ptr->hasExactlyOneRef());
   }
 }
 

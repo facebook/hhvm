@@ -9,13 +9,15 @@
  *
  */
 
-type myshape = shape('field1' => int, 'field2' => bool);
+type myshape = shape(
+  'field1' => int,
+  'field2' => bool,
+);
 
 function test(): int {
-  if(true) {
+  if (true) {
     $x = shape('field1' => 0);
-  }
-  else {
+  } else {
     $x = shape('field1' => 0);
   }
   return $x[0];

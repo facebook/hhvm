@@ -12,14 +12,14 @@ function g(): int {
 }
 
 function h(): int {
-  for (;;) {
+  for (; ; ) {
     return 1;
   }
 }
 
 function i(): int {
-  for (;;) {
-    for (;;) {
+  for (; ; ) {
+    for (; ; ) {
       break;
     }
   }

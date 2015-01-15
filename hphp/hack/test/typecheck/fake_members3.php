@@ -9,14 +9,13 @@
  *
  */
 
-function do_something(): void {
-}
+function do_something(): void {}
 
 class X {
   private static ?int $x = null;
 
   public function getX(): int {
-    if(X::$x === null) {
+    if (X::$x === null) {
       X::$x = 0;
     }
     do_something();

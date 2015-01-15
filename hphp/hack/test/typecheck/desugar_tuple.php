@@ -10,6 +10,6 @@
  */
 
 function foo((int, int) $thing): void {
-    list($v, $x) = $thing;
-    $v[] = 12;
+  list($v, $x) = $thing;
+  $v[] = 12;
 }

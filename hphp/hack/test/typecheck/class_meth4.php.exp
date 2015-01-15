@@ -1,4 +1,4 @@
-File "class_meth4.php", line 16, characters 8-28:
+File "class_meth4.php", line 15, characters 8-28:
 Could not find static method f1 in type A (Typing[4090])
 File "class_meth4.php", line 12, characters 7-7:
 Declaration of A is here

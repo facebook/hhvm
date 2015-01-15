@@ -35,18 +35,19 @@ class AddressBook extends AddressBookContactCollection {
     }
 
     invariant(
-	      $contact->getOwnerId() == $this->ownerId,
-	      'AddressBookContact owner is not the same as AddressBook owner.');
+      $contact->getOwnerId() == $this->ownerId,
+      'AddressBookContact owner is not the same as AddressBook owner.',
+    );
 
     $remote_id = $contact->getRemoteId();
     invariant(!$remote_id, 'Contact already has a remote id. Cannot add');
     invariant(
-	      !AddressBookLoader::isIncomingAssocType($contact->getAssocType()),
-	      'Incoming assocs not supported in AddressBook.');
+      !AddressBookLoader::isIncomingAssocType($contact->getAssocType()),
+      'Incoming assocs not supported in AddressBook.',
+    );
 
     return parent::addContact($contact);
   }
 }
 
-function f(){
-}
+function f() {}

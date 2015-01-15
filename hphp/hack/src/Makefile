@@ -136,3 +136,8 @@ test: build-hack copy-hack-files
 	python3 ../test/verify.py --program ../bin/hh_format ../test/format
 	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/suggest
 	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/typecheck
+	python3 ../test/verify.py --program ../bin/hh_format ../test/typecheck \
+		--disabled-extension .no_format \
+		--out-extension .format_out \
+		--expect-extension '' \
+		--flags --root .

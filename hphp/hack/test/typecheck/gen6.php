@@ -10,15 +10,16 @@
  */
 
 class A<T as A> {
-  public function bar(T $x): T { return $x; }
-  
-}
-
-class Z { 
-  public function foo(): void {
+  public function bar(T $x): T {
+    return $x;
   }
+
 }
 
+class Z {
+
+  public function foo(): void {}
+}
 
 function test(): void {
   $x = new A();

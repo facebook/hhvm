@@ -11,7 +11,9 @@
 
 class A {
   public function __construct(public A $x) {}
-  public function __toString(): string { return "A"; }
+  public function __toString(): string {
+    return "A";
+  }
 }
 
 function test(A $x): void {

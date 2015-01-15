@@ -9,5 +9,4 @@
  *
  */
 
-function f((int, bool) $x): void {
-}
+function f((int, bool) $x): void {}

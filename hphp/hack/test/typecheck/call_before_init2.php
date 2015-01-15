@@ -17,5 +17,7 @@ class Foo {
     $this->x = 0;
   }
 
-  public function foo2(): int { return 0; }
+  public function foo2(): int {
+    return 0;
+  }
 }

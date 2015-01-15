@@ -10,7 +10,7 @@
  */
 
 function test(): ?int {
-  if($a = '') {
+  if ($a = '') {
   }
   return $a;
 }

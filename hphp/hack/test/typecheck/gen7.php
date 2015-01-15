@@ -12,12 +12,12 @@
 class C {}
 
 class A<T as C> extends C {
-  public function bar(T $x): T { return $x; }
-  
+  public function bar(T $x): T {
+    return $x;
+  }
+
 }
 
-class B<T as B<A>> extends A<T> {
-}
+class B<T as B<A>> extends A<T> {}
 
-class D extends B<D> {
-}
+class D extends B<D> {}

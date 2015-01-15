@@ -12,7 +12,7 @@
 function main($fooby): void {
   $capture1 = "yo";
   $get_func = ($x, $y) ==> {
-    return $more ==> $x . $y . $capture1 . $more . $fooby;
+    return $more ==> $x.$y.$capture1.$more.$fooby;
   };
 
   $f = $get_func("one ", "two ");

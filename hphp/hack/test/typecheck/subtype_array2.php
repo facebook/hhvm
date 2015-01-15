@@ -13,8 +13,7 @@ function get_arr(): array<int> {
   return array(1, 2, 3);
 }
 
-function use_arr(array<bool> $arr): void {
-}
+function use_arr(array<bool> $arr): void {}
 
 function test(): void {
   $a = get_arr();

@@ -9,8 +9,7 @@
  *
  */
 
-class A {
-}
+class A {}
 
 function foo(): int {
   $p = class_meth('A', 'f1');

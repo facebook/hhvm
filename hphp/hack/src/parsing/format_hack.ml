@@ -378,7 +378,7 @@ let attempt_keep_lines env f =
  *
  * However, the logic is a bit complicated because the algorithm is
  * exponential and that becomes a problem on very large nested arrays.
- * The solution consist in breaking mutliple layers at once when a
+ * The solution consist in breaking multiple layers at once when a
  * certain depth is reached.
  *
  * Let's consider: array(array(.. array N times ))
@@ -1166,7 +1166,9 @@ let rec entry ~keep_source_metadata ~no_trailing_commas
     Success (k env)
   with
   | PHP -> Php_or_decl
-  | _ -> Internal_error
+  | _ ->
+      Printexc.print_backtrace stderr;
+      Internal_error
 
 (*****************************************************************************)
 (* Hack header <?hh *)
@@ -1229,7 +1231,7 @@ and typedef env = wrap env begin function
 end
 
 and shape_type_elt env =
-  if has_consumed env expr_atomic
+  if has_consumed env expr
   then seq env [space; expect "=>"; space; hint]
 
 (*****************************************************************************)

@@ -326,6 +326,9 @@ let token = make_tokenizer Lexer_hack.format_token
 (* XHP tokenizer *)
 let xhp_token = make_tokenizer Lexer_hack.format_xhptoken
 
+(* Comment tokenizer *)
+let comment_token = make_tokenizer Lexer_hack.format_comment
+
 (*****************************************************************************)
 (* Backtracking. *)
 (*****************************************************************************)
@@ -677,24 +680,13 @@ let rec comment env =
   right_n 1 env comment_loop
 
 and comment_loop env =
-  match token env with
+  match comment_token env with
   | Teof -> ()
   | Tclose_comment ->
       last_token env;
-  | Tstarstar ->
-    last_token env;
-    (match token env with
-      | Tslash -> last_token env
-      | _ -> comment_loop env)
   | Tnewline ->
       newline env;
       skip_spaces env;
-      (match token env with
-      | Teof -> ()
-      | Tstar -> last_token env
-      | Tclose_comment -> back env
-      | _ -> back env
-      );
       comment_loop env;
   | Tspace ->
       keep_space env;

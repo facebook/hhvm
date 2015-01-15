@@ -601,11 +601,17 @@ and look_for_open_cb = parse
   | '{'                { () }
   | _                  { look_for_open_cb lexbuf }
 
+and format_comment = parse
+  | [' '  '\t']        { Tspace         }
+  | '\n'               { Tnewline       }
+  | eof                { Teof           }
+  | "*/"               { Tclose_comment }
+  | _                  { Tany           }
+
 and format_token = parse
   | [' '  '\t']        { Tspace        }
   | '\n'               { Tnewline      }
   | "/*"               { Topen_comment }
-  | "*/"               { Tclose_comment }
   | "//"               { Tline_comment }
   | "#"                { Tline_comment }
   | '\"'               { Tdquote       }

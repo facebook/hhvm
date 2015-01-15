@@ -78,8 +78,13 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   }
 
   if (RuntimeOption::EvalHHIRRefcountOpts) {
-    optimizeRefcounts(unit, FrameStateMgr{unit.entry()->front().marker()});
-    finishPass("refcount opts");
+    if (!RuntimeOption::EvalHHIRRefcountOpts2) {
+      optimizeRefcounts(unit, FrameStateMgr{unit.entry()->front().marker()});
+      finishPass("refcount opts");
+    }
+  }
+  if (RuntimeOption::EvalHHIRRefcountOpts2) {
+    eliminateTakes(unit);
   }
 
   dce("initial");
@@ -116,6 +121,11 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
     doPass(optimizeStores);
     dce("storeelim");
+  }
+
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts2) {
+    doPass(optimizeRefcounts2);
+    dce("refcount");
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {

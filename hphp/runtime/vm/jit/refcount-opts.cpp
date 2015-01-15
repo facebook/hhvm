@@ -1929,6 +1929,10 @@ void eliminateTakes(const BlockList& blocks) {
 
 }
 
+void eliminateTakes(const IRUnit& unit) {
+  eliminateTakes(rpoSortCfg(unit));
+}
+
 /* optimizeRefcounts attempts to remove IncRef/DecRef pairs when we can prove
  * that doing so won't alter the visible behavior of the program. It does so in
  * three phases:

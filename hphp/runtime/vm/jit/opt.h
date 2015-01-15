@@ -30,9 +30,11 @@ struct FrameStateMgr;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * The main optimization passes, in the order they run.
+ * The main optimization passes.
  */
 void optimizeRefcounts(IRUnit&, FrameStateMgr&&);
+void eliminateTakes(const IRUnit&);
+void optimizeRefcounts2(IRUnit&);
 void optimizePredictions(IRUnit&);
 void gvn(IRUnit&);
 void optimizeLoads(IRUnit&);

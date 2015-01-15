@@ -275,6 +275,9 @@ function serial_only_tests() {
     hphp_home().'/'.'hphp/test/slow/ext_memcache/get_compressed.php',
     hphp_home().'/'.'hphp/test/slow/ext_memcached/decompression.php',
     hphp_home().'/'.'hphp/test/slow/ext_memcached/types.php',
+    hphp_home().'/'.'hphp/test/slow/ext_mysqli/store_result_updatemaxlength.php',
+    hphp_home().'/'.'hphp/test/slow/ext_mysqli/test_mysqli.php',
+    hphp_home().'/'.'hphp/test/slow/ext_mysqli/test_mysqli_bind.php',
   );
   $tests = find_tests($serial);
   return $tests;

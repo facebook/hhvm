@@ -15,8 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/base-includes.h"
 #include <vector>
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/util/logger.h"
@@ -119,7 +120,7 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
     return arReturn(ar, false);
   }
 
-  std::vector<Variant*> vars;
+  PackedArrayInit vars(type_size);
   for (int i = 0; i < type_size; i++) {
     char t = types[i];
     if (t != 'i' && t != 'd' && t != 's' && t != 'b') {
@@ -127,10 +128,15 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
                     i + 2 + start_index);
       return arReturn(ar, false);
     }
-    vars.push_back(&getArg<KindOfRef>(ar, i + 1 + start_index));
+    auto rparam = &getArg<KindOfRef>(ar, i + 1 + start_index);
+
+    if (rparam->getRawType() != KindOfRef) {
+      return arReturn(ar, false);
+    }
+    vars.appendRef(*rparam);
   }
 
-  return arReturn(ar, getStmt(obj)->bind_param(types, vars));
+  return arReturn(ar, getStmt(obj)->bind_param(types, vars.toArray()));
 }
 
 static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
@@ -142,12 +148,17 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
     return arReturn(ar, false);
   }
 
-  std::vector<Variant*> vars;
+  PackedArrayInit vars(ar->numArgs());
   for (int i = start_index; i < ar->numArgs(); i++) {
-    vars.push_back(&getArg<KindOfRef>(ar, i));
+    auto rparam = &getArg<KindOfRef>(ar, i);
+
+    if (rparam->getRawType() != KindOfRef) {
+      return arReturn(ar, false);
+    }
+    vars.appendRef(*rparam);
   }
 
-  return arReturn(ar, getStmt(obj)->bind_result(vars));
+  return arReturn(ar, getStmt(obj)->bind_result(vars.toArray()));
 }
 
 //////////////////////////////////////////////////////////////////////////////

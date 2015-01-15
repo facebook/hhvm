@@ -225,7 +225,7 @@ struct MySQLRequestData final : RequestEventHandler {
     totalRowCount = 0;
   }
 
-  Resource defaultConn;
+  SmartPtr<MySQLResource> defaultConn;
   int readTimeout;
   int totalRowCount; // from all queries in current request
 

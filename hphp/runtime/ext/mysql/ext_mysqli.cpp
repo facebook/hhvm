@@ -253,8 +253,8 @@ static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store) {
 
 static void HHVM_METHOD(mysqli, hh_init) {
   auto data = std::make_shared<MySQL>(nullptr, 0, nullptr, nullptr, nullptr);
-  auto rsrc = newres<MySQLResource>(data);
-  this_->o_set(s_connection, rsrc, s_mysqli.get());
+  auto rsrc = makeSmartPtr<MySQLResource>(std::move(data));
+  this_->o_set(s_connection, Variant(std::move(rsrc)), s_mysqli.get());
 }
 
 static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
@@ -611,8 +611,8 @@ static Variant HHVM_METHOD(mysqli_stmt, hh_field_count) {
 
 static void HHVM_METHOD(mysqli_stmt, hh_init, Variant connection) {
   Object obj = connection.toObject();
-  auto data = newres<MySQLStmt>(get_connection(obj.get())->get());
-  this_->o_set(s_stmt, Resource(data), s_mysqli_stmt.get());
+  auto data = makeSmartPtr<MySQLStmt>(get_connection(obj.get())->get());
+  this_->o_set(s_stmt, Variant(std::move(data)), s_mysqli_stmt.get());
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, hh_insert_id) {

@@ -177,11 +177,11 @@ size_t MySQL::NumCachedConnections() {
 }
 
 std::shared_ptr<MySQL> MySQL::GetDefaultConn() {
-  return s_mysql_data->defaultConn.getTyped<MySQLResource>(true)->mysql();
+  return s_mysql_data->defaultConn->mysql();
 }
 
 void MySQL::SetDefaultConn(std::shared_ptr<MySQL> conn) {
-  s_mysql_data->defaultConn = newres<MySQLResource>(std::move(conn));
+  s_mysql_data->defaultConn = makeSmartPtr<MySQLResource>(std::move(conn));
 }
 
 int MySQL::GetDefaultReadTimeout() {

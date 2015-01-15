@@ -3225,7 +3225,7 @@ and encapsed_expr_reduce_left start env e1 =
              *)
             let pid = Pos.make env.file env.lb in
             let id = Lexing.lexeme env.lb in
-            pid, (Id (pid, id))
+            pid, (String (pid, id))
         | _ ->
             L.back env.lb;
             expr { env with priority = 0 }

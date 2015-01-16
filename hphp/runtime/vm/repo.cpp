@@ -712,7 +712,6 @@ void Repo::pragmas(int repoId) {
 }
 
 void Repo::getIntPragma(int repoId, const char* name, int& val) {
-  RepoTxn txn(*this);
   std::stringstream ssPragma;
   ssPragma << "PRAGMA " << dbName(repoId) << "." << name << ";";
   RepoStmt stmt(*this);
@@ -740,7 +739,6 @@ void Repo::setIntPragma(int repoId, const char* name, int val) {
 }
 
 void Repo::getTextPragma(int repoId, const char* name, std::string& val) {
-  RepoTxn txn(*this);
   std::stringstream ssPragma;
   ssPragma << "PRAGMA " << dbName(repoId) << "." << name << ";";
   RepoStmt stmt(*this);

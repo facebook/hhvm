@@ -201,8 +201,14 @@ function test_get_best_pattern() {
   $skeleton = 'yyyyMMMMddhhmm';
   $gen = IntlDatePatternGenerator::createInstance('en_US');
 
-  VS(str_replace("yyyy,", "yyyy", $gen->getBestPattern($skeleton)), 'MMMM dd, yyyy h:mm a');
-  VS(str_replace("yyyy,", "yyyy", $gen->getBestPattern($skeleton)), 'MMMM dd, yyyy h:mm a');
+  VS(
+    str_replace("yyyy,", "yyyy", $gen->getBestPattern($skeleton)),
+    'MMMM dd, yyyy h:mm a'
+  );
+  VS(
+    str_replace("yyyy,", "yyyy", $gen->getBestPattern($skeleton)),
+    'MMMM dd, yyyy h:mm a'
+  );
 
   EXPECT_INVALID_STR($gen, function () use ($gen) {
     $gen->getBestPattern(INVALID_STR);

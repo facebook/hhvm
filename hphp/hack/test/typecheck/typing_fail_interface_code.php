@@ -1,4 +1,4 @@
-<?hh 
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -11,7 +11,7 @@
 
 interface Foo {
 
-  public function bar() : void {
+  public function bar(): void {
     $x = 0;
   }
 }

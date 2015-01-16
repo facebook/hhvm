@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Resource HHVM_FUNCTION(mailparse_msg_create) {
-  return newres<MimePart>();
+  return Resource(makeSmartPtr<MimePart>());
 }
 
 bool HHVM_FUNCTION(mailparse_msg_free, const Resource& mimemail) {
@@ -36,8 +36,7 @@ Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
   auto f = File::Open(filename, "rb");
   if (!f) return false;
 
-  MimePart *p = newres<MimePart>();
-  Resource ret(p);
+  auto p = makeSmartPtr<MimePart>();
   while (!f->eof()) {
     String line = f->readLine();
     if (!line.isNull()) {
@@ -46,7 +45,7 @@ Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
       }
     }
   }
-  return ret;
+  return Variant(std::move(p));
 }
 
 bool HHVM_FUNCTION(mailparse_msg_parse,
@@ -206,7 +205,8 @@ bool HHVM_FUNCTION(mailparse_stream_encode,
   if (line[x] == '\0' || line[x] == '\r' || line[x] == '\n') break; \
   v = line[x++]; v = UUDEC(v)
 
-static size_t mailparse_do_uudecode(File *instream, File *outstream) {
+static size_t mailparse_do_uudecode(const SmartPtr<File>& instream,
+                                    const SmartPtr<File>& outstream) {
   int A, B, C, D, n;
   size_t file_size = 0;
   if (outstream) {
@@ -259,11 +259,10 @@ const StaticString
   s_origfilename("origfilename");
 
 Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
-  File *instream = fp.getTyped<File>();
+  SmartPtr<File> instream(fp.getTyped<File>());
   instream->rewind();
 
-  File *outstream = newres<TempFile>(false);
-  Resource deleter(outstream);
+  auto outstream = makeSmartPtr<TempFile>(false);
 
   Array return_value;
   int nparts = 0;
@@ -289,7 +288,7 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
         /* create an initial item representing the file with all uuencoded
            parts removed */
         Array item = Array::Create();
-        item.set(s_filename, String(((TempFile*)outstream)->getName()));
+        item.set(s_filename, String(outstream->getName()));
         return_value.append(item);
       }
 
@@ -298,11 +297,10 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
       item.set(s_origfilename, String(origfilename, CopyString));
 
       /* create a temp file for the data */
-      File *partstream = newres<TempFile>(false);
-      Resource deleter(partstream);
+      auto partstream = makeSmartPtr<TempFile>(false);
       if (partstream)  {
         nparts++;
-        item.set(s_filename, String(((TempFile*)partstream)->getName()));
+        item.set(s_filename, String(partstream->getName()));
         return_value.append(item);
 
         /* decode it */

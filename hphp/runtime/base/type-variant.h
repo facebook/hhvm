@@ -1188,6 +1188,16 @@ ALWAYS_INLINE Variant empty_string_variant() {
   return Variant(staticEmptyString(), Variant::StaticStrInit{});
 }
 
+template <typename T>
+inline Variant toVariant(const SmartPtr<T>& p) {
+  return p ? Variant(p) : Variant(false);
+}
+
+template <typename T>
+inline Variant toVariant(SmartPtr<T>&& p) {
+  return p ? Variant(std::move(p)) : Variant(false);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

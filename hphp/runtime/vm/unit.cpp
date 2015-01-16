@@ -531,7 +531,6 @@ void Unit::loadFunc(const Func *func) {
 class FrameRestore {
  public:
   explicit FrameRestore(const PreClass* preClass) {
-    auto const ec = g_context.getNoCheck();
     ActRec* fp = vmfp();
     PC pc = vmpc();
 
@@ -560,7 +559,7 @@ class FrameRestore {
       tmp.initNumArgs(0);
       vmfp() = &tmp;
       vmpc() = preClass->unit()->at(preClass->getOffset());
-      ec->pushLocalsAndIterators(tmp.m_func);
+      pushLocalsAndIterators(tmp.m_func);
     } else {
       m_top = nullptr;
       m_fp = nullptr;
@@ -579,7 +578,6 @@ class FrameRestore {
   ActRec* m_fp;
   PC      m_pc;
 };
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class lookup.

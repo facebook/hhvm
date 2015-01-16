@@ -120,8 +120,6 @@ const bool skipCufOnInvalidParams = false;
 // to be closer to other bytecode.cpp data.
 bool RuntimeOption::RepoAuthoritative = false;
 
-using std::string;
-
 using jit::mcg;
 
 #if DEBUG
@@ -757,7 +755,7 @@ static bool checkIterScope(const Func* f, Offset o, Id iterId, bool& itRef) {
 
 static void toStringFrame(std::ostream& os, const ActRec* fp,
                           int offset, const TypedValue* ftop,
-                          const string& prefix, bool isTop = true) {
+                          const std::string& prefix, bool isTop = true) {
   assert(fp);
 
   // Use depth-first recursion to output the most deeply nested stack frame
@@ -775,7 +773,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   const Func* func = fp->m_func;
   assert(func);
   func->validate();
-  string funcName(func->fullName()->data());
+  std::string funcName(func->fullName()->data());
   os << "{func:" << funcName
      << ",soff:" << fp->m_soff
      << ",this:0x" << std::hex << (fp->hasThis() ? fp->getThis() : nullptr)
@@ -837,8 +835,8 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   os << '\n';
 }
 
-string Stack::toString(const ActRec* fp, int offset,
-                       const string prefix/* = "" */) const {
+std::string Stack::toString(const ActRec* fp, int offset,
+                       const std::string prefix/* = "" */) const {
   // The only way to figure out which stack elements are activation records is
   // to follow the frame chain. However, the goal for each stack frame is to
   // print stack fragments from deepest to shallowest -- a then b in the
@@ -903,8 +901,6 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
 
 //=============================================================================
 // ExecutionContext.
-
-using namespace HPHP;
 
 ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
   ActRec* sfp = ar->sfp();
@@ -1370,7 +1366,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
 }
 
 NEVER_INLINE
-void ExecutionContext::shuffleExtraStackArgs(ActRec* ar) {
+static void shuffleExtraStackArgs(ActRec* ar) {
   const Func* func = ar->m_func;
   assert(func);
   assert(!ar->m_varEnv);
@@ -1423,7 +1419,7 @@ void ExecutionContext::shuffleExtraStackArgs(ActRec* ar) {
   }
 }
 
-void ExecutionContext::shuffleMagicArgs(ActRec* ar) {
+static void shuffleMagicArgs(ActRec* ar) {
   // We need to put this where the first argument is
   StringData* invName = ar->getInvName();
   int nargs = ar->numArgs();
@@ -1752,8 +1748,15 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
   return true;
 }
 
-void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
-                                        StackArgsState stk) {
+enum class StackArgsState { // tells prepareFuncEntry how much work to do
+  // the stack may contain more arguments than the function expects
+  Untrimmed,
+  // the stack has already been trimmed of any extra arguments, which
+  // have been teleported away into ExtraArgs and/or a variadic param
+  Trimmed
+};
+
+static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
   assert(!ar->resumed());
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
@@ -1855,9 +1858,11 @@ void ExecutionContext::syncGdbState() {
   }
 }
 
-void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr,
-                                          Resumable* resumable,
-                                          ObjectData* exception) {
+static void dispatch();
+static void enterVMAtCurPC();
+
+static void enterVMAtAsyncFunc(ActRec* enterFnAr, Resumable* resumable,
+                               ObjectData* exception) {
   assert(enterFnAr);
   assert(enterFnAr->func()->isAsync());
   assert(enterFnAr->resumed());
@@ -1883,7 +1888,7 @@ void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr,
   }
 }
 
-void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
+static void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   assert(enterFnAr);
   assert(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
@@ -1919,12 +1924,11 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   }
 }
 
-void ExecutionContext::enterVMAtCurPC() {
+static void enterVMAtCurPC() {
   assert(vmfp());
   assert(vmpc());
   assert(vmfp()->func()->contains(vmpc()));
   Stats::inc(Stats::VMEnter);
-
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
     mcg->enterTC();
   } else {
@@ -1939,16 +1943,18 @@ void ExecutionContext::enterVMAtCurPC() {
  * inside the async function must be provided. Optionally, the resumed
  * async function will throw an 'exception' upon entering VM if passed.
  */
-void ExecutionContext::enterVM(ActRec* ar, StackArgsState stk,
-                               Resumable* resumable, ObjectData* exception) {
+static void enterVM(ActRec* ar, StackArgsState stk,
+                    Resumable* resumable = nullptr,
+                    ObjectData* exception = nullptr) {
   assert(ar);
   assert(!ar->sfp());
   assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
   assert(ar->m_soff == 0);
   assert(!resumable || (stk == StackArgsState::Untrimmed));
 
-  DEBUG_ONLY int faultDepth = m_faults.size();
-  SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
+  auto ec = &*g_context;
+  DEBUG_ONLY int faultDepth = ec->m_faults.size();
+  SCOPE_EXIT { assert(ec->m_faults.size() == faultDepth); };
 
   vmFirstAR() = ar;
 
@@ -1998,9 +2004,9 @@ resume:
    * level.
    */
 
-  assert(m_faults.size() > 0);
-  Fault fault = m_faults.back();
-  m_faults.pop_back();
+  assert(ec->m_faults.size() > 0);
+  Fault fault = ec->m_faults.back();
+  ec->m_faults.pop_back();
 
   switch (fault.m_faultType) {
   case Fault::Type::UserException:
@@ -2488,9 +2494,7 @@ void ExecutionContext::clearLastError() {
 /*
  * Helper for function entry, including pseudo-main entry.
  */
-void
-ExecutionContext::pushLocalsAndIterators(const Func* func,
-                                         int nparams /*= 0*/) {
+void pushLocalsAndIterators(const Func* func, int nparams /*= 0*/) {
   // Push locals.
   for (int i = nparams; i < func->numLocals(); i++) {
     vmStack().pushUninit();
@@ -3001,7 +3005,6 @@ enum class VectorLeaveCode {
   ConsumeAll,
   LeaveLast
 };
-using CallArrOnInvalidContainer = ExecutionContext::CallArrOnInvalidContainer;
 
 template <bool setMember,
           bool warn,
@@ -6105,7 +6108,7 @@ void iopFPassM(IOP_ARGS) {
   }
 }
 
-bool ExecutionContext::doFCall(ActRec* ar, PC& pc) {
+bool doFCall(ActRec* ar, PC& pc) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->m_func->unit()->entry(),
         int(vmfp()->m_func->base()));
@@ -6123,7 +6126,7 @@ OPTBLD_INLINE void iopFCall(IOP_ARGS) {
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
-  g_context->doFCall(ar, pc);
+  doFCall(ar, pc);
 }
 
 OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
@@ -6141,7 +6144,7 @@ OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
-  g_context->doFCall(ar, pc);
+  doFCall(ar, pc);
 }
 
 OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
@@ -6174,8 +6177,17 @@ OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
   tvCopy(ret, *vmStack().allocTV());
 }
 
-bool ExecutionContext::doFCallArray(PC& pc, int numStackValues,
-                                    CallArrOnInvalidContainer onInvalid) {
+enum class CallArrOnInvalidContainer {
+  // task #1756122: warning and returning null is what we /should/ always
+  // do in call_user_func_array, but some code depends on the broken
+  // behavior of casting the list of args to FCallArray to an array.
+  CastToArray,
+  WarnAndReturnNull,
+  WarnAndContinue
+};
+
+static bool doFCallArray(PC& pc, int numStackValues,
+                         CallArrOnInvalidContainer onInvalid) {
   assert(numStackValues >= 1);
   ActRec* ar = (ActRec*)(vmStack().top() + numStackValues);
   assert(ar->numArgs() == numStackValues);
@@ -6240,7 +6252,7 @@ bool ExecutionContext::doFCallArray(PC& pc, int numStackValues,
   return true;
 }
 
-bool ExecutionContext::doFCallArrayTC(PC pc) {
+bool doFCallArrayTC(PC pc) {
   assert_native_stack_aligned();
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
@@ -6251,7 +6263,7 @@ bool ExecutionContext::doFCallArrayTC(PC pc) {
 
 OPTBLD_INLINE void iopFCallArray(IOP_ARGS) {
   pc++;
-  g_context->doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
+  doFCallArray(pc, 1, CallArrOnInvalidContainer::CastToArray);
 }
 
 OPTBLD_INLINE void iopFCallUnpack(IOP_ARGS) {
@@ -6260,8 +6272,7 @@ OPTBLD_INLINE void iopFCallUnpack(IOP_ARGS) {
   DECODE_IVA(numArgs);
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
-  g_context->doFCallArray(pc, numArgs,
-                   CallArrOnInvalidContainer::WarnAndContinue);
+  doFCallArray(pc, numArgs, CallArrOnInvalidContainer::WarnAndContinue);
 }
 
 OPTBLD_INLINE void iopCufSafeArray(IOP_ARGS) {
@@ -7271,27 +7282,24 @@ OPTBLD_INLINE void iopSilence(IOP_ARGS) {
 #undef DECODE_JMP
 #undef DECODE
 
-string
-ExecutionContext::prettyStack(const string& prefix) const {
-  if (!vmfp()) {
-    string s("__Halted");
-    return s;
-  }
+std::string prettyStack(const std::string& prefix) {
+  if (!vmfp()) return "__Halted";
   int offset = (vmfp()->m_func->unit() != nullptr)
                ? pcOff() : 0;
-  string begPrefix = prefix + "__";
-  string midPrefix = prefix + "|| ";
-  string endPrefix = prefix + "\\/";
-  string stack = vmStack().toString(vmfp(), offset, midPrefix);
+  auto begPrefix = prefix + "__";
+  auto midPrefix = prefix + "|| ";
+  auto endPrefix = prefix + "\\/";
+  auto stack = vmStack().toString(vmfp(), offset, midPrefix);
   return begPrefix + "\n" + stack + endPrefix;
 }
 
-void ExecutionContext::DumpStack() {
-  string s = g_context->prettyStack("");
-  fprintf(stderr, "%s\n", s.c_str());
+// callable from gdb
+void DumpStack() {
+  fprintf(stderr, "%s\n", prettyStack("").c_str());
 }
 
-void ExecutionContext::DumpCurUnit(int skip) {
+// callable from gdb
+void DumpCurUnit(int skip) {
   ActRec* fp = vmfp();
   Offset pc = fp->m_func->unit() ? pcOff() : 0;
   while (skip--) {
@@ -7312,7 +7320,8 @@ void ExecutionContext::DumpCurUnit(int skip) {
   std::cout << u->toString();
 }
 
-void ExecutionContext::PrintTCCallerInfo() {
+// callable from gdb
+void PrintTCCallerInfo() {
   VMRegAnchor _;
   ActRec* fp = vmfp();
   Unit* u = fp->m_func->unit();
@@ -7361,7 +7370,7 @@ condStackTraceSep(Op opcode) {
 }
 
 #define COND_STACKTRACE(pfx)\
-  ONTRACE(3, string stack = g_context->prettyStack(pfx);\
+  ONTRACE(3, auto stack = prettyStack(pfx);\
           Trace::trace("%s\n", stack.c_str());)
 
 /**
@@ -7444,7 +7453,7 @@ void dispatchImpl() {
 #define DISPATCH() do {                                                 \
     if (breakOnCtlFlow && isCtlFlow) {                                  \
       ONTRACE(1,                                                        \
-              Trace::trace("dispatch: Halt ExecutionContext::dispatch(%p)\n", \
+              Trace::trace("dispatch: Halt dispatch(%p)\n", \
                            vmfp()));                                      \
       return;                                                           \
     }                                                                   \
@@ -7456,7 +7465,7 @@ void dispatchImpl() {
     goto *optab[uint8_t(op)];                                           \
 } while (0)
 
-  ONTRACE(1, Trace::trace("dispatch: Enter ExecutionContext::dispatch(%p)\n",
+  ONTRACE(1, Trace::trace("dispatch: Enter dispatch(%p)\n",
           vmfp()));
   PC pc = vmpc();
   DISPATCH();
@@ -7491,7 +7500,7 @@ void dispatchImpl() {
 #undef DISPATCH
 }
 
-void ExecutionContext::dispatch() {
+static void dispatch() {
   dispatchImpl<false>();
 }
 
@@ -7504,7 +7513,7 @@ void switchModeForDebugger() {
   }
 }
 
-void ExecutionContext::dispatchBB() {
+void dispatchBB() {
   if (Trace::moduleEnabled(Trace::dispatchBB)) {
     auto cat = makeStaticString("dispatchBB");
     auto name = makeStaticString(show(SrcKey(vmfp()->func(), vmpc(),

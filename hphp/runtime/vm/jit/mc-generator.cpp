@@ -1231,7 +1231,7 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
   while (!start) {
     vmpc() = sk.unit()->at(sk.offset());
     INC_TPC(interp_bb);
-    g_context->dispatchBB();
+    HPHP::dispatchBB();
     if (!vmpc()) return callToExit();
     sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
     start = getTranslation(TranslArgs(sk, true));

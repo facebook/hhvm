@@ -35,6 +35,7 @@
 #include <type_traits>
 
 namespace HPHP {
+struct Resumable;
 
 /**
  * These macros allow us to easily change the arguments to iop*() opcode
@@ -1047,6 +1048,11 @@ void resetCoverageCounters();
 // The interpOne*() methods implement individual opcode handlers.
 using InterpOneFunc = void (*) (ActRec* ar, Cell* sp, Offset pcOff);
 extern InterpOneFunc interpOneEntryPoints[];
+
+bool doFCallArrayTC(PC pc);
+bool doFCall(ActRec* ar, PC& pc);
+void dispatchBB();
+void pushLocalsAndIterators(const Func* func, int nparams = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 

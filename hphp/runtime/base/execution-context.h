@@ -289,7 +289,6 @@ private:
 public:
   void requestInit();
   void requestExit();
-  void pushLocalsAndIterators(const Func* f, int nparams = 0);
   void enqueueAPCHandle(APCHandle* handle, size_t size);
 
   void manageAPCHandle();
@@ -345,11 +344,6 @@ public:
   // Get the next outermost VM frame, even across re-entry
   ActRec* getOuterVMFrame(const ActRec* ar);
 
-  std::string prettyStack(const std::string& prefix) const;
-  static void DumpStack();
-  static void DumpCurUnit(int skip = 0);
-  static void PrintTCCallerInfo();
-
   ActRec* getStackFrame();
   ObjectData* getThis();
   Class* getContextClass();
@@ -397,41 +391,13 @@ public:
   void setVar(StringData* name, const TypedValue* v);
   void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
-  bool doFCall(ActRec* ar, PC& pc);
-  bool doFCallArrayTC(PC pc);
   const Variant& getEvaledArg(const StringData* val,
                               const String& namespacedName);
 
-  enum class CallArrOnInvalidContainer {
-    // task #1756122: warning and returning null is what we /should/ always
-    // do in call_user_func_array, but some code depends on the broken
-    // behavior of casting the list of args to FCallArray to an array.
-    CastToArray,
-    WarnAndReturnNull,
-    WarnAndContinue
-  };
-  bool doFCallArray(PC& pc, int stkSize, CallArrOnInvalidContainer);
 private:
-  enum class StackArgsState { // tells prepareFuncEntry how much work to do
-    // the stack may contain more arguments than the function expects
-    Untrimmed,
-    // the stack has already been trimmed of any extra arguments, which
-    // have been teleported away into ExtraArgs and/or a variadic param
-    Trimmed
-  };
-  void enterVMAtAsyncFunc(ActRec* enterFnAr, Resumable* resumable,
-                          ObjectData* exception);
-  void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk);
-  void enterVMAtCurPC();
-  void enterVM(ActRec* ar, StackArgsState stackTrimmed,
-               Resumable* resumable = nullptr, ObjectData* exception = nullptr);
-  void doFPushCuf(PC& pc, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
-  void prepareFuncEntry(ActRec* ar, PC& pc, StackArgsState stk);
-  void shuffleMagicArgs(ActRec* ar);
-  void shuffleExtraStackArgs(ActRec* ar);
 public:
   void syncGdbState();
 
@@ -496,9 +462,6 @@ public:
     hphp_string_hash,
     hphp_string_isame
   >;
-
-  void dispatch(); // run interpreter normally.
-  void dispatchBB(); // exits if a control-flow instruction has been run.
 
 ///////////////////////////////////////////////////////////////////////////////
 // only fields past here, please.

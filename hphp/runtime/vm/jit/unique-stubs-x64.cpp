@@ -304,9 +304,8 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
 
   a.    subq   (8, rsp);  // stack parity
 
-  a.    movq   (rEC, argNumToRegName[0]);
-  assert(rPCNext == argNumToRegName[1]);
-  a.    call   (TCA(getMethodPtr(&ExecutionContext::doFCallArrayTC)));
+  a.    movq   (rPCNext, argNumToRegName[0]);
+  a.    call   (TCA(&doFCallArrayTC));
 
   a.    loadq  (rVmTl[RDS::kVmspOff], rVmSp);
 

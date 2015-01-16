@@ -9,8 +9,7 @@
  *
  */
 
-class Stream<T> {
-}
+class Stream<T> {}
 
 async function g(): Awaitable<bool> {
   return false;
@@ -18,10 +17,9 @@ async function g(): Awaitable<bool> {
 
 async function f(): Awaitable<int> {
   $x = await g();
-  if($x) {
+  if ($x) {
     return 1;
-  }
-  else {
+  } else {
     return 2;
   }
 }

@@ -17,7 +17,9 @@ class A {
 }
 
 function f(int $x): int {
-  $f = function($y) use ($x) { return $y->doStuff(); };
+  $f = function ($y) use ($x) {
+    return $y->doStuff();
+  };
   call_user_func($f, new A());
   return call_user_func($f, new A());
 }

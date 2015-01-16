@@ -9,7 +9,8 @@
  *
  */
 
-
 function build(T $x): (function(T): T) {
-  return function(T $y): T use ($x) { return $y; };
+  return function (T $y): T use ($x) {
+    return $y;
+  };
 }

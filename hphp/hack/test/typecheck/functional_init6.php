@@ -11,7 +11,6 @@
 
 // File testing corner cases for initialization of class members
 
-
 class A {
   private string $x;
 
@@ -25,7 +24,5 @@ class A {
   }
 }
 
-function nasty(A $x): void {
-}
-
+function nasty(A $x): void {}
 

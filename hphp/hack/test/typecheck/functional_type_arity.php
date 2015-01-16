@@ -9,8 +9,6 @@
  *
  */
 
-class A<T1, T2> {
-}
+class A<T1, T2> {}
 
-class B extends A<int> {
-}
+class B extends A<int> {}

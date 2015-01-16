@@ -9,13 +9,17 @@
  *
  */
 
-class A { }
-class B extends A { }
+class A {}
+class B extends A {}
 
 function f((function(B, ...): string) $g): string {
   return $g(new B());
 }
 
 function test(): void {
-  f(function(A $x): string { return "..."; });
+  f(
+    function (A $x): string {
+      return "...";
+    },
+  );
 }

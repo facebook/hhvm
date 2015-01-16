@@ -1,4 +1,4 @@
-File "functional_anon_fun.php", line 22, characters 10-36:
+File "functional_anon_fun.php", line 24, characters 10-36:
 Invalid return type (Typing[4110])
 File "functional_anon_fun.php", line 19, characters 21-23:
 This is an int

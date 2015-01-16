@@ -11,7 +11,7 @@
 
 class Box<T> {
   private T $x;
-  
+
   public function __construct(T $x) {
     $this->x = $x;
   }
@@ -25,18 +25,16 @@ class Box<T> {
   }
 }
 
-class Ent {
-}
+class Ent {}
 
 class EntUser extends Ent {
 
-  public function iAmUser(): void { return; }
+  public function iAmUser(): void {
+    return;
+  }
 }
 
-class EntPhoto extends Ent {
-}
+class EntPhoto extends Ent {}
 
-class BoxEnt extends Box<Ent> {
-}
-
+class BoxEnt extends Box<Ent> {}
 

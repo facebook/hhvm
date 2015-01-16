@@ -32,6 +32,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class StreamContext;
+class StreamFilter;
 
 extern int __thread s_pcloseRet;
 
@@ -205,11 +206,11 @@ struct File : SweepableResourceData {
   String getStreamType() const { return m_streamType; }
   Resource &getStreamContext() { return m_streamContext; }
   void setStreamContext(Resource &context) { m_streamContext = context; }
-  void appendReadFilter(Resource &filter);
-  void appendWriteFilter(Resource &filter);
-  void prependReadFilter(Resource &filter);
-  void prependWriteFilter(Resource &filter);
-  bool removeFilter(Resource &filter);
+  void appendReadFilter(const SmartPtr<StreamFilter>& filter);
+  void appendWriteFilter(const SmartPtr<StreamFilter>& filter);
+  void prependReadFilter(const SmartPtr<StreamFilter>& filter);
+  void prependWriteFilter(const SmartPtr<StreamFilter>& filter);
+  bool removeFilter(const SmartPtr<StreamFilter>& filter);
 
   int64_t bufferedLen() { return m_data->m_writepos - m_data->m_readpos; }
 
@@ -313,8 +314,8 @@ private:
   StringData* m_wrapperType;
   StringData* m_streamType;
   Resource m_streamContext;
-  smart::list<Resource> m_readFilters;
-  smart::list<Resource> m_writeFilters;
+  smart::list<SmartPtr<StreamFilter>> m_readFilters;
+  smart::list<SmartPtr<StreamFilter>> m_writeFilters;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

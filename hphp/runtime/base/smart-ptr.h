@@ -183,6 +183,11 @@ private:
   }
 };
 
+template <typename T, typename Y>
+inline bool operator==(const SmartPtr<T>& a, const SmartPtr<Y>& b) {
+  return a.get() == b.get();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // AtomicSmartPtr
 

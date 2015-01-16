@@ -218,11 +218,11 @@ void File::invokeFiltersOnClose() {
       writeImpl(buf.data(), buf.length());
     }
   }
-  for (auto filter: m_readFilters) {
-    filter.getTyped<StreamFilter>()->invokeOnClose();
+  for (const auto& filter: m_readFilters) {
+    filter->invokeOnClose();
   }
-  for (auto filter: m_writeFilters) {
-    filter.getTyped<StreamFilter>()->invokeOnClose();
+  for (const auto& filter: m_writeFilters) {
+    filter->invokeOnClose();
   }
 }
 
@@ -476,46 +476,40 @@ bool File::stat(struct stat *sb) {
   return false;
 }
 
-void File::appendReadFilter(Resource& resource) {
-  assert(resource.is<StreamFilter>());
-  m_readFilters.push_back(resource);
+void File::appendReadFilter(const SmartPtr<StreamFilter>& filter) {
+  m_readFilters.push_back(filter);
 }
 
-void File::appendWriteFilter(Resource& resource) {
-  assert(resource.is<StreamFilter>());
-  m_writeFilters.push_back(resource);
+void File::appendWriteFilter(const SmartPtr<StreamFilter>& filter) {
+  m_writeFilters.push_back(filter);
 }
 
-void File::prependReadFilter(Resource& resource) {
-  assert(resource.is<StreamFilter>());
-  m_readFilters.push_front(resource);
+void File::prependReadFilter(const SmartPtr<StreamFilter>& filter) {
+  m_readFilters.push_front(filter);
 }
 
-void File::prependWriteFilter(Resource& resource) {
-  assert(resource.is<StreamFilter>());
-  m_writeFilters.push_front(resource);
+void File::prependWriteFilter(const SmartPtr<StreamFilter>& filter) {
+  m_writeFilters.push_front(filter);
 }
 
-bool File::removeFilter(Resource& resource) {
-  assert(resource.is<StreamFilter>());
-  ResourceData* rd = resource.get();
+bool File::removeFilter(const SmartPtr<StreamFilter>& filter) {
   for (auto it = m_readFilters.begin(); it != m_readFilters.end(); ++it) {
-    if (it->get() == rd) {
+    if (*it == filter) {
       m_readFilters.erase(it);
       return true;
     }
   }
   for (auto it = m_writeFilters.begin(); it != m_writeFilters.end(); ++it) {
-    if (it->get() == rd) {
-      std::list<Resource> closing_filters;
-      closing_filters.push_back(rd);
+    if (*it == filter) {
+      std::list<SmartPtr<StreamFilter>> closing_filters;
+      closing_filters.push_back(filter);
       String result(applyFilters(empty_string_ref,
                                  closing_filters,
                                  /* closing = */ true));
-      std::list<Resource> later_filters;
+      std::list<SmartPtr<StreamFilter>> later_filters;
       auto dupit(it);
       for (++dupit; dupit != m_writeFilters.end(); ++dupit) {
-        later_filters.push_back(dupit->get());
+        later_filters.push_back(*dupit);
       }
       result = applyFilters(result, later_filters, false);
       if (!result.empty()) {
@@ -1048,20 +1042,19 @@ String File::applyFilters(const String& buffer,
   if (buffer.empty() && !closing) {
     return buffer;
   }
-  Resource in(null_resource);
-  Resource out;
+  SmartPtr<BucketBrigade> in;
+  SmartPtr<BucketBrigade> out;
+
   if (buffer.empty()) {
-    out = Resource(newres<BucketBrigade>());
+    out = makeSmartPtr<BucketBrigade>();
   } else {
-    out = Resource(newres<BucketBrigade>(buffer));
+    out = makeSmartPtr<BucketBrigade>(buffer);
   }
 
-  for (Resource& resource: filters) {
+  for (const auto& filter : filters) {
     in = out;
-    out = Resource(newres<BucketBrigade>());
+    out = makeSmartPtr<BucketBrigade>();
 
-    auto filter = resource.getTyped<StreamFilter>();
-    assert(filter);
     auto result = filter->invokeFilter(in, out, closing);
     // PSFS_ERR_FATAL doesn't raise a fatal in Zend - appears to be
     // treated the same as PSFS_FEED_ME
@@ -1070,9 +1063,8 @@ String File::applyFilters(const String& buffer,
     }
   }
 
-  auto bb = out.getTyped<BucketBrigade>();
-  assert(bb);
-  return bb->createString();
+  assert(out);
+  return out->createString();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

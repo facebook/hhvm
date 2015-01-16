@@ -296,7 +296,7 @@ void BuiltinFiles::requestShutdown() {
 
 const Variant& BuiltinFiles::GetSTDIN() {
   if (g_builtin_files->m_stdin.isNull()) {
-    BuiltinFile *f = newres<BuiltinFile>(stdin);
+    auto f = makeSmartPtr<BuiltinFile>(stdin);
     g_builtin_files->m_stdin = f;
     f->o_setId(1);
     assert(f->o_getId() == 1);
@@ -306,7 +306,7 @@ const Variant& BuiltinFiles::GetSTDIN() {
 
 const Variant& BuiltinFiles::GetSTDOUT() {
   if (g_builtin_files->m_stdout.isNull()) {
-    BuiltinFile *f = newres<BuiltinFile>(stdout);
+    auto f = makeSmartPtr<BuiltinFile>(stdout);
     g_builtin_files->m_stdout = f;
     f->o_setId(2);
     assert(f->o_getId() == 2);
@@ -316,7 +316,7 @@ const Variant& BuiltinFiles::GetSTDOUT() {
 
 const Variant& BuiltinFiles::GetSTDERR() {
   if (g_builtin_files->m_stderr.isNull()) {
-    BuiltinFile *f = newres<BuiltinFile>(stderr);
+    auto f = makeSmartPtr<BuiltinFile>(stderr);
     g_builtin_files->m_stderr = f;
     f->o_setId(3);
     assert(f->o_getId() == 3);

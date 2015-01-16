@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <limits>
 #include <type_traits>
+#include <unordered_set>
 #include <vector>
 
 #include <folly/Optional.h>
@@ -188,6 +189,11 @@ struct BlobEncoder {
     encodeContainer(set, "set");
   }
 
+  template<class V, class H, class C>
+  void encode(const std::unordered_set<V,H,C>& set) {
+    encodeContainer(set, "set");
+  }
+
   template<class T>
   BlobEncoder& operator()(const T& t) {
     encode(t);
@@ -331,6 +337,17 @@ struct BlobDecoder {
 
   template<class V, class H, class C>
   void decode(hphp_hash_set<V,H,C>& set) {
+    uint32_t size;
+    decode(size);
+    for (uint32_t i = 0; i < size; ++i) {
+      V val;
+      decode(val);
+      set.insert(val);
+    }
+  }
+
+  template<class V, class H, class C>
+  void decode(std::unordered_set<V,H,C>& set) {
     uint32_t size;
     decode(size);
     for (uint32_t i = 0; i < size; ++i) {

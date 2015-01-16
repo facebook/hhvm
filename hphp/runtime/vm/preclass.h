@@ -31,6 +31,7 @@
 #include "hphp/util/range.h"
 
 #include <type_traits>
+#include <unordered_set>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,11 +49,9 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using TraitNameSet = hphp_hash_set<
-  LowStringPtr,
-  string_data_hash,
-  string_data_isame
->;
+using TraitNameSet = std::unordered_set<LowStringPtr,
+                                        string_data_hash,
+                                        string_data_isame>;
 
 using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
 using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;

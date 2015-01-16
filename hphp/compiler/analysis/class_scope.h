@@ -18,22 +18,26 @@
 #define incl_HPHP_CLASS_SCOPE_H_
 
 #include "hphp/compiler/analysis/block_scope.h"
+#include "hphp/compiler/analysis/exceptions.h"
+#include "hphp/compiler/analysis/function_container.h"
+#include "hphp/compiler/expression/user_attribute.h"
+#include "hphp/compiler/json.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/statement/class_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/trait_alias_statement.h"
+#include "hphp/compiler/statement/trait_prec_statement.h"
+
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/text-util.h"
+
 #include <list>
 #include <map>
 #include <set>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include "hphp/compiler/analysis/function_container.h"
-#include "hphp/compiler/statement/class_statement.h"
-#include "hphp/compiler/statement/method_statement.h"
-#include "hphp/compiler/statement/trait_prec_statement.h"
-#include "hphp/compiler/statement/trait_alias_statement.h"
-#include "hphp/compiler/expression/user_attribute.h"
-#include "hphp/compiler/json.h"
-#include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
-#include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/exceptions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -405,6 +409,156 @@ public:
   }
 
 private:
+  void informClosuresAboutScopeClone(ConstructPtr root,
+                                     FunctionScopePtr outerScope,
+                                     AnalysisResultPtr ar);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Trait flattening.
+
+public:
+  struct TraitMethod {
+    TraitMethod(ClassScopePtr trait_,
+                MethodStatementPtr method_,
+                ModifierExpressionPtr modifiers_,
+                StatementPtr ruleStmt_)
+      : trait(trait_)
+      , method(method_)
+      , originalName(method_->getOriginalName())
+      , modifiers(modifiers_ ? modifiers_ : method_->getModifiers())
+      , ruleStmt(ruleStmt_)
+    {}
+
+    TraitMethod(ClassScopePtr trait_,
+                MethodStatementPtr method_,
+                ModifierExpressionPtr modifiers_,
+                StatementPtr ruleStmt_,
+                const std::string& originalName_)
+      : trait(trait_)
+      , method(method_)
+      , originalName(originalName_)
+      , modifiers(modifiers_ ? modifiers_ : method_->getModifiers())
+      , ruleStmt(ruleStmt_)
+    {}
+
+    using class_type = ClassScopePtr;
+    using method_type = MethodStatementPtr;
+    using modifiers_type = ModifierExpressionPtr;
+
+    const ClassScopePtr      trait;
+    const MethodStatementPtr method;
+    const std::string        originalName;
+    ModifierExpressionPtr    modifiers;
+    const StatementPtr       ruleStmt; // for methods imported via aliasing
+  };
+
+private:
+  struct TMIOps {
+    using prec_type  = TraitPrecStatementPtr;
+    using alias_type = TraitAliasStatementPtr;
+
+    static bool strEmpty(const std::string& str)    { return str.empty(); }
+    static std::string clsName(ClassScopePtr cls)   { return cls->getName(); }
+
+    static bool isTrait(ClassScopePtr cls)          { return cls->isTrait(); }
+    static bool isAbstract(ModifierExpressionPtr m) { return m->isAbstract(); }
+
+    static bool exclude(const std::string&) { return false; }
+
+    static TraitMethod traitMethod(ClassScopePtr traitCls,
+                                   MethodStatementPtr methStmt,
+                                   alias_type stmt) {
+      return TraitMethod(traitCls, methStmt, stmt->getModifiers(),
+                         stmt, stmt->getNewMethodName());
+    }
+
+    static std::string precMethodName(prec_type stmt) {
+      return toLower(stmt->getMethodName());
+    }
+    static std::string precSelectedTraitName(prec_type stmt) {
+      return toLower(stmt->getTraitName());
+    }
+    static std::unordered_set<std::string> precOtherTraitNames(prec_type stmt) {
+      std::unordered_set<string> otherTraitNames;
+      stmt->getOtherTraitNames(otherTraitNames);
+      return otherTraitNames;
+    }
+
+    static std::string aliasTraitName(alias_type stmt) {
+      return toLower(stmt->getTraitName());
+    }
+    static std::string aliasOrigMethodName(alias_type stmt) {
+      return toLower(stmt->getMethodName());
+    }
+    static std::string aliasNewMethodName(alias_type stmt) {
+      return toLower(stmt->getNewMethodName());
+    }
+    static ModifierExpressionPtr aliasModifiers(alias_type stmt) {
+      return stmt->getModifiers();
+    }
+
+    static void addTraitAlias(ClassScope* cs, alias_type stmt,
+                              ClassScopePtr traitCls);
+
+    static ClassScopePtr findSingleTraitWithMethod(ClassScope* cs,
+                                              const std::string& origMethName);
+    static ClassScopePtr findTraitClass(ClassScope* cs,
+                                        const std::string& traitName);
+    static MethodStatementPtr findTraitMethod(ClassScope* cs,
+                                              ClassScopePtr traitCls,
+                                              const std::string& origMethName);
+
+    static void errorUnknownMethod(prec_type stmt) {
+      Compiler::Error(Compiler::UnknownObjectMethod, stmt);
+    }
+    static void errorUnknownMethod(alias_type stmt,
+                                   const std::string& methName) {
+      stmt->analysisTimeFatal(Compiler::UnknownTraitMethod,
+                              Strings::TRAITS_UNKNOWN_TRAIT_METHOD,
+                              methName.c_str());
+    }
+    template <class Stmt>
+    static void errorUnknownTrait(Stmt stmt,
+                                  const std::string& traitName) {
+      stmt->analysisTimeFatal(Compiler::UnknownTrait,
+                              Strings::TRAITS_UNKNOWN_TRAIT,
+                              traitName.c_str());
+    }
+    static void errorDuplicateMethod(const ClassScope* cs,
+                                     const std::string& methName) {
+      cs->getStmt()->analysisTimeFatal(
+        Compiler::MethodInMultipleTraits,
+        Strings::METHOD_IN_MULTIPLE_TRAITS,
+        methName.c_str()
+      );
+    }
+  };
+
+  friend class TMIOps;
+
+public:
+  using TMIData = TraitMethodImportData<TraitMethod, TMIOps>;
+
+private:
+  MethodStatementPtr importTraitMethod(
+      const TraitMethod& traitMethod,
+      AnalysisResultPtr ar,
+      std::string methName,
+      const std::map<string, MethodStatementPtr>& importedTraitMethods);
+  void applyTraitRules(TMIData& tmid);
+
+  bool hasMethod(const std::string &methodName) const;
+  bool usesTrait(const std::string &traitName) const;
+
+  void importTraitProperties(AnalysisResultPtr ar);
+  void importClassRequirements(AnalysisResultPtr ar, ClassScopePtr trait);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Data members.
+
+private:
   // need to maintain declaration order for ClassInfo map
   FunctionScopePtrVec m_functionsVec;
 
@@ -416,32 +570,7 @@ private:
   boost::container::flat_set<std::string> m_requiredExtends;
   boost::container::flat_set<std::string> m_requiredImplements;
   // m_traitAliases is used to support ReflectionClass::getTraitAliases
-  std::vector<std::pair<std::string, std::string> > m_traitAliases;
-
-  struct TraitMethod {
-    const ClassScopePtr      m_trait;
-    const MethodStatementPtr m_method;
-    const std::string        m_originalName;
-    ModifierExpressionPtr    m_modifiers;
-    const StatementPtr       m_ruleStmt; // for methods imported via aliasing
-    TraitMethod(ClassScopePtr trait, MethodStatementPtr method,
-                ModifierExpressionPtr modifiers, StatementPtr ruleStmt) :
-        m_trait(trait), m_method(method),
-        m_originalName(method->getOriginalName()), m_modifiers(modifiers),
-        m_ruleStmt(ruleStmt) {
-    }
-    TraitMethod(ClassScopePtr trait, MethodStatementPtr method,
-                ModifierExpressionPtr modifiers, StatementPtr ruleStmt,
-                const std::string &originalName) :
-        m_trait(trait), m_method(method), m_originalName(originalName),
-        m_modifiers(modifiers), m_ruleStmt(ruleStmt) {
-    }
-  };
-
-  typedef std::list<TraitMethod> TraitMethodList;
-  typedef std::map<std::string, TraitMethodList> MethodToTraitListMap;
-  MethodToTraitListMap m_importMethToTraitMap;
-  typedef std::map<std::string, MethodStatementPtr> ImportedMethodMap;
+  std::vector<std::pair<std::string, std::string>> m_traitAliases;
 
   mutable int m_attribute;
   int m_redeclaring; // multiple definition of the same class
@@ -466,49 +595,6 @@ private:
 
   // holds the fact that accessing this class declaration is a fatal error
   const StringData* m_fatal_error_msg = nullptr;
-
-  void addImportTraitMethod(const TraitMethod &traitMethod,
-                            const std::string &methName);
-  void informClosuresAboutScopeClone(ConstructPtr root,
-                                     FunctionScopePtr outerScope,
-                                     AnalysisResultPtr ar);
-
-  void setImportTraitMethodModifiers(const std::string &methName,
-                                     ClassScopePtr traitCls,
-                                     ModifierExpressionPtr modifiers);
-
-  MethodStatementPtr importTraitMethod(const TraitMethod&  traitMethod,
-                                       AnalysisResultPtr   ar,
-                                       std::string         methName,
-                                       const ImportedMethodMap &
-                                       importedTraitMethods);
-
-  void importTraitProperties(AnalysisResultPtr ar);
-
-  void findTraitMethodsToImport(AnalysisResultPtr ar, ClassScopePtr trait);
-
-  void importClassRequirements(AnalysisResultPtr ar, ClassScopePtr trait);
-
-  MethodStatementPtr findTraitMethod(AnalysisResultPtr ar,
-                                     ClassScopePtr trait,
-                                     const std::string &methodName,
-                                     std::set<ClassScopePtr> &visitedTraits);
-
-  void applyTraitRules(AnalysisResultPtr ar);
-
-  void applyTraitPrecRule(TraitPrecStatementPtr stmt);
-
-  void applyTraitAliasRule(AnalysisResultPtr ar, TraitAliasStatementPtr stmt);
-
-  ClassScopePtr findSingleTraitWithMethod(AnalysisResultPtr ar,
-                                          const std::string &methodName) const;
-
-  void removeSpareTraitAbstractMethods(AnalysisResultPtr ar);
-
-  bool usesTrait(const std::string &traitName) const;
-
-  bool hasMethod(const std::string &methodName) const;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

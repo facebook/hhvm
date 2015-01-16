@@ -3370,6 +3370,14 @@ bool HHVM_FUNCTION(imagesetbrush,
   return true;
 }
 
+bool HHVM_FUNCTION(imagesetinterpolation,
+    const Resource& image, int64_t method /*=GD_BILINEAR_FIXED*/) {
+  gdImagePtr im = image.getTyped<Image>()->get();
+  if (!im) return false;
+  if (method == -1) method = GD_BILINEAR_FIXED;
+  return gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method);
+}
+
 Variant HHVM_FUNCTION(imagecreate, int64_t width, int64_t height) {
   gdImagePtr im;
   if (width <= 0 || height <= 0 || width >= INT_MAX || height >= INT_MAX) {
@@ -8197,6 +8205,7 @@ class GdExtension final : public Extension {
     HHVM_FE(imagerotate);
     HHVM_FE(imagesavealpha);
     HHVM_FE(imagesetbrush);
+    HHVM_FE(imagesetinterpolation);
     HHVM_FE(imagesetpixel);
     HHVM_FE(imagesetstyle);
     HHVM_FE(imagesetthickness);

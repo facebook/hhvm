@@ -211,6 +211,24 @@ public:
    */
   void appendBlock(Block* block);
 
+  /*
+   * Set the block to branch to in case a guard fails.
+   */
+  void setGuardFailBlock(Block* block);
+
+  /*
+   * Resets the guard failure block to nullptr.
+   */
+  void resetGuardFailBlock();
+
+  /*
+   * Returns the block to branch to in case of a guard failure.  This
+   * returns nullptr if no such block has been set, and therefore
+   * guard failures should end the region and perform a service
+   * request.
+   */
+  Block* guardFailBlock() const;
+
 public:
   /*
    * To emit code to a block other than the current block, call pushBlock(),
@@ -324,7 +342,7 @@ private:
   Block* m_curBlock;
   ExnStackState m_exnStack{0, 0, 0, EvalStack{}, nullptr};
 
-  bool m_enableSimplification;
+  bool m_enableSimplification{false};
   bool m_constrainGuards;
 
   GuardConstraints m_constraints;
@@ -334,6 +352,11 @@ private:
   // TODO(t3730559): Offset is used here since it's passed from
   // emitJmp*, but SrcKey might be better in case of inlining.
   jit::flat_map<Offset,Block*> m_offsetToBlockMap;
+
+  // Keeps the block to branch to (if any) in case a guard fails.
+  // This holds nullptr if the guard failures should perform a service
+  // request (REQ_RETRANSLATE or REQ_BIND_JMP).
+  Block* m_guardFailBlock{nullptr};
 };
 
 //////////////////////////////////////////////////////////////////////

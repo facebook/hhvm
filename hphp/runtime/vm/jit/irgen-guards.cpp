@@ -43,21 +43,27 @@ void profiledGuard(HTS& env,
   auto doGuard = [&] (Type type) {
     switch (kind) {
     case ProfGuard::CheckLoc:
-      gen(env, CheckLoc, type, LocalId(id), checkExit, fp(env));
-      return;
     case ProfGuard::GuardLoc:
-      gen(env, GuardLoc, type, LocalId(id), fp(env), sp(env));
+      if (auto failBlock = env.irb->guardFailBlock()) {
+        gen(env, CheckLoc, type, LocalId(id), failBlock, fp(env));
+      } else if (kind == ProfGuard::CheckLoc) {
+        gen(env, CheckLoc, type, LocalId(id), checkExit, fp(env));
+      } else {
+        gen(env, GuardLoc, type, LocalId(id), fp(env), sp(env));
+      }
       return;
     case ProfGuard::CheckStk:
     case ProfGuard::GuardStk:
       {
         // Adjust 'id' to get an offset from the current m_irb->sp().
         auto const adjOff = offsetFromSP(env, id);
-        if (kind == ProfGuard::CheckStk) {
+        if (auto failBlock = env.irb->guardFailBlock()) {
+          gen(env, CheckStk, type, StackOffset { adjOff }, failBlock, sp(env));
+        } else if (kind == ProfGuard::CheckStk) {
           gen(env, CheckStk, type, StackOffset { adjOff }, checkExit, sp(env));
-          return;
+        } else {
+          gen(env, GuardStk, type, StackOffset { adjOff }, sp(env), fp(env));
         }
-        gen(env, GuardStk, type, StackOffset { adjOff }, sp(env), fp(env));
         return;
       }
     }
@@ -232,7 +238,16 @@ void refCheckHelper(HTS& env,
     }
 
     auto const vals64 = packBitVec(vals, i);
-    if (dest == -1) {
+    if (auto failBlock = env.irb->guardFailBlock()) {
+      gen(env,
+          CheckRefs,
+          failBlock,
+          funcPtr,
+          nParams,
+          cns(env, i),
+          cns(env, mask64),
+          cns(env, vals64));
+    } else if (dest == -1) {
       assert(offsetFromSP(env, 0) == 0);
       gen(env,
           GuardRefs,
@@ -292,7 +307,9 @@ void checkTypeStack(HTS& env, uint32_t idx, Type type, Offset dest) {
     return;
   }
 
-  auto const exit = makeExit(env, dest);
+  auto exit = env.irb->guardFailBlock();
+  if (exit == nullptr) exit = makeExit(env, dest);
+
   if (idx < env.irb->evalStack().size()) {
     FTRACE(1, "checkTypeStack({}): generating CheckType for {}\n",
            idx, type.toString());

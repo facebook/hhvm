@@ -265,6 +265,11 @@ bool ProfData::isKindProfile(TransID id) const {
   return m_transRecs[id]->kind() == TransKind::Profile;
 }
 
+int64_t ProfData::absTransCounter(TransID id) const {
+  assert(id < m_numTrans);
+  return RuntimeOption::EvalJitPGOThreshold - m_counters.get(id);
+}
+
 int64_t ProfData::transCounter(TransID id) const {
   assert(id < m_numTrans);
   return m_counters.get(id);

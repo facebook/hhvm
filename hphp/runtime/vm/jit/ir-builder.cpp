@@ -67,7 +67,6 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   , m_curMarker(initMarker)
   , m_state(initMarker)
   , m_curBlock(m_unit.entry())
-  , m_enableSimplification(false)
   , m_constrainGuards(shouldHHIRRelaxGuards())
 {
   m_state.setBuilding();
@@ -180,6 +179,18 @@ void IRBuilder::appendBlock(Block* block) {
   // Load up the state for the new block.
   m_state.startBlock(block, m_curMarker);
   m_curBlock = block;
+}
+
+void IRBuilder::setGuardFailBlock(Block* block) {
+  m_guardFailBlock = block;
+}
+
+void IRBuilder::resetGuardFailBlock() {
+  m_guardFailBlock = nullptr;
+}
+
+Block* IRBuilder::guardFailBlock() const {
+  return m_guardFailBlock;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -300,7 +300,7 @@ cdf_read(const cdf_info_t *info, off_t off, void *buf, size_t len)
     return -1;
   }
 
-  if (info->i_buf != NULL && info->i_len >= siz) {
+  if (info->i_buf != nullptr && info->i_len >= siz) {
     (void)memcpy(buf, &info->i_buf[off], len);
     return (ssize_t)len;
   }
@@ -407,7 +407,7 @@ cdf_read_sat(const cdf_info_t *info, cdf_header_t *h, cdf_sat_t *sat)
   DPRINTF(("sat_len = %" SIZE_T_FORMAT "u ss = %" SIZE_T_FORMAT "u\n",
       sat->sat_len, ss));
   if ((sat->sat_tab = CAST(cdf_secid_t *, calloc(sat->sat_len, ss)))
-      == NULL)
+      == nullptr)
     return -1;
 
   for (i = 0; i < __arraycount(h->h_master_sat); i++) {
@@ -420,7 +420,7 @@ cdf_read_sat(const cdf_info_t *info, cdf_header_t *h, cdf_sat_t *sat)
     }
   }
 
-  if ((msa = CAST(cdf_secid_t *, calloc(1, ss))) == NULL)
+  if ((msa = CAST(cdf_secid_t *, calloc(1, ss))) == nullptr)
     goto out1;
 
   mid = h->h_secid_first_sector_in_master_sat;
@@ -505,7 +505,7 @@ cdf_read_long_sector_chain(const cdf_info_t *info, const cdf_header_t *h,
     return -1;
 
   scn->sst_tab = calloc(scn->sst_len, ss);
-  if (scn->sst_tab == NULL)
+  if (scn->sst_tab == nullptr)
     return -1;
 
   for (j = i = 0; sid >= 0; i++, j++) {
@@ -547,11 +547,11 @@ cdf_read_short_sector_chain(const cdf_header_t *h,
   scn->sst_len = cdf_count_chain(ssat, sid, CDF_SEC_SIZE(h));
   scn->sst_dirlen = len;
 
-  if (sst->sst_tab == NULL || scn->sst_len == (size_t)-1)
+  if (sst->sst_tab == nullptr || scn->sst_len == (size_t)-1)
     return -1;
 
   scn->sst_tab = calloc(scn->sst_len, ss);
-  if (scn->sst_tab == NULL)
+  if (scn->sst_tab == nullptr)
     return -1;
 
   for (j = i = 0; sid >= 0; i++, j++) {
@@ -586,7 +586,7 @@ cdf_read_sector_chain(const cdf_info_t *info, const cdf_header_t *h,
     cdf_secid_t sid, size_t len, cdf_stream_t *scn)
 {
 
-  if (len < h->h_min_size_standard_stream && sst->sst_tab != NULL)
+  if (len < h->h_min_size_standard_stream && sst->sst_tab != nullptr)
     return cdf_read_short_sector_chain(h, ssat, sst, sid, len,
         scn);
   else
@@ -611,10 +611,10 @@ cdf_read_dir(const cdf_info_t *info, const cdf_header_t *h,
   dir->dir_len = ns * nd;
   dir->dir_tab = CAST(cdf_directory_t *,
       calloc(dir->dir_len, sizeof(dir->dir_tab[0])));
-  if (dir->dir_tab == NULL)
+  if (dir->dir_tab == nullptr)
     return -1;
 
-  if ((buf = CAST(char *, malloc(ss))) == NULL) {
+  if ((buf = CAST(char *, malloc(ss))) == nullptr) {
     free(dir->dir_tab);
     return -1;
   }
@@ -660,7 +660,7 @@ cdf_read_ssat(const cdf_info_t *info, const cdf_header_t *h,
     return -1;
 
   ssat->sat_tab = CAST(cdf_secid_t *, calloc(ssat->sat_len, ss));
-  if (ssat->sat_tab == NULL)
+  if (ssat->sat_tab == nullptr)
     return -1;
 
   for (j = i = 0; sid >= 0; i++, j++) {
@@ -691,11 +691,13 @@ out:
 
 int
 cdf_read_short_stream(const cdf_info_t *info, const cdf_header_t *h,
-    const cdf_sat_t *sat, const cdf_dir_t *dir, cdf_stream_t *scn)
+    const cdf_sat_t *sat, const cdf_dir_t *dir, cdf_stream_t *scn,
+    const cdf_directory_t **root)
 {
   size_t i;
   const cdf_directory_t *d;
 
+  *root = nullptr;
   for (i = 0; i < dir->dir_len; i++)
     if (dir->dir_tab[i].d_type == CDF_DIR_TYPE_ROOT_STORAGE)
       break;
@@ -704,6 +706,7 @@ cdf_read_short_stream(const cdf_info_t *info, const cdf_header_t *h,
   if (i == dir->dir_len)
     goto out;
   d = &dir->dir_tab[i];
+  *root = d;
 
   /* If the it is not there, just fake it; some docs don't have it */
   if (d->d_stream_first_sector < 0)
@@ -712,7 +715,7 @@ cdf_read_short_stream(const cdf_info_t *info, const cdf_header_t *h,
   return  cdf_read_long_sector_chain(info, h, sat,
       d->d_stream_first_sector, d->d_size, scn);
 out:
-  scn->sst_tab = NULL;
+  scn->sst_tab = nullptr;
   scn->sst_len = 0;
   scn->sst_dirlen = 0;
   return 0;
@@ -799,7 +802,7 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
     inp = CAST(cdf_property_info_t *,
         malloc(*maxcount * sizeof(*inp)));
   }
-  if (inp == NULL)
+  if (inp == nullptr)
     goto out;
   *info = inp;
   inp += *count;
@@ -897,7 +900,7 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
         *maxcount += nelements;
         inp = CAST(cdf_property_info_t *,
             realloc(*info, *maxcount * sizeof(*inp)));
-        if (inp == NULL)
+        if (inp == nullptr)
           goto out;
         *info = inp;
         inp = *info + nelem;
@@ -968,7 +971,7 @@ cdf_unpack_summary_info(const cdf_stream_t *sst, const cdf_header_t *h,
   ssi->si_count = CDF_TOLE4(si->si_count);
   *count = 0;
   maxcount = 0;
-  *info = NULL;
+  *info = nullptr;
   if (cdf_read_property_info(sst, h, CDF_TOLE4(sd->sd_offset),
       info, count, &maxcount) == -1) {
     return -1;
@@ -1177,7 +1180,7 @@ cdf_dump_dir(const cdf_info_t *info, const cdf_header_t *h,
       (void)fprintf(stderr, "Storage: %d\n", d->d_storage);
       break;
     case CDF_DIR_TYPE_USER_STREAM:
-      if (sst == NULL)
+      if (sst == nullptr)
         break;
       if (cdf_read_sector_chain(info, h, sat, ssat, sst,
           d->d_stream_first_sector, d->d_size, &scn) == -1) {
@@ -1308,7 +1311,7 @@ main(int argc, char *argv[])
     return -1;
   }
 
-  info.i_buf = NULL;
+  info.i_buf = nullptr;
   info.i_len = 0;
   for (i = 1; i < argc; i++) {
     if ((info.i_fd = open(argv[1], O_RDONLY)) == -1)

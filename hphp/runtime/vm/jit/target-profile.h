@@ -234,17 +234,14 @@ struct StructArrayProfile {
   Shape* shape{nullptr}; // Never access this directly. Use getShape instead.
 
   bool isEmpty() const {
-    assert(!!numShapesSeen == !!shape);
     return !numShapesSeen;
   }
 
   bool isMonomorphic() const {
-    assert(!!numShapesSeen == !!shape);
     return numShapesSeen == 1;
   }
 
   bool isPolymorphic() const {
-    assert(!!numShapesSeen == !!shape);
     return numShapesSeen > 1;
   }
 

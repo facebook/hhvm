@@ -440,6 +440,7 @@ SSATmp* getBase(MTS& env, TypeConstraint tc) {
 SSATmp* getKey(MTS& env) {
   auto key = getInput(env, env.iInd, DataTypeSpecific);
   auto const keyType = key->type();
+
   assert(keyType.isBoxed() || keyType.notBoxed());
   if (keyType.isBoxed()) {
     key = gen(env, LdRef, Type::InitCell, key);

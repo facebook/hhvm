@@ -710,11 +710,8 @@ struct LLVMEmitter {
       auto const recs = parseLocRecs(secLocRecs->data.get(),
                                      secLocRecs->size);
       FTRACE(2, "LLVM experimental locrecs:\n{}", show(recs));
-      auto it = recs.functionRecords.find(funcStart);
-      if (it != recs.functionRecords.end()) {
-        processFixups(it->second, funcStart);
-        processSvcReqs(it->second, funcStart);
-      }
+      processFixups(recs);
+      processSvcReqs(recs);
     }
 
     if (auto secGEH = tcMM->getDataSection(".gcc_except_table")) {
@@ -729,14 +726,12 @@ struct LLVMEmitter {
    *
    * NB: LLVM may optimize away call instructions.
    */
-  void processFixups(const LocRecs::FunctionRecord& funcRec,
-                     uint8_t* funcStart) {
+  void processFixups(const LocRecs& locRecs) {
     for (auto& fix : m_fixups) {
-      auto it = funcRec.records.find(fix.id);
-      if (it == funcRec.records.end()) continue;
-
-      for (auto& record : it->second) {
-        auto ip = funcStart + record.offset;
+      auto it = locRecs.records.find(fix.id);
+      if (it == locRecs.records.end()) continue;
+      for (auto const& record : it->second) {
+        uint8_t* ip = record.address;
         DecodedInstruction di(ip);
         if (di.isCall()) {
           auto afterCall = ip + di.size();
@@ -749,27 +744,17 @@ struct LLVMEmitter {
   }
 
   template<typename L>
-  void visitJmps(uint8_t* funcStart,
-                 const jit::vector<LocRecs::LocationRecord>& records,
-                 uint16_t id,
+  void visitJmps(const jit::vector<LocRecs::LocationRecord>& records,
                  L body) {
     for (auto& record : records) {
-      auto ip = funcStart + record.offset;
+      uint8_t* ip = record.address;
       DecodedInstruction di(ip);
       if (di.isJmp()) body(ip);
     }
   }
 
-  void processSvcReqs(const LocRecs::FunctionRecord& funcRec,
-                      uint8_t* funcStart) {
+  void processSvcReqs(const LocRecs& locRecs) {
     for (auto& req : m_bindjmps) {
-      auto it = funcRec.records.find(req.id);
-      if (it == funcRec.records.end()) {
-        // The code was optimized out. Free the stub.
-        mcg->freeRequestStub(req.stub);
-        continue;
-      }
-
       bool found = false;
       auto doBindJmp = [&] (uint8_t* jmpIp) {
         FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
@@ -810,19 +795,26 @@ struct LLVMEmitter {
         }
       };
 
-      visitJmps(funcStart, it->second, req.id, doBindJmp);
+      auto it = locRecs.records.find(req.id);
+      if (it != locRecs.records.end()) {
+        visitJmps(it->second, doBindJmp);
+      }
+
+      // The jump was optimized out. Free the stub.
+      if (!found) {
+        mcg->freeRequestStub(req.stub);
+      }
     }
 
     for (auto& req : m_fallbacks) {
-      auto it = funcRec.records.find(req.id);
-      if (it == funcRec.records.end()) continue;
-
       auto doFallback = [&] (uint8_t* jmpIp) {
         auto destSR = mcg->tx().getSrcRec(req.dest);
         destSR->registerFallbackJump(jmpIp);
       };
-
-      visitJmps(funcStart, it->second, req.id, doFallback);
+      auto it = locRecs.records.find(req.id);
+      if (it != locRecs.records.end()) {
+        visitJmps(it->second, doFallback);
+      }
     }
   }
 

@@ -884,7 +884,7 @@ bool DateTime::fromString(const String& input, SmartPtr<TimeZone> tz,
 
   m_time = TimePtr(t, time_deleter());
   if (t->tz_info != m_tz->get()) {
-    m_tz = newres<TimeZone>(t->tz_info);
+    m_tz = makeSmartPtr<TimeZone>(t->tz_info);
   }
   return true;
 }

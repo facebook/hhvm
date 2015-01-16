@@ -1333,7 +1333,8 @@ static Variant HHVM_FUNCTION(imap_open, const String& mailbox,
     return false;
   }
 
-  return newres<ImapStream>(stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL);
+  return Variant(makeSmartPtr<ImapStream>(
+                   stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL));
 }
 
 static bool HHVM_FUNCTION(imap_ping, const Resource& imap_stream) {

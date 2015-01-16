@@ -68,7 +68,7 @@ static Variant HHVM_FUNCTION(finfo_open,
     return false;
   }
 
-  return newres<FileinfoResource>(magic);
+  return Variant(makeSmartPtr<FileinfoResource>(magic));
 }
 
 static bool HHVM_FUNCTION(finfo_close, const Resource& finfo) {

@@ -149,10 +149,10 @@ Variant HHVM_FUNCTION(msg_get_queue,
       return false;
     }
   }
-  MessageQueue *q = newres<MessageQueue>();
+  auto q = makeSmartPtr<MessageQueue>();
   q->key = key;
   q->id = id;
-  return Resource(q);
+  return Variant(std::move(q));
 }
 
 bool HHVM_FUNCTION(msg_queue_exists,
@@ -523,7 +523,7 @@ Variant HHVM_FUNCTION(sem_get,
     }
   }
 
-  auto sem_ptr = newres<Semaphore>();
+  auto sem_ptr = makeSmartPtr<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
   sem_ptr->count = 0;

@@ -472,7 +472,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
                              NULL, &ldap_res);
       }
       if (rcs[i] != -1) {
-        ret.append(Resource(newres<LdapResult>(ldap_res)));
+        ret.append(Variant(makeSmartPtr<LdapResult>(ldap_res)));
       } else {
         ret.append(false);
       }
@@ -525,7 +525,7 @@ cleanup_parallel:
       }
 #endif
       parallel_search = 0;
-      ret.append(Resource(newres<LdapResult>(ldap_res)));
+      ret.append(Variant(makeSmartPtr<LdapResult>(ldap_res)));
     }
   }
 cleanup:
@@ -618,8 +618,7 @@ Variant HHVM_FUNCTION(ldap_connect,
     return false;
   }
 
-  LdapLink *ld = newres<LdapLink>();
-  Resource ret(ld);
+  auto ld = makeSmartPtr<LdapLink>();
 
   LDAP *ldap = NULL;
   if (!str_hostname.empty() && str_hostname.find('/') >= 0) {
@@ -636,7 +635,7 @@ Variant HHVM_FUNCTION(ldap_connect,
   if (ldap) {
     LDAPG(num_links)++;
     ld->link = ldap;
-    return ret;
+    return Variant(std::move(ld));
   }
   raise_warning("Unable to initialize LDAP: %s",
                 folly::errnoStr(errno).c_str());
@@ -1227,7 +1226,7 @@ Variant HHVM_FUNCTION(ldap_first_entry,
     return false;
   }
 
-  return newres<LdapResultEntry>(entry, res);
+  return Variant(makeSmartPtr<LdapResultEntry>(entry, res));
 }
 
 Variant HHVM_FUNCTION(ldap_next_entry,
@@ -1241,7 +1240,7 @@ Variant HHVM_FUNCTION(ldap_next_entry,
     return false;
   }
 
-  return newres<LdapResultEntry>(msg, entry->result.get());
+  return Variant(makeSmartPtr<LdapResultEntry>(msg, entry->result.get()));
 }
 
 Array HHVM_FUNCTION(ldap_get_attributes,
@@ -1307,7 +1306,7 @@ Variant HHVM_FUNCTION(ldap_first_reference,
     return false;
   }
 
-  return newres<LdapResultEntry>(entry, res);
+  return Variant(makeSmartPtr<LdapResultEntry>(entry, res));
 }
 
 Variant HHVM_FUNCTION(ldap_next_reference,
@@ -1321,7 +1320,8 @@ Variant HHVM_FUNCTION(ldap_next_reference,
     return false;
   }
 
-  return newres<LdapResultEntry>(entry_next, entry->result.get());
+  return Variant(
+    makeSmartPtr<LdapResultEntry>(entry_next, entry->result.get()));
 }
 
 bool HHVM_FUNCTION(ldap_parse_reference,

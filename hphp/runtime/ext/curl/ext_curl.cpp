@@ -1002,15 +1002,15 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
 
 Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   if (url.isNull()) {
-    return newres<CurlResource>(null_string);
+    return Variant(makeSmartPtr<CurlResource>(null_string));
   } else {
-    return newres<CurlResource>(url.toString());
+    return Variant(makeSmartPtr<CurlResource>(url.toString()));
   }
 }
 
 Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch) {
   CHECK_RESOURCE(curl);
-  return newres<CurlResource>(curl);
+  return Variant(makeSmartPtr<CurlResource>(curl));
 }
 
 const StaticString
@@ -1396,7 +1396,7 @@ void CurlMultiResource::sweep() {
   }
 
 Resource HHVM_FUNCTION(curl_multi_init) {
-  return newres<CurlMultiResource>();
+  return Resource(makeSmartPtr<CurlMultiResource>());
 }
 
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
@@ -1642,8 +1642,7 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   Array ret = Array::Create();
   for (int i=0; i<=max_fd; i++) {
     if (FD_ISSET(i, fd)) {
-      BuiltinFile *file = newres<BuiltinFile>(i);
-      ret.append(file);
+      ret.append(Variant(makeSmartPtr<BuiltinFile>(i)));
     }
   }
   return ret;

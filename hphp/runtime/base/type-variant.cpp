@@ -1004,6 +1004,15 @@ void Variant::unserialize(VariableUnserializer *uns,
       String v;
       v.unserialize(uns);
       operator=(v);
+      if (!uns->endOfBuffer()) {
+        // Semicolon *should* always be required,
+        // but PHP's implementation allows omitting it
+        // and still functioning.
+        // Worse, it throws it away without any check.
+        // So we'll do the same.  Sigh.
+        uns->readChar();
+      }
+      return;
     }
     break;
   case 'S':
@@ -1170,6 +1179,13 @@ void Variant::unserialize(VariableUnserializer *uns,
               unserializeProp(uns, obj.get(), k, ctx, key, i + 1);
             } else {
               unserializeProp(uns, obj.get(), key, nullptr, key, i + 1);
+            }
+
+            if (i > 0) {
+              auto lastChar = uns->peekBack();
+              if ((lastChar != ';') && (lastChar != '}')) {
+                throw Exception("Object property not terminated properly");
+              }
             }
           }
 

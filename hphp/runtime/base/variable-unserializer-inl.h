@@ -71,6 +71,14 @@ inline char VariableUnserializer::peek() const {
   return *m_buf;
 }
 
+inline char VariableUnserializer::peekBack() const {
+  return m_buf[-1];
+}
+
+inline bool VariableUnserializer::endOfBuffer() const {
+  return m_buf >= m_end;
+}
+
 inline char VariableUnserializer::readChar() {
   check();
   return *(m_buf++);

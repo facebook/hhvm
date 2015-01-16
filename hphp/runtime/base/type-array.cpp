@@ -803,6 +803,13 @@ void Array::unserialize(VariableUnserializer *uns) {
              !exists(key, true));
       Variant &value = lvalAt(key, AccessFlags::Key);
       value.unserialize(uns);
+
+      if (i < (size - 1)) {
+        auto lastChar = uns->peekBack();
+        if ((lastChar != ';' && lastChar != '}')) {
+          throw Exception("Array element not terminated properly");
+        }
+      }
     }
   }
 

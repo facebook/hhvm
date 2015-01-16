@@ -75,6 +75,8 @@ struct VariableUnserializer {
   bool allowUnknownSerializableClass() const;
   const char* head() const;
   char peek() const;
+  char peekBack() const;
+  bool endOfBuffer() const;
 
   /*
    * True if clsName is allowed to be unserialized.

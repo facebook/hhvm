@@ -226,10 +226,14 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
 ::finish(Context ctx) {
   removeSpareTraitAbstractMethods();
 
+  std::unordered_set<String> seenNames;
   std::vector<MethodData> output;
-  output.reserve(m_dataForName.size());
+
+  seenNames.reserve(m_orderedNames.size());
+  output.reserve(m_orderedNames.size());
 
   auto process = [&] (const String& name) {
+    if (seenNames.count(name)) return;
     auto const& methods = m_dataForName[name].methods;
 
     // The rules eliminated this method from all traits.
@@ -241,11 +245,20 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
       Ops::errorDuplicateMethod(ctx, name);
     }
 
+    seenNames.insert(name);
     output.push_back(MethodData { name, *methods.begin() });
   };
 
-  for (auto const& kv : m_dataForName) {
-    process(kv.first);
+  for (auto const& name : m_orderedNames) {
+    auto const& nameData = m_dataForName[name];
+
+    // Aliases of a given method name are always ordered immediately before
+    // that name (in the order the aliases were declared in), even if
+    // precedence rules override them.
+    for (auto const& alias : nameData.aliases) {
+      process(alias);
+    }
+    process(name);
   }
 
   return output;

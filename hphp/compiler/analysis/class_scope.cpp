@@ -399,9 +399,7 @@ void ClassScope::importTraitProperties(AnalysisResultPtr ar) {
 MethodStatementPtr
 ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
                               AnalysisResultPtr   ar,
-                              std::string         methName,
-                              const std::map<std::string, MethodStatementPtr>&
-                              importedTraitMethods) {
+                              std::string         methName) {
   MethodStatementPtr meth = traitMethod.method;
   std::string origMethName = traitMethod.originalName;
   ModifierExpressionPtr modifiers = traitMethod.modifiers;
@@ -662,6 +660,8 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   }
   m_traitStatus = BEING_FLATTENED;
 
+  m_numDeclMethods = m_functionsVec.size();
+
   // First, make sure that parent classes have their traits imported.
   if (!m_parent.empty()) {
     ClassScopePtr parent = ar->findClass(m_parent);
@@ -778,19 +778,13 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   }
 
   for (auto const& traitPair : importedTraitsWithOrigName) {
-    auto const& sourceName = traitPair.first;
     auto traitMethod = traitPair.second;
 
     MethodStatementPtr newMeth = importTraitMethod(
       *traitMethod,
       ar,
-      toLower(traitMethod->originalName),
-      importedTraitMethods
+      toLower(traitMethod->originalName)
     );
-
-    if (newMeth) {
-      importedTraitMethods[sourceName] = newMeth;
-    }
   }
 
   // Import trait properties

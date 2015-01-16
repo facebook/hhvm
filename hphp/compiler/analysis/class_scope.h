@@ -313,6 +313,10 @@ public:
     }
   }
 
+  int32_t getNumDeclMethods() const {
+    return m_numDeclMethods;
+  }
+
   const boost::container::flat_set<std::string>& getClassRequiredExtends()
     const {
     return m_requiredExtends;
@@ -379,21 +383,10 @@ public:
   bool addFunction(AnalysisResultConstPtr ar,
                    FunctionScopePtr funcScope);
 
-  void setNeedsCppCtor(bool needsCppCtor) {
-    m_needsCppCtor = needsCppCtor;
-  }
-
-  bool needsCppCtor() const {
-    return m_needsCppCtor;
-  }
-
-  void setNeedsInitMethod(bool needsInit) {
-    m_needsInit = needsInit;
-  }
-
-  bool needsInitMethod() const {
-    return m_needsInit;
-  }
+  void setNeedsCppCtor(bool needsCppCtor) { m_needsCppCtor = needsCppCtor; }
+  void setNeedsInitMethod(bool needsInit) { m_needsInit = needsInit; }
+  bool needsCppCtor()    const { return m_needsCppCtor; }
+  bool needsInitMethod() const { return m_needsInit; }
 
   bool canSkipCreateMethod(AnalysisResultConstPtr ar) const;
   bool checkHasPropTable(AnalysisResultConstPtr ar);
@@ -541,11 +534,9 @@ public:
   using TMIData = TraitMethodImportData<TraitMethod, TMIOps>;
 
 private:
-  MethodStatementPtr importTraitMethod(
-      const TraitMethod& traitMethod,
-      AnalysisResultPtr ar,
-      std::string methName,
-      const std::map<string, MethodStatementPtr>& importedTraitMethods);
+  MethodStatementPtr importTraitMethod(const TraitMethod& traitMethod,
+                                       AnalysisResultPtr ar,
+                                       std::string methName);
   void applyTraitRules(TMIData& tmid);
 
   bool hasMethod(const std::string &methodName) const;
@@ -592,6 +583,7 @@ private:
   // for classes with more than 31 bases, bit 31 is set iff
   // bases 32 through n are all known.
   unsigned m_knownBases;
+  int32_t m_numDeclMethods{-1};
 
   // holds the fact that accessing this class declaration is a fatal error
   const StringData* m_fatal_error_msg = nullptr;

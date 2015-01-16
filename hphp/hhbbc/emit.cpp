@@ -868,6 +868,7 @@ void emit_class(EmitUnitState& state,
   for (auto& x : cls.requirements)       pce->addClassRequirement(x);
   for (auto& x : cls.traitPrecRules)     pce->addTraitPrecRule(x);
   for (auto& x : cls.traitAliasRules)    pce->addTraitAliasRule(x);
+  pce->setNumDeclMethods(cls.numDeclMethods);
 
   for (auto& m : cls.methods) {
     FTRACE(2, "    method: {}\n", m->name->data());

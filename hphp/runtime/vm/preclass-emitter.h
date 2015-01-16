@@ -155,10 +155,10 @@ class PreClassEmitter {
   PreClass::Hoistable hoistability() const { return m_hoistable; }
   void setOffset(Offset off) { m_offset = off; }
   void setEnumBaseTy(TypeConstraint ty) { m_enumBaseTy = ty; }
-  const TypeConstraint &enumBaseTy() const {
-    return m_enumBaseTy;
-  }
+  const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
   Id id() const { return m_id; }
+  int32_t numDeclMethods() const { return m_numDeclMethods; }
+  void setNumDeclMethods(uint32_t n) { m_numDeclMethods = n; }
   const MethodVec& methods() const { return m_methods; }
   const PropMap::Builder& propMap() const { return m_propMap; }
   const ConstMap::Builder& constMap() const { return m_constMap; }
@@ -246,7 +246,9 @@ class PreClassEmitter {
   BuiltinCtorFunction m_instanceCtor{nullptr};
   BuiltinDtorFunction m_instanceDtor{nullptr};
   uint32_t m_builtinObjSize{0};
-  int32_t  m_builtinODOffset{0};
+  int32_t m_builtinODOffset{0};
+  int32_t m_numDeclMethods{-1};
+  int m_memoizeInstanceSerial{0};
 
   std::vector<LowStringPtr> m_interfaces;
   std::vector<LowStringPtr> m_usedTraits;
@@ -258,8 +260,6 @@ class PreClassEmitter {
   MethodMap m_methodMap;
   PropMap::Builder m_propMap;
   ConstMap::Builder m_constMap;
-
-  int m_memoizeInstanceSerial = 0;
 };
 
 class PreClassRepoProxy : public RepoProxy {

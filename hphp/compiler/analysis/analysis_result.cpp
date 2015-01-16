@@ -605,7 +605,7 @@ void AnalysisResult::checkClassDerivations() {
   AnalysisResultPtr ar = shared_from_this();
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
-    for (ClassScopePtr cls: iter->second) {
+    for (ClassScopePtr cls : iter->second) {
       if (Option::WholeProgram) {
         try {
           cls->importUsedTraits(ar);

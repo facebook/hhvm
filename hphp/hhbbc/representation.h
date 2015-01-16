@@ -477,17 +477,18 @@ struct Class {
   std::vector<LowStringPtr> interfaceNames;
 
   /*
-   * Names of used traits, and the trait alias/precedence rules (if
-   * any).
+   * Names of used traits, number of declared (i.e., non-trait, non-inherited)
+   * methods, trait alias/precedence rules (if any).
    *
    * This is using the exact structures from the runtime PreClass.  In
-   * WholeProgram mode, we won't see these because traits will already
-   * be flattened.
+   * WholeProgram mode, we won't see these because traits will already be
+   * flattened.
    */
   std::vector<LowStringPtr> usedTraitNames;
   std::vector<PreClass::ClassRequirement> requirements;
   std::vector<PreClass::TraitPrecRule> traitPrecRules;
   std::vector<PreClass::TraitAliasRule> traitAliasRules;
+  int32_t numDeclMethods;
 
   /*
    * Methods on the class.

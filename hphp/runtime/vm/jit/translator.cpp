@@ -1325,7 +1325,7 @@ static void setIRBlock(HTS& hts,
 
 /*
  * Set IRBuilder's Blocks for srcBlockId's successors' offsets within
- * the region.
+ * the region.  It also sets the guard-failure block, if any.
  */
 static void setSuccIRBlocks(HTS& hts,
                             const RegionDesc& region,
@@ -1336,6 +1336,13 @@ static void setSuccIRBlocks(HTS& hts,
   irb.resetOffsetMapping();
   for (auto dstBlockId : region.succs(srcBlockId)) {
     setIRBlock(hts, dstBlockId, region, blockIdToIRBlock);
+  }
+  if (auto nextRetrans = region.nextRetrans(srcBlockId)) {
+    auto it = blockIdToIRBlock.find(nextRetrans.value());
+    assert(it != blockIdToIRBlock.end());
+    irb.setGuardFailBlock(it->second);
+  } else {
+    irb.resetGuardFailBlock();
   }
 }
 
@@ -1790,6 +1797,7 @@ TranslateResult translateRegion(HTS& hts,
     // exit.
     auto const useGuards = block == region.entry() && !isLoopHeader;
     emitPredictionGuards(hts, region, block, useGuards);
+    irb.resetGuardFailBlock();
 
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       auto const lastInstr = i == block->length() - 1;

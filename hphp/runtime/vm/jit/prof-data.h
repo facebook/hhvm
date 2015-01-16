@@ -194,7 +194,10 @@ public:
   RegionDescPtr           transRegion(TransID id)     const;
   TransKind               transKind(TransID id)       const;
   bool                    isKindProfile(TransID id)   const;
+  // The actual counter value, which starts at JitPGOThreshold and goes down.
   int64_t                 transCounter(TransID id)    const;
+  // The absolute number of times that a translation executed.
+  int64_t                 absTransCounter(TransID id) const;
   int64_t*                transCounterAddr(TransID id);
   TransID                 prologueTransId(const Func* func,
                                           int nArgs)  const;

@@ -115,6 +115,7 @@ class IntlExtension final : public Extension {
     initCalendar();
     initGrapheme();
     initBreakIterator(); // Must come after initIterator()
+    initUChar();
     initUConverter();
     initUcsDet();
     initUSpoof();
@@ -143,6 +144,7 @@ class IntlExtension final : public Extension {
   void initCalendar();
   void initGrapheme();
   void initBreakIterator();
+  void initUChar();
   void initUConverter();
   void initUcsDet();
   void initUSpoof();

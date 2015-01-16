@@ -108,25 +108,34 @@ class VirtualMachine(object):
     """A single named executable with which to run benchmarks and measure.
 
     """
-    def __init__(self, name, path, env):
+    def __init__(self, name, path, env, args):
         self.name = name
         self.path = path
         self.uid = _unique_id()
         self.env = env
+        self.args = ' '.join(args)
 
     def __str__(self):
         return "{0.name}".format(self)
 
     def __repr__(self):
         return self.__str__()
-VirtualMachine.pattern = r'(?P<name>[^:]+)(?P<env_path>(?::[^:]+)+)'
+VirtualMachine.pattern = r'(?P<name>[^:]+)(?P<opts_path>(?::[^:]+)+)'
 
 
-def parse_env(env_list):
-    """Parses a series of environment variable assignment clauses.
+def parse_opts(opts_list):
+    """Parses a series of environment variable assignments or command line
+    arguments
 
     """
-    return dict([x.split('=') for x in env_list])
+    env = []
+    args = []
+    for item in opts_list:
+        if item.startswith('-'):
+            args.append(item)
+        else:
+            env.append(item.split('='))
+    return (dict(env), args)
 
 
 def load_benchmark_suites():
@@ -245,7 +254,8 @@ def single_run(**kwargs):
     printf "include '{bench.path}';\\n" >> {include}
     printf "QueueRuns({extra_iters}, \\${bench.name});\\n" >> {include}
     {setenv}
-    {wrapper} --compile --build-root={vm.path} {perf} -- {harness} > {tmp}
+    {wrapper} --compile --build-root={vm.path} {perf} {vm.args} \\
+      -- {harness} > {tmp}
     {unsetenv}
     cat {tmp} | tail -n +{lines_to_chop} >> {runlog}
     """
@@ -318,10 +328,11 @@ def parse_virtual_machines(raw_vms):
         if result is None:
             raise RuntimeError("Invalid format for VM: %s" % raw_vm)
         name = result.group('name')
-        env_path = result.group('env_path').split(':')[1:]
-        env, path = parse_env(env_path[:-1]), str(env_path[-1])
+        opts_path = result.group('opts_path').split(':')[1:]
+        env, args = parse_opts(opts_path[:-1])
+        path = str(opts_path[-1])
 
-        vms.append(VirtualMachine(name, path, env))
+        vms.append(VirtualMachine(name, path, env, args))
     return vms
 
 

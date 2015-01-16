@@ -177,19 +177,20 @@ end
 
 module FB = struct
 
-  let cEnum                 = "\\Enum"
-  let cUncheckedEnum        = "\\UncheckedEnum"
+  let cEnum                  = "\\Enum"
+  let cUncheckedEnum         = "\\UncheckedEnum"
 
-  let cGenReadApi           = "\\GenReadApi"
-  let cGenReadIdxApi        = "\\GenReadIdxApi"
+  let cGenReadApi            = "\\GenReadApi"
+  let cGenReadIdxApi         = "\\GenReadIdxApi"
 
-  let cPrivacyPolicy        = "\\PrivacyPolicy"
-  let cPrivacyPolicyBase    = "\\PrivacyPolicyBase"
-  let cDataType             = "\\DataType"
-  let cDataTypeImplProvider = "\\DataTypeImplProvider"
+  let cPrivacyPolicy         = "\\PrivacyPolicy"
+  let cPrivacyPolicyBase     = "\\PrivacyPolicyBase"
+  let cPrivacyPolicyBaseBase = "\\PrivacyPolicyBaseBase"
+  let cDataType              = "\\DataType"
+  let cDataTypeImplProvider  = "\\DataTypeImplProvider"
 
-  let cDynamicYield         = "\\DynamicYield"
-  let cIUseDynamicYield     = "\\IUseDynamicYield"
+  let cDynamicYield          = "\\DynamicYield"
+  let cIUseDynamicYield      = "\\IUseDynamicYield"
 
   let fgena                        = "gena"
   let fgenva                       = "genva"

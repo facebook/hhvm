@@ -857,7 +857,9 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       let gen_read_api_covariance =
         (cname = SN.FB.cGenReadApi || cname = SN.FB.cGenReadIdxApi) in
       let privacy_policy_contravariance =
-        (cname = SN.FB.cPrivacyPolicyBase || cname = SN.FB.cPrivacyPolicy) in
+        (cname = SN.FB.cPrivacyPolicyBaseBase
+         || cname = SN.FB.cPrivacyPolicyBase
+         || cname = SN.FB.cPrivacyPolicy) in
       let data_type_covariance =
         (cname = SN.FB.cDataType || cname = SN.FB.cDataTypeImplProvider) in
       let awaitable_covariance =

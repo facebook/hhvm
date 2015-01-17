@@ -12,13 +12,13 @@
 // testing that names existing on both sides of if is defined
 
 function stmt(): void {
-  switch(true) {
-  case true:
-    $x = 0;
-    break;
-  default:
-    $x = 1;
-    break;
+  switch (true) {
+    case true:
+      $x = 0;
+      break;
+    default:
+      $x = 1;
+      break;
   }
   $x += 1;
 }

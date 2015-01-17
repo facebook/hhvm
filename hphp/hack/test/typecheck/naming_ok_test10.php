@@ -10,10 +10,7 @@
  */
 
 class BirthdayStoryPreparable extends Preparable {
-  private
-    $userIDs,
-    $viewerContext,
-    $users = MUST_PREPARE;
+  private $userIDs, $viewerContext, $users = MUST_PREPARE;
 
   public function __construct(ViewerContext $vc, $user_ids) {
     $this->viewerContext = $vc;
@@ -33,17 +30,19 @@ class BirthdayStoryPreparable extends Preparable {
   public function prepare($pass) {
     switch ($pass) {
       case 0:
-        $this->waitFor(Ent::createEnforcingLoaderDynamic(
-          'EntPersonalUser',
-          $this->viewerContext,
-          $this->userIDs,
-          $this->users,
-          array(
-            Ent::load('BasicInfo'),
-            Ent::load('Birthday'),
-            Ent::load('ProfilePic', PicSizeConst::SQUARE),
-          )
-        ));
+        $this->waitFor(
+          Ent::createEnforcingLoaderDynamic(
+            'EntPersonalUser',
+            $this->viewerContext,
+            $this->userIDs,
+            $this->users,
+            array(
+              Ent::load('BasicInfo'),
+              Ent::load('Birthday'),
+              Ent::load('ProfilePic', PicSizeConst::SQUARE),
+            ),
+          ),
+        );
 
         return true;
       case 1:
@@ -54,6 +53,4 @@ class BirthdayStoryPreparable extends Preparable {
     return false;
   }
 }
-
-
 

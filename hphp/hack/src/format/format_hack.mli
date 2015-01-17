@@ -29,8 +29,22 @@ type source_tag =
  *)
 type source_pos = char_pos * source_tag
 
-val region: Relative_path.t -> start:int -> end_:int -> string -> string return
-val program: ?no_trailing_commas:bool -> Relative_path.t -> string ->
+val region:
+  Ast.mode option list ->
+  Relative_path.t ->
+  start:int ->
+  end_:int ->
+  string ->
   string return
-val program_with_source_metadata: Relative_path.t -> string ->
+
+val program:
+  ?no_trailing_commas:bool ->
+  Ast.mode option list ->
+  Relative_path.t -> string ->
+  string return
+
+val program_with_source_metadata:
+  Ast.mode option list ->
+  Relative_path.t ->
+  string ->
   (string * source_pos list) return

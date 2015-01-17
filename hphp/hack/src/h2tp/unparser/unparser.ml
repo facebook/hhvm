@@ -958,7 +958,9 @@ let unparse :
   to_string |>
   fun s ->
     dn s;
-    let s' = match Format_hack.program file ~no_trailing_commas:true s with
+    let modes = [Some Ast.Mstrict; Some Ast.Mpartial] in
+    let formatted = Format_hack.program modes file ~no_trailing_commas:true s in
+    let s' = match formatted with
     | Format_hack.Disabled_mode -> raise Impossible
     | Format_hack.Internal_error -> raise (FormatterError "")
     | Format_hack.Success s' -> s'

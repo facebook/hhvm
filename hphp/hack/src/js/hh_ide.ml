@@ -456,7 +456,9 @@ let hh_arg_info fn line char =
   to_js_object (JAssoc json_res)
 
 let hh_format contents start end_ =
-  let result = Format_hack.region Relative_path.default start end_ contents in
+  let modes = [Some Ast.Mstrict; Some Ast.Mpartial] in
+  let result =
+    Format_hack.region modes Relative_path.default start end_ contents in
   let error, result, internal_error = match result with
     | Format_hack.Disabled_mode -> "Php_or_decl", "", false
     | Format_hack.Parsing_error _ -> "Parsing_error", "", false

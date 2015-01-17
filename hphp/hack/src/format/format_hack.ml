@@ -237,7 +237,7 @@ let save_env env =
         char_size; silent; one_line;
         last_str; last_out; keep_source_pos; source_pos_l;
         break_on; line; failed; try_depth; spaces;
-        report_fit; in_attr; stop; from; to_; no_trailing_commas} = env in
+        report_fit; in_attr; stop; from; to_; no_trailing_commas } = env in
   { sv_margin = !margin;
     sv_last = !last;
     sv_buffer = env.buffer;
@@ -1144,15 +1144,12 @@ type 'a return =
   | Internal_error
   | Success of 'a
 
-let rec entry ~keep_source_metadata ~no_trailing_commas
+let rec entry ~keep_source_metadata ~no_trailing_commas ~modes
     file from to_ content k =
   try
     let errorl, () = Errors.do_ begin fun () ->
       let {Parser_hack.file_mode; _} = Parser_hack.program file content in
-      match file_mode with
-      | None (* PHP *)
-      | Some Ast.Mdecl -> raise PHP
-      | Some (Ast.Mpartial | Ast.Mstrict) -> ()
+      if not (List.mem file_mode modes) then raise PHP;
     end in
     if errorl <> []
     then Parsing_error errorl
@@ -2608,19 +2605,20 @@ and arrow_opt env =
 (* The outside API *)
 (*****************************************************************************)
 
-let region file ~start ~end_ content =
+let region modes file ~start ~end_ content =
   entry ~keep_source_metadata:false file start end_ content
-    ~no_trailing_commas:false
+    ~no_trailing_commas:false ~modes
     (fun env -> Buffer.contents env.buffer)
 
-let program ?no_trailing_commas:(no_trailing_commas = false) file content =
+let program ?no_trailing_commas:(no_trailing_commas = false) modes file
+    content =
   entry ~keep_source_metadata:false file 0 max_int content
-    ~no_trailing_commas:no_trailing_commas
+    ~no_trailing_commas:no_trailing_commas ~modes
     (fun env -> Buffer.contents env.buffer)
 
-let program_with_source_metadata file content =
+let program_with_source_metadata modes file content =
   entry ~keep_source_metadata:true file 0 max_int content
-    ~no_trailing_commas:false begin
+    ~no_trailing_commas:false ~modes begin
     fun env ->
       Buffer.contents env.buffer, List.rev !(env.source_pos_l)
   end

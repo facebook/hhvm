@@ -117,13 +117,6 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
 bool validate(const State& env,
               SSATmp* newDst,
               const IRInstruction* origInst) {
-  // Certain opcodes that read stack locations have valid simplification
-  // rules (we know values are available because they are on the eval
-  // stack) that are not easy to double check here.
-  if (origInst->op() == LdStk || origInst->op() == DecRefStk) {
-    return true;
-  }
-
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybeCounted()) return true;
     for (auto& oldSrc : origInst->srcs()) {

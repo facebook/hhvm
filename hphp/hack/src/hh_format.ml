@@ -36,7 +36,7 @@ let debug () fnl =
       let parsing_errors1, parser_output1 = Errors.do_ begin fun () ->
         Parser_hack.program filepath content
       end in
-      if not parser_output1.Parser_hack.is_hh_file || parsing_errors1 <> []
+      if parser_output1.Parser_hack.file_mode = None || parsing_errors1 <> []
       then raise Exit;
 
       if parsing_errors1 <> []
@@ -51,7 +51,7 @@ let debug () fnl =
       let content =
         match content with
         | Format_hack.Success content -> content
-        | Format_hack.Php_or_decl ->
+        | Format_hack.Disabled_mode ->
             raise Exit
         | Format_hack.Parsing_error _ ->
             Printf.printf "Parsing: %s\n" filename; flush stdout;
@@ -177,7 +177,7 @@ let format_in_place filepath =
       Some "Internal error\n"
   | Format_hack.Parsing_error errorl ->
       Some (Errors.to_string (Errors.to_absolute (List.hd errorl)))
-  | Format_hack.Php_or_decl ->
+  | Format_hack.Disabled_mode ->
       None
 
 (*****************************************************************************)
@@ -222,7 +222,7 @@ let format_string file from to_ content =
       Printf.fprintf stderr "Parsing error\n%s\n"
         (Errors.to_string (Errors.to_absolute (List.hd error)));
       exit 2
-  | Format_hack.Php_or_decl ->
+  | Format_hack.Disabled_mode ->
       exit 0
 
 (*****************************************************************************)

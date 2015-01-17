@@ -1139,40 +1139,44 @@ let semi_colon env =
 (*****************************************************************************)
 
 type 'a return =
-  | Php_or_decl
+  | Disabled_mode
   | Parsing_error of Errors.error list
   | Internal_error
   | Success of 'a
 
 let rec entry ~keep_source_metadata ~no_trailing_commas
     file from to_ content k =
-  let errorl, () = Errors.do_ begin fun () ->
-    let _ = Parser_hack.program file content in
-    ()
-  end in
-  if errorl <> []
-  then Parsing_error errorl
-  else try
-    let lb = Lexing.from_string content in
-    let env = empty file lb from to_ keep_source_metadata no_trailing_commas in
-    header env;
-    Success (k env)
+  try
+    let errorl, () = Errors.do_ begin fun () ->
+      let {Parser_hack.file_mode; _} = Parser_hack.program file content in
+      match file_mode with
+      | None (* PHP *)
+      | Some Ast.Mdecl -> raise PHP
+      | Some (Ast.Mpartial | Ast.Mstrict) -> ()
+    end in
+    if errorl <> []
+    then Parsing_error errorl
+    else begin
+      let lb = Lexing.from_string content in
+      let env = empty file lb from to_ keep_source_metadata no_trailing_commas in
+      header env;
+      Success (k env)
+    end
   with
-  | PHP -> Php_or_decl
-  | _ ->
-      Printexc.print_backtrace stderr;
-      Internal_error
+    | PHP -> Disabled_mode
+    | _ ->
+        Printexc.print_backtrace stderr;
+        Internal_error
 
 (*****************************************************************************)
 (* Hack header <?hh *)
 (*****************************************************************************)
 
 and header env = wrap env begin function
-  | Thh ->
+  | Thh | Tphp ->
       seq env [last_token; mode; newline];
       stmt_list ~is_toplevel:true env
-  | _ ->
-      raise PHP
+  | _ -> assert false
 end
 
 and mode env =
@@ -1180,8 +1184,6 @@ and mode env =
   | Tspace -> mode env
   | Tline_comment ->
       space env; last_token env;
-      if next_token_str env = "decl"
-      then raise PHP;
       line_comment env;
       newline env
   | _ -> back env

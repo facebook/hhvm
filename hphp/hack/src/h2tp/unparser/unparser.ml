@@ -959,7 +959,7 @@ let unparse :
   fun s ->
     dn s;
     let s' = match Format_hack.program file ~no_trailing_commas:true s with
-    | Format_hack.Php_or_decl -> raise Impossible
+    | Format_hack.Disabled_mode -> raise Impossible
     | Format_hack.Internal_error -> raise (FormatterError "")
     | Format_hack.Success s' -> s'
     | Format_hack.Parsing_error error -> raise (FormatterError

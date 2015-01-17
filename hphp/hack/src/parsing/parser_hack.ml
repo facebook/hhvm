@@ -34,11 +34,10 @@ let init_env file lb = {
 }
 
 type parser_return = {
-    (* True if we are dealing with a hack file *)
-    is_hh_file : bool;
-    comments   : (Pos.t * string) list;
-    ast        : Ast.program;
-  }
+  file_mode  : Ast.mode option; (* None if PHP *)
+  comments   : (Pos.t * string) list;
+  ast        : Ast.program;
+}
 
 (*****************************************************************************)
 (* Lexer (with backtracking) *)
@@ -416,7 +415,7 @@ let rec program ?(elaborate_namespaces = true) file content =
   L.fixmes := Utils.IMap.empty;
   let lb = Lexing.from_string content in
   let env = init_env file lb in
-  let ast, is_hh_file = header env in
+  let ast, file_mode = header env in
   let comments = !L.comment_list in
   let fixmes = !L.fixmes in
   L.comment_list := [];
@@ -427,7 +426,7 @@ let rec program ?(elaborate_namespaces = true) file content =
   let ast = if elaborate_namespaces
     then Namespaces.elaborate_defs ast
     else ast in
-  {is_hh_file; comments; ast}
+  {file_mode; comments; ast}
 
 (*****************************************************************************)
 (* Hack headers (strict, decl, partial) *)
@@ -442,14 +441,13 @@ and header env =
       let attr = SMap.empty in
       let result = ignore_toplevel ~attr [] env (fun x -> x = Teof) in
       expect env Teof;
-      let is_hh_file = head = Some Ast.Mdecl in
-      result, is_hh_file
+      result, head
   | _, Some mode ->
       let result = toplevel [] { env with mode = mode } (fun x -> x = Teof) in
       expect env Teof;
-      result, true
+      result, head
   | _ ->
-      [], false
+      [], head
 
 and get_header env =
   match L.header env.file env.lb with

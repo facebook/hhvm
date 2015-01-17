@@ -363,7 +363,7 @@ and apply_file filepath file_content modified_lines =
   match Format_hack.program_with_source_metadata filepath file_content with
   | Format_hack.Success formatted_content ->
       apply_formatted filepath formatted_content file_content modified_lines
-  | Format_hack.Php_or_decl ->
+  | Format_hack.Disabled_mode ->
       Printf.printf "PHP FILE: skipping\n"
   | Format_hack.Parsing_error _ ->
       Printf.fprintf stderr "Parsing error: %s\n" filename

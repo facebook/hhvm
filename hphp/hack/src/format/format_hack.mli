@@ -9,7 +9,7 @@
  *)
 
 type 'a return =
-  | Php_or_decl
+  | Disabled_mode
   | Parsing_error of Errors.error list
   | Internal_error
   | Success of 'a

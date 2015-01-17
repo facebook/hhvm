@@ -80,14 +80,14 @@ let convert ast src dest =
         raise (CE.InternalError m)
 
 let process_php_file src dest =
-  let {Parser_hack.is_hh_file; Parser_hack.ast; _} =
+  let {Parser_hack.file_mode; Parser_hack.ast; _} =
     (* Hack sets Root to the directory containing .hhconfig... but since the
      * dehackificator doesn't have that init sequence, this Root prefix just
      * maps to an empty string, and is used used here just to satisfy the OCaml
      * typechecker. *)
     Parser_hack.parse_or_die (Relative_path.create Relative_path.Dummy src) in
   (* Todo #t5306338 detect and throw error on decl mode files *)
-  if is_hh_file
+  if file_mode <> None
   then convert ast src dest
   else let m = "This tool does not currently support PHP files such as "^
     "\"" ^ src ^"\"" in

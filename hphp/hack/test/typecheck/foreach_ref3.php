@@ -1,5 +1,5 @@
 <?hh
-function foo() : int {
+function foo(): int {
   $arr = array(array(1, "hi"), array(2, "hi"), array(3, "hi"));
   $y = 0;
   foreach ($arr as &list($v1, $v2)) {

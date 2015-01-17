@@ -25,5 +25,4 @@ abstract class AClass<T> {
   use MyTrait;
 }
 
-class BClass extends AClass<int> {
-}
+class BClass extends AClass<int> {}

@@ -1,6 +1,6 @@
-File "anon7.php", line 14, characters 10-11:
+File "anon7.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
 File "anon7.php", line 12, characters 34-36:
 This is an int
-File "anon7.php", line 13, characters 30-36:
+File "anon7.php", line 14, characters 12-16:
 It is incompatible with a string because this is the result of a concatenation

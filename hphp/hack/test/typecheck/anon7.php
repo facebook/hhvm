@@ -10,6 +10,8 @@
  */
 
 function test(): (function(int): int) {
-  $f = function($y) { return $y . ''; };
+  $f = function ($y) {
+    return $y.'';
+  };
   return $f;
 }

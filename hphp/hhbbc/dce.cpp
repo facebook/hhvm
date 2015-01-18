@@ -252,7 +252,7 @@ struct DceState {
    * removed, however, they must all be removed, because of the need
    * to keep eval stack consumers and producers balanced.
    */
-  boost::dynamic_bitset<> markedDead;
+  boost::dynamic_bitset<> markedDead{};
 
   /*
    * The set of locals that were ever live in this block.  (This

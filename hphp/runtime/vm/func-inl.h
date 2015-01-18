@@ -70,7 +70,7 @@ inline bool Func::ParamInfo::isVariadic() const {
 
 inline void Func::validate() const {
 #ifdef DEBUG
-  assert(this && m_magic == kMagic);
+  assert(m_magic == kMagic);
 #endif
   assert(m_name != nullptr);
 }

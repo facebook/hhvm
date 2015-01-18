@@ -271,7 +271,6 @@ inline uint64_t Type::rawVal() const {
 
 inline bool Type::boolVal() const {
   assert(subtypeOf(Bool) && m_hasConstVal);
-  assert(m_boolVal <= 1);
   return m_boolVal;
 }
 

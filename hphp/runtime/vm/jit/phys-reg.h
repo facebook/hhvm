@@ -222,7 +222,7 @@ constexpr PhysReg InvalidReg;
  * Zero-initializing this class is guaranteed to produce an empty set.
  */
 struct RegSet {
-  explicit RegSet() : m_bits(0) {}
+  RegSet() : m_bits(0) {}
   explicit RegSet(PhysReg pr) : m_bits(uint64_t(1) << pr.n) {}
 
   // Union

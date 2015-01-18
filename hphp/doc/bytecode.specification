@@ -1436,7 +1436,7 @@ JmpNS <rel offset>   []  ->  []
 
   Jump, with no surprise flag checks. This behaves identically to the Jmp
   instruction, except that internal VM checks for things like OOM do not need
-  to be performed even if the offset is negative.
+  to be performed even if the offset is negative. NS means "no surprise".
 
 JmpZ <rel offset>    [C]  ->  []
 
@@ -2047,7 +2047,7 @@ DecodeCufIter <iterator id> <rel offset>   [C]  ->  []
   This instruction looks up $1 as a callable, and writes enough information to
   iterator %1 for FPushCufIter to be able to push an actrec, as if it had been
   given the callable. If the function is not successfully decoded, branches to
-  the given offset without raising a warning.
+  the given offset without raising a warning. No surprise check is performed.
 
 FPushCufIter <num params> <iterator id>   []  ->  []
 

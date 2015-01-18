@@ -430,6 +430,7 @@ bool LightProcess::initShadow(int afdt_lid,
   pid_t child = fork();
   if (child == 0) {
     // child
+    Logger::ResetPid();
     pid_t sid = setsid();
     if (sid < 0) {
       Logger::Warning("Unable to setsid");

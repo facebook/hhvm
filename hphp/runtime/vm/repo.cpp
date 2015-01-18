@@ -83,6 +83,7 @@ bool Repo::prefork() {
 void Repo::postfork(pid_t pid) {
   folly::SingletonVault::singleton()->reenableInstances();
   if (pid == 0) {
+    Logger::ResetPid();
     new (&s_lock) SimpleMutex();
   } else {
     s_lock.unlock();

@@ -41,7 +41,7 @@ public:
     LogVerbose
   };
 
-  Logger(): m_standardOut(stderr) {}
+  Logger(): m_standardOut(stderr) { ResetPid(); }
 
   static bool AlwaysEscapeLog;
   static bool UseSyslog;
@@ -96,6 +96,7 @@ public:
   static void SetStandardOut(FILE*);
 
   virtual ~Logger() { }
+  static void ResetPid();
 
 protected:
   class ThreadData {
@@ -140,6 +141,7 @@ protected:
   static std::string GetHeader();
 private:
   static Logger *s_logger;
+  static pid_t s_pid;
 
   FILE* m_standardOut;
 };

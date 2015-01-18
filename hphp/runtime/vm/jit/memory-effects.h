@@ -57,10 +57,10 @@ struct MayLoadStore   { AliasClass loads; AliasClass stores; };
 struct PureLoad       { AliasClass src; };
 
 /*
- * The effect of definitely storing to a location, without performing any other
- * work.  Instructions with these memory effects can be removed if we know the
- * value being stored does not change the value of the location, or if we know
- * the location can never be loaded from again.
+ * The effect of definitely storing `value' to a location, without performing
+ * any other work.  Instructions with these memory effects can be removed if we
+ * know the value being stored does not change the value of the location, or if
+ * we know the location can never be loaded from again.
  *
  * The NT variation means it is not storing a type tag.
  */

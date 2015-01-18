@@ -356,7 +356,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StLocPseudoMain:
     // This can store to globals or locals, but we don't have globals supported
     // in AliasClass yet.
-    return PureStore { AUnknown };
+    return PureStore { AUnknown, inst.src(1) };
 
   case ClosureStaticLocInit:
     return MayLoadStore { AFrameAny, AFrameAny };
@@ -417,7 +417,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StRef:
     // We don't have anything for ref locations at this point, but we know it
     // is a heap location.
-    return PureStore { AHeapAny };
+    return PureStore { AHeapAny, inst.src(1) };
 
   case InitObjProps:
     return MayLoadStore { AEmpty, APropAny };

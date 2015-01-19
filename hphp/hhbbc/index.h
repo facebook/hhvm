@@ -612,7 +612,7 @@ struct PublicSPropIndexer {
    * This routine may be safely called concurrently by multiple analysis
    * threads.
    */
-  void merge(Type cls, Type name, Type val);
+  void merge(Context ctx, Type cls, Type name, Type val);
 
 private:
   friend struct Index;

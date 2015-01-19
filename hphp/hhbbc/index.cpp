@@ -2323,7 +2323,7 @@ Index::could_be_related(borrowed_ptr<const php::Class> cls,
 
 //////////////////////////////////////////////////////////////////////
 
-void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
+void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
   auto const vname = tv(name);
 
   FTRACE(2, "merge_public_static: {} {} {}\n",
@@ -2366,6 +2366,8 @@ void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
         "NOTE: had to mark everything unknown for public static "
         "property types due to dynamic code.  -fanalyze-public-statics "
         "will not help for this program.\n"
+        "NOTE: The offending code occured in this context: %s\n",
+        show(ctx).c_str()
       );
       m_everything_bad = true;
       return;
@@ -2387,7 +2389,7 @@ void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
   if (unknownName) {
     for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
       for (auto& kv : ci->publicStaticProps) {
-        merge(tcls, sval(kv.first), val);
+        merge(ctx, tcls, sval(kv.first), val);
       }
     }
     return;

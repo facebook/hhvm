@@ -382,7 +382,7 @@ void handleInPublicStaticPropD(MIS& env) {
   auto const name = baseLocNameType(env.base);
   auto const ty = env.index.lookup_public_static(env.base.locTy, name);
   if (propCouldPromoteToObj(ty)) {
-    indexer->merge(env.base.locTy, name,
+    indexer->merge(env.ctx, env.base.locTy, name,
       objExact(env.index.builtin_class(s_stdClass.get())));
   }
 }
@@ -428,7 +428,7 @@ void handleInPublicStaticElemD(MIS& env) {
   auto const ty = env.index.lookup_public_static(env.base.locTy, name);
   if (elemCouldPromoteToArr(ty)) {
     // Might be possible to only merge a TArrE, but for now this is ok.
-    indexer->merge(env.base.locTy, name, TArr);
+    indexer->merge(env.ctx, env.base.locTy, name, TArr);
   }
 }
 
@@ -464,7 +464,7 @@ void handleInPublicStaticElemU(MIS& env) {
    * Merging InitCell is correct, but very conservative, for now.
    */
   auto const name = baseLocNameType(env.base);
-  indexer->merge(env.base.locTy, name, TInitCell);
+  indexer->merge(env.ctx, env.base.locTy, name, TInitCell);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -844,7 +844,7 @@ void in(ISS& env, const bc::VGetS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TRef);
+    c->merge(env.ctx, tcls, tname, TRef);
   }
 
   push(env, TRef);
@@ -1110,7 +1110,7 @@ void in(ISS& env, const bc::SetS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, t1);
+    c->merge(env.ctx, tcls, tname, t1);
   }
 
   push(env, t1);
@@ -1176,7 +1176,7 @@ void in(ISS& env, const bc::SetOpS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TInitCell);
+    c->merge(env.ctx, tcls, tname, TInitCell);
   }
 
   push(env, TInitCell);
@@ -1230,7 +1230,7 @@ void in(ISS& env, const bc::IncDecS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TInitCell);
+    c->merge(env.ctx, tcls, tname, TInitCell);
   }
 
   push(env, TInitCell);
@@ -1281,7 +1281,7 @@ void in(ISS& env, const bc::BindS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TRef);
+    c->merge(env.ctx, tcls, tname, TRef);
   }
 
   push(env, TRef);
@@ -1515,7 +1515,7 @@ void in(ISS& env, const bc::FPassS& op) {
         }
       }
       if (auto c = env.collect.publicStatics) {
-        c->merge(tcls, tname, TInitGen);
+        c->merge(env.ctx, tcls, tname, TInitGen);
       }
     }
     return push(env, TInitGen);
@@ -2142,7 +2142,7 @@ void in(ISS& env, const bc::InitProp& op) {
     if (auto c = env.collect.publicStatics) {
       auto const cls = selfClsExact(env);
       always_assert(!!cls);
-      c->merge(*cls, sval(op.str1), t);
+      c->merge(env.ctx, *cls, sval(op.str1), t);
     }
     break;
   case InitPropOp::NonStatic:

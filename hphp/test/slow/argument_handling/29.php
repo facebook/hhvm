@@ -5,5 +5,5 @@ function f($x) {
  $b++;
  }
 $a = 1;
-f(&$a);
+f($a);
 var_dump($a);

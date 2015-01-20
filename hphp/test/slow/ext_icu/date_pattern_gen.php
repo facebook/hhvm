@@ -181,7 +181,13 @@ function test_append_item_name() {
 
 function test_date_time_format() {
   $gen = IntlDatePatternGenerator::createInstance('en_US');
-  VS($gen->getDateTimeFormat(), '{1} {0}');
+  //
+  // Different versions of ICU will give us slightly different formats
+  // for the DatePatternGenerator.  Here we choose to ignore
+  // all commas, so that we accept "{1}, {0}",
+  // as for example on stock ubuntu 14.04.
+  //
+  VS(str_replace(",", "", $gen->getDateTimeFormat()), '{1} {0}');
 
   $gen->setDateTimeFormat('{0} {1}');
   VS($gen->getDateTimeFormat(), '{0} {1}');
@@ -195,8 +201,14 @@ function test_get_best_pattern() {
   $skeleton = 'yyyyMMMMddhhmm';
   $gen = IntlDatePatternGenerator::createInstance('en_US');
 
-  VS($gen->getBestPattern($skeleton), 'MMMM dd, yyyy h:mm a');
-  VS($gen->getBestPattern($skeleton), 'MMMM dd, yyyy h:mm a');
+  VS(
+    str_replace("yyyy,", "yyyy", $gen->getBestPattern($skeleton)),
+    'MMMM dd, yyyy h:mm a'
+  );
+  VS(
+    str_replace("yyyy,", "yyyy", $gen->getBestPattern($skeleton)),
+    'MMMM dd, yyyy h:mm a'
+  );
 
   EXPECT_INVALID_STR($gen, function () use ($gen) {
     $gen->getBestPattern(INVALID_STR);

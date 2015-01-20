@@ -600,6 +600,10 @@ private:
  * how it is used.
  */
 struct PublicSPropIndexer {
+  explicit PublicSPropIndexer(borrowed_ptr<const Index> index)
+    : m_index(index)
+  {}
+
   /*
    * Called by the interpreter during analyze_func_collect when a
    * PublicSPropIndexer is active.  This function must be called anywhere the
@@ -634,6 +638,7 @@ private:
   using KnownMap = tbb::concurrent_hash_map<KnownKey,Type>;
 
 private:
+  borrowed_ptr<const Index> m_index;
   std::atomic<bool> m_everything_bad{false};
   UnknownMap m_unknown;
   KnownMap m_known;

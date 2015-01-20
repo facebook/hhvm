@@ -2329,10 +2329,10 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
   FTRACE(2, "merge_public_static: {} {} {}\n",
     show(tcls), show(name), show(val));
 
-  // Figure out which class this can affect.  If we have a DCls::Sub we assume
-  // it could affect any class (we could chase the inheritance hierarchy
-  // downward to try to limit it, but don't currently).
-  auto const cinfo = [&]() -> borrowed_ptr<ClassInfo> {
+  // Figure out which class this can affect.  If we have a DCls::Sub we have to
+  // assume it could affect any subclass, so we repeat this merge for all exact
+  // class types deriving from that base.
+  auto const maybe_cinfo = [&]() -> folly::Optional<borrowed_ptr<ClassInfo>> {
     if (!is_specialized_cls(tcls)) {
       return nullptr;
     }
@@ -2341,11 +2341,18 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
     case DCls::Exact:
       return dcls.cls.val.right();
     case DCls::Sub:
-      return nullptr;
+      if (!dcls.cls.val.right()) return nullptr;
+      for (auto& sub : dcls.cls.val.right()->subclassList) {
+        auto const rcls = res::Class { m_index, sub };
+        merge(ctx, clsExact(rcls), name, val);
+      }
+      return folly::none;
     }
     not_reached();
   }();
+  if (!maybe_cinfo) return;
 
+  auto const cinfo = *maybe_cinfo;
   bool const unknownName = !vname ||
     (vname && vname->m_type != KindOfStaticString);
 

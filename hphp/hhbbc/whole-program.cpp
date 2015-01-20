@@ -304,7 +304,7 @@ void analyze_iteratively(Index& index, php::Program& program) {
 }
 
 void analyze_public_statics(Index& index, php::Program& program) {
-  PublicSPropIndexer publicStatics;
+  PublicSPropIndexer publicStatics{&index};
 
   {
     trace_time timer("analyze public statics");

@@ -1,3 +1,74 @@
+"Ballmer" 29-Jan-2015
+ - Miscellaneous fixes for clang dev build
+ - Make gd-jpeg compatible with jpeg-9
+ - [hh] typechecker: parse array-string-keys within interpolated strings
+ - [hh] T_FINALLY is a standard token
+ - [hack] Add option to format PHP and decl files
+ - [hhvm][easy] Care a little less about paths in filter_input_array.php
+ - Add HH\Asio\curl_exec() as an awaitable \curl_exec()
+ - Implement IntlChar class
+ - Add imagesetinterpolation to gd extension
+ - Add per-branch cli option support to benchy
+ - [hhvm] Restore -g to cmake debug builds
+ - Fix ReflectionClass method ordering
+ - Allow slightly malformed serialized strings, because PHP
+ - Use parameter coercing rather than explicit cast with chr()
+ - [hhvm] MySQLi: Set fetched fields prior calling a constructor
+ - Move Editor plugins to wiki
+ - Remove $ENV config from FindMySQL.cmake
+ - Fix bugs in floor and ceil behavior
+ - "Fix" tvCanBeCoercedToNumber() for malformed numeric strings
+ - Add missing file constants; use HNI for some existing ones too
+ - Fix SmartPtr move constructor on Variant.
+ - Trim values in Accept-Encoding: header filed
+ - Add "Vary: Accept-Encoding" to reposnse header when compression is enabled
+ - Fix memory leaks in MySQL common and MySQLi
+ - [hack] Various fixes for hh_format
+ - [hack] Allow array-get syntax for KeyedContainer
+ - [hack] Remove _tags file for Ocaml 3.12 compatibility
+ - Fix docs for DecodeCufIter
+ - Install hphp/runtime/version.h during make install
+ - Fix leak on bitwise string operations
+ - Improve test run to checking $_SERVER/$_ENV
+ - Cloning exceptions should raise a fatal error
+ - Disallow destructor/clone method be static
+ - [hhvm] Add version binary
+ - Update exception classes, fixes #4442
+ - Add a system profiler and hook some actions of interest to New Relic
+ - [hphp] Added NumberFormatter locale/rounding tests
+ - Add llvm/vasm bytecode counters
+ - [hack] Add support for immediately-executed async lambdas
+ - [hack] Add --no-load option, make load script path relative
+ - [hack] Have hh_server invoke the load script
+ - Add TYPO3 Unit tests to the OSS framework parity check
+ - Array multi sort
+ - Fix some stability issues in the server tests
+ - Remove Redis::SERIALIZER_IGBINARY constant
+ - Produce easier to handle HHVM version identifiers
+ - Fix bizarre memory corruption on exit
+ - Add Hack typing for array_values
+ - remove vim editor-plugin
+ - [hhvm] Fix mysqli segfault
+ - [hack] Improve position info in member-not-found error
+ - Update third party hash for small libmbfl change
+ - [hh] typechecker: canonicalize function names
+ - Capture full line ending for single-line comments
+ - Add a bunch of async helper functions
+ - [hack] Add --strict/--loose option to AT converter
+ - Autocomplete - don't suggest methods that aren't visible when class isn't fully known
+ - [hack] Fix return-in-finally check.
+ - [hack] Fix OSS tests
+ - [hack] Avoid relinking all of hh when format_hack changes
+ - [hh] updated various hhi files
+ - [hh] typechecker: parse "true", "false", "null", "array" more correctly
+ - [hh] hack build: don't generate newv calls in buildEgo
+ - [xenon] Fix attribution of CPU time spent in the asio scheduler
+ - Add StructArrays
+ - Don't let GD create images that would exceed the request memory limit
+ - [hack] Set up proper test scaffold for hh_format
+ - [hack] Allow "$c[] = .." when $c is declared as a collection w/o type params
+ - [hack] Fix race in declaration of BuiltinEnum
+
 "Austin" 15-Jan-2015
  - [asio] Introduce ConditionWaitHandle
  - [hack] `hh_server --version` should not require a root

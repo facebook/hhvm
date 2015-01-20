@@ -20,24 +20,6 @@ class Typo3 extends Framework {
     foreach($this->additionalFolders as $folder) {
       mkdir($rootDir . '/' . $folder);
     }
-    // comment out 2 methods from interfaces which couses troubles
-    // because of https://github.com/facebook/hhvm/issues/2527
-    $filePath = $rootDir .
-                '/typo3/sysext/core/Resources/PHP/TYPO3.Flow/Classes/'.
-                'TYPO3/Flow/Package/PackageManagerInterface.php';
-    file_put_contents($filePath,
-                      str_replace('public function initialize(',
-                                  '//public function initialize(',
-                                  file_get_contents($filePath)));
-    $filePath = $rootDir .
-                '/typo3/sysext/core/Resources/PHP/TYPO3.Flow/Classes/'.
-                'TYPO3/Flow/Package/PackageInterface.php';
-    file_put_contents($filePath,
-                      str_replace('public function boot(',
-                                  '//public function boot(',
-                                  file_get_contents($filePath)));
-
-
   }
 
   <<__Override>>

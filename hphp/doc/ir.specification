@@ -731,9 +731,10 @@ To string conversions:
 6. Reference manipulation
 
 
-| Box, DBox(0), S(Gen), CRc|PRc
+| Box, D(BoxedInitCell), S(Cell), CRc|PRc
 
-  Box S0 if it is unboxed, and put the resulting BoxedCell in D.
+  Box S0 and put the resulting BoxedInitCell in D. If S0 is Uninit, then
+  InitNull will be boxed instead.
 
 | UnboxPtr, DUnboxPtr, S(PtrToGen), NF
 

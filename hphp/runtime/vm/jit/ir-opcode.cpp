@@ -57,7 +57,6 @@ TRACE_SET_MOD(hhir);
 #define ND             0
 #define D(n)           HasDest
 #define DofS(n)        HasDest
-#define DBox(n)        HasDest
 #define DRefineS(n)    HasDest
 #define DParamMayRelax HasDest
 #define DParam         HasDest
@@ -102,7 +101,6 @@ OpInfo g_opInfo[] = {
 #undef ND
 #undef D
 #undef DofS
-#undef DBox
 #undef DRefineS
 #undef DParamMayRelax
 #undef DParam

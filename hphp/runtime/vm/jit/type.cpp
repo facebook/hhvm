@@ -1172,7 +1172,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
   using TypeNames::TCA;
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
-#define DBox(n)         return Type::BoxedInitCell;
 #define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
                                                  inst->typeParam());
 #define DParamMayRelax  return inst->typeParam();
@@ -1204,7 +1203,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 
 #undef D
 #undef DofS
-#undef DBox
 #undef DRefineS
 #undef DParamMayRelax
 #undef DParam
@@ -1397,8 +1395,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DBuiltin
 #define DSubtract(src, t)checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
-#define DBox(src)   checkDst(src < inst->numSrcs(),  \
-                             "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DRefineS(src) checkDst(src < inst->numSrcs(),  \
@@ -1438,7 +1434,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DSubtract
 #undef DMulti
 #undef DSetElem
-#undef DBox
 #undef DofS
 #undef DRefineS
 #undef DParamMayRelax

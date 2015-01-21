@@ -95,7 +95,8 @@ inline bool check_refcount_ns_nz(int32_t count) {
 	ALWAYS_INLINE bool decReleaseCheck() {                                \
 	  assert(!MemoryManager::sweeping());                                 \
 	  assert(check_refcount_nz(m_count));                                 \
-	  return !--m_count;                                                  \
+	  if (m_count > 0) --m_count;                                         \
+	  return !m_count;                                                    \
 	}                                                                     \
     ALWAYS_INLINE void decRefAndRelease() {                               \
       assert(!MemoryManager::sweeping());                                 \

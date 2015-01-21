@@ -26,6 +26,9 @@ function test_ops_with_newtypes(
   $c = $x << 1;
   hh_show($c); // int not FooInt
 
+  $p = $x % 100;
+  hh_show($p); // int not FooInt
+
   $array[] = 1;
   $map[''] = '';
 }

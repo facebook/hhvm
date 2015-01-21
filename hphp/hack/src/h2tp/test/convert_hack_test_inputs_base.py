@@ -401,7 +401,7 @@ OTHER_UNPARSEABLE_FILES = [
     'newtype5.php',
     'newtype6.php',
     'newtype7.php',
-    'newtype_dreeves1.php',
+    'newtype8.php',
     'nowdoc.php',
     'partial_in_strict.php',
     'printf_crash.php',

@@ -2964,8 +2964,8 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
         ), _ -> env, (Reason.Rarith_ret p, Tprim Tnum)
       )
   | Ast.Percent ->
-      let env, _ = Type.unify p Reason.URnone env ty1 (Reason.Rarith p1, Tprim Tint) in
-      let env, _ = Type.unify p Reason.URnone env ty2 (Reason.Rarith p1, Tprim Tint) in
+      let env = Type.sub_type p Reason.URnone env (Reason.Rarith p1, Tprim Tint) ty1 in
+      let env = Type.sub_type p Reason.URnone env (Reason.Rarith p1, Tprim Tint) ty2 in
       env, (Reason.Rarith_ret p, Tprim Tint)
   | Ast.Xor ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in

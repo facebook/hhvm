@@ -1,0 +1,4 @@
+File "test_consts10.php", line 6, characters 10-16:
+Cannot reference abstract constant C1::X directly (Typing[4129])
+File "test_consts10.php", line 4, characters 22-22:
+Declaration is here

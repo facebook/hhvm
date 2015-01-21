@@ -432,7 +432,8 @@ and interface c =
 
 and class_const env (h, _, e) =
   maybe hint env h;
-  expr env e
+  maybe expr env e;
+  ()
 
 and typeconst (env, class_tparams) tconst =
   maybe hint env tconst.c_tconst_type;

@@ -224,6 +224,7 @@ let rec debug stack env (r, ty) =
       | Tarraykey -> o "Tarraykey"
       )
   | Tgeneric (s, x) ->
+      o "generic ";
       o s;
       (match x with
       | None -> ()

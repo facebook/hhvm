@@ -313,13 +313,14 @@ module Typing                               = struct
   let void_usage                            = 4119 (* DONT MODIFY!!!! *)
   let declared_covariant                    = 4120 (* DONT MODIFY!!!! *)
   let declared_contravariant                = 4121 (* DONT MODIFY!!!! *)
-  (* let unset_in_strict                    = 4122 Deprecated! *)
+  (* DEPRECATED unset_in_strict             = 4122 *)
   let strict_members_not_known              = 4123 (* DONT MODIFY!!!! *)
   let generic_at_runtime                    = 4124 (* DONT MODIFY!!!! *)
   let dynamic_class                         = 4125 (* DONT MODIFY!!!! *)
   let attribute_arity                       = 4126 (* DONT MODIFY!!!! *)
   let attribute_param_type                  = 4127 (* DONT MODIFY!!!! *)
   let deprecated_use                        = 4128 (* DONT MODIFY!!!! *)
+  let abstract_const_usage                  = 4129 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -613,9 +614,16 @@ let dynamic_class pos =
     "Don't use dynamic classes"
 
 let uninstantiable_class usage_pos decl_pos name =
-  let name = (strip_ns name) in
+  let name = strip_ns name in
   add_list Typing.uninstantiable_class [
     usage_pos, (name^" is uninstantiable");
+    decl_pos, "Declaration is here"
+  ]
+
+let abstract_const_usage usage_pos decl_pos name =
+  let name = strip_ns name in
+  add_list Typing.abstract_const_usage [
+    usage_pos, ("Cannot reference abstract constant "^name^" directly");
     decl_pos, "Declaration is here"
   ]
 
@@ -939,10 +947,11 @@ let missing_field pos1 pos2 name =
 
 let explain_constraint pos name (error: error) =
   let code, msgl = error in
+  let name = Utils.strip_ns name in
   add_list code (
-  msgl @
-  [pos, "Considering the constraint on the type '"^name^"'"]
-)
+    msgl @
+      [pos, "Considering the constraint on '"^name^"'"]
+  )
 
 let overflow p =
   add Typing.overflow p "Value is too large"
@@ -1269,12 +1278,12 @@ let trait_final pos =
   add Typing.trait_final pos
     "Traits cannot be final"
 
-let implement_abstract pos1 pos2 x =
-  let s_meth = "abstract method "^x in
+let implement_abstract pos1 pos2 kind x =
+  let s_meth = "abstract "^kind^" "^x in
   add_list Typing.implement_abstract [
-  pos1, "This class must provide an implementation for the "^s_meth;
-  pos2, "The "^s_meth^" is defined here";
-]
+    pos1, "This class must provide an implementation for the "^s_meth;
+    pos2, "The "^s_meth^" is defined here";
+  ]
 
 let generic_static pos x =
   add Typing.generic_static pos (

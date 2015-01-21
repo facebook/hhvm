@@ -8,7 +8,6 @@
  *
  *)
 
-
 (* This module implements the typing.
  *
  * Given an Nast.program, it infers the type of all the local
@@ -1174,7 +1173,15 @@ and class_const env p (cid, mid) =
   TUtils.process_static_find_ref cid mid;
   let env, cty = static_class_id p env cid in
   let env, cty = Env.expand_type env cty in
-  class_get ~is_method:false ~is_const:true env cty mid cid
+  let env, const_ty = class_get ~is_method:false ~is_const:true env cty mid cid in
+  match const_ty with
+    | r, Tgeneric (n, _) ->
+      let () = match cid with
+        | CIstatic | CIvar _ -> ();
+        | _ -> Errors.abstract_const_usage p (Reason.to_pos r) n; ()
+      in env, const_ty
+    | _ ->
+      env, const_ty
 
 (*****************************************************************************)
 (* Anonymous functions. *)
@@ -3376,11 +3383,11 @@ and check_parent_abstract position parent_type class_type =
   if parent_type.tc_kind = Ast.Cabstract &&
     class_type.tc_kind <> Ast.Cabstract
   then begin
-    check_extend_abstract position class_type.tc_methods;
-    check_extend_abstract position class_type.tc_smethods;
-    check_extend_abstract_typeconsts position class_type.tc_typeconsts;
-  end
-  else ()
+    check_extend_abstract_meth position class_type.tc_methods;
+    check_extend_abstract_meth position class_type.tc_smethods;
+    check_extend_abstract_const position class_type.tc_consts;
+    check_extend_abstract_typeconst position class_type.tc_typeconsts;
+  end else ()
 
 and class_def env_up _ c =
   if c.c_mode = Ast.Mdecl
@@ -3426,9 +3433,10 @@ and class_def_ env_up c tc =
   let env, parent = class_def_parent env c tc in
   if tc.tc_kind = Ast.Cnormal && tc.tc_members_fully_known
   then begin
-    check_extend_abstract pc tc.tc_methods;
-    check_extend_abstract pc tc.tc_smethods;
-    check_extend_abstract_typeconsts pc tc.tc_typeconsts;
+    check_extend_abstract_meth pc tc.tc_methods;
+    check_extend_abstract_meth pc tc.tc_smethods;
+    check_extend_abstract_const pc tc.tc_consts;
+    check_extend_abstract_typeconst pc tc.tc_typeconsts;
   end;
   let env = Env.set_self env self in
   let env = Env.set_parent env parent in
@@ -3453,11 +3461,11 @@ and class_def_ env_up c tc =
   if DynamicYield.contains_dynamic_yield tc.tc_extends
   then DynamicYield.check_yield_visibility env c
 
-and check_extend_abstract p smap =
+and check_extend_abstract_meth p smap =
   SMap.iter begin fun x ce ->
     match ce.ce_type with
     | r, Tfun { ft_abstract = true; _ } ->
-        Errors.implement_abstract p (Reason.to_pos r) x
+        Errors.implement_abstract p (Reason.to_pos r) "method" x
     | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric (_,_) | Toption _ | Tprim _
       | Tvar _ | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
       | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
@@ -3471,11 +3479,22 @@ and check_extend_abstract p smap =
  * because it is not valid to assign a generic type parameter to a type
  * constant.
  *)
-and check_extend_abstract_typeconsts p smap =
+and check_extend_abstract_typeconst p smap =
   SMap.iter begin fun x tc ->
-    (* TODO(dreeves): provide better error message *)
     if tc.ttc_type = None then
-    Errors.implement_abstract p (fst tc.ttc_name) x
+      Errors.implement_abstract p (fst tc.ttc_name) "type constant" x
+  end smap
+
+and check_extend_abstract_const p smap =
+  SMap.iter begin fun x ce ->
+    match ce.ce_type with
+    | r, Tgeneric _ ->
+      Errors.implement_abstract p (Reason.to_pos r) "constant" x
+    | _, (Tany | Tmixed | Tarray (_, _) | Toption _ | Tprim _
+      | Tvar _ | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
+      | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
+      | Taccess (_, _)) ->
+      ()
   end smap
 
 and class_const_def env (h, id, e) =
@@ -3484,9 +3503,12 @@ and class_const_def env (h, id, e) =
     | None -> env, Env.fresh_type()
     | Some h -> Typing_hint.hint env h
   in
-  let env, ty' = expr env e in
-  ignore (Type.sub_type (fst id) Reason.URhint env ty ty');
-  ty'
+  match e with
+    | Some e ->
+      let env, ty' = expr env e in
+      ignore (Type.sub_type (fst id) Reason.URhint env ty ty');
+      ty'
+    | None -> ty
 
 and class_constr_def env c =
   match c.c_constructor with

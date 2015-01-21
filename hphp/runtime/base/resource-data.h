@@ -69,9 +69,9 @@ class ResourceData {
 
   void release() {
     assert(!hasMultipleRefs());
-    if (m_count == 1) --m_count;
-    // I think we can let this use delete as it isn't smart allocated by default
-    delete this;
+    if (prepareForRelease()) {
+      delete this;
+    }
   }
 
   int32_t o_getId() const { return o_id; }

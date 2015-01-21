@@ -92,10 +92,10 @@ std::pair<StringData*,uint32_t> allocFlatForLen(size_t len) {
 
 ALWAYS_INLINE
 void freeForSize(void* vp, uint32_t size) {
-  /*if (LIKELY(size <= kMaxSmartSize)) {
+  if (LIKELY(size <= kMaxSmartSize)) {
     return MM().smartFreeSizeLogged(vp, size);
   }
-  return MM().smartFreeSizeBigLogged(vp, size); */
+  return MM().smartFreeSizeBigLogged(vp, size);
 }
 
 }
@@ -453,10 +453,13 @@ void StringData::releaseDataSlowPath() {
 }
 
 void StringData::release() {
-  if (m_count == 1) --m_count;
   assert(checkSane());
-  if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
-  freeForSize(this, capacity() + kCapOverhead);
+
+  if (prepareForRelease()) {
+	if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
+	freeForSize(this, capacity() + kCapOverhead);
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////////

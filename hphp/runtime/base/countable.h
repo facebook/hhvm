@@ -89,10 +89,76 @@ inline bool check_refcount_ns_nz(int32_t count) {
   return check_refcount_ns(count - 1);
 }
 
+
+#ifdef LEAKY
+  #define IMPLEMENT_RELEASE_AND_PREPARE                                   \
+	ALWAYS_INLINE bool decReleaseCheck() {                                \
+	  assert(!MemoryManager::sweeping());                                 \
+	  assert(check_refcount_nz(m_count));                                 \
+	  return !--m_count;                                                  \
+	}                                                                     \
+    ALWAYS_INLINE void decRefAndRelease() {                               \
+      assert(!MemoryManager::sweeping());                                 \
+      assert(check_refcount_nz(m_count));                                 \
+	  if (m_count > 0) --m_count;                                         \
+    }                                                                     \
+    ALWAYS_INLINE bool prepareForRelease() {                              \
+      if (m_count > 0) m_count = 0;                                       \
+      return false;                                                       \
+    }
+
+#else
+  #define IMPLEMENT_RELEASE_AND_PREPARE                                   \
+	ALWAYS_INLINE bool decReleaseCheck() {                                \
+	  assert(!MemoryManager::sweeping());                                 \
+	  assert(check_refcount_nz(m_count));                                 \
+	  if (m_count == 1) return true;                                      \
+	  if (m_count > 0) --m_count;                                         \
+	  return false;                                                       \
+	}                                                                     \
+    ALWAYS_INLINE void decRefAndRelease() {                               \
+	  if (decReleaseCheck()) release();                                   \
+    }                                                                     \
+    ALWAYS_INLINE bool prepareForRelease() {                              \
+      return true;                                                        \
+    }
+#endif
+
+#ifdef LEAKY
+  #define IMPLEMENT_COUNTABLENF_RELEASE_AND_PREPARE                       \
+	ALWAYS_INLINE bool decRefAndRelease() {                               \
+	  assert(!MemoryManager::sweeping());                                 \
+      assert(check_refcount_ns_nz(m_count));                              \
+      return !--m_count;                                                  \
+	}                                                                     \
+    ALWAYS_INLINE bool prepareForRelease() {                              \
+      if (m_count > 0) m_count = 0;                                       \
+      return false;                                                       \
+    }
+#else
+  #define IMPLEMENT_COUNTABLENF_RELEASE_AND_PREPARE                       \
+    ALWAYS_INLINE bool decRefAndRelease() {                               \
+	  assert(!MemoryManager::sweeping());                                 \
+	  assert(check_refcount_ns_nz(m_count));                              \
+	  if (!--m_count) {                                                   \
+	    release();                                                        \
+	    return true;                                                      \
+	  }                                                                   \
+	  return false;                                                       \
+    }                                                                     \
+    ALWAYS_INLINE bool prepareForRelease() {                              \
+      return true;                                                        \
+    }
+#endif
+
+
+
 /**
  * Ref-counted types have a m_count field at FAST_REFCOUNT_OFFSET
  * and define counting methods with these macros.
  */
+
+
 #define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                           \
   RefCount getCount() const {                                           \
     assert(check_refcount(m_count));                                    \
@@ -125,16 +191,8 @@ inline bool check_refcount_ns_nz(int32_t count) {
     assert(check_refcount_nz(m_count));                                 \
     return isRefCounted() ? --m_count : m_count;                        \
   }                                                                     \
-  ALWAYS_INLINE bool decReleaseCheck() {                                \
-    assert(!MemoryManager::sweeping());                                 \
-    assert(check_refcount_nz(this->m_count));                           \
-    /*if (this->m_count == 1) return true;*/                            \
-    if (this->m_count > 0) --this->m_count;                             \
-    return false;                                                       \
-  }                                                                     \
-  ALWAYS_INLINE void decRefAndRelease() {                               \
-    if (decReleaseCheck()) release();                                   \
-  }
+  IMPLEMENT_RELEASE_AND_PREPARE
+
 
 #define IMPLEMENT_COUNTABLE_METHODS             \
   void setStatic() const {                      \
@@ -182,16 +240,8 @@ inline bool check_refcount_ns_nz(int32_t count) {
     assert(check_refcount_ns_nz(m_count));              \
     return --m_count;                                   \
   }                                                     \
-                                                        \
-  ALWAYS_INLINE bool decRefAndRelease() {               \
-    assert(!MemoryManager::sweeping());                 \
-    assert(check_refcount_ns_nz(m_count));              \
-    if (!--m_count) {                                   \
-      /*release();*/                                    \
-      return true;                                      \
-    }                                                   \
-    return false;                                       \
-  }
+  IMPLEMENT_COUNTABLENF_RELEASE_AND_PREPARE
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

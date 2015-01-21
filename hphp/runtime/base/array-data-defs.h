@@ -141,8 +141,9 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void ArrayData::release() {
-  if (m_count == 1) --m_count;
-  return g_array_funcs.release[m_kind](this);
+  if (prepareForRelease()) {
+    return g_array_funcs.release[m_kind](this);
+  }
 }
 
 inline ArrayData* ArrayData::append(const Variant& v, bool copy) {

@@ -596,7 +596,6 @@ NEVER_INLINE
 void PackedArray::Release(ArrayData* ad) {
   assert(checkInvariants(ad));
   assert(ad->isRefCounted());
-  if (ad->m_count == 1) --ad->m_count;
 
   auto const size = ad->m_size;
   auto const data = packedData(ad);
@@ -607,7 +606,9 @@ void PackedArray::Release(ArrayData* ad) {
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(ad);
   }
-  //MM().objFreeLogged(ad, heapSize(ad));
+  if (ad->prepareForRelease()) {
+    MM().objFreeLogged(ad, heapSize(ad));
+  }
 }
 
 const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {

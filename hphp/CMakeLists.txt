@@ -92,5 +92,7 @@ if (TEST_BIN)
   add_subdirectory(test)
 endif ()
 
+add_subdirectory(tools/gdb)
+
 # Keep this last
 add_subdirectory(tools/hphpize)

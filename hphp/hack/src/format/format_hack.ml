@@ -1241,6 +1241,16 @@ and const env =
   class_members env;
   newline env
 
+and abs_const env =
+  last_token env;
+  if attempt env begin fun env ->
+    name env;
+    next_token env = Tsc
+  end
+  then ()
+  else (space env; hint env);
+  seq [space ; name ; expect ";"]
+
 (*****************************************************************************)
 (* Type hints. *)
 (*****************************************************************************)
@@ -1536,6 +1546,8 @@ and use env = try_word env "use" begin fun env ->
 end
 
 and after_modifier env = wrap env begin function
+  | Tword when !(env.last_str) = "const" ->
+      abs_const env
   | Tword when !(env.last_str) = "function" ->
       seq env [last_token; space; fun_]
   | _ ->

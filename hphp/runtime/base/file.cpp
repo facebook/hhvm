@@ -736,6 +736,12 @@ int64_t File::printf(const String& format, const Array& args) {
   return write(str);
 }
 
+const StaticString s_Unknown("Unknown");
+const String& File::o_getResourceName() const {
+  if (isInvalid()) return s_Unknown;
+  return s_resource_name;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // csv functions
 

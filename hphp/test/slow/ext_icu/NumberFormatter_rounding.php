@@ -20,7 +20,21 @@ function test_rounding($locale, $digits, $mode = null) {
   foreach ($values as $value) {
     echo $value;
     echo " -> ";
-    echo $formatter->format($value);
+    $to_print = $formatter->format($value);
+
+    //
+    // Remove the Unicode Character 'LEFT-TO-RIGHT MARK' (U+200E)
+    // which some versions of ICU use for Farsi.
+    //
+    $to_print = str_replace("‎", "", $to_print);
+
+    //
+    // Replace the Unicode Character 'MINUS SIGN' (U+2212)
+    // which some versions of ICU use for Farsi.
+    //
+    $to_print = str_replace("−", "-", $to_print);
+
+    echo $to_print;
     echo "\n";
   }
 }

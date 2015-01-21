@@ -905,8 +905,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // alias-class.h above AStack for more).
 
   case DecRefThis:
-  case DecRef:
     return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
+  case DecRef:
+    if (inst.src(0)->type().maybe(Type::Arr | Type::Obj)) {
+      // Could re-enter to run a destructor.
+      return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
+    }
+    return IrrelevantEffects {};
 
   case DecRefStk:
     return MayLoadStore {

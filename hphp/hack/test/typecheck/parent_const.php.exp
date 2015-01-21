@@ -1,0 +1,6 @@
+File "parent_const.php", line 13, characters 12-22:
+Invalid return type (Typing[4110])
+File "parent_const.php", line 12, characters 27-32:
+This is a string
+File "parent_const.php", line 4, characters 9-11:
+It is incompatible with an int

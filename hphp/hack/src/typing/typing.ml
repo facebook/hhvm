@@ -1160,15 +1160,11 @@ and expr_ in_cond is_lvalue env (p, e) =
       let env = check_shape_keys_validity env p (ShapeMap.keys fdm) in
       env, (Reason.Rwitness p, Tshape fdm)
 
-and class_const env p = function
-  | (CIparent, mid) ->
-      let env, cty = static_class_id p env CIparent in
-      obj_get ~is_method:false ~nullsafe:None env cty mid (fun x -> x)
-  | (cid, mid) ->
-      TUtils.process_static_find_ref cid mid;
-      let env, cty = static_class_id p env cid in
-      let env, cty = Env.expand_type env cty in
-      class_get ~is_method:false ~is_const:true env cty mid cid
+and class_const env p (cid, mid) =
+  TUtils.process_static_find_ref cid mid;
+  let env, cty = static_class_id p env cid in
+  let env, cty = Env.expand_type env cty in
+  class_get ~is_method:false ~is_const:true env cty mid cid
 
 (*****************************************************************************)
 (* Anonymous functions. *)

@@ -1180,7 +1180,18 @@ void DebuggerClient::console() {
         strcasecmp(line, "Q") != 0) {
       // even if line is bad command, we still want to remember it, so
       // people can go back and fix typos
-      add_history(line);
+      HIST_ENTRY *last_entry = nullptr;
+      if (history_length > 0 &&
+          (last_entry = history_get(history_length + history_base - 1))) {
+        // Make sure we aren't duplicating history entries
+        if (strcmp(line, last_entry->line)) {
+          add_history(line);
+        }
+      } else {
+        // Add history regardless, since we know that there are no
+        // duplicate entries.
+        add_history(line);
+      }
     }
 
     AdjustScreenMetrics();

@@ -183,7 +183,7 @@ function bin_root() {
 
   $dir = hphp_home() . "/";
   if (getenv("FBMAKE_BIN_ROOT") !== false) {
-    $dir .= getenv("FBMAKE_BIN_ROOT") . 'hphp/hhvm';
+    $dir .= getenv("FBMAKE_BIN_ROOT") . '/hphp/hhvm';
   } else {
     $dir .= "_bin/hphp/hhvm";
   }

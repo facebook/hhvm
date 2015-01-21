@@ -78,7 +78,6 @@ bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
-int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::EnableZendSorting = false;
@@ -986,7 +985,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
     Config::Bind(EnableObjDestructCall, ini, eval["EnableObjDestructCall"],
                  true);
-    Config::Bind(MaxUserFunctionId, ini, eval["MaxUserFunctionId"], 2 * 65536);
     Config::Bind(CheckSymLink, ini, eval["CheckSymLink"], true);
 
     Config::Bind(EnableAlternative, ini, eval["EnableAlternative"], 0);

@@ -341,7 +341,6 @@ public:
   static bool EnableEmitterStats;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
-  static int MaxUserFunctionId;
   static bool EnableArgsInBacktraces;
   static bool EnableZendCompat;
   static bool EnableZendSorting;

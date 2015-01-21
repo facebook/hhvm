@@ -596,9 +596,15 @@ and build_constructor env class_ method_ =
   env, (Some cstr, mconsist)
 
 and class_const_decl c (env, acc) (h, id, e) =
+  let c_name = (snd c.c_name) in
   let env, ty =
-    match h with
-      | None -> begin
+    match h, e with
+      | Some h, Some _ -> Typing_hint.hint env h
+      | Some h, None ->
+        let env, h_ty = Typing_hint.hint env h in
+        let pos, name = id in
+        env, (Reason.Rwitness pos, Tgeneric (c_name^"::"^name, Some h_ty))
+      | None, Some e -> begin
         let rec infer_const e = match snd e with
           | String _
           | String2 ([], _)
@@ -630,11 +636,16 @@ and class_const_decl c (env, acc) (h, id, e) =
         in
         (env, infer_const e)
       end
-      | Some h -> Typing_hint.hint env h
+      | None, None ->
+        let pos, name = id in
+        if c.c_mode = Ast.Mstrict then Errors.missing_typehint pos;
+        let r = Reason.Rwitness pos in
+        let const_ty = r, Tgeneric (c_name^"::"^name, Some (r, Tany)) in
+        env, const_ty
   in
   let ce = { ce_final = true; ce_is_xhp_attr = false; ce_override = false;
              ce_synthesized = false; ce_visibility = Vpublic; ce_type = ty;
-             ce_origin = (snd c.c_name);
+             ce_origin = c_name;
            } in
   let acc = SMap.add (snd id) ce acc in
   env, acc

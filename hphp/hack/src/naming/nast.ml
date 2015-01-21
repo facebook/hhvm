@@ -118,7 +118,8 @@ and enum_ = {
 
 and tparam = Ast.variance * sid * hint option
 
-and class_const = hint option * sid * expr
+(* expr = None indicates an abstract const *)
+and class_const = hint option * sid * expr option
 
 (* This represents a type const definition. If a type const is abstract then
  * then the type hint acts as a constraint. Any concrete definition of the

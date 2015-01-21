@@ -5,4 +5,4 @@ This is an object of type B
 File "extend_generic2.php", line 18, characters 14-14:
 It is incompatible with an object of type A
 File "extend_generic2.php", line 18, characters 27-27:
-Considering the constraint on the type 'T'
+Considering the constraint on 'T'

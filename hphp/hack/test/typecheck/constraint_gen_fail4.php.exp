@@ -5,4 +5,4 @@ This is a value of generic type T
 File "constraint_gen_fail4.php", line 14, characters 12-16:
 It is incompatible with an object of type B
 File "constraint_gen_fail4.php", line 14, characters 12-16:
-Considering the constraint on the type 'this'
+Considering the constraint on 'this'

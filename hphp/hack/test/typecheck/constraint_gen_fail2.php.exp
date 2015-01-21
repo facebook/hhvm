@@ -3,4 +3,4 @@ This is an object of type A (Typing[4110])
 File "constraint_gen_fail2.php", line 21, characters 12-17:
 It is incompatible with a string
 File "constraint_gen_fail2.php", line 16, characters 22-22:
-Considering the constraint on the type 'T'
+Considering the constraint on 'T'

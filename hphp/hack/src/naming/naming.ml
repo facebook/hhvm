@@ -1161,7 +1161,7 @@ and class_const env x acc =
   match x with
   | Attributes _ -> acc
   | Const (h, l) -> const_defl h env l @ acc
-  | AbsConst _ -> (* fixme *) acc
+  | AbsConst (h, x) -> abs_const_def env h x :: acc
   | ClassUse _ -> acc
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
@@ -1334,10 +1334,15 @@ and const_def h env (x, e) =
   | Ast.Mstrict
   | Ast.Mpartial ->
       let h = opt_map (hint env) h in
-      h, new_const, expr env e
+      h, new_const, Some (expr env e)
   | Ast.Mdecl ->
       let h = opt_map (hint env) h in
-      h, new_const, (fst e, N.Any)
+      h, new_const, Some (fst e, N.Any)
+
+and abs_const_def env h x =
+  let new_const = Env.new_const env x in
+  let h = opt_map (hint env) h in
+  h, new_const, None
 
 and class_var_ env (x, e) =
   let id = Env.new_const env x in

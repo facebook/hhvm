@@ -3,4 +3,4 @@ This is an object of type A (Typing[4110])
 File "gen6.php", line 26, characters 11-17:
 It is incompatible with an object of type Z
 File "gen6.php", line 13, characters 30-30:
-Considering the constraint on the type 'T'
+Considering the constraint on 'T'

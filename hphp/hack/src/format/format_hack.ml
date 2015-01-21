@@ -1249,7 +1249,7 @@ and abs_const env =
   end
   then ()
   else (space env; hint env);
-  seq [space ; name ; expect ";"]
+  seq env [space ; name ; expect ";"]
 
 (*****************************************************************************)
 (* Type hints. *)

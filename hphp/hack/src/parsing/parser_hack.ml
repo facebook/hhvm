@@ -1246,18 +1246,25 @@ and class_toplevel_word env word =
       if !(env.errors) != error_state
       then look_for_next_method start env;
       m @ class_defs env
-  | "abstract" | "public" | "protected" | "private" | "final" | "static"  ->
-      (* variable | method | type const*)
-      L.back env.lb;
-      let start = Pos.make env.file env.lb in
-      let error_state = !(env.errors) in
-      let m = class_member_def env in
-      if !(env.errors) != error_state
-      then look_for_next_method start env;
-      m :: class_defs env
+  | "abstract" ->
+    (match try_abstract_const env with
+      | Some ac -> ac :: class_defs env
+      | None -> on_class_member_word env)
+  | "public" | "protected" | "private" | "final" | "static"  ->
+    on_class_member_word env
   | _ ->
       error_expect env "modifier";
       []
+
+and on_class_member_word env =
+  (* variable | method | type const*)
+  L.back env.lb;
+  let start = Pos.make env.file env.lb in
+  let error_state = !(env.errors) in
+  let m = class_member_def env in
+  if !(env.errors) != error_state
+  then look_for_next_method start env;
+  m :: class_defs env
 
 and look_for_next_method previous_pos env =
   match L.token env.file env.lb with
@@ -1344,6 +1351,19 @@ and xhp_format env =
  *)
 (*****************************************************************************)
 
+(* Is "abstract" followed by "const"?
+   abstract const _ X; *)
+and try_abstract_const env =
+    try_parse env begin fun env ->
+      match L.token env.file env.lb with
+        | Tword when Lexing.lexeme env.lb = "const" ->
+          let h = class_const_hint env in
+          let id = identifier env in
+          expect env Tsc;
+          Some (AbsConst (h, id))
+        | _ -> None
+    end
+
 (* const_hint const_name1 = value1, ..., const_name_n = value_n; *)
 and class_const_def env =
   let h = class_const_hint env in
@@ -1362,8 +1382,9 @@ and class_const_has_hint env =
     match L.token env.file env.lb with
     (* const_name = ... | hint_name const_name = ... *)
     | Tword ->
-        (* If we see 'name =', there is no type hint *)
-        L.token env.file env.lb <> Teq
+      (* If we see 'name =' or 'name;', there is no type hint *)
+      let tok = L.token env.file env.lb in
+      (tok <> Teq && tok <> Tsc)
     | _ -> true
   end
 

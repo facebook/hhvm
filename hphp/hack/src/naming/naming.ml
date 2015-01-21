@@ -1100,6 +1100,7 @@ and class_use env x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse h ->
     hint_no_typedef env h;
     hint ~allow_this:true env h :: acc
@@ -1114,6 +1115,7 @@ and xhp_attr_use env x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse _ -> acc
   | XhpAttrUse h ->
     hint_no_typedef env h;
@@ -1128,6 +1130,7 @@ and class_require env c_kind x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse _ -> acc
   | XhpAttrUse _ -> acc
   | ClassTraitRequire (MustExtend, h)
@@ -1153,6 +1156,7 @@ and class_require env c_kind x acc =
 and constructor env acc = function
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse _ -> acc
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
@@ -1171,6 +1175,7 @@ and class_const env x acc =
   match x with
   | Attributes _ -> acc
   | Const (h, l) -> const_defl h env l @ acc
+  | AbsConst _ -> (* fixme *) acc
   | ClassUse _ -> acc
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
@@ -1186,6 +1191,7 @@ and class_var_static env x acc =
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassVars (kl, h, cvl) when List.mem Static kl ->
     let h = opt_map (hint ~is_static_var:true env) h in
     let cvl = List.map (class_var_ env) cvl in
@@ -1203,6 +1209,7 @@ and class_var env x acc =
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassVars (kl, h, cvl) when not (List.mem Static kl) ->
     (* there are no covariance issues with private members *)
     let allow_this = (List.mem Private kl) in
@@ -1270,6 +1277,7 @@ and class_static_method env x acc =
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassVars _ -> acc
   | XhpAttr _ -> acc
   | Method m when snd m.m_name = SN.Members.__construct -> acc
@@ -1284,6 +1292,7 @@ and class_method env sids cv_ids x acc =
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassVars _ -> acc
   | XhpAttr _ -> acc
   | Method m when snd m.m_name = SN.Members.__construct -> acc
@@ -1298,6 +1307,7 @@ and class_typeconst env x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse _ -> acc
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc

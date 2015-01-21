@@ -40,7 +40,7 @@ module AddDeps = struct
     | ClassUse h -> hint root h
     | XhpAttrUse h -> hint root h
     | ClassTraitRequire (_, h) -> hint root h
-    | Attributes _  | Const _ | ClassVars _ | XhpAttr _ | Method _
+    | Attributes _  | Const _ | AbsConst _ | ClassVars _ | XhpAttr _ | Method _
     | TypeConst _ -> ()
 
   and hint root (_, h) =

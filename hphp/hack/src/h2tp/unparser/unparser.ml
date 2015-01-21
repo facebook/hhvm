@@ -335,6 +335,10 @@ let unparser _env =
       and declsStr = u_of_list_comma (fun (id, expr) ->
         StrWords [ u_id id; Str "="; u_expr expr]) decls
       in StrStatement [ Str "const" ; hOptionStr; declsStr ]
+    | AbsConst (hOption, name) ->
+      let hOptionStr = u_of_option u_hint hOption
+      and nameStr = u_id name
+      in StrStatement [ Str "abstract const" ; hOptionStr; nameStr ]
     | Attributes v2 ->
         u_todo "Attributes"
           (fun () ->

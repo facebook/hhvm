@@ -119,6 +119,7 @@ and trait_req_kind =
 
 and class_elt =
   | Const of hint option * (id * expr) list
+  | AbsConst of hint option * id
   | Attributes of class_attr list
   | TypeConst of typeconst
   | ClassUse of hint

@@ -232,6 +232,10 @@ let mk_mapper = fun m_in ->
                  let v1 = map_id v1 and v2 = map_expr v2 in (v1, v2))
               v2
           in Const ((v1, v2))
+      | AbsConst ((v1, v2)) ->
+          let v1 = map_hint_option v1
+          and v2 = map_id v2
+          in AbsConst ((v1, v2))
       | Attributes v1 ->
           let v1 = map_of_list map_class_attr v1 in Attributes ((v1))
       | ClassUse v1 -> let v1 = map_hint v1 in ClassUse ((v1))

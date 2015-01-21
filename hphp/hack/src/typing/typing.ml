@@ -2265,6 +2265,9 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
                     !Typing_defs.accumulate_method_calls_result;
           Typing_hooks.dispatch_smethod_hook class_ (p, mid) env (Some cid);
           (match smethod with
+          | None when not is_method ->
+            smember_not_found p ~is_const ~is_method class_ mid;
+            env, (Reason.Rnone, Tany)
           | None ->
             (match Env.get_static_member is_method env class_ SN.Members.__callStatic with
               | None ->

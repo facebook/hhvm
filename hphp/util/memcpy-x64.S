@@ -1,4 +1,4 @@
-#include "hphp/runtime/vm/jit/etch-helpers.h"
+#include "hphp/util/etch-helpers.h"
 
 #if defined(__x86_64__) && !defined(__APPLE__)
 	.file	"memcpy-x64.S"

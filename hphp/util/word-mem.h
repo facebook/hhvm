@@ -19,6 +19,8 @@
 #include <limits>
 #include <folly/Portability.h>
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

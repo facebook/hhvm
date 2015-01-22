@@ -719,6 +719,40 @@ void __attribute__((__weak__)) __hot_end();
 }
 #endif
 
+#if FACEBOOK && defined USE_SSECRC
+// Overwrite the functiosn
+NEVER_INLINE void copyFunc(void* dst, void* src, uint32_t sz = 64) {
+  if (dst >= reinterpret_cast<void*>(__hot_start) &&
+      dst < reinterpret_cast<void*>(__hot_end)) {
+    memcpy(dst, src, sz);
+    Logger::Info("Successfully overwrite function at %p.", dst);
+  } else {
+    Logger::Info("Failed to patch code at %p.", dst);
+  }
+}
+
+NEVER_INLINE void copyHashFuncs() {
+#ifdef __OPTIMIZE__
+  if (IsSSEHashSupported()) {
+    copyFunc(getMethodPtr(&HPHP::StringData::hashHelper),
+             reinterpret_cast<void*>(g_hashHelper_crc), 64);
+    typedef strhash_t (*HashFunc) (const char*, uint32_t);
+    auto hash_func = [](HashFunc x) {
+      return reinterpret_cast<void*>(x);
+    };
+    copyFunc(hash_func(hash_string_cs_unsafe),
+             hash_func(hash_string_cs_crc), 64);
+    copyFunc(hash_func(hash_string_cs),
+             hash_func(hash_string_cs_unaligned_crc), 64);
+    copyFunc(hash_func(hash_string_i_unsafe),
+             hash_func(hash_string_i_crc), 64);
+    copyFunc(hash_func(hash_string_i),
+             hash_func(hash_string_i_unaligned_crc), 80);
+  }
+#endif
+}
+#endif
+
 #if FACEBOOK
 # define AT_END_OF_TEXT       __attribute__((__section__(".stub")))
 #else
@@ -755,6 +789,11 @@ hugifyText(char* from, char* to) {
   // Needs the attribute((optimize("2")) to prevent
   // g++ from turning this back into memcpy(!)
   wordcpy((uint64_t*)from, (uint64_t*)mem, sz / sizeof(uint64_t));
+  // When supported, string hash functions using SSE 4.2 CRC32 instruction will
+  // be used, so we don't have to check every time.
+#ifdef USE_SSECRC
+  copyHashFuncs();
+#endif
   mprotect(from, sz, PROT_READ | PROT_EXEC);
   free(mem);
   mlock(from, to - from);

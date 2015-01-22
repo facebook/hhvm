@@ -12,7 +12,7 @@
  */
 
 #include "hphp/runtime/vm/jit/reserved-stack.h"
-#include "hphp/runtime/vm/jit/etch-helpers.h"
+#include "hphp/util/etch-helpers.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 #if defined(__x86_64__)

@@ -639,17 +639,46 @@ IniSetting::Map IniSetting::FromStringAsMap(const std::string& ini,
   return ret;
 }
 
-struct IniCallbackData {
+class IniCallbackData {
+public:
+  IniCallbackData() {
+    extension = nullptr;
+    mode = IniSetting::PHP_INI_NONE;
+    iniData = nullptr;
+    updateCallback = nullptr;
+    getCallback = nullptr;
+  }
+  virtual ~IniCallbackData() {
+    delete iniData;
+    iniData = nullptr;
+  }
+public:
   const Extension* extension;
   IniSetting::Mode mode;
+  UserIniData *iniData;
   std::function<bool(const folly::dynamic& value)> updateCallback;
   std::function<folly::dynamic()> getCallback;
 };
 
 typedef std::map<std::string, IniCallbackData> CallbackMap;
-// Only settable at startup
+
+//
+// These are for settings/callbacks only settable at startup.
+//
+// Empirically and surprisingly (20Jan2015):
+//   * server mode: the contents of system map are     destructed on SIGTERM
+//   * CLI    mode: the contents of system map are NOT destructed on SIGTERM
+//
 static CallbackMap s_system_ini_callbacks;
-// The script can change these during the request
+
+//
+// These are for settings/callbacks that the script
+// can change during the request.
+//
+// Empirically and surprisingly (20Jan2015), when there are N threads:
+//   * server mode: the contents of user map are     destructed N-1 times
+//   * CLI    mode: the contents of user map are NOT destructed on SIGTERM
+//
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
 
 typedef std::map<std::string, folly::dynamic> SettingMap;
@@ -672,30 +701,67 @@ public:
 
 } s_ini_extension;
 
-void IniSetting::Bind(const Extension* extension, const Mode mode,
-                      const std::string& name,
-                      std::function<bool(const folly::dynamic& value)>
-                        updateCallback,
-                      std::function<folly::dynamic()> getCallback) {
+void IniSetting::Bind(
+  const Extension* extension,
+  const Mode mode,
+  const std::string& name,
+  std::function<bool(const folly::dynamic&)> updateCallback,
+  std::function<folly::dynamic()> getCallback,
+  std::function<class UserIniData *(void)> userDataCallback
+) {
   assert(!name.empty());
 
-  bool is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
-  // For now, we require the extensions to use their own thread local memory for
-  // user-changeable settings. This means you need to use the default field to
-  // Bind and can't statically initialize them. We could conceivably let you
-  // use static memory and have our own thread local here that users can change
-  // and then reset it back to the default, but we haven't built that yet.
-  auto &data = is_thread_local ? (*s_user_callbacks)[name]
-                               : s_system_ini_callbacks[name];
-  // I would love if I could verify p is thread local or not instead of
-  // this dumb hack
-  assert(is_thread_local || !Extension::ModulesInitialised() ||
-         s_pretendExtensionsHaveNotBeenLoaded);
+  /*
+   * WATCH OUT: unlike php5, a Mode is not necessarily a bit mask.
+   * PHP_INI_ALL is NOT encoded as the union:
+   *   PHP_INI_USER|PHP_INI_PERDIR|PHP_INI_SYSTEM
+   *
+   * Note that Mode value PHP_INI_SET_USER and PHP_INI_SET_EVERY are bit
+   * sets; "SET" in this use means "bitset", and not "assignment".
+   */
+  bool is_thread_local = (
+    (mode == PHP_INI_USER) ||
+    (mode == PHP_INI_PERDIR) ||
+    (mode == PHP_INI_ALL) ||  /* See note above */
+    (mode &  PHP_INI_USER) ||
+    (mode &  PHP_INI_PERDIR) ||
+    (mode &  PHP_INI_ALL)
+    );
+
+  //
+  // There are cases where Extension::ModulesInitialised(), but the name
+  // appears in neither s_user_callbacks nor s_system_ini_callbacks.
+  // This was empirically observed for at least one non-Zend
+  // compatibility extension.
+  //
+  bool use_user = is_thread_local;
+  if (!use_user) {
+    //
+    // If it is already in the user callbacks, continue to use it from there.
+    //
+    bool in_user_callbacks =
+      (s_user_callbacks->find(name) != s_user_callbacks->end());
+    use_user = in_user_callbacks;
+  }
+
+  //
+  // For now, we require the extensions to use their own thread local
+  // memory for user-changeable settings. This means you need to use
+  // the default field to Bind and can't statically initialize them.
+  // We could conceivably let you use static memory and have our own
+  // thread local here that users can change and then reset it back to
+  // the default, but we haven't built that yet.
+  //
+  IniCallbackData &data =
+    use_user ? (*s_user_callbacks)[name] : s_system_ini_callbacks[name];
 
   data.extension = extension;
   data.mode = mode;
   data.updateCallback = updateCallback;
   data.getCallback = getCallback;
+  if (data.iniData == nullptr && userDataCallback != nullptr) {
+    data.iniData = userDataCallback();
+  }
 }
 
 void IniSetting::Unbind(const std::string& name) {

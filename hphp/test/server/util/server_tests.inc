@@ -194,20 +194,33 @@ function stopServer($adminPort, $serverProc) {
 function http_request($host, $port, $path, $timeout = 1200) {
   global $test_run_id, $LOG_ROOT;
 
+  @list($path, $post, $headers) = (array)$path;
+  if ($post) {
+    $post = http_build_query($post);
+    $post = '--data-urlencode='.urlencode($post);;
+  }
+  if ($headers) {
+    foreach ($headers as $h => $v) {
+      $s[] = "-H '$h : $v'";
+    }
+    $headers = implode(" ", $s);
+  }
   $url = "http://$host:$port/$path";
   $host_name = "hphpd.debugger.".php_uname('n');
-  $cmd = "curl --trace-ascii ${LOG_ROOT}_curl$test_run_id.log ".
+  $cmd = "curl $post --trace-ascii ${LOG_ROOT}_curl$test_run_id.log ".
     "--silent --connect-timeout $timeout ".
-    "--header 'Host: $host_name' --url \"$url\"";
+    "-H 'Host: $host_name' $headers --url \"$url\"";
   tlog("Requesting page with command: $cmd");
-  return exec($cmd);
+  if (exec($cmd, $result) === null) return null;
+  return implode("\n", $result);
 }
 
 function requestAll(array $requests, $customArgs = '') {
   runTest(
     function($serverPort) use ($requests) {
       foreach ($requests as $request) {
-        echo "Requesting '$request'\n";
+        list($r) = (array)$request;
+        echo "Requesting '$r'\n";
         var_dump(request(php_uname('n'), $serverPort, $request));
       }
     },

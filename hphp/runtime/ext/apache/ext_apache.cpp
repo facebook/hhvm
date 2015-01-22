@@ -41,16 +41,23 @@ Variant HHVM_FUNCTION(apache_note, const String& note_name,
   return false;
 }
 
-static Array get_headers(HeaderMap& headers) {
-  Array ret;
+static Array get_headers(const HeaderMap& headers, bool allHeaders = false) {
+  ArrayInit ret(headers.size(), ArrayInit::Mixed{});
   for (auto& iter : headers) {
     const auto& values = iter.second;
-    if (!values.size()) {
-      continue;
+    if (auto size = values.size()) {
+      if (LIKELY(size == 1 || !allHeaders)) {
+        ret.set(String(iter.first), String(values.back()));
+      } else {
+        PackedArrayInit dups(size);
+        for (auto& dup : values) {
+          dups.append(String(dup));
+        }
+        ret.set(String(iter.first), dups.toArray());
+      }
     }
-    ret.set(String(iter.first), String(values.back()));
   }
-  return ret;
+  return ret.toArray();
 }
 
 Array HHVM_FUNCTION(apache_request_headers) {
@@ -60,7 +67,7 @@ Array HHVM_FUNCTION(apache_request_headers) {
     transport->getHeaders(headers);
     return get_headers(headers);
   }
-  return Array();
+  return empty_array();
 }
 
 Array HHVM_FUNCTION(apache_response_headers) {
@@ -70,16 +77,12 @@ Array HHVM_FUNCTION(apache_response_headers) {
     transport->getResponseHeaders(headers);
     return get_headers(headers);
   }
-  return Array();
+  return empty_array();
 }
 
 bool HHVM_FUNCTION(apache_setenv, const String& variable, const String& value,
                      bool walk_to_top /* = false */) {
   return false;
-}
-
-Array HHVM_FUNCTION(getallheaders) {
-  return HHVM_FN(apache_request_headers)();
 }
 
 const StaticString
@@ -109,6 +112,16 @@ Array HHVM_FUNCTION(apache_get_config) {
   );
 }
 
+Array HHVM_FUNCTION(get_headers_secure) {
+  Transport *transport = g_context->getTransport();
+  if (transport) {
+    HeaderMap headers;
+    transport->getHeaders(headers);
+    return get_headers(headers, true);
+  }
+  return empty_array();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool ApacheExtension::Enable(true);
@@ -123,9 +136,9 @@ void ApacheExtension::moduleInit() {
     HHVM_FE(apache_request_headers);
     HHVM_FE(apache_response_headers);
     HHVM_FE(apache_setenv);
-    HHVM_FE(getallheaders);
+    HHVM_FALIAS(getallheaders, apache_request_headers);
     HHVM_FE(apache_get_config);
-
+    HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
     loadSystemlib();
   }
 }

@@ -1227,10 +1227,12 @@ function run_config_post($outputs, $test, $options) {
     $wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
     $wanted_re = str_replace('%d', '\d+', $wanted_re);
     $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
+    // %f allows two points "-.0.0" but that is the best *simple* expression
     $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?',
                              $wanted_re);
     $wanted_re = str_replace('%c', '.', $wanted_re);
-    // %f allows two points "-.0.0" but that is the best *simple* expression
+    // must be last
+    $wanted_re = str_replace('%%', '%%?', $wanted_re);
 
     // Normalize newlines
     $wanted_re = preg_replace("/(\r\n?|\n)/", "\n", $wanted_re);

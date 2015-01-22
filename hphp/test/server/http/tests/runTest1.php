@@ -20,5 +20,10 @@ requestAll(array(
   // This is expected to pass.
   "test_header.php?test_string=foo",
   // This is expected to fatal due to embedded newline in the header.
-  "test_header.php?test_string=f%0d%0aoo"
+  "test_header.php?test_string=f%0d%0aoo",
+  array(
+    "test_duplicate_headers.php", null, array(
+      'xyzzy' => 42, 'XyZZy' => 43, 'XYZZY' => 44, 'xxxxx' => 45
+    )
+  )
 ));

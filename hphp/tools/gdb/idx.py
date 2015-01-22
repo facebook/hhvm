@@ -55,13 +55,48 @@ def unordered_map_at(umap, idx):
 #------------------------------------------------------------------------------
 # HHVM accessors.
 
-def compact_ptr_get(csp):
-    value_type = T(str(csp.type).split('<', 1)[1][:-1])
-    return (csp['m_data'] & 0xffffffffffff).cast(value_type.pointer())
-
-
 def fixed_vector_at(fv, idx):
-    return compact_ptr_get(fv['m_sp'])[idx]
+    return rawptr(fv['m_sp'])[idx]
+
+
+def fixed_string_map_at(fsm, sd):
+    sd = deref(sd)
+
+    # Give up if the StringData was never hashed.
+    if int(sd['m_hash']) == 0:
+        return None
+
+    case_sensitive = rawtype(fsm.type).template_argument(1)
+    s = string_data_val(sd, case_sensitive)
+
+    elm = fsm['m_table'][-1 - (sd['m_hash'] & fsm['m_mask'])].address
+
+    while True:
+        sd = rawptr(elm['sd'])
+
+        if sd == 0:
+            return None
+
+        if s == string_data_val(sd, case_sensitive):
+            return elm['data']
+
+        elm = elm + 1
+        if elm == fsm['m_table']:
+            elm = elm - (fsm['m_mask'] + 1)
+
+
+def indexed_string_map_at(ism, idx):
+    sd = rawptr(idx)
+
+    if sd is not None:
+        idx = fixed_string_map_at(ism['m_map'], sd)
+
+    if idx is not None:
+        t = rawtype(rawtype(ism.type).template_argument(0))
+        access_list = ism['m_map']['m_table'].cast(t.pointer())
+        return access_list[idx]
+
+    return None
 
 
 def thm_at(thm, key):
@@ -90,10 +125,12 @@ def thm_at(thm, key):
 @memoized
 def idx_accessors():
     return {
-        'std::vector':          vector_at,
-        'std::unordered_map':   unordered_map_at,
-        'HPHP::FixedVector':    fixed_vector_at,
-        'HPHP::TreadHashMap':   thm_at,
+        'std::vector':              vector_at,
+        'std::unordered_map':       unordered_map_at,
+        'HPHP::FixedVector':        fixed_vector_at,
+        'HPHP::FixedStringMap':     fixed_string_map_at,
+        'HPHP::IndexedStringMap':   indexed_string_map_at,
+        'HPHP::TreadHashMap':       thm_at,
     }
 
 

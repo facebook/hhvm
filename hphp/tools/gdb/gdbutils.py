@@ -44,9 +44,9 @@ def gdbprint(val, ty=None):
 #------------------------------------------------------------------------------
 # String helpers.
 
-
-def string_data_val(val):
-    return val['m_data'].string('utf-8', 'ignore', val['m_len'])
+def string_data_val(val, keep_case=True):
+    s = val['m_data'].string('utf-8', 'ignore', val['m_len'])
+    return s if keep_case else s.lower()
 
 
 def vstr(value):

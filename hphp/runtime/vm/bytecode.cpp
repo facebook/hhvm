@@ -2597,7 +2597,7 @@ StrNR ExecutionContext::createFunction(const String& args,
           << "(" << args.data() << ") {"
           << code.data() << "}\n";
   std::string evalCode = codeStr.str();
-  Unit* unit = compile_string(evalCode.data(), evalCode.size());
+  Unit* unit = compile_string(evalCode.data(), evalCode.size(), nullptr, true);
   // Move the function to a different name.
   std::ostringstream newNameStr;
   newNameStr << '\0' << "lambda_" << ++m_lambdaCounter;
@@ -7659,6 +7659,7 @@ void ExecutionContext::requestExit() {
   profileRequestEnd();
   EventHook::Disable();
   EnvConstants::requestExit();
+  clearCreatedFunctions();
 
   if (m_globalVarEnv) {
     smart_delete(m_globalVarEnv);

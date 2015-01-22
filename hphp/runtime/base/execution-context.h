@@ -294,6 +294,7 @@ public:
 
   void manageAPCHandle();
   void cleanup();
+  void clearCreatedFunctions();
 
 public:
   const Func* lookupMethodCtx(const Class* cls,

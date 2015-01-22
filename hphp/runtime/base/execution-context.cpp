@@ -118,11 +118,16 @@ template<> void ThreadLocalNoCheck<ExecutionContext>::destroy() {
 
 void ExecutionContext::cleanup() {
   manageAPCHandle();
-
-  // Discard all units that were created via create_function().
-  for (auto& v : m_createdFuncs) delete v;
+  clearCreatedFunctions();
 
   always_assert(m_activeSims.empty());
+}
+
+void ExecutionContext::clearCreatedFunctions() {
+  // Discard all units that were created via create_function().
+  for (auto& v : m_createdFuncs) delete v;
+  m_createdFuncs.clear();
+  clearThreadLocalStaticStringMap();
 }
 
 void ExecutionContext::sweep() {

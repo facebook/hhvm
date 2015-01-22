@@ -58,6 +58,10 @@ HttpRequestHandler::HttpRequestHandler(int timeout)
                                  "requests_timed_out_on_queue",
                                  {ServiceData::StatsType::COUNT})) { }
 
+HttpRequestHandler::~HttpRequestHandler() {
+  freeThreadLocalStaticStringMap();
+}
+
 void HttpRequestHandler::sendStaticContent(Transport *transport,
                                            const char *data, int len,
                                            time_t mtime,

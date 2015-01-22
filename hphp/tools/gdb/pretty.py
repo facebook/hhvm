@@ -8,7 +8,9 @@ GDB pretty printers for HHVM types.
 import gdb
 import re
 from gdbutils import *
+import idx
 from nameof import nameof
+from sizeof import sizeof
 
 
 #------------------------------------------------------------------------------
@@ -262,14 +264,40 @@ class ArrayDataPrinter:
 class ObjectDataPrinter:
     RECOGNIZE = '^HPHP::(ObjectData)$'
 
+    class _iterator(_BaseIterator):
+        def __init__(self, obj):
+            self.obj = obj
+            self.cls = rawptr(obj['m_cls'])
+            self.end = sizeof(self.cls['m_declProperties'])
+            self.cur = gdb.Value(0).cast(self.end.type)
+
+        def __next__(self):
+            if self.cur == self.end:
+                raise StopIteration
+
+            decl_props = self.cls['m_declProperties']
+
+            name = idx.indexed_string_map_at(decl_props, self.cur)['m_name']
+            val = idx.object_data_at(self.obj, name)
+
+            self.cur = self.cur + 1
+
+            if val is None:
+                val = '<unknown>'
+
+            return (str(deref(name)), val)
+
     def __init__(self, val):
         self.val = val.cast(val.dynamic_type)
         self.cls = deref(val['m_cls'])
 
     def to_string(self):
-        return "Object of class %s @ 0x%x" % (
+        return "Object of class %s @ %s" % (
             nameof(self.cls),
             self.val.address)
+
+    def children(self):
+        return self._iterator(self.val)
 
 
 #------------------------------------------------------------------------------

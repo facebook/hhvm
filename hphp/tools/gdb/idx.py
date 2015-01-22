@@ -89,21 +89,27 @@ def fixed_string_map_at(fsm, sd):
             elm = elm - (fsm['m_mask'] + 1)
 
 
-def indexed_string_map_at(ism, idx):
-    sd = rawptr(idx)
+def _ism_index(ism, sd):
+    return fixed_string_map_at(ism['m_map'], sd)
 
+def _ism_access_list(ism):
+    t = rawtype(rawtype(ism.type).template_argument(0))
+    return ism['m_map']['m_table'].cast(t.pointer())
+
+def indexed_string_map_at(ism, idx):
+    # If `idx' is a string, it must be converted to an index via the underlying
+    # FixedStringMap.
+    sd = rawptr(idx)
     if sd is not None:
-        idx = fixed_string_map_at(ism['m_map'], sd)
+        idx = _ism_index(ism, sd)
 
     if idx is not None:
-        t = rawtype(rawtype(ism.type).template_argument(0))
-        access_list = ism['m_map']['m_table'].cast(t.pointer())
-        return access_list[idx]
+        return _ism_access_list(ism)[idx]
 
     return None
 
 
-def thm_at(thm, key):
+def tread_hash_map_at(thm, key):
     table = atomic_get(thm['m_table'])
     capac = table['capac']
 
@@ -124,6 +130,30 @@ def thm_at(thm, key):
 
 
 #------------------------------------------------------------------------------
+# PHP value accessors.
+
+def _object_data_prop_vec(obj):
+    cls = rawptr(obj['m_cls'])
+    extra = rawptr(cls['m_extra'])
+
+    prop_vec = (obj.address + 1).cast(T('uintptr_t')) + \
+                extra['m_builtinODTailSize']
+    return prop_vec.cast(T('HPHP::TypedValue').pointer())
+
+
+def object_data_at(obj, sd):
+    cls = rawptr(obj['m_cls'])
+
+    prop_vec = _object_data_prop_vec(obj)
+    prop_ind = _ism_index(cls['m_declProperties'], sd)
+
+    if prop_ind is None:
+        return None
+
+    return prop_vec[prop_ind]
+
+
+#------------------------------------------------------------------------------
 # `idx' command.
 
 @memoized
@@ -135,7 +165,8 @@ def idx_accessors():
         'HPHP::FixedVector':        fixed_vector_at,
         'HPHP::FixedStringMap':     fixed_string_map_at,
         'HPHP::IndexedStringMap':   indexed_string_map_at,
-        'HPHP::TreadHashMap':       thm_at,
+        'HPHP::TreadHashMap':       tread_hash_map_at,
+        'HPHP::ObjectData':         object_data_at,
     }
 
 

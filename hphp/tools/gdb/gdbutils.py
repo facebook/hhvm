@@ -112,21 +112,24 @@ def rawptr(val):
 
     name = template_type(rawtype(val.type))
 
-    if name == "std::unique_ptr":
+    if name == 'std::unique_ptr':
         return val['_M_t']['_M_head_impl']
 
-    if name == "HPHP::SmartPtr" or name == "HPHP::AtomicSmartPtr":
+    if name == 'HPHP::default_ptr':
+        return val['m_p']
+
+    if name == 'HPHP::SmartPtr' or name == 'HPHP::AtomicSmartPtr':
         return val['m_px']
 
-    if name == "HPHP::LowPtr" or name == "HPHP::LowPtrImpl":
+    if name == 'HPHP::LowPtr' or name == 'HPHP::LowPtrImpl':
         inner = t.template_argument(0)
         return val['m_raw'].cast(inner.pointer())
 
-    if name == "HPHP::CompactTaggedPtr":
+    if name == 'HPHP::CompactTaggedPtr':
         inner = t.template_argument(0)
         return (val['m_data'] & 0xffffffffffff).cast(inner.pointer())
 
-    if name == "HPHP::CompactSizedPtr":
+    if name == 'HPHP::CompactSizedPtr':
         return rawptr(val['m_data'])
 
     return None

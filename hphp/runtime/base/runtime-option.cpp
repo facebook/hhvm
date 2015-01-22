@@ -283,12 +283,12 @@ int RuntimeOption::AdminThreadCount = 1;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
 
-std::string RuntimeOption::ProxyOrigin;
+std::string RuntimeOption::ProxyOriginRaw;
+int RuntimeOption::ProxyPercentageRaw = 0;
 int RuntimeOption::ProxyRetry = 3;
 bool RuntimeOption::UseServeURLs;
 std::set<std::string> RuntimeOption::ServeURLs;
 bool RuntimeOption::UseProxyURLs;
-int RuntimeOption::ProxyPercentage = 0;
 std::set<std::string> RuntimeOption::ProxyURLs;
 std::vector<std::string> RuntimeOption::ProxyPatterns;
 bool RuntimeOption::AlwaysUseRelativePath = false;
@@ -1374,12 +1374,12 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
   {
     Hdf proxy = config["Proxy"];
-    Config::Bind(ProxyOrigin, ini, proxy["Origin"]);
+    Config::Bind(ProxyOriginRaw, ini, proxy["Origin"]);
+    Config::Bind(ProxyPercentageRaw, ini, proxy["Percentage"], 0);
     Config::Bind(ProxyRetry, ini, proxy["Retry"], 3);
     Config::Bind(UseServeURLs, ini, proxy["ServeURLs"]);
     Config::Get(ini, proxy["ServeURLs"], ServeURLs);
     Config::Bind(UseProxyURLs, ini, proxy["ProxyURLs"]);
-    Config::Bind(ProxyPercentage, ini, proxy["Percentage"], 0);
     Config::Get(ini, proxy["ProxyURLs"], ProxyURLs);
     Config::Get(ini, proxy["ProxyPatterns"], ProxyPatterns);
   }

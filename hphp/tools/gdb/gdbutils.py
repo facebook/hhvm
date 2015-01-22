@@ -112,6 +112,9 @@ def rawptr(val):
 
     name = template_type(rawtype(val.type))
 
+    if name == "std::unique_ptr":
+        return val['_M_t']['_M_head_impl']
+
     if name == "HPHP::SmartPtr" or name == "HPHP::AtomicSmartPtr":
         return val['m_px']
 

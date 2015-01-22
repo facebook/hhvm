@@ -55,6 +55,10 @@ def unordered_map_at(umap, idx):
 #------------------------------------------------------------------------------
 # HHVM accessors.
 
+def atomic_vector_at(av, idx):
+    return atomic_get(rawptr(av['m_vals'])[idx])
+
+
 def fixed_vector_at(fv, idx):
     return rawptr(fv['m_sp'])[idx]
 
@@ -127,6 +131,7 @@ def idx_accessors():
     return {
         'std::vector':              vector_at,
         'std::unordered_map':       unordered_map_at,
+        'HPHP::AtomicVector':       atomic_vector_at,
         'HPHP::FixedVector':        fixed_vector_at,
         'HPHP::FixedStringMap':     fixed_string_map_at,
         'HPHP::IndexedStringMap':   indexed_string_map_at,

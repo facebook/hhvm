@@ -90,37 +90,52 @@ def K(name):
 #------------------------------------------------------------------------------
 # Type manipulations.
 
+def rawtype(t):
+    return t.unqualified().strip_typedefs()
+
+
 def template_type(t):
     """Get the unparametrized name of a template type."""
     return str(t).split('<')[0]
 
 
-def is_ref(t):
-    """Return whether a type `t' is a C++ pointer or reference type."""
-    return (t.code == gdb.TYPE_CODE_PTR or
-            t.code == gdb.TYPE_CODE_REF)
+def rawptr(val):
+    """Fully strip a smart pointer type to a raw pointer.  References are
+    re-cast as pointers."""
+
+    t = rawtype(val.type)
+
+    if t.code == gdb.TYPE_CODE_PTR:
+        return val
+    elif t.code == gdb.TYPE_CODE_REF:
+        return val.referenced_type().address
+
+    name = template_type(rawtype(val.type))
+
+    if name == "HPHP::SmartPtr" or name == "HPHP::AtomicSmartPtr":
+        return val['m_px']
+
+    if name == "HPHP::LowPtr" or name == "HPHP::LowPtrImpl":
+        inner = t.template_argument(0)
+        return val['m_raw'].cast(inner.pointer())
+
+    if name == "HPHP::CompactTaggedPtr":
+        inner = t.template_argument(0)
+        return (val['m_data'] & 0xffffffffffff).cast(inner.pointer())
+
+    if name == "HPHP::CompactSizedPtr":
+        return rawptr(val['m_data'])
+
+    return None
 
 
 def deref(val):
     """Fully dereference a value, stripping away *, &, and all known smart
     pointer wrappers (as well as const/volatile qualifiers)."""
 
-    while True:
-        t = val.type.unqualified().strip_typedefs()
+    p = rawptr(val)
 
-        if is_ref(t):
-            val = val.referenced_value()
-            continue
-
-        name = template_type(t)
-
-        if name == "HPHP::LowPtr" or name == "HPHP::LowPtrImpl":
-            inner = t.template_argument(0)
-            val = val['m_raw'].cast(inner.pointer()).dereference()
-            continue
-
-        if name == "HPHP::SmartPtr" or name == "HPHP::AtomicSmartPtr":
-            val = val['m_px'].dereference()
-            continue
-
+    if p is None:
         return val
+    else:
+        return deref(p.referenced_value())

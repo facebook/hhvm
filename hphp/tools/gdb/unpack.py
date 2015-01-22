@@ -1,5 +1,5 @@
 """
-GDB convenience function for dereferencing arbitrary pointery types.
+GDB convenience functions for unpacking types.
 """
 # @lint-avoid-python-3-compatibility-imports
 # @lint-avoid-pyflakes3
@@ -7,6 +7,21 @@ GDB convenience function for dereferencing arbitrary pointery types.
 
 import gdb
 from gdbutils import *
+
+
+#------------------------------------------------------------------------------
+# `ptr' function.
+
+class PtrFunction(gdb.Function):
+    def __init__(self):
+        super(PtrFunction, self).__init__('ptr')
+
+    def invoke(self, val):
+        return rawptr(val)
+
+PtrFunction._PtrFunction__doc__ = rawptr.__doc__
+
+PtrFunction()
 
 
 #------------------------------------------------------------------------------

@@ -16,7 +16,6 @@ localdir = path.dirname(path.realpath(path.expanduser(__file__)))
 if sys.path[0] != localdir:
     sys.path.insert(0, localdir)
 
-import deref
 import hhbc
 import idx
 import lookup
@@ -24,3 +23,4 @@ import nameof
 import stack
 import pretty
 import unit
+import unpack

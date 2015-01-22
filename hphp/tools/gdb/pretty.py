@@ -124,7 +124,7 @@ class PtrPrinter:
 
     def _string(self):
         inner = self._pointer().dereference()
-        inner_type = inner.type.unqualified().strip_typedefs()
+        inner_type = rawtype(inner.type)
 
         if inner_type.tag == 'HPHP::StringData':
             return string_data_val(inner)
@@ -305,7 +305,7 @@ def lookup_function(val):
     if t.code == gdb.TYPE_CODE_REF:
         t = t.target()
 
-    t = t.unqualified().strip_typedefs()
+    t = rawtype(t)
 
     # Get the type name.
     typename = t.tag

@@ -16,8 +16,25 @@ Usage for commands can be obtained by running
 
     (gdb) help <command>
 
+A collection of pretty-printers for HHVM data structures is also included;
+details can be discovered by reading `pretty.py`.
 
-## deref
+
+Convenience helpers
+-------------------
+
+### ptr
+
+The `$ptr` convenience function strips away smart pointer wrapper classes and
+returns the raw underlying pointer.
+
+    (gdb) whatis $1->m_cls
+    type = HPHP::LowClassPtr
+    (gdb) p $ptr($1->m_cls)
+    $2 = (HPHP::Class *) 0x262ec0f8
+
+
+### deref
 
 The `$deref` convenience function can be used to fully dereference a value,
 stripping away all layers of `*`, `&`, and all supported smart pointer
@@ -38,15 +55,17 @@ wrappers.  Qualifiers (const/volatile) are also stripped.
     ---Type <return> to continue, or q <return> to quit---
 
 
-## idx
+Commands
+--------
+
+### idx
 
 The `idx` command, and corresponding `$idx` convenience function, can be used
 to index into arbitrary container objects, such as `std::unordered_map`.  See
 idx.py for a list of supported containers.
 
     (gdb) idx jit::mcg->m_fixupMap.m_fixups 0x1b0e0000
-    $14 = (HPHP::jit::FixupMap::FixupEntry *) 0x7f4153408018
-    {
+    $14 = {
       firstElem = 838,
       fixup = {
         pcOffset = 838,
@@ -57,9 +76,23 @@ idx.py for a list of supported containers.
         returnIpDisp = 15
       }
     }
+    (gdb) whatis $14
+    type = HPHP::jit::FixupMap::FixupEntry
 
 
-## nameof
+### sizeof
+
+The `sizeof` command prints the sizes of various container types.
+
+    (gdb) whatis $2
+    type = HPHP::Class *
+    (gdb) whatis $2->m_interfaces
+    type = HPHP::Class::InterfaceMap
+    (gdb) sizeof $2->m_interfaces
+    $3 = 15
+
+
+### nameof
 
 The `nameof` command prints the string names of named VM metadata objects, like
 Funcs or Classes.
@@ -70,7 +103,7 @@ Funcs or Classes.
     "ServiceMemoizer::__call_async"
 
 
-## unit
+### unit
 
 The `unit` command sets or prints the current context Unit.  This is primarily
 used for printing out literal strings without having to supply an explicit Unit
@@ -81,11 +114,12 @@ argument.
     (gdb) p $1->m_unit
     $3 = (HPHP::Unit *) 0x2b7ee680
     (gdb) unit $3
-    (gdb) unit
     $4 = (const HPHP::Unit *) 0x2b7ee680
+    (gdb) unit
+    $5 = (const HPHP::Unit *) 0x2b7ee680
 
 
-## lookup
+### lookup
 
 The `lookup` supercommand allows for looking up various VM objects by ID.
 Currently supported flavors include `lookup func` and `lookup litstr`, the
@@ -101,7 +135,56 @@ The `lookup func` command also comes as a convenience function called
     $2 = 44766
 
 
-## walkstk
+### hhx
+
+The `hhx` commands dumps bytecode beginning at the specified address.
+
+If two arguments are provided, the first is interpreted as the start PC, and
+the second, as the number of opcodes to print.  Subsequent calls to `hhx' may
+omit these argument to print the same number of opcodes starting wherever the
+previous call left off.
+
+If only a single argument is provided, if it is in the range for bytecode
+allocations (i.e., > 0xffffffff), it replaces the saved PC and defaults the
+count to 1 before printing.  Otherwise, it replaces the count and the PC
+remains where it left off after the previous call.
+
+Litstr IDs are converted to strings based on the context Unit set using `unit`.
+If no Unit is set, the raw IDs are printed instead.
+
+    (gdb)  lookup func 12033
+    $1 = (const HPHP::Func *) 0x28d04280
+    (gdb) unit $1->m_unit
+    $2 = (const HPHP::Unit *) 0x28ce9b40
+    (gdb) hhx $3 25
+    0x7f2b2f9460ae+0: This
+    0x7f2b2f9460ae+1: AssertRATStk 0 SubObj
+    0x7f2b2f9460ae+8: FPushObjMethodD 1 "send" 0
+    0x7f2b2f9460ae+15: AssertRATL 0 Cell
+    0x7f2b2f9460ae+18: CGetL 0
+    0x7f2b2f9460ae+20: FPassC 0
+    0x7f2b2f9460ae+22: FCallD 1 "MyClient" "send"
+    0x7f2b2f9460ae+32: UnboxRNop
+    0x7f2b2f9460ae+33: AssertRATL 1 Uninit
+    0x7f2b2f9460ae+36: SetL 1
+    0x7f2b2f9460ae+38: PopC
+    0x7f2b2f9460ae+39: CGetM <vector>
+    0x7f2b2f9460ae+54: FPushObjMethodD 1 "genWait" 0
+    0x7f2b2f9460ae+61: AssertRATL 1 InitCell
+    0x7f2b2f9460ae+64: CGetL 1
+    0x7f2b2f9460ae+66: FPassC 0
+    0x7f2b2f9460ae+68: FCall 1
+    0x7f2b2f9460ae+70: UnboxR
+    0x7f2b2f9460ae+71: Dup
+    0x7f2b2f9460ae+72: IsTypeC 0
+    0x7f2b2f9460ae+74: JmpNZ 28
+    0x7f2b2f9460ae+79: Dup
+    0x7f2b2f9460ae+80: InstanceOfD "HH\WaitHandle"
+    0x7f2b2f9460ae+85: JmpNZ 15
+    0x7f2b2f9460ae+90: FPushObjMethodD 0 "getWaitHandle" 0
+
+
+### walkstk
 
 The `walkstk` command prints out the native stack interleaved with the PHP
 stack, incorporating code and stack pointers, function names, and filepaths.

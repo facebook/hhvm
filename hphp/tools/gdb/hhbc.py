@@ -193,8 +193,8 @@ omit these argument to print the same number of opcodes starting wherever the
 previous call left off.
 
 If only a single argument is provided, if it is in the range for bytecode
-allocations (i.e., > 0xffffffff), it replaces the saved PC and defaults
-the count to 1 before printing.  Otherwise, it replaces the count and the PC
+allocations (i.e., > 0xffffffff), it replaces the saved PC and defaults the
+count to 1 before printing.  Otherwise, it replaces the count and the PC
 remains where it left off after the previous call.
 """
 

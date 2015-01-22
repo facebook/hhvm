@@ -44,4 +44,6 @@ Use `unit none` to unset.  Just `unit` displays the current Unit.
             unit_type = T('HPHP::Unit').const().pointer()
             curunit = gdb.parse_and_eval(argv[0]).cast(unit_type)
 
+        gdbprint(curunit)
+
 UnitCommand()

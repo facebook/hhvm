@@ -100,6 +100,9 @@ def idx_accessors():
 def idx(container, index):
     value = None
 
+    if container.type.code == gdb.TYPE_CODE_REF:
+        container = container.referenced_value()
+
     container_type = template_type(container.type)
     true_type = template_type(container.type.strip_typedefs())
 
@@ -115,10 +118,6 @@ def idx(container, index):
         except:
             print('idx: Unrecognized container.')
             return None
-
-    if value is None:
-        print('idx: Element not found.')
-        return None
 
     return value
 
@@ -148,8 +147,12 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
 
         value = idx(argv[0], argv[1])
 
-        gdbprint(value.address, value.type.pointer())
-        print(vstr(value))
+        if value is None:
+            print('idx: Element not found.')
+            return None
+
+        gdb.execute('print *(%s)%s' % (
+            str(value.type.pointer()), str(value.address)))
 
 
 class IdxFunction(gdb.Function):

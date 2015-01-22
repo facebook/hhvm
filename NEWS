@@ -1,4 +1,4 @@
-"Austin" 15-Jan-2014
+"Austin" 15-Jan-2015
  - [asio] Introduce ConditionWaitHandle
  - [hack] `hh_server --version` should not require a root
  - [hack] Log exceptions thrown in the master process.

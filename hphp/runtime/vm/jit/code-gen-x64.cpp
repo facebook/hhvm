@@ -502,7 +502,7 @@ Vreg CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
 void CodeGenerator::cgDefSP(IRInstruction* inst) {
   auto sp = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  v << defvmsp{dstLoc(inst, 0).reg()};
+  v << defvmsp{sp};
 
   if (RuntimeOption::EvalHHIRGenerateAsserts && !inst->marker().resumed()) {
     auto const fp = srcLoc(inst, 0).reg();
@@ -2264,9 +2264,9 @@ void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   // non-generator frames) when we don't track rVmSp independently
   // from rVmFp.  In generator frames we'll have to track offsets from
   // a DefResumableSP or something similar.
-  auto fp  = srcLoc(inst, 1).reg();
+  auto fp  = srcLoc(inst, 0).reg();
   auto dst = dstLoc(inst, 0).reg();
-  auto off = -cellsToBytes(inst->extra<ReDefSP>()->spOffset);
+  auto off = -cellsToBytes(inst->extra<ReDefSP>()->offset);
   vmain() << lea{fp[off], dst};
 }
 

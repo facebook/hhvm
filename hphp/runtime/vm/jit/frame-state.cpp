@@ -352,7 +352,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case ReDefSP:
     cur().spValue = inst->dst();
-    cur().spOffset = inst->extra<ReDefSP>()->spOffset;
+    cur().spOffset = inst->extra<ReDefSP>()->offset;
     break;
 
   case DefSP:

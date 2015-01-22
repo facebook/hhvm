@@ -708,32 +708,6 @@ struct CoerceData : IRExtraData {
   int64_t argNum;
 };
 
-/*
- * StackOffset to adjust stack pointer by and boolean indicating whether or not
- * the stack pointer in src1 used for analysis spans a function call.
- *
- * Also contains a list of frame pointers and stack offsets for all enclosing
- * frames. This is used during optimizations to recalculate offsets from the
- * frame pointer when one or more enclosing frames have been elided.
- */
-struct ReDefSPData : IRExtraData {
-  explicit ReDefSPData(int32_t off, bool spans)
-    : spOffset(off)
-    , spansCall(spans)
-  {}
-
-  std::string show() const {
-    return folly::format(
-      "{}{}",
-      spOffset,
-      spansCall ? ",spansCall" : ""
-    ).str();
-  }
-
-  int32_t spOffset;
-  bool spansCall;
-};
-
 struct RBTraceData : IRExtraData {
   RBTraceData(Trace::RingBufferType t, SrcKey sk)
     : type(t)
@@ -931,7 +905,7 @@ X(CoerceCellToBool,             CoerceData);
 X(CoerceStrToInt,               CoerceData);
 X(CoerceStrToDbl,               CoerceData);
 X(AssertStk,                    StackOffset);
-X(ReDefSP,                      ReDefSPData);
+X(ReDefSP,                      StackOffset);
 X(DefSP,                        StackOffset);
 X(LdStk,                        StackOffset);
 X(LdStkAddr,                    StackOffset);

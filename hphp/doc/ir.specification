@@ -1490,17 +1490,14 @@ To string conversions:
   This instruction is used at the beginning of tracelets to represent the state
   of the stack on entry and does not emit code.
 
-| ReDefSP<offset,spansCall>, D(StkPtr), S(StkPtr) S(FramePtr), NF
+| ReDefSP<offset>, D(StkPtr), S(FramePtr), NF
 
-  Re-define a stack in terms of a frame pointer S1 and an offset, putting the
+  Re-define a stack in terms of a frame pointer S0 and an offset, putting the
   resulting pointer in D.
 
   This instruction is used when entering or "returning" from an inlined call.
   The one used on entry will generally be DCE'd when the actrec can be
   eliminated. The one on exit is only needed until TODO(#2288359).
-
-  The spansCall boolean is true if there is possibly a Call instructions
-  between the definition of S0 and this instruction.
 
 | AdjustSP<offset>, D(StkPtr), S(StkPtr), NF
 

@@ -115,17 +115,7 @@ void beginInlining(HTS& env,
   updateMarker(env);
 
   auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, prevSP, fp(env));
-  gen(
-    env,
-    ReDefSP,
-    ReDefSPData {
-      target->numLocals(),
-      false /* spansCall; calls in FPI regions are not inline
-             * candidates currently */
-    },
-    sp(env),
-    fp(env)
-  );
+  gen(env, ReDefSP, StackOffset{target->numLocals()}, fp(env));
 
   for (unsigned i = 0; i < numParams; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
@@ -167,16 +157,7 @@ void endInlinedCommon(HTS& env) {
   env.fpiActiveStack.pop();
 
   updateMarker(env);
-  gen(
-    env,
-    ReDefSP,
-    ReDefSPData {
-      env.irb->spOffset(),
-      env.irb->frameMaySpanCall()
-    },
-    sp(env),
-    fp(env)
-  );
+  gen(env, ReDefSP, StackOffset{env.irb->spOffset()}, fp(env));
 
   /*
    * After the end of inlining, we are restoring to a previously defined stack
@@ -267,4 +248,3 @@ void inlSingletonSProp(HTS& env,
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

@@ -1167,7 +1167,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
                       CallArray,
                       ContEnter)) {
         bool const beginInlDefSP = m_inst->is(ReDefSP) &&
-                                     m_inst->src(1)->inst()->is(DefInlineFP);
+                                     m_inst->src(0)->inst()->is(DefInlineFP);
         if (!beginInlDefSP) {
           // If the StkPtr being consumed points to a pre-live ActRec, observe
           // its $this pointer since many of our helper functions decref it.

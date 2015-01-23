@@ -46,7 +46,7 @@ class Options {
     self::$original_framework_info = self::$framework_info;
     // Put any script error to a file when we are in a mode like --csv and
     // want to control what gets printed to something like STDOUT.
-    unlink(self::$script_errors_file);
+    delete_file(self::$script_errors_file);
 
     // Don't use $argv[0] which just contains the program to run
     $framework_names = new Vector(array_slice($argv, 1));

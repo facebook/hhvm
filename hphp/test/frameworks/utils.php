@@ -443,3 +443,10 @@ function nullthrows<T>(?T $x, ?string $message = null): T {
   }
   throw new Exception($message);
 }
+
+// Use this instead of unlink to avoid warnings
+function delete_file(?string $path): void {
+  if ($path !== null && file_exists($path)) {
+    unlink($path);
+  }
+}

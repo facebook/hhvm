@@ -141,10 +141,13 @@ let error_continue env =
     "Yeah...we're not going to support continue/break N. \
     It makes static analysis tricky and it's not really essential"
 
-let error_expect env expect =
+let error_back env msg =
   let pos = Pos.make env.file env.lb in
   L.back env.lb;
-  env.errors := (pos, "Expected "^expect) :: !(env.errors)
+  error_at env pos msg
+
+let error_expect env expect =
+  error_back env ("Expected "^expect)
 
 let expect env x =
   if L.token env.file env.lb = x
@@ -155,7 +158,7 @@ let expect_word env name =
   let tok = L.token env.file env.lb in
   let value = Lexing.lexeme env.lb in
   if tok <> Tword || value <> name
-  then error_expect env ("Was expecting: '"^name^ "' (not '"^value^"')");
+  then error_expect env ("'"^name^ "' (not '"^value^"')");
   ()
 
 (*****************************************************************************)
@@ -2465,6 +2468,19 @@ and reduce_ env e1 op make =
 (*****************************************************************************)
 
 and lambda_expr_body : env -> block = fun env ->
+  (* check for an async block *)
+  let tok = L.token env.file env.lb in
+  let value = Lexing.lexeme env.lb in
+  let () =
+    if tok <> Tword || value <> "async"
+    then L.back env.lb
+    else
+      (* in sync lambda: just transform into an async lambda *)
+      (* in async lambda: be explicit about the Awaitable<Awaitable<X>> return
+       * type with a return statement *)
+      error_back env "Unexpected use of async {...} as lambda expression"
+  in
+
   let (p, e1) = expr env in
   [Return (p, (Some (p, e1)))]
 

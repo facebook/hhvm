@@ -114,10 +114,9 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
         " -vRepo.Authoritative=true";
     }
 
-    $cmd = 'exec env MALLOC_CONF=junk:true ' . $hhvm .
+    $cmd = "exec env MALLOC_CONF=junk:true TESTID={$test_run_id} " . $hhvm .
       ' --mode=server' . $serverConfig . $logFileConfig .
       ' -vEval.JitProfileInterpRequests=0 -vServer.ExitOnBindFail=true' .
-      ' -vServerVariables.TESTID=' . $test_run_id .
       ' --instance-id=' . $test_run_id .
       $portConfig . $srcRootConfig .
       $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
@@ -200,7 +199,10 @@ function http_request($host, $port, $path, $timeout = 1200) {
     "--silent --connect-timeout $timeout ".
     "--header 'Host: $host_name' --url \"$url\"";
   tlog("Requesting page with command: $cmd");
-  return exec($cmd);
+  $output = array();
+  if (exec($cmd, $output) === null) return null;
+
+  return implode("\n", $output);
 }
 
 function requestAll(array $requests, $customArgs = '') {

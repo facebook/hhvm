@@ -190,7 +190,7 @@ bool RuntimeOption::ImplicitFlush = false;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
 int64_t RuntimeOption::MaxPostSize = 100;
-bool RuntimeOption::AlwaysPopulateRawPostData = true;
+bool RuntimeOption::AlwaysPopulateRawPostData = false;
 int64_t RuntimeOption::UploadMaxFileSize = 100;
 std::string RuntimeOption::UploadTmpDir = "/tmp";
 bool RuntimeOption::EnableFileUploads = true;
@@ -1151,7 +1151,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(MaxPostSize, ini, server["MaxPostSize"], 100);
     MaxPostSize <<= 20;
     Config::Bind(AlwaysPopulateRawPostData, ini,
-                 server["AlwaysPopulateRawPostData"], true);
+                 server["AlwaysPopulateRawPostData"], false);
     Config::Bind(LibEventSyncSend, ini, server["LibEventSyncSend"], true);
     Config::Bind(TakeoverFilename, ini, server["TakeoverFilename"]);
     Config::Bind(ExpiresActive, ini, server["ExpiresActive"], true);

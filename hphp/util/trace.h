@@ -114,8 +114,8 @@ namespace Trace {
       TM(hhir)          \
       TM(hhirTracelets) \
       TM(hhir_dce)      \
-      TM(hhir_meme)     \
-      TM(hhir_aloc)     \
+      TM(hhir_store)    \
+      TM(hhir_alias)    \
       TM(hhir_load)     \
       TM(llvm)          \
       TM(hhir_refcount) \

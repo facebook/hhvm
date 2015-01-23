@@ -9,7 +9,6 @@
  *
  */
 
-
 class Dude {
   private function blah(): :fbt {
     return

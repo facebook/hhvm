@@ -1,4 +1,6 @@
 File "iface_require_extends2.php", line 23, characters 10-22:
-The method methodOfSuper is undefined in an object of type IMarked (Typing[4053])
+Could not find method methodOfSuper in an object of type IMarked (Typing[4053])
 File "iface_require_extends2.php", line 22, characters 19-25:
+This is why I think it is an object of type IMarked
+File "iface_require_extends2.php", line 16, characters 11-17:
 Declaration of IMarked is here

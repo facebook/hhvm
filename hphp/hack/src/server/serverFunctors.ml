@@ -11,6 +11,8 @@
 open Utils
 open ServerEnv
 
+exception State_not_found
+
 module type SERVER_PROGRAM = sig
   module EventLogger : sig
     val init: Path.path -> float -> unit
@@ -120,7 +122,7 @@ end = struct
       if has_client then Program.handle_connection genv !env socket;
     done
 
-  let load genv { ServerArgs.filename; ServerArgs.to_recheck } =
+  let load genv filename to_recheck =
       let chan = open_in filename in
       let env = Marshal.from_channel chan in
       Program.unmarshal chan;
@@ -142,9 +144,52 @@ end = struct
       Program.EventLogger.load_recheck_end ();
       env
 
+  let run_load_script genv env cmd =
+    try
+      let cmd = Printf.sprintf "%s %s %s" cmd
+        (Filename.quote (Path.string_of_path (ServerArgs.root genv.options)))
+        (Filename.quote Build_id.build_id_ohai) in
+      Printf.fprintf stderr "Running load script: %s\n%!" cmd;
+      let ic = Unix.open_process_in cmd in
+      let state_fn = begin
+        try input_line ic
+        with End_of_file -> raise State_not_found
+      end in
+      let to_recheck = ref [] in
+      begin
+        try while true do to_recheck := input_line ic :: !to_recheck done
+        with End_of_file -> ()
+      end;
+      assert (Unix.close_process_in ic = Unix.WEXITED 0);
+      Printf.fprintf stderr
+        "Load state found at %s. %d files to recheck\n%!"
+        state_fn (List.length !to_recheck);
+      let env = load genv state_fn !to_recheck in
+      Program.EventLogger.init_done "load";
+      env
+    with
+    | State_not_found ->
+        Printf.fprintf stderr "Load state not found!\n";
+        Printf.fprintf stderr "Starting from a fresh state instead...\n%!";
+        let env = Program.init genv env in
+        Program.EventLogger.init_done "load_state_not_found";
+        env
+    | e ->
+        let msg = Printexc.to_string e in
+        Printf.fprintf stderr "Load error: %s\n%!" msg;
+        Printexc.print_backtrace stderr;
+        Printf.fprintf stderr "Starting from a fresh state instead...\n%!";
+        Program.EventLogger.load_failed msg;
+        let env = Program.init genv env in
+        Program.EventLogger.init_done "load_error";
+        env
+
   let create_program_init genv env = fun () ->
     match ServerArgs.load_save_opt genv.options with
-    | None -> Program.init genv env
+    | None ->
+        let env = Program.init genv env in
+        Program.EventLogger.init_done "fresh";
+        env
     | Some (ServerArgs.Save fn) ->
         let chan = open_out_no_fail fn in
         let env = Program.init genv env in
@@ -155,15 +200,10 @@ end = struct
          * does not expose the underlying file descriptor to C code; so we use
          * a separate ".sharedmem" file. *)
         SharedMem.save (fn^".sharedmem");
+        Program.EventLogger.init_done "save";
         env
-    | Some (ServerArgs.Load load_info) ->
-        try load genv load_info
-        with e ->
-          let msg = Printexc.to_string e in
-          Printf.fprintf stderr "Load error: %s\n%!" msg;
-          Printf.fprintf stderr "Starting from fresh state instead...\n%!";
-          Program.EventLogger.load_failed msg;
-          Program.init genv env
+    | Some (ServerArgs.Load load_script) ->
+        run_load_script genv env load_script
 
   (* The main entry point of the daemon
   * the only trick to understand here, is that env.modified is the set
@@ -172,16 +212,16 @@ end = struct
   * we look if env.modified changed.
   *)
   let main options =
+    let root = ServerArgs.root options in
+    Program.EventLogger.init root (Unix.time ());
     Program.preinit ();
     SharedMem.init();
     (* this is to transform SIGPIPE in an exception. A SIGPIPE can happen when
     * someone C-c the client.
     *)
     Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
-    let root = ServerArgs.root options in
-    Program.EventLogger.init root (ServerArgs.start_time options);
     PidLog.init root;
-    PidLog.log ~reason:(Some "main") (Unix.getpid());
+    PidLog.log ~reason:"main" (Unix.getpid());
     let genv = ServerEnvBuild.make_genv ~multicore:true options in
     let env = ServerEnvBuild.make_env options in
     let program_init = create_program_init genv env in
@@ -193,8 +233,6 @@ end = struct
     else
       let env = MainInit.go root program_init in
       let socket = Socket.init_unix_socket root in
-      let init_type = ServerArgs.load_save_opt genv.options in
-      Program.EventLogger.init_done (ServerArgs.string_of_init_type init_type);
       serve genv env socket
 
   let get_log_file root =
@@ -232,10 +270,6 @@ end = struct
 
   let start () =
     let options = Program.parse_options() in
-    if options.ServerArgs.version then begin
-      print_string Build_id.build_id_ohai;
-      exit 0
-    end;
     try
       if ServerArgs.should_detach options
       then daemonize options;

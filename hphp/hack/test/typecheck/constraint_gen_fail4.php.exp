@@ -1,8 +1,8 @@
-File "constraint_gen_fail4.php", line 13, characters 37-41:
+File "constraint_gen_fail4.php", line 14, characters 12-16:
 Invalid return type (Typing[4110])
 File "constraint_gen_fail4.php", line 13, characters 26-26:
 This is a value of generic type T
-File "constraint_gen_fail4.php", line 13, characters 37-41:
+File "constraint_gen_fail4.php", line 14, characters 12-16:
 It is incompatible with an object of type B
-File "constraint_gen_fail4.php", line 13, characters 37-41:
+File "constraint_gen_fail4.php", line 14, characters 12-16:
 Considering the constraint on the type 'this'

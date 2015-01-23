@@ -10,13 +10,12 @@
  */
 
 function test(): int {
-  if(false) {
+  if (false) {
     $x = 44;
   }
-  if(true) {
+  if (true) {
     $x = 0;
-  }
-  else {
+  } else {
     $x = 1;
   }
   return 0;

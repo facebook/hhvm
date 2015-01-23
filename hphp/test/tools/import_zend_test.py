@@ -100,6 +100,9 @@ flaky_tests = (
     # our build machines have no members in group 0...
     '/ext/posix/tests/posix_getgrgid.php',
 
+    # Checking stat of ' ' races with mkdir_variation1
+    '/ext/standard/tests/file/lstat_stat_variation22.php',
+
     # concurrency issues
     '/ext/mysql/tests/001.php',
     '/ext/mysql/tests/bug47438.php',

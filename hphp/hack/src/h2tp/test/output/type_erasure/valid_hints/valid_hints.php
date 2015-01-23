@@ -33,8 +33,7 @@ trait Baz {
   public function gimme() {
     throw new Exception("cheat");
   }
-  protected static final function hacklib_initialize_statics_Baz() {
-  }
+  protected static final function hacklib_initialize_statics_Baz() {}
 }
 class DunDunDun extends Foo implements Bar {
   use Baz;

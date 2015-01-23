@@ -349,7 +349,7 @@ function get_unit_testing_infra_dependencies(): void {
       (time() - filectime(__DIR__."/composer.phar")) >= 29*24*60*60)
   ) {
     human("Getting composer.phar....\n");
-    unlink(__DIR__."/composer.phar");
+    delete_file(__DIR__."/composer.phar");
     $comp_url = "http://getcomposer.org/composer.phar";
     $get_composer_command = "curl ".$comp_url." -o ".
       __DIR__."/composer.phar 2>&1";
@@ -404,7 +404,7 @@ function get_unit_testing_infra_dependencies(): void {
     if (file_exists($vendor_dir)) {
       remove_dir_recursive($vendor_dir);
     }
-    unlink($lock_file);
+    delete_file($lock_file);
     file_put_contents($md5_file, $checksum);
   }
 

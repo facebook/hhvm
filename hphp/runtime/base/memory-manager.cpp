@@ -550,7 +550,7 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
 
 namespace {
 const char* header_names[] = {
-  "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Apc",
+  "Packed", "Struct", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Apc",
   "Globals", "Proxy", "String", "Object", "ResumableObj", "Resource", "Ref",
   "Resumable", "Native", "Sweepable", "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole", "Debug"
@@ -683,6 +683,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
  * Allocate `bytes' from the current slab, aligned to kSmartSizeAlign.
  */
 void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
+  FTRACE(3, "slabAlloc({}, {})\n", bytes, index);
   size_t nbytes = debugAddExtra(smartSizeClass(bytes));
 
   assert(nbytes <= kSlabSize);

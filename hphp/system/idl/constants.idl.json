@@ -347,10 +347,6 @@
             "value": ""
         },
         {
-            "name": "DIRECTORY_SEPARATOR",
-            "value": "\/"
-        },
-        {
             "name": "DNS_A",
             "value": 1
         },
@@ -559,50 +555,6 @@
             "value": false
         },
         {
-            "name": "FILE_APPEND",
-            "value": 8
-        },
-        {
-            "name": "FILE_IGNORE_NEW_LINES",
-            "value": 2
-        },
-        {
-            "name": "FILE_NO_DEFAULT_CONTEXT",
-            "value": 16
-        },
-        {
-            "name": "FILE_SKIP_EMPTY_LINES",
-            "value": 4
-        },
-        {
-            "name": "FILE_USE_INCLUDE_PATH",
-            "value": 1
-        },
-        {
-            "name": "FILE_TEXT",
-            "value": 0
-        },
-        {
-            "name": "FILE_BINARY",
-            "value": 0
-        },
-        {
-            "name": "FNM_CASEFOLD",
-            "value": 16
-        },
-        {
-            "name": "FNM_NOESCAPE",
-            "value": 2
-        },
-        {
-            "name": "FNM_PATHNAME",
-            "value": 1
-        },
-        {
-            "name": "FNM_PERIOD",
-            "value": 4
-        },
-        {
             "name": "FT_INTERNAL",
             "value": 8
         },
@@ -621,30 +573,6 @@
         {
             "name": "FT_UID",
             "value": 1
-        },
-        {
-            "name": "GD_BUNDLED",
-            "value": 1
-        },
-        {
-            "name": "GD_EXTRA_VERSION",
-            "value": ""
-        },
-        {
-            "name": "GD_MAJOR_VERSION",
-            "value": 2
-        },
-        {
-            "name": "GD_MINOR_VERSION",
-            "value": 0
-        },
-        {
-            "name": "GD_RELEASE_VERSION",
-            "value": 35
-        },
-        {
-            "name": "GD_VERSION",
-            "value": "2.0.35"
         },
         {
             "name": "GLOBAL_STATE_IGNORE",
@@ -687,56 +615,12 @@
             "value": 1
         },
         {
-            "name": "GLOB_AVAILABLE_FLAGS",
-            "value": 9303
-        },
-        {
-            "name": "GLOB_BRACE",
-            "value": 1024
-        },
-        {
-            "name": "GLOB_ERR",
-            "value": 1
-        },
-        {
-            "name": "GLOB_MARK",
-            "value": 2
-        },
-        {
-            "name": "GLOB_NOCHECK",
-            "value": 16
-        },
-        {
-            "name": "GLOB_NOESCAPE",
-            "value": 64
-        },
-        {
-            "name": "GLOB_NOSORT",
-            "value": 4
-        },
-        {
-            "name": "GLOB_ONLYDIR",
-            "value": 8192
-        },
-        {
             "name": "HASH_HMAC",
             "value": 1
         },
         {
             "name": "HPHP_TRIM_CHARLIST",
             "value": "\n\r\t\u000b\u0000 "
-        },
-        {
-            "name": "HPHP_VERSION",
-            "value": "3.5.0-dev"
-        },
-        {
-            "name": "HHVM_VERSION",
-            "value": "3.5.0-dev"
-        },
-        {
-            "name": "HHVM_VERSION_ID",
-            "value": 30500
         },
         {
             "name": "HTML_ENTITIES",
@@ -959,142 +843,6 @@
             "value": 17
         },
         {
-            "name": "IMG_ARC_CHORD",
-            "value": 1
-        },
-        {
-            "name": "IMG_ARC_EDGED",
-            "value": 4
-        },
-        {
-            "name": "IMG_ARC_NOFILL",
-            "value": 2
-        },
-        {
-            "name": "IMG_ARC_PIE",
-            "value": 0
-        },
-        {
-            "name": "IMG_ARC_ROUNDED",
-            "value": 0
-        },
-        {
-            "name": "IMG_COLOR_BRUSHED",
-            "value": -3
-        },
-        {
-            "name": "IMG_COLOR_STYLED",
-            "value": -2
-        },
-        {
-            "name": "IMG_COLOR_STYLEDBRUSHED",
-            "value": -4
-        },
-        {
-            "name": "IMG_COLOR_TILED",
-            "value": -5
-        },
-        {
-            "name": "IMG_COLOR_TRANSPARENT",
-            "value": -6
-        },
-        {
-            "name": "IMG_EFFECT_ALPHABLEND",
-            "value": 1
-        },
-        {
-            "name": "IMG_EFFECT_NORMAL",
-            "value": 2
-        },
-        {
-            "name": "IMG_EFFECT_OVERLAY",
-            "value": 3
-        },
-        {
-            "name": "IMG_EFFECT_REPLACE",
-            "value": 0
-        },
-        {
-            "name": "IMG_FILTER_BRIGHTNESS",
-            "value": 2
-        },
-        {
-            "name": "IMG_FILTER_COLORIZE",
-            "value": 4
-        },
-        {
-            "name": "IMG_FILTER_CONTRAST",
-            "value": 3
-        },
-        {
-            "name": "IMG_FILTER_EDGEDETECT",
-            "value": 5
-        },
-        {
-            "name": "IMG_FILTER_EMBOSS",
-            "value": 6
-        },
-        {
-            "name": "IMG_FILTER_GAUSSIAN_BLUR",
-            "value": 7
-        },
-        {
-            "name": "IMG_FILTER_GRAYSCALE",
-            "value": 1
-        },
-        {
-            "name": "IMG_FILTER_MEAN_REMOVAL",
-            "value": 9
-        },
-        {
-            "name": "IMG_FILTER_NEGATE",
-            "value": 0
-        },
-        {
-            "name": "IMG_FILTER_SELECTIVE_BLUR",
-            "value": 8
-        },
-        {
-            "name": "IMG_FILTER_SMOOTH",
-            "value": 10
-        },
-        {
-            "name": "IMG_FILTER_PIXELATE",
-            "value": 11
-        },
-        {
-            "name": "IMG_GD2_COMPRESSED",
-            "value": 2
-        },
-        {
-            "name": "IMG_GD2_RAW",
-            "value": 1
-        },
-        {
-            "name": "IMG_GIF",
-            "value": 1
-        },
-        {
-            "name": "IMG_JPEG",
-            "value": 2
-        },
-        {
-            "name": "IMG_JPG",
-            "value": 2
-        },
-        {
-            "name": "IMG_PNG",
-            "value": 4
-        },
-        {
-            "name": "IMG_WBMP",
-            "value": 8
-        },
-        {
-            "name": "IMG_XPM",
-            "value": 16
-        },
-        {
             "name": "INI_ALL",
             "value": 7
         },
@@ -1223,6 +971,10 @@
             "value": 51
         },
         {
+            "name": "LDAP_OPT_NETWORK_TIMEOUT",
+            "value": 20485
+        },
+        {
             "name": "LDAP_OPT_PROTOCOL_VERSION",
             "value": 17
         },
@@ -1261,22 +1013,6 @@
         {
             "name": "ENT_HTML5",
             "value": 48
-        },
-        {
-            "name": "LOCK_EX",
-            "value": 2
-        },
-        {
-            "name": "LOCK_NB",
-            "value": 4
-        },
-        {
-            "name": "LOCK_SH",
-            "value": 1
-        },
-        {
-            "name": "LOCK_UN",
-            "value": 3
         },
         {
             "name": "LOG_ALERT",
@@ -2923,10 +2659,6 @@
             "value": 8
         },
         {
-            "name": "PATH_SEPARATOR",
-            "value": ":"
-        },
-        {
             "name": "PEAR_EXTENSION_DIR",
             "value": ""
         },
@@ -3029,34 +2761,6 @@
             "value": 131111
         },
         {
-            "name": "PNG_ALL_FILTERS",
-            "value": 248
-        },
-        {
-            "name": "PNG_FILTER_AVG",
-            "value": 64
-        },
-        {
-            "name": "PNG_FILTER_NONE",
-            "value": 8
-        },
-        {
-            "name": "PNG_FILTER_PAETH",
-            "value": 128
-        },
-        {
-            "name": "PNG_FILTER_SUB",
-            "value": 16
-        },
-        {
-            "name": "PNG_FILTER_UP",
-            "value": 32
-        },
-        {
-            "name": "PNG_NO_FILTER",
-            "value": 0
-        },
-        {
             "name": "PRIO_PGRP",
             "value": 1
         },
@@ -3119,18 +2823,6 @@
         {
             "name": "SA_UNSEEN",
             "value": 4
-        },
-        {
-            "name": "SEEK_CUR",
-            "value": 1
-        },
-        {
-            "name": "SEEK_END",
-            "value": 2
-        },
-        {
-            "name": "SEEK_SET",
-            "value": 0
         },
         {
             "name": "SE_FREE",

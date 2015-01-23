@@ -19,15 +19,20 @@
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit { namespace arm {
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Intelligently chooses between Add, Mov, and no-op.
@@ -160,6 +165,7 @@ inline void emitTLSLoad(vixl::MacroAssembler& a,
 }
 #endif // USE_GCC_FAST_TLS
 
+///////////////////////////////////////////////////////////////////////////////
 }}}
 
 #endif

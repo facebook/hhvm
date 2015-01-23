@@ -56,8 +56,9 @@ std::string show(const HTS& hts) {
     ? 0
     : irgen::curFunc(hts)->numSlotsInFrame();
   const int32_t stackDepth =
-    hts.irb->spOffset() + hts.irb->evalStack().size()
-    - hts.irb->stackDeficit() - frameCells;
+    hts.irb->syncedSpLevel() + hts.irb->evalStack().size() -
+      hts.irb->stackDeficit() - frameCells;
+  assert(stackDepth >= 0);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
     out << folly::format("| {:<80} |\n",
@@ -97,23 +98,36 @@ std::string show(const HTS& hts) {
                        stackDepth).str());
   for (unsigned i = 0; i < hts.irb->evalStack().size(); ++i) {
     while (checkFpi());
-    auto const value = irgen::top(const_cast<HTS&>(hts), i, DataTypeGeneric);
+    auto const value = irgen::top(const_cast<HTS&>(hts),
+      Type::StkElem, i, DataTypeGeneric);
     elem(value->inst()->toString());
   }
 
   header(" in-memory ");
-  for (unsigned i = hts.irb->stackDeficit(); spOffset > 0; ) {
+  for (unsigned i = hts.irb->evalStack().size(); spOffset > 0; ) {
     assert(i < irgen::curFunc(hts)->maxStackCells());
     if (checkFpi()) {
       i += kNumActRecCells;
       continue;
     }
 
-    auto stkVal = getStackValue(irgen::sp(hts), i);
+    auto const stkTy = hts.irb->stackType(
+      irgen::offsetFromSP(hts, i),
+      DataTypeGeneric
+    );
+    auto const stkVal = hts.irb->stackValue(
+      irgen::offsetFromSP(hts, i),
+      DataTypeGeneric
+    );
+
     std::ostringstream elemStr;
-    if (stkVal.knownType == Type::StackElem) elem("unknown");
-    else if (stkVal.value) elem(stkVal.value->inst()->toString());
-    else elem(stkVal.knownType.toString());
+    if (stkTy == Type::StkElem) {
+      elem("unknown");
+    } else if (stkVal) {
+      elem(stkVal->inst()->toString());
+    } else {
+      elem(stkTy.toString());
+    }
 
     ++i;
   }

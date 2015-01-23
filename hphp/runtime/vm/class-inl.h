@@ -18,6 +18,9 @@
 #error "class-inl.h should only be included by class.h"
 #endif
 
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/strings.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -360,6 +363,101 @@ inline void Class::allocExtraData() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Trait method import.
+
+inline bool Class::TMIOps::strEmpty(const StringData* str) {
+  return str->empty();
+}
+
+inline const StringData* Class::TMIOps::clsName(const Class* traitCls) {
+  return traitCls->name();
+}
+
+inline bool Class::TMIOps::isTrait(const Class* traitCls) {
+  return traitCls->attrs() & AttrTrait;
+}
+
+inline bool Class::TMIOps::isAbstract(Attr modifiers) {
+  return modifiers & AttrAbstract;
+}
+
+inline Class::TraitMethod
+Class::TMIOps::traitMethod(const Class* traitCls,
+                           const Func* traitMeth,
+                           Class::TMIOps::alias_type rule) {
+  return TraitMethod { traitCls, traitMeth, rule.modifiers() };
+}
+
+inline const StringData*
+Class::TMIOps::precMethodName(Class::TMIOps::prec_type rule) {
+  return rule.methodName();
+}
+
+inline const StringData*
+Class::TMIOps::precSelectedTraitName(Class::TMIOps::prec_type rule) {
+  return rule.selectedTraitName();
+}
+
+inline TraitNameSet
+Class::TMIOps::precOtherTraitNames(Class::TMIOps::prec_type rule) {
+  return rule.otherTraitNames();
+}
+
+inline const StringData*
+Class::TMIOps::aliasTraitName(Class::TMIOps::alias_type rule) {
+  return rule.traitName();
+}
+
+inline const StringData*
+Class::TMIOps::aliasOrigMethodName(Class::TMIOps::alias_type rule) {
+  return rule.origMethodName();
+}
+
+inline const StringData*
+Class::TMIOps::aliasNewMethodName(Class::TMIOps::alias_type rule) {
+  return rule.newMethodName();
+}
+
+inline Attr
+Class::TMIOps::aliasModifiers(Class::TMIOps::alias_type rule) {
+  return rule.modifiers();
+}
+
+inline const Func*
+Class::TMIOps::findTraitMethod(const Class* cls,
+                               const Class* traitCls,
+                               const StringData* origMethName) {
+  return traitCls->lookupMethod(origMethName);
+}
+
+inline void
+Class::TMIOps::errorUnknownMethod(Class::TMIOps::prec_type rule) {
+  raise_error("unknown method '%s'", rule.methodName()->data());
+}
+
+inline void
+Class::TMIOps::errorUnknownMethod(Class::TMIOps::alias_type rule,
+                                  const StringData* methName) {
+  raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, methName->data());
+}
+
+template <class Rule>
+inline void
+Class::TMIOps::errorUnknownTrait(const Rule& rule,
+                                 const StringData* traitName) {
+  raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
+}
+
+inline void
+Class::TMIOps::errorDuplicateMethod(const Class* cls,
+                                    const StringData* methName) {
+  // No error if the class will override the method.
+  if (cls->preClass()->hasMethod(methName)) return;
+  raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Non-member functions.
 
 inline Attr classKindAsAttr(ClassKind kind) {
   return static_cast<Attr>(kind);

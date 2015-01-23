@@ -2,7 +2,7 @@ File "yield_send2.php", line 12, characters 14-19:
 Invalid argument (Typing[4110])
 File "yield_send2.php", line 5, characters 39-41:
 This is an int
-File "builtins.hhi", line 33, characters 25-26:
+File "builtins.hhi", line 32, characters 25-26:
   via this generic Ts
 File "yield_send2.php", line 12, characters 14-19:
 It is incompatible with a string

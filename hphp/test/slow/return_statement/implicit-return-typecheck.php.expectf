@@ -1,0 +1,2 @@
+
+Catchable fatal error: Value returned from function foo() must be of type int, null given in %s on line 2

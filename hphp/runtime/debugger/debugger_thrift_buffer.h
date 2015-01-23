@@ -37,7 +37,7 @@ public:
     : ThriftBuffer(BUFFER_SIZE, VariableSerializer::Type::DebuggerSerialize) {}
 
   SmartPtr<Socket> getSocket() {
-    return makeSocket(m_socket);
+    return makeSmartPtr<Socket>(m_socket);
   }
 
   void create(SmartPtr<Socket> socket) {

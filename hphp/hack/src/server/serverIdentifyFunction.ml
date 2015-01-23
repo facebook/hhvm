@@ -11,8 +11,8 @@
 let identify content line char =
   let result = ref None in
   IdentifySymbolService.attach_hooks result line char;
-  let funs, classes = ServerIdeUtils.declare content in
-  ServerIdeUtils.fix_file_and_def content;
+  let funs, classes = ServerIdeUtils.declare Relative_path.default content in
+  ServerIdeUtils.fix_file_and_def Relative_path.default content;
   ServerIdeUtils.revive funs classes;
   IdentifySymbolService.detach_hooks ();
   match !result with

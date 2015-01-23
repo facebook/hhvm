@@ -347,14 +347,14 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SPLExtension : public Extension {
+class SPLExtension final : public Extension {
 public:
   SPLExtension() : Extension("spl", "0.2") { }
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
+  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     HHVM_ME(DirectoryIterator, hh_readdir);
     HHVM_ME(GlobIterator, count);
   }
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(spl_object_hash);
     HHVM_FE(hphp_object_pointer);
     HHVM_FE(hphp_get_this);

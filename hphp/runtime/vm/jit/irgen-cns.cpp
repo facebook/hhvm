@@ -75,7 +75,8 @@ void implCns(HTS& env,
     }
   } else {
     auto const c1 = gen(env, LdCns, cnsNameTmp);
-    result = env.irb->cond(
+    result = cond(
+      env,
       1,
       [&] (Block* taken) { // branch
         gen(env, CheckInit, taken, c1);
@@ -84,7 +85,7 @@ void implCns(HTS& env,
         return c1;
       },
       [&] { // Taken: miss in TC, do lookup & init
-        env.irb->hint(Block::Hint::Unlikely);
+        hint(env, Block::Hint::Unlikely);
         // We know that c1 is Uninit in this branch but we have to encode this
         // in the IR.
         gen(env, AssertType, Type::Uninit, c1);
@@ -157,21 +158,22 @@ void emitClsCnsD(HTS& env,
   );
   auto const guardType = Type::UncountedInit;
 
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, CheckTypeMem, guardType, taken, prds);
     },
     [&] {
       // Make progress through this instruction before side-exiting to the next
       // instruction, by doing a slower lookup.
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const val = gen(env, LookupClsCns, clsCnsName);
       push(env, val);
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
     }
   );
 
-  auto const val = gen(env, LdMem, guardType, prds, cns(env, 0));
+  auto const val = gen(env, LdMem, guardType, prds);
   push(env, val);
 }
 

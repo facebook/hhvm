@@ -14,24 +14,35 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
+
 #include "hphp/util/assertions.h"
+
 #include <boost/dynamic_bitset.hpp>
 
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
 namespace {
+///////////////////////////////////////////////////////////////////////////////
 
-typedef boost::dynamic_bitset<> Bits;
 bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
 bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
   using namespace reg;
+  using Bits = boost::dynamic_bitset<>;
+
   jit::vector<Bits> block_defs(unit.blocks.size()); // index by [Vlabel]
   Bits global_defs(unit.next_vr);
   Bits consts(unit.next_vr);
+
   for (auto& c : unit.constants) {
     global_defs.set(c.second);
     consts.set(c.second);
@@ -91,8 +102,10 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
   return true;
 }
 
-// make sure syncpoint{}, nothrow{}, or unwind{} only appear immediately
-// after a call.
+/*
+ * Make sure syncpoint{}, nothrow{}, or unwind{} only appear immediately after
+ * a call.
+ */
 bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
 bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
   for (auto b: blocks) {
@@ -148,41 +161,16 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
   return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }
 
-bool isBlockEnd(Vinstr& inst) {
-  switch (inst.op) {
-    // service request-y things
-    case Vinstr::bindjcc1st:
-    case Vinstr::bindjmp:
-    case Vinstr::fallback:
-    case Vinstr::svcreq:
-    // control flow
-    case Vinstr::jcc:
-    case Vinstr::jmp:
-    case Vinstr::jmpr:
-    case Vinstr::jmpm:
-    case Vinstr::phijmp:
-    case Vinstr::phijcc:
-    // terminal
-    case Vinstr::ud2:
-    case Vinstr::unwind:
-    case Vinstr::vinvoke:
-    case Vinstr::ret:
-    case Vinstr::retctrl:
-    case Vinstr::fallthru:
-    // arm specific
-    case Vinstr::hcunwind:
-    case Vinstr::cbcc:
-    case Vinstr::tbcc:
-    case Vinstr::brk:
-      return true;
-    default:
-      return false;
-  }
+bool check(Vunit& unit) {
+  auto blocks = sortBlocks(unit);
+  assert(checkSSA(unit, blocks));
+  assert(checkCalls(unit, blocks));
+  return true;
 }
 
-// check that each block has exactly one terminal instruction at the end.
 bool checkBlockEnd(Vunit& unit, Vlabel b) {
   assert(!unit.blocks[b].code.empty());
   auto& block = unit.blocks[b];
@@ -194,11 +182,5 @@ bool checkBlockEnd(Vunit& unit, Vlabel b) {
   return true;
 }
 
-bool check(Vunit& unit) {
-  auto blocks = sortBlocks(unit);
-  assert(checkSSA(unit, blocks));
-  assert(checkCalls(unit, blocks));
-  return true;
-}
-
+///////////////////////////////////////////////////////////////////////////////
 }}

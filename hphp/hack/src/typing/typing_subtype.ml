@@ -173,12 +173,8 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
        || name_super = SN.Collections.cContainer
        || name_super = SN.Collections.cIterable
        || name_super = SN.Collections.cIterator
-       || name_super = SN.Collections.cConstCollection
-       || name_super = SN.Collections.cConstVector
-       || name_super = SN.Collections.cConstSet
        || name_super = SN.Collections.cImmVector
        || name_super = SN.Collections.cImmSet
-       || name_super = SN.FB.cPrivacyPolicyBase
        || name_super = SN.FB.cDataTypeImplProvider) ->
       sub_type env ty_super ty_sub
   | (_, (Tapply ((_, name_super), [tk_super; tv_super]))),

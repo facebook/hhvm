@@ -24,7 +24,7 @@ open Utils
 type env = {
   iassume_php : bool;
   iclasses  : ((Pos.t * Ident.t) SMap.t) * (String.t SMap.t);
-  ifuns     : (Pos.t * Ident.t) SMap.t;
+  ifuns     : ((Pos.t * Ident.t) SMap.t) * (String.t SMap.t);
   itypedefs : (Pos.t * Ident.t) SMap.t;
   iconsts   : (Pos.t * Ident.t) SMap.t;
 }

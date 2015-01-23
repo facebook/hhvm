@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/smart-object.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/system/systemlib.h"
 
 
@@ -877,8 +877,8 @@ class HashCollection : public ExtCollectionObjectData {
     return b;
   }
 
-  static constexpr uint32_t sizeOffset() {
-    return offsetof(HashCollection, m_size);
+  static constexpr ptrdiff_t dataOffset() {
+    return offsetof(HashCollection, m_data);
   }
 
   static bool validPos(ssize_t pos) {

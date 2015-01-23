@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/server/transport.h"
+
+#include <boost/algorithm/string.hpp>
+
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -449,7 +452,7 @@ bool Transport::acceptEncoding(const char *encoding) {
     assert(scTokens.size() > 0);
     // lhs contains the encoding
     // rhs, if it exists, contains the qvalue
-    std::string& lhs = scTokens[0];
+    std::string lhs = boost::trim_copy(scTokens[0]);
     if (strcasecmp(lhs.c_str(), encoding) == 0) {
       return true;
     }
@@ -676,6 +679,10 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     addHeaderImpl("Set-Cookie", iter->c_str());
   }
 
+  if (isCompressionEnabled()) {
+    addHeaderImpl("Vary", "Accept-Encoding");
+  }
+
   if (compressed) {
     addHeaderImpl("Content-Encoding", "gzip");
     removeHeaderImpl("Content-Length");
@@ -713,7 +720,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
   }
 
   if (RuntimeOption::ExposeHPHP) {
-    addHeaderImpl("X-Powered-By", ("HHVM/" + k_HHVM_VERSION).c_str());
+    addHeaderImpl("X-Powered-By", (String("HHVM/") + HHVM_VERSION).c_str());
   }
 
   if ((RuntimeOption::ExposeXFBServer || RuntimeOption::ExposeXFBDebug) &&

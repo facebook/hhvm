@@ -71,7 +71,7 @@ type genv = {
   classes: (map * canon_names_map) ref;
 
   (* Set of function names defined, and their positions *)
-  funs: map ref;
+  funs: (map * canon_names_map) ref;
 
   (* Set of typedef names defined, and their position *)
   typedefs: map ref;
@@ -153,7 +153,7 @@ type lenv = {
 type env = {
   iassume_php: bool;
   iclasses: map * canon_names_map;
-  ifuns: map;
+  ifuns: map * canon_names_map;
   itypedefs: map;
   iconsts: map;
 }
@@ -171,9 +171,12 @@ let get_classes env =
 (*****************************************************************************)
 
 let predef_funs = ref SMap.empty
+let predef_funnames = ref SMap.empty
 let predef_fun x =
   let var = Pos.none, Ident.make x in
+  let canon_x = canon_key x in
   predef_funs := SMap.add x var !predef_funs;
+  predef_funnames := SMap.add canon_x x !predef_funnames;
   x
 
 let is_int    = predef_fun SN.StdlibFunctions.is_int
@@ -195,7 +198,7 @@ let predef_tests = List.fold_right SSet.add predef_tests_list SSet.empty
 let empty = {
   iassume_php = true;
   iclasses  = SMap.empty, SMap.empty;
-  ifuns     = !predef_funs;
+  ifuns     = !predef_funs, !predef_funnames;
   itypedefs = SMap.empty;
   iconsts   = SMap.empty;
 }
@@ -322,11 +325,13 @@ module Env = struct
     y
 
   let lookup genv env (p, x) =
-    let v = SMap.get x !env in
+    let v = SMap.get x env in
     match v with
     | None ->
       (match genv.in_mode with
-        | Ast.Mstrict -> Errors.unbound_name p x
+        | Ast.Mstrict -> Errors.unbound_name p x `const
+        | Ast.Mpartial | Ast.Mdecl when not genv.assume_php ->
+          Errors.unbound_name p x `const
         | Ast.Mdecl | Ast.Mpartial -> ()
       );
       p, Ident.make x
@@ -339,7 +344,7 @@ module Env = struct
     if List.mem name tparaml then Errors.generic_at_runtime p;
     ()
 
-  let canonicalize genv env_and_names (p, name) =
+  let canonicalize genv env_and_names (p, name) kind =
     let env, canon_names = !env_and_names in
     if SMap.mem name env then (p, name)
     else (
@@ -355,8 +360,8 @@ module Env = struct
           (match genv.in_mode with
             | Ast.Mpartial | Ast.Mdecl
                 when genv.assume_php || name = SN.Classes.cUnknown -> ()
-            | Ast.Mstrict -> Errors.unbound_name p name
-            | Ast.Mpartial | Ast.Mdecl -> Errors.unbound_name p name
+            | Ast.Mstrict -> Errors.unbound_name p name kind
+            | Ast.Mpartial | Ast.Mdecl -> Errors.unbound_name p name kind
           );
           p, name
     )
@@ -437,12 +442,44 @@ module Env = struct
   let get_name genv namespace x =
     ignore (lookup genv namespace x); x
 
-  (* For dealing with namespace fallback on functions and constants. *)
+  (* For dealing with namespace fallback on constants *)
   let elaborate_and_get_name_with_fallback mk_dep genv genv_sect x =
     let fq_x = Namespaces.elaborate_id genv.namespace x in
     let need_fallback =
       genv.namespace.Namespace_env.ns_name <> None &&
       not (String.contains (snd x) '\\') in
+    let pos_map = !(genv_sect) in
+    if need_fallback then begin
+      let global_x = (fst x, "\\" ^ (snd x)) in
+      (* Explicitly add dependencies on both of the consts we could be
+       * referring to here. Normally naming doesn't have to deal with
+       * deps at all -- they are added during typechecking just by the
+       * nature of looking up a class or function name. However, we're
+       * flattening namespaces here, and the fallback behavior of
+       * consts means that we might suddenly be referring to a
+       * different const without any change to the callsite at
+       * all. Adding both dependencies explicitly captures this
+       * action-at-a-distance. *)
+      Typing_deps.add_idep genv.droot (mk_dep (snd fq_x));
+      Typing_deps.add_idep genv.droot (mk_dep (snd global_x));
+      let mem (_, s) = SMap.mem s pos_map in
+      match mem fq_x, mem global_x with
+      (* Found in the current namespace *)
+      | true, _ -> get_name genv pos_map fq_x
+      (* Found in the global namespace *)
+      | _, true -> get_name genv pos_map global_x
+      (* Not found. Pick the more specific one to error on. *)
+      | false, false -> get_name genv pos_map fq_x
+    end else
+      get_name genv pos_map fq_x
+
+  (* For dealing with namespace fallback on functions *)
+  let elaborate_and_get_name_with_canonicalized_fallback mk_dep genv genv_sect x =
+    let fq_x = Namespaces.elaborate_id genv.namespace x in
+    let need_fallback =
+      genv.namespace.Namespace_env.ns_name <> None &&
+      not (String.contains (snd x) '\\') in
+    let pos_map, canon_map = !(genv_sect) in
     if need_fallback then begin
       let global_x = (fst x, "\\" ^ (snd x)) in
       (* Explicitly add dependencies on both of the functions we could be
@@ -455,16 +492,21 @@ module Env = struct
        * captures this action-at-a-distance. *)
       Typing_deps.add_idep genv.droot (mk_dep (snd fq_x));
       Typing_deps.add_idep genv.droot (mk_dep (snd global_x));
-      let mem (_, s) = SMap.mem s !(genv_sect) in
+      (* canonicalize the names being searched *)
+      let mem (_, nm) = SMap.mem (canon_key nm) (canon_map) in
       match mem fq_x, mem global_x with
-      (* Found in the current namespace *)
-      | true, _ -> get_name genv genv_sect fq_x
-      (* Found in the global namespace *)
-      | _, true -> get_name genv genv_sect global_x
-      (* Not found. Pick the more specific one to error on. *)
-      | false, false -> get_name genv genv_sect fq_x
+      | true, _ -> (* Found in the current namespace *)
+        let fq_x = canonicalize genv genv_sect fq_x `func in
+        get_name genv pos_map fq_x
+      | _, true -> (* Found in the global namespace *)
+        let global_x = canonicalize genv genv_sect global_x `func in
+        get_name genv pos_map global_x
+      | false, false ->
+        (* Not found. Pick the more specific one to error on. *)
+        get_name genv pos_map fq_x
     end else
-      get_name genv genv_sect fq_x
+      let fq_x = canonicalize genv genv_sect fq_x `func in
+      get_name genv pos_map fq_x
 
   let global_const (genv, env) x  =
     elaborate_and_get_name_with_fallback
@@ -478,7 +520,7 @@ module Env = struct
     (* Generic names are not allowed to shadow class names *)
     check_no_runtime_generic genv x;
     let x = Namespaces.elaborate_id genv.namespace x in
-    let pos, name = canonicalize genv genv.classes x in
+    let pos, name = canonicalize genv genv.classes x `cls in
     (* Don't let people use strictly internal classes
      * (except when they are being declared in .hhi files) *)
     if name = SN.Classes.cHH_BuiltinEnum &&
@@ -487,7 +529,7 @@ module Env = struct
     pos, name
 
   let fun_id (genv, _) x =
-    elaborate_and_get_name_with_fallback
+    elaborate_and_get_name_with_canonicalized_fallback
       (* Not just Dep.Fun, but Dep.FunName. This forces an incremental full
        * redeclaration of this class if the name changes, not just a
        * retypecheck -- the name that is referred to here actually changes as
@@ -538,7 +580,7 @@ module Env = struct
 
   let new_fun_id genv x =
     if SMap.mem (snd x) !predef_funs then () else
-    ignore (resilient_new_var genv.funs x)
+    ignore (resilient_new_canon_var genv.funs x)
 
   let new_class_id genv x =
     ignore (resilient_new_canon_var genv.classes x)
@@ -570,13 +612,12 @@ end
 (*****************************************************************************)
 (* Updating the environment *)
 (*****************************************************************************)
-
 let remove_decls env (funs, classes, typedefs, consts) =
   let funs = SSet.diff funs predef_tests in
-  let ifuns = SSet.fold SMap.remove funs env.ifuns in
   let canonicalize_set = (fun elt acc -> SSet.add (canon_key elt) acc) in
   let class_namekeys = SSet.fold canonicalize_set classes SSet.empty in
   let typedef_namekeys = SSet.fold canonicalize_set typedefs SSet.empty in
+  let fun_namekeys = SSet.fold canonicalize_set funs SSet.empty in
   let iclassmap, iclassnames = env.iclasses in
   let iclassmap, iclassnames =
     SSet.fold SMap.remove classes iclassmap,
@@ -586,10 +627,15 @@ let remove_decls env (funs, classes, typedefs, consts) =
     SSet.fold SMap.remove typedefs iclassmap,
     SSet.fold SMap.remove typedef_namekeys iclassnames
   in
+  let ifunmap, ifunnames = env.ifuns in
+  let ifunmap, ifunnames =
+    SSet.fold SMap.remove funs ifunmap,
+    SSet.fold SMap.remove fun_namekeys ifunnames
+  in
   let itypedefs = SSet.fold SMap.remove typedefs env.itypedefs in
   let iconsts = SSet.fold SMap.remove consts env.iconsts in
   { env with
-    ifuns     = ifuns;
+    ifuns     = ifunmap, ifunnames;
     iclasses  = iclassmap, iclassnames;
     itypedefs = itypedefs;
     iconsts   = iconsts;
@@ -812,15 +858,17 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       let (_, cname) as name = Env.class_name env id in
       let gen_read_api_covariance =
         (cname = SN.FB.cGenReadApi || cname = SN.FB.cGenReadIdxApi) in
-      let privacy_policy_base_covariance =
-        (cname = SN.FB.cPrivacyPolicyBase) in
+      let privacy_policy_contravariance =
+        (cname = SN.FB.cPrivacyPolicyBaseBase
+         || cname = SN.FB.cPrivacyPolicyBase
+         || cname = SN.FB.cPrivacyPolicy) in
       let data_type_covariance =
         (cname = SN.FB.cDataType || cname = SN.FB.cDataTypeImplProvider) in
       let awaitable_covariance =
         (cname = SN.Classes.cAwaitable || cname = SN.Classes.cWaitHandle) in
       let allow_this = allow_this &&
         (awaitable_covariance || gen_read_api_covariance ||
-         privacy_policy_base_covariance || data_type_covariance) in
+         privacy_policy_contravariance || data_type_covariance) in
       N.Happly (name, hintl ~allow_this env hl)
   end
 
@@ -970,6 +1018,17 @@ and class_ genv c =
   let sm_names = List.map (fun x -> snd x.N.m_name) smethods in
   let sm_names = List.fold_right SSet.add sm_names SSet.empty in
   let parents  = List.map (hint ~allow_this:true env) c.c_extends in
+  let parents  = match c.c_kind with
+    (* Make enums implicitly extend the BuiltinEnum class in order to provide
+     * utility methods. *)
+    | Cenum ->
+        let pos = fst name in
+        let enum_type = pos, N.Happly (name, []) in
+        let parent =
+          pos, N.Happly ((pos, Naming_special_names.Classes.cHH_BuiltinEnum),
+                         [enum_type]) in
+        parent::parents
+    | _ -> parents in
   let fmethod  = class_method env sm_names v_names in
   let methods  = List.fold_right fmethod c.c_body [] in
   let uses     = List.fold_right (class_use env) c.c_body [] in
@@ -1041,6 +1100,7 @@ and class_use env x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse h ->
     hint_no_typedef env h;
     hint ~allow_this:true env h :: acc
@@ -1055,6 +1115,7 @@ and xhp_attr_use env x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse _ -> acc
   | XhpAttrUse h ->
     hint_no_typedef env h;
@@ -1069,6 +1130,7 @@ and class_require env c_kind x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse _ -> acc
   | XhpAttrUse _ -> acc
   | ClassTraitRequire (MustExtend, h)
@@ -1094,6 +1156,7 @@ and class_require env c_kind x acc =
 and constructor env acc = function
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse _ -> acc
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
@@ -1112,6 +1175,7 @@ and class_const env x acc =
   match x with
   | Attributes _ -> acc
   | Const (h, l) -> const_defl h env l @ acc
+  | AbsConst _ -> (* fixme *) acc
   | ClassUse _ -> acc
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
@@ -1127,6 +1191,7 @@ and class_var_static env x acc =
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassVars (kl, h, cvl) when List.mem Static kl ->
     let h = opt_map (hint ~is_static_var:true env) h in
     let cvl = List.map (class_var_ env) cvl in
@@ -1144,6 +1209,7 @@ and class_var env x acc =
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassVars (kl, h, cvl) when not (List.mem Static kl) ->
     (* there are no covariance issues with private members *)
     let allow_this = (List.mem Private kl) in
@@ -1211,6 +1277,7 @@ and class_static_method env x acc =
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassVars _ -> acc
   | XhpAttr _ -> acc
   | Method m when snd m.m_name = SN.Members.__construct -> acc
@@ -1225,6 +1292,7 @@ and class_method env sids cv_ids x acc =
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassVars _ -> acc
   | XhpAttr _ -> acc
   | Method m when snd m.m_name = SN.Members.__construct -> acc
@@ -1239,6 +1307,7 @@ and class_typeconst env x acc =
   match x with
   | Attributes _ -> acc
   | Const _ -> acc
+  | AbsConst _ -> acc
   | ClassUse _ -> acc
   | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
@@ -1327,26 +1396,15 @@ and fill_cvar kl ty x =
  ) x kl
 
 and typeconst env t =
-  let genv, lenv = env in
   (* We use the same namespace as constants within the class so we cannot have
    * a const and type const with the same name
    *)
   let name = Env.new_const env t.tconst_name in
-  (* if a typeconst is declared in an interface without an assigned type it is
-   * implicitly treated as abstract i.e.
-   *
-   * interface Foo { type const Bar;}
-   *
-   *  is the same as
-   * interface Foo { abstract type const Bar;}
-   *)
-  let abstract = match genv.cclass with
-    | Some {c_kind = Ast.Cinterface; _ } when t.tconst_type = None -> true
-    | _ -> List.mem Abstract t.tconst_kind in
+  let constr = opt_map (hint env) t.tconst_constraint in
   let type_ = opt_map (hint env) t.tconst_type in
-  N.({ c_tconst_abstract = abstract;
+  N.({ c_tconst_abstract = t.tconst_abstract;
        c_tconst_name = name;
-       c_tconst_type = type_;
+       c_tconst_type = if type_ <> None then type_ else constr;
      })
 
 and fun_kind env ft =
@@ -1932,10 +1990,10 @@ and expr_ env = function
            * primitive. But we should probably just disallow object casts
            * altogether. *)
           p, N.Hany
-      | x when x = SN.Typehints.void  ->
+      | x when x = SN.Typehints.void ->
           Errors.void_cast p;
           p, N.Hany
-      | x when x = SN.Typehints.unset_cast  ->
+      | x when x = SN.Typehints.unset_cast ->
           Errors.unset_cast p;
           p, N.Hany
       | _       ->
@@ -2158,13 +2216,13 @@ let add_files_to_rename nenv failed defl defs_in_env =
 
 let ndecl_file fn
     {FileInfo.funs;
-     classes; types; consts; consider_names_just_for_autoload; comments}
+     classes; typedefs; consts; consider_names_just_for_autoload; comments}
     (errorl, failed, nenv) =
   let errors, nenv = Errors.do_ begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
     if consider_names_just_for_autoload
     then nenv
-    else make_env nenv ~funs ~classes ~typedefs:types ~consts
+    else make_env nenv ~funs ~classes ~typedefs ~consts
   end
   in
   match errors with
@@ -2197,8 +2255,8 @@ let ndecl_file fn
    * This way, when the user removes foo.php, A.php and B.php are recomputed
    * and the naming environment is in a sane state.
    *)
-  let failed = add_files_to_rename nenv failed funs nenv.ifuns in
+  let failed = add_files_to_rename nenv failed funs (fst nenv.ifuns) in
   let failed = add_files_to_rename nenv failed classes (fst nenv.iclasses) in
-  let failed = add_files_to_rename nenv failed types nenv.itypedefs in
+  let failed = add_files_to_rename nenv failed typedefs nenv.itypedefs in
   let failed = add_files_to_rename nenv failed consts nenv.iconsts in
   List.rev_append l errorl, Relative_path.Set.add fn failed, nenv

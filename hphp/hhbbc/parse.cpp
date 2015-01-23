@@ -808,6 +808,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->traitPrecRules    = pce.traitPrecRules();
   ret->traitAliasRules   = pce.traitAliasRules();
   ret->requirements      = pce.requirements();
+  ret->numDeclMethods    = pce.numDeclMethods();
 
   parse_methods(puState, borrow(ret), unit, pce);
 

@@ -48,6 +48,17 @@ if (OCAMLC_FOUND)
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
 
+  add_custom_target(
+    hack_test
+    COMMAND
+      env OPTBIN="${OCAMLC_OPT_SUFFIX}"
+          $(MAKE) test EXTRA_INCLUDE_PATHS="${extra_include_paths}"
+          EXTRA_LIB_PATHS="${extra_lib_paths}"
+          EXTRA_CC_FLAGS="${extra_cc_flags}"
+          EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  )
+
   if(NOT LZ4_FOUND)
     # if the system does not have lz4, make sure that the one in public_tld
     # gets built

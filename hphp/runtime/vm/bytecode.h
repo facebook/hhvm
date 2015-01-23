@@ -40,9 +40,6 @@ namespace HPHP {
  * These macros allow us to easily change the arguments to iop*() opcode
  * implementations.
  */
-#define IOP_ARGS        PC& pc
-#define IOP_PASS_ARGS   pc
-#define IOP_PASS(pc)    pc
 
 #define EVAL_FILENAME_SUFFIX ") : eval()'d code"
 
@@ -1044,6 +1041,12 @@ visitStackElems(const ActRec* const fp,
     tvFun(cursor++);
   }
 }
+
+void resetCoverageCounters();
+
+// The interpOne*() methods implement individual opcode handlers.
+using InterpOneFunc = void (*) (ActRec* ar, Cell* sp, Offset pcOff);
+extern InterpOneFunc interpOneEntryPoints[];
 
 ///////////////////////////////////////////////////////////////////////////////
 

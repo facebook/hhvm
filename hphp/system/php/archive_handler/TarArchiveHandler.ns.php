@@ -124,7 +124,7 @@ namespace __SystemLib {
       return $full_path;
     }
 
-    public function extractAllTo(string $root): bool {
+    public function extractAllTo(string $root) {
       foreach ($this->contents as $path => $data) {
         file_put_contents($this->createFullPath($root, $path), $data);
       }
@@ -139,7 +139,7 @@ namespace __SystemLib {
     public function addFile(string $path, string $archive_path) {
       if ($this->fp === null) {
         $this->fp = fopen($this->path, 'w');
-        }
+      }
 
       if (strlen($archive_path) > 100) {
         $header = substr($archive_path, 0, 100);

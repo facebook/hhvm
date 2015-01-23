@@ -18,5 +18,7 @@ interface IFace<T> {
 abstract class AClass<T> implements IFace<T> {}
 
 class BClass extends AClass<int> {
-  public function foo(): int { return $this->foo();}
+  public function foo(): int {
+    return $this->foo();
+  }
 }

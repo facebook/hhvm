@@ -9,14 +9,19 @@
  *
  */
 
-
 class A {
-  public function f(int $x): int { return 0; }
+  public function f(int $x): int {
+    return 0;
+  }
 }
 
 class B extends A {
-  public function f(int $x, int $y = 0): int { return 0; }
-  public function g(int $x): int { return 0; }
+  public function f(int $x, int $y = 0): int {
+    return 0;
+  }
+  public function g(int $x): int {
+    return 0;
+  }
 
 }
 
@@ -43,9 +48,9 @@ class MyNewList extends MyList<int> {
   }
 }
 
-class MyDoubleList<T1,T2> extends MyList<(T1,T2)> {
+class MyDoubleList<T1, T2> extends MyList<(T1, T2)> {
 
-  public function get_head_twice(): (T1,T2) {
+  public function get_head_twice(): (T1, T2) {
     return $this->get_head();
   }
 
@@ -53,7 +58,6 @@ class MyDoubleList<T1,T2> extends MyList<(T1,T2)> {
     $this->l[] = tuple($x, $y);
   }
 }
-
 
 $x = new MyNewList();
 dump_var($x->get_head());

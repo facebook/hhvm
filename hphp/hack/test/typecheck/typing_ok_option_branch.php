@@ -12,7 +12,7 @@
 function foo(): void {
   $x = null;
 
-  if(true) {
+  if (true) {
     $x = 10;
   }
 }

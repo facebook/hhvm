@@ -4,7 +4,7 @@ function yuk($x = "sooo") {
 }
 function foo(
   $x,
-  $y = NULL,
+  $y = null,
   $z = array("hi")
 ) {
   if (!$y) {

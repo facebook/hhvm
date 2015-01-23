@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import os
 import re
+import signal
 import subprocess
 import sys
 
@@ -38,3 +39,19 @@ def proc_call(args, stdin=None):
     sys.stderr.write(stderr_data)
     sys.stderr.flush()
     return stdout_data
+
+def ensure_output_contains(f, s, timeout=5):
+    """
+    Looks for a match in a process' output, subject to a timeout in case the
+    process hangs
+    """
+    def handler(signo, frame):
+        raise AssertionError('Failed to find %s in output' % s)
+
+    try:
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(timeout)
+        while s not in f.readline().decode('utf-8'):
+            pass
+    finally:
+        signal.alarm(0)

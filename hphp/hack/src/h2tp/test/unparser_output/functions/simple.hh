@@ -1,10 +1,7 @@
 <?hh
-function foo() {
-}
-function bar($x) {
-}
-function baz($x, $y) {
-}
+function foo() {}
+function bar($x) {}
+function baz($x, $y) {}
 async function garply() {
   return;
 }

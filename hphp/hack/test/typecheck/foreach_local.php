@@ -12,6 +12,6 @@
 function foo(Map<string, Map<string, int>> $map): void {
   foreach ($map as $m) {
     $m = $m[''];
-    
+
   }
 }

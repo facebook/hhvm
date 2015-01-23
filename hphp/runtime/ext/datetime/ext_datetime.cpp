@@ -45,7 +45,7 @@ const StaticString
   s_formatID("e"),
   s_formatAbbr("T");
 
-static String zone_type_to_string(int zoneType, SmartResource<DateTime> dt) {
+static String zone_type_to_string(int zoneType, SmartPtr<DateTime> dt) {
   switch (zoneType) {
     case TIMELIB_ZONETYPE_OFFSET:
       return dt->toString(s_formatOffset);
@@ -201,7 +201,7 @@ int64_t HHVM_METHOD(DateTime, getTimestamp) {
 
 Variant HHVM_METHOD(DateTime, getTimezone) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
-  SmartResource<TimeZone> tz = data->m_dt->timezone();
+  SmartPtr<TimeZone> tz = data->m_dt->timezone();
   if (tz->isValid()) {
     return DateTimeZoneData::wrap(tz);
   }
@@ -322,14 +322,14 @@ int64_t DateTimeData::getTimestamp(const ObjectData* od) {
   return getTimestamp(Object(const_cast<ObjectData*>(od)));
 }
 
-Object DateTimeData::wrap(SmartResource<DateTime> dt) {
+Object DateTimeData::wrap(SmartPtr<DateTime> dt) {
   ObjectData* obj = ObjectData::newInstance(getClass());
   DateTimeData* data = Native::data<DateTimeData>(obj);
   data->m_dt = dt;
   return Object(obj);
 }
 
-SmartResource<DateTime> DateTimeData::unwrap(const Object& datetime) {
+SmartPtr<DateTime> DateTimeData::unwrap(const Object& datetime) {
   if (LIKELY(datetime.instanceof(getClass()))) {
     DateTimeData* data = Native::data<DateTimeData>(datetime.get());
     return data->m_dt;
@@ -344,7 +344,7 @@ SmartResource<DateTime> DateTimeData::unwrap(const Object& datetime) {
     Object impl(tv->m_data.pobj);
     return unwrap(impl);
   }
-  return SmartResource<DateTime>();
+  return SmartPtr<DateTime>();
 }
 
 IMPLEMENT_GET_CLASS(DateTimeData)
@@ -427,19 +427,19 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
 ///////////////////////////////////////////////////////////////////////////////
 // DateTimeZone helpers
 
-Object DateTimeZoneData::wrap(SmartResource<TimeZone> tz) {
+Object DateTimeZoneData::wrap(SmartPtr<TimeZone> tz) {
   ObjectData* obj = ObjectData::newInstance(getClass());
   DateTimeZoneData* data = Native::data<DateTimeZoneData>(obj);
   data->m_tz = tz;
   return Object(obj);
 }
 
-SmartResource<TimeZone> DateTimeZoneData::unwrap(const Object& timezone) {
+SmartPtr<TimeZone> DateTimeZoneData::unwrap(const Object& timezone) {
   if (timezone.instanceof(getClass())) {
     DateTimeZoneData* data = Native::data<DateTimeZoneData>(timezone.get());
     return data->m_tz;
   }
-  return SmartResource<TimeZone>();
+  return SmartPtr<TimeZone>();
 }
 
 IMPLEMENT_GET_CLASS(DateTimeZoneData)
@@ -558,8 +558,7 @@ Variant HHVM_METHOD(DateInterval, __set,
 
 Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
                           const String& time) {
-  SmartResource<DateInterval> di(newres<DateInterval>(time, true));
-  return DateIntervalData::wrap(di);
+  return DateIntervalData::wrap(makeSmartPtr<DateInterval>(time, true));
 }
 
 String HHVM_METHOD(DateInterval, format,
@@ -571,20 +570,20 @@ String HHVM_METHOD(DateInterval, format,
 ///////////////////////////////////////////////////////////////////////////////
 // DateInterval helpers
 
-Object DateIntervalData::wrap(SmartResource<DateInterval> di) {
+Object DateIntervalData::wrap(SmartPtr<DateInterval> di) {
   ObjectData* obj = ObjectData::newInstance(getClass());
   DateIntervalData* data = Native::data<DateIntervalData>(obj);
   data->m_di = di;
   return Object(obj);
 }
 
-SmartResource<DateInterval> DateIntervalData::unwrap(const Object& obj) {
+SmartPtr<DateInterval> DateIntervalData::unwrap(const Object& obj) {
   if (obj.instanceof(getClass())) {
     DateIntervalData* data = Native::data<DateIntervalData>(obj.get());
     return data->m_di;
   }
 
-  return SmartResource<DateInterval>();
+  return SmartPtr<DateInterval>();
 }
 
 IMPLEMENT_GET_CLASS(DateIntervalData)
@@ -722,7 +721,7 @@ static Variant strtotimeImpl(const String& input, int64_t timestamp) {
   }
 
   DateTime dt(timestamp);
-  if (!dt.fromString(input, SmartResource<TimeZone>(), nullptr, false)) {
+  if (!dt.fromString(input, SmartPtr<TimeZone>(), nullptr, false)) {
     return false;
   }
   bool error;
@@ -880,7 +879,7 @@ double get_date_default_sunrise_zenith() {
 }
 
 double get_date_default_gmt_offset() {
-  SmartResource<TimeZone> tzi = TimeZone::Current();
+  SmartPtr<TimeZone> tzi = TimeZone::Current();
   // just get the offset form utc time
   // set the timestamp 0 is ok
   return tzi->offset(0) / 3600;
@@ -937,11 +936,11 @@ TypedValue* HHVM_FN(date_sunset)(ActRec* ar) {
     DateTimeZoneData::s_className.get(), s_DateTimeZone$$##name.get(),         \
     q_DateTimeZone$$##name)                                                    \
 
-static class DateTimeExtension : public Extension {
+static class DateTimeExtension final : public Extension {
 public:
   DateTimeExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(DateTime, __construct);
     HHVM_ME(DateTime, add);
     HHVM_ME(DateTime, diff);
@@ -1030,7 +1029,7 @@ public:
     loadSystemlib("datetime");
   }
 
-  void threadInit() {
+  void threadInit() override {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.timezone",

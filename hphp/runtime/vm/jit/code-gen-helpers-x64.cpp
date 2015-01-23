@@ -16,22 +16,24 @@
 
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 
-#include "hphp/util/asm-x64.h"
-#include "hphp/util/ringbuffer.h"
-#include "hphp/util/trace.h"
-
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/back-end.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/ringbuffer.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit { namespace x64 {
 
@@ -274,15 +276,13 @@ Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {
   return dstReg;
 }
 
-Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
-  auto t = v.makeReg();
-  v << copy{srcReg, t};
-  v << decq{t, dstReg, v.makeReg()};
-  return dstReg;
+Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg dst) {
+  v << decq{src, dst, v.makeReg()};
+  return dst;
 }
 
 void emitCall(Asm& a, TCA dest, RegSet args) {
-  // warning: keep this in sync with vasm-x64 call{}
+  // NB: Keep this in sync with Vgen::emit(call) in vasm-x64.cpp.
   if (a.jmpDeltaFits(dest)) {
     a.call(dest);
   } else {
@@ -434,9 +434,8 @@ void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem) {
   if (size == 8) {
     v << cmpqm{v.cns(c), mem, sf};
   } else if (size == 4) {
-    auto lowCns = v.makeReg();
-    v << movtql{v.cns(c), lowCns};
-    v << cmplm{lowCns, mem, sf};
+    v << cmplm{v.cns(safe_cast<uint32_t>(reinterpret_cast<intptr_t>(c))),
+               mem, sf};
   } else {
     not_implemented();
   }
@@ -487,13 +486,16 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   }
 }
 
-// move 2 gpr to 1 xmm
+// copy 2 64-bit values into one 128-bit value
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
-  auto t0 = v.makeReg();
-  auto t1 = v.makeReg();
-  v << copy{s0, t0};
-  v << copy{s1, t1};
-  v << unpcklpd{t1, t0, d0}; // s0,s1 -> d0[0],d0[1]
+  auto prep = [&](Vreg r) {
+    if (VregDbl::allowable(r)) return r;
+    auto t = v.makeReg();
+    v << copy{r, t};
+    return t;
+  };
+  // s0 and s1 must be valid VregDbl registers; prep() takes care of it.
+  v << unpcklpd{prep(s1), prep(s0), d0}; // s0,s1 -> d0[0],d0[1]
 }
 
 Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
@@ -502,17 +504,6 @@ Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
   auto extended = v.makeReg();
   v << movzbq{reg, extended};
   return extended;
-}
-
-ConditionCode opToConditionCode(Opcode opc) {
-  switch (opc) {
-  case JmpZero:               return CC_Z;
-  case JmpNZero:              return CC_NZ;
-  case ReqBindJmpZero:               return CC_Z;
-  case ReqBindJmpNZero:              return CC_NZ;
-  default:
-    always_assert(0);
-  }
 }
 
 }}}

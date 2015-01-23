@@ -1,5 +1,5 @@
 <?hh // strict
 
 class A<T> {
-  private type const Ta = T;
+  const type Ta = T;
 }

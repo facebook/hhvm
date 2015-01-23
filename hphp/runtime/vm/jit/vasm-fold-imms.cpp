@@ -14,9 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
+
 #include "hphp/vixl/a64/assembler-a64.h"
+
 #include <boost/dynamic_bitset.hpp>
 
 TRACE_SET_MOD(hhir);
@@ -25,8 +32,12 @@ namespace HPHP { namespace jit {
 
 namespace x64 {
 struct ImmFolder {
+  jit::vector<bool> used;
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
+
+  explicit ImmFolder(jit::vector<bool>&& used_in)
+  : used(std::move(used_in)) { }
 
   // helpers
   bool match_byte(Vreg r, int& val) {
@@ -47,8 +58,23 @@ struct ImmFolder {
   template<class Inst> void fold(Inst&, Vinstr& out) {}
   void fold(addq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = addqi{val, in.s1, in.d, in.sf}; }
-    else if (match_int(in.s1, val)) { out = addqi{val, in.s0, in.d, in.sf}; }
+    if (match_int(in.s0, val)) {
+      if (val == 0 && !used[in.sf]) { // nop sets no flags.
+        out = copy{in.s1, in.d};
+      } else if (val == 1 && !used[in.sf]) { // CF not set by inc.
+        out = incq{in.s1, in.d, in.sf};
+      } else {
+        out = addqi{val, in.s1, in.d, in.sf};
+      }
+    } else if (match_int(in.s1, val)) {
+      if (val == 0 && !used[in.sf]) { // nop sets no flags.
+        out = copy{in.s0, in.d};
+      } else if (val == 1 && !used[in.sf]) { // CF not set by inc.
+        out = incq{in.s0, in.d, in.sf};
+      } else {
+        out = addqi{val, in.s0, in.d, in.sf};
+      }
+    }
   }
   void fold(andq& in, Vinstr& out) {
     int val;
@@ -90,17 +116,63 @@ struct ImmFolder {
   }
   void fold(subq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = subqi{val, in.s1, in.d, in.sf}; }
+    if (match_int(in.s0, val)) {
+      if (val == 0 && !used[in.sf]) { // copy sets no flags.
+        out = copy{in.s1, in.d};
+      } else if (val == 1 && !used[in.sf]) { // CF not set by dec.
+        out = decq{in.s1, in.d, in.sf};
+      } else {
+        out = subqi{val, in.s1, in.d, in.sf};
+      }
+    } else if (match_int(in.s1, val)) {
+      if (val == 0) out = neg{in.s0, in.d, in.sf};
+    }
   }
+  void fold(subqi& in, Vinstr& out) {
+    if (in.s0.l() == 0 && !used[in.sf]) {  // copy sets no flags.
+      out = copy{in.s1, in.d};
+    }
+  }
+  // xor clears CF, OF.  ZF, SF, PF set accordingly
   void fold(xorb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) { out = xorbi{val, in.s1, in.d, in.sf}; }
-    else if (match_byte(in.s1, val)) { out = xorbi{val, in.s0, in.d, in.sf}; }
+    if (match_byte(in.s0, val)) {
+      if (val == 0 && !used[in.sf]) { // copy doesn't set any flags.
+        out = copy{in.s1, in.d};
+      } else if (val == -1 && !used[in.sf]) { // not doesn't set any flags.
+        out = notb{in.s1, in.d};
+      } else {
+        out = xorbi{val, in.s1, in.d, in.sf};
+      }
+    } else if (match_byte(in.s1, val)) {
+      if (val == 0 && !used[in.sf]) { // copy doesn't set any flags.
+        out = copy{in.s0, in.d};
+      } else if (val == -1 && !used[in.sf]) { // not doesn't set any flags.
+        out = notb{in.s0, in.d};
+      } else {
+        out = xorbi{val, in.s0, in.d, in.sf};
+      }
+    }
   }
   void fold(xorq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = xorqi{val, in.s1, in.d, in.sf}; }
-    else if (match_int(in.s1, val)) { out = xorqi{val, in.s0, in.d, in.sf}; }
+    if (match_int(in.s0, val)) {
+      if (val == 0 && !used[in.sf]) { // copy doesn't set any flags
+        out = copy{in.s1, in.d};
+      } else if (val == -1 && !used[in.sf]) { // not doesn't set any flags
+        out = not{in.s1, in.d};
+      } else {
+        out = xorqi{val, in.s1, in.d, in.sf};
+      }
+    } else if (match_int(in.s1, val)) {
+      if (val == 0 && !used[in.sf]) { // copy doesn't set any flags
+        out = copy{in.s0, in.d};
+      } else if (val == -1 && !used[in.sf]) { // not doesn't set any flags
+        out = not{in.s0, in.d};
+      } else {
+        out = xorqi{val, in.s0, in.d, in.sf};
+      }
+    }
   }
   void fold(movzbl& in, Vinstr& out) {
     int val;
@@ -126,6 +198,8 @@ namespace arm {
 struct ImmFolder {
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
+
+  explicit ImmFolder(jit::vector<bool>&&) {}
 
   bool arith_imm(Vreg r, int32_t& out) {
     if (!valid.test(r)) return false;
@@ -205,7 +279,19 @@ void foldImms(Vunit& unit) {
   assert(check(unit)); // especially, SSA
   // block order doesn't matter, but only visit reachable blocks.
   auto blocks = sortBlocks(unit);
-  Folder folder;
+
+  // Use flag for each registers.  If a SR is used then
+  // certain optimizations will not fire since they do not
+  // set the condition codes as the original instruction(s)
+  // would.
+  jit::vector<bool> used(unit.next_vr);
+  for (auto b : blocks) {
+    for (auto& inst : unit.blocks[b].code) {
+      visitUses(unit, inst, [&](Vreg r) { used[r] = true; });
+    }
+  }
+
+  Folder folder(std::move(used));
   folder.vals.resize(unit.next_vr);
   folder.valid.resize(unit.next_vr);
   // figure out which Vregs are constants and stash their values.

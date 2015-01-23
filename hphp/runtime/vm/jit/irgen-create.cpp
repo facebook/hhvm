@@ -32,12 +32,13 @@ const StaticString s_uuinvoke("__invoke");
 
 void initProps(HTS& env, const Class* cls) {
   cls->initPropHandle();
-  env.irb->ifThen(
-    [&](Block* taken) {
+  ifThen(
+    env,
+    [&] (Block* taken) {
       gen(env, CheckInitProps, taken, ClassData(cls));
     },
     [&] {
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       gen(env, InitProps, ClassData(cls));
     }
   );
@@ -52,12 +53,13 @@ void initProps(HTS& env, const Class* cls) {
 void initSProps(HTS& env, const Class* cls) {
   cls->initSPropHandles();
   if (RDS::isPersistentHandle(cls->sPropInitHandle())) return;
-  env.irb->ifThen(
-    [&](Block* taken) {
+  ifThen(
+    env,
+    [&] (Block* taken) {
       gen(env, CheckInitSProps, taken, ClassData(cls));
     },
     [&] {
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       gen(env, InitSProps, ClassData(cls));
     }
   );
@@ -117,7 +119,7 @@ SSATmp* allocObjFast(HTS& env, const Class* cls) {
  * so we can just burn it into the TC without using RDS.
  */
 void emitCreateCl(HTS& env, int32_t numParams, const StringData* clsName) {
-  auto const cls = Unit::lookupUniqueClass(clsName);
+  auto const cls = Unit::lookupClassOrUniqueClass(clsName);
   auto const invokeFunc = cls->lookupMethod(s_uuinvoke.get());
   auto const clonedFunc = invokeFunc->cloneAndSetClass(
     const_cast<Class*>(curClass(env))
@@ -234,12 +236,24 @@ void emitNewPackedArray(HTS& env, int32_t numArgs) {
     PUNT(NewPackedArray-UnrealisticallyHuge);
   }
 
-  auto const extra = PackedArrayData { static_cast<uint32_t>(numArgs) };
-  auto const array = gen(env, AllocPackedArray, extra);
+  auto const array = gen(
+    env,
+    AllocPackedArray,
+    PackedArrayData { static_cast<uint32_t>(numArgs) }
+  );
   static constexpr auto kMaxUnrolledInitArray = 8;
   if (numArgs > kMaxUnrolledInitArray) {
     spillStack(env);
-    gen(env, InitPackedArrayLoop, extra, array, sp(env));
+    gen(
+      env,
+      InitPackedArrayLoop,
+      InitPackedArrayLoopData {
+        offsetFromSP(env, 0),
+        static_cast<uint32_t>(numArgs)
+      },
+      array,
+      sp(env)
+    );
     discard(env, numArgs);
     push(env, array);
     return;
@@ -266,15 +280,18 @@ void emitNewStructArray(HTS& env, const ImmVector& immVec) {
   // obtain a pointer to the topmost item; if over-flushing becomes
   // a problem then we should refactor the NewPackedArray opcode to
   // take its values directly as SSA operands.
-  auto const stack = spillStack(env);
-  for (int i = 0; i < numArgs; i++) popC(env, DataTypeGeneric);
+  spillStack(env);
+
   NewStructData extra;
+  extra.offset  = offsetFromSP(env, 0);
   extra.numKeys = numArgs;
-  extra.keys = new (env.unit.arena()) StringData*[numArgs];
+  extra.keys    = new (env.unit.arena()) StringData*[numArgs];
   for (auto i = size_t{0}; i < numArgs; ++i) {
     extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
   }
-  push(env, gen(env, NewStructArray, extra, stack));
+
+  discard(env, numArgs);
+  push(env, gen(env, NewStructArray, extra, sp(env)));
 }
 
 void emitAddElemC(HTS& env) {
@@ -360,12 +377,13 @@ void emitStaticLocInit(HTS& env, int32_t locId, const StringData* name) {
 
     auto const cachedBox =
       gen(env, LdStaticLocCached, StaticLocName { curFunc(env), name });
-    env.irb->ifThen(
+    ifThen(
+      env,
       [&] (Block* taken) {
         gen(env, CheckStaticLocInit, taken, cachedBox);
       },
       [&] {
-        env.irb->hint(Block::Hint::Unlikely);
+        hint(env, Block::Hint::Unlikely);
         gen(env, StaticLocInitCached, cachedBox, value);
       }
     );
@@ -389,7 +407,8 @@ void emitStaticLoc(HTS& env, int32_t locId, const StringData* name) {
              cns(env, name), fp(env), cns(env, Type::Uninit)) :
     gen(env, LdStaticLocCached, StaticLocName { curFunc(env), name });
 
-  auto const res = env.irb->cond(
+  auto const res = cond(
+    env,
     0,
     [&] (Block* taken) {
       gen(env, CheckStaticLocInit, taken, box);

@@ -180,6 +180,11 @@ module MakeWorker = struct
         hh_worker_init();
         Gc.set gc_control;
         close_parent descr_parent_reads descr_parent_sends acc;
+        if !Utils.profile
+        then begin
+          let f = open_out (string_of_int (Unix.getpid ())^".log") in
+          Utils.log := (fun s -> Printf.fprintf f "%s\n" s)
+        end;
         (* And now start the daemon worker *)
         start_worker descr_child_reads child_reads_task child_sends_result
     | pid ->
@@ -256,7 +261,7 @@ module MakeWorker = struct
                 raise End_of_file
             | Unix.WSIGNALED x ->
                 let sig_str = PrintSignal.string_of_signal x in
-                Printf.printf "Worker interruped with signal: %s\n" sig_str;
+                Printf.printf "Worker interrupted with signal: %s\n" sig_str;
                 exit 2
             | Unix.WSTOPPED x ->
                 Printf.printf "Worker stopped with signal: %d\n" x;

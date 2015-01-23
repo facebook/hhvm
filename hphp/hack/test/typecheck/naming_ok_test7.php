@@ -12,7 +12,7 @@
 // testing loops scoping
 
 function stmt(Vector<int> $x): void {
-  foreach($x as $k => $v) {
+  foreach ($x as $k => $v) {
     $k++;
   }
 

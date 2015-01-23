@@ -14,20 +14,28 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/vasm.h"
+
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-util.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/ringbuffer.h"
 
 #include <boost/dynamic_bitset.hpp>
+
 #include <algorithm>
 
 // future work
@@ -46,39 +54,6 @@ namespace {
 using namespace Stats;
 
 size_t s_counter;
-
-// Sort blocks in reverse postorder, and try to arrange fall-through
-// blocks in the same area to be close together.
-struct BlockSorter {
-  explicit BlockSorter(const Vunit& unit)
-    : unit(unit)
-    , visited(unit.blocks.size()) {
-    blocks.reserve(unit.blocks.size());
-  }
-  unsigned area(Vlabel b) {
-    return (unsigned)unit.blocks[b].area;
-  }
-  void dfs(Vlabel b) {
-    assert(size_t(b) < unit.blocks.size() && !unit.blocks[b].code.empty());
-    if (visited.test(b)) return;
-    visited.set(b);
-    if (area(b) == 0) {
-      for (auto s : succs(unit.blocks[b])) {
-        // visit colder
-        if (area(s) > area(b)) dfs(s);
-      }
-      for (auto s : succs(unit.blocks[b])) {
-        if (area(s) <= area(b)) dfs(s);
-      }
-    } else {
-      for (auto s : succs(unit.blocks[b])) dfs(s);
-    }
-    blocks.push_back(b);
-  }
-  const Vunit& unit;
-  jit::vector<Vlabel> blocks;
-  boost::dynamic_bitset<> visited;
-};
 
 // A Use refers to the position where an interval is used or defined
 struct Use {
@@ -450,15 +425,6 @@ Vxls::~Vxls() {
   }
 }
 
-bool is_nop(copy& i) { return i.s == i.d; }
-bool is_nop(copy2& i) { return i.s0 == i.d0 && i.s1 == i.d1; }
-
-bool is_nop(lea& i) {
-  return i.s.disp == 0 && (
-         (i.s.base == i.d && !i.s.index.isValid()) ||
-         (!i.s.base.isValid() && i.s.index == i.d && i.s.scale == 1));
-}
-
 /*
  * Extended Linear Scan is based on Wimmer & Franz "Linear Scan Register
  * Allocation on SSA Form". As currently written, it also works on non-ssa
@@ -526,12 +492,9 @@ void Vxls::allocate() {
   for (auto b : blocks) {
     auto& code = unit.blocks[b].code;
     auto end = std::remove_if(code.begin(), code.end(), [&](Vinstr& inst) {
-      return (inst.op == Vinstr::copy && is_nop(inst.copy_)) ||
-             (inst.op == Vinstr::copy2 && is_nop(inst.copy2_)) ||
-             (inst.op == Vinstr::lea && is_nop(inst.lea_)) ||
-             (inst.op == Vinstr::copyargs) || // we lowered it
-             (inst.op == Vinstr::nop) || // we inserted it
-             (inst.op == Vinstr::phidef); // we lowered it
+      return is_trivial_nop(inst) ||
+             inst.op == Vinstr::copyargs || // we lowered it
+             inst.op == Vinstr::phidef; // we lowered it
     });
     code.erase(end, code.end());
   }
@@ -834,9 +797,8 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
       break;
     case Vinstr::bindaddr:
     case Vinstr::bindjcc1st:
-    case Vinstr::bindjcc2nd:
+    case Vinstr::bindjcc:
     case Vinstr::bindjmp:
-    case Vinstr::bindexit:
       defs = m_srkill;
       break;
     // arm instrs
@@ -1372,6 +1334,15 @@ void Vxls::lowerCopyargs() {
   }
 }
 
+/*
+ * Search for the phidef in block `b', then return its dest tuple.
+ */
+static Vtuple findDefs(const Vunit& unit, Vlabel b) {
+  assert(!unit.blocks[b].code.empty() &&
+         unit.blocks[b].code.front().op == Vinstr::phidef);
+  return unit.blocks[b].code.front().phidef_.defs;
+}
+
 void Vxls::resolveEdges() {
   auto addEdgeCopiesForPhiUseDefIntervalConflicts = [&](
     Vlabel block, Vlabel target, uint32_t targetIndex, const VregList& uses) {
@@ -1505,6 +1476,11 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
     assert(slot >= 0 && src == ivl->reg);
     MemoryRef ptr{slots.r + slotOffset(slot)};
     if (!ivl->wide) {
+      always_assert_flog(
+        !src.isSF(),
+        "Tried to spill %flags in Vunit:\n\n{}",
+        show(unit)
+      );
       stores.emplace_back(store{src, ptr});
     } else {
       assert(src.isSIMD());
@@ -1531,7 +1507,10 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
     } else if (ivl->constant) {
       switch (ivl->val.kind) {
         case Vconst::Quad:
-          loads.emplace_back(ldimm{ivl->val.val, dst, true});
+          loads.emplace_back(ldimmq{ivl->val.val, dst, true});
+          break;
+        case Vconst::Long:
+          loads.emplace_back(ldimml{int32_t(ivl->val.val), dst, true});
           break;
         case Vconst::Byte:
           loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst, true});
@@ -1733,49 +1712,10 @@ void Vxls::print(const char* caption) {
 
 }
 
-jit::vector<Vlabel> sortBlocks(const Vunit& unit) {
-  BlockSorter s(unit);
-  s.dfs(unit.entry);
-  std::reverse(s.blocks.begin(), s.blocks.end());
-  // put the blocks containing "fallthru" last; expect at most one per Vunit
-  std::stable_partition(s.blocks.begin(), s.blocks.end(), [&] (Vlabel b) {
-    auto& block = unit.blocks[b];
-    auto& code = block.code;
-    return code.back().op != Vinstr::fallthru;
-  });
-  return s.blocks;
-}
-
 void allocateRegisters(Vunit& unit, const Abi& abi) {
   s_counter++;
   Vxls a(unit, abi);
   a.allocate();
-}
-
-folly::Range<Vlabel*> succs(Vinstr& inst) {
-  switch (inst.op) {
-    case Vinstr::jcc: return {inst.jcc_.targets, 2};
-    case Vinstr::jmp: return {&inst.jmp_.target, 1};
-    case Vinstr::phijmp: return {&inst.phijmp_.target, 1};
-    case Vinstr::phijcc: return {inst.phijcc_.targets, 2};
-    case Vinstr::unwind: return {inst.unwind_.targets, 2};
-    case Vinstr::vinvoke: return {inst.vinvoke_.targets, 2};
-    case Vinstr::cbcc: return {inst.cbcc_.targets, 2};
-    case Vinstr::tbcc: return {inst.tbcc_.targets, 2};
-    case Vinstr::hcunwind: return {inst.hcunwind_.targets, 2};
-    default: return {nullptr, nullptr};
-  }
-}
-folly::Range<const Vlabel*> succs(const Vinstr& inst) {
-  return succs(const_cast<Vinstr&>(inst)).castToConst();
-}
-
-folly::Range<Vlabel*> succs(Vblock& block) {
-  if (block.code.empty()) return {nullptr, nullptr};
-  return succs(block.code.back());
-}
-folly::Range<const Vlabel*> succs(const Vblock& block) {
-  return succs(const_cast<Vblock&>(block)).castToConst();
 }
 
 }}

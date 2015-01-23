@@ -10,12 +10,20 @@
  */
 
 class MyVector<T> {
-  public static function fmap<T1, T2>((function(T1): T2) $f, MyVector<T1> $x): MyVector<T2> { 
-    throw new Exception('test'); 
+  public static function fmap<T1, T2>(
+    (function(T1): T2) $f,
+    MyVector<T1> $x,
+  ): MyVector<T2> {
+    throw new Exception('test');
   }
 }
 
 function test(): void {
   $in = new MyVector();
-  $in2 = MyVector::fmap(function(int $x): string { return 'x'; }, $in);
+  $in2 = MyVector::fmap(
+    function (int $x): string {
+      return 'x';
+    },
+    $in,
+  );
 }

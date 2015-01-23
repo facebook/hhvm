@@ -9,7 +9,7 @@
  *
  */
 
-type F = (function (): int);
+type F = (function(): int);
 class Foo {
   private function retDbl(): float {
     return 42.0;

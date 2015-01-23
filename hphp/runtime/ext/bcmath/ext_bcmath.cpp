@@ -242,10 +242,10 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bcmathExtension : public Extension {
+class bcmathExtension final : public Extension {
  public:
   bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(bcscale);
     HHVM_FE(bcadd);
     HHVM_FE(bcsub);
@@ -259,7 +259,7 @@ class bcmathExtension : public Extension {
     loadSystemlib();
   }
 
-  virtual void threadInit() {
+  void threadInit() override {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "bcmath.scale", "0",
                      &BCG(bc_precision));

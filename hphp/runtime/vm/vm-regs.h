@@ -108,6 +108,14 @@ inline void assert_native_stack_aligned() {
   assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
 }
 
+inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
+  assert(tl_regState == VMRegState::DIRTY);
+  tl_regState = VMRegState::CLEAN;
+  vmfp() = ar;
+  vmsp() = sp;
+  vmpc() = ar->unit()->at(pcOff);
+}
+
 /**
  * This class is used as a scoped guard around code that is called from the JIT
  * which needs the VM to be in a consistent state. JIT helpers use it to guard

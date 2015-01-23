@@ -77,6 +77,10 @@ void VariableUnserializer::read(char* buf, unsigned n) {
   m_buf += bufferLimit;
 }
 
+void VariableUnserializer::throwUnexpected(char expected, char got) {
+  throw Exception("Expected '%c' but got '%c'", expected, got);
+}
+
 bool VariableUnserializer::isWhitelistedClass(const String& clsName) const {
   if (m_type != Type::Serialize || m_classWhiteList.isNull()) {
     return true;

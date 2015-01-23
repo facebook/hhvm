@@ -17,7 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_thread.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/system/constants.h"
+#include "hphp/runtime/version.h"
 #include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
@@ -171,7 +171,7 @@ void CmdThread::onClient(DebuggerClient &client) {
 void CmdThread::debuggerInfo(InfoVec &info) {
   Add(info, "Host",       Process::GetHostName());
   Add(info, "Binary",     Process::GetAppName());
-  Add(info, "Version",    k_HHVM_VERSION.toCppString());
+  Add(info, "Version",    HHVM_VERSION);
   Add(info, "Process ID", FormatNumber("%lld", Process::GetProcessId()));
   Add(info, "Thread ID",  FormatNumber("0x%llx", (int64_t)Process::GetThreadId()));
 }

@@ -64,8 +64,11 @@ endif()
 add_definitions("-DHHVM")
 add_definitions("-DUSE_CMAKE")
 
+enable_language(ASM)
+
 add_subdirectory(tools/bootstrap)
 add_subdirectory(tools/hfsort)
+add_subdirectory(tools/version)
 
 add_subdirectory(compiler)
 add_subdirectory(hack)

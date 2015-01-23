@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/classname-is.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -288,13 +289,17 @@ struct ObjectData {
 
  private:
   template <bool warn, bool define>
-  void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-                const StringData* key);
-  bool propEmptyImpl(Class* ctx, const StringData* key);
+  TypedValue* propImpl(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  bool propEmptyImpl(const Class* ctx, const StringData* key);
+
   bool invokeSet(TypedValue* retval, const StringData* key, TypedValue* val);
   bool invokeGet(TypedValue* retval, const StringData* key);
-  bool invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
-                     const StringData* key);
   bool invokeIsset(TypedValue* retval, const StringData* key);
   bool invokeUnset(TypedValue* retval, const StringData* key);
   bool invokeNativeGetProp(TypedValue* retval, const StringData* key);
@@ -302,6 +307,7 @@ struct ObjectData {
                            TypedValue* val);
   bool invokeNativeIssetProp(TypedValue* retval, const StringData* key);
   bool invokeNativeUnsetProp(TypedValue* retval, const StringData* key);
+
   void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
                Array& props, std::vector<bool>& inserted) const;
   void getProps(const Class* klass, bool pubOnly, const PreClass* pc,
@@ -310,24 +316,50 @@ struct ObjectData {
                      Array& props, std::vector<bool>& inserted) const;
 
  public:
-  void prop(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-            const StringData* key);
-  void propD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-             const StringData* key);
-  void propW(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-             const StringData* key);
-  void propWD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-              const StringData* key);
-  bool propIsset(Class* ctx, const StringData* key);
-  bool propEmpty(Class* ctx, const StringData* key);
+  TypedValue* prop(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  TypedValue* propD(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  TypedValue* propW(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  TypedValue* propWD(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  bool propIsset(const Class* ctx, const StringData* key);
+  bool propEmpty(const Class* ctx, const StringData* key);
 
   void setProp(Class* ctx, const StringData* key, TypedValue* val,
                bool bindingAssignment = false);
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
+
   template <bool setResult>
-  void incDecProp(TypedValue& tvRef, Class* ctx, IncDecOp op,
-                  const StringData* key, TypedValue& dest);
+  void incDecProp(
+    Class* ctx,
+    IncDecOp op,
+    const StringData* key,
+    TypedValue& dest
+  );
+
   void unsetProp(Class* ctx, const StringData* key);
 
   static void raiseObjToIntNotice(const char*);
@@ -472,6 +504,14 @@ template<class T, class... Args> T* newobj(Args&&... args) {
 
 #define IMPLEMENT_CLASS(cls)                    \
   IMPLEMENT_OBJECT_ALLOCATION(c_##cls)
+
+template<class T, class... Args>
+typename std::enable_if<
+  std::is_convertible<T*, ObjectData*>::value,
+  SmartPtr<T>
+>::type makeSmartPtr(Args&&... args) {
+  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

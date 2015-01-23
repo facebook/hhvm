@@ -36,10 +36,10 @@ static const StaticString s_PAGELET_NOT_READY("PAGELET_NOT_READY");
 static const StaticString s_PAGELET_READY("PAGELET_READY");
 static const StaticString s_PAGELET_DONE("PAGELET_DONE");
 
-static class ServerExtension : public Extension {
+static class ServerExtension final : public Extension {
 public:
   ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfInt64>(s_PAGELET_NOT_READY.get(),
                                           k_PAGELET_NOT_READY);
     Native::registerConstant<KindOfInt64>(s_PAGELET_READY.get(),

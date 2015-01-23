@@ -4375,11 +4375,11 @@ bool HHVM_FUNCTION(mb_send_mail,
   return ret;
 }
 
-static class mbstringExtension : public Extension {
+static class mbstringExtension final : public Extension {
   public:
   mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET) {}
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     // TODO make these PHP_INI_ALL and thread local once we use them
     IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "mbstring.http_input",
                      &http_input);

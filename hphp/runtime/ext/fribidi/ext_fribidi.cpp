@@ -153,10 +153,10 @@ static Array HHVM_FUNCTION(
   return result;
 }
 
-class FribidiExtension : public Extension {
+class FribidiExtension final : public Extension {
 public:
   FribidiExtension() : Extension("fribidi") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     // Charsets
     Native::registerConstant<KindOfInt64>(
       s_FRIBIDI_CHARSET_UTF8.get(),

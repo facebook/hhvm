@@ -245,7 +245,7 @@ Variant HHVM_FUNCTION(mcrypt_module_open, const String& algorithm,
     return false;
   }
 
-  return Resource(newres<MCrypt>(td));
+  return Variant(makeSmartPtr<MCrypt>(td));
 }
 
 bool HHVM_FUNCTION(mcrypt_module_close, const Resource& td) {
@@ -690,10 +690,10 @@ const StaticString s_MCRYPT_TWOFISH("MCRYPT_TWOFISH");
 const StaticString s_MCRYPT_WAKE("MCRYPT_WAKE");
 const StaticString s_MCRYPT_XTEA("MCRYPT_XTEA");
 
-class McryptExtension : public Extension {
+class McryptExtension final : public Extension {
  public:
   McryptExtension() : Extension("mcrypt") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfStaticString>(
       s_MCRYPT_3DES.get(), StaticString("tripledes").get()
     );

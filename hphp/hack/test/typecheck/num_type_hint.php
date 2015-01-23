@@ -18,7 +18,7 @@ function div(int $n1, int $n2): num {
 }
 
 function cast(num $n1, num $n2): (float, int) {
-  return tuple((float) $n1, (int)$n2);
+  return tuple((float) $n1, (int) $n2);
 }
 
 // We _could_ be a tiny bit smarter and consider the following code correct

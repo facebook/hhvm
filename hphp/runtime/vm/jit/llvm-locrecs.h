@@ -30,21 +30,16 @@ struct LocRecs {
   uint8_t versionMajor;
   uint8_t versionMinor;
 
-  uint32_t numFunctions;
+  uint32_t numRecords;
 
   struct LocationRecord {
-    uint32_t offset;
-    uint16_t id;
+    uint8_t* address;
+    uint32_t id;
     uint8_t  size;
   };
 
-  struct FunctionRecord {
-    uint8_t* address;
-
-    jit::hash_map<uint16_t, jit::vector<LocationRecord>> records;
-  };
-
-  jit::hash_map<uint8_t*, FunctionRecord> functionRecords;
+  // Maps ID to records
+  jit::hash_map<uint32_t, jit::vector<LocationRecord>> records;
 };
 
 /*

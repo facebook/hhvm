@@ -54,7 +54,6 @@ struct FrameStateMgr;
  *     ND           instruction has no destination
  *     D(type)      single dst has a specific type
  *     DofS(N)      single dst has the type of src N
- *     DBox(N)      single dst has boxed type of src N
  *     DRefineS(N)  single dst's type is intersection of src N and paramType
  *     DParam       single dst has type of the instruction's type parameter
  *     DParamMayRelax like DParam, except type may relax
@@ -71,10 +70,6 @@ struct FrameStateMgr;
  *     DMulti       multiple dests. type and number depend on instruction
  *     DSetElem     single dst is a subset of CountedStr|Nullptr depending on
  *                    sources
- *     DStk(x)      up to two dests. x should be another D* macro and indicates
- *                    the type of the first dest, if any. the second (or first,
- *                    depending on the presence of a primary destination), will
- *                    be of type Type::StkPtr. implies ModifiesStack.
  *     DBuiltin     single dst for CallBuiltin. This can return complex data
  *                    types such as (Type::Str | Type::Null)
  *     DSubtract(N,t) single dest has type of src N with t removed
@@ -115,10 +110,6 @@ struct FrameStateMgr;
  *      MProp MInstrProp
  *      MElem MInstrElem
  */
-
-#define O_STK(name, dst, src, flags)            \
-  O(name, dst, src, StkFlags(flags))            \
-  O(name ## Stk, DStk(dst), src S(StkPtr), flags)
 
 // The IR opcode table is generated from lines that start with | in
 // hphp/doc/ir.specification.
@@ -175,20 +166,6 @@ bool isDblQueryOp(Opcode opc);
 Opcode queryToDblQueryOp(Opcode opc);
 
 /*
- * A "query jump op" is a conditional jump instruction that
- * corresponds to one of the fusable query op instructions.
- */
-bool isQueryJmpOp(Opcode opc);
-
-/*
- * Convert a jump operation to its corresponding conditional
- * ReqBindJmp.
- *
- * Pre: opc is a conditional jump.
- */
-Opcode jmpToReqBindJmp(Opcode opc);
-
-/*
  * Return the opcode that corresponds to negation of opc.
  */
 Opcode negateQueryOp(Opcode opc);
@@ -210,23 +187,20 @@ enum OpcodeFlag : uint64_t {
   HasDest          = 1ULL <<  0,
   CanCSE           = 1ULL <<  1,
   Branch           = 1ULL <<  2,
-  HasStackVersion  = 1ULL <<  3,
-  ConsumesRC       = 1ULL <<  4,
-  ProducesRC       = 1ULL <<  5,
-  MInstrProp       = 1ULL <<  6,
-  MInstrElem       = 1ULL <<  7,
-  MayRaiseError    = 1ULL <<  8,
-  Terminal         = 1ULL <<  9, // has no next instruction
-  NaryDest         = 1ULL << 10, // has 0 or more destinations
-  HasExtra         = 1ULL << 11,
-  Passthrough      = 1ULL << 12,
-  KillsSources     = 1ULL << 13,
-  ModifiesStack    = 1ULL << 14,
+  ConsumesRC       = 1ULL <<  3,
+  ProducesRC       = 1ULL <<  4,
+  MInstrProp       = 1ULL <<  5,
+  MInstrElem       = 1ULL <<  6,
+  MayRaiseError    = 1ULL <<  7,
+  Terminal         = 1ULL <<  8, // has no next instruction
+  NaryDest         = 1ULL <<  9, // has 0 or more destinations
+  HasExtra         = 1ULL << 10,
+  Passthrough      = 1ULL << 11,
+  KillsSources     = 1ULL << 12,
 };
 
 bool hasEdges(Opcode opc);
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
-Opcode getStackModifyingOpcode(Opcode opc);
 
 using SrcRange = folly::Range<SSATmp**>;
 using DstRange = folly::Range<SSATmp*>;
@@ -251,13 +225,6 @@ Type outputType(const IRInstruction*, int dstId = 0);
 bool checkOperandTypes(const IRInstruction*, const IRUnit* unit = nullptr);
 
 using TcaRange = folly::Range<TCA>;
-
-/*
- * Counts the number of cells a SpillStack will logically push.  (Not
- * including the number it pops.)  That is, for each SSATmp in the
- * spill sources, this totals up whether it is an ActRec or a cell.
- */
-int32_t spillValueCells(const IRInstruction* spillStack);
 
 } // namespace jit
 } // namespace HPHP

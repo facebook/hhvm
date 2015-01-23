@@ -150,7 +150,7 @@ bool HHVM_METHOD(XMLReader, open,
   if (!valid_file.empty()) {
     // Manually create the IO context to support custom stream wrappers.
     auto stream = File::Open(valid_file, "rb");
-    if (!stream.isInvalid()) {
+    if (!stream->isInvalid()) {
       reader = xmlReaderForIO(libxml_streams_IO_read,
                               libxml_streams_IO_close,
                               stream.get(),
@@ -718,10 +718,10 @@ Variant HHVM_METHOD(XMLReader, expand,
                                              makeStaticString(#name),          \
                                              q_XMLReader$$##name)              \
 
-static class XMLReaderExtension : public Extension {
+static class XMLReaderExtension final : public Extension {
 public:
   XMLReaderExtension() : Extension("xmlreader", "0.1") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_XML_READER_CONSTANT(NONE);
     REGISTER_XML_READER_CONSTANT(ELEMENT);
     REGISTER_XML_READER_CONSTANT(ATTRIBUTE);

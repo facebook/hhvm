@@ -73,7 +73,7 @@ Examples:
   % $argv[0] $ztestexample
 
   # Quick tests in JIT mode with some extra runtime options:
-  % $argv[0] test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRJumpOpts=0'
+  % $argv[0] test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
 
   # All quick tests except debugger
   % $argv[0] -e debugger test/quick
@@ -87,6 +87,10 @@ Examples:
   # Print all the standard tests
   % $argv[0] --list-tests
 
+  # Use a specific HHVM binary
+  % $argv[0] -b ~/code/hhvm/hphp/hhvm/hhvm
+  % $argv[0] --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
+
 EOT;
   return usage().$help;
 }
@@ -94,6 +98,49 @@ EOT;
 function error($message) {
   print "$message\n";
   exit(1);
+}
+
+// If a user-supplied path is provided, let's make sure we have a valid
+// executable
+function check_hhvm_executable($path) {
+  $path = realpath($path);
+  $msg = "Provided HHVM executable (" . $path . ") is not a file.\n"
+       . "If using HHVM_BIN, make sure that is set correctly.";
+  if (!is_file($path)) {
+    error($msg);
+  }
+  $output = array();
+  exec($path . " --version", $output);
+  $str = implode($output);
+  $msg = "Provided file (" . $path . ") is not an HHVM executable.\n"
+       . "If using HHVM_BIN, make sure that is set correctly.";
+  if (strpos($str, "HipHop") === false && strpos($str, "HHVM") === false) {
+    error($msg);
+  }
+}
+
+function check_for_multiple_default_hhvm_binaries() {
+  $dir = hphp_home() . "/";
+  if (getenv("FBMAKE_BIN_ROOT")) {
+    $dir .= getenv("FBMAKE_BIN_ROOT");
+  } else {
+    $dir .= "_bin";
+  }
+  // For Facebook: We have two make systems fbmake and cmake, and we
+  // can use both in the same code repo. If two binaries exist, we
+  // want the onus to be on the user to specify a particular one because
+  // before we chose the fbmake one by default and that can cause unexpected
+  // results.
+  if (file_exists($dir.'/hphp/hhvm/hhvm') &&
+      file_exists(hphp_home().'/hphp/hhvm/hhvm')) {
+    $msg = "Two binaries exist in this repo. \n"
+         . " - " . $dir . "/hphp/hhvm/hhvm\n"
+         . " - " . hphp_home() . "/hphp/hhvm/hhvm\n"
+         . "Are you in fbcode? If so, remove a binary \n"
+         . "or use the --hhvm-binary-path option to the test runner. \n"
+         . "e.g., test/run -b hphp/hhvm/hhvm quick";
+    error($msg);
+  }
 }
 
 function hphp_home() {
@@ -108,11 +155,13 @@ function idx($array, $key, $default = null) {
 }
 
 function hhvm_path() {
-  $array = $_ENV;
-  $key = "HHVM_BIN";
-  $default = bin_root().'/hphp/hhvm/hhvm';
+  $file = "";
+  if (getenv("HHVM_BIN") !== false) {
+    $file = realpath(getenv("HHVM_BIN"));
+  } else {
+    $file = bin_root().'/hhvm';
+  }
 
-  $file = is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
   if (!is_file($file)) {
     if (is_testing_dso_extension()) {
       exec("which hhvm", $output);
@@ -128,15 +177,27 @@ function hhvm_path() {
 }
 
 function bin_root() {
-  $dir = hphp_home() . '/' . idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin');
+  if (getenv("HHVM_BIN") !== false) {
+    return dirname(realpath(getenv("HHVM_BIN")));
+  }
+
+  $dir = hphp_home() . "/";
+  if (getenv("FBMAKE_BIN_ROOT") !== false) {
+    $dir .= getenv("FBMAKE_BIN_ROOT") . '/hphp/hhvm';
+  } else {
+    $dir .= "_bin/hphp/hhvm";
+  }
   return is_dir($dir) ?
     $dir :      # fbmake
-    hphp_home() # github
+    hphp_home() . "/hphp/hhvm" # github / cmake
   ;
 }
 
 function verify_hhbc() {
-  return idx($_ENV, 'VERIFY_HHBC', bin_root().'/verify.hhbc');
+  if (getenv("VERIFY_HHBC") !== false) {
+    return getenv($env_hhbc);
+  }
+  return bin_root().'/verify.hhbc';
 }
 
 function read_file($file) {
@@ -200,6 +261,7 @@ function get_options($argv) {
     'cores' => '',
     'no-clean' => '',
     'list-tests' => '',
+    'hhvm-binary-path:' => 'b:',
   );
   $options = array();
   $files = array();
@@ -275,6 +337,9 @@ function serial_only_tests() {
     hphp_home().'/'.'hphp/test/slow/ext_memcache/get_compressed.php',
     hphp_home().'/'.'hphp/test/slow/ext_memcached/decompression.php',
     hphp_home().'/'.'hphp/test/slow/ext_memcached/types.php',
+    hphp_home().'/'.'hphp/test/slow/ext_mysqli/store_result_updatemaxlength.php',
+    hphp_home().'/'.'hphp/test/slow/ext_mysqli/test_mysqli.php',
+    hphp_home().'/'.'hphp/test/slow/ext_mysqli/test_mysqli_bind.php',
   );
   $tests = find_tests($serial);
   return $tests;
@@ -661,6 +726,10 @@ class Status {
   }
 
   public static function hasCursorControl() {
+    // for runs on hudson-ci.org (aka jenkins)
+    if (getenv("HUDSON_URL")) {
+      return false;
+    }
     // for runs on travis-ci.org
     if (getenv("TRAVIS")) {
       return false;
@@ -718,7 +787,7 @@ class Status {
                 ((ord($str[$pos+1]) & 0xC0) == 0x80) &&
                 ((ord($str[$pos+2]) & 0xC0) == 0x80)) {
         // U+0800 - U+FFFF Upper Basic Multilingual Plane
-        $ret .= substr($std, $pos, 3);
+        $ret .= substr($str, $pos, 3);
         $pos += 3;
       } elseif ((($co & 0xF8) == 0xF0) &&
                 (($len - $pos) > 3) &&
@@ -1704,7 +1773,17 @@ function get_num_threads($options, $tests) {
   return min(count($tests), idx($options, 'threads', $cpus));
 }
 
+function runner_precheck() {
+  // basic checking for runner
+  if (empty($_SERVER) || empty($_ENV)) {
+    echo "Warning: \$_SERVER/\$_ENV variables not available, please check \n" .
+         "your ini setting: variables_order, it should have both 'E' and 'S'\n";
+  }
+}
+
 function main($argv) {
+  runner_precheck();
+
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
   list($options, $files) = get_options($argv);
@@ -1720,7 +1799,25 @@ function main($argv) {
     shuffle($tests);
   }
 
-  hhvm_path(); // check that binary exists
+  // Explicit path given by --hhvm-binary-path takes priority
+  // Then, if an HHVM_BIN env var exists, and the file it points to exists,
+  // that trumps any default hhvm executable path
+  $binary_path = "";
+  if (isset($options['hhvm-binary-path'])) {
+    $binary_path = realpath($options['hhvm-binary-path']);
+    check_hhvm_executable($binary_path);
+    putenv("HHVM_BIN=" . $binary_path);
+  } else if (getenv("HHVM_BIN") !== false) {
+    $binary_path = realpath(getenv("HHVM_BIN"));
+    check_hhvm_executable($binary_path);
+  } else {
+    check_for_multiple_default_hhvm_binaries();
+    $binary_path = hhvm_path();
+  }
+
+  if (isset($options['verbose'])) {
+    print "You are using the binary located at: " . $binary_path . "\n";
+  }
 
   $options['threads'] = get_num_threads($options, $tests);
 

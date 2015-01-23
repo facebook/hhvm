@@ -118,8 +118,8 @@ private:
    * Make a ZendCustomElement resource wrapping the given data block. If pDest
    * is non-null, it will be set to the newly-allocated location for the block.
    */
-  ResourceData* makeElementResource(void *pData, uint nDataSize,
-                                    void **pDest) const;
+  SmartPtr<ResourceData> makeElementResource(void *pData, uint nDataSize,
+                                             void **pDest) const;
 
   DtorFunc m_destructor;
 
@@ -223,8 +223,8 @@ void ProxyArray::proxySet(K k,
       *dest = (void*)(&r->nvGet(k)->m_data.pref);
     }
   } else {
-    ResourceData * elt = makeElementResource(data, data_size, dest);
-    r = innerArr(this)->set(k, elt, false);
+    auto elt = makeElementResource(data, data_size, dest);
+    r = innerArr(this)->set(k, Variant(std::move(elt)), false);
   }
   reseatable(this, r);
 }

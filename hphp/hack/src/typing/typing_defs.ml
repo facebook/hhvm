@@ -270,14 +270,6 @@ let arity_min ft_arity : int = match ft_arity with
   | Fstandard (min, _) | Fvariadic (min, _) | Fellipsis min -> min
 
 (*****************************************************************************)
-(* Infer-type-at-point mode *)
-(*****************************************************************************)
-
-let (infer_target: (int * int) option ref) = ref None
-let (infer_type: string option ref) = ref None
-let (infer_pos: Pos.t option ref) = ref None
-
-(*****************************************************************************)
 (* Accumulate method calls mode *)
 (*****************************************************************************)
 

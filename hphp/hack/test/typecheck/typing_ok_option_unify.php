@@ -10,7 +10,7 @@
  */
 
 function test(bool $b): ?bool {
-  $x = $b? null: false;
-  $y = $b? false: null;
+  $x = $b ? null : false;
+  $y = $b ? false : null;
   return $x;
 }

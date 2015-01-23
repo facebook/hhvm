@@ -47,7 +47,7 @@ let rec find_comment = function
   | P.T_DOC_COMMENT c :: _ -> Some ((PI.token_location_of_info c).PI.str)
   | _ -> None
 
-let update_param (changed, errl) comment_map func param =
+let update_param mode (changed, errl) comment_map func param =
   let pname, pnametok = match param.A.p_name with
     | A.DName (pname, pnametok) -> "$" ^ pname, pnametok in
   let err s = err errl func ("param " ^ pname ^ " " ^ s) in
@@ -57,14 +57,14 @@ let update_param (changed, errl) comment_map func param =
   match Smap.find pname comment_map with
     | None -> err "has no type"
     | Some at ->
-  match CT.convert (CT.Loose) at with
+  match CT.convert mode at with
     | C.Right s -> err ("does not convert cleanly: " ^ s)
     | C.Left ht ->
   pnametok.PI.transfo <- PI.AddBefore (PI.AddStr ((HT.to_string ht) ^ " "));
   changed := true;
   ()
 
-let update_return (changed, errl) comment_map func =
+let update_return mode (changed, errl) comment_map func =
   let (_, _, rptok) = func.A.f_params in
   match func.A.f_return_type with
     | Some _ -> err errl func "already has a return type"
@@ -72,14 +72,14 @@ let update_return (changed, errl) comment_map func =
   match Smap.find DP.ret_key comment_map with
     | None -> err errl func "has no return type"
     | Some at ->
-  match CT.convert (CT.Loose) at with
+  match CT.convert mode at with
     | C.Right s -> err errl func ("return type does not convert cleanly: " ^ s)
     | C.Left ht ->
   rptok.PI.transfo <- PI.AddAfter (PI.AddStr (": " ^ (HT.to_string ht)));
   changed := true;
   ()
 
-let update_func (changed, errl) comment func =
+let update_func mode (changed, errl) comment func =
   let comment_map = DP.parse comment in
   let (_, params, _) = func.A.f_params in
   List.iter begin function
@@ -87,12 +87,12 @@ let update_func (changed, errl) comment func =
     | C.Middle3 _ (* Hack-style variadic *) ->
       err errl func "unexpected Hack variadic"
     | C.Left3 param ->
-      update_param (changed, errl) comment_map func param
+      update_param mode (changed, errl) comment_map func param
   end params;
-  update_return (changed, errl) comment_map func;
+  update_return mode (changed, errl) comment_map func;
   ()
 
-let visit_func (changed, errl) toks _ func =
+let visit_func mode (changed, errl) toks _ func =
   let tok = match func.A.f_modifiers with
     | (_, x) :: _ -> x
     | [] -> func.A.f_tok in
@@ -101,22 +101,22 @@ let visit_func (changed, errl) toks _ func =
     | None -> err errl func "has no AT docblock"
     | Some comment ->
       begin try
-        update_func (changed, errl) comment func
+        update_func mode (changed, errl) comment func
       with At_parse.Parse_error ->
         err errl func "has invalid AT docblock"
       end
 
-let visitor (changed, errl) toks =
+let visitor mode (changed, errl) toks =
   V.mk_visitor { V.default_visitor with
-    V.kfunc_def = visit_func (changed, errl) toks;
-    V.kmethod_def = visit_func (changed, errl) toks;
+    V.kfunc_def = visit_func mode (changed, errl) toks;
+    V.kmethod_def = visit_func mode (changed, errl) toks;
   }
 
-let convert fn =
+let convert mode fn =
   let changed = ref false in
   let errl = ref [] in
   let (ast, toks) = Parse_php.ast_and_tokens fn in
-  visitor (changed, errl) toks (A.Program ast);
+  visitor mode (changed, errl) toks (A.Program ast);
   let outopt = if !changed then
     Some (Unparse_php.string_of_program_with_comments_using_transfo (ast, toks))
   else

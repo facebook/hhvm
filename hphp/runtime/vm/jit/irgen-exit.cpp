@@ -34,14 +34,14 @@ namespace {
  * ReqRetranslate).  In the non-inlined situation, however, we want to use
  * ReqRetranslate if and only if the target bc offset is the initial bc offset.
  */
-void exitRequest(HTS& env, TransFlags flags, Offset targetBcOff) {
+void exitRequest(HTS& env, TransFlags flags, SrcKey target) {
   auto const curBcOff = bcOff(env);
   if (!isInlining(env) &&
       curBcOff == env.context.initBcOffset &&
-      targetBcOff == curBcOff) {
-    gen(env, ReqRetranslate, ReqRetranslateData { flags });
+      target.offset() == curBcOff) {
+    gen(env, ReqRetranslate, ReqRetranslateData { flags }, sp(env));
   } else {
-    gen(env, ReqBindJmp, ReqBindJmpData { targetBcOff, flags });
+    gen(env, ReqBindJmp, ReqBindJmpData { target, flags }, sp(env));
   }
 }
 
@@ -49,9 +49,9 @@ Block* implMakeExit(HTS& env, TransFlags trflags, Offset targetBcOff) {
   if (targetBcOff == -1) targetBcOff = bcOff(env);
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
-  auto const stack = spillStack(env);
-  gen(env, SyncABIRegs, fp(env), stack);
-  exitRequest(env, trflags, targetBcOff);
+  spillStack(env);
+  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  exitRequest(env, trflags, SrcKey{curSrcKey(env), targetBcOff});
   return exit;
 }
 
@@ -89,9 +89,12 @@ Block* makeExitOpt(HTS& env, TransID transId) {
   auto const targetBcOff = bcOff(env);
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);
-  auto const stack = spillStack(env);
-  gen(env, SyncABIRegs, fp(env), stack);
-  gen(env, ReqRetranslateOpt, ReqRetransOptData(transId, targetBcOff));
+  spillStack(env);
+  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env,
+      ReqRetranslateOpt,
+      ReqRetransOptData{transId, SrcKey{curSrcKey(env), targetBcOff}},
+      sp(env));
   return exit;
 }
 

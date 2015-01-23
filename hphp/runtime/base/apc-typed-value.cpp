@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/apc-typed-value.h"
 
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
@@ -24,9 +25,14 @@ namespace HPHP {
 
 APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {
   assert(apcExtension::UseUncounted);
-  auto value = new APCTypedValue(
-    array->isPacked() ? MixedArray::MakeUncountedPacked(array)
-                      : MixedArray::MakeUncounted(array));
+  APCTypedValue* value;
+  if (array->isPacked()) {
+    value = new APCTypedValue(MixedArray::MakeUncountedPacked(array));
+  } else if (array->isStruct()) {
+    value = new APCTypedValue(StructArray::MakeUncounted(array));
+  } else {
+    value = new APCTypedValue(MixedArray::MakeUncounted(array));
+  }
   return value->getHandle();
 }
 
@@ -39,6 +45,8 @@ void APCTypedValue::deleteUncounted() {
   } else if (type == KindOfArray) {
     if (m_data.arr->isPacked()) {
       MixedArray::ReleaseUncountedPacked(m_data.arr);
+    } else if (m_data.arr->isStruct()) {
+      StructArray::ReleaseUncounted(m_data.arr);
     } else {
       MixedArray::ReleaseUncounted(m_data.arr);
     }

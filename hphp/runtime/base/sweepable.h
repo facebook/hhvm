@@ -57,16 +57,6 @@ public:
   virtual void sweep() = 0;
 
   /*
-   * Note: "Persistent" here means that the object will stay alive
-   * across requests, but *as a thread local*.  It can be reused once
-   * the same server thread gets around to handling a new request.  If
-   * you need this you probably should be using it via PersistentResourceStore.
-   */
-  void incPersistent() { ++m_persist; }
-  void decPersistent() { --m_persist; }
-  bool isPersistent() { return m_persist > 0; }
-
-  /*
    * Remove this object from the sweepable list, so it won't have
    * sweep() called at the next SweepAll.
    */
@@ -80,9 +70,7 @@ private:
     struct {
       UNUSED char m_pad[3];
       UNUSED const HeaderKind m_kind;
-      unsigned m_persist;
     };
-    uint64_t m_kind_persist;
   };
   Node m_sweepNode;
 };

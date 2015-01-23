@@ -15,8 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/base-includes.h"
 #include <vector>
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/util/logger.h"
@@ -119,7 +120,7 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
     return arReturn(ar, false);
   }
 
-  std::vector<Variant*> vars;
+  PackedArrayInit vars(type_size);
   for (int i = 0; i < type_size; i++) {
     char t = types[i];
     if (t != 'i' && t != 'd' && t != 's' && t != 'b') {
@@ -127,10 +128,15 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
                     i + 2 + start_index);
       return arReturn(ar, false);
     }
-    vars.push_back(&getArg<KindOfRef>(ar, i + 1 + start_index));
+    auto rparam = &getArg<KindOfRef>(ar, i + 1 + start_index);
+
+    if (rparam->getRawType() != KindOfRef) {
+      return arReturn(ar, false);
+    }
+    vars.appendRef(*rparam);
   }
 
-  return arReturn(ar, getStmt(obj)->bind_param(types, vars));
+  return arReturn(ar, getStmt(obj)->bind_param(types, vars.toArray()));
 }
 
 static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
@@ -142,12 +148,17 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
     return arReturn(ar, false);
   }
 
-  std::vector<Variant*> vars;
+  PackedArrayInit vars(ar->numArgs());
   for (int i = start_index; i < ar->numArgs(); i++) {
-    vars.push_back(&getArg<KindOfRef>(ar, i));
+    auto rparam = &getArg<KindOfRef>(ar, i);
+
+    if (rparam->getRawType() != KindOfRef) {
+      return arReturn(ar, false);
+    }
+    vars.appendRef(*rparam);
   }
 
-  return arReturn(ar, getStmt(obj)->bind_result(vars));
+  return arReturn(ar, getStmt(obj)->bind_result(vars.toArray()));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -163,8 +174,15 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
 
 #define VALIDATE_CONN_CONNECTED(conn) VALIDATE_CONN(conn, MySQLState::CONNECTED)
 
+// since we allow null (e.g. nullOkay is true in the call into type-resource),
+// we have to check if the resource data is null before we try to get a
+// connection.
 #define VALIDATE_RESOURCE(res, state)                                     \
-  auto const& conn = res.getTyped<MySQLResource>(true, false)->mysql();   \
+  auto rdata = res.getTyped<MySQLResource>(true, false);                  \
+  std::shared_ptr<MySQL> conn = nullptr;                                  \
+  if (rdata) {                                                            \
+    conn = rdata->mysql();                                                \
+  }                                                                       \
   VALIDATE_CONN(conn, state)
 
 static Variant HHVM_METHOD(mysqli, autocommit, bool mode) {
@@ -235,8 +253,8 @@ static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store) {
 
 static void HHVM_METHOD(mysqli, hh_init) {
   auto data = std::make_shared<MySQL>(nullptr, 0, nullptr, nullptr, nullptr);
-  auto rsrc = newres<MySQLResource>(data);
-  this_->o_set(s_connection, rsrc, s_mysqli.get());
+  auto rsrc = makeSmartPtr<MySQLResource>(std::move(data));
+  this_->o_set(s_connection, Variant(std::move(rsrc)), s_mysqli.get());
 }
 
 static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
@@ -593,8 +611,8 @@ static Variant HHVM_METHOD(mysqli_stmt, hh_field_count) {
 
 static void HHVM_METHOD(mysqli_stmt, hh_init, Variant connection) {
   Object obj = connection.toObject();
-  auto data = newres<MySQLStmt>(get_connection(obj.get())->get());
-  this_->o_set(s_stmt, Resource(data), s_mysqli_stmt.get());
+  auto data = makeSmartPtr<MySQLStmt>(get_connection(obj.get())->get());
+  this_->o_set(s_stmt, Variant(std::move(data)), s_mysqli_stmt.get());
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, hh_insert_id) {
@@ -685,10 +703,10 @@ static bool HHVM_FUNCTION(mysqli_thread_safe) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class mysqliExtension : public Extension {
+class mysqliExtension final : public Extension {
  public:
   mysqliExtension() : Extension("mysqli") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     // mysqli
     HHVM_ME(mysqli, autocommit);
     HHVM_ME(mysqli, change_user);

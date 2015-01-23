@@ -1,7 +1,7 @@
 <?hh
-function foo($x, ... ) {
+function foo($x, ...) {
   return $y[$x];
 }
-function bar(... ) {
+function bar(...) {
   return func_get_args()[3];
 }

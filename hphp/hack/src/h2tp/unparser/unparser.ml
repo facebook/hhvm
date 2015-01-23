@@ -335,6 +335,10 @@ let unparser _env =
       and declsStr = u_of_list_comma (fun (id, expr) ->
         StrWords [ u_id id; Str "="; u_expr expr]) decls
       in StrStatement [ Str "const" ; hOptionStr; declsStr ]
+    | AbsConst (hOption, name) ->
+      let hOptionStr = u_of_option u_hint hOption
+      and nameStr = u_id name
+      in StrStatement [ Str "abstract const" ; hOptionStr; nameStr ]
     | Attributes v2 ->
         u_todo "Attributes"
           (fun () ->
@@ -958,8 +962,10 @@ let unparse :
   to_string |>
   fun s ->
     dn s;
-    let s' = match Format_hack.program file ~no_trailing_commas:true s with
-    | Format_hack.Php_or_decl -> raise Impossible
+    let modes = [Some Ast.Mstrict; Some Ast.Mpartial] in
+    let formatted = Format_hack.program modes file ~no_trailing_commas:true s in
+    let s' = match formatted with
+    | Format_hack.Disabled_mode -> raise Impossible
     | Format_hack.Internal_error -> raise (FormatterError "")
     | Format_hack.Success s' -> s'
     | Format_hack.Parsing_error error -> raise (FormatterError

@@ -72,7 +72,8 @@ Cell cellPow(Cell, Cell);
  * PHP operators &, |, and ^.
  *
  * These operators return a KindOfInt64, unless both arguments are
- * KindOfString, in which case they return a KindOfString.
+ * KindOfString, in which case they return a KindOfString that the caller owns
+ * a reference to.
  */
 Cell cellBitAnd(Cell, Cell);
 Cell cellBitOr(Cell, Cell);

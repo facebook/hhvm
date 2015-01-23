@@ -29,8 +29,7 @@ LookupCommand()
 
 def lookup_func(val):
     funcid = val.cast(T('HPHP::FuncId'))
-    func_vec = V('HPHP::s_funcVec')['m_vals']['_M_t']['_M_head_impl']
-    return func_vec[funcid]['_M_b']['_M_p']
+    return idx.atomic_vector_at(V('HPHP::s_funcVec'), funcid)
 
 
 class LookupFuncCommand(gdb.Command):

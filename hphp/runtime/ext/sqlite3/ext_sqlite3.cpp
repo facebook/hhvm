@@ -787,10 +787,10 @@ bool HHVM_METHOD(SQLite3Result, finalize) {
 #define REGISTER_CONSTANT(name)                                                \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
 
-static class SQLite3Extension : public Extension {
+static class SQLite3Extension final : public Extension {
 public:
   SQLite3Extension() : Extension("sqlite3", "0.7-dev") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_CONSTANT(SQLITE3_ASSOC);
     REGISTER_CONSTANT(SQLITE3_NUM);
     REGISTER_CONSTANT(SQLITE3_BOTH);

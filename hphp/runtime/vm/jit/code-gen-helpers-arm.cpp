@@ -20,6 +20,10 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit { namespace arm {
 
@@ -76,7 +80,7 @@ Vpoint emitCall(Vout& v, CppCall call, RegSet args) {
   PhysReg rHostCall(rHostCallReg);
   switch (call.kind()) {
   case CppCall::Kind::Direct:
-    v << ldimm{reinterpret_cast<intptr_t>(call.address()), rHostCall};
+    v << ldimmq{reinterpret_cast<intptr_t>(call.address()), rHostCall};
     break;
   case CppCall::Kind::Virtual:
     v << load{arg0[0], rHostCall};

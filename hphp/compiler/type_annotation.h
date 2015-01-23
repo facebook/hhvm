@@ -75,6 +75,7 @@ public:
   void setFunction() { m_function = true; }
   void setXHP() { m_xhp = true; }
   void setTypeVar() { m_typevar = true; }
+  void setTypeAccess() { m_typeaccess = true; }
 
   bool isNullable() const { return m_nullable; }
   bool isSoft() const { return m_soft; }
@@ -82,6 +83,7 @@ public:
   bool isFunction() const { return m_function; }
   bool isXHP() const { return m_xhp; }
   bool isTypeVar() const { return m_typevar; }
+  bool isTypeAccess() const { return m_typeaccess; }
 
   /*
    * Return a shallow copy of this TypeAnnotation, except with
@@ -176,6 +178,7 @@ private:
   void xhpTypeName(std::string &name) const;
   void tupleTypeName(std::string &name) const;
   void genericTypeName(std::string &name) const;
+  void accessTypeName(std::string &name) const;
 
 private:
   std::string m_name;
@@ -187,6 +190,7 @@ private:
   unsigned m_function : 1;
   unsigned m_xhp : 1;
   unsigned m_typevar : 1;
+  unsigned m_typeaccess : 1;
 };
 
 }

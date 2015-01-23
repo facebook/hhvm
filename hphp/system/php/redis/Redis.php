@@ -46,7 +46,6 @@ class Redis {
   /* Type of serialization to use with values stored in redis */
   const SERIALIZER_NONE     = 0;
   const SERIALIZER_PHP      = 1;
-  const SERIALIZER_IGBINARY = 2;
 
   /* Options used by lInsert and similar methods */
   const AFTER  = 'after';
@@ -97,9 +96,8 @@ class Redis {
         return true;
 
       case self::OPT_SERIALIZER:
-        if (($value !== self::SERIALIZER_NONE) AND
-            ($value !== self::SERIALIZER_PHP) AND
-            ($value !== self::SERIALIZER_IGBINARY)) {
+        if (($value !== self::SERIALIZER_NONE) &&
+            ($value !== self::SERIALIZER_PHP)) {
           throw new RedisException("Invalid serializer option: $value");
         }
         $this->serializer = (int)$value;
@@ -1129,7 +1127,6 @@ class Redis {
         return $str;
       case self::SERIALIZER_PHP:
         return serialize($str);
-      case self::SERIALIZER_IGBINARY:
       default:
         throw new RedisException("Not Implemented");
     }
@@ -1141,7 +1138,6 @@ class Redis {
         return $str;
       case self::SERIALIZER_PHP:
         return unserialize($str);
-      case self::SERIALIZER_IGBINARY:
       default:
         throw new RedisException("Not Implemented");
     }

@@ -1,5 +1,5 @@
 <?hh // strict
 
 function foo(): (function(...): int) {
- return (...) ==> 4;
+  return (...) ==> 4;
 }

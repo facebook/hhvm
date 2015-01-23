@@ -472,17 +472,25 @@ public:
   void cowCheck() {
     ArrayData * ad = m_tv->m_data.parr;
     if (ad->isStatic() || ad->hasMultipleRefs()) {
-      ad = ad->copy();
-      ad->incRefCount();
-      // copy() causes an array to be unproxied, so we normally need
-      // to reproxy it
-      if (!ad->isProxyArray()) {
-        ad = ProxyArray::Make(ad);
-        ad->incRefCount();
-      }
-      m_tv->m_data.parr->decRefCount();
-      m_tv->m_data.parr = ad;
+      forceAsProxyArray ();
     }
+  }
+  inline void forceAsProxyArray () {
+    ArrayData * ad = m_tv->m_data.parr;
+    if (ad->isEmptyArray()) {
+      assert(!"can't forceAsProxyArray an empty array");
+    } else {
+      ad = ad->copy();
+    }
+    ad->incRefCount();
+    // copy() causes an array to be unproxied, so we normally need
+    // to reproxy it
+    if (!ad->isProxyArray()) {
+      ad = ProxyArray::Make(ad);
+      ad->incRefCount();
+    }
+    m_tv->m_data.parr->decRefCount();
+    m_tv->m_data.parr = ad;
   }
   /* implicit */ operator HashTable*() {
     cowCheck();

@@ -250,8 +250,12 @@ struct BackEdgeVisitor {
     m_visited.set(id);
     m_path.set(id);
 
-    walk(block->takenEdge());
-    walk(block->nextEdge());
+    // Normally blocks cannot be empty, but this is used in printing and we want
+    // to be able to print malformed blocks.
+    if (!block->empty()) {
+      walk(block->takenEdge());
+      walk(block->nextEdge());
+    }
 
     m_path.set(id, false);
   }

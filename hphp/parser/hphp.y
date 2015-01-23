@@ -1498,6 +1498,7 @@ class_statement:
   | class_abstract_constant_declaration ';'
                                        { _p->onClassVariableStart
                                          ($$,NULL,$1,NULL, true);}
+  | class_type_constant_declaration ';' { $$ = $1; }
   | method_modifiers function_loc
     is_reference hh_name_with_typevar '('
                                        { _p->onNewLabelScope(true);
@@ -1723,6 +1724,17 @@ class_abstract_constant_declaration:
     hh_name_with_type                   { _p->onClassAbstractConstant($$,&$1,$3);}
   | T_ABSTRACT T_CONST hh_name_with_type
                                         { _p->onClassAbstractConstant($$,NULL,$3);}
+;
+class_type_constant_declaration:
+    T_ABSTRACT class_type_constant
+      hh_opt_constraint                 { Token t;
+                                          _p->onClassTypeConstant($$, $2, t);
+                                          _p->popTypeScope(); }
+  | class_type_constant
+      hh_opt_constraint '=' hh_type     { _p->onClassTypeConstant($$, $1, $4);
+                                          _p->popTypeScope(); }
+class_type_constant:
+    T_CONST T_TYPE hh_name_with_typevar { $$ = $3; }
 ;
 
 expr_with_parens:
@@ -3061,6 +3073,17 @@ hh_shape_type:
      '(' hh_shape_member_list ')'      { $$.setText("array"); }
 ;
 
+hh_access_type_start:
+    fully_qualified_class_name         { $$ = $1; }
+  | T_STATIC                           { $1.setText("static"); $$ = $1; }
+;
+hh_access_type:
+    ident T_DOUBLE_COLON hh_access_type { Token t; t.reset();
+                                          _p->onTypeAnnotation($$, $1, t);
+                                          _p->onTypeList($$, $3); }
+  | ident hh_typeargs_opt               { _p->onTypeAnnotation($$, $1, $2); }
+;
+
 /* extends non_empty_type_decl with some more types */
 hh_type:
     /* double-optional types will be rejected by the typechecker; we
@@ -3079,6 +3102,13 @@ hh_type:
                                          $1.setText("callable");
                                          _p->onTypeAnnotation($$, $1, t); }
   | hh_shape_type                      { $$ = $1; }
+  | hh_access_type_start
+    T_DOUBLE_COLON
+    hh_access_type                     { only_in_hh_syntax(_p);
+                                         Token t; t.reset();
+                                         _p->onTypeAnnotation($$, $1, t);
+                                         _p->onTypeList($$, $3);
+                                         _p->onTypeSpecialization($$, 'a'); }
   | T_ARRAY T_TYPELIST_LT hh_type
     T_TYPELIST_GT                      { $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $3); }

@@ -81,20 +81,20 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant::Variant(litstr  v) {
+Variant::Variant(litstr v) {
   m_type = KindOfString;
   m_data.pstr = StringData::Make(v);
   m_data.pstr->incRefCount();
 }
 
 Variant::Variant(const String& v) {
-  m_type = KindOfString;
   StringData *s = v.get();
   if (s) {
     m_data.pstr = s;
     if (s->isStatic()) {
       m_type = KindOfStaticString;
     } else {
+      m_type = KindOfString;
       s->incRefCount();
     }
   } else {
@@ -111,9 +111,9 @@ Variant::Variant(const std::string & v) {
 }
 
 Variant::Variant(const Array& v) {
-  m_type = KindOfArray;
   ArrayData *a = v.get();
   if (a) {
+    m_type = KindOfArray;
     m_data.parr = a;
     a->incRefCount();
   } else {
@@ -122,9 +122,9 @@ Variant::Variant(const Array& v) {
 }
 
 Variant::Variant(const Object& v) {
-  m_type = KindOfObject;
   ObjectData *o = v.get();
   if (o) {
+    m_type = KindOfObject;
     m_data.pobj = o;
     o->incRefCount();
   } else {
@@ -133,9 +133,9 @@ Variant::Variant(const Object& v) {
 }
 
 Variant::Variant(const Resource& v) {
-  m_type = KindOfResource;
   ResourceData* o = v.get();
   if (o) {
+    m_type = KindOfResource;
     m_data.pres = o;
     o->incRefCount();
   } else {
@@ -167,9 +167,9 @@ Variant::Variant(const StringData* v, StaticStrInit) {
   }
 }
 
-Variant::Variant(ArrayData *v) {
-  m_type = KindOfArray;
+Variant::Variant(ArrayData* v) {
   if (v) {
+    m_type = KindOfArray;
     m_data.parr = v;
     v->incRefCount();
   } else {
@@ -177,9 +177,9 @@ Variant::Variant(ArrayData *v) {
   }
 }
 
-Variant::Variant(ObjectData *v) {
-  m_type = KindOfObject;
+Variant::Variant(ObjectData* v) {
   if (v) {
+    m_type = KindOfObject;
     m_data.pobj = v;
     v->incRefCount();
   } else {
@@ -187,9 +187,9 @@ Variant::Variant(ObjectData *v) {
   }
 }
 
-Variant::Variant(ResourceData *v) {
-  m_type = KindOfResource;
+Variant::Variant(ResourceData* v) {
   if (v) {
+    m_type = KindOfResource;
     m_data.pres = v;
     v->incRefCount();
   } else {
@@ -197,11 +197,56 @@ Variant::Variant(ResourceData *v) {
   }
 }
 
-Variant::Variant(RefData *r) {
-  m_type = KindOfRef;
+Variant::Variant(RefData* r) {
   if (r) {
+    m_type = KindOfRef;
     m_data.pref = r;
     r->incRefCount();
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(StringData* var, Attach) {
+  if (var) {
+    m_type = var->isStatic() ? KindOfStaticString : KindOfString;
+    m_data.pstr = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(ArrayData* var, Attach) {
+  if (var) {
+    m_type = KindOfArray;
+    m_data.parr = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(ObjectData* var, Attach) {
+  if (var) {
+    m_type = KindOfObject;
+    m_data.pobj = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(ResourceData* var, Attach) {
+  if (var) {
+    m_type = KindOfResource;
+    m_data.pres = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(RefData* var, Attach) {
+  if (var) {
+    m_type = KindOfRef;
+    m_data.pref = var;
   } else {
     m_type = KindOfNull;
   }
@@ -243,7 +288,7 @@ const RawDestructor g_destructors[] = {
 Variant::~Variant() {
   tvRefcountedDecRef(asTypedValue());
   if (debug) {
-    memset(this, 0x7b, sizeof(*this));
+    memset(this, kTVTrashFill2, sizeof(*this));
   }
 }
 
@@ -577,7 +622,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfString:
     case KindOfArray:
     case KindOfObject:
-      return Resource(newres<DummyResource>());
+      return Resource(makeSmartPtr<DummyResource>());
 
     case KindOfResource:
       return m_data.pres;
@@ -959,6 +1004,15 @@ void Variant::unserialize(VariableUnserializer *uns,
       String v;
       v.unserialize(uns);
       operator=(v);
+      if (!uns->endOfBuffer()) {
+        // Semicolon *should* always be required,
+        // but PHP's implementation allows omitting it
+        // and still functioning.
+        // Worse, it throws it away without any check.
+        // So we'll do the same.  Sigh.
+        uns->readChar();
+      }
+      return;
     }
     break;
   case 'S':
@@ -987,21 +1041,12 @@ void Variant::unserialize(VariableUnserializer *uns,
   case 'L':
     {
       int64_t id = uns->readInt();
-      sep = uns->readChar();
-      if (sep != ':') {
-        throw Exception("Expected ':' but got '%c'", sep);
-      }
+      uns->expectChar(':');
       String rsrcName;
       rsrcName.unserialize(uns);
-      sep = uns->readChar();
-      if (sep != '{') {
-        throw Exception("Expected '{' but got '%c'", sep);
-      }
-      sep = uns->readChar();
-      if (sep != '}') {
-        throw Exception("Expected '}' but got '%c'", sep);
-      }
-      DummyResource* rsrc = newres<DummyResource>();
+      uns->expectChar('{');
+      uns->expectChar('}');
+      auto rsrc = makeSmartPtr<DummyResource>();
       rsrc->o_setResourceId(id);
       rsrc->m_class_name = rsrcName;
       operator=(rsrc);
@@ -1015,19 +1060,10 @@ void Variant::unserialize(VariableUnserializer *uns,
       String clsName;
       clsName.unserialize(uns);
 
-      sep = uns->readChar();
-      if (sep != ':') {
-        throw Exception("Expected ':' but got '%c'", sep);
-      }
+      uns->expectChar(':');
       int64_t size = uns->readInt();
-      char sep = uns->readChar();
-      if (sep != ':') {
-        throw Exception("Expected ':' but got '%c'", sep);
-      }
-      sep = uns->readChar();
-      if (sep != '{') {
-        throw Exception("Expected '{' but got '%c'", sep);
-      }
+      uns->expectChar(':');
+      uns->expectChar('{');
 
       const bool allowObjectFormatForCollections = true;
 
@@ -1098,14 +1134,8 @@ void Variant::unserialize(VariableUnserializer *uns,
         if (type == 'O') {
           // Collections are not allowed
           if (obj->isCollection()) {
-            if (size > 0) {
-              throw Exception("%s does not support the 'O' serialization "
-                              "format", clsName.data());
-            }
-            // Be lax and tolerate the 'O' serialization format for collection
-            // classes if there are 0 properties.
-            raise_warning("%s does not support the 'O' serialization "
-                          "format", clsName.data());
+            throw Exception("%s does not support the 'O' serialization "
+                            "format", clsName.data());
           }
 
           Variant serializedNativeData = init_null();
@@ -1150,6 +1180,13 @@ void Variant::unserialize(VariableUnserializer *uns,
             } else {
               unserializeProp(uns, obj.get(), key, nullptr, key, i + 1);
             }
+
+            if (i > 0) {
+              auto lastChar = uns->peekBack();
+              if ((lastChar != ';') && (lastChar != '}')) {
+                throw Exception("Object property not terminated properly");
+              }
+            }
           }
 
           // nativeDataWakeup is called last to ensure that all properties are
@@ -1171,10 +1208,7 @@ void Variant::unserialize(VariableUnserializer *uns,
           collectionUnserialize(obj.get(), uns, size, type);
         }
       }
-      sep = uns->readChar();
-      if (sep != '}') {
-        throw Exception("Expected '}' but got '%c'", sep);
-      }
+      uns->expectChar('}');
 
       if (uns->type() != VariableUnserializer::Type::DebuggerSerialize ||
           (cls && cls->instanceCtor() && cls->isCppSerializable())) {
@@ -1196,10 +1230,7 @@ void Variant::unserialize(VariableUnserializer *uns,
       String clsName;
       clsName.unserialize(uns);
 
-      sep = uns->readChar();
-      if (sep != ':') {
-        throw Exception("Expected ':' but got '%c'", sep);
-      }
+      uns->expectChar(':');
       String serialized;
       serialized.unserialize(uns, '{', '}');
 
@@ -1232,10 +1263,7 @@ void Variant::unserialize(VariableUnserializer *uns,
   default:
     throw Exception("Unknown type '%c'", type);
   }
-  sep = uns->readChar();
-  if (sep != ';') {
-    throw Exception("Expected ';' but got '%c'", sep);
-  }
+  uns->expectChar(';');
 }
 
 VarNR::VarNR(const String& v) {

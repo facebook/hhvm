@@ -2,5 +2,5 @@ File "idx2_2.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
 File "idx2_2.php", line 7, characters 15-17:
 This is an int
-File "builtins.hhi", line 57, characters 10-12:
+File "builtins.hhi", line 56, characters 10-12:
 It is incompatible with a nullable type

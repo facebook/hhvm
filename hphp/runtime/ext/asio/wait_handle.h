@@ -42,6 +42,7 @@ namespace HPHP {
  *    GenArrayWaitHandle           - wait handle representing an array of WHs
  *    GenMapWaitHandle             - wait handle representing an Map of WHs
  *    GenVectorWaitHandle          - wait handle representing an Vector of WHs
+ *   ConditionWaitHandle           - wait handle implementing condition variable
  *   RescheduleWaitHandle          - wait handle that reschedules execution
  *   SleepWaitHandle               - wait handle that finishes after a timeout
  *   ExternalThreadEventWaitHandle - thread-powered asynchronous execution
@@ -58,6 +59,7 @@ class c_AwaitAllWaitHandle;
 class c_GenArrayWaitHandle;
 class c_GenMapWaitHandle;
 class c_GenVectorWaitHandle;
+class c_ConditionWaitHandle;
 class c_RescheduleWaitHandle;
 class c_SleepWaitHandle;
 class c_ExternalThreadEventWaitHandle;
@@ -73,6 +75,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     GenArray,
     GenMap,
     GenVector,
+    Condition,
     Reschedule,
     Sleep,
     ExternalThreadEvent,
@@ -145,6 +148,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   c_GenArrayWaitHandle* asGenArray();
   c_GenMapWaitHandle* asGenMap();
   c_GenVectorWaitHandle* asGenVector();
+  c_ConditionWaitHandle* asCondition();
   c_RescheduleWaitHandle* asReschedule();
   c_SleepWaitHandle* asSleep();
   c_ExternalThreadEventWaitHandle* asExternalThreadEvent();

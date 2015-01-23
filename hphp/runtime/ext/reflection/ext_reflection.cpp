@@ -16,23 +16,26 @@
 */
 
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
-#include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/debugger/ext_debugger.h"
-#include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/parser/parser.h"
+#include "hphp/runtime/vm/native-data.h"
 
+#include "hphp/runtime/ext/debugger/ext_debugger.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+
+#include "hphp/parser/parser.h"
 #include "hphp/system/systemlib.h"
 
-#include "hphp/runtime/vm/native-data.h"
+#include <functional>
 
 namespace HPHP {
 
@@ -1119,26 +1122,41 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   Object ret = st = newobj<c_Set>();
   st->reserve(cls->numMethods());
 
-  // const pointer to Class => pointer to a (const) Class
-  Class* currentCls = const_cast<Class*>(cls);
-  do {
-    size_t const numMethods = currentCls->preClass()->numMethods();
-    Func* const* methods = currentCls->preClass()->methods();
-    for (Slot i = 0; i < numMethods; ++i) {
-      const Func* m = methods[i];
-      if (m->isGenerated() || !(m->attrs() & mask)) continue;
+  auto add = [&] (const Func* m) {
+    if (m->isGenerated() || !(m->attrs() & mask)) return;
+    st->add(HHVM_FN(strtolower)(m->nameStr()).get());
+  };
 
-      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
+  std::function<void(const Class*)> collect;
+
+  collect = [&] (const Class* cls) {
+    if (!cls) return;
+
+    auto const methods = cls->preClass()->methods();
+    auto const numMethods = cls->preClass()->numMethods();
+
+    auto numDeclMethods = cls->preClass()->numDeclMethods();
+    if (numDeclMethods == -1) numDeclMethods = numMethods;
+
+    // Add declared methods.
+    for (Slot i = 0; i < numDeclMethods; ++i) {
+      add(methods[i]);
     }
 
-    for (Slot i = currentCls->traitsBeginIdx();
-         i < currentCls->traitsEndIdx();
-         ++i) {
-      const Func* m = currentCls->getMethod(i);
-      if (m->isGenerated() || !(m->attrs() & mask)) continue;
-      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
+    // Recurse; we need to order the parent's methods before our trait methods.
+    collect(cls->parent());
+
+    for (Slot i = numDeclMethods; i < numMethods; ++i) {
+      // For repo mode, where trait methods are flattened at compile-time.
+      add(methods[i]);
     }
-  } while ((currentCls = currentCls->parent()));
+    for (Slot i = cls->traitsBeginIdx(); i < cls->traitsEndIdx(); ++i) {
+      // For non-repo mode, where they are added at Class-creation time.
+      add(cls->getMethod(i));
+    }
+  };
+
+  collect(const_cast<Class*>(cls));
 
   // concrete classes should already have all of their methods present
   if ((AttrPublic & mask) &&
@@ -1385,10 +1403,10 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ReflectionExtension : public Extension {
+class ReflectionExtension final : public Extension {
  public:
   ReflectionExtension() : Extension("reflection", "$Id$") { }
-  void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);
     HHVM_FE(hphp_get_extension_info);

@@ -1,6 +1,8 @@
 File "inst_meth8.php", line 19, characters 22-25:
-The method f1 is undefined in an object of type A (Typing[4053])
+Could not find method f1 in an object of type A (Typing[4053])
 File "inst_meth8.php", line 13, characters 26-27:
 The closest thing is f1 but it's a static method
 File "inst_meth8.php", line 18, characters 14-14:
+This is why I think it is an object of type A
+File "inst_meth8.php", line 12, characters 7-7:
 Declaration of A is here

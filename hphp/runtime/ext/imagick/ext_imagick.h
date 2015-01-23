@@ -34,11 +34,11 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 // ImagickExtension
-class ImagickExtension : public Extension {
+class ImagickExtension final : public Extension {
  public:
   ImagickExtension();
-  virtual void moduleInit();
-  virtual void threadInit();
+  void moduleInit() override;
+  void threadInit() override;
 
   static bool hasLocaleFix();
   static bool hasProgressMonitor();
@@ -185,8 +185,8 @@ void setWandResource(const StaticString& className,
                      ObjectData* obj,
                      Wand* wand,
                      bool owner = true) {
-  auto res = Resource(newres<WandResource<Wand>>(wand, owner));
-  obj->o_set("wand", res, className.get());
+  auto res = makeSmartPtr<WandResource<Wand>>(wand, owner);
+  obj->o_set("wand", Variant(std::move(res)), className.get());
 }
 
 template<typename Wand>

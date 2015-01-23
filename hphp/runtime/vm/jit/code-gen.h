@@ -22,9 +22,11 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/code-cache.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
 enum class SyncOptions {
   kNoSyncPoint,
@@ -74,6 +76,7 @@ struct CodegenState {
 // data, and adds fixup metadata.
 void genCode(IRUnit&);
 
+///////////////////////////////////////////////////////////////////////////////
 }}
 
 #endif

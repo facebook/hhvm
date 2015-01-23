@@ -336,12 +336,11 @@ SmartPtr<SSLSocket> SSLSocket::Create(
   } else if (scheme == "tls") {
     method = CryptoMethod::ClientTLS;
   } else {
-    return SmartPtr<SSLSocket>();
+    return nullptr;
   }
 
-  auto sock = SmartPtr<SSLSocket>(
-    newres<SSLSocket>(
-      fd, domain, hosturl.getHost().c_str(), hosturl.getPort()));
+  auto sock = makeSmartPtr<SSLSocket>(
+    fd, domain, hosturl.getHost().c_str(), hosturl.getPort());
 
   sock->m_data->m_method = method;
   sock->m_data->m_connect_timeout = timeout;
@@ -608,8 +607,8 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
         /* allow the script to capture the peer cert
          * and/or the certificate chain */
         if (m_context[s_capture_peer_cert].toBoolean()) {
-          Resource cert(newres<Certificate>(peer_cert));
-          m_context.set(s_peer_certificate, cert);
+          m_context.set(s_peer_certificate,
+                        Variant(makeSmartPtr<Certificate>(peer_cert)));
           peer_cert = nullptr;
         }
 
@@ -619,7 +618,7 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
           if (chain) {
             for (int i = 0; i < sk_X509_num(chain); i++) {
               X509 *mycert = X509_dup(sk_X509_value(chain, i));
-              arr.append(Resource(newres<Certificate>(mycert)));
+              arr.append(Variant(makeSmartPtr<Certificate>(mycert)));
             }
           }
           m_context.set(s_peer_certificate_chain, arr);
@@ -712,14 +711,15 @@ BIO *Certificate::ReadData(const Variant& var, bool *file /* = NULL */) {
 }
 
 
-Resource Certificate::Get(const Variant& var) {
+SmartPtr<Certificate> Certificate::Get(const Variant& var) {
   if (var.isResource()) {
-    return var.toResource();
+    return SmartPtr<Certificate>(
+      var.toResource().getTyped<Certificate>(true, true));
   }
   if (var.isString() || var.isObject()) {
     bool file;
     BIO *in = ReadData(var, &file);
-    if (in == nullptr) return Resource();
+    if (in == nullptr) return nullptr;
 
     X509 *cert;
     /*
@@ -733,10 +733,10 @@ Resource Certificate::Get(const Variant& var) {
     cert = PEM_read_bio_X509(in, nullptr, nullptr, nullptr);
     BIO_free(in);
     if (cert) {
-      return Resource(newres<Certificate>(cert));
+      return makeSmartPtr<Certificate>(cert);
     }
   }
-  return Resource();
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -37,6 +37,19 @@ void condJmpInversion(HTS& env, Offset relOffset, bool isJmpZ) {
   implCondJmp(env, takenOff, isJmpZ, popC(env));
 }
 
+// For EvalHHIRBytecodeControlFlow we need to make sure the spOffset is the
+// same on all incoming edges going to a merge point.  This would "just happen"
+// if we didn't still have instructions that redefine StkPtrs, but calls still
+// need to do that for now, so we need this hack.
+void bccfMergeSPHack(HTS& env) {
+  gen(
+    env,
+    AdjustSP,
+    StackOffset { -(env.irb->syncedSpLevel() - env.irb->spOffset()) },
+    sp(env)
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -82,7 +95,8 @@ Block* getBlock(HTS& env, Offset offset) {
 void jmpImpl(HTS& env, Offset offset, JmpFlags flags) {
   if (env.mode == IRGenMode::CFG) {
     if (flags & JmpFlagNextIsMerge) {
-      gen(env, ExceptionBarrier, spillStack(env));
+      spillStack(env);
+      bccfMergeSPHack(env);
     }
     auto target = getBlock(env, offset);
     assert(target != nullptr);
@@ -99,11 +113,8 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
     spillStack(env);
   }
   if (env.mode == IRGenMode::CFG && (flags & JmpFlagNextIsMerge)) {
-    // Before jumping to a merge point we have to ensure that the
-    // stack pointer is sync'ed.  Without an ExceptionBarrier the
-    // SpillStack can be removed by DCE (especially since merge points
-    // start with a DefSP to block SP-chain walking).
-    gen(env, ExceptionBarrier, spillStack(env));
+    spillStack(env);
+    bccfMergeSPHack(env);
   }
   auto const target = getBlock(env, taken);
   assert(target != nullptr);
@@ -195,22 +206,21 @@ void emitSwitch(HTS& env,
     PUNT(Switch-UnknownType);
   }
 
-  std::vector<Offset> targets(iv.size());
+  std::vector<SrcKey> targets(iv.size());
   for (int i = 0; i < iv.size(); i++) {
-    targets[i] = bcOff(env) + iv.vec32()[i];
+    targets[i] = SrcKey{curSrcKey(env), bcOff(env) + iv.vec32()[i]};
   }
 
   JmpSwitchData data;
   data.base        = base;
   data.bounded     = bounded;
   data.cases       = iv.size();
-  data.defaultOff  = defaultOff;
+  data.defaultSk   = {curSrcKey(env), defaultOff};
   data.targets     = &targets[0];
 
-  auto const stack = spillStack(env);
-  gen(env, SyncABIRegs, fp(env), stack);
-
-  gen(env, JmpSwitchDest, data, index);
+  spillStack(env);
+  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env, JmpSwitchDest, data, index, sp(env));
 }
 
 void emitSSwitch(HTS& env, const ImmVector& iv) {
@@ -237,13 +247,14 @@ void emitSSwitch(HTS& env, const ImmVector& iv) {
   for (int i = 0; i < numCases; ++i) {
     auto const& kv = iv.strvec()[i];
     cases[i].str  = curUnit(env)->lookupLitstrId(kv.str);
-    cases[i].dest = bcOff(env) + kv.dest;
+    cases[i].dest = SrcKey{curSrcKey(env), bcOff(env) + kv.dest};
   }
 
   LdSSwitchData data;
   data.numCases   = numCases;
   data.cases      = &cases[0];
-  data.defaultOff = bcOff(env) + iv.strvec()[iv.size() - 1].dest;
+  data.defaultSk  = SrcKey{curSrcKey(env),
+                           bcOff(env) + iv.strvec()[iv.size() - 1].dest};
 
   auto const dest = gen(env,
                         fastPath ? LdSSwitchDestFast
@@ -251,9 +262,8 @@ void emitSSwitch(HTS& env, const ImmVector& iv) {
                         data,
                         testVal);
   gen(env, DecRef, testVal);
-  auto const stack = spillStack(env);
-  gen(env, SyncABIRegs, fp(env), stack);
-  gen(env, JmpSSwitchDest, dest);
+  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env, JmpSSwitchDest, dest, sp(env));
 }
 
 //////////////////////////////////////////////////////////////////////

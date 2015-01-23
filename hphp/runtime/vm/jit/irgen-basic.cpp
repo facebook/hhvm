@@ -37,12 +37,13 @@ void implAGet(HTS& env, SSATmp* classSrc) {
 }
 
 void checkThis(HTS& env, SSATmp* ctx) {
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, CheckCtxThis, taken, ctx);
     },
     [&] {
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const err = cns(env, makeStaticString(Strings::FATAL_NULL_THIS));
       gen(env, RaiseError, err);
     }
@@ -94,7 +95,7 @@ void emitPushL(HTS& env, int32_t id) {
 void emitCGetL2(HTS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const oldTop = pop(env, Type::StackElem);
+  auto const oldTop = pop(env, Type::StkElem);
   auto const val = ldLocInnerWarn(
     env,
     id,
@@ -129,7 +130,7 @@ void emitUnsetL(HTS& env, int32_t id) {
 
 void emitBindL(HTS& env, int32_t id) {
   if (curFunc(env)->isPseudoMain()) {
-    interpOne(env, Type::BoxedCell, 1);
+    interpOne(env, Type::BoxedInitCell, 1);
     return;
   }
 
@@ -328,7 +329,9 @@ void emitIncStat(HTS& env, int32_t counter, int32_t value) {
 
 void emitPopA(HTS& env) { popA(env); }
 void emitPopC(HTS& env) { popDecRef(env, Type::Cell, DataTypeGeneric); }
-void emitPopV(HTS& env) { popDecRef(env, Type::BoxedCell, DataTypeGeneric); }
+void emitPopV(HTS& env) { popDecRef(env,
+                                    Type::BoxedInitCell,
+                                    DataTypeGeneric); }
 void emitPopR(HTS& env) { popDecRef(env, Type::Gen, DataTypeGeneric); }
 
 void emitDir(HTS& env)  { push(env, cns(env, curUnit(env)->dirpath())); }

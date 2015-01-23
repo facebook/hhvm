@@ -17,17 +17,22 @@
 #define incl_HPHP_JIT_CODE_GEN_ARM_H
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
-#include <vector>
+
+#include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/data-block.h"
-#include "hphp/runtime/vm/jit/code-gen-x64.h"
-#include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/arg-group.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+
+#include <vector>
 
 namespace HPHP { namespace jit { namespace arm {
+///////////////////////////////////////////////////////////////////////////////
 
 struct CodeGenerator {
   CodeGenerator(CodegenState& state, Vout& main, Vout& cold)
@@ -112,6 +117,7 @@ struct CodeGenerator {
   jit::vector<Vloc>     m_slocs, m_dlocs;
 };
 
+///////////////////////////////////////////////////////////////////////////////
 }}}
 
 #endif

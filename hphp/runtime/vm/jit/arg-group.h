@@ -18,16 +18,14 @@
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
 
 class SSATmp;
 struct IRInstruction;
 
-namespace NativeCalls {
-struct CallInfo;
-}
+namespace NativeCalls { struct CallInfo; }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -42,6 +40,16 @@ struct CallInfo;
  */
 
 //////////////////////////////////////////////////////////////////////
+
+enum class DestType : uint8_t {
+  None,  // return void (no valid registers)
+  SSA,   // return a single-register value
+  Byte,  // return a single-byte register value
+  TV,    // return a TypedValue packed in two registers
+  Dbl,   // return scalar double in a single FP register
+  SIMD,  // return a TypedValue in one SIMD register
+};
+const char* destTypeName(DestType);
 
 struct CallDest {
   DestType type;

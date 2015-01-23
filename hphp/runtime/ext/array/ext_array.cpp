@@ -2567,9 +2567,11 @@ Variant HHVM_FUNCTION(hphp_array_idx,
 static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   switch (sort_flags) {
   case SORT_NATURAL:
-    return Array::SortNatural;
+    return ascending ?
+      Array::SortNaturalAscending : Array::SortNaturalDescending;
   case SORT_NATURAL_CASE:
-    return Array::SortNaturalCase;
+    return ascending ?
+      Array::SortNaturalCaseAscending: Array::SortNaturalCaseDescending;
   case SORT_NUMERIC:
     return ascending ?
       Array::SortNumericAscending : Array::SortNumericDescending;
@@ -2642,10 +2644,10 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
 #define REGISTER_CONSTANT(name)                                                \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
 
-class ArrayExtension : public Extension {
+class ArrayExtension final : public Extension {
 public:
   ArrayExtension() : Extension("array") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_CONSTANT(UCOL_DEFAULT);
     REGISTER_CONSTANT(UCOL_PRIMARY);
     REGISTER_CONSTANT(UCOL_SECONDARY);

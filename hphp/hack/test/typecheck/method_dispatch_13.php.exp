@@ -1,6 +1,6 @@
-File "method_dispatch_13.php", line 31, characters 11-12:
+File "method_dispatch_13.php", line 26, characters 11-12:
 Could not find static method f1 in type B (Typing[4090])
-File "method_dispatch_13.php", line 24, characters 19-20:
+File "method_dispatch_13.php", line 22, characters 19-20:
 The closest thing is f1 but it's not a static method
-File "method_dispatch_13.php", line 23, characters 7-7:
+File "method_dispatch_13.php", line 21, characters 7-7:
 Declaration of B is here

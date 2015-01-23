@@ -26,11 +26,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class c_BlockableWaitHandle;
+class c_ConditionWaitHandle;
 
 class AsioBlockable final {
   public:
     enum class Kind : uint8_t {
       BlockableWaitHandle,
+      ConditionWaitHandle,
     };
 
     static constexpr ptrdiff_t bitsOff() {
@@ -46,6 +48,7 @@ class AsioBlockable final {
     }
 
     c_BlockableWaitHandle* getBlockableWaitHandle() const;
+    c_ConditionWaitHandle* getConditionWaitHandle() const;
 
     void setNextParent(AsioBlockable* parent, Kind kind) {
       assert(!(reinterpret_cast<intptr_t>(parent) & 7));

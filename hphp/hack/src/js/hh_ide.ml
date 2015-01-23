@@ -102,12 +102,12 @@ let declare_file fn content =
   end old_classes;
   try
     Autocomplete.auto_complete := false;
-    let {Parser_hack.is_hh_file; comments; ast} =
+    let {Parser_hack.file_mode; comments; ast} =
       Parser_hack.program fn content
     in
-    let is_php = not is_hh_file in
+    let is_php = file_mode = None in
     Parser_heap.ParserHeap.add fn ast;
-    if is_hh_file
+    if not is_php
     then begin
       let funs, classes, typedefs, consts = make_funs_classes ast in
       Hashtbl.replace globals fn (is_php, funs, classes);
@@ -307,21 +307,13 @@ let hh_get_deps =
                         ])
 
 let infer_at_pos file line char =
-  let clean() =
-    Typing_defs.infer_type := None;
-    Typing_defs.infer_target := None;
-    Typing_defs.infer_pos := None;
-  in
   try
-    clean();
-    Typing_defs.infer_target := Some (line, char);
+    let get_result = InferAtPosService.attach_hooks line char in
     ignore (hh_check file);
-    let ty = !Typing_defs.infer_type in
-    let pos = !Typing_defs.infer_pos in
-    clean();
-    pos, ty
+    InferAtPosService.detach_hooks ();
+    get_result ()
   with _ ->
-    clean();
+    InferAtPosService.detach_hooks ();
     None, None
 
 let hh_find_lvar_refs file line char =
@@ -396,12 +388,14 @@ let hh_file_summary fn =
                         ])
 
 let hh_hack_coloring fn =
-  let type_acc = ref [] in
-  Typing.with_expr_hook (fun e ty -> type_acc := (fst e, ty) :: !type_acc)
+  let type_acc = Hashtbl.create 0 in
+  Typing.with_expr_hook
+    (fun (p, _) ty -> Hashtbl.replace type_acc p ty)
     (fun () -> ignore (hh_check fn));
   let fn = Relative_path.create Relative_path.Root fn in
-  let result = mk_level_list (Some fn) !type_acc in
-  let result = rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) result in
+  let level_of_type = Coverage_level.level_of_type_mapper fn in
+  let result = Hashtbl.fold (fun p ty xs ->
+    (Pos.info_raw p, level_of_type (p, ty)) :: xs) type_acc [] in
   let result = ColorFile.go (Hashtbl.find files fn) result in
   let result = List.map (fun input ->
                         match input with
@@ -462,9 +456,11 @@ let hh_arg_info fn line char =
   to_js_object (JAssoc json_res)
 
 let hh_format contents start end_ =
-  let result = Format_hack.region Relative_path.default start end_ contents in
+  let modes = [Some Ast.Mstrict; Some Ast.Mpartial] in
+  let result =
+    Format_hack.region modes Relative_path.default start end_ contents in
   let error, result, internal_error = match result with
-    | Format_hack.Php_or_decl -> "Php_or_decl", "", false
+    | Format_hack.Disabled_mode -> "Php_or_decl", "", false
     | Format_hack.Parsing_error _ -> "Parsing_error", "", false
     | Format_hack.Internal_error -> "", "", true
     | Format_hack.Success s -> "", s, false

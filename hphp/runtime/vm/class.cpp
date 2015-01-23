@@ -1062,267 +1062,6 @@ void Class::setSpecial() {
          (AttrPublic|AttrNoInjection|AttrPhpLeafFn));
 }
 
-void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
-                               MethodToTraitListMap& importMethToTraitMap) {
-  auto methName          = rule.methodName();
-  auto selectedTraitName = rule.selectedTraitName();
-  auto otherTraitNames   = rule.otherTraitNames();
-
-  auto methIter = importMethToTraitMap.find(methName);
-  if (methIter == importMethToTraitMap.end()) {
-    raise_error("unknown method '%s'", methName->data());
-  }
-
-  bool foundSelectedTrait = false;
-
-  TraitMethodList &methList = methIter->second;
-  for (TraitMethodList::iterator nextTraitIter = methList.begin();
-       nextTraitIter != methList.end(); ) {
-    TraitMethodList::iterator traitIter = nextTraitIter++;
-    const StringData* availTraitName = traitIter->m_trait->name();
-    if (availTraitName == selectedTraitName) {
-      foundSelectedTrait = true;
-    } else {
-      if (otherTraitNames.find(availTraitName) != otherTraitNames.end()) {
-        otherTraitNames.erase(availTraitName);
-        methList.erase(traitIter);
-      }
-    }
-  }
-
-  // Check error conditions
-  if (!foundSelectedTrait) {
-    raise_error(Strings::TRAITS_UNKNOWN_TRAIT, selectedTraitName->data());
-  }
-  if (otherTraitNames.size()) {
-    raise_error(Strings::TRAITS_UNKNOWN_TRAIT,
-                (*otherTraitNames.begin())->data());
-  }
-}
-
-Class* Class::findSingleTraitWithMethod(const StringData* methName) {
-  // Note: m_methods includes methods from parents / traits recursively
-  Class* traitCls = nullptr;
-  for (auto const& t : m_extra->m_usedTraits) {
-    if (t->m_methods.find(methName)) {
-      if (traitCls != nullptr) { // more than one trait contains method
-        raise_error("more than one trait contains method '%s'",
-          methName->data());
-      }
-      traitCls = t.get();
-    }
-  }
-  return traitCls;
-}
-
-void Class::setImportTraitMethodModifiers(TraitMethodList& methList,
-                                          Class*           traitCls,
-                                          Attr             modifiers) {
-  for (TraitMethodList::iterator iter = methList.begin();
-       iter != methList.end(); iter++) {
-    if (iter->m_trait == traitCls) {
-      iter->m_modifiers = modifiers;
-      return;
-    }
-  }
-}
-
-void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
-                                MethodToTraitListMap& importMethToTraitMap) {
-  const StringData* traitName    = rule.traitName();
-  const StringData* origMethName = rule.origMethodName();
-  const StringData* newMethName  = rule.newMethodName();
-  Attr ruleModifiers             = rule.modifiers();
-
-  Class* traitCls = nullptr;
-  if (traitName->empty()) {
-    traitCls = findSingleTraitWithMethod(origMethName);
-  } else {
-    traitCls = Unit::loadClass(traitName);
-  }
-
-  if (!traitCls || (!(traitCls->attrs() & AttrTrait))) {
-    raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
-  }
-
-  PreClass::TraitAliasRule newRule {
-    traitCls->name(), origMethName, newMethName, ruleModifiers };
-
-  allocExtraData();
-  m_extra.raw()->m_traitAliases.push_back(newRule.asNamePair());
-
-  Func* traitMeth = traitCls->lookupMethod(origMethName);
-  if (!traitMeth) {
-    raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, origMethName->data());
-  }
-
-  if (origMethName == newMethName) {
-    setImportTraitMethodModifiers(importMethToTraitMap[origMethName],
-                                  traitCls, ruleModifiers);
-  } else {
-    TraitMethod traitMethod(traitCls, traitMeth, ruleModifiers);
-    if (!Func::isSpecial(newMethName)) {
-      importMethToTraitMap[newMethName].push_back(traitMethod);
-    }
-  }
-}
-
-void Class::applyTraitRules(MethodToTraitListMap& importMethToTraitMap) {
-  for (auto const& precRule : m_preClass->traitPrecRules()) {
-    applyTraitPrecRule(precRule, importMethToTraitMap);
-  }
-  for (auto const& aliasRule : m_preClass->traitAliasRules()) {
-    applyTraitAliasRule(aliasRule, importMethToTraitMap);
-  }
-}
-
-void Class::importTraitMethod(const TraitMethod&  traitMethod,
-                              const StringData*   methName,
-                              MethodMapBuilder& builder) {
-  Func*    method    = traitMethod.m_method;
-  Attr     modifiers = traitMethod.m_modifiers;
-
-  MethodMapBuilder::iterator mm_iter = builder.find(methName);
-  // For abstract methods, simply return if method already declared
-  if ((modifiers & AttrAbstract) && mm_iter != builder.end()) {
-    return;
-  }
-
-  if (modifiers == AttrNone) {
-    modifiers = method->attrs();
-  } else {
-    // Trait alias statements are only allowed to change the attributes that
-    // are part 'attrMask' below; all other method attributes are preserved
-    Attr attrMask = (Attr)(AttrPublic | AttrProtected | AttrPrivate |
-                           AttrAbstract | AttrFinal);
-    modifiers = (Attr)((modifiers       &  (attrMask)) |
-                       (method->attrs() & ~(attrMask)));
-  }
-
-  Func* parentMethod = nullptr;
-  if (mm_iter != builder.end()) {
-    Func* existingMethod = builder[mm_iter->second];
-    if (existingMethod->cls() == this) {
-      // Don't override an existing method if this class provided an
-      // implementation
-      return;
-    }
-    parentMethod = existingMethod;
-  }
-  Func* f = method->clone(this, methName);
-  f->setNewFuncId();
-  f->setAttrs(modifiers);
-  if (!parentMethod) {
-    // New method
-    builder.add(methName, f);
-    f->setBaseCls(this);
-    f->setHasPrivateAncestor(false);
-  } else {
-    // Override an existing method
-    Class* baseClass;
-
-    methodOverrideCheck(parentMethod, f);
-
-    assert(!(f->attrs() & AttrPrivate) ||
-           (parentMethod->attrs() & AttrPrivate));
-    if ((parentMethod->attrs() & AttrPrivate) || (f->attrs() & AttrPrivate)) {
-      baseClass = this;
-    } else {
-      baseClass = parentMethod->baseCls();
-    }
-    f->setBaseCls(baseClass);
-    f->setHasPrivateAncestor(
-      parentMethod->hasPrivateAncestor() ||
-      (parentMethod->attrs() & AttrPrivate));
-    builder[mm_iter->second] = f;
-  }
-}
-
-// This method removes trait abstract methods that are either:
-//   1) implemented by other traits
-//   2) duplicate
-void Class::removeSpareTraitAbstractMethods(
-  MethodToTraitListMap& importMethToTraitMap) {
-
-  for (MethodToTraitListMap::iterator iter = importMethToTraitMap.begin();
-       iter != importMethToTraitMap.end(); iter++) {
-
-    TraitMethodList& tMethList = iter->second;
-    bool hasNonAbstractMeth = false;
-    unsigned countAbstractMeths = 0;
-    for (TraitMethodList::const_iterator traitMethIter = tMethList.begin();
-         traitMethIter != tMethList.end(); traitMethIter++) {
-      if (!(traitMethIter->m_modifiers & AttrAbstract)) {
-        hasNonAbstractMeth = true;
-      } else {
-        countAbstractMeths++;
-      }
-    }
-    if (hasNonAbstractMeth || countAbstractMeths > 1) {
-      // Erase spare abstract declarations
-      bool firstAbstractMeth = true;
-      for (TraitMethodList::iterator nextTraitIter = tMethList.begin();
-           nextTraitIter != tMethList.end(); ) {
-        TraitMethodList::iterator traitIter = nextTraitIter++;
-        if (traitIter->m_modifiers & AttrAbstract) {
-          if (hasNonAbstractMeth || !firstAbstractMeth) {
-            tMethList.erase(traitIter);
-          }
-          firstAbstractMeth = false;
-        }
-      }
-    }
-  }
-}
-
-// fatals on error
-void Class::importTraitMethods(MethodMapBuilder& builder) {
-  MethodToTraitListMap importMethToTraitMap;
-
-  // 1. Find all methods to be imported
-  for (auto const& t : m_extra->m_usedTraits) {
-    Class* trait = t.get();
-    for (Slot i = 0; i < trait->m_methods.size(); ++i) {
-      Func* method = trait->getMethod(i);
-      const StringData* methName = method->name();
-      TraitMethod traitMethod(trait, method, method->attrs());
-      if (!Func::isSpecial(methName)) {
-        importMethToTraitMap[methName].push_back(traitMethod);
-      }
-    }
-  }
-
-  // 2. Apply trait rules
-  applyTraitRules(importMethToTraitMap);
-
-  // 3. Remove abstract methods provided by other traits, and also duplicates
-  removeSpareTraitAbstractMethods(importMethToTraitMap);
-
-  // 4. Actually import the methods
-  for (MethodToTraitListMap::const_iterator iter =
-         importMethToTraitMap.begin();
-       iter != importMethToTraitMap.end(); iter++) {
-
-    // The rules may rule out a method from all traits.
-    // In this case, simply don't import the method.
-    if (iter->second.size() == 0) {
-      continue;
-    }
-
-    // Consistency checking: each name must only refer to one imported method
-    if (iter->second.size() > 1) {
-      // OK if the class will override the method...
-      if (m_preClass->hasMethod(iter->first)) continue;
-
-      raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS,
-                  iter->first->data());
-    }
-
-    TraitMethodList::const_iterator traitMethIter = iter->second.begin();
-    importTraitMethod(*traitMethIter, iter->first, builder);
-  }
-}
-
 namespace {
 
 inline void raiseIncompat(const PreClass* implementor,
@@ -2310,6 +2049,14 @@ void Class::setInitializers() {
   m_callsCustomInstanceInit = method && method->isBuiltin();
 }
 
+void Class::checkInterfaceConstraints() {
+  if (UNLIKELY(m_interfaces.contains(String("Iterator").get()) &&
+      m_interfaces.contains(String("IteratorAggregate").get()))) {
+    raise_error("Class %s cannot implement both IteratorAggregate and Iterator"
+                " at the same time", name()->data());
+  }
+}
+
 // Checks if interface methods are OK:
 //  - there's no requirement if this is a trait, interface, or abstract class
 //  - a non-abstract class must implement all methods from interfaces it
@@ -2443,6 +2190,7 @@ void Class::setInterfaces() {
   }
 
   m_interfaces.create(interfacesBuilder);
+  checkInterfaceConstraints();
   checkInterfaceMethods();
 }
 
@@ -2777,6 +2525,145 @@ void Class::getMethodNames(const Class* cls,
   // Add interface methods that the class may not have implemented yet.
   for (auto& iface : cls->declInterfaces()) {
     getMethodNames(iface.get(), ctx, out);
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Trait method import.
+
+bool Class::TMIOps::exclude(const StringData* methName) {
+  return Func::isSpecial(methName);
+}
+
+void Class::TMIOps::addTraitAlias(Class* cls,
+                                  Class::TMIOps::alias_type rule,
+                                  const Class* traitCls) {
+  PreClass::TraitAliasRule newRule { traitCls->name(),
+                                     rule.origMethodName(),
+                                     rule.newMethodName(),
+                                     rule.modifiers() };
+  cls->allocExtraData();
+  cls->m_extra.raw()->m_traitAliases.push_back(newRule.asNamePair());
+}
+
+const Class*
+Class::TMIOps::findSingleTraitWithMethod(const Class* cls,
+                                         const StringData* methName) {
+  Class* traitCls = nullptr;
+
+  for (auto const& t : cls->m_extra->m_usedTraits) {
+    // Note: m_methods includes methods from parents/traits recursively.
+    if (t->m_methods.find(methName)) {
+      if (traitCls != nullptr) {
+        raise_error("more than one trait contains method '%s'",
+                    methName->data());
+      }
+      traitCls = t.get();
+    }
+  }
+  return traitCls;
+}
+
+const Class*
+Class::TMIOps::findTraitClass(const Class* cls,
+                              const StringData* traitName) {
+  return Unit::loadClass(traitName);
+}
+
+void Class::applyTraitRules(TMIData& tmid) {
+  for (auto const& precRule : m_preClass->traitPrecRules()) {
+    tmid.applyPrecRule(precRule);
+  }
+  for (auto const& aliasRule : m_preClass->traitAliasRules()) {
+    tmid.applyAliasRule(aliasRule, this);
+  }
+}
+
+void Class::importTraitMethod(const TMIData::MethodData& mdata,
+                              MethodMapBuilder& builder) {
+  const Func* method = mdata.tm.method;
+  Attr modifiers = mdata.tm.modifiers;
+
+  auto mm_iter = builder.find(mdata.name);
+
+  // For abstract methods, simply return if method already declared.
+  if ((modifiers & AttrAbstract) && mm_iter != builder.end()) {
+    return;
+  }
+
+  if (modifiers == AttrNone) {
+    modifiers = method->attrs();
+  } else {
+    // Trait alias statements are only allowed to change the attributes that
+    // are part 'attrMask' below; all other method attributes are preserved
+    Attr attrMask = (Attr)(AttrPublic | AttrProtected | AttrPrivate |
+                           AttrAbstract | AttrFinal);
+    modifiers = (Attr)((modifiers       &  (attrMask)) |
+                       (method->attrs() & ~(attrMask)));
+  }
+
+  Func* parentMethod = nullptr;
+  if (mm_iter != builder.end()) {
+    Func* existingMethod = builder[mm_iter->second];
+    if (existingMethod->cls() == this) {
+      // Don't override an existing method if this class provided an
+      // implementation
+      return;
+    }
+    parentMethod = existingMethod;
+  }
+  Func* f = method->clone(this, mdata.name);
+  f->setNewFuncId();
+  f->setAttrs(modifiers);
+  if (!parentMethod) {
+    // New method
+    builder.add(mdata.name, f);
+    f->setBaseCls(this);
+    f->setHasPrivateAncestor(false);
+  } else {
+    // Override an existing method
+    Class* baseClass;
+
+    methodOverrideCheck(parentMethod, f);
+
+    assert(!(f->attrs() & AttrPrivate) ||
+           (parentMethod->attrs() & AttrPrivate));
+    if ((parentMethod->attrs() & AttrPrivate) || (f->attrs() & AttrPrivate)) {
+      baseClass = this;
+    } else {
+      baseClass = parentMethod->baseCls();
+    }
+    f->setBaseCls(baseClass);
+    f->setHasPrivateAncestor(
+      parentMethod->hasPrivateAncestor() ||
+      (parentMethod->attrs() & AttrPrivate));
+    builder[mm_iter->second] = f;
+  }
+}
+
+void Class::importTraitMethods(MethodMapBuilder& builder) {
+  TMIData tmid;
+
+  // Find all methods to be imported.
+  for (auto const& t : m_extra->m_usedTraits) {
+    Class* trait = t.get();
+    for (Slot i = 0; i < trait->m_methods.size(); ++i) {
+      Func* method = trait->getMethod(i);
+      const StringData* methName = method->name();
+
+      TraitMethod traitMethod { trait, method, method->attrs() };
+      tmid.add(traitMethod, methName);
+    }
+  }
+
+  // Apply trait rules and import the methods.
+  applyTraitRules(tmid);
+  auto traitMethods = tmid.finish(this);
+
+  // Import the methods.
+  for (auto const& mdata : traitMethods) {
+    importTraitMethod(mdata, builder);
   }
 }
 

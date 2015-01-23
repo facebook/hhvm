@@ -116,6 +116,8 @@ void retypeDst(IRInstruction* inst, int num) {
     return;
   }
 
+  // TODO: Task #6058731: remove this check and make things work with Bottom.
+  //
   // Update the type of the SSATmp.  However, avoid generating type Bottom,
   // which can happen when refining type of CheckType and AssertType.  In
   // such cases, the code will be unreachable anyway.
@@ -125,8 +127,6 @@ void retypeDst(IRInstruction* inst, int num) {
   } else {
     always_assert(inst->op() == CheckType || inst->op() == AssertType ||
                   inst->op() == AssertNonNull);
-    // This type doesn't matter, as long as it's not Bottom.
-    ssa->setType(Type::cns(0));
   }
 }
 }

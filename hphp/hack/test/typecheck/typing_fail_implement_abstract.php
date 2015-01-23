@@ -10,9 +10,7 @@
  */
 
 abstract class A {
-  public abstract function f(): void {
-  }
+  public abstract function f(): void {}
 }
 
-class B extends A {
-}
+class B extends A {}

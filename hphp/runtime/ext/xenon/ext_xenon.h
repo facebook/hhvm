@@ -65,9 +65,25 @@ class Xenon final {
   public:
 
     enum SampleType {
-      IOWaitSample,  // sample was taken during a function that is wait time
-      EnterSample,   // sample was during CPU time at the start of a function
-      ExitSample,    // sample was during CPU time at the end of a function
+      // Sample was taken during I/O wait and thus does not represent CPU time.
+      IOWaitSample,
+
+      // Sample was taken before an async function was resumed at await opcode.
+      // The CPU time is attributed to the resumed async function, because the
+      // CPU time was spent by the scheduler on the behalf of the resumed
+      // function (preparing for reentry, unserializing result of external
+      // thread event, etc.).
+      ResumeAwaitSample,
+
+      // Sample was taken before a function was called or a generator was
+      // resumed at yield opcode.
+      // The CPU time is attributed to the caller of the entered function.
+      EnterSample,
+
+      // Sample was taken before a function returned, suspended or failed
+      // with an exception.
+      // The CPU time is attributed to the exited function.
+      ExitSample,
     };
 
     static Xenon& getInstance(void) noexcept;

@@ -1,4 +1,6 @@
 File "decl_php.php--partial.php", line 6, characters 19-19:
-The method g is undefined in an object of type D (Typing[4053])
+Could not find method g in an object of type D (Typing[4053])
+File "decl_php.php--partial.php", line 6, characters 12-16:
+This is why I think it is an object of type D
 File "decl_php.php--partial.php", line 4, characters 7-7:
 Declaration of D is here

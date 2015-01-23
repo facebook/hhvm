@@ -124,7 +124,7 @@ const Unit* RegionFormer::curUnit() const {
 }
 
 Offset RegionFormer::curSpOffset() const {
-  return irgen::spOffset(m_hts);
+  return irgen::logicalStackDepth(m_hts);
 }
 
 bool RegionFormer::resumed() const {
@@ -301,7 +301,11 @@ bool RegionFormer::prepareInstruction() {
     // calculate the delta from the original sp to the ar.
     auto argNum = m_inst.imm[0].u_IVA;
     size_t entryArDelta = instrSpToArDelta((Op*)m_inst.pc()) -
-      (irgen::spOffset(m_hts) - m_ctx.spOffset);
+      (irgen::logicalStackDepth(m_hts) - m_ctx.spOffset);
+    FTRACE(5, "entryArDelta info: {} {} {}\n",
+      instrSpToArDelta((Op*)m_inst.pc()),
+      irgen::logicalStackDepth(m_hts),
+      m_ctx.spOffset);
     try {
       m_inst.preppedByRef = m_arStates.back().checkByRef(argNum, entryArDelta,
                                                          &m_refDeps);
@@ -416,7 +420,10 @@ bool RegionFormer::tryInline(uint32_t& instrSize) {
   auto callee = m_inst.funcd;
 
   // Make sure the FPushOp wasn't interpreted.
-  auto spillFrame = findSpillFrame(m_hts.irb->sp());
+  if (m_hts.fpiStack.empty()) {
+    return refuse("fpistack empty; fpush was in a different region");
+  }
+  auto spillFrame = m_hts.fpiStack.top().spillFrame;
   if (!spillFrame) {
     return refuse("couldn't find SpillFrame for FPushOp");
   }

@@ -1,6 +1,6 @@
-File "shape_modified3.php", line 22, characters 10-11:
+File "shape_modified3.php", line 24, characters 10-11:
 Invalid return type (Typing[4110])
-File "shape_modified3.php", line 12, characters 42-45:
+File "shape_modified3.php", line 14, characters 10-13:
 This is a bool
-File "shape_modified3.php", line 17, characters 15-15:
+File "shape_modified3.php", line 20, characters 15-15:
 It is incompatible with an int

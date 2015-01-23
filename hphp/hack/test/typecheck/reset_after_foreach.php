@@ -12,7 +12,8 @@
 class Foo {
   private Map<string, string> $prop = Map {};
   public function bar() {
-    if($this->prop) {}
+    if ($this->prop) {
+    }
     $this->prop = null;
   }
 }

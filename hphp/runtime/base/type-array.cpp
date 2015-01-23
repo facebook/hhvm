@@ -775,14 +775,8 @@ void Array::serialize(VariableSerializer *serializer,
 
 void Array::unserialize(VariableUnserializer *uns) {
   int64_t size = uns->readInt();
-  char sep = uns->readChar();
-  if (sep != ':') {
-    throw Exception("Expected ':' but got '%c'", sep);
-  }
-  sep = uns->readChar();
-  if (sep != '{') {
-    throw Exception("Expected '{' but got '%c'", sep);
-  }
+  uns->expectChar(':');
+  uns->expectChar('{');
 
   if (size == 0) {
     operator=(Create());
@@ -809,15 +803,19 @@ void Array::unserialize(VariableUnserializer *uns) {
              !exists(key, true));
       Variant &value = lvalAt(key, AccessFlags::Key);
       value.unserialize(uns);
+
+      if (i < (size - 1)) {
+        auto lastChar = uns->peekBack();
+        if ((lastChar != ';' && lastChar != '}')) {
+          throw Exception("Array element not terminated properly");
+        }
+      }
     }
   }
 
   check_request_surprise_unlikely();
 
-  sep = uns->readChar();
-  if (sep != '}') {
-    throw Exception("Expected '}' but got '%c'", sep);
-  }
+  uns->expectChar('}');
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -973,25 +971,29 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
   return true;
 }
 
-int Array::SortRegularAscending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortRegularAscending(const Variant& v1, const Variant& v2,
+                                const void *data) {
   if (HPHP::less(v1, v2)) return -1;
   if (tvEqual(*v1.asTypedValue(), *v2.asTypedValue())) return 0;
   return 1;
 }
-int Array::SortRegularDescending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortRegularDescending(const Variant& v1, const Variant& v2,
+                                 const void *data) {
   if (HPHP::less(v1, v2)) return 1;
   if (tvEqual(*v1.asTypedValue(), *v2.asTypedValue())) return 0;
   return -1;
 }
 
-int Array::SortNumericAscending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNumericAscending(const Variant& v1, const Variant& v2,
+                                const void *data) {
   double d1 = v1.toDouble();
   double d2 = v2.toDouble();
   if (d1 < d2) return -1;
   if (d1 == d2) return 0;
   return 1;
 }
-int Array::SortNumericDescending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNumericDescending(const Variant& v1, const Variant& v2,
+                                 const void *data) {
   double d1 = v1.toDouble();
   double d2 = v2.toDouble();
   if (d1 < d2) return 1;
@@ -999,25 +1001,29 @@ int Array::SortNumericDescending(const Variant& v1, const Variant& v2, const voi
   return -1;
 }
 
-int Array::SortStringAscending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortStringAscending(const Variant& v1, const Variant& v2,
+                               const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_strcmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
 
-int Array::SortStringAscendingCase(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortStringAscendingCase(const Variant& v1, const Variant& v2,
+                                   const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
 
-int Array::SortStringDescending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortStringDescending(const Variant& v1, const Variant& v2,
+                                const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_strcmp(s2.data(), s2.size(), s1.data(), s1.size());
 }
 
-int Array::SortStringDescendingCase(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortStringDescendingCase(const Variant& v1, const Variant& v2,
+                                    const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return bstrcasecmp(s2.data(), s2.size(), s1.data(), s1.size());
@@ -1039,16 +1045,32 @@ int Array::SortLocaleStringDescending(const Variant& v1, const Variant& v2,
   return strcoll(s2.data(), s1.data());
 }
 
-int Array::SortNatural(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNaturalAscending(const Variant& v1, const Variant& v2,
+                                const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 0);
 }
 
-int Array::SortNaturalCase(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNaturalDescending(const Variant& v1, const Variant& v2,
+                                 const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return string_natural_cmp(s2.data(), s2.size(), s1.data(), s1.size(), 0);
+}
+
+int Array::SortNaturalCaseAscending(const Variant& v1, const Variant& v2,
+                                    const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 1);
+}
+
+int Array::SortNaturalCaseDescending(const Variant& v1, const Variant& v2,
+                                     const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return string_natural_cmp(s2.data(), s2.size(), s1.data(), s1.size(), 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -10,8 +10,7 @@
  */
 
 class Foo {
-  protected function f(): void {
-  }
+  protected function f(): void {}
 }
 
 class Bar {

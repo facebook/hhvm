@@ -64,7 +64,7 @@ struct stdltistr {
 
 struct string_hash {
   size_t operator()(const std::string &s) const {
-    return hash_string_cs(s.c_str(), s.size());
+    return hash_string_cs_unsafe(s.c_str(), s.size());
   }
   size_t hash(const std::string &s) const {
     return operator()(s);

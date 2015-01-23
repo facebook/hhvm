@@ -203,14 +203,6 @@ static CallMap s_callMap {
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}}},
     {LookupClsRDSHandle, lookupClsRDSHandle, DSSA, SNone, {{SSA, 0}}},
-    {LookupClsMethod,    lookupClsMethodHelper, DNone, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
-    {LdArrFuncCtx,       loadArrayFunctionContext, DNone, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {LdArrFPushCuf,      fpushCufHelperArray, DNone, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {LdStrFPushCuf,      fpushCufHelperString, DNone, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {PrintStr,           print_string, DNone, SSync, {{SSA, 0}}},
     {PrintInt,           print_int, DNone, SSync, {{SSA, 0}}},
     {PrintBool,          print_boolean, DNone, SSync, {{SSA, 0}}},
@@ -228,6 +220,8 @@ static CallMap s_callMap {
     {RaiseNotice,        raiseNotice, DNone, SSync, {{SSA, 0}}},
     {RaiseArrayIndexNotice,
                          raiseArrayIndexNotice, DNone, SSync, {{SSA, 0}}},
+    {RaiseArrayKeyNotice,
+                         raiseArrayKeyNotice, DNone, SSync, {{SSA, 0}}},
     {WarnNonObjProp,     raisePropertyOnNonObject, DNone, SSync, {}},
     {RaiseUndefProp,     raiseUndefProp, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}}},
@@ -339,16 +333,6 @@ static CallMap s_callMap {
 CallMap::CallMap(CallInfoList infos) {
   for (auto const& info : infos) {
     m_map[info.op] = info;
-
-    // Check for opcodes that have a version which modifies the stack,
-    // and add an entry to the table for that one.
-    if (opcodeHasFlags(info.op, HasStackVersion)) {
-      Opcode stkOp = getStackModifyingOpcode(info.op);
-      assert(opcodeHasFlags(stkOp, ModifiesStack));
-      auto& slot = m_map[stkOp];
-      slot = info;
-      slot.op = stkOp;
-    }
   }
 }
 

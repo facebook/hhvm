@@ -37,4 +37,3 @@ function has_unsafe(int $a) {
 function has_unsafeexpr(string $a) {
   <checked>echo</checked> <unchecked>/* UNSAFE_EXPR */ $a + 1</unchecked>;
 }
-No errors

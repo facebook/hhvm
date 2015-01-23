@@ -109,9 +109,6 @@ void optimizePredictions(IRUnit& unit) {
     auto const load = checkType->src(0)->inst();
     auto const checkInfo = checkInfoForLoad(load->op());
     if (!checkInfo) return false;
-    if (load->op() == LdMem) {
-      if (load->src(1)->intVal() != 0) return false;
-    }
     if (!typeSufficientlyGeneric(load->dst()->type())) return false;
 
     FTRACE(5, "candidate: {}\n", load->toString());

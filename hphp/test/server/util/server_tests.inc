@@ -1,6 +1,6 @@
 <?php
 
-$test_run_id = rand(100000, 999999);
+$test_run_id = posix_getpid();
 $error_log_file = fopen("${LOG_ROOT}_test$test_run_id.log", 'w');
 
 function tlog($str) {
@@ -78,6 +78,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
   $chooseServer = $serverPort === null;
   $chooseAdmin = $adminPort === null;
   $chooseDebug = $debugPort === null;
+  $pid = posix_getpid();
 
   for ($i = 0; $i < 5; $i++) {
     if ($chooseServer) $serverPort = get_random_port($adminPort, $debugPort);
@@ -113,9 +114,12 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
         " -vRepo.Authoritative=true";
     }
 
-    $cmd = 'MALLOC_CONF=junk:true ' . $hhvm .
+    $cmd = 'exec env MALLOC_CONF=junk:true ' . $hhvm .
       ' --mode=server' . $serverConfig . $logFileConfig .
-      ' -vEval.JitProfileInterpRequests=0' . $portConfig . $srcRootConfig .
+      ' -vEval.JitProfileInterpRequests=0 -vServer.ExitOnBindFail=true' .
+      ' -vServerVariables.TESTID=' . $test_run_id .
+      ' --instance-id=' . $test_run_id .
+      $portConfig . $srcRootConfig .
       $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
       $debugPortConfig . $repoConfig . $jitConfig .
       ' ' . $customArgs .
@@ -127,34 +131,45 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
     $serverProc = proc_open($cmd, array(), $pipes);
     if (!is_resource($serverProc)) {
       tlog('Failed to start a shell process for the server');
-    } else if (waitForServerToGetGoing($serverPort)) {
+    } else if (waitForServerToGetGoing($serverPort, $serverProc)) {
       return $serverProc;
     }
+    killChildren($pid);
+    if ($serverProc) proc_close($serverProc);
   }
   dumpLogFilesToStdoutAndDie();
 }
 
-function waitForServerToGetGoing($serverPort) {
+function waitForServerToGetGoing($serverPort, $serverProc) {
+  global $test_run_id;
   $host = php_uname('n');
   $r = "";
   for ($i = 1; $i <= 20; $i++) {
+    $status = proc_get_status($serverProc);
+    if ($status === false || !$status['running']) {
+      break;
+    }
     sleep(1);
     $r = request($host, $serverPort, "hello.php");
-    if ($r === "Hello, World!") return true;
+    if (preg_match('/Hello, World!(\d+)/', $r, $matches)) {
+      if ($matches[1] == $test_run_id) return true;
+      tlog('a server for a different test responded');
+      break;
+    }
     tlog('Server replied: '.$r);
   }
 
   tlog('Server is not responding.');
-  dumpLogFilesToStdoutAndDie();
   return false;
 }
 
-function stopServer($adminPort) {
+function stopServer($adminPort, $serverProc) {
   global $test_run_id, $LOG_ROOT;
 
   $r = "";
   for ($i = 1; $i <= 10; $i++) {
-    $r = request(php_uname('n'), $adminPort, 'stop');
+    $r = request(php_uname('n'), $adminPort,
+                 'stop?instance-id=' . $test_run_id);
     if ($r == "OK") break;
     usleep(100000);
   }
@@ -162,6 +177,8 @@ function stopServer($adminPort) {
     tlog("Server did not stop. Response was $r");
     dumpLogFilesToStdoutAndDie();
   }
+  proc_close($serverProc);
+
   @unlink("${LOG_ROOT}_test$test_run_id.log");
   @unlink("${LOG_ROOT}_test_server$test_run_id.log");
   @unlink("${LOG_ROOT}_test_server_stderr$test_run_id.log");

@@ -260,14 +260,17 @@ Flags analyze_inst(Local& env,
     [&] (InterpOneEffects)  { clear_everything(env); },
     [&] (KillFrameLocals l) {},
     [&] (ReturnEffects l)   {},
-    [&] (CallEffects l)     { // Note: shouldn't need to give up types for
-                              // locals, but it doesn't matter right now.
+    [&] (CallEffects l)     { // Note: shouldn't need to give up types for some
+                              // locations (e.g. locals), but CallEffects needs
+                              // more information to do it correctly.
                               clear_everything(env); },
     [&] (IterEffects)       { clear_everything(env); },
     [&] (IterEffects2)      { clear_everything(env); },
+    [&] (ExitEffects)       { clear_everything(env); },
 
-    [&] (PureStore m)   { store(env, m.dst, m.value); },
-    [&] (PureStoreNT m) { store(env, m.dst, m.value); },
+    [&] (PureStore m)      { store(env, m.dst, m.value); },
+    [&] (PureStoreNT m)    { store(env, m.dst, m.value); },
+    [&] (PureSpillFrame m) { store(env, m.dst, nullptr); },
 
     [&] (PureLoad m) {
       std::tie(flags.replaceable, flags.knownType) = load(env, inst, m.src);
@@ -472,11 +475,6 @@ void analyze(Global& genv) {
  *      proved the memory location must hold that type.
  */
 void optimizeLoads(IRUnit& unit) {
-  if (RuntimeOption::EnableArgsInBacktraces) {
-    // We want to be able to run this pass with this flag on, but need to teach
-    // memory_effects about it first.
-    return;
-  }
   PassTracer tracer{&unit, Trace::hhir_load, "optimizeLoads"};
 
   auto genv = Global { unit, rpoSortCfgWithIds(unit) };

@@ -3,20 +3,14 @@ use strict;
 
 my $buffer = '';
 my $output_buffer = '';
-my $stk_opcode = 0;
 
 sub process_buffer {
     $buffer =~ s/^\s*//g;
     $buffer =~ s/\s+/ /g;
     $buffer =~ s/^\s*([a-zA-Z0-9]+)<[^>]+>/$1/g;
-    if ($stk_opcode) {
-        $output_buffer .= 'O_STK(';
-    } else {
-        $output_buffer .= 'O(';
-    }
+    $output_buffer .= 'O(';
     $output_buffer .= $buffer.") \\\n";
     $buffer = '';
-    $stk_opcode = 0;
 }
 
 while (<>) {
@@ -24,9 +18,8 @@ while (<>) {
         process_buffer;
         next;
     }
-    if (/^\|(STK)?(.*)/) {
-        $stk_opcode = 1 if defined $1;
-        $buffer .= $2;
+    if (/^\|(.*)/) {
+        $buffer .= $1;
     }
 }
 

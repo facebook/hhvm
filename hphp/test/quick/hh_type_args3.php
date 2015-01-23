@@ -22,7 +22,7 @@ Foo::test1('foo');
 Foo::test2('foo');
 Foo::test3('foo');
 Foo::test4('foo');
+Foo::test5('foo');
 test6('foo');
 test7('foo');
-Foo::test5('foo');
 echo "failed";

@@ -78,7 +78,6 @@ bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
-int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::EnableZendSorting = false;
@@ -90,9 +89,9 @@ bool RuntimeOption::IntsOverflowToInts = false;
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
 int RuntimeOption::LogHeaderMangle = 0;
-bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions =
   RuntimeOption::EnableHipHopSyntax;
+bool RuntimeOption::AlwaysEscapeLog = true;
 bool RuntimeOption::NoSilencer = false;
 int RuntimeOption::ErrorUpgradeLevel = 0;
 bool RuntimeOption::CallUserHandlerOnFatals = false;
@@ -284,12 +283,12 @@ int RuntimeOption::AdminThreadCount = 1;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
 
-std::string RuntimeOption::ProxyOrigin;
+std::string RuntimeOption::ProxyOriginRaw;
+int RuntimeOption::ProxyPercentageRaw = 0;
 int RuntimeOption::ProxyRetry = 3;
 bool RuntimeOption::UseServeURLs;
 std::set<std::string> RuntimeOption::ServeURLs;
 bool RuntimeOption::UseProxyURLs;
-int RuntimeOption::ProxyPercentage = 0;
 std::set<std::string> RuntimeOption::ProxyURLs;
 std::vector<std::string> RuntimeOption::ProxyPatterns;
 bool RuntimeOption::AlwaysUseRelativePath = false;
@@ -806,7 +805,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     }
     Config::Bind(LogFileFlusher::DropCacheChunkSize, ini,
                  logger["DropCacheChunkSize"], 1 << 20);
-    Config::Bind(AlwaysEscapeLog, ini, logger["AlwaysEscapeLog"], false);
+    Config::Bind(Logger::AlwaysEscapeLog, ini, logger["AlwaysEscapeLog"], true);
     Config::Bind(RuntimeOption::LogHeaderMangle, ini, logger["HeaderMangle"],
                  0);
 
@@ -986,7 +985,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
     Config::Bind(EnableObjDestructCall, ini, eval["EnableObjDestructCall"],
                  true);
-    Config::Bind(MaxUserFunctionId, ini, eval["MaxUserFunctionId"], 2 * 65536);
     Config::Bind(CheckSymLink, ini, eval["CheckSymLink"], true);
 
     Config::Bind(EnableAlternative, ini, eval["EnableAlternative"], 0);
@@ -1376,12 +1374,12 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
   {
     Hdf proxy = config["Proxy"];
-    Config::Bind(ProxyOrigin, ini, proxy["Origin"]);
+    Config::Bind(ProxyOriginRaw, ini, proxy["Origin"]);
+    Config::Bind(ProxyPercentageRaw, ini, proxy["Percentage"], 0);
     Config::Bind(ProxyRetry, ini, proxy["Retry"], 3);
     Config::Bind(UseServeURLs, ini, proxy["ServeURLs"]);
     Config::Get(ini, proxy["ServeURLs"], ServeURLs);
     Config::Bind(UseProxyURLs, ini, proxy["ProxyURLs"]);
-    Config::Bind(ProxyPercentage, ini, proxy["Percentage"], 0);
     Config::Get(ini, proxy["ProxyURLs"], ProxyURLs);
     Config::Get(ini, proxy["ProxyPatterns"], ProxyPatterns);
   }

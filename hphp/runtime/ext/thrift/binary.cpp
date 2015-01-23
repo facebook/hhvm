@@ -248,7 +248,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       String format = fieldspec.rvalAt(PHPTransport::s_format,
                                        AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        SmartObject<c_Set> set_ret(newobj<c_Set>());
+        auto set_ret = makeSmartPtr<c_Set>();
 
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);
@@ -260,7 +260,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
           }
         }
 
-        ret = Variant(set_ret);
+        ret = Variant(std::move(set_ret));
       } else {
         ArrayInit init(size, ArrayInit::Mixed{});
         for (uint32_t s = 0; s < size; ++s) {

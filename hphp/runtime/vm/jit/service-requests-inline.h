@@ -54,10 +54,8 @@ inline void packServiceReqArgs(ServiceReqArgVec& argv) {
 
 inline bool isEphemeralServiceReq(ServiceRequest sr) {
   return sr == REQ_BIND_JMPCC_FIRST ||
-         sr == REQ_BIND_JMPCC_SECOND ||
          sr == REQ_BIND_JMP ||
          sr == REQ_BIND_JCC ||
-         sr == REQ_BIND_SIDE_EXIT ||
          sr == REQ_BIND_ADDR;
 }
 
@@ -86,8 +84,7 @@ TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
-  return mcg->backEnd().emitServiceReqWork(cb, start, SRFlags::None, sr,
-                                           argv);
+  return mcg->backEnd().emitServiceReqWork(cb, start, SRFlags::None, sr, argv);
 }
 
 //////////////////////////////////////////////////////////////////////

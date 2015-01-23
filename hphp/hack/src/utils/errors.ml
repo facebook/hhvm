@@ -403,10 +403,14 @@ let error_name_already_bound name name_prev p p_prev =
     else errs in
   add_list Naming.error_name_already_bound errs
 
-let unbound_name pos name =
-  add Naming.unbound_name pos (
-  "Unbound name: "^(strip_ns name)
- )
+let unbound_name pos name kind =
+  let kind_str = match kind with
+    | `cls -> "an object type"
+    | `func -> "a global function"
+    | `const -> "a global constant"
+  in
+  add Naming.unbound_name pos
+    ("Unbound name: "^(strip_ns name)^" ("^kind_str^")")
 
 let different_scope pos var_name pos' =
   add_list Naming.different_scope [
@@ -415,9 +419,7 @@ let different_scope pos var_name pos' =
 ]
 
 let undefined pos var_name =
-  add Naming.undefined pos (
-  "Undefined variable: "^var_name
- )
+  add Naming.undefined pos ("Undefined variable: "^var_name)
 
 let this_reserved pos =
   add Naming.this_reserved pos
@@ -428,9 +430,7 @@ let start_with_T pos =
     "Please make your type parameter start with the letter T (capital)"
 
 let already_bound pos name =
-  add Naming.name_already_bound pos (
-  "Argument already bound: "^name
- )
+  add Naming.name_already_bound pos ("Argument already bound: "^name)
 
 let unexpected_typedef pos def_pos =
   add_list Naming.unexpected_typedef [
@@ -992,7 +992,7 @@ let field_kinds pos1 pos2 =
 
 let unbound_name_typing pos name =
   add Typing.unbound_name_typing pos
-    ("Unbound name, Typing: "^(strip_ns name))
+    ("Unbound name (typing): "^(strip_ns name))
 
 let previous_default p =
   add Typing.previous_default p
@@ -1122,7 +1122,8 @@ let undefined_field p name =
   add Typing.undefined_field p ("The field "^name^" is undefined")
 
 let array_access pos1 pos2 ty =
-  add_list Typing.array_access ((pos1, "This is not a container, this is "^ty) ::
+  add_list Typing.array_access ((pos1,
+    "This is not an object of type KeyedContainer, this is "^ty) ::
             if pos2 != Pos.none
             then [pos2, "You might want to check this out"]
             else [])
@@ -1175,18 +1176,17 @@ let not_found_hint = function
   | `did_you_mean (pos, v) ->
       [pos, "Did you mean: "^v]
 
-let member_not_found kind pos (cpos, type_name) member_name hint =
+let member_not_found kind pos (cpos, type_name) member_name hint reason =
   let type_name = strip_ns type_name in
   let kind =
     match kind with
-    | `method_ -> "method "
-    | `member -> "member "
+    | `method_ -> "method"
+    | `member -> "member"
   in
-  let msg = "The "^kind^member_name^" is undefined "
-    ^"in an object of type "^type_name
-  in
+  let msg = "Could not find "^kind^" "^member_name^" in an object of type "^
+    type_name in
   add_list Typing.member_not_found
-    ((pos, msg) :: (not_found_hint hint
+    ((pos, msg) :: (not_found_hint hint @ reason
                     @ [(cpos, "Declaration of "^type_name^" is here")]))
 
 let parent_in_trait pos =

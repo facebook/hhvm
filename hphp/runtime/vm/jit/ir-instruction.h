@@ -293,9 +293,6 @@ struct IRInstruction {
   bool killsSources() const;
   bool killsSource(int srcNo) const;
 
-  bool modifiesStack() const;
-  SSATmp* modifiedStkPtr() const;
-  SSATmp* previousStkPtr() const;
   // hasMainDst provides raw access to the HasDest flag, for instructions with
   // ModifiesStack set.
   bool hasMainDst() const;

@@ -6,8 +6,7 @@ function myErrorHandler($errno, $errstr) {
 }
 set_error_handler('myErrorHandler');
 final class E2 {
-  private function __construct() {
-  }
+  private function __construct() {}
   private static
     $hacklib_values = array(
       'Fly' => "15",

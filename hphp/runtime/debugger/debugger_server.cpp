@@ -102,7 +102,8 @@ bool DebuggerServer::start() {
     if (s_fd < 0 && errno == EAFNOSUPPORT) {
       continue;
     }
-    auto m_sock = makeSocket(s_fd, cur->ai_family, cur->ai_addr->sa_data, port);
+    auto m_sock = makeSmartPtr<Socket>(
+      s_fd, cur->ai_family, cur->ai_addr->sa_data, port);
 
     int yes = 1;
     setsockopt(m_sock->fd(), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
@@ -167,7 +168,7 @@ void DebuggerServer::accept() {
         socklen_t salen = sizeof(sa);
         try {
           auto sock = nthSocket(i);
-          auto new_sock = makeSocket(
+          auto new_sock = makeSmartPtr<Socket>(
             ::accept(sock->fd(), &sa, &salen), sock->getType());
           if (new_sock->valid()) {
             Debugger::CreateProxy(new_sock, false);

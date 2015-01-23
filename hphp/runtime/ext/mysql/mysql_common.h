@@ -225,7 +225,7 @@ struct MySQLRequestData final : RequestEventHandler {
     totalRowCount = 0;
   }
 
-  Resource defaultConn;
+  SmartPtr<MySQLResource> defaultConn;
   int readTimeout;
   int totalRowCount; // from all queries in current request
 
@@ -340,9 +340,8 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MySQLStmtVariables {
-public:
-  explicit MySQLStmtVariables(std::vector<Variant*> arr);
+struct MySQLStmtVariables {
+  explicit MySQLStmtVariables(const Array& arr);
   ~MySQLStmtVariables();
 
   bool init_params(MYSQL_STMT *stmt, const String& types);
@@ -351,17 +350,16 @@ public:
   void update_result();
 
 private:
-  std::vector<Variant*>  m_arr;
-  std::vector<Variant>   m_value_arr;
-  MYSQL_BIND            *m_vars;
-  my_bool               *m_null;
-  unsigned long         *m_length;
+  Array                   m_arr;
+  smart::vector<Variant>  m_value_arr;
+  MYSQL_BIND             *m_vars;
+  my_bool                *m_null;
+  unsigned long          *m_length;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MySQLStmt : public SweepableResourceData {
-public:
+struct MySQLStmt : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(MySQLStmt);
 
   explicit MySQLStmt(MYSQL *mysql);
@@ -379,8 +377,8 @@ public:
   Variant affected_rows();
   Variant attr_get(int64_t attr);
   Variant attr_set(int64_t attr, int64_t value);
-  Variant bind_param(const String& types, std::vector<Variant*> vars);
-  Variant bind_result(std::vector<Variant*> vars);
+  Variant bind_param(const String& types, const Array& vars);
+  Variant bind_result(const Array& vars);
   Variant data_seek(int64_t offset);
   Variant get_errno();
   Variant get_error();
@@ -401,8 +399,8 @@ public:
 protected:
   MYSQL_STMT *m_stmt;
   bool m_prepared;
-  MySQLStmtVariables *m_param_vars;
-  MySQLStmtVariables *m_result_vars;
+  smart::unique_ptr<MySQLStmtVariables> m_param_vars;
+  smart::unique_ptr<MySQLStmtVariables> m_result_vars;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

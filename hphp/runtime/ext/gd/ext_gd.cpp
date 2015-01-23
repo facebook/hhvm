@@ -41,6 +41,29 @@
 #include <zlib.h>
 #include <set>
 
+/* Section Filters Declarations */
+/* IMPORTANT NOTE FOR NEW FILTER
+ * Do not forget to update:
+ * IMAGE_FILTER_MAX: define the last filter index
+ * IMAGE_FILTER_MAX_ARGS: define the biggest amount of arguments
+ * image_filter array in PHP_FUNCTION(imagefilter)
+ */
+#define IMAGE_FILTER_NEGATE         0
+#define IMAGE_FILTER_GRAYSCALE      1
+#define IMAGE_FILTER_BRIGHTNESS     2
+#define IMAGE_FILTER_CONTRAST       3
+#define IMAGE_FILTER_COLORIZE       4
+#define IMAGE_FILTER_EDGEDETECT     5
+#define IMAGE_FILTER_EMBOSS         6
+#define IMAGE_FILTER_GAUSSIAN_BLUR  7
+#define IMAGE_FILTER_SELECTIVE_BLUR 8
+#define IMAGE_FILTER_MEAN_REMOVAL   9
+#define IMAGE_FILTER_SMOOTH         10
+#define IMAGE_FILTER_PIXELATE       11
+#define IMAGE_FILTER_MAX            11
+#define IMAGE_FILTER_MAX_ARGS       6
+
+
 // #define IM_MEMORY_CHECK
 
 namespace HPHP {
@@ -1809,7 +1832,7 @@ Variant HHVM_FUNCTION(getimagesizefromstring, const String& imagedata,
 
 static Resource php_open_plain_file(const String& filename, const char *mode,
                                    FILE **fpp) {
-  Resource resource = File::Open(filename, mode);
+  Resource resource(File::Open(filename, mode));
   PlainFile *plain_file = resource.getTyped<PlainFile>(true, true);
   if (!plain_file) {
     return Resource();
@@ -2351,7 +2374,7 @@ static gdImagePtr _php_image_create_from(const String& filename,
       return NULL;
     }
   }
-  Resource resource = File::Open(filename, "rb");
+  Resource resource(File::Open(filename, "rb"));
   File *file = resource.getTyped<File>(true);
   if (!file) {
     raise_warning("failed to open stream: %s", filename.c_str());
@@ -3170,7 +3193,7 @@ Variant HHVM_FUNCTION(imagecreatetruecolor, int64_t width, int64_t height) {
   if (!im) {
     return false;
   }
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 
 bool f_imageistruecolor(const Resource& image) {
@@ -3323,7 +3346,7 @@ Variant HHVM_FUNCTION(imagerotate, const Resource& source_image,
   gdImagePtr im_dst = gdImageRotate(im_src, angle, bgd_color,
                                     ignore_transparent);
   if (!im_dst) return false;
-  return Resource(newres<Image>(im_dst));
+  return Variant(makeSmartPtr<Image>(im_dst));
 }
 
 #if HAVE_GD_IMAGESETTILE
@@ -3347,6 +3370,14 @@ bool HHVM_FUNCTION(imagesetbrush,
   return true;
 }
 
+bool HHVM_FUNCTION(imagesetinterpolation,
+    const Resource& image, int64_t method /*=GD_BILINEAR_FIXED*/) {
+  gdImagePtr im = image.getTyped<Image>()->get();
+  if (!im) return false;
+  if (method == -1) method = GD_BILINEAR_FIXED;
+  return gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method);
+}
+
 Variant HHVM_FUNCTION(imagecreate, int64_t width, int64_t height) {
   gdImagePtr im;
   if (width <= 0 || height <= 0 || width >= INT_MAX || height >= INT_MAX) {
@@ -3357,7 +3388,7 @@ Variant HHVM_FUNCTION(imagecreate, int64_t width, int64_t height) {
   if (!im) {
     return false;
   }
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 
 int64_t HHVM_FUNCTION(imagetypes) {
@@ -3462,7 +3493,7 @@ Variant HHVM_FUNCTION(imagecreatefromstring, const String& data) {
     raise_warning("Couldn't create GD Image Stream out of Data");
     return false;
   }
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 #endif
 
@@ -3473,7 +3504,7 @@ Variant HHVM_FUNCTION(imagecreatefromgif, const String& filename) {
                            PHP_GDIMG_TYPE_GIF, "GIF",
                            (gdImagePtr(*)())gdImageCreateFromGif,
                            (gdImagePtr(*)())gdImageCreateFromGifCtx);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 #endif
 
@@ -3484,7 +3515,7 @@ Variant HHVM_FUNCTION(imagecreatefromjpeg, const String& filename) {
                            PHP_GDIMG_TYPE_JPG, "JPEG",
                            (gdImagePtr(*)())gdImageCreateFromJpeg,
                            (gdImagePtr(*)())gdImageCreateFromJpegCtx);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 #endif
 
@@ -3495,7 +3526,7 @@ Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename) {
                            PHP_GDIMG_TYPE_PNG, "PNG",
                            (gdImagePtr(*)())gdImageCreateFromPng,
                            (gdImagePtr(*)())gdImageCreateFromPngCtx);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 #endif
 
@@ -3506,7 +3537,7 @@ Variant HHVM_FUNCTION(imagecreatefromwebp, const String& filename) {
                            PHP_GDIMG_TYPE_WEBP, "WEBP",
                            (gdImagePtr(*)())gdImageCreateFromWebp,
                            (gdImagePtr(*)())gdImageCreateFromWebpCtx);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 #endif
 
@@ -3517,7 +3548,7 @@ Variant HHVM_FUNCTION(imagecreatefromxbm, const String& filename) {
                            PHP_GDIMG_TYPE_XBM, "XBM",
                            (gdImagePtr(*)())gdImageCreateFromXbm,
                            (gdImagePtr(*)())NULL);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 #endif
 
@@ -3528,7 +3559,7 @@ Variant HHVM_FUNCTION(imagecreatefromxpm, const String& filename) {
                            PHP_GDIMG_TYPE_XPM, "XPM",
                            (gdImagePtr(*)())gdImageCreateFromXpm,
                            (gdImagePtr(*)())NULL);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 #endif
 
@@ -3539,7 +3570,7 @@ Variant HHVM_FUNCTION(imagecreatefromwbmp, const String& filename) {
                            PHP_GDIMG_TYPE_WBM, "WBMP",
                            (gdImagePtr(*)())gdImageCreateFromWBMP,
                            (gdImagePtr(*)())gdImageCreateFromWBMPCtx);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 #endif
 
@@ -3549,7 +3580,7 @@ Variant HHVM_FUNCTION(imagecreatefromgd, const String& filename) {
                            PHP_GDIMG_TYPE_GD, "GD",
                            (gdImagePtr(*)())gdImageCreateFromGd,
                            (gdImagePtr(*)())gdImageCreateFromGdCtx);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 
 Variant HHVM_FUNCTION(imagecreatefromgd2, const String& filename) {
@@ -3558,7 +3589,7 @@ Variant HHVM_FUNCTION(imagecreatefromgd2, const String& filename) {
                            PHP_GDIMG_TYPE_GD2, "GD2",
                            (gdImagePtr(*)())gdImageCreateFromGd2,
                            (gdImagePtr(*)())gdImageCreateFromGd2Ctx);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 
 Variant HHVM_FUNCTION(imagecreatefromgd2part,
@@ -3569,7 +3600,7 @@ Variant HHVM_FUNCTION(imagecreatefromgd2part,
                            PHP_GDIMG_TYPE_GD2PART, "GD2",
                            (gdImagePtr(*)())gdImageCreateFromGd2Part,
                            (gdImagePtr(*)())gdImageCreateFromGd2PartCtx);
-  return Resource(newres<Image>(im));
+  return Variant(makeSmartPtr<Image>(im));
 }
 
 bool HHVM_FUNCTION(imagegif, const Resource& image,
@@ -8032,7 +8063,7 @@ Variant HHVM_FUNCTION(exif_imagetype, const String& filename) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ExifExtension : public Extension {
+class ExifExtension final : public Extension {
  public:
   ExifExtension() : Extension("exif", NO_EXTENSION_VERSION_YET) {}
 
@@ -8046,7 +8077,22 @@ class ExifExtension : public Extension {
   }
 } s_exif_extension;
 
-class GdExtension : public Extension {
+const StaticString
+#ifdef GD_VERSION_STRING
+  s_GD_VERSION("GD_VERSION"),
+  s_GD_VERSION_STRING(GD_VERSION_STRING),
+#endif
+#if defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && \
+    defined(GD_RELEASE_VERSION) && defined(GD_EXTRA_VERSION)
+  s_GD_MAJOR_VERSION("GD_MAJOR_VERSION"),
+  s_GD_MINOR_VERSION("GD_MINOR_VERSION"),
+  s_GD_RELEASE_VERSION("GD_RELEASE_VERSION"),
+  s_GD_EXTRA_VERSION("GD_EXTRA_VERSION"),
+  s_GD_EXTRA_VERSION_STRING(GD_EXTRA_VERSION),
+#endif
+  s_GD_BUNDLED("GD_BUNDLED");
+
+class GdExtension final : public Extension {
  public:
   GdExtension() : Extension("gd", NO_EXTENSION_VERSION_YET) {}
 
@@ -8159,6 +8205,7 @@ class GdExtension : public Extension {
     HHVM_FE(imagerotate);
     HHVM_FE(imagesavealpha);
     HHVM_FE(imagesetbrush);
+    HHVM_FE(imagesetinterpolation);
     HHVM_FE(imagesetpixel);
     HHVM_FE(imagesetstyle);
     HHVM_FE(imagesetthickness);
@@ -8184,6 +8231,125 @@ class GdExtension : public Extension {
     HHVM_FE(png2wbmp);
 
     HHVM_FE(imagepalettecopy);
+
+#define IMG_CONST(cns, val) Native::registerConstant<KindOfInt64> \
+  (String::FromCStr("IMG_" #cns).get(), val)
+    IMG_CONST(GIF,  1);
+    IMG_CONST(JPG,  2);
+    IMG_CONST(JPEG, 2);
+    IMG_CONST(PNG,  4);
+    IMG_CONST(WBMP, 8);
+    IMG_CONST(XPM, 16);
+
+    /* special colours for gd */
+    IMG_CONST(COLOR_TILED, gdTiled);
+    IMG_CONST(COLOR_STYLED, gdStyled);
+    IMG_CONST(COLOR_BRUSHED, gdBrushed);
+    IMG_CONST(COLOR_STYLEDBRUSHED, gdStyledBrushed);
+    IMG_CONST(COLOR_TRANSPARENT, gdTransparent);
+
+    /* for imagefilledarc */
+    IMG_CONST(ARC_ROUNDED, gdArc);
+    IMG_CONST(ARC_PIE, gdPie);
+    IMG_CONST(ARC_CHORD, gdChord);
+    IMG_CONST(ARC_NOFILL, gdNoFill);
+    IMG_CONST(ARC_EDGED, gdEdged);
+
+    /* GD2 image format types */
+    IMG_CONST(GD2_RAW, GD2_FMT_RAW);
+    IMG_CONST(GD2_COMPRESSED, GD2_FMT_COMPRESSED);
+    IMG_CONST(FLIP_HORIZONTAL, GD_FLIP_HORINZONTAL);
+    IMG_CONST(FLIP_VERTICAL, GD_FLIP_VERTICAL);
+    IMG_CONST(FLIP_BOTH, GD_FLIP_BOTH);
+    IMG_CONST(EFFECT_REPLACE, gdEffectReplace);
+    IMG_CONST(EFFECT_ALPHABLEND, gdEffectAlphaBlend);
+    IMG_CONST(EFFECT_NORMAL, gdEffectNormal);
+    IMG_CONST(EFFECT_OVERLAY, gdEffectOverlay);
+
+#define GD_CONST(cns) IMG_CONST(cns, GD_##cns)
+    GD_CONST(CROP_DEFAULT);
+    GD_CONST(CROP_TRANSPARENT);
+    GD_CONST(CROP_BLACK);
+    GD_CONST(CROP_WHITE);
+    GD_CONST(CROP_SIDES);
+    GD_CONST(CROP_THRESHOLD);
+
+    GD_CONST(BELL);
+    GD_CONST(BESSEL);
+    GD_CONST(BILINEAR_FIXED);
+    GD_CONST(BICUBIC);
+    GD_CONST(BICUBIC_FIXED);
+    GD_CONST(BLACKMAN);
+    GD_CONST(BOX);
+    GD_CONST(BSPLINE);
+    GD_CONST(CATMULLROM);
+    GD_CONST(GAUSSIAN);
+    GD_CONST(GENERALIZED_CUBIC);
+    GD_CONST(HERMITE);
+    GD_CONST(HAMMING);
+    GD_CONST(HANNING);
+    GD_CONST(MITCHELL);
+    GD_CONST(POWER);
+    GD_CONST(QUADRATIC);
+    GD_CONST(SINC);
+    GD_CONST(NEAREST_NEIGHBOUR);
+    GD_CONST(WEIGHTED4);
+    GD_CONST(TRIANGLE);
+
+    GD_CONST(AFFINE_TRANSLATE);
+    GD_CONST(AFFINE_SCALE);
+    GD_CONST(AFFINE_ROTATE);
+    GD_CONST(AFFINE_SHEAR_HORIZONTAL);
+    GD_CONST(AFFINE_SHEAR_VERTICAL);
+#undef GD_CONST
+#define IMAGE_CONST(cns) IMG_CONST(cns, IMAGE_##cns)
+    IMAGE_CONST(FILTER_BRIGHTNESS);
+    IMAGE_CONST(FILTER_COLORIZE);
+    IMAGE_CONST(FILTER_CONTRAST);
+    IMAGE_CONST(FILTER_EDGEDETECT);
+    IMAGE_CONST(FILTER_EMBOSS);
+    IMAGE_CONST(FILTER_GAUSSIAN_BLUR);
+    IMAGE_CONST(FILTER_GRAYSCALE);
+    IMAGE_CONST(FILTER_MEAN_REMOVAL);
+    IMAGE_CONST(FILTER_NEGATE);
+    IMAGE_CONST(FILTER_SELECTIVE_BLUR);
+    IMAGE_CONST(FILTER_SMOOTH);
+    IMAGE_CONST(FILTER_PIXELATE);
+#undef IMAGE_CONST
+#undef IMG_CONST
+
+#ifdef GD_VERSION_STRING
+    Native::registerConstant<KindOfStaticString>
+      (s_GD_VERSION.get(), s_GD_VERSION_STRING.get());
+#endif
+
+#if defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && \
+    defined(GD_RELEASE_VERSION) && defined(GD_EXTRA_VERSION)
+    Native::registerConstant<KindOfInt64>
+      (s_GD_MAJOR_VERSION.get(), GD_MAJOR_VERSION);
+    Native::registerConstant<KindOfInt64>
+      (s_GD_MINOR_VERSION.get(), GD_MINOR_VERSION);
+    Native::registerConstant<KindOfInt64>
+      (s_GD_RELEASE_VERSION.get(), GD_RELEASE_VERSION);
+    Native::registerConstant<KindOfStaticString>
+      (s_GD_EXTRA_VERSION.get(), s_GD_EXTRA_VERSION_STRING.get());
+#endif
+
+#ifdef HAVE_GD_PNG
+#define PNG_CONST(cns, val) Native::registerConstant<KindOfInt64> \
+  (String::FromCStr("PNG_" #cns).get(), val)
+    PNG_CONST(NO_FILTER,     0x00);
+    PNG_CONST(FILTER_NONE,   0x08);
+    PNG_CONST(FILTER_SUB,    0x10);
+    PNG_CONST(FILTER_UP,     0x20);
+    PNG_CONST(FILTER_AVG,    0x40);
+    PNG_CONST(FILTER_PAETH,  0x80);
+    PNG_CONST(ALL_FILTERS,   0x08 | 0x10 | 0x20 | 0x40 | 0x80);
+#undef PNG_CONST
+#endif
+
+    Native::registerConstant<KindOfBoolean>(s_GD_BUNDLED.get(), true);
+
     loadSystemlib();
   }
 } s_gd_extension;

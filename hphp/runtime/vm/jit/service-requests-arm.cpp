@@ -105,11 +105,7 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
   a.     Mov   (argReg(0), req);
 
   a.     Ldr   (rLinkReg, MemOperand(sp, 16, PostIndex));
-  if (flags & SRFlags::JmpInsteadOfRet) {
-    a.   Br    (rLinkReg);
-  } else {
-    a.   Ret   ();
-  }
+  a.     Ret   ();
   a.     Brk   (0);
 
   if (!persist) {
@@ -129,65 +125,6 @@ void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest) {
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                  SrcKey dest) {
   emitBindJ(cb, frozen, dest, cc, REQ_BIND_JCC, TransFlags{});
-}
-
-void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
-                      jit::ConditionCode cc) {
-  emitBindJ(cb, frozen, dest, cc, REQ_BIND_SIDE_EXIT, TransFlags{});
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey,
-                        const Func* func, int numArgs,
-                        Vreg sp, Vreg fp, Vreg rds) {
-  assert(isNativeImplCall(func, numArgs));
-
-  // We need to store the return address into the AR, but we don't know it
-  // yet. Use ldpoint, and point{} below, to get the address.
-  auto ret_point = v.makePoint();
-  auto ret_addr = v.makeReg();
-  v << ldpoint{ret_point, ret_addr};
-  v << store{ret_addr, sp[cellsToBytes(numArgs) + AROFF(m_savedRip)]};
-
-  v << lea{sp[cellsToBytes(numArgs)], fp};
-  emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup(0, numArgs));
-  // rVmSp is already correctly adjusted, because there's no locals other than
-  // the arguments passed.
-
-  BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
-  v << copy{fp, PhysReg{argReg(0)}};
-  if (mcg->fixupMap().eagerRecord(func)) {
-    v << store{v.cns(func->getEntry()), rds[RDS::kVmpcOff]};
-    v << store{fp, rds[RDS::kVmfpOff]};
-    v << store{sp, rds[RDS::kVmspOff]};
-  }
-  auto syncPoint = emitCall(v, CppCall::direct(builtinFuncPtr), argSet(1));
-
-  Offset pcOffset = 0;
-  Offset stackOff = func->numLocals();
-  v << hcsync{Fixup{pcOffset, stackOff}, syncPoint};
-
-  int nLocalCells = func->numSlotsInFrame();
-  v << load{fp[AROFF(m_sfp)], fp};
-  v << point{ret_point};
-
-  int adjust = sizeof(ActRec) + cellsToBytes(nLocalCells - 1);
-  if (adjust != 0) {
-    v << addqi{adjust, sp, sp, v.makeReg()};
-  }
-}
-
-void emitBindCall(Vout& v, CodeBlock& frozen, const Func* func, int numArgs) {
-  assert(!isNativeImplCall(func, numArgs));
-
-  auto& us = mcg->tx().uniqueStubs;
-  auto addr = func ? us.immutableBindCallStub : us.bindCallStub;
-
-  // emit the mainline code
-  PhysReg new_fp{rStashedAR}, vmsp{arm::rVmSp};
-  v << lea{vmsp[cellsToBytes(numArgs)], new_fp};
-  v << bindcall{addr, RegSet(new_fp)};
 }
 
 }}}

@@ -1333,7 +1333,8 @@ static Variant HHVM_FUNCTION(imap_open, const String& mailbox,
     return false;
   }
 
-  return newres<ImapStream>(stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL);
+  return Variant(makeSmartPtr<ImapStream>(
+                   stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL));
 }
 
 static bool HHVM_FUNCTION(imap_ping, const Resource& imap_stream) {
@@ -1572,11 +1573,11 @@ const StaticString s_IMAP_OPENTIMEOUT("IMAP_OPENTIMEOUT");
 const StaticString s_IMAP_READTIMEOUT("IMAP_READTIMEOUT");
 const StaticString s_IMAP_WRITETIMEOUT("IMAP_WRITETIMEOUT");
 
-static class imapExtension : public Extension {
+static class imapExtension final : public Extension {
 public:
   imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET) {}
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     mail_link(&unixdriver);   /* link in the unix driver */
     mail_link(&mhdriver);     /* link in the mh driver */
     /* According to c-client docs (internal.txt) this shouldn't be used. */

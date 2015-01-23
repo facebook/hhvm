@@ -37,6 +37,7 @@ template<typename T>
 class SmartPtr {
 public:
   SmartPtr() : m_px(nullptr) {}
+  /* implicit */ SmartPtr(std::nullptr_t) : m_px(nullptr) { }
   explicit SmartPtr(T* px) : m_px(px) { if (m_px) m_px->incRefCount(); }
   SmartPtr(const SmartPtr<T>& src) : m_px(src.get()) {
     if (m_px) m_px->incRefCount();
@@ -93,7 +94,7 @@ public:
   // Move assignment for derived types
   template<class Y>
   SmartPtr& operator=(SmartPtr<Y>&& src) {
-    assert(this != &src);
+    assert((void*)this != (void*)&src);
     // Update m_px before releasing the goner
     auto goner = m_px;
     m_px = src.m_px;
@@ -138,10 +139,33 @@ public:
   }
 
   /**
-   * Reset the raw pointer.
+   * Reset the raw pointer.  This will increment the ref count on ptr
+   * (when it is non-null) and decrement the ref count on the old pointer
+   * being replaced.
    */
-  void reset() {
-    operator=((T*)nullptr);
+  void reset(T* ptr = nullptr) {
+    operator=(ptr);
+  }
+
+  /**
+   * Release the raw pointer.
+   * Note: be careful when using this.  It does not decrement the
+   * ref count on m_px.
+   */
+  T* detach() {
+    T* ptr = m_px;
+    m_px = nullptr;
+    return ptr;
+  }
+
+  /**
+   * Take ownership of a pointer without touching the ref count.
+   */
+  template <typename Y>
+  static SmartPtr<Y> attach(Y* ptr) {
+    SmartPtr<Y> sp;
+    sp.m_px = ptr;
+    return sp;
   }
 
 protected:
@@ -158,6 +182,11 @@ private:
     static_assert(offsetof(SmartPtr, m_px) == kExpectedMPxOffset, "");
   }
 };
+
+template <typename T, typename Y>
+inline bool operator==(const SmartPtr<T>& a, const SmartPtr<Y>& b) {
+  return a.get() == b.get();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // AtomicSmartPtr

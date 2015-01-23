@@ -184,6 +184,10 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
                    const Resource& result,
                    VRefParam cookie = uninit_null(),
                    VRefParam estimated = uninit_null());
+String HHVM_FUNCTION(ldap_escape,
+                     const String& value,
+                     const String& ignores = empty_string(),
+                     int flags = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

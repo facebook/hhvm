@@ -3,8 +3,7 @@ namespace foo\bar {
   require_once ($GLOBALS['HACKLIB_ROOT']);
   trait t1 {
     public static $a = 20;
-    protected static final function hacklib_initialize_statics_t1() {
-    }
+    protected static final function hacklib_initialize_statics_t1() {}
   }
   trait t2 {
     public static $b;

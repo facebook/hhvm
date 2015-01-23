@@ -1,14 +1,11 @@
 <?hh
 
-require(__DIR__ . "/async-curl.inc");
+$files = Map {
+  "file://" . __FILE__ => null,
+  "file://" . __FILE__ . ".expectf" => null,
+};
 
-$files = [
-  "file://" . __FILE__,
-  "file://" . __DIR__ . "/async-curl.inc",
-];
-
-$ac = new AsyncCurl(...$files);
-$awaitable = $ac->gen();
+$handles = $files->mapWithKey(($file, $dummy) ==> HH\Asio\curl_exec($file));
 
 // Make sure things cleanup when curl_multi_await is abandoned
 echo "Done.\n";

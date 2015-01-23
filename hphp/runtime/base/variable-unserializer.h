@@ -63,12 +63,20 @@ struct VariableUnserializer {
   void read(char* buf, unsigned n);
 
   /*
+   * Read a character and throw if it differs from expected.
+   */
+  void expectChar(char expected);
+  void throwUnexpected(char expected, char got);
+
+  /*
    * Accessors.
    */
   Type type() const;
   bool allowUnknownSerializableClass() const;
   const char* head() const;
   char peek() const;
+  char peekBack() const;
+  bool endOfBuffer() const;
 
   /*
    * True if clsName is allowed to be unserialized.

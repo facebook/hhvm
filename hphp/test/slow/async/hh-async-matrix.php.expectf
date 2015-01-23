@@ -1,0 +1,544 @@
+HH\Asio\a() => array(8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\aw() => array(8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\ac() => array(8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\acw() => array(8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\v() => object(HH\Vector)#%d (8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\vw() => object(HH\Vector)#%d (8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\vc() => object(HH\Vector)#%d (8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\vcw() => object(HH\Vector)#%d (8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\m() => object(HH\Map)#%d (8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\mw() => object(HH\Map)#%d (8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\mc() => object(HH\Map)#%d (8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\mcw() => object(HH\Map)#%d (8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\va() => array(8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\vaw() => array(8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\vac() => array(8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}
+HH\Asio\vacw() => array(8) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  int(1)
+  [4]=>
+  float(2)
+  [5]=>
+  string(11) "Hello World"
+  [6]=>
+  array(1) {
+    [0]=>
+    float(3.14)
+  }
+  [7]=>
+  object(stdClass)#1 (6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(8)
+    [2]=>
+    int(15)
+    [3]=>
+    int(16)
+    [4]=>
+    int(23)
+    [5]=>
+    int(42)
+  }
+}

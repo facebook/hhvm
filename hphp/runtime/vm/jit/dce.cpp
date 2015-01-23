@@ -114,9 +114,9 @@ bool canDCE(IRInstruction* inst) {
   case ClsNeq:
   case UnboxPtr:
   case BoxPtr:
-  case LdStack:
+  case LdStk:
   case LdLoc:
-  case LdStackAddr:
+  case LdStkAddr:
   case LdLocAddr:
   case LdRDSAddr:
   case LdMem:
@@ -157,12 +157,9 @@ bool canDCE(IRInstruction* inst) {
   case NewVArray:
   case NewLikeArray:
   case NewCol:
-  case SpillFrame:
-  case CufIterSpillFrame:
   case FreeActRec:
   case DefInlineFP:
   case LdRetAddr:
-  case SpillStack:
   case Mov:
   case TakeRef:
   case ReDefSP:
@@ -190,9 +187,14 @@ bool canDCE(IRInstruction* inst) {
   case ColIsEmpty:
   case ColIsNEmpty:
   case LdUnwinderValue:
+  case LdColArray:
     assert(!inst->isControlFlow());
     return true;
 
+  case AdjustSP:
+  case StStk:
+  case SpillFrame:
+  case CufIterSpillFrame:
   case CheckType:
   case CheckNullptr:
   case AssertType:
@@ -206,7 +208,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckStk:
   case AssertStk:
   case CastStk:
-  case CastStkIntToDbl:
   case CoerceStk:
   case CoerceCellToBool:
   case CoerceCellToInt:
@@ -253,7 +254,7 @@ bool canDCE(IRInstruction* inst) {
   case Jmp:
   case DefLabel:
   case Box:
-  case TakeStack:
+  case TakeStk:
   case LdLocPseudoMain:
   case LdVectorBase:
   case LdPairBase:
@@ -302,28 +303,23 @@ bool canDCE(IRInstruction* inst) {
   case CallBuiltin:
   case RetCtrl:
   case StRetVal:
-  case RetAdjustStack:
+  case RetAdjustStk:
   case ReleaseVVOrExit:
   case GenericRetDecRefs:
   case StMem:
-  case StProp:
   case StElem:
   case StLoc:
   case StLocNT:
   case StLocPseudoMain:
   case StRef:
-  case ExceptionBarrier:
-  case SyncABIRegs:
   case EagerSyncVMRegs:
   case ReqBindJmp:
   case ReqRetranslate:
   case ReqRetranslateOpt:
-  case ReqBindJmpZero:
-  case ReqBindJmpNZero:
   case IncRef:
   case IncRefCtx:
   case DecRefLoc:
-  case DecRefStack:
+  case DecRefStk:
   case DecRefThis:
   case DecRef:
   case DecRefMem:
@@ -344,6 +340,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseWarning:
   case RaiseNotice:
   case RaiseArrayIndexNotice:
+  case RaiseArrayKeyNotice:
   case ClosureStaticLocInit:
   case StaticLocInitCached:
   case PrintStr:
@@ -420,57 +417,38 @@ bool canDCE(IRInstruction* inst) {
   case BaseG:
   case PropX:
   case PropDX:
-  case PropDXStk:
   case CGetProp:
   case VGetProp:
-  case VGetPropStk:
   case BindProp:
-  case BindPropStk:
   case SetProp:
-  case SetPropStk:
   case UnsetProp:
   case SetOpProp:
-  case SetOpPropStk:
   case IncDecProp:
-  case IncDecPropStk:
   case EmptyProp:
   case IssetProp:
   case ElemX:
   case ElemArray:
   case ElemArrayW:
   case ElemDX:
-  case ElemDXStk:
   case ElemUX:
-  case ElemUXStk:
   case ArrayGet:
   case StringGet:
   case MapGet:
   case CGetElem:
   case VGetElem:
-  case VGetElemStk:
   case BindElem:
-  case BindElemStk:
   case ArraySet:
   case ArraySetRef:
   case MapSet:
   case SetElem:
-  case SetElemStk:
   case SetWithRefElem:
-  case SetWithRefElemStk:
   case UnsetElem:
-  case UnsetElemStk:
   case SetOpElem:
-  case SetOpElemStk:
   case IncDecElem:
-  case IncDecElemStk:
   case SetNewElem:
-  case SetNewElemStk:
   case SetNewElemArray:
-  case SetNewElemArrayStk:
   case SetWithRefNewElem:
-  case SetWithRefNewElemStk:
   case BindNewElem:
-  case BindNewElemStk:
   case ArrayIsset:
   case VectorIsset:
   case PairIsset:
@@ -478,12 +456,14 @@ bool canDCE(IRInstruction* inst) {
   case IssetElem:
   case EmptyElem:
   case CheckBounds:
-  case ProfileArray:
+  case ProfilePackedArray:
+  case ProfileStructArray:
   case ProfileStr:
   case CheckPackedArrayBounds:
   case CheckTypePackedArrayElem:
   case IsPackedArrayElemNull:
   case LdPackedArrayElem:
+  case LdStructArrayElem:
   case LdVectorSize:
   case VectorDoCow:
   case VectorHasImmCopy:
@@ -493,10 +473,13 @@ bool canDCE(IRInstruction* inst) {
   case EndCatch:
   case UnwindCheckSideExit:
   case DeleteUnwinderException:
+  case CountBytecode:
+  case DbgTrashStk:
+  case DbgTrashFrame:
+  case DbgTrashMem:
     return false;
   }
   not_reached();
-  return false;
 }
 
 /* DceFlags tracks the state of one instruction during dead code analysis. */
@@ -653,25 +636,6 @@ bool findWeakActRecUses(const BlockList& blocks,
       incWeak(inst, inst->src(0));
       break;
 
-    /*
-     * You can use the stack inside an inlined callee without using
-     * the frame, and we can adjust the initial ReDefSP that comes at
-     * the start of the callee in this situation, but only if we're
-     * not in a resumable.  In a resumable, there is no relation
-     * between the main frame and the stack, so we can't modify this
-     * ReDefSP to work on the outer frame.
-     */
-    case ReDefSP:
-      {
-        auto const fp = inst->src(1)->inst();
-        if (fp->is(DefInlineFP) &&
-            !fp->src(2)->inst()->marker().resumed()) {
-          ITRACE(3, "weak use of {} from {}\n", fp->dst(), *inst);
-          state[fp].incWeakUse();
-        }
-      }
-      break;
-
     case InlineReturn:
       {
         auto const frameInst = inst->src(0)->inst();
@@ -743,50 +707,6 @@ void performActRecFixups(const BlockList& blocks,
              inst, state[inst].weakUseCount(), uses[inst.dst()]);
         break;
 
-      /*
-       * A ReDefSP that depends on a removable DefInlineFP needs to be
-       * adjusted.  Its current frame is going away, so we have to
-       * adjust it to depend on the outer frame, and have an offset
-       * relative to that frame.
-       *
-       * In the common cases this ReDefSP is also going to be dce'd,
-       * but we need to adjust it in case it isn't.
-       *
-       * The offset from the current frame (DefInlineFP) is a
-       * parameter to the ReDefSP.  To turn that into an effective
-       * offset from the outer frame we take the following: the
-       * returnSpOffset that we recorded in this DefInlineFP, plus
-       * whatever offset the ReDefSP had from the frame, plus the
-       * cells for the ActRec, minus the space for the frame had for
-       * locals or iterators.
-       *
-       * If this is the first ReDefSP in a callee, the spOffset here
-       * will be numSlotsInFrame, so it cancels out and we just use
-       * the return sp offset (plus the ActRec cells).  However, if
-       * it's the ReDefSP that comes /after/ an InlineReturn, the fact
-       * that it depends on a DefInlineFP (instead of a DefFP) means
-       * we're in a nested inlining situation, and it is depending on
-       * a stack defined inside the outer inlined callee.  In this
-       * case, its offset will potentially not just be
-       * numSlotsInFrame, because we may have more spills going on in
-       * the outer callee.
-       *
-       * It's easiest to understand this by ignoring the above
-       * particulars and thinking about what it should mean to adjust
-       * a ReDefSP whose frame is being eliminated in isolation.
-       */
-      case ReDefSP:
-        {
-          auto const fp = inst.src(1)->inst();
-          if (fp->is(DefInlineFP) && state[fp].isDead()) {
-            inst.setSrc(1, fp->src(2));
-            inst.extra<ReDefSP>()->spOffset +=
-              fp->extra<DefInlineFP>()->retSPOff + kNumActRecCells -
-              fp->extra<DefInlineFP>()->target->numSlotsInFrame();
-          }
-        }
-        break;
-
       case StLocNT:
       case StLoc:
         if (state[inst.src(0)->inst()].isDead()) {
@@ -803,7 +723,7 @@ void performActRecFixups(const BlockList& blocks,
        */
       case DecRef:
       case DecRefLoc:
-      case DecRefStack:
+      case DecRefStk:
       case DecRefMem:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);

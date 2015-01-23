@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -26,12 +27,6 @@ namespace HPHP { namespace jit {
 
 #define SERVICE_REQUESTS \
   /*
-   * Return from this nested VM invocation to the previous invocation.
-   * (Ending the program if there is no previous invocation.)
-   */ \
-  REQ(EXIT) \
-  \
-  /*
    * BIND_* all are requests for the first time a call, jump, or
    * whatever is needed.  This generally involves translating new code
    * and then patching an address supplied as a service request
@@ -41,9 +36,7 @@ namespace HPHP { namespace jit {
   REQ(BIND_JMP)          \
   REQ(BIND_JCC)          \
   REQ(BIND_ADDR)         \
-  REQ(BIND_SIDE_EXIT)    \
   REQ(BIND_JMPCC_FIRST)  \
-  REQ(BIND_JMPCC_SECOND) \
   \
   /*
    * When all translations don't support the incoming types, a
@@ -58,9 +51,10 @@ namespace HPHP { namespace jit {
   REQ(RETRANSLATE_OPT) \
   \
   /*
-   * If the max translations is reached for a SrcKey, the last
-   * translation in the chain will jump to an interpret request stub.
-   * This instructs enterTC to punt to the interpreter.
+   * If the max translations is reached for a SrcKey, the last translation in
+   * the chain will jump to an interpret request stub.  This instructs enterTC
+   * to punt to the interpreter for a basic block, then attempt to reenter
+   * translated code.
    */ \
   REQ(INTERPRET) \
   \
@@ -117,17 +111,10 @@ enum class SRFlags {
   Align = 1 << 0,
 
   /*
-   * For some service requests (returning from interpreted frames),
-   * using a ret instruction to get back to enterTCHelper will
-   * unbalance the return stack buffer---in these cases use a jmp.
-   */
-  JmpInsteadOfRet = 1 << 1,
-
-  /*
    * Indicates if the service request is persistent. For non-persistent
    * requests, the service request stub may be reused.
    */
-  Persist = 1 << 2,
+  Persist = 1 << 1,
 };
 
 inline bool operator&(SRFlags a, SRFlags b) {
@@ -165,6 +152,34 @@ inline ServiceReqArgInfo RipRelative(TCA addr) {
 }
 
 typedef jit::vector<ServiceReqArgInfo> ServiceReqArgVec;
+
+union ServiceReqArg {
+  TCA tca;
+  Offset offset;
+  SrcKey::AtomicInt sk;
+  TransFlags trflags;
+  TransID transID;
+  bool boolVal;
+  ActRec* ar;
+};
+
+/*
+ * Any changes to the size or layout of this struct must be reflected in
+ * handleSRHelper() in translator-asm-helpers.S.
+ */
+struct ServiceReqInfo {
+  ServiceRequest req;
+  TCA stub;
+  ActRec* stashedAR;
+  ServiceReqArg args[4];
+};
+
+/*
+ * Assembly stub called by translated code to pack argument registers into a
+ * ServiceReqInfo, along with some other bookkeeping tasks before a service
+ * request.
+ */
+extern "C" void handleSRHelper();
 
 }}
 

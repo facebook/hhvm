@@ -43,6 +43,7 @@ public:
 
   Logger(): m_standardOut(stderr) {}
 
+  static bool AlwaysEscapeLog;
   static bool UseSyslog;
   static bool UseLogFile;
   static bool UseRequestLog;

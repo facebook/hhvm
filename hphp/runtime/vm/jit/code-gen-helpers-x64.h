@@ -29,7 +29,9 @@
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -141,12 +143,12 @@ template<typename T>
 inline void
 emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
   PhysRegSaver(v, kGPCallerSaved); // we don't know for sure what's alive
-  v << ldimm{datum.m_key, argNumToRegName[0]};
+  v << ldimmq{datum.m_key, argNumToRegName[0]};
   const CodeAddress addr = (CodeAddress)pthread_getspecific;
   if (deltaFits((uintptr_t)addr, sz::dword)) {
     v << call{addr, argSet(1)};
   } else {
-    v << ldimm{addr, reg::rax};
+    v << ldimmq{addr, reg::rax};
     v << callr{reg::rax, argSet(1)};
   }
   if (dest != Vreg(reg::rax)) {
@@ -184,8 +186,6 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType);
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0);
 
 Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg);
-
-ConditionCode opToConditionCode(Opcode opc);
 
 template<ConditionCode Jcc, class Lambda>
 void jccBlock(Asm& a, Lambda body) {

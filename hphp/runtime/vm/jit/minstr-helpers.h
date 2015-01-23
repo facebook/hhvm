@@ -258,13 +258,14 @@ SETOPPROP_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template <bool isObj>
-TypedValue incDecPropImpl(Class* ctx, TypedValue* base,
-                          TypedValue key,
-                          MInstrState* mis, IncDecOp op) {
-  TypedValue result;
-  result.m_type = KindOfUninit;
-  HPHP::IncDecProp<true, isObj>(
-    mis->tvScratch, mis->tvRef, ctx, op, base, key, result);
+TypedValue incDecPropImpl(
+  Class* ctx,
+  TypedValue* base,
+  TypedValue key,
+  IncDecOp op
+) {
+  auto result = make_tv<KindOfUninit>();
+  HPHP::IncDecProp<true, isObj>(ctx, op, base, key, result);
   assert(result.m_type != KindOfRef);
   return result;
 }
@@ -275,9 +276,13 @@ TypedValue incDecPropImpl(Class* ctx, TypedValue* base,
   m(incDecPropCO,   true)
 
 #define X(nm, ...)                                                      \
-inline TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,      \
-                     MInstrState* mis, IncDecOp op) {                   \
-  return incDecPropImpl<__VA_ARGS__>(ctx, base, key, mis, op);          \
+inline TypedValue nm(                                                   \
+  Class* ctx,                                                           \
+  TypedValue* base,                                                     \
+  TypedValue key,                                                       \
+  IncDecOp op                                                           \
+) {                                                                     \
+  return incDecPropImpl<__VA_ARGS__>(ctx, base, key, op);               \
 }
 INCDECPROP_HELPER_TABLE(X)
 #undef X

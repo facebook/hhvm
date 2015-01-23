@@ -359,7 +359,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_result,
       return true;
     }
 
-    return Resource(newres<MySQLResult>(mysql_result));
+    return Variant(makeSmartPtr<MySQLResult>(mysql_result));
 }
 
 static Variant HHVM_FUNCTION(mysql_unbuffered_query, const String& query,
@@ -376,12 +376,12 @@ static Variant HHVM_FUNCTION(mysql_list_dbs,
                       const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
-  MYSQL_RES *res = mysql_list_dbs(conn, NULL);
+  MYSQL_RES *res = mysql_list_dbs(conn, nullptr);
   if (!res) {
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Resource(newres<MySQLResult>(res));
+  return Variant(makeSmartPtr<MySQLResult>(res));
 }
 
 static Variant HHVM_FUNCTION(mysql_list_tables, const String& database,
@@ -391,12 +391,12 @@ static Variant HHVM_FUNCTION(mysql_list_tables, const String& database,
   if (mysql_select_db(conn, database.data())) {
     return false;
   }
-  MYSQL_RES *res = mysql_list_tables(conn, NULL);
+  MYSQL_RES *res = mysql_list_tables(conn, nullptr);
   if (!res) {
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Resource(newres<MySQLResult>(res));
+  return Variant(makeSmartPtr<MySQLResult>(res));
 }
 
 static Variant HHVM_FUNCTION(mysql_list_processes,
@@ -408,7 +408,7 @@ static Variant HHVM_FUNCTION(mysql_list_processes,
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Resource(newres<MySQLResult>(res));
+  return Variant(makeSmartPtr<MySQLResult>(res));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -502,15 +502,14 @@ static Variant HHVM_FUNCTION(mysql_async_query_result,
   mySQL->m_async_query.clear();
 
   MYSQL_RES* mysql_result = mysql_use_result(conn);
-  MySQLResult *r = newres<MySQLResult>(mysql_result);
+  auto r = makeSmartPtr<MySQLResult>(mysql_result);
   r->setAsyncConnection(mySQL);
-  Resource ret(r);
-  return ret;
+  return Variant(std::move(r));
 }
 
 static bool HHVM_FUNCTION(mysql_async_query_completed, const Resource& result) {
   auto const res = result.getTyped<MySQLResult>(true, true);
-  return !res || res->get() == NULL;
+  return !res || res->get() == nullptr;
 }
 
 static Variant HHVM_FUNCTION(mysql_async_fetch_array, const Resource& result,
@@ -531,13 +530,13 @@ static Variant HHVM_FUNCTION(mysql_async_fetch_array, const Resource& result,
     return false;
   }
 
-  MYSQL_ROW mysql_row = NULL;
+  MYSQL_ROW mysql_row = nullptr;
   int status = mysql_fetch_row_nonblocking(mysql_result, &mysql_row);
   // Last row, or no row yet available.
   if (status != NET_ASYNC_COMPLETE) {
     return false;
   }
-  if (mysql_row == NULL) {
+  if (mysql_row == nullptr) {
     res->close();
     return false;
   }
@@ -682,7 +681,7 @@ static int64_t HHVM_FUNCTION(mysql_async_status,
 
 static bool HHVM_FUNCTION(mysql_data_seek, const Resource& result, int row) {
   MySQLResult *res = php_mysql_extract_result(result);
-  if (res == NULL) return false;
+  if (res == nullptr) return false;
 
   return res->seekRow(row);
 }
@@ -696,26 +695,37 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
                       const Variant& var_result,
                       const String& class_name /* = "stdClass" */,
                       const Variant& params /* = null */) {
+
   Resource result = var_result.isResource() ? var_result.toResource()
                                             : null_resource;
   Variant properties = php_mysql_fetch_hash(result, PHP_MYSQL_ASSOC);
   if (!same(properties, false)) {
     Object obj;
-    if (params.isArray()) {
-      obj = create_object(class_name, params.asCArrRef());
-    } else {
-      obj = create_object(class_name, Array());
-    }
+
+    const auto paramsArray = params.isArray()
+      ? params.asCArrRef()
+      : Array();
+
+    // We need to create an object without initialization (constructor call),
+    // and set the fetched fields as dynamic properties on the object prior
+    // calling the constructor.
+    obj = create_object_only(class_name);
+
+    // Set the fields.
     obj->o_setArray(properties.toArray());
+
+    // And finally initialize the object by calling the constructor.
+    obj = init_object(class_name, paramsArray, obj.get());
 
     return obj;
   }
+
   return false;
 }
 
 static Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
   MySQLResult *res = php_mysql_extract_result(result);
-  if (res == NULL) return false;
+  if (res == nullptr) return false;
 
   if (res->isLocalized()) {
     if (!res->isRowReady()) return false;
@@ -751,11 +761,11 @@ static Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
 static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int row,
                                     const Variant& field /* = 0 */) {
   MySQLResult *res = php_mysql_extract_result(result);
-  if (res == NULL) return false;
+  if (res == nullptr) return false;
 
-  MYSQL_RES *mysql_result = NULL;
-  MYSQL_ROW sql_row = NULL;
-  unsigned long *sql_row_lengths = NULL;
+  MYSQL_RES *mysql_result = nullptr;
+  MYSQL_ROW sql_row = nullptr;
+  unsigned long *sql_row_lengths = nullptr;
 
   if (res->isLocalized()) {
     if (!res->seekRow(row)) return false;
@@ -870,7 +880,7 @@ static bool HHVM_FUNCTION(mysql_free_result, const Resource& result) {
 static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
                                          int field /* = -1 */) {
   MySQLResult *res = php_mysql_extract_result(result);
-  if (res == NULL) return false;
+  if (res == nullptr) return false;
 
   if (field != -1) {
     if (!res->seekField(field)) return false;
@@ -897,7 +907,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
 
 static bool HHVM_FUNCTION(mysql_field_seek, const Resource& result, int field) {
   MySQLResult *res = php_mysql_extract_result(result);
-  if (res == NULL) return false;
+  if (res == nullptr) return false;
   return res->seekField(field);
 }
 

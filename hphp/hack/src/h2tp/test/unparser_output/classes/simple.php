@@ -1,5 +1,4 @@
 <?php
 class Foo {
-  public static function bar() {
-  }
+  public static function bar() {}
 }

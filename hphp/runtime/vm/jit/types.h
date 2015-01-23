@@ -93,7 +93,7 @@ inline std::string show(TransKind k) {
  * hints or demands for retranslations.
  */
 struct TransFlags {
-  explicit TransFlags(uint64_t flags = 0) : packed(flags) {}
+  /* implicit */ TransFlags(uint64_t flags = 0) : packed(flags) {}
 
   union {
     struct {

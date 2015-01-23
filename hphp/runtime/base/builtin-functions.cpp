@@ -507,6 +507,10 @@ Object create_object_only(const String& s) {
   return g_context->createObjectOnly(s.get());
 }
 
+Object init_object(const String& s, const Array& params, ObjectData* o) {
+  return g_context->initObject(s.get(), params, o);
+}
+
 Object create_object(const String& s, const Array& params, bool init /* = true */) {
   return g_context->createObject(s.get(), params, init);
 }

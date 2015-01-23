@@ -11,5 +11,5 @@
 
 function main() {
   $arr = array();
-  $arr[$arr->getLength()] = 1; 
+  $arr[$arr->getLength()] = 1;
 }

@@ -286,11 +286,6 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
 }
 
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
-  // Xenon
-  if (flags & RequestInjectionData::XenonSignalFlag) {
-    Xenon::getInstance().log(Xenon::EnterSample);
-  }
-
   // User profiler
   if (flags & RequestInjectionData::EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
@@ -320,7 +315,8 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // Inlined calls normally skip the function enter and exit events. If we
   // side exit in an inlined callee, we short-circuit here in order to skip
   // exit events that could unbalance the call stack.
-  if ((jit::TCA) ar->m_savedRip == jit::mcg->tx().uniqueStubs.retInlHelper) {
+  if (RuntimeOption::EvalJit &&
+      ((jit::TCA) ar->m_savedRip == jit::mcg->tx().uniqueStubs.retInlHelper)) {
     return;
   }
 
@@ -363,12 +359,35 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {
     return false;
   }
+
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(Xenon::EnterSample);
+  }
+
   onFunctionEnter(ar, funcType, flags);
   return true;
 }
 
-void EventHook::onFunctionResume(const ActRec* ar) {
+void EventHook::onFunctionResumeAwait(const ActRec* ar) {
   ssize_t flags = CheckSurprise();
+
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(Xenon::ResumeAwaitSample);
+  }
+
+  onFunctionEnter(ar, EventHook::NormalFunc, flags);
+}
+
+void EventHook::onFunctionResumeYield(const ActRec* ar) {
+  ssize_t flags = CheckSurprise();
+
+  // Xenon
+  if (flags & RequestInjectionData::XenonSignalFlag) {
+    Xenon::getInstance().log(Xenon::EnterSample);
+  }
+
   onFunctionEnter(ar, EventHook::NormalFunc, flags);
 }
 

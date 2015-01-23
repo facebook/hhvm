@@ -14,8 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/vasm.h"
+
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 TRACE_SET_MOD(vasm);
 
@@ -47,6 +52,22 @@ bool match_jcc(Vinstr& inst, Vreg flags) {
 }
 
 bool sets_flags(Vinstr& inst) {
+  // Some special cases that also clobber flags:
+  switch (inst.op) {
+  case Vinstr::vcall:
+  case Vinstr::vinvoke:
+  case Vinstr::call:
+  case Vinstr::callm:
+  case Vinstr::callr:
+  case Vinstr::mccall:
+  case Vinstr::callstub:
+  case Vinstr::bindcall:
+  case Vinstr::contenter:
+    return true;
+  default:
+    break;
+  }
+
   DefVisitor dv;
   visitOperands(inst, dv);
   return dv.flags.isValid();

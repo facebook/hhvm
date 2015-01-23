@@ -174,7 +174,7 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::Obj | Type::Func);
   expectTrue(Type::Init);
   expectTrue(Type::Top);
-  expectTrue(Type::StackElem);
+  expectTrue(Type::StkElem);
   expectTrue(Type::AnyObj);
   expectTrue(Type::AnyNullableObj);
   expectTrue(Type::AnyRes);

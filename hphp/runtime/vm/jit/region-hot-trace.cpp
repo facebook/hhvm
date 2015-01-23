@@ -184,6 +184,9 @@ RegionDescPtr selectHotTrace(TransID triggerId,
         // region if they exist in the TransCFG.
         if (RuntimeOption::EvalJitLoops &&
             cfg.hasArc(newTransId, otherTransId) &&
+            // Don't add the arc if the last opcode in the source block ends the
+            // region.
+            !breaksRegion(*profData->transLastInstr(newTransId)) &&
             // Task #4157613 will allow the following check to go away
             !succSKSet[newLastBlockId].count(otherFirstBlockSk)) {
           region->addArc(newLastBlockId, otherFirstBlockId);

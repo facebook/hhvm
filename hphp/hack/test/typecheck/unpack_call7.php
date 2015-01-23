@@ -1,9 +1,7 @@
 <?hh
 
 class C1 {
-  public function __construct(
-    private string $foo,
-  ) {}
+  public function __construct(private string $foo) {}
 }
 
 function test(): void {

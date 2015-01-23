@@ -39,8 +39,28 @@ Block* create_catch_block(HTS& env) {
 
   gen(env, BeginCatch);
   spillStack(env);
-  gen(env, EndCatch, fp(env), sp(env));
+  gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env), sp(env));
   return catchBlock;
+}
+
+void check_catch_stack_state(HTS& env, const IRInstruction* inst) {
+  auto const& exnStack = env.irb->exceptionStackState();
+  always_assert_flog(
+    exnStack.sp == sp(env) &&
+      exnStack.syncedSpLevel == env.irb->syncedSpLevel() &&
+      exnStack.spOffset == env.irb->spOffset(),
+    "catch block would have had a mismatched stack pointer:\n"
+    "     inst: {}\n"
+    "       sp: {}\n"
+    " expected: {}\n"
+    "  spLevel: {}\n"
+    " expected: {}\n",
+    inst->toString(),
+    sp(env)->toString(),
+    exnStack.sp->toString(),
+    exnStack.syncedSpLevel,
+    env.irb->syncedSpLevel()
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -60,24 +80,14 @@ Block* create_catch_block(HTS& env) {
 namespace detail {
 SSATmp* genInstruction(HTS& env, IRInstruction* inst) {
   if (inst->mayRaiseError() && inst->taken()) {
-    FTRACE(1, "{}: asserting about catch block\n",
-      inst->toString());
+    FTRACE(1, "{}: asserting about catch block\n", inst->toString());
     /*
      * This assertion means you manually created a catch block, but didn't put
      * an exceptionStackBoundary after an update to the stack.  Even if you're
      * manually creating catches we require this just to make sure you're not
      * doing it on accident.
      */
-    always_assert_flog(
-      env.irb->exceptionStackState().sp == sp(env),
-      "catch block would have had a mismatched stack pointer:\n"
-      "     inst: {}\n"
-      "       sp: {}\n"
-      " expected: {}\n",
-      inst->toString(),
-      sp(env)->toString(),
-      env.irb->exceptionStackState().sp->toString()
-    );
+    check_catch_stack_state(env, inst);
   }
 
   if (inst->mayRaiseError() && !inst->taken()) {
@@ -91,16 +101,7 @@ SSATmp* genInstruction(HTS& env, IRInstruction* inst) {
      * documentation for exceptionStackBoundary in the header for more
      * information.
      */
-    always_assert_flog(
-      env.irb->exceptionStackState().sp == sp(env),
-      "catch block would have had a mismatched stack pointer:\n"
-      "     inst: {}\n"
-      "       sp: {}\n"
-      " expected: {}\n",
-      inst->toString(),
-      sp(env)->toString(),
-      env.irb->exceptionStackState().sp->toString()
-    );
+    check_catch_stack_state(env, inst);
     inst->setTaken(
       env.catchCreator
         ? env.catchCreator()
@@ -151,6 +152,12 @@ void endRegion(HTS& env) {
 }
 
 void endRegion(HTS& env, Offset nextPc) {
+  FTRACE(1, "------------------- endRegion ---------------------------\n");
+  if (!fp(env)) {
+    // The function already returned.  There's no reason to generate code to
+    // try to go to the next part of it.
+    return;
+  }
   if (nextPc >= curFunc(env)->past()) {
     // We have fallen off the end of the func's bytecodes. This happens
     // when the function's bytecodes end with an unconditional
@@ -163,9 +170,10 @@ void endRegion(HTS& env, Offset nextPc) {
     return;
   }
   prepareForNextHHBC(env, nullptr, nextPc, true);
-  auto const stack = spillStack(env);
-  gen(env, SyncABIRegs, fp(env), stack);
-  gen(env, ReqBindJmp, ReqBindJmpData(nextPc));
+  spillStack(env);
+  auto dest = SrcKey{curSrcKey(env), nextPc};
+  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env, ReqBindJmp, ReqBindJmpData { dest }, sp(env));
 }
 
 // All accesses to the stack and locals in this function use DataTypeGeneric so
@@ -177,18 +185,16 @@ Type predictedTypeFromLocation(HTS& env, const Location& loc) {
       auto i = loc.offset;
       assert(i >= 0);
       if (i < env.irb->evalStack().size()) {
-        return top(env, i, DataTypeGeneric)->type();
+        return topType(env, i, DataTypeGeneric);
       } else {
-        auto stackVal =
-          getStackValue(
-            env.irb->sp(),
-            i - env.irb->evalStack().size() + env.irb->stackDeficit()
-          );
-        if (stackVal.knownType.isBoxed() &&
-            !(stackVal.predictedInner <= Type::Bottom)) {
-          return ldRefReturn(stackVal.predictedInner.unbox()).box();
+        auto stackTy = env.irb->stackType(
+          offsetFromSP(env, i),
+          DataTypeGeneric
+        );
+        if (stackTy.isBoxed()) {
+          return env.irb->stackInnerTypePrediction(offsetFromSP(env, i)).box();
         }
-        return stackVal.knownType;
+        return stackTy;
       }
     } break;
     case Location::Local:
@@ -213,6 +219,11 @@ Type predictedTypeFromLocation(HTS& env, const Location& loc) {
 }
 
 void endBlock(HTS& env, Offset next, bool nextIsMerge) {
+  if (!fp(env)) {
+    // If there's no fp, we've already executed a RetCtrl or similar, so
+    // there's no reason to try to jump anywhere now.
+    return;
+  }
   jmpImpl(env, next, nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone);
 }
 
@@ -238,9 +249,11 @@ void prepareForNextHHBC(HTS& env,
   env.irb->prepareForNextHHBC();
 }
 
-size_t spOffset(const HTS& env) {
-  return env.irb->spOffset() + env.irb->evalStack().size() -
-    env.irb->stackDeficit();
+size_t logicalStackDepth(const HTS& env) {
+  // Negate the offsetFromSP because it is an offset from the actual StkPtr (so
+  // negative values go deeper on the stack), but this function deals with
+  // logical stack depths (where more positive values are deeper).
+  return env.irb->spOffset() + -offsetFromSP(env, 0);
 }
 
 Type publicTopType(const HTS& env, int32_t idx) {

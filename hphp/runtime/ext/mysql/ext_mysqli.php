@@ -1704,8 +1704,8 @@ function mysqli_autocommit(mysqli $link, bool $mode): bool {
  * @return bool -
  */
 function mysqli_begin_transaction(mysqli $link,
-                                  int $flags,
-                                  string $name): bool {
+                                  int $flags = 0,
+                                  ?string $name = null): bool {
   return $link->begin_transaction($flags, $name);
 }
 

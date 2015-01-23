@@ -18,9 +18,11 @@
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/minstr-effects.h"
+
+#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP { namespace jit {
 
@@ -44,26 +46,12 @@ PhysReg forceAlloc(const SSATmp& tmp) {
     assert_flog(
       opc == DefSP ||
       opc == ReDefSP ||
+      opc == AdjustSP ||
       opc == Call ||
       opc == CallArray ||
       opc == ContEnter ||
-      opc == SpillStack ||
-      opc == SpillFrame ||
-      opc == CufIterSpillFrame ||
-      opc == ExceptionBarrier ||
-      opc == RetAdjustStack ||
-      opc == InterpOne ||
-      opc == InterpOneCF ||
-      opc == Mov ||
-      opc == CheckStk ||
-      opc == GuardStk ||
-      opc == AssertStk ||
-      opc == CastStk ||
-      opc == CastStkIntToDbl ||
-      opc == CoerceStk ||
-      opc == DefLabel ||
-      opc == HintStkInner ||
-      MInstrEffects::supported(opc),
+      opc == RetAdjustStk ||
+      opc == Mov,
       "unexpected StkPtr dest from {}",
       opcodeName(opc)
     );

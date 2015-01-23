@@ -199,7 +199,7 @@ const StaticString s_ERR_NONE("ERR_NONE");
 
 class PDOData {
  public:
-  public: sp_PDOConnection m_dbh;
+  public: sp_PDOResource m_dbh;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

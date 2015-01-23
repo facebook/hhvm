@@ -11,6 +11,8 @@
 
 function test(): void {
   $x = 0;
-  $f = function($y) use ($x) { return $x + $y; };
+  $f = function ($y) use ($x) {
+    return $x + $y;
+  };
   $f(0);
 }

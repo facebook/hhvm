@@ -1,4 +1,4 @@
 File "stdclass_final.php", line 3, characters 7-18:
 You cannot extend final class stdClass (Typing[4035])
-File "builtins.hhi", line 58, characters 13-20:
+File "builtins.hhi", line 57, characters 13-20:
 Declaration is here

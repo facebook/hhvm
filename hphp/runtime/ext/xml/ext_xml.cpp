@@ -34,10 +34,10 @@
 
 namespace HPHP {
 
-static class XMLExtension : public Extension {
+static class XMLExtension final : public Extension {
 public:
   XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(xml_parser_create);
     HHVM_FE(xml_parser_free);
     HHVM_FE(xml_parse);

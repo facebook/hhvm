@@ -1,4 +1,6 @@
-File "typing_fail_this.php", line 53, characters 12-12:
-The member l is undefined in an object of type MyDoubleList (Typing[4053])
-File "typing_fail_this.php", line 46, characters 7-18:
+File "typing_fail_this.php", line 58, characters 12-12:
+Could not find member l in an object of type MyDoubleList (Typing[4053])
+File "typing_fail_this.php", line 58, characters 5-9:
+This is why I think it is an object of type MyDoubleList
+File "typing_fail_this.php", line 51, characters 7-18:
 Declaration of MyDoubleList is here

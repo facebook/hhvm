@@ -322,10 +322,10 @@ const StaticString s_PHP_URL_FRAGMENT("PHP_URL_FRAGMENT");
 const StaticString s_PHP_QUERY_RFC1738("PHP_QUERY_RFC1738");
 const StaticString s_PHP_QUERY_RFC3986("PHP_QUERY_RFC3986");
 
-class StandardURLExtension : public Extension {
+class StandardURLExtension final : public Extension {
  public:
   StandardURLExtension() : Extension("url") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfInt64>(
       s_PHP_URL_SCHEME.get(), k_PHP_URL_SCHEME
     );

@@ -10,29 +10,35 @@
  */
 
 class A {
-  public function f(): int { return 0; }
+  public function f(): int {
+    return 0;
+  }
 }
 
 class B {
-  public function f(): int { return 0; }
-  public function g(): int { return 0; }
+  public function f(): int {
+    return 0;
+  }
+  public function g(): int {
+    return 0;
+  }
 }
 
 function test(): void {
   $x = new A();
-  if($x instanceof B) {
+  if ($x instanceof B) {
 
   }
 }
 
 function test2(dyn $x): void {
-  if($x instanceof A) {
+  if ($x instanceof A) {
     $x->f();
-  } else if($x instanceof B) {
+  } else if ($x instanceof B) {
     $x->g();
-  } else if($x = 0) {
+  } else if ($x = 0) {
     $y = $x + 1;
-  } else if($x) {
+  } else if ($x) {
     $x = $x + 1;
   }
 }

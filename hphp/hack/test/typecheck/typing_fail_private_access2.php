@@ -10,8 +10,7 @@
  */
 
 class Foo {
-  private function f(): void {
-  }
+  private function f(): void {}
 }
 
 class Bar extends Foo {

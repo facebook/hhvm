@@ -806,6 +806,14 @@ void StringData::setUncounted() const {
   preCompute();
 }
 
+NEVER_INLINE strhash_t StringData::hashHelper() const {
+  assert(!isShared());
+  strhash_t h = hash_string_i_unsafe(m_data, m_len);
+  assert(h >= 0);
+  m_hash |= h;
+  return h;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
@@ -971,17 +979,6 @@ int StringData::compare(const StringData *v2) const {
     return len < len1 ? 1 : -1;
   }
   return ret;
-}
-
-strhash_t StringData::hashHelper() const {
-  assert(!isShared());
-  // Use the inlined unsafe version here, as StringData is 8-byte
-  // aligned. The generated code for the entire method should be exactly 64
-  // bytes with g++ optimization.
-  strhash_t h = hash_string_inline_unsafe(m_data, m_len);
-  assert(h >= 0);
-  m_hash |= h;
-  return h;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

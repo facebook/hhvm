@@ -328,7 +328,10 @@ Cell cellBitOp(StrLenOp strLenOp, Cell c1, Cell c2) {
 template<class Op>
 void cellBitOpEq(Op op, Cell& c1, Cell c2) {
   auto const result = op(c1, c2);
-  cellSet(result, c1);
+  auto const type = c1.m_type;
+  auto const data = c1.m_data.num;
+  tvCopy(result, c1);
+  tvRefcountedDecRefHelper(type, data);
 }
 
 // Op must implement the interface described for cellIncDecOp.

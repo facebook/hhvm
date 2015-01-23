@@ -57,13 +57,13 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
     return false;
   }
 
-  BZ2File *bz;
+  SmartPtr<BZ2File> bz;
   if (filename.isString()) {
     if (filename.asCStrRef().empty()) {
       raise_warning("filename cannot be empty");
       return false;
     }
-    bz = newres<BZ2File>();
+    bz = makeSmartPtr<BZ2File>();
     bool ret = bz->open(File::TranslatePath(filename.toString()), mode);
     if (!ret) {
       raise_warning("%s", folly::errnoStr(errno).c_str());
@@ -74,7 +74,7 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
       raise_warning("first parameter has to be string or file-resource");
       return false;
     }
-    PlainFile* f = filename.toResource().getTyped<PlainFile>();
+    SmartPtr<PlainFile> f(filename.toResource().getTyped<PlainFile>());
     if (!f) {
       return false;
     }
@@ -106,10 +106,9 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
       return false;
     }
 
-    bz = newres<BZ2File>(f);
+    bz = makeSmartPtr<BZ2File>(std::move(f));
   }
-  Resource handle(bz);
-  return handle;
+  return Variant(std::move(bz));
 }
 
 bool HHVM_FUNCTION(bzflush, const Resource& bz) {
@@ -202,10 +201,10 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bz2Extension : public Extension {
+class bz2Extension final : public Extension {
  public:
   bz2Extension() : Extension("bz2") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(bzclose);
     HHVM_FE(bzread);
     HHVM_FE(bzwrite);

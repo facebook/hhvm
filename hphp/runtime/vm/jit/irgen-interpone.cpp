@@ -373,7 +373,7 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
          stackType.hasValue() ? stackType->toString() : "<none>",
          popped, pushed);
 
-  InterpOneData idata;
+  InterpOneData idata { offsetFromSP(env, 0) };
   auto locals = interpOutputLocals(env, inst, idata.smashesAllLocals,
     stackType);
   idata.nChangedLocals = locals.size();
@@ -390,12 +390,12 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
 }
 
 void interpOne(HTS& env, int popped) {
-  InterpOneData idata;
+  InterpOneData idata { offsetFromSP(env, 0) };
   interpOne(env, folly::none, popped, 0, idata);
 }
 
 void interpOne(HTS& env, Type outType, int popped) {
-  InterpOneData idata;
+  InterpOneData idata { offsetFromSP(env, 0) };
   interpOne(env, outType, popped, 1, idata);
 }
 
@@ -405,13 +405,13 @@ void interpOne(HTS& env,
                int pushed,
                InterpOneData& idata) {
   auto const unit = curUnit(env);
-  auto const stack = spillStack(env);
+  spillStack(env);
   env.irb->exceptionStackBoundary();
   auto const op = unit->getOpcode(bcOff(env));
 
   auto& iInfo = getInstrInfo(op);
   if (iInfo.type == jit::InstrFlags::OutFDesc) {
-    env.fpiStack.emplace(stack, env.irb->spOffset());
+    env.fpiStack.push(FPIInfo { sp(env), env.irb->spOffset(), nullptr });
   } else if (isFCallStar(op) && !env.fpiStack.empty()) {
     env.fpiStack.pop();
   }
@@ -421,9 +421,14 @@ void interpOne(HTS& env,
   idata.cellsPushed = pushed;
   idata.opcode = op;
 
-  auto const changesPC = opcodeChangesPC(idata.opcode);
-  gen(env, changesPC ? InterpOneCF : InterpOne, outType,
-      idata, stack, fp(env));
+  gen(
+    env,
+    opcodeChangesPC(idata.opcode) ? InterpOneCF : InterpOne,
+    outType,
+    idata,
+    sp(env),
+    fp(env)
+  );
   assert(env.irb->stackDeficit() == 0);
 }
 

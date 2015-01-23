@@ -723,3 +723,21 @@ function ldap_control_paged_result_response(resource $link,
                                             resource $result,
                                             mixed &$cookie = null,
                                             mixed &$estimated = null): bool;
+
+/**
+ * Escape a string for use in an LDAP filter or DN.
+ *
+ * @param string $value - The value to escape.
+ * @param string $ignore - Characters to ignore when escaping.
+ * @param int $flags - Flags indicating the context the escaped string
+ *   will be used in (combined with the | bitwise operator):
+ *   integer LDAP_ESCAPE_FILTER for filters to be used with ldap_search(), or
+ *   integer LDAP_ESCAPE_DN for DNs.
+ *
+ * @return string - Returns the escaped string.
+ *
+ */
+<<__Native>>
+function ldap_escape(string $value,
+                     string $ignore = "",
+                     int $flags = 0): string;

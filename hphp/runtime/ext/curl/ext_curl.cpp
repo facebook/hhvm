@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/smart-object.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -71,7 +71,7 @@ private:
 
     int                method;
     Variant            callback;
-    SmartResource<File> fp;
+    SmartPtr<File>     fp;
     StringBuffer       buf;
     String             content;
     int                type;
@@ -83,7 +83,7 @@ private:
 
     int                method;
     Variant            callback;
-    SmartResource<File> fp;
+    SmartPtr<File>     fp;
   };
 
   class ToFree {
@@ -469,21 +469,20 @@ public:
         }
 
         Resource obj = value.toResource();
-        if (obj.isNull() || obj.getTyped<File>(true) == nullptr) {
-          return false;
-        }
+        auto fp = obj.getTyped<File>(true);
+        if (!fp) return false;
 
         switch (option) {
           case CURLOPT_FILE:
-            m_write.fp = obj;
+            m_write.fp = fp;
             m_write.method = PHP_CURL_FILE;
             break;
           case CURLOPT_WRITEHEADER:
-            m_write_header.fp = obj;
+            m_write_header.fp = fp;
             m_write_header.method = PHP_CURL_FILE;
             break;
           case CURLOPT_INFILE:
-            m_read.fp = obj;
+            m_read.fp = fp;
             m_emptyPost = false;
             break;
           default: {
@@ -780,7 +779,7 @@ public:
     int length = -1;
     switch (t->method) {
     case PHP_CURL_DIRECT:
-      if (!t->fp.isNull()) {
+      if (t->fp) {
         int data_size = size * nmemb;
         String ret = t->fp->read(data_size);
         length = ret.size();
@@ -793,7 +792,8 @@ public:
       {
         int data_size = size * nmemb;
         Variant ret = ch->do_callback(
-          t->callback, make_packed_array(Resource(ch), t->fp, data_size));
+          t->callback,
+          make_packed_array(Resource(ch), Resource(t->fp), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -1002,15 +1002,15 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
 
 Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   if (url.isNull()) {
-    return newres<CurlResource>(null_string);
+    return Variant(makeSmartPtr<CurlResource>(null_string));
   } else {
-    return newres<CurlResource>(url.toString());
+    return Variant(makeSmartPtr<CurlResource>(url.toString()));
   }
 }
 
 Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch) {
   CHECK_RESOURCE(curl);
-  return newres<CurlResource>(curl);
+  return Variant(makeSmartPtr<CurlResource>(curl));
 }
 
 const StaticString
@@ -1396,7 +1396,7 @@ void CurlMultiResource::sweep() {
   }
 
 Resource HHVM_FUNCTION(curl_multi_init) {
-  return newres<CurlMultiResource>();
+  return Resource(makeSmartPtr<CurlMultiResource>());
 }
 
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
@@ -1642,8 +1642,7 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   Array ret = Array::Create();
   for (int i=0; i<=max_fd; i++) {
     if (FD_ISSET(i, fd)) {
-      BuiltinFile *file = newres<BuiltinFile>(i);
-      ret.append(file);
+      ret.append(Variant(makeSmartPtr<BuiltinFile>(i)));
     }
   }
   return ret;
@@ -2224,10 +2223,10 @@ const StaticString s_CURL_VERSION_KERBEROS4("CURL_VERSION_KERBEROS4");
 const StaticString s_CURL_VERSION_LIBZ("CURL_VERSION_LIBZ");
 const StaticString s_CURL_VERSION_SSL("CURL_VERSION_SSL");
 
-class CurlExtension : public Extension {
+class CurlExtension final : public Extension {
  public:
   CurlExtension() : Extension("curl") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
 #if LIBCURL_VERSION_NUM >= 0x071500
     Native::registerConstant<KindOfInt64>(
       s_CURLINFO_LOCAL_PORT.get(), k_CURLINFO_LOCAL_PORT

@@ -17,67 +17,105 @@
 #ifndef incl_HPHP_JIT_VASM_H_
 #define incl_HPHP_JIT_VASM_H_
 
+#include "hphp/runtime/base/rds.h"
+
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/containers.h"
+
 #include "hphp/util/safe-cast.h"
 
 #include <folly/Range.h>
 #include <iosfwd>
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
+
 struct Vunit;
 struct Vinstr;
 struct Vblock;
 struct Vreg;
 struct Abi;
 
-// Vlabel wraps a block number
-struct Vlabel {
-  Vlabel() : n(0xffffffff) {}
-  explicit Vlabel(size_t n) : n(safe_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
-private:
-  unsigned n; // index in Vunit::blocks
-};
-
-// Vpoint is a handle to record or retreive a code address
-struct Vpoint {
-  Vpoint(){}
-  explicit Vpoint(size_t n) : n(safe_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { return n; }
-private:
-  unsigned n;
-};
-
-// Vtuple is an index to a tuple in Vunit::tuples
-struct Vtuple {
-  Vtuple() : n(0xffffffff) {}
-  explicit Vtuple(size_t n) : n(safe_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
-private:
-  unsigned n; // index in Vunit::tuples
-};
-
-// VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs
-struct VcallArgsId {
-  explicit VcallArgsId(size_t n) : n(safe_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
-private:
-  unsigned n; // index in Vunit::vcallArgs
-};
-
-enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
-
-// passes
-void allocateRegisters(Vunit&, const Abi&);
-void optimizeExits(Vunit&);
-void optimizeJmps(Vunit&);
-void fuseBranches(Vunit&);
-void removeDeadCode(Vunit&);
-template<typename Folder> void foldImms(Vunit&);
-void lowerForARM(Vunit&);
+///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Get the successors of a block or instruction. If given a non-const
+ * If Trace::moduleEnabled(Trace::llvm) || RuntimeOption::EvalJitLLVMCounters,
+ * these two RDS values are used to count the number of bytecodes executed by
+ * code emitted from their respective backends.
+ */
+extern RDS::Link<uint64_t> g_bytecodesLLVM;
+extern RDS::Link<uint64_t> g_bytecodesVasm;
+
+///////////////////////////////////////////////////////////////////////////////
+
+#define DECLARE_VNUM(Vnum, check)                         \
+struct Vnum {                                             \
+  Vnum() {}                                               \
+  explicit Vnum(size_t n) : n(safe_cast<unsigned>(n)) {}  \
+                                                          \
+  /* implicit */ operator size_t() const {                \
+    if (check) assert(n != 0xffffffff);                   \
+    return n;                                             \
+  }                                                       \
+                                                          \
+private:                                                  \
+  unsigned n{0xffffffff};                                 \
+}
+
+/*
+ * Vlabel wraps a block number.
+ */
+DECLARE_VNUM(Vlabel, true);
+
+/*
+ * Vpoint is a handle to record or retreive a code address.
+ */
+DECLARE_VNUM(Vpoint, false);
+
+/*
+ * Vtuple is an index to a tuple in Vunit::tuples.
+ */
+DECLARE_VNUM(Vtuple, true);
+
+/*
+ * VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs.
+ */
+DECLARE_VNUM(VcallArgsId, true);
+
+#undef DECLARE_VNUM
+
+/*
+ * Vreg discriminator.
+ */
+enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Assert invariants on a Vunit.
+ */
+bool check(Vunit&);
+
+/*
+ * Check that each block has exactly one terminal instruction at the end.
+ */
+bool checkBlockEnd(Vunit& v, Vlabel b);
+
+/*
+ * Passes.
+ */
+void allocateRegisters(Vunit&, const Abi&);
+void fuseBranches(Vunit&);
+void optimizeExits(Vunit&);
+void optimizeJmps(Vunit&);
+void removeDeadCode(Vunit&);
+void removeTrivialNops(Vunit&);
+template<typename Folder> void foldImms(Vunit&);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Get the successors of a block or instruction.  If given a non-const
  * reference, the resulting Range will allow mutation of the Vlabels.
  */
 folly::Range<Vlabel*> succs(Vinstr& inst);
@@ -85,12 +123,18 @@ folly::Range<Vlabel*> succs(Vblock& block);
 folly::Range<const Vlabel*> succs(const Vinstr& inst);
 folly::Range<const Vlabel*> succs(const Vblock& block);
 
-// Sort blocks in reverse-postorder starting from unit.entry
+/*
+ * Sort blocks in reverse-postorder starting from `unit.entry'.
+ */
 jit::vector<Vlabel> sortBlocks(const Vunit& unit);
 
-// Group blocks into main, cold, and frozen while preserving relative
-// order with each section.
+/*
+ * Group blocks into main, cold, and frozen while preserving relative order
+ * with each section.
+ */
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
 
+///////////////////////////////////////////////////////////////////////////////
 }}
+
 #endif

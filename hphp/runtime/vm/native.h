@@ -40,7 +40,7 @@ class Object;
  *   }
  *
  * Then register it from your Extension's moduleLoad() hook:
- *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
+ *   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
  *     HHVM_FE(sum);
  *   }
  *

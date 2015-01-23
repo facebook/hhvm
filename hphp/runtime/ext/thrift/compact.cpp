@@ -899,7 +899,7 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        SmartObject<c_Set> set_ret(newobj<c_Set>());
+        auto set_ret = makeSmartPtr<c_Set>();
         if (size) set_ret->reserve(size);
 
         for (uint32_t i = 0; i < size; i++) {
@@ -907,7 +907,7 @@ class CompactReader {
           set_ret->t_add(value);
         }
 
-        ret = Variant(set_ret);
+        ret = Variant(std::move(set_ret));
       } else {
         // Note: the Mixed{} is just out of uncertainty right now.
         // These probably are generally string keys and this should

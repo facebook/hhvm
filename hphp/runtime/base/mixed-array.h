@@ -28,6 +28,8 @@ namespace HPHP {
 
 class ArrayInit;
 struct MemoryProfile;
+class Shape;
+struct StructArray;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -166,6 +168,8 @@ public:
    */
   static MixedArray* MakeStruct(uint32_t size, StringData** keys,
                                const TypedValue* values);
+  static StructArray* MakeStructArray(uint32_t size, const TypedValue* values,
+                                      Shape*);
 
   /*
    * Allocate an uncounted MixedArray and copy the values from the
@@ -221,6 +225,8 @@ private:
   using ArrayData::nvGet;
   using ArrayData::release;
 public:
+  static Variant CreateVarForUncountedArray(const Variant& source);
+  static void ReleaseUncountedTypedValue(TypedValue& tv);
 
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
@@ -391,6 +397,7 @@ private:
   friend struct MemoryProfile;
   friend struct EmptyArray;
   friend struct PackedArray;
+  friend struct StructArray;
   friend class HashCollection;
   friend class BaseMap;
   friend class c_Map;
@@ -527,6 +534,9 @@ private:
   ArrayData* nextInsertWithRef(const Variant& data);
   ArrayData* addVal(int64_t ki, Cell data);
   ArrayData* addVal(StringData* key, Cell data);
+  ArrayData* addValNoAsserts(StringData* key, Cell data);
+
+  Elm& addKeyAndGetElem(StringData* key);
 
   template <class K> ArrayData* addLvalImpl(K k, Variant*& ret);
   template <class K> ArrayData* update(K k, Cell data);

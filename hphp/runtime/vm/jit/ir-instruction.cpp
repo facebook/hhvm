@@ -55,16 +55,12 @@ bool IRInstruction::hasExtra() const {
   return m_extra;
 }
 
-// Instructions with ModifiesStack are always naryDst regardless of
-// the inner dest.
-
 bool IRInstruction::hasDst() const {
-  return opcodeHasFlags(op(), HasDest) &&
-    !opcodeHasFlags(op(), ModifiesStack);
+  return opcodeHasFlags(op(), HasDest);
 }
 
 bool IRInstruction::naryDst() const {
-  return opcodeHasFlags(op(), NaryDest | ModifiesStack);
+  return opcodeHasFlags(op(), NaryDest);
 }
 
 bool IRInstruction::producesReference(int dstNo) const {
@@ -109,19 +105,14 @@ bool IRInstruction::consumesReference(int srcNo) const {
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
 
-    case StProp:
     case StMem:
-      // StProp|StMem <base>, <offset>, <value>
-      return srcNo == 2;
+      // StMem <base>, <value>
+      return srcNo == 1;
 
     case ArraySet:
     case ArraySetRef:
       // Only consumes the reference to its input array
       return srcNo == 0;
-
-    case SpillStack:
-      // Inputs 2+ are values to store
-      return srcNo >= 2;
 
     case SpillFrame:
       // Consumes the $this/Class field of the ActRec
@@ -174,7 +165,7 @@ bool IRInstruction::isRawLoad() const {
   switch (m_op) {
     case LdMem:
     case LdRef:
-    case LdStack:
+    case LdStk:
     case LdElem:
     case LdContField:
     case LdPackedArrayElem:
@@ -215,22 +206,6 @@ bool IRInstruction::killsSource(int idx) const {
       not_reached();
       break;
   }
-}
-
-bool IRInstruction::modifiesStack() const {
-  return opcodeHasFlags(op(), ModifiesStack);
-}
-
-SSATmp* IRInstruction::modifiedStkPtr() const {
-  assert(modifiesStack());
-  SSATmp* sp = dst(hasMainDst() ? 1 : 0);
-  assert(sp->isA(Type::StkPtr));
-  return sp;
-}
-
-SSATmp* IRInstruction::previousStkPtr() const {
-  assert(modifiesStack());
-  return src(numSrcs() - 1);
 }
 
 bool IRInstruction::hasMainDst() const {

@@ -11,13 +11,19 @@
 
 class PlaceMutation implements IPlaceMutation {
 
-  private $preMutationPlace, $visibilityLock, $location,
-    $sentryCategory, $appID, $uri, $visibilityInfo,
+  private
+    $preMutationPlace,
+    $visibilityLock,
+    $location,
+    $sentryCategory,
+    $appID,
+    $uri,
+    $visibilityInfo,
     $relatedUIDs;
 
-  public function setRadiusMeters($x) { }
-  public function getMutationOperation() { }
-  public function changesVisibility() { }
+  public function setRadiusMeters($x) {}
+  public function getMutationOperation() {}
+  public function changesVisibility() {}
 
   public function setPreMutationPlace(EntPlace $place) {
     $this->preMutationPlace = $place;
@@ -26,12 +32,12 @@ class PlaceMutation implements IPlaceMutation {
     if ($place->getRadiusMeters()) {
       $this->setRadiusMeters($place->getRadiusMeters());
     }
-    return $this
-      ->setLocation($place->getLocation())
-      ->setPlaceID($place->getID())
-      ->setUnindexedPlace($place->getUnindexedPlace())
-      ->setVisibilityInfo($place->getVisibilityInfo())
-      ->setRankBoost($place->getRankBoost());
+    return
+      $this->setLocation($place->getLocation())
+        ->setPlaceID($place->getID())
+        ->setUnindexedPlace($place->getUnindexedPlace())
+        ->setVisibilityInfo($place->getVisibilityInfo())
+        ->setRankBoost($place->getRankBoost());
   }
 
   public function hasPreMutationPlace() {
@@ -56,13 +62,9 @@ class PlaceMutation implements IPlaceMutation {
     return $this;
   }
 
-
-
-
   public function setDescription($description) {
     return $this;
   }
-
 
   public function setCreationDBID(int $creation_dbid) {
     return $this;
@@ -99,7 +101,9 @@ class PlaceMutation implements IPlaceMutation {
   public function setVisibilityInfo($visibility_info) {
     $visibility_info = $visibility_info ? $visibility_info : array();
     $this->visibilityInfo = ArgAssert::isArray($visibility_info);
-    PlaceVisibilityPreparable::validateVisibilityInfoParams($visibility_info);
+    PlaceVisibilityPreparable::validateVisibilityInfoParams(
+      $visibility_info,
+    );
 
     switch ($this->getMutationOperation()) {
       case IPlaceMutation::OPERATION_CREATE:
@@ -107,7 +111,7 @@ class PlaceMutation implements IPlaceMutation {
       default:
         if (!$this->hasPreMutationPlace()) {
           throw new Exception(
-            'Cannot Set Visibility without setting old Place data first'
+            'Cannot Set Visibility without setting old Place data first',
           );
         }
         break;
@@ -122,8 +126,9 @@ class PlaceMutation implements IPlaceMutation {
           break;
         default:
           throw new Exception(
-            'Action '.$this->getMutationOperation().
-            ' does not support visibility changes'
+            'Action '.
+            $this->getMutationOperation().
+            ' does not support visibility changes',
           );
       }
     }

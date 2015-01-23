@@ -587,14 +587,15 @@ void emitDiv(HTS& env) {
   dividend = make_double(popC(env));
 
   SSATmp* divVal = nullptr;  // edge-defined value
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       divVal = gen(env, DivDbl, taken, dividend, divisor);
     },
     [&] {
       // Make progress by raising a warning and pushing false before
       // side-exiting to the next instruction.
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
       gen(env, RaiseWarning, msg);
       push(env, cns(env, false));
@@ -612,14 +613,15 @@ void emitMod(HTS& env) {
   auto const tl = gen(env, ConvCellToInt, btl);
 
   // Generate an exit for the rare case that r is zero.
-  env.irb->ifThen(
+  ifThen(
+    env,
     [&] (Block* taken) {
       gen(env, JmpZero, taken, tr);
     },
     [&] {
       // Make progress before side-exiting to the next instruction: raise a
       // warning and push false.
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
       gen(env, RaiseWarning, msg);
       gen(env, DecRef, btr);
@@ -637,7 +639,8 @@ void emitMod(HTS& env) {
 
   // Check for -1.  The Mod IR instruction has undefined behavior for -1, but
   // php semantics are to return zero.
-  auto const res = env.irb->cond(
+  auto const res = cond(
+    env,
     0,
     [&] (Block* taken) {
       auto const negone = gen(env, Eq, tr, cns(env, -1));
@@ -647,7 +650,7 @@ void emitMod(HTS& env) {
       return gen(env, Mod, tl, tr);
     },
     [&] {
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       return cns(env, 0);
     }
   );

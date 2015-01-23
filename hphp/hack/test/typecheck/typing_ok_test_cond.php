@@ -9,49 +9,45 @@
  *
  */
 
-class A { }
+class A {}
 
-function foo(A $x): void {
-}
-
-
+function foo(A $x): void {}
 
 function test1(?A $x): void {
-  while($x) {
-  assert($x instanceof A);
+  while ($x) {
+    assert($x instanceof A);
     foo($x);
   }
 }
 
 function test2(?A $x): void {
-  while(!$x) {
+  while (!$x) {
   }
   foo($x);
 }
 
 function test3(?A $x): void {
-  for(; $x ;) {
-  assert($x instanceof A);
+  for (; $x; ) {
+    assert($x instanceof A);
     foo($x);
   }
 }
 
 function test4(?A $x): void {
-  for(; !$x ;) {
+  for (; !$x; ) {
   }
   foo($x);
 }
 
 function test5(?A $x): void {
-  if($x) {
+  if ($x) {
     foo($x);
   }
 }
 
 function test6(?A $x): void {
-  if(!$x) {
-  }
-  else {
+  if (!$x) {
+  } else {
     foo($x);
   }
 }

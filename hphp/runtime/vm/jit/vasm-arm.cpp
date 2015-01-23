@@ -14,28 +14,38 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/back-end-arm.h"
-#include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/back-end-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
+#include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
+
 using namespace arm;
 using namespace vixl;
 
 namespace arm { struct ImmFolder; }
 
 namespace {
+///////////////////////////////////////////////////////////////////////////////
 
 vixl::Register W(Vreg32 r) {
   PhysReg pr(r.asReg());
@@ -85,7 +95,7 @@ private:
 
   // intrinsics
   void emit(bindcall& i);
-  void emit(bindexit& i);
+  void emit(bindjcc& i);
   void emit(bindjmp& i);
   void emit(copy& i);
   void emit(copy2& i);
@@ -96,7 +106,7 @@ private:
   void emit(hcnocatch& i);
   void emit(hcunwind& i);
   void emit(hostcall& i);
-  void emit(ldimm& i);
+  void emit(ldimmq& i);
   void emit(ldimmb& i);
   void emit(ldpoint& i);
   void emit(load& i);
@@ -327,8 +337,8 @@ void Vgen::emit(bindcall& i) {
   mcg->backEnd().emitSmashableCall(*codeBlock, i.stub);
 }
 
-void Vgen::emit(bindexit& i) {
-  emitBindSideExit(*codeBlock, frozen(), i.target, i.cc);
+void Vgen::emit(bindjcc& i) {
+  emitBindJcc(*codeBlock, frozen(), i.cc, i.target);
 }
 
 void Vgen::emit(bindjmp& i) {
@@ -397,7 +407,7 @@ void Vgen::emit(hostcall& i) {
   a->HostCall(i.argc);
 }
 
-void Vgen::emit(ldimm& i) {
+void Vgen::emit(ldimmq& i) {
   union { double dval; int64_t ival; };
   ival = i.s.q();
   if (i.d.isSIMD()) {
@@ -515,7 +525,7 @@ void Vgen::emit(tbcc& i) {
 // Lower svcreq{} by making copies to abi registers explicit, saving
 // vm regs, and returning to the VM. svcreq{} is guaranteed to be
 // at the end of a block, so we can just keep appending to the same block.
-static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
+void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   auto svcreq = inst.svcreq_; // copy it
   auto origin = inst.origin;
   auto& argv = unit.tuples[svcreq.args];
@@ -537,9 +547,9 @@ static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   if (svcreq.stub_block) {
     always_assert(false && "use rip-rel addr to get ephemeral stub addr");
   } else {
-    v << ldimm{0, PhysReg{arm::rAsm}}; // because persist flag
+    v << ldimmq{0, PhysReg{arm::rAsm}}; // because persist flag
   }
-  v << ldimm{svcreq.req, PhysReg{argReg(0)}};
+  v << ldimmq{svcreq.req, PhysReg{argReg(0)}};
   arg_regs |= arm::rAsm | argReg(0);
 
   // Weird hand-shaking with enterTC: reverse-call a service routine.
@@ -578,6 +588,70 @@ void lower(Vunit& unit) {
   }
 }
 
+/*
+ * Some vasm opcodes don't have equivalent single instructions on ARM, and the
+ * equivalent instruction sequences require scratch registers.  We have to
+ * lower these to ARM-suitable vasm opcodes before register allocation.
+ */
+template<typename Inst>
+void lower(Inst& i, Vout& v) {
+  v << i;
+}
+
+void lower(cmpbim& i, Vout& v) {
+  auto scratch = v.makeReg();
+  v << loadzbl{i.s1, scratch};
+  v << cmpli{i.s0, scratch, i.sf};
+}
+
+void lower(cmplim& i, Vout& v) {
+  auto scratch = v.makeReg();
+  v << loadl{i.s1, scratch};
+  v << cmpli{i.s0, scratch, i.sf};
+}
+
+void lower(cmpqm& i, Vout& v) {
+  auto scratch = v.makeReg();
+  v << load{i.s1, scratch};
+  v << cmpq{i.s0, scratch, i.sf};
+}
+
+void lower(testbim& i, Vout& v) {
+  auto scratch = v.makeReg();
+  v << loadzbl{i.s1, scratch};
+  v << testli{i.s0, scratch, i.sf};
+}
+
+void lowerForARM(Vunit& unit) {
+  assert(check(unit));
+
+  // block order doesn't matter, but only visit reachable blocks.
+  auto blocks = sortBlocks(unit);
+
+  for (auto b : blocks) {
+    auto oldCode = std::move(unit.blocks[b].code);
+    Vout v{unit, b};
+
+    for (auto& inst : oldCode) {
+      v.setOrigin(inst.origin);
+
+      switch (inst.op) {
+#define O(nm, imm, use, def) \
+        case Vinstr::nm: \
+          lower(inst.nm##_, v); \
+          break;
+
+        VASM_OPCODES
+#undef O
+      }
+    }
+  }
+
+  assert(check(unit));
+  printUnit(kVasmARMFoldLevel, "after lowerForARM", unit);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
@@ -602,4 +676,5 @@ void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
   Vgen(m_unit, m_areas, asmInfo).emit(blocks);
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }}

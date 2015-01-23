@@ -262,12 +262,17 @@ public:
   static std::string AdminPassword;
   static std::set<std::string> AdminPasswords;
 
-  static std::string ProxyOrigin;
+  /*
+   * Options related to reverse proxying. ProxyOriginRaw and ProxyPercentageRaw
+   * may be mutated by background threads and should only be read or written
+   * using the helper functions defined with HttpRequestHandler.
+   */
+  static std::string ProxyOriginRaw;
+  static int ProxyPercentageRaw;
   static int ProxyRetry;
   static bool UseServeURLs;
   static std::set<std::string> ServeURLs;
   static bool UseProxyURLs;
-  static int ProxyPercentage;
   static std::set<std::string> ProxyURLs;
   static std::vector<std::string> ProxyPatterns;
   static bool AlwaysUseRelativePath;
@@ -341,7 +346,6 @@ public:
   static bool EnableEmitterStats;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
-  static int MaxUserFunctionId;
   static bool EnableArgsInBacktraces;
   static bool EnableZendCompat;
   static bool EnableZendSorting;
@@ -391,6 +395,11 @@ public:
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(uint32_t, JitLLVM,                 jitLLVMDefault())                \
+  F(bool,     JitLLVMFastISel,         false)                           \
+  F(bool,     JitLLVMBasicOpt,         true)                            \
+  F(uint32_t, JitLLVMOptLevel,         2)                               \
+  F(uint32_t, JitLLVMSizeLevel,        0)                               \
+  F(bool,     JitLLVMCounters,         false)                           \
   F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             ahotDefault())                   \
@@ -462,7 +471,6 @@ public:
   F(bool, HHIRCse,                     false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
-  F(bool, HHIRJumpOpts,                true)                            \
   F(bool, HHIRRefcountOpts,            refcountOptsDefault())           \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \
@@ -521,6 +529,7 @@ public:
                         kDefaultInitialStaticStringTableSize)           \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \
+  F(string, PCRECacheType, std::string("static"))                       \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   /* */

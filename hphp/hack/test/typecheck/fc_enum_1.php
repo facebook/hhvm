@@ -12,13 +12,11 @@ enum Bar : int {
   BAZ = 3;
 }
 
-
 function test(): Foo {
   return Foo::FOO;
 }
 
-function test2(int $x): void {
-}
+function test2(int $x): void {}
 
 function test3(): void {
   test2(Foo::BAR);

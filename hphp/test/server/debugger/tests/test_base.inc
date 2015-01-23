@@ -58,10 +58,11 @@ function runTest($testName, $testController) {
     // Echo stderr, just in case.
     // (It was redirected to stdout, so this should be empty).
     echo stream_get_contents($pipes[2]);
-    stopServer($adminPort);
+    stopServer($adminPort, $serverProc);
   } catch (Exception $e) {
     error_log("Caught exception, test failed, pid=$pid");
     killChildren(posix_getpid());
+    if ($serverProc) proc_close($serverProc);
     error_log('test failed');
   }
 }

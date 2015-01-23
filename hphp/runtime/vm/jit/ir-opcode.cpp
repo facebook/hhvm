@@ -51,14 +51,12 @@ TRACE_SET_MOD(hhir);
 #define B      Branch
 #define P      Passthrough
 #define K      KillsSources
-#define StkFlags(f) HasStackVersion|(f)
 #define MProp  MInstrProp
 #define MElem  MInstrElem
 
 #define ND             0
 #define D(n)           HasDest
 #define DofS(n)        HasDest
-#define DBox(n)        HasDest
 #define DRefineS(n)    HasDest
 #define DParamMayRelax HasDest
 #define DParam         HasDest
@@ -71,7 +69,6 @@ TRACE_SET_MOD(hhir);
 #define DThis          HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
-#define DStk(x)        ModifiesStack|(x)
 #define DPtrToParam    HasDest
 #define DBuiltin       HasDest
 #define DSubtract(n,t) HasDest
@@ -98,14 +95,12 @@ OpInfo g_opInfo[] = {
 #undef B
 #undef P
 #undef K
-#undef StkFlags
 #undef MProp
 #undef MElem
 
 #undef ND
 #undef D
 #undef DofS
-#undef DBox
 #undef DRefineS
 #undef DParamMayRelax
 #undef DParam
@@ -118,20 +113,12 @@ OpInfo g_opInfo[] = {
 #undef DThis
 #undef DMulti
 #undef DSetElem
-#undef DStk
 #undef DPtrToParam
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
 
 //////////////////////////////////////////////////////////////////////
-
-Opcode getStackModifyingOpcode(Opcode opc) {
-  assert(opcodeHasFlags(opc, HasStackVersion));
-  opc = Opcode(uint64_t(opc) + 1);
-  assert(opcodeHasFlags(opc, ModifiesStack));
-  return opc;
-}
 
 const StringData* findClassName(SSATmp* cls) {
   assert(cls->isA(Type::Cls));
@@ -238,24 +225,6 @@ bool isDblQueryOp(Opcode opc) {
   }
 }
 
-bool isQueryJmpOp(Opcode opc) {
-  switch (opc) {
-  case JmpZero:
-  case JmpNZero:
-    return true;
-  default:
-    return false;
-  }
-}
-
-Opcode jmpToReqBindJmp(Opcode opc) {
-  switch (opc) {
-  case JmpZero:               return ReqBindJmpZero;
-  case JmpNZero:              return ReqBindJmpNZero;
-  default:                    always_assert(0);
-  }
-}
-
 Opcode negateQueryOp(Opcode opc) {
   assert(isQueryOp(opc));
   switch (opc) {
@@ -353,12 +322,6 @@ Opcode queryToDblQueryOp(Opcode opc) {
   case NeqInt:return NeqDbl;
   default: always_assert(0);
   }
-}
-
-int32_t spillValueCells(const IRInstruction* spillStack) {
-  assert(spillStack->op() == SpillStack);
-  int32_t numSrcs = spillStack->numSrcs();
-  return numSrcs - 2;
 }
 
 }}

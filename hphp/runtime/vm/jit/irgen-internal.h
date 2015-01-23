@@ -75,10 +75,194 @@ inline Offset nextBcOff(const HTS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Control-flow helpers.
+
+inline void hint(HTS& env, Block::Hint h) {
+  env.irb->curBlock()->setHint(h);
+}
+
+/*
+ * BranchImpl is used by cond to support branch and next lambdas with different
+ * signatures. See cond for details.
+ */
+
+template<class T> struct BranchImpl;
+
+template<> struct BranchImpl<void> {
+  template<class Branch, class Next>
+  static SSATmp* go(Branch branch, Block* taken, Next next) {
+    branch(taken);
+    return next();
+  }
+};
+
+template<> struct BranchImpl<SSATmp*> {
+  template<class Branch, class Next>
+  static SSATmp* go(Branch branch, Block* taken, Next next) {
+    return next(branch(taken));
+  }
+};
+
+/*
+ * cond() generates if-then-else blocks within a trace.  The caller supplies
+ * lambdas to create the branch, next-body, and taken-body.  The next and
+ * taken lambdas must return one SSATmp* value; cond() returns the SSATmp for
+ * the merged value.
+ *
+ * If branch returns void, next must take zero arguments. If branch returns
+ * SSATmp*, next must take one SSATmp* argument. This allows branch to return
+ * an SSATmp* that is only defined in the next branch, without letting it
+ * escape into the caller's scope (most commonly used with things like
+ * LdMem).
+ *
+ * The producedRefs argument is needed for the refcount optimizations in
+ * refcount-opts.cpp. It should be the number of unconsumed references
+ * forwarded from each Jmp src to the DefLabel's dst (for a description of
+ * reference producers and consumers, read the "Refcount Optimizations"
+ * section in hphp/doc/hackers-guide/jit-optimizations.md). As an example,
+ * code that looks like the following should pass 1 for producedRefs, since
+ * LdCns and LookupCns each produce a reference that should then be forwarded
+ * to t2, the dest of the DefLabel:
+ *
+ * B0:
+ *   t0:FramePtr = DefFP
+ *   t1:Cell = LdCns "foo"        // produce reference to t1
+ *   CheckInit t1:Cell -> B3<Unlikely>
+ *  -> B1
+ *
+ * B1 (preds B0):
+ *   Jmp t1:Cell -> B2            // forward t1's unconsumed ref to t2
+ *
+ * B2 (preds B1, B3):
+ *   t2:Cell = DefLabel           // produce reference to t2, from t1 and t4
+ *   StLoc<1> t0:FramePtr t2:Cell // consume reference to t2
+ *   Halt
+ *
+ * B3<Unlikely> (preds B0):
+ *   t3:Uninit = AssertType<Uninit> t1:Cell // consume reference to t1
+ *   t4:Cell = LookupCns "foo"    // produce reference to t4
+ *   Jmp t4:Cell -> B2            // forward t4's unconsumed ref to t2
+ *
+ * A sufficiently advanced analysis pass could deduce this value from the
+ * structure of the IR, but it would require traversing all possible control
+ * flow paths, causing an explosion of required CPU time and/or memory.
+ */
+template<class Branch, class Next, class Taken>
+SSATmp* cond(HTS& env,
+             unsigned producedRefs,
+             Branch branch,
+             Next next,
+             Taken taken) {
+  auto const taken_block = env.unit.defBlock();
+  auto const done_block = env.unit.defBlock();
+
+  using T = decltype(branch(taken_block));
+  auto const v1 = BranchImpl<T>::go(branch, taken_block, next);
+  gen(env, Jmp, done_block, v1);
+  env.irb->appendBlock(taken_block);
+  auto const v2 = taken();
+  gen(env, Jmp, done_block, v2);
+
+  env.irb->appendBlock(done_block);
+  auto const label = env.unit.defLabel(
+    1,
+    env.irb->curMarker(),
+    {producedRefs}
+  );
+  done_block->push_back(label);
+  auto const result = label->dst(0);
+  result->setType(Type::unionOf(v1->type(), v2->type()));
+  return result;
+}
+
+/*
+ * ifThenElse() generates if-then-else blocks within a trace that do not
+ * produce values. Code emitted in the {next,taken} lambda will be executed iff
+ * the branch emitted in the branch lambda is {not,} taken.
+ */
+template<class Branch, class Next, class Taken>
+void ifThenElse(HTS& env, Branch branch, Next next, Taken taken) {
+  auto const taken_block = env.unit.defBlock();
+  auto const done_block = env.unit.defBlock();
+  branch(taken_block);
+  next();
+  // patch the last block added by the Next lambda to jump to
+  // the done block.  Note that last might not be taken_block.
+  auto const cur = env.irb->curBlock();
+  if (cur->empty() || !cur->back().isBlockEnd()) {
+    gen(env, Jmp, done_block);
+  } else if (!cur->back().isTerminal()) {
+    cur->back().setNext(done_block);
+  }
+  env.irb->appendBlock(taken_block);
+  taken();
+  // patch the last block added by the Taken lambda to jump to
+  // the done block.  Note that last might not be taken_block.
+  auto const last = env.irb->curBlock();
+  if (last->empty() || !last->back().isBlockEnd()) {
+    gen(env, Jmp, done_block);
+  } else if (!last->back().isTerminal()) {
+    last->back().setNext(done_block);
+  }
+  env.irb->appendBlock(done_block);
+}
+
+/*
+ * ifThen generates if-then blocks within a trace that do not produce
+ * values. Code emitted in the taken lambda will be executed iff the branch
+ * emitted in the branch lambda is taken.
+ */
+template<class Branch, class Taken>
+void ifThen(HTS& env, Branch branch, Taken taken) {
+  auto const taken_block = env.unit.defBlock();
+  auto const done_block = env.unit.defBlock();
+  branch(taken_block);
+  auto const cur = env.irb->curBlock();
+  if (cur->empty() || !cur->back().isBlockEnd()) {
+    gen(env, Jmp, done_block);
+  } else if (!cur->back().isTerminal()) {
+    cur->back().setNext(done_block);
+  }
+  env.irb->appendBlock(taken_block);
+  taken();
+  // patch the last block added by the Taken lambda to jump to
+  // the done block.  Note that last might not be taken_block.
+  auto const last = env.irb->curBlock();
+  if (last->empty() || !last->back().isBlockEnd()) {
+    gen(env, Jmp, done_block);
+  } else if (!last->back().isTerminal()) {
+    last->back().setNext(done_block);
+  }
+  env.irb->appendBlock(done_block);
+}
+
+/*
+ * ifElse generates if-then-else blocks with an empty 'then' block
+ * that do not produce values. Code emitted in the next lambda will
+ * be executed iff the branch emitted in the branch lambda is not
+ * taken.
+ */
+template<class Branch, class Next>
+void ifElse(HTS& env, Branch branch, Next next) {
+  auto const done_block = env.unit.defBlock();
+  branch(done_block);
+  next();
+  // patch the last block added by the Next lambda to jump to
+  // the done block.
+  auto last = env.irb->curBlock();
+  if (last->empty() || !last->back().isBlockEnd()) {
+    gen(env, Jmp, done_block);
+  } else if (!last->back().isTerminal()) {
+    last->back().setNext(done_block);
+  }
+  env.irb->appendBlock(done_block);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 inline BCMarker makeMarker(HTS& env, Offset bcOff) {
-  int32_t stackOff = env.irb->spOffset() +
-    env.irb->evalStack().numCells() - env.irb->stackDeficit();
+  int32_t stackOff = env.irb->syncedSpLevel() +
+    env.irb->evalStack().size() - env.irb->stackDeficit();
 
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff, curFunc(env)->fullName()->data());
@@ -97,21 +281,42 @@ inline void updateMarker(HTS& env) {
 //////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
+// Convert stack offsets that are relative to the current HHBC instruction
+// (positive is higher on the stack) to offsets that are relative to the
+// currently defined StkPtr.
+inline int32_t offsetFromSP(const HTS& env, int32_t offsetFromInstr) {
+  int32_t const virtDelta = env.irb->evalStack().size() -
+    env.irb->stackDeficit();
+  auto const curSPTop = env.irb->syncedSpLevel() + virtDelta;
+  auto const absSPOff = curSPTop - offsetFromInstr;
+  auto const ret = -static_cast<int32_t>(absSPOff - env.irb->spOffset());
+  FTRACE(1,
+    "offsetFromSP({}) --> spOff: {}, virtDelta: {}, curTop: {}, abs: {}, "
+      "ret: {}\n",
+    offsetFromInstr,
+    env.irb->spOffset(),
+    virtDelta,
+    curSPTop,
+    absSPOff,
+    ret
+  );
+  return ret;
+}
+
 inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
   auto const opnd = env.irb->evalStack().pop();
   env.irb->constrainValue(opnd, tc);
 
   if (opnd == nullptr) {
-    auto const stackOff = env.irb->stackDeficit();
+    env.irb->constrainStack(offsetFromSP(env, 0), tc);
+    auto value = gen(
+      env,
+      LdStk,
+      type,
+      StackOffset { offsetFromSP(env, 0) },
+      sp(env)
+    );
     env.irb->incStackDeficit();
-    env.irb->constrainStack(stackOff, tc);
-
-    // pop() is usually called with Cell or Gen. Don't rely on the simplifier
-    // to get a better type for the LdStack.
-    auto const info = getStackValue(sp(env), stackOff);
-    type = std::min(type, info.knownType);
-
-    auto value = gen(env, LdStack, type, StackOffset(stackOff), sp(env));
     FTRACE(2, "popping {}\n", *value->inst());
     return value;
   }
@@ -125,13 +330,13 @@ inline SSATmp* popC(HTS& env, TypeConstraint tc = DataTypeSpecific) {
 }
 
 inline SSATmp* popA(HTS& env) { return pop(env, Type::Cls); }
-inline SSATmp* popV(HTS& env) { return pop(env, Type::BoxedCell); }
+inline SSATmp* popV(HTS& env) { return pop(env, Type::BoxedInitCell); }
 inline SSATmp* popR(HTS& env) { return pop(env, Type::Gen); }
 inline SSATmp* popF(HTS& env) { return pop(env, Type::Gen); }
 
 inline void discard(HTS& env, uint32_t n) {
   for (auto i = uint32_t{0}; i < n; ++i) {
-    pop(env, Type::StackElem, DataTypeGeneric); // don't care about the values
+    pop(env, Type::StkElem, DataTypeGeneric); // don't care about the values
   }
 }
 
@@ -144,8 +349,15 @@ inline void popDecRef(HTS& env,
     return;
   }
 
-  env.irb->constrainStack(env.irb->stackDeficit(), tc);
-  gen(env, DecRefStack, StackOffset(env.irb->stackDeficit()), type, sp(env));
+  auto const offset = offsetFromSP(env, 0);
+  env.irb->constrainStack(offset, tc);
+  gen(
+    env,
+    DecRefStk,
+    StackOffset { offset },
+    type,
+    sp(env)
+  );
   env.irb->incStackDeficit();
 }
 
@@ -163,33 +375,16 @@ inline SSATmp* pushIncRef(HTS& env,
   return push(env, tmp);
 }
 
-inline SSATmp* top(HTS& env,
-                   uint32_t offset = 0,
-                   TypeConstraint tc = DataTypeSpecific) {
-  auto const tmp = env.irb->evalStack().top(offset);
-  if (!tmp) return nullptr;
-  env.irb->constrainValue(tmp, tc);
-  return tmp;
-}
-
-/*
- * We don't know what type description to expect for the stack locations before
- * index, so we use a generic type when popping the intermediate values.  If it
- * ends up creating a new LdStack, refineType during a later pop() or top()
- * will fix up the type to the known type.
- *
- * TODO(#4810319): the above comment is definitely not true anymore.
- */
 inline void extendStack(HTS& env, uint32_t index, Type type) {
   // DataTypeGeneric is used in here because nobody's actually looking at the
-  // values, we're just inserting LdStacks into the eval stack to be consumed
+  // values, we're just inserting LdStks into the eval stack to be consumed
   // elsewhere.
   if (index == 0) {
     push(env, pop(env, type, DataTypeGeneric));
     return;
   }
 
-  auto const tmp = pop(env, Type::StackElem, DataTypeGeneric);
+  auto const tmp = pop(env, Type::StkElem, DataTypeGeneric);
   extendStack(env, index - 1, type);
   push(env, tmp);
 }
@@ -198,12 +393,13 @@ inline SSATmp* top(HTS& env,
                    Type type,
                    uint32_t index = 0,
                    TypeConstraint tc = DataTypeSpecific) {
-  auto tmp = top(env, index, tc);
+  auto tmp = env.irb->evalStack().top(index);
   if (!tmp) {
     extendStack(env, index, type);
-    tmp = top(env, index, tc);
-    assert(tmp);
+    tmp = env.irb->evalStack().top(index);
   }
+  assert(tmp);
+  env.irb->constrainValue(tmp, tc);
   return tmp;
 }
 
@@ -220,7 +416,7 @@ inline SSATmp* topF(HTS& env,
 }
 
 inline SSATmp* topV(HTS& env, uint32_t i = 0) {
-  return top(env, Type::BoxedCell, i);
+  return top(env, Type::BoxedInitCell, i);
 }
 
 inline SSATmp* topR(HTS& env, uint32_t i = 0) {
@@ -232,36 +428,26 @@ inline Type topType(HTS& env,
                     TypeConstraint constraint = DataTypeSpecific) {
   FTRACE(5, "Asking for type of stack elem {}\n", idx);
   if (idx < env.irb->evalStack().size()) {
-    return top(env, idx, constraint)->type();
+    auto const tmp = env.irb->evalStack().top(idx);
+    env.irb->constrainValue(tmp, constraint);
+    return tmp->type();
   }
-  auto const absIdx = idx - env.irb->evalStack().size() + env.irb->stackDeficit();
-  auto const stkVal = getStackValue(sp(env), absIdx);
-  env.irb->constrainStack(absIdx, constraint);
-  return stkVal.knownType;
+  return env.irb->stackType(offsetFromSP(env, idx), constraint);
 }
 
 //////////////////////////////////////////////////////////////////////
 // Eval stack---SpillStack machinery
 
-inline SSATmp* spillStack(HTS& env) {
-  auto vals = std::vector<SSATmp*>{};
-  vals.reserve(env.irb->evalStack().size() + 2);
-  vals.push_back(sp(env));
-  vals.push_back(cns(env, int64_t{env.irb->stackDeficit()}));
-  for (auto i = uint32_t{0}; i < env.irb->evalStack().size(); ++i) {
-    // DataTypeGeneric is used here because SpillStack just teleports the
-    // values to memory.
-    vals.push_back(top(env, i, DataTypeGeneric));
+inline void spillStack(HTS& env) {
+  auto const toSpill = env.irb->evalStack();
+  for (auto idx = toSpill.size(); idx-- > 0;) {
+    gen(env,
+        StStk,
+        StackOffset { offsetFromSP(env, idx) },
+        sp(env),
+        toSpill.top(idx));
   }
-
-  auto const newSp = gen(
-    env,
-    SpillStack,
-    std::make_pair(vals.size(), &vals[0])
-  );
-  env.irb->evalStack().clear();
-  env.irb->clearStackDeficit();
-  return newSp;
+  env.irb->syncEvalStack();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -291,7 +477,8 @@ inline SSATmp* unbox(HTS& env, SSATmp* val, Block* exit) {
     return val;
   }
 
-  return env.irb->cond(
+  return cond(
+    env,
     0,
     [&](Block* taken) {
       return gen(env, CheckType, Type::BoxedCell, taken, val);
@@ -438,7 +625,8 @@ inline SSATmp* ldLocInnerWarn(HTS& env,
 
   if (locVal->type().maybe(Type::Uninit)) {
     // The local might be Uninit so we have to check at runtime.
-    return env.irb->cond(
+    return cond(
+      env,
       0,
       [&](Block* taken) {
         gen(env, CheckInit, taken, locVal);
@@ -568,17 +756,17 @@ inline SSATmp* ldLocAddr(HTS& env, uint32_t locId) {
   return gen(env, LdLocAddr, Type::PtrToFrameGen, LocalId(locId), fp(env));
 }
 
-inline SSATmp* ldStackAddr(HTS& env, int32_t offset) {
-  env.irb->constrainStack(offset, DataTypeSpecific);
+inline SSATmp* ldStkAddr(HTS& env, int32_t relOffset) {
   // You're almost certainly doing it wrong if you want to get the address of a
-  // stack cell that's in m_irb->evalStack().
-  assert(offset >= static_cast<int32_t>(env.irb->evalStack().numCells()));
+  // stack cell that's in irb->evalStack().
+  assert(relOffset >= static_cast<int32_t>(env.irb->evalStack().size()));
+  auto const offset = offsetFromSP(env, relOffset);
+  env.irb->constrainStack(offset, DataTypeSpecific);
   return gen(
     env,
-    LdStackAddr,
+    LdStkAddr,
     Type::PtrToStkGen,
-    StackOffset(offset + env.irb->stackDeficit() -
-      env.irb->evalStack().numCells()),
+    StackOffset { offset },
     sp(env)
   );
 }

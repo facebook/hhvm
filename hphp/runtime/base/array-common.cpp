@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/struct-array.h"
+#include "hphp/runtime/base/struct-array-defs.h"
 
 namespace HPHP {
 
@@ -29,15 +31,18 @@ ssize_t ArrayCommon::ReturnInvalidIndex(const ArrayData*) {
 }
 
 bool ArrayCommon::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
-  if (ad->isPacked()) {
-    assert(PackedArray::checkInvariants(ad));
-  } else {
-    assert(MixedArray::asMixed(ad));
-  }
   assert(fp.getContainer() == ad);
   if (fp.getResetFlag()) return false;
-  return fp.m_pos != (ad->isPacked() ? ad->getSize()
-                                     : MixedArray::asMixed(ad)->iterLimit());
+  if (ad->isPacked()) {
+    assert(PackedArray::checkInvariants(ad));
+    return fp.m_pos != ad->getSize();
+  } else if (ad->isStruct()) {
+    assert(StructArray::asStructArray(ad));
+    return fp.m_pos != StructArray::asStructArray(ad)->size();
+  } else {
+    assert(MixedArray::asMixed(ad));
+    return fp.m_pos != MixedArray::asMixed(ad)->iterLimit();
+  }
 }
 
 ArrayData* ArrayCommon::Pop(ArrayData* a, Variant &value) {

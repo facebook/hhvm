@@ -9,14 +9,13 @@
  *
  */
 
-class A { }
+class A {}
 
 function main(): void {
   $x = 1;
-  if(true) {
+  if (true) {
     $x = new A();
-  }
-  else {
+  } else {
     $x = 0;
   }
 }

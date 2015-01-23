@@ -228,14 +228,14 @@ public:
    *   passphrase - NULL causes a passphrase prompt to be emitted in
    *   the Apache error log!
    */
-  static Resource Get(const Variant& var, bool public_key,
-                      const char *passphrase = nullptr) {
+  static SmartPtr<Key> Get(const Variant& var, bool public_key,
+                           const char *passphrase = nullptr) {
     if (var.is(KindOfArray)) {
       Array arr = var.toArray();
       if (!arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
         raise_warning("key array must be of the form "
                         "array(0 => key, 1 => phrase)");
-        return Resource();
+        return nullptr;
       }
 
       String zphrase = arr[1].toString();
@@ -244,29 +244,28 @@ public:
     return GetHelper(var, public_key, passphrase);
   }
 
-  static Resource GetHelper(const Variant& var, bool public_key,
-                            const char *passphrase) {
-    Resource ocert;
+  static SmartPtr<Key> GetHelper(const Variant& var, bool public_key,
+                                 const char *passphrase) {
+    SmartPtr<Certificate> ocert;
     EVP_PKEY *key = NULL;
 
     if (var.isResource()) {
-      Certificate *cert = var.toResource().getTyped<Certificate>(true, true);
-      Key *key = var.toResource().getTyped<Key>(true, true);
-      if (cert == NULL && key == NULL) {
-        return Resource();
-      }
+      auto cert = SmartPtr<Certificate>(
+        var.toResource().getTyped<Certificate>(true, true));
+      auto key = SmartPtr<Key>(var.toResource().getTyped<Key>(true, true));
+      if (!cert && !key) return nullptr;
       if (key) {
         bool is_priv = key->isPrivate();
         if (!public_key && !is_priv) {
           raise_warning("supplied key param is a public key");
-          return Resource();
+          return nullptr;
         }
         if (public_key && is_priv) {
           raise_warning("Don't know how to get public key from "
                           "this private key");
-          return Resource();
+          return nullptr;
         }
-        return var.toResource();
+        return key;
       }
       ocert = cert;
     } else {
@@ -274,32 +273,32 @@ public:
          the data from that */
       if (public_key) {
         ocert = Certificate::Get(var);
-        if (ocert.isNull()) {
+        if (!ocert) {
           /* not a X509 certificate, try to retrieve public key */
           BIO *in = Certificate::ReadData(var);
-          if (in == nullptr) return Resource();
+          if (in == nullptr) return nullptr;
           key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
           BIO_free(in);
         }
       } else {
         /* we want the private key */
         BIO *in = Certificate::ReadData(var);
-        if (in == nullptr) return Resource();
+        if (in == nullptr) return nullptr;
         key = PEM_read_bio_PrivateKey(in, NULL,NULL, (void*)passphrase);
         BIO_free(in);
       }
     }
 
-    if (public_key && !ocert.isNull() && key == NULL) {
+    if (public_key && ocert && key == nullptr) {
       /* extract public key from X509 cert */
-      key = (EVP_PKEY *)X509_get_pubkey(ocert.getTyped<Certificate>()->get());
+      key = (EVP_PKEY *)X509_get_pubkey(ocert->get());
     }
 
     if (key) {
-      return Resource(newres<Key>(key));
+      return makeSmartPtr<Key>(key);
     }
-    // Is it okay to return a "null" resource?
-    return Resource();
+
+    return nullptr;
   }
 };
 
@@ -1020,21 +1019,21 @@ Variant HHVM_FUNCTION(openssl_csr_new,
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
 
-  Resource okey;
+  SmartPtr<Key> okey;
   X509_REQ *csr = NULL;
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings)) {
     /* Generate or use a private key */
     if (!privkey.isNull()) {
       okey = Key::Get(privkey, false);
-      if (!okey.isNull()) {
-        req.priv_key = okey.getTyped<Key>()->m_key;
+      if (okey) {
+        req.priv_key = okey->m_key;
       }
     }
     if (req.priv_key == NULL) {
       req.generatePrivateKey();
       if (req.priv_key) {
-        okey = Resource(newres<Key>(req.priv_key));
+        okey = makeSmartPtr<Key>(req.priv_key);
       }
     }
     if (req.priv_key == NULL) {
@@ -1083,30 +1082,30 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
   X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
   if (pcsr == NULL) return false;
 
-  Resource ocert;
+  SmartPtr<Certificate> ocert;
   if (!cacert.isNull()) {
     ocert = Certificate::Get(cacert);
-    if (ocert.isNull()) {
+    if (!ocert) {
       raise_warning("cannot get cert from parameter 2");
       return false;
     }
   }
-  Resource okey = Key::Get(priv_key, false);
-  if (okey.isNull()) {
+  auto okey = Key::Get(priv_key, false);
+  if (!okey) {
     raise_warning("cannot get private key from parameter 3");
     return false;
   }
   X509 *cert = NULL;
-  if (!ocert.isNull()) {
-    cert = ocert.getTyped<Certificate>()->m_cert;
+  if (ocert) {
+    cert = ocert->m_cert;
   }
-  EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
+  EVP_PKEY *pkey = okey->m_key;
   if (cert && !X509_check_private_key(cert, pkey)) {
     raise_warning("private key does not correspond to signing cert");
     return false;
   }
 
-  Resource onewcert;
+  SmartPtr<Certificate> onewcert;
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
   Variant ret = false;
@@ -1140,7 +1139,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
     raise_warning("No memory");
     goto cleanup;
   }
-  onewcert = Resource(newres<Certificate>(new_cert));
+  onewcert = makeSmartPtr<Certificate>(new_cert);
   /* Version 3 cert */
   if (!X509_set_version(new_cert, 2)) {
     goto cleanup;
@@ -1208,12 +1207,12 @@ bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
     }
   }
 
-  Resource okey = Key::Get(priv_key_id, false);
-  if (okey.isNull()) {
+  auto okey = Key::Get(priv_key_id, false);
+  if (!okey) {
     raise_warning("unable to coerce parameter 4 into a private key");
     return false;
   }
-  EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
+  EVP_PKEY *pkey = okey->m_key;
 
   String s = String(sealed_data.size(), ReserveString);
   unsigned char *buf = (unsigned char *)s.bufferSlice().ptr;
@@ -1243,11 +1242,11 @@ static STACK_OF(X509) *php_array_to_X509_sk(const Variant& certs) {
     arrCerts.append(certs);
   }
   for (ArrayIter iter(arrCerts); iter; ++iter) {
-    Resource ocert = Certificate::Get(iter.second());
-    if (ocert.isNull()) {
+    auto ocert = Certificate::Get(iter.second());
+    if (!ocert) {
       break;
     }
-    sk_X509_push(pcerts, ocert.getTyped<Certificate>()->m_cert);
+    sk_X509_push(pcerts, ocert->m_cert);
   }
   return pcerts;
 }
@@ -1259,18 +1258,18 @@ const StaticString
 static bool openssl_pkcs12_export_impl(const Variant& x509, BIO *bio_out,
                                        const Variant& priv_key, const String& pass,
                                        const Variant& args /* = null_variant */) {
-  Resource ocert = Certificate::Get(x509);
-  if (ocert.isNull()) {
+  auto ocert = Certificate::Get(x509);
+  if (!ocert) {
     raise_warning("cannot get cert from parameter 1");
     return false;
   }
-  Resource okey = Key::Get(priv_key, false);
-  if (okey.isNull()) {
+  auto okey = Key::Get(priv_key, false);
+  if (!okey) {
     raise_warning("cannot get private key from parameter 3");
     return false;
   }
-  X509 *cert = ocert.getTyped<Certificate>()->m_cert;
-  EVP_PKEY *key = okey.getTyped<Key>()->m_key;
+  X509 *cert = ocert->m_cert;
+  EVP_PKEY *key = okey->m_key;
   if (cert && !X509_check_private_key(cert, key)) {
     raise_warning("private key does not correspond to cert");
     return false;
@@ -1406,16 +1405,16 @@ bool HHVM_FUNCTION(openssl_pkcs7_decrypt, const String& infilename,
   bool ret = false;
   BIO *in = NULL, *out = NULL, *datain = NULL;
   PKCS7 *p7 = NULL;
-  Resource okey;
+  SmartPtr<Key> okey;
 
-  Resource ocert = Certificate::Get(recipcert);
-  if (ocert.isNull()) {
+  auto ocert = Certificate::Get(recipcert);
+  if (!ocert) {
     raise_warning("unable to coerce parameter 3 to x509 cert");
     goto clean_exit;
   }
 
   okey = Key::Get(recipkey.isNull() ? recipcert : recipkey, false);
-  if (okey.isNull()) {
+  if (!okey) {
     raise_warning("unable to get private key");
     goto clean_exit;
   }
@@ -1435,11 +1434,9 @@ bool HHVM_FUNCTION(openssl_pkcs7_decrypt, const String& infilename,
   if (p7 == NULL) {
     goto clean_exit;
   }
-  assert(okey.getTyped<Key>()->m_key);
-  assert(ocert.getTyped<Certificate>()->m_cert);
-  if (PKCS7_decrypt(p7, okey.getTyped<Key>()->m_key,
-                    ocert.getTyped<Certificate>()->m_cert, out,
-                    PKCS7_DETACHED)) {
+  assert(okey->m_key);
+  assert(ocert->m_cert);
+  if (PKCS7_decrypt(p7, okey->m_key, ocert->m_cert, out, PKCS7_DETACHED)) {
     ret = true;
   }
 
@@ -1539,7 +1536,8 @@ bool HHVM_FUNCTION(openssl_pkcs7_sign, const String& infilename,
   STACK_OF(X509) *others = NULL;
   BIO *infile = NULL, *outfile = NULL;
   PKCS7 *p7 = NULL;
-  Resource okey, ocert;
+  SmartPtr<Key> okey;
+  SmartPtr<Certificate> ocert;
 
   if (!extracerts.empty()) {
     others = load_all_certs_from_file(extracerts.data());
@@ -1549,20 +1547,20 @@ bool HHVM_FUNCTION(openssl_pkcs7_sign, const String& infilename,
   }
 
   okey = Key::Get(privkey, false);
-  if (okey.isNull()) {
+  if (!okey) {
     raise_warning("error getting private key");
     goto clean_exit;
   }
   EVP_PKEY *key;
-  key = okey.getTyped<Key>()->m_key;
+  key = okey->m_key;
 
   ocert = Certificate::Get(signcert);
-  if (ocert.isNull()) {
+  if (!ocert) {
     raise_warning("error getting cert");
     goto clean_exit;
   }
   X509 *cert;
-  cert = ocert.getTyped<Certificate>()->m_cert;
+  cert = ocert->m_cert;
 
   infile = BIO_new_file(infilename.data(), "r");
   if (infile == NULL) {
@@ -1725,12 +1723,12 @@ Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int flags,
 static bool openssl_pkey_export_impl(const Variant& key, BIO *bio_out,
                                      const String& passphrase /* = null_string */,
                                      const Variant& configargs /* = null_variant */) {
-  Resource okey = Key::Get(key, false, passphrase.data());
-  if (okey.isNull()) {
+  auto okey = Key::Get(key, false, passphrase.data());
+  if (!okey) {
     raise_warning("cannot get key from parameter 1");
     return false;
   }
-  EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
+  EVP_PKEY *pkey = okey->m_key;
 
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
@@ -1887,19 +1885,11 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
 
 Variant HHVM_FUNCTION(openssl_pkey_get_private, const Variant& key,
                                  const String& passphrase /* = null_string */) {
-  Resource okey = Key::Get(key, false, passphrase.data());
-  if (okey.isNull()) {
-    return false;
-  }
-  return okey;
+  return toVariant(Key::Get(key, false, passphrase.data()));
 }
 
 Variant HHVM_FUNCTION(openssl_pkey_get_public, const Variant& certificate) {
-  Resource okey = Key::Get(certificate, true);
-  if (okey.isNull()) {
-    return false;
-  }
-  return okey;
+  return toVariant(Key::Get(certificate, true));
 }
 
 Resource HHVM_FUNCTION(openssl_pkey_new,
@@ -1922,12 +1912,12 @@ bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
                                             VRefParam decrypted,
                                             const Variant& key,
                                   int padding /* = k_OPENSSL_PKCS1_PADDING */) {
-  Resource okey = Key::Get(key, false);
-  if (okey.isNull()) {
+  auto okey = Key::Get(key, false);
+  if (!okey) {
     raise_warning("key parameter is not a valid private key");
     return false;
   }
-  EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
+  EVP_PKEY *pkey = okey->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
   unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
@@ -1962,12 +1952,12 @@ bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
                                             VRefParam crypted,
                                             const Variant& key,
                                   int padding /* = k_OPENSSL_PKCS1_PADDING */) {
-  Resource okey = Key::Get(key, false);
-  if (okey.isNull()) {
+  auto okey = Key::Get(key, false);
+  if (!okey) {
     raise_warning("key param is not a valid private key");
     return false;
   }
-  EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
+  EVP_PKEY *pkey = okey->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
   unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
@@ -1998,12 +1988,12 @@ bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
                                            VRefParam decrypted,
                                            const Variant& key,
                                   int padding /* = k_OPENSSL_PKCS1_PADDING */) {
-  Resource okey = Key::Get(key, true);
-  if (okey.isNull()) {
+  auto okey = Key::Get(key, true);
+  if (!okey) {
     raise_warning("key parameter is not a valid public key");
     return false;
   }
-  EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
+  EVP_PKEY *pkey = okey->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
   unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
@@ -2038,12 +2028,12 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
                                            VRefParam crypted,
                                            const Variant& key,
                                   int padding /* = k_OPENSSL_PKCS1_PADDING */) {
-  Resource okey = Key::Get(key, true);
-  if (okey.isNull()) {
+  auto okey = Key::Get(key, true);
+  if (!okey) {
     raise_warning("key parameter is not a valid public key");
     return false;
   }
-  EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
+  EVP_PKEY *pkey = okey->m_key;
   int cryptedlen = EVP_PKEY_size(pkey);
   String s = String(cryptedlen, ReserveString);
   unsigned char *cryptedbuf = (unsigned char *)s.bufferSlice().ptr;
@@ -2096,7 +2086,11 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
   int *eksl = (int*)malloc(nkeys * sizeof(*eksl));
   unsigned char **eks = (unsigned char **)malloc(nkeys * sizeof(*eks));
   memset(eks, 0, sizeof(*eks) * nkeys);
-  std::vector<Resource> holder;
+
+  // holder is needed to make sure none of the Keys get deleted prematurely.
+  // The pkeys array points to elements inside of Keys returned from Key::Get()
+  // which may be newly allocated and have no other owners.
+  std::vector<SmartPtr<Key>> holder;
 
   /* get the public keys we are using to seal this data */
   bool ret = true;
@@ -2104,14 +2098,14 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
   String s;
   unsigned char *buf = NULL;
   for (ArrayIter iter(pub_key_ids); iter; ++iter, ++i) {
-    Resource okey = Key::Get(iter.second(), true);
-    if (okey.isNull()) {
+    auto okey = Key::Get(iter.second(), true);
+    if (!okey) {
       raise_warning("not a public key (%dth member of pubkeys)", i + 1);
       ret = false;
       goto clean_exit;
     }
     holder.push_back(okey);
-    pkeys[i] = okey.getTyped<Key>()->m_key;
+    pkeys[i] = okey->m_key;
     eks[i] = (unsigned char *)malloc(EVP_PKEY_size(pkeys[i]) + 1);
   }
 
@@ -2186,8 +2180,8 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
 bool HHVM_FUNCTION(openssl_sign, const String& data, VRefParam signature,
                                  const Variant& priv_key_id,
                      const Variant& signature_alg /* = k_OPENSSL_ALGO_SHA1 */) {
-  Resource okey = Key::Get(priv_key_id, false);
-  if (okey.isNull()) {
+  auto okey = Key::Get(priv_key_id, false);
+  if (!okey) {
     raise_warning("supplied key param cannot be coerced into a private key");
     return false;
   }
@@ -2204,7 +2198,7 @@ bool HHVM_FUNCTION(openssl_sign, const String& data, VRefParam signature,
     return false;
   }
 
-  EVP_PKEY *pkey = okey.getTyped<Key>()->m_key;
+  EVP_PKEY *pkey = okey->m_key;
   int siglen = EVP_PKEY_size(pkey);
   String s = String(siglen, ReserveString);
   unsigned char *sigbuf = (unsigned char *)s.bufferSlice().ptr;
@@ -2243,8 +2237,8 @@ Variant HHVM_FUNCTION(openssl_verify, const String& data,
     return false;
   }
 
-  Resource okey = Key::Get(pub_key_id, true);
-  if (okey.isNull()) {
+  auto okey = Key::Get(pub_key_id, true);
+  if (!okey) {
     raise_warning("supplied key param cannot be coerced into a public key");
     return false;
   }
@@ -2253,7 +2247,7 @@ Variant HHVM_FUNCTION(openssl_verify, const String& data,
   EVP_VerifyInit(&md_ctx, mdtype);
   EVP_VerifyUpdate(&md_ctx, (unsigned char*)data.data(), data.size());
   err = EVP_VerifyFinal(&md_ctx, (unsigned char *)signature.data(),
-                         signature.size(), okey.getTyped<Key>()->m_key);
+                         signature.size(), okey->m_key);
 #if OPENSSL_VERSION_NUMBER >= 0x0090700fL
   EVP_MD_CTX_cleanup(&md_ctx);
 #endif
@@ -2262,16 +2256,15 @@ Variant HHVM_FUNCTION(openssl_verify, const String& data,
 
 bool HHVM_FUNCTION(openssl_x509_check_private_key, const Variant& cert,
                                                    const Variant& key) {
-  Resource ocert = Certificate::Get(cert);
-  if (ocert.isNull()) {
+  auto ocert = Certificate::Get(cert);
+  if (!ocert) {
     return false;
   }
-  Resource okey = Key::Get(key, false);
-  if (okey.isNull()) {
+  auto okey = Key::Get(key, false);
+  if (!okey) {
     return false;
   }
-  return X509_check_private_key(ocert.getTyped<Certificate>()->m_cert,
-                                okey.getTyped<Key>()->m_key);
+  return X509_check_private_key(ocert->m_cert, okey->m_key);
 }
 
 static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain,
@@ -2299,7 +2292,7 @@ Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
   int ret = -1;
   STACK_OF(X509) *untrustedchain = NULL;
   X509_STORE *pcainfo = NULL;
-  Resource ocert;
+  SmartPtr<Certificate> ocert;
 
   if (!untrustedfile.empty()) {
     untrustedchain = load_all_certs_from_file(untrustedfile.data());
@@ -2314,12 +2307,12 @@ Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
   }
 
   ocert = Certificate::Get(x509cert);
-  if (ocert.isNull()) {
+  if (!ocert) {
     raise_warning("cannot get cert from parameter 1");
     return false;
   }
   X509 *cert;
-  cert = ocert.getTyped<Certificate>()->m_cert;
+  cert = ocert->m_cert;
   assert(cert);
 
   ret = check_cert(pcainfo, cert, untrustedchain, purpose);
@@ -2336,12 +2329,12 @@ Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
 
 static bool openssl_x509_export_impl(const Variant& x509, BIO *bio_out,
                                      bool notext /* = true */) {
-  Resource ocert = Certificate::Get(x509);
-  if (ocert.isNull()) {
+  auto ocert = Certificate::Get(x509);
+  if (!ocert) {
     raise_warning("cannot get cert from parameter 1");
     return false;
   }
-  X509 *cert = ocert.getTyped<Certificate>()->m_cert;
+  X509 *cert = ocert->m_cert;
   assert(cert);
 
   assert(bio_out);
@@ -2508,11 +2501,11 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 }
 Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
                                           bool shortnames /* = true */) {
-  Resource ocert = Certificate::Get(x509cert);
-  if (ocert.isNull()) {
+  auto ocert = Certificate::Get(x509cert);
+  if (!ocert) {
     return false;
   }
-  X509 *cert = ocert.getTyped<Certificate>()->m_cert;
+  X509 *cert = ocert->m_cert;
   assert(cert);
 
   Array ret;
@@ -2614,13 +2607,13 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
 }
 
 Variant HHVM_FUNCTION(openssl_x509_read, const Variant& x509certdata) {
-  Resource ocert = Certificate::Get(x509certdata);
-  if (ocert.isNull()) {
+  auto ocert = Certificate::Get(x509certdata);
+  if (!ocert) {
     raise_warning("supplied parameter cannot be coerced into "
-                    "an X509 certificate!");
+                  "an X509 certificate!");
     return false;
   }
-  return ocert;
+  return Variant(ocert);
 }
 
 Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
@@ -2901,10 +2894,10 @@ Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases /* = false */) {
 
 const StaticString s_OPENSSL_VERSION_TEXT("OPENSSL_VERSION_TEXT");
 
-class opensslExtension : public Extension {
+class opensslExtension final : public Extension {
  public:
   opensslExtension() : Extension("openssl") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
 #define SSLCNS(cns) Native::registerConstant<KindOfInt64> \
                       (makeStaticString("OPENSSL_"#cns), k_OPENSSL_##cns)
     SSLCNS(RAW_DATA);

@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/smart-object.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/timezone.h"
 #include "hphp/runtime/base/dateinterval.h"
 #include "hphp/runtime/base/request-local.h"
@@ -216,7 +216,7 @@ public:
   /**
    * What time is it?
    */
-  static SmartResource<DateTime> Current(bool utc = false);
+  static SmartPtr<DateTime> Current(bool utc = false);
 
   /**
    * Returns are really in special PHP formats, and please read datetime.cpp
@@ -230,7 +230,7 @@ public:
   // constructor
   DateTime();
   explicit DateTime(int64_t timestamp, bool utc = false); // from a timestamp
-  explicit DateTime(int64_t timestamp, SmartResource<TimeZone> tz);
+  explicit DateTime(int64_t timestamp, SmartPtr<TimeZone> tz);
 
   CLASSNAME_IS("DateTime");
   // overriding ResourceData
@@ -255,7 +255,7 @@ public:
   int isoYear() const;
   int isoDow() const;
   int offset() const;  // timezone offset from UTC
-  SmartResource<TimeZone> timezone() const { return m_tz->cloneTimeZone();}
+  SmartPtr<TimeZone> timezone() const { return m_tz->cloneTimeZone();}
 
   const char *weekdayName() const;
   const char *shortWeekdayName() const;
@@ -267,10 +267,10 @@ public:
   void setDate(int year, int month, int day);
   void setISODate(int year, int week, int day = 1);
   void setTime(int hour, int minute, int second = 0);
-  void setTimezone(SmartResource<TimeZone> tz);
+  void setTimezone(SmartPtr<TimeZone> tz);
   void modify(const String& diff); // PHP's date_modify() function, muy powerful
-  void add(const SmartResource<DateInterval> &interval);
-  void sub(const SmartResource<DateInterval> &interval);
+  void add(const SmartPtr<DateInterval>& interval);
+  void sub(const SmartPtr<DateInterval>& interval);
 
   // conversions
   void toTm(struct tm &ta) const;
@@ -280,15 +280,15 @@ public:
   String toString(DateFormat format) const;
   Array toArray(ArrayFormat format) const;
   void fromTimeStamp(int64_t timestamp, bool utc = false);
-  bool fromString(const String& input, SmartResource<TimeZone> tz,
+  bool fromString(const String& input, SmartPtr<TimeZone> tz,
                   const char* format=nullptr, bool throw_on_error = true);
 
   // comparison
-  SmartResource<DateInterval> diff(SmartResource<DateTime> datetime2,
-                                   bool absolute = false);
+  SmartPtr<DateInterval> diff(SmartPtr<DateTime> datetime2,
+                              bool absolute = false);
 
   // cloning
-  SmartResource<DateTime> cloneDateTime() const;
+  SmartPtr<DateTime> cloneDateTime() const;
 
   // sun info
   Array getSunInfo(double latitude, double longitude) const;
@@ -355,7 +355,7 @@ private:
   typedef std::shared_ptr<timelib_time> TimePtr;
 
   TimePtr m_time;
-  SmartResource<TimeZone> m_tz;
+  SmartPtr<TimeZone> m_tz;
   mutable int64_t m_timestamp;
   mutable bool m_timestampSet;
 

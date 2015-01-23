@@ -360,7 +360,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
   if (vm.count("version")) {
     cout << "HipHop Repo Compiler";
-    cout << " " << k_HHVM_VERSION.c_str();
+    cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";

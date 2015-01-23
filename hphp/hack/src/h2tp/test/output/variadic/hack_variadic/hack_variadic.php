@@ -9,7 +9,7 @@ class Bar {
     return count(func_get_args());
   }
 }
-function var_php_variadic($foo, ... $bar) {
+function var_php_variadic($foo, ...$bar) {
   return count($bar);
 }
 echo (var_foo(5)."\n");

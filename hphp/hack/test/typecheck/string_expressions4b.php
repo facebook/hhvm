@@ -24,7 +24,7 @@ class Meh {
   }
 
   public function __toString(): string {
-     return "hello";
+    return "hello";
   }
 
   public function foo() {

@@ -12,7 +12,7 @@
 interface A {}
 
 // until we find something better
-class Null {
+class CNull {
   const ?A A = null;
 }
 
@@ -28,7 +28,7 @@ class D {
   }
 
   public function foo() {
-    $y = Null::A;
+    $y = CNull::A;
     if (true) {
       $y = new B();
     } else {

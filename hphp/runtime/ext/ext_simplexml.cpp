@@ -1163,7 +1163,7 @@ Variant f_simplexml_load_file(const String& filename,
   }
 
   auto stream = File::Open(filename, "rb");
-  if (stream.isInvalid()) return false;
+  if (stream->isInvalid()) return false;
 
   xmlDocPtr doc = nullptr;
   xmlParserCtxtPtr ctxt = xmlCreateIOParserCtxt(nullptr, nullptr,

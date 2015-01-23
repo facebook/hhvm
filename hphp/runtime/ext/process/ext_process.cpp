@@ -122,10 +122,10 @@ static bool check_cmd(const char *cmd) {
 ///////////////////////////////////////////////////////////////////////////////
 // pcntl
 
-static class ProcessExtension : public Extension {
+static class ProcessExtension final : public Extension {
 public:
   ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(pcntl_alarm);
     HHVM_FE(pcntl_exec);
     HHVM_FE(pcntl_fork);

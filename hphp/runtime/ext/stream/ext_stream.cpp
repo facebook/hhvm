@@ -61,10 +61,10 @@ static StreamContext* get_stream_context(const Variant& stream_or_context);
 #define REGISTER_CONSTANT(name, value)                                         \
   Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
 
-static class StreamExtension : public Extension {
+static class StreamExtension final : public Extension {
 public:
   StreamExtension() : Extension("stream") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_CONSTANT(STREAM_CLIENT_CONNECT, k_STREAM_CLIENT_CONNECT);
     REGISTER_CONSTANT(STREAM_CLIENT_ASYNC_CONNECT,
                       k_STREAM_CLIENT_ASYNC_CONNECT);
@@ -162,6 +162,9 @@ public:
     REGISTER_CONSTANT(STREAM_AWAIT_TIMEOUT, FileAwait::TIMEOUT);
     REGISTER_CONSTANT(STREAM_AWAIT_READY, FileAwait::READY);
     REGISTER_CONSTANT(STREAM_AWAIT_CLOSED, FileAwait::CLOSED);
+
+    REGISTER_CONSTANT(STREAM_URL_STAT_LINK, k_STREAM_URL_STAT_LINK);
+    REGISTER_CONSTANT(STREAM_URL_STAT_QUIET, k_STREAM_URL_STAT_QUIET);
 
     HHVM_FE(stream_context_create);
     HHVM_FE(stream_context_get_options);
@@ -569,7 +572,7 @@ static SmartPtr<Socket> socket_accept_impl(
   socklen_t *addrlen
 ) {
   Socket *sock = socket.getTyped<Socket>();
-  auto new_sock = makeSocket(
+  auto new_sock = makeSmartPtr<Socket>(
     accept(sock->fd(), addr, addrlen), sock->getType());
   if (!new_sock->valid()) {
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);

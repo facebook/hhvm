@@ -1,12 +1,12 @@
 <?hh // strict
 
 abstract class A {
-  public type const T = Container<int>;
+  const type T = Container<int>;
 }
 
 class C {
-  public type const B = D;
-  public type const Test = static::B::X;
+  const type B as D = D;
+  const type Test = static::B::X;
 
   public static function foo(): static::Test::T {
     return array();
@@ -14,7 +14,7 @@ class C {
 }
 
 abstract class B {
-  public type const X = A;
+  const type X = A;
 }
 
 class D extends B {

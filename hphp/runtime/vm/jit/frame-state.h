@@ -23,7 +23,6 @@
 
 #include <folly/Optional.h>
 
-#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/type-source.h"
 #include "hphp/runtime/vm/jit/local-effects.h"
@@ -34,6 +33,7 @@ struct Func;
 
 namespace jit {
 
+struct BlocksWithIds;
 struct IRInstruction;
 struct SSATmp;
 
@@ -69,14 +69,6 @@ struct EvalStack {
     m_vector[index] = tmp;
   }
 
-  uint32_t numCells() const {
-    uint32_t ret = 0;
-    for (auto& t : m_vector) {
-      ret += t->type() == Type::ActRec ? kNumActRecCells : 1;
-    }
-    return ret;
-  }
-
   bool empty() const { return m_vector.empty(); }
   int  size()  const { return m_vector.size(); }
   void clear()       { m_vector.clear(); }
@@ -92,31 +84,34 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * LocalState stores information about a local variable in the current
- * function.
+ * SlotState stores information about either a local variable or a stack slot
+ * in the current function, for FrameState.  LocalState and StackState are the
+ * concrete versions of this struct, which differ only by the default type they
+ * use.
  */
-struct LocalState {
+template<bool Stack>
+struct SlotState {
   /*
-   * The current value of the local.
+   * The current value of the or stack slot.
    */
   SSATmp* value{nullptr};
 
   /*
-   * The current type of the local.  We may have a tracked type even if we
-   * don't have an available value.  This happens across PHP-level calls, for
-   * example, or at some joint points where we couldn't find the same available
-   * value for all incoming edges.
+   * The current type of the local or stack slot.  We may have a tracked type
+   * even if we don't have an available value.  This happens across PHP-level
+   * calls, for example, or at some joint points where we couldn't find the
+   * same available value for all incoming edges.
    */
-  Type type{Type::Gen};
+  Type type{Stack ? Type::StkElem : Type::Gen};
 
   /*
-   * Prediction for the type of a local, if it's boxed or if we're in a
-   * pseudomain.  Otherwise it will be the same as `type'.
+   * Prediction for the type of a local or stack slot, if it's boxed or if
+   * we're in a pseudomain.  Otherwise it will be the same as `type'.
    *
    * Invariants:
    *   always a subtype of `type'
    */
-  Type predictedType{Type::Gen};
+  Type predictedType{Stack ? Type::StkElem : Type::Gen};
 
   /*
    * The sources of the currently known type. They may be values. If the value
@@ -126,12 +121,8 @@ struct LocalState {
   TypeSourceSet typeSrcs;
 };
 
-inline bool operator==(const LocalState& a, const LocalState& b) {
-  return a.value         == b.value &&
-         a.type          == b.type &&
-         a.predictedType == b.predictedType &&
-         a.typeSrcs      == b.typeSrcs;
-}
+using LocalState = SlotState<false>;
+using StackState = SlotState<true>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -145,9 +136,7 @@ struct FrameState {
    * fp, and bytecode position.
    */
   const Func* curFunc;
-  SSATmp* spValue{nullptr};
   SSATmp* fpValue{nullptr};
-  int32_t spOffset;
 
   /*
    * m_thisAvailable tracks whether the current frame is known to have a
@@ -156,20 +145,39 @@ struct FrameState {
   bool thisAvailable{false};
 
   /*
-   * Tracking of the state of the virtual execution stack:
+   * Tracking of the not-in-memory state of the virtual execution stack:
    *
-   *   During HhbcTranslator's run over the bytecode, these stacks
-   *   contain SSATmp values representing the execution stack state
-   *   since the last SpillStack.
+   *   During HhbcTranslator's run over the bytecode, these stacks contain
+   *   SSATmp values representing the execution stack state since the last
+   *   spillStack() call.
    *
-   *   The EvalStack contains cells and ActRecs that need to be
-   *   spilled in order to materialize the stack.
+   *   The EvalStack contains cells that need to be spilled in order to
+   *   materialize the stack.
    *
-   *   m_stackDeficit represents the number of cells we've popped off
-   *   the virtual stack since the last sync.
+   *   stackDeficit represents the number of cells we've popped off the virtual
+   *   stack since the last sync.
+   *
+   *   syncedSpLevel indicates the depth that has been spilled to memory.
+   *
+   * TODO(#5868851): these fields just dangle meaninglessly when FrameState is
+   * being used in LegacyReoptimize mode.
    */
   uint32_t stackDeficit{0};
   EvalStack evalStack;
+  int32_t syncedSpLevel{0};
+
+  /*
+   * Tracking of in-memory state of the evaluation stack.
+   */
+  SSATmp* spValue{nullptr};
+  int32_t spOffset;   // delta from vmfp to spvalue
+
+  /*
+   * The values in the eval stack that are already in memory, either above or
+   * below the current spValue pointer.  These are indexed relative to the base
+   * of the eval stack for the whole function.
+   */
+  jit::vector<StackState> memoryStack;
 
   /*
    * Vector of local variable inforation; sized for numLocals on the curFunc
@@ -183,17 +191,6 @@ struct FrameState {
    */
   bool frameMaySpanCall{false};
 };
-
-inline bool operator==(const FrameState& a, const FrameState& b) {
-  return
-    a.spValue          == b.spValue &&
-    a.fpValue          == b.fpValue &&
-    a.curFunc          == b.curFunc &&
-    a.spOffset         == b.spOffset &&
-    a.thisAvailable    == b.thisAvailable &&
-    a.locals           == b.locals &&
-    a.frameMaySpanCall == b.frameMaySpanCall;
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -218,7 +215,7 @@ inline bool operator==(const FrameState& a, const FrameState& b) {
  *   - current function and bytecode offset
  */
 struct FrameStateMgr final : private LocalStateHook {
-  explicit FrameStateMgr(const IRUnit&, BCMarker);
+  explicit FrameStateMgr(BCMarker);
 
   FrameStateMgr(const FrameStateMgr&) = delete;
   FrameStateMgr(FrameStateMgr&&) = default;
@@ -313,11 +310,18 @@ struct FrameStateMgr final : private LocalStateHook {
   void clearStackDeficit() { cur().stackDeficit = 0; }
   void setStackDeficit(uint32_t d) { cur().stackDeficit = d; }
   EvalStack& evalStack() { return cur().evalStack; }
+  int32_t syncedSpLevel() const { return cur().syncedSpLevel; }
+  void syncEvalStack();
 
   Type localType(uint32_t id) const;
   Type predictedLocalType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
   TypeSourceSet localTypeSources(uint32_t id) const;
+
+  Type stackType(int32_t) const;
+  Type predictedStackType(int32_t) const;
+  SSATmp* stackValue(int32_t) const;
+  TypeSourceSet stackTypeSources(int32_t) const;
 
   /*
    * Call a function with const access to the LocalState& for each local we're
@@ -377,6 +381,8 @@ private:
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
   void loopHeaderClear(BCMarker);
+  StackState& stackState(int32_t offset);
+  const StackState& stackState(int32_t offset) const;
 
 private:
   FrameState& cur() {
@@ -399,6 +405,15 @@ private: // LocalStateHook overrides
   void updateLocalRefPredictions(SSATmp*, SSATmp*) override;
   void setLocalTypeSource(uint32_t id, TypeSource typeSrc) override;
   void clearLocals() override;
+
+private: // stack tracking helpers
+  void setStackValue(int32_t offset, SSATmp*);
+  void setStackType(int32_t offset, Type);
+  void refineStackValues(SSATmp* oldval, SSATmp* newVal);
+  void refineStackType(int32_t offset, Type, TypeSource typeSrc);
+  void clearStackForCall();
+  void setBoxedStkPrediction(int32_t offset, Type type);
+  void spillFrameStack(int32_t offset);
 
 private:
   Status m_status{Status::None};

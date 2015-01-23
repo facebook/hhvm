@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/hdf.h"
+#include "hphp/runtime/version.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/bytecode.h"
 
@@ -49,7 +50,7 @@ namespace HPHP {
 #define NO_EXTENSION_VERSION_YET "\0"
 
 #define IMPLEMENT_DEFAULT_EXTENSION_VERSION(name, v)    \
-  static class name ## Extension : public Extension {   \
+  static class name ## Extension final : public Extension {   \
   public:                                               \
     name ## Extension() : Extension(#name, #v) {}       \
   } s_ ## name ## _extension
@@ -129,7 +130,7 @@ private:
   std::string m_dsoName;
 };
 
-#define HHVM_API_VERSION 20140829L
+#define HHVM_API_VERSION 20150112L
 
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \

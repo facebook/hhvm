@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "mysql.h"
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/base/persistent-resource-store.h"
 #include "hphp/runtime/base/config.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
@@ -35,13 +34,13 @@
 
 namespace HPHP {
 
-class mysqlExtension : public Extension {
+class mysqlExtension final : public Extension {
 public:
   mysqlExtension() : Extension("mysql", "1.0") {}
 
   // implementing IDebuggable
-  virtual int debuggerSupport();
-  virtual void debuggerInfo(InfoVec &info);
+  virtual int debuggerSupport() override;
+  virtual void debuggerInfo(InfoVec &info) override;
 
   static bool ReadOnly;
 #ifdef FACEBOOK
@@ -57,8 +56,8 @@ public:
   static std::string Socket;
   static bool TypedResults;
 
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config);
-  void moduleInit();
+  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
+  void moduleInit() override;
 };
 
 extern mysqlExtension s_mysql_extension;

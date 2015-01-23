@@ -14,6 +14,5 @@ interface Foo {
 }
 
 class A implements Foo {
-  public function __construct(bool $x) {
-  }
+  public function __construct(bool $x) {}
 }

@@ -12,5 +12,5 @@ let fork ?reason () =
   let result = Unix.fork() in
   (match result with
   | -1 | 0 -> ()
-  | pid -> PidLog.log ~reason pid);
+  | pid -> PidLog.log ?reason pid);
   result

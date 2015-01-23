@@ -70,6 +70,7 @@ struct Variant : private TypedValue {
   enum class CellDup {};
   enum class ArrayInitCtor {};
   enum class StrongBind {};
+  enum class Attach {};
 
   Variant() { m_type = KindOfUninit; }
   explicit Variant(NullInit) { m_type = KindOfNull; }
@@ -83,7 +84,7 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(long long v) { m_type = KindOfInt64; m_data.num = v; }
   /* implicit */ Variant(uint64_t  v) { m_type = KindOfInt64; m_data.num = v; }
 
-  /* implicit */ Variant(double  v) { m_type = KindOfDouble; m_data.dbl = v; }
+  /* implicit */ Variant(double    v) { m_type = KindOfDouble; m_data.dbl = v; }
 
   /* implicit */ Variant(litstr  v);
   /* implicit */ Variant(const std::string &v);
@@ -98,14 +99,16 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const Array& v);
   /* implicit */ Variant(const Object& v);
   /* implicit */ Variant(const Resource& v);
-  /* implicit */ Variant(StringData *v);
-  /* implicit */ Variant(ArrayData *v);
-  /* implicit */ Variant(ObjectData *v);
-  /* implicit */ Variant(ResourceData *v);
-  /* implicit */ Variant(RefData *r);
+  /* implicit */ Variant(StringData* v);
+  /* implicit */ Variant(ArrayData* v);
+  /* implicit */ Variant(ObjectData* v);
+  /* implicit */ Variant(ResourceData* v);
+  /* implicit */ Variant(RefData* r);
 
   template <typename T>
   explicit Variant(const SmartPtr<T>& ptr) : Variant(ptr.get()) { }
+  template <typename T>
+  explicit Variant(SmartPtr<T>&& ptr) : Variant(ptr.detach(), Attach{}) { }
 
   /*
    * Creation constructor from ArrayInit that avoids a null check.
@@ -198,9 +201,9 @@ struct Variant : private TypedValue {
 
   // Move ctor for arrays
   /* implicit */ Variant(Array&& v) {
-    m_type = KindOfArray;
     ArrayData *a = v.get();
     if (LIKELY(a != nullptr)) {
+      m_type = KindOfArray;
       m_data.parr = a;
       v.detach();
     } else {
@@ -210,9 +213,9 @@ struct Variant : private TypedValue {
 
   // Move ctor for objects
   /* implicit */ Variant(Object&& v) {
-    m_type = KindOfObject;
     ObjectData *pobj = v.get();
     if (pobj) {
+      m_type = KindOfObject;
       m_data.pobj = pobj;
       v.detach();
     } else {
@@ -222,9 +225,9 @@ struct Variant : private TypedValue {
 
   // Move ctor for resources
   /* implicit */ Variant(Resource&& v) {
-    m_type = KindOfResource;
     ResourceData *pres = v.get();
     if (pres) {
+      m_type = KindOfResource;
       m_data.pres = pres;
       v.detach();
     } else {
@@ -606,7 +609,6 @@ struct Variant : private TypedValue {
   /* implicit */ operator String () const = delete;
   /* implicit */ operator Array  () const = delete;
   /* implicit */ operator Object () const = delete;
-  template<typename T> /* implicit */ operator SmartObject<T>() const = delete;
 
   /**
    * Explicit type conversions
@@ -786,6 +788,17 @@ struct Variant : private TypedValue {
   Ref* asRef() { PromoteToRef(*this); return this; }
 
  private:
+  /*
+   * This set of constructors act like the normal constructors for the
+   * given types except that they do not increment the reference count
+   * of the passed value.  They are used for the SmartPtr move constructor.
+   */
+  Variant(StringData* var, Attach);
+  Variant(ArrayData* var, Attach);
+  Variant(ObjectData* var, Attach);
+  Variant(ResourceData* var, Attach);
+  Variant(RefData* var, Attach);
+
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
     assert(m_type != KindOfRef);
@@ -818,12 +831,7 @@ struct Variant : private TypedValue {
   void set(const Resource& v) { return set(v.get()); }
 
   template<typename T>
-  void set(const SmartObject<T> &v) {
-    return set(v.get());
-  }
-
-  template<typename T>
-  void set(const SmartResource<T> &v) {
+  void set(const SmartPtr<T> &v) {
     return set(v.get());
   }
 
@@ -1050,7 +1058,7 @@ public:
   ~VarNR() {
     if (debug) {
       checkRefCount();
-      memset(this, 0x7b, sizeof(*this));
+      memset(this, kTVTrashFill2, sizeof(*this));
     }
   }
 
@@ -1178,6 +1186,16 @@ inline Array& forceToArray(Variant& var) {
 
 ALWAYS_INLINE Variant empty_string_variant() {
   return Variant(staticEmptyString(), Variant::StaticStrInit{});
+}
+
+template <typename T>
+inline Variant toVariant(const SmartPtr<T>& p) {
+  return p ? Variant(p) : Variant(false);
+}
+
+template <typename T>
+inline Variant toVariant(SmartPtr<T>&& p) {
+  return p ? Variant(std::move(p)) : Variant(false);
 }
 
 //////////////////////////////////////////////////////////////////////

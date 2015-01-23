@@ -543,14 +543,9 @@ void String::unserialize(VariableUnserializer *uns,
                     int(size));
   }
 
-  char ch = uns->readChar();
-  if (ch != ':') {
-    throw Exception("Expected ':' but got '%c'", ch);
-  }
-  ch = uns->readChar();
-  if (ch != delimiter0) {
-    throw Exception("Expected '%c' but got '%c'", delimiter0, ch);
-  }
+  uns->expectChar(':');
+  uns->expectChar(delimiter0);
+
   StringData *px = StringData::Make(int(size));
   auto const buf = px->bufferSlice();
   assert(size <= buf.len);
@@ -560,10 +555,7 @@ void String::unserialize(VariableUnserializer *uns,
   m_px = px;
   px->setRefCount(1);
 
-  ch = uns->readChar();
-  if (ch != delimiter1) {
-    throw Exception("Expected '%c' but got '%c'", delimiter1, ch);
-  }
+  uns->expectChar(delimiter1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

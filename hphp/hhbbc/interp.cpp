@@ -30,8 +30,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/runtime/ext/std/ext_std_math.h" // HHVM_FN(abs)
-
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
@@ -846,7 +844,7 @@ void in(ISS& env, const bc::VGetS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TRef);
+    c->merge(env.ctx, tcls, tname, TRef);
   }
 
   push(env, TRef);
@@ -1112,7 +1110,7 @@ void in(ISS& env, const bc::SetS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, t1);
+    c->merge(env.ctx, tcls, tname, t1);
   }
 
   push(env, t1);
@@ -1178,7 +1176,7 @@ void in(ISS& env, const bc::SetOpS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TInitCell);
+    c->merge(env.ctx, tcls, tname, TInitCell);
   }
 
   push(env, TInitCell);
@@ -1232,7 +1230,7 @@ void in(ISS& env, const bc::IncDecS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TInitCell);
+    c->merge(env.ctx, tcls, tname, TInitCell);
   }
 
   push(env, TInitCell);
@@ -1283,7 +1281,7 @@ void in(ISS& env, const bc::BindS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TRef);
+    c->merge(env.ctx, tcls, tname, TRef);
   }
 
   push(env, TRef);
@@ -1517,7 +1515,7 @@ void in(ISS& env, const bc::FPassS& op) {
         }
       }
       if (auto c = env.collect.publicStatics) {
-        c->merge(tcls, tname, TInitGen);
+        c->merge(env.ctx, tcls, tname, TInitGen);
       }
     }
     return push(env, TInitGen);
@@ -1724,7 +1722,10 @@ void in(ISS& env, const bc::CufSafeReturn&) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::DecodeCufIter&) { popC(env); }
+void in(ISS& env, const bc::DecodeCufIter& op) {
+  popC(env); // func
+  env.propagate(*op.target, env.state); // before iter is modifed
+}
 
 void in(ISS& env, const bc::IterInit& op) {
   auto const t1 = popC(env);
@@ -2121,24 +2122,6 @@ void in(ISS& env, const bc::Strlen&) {
 
 void in(ISS& env, const bc::IncStat&) {}
 
-void in(ISS& env, const bc::Abs&) {
-  auto const t1 = popC(env);
-  auto const v1 = tv(t1);
-  if (v1) {
-    constprop(env);
-    auto const cell = eval_cell([&] {
-      auto const cell = *v1;
-      auto const ret = HHVM_FN(abs)(tvAsCVarRef(&cell));
-      assert(!IS_REFCOUNTED_TYPE(ret.asCell()->m_type));
-      return *ret.asCell();
-    });
-    return push(env, cell ? *cell : TInitCell);
-  }
-  if (t1.subtypeOf(TInt)) return push(env, TInt);
-  if (t1.subtypeOf(TDbl)) return push(env, TDbl);
-  return push(env, TInitUnc);
-}
-
 void in(ISS& env, const bc::Idx&) {
   popC(env); popC(env); popC(env);
   push(env, TInitCell);
@@ -2148,27 +2131,6 @@ void in(ISS& env, const bc::ArrayIdx&) {
   popC(env); popC(env); popC(env);
   push(env, TInitCell);
 }
-
-template<class Op>
-void floatFnImpl(ISS& env, Op op, Type nonConstType) {
-  auto const t1 = popC(env);
-  auto const v1 = tv(t1);
-  if (v1) {
-    if (v1->m_type == KindOfDouble) {
-      constprop(env);
-      return push(env, dval(op(v1->m_data.dbl)));
-    }
-    if (v1->m_type == KindOfInt64) {
-      constprop(env);
-      return push(env, dval(op(static_cast<double>(v1->m_data.num))));
-    }
-  }
-  push(env, nonConstType);
-}
-
-void in(ISS& env, const bc::Floor&) { floatFnImpl(env, floor, TDbl); }
-void in(ISS& env, const bc::Ceil&)  { floatFnImpl(env, ceil, TDbl); }
-void in(ISS& env, const bc::Sqrt&)  { floatFnImpl(env, sqrt, TInitUnc); }
 
 void in(ISS& env, const bc::CheckProp&) { push(env, TBool); }
 
@@ -2180,7 +2142,7 @@ void in(ISS& env, const bc::InitProp& op) {
     if (auto c = env.collect.publicStatics) {
       auto const cls = selfClsExact(env);
       always_assert(!!cls);
-      c->merge(*cls, sval(op.str1), t);
+      c->merge(env.ctx, *cls, sval(op.str1), t);
     }
     break;
   case InitPropOp::NonStatic:

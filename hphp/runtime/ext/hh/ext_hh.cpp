@@ -82,10 +82,10 @@ Variant HHVM_FUNCTION(serialize_memoize_param, const Variant& param) {
   return fb_compact_serialize(param, FBCompactSerializeBehavior::MemoizeParam);
 }
 
-static class HHExtension : public Extension {
+static class HHExtension final : public Extension {
  public:
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_NAMED_FE(HH\\autoload_set_paths, HHVM_FN(autoload_set_paths));
     HHVM_NAMED_FE(HH\\could_include, HHVM_FN(could_include));
     HHVM_NAMED_FE(HH\\serialize_memoize_param,
@@ -94,7 +94,7 @@ static class HHExtension : public Extension {
   }
 } s_hh_extension;
 
-static class XHPExtension : public Extension {
+static class XHPExtension final : public Extension {
  public:
   XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET) { }
   bool moduleEnabled() const override { return RuntimeOption::EnableXHP; }

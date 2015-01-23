@@ -10,5 +10,5 @@
  */
 
 function f(int $a): mixed {
-  return (unset)$a;
+  return (unset) $a;
 }

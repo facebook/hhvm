@@ -214,7 +214,6 @@ static const struct {
   { OpConcat,      {StackTop2,        Stack1,       OutString,        -1 }},
   { OpConcatN,     {StackN,           Stack1,       OutString,         0 }},
   /* Arithmetic ops */
-  { OpAbs,         {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpAdd,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpSub,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},
@@ -226,7 +225,6 @@ static const struct {
   { OpDiv,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpMod,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpPow,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
-  { OpSqrt,        {Stack1,           Stack1,       OutUnknown,        0 }},
   /* Logical ops */
   { OpXor,         {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpNot,         {Stack1,           Stack1,       OutBoolean,        0 }},
@@ -473,8 +471,6 @@ static const struct {
   { OpIncStat,     {None,             None,         OutNone,           0 }},
   { OpIdx,         {StackTop3,        Stack1,       OutUnknown,       -2 }},
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
-  { OpFloor,       {Stack1,           Stack1,       OutDouble,         0 }},
-  { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
   { OpCheckProp,   {None,             Stack1,       OutBoolean,        1 }},
   { OpInitProp,    {Stack1,           None,         OutNone,          -1 }},
   { OpSilence,     {Local|DontGuardAny,
@@ -968,7 +964,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::AGetC:
   case Op::AGetL:
   case Op::AKExists:
-  case Op::Abs:
   case Op::AddElemC:
   case Op::AddNewElemC:
   case Op::Array:
@@ -987,7 +982,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::CastInt:
   case Op::CastObject:
   case Op::CastString:
-  case Op::Ceil:
   case Op::CheckProp:
   case Op::CheckThis:
   case Op::Clone:
@@ -1023,7 +1017,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::FPushObjMethodD:
   case Op::False:
   case Op::File:
-  case Op::Floor:
   case Op::GetMemoKey:
   case Op::Idx:
   case Op::InitThisLoc:
@@ -1067,7 +1060,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::Shl:
   case Op::Shr:
   case Op::Silence:
-  case Op::Sqrt:
   case Op::StaticLoc:
   case Op::StaticLocInit:
   case Op::String:
@@ -1599,7 +1591,7 @@ static Type flavorToType(FlavorDesc f) {
 
     case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
     case UV: return Type::Uninit;
-    case VV: return Type::BoxedCell;
+    case VV: return Type::BoxedInitCell;
     case AV: return Type::Cls;
     case RV: case FV: case CVV: case CVUV: return Type::Gen;
   }
@@ -1607,15 +1599,13 @@ static Type flavorToType(FlavorDesc f) {
 }
 
 void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
-  /*
-   * These generate AssertStks, which define new StkPtrs, and we don't allow IR
-   * lowering functions to gen instructions that may throw after defining a new
-   * StkPtrs.  This means right now they must be before we prepare for the next
-   * HHBC opcode (it's fine that they will have a marker on the previous
-   * instruction).
-   *
-   * TODO(#4810319): this will go away once we stop threading StkPtrs around.
-   */
+  irgen::prepareForNextHHBC(
+    hts,
+    &ni,
+    ni.source.offset(),
+    ni.endsRegion && !irgen::isInlining(hts)
+  );
+
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     auto const type = flavorToType(instrInputFlavor(pc, i));
@@ -1626,18 +1616,16 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
     }
   }
 
-  irgen::prepareForNextHHBC(
-    hts,
-    &ni,
-    ni.source.offset(),
-    ni.endsRegion && !irgen::isInlining(hts)
-  );
   FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
                                          ni.offset(), ni.toString(),
                                          show(hts)));
 
   irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(hts, Stats::Instr_TC, 1);
+  if (Trace::moduleEnabledRelease(Trace::llvm, 1) ||
+      RuntimeOption::EvalJitLLVMCounters) {
+    irgen::gen(hts, CountBytecode);
+  }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
     irgen::gen(hts, DbgAssertRetAddr);

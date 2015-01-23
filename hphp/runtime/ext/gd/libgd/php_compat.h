@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-php-config.h"
+#include "hphp/util/string-vsnprintf.h"
 
 // And start the blasted C stuff again
 extern "C" {
@@ -72,12 +73,15 @@ inline char *estrdup(const char *s) {
 #define E_NOTICE      (1<<3L)
 inline void php_verror(const char *docref, const char *params, int type,
                        const char *format, va_list args) {
+  std::string msg;
+  HPHP::string_vsnprintf(msg, format, args);
+
   if (type == E_ERROR) {
-    return HPHP::raise_error(format, args);
+    return HPHP::raise_error(msg);
   } else if (type == E_WARNING) {
-    return HPHP::raise_warning(format, args);
+    return HPHP::raise_warning(msg);
   } else if (type == E_NOTICE) {
-    return HPHP::raise_notice(format, args);
+    return HPHP::raise_notice(msg);
   }
   not_reached();
 }

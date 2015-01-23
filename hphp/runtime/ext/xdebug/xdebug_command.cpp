@@ -85,7 +85,7 @@ namespace HPHP {
   FEATURE("encoding", "1", "iso-8859-1",  false)                               \
   FEATURE("language_name", "1", "PHP", false)                                  \
   FEATURE("language_supports_threads", "1", "0", false)                        \
-  FEATURE("language_version", "1", xdstrdup(k_HHVM_VERSION.c_str()), true)     \
+  FEATURE("language_version", "1", xdstrdup(HHVM_VERSION), true)               \
   FEATURE("max_children", "1",                                                 \
           xdebug_sprintf("%d", m_server.m_maxChildren), true)                  \
   FEATURE("max_data", "1", xdebug_sprintf("%d", m_server.m_maxData), true)     \

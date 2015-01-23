@@ -19,10 +19,12 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 
 TRACE_SET_MOD(hhir);
 
@@ -56,9 +58,10 @@ bool merge_into(TypeSourceSet& dst, const TypeSourceSet& src) {
 }
 
 /*
- * Merge LocalStates, returning whether anything changed.
+ * Merge SlotStates, returning whether anything changed.
  */
-bool merge_into(LocalState& dst, const LocalState& src) {
+template<bool Stack>
+bool merge_into(SlotState<Stack>& dst, const SlotState<Stack>& src) {
   auto changed = false;
 
   // Get the least common ancestor across both states.
@@ -78,6 +81,20 @@ bool merge_into(LocalState& dst, const LocalState& src) {
     merge_util(dst.predictedType,
                Type::unionOf(dst.predictedType, src.predictedType)) ||
     changed;
+}
+
+bool merge_memory_stack_into(jit::vector<StackState>& dst,
+                             const jit::vector<StackState>& src) {
+  auto changed = false;
+  // We may need to merge different-sized memory stacks, because a predecessor
+  // may not touch some stack memory that another pred did.  We just need to
+  // conservatively throw away slots that aren't tracked on all preds.
+  auto const result_size = std::min(dst.size(), src.size());
+  dst.resize(result_size);
+  for (auto i = uint32_t{0}; i < result_size; ++i) {
+    if (merge_into(dst[i], src[i])) changed = true;
+  }
+  return changed;
 }
 
 /*
@@ -104,6 +121,10 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   if (dst.spValue != src.spValue) {
     // We have two different sp definitions but we know they're equal because
     // spOffset matched.
+    //
+    // TODO(#4810319): we should be able to just require the spValues are the
+    // same after we can fix things like Call not to need to redefine the stack
+    // pointer.
     dst.spValue = nullptr;
     changed = true;
   }
@@ -123,6 +144,10 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     if (merge_into(dst.locals[i], src.locals[i])) {
       changed = true;
     }
+  }
+
+  if (merge_memory_stack_into(dst.memoryStack, src.memoryStack)) {
+    changed = true;
   }
 
   return changed;
@@ -172,6 +197,16 @@ bool check_invariants(const FrameState& state) {
       );
     }
   }
+
+  // We require the memory stack is always at least as big as the spOffset,
+  // unless spOffset went negative (because we're returning and have freed the
+  // ActRec).  Note that there are some "wasted" slots where locals/iterators
+  // would be in the vector right now.
+  always_assert_flog(
+    state.spOffset < 0 || state.memoryStack.size() >= state.spOffset,
+    "memoryStack was smaller than possible"
+  );
+
   return true;
 }
 
@@ -179,11 +214,13 @@ bool check_invariants(const FrameState& state) {
 
 }
 
-FrameStateMgr::FrameStateMgr(const IRUnit& unit, BCMarker marker) {
+FrameStateMgr::FrameStateMgr(BCMarker marker) {
   m_stack.push_back(FrameState{});
-  cur().curFunc = marker.func();
-  cur().spOffset = marker.spOff();
+  cur().curFunc       = marker.func();
+  cur().spOffset      = marker.spOff();
+  cur().syncedSpLevel = marker.spOff();
   cur().locals.resize(marker.func()->numLocals());
+  cur().memoryStack.resize(marker.spOff());
 }
 
 bool FrameStateMgr::update(const IRInstruction* inst) {
@@ -229,31 +266,88 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case InlineReturn:   trackInlineReturn(); break;
 
   case Call:
-    cur().spValue = inst->dst();
-    for (auto& st : m_stack) st.frameMaySpanCall = true;
-    // A call pops the ActRec and the arguments, and then pushes a
-    // return value.
-    cur().spOffset -= kNumActRecCells + inst->extra<Call>()->numParams;
-    cur().spOffset += 1;
-    assert(cur().spOffset >= 0);
+    {
+      auto const extra = inst->extra<Call>();
+      for (auto& st : m_stack) st.frameMaySpanCall = true;
+      // Remove tracked state for the slots for args and the actrec.
+      for (auto i = uint32_t{0}; i < kNumActRecCells + extra->numParams; ++i) {
+        setStackValue(extra->spOffset + i, nullptr);
+      }
+      clearStackForCall();
+      // The return value is known to be at least a Gen.
+      setStackType(extra->spOffset + kNumActRecCells + extra->numParams - 1,
+                   Type::Gen);
+      // What we're considering sync'd to memory is popping an actrec, popping
+      // args, and pushing a return value.
+      if (m_status == Status::Building) {
+        assert(cur().syncedSpLevel == inst->marker().spOff());
+      } else {
+        cur().syncedSpLevel = inst->marker().spOff();
+      }
+      cur().syncedSpLevel -= extra->numParams + kNumActRecCells;
+      cur().syncedSpLevel += 1;
+      /*
+       * TODO(#4810319): Call still defines a StkPtr because we can't keep the
+       * previous DefSP live across it right now.
+       */
+      cur().spOffset = cur().syncedSpLevel;
+      cur().spValue = inst->dst();
+    }
     break;
 
   case CallArray:
-    cur().spValue = inst->dst();
-    for (auto& st : m_stack) st.frameMaySpanCall = true;
-    // A CallArray pops the ActRec an array arg and pushes a return value.
-    cur().spOffset -= kNumActRecCells;
-    assert(cur().spOffset >= 0);
+    {
+      auto const extra = inst->extra<CallArray>();
+      for (auto& st : m_stack) st.frameMaySpanCall = true;
+      // Remove tracked state for the actrec and array arg.
+      for (auto i = uint32_t{0}; i < kNumActRecCells + 1; ++i) {
+        setStackValue(extra->spOffset + i, nullptr);
+      }
+      clearStackForCall();
+      setStackType(extra->spOffset + kNumActRecCells, Type::Gen);
+      // A CallArray pops the ActRec, an array arg, and pushes a return value.
+      if (m_status == Status::Building) {
+        assert(cur().syncedSpLevel == inst->marker().spOff());
+      } else {
+        cur().syncedSpLevel = inst->marker().spOff();
+      }
+      cur().syncedSpLevel -= kNumActRecCells;
+      cur().spOffset = cur().syncedSpLevel;
+      cur().spValue = inst->dst();
+    }
     break;
 
   case ContEnter:
-    cur().spValue = inst->dst();
-    for (auto& st : m_stack) st.frameMaySpanCall = true;
+    {
+      auto const extra = inst->extra<ContEnter>();
+      for (auto& st : m_stack) st.frameMaySpanCall = true;
+      clearStackForCall();
+      setStackType(extra->spOffset, Type::Gen);
+      // ContEnter pops a cell and pushes a yielded value.
+      if (m_status == Status::Building) {
+        assert(cur().syncedSpLevel == inst->marker().spOff());
+      } else {
+        cur().syncedSpLevel = inst->marker().spOff();
+      }
+      cur().spOffset = cur().syncedSpLevel;
+      cur().spValue = inst->dst();
+    }
     break;
 
   case DefFP:
   case FreeActRec:
     cur().fpValue = inst->dst();
+    break;
+
+  case RetAdjustStk:
+    cur().spValue = inst->dst();
+    cur().spOffset = -2;
+    cur().memoryStack.clear();
+    break;
+
+  case RetCtrl:
+    cur().spValue = nullptr;
+    cur().fpValue = nullptr;
     break;
 
   case ReDefSP:
@@ -266,15 +360,39 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().spOffset = inst->extra<StackOffset>()->offset;
     break;
 
-  case AssertStk:
-  case CastStk:
-  case CastStkIntToDbl:
-  case CoerceStk:
-  case CheckStk:
-  case GuardStk:
-  case HintStkInner:
-  case ExceptionBarrier:
+  case AdjustSP:
     cur().spValue = inst->dst();
+    cur().spOffset += -inst->extra<AdjustSP>()->offset;
+    break;
+
+  case StStk:
+    setStackValue(inst->extra<StStk>()->offset, inst->src(1));
+    break;
+
+  case CheckType:
+  case AssertType:
+    refineStackValues(inst->src(0), inst->dst());
+    break;
+
+  case AssertStk:
+  case GuardStk:
+  case CheckStk:
+    refineStackType(inst->extra<StackOffset>()->offset,
+                    inst->typeParam(),
+                    TypeSource::makeGuard(inst));
+    break;
+
+  case HintStkInner:
+    setBoxedStkPrediction(inst->extra<HintStkInner>()->offset,
+                          inst->typeParam());
+    break;
+
+  case CastStk:
+    setStackType(inst->extra<CastStk>()->offset, inst->typeParam());
+    break;
+
+  case CoerceStk:
+    setStackType(inst->extra<CoerceStk>()->offset, inst->typeParam());
     break;
 
   case EndCatch:
@@ -284,42 +402,62 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
      * the unwinder won't see what we expect.
      */
     always_assert_flog(
-      cur().spOffset == inst->marker().spOff() &&
-      cur().stackDeficit == 0 &&
-      cur().evalStack.size() == 0,
+      cur().spOffset + -inst->extra<EndCatch>()->offset ==
+          inst->marker().spOff() &&
+        cur().stackDeficit == 0 &&
+        cur().evalStack.size() == 0,
       "EndCatch stack didn't seem right:\n"
       "                 spOff: {}\n"
+      "       EndCatch offset: {}\n"
       "        marker's spOff: {}\n"
       "  eval stack def, size: {}, {}\n",
       cur().spOffset,
+      inst->extra<EndCatch>()->offset,
       inst->marker().spOff(),
       cur().stackDeficit,
       cur().evalStack.size()
     );
     break;
 
-  case SpillStack: {
-    cur().spValue = inst->dst();
-    // Push the spilled values but adjust for the popped values
-    int64_t stackAdjustment = inst->src(1)->intVal();
-    cur().spOffset -= stackAdjustment;
-    cur().spOffset += spillValueCells(inst);
-    break;
-  }
-
-  case SpillFrame:
   case CufIterSpillFrame:
-    cur().spValue = inst->dst();
-    cur().spOffset += kNumActRecCells;
+    spillFrameStack(inst->extra<CufIterSpillFrame>()->spOffset);
+    break;
+  case SpillFrame:
+    spillFrameStack(inst->extra<SpillFrame>()->spOffset);
     break;
 
   case InterpOne:
   case InterpOneCF: {
-    cur().spValue = inst->dst();
     auto const& extra = *inst->extra<InterpOneData>();
-    int64_t stackAdjustment = extra.cellsPopped - extra.cellsPushed;
-    // push the return value if any and adjust for the popped values
-    cur().spOffset -= stackAdjustment;
+    auto const spOffset = extra.spOffset;
+
+    // Clear tracked information for slots pushed and popped.
+    for (auto i = uint32_t{0}; i < extra.cellsPopped; ++i) {
+      setStackValue(spOffset + i, nullptr);
+    }
+    for (auto i = uint32_t{0}; i < extra.cellsPushed; ++i) {
+      setStackValue(spOffset + extra.cellsPopped - 1 - i, nullptr);
+    }
+    auto const adjustedTop = spOffset + extra.cellsPopped - extra.cellsPushed;
+
+    switch (extra.opcode) {
+    case Op::CGetL2:
+      setStackType(adjustedTop + 1, inst->typeParam());
+      break;
+    case Op::CGetL3:
+      setStackType(adjustedTop + 2, inst->typeParam());
+      break;
+    default:
+      // We don't track cells pushed by interp one except the top of the stack,
+      // aside from above special cases.
+      if (inst->hasTypeParam()) setStackType(adjustedTop, inst->typeParam());
+      break;
+    }
+
+    cur().syncedSpLevel -= extra.cellsPopped;
+    cur().syncedSpLevel += extra.cellsPushed;
+    assert(cur().evalStack.size() == 0);
+    assert(cur().stackDeficit == 0);
     break;
   }
 
@@ -328,11 +466,23 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   default:
+    if (MInstrEffects::supported(inst)) {
+      auto const base = inst->src(minstrBaseIdx(inst->op()));
+      // Right now we require that minstrs that affect stack locations take the
+      // stack address as an immediate source.  This isn't actually specified
+      // in the ir.spec but we intend to make it more general soon.  There is
+      // an analagous problem in local-effects.cpp for LdLocAddr.
+      if (base->inst()->is(LdStkAddr)) {
+        auto const offset = base->inst()->extra<LdStkAddr>()->offset;
+        auto const prevTy = stackType(offset);
+        MInstrEffects effects(inst->op(), prevTy.ptr(Ptr::Stk));
+        if (effects.baseTypeChanged || effects.baseValChanged) {
+          auto const ty = effects.baseType.derefIfPtr();
+          setStackType(offset, ty.isBoxed() ? Type::BoxedInitCell : ty);
+        }
+      }
+    }
     break;
-  }
-
-  if (inst->modifiesStack()) {
-    cur().spValue = inst->modifiedStkPtr();
   }
 
   return changed;
@@ -468,8 +618,9 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   // Whatever the current fpValue is is good enough, but we have to be
   // passed in the StkPtr that represents the stack prior to the
   // ActRec being allocated.
-  cur().spOffset = savedSPOff;
-  cur().spValue = savedSP;
+  cur().syncedSpLevel = savedSPOff;
+  assert(cur().spValue == savedSP);
+  cur().spValue = savedSP;  // TODO(#5868870): this isn't needed anymore
 
   /*
    * Push a new state for the inlined callee.
@@ -488,9 +639,18 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().thisAvailable    = target->cls() != nullptr && !target->isStatic();
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
+  cur().syncedSpLevel    = target->numLocals();
+
+  // XXX: we're setting spOffset to keep some invariants about it true,
+  // although, we don't really define it as part of the DefInlineFP---there's
+  // going to be a ReDefSp coming that does it.  TODO(#5868870): can this be
+  // improved to set spOffset relative to the new fp in a non-lying way?
+  cur().spOffset = cur().syncedSpLevel;
 
   cur().locals.clear();
   cur().locals.resize(target->numLocals());
+  cur().memoryStack.clear();
+  cur().memoryStack.resize(cur().syncedSpLevel);
 }
 
 void FrameStateMgr::trackInlineReturn() {
@@ -512,6 +672,8 @@ bool FrameStateMgr::checkInvariants() const {
  * must be the same, so it is not cleared.
  */
 void FrameStateMgr::loopHeaderClear(BCMarker marker) {
+  FTRACE(1, "loopHeaderClear\n");
+
   /*
    * Important note: we're setting our tracked spOffset to the marker spOffset.
    * These two spOffsets have different meanings.  One is the offset for the
@@ -527,11 +689,42 @@ void FrameStateMgr::loopHeaderClear(BCMarker marker) {
   cur().stackDeficit   = 0;
   cur().evalStack      = EvalStack();
 
+  // In HHBC, stacks should always be empty when we are at a loop header, which
+  // is the only situation we currently create loops.  We might as well clear
+  // the stack state though, since it's logically the thing to do.
+  for (auto& state : m_stack) {
+    for (auto& stk : state.memoryStack) {
+      stk = StackState{};
+    }
+  }
+
   // These two values must go toward their conservative state.
   cur().thisAvailable    = false;
   cur().frameMaySpanCall = true;
 
   clearLocals();
+}
+
+StackState& FrameStateMgr::stackState(int32_t offset) {
+  auto const idx = cur().spOffset - offset;
+  FTRACE(6, "stackState offset: {} (@ spOff {}) --> idx={}\n",
+    offset, cur().spOffset, idx);
+  always_assert_flog(
+    idx >= 0,
+    "idx went negative: curSpOffset: {}, offset: {}\n",
+    cur().spOffset,
+    offset
+  );
+  if (idx >= cur().memoryStack.size()) {
+    cur().memoryStack.resize(idx + 1);
+  }
+  return cur().memoryStack[idx];
+}
+
+const StackState& FrameStateMgr::stackState(int32_t offset) const {
+  // We consider it logically const to extend with default-constructed stack
+  // values.
+  return const_cast<FrameStateMgr&>(*this).stackState(offset);
 }
 
 void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
@@ -583,6 +776,13 @@ void FrameStateMgr::loadBlock(Block* block) {
   assert(!m_stack.empty());
 }
 
+void FrameStateMgr::syncEvalStack() {
+  cur().syncedSpLevel += cur().evalStack.size() - cur().stackDeficit;
+  cur().evalStack.clear();
+  cur().stackDeficit = 0;
+  FTRACE(2, "syncEvalStack --- level {}\n", cur().syncedSpLevel);
+}
+
 SSATmp* FrameStateMgr::localValue(uint32_t id) const {
   always_assert(id < cur().locals.size());
   return cur().locals[id].value;
@@ -603,6 +803,88 @@ Type FrameStateMgr::predictedLocalType(uint32_t id) const {
   auto const ty = cur().locals[id].predictedType;
   ITRACE(2, "Predicting {}: {}\n", id, ty);
   return ty;
+}
+
+Type FrameStateMgr::stackType(int32_t offset) const {
+  return stackState(offset).type;
+}
+
+Type FrameStateMgr::predictedStackType(int32_t offset) const {
+  return stackState(offset).predictedType;
+}
+
+SSATmp* FrameStateMgr::stackValue(int32_t offset) const {
+  return stackState(offset).value;
+}
+
+TypeSourceSet FrameStateMgr::stackTypeSources(int32_t offset) const {
+  return stackState(offset).typeSrcs;
+}
+
+void FrameStateMgr::setStackValue(int32_t offset, SSATmp* value) {
+  auto& stk = stackState(offset);
+  FTRACE(2, "stk[{}] := {}\n", offset,
+    value ? value->toString() : std::string("<>"));
+  stk.value         = value;
+  stk.type          = value ? value->type() : Type::StkElem;
+  stk.predictedType = stk.type;
+  stk.typeSrcs.clear();
+  if (value) {
+    stk.typeSrcs.insert(TypeSource::makeValue(value));
+  }
+}
+
+void FrameStateMgr::setStackType(int32_t offset, Type type) {
+  auto& stk = stackState(offset);
+  FTRACE(2, "stk[{}] :: {}\n", offset, type.toString());
+  stk.value = nullptr;
+  stk.type = type;
+  stk.predictedType = type;
+  stk.typeSrcs.clear();
+}
+
+void FrameStateMgr::setBoxedStkPrediction(int32_t offset, Type type) {
+  auto& state = stackState(offset);
+  always_assert_flog(
+    state.type.maybe(Type::BoxedCell),
+    "HintStkInner {} with base type {}",
+    offset,
+    state.type
+  );
+  if (state.type <= Type::BoxedCell) {
+    state.predictedType = type;
+  } else {
+    state.predictedType = state.type;
+  }
+}
+
+void FrameStateMgr::spillFrameStack(int32_t offset) {
+  for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
+    setStackValue(offset + i, nullptr);
+  }
+  cur().syncedSpLevel += kNumActRecCells;
+}
+
+void FrameStateMgr::refineStackType(int32_t offset,
+                                    Type ty,
+                                    TypeSource typeSrc) {
+  auto& state = stackState(offset);
+  auto const newType = refineTypeNoCheck(state.type, ty);
+  ITRACE(2, "stk[{}] updating type {} as {} -> {}\n", offset,
+    state.type, ty, newType);
+  state.type = newType;
+  state.predictedType = newType;
+  state.typeSrcs.clear();
+  state.typeSrcs.insert(typeSrc);
+}
+
+void FrameStateMgr::clearStackForCall() {
+  ITRACE(2, "clearStackForCall\n");
+  for (auto& state : m_stack) {
+    for (auto& stk : state.memoryStack) {
+      stk.value = nullptr;
+    }
+  }
 }
 
 void FrameStateMgr::clearLocals() {
@@ -694,9 +976,8 @@ void FrameStateMgr::setBoxedLocalPrediction(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
   always_assert(type <= Type::BoxedCell);
   always_assert_flog(
-    cur().locals[id].type == Type::BoxedInitCell ||
-    cur().locals[id].type == Type::Gen,
-    "PredictLocInner {} with base type {}",
+    cur().locals[id].type.maybe(Type::BoxedCell),
+    "HintLocInner {} with base type {}",
     id,
     cur().locals[id].type
   );
@@ -749,6 +1030,22 @@ void FrameStateMgr::refineLocalValues(SSATmp* oldVal, SSATmp* newVal) {
       local.predictedType = local.type;
       local.typeSrcs.clear();
       local.typeSrcs.insert(TypeSource::makeValue(newVal));
+    }
+  }
+}
+
+void FrameStateMgr::refineStackValues(SSATmp* oldVal, SSATmp* newVal) {
+  for (auto& frame : m_stack) {
+    for (auto& slot : frame.memoryStack) {
+      if (!slot.value || canonical(slot.value) != canonical(oldVal)) {
+        continue;
+      }
+      ITRACE(2, "refining on stack {} -> {}\n", *oldVal, *newVal);
+      slot.value         = newVal;
+      slot.type          = newVal->type();
+      slot.predictedType = newVal->type();
+      slot.typeSrcs.clear();
+      slot.typeSrcs.insert(TypeSource::makeValue(newVal));
     }
   }
 }

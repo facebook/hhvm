@@ -34,6 +34,12 @@ namespace ServiceData {
 class ExportedTimeSeries;
 }
 
+/*
+ * Atomically (with respect to concurrent calls to shouldProxyPath()) set a new
+ * origin and proxy percentage. All other options are unmodified.
+ */
+void setProxyOriginPercentage(const std::string& origin, int percentage);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class HttpRequestHandler : public RequestHandler {
@@ -66,8 +72,6 @@ private:
   bool executePHPRequest(Transport *transport, RequestURI &reqURI,
                          SourceRootInfo &sourceRootInfo,
                          bool cacheableDynamicContent);
-  bool MatchAnyPattern(const std::string &path,
-                       const std::vector<std::string> &patterns);
 
   static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;

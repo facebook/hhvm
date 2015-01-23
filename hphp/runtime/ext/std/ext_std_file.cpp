@@ -38,7 +38,6 @@
 #include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
-#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/system/constants.h"
@@ -62,6 +61,12 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <vector>
 
+#define REGISTER_CONSTANT(name, value)                                         \
+  Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
+
+#define REGISTER_STRING_CONSTANT(name, value)                                  \
+  Native::registerConstant<KindOfStaticString>(makeStaticString(#name),        \
+                                               value.get())                    \
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
   File *f = handle.getTyped<File>(true, true);          \
@@ -265,9 +270,6 @@ Array stat_impl(struct stat *stat_sb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64_t k_STREAM_URL_STAT_LINK = 1;
-const int64_t k_STREAM_URL_STAT_QUIET = 2;
-
 Variant HHVM_FUNCTION(fopen,
                       const String& filename,
                       const String& mode,
@@ -285,13 +287,13 @@ Variant HHVM_FUNCTION(fopen,
     return false;
   }
 
-  Resource resource = File::Open(filename, mode,
-                                 use_include_path ? File::USE_INCLUDE_PATH : 0,
-                                 context);
-  if (resource.isNull()) {
+  auto file = File::Open(filename, mode,
+                         use_include_path ? File::USE_INCLUDE_PATH : 0,
+                         context);
+  if (!file) {
     return false;
   }
-  return resource;
+  return Variant(file);
 }
 
 Variant HHVM_FUNCTION(popen,
@@ -589,23 +591,23 @@ Variant HHVM_FUNCTION(file_put_contents,
                       int flags /* = 0 */,
                       const Variant& context /* = null */) {
   CHECK_PATH(filename, 1);
-  Resource resource = File::Open(
+  auto file = File::Open(
     filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", flags, context);
-  File *f = resource.getTyped<File>(true);
-  if (!f) {
+
+  if (!file) {
     return false;
   }
 
   if (flags & LOCK_EX) {
     // Check to make sure we are dealing with a regular file
-    if (!dynamic_cast<PlainFile*>(f)) {
+    if (!dynamic_cast<PlainFile*>(file.get())) {
       raise_warning(
         "%s(): Exclusive locks may only be set for regular files",
         __FUNCTION__ + 2);
       return false;
     }
 
-    if (!f->lock(LOCK_EX)) {
+    if (!file->lock(LOCK_EX)) {
       return false;
     }
   }
@@ -624,7 +626,7 @@ Variant HHVM_FUNCTION(file_put_contents,
         int len = fsrc->readImpl(buffer, sizeof(buffer));
         if (len == 0) break;
         numbytes += len;
-        int written = f->writeImpl(buffer, len);
+        int written = file->writeImpl(buffer, len);
         if (written != len) {
           numbytes = -1;
           break;
@@ -639,7 +641,7 @@ Variant HHVM_FUNCTION(file_put_contents,
         String value = iter.second();
         if (!value.empty()) {
           numbytes += value.size();
-          int written = f->writeImpl(value.data(), value.size());
+          int written = file->writeImpl(value.data(), value.size());
           if (written != value.size()) {
             numbytes = -1;
             break;
@@ -666,7 +668,7 @@ Variant HHVM_FUNCTION(file_put_contents,
       String value = data.toString();
       if (!value.empty()) {
         numbytes += value.size();
-        int written = f->writeImpl(value.data(), value.size());
+        int written = file->writeImpl(value.data(), value.size());
         if (written != value.size()) {
           numbytes = -1;
         }
@@ -679,7 +681,7 @@ Variant HHVM_FUNCTION(file_put_contents,
   }
 
   // like fwrite(), fclose() can error when fflush()ing
-  if (numbytes < 0 || !f->close()) {
+  if (numbytes < 0 || !file->close()) {
     return false;
   }
 
@@ -1872,12 +1874,12 @@ Variant HHVM_FUNCTION(opendir,
                       const Variant& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
   if (!w) return false;
-  Directory *p = w->opendir(path);
+  auto p = w->opendir(path);
   if (!p) {
     return false;
   }
   s_directory_data->defaultDirectory = p;
-  return Resource(p);
+  return Variant(p);
 }
 
 Variant HHVM_FUNCTION(readdir,
@@ -1924,11 +1926,10 @@ Variant HHVM_FUNCTION(scandir,
   CHECK_PATH(directory, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(directory);
   if (!w) return false;
-  Directory *dir = w->opendir(directory);
+  auto dir = w->opendir(directory);
   if (!dir) {
     return false;
   }
-  Resource deleter(dir);
 
   std::vector<String> names;
   while (true) {
@@ -1971,10 +1972,38 @@ void HHVM_FUNCTION(closedir,
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initFile() {
-  Native::registerConstant<KindOfInt64>(s_STREAM_URL_STAT_LINK.get(),
-                                        k_STREAM_URL_STAT_LINK);
-  Native::registerConstant<KindOfInt64>(s_STREAM_URL_STAT_QUIET.get(),
-                                        k_STREAM_URL_STAT_QUIET);
+
+  REGISTER_STRING_CONSTANT(DIRECTORY_SEPARATOR, s_DIRECTORY_SEPARATOR);
+  REGISTER_CONSTANT(FILE_USE_INCLUDE_PATH, k_FILE_USE_INCLUDE_PATH);
+  REGISTER_CONSTANT(FILE_IGNORE_NEW_LINES, k_FILE_IGNORE_NEW_LINES);
+  REGISTER_CONSTANT(FILE_SKIP_EMPTY_LINES, k_FILE_SKIP_EMPTY_LINES);
+  REGISTER_CONSTANT(FILE_APPEND, k_FILE_APPEND);
+  REGISTER_CONSTANT(FILE_NO_DEFAULT_CONTEXT, k_FILE_NO_DEFAULT_CONTEXT);
+  REGISTER_CONSTANT(FILE_TEXT, k_FILE_TEXT);
+  REGISTER_CONSTANT(FILE_BINARY, k_FILE_BINARY);
+  REGISTER_CONSTANT(FNM_NOESCAPE, k_FNM_NOESCAPE);
+  REGISTER_CONSTANT(FNM_CASEFOLD, k_FNM_CASEFOLD);
+  REGISTER_CONSTANT(FNM_PERIOD, k_FNM_PERIOD);
+  REGISTER_CONSTANT(FNM_PATHNAME, k_FNM_PATHNAME);
+  REGISTER_CONSTANT(GLOB_AVAILABLE_FLAGS, k_GLOB_AVAILABLE_FLAGS);
+  REGISTER_CONSTANT(GLOB_BRACE, k_GLOB_BRACE);
+  REGISTER_CONSTANT(GLOB_ERR, k_GLOB_ERR);
+  REGISTER_CONSTANT(GLOB_MARK, k_GLOB_MARK);
+  REGISTER_CONSTANT(GLOB_NOCHECK, k_GLOB_NOCHECK);
+  REGISTER_CONSTANT(GLOB_NOESCAPE, k_GLOB_NOESCAPE);
+  REGISTER_CONSTANT(GLOB_NOSORT, k_GLOB_NOSORT);
+  REGISTER_CONSTANT(GLOB_ONLYDIR, k_GLOB_ONLYDIR);
+  REGISTER_CONSTANT(LOCK_SH, k_LOCK_SH);
+  REGISTER_CONSTANT(LOCK_EX, k_LOCK_EX);
+  REGISTER_CONSTANT(LOCK_UN, k_LOCK_UN);
+  REGISTER_CONSTANT(LOCK_NB, k_LOCK_NB);
+  REGISTER_STRING_CONSTANT(PATH_SEPARATOR, s_PATH_SEPARATOR);
+  REGISTER_CONSTANT(SCANDIR_SORT_ASCENDING, k_SCANDIR_SORT_ASCENDING);
+  REGISTER_CONSTANT(SCANDIR_SORT_DESCENDING, k_SCANDIR_SORT_DESCENDING);
+  REGISTER_CONSTANT(SCANDIR_SORT_NONE, k_SCANDIR_SORT_NONE);
+  REGISTER_CONSTANT(SEEK_SET, k_SEEK_SET);
+  REGISTER_CONSTANT(SEEK_CUR, k_SEEK_CUR);
+  REGISTER_CONSTANT(SEEK_END, k_SEEK_END);
 
   HHVM_FE(fopen);
   HHVM_FE(popen);

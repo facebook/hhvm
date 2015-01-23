@@ -26,10 +26,9 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 void bindMem(HTS& env, SSATmp* ptr, SSATmp* src) {
-  auto const prevValue = gen(env, LdMem, ptr->type().deref(), ptr,
-    cns(env, 0));
+  auto const prevValue = gen(env, LdMem, ptr->type().deref(), ptr);
   pushIncRef(env, src);
-  gen(env, StMem, ptr, cns(env, 0), src);
+  gen(env, StMem, ptr, src);
   gen(env, DecRef, prevValue);
 }
 
@@ -101,8 +100,7 @@ void emitCGetS(HTS& env) {
   auto const ssaCls   = popA(env);
   auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
   auto const unboxed  = gen(env, UnboxPtr, propAddr);
-  auto const ldMem    = gen(env, LdMem, unboxed->type().deref(),
-                          unboxed, cns(env, 0));
+  auto const ldMem    = gen(env, LdMem, unboxed->type().deref(), unboxed);
 
   destroyName(env, ssaPropName);
   pushIncRef(env, ldMem);
@@ -138,9 +136,8 @@ void emitVGetS(HTS& env) {
   auto const val = gen(
     env,
     LdMem,
-    Type::BoxedCell,
-    gen(env, BoxPtr, propAddr),
-    cns(env, 0)
+    Type::BoxedInitCell,
+    gen(env, BoxPtr, propAddr)
   );
   pushIncRef(env, val);
 }
@@ -167,7 +164,8 @@ void emitIssetS(HTS& env) {
   }
   auto const ssaCls = popA(env);
 
-  auto const ret = env.irb->cond(
+  auto const ret = cond(
+    env,
     0,
     [&] (Block* taken) {
       auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
@@ -192,7 +190,8 @@ void emitEmptyS(HTS& env) {
   }
 
   auto const ssaCls = popA(env);
-  auto const ret = env.irb->cond(
+  auto const ret = cond(
+    env,
     0,
     [&] (Block* taken) {
       auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
@@ -200,8 +199,7 @@ void emitEmptyS(HTS& env) {
     },
     [&] (SSATmp* ptr) {
       auto const unbox = gen(env, UnboxPtr, ptr);
-      auto const val   = gen(env, LdMem, unbox->type().deref(), unbox,
-        cns(env, 0));
+      auto const val   = gen(env, LdMem, unbox->type().deref(), unbox);
       return gen(env, XorBool, gen(env, ConvCellToBool, val), cns(env, true));
     },
     [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
@@ -222,7 +220,7 @@ void emitCGetG(HTS& env) {
   destroyName(env, name);
   pushIncRef(
     env,
-    gen(env, LdMem, Type::Cell, gen(env, UnboxPtr, ptr), cns(env, 0))
+    gen(env, LdMem, Type::Cell, gen(env, UnboxPtr, ptr))
   );
 }
 
@@ -233,7 +231,7 @@ void emitVGetG(HTS& env) {
   destroyName(env, name);
   pushIncRef(
     env,
-    gen(env, LdMem, Type::BoxedCell, gen(env, BoxPtr, ptr), cns(env, 0))
+    gen(env, LdMem, Type::BoxedInitCell, gen(env, BoxPtr, ptr))
   );
 }
 
@@ -259,7 +257,8 @@ void emitIssetG(HTS& env) {
   auto const name = topC(env, 0);
   if (!name->isA(Type::Str)) PUNT(IssetG-NameNotStr);
 
-  auto const ret = env.irb->cond(
+  auto const ret = cond(
+    env,
     0,
     [&] (Block* taken) {
       return gen(env, LdGblAddr, taken, name);
@@ -279,14 +278,15 @@ void emitEmptyG(HTS& env) {
   auto const name = topC(env);
   if (!name->isA(Type::Str)) PUNT(EmptyG-NameNotStr);
 
-  auto const ret = env.irb->cond(
+  auto const ret = cond(
+    env,
     0,
     [&] (Block* taken) {
       return gen(env, LdGblAddr, taken, name);
     },
     [&] (SSATmp* ptr) { // Next: global exists
       auto const unboxed = gen(env, UnboxPtr, ptr);
-      auto const val     = gen(env, LdMem, Type::Cell, unboxed, cns(env, 0));
+      auto const val     = gen(env, LdMem, Type::Cell, unboxed);
       return gen(env, XorBool, gen(env, ConvCellToBool, val), cns(env, true));
     },
     [&] { // Taken: global doesn't exist

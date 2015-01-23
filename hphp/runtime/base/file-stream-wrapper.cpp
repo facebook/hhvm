@@ -30,24 +30,25 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-MemFile* FileStreamWrapper::openFromCache(const String& filename,
-                                          const String& mode) {
+SmartPtr<MemFile> FileStreamWrapper::openFromCache(const String& filename,
+                                                   const String& mode) {
   if (!StaticContentCache::TheFileCache) {
     return nullptr;
   }
 
   String relative =
     FileCache::GetRelativePath(File::TranslatePath(filename).c_str());
-  std::unique_ptr<MemFile> file(newres<MemFile>());
+  auto file = makeSmartPtr<MemFile>();
   bool ret = file->open(relative, mode);
   if (ret) {
-    return file.release();
+    return file;
   }
   return nullptr;
 }
 
-File* FileStreamWrapper::open(const String& filename, const String& mode,
-                              int options, const Variant& context) {
+SmartPtr<File>
+FileStreamWrapper::open(const String& filename, const String& mode,
+                        int options, const Variant& context) {
   String fname;
   if (StringUtil::IsFileUrl(filename)) {
     fname = StringUtil::DecodeFileUrl(filename);
@@ -59,7 +60,7 @@ File* FileStreamWrapper::open(const String& filename, const String& mode,
     fname = filename;
   }
 
-  if (MemFile *file = openFromCache(fname, mode)) {
+  if (auto file = openFromCache(fname, mode)) {
     return file;
   }
 
@@ -71,24 +72,22 @@ File* FileStreamWrapper::open(const String& filename, const String& mode,
     }
   }
 
-  std::unique_ptr<PlainFile> file(newres<PlainFile>());
+  auto file = makeSmartPtr<PlainFile>();
   bool ret = file->open(File::TranslatePath(fname), mode);
   if (!ret) {
     raise_warning("%s", file->getLastError().c_str());
     return nullptr;
   }
-  return file.release();
+  return file;
 }
 
-Directory* FileStreamWrapper::opendir(const String& path) {
-  std::unique_ptr<PlainDirectory> dir(
-    newres<PlainDirectory>(File::TranslatePath(path))
-  );
+SmartPtr<Directory> FileStreamWrapper::opendir(const String& path) {
+  auto dir = makeSmartPtr<PlainDirectory>(File::TranslatePath(path));
   if (!dir->isValid()) {
     raise_warning("%s", dir->getLastError().c_str());
     return nullptr;
   }
-  return dir.release();
+  return dir;
 }
 
 int FileStreamWrapper::rename(const String& oldname, const String& newname) {

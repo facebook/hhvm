@@ -5,6 +5,5 @@ interface I {
 }
 
 class C implements I {
-  public function __construct() {
-  }
+  public function __construct() {}
 }

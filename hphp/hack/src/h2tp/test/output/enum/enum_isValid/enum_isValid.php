@@ -1,8 +1,7 @@
 <?php
 require_once ($GLOBALS['HACKLIB_ROOT']);
 final class E2 {
-  private function __construct() {
-  }
+  private function __construct() {}
   private static
     $hacklib_values = array(
       'Fly' => "15",

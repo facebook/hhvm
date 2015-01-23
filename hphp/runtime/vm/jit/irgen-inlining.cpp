@@ -40,7 +40,7 @@ bool isInlining(const HTS& env) { return env.bcStateStack.size() > 1; }
  *     sp2   = SpillFrame sp1, ...
  *     // ... possibly more spillstacks due to argument expressions
  *     sp3   = SpillStack sp2, -argCount
- *     fp2   = DefInlineFP<func,retBC,retSP> sp2 sp1
+ *     fp2   = DefInlineFP<func,retBC,retSP,off> sp2 sp1
  *     sp4   = ReDefSP<spOffset,spansCall> sp1 fp2
  *
  *         // ... callee body ...
@@ -82,14 +82,27 @@ void beginInlining(HTS& env,
     params[numParams - i - 1] = popF(env);
   }
 
-  auto const prevSP    = env.fpiStack.top().first;
-  auto const prevSPOff = env.fpiStack.top().second;
-  auto const calleeSP  = spillStack(env);
+  auto const prevSP    = env.fpiStack.top().returnSP;
+  auto const prevSPOff = env.fpiStack.top().returnSPOff;
+  spillStack(env);
+  auto const calleeSP  = sp(env);
+
+  always_assert_flog(
+    env.fpiStack.top().spillFrame != nullptr,
+    "Couldn't find SpillFrame for inlined call on sp {}."
+    " Was the FPush instruction interpreted?\n{}",
+    *calleeSP->inst(), env.irb->unit()
+  );
+
+  auto const sframe = env.fpiStack.top().spillFrame;
 
   DefInlineFPData data;
-  data.target   = target;
-  data.retBCOff = returnBcOffset;
-  data.retSPOff = prevSPOff;
+  data.target        = target;
+  data.retBCOff      = returnBcOffset;
+  data.fromFPushCtor = sframe->extra<ActRecInfo>()->isFromFPushCtor();
+  data.ctx           = sframe->src(2);
+  data.retSPOff      = prevSPOff;
+  data.spOffset      = offsetFromSP(env, 0);
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
@@ -100,13 +113,6 @@ void beginInlining(HTS& env,
   };
   env.bcStateStack.emplace_back(key);
   updateMarker(env);
-
-  always_assert_flog(
-    findSpillFrame(calleeSP),
-    "Couldn't find SpillFrame for inlined call on sp {}."
-    " Was the FPush instruction interpreted?\n{}",
-    *calleeSP->inst(), env.irb->unit()
-  );
 
   auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, prevSP, fp(env));
   gen(
@@ -132,7 +138,8 @@ void beginInlining(HTS& env,
     stLocRaw(env, i, calleeFP, cns(env, Type::Uninit));
   }
 
-  env.fpiActiveStack.push(std::move(env.fpiStack.top()));
+  env.fpiActiveStack.push(std::make_pair(env.fpiStack.top().returnSP,
+                                         env.fpiStack.top().returnSPOff));
   env.fpiStack.pop();
 }
 
@@ -179,7 +186,7 @@ void endInlinedCommon(HTS& env) {
    * The push of the return value in the caller of this function is not yet
    * materialized.
    */
-  assert(env.irb->evalStack().numCells() == 0);
+  assert(env.irb->evalStack().empty());
   env.irb->clearStackDeficit();
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());
@@ -247,8 +254,7 @@ void inlSingletonSProp(HTS& env,
   // Look up the static property.
   auto const sprop   = ldClsPropAddrKnown(env, cls, propName);
   auto const unboxed = gen(env, UnboxPtr, sprop);
-  auto const value   = gen(env, LdMem, unboxed->type().deref(),
-                         unboxed, cns(env, 0));
+  auto const value   = gen(env, LdMem, unboxed->type().deref(), unboxed);
 
   // Side exit if the static property is null.
   auto isnull = gen(env, IsType, Type::Null, value);

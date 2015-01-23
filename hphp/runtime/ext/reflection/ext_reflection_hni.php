@@ -335,7 +335,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * Returns whether the function is deprecated.
    */
   public function isDeprecated(): bool {
-    return false; // not supported in HHVM
+    return null !== $this->getAttribute('__Deprecated');
   }
 
   public function getExtension() {

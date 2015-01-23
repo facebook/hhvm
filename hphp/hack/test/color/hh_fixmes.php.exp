@@ -10,4 +10,3 @@ function g(string $a): string {
   <partial>$b = </partial><partial>$a</partial><partial> + </partial><partial>1</partial>;
   return <checked>$b</checked>;
 }
-No errors

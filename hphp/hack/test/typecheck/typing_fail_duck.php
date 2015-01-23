@@ -34,5 +34,5 @@ function test(DoesRender $obj): string {
 }
 
 function main(): void {
-  $my_string = test(new MyClass1()) ;
+  $my_string = test(new MyClass1());
 }

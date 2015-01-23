@@ -9,11 +9,10 @@
  *
  */
 
-class A extends Exception {
-}
+class A extends Exception {}
 
 function f(?int $x): int {
-  if(is_null($x)) {
+  if (is_null($x)) {
     throw (new A());
   }
 

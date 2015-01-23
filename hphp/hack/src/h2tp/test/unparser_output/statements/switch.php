@@ -1,6 +1,5 @@
 <?php
-function foo($x) {
-}
+function foo($x) {}
 class Foo {
   public static function bar($str) {
     switch ($str) {

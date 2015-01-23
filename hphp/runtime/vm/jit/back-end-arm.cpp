@@ -89,14 +89,14 @@ struct BackEnd : public jit::BackEnd {
    * A partial equivalent of enterTCHelper, used to set up the ARM simulator.
    */
   uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
-                                 uintptr_t saved_rStashedAr) {
+                                 ActRec* saved_rStashedAr) {
     sim.   set_xreg(arm::rGContextReg.code(), g_context.getNoCheck());
 
     auto& vmRegs = vmRegsUnsafe();
     sim.   set_xreg(arm::rVmFp.code(), vmRegs.fp);
     sim.   set_xreg(arm::rVmSp.code(), vmRegs.stack.top());
     sim.   set_xreg(arm::rVmTl.code(), RDS::tl_base);
-    sim.   set_xreg(arm::rStashedAR.code(), saved_rStashedAr);
+    sim.   set_xreg(arm::rStashedAR.code(), uintptr_t(saved_rStashedAr));
 
     // Leave space for register spilling and MInstrState.
     sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
@@ -115,11 +115,10 @@ struct BackEnd : public jit::BackEnd {
   }
 
  public:
-  void enterTCHelper(TCA start, TReqInfo& info) override {
+  void enterTCHelper(TCA start, ActRec* stashedAR) override {
     // This is a pseudo-copy of the logic in enterTCHelper: it sets up the
     // simulator's registers and stack, runs the translation, and gets the
     // necessary information out of the registers when it's done.
-
     vixl::PrintDisassembler disasm(std::cout);
     vixl::Decoder decoder;
     if (getenv("ARM_DISASM")) {
@@ -137,16 +136,14 @@ struct BackEnd : public jit::BackEnd {
     g_context->m_activeSims.push_back(&sim);
     SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
 
-    DEBUG_ONLY auto spOnEntry =
-      setupSimRegsAndStack(sim, info.saved_rStashedAr);
+    DEBUG_ONLY auto spOnEntry = setupSimRegsAndStack(sim, stashedAR);
 
-    // The handshake is different in the case of REQ_BIND_CALL. The code we're
-    // jumping to expects to find a return address in x30, and a saved return
-    // address on the stack.
-    if (info.requestNum == REQ_BIND_CALL) {
+    // The handshake is different when entering at a func prologue. The code
+    // we're jumping to expects to find a return address in x30, and a saved
+    // return address on the stack.
+    if (stashedAR) {
       // Put the call's return address in the link register.
-      auto* ar = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
-      sim.set_lr(ar->m_savedRip);
+      sim.set_lr(stashedAR->m_savedRip);
     }
 
     std::cout.flush();
@@ -157,16 +154,6 @@ struct BackEnd : public jit::BackEnd {
 
     vmRegsUnsafe().fp = (ActRec*)sim.xreg(arm::rVmFp.code());
     vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(arm::rVmSp.code());
-
-    info.requestNum = sim.xreg(0);
-    info.args[0] = sim.xreg(1);
-    info.args[1] = sim.xreg(2);
-    info.args[2] = sim.xreg(3);
-    info.args[3] = sim.xreg(4);
-    info.args[4] = sim.xreg(5);
-    info.saved_rStashedAr = sim.xreg(arm::rStashedAR.code());
-
-    info.stubAddr = reinterpret_cast<TCA>(sim.xreg(arm::rAsm.code()));
   }
 
   void moveToAlign(CodeBlock& cb,
@@ -404,6 +391,10 @@ struct BackEnd : public jit::BackEnd {
       assert((dest & 7) == 0);
     }
     return *reinterpret_cast<TCA*>(dest);
+  }
+
+  ConditionCode jccCondCode(TCA) override {
+    not_implemented();
   }
 
   TCA callTarget(TCA call) override {

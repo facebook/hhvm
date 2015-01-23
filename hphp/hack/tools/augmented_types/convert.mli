@@ -8,5 +8,5 @@
  *
  *)
 
-(* filename -> (output if changed * list of errors *)
-val convert : string -> string option * string list
+(* mode -> filename -> (output if changed * list of errors *)
+val convert : Convert_ty.mode -> string -> string option * string list

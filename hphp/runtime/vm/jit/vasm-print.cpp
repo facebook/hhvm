@@ -16,11 +16,16 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/arch.h"
-#include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
+
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/stack-trace.h"

@@ -11,8 +11,7 @@
 
 class Foo {
 
-  public function bar(): void {
-  }
+  public function bar(): void {}
 
 }
 

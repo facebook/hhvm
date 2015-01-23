@@ -15,7 +15,7 @@ class A {
   private string $x;
 
   public function __construct(string $x) {
-    if($x === '') {
+    if ($x === '') {
       $this->x = 'foo';
     }
     $this->setX($x);
@@ -34,7 +34,6 @@ class B extends A {
     parent::__construct('fooled');
   }
 
-  protected function setX(string $x): void {
-  }
+  protected function setX(string $x): void {}
 
 }

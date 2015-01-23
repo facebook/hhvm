@@ -9,11 +9,9 @@
  *
  */
 
-interface IResult {
-}
+interface IResult {}
 
-class ResultObject implements IResult {
-}
+class ResultObject implements IResult {}
 
 async function gen(): Awaitable<IResult> {
   return new ResultObject();

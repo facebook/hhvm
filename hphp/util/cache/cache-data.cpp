@@ -187,7 +187,7 @@ bool CacheData::loadFromMmap(MmapFile* mmap_file, string* name) {
 }
 
 bool CacheData::save(CacheSaver* cs) const {
-  CacheSaver::DirEntry de = { 0 };
+  CacheSaver::DirEntry de;
 
   de.id = id_;
   de.flags = flags_;

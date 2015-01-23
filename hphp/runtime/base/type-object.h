@@ -54,6 +54,12 @@ public:
   /* implicit */ Object(ObjectData *data) : ObjectBase(data) { }
   /* implicit */ Object(const Object& src) : ObjectBase(src.m_px) { }
 
+  template <typename T>
+  explicit Object(const SmartPtr<T> &ptr) : ObjectBase(ptr) { }
+
+  template <typename T>
+  explicit Object(SmartPtr<T>&& ptr) : ObjectBase(std::move(ptr)) { }
+
   // Move ctor
   Object(Object&& src) noexcept : ObjectBase(std::move(src)) { }
 
@@ -62,8 +68,21 @@ public:
     ObjectBase::operator=(src);
     return *this;
   }
+
+  template <typename T>
+  Object& operator=(const SmartPtr<T>& src) {
+    ObjectBase::operator=(src);
+    return *this;
+  }
+
   // Move assign
   Object& operator=(Object&& src) {
+    ObjectBase::operator=(std::move(src));
+    return *this;
+  }
+
+  template <typename T>
+  Object& operator=(SmartPtr<T>&& src) {
     ObjectBase::operator=(std::move(src));
     return *this;
   }

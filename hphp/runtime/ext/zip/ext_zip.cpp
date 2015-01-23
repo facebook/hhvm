@@ -97,8 +97,8 @@ void ZipStream::sweep() {
 
 class ZipStreamWrapper : public Stream::Wrapper {
  public:
-  virtual File* open(const String& filename, const String& mode,
-                     int options, const Variant& context) {
+  virtual SmartPtr<File> open(const String& filename, const String& mode,
+                              int options, const Variant& context) {
     std::string url(filename.c_str());
     auto pound = url.find('#');
     if (pound == std::string::npos) {
@@ -119,7 +119,7 @@ class ZipStreamWrapper : public Stream::Wrapper {
       return nullptr;
     }
 
-    return newres<ZipStream>(z, file);
+    return makeSmartPtr<ZipStream>(z, file);
   }
 };
 
@@ -1366,10 +1366,10 @@ static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class zipExtension : public Extension {
+class zipExtension final : public Extension {
  public:
   zipExtension() : Extension("zip", "1.12.4-dev") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(ZipArchive, getProperty);
     HHVM_ME(ZipArchive, addEmptyDir);
     HHVM_ME(ZipArchive, addFile);

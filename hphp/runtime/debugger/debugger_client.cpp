@@ -83,7 +83,7 @@ static String wordwrap(const String& str, int width /* = 75 */,
   return vm_call_user_func("wordwrap", args);
 }
 
-class DebuggerExtension : public Extension {
+class DebuggerExtension final : public Extension {
  public:
   DebuggerExtension() : Extension("hhvm.debugger", NO_EXTENSION_VERSION_YET) {}
 } s_debugger_extension;
@@ -548,8 +548,8 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
     throw Exception("unable to create socket pair for local debugging");
   }
-  auto socket1 = makeSocket(fds[0], AF_UNIX);
-  auto socket2 = makeSocket(fds[1], AF_UNIX);
+  auto socket1 = makeSmartPtr<Socket>(fds[0], AF_UNIX);
+  auto socket2 = makeSmartPtr<Socket>(fds[1], AF_UNIX);
 
   socket1->unregister();
   socket2->unregister();
@@ -619,7 +619,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   /* try possible families (v4, v6) until we get a connection */
   struct addrinfo *cur;
   for (cur = ai; cur; cur = ai->ai_next) {
-    auto sock = makeSocket(
+    auto sock = makeSmartPtr<Socket>(
       socket(cur->ai_family, cur->ai_socktype, 0),
       cur->ai_family,
       cur->ai_addr->sa_data,
@@ -1180,7 +1180,18 @@ void DebuggerClient::console() {
         strcasecmp(line, "Q") != 0) {
       // even if line is bad command, we still want to remember it, so
       // people can go back and fix typos
-      add_history(line);
+      HIST_ENTRY *last_entry = nullptr;
+      if (history_length > 0 &&
+          (last_entry = history_get(history_length + history_base - 1))) {
+        // Make sure we aren't duplicating history entries
+        if (strcmp(line, last_entry->line)) {
+          add_history(line);
+        }
+      } else {
+        // Add history regardless, since we know that there are no
+        // duplicate entries.
+        add_history(line);
+      }
     }
 
     AdjustScreenMetrics();

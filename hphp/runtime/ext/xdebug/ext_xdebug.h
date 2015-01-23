@@ -182,14 +182,14 @@ const int64_t k_XDEBUG_PROFILE_APPEND = 1;
 Variant HHVM_FUNCTION(xdebug_get_profiler_filename);
 ///////////////////////////////////////////////////////////////////////////////
 
-class XDebugExtension : public Extension {
+class XDebugExtension final : public Extension {
 public:
   XDebugExtension() : Extension(XDEBUG_NAME, XDEBUG_VERSION) { }
 
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf);
-  virtual void moduleInit();
-  virtual void requestInit();
-  virtual void requestShutdown();
+  void moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) override;
+  void moduleInit() override;
+  void requestInit() override;
+  void requestShutdown() override;
 
   // Standard config options
   #define XDEBUG_OPT(T, name, sym, val) static DECLARE_THREAD_LOCAL(T, sym);
@@ -202,7 +202,7 @@ public:
 
   // Indicates whether the xdebug extension has been enabled via xdebug.enable
   static bool Enable;
-  virtual bool moduleEnabled() const { return Enable; }
+  bool moduleEnabled() const override { return Enable; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

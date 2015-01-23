@@ -10,7 +10,7 @@ import tempfile
 import time
 import unittest
 
-from utils import touch, write_files, proc_call
+from utils import touch, write_files, proc_call, ensure_output_contains
 
 def write_load_config(repo_dir, saved_state_path, changed_files=[]):
     """
@@ -21,15 +21,13 @@ def write_load_config(repo_dir, saved_state_path, changed_files=[]):
     saved_state_path: Path to file containing saved server state
     changed_files: list of strings
     """
-    fd, recheck_fn = tempfile.mkstemp()
-    with os.fdopen(fd, 'w') as f:
-        f.write("\n".join(changed_files))
-
     with open(os.path.join(repo_dir, 'server_options.sh'), 'w') as f:
         f.write(r"""
 #! /bin/sh
-echo --load \"%s %s\"
-        """ % (saved_state_path, recheck_fn))
+echo %s
+""" % saved_state_path)
+        for fn in changed_files:
+            f.write("echo %s\n" % fn)
         os.fchmod(f.fileno(), 0o700)
 
     with open(os.path.join(repo_dir, '.hhconfig'), 'w') as f:
@@ -37,7 +35,7 @@ echo --load \"%s %s\"
         # be passing this command some command-line options
         f.write(r"""
 # some comment
-server_options_cmd = %s
+load_script = %s
         """ % os.path.join(repo_dir, 'server_options.sh'))
 
 class TestSaveRestore(unittest.TestCase):
@@ -118,6 +116,12 @@ class TestSaveRestore(unittest.TestCase):
         shutil.rmtree(cls.repo_dir)
         shutil.rmtree(cls.saved_state_dir)
 
+    @classmethod
+    def start_hh_server(cls):
+        return subprocess.Popen(
+                [cls.hh_server, cls.repo_dir],
+                stderr=subprocess.PIPE)
+
     def setUp(self):
         write_files(self.files, self.repo_dir)
 
@@ -148,9 +152,13 @@ class TestSaveRestore(unittest.TestCase):
         """
         Update mtimes of files and check that errors remain unchanged.
         """
+        state_fn = os.path.join(self.saved_state_dir, 'foo')
         write_load_config(
             self.repo_dir,
-            os.path.join(self.saved_state_dir, 'foo'))
+            state_fn)
+        server_proc = self.start_hh_server()
+        ensure_output_contains(server_proc.stderr,
+                'Load state found at %s.' % state_fn)
 
         self.check_cmd(self.initial_errors)
         touch(os.path.join(self.repo_dir, 'foo_1.php'))
@@ -407,7 +415,7 @@ echo "$2" >> {out}
         with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
             f.write(r"""
 # some comment
-server_options_cmd = %s
+load_script = %s
             """ % os.path.join(self.repo_dir, 'server_options.sh'))
 
         proc_call([
@@ -418,7 +426,6 @@ server_options_cmd = %s
 
         version = proc_call([
             self.hh_server,
-            self.repo_dir,
             '--version'
         ])
 

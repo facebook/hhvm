@@ -31,6 +31,7 @@
 #include "hphp/util/range.h"
 
 #include <type_traits>
+#include <unordered_set>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,11 +49,9 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using TraitNameSet = hphp_hash_set<
-  LowStringPtr,
-  string_data_hash,
-  string_data_isame
->;
+using TraitNameSet = std::unordered_set<LowStringPtr,
+                                        string_data_hash,
+                                        string_data_isame>;
 
 using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
 using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
@@ -308,7 +307,20 @@ public:
   const StringData* parent()       const { return m_parent; }
   const StringData* docComment()   const { return m_docComment; }
   Hoistable         hoistability() const { return m_hoistable; }
-  const TypeConstraint& enumBaseTy()   const { return m_enumBaseTy; }
+
+  /*
+   * Number of methods declared on this class (as opposed to included via
+   * traits).
+   *
+   * This value is only valid when trait methods are flattened; otherwise, it
+   * is -1.
+   */
+  int32_t numDeclMethods() const { return m_numDeclMethods; }
+
+  /*
+   * If this is an enum class, return the type of its enum values.
+   */
+  const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
 
   /*
    * For a builtin class c_Foo:
@@ -436,6 +448,7 @@ private:
   LowStringPtr m_name;
   LowStringPtr m_parent;
   LowStringPtr m_docComment;
+  int32_t m_numDeclMethods;
   TypeConstraint m_enumBaseTy;
   BuiltinCtorFunction m_instanceCtor{nullptr};
   BuiltinDtorFunction m_instanceDtor{nullptr};

@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/preclass.h"
+#include "hphp/runtime/vm/trait-method-import-data.h"
 
 #include "hphp/util/default-ptr.h"
 #include "hphp/util/hash-map-typedefs.h"
@@ -866,22 +867,85 @@ private:
   using SPropMap = IndexedStringMap<SProp,true,Slot>;
 
   struct TraitMethod {
-    TraitMethod(Class* trait, Func* method, Attr modifiers)
-      : m_trait(trait)
-      , m_method(method)
-      , m_modifiers(modifiers)
+    TraitMethod(const Class* trait_, const Func* method_, Attr modifiers_)
+      : trait(trait_)
+      , method(method_)
+      , modifiers(modifiers_)
     {}
 
-    LowClassPtr m_trait;
-    Func* m_method;
-    Attr m_modifiers;
+    using class_type = const Class*;
+    using method_type = const Func*;
+    using modifiers_type = Attr;
+
+    const Class* trait;
+    const Func* method;
+    Attr modifiers;
   };
 
-  using TraitMethodList      = std::list<TraitMethod>;
-  using MethodToTraitListMap = hphp_hash_map<LowStringPtr,
-                                             TraitMethodList,
-                                             string_data_hash,
-                                             string_data_isame>;
+  struct TMIOps {
+    using prec_type  = const PreClass::TraitPrecRule&;
+    using alias_type = const PreClass::TraitAliasRule&;
+
+    // Whether `str' is empty.
+    static bool strEmpty(const StringData* str);
+
+    // Return the name for the trait class.
+    static const StringData* clsName(const Class* traitCls);
+
+    // Is-a methods.
+    static bool isTrait(const Class* traitCls);
+    static bool isAbstract(Attr modifiers);
+
+    // Whether to exclude methods with name `methName' when adding.
+    static bool exclude(const StringData* methName);
+
+    // TraitMethod constructor.
+    static TraitMethod traitMethod(const Class* traitCls,
+                                   const Func* traitMeth,
+                                   alias_type rule);
+
+    // Accessors for the precedence rule type.
+    static const StringData* precMethodName(prec_type rule);
+    static const StringData* precSelectedTraitName(prec_type rule);
+    static TraitNameSet      precOtherTraitNames(prec_type rule);
+
+    // Accessors for the alias rule type.
+    static const StringData* aliasTraitName(alias_type rule);
+    static const StringData* aliasOrigMethodName(alias_type rule);
+    static const StringData* aliasNewMethodName(alias_type rule);
+    static Attr aliasModifiers(alias_type rule);
+
+    // Register a trait alias once the trait class is found.
+    static void addTraitAlias(Class* cls, alias_type rule,
+                              const Class* traitCls);
+
+    // Trait class/method finders.
+    static const Class* findSingleTraitWithMethod(const Class* cls,
+                                       const StringData* origMethName);
+    static const Class* findTraitClass(const Class* cls,
+                                       const StringData* traitName);
+    static const Func* findTraitMethod(const Class* cls,
+                                       const Class* traitCls,
+                                       const StringData* origMethName);
+
+    // Errors.
+    static void errorUnknownMethod(prec_type rule);
+    static void errorUnknownMethod(alias_type rule,
+                                   const StringData* methName);
+    template <class Rule>
+    static void errorUnknownTrait(const Rule& rule,
+                                  const StringData* traitName);
+    static void errorDuplicateMethod(const Class* cls,
+                                     const StringData* methName);
+  };
+
+  friend class TMIOps;
+
+  using TMIData = TraitMethodImportData<TraitMethod,
+                                        TMIOps,
+                                        const StringData*,
+                                        string_data_hash,
+                                        string_data_isame>;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -897,20 +961,14 @@ private:
 
   bool needsInitSProps() const;
 
-  void importTraitMethod(const TraitMethod&  traitMethod,
-                         const StringData*   methName,
+  /*
+   * Trait method import routines.
+   */
+  void importTraitMethod(const TMIData::MethodData& mdata,
                          MethodMapBuilder& curMethodMap);
-  Class* findSingleTraitWithMethod(const StringData* methName);
-  void setImportTraitMethodModifiers(TraitMethodList& methList,
-                                     Class*           traitCls,
-                                     Attr             modifiers);
   void importTraitMethods(MethodMapBuilder& curMethodMap);
-  void addTraitPropInitializers(std::vector<const Func*>&, bool staticProps);
-  void applyTraitRules(MethodToTraitListMap& importMethToTraitMap);
-  void applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
-                          MethodToTraitListMap& importMethToTraitMap);
-  void applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
-                           MethodToTraitListMap& importMethToTraitMap);
+  void applyTraitRules(TMIData& tmid);
+
   void importTraitProps(int idxOffset,
                         PropMap::Builder& curPropMap,
                         SPropMap::Builder& curSPropMap);
@@ -924,16 +982,13 @@ private:
                              const int idxOffset,
                              PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap);
-  void addTraitAlias(const StringData* traitName,
-                     const StringData* origMethName,
-                     const StringData* newMethName);
+  void addTraitPropInitializers(std::vector<const Func*>&, bool staticProps);
 
   void checkInterfaceMethods();
+  void checkInterfaceConstraints();
   void methodOverrideCheck(const Func* parentMethod, const Func* method);
 
   static bool compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2);
-  void removeSpareTraitAbstractMethods(
-    MethodToTraitListMap& importMethToTraitMap);
 
   void setParent();
   void setSpecial();

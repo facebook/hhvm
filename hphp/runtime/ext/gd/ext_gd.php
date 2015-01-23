@@ -911,8 +911,19 @@ function png2wbmp(string $pngname,
                   int $dest_width,
                   int $threshold): bool;
 
-/* imagepalettecopy() copies the palette from the source image to the destination image.
-*/
+/**
+ * imagepalettecopy() copies the palette from the source image
+ * to the destination image.
+ */
 <<__Native>>
 function imagepalettecopy(resource $dst,
-                            resource $src): mixed;
+                          resource $src): mixed;
+
+/**
+ * Sets the interpolation method, setting an interpolation method
+ * effects the rendering of various functions in GD,
+ * such as the imagerotate() function.
+ */
+<<__Native>>
+function imagesetinterpolation(resource $img,
+                               int $method = IMG_BILINEAR_FIXED): bool;

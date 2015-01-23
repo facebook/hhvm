@@ -30,6 +30,7 @@
 #include "hphp/util/rank.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
+#include "hphp/runtime/ext/ext_system_profiler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/string-util.h"
@@ -190,7 +191,7 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
 folly::Optional<String> readFileAsString(const StringData* path) {
   auto const fd = open(path->data(), O_RDONLY);
   if (!fd) return folly::none;
-  SmartPtr<PlainFile> file(newres<PlainFile>(fd));
+  auto file = makeSmartPtr<PlainFile>(fd);
   return file->read();
 }
 
@@ -213,7 +214,7 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
   auto const f = w->open(StrNR(requestedPath), "r", 0, null_variant);
   if (!f) return CachedUnit{};
   StringBuffer sb;
-  sb.read(f);
+  sb.read(f.get());
   return createUnitFromString(requestedPath->data(), sb.detach());
 }
 
@@ -473,6 +474,9 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     spath.get()->incRefCount();
     if (!cunit.unit->filepath()->same(spath.get())) {
       eContext->m_evaledFiles[cunit.unit->filepath()] = cunit.unit;
+    }
+    if (g_system_profiler) {
+      g_system_profiler->fileLoadCallBack(path->toCppString());
     }
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
   }

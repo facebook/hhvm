@@ -147,9 +147,9 @@ void prepareForNextHHBC(HTS&,
                         bool lastBcOff);
 
 /*
- * This function causes ht to generate a SpillStack, and is called for
- * presumably good reasons by the region translator, in situations that differ
- * depending on IRGenMode.
+ * This function causes ht to spill the stack, and is called for presumably
+ * good reasons by the region translator, in situations that differ depending
+ * on IRGenMode.
  */
 void prepareForSideExit(HTS&);
 
@@ -195,9 +195,9 @@ void inlSingletonSLoc(HTS&, const Func*, const Op* op);
  */
 
 /*
- * The logical stack offset in the current situation.
+ * The logical stack depth (from an hhbc perspective) in the current situation.
  */
-size_t spOffset(const HTS& env);
+size_t logicalStackDepth(const HTS& env);
 
 /*
  * Access the type of the top of the stack, without making any change to the

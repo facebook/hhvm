@@ -692,11 +692,11 @@ const StaticString s_xslt_version("LIBXSLT_VERSION");
 const StaticString s_xslt_dotted_version("LIBXSLT_DOTTED_VERSION");
 const StaticString s_xslt_dotted_version_value(LIBXSLT_DOTTED_VERSION);
 
-class XSLExtension : public Extension {
+class XSLExtension final : public Extension {
   public:
     XSLExtension() : Extension("xsl", "0.1") {};
 
-    virtual void moduleInit() {
+    void moduleInit() override {
       xsltSetGenericErrorFunc(nullptr, xslt_ext_error_handler);
       exsltRegisterAll();
       Native::registerConstant<KindOfInt64>(

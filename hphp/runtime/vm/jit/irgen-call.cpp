@@ -87,7 +87,7 @@ const Func* findCuf(Op op,
   } else if (sclass->isame(s_static.get())) {
     return nullptr;
   } else {
-    cls = Unit::lookupUniqueClass(sclass);
+    cls = Unit::lookupClassOrUniqueClass(sclass);
     if (!cls) return nullptr;
   }
 
@@ -127,7 +127,7 @@ void fpushObjMethodUnknown(HTS& env,
               obj,
               numParams,
               nullptr);
-  auto const actRec = spillStack(env);
+  spillStack(env);
   auto const objCls = gen(env, LdObjClass, obj);
 
   // This is special.  We need to move the stackpointer in case LdObjMethod
@@ -137,9 +137,9 @@ void fpushObjMethodUnknown(HTS& env,
 
   gen(env,
       LdObjMethod,
-      LdObjMethodData { methodName, shouldFatal },
+      LdObjMethodData { offsetFromSP(env, 0), methodName, shouldFatal },
       objCls,
-      actRec);
+      sp(env));
 }
 
 void fpushObjMethodCommon(HTS& env,
@@ -263,7 +263,7 @@ void fpushFuncArr(HTS& env, int32_t numParams) {
     numParams,
     nullptr
   );
-  auto const actRec = spillStack(env);
+  spillStack(env);
 
   // This is special. We need to move the stackpointer incase LdArrFuncCtx
   // calls a destructor. Otherwise it would clobber the ActRec we just
@@ -271,7 +271,8 @@ void fpushFuncArr(HTS& env, int32_t numParams) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  gen(env, LdArrFuncCtx, arr, actRec, thisAR);
+  gen(env, LdArrFuncCtx, StackOffset { offsetFromSP(env, 0) }, arr, sp(env),
+    thisAR);
   gen(env, DecRef, arr);
 }
 
@@ -295,7 +296,7 @@ void fpushCufUnknown(HTS& env, Op op, int32_t numParams) {
     numParams,
     nullptr
   );
-  auto const actRec = spillStack(env);
+  spillStack(env);
 
   /*
    * This is a similar case to lookup for functions in FPushFunc or
@@ -309,7 +310,8 @@ void fpushCufUnknown(HTS& env, Op op, int32_t numParams) {
 
   auto const opcode = callable->isA(Type::Arr) ? LdArrFPushCuf
                                                : LdStrFPushCuf;
-  gen(env, opcode, callable, actRec, fp(env));
+  gen(env, opcode, StackOffset { offsetFromSP(env, 0) }, callable, sp(env),
+    fp(env));
   gen(env, DecRef, callable);
 }
 
@@ -446,42 +448,45 @@ void fpushActRec(HTS& env,
                  SSATmp* objOrClass,
                  int32_t numArgs,
                  const StringData* invName) {
-  /*
-   * Before allocating an ActRec, we do a spillStack so we'll have a
-   * StkPtr that represents what the stack will look like after the
-   * ActRec is popped.
-   */
-  auto const actualStack = spillStack(env);
-  auto const returnSp = actualStack;
-
-  env.fpiStack.emplace(returnSp, env.irb->spOffset());
+  spillStack(env);
+  auto const returnSPOff = env.irb->syncedSpLevel();
 
   ActRecInfo info;
+  info.spOffset = offsetFromSP(env, -int32_t{kNumActRecCells});
   info.numArgs = numArgs;
   info.invName = invName;
   gen(
     env,
     SpillFrame,
     info,
-    // Using actualStack instead of returnSp so SpillFrame still gets
-    // the src in rVmSp.  (TODO(#2288359).)
-    actualStack,
+    sp(env),
     func,
     objOrClass
   );
+  auto const sframe = &env.irb->curBlock()->back();
+  assert(sframe->is(SpillFrame));
+
+  env.fpiStack.push(FPIInfo { sp(env), returnSPOff, sframe });
+
   assert(env.irb->stackDeficit() == 0);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void emitFPushCufIter(HTS& env, int32_t numParams, int32_t itId) {
-  auto stack = spillStack(env);
-  env.fpiStack.emplace(stack, env.irb->spOffset());
-  gen(env,
-      CufIterSpillFrame,
-      FPushCufData(numParams, itId),
-      stack,
-      fp(env));
+  spillStack(env);
+  env.fpiStack.push(FPIInfo { sp(env), env.irb->spOffset(), nullptr });
+  gen(
+    env,
+    CufIterSpillFrame,
+    FPushCufData {
+      offsetFromSP(env, -int32_t{kNumActRecCells}),
+      static_cast<uint32_t>(numParams),
+      itId
+    },
+    sp(env),
+    fp(env)
+  );
 }
 
 void emitFPushCuf(HTS& env, int32_t numArgs) {
@@ -507,7 +512,7 @@ void emitFPushCtor(HTS& env, int32_t numParams) {
 void emitFPushCtorD(HTS& env,
                     int32_t numParams,
                     const StringData* className) {
-  auto const cls = Unit::lookupUniqueClass(className);
+  auto const cls = Unit::lookupClassOrUniqueClass(className);
   bool const uniqueCls = classIsUnique(cls);
   bool const persistentCls = classHasPersistentRDS(cls);
   bool const canInstantiate = canInstantiateClass(cls);
@@ -590,7 +595,7 @@ void emitFPushClsMethodD(HTS& env,
                          int32_t numParams,
                          const StringData* methodName,
                          const StringData* className) {
-  auto const baseClass  = Unit::lookupUniqueClass(className);
+  auto const baseClass  = Unit::lookupClassOrUniqueClass(className);
   bool magicCall        = false;
 
   if (auto const func = lookupImmutableMethod(baseClass,
@@ -613,7 +618,8 @@ void emitFPushClsMethodD(HTS& env,
 
   // Look up the Func* in the targetcache. If it's not there, try the slow
   // path. If that fails, slow exit.
-  auto const func = env.irb->cond(
+  auto const func = cond(
+    env,
     0,
     [&] (Block* taken) {
       auto const mcFunc = gen(env, LdClsMethodCacheFunc, data);
@@ -623,7 +629,7 @@ void emitFPushClsMethodD(HTS& env,
       return func;
     },
     [&] { // taken
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const result = gen(env, LookupClsMethodCache, data, fp(env));
       return gen(env, CheckNonNull, slowExit, result);
     }
@@ -686,7 +692,7 @@ void emitFPushClsMethod(HTS& env, int32_t numParams) {
               cns(env, Type::Nullptr),
               numParams,
               nullptr);
-  auto const actRec = spillStack(env);
+  spillStack(env);
 
   /*
    * Similar to FPushFunc/FPushObjMethod, we have an incomplete ActRec on the
@@ -695,7 +701,8 @@ void emitFPushClsMethod(HTS& env, int32_t numParams) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  gen(env, LookupClsMethod, clsVal, methVal, actRec, fp(env));
+  gen(env, LookupClsMethod, StackOffset { offsetFromSP(env, 0) }, clsVal,
+    methVal, sp(env), fp(env));
   gen(env, DecRef, methVal);
 }
 
@@ -731,7 +738,8 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
   }
 
   auto const data = ClsMethodData{cls->name(), methName};
-  auto const funcTmp = env.irb->cond(
+  auto const funcTmp = cond(
+    env,
     0,
     [&](Block* taken) {
       auto const fcacheFunc = gen(env, LdClsMethodFCacheFunc, data);
@@ -741,7 +749,7 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
       return func;
     },
     [&] { // taken
-      env.irb->hint(Block::Hint::Unlikely);
+      hint(env, Block::Hint::Unlikely);
       auto const result = gen(
         env,
         LookupClsMethodFCache,
@@ -833,13 +841,14 @@ void emitFPassCW(HTS& env, int32_t argNum) {
 //////////////////////////////////////////////////////////////////////
 
 void emitFCallArray(HTS& env) {
+  spillStack(env);
   auto const data = CallArrayData {
+    offsetFromSP(env, 0),
     bcOff(env),
     nextBcOff(env),
     callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
   };
-  auto const stack = spillStack(env);
-  gen(env, CallArray, data, stack, fp(env));
+  gen(env, CallArray, data, sp(env), fp(env));
 }
 
 void emitFCallD(HTS& env,
@@ -857,17 +866,18 @@ void emitFCall(HTS& env, int32_t numParams) {
     curFunc(env)
   );
 
-  auto const stack = spillStack(env);
+  spillStack(env);
   gen(
     env,
     Call,
     CallData {
+      offsetFromSP(env, 0),
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,
       destroyLocals
     },
-    stack,
+    sp(env),
     fp(env)
   );
 

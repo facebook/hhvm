@@ -30,7 +30,12 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #ifdef USE_LLVM
 
@@ -64,6 +69,8 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetMachine.h>
+#include <llvm/Transforms/IPO.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <llvm/Transforms/Scalar.h>
 
 TRACE_SET_MOD(llvm);
@@ -515,6 +522,9 @@ struct LLVMEmitter {
         case Vconst::Quad:
           defineValue(pair.second, cns(pair.first.val));
           break;
+        case Vconst::Long:
+          defineValue(pair.second, cns(int32_t(pair.first.val)));
+          break;
         case Vconst::Byte:
           defineValue(pair.second, cns(uint8_t(pair.first.val)));
           break;
@@ -581,6 +591,19 @@ struct LLVMEmitter {
     m_typedValueType = llvm::StructType::get(
         m_context, std::vector<llvm::Type*>({m_int64, m_int8}),
         /*isPacked*/ false);
+
+    // The hacky way of tuning LLVM command-line parameters. This has to live
+    // till a better debug option control library is implemented.
+    static bool isCLSet = false;
+    if (!isCLSet) {
+      const char* pseudoCL[] = {
+        "hhvm",
+        "-disable-block-placement"
+      };
+      constexpr size_t numArgs = sizeof(pseudoCL) / sizeof(*pseudoCL);
+      llvm::cl::ParseCommandLineOptions(numArgs, pseudoCL, "");
+      isCLSet = true;
+    }
   }
 
   ~LLVMEmitter() {
@@ -612,13 +635,17 @@ struct LLVMEmitter {
     FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ", showModule());
     verifyModule();
 
+    llvm::TargetOptions targetOptions;
+    targetOptions.EnableFastISel = RuntimeOption::EvalJitLLVMFastISel;
+
+    auto module = m_module.release();
     auto tcMM = m_tcMM.release();
     auto cpu = RuntimeOption::EvalJitCPU;
     if (cpu == "native") cpu = llvm::sys::getHostCPUName();
     FTRACE(1, "Creating ExecutionEngine with CPU '{}'\n", cpu);
     std::string errStr;
     std::unique_ptr<llvm::ExecutionEngine> ee(
-      llvm::EngineBuilder(m_module.get())
+      llvm::EngineBuilder(module)
       .setMCPU(cpu)
       .setErrorStr(&errStr)
       .setUseMCJIT(true)
@@ -627,44 +654,43 @@ struct LLVMEmitter {
       .setRelocationModel(llvm::Reloc::Static)
       .setCodeModel(llvm::CodeModel::Small)
       .setVerifyModules(true)
+      .setTargetOptions(targetOptions)
       .create());
     always_assert_flog(ee, "ExecutionEngine creation failed: {}\n", errStr);
-
-    assert(m_module != nullptr);
 
     llvm::LLVMTargetMachine* targetMachine =
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
 
-    auto fpm = folly::make_unique<llvm::FunctionPassManager>(m_module.get());
-    fpm->add(new llvm::DataLayoutPass(m_module.get()));
-    targetMachine->addAnalysisPasses(*fpm);
-
-    fpm->add(llvm::createBasicAliasAnalysisPass());
-    fpm->add(llvm::createVerifierPass(true));
-    fpm->add(llvm::createDebugInfoVerifierPass(false));
-    fpm->add(llvm::createLoopSimplifyPass());
-    fpm->add(llvm::createGCLoweringPass());
-    fpm->add(llvm::createUnreachableBlockEliminationPass());
-    fpm->add(llvm::createPromoteMemoryToRegisterPass());
-    fpm->add(llvm::createInstructionCombiningPass());
-    fpm->add(llvm::createReassociatePass());
-    fpm->add(llvm::createGVNPass());
-    fpm->add(llvm::createCFGSimplificationPass());
-    fpm->add(llvm::createTailCallEliminationPass());
-    fpm->doInitialization();
-
-    m_module->addModuleFlag(llvm::Module::Error, "code_skew",
+    module->addModuleFlag(llvm::Module::Error, "code_skew",
                             tcMM->computeCodeSkew(x64::kCacheLineSize));
+
+    auto fpm = folly::make_unique<llvm::FunctionPassManager>(module);
+    fpm->add(new llvm::DataLayoutPass(module));
+    if (RuntimeOption::EvalJitLLVMBasicOpt) {
+      targetMachine->addAnalysisPasses(*fpm);
+      fpm->add(llvm::createBasicAliasAnalysisPass());
+      fpm->add(llvm::createUnreachableBlockEliminationPass());
+      fpm->add(llvm::createPromoteMemoryToRegisterPass());
+      fpm->add(llvm::createInstructionCombiningPass());
+      fpm->add(llvm::createReassociatePass());
+      fpm->add(llvm::createGVNPass());
+      fpm->add(llvm::createCFGSimplificationPass());
+    } else {
+      llvm::PassManagerBuilder PM;
+      PM.OptLevel = RuntimeOption::EvalJitLLVMOptLevel;
+      PM.SizeLevel = RuntimeOption::EvalJitLLVMSizeLevel;
+      PM.populateFunctionPassManager(*fpm);
+    }
 
     {
       Timer _t(Timer::llvm_optimize);
-      for (auto it = m_module->begin(); it != m_module->end(); ++it) {
+      fpm->doInitialization();
+      for (auto it = module->begin(); it != module->end(); ++it) {
         fpm->run(*it);
       }
+      fpm->doFinalization();
     }
     FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ", showModule());
-
-    m_module.release(); // ee took ownership of the module.
 
     {
       Timer _t(Timer::llvm_codegen);
@@ -684,11 +710,8 @@ struct LLVMEmitter {
       auto const recs = parseLocRecs(secLocRecs->data.get(),
                                      secLocRecs->size);
       FTRACE(2, "LLVM experimental locrecs:\n{}", show(recs));
-      auto it = recs.functionRecords.find(funcStart);
-      if (it != recs.functionRecords.end()) {
-        processFixups(it->second, funcStart);
-        processSvcReqs(it->second, funcStart);
-      }
+      processFixups(recs);
+      processSvcReqs(recs);
     }
 
     if (auto secGEH = tcMM->getDataSection(".gcc_except_table")) {
@@ -703,72 +726,95 @@ struct LLVMEmitter {
    *
    * NB: LLVM may optimize away call instructions.
    */
-  void processFixups(const LocRecs::FunctionRecord& funcRec,
-                     uint8_t* funcStart) {
+  void processFixups(const LocRecs& locRecs) {
     for (auto& fix : m_fixups) {
-      auto it = funcRec.records.find(fix.id);
-      if (it == funcRec.records.end()) continue;
-
-      auto afterCall = [&]() -> unsigned char* {
-        for (auto& record : it->second) {
-          auto ip = funcStart + record.offset;
-          DecodedInstruction di(ip);
-          if (di.isCall()) return ip + di.size();
+      auto it = locRecs.records.find(fix.id);
+      if (it == locRecs.records.end()) continue;
+      for (auto const& record : it->second) {
+        uint8_t* ip = record.address;
+        DecodedInstruction di(ip);
+        if (di.isCall()) {
+          auto afterCall = ip + di.size();
+          FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
+          mcg->recordSyncPoint(afterCall,
+                               fix.fixup.pcOffset, fix.fixup.spOffset);
         }
-        FTRACE(1, "Couldn't find call instruction for locrec {}\n", fix.id);
-        return nullptr;
-      }();
-      if (!afterCall) continue;
-
-      FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
-      mcg->recordSyncPoint(afterCall, fix.fixup.pcOffset, fix.fixup.spOffset);
+      }
     }
   }
 
-  void processSvcReqs(const LocRecs::FunctionRecord& funcRec,
-                      uint8_t* funcStart) {
-    auto findJmp = [&](const jit::vector<LocRecs::LocationRecord>& records,
-                       uint16_t id) -> unsigned char* {
-      for (auto& record : records) {
-        auto ip = funcStart + record.offset;
-        DecodedInstruction di(ip);
-        if (di.isJmp()) return ip;
-      }
-      FTRACE(1, "Couldn't find jmp instruction for locrec {}\n", id);
-      return nullptr;
-    };
+  template<typename L>
+  void visitJmps(const jit::vector<LocRecs::LocationRecord>& records,
+                 L body) {
+    for (auto& record : records) {
+      uint8_t* ip = record.address;
+      DecodedInstruction di(ip);
+      if (di.isJmp()) body(ip);
+    }
+  }
 
+  void processSvcReqs(const LocRecs& locRecs) {
     for (auto& req : m_bindjmps) {
-      auto it = funcRec.records.find(req.id);
-      if (it == funcRec.records.end()) continue;
+      bool found = false;
+      auto doBindJmp = [&] (uint8_t* jmpIp) {
+        FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
-      auto jmpIp = findJmp(it->second, req.id);
-      if (!jmpIp) continue;
+        mcg->cgFixups().m_alignFixups.emplace(
+          jmpIp, std::make_pair(x64::kJmpLen, 0));
+        mcg->setJmpTransID(jmpIp);
 
-      FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
+        if (found) {
+          // If LLVM duplicated the tail call into more than one jmp
+          // instruction, we have to create new stubs for the duplicates to
+          // avoid reusing the ephemeral stubs before they're done.
+          auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+          auto newStub = emitEphemeralServiceReq(
+            frozen,
+            mcg->getFreeStub(frozen, &mcg->cgFixups()),
+            REQ_BIND_JMP,
+            RipRelative(jmpIp),
+            req.target.toAtomicInt(),
+            req.trflags.packed
+          );
+          FTRACE(2, "Patching tail call at {} to point to {}\n",
+                 jmpIp, newStub);
 
-      mcg->cgFixups().m_alignFixups.emplace(
-        jmpIp, std::make_pair(x64::kJmpLen, kX64CacheLineSize));
-      mcg->setJmpTransID(jmpIp);
+          // Patch the jmp to point to the new stub.
+          auto afterJmp = jmpIp + x64::kJmpLen;
+          auto delta = safe_cast<int32_t>(newStub - afterJmp);
+          memcpy(afterJmp - sizeof(delta), &delta, sizeof(delta));
+        } else {
+          found = true;
+          // Patch the rip-relative lea in the stub to point at the jmp.
+          auto leaIp = req.stub;
+          always_assert((leaIp[0] & 0x48) == 0x48); // REX.W
+          always_assert(leaIp[1] == 0x8d); // lea
+          auto afterLea = leaIp + x64::kRipLeaLen;
+          auto delta = safe_cast<int32_t>(jmpIp - afterLea);
+          memcpy(afterLea - sizeof(delta), &delta, sizeof(delta));
+        }
+      };
 
-      // Patch the rip-relative lea in the stub to point at the jmp.
-      auto leaIp = req.stub;
-      always_assert((leaIp[0] & 0x48) == 0x48); // REX.W
-      always_assert(leaIp[1] == 0x8d); // lea
-      auto afterLea = leaIp + x64::kRipLeaLen;
-      auto delta = safe_cast<int32_t>(jmpIp - afterLea);
-      memcpy(afterLea - sizeof(delta), &delta, sizeof(delta));
+      auto it = locRecs.records.find(req.id);
+      if (it != locRecs.records.end()) {
+        visitJmps(it->second, doBindJmp);
+      }
+
+      // The jump was optimized out. Free the stub.
+      if (!found) {
+        mcg->freeRequestStub(req.stub);
+      }
     }
 
     for (auto& req : m_fallbacks) {
-      auto it = funcRec.records.find(req.id);
-      if (it == funcRec.records.end()) continue;
-
-      auto jmpIp = findJmp(it->second, req.id);
-      if (!jmpIp) continue;
-
-      auto destSR = mcg->tx().getSrcRec(req.dest);
-      destSR->registerFallbackJump(jmpIp);
+      auto doFallback = [&] (uint8_t* jmpIp) {
+        auto destSR = mcg->tx().getSrcRec(req.dest);
+        destSR->registerFallbackJump(jmpIp);
+      };
+      auto it = locRecs.records.find(req.id);
+      if (it != locRecs.records.end()) {
+        visitJmps(it->second, doFallback);
+      }
     }
   }
 
@@ -966,6 +1012,8 @@ private:
   struct LLVMBindJmp {
     uint32_t id;
     TCA stub;
+    SrcKey target;
+    TransFlags trflags;
   };
 
   struct LLVMFallback {
@@ -1049,8 +1097,6 @@ VASM_OPCODES
                          llvm::Type* type);
   void emitTrap();
   void emitCall(const Vinstr& instr);
-  void emit(const bindjcc1st&, SrcKey);
-  void emit(const bindjcc2nd&, SrcKey);
   llvm::Value* emitCmpForCC(Vreg sf, ConditionCode cc);
 
   llvm::Value* emitFuncPtr(const std::string& name,
@@ -1165,7 +1211,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
   // first.
-  for (auto label : labels) {
+  for (auto label : layoutBlocks(m_unit)) {
     block(label);
   }
 
@@ -1206,8 +1252,9 @@ O(andl) \
 O(andli) \
 O(andq) \
 O(andqi) \
+O(bindjcc1st) \
+O(bindjcc) \
 O(bindjmp) \
-O(bindexit) \
 O(bindaddr) \
 O(debugtrap) \
 O(defvmsp) \
@@ -1248,8 +1295,10 @@ O(jcc) \
 O(jmp) \
 O(jmpr) \
 O(jmpm) \
+O(jmpi) \
 O(ldimmb) \
-O(ldimm) \
+O(ldimml) \
+O(ldimmq) \
 O(lea) \
 O(loaddqu) \
 O(load) \
@@ -1272,6 +1321,7 @@ O(mul) \
 O(neg) \
 O(nop) \
 O(not) \
+O(notb) \
 O(orwim) \
 O(orq) \
 O(orqi) \
@@ -1327,7 +1377,8 @@ O(retctrl) \
 O(absdbl) \
 O(phijmp) \
 O(phijcc) \
-O(phidef)
+O(phidef) \
+O(countbytecode)
 #define O(name) case Vinstr::name: emit(inst.name##_); break;
   SUPPORTED_OPS
 #undef O
@@ -1336,14 +1387,6 @@ O(phidef)
       case Vinstr::vcall:
       case Vinstr::vinvoke:
         emitCall(inst);
-        break;
-
-      case Vinstr::bindjcc1st:
-        emit(inst.bindjcc1st_, inst.origin->marker().sk());
-        break;
-
-      case Vinstr::bindjcc2nd:
-        emit(inst.bindjcc2nd_, inst.origin->marker().sk());
         break;
 
       // These instructions are intentionally unsupported for a variety of
@@ -1531,13 +1574,14 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   // emitter, so that's what we do here.
 
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
-  auto reqIp = emitEphemeralServiceReq(frozen,
-                                       mcg->getFreeStub(frozen,
-                                                        &mcg->cgFixups()),
-                                       REQ_BIND_JMP,
-                                       RipRelative(mcg->code.base()),
-                                       inst.target.toAtomicInt(),
-                                       inst.trflags.packed);
+  auto reqIp = emitEphemeralServiceReq(
+    frozen,
+    mcg->getFreeStub(frozen, &mcg->cgFixups()),
+    REQ_BIND_JMP,
+    RipRelative(mcg->code.base()),
+    inst.target.toAtomicInt(),
+    inst.trflags.packed
+  );
   auto stubName = folly::sformat("bindjmpStub_{}", reqIp);
   auto stubFunc = emitFuncPtr(stubName, m_traceletFnTy, uint64_t(reqIp));
   auto call = emitTraceletTailCall(stubFunc);
@@ -1547,37 +1591,28 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   FTRACE(2, "Adding bindjmp locrec {} for {}\n", id, llshow(call));
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(id)));
-  m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp});
+  m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp, inst.target, inst.trflags});
 }
 
-// Emitting a real REQ_BIND_SIDE_EXIT or REQ_BIND_JMPCC_(FIRST|SECOND) only
-// makes sense if we can guarantee that llvm will emit a smashable jcc. Until
-// then, we jcc to a REQ_BIND_JMP.
-void LLVMEmitter::emit(const bindexit& inst) {
-  emitJcc(
-    inst.sf, inst.cc, "exit",
-    [&] {
-      emit(bindjmp{inst.target, inst.trflags});
-    }
-  );
-}
-
-void LLVMEmitter::emit(const bindjcc1st& inst, SrcKey instSk) {
+// Emitting a real REQ_BIND_(JUMPCC_FIRST|JCC) only makes sense if we can
+// guarantee that llvm will emit a smashable jcc. Until then, we jcc to a
+// REQ_BIND_JMP.
+void LLVMEmitter::emit(const bindjcc1st& inst) {
   emitJcc(
     inst.sf, inst.cc, "jcc1",
     [&] {
-      emit(bindjmp{{instSk.func(), inst.targets[1], instSk.resumed()}});
+      emit(bindjmp{inst.targets[1]});
     }
   );
 
-  emit(bindjmp{{instSk.func(), inst.targets[0], instSk.resumed()}});
+  emit(bindjmp{inst.targets[0]});
 }
 
-void LLVMEmitter::emit(const bindjcc2nd& inst, SrcKey instSk) {
+void LLVMEmitter::emit(const bindjcc& inst) {
   emitJcc(
-    inst.sf, inst.cc, "jcc2",
+    inst.sf, inst.cc, "jcc",
     [&] {
-      emit(bindjmp{{instSk.func(), inst.target, instSk.resumed()}});
+      emit(bindjmp{inst.target, inst.trflags});
     }
   );
 }
@@ -2132,11 +2167,22 @@ void LLVMEmitter::emit(const jmpm& inst) {
   emitTraceletTailCall(func);
 }
 
+void LLVMEmitter::emit(const jmpi& inst) {
+  auto func = emitFuncPtr(folly::sformat("jmpi_{}", inst.target),
+                          m_traceletFnTy,
+                          reinterpret_cast<uint64_t>(inst.target));
+  emitTraceletTailCall(func);
+}
+
 void LLVMEmitter::emit(const ldimmb& inst) {
   defineValue(inst.d, cns(inst.s.b()));
 }
 
-void LLVMEmitter::emit(const ldimm& inst) {
+void LLVMEmitter::emit(const ldimml& inst) {
+  defineValue(inst.d, cns(inst.s.l()));
+}
+
+void LLVMEmitter::emit(const ldimmq& inst) {
   assert(inst.d.isVirt());
   defineValue(inst.d, cns(inst.s.q()));
 }
@@ -2241,6 +2287,10 @@ void LLVMEmitter::emit(const nop& inst) {
 
 void LLVMEmitter::emit(const not& inst) {
   defineValue(inst.d, m_irb.CreateXor(value(inst.s), cns(int64_t{-1})));
+}
+
+void LLVMEmitter::emit(const notb& inst) {
+  defineValue(inst.d, m_irb.CreateXor(value(inst.s), cns(int8_t{-1})));
 }
 
 void LLVMEmitter::emit(const orwim& inst) {
@@ -2506,16 +2556,6 @@ void LLVMEmitter::emit(const subsd& inst) {
                                        asDbl(value(inst.s0))));
 }
 
-/*
- * To leave the TC and perform a service request, translated code is supposed
- * to execute a ret instruction after populating the right registers. There are
- * a number of different ways to do this, but the most straightforward for now
- * is to do a tail call with the right calling convention to a stub with a
- * single ret instruction. Rather than emitting a dedicated stub for this, we
- * just reuse the ret at the end of enterTCHelper().
- */
-extern "C" void enterTCReturn();
-
 void LLVMEmitter::emit(const svcreq& inst) {
   std::vector<llvm::Value*> args{
     value(x64::rVmSp),
@@ -2530,10 +2570,10 @@ void LLVMEmitter::emit(const svcreq& inst) {
 
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
   auto funcType = llvm::FunctionType::get(m_irb.getVoidTy(), argTypes, false);
-  auto func = emitFuncPtr(folly::to<std::string>("enterTCServiceReqLLVM_",
+  auto func = emitFuncPtr(folly::to<std::string>("handleSRHelper_",
                                                  argTypes.size()),
                           funcType,
-                          uint64_t(enterTCReturn));
+                          uint64_t(handleSRHelper));
   auto call = m_irb.CreateCall(func, args);
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_SR);
   call->setTailCallKind(llvm::CallInst::TCK_Tail);
@@ -2617,6 +2657,12 @@ void LLVMEmitter::emit(const landingpad& inst) {
   // for now.
   auto pad = m_irb.CreateLandingPad(m_typedValueType, m_personalityFunc, 0);
   pad->setCleanup(true);
+}
+
+void LLVMEmitter::emit(const countbytecode& inst) {
+  auto ptr = emitPtr(inst.base[g_bytecodesLLVM.handle()], 64);
+  auto load = m_irb.CreateLoad(ptr);
+  m_irb.CreateStore(m_irb.CreateAdd(load, m_int64One), ptr);
 }
 
 void LLVMEmitter::emitTrap() {

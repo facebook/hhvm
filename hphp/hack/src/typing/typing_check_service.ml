@@ -96,6 +96,17 @@ let check_file fast (errors, failed) fn =
 
 let check_files fast (errors, failed) fnl =
   SharedMem.invalidate_caches();
+  let check_file =
+    if !Utils.profile
+    then (fun fast acc fn ->
+      let t = Unix.gettimeofday () in
+      let result = check_file fast acc fn in
+      let t' = Unix.gettimeofday () in
+      let msg =
+        Printf.sprintf "%f %s [type-check]" (t' -. t) (Relative_path.suffix fn) in
+      !Utils.log msg;
+      result)
+    else check_file in
   let errors, failed = List.fold_left (check_file fast) (errors, failed) fnl in
   errors, failed
 

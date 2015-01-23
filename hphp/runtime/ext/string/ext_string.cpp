@@ -901,9 +901,16 @@ TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
   return arReturn(ar, sscanfImpl(str, format, args));
 }
 
-String HHVM_FUNCTION(chr,
-                     Variant ascii) {
-  return String(makeStaticString((char)ascii.toInt64()));
+String HHVM_FUNCTION(chr, const Variant& ascii) {
+  // This is the only known occurance of ParamCoerceModeNullByte,
+  // so we treat it specially using an explicit tvCoerce call
+  Variant v(ascii);
+  auto tv = v.asTypedValue();
+  char c = 0;
+  if (tvCoerceParamToInt64InPlace(tv)) {
+    c = tv->m_data.num & 0xFF;
+  }
+  return String::FromChar(c);
 }
 
 int64_t HHVM_FUNCTION(ord,
@@ -2114,7 +2121,7 @@ String HHVM_FUNCTION(hebrevc,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StringExtension : public Extension {
+class StringExtension final : public Extension {
 public:
   StringExtension() : Extension("string") {}
   void moduleInit() override {

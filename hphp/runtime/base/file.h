@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
@@ -31,6 +32,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class StreamContext;
+class StreamFilter;
 
 extern int __thread s_pcloseRet;
 
@@ -95,8 +97,9 @@ struct File : SweepableResourceData {
   // Same as TranslatePath except checks the file cache on miss
   static String TranslatePathWithFileCache(const String& filename);
   static String TranslateCommand(const String& cmd);
-  static Resource Open(const String& filename, const String& mode,
-                       int options = 0, const Variant& context = uninit_null());
+  static SmartPtr<File> Open(
+    const String& filename, const String& mode,
+    int options = 0, const Variant& context = uninit_null());
 
   static bool IsVirtualDirectory(const String& filename);
   static bool IsPlainFilePath(const String& filename) {
@@ -203,11 +206,11 @@ struct File : SweepableResourceData {
   String getStreamType() const { return m_streamType; }
   Resource &getStreamContext() { return m_streamContext; }
   void setStreamContext(Resource &context) { m_streamContext = context; }
-  void appendReadFilter(Resource &filter);
-  void appendWriteFilter(Resource &filter);
-  void prependReadFilter(Resource &filter);
-  void prependWriteFilter(Resource &filter);
-  bool removeFilter(Resource &filter);
+  void appendReadFilter(const SmartPtr<StreamFilter>& filter);
+  void appendWriteFilter(const SmartPtr<StreamFilter>& filter);
+  void prependReadFilter(const SmartPtr<StreamFilter>& filter);
+  void prependWriteFilter(const SmartPtr<StreamFilter>& filter);
+  bool removeFilter(const SmartPtr<StreamFilter>& filter);
 
   int64_t bufferedLen() { return m_data->m_writepos - m_data->m_readpos; }
 
@@ -311,8 +314,8 @@ private:
   StringData* m_wrapperType;
   StringData* m_streamType;
   Resource m_streamContext;
-  smart::list<Resource> m_readFilters;
-  smart::list<Resource> m_writeFilters;
+  smart::list<SmartPtr<StreamFilter>> m_readFilters;
+  smart::list<SmartPtr<StreamFilter>> m_writeFilters;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -59,10 +59,10 @@ using HPHP::ScopedMem;
 
 namespace HPHP {
 
-static class SysvmsgExtension : public Extension {
+static class SysvmsgExtension final : public Extension {
 public:
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(ftok);
     HHVM_FE(msg_get_queue);
     HHVM_FE(msg_queue_exists);
@@ -76,10 +76,10 @@ public:
   }
 } s_sysvmsg_extension;
 
-static class SysvsemExtension : public Extension {
+static class SysvsemExtension final : public Extension {
 public:
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(sem_acquire);
     HHVM_FE(sem_get);
     HHVM_FE(sem_release);
@@ -89,10 +89,10 @@ public:
   }
 } s_sysvsem_extension;
 
-static class SysvshmExtension : public Extension {
+static class SysvshmExtension final : public Extension {
 public:
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(shm_attach);
     HHVM_FE(shm_detach);
     HHVM_FE(shm_remove);
@@ -149,10 +149,10 @@ Variant HHVM_FUNCTION(msg_get_queue,
       return false;
     }
   }
-  MessageQueue *q = newres<MessageQueue>();
+  auto q = makeSmartPtr<MessageQueue>();
   q->key = key;
   q->id = id;
-  return Resource(q);
+  return Variant(std::move(q));
 }
 
 bool HHVM_FUNCTION(msg_queue_exists,
@@ -523,7 +523,7 @@ Variant HHVM_FUNCTION(sem_get,
     }
   }
 
-  auto sem_ptr = newres<Semaphore>();
+  auto sem_ptr = makeSmartPtr<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
   sem_ptr->count = 0;

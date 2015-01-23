@@ -21,8 +21,10 @@
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/EventBaseManager.h>
+#include <folly/wangle/acceptor/Acceptor.h>
 #include <memory>
 #include <thrift/lib/cpp/async/TAsyncTransport.h>
+#include <thrift/lib/cpp/async/TAsyncSSLSocket.h>
 
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
@@ -30,7 +32,6 @@
 #include "hphp/runtime/server/fastcgi/socket-connection.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/util/job-queue.h"
-#include "proxygen/lib/services/Acceptor.h"
 #include "proxygen/lib/services/AcceptorConfiguration.h"
 #include "proxygen/lib/services/WorkerThread.h"
 #include "thrift/lib/cpp/async/TAsyncServerSocket.h"
@@ -47,22 +48,22 @@ class FastCGIServer;
  * FastCGIAcceptor accepts new connections from a listening socket, wrapping
  * each one in a FastCGIConnection.
  */
-class FastCGIAcceptor : public ::proxygen::Acceptor {
+class FastCGIAcceptor : public ::folly::Acceptor {
 public:
   explicit FastCGIAcceptor(
-      const ::proxygen::AcceptorConfiguration& config,
+      const ::folly::ServerSocketConfig& config,
       FastCGIServer *server)
-      : ::proxygen::Acceptor(config),
+      : ::folly::Acceptor(config),
         m_server(server) {}
   virtual ~FastCGIAcceptor() {}
 
   bool canAccept(
-    const apache::thrift::transport::TSocketAddress& address) override;
+    const folly::SocketAddress& address) override;
   void onNewConnection(
-    apache::thrift::async::TAsyncSocket::UniquePtr sock,
-    const apache::thrift::transport::TSocketAddress* peerAddress,
+    folly::AsyncSocket::UniquePtr sock,
+    const folly::SocketAddress* peerAddress,
     const std::string& nextProtocolName,
-    const ::proxygen::TransportInfo& tinfo) override;
+    const ::folly::TransportInfo& tinfo) override;
   void onConnectionsDrained() override;
 
 private:
@@ -71,7 +72,7 @@ private:
   static const int k_maxConns;
   static const int k_maxRequests;
 
-  static const apache::thrift::transport::TSocketAddress s_unknownSocketAddress;
+  static const folly::SocketAddress s_unknownSocketAddress;
 };
 
 
@@ -92,9 +93,9 @@ friend class FastCGITransport;
 public:
   FastCGIConnection(
     FastCGIServer* server,
-    apache::thrift::async::TAsyncTransport::UniquePtr sock,
-    const apache::thrift::transport::TSocketAddress& localAddr,
-    const apache::thrift::transport::TSocketAddress& peerAddr);
+    folly::AsyncSocket::UniquePtr sock,
+    const folly::SocketAddress& localAddr,
+    const folly::SocketAddress& peerAddr);
   ~FastCGIConnection() override;
 
   void getReadBuffer(void** bufReturn, size_t* lenReturn) override;
@@ -215,7 +216,7 @@ private:
   apache::thrift::async::TEventBaseManager m_eventBaseManager;
   bool m_done{true};
   ::proxygen::WorkerThread m_worker;
-  ::proxygen::AcceptorConfiguration m_socketConfig;
+  ::folly::ServerSocketConfig m_socketConfig;
   std::unique_ptr<FastCGIAcceptor> m_acceptor;
   JobQueueDispatcher<FastCGIWorker> m_dispatcher;
 };

@@ -11,8 +11,12 @@
 
 class A<T> {
   private T $x;
-  public function __construct(T $x) { $this->x = $x; }
-  public function get(): T {return $this->x;}
+  public function __construct(T $x) {
+    $this->x = $x;
+  }
+  public function get(): T {
+    return $this->x;
+  }
 }
 
 function foo(A $x): int {

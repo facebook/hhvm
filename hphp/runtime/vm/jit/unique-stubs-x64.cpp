@@ -50,8 +50,7 @@ TCA emitRetFromInterpretedFrame() {
   auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
   a.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   a.   movq (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.cold(), SRFlags::JmpInsteadOfRet,
-                 REQ_POST_INTERP_RET);
+  emitServiceReq(mcg->code.cold(), SRFlags::None, REQ_POST_INTERP_RET);
   return ret;
 }
 
@@ -66,8 +65,7 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
   a.    lea  (rContAR[c_Generator::arOff()], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.cold(), SRFlags::JmpInsteadOfRet,
-                 REQ_POST_INTERP_RET);
+  emitServiceReq(mcg->code.cold(), SRFlags::None, REQ_POST_INTERP_RET);
   return ret;
 }
 
@@ -80,11 +78,9 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   // hitting an assert in recordGdbStub when we call it with stub - 1
   // as the start address.
   a.emitNop(1);
-  auto const stub = emitServiceReq(
-    mcg->code.main(),
-    SRFlags::Align | SRFlags::JmpInsteadOfRet,
-    REQ_EXIT
-  );
+  auto const stub = a.frontier();
+  a.pop(rax);
+  a.jmp(rax);
 
   // On a backtrace, gdb tries to locate the calling frame at address
   // returnRIP-1. However, for the first VM frame, there is no code at
@@ -430,11 +426,9 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   a.   pop     (rVmFp);
   a.   ret     ();
 asm_label(a, skip);
-// The event hook has already cleaned up the stack/actrec
-// so that we're ready to continue from the original call
-// site.
-// Just need to grab the fp/rip from the original frame,
-// and sync rVmSp to the execution-context's copy.
+  // The event hook has already cleaned up the stack/actrec so that we're ready
+  // to continue from the original call site.  Just need to grab the fp/rip
+  // from the original frame, and sync rVmSp to the execution-context's copy.
   a.   pop     (rVmFp);
   a.   pop     (rsi);
   a.   addq    (16, rsp); // drop our call frame

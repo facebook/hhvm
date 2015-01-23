@@ -305,7 +305,7 @@ Array HHVM_FUNCTION(xenon_get_data, void) {
 
 } // namespace
 
-class xenonExtension : public Extension {
+class xenonExtension final : public Extension {
  public:
   xenonExtension() : Extension("xenon", "1.0") { }
 

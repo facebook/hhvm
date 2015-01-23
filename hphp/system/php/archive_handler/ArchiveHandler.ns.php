@@ -14,7 +14,7 @@ namespace __SystemLib {
   abstract class ArchiveHandler {
     abstract public function getContentsList(): Map<string, ArchiveEntryStat>;
     abstract public function read(string $path): ?string;
-    abstract public function extractAllTo(string $path): bool;
+    abstract public function extractAllTo(string $path);
     abstract public function addFile(string $path, string $archivePath): bool;
     abstract public function close(): void;
 

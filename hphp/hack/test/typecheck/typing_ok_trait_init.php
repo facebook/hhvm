@@ -19,12 +19,8 @@ trait C {
 
 abstract class B {
   use C;
-  
-  public function __construct() {
 
-  }
+  public function __construct() {}
 }
 
-class D extends B {
-  
-}
+class D extends B {}

@@ -251,18 +251,7 @@ public:
                                   SSATmp* dst = nullptr) {
     auto newInst = new (m_arena) IRInstruction(
       m_arena, inst, IRInstruction::Id(m_nextInstId++));
-    if (newInst->modifiesStack()) {
-      assert(newInst->naryDst());
-      assert(!dst);
-      // The instruction is an opcode that modifies the stack, returning a new
-      // StkPtr.
-      int numDsts = 1 + (newInst->hasMainDst() ? 1 : 0);
-      SSATmp* dsts = (SSATmp*)m_arena.alloc(numDsts * sizeof(SSATmp));
-      for (int dstNo = 0; dstNo < numDsts; ++dstNo) {
-        new (&dsts[dstNo]) SSATmp(m_nextOpndId++, newInst, dstNo);
-      }
-      newInst->setDsts(numDsts, dsts);
-    } else if (dst) {
+    if (dst) {
       newInst->setDst(dst);
       dst->setInstruction(newInst, 0);
     } else {
@@ -301,6 +290,7 @@ public:
   uint32_t numInsts() const           { return m_nextInstId; }
   CSEHash& constTable()               { return m_constTable; }
   uint32_t bcOff() const              { return m_context.initBcOffset; }
+  SrcKey   initSrcKey() const         { return m_context.srcKey(); }
 
   // This should return a const Block*. t3538578
   Block*   entry() const         { return m_entry; }

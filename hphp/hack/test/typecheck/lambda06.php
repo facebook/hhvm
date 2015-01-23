@@ -9,7 +9,7 @@
  *
  */
 
-function foo(Map<string,int> $map): void {
+function foo(Map<string, int> $map): void {
   $func = $x ==> $x + 1;
   $routine = $y ==> {
     $ret = Map {};

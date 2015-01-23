@@ -1,6 +1,6 @@
 File "idx2_4.php", line 9, characters 12-12:
 Invalid argument (Typing[4110])
-File "builtins.hhi", line 57, characters 23-30:
-This is an object of type Indexish
+File "builtins.hhi", line 56, characters 23-36:
+This is an object of type KeyedContainer
 File "idx2_4.php", line 9, characters 12-12:
 It is incompatible with an int

@@ -38,7 +38,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/base/persistent-resource-store.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/socket.h"
@@ -178,11 +177,11 @@ size_t MySQL::NumCachedConnections() {
 }
 
 std::shared_ptr<MySQL> MySQL::GetDefaultConn() {
-  return s_mysql_data->defaultConn.getTyped<MySQLResource>(true)->mysql();
+  return s_mysql_data->defaultConn->mysql();
 }
 
 void MySQL::SetDefaultConn(std::shared_ptr<MySQL> conn) {
-  s_mysql_data->defaultConn = newres<MySQLResource>(std::move(conn));
+  s_mysql_data->defaultConn = makeSmartPtr<MySQLResource>(std::move(conn));
 }
 
 int MySQL::GetDefaultReadTimeout() {
@@ -789,11 +788,11 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
 ///////////////////////////////////////////////////////////////////////////////
 // MySQLStmtVariables
 
-MySQLStmtVariables::MySQLStmtVariables(std::vector<Variant*> arr): m_arr(arr) {
+MySQLStmtVariables::MySQLStmtVariables(const Array& arr): m_arr(arr) {
   int count = m_arr.size();
-  m_vars   = (MYSQL_BIND*)calloc(count, sizeof(MYSQL_BIND));
-  m_null   = (my_bool*)calloc(count, sizeof(my_bool));
-  m_length = (unsigned long*)calloc(count, sizeof(unsigned long));
+  m_vars   = (MYSQL_BIND*)smart_calloc(count, sizeof(MYSQL_BIND));
+  m_null   = (my_bool*)smart_calloc(count, sizeof(my_bool));
+  m_length = (unsigned long*)smart_calloc(count, sizeof(unsigned long));
 
   for (int i = 0; i < count; i++) {
     m_null[i] = false;
@@ -809,9 +808,16 @@ MySQLStmtVariables::MySQLStmtVariables(std::vector<Variant*> arr): m_arr(arr) {
 }
 
 MySQLStmtVariables::~MySQLStmtVariables() {
-  free(m_vars);
-  free(m_null);
-  free(m_length);
+  for (int i = 0; i < m_arr.size(); i++) {
+    auto buf = &m_vars[i];
+    if (buf->buffer_length > 0) {
+      smart_free(buf->buffer);
+    }
+  }
+
+  smart_free(m_vars);
+  smart_free(m_null);
+  smart_free(m_length);
 }
 
 bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
@@ -873,7 +879,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
     }
 
     if (b->buffer_length > 0) {
-      b->buffer = calloc(1, b->buffer_length);
+      b->buffer = smart_calloc(1, b->buffer_length);
     }
   }
   mysql_free_result(res);
@@ -904,7 +910,7 @@ void MySQLStmtVariables::update_result() {
       }
     }
 
-    *m_arr[i]->getRefData() = v;
+    *m_arr.lvalAt(i).getRefData() = v;
   }
 }
 
@@ -938,7 +944,7 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
   m_value_arr.clear();
   for (int i = 0; i < m_arr.size(); i++) {
     MYSQL_BIND *b = &m_vars[i];
-    const Variant& var = *m_arr[i];
+    auto const& var = m_arr.lvalAt(i);
     Variant v;
     if (var.isNull()) {
       *b->is_null = 1;
@@ -961,7 +967,8 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
             m_value_arr.push_back(var.toString());
             StringData *sd = m_value_arr.back().getStringData();
             b->buffer = (void *)sd->data();
-            b->buffer_length = sd->size();
+            // FIXME: setting buffer_length will cause the destructor to free
+            // memory owned by the string
             *b->length = sd->size();
           }
           break;
@@ -995,19 +1002,11 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
   }
 
 MySQLStmt::MySQLStmt(MYSQL *mysql)
-  : m_stmt(mysql_stmt_init(mysql)), m_prepared(false), m_param_vars(nullptr),
-    m_result_vars(nullptr)
+  : m_stmt(mysql_stmt_init(mysql)), m_prepared(false)
 {}
 
 MySQLStmt::~MySQLStmt() {
   close();
-
-  if (m_param_vars) {
-    delete m_param_vars;
-  }
-  if (m_result_vars) {
-    delete m_result_vars;
-  }
 }
 
 void MySQLStmt::sweep() {
@@ -1049,23 +1048,17 @@ Variant MySQLStmt::attr_set(int64_t attr, int64_t value) {
   return !mysql_stmt_attr_set(m_stmt, (enum_stmt_attr_type)attr, &value);
 }
 
-Variant MySQLStmt::bind_param(const String& types, std::vector<Variant*> vars) {
+Variant MySQLStmt::bind_param(const String& types, const Array& vars) {
   VALIDATE_PREPARED
 
-  if (m_param_vars) {
-    delete m_param_vars;
-  }
-  m_param_vars = new MySQLStmtVariables(vars);
+  m_param_vars = smart::make_unique<MySQLStmtVariables>(vars);
   return m_param_vars->init_params(m_stmt, types);
 }
 
-Variant MySQLStmt::bind_result(std::vector<Variant*> vars) {
+Variant MySQLStmt::bind_result(const Array& vars) {
   VALIDATE_PREPARED
 
-  if (m_result_vars) {
-    delete m_result_vars;
-  }
-  m_result_vars = new MySQLStmtVariables(vars);
+  m_result_vars = smart::make_unique<MySQLStmtVariables>(vars);
   return m_result_vars->bind_result(m_stmt);
 }
 
@@ -1156,14 +1149,8 @@ Variant MySQLStmt::prepare(const String& query) {
   VALIDATE_STMT
 
   // Cleaning up just in case they have been set before
-  if (m_param_vars) {
-    delete m_param_vars;
-    m_param_vars = nullptr;
-  }
-  if (m_result_vars) {
-    delete m_result_vars;
-    m_result_vars = nullptr;
-  }
+  m_param_vars.reset();
+  m_result_vars.reset();
 
   m_prepared = !mysql_stmt_prepare(m_stmt, query.c_str(), query.size());
   return m_prepared;

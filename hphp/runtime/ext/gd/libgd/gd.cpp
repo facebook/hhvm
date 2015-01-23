@@ -7,6 +7,8 @@
 #include "gdhelpers.h"
 #include "php.h"
 
+#include "hphp/runtime/base/memory-manager.h"
+
 using std::abs;
 
 #ifdef _MSC_VER
@@ -189,6 +191,16 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	}
 
 	if (overflow2(sizeof(int), sx)) {
+		return NULL;
+	}
+
+	// Check for OOM before doing a potentially large allocation.
+	auto allocsz = sizeof(gdImage)
+	  + sy * (sizeof(int *) + sizeof(unsigned char *))
+	  + sx * sy * (sizeof(int) + sizeof(unsigned char));
+	if (UNLIKELY(allocsz > HPHP::kMaxSmartSize
+		     && HPHP::MM().preAllocOOM(allocsz))) {
+		// Don't throw here because GD might need to do its own cleanup.
 		return NULL;
 	}
 

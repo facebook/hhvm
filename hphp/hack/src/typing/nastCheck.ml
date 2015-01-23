@@ -225,7 +225,7 @@ type control_context =
   | SwitchContext
 
 type env = {
-  t_is_finally: bool ref;
+  t_is_finally: bool;
   class_name: string option;
   class_kind: Ast.class_kind option;
   imm_ctrl_ctx: control_context;
@@ -248,7 +248,7 @@ let rec fun_ tenv f named_body =
   if f.f_mode = Ast.Mdecl || !auto_complete then ()
   else begin
     let tenv = Typing_env.set_root tenv (Dep.Fun (snd f.f_name)) in
-    let env = { t_is_finally = ref false;
+    let env = { t_is_finally = false;
                 class_name = None; class_kind = None;
                 imm_ctrl_ctx = Toplevel;
                 tenv = tenv } in
@@ -259,7 +259,10 @@ and func env f named_body =
   let p, fname = f.f_name in
   if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
   then Errors.illegal_function_name p fname;
-  let env = { env with tenv = Env.set_mode env.tenv f.f_mode } in
+  let env = { env with
+    tenv = Env.set_mode env.tenv f.f_mode;
+    t_is_finally = false;
+  } in
   maybe hint env f.f_ret;
   List.iter (fun_param env) f.f_params;
   block env named_body;
@@ -314,7 +317,7 @@ and class_ tenv c =
   if c.c_mode = Ast.Mdecl || !auto_complete then () else begin
   let cname = Some (snd c.c_name) in
   let tenv = Typing_env.set_root tenv (Dep.Class (snd c.c_name)) in
-  let env = { t_is_finally = ref false;
+  let env = { t_is_finally = false;
               class_name = cname;
               class_kind = Some c.c_kind;
               imm_ctrl_ctx = Toplevel;
@@ -523,7 +526,7 @@ and fun_param_opt env (h, _, e) =
   ()
 
 and stmt env = function
-  | Return (p, _) when !(env.t_is_finally) ->
+  | Return (p, _) when env.t_is_finally ->
     Errors.return_in_finally p; ()
   | Return (_, None)
   | Noop
@@ -575,10 +578,7 @@ and stmt env = function
   | Try (b, cl, fb) ->
       block env b;
       liter catch env cl;
-      let is_fin_copy = !(env.t_is_finally) in
-      env.t_is_finally := true;
-      block env fb;
-      env.t_is_finally := is_fin_copy;
+      block { env with t_is_finally = true } fb;
       ()
 
 and as_expr env = function
@@ -731,7 +731,7 @@ and attribute env (_, e) =
   ()
 
 let typedef tenv (_, _, h) =
-  let env = { t_is_finally = ref false;
+  let env = { t_is_finally = false;
               class_name = None; class_kind = None;
               imm_ctrl_ctx = Toplevel;
               tenv = tenv } in

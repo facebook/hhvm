@@ -65,8 +65,18 @@ public:
     ResourceBase::operator=(src);
     return *this;
   }
+  template <typename T>
+  Resource& operator=(const SmartPtr<T>& src) {
+    ResourceBase::operator=(src);
+    return *this;
+  }
   // Move assign
   Resource& operator=(Resource&& src) {
+    ResourceBase::operator=(std::move(src));
+    return *this;
+  }
+  template <typename T>
+  Resource& operator=(SmartPtr<T>&& src) {
     ResourceBase::operator=(std::move(src));
     return *this;
   }

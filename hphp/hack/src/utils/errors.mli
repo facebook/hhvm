@@ -35,7 +35,7 @@ val unterminated_xhp_comment : Pos.t -> unit
 val name_already_bound : string -> Pos.t -> Pos.t -> unit
 val method_name_already_bound : Pos.t -> string -> unit
 val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
-val unbound_name : Pos.t -> string -> unit
+val unbound_name : Pos.t -> string -> [< `cls | `func | `const ] -> unit
 val different_scope : Pos.t -> string -> Pos.t -> unit
 val undefined : Pos.t -> string -> unit
 val this_reserved : Pos.t -> unit
@@ -145,6 +145,7 @@ val member_not_found :
   Pos.t * string ->
   string ->
   [< `closest of Pos.t * string | `did_you_mean of Pos.t * string | `no_hint ] ->
+  (Pos.t * string) list ->
   unit
 val parent_in_trait : Pos.t -> unit
 val parent_undefined : Pos.t -> unit

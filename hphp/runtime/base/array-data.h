@@ -47,15 +47,16 @@ struct ArrayData {
   // kNumKinds-1 since we use these values to index into a table.
   enum ArrayKind : uint8_t {
     kPackedKind = 0,  // PackedArray with keys in range [0..size)
-    kMixedKind = 1,   // MixedArray arbitrary int or string keys, maybe holes
-    kStrMapKind = 2,  // StrMapArray, string keys, mixed values, like MixedArray
-    kIntMapKind = 3,  // IntMapArray, int keys, maybe holes, like MixedArray
-    kVPackedKind = 4, // PackedArray with extra warnings for certain operations
-    kEmptyKind = 5,   // The singleton static empty array
-    kApcKind = 6,     // APCLocalArray
-    kGlobalsKind = 7, // GlobalsArray
-    kProxyKind = 8,   // ProxyArray
-    kNumKinds = 9     // insert new values before kNumKinds.
+    kStructKind = 1,  // StructArray with static string keys
+    kMixedKind = 2,   // MixedArray arbitrary int or string keys, maybe holes
+    kStrMapKind = 3,  // StrMapArray, string keys, mixed values, like MixedArray
+    kIntMapKind = 4,  // IntMapArray, int keys, maybe holes, like MixedArray
+    kVPackedKind = 5, // PackedArray with extra warnings for certain operations
+    kEmptyKind = 6,   // The singleton static empty array
+    kApcKind = 7,     // APCLocalArray
+    kGlobalsKind = 8, // GlobalsArray
+    kProxyKind = 9,   // ProxyArray
+    kNumKinds = 10     // insert new values before kNumKinds.
   };
 
 protected:
@@ -150,18 +151,34 @@ public:
    * Returns true if this is a PackedArray or a varray
    */
   bool isPacked() const {
-    bool b = !(m_kind & ~uint8_t{4});
-    assert(b == (m_kind == kPackedKind || m_kind == kVPackedKind));
-    return b;
+    switch (m_kind) {
+    case kPackedKind:
+    case kVPackedKind:
+      return true;
+    default:
+      return false;
+    }
   }
+
+  /*
+   * Returns true if this is a StructArray.
+   */
+  bool isStruct() const {
+    return m_kind == kStructKind;
+  }
+
   /*
    * Returns true if this is a MixedArray, msarray, or miarray
    */
   bool isMixed() const {
-    bool b = ((uint64_t{m_kind} - uint64_t{1}) <= uint64_t{2});
-    assert(b == (m_kind == kMixedKind || m_kind == kStrMapKind ||
-                 m_kind == kIntMapKind));
-    return b;
+    switch (m_kind) {
+    case kMixedKind:
+    case kStrMapKind:
+    case kIntMapKind:
+      return true;
+    default:
+      return false;
+    }
   }
 
   /*
@@ -177,32 +194,45 @@ public:
    * or miarray).
    */
   bool isCheckedArray() const {
-    bool b = ((uint64_t{m_kind} - uint64_t{2}) <= uint64_t{2});
-    assert(b == (m_kind == kStrMapKind || m_kind == kIntMapKind ||
-                 m_kind == kVPackedKind));
-    return b;
+    switch (m_kind) {
+    case kVPackedKind:
+    case kStrMapKind:
+    case kIntMapKind:
+      return true;
+    default:
+      return false;
+    }
   }
 
   /*
    * Returns true if this is a msarray or miarray.
    */
   bool isStrMapArrayOrIntMapArray() const {
-    bool b = ((uint64_t{m_kind} - uint64_t{2}) <= uint64_t{1});
-    assert(b == (m_kind == kStrMapKind || m_kind == kIntMapKind));
-    return b;
+    switch (m_kind) {
+    case kStrMapKind:
+    case kIntMapKind:
+      return true;
+    default:
+      return false;
+    }
   }
   /*
    * Returns true if this is a varray or miarray.
    */
   bool isVPackedArrayOrIntMapArray() const {
-    bool b = ((uint64_t{m_kind} - uint64_t{3}) <= uint64_t{1});
-    assert(b == (m_kind == kIntMapKind || m_kind == kVPackedKind));
-    return b;
+    switch (m_kind) {
+    case kIntMapKind:
+    case kVPackedKind:
+      return true;
+    default:
+      return false;
+    }
   }
 
   bool isApcArray() const { return m_kind == kApcKind; }
   bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
+  bool isEmptyArray() const { return m_kind == kEmptyKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -466,6 +496,7 @@ protected:
   friend struct PackedArray;
   friend struct EmptyArray;
   friend struct MixedArray;
+  friend struct StructArray;
   friend class BaseVector;
   friend class c_Vector;
   friend class c_ImmVector;
@@ -504,6 +535,7 @@ protected:
 };
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
+static_assert(ArrayData::kStructKind == uint8_t(HeaderKind::Struct), "");
 static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
 static_assert(ArrayData::kStrMapKind == uint8_t(HeaderKind::StrMap), "");
 static_assert(ArrayData::kIntMapKind == uint8_t(HeaderKind::IntMap), "");

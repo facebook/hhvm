@@ -87,7 +87,7 @@ const Func* findCuf(Op op,
   } else if (sclass->isame(s_static.get())) {
     return nullptr;
   } else {
-    cls = Unit::lookupUniqueClass(sclass);
+    cls = Unit::lookupClassOrUniqueClass(sclass);
     if (!cls) return nullptr;
   }
 
@@ -512,7 +512,7 @@ void emitFPushCtor(HTS& env, int32_t numParams) {
 void emitFPushCtorD(HTS& env,
                     int32_t numParams,
                     const StringData* className) {
-  auto const cls = Unit::lookupUniqueClass(className);
+  auto const cls = Unit::lookupClassOrUniqueClass(className);
   bool const uniqueCls = classIsUnique(cls);
   bool const persistentCls = classHasPersistentRDS(cls);
   bool const canInstantiate = canInstantiateClass(cls);
@@ -595,7 +595,7 @@ void emitFPushClsMethodD(HTS& env,
                          int32_t numParams,
                          const StringData* methodName,
                          const StringData* className) {
-  auto const baseClass  = Unit::lookupUniqueClass(className);
+  auto const baseClass  = Unit::lookupClassOrUniqueClass(className);
   bool magicCall        = false;
 
   if (auto const func = lookupImmutableMethod(baseClass,

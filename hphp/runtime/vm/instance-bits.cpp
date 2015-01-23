@@ -112,7 +112,7 @@ void init() {
   uint64_t accum = 0;
   for (auto& item : counts) {
     if (i >= kNumInstanceBits) break;
-    if (Class* cls = Unit::lookupUniqueClass(item.first)) {
+    if (Class* cls = Unit::lookupClassOrUniqueClass(item.first)) {
       if (cls->attrs() & AttrUnique) {
         s_instanceBitsMap[item.first] = i;
         accum += item.second;

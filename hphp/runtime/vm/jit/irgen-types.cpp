@@ -299,7 +299,7 @@ folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
   case T::SubObj:
     {
       auto ty = Type::Obj;
-      auto const cls = Unit::lookupUniqueClass(rat.clsName());
+      auto const cls = Unit::lookupClassOrUniqueClass(rat.clsName());
       if (classIsUniqueOrCtxParent(env, cls)) {
         if (rat.tag() == T::OptExactObj || rat.tag() == T::ExactObj) {
           ty = ty.specializeExact(cls);
@@ -366,7 +366,7 @@ SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className) {
   InstanceBits::init();
   const bool haveBit = InstanceBits::lookup(className) != 0;
 
-  auto const maybeCls = Unit::lookupUniqueClass(className);
+  auto const maybeCls = Unit::lookupClassOrUniqueClass(className);
   const bool isNormalClass = classIsUniqueNormalClass(maybeCls);
   const bool isUnique = classIsUnique(maybeCls);
 

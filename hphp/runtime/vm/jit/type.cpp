@@ -1127,7 +1127,7 @@ Type convertToType(RepoAuthType ty) {
   case T::SubObj:
   case T::ExactObj: {
     auto const base = Type::Obj;
-    if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
+    if (auto const cls = Unit::lookupClassOrUniqueClass(ty.clsName())) {
       return ty.tag() == T::ExactObj ?
         base.specializeExact(cls) :
         base.specialize(cls);
@@ -1137,7 +1137,7 @@ Type convertToType(RepoAuthType ty) {
   case T::OptSubObj:
   case T::OptExactObj: {
     auto const base = Type::Obj | Type::InitNull;
-    if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
+    if (auto const cls = Unit::lookupClassOrUniqueClass(ty.clsName())) {
       return ty.tag() == T::OptExactObj ?
         base.specializeExact(cls) :
         base.specialize(cls);

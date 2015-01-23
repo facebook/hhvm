@@ -550,8 +550,8 @@ public:
    * burn the Class* into the TC, since it will be defined by the time the code
    * that needs the Class* runs (via autoload or whatnot).
    */
-  static Class* lookupUniqueClass(const NamedEntity* ne);
-  static Class* lookupUniqueClass(const StringData* name);
+  static Class* lookupClassOrUniqueClass(const NamedEntity* ne);
+  static Class* lookupClassOrUniqueClass(const StringData* name);
 
   /*
    * Look up, or autoload and define, the Class in this request with name

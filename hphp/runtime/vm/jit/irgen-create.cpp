@@ -119,7 +119,7 @@ SSATmp* allocObjFast(HTS& env, const Class* cls) {
  * so we can just burn it into the TC without using RDS.
  */
 void emitCreateCl(HTS& env, int32_t numParams, const StringData* clsName) {
-  auto const cls = Unit::lookupUniqueClass(clsName);
+  auto const cls = Unit::lookupClassOrUniqueClass(clsName);
   auto const invokeFunc = cls->lookupMethod(s_uuinvoke.get());
   auto const clonedFunc = invokeFunc->cloneAndSetClass(
     const_cast<Class*>(curClass(env))

@@ -1,5 +1,5 @@
 """
-GDB convenience functions for unpacking types.
+GDB utility convenience functions.
 """
 # @lint-avoid-python-3-compatibility-imports
 # @lint-avoid-pyflakes3
@@ -37,3 +37,18 @@ class DerefFunction(gdb.Function):
 DerefFunction._DerefFunction__doc__ = deref.__doc__
 
 DerefFunction()
+
+
+#------------------------------------------------------------------------------
+# `strhash' function.
+
+class StrhashFunction(gdb.Function):
+    """Return the hash of a string."""
+
+    def __init__(self):
+        super(StrhashFunction, self).__init__('strhash')
+
+    def invoke(self, val):
+        return strinfo(val)['hash']
+
+StrhashFunction()

@@ -64,16 +64,13 @@ def fixed_vector_at(fv, idx):
 
 
 def fixed_string_map_at(fsm, sd):
-    sd = deref(sd)
+    case_sensitive = rawtype(fsm.type).template_argument(1)
+    sinfo = strinfo(sd, case_sensitive)
 
-    # Give up if the StringData was never hashed.
-    if int(sd['m_hash']) == 0:
+    if sinfo is None:
         return None
 
-    case_sensitive = rawtype(fsm.type).template_argument(1)
-    s = string_data_val(sd, case_sensitive)
-
-    elm = fsm['m_table'][-1 - (sd['m_hash'] & fsm['m_mask'])].address
+    elm = fsm['m_table'][-1 - (sinfo['hash'] & fsm['m_mask'])].address
 
     while True:
         sd = rawptr(elm['sd'])
@@ -81,7 +78,7 @@ def fixed_string_map_at(fsm, sd):
         if sd == 0:
             return None
 
-        if s == string_data_val(sd, case_sensitive):
+        if sinfo['data'] == string_data_val(sd, case_sensitive):
             return elm['data']
 
         elm = elm + 1
@@ -89,8 +86,8 @@ def fixed_string_map_at(fsm, sd):
             elm = elm - (fsm['m_mask'] + 1)
 
 
-def _ism_index(ism, sd):
-    return fixed_string_map_at(ism['m_map'], sd)
+def _ism_index(ism, s):
+    return fixed_string_map_at(ism['m_map'], s)
 
 def _ism_access_list(ism):
     t = rawtype(rawtype(ism.type).template_argument(0))
@@ -99,9 +96,9 @@ def _ism_access_list(ism):
 def indexed_string_map_at(ism, idx):
     # If `idx' is a string, it must be converted to an index via the underlying
     # FixedStringMap.
-    sd = rawptr(idx)
-    if sd is not None:
-        idx = _ism_index(ism, sd)
+    sinfo = strinfo(idx)
+    if sinfo is not None:
+        idx = _ism_index(ism, idx)
 
     if idx is not None:
         return _ism_access_list(ism)[idx]
@@ -141,11 +138,11 @@ def _object_data_prop_vec(obj):
     return prop_vec.cast(T('HPHP::TypedValue').pointer())
 
 
-def object_data_at(obj, sd):
+def object_data_at(obj, prop_name):
     cls = rawptr(obj['m_cls'])
 
     prop_vec = _object_data_prop_vec(obj)
-    prop_ind = _ism_index(cls['m_declProperties'], sd)
+    prop_ind = _ism_index(cls['m_declProperties'], prop_name)
 
     if prop_ind is None:
         return None

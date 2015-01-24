@@ -907,6 +907,7 @@ X(CoerceStrToDbl,               CoerceData);
 X(AssertStk,                    StackOffset);
 X(ReDefSP,                      StackOffset);
 X(DefSP,                        StackOffset);
+X(ResetSP,                      StackOffset);
 X(LdStk,                        StackOffset);
 X(LdStkAddr,                    StackOffset);
 X(DecRefStk,                    StackOffset);

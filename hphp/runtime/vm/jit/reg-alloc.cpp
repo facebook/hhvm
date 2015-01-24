@@ -46,6 +46,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
     assert_flog(
       opc == DefSP ||
       opc == ReDefSP ||
+      opc == ResetSP ||
       opc == AdjustSP ||
       opc == Call ||
       opc == CallArray ||

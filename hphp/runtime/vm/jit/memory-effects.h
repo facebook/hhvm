@@ -144,9 +144,10 @@ struct InterpOneEffects { AliasClass killed; };
 
 /*
  * An instruction that does KillFrameLocals prevents any upward exposed uses of
- * frame local slots, with no other memory effects.  This effect means that the
- * instruction semantically prevents any future loads from locals on that
- * frame.
+ * frame local slots, and stack slots related to that frame, with no other
+ * memory effects.  This effect means that the instruction semantically
+ * prevents any future loads from locals on that frame or stack slots below
+ * that frame.
  */
 struct KillFrameLocals { SSATmp* fp; };
 

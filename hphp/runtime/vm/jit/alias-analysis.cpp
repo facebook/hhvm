@@ -49,7 +49,6 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (UnknownEffects)      {},
         [&] (InterpOneEffects x)  { visit(x.killed); },
         [&] (ReturnEffects x)     { visit(x.killed); },
-        [&] (KillFrameLocals)     {},
         [&] (CallEffects x)       { visit(x.killed); visit(x.stack); },
         [&] (IterEffects x)       { visit(x.killed); },
         [&] (IterEffects2 x)      { visit(x.killed); },
@@ -58,7 +57,11 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (PureStore x)         { visit(x.dst); },
         [&] (PureStoreNT x)       { visit(x.dst); },
         [&] (PureSpillFrame x)    { visit(x.dst); },
-        [&] (ExitEffects x)       { visit(x.live); visit(x.kill); }
+        [&] (ExitEffects x)       { visit(x.live); visit(x.kill); },
+
+        [&] (KillFrameLocals x) {
+          visit(AStack { x.fp, 2, std::numeric_limits<int32_t>::max() });
+        }
       );
     }
   }

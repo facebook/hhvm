@@ -155,11 +155,6 @@ void addKillSet(Local& env, const ALocBits& bits) {
   env.live &= ~bits;
 }
 
-void killFrame(Local& env, const SSATmp* fp) {
-  auto const killSet = env.global.ainfo.per_frame_bits[fp];
-  addKillSet(env, killSet);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void load(Local& env, AliasClass acls) {
@@ -175,6 +170,12 @@ void load(Local& env, AliasClass acls) {
 
 void kill(Local& env, AliasClass acls) {
   addKillSet(env, env.global.ainfo.must_alias(canonicalize(acls)));
+}
+
+void killFrame(Local& env, SSATmp* fp) {
+  auto const killSet = env.global.ainfo.per_frame_bits[fp];
+  addKillSet(env, killSet);
+  kill(env, AStack { fp, 2, std::numeric_limits<int32_t>::max() });
 }
 
 folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {

@@ -2,7 +2,7 @@ File "variadic_args5.php", line 13, characters 7-8:
 This object is of type C2 (Typing[4043])
 File "variadic_args5.php", line 13, characters 18-19:
 It is incompatible with this object of type C1
-because some of their methods are incompatible.
+because some declarations are incompatible.
 Read the following to see why:
 File "variadic_args5.php", line 14, characters 19-22:
 Variadic arguments: ...-style is not a subtype of ...$args

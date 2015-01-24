@@ -2270,6 +2270,13 @@ void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   vmain() << lea{fp[off], dst};
 }
 
+void CodeGenerator::cgResetSP(IRInstruction* inst) {
+  auto fp  = srcLoc(inst, 0).reg();
+  auto dst = dstLoc(inst, 0).reg();
+  auto off = -cellsToBytes(inst->extra<ResetSP>()->offset);
+  vmain() << lea{fp[off], dst};
+}
+
 void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
   auto const rsrc = srcLoc(inst, 0).reg();
   auto const rdst = dstLoc(inst, 0).reg();

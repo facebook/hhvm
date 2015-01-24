@@ -1495,9 +1495,14 @@ To string conversions:
   Re-define a stack in terms of a frame pointer S0 and an offset, putting the
   resulting pointer in D.
 
-  This instruction is used when entering or "returning" from an inlined call.
-  The one used on entry will generally be DCE'd when the actrec can be
-  eliminated. The one on exit is only needed until TODO(#2288359).
+  This instruction is used when entering an inlined call, and it will generally
+  be DCE'd when the actrec can be eliminated.
+
+| ResetSP<offset>, D(StkPtr), S(FramePtr), NF
+
+  Reset the stack pointer given the `offset' from the frame pointer in S0.
+  This instruction is not a candidate for DCE.
+  This instruction is only needed until TODO(#2288359).
 
 | AdjustSP<offset>, D(StkPtr), S(StkPtr), NF
 

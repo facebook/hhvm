@@ -47,7 +47,7 @@ bool isInlining(const HTS& env) { return env.bcStateStack.size() > 1; }
  *
  *           = InlineReturn fp2
  *
- * [ sp5  = ReDefSP<spOffset,spansCall> sp1 fp0 ]
+ * [ sp5  = ResetSP<spOffset> fp0 ]
  *
  * The rest of the code then depends on sp5, and not any of the StkPtr
  * tree going through the callee body.  The sp5 tmp has the same view
@@ -157,7 +157,7 @@ void endInlinedCommon(HTS& env) {
   env.fpiActiveStack.pop();
 
   updateMarker(env);
-  gen(env, ReDefSP, StackOffset{env.irb->spOffset()}, fp(env));
+  gen(env, ResetSP, StackOffset{env.irb->spOffset()}, fp(env));
 
   /*
    * After the end of inlining, we are restoring to a previously defined stack

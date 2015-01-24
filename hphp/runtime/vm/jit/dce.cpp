@@ -192,6 +192,7 @@ bool canDCE(IRInstruction* inst) {
     return true;
 
   case AdjustSP:
+  case ResetSP:
   case StStk:
   case SpillFrame:
   case CufIterSpillFrame:

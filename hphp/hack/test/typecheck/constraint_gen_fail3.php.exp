@@ -2,7 +2,7 @@ File "constraint_gen_fail3.php", line 23, characters 7-7:
 This object is of type U (Typing[4110])
 File "constraint_gen_fail3.php", line 23, characters 20-20:
 It is incompatible with this object of type L
-because some of their methods are incompatible.
+because some declarations are incompatible.
 Read the following to see why:
 File "constraint_gen_fail3.php", line 23, characters 22-22:
 This is an object of type A

@@ -2,7 +2,7 @@ File "construct_consist1.php", line 6, characters 7-8:
 This object is of type C2 (Typing[4041])
 File "construct_consist1.php", line 6, characters 18-19:
 It is incompatible with this object of type C1
-because some of their methods are incompatible.
+because some declarations are incompatible.
 Read the following to see why:
 File "construct_consist1.php", line 8, characters 19-29:
 Too many mandatory arguments

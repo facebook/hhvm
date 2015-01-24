@@ -2,7 +2,7 @@ File "async_function_untyped5.php", line 7, characters 7-8:
 This object is of type C2 (Typing[4110])
 File "async_function_untyped5.php", line 7, characters 18-19:
 It is incompatible with this object of type C1
-because some of their methods are incompatible.
+because some declarations are incompatible.
 Read the following to see why:
 File "async_function_untyped5.php", line 4, characters 25-25:
 This is an object of type Awaitable (result of 'async function')

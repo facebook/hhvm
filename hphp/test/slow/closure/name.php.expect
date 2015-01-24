@@ -1,0 +1,28 @@
+array(1) {
+  [0]=>
+  string(15) "Closure$testOne"
+}
+array(1) {
+  [0]=>
+  string(17) "Closure$testTwo#2"
+}
+array(2) {
+  [0]=>
+  string(18) "Closure$testNested"
+  [1]=>
+  string(20) "Closure$testNested#2"
+}
+array(2) {
+  [0]=>
+  string(23) "Closure$testTwoNested#3"
+  [1]=>
+  string(23) "Closure$testTwoNested#4"
+}
+array(1) {
+  [0]=>
+  string(24) "Closure$Test::testStatic"
+}
+array(1) {
+  [0]=>
+  string(24) "Closure$Test::testMethod"
+}

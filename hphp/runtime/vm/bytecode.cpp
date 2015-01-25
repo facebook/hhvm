@@ -122,6 +122,7 @@ bool RuntimeOption::RepoAuthoritative = false;
 
 using jit::mcg;
 
+#define IOP_ARGS        PC& pc
 #if DEBUG
 #define OPTBLD_INLINE
 #else
@@ -212,41 +213,60 @@ const StaticString s_line("line");
 ///////////////////////////////////////////////////////////////////////////////
 
 //=============================================================================
-// Miscellaneous macros.
+// Miscellaneous decoders.
 
-#define IOP_PASS(pc)    pc
-#define IOP_ARGS        PC& pc
-#define DECODE_JMP(type, var)                                                 \
-  type var __attribute__((__unused__)) = *(type*)pc;                              \
-  ONTRACE(2,                                                                  \
-          Trace::trace("decode:     Immediate %s %" PRIi64"\n", #type,        \
-                       (int64_t)var));
+inline const char* prettytype(int) { return "int"; }
+inline const char* prettytype(long) { return "long"; }
+inline const char* prettytype(double) { return "double"; }
+inline const char* prettytype(unsigned) { return "unsigned"; }
+inline const char* prettytype(OODeclExistsOp) { return "OpDeclExistsOp"; }
+inline const char* prettytype(FatalOp) { return "FatalOp"; }
+inline const char* prettytype(IsTypeOp) { return "IsTypeOp"; }
+inline const char* prettytype(SetOpOp) { return "SetOpOp"; }
+inline const char* prettytype(IncDecOp) { return "IncDecOp"; }
+inline const char* prettytype(ObjMethodOp) { return "ObjMethodOp"; }
+inline const char* prettytype(BareThisOp) { return "BareThisOp"; }
+inline const char* prettytype(InitPropOp) { return "InitPropOp"; }
+inline const char* prettytype(SilenceOp) { return "SilenceOp"; }
 
-#define DECODE(type, var)                                                     \
-  DECODE_JMP(type, var);                                                      \
-  pc += sizeof(type)
-#define DECODE_IVA(var)                                                       \
-  int32_t var UNUSED = decodeVariableSizeImm(&pc);                            \
-  ONTRACE(2,                                                                  \
-          Trace::trace("decode:     Immediate int32 %" PRIi64"\n",            \
-                       (int64_t)var));
-#define DECODE_LITSTR(var)                                \
-  StringData* var;                                        \
-  do {                                                    \
-    DECODE(Id, id);                                       \
-    var = vmfp()->m_func->unit()->lookupLitstrId(id);       \
-  } while (false)
+// load a T value from *pc without incrementing
+template<class T> T peek(PC pc) {
+  T v;
+  std::memcpy(&v, pc, sizeof v); // should compile to a load
+  ONTRACE(2, Trace::trace("decode:     Immediate %s %" PRIi64"\n",
+          prettytype(v), int64_t(v)));
+  return v;
+}
 
-#define DECODE_LA(var) DECODE_IVA(var)
-#define DECODE_IA(var) DECODE_IVA(var)
-#define DECODE_OA      DECODE
+template<class T> T decode(PC& pc) {
+  auto v = peek<T>(pc);
+  pc += sizeof(T);
+  return v;
+}
 
-#define DECODE_ITER_LIST(typeList, idList, vecLen) \
-  DECODE(int32_t, vecLen);                         \
-  assert(vecLen > 0);                              \
-  Id* typeList = (Id*)pc;                          \
-  Id* idList   = (Id*)pc + 1;                      \
-  pc += 2 * vecLen * sizeof(Id);
+inline int32_t decode_iva(PC& pc) {
+  auto v = decodeVariableSizeImm(&pc);
+  ONTRACE(2, Trace::trace("decode:     Immediate int32 %" PRIi64"\n",
+          int64_t(v)));
+  return v;
+}
+
+StringData* decode_litstr(PC& pc) {
+  auto id = decode<Id>(pc);
+  return vmfp()->m_func->unit()->lookupLitstrId(id);
+}
+
+inline int32_t decode_la(PC& pc) {
+  return decode_iva(pc);
+}
+
+inline int32_t decode_ia(PC& pc) {
+  return decode_iva(pc);
+}
+
+template<class T> T decode_oa(PC& pc) {
+  return decode<T>(pc);
+}
 
 //=============================================================================
 // Miscellaneous helpers.
@@ -3476,32 +3496,32 @@ OPTBLD_INLINE void iopNameA(IOP_ARGS) {
 
 OPTBLD_INLINE void iopInt(IOP_ARGS) {
   pc++;
-  DECODE(int64_t, i);
+  auto i = decode<int64_t>(pc);
   vmStack().pushInt(i);
 }
 
 OPTBLD_INLINE void iopDouble(IOP_ARGS) {
   pc++;
-  DECODE(double, d);
+  auto d = decode<double>(pc);
   vmStack().pushDouble(d);
 }
 
 OPTBLD_INLINE void iopString(IOP_ARGS) {
   pc++;
-  DECODE_LITSTR(s);
+  auto s = decode_litstr(pc);
   vmStack().pushStaticString(s);
 }
 
 OPTBLD_INLINE void iopArray(IOP_ARGS) {
   pc++;
-  DECODE(Id, id);
+  auto id = decode<Id>(pc);
   ArrayData* a = vmfp()->m_func->unit()->lookupArrayId(id);
   vmStack().pushStaticArray(a);
 }
 
 OPTBLD_INLINE void iopNewArray(IOP_ARGS) {
   pc++;
-  DECODE_IVA(capacity);
+  auto capacity = decode_iva(pc);
   if (capacity == 0) {
     vmStack().pushArrayNoRc(staticEmptyArray());
   } else {
@@ -3511,7 +3531,7 @@ OPTBLD_INLINE void iopNewArray(IOP_ARGS) {
 
 OPTBLD_INLINE void iopNewMixedArray(IOP_ARGS) {
   pc++;
-  DECODE_IVA(capacity);
+  auto capacity = decode_iva(pc);
   if (capacity == 0) {
     vmStack().pushArrayNoRc(staticEmptyArray());
   } else {
@@ -3521,29 +3541,29 @@ OPTBLD_INLINE void iopNewMixedArray(IOP_ARGS) {
 
 OPTBLD_INLINE void iopNewVArray(IOP_ARGS) {
   pc++;
-  DECODE_IVA(capacity);
+  auto capacity = decode_iva(pc);
   // TODO(t4757263) staticEmptyArray() for VArray
   vmStack().pushArrayNoRc(MixedArray::MakeReserveVArray(capacity));
 }
 
 OPTBLD_INLINE void iopNewMIArray(IOP_ARGS) {
   pc++;
-  DECODE_IVA(capacity);
+  auto capacity = decode_iva(pc);
   // TODO(t4757263) staticEmptyArray() for IntMap
   vmStack().pushArrayNoRc(MixedArray::MakeReserveIntMap(capacity));
 }
 
 OPTBLD_INLINE void iopNewMSArray(IOP_ARGS) {
   pc++;
-  DECODE_IVA(capacity);
+  auto capacity = decode_iva(pc);
   // TODO(t4757263) staticEmptyArray() for StrMap
   vmStack().pushArrayNoRc(MixedArray::MakeReserveStrMap(capacity));
 }
 
 OPTBLD_INLINE void iopNewLikeArrayL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
-  DECODE_IVA(capacity);
+  auto local = decode_la(pc);
+  auto capacity = decode_iva(pc);
 
   ArrayData* arr;
   TypedValue* fr = frame_local(vmfp(), local);
@@ -3559,7 +3579,7 @@ OPTBLD_INLINE void iopNewLikeArrayL(IOP_ARGS) {
 
 OPTBLD_INLINE void iopNewPackedArray(IOP_ARGS) {
   pc++;
-  DECODE_IVA(n);
+  auto n = decode_iva(pc);
   // This constructor moves values, no inc/decref is necessary.
   auto* a = MixedArray::MakePacked(n, vmStack().topC());
   vmStack().ndiscard(n);
@@ -3568,12 +3588,11 @@ OPTBLD_INLINE void iopNewPackedArray(IOP_ARGS) {
 
 OPTBLD_INLINE void iopNewStructArray(IOP_ARGS) {
   pc++;
-  DECODE(uint32_t, n); // number of keys and elements
+  auto n = decode<uint32_t>(pc); // number of keys and elements
   assert(n > 0 && n <= StructArray::MaxMakeSize);
   StringData* names[n];
   for (size_t i = 0; i < n; i++) {
-    DECODE_LITSTR(s);
-    names[i] = s;
+    names[i] = decode_litstr(pc);
   }
   // This constructor moves values, no inc/decref is necessary.
   ArrayData* a;
@@ -3644,8 +3663,8 @@ OPTBLD_INLINE void iopAddNewElemV(IOP_ARGS) {
 
 OPTBLD_INLINE void iopNewCol(IOP_ARGS) {
   pc++;
-  DECODE_IVA(cType);
-  DECODE_IVA(nElms);
+  auto cType = decode_iva(pc);
+  auto nElms = decode_iva(pc);
   ObjectData* obj = newCollectionHelper(cType, nElms);
   vmStack().pushObject(obj);
 }
@@ -3678,7 +3697,7 @@ OPTBLD_INLINE void iopColAddElemC(IOP_ARGS) {
 
 OPTBLD_INLINE void iopCns(IOP_ARGS) {
   pc++;
-  DECODE_LITSTR(s);
+  auto s = decode_litstr(pc);
   auto const cns = Unit::loadCns(s);
   if (cns == nullptr) {
     raise_notice(Strings::UNDEFINED_CONSTANT, s->data(), s->data());
@@ -3691,7 +3710,7 @@ OPTBLD_INLINE void iopCns(IOP_ARGS) {
 
 OPTBLD_INLINE void iopCnsE(IOP_ARGS) {
   pc++;
-  DECODE_LITSTR(s);
+  auto s = decode_litstr(pc);
   auto const cns = Unit::loadCns(s);
   if (cns == nullptr) {
     raise_error("Undefined constant '%s'", s->data());
@@ -3702,8 +3721,8 @@ OPTBLD_INLINE void iopCnsE(IOP_ARGS) {
 
 OPTBLD_INLINE void iopCnsU(IOP_ARGS) {
   pc++;
-  DECODE_LITSTR(name);
-  DECODE_LITSTR(fallback);
+  auto name = decode_litstr(pc);
+  auto fallback = decode_litstr(pc);
   auto cns = Unit::loadCns(name);
   if (cns == nullptr) {
     cns = Unit::loadCns(fallback);
@@ -3723,14 +3742,14 @@ OPTBLD_INLINE void iopCnsU(IOP_ARGS) {
 
 OPTBLD_INLINE void iopDefCns(IOP_ARGS) {
   pc++;
-  DECODE_LITSTR(s);
+  auto s = decode_litstr(pc);
   bool result = Unit::defCns(s, vmStack().topTV());
   vmStack().replaceTV<KindOfBoolean>(result);
 }
 
 OPTBLD_INLINE void iopClsCns(IOP_ARGS) {
   pc++;
-  DECODE_LITSTR(clsCnsName);
+  auto clsCnsName = decode_litstr(pc);
 
   auto const cls    = vmStack().topA();
   auto const clsCns = cls->clsCnsGet(clsCnsName);
@@ -3745,8 +3764,8 @@ OPTBLD_INLINE void iopClsCns(IOP_ARGS) {
 
 OPTBLD_INLINE void iopClsCnsD(IOP_ARGS) {
   pc++;
-  DECODE_LITSTR(clsCnsName);
-  DECODE(Id, classId);
+  auto clsCnsName = decode_litstr(pc);
+  auto classId = decode<Id>(pc);
   const NamedEntityPair& classNamedEntity =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
 
@@ -3769,7 +3788,7 @@ OPTBLD_INLINE void iopConcat(IOP_ARGS) {
 
 OPTBLD_INLINE void iopConcatN(IOP_ARGS) {
   pc++;
-  DECODE_IVA(n);
+  auto n = decode_iva(pc);
 
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
@@ -4043,7 +4062,7 @@ OPTBLD_INLINE void iopInstanceOf(IOP_ARGS) {
 
 OPTBLD_INLINE void iopInstanceOfD(IOP_ARGS) {
   pc++;
-  DECODE(Id, id);
+  auto id = decode<Id>(pc);
   if (isProfileRequest()) {
     InstanceBits::profile(vmfp()->m_func->unit()->lookupLitstrId(id));
   }
@@ -4093,7 +4112,7 @@ OPTBLD_INLINE void iopFatal(IOP_ARGS) {
   pc++;
   TypedValue* top = vmStack().topTV();
   std::string msg;
-  DECODE_OA(FatalOp, kind_char);
+  auto kind_char = decode_oa<FatalOp>(pc);
   if (IS_STRING_TYPE(top->m_type)) {
     msg = top->m_data.pstr->data();
   } else {
@@ -4120,14 +4139,14 @@ OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
 
 OPTBLD_INLINE void iopJmp(IOP_ARGS) {
   pc++;
-  DECODE_JMP(Offset, offset);
+  auto offset = peek<Offset>(pc);
   jmpSurpriseCheck(offset);
   pc += offset - 1;
 }
 
 OPTBLD_INLINE void iopJmpNS(IOP_ARGS) {
   pc++;
-  DECODE_JMP(Offset, offset);
+  auto offset = peek<Offset>(pc);
   pc += offset - 1;
 }
 
@@ -4136,7 +4155,7 @@ OPTBLD_INLINE void jmpOpImpl(PC& pc) {
   static_assert(op == OpJmpZ || op == OpJmpNZ,
                 "jmpOpImpl should only be used by JmpZ and JmpNZ");
   pc++;
-  DECODE_JMP(Offset, offset);
+  auto offset = peek<Offset>(pc);
   jmpSurpriseCheck(offset);
 
   Cell* c1 = vmStack().topC();
@@ -4169,33 +4188,27 @@ OPTBLD_INLINE void iopJmpNZ(IOP_ARGS) {
   jmpOpImpl<OpJmpNZ>(pc);
 }
 
-#define FREE_ITER_LIST(typeList, idList, vecLen) do {           \
-  int iterIndex;                                                \
-  for (iterIndex = 0; iterIndex < 2 * veclen; iterIndex += 2) { \
-    Id iterType = typeList[iterIndex];                          \
-    Id iterId   = idList[iterIndex];                            \
-                                                                \
-    Iter *iter = frame_iter(vmfp(), iterId);                      \
-                                                                \
-    switch (iterType) {                                         \
-      case KindOfIter:  iter->free();  break;                   \
-      case KindOfMIter: iter->mfree(); break;                   \
-      case KindOfCIter: iter->cfree(); break;                   \
-    }                                                           \
-  }                                                             \
-} while(0)
-
 OPTBLD_INLINE void iopIterBreak(IOP_ARGS) {
   PC savedPc = pc;
   pc++;
-  DECODE_ITER_LIST(iterTypeList, iterIdList, veclen);
-  DECODE_JMP(Offset, offset);
-
-  FREE_ITER_LIST(iterTypeList, iterIdList, veclen);
+  auto veclen = decode<int32_t>(pc);
+  assert(veclen > 0);
+  Id* iterTypeList = (Id*)pc;
+  Id* iterIdList   = (Id*)pc + 1;
+  pc += 2 * veclen * sizeof(Id);
+  auto offset = peek<Offset>(pc);
+  for (auto i = 0; i < 2 * veclen; i += 2) {
+    Id iterType = iterTypeList[i];
+    Id iterId   = iterIdList[i];
+    Iter *iter = frame_iter(vmfp(), iterId);
+    switch (iterType) {
+      case KindOfIter:  iter->free();  break;
+      case KindOfMIter: iter->mfree(); break;
+      case KindOfCIter: iter->cfree(); break;
+    }
+  }
   pc = savedPc + offset;
 }
-
-#undef FREE_ITER_LIST
 
 enum class SwitchMatch {
   NORMAL,  // value was converted to an int: match normally
@@ -4215,12 +4228,12 @@ static SwitchMatch doubleCheck(double d, int64_t& out) {
 OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
   PC origPC = pc;
   pc++;
-  DECODE(int32_t, veclen);
+  auto veclen = decode<int32_t>(pc);
   assert(veclen > 0);
   Offset* jmptab = (Offset*)pc;
   pc += veclen * sizeof(*jmptab);
-  DECODE(int64_t, base);
-  DECODE_IVA(bounded);
+  auto base = decode<int64_t>(pc);
+  auto bounded = decode_iva(pc);
 
   TypedValue* val = vmStack().topTV();
   if (!bounded) {
@@ -4332,7 +4345,7 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
 OPTBLD_INLINE void iopSSwitch(IOP_ARGS) {
   PC origPC = pc;
   pc++;
-  DECODE(int32_t, veclen);
+  auto veclen = decode<int32_t>(pc);
   assert(veclen > 1);
   unsigned cases = veclen - 1; // the last vector item is the default case
   StrVecItem* jmptab = (StrVecItem*)pc;
@@ -4460,7 +4473,7 @@ OPTBLD_INLINE void iopAGetC(IOP_ARGS) {
 
 OPTBLD_INLINE void iopAGetL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   vmStack().pushUninit();
   TypedValue* fr = frame_local_inner(vmfp(), local);
   lookupClsRef(fr, vmStack().top());
@@ -4493,7 +4506,7 @@ static inline void cgetl_body(ActRec* fp,
 
 OPTBLD_INLINE void iopCGetL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   Cell* to = vmStack().allocC();
   TypedValue* fr = frame_local(vmfp(), local);
   cgetl_body(vmfp(), fr, to, local);
@@ -4501,7 +4514,7 @@ OPTBLD_INLINE void iopCGetL(IOP_ARGS) {
 
 OPTBLD_INLINE void iopCGetL2(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   TypedValue* oldTop = vmStack().topTV();
   TypedValue* newTop = vmStack().allocTV();
   memcpy(newTop, oldTop, sizeof *newTop);
@@ -4512,7 +4525,7 @@ OPTBLD_INLINE void iopCGetL2(IOP_ARGS) {
 
 OPTBLD_INLINE void iopCGetL3(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   TypedValue* oldTop = vmStack().topTV();
   TypedValue* oldSubTop = vmStack().indTV(1);
   TypedValue* newTop = vmStack().allocTV();
@@ -4524,7 +4537,7 @@ OPTBLD_INLINE void iopCGetL3(IOP_ARGS) {
 
 OPTBLD_INLINE void iopPushL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   TypedValue* locVal = frame_local(vmfp(), local);
   assert(locVal->m_type != KindOfUninit);
   assert(locVal->m_type != KindOfRef);
@@ -4574,41 +4587,51 @@ OPTBLD_INLINE void iopCGetG(IOP_ARGS) {
   decRefStr(name); // TODO(#1146727): leaks during exceptions
 }
 
-#define SPROP_OP_PRELUDE                                  \
-  pc++;                                                 \
-  TypedValue* clsref = vmStack().topTV();                   \
-  TypedValue* nameCell = vmStack().indTV(1);                \
-  TypedValue* output = nameCell;                          \
-  TypedValue* val;                                        \
-  bool visible, accessible;                               \
-  lookup_sprop(vmfp(), clsref, name, nameCell, val, visible, \
-               accessible);
+struct SpropState {
+  StringData* name;
+  TypedValue* clsref;
+  TypedValue* nameCell;
+  TypedValue* output;
+  TypedValue* val;
+  bool visible;
+  bool accessible;
+};
 
-#define SPROP_OP_POSTLUDE                     \
-  decRefStr(name);
+static void spropInit(SpropState& ss) {
+  ss.clsref = vmStack().topTV();
+  ss.nameCell = vmStack().indTV(1);
+  ss.output = ss.nameCell;
+  lookup_sprop(vmfp(), ss.clsref, ss.name, ss.nameCell, ss.val, ss.visible,
+               ss.accessible);
+}
 
-#define GETS(box) do {                                    \
-  SPROP_OP_PRELUDE                                        \
-  if (!(visible && accessible)) {                         \
-    raise_error("Invalid static property access: %s::%s", \
-                clsref->m_data.pcls->name()->data(),      \
-                name->data());                            \
-  }                                                       \
-  if (box) {                                              \
-    if (val->m_type != KindOfRef) {                       \
-      tvBox(val);                                         \
-    }                                                     \
-    refDup(*val, *output);                                \
-  } else {                                                \
-    cellDup(*tvToCell(val), *output);                     \
-  }                                                       \
-  vmStack().popA();                                         \
-  SPROP_OP_POSTLUDE                                       \
-} while (0)
+static void spropFinish(SpropState& ss) {
+  decRefStr(ss.name);
+}
+
+template<bool box> void getS(PC& pc) {
+  pc++;
+  SpropState ss;
+  spropInit(ss);
+  if (!(ss.visible && ss.accessible)) {
+    raise_error("Invalid static property access: %s::%s",
+                ss.clsref->m_data.pcls->name()->data(),
+                ss.name->data());
+  }
+  if (box) {
+    if (ss.val->m_type != KindOfRef) {
+      tvBox(ss.val);
+    }
+    refDup(*ss.val, *ss.output);
+  } else {
+    cellDup(*tvToCell(ss.val), *ss.output);
+  }
+  vmStack().popA();
+  spropFinish(ss);
+}
 
 OPTBLD_INLINE void iopCGetS(IOP_ARGS) {
-  StringData* name;
-  GETS(false);
+  getS<false>(pc);
 }
 
 OPTBLD_INLINE void iopCGetM(IOP_ARGS) {
@@ -4629,7 +4652,7 @@ static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
 
 OPTBLD_INLINE void iopVGetL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   Ref* to = vmStack().allocV();
   TypedValue* fr = frame_local(vmfp(), local);
   vgetl_body(fr, to);
@@ -4660,10 +4683,8 @@ OPTBLD_INLINE void iopVGetG(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopVGetS(IOP_ARGS) {
-  StringData* name;
-  GETS(true);
+  getS<true>(pc);
 }
-#undef GETS
 
 OPTBLD_INLINE void iopVGetM(IOP_ARGS) {
   pc++;
@@ -4716,18 +4737,19 @@ OPTBLD_INLINE void iopIssetG(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopIssetS(IOP_ARGS) {
-  StringData* name;
-  SPROP_OP_PRELUDE
+  pc++;
+  SpropState ss;
+  spropInit(ss);
   bool e;
-  if (!(visible && accessible)) {
+  if (!(ss.visible && ss.accessible)) {
     e = false;
   } else {
-    e = !cellIsNull(tvToCell(val));
+    e = !cellIsNull(tvToCell(ss.val));
   }
   vmStack().popA();
-  output->m_data.num = e;
-  output->m_type = KindOfBoolean;
-  SPROP_OP_POSTLUDE
+  ss.output->m_data.num = e;
+  ss.output->m_type = KindOfBoolean;
+  spropFinish(ss);
 }
 
 template <bool isEmpty>
@@ -4770,7 +4792,7 @@ OPTBLD_INLINE void iopIssetM(IOP_ARGS) {
 
 OPTBLD_INLINE void iopIssetL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   TypedValue* tv = frame_local(vmfp(), local);
   bool ret = is_not_null(tvAsCVarRef(tv));
   TypedValue* topTv = vmStack().allocTV();
@@ -4794,8 +4816,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
 
 OPTBLD_INLINE void iopIsTypeL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
-  DECODE_OA(IsTypeOp, op);
+  auto local = decode_la(pc);
+  auto op = decode_oa<IsTypeOp>(pc);
   TypedValue* tv = frame_local(vmfp(), local);
   if (tv->m_type == KindOfUninit) {
     raise_undefined_local(vmfp(), local);
@@ -4807,7 +4829,7 @@ OPTBLD_INLINE void iopIsTypeL(IOP_ARGS) {
 
 OPTBLD_INLINE void iopIsTypeC(IOP_ARGS) {
   pc++;
-  DECODE_OA(IsTypeOp, op);
+  auto op = decode_oa<IsTypeOp>(pc);
   TypedValue* topTv = vmStack().topTV();
   assert(topTv->m_type != KindOfRef);
   bool ret = isTypeHelper(topTv, op);
@@ -4818,7 +4840,7 @@ OPTBLD_INLINE void iopIsTypeC(IOP_ARGS) {
 
 OPTBLD_INLINE void iopAssertRATL(IOP_ARGS) {
   pc++;
-  DECODE_LA(localId);
+  auto localId = decode_la(pc);
   if (debug) {
     auto const rat = decodeRAT(vmfp()->m_func->unit(), pc);
     auto const tv = *frame_local(vmfp(), localId);
@@ -4842,7 +4864,7 @@ OPTBLD_INLINE void iopAssertRATL(IOP_ARGS) {
 
 OPTBLD_INLINE void iopAssertRATStk(IOP_ARGS) {
   pc++;
-  DECODE_IVA(stkSlot);
+  auto stkSlot = decode_iva(pc);
   if (debug) {
     auto const rat = decodeRAT(vmfp()->m_func->unit(), pc);
     auto const tv = *vmStack().indTV(stkSlot);
@@ -4867,7 +4889,7 @@ OPTBLD_INLINE void iopBreakTraceHint(IOP_ARGS) {
 
 OPTBLD_INLINE void iopEmptyL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   TypedValue* loc = frame_local(vmfp(), local);
   bool e = !cellToBool(*tvToCell(loc));
   vmStack().pushBool(e);
@@ -4906,18 +4928,19 @@ OPTBLD_INLINE void iopEmptyG(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopEmptyS(IOP_ARGS) {
-  StringData* name;
-  SPROP_OP_PRELUDE
+  pc++;
+  SpropState ss;
+  spropInit(ss);
   bool e;
-  if (!(visible && accessible)) {
+  if (!(ss.visible && ss.accessible)) {
     e = true;
   } else {
-    e = !cellToBool(*tvToCell(val));
+    e = !cellToBool(*tvToCell(ss.val));
   }
   vmStack().popA();
-  output->m_data.num = e;
-  output->m_type = KindOfBoolean;
-  SPROP_OP_POSTLUDE
+  ss.output->m_data.num = e;
+  ss.output->m_type = KindOfBoolean;
+  spropFinish(ss);
 }
 
 OPTBLD_INLINE void iopEmptyM(IOP_ARGS) {
@@ -4971,7 +4994,7 @@ OPTBLD_INLINE void iopArrayIdx(IOP_ARGS) {
 
 OPTBLD_INLINE void iopSetL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   assert(local < vmfp()->m_func->numLocals());
   Cell* fr = vmStack().topC();
   TypedValue* to = frame_local(vmfp(), local);
@@ -5069,7 +5092,7 @@ OPTBLD_INLINE void iopSetWithRefLM(IOP_ARGS) {
   MemberState mstate;
   bool skip = setHelperPre<false, true, false, false, 0,
                        VectorLeaveCode::ConsumeAll>(pc, mstate);
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   if (!skip) {
     TypedValue* from = frame_local(vmfp(), local);
     tvAsVariant(mstate.base).setWithRef(tvAsVariant(from));
@@ -5092,8 +5115,8 @@ OPTBLD_INLINE void iopSetWithRefRM(IOP_ARGS) {
 
 OPTBLD_INLINE void iopSetOpL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
-  DECODE_OA(SetOpOp, op);
+  auto local = decode_la(pc);
+  auto op = decode_oa<SetOpOp>(pc);
   Cell* fr = vmStack().topC();
   Cell* to = tvToCell(frame_local(vmfp(), local));
   SETOP_BODY_CELL(to, op, fr);
@@ -5103,7 +5126,7 @@ OPTBLD_INLINE void iopSetOpL(IOP_ARGS) {
 
 OPTBLD_INLINE void iopSetOpN(IOP_ARGS) {
   pc++;
-  DECODE_OA(SetOpOp, op);
+  auto op = decode_oa<SetOpOp>(pc);
   StringData* name;
   Cell* fr = vmStack().topC();
   TypedValue* tv2 = vmStack().indTV(1);
@@ -5121,7 +5144,7 @@ OPTBLD_INLINE void iopSetOpN(IOP_ARGS) {
 
 OPTBLD_INLINE void iopSetOpG(IOP_ARGS) {
   pc++;
-  DECODE_OA(SetOpOp, op);
+  auto op = decode_oa<SetOpOp>(pc);
   StringData* name;
   Cell* fr = vmStack().topC();
   TypedValue* tv2 = vmStack().indTV(1);
@@ -5139,7 +5162,7 @@ OPTBLD_INLINE void iopSetOpG(IOP_ARGS) {
 
 OPTBLD_INLINE void iopSetOpS(IOP_ARGS) {
   pc++;
-  DECODE_OA(SetOpOp, op);
+  auto op = decode_oa<SetOpOp>(pc);
   Cell* fr = vmStack().topC();
   TypedValue* classref = vmStack().indTV(1);
   TypedValue* propn = vmStack().indTV(2);
@@ -5163,7 +5186,7 @@ OPTBLD_INLINE void iopSetOpS(IOP_ARGS) {
 
 OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
   pc++;
-  DECODE_OA(SetOpOp, op);
+  auto op = decode_oa<SetOpOp>(pc);
   MemberState mstate;
   if (!setHelperPre<MoreWarnings, true, false, false, 1,
       VectorLeaveCode::LeaveLast>(pc, mstate)) {
@@ -5204,8 +5227,8 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
 
 OPTBLD_INLINE void iopIncDecL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
-  DECODE_OA(IncDecOp, op);
+  auto local = decode_la(pc);
+  auto op = decode_oa<IncDecOp>(pc);
   TypedValue* to = vmStack().allocTV();
   tvWriteUninit(to);
   TypedValue* fr = frame_local(vmfp(), local);
@@ -5220,7 +5243,7 @@ OPTBLD_INLINE void iopIncDecL(IOP_ARGS) {
 
 OPTBLD_INLINE void iopIncDecN(IOP_ARGS) {
   pc++;
-  DECODE_OA(IncDecOp, op);
+  auto op = decode_oa<IncDecOp>(pc);
   StringData* name;
   TypedValue* nameCell = vmStack().topTV();
   TypedValue* local = nullptr;
@@ -5232,7 +5255,7 @@ OPTBLD_INLINE void iopIncDecN(IOP_ARGS) {
 
 OPTBLD_INLINE void iopIncDecG(IOP_ARGS) {
   pc++;
-  DECODE_OA(IncDecOp, op);
+  auto op = decode_oa<IncDecOp>(pc);
   StringData* name;
   TypedValue* nameCell = vmStack().topTV();
   TypedValue* gbl = nullptr;
@@ -5243,23 +5266,24 @@ OPTBLD_INLINE void iopIncDecG(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopIncDecS(IOP_ARGS) {
-  StringData* name;
-  SPROP_OP_PRELUDE
-  DECODE_OA(IncDecOp, op);
-  if (!(visible && accessible)) {
+  pc++;
+  SpropState ss;
+  spropInit(ss);
+  auto op = decode_oa<IncDecOp>(pc);
+  if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
-                clsref->m_data.pcls->name()->data(),
-                name->data());
+                ss.clsref->m_data.pcls->name()->data(),
+                ss.name->data());
   }
-  tvRefcountedDecRef(nameCell);
-  IncDecBody<true>(op, tvToCell(val), output);
+  tvRefcountedDecRef(ss.nameCell);
+  IncDecBody<true>(op, tvToCell(ss.val), ss.output);
   vmStack().discard();
-  SPROP_OP_POSTLUDE
+  spropFinish(ss);
 }
 
 OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
   pc++;
-  DECODE_OA(IncDecOp, op);
+  auto op = decode_oa<IncDecOp>(pc);
   MemberState mstate;
   TypedValue to = make_tv<KindOfUninit>();
   if (!setHelperPre<MoreWarnings, true, false, false, 0,
@@ -5294,7 +5318,7 @@ OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
 
 OPTBLD_INLINE void iopBindL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   Ref* fr = vmStack().topV();
   TypedValue* to = frame_local(vmfp(), local);
   tvBind(fr, to);
@@ -5364,7 +5388,7 @@ OPTBLD_INLINE void iopBindM(IOP_ARGS) {
 
 OPTBLD_INLINE void iopUnsetL(IOP_ARGS) {
   pc++;
-  DECODE_LA(local);
+  auto local = decode_la(pc);
   assert(local < vmfp()->m_func->numLocals());
   TypedValue* tv = frame_local(vmfp(), local);
   tvRefcountedDecRef(tv);
@@ -5433,7 +5457,7 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
 
 OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
+  auto numArgs = decode_iva(pc);
   Cell* c1 = vmStack().topC();
   const Func* func = nullptr;
 
@@ -5519,8 +5543,8 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
 
 OPTBLD_INLINE void iopFPushFuncD(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE(Id, id);
+  auto numArgs = decode_iva(pc);
+  auto id = decode<Id>(pc);
   const NamedEntityPair nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
@@ -5534,9 +5558,9 @@ OPTBLD_INLINE void iopFPushFuncD(IOP_ARGS) {
 
 OPTBLD_INLINE void iopFPushFuncU(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE(Id, nsFunc);
-  DECODE(Id, globalFunc);
+  auto numArgs = decode_iva(pc);
+  auto nsFunc = decode<Id>(pc);
+  auto globalFunc = decode<Id>(pc);
   Unit* unit = vmfp()->m_func->unit();
   const NamedEntityPair nep = unit->lookupNamedEntityPairId(nsFunc);
   Func* func = Unit::loadFunc(nep.second, nep.first);
@@ -5602,8 +5626,8 @@ static void throw_call_non_object(const char* methodName,
 
 OPTBLD_INLINE void iopFPushObjMethod(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE_OA(ObjMethodOp, op);
+  auto numArgs = decode_iva(pc);
+  auto op = decode_oa<ObjMethodOp>(pc);
   Cell* c1 = vmStack().topC(); // Method name.
   if (!IS_STRING_TYPE(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
@@ -5629,9 +5653,9 @@ OPTBLD_INLINE void iopFPushObjMethod(IOP_ARGS) {
 
 OPTBLD_INLINE void iopFPushObjMethodD(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE_LITSTR(name);
-  DECODE_OA(ObjMethodOp, op);
+  auto numArgs = decode_iva(pc);
+  auto name = decode_litstr(pc);
+  auto op = decode_oa<ObjMethodOp>(pc);
   Cell* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject) {
     if (UNLIKELY(op == ObjMethodOp::NullThrows || !IS_NULL_TYPE(c1->m_type))) {
@@ -5695,7 +5719,7 @@ void pushClsMethodImpl(Class* cls, StringData* name, ObjectData* obj,
 
 OPTBLD_INLINE void iopFPushClsMethod(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
+  auto numArgs = decode_iva(pc);
   Cell* c1 = vmStack().indC(1); // Method name.
   if (!IS_STRING_TYPE(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -5713,9 +5737,9 @@ OPTBLD_INLINE void iopFPushClsMethod(IOP_ARGS) {
 
 OPTBLD_INLINE void iopFPushClsMethodD(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE_LITSTR(name);
-  DECODE(Id, classId);
+  auto numArgs = decode_iva(pc);
+  auto name = decode_litstr(pc);
+  auto classId = decode<Id>(pc);
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Unit::loadClass(nep.second, nep.first);
@@ -5728,7 +5752,7 @@ OPTBLD_INLINE void iopFPushClsMethodD(IOP_ARGS) {
 
 OPTBLD_INLINE void iopFPushClsMethodF(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
+  auto numArgs = decode_iva(pc);
   Cell* c1 = vmStack().indC(1); // Method name.
   if (!IS_STRING_TYPE(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -5746,7 +5770,7 @@ OPTBLD_INLINE void iopFPushClsMethodF(IOP_ARGS) {
 
 OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
+  auto numArgs = decode_iva(pc);
   TypedValue* tv = vmStack().topTV();
   assert(tv->m_type == KindOfClass);
   Class* cls = tv->m_data.pcls;
@@ -5773,8 +5797,8 @@ OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
 
 OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE(Id, id);
+  auto numArgs = decode_iva(pc);
+  auto id = decode<Id>(pc);
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   Class* cls = Unit::loadClass(nep.second, nep.first);
@@ -5803,8 +5827,8 @@ OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
 OPTBLD_INLINE void iopDecodeCufIter(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
 
   Iter* it = frame_iter(vmfp(), itId);
   CufIter &cit = it->cuf();
@@ -5840,8 +5864,8 @@ OPTBLD_INLINE void iopDecodeCufIter(IOP_ARGS) {
 
 OPTBLD_INLINE void iopFPushCufIter(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE_IA(itId);
+  auto numArgs = decode_iva(pc);
+  auto itId = decode_ia(pc);
 
   Iter* it = frame_iter(vmfp(), itId);
 
@@ -5864,7 +5888,7 @@ OPTBLD_INLINE void iopFPushCufIter(IOP_ARGS) {
 
 OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
   pc++;
-  DECODE_IVA(numArgs);
+  auto numArgs = decode_iva(pc);
 
   TypedValue func = vmStack().topTV()[safe];
 
@@ -5926,14 +5950,14 @@ static inline ActRec* arFromInstr(TypedValue* sp, const Op* pc) {
 OPTBLD_INLINE void iopFPassC(IOP_ARGS) {
   DEBUG_ONLY auto const ar = arFromInstr(vmStack().top(), (Op*)pc);
   pc++;
-  DECODE_IVA(paramId);
+  UNUSED auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
 }
 
 OPTBLD_INLINE void iopFPassCW(IOP_ARGS) {
   auto const ar = arFromInstr(vmStack().top(), reinterpret_cast<const Op*>(pc));
   pc++;
-  DECODE_IVA(paramId);
+  auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
@@ -5944,7 +5968,7 @@ OPTBLD_INLINE void iopFPassCW(IOP_ARGS) {
 OPTBLD_INLINE void iopFPassCE(IOP_ARGS) {
   auto const ar = arFromInstr(vmStack().top(), reinterpret_cast<const Op*>(pc));
   pc++;
-  DECODE_IVA(paramId);
+  auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
@@ -5955,7 +5979,7 @@ OPTBLD_INLINE void iopFPassCE(IOP_ARGS) {
 OPTBLD_INLINE void iopFPassV(IOP_ARGS) {
   ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
   pc++;
-  DECODE_IVA(paramId);
+  auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   const Func* func = ar->m_func;
   if (!func->byRef(paramId)) {
@@ -5966,7 +5990,7 @@ OPTBLD_INLINE void iopFPassV(IOP_ARGS) {
 OPTBLD_INLINE void iopFPassVNop(IOP_ARGS) {
   DEBUG_ONLY auto const ar = arFromInstr(vmStack().top(), (Op*)pc);
   pc++;
-  DECODE_IVA(paramId);
+  UNUSED auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   assert(ar->m_func->byRef(paramId));
 }
@@ -5974,7 +5998,7 @@ OPTBLD_INLINE void iopFPassVNop(IOP_ARGS) {
 OPTBLD_INLINE void iopFPassR(IOP_ARGS) {
   ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
   pc++;
-  DECODE_IVA(paramId);
+  auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   const Func* func = ar->m_func;
   if (func->byRef(paramId)) {
@@ -5992,8 +6016,8 @@ OPTBLD_INLINE void iopFPassR(IOP_ARGS) {
 OPTBLD_INLINE void iopFPassL(IOP_ARGS) {
   ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
   pc++;
-  DECODE_IVA(paramId);
-  DECODE_LA(local);
+  auto paramId = decode_iva(pc);
+  auto local = decode_la(pc);
   assert(paramId < ar->numArgs());
   TypedValue* fr = frame_local(vmfp(), local);
   TypedValue* to = vmStack().allocTV();
@@ -6008,12 +6032,12 @@ OPTBLD_INLINE void iopFPassN(IOP_ARGS) {
   ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
   PC origPc = pc;
   pc++;
-  DECODE_IVA(paramId);
+  auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
-    iopCGetN(IOP_PASS(origPc));
+    iopCGetN(origPc);
   } else {
-    iopVGetN(IOP_PASS(origPc));
+    iopVGetN(origPc);
   }
 }
 
@@ -6021,12 +6045,12 @@ OPTBLD_INLINE void iopFPassG(IOP_ARGS) {
   ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
   PC origPc = pc;
   pc++;
-  DECODE_IVA(paramId);
+  auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
-    iopCGetG(IOP_PASS(origPc));
+    iopCGetG(origPc);
   } else {
-    iopVGetG(IOP_PASS(origPc));
+    iopVGetG(origPc);
   }
 }
 
@@ -6034,19 +6058,19 @@ OPTBLD_INLINE void iopFPassS(IOP_ARGS) {
   ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
   PC origPc = pc;
   pc++;
-  DECODE_IVA(paramId);
+  auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
-    iopCGetS(IOP_PASS(origPc));
+    iopCGetS(origPc);
   } else {
-    iopVGetS(IOP_PASS(origPc));
+    iopVGetS(origPc);
   }
 }
 
-void iopFPassM(IOP_ARGS) {
+OPTBLD_INLINE void iopFPassM(IOP_ARGS) {
   ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
   pc++;
-  DECODE_IVA(paramId);
+  auto paramId = decode_iva(pc);
   assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
     MemberState mstate;
@@ -6086,7 +6110,7 @@ bool doFCall(ActRec* ar, PC& pc) {
 OPTBLD_INLINE void iopFCall(IOP_ARGS) {
   ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
   pc++;
-  DECODE_IVA(numArgs);
+  UNUSED auto numArgs = decode_iva(pc);
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
@@ -6096,11 +6120,9 @@ OPTBLD_INLINE void iopFCall(IOP_ARGS) {
 OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
   auto const ar = arFromInstr(vmStack().top(), reinterpret_cast<const Op*>(pc));
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE_LITSTR(clsName);
-  DECODE_LITSTR(funcName);
-  (void) clsName;
-  (void) funcName;
+  UNUSED auto numArgs = decode_iva(pc);
+  UNUSED auto clsName = decode_litstr(pc);
+  UNUSED auto funcName = decode_litstr(pc);
   if (!RuntimeOption::EvalJitEnableRenameFunction &&
       !(ar->m_func->attrs() & AttrInterceptable)) {
     assert(ar->m_func->name()->isame(funcName));
@@ -6113,9 +6135,9 @@ OPTBLD_INLINE void iopFCallD(IOP_ARGS) {
 
 OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE_IVA(numNonDefault);
-  DECODE(Id, id);
+  auto numArgs = decode_iva(pc);
+  auto numNonDefault = decode_iva(pc);
+  auto id = decode<Id>(pc);
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
   Func* func = Unit::lookupFunc(ne);
   if (func == nullptr) {
@@ -6233,7 +6255,7 @@ OPTBLD_INLINE void iopFCallArray(IOP_ARGS) {
 OPTBLD_INLINE void iopFCallUnpack(IOP_ARGS) {
   ActRec* ar = arFromInstr(vmStack().top(), (Op*)pc);
   pc++;
-  DECODE_IVA(numArgs);
+  auto numArgs = decode_iva(pc);
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
   doFCallArray(pc, numArgs, CallArrOnInvalidContainer::WarnAndContinue);
@@ -6271,9 +6293,9 @@ inline bool initIterator(PC& pc, PC& origPc, Iter* it,
 OPTBLD_INLINE void iopIterInit(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
   Cell* c1 = vmStack().topC();
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6285,10 +6307,10 @@ OPTBLD_INLINE void iopIterInit(IOP_ARGS) {
 OPTBLD_INLINE void iopIterInitK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
-  DECODE_LA(key);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
+  auto key = decode_la(pc);
   Cell* c1 = vmStack().topC();
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6302,9 +6324,9 @@ OPTBLD_INLINE void iopIterInitK(IOP_ARGS) {
 OPTBLD_INLINE void iopWIterInit(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
   Cell* c1 = vmStack().topC();
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6316,10 +6338,10 @@ OPTBLD_INLINE void iopWIterInit(IOP_ARGS) {
 OPTBLD_INLINE void iopWIterInitK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
-  DECODE_LA(key);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
+  auto key = decode_la(pc);
   Cell* c1 = vmStack().topC();
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6355,9 +6377,9 @@ inline bool initIteratorM(PC& pc, PC& origPc, Iter* it, Offset offset,
 OPTBLD_INLINE void iopMIterInit(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
   Ref* r1 = vmStack().topV();
   assert(r1->m_type == KindOfRef);
   Iter* it = frame_iter(vmfp(), itId);
@@ -6368,10 +6390,10 @@ OPTBLD_INLINE void iopMIterInit(IOP_ARGS) {
 OPTBLD_INLINE void iopMIterInitK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
-  DECODE_LA(key);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
+  auto key = decode_la(pc);
   Ref* r1 = vmStack().topV();
   assert(r1->m_type == KindOfRef);
   Iter* it = frame_iter(vmfp(), itId);
@@ -6383,9 +6405,9 @@ OPTBLD_INLINE void iopMIterInitK(IOP_ARGS) {
 OPTBLD_INLINE void iopIterNext(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
   jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6398,10 +6420,10 @@ OPTBLD_INLINE void iopIterNext(IOP_ARGS) {
 OPTBLD_INLINE void iopIterNextK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
-  DECODE_LA(key);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
+  auto key = decode_la(pc);
   jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6416,9 +6438,9 @@ OPTBLD_INLINE void iopIterNextK(IOP_ARGS) {
 OPTBLD_INLINE void iopWIterNext(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
   jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6431,10 +6453,10 @@ OPTBLD_INLINE void iopWIterNext(IOP_ARGS) {
 OPTBLD_INLINE void iopWIterNextK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
-  DECODE_LA(key);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
+  auto key = decode_la(pc);
   jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6449,9 +6471,9 @@ OPTBLD_INLINE void iopWIterNextK(IOP_ARGS) {
 OPTBLD_INLINE void iopMIterNext(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
   jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6463,10 +6485,10 @@ OPTBLD_INLINE void iopMIterNext(IOP_ARGS) {
 OPTBLD_INLINE void iopMIterNextK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
-  DECODE_IA(itId);
-  DECODE(Offset, offset);
-  DECODE_LA(val);
-  DECODE_LA(key);
+  auto itId = decode_ia(pc);
+  auto offset = decode<Offset>(pc);
+  auto val = decode_la(pc);
+  auto key = decode_la(pc);
   jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
@@ -6478,21 +6500,21 @@ OPTBLD_INLINE void iopMIterNextK(IOP_ARGS) {
 
 OPTBLD_INLINE void iopIterFree(IOP_ARGS) {
   pc++;
-  DECODE_IA(itId);
+  auto itId = decode_ia(pc);
   Iter* it = frame_iter(vmfp(), itId);
   it->free();
 }
 
 OPTBLD_INLINE void iopMIterFree(IOP_ARGS) {
   pc++;
-  DECODE_IA(itId);
+  auto itId = decode_ia(pc);
   Iter* it = frame_iter(vmfp(), itId);
   it->mfree();
 }
 
 OPTBLD_INLINE void iopCIterFree(IOP_ARGS) {
   pc++;
-  DECODE_IA(itId);
+  auto itId = decode_ia(pc);
   Iter* it = frame_iter(vmfp(), itId);
   it->cfree();
 }
@@ -6616,26 +6638,26 @@ OPTBLD_INLINE void iopEval(IOP_ARGS) {
 
 OPTBLD_INLINE void iopDefFunc(IOP_ARGS) {
   pc++;
-  DECODE_IVA(fid);
+  auto fid = decode_iva(pc);
   Func* f = vmfp()->m_func->unit()->lookupFuncId(fid);
   setCachedFunc(f, isDebuggerAttached());
 }
 
 OPTBLD_INLINE void iopDefCls(IOP_ARGS) {
   pc++;
-  DECODE_IVA(cid);
+  auto cid = decode_iva(pc);
   PreClass* c = vmfp()->m_func->unit()->lookupPreClassId(cid);
   Unit::defClass(c);
 }
 
 OPTBLD_INLINE void iopDefClsNop(IOP_ARGS) {
   pc++;
-  DECODE_IVA(cid);
+  decode_iva(pc); // cid
 }
 
 OPTBLD_INLINE void iopDefTypeAlias(IOP_ARGS) {
   pc++;
-  DECODE_IVA(tid);
+  auto tid = decode_iva(pc);
   vmfp()->m_func->unit()->defTypeAlias(tid);
 }
 
@@ -6654,7 +6676,7 @@ OPTBLD_INLINE void iopThis(IOP_ARGS) {
 
 OPTBLD_INLINE void iopBareThis(IOP_ARGS) {
   pc++;
-  DECODE_OA(BareThisOp, bto);
+  auto bto = decode_oa<BareThisOp>(pc);
   if (vmfp()->hasThis()) {
     ObjectData* this_ = vmfp()->getThis();
     vmStack().pushObject(this_);
@@ -6677,7 +6699,7 @@ OPTBLD_INLINE void iopCheckThis(IOP_ARGS) {
 
 OPTBLD_INLINE void iopInitThisLoc(IOP_ARGS) {
   pc++;
-  DECODE_LA(id);
+  auto id = decode_la(pc);
   TypedValue* thisLoc = frame_local(vmfp(), id);
   tvRefcountedDecRef(thisLoc);
   if (vmfp()->hasThis()) {
@@ -6708,8 +6730,8 @@ static inline RefData* lookupStatic(StringData* name,
 
 OPTBLD_INLINE void iopStaticLoc(IOP_ARGS) {
   pc++;
-  DECODE_LA(localId);
-  DECODE_LITSTR(var);
+  auto localId = decode_la(pc);
+  auto var = decode_litstr(pc);
 
   bool inited;
   auto const refData = lookupStatic(var, vmfp(), inited);
@@ -6729,8 +6751,8 @@ OPTBLD_INLINE void iopStaticLoc(IOP_ARGS) {
 
 OPTBLD_INLINE void iopStaticLocInit(IOP_ARGS) {
   pc++;
-  DECODE_LA(localId);
-  DECODE_LITSTR(var);
+  auto localId = decode_la(pc);
+  auto var = decode_litstr(pc);
 
   bool inited;
   auto const refData = lookupStatic(var, vmfp(), inited);
@@ -6770,7 +6792,7 @@ OPTBLD_INLINE void iopVerifyParamType(IOP_ARGS) {
   vmpc() = pc; // We might need vmpc() to be updated to throw.
   pc++;
 
-  DECODE_LA(paramId);
+  auto paramId = decode_la(pc);
   const Func *func = vmfp()->m_func;
   assert(paramId < func->numParams());
   assert(func->numParams() == int(func->params().size()));
@@ -6850,8 +6872,8 @@ OPTBLD_INLINE void iopParent(IOP_ARGS) {
 
 OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
   pc++;
-  DECODE_IVA(numArgs);
-  DECODE_LITSTR(clsName);
+  auto numArgs = decode_iva(pc);
+  auto clsName = decode_litstr(pc);
   auto const cls = Unit::loadClass(clsName);
   auto const cl = static_cast<c_Closure*>(newInstance(cls));
   cl->init(numArgs, vmfp(), vmStack().top());
@@ -6936,7 +6958,7 @@ OPTBLD_INLINE void iopContEnter(IOP_ARGS) {
 
 OPTBLD_INLINE void iopContRaise(IOP_ARGS) {
   contEnterImpl(pc);
-  iopThrow(IOP_PASS(pc));
+  iopThrow(pc);
 }
 
 OPTBLD_INLINE void yield(PC& pc, const Cell* key, const Cell value) {
@@ -6995,7 +7017,7 @@ OPTBLD_INLINE void iopYieldK(IOP_ARGS) {
 
 OPTBLD_INLINE void iopContCheck(IOP_ARGS) {
   pc++;
-  DECODE_IVA(checkStarted);
+  auto checkStarted = decode_iva(pc);
   this_base_generator(vmfp())->preNext(checkStarted);
 }
 
@@ -7108,7 +7130,7 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
 
 OPTBLD_INLINE void iopAwait(IOP_ARGS) {
   pc++;
-  DECODE_IVA(iters);
+  auto iters = decode_iva(pc);
 
   auto const wh = c_WaitHandle::fromCell(vmStack().topC());
   if (UNLIKELY(wh == nullptr)) {
@@ -7132,7 +7154,7 @@ OPTBLD_INLINE void iopAwait(IOP_ARGS) {
 
 OPTBLD_INLINE void iopCheckProp(IOP_ARGS) {
   pc++;
-  DECODE_LITSTR(propName);
+  auto propName = decode_litstr(pc);
 
   auto* cls = vmfp()->getClass();
   auto* propVec = cls->getPropData();
@@ -7151,8 +7173,8 @@ OPTBLD_INLINE void iopCheckProp(IOP_ARGS) {
 
 OPTBLD_INLINE void iopInitProp(IOP_ARGS) {
   pc++;
-  DECODE_LITSTR(propName);
-  DECODE_OA(InitPropOp, propOp);
+  auto propName = decode_litstr(pc);
+  auto propOp = decode_oa<InitPropOp>(pc);
 
   auto* cls = vmfp()->getClass();
   TypedValue* tv;
@@ -7193,14 +7215,14 @@ OPTBLD_INLINE void iopStrlen(IOP_ARGS) {
 
 OPTBLD_INLINE void iopIncStat(IOP_ARGS) {
   pc++;
-  DECODE_IVA(counter);
-  DECODE_IVA(value);
+  auto counter = decode_iva(pc);
+  auto value = decode_iva(pc);
   Stats::inc(Stats::StatCounter(counter), value);
 }
 
 OPTBLD_INLINE void iopOODeclExists(IOP_ARGS) {
   pc++;
-  DECODE_OA(OODeclExistsOp, subop);
+  auto subop = decode<OODeclExistsOp>(pc);
 
   TypedValue* aloadTV = vmStack().topTV();
   tvCastToBooleanInPlace(aloadTV);
@@ -7223,8 +7245,8 @@ OPTBLD_INLINE void iopOODeclExists(IOP_ARGS) {
 
 OPTBLD_INLINE void iopSilence(IOP_ARGS) {
   pc++;
-  DECODE_LA(localId);
-  DECODE_OA(SilenceOp, subop);
+  auto localId = decode_la(pc);
+  auto subop = decode_oa<SilenceOp>(pc);
 
   switch (subop) {
     case SilenceOp::Start: {
@@ -7242,9 +7264,6 @@ OPTBLD_INLINE void iopSilence(IOP_ARGS) {
     }
   }
 }
-
-#undef DECODE_JMP
-#undef DECODE
 
 std::string prettyStack(const std::string& prefix) {
   if (!vmfp()) return "__Halted";

@@ -424,7 +424,7 @@ struct sparse_id_map {
   ~sparse_id_map() {
     if (!m_universe_size) return;
     if (!std::is_trivially_destructible<V>::value) {
-      for (auto kv : *this) {
+      for (auto& kv : *this) {
         kv.~value_type();
       }
     }
@@ -563,7 +563,7 @@ struct sparse_id_map {
    */
   void clear() {
     if (!std::is_trivially_destructible<V>::value) {
-      for (auto kv : *this) {
+      for (auto& kv : *this) {
         kv.~value_type();
       }
     }
@@ -650,7 +650,7 @@ struct sparse_id_map {
   bool operator==(const sparse_id_map& o) const {
     if (universe_size() != o.universe_size()) return false;
     if (size() != o.size()) return false;
-    for (auto kv : *this) {
+    for (auto& kv : *this) {
       if (!o.containsImpl(kv.first)) return false;
       if (!(o.dense()[o.sparse()[kv.first]].second == kv.second)) {
         return false;

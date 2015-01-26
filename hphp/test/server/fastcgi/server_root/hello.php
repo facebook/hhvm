@@ -1,1 +1,3 @@
-<?php echo "Hello, World!".$_SERVER['TESTID'];
+<?php
+$testid = getenv('TESTID');
+echo "Hello, World!{$testid}";

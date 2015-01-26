@@ -1255,8 +1255,19 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   auto bail = [&] (const std::string& msg) {
     FTRACE(1, "{}", msg);
     fprintf(stderr, "%s\n", msg.c_str());
-    if (unit) print(*unit);
-    always_assert(false && "instruction operand type check failure");
+
+    // Just print the message if the unit doesn't exist.
+    always_assert_log(unit != nullptr, [&] { return msg; });
+
+    always_assert_flog(
+      false,
+      "{}\n\n"
+      "{:-^80}\n{}{:-^80}\n",
+      msg,
+      " unit ",
+      *unit,
+      ""
+    );
   };
 
   if (opHasExtraData(inst->op()) != (bool)inst->rawExtra()) {

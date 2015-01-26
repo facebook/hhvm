@@ -18,8 +18,6 @@
 #define incl_HPHP_URL_H_
 
 #include <string>
-#include <cstring>
-#include <cassert>
 
 namespace HPHP {
 

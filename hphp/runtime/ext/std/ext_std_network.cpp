@@ -294,9 +294,10 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
   return (int64_t)ntohl(ip.s_addr);
 }
 
-String HHVM_FUNCTION(long2ip, int64_t proper_address) {
+String HHVM_FUNCTION(long2ip, const String& proper_address) {
+  unsigned long n = strtoul(proper_address.c_str(), NULL, 0);
   struct in_addr myaddr;
-  myaddr.s_addr = htonl(proper_address);
+  myaddr.s_addr = htonl(n);
   return safe_inet_ntoa(myaddr);
 }
 

@@ -421,7 +421,7 @@ function ip2long(string $ip_address): mixed;
  * @return string - Returns the Internet IP address as a string.
  */
 <<__Native>>
-function long2ip(int $proper_address): string;
+function long2ip(string $proper_address): string;
 
 /**
  * Open connection to system logger

@@ -24,20 +24,23 @@ function runTest($testController, $customArgs = '') {
   }
 }
 
-function request($host, $port, $path, $extra_args = []) {
+function request($host, $port, $path, $post = [], $headers = [], $extra_args = []) {
   global $test_run_id, $LOG_ROOT, $DOC_ROOT;
 
   try {
     $client = new \Adoy\FastCGI\Client($host, $port);
-    $content = '';
+    $content = http_build_query($post);
 
     $args = array_merge(array(
       'GATEWAY_INTERFACE' => 'FastCGI/1.0',
-      'REQUEST_METHOD' => 'GET',
+      'REQUEST_METHOD' => empty($post) ? 'GET' : 'POST',
       'SERVER_SOFTWARE' => 'php/fcgiclient',
       'SERVER_PROTOCOL' => 'HTTP/1.1',
       'CONTENT_LENGTH' => strlen($content)
     ), $extra_args);
+    foreach($headers as $k => $v) {
+      $args["HTTP_" . strtoupper($k)] = $v;
+    }
     $pos = strpos($path, '?');
     if ($pos !== false) {
       $args['QUERY_STRING'] = substr($path, $pos + 1);

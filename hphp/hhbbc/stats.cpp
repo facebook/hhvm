@@ -309,7 +309,7 @@ bool in(StatsSS& env, const bc::CGetM& op) {
     case LSL:
     case LSC:
       return TTop;
-    case NumLocationCodes:
+    case InvalidLocationCode:
       break;
     }
     not_reached();

@@ -662,7 +662,16 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfClass:
     os << "A:";
     break;
-  default:
+  case KindOfUninit:
+  case KindOfNull:
+  case KindOfBoolean:
+  case KindOfInt64:
+  case KindOfDouble:
+  case KindOfStaticString:
+  case KindOfString:
+  case KindOfArray:
+  case KindOfObject:
+  case KindOfResource:
     os << "C:";
     break;
   }
@@ -3146,7 +3155,8 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
     loc = &mstate.scratch;
     break;
 
-  default: not_reached();
+  case InvalidLocationCode:
+    not_reached();
   }
 
   mstate.base = loc;
@@ -3224,7 +3234,7 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
         result = nullptr;
       }
       break;
-    default:
+    case InvalidMemberCode:
       assert(false);
       result = nullptr; // Silence compiler warning.
     }
@@ -4761,25 +4771,28 @@ OPTBLD_INLINE void isSetEmptyM(PC& pc) {
   // operations.
   bool isSetEmptyResult = false;
   switch (mstate.mcode) {
-  case MEL:
-  case MEC:
-  case MET:
-  case MEI: {
-    isSetEmptyResult = IssetEmptyElem<isEmpty>(
-      mstate.scratch, *mstate.ref.asTypedValue(), mstate.base, *mstate.curMember
-    );
-    break;
-  }
-  case MPL:
-  case MPC:
-  case MPT: {
-    Class* ctx = arGetContextClass(vmfp());
-    isSetEmptyResult = IssetEmptyProp<isEmpty>(
-      ctx, mstate.base, *mstate.curMember
-    );
-    break;
-  }
-  default: assert(false);
+    case MEL:
+    case MEC:
+    case MET:
+    case MEI: {
+      isSetEmptyResult = IssetEmptyElem<isEmpty>(
+        mstate.scratch, *mstate.ref.asTypedValue(), mstate.base,
+        *mstate.curMember
+      );
+      break;
+    }
+    case MPL:
+    case MPC:
+    case MPT: {
+      Class* ctx = arGetContextClass(vmfp());
+      isSetEmptyResult = IssetEmptyProp<isEmpty>(
+        ctx, mstate.base, *mstate.curMember
+      );
+      break;
+    }
+    case MW:
+    case InvalidMemberCode:
+      assert(false);
   }
   auto tvRet = getHelperPost(mstate.ndiscard);
   tvRet->m_data.num = isSetEmptyResult;
@@ -5057,10 +5070,10 @@ OPTBLD_INLINE void iopSetM(IOP_ARGS) {
   if (!setHelperPre<false, true, false, false, 1,
       VectorLeaveCode::LeaveLast>(pc, mstate)) {
     Cell* c1 = vmStack().topC();
-    if (mstate.mcode == MW) {
-      SetNewElem<true>(mstate.base, c1);
-    } else {
-      switch (mstate.mcode) {
+    switch (mstate.mcode) {
+      case MW:
+        SetNewElem<true>(mstate.base, c1);
+        break;
       case MEL:
       case MEC:
       case MET:
@@ -5080,8 +5093,9 @@ OPTBLD_INLINE void iopSetM(IOP_ARGS) {
         SetProp<true>(ctx, mstate.base, *mstate.curMember, c1);
         break;
       }
-      default: assert(false);
-      }
+      case InvalidMemberCode:
+        assert(false);
+        break;
     }
   }
   setHelperPost<1>(mstate.ndiscard);
@@ -5193,11 +5207,11 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
     TypedValue* result;
     Cell* rhs = vmStack().topC();
 
-    if (mstate.mcode == MW) {
-      result = SetOpNewElem(mstate.scratch, *mstate.ref.asTypedValue(),
-                            op, mstate.base, rhs);
-    } else {
-      switch (mstate.mcode) {
+    switch (mstate.mcode) {
+      case MW:
+        result = SetOpNewElem(mstate.scratch, *mstate.ref.asTypedValue(),
+                              op, mstate.base, rhs);
+        break;
       case MEL:
       case MEC:
       case MET:
@@ -5213,10 +5227,11 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
                            ctx, op, mstate.base, *mstate.curMember, rhs);
         break;
       }
-      default:
+
+      case InvalidMemberCode:
         assert(false);
         result = nullptr; // Silence compiler warning.
-      }
+        break;
     }
 
     tvRefcountedDecRef(rhs);
@@ -5288,11 +5303,11 @@ OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
   TypedValue to = make_tv<KindOfUninit>();
   if (!setHelperPre<MoreWarnings, true, false, false, 0,
       VectorLeaveCode::LeaveLast>(pc, mstate)) {
-    if (mstate.mcode == MW) {
-      IncDecNewElem<true>(mstate.scratch, *mstate.ref.asTypedValue(),
-                          op, mstate.base, to);
-    } else {
-      switch (mstate.mcode) {
+    switch (mstate.mcode) {
+      case MW:
+        IncDecNewElem<true>(mstate.scratch, *mstate.ref.asTypedValue(),
+                            op, mstate.base, to);
+        break;
       case MEL:
       case MEC:
       case MET:
@@ -5307,8 +5322,9 @@ OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
         IncDecProp<true>(ctx, op, mstate.base, *mstate.curMember, to);
         break;
       }
-      default: assert(false);
-      }
+      case InvalidMemberCode:
+        assert(false);
+        break;
     }
   }
   setHelperPost<0>(mstate.ndiscard);
@@ -5427,20 +5443,23 @@ OPTBLD_INLINE void iopUnsetM(IOP_ARGS) {
   if (!setHelperPre<false, false, true, false, 0,
       VectorLeaveCode::LeaveLast>(pc, mstate)) {
     switch (mstate.mcode) {
-    case MEL:
-    case MEC:
-    case MET:
-    case MEI:
-      UnsetElem(mstate.base, *mstate.curMember);
-      break;
-    case MPL:
-    case MPC:
-    case MPT: {
-      Class* ctx = arGetContextClass(vmfp());
-      UnsetProp(ctx, mstate.base, *mstate.curMember);
-      break;
-    }
-    default: assert(false);
+      case MEL:
+      case MEC:
+      case MET:
+      case MEI:
+        UnsetElem(mstate.base, *mstate.curMember);
+        break;
+      case MPL:
+      case MPC:
+      case MPT: {
+        Class* ctx = arGetContextClass(vmfp());
+        UnsetProp(ctx, mstate.base, *mstate.curMember);
+        break;
+      }
+      case MW:
+      case InvalidMemberCode:
+        assert(false);
+        break;
     }
   }
   setHelperPost<0>(mstate.ndiscard);

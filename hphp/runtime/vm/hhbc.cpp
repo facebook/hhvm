@@ -262,9 +262,13 @@ int64_t decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode) {
     case MEI:
       return decodeImm<int64_t>(immPtr);
 
-    default:
-      not_reached();
+    case MEC:
+    case MPC:
+    case MW:
+    case InvalidMemberCode:
+      break;
   }
+  not_reached();
 }
 
 // TODO: merge with emitIVA in unit.h
@@ -558,7 +562,8 @@ FlavorDesc minstrFlavor(const Op* op, uint32_t i, FlavorDesc top) {
       i -= 2;
       break;
 
-    case NumLocationCodes: not_reached();
+    case InvalidLocationCode:
+      not_reached();
   }
 
   if (i < getImmVector(op).numStackValues()) return CV;
@@ -830,7 +835,7 @@ static_assert(memberNamesCount == NumMemberCodes,
              "Member code missing for memberCodeString");
 
 const char* memberCodeString(MemberCode mcode) {
-  assert(mcode >= 0 && mcode < NumMemberCodes);
+  assert(mcode >= 0 && mcode < InvalidMemberCode);
   return memberNames[mcode];
 }
 

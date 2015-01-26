@@ -131,9 +131,9 @@ enum LocationCode {
   // Base is a function return value.
   LR,
 
-  NumLocationCodes,
-  InvalidLocationCode = NumLocationCodes
+  InvalidLocationCode, // keep this last
 };
+constexpr int NumLocationCodes = InvalidLocationCode;
 
 inline int numLocationCodeImms(LocationCode lc) {
   switch (lc) {
@@ -141,9 +141,10 @@ inline int numLocationCodeImms(LocationCode lc) {
     return 1;
   case LC: case LH: case LGC: case LNC: case LSC: case LR:
     return 0;
-  default:
-    not_reached();
+  case InvalidLocationCode:
+    break;
   }
+  not_reached();
 }
 
 inline int numLocationCodeStackVals(LocationCode lc) {
@@ -154,9 +155,10 @@ inline int numLocationCodeStackVals(LocationCode lc) {
     return 1;
   case LSC:
     return 2;
-  default:
-    not_reached();
+  case InvalidLocationCode:
+    break;
   }
+  not_reached();
 }
 
 // Returns string representation of `lc'.  (Pointer to internal static
@@ -188,9 +190,10 @@ enum MemberCode {
   // New element operation.  (No real stack element.)
   MW,
 
-  NumMemberCodes,
-  InvalidMemberCode = NumMemberCodes
+  InvalidMemberCode,
 };
+
+constexpr int NumMemberCodes = InvalidMemberCode;
 
 enum MInstrAttr {
   MIA_none         = 0x00,

@@ -24,6 +24,9 @@
 #include <folly/io/async/EventBaseManager.h> // @nolint
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
 
+#include <grp.h>
+#include <pwd.h>
+
 namespace HPHP {
 
 using folly::IOBuf;
@@ -239,7 +242,42 @@ void FastCGIServer::start() {
   }
   if (m_socketConfig.bindAddress.getFamily() == AF_UNIX) {
     auto path = m_socketConfig.bindAddress.getPath();
-    chmod(path.c_str(), 0760);
+    if ((RuntimeOption::ServerFileSocketOwner != "") ||
+        (RuntimeOption::ServerFileSocketGroup != "")) {
+      uid_t sock_uid = -1;
+      if (RuntimeOption::ServerFileSocketOwner != "") {
+        auto pw = getpwnam(RuntimeOption::ServerFileSocketOwner.c_str());
+        if (pw == nullptr) {
+          Logger::Warning("Bad ServerFileSocketOwner %s: %s",
+            RuntimeOption::ServerFileSocketOwner.c_str(),
+             folly::errnoStr(errno).c_str());
+        }
+        else {
+          sock_uid = pw->pw_uid;
+        }
+      }
+      gid_t sock_gid = -1;
+      if (RuntimeOption::ServerFileSocketGroup != "") {
+        auto gr = getgrnam(RuntimeOption::ServerFileSocketGroup.c_str());
+        if (gr == nullptr) {
+          Logger::Warning("Bad ServerFileSocketGroup %s: %s",
+            RuntimeOption::ServerFileSocketGroup.c_str(),
+            folly::errnoStr(errno).c_str());
+        }
+        else {
+          sock_gid = gr->gr_gid;
+        }
+      }
+      if (chown(path.c_str(), sock_uid, sock_gid) != 0) {
+        Logger::Warning("chown ServerFileSocket %s %d:%d failed: %s",
+          path.c_str(), sock_uid, sock_gid, folly::errnoStr(errno).c_str());
+      }
+    }
+    if (chmod(path.c_str(), RuntimeOption::ServerFileSocketMode) != 0) {
+      Logger::Warning("chmod ServerFileSocket %s %o failed: %s",
+        path.c_str(), RuntimeOption::ServerFileSocketMode,
+        folly::errnoStr(errno).c_str());
+    }
   }
   m_acceptor.reset(new FastCGIAcceptor(m_socketConfig, this));
   m_acceptor->init(m_socket.get(), m_worker.getEventBase());

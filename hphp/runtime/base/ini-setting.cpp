@@ -55,14 +55,22 @@ int64_t convert_bytes_to_long(const std::string& value) {
   if (value.size() == 0) {
     return 0;
   }
-  int64_t newInt = strtoll(value.data(), nullptr, 10);
-  char lastChar = value.data()[value.size() - 1];
-  if (lastChar == 'K' || lastChar == 'k') {
-    newInt <<= 10;
-  } else if (lastChar == 'M' || lastChar == 'm') {
-    newInt <<= 20;
-  } else if (lastChar == 'G' || lastChar == 'g') {
-    newInt <<= 30;
+  int base = 10;
+  const char* value_cstr = value.c_str();
+  if (value_cstr[0] == '0') {
+    value_cstr++;
+    base = 8;
+  }
+  int64_t newInt = strtoll(value_cstr, nullptr, base);
+  if (base == 10) {
+    const char& lastChar = value.back();
+    if (lastChar == 'K' || lastChar == 'k') {
+      newInt <<= 10;
+    } else if (lastChar == 'M' || lastChar == 'm') {
+      newInt <<= 20;
+    } else if (lastChar == 'G' || lastChar == 'g') {
+      newInt <<= 30;
+    }
   }
   return newInt;
 }

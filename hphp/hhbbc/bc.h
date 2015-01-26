@@ -80,7 +80,7 @@ struct MElem {
     case MPT:  return immStr == o.immStr;
     case MEI:  return immInt == o.immInt;
     case MW:   return true;
-    case NumMemberCodes:
+    case InvalidMemberCode:
       break;
     }
     not_reached();
@@ -543,7 +543,7 @@ struct Bytecode {
   // Note: assuming bc::Nop is empty and has trivial dtor/ctor.
 
   Bytecode(const Bytecode& o) : op(Op::Nop) { *this = o; }
-  Bytecode(Bytecode&& o) : op(Op::Nop) { *this = std::move(o); }
+  Bytecode(Bytecode&& o) noexcept : op(Op::Nop) { *this = std::move(o); }
 
   Bytecode& operator=(const Bytecode& o) {
     destruct();

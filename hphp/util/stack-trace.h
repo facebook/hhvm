@@ -57,7 +57,8 @@ protected:
    * Translate a frame pointer to file name and line number pair.
    */
   static bool Translate(void *bt, Frame * f, Dl_info&, void*,
-                        void *bfds=nullptr, unsigned bfd_size=0) ;
+                        void *bfds=nullptr, unsigned bfd_size=0,
+                        bool avoid_malloc=false);
 
   /**
    * Run addr2line to translate a function pointer into function name and line
@@ -178,7 +179,7 @@ private:
    * Translate a frame pointer to file name and line number pair.
    */
   static bool Translate(int fd, void *bt, int frame_num, void *,
-                        unsigned int bfds_size) ;
+                        unsigned int bfds_size, bool avoid_malloc);
 
   /**
    * Demangle a function name.

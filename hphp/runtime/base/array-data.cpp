@@ -272,7 +272,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
   /*
    * size_t Vsize(const ArrayData*)
    *
-   *   This entry point essentially is only for GlobalsArray;
+   *   This entry point essentially is only for GlobalsArray and ProxyArray;
    *   all the other cases are not_reached().
    *
    *   Because of particulars of how GlobalsArray works,

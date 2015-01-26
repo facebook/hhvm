@@ -1524,8 +1524,8 @@ To string conversions:
   Computes the number of elements in S0 using the same definition as Count, but
   with a restriction on the input type.
 
-  CountArray expects any array. CountArrayFast expects an array whose kind is not
-  kGlobalsKind. CountCollection expects a collection object.
+  CountArray expects any array. CountArrayFast expects an array whose kind is
+  not kGlobalsKind or kProxyKind. CountCollection expects a collection object.
 
 | Nop, ND, NA, NF
 

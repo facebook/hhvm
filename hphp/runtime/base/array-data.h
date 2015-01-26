@@ -124,9 +124,9 @@ public:
     return m_size;
   }
 
-  // unlike ArrayData::size(), this functions doesn't delegate
+  // Unlike ArrayData::size(), this function doesn't delegate
   // to the vsize() function, so its more efficient to use this when
-  // you know you don't have a GlobalsArray or ProxyArray
+  // you know you don't have a GlobalsArray or ProxyArray.
   size_t getSize() const {
     return m_size;
   }

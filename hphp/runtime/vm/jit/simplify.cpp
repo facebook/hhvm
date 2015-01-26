@@ -1747,14 +1747,21 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
   if (src->isConst()) return cns(env, src->arrVal()->size());
 
-  auto const notGlobals =
-    ty.hasArrayKind() && ty.getArrayKind() != ArrayData::kGlobalsKind;
+  if (!ty.hasArrayKind() || mightRelax(env, src)) return nullptr;
 
-  if (!mightRelax(env, src) && notGlobals) {
-    return gen(env, CountArrayFast, src);
+  switch (ty.getArrayKind()) {
+    case ArrayData::kPackedKind:
+    case ArrayData::kStructKind:
+    case ArrayData::kMixedKind:
+    case ArrayData::kStrMapKind:
+    case ArrayData::kIntMapKind:
+    case ArrayData::kVPackedKind:
+    case ArrayData::kEmptyKind:
+    case ArrayData::kApcKind:
+      return gen(env, CountArrayFast, src);
+    default:
+      return nullptr;
   }
-
-  return nullptr;
 }
 
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {

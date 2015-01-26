@@ -157,7 +157,7 @@ TEST(Simplifier, Count) {
     EXPECT_MATCH(result.instrs[0], CountArray, arr->dst());
   }
 
-  // Count($array_not_nvtw) --> CountArrayFast($array_not_nvtw)
+  // Count($array_packed) --> CountArrayFast($array_packed)
   {
     auto ty = Type::Arr.specialize(ArrayData::kPackedKind);
     auto arr = unit.gen(Conjure, dummy, ty);

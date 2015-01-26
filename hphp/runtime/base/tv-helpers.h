@@ -440,17 +440,15 @@ inline bool tvIsStatic(const TypedValue* tv) {
 }
 
 /**
- * tvAsVariant and tvAsconst Variant& serve as escape hatches that allow us to call
+ * tvAsVariant and tvAsCVarRef serve as escape hatches that allow us to call
  * into the Variant machinery. Ideally we will use these as little as possible
  * in the long term.
  */
 
 // Assumes 'tv' is live
 inline Variant& tvAsVariant(TypedValue* tv) {
-  // Avoid treating uninitialized TV's as variants. We have some slightly
-  // perverse, but defensible uses where we pass in NULL (and later check
-  // a Variant* against NULL) so tolerate it.
-  assert(nullptr == tv || tvIsPlausible(*tv));
+  assert(tv != nullptr);
+  assert(tvIsPlausible(*tv));
   return *(Variant*)(tv);
 }
 

@@ -1364,9 +1364,8 @@ TypedValue* ObjectData::propImpl(
   }
 
   // First see if native getter is implemented.
-  if (getAttribute(HasNativePropHandler) &&
-      invokeNativeGetProp(tvScratch, key)) {
-    return tvScratch;
+  if (getAttribute(HasNativePropHandler) && invokeNativeGetProp(tvRef, key)) {
+    return tvRef;
   }
 
   // Next try calling user-level `__get` if it's used.

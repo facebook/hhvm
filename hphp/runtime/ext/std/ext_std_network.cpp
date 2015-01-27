@@ -286,9 +286,10 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
   return (int64_t)ntohl(ip.s_addr);
 }
 
-String HHVM_FUNCTION(long2ip, int64_t proper_address) {
+String HHVM_FUNCTION(long2ip, const String& proper_address) {
+  unsigned long ul = strtoul(proper_address.c_str(), NULL, 0);
   try {
-    return folly::IPAddress::fromLongHBO(proper_address).str();
+    return folly::IPAddress::fromLongHBO(ul).str();
   } catch (folly::IPAddressFormatException &e) {
     return s_empty;
   }

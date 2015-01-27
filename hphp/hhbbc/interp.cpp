@@ -2013,17 +2013,36 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
   // is not soft.  We can safely assume that either VerifyRetTypeC will
   // throw or it will produce a value whose type is compatible with the
   // return type constraint.
-  auto const tcT =
+  auto tcT =
     remove_uninit(env.index.lookup_constraint(env.ctx, constraint));
-  // If stackT is a subtype of tcT, use stackT. Otherwise, if tc is an opt
+
+  // Below we compute retT, which is a rough conservative approximate of the
+  // intersection of stackT and tcT.
+  // TODO(4441939): We could do better if we had an intersect_of() function
+  // that provided a formal way to compute the intersection of two Types.
+
+  // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
+  // Why?  Because we want uphold the invariant that we only refine return
+  // types and never widen them, and if we allow tcT to be an interface then
+  // it's possible for violations of this invariant to arise.  For an example,
+  // see "hphp/test/slow/hhbbc/return-type-opt-bug.php".
+  // Note: It's safe to use TObj/TOptObj because lookup_constraint() only
+  // returns classes or interfaces or traits (it never returns something that
+  // could be an enum or type alias) and it never returns anything that could
+  // be a "magic" interface that supports non-objects.  (For traits the return
+  // typehint will always throw at run time, so it's safe to use TObj/TOptObj.)
+  if (is_specialized_obj(tcT) && dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
+    tcT = is_opt(tcT) ? TOptObj : TObj;
+  }
+  // If stackT is a subtype of tcT, use stackT.  Otherwise, if tc is an opt
   // type and stackT cannot be InitNull, then we can safely use unopt(tcT).
   // In all other cases, use tcT.
-  // TODO(4441939): We could do better here if we had an intersect_of()
-  // function that provided a formal way to compute the intersection of
-  // two Types.
   auto const retT = stackT.subtypeOf(tcT) ? stackT :
-                    is_opt(tcT) && !TInitNull.subtypeOf(stackT) ? unopt(tcT) :
+                    is_opt(tcT) && !stackT.couldBe(TInitNull) ? unopt(tcT) :
                     tcT;
+
+  // Update the top of stack with the rough conservative approximate of the
+  // intersection of stackT and tcT
   popC(env);
   push(env, retT);
 }

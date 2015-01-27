@@ -486,6 +486,15 @@ SString Class::name() const {
   );
 }
 
+bool Class::couldBeInterfaceOrTrait() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return (cinfo->cls->attrs & (AttrInterface | AttrTrait));
+    }
+  );
+}
+
 bool Class::couldBeOverriden() const {
   return val.match(
     [] (SString) { return true; },

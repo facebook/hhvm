@@ -300,9 +300,6 @@ ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
       return currentCls;
     }
   }
-  if (FileScopePtr currentFile = cs->getFileScope()) {
-    return currentFile->resolveClass(cls);
-  }
   return ClassScopePtr();
 }
 
@@ -517,8 +514,7 @@ bool AnalysisResult::addClassDependency(FileScopePtr usingFile,
   if (iter == m_classDecs.end() || !iter->second.size()) return false;
   ClassScopePtr classScope = iter->second[0];
   if (iter->second.size() != 1) {
-    classScope = usingFile->resolveClass(classScope);
-    if (!classScope) return false;
+    return false;
   }
   FileScopePtr fileScope = classScope->getContainingFile();
   link(usingFile, fileScope);
@@ -534,8 +530,7 @@ bool AnalysisResult::addFunctionDependency(FileScopePtr usingFile,
   if (iter == m_functionDecs.end()) return false;
   FunctionScopePtr functionScope = iter->second;
   if (functionScope->isRedeclaring()) {
-    functionScope = usingFile->resolveFunction(functionScope);
-    if (!functionScope) return false;
+    return false;
   }
   FileScopePtr fileScope = functionScope->getContainingFile();
   link(usingFile, fileScope);
@@ -787,13 +782,6 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   // Analyze perfect virtuals
   if (Option::AnalyzePerfectVirtuals && !system) {
     analyzePerfectVirtuals();
-  }
-}
-
-void AnalysisResult::analyzeIncludes() {
-  AnalysisResultPtr ar = shared_from_this();
-  for (unsigned i = 0; i < m_fileScopes.size(); i++) {
-    m_fileScopes[i]->analyzeIncludes(ar);
   }
 }
 

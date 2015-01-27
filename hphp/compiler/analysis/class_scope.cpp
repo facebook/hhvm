@@ -75,7 +75,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_kindOf(kindOf), m_derivesFromRedeclaring(Derivation::Normal),
     m_traitStatus(NOT_FLATTENED), m_volatile(false),
     m_persistent(false), m_derivedByDynamic(false),
-    m_needsCppCtor(false), m_needsInit(true), m_knownBases(0) {
+    m_needsCppCtor(false), m_needsInit(true) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
@@ -107,7 +107,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_traitStatus(NOT_FLATTENED), m_dynamic(false),
     m_volatile(false), m_persistent(false),
     m_derivedByDynamic(false), m_needsCppCtor(false),
-    m_needsInit(true), m_knownBases(0) {
+    m_needsInit(true) {
   for (FunctionScopePtr f: methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
@@ -1044,29 +1044,6 @@ TypePtr ClassScope::checkConst(BlockScopeRawPtr context,
   defScope = nullptr;
   return getConstants()->check(context, name, type, coerce,
                                ar, construct, m_bases, defScope);
-}
-
-void ClassScope::getAllParents(AnalysisResultConstPtr ar,
-                               std::vector<std::string> &names) {
-  if (m_stmt) {
-    if (isInterface()) {
-      dynamic_pointer_cast<InterfaceStatement>
-        (m_stmt)->getAllParents(ar, names);
-    } else {
-      dynamic_pointer_cast<ClassStatement>
-        (m_stmt)->getAllParents(ar, names);
-    }
-  } else {
-    for (unsigned i = 0; i < m_bases.size(); i++) {
-      const string &base = m_bases[i];
-      names.push_back(base);
-      if (ClassScopePtr cls = ar->findClass(base)) {
-        if (!cls->isRedeclaring()) {
-          cls->getAllParents(ar, names);
-        }
-      }
-    }
-  }
 }
 
 void ClassScope::getInterfaces(AnalysisResultConstPtr ar,

@@ -725,11 +725,6 @@ static void wholeProgramPasses(const CompilerOptions& po,
     Timer timer(Timer::WallTime, "pre-optimizing");
     ar->preOptimize();
   }
-
-  if (!Option::AllVolatile) {
-    Timer timer(Timer::WallTime, "analyze includes");
-    ar->analyzeIncludes();
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

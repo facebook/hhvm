@@ -159,7 +159,6 @@ public:
   void addSystemFunction(FunctionScopeRawPtr fs);
   void addSystemClass(ClassScopeRawPtr cs);
   void analyzeProgram(bool system = false);
-  void analyzeIncludes();
   void analyzeProgramFinal();
   void analyzePerfectVirtuals();
   void dump();

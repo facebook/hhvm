@@ -45,7 +45,7 @@ namespace HPHP {
 
 FileScope::FileScope(const string &fileName, int fileSize, const MD5 &md5)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
-    m_size(fileSize), m_md5(md5), m_includeState(0), m_system(false),
+    m_size(fileSize), m_md5(md5), m_system(false),
     m_isHHFile(false), m_preloadPriority(0),
     m_fileName(fileName), m_redeclaredFunctions(0) {
   pushAttribute(); // for global scope
@@ -273,137 +273,8 @@ void FileScope::analyzeProgram(AnalysisResultPtr ar) {
   resolve_lambda_names(ar, shared_from_this());
 }
 
-ClassScopeRawPtr FileScope::resolveClass(ClassScopeRawPtr cls) {
-  BlockScopeSet::iterator it = m_providedDefs.find(cls);
-  if (it != m_providedDefs.end()) {
-    return ClassScopeRawPtr(static_cast<HPHP::ClassScope*>(it->get()));
-  }
-  return ClassScopeRawPtr();
-}
-
 bool FileScope::checkClass(const string &cls) {
   return m_redecBases.find(cls) != m_redecBases.end();
-}
-
-FunctionScopeRawPtr FileScope::resolveFunction(FunctionScopeRawPtr func) {
-  BlockScopeSet::iterator it = m_providedDefs.find(func);
-  if (it != m_providedDefs.end()) {
-    return FunctionScopeRawPtr(static_cast<HPHP::FunctionScope*>(it->get()));
-  }
-  return FunctionScopeRawPtr();
-}
-
-/*
- * Insert the class, and its parents (recursively) into m_providedDefs,
- * returning true if the class was already known to exist.
- * If def is true, this is the actual definition for the class,
- * so set the hasBase flags.
- */
-bool FileScope::insertClassUtil(AnalysisResultPtr ar,
-                                ClassScopeRawPtr cls, bool def) {
-  if (!m_providedDefs.insert(cls).second) return true;
-
-  const vector<string> &bases = cls->getBases();
-  bool topBasesKnown = def && bases.size() > 31;
-  for (unsigned i = 0; i < bases.size(); i++) {
-    const string &s = bases[i];
-    ClassScopeRawPtr c = ar->findClass(s);
-    if (c) {
-      if (c->isRedeclaring()) {
-        ClassScopeRawPtr cr = resolveClass(c);
-        if (!cr) {
-          if (i >= 31) topBasesKnown = false;
-          m_redecBases.insert(c->getName());
-          continue;
-        }
-        c = cr;
-      } else if (!c->isVolatile()) {
-        if (def && i < 31) cls->setKnownBase(i);
-        continue;
-      }
-      if (insertClassUtil(ar, c, false)) {
-        if (def && i < 31) cls->setKnownBase(i);
-      } else {
-        if (i >= 31) topBasesKnown = false;
-      }
-    }
-  }
-
-  if (topBasesKnown) cls->setKnownBase(31);
-  return false;
-}
-
-void FileScope::analyzeIncludesHelper(AnalysisResultPtr ar) {
-  m_includeState = 1;
-  SCOPE_EXIT { m_includeState = 2; };
-
-  if (!m_pseudoMain) return;
-
-  StatementList &stmts = *getStmt();
-  bool hoistOnly = false;
-
-  for (int i = 0, n = stmts.getCount(); i < n; i++) {
-    StatementPtr s = stmts[i];
-    if (!s) continue;
-
-    if (s->is(Statement::KindOfClassStatement) ||
-        s->is(Statement::KindOfInterfaceStatement)) {
-      ClassScopeRawPtr cls(
-        static_pointer_cast<InterfaceStatement>(s)->getClassScope());
-      if (hoistOnly) {
-        const string &parent = cls->getOriginalParent();
-        if (cls->getBases().size() > (parent.empty() ? 0 : 1)) {
-          continue;
-        }
-        if (!parent.empty()) {
-          ClassScopeRawPtr c = ar->findClass(parent);
-          if (!c || (c->isVolatile() &&
-                     !resolveClass(c) && !checkClass(parent))) {
-            continue;
-          }
-        }
-      }
-      if (cls->isVolatile()) {
-        insertClassUtil(ar, cls, true);
-      }
-      continue;
-    }
-
-    if (s->is(Statement::KindOfFunctionStatement)) {
-      FunctionScopeRawPtr func(
-        static_pointer_cast<FunctionStatement>(s)->getFunctionScope());
-      if (func->isVolatile()) m_providedDefs.insert(func);
-      continue;
-    }
-
-    if (!hoistOnly && s->is(Statement::KindOfExpStatement)) {
-      ExpressionRawPtr exp(
-        static_pointer_cast<ExpStatement>(s)->getExpression());
-      if (exp && exp->is(Expression::KindOfIncludeExpression)) {
-        FileScopeRawPtr fs(
-          static_pointer_cast<IncludeExpression>(exp)->getIncludedFile(ar));
-        if (fs && fs->m_includeState != 1) {
-          if (!fs->m_includeState) {
-            fs->analyzeIncludesHelper(ar);
-          }
-          for (BlockScopeRawPtr bs: fs->m_providedDefs) {
-            m_providedDefs.insert(bs);
-          }
-          continue;
-        }
-      }
-    }
-
-    hoistOnly = true;
-  }
-
-  m_includeState = 2;
-}
-
-void FileScope::analyzeIncludes(AnalysisResultPtr ar) {
-  if (!m_includeState) {
-    analyzeIncludesHelper(ar);
-  }
 }
 
 void FileScope::visit(AnalysisResultPtr ar,

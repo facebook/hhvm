@@ -308,31 +308,6 @@ void ClassStatement::outputCodeModel(CodeGenerator &cg) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void ClassStatement::getAllParents(AnalysisResultConstPtr ar,
-                                   std::vector<std::string> &names) {
-  if (!m_parent.empty()) {
-    ClassScopePtr cls = ar->findClass(m_parent);
-    if (cls) {
-      if (!cls->isRedeclaring()) {
-        cls->getAllParents(ar, names);
-      }
-      names.push_back(m_originalParent);
-    }
-  }
-
-  if (m_base) {
-    vector<string> bases;
-    m_base->getStrings(bases);
-    for (unsigned int i = 0; i < bases.size(); i++) {
-      ClassScopePtr cls = ar->findClass(bases[i]);
-      if (cls) {
-        cls->getAllParents(ar, names);
-        names.push_back(cls->getOriginalName());
-      }
-    }
-  }
-}
-
 void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   if (!classScope->isUserClass()) return;

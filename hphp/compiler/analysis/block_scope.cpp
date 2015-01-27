@@ -121,17 +121,7 @@ ClassScopeRawPtr BlockScope::findExactClass(ClassScopeRawPtr cls) {
       return currentCls;
     }
   }
-  if (FileScopePtr currentFile = getContainingFile()) {
-    return currentFile->resolveClass(cls);
-  }
   return ClassScopeRawPtr();
-}
-
-FunctionScopeRawPtr BlockScope::findExactFunction(FunctionScopeRawPtr func) {
-  if (FileScopePtr currentFile = getContainingFile()) {
-    return currentFile->resolveFunction(func);
-  }
-  return FunctionScopeRawPtr();
 }
 
 bool BlockScope::hasUser(BlockScopeRawPtr user, int useKinds) const {

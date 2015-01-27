@@ -191,7 +191,6 @@ public:
   AnalysisResultRawPtr getContainingProgram();
 
   ClassScopeRawPtr findExactClass(ClassScopeRawPtr cls);
-  FunctionScopeRawPtr findExactFunction(FunctionScopeRawPtr func);
 
   bool hasUser(BlockScopeRawPtr user, int useFlags) const;
   void addUse(BlockScopeRawPtr user, int useFlags);

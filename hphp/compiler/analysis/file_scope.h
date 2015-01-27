@@ -186,13 +186,8 @@ public:
   int preloadPriority() const { return m_preloadPriority; }
 
   void analyzeProgram(AnalysisResultPtr ar);
-  void analyzeIncludes(AnalysisResultPtr ar);
-  void analyzeIncludesHelper(AnalysisResultPtr ar);
-  bool insertClassUtil(AnalysisResultPtr ar, ClassScopeRawPtr cls, bool def);
 
   bool checkClass(const std::string &cls);
-  ClassScopeRawPtr resolveClass(ClassScopeRawPtr cls);
-  FunctionScopeRawPtr resolveFunction(FunctionScopeRawPtr func);
   void visit(AnalysisResultPtr ar,
              void (*cb)(AnalysisResultPtr, StatementPtr, void*),
              void *data);
@@ -213,7 +208,6 @@ public:
 private:
   int m_size;
   MD5 m_md5;
-  unsigned m_includeState : 2;
   unsigned m_system : 1;
   unsigned m_isHHFile : 1;
   int m_preloadPriority;
@@ -228,7 +222,6 @@ private:
   vertex_descriptor m_vertex;
 
   std::string m_pseudoMainName;
-  BlockScopeSet m_providedDefs;
   std::set<std::string> m_redecBases;
 
   // Map from class alias names to the class they are aliased to.

@@ -167,6 +167,15 @@ struct Class {
   SString name() const;
 
   /*
+   * Whether this class could possibly be an interface or a trait.
+   *
+   * When returning false, it is known that this class is not an interface
+   * or a trait. When returning true, it's possible that this class is not
+   * an interface or trait but the system cannot tell.
+   */
+  bool couldBeInterfaceOrTrait() const;
+
+  /*
    * Returns whether this type has the no override attribute, that is, if it
    * is a final class (explicitly marked by the user or known by the static
    * analysis).

@@ -287,7 +287,7 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
 }
 
 String HHVM_FUNCTION(long2ip, const String& proper_address) {
-  unsigned long ul = strtoul(proper_address.c_str(), NULL, 0);
+  unsigned long ul = strtoul(proper_address.c_str(), nullptr, 0);
   try {
     return folly::IPAddress::fromLongHBO(ul).str();
   } catch (folly::IPAddressFormatException &e) {

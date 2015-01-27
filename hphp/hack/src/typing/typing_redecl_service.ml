@@ -16,41 +16,39 @@
  * work to do. We need calculate what must be re-checked.
  *)
 (*****************************************************************************)
+open Typing_deps
 open Utils
 
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)
 (*****************************************************************************)
-let otf_neutral =  [], SSet.empty
-let compute_deps_neutral = ISet.empty, ISet.empty
+let otf_neutral =  [], Relative_path.Set.empty
+let compute_deps_neutral = DepSet.empty, DepSet.empty
 
 (*****************************************************************************)
 (* This is the place where we are going to put everything necessary for
  * the redeclaration. We could "pass" the values directly to the workers,
  * but it gives too much work to the master and slows things downn.
- * So what we do instead is:
- * Set the value of "data_storage", which means that one of the data nodes
- * has this value.
- * Let each worker pool the data from "data_storage".
+ * So what we do instead is pass the data through shared memory via
+ * OnTheFlyStore.
  * I tried replicating the data to speed things up but it had no effect.
  *)
 (*****************************************************************************)
 
-type fast = FileInfo.names SMap.t
-type classes = SSet.t SMap.t
+type classes = Relative_path.Set.t SMap.t
 
 module OnTheFlyStore = GlobalStorage.Make(struct
-  type t = Naming.env * classes * fast
+  type t = Naming.env * classes * FileInfo.fast
 end)
 
 (*****************************************************************************)
 (* Re-declaring the types in a file *)
 (*****************************************************************************)
 
-let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
+let on_the_fly_decl_file nenv all_classes (errors, failed) fn =
   let decl_errors, () = Errors.do_
     begin fun () ->
-    (* We start "recording" dependencies. 
+    (* We start "recording" dependencies.
      * Whenever we are type-checking or declaring types, the checker
      * records all the dependencies in a global (cf Typing_deps).
      * At any given time, all the workers must be aware of all the
@@ -72,10 +70,10 @@ let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
      * where the error occurs might be different from the file we
      * are declaring right now.
      *)
-      let file_with_error = Errors.filename error in
-      assert (file_with_error <> "");
-      let failed = SSet.add file_with_error failed in
-      let failed = SSet.add fn failed in
+      let file_with_error = Pos.filename (Errors.get_pos error) in
+      assert (file_with_error <> Relative_path.default);
+      let failed = Relative_path.Set.add file_with_error failed in
+      let failed = Relative_path.Set.add fn failed in
       error :: errors, failed
     end (errors, failed) decl_errors
 
@@ -87,12 +85,11 @@ let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
 
 let compute_classes_deps old_classes new_classes acc classes =
   let to_redecl, to_recheck = acc in
-  let trace = ref ISet.empty in
   let rdd, rdc = 
-    Typing_compare.get_classes_deps old_classes new_classes trace classes
+    Typing_compare.get_classes_deps old_classes new_classes classes
   in
-  let to_redecl = ISet.union rdd to_redecl in
-  let to_recheck = ISet.union rdc to_recheck in
+  let to_redecl = DepSet.union rdd to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
   to_redecl, to_recheck
 
 (*****************************************************************************)
@@ -103,8 +100,8 @@ let compute_classes_deps old_classes new_classes acc classes =
 
 let compute_funs_deps old_funs (to_redecl, to_recheck) funs =
   let rdd, rdc = Typing_compare.get_funs_deps old_funs funs in
-  let to_redecl = ISet.union rdd to_redecl in
-  let to_recheck = ISet.union rdc to_recheck in
+  let to_redecl = DepSet.union rdd to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
   to_redecl, to_recheck
 
 (*****************************************************************************)
@@ -115,8 +112,8 @@ let compute_funs_deps old_funs (to_redecl, to_recheck) funs =
 
 let compute_types_deps old_types (to_redecl, to_recheck) types =
   let rdc = Typing_compare.get_types_deps old_types types in
-  let to_redecl = ISet.union rdc to_redecl in
-  let to_recheck = ISet.union rdc to_recheck in
+  let to_redecl = DepSet.union rdc to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
   to_redecl, to_recheck
 
 (*****************************************************************************)
@@ -127,8 +124,8 @@ let compute_types_deps old_types (to_redecl, to_recheck) types =
 
 let compute_gconsts_deps old_gconsts (to_redecl, to_recheck) gconsts =
   let rdd, rdc = Typing_compare.get_gconsts_deps old_gconsts gconsts in
-  let to_redecl = ISet.union rdd to_redecl in
-  let to_recheck = ISet.union rdc to_recheck in
+  let to_redecl = DepSet.union rdd to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
   to_redecl, to_recheck
 
 (*****************************************************************************)
@@ -147,23 +144,27 @@ let compute_gconsts_deps old_gconsts (to_redecl, to_recheck) gconsts =
 (*****************************************************************************)
 
 (*
-let update_positions classes to_update =
+ * XXX UNUSED: Position substitution has been disabled for now, but we're
+ * leaving the code in to minimize bitrot
+ *)
+let update_positions classes _to_update =
   (* First compute the substitution *)
-  let position_subst, is_empty = 
+  let _position_subst, is_empty =
     let old_classes = Typing_env.Classes.get_old_batch classes in
-    let new_classes = Typing_env.Classes.find_batch classes in
+    let new_classes = Typing_env.Classes.get_batch classes in
     Typing_compare.get_classes_psubst old_classes new_classes classes
   in
   if is_empty 
   then ()
   else begin
-    (* Now apply the sustitution in parallel on all the data nodes *)
+    (* Now apply the substitution in parallel on all the data nodes *)
+    (*
     Typing_env.Classes.apply_batch to_update begin fun class_ ->
       Typing_compare.SubstPos.class_type position_subst class_
     end;
+    *)
   end;
   ()
-*)
 
 (*****************************************************************************)
 (* Redeclares a list of files 
@@ -172,23 +173,23 @@ let update_positions classes to_update =
  *)
 (*****************************************************************************)
 
-let redeclare_files nenv all_classes fast filel =
+let redeclare_files nenv all_classes filel =
   List.fold_left
-    (on_the_fly_decl_file nenv all_classes fast)
-    ([], SSet.empty)
+    (on_the_fly_decl_file nenv all_classes)
+    ([], Relative_path.Set.empty)
     filel
 
-let otf_decl_files nenv all_classes fast filel =
+let otf_decl_files nenv all_classes filel =
   SharedMem.invalidate_caches();
   (* Redeclaring the files *)
-  let errors, failed = redeclare_files nenv all_classes fast filel in
+  let errors, failed = redeclare_files nenv all_classes filel in
   errors, failed
 
-let compute_deps ~update_pos nenv fast filel =
-  let infol = List.map (fun fn -> SMap.find_unsafe fn fast) filel in
+let compute_deps ~update_pos fast filel =
+  let infol = List.map (fun fn -> Relative_path.Map.find_unsafe fn fast) filel in
   let names = List.fold_left FileInfo.merge_names FileInfo.empty_names infol in
   let { FileInfo.n_classes; n_funs; n_types; n_consts } = names in
-  let acc = ISet.empty, ISet.empty in
+  let acc = DepSet.empty, DepSet.empty in
   (* Fetching everything at once is faster *)
   let old_funs = Typing_env.Funs.get_old_batch n_funs in
   let acc = compute_funs_deps old_funs acc n_funs in
@@ -203,8 +204,8 @@ let compute_deps ~update_pos nenv fast filel =
   let new_classes = Typing_env.Classes.get_batch n_classes in
   let compare_classes = compute_classes_deps old_classes new_classes in
   let (to_redecl, to_recheck) = compare_classes acc n_classes in
+  if update_pos then ();
 (* TODO: DEACTIVATING THE CODE FOR NOW BECAUSE OF A BUG  
-  if update_pos
   then update_positions classes (SSet.diff to_redecl to_recheck);
   let to_redecl = SSet.inter to_redecl to_recheck in
 *)
@@ -214,33 +215,33 @@ let compute_deps ~update_pos nenv fast filel =
 (* Load the environment and then redeclare *)
 (*****************************************************************************)
 
-let load_and_otf_decl_files acc filel =
+let load_and_otf_decl_files _ filel =
   try
-    let nenv, all_classes, fast = OnTheFlyStore.load() in
-    otf_decl_files nenv all_classes fast filel
+    let nenv, all_classes, _ = OnTheFlyStore.load() in
+    otf_decl_files nenv all_classes filel
   with e ->
     Printf.printf "Error: %s\n" (Printexc.to_string e);
     flush stdout;
     raise e
 
-let load_and_compute_deps ~update_pos acc filel =
+let load_and_compute_deps ~update_pos _acc filel =
   try
-    let nenv, _, fast = OnTheFlyStore.load() in
-    compute_deps ~update_pos nenv fast filel
+    let _, _, fast = OnTheFlyStore.load() in
+    compute_deps ~update_pos fast filel
   with e ->
     Printf.printf "Error: %s\n" (Printexc.to_string e);
     flush stdout;
     raise e
 
 (*****************************************************************************)
-(* Merges the results comming back from the different workers *)
+(* Merges the results coming back from the different workers *)
 (*****************************************************************************)
 
 let merge_on_the_fly (errorl1, failed1) (errorl2, failed2) =
-  errorl1 @ errorl2, SSet.union failed1 failed2
+  errorl1 @ errorl2, Relative_path.Set.union failed1 failed2
 
 let merge_compute_deps (to_redecl1, to_recheck1) (to_redecl2, to_recheck2) =
-  ISet.union to_redecl1 to_redecl2, ISet.union to_recheck1 to_recheck2
+  DepSet.union to_redecl1 to_redecl2, DepSet.union to_recheck1 to_recheck2
 
 (*****************************************************************************)
 (* The parallel worker *)
@@ -293,29 +294,25 @@ let remove_old_defs { FileInfo.n_funs; n_classes; n_types; n_consts } =
   ()
 
 let get_defs fast =
-  SMap.fold begin fun _ names1 names2 ->
+  Relative_path.Map.fold begin fun _ names1 names2 ->
     FileInfo.merge_names names1 names2
   end fast FileInfo.empty_names
 
 (*****************************************************************************)
-(* The main entry points *)
+(* The main entry point *)
 (*****************************************************************************)
 
-let init workers fast =
-  let fnl = SMap.fold (fun x _ y -> x :: y) fast [] in
-  let all_classes = Typing_decl_service.get_classes fast in
-  all_classes, fnl
-
 let redo_type_decl ~update_pos workers nenv fast =
-  let all_classes, fnl = init workers fast in
+  let fnl = Relative_path.Map.keys fast in
+  let all_classes = Typing_decl_service.get_classes fast in
   let defs = get_defs fast in
   invalidate_heap defs;
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let result =
     if List.length fnl < 10
-    then 
-      let errors, failed = otf_decl_files nenv all_classes fast fnl in
-      let to_redecl, to_recheck = compute_deps ~update_pos nenv fast fnl in
+    then
+      let errors, failed = otf_decl_files nenv all_classes fnl in
+      let to_redecl, to_recheck = compute_deps ~update_pos fast fnl in
       errors, failed, to_redecl, to_recheck
     else parallel_otf_decl ~update_pos workers nenv all_classes fast fnl
   in

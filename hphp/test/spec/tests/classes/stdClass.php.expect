@@ -1,0 +1,23 @@
+====== explicit conversions of certain values to type object ======
+
+Type is >stdClass<
+    Instance has no properties
+
+Type is >stdClass<
+    Property >scalar< with value 10
+
+Type is >stdClass<
+    Property >0< with value 11
+    Property >1< with value 21
+    Property >2< with value 31
+
+====== Use of certain values as the left-hand operand of -> ======
+
+Type is >stdClass<
+    Property >x< with value 33
+
+Type is >stdClass<
+    Property >x< with value 44
+
+Type is >stdClass<
+    Property >x< with value 55

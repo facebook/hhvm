@@ -73,89 +73,39 @@ constexpr Reg64 rAsm         = reg::r10;
  * translator manages via its RegMap.
  */
 
-const RegSet kGPCallerSaved = RegSet()
-  | RegSet(reg::rax)
-  | RegSet(reg::rcx)
-  | RegSet(reg::rdx)
-  | RegSet(reg::rsi)
-  | RegSet(reg::rdi)
-  | RegSet(reg::r8)
-  | RegSet(reg::r9)
-  ;
+const RegSet kGPCallerSaved =
+  reg::rax | reg::rcx | reg::rdx | reg::rsi | reg::rdi | reg::r8 | reg::r9;
 
-const RegSet kGPCalleeSaved = RegSet()
-  | RegSet(reg::r13)
-  | RegSet(reg::r14)
-  | RegSet(reg::r15)
-  ;
+const RegSet kGPCalleeSaved =
+  reg::rbx | reg::r13 | reg::r14 | reg::r15;
 
-const RegSet kGPUnreserved = RegSet()
-  | kGPCallerSaved
-  | kGPCalleeSaved
-  ;
+const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
-const RegSet kGPReserved = RegSet()
-  | RegSet(rVmSp)
-  | RegSet(reg::rsp)
-  | RegSet(rVmFp)
-  | RegSet(rVmTl)
-  | RegSet(reg::r11)
-  | RegSet(rAsm)
-  ;
+const RegSet kGPReserved =
+  reg::rsp | rVmFp | rVmTl | reg::r11 | rAsm;
 
-const RegSet kGPRegs = RegSet()
-  | kGPUnreserved
-  | kGPReserved
-  ;
+const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
-const RegSet kXMMCallerSaved = RegSet()
-  | RegSet(reg::xmm0)
-  | RegSet(reg::xmm1)
-  | RegSet(reg::xmm2)
-  | RegSet(reg::xmm3)
-  | RegSet(reg::xmm4)
-  //| RegSet(reg::xmm5) for vasm
-  //| RegSet(reg::xmm6) for vasm
-  //| RegSet(reg::xmm7) for vasm
-  | RegSet(reg::xmm8)
-  | RegSet(reg::xmm9)
-  | RegSet(reg::xmm10)
-  | RegSet(reg::xmm11)
-  | RegSet(reg::xmm12)
-  | RegSet(reg::xmm13)
-  | RegSet(reg::xmm14)
-  // | RegSet(reg::xmm15) for vasm
-  ;
+const RegSet kXMMCallerSaved =
+  reg::xmm0 | reg::xmm1 | reg::xmm2 | reg::xmm3 |
+  reg::xmm4 | // reg::xmm5 | reg::xmm6 | reg::xmm7 // for vasm
+  reg::xmm8 | reg::xmm9 | reg::xmm10 | reg::xmm11 |
+  reg::xmm12 | reg::xmm13 | reg::xmm14; // | reg::xmm15 // for vasm
 
-const RegSet kXMMCalleeSaved = RegSet()
-  ;
+const RegSet kXMMCalleeSaved;
 
-const RegSet kXMMUnreserved = RegSet()
-  | kXMMCallerSaved
-  | kXMMCalleeSaved
-  ;
+const RegSet kXMMUnreserved = kXMMCallerSaved | kXMMCalleeSaved;
 
-const RegSet kXMMReserved = RegSet()
-  | RegSet(reg::xmm5) // for vasm
-  | RegSet(reg::xmm6) // for vasm
-  | RegSet(reg::xmm7) // for vasm
-  | RegSet(reg::xmm15) // for vasm
-  ;
+const RegSet kXMMReserved =
+  reg::xmm5 | reg::xmm6 | reg::xmm7 | reg::xmm15; // for vasm
 
-const RegSet kCallerSaved = RegSet()
-  | kGPCallerSaved
-  | kXMMCallerSaved
-  ;
+const RegSet kCallerSaved = kGPCallerSaved | kXMMCallerSaved;
 
-const RegSet kCalleeSaved = RegSet()
-  | kGPCalleeSaved
-  | kXMMCalleeSaved
-  ;
+const RegSet kCalleeSaved = kGPCalleeSaved | kXMMCalleeSaved;
 
-const RegSet kXMMRegs = RegSet()
-  | kXMMUnreserved
-  | kXMMReserved
-  ;
+const RegSet kSF = RegSet(RegSF{0});
+
+const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -174,17 +124,17 @@ const RegSet kXMMRegs = RegSet()
 constexpr PhysReg rStashedAR = reg::r15;
 
 /*
- * A set of all special cross-tracelet registers.
+ * Registers that are live between all tracelets.
  */
-const RegSet kSpecialCrossTraceRegs
-  = RegSet()
-  | RegSet(rStashedAR)
-  // These registers go through various states between tracelets, but
-  // should all be considered special.
-  | RegSet(rVmFp)
-  | RegSet(rVmSp)
-  | RegSet(rVmTl)
-  ;
+const RegSet kCrossTraceRegs =
+  rVmFp | rVmSp | rVmTl;
+
+/*
+ * Registers that are live during a PHP function call, between the caller and
+ * the callee.
+ */
+const RegSet kCrossCallRegs =
+  kCrossTraceRegs | rStashedAR;
 
 /*
  * Registers that can safely be used for scratch purposes in-between
@@ -194,11 +144,8 @@ const RegSet kSpecialCrossTraceRegs
  * assertions if you remove rax, rdx, or rcx from this set without
  * modifying them.
  */
-const RegSet kScratchCrossTraceRegs
-  = RegSet()
-  | (kGPUnreserved - kSpecialCrossTraceRegs)
-  | kXMMCallerSaved
-  ;
+const RegSet kScratchCrossTraceRegs = kXMMCallerSaved |
+  (kGPUnreserved - kCrossCallRegs);
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -230,11 +177,11 @@ const int kNumSIMDRegisterArgs = sizeof(argNumToSIMDRegName) / sizeof(PhysReg);
  * JIT'd code "reverse calls" the enterTC routine by returning to it,
  * with a service request number and arguments.
  */
-const PhysReg serviceReqArgRegs[] = {
+constexpr PhysReg serviceReqArgRegs[] = {
   // rdi: contains request number
   reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
 };
-const int kNumServiceReqArgRegs =
+constexpr int kNumServiceReqArgRegs =
   sizeof(serviceReqArgRegs) / sizeof(PhysReg);
 
 /*
@@ -251,7 +198,8 @@ UNUSED const Abi abi {
   kGPReserved,    // gpReserved
   kXMMUnreserved, // simdUnreserved
   kXMMReserved,   // simdReserved
-  kCalleeSaved    // calleeSaved
+  kCalleeSaved,   // calleeSaved
+  kSF             // sf
 };
 
 //////////////////////////////////////////////////////////////////////

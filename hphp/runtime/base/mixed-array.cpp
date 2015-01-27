@@ -24,7 +24,9 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/vm/member-operations.h"
@@ -53,11 +55,11 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
   auto const mask  = cmret.second;
   auto const ad    = smartAllocArray(cap, mask);
 
-  ad->m_kindAndSize = kMixedKind << 24; // zero's size
-  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
-  ad->m_capAndUsed  = cap;
-  ad->m_tableMask   = mask;
-  ad->m_nextKI      = 0;
+  ad->m_sizeAndPos   = 0; // size=0, pos=0
+  ad->m_kindAndCount = kMixedKind << 24 | uint64_t{1} << 32; // count=1
+  ad->m_capAndUsed   = cap;
+  ad->m_tableMask    = mask;
+  ad->m_nextKI       = 0;
 
   auto const data = mixedData(ad);
   auto const hash = reinterpret_cast<int32_t*>(data + cap);
@@ -92,11 +94,11 @@ ArrayData* MixedArray::MakeReserveIntMap(uint32_t capacity) {
   auto const mask  = cmret.second;
   auto const ad    = smartAllocArray(cap, mask);
 
-  ad->m_kindAndSize = kIntMapKind << 24; // zero's size
-  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
-  ad->m_capAndUsed  = cap;
-  ad->m_tableMask   = mask;
-  ad->m_nextKI      = 0;
+  ad->m_sizeAndPos   = 0;
+  ad->m_kindAndCount = kIntMapKind << 24 | uint64_t{1} << 32; // count=1
+  ad->m_capAndUsed   = cap;
+  ad->m_tableMask    = mask;
+  ad->m_nextKI       = 0;
 
   auto const data = reinterpret_cast<Elm*>(ad + 1);
   auto const hash = reinterpret_cast<int32_t*>(data + cap);
@@ -120,8 +122,8 @@ ArrayData* MixedArray::MakeReserveStrMap(uint32_t capacity) {
   auto const mask  = cmret.second;
   auto const ad    = smartAllocArray(cap, mask);
 
-  ad->m_kindAndSize = kStrMapKind << 24; // zero's size
-  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
+  ad->m_sizeAndPos  = 0;
+  ad->m_kindAndCount = kStrMapKind << 24 | uint64_t{1} << 32; // count=1
   ad->m_capAndUsed  = cap;
   ad->m_tableMask   = mask;
   ad->m_nextKI      = 0;
@@ -146,20 +148,23 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
   ArrayData* ad;
   if (LIKELY(size <= kPackedCapCodeThreshold)) {
-    auto const cap = size;
+    auto cap = size;
+    if (auto const newCap = PackedArray::getMaxCapInPlaceFast(cap)) {
+      cap = newCap;
+    }
+    assert(cap > 0);
     ad = static_cast<ArrayData*>(
       MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
     );
     assert(cap == packedCodeToCap(cap));
-    ad->m_kindAndSize = uint64_t{size} << 32 | cap;  // sets kPackedKind
+    ad->m_sizeAndPos = size; // pos=0
+    ad->m_kindAndCount = cap | uint64_t{1} << 32; // kind=0, count=1
     assert(ad->m_kind == kPackedKind);
     assert(ad->m_size == size);
     assert(packedCodeToCap(ad->m_packedCapCode) == cap);
   } else {
     ad = MakePackedHelper(size, values);
   }
-
-  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
 
   // Append values by moving -- Caller assumes we update refcount.
   // Values are in reverse order since they come from the stack, which
@@ -178,18 +183,33 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
-NEVER_INLINE
-ArrayData*
+NEVER_INLINE ArrayData*
 MixedArray::MakePackedHelper(uint32_t size, const TypedValue* values) {
-  auto const cap = roundUpPackedCap(size);
-  auto const ad = static_cast<ArrayData*>(
+  auto const ad = MakeReserveSlow(size); // size=pos=count=kind=0
+  ad->m_count = 1;
+  assert(ad->m_kind == kPackedKind);
+  assert(ad->m_size == size);
+  assert(packedCodeToCap(ad->m_packedCapCode) >= size);
+  return ad;
+}
+
+ArrayData* MixedArray::MakePackedUninitialized(uint32_t size) {
+  assert(size > 0);
+  ArrayData* ad;
+  assert(size <= kPackedCapCodeThreshold);
+  auto const cap = size;
+  ad = static_cast<ArrayData*>(
     MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
   );
-  auto const capCode = packedCapToCode(cap);
-  ad->m_kindAndSize = uint64_t{size} << 32 | capCode;  // sets kPackedKind
+  assert(cap == packedCodeToCap(cap));
+  ad->m_sizeAndPos = size; // pos=0
+  ad->m_kindAndCount = cap | uint64_t{1} << 32; // kind=0, count=1
   assert(ad->m_kind == kPackedKind);
   assert(ad->m_size == size);
   assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  assert(ad->m_pos == 0);
+  assert(ad->m_count == 1);
+  assert(PackedArray::checkInvariants(ad));
   return ad;
 }
 
@@ -202,10 +222,9 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   auto const mask  = cmret.second;
   auto const ad    = smartAllocArray(cap, mask);
 
-  auto const shiftedSize = uint64_t{size} << 32;
-  ad->m_kindAndSize      = shiftedSize | kMixedKind << 24;
-  ad->m_posAndCount      = uint64_t{1} << 32; // zero's pos
-  ad->m_capAndUsed       = shiftedSize | cap;
+  ad->m_sizeAndPos       = size; // pos=0
+  ad->m_kindAndCount     = kMixedKind << 24 | uint64_t{1} << 32; // count=1
+  ad->m_capAndUsed       = uint64_t{size} << 32 | cap; // used=size
   ad->m_tableMask        = mask;
   ad->m_nextKI           = 0;
 
@@ -239,6 +258,21 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   return ad;
 }
 
+StructArray* MixedArray::MakeStructArray(
+  uint32_t size,
+  const TypedValue* values,
+  Shape* shape
+) {
+  assert(size > 0);
+  assert(size <= kPackedCapCodeThreshold);
+  assert(shape);
+
+  // Append values by moving -- Caller assumes we update refcount.
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  return StructArray::createReversedValues(shape, values, size);
+}
+
 // for internal use by nonSmartCopy() and copyMixed()
 template<class CopyKeyValue>
 ALWAYS_INLINE
@@ -252,10 +286,9 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   auto const ad = mode == AllocMode::Smart
     ? smartAllocArray(cap, mask)
     : mallocArray(cap, mask);
-  auto const otherKind = other.m_kind;
 
-  ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | otherKind << 24;
-  ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos); // zero's count
+  ad->m_sizeAndPos      = other.m_sizeAndPos;
+  ad->m_kindAndCount    = other.m_packedCapCode; // copy kind; count=0
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
   ad->m_tableMask       = mask;
   ad->m_nextKI          = other.m_nextKI;
@@ -274,7 +307,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
       copyKeyValue(e, te, &other);
     } else {
       // Tombstone.
-      te.data.m_type = KindOfInvalid;
+      te.data.m_type = kInvalidDataType;
     }
   }
 
@@ -346,20 +379,28 @@ MixedArray* MixedArray::copyMixedAndResizeIfNeededSlow() const {
   return ret;
 }
 
-namespace {
+//////////////////////////////////////////////////////////////////////
 
-Variant CreateVarForUncountedArray(const Variant& source) {
+size_t MixedArray::computeAllocBytesFromMaxElms(uint32_t maxElms) {
+  auto const cam = computeCapAndMask(maxElms);
+  return computeAllocBytes(cam.first, cam.second);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return init_null();
+
     case KindOfBoolean:
       return source.getBoolean();
     case KindOfInt64:
       return source.getInt64();
     case KindOfDouble:
       return source.getDouble();
-    case KindOfUninit:
-    case KindOfNull:
-      return init_null();
     case KindOfStaticString:
       return source.getStringData();
 
@@ -371,17 +412,19 @@ Variant CreateVarForUncountedArray(const Variant& source) {
 
     case KindOfArray: {
       auto const ad = source.getArrayData();
-      return ad == staticEmptyArray() ? ad :
-             ad->isPacked() ? MixedArray::MakeUncountedPacked(ad) :
-             MixedArray::MakeUncounted(ad);
+      if (ad == staticEmptyArray()) return ad;
+      if (ad->isPacked()) return MixedArray::MakeUncountedPacked(ad);
+      if (ad->isStruct()) return StructArray::MakeUncounted(ad);
+      return MixedArray::MakeUncounted(ad);
     }
 
-    default:
-      assert(false); // type not allowed
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  return init_null();
-}
-
+  not_reached();
 }
 
 ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
@@ -421,16 +464,14 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
       std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
     assert(cap == packedCodeToCap(cap));
-    ad->m_kindAndSize = uint64_t{size} << 32 | cap; // zero kind
+    ad->m_sizeAndPos = array->m_sizeAndPos;
+    ad->m_kindAndCount = cap | int64_t{UncountedValue} << 32; // kind=0
     assert(ad->m_kind == ArrayData::kPackedKind);
     assert(packedCodeToCap(ad->m_packedCapCode) == cap);
     assert(ad->m_size == size);
   } else {
     ad = MakeUncountedPackedHelper(array);
   }
-
-  ad->m_posAndCount = static_cast<uint64_t>(UncountedValue) << 32 |
-                        static_cast<uint32_t>(array->m_pos);
   auto const srcData = packedData(array);
   auto const stop    = srcData + size;
   auto targetData    = reinterpret_cast<TypedValue*>(ad + 1);
@@ -452,11 +493,12 @@ ArrayData* MixedArray::MakeUncountedPackedHelper(ArrayData* array) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   auto const capCode = packedCapToCode(cap);
-  auto const size = array->m_size;
-  ad->m_kindAndSize = uint64_t{size} << 32 | capCode; // zero kind
+  ad->m_sizeAndPos = array->m_sizeAndPos;
+  ad->m_kindAndCount = capCode | int64_t{UncountedValue} << 32;
   assert(ad->m_kind == ArrayData::kPackedKind);
   assert(packedCodeToCap(ad->m_packedCapCode) == cap);
-  assert(ad->m_size == size);
+  assert(ad->m_size == array->m_size);
+  assert(ad->m_pos == array->m_pos);
   return ad;
 }
 
@@ -482,17 +524,14 @@ void MixedArray::Release(ArrayData* in) {
       free_strong_iterators(ad);
     }
   }
-
-  auto const cap  = ad->m_cap;
-  auto const mask = ad->m_tableMask;
-  MM().objFreeLogged(ad, computeAllocBytes(cap, mask));
+  MM().objFreeLogged(ad, ad->heapSize());
 }
 
-static void release_unk_tv(TypedValue& tv) {
+void MixedArray::ReleaseUncountedTypedValue(TypedValue& tv) {
   if (tv.m_type == KindOfString) {
     assert(!tv.m_data.pstr->isRefCounted());
-    if (!tv.m_data.pstr->isStatic()) {
-      tv.m_data.pstr->destructStatic();
+    if (tv.m_data.pstr->isUncounted()) {
+      tv.m_data.pstr->destructUncounted();
     }
     return;
   }
@@ -502,6 +541,8 @@ static void release_unk_tv(TypedValue& tv) {
     if (!tv.m_data.parr->isStatic()) {
       if (tv.m_data.parr->isPacked()) {
         MixedArray::ReleaseUncountedPacked(tv.m_data.parr);
+      } else if (tv.m_data.parr->isStruct()) {
+        StructArray::ReleaseUncounted(tv.m_data.parr);
       } else {
         MixedArray::ReleaseUncounted(tv.m_data.parr);
       }
@@ -525,12 +566,12 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
       if (isTombstone(ptr->data.m_type)) continue;
       if (ptr->hasStrKey()) {
         assert(!ptr->skey->isRefCounted());
-        if (!ptr->skey->isStatic()) {
-          ptr->skey->destructStatic();
+        if (ptr->skey->isUncounted()) {
+          ptr->skey->destructUncounted();
         }
       }
 
-      release_unk_tv(ptr->data);
+      ReleaseUncountedTypedValue(ptr->data);
     }
 
     // We better not have strong iterators associated with uncounted
@@ -552,7 +593,7 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
   auto const data = packedData(ad);
   auto const stop = data + ad->m_size;
   for (auto ptr = data; ptr != stop; ++ptr) {
-    release_unk_tv(*ptr);
+    ReleaseUncountedTypedValue(*ptr);
   }
 
   // We better not have strong iterators associated with uncounted
@@ -594,7 +635,7 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
  *
  * kMixedKind:
  *   m_nextKI >= highest actual int key
- *   Elm.data.m_type maybe KindOfInvalid (tombstone)
+ *   Elm.data.m_type maybe kInvalidDataType (tombstone)
  *   hash[] maybe Tombstone
  *
  * kPackedKind:
@@ -602,7 +643,7 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
  *   m_nextKI = uninitialized
  *   Elm.skey uninitialized
  *   Elm.hash uninitialized
- *   no KindOfInvalid tombstones
+ *   no kInvalidDataType tombstones
  */
 bool MixedArray::checkInvariants() const {
   static_assert(ssize_t(Empty) == ssize_t(-1), "");
@@ -902,8 +943,9 @@ ssize_t MixedArray::findForRemove(int64_t ki, bool updateNext) {
         // Hacky: don't removed the unsigned cast, else g++ can optimize away
         // the check for == 0x7fff..., since there is no signed int k
         // for which k-1 == 0x7fff...
-        if ((uint64_t)ki == (uint64_t)m_nextKI-1
-              && (ki == 0x7fffffffffffffffLL || updateNext)) {
+        if (((uint64_t)ki == (uint64_t)m_nextKI-1) &&
+            (ki >= 0) &&
+            (ki == 0x7fffffffffffffffLL || updateNext)) {
           --m_nextKI;
         }
       }
@@ -1011,12 +1053,12 @@ MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
 ALWAYS_INLINE
 MixedArray* MixedArray::setVal(TypedValue& tv, Cell src) {
   auto const dst = tvToCell(&tv);
-  cellSet(src, *dst);
   // TODO(#3888164): we should restructure things so we don't have to
   // check KindOfUninit here.
   if (UNLIKELY(src.m_type == KindOfUninit)) {
-    dst->m_type = KindOfNull;
+    src = make_tv<KindOfNull>();
   }
+  cellSet(src, *dst);
   return this;
 }
 
@@ -1036,7 +1078,7 @@ ArrayData* MixedArray::zSetVal(TypedValue& tv, RefData* v) {
  */
 ALWAYS_INLINE
 MixedArray* MixedArray::moveVal(TypedValue& tv, TypedValue v) {
-  tv.m_type = typeInitNull(v.m_type);
+  tv.m_type = v.m_type == KindOfUninit ? KindOfNull : v.m_type;
   tv.m_data.num = v.m_data.num;
   return this;
 }
@@ -1165,19 +1207,13 @@ MixedArray::Grow(MixedArray* old, uint32_t newCap, uint32_t newMask) {
   assert(newMask == folly::nextPowTwo<uint64_t>(newCap) - 1);
   assert(newCap == computeMaxElms(newMask));
 
-  DEBUG_ONLY auto oldPos = old->m_pos;
-
   auto const mask       = newMask;
   auto const cap        = newCap;
   auto const ad         = smartAllocArray(cap, mask);
-  auto const oldKind    = old->m_kind;
+  auto const oldUsed    = old->m_used;
 
-  auto const oldSize        = old->m_size;
-  auto const oldPosUnsigned = static_cast<uint32_t>(old->m_pos);
-  auto const oldUsed        = old->m_used;
-
-  ad->m_kindAndSize     = uint64_t{oldSize} << 32 | oldKind << 24;
-  ad->m_posAndCount     = oldPosUnsigned; // zero's count
+  ad->m_sizeAndPos      = old->m_sizeAndPos;
+  ad->m_kindAndCount    = old->m_packedCapCode; // kind=old->kind, count=0
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
   ad->m_tableMask       = mask;
   ad->m_nextKI          = old->m_nextKI;
@@ -1207,10 +1243,10 @@ MixedArray::Grow(MixedArray* old, uint32_t newCap, uint32_t newMask) {
   old->setZombie();
 
   assert(old->isZombie());
-  assert(ad->m_kind == oldKind);
-  assert(ad->m_size == oldSize);
+  assert(ad->m_kind == old->m_kind);
+  assert(ad->m_size == old->m_size);
   assert(ad->m_count == 0);
-  assert(ad->m_pos == oldPos);
+  assert(ad->m_pos == old->m_pos);
   assert(ad->m_used == oldUsed);
   assert(ad->m_tableMask == mask);
   assert(ad->checkInvariants());
@@ -1716,7 +1752,7 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
   TypedValue* tv = &e.data;
   DataType oldType = tv->m_type;
   uint64_t oldDatum = tv->m_data.num;
-  tv->m_type = KindOfInvalid;
+  tv->m_type = kInvalidDataType;
   --m_size;
   // Mark the hash entry as "deleted".
   assert(m_used <= m_cap);
@@ -1938,18 +1974,13 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const cap   = cmret.first;
   auto const mask  = cmret.second;
   auto const ad    = smartAllocArray(cap, mask);
+  auto const oldUsed = src->m_used;
 
-  auto const oldSize        = src->m_size;
-  auto const oldPosUnsigned = static_cast<uint32_t>(src->m_pos);
-  auto const oldNextKI      = src->m_nextKI;
-  auto const oldUsed        = src->m_used;
-  auto const oldKind        = src->m_kind;
-
-  ad->m_kindAndSize     = uint64_t{oldSize} << 32 | oldKind << 24;
-  ad->m_posAndCount     = uint64_t{1} << 32 | oldPosUnsigned;
+  ad->m_sizeAndPos      = src->m_sizeAndPos;
+  ad->m_kindAndCount    = src->m_packedCapCode | uint64_t{1} << 32; // count=1
   ad->m_cap             = cap;
   ad->m_tableMask       = mask;
-  ad->m_nextKI          = oldNextKI;
+  ad->m_nextKI          = src->m_nextKI;
 
   auto const data  = ad->data();
   auto const table = reinterpret_cast<int32_t*>(data + cap);
@@ -2007,14 +2038,14 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   assert(i == dstElm - data);
   ad->m_used = i;
 
-  assert(ad->m_kind == oldKind);
-  assert(ad->m_size == oldSize);
+  assert(ad->m_kind == src->m_kind);
+  assert(ad->m_size == src->m_size);
   assert(ad->m_count == 1);
   assert(ad->m_cap == cap);
   assert(ad->m_used <= oldUsed);
   assert(ad->m_used == dstElm - data);
   assert(ad->m_tableMask == mask);
-  assert(ad->m_nextKI == oldNextKI);
+  assert(ad->m_nextKI == src->m_nextKI);
   assert(ad->checkInvariants());
   return ad;
 }

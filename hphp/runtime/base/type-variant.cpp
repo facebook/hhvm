@@ -34,6 +34,7 @@
 
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -80,20 +81,20 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant::Variant(litstr  v) {
+Variant::Variant(litstr v) {
   m_type = KindOfString;
   m_data.pstr = StringData::Make(v);
   m_data.pstr->incRefCount();
 }
 
 Variant::Variant(const String& v) {
-  m_type = KindOfString;
   StringData *s = v.get();
   if (s) {
     m_data.pstr = s;
     if (s->isStatic()) {
       m_type = KindOfStaticString;
     } else {
+      m_type = KindOfString;
       s->incRefCount();
     }
   } else {
@@ -110,9 +111,9 @@ Variant::Variant(const std::string & v) {
 }
 
 Variant::Variant(const Array& v) {
-  m_type = KindOfArray;
   ArrayData *a = v.get();
   if (a) {
+    m_type = KindOfArray;
     m_data.parr = a;
     a->incRefCount();
   } else {
@@ -121,9 +122,9 @@ Variant::Variant(const Array& v) {
 }
 
 Variant::Variant(const Object& v) {
-  m_type = KindOfObject;
   ObjectData *o = v.get();
   if (o) {
+    m_type = KindOfObject;
     m_data.pobj = o;
     o->incRefCount();
   } else {
@@ -132,9 +133,9 @@ Variant::Variant(const Object& v) {
 }
 
 Variant::Variant(const Resource& v) {
-  m_type = KindOfResource;
   ResourceData* o = v.get();
   if (o) {
+    m_type = KindOfResource;
     m_data.pres = o;
     o->incRefCount();
   } else {
@@ -166,9 +167,9 @@ Variant::Variant(const StringData* v, StaticStrInit) {
   }
 }
 
-Variant::Variant(ArrayData *v) {
-  m_type = KindOfArray;
+Variant::Variant(ArrayData* v) {
   if (v) {
+    m_type = KindOfArray;
     m_data.parr = v;
     v->incRefCount();
   } else {
@@ -176,9 +177,9 @@ Variant::Variant(ArrayData *v) {
   }
 }
 
-Variant::Variant(ObjectData *v) {
-  m_type = KindOfObject;
+Variant::Variant(ObjectData* v) {
   if (v) {
+    m_type = KindOfObject;
     m_data.pobj = v;
     v->incRefCount();
   } else {
@@ -186,9 +187,9 @@ Variant::Variant(ObjectData *v) {
   }
 }
 
-Variant::Variant(ResourceData *v) {
-  m_type = KindOfResource;
+Variant::Variant(ResourceData* v) {
   if (v) {
+    m_type = KindOfResource;
     m_data.pres = v;
     v->incRefCount();
   } else {
@@ -196,11 +197,56 @@ Variant::Variant(ResourceData *v) {
   }
 }
 
-Variant::Variant(RefData *r) {
-  m_type = KindOfRef;
+Variant::Variant(RefData* r) {
   if (r) {
+    m_type = KindOfRef;
     m_data.pref = r;
     r->incRefCount();
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(StringData* var, Attach) {
+  if (var) {
+    m_type = var->isStatic() ? KindOfStaticString : KindOfString;
+    m_data.pstr = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(ArrayData* var, Attach) {
+  if (var) {
+    m_type = KindOfArray;
+    m_data.parr = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(ObjectData* var, Attach) {
+  if (var) {
+    m_type = KindOfObject;
+    m_data.pobj = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(ResourceData* var, Attach) {
+  if (var) {
+    m_type = KindOfResource;
+    m_data.pres = var;
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(RefData* var, Attach) {
+  if (var) {
+    m_type = KindOfRef;
+    m_data.pref = var;
   } else {
     m_type = KindOfNull;
   }
@@ -240,8 +286,9 @@ const RawDestructor g_destructors[] = {
 };
 
 Variant::~Variant() {
-  if (IS_REFCOUNTED_TYPE(m_type)) {
-    tvDecRefHelper(m_type, uint64_t(m_data.pref));
+  tvRefcountedDecRef(asTypedValue());
+  if (debug) {
+    memset(this, kTVTrashFill2, sizeof(*this));
   }
 }
 
@@ -249,9 +296,9 @@ void tvDecRefHelper(DataType type, uint64_t datum) {
   assert(type == KindOfString || type == KindOfArray ||
          type == KindOfObject || type == KindOfResource ||
          type == KindOfRef);
-  DECREF_AND_RELEASE_MAYBE_STATIC(
-    ((RefData*)datum),
-    g_destructors[typeToDestrIndex(type)]((void*)datum));
+  if (((ArrayData*)datum)->decReleaseCheck()) {
+    g_destructors[typeToDestrIndex(type)]((void*)datum);
+  }
 }
 
 Variant &Variant::assign(const Variant& v) {
@@ -328,15 +375,16 @@ IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
 
 int Variant::getRefCount() const {
   switch (m_type) {
-  case KindOfString:  return m_data.pstr->getCount();
-  case KindOfArray:   return m_data.parr->getCount();
-  case KindOfObject:  return m_data.pobj->getCount();
-  case KindOfResource: return m_data.pres->getCount();
-  case KindOfRef: return m_data.pref->var()->getRefCount();
-  default:
-    break;
+    DT_UNCOUNTED_CASE:
+      return 1;
+    case KindOfString:    return m_data.pstr->getCount();
+    case KindOfArray:     return m_data.parr->getCount();
+    case KindOfObject:    return m_data.pobj->getCount();
+    case KindOfResource:  return m_data.pres->getCount();
+    case KindOfRef:       return m_data.pref->var()->getRefCount();
+    case KindOfClass:     break;
   }
-  return 1;
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -350,40 +398,60 @@ bool Variant::isNumeric(bool checkString /* = false */) const {
 }
 
 DataType Variant::toNumeric(int64_t &ival, double &dval,
-    bool checkString /* = false */) const {
+                            bool checkString /* = false */) const {
   switch (m_type) {
-  case KindOfInt64:
-    ival = m_data.num;
-    return KindOfInt64;
-  case KindOfDouble:
-    dval = m_data.dbl;
-    return KindOfDouble;
-  case KindOfStaticString:
-  case KindOfString:
-    if (checkString) {
-      return m_data.pstr->toNumeric(ival, dval);
-    }
-    break;
-  case KindOfRef:
-    return m_data.pref->var()->toNumeric(ival, dval, checkString);
-  default:
-    break;
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      return m_type;
+
+    case KindOfInt64:
+      ival = m_data.num;
+      return KindOfInt64;
+
+    case KindOfDouble:
+      dval = m_data.dbl;
+      return KindOfDouble;
+
+    case KindOfStaticString:
+    case KindOfString:
+      return checkString ? m_data.pstr->toNumeric(ival, dval) : m_type;
+
+    case KindOfRef:
+      return m_data.pref->var()->toNumeric(ival, dval, checkString);
+
+    case KindOfClass:
+      break;
   }
-  return m_type;
+  not_reached();
 }
 
 bool Variant::isScalar() const {
   switch (getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-  case KindOfArray:
-  case KindOfObject:
-  case KindOfResource:
-    return false;
-  default:
-    break;
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      return false;
+
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfStaticString:
+    case KindOfString:
+      return true;
+
+    case KindOfRef:
+      always_assert(false && "isScalar() called on a boxed value");
+
+    case KindOfClass:
+      break;
   }
-  return true;
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -400,141 +468,172 @@ inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
 bool Variant::toBooleanHelper() const {
   assert(m_type > KindOfInt64);
   switch (m_type) {
-  case KindOfDouble:  return m_data.dbl != 0;
-  case KindOfStaticString:
-  case KindOfString:  return m_data.pstr->toBoolean();
-  case KindOfArray:   return !m_data.parr->empty();
-  case KindOfObject:  return m_data.pobj->o_toBoolean();
-  case KindOfResource: return m_data.pres->o_toBoolean();
-  case KindOfRef: return m_data.pref->var()->toBoolean();
-  default:
-    assert(false);
-    break;
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:         return m_data.num;
+    case KindOfDouble:        return m_data.dbl != 0;
+    case KindOfStaticString:
+    case KindOfString:        return m_data.pstr->toBoolean();
+    case KindOfArray:         return !m_data.parr->empty();
+    case KindOfObject:        return m_data.pobj->toBoolean();
+    case KindOfResource:      return m_data.pres->o_toBoolean();
+    case KindOfRef:           return m_data.pref->var()->toBoolean();
+    case KindOfClass:         break;
   }
-  return m_data.num;
+  not_reached();
 }
 
 int64_t Variant::toInt64Helper(int base /* = 10 */) const {
   assert(m_type > KindOfInt64);
   switch (m_type) {
-  case KindOfDouble:  {
-    return HPHP::toInt64(m_data.dbl);
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:         return m_data.num;
+    case KindOfDouble:        return HPHP::toInt64(m_data.dbl);
+    case KindOfStaticString:
+    case KindOfString:        return m_data.pstr->toInt64(base);
+    case KindOfArray:         return m_data.parr->empty() ? 0 : 1;
+    case KindOfObject:        return m_data.pobj->toInt64();
+    case KindOfResource:      return m_data.pres->o_toInt64();
+    case KindOfRef:           return m_data.pref->var()->toInt64(base);
+    case KindOfClass:         break;
   }
-  case KindOfStaticString:
-  case KindOfString:  return m_data.pstr->toInt64(base);
-  case KindOfArray:   return m_data.parr->empty() ? 0 : 1;
-  case KindOfObject:  return m_data.pobj->o_toInt64();
-  case KindOfResource: return m_data.pres->o_toInt64();
-  case KindOfRef: return m_data.pref->var()->toInt64(base);
-  default:
-    assert(false);
-    break;
-  }
-  return m_data.num;
+  not_reached();
 }
 
 double Variant::toDoubleHelper() const {
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:    return 0.0;
-  case KindOfDouble:  return m_data.dbl;
-  case KindOfStaticString:
-  case KindOfString:  return m_data.pstr->toDouble();
-  case KindOfObject:  return m_data.pobj->o_toDouble();
-  case KindOfResource: return m_data.pres->o_toDouble();
-  case KindOfRef: return m_data.pref->var()->toDouble();
-  default:
-    break;
+    case KindOfUninit:
+    case KindOfNull:          return 0.0;
+    case KindOfBoolean:
+    case KindOfInt64:         return (double)toInt64();
+    case KindOfDouble:        return m_data.dbl;
+    case KindOfStaticString:
+    case KindOfString:        return m_data.pstr->toDouble();
+    case KindOfArray:         return (double)toInt64();
+    case KindOfObject:        return m_data.pobj->toDouble();
+    case KindOfResource:      return m_data.pres->o_toDouble();
+    case KindOfRef:           return m_data.pref->var()->toDouble();
+    case KindOfClass:         break;
   }
-  return (double)toInt64();
+  not_reached();
 }
 
 String Variant::toStringHelper() const {
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:    return empty_string();
-  case KindOfBoolean: return m_data.num ? static_cast<String>(s_1)
-                                        : empty_string();
-  case KindOfDouble:  return m_data.dbl;
-  case KindOfStaticString:
-  case KindOfString:
-    assert(false); // Should be done in caller
-    return m_data.pstr;
-  case KindOfArray:   raise_notice("Array to string conversion");
-                      return array_string;
-  case KindOfObject:  return m_data.pobj->invokeToString();
-  case KindOfResource: return m_data.pres->o_toString();
-  case KindOfRef: return m_data.pref->var()->toString();
-  default:
-    break;
+    case KindOfUninit:
+    case KindOfNull:
+      return empty_string();
+
+    case KindOfBoolean:
+      return m_data.num ? static_cast<String>(s_1)
+                        : empty_string();
+
+    case KindOfInt64:
+      return m_data.num;
+
+    case KindOfDouble:
+      return m_data.dbl;
+
+    case KindOfStaticString:
+    case KindOfString:
+      assert(false); // Should be done in caller
+      return m_data.pstr;
+
+    case KindOfArray:
+      raise_notice("Array to string conversion");
+      return array_string;
+
+    case KindOfObject:
+      return m_data.pobj->invokeToString();
+
+    case KindOfResource:
+      return m_data.pres->o_toString();
+
+    case KindOfRef:
+      return m_data.pref->var()->toString();
+
+    case KindOfClass:
+      break;
   }
-  return m_data.num;
+  not_reached();
 }
 
 Array Variant::toArrayHelper() const {
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:    return empty_array();
-  case KindOfInt64:   return Array::Create(m_data.num);
-  case KindOfStaticString:
-  case KindOfString:  return Array::Create(m_data.pstr);
-  case KindOfArray:   return Array(m_data.parr);
-  case KindOfObject:  return m_data.pobj->o_toArray();
-  case KindOfResource: return m_data.pres->o_toArray();
-  case KindOfRef: return m_data.pref->var()->toArray();
-  default:
-    break;
+    case KindOfUninit:
+    case KindOfNull:          return empty_array();
+    case KindOfBoolean:       return Array::Create(*this);
+    case KindOfInt64:         return Array::Create(m_data.num);
+    case KindOfDouble:        return Array::Create(*this);
+    case KindOfStaticString:
+    case KindOfString:        return Array::Create(m_data.pstr);
+    case KindOfArray:         return Array(m_data.parr);
+    case KindOfObject:        return m_data.pobj->toArray();
+    case KindOfResource:      return m_data.pres->o_toArray();
+    case KindOfRef:           return m_data.pref->var()->toArray();
+    case KindOfClass:         break;
   }
-  return Array::Create(*this);
+  not_reached();
 }
 
 Object Variant::toObjectHelper() const {
-  if (m_type == KindOfRef) return m_data.pref->var()->toObject();
-
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  case KindOfBoolean:
-  case KindOfInt64:
-  case KindOfDouble:
-  case KindOfStaticString:
-  case KindOfString:
-  case KindOfResource:
-    {
+    case KindOfUninit:
+    case KindOfNull:
+      return Object(SystemLib::AllocStdClassObject());
+
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfResource: {
       ObjectData *obj = SystemLib::AllocStdClassObject();
       obj->o_set(s_scalar, *this, false);
       return obj;
     }
-  case KindOfArray:   return ObjectData::FromArray(m_data.parr);
-  case KindOfObject:  return m_data.pobj;
-  default:
-    assert(false);
-    break;
+
+    case KindOfArray:
+      return ObjectData::FromArray(m_data.parr);
+
+    case KindOfObject:
+      return m_data.pobj;
+
+    case KindOfRef:
+      return m_data.pref->var()->toObject();
+
+    case KindOfClass:
+      break;
   }
-  return Object(SystemLib::AllocStdClassObject());
+  not_reached();
 }
 
 Resource Variant::toResourceHelper() const {
-  if (m_type == KindOfRef) return m_data.pref->var()->toResource();
-
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-  case KindOfBoolean:
-  case KindOfInt64:
-  case KindOfDouble:
-  case KindOfStaticString:
-  case KindOfString:
-  case KindOfArray:
-  case KindOfObject:
-    break;
-  case KindOfResource:  return m_data.pres;
-  default:
-    assert(false);
-    break;
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+    case KindOfObject:
+      return Resource(makeSmartPtr<DummyResource>());
+
+    case KindOfResource:
+      return m_data.pres;
+
+    case KindOfRef:
+      return m_data.pref->var()->toResource();
+
+    case KindOfClass:
+      break;
   }
-  return Resource(NEWOBJ(DummyResource));
+  not_reached();
 }
 
 VarNR Variant::toKey() const {
@@ -547,24 +646,32 @@ VarNR Variant::toKey() const {
     }
   }
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    return VarNR(staticEmptyString());
-  case KindOfBoolean:
-  case KindOfInt64:
-    return VarNR(m_data.num);
-  case KindOfObject:
-    break;
-  case KindOfDouble:
-  case KindOfResource:
-    return VarNR(toInt64());
-  case KindOfRef:
-    return m_data.pref->var()->toKey();
-  default:
-    break;
+    case KindOfUninit:
+    case KindOfNull:
+      return VarNR(staticEmptyString());
+
+    case KindOfBoolean:
+    case KindOfInt64:
+      return VarNR(m_data.num);
+
+    case KindOfDouble:
+    case KindOfResource:
+      return VarNR(toInt64());
+
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+    case KindOfObject:
+      throw_bad_type_exception("Invalid type used as key");
+      return null_varNR;
+
+    case KindOfRef:
+      return m_data.pref->var()->toKey();
+
+    case KindOfClass:
+      break;
   }
-  throw_bad_type_exception("Invalid type used as key");
-  return null_varNR;
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -611,37 +718,39 @@ Variant& lvalBlackHole() {
 
 void Variant::setEvalScalar() {
   switch (m_type) {
-  case KindOfString: {
-    StringData *pstr = m_data.pstr;
-    if (!pstr->isStatic()) {
-      StringData *sd = makeStaticString(pstr);
-      decRefStr(pstr);
-      m_data.pstr = sd;
-      assert(m_data.pstr->isStatic());
-      m_type = KindOfStaticString;
+    DT_UNCOUNTED_CASE:
+      return;
+
+    case KindOfString: {
+      StringData *pstr = m_data.pstr;
+      if (!pstr->isStatic()) {
+        StringData *sd = makeStaticString(pstr);
+        decRefStr(pstr);
+        m_data.pstr = sd;
+        assert(m_data.pstr->isStatic());
+        m_type = KindOfStaticString;
+      }
+      return;
     }
-    break;
-  }
-  case KindOfArray: {
-    ArrayData *parr = m_data.parr;
-    if (!parr->isStatic()) {
-      ArrayData *ad = ArrayData::GetScalarArray(parr);
-      decRefArr(parr);
-      m_data.parr = ad;
-      assert(m_data.parr->isStatic());
+
+    case KindOfArray: {
+      ArrayData *parr = m_data.parr;
+      if (!parr->isStatic()) {
+        ArrayData *ad = ArrayData::GetScalarArray(parr);
+        decRefArr(parr);
+        m_data.parr = ad;
+        assert(m_data.parr->isStatic());
+      }
+      return;
     }
-    break;
+
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  case KindOfRef:
-    not_reached();
-    break;
-  case KindOfObject:
-  case KindOfResource:
-    not_reached(); // object shouldn't be in a scalar array
-    break;
-  default:
-    break;
-  }
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -670,48 +779,64 @@ void Variant::serialize(VariableSerializer *serializer,
   }
 
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    assert(!isArrayKey);
-    serializer->writeNull();                break;
-  case KindOfBoolean:
-    assert(!isArrayKey);
-    serializer->write(m_data.num != 0);     break;
-  case KindOfInt64:
-    serializer->write(m_data.num);          break;
-  case KindOfDouble:
-    serializer->write(m_data.dbl);          break;
-  case KindOfStaticString:
-  case KindOfString:
-    serializer->write(m_data.pstr->data(),
-                      m_data.pstr->size(), isArrayKey, noQuotes);
-    break;
-  case KindOfArray:
-    assert(!isArrayKey);
-    m_data.parr->serialize(serializer, skipNestCheck);
-    break;
-  case KindOfObject:
-    assert(!isArrayKey);
-    m_data.pobj->serialize(serializer);     break;
-  case KindOfResource:
-    assert(!isArrayKey);
-    m_data.pres->serialize(serializer);     break;
-  default:
-    assert(false);
-    break;
+    case KindOfUninit:
+    case KindOfNull:
+      assert(!isArrayKey);
+      serializer->writeNull();
+      return;
+
+    case KindOfBoolean:
+      assert(!isArrayKey);
+      serializer->write(m_data.num != 0);
+      return;
+
+    case KindOfInt64:
+      serializer->write(m_data.num);
+      return;
+
+    case KindOfDouble:
+      serializer->write(m_data.dbl);
+      return;
+
+    case KindOfStaticString:
+    case KindOfString:
+      serializer->write(m_data.pstr->data(),
+                        m_data.pstr->size(), isArrayKey, noQuotes);
+      return;
+
+    case KindOfArray:
+      assert(!isArrayKey);
+      m_data.parr->serialize(serializer, skipNestCheck);
+      return;
+
+    case KindOfObject:
+      assert(!isArrayKey);
+      m_data.pobj->serialize(serializer);
+      return;
+
+    case KindOfResource:
+      assert(!isArrayKey);
+      m_data.pres->serialize(serializer);
+      return;
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
-static void unserializeProp(VariableUnserializer *uns,
-                            ObjectData *obj, const String& key,
-                            Class* ctx, const String& realKey,
+static void unserializeProp(VariableUnserializer* uns,
+                            ObjectData* obj,
+                            const String& key,
+                            Class* ctx,
+                            const String& realKey,
                             int nProp) {
   // Do a two-step look up
-  bool visible, accessible, unset;
-  auto t = &tvAsVariant(obj->getProp(ctx, key.get(),
-                                     visible, accessible, unset));
-  assert(!unset);
-  if (!t || !accessible) {
+  auto const lookup = obj->getProp(ctx, key.get());
+  Variant* t;
+
+  if (!lookup.prop || !lookup.accessible) {
     // Dynamic property. If this is the first, and we're using MixedArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
@@ -719,11 +844,12 @@ static void unserializeProp(VariableUnserializer *uns,
     // TODO(#2881866): this assumption means we can't do reallocations
     // when promoting kPackedKind -> kMixedKind.
     t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
+  } else {
+    t = &tvAsVariant(lookup.prop);
   }
 
   t->unserialize(uns);
 
-  if (!RuntimeOption::EvalCheckRepoAuthDeserialize) return;
   if (!RuntimeOption::RepoAuthoritative) return;
   if (!Repo::get().global().HardPrivatePropInference) return;
 
@@ -878,10 +1004,19 @@ void Variant::unserialize(VariableUnserializer *uns,
       String v;
       v.unserialize(uns);
       operator=(v);
+      if (!uns->endOfBuffer()) {
+        // Semicolon *should* always be required,
+        // but PHP's implementation allows omitting it
+        // and still functioning.
+        // Worse, it throws it away without any check.
+        // So we'll do the same.  Sigh.
+        uns->readChar();
+      }
+      return;
     }
     break;
   case 'S':
-    if (uns->getType() == VariableUnserializer::Type::APCSerialize) {
+    if (uns->type() == VariableUnserializer::Type::APCSerialize) {
       union {
         char buf[8];
         StringData *sd;
@@ -894,6 +1029,9 @@ void Variant::unserialize(VariableUnserializer *uns,
     break;
   case 'a':
     {
+      // check stack depth to avoid overflow
+      check_native_recursion();
+
       Array v = Array::Create();
       v.unserialize(uns);
       operator=(v);
@@ -903,21 +1041,12 @@ void Variant::unserialize(VariableUnserializer *uns,
   case 'L':
     {
       int64_t id = uns->readInt();
-      sep = uns->readChar();
-      if (sep != ':') {
-        throw Exception("Expected ':' but got '%c'", sep);
-      }
+      uns->expectChar(':');
       String rsrcName;
       rsrcName.unserialize(uns);
-      sep = uns->readChar();
-      if (sep != '{') {
-        throw Exception("Expected '{' but got '%c'", sep);
-      }
-      sep = uns->readChar();
-      if (sep != '}') {
-        throw Exception("Expected '}' but got '%c'", sep);
-      }
-      DummyResource* rsrc = NEWOBJ(DummyResource);
+      uns->expectChar('{');
+      uns->expectChar('}');
+      auto rsrc = makeSmartPtr<DummyResource>();
       rsrc->o_setResourceId(id);
       rsrc->m_class_name = rsrcName;
       operator=(rsrc);
@@ -931,19 +1060,10 @@ void Variant::unserialize(VariableUnserializer *uns,
       String clsName;
       clsName.unserialize(uns);
 
-      sep = uns->readChar();
-      if (sep != ':') {
-        throw Exception("Expected ':' but got '%c'", sep);
-      }
+      uns->expectChar(':');
       int64_t size = uns->readInt();
-      char sep = uns->readChar();
-      if (sep != ':') {
-        throw Exception("Expected ':' but got '%c'", sep);
-      }
-      sep = uns->readChar();
-      if (sep != '{') {
-        throw Exception("Expected '{' but got '%c'", sep);
-      }
+      uns->expectChar(':');
+      uns->expectChar('{');
 
       const bool allowObjectFormatForCollections = true;
 
@@ -1008,18 +1128,19 @@ void Variant::unserialize(VariableUnserializer *uns,
       operator=(obj);
 
       if (size > 0) {
+        // check stack depth to avoid overflow
+        check_native_recursion();
+
         if (type == 'O') {
           // Collections are not allowed
           if (obj->isCollection()) {
-            if (size > 0) {
-              throw Exception("%s does not support the 'O' serialization "
-                              "format", clsName.data());
-            }
-            // Be lax and tolerate the 'O' serialization format for collection
-            // classes if there are 0 properties.
-            raise_warning("%s does not support the 'O' serialization "
-                          "format", clsName.data());
+            throw Exception("%s does not support the 'O' serialization "
+                            "format", clsName.data());
           }
+
+          Variant serializedNativeData = init_null();
+          bool hasSerializedNativeData = false;
+
           /*
             Count backwards so that i is the number of properties
             remaining (to be used as an estimate for the total number
@@ -1027,11 +1148,16 @@ void Variant::unserialize(VariableUnserializer *uns,
             see getVariantPtr
           */
           for (int64_t i = size; i--; ) {
-            String key = uns->unserializeKey().toString();
+            Variant v;
+            v.unserialize(uns, Uns::Mode::Key);
+            String key = v.toString();
             int ksize = key.size();
             const char *kdata = key.data();
             int subLen = 0;
-            if (kdata[0] == '\0') {
+            if (key == ObjectData::s_serializedNativeDataKey) {
+              serializedNativeData.unserialize(uns);
+              hasSerializedNativeData = true;
+            } else if (kdata[0] == '\0') {
               if (UNLIKELY(!ksize)) {
                 raise_error("Cannot access empty property");
               }
@@ -1054,6 +1180,25 @@ void Variant::unserialize(VariableUnserializer *uns,
             } else {
               unserializeProp(uns, obj.get(), key, nullptr, key, i + 1);
             }
+
+            if (i > 0) {
+              auto lastChar = uns->peekBack();
+              if ((lastChar != ';') && (lastChar != '}')) {
+                throw Exception("Object property not terminated properly");
+              }
+            }
+          }
+
+          // nativeDataWakeup is called last to ensure that all properties are
+          // already unserialized. We also ensure that nativeDataWakeup is
+          // invoked regardless of whether or not serialized native data exists
+          // within the serialized content.
+          if (obj->getAttribute(ObjectData::HasNativeData) &&
+              obj->getVMClass()->getNativeDataInfo()->isSerializable()) {
+            Native::nativeDataWakeup(obj.get(), serializedNativeData);
+          } else if (hasSerializedNativeData) {
+            raise_warning("%s does not expect any serialized native data.",
+                          clsName.data());
           }
         } else {
           assert(type == 'V' || type == 'K');
@@ -1063,12 +1208,12 @@ void Variant::unserialize(VariableUnserializer *uns,
           collectionUnserialize(obj.get(), uns, size, type);
         }
       }
-      sep = uns->readChar();
-      if (sep != '}') {
-        throw Exception("Expected '}' but got '%c'", sep);
-      }
+      uns->expectChar('}');
 
-      if (uns->getType() != VariableUnserializer::Type::DebuggerSerialize) {
+      if (uns->type() != VariableUnserializer::Type::DebuggerSerialize ||
+          (cls && cls->instanceCtor() && cls->isCppSerializable())) {
+        // Don't call wakeup when unserializing for the debugger, except for
+        // natively implemented classes.
         obj->invokeWakeup();
       }
 
@@ -1079,16 +1224,13 @@ void Variant::unserialize(VariableUnserializer *uns,
     break;
   case 'C':
     {
-      if (uns->getType() == VariableUnserializer::Type::DebuggerSerialize) {
+      if (uns->type() == VariableUnserializer::Type::DebuggerSerialize) {
         raise_error("Debugger shouldn't call custom unserialize method");
       }
       String clsName;
       clsName.unserialize(uns);
 
-      sep = uns->readChar();
-      if (sep != ':') {
-        throw Exception("Expected ':' but got '%c'", sep);
-      }
+      uns->expectChar(':');
       String serialized;
       serialized.unserialize(uns, '{', '}');
 
@@ -1108,7 +1250,7 @@ void Variant::unserialize(VariableUnserializer *uns,
 
       if (!obj->instanceof(SystemLib::s_SerializableClass)) {
         raise_warning("Class %s has no unserializer",
-                      obj->o_getClassName().data());
+                      obj->getClassName().data());
       } else {
         obj->o_invoke_few_args(s_unserialize, 1, serialized);
         obj.get()->clearNoDestruct();
@@ -1121,10 +1263,7 @@ void Variant::unserialize(VariableUnserializer *uns,
   default:
     throw Exception("Unknown type '%c'", type);
   }
-  sep = uns->readChar();
-  if (sep != ';') {
-    throw Exception("Expected ';' but got '%c'", sep);
-  }
+  uns->expectChar(';');
 }
 
 VarNR::VarNR(const String& v) {

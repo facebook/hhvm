@@ -8,109 +8,99 @@
  *
  *)
 
-open Typing_defs
+open Utils
 
 (*****************************************************************************)
-(* Section defining the colors we are going to use *)
-(*****************************************************************************)
-
-type mycolor =
-  | Unchecked_code (* Unchecked code *)
-  | Checked_code   (* Checked code *)
-  | Keyword        (* Keyword *)
-  | Fun            (* Function name *)
-  | Default        (* All the rest *)
-
-let make_color (pos, ty) =
-  pos, match ty with
-  | _, Typing_defs.Tany -> Unchecked_code
-  | _ -> Checked_code
-
-(*****************************************************************************)
-(* Module comparing positions and types (to sort them later) *)
+(* Module comparing positions (to sort them later)
+ * This assumes that all positions are either nested or disjoint,
+ * i.e. there are no partial overlaps... which should be the case for all
+ * well-formed ASTs *)
 (*****************************************************************************)
 
 module Compare = struct
 
-  (* If two positions overlap, they are considered equal *)
-  let pos pos1 pos2 =
-    let char_start1, char_end1 = Pos.info_raw pos1 in
-    let char_start2, char_end2 = Pos.info_raw pos2 in
+  let pos (char_start1, char_end1) (char_start2, char_end2) =
     if char_end1 <= char_start2
     then -1
     else if char_end2 <= char_start1
     then 1
-    else 0
+    (* If one position is nested inside another, put the outer position first *)
+    else if char_start1 < char_start2
+    then -1
+    else if char_start2 < char_start1
+    then 1
+    else compare char_end2 char_end1
 
-  (* All the types that are different from Tany are considered equal *)
-  let type_ ty1 ty2 =
-    match ty1, ty2 with
-    | (_, Tany), (_, Tany) -> 0
-    | (_, Tany), _ -> -1
-    | _, (_, Tany) -> 1
-    | _, _ -> 0
-
-  let pos_type (p1, ty1) (p2, ty2) =
-    let c = pos p1 p2 in
-    if c = 0 then type_ ty1 ty2 else c
 end
 
 (*****************************************************************************)
-(* Logic deciding which color we keep when positions overlap *)
+(* Flatten nested positions (intervals).
+ * E.g. if A, B, C are colors, we convert [AA[B]A[C]A] to [AA][B][A][C][A].
+ *
+ * Invariant: the list of intervals is always sorted wrt the Compare module
+ * above, and every element on the stack is >= than the head element of the
+ * list. *)
 (*****************************************************************************)
 
-let rec filter = function
-  | [] | [_] as l -> l
-  (* One of them is unchecked code, an they overlap. *)
-  | (pos1, (_, Tany as ty1) as elt1) :: (pos2, ty2 as elt2) :: rl
-  | (pos1, ty1 as elt1) :: (pos2, (_, Tany as ty2) as elt2) :: rl
-    when Compare.pos pos1 pos2 = 0 ->
-      let cmp_ty = Compare.type_ ty1 ty2 in
-      (* Unchecked wins *)
-      if cmp_ty < 0
-      then filter (elt1 :: rl)
-      (* Unchecked wins *)
-      else if cmp_ty > 0
-      then filter (elt2 :: rl)
-      (* The smallest one wins *)
-      else if Pos.length pos1 <= Pos.length pos2
-      then filter (elt1 :: rl)
-      else filter (elt2 :: rl)
-  | (pos1, _ as elt1) :: (pos2, _ as elt2) :: rl
-    when Compare.pos pos1 pos2 = 0 ->
-      (* The largest one wins *)
-      if Pos.length pos1 >= Pos.length pos2
-      then filter (elt1 :: rl)
-      else filter (elt2 :: rl)
-  | elt :: (_ :: _ as rl) -> elt :: filter rl
+let rec flatten_ acc stack = function
+  | [] | [_] as l when Stack.is_empty stack -> l @ acc
+  | [] ->
+      let elem = Stack.pop stack in
+      flatten_ acc stack [elem]
+  | (pos, _ as elt) :: rl when not (Stack.is_empty stack) &&
+    Compare.pos pos (fst (Stack.top stack)) = 1 ->
+      let elem = Stack.pop stack in
+      flatten_ acc stack (elem :: elt :: rl)
+  | [elt] ->
+      flatten_ (elt :: acc) stack []
+  | (pos1, x as elt1) :: ((pos2, _) :: _ as rl) ->
+      if snd pos1 <= fst pos2
+      then (* Intervals are disjoint *)
+        if Stack.is_empty stack
+        then
+          flatten_ (elt1 :: acc) stack rl
+        else
+          let elem = Stack.pop stack in
+          flatten_ (elt1 :: acc) stack (elem :: rl)
+      else begin (* interval 2 is nested within interval 1 *)
+        (* avoid creating zero-length intervals *)
+        if snd pos1 <> snd pos2
+        then
+          (let pos1_rest = (snd pos2, snd pos1) in
+          Stack.push (pos1_rest, x) stack);
+        let pos1_head = (fst pos1, fst pos2) in
+        flatten_ ((pos1_head, x) :: acc) stack rl
+      end
+
+let flatten xs =
+  flatten_ [] (Stack.create ()) xs |> List.rev
 
 (*****************************************************************************)
 (* Walks the content of a string and adds colors at the given positions. *)
 (*****************************************************************************)
 
-let walk content pos_color_list =
+let walk content pos_level_list =
   let result = ref [] in
   let i = ref 0 in
-  let add color j =
+  let add level_opt j =
     if j <= !i then () else
-    let size = (j - !i + 1) in
-    result := (color, String.sub content !i size) :: !result;
+    let size = j - !i in
+    result := (level_opt, String.sub content !i size) :: !result;
     i := !i + size
   in
-  List.iter begin fun (pos, color) ->
-    let char_start, char_end = Pos.info_raw pos in
-    add Default (char_start - 1);
-    add color (char_end - 1);
-  end pos_color_list;
-  add Default (String.length content - 1);
+  List.iter begin fun ((char_start, char_end), level) ->
+    add None char_start;
+    add (Some level) char_end;
+  end pos_level_list;
+  add None (String.length content);
   List.rev !result
 
 (*****************************************************************************)
 (* The entry point. *)
 (*****************************************************************************)
 
-let go str (pos_type_l: (Pos.t * Typing_defs.ty) list) =
-  let pos_type_l = List.sort Compare.pos_type pos_type_l in
-  let pos_type_l = filter pos_type_l in
-  let pos_color_l = List.map make_color pos_type_l in
-  walk str pos_color_l
+let go str pos_level_l =
+  let cmp x y = Compare.pos (fst x) (fst y) in
+  let pos_level_l = List.sort cmp pos_level_l in
+  let pos_level_l = flatten pos_level_l in
+  walk str pos_level_l

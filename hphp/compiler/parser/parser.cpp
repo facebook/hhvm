@@ -101,13 +101,6 @@
 
 #include "hphp/runtime/base/unit-cache.h"
 
-#ifdef FACEBOOK
-#include "hphp/facebook/src/compiler/fb_compiler_hooks.h"
-#define RealSimpleFunctionCall FBSimpleFunctionCall
-#else
-#define RealSimpleFunctionCall SimpleFunctionCall
-#endif
-
 #define NEW_EXP0(cls)                                           \
   cls##Ptr(new cls(BlockScopePtr(),                             \
                    getLocation()))
@@ -132,7 +125,7 @@ SimpleFunctionCallPtr NewSimpleFunctionCall(
   const std::string &name, bool hadBackslash, ExpressionListPtr params,
   ExpressionPtr cls) {
   return SimpleFunctionCallPtr(
-    new RealSimpleFunctionCall(
+    new SimpleFunctionCall(
       EXPRESSION_CONSTRUCTOR_DERIVED_PARAMETER_VALUES,
       name, hadBackslash, params, cls));
 }
@@ -170,7 +163,7 @@ StatementListPtr Parser::ParseString(const String& input, AnalysisResultPtr ar,
     return parser.m_file->getStmt();
   }
   Logger::Error("Error parsing %s: %s\n%s\n", fileName,
-                parser.getMessage().c_str(), input.data());
+                parser.getMessage(false,true).c_str(), input.data());
   return StatementListPtr();
 }
 
@@ -229,7 +222,19 @@ void Parser::error(const char* fmt, ...) {
 void Parser::parseFatal(const Location* loc, const char* msg) {
   // we can't use loc->file, as the bison parser doesn't track that in YYLTYPE
   auto file = m_file->getName().c_str();
-  auto exn = ParseTimeFatalException(file, loc->line0, "%s", msg);
+
+  // If the parser has a message, prepend it to the given message. Otherwise
+  // just use the given message.
+  std::string str = getMessage();
+  std::string strInput;
+  if (!str.empty()) {
+    strInput = str;
+    strInput += "\n";
+  }
+  strInput += msg;
+
+  auto exn = ParseTimeFatalException(file, loc->line0, "%s", strInput.c_str());
+
   exn.setParseFatal();
   throw exn;
 }
@@ -341,6 +346,27 @@ void Parser::onClassVariable(Token &out, Token *exprs, Token &var,
 void Parser::onClassConstant(Token &out, Token *exprs, Token &var,
                              Token &value) {
   onVariable(out, exprs, var, &value, true, m_scanner.detachDocComment());
+}
+
+void Parser::onClassAbstractConstant(Token &out, Token *exprs, Token &var) {
+  onVariable(out, exprs, var, nullptr, true, m_scanner.detachDocComment());
+}
+
+void Parser::onClassTypeConstant(Token &out, Token &var, Token &value) {
+  Token typeConst;
+  bool isAbstract = value.typeAnnotationName() == "";
+
+  if (isAbstract) {
+    onClassAbstractConstant(typeConst, nullptr, var);
+  } else {
+    value.setText(value.typeAnnotationName());
+    Token typeConstValue;
+    onScalar(typeConstValue, T_STRING, value);
+
+    onClassConstant(typeConst, nullptr, var, typeConstValue);
+  }
+
+  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract);
 }
 
 void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
@@ -487,8 +513,13 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "invariant_callback_register" ||
            stripped == "invariant" ||
            stripped == "invariant_violation" ||
+           stripped == "asio_get_current_context_idx" ||
+           stripped == "asio_get_running_in_context" ||
+           stripped == "asio_get_running" ||
            stripped == "xenon_get_data" ||
+           stripped == "objprof_get_strings" ||
            stripped == "objprof_get_data" ||
+           stripped == "objprof_start" ||
            stripped == "server_warmup_status"
           )) {
         funcName = "HH\\" + stripped;
@@ -501,7 +532,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     }
 
     SimpleFunctionCallPtr call
-      (new RealSimpleFunctionCall
+      (new SimpleFunctionCall
        (BlockScopePtr(), getLocation(),
         funcName, hadBackslash,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
@@ -526,6 +557,21 @@ void Parser::onObjectProperty(Token &out, Token &base, bool nullsafe,
                               Token &prop) {
   if (nullsafe) {
     PARSE_ERROR("?-> is not supported for property access");
+  }
+  if (prop.num() == ObjPropXhpAttr) {
+    // Handle "$obj->:xhp-attr" transform
+    ExpressionListPtr paramsExp = NEW_EXP0(ExpressionList);
+    ScalarExpressionPtr name =
+      NEW_EXP(ScalarExpression, T_CONSTANT_ENCAPSED_STRING,
+              prop->text(), true);
+    paramsExp->addElement(name);
+    ScalarExpressionPtr getAttributeMethodName =
+      NEW_EXP(ScalarExpression, T_STRING, std::string("getAttribute"));
+    auto om = NEW_EXP(ObjectMethodExpression, base->exp,
+                      getAttributeMethodName, paramsExp, nullsafe);
+    om->setIsXhpGetAttr();
+    out->exp = om;
+    return;
   }
   if (!prop->exp) {
     prop->exp = NEW_EXP(ScalarExpression, T_STRING, prop->text());
@@ -691,13 +737,25 @@ void Parser::onExprListElem(Token &out, Token *exprs, Token &expr) {
   out->exp = expList;
 }
 
+void Parser::checkAllowedInWriteContext(ExpressionPtr e) {
+  if (dynamic_pointer_cast<FunctionCall>(e)) {
+    if (e->is(Expression::KindOfObjectMethodExpression)) {
+      ObjectMethodExpressionPtr om =
+        dynamic_pointer_cast<ObjectMethodExpression>(e);
+      if (om->isXhpGetAttr()) {
+        PARSE_ERROR("Using ->: syntax in write context is not supported");
+      }
+    }
+    PARSE_ERROR("Can't use return value in write context");
+  }
+}
+
 void Parser::onListAssignment(Token &out, Token &vars, Token *expr,
                               bool rhsFirst /* = false */) {
   ExpressionListPtr el(dynamic_pointer_cast<ExpressionList>(vars->exp));
   for (int i = 0; i < el->getCount(); i++) {
-    if (dynamic_pointer_cast<FunctionCall>((*el)[i])) {
-      PARSE_ERROR("Can't use return value in write context");
-    }
+    checkAllowedInWriteContext((*el)[i]);
+    checkAssignThis((*el)[i]);
   }
   out->exp = NEW_EXP(ListAssignment,
                      dynamic_pointer_cast<ExpressionList>(vars->exp),
@@ -722,24 +780,41 @@ void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
   onExprListElem(out, list, out);
 }
 
+void Parser::checkAssignThis(string var) {
+  if (var == "this") {
+    PARSE_ERROR("Cannot re-assign $this");
+  }
+}
+
 void Parser::checkAssignThis(Token &var) {
   if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(var.exp)) {
-    if (simp->getName() == "this") {
-      PARSE_ERROR("Cannot re-assign $this");
-    }
+    checkAssignThis(simp->getName());
+  }
+}
+
+void Parser::checkAssignThis(ExpressionPtr e) {
+  if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(e)) {
+    checkAssignThis(simp->getName());
+  }
+}
+
+void Parser::checkAssignThis(ExpressionListPtr params) {
+  for (int i = 0, count = params->getCount(); i < count; i++) {
+    ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+    checkAssignThis(param->getName());
   }
 }
 
 void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref,
                       bool rhsFirst /* = false */) {
-  if (dynamic_pointer_cast<FunctionCall>(var->exp)) {
-    PARSE_ERROR("Can't use return value in write context");
-  }
+  checkAllowedInWriteContext(var->exp);
   checkAssignThis(var);
   out->exp = NEW_EXP(AssignmentExpression, var->exp, expr->exp, ref, rhsFirst);
 }
 
 void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
+  checkAllowedInWriteContext(var->exp);
   checkAssignThis(var);
   ExpressionPtr exp =
     NEW_EXP(NewObjectExpression, name->exp,
@@ -771,9 +846,7 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
   case T_DEC:
   case T_ISSET:
   case T_UNSET:
-    if (dynamic_pointer_cast<FunctionCall>(operand->exp)) {
-      PARSE_ERROR("Can't use return value in write context");
-    }
+    checkAllowedInWriteContext(operand->exp);
   default:
     {
       UnaryOpExpressionPtr exp = NEW_EXP(UnaryOpExpression, operand->exp, op,
@@ -790,9 +863,8 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
   BinaryOpExpressionPtr bop =
     NEW_EXP(BinaryOpExpression, operand1->exp, operand2->exp, op);
 
-  if (bop->isAssignmentOp() &&
-      dynamic_pointer_cast<FunctionCall>(operand1->exp)) {
-    PARSE_ERROR("Can't use return value in write context");
+  if (bop->isAssignmentOp()) {
+    checkAllowedInWriteContext(operand1->exp);
   }
 
   out->exp = bop;
@@ -1058,7 +1130,7 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
 string Parser::getFunctionName(FunctionType type, Token* name) {
   switch (type) {
     case FunctionType::Closure:
-      return newClosureName(m_clsName, m_containingFuncName);
+      return newClosureName(m_namespace, m_clsName, m_containingFuncName);
     case FunctionType::Function:
       assert(name);
       if (!m_lambdaMode) {
@@ -1099,6 +1171,11 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
 
   ExpressionListPtr old_params =
     dynamic_pointer_cast<ExpressionList>(params->exp);
+
+  if (type == FunctionType::Method && old_params &&
+     !modifiersExp->isStatic()) {
+    checkAssignThis(old_params);
+  }
 
   string funcName = getFunctionName(type, name);
 
@@ -1438,21 +1515,22 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
 }
 
 void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                                  Token *type) {
+                                  Token *type, bool abstract /* = false */) {
   if (modifiers) {
     ModifierExpressionPtr exp = modifiers->exp ?
       dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
       : NEW_EXP0(ModifierExpression);
 
-    out->stmt = NEW_STMT
-      (ClassVariable, exp,
-       (type) ? type->typeAnnotationName() : "",
-       dynamic_pointer_cast<ExpressionList>(decl->exp));
+    out->stmt = NEW_STMT(
+      ClassVariable, exp,
+      (type) ? type->typeAnnotationName() : "",
+      dynamic_pointer_cast<ExpressionList>(decl->exp));
   } else {
-    out->stmt =
-      NEW_STMT(ClassConstant,
-        (type) ? type->typeAnnotationName() : "",
-        dynamic_pointer_cast<ExpressionList>(decl->exp));
+    out->stmt = NEW_STMT(
+      ClassConstant,
+      (type) ? type->typeAnnotationName() : "",
+      dynamic_pointer_cast<ExpressionList>(decl->exp),
+      abstract);
   }
 }
 
@@ -1714,12 +1792,14 @@ void Parser::setIsGenerator() {
   fc.isGenerator = true;
 }
 
-void Parser::onYield(Token &out, Token &expr) {
+void Parser::onYield(Token &out, Token *expr) {
   setIsGenerator();
-  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
+  // yield; == yield null;
+  auto expPtr = expr ? expr->exp : NEW_EXP(ConstantExpression, "null", false);
+  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expPtr);
 }
 
-void Parser::onYieldPair(Token &out, Token &key, Token &val) {
+void Parser::onYieldPair(Token &out, Token *key, Token *val) {
   setIsGenerator();
   out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
 }
@@ -1791,6 +1871,19 @@ void Parser::onStatic(Token &out, Token &expr) {
                        dynamic_pointer_cast<ExpressionList>(expr->exp));
 }
 
+void Parser::onHashBang(Token &out, Token &text) {
+  ExpressionPtr exp = NEW_EXP(ScalarExpression, T_STRING, text->text(),
+                              true);
+  ExpressionListPtr expList = NEW_EXP(ExpressionList);
+  expList->addElement(exp);
+  ExpressionPtr callExp = NEW_EXP(SimpleFunctionCall,
+                                  "__SystemLib\\print_hashbang",
+                                  true, expList, ExpressionPtr());
+  ExpStatementPtr expStmt(NEW_STMT(ExpStatement, callExp));
+  out->stmt = expStmt;
+  expStmt->onParse(m_ar, m_file);
+}
+
 void Parser::onEcho(Token &out, Token &expr, bool html) {
   if (html) {
     LocationPtr loc = getLocation();
@@ -1824,10 +1917,8 @@ void Parser::onExpStatement(Token &out, Token &expr) {
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt, bool awaitAs) {
-  if (dynamic_pointer_cast<FunctionCall>(name->exp) ||
-      dynamic_pointer_cast<FunctionCall>(value->exp)) {
-    PARSE_ERROR("Can't use return value in write context");
-  }
+  checkAllowedInWriteContext(name->exp);
+  checkAllowedInWriteContext(value->exp);
   if (value->exp && name->num()) {
     PARSE_ERROR("Key element cannot be a reference");
   }
@@ -1914,15 +2005,15 @@ Token Parser::onClosure(ClosureType type,
                         Token& ref,
                         Token& params,
                         Token& cparams,
-                        Token& stmts) {
+                        Token& stmts,
+                        Token& ret) {
   Token out;
   Token name;
 
-  Token retIgnore;
   auto stmt = onFunctionHelper(
     FunctionType::Closure,
     modifiers,
-    retIgnore,
+    ret,
     ref,
     nullptr,
     params,
@@ -2037,6 +2128,9 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
       break;
     case 'x':
       type.typeAnnotation->setXHP();
+      break;
+    case 'a':
+      type.typeAnnotation->setTypeAccess();
       break;
     }
   }
@@ -2247,6 +2341,29 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"ImmMap", "HH\\ImmMap"},
     (AliasEntry){"ImmSet", "HH\\ImmSet"},
     (AliasEntry){"InvariantException", "HH\\InvariantException"},
+    (AliasEntry){"IMemoizeParam", "HH\\IMemoizeParam"},
+
+    (AliasEntry){"Awaitable", "HH\\Awaitable"},
+    (AliasEntry){"AsyncGenerator", "HH\\AsyncGenerator"},
+    (AliasEntry){"WaitHandle", "HH\\WaitHandle"},
+    // Keep in sync with order in hphp/runtime/ext/asio/wait_handle.h
+    (AliasEntry){"StaticWaitHandle", "HH\\StaticWaitHandle"},
+    (AliasEntry){"WaitableWaitHandle", "HH\\WaitableWaitHandle"},
+    (AliasEntry){"BlockableWaitHandle", "HH\\BlockableWaitHandle"},
+    (AliasEntry){"ResumableWaitHandle", "HH\\ResumableWaitHandle"},
+    (AliasEntry){"AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle"},
+    (AliasEntry){"AsyncGeneratorWaitHandle", "HH\\AsyncGeneratorWaitHandle"},
+    (AliasEntry){"AwaitAllWaitHandle", "HH\\AwaitAllWaitHandle"},
+    (AliasEntry){"GenArrayWaitHandle", "HH\\GenArrayWaitHandle"},
+    (AliasEntry){"GenMapWaitHandle", "HH\\GenMapWaitHandle"},
+    (AliasEntry){"GenVectorWaitHandle", "HH\\GenVectorWaitHandle"},
+    (AliasEntry){"ConditionWaitHandle", "HH\\ConditionWaitHandle"},
+    (AliasEntry){"RescheduleWaitHandle", "HH\\RescheduleWaitHandle"},
+    (AliasEntry){"SleepWaitHandle", "HH\\SleepWaitHandle"},
+    (AliasEntry){
+      "ExternalThreadEventWaitHandle",
+      "HH\\ExternalThreadEventWaitHandle"
+    },
 
     (AliasEntry){"bool", "HH\\bool"},
     (AliasEntry){"boolean", "HH\\bool"},
@@ -2256,6 +2373,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"double", "HH\\float"},
     (AliasEntry){"real", "HH\\float"},
     (AliasEntry){"num", "HH\\num"},
+    (AliasEntry){"arraykey", "HH\\arraykey"},
     (AliasEntry){"string", "HH\\string"},
     (AliasEntry){"classname", "HH\\string"}, // for ::class
     (AliasEntry){"resource", "HH\\resource"},
@@ -2277,12 +2395,12 @@ const hphp_string_imap<std::string>& Parser::getAutoAliasedClasses() {
 void Parser::nns(int token, const std::string& text) {
   if (m_nsState == SeenNamespaceStatement && token != ';') {
     error("No code may exist outside of namespace {}: %s",
-          getMessage().c_str());
+          getMessage(false,true).c_str());
     return;
   }
 
   if (m_nsState == SeenNothing && !text.empty() && token != T_DECLARE &&
-      token != ';') {
+      token != ';' && token != T_HASHBANG) {
     m_nsState = SeenNonNamespaceStatement;
   }
 }
@@ -2291,7 +2409,7 @@ void Parser::onNamespaceStart(const std::string &ns,
                               bool file_scope /* =false */) {
   if (m_nsState == SeenNonNamespaceStatement) {
     error("Namespace declaration statement has to be the very first "
-          "statement in the script: %s", getMessage().c_str());
+          "statement in the script: %s", getMessage(false,true).c_str());
     return;
   }
   if (m_nsState != SeenNothing && file_scope != m_nsFileScope) {
@@ -2302,14 +2420,26 @@ void Parser::onNamespaceStart(const std::string &ns,
   m_nsState = InsideNamespace;
   m_nsFileScope = file_scope;
   pushComment();
-  m_namespace = ns;
+  if (file_scope) {
+    m_nsStack.clear();
+    m_namespace.clear();
+  }
+  m_nsStack.push_back(m_namespace.size());
+  if (!ns.empty()) {
+    if (!m_namespace.empty()) m_namespace += NAMESPACE_SEP;
+    m_namespace += ns;
+  }
   m_nsAliasTable.clear();
   m_fnAliasTable.clear();
   m_cnstAliasTable.clear();
 }
 
 void Parser::onNamespaceEnd() {
-  m_nsState = SeenNamespaceStatement;
+  m_namespace.resize(m_nsStack.back());
+  m_nsStack.pop_back();
+  if (m_nsStack.empty()) {
+    m_nsState = SeenNamespaceStatement;
+  }
 }
 
 void Parser::onUse(const std::string &ns, const std::string &as) {
@@ -2320,14 +2450,14 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
   // auto-imported and 'use' statement is trying to replace it.
   if (m_nsAliasTable.isUseType(key)) {
     error("Cannot use %s as %s because the name is already in use: %s",
-          ns.c_str(), key.c_str(), getMessage().c_str());
+          ns.c_str(), key.c_str(), getMessage(false,true).c_str());
     return;
   }
   if (m_nsAliasTable.isDefType(key)) {
     auto defName = m_nsAliasTable.getDefName(key);
     if (strcasecmp(defName.c_str(), ns.c_str())) {
       error("Cannot use %s as %s because the name is already in use: %s",
-            ns.c_str(), key.c_str(), getMessage().c_str());
+            ns.c_str(), key.c_str(), getMessage(false,true).c_str());
       return;
     }
   }
@@ -2341,7 +2471,7 @@ void Parser::onUseFunction(const std::string &fn, const std::string &as) {
   if (m_fnTable.count(key) || m_fnAliasTable.count(key)) {
     error(
       "Cannot use function %s as %s because the name is already in use in %s",
-      fn.c_str(), key.c_str(), getMessage().c_str());
+      fn.c_str(), key.c_str(), getMessage(false,true).c_str());
   }
 
   m_fnAliasTable[key] = fn;
@@ -2353,7 +2483,7 @@ void Parser::onUseConst(const std::string &cnst, const std::string &as) {
   if (m_cnstTable.count(key) || m_cnstAliasTable.count(key)) {
     error(
       "Cannot use const %s as %s because the name is already in use in %s",
-      cnst.c_str(), key.c_str(), getMessage().c_str());
+      cnst.c_str(), key.c_str(), getMessage(false,true).c_str());
   }
 
   m_cnstAliasTable[key] = cnst;
@@ -2451,7 +2581,7 @@ void Parser::registerAlias(std::string name) {
       auto useName = m_nsAliasTable.getUseName(key);
       if (strcasecmp(useName.c_str(), name.c_str())) {
         error("Cannot declare class %s because the name is already in use: %s",
-              name.c_str(), getMessage().c_str());
+              name.c_str(), getMessage(false,true).c_str());
         return;
       }
     } else {

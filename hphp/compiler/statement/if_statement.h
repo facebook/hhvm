@@ -31,7 +31,6 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
-  StatementPtr postOptimize(AnalysisResultConstPtr ar);
   virtual bool hasDecl() const;
   virtual bool hasRetExp() const;
   virtual int getRecursiveCount() const;

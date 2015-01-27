@@ -1,46 +1,46 @@
 DOMText
 object(DOMText)#1 (19) {
-  ["length"]=>
-  int(0)
-  ["wholeText"]=>
-  string(0) ""
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["nodeType"]=>
-  int(3)
-  ["lastChild"]=>
-  NULL
   ["nodeName"]=>
   string(5) "#text"
-  ["previousSibling"]=>
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(3)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
   NULL
   ["firstChild"]=>
   NULL
-  ["data"]=>
-  string(0) ""
-  ["childNodes"]=>
+  ["lastChild"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
+  ["previousSibling"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["data"]=>
+  string(0) ""
+  ["length"]=>
+  int(0)
+  ["wholeText"]=>
+  string(0) ""
 }
 
-Warning: Attempted to serialize unserializable builtin class DOMText in %s/quick/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class DOMText in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
 array(30) {
@@ -110,47 +110,47 @@ A_DOMText
 object(A_DOMText)#2 (20) {
   ["___x"]=>
   NULL
-  ["length"]=>
-  int(0)
-  ["wholeText"]=>
-  string(0) ""
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["nodeType"]=>
-  int(3)
-  ["lastChild"]=>
-  NULL
   ["nodeName"]=>
   string(5) "#text"
-  ["previousSibling"]=>
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(3)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
   NULL
   ["firstChild"]=>
   NULL
-  ["data"]=>
-  string(0) ""
-  ["childNodes"]=>
+  ["lastChild"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
+  ["previousSibling"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["data"]=>
+  string(0) ""
+  ["length"]=>
+  int(0)
+  ["wholeText"]=>
+  string(0) ""
 }
 
-Warning: Attempted to serialize unserializable builtin class A_DOMText in %s/quick/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_DOMText in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
 array(30) {

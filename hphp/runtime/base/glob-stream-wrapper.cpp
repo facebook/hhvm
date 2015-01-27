@@ -17,15 +17,15 @@
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 
 #include "hphp/runtime/base/directory.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-File* GlobStreamWrapper::open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const Variant& context) {
+SmartPtr<File> GlobStreamWrapper::open(const String& filename,
+                                       const String& mode,
+                                       int options,
+                                       const Variant& context) {
   // Can't open a glob as a file, it's meant to be opened as a directory
 
   // if the function was called via FCallBuiltin, we'll get a bogus name as
@@ -40,7 +40,7 @@ File* GlobStreamWrapper::open(const String& filename,
   return nullptr;
 }
 
-Directory* GlobStreamWrapper::opendir(const String& path) {
+SmartPtr<Directory> GlobStreamWrapper::opendir(const String& path) {
   const char* prefix = "glob://";
   const char* path_str = path.data();
   int path_len = path.length();
@@ -53,11 +53,11 @@ Directory* GlobStreamWrapper::opendir(const String& path) {
   path_str += strlen(prefix);
   path_len -= strlen(prefix);
 
-  auto glob = f_glob(String(path_str, path_len, CopyString));
+  auto glob = HHVM_FN(glob)(String(path_str, path_len, CopyString));
   if (!glob.isArray()) {
     return nullptr;
   }
-  return NEWOBJ(ArrayDirectory)(glob.toArray());
+  return makeSmartPtr<ArrayDirectory>(glob.toArray());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

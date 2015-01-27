@@ -14,27 +14,20 @@
  */
 
 class A {
-  public function f1(): void {
-  }
-  public static function f2(): void {
-  }
+  public function f1(): void {}
+  public static function f2(): void {}
 }
 
 class B extends A {
-  public function f1(): void {
-  }
-  public static function f2(): void {
-  }
+  public function f1(): void {}
+  public static function f2(): void {}
   public function test1(): void {
     static::f2();
   }
-  public static function test2(): void {
-  }
+  public static function test2(): void {}
 }
 
 class C {
-  public function f3(): void {
-  }
-  public static function f4(): void {
-  }
+  public function f3(): void {}
+  public static function f4(): void {}
 }

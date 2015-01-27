@@ -1,0 +1,6 @@
+<?php
+$support = gd_info();
+if (!isset($support['JPEG Support']) || $support['JPEG Support'] === false) {
+	print 'skip jpeg support not available';
+}
+?>

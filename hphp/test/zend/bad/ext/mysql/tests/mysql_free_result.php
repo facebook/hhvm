@@ -31,6 +31,7 @@ if ($tmp = sys_get_temp_dir()) {
 mysql_close($link);
 print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once("clean_table.inc");
 ?>

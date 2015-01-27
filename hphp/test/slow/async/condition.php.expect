@@ -1,0 +1,33 @@
+running condition_noblock...
+not blocking
+failed: ConditionWaitHandle not notified by its child
+
+running condition_block...
+block enter
+constructed ConditionWaitHandle
+block exit
+failed: ConditionWaitHandle not notified by its child
+
+running condition_block_ugly_succeed...
+block enter
+constructed ConditionWaitHandle
+succeeded: 42
+block exit
+
+running condition_block_ugly_fail...
+block enter
+constructed ConditionWaitHandle
+failed: horrible failure
+block exit
+
+running condition_block_nice_succeed...
+block enter
+constructed ConditionWaitHandle
+block exit
+succeeded: 42
+
+running condition_block_nice_fail...
+block enter
+constructed ConditionWaitHandle
+block exit
+failed: horrible failure

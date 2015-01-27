@@ -43,6 +43,7 @@ rmdir($pname . '/');
 mkdir($pname . '/');
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/ok.phar'); ?>
 <?php unlink(dirname(__FILE__) . '/oops.phar'); ?>

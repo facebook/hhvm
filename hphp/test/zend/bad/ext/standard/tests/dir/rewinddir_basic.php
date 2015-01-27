@@ -55,6 +55,7 @@ delete_files($dir_path1, 1);
 delete_files($dir_path2, 1, 'file', 2);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $dir_path1 = dirname(__FILE__) . "/rewinddir_basic_dir1";
 $dir_path2 = dirname(__FILE__) . "/rewinddir_basic_dir2";

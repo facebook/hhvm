@@ -1,0 +1,55 @@
+string(4) "C::X"
+string(4) "I::Y"
+string(10) "I::Y via Z"
+string(4) "J::X"
+string(4) "I::Y"
+string(10) "I::Y via Z"
+
+== reflect ==
+array(2) {
+  ["Y"]=>
+  string(4) "I::Y"
+  ["Z"]=>
+  string(10) "I::Y via Z"
+}
+array(2) {
+  ["Y"]=>
+  string(4) "I::Y"
+  ["Z"]=>
+  string(10) "I::Y via Z"
+}
+array(1) {
+  ["X"]=>
+  string(1) "X"
+}
+bool(false)
+array(1) {
+  ["X"]=>
+  string(4) "C::X"
+}
+array(3) {
+  ["X"]=>
+  string(4) "C::X"
+  ["Y"]=>
+  string(4) "I::Y"
+  ["Z"]=>
+  string(10) "I::Y via Z"
+}
+array(0) {
+}
+bool(true)
+array(1) {
+  ["X"]=>
+  string(4) "J::X"
+}
+array(3) {
+  ["X"]=>
+  string(4) "J::X"
+  ["Y"]=>
+  string(4) "I::Y"
+  ["Z"]=>
+  string(10) "I::Y via Z"
+}
+array(0) {
+}
+bool(true)

@@ -21,7 +21,6 @@
 
 #include "hphp/util/bits.h"
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/macros.h"
 
 #include <tbb/concurrent_hash_map.h>
 #include <list>
@@ -215,11 +214,6 @@ public:
   }
   const std::string &getDocComment() const { return m_docComment;}
   void setDocComment(const std::string &doc) { m_docComment = doc;}
-
-  /**
-   * Triggers type inference of all statements inside this block.
-   */
-  void inferTypes(AnalysisResultPtr ar);
 
   /**
    * Code gen

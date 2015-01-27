@@ -1,7 +1,7 @@
 <?php
 
 // the stack size + some random constant
-$boundary = 64*1024;
+$boundary = 16*1024-16;
 $limit    = $boundary+42;
 
 
@@ -55,6 +55,7 @@ include($filename);
 echo "Done\n";
 
 ?>
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__).'/010-file.php');
 ?>

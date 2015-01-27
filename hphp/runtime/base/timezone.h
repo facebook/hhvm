@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/system/constants.h"
 
 extern "C" {
 #include <timelib.h>
@@ -29,10 +30,7 @@ extern "C" {
 namespace HPHP {
 
 class Array;
-template <typename T> class SmartResource;
 
-typedef std::shared_ptr<timelib_tzinfo> TimeZoneInfo;
-typedef std::map<std::string, TimeZoneInfo> MapStringToTimeZoneInfo;
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -46,7 +44,7 @@ public:
    * Get/set current timezone that controls how local time is interpreted.
    */
   static String CurrentName();            // current timezone's name
-  static SmartResource<TimeZone> Current(); // current timezone
+  static SmartPtr<TimeZone> Current(); // current timezone
   static bool SetCurrent(const String& name);   // returns false if invalid
 
   /**
@@ -97,7 +95,8 @@ public:
   /**
    * Query transition times for DST.
    */
-  Array transitions() const;
+  Array transitions(int64_t timestamp_begin = k_PHP_INT_MIN,
+                    int64_t timestamp_end = k_PHP_INT_MAX) const;
 
   /**
    * Get information about a timezone
@@ -115,7 +114,7 @@ public:
   /**
    * Make a copy of this timezone object, so it can be changed independently.
    */
-  SmartResource<TimeZone> cloneTimeZone() const;
+  SmartPtr<TimeZone> cloneTimeZone() const;
 
 protected:
   friend class DateTime;
@@ -125,30 +124,22 @@ protected:
   /**
    * Returns raw pointer. For internal use only.
    */
-  timelib_tzinfo *get() const { return m_tzi.get();}
+  timelib_tzinfo *get() const { return m_tzi; }
 
 private:
-  struct tzinfo_deleter {
-    void operator()(timelib_tzinfo *tzi) {
-      if (tzi) {
-        timelib_tzinfo_dtor(tzi);
-      }
-    }
-  };
-
   static const timelib_tzdb *GetDatabase();
 
   /**
    * Look up cache and if found return it, otherwise, read it from database.
    */
-  static TimeZoneInfo GetTimeZoneInfo(char* name, const timelib_tzdb* db);
-  /**
-   * only for timelib, don't use it unless you are passing to a timelib func
-   */
   static timelib_tzinfo* GetTimeZoneInfoRaw(char* name, const timelib_tzdb* db);
 
-  TimeZoneInfo m_tzi; // raw pointer
+  timelib_tzinfo* m_tzi;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+void timezone_init();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

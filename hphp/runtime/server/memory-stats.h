@@ -23,6 +23,7 @@
 #include <memory>
 
 #include "hphp/runtime/server/writer.h"
+
 namespace HPHP {
 
 class MemoryStats {
@@ -39,9 +40,9 @@ class MemoryStats {
     static MemoryStats* GetInstance();
     void ResetStaticStringSize();
     void LogStaticStringAlloc(size_t bytes);
+    MemoryStats() {}
 
   private:
-    MemoryStats() {}
     size_t GetStaticStringSize();
     bool FillProcessStatM(StatM* pStatM);
     std::atomic<size_t> m_staticStringSize;

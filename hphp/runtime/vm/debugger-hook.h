@@ -79,12 +79,14 @@ public:
     }
 
     // Attach to the thread
-    ti->m_reqInjectionData.setDebuggerAttached(true);
-    ti->m_debugHookHandler = new HandlerClass();
+    ti->m_debugHookHandler = HandlerClass::GetInstance();
 
     // Increment the number of attached handlers
-    Lock lock(s_lock);
-    s_numAttached++;
+    {
+      Lock lock(s_lock);
+      s_numAttached++;
+      ti->m_reqInjectionData.setDebuggerAttached(true);
+    }
 
     // Event hooks need to be enabled to receive function entry and exit events.
     // This comes at the cost of a small bit of performance, however, it makes
@@ -93,7 +95,7 @@ public:
     // just disable the breakpoint until we leave the site because some opcode
     // in the site could recurse to the site. So a disable must be attached to
     // a stack depth. This will be disabled on call to detach().
-    EventHook::EnableDebug();
+    ti->m_reqInjectionData.setDebuggerHookFlag();
 
     return true;
   }
@@ -169,7 +171,7 @@ void phpDebuggerRequestShutdownHook();
 void phpDebuggerFuncEntryHook(const ActRec* ar);
 void phpDebuggerFuncExitHook(const ActRec* ar);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);
-void phpDebuggerExceptionHandlerHook();
+void phpDebuggerExceptionHandlerHook() noexcept;
 void phpDebuggerErrorHook(const ExtendedException &ee,
                           int errnum,
                           const std::string& message);

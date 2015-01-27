@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh // decl /* -*- mode: php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -14,40 +14,6 @@
  *
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
-
-class Exception {
-  protected string $message;
-  protected int $code;
-  protected ?Exception $previous = null;
-  protected string $file;
-  protected int $line;
-  protected array $trace;
-
-  public function __construct (string $message = "", int $code = 0,
-                               ?Exception $previous = null) {}
-  public function getMessage(): string {}
-  final public function getPrevious(): Exception {}
-  public final function setPrevious(Exception $previous): void;
-  public function getCode(): int {}
-  final public function getFile(): string {}
-  final public function getLine(): int {}
-  final public function getTrace(): array {}
-  final public function getTraceAsString(): string {}
-  public function __toString(): string {}
-  final private function __clone(): void {}
-
-  public static function getTraceOptions() {}
-  public static function setTraceOptions($opts) {}
-}
-
-class InvalidArgumentException extends Exception {
-}
-
-class RuntimeException extends Exception {
-}
-
-class OutOfBoundsException extends RuntimeException {
-}
 
 final class AsyncGenerator<Tk, Tv, Ts> implements AsyncKeyedIterator<Tk, Tv> {
   public function next(): Awaitable<?(Tk, Tv)> {}
@@ -70,9 +36,6 @@ final class Generator<Tk, Tv, Ts> implements KeyedIterator<Tk, Tv> {
   public function get_arg(int $index): mixed {}
 }
 
-// TODO(#4534682) Kill Continuation
-type Continuation<Tv> = Generator<int, Tv, void>;
-
 abstract class WaitHandle<T> implements Awaitable<T> {
   public function getWaitHandle(): this {}
   public function import(): void {}
@@ -82,6 +45,7 @@ abstract class WaitHandle<T> implements Awaitable<T> {
   public function isFailed(): bool {}
   public function getID(): int {}
   public function getName(): string {}
+  public function result() : T {}
   public function getExceptionIfFailed(): ?Exception {}
   public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
   public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}
@@ -144,6 +108,13 @@ final class GenVectorWaitHandle<T> extends BlockableWaitHandle<Vector<T>> {
   public static function setOnCreateCallback(?(function(GenVectorWaitHandle<T>, Vector<mixed>): void) $callback) {}
 }
 
+final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
+  public static function create(WaitHandle<void> $child): ConditionWaitHandle<T> {}
+  public static function setOnCreateCallback(?(function(ConditionWaitHandle<T>, WaitableWaitHandle<void>): void) $callback) {}
+  public function succeed(T $result): void {}
+  public function fail(Exception $exception): void {}
+}
+
 final class RescheduleWaitHandle extends WaitableWaitHandle<void> {
   const int QUEUE_DEFAULT = 0;
   const int QUEUE_NO_PENDING_IO = 1;
@@ -161,3 +132,11 @@ final class ExternalThreadEventWaitHandle<T> extends WaitableWaitHandle<T> {
   public static function setOnSuccessCallback(?(function(ExternalThreadEventWaitHandle<mixed>, mixed): void) $callback) {}
   public static function setOnFailCallback(?(function(ExternalThreadEventWaitHandle<mixed>, Exception): void) $callback) {}
 }
+
+/*
+ * stdClass is not really final. However, because stdClass has no
+ * properties of its own and is the result of casting an array to an
+ * object, it is exempt from 'property must exist' checks and so should not
+ * be getting extended.
+ */
+final class stdClass {}

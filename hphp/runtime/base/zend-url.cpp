@@ -102,7 +102,7 @@ bool url_parse(Url &output, const char *str, int length) {
             /* support windows drive letters as in:
                file:///c:/somedir/file.txt
             */
-            if (*(e + 5) == ':') {
+            if (e[4] != '\0' && e[5] == ':') {
               s = e + 4;
             }
             goto nohost;

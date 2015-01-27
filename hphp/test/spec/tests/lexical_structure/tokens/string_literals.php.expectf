@@ -1,0 +1,88 @@
+================= xxx =================
+string(0) ""
+><
+> a B c <
+>'.\".\.\$.\eXXX.\f.\n.\r.\t.\v.\101.\x41.\X41.\F.\Q.\S<
+>\$x.$x<
+>xxx    // this comment-like thingy really is part of the string literal
+yyy
+zzz<
+string(2) "\e"
+string(0) ""
+><
+> a B c <
+>\'.".\.$.XXX..
+..	..A.A.A.\F.\Q.\S<
+>$x.123<
+>xxx    // this comment-like thingy really is part of the string literal
+yyy
+zzz<
+string(1) ""
+string(1) ""
+string(1) ""
+string(1) ""
+string(3) "435"
+string(10) "-1.234E+24"
+string(0) ""
+string(1) "1"
+string(0) ""
+string(8) "blue sky"
+>435|-1.234E+24||1||blue sky<
+>435|-1.234E+24||1||blue sky<
+>24.543567891235<--- o/p from string substition
+>24.543567891235<--- using o/p from sprintf with hard-coded precision
+>-2.345E+28<--- o/p from string substition
+>-2.345E+28<--- using o/p from sprintf with hard-coded precision
+>6.0E-200<--- o/p from string substition
+>6.0E-200<--- using o/p from sprintf with hard-coded precision
+>NAN<--- o/p from string substition
+>NaN<--- using o/p from sprintf with hard-coded precision
+>INF<--- o/p from string substition
+>INF<--- using o/p from sprintf with hard-coded precision
+>NAN<--- o/p from string substition
+>NaN<--- using o/p from sprintf with hard-coded precision
+
+Notice: Undefined variable: zX in %s/lexical_structure/tokens/string_literals.php on line 88
+
+Notice: Undefined variable: zz_ in %s/lexical_structure/tokens/string_literals.php on line 88
+
+Notice: Undefined variable: zzz3 in %s/lexical_structure/tokens/string_literals.php on line 88
+>|-34 X||ABC _||1 3|5.67E+14+|5.67E+14 +<
+
+Notice: Undefined variable: zX in %s/lexical_structure/tokens/string_literals.php on line 90
+string(0) ""
+
+Notice: Undefined variable: zz_ in %s/lexical_structure/tokens/string_literals.php on line 91
+string(0) ""
+
+Notice: Undefined variable: zzz3 in %s/lexical_structure/tokens/string_literals.php on line 92
+string(0) ""
+string(9) "5.67E+14+"
+>$1|$&<
+
+Notice: Array to string conversion in %s/lexical_structure/tokens/string_literals.php on line 103
+\colors contains >Array<
+\colors[1] contains >white<
+
+Notice: Array to string conversion in %s/lexical_structure/tokens/string_literals.php on line 105
+\colors[1] contains >Array [1]<
+string(5) "white"
+
+Notice: Undefined index: 01 in %s/lexical_structure/tokens/string_literals.php on line 109
+string(0) ""
+
+Notice: Undefined index: 0x1 in %s/lexical_structure/tokens/string_literals.php on line 110
+string(0) ""
+
+Notice: Undefined index: 0X1 in %s/lexical_structure/tokens/string_literals.php on line 111
+string(0) ""
+$colors[2] contains >blue<
+
+Notice: Array to string conversion in %s/lexical_structure/tokens/string_literals.php on line 123
+
+Notice: Array to string conversion in %s/lexical_structure/tokens/string_literals.php on line 123
+>Array|Array<
+$myC->p1 = >2<
+>-34X|-34 X|ABC_|ABC _|13|1 3|5.67E+14+|5.67E+14 +<
+>{}|{q}|}|{<
+10

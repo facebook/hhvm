@@ -20,7 +20,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "folly/Lazy.h"
+#include <folly/Lazy.h>
 
 namespace HPHP { namespace HHBBC {
 

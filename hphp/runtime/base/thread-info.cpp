@@ -26,15 +26,15 @@
 #include <set>
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
-#include "folly/String.h"
+#include <folly/String.h>
 
 using std::map;
 
@@ -59,12 +59,6 @@ ThreadInfo::ThreadInfo()
   m_pendingException = nullptr;
   m_coverage = new CodeCoverage();
   m_debugHookHandler = nullptr;
-
-  RDS::threadInit();
-  onSessionInit();
-
-  Lock lock(s_thread_info_mutex);
-  s_thread_infos.insert(this);
 }
 
 ThreadInfo::~ThreadInfo() {
@@ -74,6 +68,16 @@ ThreadInfo::~ThreadInfo() {
   s_thread_infos.erase(this);
   delete m_coverage;
   RDS::threadExit();
+}
+
+void ThreadInfo::init() {
+  m_reqInjectionData.threadInit();
+  RDS::threadInit();
+  onSessionInit();
+
+  Lock lock(s_thread_info_mutex);
+  s_thread_infos.insert(this);
+  Sweepable::InitSweepableList();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {
@@ -132,6 +136,7 @@ void ThreadInfo::onSessionExit() {
   // Clear any timeout handlers to they don't fire when the request has already
   // been destroyed
   m_reqInjectionData.setTimeout(0);
+  m_reqInjectionData.setCPUTimeout(0);
 
   m_reqInjectionData.reset();
   RDS::requestExit();
@@ -148,12 +153,50 @@ void throw_infinite_recursion_exception() {
   }
 }
 
+static Exception* generate_request_timeout_exception() {
+  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInjectionData& data = info->m_reqInjectionData;
+
+  auto exceptionMsg = folly::format(
+    RuntimeOption::ClientExecutionMode()
+      ? "Maximum execution time of {} seconds exceeded"
+      : "entire web request took longer than {} seconds and timed out",
+    data.getTimeout()).str();
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
+  return new RequestTimeoutException(exceptionMsg, exceptionStack);
+}
+
+static Exception* generate_request_cpu_timeout_exception() {
+  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInjectionData& data = info->m_reqInjectionData;
+
+  auto exceptionMsg =
+    folly::format("Maximum CPU time of {} seconds exceeded",
+                  data.getCPUTimeout()).str();
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
+  return new RequestCPUTimeoutException(exceptionMsg, exceptionStack);
+}
+
+static Exception* generate_memory_exceeded_exception() {
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
+  return new RequestMemoryExceededException(
+    "request has exceeded memory limit", exceptionStack);
+}
+
 ssize_t check_request_surprise(ThreadInfo* info) {
   auto& p = info->m_reqInjectionData;
-  bool do_timedout, do_memExceeded, do_signaled;
+  bool do_timedout, do_cpuTimedOut, do_memExceeded, do_signaled;
 
   ssize_t flags = p.fetchAndClearFlags();
   do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
+    !p.getDebuggerAttached();
+  do_cpuTimedOut = (flags & RequestInjectionData::CPUTimedOutFlag) &&
     !p.getDebuggerAttached();
   do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
   do_signaled = (flags & RequestInjectionData::SignaledFlag);
@@ -163,10 +206,20 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   info->m_pendingException = nullptr;
 
   if (do_timedout) {
+    p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.
     if (pendingException) {
       p.setTimedOutFlag();
     } else {
       pendingException = generate_request_timeout_exception();
+    }
+  }
+  // Don't bother with the CPU timeout if we're already handling a wall timeout.
+  if (do_cpuTimedOut && !do_timedout) {
+    p.setTimeout(0);  // Stop wall timer so we won't time out twice.
+    if (pendingException) {
+      p.setCPUTimedOutFlag();
+    } else {
+      pendingException = generate_request_cpu_timeout_exception();
     }
   }
   if (do_memExceeded) {
@@ -177,8 +230,8 @@ ssize_t check_request_surprise(ThreadInfo* info) {
     }
   }
   if (do_signaled) {
-    extern bool f_pcntl_signal_dispatch();
-    f_pcntl_signal_dispatch();
+    extern bool HHVM_FN(pcntl_signal_dispatch)();
+    HHVM_FN(pcntl_signal_dispatch)();
   }
 
   if (pendingException) {

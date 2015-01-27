@@ -9,16 +9,16 @@
  *)
 
 type parser_return = {
-    (* True if we are dealing with a hack file *)
-    is_hh_file : bool;
+    file_mode  : Ast.mode option; (* None if PHP *)
     comments   : (Pos.t * string) list;
     ast        : Ast.program;
   }
 
-val program : string -> parser_return
+val program : ?elaborate_namespaces:bool -> Relative_path.t ->
+  string -> parser_return
 
 (* Parses a file *)
-val from_file : string -> parser_return
+val from_file : Relative_path.t -> parser_return
 
 type saved_lb
 type assoc

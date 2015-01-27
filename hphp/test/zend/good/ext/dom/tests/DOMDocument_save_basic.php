@@ -16,6 +16,7 @@ $temp_filename = dirname(__FILE__)."/DomDocument_save_basic.tmp";
 
 echo 'Wrote: ' . $doc->save($temp_filename) . ' bytes'; // Wrote: 72 bytes
 ?>
+<?php error_reporting(0); ?>
 <?php
 	$temp_filename = dirname(__FILE__)."/DomDocument_save_basic.tmp";
 	unlink($temp_filename);

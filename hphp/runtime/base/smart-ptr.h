@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/countable.h"
+#include "hphp/util/compilation-flags.h"
 #include <utility>
 #include <algorithm>
 
@@ -36,6 +37,7 @@ template<typename T>
 class SmartPtr {
 public:
   SmartPtr() : m_px(nullptr) {}
+  /* implicit */ SmartPtr(std::nullptr_t) : m_px(nullptr) { }
   explicit SmartPtr(T* px) : m_px(px) { if (m_px) m_px->incRefCount(); }
   SmartPtr(const SmartPtr<T>& src) : m_px(src.get()) {
     if (m_px) m_px->incRefCount();
@@ -51,7 +53,7 @@ public:
   }
 
   // Move ctor
-  SmartPtr(SmartPtr&& src) : m_px(src.get()) {
+  SmartPtr(SmartPtr&& src) noexcept : m_px(src.get()) {
     src.m_px = nullptr;
   }
 
@@ -67,6 +69,9 @@ public:
 
   ~SmartPtr() {
     decRefPtr(m_px);
+    if (debug) {
+      m_px = reinterpret_cast<T*>(0xdeadbeeffaceb004);
+    }
   }
 
   /**
@@ -89,7 +94,7 @@ public:
   // Move assignment for derived types
   template<class Y>
   SmartPtr& operator=(SmartPtr<Y>&& src) {
-    assert(this != &src);
+    assert((void*)this != (void*)&src);
     // Update m_px before releasing the goner
     auto goner = m_px;
     m_px = src.m_px;
@@ -115,11 +120,15 @@ public:
   }
 
   /**
+   * Safe bool cast.
+   */
+  explicit operator bool() const { return m_px != nullptr; }
+
+  /**
    * Magic delegation.
    */
   T* operator->() const {
-    if (UNLIKELY(!m_px)) throw_null_pointer_exception();
-    return m_px;
+    return m_px; // intentionally skip nullptr check.
   }
 
   /**
@@ -130,13 +139,39 @@ public:
   }
 
   /**
-   * Reset the raw pointer.
+   * Reset the raw pointer.  This will increment the ref count on ptr
+   * (when it is non-null) and decrement the ref count on the old pointer
+   * being replaced.
    */
-  void reset() {
-    operator=((T*)nullptr);
+  void reset(T* ptr = nullptr) {
+    operator=(ptr);
+  }
+
+  /**
+   * Release the raw pointer.
+   * Note: be careful when using this.  It does not decrement the
+   * ref count on m_px.
+   */
+  T* detach() {
+    T* ptr = m_px;
+    m_px = nullptr;
+    return ptr;
+  }
+
+  /**
+   * Take ownership of a pointer without touching the ref count.
+   */
+  template <typename Y>
+  static SmartPtr<Y> attach(Y* ptr) {
+    SmartPtr<Y> sp;
+    sp.m_px = ptr;
+    return sp;
   }
 
 protected:
+  // For templatized SmartPtr<Y> move constructor.
+  template <typename Y> friend class SmartPtr;
+
   T* m_px;  // raw pointer
 
 private:
@@ -147,6 +182,11 @@ private:
     static_assert(offsetof(SmartPtr, m_px) == kExpectedMPxOffset, "");
   }
 };
+
+template <typename T, typename Y>
+inline bool operator==(const SmartPtr<T>& a, const SmartPtr<Y>& b) {
+  return a.get() == b.get();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // AtomicSmartPtr
@@ -222,6 +262,11 @@ struct AtomicSmartPtr {
   }
 
   /**
+   * Safe bool cast.
+   */
+  explicit operator bool() const { return m_px != nullptr; }
+
+  /**
    * Magic delegation.
    */
   T* operator->() const {
@@ -238,8 +283,8 @@ struct AtomicSmartPtr {
   /**
    * Reset the raw pointer.
    */
-  void reset() {
-    operator=((T*)nullptr);
+  void reset(T* p = nullptr) {
+    operator=(p);
   }
 
 protected:

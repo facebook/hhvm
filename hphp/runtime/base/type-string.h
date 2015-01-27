@@ -18,11 +18,13 @@
 #define incl_HPHP_STRING_H_
 
 #include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/functional.h"
 
 #include <algorithm>
 
@@ -52,7 +54,7 @@ constexpr int kMinShrinkThreshold = 1024;
 //////////////////////////////////////////////////////////////////////
 
 StringData* buildStringData(int     n);
-StringData* buildStringData(int64_t   n);
+StringData* buildStringData(int64_t n);
 StringData* buildStringData(double  n);
 
 std::string convDblToStrWithPhpFormat(double n);
@@ -202,14 +204,7 @@ public:
     m_px->setRefCount(1);
   }
 
-  static String attach(const String& s) {
-    String result;
-    result.m_px = s.m_px;
-    return result;
-  }
-
-  static ALWAYS_INLINE String attach(StringData* sd) {
-    assert(sd->isStatic());
+  static String attach(StringData* sd) {
     return String(sd, StringBase::NoIncRef{});
   }
 
@@ -254,6 +249,9 @@ public:
   int length() const {
     return m_px ? m_px->size() : 0;
   }
+  uint32_t capacity() const {
+    return m_px->capacity(); // intentionally skip nullptr check
+  }
   StringSlice slice() const {
     return m_px ? m_px->slice() : StringSlice("", 0);
   }
@@ -279,11 +277,6 @@ public:
    */
   String substr(int start, int length = 0x7FFFFFFF,
                 bool nullable = false) const;
-
-  /**
-   * Returns the last token if string is delimited by the specified.
-   */
-  String lastToken(char delimiter);
 
   /**
    * Find a character or a substring and return its position. "pos" has to be
@@ -393,6 +386,9 @@ public:
   bool more (const Array& v2) const;
   bool more (const Object& v2) const;
   bool more (const Resource& v2) const;
+
+  int compare(litstr v2) const;
+  int compare(const String& v2) const;
 
   /**
    * Offset
@@ -540,13 +536,21 @@ public:
   explicit StrNR(const StringData *sd) : m_px(const_cast<StringData*>(sd)) {}
   explicit StrNR(const String &s) : m_px(s.get()) {} // XXX
 
-  ~StrNR() {}
+  ~StrNR() {
+    if (debug) {
+      m_px = reinterpret_cast<StringData*>(0xdeadbeeffaceb004);
+    }
+  }
 
   /* implicit */ operator const String&() const { return asString(); }
   const char* data() const { return m_px ? m_px->data() : ""; }
   const char* c_str() const { return data(); }
   int size() const { return m_px ? m_px->size() : 0; }
   bool empty() const { return size() == 0; }
+
+  uint32_t capacity() const {
+    return m_px->capacity(); // intentionally skip nullptr check
+  }
 
   String& asString() {
     return *reinterpret_cast<String*>(this);
@@ -556,7 +560,6 @@ public:
   }
 
   StringData* get() const { return m_px; }
-  StringData* operator->() const { return get(); }
 
 private:
   static void compileTimeAssertions() {
@@ -588,6 +591,8 @@ public:
 private:
   void insert();
 };
+
+#define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
 
 String getDataTypeString(DataType t);
 

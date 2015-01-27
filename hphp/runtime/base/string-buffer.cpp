@@ -21,7 +21,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -90,7 +90,7 @@ void StringBuffer::absorb(StringBuffer& buf) {
     if (str) {
       buf.m_buffer = (char*)str->data();
       buf.m_len = str->size();
-      buf.m_cap = str->capacity() - 1;
+      buf.m_cap = str->capacity();
     } else {
       buf.m_buffer = 0;
       buf.m_len = 0;
@@ -179,15 +179,23 @@ void StringBuffer::append(int64_t n) {
 void StringBuffer::append(const Variant& v) {
   auto const cell = v.asCell();
   switch (cell->m_type) {
-  case KindOfStaticString:
-  case KindOfString:
-    append(cell->m_data.pstr);
-    break;
-  case KindOfInt64:
-    append(cell->m_data.num);
-    break;
-  default:
-    append(v.toString());
+    case KindOfInt64:
+      append(cell->m_data.num);
+      break;
+    case KindOfStaticString:
+    case KindOfString:
+      append(cell->m_data.pstr);
+      break;
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfDouble:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      append(v.toString());
   }
 }
 
@@ -204,7 +212,7 @@ void StringBuffer::makeValid(int minCap) {
   assert(!m_len);
   m_str = StringData::Make(std::max(m_initialCap, minCap));
   m_buffer = (char*)m_str->data();
-  m_cap = m_str->capacity() - 1;
+  m_cap = m_str->capacity();
 }
 
 void StringBuffer::appendHelper(const char *s, int len) {
@@ -361,7 +369,9 @@ void CstrBuffer::append(StringSlice slice) {
   auto const data = slice.ptr;
   auto const len = slice.len;
 
-  assert(m_buffer && len >= 0);
+  static_assert(std::is_unsigned<typeof(len)>::value,
+                "len is supposed to be unsigned");
+  assert(m_buffer);
 
   unsigned newlen = m_len + len;
   if (newlen + 1 > m_cap) {

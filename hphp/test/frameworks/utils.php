@@ -136,10 +136,6 @@ function find_all_files_containing_text(
   return $files;
 }
 
-function idx(array $array, mixed $key, mixed $default = null): mixed {
-  return isset($array[$key]) ? $array[$key] : $default;
-}
-
 function command_exists(string $cmd): bool {
     $ret = shell_exec("which $cmd");
     return !empty($ret);
@@ -362,6 +358,7 @@ function run_install(
       return $result;
     } catch (TimeoutException $e) {
       verbose((string) $e);
+      remove_dir_recursive(nullthrows($path));
       fbmake_json(
         Map {'op' => 'test_done', 'test' => $test_name, 'status' => 'skipped' }
       );
@@ -445,4 +442,11 @@ function nullthrows<T>(?T $x, ?string $message = null): T {
     $message = 'Unexpected null';
   }
   throw new Exception($message);
+}
+
+// Use this instead of unlink to avoid warnings
+function delete_file(?string $path): void {
+  if ($path !== null && file_exists($path)) {
+    unlink($path);
+  }
 }

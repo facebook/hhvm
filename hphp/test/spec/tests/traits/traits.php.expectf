@@ -1,0 +1,63 @@
+Inside ><
+Inside ><
+Inside ><
+Inside ><
+===================== Test an Empty Trait =========================
+========== Test Overriding and Collisions Between Traits =====
+-------
+Inside T2a
+Inside C2Derived
+Inside T2a::f
+-------
+Inside T2b
+Inside C2Derived
+Inside T2b::f
+-------
+Inside T2a
+Inside C2Derived
+Inside T2a::f
+===================== Changing Visibility =========================
+Inside T3::m3
+Inside T3::m4
+===================== Traits using other Traits =========================
+-------
+Inside T2a
+Inside C4
+Inside T2a::f
+-------
+Inside T3::m1
+-------
+Inside Tx1
+Inside C4
+Inside Tx1::k
+-------
+Inside Tx2
+Inside C4
+Inside Tx2::m
+===================== static properties =========================
+123
+red
+===================== function statics =========================
+Inside T6::f
+$v = 0
+Inside T6::f
+$v = 1
+-------
+Inside T6::f
+$v = 0
+Inside T6::f
+$v = 1
+Inside T6::f
+$v = 2
+===================== Using a Trait without a Class =========================
+%AInside T7
+Inside T7
+Inside T7::f
+
+Notice: Undefined variable: this in %s/traits/traits.php on line 227
+NULL
+-------
+Inside T7
+Inside T7
+Inside T7::g
+===================== examples for spec =========================

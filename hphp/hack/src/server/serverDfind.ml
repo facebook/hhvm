@@ -16,7 +16,7 @@ open Utils
 
 
 (*****************************************************************************)
-(* dfind doesn't always pick up the token 
+(* dfind doesn't always pick up the token
  * however, it seems that in some cases, despite the fact that the token was
  * not picked up, dfind is still healthy.
  * So here is our strategy:
@@ -33,28 +33,24 @@ let dfind_pid = ref None
 
 let dfind_init root =
   let proc, pid = DfindLib.start (Path.string_of_path root) in
-  PidLog.log ~reason:(Some "dfind") pid;
+  PidLog.log ~reason:"dfind" pid;
   dfind_proc := Some proc;
   dfind_pid := Some pid
 
-let dfind genv (root:Path.path) retries =
-  (match !dfind_proc with
+let dfind (root:Path.path) retries = match !dfind_proc with
   | None -> assert false
-  | Some x -> 
-      DfindEnv.SSet.fold SSet.add (DfindLib.get_changes x) SSet.empty)
+  | Some x -> DfindLib.get_changes x
 
-let dfind genv root = dfind genv root 20
+let dfind root = dfind root 20
 
-let rec get_updates_ (acc_php, acc_js) genv root =
-  let diff = dfind genv root in
-  let diff_php = SSet.filter Find.is_php_path diff in
-  let diff_js = SSet.filter Find.is_js_path diff in
+let rec get_updates_ acc root =
+  let diff = dfind root in
   if SSet.is_empty diff
-  then acc_php, acc_js
+  then acc
   else begin
-    let acc_php = SSet.union diff_php acc_php in
-    let acc_js = SSet.union diff_js acc_js in
-    get_updates_ (acc_php, acc_js) genv root
+    let acc = SSet.union diff acc in
+    get_updates_ acc root
   end
 
-let get_updates genv root = get_updates_ (SSet.empty, SSet.empty) genv root
+let get_updates root =
+  get_updates_ SSet.empty root

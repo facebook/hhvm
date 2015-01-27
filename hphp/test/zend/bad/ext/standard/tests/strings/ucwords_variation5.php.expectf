@@ -1,0 +1,6 @@
+*** Testing ucwords() : usage variations ***
+string(%d) "Testing-Dashed-Words"
+string(%d) "Test(Braced)Words"
+string(%d) "Testing empty delimiters"
+string(%d) "TeSting raNgeS"
+Done

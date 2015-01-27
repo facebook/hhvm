@@ -36,6 +36,7 @@ var_dump( get_resource_type($file_handle) );  //Check whether resource is lost a
 $file_handle = fopen($file, "x+");  //Opening the existing data file in "x+" mode to check for the warning message
 echo "*** Done ***\n"; 
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__)."/007_variation8.tmp");
 ?>

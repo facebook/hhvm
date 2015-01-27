@@ -41,12 +41,12 @@ array(4) {
 }
 -- Iteration 7 --
 array(4) {
-  ["	Hello"]=>
-  string(6) "	Hello"
-  ["col	or"]=>
-  string(6) "col	or"
-  ["world"]=>
-  string(7) "world"
+  ["%r\x09%rHello"]=>
+  string(6) "%r\x09%rHello"
+  ["col%r\x09%ror"]=>
+  string(6) "col%r\x09%ror"
+  ["%r\x0b\x0c%rworld"]=>
+  string(7) "%r\x0b\x0c%rworld"
   ["pen
 "]=>
   string(4) "pen

@@ -8,6 +8,8 @@ all sub-suites.
   sure, your test doesn't belong here.
 * slow - Slower full featured tests. Grouped into sub-suites. By default put
   your test here.
+* spec - Tests associated with the official PHP language specification.
+  https://github.com/php/php-langspec/
 * zend/good - Passing tests from Zend's suite.
 * zend/bad - Failing tests from Zend. Fix these and move them to zend/good.
 * zend/flakey - Tests which mostly pass but have race conditions or can't be
@@ -24,10 +26,8 @@ all sub-suites.
 * Slow tests with the JIT in PGO mode -
 `test/run test/slow -m pgo`
 
-* Slow tests with the JIT, using `pseudomain_wrapper.php` to ensure that
-  statements in global scope get jitted (may have false positives due to,
-  e.g. backtraces changing) -
-`test/run test/slow -m automain`
+* PHP Specification tests with JIT
+`test/run test/spec`
 
 * Run everything that is supposed to pass -
 `test/run all`
@@ -72,16 +72,17 @@ breakage or they need to change the expected output.
 
 These can appear in `.expectf` files.
 
-| Char | Description                                | Regex
-|------|--------------------------------------------|-------
-| %e   | Path separator                             | \/
-| %s   | Any characters except newlines             | [^\r\n]+
-| %S   | Optionally any characters except newlines  | [^\r\n]*
-| %a   | Any characters                             | .+
-| %A   | Optionally any characters                  | .*
-| %w   | Optional whitespace                        | \s*
-| %i   | Integer with optional sign                 | [+-]?\d+
-| %d   | Digits                                     | \d+
-| %x   | Hex                                        | [0-9a-fA-F]+
-| %f   | Float                                      | [+-]?\.?\d+\.?\d|(?:[Ee][+-]?\d+)?
-| %c   | Character                                  | .
+| Char    | Description                                | Regex
+|---------|--------------------------------------------|-------
+| %e      | Path separator                             | \/
+| %s      | Any characters except newlines             | [^\r\n]+
+| %S      | Optionally any characters except newlines  | [^\r\n]*
+| %a      | Any characters                             | .+
+| %A      | Optionally any characters                  | .*
+| %w      | Optional whitespace                        | \s*
+| %i      | Integer with optional sign                 | [+-]?\d+
+| %d      | Digits                                     | \d+
+| %x      | Hex                                        | [0-9a-fA-F]+
+| %f      | Float                                      | [+-]?\.?\d+\.?\d|(?:[Ee][+-]?\d+)?
+| %c      | Character                                  | .
+| %r...%r | The ... is a regex                         | The part that is ...

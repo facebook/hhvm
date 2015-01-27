@@ -46,6 +46,7 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool Logger::AlwaysEscapeLog = true;
 bool Logger::UseSyslog = false;
 bool Logger::UseLogFile = true;
 bool Logger::UseRequestLog = false;
@@ -60,6 +61,8 @@ bool Logger::LogNativeStackTrace = true;
 std::string Logger::ExtraHeader;
 int Logger::MaxMessagesPerRequest = -1;
 bool Logger::Escape = true;
+pid_t Logger::s_pid;
+
 IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 Logger *Logger::s_logger = new Logger();
@@ -139,7 +142,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
                  const StackTrace *stackTrace,
                  bool escape /* = false */, bool escapeMore /* = false */) {
 
-  if (Logger::Escape) {
+  if (Logger::AlwaysEscapeLog && Logger::Escape) {
     escape = true;
   }
   assert(!escapeMore || escape);
@@ -212,21 +215,24 @@ void Logger::log(LogLevelType level, const std::string &msg,
   }
 }
 
+void Logger::ResetPid() {
+  s_pid = Process::GetProcessId();
+}
+
 std::string Logger::GetHeader() {
   static std::string host = Process::GetHostName();
-  static pid_t pid = Process::GetProcessId();
 
   time_t now = time(nullptr);
   char snow[64];
   ctime_r(&now, snow);
-  // Eliminate trailing newilne from ctime_r.
+  // Eliminate trailing newline from ctime_r.
   snow[24] = '\0';
 
   char header[128];
   ThreadData *threadData = s_threadData.get();
   snprintf(header, sizeof(header), "[%s] [hphp] [%lld:%llx:%d:%06d%s] ",
            snow,
-           (unsigned long long)pid,
+           (unsigned long long)s_pid,
            (unsigned long long)Process::GetThreadId(),
            threadData->request,
            (threadData->message == -1 ? 0 : threadData->message),

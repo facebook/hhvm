@@ -16,16 +16,18 @@
 */
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
-#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
-#include "hphp/runtime/ext/xdebug/xdebug_server.h"
 
 #include "hphp/runtime/base/array-util.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
+#include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/timer.h"
@@ -48,9 +50,9 @@ static const StaticString
 static ActRec *get_call_fp(Offset *off = nullptr) {
   // We want the frame of our callee's callee
   VMRegAnchor _; // Ensure consistent state for vmfp
-  ActRec* fp0 = g_context->getPrevVMState(vmfp());
+  ActRec* fp0 = g_context->getPrevVMStateUNSAFE(vmfp());
   assert(fp0);
-  ActRec* fp1 = g_context->getPrevVMState(fp0, off);
+  ActRec* fp1 = g_context->getPrevVMStateUNSAFE(fp0, off);
 
   // fp1 should only be NULL if fp0 is the top-level pseudo-main
   if (!fp1) {
@@ -118,7 +120,7 @@ static String format_filename(String* dir,
     switch (c) {
       // crc32 of current working directory
       case 'c': {
-        int64_t crc32 = f_crc32(g_context->getCwd());
+        int64_t crc32 = HHVM_FN(crc32)(g_context->getCwd());
         buf.append(crc32);
         break;
       }
@@ -128,7 +130,7 @@ static String format_filename(String* dir,
         break;
       // Random number
       case 'r':
-        buf.printf("%lx", (uint64_t) f_rand());
+        buf.printf("%lx", (uint64_t) HHVM_FN(rand)());
         break;
       // Script name
       case 's': {
@@ -291,6 +293,7 @@ static void attach_xdebug_profiler() {
     }
     profiler->setCollectMemory(XDEBUG_GLOBAL(CollectMemory));
     profiler->setCollectTime(XDEBUG_GLOBAL(CollectTime));
+    profiler->setMaxNestingLevel(XDEBUG_GLOBAL(MaxNestingLevel));
   } else {
     raise_error("Could not start xdebug profiler. Another profiler is "
                 "likely already attached to this thread.");
@@ -308,16 +311,46 @@ static void detach_xdebug_profiler() {
 static void detach_xdebug_profiler_if_needed() {
   assert(XDEBUG_GLOBAL(ProfilerAttached));
   XDebugProfiler* profiler = xdebug_profiler();
-  if (!profiler->isCollecting()) {
+  if (!profiler->isNeeded()) {
     detach_xdebug_profiler();
+  }
+}
+
+// If the xdebug profiler is attached, ensures we still need it. If it is not
+// attached, check if we need it.
+static void refresh_xdebug_profiler() {
+  if (XDEBUG_GLOBAL(ProfilerAttached)) {
+    detach_xdebug_profiler_if_needed();
+  } else if (XDebugProfiler::isCollectionNeeded()) {
+    // We know that the profiler is not attached, so either we failed the
+    // request init checks or it was turned off during runtime. So we
+    // only want to turn on profiling if collection is now needed.
+    attach_xdebug_profiler();
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // XDebug Implementation
 
-static bool HHVM_FUNCTION(xdebug_break)
-  XDEBUG_NOTIMPLEMENTED
+static bool HHVM_FUNCTION(xdebug_break) {
+  XDebugServer* server = XDEBUG_GLOBAL(Server);
+  if (server == nullptr) {
+    return false;
+  }
+
+  // Breakpoint displays the current file/line number
+  StringData* file = g_context->getContainingFileName();
+  String filename = file == nullptr ?
+    empty_string() : String(file->data(), CopyString);
+  int line = g_context->getLine();
+
+  // Attempt to perform the breakpoint, detach the server if something goes
+  // wrong
+  if (!server->breakpoint(filename, init_null(), init_null(), line)) {
+    XDebugServer::detach();
+  }
+  return true;
+}
 
 static Variant HHVM_FUNCTION(xdebug_call_class) {
   // PHP5 xdebug returns false if the callee is top-level
@@ -337,12 +370,15 @@ static Variant HHVM_FUNCTION(xdebug_call_class) {
 static String HHVM_FUNCTION(xdebug_call_file) {
   // PHP5 xdebug returns the top-level file if the callee is top-level
   ActRec *fp = get_call_fp();
+  const Func *func;
   if (fp == nullptr) {
     VMRegAnchor _; // Ensure consistent state for vmfp
-    fp = g_context->getPrevVMState(vmfp());
-    assert(fp);
+    func = g_context->getPrevFunc(vmfp());
+    assert(func);
+  } else {
+    func = fp->func();
   }
-  return String(fp->m_func->filename()->data(), CopyString);
+  return String(func->filename()->data(), CopyString);
 }
 
 static int64_t HHVM_FUNCTION(xdebug_call_line) {
@@ -380,20 +416,26 @@ static bool HHVM_FUNCTION(xdebug_code_coverage_started) {
   return ti->m_reqInjectionData.getCoverage();
 }
 
+// TODO(#3704) This requires var_dump
 static TypedValue* HHVM_FN(xdebug_debug_zval)(ActRec* ar)
   XDEBUG_NOTIMPLEMENTED
 
+// TODO(#3704) Requires xdebug_debug_zval, just print to stdout
 static TypedValue* HHVM_FN(xdebug_debug_zval_stdout)(ActRec* ar)
   XDEBUG_NOTIMPLEMENTED
 
-static void HHVM_FUNCTION(xdebug_disable)
-  XDEBUG_NOTIMPLEMENTED
+static void HHVM_FUNCTION(xdebug_disable) {
+  XDEBUG_GLOBAL(DefaultEnable) = false;
+}
 
+// TODO(#3704) This requires var_dump. Just dump the superglobals as specified
+//             via ini
 static void HHVM_FUNCTION(xdebug_dump_superglobals)
   XDEBUG_NOTIMPLEMENTED
 
-static void HHVM_FUNCTION(xdebug_enable)
-  XDEBUG_NOTIMPLEMENTED
+static void HHVM_FUNCTION(xdebug_enable) {
+  XDEBUG_GLOBAL(DefaultEnable) = true;
+}
 
 static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
@@ -403,6 +445,7 @@ static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
   return Array::Create();
 }
 
+// TODO(#3704) see xdebug_start_error_collection()
 static Array HHVM_FUNCTION(xdebug_get_collected_errors,
                            bool clean /* = false */)
   XDEBUG_NOTIMPLEMENTED
@@ -410,11 +453,17 @@ static Array HHVM_FUNCTION(xdebug_get_collected_errors,
 static const StaticString s_closure_varname("0Closure");
 
 static Array HHVM_FUNCTION(xdebug_get_declared_vars) {
+  if (RuntimeOption::RepoAuthoritative) {
+    raise_error("xdebug_get_declared_vars unsupported in RepoAuthoritative "
+      "mode");
+  }
+
   // Grab the callee function
   VMRegAnchor _; // Ensure consistent state for vmfp
-  ActRec* fp = g_context->getPrevVMState(vmfp());
-  assert(fp);
-  const Func* func = fp->func();
+  auto func = g_context->getPrevFunc(vmfp());
+  if (!func) {
+    return Array::Create();
+  }
 
   // Add each named local to the returned array. Note that since this function
   // is supposed to return all _declared_ variables in scope, which includes
@@ -443,6 +492,10 @@ static Array HHVM_FUNCTION(xdebug_get_function_stack) {
   return ArrayUtil::Reverse(bt).toArray();
 }
 
+// TODO(#3704) In php5 xdebug this function works even in cli mode. If we choose
+//             to support this, header() and setcookie() do not work without a
+//             transport so we'd need to get around that. Beyond that, this is
+//             identical to headers_list().
 static Array HHVM_FUNCTION(xdebug_get_headers)
   XDEBUG_NOTIMPLEMENTED
 
@@ -459,8 +512,9 @@ Variant HHVM_FUNCTION(xdebug_get_profiler_filename) {
   }
 }
 
-static int64_t HHVM_FUNCTION(xdebug_get_stack_depth)
-  XDEBUG_NOTIMPLEMENTED
+static int64_t HHVM_FUNCTION(xdebug_get_stack_depth) {
+  return XDebugUtils::stackDepth();
+}
 
 static Variant HHVM_FUNCTION(xdebug_get_tracefile_name) {
   if (XDEBUG_GLOBAL(ProfilerAttached)) {
@@ -473,7 +527,7 @@ static Variant HHVM_FUNCTION(xdebug_get_tracefile_name) {
 }
 
 static bool HHVM_FUNCTION(xdebug_is_enabled) {
-  return false;
+  return XDEBUG_GLOBAL(DefaultEnable);
 }
 
 static int64_t HHVM_FUNCTION(xdebug_memory_usage) {
@@ -487,6 +541,7 @@ static int64_t HHVM_FUNCTION(xdebug_peak_memory_usage) {
   return MM().getStats().peakUsage;
 }
 
+// TODO(#3704) This requires var_dump, error handling, and stack trace printing
 static void HHVM_FUNCTION(xdebug_print_function_stack,
                           const String& message /* = "user triggered" */,
                           int64_t options /* = 0 */)
@@ -513,6 +568,11 @@ static void HHVM_FUNCTION(xdebug_start_code_coverage,
   throw VMSwitchModeBuiltin();
 }
 
+// TODO(#3704) This requires overriding the default behavior on
+//             exceptions/errors. Unfortunately program_functions.cpp was not
+//             at all written with this in mind. We need to be able to install
+//             a handler (from any extension, generally) as we also need to be
+//             able to print stack traces on errors/exceptions.
 static void HHVM_FUNCTION(xdebug_start_error_collection)
   XDEBUG_NOTIMPLEMENTED
 
@@ -552,6 +612,7 @@ static void HHVM_FUNCTION(xdebug_stop_code_coverage,
   }
 }
 
+// TODO(#3704) See xdebug_start_error_collection
 static void HHVM_FUNCTION(xdebug_stop_error_collection)
   XDEBUG_NOTIMPLEMENTED
 
@@ -578,12 +639,15 @@ static double HHVM_FUNCTION(xdebug_time_index) {
   return micro * 1.0e-6;
 }
 
+// TODO(#3704) Almost everything left relies on this. Need to translate xdebug's
+//             var_dump code in xdebug_var.c into the appropriate code in
+//             xdebug_var.cpp
 static TypedValue* HHVM_FN(xdebug_var_dump)(ActRec* ar)
   XDEBUG_NOTIMPLEMENTED
 
 static void HHVM_FUNCTION(_xdebug_check_trigger_vars) {
   if (XDebugExtension::Enable &&
-      XDebugProfiler::isNeeded() &&
+      XDebugProfiler::isAttachNeeded() &&
       !XDEBUG_GLOBAL(ProfilerAttached)) {
     attach_xdebug_profiler();
   }
@@ -626,31 +690,39 @@ static inline T xdebug_init_opt(const char* name, T defVal,
   return defVal;
 }
 
+// Environment variables the idekey is grabbed from
+const static StaticString
+  s_DBGP_IDEKEY("DBGP_IDEKEY"),
+  s_USER("USER"),
+  s_USERNAME("USERNAME");
+
 // Attempts to load the default idekey from environment variables
 static void loadIdeKey(map<string, string>& envCfg) {
-  const char* dbgp_idekey = getenv("DBGP_IDEKEY");
-  if (dbgp_idekey != nullptr) {
-    envCfg["idekey"] = dbgp_idekey;
+  const String dbgp_idekey = g_context->getenv(s_DBGP_IDEKEY);
+  if (!dbgp_idekey.empty()) {
+    envCfg["idekey"] = dbgp_idekey.toCppString();
     return;
   }
 
-  const char* user = getenv("USER");
-  if (user != nullptr) {
-    envCfg["idekey"] = user;
+  const String user = g_context->getenv(s_USER);
+  if (!user.empty()) {
+    envCfg["idekey"] = user.toCppString();
     return;
   }
 
-  const char* username = getenv("USERNAME");
-  if (username != nullptr) {
-    envCfg["idekey"] = username;
+  const String username = g_context->getenv(s_USERNAME);
+  if (!username.empty()) {
+    envCfg["idekey"] = username.toCppString();
   }
 }
 
+// Environment variable that can be used for certain settings
+const static StaticString s_XDEBUG_CONFIG("XDEBUG_CONFIG");
+
 // Loads the "XDEBUG_CONFIG" environment variables.
 static void loadEnvConfig(map<string, string>& envCfg) {
-  // php5 xdebug grabs from getenv, not $_ENV
-  const char* cfg_raw = getenv("XDEBUG_CONFIG");
-  if (cfg_raw == nullptr) {
+  const String cfg_raw = g_context->getenv(s_XDEBUG_CONFIG);
+  if (cfg_raw.empty()) {
     return;
   }
 
@@ -684,8 +756,10 @@ static void loadEnvConfig(map<string, string>& envCfg) {
 }
 
 void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
-  Hdf hdf = xdebug_hdf[XDEBUG_NAME];
-  Enable = Config::GetBool(ini, hdf["enable"], false);
+  const auto* ini_val = ini.get_ptr(XDEBUG_INI("enable"));
+  if (ini_val != nullptr) {
+    ini_on_update(*ini_val, Enable);
+  }
 }
 
 void XDebugExtension::moduleInit() {
@@ -765,7 +839,7 @@ void XDebugExtension::requestInit() {
   XDEBUG_CFG
   #undef XDEBUG_OPT
 
-  // hhvm.xdebug.dump.*
+  // xdebug.dump.*
   #define XDEBUG_OPT(T, name, sym, val) { \
     XDEBUG_GLOBAL(sym) = xdebug_init_opt<T>(name, val, env_cfg); \
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL, \
@@ -779,14 +853,41 @@ void XDebugExtension::requestInit() {
     XDEBUG_GLOBAL(sym) = xdebug_init_opt<T>(name, def, env_cfg); \
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL, XDEBUG_INI(name), \
                      IniSetting::SetAndGet<T>([](const T& val) { \
+                       XDEBUG_GLOBAL(sym) = val; \
                        if (XDEBUG_GLOBAL(ProfilerAttached)) { \
                          xdebug_profiler()->set##sym(val); \
-                         detach_xdebug_profiler_if_needed(); \
                        } \
+                       refresh_xdebug_profiler(); \
                        return true; \
-                    }, nullptr), &XDEBUG_GLOBAL(sym));
+                    }, []() { return XDEBUG_GLOBAL(sym); }));
   XDEBUG_PROF_CFG
   #undef XDEBUG_OPT
+
+  // scream
+  XDEBUG_GLOBAL(Scream) = RuntimeOption::NoSilencer;
+  IniSetting::Bind(this, IniSetting::PHP_INI_ALL, XDEBUG_INI("scream"),
+                   IniSetting::SetAndGet<bool>([] (const bool& val) {
+                      RuntimeOption::NoSilencer = val;
+                      return true;
+                    }, nullptr), &XDEBUG_GLOBAL(Scream));
+
+  // force_error_reporting
+  XDEBUG_GLOBAL(ForceErrorReporting) = RuntimeOption::ForceErrorReportingLevel;
+  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                   XDEBUG_INI("force_error_reporting"),
+                   IniSetting::SetAndGet<int>([] (const int& val) {
+                      RuntimeOption::ForceErrorReportingLevel = val;
+                      return true;
+                    }, nullptr), &XDEBUG_GLOBAL(ForceErrorReporting));
+
+  // halt_level
+  XDEBUG_GLOBAL(HaltLevel) = RuntimeOption::ErrorUpgradeLevel;
+  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                   XDEBUG_INI("halt_level"),
+                   IniSetting::SetAndGet<int>([] (const int& val) {
+                      RuntimeOption::ErrorUpgradeLevel = val;
+                      return true;
+                    }, nullptr), &XDEBUG_GLOBAL(HaltLevel));
 
   // Custom request local globals
   #define XDEBUG_OPT(T, name, sym, val) XDEBUG_GLOBAL(sym) = val;
@@ -797,7 +898,7 @@ void XDebugExtension::requestInit() {
   XDebugServer::onRequestInit();
 
   // Potentially attach the xdebug profiler
-  if (XDebugProfiler::isNeeded()) {
+  if (XDebugProfiler::isAttachNeeded()) {
     attach_xdebug_profiler();
   }
 }
@@ -820,6 +921,7 @@ bool XDebugExtension::Enable = false;
 #define XDEBUG_OPT(T, name, sym, val) \
   IMPLEMENT_THREAD_LOCAL(T, XDebugExtension::sym);
 XDEBUG_CFG
+XDEBUG_MAPPED_CFG
 XDEBUG_DUMP_CFG
 XDEBUG_PROF_CFG
 XDEBUG_CUSTOM_GLOBALS

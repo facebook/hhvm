@@ -83,9 +83,9 @@
 #include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 
-#include "folly/Conv.h"
-#include "folly/Range.h"
-#include "folly/String.h"
+#include <folly/Conv.h>
+#include <folly/Range.h>
+#include <folly/String.h>
 
 #include "hphp/util/md5.h"
 
@@ -360,7 +360,7 @@ struct Input {
 private:
   struct is_bareword {
     bool operator()(int i) const {
-      return isalnum(i) || i == '_' || i == '.' || i == '$';
+      return isalnum(i) || i == '_' || i == '.' || i == '$' || i == '\\';
     }
   };
 
@@ -1438,7 +1438,7 @@ void parse_fault(AsmState& as, int nestLevel) {
   as.in.expectWs('{');
   parse_function_body(as, nestLevel + 1);
 
-  EHEnt& eh = as.fe->addEHEnt();
+  auto& eh = as.fe->addEHEnt();
   eh.m_type = EHEnt::Type::Fault;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
@@ -1481,7 +1481,7 @@ void parse_catch(AsmState& as, int nestLevel) {
   as.in.expect('{');
   parse_function_body(as, nestLevel + 1);
 
-  EHEnt& eh = as.fe->addEHEnt();
+  auto& eh = as.fe->addEHEnt();
   eh.m_type = EHEnt::Type::Catch;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();

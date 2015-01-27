@@ -18,7 +18,6 @@
 #define incl_HPHP_VARIANT_H_
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -71,6 +70,7 @@ struct Variant : private TypedValue {
   enum class CellDup {};
   enum class ArrayInitCtor {};
   enum class StrongBind {};
+  enum class Attach {};
 
   Variant() { m_type = KindOfUninit; }
   explicit Variant(NullInit) { m_type = KindOfNull; }
@@ -84,7 +84,7 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(long long v) { m_type = KindOfInt64; m_data.num = v; }
   /* implicit */ Variant(uint64_t  v) { m_type = KindOfInt64; m_data.num = v; }
 
-  /* implicit */ Variant(double  v) { m_type = KindOfDouble; m_data.dbl = v; }
+  /* implicit */ Variant(double    v) { m_type = KindOfDouble; m_data.dbl = v; }
 
   /* implicit */ Variant(litstr  v);
   /* implicit */ Variant(const std::string &v);
@@ -99,11 +99,16 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const Array& v);
   /* implicit */ Variant(const Object& v);
   /* implicit */ Variant(const Resource& v);
-  /* implicit */ Variant(StringData *v);
-  /* implicit */ Variant(ArrayData *v);
-  /* implicit */ Variant(ObjectData *v);
-  /* implicit */ Variant(ResourceData *v);
-  /* implicit */ Variant(RefData *r);
+  /* implicit */ Variant(StringData* v);
+  /* implicit */ Variant(ArrayData* v);
+  /* implicit */ Variant(ObjectData* v);
+  /* implicit */ Variant(ResourceData* v);
+  /* implicit */ Variant(RefData* r);
+
+  template <typename T>
+  explicit Variant(const SmartPtr<T>& ptr) : Variant(ptr.get()) { }
+  template <typename T>
+  explicit Variant(SmartPtr<T>&& ptr) : Variant(ptr.detach(), Attach{}) { }
 
   /*
    * Creation constructor from ArrayInit that avoids a null check.
@@ -150,12 +155,10 @@ struct Variant : private TypedValue {
   Variant(const Variant& v, CellDup) {
     m_type = v.m_type;
     m_data = v.m_data;
-    if (IS_REFCOUNTED_TYPE(m_type)) {
-      m_data.pstr->incRefCount();
-    }
+    tvRefcountedIncRef(asTypedValue());
   }
 
-  Variant(Variant& v, StrongBind) { constructRefHelper(v); }
+  Variant(StrongBind, Variant& v) { constructRefHelper(v); }
 
   Variant& operator=(const Variant& v) {
     return assign(v);
@@ -198,9 +201,9 @@ struct Variant : private TypedValue {
 
   // Move ctor for arrays
   /* implicit */ Variant(Array&& v) {
-    m_type = KindOfArray;
     ArrayData *a = v.get();
     if (LIKELY(a != nullptr)) {
+      m_type = KindOfArray;
       m_data.parr = a;
       v.detach();
     } else {
@@ -210,9 +213,9 @@ struct Variant : private TypedValue {
 
   // Move ctor for objects
   /* implicit */ Variant(Object&& v) {
-    m_type = KindOfObject;
     ObjectData *pobj = v.get();
     if (pobj) {
+      m_type = KindOfObject;
       m_data.pobj = pobj;
       v.detach();
     } else {
@@ -222,9 +225,9 @@ struct Variant : private TypedValue {
 
   // Move ctor for resources
   /* implicit */ Variant(Resource&& v) {
-    m_type = KindOfResource;
     ResourceData *pres = v.get();
     if (pres) {
+      m_type = KindOfResource;
       m_data.pres = pres;
       v.detach();
     } else {
@@ -482,12 +485,17 @@ struct Variant : private TypedValue {
       case KindOfObject:
       case KindOfResource:
         return true;
+      case KindOfDouble:
+      case KindOfStaticString:
+      case KindOfString:
+      case KindOfArray:
+        return false;
       case KindOfRef:
         return m_data.pref->var()->isIntVal();
-      default:
+      case KindOfClass:
         break;
     }
-    return false;
+    not_reached();
   }
   bool isArray() const {
     return getType() == KindOfArray;
@@ -601,7 +609,6 @@ struct Variant : private TypedValue {
   /* implicit */ operator String () const = delete;
   /* implicit */ operator Array  () const = delete;
   /* implicit */ operator Object () const = delete;
-  template<typename T> /* implicit */ operator SmartObject<T>() const = delete;
 
   /**
    * Explicit type conversions
@@ -649,23 +656,19 @@ struct Variant : private TypedValue {
   /**
    * Whether or not calling toKey() will throw a bad type exception
    */
-  bool  canBeValidKey() const {
-    switch (getType()) {
-    case KindOfArray:  return false;
-    case KindOfObject: return false;
-    default:           return true;
-    }
+  bool canBeValidKey() const {
+    return !IS_ARRAY_TYPE(getType()) && getType() != KindOfObject;
   }
-  VarNR toKey   () const;
+  VarNR toKey() const;
   /* Creating a temporary Array, String, or Object with no ref-counting and
    * no type checking, use it only when we have checked the variant type and
    * we are sure the internal data will have a reference until the temporary
    * one gets out-of-scope.
    */
-  StrNR toStrNR () const {
+  StrNR toStrNR() const {
     return StrNR(getStringData());
   }
-  ArrNR toArrNR () const {
+  ArrNR toArrNR() const {
     return ArrNR(getArrayData());
   }
   ObjNR toObjNR() const {
@@ -785,6 +788,17 @@ struct Variant : private TypedValue {
   Ref* asRef() { PromoteToRef(*this); return this; }
 
  private:
+  /*
+   * This set of constructors act like the normal constructors for the
+   * given types except that they do not increment the reference count
+   * of the passed value.  They are used for the SmartPtr move constructor.
+   */
+  Variant(StringData* var, Attach);
+  Variant(ArrayData* var, Attach);
+  Variant(ObjectData* var, Attach);
+  Variant(ResourceData* var, Attach);
+  Variant(RefData* var, Attach);
+
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
     assert(m_type != KindOfRef);
@@ -817,12 +831,7 @@ struct Variant : private TypedValue {
   void set(const Resource& v) { return set(v.get()); }
 
   template<typename T>
-  void set(const SmartObject<T> &v) {
-    return set(v.get());
-  }
-
-  template<typename T>
-  void set(const SmartResource<T> &v) {
+  void set(const SmartPtr<T> &v) {
     return set(v.get());
   }
 
@@ -842,9 +851,7 @@ struct Variant : private TypedValue {
       self->m_type = KindOfNull;
     } else {
       const Value odata = other->m_data;
-      if (IS_REFCOUNTED_TYPE(otype)) {
-        odata.pstr->incRefCount();
-      }
+      tvRefcountedIncRef(other);
       self->m_data = odata;
       self->m_type = otype;
     }
@@ -892,9 +899,7 @@ public:
     const Variant *other =
       UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
     assert(this != other);
-    if (IS_REFCOUNTED_TYPE(other->m_type)) {
-      other->m_data.pstr->incRefCount();
-    }
+    tvRefcountedIncRef(other);
     m_type = other->m_type != KindOfUninit ? other->m_type : KindOfNull;
     m_data = other->m_data;
   }
@@ -905,9 +910,7 @@ public:
     assert(v.m_type == KindOfRef);
     m_type = v.m_data.pref->tv()->m_type; // Can't be KindOfUninit.
     m_data = v.m_data.pref->tv()->m_data;
-    if (IS_REFCOUNTED_TYPE(m_type)) {
-      m_data.pstr->incRefCount();
-    }
+    tvRefcountedIncRef(asTypedValue());
     decRefRef(v.m_data.pref);
     v.m_type = KindOfNull;
   }
@@ -921,11 +924,7 @@ public:
     const Variant& rhs =
       v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
         ? *v.m_data.pref->var() : v;
-    if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
-      assert(rhs.m_data.pstr);
-      rhs.m_data.pstr->incRefCount();
-    }
-
+    tvRefcountedIncRef(rhs.asTypedValue());
     auto const d = m_data.num;
     auto const t = m_type;
     m_type = rhs.m_type;
@@ -966,7 +965,7 @@ public:
 
   /* implicit */ VRefParamValue() : m_var(Variant::NullInit()) {}
   /* implicit */ VRefParamValue(RefResult v)
-    : m_var(const_cast<Variant&>(variant(v)), Variant::StrongBind{}) {} // XXX
+    : m_var(Variant::StrongBind{}, const_cast<Variant&>(variant(v))) {} // XXX
   template <typename T>
   Variant &operator=(const T &v) const {
     m_var = v;
@@ -1056,7 +1055,12 @@ public:
 
   explicit VarNR() { asVariant()->asTypedValue()->m_type = KindOfUninit; }
 
-  ~VarNR() { if (debug) checkRefCount(); }
+  ~VarNR() {
+    if (debug) {
+      checkRefCount();
+      memset(this, kTVTrashFill2, sizeof(*this));
+    }
+  }
 
   operator const Variant&() const { return *asVariant(); }
 
@@ -1079,25 +1083,28 @@ private:
   }
   void checkRefCount() {
     assert(m_type != KindOfRef);
-    if (!IS_REFCOUNTED_TYPE(m_type)) return;
-    assert(varNrFlag() == NR_FLAG);
+    assert(IS_REFCOUNTED_TYPE(m_type) ? varNrFlag() == NR_FLAG : true);
+
     switch (m_type) {
-    case KindOfArray:
-      assert_refcount_realistic(m_data.parr->getCount());
-      return;
-    case KindOfString:
-      assert_refcount_realistic(m_data.pstr->getCount());
-      return;
-    case KindOfObject:
-      assert_refcount_realistic(m_data.pobj->getCount());
-      return;
-    case KindOfResource:
-      assert_refcount_realistic(m_data.pres->getCount());
-      return;
-    default:
-      break;
+      DT_UNCOUNTED_CASE:
+        return;
+      case KindOfString:
+        assert(check_refcount(m_data.pstr->getCount()));
+        return;
+      case KindOfArray:
+        assert(check_refcount(m_data.parr->getCount()));
+        return;
+      case KindOfObject:
+        assert(check_refcount(m_data.pobj->getCount()));
+        return;
+      case KindOfResource:
+        assert(check_refcount(m_data.pres->getCount()));
+        return;
+      case KindOfRef:
+      case KindOfClass:
+        break;
     }
-    assert(false);
+    not_reached();
   }
 };
 
@@ -1164,7 +1171,7 @@ inline Variant &concat_assign(Variant &v1, const String& s2) {
 
 // Defined here for include order reasons.
 inline RefData::~RefData() {
-  assert(m_magic == Magic::kMagic);
+  assert(m_kind == HeaderKind::Ref);
   tvAsVariant(&m_tv).~Variant();
 }
 
@@ -1179,6 +1186,16 @@ inline Array& forceToArray(Variant& var) {
 
 ALWAYS_INLINE Variant empty_string_variant() {
   return Variant(staticEmptyString(), Variant::StaticStrInit{});
+}
+
+template <typename T>
+inline Variant toVariant(const SmartPtr<T>& p) {
+  return p ? Variant(p) : Variant(false);
+}
+
+template <typename T>
+inline Variant toVariant(SmartPtr<T>&& p) {
+  return p ? Variant(std::move(p)) : Variant(false);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -70,14 +70,24 @@ class EventHook {
     return UNLIKELY(checkConditionFlags())
       ? onFunctionCall(ar, funcType) : true;
   }
-  static inline void FunctionResume(const ActRec* ar) {
+  static inline void FunctionResumeAwait(const ActRec* ar) {
     ringbufferEnter(ar);
-    if (UNLIKELY(checkConditionFlags())) { onFunctionResume(ar); }
+    if (UNLIKELY(checkConditionFlags())) { onFunctionResumeAwait(ar); }
   }
-  static inline void FunctionSuspend(const ActRec* ar, bool suspendingResumed) {
-    ringbufferExit(ar);
+  static inline void FunctionResumeYield(const ActRec* ar) {
+    ringbufferEnter(ar);
+    if (UNLIKELY(checkConditionFlags())) { onFunctionResumeYield(ar); }
+  }
+  static void FunctionSuspendE(ActRec* suspending, const ActRec* resumableAR) {
+    ringbufferExit(resumableAR);
     if (UNLIKELY(checkConditionFlags())) {
-      onFunctionSuspend(ar, suspendingResumed);
+      onFunctionSuspendE(suspending, resumableAR);
+    }
+  }
+  static void FunctionSuspendR(ActRec* suspending, ObjectData* child) {
+    ringbufferExit(suspending);
+    if (UNLIKELY(checkConditionFlags())) {
+      onFunctionSuspendR(suspending, child);
     }
   }
   static inline void FunctionReturn(ActRec* ar, const TypedValue& retval) {
@@ -93,7 +103,8 @@ class EventHook {
    * Event hooks -- JIT entry points.
    */
   static bool onFunctionCall(const ActRec* ar, int funcType);
-  static void onFunctionSuspend(const ActRec* ar, bool suspendingResumed);
+  static void onFunctionSuspendE(ActRec*, const ActRec*);
+  static void onFunctionSuspendR(ActRec*, ObjectData*);
   static void onFunctionReturnJit(ActRec* ar, const TypedValue retval) {
     onFunctionReturn(ar, retval);
   }
@@ -104,7 +115,8 @@ private:
     ProfileExit,
   };
 
-  static void onFunctionResume(const ActRec* ar);
+  static void onFunctionResumeAwait(const ActRec* ar);
+  static void onFunctionResumeYield(const ActRec* ar);
   static void onFunctionReturn(ActRec* ar, const TypedValue& retval);
   static void onFunctionUnwind(const ActRec* ar, const Fault& fault);
 

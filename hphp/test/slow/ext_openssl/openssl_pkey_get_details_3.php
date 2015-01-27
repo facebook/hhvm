@@ -41,6 +41,6 @@ EOF;
 
 print $key;
 $res = openssl_pkey_get_public($key);
-var_dump(openssl_pkey_get_details($res));
+include __DIR__.'/recursive.inc';
+var_dump(openssl_pkey_get_bin2hex_details($res));
 ?>
-

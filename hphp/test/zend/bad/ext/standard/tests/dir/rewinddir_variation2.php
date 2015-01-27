@@ -23,6 +23,7 @@ echo "\n-- Call to rewinddir() --\n";
 var_dump(rewinddir($dir_handle));
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $dir_path = dirname(__FILE__) . '/rewinddir_variation2';
 rmdir($dir_path);

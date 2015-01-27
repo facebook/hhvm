@@ -159,53 +159,10 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
-                                            TypePtr type, bool coerce) {
-  m_valid = false;
-  ConstructPtr self = shared_from_this();
-
-  if (m_class) {
-    m_class->inferAndCheck(ar, Type::Any, false);
-    return Type::Variant;
-  }
-
-  ClassScopePtr cls = resolveClassWithChecks();
-  if (!cls) {
-    return Type::Variant;
-  }
-
-  ClassScopePtr defClass = cls;
-  ConstructPtr decl =
-    cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);
-
-  if (decl) { // No decl means an extension class or derived from redeclaring
-    cls = defClass;
-    m_valid = true;
-    if (cls->isUserClass()) {
-      cls->addUse(getScope(), BlockScope::UseKindConstRef);
-    }
-  }
-
-  BlockScope *defScope;
-  // checkConst grabs locks for us
-  TypePtr t = cls->checkConst(getScope(), m_varName, type,
-                              coerce, ar,
-                              shared_from_this(),
-                              cls->getBases(), defScope);
-  if (defScope) {
-    m_valid = true;
-    m_defScope = defScope;
-  } else if (cls->derivesFromRedeclaring() == Derivation::Redeclaring) {
-    m_defScope = cls.get();
-  }
-
-  return t;
-}
-
 unsigned ClassConstantExpression::getCanonHash() const {
   int64_t val =
-    hash_string(toLower(m_varName).c_str(), m_varName.size()) -
-    hash_string(toLower(m_className).c_str(), m_className.size());
+    hash_string_i_unsafe(m_varName.c_str(), m_varName.size()) -
+    hash_string_i_unsafe(m_className.c_str(), m_className.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 

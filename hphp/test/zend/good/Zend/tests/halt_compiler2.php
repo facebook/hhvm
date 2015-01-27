@@ -9,6 +9,7 @@ include dirname(__FILE__) . '/test1.php';
 include dirname(__FILE__) . '/test2.php';
 ?>
 ==DONE==
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__) . '/test1.php');
 unlink(dirname(__FILE__) . '/test2.php');

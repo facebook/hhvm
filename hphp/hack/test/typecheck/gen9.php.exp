@@ -1,6 +1,8 @@
 File "gen9.php", line 25, characters 10-11:
 Invalid return type (Typing[4110])
-File "gen9.php", line 21, characters 15-17:
+File "gen9.php", line 13, characters 15-15:
 This is an int
+File "gen9.php", line 21, characters 15-17:
+It was implicitly typed as an int during this operation
 File "gen9.php", line 23, characters 39-40:
 It is incompatible with a value of generic type T3

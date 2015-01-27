@@ -9,8 +9,7 @@
  *
  */
 
-function f1(int $x): void {
-}
+function f1(int $x): void {}
 
 function f2(): void {
   f1(1.0);

@@ -16,9 +16,13 @@
 */
 
 #include "hphp/runtime/ext/soap/xml.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,14 +81,15 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   String cache_key("HPHP.SOAP.WSDL.");
   cache_key += filename;
 
-  Variant content = f_apc_fetch(cache_key);
+  Variant content = HHVM_FN(apc_fetch)(cache_key);
   if (same(content, false)) {
-    Resource resource = File::Open(filename, "rb", 0, f_stream_context_create(
-                make_map_array(s_http, make_map_array(s_timeout, 1000))));
-    if (!resource.isNull()) {
-      content = f_stream_get_contents(resource);
+    Variant cxt = HHVM_FN(stream_context_create)(make_map_array(
+                  s_http, make_map_array(s_timeout, 1000)));
+    auto file = File::Open(filename, "rb", 0, cxt);
+    if (file) {
+      content = HHVM_FN(stream_get_contents)(Resource(file));
       if (!same(content, false)) {
-        f_apc_store(cache_key, content);
+        HHVM_FN(apc_store)(cache_key, content);
       }
     }
   }

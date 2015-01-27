@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <vector>
 #include "hphp/zend/zend-html.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
@@ -163,8 +164,8 @@ Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
     return false;
   }
 
-  Array ret;
   int len = str.size();
+  PackedArrayInit ret(len / split_length + 1, CheckAllocation{});
   if (split_length >= len) {
     ret.append(str);
   } else {
@@ -172,7 +173,7 @@ Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
       ret.append(str.substr(i, split_length));
     }
   }
-  return ret;
+  return ret.toArray();
 }
 
 Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
@@ -440,6 +441,11 @@ int64_t StringUtil::CRC32(const String& input) {
 }
 
 String StringUtil::Crypt(const String& input, const char *salt /* = "" */) {
+  if (salt && salt[0] == '\0') {
+    raise_notice("crypt(): No salt parameter was specified."
+      " You must use a randomly generated salt and a strong"
+      " hash function to produce a secure hash.");
+  }
   return String(string_crypt(input.c_str(), salt), AttachString);
 }
 

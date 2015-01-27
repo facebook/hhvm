@@ -16,15 +16,6 @@
 #ifndef incl_HPHP_COMPILATION_FLAGS_H_
 #define incl_HPHP_COMPILATION_FLAGS_H_
 
-#ifndef INSTALL_PREFIX
-# if defined(__APPLE__) || defined(__FreeBSD__) || \
-     defined(__OpenBSD__) || defined(__NetBSD__)
-#  define INSTALL_PREFIX "/usr/local"
-# else
-#  define INSTALL_PREFIX ""
-# endif
-#endif
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -48,14 +39,6 @@ const bool debug =
 #endif
   ;
 
-const bool packed_tv =
-#ifdef PACKED_TV
-  true
-#else
-  false
-#endif
-  ;
-
 const bool memory_profiling =
 #ifdef MEMORY_PROFILING
   true
@@ -64,6 +47,13 @@ const bool memory_profiling =
 #endif
   ;
 
+const bool contiguous_heap =
+#if CONTIGUOUS_HEAP
+  true
+#else
+  false
+#endif
+  ;
 //////////////////////////////////////////////////////////////////////
 
 }

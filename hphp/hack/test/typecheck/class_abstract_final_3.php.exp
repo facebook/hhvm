@@ -1,0 +1,4 @@
+File "class_abstract_final_3.php", line 7, characters 7-7:
+You cannot extend final class Foo (Typing[4035])
+File "class_abstract_final_3.php", line 3, characters 22-24:
+Declaration is here

@@ -28,6 +28,7 @@ if (!is_null($tmp = @mysql_get_host_info($link, "too many arguments"))) {
 
 print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once("clean_table.inc");
 ?>

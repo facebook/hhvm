@@ -22,6 +22,7 @@ chmod($initdir."/test/ok/ok.txt", 0777);
 
 test_open_basedir_after("chmod");
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once "open_basedir.inc";
 delete_directories();

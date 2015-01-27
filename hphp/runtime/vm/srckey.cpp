@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/srckey.h"
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/runtime/vm/hhbc.h"
 

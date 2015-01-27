@@ -14,6 +14,7 @@ var_dump(fread($fp, 1));
 var_dump(filesize($local_file));
 fclose($fp);
 ?>
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "ftp_nb_get_large.txt");
 ?>

@@ -25,14 +25,14 @@ TRACE_SET_MOD(debugger);
 String DebuggerThriftBuffer::readImpl() {
   TRACE(7, "DebuggerThriftBuffer::readImpl\n");
   assert(m_size <= BUFFER_SIZE);
-  int nread = m_socket->readImpl(m_buffer, m_size);
+  int nread = getSocket()->readImpl(m_buffer, m_size);
   m_buffer[nread] = '\0';
   return String(m_buffer, nread, CopyString);
 }
 
 void DebuggerThriftBuffer::flushImpl(const String& data) {
   TRACE(7, "DebuggerThriftBuffer::flushImpl\n");
-  m_socket->write(data);
+  getSocket()->write(data);
 }
 
 void DebuggerThriftBuffer::throwError(const char *msg, int code) {

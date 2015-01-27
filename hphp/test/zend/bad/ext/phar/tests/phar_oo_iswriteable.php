@@ -49,6 +49,7 @@ var_dump($b->isWritable());
 chmod($fname2, 0666);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.phar.php');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar');

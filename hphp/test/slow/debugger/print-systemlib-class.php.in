@@ -1,0 +1,2 @@
+=new stdClass()
+=new __SystemLib\TarArchiveHandler('/dev/null');

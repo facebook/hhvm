@@ -98,4 +98,4 @@ valid output
 Arg value  
 valid output
 
-Fatal error: %s
+Catchable fatal error: %s

@@ -9,8 +9,8 @@ class Mediawiki extends Framework {
     parent::__construct($name, $tc, null, null, true, TestFindModes::TOKEN);
   }
 
-  protected function install(): void {
-    parent::install();
+  <<Override>>
+  protected function extraPostComposer(): void {
     $this->skipDatabaseTests();
     # Mediawiki has a custom test runner that pulls in parts of PHPUnit
     # from vendor/
@@ -20,8 +20,7 @@ class Mediawiki extends Framework {
       "require 'phpunit/phpunit=3.7.*'";
     exec($phpunit);
     verbose("Adding LocalSettings.php file to Mediawiki test dir.\n");
-    $touch_command = "touch ".$this->getInstallRoot()."/LocalSettings.php";
-    exec($touch_command);
+    touch($this->getInstallRoot().'/LocalSettings.php');
   }
 
   // We don't have a MySQL instance running for our test runs, so Database

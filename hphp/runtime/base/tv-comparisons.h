@@ -16,7 +16,8 @@
 #ifndef incl_HPHP_TV_COMPARISONS_H_
 #define incl_HPHP_TV_COMPARISONS_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 

@@ -13,55 +13,36 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_TRANSLATOR_RUNTIME_H_
 #define incl_HPHP_TRANSLATOR_RUNTIME_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/base/typed-value.h"
+
 #include "hphp/runtime/vm/bytecode.h"
 
-namespace HPHP { namespace jit {
+#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/types.h"
 
+struct _Unwind_Exception;
 
-/* MInstrState is stored right above the reserved spill space on the C++
- * stack. */
-#define MISOFF(nm)                                         \
-  (offsetof(MInstrState, nm) + kReservedRSPSpillSpace)
-
-const size_t kReservedRSPMInstrStateSpace = RESERVED_STACK_MINSTR_STATE_SPACE;
-const size_t kReservedRSPSpillSpace       = RESERVED_STACK_SPILL_SPACE;
-const size_t kReservedRSPTotalSpace       = RESERVED_STACK_TOTAL_SPACE;
-
+namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
-struct MInstrState {
-  // Room for this structure is allocated on the stack before we
-  // make a call into the tc, so this first element is padding for
-  // the return address pushed by the call.
-  uintptr_t returnAddress;
-  uintptr_t padding; // keep the following TV's SSE friendly.
-  union {
-    // This space is used for both vector instructions and
-    // the return value of builtin functions that return by reference.
-    // Since we don't ever use the two at the same time, it is
-    // OK to use a union.
-    TypedValue tvScratch;
-    TypedValue tvBuiltinReturn;
-  };
-  TypedValue tvRef;
-  TypedValue tvRef2;
-  TypedValue tvResult;
-  TypedValue tvVal;
-} __attribute__((__aligned__(16)));
-static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
-              "MInstrState members require 16-byte alignment for SSE");
-static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
-              < kReservedRSPTotalSpace,
-              "MInstrState is too large for the rsp scratch space "
-              "in enterTCHelper");
+struct Func;
+struct c_Vector;
+struct MInstrState;
+
+namespace jit {
+//////////////////////////////////////////////////////////////////////
+
+struct TypeConstraint;
+
+constexpr size_t kReservedRSPSpillSpace = RESERVED_STACK_SPILL_SPACE;
+constexpr size_t kReservedRSPTotalSpace = RESERVED_STACK_TOTAL_SPACE;
+
+//////////////////////////////////////////////////////////////////////
 
 /* Helper functions for translated code */
 
@@ -129,6 +110,13 @@ StringData* convObjToStrHelper(ObjectData* o);
 StringData* convResToStrHelper(ResourceData* o);
 StringData* convCellToStrHelper(TypedValue tv);
 
+
+bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func);
+int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func);
+int64_t coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func);
+int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func);
+int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func);
+
 void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void raiseUndefVariable(StringData* nm);
@@ -159,6 +147,8 @@ TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 TypedValue genericIdx(TypedValue, TypedValue, TypedValue);
+
+TypedValue getMemoKeyHelper(TypedValue tv);
 
 int32_t arrayVsize(ArrayData*);
 
@@ -231,9 +221,25 @@ RDS::Handle lookupClsRDSHandle(const StringData* name);
 void registerLiveObj(ObjectData* obj);
 
 /*
+ * Set tl_regState to CLEAN and call _Unwind_Resume.
+ */
+void unwindResumeHelper();
+
+namespace MInstrHelpers {
+StringData* stringGetI(StringData*, uint64_t);
+uint64_t pairIsset(c_Pair*, int64_t);
+uint64_t vectorIsset(c_Vector*, int64_t);
+void bindElemC(TypedValue*, TypedValue, RefData*, MInstrState*);
+void setWithRefElemC(TypedValue*, TypedValue, TypedValue*, MInstrState*);
+void setWithRefNewElem(TypedValue*, TypedValue*, MInstrState*);
+}
+
+/*
  * Just calls tlsBase, but not inlined, so it can be called from the TC.
  */
 uintptr_t tlsBaseNoInline();
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

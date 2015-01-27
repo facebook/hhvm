@@ -16,9 +16,12 @@ interface IFace {
 }
 
 // multiple layers
-abstract class AClass implements IFace {
-}
+abstract class AClass implements IFace {}
 
 abstract class BClass extends AClass {}
 abstract class CClass extends BClass {}
-class DClass extends CClass { public function foo(): int { return 0; }}
+class DClass extends CClass {
+  public function foo(): int {
+    return 0;
+  }
+}

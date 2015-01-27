@@ -21,7 +21,7 @@
 #include <vector>
 #include <stdarg.h>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
@@ -100,6 +100,7 @@ namespace Trace {
       TM(fixup)         \
       TM(fr)            \
       TM(gc)            \
+      TM(gvn)           \
       TM(heap)          \
       TM(hhas)          \
       TM(hhbbc)         \
@@ -109,9 +110,13 @@ namespace Trace {
       TM(hhbbc_index)   \
       TM(hhbbc_time)    \
       TM(hhbc)          \
+      TM(vasm)          \
       TM(hhir)          \
       TM(hhirTracelets) \
       TM(hhir_dce)      \
+      TM(hhir_store)    \
+      TM(hhir_alias)    \
+      TM(hhir_load)     \
       TM(llvm)          \
       TM(hhir_refcount) \
       TM(inlining)      \

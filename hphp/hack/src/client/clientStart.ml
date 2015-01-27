@@ -9,6 +9,7 @@
  *)
 
 open ClientExceptions
+open Utils
 
 let get_hhserver () =
   let server_next_to_client = (Filename.dirname Sys.argv.(0)) ^ "/hh_server" in
@@ -19,6 +20,7 @@ let get_hhserver () =
 type env = {
   root: Path.path;
   wait: bool;
+  no_load : bool;
 }
 
 let rec wait env =
@@ -38,14 +40,15 @@ let rec wait env =
   end
 
 let start_server env =
-  Printf.fprintf stderr "Server launched for %s\n%!"
-    (Path.string_of_path env.root);
-  let hh_server =  Printf.sprintf "%s -d %s"
-    (get_hhserver())
-    (Path.string_of_path env.root) in
-  match Unix.system hh_server with
+  let hh_server = Printf.sprintf "%s -d %s %s"
+    (Filename.quote (get_hhserver ()))
+    (Filename.quote (Path.string_of_path env.root))
+    (if env.no_load then "--no-load" else "") in
+  Printf.fprintf stderr "Server launched with the following command:\n\t%s\n%!"
+    hh_server;
+  let () = match Unix.system hh_server with
     | Unix.WEXITED 0 -> ()
-    | _ -> (Printf.fprintf stderr "Could not start hh_server!\n"; exit 77);
+    | _ -> Printf.fprintf stderr "Could not start hh_server!\n"; exit 77 in
   if env.wait then wait env;
   ()
 
@@ -54,12 +57,18 @@ let should_start env =
   then begin
     try
       (* Let's ping the server to make sure it's up and not out of date *)
-      Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ -> raise Server_busy));
-      ignore(Unix.alarm 6);
-      let ic, oc = ClientUtils.connect env.root in
-      ServerMsg.cmd_to_channel oc ServerMsg.PING;
-      let response = ServerMsg.response_from_channel ic in
-      ignore (Unix.alarm 0);
+      let response = with_context
+        ~enter:(fun () ->
+          Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ ->
+            raise Server_busy));
+          ignore (Unix.alarm 6))
+        ~exit:(fun () ->
+          ignore (Unix.alarm 0);
+          Sys.set_signal Sys.sigalrm Sys.Signal_default)
+        ~do_:(fun () ->
+          let ic, oc = ClientUtils.connect env.root in
+          ServerMsg.cmd_to_channel oc ServerMsg.PING;
+          ServerMsg.response_from_channel ic) in
       match response with
       | ServerMsg.PONG -> false
       | ServerMsg.SERVER_OUT_OF_DATE ->
@@ -105,10 +114,7 @@ let main env =
     Printf.fprintf
       stderr
       "Error: Server already exists for %s\n\
-      Use hh restart if you want to kill it and start a new one\n%!"
+      Use hh_client restart if you want to kill it and start a new one\n%!"
       (Path.string_of_path env.root);
     exit 77
   end
-
-let start_server ?wait:(wait=false) root =
-  start_server {root = root; wait = wait;}

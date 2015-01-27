@@ -133,7 +133,7 @@ struct TokenStore {
     LookaheadSlab* s = m_head;
     LookaheadSlab* next;
     while (s) {
-      next = m_head->m_next;
+      next = s->m_next;
       delete s;
       s = next;
     }
@@ -273,7 +273,6 @@ public:
     }
     incLoc(rawText, rawLeng, type);
   }
-  void setHashBang(const char *rawText, int rawLeng, int type = -1);
   // also used for YY_FATAL_ERROR in hphp.x
   void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
   void warn(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);

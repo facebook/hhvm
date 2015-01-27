@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_CLASS_INFO_H_
 #define incl_HPHP_CLASS_INFO_H_
 
-#include "hphp/runtime/base/types.h"
 #include <utility>
 #include <vector>
+
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/functional.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,6 @@ public:
 
     VariableArguments      = (1 << 17), //                  x      x
     RefVariableArguments   = (1 << 18), //                  x      x
-    MixedVariableArguments = (1 << 19), //                  x      x
 
     FunctionIsFoldable     = (1 << 20), //                  x
     NoEffect               = (1 << 21), //                  x
@@ -124,7 +123,7 @@ public:
   struct ParameterInfo {
     ~ParameterInfo();
     Attribute attribute;
-    DataType argType;      // hinted arg type
+    MaybeDataType argType; // hinted arg type
     const char *name;
     const char *type;      // hinted type string
     const char *value;     // serialized default value
@@ -151,7 +150,7 @@ public:
     const char *file;
     int line1;
     int line2;
-    DataType returnType;
+    MaybeDataType returnType;
   };
 
   class PropertyInfo {
@@ -159,7 +158,7 @@ public:
     PropertyInfo() : docComment(nullptr) {}
     Attribute attribute;
     String name;
-    DataType type;
+    MaybeDataType type;
     const char *docComment;
     const ClassInfo *owner;
   };
@@ -299,10 +298,15 @@ public:
         return *(Object*)addr;
       case KindOfResource:
         return *(Resource*)addr;
-      default:
-        assert(false);
-        return uninit_null();
+
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfStaticString:
+      case KindOfRef:
+      case KindOfClass:
+        break;
     }
+    not_reached();
   }
 
 public:

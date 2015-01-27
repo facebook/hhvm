@@ -29,6 +29,7 @@ closedir($dh1);
 closedir($dh2);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $path = dirname(__FILE__) . "/opendir_variation3";
 rmdir($path);

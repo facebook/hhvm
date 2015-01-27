@@ -1,0 +1,24 @@
+array(11) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(12) "BAbsProtStat"
+  [2]=>
+  string(12) "AAbsProtStat"
+  [3]=>
+  string(10) "BPrivStat1"
+  [4]=>
+  string(10) "BPrivStat2"
+  [5]=>
+  string(8) "BPublic1"
+  [6]=>
+  string(8) "BPublic2"
+  [7]=>
+  string(10) "APrivStat1"
+  [8]=>
+  string(10) "APrivStat2"
+  [9]=>
+  string(8) "APublic1"
+  [10]=>
+  string(8) "APublic2"
+}

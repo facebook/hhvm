@@ -115,10 +115,6 @@ function test_SpoofChecker_setchecks() {
   $checker = new SpoofChecker();
   VS($checker->issuspicious(u('True fact: \u5fcd\u8005 are mammals')), false);
 
-  // Only allow characters of a single script.
-  $checker->setchecks(SpoofChecker::SINGLE_SCRIPT);
-  VS($checker->issuspicious(u('True fact: \u5fcd\u8005 are mammals')), true);
-
   // try {
   //   $checker = new SpoofChecker();
   //   $checker->setchecks(0xDEADBEEF);

@@ -28,10 +28,26 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+#define PHP_LOCK_SH 1
+#define PHP_LOCK_EX 2
+#define PHP_LOCK_UN 3
+#define PHP_LOCK_NB 4
+
+/* coerce the stream into some other form */
+  /* cast as a stdio FILE * */
+#define PHP_STREAM_AS_STDIO         0
+  /* cast as a POSIX fd or socketd */
+#define PHP_STREAM_AS_FD            1
+  /* cast as a socketd */
+#define PHP_STREAM_AS_SOCKETD       2
+  /* cast as fd/socket for select purposes */
+#define PHP_STREAM_AS_FD_FOR_SELECT 3
 
 StaticString s_stream_open("stream_open");
 StaticString s_stream_close("stream_close");
@@ -44,6 +60,8 @@ StaticString s_stream_flush("stream_flush");
 StaticString s_stream_truncate("stream_truncate");
 StaticString s_stream_lock("stream_lock");
 StaticString s_stream_stat("stream_stat");
+StaticString s_stream_metadata("stream_metadata");
+StaticString s_stream_cast("stream_cast");
 StaticString s_url_stat("url_stat");
 StaticString s_unlink("unlink");
 StaticString s_rename("rename");
@@ -69,17 +87,20 @@ UserFile::UserFile(Class *cls, const Variant& context /*= null */) : UserFSNode(
   m_Rename      = lookupMethod(s_rename.get());
   m_Mkdir       = lookupMethod(s_mkdir.get());
   m_Rmdir       = lookupMethod(s_rmdir.get());
-  m_isLocal = true;
+  m_StreamMetadata = lookupMethod(s_stream_metadata.get());
+  m_StreamCast  = lookupMethod(s_stream_cast.get());
+
+  setIsLocal(true);
 
   // UserFile, to match Zend, should not call stream_close() unless it was ever
   // opened. This is a bit of a misuse of this field but the API doesn't allow
   // one direct access to an not-yet-opened stream resource so it should be
   // safe.
-  m_closed = true;
+  setIsClosed(true);
 }
 
 UserFile::~UserFile() {
-  if (!m_closed) {
+  if (!isClosed()) {
     close();
   }
 }
@@ -89,6 +110,57 @@ void UserFile::sweep() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+Resource UserFile::invokeCast(int castas) {
+  bool invoked = false;
+  Variant ret = invoke(
+    m_StreamCast,
+    s_stream_cast,
+    PackedArrayInit(1)
+      .append(castas)
+      .toArray(),
+    invoked
+  );
+
+  if (!invoked) {
+    raise_warning(
+      "%s::stream_cast is not implemented!",
+      m_cls->name()->data()
+    );
+    return Resource();
+  }
+  if (ret.toBoolean() == false) {
+    return Resource();
+  }
+  Resource handle = ret.toResource();
+  File *f = handle.getTyped<File>(true, true);
+  if (!f) {
+    raise_warning(
+      "%s::stream_cast must return a stream resource",
+      m_cls->name()->data()
+    );
+    return Resource();
+  }
+  if (f == this) {
+    raise_warning(
+      "%s::stream_cast must not return itself",
+      m_cls->name()->data()
+    );
+    return Resource();
+  }
+
+  return handle;
+}
+
+int UserFile::fd() const {
+  Resource handle = const_cast<UserFile*>(this)->invokeCast(
+    PHP_STREAM_AS_FD_FOR_SELECT);
+  if (handle.isNull()) {
+    return -1;
+  }
+  File *f = handle.getTyped<File>();
+  return f->fd();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -109,7 +181,7 @@ bool UserFile::openImpl(const String& filename, const String& mode,
     invoked
   );
   if (invoked && (ret.toBoolean() == true)) {
-    m_closed = false;
+    setIsClosed(false);
     return true;
   }
 
@@ -119,7 +191,7 @@ bool UserFile::openImpl(const String& filename, const String& mode,
 
 bool UserFile::close() {
   // fclose() should prevent this from being called on a closed stream
-  assert(!m_closed);
+  assert(!isClosed());
 
   // PHP's streams layer explicitly flushes on close
   // Mimick that for user-wrappers by pushing the flush here
@@ -128,7 +200,7 @@ bool UserFile::close() {
 
   // void stream_close()
   invoke(m_StreamClose, s_stream_close, Array::Create());
-  m_closed = true;
+  setIsClosed(true);
   return ret;
 }
 
@@ -197,23 +269,23 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
 
   // Seek within m_buffer if we can, otherwise kill it and call user stream_seek / stream_tell
   if (whence == SEEK_CUR &&
-      0 <= m_readpos + offset &&
-           m_readpos + offset < m_writepos) {
-    m_readpos += offset;
-    m_position += offset;
+      0 <= getReadPosition() + offset &&
+           getReadPosition() + offset < getWritePosition()) {
+    setReadPosition(getReadPosition() + offset);
+    setPosition(getPosition() + offset);
     return true;
   } else if (whence == SEEK_SET &&
-             0 <= offset - m_position + m_readpos &&
-                  offset - m_position + m_readpos < m_writepos) {
-    m_readpos = offset - m_position + m_readpos;
-    m_position = offset;
+             0 <= offset - getPosition() + getReadPosition() &&
+             offset - getPosition() + getReadPosition() < getWritePosition()) {
+    setReadPosition(offset - getPosition() + getReadPosition());
+    setPosition(offset);
     return true;
   } else {
     if (whence == SEEK_CUR) {
-      offset += m_readpos - m_writepos;
+      offset += getReadPosition() - getWritePosition();
     }
-    m_readpos = 0;
-    m_writepos = 0;
+    setReadPosition(0);
+    setWritePosition(0);
   }
 
   // bool stream_seek($offset, $whence)
@@ -234,17 +306,17 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
     raise_warning("%s::stream_tell is not implemented!", m_cls->name()->data());
     return false;
   }
-  m_position = ret.isInteger() ? ret.toInt64() : -1;
+  setPosition(ret.isInteger() ? ret.toInt64() : -1);
   return true;
 }
 
 int64_t UserFile::tell() {
-  return m_position;
+  return getPosition();
 }
 
 bool UserFile::eof() {
   // If there's data in the read buffer, then we're clearly not EOF
-  if ((m_writepos - m_readpos) > 0) {
+  if (bufferedLen() > 0) {
     return false;
   }
 
@@ -286,12 +358,12 @@ bool UserFile::truncate(int64_t size) {
 bool UserFile::lock(int operation, bool &wouldBlock) {
   int64_t op = 0;
   if (operation & LOCK_NB) {
-    op |= LOCK_NB;
+    op |= PHP_LOCK_NB;
   }
   switch (operation & ~LOCK_NB) {
-    case LOCK_SH: op |= LOCK_SH; break;
-    case LOCK_EX: op |= LOCK_EX; break;
-    case LOCK_UN: op |= LOCK_UN; break;
+    case LOCK_SH: op |= PHP_LOCK_SH; break;
+    case LOCK_EX: op |= PHP_LOCK_EX; break;
+    case LOCK_UN: op |= PHP_LOCK_UN; break;
   }
 
   // bool stream_lock(int $operation)
@@ -371,7 +443,6 @@ static inline int simulateAccessResult(bool allowed) {
   }
 }
 
-extern const int64_t k_STREAM_URL_STAT_QUIET;
 int UserFile::access(const String& path, int mode) {
   struct stat buf;
   auto ret = urlStat(path, &buf, k_STREAM_URL_STAT_QUIET);
@@ -395,21 +466,21 @@ int UserFile::access(const String& path, int mode) {
                (buf.st_mode & S_IWOTH));
     case X_OK: // Test for execute permission.
       return simulateAccessResult(
-               (buf.st_uid == uid && (buf.st_mode & S_IXUSR)) ||
+               !(buf.st_mode & S_IFDIR) &&  // Directories are not executable
+               ((buf.st_uid == uid && (buf.st_mode & S_IXUSR)) ||
                (buf.st_gid == gid && (buf.st_mode & S_IXGRP)) ||
-               (buf.st_mode & S_IXOTH));
+               (buf.st_mode & S_IXOTH)));
     default: // Unknown mode.
       return -1;
   }
 }
 
-extern const int64_t k_STREAM_URL_STAT_LINK;
 int UserFile::lstat(const String& path, struct stat* buf) {
   return urlStat(path, buf, k_STREAM_URL_STAT_LINK);
 }
 
 int UserFile::stat(const String& path, struct stat* buf) {
-  return urlStat(path, buf);
+  return urlStat(path, buf, k_STREAM_URL_STAT_QUIET);
 }
 
 bool UserFile::unlink(const String& filename) {
@@ -427,7 +498,6 @@ bool UserFile::unlink(const String& filename) {
     return true;
   }
 
-  raise_warning("\"%s::unlink\" call failed", m_cls->name()->data());
   return false;
 }
 
@@ -447,7 +517,6 @@ bool UserFile::rename(const String& oldname, const String& newname) {
     return true;
   }
 
-  raise_warning("\"%s::rename\" call failed", m_cls->name()->data());
   return false;
 }
 
@@ -468,7 +537,6 @@ bool UserFile::mkdir(const String& filename, int mode, int options) {
     return true;
   }
 
-  raise_warning("\"%s::mkdir\" call failed", m_cls->name()->data());
   return false;
 }
 
@@ -488,8 +556,84 @@ bool UserFile::rmdir(const String& filename, int options) {
     return true;
   }
 
-  raise_warning("\"%s::rmdir\" call failed", m_cls->name()->data());
   return false;
+}
+
+bool UserFile::invokeMetadata(const Array& args, const char* funcName) {
+  bool invoked = false;
+  Variant ret = invoke(m_StreamMetadata, s_stream_metadata, args, invoked);
+  if (!invoked) {
+    raise_warning("%s(): %s::stream_metadata is not implemented!",
+                  funcName, m_cls->name()->data());
+    return false;
+  } else if (ret.toBoolean() == true) {
+    return true;
+  }
+  return false;
+}
+
+bool UserFile::touch(const String& path, int64_t mtime, int64_t atime) {
+  if (atime == 0) {
+    atime = mtime;
+  }
+
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(1) // STREAM_META_TOUCH
+      .append(atime ? make_packed_array(mtime, atime) : Array::Create())
+      .toArray(),
+    "touch");
+}
+
+bool UserFile::chmod(const String& path, int64_t mode) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(6) // STREAM_META_ACCESS
+      .append(mode)
+      .toArray(),
+    "chmod");
+}
+
+bool UserFile::chown(const String& path, int64_t uid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(3) // STREAM_META_OWNER
+      .append(uid)
+      .toArray(),
+    "chown");
+}
+
+bool UserFile::chown(const String& path, const String& uid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(2) // STREAM_META_OWNER_NAME
+      .append(uid)
+      .toArray(),
+    "chown");
+}
+
+bool UserFile::chgrp(const String& path, int64_t gid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(5) // STREAM_META_GROUP
+      .append(gid)
+      .toArray(),
+      "chgrp");
+}
+
+bool UserFile::chgrp(const String& path, const String& gid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(4) // STREAM_META_GROUP_NAME
+      .append(gid)
+      .toArray(),
+    "chgrp");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

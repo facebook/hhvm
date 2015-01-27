@@ -46,18 +46,18 @@ array(1) {
 array(1) {
   ["h3"]=>
   string(88) "hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
 }
 array(1) {
   ["h3"]=>
   string(88) "hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
 }
 -- Iteration 9 --
 array(0) {

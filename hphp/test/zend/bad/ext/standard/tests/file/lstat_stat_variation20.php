@@ -46,6 +46,7 @@ var_dump( stat($link_array_with_key['linkname']) );
 echo "\n--- Done ---";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation20_link.tmp");

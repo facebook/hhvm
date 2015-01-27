@@ -1,6 +1,6 @@
-File "anon2.php", line 14, characters 44-45:
+File "anon2.php", line 15, characters 17-18:
 Typing error (Typing[4110])
-File "anon2.php", line 14, characters 44-45:
+File "anon2.php", line 15, characters 17-18:
 This is a num (int/float) because this is used in an arithmetic operation
-File "anon2.php", line 15, characters 6-7:
+File "anon2.php", line 17, characters 6-7:
 It is incompatible with a string

@@ -18,15 +18,13 @@
 #define incl_HPHP_OBJECT_DATA_H_
 
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/classname-is.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
-
-#include "hphp/system/systemlib.h"
 
 #include "hphp/util/low-ptr.h"
 
@@ -35,17 +33,34 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class MixedArray;
 struct TypedValue;
-class PreClass;
-class Class;
+
+#define INVOKE_FEW_ARGS_COUNT 6
+#define INVOKE_FEW_ARGS_DECL3                        \
+  const Variant& a0 = null_variant,                  \
+  const Variant& a1 = null_variant,                  \
+  const Variant& a2 = null_variant
+#define INVOKE_FEW_ARGS_DECL6                        \
+  INVOKE_FEW_ARGS_DECL3,                             \
+  const Variant& a3 = null_variant,                  \
+  const Variant& a4 = null_variant,                  \
+  const Variant& a5 = null_variant
+#define INVOKE_FEW_ARGS_DECL10                       \
+  INVOKE_FEW_ARGS_DECL6,                             \
+  const Variant& a6 = null_variant,                  \
+  const Variant& a7 = null_variant,                  \
+  const Variant& a8 = null_variant,                  \
+  const Variant& a9 = null_variant
+#define INVOKE_FEW_ARGS_HELPER(kind,num) kind##num
+#define INVOKE_FEW_ARGS(kind,num) \
+  INVOKE_FEW_ARGS_HELPER(INVOKE_FEW_ARGS_##kind,num)
+#define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS(DECL,INVOKE_FEW_ARGS_COUNT)
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
 
-class ObjectData {
- public:
-  enum Attribute {
+struct ObjectData {
+  enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
     HasSleep      = 0x0002, // __sleep()
     UseSet        = 0x0004, // __set()
@@ -61,7 +76,10 @@ class ObjectData {
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
     IsCollection  = 0x2000, // it's a collection (and the specific type is
-                            // stored in o_subclassData.u16)
+                            // stored in o_subclass_u8)
+    HasPropEmpty  = 0x4000, // has custom propEmpty logic
+    HasNativePropHandler    // class has native magic props handler
+                  = 0x8000,
     InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
   };
 
@@ -71,85 +89,43 @@ class ObjectData {
     RealPropExist = 16,    // For property_exists
   };
 
+  static const StaticString s_serializedNativeDataKey;
+
  private:
   static __thread int os_max_id;
 
  public:
-  static void resetMaxId() { os_max_id = 0; }
+  static void resetMaxId();
 
-  explicit ObjectData(Class* cls)
-    : m_cls(cls)
-    , o_attribute(0)
-    , m_count(0)
-  {
-    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    o_id = ++os_max_id;
-    instanceInit(cls);
-  }
-
- protected:
-  explicit ObjectData(Class* cls, uint16_t flags)
-    : m_cls(cls)
-    , o_attribute(flags)
-    , m_count(0)
-  {
-    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    o_id = ++os_max_id;
-    instanceInit(cls);
-  }
-
- private:
-  enum class NoInit { noinit };
-  explicit ObjectData(Class* cls, NoInit)
-    : m_cls(cls)
-    , o_attribute(0)
-    , m_count(0)
-  {
-    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    o_id = ++os_max_id;
-  }
+  explicit ObjectData(Class*);
+  ~ObjectData();
 
   // Disallow copy construction and assignemt
   ObjectData(const ObjectData&) = delete;
   ObjectData& operator=(const ObjectData&) = delete;
 
+ protected:
+  explicit ObjectData(Class*, uint16_t flags, HeaderKind = HeaderKind::Object);
+
+ private:
+  enum class NoInit {};
+
+  explicit ObjectData(Class*, NoInit);
+
  public:
-  void setStatic() const { assert(false); }
-  bool isStatic() const { return false; }
-  void setUncounted() const { assert(false); }
-  bool isUncounted() const { return false; }
+  void setStatic() const;
+  bool isStatic() const;
+  void setUncounted() const;
+  bool isUncounted() const;
+
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
-  ~ObjectData();
+  size_t heapSize() const;
+
  public:
 
   // Call newInstance() to instantiate a PHP object
-  static ObjectData* newInstance(Class* cls) {
-    if (auto const ctor = cls->instanceCtor()) {
-      return ctor(cls);
-    }
-    Attr attrs = cls->attrs();
-    if (UNLIKELY(attrs &
-                 (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
-      raiseAbstractClassError(cls);
-    }
-    size_t nProps = cls->numDeclProperties();
-    size_t size = sizeForNProps(nProps);
-    auto const obj = new (MM().objMallocLogged(size)) ObjectData(cls);
-    if (UNLIKELY(cls->callsCustomInstanceInit())) {
-      /*
-        This must happen after the constructor finishes,
-        because it can leak references to obj AND it can
-        throw exceptions. If we have this in the ObjectData
-        constructor, and it throws, obj will be partially
-        destroyed (ie ~ObjectData will be called, resetting
-        the vtable pointer) leaving dangling references
-        to the object (eg in backtraces).
-      */
-      obj->callCustomInstanceInit();
-    }
-    return obj;
-  }
+  static ObjectData* newInstance(Class*);
 
   /*
    * Given a Class that is assumed to be a concrete, regular (not a
@@ -159,120 +135,52 @@ class ObjectData {
    * newInstanceRaw should be called only when size <= kMaxSmartSize,
    * otherwise use newInstanceRawBig.
    */
-  static ObjectData* newInstanceRaw(Class* cls, uint32_t size);
-  static ObjectData* newInstanceRawBig(Class* cls, size_t size);
+  static ObjectData* newInstanceRaw(Class*, uint32_t);
+  static ObjectData* newInstanceRawBig(Class*, size_t);
 
  private:
-  void instanceInit(Class* cls) {
-    setAttributes(cls->getODAttrs());
-    size_t nProps = cls->numDeclProperties();
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
-    if (nProps > 0) {
-      if (cls->pinitVec().size() > 0) {
-        const Class::PropInitVec* propInitVec = m_cls->getPropData();
-        assert(propInitVec != nullptr);
-        assert(nProps == propInitVec->size());
-        if (!cls->hasDeepInitProps()) {
-          memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
-        } else {
-          deepInitHelper(propVec(), &(*propInitVec)[0], nProps);
-        }
-      } else {
-        assert(nProps == cls->declPropInit().size());
-        memcpy(propVec(), &cls->declPropInit()[0], nProps * sizeof(TypedValue));
-      }
-    }
-  }
+  void instanceInit(Class*);
 
  public:
-  static void DeleteObject(ObjectData* p);
+  static void DeleteObject(ObjectData*);
 
-  void release() {
-    assert(!hasMultipleRefs());
-    if (LIKELY(destruct())) DeleteObject(this);
-  }
+  void release();
 
-  Class* getVMClass() const {
-    return m_cls;
-  }
-  bool instanceof(const Class* c) const {
-    return m_cls->classof(c);
-  }
+  Class* getVMClass() const;
+  StrNR getClassName() const;
+  int getId() const;
 
-  bool isCollection() const {
-    return getAttribute(Attribute::IsCollection);
-  }
+  // instanceof() can be used for both classes and interfaces.
+  bool instanceof(const String&) const;
+  bool instanceof(const Class*) const;
 
-  bool isMutableCollection() const {
-    return Collection::isMutableType(getCollectionType());
-  }
+  // Whether the object implements Iterator.
+  bool isIterator() const;
 
-  bool isImmutableCollection() const {
-    return Collection::isImmutableType(getCollectionType());
-  }
+  // Whether the object is a collection.
+  bool isCollection() const;
+  bool isMutableCollection() const;
+  bool isImmutableCollection() const;
 
-  Collection::Type getCollectionType() const {
-    return isCollection() ? static_cast<Collection::Type>(o_subclassData.u16)
-                          : Collection::Type::InvalidType;
-  }
+  Collection::Type getCollectionType() const;
 
-  bool implementsIterator() {
-    return (instanceof(SystemLib::s_IteratorClass));
-  }
+  bool getAttribute(Attribute) const;
+  void setAttribute(Attribute) const;
 
-  void setAttributes(int attrs) { o_attribute |= attrs; }
-  void setAttributes(const ObjectData* o) { o_attribute |= o->o_attribute; }
-  bool getAttribute(Attribute attr) const { return o_attribute & attr; }
-  void setAttribute(Attribute attr) const { o_attribute |= attr;}
-  void clearAttribute(Attribute attr) const { o_attribute &= ~attr;}
-  bool noDestruct() const { return getAttribute(NoDestructor); }
-  void setNoDestruct() { setAttribute(NoDestructor); }
-  ObjectData* clearNoDestruct() { clearAttribute(NoDestructor); return this; }
+  bool noDestruct() const;
+  void setNoDestruct();
+  void clearNoDestruct();
 
   Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
 
-  /**
-   * o_instanceof() can be used for both classes and interfaces.
+  /*
+   * Type conversions. Some subclasses of ObjectData have custom conversions.
+   * (e.g. SimpleXMLElement -> bool)
    */
-  bool o_instanceof(const String& s) const;
-
-  // class info
-  StrNR o_getClassName() const;
-  int o_getId() const { return o_id;}
-
-  bool o_toBoolean() const {
-    if (UNLIKELY(getAttribute(CallToImpl))) {
-      return o_toBooleanImpl();
-    }
-    return true;
-  }
-
-  bool castableToNumber() const {
-    return getAttribute(CallToImpl) && !isCollection();
-  }
-
-  int64_t o_toInt64() const {
-    if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
-      return o_toInt64Impl();
-    }
-    raiseObjToIntNotice(classname_cstr());
-    return 1;
-  }
-
-  double o_toDouble() const {
-    if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
-      return o_toDoubleImpl();
-    }
-    return o_toInt64();
-  }
-
-  // overridable casting
-  bool o_toBooleanImpl() const noexcept;
-  int64_t o_toInt64Impl() const noexcept;
-  double o_toDoubleImpl() const noexcept;
-  Array o_toArray(bool pubOnly = false) const;
+  bool toBoolean() const;
+  int64_t toInt64() const;
+  double toDouble() const;
+  Array toArray(bool pubOnly = false) const;
 
   bool destruct();
 
@@ -295,15 +203,15 @@ class ObjectData {
   // TODO Task #2584896: o_invoke and o_invoke_few_args are deprecated. These
   // APIs don't properly take class context into account when looking up the
   // method, and they duplicate some of the functionality from invokeFunc(),
-  // invokeFuncFew(), and vm_decode_function(). We should remove these APIs
-  // and migrate all callers to use invokeFunc(), invokeFuncFew(), and
+  // invokeFuncFew(), and vm_decode_function(). We should remove these APIs and
+  // migrate all callers to use invokeFunc(), invokeFuncFew(), and
   // vm_decode_function() instead.
   Variant o_invoke(const String& s, const Variant& params, bool fatal = true);
   Variant o_invoke_few_args(const String& s, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
-  void serialize(VariableSerializer* serializer) const;
-  void serializeImpl(VariableSerializer* serializer) const;
+  void serialize(VariableSerializer*) const;
+  void serializeImpl(VariableSerializer*) const;
   ObjectData* clone();
 
   Variant offsetGet(Variant key);
@@ -313,14 +221,6 @@ class ObjectData {
   Variant invokeSleep();
   Variant invokeToDebugDisplay();
   Variant invokeWakeup();
-
-  /**
-   * Used by the ext_zend_compat layer.
-   * Identical to o_get but the output is boxed.
-   */
-  RefData* zGetProp(Class* ctx, const StringData* key,
-                    bool& visible, bool& accessible,
-                    bool& unset);
 
   /*
    * Returns whether this object has any dynamic properties.
@@ -350,24 +250,21 @@ class ObjectData {
   TypedValue* propVec();
   const TypedValue* propVec() const;
 
+  uint8_t& subclass_u8();
+  uint8_t subclass_u8() const;
+
  public:
   ObjectData* callCustomInstanceInit();
 
   //============================================================================
   // Miscellaneous.
 
-  void cloneSet(ObjectData* clone);
+  void cloneSet(ObjectData*);
   ObjectData* cloneImpl();
 
-  const Func* methodNamed(const StringData* sd) const {
-    return getVMClass()->lookupMethod(sd);
-  }
+  const Func* methodNamed(const StringData*) const;
 
-  static size_t sizeForNProps(Slot nProps) {
-    size_t sz = sizeof(ObjectData) + (sizeof(TypedValue) * nProps);
-    assert((sz & (sizeof(TypedValue) - 1)) == 0);
-    return sz;
-  }
+  static size_t sizeForNProps(Slot);
 
   //============================================================================
   // Properties.
@@ -380,20 +277,37 @@ class ObjectData {
   template <typename T>
   inline Variant o_setImpl(const String& propName, T v, const String& context);
  public:
-  TypedValue* getProp(Class* ctx, const StringData* key, bool& visible,
-                      bool& accessible, bool& unset);
-  const TypedValue* getProp(Class* ctx, const StringData* key, bool& visible,
-                            bool& accessible, bool& unset) const;
+
+  template <class T>
+  struct PropLookup {
+    T prop;
+    bool accessible;
+  };
+
+  PropLookup<TypedValue*> getProp(const Class*, const StringData*);
+  PropLookup<const TypedValue*> getProp(const Class*, const StringData*) const;
+
  private:
   template <bool warn, bool define>
-  void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-                const StringData* key);
+  TypedValue* propImpl(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  bool propEmptyImpl(const Class* ctx, const StringData* key);
+
   bool invokeSet(TypedValue* retval, const StringData* key, TypedValue* val);
   bool invokeGet(TypedValue* retval, const StringData* key);
-  bool invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
-                     const StringData* key);
   bool invokeIsset(TypedValue* retval, const StringData* key);
   bool invokeUnset(TypedValue* retval, const StringData* key);
+  bool invokeNativeGetProp(TypedValue* retval, const StringData* key);
+  bool invokeNativeSetProp(TypedValue* retval, const StringData* key,
+                           TypedValue* val);
+  bool invokeNativeIssetProp(TypedValue* retval, const StringData* key);
+  bool invokeNativeUnsetProp(TypedValue* retval, const StringData* key);
+
   void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
                Array& props, std::vector<bool>& inserted) const;
   void getProps(const Class* klass, bool pubOnly, const PreClass* pc,
@@ -402,34 +316,64 @@ class ObjectData {
                      Array& props, std::vector<bool>& inserted) const;
 
  public:
-  void prop(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-            const StringData* key);
-  void propD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-             const StringData* key);
-  void propW(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-             const StringData* key);
-  void propWD(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
-              const StringData* key);
-  bool propIsset(Class* ctx, const StringData* key);
-  bool propEmpty(Class* ctx, const StringData* key);
+  TypedValue* prop(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  TypedValue* propD(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  TypedValue* propW(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  TypedValue* propWD(
+    TypedValue* tvScratch,
+    TypedValue* tvRef,
+    Class* ctx,
+    const StringData* key
+  );
+
+  bool propIsset(const Class* ctx, const StringData* key);
+  bool propEmpty(const Class* ctx, const StringData* key);
 
   void setProp(Class* ctx, const StringData* key, TypedValue* val,
                bool bindingAssignment = false);
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
+
   template <bool setResult>
-  void incDecProp(TypedValue& tvRef, Class* ctx, IncDecOp op,
-                  const StringData* key, TypedValue& dest);
+  void incDecProp(
+    Class* ctx,
+    IncDecOp op,
+    const StringData* key,
+    TypedValue& dest
+  );
+
   void unsetProp(Class* ctx, const StringData* key);
 
   static void raiseObjToIntNotice(const char*);
-  static void raiseAbstractClassError(Class* cls);
-  void raiseUndefProp(const StringData* name);
+  static void raiseAbstractClassError(Class*);
+  void raiseUndefProp(const StringData*);
 
-  static ptrdiff_t getVMClassOffset() { return offsetof(ObjectData, m_cls); }
-  static ptrdiff_t attributeOff() { return offsetof(ObjectData, o_attribute); }
-  static ptrdiff_t whStateOffset() {
-    return offsetof(ObjectData, o_subclassData.u8[0]);
+  static constexpr ptrdiff_t getVMClassOffset() {
+    return offsetof(ObjectData, m_cls);
+  }
+  static constexpr ptrdiff_t attributeOff() {
+    return offsetof(ObjectData, o_attribute);
+  }
+  static constexpr ptrdiff_t whStateOffset() {
+    return offsetof(ObjectData, o_subclass_u8);
   }
 
 private:
@@ -439,38 +383,54 @@ private:
 
   static void compileTimeAssertions();
 
-private:
-  LowClassPtr m_cls;
-  mutable uint16_t o_attribute;
+  bool toBooleanImpl() const noexcept;
+  int64_t toInt64Impl() const noexcept;
+  double toDoubleImpl() const noexcept;
 
-  // 16 bits of memory that can be reused by subclasses
-protected:
-  union {
-    uint16_t u16;
-    uint8_t u8[2];
-  } o_subclassData;
+// offset:  0    4    8     10  11    12     16   20          32
+// 64bit:   cls       attr  u8  kind  count  id   [subclass]  [props...]
+// lowptr:  cls  id   attr  u8  kind  count  [subclass][props...]
 
 private:
 #ifdef USE_LOWPTR
+  LowClassPtr m_cls;
   int o_id; // Numeric identifier of this object (used for var_dump())
-  mutable RefCount m_count;
+  union {
+    struct {
+      mutable uint16_t o_attribute;
+      uint8_t o_subclass_u8; // for subclasses
+      HeaderKind m_kind;
+      mutable RefCount m_count;
+    };
+    uint64_t m_attr_kind_count;
+  };
 #else
-  mutable RefCount m_count;
+  LowClassPtr m_cls;
+  union {
+    struct {
+      mutable uint16_t o_attribute;
+      uint8_t o_subclass_u8; // for subclasses
+      HeaderKind m_kind;
+      mutable RefCount m_count;
+    };
+    uint64_t m_attr_kind_count;
+  };
   int o_id; // Numeric identifier of this object (used for var_dump())
 #endif
-} __attribute__((__aligned__(16)));
+};
 
-typedef GlobalNameValueTableWrapper GlobalVariables;
+typedef GlobalsArray GlobalVariables;
 
-inline
-CountableHelper::CountableHelper(ObjectData* object) : m_object(object) {
-  object->incRefCount();
-}
-
-inline
-CountableHelper::~CountableHelper() {
-  m_object->decRefCount();
-}
+struct CountableHelper : private boost::noncopyable {
+  explicit CountableHelper(ObjectData* object) : m_object(object) {
+    object->incRefCount();
+  }
+  ~CountableHelper() {
+    m_object->decRefCount();
+  }
+private:
+  ObjectData *m_object;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -488,8 +448,9 @@ inline ObjectData* instanceFromTv(TypedValue* tv) {
 
 template<uint16_t Flags>
 struct ExtObjectDataFlags : ObjectData {
-  explicit ExtObjectDataFlags(HPHP::Class* cb)
-    : ObjectData(cb, Flags | ObjectData::IsCppBuiltin)
+  explicit ExtObjectDataFlags(HPHP::Class* cb,
+                              HeaderKind kind = HeaderKind::Object)
+    : ObjectData(cb, Flags | ObjectData::IsCppBuiltin, kind)
   {
     assert(!getVMClass()->callsCustomInstanceInit());
   }
@@ -500,8 +461,67 @@ protected:
 
 using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
 
+template<class T, class... Args> T* newobj(Args&&... args) {
+  static_assert(std::is_convertible<T*,ObjectData*>::value, "");
+  auto const mem = MM().smartMallocSizeLogged(sizeof(T));
+  try {
+    return new (mem) T(std::forward<Args>(args)...);
+  } catch (...) {
+    MM().smartFreeSizeLogged(mem, sizeof(T));
+    throw;
+  }
+}
+
+#define DECLARE_OBJECT_ALLOCATION(T)                                    \
+  static void typeCheck() {                                             \
+    static_assert(std::is_base_of<ObjectData,T>::value, "");            \
+  }                                                                     \
+  virtual void sweep() override;
+
+#define IMPLEMENT_OBJECT_ALLOCATION(T) \
+  static_assert(std::is_base_of<ObjectData,T>::value, ""); \
+  void HPHP::T::sweep() { this->~T(); }
+
+#define DECLARE_CLASS_NO_SWEEP(originalName)                    \
+  public:                                                       \
+  CLASSNAME_IS(#originalName)                                   \
+  friend ObjectData* new_##originalName##_Instance(Class*);     \
+  friend void delete_##originalName(ObjectData*, const Class*); \
+  static inline HPHP::LowClassPtr& classof() {                  \
+    static HPHP::LowClassPtr result;                            \
+    return result;                                              \
+  }
+
+/**
+ * By this declaration a class introduced with DECLARE_CLASS can only
+ * be smart-allocated.
+ */
+#define DECLARE_CLASS(cls)                      \
+  DECLARE_OBJECT_ALLOCATION(c_##cls)            \
+  DECLARE_CLASS_NO_SWEEP(cls)
+
+#define IMPLEMENT_CLASS_NO_SWEEP(cls)
+
+#define IMPLEMENT_CLASS(cls)                    \
+  IMPLEMENT_OBJECT_ALLOCATION(c_##cls)
+
+template<class T, class... Args>
+typename std::enable_if<
+  std::is_convertible<T*, ObjectData*>::value,
+  SmartPtr<T>
+>::type makeSmartPtr(Args&&... args) {
+  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
-}
+#define incl_HPHP_OBJECT_DATA_INL_H_
+#include "hphp/runtime/base/object-data-inl.h"
+#undef incl_HPHP_OBJECT_DATA_INL_H_
+
+///////////////////////////////////////////////////////////////////////////////
 
 #endif

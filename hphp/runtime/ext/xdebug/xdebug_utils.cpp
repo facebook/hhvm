@@ -19,8 +19,9 @@
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/ext_datetime.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 
 namespace HPHP {
@@ -40,7 +41,7 @@ bool XDebugUtils::isTriggerSet(const String& trigger) {
   return cookies.exists(trigger) || get.exists(trigger) || post.exists(trigger);
 }
 
-// TODO(#4489053) Clean this up-- this was taken from php5 xdebug
+// TODO(#3704) Clean this up-- this was taken from php5 xdebug
 static char *xdebug_raw_url_encode(char const *s, int len, int *new_length,
                                    int skip_slash) {
   static unsigned char hexchars[] = "0123456789ABCDEF";
@@ -69,7 +70,7 @@ static char *xdebug_raw_url_encode(char const *s, int len, int *new_length,
   return ((char *) str);
 }
 
-// TODO(#4489053) Clean this up-- this was taken from php5 xdebug
+// TODO(#3704) Clean this up-- this was taken from php5 xdebug
 char* XDebugUtils::pathToUrl(const char* fileurl) {
   int l, i, new_len;
   char *tmp = nullptr;
@@ -84,7 +85,7 @@ char* XDebugUtils::pathToUrl(const char* fileurl) {
     tmp = xdstrdup(fileurl);
   } else if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
     String path(fileurl, CopyString);
-    Variant realpath = f_realpath(path);
+    Variant realpath = HHVM_FN(realpath)(path);
     if (realpath.isString()) {
       char* realpath_str = realpath.toString().get()->mutableData();
       tmp = xdebug_sprintf("file://%s", realpath_str);
@@ -140,7 +141,7 @@ int XDebugUtils::stackDepth() {
   int depth = 0;
   for (ActRec* fp = g_context->getStackFrame();
       fp != nullptr;
-      fp = g_context->getPrevVMState(fp), depth++) {}
+      fp = g_context->getPrevVMStateUNSAFE(fp), depth++) {}
   return depth;
 }
 

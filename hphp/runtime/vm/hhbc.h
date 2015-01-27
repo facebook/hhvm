@@ -17,11 +17,13 @@
 #ifndef incl_HPHP_VM_HHBC_H_
 #define incl_HPHP_VM_HHBC_H_
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 
@@ -485,6 +487,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(BoxRNop,         NA,               ONE(RV),         ONE(VV),    NF) \
   O(UnboxR,          NA,               ONE(RV),         ONE(CV),    NF) \
   O(UnboxRNop,       NA,               ONE(RV),         ONE(CV),    NF) \
+  O(RGetCNop,        NA,               ONE(CV),         ONE(RV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
   O(NullUninit,      NA,               NOV,             ONE(UV),    NF) \
   O(True,            NA,               NOV,             ONE(CV),    NF) \
@@ -527,7 +530,6 @@ constexpr int32_t kMaxConcatN = 4;
   O(Div,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mod,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Pow,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(Sqrt,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(Xor,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Not,             NA,               ONE(CV),         ONE(CV),    NF) \
   O(Same,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -582,6 +584,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(VGetM,           ONE(MA),          MMANY,           ONE(VV),    NF) \
   O(AGetC,           NA,               ONE(CV),         ONE(AV),    NF) \
   O(AGetL,           ONE(LA),          NOV,             ONE(AV),    NF) \
+  O(GetMemoKey,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
@@ -721,11 +724,8 @@ constexpr int32_t kMaxConcatN = 4;
   O(Await,           ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
-  O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
-  O(Floor,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(Ceil,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
   O(InitProp,        TWO(SA,                                            \
                        OA(InitPropOp)),ONE(CV),         NOV,        NF) \
@@ -981,6 +981,7 @@ Offset instrJumpTarget(const Op* instrs, Offset pos);
  * Returns the set of bytecode offsets for the instructions that may
  * be executed immediately after opc.
  */
+using OffsetSet = hphp_hash_set<Offset>;
 OffsetSet instrSuccOffsets(Op* opc, const Unit* unit);
 
 struct StackTransInfo {
@@ -989,9 +990,9 @@ struct StackTransInfo {
     InsertMid
   };
   Kind kind;
-  int numPops;
-  int numPushes;
-  int pos;
+  int numPops;   // only for PushPop
+  int numPushes; // only for PushPop
+  int pos;       // only for InsertMid
 };
 
 bool instrIsNonCallControlFlow(Op opcode);

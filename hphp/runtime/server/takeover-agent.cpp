@@ -17,8 +17,8 @@
 #include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "folly/String.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+#include <folly/String.h>
 #include <afdt.h>
 
 /*
@@ -196,7 +196,7 @@ int TakeoverAgent::takeover(std::chrono::seconds timeoutSec) {
     Logger::Error(
         "AFDT did not receive a file descriptor: "
         "response = '%s'",
-        f_addcslashes(resp, null_string).data());
+        HHVM_FN(addcslashes)(resp, null_string).data());
     errno = EADDRINUSE;
     return -1;
   }
@@ -242,7 +242,7 @@ void TakeoverAgent::requestShutdown() {
       Logger::Error(
           "Old server could not shut down: "
           "response = '%s'",
-          f_addcslashes(resp, null_string).data());
+          HHVM_FN(addcslashes)(resp, null_string).data());
     } else {
       Logger::Info("takeover: old satellites have shut down");
     }

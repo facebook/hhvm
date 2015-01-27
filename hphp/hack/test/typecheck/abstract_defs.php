@@ -11,11 +11,15 @@
 
 trait FooTrait {
   abstract public function abstractFunc();
-  final public function doSomething() { return $this->abstractFunc(); }
+  final public function doSomething() {
+    return $this->abstractFunc();
+  }
 }
 
 abstract class Base {
-  final public function abstractFunc() { return 4; }
+  final public function abstractFunc() {
+    return 4;
+  }
 }
 
 class Child extends Base {

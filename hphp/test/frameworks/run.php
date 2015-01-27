@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?hh
 /*
  * This script allows us to more easily test the key OSS PHP frameworks
@@ -342,12 +341,15 @@ function run_test_bucket(array $test_bucket): int {
 }
 
 function get_unit_testing_infra_dependencies(): void {
-  // Install composer.phar. If it exists, but it is nearing that
-  // 30 day old mark, resintall it anyway.
-  if (!(file_exists(__DIR__."/composer.phar")) ||
-      (time() - filectime(__DIR__."/composer.phar")) >= 29*24*60*60) {
+  // Even if we have vendor/, try and grab composer in case we're missing
+  // we're running a framework that isn't already installed.
+  if (
+    (!Options::$local_source_only) &&
+    (!(file_exists(__DIR__."/composer.phar")) ||
+      (time() - filectime(__DIR__."/composer.phar")) >= 29*24*60*60)
+  ) {
     human("Getting composer.phar....\n");
-    unlink(__DIR__."/composer.phar");
+    delete_file(__DIR__."/composer.phar");
     $comp_url = "http://getcomposer.org/composer.phar";
     $get_composer_command = "curl ".$comp_url." -o ".
       __DIR__."/composer.phar 2>&1";
@@ -358,19 +360,52 @@ function get_unit_testing_infra_dependencies(): void {
     }
   }
 
+  $checksum = md5(serialize([
+    // Use both in case composer.json has been changed, but the lock file
+    // hasn't been updated yet.
+    file_get_contents(__DIR__.'/composer.json'),
+    file_get_contents(__DIR__.'/composer.lock'),
+  ]));
+  $stamp_file = __DIR__.'/vendor/'.$checksum.'.stamp';
+  if (file_exists($stamp_file)) {
+    return;
+  }
+
+  $cache_dir = Options::$cache_directory;
+  $cache_file = $cache_dir.'/vendor-'.$checksum.'.tar.bz2';
+  if (!file_exists($stamp_file)) {
+    invariant(
+      file_exists($cache_file) || !Options::$local_source_only,
+      '--local-source-only specified, but no vendor cache'
+    );
+    if ($cache_dir && file_exists($cache_file)) {
+      human("Extracting vendor cache, eg PHPUnit...\n");
+      $pd = new PharData($cache_file);
+      $pd->extractTo(__DIR__);
+      invariant(file_exists($stamp_file), 'Failed to extract vendor cache');
+      invariant(
+        file_exists(__DIR__.'/vendor/bin/phpunit'),
+        'PHPUnit executable not in vendor cache',
+      );
+      return;
+    }
+  }
+
+  // We don't have a cached vendor/, but as --local-source-only wasn't
+  // specified, we can try to download it.
+
   // Quick hack to make sure we get the latest phpunit binary from composer
   $md5_file = __DIR__."/composer.json.md5";
-  $json_file_contents = file_get_contents(__DIR__."/composer.json");
   $vendor_dir = __DIR__."/vendor";
   $lock_file = __DIR__."/composer.lock";
   if (!file_exists($md5_file) ||
-      file_get_contents($md5_file) !== md5($json_file_contents)) {
+      file_get_contents($md5_file) !== $checksum) {
     human("\nUpdated composer.json found. Updating phpunit binary.\n");
     if (file_exists($vendor_dir)) {
       remove_dir_recursive($vendor_dir);
     }
-    unlink($lock_file);
-    file_put_contents($md5_file, md5($json_file_contents));
+    delete_file($lock_file);
+    file_put_contents($md5_file, $checksum);
   }
 
   // Install phpunit from composer.json located in __DIR__
@@ -390,6 +425,13 @@ function get_unit_testing_infra_dependencies(): void {
     }
   }
 
+  touch($stamp_file);
+  if ($cache_dir) {
+    run_install(
+      'tar jcf '.escapeshellarg($cache_file).' vendor/',
+      __DIR__
+    );
+  }
 }
 
 function print_diffs(Framework $framework): void {
@@ -614,8 +656,6 @@ function oss_test_option_map(): OptionInfoMap {
     'isolate'             => Pair {'',   "Try to make tests that have ".
                                          "external dependencies automatically ".
                                          "fail"},
-    'toran-proxy:'        => Pair {'',   "URL of Toran Proxy to use for ".
-                                         "dependencies"},
     'cache-directory:'    => Pair {'',   'Directory to store source tarballs'},
     'local-source-only'   => Pair {'',   'Fail if git or composer calls are '.
                                          'needed'},

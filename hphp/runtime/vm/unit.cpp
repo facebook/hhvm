@@ -16,6 +16,29 @@
 
 #include "hphp/runtime/vm/unit.h"
 
+#include <algorithm>
+#include <atomic>
+#include <cstdlib>
+#include <cstring>
+#include <iomanip>
+#include <map>
+#include <ostream>
+#include <sstream>
+#include <vector>
+
+#include <boost/container/flat_map.hpp>
+
+#include <folly/Format.h>
+
+#include <tbb/concurrent_hash_map.h>
+
+#include "hphp/util/alloc.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/compilation-flags.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/functional.h"
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -54,49 +77,94 @@
 
 #include "hphp/runtime/server/source-root-info.h"
 
+#include "hphp/runtime/ext/string/ext_string.h"
+
 #include "hphp/system/systemlib.h"
 
-#include "hphp/util/alloc.h"
-#include "hphp/util/assertions.h"
-#include "hphp/util/compilation-flags.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/trace.h"
-
-#include <folly/Format.h>
-
-#include <algorithm>
-#include <atomic>
-#include <cstdlib>
-#include <cstring>
-#include <iomanip>
-#include <map>
-#include <ostream>
-#include <sstream>
-#include <vector>
-
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhbc);
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
 
 const StaticString s_stdin("STDIN");
 const StaticString s_stdout("STDOUT");
 const StaticString s_stderr("STDERR");
 
-Mutex Unit::s_classesMutex;
+//////////////////////////////////////////////////////////////////////
 
-
-///////////////////////////////////////////////////////////////////////////////
-
-/**
+/*
  * Read typed data from an offset relative to a base address
  */
-template <class T>
+template<class T>
 T& getDataRef(void* base, unsigned offset) {
-  return *(T*)((char*)base + offset);
+  return *reinterpret_cast<T*>(static_cast<char*>(base) + offset);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * We store 'detailed' line number information on a table on the side, because
+ * in production modes for HHVM it's generally not useful (which keeps Unit
+ * smaller in that case)---this stuff is only used for the debugger, where we
+ * can afford the lookup here.  The normal Unit m_lineTable is capable of
+ * producing enough line number information for things needed in production
+ * modes (backtraces, warnings, etc).
+ */
+
+using LineToOffsetRangeVecMap = std::map<int,OffsetRangeVec>;
+
+struct ExtendedLineInfo {
+  SourceLocTable sourceLocTable;
+
+  /*
+   * Map from source lines to a collection of all the bytecode ranges the line
+   * encompasses.
+   *
+   * The value type of the map is a list of offset ranges, so a single line
+   * with several sub-statements may correspond to the bytecodes of all of the
+   * sub-statements.
+   *
+   * May not be initialized.  Lookups need to check if it's empty() and if so
+   * compute it from sourceLocTable.
+   */
+  LineToOffsetRangeVecMap lineToOffsetRange;
+};
+
+using ExtendedLineInfoCache = tbb::concurrent_hash_map<
+  const Unit*,
+  ExtendedLineInfo,
+  pointer_hash<Unit>
+>;
+ExtendedLineInfoCache s_extendedLineInfo;
+
+using LineTableStash = tbb::concurrent_hash_map<
+  const Unit*,
+  LineTable,
+  pointer_hash<Unit>
+>;
+LineTableStash s_lineTables;
+
+/*
+ * Since line numbers are only used for generating warnings and backtraces, the
+ * set of Offset-to-Line# mappings needed is sparse.  To save memory we load
+ * these mappings lazily from the repo and cache only the ones we actually use.
+*/
+
+using LineMap = boost::container::flat_map<Offset,int>;
+
+using LineInfoCache = tbb::concurrent_hash_map<
+  const Unit*,
+  LineMap,
+  pointer_hash<Unit>
+>;
+LineInfoCache s_lineInfo;
+
+//////////////////////////////////////////////////////////////////////
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // MergeInfo.
@@ -115,9 +183,18 @@ Unit::MergeInfo* Unit::MergeInfo::alloc(size_t size) {
 ///////////////////////////////////////////////////////////////////////////////
 // Construction and destruction.
 
-Unit::Unit() : m_mainReturn(make_tv<KindOfUninit>()) {}
+Unit::Unit()
+  : m_mergeOnly(false)
+  , m_interpretOnly(false)
+  , m_isHHFile(false)
+  , m_mainReturn(make_tv<KindOfUninit>())
+{}
 
 Unit::~Unit() {
+  s_extendedLineInfo.erase(this);
+  s_lineTables.erase(this);
+  s_lineInfo.erase(this);
+
   if (!RuntimeOption::RepoAuthoritative) {
     if (debug) {
       // poison released bytecode
@@ -148,7 +225,7 @@ Unit::~Unit() {
   if (m_pseudoMainCache) {
     for (auto it = m_pseudoMainCache->begin();
          it != m_pseudoMainCache->end(); ++it) {
-      delete it->second;
+      Func::destroy(it->second);
     }
     delete m_pseudoMainCache;
   }
@@ -166,28 +243,52 @@ void Unit::operator delete(void* p, size_t sz) {
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
 
+static SourceLocTable loadSourceLocTable(const Unit* unit) {
+  auto ret = SourceLocTable{};
+  if (unit->repoID() == RepoIdInvalid) return ret;
+
+  Lock lock(g_classesMutex);
+  auto& urp = Repo::get().urp();
+  urp.getSourceLocTab[unit->repoID()].get(unit->sn(), ret);
+  return ret;
+}
+
 /*
- * Return a copy of the Unit's SourceLocTable, extracting it from the repo if
+ * Return the Unit's SourceLocTable, extracting it from the repo if
  * necessary.
  */
-SourceLocTable Unit::getSourceLocTable() const {
-  if (m_sourceLocTable.size() > 0 || m_repoId == RepoIdInvalid) {
-    return m_sourceLocTable;
+const SourceLocTable& getSourceLocTable(const Unit* unit) {
+  {
+    ExtendedLineInfoCache::const_accessor acc;
+    if (s_extendedLineInfo.find(acc, unit)) {
+      return acc->second.sourceLocTable;
+    }
   }
-  Lock lock(s_classesMutex);
-  UnitRepoProxy& urp = Repo::get().urp();
-  urp.getSourceLocTab(m_repoId).get(m_sn, ((Unit*)this)->m_sourceLocTable);
-  return m_sourceLocTable;
+
+  // Try to load it while we're not holding the lock.
+  auto newTable = loadSourceLocTable(unit);
+  ExtendedLineInfoCache::accessor acc;
+  if (s_extendedLineInfo.insert(acc, unit)) {
+    acc->second.sourceLocTable = std::move(newTable);
+  }
+  return acc->second.sourceLocTable;
 }
 
 /*
  * Return a copy of the Unit's line to OffsetRangeVec table.
  */
-LineToOffsetRangeVecMap Unit::getLineToOffsetRangeVecMap() const {
-  if (m_lineToOffsetRangeVecMap.size() > 0) {
-    return m_lineToOffsetRangeVecMap;
+static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
+  {
+    ExtendedLineInfoCache::const_accessor acc;
+    if (s_extendedLineInfo.find(acc, unit)) {
+      if (!acc->second.lineToOffsetRange.empty()) {
+        return acc->second.lineToOffsetRange;
+      }
+    }
   }
-  auto srcLoc = this->getSourceLocTable();
+
+  auto const& srcLoc = getSourceLocTable(unit);
+
   LineToOffsetRangeVecMap map;
   Offset baseOff = 0;
   for (size_t i = 0; i < srcLoc.size(); ++i) {
@@ -207,8 +308,33 @@ LineToOffsetRangeVecMap Unit::getLineToOffsetRangeVecMap() const {
     }
     baseOff = pastOff;
   }
-  const_cast<Unit*>(this)->m_lineToOffsetRangeVecMap = map;
-  return m_lineToOffsetRangeVecMap;
+
+  ExtendedLineInfoCache::accessor acc;
+  if (!s_extendedLineInfo.find(acc, unit)) {
+    always_assert_flog(0, "ExtendedLineInfoCache was not found when it should "
+      "have been");
+  }
+  if (acc->second.lineToOffsetRange.empty()) {
+    acc->second.lineToOffsetRange = std::move(map);
+  }
+  return acc->second.lineToOffsetRange;
+}
+
+static LineTable loadLineTable(const Unit* unit) {
+  auto ret = LineTable{};
+  if (unit->repoID() == RepoIdInvalid) {
+    LineTableStash::accessor acc;
+    if (s_lineTables.find(acc, unit)) {
+      return acc->second;
+    }
+    return ret;
+  }
+
+  Lock lock(g_classesMutex);
+  auto& urp = Repo::get().urp();
+  urp.getUnitLineTable(unit->repoID(), unit->sn(), ret);
+
+  return ret;
 }
 
 int getLineNumber(const LineTable& table, Offset pc) {
@@ -222,7 +348,35 @@ int getLineNumber(const LineTable& table, Offset pc) {
 }
 
 int Unit::getLineNumber(Offset pc) const {
-  return HPHP::getLineNumber(m_lineTable, pc);
+  {
+    LineInfoCache::const_accessor acc;
+    if (s_lineInfo.find(acc, this)) {
+      auto& lineMap = acc->second;
+      auto const it = lineMap.find(pc);
+      if (it != lineMap.end()) {
+        return it->second;
+      }
+    }
+  }
+
+  auto line = HPHP::getLineNumber(loadLineTable(this), pc);
+
+  {
+    LineInfoCache::accessor acc;
+    if (s_lineInfo.find(acc, this)) {
+      auto& lineMap = acc->second;
+      lineMap.insert(std::pair<Offset,int>(pc, line));
+      return line;
+    }
+  }
+
+  LineMap newLineMap{};
+  newLineMap.insert(std::pair<Offset,int>(pc, line));
+  LineInfoCache::accessor acc;
+  if (s_lineInfo.insert(acc, this)) {
+    acc->second = std::move(newLineMap);
+  }
+  return line;
 }
 
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
@@ -237,16 +391,17 @@ bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
 }
 
 bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
-  auto sourceLocTable = getSourceLocTable();
+  auto const& sourceLocTable = getSourceLocTable(this);
   return HPHP::getSourceLoc(sourceLocTable, pc, sLoc);
 }
 
 bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
   LineEntry key = LineEntry(pc, -1);
-  auto it = std::upper_bound(m_lineTable.begin(), m_lineTable.end(), key);
-  if (it != m_lineTable.end()) {
+  auto lineTable = loadLineTable(this);
+  auto it = std::upper_bound(lineTable.begin(), lineTable.end(), key);
+  if (it != lineTable.end()) {
     assert(pc < it->pastOffset());
-    Offset base = it == m_lineTable.begin() ? 0 : (it-1)->pastOffset();
+    Offset base = it == lineTable.begin() ? 0 : (it-1)->pastOffset();
     range.m_base = base;
     range.m_past = it->pastOffset();
     return true;
@@ -256,7 +411,7 @@ bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
 
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
   assert(offsets.size() == 0);
-  auto map = getLineToOffsetRangeVecMap();
+  auto map = getLineToOffsetRangeVecMap(this);
   auto it = map.find(line);
   if (it == map.end()) return false;
   offsets = it->second;
@@ -273,13 +428,19 @@ const Func* Unit::getFunc(Offset pc) const {
   return nullptr;
 }
 
+void stashLineTable(const Unit* unit, LineTable table) {
+  LineTableStash::accessor acc;
+  if (s_lineTables.insert(acc, unit)) {
+    acc->second = std::move(table);
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Funcs and PreClasses.
 
 Func* Unit::getMain(Class* cls /* = nullptr */) const {
   if (!cls) return *m_mergeInfo->funcBegin();
-  Lock lock(s_classesMutex);
+  Lock lock(g_classesMutex);
   if (!m_pseudoMainCache) {
     m_pseudoMainCache = new PseudoMainCacheMap;
   }
@@ -370,7 +531,6 @@ void Unit::loadFunc(const Func *func) {
 class FrameRestore {
  public:
   explicit FrameRestore(const PreClass* preClass) {
-    auto const ec = g_context.getNoCheck();
     ActRec* fp = vmfp();
     PC pc = vmpc();
 
@@ -399,7 +559,7 @@ class FrameRestore {
       tmp.initNumArgs(0);
       vmfp() = &tmp;
       vmpc() = preClass->unit()->at(preClass->getOffset());
-      ec->pushLocalsAndIterators(tmp.m_func);
+      pushLocalsAndIterators(tmp.m_func);
     } else {
       m_top = nullptr;
       m_fp = nullptr;
@@ -418,7 +578,6 @@ class FrameRestore {
   ActRec* m_fp;
   PC      m_pc;
 };
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class lookup.
@@ -498,7 +657,7 @@ Class* Unit::defClass(const PreClass* preClass,
       FrameRestore fr(preClass);
       newClass = Class::newClass(const_cast<PreClass*>(preClass), parent);
     }
-    Lock l(Unit::s_classesMutex);
+    Lock l(g_classesMutex);
 
     if (UNLIKELY(top != nameList->clsList())) {
       top = nameList->clsList();
@@ -720,18 +879,25 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
 namespace {
 
 TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
-  // If the class is an enum, pull out the actual base type.
+  TypeAliasReq req;
+
   if (isEnum(klass)) {
-    return TypeAliasReq { klass->enumBaseTy(),
-                          thisType->nullable,
-                          nullptr,
-                          thisType->name };
+    // If the class is an enum, pull out the actual base type.
+    if (auto const enumType = klass->enumBaseTy()) {
+      req.kind     = *enumType;
+      req.nullable = thisType->nullable;
+      req.name     = thisType->name;
+    } else {
+      req.any  = true;
+      req.name = thisType->name;
+    }
   } else {
-    return TypeAliasReq { KindOfObject,
-                          thisType->nullable,
-                          klass,
-                          thisType->name };
+    req.kind     = KindOfObject;
+    req.nullable = thisType->nullable;
+    req.klass    = klass;
+    req.name     = thisType->name;
   }
+  return req;
 }
 
 TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
@@ -748,10 +914,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
    */
 
   if (thisType->kind != KindOfObject) {
-    return TypeAliasReq { thisType->kind,
-                          thisType->nullable,
-                          nullptr,
-                          thisType->name };
+    return TypeAliasReq::From(*thisType);
   }
 
   /*
@@ -776,10 +939,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    return TypeAliasReq { targetTd->kind,
-                          thisType->nullable || targetTd->nullable,
-                          targetTd->klass,
-                          thisType->name };
+    return TypeAliasReq::From(*targetTd, *thisType);
   }
 
   if (AutoloadHandler::s_instance->autoloadClassOrType(
@@ -789,14 +949,11 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
       return typeAliasFromClass(thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      return TypeAliasReq { targetTd->kind,
-                            thisType->nullable || targetTd->nullable,
-                            targetTd->klass,
-                            thisType->name };
+      return TypeAliasReq::From(*targetTd, *thisType);
     }
   }
 
-  return TypeAliasReq { KindOfInvalid, false, nullptr, nullptr };
+  return TypeAliasReq::Invalid();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -819,17 +976,12 @@ void Unit::defTypeAlias(Id id) {
     };
     if (thisType->attrs & AttrPersistent) {
       // We may have cached the fully resolved type in a previous request.
-      auto resolved = resolveTypeAlias(thisType);
-      if (resolved.kind != current->kind ||
-          resolved.nullable != current->nullable ||
-          resolved.klass != current->klass) {
+      if (resolveTypeAlias(thisType) != *current) {
         raiseIncompatible();
       }
       return;
     }
-    if (thisType->kind != current->kind ||
-        thisType->nullable != current->nullable ||
-        Unit::lookupClass(typeName) != current->klass) {
+    if (!current->compat(*thisType)) {
       raiseIncompatible();
     }
     return;
@@ -852,7 +1004,7 @@ void Unit::defTypeAlias(Id id) {
   }
 
   auto resolved = resolveTypeAlias(thisType);
-  if (resolved.kind == KindOfInvalid) {
+  if (resolved.invalid) {
     raise_error("Unknown type or class %s", typeName->data());
     return;
   }
@@ -1463,7 +1615,7 @@ Array getFunctions() {
       if (!func_ || (system ^ func_->isBuiltin()) || func_->isGenerated()) {
         continue;
       }
-      a.append(VarNR(func_->name()));
+      a.append(VarNR(HHVM_FN(strtolower)(func_->nameStr())));
     }
   }
   return a;

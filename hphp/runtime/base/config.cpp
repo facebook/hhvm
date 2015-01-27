@@ -26,16 +26,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * Normalizes hdf string names to their ini counterparts
- *
- * We have special handling for a few hdf strings such as those containing
- * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
- */
-static std::string normalize(const std::string &name) {
-  std::string out = ".";
+std::string hdfToIni(const std::string& name) {
+  std::string out = "hhvm.";
   size_t idx = 0;
-  for (auto &c : name) {
+  for (auto& c : name) {
     // This is the first or last character
     if (idx == 0 || idx == name.length() - 1) {
       out += tolower(c);
@@ -61,6 +55,9 @@ static std::string normalize(const std::string &name) {
     idx++;
   }
 
+  boost::replace_first(out,
+                       "hhvm.server.upload.max_file_uploads",
+                       "max_file_uploads");
   // Make sure IPv6 or IPv4 are handled correctly
   boost::replace_first(out, "_i_pv", "_ipv");
   boost::replace_first(out, ".i_pv", ".ipv");
@@ -76,20 +73,66 @@ static std::string normalize(const std::string &name) {
 }
 
 std::string Config::IniName(const Hdf& config) {
-  return "hhvm" + normalize(config.getFullPath());
+  return Config::IniName(config.getFullPath());
 }
 
-void Config::Parse(const std::string &config, IniSetting::Map &ini, Hdf &hdf) {
-  if (boost::ends_with(config, "ini")) {
-    std::ifstream ifs(config);
+std::string Config::IniName(const std::string& config) {
+  return hdfToIni(config);
+}
+
+void Config::ParseIniString(const std::string iniStr, IniSetting::Map &ini) {
+  Config::SetParsedIni(ini, iniStr, "", false);
+}
+
+void Config::ParseHdfString(const std::string hdfStr, Hdf &hdf,
+                            IniSetting::Map &ini) {
+  hdf.fromString(hdfStr.c_str());
+}
+
+void Config::ParseConfigFile(const std::string &filename, IniSetting::Map &ini,
+                             Hdf &hdf) {
+  // We don't allow a filename of just ".ini"
+  if (boost::ends_with(filename, ".ini") && filename.length() > 4) {
+    Config::ParseIniFile(filename, ini);
+  } else {
+    // For now, assume anything else is an hdf file
+    // TODO(#5151773): Have a non-invasive warning if HDF file does not end
+    // .hdf
+    Config::ParseHdfFile(filename, hdf, ini);
+  }
+}
+
+void Config::ParseIniFile(const std::string &filename) {
+  IniSetting::Map ini = IniSetting::Map::object;;
+  Config::ParseIniFile(filename, ini, false);
+}
+
+void Config::ParseIniFile(const std::string &filename, IniSetting::Map &ini,
+                          const bool constants_only /* = false */) {
+    std::ifstream ifs(filename);
     const std::string str((std::istreambuf_iterator<char>(ifs)),
                           std::istreambuf_iterator<char>());
-    auto parsed_ini = IniSetting::FromStringAsMap(str, config);
-    for (auto &pair : parsed_ini.items()) {
-      ini[pair.first] = pair.second;
+    Config::SetParsedIni(ini, str, filename, constants_only);
+}
+
+void Config::ParseHdfFile(const std::string &filename, Hdf &hdf,
+                          IniSetting::Map &ini) {
+  hdf.append(filename);
+}
+
+void Config::SetParsedIni(IniSetting::Map &ini, const std::string confStr,
+                          const std::string filename, bool constants_only) {
+  assert(ini != nullptr);
+  auto parsed_ini = IniSetting::FromStringAsMap(confStr, filename);
+  for (auto &pair : parsed_ini.items()) {
+    ini[pair.first] = pair.second;
+    if (constants_only) {
+      IniSetting::FillInConstant(pair.first.data(), pair.second,
+                                 IniSetting::FollyDynamic());
+    } else {
+      IniSetting::Set(pair.first.data(), pair.second,
+                      IniSetting::FollyDynamic());
     }
-  } else {
-    hdf.append(config);
   }
 }
 
@@ -102,16 +145,27 @@ const char* Config::Get(const IniSetting::Map &ini, const Hdf& config,
   return config.configGet(defValue);
 }
 
+template<class T> static T variant_init(T v) {
+    return v;
+}
+static int64_t variant_init(uint32_t v) {
+    return v;
+}
+
 #define CONFIG_BODY(T, METHOD) \
 T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
                       const T defValue /* = 0ish */) { \
   auto* value = ini.get_ptr(IniName(config)); \
   if (value && value->isString()) { \
-    T ret; \
-    ini_on_update(value->data(), ret); \
+    T ini_ret, hdf_ret; \
+    ini_on_update(value->data(), ini_ret); \
     /* The HDF still wins because the -v options
-     * are still done via HDF, for now */ \
-    return config.configGet##METHOD(ret); \
+     * are still done via HDF, for now.*/ \
+    hdf_ret = config.configGet##METHOD(ini_ret); \
+    if (ini_ret != hdf_ret) { \
+      IniSetting::Set(IniName(config), variant_init(hdf_ret)); \
+    } \
+    return hdf_ret; \
   } \
   return config.configGet##METHOD(defValue); \
 } \
@@ -150,7 +204,7 @@ static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
   auto val = Config::GetString(ini, config);
   if (val.empty()) {
     if (Option::EnableHipHopSyntax || RuntimeOption::EnableHipHopSyntax) {
-      return HackStrictOption::ERROR;
+      return HackStrictOption::ON;
     }
     return HackStrictOption::OFF;
   }
@@ -159,7 +213,7 @@ static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
   }
   bool ret;
   ini_on_update(val, ret);
-  return ret ? HackStrictOption::ERROR : HackStrictOption::OFF;
+  return ret ? HackStrictOption::ON : HackStrictOption::OFF;
 }
 
 void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
@@ -172,6 +226,26 @@ void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
 void Config::Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
                   const Hdf& config) {
   std::vector<std::string> ret;
+  auto ini_name = IniName(config);
+  auto* value = ini.get_ptr(ini_name);
+  if (value && value->isObject()) {
+    ini_on_update(*value, ret);
+    loc = ret;
+  }
+  // If there is an HDF setting for the config, then it still wins for
+  // the RuntimeOption value until we obliterate HDFs
+  ret.clear();
+  config.configGet(ret);
+  if (ret.size() > 0) {
+    loc = ret;
+  }
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, ini_name,
+                   &loc);
+}
+
+void Config::Bind(std::map<std::string, std::string>& loc,
+                  const IniSettingMap& ini, const Hdf& config) {
+  std::map<std::string, std::string> ret;
   auto ini_name = IniName(config);
   auto* value = ini.get_ptr(ini_name);
   if (value && value->isObject()) {

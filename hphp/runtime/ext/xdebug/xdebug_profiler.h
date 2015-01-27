@@ -27,7 +27,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Frame data gathered on function enter/exit.
-// TODO(#4489053) Should look into reducing size
 struct FrameData {
   const Func* func;
   int64_t time;
@@ -37,15 +36,15 @@ struct FrameData {
   // in ext_hotprofiler.cpp does the same.
   int64_t memory_usage : 63;
   bool is_func_begin : 1; // Whether or not this is an enter event
-  // If is_func_begin, then this will be the serialized aruments. Otherwise it
+  // If is_func_begin, then this will be the serialized arguments. Otherwise it
   // will be the serialized return value
   const StringData* context_str;
 };
 
-// TODO(#4489053) consider allowing user to set the maximum buffer size
+// TODO(#3704) Allow user to set maximum buffer size
 class XDebugProfiler : public Profiler {
 public:
-  explicit XDebugProfiler() {}
+  explicit XDebugProfiler() : Profiler(true) {}
   ~XDebugProfiler() {
     if (m_profilingEnabled) {
       writeProfilingResults();
@@ -54,6 +53,15 @@ public:
       disableTracing();
     }
     smart_free(m_frameBuffer);
+  }
+
+  // Returns true if function enter/exit event collection is required by the
+  // extension settings
+  static inline bool isCollectionNeeded() {
+    return
+      XDEBUG_GLOBAL(MaxNestingLevel) ||
+      XDEBUG_GLOBAL(CollectTime) ||
+      XDEBUG_GLOBAL(CollectMemory);
   }
 
   // Returns true if profiling is required by the extension settings or the
@@ -75,23 +83,28 @@ public:
   }
 
   // Returns true if a profiler should be attached to the current thread
-  static inline bool isNeeded() {
-    return
-      XDEBUG_GLOBAL(CollectTime) ||
-      XDEBUG_GLOBAL(CollectMemory) ||
-      isProfilingNeeded() ||
-      isTracingNeeded();
+  static inline bool isAttachNeeded() {
+    return isCollectionNeeded() || isProfilingNeeded() || isTracingNeeded();
   }
 
-  // Whether or not the profiler is collecting data
+  // Whether or not this profiler is collecting frame/exit enter information
   inline bool isCollecting() {
-    return m_profilingEnabled || m_tracingEnabled || m_collectMemory ||
-           m_collectTime;
+    return
+      m_profilingEnabled ||
+      m_tracingEnabled ||
+      m_collectMemory ||
+      m_collectTime;
   }
 
-  // Set memory/time collecting
+  // Whether or not this profiler is needed
+  inline bool isNeeded() {
+    return m_maxDepth != 0 || isCollecting();
+  }
+
+  // Ini setting setters
   inline void setCollectMemory(bool collect) { m_collectMemory = collect; }
   inline void setCollectTime(bool collect) { m_collectTime = collect; }
+  inline void setMaxNestingLevel(int depth) { m_maxDepth = depth; }
 
   // Enables profiling. Profiling cannot be disabled.
   void enableProfiling(const String& filename, int64_t opts);
@@ -118,9 +131,8 @@ public:
   // xdebug has no need to write stats to php array
   virtual inline void writeStats(Array &ret) {}
 
-  // TODO (#4489053) Iteration up the stack
-  inline void begin() XDEBUG_NOTIMPLEMENTED
-  inline void end() XDEBUG_NOTIMPLEMENTED
+  // TODO (#3704) Need some way to get stack time/memory information for when
+  //              we print the stack trace
 private:
   // Allocates more buffer space if needed, otherwise does nothing.
   // On failure, a human-readable error is thrown.
@@ -247,6 +259,10 @@ private:
   std::vector<FrameData> m_tracingStartFrameData;
   String m_tracingFilename;
   FILE* m_tracingFile;
+
+  // Maximum stack depth allowed. 0 implies infinite
+  uint64_t m_maxDepth = 0;
+  uint64_t m_depth = XDebugUtils::stackDepth(); // current stack depth
 
   // When writing the tracing file in computerized and html output we need to
   // assign each begin/end frame pair an id.

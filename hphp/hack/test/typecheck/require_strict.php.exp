@@ -1,0 +1,2 @@
+File "require_strict.php", line 2, characters 6-12:
+Parse error: require is supported only as a toplevel declaration (Parsing[1002])

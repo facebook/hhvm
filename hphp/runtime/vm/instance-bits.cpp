@@ -20,8 +20,8 @@
 #include <atomic>
 #include <tbb/concurrent_hash_map.h>
 
-#include "folly/ScopeGuard.h"
-#include "folly/MapUtil.h"
+#include <folly/ScopeGuard.h>
+#include <folly/MapUtil.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
@@ -112,14 +112,13 @@ void init() {
   uint64_t accum = 0;
   for (auto& item : counts) {
     if (i >= kNumInstanceBits) break;
-    if (Class* cls = Unit::lookupUniqueClass(item.first)) {
-      if (!(cls->attrs() & AttrUnique)) {
-        continue;
+    if (Class* cls = Unit::lookupClassOrUniqueClass(item.first)) {
+      if (cls->attrs() & AttrUnique) {
+        s_instanceBitsMap[item.first] = i;
+        accum += item.second;
+        ++i;
       }
     }
-    s_instanceBitsMap[item.first] = i;
-    accum += item.second;
-    ++i;
   }
 
   // Print out stats about what we ended up using

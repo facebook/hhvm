@@ -17,7 +17,9 @@
 #define incl_HPHP_WORD_MEM_H_
 
 #include <limits>
-#include "folly/Portability.h"
+#include <folly/Portability.h>
+
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 
@@ -38,15 +40,16 @@ namespace HPHP {
  */
 ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
-  assert(reinterpret_cast<const uintptr_t>(mem1) % 4 == 0);
-  auto p1 = reinterpret_cast<const uint32_t*>(mem1);
-  auto p2 = reinterpret_cast<const uint32_t*>(mem2);
-  auto constexpr W = sizeof(*p1);
+  using T = uint64_t;
+  auto constexpr W = sizeof(T);
+  assert(reinterpret_cast<const uintptr_t>(mem1) % W == 0);
+  auto p1 = reinterpret_cast<const T*>(mem1);
+  auto p2 = reinterpret_cast<const T*>(mem2);
   for (auto end = p1 + lenBytes / W; p1 < end; p1++, p2++) {
     if (*p1 != *p2) return false;
   }
-  // let W = sizeof(*p1); now p1 and p2 point to the last 0..W-1 bytes plus
-  // the 0 terminator, ie the last 1..W bytes.  Load W bytes, shift off the
+  // let W = sizeof(*p1); p1 and p2 point to the last 0..W-1 bytes plus
+  // the 0 terminator, ie the last 1..W bytes. Load W bytes, shift off the
   // bytes after the 0, then compare.
   auto shift = 8 * (W - 1) - 8 * (lenBytes % W);
   return (*p1 << shift) == (*p2 << shift);

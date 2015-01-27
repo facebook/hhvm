@@ -42,6 +42,12 @@ void finishRequest();
 int64_t getOldestStartTime();
 
 /*
+ * Returns for how long (wall time) the oldest request in flight has
+ * been running, in seconds.
+ */
+int64_t getAgeOldestRequest();
+
+/*
  * Ask for memory to be freed (as in free, not delete) by the next
  * appropriate treadmill round.
  */

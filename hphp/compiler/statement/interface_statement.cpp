@@ -97,14 +97,12 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
   }
 
   ClassScopePtr classScope
-    (new ClassScope(ClassScope::KindOfInterface, m_name, "", bases,
+    (new ClassScope(ClassScope::KindOf::Interface, m_name, "", bases,
                     m_docComment, stmt, attrs));
   setBlockScope(classScope);
   scope->addClass(ar, classScope);
 
-  if (Option::PersistenceHook) {
-    classScope->setPersistent(Option::PersistenceHook(classScope, scope));
-  }
+  classScope->setPersistent(false);
 
   if (m_stmt) {
     for (int i = 0; i < m_stmt->getCount(); i++) {
@@ -249,9 +247,6 @@ StatementPtr InterfaceStatement::preOptimize(AnalysisResultConstPtr ar) {
     checkVolatile(ar);
   }
   return StatementPtr();
-}
-
-void InterfaceStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

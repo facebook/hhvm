@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/func-prologues-x64.h"
-#include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/reg-alloc-x64.h"
@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-llvm.h"
 
 namespace HPHP { namespace jit {
 
@@ -44,9 +45,9 @@ using namespace reg;
 extern "C" void enterTCHelper(Cell* vm_sp,
                               ActRec* vm_fp,
                               TCA start,
-                              TReqInfo* infoPtr,
                               ActRec* firstAR,
-                              void* targetCacheBase);
+                              void* targetCacheBase,
+                              ActRec* stashedAR);
 
 namespace x64 {
 
@@ -76,20 +77,16 @@ struct BackEnd : public jit::BackEnd {
     return x64::rVmFp;
   }
 
-  Constraint srcConstraint(const IRInstruction& inst, unsigned i) override {
-    always_assert(false);
+  PhysReg rVmTl() override {
+    return x64::rVmTl;
   }
 
-  Constraint dstConstraint(const IRInstruction& inst, unsigned i) override {
-    always_assert(false);
+  bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
+    return x64::storesCell(inst, srcIdx);
   }
 
-  RegPair precolorSrc(const IRInstruction& inst, unsigned i) override {
-    always_assert(false);
-  }
-
-  RegPair precolorDst(const IRInstruction& inst, unsigned i) override {
-    always_assert(false);
+  bool loadsCell(const IRInstruction& inst) override {
+    return x64::loadsCell(inst.op());
   }
 
   /*
@@ -97,8 +94,8 @@ struct BackEnd : public jit::BackEnd {
    * when we call it from C++, we have to tell gcc to clobber all the other
    * callee-saved registers.
    */
-  #define CALLEE_SAVED_BARRIER() \
-    asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15")
+  #define CALLEE_SAVED_BARRIER()                                    \
+      asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15");
 
   /*
    * enterTCHelper is a handwritten assembly function that transfers control in
@@ -109,25 +106,17 @@ struct BackEnd : public jit::BackEnd {
                 x64::rVmTl == r12 &&
                 x64::rStashedAR == r15,
                 "__enterTCHelper needs to be modified to use the correct ABI");
-  static_assert(REQ_BIND_CALL == 0x1,
-                "Update assembly test for REQ_BIND_CALL in __enterTCHelper");
+  static_assert(REQ_BIND_CALL == 0x0,
+                "Update assembly test for REQ_BIND_CALL in handleSRHelper");
 
-  void enterTCHelper(TCA start, TReqInfo& info) override {
+  void enterTCHelper(TCA start, ActRec* stashedAR) override {
     // We have to force C++ to spill anything that might be in a callee-saved
     // register (aside from rbp). enterTCHelper does not save them.
     CALLEE_SAVED_BARRIER();
     auto& regs = vmRegsUnsafe();
     jit::enterTCHelper(regs.stack.top(), regs.fp, start,
-                       &info, vmFirstAR(), RDS::tl_base);
+                       vmFirstAR(), RDS::tl_base, stashedAR);
     CALLEE_SAVED_BARRIER();
-  }
-
-  jit::CodeGenerator* newCodeGenerator(const IRUnit& unit,
-                                       CodeBlock& mainCode,
-                                       CodeBlock& coldCode,
-                                       CodeBlock& frozenCode,
-                                       CodegenState& state) override {
-    always_assert(false);
   }
 
   void moveToAlign(CodeBlock& cb,
@@ -160,7 +149,7 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
-                     const SrcKey& sk) override {
+                     SrcKey sk) override {
     Asm a { mainCode };
     // Add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {
@@ -206,14 +195,6 @@ struct BackEnd : public jit::BackEnd {
     x64::emitTraceCall(cb, pcOff);
   }
 
-  void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) override {
-    always_assert(false);
-  }
-
-  void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) override {
-    always_assert(false);
-  }
-
   bool isSmashable(Address frontier, int nBytes, int offset = 0) override {
     assert(nBytes <= int(kCacheLineSize));
     uintptr_t iFrontier = uintptr_t(frontier) + offset;
@@ -256,9 +237,14 @@ struct BackEnd : public jit::BackEnd {
       case TestAndSmashFlags::kAlignJccAndJmp:
         // Ensure that the entire jcc, and the entire jmp are smashable
         // (but we dont need them both to be in the same cache line)
-        prepareForSmash(cb, testBytes + kJmpccLen, testBytes);
-        prepareForSmash(cb, testBytes + kJmpccLen + kJmpLen,
-                        testBytes + kJmpccLen);
+        prepareForSmashImpl(cb, testBytes + kJmpccLen, testBytes);
+        prepareForSmashImpl(cb, testBytes + kJmpccLen + kJmpLen,
+                            testBytes + kJmpccLen);
+        mcg->cgFixups().m_alignFixups.emplace(
+          cb.frontier(), std::make_pair(testBytes + kJmpccLen, testBytes));
+        mcg->cgFixups().m_alignFixups.emplace(
+          cb.frontier(), std::make_pair(testBytes + kJmpccLen + kJmpLen,
+                                        testBytes + kJmpccLen));
         assert(isSmashable(cb.frontier() + testBytes, kJmpccLen));
         assert(isSmashable(cb.frontier() + testBytes + kJmpccLen, kJmpLen));
         break;
@@ -269,16 +255,39 @@ struct BackEnd : public jit::BackEnd {
     return true;
   }
 
+  typedef hphp_hash_set<void*> WideJmpSet;
+  struct JmpOutOfRange : std::exception {};
+
   size_t relocate(RelocationInfo& rel,
                   CodeBlock& destBlock,
                   TCA start, TCA end,
-                  CodeGenFixups& fixups) override {
+                  CodeGenFixups& fixups,
+                  TCA* exitAddr) override {
+    WideJmpSet wideJmps;
+    while (true) {
+      try {
+        return relocateImpl(rel, destBlock, start, end,
+                            fixups, exitAddr, wideJmps);
+      } catch (JmpOutOfRange& j) {
+      }
+    }
+  }
+
+  size_t relocateImpl(RelocationInfo& rel,
+                      CodeBlock& destBlock,
+                      TCA start, TCA end,
+                      CodeGenFixups& fixups,
+                      TCA* exitAddr,
+                      WideJmpSet& wideJmps) {
     TCA src = start;
     size_t range = end - src;
     bool hasInternalRefs = false;
     bool internalRefsNeedUpdating = false;
     TCA destStart = destBlock.frontier();
     size_t asm_count{0};
+    TCA jmpDest = nullptr;
+    TCA keepNopLow = nullptr;
+    TCA keepNopHigh = nullptr;
     try {
       while (src != end) {
         assert(src < end);
@@ -288,6 +297,11 @@ struct BackEnd : public jit::BackEnd {
         int destRange = 0;
         auto af = fixups.m_alignFixups.equal_range(src);
         while (af.first != af.second) {
+          auto low = src + af.first->second.second;
+          auto hi = src + af.first->second.first;
+          assert(low < hi);
+          if (!keepNopLow || keepNopLow > low) keepNopLow = low;
+          if (!keepNopHigh || keepNopHigh < hi) keepNopHigh = hi;
           TCA tmp = destBlock.frontier();
           prepareForSmashImpl(destBlock,
                               af.first->second.first, af.first->second.second);
@@ -298,28 +312,41 @@ struct BackEnd : public jit::BackEnd {
           ++af.first;
         }
 
+        bool preserveAlignment = keepNopLow && keepNopHigh &&
+          keepNopLow <= src && keepNopHigh > src;
+        TCA target = nullptr;
         TCA dest = destBlock.frontier();
         destBlock.bytes(di.size(), src);
         DecodedInstruction d2(dest);
         if (di.hasPicOffset()) {
+          if (di.isBranch(false)) {
+            target = di.picAddress();
+          }
           /*
            * Rip-relative offsets that point outside the range
            * being moved need to be adjusted so they continue
            * to point at the right thing
            */
-          if (size_t(di.picAddress() - start) > range) {
+          if (size_t(di.picAddress() - start) >= range) {
             bool DEBUG_ONLY success = d2.setPicAddress(di.picAddress());
             assert(success);
           } else {
-            if (d2.isBranch() && d2.shrinkBranch()) {
-              internalRefsNeedUpdating = true;
+            if (!preserveAlignment && d2.isBranch()) {
+              if (wideJmps.count(src)) {
+                if (d2.size() < kJmpLen) {
+                  d2.widenBranch();
+                  internalRefsNeedUpdating = true;
+                }
+              } else if (d2.shrinkBranch()) {
+                internalRefsNeedUpdating = true;
+              }
             }
             hasInternalRefs = true;
           }
         }
         if (di.hasImmediate()) {
           if (fixups.m_addressImmediates.count(src)) {
-            if (size_t(di.immediate() - (uint64_t)start) <= range) {
+            if (size_t(di.immediate() - (uint64_t)start) < range) {
               hasInternalRefs = internalRefsNeedUpdating = true;
             }
           } else {
@@ -337,7 +364,7 @@ struct BackEnd : public jit::BackEnd {
              * fixups.m_addressImmediates. But it could just happen by bad
              * luck, so just log it.
              */
-            if (size_t(di.immediate() - (uint64_t)start) <= range) {
+            if (size_t(di.immediate() - (uint64_t)start) < range) {
               FTRACE(3,
                      "relocate: instruction at {} has immediate 0x{:x}"
                      "which looks like an address that needs relocating\n",
@@ -356,31 +383,44 @@ struct BackEnd : public jit::BackEnd {
         } else {
           rel.recordAddress(src, dest - destRange, destRange);
         }
-        if (di.isNop()) {
+        if (preserveAlignment && di.size() == kJmpLen &&
+            di.isNop() && src + kJmpLen == end) {
+          smashJmp(dest, src + kJmpLen);
+          dest += kJmpLen;
+        } else if (di.isNop() && !preserveAlignment) {
           internalRefsNeedUpdating = true;
         } else {
           dest += d2.size();
         }
+        jmpDest = target;
         assert(dest <= destBlock.frontier());
         destBlock.setFrontier(dest);
         src += di.size();
+        if (keepNopHigh && src >= keepNopHigh) {
+          keepNopLow = keepNopHigh = nullptr;
+        }
+      }
+
+      if (exitAddr) {
+        *exitAddr = jmpDest;
       }
 
       rel.recordRange(start, end, destStart, destBlock.frontier());
 
       if (hasInternalRefs && internalRefsNeedUpdating) {
         src = start;
+        bool ok = true;
         while (src != end) {
           DecodedInstruction di(src);
           TCA newPicAddress = nullptr;
           int64_t newImmediate = 0;
           if (di.hasPicOffset() &&
-              size_t(di.picAddress() - start) <= range) {
+              size_t(di.picAddress() - start) < range) {
             newPicAddress = rel.adjustedAddressAfter(di.picAddress());
             always_assert(newPicAddress);
           }
           if (di.hasImmediate() &&
-              size_t((TCA)di.immediate() - start) <= range &&
+              size_t((TCA)di.immediate() - start) < range &&
               fixups.m_addressImmediates.count(src)) {
             newImmediate =
               (int64_t)rel.adjustedAddressAfter((TCA)di.immediate());
@@ -390,18 +430,28 @@ struct BackEnd : public jit::BackEnd {
             TCA dest = rel.adjustedAddressAfter(src);
             DecodedInstruction d2(dest);
             if (newPicAddress) {
-              d2.setPicAddress(newPicAddress);
+              if (!d2.setPicAddress(newPicAddress)) {
+                always_assert(d2.isBranch() && d2.size() == 2);
+                wideJmps.insert(src);
+                ok = false;
+              }
             }
             if (newImmediate) {
-              d2.setImmediate(newImmediate);
+              if (!d2.setImmediate(newImmediate)) {
+                always_assert(false);
+              }
             }
           }
           src += di.size();
+        }
+        if (!ok) {
+          throw JmpOutOfRange();
         }
       }
       rel.markAddressImmediates(fixups.m_addressImmediates);
     } catch (...) {
       rel.rewind(start, end);
+      destBlock.setFrontier(destStart);
       throw;
     }
     return asm_count;
@@ -433,48 +483,72 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void adjustForRelocation(RelocationInfo& rel) override {
-    for (const auto& range : rel) {
-      auto start = range.first;
-      auto end = range.second;
-      while (start != end) {
-        assert(start < end);
-        DecodedInstruction di(start);
-
-        if (di.hasPicOffset()) {
-          /*
-           * A pointer into something that has been relocated needs to be
-           * updated.
-           */
-          if (TCA adjusted = rel.adjustedAddressAfter(di.picAddress())) {
-            di.setPicAddress(adjusted);
-          }
-        }
-
-        if (di.hasImmediate()) {
-          /*
-           * Similarly for addressImmediates - and see comment above
-           * for non-address immediates.
-           */
-          if (TCA adjusted = rel.adjustedAddressAfter((TCA)di.immediate())) {
-            if (rel.isAddressImmediate(start)) {
-              di.setImmediate((int64_t)adjusted);
-            } else {
-              FTRACE(3,
-                     "relocate: instruction at {} has immediate 0x{:x}"
-                     "which looks like an address that needs relocating\n",
-                     start, di.immediate());
-            }
-          }
-        }
-
-        start += di.size();
-      }
+    for (const auto& range : rel.srcRanges()) {
+      adjustForRelocation(rel, range.first, range.second);
     }
   }
 
   void adjustForRelocation(RelocationInfo& rel,
-                           AsmInfo* asmInfo,
-                           CodeGenFixups& fixups) override {
+                           TCA srcStart, TCA srcEnd) override {
+    auto start = rel.adjustedAddressAfter(srcStart);
+    auto end = rel.adjustedAddressBefore(srcEnd);
+    if (!start) {
+      start = srcStart;
+      end = srcEnd;
+    } else {
+      always_assert(end);
+    }
+    while (start != end) {
+      assert(start < end);
+      DecodedInstruction di(start);
+
+      if (di.hasPicOffset()) {
+        /*
+         * A pointer into something that has been relocated needs to be
+         * updated.
+         */
+        if (TCA adjusted = rel.adjustedAddressAfter(di.picAddress())) {
+          di.setPicAddress(adjusted);
+        }
+      }
+
+      if (di.hasImmediate()) {
+        /*
+         * Similarly for addressImmediates - and see comment above
+         * for non-address immediates.
+         */
+        if (TCA adjusted = rel.adjustedAddressAfter((TCA)di.immediate())) {
+          if (rel.isAddressImmediate(start)) {
+            di.setImmediate((int64_t)adjusted);
+          } else {
+            FTRACE(3,
+                   "relocate: instruction at {} has immediate 0x{:x}"
+                   "which looks like an address that needs relocating\n",
+                   start, di.immediate());
+          }
+        }
+      }
+
+      start += di.size();
+
+      if (start == end && di.isNop() &&
+          di.size() == kJmpLen &&
+          rel.adjustedAddressAfter(srcEnd)) {
+
+        smashJmp(start - di.size(), rel.adjustedAddressAfter(end));
+      }
+    }
+  }
+
+  /*
+   * Adjusts the addresses in asmInfo and fixups to match the new
+   * location of the code.
+   * This will not "hook up" the relocated code in any way, so is safe
+   * to call before the relocated code is ready to run.
+   */
+  void adjustMetaDataForRelocation(RelocationInfo& rel,
+                                   AsmInfo* asmInfo,
+                                   CodeGenFixups& fixups) override {
     auto& ip = fixups.m_inProgressTailJumps;
     for (size_t i = 0; i < ip.size(); ++i) {
       IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
@@ -517,6 +591,69 @@ struct BackEnd : public jit::BackEnd {
       }
     }
 
+    /*
+     * Most of the time we want to adjust to a corresponding "before" address
+     * with the exception of the start of the range where "before" can point to
+     * the end of a previous range.
+     */
+    if (!fixups.m_bcMap.empty()) {
+      auto const aStart = fixups.m_bcMap[0].aStart;
+      auto const acoldStart = fixups.m_bcMap[0].acoldStart;
+      auto const afrozenStart = fixups.m_bcMap[0].afrozenStart;
+      for (auto& tbc : fixups.m_bcMap) {
+        if (TCA adjusted = (tbc.aStart == aStart
+                              ? rel.adjustedAddressAfter(aStart)
+                              : rel.adjustedAddressBefore(tbc.aStart))) {
+          tbc.aStart = adjusted;
+        }
+        if (TCA adjusted = (tbc.acoldStart == acoldStart
+                              ? rel.adjustedAddressAfter(acoldStart)
+                              : rel.adjustedAddressBefore(tbc.acoldStart))) {
+          tbc.acoldStart = adjusted;
+        }
+        if (TCA adjusted = (tbc.afrozenStart == afrozenStart
+                              ? rel.adjustedAddressAfter(afrozenStart)
+                              : rel.adjustedAddressBefore(tbc.afrozenStart))) {
+          tbc.afrozenStart = adjusted;
+        }
+      }
+    }
+
+    decltype(fixups.m_addressImmediates) updatedAI;
+    for (auto addrImm : fixups.m_addressImmediates) {
+      if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
+        updatedAI.insert(adjusted);
+      } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
+        // just for cgLdObjMethod
+        updatedAI.insert((TCA)~uintptr_t(odd));
+      } else {
+        updatedAI.insert(addrImm);
+      }
+    }
+    updatedAI.swap(fixups.m_addressImmediates);
+
+    decltype(fixups.m_alignFixups) updatedAF;
+    for (auto af : fixups.m_alignFixups) {
+      if (TCA adjusted = rel.adjustedAddressAfter(af.first)) {
+        updatedAF.emplace(adjusted, af.second);
+      } else {
+        updatedAF.emplace(af);
+      }
+    }
+    updatedAF.swap(fixups.m_alignFixups);
+
+    if (asmInfo) {
+      fixupStateVector(asmInfo->asmInstRanges, rel);
+      fixupStateVector(asmInfo->asmBlockRanges, rel);
+      fixupStateVector(asmInfo->coldInstRanges, rel);
+      fixupStateVector(asmInfo->coldBlockRanges, rel);
+      fixupStateVector(asmInfo->frozenInstRanges, rel);
+      fixupStateVector(asmInfo->frozenBlockRanges, rel);
+    }
+  }
+
+  void adjustCodeForRelocation(RelocationInfo& rel,
+                               CodeGenFixups& fixups) override {
     for (auto addr : fixups.m_reusedStubs) {
       /*
        * The stubs are terminated by a ud2. Check for it.
@@ -532,42 +669,10 @@ struct BackEnd : public jit::BackEnd {
       }
     }
 
-    for (auto& tbc : fixups.m_bcMap) {
-      if (TCA adjusted = rel.adjustedAddressBefore(tbc.aStart)) {
-        tbc.aStart = adjusted;
-      }
-      if (TCA adjusted = rel.adjustedAddressBefore(tbc.acoldStart)) {
-        tbc.acoldStart = adjusted;
-      }
-      if (TCA adjusted = rel.adjustedAddressBefore(tbc.afrozenStart)) {
-        tbc.afrozenStart = adjusted;
-      }
-    }
-
-    std::set<TCA> updated;
-    for (auto addrImm : fixups.m_addressImmediates) {
-      if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
-        updated.insert(adjusted);
-      } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
-        // just for cgLdObjMethod
-        updated.insert((TCA)~uintptr_t(odd));
-      } else {
-        updated.insert(addrImm);
-      }
-    }
-    updated.swap(fixups.m_addressImmediates);
-
     for (auto codePtr : fixups.m_codePointers) {
       if (TCA adjusted = rel.adjustedAddressAfter(*codePtr)) {
         *codePtr = adjusted;
       }
-    }
-
-    if (asmInfo) {
-      fixupStateVector(asmInfo->instRanges, rel);
-      fixupStateVector(asmInfo->asmRanges, rel);
-      fixupStateVector(asmInfo->acoldRanges, rel);
-      fixupStateVector(asmInfo->afrozenRanges, rel);
     }
   }
 
@@ -633,6 +738,12 @@ struct BackEnd : public jit::BackEnd {
     }
   }
 
+  TCA smashableCallFromReturn(TCA retAddr) override {
+    auto addr = retAddr - x64::kCallLen;
+    assert(isSmashable(addr, x64::kCallLen));
+    return addr;
+  }
+
   void emitSmashableCall(CodeBlock& cb, TCA dest) override {
     X64Assembler a { cb };
     assert(isSmashable(cb.frontier(), x64::kCallLen));
@@ -640,13 +751,25 @@ struct BackEnd : public jit::BackEnd {
   }
 
   TCA jmpTarget(TCA jmp) override {
-    if (jmp[0] != 0xe9) return nullptr;
+    if (jmp[0] != 0xe9) {
+      if (jmp[0] == 0x0f &&
+          jmp[1] == 0x1f &&
+          jmp[2] == 0x44) {
+        // 5 byte nop
+        return jmp + 5;
+      }
+      return nullptr;
+    }
     return jmp + 5 + ((int32_t*)(jmp + 5))[-1];
   }
 
   TCA jccTarget(TCA jmp) override {
     if (jmp[0] != 0x0F || (jmp[1] & 0xF0) != 0x80) return nullptr;
     return jmp + 6 + ((int32_t*)(jmp + 6))[-1];
+  }
+
+  ConditionCode jccCondCode(TCA jmp) override {
+    return DecodedInstruction(jmp).jccCondCode();
   }
 
   TCA callTarget(TCA call) override {
@@ -670,9 +793,10 @@ struct BackEnd : public jit::BackEnd {
     a.   jnz    (fallback);
   }
 
-  void streamPhysReg(std::ostream& os, PhysReg& reg) override {
-    auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
-      reg::regname(RegXMM(reg));
+  void streamPhysReg(std::ostream& os, PhysReg reg) override {
+    auto name = (reg.type() == PhysReg::GP) ? reg::regname(Reg64(reg)) :
+      (reg.type() == PhysReg::SIMD) ? reg::regname(RegXMM(reg)) :
+      /* (reg.type() == PhysReg::SF) ? */ reg::regname(RegSF(reg));
     os << name;
   }
 
@@ -684,93 +808,23 @@ struct BackEnd : public jit::BackEnd {
     disasm.disasm(os, begin, end);
   }
 
-  virtual void genCodeImpl(IRUnit& unit, AsmInfo*);
+  void genCodeImpl(IRUnit& unit, AsmInfo*) override;
 };
 
 std::unique_ptr<jit::BackEnd> newBackEnd() {
   return folly::make_unique<BackEnd>();
 }
 
-static void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
-                       const BlockList& blocks) {
-  // visit instructions to find tmps eligible to use SIMD registers
-  auto const try_wide = !packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs;
-  boost::dynamic_bitset<> not_wide(unit.numTmps());
-  StateVector<SSATmp,SSATmp*> tmps(unit, nullptr);
-  for (auto block : blocks) {
-    for (auto& inst : *block) {
-      for (uint32_t i = 0, n = inst.numSrcs(); i < n; i++) {
-        auto s = inst.src(i);
-        tmps[s] = s;
-        if (!try_wide || !storesCell(inst, i)) {
-          not_wide.set(s->id());
-        }
-      }
-      for (auto& d : inst.dsts()) {
-        tmps[&d] = &d;
-        if (!try_wide || inst.isControlFlow() || !loadsCell(inst.op())) {
-          not_wide.set(d.id());
-        }
-      }
-    }
-  }
-  // visit each tmp, assign 1 or 2 registers to each.
-  auto cns = [&](uint64_t c) { return vunit.makeConst(c); };
-  for (auto tmp : tmps) {
-    if (!tmp) continue;
-    auto forced = forceAlloc(*tmp);
-    if (forced != InvalidReg) {
-      state.locs[tmp] = Vloc{forced};
-      UNUSED Reg64 r = forced;
-      FTRACE(kRegAllocLevel, "force t{} in {}\n", tmp->id(), reg::regname(r));
-      continue;
-    }
-    if (tmp->inst()->is(DefConst)) {
-      // null, uninit, and nullptr do not allow rawVal(); make them 0.
-      auto c = tmp->isA(Type::Null) || tmp->isA(Type::Nullptr) ? cns(0) :
-               cns(tmp->rawVal());
-      state.locs[tmp] = Vloc{c};
-      FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(), size_t(c));
-    } else {
-      if (tmp->numWords() == 2) {
-        if (!not_wide.test(tmp->id())) {
-          auto r = vunit.makeReg();
-          state.locs[tmp] = Vloc{Vloc::kWide, r};
-          FTRACE(kRegAllocLevel, "def t{} in wide %{}\n", tmp->id(), size_t(r));
-        } else {
-          auto data = vunit.makeReg();
-          auto type = vunit.makeReg();
-          state.locs[tmp] = Vloc{data, type};
-          FTRACE(kRegAllocLevel, "def t{} in %{},%{}\n", tmp->id(),
-                 size_t(data), size_t(type));
-        }
-      } else if (tmp->numWords() == 1) {
-        auto data = vunit.makeReg();
-        state.locs[tmp] = Vloc{data};
-        FTRACE(kRegAllocLevel, "def t{} in %{}\n", tmp->id(), size_t(data));
-      }
-    }
-  }
-}
-
-static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
-                       CodegenState& state, Block* block) {
+static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
-  CodeGenerator cg(unit, v, vasm.cold(), vasm.frozen(), state);
+  CodeGenerator cg(state, v, vc);
   size_t hhir_count{0};
-  for (IRInstruction& instr : *block) {
-    if (instr.op() != Shuffle) hhir_count++;
-    IRInstruction* inst = &instr;
-
-    if (instr.is(EndGuards)) state.pastGuards = true;
-    if (state.pastGuards &&
-        (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI)) {
-      SrcKey sk = inst->marker().sk();
-      vasm.main().setSrcKey(sk);
-      vasm.cold().setSrcKey(sk);
-      vasm.frozen().setSrcKey(sk);
-    }
-    cg.cgInst(inst);
+  for (IRInstruction& inst : *block) {
+    hhir_count++;
+    if (inst.is(EndGuards)) state.pastGuards = true;
+    v.setOrigin(&inst);
+    vc.setOrigin(&inst);
+    cg.cgInst(&inst);
   }
   return hhir_count;
 }
@@ -782,22 +836,19 @@ UNUSED const Abi vasm_abi {
   .gpReserved = x64::abi.gp() - vasm_gp,
   .simdUnreserved = vasm_simd,
   .simdReserved = x64::abi.simd() - vasm_simd,
-  .calleeSaved = x64::kCalleeSaved
+  .calleeSaved = x64::kCalleeSaved,
+  .sf = x64::abi.sf
 };
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   Timer _t(Timer::codeGen);
-  RegAllocInfo no_regs(unit);
-  LiveRegs no_live_regs(unit, RegSet());
-  CodegenState state(unit, no_regs, no_live_regs, asmInfo);
-
   CodeBlock& mainCodeIn   = mcg->code.main();
   CodeBlock& coldCodeIn   = mcg->code.cold();
   CodeBlock* frozenCode   = &mcg->code.frozen();
 
   CodeBlock mainCode;
   CodeBlock coldCode;
-  const bool useLLVM = RuntimeOption::EvalJitLLVM;
+  const bool useLLVM = mcg->useLLVM();
   bool relocate = false;
   if (!useLLVM &&
       RuntimeOption::EvalJitRelocationSize &&
@@ -838,10 +889,12 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   if (frozenCode == &coldCodeIn) {
     frozenCode = &coldCode;
   }
+
   auto frozenStart = frozenCode->frontier();
   auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
   auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
   size_t hhir_count{0};
+
   {
     mcg->code.lock();
     mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
@@ -855,25 +908,22 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       emitTraceCall(mainCode, unit.bcOff());
     }
 
-    auto const linfo = layoutBlocks(unit);
-    auto main_start = mainCode.frontier();
-    auto cold_start = coldCode.frontier();
-    auto frozen_start = frozenCode->frontier();
-    Vasm vasm(&state.meta);
+    CodegenState state(unit, asmInfo, *frozenCode);
+    auto const blocks = rpoSortCfg(unit);
+    Vasm vasm;
     auto& vunit = vasm.unit();
     // create the initial set of vasm numbered the same as hhir blocks.
     for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
     // create vregs for all relevant SSATmps
-    assignRegs(unit, vunit, state, linfo.blocks);
-    vunit.roots.push_back(state.labels[unit.entry()]);
+    assignRegs(unit, vunit, state, blocks, this);
+    vunit.entry = state.labels[unit.entry()];
     vasm.main(mainCode);
     vasm.cold(coldCode);
     vasm.frozen(*frozenCode);
-    for (auto it = linfo.blocks.begin(); it != linfo.blocks.end(); ++it) {
-      auto block = *it;
-      auto v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
+    for (auto block : blocks) {
+      auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
                block->hint() == Block::Hint::Unused ? vasm.frozen() :
                vasm.main();
       FTRACE(6, "genBlock {} on {}\n", block->id(),
@@ -881,26 +931,30 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       auto b = state.labels[block];
       vunit.blocks[b].area = v.area();
       v.use(b);
-      hhir_count += genBlock(unit, v, vasm, state, block);
+      hhir_count += genBlock(state, v, vasm.cold(), block);
       assert(v.closed());
       assert(vasm.main().empty() || vasm.main().closed());
       assert(vasm.cold().empty() || vasm.cold().closed());
       assert(vasm.frozen().empty() || vasm.frozen().closed());
     }
-    printUnit("after code-gen", vasm.unit());
-    vasm.finish(vasm_abi, useLLVM);
-    if (state.asmInfo) {
-      auto block = unit.entry();
-      state.asmInfo->asmRanges[block] = {main_start, mainCode.frontier()};
-      if (mainCode.base() != coldCode.base() && frozenCode != &coldCode) {
-        state.asmInfo->acoldRanges[block] = {cold_start, coldCode.frontier()};
+    printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
+    assert(check(vunit));
+
+    vasm.optimizeX64();
+    if (useLLVM) {
+      try {
+        genCodeLLVM(vunit, vasm.areas(), sortBlocks(vunit));
+      } catch (const FailedLLVMCodeGen& e) {
+        FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
+               e.what());
+        mcg->setUseLLVM(false);
+        vasm.finishX64(vasm_abi, state.asmInfo);
       }
-      if (mainCode.base() != frozenCode->base()) {
-        state.asmInfo->afrozenRanges[block] = {frozen_start,
-                                               frozenCode->frontier()};
-      }
+    } else {
+      vasm.finishX64(vasm_abi, state.asmInfo);
     }
   }
+
   auto bcMap = &mcg->cgFixups().m_bcMap;
   if (relocate && !bcMap->empty()) {
     TRACE(1, "BCMAPS before relocation\n");
@@ -915,8 +969,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
   if (relocate) {
     if (asmInfo) {
-      printUnit(kRelocationLevel, unit, " before relocation ", nullptr,
-                asmInfo);
+      printUnit(kRelocationLevel, unit, " before relocation ", asmInfo);
     }
 
     auto& be = mcg->backEnd();
@@ -924,11 +977,11 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     size_t asm_count{0};
     asm_count += be.relocate(rel, mainCodeIn,
                              mainCode.base(), mainCode.frontier(),
-                             mcg->cgFixups());
+                             mcg->cgFixups(), nullptr);
 
     asm_count += be.relocate(rel, coldCodeIn,
                              coldCode.base(), coldCode.frontier(),
-                             mcg->cgFixups());
+                             mcg->cgFixups(), nullptr);
     TRACE(1, "hhir-inst-count %ld asm %ld\n", hhir_count, asm_count);
 
     if (frozenCode != &coldCode) {
@@ -936,7 +989,8 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
                       frozenStart, frozenCode->frontier());
     }
     be.adjustForRelocation(rel);
-    be.adjustForRelocation(rel, asmInfo, mcg->cgFixups());
+    be.adjustMetaDataForRelocation(rel, asmInfo, mcg->cgFixups());
+    be.adjustCodeForRelocation(rel, mcg->cgFixups());
 
     if (asmInfo) {
       static int64_t mainDeltaTot = 0, coldDeltaTot = 0;
@@ -972,7 +1026,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   }
 
   if (asmInfo) {
-    printUnit(kCodeGenLevel, unit, " after code gen ", nullptr, asmInfo);
+    printUnit(kCodeGenLevel, unit, " after code gen ", asmInfo);
   }
 }
 

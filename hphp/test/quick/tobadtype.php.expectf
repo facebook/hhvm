@@ -6,4 +6,4 @@ test dbl
 Notice: Object of class X could not be converted to int in %s on line 25
 test str
 
-Fatal error: Object of class X could not be converted to string in %s on line 17
+Catchable fatal error: Object of class X could not be converted to string in %s on line 17

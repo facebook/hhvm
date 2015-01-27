@@ -31,26 +31,44 @@ external collect: unit -> unit = "hh_collect"
 external init_done: unit -> unit = "hh_call_after_init"
 
 (*****************************************************************************)
+(* Serializes the shared memory and writes it to a file *)
+(*****************************************************************************)
+external save: string -> unit = "hh_save"
+
+(*****************************************************************************)
+(* Loads the shared memory by reading from a file *)
+(*****************************************************************************)
+external load: string -> unit = "hh_load"
+
+(*****************************************************************************)
+(* The size of the dynamically allocated shared memory section *)
+(*****************************************************************************)
+external heap_size: unit -> int = "hh_heap_size"
+
+(*****************************************************************************)
 (* Module returning the MD5 of the key. It's because the code in C land
  * expects this format. I prefer to make it an abstract type to make sure
  * we don't forget to give the MD5 instead of the key itself.
  *)
 (*****************************************************************************)
 
-module Key: sig
+module type Key = sig
 
-  (* The type of keys *)
+  (* The type of keys that OCaml-land callers try to insert *)
+  type userkey
+
+  (* The type of keys that get stored in the C hashtable *)
   type t
 
-  (* The type of old keys *)
+  (* The type of old keys that get stored in the C hashtable *)
   type old
 
   (* The md5 of an old or a new key *)
   type md5
 
   (* Creation/conversion primitives *)
-  val make     : Prefix.t -> string -> t
-  val make_old : Prefix.t -> string -> old
+  val make     : Prefix.t -> userkey -> t
+  val make_old : Prefix.t -> userkey -> old
   val to_old   : t -> old
   val to_new   : old -> t
 
@@ -58,19 +76,27 @@ module Key: sig
   val md5     : t -> md5
   val md5_old : old -> md5
 
-end = struct
-  type t   = string
-  type old = string
-  type md5 = string
+end
 
-  (* The prefix we use for old keys. The prefix garantees that we never
+module KeyFunctor (UserKeyType : sig
+  type t
+  val to_string : t -> string
+end) : Key with type userkey = UserKeyType.t = struct
+
+  type userkey = UserKeyType.t
+  type t       = string
+  type old     = string
+  type md5     = string
+
+  (* The prefix we use for old keys. The prefix guarantees that we never
    * mix old and new data, because a key can never start with the prefix
    * "old_", it always starts with a number (cf Prefix.make()).
    *)
   let old_prefix = "old_"
 
-  let make = Prefix.make_key
-  let make_old prefix x = old_prefix^Prefix.make_key prefix x
+  let make prefix x = Prefix.make_key prefix (UserKeyType.to_string x)
+  let make_old prefix x =
+    old_prefix^Prefix.make_key prefix (UserKeyType.to_string x)
 
   let to_old x = old_prefix^x
 
@@ -108,18 +134,8 @@ end
  * representation).
  *)
 (*****************************************************************************)
-module Raw: functor(Value: sig type t end) -> sig
+module Raw (Key: Key) (Value: sig type t end) = struct
 
-  val hh_shared_init : unit -> unit
-  val hh_add         : Key.md5 -> Value.t -> unit
-  val hh_mem         : Key.md5 -> bool
-  val hh_get         : Key.md5 -> Value.t
-  val hh_remove      : Key.md5 -> unit
-  val hh_move        : Key.md5 -> Key.md5 -> unit
-
-end = functor(Value: sig type t end) -> struct
-
-  external hh_shared_init : unit -> unit               = "hh_shared_init"
   external hh_add         : Key.md5 -> Value.t -> unit = "hh_add"
   external hh_mem         : Key.md5 -> bool            = "hh_mem"
   external hh_get         : Key.md5 -> Value.t         = "hh_get"
@@ -135,14 +151,14 @@ end
  * The "old" representation is the value that was bound to that key in the
  * last round of type-checking.
  * Despite the fact that the same storage is used under the hood, it's good
- * to seperate the two interfaces to make sure we never mix old and new
+ * to separate the two interfaces to make sure we never mix old and new
  * values.
  *)
 (*****************************************************************************)
 
-module New: functor(Value: Value.Type) -> sig
+module New : functor (Key : Key) -> functor(Value: Value.Type) -> sig
   
-  (* Adds a binding to the table, the table is left unchanged in the
+  (* Adds a binding to the table, the table is left unchanged if the
    * key was already bound.
    *)
   val add         : Key.t -> Value.t -> unit
@@ -159,10 +175,10 @@ module New: functor(Value: Value.Type) -> sig
    *)
   val oldify      : Key.t -> unit
 
-end = functor(Value: Value.Type) -> struct
+end = functor (Key : Key) -> functor (Value : Value.Type) -> struct
 
-  module Data      = Serial(Value)
-  module Raw = Raw(Data)
+  module Data = Serial(Value)
+  module Raw = Raw (Key) (Data)
 
   let add key value = Raw.hh_add (Key.md5 key) (Data.make value)
   let mem key = Raw.hh_mem (Key.md5 key)
@@ -196,21 +212,21 @@ end = functor(Value: Value.Type) -> struct
 end
 
 (* Same as new, but for old values *)
-module Old: functor(Value: Value.Type) -> sig
+module Old : functor (Key : Key) -> functor (Value : Value.Type) -> sig
 
   val get         : Key.old -> Value.t option
-  val find_unsafe : Key.old -> Value.t
   val remove      : Key.old -> unit
   val mem         : Key.old -> bool
 
-  (* Takes an old value and moves it back to a "new" one 
+  (* Takes an old value and moves it back to a "new" one
    * (useful for auto-complete).
    *)
   val revive      : Key.old -> unit
-end = functor(Value: Value.Type) -> struct
+
+end = functor (Key : Key) -> functor (Value: Value.Type) -> struct
 
   module Data = Serial(Value)
-  module Raw = Raw(Data)
+  module Raw = Raw (Key) (Data)
 
   let get key =
     let key = Key.md5_old key in
@@ -223,11 +239,6 @@ end = functor(Value: Value.Type) -> struct
   let remove key = 
     if mem key
     then Raw.hh_remove (Key.md5_old key)
-
-  let find_unsafe key = 
-    match get key with 
-    | None -> raise Not_found
-    | Some x -> x
 
   let revive key =
     if mem key
@@ -245,29 +256,47 @@ end
 (*****************************************************************************)
 
 module type S = sig
+  type key
   type t
+  module KeySet : Set.S with type elt = key
+  module KeyMap : MapSig with type key = key
 
-  val add              : string -> t -> unit
-  val get              : string -> t option
-  val get_old          : string -> t option
-  val get_old_batch    : SSet.t -> t option SMap.t
-  val remove_old_batch : SSet.t -> unit
-  val find_unsafe      : string -> t
-  val get_batch        : SSet.t -> t option SMap.t
-  val remove_batch     : SSet.t -> unit
-  val mem              : string -> bool
-  val oldify_batch     : SSet.t -> unit
-  val revive_batch     : SSet.t -> unit
+  val add              : key -> t -> unit
+  val get              : key -> t option
+  val get_old          : key -> t option
+  val get_old_batch    : KeySet.t -> t option KeyMap.t
+  val remove_old_batch : KeySet.t -> unit
+  val find_unsafe      : key -> t
+  val get_batch        : KeySet.t -> t option KeyMap.t
+  val remove_batch     : KeySet.t -> unit
+  val mem              : key -> bool
+  val oldify_batch     : KeySet.t -> unit
+  val revive_batch     : KeySet.t -> unit
+end
+
+(*****************************************************************************)
+(* The interface that all keys need to implement *)
+(*****************************************************************************)
+
+module type UserKeyType = sig
+  type t
+  val to_string : t -> string
+  val compare : t -> t -> int
 end
 
 (*****************************************************************************)
 (* A functor returning an implementation of the S module without caching. *)
 (*****************************************************************************)        
 
-module NoCache = functor(Value:Value.Type) -> struct
-  module New = New(Value)
-  module Old = Old(Value)
+module NoCache (UserKeyType : UserKeyType) (Value : Value.Type) = struct
 
+  module Key = KeyFunctor (UserKeyType)
+  module New = New (Key) (Value)
+  module Old = Old (Key) (Value)
+  module KeySet = Set.Make (UserKeyType)
+  module KeyMap = MyMap (UserKeyType)
+
+  type key = UserKeyType.t
   type t = Value.t
 
   let add x y = New.add (Key.make Value.prefix x) y
@@ -281,19 +310,19 @@ module NoCache = functor(Value:Value.Type) -> struct
     Old.get key
 
   let get_old_batch xs =
-    SSet.fold begin fun str_key acc ->
+    KeySet.fold begin fun str_key acc ->
       let key = Key.make_old Value.prefix str_key in
-      SMap.add str_key (Old.get key) acc
-    end xs SMap.empty
+      KeyMap.add str_key (Old.get key) acc
+    end xs KeyMap.empty
 
   let remove_batch xs =
-    SSet.iter begin fun str_key ->
+    KeySet.iter begin fun str_key ->
       let key = Key.make Value.prefix str_key in
       New.remove key
     end xs
 
   let oldify_batch xs =
-    SSet.iter begin fun str_key ->
+    KeySet.iter begin fun str_key ->
       let key = Key.make Value.prefix str_key in
       if New.mem key
       then
@@ -304,7 +333,7 @@ module NoCache = functor(Value:Value.Type) -> struct
     end xs
 
   let revive_batch xs =
-    SSet.iter begin fun str_key ->
+    KeySet.iter begin fun str_key ->
       let old_key = Key.make_old Value.prefix str_key in
       if Old.mem old_key
       then
@@ -315,17 +344,17 @@ module NoCache = functor(Value:Value.Type) -> struct
     end xs
 
   let get_batch xs = 
-    SSet.fold begin fun str_key acc ->
+    KeySet.fold begin fun str_key acc ->
       let key = Key.make Value.prefix str_key in
       match New.get key with
-      | None -> SMap.add str_key None acc
-      | Some data -> SMap.add str_key (Some data) acc
-    end xs SMap.empty
+      | None -> KeyMap.add str_key None acc
+      | Some data -> KeyMap.add str_key (Some data) acc
+    end xs KeyMap.empty
 
   let mem x = New.mem (Key.make Value.prefix x)
 
   let remove_old_batch xs =
-    SSet.iter begin fun str_key ->
+    KeySet.iter begin fun str_key ->
       let key = Key.make_old Value.prefix str_key in
       Old.remove key
     end xs
@@ -352,21 +381,21 @@ end
 (*****************************************************************************)
       
 module type CacheType = sig
+  type key
   type value
 
-  val add: Key.t -> value -> unit
-  val get: Key.t -> value option
-  val find: Key.t -> value
-  val remove: Key.t -> unit
+  val add: key -> value -> unit
+  val get: key -> value option
+  val remove: key -> unit
   val clear: unit -> unit
 end
-
 
 (*****************************************************************************)
 (* Cache keeping the objects the most frequently used. *)
 (*****************************************************************************)
       
-module FreqCache = functor(Config:ConfigType) -> struct
+module FreqCache (Key : Key) (Config:ConfigType) :
+  CacheType with type key := Key.t and type value := Config.value = struct
 
   type value = Config.value
 
@@ -379,7 +408,6 @@ module FreqCache = functor(Config:ConfigType) -> struct
     Hashtbl.clear cache;
     size := 0
  
-
 (* The collection function is called when we reach twice original capacity
  * in size. When the collection is triggered, we only keep the most recent
  * object.
@@ -431,19 +459,17 @@ module FreqCache = functor(Config:ConfigType) -> struct
     if Hashtbl.mem cache x
     then decr size;
     Hashtbl.remove cache x
-      
+
 end
 
 (*****************************************************************************)
 (* An ordered cache keeps the most recently used objects *)
 (*****************************************************************************)
 
-module OrderedCache = functor(Config:ConfigType) -> struct
-  
-  type value = Config.value
+module OrderedCache (Key : Key) (Config:ConfigType):
+  CacheType with type key := Key.t and type value := Config.value = struct
 
-  let iorder = ref 0
-  let (cache: (Key.t, Config.value) Hashtbl.t) = 
+  let (cache: (Key.t, Config.value) Hashtbl.t) =
     Hashtbl.create Config.capacity
 
   let queue = Queue.create()
@@ -497,8 +523,9 @@ let invalidate_caches () =
  * much time. The caches keep a deserialized version of the types.
  *)
 (*****************************************************************************)        
+module WithCache (UserKeyType : UserKeyType) (Value:Value.Type) = struct
 
-module WithCache = functor(Value:Value.Type) -> struct
+  type key = UserKeyType.t
   type t = Value.t
 
   module ConfValue = struct
@@ -506,15 +533,19 @@ module WithCache = functor(Value:Value.Type) -> struct
     let capacity = 1000
   end
 
+  module Key = KeyFunctor (UserKeyType)
+
   (* Young values cache *)
-  module L1 = OrderedCache(ConfValue)
+  module L1 = OrderedCache (Key) (ConfValue)
   (* Frequent values cache *)
-  module L2 = FreqCache(ConfValue)
+  module L2 = FreqCache (Key) (ConfValue)
 
-  module New = New(Value)
-  module Old = Old(Value)
+  module New = New (Key) (Value)
+  module Old = Old (Key) (Value)
+  module KeySet = Set.Make (UserKeyType)
+  module KeyMap = MyMap (UserKeyType)
 
-  module Direct = NoCache(Value)
+  module Direct = NoCache (UserKeyType) (Value)
 
   let add x y = 
     let x = Key.make Value.prefix x in
@@ -522,10 +553,6 @@ module WithCache = functor(Value:Value.Type) -> struct
     L2.add x y;
     New.add x y
 
-  let force_get = function
-    | Some x -> x
-    | None -> raise Not_found
-        
   let get x = 
     let x = Key.make Value.prefix x in
     match L1.get x with
@@ -569,13 +596,13 @@ module WithCache = functor(Value:Value.Type) -> struct
     New.remove x
 
   let get_batch keys =
-    SSet.fold begin fun key acc ->
-      SMap.add key (get key) acc
-    end keys SMap.empty
+    KeySet.fold begin fun key acc ->
+      KeyMap.add key (get key) acc
+    end keys KeyMap.empty
 
   let oldify_batch keys =
     Direct.oldify_batch keys;
-    SSet.iter begin fun key ->
+    KeySet.iter begin fun key ->
       let key = Key.make Value.prefix key in
       L1.remove key;
       L2.remove key;
@@ -583,13 +610,13 @@ module WithCache = functor(Value:Value.Type) -> struct
 
   let revive_batch keys =
     Direct.revive_batch keys;
-    SSet.iter begin fun x ->
+    KeySet.iter begin fun x ->
       let x = Key.make Value.prefix x in
       L1.remove x;
       L2.remove x;
     end keys
 
-  let remove_batch xs = SSet.iter remove xs
+  let remove_batch xs = KeySet.iter remove xs
 
   let () =
     invalidate_callback_list := begin fun () ->
@@ -598,7 +625,6 @@ module WithCache = functor(Value:Value.Type) -> struct
     end :: !invalidate_callback_list
 
   let remove_old x = Old.remove (Key.make_old Value.prefix x)
-  let remove_old_batch = SSet.iter remove_old
+  let remove_old_batch = KeySet.iter remove_old
 
 end
-

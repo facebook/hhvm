@@ -11,6 +11,7 @@ var_dump( filegroup( $symlink ) === $gid );
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 
 $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchgrp.txt';

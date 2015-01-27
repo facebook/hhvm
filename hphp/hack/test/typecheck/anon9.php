@@ -10,6 +10,8 @@
  */
 
 function test(): (function(string): string) {
-  $f = function() { return ''; };
+  $f = function () {
+    return '';
+  };
   return $f;
 }

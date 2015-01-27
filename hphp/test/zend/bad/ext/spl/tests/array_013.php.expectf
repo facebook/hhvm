@@ -11,4 +11,4 @@ one=>1
 two=>2
 ===Append===
 
-Fatal error: %s
+Catchable fatal error: %s

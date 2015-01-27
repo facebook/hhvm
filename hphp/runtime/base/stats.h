@@ -47,8 +47,6 @@ namespace Stats {
   STAT(TC_SyncUnwind) \
   STAT(TC_CatchTrace) \
   STAT(TC_CatchSideExit) \
-  STAT(TC_SetMStrGuess_Hit) \
-  STAT(TC_SetMStrGuess_Miss) \
   STAT(TC_DecRef_NZ) \
   STAT(TC_DecRef_Normal_Decl) \
   STAT(TC_DecRef_Normal_Destroy) \

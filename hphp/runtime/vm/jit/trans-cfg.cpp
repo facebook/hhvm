@@ -17,27 +17,38 @@
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include <algorithm>
 
-#include "folly/MapUtil.h"
+#include <folly/MapUtil.h>
 
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 namespace HPHP { namespace jit {
 
-static const Trace::Module TRACEMOD = Trace::pgo;
+TRACE_SET_MOD(pgo);
 
-static TransIDSet findPredTrans(const SrcRec* sr,
+static TransIDSet findPredTrans(TransID dstID,
+                                const ProfData* profData,
+                                const SrcDB& srcDB,
                                 const TcaTransIDMap& jmpToTransID) {
-  assert(sr);
+  SrcKey dstSK = profData->transSrcKey(dstID);
+  const SrcRec* dstSR = srcDB.find(dstSK);
+  assert(dstSR);
   TransIDSet predSet;
 
-  for (auto& inBr : sr->incomingBranches()) {
-    TransID srcId = folly::get_default(jmpToTransID, inBr.toSmash(),
-      kInvalidTransID);
-    FTRACE(5, "findPredTrans: toSmash = {}   srcId = {}\n",
-           inBr.toSmash(), srcId);
-    if (srcId != kInvalidTransID) {
-      predSet.insert(srcId);
+  for (auto& inBr : dstSR->incomingBranches()) {
+    TransID srcID = folly::get_default(jmpToTransID, inBr.toSmash(),
+                                       kInvalidTransID);
+    FTRACE(5, "findPredTrans: toSmash = {}   srcID = {}\n",
+           inBr.toSmash(), srcID);
+    if (srcID != kInvalidTransID && profData->isKindProfile(srcID)) {
+      auto srcSuccOffsets = profData->transLastSrcKey(srcID).succOffsets();
+      if (srcSuccOffsets.count(dstSK.offset())) {
+        predSet.insert(srcID);
+      } else {
+        FTRACE(5, "findPredTrans: WARNING: incoming branch with impossible "
+               "control flow between translations: {} -> {}"
+               "(probably due to side exit)\n", srcID, dstID);
+      }
     }
   }
 
@@ -97,9 +108,8 @@ TransCFG::TransCFG(FuncId funcId,
   for (TransID dstId : nodes()) {
     SrcKey dstSK = profData->transSrcKey(dstId);
     RegionDesc::BlockPtr dstBlock = profData->transRegion(dstId)->entry();
-    const SrcRec* dstSR = srcDB.find(dstSK);
     FTRACE(5, "TransCFG: adding incoming arcs in dstId = {}\n", dstId);
-    TransIDSet predIDs = findPredTrans(dstSR, jmpToTransID);
+    TransIDSet predIDs = findPredTrans(dstId, profData, srcDB, jmpToTransID);
     for (auto predId : predIDs) {
       if (hasNode(predId)) {
         auto predPostConds =

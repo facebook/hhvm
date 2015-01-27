@@ -15,20 +15,20 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/bz2/bz2-file.h"
+#include "hphp/runtime/base/array-init.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BZ2File::BZ2File(): m_bzFile(nullptr) {
-  m_innerFile = NEWOBJ(PlainFile)();
+BZ2File::BZ2File(): m_bzFile(nullptr), m_innerFile(makeSmartPtr<PlainFile>()) {
   m_innerFile->unregister();
-  m_isLocal = m_innerFile->m_isLocal;
+  setIsLocal(m_innerFile->isLocal());
 }
 
-BZ2File::BZ2File(PlainFile* innerFile): m_bzFile(nullptr) {
-  m_innerFile = innerFile;
-  m_isLocal = m_innerFile->m_isLocal;
+BZ2File::BZ2File(SmartPtr<PlainFile>&& innerFile)
+: m_bzFile(nullptr), m_innerFile(std::move(innerFile)) {
+  setIsLocal(m_innerFile->isLocal());
 }
 
 BZ2File::~BZ2File() {
@@ -86,10 +86,18 @@ bool BZ2File::flush() {
 }
 
 int64_t BZ2File::readImpl(char * buf, int64_t length) {
+  if (length == 0) {
+    return 0;
+  }
   assert(m_bzFile);
   int len = BZ2_bzread(m_bzFile, buf, length);
-  if (len < length)
-    m_eof = true;
+  /* Sometimes libbz2 will return fewer bytes than requested, and set bzerror
+   * to BZ_STREAM_END, but it's not actually EOF, and you can keep reading from
+   * the file - so, only set EOF after a failed read. This matches PHP5.
+   */
+  if (len == 0) {
+    setEof(true);
+  }
   return len;
 }
 
@@ -103,16 +111,16 @@ bool BZ2File::closeImpl() {
   bool ret = true;
   BZ2_bzclose(m_bzFile);
   m_bzFile = nullptr;
-  m_closed = true;
+  setIsClosed(true);
   m_innerFile->close();
   File::closeImpl();
-  m_eof = false;
+  setEof(false);
   return ret;
 }
 
 bool BZ2File::eof() {
   assert(m_bzFile);
-  return m_eof;
+  return getEof();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -20,13 +20,13 @@
 #include <string>
 #include <utility>
 
-#include "folly/Optional.h"
-#include "folly/Format.h"
+#include <folly/Optional.h>
+#include <folly/Format.h>
 
 #include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-internal.h"
-#include "hphp/hhbbc/type-arith.h"
+#include "hphp/hhbbc/type-ops.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -37,6 +37,19 @@ namespace {
 const StaticString s_stdClass("stdClass");
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Note: the couldBe comparisons here with sempty() are asking "can this string
+ * be a non-reference counted empty string".  What actually matters is whether
+ * it can be an empty string at all.  Currently, all reference counted strings
+ * are TStr, which has no values and may also be non-reference
+ * counted---emptiness isn't separately tracked like it is for arrays, so if
+ * anything happened that could make it reference counted this check will
+ * return true.
+ *
+ * This means this code is fine for now, but if we implement #3837503
+ * (non-static strings with values in the type system) it will need to change.
+ */
 
 bool couldBeEmptyish(Type ty) {
   return ty.couldBe(TNull) ||
@@ -169,6 +182,10 @@ std::string base_string(const Base& b) {
     show(b.locTy),
     b.locName ? b.locName->data() : "?"
   ).str();
+}
+
+Type baseLocNameType(const Base& b) {
+  return b.locName ? sval(b.locName) : TInitGen;
 }
 
 struct MIS : ISS {
@@ -318,6 +335,10 @@ bool couldBeInSelf(ISS& env, const Base& b) {
   return !selfTy || b.locTy.couldBe(*selfTy);
 }
 
+bool couldBeInPublicStatic(ISS& env, const Base& b) {
+  return b.loc == BaseLoc::StaticObjProp;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void handleInThisPropD(MIS& env) {
@@ -352,6 +373,20 @@ void handleInSelfPropD(MIS& env) {
   loseNonRefSelfPropTypes(env);
 }
 
+void handleInPublicStaticPropD(MIS& env) {
+  if (!couldBeInPublicStatic(env, env.base)) return;
+
+  auto const indexer = env.collect.publicStatics;
+  if (!indexer) return;
+
+  auto const name = baseLocNameType(env.base);
+  auto const ty = env.index.lookup_public_static(env.base.locTy, name);
+  if (propCouldPromoteToObj(ty)) {
+    indexer->merge(env.ctx, env.base.locTy, name,
+      objExact(env.index.builtin_class(s_stdClass.get())));
+  }
+}
+
 void handleInThisElemD(MIS& env) {
   if (!couldBeInThis(env, env.base)) return;
 
@@ -383,10 +418,25 @@ void handleInSelfElemD(MIS& env) {
   loseNonRefSelfPropTypes(env);
 }
 
+void handleInPublicStaticElemD(MIS& env) {
+  if (!couldBeInPublicStatic(env, env.base)) return;
+
+  auto const indexer = env.collect.publicStatics;
+  if (!indexer) return;
+
+  auto const name = baseLocNameType(env.base);
+  auto const ty = env.index.lookup_public_static(env.base.locTy, name);
+  if (elemCouldPromoteToArr(ty)) {
+    // Might be possible to only merge a TArrE, but for now this is ok.
+    indexer->merge(env.ctx, env.base.locTy, name, TArr);
+  }
+}
+
 // Currently NewElem and Elem InFoo effects don't need to do
 // anything different from each other.
 void handleInThisNewElem(MIS& env) { handleInThisElemD(env); }
 void handleInSelfNewElem(MIS& env) { handleInSelfElemD(env); }
+void handleInPublicStaticNewElem(MIS& env) { handleInPublicStaticElemD(env); }
 
 void handleInSelfElemU(MIS& env) {
   if (!couldBeInSelf(env, env.base)) return;
@@ -397,6 +447,24 @@ void handleInSelfElemU(MIS& env) {
   } else {
     mergeEachSelfPropRaw(env, loosen_statics);
   }
+}
+
+void handleInPublicStaticElemU(MIS& env) {
+  if (!couldBeInPublicStatic(env, env.base)) return;
+
+  auto const indexer = env.collect.publicStatics;
+  if (!indexer) return;
+
+  /*
+   * We need to ensure that the type could become non-static, but since we're
+   * never going to see anything specialized from lookup_public_static the
+   * first time we're running with collect.publicStatics, we can't do much
+   * right now since we don't have a type for the union of all counted types.
+   *
+   * Merging InitCell is correct, but very conservative, for now.
+   */
+  auto const name = baseLocNameType(env.base);
+  indexer->merge(env.ctx, env.base.locTy, name, TInitCell);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -635,6 +703,10 @@ Base miBaseSProp(MIS& env, Type cls, Type tprop) {
       return Base { *ty, BaseLoc::StaticObjProp, cls, name };
     }
   }
+  auto const indexTy = env.index.lookup_public_static(cls, tprop);
+  if (indexTy.subtypeOf(TInitCell)) {
+    return Base { indexTy, BaseLoc::StaticObjProp, cls, name };
+  }
   return Base { TInitCell, BaseLoc::StaticObjProp, cls, name };
 }
 
@@ -730,6 +802,7 @@ void miProp(MIS& env) {
   if (isDefine) {
     handleInThisPropD(env);
     handleInSelfPropD(env);
+    handleInPublicStaticPropD(env);
     handleBasePropD(env);
   }
 
@@ -793,12 +866,14 @@ void miElem(MIS& env) {
    */
   if (isUnset) {
     handleInSelfElemU(env);
+    handleInPublicStaticElemU(env);
     handleBaseElemU(env);
   }
 
   if (isDefine) {
     handleInThisElemD(env);
     handleInSelfElemD(env);
+    handleInPublicStaticElemD(env);
     handleBaseElemD(env);
 
     auto const couldDoChain =
@@ -844,6 +919,7 @@ void miNewElem(MIS& env) {
 
   handleInThisNewElem(env);
   handleInSelfNewElem(env);
+  handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
 
   auto const couldDoChain =
@@ -904,6 +980,7 @@ void miFinalVGetProp(MIS& env) {
   miPop(env);
   handleInThisPropD(env);
   handleInSelfPropD(env);
+  handleInPublicStaticPropD(env);
   handleBasePropD(env);
   if (couldBeThisObj(env, env.base)) {
     if (name) {
@@ -922,6 +999,7 @@ void miFinalSetProp(MIS& env) {
   miPop(env);
   handleInThisPropD(env);
   handleInSelfPropD(env);
+  handleInPublicStaticPropD(env);
   handleBasePropD(env);
 
   auto const resultTy = env.base.type.subtypeOf(TObj) ? t1 : TInitCell;
@@ -952,6 +1030,7 @@ void miFinalSetOpProp(MIS& env, SetOpOp subop) {
   miPop(env);
   handleInThisPropD(env);
   handleInSelfPropD(env);
+  handleInPublicStaticPropD(env);
   handleBasePropD(env);
 
   auto resultTy = TInitCell;
@@ -959,7 +1038,7 @@ void miFinalSetOpProp(MIS& env, SetOpOp subop) {
   if (couldBeThisObj(env, env.base)) {
     if (name && mustBeThisObj(env, env.base)) {
       if (auto const lhsTy = thisPropAsCell(env, name)) {
-        resultTy = typeArithSetOp(subop, *lhsTy, rhsTy);
+        resultTy = typeSetOp(subop, *lhsTy, rhsTy);
       }
     }
 
@@ -978,6 +1057,7 @@ void miFinalIncDecProp(MIS& env) {
   miPop(env);
   handleInThisPropD(env);
   handleInSelfPropD(env);
+  handleInPublicStaticPropD(env);
   handleBasePropD(env);
   if (couldBeThisObj(env, env.base)) {
     if (name) {
@@ -995,6 +1075,7 @@ void miFinalBindProp(MIS& env) {
   miPop(env);
   handleInThisPropD(env);
   handleInSelfPropD(env);
+  handleInPublicStaticPropD(env);
   handleBasePropD(env);
   if (couldBeThisObj(env, env.base)) {
     if (name) {
@@ -1063,6 +1144,7 @@ void miFinalVGetElem(MIS& env) {
   miPop(env);
   handleInThisElemD(env);
   handleInSelfElemD(env);
+  handleInPublicStaticElemD(env);
   handleBaseElemD(env);
   pessimisticFinalElemD(env, key, TInitGen);
   push(env, TRef);
@@ -1075,6 +1157,7 @@ void miFinalSetElem(MIS& env) {
 
   handleInThisElemD(env);
   handleInSelfElemD(env);
+  handleInPublicStaticElemD(env);
 
   // Note: we must handle the string-related cases before doing the
   // general handleBaseElemD, since operates on strings as if this
@@ -1143,6 +1226,7 @@ void miFinalSetOpElem(MIS& env) {
   miPop(env);
   handleInThisElemD(env);
   handleInSelfElemD(env);
+  handleInPublicStaticElemD(env);
   handleBaseElemD(env);
   pessimisticFinalElemD(env, key, TInitCell);
   push(env, TInitCell);
@@ -1153,6 +1237,7 @@ void miFinalIncDecElem(MIS& env) {
   miPop(env);
   handleInThisElemD(env);
   handleInSelfElemD(env);
+  handleInPublicStaticElemD(env);
   handleBaseElemD(env);
   pessimisticFinalElemD(env, key, TInitCell);
   push(env, TInitCell);
@@ -1164,6 +1249,7 @@ void miFinalBindElem(MIS& env) {
   miPop(env);
   handleInThisElemD(env);
   handleInSelfElemD(env);
+  handleInPublicStaticElemD(env);
   handleBaseElemD(env);
   pessimisticFinalElemD(env, key, TInitGen);
   push(env, TRef);
@@ -1173,6 +1259,7 @@ void miFinalUnsetElem(MIS& env) {
   mcodeKey(env);
   miPop(env);
   handleInSelfElemU(env);
+  handleInPublicStaticElemU(env);
   handleBaseElemU(env);
   // We don't handle inner-array types with unset yet.
   always_assert(env.base.loc != BaseLoc::LocalArrChain);
@@ -1203,6 +1290,7 @@ void miFinalVGetNewElem(MIS& env) {
   miPop(env);
   handleInThisNewElem(env);
   handleInSelfNewElem(env);
+  handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
   pessimisticFinalNewElem(env, TInitGen);
   push(env, TRef);
@@ -1213,6 +1301,7 @@ void miFinalSetNewElem(MIS& env) {
   miPop(env);
   handleInThisNewElem(env);
   handleInSelfNewElem(env);
+  handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
 
   if (mustBeInFrame(env.base) && env.base.type.subtypeOf(TArr)) {
@@ -1241,6 +1330,7 @@ void miFinalSetOpNewElem(MIS& env) {
   miPop(env);
   handleInThisNewElem(env);
   handleInSelfNewElem(env);
+  handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
   pessimisticFinalNewElem(env, TInitCell);
   push(env, TInitCell);
@@ -1250,6 +1340,7 @@ void miFinalIncDecNewElem(MIS& env) {
   miPop(env);
   handleInThisNewElem(env);
   handleInSelfNewElem(env);
+  handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
   pessimisticFinalNewElem(env, TInitCell);
   push(env, TInitCell);
@@ -1260,6 +1351,7 @@ void miFinalBindNewElem(MIS& env) {
   miPop(env);
   handleInThisNewElem(env);
   handleInSelfNewElem(env);
+  handleInPublicStaticNewElem(env);
   handleBaseNewElem(env);
   pessimisticFinalNewElem(env, TInitGen);
   push(env, TRef);

@@ -8,4 +8,4 @@ if (strpos($ret, 'privilege')) {
 	die('skip. SeCreateSymbolicLinkPrivilege not enable for this user.');
 }
 unlink('bug48746_tmp.lnk');
-?>
+?>

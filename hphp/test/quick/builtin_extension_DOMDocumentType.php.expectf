@@ -7,15 +7,15 @@ string(2) "N;"
 NULL
 array(22) {
   [0]=>
-  string(11) "__construct"
-  [1]=>
   string(5) "__get"
-  [2]=>
+  [1]=>
   string(5) "__set"
-  [3]=>
+  [2]=>
   string(7) "__isset"
-  [4]=>
+  [3]=>
   string(11) "__debuginfo"
+  [4]=>
+  string(11) "__construct"
   [5]=>
   string(11) "appendChild"
   [6]=>
@@ -63,15 +63,15 @@ string(2) "N;"
 NULL
 array(22) {
   [0]=>
-  string(11) "__construct"
-  [1]=>
   string(5) "__get"
-  [2]=>
+  [1]=>
   string(5) "__set"
-  [3]=>
+  [2]=>
   string(7) "__isset"
-  [4]=>
+  [3]=>
   string(11) "__debuginfo"
+  [4]=>
+  string(11) "__construct"
   [5]=>
   string(11) "appendChild"
   [6]=>

@@ -31,6 +31,7 @@ foreach($entries as $entry) {
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $path = dirname(__FILE__) . '/readdir_variation2';
 rmdir($path);

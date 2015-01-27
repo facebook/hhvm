@@ -34,4 +34,3 @@ function f2(): void {
   echo $y;
 }
 
-

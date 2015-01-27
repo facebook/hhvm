@@ -1,70 +1,70 @@
 --Document--
 DOMDocument Object
 (
-    [recover] => 
-    [documentURI] => %s
-    [strictErrorChecking] => 1
-    [xmlStandalone] => 1
-    [standalone] => 1
-    [attributes] => 
-    [nodeValue] => 
-    [resolveExternals] => 
-    [childNodes] => (object value omitted)
-    [previousSibling] => 
     [nodeName] => #document
-    [xmlVersion] => 1.0
-    [lastChild] => (object value omitted)
+    [nodeValue] => 
     [nodeType] => 9
-    [formatOutput] => 
-    [firstChild] => (object value omitted)
     [parentNode] => 
+    [childNodes] => (object value omitted)
+    [firstChild] => (object value omitted)
+    [lastChild] => (object value omitted)
+    [previousSibling] => 
+    [nextSibling] => 
+    [attributes] => 
     [ownerDocument] => 
-    [config] => 
-    [prefix] => 
-    [implementation] => (object value omitted)
-    [preserveWhiteSpace] => 1
-    [documentElement] => (object value omitted)
     [namespaceURI] => 
-    [baseURI] => %s
-    [substituteEntities] => 
+    [prefix] => 
+    [localName] => 
+    [baseURI] => %s/
     [textContent] => 
   Hello
   World
 
-    [nextSibling] => 
     [doctype] => 
-    [validateOnParse] => 
-    [version] => 1.0
+    [implementation] => (object value omitted)
+    [documentElement] => (object value omitted)
     [actualEncoding] => 
     [encoding] => 
-    [localName] => 
     [xmlEncoding] => 
+    [standalone] => 1
+    [xmlStandalone] => 1
+    [version] => 1.0
+    [xmlVersion] => 1.0
+    [strictErrorChecking] => 1
+    [documentURI] => %s/
+    [config] => 
+    [formatOutput] => 
+    [validateOnParse] => 
+    [resolveExternals] => 
+    [preserveWhiteSpace] => 1
+    [recover] => 
+    [substituteEntities] => 
 )
 --Element--
 DOMElement Object
 (
-    [schemaTypeInfo] => 
-    [tagName] => root
-    [textContent] => 
-  Hello
-  World
-
-    [baseURI] => %s
-    [localName] => root
-    [prefix] => 
-    [ownerDocument] => (object value omitted)
-    [parentNode] => (object value omitted)
-    [namespaceURI] => 
-    [nodeType] => 1
-    [lastChild] => (object value omitted)
     [nodeName] => root
-    [previousSibling] => 
-    [firstChild] => (object value omitted)
-    [childNodes] => (object value omitted)
     [nodeValue] => 
   Hello
   World
 
+    [nodeType] => 1
+    [parentNode] => (object value omitted)
+    [childNodes] => (object value omitted)
+    [firstChild] => (object value omitted)
+    [lastChild] => (object value omitted)
+    [previousSibling] => 
     [nextSibling] => 
     [attributes] => (object value omitted)
+    [ownerDocument] => (object value omitted)
+    [namespaceURI] => 
+    [prefix] => 
+    [localName] => root
+    [baseURI] => %s/
+    [textContent] => 
+  Hello
+  World
+
+    [tagName] => root
+    [schemaTypeInfo] => 
 )

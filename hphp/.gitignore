@@ -1,8 +1,10 @@
 # HHVM build results
 *.hhbc
 *.[oa]
+/hhvm/hhbbc
 /hhvm/hhvm
 /hhvm/hphp
+/hhvm/php
 
 # CMake build artifacts
 CMakeFiles
@@ -10,8 +12,7 @@ CMakeFiles
 cmake_install.cmake
 Makefile
 /compiler/analysis/code_error.inc
-/runtime/ext_hhvm/ext_hhvm_infotabs.h
-/runtime/ext_hhvm/ext_hhvm_infotabs.cpp
+/runtime/ir-opcode-generated.h
 /hphp-build-info.cpp
 /hphp-repo-schema.h
 
@@ -23,9 +24,12 @@ cotire
 .*.swp
 .*.swo
 
+# vim config
+.vimrc
+
 # tags files
-*/tags
-*/TAGS
+tags
+TAGS
 
 # logs
 *.log

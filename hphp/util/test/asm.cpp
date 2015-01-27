@@ -26,8 +26,8 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "folly/Format.h"
-#include "folly/String.h"
+#include <folly/Format.h>
+#include <folly/String.h>
 
 #include "hphp/util/disasm.h"
 
@@ -831,6 +831,138 @@ incq 0x10(%rax,%rdi,2)
 incq 0x15(%rax,%rsi,4)
 decq 0x12(%rbp,%r15,2)
 )");
+}
+
+TEST(Asm, Unpcklpd) {
+  TestDataBlock db(256);
+  Asm a { db };
+
+  Address current = db.frontier();
+  a.unpcklpd(xmm0, xmm1);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x0f, current[1]);
+  EXPECT_EQ(0x14, current[2]);
+
+  current = db.frontier();
+  a.unpcklpd(xmm11, xmm1);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x41, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0x14, current[3]);
+
+  current = db.frontier();
+  a.unpcklpd(xmm5, xmm13);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x44, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0x14, current[3]);
+
+  current = db.frontier();
+  a.unpcklpd(xmm11, xmm13);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x45, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0x14, current[3]);
+}
+
+TEST(Asm, Ucomisd) {
+  TestDataBlock db(256);
+  Asm a { db };
+
+  Address current = db.frontier();
+  a.ucomisd(xmm0, xmm1);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x0f, current[1]);
+  EXPECT_EQ(0x2e, current[2]);
+
+  current = db.frontier();
+  a.ucomisd(xmm9, xmm2);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x44, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0x2e, current[3]);
+
+  current = db.frontier();
+  a.ucomisd(xmm3, xmm12);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x41, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0x2e, current[3]);
+
+  current = db.frontier();
+  a.ucomisd(xmm11, xmm12);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x45, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0x2e, current[3]);
+}
+
+TEST(Asm, Pxor) {
+  TestDataBlock db(256);
+  Asm a { db };
+
+  Address current = db.frontier();
+  a.pxor(xmm0, xmm1);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x0f, current[1]);
+  EXPECT_EQ(0xef, current[2]);
+
+  current = db.frontier();
+  a.pxor(xmm8, xmm1);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x41, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0xef, current[3]);
+
+  current = db.frontier();
+  a.pxor(xmm0, xmm15);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x44, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0xef, current[3]);
+
+  current = db.frontier();
+  a.pxor(xmm11, xmm15);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x45, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0xef, current[3]);
+}
+
+TEST(Asm, Psrlq) {
+  TestDataBlock db(256);
+  Asm a { db };
+
+  Address current = db.frontier();
+  a.psrlq(3, xmm1);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x0f, current[1]);
+  EXPECT_EQ(0x73, current[2]);
+
+  current = db.frontier();
+  a.psrlq(3, xmm9);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x41, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0x73, current[3]);
+}
+
+TEST(Asm, Psllq) {
+  TestDataBlock db(256);
+  Asm a { db };
+
+  Address current = db.frontier();
+  a.psllq(3, xmm1);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x0f, current[1]);
+  EXPECT_EQ(0x73, current[2]);
+
+  current = db.frontier();
+  a.psllq(3, xmm9);
+  EXPECT_EQ(0x66, current[0]);
+  EXPECT_EQ(0x41, current[1]);
+  EXPECT_EQ(0x0f, current[2]);
+  EXPECT_EQ(0x73, current[3]);
 }
 
 }}

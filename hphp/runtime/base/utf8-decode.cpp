@@ -129,20 +129,14 @@ unsigned int UTF8To16Decoder::getNextChar() {
   return this_char;
 }
 
-int UTF8To16Decoder::decode() {
-  if (m_low_surrogate) {
-    int ret = m_low_surrogate;
-    m_low_surrogate = 0;
-    return ret;
+int UTF8To16Decoder::decodeTail() {
+  int c = getNext();
+  if (c < 0x10000) {
+    return c;
   } else {
-    int c = getNext();
-    if (c < 0x10000) {
-      return c;
-    } else {
-      c -= 0x10000;
-      m_low_surrogate = (0xDC00 | (c & 0x3FF));
-      return (0xD800 | (c >> 10));
-    }
+    c -= 0x10000;
+    m_low_surrogate = (0xDC00 | (c & 0x3FF));
+    return (0xD800 | (c >> 10));
   }
 }
 

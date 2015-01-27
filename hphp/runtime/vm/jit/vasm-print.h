@@ -17,31 +17,52 @@
 #ifndef incl_HPHP_JIT_VASM_PRINT_H_
 #define incl_HPHP_JIT_VASM_PRINT_H_
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include <vector>
 #include <iostream>
 #include <string>
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
-std::string show(x64::Vreg r);
-std::string show(x64::Vptr p);
-std::string show(const x64::Vunit& unit, const x64::Vinstr& inst);
+struct Vinstr;
+struct Vunit;
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string show(Vreg r);
+std::string show(Vptr p);
+std::string show(const Vunit& unit);
+std::string show(const Vunit& unit, const Vinstr& inst);
 
 // print a dot-compatible digraph of the blocks (without contents)
-void printCfg(const x64::Vunit& unit, const jit::vector<Vlabel>& blocks);
-void printCfg(std::ostream& out, const x64::Vunit& unit,
+void printCfg(const Vunit& unit, const jit::vector<Vlabel>& blocks);
+void printCfg(std::ostream& out, const Vunit& unit,
               const jit::vector<Vlabel>& blocks);
 
-std::string show(const x64::Vunit& unit);
+// Tracing level constants.
+constexpr int kInitialVasmLevel = 1;
+constexpr int kVasmImmsLevel = 2;
+constexpr int kVasmFusionLevel = 2;
+constexpr int kVasmCodeGenLevel = 2;
+constexpr int kVasmRegAllocLevel = 3;
+constexpr int kVasmARMFoldLevel = 4;
+constexpr int kVasmJumpsLevel = 4;
+constexpr int kVasmDCELevel = 4;
+constexpr int kVasmLowerLevel = 4;
 
-// print the cfg digraph followed by a code listing
-void printUnit(std::string caption, const x64::Vunit& unit);
+// Print the cfg digraph followed by a vasm code listing, if the trace level is
+// above `level'.
+void printUnit(int level,
+               const std::string& caption,
+               const Vunit& unit);
 
 // main, cold, frozen
 extern const char* area_names[];
 
-} }
+///////////////////////////////////////////////////////////////////////////////
+}}
 
 #endif

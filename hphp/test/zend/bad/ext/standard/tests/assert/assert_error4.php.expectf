@@ -1,5 +1,5 @@
 
 Fatal error: %s
 
-Fatal error: %s
+Catchable fatal error: %s
 Describing what was asserted:"0 $ 0" in %s on line 3

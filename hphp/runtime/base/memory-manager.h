@@ -20,16 +20,27 @@
 #include <array>
 #include <vector>
 #include <utility>
+#include <set>
 
-#include "folly/Memory.h"
+#include <folly/Memory.h>
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
+
 #include "hphp/runtime/base/memory-usage-stats.h"
+#include "hphp/runtime/base/request-event-handler.h"
+
+// used for mmapping contiguous heap space
+// If used, anonymous pages are not cleared when mapped with mmap. It is not
+// enabled by default and should be checked before use
+#define       MAP_UNINITIALIZED 0x4000000 /* XXX Fragile. */
 
 namespace HPHP {
+struct APCLocalArray;
+struct MemoryManager;
+struct ObjectData;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -52,7 +63,6 @@ namespace HPHP {
  *     malloc implementation.  (This feature is gated on being
  *     compiled with jemalloc.)
  */
-struct MemoryManager;
 MemoryManager& MM();
 
 //////////////////////////////////////////////////////////////////////
@@ -104,17 +114,36 @@ template<class T> void smart_delete_array(T* t, size_t count);
 
 //////////////////////////////////////////////////////////////////////
 
+enum class HeaderKind : uint8_t {
+  // ArrayKind aliases
+  Packed, Struct, Mixed, StrMap, IntMap, VPacked, Empty, Apc, Globals, Proxy,
+  // Other ordinary refcounted heap objects
+  String, Object, ResumableObj, Resource, Ref,
+  Resumable, // ResumableNode followed by Frame, Resumable, ObjectData
+  Native, // a NativeData header preceding an HNI ObjectData
+  Sweepable, // a Sweepable header preceding an ObjectData ResourceData
+  SmallMalloc, // small smart_malloc'd block
+  BigMalloc, // big smart_malloc'd block
+  BigObj, // big size-tracked object (valid header follows BigNode)
+  Free, // small block in a FreeList
+  Hole, // wasted space not in any freelist
+  Debug // a DebugHeader
+};
+
+const size_t HeaderKindOffset = 11;
+const unsigned NumHeaderKinds = (uint8_t)HeaderKind::Debug+1;
+
 /*
  * Debug mode header.
  *
  * For size-untracked allocations, this sits in front of the user
- * payload for small allocations, and in front of the SweepNode in
+ * payload for small allocations, and in front of the BigNode in
  * big allocations.  The allocatedMagic aliases the space for the
  * FreeList::Node pointers, but should catch double frees due to
  * kAllocatedMagic.
  *
  * For size-tracked allocations, this always sits in front of
- * whatever header we're using (SmallNode or SweepNode).
+ * whatever header we're using (SmallNode or BigNode).
  *
  * We set requestedSize to kFreedMagic when a block is not
  * allocated.
@@ -124,15 +153,16 @@ struct DebugHeader {
   static constexpr size_t kFreedMagic =        0x5AB07A6ED4110CEEull;
 
   uintptr_t allocatedMagic;
-  size_t requestedSize;     // zero for size-untracked allocator
+  uint8_t pad[3];
+  HeaderKind kind;
+  size_t requestedSize; // zero for size-untracked allocator
   size_t returnedCap;
-  size_t padding;
 };
 
 /*
  * Slabs are consumed via bump allocation.  The individual allocations are
  * quantized into a fixed set of size classes, the sizes of which are an
- * implementation detail documented here to shed light on the algorthms that
+ * implementation detail documented here to shed light on the algorithms that
  * compute size classes.  Request sizes are rounded up to the nearest size in
  * the relevant SMART_SIZES table; e.g. 17 is rounded up to 32.  There are
  * 2^LG_SMART_SIZES_PER_DOUBLING size classes for each doubling of size
@@ -261,28 +291,149 @@ constexpr size_t kSmartPreallocBytesLimit = size_t{1} << 9;
  * debugging.  There's also 0x7a for junk-filling some cases of
  * ex-TypedValue memory (evaluation stack).
  */
-constexpr char kSmartFreeFill = 0x6a;
-constexpr char kTVTrashFill = 0x7a;
+constexpr char kSmartFreeFill   = 0x6a;
+constexpr char kTVTrashFill     = 0x7a; // used by interpreter
+constexpr char kTVTrashFill2    = 0x7b; // used by smart pointer dtors
+constexpr char kTVTrashJITStk   = 0x7c; // used by the JIT for stack slots
+constexpr char kTVTrashJITFrame = 0x7d; // used by the JIT for stack frames
+constexpr char kTVTrashJITHeap  = 0x7e; // used by the JIT for heap
 constexpr uintptr_t kSmartFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * This is the header MemoryManager uses for large allocations, and
- * it's also used for StringData's that wrap APCHandle.
- *
- * TODO(#2946560): refactor this not to be shared with StringData.
- */
-struct SweepNode {
-  SweepNode* next;
+// Header MemoryManager uses for StringDatas that wrap APCHandle
+struct StringDataNode {
+  StringDataNode* next;
+  StringDataNode* prev;
+};
+
+// This is the header MemoryManager uses to remember large allocations
+// so they can be auto-freed in MemoryManager::reset()
+struct BigNode {
+  size_t nbytes;
+  char pad[3];
+  HeaderKind kind;
+  uint32_t index;
+};
+
+// Header used for small smart_malloc allocations (but not *Size allocs)
+struct SmallNode {
+  size_t padbytes;
+  char pad[3];
+  HeaderKind kind;
+};
+
+// all FreeList entries are parsed by inspecting this header.
+struct FreeNode {
+  FreeNode* next;
   union {
-    SweepNode* prev;
-    size_t padbytes;
+    struct {
+      char pad[3];
+      HeaderKind kind;
+      uint32_t size;
+    };
+    uint64_t kind_size;
   };
 };
 
-//////////////////////////////////////////////////////////////////////
+// header for HNI objects with NativeData payloads. see native-data.h
+// for details about memory layout.
+struct NativeNode {
+  uint32_t sweep_index; // index in MM::m_natives
+  uint32_t obj_offset; // byte offset from this to ObjectData*
+  char pad[3];
+  HeaderKind kind;
+};
+
+// header for Resumable objects. See layout comment in resumable.h
+struct ResumableNode {
+  size_t framesize;
+  char pad[3];
+  HeaderKind kind; // Resumable
+};
+
+// POD type for tracking arbitrary memory ranges
+struct MemBlock {
+  void* ptr;
+  size_t size; // bytes
+};
+
+// allocator for slabs and big blocks
+struct BigHeap {
+  struct iterator;
+  BigHeap() {}
+  bool empty() const {
+    return m_slabs.empty() && m_bigs.empty();
+  }
+
+  // return true if ptr points into one of the slabs
+  bool contains(void* ptr) const;
+
+  // allocate a MemBlock of at least size bytes, track in m_slabs.
+  MemBlock allocSlab(size_t size);
+
+  // allocation api for big blocks. These get a BigNode header and
+  // are tracked in m_bigs
+  MemBlock allocBig(size_t size, HeaderKind kind);
+  MemBlock callocBig(size_t size);
+  MemBlock resizeBig(void* p, size_t size);
+  void freeBig(void*);
+
+  // free all slabs and big blocks
+  void reset();
+
+  // Release auxiliary structures to prepare to be idle for a while
+  void flush();
+
+  // allow whole-heap iteration
+  iterator begin();
+  iterator end();
+
+ protected:
+  void enlist(BigNode*, HeaderKind kind, size_t size);
+
+ protected:
+  std::vector<MemBlock> m_slabs;
+  std::vector<BigNode*> m_bigs;
+};
+
+// Contiguous Heap handles allocations and provides a contiguous address space
+// for requests. To turn on build with CONTIGUOUS_HEAP = 1
+struct ContiguousHeap : BigHeap {
+  bool contains(void* ptr) const;
+
+  MemBlock allocSlab(size_t size);
+
+  MemBlock allocBig(size_t size, HeaderKind kind);
+  MemBlock callocBig(size_t size);
+  MemBlock resizeBig(void* p, size_t size);
+  void freeBig(void*);
+
+  void reset();
+
+  void flush();
+
+  ~ContiguousHeap();
+ private:
+  // Contiguous Heap Pointers
+  char* m_base = nullptr;
+  char* m_used;
+  char* m_end;
+  char* m_peak;
+  char* m_OOMMarker;
+  FreeNode m_freeList;
+
+  // Contiguous Heap Counters
+  uint32_t m_requestCount;
+  size_t m_heapUsage;
+  size_t m_contiguousHeapSize;
+
+ private:
+  void* heapAlloc(size_t nbytes, size_t &cap);
+  void  createRequestHeap();
+};
+
 
 struct MemoryManager {
   /*
@@ -305,6 +456,11 @@ struct MemoryManager {
   struct MaskAlloc;
 
   /*
+   * An RAII wrapper to suppress OOM checking in a region.
+   */
+  struct SuppressOOM;
+
+  /*
    * Returns true iff a sweep is in progress.  I.e., is the current
    * thread running inside a call to MemoryManager::sweep().
    *
@@ -312,16 +468,6 @@ struct MemoryManager {
    * MemoryManager may not be set up (i.e. between requests).
    */
   static bool sweeping();
-
-  /*
-   * Size class helpers.
-   */
-private:
-  static uint32_t bsr(uint32_t x);
-  static uint8_t smartSize2IndexCompute(uint32_t size);
-  static uint8_t smartSize2IndexLookup(uint32_t size);
-  static uint8_t smartSize2Index(uint32_t size);
-public:
 
   /*
    * Return the smart size class for a given requested allocation
@@ -374,7 +520,7 @@ public:
    * Pre: size > kMaxSmartSize
    */
   template<bool callerSavesActualSize>
-  std::pair<void*,size_t> smartMallocSizeBig(size_t size);
+  MemBlock smartMallocSizeBig(size_t size);
   void smartFreeSizeBig(void* vp, size_t size);
 
   /*
@@ -403,11 +549,11 @@ public:
    */
   void* smartMallocSizeLogged(uint32_t size);
   void smartFreeSizeLogged(void* p, uint32_t size);
-  template<bool callerSavesActualSize>
-  std::pair<void*,size_t> smartMallocSizeBigLogged(size_t size);
-  void smartFreeSizeBigLogged(void* vp, size_t size);
   void* objMallocLogged(size_t size);
   void objFreeLogged(void* vp, size_t size);
+  template<bool callerSavesActualSize>
+  MemBlock smartMallocSizeBigLogged(size_t size);
+  void smartFreeSizeBigLogged(void* vp, size_t size);
 
   /*
    * During session shutdown, before resetAllocator(), this phase runs
@@ -418,9 +564,15 @@ public:
   void sweep();
 
   /*
+   * Returns ptr to head node of m_strings linked list. This used by
+   * StringData during a reset, enlist, and delist
+   */
+  StringDataNode& getStringList() { return m_strings; }
+
+  /*
    * Returns true if there are no allocated slabs
    */
-  bool empty() const { return m_slabs.empty(); }
+  bool empty() const { return m_heap.empty(); }
 
   /*
    * Release all the request-local allocations.  Zeros all the free
@@ -430,6 +582,12 @@ public:
    * This is called after sweep in the end-of-request path.
    */
   void resetAllocator();
+
+  /*
+   * Prepare for being idle for a while by releasing or madvising
+   * as much as possible.
+   */
+  void flush();
 
   /*
    * Reset all stats that are synchronzied externally from the memory manager.
@@ -483,6 +641,11 @@ public:
   bool preAllocOOM(int64_t size);
 
   /*
+   * Unconditionally register an OOM fatal. Still respects the m_couldOOM flag.
+   */
+  void forceOOM();
+
+  /*
    * Reset whether or not we should raise an OOM fatal if we exceed the memory
    * limit for the request.
    *
@@ -490,39 +653,78 @@ public:
    * until this flag has been reset, to try to avoid getting OOMs during the
    * initial OOM processing.
    */
-  void resetCouldOOM();
+  void resetCouldOOM(bool state = true);
 
   /*
-   * Iterator to the allocated slabs. Used to traverse the memory
-   * in profiling extensions.
+   * Methods for maintaining dedicated sweep lists of sweepable NativeData
+   * objects, and APCLocalArray instances.
    */
-  typedef void (*iterate_callback)(
-    void* slab,
-    int slab_size,
-    bool is_big,
-    void* callback_data
-  );
+  void addNativeObject(NativeNode*);
+  void removeNativeObject(NativeNode*);
+  void addApcArray(APCLocalArray*);
+  void removeApcArray(APCLocalArray*);
 
-  void iterate(iterate_callback p_callback, void* user_data);
+  /*
+   * Object tracking keeps instances of object data's by using track/untrack.
+   * It is then possible to iterate them by iterating the memory manager.
+   * This entire feature is enabled/disabled by using setObjectTracking(bool).
+   */
+  void setObjectTracking(bool val);
+  bool getObjectTracking();
+
+  /*
+   * Iterating the memory manager tracked objects.
+   */
+  template<class Fn> void forEachObject(Fn);
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Request profiling.
+
+  /*
+   * Trigger heap profiling in the next request.
+   *
+   * Allocate the s_trigger atomic so that the next request can consume it.  If
+   * an unconsumed trigger exists, do nothing and return false; else return
+   * true.
+   */
+  static bool triggerProfiling(const std::string& filename);
+
+  /*
+   * Do per-request initialization.
+   *
+   * Attempt to consume the profiling trigger, and copy it to m_profctx if we
+   * are successful.  Also enable jemalloc heap profiling.
+   */
+  static void requestInit();
+
+  /*
+   * Do per-request shutdown.
+   *
+   * Dump a jemalloc heap profiling, then reset the profiler.
+   */
+  static void requestShutdown();
+
 private:
-  friend class StringData; // for enlist/delist access to m_strings
   friend void* smart_malloc(size_t nbytes);
   friend void* smart_calloc(size_t count, size_t bytes);
   friend void* smart_realloc(void* ptr, size_t nbytes);
   friend void  smart_free(void* ptr);
 
-  struct SmallNode;
-
   struct FreeList {
-    struct Node;
-
     void* maybePop();
-    void push(void*);
-
-    Node* head = nullptr;
+    void push(void*, size_t size);
+    FreeNode* head = nullptr;
   };
 
-  static void* TlsInitSetup;
+  /*
+   * Request-local heap profiling context.
+   */
+  struct ReqProfContext {
+    bool flag{false};
+    bool prof_active{false};
+    bool thread_prof_active{false};
+    std::string filename;
+  };
 
 private:
   MemoryManager();
@@ -530,26 +732,27 @@ private:
   MemoryManager& operator=(const MemoryManager&) = delete;
 
 private:
-  void* slabAlloc(size_t nbytes, unsigned index);
+  void* slabAlloc(uint32_t bytes, unsigned index);
   void* newSlab(size_t nbytes);
-  void* smartEnlist(SweepNode*);
+  void  updateBigStats();
   void* smartMallocBig(size_t nbytes);
   void* smartCallocBig(size_t nbytes);
-  void  smartFreeBig(SweepNode*);
   void* smartMalloc(size_t nbytes);
   void* smartRealloc(void* ptr, size_t nbytes);
   void  smartFree(void* ptr);
+
+  static uint32_t bsr(uint32_t x);
+  static uint8_t smartSize2IndexCompute(uint32_t size);
+  static uint8_t smartSize2IndexLookup(uint32_t size);
+  static uint8_t smartSize2Index(uint32_t size);
+
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&, size_t*&, size_t&);
-  void refreshStatsHelper();
   void refreshStats();
   template<bool live> void refreshStatsImpl(MemoryUsageStats& stats);
   void refreshStatsHelperExceeded();
-#ifdef USE_JEMALLOC
   void refreshStatsHelperStop();
-  template<bool callerSavesActualSize>
-  void* smartMallocSizeBigHelper(void*&, size_t&, size_t);
-#endif
+
   void resetStatsImpl(bool isInternalCall);
   bool checkPreFree(DebugHeader*, size_t, size_t) const;
   template<class SizeT> static SizeT debugAddExtra(SizeT);
@@ -560,20 +763,41 @@ private:
   void logAllocation(void*, size_t);
   void logDeallocation(void*);
 
+  void checkHeap();
+  void initHole();
+  void initFree();
+  BigHeap::iterator begin();
+  BigHeap::iterator end();
+
 private:
   TRACE_SET_MOD(smartalloc);
 
   void* m_front;
   void* m_limit;
   std::array<FreeList,kNumSmartSizes> m_freelists;
-  SweepNode m_sweep;   // oversize smart_malloc'd blocks
-  SweepNode m_strings; // in-place node is head of circular list
+  StringDataNode m_strings; // in-place node is head of circular list
+  std::vector<APCLocalArray*> m_apc_arrays;
   MemoryUsageStats m_stats;
+#if CONTIGUOUS_HEAP
+  ContiguousHeap m_heap;
+#else
+  BigHeap m_heap;
+#endif
+  std::vector<NativeNode*> m_natives;
+
+  bool m_sweeping;
+  bool m_trackingInstances;
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
-  std::vector<void*> m_slabs;
+  bool m_bypassSlabAlloc;
+
+  ReqProfContext m_profctx;
+  static std::atomic<ReqProfContext*> s_trigger;
+
+  static void* TlsInitSetup;
 
 #ifdef USE_JEMALLOC
+  // pointers to jemalloc-maintained allocation counters
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
   uint64_t m_prevAllocated;
@@ -584,9 +808,6 @@ private:
   static size_t s_cactiveLimitCeiling;
   bool m_enableStatsSync;
 #endif
-
-private:
-  bool m_sweeping;
 };
 
 //////////////////////////////////////////////////////////////////////

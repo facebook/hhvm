@@ -12,17 +12,19 @@
 (*****************************************************************************)
 (* Building the environment *)
 (*****************************************************************************)
-open Utils
 open ServerEnv
 
 let make_genv ~multicore options =
   let root         = ServerArgs.root options in
   let check_mode   = ServerArgs.check_mode options in
+  let gc_control   = ServerArgs.gc_control options in
+  Relative_path.set_path_prefix Relative_path.Root (Path.string_of_path root);
   Typing_deps.trace :=
-    not check_mode || ServerArgs.convert options <> None;
+    not check_mode || ServerArgs.convert options <> None ||
+    ServerArgs.load_save_opt options <> None;
   let nbr_procs    = ServerConfig.nbr_procs in
-  let workers = 
-    if multicore then Some (Worker.make nbr_procs) else None
+  let workers =
+    if multicore then Some (Worker.make nbr_procs gc_control) else None
   in
   if not check_mode
   then begin
@@ -38,10 +40,13 @@ let make_genv ~multicore options =
   }
 
 let make_env options =
-  { nenv           = Naming.empty;
-    files_info     = SMap.empty;
+  let nenv = Naming.empty in
+  let iassume_php = ServerArgs.assume_php options in
+  let nenv = { nenv with Naming.iassume_php = iassume_php} in
+  { nenv;
+    files_info     = Relative_path.Map.empty;
     errorl         = [];
-    failed_parsing = SSet.empty;
-    failed_decl    = SSet.empty;
-    failed_check   = SSet.empty;
+    failed_parsing = Relative_path.Set.empty;
+    failed_decl    = Relative_path.Set.empty;
+    failed_check   = Relative_path.Set.empty;
   }

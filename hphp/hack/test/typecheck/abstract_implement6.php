@@ -16,10 +16,11 @@ interface IFace {
 }
 
 // multiple layers
-abstract class AClass implements IFace {
-}
+abstract class AClass implements IFace {}
 
 abstract class BClass extends AClass {}
 abstract class CClass extends BClass {}
-class DClass extends CClass { /* should fail, foo is missing */ }
+class DClass extends CClass {
+  /* should fail, foo is missing */
+}
 

@@ -20,7 +20,7 @@ calls=1 0 0
 
 fl=php:internal
 fn=php::xdebug_call_file
-23 %d
+28 %d
 
 fl=php:internal
 fn=php::var_dump

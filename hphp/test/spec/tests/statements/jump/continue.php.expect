@@ -1,0 +1,51 @@
+1 is odd
+3 is odd
+5 is odd
+17 is odd
+9 is odd
+1 is odd
+In for loop
+In for loop
+51 is odd
+27 is odd
+3 is odd
+In for loop
+In for loop
+85 is odd
+45 is odd
+5 is odd
+In for loop
+
+$i = 10: ten
+Just beyond the switch
+$i = 20: twenty
+Just beyond the switch
+$i = 30: thirty
+Just beyond the switch
+$i = 40: 
+Just beyond the switch
+----------
+
+$i = 10: ten
+Just beyond the switch
+$i = 20: twenty
+----------
+
+$i = 10: ten
+Just beyond the switch
+$i = 20: twenty
+Just beyond the switch
+$i = 30: thirty
+Just beyond the switch
+$i = 40: 
+Just beyond the switch
+----------
+
+$i = 10: ten
+Just beyond the switch
+$i = 20: twenty
+$i = 30: thirty
+Just beyond the switch
+$i = 40: 
+Just beyond the switch
+----------

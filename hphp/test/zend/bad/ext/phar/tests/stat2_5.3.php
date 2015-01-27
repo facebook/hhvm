@@ -27,5 +27,6 @@ __HALT_COMPILER();');
 include $fname3;
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar'); ?>

@@ -41,6 +41,7 @@ SOFTWARE.
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/zend-strtod.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
@@ -164,7 +165,7 @@ namespace HPHP {
     This table maps the 128 ASCII characters into the 32 character classes.
     The remaining Unicode characters should be mapped to S_ETC.
 */
-static const int ascii_class[128] = {
+static const int8_t ascii_class[128] __attribute__((__aligned__(64))) = {
     S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
     S_ERR, S_WSP, S_WSP, S_ERR, S_ERR, S_WSP, S_ERR, S_ERR,
     S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
@@ -187,7 +188,7 @@ static const int ascii_class[128] = {
 };
 
 /*<fb>*/
-static const int loose_ascii_class[128] = {
+static const int8_t loose_ascii_class[128] __attribute__((__aligned__(64))) = {
   S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
   S_ERR, S_WSP, S_WSP, S_ERR, S_ERR, S_WSP, S_ERR, S_ERR,
   S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
@@ -218,7 +219,7 @@ static const int loose_ascii_class[128] = {
     0 and 29. An action is a negative number between -1 and -9. A JSON text is
     accepted if the end of the text is in state 9 and mode is MODE_DONE.
 */
-static const int state_transition_table[30][31] = {
+static const int8_t state_transition_table[30][32] __attribute__((__aligned__(64))) = {
 /* 0*/ { 0, 0,-8,-1,-6,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
 /* 1*/ { 1, 1,-1,-9,-1,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
 /* 2*/ { 2, 2,-8,-1,-6,-5,-1,-1, 3,-1,-1,-1,20,-1,21,22,-1,-1,-1,-1,-1,13,-1,17,-1,-1,10,-1,-1,-1,-1},
@@ -255,7 +256,7 @@ static const int state_transition_table[30][31] = {
 /*
   Alternate "loose" transition table to support unquoted keys.
 */
-static const int loose_state_transition_table[31][31] = {
+static const int8_t loose_state_transition_table[31][32] __attribute__((__aligned__(64))) = {
 /* 0*/ { 0, 0,-8,-1,-6,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
 /* 1*/ { 1, 1,-1,-9,-1,-1,-1,-1, 3,-1,-1,-1,-1,-1,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30},
 /* 2*/ { 2, 2,-8,-1,-6,-5,-1,-1, 3,-1,-1,-1,20,-1,21,22,-1,-1,-1,-1,-1,13,-1,17,-1,-1,10,-1,-1,-1,-1},
@@ -412,11 +413,27 @@ static int dehexchar(char c) {
   return -1;
 }
 
+static String copy_and_clear(StringBuffer &buf) {
+  auto ret = buf.size() > 0 ? buf.copy() : empty_string();
+  buf.clear();
+  return ret;
+}
+
+static Variant to_double(StringBuffer &buf) {
+  auto data = buf.data();
+  auto ret = data ? zend_strtod(data, nullptr) : 0.0;
+  buf.clear();
+  return ret;
+}
+
 static void json_create_zval(Variant &z, StringBuffer &buf, int type,
                              int64_t options) {
   switch (type) {
-  case KindOfInt64:
-    {
+    case KindOfBoolean:
+      z = (buf.data() && (*buf.data() == 't'));
+      return;
+
+    case KindOfInt64: {
       bool bigint = false;
       const char *p = buf.data();
       assert(p);
@@ -441,44 +458,47 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
       }
 
       if (bigint) {
-        z = buf.detach();
         if (!(options & k_JSON_BIGINT_AS_STRING)) {
           // See KindOfDouble (below)
-          z = z.toDouble();
+          z = to_double(buf);
+        } else {
+          z = copy_and_clear(buf);
         }
       } else {
         z = int64_t(strtoll(buf.data(), nullptr, 10));
       }
+      return;
     }
-    break;
-  case KindOfDouble:
-    // Can't use strtod() here since it's locale dependent
-    // JSON specifies using a '.' for decimal separators
-    // regardless of locale.
-    // Fallback on Variant's toDouble() machinery.
-    if (buf.data()) {
-      z = buf.detach();
-      z = z.toDouble();
-    } else {
-      z = 0.0;
-    }
-    break;
-  case KindOfString:
-    z = buf.detach();
-    break;
-  case KindOfBoolean:
-    z = (buf.data() && (*buf.data() == 't'));
-    break;
-  default:
-    z = uninit_null();
-    break;
+
+    case KindOfDouble:
+      // Use zend_strtod() instead of strtod() here since JSON specifies using
+      // a '.' for decimal separators regardless of locale.
+      z = to_double(buf);
+      return;
+
+    case KindOfString:
+      z = copy_and_clear(buf);
+      return;
+
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfStaticString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+      z = uninit_null();
+      return;
+
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
-void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
-  if (utf16 < 0x80) {
-    buf.append((char)utf16);
-  } else if (utf16 < 0x800) {
+NEVER_INLINE
+void utf16_to_utf8_tail(StringBuffer &buf, unsigned short utf16) {
+  if (utf16 < 0x800) {
     buf.append((char)(0xc0 | (utf16 >> 6)));
     buf.append((char)(0x80 | (utf16 & 0x3f)));
   } else if ((utf16 & 0xfc00) == 0xdc00
@@ -503,6 +523,15 @@ void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
     buf.append((char)(0x80 | ((utf16 >> 6) & 0x3f)));
     buf.append((char)(0x80 | (utf16 & 0x3f)));
   }
+}
+
+ALWAYS_INLINE
+void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
+  if (LIKELY(utf16 < 0x80)) {
+    buf.append((char)utf16);
+    return;
+  }
+  return utf16_to_utf8_tail(buf, utf16);
 }
 
 StaticString s__empty_("_empty_");
@@ -580,11 +609,14 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   bool const stable_maps = options & k_JSON_FB_STABLE_MAPS;
   bool const collections = stable_maps || (options & k_JSON_FB_COLLECTIONS);
   int qchr = 0;
-  int const *byte_class;
+  int8_t const *byte_class;
+  int8_t const (*next_state_table)[32];
   if (loose) {
     byte_class = loose_ascii_class;
+    next_state_table = loose_state_transition_table;
   } else {
     byte_class = ascii_class;
+    next_state_table = state_transition_table;
   }
   /*</fb>*/
 
@@ -634,11 +666,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
     */
 
     /*<fb>*/
-    if (loose) {
-      s = loose_state_transition_table[the_state][c];
-    } else {
-      s = state_transition_table[the_state][c];
-    }
+    s = next_state_table[the_state][c];
 
     if (s == -4) {
       if (b != qchr) {
@@ -686,7 +714,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           /*<fb>*/
           if (collections) {
             // stable_maps is meaningless
-            top = NEWOBJ(c_Map)();
+            top = newobj<c_Map>();
           } else {
           /*</fb>*/
             if (!assoc) {
@@ -697,7 +725,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           /*<fb>*/
           }
           /*</fb>*/
-          the_json->the_kstack[the_json->the_top] = key->detach();
+          the_json->the_kstack[the_json->the_top] = copy_and_clear(*key);
           JSON_RESET_TYPE();
         }
         break;
@@ -724,7 +752,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           Variant mval;
           json_create_zval(mval, *buf, type, options);
           Variant &top = the_json->the_zstack[the_json->the_top];
-          object_set(top, key->detach(), mval, assoc, collections);
+          object_set(top, copy_and_clear(*key), mval, assoc, collections);
           buf->clear();
           JSON_RESET_TYPE();
         }
@@ -757,12 +785,12 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           }
           /*<fb>*/
           if (collections) {
-            top = NEWOBJ(c_Vector)();
+            top = newobj<c_Vector>();
           } else {
             top = Array::Create();
           }
           /*</fb>*/
-          the_json->the_kstack[the_json->the_top] = key->detach();
+          the_json->the_kstack[the_json->the_top] = copy_and_clear(*key);
           JSON_RESET_TYPE();
         }
         break;
@@ -811,7 +839,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           break;
         case MODE_DONE:
           if (type == KindOfString) {
-            z = buf->detach();
+            z = copy_and_clear(*buf);
             the_state = 9;
             break;
           }
@@ -839,7 +867,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                 push(the_json, MODE_KEY)) {
               if (type != -1) {
                 Variant &top = the_json->the_zstack[the_json->the_top];
-                object_set(top, key->detach(), mval, assoc, collections);
+                object_set(top, copy_and_clear(*key), mval, assoc, collections);
               }
               the_state = 29;
             }

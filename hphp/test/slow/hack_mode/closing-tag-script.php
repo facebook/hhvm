@@ -1,0 +1,4 @@
+<?hh
+
+</script>
+Hello World

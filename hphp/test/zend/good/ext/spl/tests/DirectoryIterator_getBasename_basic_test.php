@@ -1,5 +1,5 @@
 <?php
-   $targetDir = __DIR__.DIRECTORY_SEPARATOR.md5('directoryIterator::getbasename');
+   $targetDir = __DIR__.DIRECTORY_SEPARATOR.md5('directoryIterator::getbasename1');
    mkdir($targetDir);
    touch($targetDir.DIRECTORY_SEPARATOR.'getBasename_test.txt');
    $dir = new DirectoryIterator($targetDir.DIRECTORY_SEPARATOR);
@@ -8,8 +8,9 @@
    }
    echo $dir->getBasename('.txt');
 ?>
+<?php error_reporting(0); ?>
 <?php
-   $targetDir = __DIR__.DIRECTORY_SEPARATOR.md5('directoryIterator::getbasename');
+   $targetDir = __DIR__.DIRECTORY_SEPARATOR.md5('directoryIterator::getbasename1');
    unlink($targetDir.DIRECTORY_SEPARATOR.'getBasename_test.txt');
    rmdir($targetDir);
 ?>

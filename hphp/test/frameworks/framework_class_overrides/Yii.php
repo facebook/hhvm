@@ -1,6 +1,6 @@
 <?hh
 require_once __DIR__.'/../Framework.php';
-
+require_once __DIR__.'/../utils.php';
 class Yii extends Framework {
   public function __construct(string $name) {
     $env_vars = Map { "PHP_BINARY" =>  get_runtime_build(true) };
@@ -12,12 +12,12 @@ class Yii extends Framework {
                   "/tests/assets/*/CAssetManagerTest.php");
     foreach ($files as $file) {
       verbose("Removing $file\n");
-      unlink($file);
+      delete_file($file);
     }
   }
 
-  protected function install(): void {
-    parent::install();
+  <<Override>>
+  protected function extraPostComposer(): void {
     verbose("Creating a new phpunit.xml for running the yii tests.\n");
     $phpunit_xml = <<<XML
 <phpunit bootstrap="bootstrap.php"
@@ -34,7 +34,7 @@ class Yii extends Framework {
 </phpunit>
 XML;
     file_put_contents($this->getTestPath()."/phpunit.xml.dist", $phpunit_xml);
-    unlink($this->getTestPath()."/phpunit.xml");
+    delete_file($this->getTestPath()."/phpunit.xml");
   }
 
   protected function isInstalled(): bool {

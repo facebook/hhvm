@@ -36,13 +36,15 @@ public:
   DebuggerThriftBuffer()
     : ThriftBuffer(BUFFER_SIZE, VariableSerializer::Type::DebuggerSerialize) {}
 
-  SmartPtr<Socket> getSocket() { return m_socket;}
+  SmartPtr<Socket> getSocket() {
+    return makeSmartPtr<Socket>(m_socket);
+  }
 
   void create(SmartPtr<Socket> socket) {
-    m_socket = socket;
+    m_socket = socket->getData();
   }
   void close() {
-    m_socket->close();
+    getSocket()->close();
   }
 
 protected:
@@ -52,7 +54,7 @@ protected:
 
 private:
   char m_buffer[BUFFER_SIZE + 1];
-  SmartPtr<Socket> m_socket;
+  std::shared_ptr<SocketData> m_socket;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

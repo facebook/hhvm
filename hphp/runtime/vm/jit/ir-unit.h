@@ -21,10 +21,11 @@
 #include <vector>
 #include <utility>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 #include "hphp/util/arena.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/base/memory-manager.h"
 
@@ -141,7 +142,7 @@ private:
 
   // Finally we end up here.
   Ret stop(IRInstruction* inst) {
-    assertOperandTypes(inst);
+    assert(checkOperandTypes(inst));
     return func(inst);
   }
 
@@ -162,7 +163,7 @@ makeInstruction(Func func, Args&&... args) {
 
 /* Map from DefLabel instructions to produced references. See comment in
  * IRBuilder::cond for more details. */
-using LabelRefs = jit::hash_map<const IRInstruction*, jit::vector<unsigned>>;
+using LabelRefs = jit::hash_map<const IRInstruction*, jit::vector<uint32_t>>;
 
 /*
  * IRUnit is the compilation unit for the JIT.  It owns an Arena used for
@@ -250,18 +251,7 @@ public:
                                   SSATmp* dst = nullptr) {
     auto newInst = new (m_arena) IRInstruction(
       m_arena, inst, IRInstruction::Id(m_nextInstId++));
-    if (newInst->modifiesStack()) {
-      assert(newInst->naryDst());
-      assert(!dst);
-      // The instruction is an opcode that modifies the stack, returning a new
-      // StkPtr.
-      int numDsts = 1 + (newInst->hasMainDst() ? 1 : 0);
-      SSATmp* dsts = (SSATmp*)m_arena.alloc(numDsts * sizeof(SSATmp));
-      for (int dstNo = 0; dstNo < numDsts; ++dstNo) {
-        new (&dsts[dstNo]) SSATmp(m_nextOpndId++, newInst, dstNo);
-      }
-      newInst->setDsts(numDsts, dsts);
-    } else if (dst) {
+    if (dst) {
       newInst->setDst(dst);
       dst->setInstruction(newInst, 0);
     } else {
@@ -275,8 +265,8 @@ public:
    * Some helpers for creating specific instruction patterns.
    */
   IRInstruction* defLabel(unsigned numDst, BCMarker marker,
-                          const jit::vector<unsigned>& producedRefs);
-  Block* defBlock();
+                          const jit::vector<uint32_t>& producedRefs);
+  Block* defBlock(Block::Hint hint = Block::Hint::Neither);
 
   template<typename T> SSATmp* cns(T val) {
     return cns(Type::cns(val));
@@ -300,6 +290,7 @@ public:
   uint32_t numInsts() const           { return m_nextInstId; }
   CSEHash& constTable()               { return m_constTable; }
   uint32_t bcOff() const              { return m_context.initBcOffset; }
+  SrcKey   initSrcKey() const         { return m_context.srcKey(); }
 
   // This should return a const Block*. t3538578
   Block*   entry() const         { return m_entry; }

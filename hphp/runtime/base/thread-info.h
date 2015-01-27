@@ -77,6 +77,12 @@ struct ThreadInfo {
   ThreadInfo();
   ~ThreadInfo();
 
+  /**
+   * Since this is often used as a static global, we want to do anything that
+   * might try to access ThreadInfo::s_threadInfo here instead of in the
+   * constructor */
+  void init();
+
   void onSessionInit();
   void onSessionExit();
   void setPendingException(Exception* e);
@@ -105,6 +111,20 @@ inline void check_recursion(const ThreadInfo* info) {
 
 ssize_t check_request_surprise(ThreadInfo *info);
 ssize_t check_request_surprise_unlikely();
+
+inline void check_native_recursion() {
+  char marker;
+  if (UNLIKELY(uintptr_t(&marker) < s_stackLimit + ThreadInfo::StackSlack)) {
+    throw Exception("Maximum stack size reached");
+  }
+}
+///////////////////////////////////////////////////////////////////////////////
+// code instrumentation or injections
+
+#define DECLARE_THREAD_INFO                     \
+  ThreadInfo *info ATTRIBUTE_UNUSED =           \
+    ThreadInfo::s_threadInfo.getNoCheck();      \
+  int lc ATTRIBUTE_UNUSED = 0;
 
 //////////////////////////////////////////////////////////////////////
 

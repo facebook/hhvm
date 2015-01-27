@@ -10,16 +10,14 @@
  */
 
 trait DynamicYield {
-  public function __call(string $name, array $args = array()) {
-  }
+  public function __call(string $name, array $args = array()) {}
 }
 
 class Foo {
   use DynamicYield;
 }
 
-class Bar extends Foo {
-}
+class Bar extends Foo {}
 
 function bar(): int {
   return (new Bar())->getBar();

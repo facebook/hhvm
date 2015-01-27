@@ -17,18 +17,12 @@
 #ifndef incl_HPHP_BUILTIN_FUNCTIONS_H_
 #define incl_HPHP_BUILTIN_FUNCTIONS_H_
 
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/util/functional.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/util/functional.h"
 
 #if defined(__APPLE__) || defined(__USE_BSD)
 /**
@@ -65,7 +59,6 @@ String concat4(const String& s1, const String& s2, const String& s3,
 ///////////////////////////////////////////////////////////////////////////////
 
 void NEVER_INLINE throw_invalid_property_name(const String& name);
-void NEVER_INLINE throw_null_object_prop();
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
 void throw_exception(const Object& e);
@@ -80,7 +73,16 @@ inline bool is_int(const Variant& v)    { return v.isInteger();}
 inline bool is_double(const Variant& v) { return v.is(KindOfDouble);}
 inline bool is_string(const Variant& v) { return v.isString();}
 inline bool is_array(const Variant& v)  { return v.is(KindOfArray);}
-inline bool is_object(const Variant& var) { return var.is(KindOfObject); }
+
+inline bool is_object(const Variant& var) {
+  if (!var.is(KindOfObject)) {
+    return false;
+  }
+  auto cls = var.toObject().get()->getVMClass();
+  auto incompleteClass = SystemLib::s___PHP_Incomplete_ClassClass;
+  return cls != incompleteClass;
+}
+
 inline bool is_empty_string(const Variant& v) {
   return v.isString() && v.getStringData()->empty();
 }
@@ -89,9 +91,6 @@ inline bool is_empty_string(const Variant& v) {
 // misc functions
 
 bool array_is_valid_callback(const Array& arr);
-
-Variant f_call_user_func_array(const Variant& function, const Array& params,
-                               bool bound = false);
 
 const HPHP::Func*
 vm_decode_function(const Variant& function,
@@ -136,6 +135,7 @@ void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);
 Object create_object(const String& s, const Array &params, bool init = true);
+Object init_object(const String& s, const Array &params, ObjectData* o);
 
 /**
  * Argument count handling.
@@ -180,12 +180,6 @@ void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2)
  * Unsetting ClassName::StaticProperty.
  */
 Variant throw_fatal_unset_static_property(const char *s, const char *prop);
-
-/**
- * Exceptions injected code throws
- */
-Exception* generate_request_timeout_exception();
-Exception* generate_memory_exceeded_exception();
 
 // unserializable default value arguments such as TimeStamp::Current()
 // are serialized as "\x01"

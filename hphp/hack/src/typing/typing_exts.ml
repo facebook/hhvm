@@ -34,6 +34,7 @@ open Utils
 module Env = Typing_env
 module Reason = Typing_reason
 module Print = Typing_print
+module SN = Naming_special_names
 
 let magic_method_name input =
   match input with
@@ -50,8 +51,7 @@ let map_snd f (x,y) = (x, f y)
 
 let rec map_ty_ f t =
   match t with
-    | Tarray (a,ot,ot') -> f (Tarray (a,
-                                     (opt_map (map_ty f) ot),
+    | Tarray (ot, ot') -> f (Tarray ((opt_map (map_ty f) ot),
                                      (opt_map (map_ty f) ot')))
     | Tgeneric (a,ot) -> f (Tgeneric (a, opt_map (map_ty f) ot))
     | Toption t -> f (Toption (map_ty f t))
@@ -63,7 +63,7 @@ and map_ty f = map_snd (map_ty_ f)
 let fresh_tvars (env:Env.env) (ts:tparam list) (ps:fun_params) (uniq:int) : Env.env * fun_params * tparam list =
   let append_id s = Printf.sprintf "%s_%d" s uniq in
   let rename_str s =
-    match List.find_all (fun ((pos,str),_) -> str = s) ts with
+    match List.find_all (fun (_, (_, str),_) -> str = s) ts with
       | [_] -> append_id s
       | _ -> s in
   let rename_ty = function
@@ -73,18 +73,17 @@ let fresh_tvars (env:Env.env) (ts:tparam list) (ps:fun_params) (uniq:int) : Env.
         Tgeneric (rename_str name, ot)
     | s -> s in
   let ps' = List.map (map_snd (map_ty rename_ty)) ps in
-  let ts' = List.map (map_fst (map_snd rename_str)) ts in
+  let ts' = List.map (fun (x, y, z) -> x, map_snd rename_str y, z) ts in
   env, ps', ts'
-
 
 let lookup_magic_type (env:Env.env) (class_:ty) (fname:string) (uniq:int) :
     Env.env * (fun_params * tparam list * ty option) option =
   match class_ with
-    | (why, Tapply ((_, className), [])) ->
+    | (_, Tapply ((_, className), [])) ->
         (match Env.get_class env className with
-           | env, Some c ->
+           | Some c ->
                (match Env.get_member true env c fname with
-                  | env, Some {
+                  | Some {
                       ce_type = (_, Tfun {
                                    ft_tparams = tpars;
                                    ft_params = pars;
@@ -97,9 +96,9 @@ let lookup_magic_type (env:Env.env) (class_:ty) (fname:string) (uniq:int) :
                                     tpars,
                                     (match ty with
                                        | (_, Tprim Nast.Tstring) -> None
-                                       | x -> Some ty))
-                  | env, _ -> env, None)
-           | env, None -> env, None)
+                                       | _ -> Some ty))
+                  | _ -> env, None)
+           | None -> env, None)
     | _ -> env, None
 
 let get_char s i =
@@ -109,7 +108,7 @@ let parse_printf_string (env:Env.env) (s:string) (pos:Pos.t) (class_:ty) : Env.e
   let rec read_text env i : Env.env * fun_params * tparam list =
     match get_char s i with
       | Some '%' -> read_modifier env (i+1) class_ i
-      | Some c   -> read_text env (i+1)
+      | Some _   -> read_text env (i+1)
       | None     -> env, [], []
   and read_modifier env i class_ i0 : Env.env * fun_params * tparam list =
     let fname = magic_method_name (get_char s i) in
@@ -131,7 +130,6 @@ let parse_printf_string (env:Env.env) (s:string) (pos:Pos.t) (class_:ty) : Env.e
              | env, xs, ys -> env, add_reason xs, ys)
   in
     read_text env 0
-
 
 type ('a, 'b) either = Left of 'a | Right of 'b
 
@@ -167,9 +165,11 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
 let retype_magic_func (env:Env.env) (ft:fun_type) (el:Nast.expr list) : Env.env * fun_type =
   let rec f env param_types args : Env.env * (fun_params * tparam list) option =
     (match param_types, args with
-      | [(_,    (_,   Toption (_, Tapply ((_, "\\FormatString"), [_       ]))))], [(_, Nast.Null)] -> env,None
-      | [(name, (why, Toption (_, Tapply ((_, "\\FormatString"), [type_arg]))))], (arg :: args)
-      | [(name, (why,             Tapply ((_, "\\FormatString"), [type_arg] )))], (arg :: args) ->
+      | [(_,    (_,   Toption (_, Tapply ((_, fs), [_       ]))))], [(_, Nast.Null)]
+        when fs = SN.Classes.cFormatString -> env,None
+      | [(name, (why, Toption (_, Tapply ((_, fs), [type_arg]))))], (arg :: _)
+      | [(name, (why,             Tapply ((_, fs), [type_arg] )))], (arg :: _)
+        when fs = SN.Classes.cFormatString ->
           (match const_string_of env arg with
              |  env, Right str ->
                   let env, argl, targl = parse_printf_string env str (fst arg) type_arg in

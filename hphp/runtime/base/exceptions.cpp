@@ -74,19 +74,14 @@ void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
 
 //////////////////////////////////////////////////////////////////////
 
-ParseTimeFatalException::ParseTimeFatalException(const char* file, int line,
-                                                 const char* msg, ...)
-  : m_file(file), m_line(line) {
-  va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
-}
-
 FatalErrorException::FatalErrorException(int, const char *msg, ...) {
   va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
 }
 
 FatalErrorException::FatalErrorException(const std::string& msg,
-                                         const Array& backtrace)
-  : ExtendedException(msg, backtrace.get())
+                                         const Array& backtrace,
+                                         bool isRecoverable /* = false */)
+  : ExtendedException(msg, backtrace.get()), m_recoverable(isRecoverable)
 {}
 
 //////////////////////////////////////////////////////////////////////

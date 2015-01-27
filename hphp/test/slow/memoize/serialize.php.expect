@@ -1,0 +1,54 @@
+== no serialization ==
+int(11)
+int(11)
+int(22)
+int(22)
+string(13) "O:2:"C1":0:{}"
+== unserialize (Base) ==
+string(13) "O:2:"C1":0:{}"
+int(13)
+int(13)
+int(24)
+int(24)
+int(35)
+int(35)
+== unserialize (WithoutMemoize) ==
+string(13) "O:2:"C2":0:{}"
+int(15)
+int(16)
+int(27)
+int(28)
+int(39)
+int(40)
+== unserialize (WithDifferentCode) ==
+string(13) "O:2:"C3":0:{}"
+int(15)
+int(15)
+int(26)
+int(26)
+int(37)
+int(37)
+== unserialize (WithDifferentParam) ==
+string(13) "O:2:"C4":0:{}"
+int(11)
+int(11)
+int(22)
+int(22)
+int(33)
+int(33)
+== unserialize (WithMoreParams) ==
+string(13) "O:2:"C5":0:{}"
+int(11)
+int(11)
+int(22)
+int(22)
+int(33)
+int(33)
+== unserialize (WithNoParams) ==
+string(13) "O:2:"C6":0:{}"
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)

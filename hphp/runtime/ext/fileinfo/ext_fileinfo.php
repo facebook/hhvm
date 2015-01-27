@@ -19,7 +19,7 @@ class finfo {
    *   empty string will be equivalent to the default value.
    */
   public function finfo(int $options = FILEINFO_NONE,
-                        ?string $magic_file = NULL): finfo {
+                        ?string $magic_file = NULL) {
     $this->resource = finfo_open($options, $magic_file);
 
     $this->options = $options;
@@ -98,7 +98,7 @@ class finfo {
  * @return string - Returns a textual description of the string argument,
  *   or FALSE if an error occurred.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function finfo_buffer(resource $finfo,
                       ?string $string = NULL,
                       int $options = FILEINFO_NONE,
@@ -111,7 +111,7 @@ function finfo_buffer(resource $finfo,
  *
  * @return bool -
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function finfo_close(resource $finfo): bool;
 
 /**
@@ -125,7 +125,7 @@ function finfo_close(resource $finfo): bool;
  * @return string - Returns a textual description of the contents of the
  *   filename argument, or FALSE if an error occurred.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function finfo_file(resource $finfo,
                     ?string $file_name = NULL,
                     int $options = FILEINFO_NONE,
@@ -156,7 +156,7 @@ function finfo_open(int $options = FILEINFO_NONE,
  *
  * @return bool -
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function finfo_set_flags(resource $finfo,
                          int $options): bool;
 

@@ -19,11 +19,13 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <type_traits>
-#include <vector>
 #include <limits>
+#include <type_traits>
+#include <unordered_set>
+#include <vector>
 
-#include "folly/Varint.h"
+#include <folly/Optional.h>
+#include <folly/Varint.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-helpers.h"
@@ -94,7 +96,7 @@ struct BlobEncoder {
 
   /*
    * Currently the most basic encoder/decode only works for integral
-   * types.  (We don't want this to accidently get used for things
+   * types.  (We don't want this to accidentally get used for things
    * like pointers or aggregates.)
    *
    * Floating point support could be added later if we need it ...
@@ -134,9 +136,10 @@ struct BlobEncoder {
   }
 
   void encode(const StringData* sd) {
-    if (!sd) return encode(uint32_t(0));
+    if (!sd) { return encode(uint32_t(0)); }
     uint32_t sz = sd->size();
     encode(sz + 1);
+    if (!sz) { return; }
 
     const size_t start = m_blob.size();
     m_blob.resize(start + sz);
@@ -150,11 +153,19 @@ struct BlobEncoder {
 
   void encode(const TypedValue& tv) {
     if (tv.m_type == KindOfUninit) {
-      // This represents an empty string
-      return encode(uint32_t(1));
+      return encode(staticEmptyString());
     }
     String s = f_serialize(tvAsCVarRef(&tv));
     encode(s.get());
+  }
+
+  void encode(const TypedValueAux& tv) = delete;
+
+  template<class T>
+  void encode(const folly::Optional<T>& opt) {
+    const bool some = opt.hasValue();
+    encode(some);
+    if (some) encode(*opt);
   }
 
   template<class K, class V>
@@ -175,6 +186,11 @@ struct BlobEncoder {
 
   template<class V, class H, class C>
   void encode(const hphp_hash_set<V,H,C>& set) {
+    encodeContainer(set, "set");
+  }
+
+  template<class V, class H, class C>
+  void encode(const std::unordered_set<V,H,C>& set) {
     encodeContainer(set, "set");
   }
 
@@ -214,6 +230,10 @@ struct BlobDecoder {
     : m_p(static_cast<const unsigned char*>(vp))
     , m_last(m_p + sz)
   {}
+
+  void assertDone() {
+    assert(m_p >= m_last);
+  }
 
   // See encode() in BlobEncoder for why this only allows integral
   // types.
@@ -272,6 +292,22 @@ struct BlobDecoder {
     tvAsVariant(&tv).setEvalScalar();
   }
 
+  void decode(TypedValueAux& tv) = delete;
+
+  template<class T>
+  void decode(folly::Optional<T>& opt) {
+    bool some;
+    decode(some);
+
+    if (!some) {
+      opt = folly::none;
+    } else {
+      T value;
+      decode(value);
+      opt = value;
+    }
+  }
+
   template<class K, class V>
   void decode(std::pair<K,V>& val) {
     decode(val.first);
@@ -310,6 +346,17 @@ struct BlobDecoder {
     }
   }
 
+  template<class V, class H, class C>
+  void decode(std::unordered_set<V,H,C>& set) {
+    uint32_t size;
+    decode(size);
+    for (uint32_t i = 0; i < size; ++i) {
+      V val;
+      decode(val);
+      set.insert(val);
+    }
+  }
+
   template<class T>
   BlobDecoder& operator()(T& t) {
     decode(t);
@@ -322,6 +369,7 @@ private:
     decode(sz);
     if (sz == 0) return String();
     sz--;
+    if (sz == 0) return empty_string();
 
     String s = String(sz, ReserveString);
     char* pch = s.bufferSlice().ptr;

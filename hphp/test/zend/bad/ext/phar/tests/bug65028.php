@@ -139,6 +139,7 @@ catch(UnexpectedValueException $ex)
 	echo "Exception thrown: " . $ex->getMessage() . "\n";
 }
 ?>
+<?php error_reporting(0); ?>
 <?php
 @unlink(__DIR__ . "/bug65028.phar");
 @unlink(__DIR__ . "/bug65028-copy.phar");

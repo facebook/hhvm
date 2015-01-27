@@ -11,19 +11,19 @@ array(12) {
   [1]=>
   NULL
   [2]=>
-  string(1) "	"
+  string(1) "%r\x09%r"
   [3]=>
   string(1) "
 "
   [4]=>
-  string(1) ""
+  string(1) "%r\x0b%r"
   [5]=>
-  string(1) ""
+  string(1) "%r\x0c%r"
   [6]=>
   string(1) "
 "
   [7]=>
-  string(1) ""
+  string(1) "%r\x1b%r"
   [8]=>
   string(2) "\a"
   [9]=>
@@ -41,19 +41,19 @@ array(12) {
   [1]=>
   NULL
   [2]=>
-  string(1) "	"
+  string(1) "%r\x09%r"
   [3]=>
   string(1) "
 "
   [4]=>
-  string(1) ""
+  string(1) "%r\x0b%r"
   [5]=>
-  string(1) ""
+  string(1) "%r\x0c%r"
   [6]=>
   string(1) "
 "
   [7]=>
-  string(1) ""
+  string(1) "%r\x1b%r"
   [8]=>
   string(2) "\a"
   [9]=>
@@ -71,19 +71,19 @@ array(12) {
   [1]=>
   NULL
   [2]=>
-  string(1) "	"
+  string(1) "%r\x09%r"
   [3]=>
   string(1) "
 "
   [4]=>
-  string(1) ""
+  string(1) "%r\x0b%r"
   [5]=>
-  string(1) ""
+  string(1) "%r\x0c%r"
   [6]=>
   string(1) "
 "
   [7]=>
-  string(1) ""
+  string(1) "%r\x1b%r"
   [8]=>
   string(2) "\a"
   [9]=>

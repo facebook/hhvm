@@ -17,74 +17,124 @@
 #ifndef incl_HPHP_JIT_VASM_H_
 #define incl_HPHP_JIT_VASM_H_
 
+#include "hphp/runtime/base/rds.h"
+
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/containers.h"
+
+#include "hphp/util/safe-cast.h"
+
 #include <folly/Range.h>
 #include <iosfwd>
 
 namespace HPHP { namespace jit {
-namespace x64 {
+///////////////////////////////////////////////////////////////////////////////
+
 struct Vunit;
 struct Vinstr;
 struct Vblock;
 struct Vreg;
-}
 struct Abi;
 
-// Vlabel wraps a block number
-struct Vlabel {
-  Vlabel() : n(0xffffffff) {}
-  explicit Vlabel(size_t n) : n(static_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { return n; }
-private:
-  unsigned n; // index in Vunit::blocks
-};
-
-// Vpoint is a handle to record or retreive a code address
-struct Vpoint {
-  Vpoint(){}
-  explicit Vpoint(size_t n) : n(static_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { return n; }
-private:
-  unsigned n; // index in Vmeta::points
-};
-
-// Vtuple is an index to a tuple in Vunit::tuples
-struct Vtuple {
-  Vtuple() : n(0xffffffff) {}
-  explicit Vtuple(size_t n) : n(static_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { return n; }
-private:
-  unsigned n; // index in Vunit::reglists
-};
-
-enum class VregKind : uint8_t { Any, Gpr, Simd };
-enum class AreaIndex: unsigned { Main, Cold, Frozen, Max };
-
-// holds information generated while assembling final code;
-// designed to outlive instances of Vunit and Vasm.
-struct Vmeta {
-  Vpoint makePoint() {
-    auto next = points.size();
-    points.push_back(nullptr);
-    return Vpoint{next};
-  }
-  jit::vector<CodeAddress> points;
-};
-
-void allocateRegisters(x64::Vunit&, const Abi&);
-void optimizeJmps(x64::Vunit&);
-void removeDeadCode(x64::Vunit&);
+///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Get the successors of a block or instruction. If given a non-const
+ * If Trace::moduleEnabled(Trace::llvm) || RuntimeOption::EvalJitLLVMCounters,
+ * these two RDS values are used to count the number of bytecodes executed by
+ * code emitted from their respective backends.
+ */
+extern RDS::Link<uint64_t> g_bytecodesLLVM;
+extern RDS::Link<uint64_t> g_bytecodesVasm;
+
+///////////////////////////////////////////////////////////////////////////////
+
+#define DECLARE_VNUM(Vnum, check)                         \
+struct Vnum {                                             \
+  Vnum() {}                                               \
+  explicit Vnum(size_t n) : n(safe_cast<unsigned>(n)) {}  \
+                                                          \
+  /* implicit */ operator size_t() const {                \
+    if (check) assert(n != 0xffffffff);                   \
+    return n;                                             \
+  }                                                       \
+                                                          \
+private:                                                  \
+  unsigned n{0xffffffff};                                 \
+}
+
+/*
+ * Vlabel wraps a block number.
+ */
+DECLARE_VNUM(Vlabel, true);
+
+/*
+ * Vpoint is a handle to record or retreive a code address.
+ */
+DECLARE_VNUM(Vpoint, false);
+
+/*
+ * Vtuple is an index to a tuple in Vunit::tuples.
+ */
+DECLARE_VNUM(Vtuple, true);
+
+/*
+ * VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs.
+ */
+DECLARE_VNUM(VcallArgsId, true);
+
+#undef DECLARE_VNUM
+
+/*
+ * Vreg discriminator.
+ */
+enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Assert invariants on a Vunit.
+ */
+bool check(Vunit&);
+
+/*
+ * Check that each block has exactly one terminal instruction at the end.
+ */
+bool checkBlockEnd(Vunit& v, Vlabel b);
+
+/*
+ * Passes.
+ */
+void allocateRegisters(Vunit&, const Abi&);
+void fuseBranches(Vunit&);
+void optimizeExits(Vunit&);
+void optimizeJmps(Vunit&);
+void removeDeadCode(Vunit&);
+void removeTrivialNops(Vunit&);
+template<typename Folder> void foldImms(Vunit&);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Get the successors of a block or instruction.  If given a non-const
  * reference, the resulting Range will allow mutation of the Vlabels.
  */
-folly::Range<Vlabel*> succs(x64::Vinstr& inst);
-folly::Range<Vlabel*> succs(x64::Vblock& block);
-folly::Range<const Vlabel*> succs(const x64::Vinstr& inst);
-folly::Range<const Vlabel*> succs(const x64::Vblock& block);
+folly::Range<Vlabel*> succs(Vinstr& inst);
+folly::Range<Vlabel*> succs(Vblock& block);
+folly::Range<const Vlabel*> succs(const Vinstr& inst);
+folly::Range<const Vlabel*> succs(const Vblock& block);
 
-jit::vector<Vlabel> sortBlocks(const x64::Vunit& unit);
+/*
+ * Sort blocks in reverse-postorder starting from `unit.entry'.
+ */
+jit::vector<Vlabel> sortBlocks(const Vunit& unit);
 
+/*
+ * Group blocks into main, cold, and frozen while preserving relative order
+ * with each section.
+ */
+jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
+
+///////////////////////////////////////////////////////////////////////////////
 }}
+
 #endif

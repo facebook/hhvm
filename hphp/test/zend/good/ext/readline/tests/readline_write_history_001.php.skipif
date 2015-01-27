@@ -1,0 +1,3 @@
+<?php if (!extension_loaded("readline") || !function_exists('readline_add_history')) die("skip");
+if (READLINE_LIB == "libedit") die("skip readline only");
+?>

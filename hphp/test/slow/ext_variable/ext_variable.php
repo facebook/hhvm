@@ -143,3 +143,19 @@ VS(serialize($v),
 }
 
 get_defined_vars();
+
+$typesTest = array(
+    'boolean' => array(0, 1, 2, true, false),
+    'integer' => array(1.0, 1, -1),
+    'int' => array(1.0, 1, -1),
+    'double' => array(1.0, 1, -1),
+    'float' => array(1.0, 1, -1),
+);
+
+
+foreach ($typesTest as $testedType => $values) {
+    foreach ($values as $value) {
+        settype($value, $testedType);
+        var_dump(gettype($value));
+    }
+}

@@ -17,11 +17,12 @@
 #ifndef incl_HPHP_VM_BLOCK_H_
 #define incl_HPHP_VM_BLOCK_H_
 
-#include "hphp/runtime/vm/jit/containers.h"
 #include <algorithm>
-#include "hphp/runtime/vm/jit/ir.h"
+
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 
 namespace HPHP { namespace jit {
 
@@ -71,12 +72,12 @@ struct Block : boost::noncopyable {
     , m_hint(Hint::Neither)
   {}
 
-  uint32_t    id() const           { return m_id; }
+  unsigned    id() const           { return m_id; }
   Hint        hint() const         { return m_hint; }
   void        setHint(Hint hint)   { m_hint = hint; }
 
   // Returns true if this block has no successors.
-  bool isExit() const { return !taken() && !next(); }
+  bool isExit() const { return !empty() && !taken() && !next(); }
 
   // Returns whether this block is the initial entry block for the tracelet.
   bool isEntry() const { return id() == 0; }
@@ -141,6 +142,8 @@ struct Block : boost::noncopyable {
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
   InstructionList& instrs()      { return m_instrs; }
+  const InstructionList&
+                   instrs() const{ return m_instrs; }
   bool             empty() const { return m_instrs.empty(); }
   iterator         begin()       { return m_instrs.begin(); }
   iterator         end()         { return m_instrs.end(); }
@@ -174,7 +177,8 @@ struct Block : boost::noncopyable {
   Hint m_hint;              // execution frequency hint
 };
 
-typedef jit::vector<Block*> BlockList;
+using BlockList = jit::vector<Block*>;
+using BlockSet = jit::flat_set<Block*>;
 
 inline Block::reference Block::front() {
   assert(!m_instrs.empty());

@@ -23,6 +23,7 @@
 #include <tbb/atomic.h>
 #include "hphp/util/atomic.h"
 #include "hphp/util/hash.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

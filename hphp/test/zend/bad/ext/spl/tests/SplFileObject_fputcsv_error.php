@@ -1,5 +1,5 @@
 <?php
-$fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv_error.csv', 'w');
+$fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv2.csv', 'w');
 
 echo "*** Testing error conditions ***\n";
 // zero argument
@@ -15,7 +15,8 @@ var_dump( $fo->fputcsv($fields, $delim, $enclosure, $fo) );
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
-$file = __DIR__ . '/SplFileObject_fputcsv_error.csv';
+$file = __DIR__ . '/SplFileObject_fputcsv2.csv';
 unlink($file);
 ?>

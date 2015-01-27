@@ -11,6 +11,7 @@ var_dump(file_put_contents($initdir."/test/bad/bad.txt", "Hello World!"));
 
 test_open_basedir_after("file_put_contents");
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once "open_basedir.inc";
 delete_directories();

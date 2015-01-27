@@ -1,6 +1,6 @@
-File "functional_generator.php", line 30, characters 3-7:
+File "functional_generator.php", line 28, characters 3-7:
 Invalid yield (Typing[4110])
-File "functional_generator.php", line 29, characters 20-25:
+File "functional_generator.php", line 27, characters 20-25:
 This is an object of type Stream
-File "functional_generator.php", line 30, characters 3-7:
+File "functional_generator.php", line 28, characters 3-7:
 It is incompatible with an object of type Generator (result of function with 'yield' in the body)

@@ -57,6 +57,8 @@ public:
     if (m_arrayIds) delete m_arrayIds;
   }
 
+  static __thread int64_t serializationSizeLimit;
+
   /**
    * Top level entry function called by f_ functions.
    */
@@ -107,9 +109,10 @@ public:
   void incMaxCount() { m_maxCount++; }
   bool incNestedLevel(void *ptr, bool isObject = false);
   void decNestedLevel(void *ptr);
-  void setObjectInfo(const String& objClass, int objId, char objCode);
-  void setResourceInfo(const String& rsrcName, int rsrcId);
-  void getResourceInfo(String &rsrcName, int &rsrcId);
+  void pushObjectInfo(const String& objClass, int objId, char objCode);
+  void popObjectInfo();
+  void pushResourceInfo(const String& rsrcName, int rsrcId);
+  void popResourceInfo();
   Type getType() const { return m_type; }
 
 private:
@@ -142,6 +145,15 @@ private:
     int  size;          // the number of elements in the array
   };
   smart::vector<ArrayInfo> m_arrayInfos;
+
+  struct ObjectInfo {
+    String objClass;
+    int    objId;
+    char   objCode;
+    String rsrcName;
+    int    rsrcId;
+  };
+  smart::vector<ObjectInfo> m_objectInfos;
 
   // The func parameter will be invoked only if there is no overflow.
   // Otherwise, writeOverflow will be invoked instead.

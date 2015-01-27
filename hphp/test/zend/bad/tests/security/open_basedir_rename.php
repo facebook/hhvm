@@ -11,6 +11,7 @@ var_dump(rename($initdir."/test/bad/bad.txt", "rename.txt"));
 
 test_open_basedir_after("rename");
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once "open_basedir.inc";
 delete_directories();

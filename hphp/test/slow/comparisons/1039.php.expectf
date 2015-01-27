@@ -1,22 +1,22 @@
-1	YYYY	array(2) >= true	
-2	YYYY	array(2) >= false	
-3	YYYY	array(2) >= 1	
-4	YYYY	array(2) >= 0	
-5	YYYY	array(2) >= -1	
-6	YYYY	array(2) >= '1'	
-7	YYYY	array(2) >= '0'	
-8	YYYY	array(2) >= '-1'	
-9	YYYY	array(2) >= null	
-10	YYYY	array(2) >= array()	
-11	YYYY	array(2) >= array(1)	
-12	YYYY	array(2) >= array(2)	
-13	YYYY	array(2) >= array('1')	
-14	YYYY	array(2) >= array('0' => '1')	
-15	YYYY	array(2) >= array('a')	
-16	NNNN	array(2) >= array('a' => 1)	
-17	NNNN	array(2) >= array('b' => 1)	
-18	NNNN	array(2) >= array('a' => 1, 'b' => 2)	
-19	NNNN	array(2) >= array(array('a' => 1))	
-20	NNNN	array(2) >= array(array('b' => 1))	
-21	YYYY	array(2) >= 'php'	
-22	YYYY	array(2) >= ''
+1%r\x09%rYYYY%r\x09%rarray(2) >= true%r\x09%r
+2%r\x09%rYYYY%r\x09%rarray(2) >= false%r\x09%r
+3%r\x09%rYYYY%r\x09%rarray(2) >= 1%r\x09%r
+4%r\x09%rYYYY%r\x09%rarray(2) >= 0%r\x09%r
+5%r\x09%rYYYY%r\x09%rarray(2) >= -1%r\x09%r
+6%r\x09%rYYYY%r\x09%rarray(2) >= '1'%r\x09%r
+7%r\x09%rYYYY%r\x09%rarray(2) >= '0'%r\x09%r
+8%r\x09%rYYYY%r\x09%rarray(2) >= '-1'%r\x09%r
+9%r\x09%rYYYY%r\x09%rarray(2) >= null%r\x09%r
+10%r\x09%rYYYY%r\x09%rarray(2) >= array()%r\x09%r
+11%r\x09%rYYYY%r\x09%rarray(2) >= array(1)%r\x09%r
+12%r\x09%rYYYY%r\x09%rarray(2) >= array(2)%r\x09%r
+13%r\x09%rYYYY%r\x09%rarray(2) >= array('1')%r\x09%r
+14%r\x09%rYYYY%r\x09%rarray(2) >= array('0' => '1')%r\x09%r
+15%r\x09%rYYYY%r\x09%rarray(2) >= array('a')%r\x09%r
+16%r\x09%rNNNN%r\x09%rarray(2) >= array('a' => 1)%r\x09%r
+17%r\x09%rNNNN%r\x09%rarray(2) >= array('b' => 1)%r\x09%r
+18%r\x09%rNNNN%r\x09%rarray(2) >= array('a' => 1, 'b' => 2)%r\x09%r
+19%r\x09%rNNNN%r\x09%rarray(2) >= array(array('a' => 1))%r\x09%r
+20%r\x09%rNNNN%r\x09%rarray(2) >= array(array('b' => 1))%r\x09%r
+21%r\x09%rYYYY%r\x09%rarray(2) >= 'php'%r\x09%r
+22%r\x09%rYYYY%r\x09%rarray(2) >= ''

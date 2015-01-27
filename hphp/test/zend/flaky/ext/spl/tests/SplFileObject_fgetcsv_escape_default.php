@@ -1,11 +1,12 @@
 <?php
-$fp = fopen('SplFileObject_fgetcsv_escape_default.csv', 'w+');
+$fp = fopen('SplFileObject__fgetcsv7.csv', 'w+');
 fwrite($fp, '"aa\"","bb","\"c"');
 fclose($fp);
 
-$fo = new SplFileObject('SplFileObject_fgetcsv_escape_default.csv');
+$fo = new SplFileObject('SplFileObject__fgetcsv7.csv');
 var_dump($fo->fgetcsv());
 ?>
+<?php error_reporting(0); ?>
 <?php
-unlink('SplFileObject_fgetcsv_escape_default.csv');
+unlink('SplFileObject__fgetcsv7.csv');
 ?>

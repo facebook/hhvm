@@ -3,51 +3,10 @@
     "consts": [
     ],
     "funcs": [
-        {
-            "name": "asio_get_current_context_idx",
-            "desc": "Get index of the current scheduler context, or 0 if there is none",
-            "flags": [
-            ],
-            "return": {
-                "type": "Int32",
-                "desc": "An index of the current scheduler context"
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "asio_get_running_in_context",
-            "desc": "Get currently running wait handle in a context specified by its index",
-            "flags": [
-            ],
-            "return": {
-                "type": "Object",
-                "desc": "A ResumableWaitHandle that is running in a specified context"
-            },
-            "args": [
-                {
-                    "name": "ctx_idx",
-                    "type": "Int32",
-                    "desc": "An index of a specified context"
-                }
-            ]
-        },
-        {
-            "name": "asio_get_running",
-            "desc": "Get currently running wait handle, or null if there is none",
-            "flags": [
-            ],
-            "return": {
-                "type": "Object",
-                "desc": "A ResumableWaitHandle that is running in the current context"
-            },
-            "args": [
-            ]
-        }
     ],
     "classes": [
         {
-            "name": "AsyncGenerator",
+            "name": "HH\\AsyncGenerator",
             "desc": "A generator that can be iterated asynchronously",
             "flags": [
                 "IsFinal",
@@ -75,7 +34,7 @@
                     "flags": [
                     ],
                     "return": {
-                        "type": "Object"
+                        "type": null
                     },
                     "args": [
                     ]
@@ -86,7 +45,7 @@
                     "flags": [
                     ],
                     "return": {
-                        "type": "Object"
+                        "type": null
                     },
                     "args": [
                         {
@@ -102,7 +61,7 @@
                     "flags": [
                     ],
                     "return": {
-                        "type": "Object"
+                        "type": null
                     },
                     "args": [
                         {
@@ -115,7 +74,7 @@
             ]
         },
         {
-            "name": "WaitHandle",
+            "name": "HH\\WaitHandle",
             "desc": "A wait handle representing asynchronous operation",
             "flags": [
                 "IsAbstract",
@@ -123,7 +82,7 @@
                 "NoDefaultSweep"
             ],
             "ifaces": [
-                "Awaitable"
+                "HH\\Awaitable"
             ],
             "funcs": [
                 {
@@ -226,6 +185,18 @@
                     ]
                 },
                 {
+                    "name": "result",
+                    "desc": "Return the wait handle's result if it is already finished (and valid), throw an exception otherwise",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A result of the operation represented by given wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "isFinished",
                     "desc": "Check if this wait handle finished (succeeded or failed)",
                     "flags": [
@@ -302,8 +273,8 @@
             ]
         },
         {
-            "name": "StaticWaitHandle",
-            "parent": "WaitHandle",
+            "name": "HH\\StaticWaitHandle",
+            "parent": "HH\\WaitHandle",
             "desc": "A wait handle that is always finished",
             "flags": [
                 "IsFinal",
@@ -326,8 +297,8 @@
             ]
         },
         {
-            "name": "WaitableWaitHandle",
-            "parent": "WaitHandle",
+            "name": "HH\\WaitableWaitHandle",
+            "parent": "HH\\WaitHandle",
             "desc": "A wait handle that can be waited upon",
             "flags": [
                 "IsAbstract",
@@ -388,8 +359,8 @@
             ]
         },
         {
-            "name": "BlockableWaitHandle",
-            "parent": "WaitableWaitHandle",
+            "name": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that can be blocked on a dependency",
             "flags": [
                 "IsAbstract",
@@ -402,8 +373,8 @@
             ]
         },
         {
-            "name": "ResumableWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\ResumableWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle that can resume execution of PHP code",
             "flags": [
                 "IsAbstract",
@@ -488,8 +459,8 @@
             ]
         },
         {
-            "name": "AsyncFunctionWaitHandle",
-            "parent": "ResumableWaitHandle",
+            "name": "HH\\AsyncFunctionWaitHandle",
+            "parent": "HH\\ResumableWaitHandle",
             "desc": "A wait handle representing asynchronous execution of async function",
             "flags": [
                 "IsFinal",
@@ -513,8 +484,8 @@
             ]
         },
         {
-            "name": "AsyncGeneratorWaitHandle",
-            "parent": "ResumableWaitHandle",
+            "name": "HH\\AsyncGeneratorWaitHandle",
+            "parent": "HH\\ResumableWaitHandle",
             "desc": "A wait handle representing asynchronous execution of async generator",
             "flags": [
                 "IsFinal",
@@ -537,8 +508,8 @@
             ]
         },
         {
-            "name": "AwaitAllWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\AwaitAllWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle that waits for a list of other wait handles",
             "flags": [
                 "IsFinal",
@@ -623,8 +594,8 @@
             ]
         },
         {
-            "name": "GenArrayWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\GenArrayWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle representing an array of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -672,8 +643,8 @@
             ]
         },
         {
-            "name": "GenMapWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\GenMapWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle representing a map of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -721,8 +692,8 @@
             ]
         },
         {
-            "name": "GenVectorWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\GenVectorWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle representing a vector of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -770,8 +741,89 @@
             ]
         },
         {
-            "name": "RescheduleWaitHandle",
-            "parent": "WaitableWaitHandle",
+            "name": "HH\\ConditionWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
+            "desc": "A wait handle representing a condition variable waiting for a notification",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that waits for a notification",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a notification"
+                    },
+                    "args": [
+                        {
+                            "name": "child",
+                            "type": "Variant",
+                            "desc": "A WaitHandle representing job responsible for notifying the condition variable"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a ConditionWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                },
+                {
+                    "name": "succeed",
+                    "desc": "Notify the condition variable and mark the ConditionWaitHandle as succeeded",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "result",
+                            "type": "Variant",
+                            "desc": "A result to be set"
+                        }
+                    ]
+                },
+                {
+                    "name": "fail",
+                    "desc": "Notify the condition variable and mark the ConditionWaitHandle as failed",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "exception",
+                            "type": "Variant",
+                            "desc": "An exception to be set"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "HH\\RescheduleWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that succeeds with null once desired scheduling priority is eligible for execution",
             "flags": [
                 "IsFinal",
@@ -816,8 +868,8 @@
             ]
         },
         {
-            "name": "SleepWaitHandle",
-            "parent": "WaitableWaitHandle",
+            "name": "HH\\SleepWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that succeeds with null after the desired timeout expires",
             "flags": [
                 "IsFinal",
@@ -883,8 +935,8 @@
             ]
         },
         {
-            "name": "ExternalThreadEventWaitHandle",
-            "parent": "WaitableWaitHandle",
+            "name": "HH\\ExternalThreadEventWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that synchronizes against C++ operation in external thread",
             "bases": [
                 "Sweepable"

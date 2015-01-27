@@ -16,12 +16,26 @@
 */
 #include <zip.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 
 namespace HPHP {
+
+static String to_full_path(const String& filename) {
+  if (filename.charAt(0) == '/') {
+    return filename;
+  }
+  return f_getcwd().toString() + String::FromChar('/') + filename;
+}
+
+// A wrapper for `zip_open` that prepares a full path
+// file name to consider current working directory.
+static zip* _zip_open(const String& filename, int _flags, int* zep) {
+  return zip_open(to_full_path(filename).c_str(), _flags, zep);
+}
 
 class ZipStream : public File {
  public:
@@ -83,8 +97,8 @@ void ZipStream::sweep() {
 
 class ZipStreamWrapper : public Stream::Wrapper {
  public:
-  virtual File* open(const String& filename, const String& mode,
-                     int options, const Variant& context) {
+  virtual SmartPtr<File> open(const String& filename, const String& mode,
+                              int options, const Variant& context) {
     std::string url(filename.c_str());
     auto pound = url.find('#');
     if (pound == std::string::npos) {
@@ -100,12 +114,12 @@ class ZipStreamWrapper : public Stream::Wrapper {
     }
 
     int err;
-    auto z = zip_open(path.c_str(), 0, &err);
+    auto z = _zip_open(path, 0, &err);
     if (z == nullptr) {
       return nullptr;
     }
 
-    return NEWOBJ(ZipStream)(z, file);
+    return makeSmartPtr<ZipStream>(z, file);
   }
 };
 
@@ -143,12 +157,12 @@ class ZipEntry : public SweepableResourceData {
   }
 
   String read(int64_t len) {
-    auto sb  = NEWOBJ(StringBuffer)(len);
-    auto buf = sb->appendCursor(len);
+    StringBuffer sb(len);
+    auto buf = sb.appendCursor(len);
     auto n   = zip_fread(m_zipFile, buf, len);
     if (n > 0) {
-      sb->resize(n);
-      return sb->detach();
+      sb.resize(n);
+      return sb.detach();
     }
     return empty_string();
   }
@@ -195,7 +209,7 @@ class ZipEntry : public SweepableResourceData {
   struct zip_stat m_zipStat;
   zip_file*       m_zipFile;
 };
-IMPLEMENT_OBJECT_ALLOCATION(ZipEntry);
+IMPLEMENT_RESOURCE_ALLOCATION(ZipEntry);
 
 class ZipDirectory: public SweepableResourceData {
  public:
@@ -232,7 +246,7 @@ class ZipDirectory: public SweepableResourceData {
       return false;
     }
 
-    auto zipEntry = NEWOBJ(ZipEntry)(m_zip, m_curIndex);
+    auto zipEntry = newres<ZipEntry>(m_zip, m_curIndex);
 
     if (!zipEntry->isValid()) {
       return false;
@@ -252,7 +266,7 @@ class ZipDirectory: public SweepableResourceData {
   int  m_numFiles;
   int  m_curIndex;
 };
-IMPLEMENT_OBJECT_ALLOCATION(ZipDirectory);
+IMPLEMENT_RESOURCE_ALLOCATION(ZipDirectory);
 
 const StaticString s_ZipArchive("ZipArchive");
 const StaticString s_CREATE("CREATE");
@@ -507,7 +521,7 @@ static bool HHVM_METHOD(ZipArchive, addEmptyDir, const String& dirname) {
 
 static bool addFile(zip* zipStruct, const char* source, const char* dest,
                     int64_t start = 0, int64_t length = 0) {
-  if (!f_is_file(source)) {
+  if (!HHVM_FN(is_file)(source)) {
     return false;
   }
 
@@ -608,7 +622,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
 
   Array files;
   if (glob) {
-    auto match = f_glob(pattern, flags);
+    auto match = HHVM_FN(glob)(pattern, flags);
     if (match.isArray()) {
       files = match.toArrRef();
     } else {
@@ -618,7 +632,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
     if (path[path.size() - 1] != '/') {
       path.push_back('/');
     }
-    auto allFiles = f_scandir(path);
+    auto allFiles = HHVM_FN(scandir)(path);
     if (allFiles.isArray()) {
       files = allFiles.toArrRef();
     } else {
@@ -636,7 +650,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
     }
 
     auto source = var.asCStrRef();
-    if (f_is_dir(source)) {
+    if (HHVM_FN(is_dir)(source)) {
       continue;
     }
 
@@ -752,7 +766,7 @@ static bool extractFileTo(zip* zip, const std::string &file, std::string& to,
   auto sep = file.rfind('/');
   if (sep != std::string::npos) {
     auto path = to + file.substr(0, sep);
-    if (!f_is_dir(path) && !f_mkdir(path, 0777, true)) {
+    if (!HHVM_FN(is_dir)(path) && !HHVM_FN(mkdir)(path, 0777, true)) {
       return false;
     }
 
@@ -812,7 +826,7 @@ static bool HHVM_METHOD(ZipArchive, extractTo, const String& destination,
     to.push_back('/');
   }
 
-  if (!f_is_dir(to) && !f_mkdir(to)) {
+  if (!HHVM_FN(is_dir)(to) && !HHVM_FN(mkdir)(to)) {
     return false;
   }
 
@@ -930,12 +944,12 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
     length = zipStat.size;
   }
 
-  auto sb  = NEWOBJ(StringBuffer)(length);
-  auto buf = sb->appendCursor(length);
+  StringBuffer sb(length);
+  auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
   if (n > 0) {
-    sb->resize(n);
-    return sb->detach();
+    sb.resize(n);
+    return sb.detach();
   }
   return empty_string_variant();
 }
@@ -967,12 +981,12 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
     length = zipStat.size;
   }
 
-  auto sb  = NEWOBJ(StringBuffer)(length);
-  auto buf = sb->appendCursor(length);
+  StringBuffer sb(length);
+  auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
   if (n > 0) {
-    sb->resize(n);
-    return sb->detach();
+    sb.resize(n);
+    return sb.detach();
   }
   return empty_string_variant();
 }
@@ -1010,7 +1024,7 @@ static Variant HHVM_METHOD(ZipArchive, getStream, const String& name) {
   FAIL_IF_INVALID_ZIPARCHIVE(getStream, zipDir);
   FAIL_IF_EMPTY_STRING_ZIPARCHIVE(getStream, name);
 
-  auto zipStream    = NEWOBJ(ZipStream)(zipDir->getZip(), name);
+  auto zipStream    = newres<ZipStream>(zipDir->getZip(), name);
   auto zipStreamRes = Resource(zipStream);
   if (zipStream->eof()) {
     return false;
@@ -1037,12 +1051,12 @@ static Variant HHVM_METHOD(ZipArchive, open, const String& filename,
   FAIL_IF_EMPTY_STRING_ZIPARCHIVE(open, filename);
 
   int  err;
-  auto z = zip_open(filename.c_str(), flags, &err);
+  auto z = _zip_open(filename, flags, &err);
   if (z == nullptr) {
     return err;
   }
 
-  auto zipDir = NEWOBJ(ZipDirectory)(z);
+  auto zipDir = newres<ZipDirectory>(z);
 
   setVariable(this_, "zipDir", Resource(zipDir));
   setVariable(this_, "filename", filename);
@@ -1332,12 +1346,12 @@ static Variant HHVM_FUNCTION(zip_open, const String& filename) {
   FAIL_IF_EMPTY_STRING(zip_open, filename);
 
   int  err;
-  auto z = zip_open(filename.c_str(), 0, &err);
+  auto z = _zip_open(filename, 0, &err);
   if (z == nullptr) {
     return err;
   }
 
-  auto zipDir = NEWOBJ(ZipDirectory)(z);
+  auto zipDir = newres<ZipDirectory>(z);
 
   return Resource(zipDir);
 }
@@ -1352,10 +1366,10 @@ static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class zipExtension : public Extension {
+class zipExtension final : public Extension {
  public:
   zipExtension() : Extension("zip", "1.12.4-dev") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(ZipArchive, getProperty);
     HHVM_ME(ZipArchive, addEmptyDir);
     HHVM_ME(ZipArchive, addFile);
@@ -1538,8 +1552,9 @@ class zipExtension : public Extension {
     HHVM_FE(zip_open);
     HHVM_FE(zip_read);
 
-    auto wrapper = NEWOBJ(ZipStreamWrapper)();
+    auto wrapper = new ZipStreamWrapper();
     if (wrapper == nullptr || !Stream::registerWrapper("zip", wrapper)) {
+      delete wrapper;
       raise_warning("Couldn't register Zip wrapper");
     }
 

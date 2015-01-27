@@ -35,6 +35,7 @@ if ($a['mtime'] != $b['mtime']) {
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/phar_gzip.phar');
 @unlink(dirname(__FILE__) . '/phar_gzip.2.phar');

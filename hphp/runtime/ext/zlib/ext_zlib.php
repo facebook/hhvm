@@ -9,11 +9,11 @@
  *
  * @return bool -
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzclose(resource $zp): bool;
 
 /**
- * ( excerpt from http://php.net/manual/en/function.zlib-encode.php )
+ * ( excerpt from http://docs.hhvm.com/manual/en/function.zlib-encode.php )
  *
  * Compress data with the specified encoding. Warning: This function is
  * currently not documented; only its argument list is available.
@@ -26,7 +26,7 @@ function gzclose(resource $zp): bool;
 function zlib_encode(string $data, int $encoding, int $level = -1): mixed;
 
 /**
- * ( excerpt from http://php.net/manual/en/function.zlib-decode.php )
+ * ( excerpt from http://docs.hhvm.com/manual/en/function.zlib-decode.php )
  *
  * Uncompress any raw/gzip/zlib encoded data. Warning: This function is
  * currently not documented; only its argument list is available.
@@ -109,7 +109,7 @@ function gzencode(string $data,
  * @return bool - Returns TRUE if the gz-file pointer is at EOF or an
  *   error occurs; otherwise returns FALSE.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzeof(resource $zp): bool;
 
 /**
@@ -134,7 +134,7 @@ function gzfile(string $filename,
  * @return string - The uncompressed character or FALSE on EOF (unlike
  *   gzeof()).
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzgetc(resource $zp): mixed;
 
 /**
@@ -146,7 +146,7 @@ function gzgetc(resource $zp): mixed;
  *
  * @return string - The uncompressed string, or FALSE on error.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzgets(resource $zp,
                 int $length = 1024): mixed;
 
@@ -163,7 +163,7 @@ function gzgets(resource $zp,
  * @return string - The uncompressed and striped string, or FALSE on
  *   error.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzgetss(resource $zp,
                  int $length = 0,
                  string $allowable_tags = ''): mixed;
@@ -214,7 +214,7 @@ function gzopen(string $filename,
  * @return int - The number of uncompressed characters read from gz and
  *   passed through to the input, or FALSE on error.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzpassthru(resource $zp): mixed;
 
 /**
@@ -233,7 +233,7 @@ function gzputs(resource $zp, string $string, int $length = 0): mixed {
  *
  * @return string - The data that have been read.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzread(resource $zp,
                 int $length = 0): mixed;
 
@@ -245,7 +245,7 @@ function gzread(resource $zp,
  *
  * @return bool -
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzrewind(resource $zp): bool;
 
 /**
@@ -261,7 +261,7 @@ function gzrewind(resource $zp): bool;
  * @return int - Upon success, returns 0; otherwise, returns -1. Note
  *   that seeking past EOF is not considered an error.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzseek(resource $zp,
                 int $offset,
                 int $whence = SEEK_SET): mixed;
@@ -275,7 +275,7 @@ function gzseek(resource $zp,
  * @return int - The position of the file pointer or FALSE if an error
  *   occurs.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gztell(resource $zp): mixed;
 
 /**
@@ -308,7 +308,7 @@ function gzuncompress(string $data, int $length = 0): mixed;
  * @return int - Returns the number of (uncompressed) bytes written to
  *   the given gz-file stream.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function gzwrite(resource $zp,
                  string $string,
                  int $length = 0): mixed;

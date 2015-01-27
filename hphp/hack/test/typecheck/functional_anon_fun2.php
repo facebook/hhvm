@@ -9,10 +9,16 @@
  *
  */
 
-function f(int $x): int { return 0; }
+function f(int $x): int {
+  return 0;
+}
 
 function test(): void {
-  $f = function($x) { return $x; };
-  $f = function($x) use ($f) { return call_user_func($f, $x); };
+  $f = function ($x) {
+    return $x;
+  };
+  $f = function ($x) use ($f) {
+    return call_user_func($f, $x);
+  };
   call_user_func(fun(f), 0);
 }

@@ -33,7 +33,7 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include <sstream>
 #include <cmath>
@@ -72,20 +72,33 @@ ScalarExpression::ScalarExpression
       m_dval = value.toDouble();
     }
   }
-  switch (value.getType()) {
-  case KindOfStaticString:
-  case KindOfString:
-    m_type = T_STRING;
-    break;
-  case KindOfInt64:
-    m_type = T_LNUMBER;
-    break;
-  case KindOfDouble:
-    m_type = T_DNUMBER;
-    break;
-  default:
-    assert(false);
-  }
+  [&] {
+    switch (value.getType()) {
+      case KindOfInt64:
+        m_type = T_LNUMBER;
+        return;
+
+      case KindOfDouble:
+        m_type = T_DNUMBER;
+        return;
+
+      case KindOfStaticString:
+      case KindOfString:
+        m_type = T_STRING;
+        return;
+
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }();
   const String& s = value.toString();
   m_value = s.toCppString();
   if (m_type == T_DNUMBER && m_value.find_first_of(".eE", 0) == string::npos) {
@@ -188,7 +201,7 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
 unsigned ScalarExpression::getCanonHash() const {
   int64_t val = getHash();
   if (val == -1) {
-    val = hash_string(m_value.c_str(), m_value.size());
+    val = hash_string_unsafe(m_value.c_str(), m_value.size());
   }
   return unsigned(val) ^ unsigned(val >> 32);
 }
@@ -202,38 +215,6 @@ bool ScalarExpression::canonCompare(ExpressionPtr e) const {
     m_value == s->m_value &&
     m_type == s->m_type &&
     m_quoted == s->m_quoted;
-}
-
-ExpressionPtr ScalarExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (!m_expectedType || Type::SameType(m_actualType, m_expectedType)) {
-    return ExpressionPtr();
-  }
-
-  Variant orig = getVariant();
-  Variant cast;
-  bool match = false;
-
-  switch (m_expectedType->getKindOf()) {
-  case Type::KindOfBoolean: match = true; cast = orig.toBoolean(); break;
-  case Type::KindOfInt64:   match = true; cast = orig.toInt64();   break;
-  case Type::KindOfDouble:  match = true; cast = orig.toDouble();  break;
-  case Type::KindOfString:  match = true; cast = orig.toString();  break;
-  }
-
-  if (!match || same(orig, cast)) {
-    // no changes need to be made
-    return ExpressionPtr();
-  }
-
-  ExpressionPtr p = makeScalarExpression(ar, cast);
-  p->setActualType(m_expectedType);
-  return p;
-}
-
-TypePtr ScalarExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                     bool coerce) {
-  assert(false);
-  return TypePtr();
 }
 
 TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
@@ -276,21 +257,6 @@ TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
   }
 
   return checkTypesImpl(ar, type, actualType, coerce);
-}
-
-TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                        bool coerce) {
-  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
-  resetTypes();
-
-  if (!Option::AllDynamic &&
-      ar->getPhase() == AnalysisResult::FirstInference &&
-      getScope()->isFirstPass() &&
-      isLiteralString() && m_value.find(' ') == string::npos) {
-    setDynamicByIdentifier(ar, m_value);
-  }
-
-  return inferenceImpl(ar, type, coerce);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -523,7 +489,7 @@ int64_t ScalarExpression::getHash() const {
     if (is_strictly_integer(scs.c_str(), scs.size(), res)) {
       hash = hash_int64(res);
     } else {
-      hash = hash_string(scs.c_str(), scs.size());
+      hash = hash_string_unsafe(scs.c_str(), scs.size());
     }
   }
   return hash;
@@ -633,7 +599,8 @@ void ScalarExpression::setCompilerHaltOffset(int64_t ofs) {
 
 int64_t ScalarExpression::getIntValue() const {
   // binary number syntax "0b" is not supported by strtoll
-  if (m_value.compare(0, 2, "0b") == 0) {
+  if ((m_value.compare(0, 2, "0b") == 0) ||
+      (m_value.compare(0, 2, "0B") == 0)) {
     return strtoll(m_value.c_str() + 2, nullptr, 2);
   }
   return strtoll(m_value.c_str(), nullptr, 0);

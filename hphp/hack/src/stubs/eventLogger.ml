@@ -8,8 +8,13 @@
  *
  *)
 
-let init _ = ()
+let init _ _ = ()
 let init_done _ = ()
+let load_read_end _ = ()
+let load_recheck_end _ = ()
+let load_failed _ = ()
+let master_exception _ = ()
+let worker_exception _ = ()
 let out_of_date _ = ()
 let killed _ = ()
 let lock_lost _ _ = ()

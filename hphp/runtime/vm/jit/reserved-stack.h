@@ -21,11 +21,9 @@
  * RESERVED_STACK_TOTAL_SPACE space (in bytes) at 8(%rsp) is
  * allocated on entry to the TC and made available for scratch
  * purposes (right above the return address).  It is used as spill
- * locations (see LinearScan), and for MInstrState.
+ * locations for vxls.
  */
-#define RESERVED_STACK_MINSTR_STATE_SPACE 0x80
-#define RESERVED_STACK_SPILL_SPACE        0x400
-#define RESERVED_STACK_TOTAL_SPACE        (RESERVED_STACK_MINSTR_STATE_SPACE + \
-                                           RESERVED_STACK_SPILL_SPACE)
+#define RESERVED_STACK_SPILL_SPACE        0x408
+#define RESERVED_STACK_TOTAL_SPACE        RESERVED_STACK_SPILL_SPACE
 
 #endif

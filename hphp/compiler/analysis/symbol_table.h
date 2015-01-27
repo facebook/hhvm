@@ -25,7 +25,7 @@
 #include "hphp/compiler/json.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash-map-typedefs.h"
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ public:
 
   void setName(const std::string &name) {
     m_name = name;
-    m_hash = (unsigned int) hash_string_inline(m_name.c_str(), m_name.size());
+    m_hash = (unsigned int) hash_string_unsafe(m_name.c_str(), m_name.size());
   }
   const std::string &getName() const { return m_name; }
   unsigned int getHash() const { return m_hash; }

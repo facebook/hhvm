@@ -45,6 +45,14 @@ inline vixl::Register argReg(unsigned index) {
   return vixl::Register::XRegFromCode(index);
 }
 
+inline RegSet argSet(int n) {
+  RegSet regs;
+  for (int i = 0; i < n; i++) {
+    regs.add(PhysReg(argReg(i)));
+  }
+  return regs;
+}
+
 inline vixl::Register serviceReqArgReg(unsigned index) {
   // First arg holds the request number
   return argReg(index + 1);
@@ -93,125 +101,71 @@ const vixl::Register rLinkReg(vixl::x30);
 const vixl::Register rReturnReg(vixl::x0);
 const vixl::Register rHostCallReg(vixl::x16);
 
-const RegSet kGPCallerSaved = RegSet()
-  | RegSet(vixl::x0)
-  | RegSet(vixl::x1)
-  | RegSet(vixl::x2)
-  | RegSet(vixl::x3)
-  | RegSet(vixl::x4)
-  | RegSet(vixl::x5)
-  | RegSet(vixl::x6)
-  | RegSet(vixl::x7)
-  | RegSet(vixl::x8)
+const RegSet kGPCallerSaved =
+  vixl::x0 | vixl::x1 | vixl::x2 | vixl::x3 |
+  vixl::x4 | vixl::x5 | vixl::x6 | vixl::x7 |
+  vixl::x8 |
   // x9  = rAsm
   // x10 = rAsm2
-  | RegSet(vixl::x11)
-  | RegSet(vixl::x12)
-  | RegSet(vixl::x13)
-  | RegSet(vixl::x14)
-  | RegSet(vixl::x15)
+  vixl::x11 | vixl::x12 | vixl::x13 | vixl::x14 | vixl::x15 |
   // x16 = rHostCallReg, used as ip0/tmp0 by MacroAssembler
   // x17 = used as ip1/tmp1 by MacroAssembler
-  | RegSet(vixl::x18)
-  ;
+  vixl::x18;
 
-const RegSet kGPCalleeSaved = RegSet()
+const RegSet kGPCalleeSaved =
   // x19 = rVmSp
   // x20 = rVmTl
   // x21 = rStashedAR
-  | RegSet(vixl::x22)
-  | RegSet(vixl::x23)
+  vixl::x22 | vixl::x23 |
   // x24 = rGContextReg
-  | RegSet(vixl::x25)
-  | RegSet(vixl::x26)
-  | RegSet(vixl::x27)
-  | RegSet(vixl::x28)
-  ;
+  vixl::x25 | vixl::x26 | vixl::x27 | vixl::x28;
+  // x29 = rVmFp
+  // x30 = rLinkReg
 
-const RegSet kGPUnreserved = RegSet()
-  | kGPCallerSaved
-  | kGPCalleeSaved
-  ;
+const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
-const RegSet kGPReserved = RegSet()
-  | RegSet(rAsm)
-  | RegSet(rAsm2)
-  | RegSet(rHostCallReg)
-  | RegSet(vixl::x17)
-  | RegSet(rVmSp)
-  | RegSet(rVmTl)
-  | RegSet(rStashedAR)
-  | RegSet(rGContextReg)
-  | RegSet(rVmFp)
-  | RegSet(rLinkReg)
+const RegSet kGPReserved =
+  rAsm | rAsm2 | rHostCallReg | vixl::x17 |
+  rVmSp | rVmTl | rStashedAR | rGContextReg | rVmFp | rLinkReg |
   // ARM machines really only have 32 GP regs. However, vixl has 33 separate
   // register codes, because it treats the zero register and stack pointer
   // (which are really both register 31) separately. Rather than lose this
   // distinction in vixl (it's really helpful for avoiding stupid mistakes), we
   // sacrifice the ability to represent all 32 SIMD regs, and pretend that are
   // 33 GP regs.
-  | RegSet(vixl::xzr) // x31
-  | RegSet(vixl::sp) // x31, but with special vixl code
-  ;
+  vixl::xzr | // x31
+  vixl::sp; // x31, but with special vixl code
 
-const RegSet kSIMDCallerSaved = RegSet()
-  | RegSet(vixl::d0)
-  | RegSet(vixl::d1)
-  | RegSet(vixl::d2)
-  | RegSet(vixl::d3)
-  | RegSet(vixl::d4)
-  | RegSet(vixl::d5)
-  | RegSet(vixl::d6)
-  | RegSet(vixl::d7)
+const RegSet kSIMDCallerSaved =
+  vixl::d0 | vixl::d1 | vixl::d2 | vixl::d3 |
+  vixl::d4 | vixl::d5 | vixl::d6 | vixl::d7 |
   // 8-15 are callee-saved
-  | RegSet(vixl::d16)
-  | RegSet(vixl::d17)
-  | RegSet(vixl::d18)
-  | RegSet(vixl::d19)
-  | RegSet(vixl::d20)
-  | RegSet(vixl::d21)
-  | RegSet(vixl::d22)
-  | RegSet(vixl::d23)
-  | RegSet(vixl::d24)
-  | RegSet(vixl::d25)
-  | RegSet(vixl::d26)
-  | RegSet(vixl::d27)
-  | RegSet(vixl::d28)
-  | RegSet(vixl::d29)
-  | RegSet(vixl::d30)
+  vixl::d16 | vixl::d17 | vixl::d18 | vixl::d19 |
+  vixl::d20 | vixl::d21 | vixl::d22 | vixl::d23 |
+  vixl::d24 | vixl::d25 | vixl::d26 | vixl::d27 |
+  vixl::d28 | vixl::d29;
+  // d30 exists, but PhysReg can't represent it, so we don't use it.
   // d31 exists, but PhysReg can't represent it, so we don't use it.
-  ;
 
-const RegSet kSIMDCalleeSaved = RegSet()
-  | RegSet(vixl::d8)
-  | RegSet(vixl::d9)
-  | RegSet(vixl::d10)
-  | RegSet(vixl::d11)
-  | RegSet(vixl::d12)
-  | RegSet(vixl::d13)
-  | RegSet(vixl::d14)
-  | RegSet(vixl::d15)
-  ;
+const RegSet kSIMDCalleeSaved =
+  vixl::d8 | vixl::d9 | vixl::d10 | vixl::d11 |
+  vixl::d12 | vixl::d13 | vixl::d14 | vixl::d15;
 
-const RegSet kSIMDUnreserved = RegSet()
-  | kSIMDCallerSaved
-  | kSIMDCalleeSaved
-  ;
+const RegSet kSIMDUnreserved = kSIMDCallerSaved | kSIMDCalleeSaved;
 
-const RegSet kSIMDReserved = RegSet()
-  ;
+const RegSet kSIMDReserved;
 
-const RegSet kCalleeSaved = RegSet()
-  | kGPCalleeSaved
-  | kSIMDCalleeSaved
-  ;
+const RegSet kCalleeSaved = kGPCalleeSaved | kSIMDCalleeSaved;
+
+const RegSet kSF = RegSet(RegSF{0});
 
 UNUSED const Abi abi {
   kGPUnreserved,   // gpUnreserved
   kGPReserved,     // gpReserved
   kSIMDUnreserved, // simdUnreserved
   kSIMDReserved,   // simdReserved
-  kCalleeSaved     // calleeSaved
+  kCalleeSaved,    // calleeSaved
+  kSF              // sf
 };
 
 }}}

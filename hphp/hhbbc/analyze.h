@@ -115,6 +115,14 @@ struct ClassAnalysis {
 FuncAnalysis analyze_func(const Index&, Context);
 
 /*
+ * Analyze a function like analyze_func, but exposing gathered CollectedInfo
+ * results.  The CollectedInfo structure can be initialized by the caller to
+ * enable collecting some pass-specific types of information (e.g. public
+ * static property types).
+ */
+FuncAnalysis analyze_func_collect(const Index&, Context, CollectedInfo&);
+
+/*
  * Perform a flow-sensitive type analysis on a function, using the
  * given Index and Context when we need information about things
  * outside of this function, and assuming that the arguments to the

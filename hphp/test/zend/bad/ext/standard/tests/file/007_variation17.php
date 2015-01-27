@@ -34,6 +34,7 @@ var_dump( fclose($file_handle) );  //Check for close operation on the file handl
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
 echo "*** Done ***\n"; 
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__)."/007_variation17.tmp");
 ?>

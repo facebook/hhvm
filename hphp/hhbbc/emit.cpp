@@ -22,10 +22,10 @@
 #include <memory>
 #include <type_traits>
 
-#include "folly/gen/Base.h"
-#include "folly/Conv.h"
-#include "folly/Optional.h"
-#include "folly/Memory.h"
+#include <folly/gen/Base.h>
+#include <folly/Conv.h>
+#include <folly/Optional.h>
+#include <folly/Memory.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
@@ -466,7 +466,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     for (auto& inst : b->hhbcs) emit_inst(inst);
 
     if (b->fallthrough) {
-      if (boost::next(blockIt) == endBlockIt || blockIt[1] != b->fallthrough) {
+      if (std::next(blockIt) == endBlockIt || blockIt[1] != b->fallthrough) {
         if (b->fallthroughNS) {
           emit_inst(bc::JmpNS { b->fallthrough });
         } else {
@@ -868,6 +868,7 @@ void emit_class(EmitUnitState& state,
   for (auto& x : cls.requirements)       pce->addClassRequirement(x);
   for (auto& x : cls.traitPrecRules)     pce->addTraitPrecRule(x);
   for (auto& x : cls.traitAliasRules)    pce->addTraitAliasRule(x);
+  pce->setNumDeclMethods(cls.numDeclMethods);
 
   for (auto& m : cls.methods) {
     FTRACE(2, "    method: {}\n", m->name->data());
@@ -910,12 +911,19 @@ void emit_class(EmitUnitState& state,
   }
 
   for (auto& cconst : cls.constants) {
-    pce->addConstant(
-      cconst.name,
-      cconst.typeConstraint,
-      &cconst.val,
-      cconst.phpCode
-    );
+    if (!cconst.val.hasValue()) {
+      pce->addAbstractConstant(
+        cconst.name,
+        cconst.typeConstraint
+      );
+    } else {
+      pce->addConstant(
+        cconst.name,
+        cconst.typeConstraint,
+        &cconst.val.value(),
+        cconst.phpCode
+      );
+    }
   }
 
   pce->setEnumBaseTy(cls.enumBaseTy);

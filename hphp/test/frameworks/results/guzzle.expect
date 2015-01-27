@@ -1172,15 +1172,15 @@ Guzzle\Tests\Inflection\PreComputedInflectorTest::testUsesPreComputedHash
 .
 Guzzle\Tests\Iterator\AppendIteratorTest::testTraversesIteratorsInOrder
 .
-Guzzle\Tests\Iterator\ChunkedIteratorTest::mustNotTerminateWithTraversable
-.
-Guzzle\Tests\Iterator\ChunkedIteratorTest::sizeLowerZeroThrowsException
-.
-Guzzle\Tests\Iterator\ChunkedIteratorTest::sizeOfZeroMakesIteratorInvalid
-.
 Guzzle\Tests\Iterator\ChunkedIteratorTest::testChunksIterator
 .
 Guzzle\Tests\Iterator\ChunkedIteratorTest::testChunksIteratorWithOddValues
+.
+Guzzle\Tests\Iterator\ChunkedIteratorTest::testMustNotTerminateWithTraversable
+.
+Guzzle\Tests\Iterator\ChunkedIteratorTest::testSizeLowerZeroThrowsException
+.
+Guzzle\Tests\Iterator\ChunkedIteratorTest::testSizeOfZeroMakesIteratorInvalid
 .
 Guzzle\Tests\Iterator\FilterIteratorTest::testFiltersValues
 .
@@ -2619,6 +2619,8 @@ Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testEnsure
 Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testEnsuresWrappedArraysAreInCorrectLocations with data set #1
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testEnsuresWrappedArraysAreInCorrectLocations with data set #2
+.
+Guzzle\Tests\Service\Command\LocationVisitor\Response\XmlVisitorTest::testProperlyHandlesEmptyStringValues
 .
 Guzzle\Tests\Service\Command\MapFactoryTest::testCreatesCommandsUsingMappings with data set #0
 .

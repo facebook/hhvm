@@ -35,5 +35,6 @@ echo 'b: ' ,file_get_contents($p2['b']->getPathName());
 echo 'c: ' ,file_get_contents($p2['c']->getPathName());
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar.php'); ?>

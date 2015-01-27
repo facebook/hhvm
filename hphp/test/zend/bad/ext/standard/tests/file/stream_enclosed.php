@@ -10,4 +10,4 @@ while ($i++ < 5000) {
 }
 
 leak_variable($s, true);
-leak_variable($t, true);
+leak_variable($t, true);

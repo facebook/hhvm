@@ -16,8 +16,12 @@
 */
 
 #include "hphp/runtime/ext/stream/ext_stream.h"
+
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
-#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/plain-file.h"
@@ -25,6 +29,8 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-await.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/user-stream-wrapper.h"
@@ -42,10 +48,9 @@
 #include <algorithm>
 #endif
 
-#define PHP_STREAM_BUFFER_NONE  0   /* unbuffered */
-#define PHP_STREAM_BUFFER_LINE  1   /* line buffered */
-#define PHP_STREAM_BUFFER_FULL  2   /* fully buffered */
 #define PHP_STREAM_COPY_ALL     (-1)
+
+
 
 namespace HPHP {
 
@@ -53,19 +58,169 @@ namespace HPHP {
 
 static StreamContext* get_stream_context(const Variant& stream_or_context);
 
+#define REGISTER_CONSTANT(name, value)                                         \
+  Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
+
+static class StreamExtension final : public Extension {
+public:
+  StreamExtension() : Extension("stream") {}
+  void moduleInit() override {
+    REGISTER_CONSTANT(STREAM_CLIENT_CONNECT, k_STREAM_CLIENT_CONNECT);
+    REGISTER_CONSTANT(STREAM_CLIENT_ASYNC_CONNECT,
+                      k_STREAM_CLIENT_ASYNC_CONNECT);
+    REGISTER_CONSTANT(STREAM_CLIENT_PERSISTENT, k_STREAM_CLIENT_PERSISTENT);
+    REGISTER_CONSTANT(STREAM_META_TOUCH, k_STREAM_META_TOUCH);
+    REGISTER_CONSTANT(STREAM_META_OWNER_NAME, k_STREAM_META_OWNER_NAME);
+    REGISTER_CONSTANT(STREAM_META_OWNER, k_STREAM_META_OWNER);
+    REGISTER_CONSTANT(STREAM_META_GROUP_NAME, k_STREAM_META_GROUP_NAME);
+    REGISTER_CONSTANT(STREAM_META_GROUP, k_STREAM_META_GROUP);
+    REGISTER_CONSTANT(STREAM_META_ACCESS, k_STREAM_META_ACCESS);
+    REGISTER_CONSTANT(STREAM_BUFFER_NONE, k_STREAM_BUFFER_NONE);
+    REGISTER_CONSTANT(STREAM_BUFFER_LINE, k_STREAM_BUFFER_LINE);
+    REGISTER_CONSTANT(STREAM_BUFFER_FULL, k_STREAM_BUFFER_FULL);
+    REGISTER_CONSTANT(STREAM_SERVER_BIND, k_STREAM_SERVER_BIND);
+    REGISTER_CONSTANT(STREAM_SERVER_LISTEN, k_STREAM_SERVER_LISTEN);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_SSLv23_CLIENT,
+                      k_STREAM_CRYPTO_METHOD_SSLv23_CLIENT);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_SSLv23_SERVER,
+                      k_STREAM_CRYPTO_METHOD_SSLv23_SERVER);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_SSLv2_CLIENT,
+                      k_STREAM_CRYPTO_METHOD_SSLv2_CLIENT);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_SSLv2_SERVER,
+                      k_STREAM_CRYPTO_METHOD_SSLv2_SERVER);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_SSLv3_CLIENT,
+                      k_STREAM_CRYPTO_METHOD_SSLv3_CLIENT);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_SSLv3_SERVER,
+                      k_STREAM_CRYPTO_METHOD_SSLv3_SERVER);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_TLS_CLIENT,
+                      k_STREAM_CRYPTO_METHOD_TLS_CLIENT);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_TLS_SERVER,
+                      k_STREAM_CRYPTO_METHOD_TLS_SERVER);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT,
+                      k_STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_TLSv1_0_SERVER,
+                      k_STREAM_CRYPTO_METHOD_TLSv1_0_SERVER);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,
+                      k_STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,
+                      k_STREAM_CRYPTO_METHOD_TLSv1_1_SERVER);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
+                      k_STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,
+                      k_STREAM_CRYPTO_METHOD_TLSv1_2_SERVER);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_ANY_CLIENT,
+                      k_STREAM_CRYPTO_METHOD_ANY_CLIENT);
+    REGISTER_CONSTANT(STREAM_CRYPTO_METHOD_ANY_SERVER,
+                      k_STREAM_CRYPTO_METHOD_ANY_SERVER);
+    REGISTER_CONSTANT(STREAM_ENFORCE_SAFE_MODE, k_STREAM_ENFORCE_SAFE_MODE);
+    REGISTER_CONSTANT(STREAM_IGNORE_URL, k_STREAM_IGNORE_URL);
+    REGISTER_CONSTANT(STREAM_IPPROTO_ICMP, k_STREAM_IPPROTO_ICMP);
+    REGISTER_CONSTANT(STREAM_IPPROTO_IP, k_STREAM_IPPROTO_IP);
+    REGISTER_CONSTANT(STREAM_IPPROTO_RAW, k_STREAM_IPPROTO_RAW);
+    REGISTER_CONSTANT(STREAM_IPPROTO_TCP, k_STREAM_IPPROTO_TCP);
+    REGISTER_CONSTANT(STREAM_IPPROTO_UDP, k_STREAM_IPPROTO_UDP);
+    REGISTER_CONSTANT(STREAM_IS_URL, k_STREAM_IS_URL);
+    REGISTER_CONSTANT(STREAM_MKDIR_RECURSIVE, k_STREAM_MKDIR_RECURSIVE);
+    REGISTER_CONSTANT(STREAM_MUST_SEEK, k_STREAM_MUST_SEEK);
+    REGISTER_CONSTANT(STREAM_NOTIFY_AUTH_REQUIRED,
+                      k_STREAM_NOTIFY_AUTH_REQUIRED);
+    REGISTER_CONSTANT(STREAM_NOTIFY_AUTH_RESULT, k_STREAM_NOTIFY_AUTH_RESULT);
+    REGISTER_CONSTANT(STREAM_NOTIFY_COMPLETED, k_STREAM_NOTIFY_COMPLETED);
+    REGISTER_CONSTANT(STREAM_NOTIFY_CONNECT, k_STREAM_NOTIFY_CONNECT);
+    REGISTER_CONSTANT(STREAM_NOTIFY_FAILURE, k_STREAM_NOTIFY_FAILURE);
+    REGISTER_CONSTANT(STREAM_NOTIFY_FILE_SIZE_IS, k_STREAM_NOTIFY_FILE_SIZE_IS);
+    REGISTER_CONSTANT(STREAM_NOTIFY_MIME_TYPE_IS, k_STREAM_NOTIFY_MIME_TYPE_IS);
+    REGISTER_CONSTANT(STREAM_NOTIFY_PROGRESS, k_STREAM_NOTIFY_PROGRESS);
+    REGISTER_CONSTANT(STREAM_NOTIFY_REDIRECTED, k_STREAM_NOTIFY_REDIRECTED);
+    REGISTER_CONSTANT(STREAM_NOTIFY_RESOLVE, k_STREAM_NOTIFY_RESOLVE);
+    REGISTER_CONSTANT(STREAM_NOTIFY_SEVERITY_ERR, k_STREAM_NOTIFY_SEVERITY_ERR);
+    REGISTER_CONSTANT(STREAM_NOTIFY_SEVERITY_INFO,
+                      k_STREAM_NOTIFY_SEVERITY_INFO);
+    REGISTER_CONSTANT(STREAM_NOTIFY_SEVERITY_WARN,
+                      k_STREAM_NOTIFY_SEVERITY_WARN);
+    REGISTER_CONSTANT(STREAM_OOB, k_STREAM_OOB);
+    REGISTER_CONSTANT(STREAM_PEEK, k_STREAM_PEEK);
+    REGISTER_CONSTANT(STREAM_PF_INET, k_STREAM_PF_INET);
+    REGISTER_CONSTANT(STREAM_PF_INET6, k_STREAM_PF_INET6);
+    REGISTER_CONSTANT(STREAM_PF_UNIX, k_STREAM_PF_UNIX);
+    REGISTER_CONSTANT(STREAM_REPORT_ERRORS, k_STREAM_REPORT_ERRORS);
+    REGISTER_CONSTANT(STREAM_SHUT_RD, k_STREAM_SHUT_RD);
+    REGISTER_CONSTANT(STREAM_SHUT_RDWR, k_STREAM_SHUT_RDWR);
+    REGISTER_CONSTANT(STREAM_SHUT_WR, k_STREAM_SHUT_WR);
+    REGISTER_CONSTANT(STREAM_SOCK_DGRAM, k_STREAM_SOCK_DGRAM);
+    REGISTER_CONSTANT(STREAM_SOCK_RAW, k_STREAM_SOCK_RAW);
+    REGISTER_CONSTANT(STREAM_SOCK_RDM, k_STREAM_SOCK_RDM);
+    REGISTER_CONSTANT(STREAM_SOCK_SEQPACKET, k_STREAM_SOCK_SEQPACKET);
+    REGISTER_CONSTANT(STREAM_SOCK_STREAM, k_STREAM_SOCK_STREAM);
+    REGISTER_CONSTANT(STREAM_USE_PATH, k_STREAM_USE_PATH);
+
+    REGISTER_CONSTANT(STREAM_AWAIT_READ, FileEventHandler::READ);
+    REGISTER_CONSTANT(STREAM_AWAIT_WRITE, FileEventHandler::WRITE);
+    REGISTER_CONSTANT(STREAM_AWAIT_READ_WRITE, FileEventHandler::READ_WRITE);
+
+    REGISTER_CONSTANT(STREAM_AWAIT_ERROR, FileAwait::ERROR);
+    REGISTER_CONSTANT(STREAM_AWAIT_TIMEOUT, FileAwait::TIMEOUT);
+    REGISTER_CONSTANT(STREAM_AWAIT_READY, FileAwait::READY);
+    REGISTER_CONSTANT(STREAM_AWAIT_CLOSED, FileAwait::CLOSED);
+
+    REGISTER_CONSTANT(STREAM_URL_STAT_LINK, k_STREAM_URL_STAT_LINK);
+    REGISTER_CONSTANT(STREAM_URL_STAT_QUIET, k_STREAM_URL_STAT_QUIET);
+
+    HHVM_FE(stream_context_create);
+    HHVM_FE(stream_context_get_options);
+    HHVM_FE(stream_context_set_option);
+    HHVM_FE(stream_context_get_default);
+    HHVM_FE(stream_context_get_params);
+    HHVM_FE(stream_context_set_params);
+    HHVM_FE(stream_copy_to_stream);
+    HHVM_FE(stream_get_contents);
+    HHVM_FE(stream_get_line);
+    HHVM_FE(stream_get_meta_data);
+    HHVM_FE(stream_get_transports);
+    HHVM_FE(stream_get_wrappers);
+    HHVM_FE(stream_is_local);
+    HHVM_FE(stream_register_wrapper);
+    HHVM_FE(stream_wrapper_register);
+    HHVM_FE(stream_wrapper_restore);
+    HHVM_FE(stream_wrapper_unregister);
+    HHVM_FE(stream_resolve_include_path);
+    HHVM_FE(stream_select);
+    HHVM_FE(stream_await);
+    HHVM_FE(stream_set_blocking);
+    HHVM_FE(stream_set_timeout);
+    HHVM_FE(stream_set_write_buffer);
+    HHVM_FE(set_file_buffer);
+    HHVM_FE(stream_socket_accept);
+    HHVM_FE(stream_socket_server);
+    HHVM_FE(stream_socket_client);
+    HHVM_FE(stream_socket_get_name);
+    HHVM_FE(stream_socket_pair);
+    HHVM_FE(stream_socket_recvfrom);
+    HHVM_FE(stream_socket_sendto);
+    HHVM_FE(stream_socket_shutdown);
+
+    loadSystemlib();
+  }
+} s_stream_extension;
+
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_stream_context_create(const Array& options /* = null_array */,
-                                const Array& params /* = null_array */) {
-  if (!options.isNull() && !StreamContext::validateOptions(options)) {
+Variant HHVM_FUNCTION(stream_context_create,
+                      const Variant& options /* = null_variant */,
+                      const Variant& params /* = null_variant */) {
+  const Array& arrOptions = options.isNull() ? null_array : options.toArray();
+  const Array& arrParams = params.isNull() ? null_array : params.toArray();
+
+  if (!arrOptions.isNull() && !StreamContext::validateOptions(arrOptions)) {
     raise_warning("options should have the form "
                   "[\"wrappername\"][\"optionname\"] = $value");
-    return Resource(NEWOBJ(StreamContext)(HPHP::null_array, HPHP::null_array));
+    return Resource(newres<StreamContext>(HPHP::null_array, HPHP::null_array));
   }
-  return Resource(NEWOBJ(StreamContext)(options, params));
+  return Resource(newres<StreamContext>(arrOptions, arrParams));
 }
 
-Variant f_stream_context_get_options(const Resource& stream_or_context) {
+Variant HHVM_FUNCTION(stream_context_get_options,
+                      const Resource& stream_or_context) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -74,8 +229,8 @@ Variant f_stream_context_get_options(const Resource& stream_or_context) {
   return context->getOptions();
 }
 
-bool f_stream_context_set_option0(StreamContext* context,
-                                  const Array& options) {
+static bool stream_context_set_option0(StreamContext* context,
+                                       const Array& options) {
   if (!StreamContext::validateOptions(options)) {
     raise_warning("options should have the form "
                   "[\"wrappername\"][\"optionname\"] = $value");
@@ -85,18 +240,19 @@ bool f_stream_context_set_option0(StreamContext* context,
   return true;
 }
 
-bool f_stream_context_set_option1(StreamContext* context,
-                                  const String& wrapper,
-                                  const String& option,
-                                  const Variant& value) {
+static bool stream_context_set_option1(StreamContext* context,
+                                       const String& wrapper,
+                                       const String& option,
+                                       const Variant& value) {
   context->setOption(wrapper, option, value);
   return true;
 }
 
-bool f_stream_context_set_option(const Variant& stream_or_context,
-                                 const Variant& wrapper_or_options,
-                                 const Variant& option /* = null_variant */,
-                                 const Variant& value /* = null_variant */) {
+bool HHVM_FUNCTION(stream_context_set_option,
+                   const Variant& stream_or_context,
+                   const Variant& wrapper_or_options,
+                   const Variant& option /* = null_variant */,
+                   const Variant& value /* = null_variant */) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -105,38 +261,43 @@ bool f_stream_context_set_option(const Variant& stream_or_context,
   if (wrapper_or_options.isArray() &&
       !option.isInitialized() &&
       !value.isInitialized()) {
-    return f_stream_context_set_option0(context, wrapper_or_options.toArray());
+    return stream_context_set_option0(context, wrapper_or_options.toArray());
   } else if (wrapper_or_options.isString() &&
              option.isInitialized() &&
              option.isString() &&
              value.isInitialized()) {
-    return f_stream_context_set_option1(context, wrapper_or_options.toString(),
-                                        option.toString(), value);
+    return stream_context_set_option1(context, wrapper_or_options.toString(),
+                                      option.toString(), value);
   } else {
     raise_warning("called with wrong number or type of parameters; please RTM");
     return false;
   }
 }
 
-Variant f_stream_context_get_default(const Array& options /* = null_array */) {
+Variant HHVM_FUNCTION(stream_context_get_default,
+                      const Variant& options /* = null_variant */) {
+  const Array& arrOptions = options.isNull() ? null_array : options.toArray();
   Resource &resource = g_context->getStreamContext();
   if (resource.isNull()) {
-    resource = Resource(NEWOBJ(StreamContext)(Array::Create(),
+    resource = Resource(newres<StreamContext>(Array::Create(),
                                               Array::Create()));
     g_context->setStreamContext(resource);
   }
   StreamContext *context = resource.getTyped<StreamContext>();
-  if (!options.isNull() && !f_stream_context_set_option0(context, options)) {
+  if (!arrOptions.isNull() &&
+      !stream_context_set_option0(context, arrOptions)) {
     return false;
   }
   return resource;
 }
 
-Variant f_stream_context_set_default(const Array& options) {
-  return f_stream_context_get_default(options);
+Variant HHVM_FUNCTION(stream_context_set_default,
+const Array& options) {
+  return HHVM_FN(stream_context_get_default)(options);
 }
 
-Variant f_stream_context_get_params(const Resource& stream_or_context) {
+Variant HHVM_FUNCTION(stream_context_get_params,
+                      const Resource& stream_or_context) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -145,8 +306,9 @@ Variant f_stream_context_get_params(const Resource& stream_or_context) {
   return context->getParams();
 }
 
-bool f_stream_context_set_params(const Resource& stream_or_context,
-                                 const Array& params) {
+bool HHVM_FUNCTION(stream_context_set_params,
+                   const Resource& stream_or_context,
+                   const Array& params) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context || !StreamContext::validateParams(params)) {
     raise_warning("Invalid stream/context parameter");
@@ -156,9 +318,11 @@ bool f_stream_context_set_params(const Resource& stream_or_context,
   return true;
 }
 
-Variant f_stream_copy_to_stream(const Resource& source, const Resource& dest,
-                                int maxlength /* = -1 */,
-                                int offset /* = 0 */) {
+Variant HHVM_FUNCTION(stream_copy_to_stream,
+                      const Resource& source,
+                      const Resource& dest,
+                      int maxlength /* = -1 */,
+                      int offset /* = 0 */) {
   if (maxlength == 0) return 0;
   if (maxlength == PHP_STREAM_COPY_ALL) maxlength = 0;
 
@@ -187,8 +351,10 @@ Variant f_stream_copy_to_stream(const Resource& source, const Resource& dest,
   return cbytes;
 }
 
-Variant f_stream_get_contents(const Resource& handle, int maxlen /* = -1 */,
-                              int offset /* = -1 */) {
+Variant HHVM_FUNCTION(stream_get_contents,
+                      const Resource& handle,
+                      int maxlen /* = -1 */,
+                      int offset /* = -1 */) {
   if (maxlen < -1) {
     throw_invalid_argument("maxlen: %d", maxlen);
     return false;
@@ -223,24 +389,33 @@ Variant f_stream_get_contents(const Resource& handle, int maxlen /* = -1 */,
   return ret;
 }
 
-Variant f_stream_get_line(const Resource& handle, int length /* = 0 */,
-                          const String& ending /* = null_string */) {
+Variant HHVM_FUNCTION(stream_get_line,
+                      const Resource& handle,
+                      int length /* = 0 */,
+                      const Variant& ending /* = null_variant */) {
+  const String& strEnding = ending.isNull() ? null_string : ending.toString();
   File *file = handle.getTyped<File>();
-  return file->readRecord(ending, length);
+  return file->readRecord(strEnding, length);
 }
 
-Variant f_stream_get_meta_data(const Resource& stream) {
+Variant HHVM_FUNCTION(stream_get_meta_data,
+                      const Resource& stream) {
   File *f = stream.getTyped<File>(true, true);
   if (f) return f->getMetaData();
+  Directory *d = stream.getTyped<Directory>(true, true);
+  if (d) {
+    return d->getMetaData();
+  }
   return false;
 }
 
-Array f_stream_get_transports() {
+Array HHVM_FUNCTION(stream_get_transports) {
   return make_packed_array("tcp", "udp", "unix", "udg");
 }
 
-Variant f_stream_resolve_include_path(const String& filename,
-                                     const Resource& context /* = null_object */) {
+Variant HHVM_FUNCTION(stream_resolve_include_path,
+                      const String& filename,
+                      const Variant& context /* = null_variant */) {
   struct stat s;
   String ret = resolveVmInclude(filename.get(), "", &s, true);
   if (ret.isNull()) {
@@ -249,12 +424,27 @@ Variant f_stream_resolve_include_path(const String& filename,
   return ret;
 }
 
-Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,
-                        const Variant& vtv_sec, int tv_usec /* = 0 */) {
-  return f_socket_select(ref(read), ref(write), ref(except), vtv_sec, tv_usec);
+Variant HHVM_FUNCTION(stream_select,
+                      VRefParam read,
+                      VRefParam write,
+                      VRefParam except,
+                      const Variant& vtv_sec,
+                      int tv_usec /* = 0 */) {
+  return HHVM_FN(socket_select)(ref(read), ref(write), ref(except),
+                                vtv_sec, tv_usec);
 }
 
-bool f_stream_set_blocking(const Resource& stream, int mode) {
+Object HHVM_FUNCTION(stream_await,
+                     const Resource& stream,
+                     uint16_t events,
+                     double timeout /*= 0.0 */) {
+  auto f = stream.getTyped<File>();
+  return f->await(events, timeout);
+}
+
+bool HHVM_FUNCTION(stream_set_blocking,
+                   const Resource& stream,
+                   int mode) {
   File *file = stream.getTyped<File>();
   int flags = fcntl(file->fd(), F_GETFL, 0);
   if (mode) {
@@ -269,17 +459,21 @@ const StaticString
   s_sec("sec"),
   s_usec("usec");
 
-bool f_stream_set_timeout(const Resource& stream, int seconds,
-                          int microseconds /* = 0 */) {
+bool HHVM_FUNCTION(stream_set_timeout,
+                   const Resource& stream,
+                   int seconds,
+                   int microseconds /* = 0 */) {
   if (stream.getTyped<Socket>(false, true)) {
-    return f_socket_set_option
+    return HHVM_FN(socket_set_option)
       (stream, SOL_SOCKET, SO_RCVTIMEO,
        make_map_array(s_sec, seconds, s_usec, microseconds));
   }
   return false;
 }
 
-int64_t f_stream_set_write_buffer(const Resource& stream, int buffer) {
+int64_t HHVM_FUNCTION(stream_set_write_buffer,
+                      const Resource& stream,
+                      int buffer) {
   PlainFile *plain_file = stream.getTyped<PlainFile>(false, true);
   if (!plain_file) {
     return -1;
@@ -290,29 +484,32 @@ int64_t f_stream_set_write_buffer(const Resource& stream, int buffer) {
   }
 
   switch (buffer) {
-  case PHP_STREAM_BUFFER_NONE:
+  case k_STREAM_BUFFER_NONE:
     return setvbuf(file, nullptr, _IONBF, 0);
-  case PHP_STREAM_BUFFER_LINE:
+  case k_STREAM_BUFFER_LINE:
     return setvbuf(file, nullptr, _IOLBF, BUFSIZ);
-  case PHP_STREAM_BUFFER_FULL:
+  case k_STREAM_BUFFER_FULL:
     return setvbuf(file, nullptr, _IOFBF, BUFSIZ);
   default:
     return -1;
   }
 }
 
-int64_t f_set_file_buffer(const Resource& stream, int buffer) {
-  return f_stream_set_write_buffer(stream, buffer);
+int64_t HHVM_FUNCTION(set_file_buffer,
+                      const Resource& stream,
+                      int buffer) {
+  return HHVM_FN(stream_set_write_buffer)(stream, buffer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Wrappers
 
-Array f_stream_get_wrappers() {
+Array HHVM_FUNCTION(stream_get_wrappers) {
   return Stream::enumWrappers();
 }
 
-bool f_stream_is_local(const Variant& stream_or_url) {
+bool HHVM_FUNCTION(stream_is_local,
+                   const Variant& stream_or_url) {
   if (stream_or_url.isString()) {
     auto wrapper = Stream::getWrapperFromURI(stream_or_url.asCStrRef());
     return wrapper ? wrapper->m_isLocal : false;
@@ -323,20 +520,24 @@ bool f_stream_is_local(const Variant& stream_or_url) {
       raise_warning("supplied resource is not a valid stream resource");
       return false;
     }
-    return file->m_isLocal;
+    return file->isLocal();
   }
   // Zend returns true for random data types...
   return true;
 }
 
 
-bool f_stream_register_wrapper(const String& protocol, const String& classname,
-                               int flags) {
-  return f_stream_wrapper_register(protocol, classname, flags);
+bool HHVM_FUNCTION(stream_register_wrapper,
+                   const String& protocol,
+                   const String& classname,
+                   int flags) {
+  return HHVM_FN(stream_wrapper_register)(protocol, classname, flags);
 }
 
-bool f_stream_wrapper_register(const String& protocol, const String& classname,
-                               int flags) {
+bool HHVM_FUNCTION(stream_wrapper_register,
+                   const String& protocol,
+                   const String& classname,
+                   int flags) {
   auto const cls = Unit::loadClass(classname.get());
   if (!cls) {
     raise_warning("Undefined class: '%s'", classname.data());
@@ -352,26 +553,30 @@ bool f_stream_wrapper_register(const String& protocol, const String& classname,
   return true;
 }
 
-bool f_stream_wrapper_restore(const String& protocol) {
+bool HHVM_FUNCTION(stream_wrapper_restore,
+                   const String& protocol) {
   return Stream::restoreWrapper(protocol);
 }
 
-bool f_stream_wrapper_unregister(const String& protocol) {
+bool HHVM_FUNCTION(stream_wrapper_unregister,
+                   const String& protocol) {
   return Stream::disableWrapper(protocol);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream socket functions
 
-static Socket *socket_accept_impl(const Resource& socket, struct sockaddr *addr,
-                                  socklen_t *addrlen) {
+static SmartPtr<Socket> socket_accept_impl(
+  const Resource& socket,
+  struct sockaddr *addr,
+  socklen_t *addrlen
+) {
   Socket *sock = socket.getTyped<Socket>();
-  Socket *new_sock = new Socket(accept(sock->fd(), addr, addrlen),
-                                sock->getType());
+  auto new_sock = makeSmartPtr<Socket>(
+    accept(sock->fd(), addr, addrlen), sock->getType());
   if (!new_sock->valid()) {
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);
-    delete new_sock;
-    return NULL;
+    new_sock.reset();
   }
   return new_sock;
 }
@@ -431,9 +636,10 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
   return String();
 }
 
-Variant f_stream_socket_accept(const Resource& server_socket,
-                               double timeout /* = -1.0 */,
-                               VRefParam peername /* = null */) {
+Variant HHVM_FUNCTION(stream_socket_accept,
+                      const Resource& server_socket,
+                      double timeout /* = -1.0 */,
+                      VRefParam peername /* = null */) {
   Socket *sock = server_socket.getTyped<Socket>();
   pollfd p;
   int n;
@@ -450,7 +656,7 @@ Variant f_stream_socket_accept(const Resource& server_socket,
   if (n > 0) {
     struct sockaddr sa;
     socklen_t salen = sizeof(sa);
-    Socket *new_sock = socket_accept_impl(server_socket, &sa, &salen);
+    auto new_sock = socket_accept_impl(server_socket, &sa, &salen);
     peername = get_sockaddr_name(&sa, salen);
     if (new_sock) return Resource(new_sock);
   } else if (n < 0) {
@@ -461,32 +667,36 @@ Variant f_stream_socket_accept(const Resource& server_socket,
   return false;
 }
 
-Variant f_stream_socket_server(const String& local_socket,
-                               VRefParam errnum /* = null */,
-                               VRefParam errstr /* = null */,
-                               int flags /* = 0 */,
-                               const Resource& context /* = null_object */) {
+Variant HHVM_FUNCTION(stream_socket_server,
+                      const String& local_socket,
+                      VRefParam errnum /* = null */,
+                      VRefParam errstr /* = null */,
+                      int flags /* = 0 */,
+                      const Variant& context /* = null_variant */) {
   HostURL hosturl(static_cast<const std::string>(local_socket));
   return socket_server_impl(hosturl, flags, errnum, errstr);
 }
 
-Variant f_stream_socket_client(const String& remote_socket,
-                               VRefParam errnum /* = null */,
-                               VRefParam errstr /* = null */,
-                               double timeout /* = -1.0 */,
-                               int flags /* = 0 */,
-                               const Resource& context /* = null_object */) {
+Variant HHVM_FUNCTION(stream_socket_client,
+                      const String& remote_socket,
+                      VRefParam errnum /* = null */,
+                      VRefParam errstr /* = null */,
+                      double timeout /* = -1.0 */,
+                      int flags /* = 0 */,
+                      const Variant& context /* = null_variant */) {
   HostURL hosturl(static_cast<const std::string>(remote_socket));
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
-Variant f_stream_socket_get_name(const Resource& handle, bool want_peer) {
+Variant HHVM_FUNCTION(stream_socket_get_name,
+                      const Resource& handle,
+                      bool want_peer) {
   Variant address, port;
   bool ret;
   if (want_peer) {
-    ret = f_socket_getpeername(handle, ref(address), ref(port));
+    ret = HHVM_FN(socket_getpeername)(handle, ref(address), ref(port));
   } else {
-    ret = f_socket_getsockname(handle, ref(address), ref(port));
+    ret = HHVM_FN(socket_getsockname)(handle, ref(address), ref(port));
   }
   if (ret) {
     return address.toString() + ":" + port.toString();
@@ -494,20 +704,25 @@ Variant f_stream_socket_get_name(const Resource& handle, bool want_peer) {
   return false;
 }
 
-Variant f_stream_socket_pair(int domain, int type, int protocol) {
+Variant HHVM_FUNCTION(stream_socket_pair,
+                      int domain,
+                      int type,
+                      int protocol) {
   Variant fd;
-  if (!f_socket_create_pair(domain, type, protocol, ref(fd))) {
+  if (!HHVM_FN(socket_create_pair)(domain, type, protocol, ref(fd))) {
     return false;
   }
   return fd;
 }
 
-Variant f_stream_socket_recvfrom(const Resource& socket, int length,
-                                 int flags /* = 0 */,
-                                 VRefParam address /* = null_string */) {
+Variant HHVM_FUNCTION(stream_socket_recvfrom,
+                      const Resource& socket,
+                      int length,
+                      int flags /* = 0 */,
+                      VRefParam address /* = null_string */) {
   Variant ret, host, port;
-  Variant retval = f_socket_recvfrom(socket, ref(ret), length, flags,
-                                     ref(host), ref(port));
+  Variant retval = HHVM_FN(socket_recvfrom)(socket, ref(ret), length, flags,
+                                            ref(host), ref(port));
   if (!same(retval, false) && retval.toInt64() >= 0) {
     Socket *sock = socket.getTyped<Socket>();
     if (sock->getType() == AF_INET6) {
@@ -520,26 +735,33 @@ Variant f_stream_socket_recvfrom(const Resource& socket, int length,
   return false;
 }
 
-Variant f_stream_socket_sendto(const Resource& socket, const String& data,
-                               int flags /* = 0 */,
-                               const String& address /* = null_string */) {
+Variant HHVM_FUNCTION(stream_socket_sendto,
+                      const Resource& socket,
+                      const String& data,
+                      int flags /* = 0 */,
+                      const Variant& address /* = null_variant */) {
   String host; int port;
+  const String& strAddress = address.isNull()
+                           ? null_string
+                           : address.toString();
 
-  if (address == null_string) {
+  if (strAddress == null_string) {
     Socket *sock = socket.getTyped<Socket>();
     host = sock->getAddress();
     port = sock->getPort();
   } else {
-    HostURL hosturl(static_cast<std::string>(address));
+    HostURL hosturl(static_cast<std::string>(strAddress));
     host = hosturl.getHost();
     port = hosturl.getPort();
   }
 
-  return f_socket_sendto(socket, data, data.size(), flags, host, port);
+  return HHVM_FN(socket_sendto)(socket, data, data.size(), flags, host, port);
 }
 
-bool f_stream_socket_shutdown(const Resource& stream, int how) {
-  return f_socket_shutdown(stream, how);
+bool HHVM_FUNCTION(stream_socket_shutdown,
+                   const Resource& stream,
+                   int how) {
+  return HHVM_FN(socket_shutdown)(stream, how);
 }
 
 static StreamContext* get_stream_context(const Variant& stream_or_context) {
@@ -556,7 +778,7 @@ static StreamContext* get_stream_context(const Variant& stream_or_context) {
     Resource resource = file->getStreamContext();
     if (file->getStreamContext().isNull()) {
       resource =
-        Resource(NEWOBJ(StreamContext)(Array::Create(), Array::Create()));
+        Resource(newres<StreamContext>(Array::Create(), Array::Create()));
       file->setStreamContext(resource);
     }
     return resource.getTyped<StreamContext>();
@@ -665,36 +887,6 @@ Array StreamContext::getParams() const {
   params.set(options_key, getOptions());
   return params;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_STREAM_FILTER_READ("STREAM_FILTER_READ"),
-  s_STREAM_FILTER_WRITE("STREAM_FILTER_WRITE"),
-  s_STREAM_FILTER_ALL("STREAM_FILTER_ALL");
-
-class StreamExtension : public Extension {
- public:
-  StreamExtension() : Extension("stream") {}
-  void moduleInit() override {
-#define SFCNS(v) Native::registerConstant<KindOfInt64> \
-                         (s_STREAM_FILTER_##v.get(), k_STREAM_FILTER_##v)
-    SFCNS(READ);
-    SFCNS(WRITE);
-    SFCNS(ALL);
-#undef SFCNS
-
-    HHVM_FE(stream_get_filters);
-    HHVM_FE(stream_filter_register);
-    HHVM_FE(stream_filter_append);
-    HHVM_FE(stream_filter_prepend);
-    HHVM_FE(stream_filter_remove);
-    HHVM_FE(stream_bucket_make_writeable);
-    HHVM_FE(stream_bucket_append);
-    HHVM_FE(stream_bucket_prepend);
-    loadSystemlib("stream-user-filters");
-  }
-} s_stream_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

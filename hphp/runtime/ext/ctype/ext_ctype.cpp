@@ -100,10 +100,10 @@ bool HHVM_FUNCTION(ctype_xdigit, const Variant& text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CtypeExtension : public Extension {
+class CtypeExtension final : public Extension {
  public:
   CtypeExtension() : Extension("ctype") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(ctype_alnum);
     HHVM_FE(ctype_alpha);
     HHVM_FE(ctype_cntrl);

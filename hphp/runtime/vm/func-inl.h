@@ -23,21 +23,6 @@ namespace HPHP {
 // EH and FPI tables.
 
 template<class SerDe>
-void EHEnt::serde(SerDe& sd) {
-  sd(m_type)
-    (m_base)
-    (m_past)
-    (m_iterId)
-    (m_fault)
-    (m_itRef)
-    (m_parentIndex)
-    ;
-  if (m_type == Type::Catch) {
-    sd(m_catches);
-  }
-}
-
-template<class SerDe>
 void FPIEnt::serde(SerDe& sd) {
   sd(m_fpushOff)
     (m_fcallOff)
@@ -49,11 +34,43 @@ void FPIEnt::serde(SerDe& sd) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// ParamInfo.
+
+inline Func::ParamInfo::ParamInfo()
+  : defaultValue(make_tv<KindOfUninit>())
+{}
+
+template<class SerDe>
+inline void Func::ParamInfo::serde(SerDe& sd) {
+  sd(builtinType)
+    (funcletOff)
+    (defaultValue)
+    (phpCode)
+    (typeConstraint)
+    (variadic)
+    (userAttributes)
+    (userType)
+    ;
+}
+
+inline bool Func::ParamInfo::hasDefaultValue() const {
+  return funcletOff != InvalidAbsoluteOffset;
+}
+
+inline bool Func::ParamInfo::hasScalarDefaultValue() const {
+  return hasDefaultValue() && defaultValue.m_type != KindOfUninit;
+}
+
+inline bool Func::ParamInfo::isVariadic() const {
+  return variadic;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Func.
 
 inline void Func::validate() const {
 #ifdef DEBUG
-  assert(this && m_magic == kMagic);
+  assert(m_magic == kMagic);
 #endif
   assert(m_name != nullptr);
 }
@@ -144,7 +161,13 @@ inline int Func::line1() const {
 }
 
 inline int Func::line2() const {
-  return shared()->m_line2;
+  auto const sd = shared();
+  auto const delta = sd->m_line2Delta;
+  if (UNLIKELY(delta == kSmallDeltaLimit)) {
+    assert(extShared());
+    return static_cast<const ExtendedSharedData*>(sd)->m_line2;
+  }
+  return line1() + delta;
 }
 
 inline const StringData* Func::docComment() const {
@@ -163,7 +186,13 @@ inline Offset Func::base() const {
 }
 
 inline Offset Func::past() const {
-  return shared()->m_past;
+  auto const sd = shared();
+  auto const delta = sd->m_pastDelta;
+  if (UNLIKELY(delta == kSmallDeltaLimit)) {
+    assert(extShared());
+    return static_cast<const ExtendedSharedData*>(sd)->m_past;
+  }
+  return base() + delta;
 }
 
 inline bool Func::contains(PC pc) const {
@@ -177,7 +206,7 @@ inline bool Func::contains(Offset offset) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Return type.
 
-inline DataType Func::returnType() const {
+inline MaybeDataType Func::returnType() const {
   return shared()->m_returnType;
 }
 
@@ -252,6 +281,10 @@ inline int Func::maxStackCells() const {
   return m_maxStackCells;
 }
 
+inline bool Func::hasForeignThis() const {
+  return attrs() & AttrHasForeignThis;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Static locals.
 
@@ -307,7 +340,8 @@ inline bool Func::isBuiltin() const {
 }
 
 inline bool Func::isCPPBuiltin() const {
-  return shared()->m_builtinFuncPtr;
+  auto const ex = extShared();
+  return UNLIKELY(!!ex) && ex->m_builtinFuncPtr;
 }
 
 inline bool Func::isNative() const {
@@ -315,15 +349,24 @@ inline bool Func::isNative() const {
 }
 
 inline BuiltinFunction Func::builtinFuncPtr() const {
-  return shared()->m_builtinFuncPtr;
+  if (auto const ex = extShared()) {
+    return ex->m_builtinFuncPtr;
+  }
+  return nullptr;
 }
 
 inline BuiltinFunction Func::nativeFuncPtr() const {
-  return shared()->m_nativeFuncPtr;
+  if (auto const ex = extShared()) {
+    return ex->m_nativeFuncPtr;
+  }
+  return nullptr;
 }
 
 inline const ClassInfo::MethodInfo* Func::methInfo() const {
-  return shared()->m_info;
+  if (auto const ex = extShared()) {
+    return ex->m_info;
+  }
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -526,6 +569,19 @@ inline void Func::setHasPrivateAncestor(bool b) {
 inline void Func::setMethodSlot(Slot s) {
   assert(m_cls);
   m_methodSlot = s;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline const Func::ExtendedSharedData* Func::extShared() const {
+  return const_cast<Func*>(this)->extShared();
+}
+
+inline Func::ExtendedSharedData* Func::extShared() {
+  auto const s = shared();
+  return UNLIKELY(s->m_hasExtendedSharedData)
+    ? static_cast<ExtendedSharedData*>(s)
+    : nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

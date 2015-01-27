@@ -13,4 +13,4 @@ if ($so === false) {
 }
 if (!defined("MCAST_BLOCK_SOURCE")) {
     die('skip source operations are unavailable');
-}
+}

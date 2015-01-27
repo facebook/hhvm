@@ -1,0 +1,10 @@
+object(SoapVar)#2 (2) {
+  ["enc_type"]=>
+  int(301)
+  ["enc_value"]=>
+  object(stdClass)#1 (1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+}
+string(3) "bar"

@@ -1004,6 +1004,11 @@ UnboxRNop   [R:<T>]  ->  [C:<T>]
   UnboxR, no op. $1 must be statically known to be unboxed. This instruction
   pushes $1 on the stack as a cell.
 
+RGetCNop    [C:<T>]  ->  [R:<T>]
+
+  Convert a cell to an R, no op.  This is a flavor-safety only opcode.
+
+
 2. Literal and constant instructions
 ------------------------------------
 
@@ -1431,7 +1436,7 @@ JmpNS <rel offset>   []  ->  []
 
   Jump, with no surprise flag checks. This behaves identically to the Jmp
   instruction, except that internal VM checks for things like OOM do not need
-  to be performed even if the offset is negative.
+  to be performed even if the offset is negative. NS means "no surprise".
 
 JmpZ <rel offset>    [C]  ->  []
 
@@ -1692,8 +1697,12 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       Obj      |  Obj
       Scalar   | Int or Dbl or Str or Bool
 
-  If $1 is of type t, this instruction pushes true onto the stack, otherwise it
-  pushes false.
+  If t is Obj, this instruction checks if the operand in an object.
+    Instances of a special class __PHP_Incomplete_Class are not considered
+    objects.
+    Instances of descendants of __PHP_Incomplete_Class are considered objects.
+  Otherwise, the result is true if $1 is of type t and false otherwise.
+  The result is pushed on the stack.
 
 IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
 
@@ -1711,10 +1720,10 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
       Obj      |  Obj                       | false
       Scalar   |  Int or Dbl or Str or Bool | false
 
-  If the local variable given by %1 is defined, this pushes true onto the stack
-  if the local variable is of type t, otherwise it pushes false. If the local
-  is of kind reference, then the inner value is used to determine the type.
-
+  If the local variable given by %1 is defined, the logic is the same as for
+    IsTypeC (see above).
+  If the local is of kind reference, then the inner value is used to determine
+    the type.
   If the local variable given by %1 is not defined, this instruction raises a
   warning and pushes x onto the stack.
 
@@ -2033,12 +2042,12 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
   being passed (given by %1) and a reference to the FPI structure for the
   constructor for class x.
 
-DecodeCufIter <iterator id>    [C]  ->  []
+DecodeCufIter <iterator id> <rel offset>   [C]  ->  []
 
   This instruction looks up $1 as a callable, and writes enough information to
   iterator %1 for FPushCufIter to be able to push an actrec, as if it had been
-  given the callable. If the function is not successfully decoded, sets up iter
-  to call a function that does nothing and returns Null. No warning is raised.
+  given the callable. If the function is not successfully decoded, branches to
+  the given offset without raising a warning. No surprise check is performed.
 
 FPushCufIter <num params> <iterator id>   []  ->  []
 
@@ -4112,6 +4121,11 @@ Silence  <local id> <Start|End>   []  ->  []
   reporting level to the previous value (stored in local variable %1); if the
   error reporting level is not 0, does nothing.
 
+GetMemoKey    [C] ->  [C]
+
+  Given a cell, produces a cell that can be used as a cache key. Valid values
+  for the input include all basic types, arrays and collections, and objects
+  that implement IMemozieParam. Any other type will cause GetMemoKey to throw.
 
 14. Generator creation and execution
 ---------------------------------------
@@ -4190,7 +4204,7 @@ ContCurrent    []  ->  [C]
 15. Async functions
 -------------------
 
-Await  <number of iterators>   [C:Obj]  ->  [C]
+Await  <number of iterators>   [C]  ->  [C]
 
   This instruction may only appear in bodies of async functions. Awaits
   a WaitHandle provided by $1, suspending the execution if the WaitHandle

@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -296,8 +297,6 @@ IMPLEMENT_THREAD_LOCAL(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 
 // Helper that grabs the breakpoint ids for the given breakpoint type using the
 // given breakpoint info. Pushes the ids onto the passed vector.
-// TODO(#4489053) I know there is a way to using template magic to return a
-// generic iterator range over the values of the different types of maps.
 template<BreakType type>
 static void get_breakpoint_ids(const BreakInfo& bi, std::vector<int>& ids) {
   switch (type) {
@@ -330,8 +329,7 @@ static void get_breakpoint_ids(const BreakInfo& bi, std::vector<int>& ids) {
       }
 
       // Check if breakpoint's exception is registered.
-      const StringData* name = bi.exception->getVMClass()->name();
-      iter = EXCEPTION_MAP.find(name->toCppString());
+      iter = EXCEPTION_MAP.find(bi.name->toCppString());
       if (iter != EXCEPTION_MAP.end()) {
         ids.push_back(iter->second);
       }
@@ -383,18 +381,18 @@ static bool is_breakpoint_hit(XDebugBreakpoint& bp) {
   }
 }
 
-// getMessage method for exceptions
-static const StaticString s_GET_MESSAGE("getMessage");
-
 // Returns the message from the given breakpoint info
 template<BreakType type>
-const Variant get_breakpoint_message(const BreakInfo& bi) {
+static const Variant get_breakpoint_message(const BreakInfo& bi) {
   // In php5 xdebug, only messages have a string. But this could be extended to
   // be more useful.
-  if (type == BreakType::EXCEPTION) {
-    return bi.exception->o_invoke(s_GET_MESSAGE, init_null(), false);
-  }
-  return init_null();
+  return type == BreakType::EXCEPTION ?
+    Variant(bi.message->data()) : init_null();
+}
+
+DebugHookHandler* XDebugHookHandler::GetInstance() {
+  static DebugHookHandler* instance = new XDebugHookHandler;
+  return instance;
 }
 
 template<BreakType type>
@@ -435,6 +433,17 @@ void XDebugHookHandler::onBreak(const BreakInfo& bi) {
       XDEBUG_REMOVE_BREAKPOINT(id);
     }
   }
+}
+
+// Exception::getMessage method name
+static const StaticString s_GET_MESSAGE("getMessage");
+
+void XDebugHookHandler::onExceptionThrown(ObjectData* exception) {
+  // Grab the exception name and message
+  const StringData* name = exception->getVMClass()->name();
+  const Variant msg = exception->o_invoke(s_GET_MESSAGE, init_null(), false);
+  const String msg_str = msg.isNull() ? empty_string() : msg.toString();
+  onExceptionBreak(name, msg.isNull() ? nullptr : msg_str.get());
 }
 
 void XDebugHookHandler::onFlowBreak(const Unit* unit, int line) {

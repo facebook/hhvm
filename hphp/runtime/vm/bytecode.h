@@ -35,14 +35,12 @@
 #include <type_traits>
 
 namespace HPHP {
+struct Resumable;
 
 /**
  * These macros allow us to easily change the arguments to iop*() opcode
  * implementations.
  */
-#define IOP_ARGS        PC& pc
-#define IOP_PASS_ARGS   pc
-#define IOP_PASS(pc)    pc
 
 #define EVAL_FILENAME_SUFFIX ") : eval()'d code"
 
@@ -475,7 +473,10 @@ inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
   return arAtOffset(sp, offset);
 }
 
+void frame_free_locals_no_hook(ActRec* fp);
+
 inline TypedValue* arReturn(ActRec* ar, Variant&& value) {
+  frame_free_locals_no_hook(ar);
   ar->m_r = *value.asTypedValue();
   tvWriteNull(value.asTypedValue());
   return &ar->m_r;
@@ -568,6 +569,7 @@ class Stack {
                       // m_elms.
 
 public:
+  bool isAllocated() { return m_elms != nullptr; }
   void* getStackLowAddress() const { return m_elms; }
   void* getStackHighAddress() const { return m_base; }
   bool isValidAddress(uintptr_t v) {
@@ -623,7 +625,7 @@ public:
   void popC() {
     assert(m_top != m_base);
     assert(cellIsPlausible(*m_top));
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     tvDebugTrash(m_top);
     m_top++;
   }
@@ -881,10 +883,10 @@ public:
   }
 
   ALWAYS_INLINE
-  void replaceC(const Cell& c) {
+  void replaceC(const Cell c) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     *m_top = c;
   }
 
@@ -893,7 +895,7 @@ public:
   void replaceC() {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     *m_top = make_tv<DT>();
   }
 
@@ -902,7 +904,7 @@ public:
   void replaceC(T value) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRefCell(m_top);
+    tvRefcountedDecRef(m_top);
     *m_top = make_tv<DT>(value);
   }
 
@@ -1040,6 +1042,17 @@ visitStackElems(const ActRec* const fp,
     tvFun(cursor++);
   }
 }
+
+void resetCoverageCounters();
+
+// The interpOne*() methods implement individual opcode handlers.
+using InterpOneFunc = void (*) (ActRec* ar, Cell* sp, Offset pcOff);
+extern InterpOneFunc interpOneEntryPoints[];
+
+bool doFCallArrayTC(PC pc);
+bool doFCall(ActRec* ar, PC& pc);
+void dispatchBB();
+void pushLocalsAndIterators(const Func* func, int nparams = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 

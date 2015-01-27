@@ -17,13 +17,15 @@
 
 #include <iostream>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace Trace {
 
 void dumpEntry(const RingBufferEntry* e) {
+  if (e->m_type == RBTypeUninit) return;
+
   std::cerr <<
     folly::format("{:#x} {:10} {:20}",
                   e->m_threadId, e->m_seq, ringbufferName(e->m_type));
@@ -31,13 +33,14 @@ void dumpEntry(const RingBufferEntry* e) {
   switch (e->m_type) {
     case RBTypeUninit: return;
     case RBTypeMsg:
-    case RBTypeFuncPrologueTry: {
+    case RBTypeFuncPrologue: {
       // The strings in thread-private ring buffers are not null-terminated;
       // we also can't trust their length, since they might wrap around.
-      fwrite(e->m_msg,
-             std::min(size_t(e->m_len), strlen(e->m_msg)),
-             1,
-             stderr);
+      auto len = std::min(size_t(e->m_len), strlen(e->m_msg));
+
+      // We append our own newline so ignore any newlines in the msg.
+      while (len > 0 && e->m_msg[len - 1] == '\n') --len;
+      fwrite(e->m_msg, len, 1, stderr);
       fprintf(stderr, "\n");
       break;
     }
@@ -80,7 +83,7 @@ void dumpEntry(const RingBufferEntry* e) {
 //
 //    (gdb) call HPHP::Trace::dumpRingBufferMasked(100,
 //       (1 << HPHP::Trace::RBTypeFuncEntry))
-void dumpRingBufferMasked(int numEntries, uint32_t types) {
+void dumpRingBufferMasked(int numEntries, uint32_t types, uint32_t threadId) {
   if (!g_ring_ptr) return;
   int startIdx = (g_ringIdx.load() - numEntries) % kMaxRBEntries;
   while (startIdx < 0) {
@@ -90,7 +93,8 @@ void dumpRingBufferMasked(int numEntries, uint32_t types) {
   int numDumped = 0;
   for (int i = 0; i < kMaxRBEntries && numDumped < numEntries; i++) {
     RingBufferEntry* rb = &g_ring_ptr[(startIdx + i) % kMaxRBEntries];
-    if ((1 << rb->m_type) & types) {
+    if ((1 << rb->m_type) & types &&
+        (!threadId || threadId == rb->m_threadId)) {
       numDumped++;
       dumpEntry(rb);
     }
@@ -98,8 +102,8 @@ void dumpRingBufferMasked(int numEntries, uint32_t types) {
 }
 
 KEEP_SECTION
-void dumpRingBuffer(int numEntries) {
-  dumpRingBufferMasked(numEntries, -1u);
+void dumpRingBuffer(int numEntries, uint32_t threadId) {
+  dumpRingBufferMasked(numEntries, -1u, threadId);
 }
 
 } }

@@ -22,8 +22,8 @@
 
 #include <boost/operators.hpp>
 
-#include "folly/String.h"
-#include "folly/Range.h"
+#include <folly/String.h>
+#include <folly/Range.h>
 
 #include "hphp/util/byte-order.h"
 

@@ -28,32 +28,33 @@ namespace HPHP { namespace Eval {
 void proxySetBreakPoints(DebuggerProxy* proxy);
 
 // Debug vm hook handler for hphpd
-class DebuggerHookHandler : public DebugHookHandler {
-public:
-  DebuggerHookHandler() {}
-  virtual ~DebuggerHookHandler() {}
+struct DebuggerHookHandler : DebugHookHandler {
+  static DebugHookHandler* GetInstance();
 
-  virtual void onOpcode(const unsigned char* pc) override {
+  void onOpcode(const unsigned char* pc) override {
     Debugger::InterruptVMHook();
   }
 
-  virtual void onExceptionThrown(ObjectData* exception) override {
+  void onExceptionThrown(ObjectData* exception) override {
     Debugger::InterruptVMHook(ExceptionThrown, exception);
   }
 
-  virtual void onExceptionHandle() override {
+  void onExceptionHandle() override {
     Debugger::InterruptVMHook(ExceptionHandler);
   }
 
-  virtual void onError(const ExtendedException &ee,
+  void onError(const ExtendedException &ee,
                        int errnum,
                        const std::string& message) override {
     Debugger::InterruptVMHook(ExceptionThrown, String(message));
   }
 
-  virtual void onFileLoad(Unit* unit) override;
-  virtual void onDefClass(const Class* cls) override;
-  virtual void onDefFunc(const Func* f) override;
+  void onFileLoad(Unit* unit) override;
+  void onDefClass(const Class* cls) override;
+  void onDefFunc(const Func* f) override;
+private:
+  DebuggerHookHandler() {}
+  ~DebuggerHookHandler() override {}
 };
 
 }}

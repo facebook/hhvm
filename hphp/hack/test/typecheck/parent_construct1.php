@@ -25,12 +25,22 @@ class C extends B {
 
   public function __construct() {
     $this->x = 0;
-    if(true) {
-      parent::__construct(0);
-    }
-    else {
-      parent::__construct($this->x);
+    switch (mt_rand() % 3) {
+      case 0:
+        parent::__construct(0);
+        break;
+      case 1:
+        parent::__construct($this->x);
+        break;
+      case 2:
+        $args = array(1);
+        parent::__construct(...$args);
+        break;
     }
   }
 
+}
+
+function mt_rand(): int {
+  // UNSAFE
 }

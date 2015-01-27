@@ -74,8 +74,8 @@ void NamedEntity::removeClass(Class* goner) {
   if (head == goner) {
     return m_clsList.store(head->m_nextClass, std::memory_order_release);
   }
-  Class** cls = &head->m_nextClass;
-  while (*cls != goner) {
+  LowClassPtr* cls = &head->m_nextClass;
+  while (cls->get() != goner) {
     assert(*cls);
     cls = &(*cls)->m_nextClass;
   }

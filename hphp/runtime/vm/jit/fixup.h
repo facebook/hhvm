@@ -112,6 +112,8 @@ struct Fixup {
 
   Fixup() {}
 
+  bool isValid() const { return pcOffset >= 0 && spOffset >= 0; }
+
   int32_t pcOffset{-1};
   int32_t spOffset{-1};
 };
@@ -141,6 +143,12 @@ public:
     TRACE(3, "FixupMapImpl::recordFixup: tca %p -> (pcOff %d, spOff %d)\n",
           tca, fixup.pcOffset, fixup.spOffset);
     m_fixups.insert(tca, FixupEntry(fixup));
+  }
+
+  const Fixup* findFixup(CTCA tca) const {
+    auto ent = m_fixups.find(tca);
+    if (!ent) return nullptr;
+    return &ent->fixup;
   }
 
   bool getFrameRegs(const ActRec* ar, const ActRec* prevAr,

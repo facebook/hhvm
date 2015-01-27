@@ -36,7 +36,6 @@ class Options {
   public static array $original_framework_info = [];
   public static int $num_threads = -1;
   public static bool $as_phpunit = false;
-  public static ?string $toran_proxy = null;
   public static ?string $cache_directory = null;
   public static bool $local_source_only = false;
 
@@ -47,7 +46,7 @@ class Options {
     self::$original_framework_info = self::$framework_info;
     // Put any script error to a file when we are in a mode like --csv and
     // want to control what gets printed to something like STDOUT.
-    unlink(self::$script_errors_file);
+    delete_file(self::$script_errors_file);
 
     // Don't use $argv[0] which just contains the program to run
     $framework_names = new Vector(array_slice($argv, 1));
@@ -182,11 +181,6 @@ class Options {
 
     if ($options->containsKey('record')) {
       self::$generate_new_expect_file = true;
-      $framework_names->removeKey(0);
-    }
-
-    if ($options->containsKey('toran-proxy')) {
-      self::$toran_proxy = ((string) $options['toran-proxy']) ?: null;
       $framework_names->removeKey(0);
     }
 

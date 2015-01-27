@@ -116,6 +116,8 @@ echo "Done\n";
 
 ?>
 
+<?php error_reporting(0); ?>
+<?php
 /* cleaning resource handles */
 fclose( $file_handle );  //file resource handle deleted
 closedir( $dir_handle );  //dir resource handle deleted

@@ -37,7 +37,7 @@ const Func* lookupDirectFunc(SrcKey const sk,
                              const StringData* clsName,
                              bool staticCall) {
   if (clsName && !clsName->isame(s_empty.get())) {
-    auto const cls = Unit::lookupUniqueClass(clsName);
+    auto const cls = Unit::lookupClassOrUniqueClass(clsName);
     bool magic = false;
     auto const ctx = sk.func()->cls();
     return lookupImmutableMethod(cls, fname, magic, staticCall, ctx);

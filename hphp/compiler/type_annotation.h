@@ -75,6 +75,7 @@ public:
   void setFunction() { m_function = true; }
   void setXHP() { m_xhp = true; }
   void setTypeVar() { m_typevar = true; }
+  void setTypeAccess() { m_typeaccess = true; }
 
   bool isNullable() const { return m_nullable; }
   bool isSoft() const { return m_soft; }
@@ -82,6 +83,7 @@ public:
   bool isFunction() const { return m_function; }
   bool isXHP() const { return m_xhp; }
   bool isTypeVar() const { return m_typevar; }
+  bool isTypeAccess() const { return m_typeaccess; }
 
   /*
    * Return a shallow copy of this TypeAnnotation, except with
@@ -108,6 +110,15 @@ public:
   bool isVoid() const { return !strcasecmp(m_name.c_str(), "HH\\void"); }
 
   bool isThis() const { return !strcasecmp(m_name.c_str(), "HH\\this"); }
+
+  bool isAwaitable() const {
+    return !strcasecmp(m_name.c_str(), "HH\\Awaitable");
+  }
+
+  bool isWaitHandle() const {
+    return !strcasecmp(m_name.c_str(), "WaitHandle") ||
+           !strcasecmp(m_name.c_str(), "HH\\WaitHandle");
+  }
 
   /*
    * Returns whether this TypeAnnotation is "simple"---as described
@@ -147,26 +158,27 @@ public:
   void appendToTypeList(TypeAnnotationPtr typeList);
 
   /*
-   * Root datatype, ignores inner types for generics
+   * Root datatype; ignores inner types for generics.
    *
-   * For nullable or soft types, KindOfUnknown will be returned
-   * since the annotation could represent more than one type.
-   *
-   * To get the expected type even with nullable/soft annotations
-   * pass TRUE for the optional argument.
+   * For nullable or soft types, folly::none will be returned since the
+   * annotation could represent more than one type.
    */
-  DataType dataType(bool expectedType = false) const;
+  MaybeDataType dataType() const;
 
   /*
    *  Serializes the type annotation using the given CodeGenerator.
    */
   void outputCodeModel(CodeGenerator& cg);
 
+  int numTypeArgs() const;
+  TypeAnnotationPtr getTypeArg(int n) const;
+
 private:
   void functionTypeName(std::string &name) const;
   void xhpTypeName(std::string &name) const;
   void tupleTypeName(std::string &name) const;
   void genericTypeName(std::string &name) const;
+  void accessTypeName(std::string &name) const;
 
 private:
   std::string m_name;
@@ -178,6 +190,7 @@ private:
   unsigned m_function : 1;
   unsigned m_xhp : 1;
   unsigned m_typevar : 1;
+  unsigned m_typeaccess : 1;
 };
 
 }

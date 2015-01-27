@@ -18,11 +18,12 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <sys/param.h>
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/http-client.h"
-#include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/ext_mb.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/mbstring/ext_mbstring.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/ext/url/ext_url.h"
 
 using namespace HPHP;
 
@@ -126,7 +127,7 @@ std::string TestLogger::getRepoRoot() {
 
     // Need to normalize of this commands succeeds
     if (getOutput("git rev-parse --show-cdup", out) != -1)
-      return f_realpath(String(out)).toString().data();
+      return HHVM_FN(realpath)(String(out)).toString().data();
   }
 
   // Fall back to our current directory

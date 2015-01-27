@@ -1,0 +1,4 @@
+string(1) "0"
+string(1) "1"
+
+Fatal error: Maximum CPU time of 1 seconds exceeded in %s/max_cpu_time.php on line %d

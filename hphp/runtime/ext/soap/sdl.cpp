@@ -19,13 +19,19 @@
 #include <string>
 #include <memory>
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+sdlCtx::~sdlCtx() {
+  for (auto const& doc : docs) {
+    xmlFreeDoc(doc.second);
+  }
+}
 
 encodePtr get_encoder_from_prefix(sdl *sdl, xmlNodePtr node,
                                   const xmlChar *type) {

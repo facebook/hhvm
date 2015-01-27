@@ -18,6 +18,7 @@ ftp_close($ftp);
 
 echo file_get_contents($local_file);
 ?>
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "mediumfile.txt");
 ?>

@@ -24,9 +24,9 @@
 #include <unordered_set>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "folly/FBString.h"
-#include "folly/Format.h"
-#include "folly/ScopeGuard.h"
+#include <folly/FBString.h>
+#include <folly/Format.h>
+#include <folly/ScopeGuard.h>
 
 #include "hphp/tools/bootstrap/idl.h"
 
@@ -34,7 +34,7 @@ using folly::fbstring;
 using namespace HPHP::IDL;
 using namespace HPHP;
 
-std::unordered_map<fbstring, const PhpFunc*> g_mangleMap;
+std::vector<const PhpFunc*> g_funcVec;
 std::unordered_map<fbstring, const PhpClass*> g_classMap;
 
 // Functions with return types that don't fit in registers are handled
@@ -50,6 +50,7 @@ constexpr char* g_allIncludes = R"(
 #include "hphp/runtime/ext/ext.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/util/abi-cxx.h"
 #include <exception>
 )";
 
@@ -92,13 +93,13 @@ void delete_{0:s}(ObjectData* obj, const Class* cls) {{
 }
 
 /*
- * Emits a declaration that corresponds to the f_* functions, but with types and
- * signatures adjusted to reflect the underlying C++ ABI.
+ * Emits a function pointer type that corresponds to a given f_* function or
+ * t_* or ti_* method, but with types and signatures adjusted to reflect the
+ * underlying C++ ABI.
  */
-void emitRemappedFuncDecl(const PhpFunc& func,
-                          const fbstring& mangled,
-                          const fbstring& prefix,
-                          std::ostream& out) {
+void emitFuncPtrType(const PhpFunc& func,
+                     const fbstring& name,
+                     std::ostream& out) {
   int returnKindOf = func.returnKindOf();
   bool indirectReturn = func.isIndirectReturn();
   if (indirectReturn) {
@@ -111,38 +112,38 @@ void emitRemappedFuncDecl(const PhpFunc& func,
     out << func.returnCppType() << ' ';
   }
 
-  out << prefix << func.getUniqueName() << '(';
+  out << "(*" << name << ")(";
 
   bool isFirstParam = true;
 
   if (!g_armMode && indirectReturn) {
     if (func.returnKindOf() == KindOfAny) {
-      out << "TypedValue* _rv";
+      out << "TypedValue*";
     } else {
-      out << "Value* _rv";
+      out << "Value*";
     }
     isFirstParam = false;
   }
 
   if (func.usesThis()) {
     if (!isFirstParam) {
-      out << ", ";
+      out << ",";
     }
-    out << "c_" << func.className() << "* this_";
+    out << "c_" << func.className() << "*";
     isFirstParam = false;
   }
 
   if (func.isVarArgs()) {
     if (!isFirstParam) {
-      out << ", ";
+      out << ",";
     }
-    out << "int64_t _argc";
+    out << "int64_t";
     isFirstParam = false;
   }
 
   for (auto const& param : func.params()) {
     if (!isFirstParam) {
-      out << ", ";
+      out << ",";
     }
     auto kindof = param.kindOf();
     if (param.isIndirectPass()) {
@@ -154,17 +155,28 @@ void emitRemappedFuncDecl(const PhpFunc& func,
     } else {
       out << param.getCppType();
     }
-    out << ' ' << param.name();
     isFirstParam = false;
   }
 
   if (func.isVarArgs()) {
     assert(!isFirstParam);
-    out << ", Value* _argv";
+    out << ",Value*";
   }
 
-  out << ") asm(\""
-      << mangled << "\");\n\n";
+  out << ")";
+}
+
+static void emitFuncPtrDecl(const PhpFunc& func,
+                            const fbstring& ind,
+                            std::ostream& out) {
+  out << ind;
+  fbstring declPrefix = (func.isMethod() ? "th_" : "fh_");
+  emitFuncPtrType(func, declPrefix + func.getUniqueName(), out);
+  out << " =\n";
+  out << ind << "  (";
+  emitFuncPtrType(func, "", out);
+  out << ")" << (func.isMethod() ? "getMethodPtr" : "")
+      << "(&" << func.getPrefixedCppName() << ");\n";
 }
 
 static void emitZendParamPrefix(std::ostream& out,
@@ -545,6 +557,8 @@ void emitSlowPathHelper(const PhpFunc& func, const fbstring& prefix,
   const char* eightSpaces = "        ";
   const char* ind = eightSpaces + 6;
 
+  emitFuncPtrDecl(func, ind, out);
+
   out << ind << "TypedValue* args UNUSED = ((TypedValue*)ar) - 1;\n";
 
   emitCasts(func, out, ind);
@@ -574,51 +588,21 @@ static void emitClassCtorAndDtor(const PhpClass& klass, std::ostream& out) {
 // Top level
 
 /*
- * Called for each line on stdin. Looks up the symbol's characteristics in the
- * IDL, and emits up to three things:
+ * Looks up a function's characteristics in the IDL, and emits up to three
+ * things:
  *
- * - An fh_* declaration, which is the f_* signature with ABI exposed.
- * - [Maybe] an fg1_* stub which does type casting of arguments, then calls fh_.
- * - An fg_ stub which checks arg counts and types, then calls fh_ or fg1_.
+ * - An fg_ or tg_ stub which checks arg counts and types, then calls
+ *   fg1_/tg1_ or the fh_/th_ alias.
+ * - [Maybe] an fg1_ or tg1_ stub which does type casting of arguments, then
+ *   calls fh_/th_.
+ * - [Maybe] an extern declaration for the f_ function if it's not a method
+ *
+ * Inside the bodies of the fg_/tg_ stub and the fg1_/tg1_ stub, we emit a
+ * fh_ or th_ function pointer alias, which is the f_/t_ signature with ABI
+ * exposed.
  */
-void processSymbol(const fbstring& symbol, std::ostream& header,
-                   std::ostream& cpp) {
-  int status;
-  const char *mangledSymbol = symbol.c_str();
-#ifdef __APPLE__
-  mangledSymbol++;
-#endif
-  auto demangled = abi::__cxa_demangle(mangledSymbol, nullptr, 0, &status);
-  SCOPE_EXIT { free(demangled); };
-
-  if (status != 0) {
-    return;
-  }
-
-  auto idlIt = g_mangleMap.find(demangled);
-  if (idlIt == g_mangleMap.end()) {
-    fbstring munged = demangled;
-    fbstring target = "HPHP::String";
-    size_t pos = 0;
-    while (true) {
-      pos = munged.find(target, pos);
-      if (pos == fbstring::npos) break;
-      pos += target.size();
-      if (pos >= munged.size() ||
-          munged[pos] == ' ') {
-        continue;
-      }
-      munged.replace(pos, 0, " const&");
-    }
-
-    idlIt = g_mangleMap.find(munged);
-    if (idlIt == g_mangleMap.end()) {
-      // A symbol that doesn't correspond to anything in the IDL.
-      return;
-    }
-  }
-
-  auto& func = *idlIt->second;
+void processFunc(const PhpFunc& func, std::ostream& header,
+                 std::ostream& cpp) {
   bool isMethod = func.isMethod();
   auto classIt = g_classMap.find(func.className());
   if (classIt != g_classMap.end()) {
@@ -627,14 +611,13 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
     g_classMap.erase(classIt);
   }
 
-  fbstring declPrefix = (isMethod ? "th_" : "fh_");
   fbstring slowPathPrefix = (isMethod ? "tg1_" : "fg1_");
   fbstring stubPrefix = (isMethod ? "tg_" : "fg_");
 
-  std::ostringstream decl;
-  emitRemappedFuncDecl(func, symbol, declPrefix, decl);
-  header << decl.str();
-  cpp << decl.str();
+  if (!isMethod) {
+    cpp << "extern " << func.returnCppType() << " "
+        << func.getCppSig(false) << ";\n\n";
+  }
 
   if (func.numTypeChecks() > 0) {
     emitSlowPathHelper(func, slowPathPrefix, cpp);
@@ -646,6 +629,9 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 
   cpp << "TypedValue* " << stubPrefix << func.getUniqueName()
       << "(ActRec* ar) {\n";
+
+  emitFuncPtrDecl(func, in, cpp);
+
   cpp << in << "TypedValue rvSpace;\n";
   cpp << in << "TypedValue* rv = &rvSpace;\n";
   cpp << in << "int32_t count = ar->numArgs();\n";
@@ -752,8 +738,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 int main(int argc, const char* argv[]) {
   if (argc < 5) {
     std::cout << "Usage: " << argv[0]
-              << " <x64|arm> <output .h> <output .cpp> <*.idl.json>...\n"
-              << "Pipe mangled C++ symbols to stdin.\n";
+              << " <x64|arm> <output .h> <output .cpp> <*.idl.json>...\n";
     return 0;
   }
 
@@ -781,12 +766,12 @@ int main(int argc, const char* argv[]) {
   }
 
   for (auto const& func : funcs) {
-    g_mangleMap[func.getCppSig()] = &func;
+    g_funcVec.push_back(&func);
   }
   for (auto const& klass : classes) {
     g_classMap[klass.getCppName()] = &klass;
     for (auto const& func : klass.methods()) {
-      g_mangleMap[func.getCppSig()] = &func;
+      g_funcVec.push_back(&func);
     }
   }
 
@@ -794,9 +779,9 @@ int main(int argc, const char* argv[]) {
   cpp << g_allIncludes << "\n";
   cpp << "namespace HPHP {\n\n";
 
-  std::string line;
-  while (std::getline(std::cin, line)) {
-    processSymbol(line, header, cpp);
+  auto idlIt = g_funcVec.begin();
+  for (; idlIt != g_funcVec.end(); ++idlIt) {
+    processFunc(**idlIt, header, cpp);
   }
 
   header << "} // namespace HPHP\n";

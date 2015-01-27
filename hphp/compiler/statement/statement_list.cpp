@@ -394,35 +394,6 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
                  : StatementPtr();
 }
 
-StatementPtr StatementList::postOptimize(AnalysisResultConstPtr ar) {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    StatementPtr &s = m_stmts[i];
-    if (s->is(KindOfExpStatement) && !s->hasEffect()) {
-      ExpressionPtr e =
-        dynamic_pointer_cast<ExpStatement>(s)->getExpression();
-      if (e->isNoRemove()) continue;
-      if (Option::EliminateDeadCode ||
-          static_pointer_cast<ExpStatement>(s)->getExpression()->isScalar()) {
-        removeElement(i--);
-        getScope()->addUpdates(BlockScope::UseKindCaller);
-        continue;
-      }
-    } else if (s->is(KindOfBlockStatement) &&
-               !static_pointer_cast<BlockStatement>(s)->getStmts()) {
-      removeElement(i--);
-      getScope()->addUpdates(BlockScope::UseKindCaller);
-      continue;
-    }
-  }
-  return StatementPtr();
-}
-
-void StatementList::inferTypes(AnalysisResultPtr ar) {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    m_stmts[i]->inferTypes(ar);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void StatementList::outputCodeModel(CodeGenerator &cg) {

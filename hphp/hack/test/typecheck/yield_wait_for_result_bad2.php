@@ -15,7 +15,7 @@ function foo(): Awaitable<int> {
 
 /**
  * TODO(glevi): This should error as soon as we remove that hack that says a
- * Continuation is Awaitable
+ * Generator is Awaitable
  */
 function bar(): Awaitable<int> {
   yield wait_for_result(foo());

@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -40,8 +41,8 @@ static const StaticString
 
 static class PharStreamWrapper : public Stream::Wrapper {
  public:
-  virtual File* open(const String& filename, const String& mode,
-                     int options, const Variant& context) {
+  virtual SmartPtr<File> open(const String& filename, const String& mode,
+                              int options, const Variant& context) {
     static const char cz[] = "phar://";
     if (strncmp(filename.data(), cz, sizeof(cz) - 1)) {
       return nullptr;
@@ -59,8 +60,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     );
     String contents = ret.toString();
 
-    MemFile* file = NEWOBJ(MemFile)(contents.data(), contents.size());
-    return file;
+    return makeSmartPtr<MemFile>(contents.data(), contents.size());
   }
 
   virtual int access(const String& path, int mode) {
@@ -91,7 +91,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     return stat(path, buf);
   }
 
-  virtual Directory* opendir(const String& path) {
+  virtual SmartPtr<Directory> opendir(const String& path) {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_opendir.get());
     Variant ret;
     g_context->invokeFunc(
@@ -106,7 +106,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
       raise_warning("No such file or directory");
       return nullptr;
     }
-    return NEWOBJ(ArrayDirectory)(files);
+    return makeSmartPtr<ArrayDirectory>(files);
   }
 
  private:
@@ -125,10 +125,10 @@ static class PharStreamWrapper : public Stream::Wrapper {
 
 } s_phar_stream_wrapper;
 
-class pharExtension : public Extension {
+class pharExtension final : public Extension {
  public:
   pharExtension() : Extension("phar") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     s_phar_stream_wrapper.registerAs("phar");
   }
 } s_phar_extension;

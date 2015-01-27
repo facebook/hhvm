@@ -51,8 +51,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
 TCA fcallHelper(ActRec* ar, void* sp) {
   try {
     assert(!ar->resumed());
-    TCA tca =
-      mcg->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
+    TCA tca = mcg->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
     if (tca) {
       return tca;
     }
@@ -64,7 +63,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
        * dv funclets. Dont run the prologue again.
        */
       VMRegAnchor _(ar);
-      if (g_context->doFCall(ar, vmpc())) {
+      if (doFCall(ar, vmpc())) {
         return mcg->tx().uniqueStubs.resumeHelperRet;
       }
       // We've been asked to skip the function body
@@ -96,10 +95,11 @@ TCA fcallHelper(ActRec* ar, void* sp) {
 }
 
 /*
- * This is used to generate an entry point for the entry
- * to a function, after the prologue has run.
+ * This is used to generate an entry point for the entry to a function, after
+ * the prologue has run.
  */
 TCA funcBodyHelper(ActRec* fp, void* sp) {
+  assert_native_stack_aligned();
   setupAfterPrologue(fp, sp);
   tl_regState = VMRegState::CLEAN;
   Func* func = const_cast<Func*>(fp->m_func);

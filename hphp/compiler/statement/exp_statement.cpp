@@ -87,15 +87,6 @@ StatementPtr ExpStatement::preOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr ExpStatement::postOptimize(AnalysisResultConstPtr ar) {
-  m_exp = m_exp->unneeded();
-  return StatementPtr();
-}
-
-void ExpStatement::inferTypes(AnalysisResultPtr ar) {
-  m_exp->inferAndCheck(ar, Type::Any, false);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ExpStatement::outputCodeModel(CodeGenerator &cg) {

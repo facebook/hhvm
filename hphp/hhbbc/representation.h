@@ -204,10 +204,10 @@ struct Param {
 
   /*
    * The type of the arguments for builtin functions, or for HNI
-   * functions with a native implementation.  KindOfInvalid for
+   * functions with a native implementation.  folly::none for
    * non-builtins.
    */
-  DataType builtinType;
+  folly::Optional<DataType> builtinType;
 
   /*
    * Whether this parameter is passed by reference.
@@ -250,9 +250,10 @@ struct StaticLocalInfo {
  */
 struct NativeInfo {
   /*
-   * Return type from the C++ implementation function, as a DataType.
+   * Return type from the C++ implementation function, as an optional DataType;
+   * folly::none stands for a Variant return.
    */
-  DataType returnType;
+  folly::Optional<DataType> returnType;
 };
 
 /*
@@ -419,8 +420,10 @@ struct Const {
   /*
    * The value will be KindOfUninit if the class constant is defined
    * using an 86cinit method.
+   *
+   * The lack of a value represents an abstract class constant.
    */
-  Cell val;
+  folly::Optional<Cell> val;
 
   /*
    * We pass through eval'able php code and a string type constraint,
@@ -474,17 +477,18 @@ struct Class {
   std::vector<LowStringPtr> interfaceNames;
 
   /*
-   * Names of used traits, and the trait alias/precedence rules (if
-   * any).
+   * Names of used traits, number of declared (i.e., non-trait, non-inherited)
+   * methods, trait alias/precedence rules (if any).
    *
    * This is using the exact structures from the runtime PreClass.  In
-   * WholeProgram mode, we won't see these because traits will already
-   * be flattened.
+   * WholeProgram mode, we won't see these because traits will already be
+   * flattened.
    */
   std::vector<LowStringPtr> usedTraitNames;
   std::vector<PreClass::ClassRequirement> requirements;
   std::vector<PreClass::TraitPrecRule> traitPrecRules;
   std::vector<PreClass::TraitAliasRule> traitAliasRules;
+  int32_t numDeclMethods;
 
   /*
    * Methods on the class.

@@ -162,14 +162,6 @@ String String::substr(int start, int length /* = 0x7FFFFFFF */,
   return nullable ? String() : String("", 0, CopyString);
 }
 
-String String::lastToken(char delimiter) {
-  int pos = rfind(delimiter);
-  if (pos >= 0) {
-    return substr(pos + 1);
-  }
-  return *this;
-}
-
 int String::find(char ch, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
@@ -477,6 +469,22 @@ bool String::more(const Resource& v2) const {
   return HPHP::more(m_px, v2);
 }
 
+int String::compare(litstr v2) const {
+  int lengthDiff = length() - strlen(v2);
+  if(lengthDiff == 0)
+    return memcmp(data(), v2, length());
+  else
+    return lengthDiff;
+}
+
+int String::compare(const String& v2) const {
+  int lengthDiff = length() - v2.length();
+  if(lengthDiff == 0)
+    return memcmp(data(), v2.data(), length());
+  else
+    return lengthDiff;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // comparison operators
 
@@ -535,14 +543,9 @@ void String::unserialize(VariableUnserializer *uns,
                     int(size));
   }
 
-  char ch = uns->readChar();
-  if (ch != ':') {
-    throw Exception("Expected ':' but got '%c'", ch);
-  }
-  ch = uns->readChar();
-  if (ch != delimiter0) {
-    throw Exception("Expected '%c' but got '%c'", delimiter0, ch);
-  }
+  uns->expectChar(':');
+  uns->expectChar(delimiter0);
+
   StringData *px = StringData::Make(int(size));
   auto const buf = px->bufferSlice();
   assert(size <= buf.len);
@@ -552,10 +555,7 @@ void String::unserialize(VariableUnserializer *uns,
   m_px = px;
   px->setRefCount(1);
 
-  ch = uns->readChar();
-  if (ch != delimiter1) {
-    throw Exception("Expected '%c' but got '%c'", delimiter1, ch);
-  }
+  uns->expectChar(delimiter1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -609,7 +609,6 @@ const StaticString
   s_array("array"),
   s_object("object"),
   s_resource("resource"),
-  s_namedlocal("namedlocal"),
   s_ref("reference");
 
 String getDataTypeString(DataType t) {
@@ -625,13 +624,11 @@ String getDataTypeString(DataType t) {
     case KindOfObject:     return s_object;
     case KindOfResource:   return s_resource;
     case KindOfRef:        return s_ref;
-    case KindOfNamedLocal: return s_namedlocal;
 
-    default:
-      assert(false);
+    case KindOfClass:
       break;
   }
-  return empty_string();
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////////////

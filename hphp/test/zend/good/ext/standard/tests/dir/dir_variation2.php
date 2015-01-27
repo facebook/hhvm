@@ -96,6 +96,7 @@ foreach( $unexpected_values as $unexpected_value ) {
 
 echo "Done";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $directory = $file_path."/dir_variation2";

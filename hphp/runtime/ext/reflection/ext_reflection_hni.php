@@ -2,7 +2,7 @@
 
 /**
  * ( excerpt from
- * http://php.net/manual/en/class.reflectionfunctionabstract.php )
+ * http://docs.hhvm.com/manual/en/class.reflectionfunctionabstract.php )
  *
  * A parent class to ReflectionFunction and ParentMethod. Read their
  * descriptions for details.
@@ -19,7 +19,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * (excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getname.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getname.php )
    *
    * Get the name of the function. Warning: This function is currently not
    * documented; only its argument list is available.
@@ -30,7 +30,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getName(): string;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionfunctionabstract.innamespace.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionfunctionabstract.innamespace.php
    * )
    *
    * Checks whether a function is defined in a namespace.
@@ -43,7 +43,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getnamespacename.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getnamespacename.php )
    *
    * Get the namespace name where the function is defined.
    *
@@ -57,7 +57,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getshortname.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getshortname.php )
    *
    * Get the short name of the function (without the namespace part).
    *
@@ -69,9 +69,12 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     return ($pos === false) ? $name : substr($name, $pos + 1);
   }
 
+  <<__Native, __HipHopSpecific>>
+  public function isHack(): bool;
+
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.isinternal.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.isinternal.php )
    *
    * Checks whether the function is internal, as opposed to user-defined.
    * Warning: This function is currently not documented; only its argument
@@ -84,7 +87,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.isclosure.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.isclosure.php )
    *
    * Checks whether it's a closure. Warning: This function is currently not
    * documented; only its argument list is available.
@@ -97,7 +100,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.isgenerator.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.isgenerator.php )
    *
    * Warning: This function is currently not documented; only its argument
    * list is available.
@@ -124,7 +127,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.isuserdefined.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.isuserdefined.php )
    *
    * Checks whether the function is user-defined, as opposed to internal.
    * Warning: This function is currently not documented; only its argument
@@ -138,7 +141,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getfilename.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getfilename.php )
    *
    * Gets the file name from a user-defined function. Warning: This function
    * is currently not documented; only its argument list is available.
@@ -146,11 +149,11 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return     mixed   The file name.
    */
   <<__Native>>
-  public function getFileName(): string;
+  public function getFileName(): mixed;
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getstartline.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getstartline.php )
    *
    * Gets the starting line number of the function. Warning: This function
    * is currently not documented; only its argument list is available.
@@ -158,11 +161,11 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return     mixed   The starting line number.
    */
   <<__Native>>
-  public function getStartLine(): int;
+  public function getStartLine(): mixed;
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getendline.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getendline.php )
    *
    * Get the ending line number. Warning: This function is currently not
    * documented; only its argument list is available.
@@ -171,11 +174,11 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *                     or FALSE if unknown.
    */
   <<__Native>>
-  public function getEndLine(): int;
+  public function getEndLine(): mixed;
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getdoccomment.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getdoccomment.php )
    *
    * Get a Doc comment from a function. Warning: This function is currently
    * not documented; only its argument list is available.
@@ -187,7 +190,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getstaticvariables.php
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getstaticvariables.php
    * )
    *
    * Get the static variables. Warning: This function is currently not
@@ -200,7 +203,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.returnsreference.php
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.returnsreference.php
    * )
    *
    * Checks whether the function returns a reference. Warning: This function
@@ -211,35 +214,58 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native>>
   public function returnsReference(): bool;
 
-  private static function stripHHPrefix($str) {
-    if (!is_string($str)) return $str;
-    return str_ireplace(
-      array('HH\\this'),
-      array('this'),
-      $str
-    );
-  }
-
   <<__Native, __HipHopSpecific>>
   private function getReturnTypeHint(): string;
 
   <<__HipHopSpecific>>
   public function getReturnTypeText() {
-    $hint = $this->getReturnTypeHint();
-    return ($hint) ? self::stripHHPrefix($hint) : false;
+    return $this->getReturnTypeHint() ?: false;
   }
 
+  /**
+   * ( excerpt from
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getattributes.php )
+   *
+   * Gets all attributes
+   *
+   * @return  array<arraykey, array<int, mixed>>
+   */
   <<__Native>>
   final public function getAttributes(): array;
 
+  /**
+   * ( excerpt from
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getattribute.php )
+   *
+   * Returns all attributes with given key.
+   *
+   * @return  ?array<int, mixed>
+   */
   final public function getAttribute(string $name) {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }
 
+  /**
+   * ( excerpt from
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getattributes.php )
+   *
+   * Gets all attributes
+   *
+   * @return  array<arraykey, array<int, mixed>>
+   */
   public function getAttributesRecursive(): array {
     return $this->getAttributes();
   }
 
+  /**
+   * ( excerpt from
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getattributerecursive.php
+   * )
+   *
+   * Returns all attributes with given key from a class and its parents.
+   *
+   * @return array<arraykey, array<int, mixed>>
+   */
   public function getAttributeRecursive($name) {
     return $this->getAttribute($name);
   }
@@ -254,7 +280,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getparameters.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getparameters.php )
    *
    * Get the parameters as an array of ReflectionParameter. Warning: This
    * function is currently not documented; only its argument list is
@@ -280,7 +306,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getnumberofrequiredparameters.php
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getnumberofrequiredparameters.php
    * )
    *
    * Get the number of required parameters that a function defines. Warning:
@@ -303,13 +329,13 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://www.php.net/manual/en/reflectionfunctionabstract.isdeprecated.php
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.isdeprecated.php
    * )
    *
    * Returns whether the function is deprecated.
    */
   public function isDeprecated(): bool {
-    return false; // not supported in HHVM
+    return null !== $this->getAttribute('__Deprecated');
   }
 
   public function getExtension() {
@@ -323,7 +349,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
-   * http://www.php.net/manual/en/reflectionfunctionabstract.getclosurescopeclass.php
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getclosurescopeclass.php
    * )
    *
    * Returns the scope associated to the closure
@@ -386,11 +412,13 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     }
 
     $params = $this->getParameters();
-    $ret .= "\n  - Parameters [" . count($params) . "] {\n  ";
-    foreach ($params as $param) {
-      $ret .= '  '.str_replace("\n", "\n  ", $param."\n");
+    if (count($params) > 0) {
+      $ret .= "\n  - Parameters [" . count($params) . "] {\n  ";
+      foreach ($params as $param) {
+        $ret .= '  '.str_replace("\n", "\n  ", $param."\n");
+      }
+      $ret .= "}\n";
     }
-    $ret .= "}\n";
 
     $ret .= "}\n";
     return $ret;
@@ -399,17 +427,17 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
 
 /**
- * ( excerpt from http://php.net/manual/en/class.reflectionfunction.php )
+ * ( excerpt from http://docs.hhvm.com/manual/en/class.reflectionfunction.php )
  *
  * The ReflectionFunction class reports information about a function.
  */
 class ReflectionFunction extends ReflectionFunctionAbstract {
 
-  /* public readonly string $name; */
+  public string $name; // should be readonly (PHP compatibility)
   private ?Closure $closure = null;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionfunction.construct.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionfunction.construct.php
    * )
    *
    * Constructs a ReflectionFunction object.
@@ -433,6 +461,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
                 __METHOD__, gettype($name_or_closure))
       );
     }
+
+    $this->name = $this->getName();
   }
 
   <<__Native>>
@@ -443,7 +473,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
 
   /**
    * (excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getname.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getname.php )
    *
    * Get the name of the function. Warning: This function is currently not
    * documented; only its argument list is available.
@@ -452,43 +482,17 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    */
   public function getName(): string {
     if ($this->closure) {
-      $clsname = $this->getClosureScopeClassname($this->closure);
-      $pos = $clsname ? strrpos($clsname, '\\') : false;
-      return ($pos === false)
-        ? '{closure}'
-        : substr($clsname, 0, $pos + 1).'{closure}';
+      // Format: Closure$scope;hash
+      $cls = get_class($this->closure);
+      $ns_end = strrpos($cls, '\\');
+      if ($ns_end !== false) {
+        $ns_start = strpos($cls, '$') + 1;
+        $ns = substr($cls, $ns_start, $ns_end - $ns_start);
+        return $ns.'\\{closure}';
+      }
+      return '{closure}';
     }
     return parent::getName();
-  }
-
-  // __get and __set are used to maintain read-only $this->name
-  final public function __get(string $name): ?string {
-    // $name is a read-only property
-    if ($name === 'name') {
-      return $this->getName();
-    }
-    $static_cls = get_class($this);
-    if (property_exists($static_cls, $name)) {
-      // __get is called if an existing property is inaccessible
-      trigger_error("Cannot access property $static_cls::$name", E_ERROR);
-    }
-    trigger_error("Undefined property $static_cls::$name", E_NOTICE);
-    return null;
-  }
-
-  // __get and __set are used to maintain read-only $this->name
-  final public function __set(string $name, $value): void {
-    // $name is a read-only property
-    if ($name === 'name') {
-      throw new ReflectionException(
-        'Cannot set read-only property '.__CLASS__.'::'.$name);
-    }
-    if (property_exists(get_class($this), $name)) {
-      // __set is called if the property is inaccessible
-      trigger_error(
-        'Cannot access property '.get_class($this).'::'.$name, E_ERROR);
-    }
-    $this->{$name} = $value;
   }
 
   public function getClosure() {
@@ -501,7 +505,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionfunction.tostring.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionfunction.tostring.php )
    *
    * @return     string  A representation of this ReflectionFunction.
    */
@@ -510,7 +514,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionfunction.export.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionfunction.export.php )
    *
    * Exports a Reflected function.
    *
@@ -534,7 +538,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.getstaticvariables.php
+   * http://docs.hhvm.com/manual/en/reflectionfunctionabstract.getstaticvariables.php
    * )
    *
    * Get the static variables. Warning: This function is currently not
@@ -556,7 +560,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   private function getClosureUseVariables(object $closure): array;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionfunction.invoke.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionfunction.invoke.php )
    *
    * Invokes a reflected function.
    *
@@ -572,7 +576,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionfunction.invokeargs.php )
+   * http://docs.hhvm.com/manual/en/reflectionfunction.invokeargs.php )
    *
    * Invokes the function and pass its arguments as array.
    *
@@ -612,17 +616,33 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     }
     return null;
   }
+
+  <<__Native>>
+  private function getClosureThisObject(object $closure): object;
+
+  /**
+   * Returns this pointer bound to closure.
+   *
+   * @return object|NULL Returns $this pointer. Returns NULL in case of
+   * an error.
+   */
+  public function getClosureThis(): ?mixed {
+    if ($this->closure) {
+      return $this->getClosureThisObject($this->closure);
+    }
+    return null;
+  }
 }
 
 /**
- * ( excerpt from http://php.net/manual/en/class.reflectionmethod.php )
+ * ( excerpt from http://docs.hhvm.com/manual/en/class.reflectionmethod.php )
  *
  * The ReflectionMethod class reports information about a method.
  */
 class ReflectionMethod extends ReflectionFunctionAbstract {
 
-  /* public readonly string $name; */
-  /* public readonly string $class; */
+  public string $name; // should be readonly (PHP compatibility)
+  public string $class; // should be readonly (PHP compatibility)
 
   private /*string*/ $originalClass;
   private /*bool*/ $forcedAccessible = false;
@@ -631,7 +651,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   private function __init(mixed $cls_or_obj, string $meth): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.construct.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.construct.php )
    *
    * Constructs a new ReflectionMethod.
    *
@@ -655,7 +675,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     if (count($args) == 1) {
       $arr = explode('::', $args[0], 3);
       if (count($arr) !== 2) {
-        throw new ReflectionException("$cls is not a valid method name");
+        $name = $args[0];
+        throw new ReflectionException("$name is not a valid method name");
       }
       list($cls, $name) = $arr;
       $classname = $cls;
@@ -672,41 +693,13 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       throw new ReflectionException(
         "Method $classname::$name() does not exist");
     }
-  }
 
-  // __get and __set are used to maintain read-only $this->name, $this->class
-  final public function __get(string $name): ?string {
-    if ($name === 'name') { // $name is a read-only property
-      return $this->getName();
-    } else if ($name === 'class') { // ... as is $class
-      return $this->getDeclaringClassname();
-    }
-    $static_cls = get_class($this);
-    if (property_exists($static_cls, $name)) {
-      // __get is called if an existing property is inaccessible
-      trigger_error("Cannot access property $static_cls::$name", E_ERROR);
-    }
-    trigger_error("Undefined property $static_cls::$name", E_NOTICE);
-    return null;
-  }
-
-  // __get and __set are used to maintain read-only $this->name, $this->class
-  final public function __set(string $name, $value): void {
-    // $name and $class are read-only properties
-    if ($name === 'name' || $name === 'class') {
-      throw new ReflectionException(
-        'Cannot set read-only property '.__CLASS__.'::'.$name);
-    }
-    if (property_exists(get_class($this), $name)) {
-      // __set is called if the property is inaccessible
-      trigger_error(
-        'Cannot access property '.get_class($this).'::'.$name, E_ERROR);
-    }
-    $this->{$name} = $value;
+    $this->name = $this->getName();
+    $this->class = $this->getDeclaringClassname();
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.tostring.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.tostring.php )
    *
    * @return     string  A string representation of this ReflectionMethod.
    */
@@ -751,8 +744,12 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return $this->__toStringHelper('Method', $preAttrs, $funcAttrs);
   }
 
+  public function __debuginfo() {
+    return array('name' => $this->name, 'class' => $this->class);
+  }
+
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.export.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.export.php )
    *
    * Exports a ReflectionMethod. Warning: This function is currently not
    * documented; only its argument list is available.
@@ -785,7 +782,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.invoke.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.invoke.php )
    *
    * Invokes a reflected method.
    *
@@ -813,7 +810,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.invokeargs.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.invokeargs.php
    * )
    *
    * Invokes the reflected method and pass its arguments as array.
@@ -849,7 +846,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.isfinal.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.isfinal.php )
    *
    * Checks if the method is final.
    *
@@ -859,7 +856,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   public function isFinal(): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.isabstract.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.isabstract.php
    * )
    *
    * Checks if the method is abstract.
@@ -870,7 +867,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   public function isAbstract(): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.ispublic.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.ispublic.php )
    *
    * Checks if the method is public.
    *
@@ -880,7 +877,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   public function isPublic(): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.isprotected.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.isprotected.php
    * )
    *
    * Checks if the method is protected.
@@ -891,7 +888,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   public function isProtected(): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.isprivate.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.isprivate.php )
    *
    * Checks if the method is private. Warning: This function is currently
    * not documented; only its argument list is available.
@@ -902,7 +899,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   public function isPrivate(): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.isstatic.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.isstatic.php )
    *
    * Checks if the method is static.
    *
@@ -913,7 +910,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionmethod.isconstructor.php )
+   * http://docs.hhvm.com/manual/en/reflectionmethod.isconstructor.php )
    *
    * Checks if the method is a constructor.
    *
@@ -924,7 +921,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionmethod.isdestructor.php )
+   * http://docs.hhvm.com/manual/en/reflectionmethod.isdestructor.php )
    *
    * Checks if the method is a destructor.
    *
@@ -936,7 +933,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionmethod.getmodifiers.php )
+   * http://docs.hhvm.com/manual/en/reflectionmethod.getmodifiers.php )
    *
    * Returns a bitfield of the access modifiers for this method.
    *
@@ -950,7 +947,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionmethod.getprototype.php )
+   * http://docs.hhvm.com/manual/en/reflectionmethod.getprototype.php )
    *
    * Returns the methods prototype.
    *
@@ -971,7 +968,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionmethod.getclosure.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionmethod.getclosure.php
    * )
    *
    * Warning: This function is currently not documented; only its argument
@@ -1006,7 +1003,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionmethod.setaccessible.php )
+   * http://docs.hhvm.com/manual/en/reflectionmethod.setaccessible.php )
    *
    * Sets a method to be accessible. For example, it may allow protected and
    * private methods to be invoked.
@@ -1024,7 +1021,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionmethod.getdeclaringclass.php )
+   * http://docs.hhvm.com/manual/en/reflectionmethod.getdeclaringclass.php )
    *
    * Gets the declaring class for the reflected method.
    *
@@ -1071,21 +1068,21 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 }
 
 /**
- * ( excerpt from http://php.net/manual/en/class.reflectionclass.php )
+ * ( excerpt from http://docs.hhvm.com/manual/en/class.reflectionclass.php )
  *
  * The ReflectionClass class reports information about a class.
  */
 <<__NativeData('ReflectionClassHandle')>>
-class ReflectionClass implements Reflector, Serializable {
+class ReflectionClass implements Reflector {
   const int IS_IMPLICIT_ABSTRACT = 16;
   const int IS_EXPLICIT_ABSTRACT = 32;
   const int IS_FINAL = 64;
 
-  /* public readonly string $name; */
+  public string $name; // should be readonly (PHP compatibility)
   private $obj = null;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.construct.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.construct.php )
    *
    * Constructs a new ReflectionClass object. Warning: This function is
    * currently not documented; only its argument list is available.
@@ -1103,21 +1100,15 @@ class ReflectionClass implements Reflector, Serializable {
     if (!$this->__init($classname)) {
       throw new ReflectionException("Class $classname does not exist");
     }
-  }
 
-  public function serialize() {
-    return serialize(['name' => $this->getName()]);
-  }
-
-  public function unserialize($string) {
-    $this->__init(unserialize($string)['name']);
+    $this->name = $this->getName();
   }
 
   <<__Native>>
   private function __init(string $name): string;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.tostring.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.tostring.php )
    *
    * @return     string  A string representation of this ReflectionClass.
    */
@@ -1132,6 +1123,8 @@ class ReflectionClass implements Reflector, Serializable {
       $ret .= 'Interface [ ';
     } elseif ($this->isTrait()) {
       $ret .= 'Trait [ ';
+    } elseif ($this->isEnum()) {
+      $ret .= 'Enum [ ';
     } else {
       $ret .= 'Class [ ';
     }
@@ -1151,6 +1144,8 @@ class ReflectionClass implements Reflector, Serializable {
       $ret .= 'interface ';
     } elseif ($this->isTrait()) {
       $ret .= 'trait ';
+    } elseif ($this->isEnum()) {
+      $ret .= 'enum ';
     } else {
       if ($this->isAbstract()) {
         $ret .= 'abstract ';
@@ -1179,9 +1174,13 @@ class ReflectionClass implements Reflector, Serializable {
     }
 
     $consts = $this->getConstants();
-    $ret .= "\n  - Constants [" . count($consts) . "] {\n";
+    $abs_consts = $this->getAbstractConstantNames();
+    $ret .= "\n  - Constants [" . (count($consts) + count($abs_consts)) . "] {\n";
     foreach ($consts as $k => $v) {
-      $ret .= '    Constant [ ' . gettype($v) . " $k {" . (string)$v . "}\n";
+      $ret .= '    Constant [ ' . gettype($v) . " $k {" . (string)$v . "} ]\n";
+    }
+    foreach ($abs_consts as $k) {
+      $ret .= '    Abstract Constant [ '. $k ."]\n";
     }
     $ret .= "  }\n";
 
@@ -1260,7 +1259,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.export.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.export.php )
    *
    * Exports a reflected class.
    *
@@ -1285,41 +1284,11 @@ class ReflectionClass implements Reflector, Serializable {
   <<__Native>>
   public function getName(): string;
 
-  // __get and __set are used to maintain read-only $this->name
-  final public function __get(string $name): ?string {
-    // $name is a read-only property
-    if ($name === 'name') {
-      return $this->getName();
-    }
-    $static_cls = get_class($this);
-    if (property_exists($static_cls, $name)) {
-      // __get is called if an existing property is inaccessible
-      trigger_error("Cannot access property $static_cls::$name", E_ERROR);
-    }
-    trigger_error("Undefined property $static_cls::$name", E_NOTICE);
-    return null;
-  }
-
-  // __get and __set are used to maintain read-only $this->name
-  final public function __set(string $name, $value): void {
-    // $name is a read-only property
-    if ($name === 'name') {
-      throw new ReflectionException(
-        'Cannot set read-only property '.__CLASS__.'::'.$name);
-    }
-    if (property_exists(get_class($this), $name)) {
-      // __set is called if the property is inaccessible
-      trigger_error(
-        'Cannot access property '.get_class($this).'::'.$name, E_ERROR);
-    }
-    $this->{$name} = $value;
-  }
-
   <<__Native>>
   private function getParentName(): string;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.innamespace.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.innamespace.php
    * )
    *
    * Checks if this class is defined in a namespace.
@@ -1332,7 +1301,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.functionabstract.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.functionabstract.php )
    *
    * Gets the namespace name.
    *
@@ -1346,7 +1315,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getshortname.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.getshortname.php )
    *
    * Get the short name of the function (without the namespace part).
    *
@@ -1358,8 +1327,11 @@ class ReflectionClass implements Reflector, Serializable {
     return ($pos === false) ? $name : substr($name, $pos + 1);
   }
 
+  <<__Native, __HipHopSpecific>>
+  public function isHack(): bool;
+
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.isinternal.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.isinternal.php )
    *
    * Checks if the class is defined internally by an extension, or the core,
    * as opposed to user-defined.
@@ -1375,7 +1347,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.isinstantiable.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.isinstantiable.php )
    *
    * Checks if the class is instantiable.
    *
@@ -1386,7 +1358,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.iscloneable.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.iscloneable.php )
    *
    * Returns whether this class is cloneable.
    *
@@ -1398,7 +1370,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getmethod.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getmethod.php )
    *
    * Gets a ReflectionMethod for a class method.
    *
@@ -1411,7 +1383,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.hasmethod.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.hasmethod.php )
    *
    * Checks whether a specific method is defined in a class.
    *
@@ -1441,7 +1413,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getmethods.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getmethods.php )
    *
    * Gets an array of methods for the class.
    *
@@ -1468,7 +1440,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.hasconstant.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.hasconstant.php
    * )
    *
    * Checks whether the class has a specific constant defined or not.
@@ -1481,7 +1453,7 @@ class ReflectionClass implements Reflector, Serializable {
   public function hasConstant(string $name): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getconstant.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getconstant.php
    * )
    *
    * Gets the defined constant. Warning: This function is currently not
@@ -1497,7 +1469,7 @@ class ReflectionClass implements Reflector, Serializable {
   private static $constCache = array();
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getconstants.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getconstants.php
    * )
    *
    * Gets defined constants from a class. Warning: This function is
@@ -1515,12 +1487,36 @@ class ReflectionClass implements Reflector, Serializable {
     return self::$constCache[$clsname] = $this->getOrderedConstants();
   }
 
-  <<__Native>>
-  private function getOrderedConstants(): array<string, mixed>;
+  private static $absConstCache = array();
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getinterfacenames.php )
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getabstractconstantnames.php
+   * )
+   *
+   * Returns an array containing the names of abstract constants as both
+   * keys and values.
+   *
+   * @return  array<string, string>
+   */
+  public function getAbstractConstantNames(): array<string, string> {
+    $clsname = $this->getName();
+    $cached = hphp_array_idx(self::$absConstCache, $clsname, null);
+    if (null !== $cached) {
+      return $cached;
+    }
+    return self::$absConstCache[$clsname] = $this->getOrderedAbstractConstants();
+  }
+
+  <<__Native>>
+  private function getOrderedConstants(): array<string, mixed>;
+
+  <<__Native>>
+  private function getOrderedAbstractConstants(): array<string, string>;
+
+  /**
+   * ( excerpt from
+   * http://docs.hhvm.com/manual/en/reflectionclass.getinterfacenames.php )
    *
    * Get the interface names.
    *
@@ -1532,7 +1528,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getinterfaces.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.getinterfaces.php )
    *
    * Gets the interfaces.
    *
@@ -1564,7 +1560,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.gettraitnames.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.gettraitnames.php )
    *
    * Warning: This function is currently not documented; only its argument
    * list is available.
@@ -1577,7 +1573,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.gettraitaliases.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.gettraitaliases.php )
    *
    * Warning: This function is currently not documented; only its argument
    * list is available.
@@ -1590,7 +1586,7 @@ class ReflectionClass implements Reflector, Serializable {
   public function getTraitAliases(): array<string, string>;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.gettraits.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.gettraits.php )
    *
    * Warning: This function is currently not documented; only its argument
    * list is available.
@@ -1615,7 +1611,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.isinterface.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.isinterface.php
    * )
    *
    * Checks whether the class is an interface.
@@ -1626,7 +1622,7 @@ class ReflectionClass implements Reflector, Serializable {
   public function isInterface(): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.isabstract.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.isabstract.php )
    *
    * Checks if the class is abstract.
    *
@@ -1636,7 +1632,7 @@ class ReflectionClass implements Reflector, Serializable {
   public function isAbstract(): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.isfinal.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.isfinal.php )
    *
    * Checks if a class is final.
    *
@@ -1646,18 +1642,25 @@ class ReflectionClass implements Reflector, Serializable {
   public function isFinal(): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.istrait.php )
    *
-   * Warning: This function is currently not documented; only its argument
-   * list is available.
+   * Returns whether this is a trait.
    *
-   * @return     bool   Returns TRUE on success or FALSE on failure.
+   * @return     bool   Returns TRUE if this is a trait, FALSE otherwise.
    */
   <<__Native>>
   public function isTrait(): bool;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getmodifiers.php
+   * Returns whether this ReflectionClass represents an enum.
+   *
+   * @return     bool   Returns TRUE if this is an enum, FALSE otherwise.
+   */
+  <<__Native>>
+  public function isEnum(): bool;
+
+  /**
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getmodifiers.php
    * )
    *
    * Returns a bitfield of the access modifiers for this class.
@@ -1668,7 +1671,7 @@ class ReflectionClass implements Reflector, Serializable {
   public function getModifiers(): int;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.isinstance.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.isinstance.php )
    *
    * Checks if an object is an instance of a class.
    *
@@ -1685,7 +1688,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getconstructor.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.getconstructor.php )
    *
    * Gets the constructor of the reflected class.
    *
@@ -1699,7 +1702,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.newinstance.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.newinstance.php
    * )
    *
    * Creates a new instance of the class. The given arguments are passed to
@@ -1718,7 +1721,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.newinstanceargs.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.newinstanceargs.php )
    *
    * Creates a new instance of the class, the given arguments are passed to
    * the class constructor.
@@ -1742,7 +1745,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.newinstancewithoutconstructor.php
+   * http://docs.hhvm.com/manual/en/reflectionclass.newinstancewithoutconstructor.php
    * )
    *
    * Creates a new instance of the class without invoking the constructor.
@@ -1805,7 +1808,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getproperty.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getproperty.php
    * )
    *
    * Gets a ReflectionProperty for a class's property.
@@ -1824,7 +1827,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.hasproperty.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.hasproperty.php
    * )
    *
    * Checks whether the specified property is defined.
@@ -1838,7 +1841,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt* http://php.net/manual/en/reflectionclass.getproperties.php )
+   * ( excerpt* http://docs.hhvm.com/manual/en/reflectionclass.getproperties.php )
    *
    * Retrieves reflected properties.
    *
@@ -1864,7 +1867,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getstaticproperties.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.getstaticproperties.php )
    *
    * Get the static properties. Warning: This function is currently not
    * documented; only its argument list is available.
@@ -1882,7 +1885,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getstaticpropertyvalue.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.getstaticpropertyvalue.php )
    *
    * Gets the value of a static property on this class.
    *
@@ -1892,17 +1895,27 @@ class ReflectionClass implements Reflector, Serializable {
    *
    * @return     mixed   The value of the static property.
    */
-  public function getStaticPropertyValue($name, $default = null) {
+  public function getStaticPropertyValue($name /*, $default */) {
+    // We can't check if a parameter isn't passed,
+    // we can only check its default value, but that fails
+    // if I want to pass the default value.
+    // Use func_get_args() for this.
+    $args = func_get_args();
     if ($this->hasProperty($name) &&
         $this->getProperty($name)->isStatic()) {
       return hphp_get_static_property($this->getName(), $name, false);
+    } else if (!array_key_exists(1, $args)) {
+      throw new ReflectionException(
+        sprintf("Class %s does not have a property named %s",
+                $this->getName(), $name)
+      );
     }
-    return $default;
+    return $args[1];
   }
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.setstaticpropertyvalue.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.setstaticpropertyvalue.php )
    *
    * Sets static property value. Warning: This function is currently not
    * documented; only its argument list is available.
@@ -1917,7 +1930,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getdefaultproperties.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.getdefaultproperties.php )
    *
    * Gets default properties from a class (including inherited properties).
    *
@@ -1944,7 +1957,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getextension.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getextension.php
    * )
    *
    * Gets a ReflectionExtension object for the extension which defined the
@@ -1965,7 +1978,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getextensionname.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.getextensionname.php )
    *
    * Gets the name of the extension which defined the class.
    *
@@ -1982,7 +1995,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.isiterateable.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.isiterateable.php )
    *
    * Checks whether the class is iterateable.
    *
@@ -1994,7 +2007,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.implementsinterface.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.implementsinterface.php )
    *
    * Checks whether it implements an interface.
    *
@@ -2017,7 +2030,7 @@ class ReflectionClass implements Reflector, Serializable {
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getparentclass.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.getparentclass.php )
    *
    * Warning: This function is currently not documented; only its argument
    * list is available.
@@ -2030,7 +2043,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.issubclassof.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.issubclassof.php
    * )
    *
    * Checks if the class is a subclass of a specified class or implements a
@@ -2048,7 +2061,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getfilename.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getfilename.php
    * )
    *
    * Gets the filename of the file in which the class has been defined.
@@ -2058,10 +2071,10 @@ class ReflectionClass implements Reflector, Serializable {
    *                     core or in a PHP extension, FALSE is returned.
    */
   <<__Native>>
-  public function getFileName(): string;
+  public function getFileName(): mixed;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getstartline.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getstartline.php
    * )
    *
    * Get the starting line number. Warning: This function is currently not
@@ -2070,10 +2083,10 @@ class ReflectionClass implements Reflector, Serializable {
    * @return     int   The starting line number, as an integer.
    */
   <<__Native>>
-  public function getStartLine(): int;
+  public function getStartLine(): mixed;
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionclass.getendline.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getendline.php )
    *
    * Gets end line number from a user-defined class definition.
    *
@@ -2081,11 +2094,11 @@ class ReflectionClass implements Reflector, Serializable {
    *                   FALSE if unknown.
    */
   <<__Native>>
-  public function getEndLine(): int;
+  public function getEndLine(): mixed;
 
   /**
    * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.getdoccomment.php )
+   * http://docs.hhvm.com/manual/en/reflectionclass.getdoccomment.php )
    *
    * Gets doc comments from a class. Warning: This function is currently not
    * documented; only its argument list is available.
@@ -2118,7 +2131,7 @@ class ReflectionClass implements Reflector, Serializable {
 // object
 
 /**
- * ( excerpt from http://php.net/manual/en/class.reflectionobject.php )
+ * ( excerpt from http://docs.hhvm.com/manual/en/class.reflectionobject.php )
  *
  * The ReflectionObject class reports information about an object.
  *
@@ -2126,7 +2139,7 @@ class ReflectionClass implements Reflector, Serializable {
 class ReflectionObject extends ReflectionClass {
 
   /**
-   * ( excerpt from http://www.php.net/manual/en/reflectionobject.construct.php
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionobject.construct.php
    * )
    *
    *  Constructs a ReflectionObject.
@@ -2142,7 +2155,7 @@ class ReflectionObject extends ReflectionClass {
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/reflectionobject.export.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/reflectionobject.export.php )
    *
    * Exports a reflection. Warning: This function is currently not
    * documented; only its argument list is available.

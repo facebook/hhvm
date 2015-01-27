@@ -20,7 +20,6 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
-#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -58,7 +57,9 @@ DebuggerProxyPtr Debugger::StartClient(const DebuggerClientOptions &options) {
 void Debugger::Stop() {
   TRACE(2, "Debugger::Stop\n");
   LogShutdown(ShutdownKind::Normal);
-  s_debugger.m_proxyMap.clear();
+  while (!s_debugger.m_proxyMap.empty()) {
+    s_debugger.m_proxyMap.begin()->second->stop();
+  }
   DebuggerServer::Stop();
   CleanupRetiredProxies();
   if (s_clientStarted) {
@@ -465,7 +466,7 @@ DebuggerProxyPtr Debugger::createProxy(SmartPtr<Socket> socket, bool local) {
   {
     // Place this new proxy into the proxy map keyed on the dummy sandbox id.
     // This keeps the proxy alive in the server case, which drops the result of
-    // this function on the floor. It also makes the proxy findable when we a
+    // this function on the floor. It also makes the proxy findable when a
     // dummy sandbox thread needs to interrupt.
     const StringData* sid =
       makeStaticString(proxy->getDummyInfo().id());

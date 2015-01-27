@@ -1,0 +1,32 @@
+int(1)
+NULL
+array(0) {
+}
+int(1)
+int(2)
+array(0) {
+}
+int(1)
+int(2)
+array(1) {
+  [0]=>
+  int(3)
+}
+int(1)
+int(2)
+array(2) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(4)
+}
+int(1)
+int(2)
+array(3) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(4)
+  [2]=>
+  int(5)
+}

@@ -11,7 +11,8 @@
 type env = {
   root: Path.path;
   wait: bool;
+  no_load: bool;
 }
 
 val main : env -> unit
-val start_server : ?wait:bool -> Path.path -> unit
+val start_server : env -> unit

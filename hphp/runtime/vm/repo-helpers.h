@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_REPO_HELPERS_H_
 #define incl_HPHP_VM_REPO_HELPERS_H_
 
+#include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/md5.h"

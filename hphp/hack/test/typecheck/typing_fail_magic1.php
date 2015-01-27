@@ -10,8 +10,7 @@
  */
 
 class A {
-  public function __set() {
-  }
+  public function __set() {}
 }
 
 function test1(A $x) {

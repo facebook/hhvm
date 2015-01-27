@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/async_generator.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
@@ -32,11 +33,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void delete_AsyncGenerator(ObjectData* od, const Class*) {
-  auto const gen = static_cast<c_AsyncGenerator*>(od);
-  auto const size = gen->resumable()->size();
-  auto const base = (char*)(gen + 1) - size;
-  gen->~c_AsyncGenerator();
-  MM().objFreeLogged(base, size);
+  Resumable::Destroy(static_cast<c_AsyncGenerator*>(od));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,7 +93,7 @@ c_AsyncGenerator::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
 
 c_StaticWaitHandle*
 c_AsyncGenerator::yield(Offset resumeOffset,
-                        const Cell* key, const Cell& value) {
+                        const Cell* key, const Cell value) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
   setState(State::Started);

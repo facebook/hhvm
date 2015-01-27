@@ -13,8 +13,8 @@ In genBar
 ** enter var_dump
 int(43)
 ** exit var_dump
-** enter RescheduleWaitHandle::create
-** exit RescheduleWaitHandle::create
+** enter HH\RescheduleWaitHandle::create
+** exit HH\RescheduleWaitHandle::create
 ** exit genBar
 ** enter genBar
 ** enter error_log
@@ -23,20 +23,20 @@ In genBar
 ** enter var_dump
 int(44)
 ** exit var_dump
-** enter RescheduleWaitHandle::create
-** exit RescheduleWaitHandle::create
+** enter HH\RescheduleWaitHandle::create
+** exit HH\RescheduleWaitHandle::create
 ** exit genBar
 ** enter gen2
 ** enter error_log
 In gen2
 ** exit error_log
-** enter RescheduleWaitHandle::create
-** exit RescheduleWaitHandle::create
+** enter HH\RescheduleWaitHandle::create
+** exit HH\RescheduleWaitHandle::create
 ** exit gen2
-** enter GenArrayWaitHandle::create
-** exit GenArrayWaitHandle::create
+** enter HH\GenArrayWaitHandle::create
+** exit HH\GenArrayWaitHandle::create
 ** exit genFoo
-** enter WaitHandle::join
+** enter HH\WaitHandle::join
 ** enter Exception::__init__
 ** enter Exception::initTrace
 ** enter Exception::getTraceOptions
@@ -77,13 +77,13 @@ In gen1
 ** enter error_log
 Finished in gen1
 ** exit error_log
-** enter RescheduleWaitHandle::create
-** exit RescheduleWaitHandle::create
+** enter HH\RescheduleWaitHandle::create
+** exit HH\RescheduleWaitHandle::create
 ** exit gen1
-** enter WaitHandle::join
+** enter HH\WaitHandle::join
 ** enter gen1
 ** exit gen1
-** exit WaitHandle::join
+** exit HH\WaitHandle::join
 ** enter error_log
 Finished in gen2
 ** exit error_log
@@ -99,7 +99,7 @@ int(46)
 Finished in genFoo
 ** exit error_log
 ** exit genFoo
-** exit WaitHandle::join
+** exit HH\WaitHandle::join
 ** enter var_dump
 int(91)
 ** exit var_dump

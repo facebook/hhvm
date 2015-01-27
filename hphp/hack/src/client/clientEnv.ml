@@ -11,15 +11,14 @@
 
 type client_mode =
 | MODE_LIST_FILES
-| MODE_SHOW_TYPES of string
 | MODE_TYPE_AT_POS of string
 | MODE_AUTO_COMPLETE
 | MODE_STATUS
 | MODE_UNSPECIFIED
 | MODE_VERSION
-| MODE_SAVE_STATE of string
 | MODE_SHOW of string
 | MODE_COLORING of string
+| MODE_COVERAGE of string
 | MODE_FIND_REFS of string
 | MODE_IDENTIFY_FUNCTION of string
 | MODE_OUTLINE
@@ -40,4 +39,5 @@ type client_check_env = {
   retries: int;
   timeout: float option;
   autostart: bool;
+  no_load: bool;
 }

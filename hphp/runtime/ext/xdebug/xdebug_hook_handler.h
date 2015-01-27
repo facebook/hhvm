@@ -20,6 +20,8 @@
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
+#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
+
 #include "hphp/runtime/vm/debugger-hook.h"
 
 namespace HPHP {
@@ -145,8 +147,8 @@ extern DECLARE_THREAD_LOCAL(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 ////////////////////////////////////////////////////////////////////////////////
 // XDebugHookHandler
 
-class XDebugHookHandler : public DebugHookHandler {
-public:
+struct XDebugHookHandler : DebugHookHandler {
+  static DebugHookHandler* GetInstance();
   // Starting the server on request init
   void onRequestInit() override {
     if (XDebugServer::isNeeded()) {
@@ -170,8 +172,11 @@ public:
       const Unit* unit;
       int line;
     };
-    // Exception breakpoint
-    ObjectData* exception;
+    // Exception breakpoint (for both errors and exceptions)
+    struct {
+      const StringData* name;
+      const StringData* message;
+    };
   };
 
   // Generic breakpoint handling routine. Most of the break handling
@@ -198,7 +203,9 @@ public:
     onBreak<XDebugBreakpoint::Type::LINE>(bi);
   }
 
-  void onExceptionThrown(ObjectData* exception) override {
+  // Helper for errors and exceptions that potentially starts the debug server
+  // if needed
+  void onExceptionBreak(const StringData* name, const StringData* msg) {
     // Potentially start the debug server if it hasn't been started
     if (XDEBUG_GLOBAL(RemoteEnable) &&
         !XDebugServer::isAttached() &&
@@ -208,8 +215,18 @@ public:
 
     // Handle the exception
     BreakInfo bi;
-    bi.exception = exception;
+    bi.name = name;
+    bi.message = msg;
     onBreak<XDebugBreakpoint::Type::EXCEPTION>(bi);
+  }
+
+  void onExceptionThrown(ObjectData* exception) override;
+  void onError(const ExtendedException& ee,
+               int errnum,
+               const string& message) override {
+    const String name = xdebug_error_type(errnum);
+    const String msg = String(message);
+    onExceptionBreak(name.get(), msg.get());
   }
 
   // Flow control. Each break type just calls the generic onFlowBreak
@@ -228,6 +245,9 @@ public:
   void onFileLoad(Unit* efile) override;
   void onDefClass(const Class* cls) override;
   void onDefFunc(const Func* func) override;
+ private:
+  XDebugHookHandler() {}
+  ~XDebugHookHandler() override {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

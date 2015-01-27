@@ -32,6 +32,8 @@ var_dump(rmdir($sessions));
 echo "Done";
 ob_end_flush();
 ?>
+<?php error_reporting(0); ?>
+<?php
 $initdir = getcwd();
 $sessions = ($initdir."/sessions");
 var_dump(rmdir($sessions));

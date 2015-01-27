@@ -29,6 +29,60 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(trans)
 
+void IncomingBranch::relocate(RelocationInfo& rel) {
+  // compute adjustedTarget before altering the smash address,
+  // because it might be a 5-byte nop
+  TCA adjustedTarget = rel.adjustedAddressAfter(target());
+
+  if (TCA adjusted = rel.adjustedAddressAfter(toSmash())) {
+    m_ptr.set(m_ptr.tag(), adjusted);
+  }
+
+  if (adjustedTarget) {
+    FTRACE_MOD(Trace::mcg, 1, "Patching: 0x{:08x} from 0x{:08x} to 0x{:08x}\n",
+               (uintptr_t)toSmash(), (uintptr_t)target(),
+               (uintptr_t)adjustedTarget);
+
+    patch(adjustedTarget);
+  }
+}
+
+void IncomingBranch::patch(TCA dest) {
+  switch (type()) {
+    case Tag::JMP: {
+      mcg->backEnd().smashJmp(toSmash(), dest);
+      break;
+    }
+
+    case Tag::JCC: {
+      mcg->backEnd().smashJcc(toSmash(), dest);
+      break;
+    }
+
+    case Tag::ADDR: {
+      // Note that this effectively ignores a
+      TCA* addr = reinterpret_cast<TCA*>(toSmash());
+      assert_address_is_atomically_accessible(addr);
+      *addr = dest;
+      break;
+    }
+  }
+}
+
+TCA IncomingBranch::target() const {
+  switch (type()) {
+    case Tag::JMP:
+      return mcg->backEnd().jmpTarget(toSmash());
+
+    case Tag::JCC:
+      return mcg->backEnd().jccTarget(toSmash());
+
+    case Tag::ADDR:
+      return *reinterpret_cast<TCA*>(toSmash());
+  }
+  always_assert(false);
+}
+
 void SrcRec::setFuncInfo(const Func* f) {
   m_unitMd5 = f->unit()->md5();
 }
@@ -56,7 +110,7 @@ void SrcRec::chainFrom(IncomingBranch br) {
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p (type %d); %zd incoming branches\n",
         this,
         br.toSmash(), destAddr, br.type(), m_incomingBranches.size());
-  patch(br, destAddr);
+  br.patch(destAddr);
 }
 
 void SrcRec::emitFallbackJump(CodeBlock& cb, ConditionCode cc /* = -1 */) {
@@ -65,13 +119,16 @@ void SrcRec::emitFallbackJump(CodeBlock& cb, ConditionCode cc /* = -1 */) {
     cb,
     cc == CC_None ? x64::kJmpLen : x64::kJmpccLen
   );
-  auto from = cb.frontier();
 
+  auto from = cb.frontier();
   TCA destAddr = getFallbackTranslation();
+  mcg->backEnd().emitSmashableJump(cb, destAddr, cc);
+  registerFallbackJump(from, cc);
+}
+
+void SrcRec::registerFallbackJump(TCA from, ConditionCode cc /* = -1 */) {
   auto incoming = cc < 0 ? IncomingBranch::jmpFrom(from)
                          : IncomingBranch::jccFrom(from);
-
-  mcg->backEnd().emitSmashableJump(cb, destAddr, cc);
 
   // We'll need to know the location of this jump later so we can
   // patch it to new translations added to the chain.
@@ -84,10 +141,7 @@ void SrcRec::emitFallbackJumpCustom(CodeBlock& cb, CodeBlock& frozen,
   // Another platform dependency (the same one as above). TODO(2990497)
   auto toSmash = x64::emitRetranslate(cb, frozen, cc, sk, trflags);
 
-  auto incoming = cc < 0 ? IncomingBranch::jmpFrom(toSmash)
-                         : IncomingBranch::jccFrom(toSmash);
-
-  mcg->cgFixups().m_inProgressTailJumps.push_back(incoming);
+  registerFallbackJump(toSmash, cc);
 }
 
 void SrcRec::newTranslation(TCA newStart,
@@ -118,13 +172,37 @@ void SrcRec::newTranslation(TCA newStart,
    * get into REQ_RETRANSLATE, they'll acquire it and generate a
    * translation possibly for this same situation.)
    */
-  for (size_t i = 0; i < m_tailFallbackJumps.size(); ++i) {
-    patch(m_tailFallbackJumps[i], newStart);
+  for (auto& br : m_tailFallbackJumps) {
+    br.patch(newStart);
   }
 
   // This is the new tail translation, so store the fallback jump list
   // in case we translate this again.
   m_tailFallbackJumps.swap(tailBranches);
+}
+
+void SrcRec::relocate(RelocationInfo& rel) {
+  if (auto adjusted = rel.adjustedAddressAfter(m_anchorTranslation)) {
+    m_anchorTranslation = adjusted;
+  }
+
+  if (auto adjusted = rel.adjustedAddressAfter(m_topTranslation.load())) {
+    m_topTranslation.store(adjusted);
+  }
+
+  for (auto &t : m_translations) {
+    if (TCA adjusted = rel.adjustedAddressAfter(t)) {
+      t = adjusted;
+    }
+  }
+
+  for (auto &ib : m_tailFallbackJumps) {
+    ib.relocate(rel);
+  }
+
+  for (auto &ib : m_incomingBranches) {
+    ib.relocate(rel);
+  }
 }
 
 void SrcRec::addDebuggerGuard(TCA dbgGuard, TCA dbgBranchGuardSrc) {
@@ -153,11 +231,10 @@ void SrcRec::patchIncomingBranches(TCA newStart) {
 
   TRACE(1, "%zd incoming branches to rechain\n", m_incomingBranches.size());
 
-  auto& change = m_incomingBranches;
-  for (unsigned i = 0; i < change.size(); ++i) {
+  for (auto &br : m_incomingBranches) {
     TRACE(1, "SrcRec(%p)::newTranslation rechaining @%p -> %p\n",
-          this, change[i].toSmash(), newStart);
-    patch(change[i], newStart);
+          this, br.toSmash(), newStart);
+    br.patch(newStart);
   }
 }
 
@@ -188,28 +265,6 @@ void SrcRec::replaceOldTranslations() {
    */
   assert(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   patchIncomingBranches(m_anchorTranslation);
-}
-
-void SrcRec::patch(IncomingBranch branch, TCA dest) {
-  switch (branch.type()) {
-  case IncomingBranch::Tag::JMP: {
-    mcg->backEnd().smashJmp(branch.toSmash(), dest);
-    break;
-  }
-
-  case IncomingBranch::Tag::JCC: {
-    mcg->backEnd().smashJcc(branch.toSmash(), dest);
-    break;
-  }
-
-  case IncomingBranch::Tag::ADDR: {
-    // Note that this effectively ignores a
-    TCA* addr = reinterpret_cast<TCA*>(branch.toSmash());
-    assert_address_is_atomically_accessible(addr);
-    *addr = dest;
-    break;
-  }
-  }
 }
 
 } } // HPHP::jit

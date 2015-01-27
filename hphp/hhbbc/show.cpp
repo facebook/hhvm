@@ -20,16 +20,17 @@
 #include <memory>
 #include <vector>
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
-#include "folly/String.h"
-#include "folly/Range.h"
-#include "folly/gen/Base.h"
-#include "folly/gen/String.h"
+#include <folly/Conv.h>
+#include <folly/Format.h>
+#include <folly/String.h>
+#include <folly/Range.h>
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/func-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -299,7 +300,7 @@ std::string show(const Bytecode& bc) {
         folly::toAppend(":", m.immInt, &ret);
         break;
       case MCodeImm::Local:
-        folly::toAppend(":$", m.immLoc->name->data(), &ret);
+        folly::toAppend(":$", local_string(m.immLoc), &ret);
         break;
       }
     }
@@ -577,6 +578,11 @@ std::string show(Type t) {
 
 std::string show(Context ctx) {
   auto ret = std::string{};
+  if (is_pseudomain(ctx.func)) {
+    ret = ctx.func->unit->filename->data();
+    ret += ";pseudomain";
+    return ret;
+  }
   if (ctx.cls) {
     ret = ctx.cls->name->data();
     ret += "::";

@@ -17,10 +17,9 @@ class UnrelatedClass {}
 function foo<T as I>(T $x): void {}
 
 function test(): void {
-  if(true) {
+  if (true) {
     $y = new B();
-  }
-  else {
+  } else {
     $y = new UnrelatedClass();
   }
   foo($y);

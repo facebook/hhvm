@@ -17,6 +17,7 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
@@ -202,8 +203,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     numLocals += numUseVars + 1;
   }
 
+  assert(func->numLocals() >= numLocals);
   auto numUninitLocals = func->numLocals() - numLocals;
-  assert(numUninitLocals >= 0);
   if (numUninitLocals > 0) {
     if (numUninitLocals > kLocalsToInitializeInline) {
       auto const& loopReg = rAsm2;
@@ -262,7 +263,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), rVmTl, fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams
@@ -346,6 +347,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
                 SrcKey(func, dvs[i].second, false));
   }
   emitBindJmp(mainCode, frozenCode, SrcKey(func, func->base(), false));
+  mcg->cgFixups().process(nullptr);
   return start;
 }
 

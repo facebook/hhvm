@@ -27,12 +27,13 @@ struct Abi {
   RegSet simdUnreserved; // unreserved floating point / simd 128-bit registers
   RegSet simdReserved;   // reserved floating point / simd 128-bit registers
   RegSet calleeSaved;    // callee-saved (gp and simd)
+  RegSet sf;             // status flags
 
   // convenience methods
-  RegSet unreserved() const { return gpUnreserved | simdUnreserved; }
+  RegSet unreserved() const { return gpUnreserved | simdUnreserved | sf; }
   RegSet gp() const { return gpUnreserved | gpReserved; }
-  RegSet simd() const { return simdUnreserved |simdReserved; }
-  RegSet all() const { return gp() | simd(); }
+  RegSet simd() const { return simdUnreserved | simdReserved; }
+  RegSet all() const { return gp() | simd() | sf; }
 };
 
 }}

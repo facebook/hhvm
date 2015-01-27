@@ -27,7 +27,7 @@
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle-defs.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
-#include "hphp/runtime/ext/ext_xenon.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/timer.h"
@@ -64,8 +64,10 @@ namespace {
   }
 
   inline void onIOWaitExit(AsioSession* session) {
-    // The web request may have timed out while we were waiting for I/O.
-    // Fail early to avoid further execution of PHP code.
+    // The web request may have timed out while we were waiting for I/O.  Fail
+    // early to avoid further execution of PHP code.  We limit I/O waiting to
+    // the time currently remaining in the request (see
+    // AsioSession::getLatestWakeTime).
     if (UNLIKELY(checkConditionFlags())) {
       ssize_t flags = EventHook::CheckSurprise();
       if (flags & RequestInjectionData::XenonSignalFlag) {

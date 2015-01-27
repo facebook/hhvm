@@ -75,19 +75,6 @@ void DynamicVariable::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr DynamicVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                    bool coerce) {
-  ConstructPtr self = shared_from_this();
-  if (m_context & (LValue | RefValue)) {
-    VariableTablePtr variables(getScope()->getVariables());
-    variables->forceVariants(ar, VariableTable::AnyVars);
-    variables->setAttribute(VariableTable::ContainsLDynamicVariable);
-  }
-
-  m_exp->inferAndCheck(ar, Type::String, false);
-  return m_implementedType = Type::Variant;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void DynamicVariable::outputCodeModel(CodeGenerator &cg) {

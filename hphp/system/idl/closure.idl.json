@@ -31,6 +31,109 @@
                     ],
                     "args": [
                     ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "bind",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "flags": [
+                      "IsStatic"
+                    ],
+                    "args": [
+                        {
+                            "name": "closure",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "newthis",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "newscope",
+                            "type": "Variant",
+                            "value": "\"static\""
+                        }
+                    ]
+                },
+                {
+                    "name": "bindto",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                        {
+                            "name": "newthis",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "newscope",
+                            "type": "Variant",
+                            "value": "\"static\""
+                        }
+                    ]
                 }
             ],
             "consts": [

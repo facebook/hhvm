@@ -81,9 +81,10 @@ void ProxyArray::Release(ArrayData*ad) {
 
 void ProxyArray::reseatable(const ArrayData* oldArr, ArrayData* newArr) {
   if (innerArr(oldArr) != newArr) {
-    decRefArr(innerArr(oldArr));
+    auto old = innerArr(oldArr);
     newArr->incRefCount();
     asProxyArray(oldArr)->m_ref->tv()->m_data.parr = newArr;
+    decRefArr(old);
   }
 }
 
@@ -423,8 +424,8 @@ void ProxyArray::proxyAppend(void* data, uint32_t data_size, void** dest) {
       *dest = (void*)(&r->nvGet(k)->m_data.pref);
     }
   } else {
-    ResourceData * elt = makeElementResource(data, data_size, dest);
-    r = innerArr(this)->append(elt, false);
+    auto elt = makeElementResource(data, data_size, dest);
+    r = innerArr(this)->append(Variant(std::move(elt)), false);
   }
   reseatable(this, r);
 }
@@ -441,11 +442,12 @@ void ProxyArray::proxyInit(uint32_t nSize,
   m_destructor = pDestructor;
 }
 
-ResourceData * ProxyArray::makeElementResource(
-    void *pData, uint nDataSize, void **pDest) const {
-  ZendCustomElement * elt = new ZendCustomElement(pData, nDataSize,
-                                                  pDest, m_destructor);
-  return static_cast<ResourceData*>(elt);
+SmartPtr<ResourceData>
+ProxyArray::makeElementResource(void* pData, uint nDataSize,
+                                void** pDest) const {
+  auto elt = makeSmartPtr<ZendCustomElement>(pData, nDataSize, m_destructor);
+  if (pDest) *pDest = elt->data();
+  return elt;
 }
 
 void * ProxyArray::proxyGet(StringData * str) const {
@@ -497,7 +499,7 @@ void * ProxyArray::elementToData(Variant * v) const {
     return (void*)(&tv->m_data.pref);
   } else {
     always_assert(tv->m_type == KindOfResource);
-    ZendCustomElement * elt = dynamic_cast<ZendCustomElement*>(tv->m_data.pres);
+    auto elt = dynamic_cast<ZendCustomElement*>(tv->m_data.pres);
     always_assert(elt);
     return elt->data();
   }

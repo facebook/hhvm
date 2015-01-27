@@ -24,6 +24,7 @@ clearstatcache();
 echo file_get_contents($logfile);
 ?>
 Done
+<?php error_reporting(0); ?>
 <?php
 unlink("/tmp/mail.log");
 unlink("/tmp/mail.out");

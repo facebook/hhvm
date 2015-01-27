@@ -49,17 +49,16 @@ echo main(42) . "\n";
 
 // get the Xenon data then verify that there are no unknown functions
 // and that all of the functions in this file are in the stack
-$stacks = xenon_get_data();
-$functionList = array("fn1", "fn0", "main", "", "fa0", "fa1", "fa2", "fa3",
-  "WaitHandle::join", "strcasecmp", "array_shift", "include");
-$requiredFunctions = array(
-  "fn1" => 1,
-  "fn0" => 1,
-  "main" =>1);
 
-$asyncList = array("fa3", "fa2", "fa1", "fa0", "",
-  "<gen-array>", "<prep>");
-$requiredAsync = array("fa3" => 1, "fa2" => 1, "fa1" => 1, "fa0" => 1);
-
-verifyTestRun($stacks, $functionList, $requiredFunctions,
-  $asyncList, $requiredAsync);
+verifyTestRun(
+  xenon_get_data(),
+  array(
+    "fn1", "fn0", "main", "", "fa0", "fa1", "fa2", "fa3",
+    WaitHandle::class."::join", "strcasecmp", "array_shift", "include",
+    "fa3", "fa2", "fa1", "fa0",
+  ),
+  array(
+    "fn1" => 1, "fn0" => 1, "main" => 1, "fa3" => 1, "fa2" => 1, "fa1" => 1,
+    "fa0" => 1
+  ),
+);

@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/server/memory-stats.h"
 
-#include "folly/AtomicHashMap.h"
+#include <folly/AtomicHashMap.h>
 
 namespace HPHP {
 
@@ -33,7 +33,7 @@ namespace {
 // Pointer to StringData, or pointer to StringSlice.
 typedef intptr_t StrInternKey;
 
-constexpr intptr_t kAhmMagicThreshold = -3;
+DEBUG_ONLY constexpr intptr_t kAhmMagicThreshold = -3;
 
 StrInternKey make_intern_key(const StringData* sd) {
   auto const ret = reinterpret_cast<StrInternKey>(sd);
@@ -57,17 +57,6 @@ const StringSlice* to_sslice(StrInternKey key) {
   return reinterpret_cast<const StringSlice*>(-key);
 }
 
-// To avoid extra instructions in strintern_eq, we currently are
-// making use of the fact that StringSlice and StringData have the
-// same initial layout.  See the static_asserts in checkSane.
-const StringSlice* to_sslice_punned(StrInternKey key) {
-  if (UNLIKELY(key < 0)) {
-    return reinterpret_cast<const StringSlice*>(-key);
-  }
-  // Actually a StringData*, but same layout.
-  return reinterpret_cast<const StringSlice*>(key);
-}
-
 struct strintern_eq {
   bool operator()(StrInternKey k1, StrInternKey k2) const {
     if (k1 < 0) {
@@ -77,9 +66,18 @@ struct strintern_eq {
     }
     assert(k2 >= 0 || k2 < kAhmMagicThreshold);
     auto const sd1 = to_sdata(k1);
-    auto const s2 = to_sslice_punned(k2);
-    return sd1->size() == s2->len &&
-           wordsame(sd1->data(), s2->ptr, s2->len);
+    auto const len1 = sd1->size();
+    const char* const* ptr2;
+    if (UNLIKELY(k2 < 0)) {
+      auto slice2 = to_sslice(k2);
+      if (len1 != slice2->len) return false;
+      ptr2 = reinterpret_cast<const char* const*>(slice2);
+    } else {
+      auto string2 = to_sdata(k2);
+      if (len1 != string2->size()) return false;
+      ptr2 = reinterpret_cast<const char* const*>(string2);
+    }
+    return wordsame(sd1->data(), *ptr2, len1);
   }
 };
 
@@ -90,7 +88,7 @@ struct strintern_hash {
       return to_sdata(k)->hash();
     }
     auto const slice = *to_sslice(k);
-    return hash_string_inline(slice.ptr, slice.len);
+    return hash_string(slice.ptr, slice.len);
   }
 };
 

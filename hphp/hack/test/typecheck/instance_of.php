@@ -12,5 +12,6 @@
 function foo($x, $y): void {
   if($x instanceof $y[0]) {
   } else if ($x instanceof $y->bla) {
+  } else if ($x instanceof ($y->blah())) {
   }
 }

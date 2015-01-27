@@ -8,6 +8,7 @@ print(file_get_contents('phar://bug53872-phar.phar/first.txt'));
 print(file_get_contents('phar://bug53872-phar.phar/second.txt'));
 print(file_get_contents('phar://bug53872-phar.phar/third.txt'));
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink("bug53872-phar.phar");
 ?>

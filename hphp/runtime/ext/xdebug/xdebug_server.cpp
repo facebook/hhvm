@@ -20,8 +20,10 @@
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/util/timer.h"
 #include "hphp/util/network.h"
 
 #include <fcntl.h>
@@ -74,7 +76,7 @@ static const char* getXDebugErrorString(XDebugServer::ErrorCode error) {
       return "error evaluating code";
     case XDebugServer::ERROR_INVALID_EXPRESSION:
       return "invalid expression";
-    case XDebugServer::ERROR_PROPERTY_NON_EXISTANT:
+    case XDebugServer::ERROR_PROPERTY_NON_EXISTENT:
       return "can not get property";
     case XDebugServer::ERROR_STACK_DEPTH_INVALID:
       return "stack depth invalid";
@@ -352,9 +354,13 @@ void XDebugServer::onRequestInit() {
     String sess_start = sess_start_var.toString();
     cookie.set(s_SESSION,  sess_start);
     if (transport != nullptr) {
-      transport->setCookie(s_SESSION,
-                           sess_start,
-                           XDEBUG_GLOBAL(RemoteCookieExpireTime));
+      int64_t expire = XDEBUG_GLOBAL(RemoteCookieExpireTime);
+      if (expire > 0) {
+        timespec ts;
+        Timer::GetRealtimeTime(ts);
+        expire += ts.tv_sec;
+      }
+      transport->setCookie(s_SESSION, sess_start, expire);
     }
   }
 }
@@ -399,8 +405,9 @@ void XDebugServer::detach() {
 // Header for sent messages
 #define XML_MSG_HEADER "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n"
 
-// Needed $_SERVER variables
-static const StaticString s_SCRIPT_FILENAME("SCRIPT_FILENAME");
+static const StaticString
+  s_SCRIPT_FILENAME("SCRIPT_FILENAME"), // Needed $_SERVER variable
+  s_DBGP_COOKIE("DBGP_COOKIE"); // Needed $_ENV variable
 
 void XDebugServer::addXmlns(xdebug_xml_node& node) {
   xdebug_xml_add_attribute(&node, "xmlns", "urn:debugger_protocol_v1");
@@ -501,9 +508,9 @@ bool XDebugServer::initDbgp() {
   xdebug_xml_add_attribute(response, "appid", getpid());
 
   // Add the DBGP_COOKIE environment variable
-  char* dbgp_cookie = getenv("DBGP_COOKIE");
-  if (dbgp_cookie != nullptr) {
-    xdebug_xml_add_attribute(response, "session", dbgp_cookie);
+  const String dbgp_cookie = g_context->getenv(s_DBGP_COOKIE);
+  if (!dbgp_cookie.empty()) {
+    xdebug_xml_add_attribute(response, "session", dbgp_cookie.data());
   }
 
   // Add the idekey
@@ -826,7 +833,7 @@ void XDebugServer::parseInput(String& cmd, Array& args) {
         if (args[opt].isNull()) {
           size_t size = ptr - value;
           StringData* val_data = StringData::Make(value, size, CopyString);
-          args.set(opt, f_stripcslashes(String(val_data)));
+          args.set(opt, HHVM_FN(stripcslashes)(String(val_data)));
           state = ParseState::SKIP_CHAR;
         } else {
           throw ERROR_DUP_ARG;

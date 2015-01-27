@@ -16,14 +16,21 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
+
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/stack-trace.h"
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 using namespace x64;
@@ -32,6 +39,11 @@ using Trace::ringbufferName;
 
 const char* area_names[] = { "main", "cold", "frozen" };
 namespace {
+
+const char* vixl_ccs[] = {
+  "eq", "ne", "hs", "lo", "mi", "pl", "vs", "vc",
+  "hi", "ls", "ge", "lt", "gt", "le", "al", "nv"
+};
 
 // Visitor class to format the operands of a Vinstr. There are
 // imm() overloaded methods for each type of operand used by any Vinstr.
@@ -44,6 +56,9 @@ struct FormatVisitor {
     str << sep() << "?";
   }
   void imm(ConditionCode cc) { str << sep() << cc_names[cc]; }
+  void imm(vixl::Condition cc) { str << sep() << vixl_ccs[cc]; }
+  void imm(uint8_t i) { imm(int(i)); }
+  void imm(uint16_t i) { imm(int(i)); }
   void imm(int i) { str << sep() << i; }
   void imm(bool b) { str << sep() << (b ? 'T' : 'F'); }
   void imm(Immed s) { str << sep() << s.l(); }
@@ -55,7 +70,29 @@ struct FormatVisitor {
   void imm(TCA addr) {
     str << sep() << getNativeFunctionName(addr);
   }
-  void imm(Vpoint p) { str << sep() << (size_t)p; }
+  void imm(TCA* addr) {
+    str << sep() << folly::format("{}", addr);
+  }
+  void imm(Vpoint p) { str << sep() << '@' << (size_t)p; }
+  void imm(const CppCall& cppcall) {
+    switch (cppcall.kind()) {
+    default:
+      str << sep() << "<unknown>";
+      break;
+    case CppCall::Kind::Direct:
+      return imm((TCA)cppcall.address());
+    case CppCall::Kind::Virtual:
+      str << sep() << folly::format("<virtual at 0x{:08x}>",
+                                    cppcall.vtableOffset());
+      break;
+    case CppCall::Kind::ArrayVirt:
+      str << sep() << folly::format("ArrayVirt({})", cppcall.arrayTable());
+      break;
+    case CppCall::Kind::Destructor:
+      str << sep() << folly::format("destructor({})", show(cppcall.reg()));
+      break;
+    }
+  }
   void imm(RingBufferType t) { str << sep() << ringbufferName(t); }
   void imm(SrcKey k) { str << sep() << showShort(k); }
   void imm(Fixup fix) {
@@ -63,7 +100,6 @@ struct FormatVisitor {
   }
   void imm(Stats::StatCounter c) { str << sep() << Stats::g_counterNames[c]; }
   void imm(Vlabel b) { str << sep() << "B" << size_t(b); }
-  void imm(TransID id) { str << sep() << id; }
   void imm(const Func* func) {
     str << sep();
     if (func) {
@@ -73,12 +109,25 @@ struct FormatVisitor {
       str << "nullptr";
     }
   }
+  void imm(ServiceRequest req) {
+    str << sep() << serviceReqName(req);
+  }
   void imm(TransFlags f) {
     if (f.noinlineSingleton) str << sep() << "noinlineSingleton";
+  }
+  void imm(DestType dt) {
+    str << sep() << destTypeName(dt);
+  }
+  void imm(RIPRelativeRef r) {
+    str << sep() << folly::format("ip[{:#x}]", r.r.disp);
+  }
+  void imm(RoundDirection rd) {
+    str << sep() << show(rd);
   }
 
   template<class R> void across(R r) { print(r); }
   template<class R> void use(R r) { print(r); }
+  template<class R, class H> void useHint(R r, H) { print(r); }
   void use(Vptr m) { print(m); }
   void use(Vtuple uses) { print(uses); }
 
@@ -92,43 +141,39 @@ struct FormatVisitor {
   }
   void def(Vtuple defs) { defSep(); print(defs); }
   template<class R> void def(R r) { defSep(); print(r); }
+  template<class R, class H> void defHint(R r, H) { defSep(); print(r); }
 
   void print(Vptr p) {
     str << sep() << show(p);
   }
 
-  void print(Reg64 r) {
-    str << sep() << reg::regname(r);
+  void print(Vtuple t) {
+    print(unit.tuples[t]);
   }
 
-  void print(Vtuple t) {
-    for (auto r : unit.tuples[t]) print(r);
+  void print(const VregList& regs) {
+    str << sep() << '{';
+    comma = false;
+    for (auto r : regs) print(r);
+    comma = true;
+    str << '}';
+  }
+
+  void print(VcallArgsId id) {
+    auto& args = unit.vcallArgs[id];
+    print(args.args);
+    print(args.simdArgs);
+    print(args.stkArgs);
   }
 
   void print(RegSet regs) {
     regs.forEach([&](Vreg r) { print(r); });
   }
 
-  template<class R> void print(R r) {
-    str << sep();
-    if (!r.isValid()) str << "%?";
-    else if (r.isVirt()) str << "%" << size_t(r);
-    else str << name(r);
+  void print(Vreg r) {
+    str << sep() << show(r);
   }
-  const char* name(Vreg64 r) { return reg::regname(r.asReg()); }
-  const char* name(Vreg32 r) { return reg::regname(r.asReg()); }
-  const char* name(Vreg8 r) { return reg::regname(r.asReg()); }
-  const char* name(VregXMM r) {
-    return reg::regname(r.asReg());
-  }
-  const char* name(Vreg r) {
-    if (r.isGP()) {
-      Reg64 tmp = r;
-      return reg::regname(tmp);
-    }
-    RegXMM tmp = r;
-    return reg::regname(tmp);
-  }
+
   const char* sep() { return comma ? ", " : (comma = true, ""); }
   const Vunit& unit;
 
@@ -140,16 +185,12 @@ struct FormatVisitor {
 
 std::string show(Vreg r) {
   if (!r.isValid()) return "%?";
-  if (r.isPhys()) {
-    if (r.isGP()) {
-      Reg64 gpr = r;
-      return reg::regname(gpr);
-    }
-    RegXMM xmm = r;
-    return reg::regname(xmm);
-  }
   std::ostringstream str;
-  str << "%" << size_t(r);
+  if (r.isPhys()) {
+    mcg->backEnd().streamPhysReg(str, r);
+  } else {
+    str << "%" << size_t(r);
+  }
   return str.str();
 }
 
@@ -201,11 +242,21 @@ std::string show(const Vunit& unit, const Vinstr& inst) {
 void printBlock(std::ostream& out, const Vunit& unit,
                 const PredVector& preds, Vlabel b) {
   auto& block = unit.blocks[b];
-  out << folly::format("B{: <11} {}", size_t(b), area_names[int(block.area)]);
+  out << '\n' << color(ANSI_COLOR_MAGENTA);
+  out << folly::format(" B{: <11} {}", size_t(b),
+           area_names[int(block.area)]);
   for (auto p : preds[b]) out << ", B" << size_t(p);
-  out << "\n";
+  out << color(ANSI_COLOR_END);
+
+  if (!block.code.empty() && !block.code.front().origin) out << '\n';
+
+  const IRInstruction* currentOrigin = nullptr;
   for (auto& inst : block.code) {
-    out << "  " << show(unit, inst) << "\n";
+    if (currentOrigin != inst.origin && inst.origin) {
+      currentOrigin = inst.origin;
+      out << "\n    " << currentOrigin->toString() << '\n';
+    }
+    out << "        " << show(unit, inst) << '\n';
   }
 }
 
@@ -238,16 +289,20 @@ std::string show(const Vunit& unit) {
   auto blocks = sortBlocks(unit);
 
   std::ostringstream out;
-  printCfg(out, unit, blocks);
   for (auto b : blocks) {
     printBlock(out, unit, preds, b);
   }
   return out.str();
 }
 
-void printUnit(std::string caption, const Vunit& unit) {
-  if (!dumpIREnabled(1)) return;
-  Trace::ftraceRelease("\n{}\n{}\n", caption, show(unit));
+void printUnit(int level, const std::string& caption, const Vunit& unit) {
+  if (!Trace::moduleEnabledRelease(HPHP::Trace::vasm, level)) return;
+  Trace::ftraceRelease(
+    "\n{}{}\n{}",
+    banner(caption.c_str()),
+    show(unit),
+    banner("")
+  );
 }
 
 }}

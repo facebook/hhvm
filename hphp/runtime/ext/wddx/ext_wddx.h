@@ -19,11 +19,9 @@
 #define incl_HPHP_EXT_WDDX_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/string-buffer.h"
 
 namespace HPHP {
-
-using std::string;
-using std::vector;
 
 class WddxPacket: public ResourceData {
  public:
@@ -37,20 +35,24 @@ class WddxPacket: public ResourceData {
 
 
   bool add_var(const String& varName, bool hasVarTag);
-  string packet_end();
+  String packet_end();
   bool serialize_value(const Variant& varVariant);
   bool recursiveAddVar(const String& varName, const Variant& varVariant,
                        bool hasVarTag );
 
  private:
-  string getWddxEncoded(const string& varType, const string& varValue,
-                        const String& varName, bool hasVarTag);
+  String getWddxEncoded(const String& varType,
+                        const String& varValue,
+                        const String& varName,
+                        bool hasVarTag);
 
-  string wrapValue(const string& start, const string& end,
-                   const string& varValue, const String& varName,
+  String wrapValue(const String& start,
+                   const String& end,
+                   const String& varValue,
+                   const String& varName,
                    bool hasVarTag);
 
-  string m_packetString;
+  StringBuffer m_packetString;
   bool m_packetClosed;
   bool m_manualPacketCreation;
 };

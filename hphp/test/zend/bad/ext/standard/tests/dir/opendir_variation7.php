@@ -58,6 +58,7 @@ foreach ($permission_values as $perm) {
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 // deleting temporary directory
 $dir_path = dirname(__FILE__) . "/opendir_variation7";

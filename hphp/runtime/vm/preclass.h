@@ -19,11 +19,11 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
-#include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
@@ -31,6 +31,7 @@
 #include "hphp/util/range.h"
 
 #include <type_traits>
+#include <unordered_set>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,12 +49,12 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef hphp_hash_set<LowStringPtr,
-                      string_data_hash,
-                      string_data_isame> TraitNameSet;
+using TraitNameSet = std::unordered_set<LowStringPtr,
+                                        string_data_hash,
+                                        string_data_isame>;
 
-using BuiltinCtorFunction = ObjectData* (*)(Class*);
-using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
+using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
+using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
 
 /*
  * A PreClass represents the source-level definition of a PHP class, interface,
@@ -128,9 +129,8 @@ struct PreClass : AtomicCountable {
          const TypedValue& val,
          RepoAuthType repoAuthType);
 
-    void prettyPrint(std::ostream& out) const;
+    void prettyPrint(std::ostream&, const PreClass*) const;
 
-    PreClass*         preClass()       const { return m_preClass; }
     const StringData* name()           const { return m_name; }
     const StringData* mangledName()    const { return m_mangledName; }
     Attr              attrs()          const { return m_attrs; }
@@ -140,7 +140,6 @@ struct PreClass : AtomicCountable {
     RepoAuthType      repoAuthType()   const { return m_repoAuthType; }
 
   private:
-    PreClass* m_preClass;
     LowStringPtr m_name;
     LowStringPtr m_mangledName;
     Attr m_attrs;
@@ -154,32 +153,32 @@ struct PreClass : AtomicCountable {
    * Class constant information.
    */
   struct Const {
-    Const(PreClass* preClass,
-          const StringData* name,
-          const StringData* typeConstraint,
-          const TypedValue& val,
+    Const(const StringData* name,
+          const TypedValueAux& val,
           const StringData* phpCode);
 
-    void prettyPrint(std::ostream& out) const;
+    void prettyPrint(std::ostream&, const PreClass*) const;
 
-    PreClass*         preClass()       const { return m_preClass; }
-    const StringData* name()           const { return m_name; }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
-    const TypedValue& val()            const { return m_val; }
-    const StringData* phpCode()        const { return m_phpCode; }
+    const StringData* name()     const { return m_name; }
+    const TypedValueAux& val()   const { return m_val; }
+    const StringData* phpCode()  const { return m_phpCode; }
+    bool isAbstract()            const { return m_val.isAbstractConst(); }
+
+    template<class SerDe> void serde(SerDe& sd);
 
   private:
-    PreClass* m_preClass;
     LowStringPtr m_name;
-    LowStringPtr m_typeConstraint;
-    TypedValue m_val;
+    /* m_aux.u_isAbstractConst indicates an abstract constant. A TypedValue
+     * with KindOfUninit represents a constant whose value is not
+     * statically available (e.g. "const X = self::Y + 5;") */
+    TypedValueAux m_val;
     LowStringPtr m_phpCode;
   };
 
   /*
    * Trait precedence rule.  Describes a usage of the `insteadof' operator.
    *
-   * @see: http://www.php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
+   * @see: http://docs.hhvm.com/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
    */
   struct TraitPrecRule {
     TraitPrecRule();
@@ -205,7 +204,7 @@ struct PreClass : AtomicCountable {
   /*
    * Trait alias rule.  Describes a usage of the `as' operator.
    *
-   * @see: http://www.php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
+   * @see: http://docs.hhvm.com/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
    */
   struct TraitAliasRule {
     TraitAliasRule();
@@ -222,6 +221,18 @@ struct PreClass : AtomicCountable {
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_traitName)(m_origMethodName)(m_newMethodName)(m_modifiers);
     }
+
+    /*
+     * Pair of (new name, original name) representing the rule.
+     *
+     * This is the format for alias rules expected by reflection.
+     */
+    using NamePair = std::pair<LowStringPtr,LowStringPtr>;
+
+    /*
+     * Get the rule as a NamePair.
+     */
+    NamePair asNamePair() const;
 
   private:
     LowStringPtr m_traitName;
@@ -296,7 +307,20 @@ public:
   const StringData* parent()       const { return m_parent; }
   const StringData* docComment()   const { return m_docComment; }
   Hoistable         hoistability() const { return m_hoistable; }
-  const TypeConstraint& enumBaseTy()   const { return m_enumBaseTy; }
+
+  /*
+   * Number of methods declared on this class (as opposed to included via
+   * traits).
+   *
+   * This value is only valid when trait methods are flattened; otherwise, it
+   * is -1.
+   */
+  int32_t numDeclMethods() const { return m_numDeclMethods; }
+
+  /*
+   * If this is an enum class, return the type of its enum values.
+   */
+  const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
 
   /*
    * For a builtin class c_Foo:
@@ -424,6 +448,7 @@ private:
   LowStringPtr m_name;
   LowStringPtr m_parent;
   LowStringPtr m_docComment;
+  int32_t m_numDeclMethods;
   TypeConstraint m_enumBaseTy;
   BuiltinCtorFunction m_instanceCtor{nullptr};
   BuiltinDtorFunction m_instanceDtor{nullptr};

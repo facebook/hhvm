@@ -21,11 +21,12 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(DateInterval)
+IMPLEMENT_RESOURCE_ALLOCATION(DateInterval)
 ///////////////////////////////////////////////////////////////////////////////
 
 DateInterval::DateInterval() {
@@ -87,6 +88,13 @@ bool DateInterval::setInterval(const String& date_interval) {
     timelib_rel_time_dtor(di);
     return false;
   } else {
+#ifdef TIMELIB_HAVE_INTERVAL
+    if (UNLIKELY(!di && start && end)) {
+      timelib_update_ts(start, nullptr);
+      timelib_update_ts(end, nullptr);
+      di = timelib_diff(start, end);
+    }
+#endif
     m_di = DateIntervalPtr(di, dateinterval_deleter());
     return true;
   }
@@ -158,9 +166,9 @@ String DateInterval::format(const String& format_spec) {
   return s.detach();
 }
 
-SmartResource<DateInterval> DateInterval::cloneDateInterval() const {
-  if (!m_di) return NEWOBJ(DateInterval)();
-  return NEWOBJ(DateInterval)(timelib_rel_time_clone(m_di.get()));
+SmartPtr<DateInterval> DateInterval::cloneDateInterval() const {
+  if (!m_di) return makeSmartPtr<DateInterval>();
+  return makeSmartPtr<DateInterval>(timelib_rel_time_clone(m_di.get()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

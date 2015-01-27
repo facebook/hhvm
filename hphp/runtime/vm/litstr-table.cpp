@@ -28,7 +28,7 @@ LitstrTable* LitstrTable::s_litstrTable = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 
 Id LitstrTable::mergeLitstr(const StringData* litstr) {
-  mutex().lock();
+  std::lock_guard<Mutex> g(mutex());
   assert(!m_safeToRead);
   auto it = m_litstr2id.find(litstr);
 
@@ -39,10 +39,8 @@ Id LitstrTable::mergeLitstr(const StringData* litstr) {
     m_litstr2id[sd] = id;
     m_namedInfo.emplace_back(sd, nullptr);
 
-    mutex().unlock();
     return id;
   } else {
-    mutex().unlock();
     return it->second;
   }
 }

@@ -64,11 +64,20 @@ struct RequestLocal {
     }
     if (!m_node.m_p->getInited()) {
       m_node.m_p->setInited(true);
-      m_node.m_p->requestInit();
+      try {
+        m_node.m_p->requestInit();
+      } catch (...) {
+        m_node.m_p->setInited(false);
+        throw;
+      }
       // this registration makes sure m_p->requestShutdown() will be called
       g_context->registerRequestEventHandler(m_node.m_p);
     }
     return m_node.m_p;
+  }
+
+  bool getInited() const {
+    return (m_node.m_p != nullptr) && m_node.m_p->getInited();
   }
 
   void create() NEVER_INLINE;
@@ -119,6 +128,11 @@ template<typename T>
 class RequestLocal {
 public:
   RequestLocal(ThreadLocal<T> & tl) : m_tlsObjects(tl) {}
+
+  bool getInited() const {
+    return !m_tlsObjects.isNull() && m_tlsObjects.get()->getInited();
+  }
+
   T *operator->() const { return get();}
   T &operator*() const { return *get();}
 
@@ -126,7 +140,12 @@ public:
     T *obj = m_tlsObjects.get();
     if (!obj->getInited()) {
       obj->setInited(true);
-      obj->requestInit();
+      try {
+        obj->requestInit();
+      } catch (...) {
+        obj->setInited(false);
+        throw;
+      }
 
       // this registration makes sure obj->requestShutdown() will be called
       g_context->registerRequestEventHandler(obj);

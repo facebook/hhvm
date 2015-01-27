@@ -30,9 +30,11 @@
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/compiler/parser/parser.h"
+
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/type-conversions.h"
 
 using namespace HPHP;
 
@@ -405,44 +407,6 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (m_op == T_PRINT && m_exp->is(KindOfEncapsListExpression) &&
-      !m_exp->hasEffect()) {
-    EncapsListExpressionPtr e = static_pointer_cast<EncapsListExpression>
-      (m_exp);
-    e->stripConcat();
-  }
-
-  if (m_op == T_UNSET_CAST && !hasEffect()) {
-    if (!getScope()->getVariables()->
-        getAttribute(VariableTable::ContainsCompact) ||
-        !m_exp->isScalar()) {
-      return CONSTANT("null");
-    }
-  } else if (m_op == T_UNSET && m_exp->is(KindOfExpressionList) &&
-             !static_pointer_cast<ExpressionList>(m_exp)->getCount()) {
-    recomputeEffects();
-    return CONSTANT("null");
-  } else if (m_op == T_BOOL_CAST) {
-    if (m_exp->getActualType() &&
-        m_exp->getActualType()->is(Type::KindOfBoolean)) {
-      return replaceValue(m_exp);
-    }
-  } else if (m_op != T_ARRAY &&
-             m_op != T_VARRAY &&
-             m_op != T_MIARRAY &&
-             m_op != T_MSARRAY &&
-             m_exp &&
-             m_exp->isScalar()) {
-    Variant value;
-    Variant result;
-    if (m_exp->getScalarValue(value) && preCompute(value, result)) {
-      return replaceValue(makeScalarExpression(ar, result));
-    }
-  }
-  return ExpressionPtr();
-}
-
 void UnaryOpExpression::setExistContext() {
   if (m_exp) {
     if (m_exp->is(Expression::KindOfExpressionList)) {
@@ -456,123 +420,6 @@ void UnaryOpExpression::setExistContext() {
     }
 
     m_exp->setContext(Expression::ExistContext);
-  }
-}
-
-TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                      bool coerce) {
-  TypePtr et; // expected m_exp's type
-  TypePtr rt; // return type
-
-  switch (m_op) {
-  case '!':             et = rt = Type::Boolean;                     break;
-  case '+':
-  case '-':             et = Type::Numeric; rt = Type::Numeric;      break;
-  case T_INC:
-  case T_DEC:
-  case '~':             et = rt = Type::Primitive;                   break;
-  case T_CLONE:         et = Type::Some;      rt = Type::Object;     break;
-  case '@':             et = type;            rt = Type::Variant;    break;
-  case T_INT_CAST:      et = rt = Type::Int64;                       break;
-  case T_DOUBLE_CAST:   et = rt = Type::Double;                      break;
-  case T_STRING_CAST:   et = rt = Type::String;                      break;
-  case T_ARRAY:
-  case T_VARRAY:
-  case T_MIARRAY:
-  case T_MSARRAY:       et = Type::Some;      rt = Type::Array;      break;
-  case T_ARRAY_CAST:    et = rt = Type::Array;                       break;
-  case T_OBJECT_CAST:   et = rt = Type::Object;                      break;
-  case T_BOOL_CAST:     et = rt = Type::Boolean;                     break;
-  case T_UNSET_CAST:    et = Type::Some;      rt = Type::Variant;    break;
-  case T_UNSET:         et = Type::Null;      rt = Type::Variant;    break;
-  case T_EXIT:          et = Type::Primitive; rt = Type::Variant;    break;
-  case T_PRINT:         et = Type::String;    rt = Type::Int64;      break;
-  case T_ISSET:         et = Type::Variant;   rt = Type::Boolean;
-    setExistContext();
-    break;
-  case T_EMPTY:         et = Type::Some;      rt = Type::Boolean;
-    setExistContext();
-    break;
-  case T_INCLUDE:
-  case T_INCLUDE_ONCE:
-  case T_REQUIRE:
-  case T_REQUIRE_ONCE:  et = Type::String;    rt = Type::Variant;    break;
-  case T_EVAL:
-    et = Type::String;
-    rt = Type::Any;
-    getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
-    break;
-  case T_DIR:
-  case T_FILE:          et = rt = Type::String;                      break;
-  default:
-    assert(false);
-  }
-
-  if (m_exp) {
-    TypePtr expType = m_exp->inferAndCheck(ar, et, false);
-    if (Type::SameType(expType, Type::String) &&
-        (m_op == T_INC || m_op == T_DEC)) {
-      rt = expType = m_exp->inferAndCheck(ar, Type::Variant, true);
-    }
-
-    switch (m_op) {
-    case '+':
-    case '-':
-      if (Type::SameType(expType, Type::Int64) ||
-          Type::SameType(expType, Type::Double)) {
-        rt = expType;
-      }
-      break;
-    case T_INC:
-    case T_DEC:
-    case '~':
-      if (Type::SameType(expType, Type::Int64) ||
-          Type::SameType(expType, Type::Double) ||
-          Type::SameType(expType, Type::String)) {
-        rt = expType;
-      }
-      break;
-    case T_ISSET:
-    case T_EMPTY:
-      if (m_exp->is(Expression::KindOfExpressionList)) {
-        ExpressionListPtr exps =
-          dynamic_pointer_cast<ExpressionList>(m_exp);
-        if (exps->getListKind() == ExpressionList::ListKindParam) {
-          for (int i = 0; i < exps->getCount(); i++) {
-            SetExpTypeForExistsContext(ar, (*exps)[i], m_op == T_EMPTY);
-          }
-        }
-      } else {
-        SetExpTypeForExistsContext(ar, m_exp, m_op == T_EMPTY);
-      }
-      break;
-    default:
-      break;
-    }
-  }
-
-  return rt;
-}
-
-void UnaryOpExpression::SetExpTypeForExistsContext(AnalysisResultPtr ar,
-                                                   ExpressionPtr e,
-                                                   bool allowPrimitives) {
-  if (!e) return;
-  TypePtr at(e->getActualType());
-  if (!allowPrimitives && at &&
-      at->isExactType() && at->isPrimitive()) {
-    at = e->inferAndCheck(ar, Type::Variant, true);
-  }
-  TypePtr it(e->getImplementedType());
-  TypePtr et(e->getExpectedType());
-  if (et && et->is(Type::KindOfVoid)) e->setExpectedType(TypePtr());
-  if (at && (!it || Type::IsMappedToVariant(it)) &&
-      ((allowPrimitives && Type::HasFastCastMethod(at)) ||
-       (!allowPrimitives &&
-        (at->is(Type::KindOfObject) ||
-         at->is(Type::KindOfArray) ||
-         at->is(Type::KindOfString))))) {
-    e->setExpectedType(it ? at : TypePtr());
   }
 }
 

@@ -86,16 +86,39 @@ public:
   virtual ~RequestHandler() {}
 
   /**
+   * Called before and after request-handling work.
+   */
+  virtual void setupRequest(Transport* transport) {}
+  virtual void teardownRequest(Transport* transport) noexcept {}
+
+  /**
    * Sub-class handles a request by implementing this function.
    */
-  virtual void handleRequest(Transport *transport) = 0;
+  virtual void handleRequest(Transport* transport) = 0;
+
   /**
    * Sub-class handles a request by implementing this function. This is called
-   * when the server determines this request should not be processed (ie. due to
-   * timeout).
+   * when the server determines this request should not be processed (e.g., due
+   * to timeout).
    */
-  virtual void abortRequest(Transport *transport) = 0;
+  virtual void abortRequest(Transport* transport) = 0;
+
+  /**
+   * Convenience wrapper around {setup,handle,teardown}Request().
+   */
+  void run(Transport* transport) {
+    SCOPE_EXIT { teardownRequest(transport); };
+    setupRequest(transport);
+    handleRequest(transport);
+  }
+
+  /**
+   * Write an entry to the handler's access log.
+   */
+  virtual void logToAccessLog(Transport* transport) {}
+
   int getDefaultTimeout() const { return m_timeout; }
+
 private:
   int m_timeout;
 };

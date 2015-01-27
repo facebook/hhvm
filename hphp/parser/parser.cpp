@@ -15,8 +15,8 @@
 */
 #include "parser.h"
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
+#include <folly/Conv.h>
+#include <folly/Format.h>
 
 #include "hphp/util/hash.h"
 
@@ -30,6 +30,7 @@ bool ParserBase::IsClosureName(const std::string &name) {
 }
 
 std::string ParserBase::newClosureName(
+    const std::string &namespaceName,
     const std::string &className,
     const std::string &funcName) {
   // Closure names must be globally unique.  The easiest way to do
@@ -39,6 +40,9 @@ std::string ParserBase::newClosureName(
   std::string name = "Closure$";
   if (!className.empty()) {
     name += className + "::";
+  } else if (!namespaceName.empty()) {
+    // If className is present, it already includes the namespace
+    name += namespaceName + "\\";
   }
   name += funcName;
 
@@ -68,12 +72,18 @@ ParserBase::ParserBase(Scanner &scanner, const char *fileName)
 ParserBase::~ParserBase() {
 }
 
-std::string ParserBase::getMessage(bool filename /* = false */) const {
+std::string ParserBase::getMessage(bool filename /* = false */,
+                                   bool rawPosWhenNoError /* = false */
+                                  ) const {
   std::string ret = m_scanner.getError();
+
   if (!ret.empty()) {
     ret += " ";
   }
-  ret += getMessage(m_scanner.getLocation(), filename);
+  if (!ret.empty() || rawPosWhenNoError) {
+    ret += getMessage(m_scanner.getLocation(), filename);
+  }
+
   return ret;
 }
 
@@ -91,7 +101,7 @@ std::string ParserBase::getMessage(Location *loc,
 }
 
 LocationPtr ParserBase::getLocation() const {
-  LocationPtr location(new Location());
+  auto location = std::make_shared<Location>();
   location->file  = file();
   location->line0 = line0();
   location->char0 = char0();

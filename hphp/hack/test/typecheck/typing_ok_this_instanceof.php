@@ -12,13 +12,12 @@
 class A {
 
   public function foo(): void {
-    if($this instanceof B) {
+    if ($this instanceof B) {
       $this->bar();
     }
   }
 }
 
 class B {
-  public function bar(): void {
-  }
+  public function bar(): void {}
 }

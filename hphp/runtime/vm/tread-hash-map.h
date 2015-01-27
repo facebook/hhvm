@@ -19,9 +19,9 @@
 #include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/type_traits/is_convertible.hpp>
+#include <type_traits>
 #include <utility>
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 #include "hphp/util/atomic.h"
 
 namespace HPHP {

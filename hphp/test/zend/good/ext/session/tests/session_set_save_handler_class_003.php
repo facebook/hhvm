@@ -50,6 +50,7 @@ session_set_save_handler($handler);
 
 session_start();
 
+$_SESSION['bar'] = 'hello';
 session_write_close();
 session_unset();
 

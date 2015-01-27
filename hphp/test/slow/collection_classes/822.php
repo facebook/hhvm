@@ -6,8 +6,6 @@ function f() {
 ;
   $m = new Map($v);
   var_dump($m);
-  $sm = new StableMap($m);
-  var_dump($sm);
 }
 function g() {
   $m = Map {
@@ -22,7 +20,7 @@ function h() {
   var_dump(new Map($arr1));
   $arr2 = array('a' => 1, 2 => 'b');
   var_dump(new Vector($arr2));
-  var_dump(new StableMap($arr2));
+  var_dump(new Map($arr2));
 }
 function gen() {
   yield 42;

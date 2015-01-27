@@ -1,5 +1,5 @@
-Awaitable::getWaitHandle
+HH\Awaitable::getWaitHandle
 HH\Iterator::next
-Method BlockableWaitHandle::getContextIdx does not have a prototype
-Awaitable::getWaitHandle
-WaitableWaitHandle::getContextIdx
+Method HH\BlockableWaitHandle::getContextIdx does not have a prototype
+HH\Awaitable::getWaitHandle
+HH\WaitableWaitHandle::getContextIdx

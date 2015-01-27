@@ -16,17 +16,44 @@
 
 #include "hphp/runtime/base/directory.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 #include <sys/types.h>
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(PlainDirectory)
+IMPLEMENT_RESOURCE_ALLOCATION(PlainDirectory)
 
 ///////////////////////////////////////////////////////////////////////////////
+
+const StaticString
+  s_wrapper_type("wrapper_type"),
+  s_stream_type("stream_type"),
+  s_mode("mode"),
+  s_unread_bytes("unread_bytes"),
+  s_seekable("seekable"),
+  s_timed_out("timed_out"),
+  s_blocked("blocked"),
+  s_eof("eof"),
+  s_plainfile("plainfile"),
+  s_dir("dir"),
+  s_r("r");
+
+Array Directory::getMetaData() {
+  return make_map_array(
+    s_wrapper_type, s_plainfile, // PHP5 compatibility
+    s_stream_type,  s_dir,
+    s_mode,         s_r,
+    s_unread_bytes, 0,
+    s_seekable,     false,
+    s_timed_out,    false,
+    s_blocked,      true,
+    s_eof,          isEof()
+  );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -71,11 +98,15 @@ Variant ArrayDirectory::read() {
   auto ret = m_it.second();
   assert(ret.isString());
   ++m_it;
-  return Variant(f_basename(ret.toString()));
+  return Variant(HHVM_FN(basename)(ret.toString()));
 }
 
 void ArrayDirectory::rewind() {
   m_it.setPos(0);
+}
+
+bool ArrayDirectory::isEof() const {
+  return m_it.end();
 }
 
 String ArrayDirectory::path() {
@@ -85,7 +116,7 @@ String ArrayDirectory::path() {
 
   auto entry = m_it.second();
   assert(entry.isString());
-  return f_dirname(entry.toString());
+  return HHVM_FN(dirname)(entry.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

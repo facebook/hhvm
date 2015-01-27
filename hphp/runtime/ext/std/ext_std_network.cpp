@@ -16,22 +16,24 @@
 */
 #include "hphp/runtime/ext/std/ext_std_network.h"
 
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <resolv.h>
+#include <sys/socket.h>
 
-#include "folly/ScopeGuard.h"
+#include <folly/IPAddress.h>
+#include <folly/ScopeGuard.h>
 
-#include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/file.h"
 #include "hphp/util/network.h"
 
 #if defined(__APPLE__)
@@ -157,37 +159,23 @@ Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address) {
   return ip_address;
 }
 
+const StaticString s_empty("");
+
 String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   IOStatusHelper io("gethostbyname", hostname.data());
-  if (RuntimeOption::EnableDnsCache) {
-    Variant success;
-    Variant resolved = f_apc_fetch(hostname, ref(success),
-                                   SHARED_STORE_DNS_CACHE);
-    if (same(success, true)) {
-      if (same(resolved, false)) {
-        return hostname;
-      }
-      return resolved.toString();
-    }
-  }
 
   HostEnt result;
   if (!safe_gethostbyname(hostname.data(), result)) {
-    if (RuntimeOption::EnableDnsCache) {
-      f_apc_store(hostname, false, RuntimeOption::DnsCacheTTL,
-                  SHARED_STORE_DNS_CACHE);
-    }
     return hostname;
   }
 
   struct in_addr in;
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
-  String ret(safe_inet_ntoa(in));
-  if (RuntimeOption::EnableDnsCache) {
-    f_apc_store(hostname, ret, RuntimeOption::DnsCacheTTL,
-                SHARED_STORE_DNS_CACHE);
+  try {
+    return String(folly::IPAddressV4(in).str());
+  } catch (folly::IPAddressFormatException &e) {
+    return hostname;
   }
-  return ret;
 }
 
 Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
@@ -200,7 +188,11 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
   Array ret;
   for (int i = 0 ; result.hostbuf.h_addr_list[i] != 0 ; i++) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
-    ret.append(String(safe_inet_ntoa(in)));
+    try {
+      ret.append(String(folly::IPAddressV4(in).str()));
+    } catch (folly::IPAddressFormatException &e) {
+        // ok to skip
+    }
   }
   return ret;
 }
@@ -257,7 +249,7 @@ Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
 
   char buffer[40];
   if (!inet_ntop(af, in_addr.data(), buffer, sizeof(buffer))) {
-    raise_warning("An unknown error occured");
+    raise_warning("An unknown error occurred");
     return false;
   }
   return String(buffer, CopyString);
@@ -295,10 +287,12 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
 }
 
 String HHVM_FUNCTION(long2ip, const String& proper_address) {
-  unsigned long n = strtoul(proper_address.c_str(), NULL, 0);
-  struct in_addr myaddr;
-  myaddr.s_addr = htonl(n);
-  return safe_inet_ntoa(myaddr);
+  try {
+    unsigned long n = strtoul(proper_address.c_str(), NULL, 0);
+    return folly::IPAddress::fromLongHBO(n).str();
+  } catch (folly::IPAddressFormatException &e) {
+    return s_empty;
+  }
 }
 
 /* just a hack to free resources allocated by glibc in __res_nsend()
@@ -933,14 +927,14 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
     raise_warning("Cannot modify header information - headers already sent");
   }
 
-  String header = f_rtrim(str);
+  String header = HHVM_FN(rtrim)(str);
 
   // new line safety check
   // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad
   // for security?
   if (header.find('\n') >= 0 || header.find('\r') >= 0) {
-    raise_warning("Header may not contain more than a single header, "
-                  "new line detected");
+    raise_error("Header may not contain more than a single header, "
+                "new line detected");
     return;
   }
 
@@ -949,10 +943,11 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
     const char *header_line = header.data();
 
     // handle single line of status code
-    if (header.size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
+    if ((header.size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) ||
+        (header.size() >= 7 && strncasecmp(header_line, "Status:", 7) == 0)) {
       int code = 200;
       const char *reason = nullptr;
-      for (const char *ptr = header_line; *ptr; ptr++) {
+      for (const char *ptr = header_line + 5; *ptr; ptr++) {
         if (*ptr == ' ' && *(ptr + 1) != ' ') {
           code = atoi(ptr + 1);
           for (ptr++; *ptr; ptr++) {
@@ -990,8 +985,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
       transport->addHeader(newHeader.empty() ? header : newHeader);
     }
     if (http_response_code) {
-      transport->setResponse(http_response_code,
-                             "explicit_header_response_code");
+      transport->setResponse(http_response_code);
     }
   }
 }
@@ -1003,7 +997,7 @@ Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
   if (transport) {
     *s_response_code = transport->getResponseCode();
     if (response_code) {
-      transport->setResponse(response_code, "explicit_header_response_code");
+      transport->setResponse(response_code);
     }
   }
 
@@ -1049,8 +1043,14 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
   return false;
 }
 
-bool HHVM_FUNCTION(header_register_callback, const Variant& callback) {
+Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
   Transport *transport = g_context->getTransport();
+
+  if (!HHVM_FN(is_callable)(callback)) {
+    raise_warning("First argument is expected to be a valid callback");
+    return init_null();
+  }
+
   if (!transport) {
     // fail if there is no transport
     return false;
@@ -1076,7 +1076,7 @@ void HHVM_FUNCTION(header_remove, const Variant& name /* = null_string */) {
   }
 }
 
-int HHVM_FUNCTION(get_http_request_size) {
+int64_t HHVM_FUNCTION(get_http_request_size) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     return transport->getRequestSize();

@@ -54,16 +54,35 @@ public:
   /* implicit */ Object(ObjectData *data) : ObjectBase(data) { }
   /* implicit */ Object(const Object& src) : ObjectBase(src.m_px) { }
 
+  template <typename T>
+  explicit Object(const SmartPtr<T> &ptr) : ObjectBase(ptr) { }
+
+  template <typename T>
+  explicit Object(SmartPtr<T>&& ptr) : ObjectBase(std::move(ptr)) { }
+
   // Move ctor
-  Object(Object&& src) : ObjectBase(std::move(src)) { }
+  Object(Object&& src) noexcept : ObjectBase(std::move(src)) { }
 
   // Regular assign
   Object& operator=(const Object& src) {
     ObjectBase::operator=(src);
     return *this;
   }
+
+  template <typename T>
+  Object& operator=(const SmartPtr<T>& src) {
+    ObjectBase::operator=(src);
+    return *this;
+  }
+
   // Move assign
   Object& operator=(Object&& src) {
+    ObjectBase::operator=(std::move(src));
+    return *this;
+  }
+
+  template <typename T>
+  Object& operator=(SmartPtr<T>&& src) {
     ObjectBase::operator=(std::move(src));
     return *this;
   }
@@ -77,7 +96,7 @@ public:
     return m_px == nullptr;
   }
   bool instanceof(const String& s) const {
-    return m_px && m_px->o_instanceof(s);
+    return m_px && m_px->instanceof(s);
   }
   bool instanceof(const Class* cls) const {
     return m_px && m_px->instanceof(cls);
@@ -126,12 +145,12 @@ public:
   /**
    * Type conversions
    */
-  bool    toBoolean() const { return m_px ? m_px->o_toBoolean() : false;}
-  char    toByte   () const { return m_px ? m_px->o_toInt64() : 0;}
-  short   toInt16  () const { return m_px ? m_px->o_toInt64() : 0;}
-  int     toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
-  int64_t toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
-  double  toDouble () const { return m_px ? m_px->o_toDouble() : 0;}
+  bool    toBoolean() const { return m_px ? m_px->toBoolean() : false; }
+  char    toByte   () const { return toInt64(); }
+  int16_t toInt16  () const { return toInt64(); }
+  int32_t toInt32  () const { return toInt64(); }
+  int64_t toInt64  () const { return m_px ? m_px->toInt64() : 0; }
+  double  toDouble () const { return m_px ? m_px->toDouble() : 0; }
   String  toString () const;
   Array   toArray  () const;
 

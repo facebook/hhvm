@@ -1,6 +1,6 @@
 <?php
 
-
+var_dump(mb_parse_str("first=value&arr[]=foo+bar&arr[]=baz"));
 mb_parse_str("first=value&arr[]=foo+bar&arr[]=baz", $output);
 var_dump($output['first']);
 var_dump($output['arr[]']); // bug in mb_parse_str not following PHP's
@@ -13,6 +13,10 @@ var_dump($ret[0]);
 var_dump($ret[1]);
 var_dump($ret[2]);
 
+$date = "04/30/1973";
+$ret = mb_split("[/.-]", $date, 2);
+var_dump($ret);
+
 var_dump(mb_strcut("abcdef", 1));
 var_dump(mb_strcut("abcdef", 1, 3));
 var_dump(mb_strcut("abcdef", 0, 4));
@@ -24,12 +28,16 @@ var_dump(mb_strcut("\xC3\x9C"."bcdef", 2, 3));
 var_dump(mb_strcut("\xC3\x9C"."bcdef", 0, 4) === "\xC3\x9C"."bc");
 var_dump(mb_strcut("\xC3\x9C"."bcdef", 0, 8) === "\xC3\x9C"."bcdef");
 var_dump(mb_strcut("\xC3\x9C"."bcdef", -1, 1));
+var_dump(mb_strcut("\xC3\x9C"."bcdef", -1, 1, "UTF-8"));
 
+var_dump(mb_strimwidth("long string", 0, 6));
 var_dump(mb_strimwidth("long string", 0, 6, "..>"));
 var_dump(mb_strimwidth("\xC3\x9C"."long string", 0, 6, "..>"));
+var_dump(mb_strimwidth("long string", 0, 6, "..>", 'UTF-8'));
 
 var_dump(mb_stripos("abcdef abcdef", "A", 1));
 var_dump(mb_stripos("abcdef\xC3\x9C"."abcdef", "A", 1));
+var_dump(mb_stripos("abcdef\xC3\x9C"."abcdef", "A", 1, "UTF-8"));
 
 var_dump(mb_stristr("Hello World!", "earth"));
 

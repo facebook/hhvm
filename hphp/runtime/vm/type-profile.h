@@ -13,32 +13,21 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef TYPE_PROFILE_H_
 #define TYPE_PROFILE_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 namespace HPHP {
 
-class StringData;
+//////////////////////////////////////////////////////////////////////
 
-struct TypeProfileKey {
-  enum KeyType {
-    MethodName,
-    PropName,
-    EltName,
-    StaticPropName
-  } m_kind;
-  const StringData* m_name;
+struct Func;
 
-  TypeProfileKey(KeyType kind, const StringData* sd) :
-   m_kind(kind), m_name(sd) { }
-
-  TypeProfileKey(MemberCode mc, const StringData* sd) :
-    m_kind(mc == MET ? EltName : PropName), m_name(sd) { }
-  uint64_t hash() const;
-};
+//////////////////////////////////////////////////////////////////////
 
 // These are both best-effort, and return noisy results.
 void profileInit();
@@ -46,9 +35,12 @@ void profileWarmupStart();
 void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
-void recordType(TypeProfileKey sk, DataType dt);
-std::pair<DataType, double> predictType(TypeProfileKey key);
 int64_t requestCount();
+
+/*
+ * Profiling for func hotness goes through this module.
+ */
+void profileIncrementFuncCounter(const Func*);
 
 extern __thread bool profileOn;
 inline bool isProfileRequest() {
@@ -60,6 +52,9 @@ inline bool isStandardRequest() {
   return standardRequest;
 }
 
+void setRelocateRequests(int32_t n);
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif // TYPE_PROFILE_H_
+#endif

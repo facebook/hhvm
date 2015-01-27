@@ -94,6 +94,7 @@ foreach($inputs as $input) {
 fclose($fp);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $dir = dirname(__FILE__) . '/scandir_variation2';
 rmdir($dir);

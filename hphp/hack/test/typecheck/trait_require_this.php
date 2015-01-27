@@ -42,7 +42,3 @@ function takes_kid(Kid $p): void {}
 function takes_parent(CParent $p): void {}
 
 function takes_iparent(IParent $ip): void {}
-
-// this declaration really should be a statically detected error,
-// what with traits not being a thing at runtime ...
-function takes_kt(KidTrait $kt): void {}

@@ -10,6 +10,7 @@
  */
 
 function foo(?int $x): void {
-  if ($x === null) {}
+  if ($x === null) {
+  }
   $a = $x + 10;
 }

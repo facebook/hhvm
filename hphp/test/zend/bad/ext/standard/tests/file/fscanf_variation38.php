@@ -57,6 +57,7 @@ foreach($hexa_formats as $hexa_format) {
 
 echo "\n*** Done ***";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation38.tmp";

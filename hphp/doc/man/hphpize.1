@@ -1,0 +1,56 @@
+.TH HPHPIZE 1
+
+.SH NAME
+hphpize \- prepare an HHVM extension for compiling DSOs.
+
+.SH SYNPOSIS
+.B hphpize
+
+.SH DESCRIPTION
+.BR hphpize (1)
+is a shell script to prepare an HHVM extension for compiling a dynamically
+shared object (DSO).
+
+.BR hphpize (1)
+requires, at a minimum, a PHP|Hack|C++ extension and a
+.B config\.cmake
+file that contains the build information for cmake.
+
+.B config\.cmake
+must contain at least the following two lines:
+
+.nf
+.RS
+HHVM_EXTENSION(${extension_name} ${filestobuild})
+.RE
+.RS
+HHVM_SYSTEMLIB(${extension_name} ${PHPfiletobuild})
+.RE
+.fi
+
+specifying the C++ source file(s) to build and one PHP file to embed in the DSO
+as a system library (systemlib).
+
+.B config\.cmake can contain other information as well, such as links to other
+libraries, etc.
+
+.SH EXAMPLE
+.I https://github.com/hhvm/extension-example
+
+.SH VERSION INFORMATION
+This manpage describes
+.BR hphpize (1),
+version 3.0 and greater
+
+.SH COPYRIGHT
+HHVM is licensed under the PHP and Zend licenses except as otherwise noted. The full license can be found at:
+.IR https://github\.com/facebook/hhvm
+
+.SH SEE ALSO
+.BR hhvm (1)
+.br
+.I https://github.com/facebook/hhvm/wiki/extension-api
+.br
+.I https://github.com/hhvm/extension-example
+.br
+.I http://docs\.hhvm\.com

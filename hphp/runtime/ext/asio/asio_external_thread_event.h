@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class AsioSession;
-FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
+class c_ExternalThreadEventWaitHandle;
 
 /**
  * An asynchronous external thread event.

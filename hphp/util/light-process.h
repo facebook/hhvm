@@ -78,9 +78,10 @@ private:
   static int GetId();
   static void SigChldHandler(int sig, siginfo_t* info, void* ctx);
 
-  bool initShadow(const std::string &prefix, int id,
+  bool initShadow(int afdt_listen,
+                  const std::string& afdt_filename, int id,
                   const std::vector<int> &inherited_fds);
-  void runShadow(int fdin, int fdout);
+  void runShadow();
   void closeShadow();
 
   /**
@@ -95,12 +96,8 @@ private:
 
   static Mutex s_mutex;
   pid_t m_shadowProcess;
-  FILE *m_fin;   // the pipe to read from the child
-  FILE *m_fout;  // the pipe to write to the child
   Mutex m_procMutex;
-  std::string m_afdtFilename;
   int m_afdt_fd;
-  int m_afdt_lfd;
   std::map<int64_t, int64_t> m_popenMap;
 };
 

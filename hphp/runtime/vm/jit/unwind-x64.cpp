@@ -89,9 +89,10 @@ void sync_regstate(_Unwind_Context* context) {
 }
 
 bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
-                         InvalidSetMException* ism) {
+                         bool do_side_exit, TypedValue unwinder_tv) {
   auto const rip = (TCA)_Unwind_GetIP(ctx);
   auto catchTraceOpt = mcg->getCatchTrace(rip);
+  FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
   if (!catchTraceOpt) return false;
 
   auto catchTrace = *catchTraceOpt;
@@ -119,9 +120,9 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
     return false;
   }
 
-  FTRACE(1, "installing catch trace {} for call {} with ism {}, "
+  FTRACE(1, "installing catch trace {} for call {} with tv {}, "
          "returning _URC_INSTALL_CONTEXT\n",
-         catchTrace, rip, ism);
+         catchTrace, rip, unwinder_tv.pretty());
 
   // In theory the unwind api will let us set registers in the frame
   // before executing our landing pad. In practice, trying to use
@@ -130,15 +131,22 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // RDS. This also simplifies the handler code because it doesn't
   // have to worry about saving its arguments somewhere while
   // executing the exit trace.
-  unwindRdsInfo->unwinderScratch = (int64_t)exn;
-  unwindRdsInfo->doSideExit = ism;
-  if (ism) {
-    unwindRdsInfo->unwinderTv = ism->tv();
+  unwindRdsInfo->exn = exn;
+  unwindRdsInfo->doSideExit = do_side_exit;
+  if (do_side_exit) {
+    unwindRdsInfo->unwinderTv = unwinder_tv;
   }
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;
 
   return true;
+}
+
+void deregister_unwind_region(std::vector<char>* p) {
+  std::auto_ptr<std::vector<char> > del(p);
+  __deregister_frame(&(*p)[0]);
+}
+
 }
 
 _Unwind_Reason_Code
@@ -153,13 +161,18 @@ tc_unwind_personality(int version,
   // any other runtimes but this may change in the future.
   DEBUG_ONLY constexpr uint64_t kMagicClass = 0x474e5543432b2b00;
   DEBUG_ONLY constexpr uint64_t kMagicDependentClass = 0x474e5543432b2b01;
-  assert(exceptionClass == kMagicClass || exceptionClass == kMagicDependentClass);
+  assert(exceptionClass == kMagicClass ||
+         exceptionClass == kMagicDependentClass);
   assert(version == 1);
 
   auto const& ti = typeInfoFromUnwindException(exceptionObj);
   InvalidSetMException* ism = nullptr;
+  TVCoercionException* tce = nullptr;
   if (ti == typeid(InvalidSetMException)) {
     ism = static_cast<InvalidSetMException*>(
+      exceptionFromUnwindException(exceptionObj));
+  } else if (ti == typeid(TVCoercionException)) {
+    tce = static_cast<TVCoercionException*>(
       exceptionFromUnwindException(exceptionObj));
   }
 
@@ -170,7 +183,7 @@ tc_unwind_personality(int version,
     auto* exnType = __cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
     assert(status == 0);
-    FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}. ",
+    FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}.\n",
            unwindType, exceptionObj,
            tl_regState == VMRegState::DIRTY ? "dirty" : "clean",
            (TCA)_Unwind_GetIP(context), exnType);
@@ -189,6 +202,10 @@ tc_unwind_personality(int version,
              ism->tv().pretty());
       return _URC_HANDLER_FOUND;
     }
+    if (tce) {
+      FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND");
+      return _URC_HANDLER_FOUND;
+    }
   }
 
   /*
@@ -198,23 +215,19 @@ tc_unwind_personality(int version,
    * which is an exit trace from hhir with a few special instructions.
    */
   else if (actions & _UA_CLEANUP_PHASE) {
+    TypedValue tv = ism ? ism->tv() : tce ? tce->tv() : TypedValue();
     if (tl_regState == VMRegState::DIRTY) {
       sync_regstate(context);
     }
-    if (install_catch_trace(context, exceptionObj, ism)) {
+    if (install_catch_trace(context, exceptionObj, ism || tce, tv)) {
       return _URC_INSTALL_CONTEXT;
     }
   }
 
+  always_assert(!(actions & _UA_HANDLER_FRAME));
+
   FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");
   return _URC_CONTINUE_UNWIND;
-}
-
-void deregister_unwind_region(std::vector<char>* p) {
-  std::auto_ptr<std::vector<char> > del(p);
-  __deregister_frame(&(*p)[0]);
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

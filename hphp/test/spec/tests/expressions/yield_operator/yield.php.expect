@@ -1,0 +1,33 @@
+key: 0, value: 1
+key: 1, value: 2
+key: 2, value: 3
+key: 3, value: 4
+key: 4, value: 5
+===========================
+key: 0, value: d
+key: 1, value: e
+key: 2, value: f
+===========================
+object(Generator)#1 (0) {
+}
+This type is an instance of Generator
+===========================
+>Once upon a time,<
+>in a land<
+>far,   <
+>far away,  <
+>there lived an ogre called Big Bad Bruce.<
+===========================
+key: 0, value: 1
+key: 1, value: 2
+key: 2, value: 3
+===========================
+key: X1, value: 1
+key: X2, value: 2
+key: X3, value: 3
+key: X4, value: 4
+key: X5, value: 5
+===========================
+key: Keyd, value: d
+key: Keye, value: e
+key: Keyf, value: f

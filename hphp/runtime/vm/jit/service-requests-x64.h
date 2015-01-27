@@ -17,10 +17,13 @@
 #define incl_HPHP_JIT_SERVICE_REQUESTS_X64_H_
 
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
+struct Vout;
+namespace x64 {
 
 /*
  * emitServiceReqWork --
@@ -46,9 +49,7 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
 void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
                  TransFlags trflags = TransFlags{});
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-                 SrcKey dest);
-void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-                      SrcKey dest, TransFlags trflags = TransFlags{});
+                 SrcKey dest, TransFlags trflags = TransFlags{});
 
 /*
  * Similar to the emitBindJ() series.  The address of the jmp is returned.
@@ -56,12 +57,9 @@ void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
 TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                     SrcKey dest, TransFlags trflags);
 
-/*
- * Emits a REQ_BIND_CALL service request, and adjusts rVmSp after the call.
- */
-void emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,
-                  CodeBlock& frozenCode, SrcKey srcKey,
-                  const Func* funcd, int numArgs);
+// An intentionally funny-looking-in-core-dumps constant for uninitialized
+// instruction pointers.
+constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
 
 }}}
 

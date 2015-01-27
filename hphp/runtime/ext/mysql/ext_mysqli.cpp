@@ -15,8 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/base-includes.h"
 #include <vector>
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/util/logger.h"
@@ -52,6 +53,7 @@ const StaticString
 
 //////////////////////////////////////////////////////////////////////////////
 // helper
+
 static Resource get_connection_resource(ObjectData* obj) {
   auto res = obj->o_realProp(
     s_connection,
@@ -65,9 +67,9 @@ static Resource get_connection_resource(ObjectData* obj) {
   return res->toResource();
 }
 
-static MySQL *get_connection(ObjectData* obj) {
+static std::shared_ptr<MySQL> get_connection(ObjectData* obj) {
   auto res = get_connection_resource(obj);
-  return res.getTyped<MySQL>(true, false);
+  return res.getTyped<MySQLResource>(true, false)->mysql();
 }
 
 static MySQLStmt *getStmt(ObjectData* obj) {
@@ -118,7 +120,7 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
     return arReturn(ar, false);
   }
 
-  std::vector<Variant*> vars;
+  PackedArrayInit vars(type_size);
   for (int i = 0; i < type_size; i++) {
     char t = types[i];
     if (t != 'i' && t != 'd' && t != 's' && t != 'b') {
@@ -126,10 +128,15 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
                     i + 2 + start_index);
       return arReturn(ar, false);
     }
-    vars.push_back(&getArg<KindOfRef>(ar, i + 1 + start_index));
+    auto rparam = &getArg<KindOfRef>(ar, i + 1 + start_index);
+
+    if (rparam->getRawType() != KindOfRef) {
+      return arReturn(ar, false);
+    }
+    vars.appendRef(*rparam);
   }
 
-  return arReturn(ar, getStmt(obj)->bind_param(types, vars));
+  return arReturn(ar, getStmt(obj)->bind_param(types, vars.toArray()));
 }
 
 static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
@@ -141,27 +148,41 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
     return arReturn(ar, false);
   }
 
-  std::vector<Variant*> vars;
+  PackedArrayInit vars(ar->numArgs());
   for (int i = start_index; i < ar->numArgs(); i++) {
-    vars.push_back(&getArg<KindOfRef>(ar, i));
+    auto rparam = &getArg<KindOfRef>(ar, i);
+
+    if (rparam->getRawType() != KindOfRef) {
+      return arReturn(ar, false);
+    }
+    vars.appendRef(*rparam);
   }
 
-  return arReturn(ar, getStmt(obj)->bind_result(vars));
+  return arReturn(ar, getStmt(obj)->bind_result(vars.toArray()));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // class mysqli
 
-#define VALIDATE_CONN(conn, state)                                             \
-  if (!conn || (state && (int64_t)conn->getState() < state)) {                 \
-    raise_warning("invalid object or resource mysqli");                        \
-    return init_null();                                                        \
+#define VALIDATE_CONN(conn, state)                                \
+  if (!conn ||                                                    \
+      (static_cast<MySQLState>(state) != MySQLState::CLOSED &&    \
+       conn->getState() < static_cast<MySQLState>(state))) {      \
+    raise_warning("invalid object or resource mysqli");           \
+    return init_null();                                           \
   }
 
 #define VALIDATE_CONN_CONNECTED(conn) VALIDATE_CONN(conn, MySQLState::CONNECTED)
 
-#define VALIDATE_RESOURCE(res, state)                                          \
-  MySQL* conn = res.getTyped<MySQL>(true, false);                              \
+// since we allow null (e.g. nullOkay is true in the call into type-resource),
+// we have to check if the resource data is null before we try to get a
+// connection.
+#define VALIDATE_RESOURCE(res, state)                                     \
+  auto rdata = res.getTyped<MySQLResource>(true, false);                  \
+  std::shared_ptr<MySQL> conn = nullptr;                                  \
+  if (rdata) {                                                            \
+    conn = rdata->mysql();                                                \
+  }                                                                       \
   VALIDATE_CONN(conn, state)
 
 static Variant HHVM_METHOD(mysqli, autocommit, bool mode) {
@@ -231,8 +252,9 @@ static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store) {
 }
 
 static void HHVM_METHOD(mysqli, hh_init) {
-  Resource data = new MySQL(nullptr, 0, nullptr, nullptr, nullptr);
-  this_->o_set(s_connection, data, s_mysqli.get());
+  auto data = std::make_shared<MySQL>(nullptr, 0, nullptr, nullptr, nullptr);
+  auto rsrc = makeSmartPtr<MySQLResource>(std::move(data));
+  this_->o_set(s_connection, Variant(std::move(rsrc)), s_mysqli.get());
 }
 
 static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
@@ -250,7 +272,13 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
                   conn, s, username.toString(), password.toString(),
                   dbname.toString(), client_flags.toInt64(), persistent, false,
                   -1, -1);
-  return ret.toBoolean();
+  if (ret.toBoolean()) {
+    // replace the connection incase we get a different one back (persistent)
+    this_->o_set(s_connection, ret, s_mysqli.get());
+    return true;
+  } else {
+    return false;
+  }
 }
 
 static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
@@ -305,7 +333,7 @@ static Variant HHVM_METHOD(mysqli, kill, int64_t processid) {
   return !mysql_kill(conn->get(), processid);
 }
 
-static DataType get_option_value_type(int64_t option) {
+static MaybeDataType get_option_value_type(int64_t option) {
   switch (option) {
     case MYSQL_INIT_COMMAND:
     case MYSQL_READ_DEFAULT_FILE:
@@ -357,7 +385,7 @@ static DataType get_option_value_type(int64_t option) {
 #endif
       return KindOfNull;
     default:
-      return KindOfUnknown;
+      return folly::none;
   }
 
   not_reached();
@@ -368,10 +396,8 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
   auto conn = get_connection(this_);
   VALIDATE_CONN(conn, MySQLState::INITED)
 
-  DataType dt = get_option_value_type(option);
-  if (dt == KindOfUnknown) {
-    return false;
-  }
+  MaybeDataType dt = get_option_value_type(option);
+  if (!dt) return false;
 
   // Just holders for the value
   my_bool bool_value;
@@ -379,24 +405,35 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
 
   const void *value_ptr = nullptr;
   if (!value.isNull()) {
-    switch (dt) {
-      case KindOfString:
-        other_value = value.toString();
-        value_ptr = other_value.getStringData()->data();
-        break;
-      case KindOfInt64:
-        other_value = value.toInt64();
-        value_ptr = other_value.getInt64Data();
-        break;
-      case KindOfBoolean:
-        bool_value = value.toBoolean();
-        value_ptr = &bool_value;
-        break;
-      case KindOfNull:
-        break;
-      default:
-        not_reached();
-    }
+    [&] {
+      switch (*dt) {
+        case KindOfNull:
+          return;
+        case KindOfBoolean:
+          bool_value = value.toBoolean();
+          value_ptr = &bool_value;
+          return;
+        case KindOfInt64:
+          other_value = value.toInt64();
+          value_ptr = other_value.getInt64Data();
+          return;
+        case KindOfString:
+          other_value = value.toString();
+          value_ptr = other_value.getStringData()->data();
+          return;
+        case KindOfUninit:
+        case KindOfDouble:
+        case KindOfStaticString:
+        case KindOfArray:
+        case KindOfObject:
+        case KindOfResource:
+        case KindOfRef:
+        case KindOfClass:
+          // Impossible.
+          break;
+      }
+      not_reached();
+    }();
   }
 
   return !mysql_options(conn->get(), (mysql_option)option,
@@ -445,8 +482,6 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
   return true;
 }
 
-#undef VALIDATE_CONN
-#undef VALIDATE_CONN_CONNECTED
 
 //////////////////////////////////////////////////////////////////////////////
 // class mysqli_driver
@@ -468,6 +503,17 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
     raise_warning("invalid object or resource mysqli_result");                 \
     return init_null();                                                        \
   }
+
+static Variant HHVM_METHOD(mysqli_result, get_mysqli_conn_resource,
+                           Variant connection) {
+  Object obj = connection.toObject();
+  auto res = get_connection_resource(obj.get());
+  VALIDATE_RESOURCE(res, MySQLState::CONNECTED);
+  return res;
+}
+
+#undef VALIDATE_CONN
+#undef VALIDATE_CONN_CONNECTED
 
 static Variant HHVM_METHOD(mysqli_result, hh_field_tell) {
   auto res = getResult(this_);
@@ -565,8 +611,8 @@ static Variant HHVM_METHOD(mysqli_stmt, hh_field_count) {
 
 static void HHVM_METHOD(mysqli_stmt, hh_init, Variant connection) {
   Object obj = connection.toObject();
-  auto data = NEWOBJ(MySQLStmt)(get_connection(obj.get())->get());
-  this_->o_set(s_stmt, Resource(data), s_mysqli_stmt.get());
+  auto data = makeSmartPtr<MySQLStmt>(get_connection(obj.get())->get());
+  this_->o_set(s_stmt, Variant(std::move(data)), s_mysqli_stmt.get());
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, hh_insert_id) {
@@ -657,10 +703,10 @@ static bool HHVM_FUNCTION(mysqli_thread_safe) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class mysqliExtension : public Extension {
+class mysqliExtension final : public Extension {
  public:
   mysqliExtension() : Extension("mysqli") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     // mysqli
     HHVM_ME(mysqli, autocommit);
     HHVM_ME(mysqli, change_user);
@@ -686,6 +732,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli, ssl_set);
 
     // mysqli_result
+    HHVM_ME(mysqli_result, get_mysqli_conn_resource);
     HHVM_ME(mysqli_result, hh_field_tell);
     HHVM_ME(mysqli_result, fetch_field);
 

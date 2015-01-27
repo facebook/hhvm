@@ -5,7 +5,6 @@ TOP=..
 #############################################################################
 
 SRC = \
-  deriving_Json_Str.ml\
   hh_json.ml\
   ide.ml\
   pos.ml\
@@ -22,7 +21,6 @@ SRC = \
   ast.ml\
   namespaces.ml\
   parser_heap.ml\
-  preprocessor.ml\
   lexing_modes.ml\
   lexer_hack.ml\
   parser_hack.ml\
@@ -59,12 +57,17 @@ SRC = \
   typing_lenv.ml\
   typing.ml\
   typing_inherit.ml\
+  typing_variance.ml\
   typing_decl.ml\
   pp.ml\
   colorFile.ml\
   fileOutline.ml\
   format_hack.ml\
-  hh_ide.ml
+  hh_ide.ml\
+  typeVisitor.ml\
+  coverage_level.ml\
+  typingEqualityCheck.ml\
+  typing_taccess.ml\
 
 INCLUDEDIRS=$(shell ocamlfind -query js_of_ocaml)
 
@@ -94,7 +97,7 @@ lexer_hack.ml: $(TOP)/parsing/lexer_hack.ml
 	cp $(TOP)/parsing/lexer_hack.ml .
 
 format_hack.ml: $(TOP)/parsing/format_hack.ml
-        cp $(TOP)/parsing/format_hack.ml .
+	cp $(TOP)/parsing/format_hack.ml .
 
 parser_hack.ml: $(TOP)/parsing/parser_hack.ml
 	cp $(TOP)/parsing/parser_hack.ml .
@@ -126,9 +129,6 @@ namespaces.ml: $(TOP)/parsing/namespaces.ml
 parser_heap.ml: $(TOP)/parsing/parser_heap.ml
 	cp $(TOP)/parsing/parser_heap.ml .
 
-preprocessor.ml: $(TOP)/parsing/preprocessor.ml
-	cp $(TOP)/parsing/preprocessor.ml .
-
 parser.ml: $(TOP)/parsing/parser.ml
 	cp $(TOP)/parsing/parser.ml .
 
@@ -152,6 +152,12 @@ typing_suggest.ml: $(TOP)/typing/typing_suggest.ml
 
 typing_utils.ml: $(TOP)/typing/typing_utils.ml
 	cp $(TOP)/typing/typing_utils.ml .
+
+typeVisitor.ml: $(TOP)/typing/typeVisitor.ml
+	cp $(TOP)/typing/typeVisitor.ml .
+
+coverage_level.ml: $(TOP)/typing/coverage_level.ml
+	cp $(TOP)/typing/coverage_level.ml .
 
 typing_dynamic_yield.ml: $(TOP)/typing/typing_dynamic_yield.ml
 	cp $(TOP)/typing/typing_dynamic_yield.ml .
@@ -179,6 +185,9 @@ typing_extends.ml: $(TOP)/typing/typing_extends.ml
 
 typing.ml: $(TOP)/typing/typing.ml
 	cp $(TOP)/typing/typing.ml .
+
+typing_variance.ml: $(TOP)/typing/typing_variance.ml
+	cp $(TOP)/typing/typing_variance.ml .
 
 typing_decl.ml: $(TOP)/typing/typing_decl.ml
 	cp $(TOP)/typing/typing_decl.ml .
@@ -295,7 +304,6 @@ clean::
 	rm -f typing_env.ml
 	rm -f typing_ops.ml
 	rm -f fix_file.ml
-	rm -f preprocessor.ml
 	rm -f typing_async.ml
 	rm -f typing_expand.ml
 	rm -f typing_alias.ml

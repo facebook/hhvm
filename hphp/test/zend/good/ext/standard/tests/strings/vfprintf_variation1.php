@@ -49,6 +49,7 @@ fclose( $fp );
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 
 $file = 'vfprintf_variation1.phpt.txt';

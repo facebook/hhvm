@@ -1,0 +1,5 @@
+<?php
+
+if (READLINE_LIB !== "libedit") {
+  die("skip");
+}

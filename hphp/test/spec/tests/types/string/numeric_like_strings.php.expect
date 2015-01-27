@@ -1,0 +1,61 @@
+============== var_dump(numeric_like_string) ===================
+
+string(8) "12345xxx"
+string(9) "12345 xxx"
+string(10) "12345.6xxx"
+string(11) "12345.6 xxx"
+
+============== is_numeric(numeric_like_string) ===================
+
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+============== cast of numeric_like_string ===================
+
+int(12345)
+int(12345)
+float(12345.6)
+float(12345.6)
+
+============== +/- numeric_like_string ===================
+
+int(12345)
+int(12345)
+float(12345.6)
+float(12345.6)
+int(-12345)
+int(-12345)
+float(-12345.6)
+float(-12345.6)
+
+============== relational/equality ops with numeric_like_string ===================
+
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+============== ++/-- ops with numeric_like_string ===================
+
+string(8) "12345xxy"
+string(9) "12345 xxy"
+string(10) "12345.6xxy"
+string(11) "12345.6 xxy"
+string(8) "12345xxx"
+string(9) "12345 xxx"
+string(10) "12345.6xxx"
+string(11) "12345.6 xxx"
+string(8) "12345xxx"
+string(9) "12345 xxx"
+string(10) "12345.6xxx"
+string(11) "12345.6 xxx"
+string(8) "12345xxx"
+string(9) "12345 xxx"
+string(10) "12345.6xxx"
+string(11) "12345.6 xxx"

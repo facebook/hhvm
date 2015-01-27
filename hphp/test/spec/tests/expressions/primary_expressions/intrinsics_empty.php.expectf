@@ -1,0 +1,68 @@
+--------- TRUE -------------
+bool(false)
+bool(false)
+--------- FALSE -------------
+bool(true)
+bool(true)
+--------- -10 -------------
+bool(false)
+bool(false)
+---------- 0 ------------
+bool(true)
+bool(true)
+---------- 123 ------------
+bool(false)
+bool(false)
+--------- -10.56 -------------
+bool(false)
+bool(false)
+--------- 0.0 -------------
+bool(true)
+bool(true)
+-------- 123.456 --------------
+bool(false)
+bool(false)
+--------- NULL -------------
+bool(true)
+bool(true)
+---------- "" ------------
+bool(true)
+bool(true)
+---------- "0" ------------
+bool(true)
+bool(true)
+---------- "00" ------------
+bool(false)
+bool(false)
+--------- "Hello" -------------
+bool(false)
+bool(false)
+--------- [] -------------
+bool(true)
+bool(true)
+---------- [10, 20] ------------
+bool(false)
+bool(false)
+--------- Point(3, 5) -------------
+bool(false)
+--------- instance of class having no properties -------------
+bool(false)
+--------- undefined parameter -------------
+
+Warning: %s
+
+Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_empty.php on line 118
+NULL
+bool(true)
+NULL
+bool(true)
+int(10)
+bool(false)
+---------- resource STDIN ------------
+bool(false)
+bool(false)
+---------- dynamic property ------------
+bool(true)
+bool(false)
+Inside X2::__isset with $name m
+bool(true)

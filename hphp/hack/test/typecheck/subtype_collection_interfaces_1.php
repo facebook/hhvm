@@ -20,5 +20,5 @@ function test5(array<C> $x): void { foo5($x); }
 function foo6(KeyedContainer<mixed, B> $x): void {}
 function test6(array<int, C> $x): void { foo6($x); }
 
-function foo7(Indexish<mixed, B> $x): void {}
+function foo7(KeyedContainer<mixed, B> $x): void {}
 function test7(array<int, C> $x): void { foo7($x); }

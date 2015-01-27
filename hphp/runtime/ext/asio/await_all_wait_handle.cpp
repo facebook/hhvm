@@ -33,9 +33,8 @@ namespace HPHP {
 
 void delete_AwaitAllWaitHandle(ObjectData* od, const Class*) {
   auto const waitHandle = static_cast<c_AwaitAllWaitHandle*>(od);
-  auto const size = waitHandle->m_size;
   waitHandle->~c_AwaitAllWaitHandle();
-  MM().objFreeLogged(waitHandle, size);
+  smart_free(waitHandle);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,18 +86,18 @@ retry:
     case ArrayData::kMixedKind:
     case ArrayData::kIntMapKind:
     case ArrayData::kStrMapKind:
+    case ArrayData::kStructKind:
       return FromMixedArray(MixedArray::asMixed(ad));
 
     case ArrayData::kProxyKind:
       ad = ProxyArray::innerArr(ad);
       goto retry;
 
-    case ArrayData::kSharedKind:
-    case ArrayData::kNvtwKind:
-      // APC can't store WaitHandles, NameValueTableWrapper is used only for
+    case ArrayData::kApcKind:
+    case ArrayData::kGlobalsKind:
+      // APC can't store WaitHandles, GlobalsArray is used only for
       // $GLOBALS, which contain non-WaitHandles.
       failArray();
-
 
     case ArrayData::kEmptyKind:
       // Handled by dependencies->size() check.
@@ -139,7 +138,6 @@ Object c_AwaitAllWaitHandle::ti_fromvector(const Variant& dependencies) {
   return FromVector(static_cast<BaseVector*>(dependencies.getObjectData()));
 }
 
-
 Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
   auto const start = reinterpret_cast<const TypedValue*>(dependencies + 1);
   auto const stop = start + dependencies->getSize();
@@ -154,7 +152,7 @@ Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  p_AwaitAllWaitHandle result = Alloc(cnt);
+  SmartPtr<c_AwaitAllWaitHandle> result(Alloc(cnt));
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
@@ -167,7 +165,7 @@ Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
 
   assert(next == &result->m_children[0]);
   result->initialize();
-  return result;
+  return Object(std::move(result));
 }
 
 Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
@@ -185,7 +183,7 @@ Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  p_AwaitAllWaitHandle result = Alloc(cnt);
+  SmartPtr<c_AwaitAllWaitHandle> result(Alloc(cnt));
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
@@ -199,7 +197,7 @@ Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
 
   assert(next == &result->m_children[0]);
   result->initialize();
-  return result;
+  return Object(std::move(result));
 }
 
 Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
@@ -216,7 +214,7 @@ Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  p_AwaitAllWaitHandle result = Alloc(cnt);
+  SmartPtr<c_AwaitAllWaitHandle> result(Alloc(cnt));
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter != stop; iter = BaseMap::nextElm(iter, stop)) {
@@ -229,7 +227,7 @@ Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
 
   assert(next == &result->m_children[0]);
   result->initialize();
-  return result;
+  return Object(std::move(result));
 }
 
 Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
@@ -246,7 +244,7 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  p_AwaitAllWaitHandle result = Alloc(cnt);
+  SmartPtr<c_AwaitAllWaitHandle> result(Alloc(cnt));
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
@@ -259,16 +257,15 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
 
   assert(next == &result->m_children[0]);
   result->initialize();
-  return result;
+  return Object(std::move(result));
 }
 
 c_AwaitAllWaitHandle* c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
-  size_t size = sizeof(c_AwaitAllWaitHandle) +
-                cnt * sizeof(c_WaitableWaitHandle*);
-  void* mem = MM().objMallocLogged(size);
+  auto size = sizeof(c_AwaitAllWaitHandle) +
+              cnt * sizeof(c_WaitableWaitHandle*);
+  auto mem = smart_malloc(size);
   auto const waitHandle = new (mem) c_AwaitAllWaitHandle();
   waitHandle->m_cur = cnt - 1;
-  waitHandle->m_size = size;
   return waitHandle;
 }
 
@@ -277,12 +274,12 @@ void c_AwaitAllWaitHandle::initialize() {
   assert(m_cur >= 0);
 
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreateCallback())) {
-    p_Vector vector = NEWOBJ(c_Vector)();
+    auto vector = makeSmartPtr<c_Vector>();
     for (int32_t idx = m_cur; idx >= 0; --idx) {
       TypedValue child = make_tv<KindOfObject>(m_children[idx]);
       vector->add(&child);
     }
-    AsioSession::Get()->onAwaitAllCreate(this, vector);
+    AsioSession::Get()->onAwaitAllCreate(this, Variant(std::move(vector)));
   }
 
   blockOnCurrent<false>();

@@ -22,7 +22,7 @@
 
 #include <boost/variant.hpp>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/misc.h"
@@ -80,9 +80,34 @@ using Iter = boost::variant< UnknownIter
 
 /*
  * A program state at a position in a php::Block.
+ *
+ * The `initialized' flag indicates whether the state knows anything.  All
+ * other fields are invalid if a state is not initialized, and notably, after
+ * all analysis has run, any blocks that still don't have initialized input
+ * states are not reachable.
+ *
+ * The `unreachable' flag means we've produced this state from analysis, but
+ * the program cannot reach this program position.  This flag has two uses:
+ *
+ *    o It allows us to determine arbitrary mid-block positions where code
+ *      becomes unreachable, and eliminate that code in optimize.cpp.
+ *
+ *    o HHBC invariants can complicate removing unreachable code in FPI
+ *      regions---see the rules in bytecode.specification.  Inside FPI regions,
+ *      we still do abstract interpretation of the unreachable code, but this
+ *      flag is used when merging states to allow the interpreter to analyze
+ *      blocks that are unreachable without pessimizing states for reachable
+ *      blocks that would've been their successors.
+ *
+ * One other note: having the interpreter visit blocks when they are
+ * unreachable still potentially merges types into object properties that
+ * aren't possible at runtime.  We're only doing this to handle FPI regions for
+ * now, but it's not ideal.
+ *
  */
 struct State {
   bool initialized = false;
+  bool unreachable = false;
   bool thisAvailable = false;
   std::vector<Type> locals;
   std::vector<Iter> iters;
@@ -158,12 +183,17 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
  * a series of step operations (possibly cross block).
  */
 struct CollectedInfo {
-  explicit CollectedInfo(const Index& index, Context ctx, ClassAnalysis* cls)
+  explicit CollectedInfo(const Index& index,
+                         Context ctx,
+                         ClassAnalysis* cls,
+                         PublicSPropIndexer* publicStatics)
     : props{index, ctx, cls}
+    , publicStatics{publicStatics}
   {}
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
+  PublicSPropIndexer* const publicStatics;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -35,8 +35,10 @@ namespace {
 int typeNeededWords(Type t) {
   assert(!t.equals(Type::Bottom));
 
-  if (t.subtypeOfAny(Type::Uninit, Type::InitNull,
-                     Type::ActRec, Type::RetAddr, Type::Nullptr)) {
+  if (t.subtypeOfAny(Type::Uninit,
+                     Type::InitNull,
+                     Type::RetAddr,
+                     Type::Nullptr)) {
     // These don't need a register because their values are static or unused.
     //
     // RetAddr doesn't take any register because currently we only target x86,
@@ -53,11 +55,11 @@ int typeNeededWords(Type t) {
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assert(IMPLIES(t <= Type::StackElem, t.isKnownDataType()));
+    assert(IMPLIES(t <= Type::StkElem, t.isKnownDataType()));
     return 1;
   }
 
-  assert(t <= Type::StackElem);
+  assert(t <= Type::StkElem);
 
   // XXX(t4592459): This will return 2 for Type::Null, even though it only
   // needs 1 register (one for the type, none for the value). This is to work
@@ -74,24 +76,28 @@ int SSATmp::numWords() const {
 
 Variant SSATmp::variantVal() const {
   switch (type().toDataType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    // Upon return both will converted to KindOfNull anyway.
-    return init_null();
-  case KindOfBoolean:
-    return boolVal();
-  case KindOfInt64:
-    return intVal();
-  case KindOfDouble:
-    return dblVal();
-  case KindOfString:
-  case KindOfStaticString:
-    return Variant(const_cast<StringData*>(strVal()));
-  case KindOfArray:
-    return const_cast<ArrayData*>(arrVal());
-  default:
-    always_assert(false);
+    case KindOfUninit:
+    case KindOfNull:
+      // Upon return both will converted to KindOfNull anyway.
+      return init_null();
+    case KindOfBoolean:
+      return boolVal();
+    case KindOfInt64:
+      return intVal();
+    case KindOfDouble:
+      return dblVal();
+    case KindOfStaticString:
+    case KindOfString:
+      return Variant(const_cast<StringData*>(strVal()));
+    case KindOfArray:
+      return const_cast<ArrayData*>(arrVal());
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 std::string SSATmp::toString() const {

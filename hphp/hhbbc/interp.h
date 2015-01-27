@@ -20,7 +20,7 @@
 #include <vector>
 #include <bitset>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/index.h"
@@ -88,11 +88,6 @@ struct StepFlags {
   enum class JmpFlags : uint8_t { Either, Taken, Fallthrough };
 
   JmpFlags jmpFlag = JmpFlags::Either;
-
-  /*
-   * If true, we made a call to a function that never returns.
-   */
-  bool calledNoReturn = false;
 
   /*
    * If an instruction sets this flag, it means that if it pushed a

@@ -15,13 +15,16 @@
 */
 
 #include "hphp/compiler/statement/trait_prec_statement.h"
-#include <set>
-#include "hphp/compiler/statement/statement_list.h"
+
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/statement/method_statement.h"
-#include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/statement/statement_list.h"
+
 #include "hphp/util/text-util.h"
+
+#include <unordered_set>
 
 using namespace HPHP;
 
@@ -45,8 +48,9 @@ StatementPtr TraitPrecStatement::clone() {
   return new_stmt;
 }
 
-void TraitPrecStatement::getOtherTraitNames(std::set<string> &namesSet) const {
-  vector<string> namesVec;
+void TraitPrecStatement::getOtherTraitNames(
+    std::unordered_set<std::string>& namesSet) const {
+  std::vector<std::string> namesVec;
   m_otherTraitNames->getStrings(namesVec);
   for (unsigned int i = 0; i < namesVec.size(); i++) {
     namesVec[i] = toLower(namesVec[i]);
@@ -104,9 +108,6 @@ void TraitPrecStatement::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-void TraitPrecStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

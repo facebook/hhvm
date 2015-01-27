@@ -1,4 +1,5 @@
 #include "hphp/runtime/ext/icu/ext_icu_collator.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-qsort.h"
 
@@ -14,10 +15,11 @@ enum CollatorSort {
 
 const StaticString s_Collator("Collator");
 
-#define FETCH_COL(dest, src) \
+#define FETCH_COL(dest, src, ret) \
   auto dest = Collator::Get(src); \
   if (!dest) { \
-    raise_error("Collator not initialized"); \
+    raise_recoverable_error("Collator not initialized"); \
+    return ret; \
   }
 
 static void HHVM_METHOD(Collator, __construct, const String& locale) {
@@ -42,7 +44,7 @@ static void HHVM_METHOD(Collator, __construct, const String& locale) {
 }
 
 static bool HHVM_METHOD(Collator, asort, VRefParam arr, int64_t flag) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, false);
   if (!arr.isArray()) {
     throw_expected_array_exception();
     return false;
@@ -56,7 +58,7 @@ static bool HHVM_METHOD(Collator, asort, VRefParam arr, int64_t flag) {
 }
 
 static Variant HHVM_METHOD(Collator, compare, const Variant& str1, const Variant& str2) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, false);
   data->clearError();
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString ustr1(u16(str1.toString(), error));
@@ -76,7 +78,7 @@ static Variant HHVM_METHOD(Collator, compare, const Variant& str1, const Variant
 }
 
 static int64_t HHVM_METHOD(Collator, getAttribute, int64_t attr) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, 0);
   data->clearError();
   UErrorCode error = U_ZERO_ERROR;
   int64_t ret = (int64_t)ucol_getAttribute(data->collator(),
@@ -90,17 +92,17 @@ static int64_t HHVM_METHOD(Collator, getAttribute, int64_t attr) {
 }
 
 static int64_t HHVM_METHOD(Collator, getErrorCode) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, 0);
   return data->getErrorCode();
 }
 
 static String HHVM_METHOD(Collator, getErrorMessage) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, "");
   return data->getErrorMessage();
 }
 
 static String HHVM_METHOD(Collator, getLocale, int64_t type) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, "");
   data->clearError();
   UErrorCode error = U_ZERO_ERROR;
   auto loc = ucol_getLocaleByType(data->collator(), (ULocDataLocaleType)type,
@@ -112,12 +114,12 @@ static String HHVM_METHOD(Collator, getLocale, int64_t type) {
 }
 
 static int64_t HHVM_METHOD(Collator, getStrength) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, false);
   return ucol_getStrength(data->collator());
 }
 
 static bool HHVM_METHOD(Collator, setAttribute, int64_t attr, int64_t val) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, false);
   data->clearError();
   UErrorCode error = U_ZERO_ERROR;
   ucol_setAttribute(data->collator(), (UColAttribute)attr,
@@ -130,7 +132,7 @@ static bool HHVM_METHOD(Collator, setAttribute, int64_t attr, int64_t val) {
 }
 
 static Variant HHVM_METHOD(Collator, getSortKey, const String& val) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString strval(u16(val, error));
   if (U_FAILURE(error)) {
@@ -149,7 +151,7 @@ static Variant HHVM_METHOD(Collator, getSortKey, const String& val) {
   sortkey_len = ucol_getSortKey(data->collator(),
                                 strval.getBuffer(), strval.length(),
                                 (uint8_t*) ret.get()->mutableData(),
-                                ret.get()->capacity());
+                                ret.capacity() + 1);
   if (sortkey_len <= 0) {
     return false;
   }
@@ -159,7 +161,7 @@ static Variant HHVM_METHOD(Collator, getSortKey, const String& val) {
 }
 
 static bool HHVM_METHOD(Collator, setStrength, int64_t strength) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, false);
   ucol_setStrength(data->collator(), (UCollationStrength)strength);
   return true;
 }
@@ -184,7 +186,7 @@ static int collator_cmp_sort_keys(const void* p1, const void* p2, const void*) {
 }
 
 static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, false);
   data->clearError();
 
   if (!arr.isArray()) {
@@ -292,7 +294,7 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
 
 static bool HHVM_METHOD(Collator, sort, VRefParam arr,
                         int64_t sort_flag /* = Collator::SORT_REGULAR */) {
-  FETCH_COL(data, this_);
+  FETCH_COL(data, this_, false);
   if (!arr.isArray()) {
     throw_expected_array_exception();
     return false;

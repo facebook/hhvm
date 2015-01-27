@@ -1,0 +1,3 @@
+finally
+
+Catchable fatal error: Value returned from function foo() must be of type A, B given in %s/finally-typecheck.php on line 11

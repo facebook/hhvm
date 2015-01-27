@@ -39,6 +39,7 @@ fclose( fopen($file, "a+") );  //Opening the non-existing file in "a+" mode, whi
 var_dump( file_exists($file) );  //Check for the existence of file
 echo "*** Done ***\n"; 
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__)."/007_variation6.tmp");
 ?>

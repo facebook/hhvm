@@ -11,9 +11,7 @@
 interface GenReadApi<Tk, Tv> {}
 
 class GenReadApiClass<Tk, Tv> implements GenReadApi<Tk, Tv> {
-  public function __construct(
-    private Tv $v,
-  ) {}
+  public function __construct(private Tv $v) {}
 }
 
 class Foo {
@@ -31,9 +29,7 @@ final class Bar extends Foo {
 interface GenReadIdxApi<Tk, Tv> {}
 
 class GenReadIdxApiClass<Tk, Tv> implements GenReadIdxApi<Tk, Tv> {
-  public function __construct(
-    private Tv $v,
-  ) {}
+  public function __construct(private Tv $v) {}
 }
 
 class FooIdx {

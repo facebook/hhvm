@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_EITHER_H_
 #define incl_HPHP_EITHER_H_
 
+#include <cassert>
 #include <cstdint>
 #include <cstddef>
 #include <type_traits>
@@ -40,15 +41,30 @@ namespace HPHP {
  *
  *   - The two types must be unrelated, and must be pointers.
  *
- *   - The pointer types used with this class must be known to be at
- *     least 2-byte aligned, since it discriminates using the low bit.
- *     NB: this is not the case for string literals on gcc.
+ *   - The pointer types used with this class must be known to be at least
+ *     2-byte aligned with the default arguments, since it discriminates using
+ *     the low bit (NB: this is not the case for string literals on gcc).  You
+ *     can pass either_policy::high_bit to use the highest bit as the tag
+ *     instead in cases where this doesn't apply.
  *
  *   - This class assumes pointers of L and R types never alias.
  *
  */
-template<class L, class R>
+namespace either_policy { struct high_bit {}; }
+template<class L, class R, class TagBitPolicy = void>
 struct Either {
+  static_assert(
+    std::is_same<TagBitPolicy,void>::value ||
+      std::is_same<TagBitPolicy,either_policy::high_bit>::value,
+    "Unknown policy in Either"
+  );
+  static constexpr uintptr_t TagBit =
+    std::conditional<
+      std::is_same<TagBitPolicy,void>::value,
+      std::integral_constant<uintptr_t,0x1>,
+      std::integral_constant<uintptr_t,0x8000000000000000>
+    >::type::value;
+
   /*
    * The default constructor creates an Either that isNull.
    *
@@ -72,7 +88,9 @@ struct Either {
    */
   /* implicit */ Either(L l)
     : bits{reinterpret_cast<uintptr_t>(l)}
-  {}
+  {
+    assert(!(reinterpret_cast<uintptr_t>(l) & TagBit));
+  }
 
   /*
    * Create an Either in the right mode.
@@ -80,17 +98,20 @@ struct Either {
    * Post: left() == nullptr && right() == r
    */
   /* implicit */ Either(R r)
-    : bits{reinterpret_cast<uintptr_t>(r) | 0x1}
-  {}
+    : bits{reinterpret_cast<uintptr_t>(r) | TagBit}
+  {
+    assert(!(reinterpret_cast<uintptr_t>(r) & TagBit));
+  }
 
   /*
    * Equality comparison is shallow.  If the pointers are equal, the
    * Eithers are equal.
    */
   bool operator==(Either<L,R> o) const {
-    // We assume L* and R* don't alias, so we don't need to check type
-    // tags when comparing.
-    return (bits | 0x1) == (o.bits | 0x1);
+    // We assume L* and R* don't alias, so we don't need to check type tags
+    // when comparing.  But we have to put the TagBit in in case we constructed
+    // a null from the right (we'll have a tagged null).
+    return (bits | TagBit) == (o.bits | TagBit);
   }
   bool operator!=(Either<L,R> o) const {
     return !(*this == o);
@@ -116,7 +137,7 @@ struct Either {
     typename std::result_of<RF(R)>::type
   >::type match(const LF& lf, const RF& rf) const {
     if (auto const l = left()) return lf(l);
-    return rf(reinterpret_cast<R>(bits & ~0x1));
+    return rf(reinterpret_cast<R>(bits & ~TagBit));
   }
 
   /*
@@ -125,16 +146,16 @@ struct Either {
    * hold that type.
    */
   L left() const {
-    return bits & 0x1 ? nullptr : reinterpret_cast<L>(bits);
+    return bits & TagBit ? nullptr : reinterpret_cast<L>(bits);
   }
   R right() const {
-    return bits & 0x1 ? reinterpret_cast<R>(bits & ~0x1) : nullptr;
+    return bits & TagBit ? reinterpret_cast<R>(bits & ~TagBit) : nullptr;
   }
 
   /*
    * Returns whether this Either contains neither left nor right.
    */
-  bool isNull() const { return !(bits & ~0x1); }
+  bool isNull() const { return !(bits & ~TagBit); }
 
 private:
   static_assert(

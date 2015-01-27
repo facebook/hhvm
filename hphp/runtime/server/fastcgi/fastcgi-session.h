@@ -18,8 +18,8 @@
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SESSION_H_
 
 #include "hphp/runtime/server/fastcgi/protocol-session-handler.h"
-#include "folly/io/IOBuf.h"
-#include "folly/io/Cursor.h"
+#include <folly/io/IOBuf.h>
+#include <folly/io/Cursor.h>
 #include <unordered_map>
 
 namespace HPHP {
@@ -285,7 +285,6 @@ protected:
   ContentLength m_contentLeft;
   PaddingLength m_paddingLength;
   PaddingLength m_paddingLeft;
-  bool m_keepConn;
   int m_maxConns;
   int m_maxRequests;
 

@@ -27,7 +27,7 @@ $counter = 1;
 foreach($modes as $mode) {
   
   // create an empty file
-  $filename = "$file_path/fscanf_variation52.tmp";
+  $filename = "$file_path/fscanf_variation53.tmp";
   $file_handle = fopen($filename, "w");
   if($file_handle == false)
     exit("Error:failed to open file $filename");
@@ -67,6 +67,7 @@ foreach($modes as $mode) {
 
 echo "\n*** Done ***";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation53.tmp";

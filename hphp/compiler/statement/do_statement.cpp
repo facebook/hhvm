@@ -79,17 +79,6 @@ void DoStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void DoStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_stmt) {
-    getScope()->incLoopNestedLevel();
-    m_stmt->inferTypes(ar);
-    m_condition->inferAndCheck(ar, Type::Boolean, false);
-    getScope()->decLoopNestedLevel();
-  } else {
-    m_condition->inferAndCheck(ar, Type::Boolean, false);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void DoStatement::outputCodeModel(CodeGenerator &cg) {

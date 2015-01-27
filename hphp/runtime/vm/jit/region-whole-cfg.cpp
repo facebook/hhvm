@@ -16,8 +16,7 @@
 
 #include <stack>
 
-#include <boost/container/flat_set.hpp>
-#include <boost/container/flat_map.hpp>
+#include <folly/MapUtil.h>
 
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
@@ -30,80 +29,94 @@ TRACE_SET_MOD(pgo);
 
 struct DFS {
   DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv)
-      : profData(p)
-      , cfg(c)
-      , selectedSet(ts)
-      , selectedVec(tv)
-      , region(std::make_shared<RegionDesc>())
+      : m_profData(p)
+      , m_cfg(c)
+      , m_selectedSet(ts)
+      , m_selectedVec(tv)
+      , m_numBCInstrs(0)
     {}
 
-  RegionDescPtr go(TransID tid) {
-    auto sk = profData->transSrcKey(tid);
-    srcKeyToTransID[sk] = tid;
-    visiting.insert(tid);
-    visited.insert(tid);
-
-    if (breaksRegion(*(profData->transLastInstr(tid)))) {
-      select(tid);
-      visiting.erase(tid);
-      return region;
+  RegionDescPtr formRegion(TransID head) {
+    m_region = std::make_shared<RegionDesc>();
+    m_selectedSet.clear();
+    if (m_selectedVec) m_selectedVec->clear();
+    visit(head);
+    if (m_selectedVec) {
+      std::reverse(m_selectedVec->begin(), m_selectedVec->end());
     }
-
-    for (auto const arc : cfg.outArcs(tid)) {
-      auto dst = arc->dst();
-
-      // If dst is in the visiting set then this arc forms a cycle. Don't
-      // include it unless we've asked for loops.
-      if (!RuntimeOption::EvalJitLoops &&
-          visiting.find(dst) != visiting.end()) {
-        continue;
-      }
-
-      // Don't select dst if SrcKey has already been used for a different
-      // TransID.
-      auto dstSK = profData->transSrcKey(dst);
-      if (srcKeyToTransID.count(dstSK) > 0 && srcKeyToTransID[dstSK] != dst) {
-        continue;
-      }
-
-      auto dstRegion = profData->transRegion(dst);
-
-      // Add the block and arc to region.
-      auto predBlockId =
-          profData->transRegion(tid)->blocks().back().get()->id();
-      auto dstBlockId = dstRegion->blocks().front().get()->id();
-      region->addArc(predBlockId, dstBlockId);
-
-      // Push the dst if we haven't already processed it.
-      if (visited.count(dst) == 0) {
-        go(dst);
-      }
+    for (auto& arc : m_arcs) {
+      m_region->addArc(arc.src, arc.dst);
     }
-
-    select(tid);
-    visiting.erase(tid);
-    return region;
+    return m_region;
   }
 
  private:
-  void select(TransID tid) {
-    auto transRegion = profData->transRegion(tid);
-    region->prepend(*transRegion);
-    selectedSet.insert(tid);
-    if (selectedVec) selectedVec->insert(selectedVec->begin(), tid);
+
+  void visit(TransID tid) {
+    auto tidRegion = m_profData->transRegion(tid);
+    auto tidInstrs = tidRegion->instrSize();
+    if (m_numBCInstrs + tidInstrs > RuntimeOption::EvalJitMaxRegionInstrs) {
+      return;
+    }
+
+    if (m_visited.count(tid)) return;
+    m_visited.insert(tid);
+    m_visiting.insert(tid);
+
+    auto sk = m_profData->transSrcKey(tid);
+    m_srcKeyToTransID[sk] = tid;
+
+    if (!breaksRegion(*(m_profData->transLastInstr(tid)))) {
+
+      auto srcBlockId = tidRegion->blocks().back().get()->id();
+
+      for (auto const arc : m_cfg.outArcs(tid)) {
+        auto dst = arc->dst();
+
+        // If dst is in the visiting set then this arc forms a cycle. Don't
+        // include it unless we've asked for loops.
+        if (!RuntimeOption::EvalJitLoops && m_visiting.count(dst)) continue;
+
+        // Skip dst if region already has another block with the same SrcKey.
+        // Task #4157613: add support for regions with multiple blocks with
+        // the same SrcKey.
+        auto dstSK = m_profData->transSrcKey(dst);
+        if (folly::get_default(m_srcKeyToTransID, dstSK, dst) != dst) continue;
+
+        // Skip dst if we already generated a region starting at that SrcKey.
+        if (m_profData->optimized(dstSK)) continue;
+
+        auto dstBlockId = m_profData->transRegion(dst)->entry()->id();
+        m_arcs.push_back({srcBlockId, dstBlockId});
+
+        visit(dst);
+      }
+    }
+
+    // Now insert the region for tid in the front of m_region.  We do
+    // this last so that the region ends up in (quasi-)topological order
+    // (it'll be in topological order for acyclic regions).
+    m_region->prepend(*tidRegion);
+    m_selectedSet.insert(tid);
+    if (m_selectedVec) m_selectedVec->push_back(tid);
+    m_numBCInstrs += tidRegion->instrSize();
+    always_assert(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
+
+    m_visiting.erase(tid);
   }
 
+
  private:
-  const ProfData* profData;
-  const TransCFG& cfg;
-  TransIDSet& selectedSet;
-  TransIDVec* selectedVec;
-
-  RegionDescPtr region;
-
-  std::unordered_set<TransID> visiting;
-  boost::container::flat_set<TransID> visited;
-  boost::container::flat_map<SrcKey, TransID> srcKeyToTransID;
+  const ProfData*                m_profData;
+  const TransCFG&                m_cfg;
+  TransIDSet&                    m_selectedSet;
+  TransIDVec*                    m_selectedVec;
+  RegionDescPtr                  m_region;
+  uint32_t                       m_numBCInstrs;
+  jit::hash_set<TransID>         m_visiting;
+  jit::hash_set<TransID>         m_visited;
+  jit::flat_map<SrcKey, TransID> m_srcKeyToTransID;
+  jit::vector<RegionDesc::Arc>   m_arcs;
 };
 
 /*
@@ -115,9 +128,7 @@ RegionDescPtr selectWholeCFG(TransID triggerId,
                              const TransCFG& cfg,
                              TransIDSet& selectedSet,
                              TransIDVec* selectedVec) {
-  selectedSet.clear();
-  if (selectedVec) selectedVec->clear();
-  return DFS(profData, cfg, selectedSet, selectedVec).go(triggerId);
+  return DFS(profData, cfg, selectedSet, selectedVec).formRegion(triggerId);
 }
 
 }}

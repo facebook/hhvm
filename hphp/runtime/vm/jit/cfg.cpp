@@ -25,14 +25,19 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
-BlockList rpoSortCfg(const IRUnit& unit) {
-  BlockList blocks;
+BlockList poSortCfg(const IRUnit& unit) {
+  auto blocks = BlockList{};
   blocks.reserve(unit.numBlocks());
   postorderWalk(unit,
-    [&](Block* block) {
+    [&] (Block* block) {
       blocks.push_back(block);
-    });
+    }
+  );
+  return blocks;
+}
 
+BlockList rpoSortCfg(const IRUnit& unit) {
+  auto blocks = poSortCfg(unit);
   std::reverse(blocks.begin(), blocks.end());
   assert(blocks.size() <= unit.numBlocks());
   return blocks;
@@ -41,16 +46,16 @@ BlockList rpoSortCfg(const IRUnit& unit) {
 BlocksWithIds rpoSortCfgWithIds(const IRUnit& unit) {
   auto ret = BlocksWithIds{rpoSortCfg(unit), {unit, 0xffffffff}};
 
-  auto id = ret.blocks.size();
-  for (auto* block : ret.blocks) {
-    ret.ids[block] = --id;
+  uint32_t id = 0;
+  for (auto block : ret.blocks) {
+    ret.ids[block] = id++;
   }
-  assert(id == 0);
+  assert(id == ret.blocks.size());
 
   return ret;
 }
 
-Block* splitEdge(IRUnit& unit, Block* from, Block* to, BCMarker marker) {
+Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
   auto& branch = from->back();
   Block* middle = unit.defBlock();
   FTRACE(3, "splitting edge from B{} -> B{} using B{}\n",
@@ -62,7 +67,7 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to, BCMarker marker) {
     branch.setNext(middle);
   }
 
-  middle->prepend(unit.gen(Jmp, marker, to));
+  middle->prepend(unit.gen(Jmp, branch.marker(), to));
   auto const unlikely = Block::Hint::Unlikely;
   if (from->hint() == unlikely || to->hint() == unlikely) {
     middle->setHint(unlikely);
@@ -83,7 +88,7 @@ void splitCriticalEdge(IRUnit& unit, Edge* edge) {
   auto* from = branch->block();
   if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
 
-  splitEdge(unit, from, to, to->front().marker());
+  splitEdge(unit, from, to);
 }
 }
 
@@ -159,7 +164,7 @@ bool removeUnreachable(IRUnit& unit) {
  */
 IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
   auto& blocks = blockIds.blocks;
-  auto& postIds = blockIds.ids;
+  auto& rpoIds = blockIds.ids;
 
   // Calculate immediate dominators with the iterative two-finger algorithm.
   // When it terminates, idom[post-id] will contain the post-id of the
@@ -185,10 +190,10 @@ IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
         auto p2 = predIter->from();
         if (p2 == p1 || !idom[p2]) continue;
         // find earliest common predecessor of p1 and p2
-        // (higher postIds are earlier in flow and in dom-tree).
+        // (lower RPO ids are earlier in flow and in dom-tree).
         do {
-          while (postIds[p1] < postIds[p2]) p1 = idom[p1];
-          while (postIds[p2] < postIds[p1]) p2 = idom[p2];
+          while (rpoIds[p1] < rpoIds[p2]) p2 = idom[p2];
+          while (rpoIds[p2] < rpoIds[p1]) p1 = idom[p1];
         } while (p1 != p2);
       }
       if (idom[block] != p1) {
@@ -201,54 +206,139 @@ IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
   return idom;
 }
 
-DomChildren findDomChildren(const IRUnit& unit, const BlocksWithIds& blocks) {
-  IdomVector idom = findDominators(unit, blocks);
-  DomChildren children(unit, BlockList());
-  for (Block* block : blocks.blocks) {
-    auto idomBlock = idom[block];
-    if (idomBlock) children[idomBlock].push_back(block);
-  }
-  return children;
-}
-
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
+  assert(b1 != nullptr && b2 != nullptr);
   for (auto b = b2; b != nullptr; b = idoms[b]) {
     if (b == b1) return true;
   }
   return false;
 }
 
-static bool loopVisit(const Block* b,
-                      boost::dynamic_bitset<>& visited,
-                      boost::dynamic_bitset<>& path) {
-  if (b == nullptr) return false;
+namespace {
 
-  auto const id = b->id();
+// Visits all back-edges in a CFG.
+template <class Visitor>
+struct BackEdgeVisitor {
+  BackEdgeVisitor(const IRUnit& unit, Visitor& visitor)
+    : m_path(unit.numBlocks())
+    , m_visited(unit.numBlocks())
+    , m_visitor(visitor)
+  {}
 
-  // If we're revisiting a block in our current search, then we've
-  // found a backedge.
-  if (path.test(id)) return true;
+  using BitSet = boost::dynamic_bitset<>;
 
-  // Otherwise if we're getting back to a block that's already been
-  // visited, but it hasn't been visited in this path, then we can
-  // prune this search.
-  if (visited.test(id)) return false;
+  void walk(Edge* e) {
+    if (e == nullptr) return;
 
-  visited.set(id);
-  path.set(id);
+    auto const block = e->to();
+    auto const id = block->id();
 
-  bool res = loopVisit(b->taken(), visited, path) ||
-             loopVisit(b->next(), visited, path);
+    // If we're revisiting a block in our current search, then we've
+    // found a backedge.
+    if (m_path.test(id)) {
+      // The entry block can't be a loop header.
+      assert(!block->isEntry());
 
-  path.set(id, false);
+      m_visitor(e);
+    }
 
-  return res;
+    // Otherwise if we're getting back to a block that's already been
+    // visited, but it hasn't been visited in this path, then we can
+    // prune this search.
+    if (m_visited.test(id)) return;
+
+    m_visited.set(id);
+    m_path.set(id);
+
+    // Normally blocks cannot be empty, but this is used in printing and we want
+    // to be able to print malformed blocks.
+    if (!block->empty()) {
+      walk(block->takenEdge());
+      walk(block->nextEdge());
+    }
+
+    m_path.set(id, false);
+  }
+
+private:
+  BitSet m_path;
+  BitSet m_visited;
+  Visitor& m_visitor;
+};
+
+template <class Visitor>
+void backEdgeWalk(const IRUnit& unit, Visitor visitor) {
+  BackEdgeVisitor<Visitor> bev(unit, visitor);
+
+  auto const entry = unit.entry();
+  bev.walk(entry->takenEdge());
+  bev.walk(entry->nextEdge());
+}
+
+}
+
+bool insertLoopPreHeaders(IRUnit& unit) {
+  ITRACE(2, "making preheaders\n");
+  Trace::Indent _i;
+
+  bool changed = false;
+
+  auto const backEdges = findBackEdges(unit);
+
+  for (auto header : findLoopHeaders(unit)) {
+    // Compute the set of forward predecessors for the loop header.
+    EdgeSet fwdPreds;
+    for (auto& pred : header->preds()) {
+      if (backEdges.find(&pred) == backEdges.end()) fwdPreds.insert(&pred);
+    }
+
+    // Header can't be the entry block.
+    assert(fwdPreds.size() != 0);
+
+    // Already have a pre-header, so do nothing.
+    if (fwdPreds.size() == 1) continue;
+
+    auto const preheader = unit.defBlock();
+    preheader->push_back(unit.gen(Jmp, header->front().marker(), header));
+
+    ITRACE(4, "making pre-header B{} for header B{}\n",
+           preheader->id(), header->id());
+
+    auto constexpr unlikely = Block::Hint::Unlikely;
+    if (header->hint() == unlikely) preheader->setHint(unlikely);
+
+    // Point all forward preds at pre-header.
+    for (auto const pred : fwdPreds) {
+      auto& branch = pred->from()->back();
+
+      assert(branch.taken() == header || branch.next() == header);
+
+      if (branch.taken() == header) branch.setTaken(preheader);
+      if (branch.next() == header) branch.setNext(preheader);
+
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+EdgeSet findBackEdges(const IRUnit& unit) {
+  EdgeSet edges;
+  backEdgeWalk(unit, [&] (Edge* e) { edges.insert(e); });
+  return edges;
+}
+
+BlockSet findLoopHeaders(const IRUnit& unit) {
+  BlockSet headers;
+  backEdgeWalk(unit, [&] (Edge* e) { headers.insert(e->to()); });
+  return headers;
 }
 
 bool cfgHasLoop(const IRUnit& unit) {
-  boost::dynamic_bitset<> path(unit.numBlocks());
-  boost::dynamic_bitset<> visited(unit.numBlocks());
-  return loopVisit(unit.entry(), path, visited);
+  bool hasLoop = false;
+  backEdgeWalk(unit, [&] (Edge*) { hasLoop = true; });
+  return hasLoop;
 }
 
 }}

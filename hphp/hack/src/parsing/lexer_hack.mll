@@ -33,7 +33,7 @@ let add_fixme err_nbr pos =
   ()
 
 (*****************************************************************************)
-(* The type for tokens. Some of them don't represent "real" tokens comming
+(* The type for tokens. Some of them don't represent "real" tokens coming
  * from the buffer. For example Terror can be used to tag an error, or Tyield
  * doesn't really correspond to a string, it's just there to encode the
  * priority.
@@ -78,6 +78,7 @@ type token =
   | Tplus
   | Tminus
   | Tstar
+  | Tstarstar
   | Tslash
   | Tbslash
   | Txor
@@ -126,11 +127,8 @@ type token =
 (* Fake tokens *)
   | Tyield
   | Tawait
-  | Tinclude
-  | Tinclude_once
+  | Timport
   | Teval
-  | Trequire
-  | Trequire_once
   | Tprint
   | Tinstanceof
   | Tnew
@@ -194,6 +192,7 @@ let token_to_string = function
   | Tplus         -> "+"
   | Tminus        -> "-"
   | Tstar         -> "*"
+  | Tstarstar     -> "**"
   | Tslash        -> "/"
   | Tbslash       -> "\\"
   | Txor          -> "^"
@@ -235,11 +234,8 @@ let token_to_string = function
   | Teof          -> "eof"
   | Tyield        -> "yield"
   | Tawait        -> "await"
-  | Tinclude      -> "include"
-  | Tinclude_once -> "include_once"
+  | Timport       -> "import"
   | Teval         -> "eval"
-  | Trequire      -> "require"
-  | Trequire_once -> "require_once"
   | Tprint        -> "print"
   | Tinstanceof   -> "instanceof"
   | Tnew          -> "new"
@@ -272,13 +268,11 @@ let alphanumeric = digit | letter
 let varname = letter alphanumeric*
 let word_part = (letter alphanumeric*) | (['a'-'z'] (alphanumeric | '-')* alphanumeric)
 let word = ('\\' | word_part)+ (* Namespaces *)
-let xhpname = ('%')? letter (alphanumeric | ':' [^':''>'] | '-')*
+let xhpname = ('%')? varname ([':' '-'] varname)*
 let otag = '<' ['a'-'z''A'-'Z'] (alphanumeric | ':' | '-')*
 let ctag = '<' '/' (alphanumeric | ':' | '-')+ '>'
 let lvar = '$' varname
-let reflvar = '&' '$' varname
 let ws = [' ' '\t' '\r' '\x0c']
-let wsnl = [' ' '\t' '\r' '\x0c''\n']
 let hex = digit | ['a'-'f''A'-'F']
 let hex_number = '0' 'x' hex+
 let bin_number = '0' 'b' ['0'-'1']+
@@ -294,23 +288,32 @@ let unsafeexpr_start = "/*" ws* "UNSAFE_EXPR"
 let fixme_start = "/*" ws* "HH_FIXME"
 let fallthrough = "//" ws* "FALLTHROUGH" [^'\n']*
 
-rule token = parse
+rule token file = parse
   (* ignored *)
-  | ws+                { token lexbuf }
-  | '\n'               { Lexing.new_line lexbuf; token lexbuf }
+  | ws+                { token file lexbuf }
+  | '\n'               { Lexing.new_line lexbuf; token file lexbuf }
   | unsafeexpr_start   { let buf = Buffer.create 256 in
-                         ignore (comment buf lexbuf);
+                         let start = lexbuf.Lexing.lex_start_p in
+                         ignore (comment buf file lexbuf);
+                         (* unsafeexpr is technically made up of multiple
+                          * tokens, but we want to treat it as a single token
+                          * as far as start / end positions are concerned *)
+                         lexbuf.Lexing.lex_start_p <- start;
                          Tunsafeexpr
                        }
-  | fixme_start        { fixme_state0 lexbuf;
-                         token lexbuf
+  | fixme_start        { let fixme = fixme_state0 file lexbuf in
+                         let tok = token file lexbuf in
+                         (match fixme with
+                           | Some err_nbr -> add_fixme err_nbr (Pos.make file lexbuf)
+                           | None -> ());
+                         tok
                        }
   | "/*"               { let buf = Buffer.create 256 in
-                         comment_list := comment buf lexbuf :: !comment_list;
-                         token lexbuf
+                         comment_list := comment buf file lexbuf :: !comment_list;
+                         token file lexbuf
                        }
-  | "//"               { line_comment lexbuf; token lexbuf }
-  | "#"                { line_comment lexbuf; token lexbuf }
+  | "//"               { line_comment lexbuf; token file lexbuf }
+  | "#"                { line_comment lexbuf; token file lexbuf }
   | '\"'               { Tdquote      }
   | '''                { Tquote       }
   | "<<<"              { Theredoc     }
@@ -352,6 +355,7 @@ rule token = parse
   | '+'                { Tplus        }
   | '-'                { Tminus       }
   | '*'                { Tstar        }
+  | "**"               { Tstarstar    }
   | '/'                { Tslash       }
   | '^'                { Txor         }
   | '%'                { Tpercent     }
@@ -384,22 +388,22 @@ rule token = parse
   | eof                { Teof         }
   | _                  { Terror       }
 
-and xhpname = parse
+and xhpname file = parse
   | eof                { Terror      }
-  | '\n'               { Lexing.new_line lexbuf; xhpname lexbuf }
-  | ws+                { xhpname lexbuf }
-  | "/*"               { ignore (comment (Buffer.create 256) lexbuf);
-                         xhpname lexbuf
+  | '\n'               { Lexing.new_line lexbuf; xhpname file lexbuf }
+  | ws+                { xhpname file lexbuf }
+  | "/*"               { ignore (comment (Buffer.create 256) file lexbuf);
+                         xhpname file lexbuf
                        }
-  | "//"               { line_comment lexbuf; xhpname lexbuf }
-  | "#"                { line_comment lexbuf; xhpname lexbuf }
+  | "//"               { line_comment lexbuf; xhpname file lexbuf }
+  | "#"                { line_comment lexbuf; xhpname file lexbuf }
   | word               { Txhpname    }
   | xhpname            { Txhpname    }
   | _                  { Terror      }
 
-and xhptoken = parse
+and xhptoken file = parse
   | eof                { Teof        }
-  | '\n'               { Lexing.new_line lexbuf; xhptoken lexbuf }
+  | '\n'               { Lexing.new_line lexbuf; xhptoken file lexbuf }
   | '<'                { Tlt         }
   | '>'                { Tgt         }
   | '{'                { Tlcb        }
@@ -407,18 +411,25 @@ and xhptoken = parse
   | '/'                { Tslash      }
   | '\"'               { Tdquote     }
   | word               { Tword       }
-  | "<!--"             { xhp_comment lexbuf; xhptoken lexbuf }
-  | _                  { xhptoken lexbuf }
+  | "<!--"             { xhp_comment file lexbuf; xhptoken file lexbuf }
+  | _                  { xhptoken file lexbuf }
 
-and xhpattr = parse
+and xhpattr file = parse
   | eof                { Teof        }
-  | ws+                { xhpattr lexbuf }
-  | '\n'               { Lexing.new_line lexbuf; xhpattr lexbuf }
-  | "/*"               { ignore (comment (Buffer.create 256) lexbuf);
-                         xhpattr lexbuf
+  | ws+                { xhpattr file lexbuf }
+  | '\n'               { Lexing.new_line lexbuf; xhpattr file lexbuf }
+  | fixme_start        { let fixme = fixme_state0 file lexbuf in
+                         let tok = xhpattr file lexbuf in
+                         (match fixme with
+                           | Some err_nbr -> add_fixme err_nbr (Pos.make file lexbuf)
+                           | None -> ());
+                         tok
                        }
-  | "//"               { line_comment lexbuf; xhpattr lexbuf }
-  | '\n'               { Lexing.new_line lexbuf; xhpattr lexbuf }
+  | "/*"               { ignore (comment (Buffer.create 256) file lexbuf);
+                         xhpattr file lexbuf
+                       }
+  | "//"               { line_comment lexbuf; xhpattr file lexbuf }
+  | '\n'               { Lexing.new_line lexbuf; xhpattr file lexbuf }
   | '<'                { Tlt         }
   | '>'                { Tgt         }
   | '{'                { Tlcb        }
@@ -435,94 +446,93 @@ and heredoc_token = parse
   | ';'                { Tsc         }
   | _                  { Tany        }
 
-and comment buf = parse
-  | eof                { let pos = Pos.make lexbuf in
+and comment buf file = parse
+  | eof                { let pos = Pos.make file lexbuf in
                          Errors.unterminated_comment pos;
                          pos, Buffer.contents buf
                        }
   | '\n'               { Lexing.new_line lexbuf;
                          Buffer.add_char buf '\n';
-                         comment buf lexbuf
+                         comment buf file lexbuf
                        }
-  | "*/"               { Pos.make lexbuf, Buffer.contents buf }
+  | "*/"               { Pos.make file lexbuf, Buffer.contents buf }
   | _                  { Buffer.add_string buf (Lexing.lexeme lexbuf);
-                         comment buf lexbuf
+                         comment buf file lexbuf
                        }
 
 (* HH_FIXME... *)
-and fixme_state0 = parse
-  | eof                { let pos = Pos.make lexbuf in
+and fixme_state0 file = parse
+  | eof                { let pos = Pos.make file lexbuf in
                          Errors.unterminated_comment pos;
+                         None
                        }
-  | ws+                { fixme_state0 lexbuf
+  | ws+                { fixme_state0 file lexbuf
                        }
   | '\n'               { Lexing.new_line lexbuf;                        
-                         fixme_state0 lexbuf
+                         fixme_state0 file lexbuf
                        }
-  | '['                { fixme_state1 lexbuf }
-  | _                  { Errors.fixme_format (Pos.make lexbuf);
-                         ignore (comment (Buffer.create 256) lexbuf)
+  | '['                { fixme_state1 file lexbuf }
+  | _                  { Errors.fixme_format (Pos.make file lexbuf);
+                         ignore (comment (Buffer.create 256) file lexbuf);
+                         None
                        }
 
 (* HH_FIXME[... *)
-and fixme_state1 = parse
-  | eof                { let pos = Pos.make lexbuf in
-                         Errors.unterminated_comment pos
+and fixme_state1 file = parse
+  | eof                { let pos = Pos.make file lexbuf in
+                         Errors.unterminated_comment pos;
+                         None
                        }
-  | ws+                { fixme_state1 lexbuf }
+  | ws+                { fixme_state1 file lexbuf }
   | '\n'               { Lexing.new_line lexbuf;
-                         fixme_state1 lexbuf
+                         fixme_state1 file lexbuf
                        }
   | int                { let err_nbr = Lexing.lexeme lexbuf in
                          let err_nbr = int_of_string err_nbr in
-                         fixme_state2 err_nbr lexbuf }
-  | _                  { Errors.fixme_format (Pos.make lexbuf);
-                         ignore (comment (Buffer.create 256) lexbuf)
+                         fixme_state2 err_nbr file lexbuf }
+  | _                  { Errors.fixme_format (Pos.make file lexbuf);
+                         ignore (comment (Buffer.create 256) file lexbuf);
+                         None
                        }
 
 (* HH_FIXME[NUMBER... *)
-and fixme_state2 err_nbr = parse
-  | eof                { let pos = Pos.make lexbuf in
-                         Errors.unterminated_comment pos
+and fixme_state2 err_nbr file = parse
+  | eof                { let pos = Pos.make file lexbuf in
+                         Errors.unterminated_comment pos;
+                         None
                        }
   | "*/" ws* '\n'      { Lexing.new_line lexbuf;
-                         let pos = Pos.make lexbuf in
-                         let line, _, _ = Pos.info_pos pos in
-                         let pos = Pos.set_line pos (line+1) in
-                         (* Nothing after */, the HH_FIXME applies to the
-                          * next line.
-                          *)
-                         add_fixme err_nbr pos
+                         Some err_nbr
                        }
-  | "*/"               { add_fixme err_nbr (Pos.make lexbuf) }
+  | "*/"               { Some err_nbr }
   | '\n'               { Lexing.new_line lexbuf;
-                         fixme_state2 err_nbr lexbuf
+                         fixme_state2 err_nbr file lexbuf
                        }
-  | _                  { fixme_state2 err_nbr lexbuf }
+  | _                  { fixme_state2 err_nbr file lexbuf }
 
 and line_comment = parse
   | eof                { () }
   | '\n'               { Lexing.new_line lexbuf }
   | _                  { line_comment lexbuf }
 
-and xhp_comment = parse
-  | eof                { let pos = Pos.make lexbuf in
+and xhp_comment file = parse
+  | eof                { let pos = Pos.make file lexbuf in
                          Errors.unterminated_xhp_comment pos;
                          ()
                        }
-  | '\n'               { Lexing.new_line lexbuf; xhp_comment lexbuf }
+  | '\n'               { Lexing.new_line lexbuf; xhp_comment file lexbuf }
   | "-->"              { () }
-  | _                  { xhp_comment lexbuf }
+  | _                  { xhp_comment file lexbuf }
 
-and gt_or_comma = parse
+and gt_or_comma file = parse
   | eof                { Terror }
-  | ws+                { gt_or_comma lexbuf }
-  | '\n'               { Lexing.new_line lexbuf; gt_or_comma lexbuf }
-  | "/*"               { ignore (comment (Buffer.create 256) lexbuf);
-                         gt_or_comma lexbuf
+  | ws+                { gt_or_comma file lexbuf }
+  | '\n'               { Lexing.new_line lexbuf; gt_or_comma file lexbuf }
+  | "/*"               { ignore (comment (Buffer.create 256) file lexbuf);
+                         gt_or_comma file lexbuf
                        }
-  | "//"               { line_comment lexbuf; gt_or_comma lexbuf }
-  | '\n'               { Lexing.new_line lexbuf; gt_or_comma lexbuf }
+  | "//"               { line_comment lexbuf; gt_or_comma file lexbuf }
+  | '\n'               { Lexing.new_line lexbuf; gt_or_comma file lexbuf }
   | '>'                { Tgt  }
   | ','                { Tcomma  }
   | _                  { Terror }
@@ -532,25 +542,25 @@ and no_space_id = parse
   | word               { Tword  }
   | _                  { Terror }
 
-and string = parse
+and string file = parse
   | eof                { Teof }
-  | '\n'               { Lexing.new_line lexbuf; string lexbuf }
-  | '\\'               { string_backslash lexbuf; string lexbuf }
+  | '\n'               { Lexing.new_line lexbuf; string file lexbuf }
+  | '\\'               { string_backslash file lexbuf; string file lexbuf }
   | '''                { Tquote }
-  | _                  { string lexbuf }
+  | _                  { string file lexbuf }
 
-and string_backslash = parse
-  | eof                { let pos = Pos.make lexbuf in
+and string_backslash file = parse
+  | eof                { let pos = Pos.make file lexbuf in
                          Errors.unexpected_eof pos;
                          ()
                        }
   | '\n'               { Lexing.new_line lexbuf }
   | _                  { () }
 
-and string2 = parse
+and string2 file = parse
   | eof                { Teof }
-  | '\n'               { Lexing.new_line lexbuf; string2 lexbuf }
-  | '\\'               { string_backslash lexbuf; string2 lexbuf }
+  | '\n'               { Lexing.new_line lexbuf; string2 file lexbuf }
+  | '\\'               { string_backslash file lexbuf; string2 file lexbuf }
   | '\"'               { Tdquote }
   | '{'                { Tlcb }
   | '}'                { Trcb }
@@ -564,15 +574,15 @@ and string2 = parse
   | lvar               { Tlvar }
   | _                  { Tany }
 
-and header = parse
+and header file = parse
   | eof                         { `error }
-  | ws+                         { header lexbuf }
-  | '\n'                        { Lexing.new_line lexbuf; header lexbuf }
-  | "//"                        { line_comment lexbuf; header lexbuf }
-  | "/*"                        { ignore (comment (Buffer.create 256) lexbuf);
-                                  header lexbuf
+  | ws+                         { header file lexbuf }
+  | '\n'                        { Lexing.new_line lexbuf; header file lexbuf }
+  | "//"                        { line_comment lexbuf; header file lexbuf }
+  | "/*"                        { ignore (comment (Buffer.create 256) file lexbuf);
+                                  header file lexbuf
                                 }
-  | "#"                         { line_comment lexbuf; header lexbuf }
+  | "#"                         { line_comment lexbuf; header file lexbuf }
   | "<?hh"                      { `default_mode }
   | "<?hh" ws* "//"             { `explicit_mode }
   | "<?php" ws* "//" ws* "decl" { `php_decl_mode }
@@ -591,11 +601,29 @@ and look_for_open_cb = parse
   | '{'                { () }
   | _                  { look_for_open_cb lexbuf }
 
+(* Normally you can just use "token" and get back Tlvar, but specifically for
+ * member variable accesses, the part to the right of the "->" isn't a word
+ * (cannot contain '-' for example) but doesn't start with '$' so isn't an lvar
+ * either. *)
+and varname = parse
+  | varname            { Tword  }
+  | _                  { Terror }
+
+(****************************************************************************)
+(* hh_format tokenizers. *)
+(****************************************************************************)
+
+and format_comment = parse
+  | [' '  '\t']        { Tspace         }
+  | '\n'               { Tnewline       }
+  | eof                { Teof           }
+  | "*/"               { Tclose_comment }
+  | _                  { Tany           }
+
 and format_token = parse
-  | ' '                { Tspace        }
+  | [' '  '\t']        { Tspace        }
   | '\n'               { Tnewline      }
   | "/*"               { Topen_comment }
-  | "*/"               { Tclose_comment }
   | "//"               { Tline_comment }
   | "#"                { Tline_comment }
   | '\"'               { Tdquote       }
@@ -639,6 +667,7 @@ and format_token = parse
   | '+'                { Tplus         }
   | '-'                { Tminus        }
   | '*'                { Tstar         }
+  | "**"               { Tstarstar     }
   | '/'                { Tslash        }
   | '\\'               { Tbslash       }
   | '^'                { Txor          }

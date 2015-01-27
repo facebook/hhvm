@@ -39,7 +39,7 @@ public:
     DecodeNoBody    = 4,  /* don't include the body */
   };
 
-  static bool ProcessLine(MimePart *workpart, const String& line);
+  static bool ProcessLine(SmartPtr<MimePart> workpart, const String& line);
 
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MimePart);
@@ -83,10 +83,10 @@ private:
   };
 
 private:
-  static void UpdatePositions(MimePart *part, int newendpos,
+  static void UpdatePositions(SmartPtr<MimePart> part, int newendpos,
                               int newbodyend, int deltanlines);
 
-  Resource m_parent;
+  SmartPtr<MimePart> m_parent;
   Array  m_children;   /* child parts */
 
   int m_startpos, m_endpos;   /* offsets of this part in the message */
@@ -119,13 +119,13 @@ private:
 
     String workbuf;
     String headerbuf;
-    Resource lastpart;
+    SmartPtr<MimePart> lastpart;
   } m_parsedata;
 
   int extractImpl(int decode, File *src);
-  MimePart *createChild(int startpos, bool inherit);
+  SmartPtr<MimePart> createChild(int startpos, bool inherit);
   bool processHeader();
-  MimePart *getParent();
+  const SmartPtr<MimePart>& getParent() { return m_parent; }
 
   void decoderPrepare(bool do_decode);
   void decoderFeed(const String& str);

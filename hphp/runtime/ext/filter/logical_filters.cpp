@@ -15,14 +15,17 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/filter/logical_filters.h"
+#include "hphp/runtime/ext/filter/ext_filter.h"
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
-#include "hphp/runtime/ext/ext_filter.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-php-config.h"
 #include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include <arpa/inet.h>
 #include <pcre.h>
@@ -342,20 +345,21 @@ Variant php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) {
 
   int64_t lval;
   double dval;
-  switch (is_numeric_string(p.data(), p.size(), &lval, &dval, 0)) {
-    case KindOfInt64:
-      return (double) lval;
-      break;
-    case KindOfDouble:
-      if ((!dval && p.size() > 1 && strpbrk(p.data(), "123456789")) ||
-           !zend_finite(dval)) {
-        goto error;
-      }
-      return dval;
-      break;
-    default:
+  DataType dt;
+
+  dt = is_numeric_string(p.data(), p.size(), &lval, &dval, 0);
+
+  if (IS_INT_TYPE(dt)) {
+    return (double)lval;
+  } else if (IS_DOUBLE_TYPE(dt)) {
+    if ((!dval && p.size() > 1 && strpbrk(p.data(), "123456789")) ||
+         !zend_finite(dval)) {
+      goto error;
+    }
+    return dval;
+  } else {
 error:
-      RETURN_VALIDATION_FAILED
+    RETURN_VALIDATION_FAILED
   }
   return value;
 }
@@ -771,7 +775,7 @@ Variant php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) {
 }
 
 Variant php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL) {
-  if (!f_is_callable(option_array)) {
+  if (!HHVM_FN(is_callable)(option_array)) {
     raise_warning("First argument is expected to be a valid callback");
     return init_null();
   }

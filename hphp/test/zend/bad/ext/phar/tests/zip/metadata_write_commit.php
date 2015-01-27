@@ -44,4 +44,5 @@ foreach($files as $name => $cont) {
 var_dump($phar->getMetadata());
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip.php'); ?>

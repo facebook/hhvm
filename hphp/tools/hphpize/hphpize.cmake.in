@@ -38,3 +38,9 @@ add_definitions("-DHHVM_BUILD_DSO")
 foreach (def ${HHVM_DEFINITIONS})
   add_definitions("-D${def}")
 endforeach()
+
+add_custom_target(test COMMAND
+                       HHVM_BIN=${CMAKE_INSTALL_PREFIX}/bin/hhvm
+                       ${CMAKE_CURRENT_SOURCE_DIR}/run-test
+                       -a "-vDynamicExtensions.99=${EXTENSION_NAME}.so" test
+                       DEPENDS ${EXTENSION_NAME})

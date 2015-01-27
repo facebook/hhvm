@@ -18,10 +18,10 @@
 
 #include <string>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/compact-sized-ptr.h"
+#include "hphp/util/compact-tagged-ptrs.h"
 
 #include "hphp/runtime/base/datatype.h"
 
@@ -91,7 +91,7 @@ struct RepoAuthType {
   };
 
   explicit RepoAuthType(Tag tag = Tag::Gen, const StringData* sd = nullptr) {
-    m_data.set(static_cast<uint8_t>(tag), sd);
+    m_data.set(tag, sd);
     switch (tag) {
     case Tag::OptSubObj: case Tag::OptExactObj:
     case Tag::SubObj: case Tag::ExactObj:
@@ -103,11 +103,11 @@ struct RepoAuthType {
   }
 
   explicit RepoAuthType(Tag tag, const Array* ar) {
-    m_data.set(static_cast<uint8_t>(tag), ar);
+    m_data.set(tag, ar);
     assert(mayHaveArrData());
   }
 
-  Tag tag() const { return static_cast<Tag>(m_data.size() & 0xff); }
+  Tag tag() const { return m_data.tag(); }
 
   bool operator==(RepoAuthType) const;
   bool operator!=(RepoAuthType o) const { return !(*this == o); }
@@ -150,7 +150,7 @@ struct RepoAuthType {
     sd(t);
     if (SerDe::deserializing) {
       // mayHaveArrData and hasClassName need to read tag().
-      m_data.set(static_cast<uint8_t>(t), nullptr);
+      m_data.set(t, nullptr);
     }
     auto const vp = [&]() -> const void* {
       if (mayHaveArrData()) {
@@ -164,14 +164,14 @@ struct RepoAuthType {
       }
       return nullptr;
     }();
-    m_data.set(static_cast<uint8_t>(t), vp);
+    m_data.set(t, vp);
   }
 
 private:
   // This is the type tag, plus an optional pointer to a class name
   // (for the obj_* types), or an optional pointer to array
   // information for array types.
-  CompactSizedPtr<const void> m_data;
+  CompactTaggedPtr<const void,Tag> m_data;
 };
 
 //////////////////////////////////////////////////////////////////////

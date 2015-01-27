@@ -71,12 +71,6 @@ void SimpleQueryClause::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr SimpleQueryClause::inferTypes(AnalysisResultPtr ar,
-  TypePtr type, bool coerce) {
-  m_expression->inferAndCheck(ar, Type::Some, false);
-  return Type::Object;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void SimpleQueryClause::outputCodeModel(CodeGenerator &cg) {

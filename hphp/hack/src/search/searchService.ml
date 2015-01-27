@@ -11,7 +11,6 @@
 module Make(S : SearchUtils.Searchable) = struct
   module Fuzzy = FuzzySearchService.Make(S)
   module Trie = TrieSearchService.Make(S)
-  module SUtils = SearchUtils.Make(S)
 
   module WorkerApi = struct
 
@@ -27,12 +26,20 @@ module Make(S : SearchUtils.Searchable) = struct
 
   module MasterApi = struct
 
+    let marshal chan =
+      Fuzzy.marshal chan;
+      Trie.MasterApi.marshal chan
+
+    let unmarshal chan =
+      Fuzzy.unmarshal chan;
+      Trie.MasterApi.unmarshal chan
+
     (* Called by the master process when there is new information in
      * shared memory for us to index *)
     let update_search_index files =
       Trie.MasterApi.index_files files;
       Fuzzy.index_files files;
-      (* At this point, users can start searching agian so we should clear the
+      (* At this point, users can start searching again so we should clear the
        * cache that contains the actual results. We don't have to worry
        * about the string->keys list shared memory because it's uncached *)
       SharedMem.invalidate_caches()

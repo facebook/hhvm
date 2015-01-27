@@ -27,10 +27,13 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <signal.h>
 
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/rank.h"
-#include "hphp/runtime/base/macros.h"
+#include "hphp/util/service-data.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {  namespace Treadmill {
@@ -43,9 +46,14 @@ namespace {
 
 const int64_t ONE_SEC_IN_MICROSEC = 1000000;
 
+struct RequestInfo {
+  GenCount  startTime;
+  pthread_t pthreadId;
+};
+
 pthread_mutex_t s_genLock = PTHREAD_MUTEX_INITIALIZER;
 const GenCount kIdleGenCount = 0; // not processing any requests.
-std::vector<GenCount> s_inflightRequests;
+std::vector<RequestInfo> s_inflightRequests;
 GenCount s_latestCount = 0;
 std::atomic<GenCount> s_oldestRequestInFlight(0);
 
@@ -107,12 +115,50 @@ struct GenCountGuard {
 
 //////////////////////////////////////////////////////////////////////
 
+pthread_t getOldestRequestThreadId() {
+  int64_t oldestStart = s_oldestRequestInFlight.load(std::memory_order_relaxed);
+  for (auto& req : s_inflightRequests) {
+    if (req.startTime == oldestStart) return req.pthreadId;
+  }
+  not_reached();
 }
 
-typedef std::list<std::unique_ptr<WorkItem>> PendingTriggers;
-static PendingTriggers s_tq;
+void checkOldest() {
+  int64_t limit =
+    RuntimeOption::MaxRequestAgeFactor * RuntimeOption::RequestTimeoutSeconds;
+  if (!limit) return;
 
+  int64_t ageOldest = getAgeOldestRequest();
+  if (ageOldest > limit) {
+    auto msg = folly::format("Oldest request has been running for {} "
+                             "seconds. Aborting the server.", ageOldest).str();
+    Logger::Error(msg);
+    pthread_t oldestTid = getOldestRequestThreadId();
+    pthread_kill(oldestTid, SIGABRT);
+  }
+}
+
+void refreshStats() {
+  static ServiceData::ExportedCounter* s_oldestRequestAgeStat =
+    ServiceData::createCounter("treadmill.age");
+  s_oldestRequestAgeStat->setValue(getAgeOldestRequest());
+}
+
+}
+
+struct PendingTriggers : std::list<std::unique_ptr<WorkItem>> {
+  ~PendingTriggers() {
+    s_destroyed = true;
+  }
+  static bool s_destroyed;
+};
+
+static PendingTriggers s_tq;
+bool PendingTriggers::s_destroyed = false;
 void enqueueInternal(std::unique_ptr<WorkItem> gt) {
+  if (PendingTriggers::s_destroyed) {
+    return;
+  }
   GenCount time = getTime();
   {
     GenCountGuard g;
@@ -125,35 +171,39 @@ void startRequest() {
   if (UNLIKELY(s_thisThreadIdx == -1)) {
     s_thisThreadIdx = s_nextThreadIdx.fetch_add(1);
   }
-  auto const threadId = s_thisThreadIdx;
+  auto const threadIdx = s_thisThreadIdx;
 
   GenCount startTime = getTime();
   {
     GenCountGuard g;
-    if (threadId >= s_inflightRequests.size()) {
-      s_inflightRequests.resize(threadId + 1, kIdleGenCount);
+    refreshStats();
+    checkOldest();
+    if (threadIdx >= s_inflightRequests.size()) {
+      s_inflightRequests.resize(threadIdx + 1, {kIdleGenCount, 0});
     } else {
-      assert(s_inflightRequests[threadId] == kIdleGenCount);
+      assert(s_inflightRequests[threadIdx].startTime == kIdleGenCount);
     }
-    s_inflightRequests[threadId] = correctTime(startTime);
-    FTRACE(1, "tid {} start @gen {}\n", threadId,
-      s_inflightRequests[threadId]);
+    s_inflightRequests[threadIdx].startTime = correctTime(startTime);
+    s_inflightRequests[threadIdx].pthreadId = Process::GetThreadId();
+    FTRACE(1, "threadIdx {} pthreadId {} start @gen {}\n", threadIdx,
+           s_inflightRequests[threadIdx].pthreadId,
+           s_inflightRequests[threadIdx].startTime);
     if (s_oldestRequestInFlight.load(std::memory_order_relaxed) == 0) {
-      s_oldestRequestInFlight = s_inflightRequests[threadId];
+      s_oldestRequestInFlight = s_inflightRequests[threadIdx].startTime;
     }
   }
 }
 
 void finishRequest() {
-  auto const threadId = s_thisThreadIdx;
-  assert(threadId != -1);
-  FTRACE(1, "tid {} finish\n", threadId);
+  auto const threadIdx = s_thisThreadIdx;
+  assert(threadIdx != -1);
+  FTRACE(1, "tid {} finish\n", threadIdx);
   std::vector<std::unique_ptr<WorkItem>> toFire;
   {
     GenCountGuard g;
-    assert(s_inflightRequests[threadId] != kIdleGenCount);
-    GenCount finishedRequest = s_inflightRequests[threadId];
-    s_inflightRequests[threadId] = kIdleGenCount;
+    assert(s_inflightRequests[threadIdx].startTime != kIdleGenCount);
+    GenCount finishedRequest = s_inflightRequests[threadIdx].startTime;
+    s_inflightRequests[threadIdx].startTime = kIdleGenCount;
 
     // After finishing a request, check to see if we've allowed any triggers
     // to fire and update the time of the oldest request in flight.
@@ -162,9 +212,9 @@ void finishRequest() {
     if (s_oldestRequestInFlight.load(std::memory_order_relaxed) ==
         finishedRequest) {
       GenCount limit = s_latestCount + 1;
-      for (auto val : s_inflightRequests) {
-        if (val != kIdleGenCount && val < limit) {
-          limit = val;
+      for (auto& val : s_inflightRequests) {
+        if (val.startTime != kIdleGenCount && val.startTime < limit) {
+          limit = val.startTime;
         }
       }
       // update "oldest in flight" or kill it if there are no running requests
@@ -189,9 +239,24 @@ void finishRequest() {
   }
 }
 
+/*
+ * Return the start time of the oldest request in seconds, rounded such that
+ * time(nullptr) >= getOldestStartTime() is guaranteed to be true.
+ *
+ * Subtract s_nextThreadIdx because if n threads start at the same time,
+ * one of their start times will be increased by n-1 (and we need to subtract
+ * 1 anyway, to deal with exact seconds).
+ */
 int64_t getOldestStartTime() {
   int64_t time = s_oldestRequestInFlight.load(std::memory_order_relaxed);
-  return time / ONE_SEC_IN_MICROSEC + 1; // round up 1 sec
+  return (time - s_nextThreadIdx)/ ONE_SEC_IN_MICROSEC + 1;
+}
+
+int64_t getAgeOldestRequest() {
+  int64_t start = s_oldestRequestInFlight.load(std::memory_order_relaxed);
+  if (start == 0) return 0; // no request in flight
+  int64_t time = getTime() - start;
+  return time / ONE_SEC_IN_MICROSEC;
 }
 
 void deferredFree(void* p) {

@@ -2,8 +2,8 @@
 require_once __DIR__.'/../Framework.php';
 
 class Kohana extends Framework {
-  protected function install(): void {
-    parent::install();
+  <<Override>>
+  protected function extraPreComposer(): void {
     $root = nullthrows($this->getInstallRoot());
 
     verbose("Initialize submodules.\n");
@@ -44,6 +44,7 @@ XML;
     file_put_contents($this->getTestPath()."/phpunit.xml", $phpunit_xml);
   }
 
+  <<Override>>
   protected function isInstalled(): bool {
     $extra_files = Set {
       $this->getTestPath()."/phpunit.xml",

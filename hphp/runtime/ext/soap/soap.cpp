@@ -60,7 +60,7 @@ sdl *SoapData::get_sdl(const char *uri, long cache_wsdl,
   if (sdl) {
     // holding it for the entire request life time, so soapserver and
     // soapclient can use sdl* without being deleted
-    m_sdls.push_back(sdl);
+    m_sdls.insert(sdl);
     return sdl.get();
   }
   return NULL;
@@ -70,7 +70,7 @@ encodeMap *SoapData::register_typemap(encodeMapPtr typemap) {
   if (typemap) {
     // holding it for the entire request life time, so soapserver and
     // soapclient can use encodeMap* without being deleted
-    m_typemaps.push_back(typemap);
+    m_typemaps.insert(typemap);
     return typemap.get();
   }
   return NULL;
@@ -78,7 +78,7 @@ encodeMap *SoapData::register_typemap(encodeMapPtr typemap) {
 
 void SoapData::register_encoding(xmlCharEncodingHandlerPtr encoding) {
   if (encoding) {
-    m_encodings.push_back(encoding);
+    m_encodings.insert(encoding);
   }
 }
 
@@ -130,8 +130,8 @@ void SoapData::reset() {
   m_sdls.clear();
   m_typemaps.clear();
 
-  for (unsigned int i = 0; i < m_encodings.size(); i++) {
-    xmlCharEncCloseFunc(m_encodings[i]);
+  for (auto itr = m_encodings.begin(); itr != m_encodings.end(); ++itr) {
+    xmlCharEncCloseFunc(*itr);
   }
   m_encodings.clear();
 }

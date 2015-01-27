@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,15 +33,10 @@ namespace HPHP {
 
 class MCrypt : public SweepableResourceData {
 public:
-  explicit MCrypt(MCRYPT td) : m_td(td), m_init(false) {
-  }
+  explicit MCrypt(MCRYPT td) : m_td(td), m_init(false) {}
 
   ~MCrypt() {
     MCrypt::close();
-  }
-
-  void sweep() FOLLY_OVERRIDE {
-    close();
   }
 
   void close() {
@@ -56,9 +51,14 @@ public:
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
+  DECLARE_RESOURCE_ALLOCATION(MCrypt)
+
+public:
   MCRYPT m_td;
   bool m_init;
 };
+
+IMPLEMENT_RESOURCE_ALLOCATION(MCrypt)
 
 typedef enum {
   RANDOM = 0,
@@ -245,7 +245,7 @@ Variant HHVM_FUNCTION(mcrypt_module_open, const String& algorithm,
     return false;
   }
 
-  return Resource(new MCrypt(td));
+  return Variant(makeSmartPtr<MCrypt>(td));
 }
 
 bool HHVM_FUNCTION(mcrypt_module_close, const Resource& td) {
@@ -378,7 +378,7 @@ Variant HHVM_FUNCTION(mcrypt_create_iv, int size, int source /* = 0 */) {
     n = size;
     while (size) {
       // Use userspace rand() function because it handles auto-seeding
-      iv[--size] = (char)f_rand(0, 255);
+      iv[--size] = (char)HHVM_FN(rand)(0, 255);
     }
   }
   return String(iv, n, AttachString);
@@ -593,7 +593,7 @@ int64_t HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
     raise_warning("Iv size incorrect; supplied length: %d, needed: %d",
                     iv.size(), iv_size);
   }
-  memcpy(iv_s, iv.data(), iv_size);
+  memcpy(iv_s, iv.data(), std::min(iv_size, iv.size()));
 
   mcrypt_generic_deinit(pm->m_td);
   int result = mcrypt_generic_init(pm->m_td, key_s, key_size, iv_s);
@@ -614,8 +614,10 @@ int64_t HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
       raise_warning("Unknown error");
       break;
     }
+  } else {
+    pm->m_init = true;
   }
-  pm->m_init = true;
+
   free(iv_s);
   free(key_s);
   return result;
@@ -688,10 +690,10 @@ const StaticString s_MCRYPT_TWOFISH("MCRYPT_TWOFISH");
 const StaticString s_MCRYPT_WAKE("MCRYPT_WAKE");
 const StaticString s_MCRYPT_XTEA("MCRYPT_XTEA");
 
-class McryptExtension : public Extension {
+class McryptExtension final : public Extension {
  public:
   McryptExtension() : Extension("mcrypt") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfStaticString>(
       s_MCRYPT_3DES.get(), StaticString("tripledes").get()
     );

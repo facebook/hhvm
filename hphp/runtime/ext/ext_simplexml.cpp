@@ -17,9 +17,11 @@
 
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include <vector>
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/class-info.h"
-#include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_domdocument.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/ext/domdocument/ext_domdocument.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -119,7 +121,7 @@ static void sxe_add_namespaces(c_SimpleXMLElement* sxe, xmlNodePtr node,
 static Object _node_as_zval(c_SimpleXMLElement* sxe, xmlNodePtr node,
                             SXE_ITER itertype, const char* name,
                             const xmlChar* nsprefix, bool isprefix) {
-  Object obj = create_object(sxe->o_getClassName(), Array(), false);
+  Object obj = create_object(sxe->getClassName(), Array(), false);
   c_SimpleXMLElement* subnode = obj.getTyped<c_SimpleXMLElement>();
   subnode->document = sxe->document;
   subnode->iter.type = itertype;
@@ -682,7 +684,7 @@ static Variant _get_base_node_value(c_SimpleXMLElement* sxe_ref,
       return obj;
     }
   } else {
-    Object obj = create_object(sxe_ref->o_getClassName(), Array(), false);
+    Object obj = create_object(sxe_ref->getClassName(), Array(), false);
     c_SimpleXMLElement* subnode = obj.getTyped<c_SimpleXMLElement>();
     subnode->document = sxe_ref->document;
     if (nsprefix && *nsprefix) {
@@ -1092,7 +1094,7 @@ static Class* class_from_name(const String& class_name, const char* callee) {
 Variant f_simplexml_import_dom(
   const Object& node,
   const String& class_name /* = "SimpleXMLElement" */) {
-  c_DOMNode *domnode = node.getTyped<c_DOMNode>();
+  DOMNode* domnode = toDOMNode(node.get());
   xmlNodePtr nodep = domnode->m_node;
 
   if (nodep) {
@@ -1113,7 +1115,7 @@ Variant f_simplexml_import_dom(
     }
     Object obj = create_object(cls->nameStr(), Array(), false);
     c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
-    sxe->document = Resource(NEWOBJ(XmlDocWrapper)(nodep->doc, node));
+    sxe->document = Resource(newres<XmlDocWrapper>(nodep->doc, node));
     sxe->node = nodep;
     return obj;
   } else {
@@ -1143,7 +1145,7 @@ Variant f_simplexml_load_string(
 
   Object obj = create_object(cls->nameStr(), Array(), false);
   c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
-  sxe->document = Resource(NEWOBJ(XmlDocWrapper)(doc));
+  sxe->document = Resource(newres<XmlDocWrapper>(doc));
   sxe->node = xmlDocGetRootElement(doc);
   sxe->iter.nsprefix = ns.size() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   sxe->iter.isprefix = is_prefix;
@@ -1161,7 +1163,7 @@ Variant f_simplexml_load_file(const String& filename,
   }
 
   auto stream = File::Open(filename, "rb");
-  if (stream.isInvalid()) return false;
+  if (stream->isInvalid()) return false;
 
   xmlDocPtr doc = nullptr;
   xmlParserCtxtPtr ctxt = xmlCreateIOParserCtxt(nullptr, nullptr,
@@ -1187,7 +1189,7 @@ Variant f_simplexml_load_file(const String& filename,
 
   Object obj = create_object(cls->nameStr(), Array(), false);
   c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
-  sxe->document = Resource(NEWOBJ(XmlDocWrapper)(doc));
+  sxe->document = Resource(newres<XmlDocWrapper>(doc));
   sxe->node = xmlDocGetRootElement(doc);
   sxe->iter.nsprefix = ns.size() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   sxe->iter.isprefix = is_prefix;
@@ -1203,7 +1205,8 @@ c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
                        ObjectData::CallToImpl|
-                       ObjectData::HasClone>(cb),
+                       ObjectData::HasClone|
+                       ObjectData::HasPropEmpty>(cb),
       document(nullptr), node(nullptr), xpath(nullptr) {
   iter.name     = nullptr;
   iter.nsprefix = nullptr;
@@ -1247,7 +1250,7 @@ void c_SimpleXMLElement::t___construct(const String& data,
   }
   iter.nsprefix = !ns.empty() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   iter.isprefix = is_prefix;
-  document = Resource(NEWOBJ(XmlDocWrapper)(docp));
+  document = Resource(newres<XmlDocWrapper>(docp));
   node = xmlDocGetRootElement(docp);
 }
 
@@ -1608,6 +1611,11 @@ bool c_SimpleXMLElement::t___isset(Variant name) {
 
 Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
   return sxe_prop_dim_write(this, name, value, true, false, nullptr);
+}
+
+bool c_SimpleXMLElement::PropEmpty(ObjectData* obj, const StringData* key) {
+  return !sxe_prop_dim_exists(static_cast<c_SimpleXMLElement*>(obj),
+    Variant(key->toCppString()), true, true, false);
 }
 
 c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {

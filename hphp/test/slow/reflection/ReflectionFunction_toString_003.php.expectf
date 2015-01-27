@@ -1,0 +1,3 @@
+Function [ <user> function zeroArgs ] {
+  @@ %s/ReflectionFunction_toString_003.php 3 - 3
+}

@@ -9,8 +9,6 @@
  *)
 
 
-open Utils
-
 (**********************************)
 (* Handling dependencies *)
 (**********************************)
@@ -43,8 +41,8 @@ module Dep = struct
   (* 30 bits for the hash and 1 bit to determine if something is a class *)
   let mask = 1 lsl 30 - 1
 
-  let make = function 
-    | Class class_name -> 
+  let make = function
+    | Class class_name ->
         let h = Hashtbl.hash class_name land mask in
         let h = h lsl 1 in
         let h = h lor 1 in
@@ -53,7 +51,7 @@ module Dep = struct
         let h = Hashtbl.hash class_name land mask in
         let h = h lsl 1 in
         h
-    | variant -> 
+    | variant ->
         let h = Hashtbl.hash variant land mask in
         let h = h lsl 1 in
         h
@@ -61,21 +59,38 @@ module Dep = struct
   let is_class x = x land 1 = 1
   let extends_of_class x = x lxor 1
 
-  let compare x y = x - y
+  let compare = (-)
 
+end
+
+module DepSet = Set.Make (Dep)
+
+(****************************************************************************)
+(* Module for a compact graph. *)
+(* Please consult hh_shared.c for the underlying representation. *)
+(****************************************************************************)
+module Graph = struct
+  external hh_add_dep: int -> unit     = "hh_add_dep"
+  external hh_get_dep: int -> int list = "hh_get_dep"
+
+  let add x y = hh_add_dep ((x lsl 31) lor y)
+
+  let get x =
+    let l = hh_get_dep x in
+    List.fold_left begin fun acc node ->
+      DepSet.add node acc
+    end DepSet.empty l
 end
 
 (*****************************************************************************)
 (* Module keeping track of what object depends on what. *)
 (*****************************************************************************)
-module Graph = Typing_graph
-
 let trace = ref true
 
 let add_idep root obj =
   if !trace
   then
-    let root = 
+    let root =
       match root with
       | None -> assert false
       | Some x -> x
@@ -104,44 +119,47 @@ let get_bazooka x =
   | Dep.FunName fid -> get_ideps (Dep.FunName fid)
   | Dep.GConst cid -> get_ideps (Dep.GConst cid)
   | Dep.GConstName cid -> get_ideps (Dep.GConstName cid)
-  | Dep.Injectable -> ISet.empty
+  | Dep.Injectable -> DepSet.empty
 
 (*****************************************************************************)
 (* Module keeping track which files contain the toplevel definitions. *)
 (*****************************************************************************)
 
-let (ifiles: (int, SSet.t) Hashtbl.t) = Hashtbl.create 23
+let (ifiles: (Dep.t, Relative_path.Set.t) Hashtbl.t ref) = ref (Hashtbl.create 23)
+
+let marshal chan = Marshal.to_channel chan !ifiles []
+
+let unmarshal chan = ifiles := Marshal.from_channel chan
 
 let get_files deps =
-  ISet.fold begin fun dep acc ->
-    try 
-      let files = Hashtbl.find ifiles dep in
-      SSet.union files acc
+  DepSet.fold begin fun dep acc ->
+    try
+      let files = Hashtbl.find !ifiles dep in
+      Relative_path.Set.union files acc
     with Not_found -> acc
-  end deps SSet.empty
+  end deps Relative_path.Set.empty
 
-let update_files workers fast =
-  SMap.iter begin fun filename info ->
-    let {FileInfo.funs; classes; types; 
+let update_files fast =
+  Relative_path.Map.iter begin fun filename info ->
+    let {FileInfo.funs; classes; typedefs;
          consts = _ (* TODO probably a bug #3844332 *);
          comments = _;
          consider_names_just_for_autoload = _;
         } = info in
     let funs = List.fold_left begin fun acc (_, fun_id) ->
-      ISet.add (Dep.make (Dep.Fun fun_id)) acc
-    end ISet.empty funs in
+      DepSet.add (Dep.make (Dep.Fun fun_id)) acc
+    end DepSet.empty funs in
     let classes = List.fold_left begin fun acc (_, class_id) ->
-      ISet.add (Dep.make (Dep.Class class_id)) acc
-    end ISet.empty classes in
+      DepSet.add (Dep.make (Dep.Class class_id)) acc
+    end DepSet.empty classes in
     let classes = List.fold_left begin fun acc (_, type_id) ->
-      ISet.add (Dep.make (Dep.Class type_id)) acc
-    end classes types in
-    let defs = ISet.union funs classes in
-    ISet.iter begin fun def ->
+      DepSet.add (Dep.make (Dep.Class type_id)) acc
+    end classes typedefs in
+    let defs = DepSet.union funs classes in
+    DepSet.iter begin fun def ->
       let previous =
-        try Hashtbl.find ifiles def with Not_found -> SSet.empty
+        try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty
       in
-      Hashtbl.replace ifiles def (SSet.add filename previous)
+      Hashtbl.replace !ifiles def (Relative_path.Set.add filename previous)
     end defs
-  end fast 
-
+  end fast

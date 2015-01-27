@@ -17,6 +17,7 @@ var_dump($phar2->isCompressed() == Phar::BZ2);
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/tar_makebz2.phar.bz2');
 @unlink(dirname(__FILE__) . '/tar_makebz2.phar.tar');

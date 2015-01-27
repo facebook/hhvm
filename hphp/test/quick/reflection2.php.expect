@@ -42,18 +42,7 @@ isStatic: bool(false)
 array(0) {
 }
 Prototype: my_base::my_override_method
-4: my_trait_method
-modifiers: int(256)
-isFinal: bool(false)
-isAbstract: bool(false)
-isPublic: bool(true)
-isProtected: bool(false)
-isPrivate: bool(false)
-isStatic: bool(false)
-array(0) {
-}
-ReflectionException: Method my_child::my_trait_method does not have a prototype
-5: my_base_method
+4: my_base_method
 modifiers: int(256)
 isFinal: bool(false)
 isAbstract: bool(false)
@@ -64,6 +53,17 @@ isStatic: bool(false)
 array(0) {
 }
 ReflectionException: Method my_child::my_base_method does not have a prototype
+5: my_trait_method
+modifiers: int(256)
+isFinal: bool(false)
+isAbstract: bool(false)
+isPublic: bool(true)
+isProtected: bool(false)
+isPrivate: bool(false)
+isStatic: bool(false)
+array(0) {
+}
+ReflectionException: Method my_child::my_trait_method does not have a prototype
 object(ReflectionParameter)#18 (2) {
   ["info"]=>
   array(8) {

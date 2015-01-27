@@ -38,8 +38,8 @@ struct Repo::GlobalData {
    * Indicates whether a repo was compiled with HardTypeHints.
    *
    * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
-   * raise if you violate a typehint, because doing so would allow
-   * violating assumptions from the optimizer.
+   * raise if you violate a parameter typehint, because doing so
+   * would allow violating assumptions from the optimizer.
    */
   bool HardTypeHints = false;
 
@@ -61,12 +61,22 @@ struct Repo::GlobalData {
    */
   bool DisallowDynamicVarEnvFuncs = false;
 
+  /*
+   * Indicates whether a repo was compiled with HardReturnTypeHints.
+   *
+   * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
+   * raise if you violate a return typehint, because doing so would
+   * allow violating assumptions from the optimizer.
+   */
+  bool HardReturnTypeHints = false;
+
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
       (HardTypeHints)
       (HardPrivatePropInference)
       (arrayTypeTable)
       (DisallowDynamicVarEnvFuncs)
+      (HardReturnTypeHints)
       ;
   }
 };

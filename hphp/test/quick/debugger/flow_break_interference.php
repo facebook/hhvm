@@ -23,7 +23,7 @@ function main() {
     var_dump($x);
   }
   // If we're really stopped at the beginning of this line, then
-  // chaning $a will show in $z.
+  // changing $a will show in $z.
   $z = $a;
   var_dump($z);
 }

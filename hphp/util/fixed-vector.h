@@ -20,7 +20,7 @@
 #include <vector>
 #include <stdexcept>
 #include "hphp/util/assertions.h"
-#include "hphp/util/compact-sized-ptr.h"
+#include "hphp/util/compact-tagged-ptrs.h"
 
 namespace HPHP {
 
@@ -38,41 +38,27 @@ struct FixedVector {
   typedef T value_type;
   typedef T* iterator;
   typedef const T* const_iterator;
+  typedef std::reverse_iterator<iterator> reverse_iterator;
+  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
   /*
    * Default constructor leaves a FixedVector with size() == 0.
    */
   explicit FixedVector() {}
 
+  FixedVector(const FixedVector& fv) = delete;
+  FixedVector& operator=(const FixedVector&) = delete;
+
   /*
    * Create a FixedVector using the supplied std::vector as a starting
    * point.  Throws if the sourceVec is too large.
    */
   explicit FixedVector(const std::vector<T>& sourceVec) {
-    auto const neededSize = sourceVec.size();
+    move(sourceVec);
+  }
 
-    if (neededSize >> 16) {
-      throw std::runtime_error("FixedVector maximum size exceeded");
-    }
-
-    auto const ptr = neededSize > 0
-      ? static_cast<T*>(malloc(neededSize * sizeof(T)))
-      : nullptr;
-
-    size_t i = 0;
-    try {
-      for (; i < sourceVec.size(); ++i) {
-        new (&ptr[i]) T(sourceVec[i]);
-      }
-    } catch (...) {
-      for (size_t j = 0; j < i; ++j) {
-        ptr[j].~T();
-      }
-      free(ptr);
-      throw;
-    }
-    assert(i == neededSize);
-    m_sp.set(neededSize, ptr);
+  FixedVector(FixedVector<T>&& fv) {
+    swap(fv);
   }
 
   ~FixedVector() {
@@ -93,6 +79,11 @@ struct FixedVector {
     return *this;
   }
 
+  FixedVector& operator=(std::vector<T>&& src) {
+    move(src);
+    return *this;
+  }
+
   uint32_t size()  const { return m_sp.size(); }
   bool     empty() const { return !size(); }
 
@@ -103,14 +94,47 @@ struct FixedVector {
   const_iterator end()   const { return m_sp.ptr() + size(); }
   iterator begin()             { return m_sp.ptr(); }
   iterator end()               { return m_sp.ptr() + size(); }
+  reverse_iterator rbegin() { return reverse_iterator(end()); }
+  reverse_iterator rend()   { return reverse_iterator(begin()); }
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator(end());
+  }
+  const_reverse_iterator rend() const {
+    return const_reverse_iterator(begin());
+  }
 
   void swap(FixedVector& fv) {
     std::swap(m_sp, fv.m_sp);
   }
 
 private:
-  FixedVector(const FixedVector&);
-  FixedVector& operator=(const FixedVector&);
+  template<class Src>
+  void move(Src& sourceVec) {
+    auto const neededSize = sourceVec.size();
+
+    if (neededSize >> 16) {
+      throw std::runtime_error("FixedVector maximum size exceeded");
+    }
+
+    auto const ptr = neededSize > 0
+      ? static_cast<T*>(malloc(neededSize * sizeof(T)))
+      : nullptr;
+
+    size_t i = 0;
+    try {
+      for (; i < neededSize; ++i) {
+        new (&ptr[i]) T(std::move(sourceVec[i]));
+      }
+    } catch (...) {
+      for (size_t j = 0; j < i; ++j) {
+        ptr[j].~T();
+      }
+      free(ptr);
+      throw;
+    }
+    assert(i == neededSize);
+    m_sp.set(neededSize, ptr);
+  }
 
 private:
   CompactSizedPtr<T> m_sp;

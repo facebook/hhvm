@@ -45,9 +45,9 @@ function get_ifoo(): IFoo {
   return new Foo();
 }
 
-function test1(): int {
+function test1(): Awaitable<int> {
   $ifoo = get_ifoo();
-  return $ifoo->getStuff();
+  return $ifoo->genStuff();
 }
 
 function test2(): Awaitable<bool> {

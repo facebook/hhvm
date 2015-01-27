@@ -21,6 +21,7 @@
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/externals.h"
@@ -28,7 +29,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
 
@@ -50,10 +51,7 @@ APCObject::APCObject(ObjectData* obj, uint32_t propCount)
   : m_handle(KindOfObject)
   , m_cls{make_class(obj->getVMClass())}
   , m_propCount{propCount}
-{
-  m_handle.setIsObj();
-  m_handle.mustCache();
-}
+{}
 
 APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {
   // This function assumes the object and object/array down the tree
@@ -62,7 +60,7 @@ APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {
   assert(!objectData->instanceof(SystemLib::s_SerializableClass));
 
   Array odProps;
-  objectData->o_getArray(odProps, false);
+  objectData->o_getArray(odProps);
   auto const propCount = odProps.size();
 
   size = sizeof(APCObject) + sizeof(Prop) * propCount;
@@ -91,7 +89,12 @@ APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {
         prop->ctx = nullptr;
       } else {
         // Private.
-        prop->ctx = Unit::lookupClass(cls.get());
+        auto* ctx = Unit::lookupClass(cls.get());
+        if (ctx && ctx->attrs() & AttrUnique) {
+          prop->ctx = ctx;
+        } else {
+          prop->ctx = makeStaticString(cls.get());
+        }
       }
 
       prop->name = makeStaticString(keySD.substr(subLen));
@@ -118,7 +121,7 @@ APCObject::~APCObject() {
 }
 
 void APCObject::Delete(APCHandle* handle) {
-  if (!handle->getIsObj()) {
+  if (handle->isSerializedObj()) {
     delete APCString::fromHandle(handle);
     return;
   }
@@ -133,7 +136,7 @@ void APCObject::Delete(APCHandle* handle) {
 
 APCHandle* APCObject::MakeAPCObject(
     APCHandle* obj, size_t& size, const Variant& value) {
-  if (!value.is(KindOfObject) || obj->getObjAttempted()) {
+  if (!value.is(KindOfObject) || obj->objAttempted()) {
     return nullptr;
   }
   obj->setObjAttempted();
@@ -150,12 +153,12 @@ APCHandle* APCObject::MakeAPCObject(
   return tmp;
 }
 
-Variant APCObject::MakeObject(APCHandle* handle) {
-  if (handle->getIsObj()) {
-    return APCObject::fromHandle(handle)->createObject();
+Variant APCObject::MakeObject(const APCHandle* handle) {
+  if (handle->isSerializedObj()) {
+    auto const serObj = APCString::fromHandle(handle)->getStringData();
+    return apc_unserialize(serObj->data(), serObj->size());
   }
-  StringData* serObj = APCString::fromHandle(handle)->getStringData();
-  return apc_unserialize(serObj->data(), serObj->size());
+  return APCObject::fromHandle(handle)->createObject();
 }
 
 Object APCObject::createObject() const {

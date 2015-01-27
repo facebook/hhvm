@@ -67,15 +67,17 @@ StatementPtr ClassStatement::clone() {
 // parser functions
 
 void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
-  ClassScope::KindOf kindOf = ClassScope::KindOfObjectClass;
+  ClassScope::KindOf kindOf = ClassScope::KindOf::ObjectClass;
   switch (m_type) {
-  case T_CLASS:     kindOf = ClassScope::KindOfObjectClass;   break;
-  case T_ABSTRACT:  kindOf = ClassScope::KindOfAbstractClass; break;
-  case T_FINAL:     kindOf = ClassScope::KindOfFinalClass;    break;
-  case T_TRAIT:     kindOf = ClassScope::KindOfTrait;         break;
-  case T_ENUM:      kindOf = ClassScope::KindOfEnum;          break;
-  default:
-    assert(false);
+    case T_CLASS:     kindOf = ClassScope::KindOf::ObjectClass;   break;
+    case T_ABSTRACT:  kindOf = ClassScope::KindOf::AbstractClass; break;
+    case T_STATIC: // Slight hack: see comments in hphp.y
+      kindOf = ClassScope::KindOf::UtilClass;     break;
+    case T_FINAL:     kindOf = ClassScope::KindOf::FinalClass;    break;
+    case T_TRAIT:     kindOf = ClassScope::KindOf::Trait;         break;
+    case T_ENUM:      kindOf = ClassScope::KindOf::Enum;          break;
+    default:
+      assert(false);
   }
 
   vector<string> bases;
@@ -108,12 +110,12 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     return;
   }
 
-  if (Option::PersistenceHook) {
-    classScope->setPersistent(Option::PersistenceHook(classScope, fs));
-  }
+  classScope->setPersistent(false);
 
   if (m_stmt) {
-    MethodStatementPtr constructor;
+    MethodStatementPtr constructor = nullptr;
+    MethodStatementPtr destructor = nullptr;
+    MethodStatementPtr clone = nullptr;
 
     // flatten continuation StatementList into MethodStatements
     for (int i = 0; i < m_stmt->getCount(); i++) {
@@ -130,11 +132,25 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     for (int i = 0; i < m_stmt->getCount(); i++) {
       MethodStatementPtr meth =
         dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
-      if (meth && meth->getName() == "__construct") {
-        constructor = meth;
+      if (meth) {
+        if (meth->getName() == "__construct") {
+          constructor = meth;
+          continue;
+        }
+        if (meth->getName() == "__destruct") {
+          destructor = meth;
+          continue;
+        }
+        if (meth->getName() == "__clone") {
+          clone = meth;
+          continue;
+        }
+      }
+      if (constructor && destructor && clone) {
         break;
       }
     }
+
     for (int i = 0; i < m_stmt->getCount(); i++) {
       if (!constructor) {
         MethodStatementPtr meth =
@@ -154,6 +170,18 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
                                   "Constructor %s::%s() cannot be static",
                                   classScope->getOriginalName().c_str(),
                                   constructor->getOriginalName().c_str());
+    }
+    if (destructor && destructor->getModifiers()->isStatic()) {
+      destructor->parseTimeFatal(Compiler::InvalidAttribute,
+                                  "Destructor %s::%s() cannot be static",
+                                  classScope->getOriginalName().c_str(),
+                                  destructor->getOriginalName().c_str());
+    }
+    if (clone && clone->getModifiers()->isStatic()) {
+      clone->parseTimeFatal(Compiler::InvalidAttribute,
+                                  "Clone method %s::%s() cannot be static",
+                                  classScope->getOriginalName().c_str(),
+                                  clone->getOriginalName().c_str());
     }
   }
 }
@@ -213,15 +241,14 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-void ClassStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassStatement::outputCodeModel(CodeGenerator &cg) {
   auto numProps = 4;
   if (m_attrList != nullptr) numProps++;
-  if (m_type == T_ABSTRACT || m_type == T_FINAL) numProps++;
+  if (m_type == T_ABSTRACT
+      || m_type == T_FINAL
+      || m_type == T_STATIC) numProps++;
   if (!m_parent.empty()) numProps++;
   if (m_base != nullptr) numProps++;
   if (!m_docComment.empty()) numProps++;
@@ -237,10 +264,15 @@ void ClassStatement::outputCodeModel(CodeGenerator &cg) {
   } else if (m_type == T_FINAL) {
     cg.printPropertyHeader("modifiers");
     cg.printModifierVector("final");
+  } else if (m_type == T_STATIC) {
+    cg.printPropertyHeader("modifiers");
+    cg.printModifierVector("abstract final");
   }
   cg.printPropertyHeader("kind");
   if (m_type == T_TRAIT) {
     cg.printValue(PHP_TRAIT);
+  } else if (m_type == T_ENUM) {
+    cg.printValue(PHP_ENUM);
   } else {
     cg.printValue(PHP_CLASS);
   }

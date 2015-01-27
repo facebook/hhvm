@@ -108,16 +108,6 @@ void CaseStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void CaseStatement::inferTypes(AnalysisResultPtr ar) {
-  assert(false);
-}
-
-void CaseStatement::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                  bool coerce) {
-  if (m_condition) m_condition->inferAndCheck(ar, type, coerce);
-  if (m_stmt) m_stmt->inferTypes(ar);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void CaseStatement::outputCodeModel(CodeGenerator &cg) {

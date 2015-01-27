@@ -1,0 +1,109 @@
+----------------------
+int(-100)
+Point::__get(DUMmy)
+NULL
+dummy: 
+Point::__get(dummy)
+dynamic dummy: 
+Point::__set(dummy, xx)
+dummy: 987
+Point::__get(dummy)
+dynamic dummy: 456
+----------------------
+bool(true)
+Point::__isset(dummy)
+bool(true)
+----------------------
+Point::__get(x)
+NULL
+----------------------
+Point::__isset(x)
+bool(false)
+Point::__isset(x)
+bool(false)
+Point::__set(x, xx)
+Point::__get(x)
+int(200)
+Point::__isset(x)
+bool(true)
+Point::__isset(x)
+bool(true)
+----------------------
+Point::__set(color, xx)
+Point::__get(color)
+color: red
+----------------------
+Point::__isset(color)
+bool(true)
+----------------------
+$v: 555, dummy: 555
+Point::__set(color, xx)
+Point::__get(color)
+$v: White, color: White
+----------------------
+bool(true)
+Point::__isset(dummy)
+bool(true)
+Point::__unset(dummy)
+bool(true)
+Point::__isset(dummy)
+bool(false)
+Point::__unset(abc)
+Point::__unset(x)
+bool(true)
+Point::__isset(dummy)
+bool(false)
+Point::__isset(color)
+bool(true)
+Point::__unset(color)
+Point::__isset(color)
+bool(false)
+----------------------
+Point::__set(thing, xx)
+Point::__get(thing)
+object(X)#2 (0) {
+}
+----------------------
+object(Test)#3 (2) {
+  ["p1"]=>
+  int(23)
+  ["p2"]=>
+  string(5) "Hello"
+}
+----------------------
+key p1 has a value of 23
+key p2 has a value of Hello
+----------------------
+object(Test)#4 (1) {
+  ["p3"]=>
+  bool(false)
+}
+----------------------
+key p3 has a value of 
+----------------------
+object(Test)#5 (7) {
+  ["p4"]=>
+  int(999)
+  ["p5"]=>
+  int(999)
+  ["p6"]=>
+  int(999)
+  ["p7"]=>
+  int(999)
+  ["p8"]=>
+  int(999)
+  ["p9"]=>
+  int(999)
+  ["p10"]=>
+  int(999)
+}
+----------------------
+key p4 has a value of 999
+key p5 has a value of 999
+key p6 has a value of 999
+key p7 has a value of 999
+key p8 has a value of 999
+key p9 has a value of 999
+key p10 has a value of 999
+----------------------
+X::__destruct

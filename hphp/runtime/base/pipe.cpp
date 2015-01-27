@@ -22,7 +22,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(Pipe)
+IMPLEMENT_RESOURCE_ALLOCATION(Pipe)
 ///////////////////////////////////////////////////////////////////////////////
 
 Pipe::Pipe() {
@@ -34,14 +34,14 @@ Pipe::~Pipe() {
 
 bool Pipe::open(const String& filename, const String& mode) {
   assert(m_stream == nullptr);
-  assert(m_fd == -1);
+  assert(getFd() == -1);
 
   FILE *f = LightProcess::popen(filename.data(), mode.data());
   if (!f) {
     return false;
   }
   m_stream = f;
-  m_fd = fileno(f);
+  setFd(fileno(f));
   return true;
 }
 
@@ -52,14 +52,14 @@ bool Pipe::close() {
 
 bool Pipe::closeImpl() {
   bool ret = true;
-  s_file_data->m_pcloseRet = 0;
+  s_pcloseRet = 0;
   if (valid() && !isClosed()) {
     assert(m_stream);
     int pcloseRet = LightProcess::pclose(m_stream);
     if (WIFEXITED(pcloseRet)) pcloseRet = WEXITSTATUS(pcloseRet);
-    s_file_data->m_pcloseRet = pcloseRet;
+    s_pcloseRet = pcloseRet;
     ret = (pcloseRet == 0);
-    m_closed = true;
+    setIsClosed(true);
     m_stream = nullptr;
   }
   File::closeImpl();

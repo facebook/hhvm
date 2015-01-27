@@ -100,9 +100,6 @@ void TraitAliasStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void TraitAliasStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void TraitAliasStatement::outputCodeModel(CodeGenerator &cg) {

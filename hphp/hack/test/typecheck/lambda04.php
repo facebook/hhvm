@@ -11,10 +11,16 @@
 
 function foo(): void {
   $y = ($a, $b) ==> $a + $b;
-  $y = () ==> { return ($x, $y) ==> $x + $y; };
+  $y = () ==> {
+    return ($x, $y) ==> $x + $y;
+  };
   $z = $y();
-  if ($z(1, 2) < 10) { echo "yay\n"; }
+  if ($z(1, 2) < 10) {
+    echo "yay\n";
+  }
   $y = () ==> ($x, $y) ==> $x + $y;
   $z = $y();
-  if ($z(1, 2) < 10) { echo "yay\n"; }
+  if ($z(1, 2) < 10) {
+    echo "yay\n";
+  }
 }

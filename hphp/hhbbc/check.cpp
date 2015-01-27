@@ -15,11 +15,11 @@
 */
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/next_prior.hpp>
 #include <algorithm>
+#include <iterator>
 #include <set>
 
-#include "folly/gen/Base.h"
+#include <folly/gen/Base.h>
 
 #include "hphp/runtime/vm/unit-util.h"
 
@@ -44,7 +44,7 @@ bool checkBlock(const php::Block& b) {
   // or be an unconditional Jmp.
   for (auto it = begin(b.hhbcs); it != end(b.hhbcs); ++it) {
     assert(it->op != Op::Jmp && "unconditional Jmp mid-block");
-    if (boost::next(it) == end(b.hhbcs)) break;
+    if (std::next(it) == end(b.hhbcs)) break;
     forEachTakenEdge(*it, [&] (php::Block& b) {
       assert(!"Instruction in middle of block had a jump target");
     });

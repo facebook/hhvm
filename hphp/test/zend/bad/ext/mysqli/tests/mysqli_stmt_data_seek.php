@@ -65,6 +65,7 @@
 	mysqli_close($link);
 	print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 	$test_table_name = 'test_mysqli_stmt_data_seek_table_1'; require_once("clean_table.inc");
 ?>

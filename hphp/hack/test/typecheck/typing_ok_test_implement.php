@@ -9,18 +9,13 @@
  *
  */
 
+interface X {}
 
-interface X {
-}
+interface Y extends X {}
 
-interface Y extends X {
-}
+class U implements Y {}
 
-class U implements Y {
-}
-
-function f(X $x): void {
-}
+function f(X $x): void {}
 
 function main(): void {
   $u = new U();

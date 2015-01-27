@@ -32,11 +32,12 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_tuple(false),
                                 m_function(false),
                                 m_xhp(false),
-                                m_typevar(false) { }
+                                m_typevar(false),
+                                m_typeaccess(false) { }
 
 std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime
-  if (m_nullable || m_soft || m_typevar || m_function) {
+  if (m_nullable || m_soft || m_typevar || m_function || m_typeaccess) {
     return "";
   }
   if (!strcasecmp(m_name.c_str(), "HH\\mixed") ||
@@ -57,6 +58,8 @@ std::string TypeAnnotation::fullName() const {
 
   if (m_function) {
     functionTypeName(name);
+  } else if (m_typeaccess) {
+    accessTypeName(name);
   } else if (m_xhp) {
     xhpTypeName(name);
   } else if (m_tuple) {
@@ -69,15 +72,15 @@ std::string TypeAnnotation::fullName() const {
   return name;
 }
 
-DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
+MaybeDataType TypeAnnotation::dataType() const {
   if (m_function || m_xhp || m_tuple) {
     return KindOfObject;
   }
   if (m_typeArgs) {
     return !strcasecmp(m_name.c_str(), "array") ? KindOfArray : KindOfObject;
   }
-  if (!expectedType && (m_nullable || m_soft)) {
-    return KindOfUnknown;
+  if (m_nullable || m_soft) {
+    return folly::none;
   }
   if (!strcasecmp(m_name.c_str(), "null") ||
       !strcasecmp(m_name.c_str(), "HH\\void")) {
@@ -86,11 +89,12 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
   if (!strcasecmp(m_name.c_str(), "HH\\bool"))     return KindOfBoolean;
   if (!strcasecmp(m_name.c_str(), "HH\\int"))      return KindOfInt64;
   if (!strcasecmp(m_name.c_str(), "HH\\float"))    return KindOfDouble;
-  if (!strcasecmp(m_name.c_str(), "HH\\num"))      return KindOfUnknown;
+  if (!strcasecmp(m_name.c_str(), "HH\\num"))      return folly::none;
+  if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return folly::none;
   if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
   if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
   if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
-  if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return KindOfUnknown;
+  if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return folly::none;
 
   return KindOfObject;
 }
@@ -165,6 +169,16 @@ void TypeAnnotation::genericTypeName(std::string &name) const {
   name.replace(name.size() - 2, 2, ">");
 }
 
+void TypeAnnotation::accessTypeName(std::string &name) const {
+  name += m_name;
+  TypeAnnotationPtr typeEl = m_typeList;
+  while (typeEl) {
+    name += "::";
+    name += typeEl->fullName();
+    typeEl = typeEl->m_typeList;
+  }
+}
+
 void TypeAnnotation::appendToTypeList(TypeAnnotationPtr typeList) {
   if (m_typeList) {
     TypeAnnotationPtr current = m_typeList;
@@ -179,13 +193,7 @@ void TypeAnnotation::appendToTypeList(TypeAnnotationPtr typeList) {
 
 void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
   TypeAnnotationPtr typeArgsElem = m_typeArgs;
-  auto numTypeArgs = 0;
-  while (typeArgsElem != nullptr) {
-    numTypeArgs++;
-    typeArgsElem = typeArgsElem->m_typeList;
-  }
-  typeArgsElem = m_typeArgs;
-
+  auto numTypeArgs = this->numTypeArgs();
   auto numProps = 1;
   if (m_nullable) numProps++;
   if (m_soft) numProps++;
@@ -228,6 +236,29 @@ void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
     cg.printf("}");
   }
   cg.printObjectFooter();
+}
+
+int TypeAnnotation::numTypeArgs() const {
+  int n = 0;
+  TypeAnnotationPtr typeEl = m_typeArgs;
+  while (typeEl) {
+    ++n;
+    typeEl = typeEl->m_typeList;
+  }
+  return n;
+}
+
+TypeAnnotationPtr TypeAnnotation::getTypeArg(int n) const {
+  int i = 0;
+  TypeAnnotationPtr typeEl = m_typeArgs;
+  while (typeEl) {
+    if (i == n) {
+      return typeEl;
+    }
+    ++i;
+    typeEl = typeEl->m_typeList;
+  }
+  return TypeAnnotationPtr();
 }
 
 }

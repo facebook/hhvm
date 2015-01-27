@@ -31,8 +31,7 @@ namespace HPHP {
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
-class c_AwaitAllWaitHandle : public c_BlockableWaitHandle {
+class c_AwaitAllWaitHandle final : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AwaitAllWaitHandle)
 
@@ -65,8 +64,7 @@ class c_AwaitAllWaitHandle : public c_BlockableWaitHandle {
  private:
   void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
   int32_t m_cur;
-  int32_t m_size;
-  c_WaitableWaitHandle* m_children[0];
+  c_WaitableWaitHandle* m_children[0]; // allocated off the end
 };
 
 inline c_AwaitAllWaitHandle* c_WaitHandle::asAwaitAll() {

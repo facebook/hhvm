@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/pdo_sqlite.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,17 +31,23 @@ PDODriverMap PDODriver::s_drivers;
 static PDOSqlite s_sqlite_driver;
 static PDOMySql s_mysql_driver;
 
+const StaticString s_general_error_code("HY000");
+
 PDODriver::PDODriver(const char *name) : m_name(name) {
   s_drivers[name] = this;
 }
 
-PDOConnection *PDODriver::createConnection(const String& datasource,
-                                           const String& username,
-                                           const String& password, const Array& options) {
-  PDOConnection *conn = createConnectionObject();
-  conn->data_source = std::string(datasource.data(), datasource.size());
-  conn->username = std::string(username.data(), username.size());
-  conn->password = std::string(password.data(), password.size());
+PDOResource* PDODriver::createResource(const String& datasource,
+                                       const String& username,
+                                       const String& password,
+                                       const Array& options) {
+  // This is a bare ResourceData*, so it needs to be freed on error.
+  auto const rsrc = createResourceImpl();
+  auto const& conn = rsrc->conn();
+
+  conn->data_source = datasource.toCppString();
+  conn->username = username.toCppString();
+  conn->password = password.toCppString();
 
   if (options.exists(PDO_ATTR_AUTOCOMMIT)) {
     conn->auto_commit = options[PDO_ATTR_AUTOCOMMIT].toInt64();
@@ -49,47 +56,22 @@ PDOConnection *PDODriver::createConnection(const String& datasource,
   }
 
   if (!conn->create(options)) {
-    delete conn;
-    return NULL;
+    Array err;
+    bool hasError = conn->fetchErr(nullptr, err);
+
+    rsrc->release();
+
+    if (hasError && !err.empty()) {
+      throw_pdo_exception(s_general_error_code, uninit_null(), "[%ld]: %s",
+                          err[0].toInt64(), err[1].toString().data());
+    }
+    return nullptr;
   }
-  return conn;
+  return rsrc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // PDOConnection
-
-const char *PDOConnection::PersistentKey = "pdo_connection";
-
-PDOConnection::PDOConnection()
-    : is_persistent(0), auto_commit(0), is_closed(0), alloc_own_columns(0),
-      in_txn(0), max_escaped_char_length(0), oracle_nulls(0), stringify(0),
-      _reserved_flags(0), error_mode(PDO_ERRMODE_SILENT),
-      native_case(PDO_CASE_NATURAL), desired_case(PDO_CASE_NATURAL),
-      driver(NULL), default_fetch_type(PDO_FETCH_USE_DEFAULT) {
-  memset(error_code, 0, sizeof(error_code));
-}
-
-PDOConnection::~PDOConnection() {
-}
-
-void PDOConnection::sweep() {
-  assert(!is_persistent);
-  def_stmt_ctor_args.asTypedValue()->m_type = KindOfNull;
-  delete this;
-}
-
-void PDOConnection::persistentSave() {
-  String serialized = HHVM_FN(serialize)(def_stmt_ctor_args);
-  serialized_def_stmt_ctor_args = std::string(serialized.data(),
-    serialized.size());
-  def_stmt_ctor_args.releaseForSweep(); // we're called from requestShutdown
-}
-
-void PDOConnection::persistentRestore() {
-  if (!serialized_def_stmt_ctor_args.empty()) {
-    def_stmt_ctor_args = unserialize_from_string(serialized_def_stmt_ctor_args);
-  }
-}
 
 bool PDOConnection::support(SupportedMethod method) {
   return false;
@@ -157,8 +139,26 @@ bool PDOConnection::checkLiveness() {
   return false;
 }
 
-void PDOConnection::persistentShutdown() {
-  throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
+///////////////////////////////////////////////////////////////////////////////
+// PDOResource
+
+void PDOResource::sweep() {
+  assert(!conn()->is_persistent);
+  def_stmt_ctor_args.releaseForSweep();
+  this->~PDOResource();
+}
+
+void PDOResource::persistentSave() {
+  String serialized = HHVM_FN(serialize)(def_stmt_ctor_args);
+  conn()->serialized_def_stmt_ctor_args = serialized.toCppString();
+  def_stmt_ctor_args.releaseForSweep(); // we're called from requestShutdown
+}
+
+void PDOResource::persistentRestore() {
+  auto const serialized = conn()->serialized_def_stmt_ctor_args;
+  if (!serialized.empty()) {
+    def_stmt_ctor_args = unserialize_from_string(serialized);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -267,4 +267,3 @@ bool PDOStatement::cursorCloser() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

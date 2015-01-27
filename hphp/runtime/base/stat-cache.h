@@ -29,20 +29,19 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/atomic-countable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StatCache {
- public:
+struct StatCache {
   struct Node;
   typedef AtomicSmartPtr<Node> NodePtr;
   typedef tbb::concurrent_hash_map<std::string, NodePtr,
                                    stringHashCompare> NameNodeMap;
   typedef hphp_hash_map<int, NodePtr, int64_hash> WatchNodeMap;
 
-  class Node : public AtomicCountable {
-   public:
+  struct Node : AtomicCountable {
     typedef hphp_hash_map<std::string, NodePtr, string_hash> NameNodeMap;
     typedef hphp_hash_map<std::string, void*, string_hash> NameMap;
 

@@ -15,4 +15,4 @@ bool(false)
 Warning: %s
 bool(false)
 
-Fatal error: %s
+Catchable fatal error: %s

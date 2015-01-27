@@ -3,7 +3,6 @@
 $collections = array(
   'Vector' => new Vector(),
   'Map' => new Map(),
-  'StableMap' => new StableMap(),
   'Set' => new Set(),
 );
 try {

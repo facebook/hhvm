@@ -1,0 +1,2 @@
+File "primitive_casing_cast.php", line 4, characters 11-16:
+Invalid Hack type. Using 'strING' in Hack is considered an error. Use 'string' instead, to keep the codebase consistent. (Naming[2004])

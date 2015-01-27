@@ -11,14 +11,17 @@
 
 type f<Ty> = (function(Ty): Ty);
 
-function mapp<Ty>(Vector<Ty> $arr, f<Ty> $fun): void {
-}
+function mapp<Ty>(Vector<Ty> $arr, f<Ty> $fun): void {}
 
 function foo(): void {
   $func = $y ==> $y + 1;
   $func = $y ==> $y + 2;
-  $func = $y ==> { return $y + 2; };
-  $func = $y ==> { return $y - 2; };
-  $x = Vector { 1,2,3 };
+  $func = $y ==> {
+    return $y + 2;
+  };
+  $func = $y ==> {
+    return $y - 2;
+  };
+  $x = Vector {1, 2, 3};
   mapp($x, $func);
 }

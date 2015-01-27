@@ -48,6 +48,7 @@ fclose( fopen($file, "w") );  //Opening the non-existing file in "w" mode, which
 var_dump( file_exists($file) );  //Check for the existence of file
 echo "*** Done ***\n"; 
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__)."/007_variation3.tmp");
 ?>

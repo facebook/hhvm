@@ -35,7 +35,7 @@ public:
   const String& o_getClassNameHook() const { return classnameof(); }
 
   BZ2File();
-  explicit BZ2File(PlainFile* innerFile);
+  explicit BZ2File(SmartPtr<PlainFile>&& innerFile);
   virtual ~BZ2File();
 
   bool open(const String& filename, const String& mode);
@@ -50,7 +50,7 @@ public:
 
 private:
   BZFILE * m_bzFile;
-  PlainFile * m_innerFile;
+  SmartPtr<PlainFile> m_innerFile;
   bool closeImpl();
 };
 

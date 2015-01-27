@@ -21,6 +21,8 @@
 #include "hphp/vixl/a64/assembler-a64.h"
 
 namespace HPHP { namespace jit {
+struct Vreg;
+struct Vout;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -34,23 +36,23 @@ namespace HPHP { namespace jit {
 struct PhysReg {
  private:
   static constexpr auto kMaxRegs = 64;
-  static constexpr auto kSIMDOffset = 33;
-
-  // These are populated in Map's constructor, because they depend on a
-  // RuntimeOption.
-  static int kNumGP;
-  static int kNumSIMD;
+  static constexpr auto kGPOffset = 0;
+  static constexpr auto kSIMDOffset = 33; // ARM has 33 GP registers.
+  static constexpr auto kSFOffset = 63;
+  static constexpr auto kNumSF = 1;
 
  public:
   enum Type {
     GP,
     SIMD,
-    kNumTypes,  // keep last
+    SF,
   };
   explicit constexpr PhysReg() : n(-1) {}
   constexpr /* implicit */ PhysReg(Reg64 r) : n(int(r)) {}
   constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kSIMDOffset) {}
+  constexpr /* implicit */ PhysReg(RegSF r) : n(int(r) + kSFOffset) {}
   explicit constexpr PhysReg(Reg32 r) : n(int(r)) {}
+  explicit constexpr PhysReg(Reg8 r) : n(int(r)) {}
 
   constexpr /* implicit */ PhysReg(vixl::Register r) : n(r.code()) {}
   constexpr /* implicit */ PhysReg(vixl::FPRegister r)
@@ -64,6 +66,10 @@ struct PhysReg {
     assert(isSIMD() || n == -1);
     return RegXMM(n - kSIMDOffset);
   }
+  /* implicit */ operator RegSF() const {
+    assert(isSF() || n == -1);
+    return RegSF(n - kSFOffset);
+  }
 
   /* implicit */ operator vixl::CPURegister() const {
     if (n == -1) {
@@ -72,19 +78,25 @@ struct PhysReg {
       if (isGP()) {
         return vixl::CPURegister(n, vixl::kXRegSize,
                                  vixl::CPURegister::kRegister);
-      } else {
+      } else if (isSIMD()) {
         return vixl::CPURegister(n - kSIMDOffset, vixl::kDRegSize,
                                  vixl::CPURegister::kFPRegister);
+      } else {
+        assert(isSF());
+        return vixl::NoCPUReg;
       }
     }
   }
 
   Type type() const {
     assert(n >= 0 && n < kMaxRegs);
-    return n < kSIMDOffset ? GP : SIMD;
+    return isGP() ? GP :
+           isSIMD() ? SIMD :
+           /* isSF() ? */ SF;
   }
-  bool isGP () const { return n >= 0 && n < kSIMDOffset; }
-  bool isSIMD() const { return n >= kSIMDOffset && n < kMaxRegs; }
+  bool isGP() const { return n >= kGPOffset && n < kGPOffset+numGP(); }
+  bool isSIMD() const { return n >= kSIMDOffset && n < kSIMDOffset+numSIMD(); }
+  bool isSF() const { return n >= kSFOffset && n < kSFOffset+kNumSF; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }
   constexpr bool operator!=(PhysReg r) const { return n != r.n; }
   constexpr bool operator==(Reg64 r) const { return Reg64(n) == r; }
@@ -115,6 +127,14 @@ struct PhysReg {
 
   static int getNumGP();
   static int getNumSIMD();
+  static int numGP() {
+    static int kNumGP = getNumGP();
+    return kNumGP;
+  }
+  static int numSIMD() {
+    static int kNumSIMD = getNumSIMD();
+    return kNumSIMD;
+  }
 
   /*
    * This struct can be used to efficiently represent a map from PhysReg to T.
@@ -128,13 +148,6 @@ struct PhysReg {
   template<typename T>
   struct Map {
     Map() : m_elms() {
-      // These are used in operator++ to determine how to iterate. They're
-      // initialized here because they depend on a RuntimeOption so they can't
-      // be inited at static init time.
-      if (kNumGP == 0 || kNumSIMD == 0) {
-        kNumGP = getNumGP();
-        kNumSIMD = getNumSIMD();
-      }
     }
 
     T& operator[](const PhysReg& r) {
@@ -158,9 +171,11 @@ struct PhysReg {
 
       iterator& operator++() {
         idx++;
-        if (idx == kNumGP) {
+        if (idx == kGPOffset + numGP() && idx < kSIMDOffset) {
           idx = kSIMDOffset;
-        } else if (idx == kSIMDOffset + kNumSIMD) {
+        } else if (idx == kSIMDOffset + numSIMD() && idx < kSFOffset) {
+          idx = kSFOffset;
+        } else if (idx == kSFOffset + kNumSF && idx < kMaxRegs) {
           idx = kMaxRegs;
         }
         return *this;
@@ -184,6 +199,7 @@ struct PhysReg {
 
 private:
   friend struct RegSet;
+  friend struct Vreg;
   explicit constexpr PhysReg(int n) : n(n) {}
 
   int8_t n;
@@ -206,7 +222,7 @@ constexpr PhysReg InvalidReg;
  * Zero-initializing this class is guaranteed to produce an empty set.
  */
 struct RegSet {
-  explicit RegSet() : m_bits(0) {}
+  RegSet() : m_bits(0) {}
   explicit RegSet(PhysReg pr) : m_bits(uint64_t(1) << pr.n) {}
 
   // Union
@@ -219,6 +235,10 @@ struct RegSet {
   RegSet& operator|=(const RegSet& rhs) {
     m_bits |= rhs.m_bits;
     return *this;
+  }
+
+  RegSet& operator|=(PhysReg r) {
+    return add(r);
   }
 
   // Intersection
@@ -346,32 +366,26 @@ private:
   static_assert(sizeof(m_bits) * 8 >= PhysReg::kMaxRegs, "");
 };
 
-// this could be a std::pair<PhysReg> but initializing them using
-// Reg64, e.g. {rax,rdx} causes an internal error in gcc-4.7.1.
-struct RegPair {
-  RegPair() {}
-  explicit RegPair(PhysReg r) : first(r) {}
-  RegPair(PhysReg r0, PhysReg r1) : first(r0), second(r1) {}
-  PhysReg first, second;
-};
-const RegPair InvalidRegPair; // {InvalidReg,InvalidReg}
+inline RegSet operator|(PhysReg r1, PhysReg r2) {
+  return RegSet(r1).add(r2);
+}
+
+inline RegSet operator|(RegSet regs, PhysReg r) {
+  return regs.add(r);
+}
 
 static_assert(std::is_trivially_destructible<RegSet>::value,
               "RegSet must have a trivial destructor");
 
 //////////////////////////////////////////////////////////////////////
 
-namespace x64 {
-struct Vout;
-}
-
 struct PhysRegSaverParity {
   PhysRegSaverParity(int parity, X64Assembler& as, RegSet regs);
-  PhysRegSaverParity(int parity, x64::Vout& as, RegSet regs);
+  PhysRegSaverParity(int parity, Vout& as, RegSet regs);
   ~PhysRegSaverParity();
 
   static void emitPops(X64Assembler& as, RegSet regs);
-  static void emitPops(x64::Vout&, RegSet regs);
+  static void emitPops(Vout&, RegSet regs);
 
   PhysRegSaverParity(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity(PhysRegSaverParity&&) noexcept = default;
@@ -384,7 +398,7 @@ struct PhysRegSaverParity {
 
 private:
   X64Assembler* m_as;
-  x64::Vout* m_v;
+  Vout* m_v;
   RegSet m_regs;
   int m_adjust;
 };
@@ -393,7 +407,7 @@ struct PhysRegSaverStub : public PhysRegSaverParity {
   PhysRegSaverStub(X64Assembler& as, RegSet regs)
       : PhysRegSaverParity(0, as, regs)
   {}
-  PhysRegSaverStub(x64::Vout& v, RegSet regs)
+  PhysRegSaverStub(Vout& v, RegSet regs)
       : PhysRegSaverParity(0, v, regs)
   {}
 };
@@ -402,7 +416,7 @@ struct PhysRegSaver : public PhysRegSaverParity {
   PhysRegSaver(X64Assembler& as, RegSet regs)
       : PhysRegSaverParity(1, as, regs)
   {}
-  PhysRegSaver(x64::Vout& v, RegSet regs)
+  PhysRegSaver(Vout& v, RegSet regs)
       : PhysRegSaverParity(1, v, regs)
   {}
 };

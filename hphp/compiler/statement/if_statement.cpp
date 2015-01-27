@@ -166,56 +166,6 @@ StatementPtr IfStatement::preOptimize(AnalysisResultConstPtr ar) {
   }
 }
 
-StatementPtr IfStatement::postOptimize(AnalysisResultConstPtr ar) {
-  // we cannot optimize away the code inside if statement, because
-  // there may be a goto that goes into if statement.
-  if (hasReachableLabel()) {
-    return StatementPtr();
-  }
-
-  bool changed = false;
-  for (int i = 0; i < m_stmts->getCount(); i++) {
-    IfBranchStatementPtr branch =
-      dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);
-    ExpressionPtr condition = branch->getCondition();
-    if (!branch->getStmt() || !branch->getStmt()->hasImpl()) {
-      if (!condition ||
-          (i == m_stmts->getCount() - 1 &&
-           !condition->hasEffect())) {
-        // remove else branch without C++ implementation.
-        m_stmts->removeElement(i);
-        changed = true;
-      } else if (condition->is(Expression::KindOfConstantExpression)) {
-        ConstantExpressionPtr exp =
-          dynamic_pointer_cast<ConstantExpression>(condition);
-        // Remove if (false) branch without C++ implementation.
-        // if (true) branch without C++ implementation is kept unless
-        // it is the last branch. In general we cannot let a if (true)
-        // branch short-circuit the rest branches which if removed may
-        // cause g++ to complain unreferenced variables.
-        if (exp->isBoolean()) {
-          if (!exp->getBooleanValue() ||
-              (exp->getBooleanValue() && i == m_stmts->getCount() - 1)) {
-            m_stmts->removeElement(i);
-            changed = true;
-            i--;
-          }
-        }
-      }
-    }
-  }
-  if (m_stmts->getCount() == 0) {
-    return NULL_STATEMENT();
-  } else {
-    return changed ? static_pointer_cast<Statement>(shared_from_this())
-                   : StatementPtr();
-  }
-}
-
-void IfStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_stmts) m_stmts->inferTypes(ar);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void IfStatement::outputCodeModel(CodeGenerator &cg) {

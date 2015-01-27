@@ -168,7 +168,7 @@ static Object HHVM_METHOD(ImagickDraw, getFillColor) {
   auto wand = getDrawingWandResource(this_);
   auto pixel = NewPixelWand();
   DrawGetFillColor(wand->getWand(), pixel);
-  return createImagickPixel(pixel, true);
+  return createImagickPixel(pixel);
 }
 
 static double HHVM_METHOD(ImagickDraw, getFillOpacity) {
@@ -225,7 +225,7 @@ static Object HHVM_METHOD(ImagickDraw, getStrokeColor) {
   auto wand = getDrawingWandResource(this_);
   auto pixel = NewPixelWand();
   DrawGetStrokeColor(wand->getWand(), pixel);
-  return createImagickPixel(pixel, true);
+  return createImagickPixel(pixel);
 }
 
 static Array HHVM_METHOD(ImagickDraw, getStrokeDashArray) {
@@ -289,7 +289,7 @@ static Object HHVM_METHOD(ImagickDraw, getTextUnderColor) {
   auto wand = getDrawingWandResource(this_);
   auto pixel = NewPixelWand();
   DrawGetTextUnderColor(wand->getWand(), pixel);
-  return createImagickPixel(pixel, true);
+  return createImagickPixel(pixel);
 }
 
 static String HHVM_METHOD(ImagickDraw, getVectorGraphics) {
@@ -619,8 +619,8 @@ static bool HHVM_METHOD(ImagickDraw, setFillAlpha, double opacity) {
 static bool HHVM_METHOD(ImagickDraw, setFillColor,
     const Variant& fill_pixel) {
   auto wand = getDrawingWandResource(this_);
-  WandResource<PixelWand> pixel(buildColorWand(fill_pixel));
-  DrawSetFillColor(wand->getWand(), pixel.getWand());
+  auto pixel(buildColorWand(fill_pixel));
+  DrawSetFillColor(wand->getWand(), pixel->getWand());
   return true;
 }
 
@@ -746,8 +746,8 @@ static bool HHVM_METHOD(ImagickDraw, setStrokeAntialias,
 static bool HHVM_METHOD(ImagickDraw, setStrokeColor,
     const Variant& stroke_pixel) {
   auto wand = getDrawingWandResource(this_);
-  WandResource<PixelWand> pixel(buildColorWand(stroke_pixel));
-  DrawSetStrokeColor(wand->getWand(), pixel.getWand());
+  auto pixel(buildColorWand(stroke_pixel));
+  DrawSetStrokeColor(wand->getWand(), pixel->getWand());
   return true;
 }
 
@@ -842,8 +842,8 @@ static bool HHVM_METHOD(ImagickDraw, setTextEncoding,
 static bool HHVM_METHOD(ImagickDraw, setTextUnderColor,
     const Variant& under_color) {
   auto wand = getDrawingWandResource(this_);
-  WandResource<PixelWand> pixel(buildColorWand(under_color));
-  DrawSetTextUnderColor(wand->getWand(), pixel.getWand());
+  auto pixel(buildColorWand(under_color));
+  DrawSetTextUnderColor(wand->getWand(), pixel->getWand());
   return true;
 }
 

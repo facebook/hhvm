@@ -18,6 +18,9 @@
 #error "class-inl.h should only be included by class.h"
 #endif
 
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/strings.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -64,7 +67,7 @@ inline unsigned Class::classVecLen() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Ancestry.
 
-inline uint64_t Class::classof(const Class* cls) const {
+inline bool Class::classof(const Class* cls) const {
   // If `cls' is an interface, we can simply check to see if cls is in
   // this->m_interfaces.  Otherwise, if `this' is not an interface, the
   // classVec check will determine whether it's an instance of cls (including
@@ -146,19 +149,19 @@ inline bool Class::isBuiltin() const {
 }
 
 inline const ClassInfo* Class::clsInfo() const {
-  return m_clsInfo;
+  return m_extra->m_clsInfo;
 }
 
 inline BuiltinCtorFunction Class::instanceCtor() const {
-  return m_instanceCtor;
+  return m_extra->m_instanceCtor;
 }
 
 inline BuiltinDtorFunction Class::instanceDtor() const {
-  return m_instanceDtor;
+  return m_extra->m_instanceDtor;
 }
 
 inline int32_t Class::builtinODTailSize() const {
-  return m_builtinODTailSize;
+  return m_extra->m_builtinODTailSize;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -169,12 +172,12 @@ inline size_t Class::numMethods() const {
 }
 
 inline Func* Class::getMethod(Slot idx) const {
-  Func** funcVec = (Func**)this;
+  auto funcVec = (LowFuncPtr*)this;
   return funcVec[-((int32_t)idx + 1)];
 }
 
 inline void Class::setMethod(Slot idx, Func* func) {
-  Func** funcVec = (Func**)this;
+  auto funcVec = (LowFuncPtr*)this;
   funcVec[-((int32_t)idx + 1)] = func;
 }
 
@@ -238,7 +241,7 @@ inline const Class::PropInitVec& Class::declPropInit() const {
   return m_declPropInit;
 }
 
-inline const std::vector<const Func*>& Class::pinitVec() const {
+inline const FixedVector<const Func*>& Class::pinitVec() const {
   return m_pinitVec;
 }
 
@@ -275,14 +278,17 @@ inline const Class::Const* Class::constants() const {
 }
 
 inline bool Class::hasConstant(const StringData* clsCnsName) const {
-  return m_constants.contains(clsCnsName);
+  // m_constants.contains(clsCnsName) returns abstract constants
+  auto clsCnsInd = m_constants.findIndex(clsCnsName);
+  return (clsCnsInd != kInvalidSlot) &&
+    !m_constants[clsCnsInd].m_val.isAbstractConst();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Interfaces and traits.
 
-inline boost::iterator_range<const ClassPtr*> Class::declInterfaces() const {
-  return boost::make_iterator_range(
+inline folly::Range<const ClassPtr*> Class::declInterfaces() const {
+  return folly::range(
     m_declInterfaces.get(),
     m_declInterfaces.get() + m_numDeclInterfaces
   );
@@ -293,15 +299,19 @@ inline const Class::InterfaceMap& Class::allInterfaces() const {
 }
 
 inline Slot Class::traitsBeginIdx() const {
-  return m_traitsBeginIdx;
+  return m_extra->m_traitsBeginIdx;
 }
 
 inline Slot Class::traitsEndIdx() const   {
-  return m_traitsEndIdx;
+  return m_extra->m_traitsEndIdx;
 }
 
 inline const std::vector<ClassPtr>& Class::usedTraitClasses() const {
-  return m_usedTraits;
+  return m_extra->m_usedTraits;
+}
+
+inline const Class::TraitAliasVec& Class::traitAliases() const {
+  return m_extra->m_traitAliases;
 }
 
 inline const Class::RequirementMap& Class::allRequirements() const {
@@ -336,14 +346,118 @@ inline void Class::setCached() {
 }
 
 inline const Native::NativeDataInfo* Class::getNativeDataInfo() const {
-  return m_nativeDataInfo;
+  return m_extra->m_nativeDataInfo;
 }
 
-inline DataType Class::enumBaseTy() const {
+inline MaybeDataType Class::enumBaseTy() const {
   return m_enumBaseTy;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// ExtraData.
+
+inline void Class::allocExtraData() {
+  if (!m_extra) {
+    m_extra = new ExtraData();
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Trait method import.
+
+inline bool Class::TMIOps::strEmpty(const StringData* str) {
+  return str->empty();
+}
+
+inline const StringData* Class::TMIOps::clsName(const Class* traitCls) {
+  return traitCls->name();
+}
+
+inline bool Class::TMIOps::isTrait(const Class* traitCls) {
+  return traitCls->attrs() & AttrTrait;
+}
+
+inline bool Class::TMIOps::isAbstract(Attr modifiers) {
+  return modifiers & AttrAbstract;
+}
+
+inline Class::TraitMethod
+Class::TMIOps::traitMethod(const Class* traitCls,
+                           const Func* traitMeth,
+                           Class::TMIOps::alias_type rule) {
+  return TraitMethod { traitCls, traitMeth, rule.modifiers() };
+}
+
+inline const StringData*
+Class::TMIOps::precMethodName(Class::TMIOps::prec_type rule) {
+  return rule.methodName();
+}
+
+inline const StringData*
+Class::TMIOps::precSelectedTraitName(Class::TMIOps::prec_type rule) {
+  return rule.selectedTraitName();
+}
+
+inline TraitNameSet
+Class::TMIOps::precOtherTraitNames(Class::TMIOps::prec_type rule) {
+  return rule.otherTraitNames();
+}
+
+inline const StringData*
+Class::TMIOps::aliasTraitName(Class::TMIOps::alias_type rule) {
+  return rule.traitName();
+}
+
+inline const StringData*
+Class::TMIOps::aliasOrigMethodName(Class::TMIOps::alias_type rule) {
+  return rule.origMethodName();
+}
+
+inline const StringData*
+Class::TMIOps::aliasNewMethodName(Class::TMIOps::alias_type rule) {
+  return rule.newMethodName();
+}
+
+inline Attr
+Class::TMIOps::aliasModifiers(Class::TMIOps::alias_type rule) {
+  return rule.modifiers();
+}
+
+inline const Func*
+Class::TMIOps::findTraitMethod(const Class* cls,
+                               const Class* traitCls,
+                               const StringData* origMethName) {
+  return traitCls->lookupMethod(origMethName);
+}
+
+inline void
+Class::TMIOps::errorUnknownMethod(Class::TMIOps::prec_type rule) {
+  raise_error("unknown method '%s'", rule.methodName()->data());
+}
+
+inline void
+Class::TMIOps::errorUnknownMethod(Class::TMIOps::alias_type rule,
+                                  const StringData* methName) {
+  raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, methName->data());
+}
+
+template <class Rule>
+inline void
+Class::TMIOps::errorUnknownTrait(const Rule& rule,
+                                 const StringData* traitName) {
+  raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
+}
+
+inline void
+Class::TMIOps::errorDuplicateMethod(const Class* cls,
+                                    const StringData* methName) {
+  // No error if the class will override the method.
+  if (cls->preClass()->hasMethod(methName)) return;
+  raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Non-member functions.
 
 inline Attr classKindAsAttr(ClassKind kind) {
   return static_cast<Attr>(kind);

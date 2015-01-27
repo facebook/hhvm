@@ -6,14 +6,6 @@ object(HH\Map)#2 (3) {
   [2]=>
   string(1) "c"
 }
-object(HH\Map)#3 (3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 object(HH\Vector)#2 (2) {
   [0]=>
   int(1)

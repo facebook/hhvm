@@ -17,6 +17,9 @@
 #ifndef incl_HPHP_SWEEPABLE_H_
 #define incl_HPHP_SWEEPABLE_H_
 
+#include "hphp/util/portability.h"
+#include "hphp/runtime/base/memory-manager.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -41,27 +44,17 @@ public:
     void delist();
     void init();
   };
-  static void SweepAll();
+  static unsigned SweepAll();
   static void InitSweepableList();
 
 public:
-  Sweepable();
+  explicit Sweepable(HeaderKind kind = HeaderKind::Sweepable);
 
   /*
    * There is no default behavior. Make sure this function frees all
    * NON-SMART-ALLOCATED resources ONLY.
    */
   virtual void sweep() = 0;
-
-  /*
-   * Note: "Persistent" here means that the object will stay alive
-   * across requests, but *as a thread local*.  It can be reused once
-   * the same server thread gets around to handling a new request.  If
-   * you need this you probably should be using it via PersistentResourceStore.
-   */
-  void incPersistent() { ++m_persistentCount; }
-  void decPersistent() { --m_persistentCount; }
-  bool isPersistent() { return m_persistentCount > 0; }
 
   /*
    * Remove this object from the sweepable list, so it won't have
@@ -73,8 +66,13 @@ protected:
   ~Sweepable();
 
 private:
+  union {
+    struct {
+      UNUSED char m_pad[3];
+      UNUSED const HeaderKind m_kind;
+    };
+  };
   Node m_sweepNode;
-  unsigned int m_persistentCount;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

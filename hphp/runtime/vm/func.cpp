@@ -19,8 +19,8 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
@@ -32,7 +32,6 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/verifier/cfg.h"
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/fixed-vector.h"
@@ -74,17 +73,13 @@ const AtomicVector<const Func*>& Func::getFuncVec() {
 ///////////////////////////////////////////////////////////////////////////////
 // Creation and destruction.
 
-Func::Func(Unit& unit, PreClass* preClass, int line1, int line2,
-           Offset base, Offset past, const StringData* name, Attr attrs,
-           bool top, const StringData* docComment, int numParams)
+Func::Func(Unit& unit, const StringData* name, Attr attrs)
   : m_name(name)
   , m_unit(&unit)
   , m_attrs(attrs)
 {
   m_hasPrivateAncestor = false;
-  m_shared = new SharedData(preClass, base, past,
-                            line1, line2, top, docComment);
-  init(numParams);
+  m_shared = nullptr;
 }
 
 Func::~Func() {
@@ -120,11 +115,7 @@ void* Func::allocFuncMem(
     numExtraPrologues * sizeof(unsigned char*) +
     numExtraFuncPtrs * sizeof(Func*);
 
-  if (needsNextClonedClosure) {
-    s_totalClonedClosures++;
-    always_assert(
-      s_totalClonedClosures <= RuntimeOption::EvalMaxClonedClosures);
-  }
+  if (needsNextClonedClosure) s_totalClonedClosures++;
 
   void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
 
@@ -199,24 +190,24 @@ Func* Func::clone(Class* cls, const StringData* name) const {
     f->m_cls = cls;
   }
   f->setFullName(numParams);
-  f->m_profCounter = 0;
   return f;
 }
 
-Func* Func::cloneAndSetClass(Class* cls) const {
-  if (Func* ret = findCachedClone(cls)) {
+Func* Func::cloneAndModify(Class* cls, Attr attrs) const {
+  if (Func* ret = findCachedClone(cls, attrs)) {
     return ret;
   }
 
   static Mutex s_clonedFuncListMutex;
   Lock l(s_clonedFuncListMutex);
   // Check again now that I'm the writer
-  if (Func* ret = findCachedClone(cls)) {
+  if (Func* ret = findCachedClone(cls, attrs)) {
     return ret;
   }
 
   Func* clonedFunc = clone(cls);
   clonedFunc->setNewFuncId();
+  clonedFunc->setAttrs(attrs);
 
   // Save it so we don't have to keep cloning it and retranslating
   Func** nextFunc = &this->nextClonedClosure();
@@ -250,13 +241,8 @@ void Func::init(int numParams) {
   }
   if (isSpecial(m_name)) {
     /*
-     * i)  We dont want these compiler generated functions to
-     *     appear in backtraces.
-     *
-     * ii) 86sinit and 86pinit construct NameValueTableWrappers
-     *     on the stack. So we MUST NOT allow those to leak into
-     *     the backtrace (since the backtrace will outlive the
-     *     variables).
+     * We dont want these compiler generated functions to
+     * appear in backtraces.
      */
     m_attrs = m_attrs | AttrNoInjection;
   }
@@ -409,7 +395,7 @@ bool Func::isFuncIdValid(FuncId id) {
 // Bytecode.
 
 DVFuncletsVec Func::getDVFunclets() const {
- DVFuncletsVec dvs;
+  DVFuncletsVec dvs;
   int nParams = numParams();
   for (int i = 0; i < nParams; ++i) {
     const ParamInfo& pi = params()[i];
@@ -516,11 +502,14 @@ bool Func::mustBeRef(int32_t arg) const {
       if (name() == s_array_multisort.get() && !cls()) return false;
     }
   }
+
+  // We force mustBeRef() to return false for array_multisort(). It tries to
+  // pass all variadic arguments by reference, but it also allow expressions
+  // that cannot be taken by reference (ex. SORT_REGULAR flag).
   return
     arg < numParams() ||
     !(m_attrs & AttrVariadicByRef) ||
-    !methInfo() ||
-    !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
+    !(name() == s_array_multisort.get() && !cls());
 }
 
 
@@ -546,11 +535,11 @@ bool Func::isClonedClosure() const {
   return cls()->lookupMethod(name()) != this;
 }
 
-Func* Func::findCachedClone(Class* cls) const {
+Func* Func::findCachedClone(Class* cls, Attr attrs) const {
   Func* nextFunc = const_cast<Func*>(this);
   while (nextFunc) {
     if (nextFunc->cls() == cls) {
-      return nextFunc;
+      if (LIKELY(nextFunc->attrs() == attrs)) return nextFunc;
     }
     nextFunc = nextFunc->nextClonedClosure();
   }
@@ -614,12 +603,11 @@ const FPIEnt* Func::findPrecedingFPI(Offset o) const {
   assert(o >= base() && o < past());
   const FPIEntVec& fpitab = shared()->m_fpitab;
   assert(fpitab.size());
-  const FPIEnt* fe = &fpitab[0];
-  unsigned int i;
-  for (i = 1; i < fpitab.size(); i++) {
+  const FPIEnt* fe = 0;
+  for (unsigned i = 0; i < fpitab.size(); i++) {
     const FPIEnt* cur = &fpitab[i];
     if (o > cur->m_fcallOff &&
-        fe->m_fcallOff < cur->m_fcallOff) {
+        (!fe || fe->m_fcallOff < cur->m_fcallOff)) {
       fe = cur;
     }
   }
@@ -741,186 +729,30 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Other methods.
-
-void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
-  assert(mi);
-  if (methInfo() != nullptr) {
-    // Very large operator=() invocation.
-    *mi = *methInfo();
-    // Deep copy the vectors of mi-owned pointers.
-    for (auto& p : mi->parameters)      p = new ClassInfo::ParameterInfo(*p);
-    for (auto& p : mi->staticVariables) p = new ClassInfo::ConstantInfo(*p);
-  } else {
-    // hphpc sets the ClassInfo::VariableArguments attribute if the method
-    // contains a call to func_get_arg, func_get_args, or func_num_args. We
-    // don't do this in the VM currently and hopefully we never will need to.
-    int attr = 0;
-    if (m_attrs & AttrReference) attr |= ClassInfo::IsReference;
-    if (m_attrs & AttrAbstract) attr |= ClassInfo::IsAbstract;
-    if (m_attrs & AttrFinal) attr |= ClassInfo::IsFinal;
-    if (m_attrs & AttrProtected) attr |= ClassInfo::IsProtected;
-    if (m_attrs & AttrPrivate) attr |= ClassInfo::IsPrivate;
-    if (m_attrs & AttrStatic) attr |= ClassInfo::IsStatic;
-    if (m_attrs & AttrHPHPSpecific) attr |= ClassInfo::HipHopSpecific;
-    if (!(attr & ClassInfo::IsProtected || attr & ClassInfo::IsPrivate)) {
-      attr |= ClassInfo::IsPublic;
-    }
-    if (attr == 0) attr = ClassInfo::IsNothing;
-    mi->attribute = (ClassInfo::Attribute)attr;
-    mi->name = m_name->data();
-    mi->file = m_unit->filepath()->data();
-    mi->line1 = line1();
-    mi->line2 = line2();
-    if (docComment() && !docComment()->empty()) {
-      mi->docComment = docComment()->data();
-    }
-    // Get the parameter info
-    auto limit = numParams();
-    for (unsigned i = 0; i < limit; ++i) {
-      ClassInfo::ParameterInfo* pi = new ClassInfo::ParameterInfo;
-      attr = 0;
-      if (byRef(i)) {
-        attr |= ClassInfo::IsReference;
-      }
-      if (attr == 0) {
-        attr = ClassInfo::IsNothing;
-      }
-      const ParamInfoVec& params = shared()->m_params;
-      const ParamInfo& fpi = params[i];
-      pi->attribute = (ClassInfo::Attribute)attr;
-      pi->name = shared()->m_localNames[i]->data();
-      if (params.size() <= i || !fpi.hasDefaultValue()) {
-        pi->value = nullptr;
-        pi->valueText = "";
-      } else {
-        if (fpi.hasScalarDefaultValue()) {
-          // Most of the time the default value is scalar, so we can
-          // avoid evaling in the common case
-          pi->value = strdup(f_serialize(
-            tvAsVariant((TypedValue*)&fpi.defaultValue)).get()->data());
-        } else {
-          // Eval PHP code to get default value, and serialize the result. Note
-          // that access of undefined class constants can cause the eval() to
-          // fatal. Zend lets such fatals propagate, so don't bother catching
-          // exceptions here.
-          const Variant& v = g_context->getEvaledArg(
-            fpi.phpCode,
-            cls() ? cls()->nameStr() : nameStr()
-          );
-          pi->value = strdup(f_serialize(v).get()->data());
-        }
-        // This is a raw char*, but its lifetime should be at least as long
-        // as the the Func*. At this writing, it's a merged anon string
-        // owned by ParamInfo.
-        pi->valueText = fpi.phpCode->data();
-      }
-      pi->type = fpi.typeConstraint.hasConstraint() ?
-        fpi.typeConstraint.typeName()->data() : "";
-      for (auto it = fpi.userAttributes.begin();
-          it != fpi.userAttributes.end(); ++it) {
-        // convert the typedvalue to a cvarref and push into pi.
-        auto userAttr = new ClassInfo::UserAttributeInfo;
-        assert(it->first->isStatic());
-        userAttr->name = const_cast<StringData*>(it->first.get());
-        userAttr->setStaticValue(tvAsCVarRef(&it->second));
-        pi->userAttrs.push_back(userAttr);
-      }
-      mi->parameters.push_back(pi);
-    }
-    // XXX ConstantInfo is abused to store static variable metadata, and
-    // although ConstantInfo::callbacks provides a mechanism for registering
-    // callbacks, it does not pass enough information through for the callback
-    // functions to know the function context whence the callbacks came.
-    // Furthermore, the callback mechanism isn't employed in a fashion that
-    // would allow repeated introspection to reflect updated values.
-    // Supporting introspection of static variable values will require
-    // different plumbing than currently exists in ConstantInfo.
-    const SVInfoVec& staticVars = shared()->m_staticVars;
-    for (SVInfoVec::const_iterator it = staticVars.begin();
-         it != staticVars.end(); ++it) {
-      ClassInfo::ConstantInfo* ci = new ClassInfo::ConstantInfo;
-      ci->name = StrNR(it->name);
-      if ((*it).phpCode != nullptr) {
-        ci->valueLen = (*it).phpCode->size();
-        ci->valueText = (*it).phpCode->data();
-      } else {
-        ci->valueLen = 0;
-        ci->valueText = "";
-      }
-
-      mi->staticVariables.push_back(ci);
-    }
-  }
-}
-
-bool Func::shouldPGO() const {
-  if (!RuntimeOption::EvalJitPGO) return false;
-
-  // Non-cloned closures simply contain prologues that redispacth to
-  // cloned closures.  They don't contain a translation for the
-  // function entry, which is what triggers an Optimize retranslation.
-  // So don't generate profiling translations for them -- there's not
-  // much to do with PGO anyway here, since they just have prologues.
-  if (isClosureBody() && !isClonedClosure()) return false;
-
-  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
-  return attrs() & AttrHot;
-}
-
-void Func::incProfCounter() {
-  assert(isProfileRequest());
-  __sync_fetch_and_add(&m_profCounter, 1);
-}
-
-bool Func::anyBlockEndsAt(Offset off) const {
-  assert(jit::Translator::WriteLease().amOwner());
-  // The empty() check relies on a Func's bytecode always being nonempty
-  assert(base() != past());
-  if (m_shared->m_blockEnds.empty()) {
-    using namespace Verifier;
-
-    Arena arena;
-    GraphBuilder builder{arena, this};
-    Graph* cfg = builder.build();
-
-    for (LinearBlocks blocks = linearBlocks(cfg); !blocks.empty(); ) {
-      auto last = blocks.popFront()->last - m_unit->entry();
-      m_shared->m_blockEnds.insert(last);
-    }
-
-    assert(!m_shared->m_blockEnds.empty());
-  }
-
-  return m_shared->m_blockEnds.count(off) != 0;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // SharedData.
 
 Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
                              int line1, int line2, bool top,
                              const StringData* docComment)
-  : m_preClass(preClass)
-  , m_base(base)
-  , m_past(past)
+  : m_base(base)
+  , m_preClass(preClass)
   , m_numLocals(0)
   , m_numIterators(0)
   , m_line1(line1)
-  , m_line2(line2)
-  , m_info(nullptr)
-  , m_refBitPtr(0)
-  , m_builtinFuncPtr(nullptr)
   , m_docComment(docComment)
+  , m_refBitPtr(0)
   , m_top(top)
   , m_isClosureBody(false)
   , m_isAsync(false)
   , m_isGenerator(false)
   , m_isPairGenerator(false)
   , m_isGenerated(false)
+  , m_hasExtendedSharedData(false)
   , m_originalFilename(nullptr)
-{}
+{
+  m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);
+  m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
+}
 
 Func::SharedData::~SharedData() {
   free(m_refBitPtr);

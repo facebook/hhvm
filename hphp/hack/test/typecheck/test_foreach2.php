@@ -10,7 +10,7 @@
  */
 
 function test(Map<int, string> $x): int {
-  foreach($x as $k => $v) {
+  foreach ($x as $k => $v) {
     return $v;
   }
 

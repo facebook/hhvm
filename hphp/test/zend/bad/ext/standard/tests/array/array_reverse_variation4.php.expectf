@@ -139,11 +139,11 @@ array(4) {
   ["pen
 "]=>
   int(33)
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
-  ["re	d"]=>
+  ["re%r\x09%rd"]=>
   string(5) "color"
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
 }
 - $preserve keys = true -
@@ -151,11 +151,11 @@ array(4) {
   ["pen
 "]=>
   int(33)
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
-  ["re	d"]=>
+  ["re%r\x09%rd"]=>
   string(5) "color"
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
 }
 - $preserve_keys = false -
@@ -163,11 +163,11 @@ array(4) {
   ["pen
 "]=>
   int(33)
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
-  ["re	d"]=>
+  ["re%r\x09%rd"]=>
   string(5) "color"
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
 }
 -- Iteration 8 --
@@ -176,11 +176,11 @@ array(4) {
   ["pen
 "]=>
   int(33)
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
-  ["re	d"]=>
+  ["re%r\x09%rd"]=>
   string(5) "color"
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
 }
 - $preserve keys = true -
@@ -188,11 +188,11 @@ array(4) {
   ["pen
 "]=>
   int(33)
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
-  ["re	d"]=>
+  ["re%r\x09%rd"]=>
   string(5) "color"
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
 }
 - $preserve_keys = false -
@@ -200,11 +200,11 @@ array(4) {
   ["pen
 "]=>
   int(33)
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
-  ["re	d"]=>
+  ["re%r\x09%rd"]=>
   string(5) "color"
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
 }
 -- Iteration 9 --

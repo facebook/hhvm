@@ -9,8 +9,6 @@
  *
  */
 
-interface A {
-}
+interface A {}
 
-class B extends A {
-}
+class B extends A {}

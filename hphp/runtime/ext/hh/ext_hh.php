@@ -56,6 +56,6 @@ function could_include(string $file) : bool;
   * and with objects that implement the HH\IMemoizeParam interface
   */
 <<__Native>>
-function serialize_memoize_param(mixed $param): string;
+function serialize_memoize_param(mixed $param): arraykey;
 
 }

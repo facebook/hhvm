@@ -1,5 +1,5 @@
 <?php
-$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar');
+$phar = new Phar(dirname(__FILE__) . '/buildfromiterator1.phar');
 try {
 	ini_set('phar.readonly', 1);
 	$phar->buildFromIterator(1);
@@ -9,7 +9,8 @@ try {
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
-unlink(dirname(__FILE__) . '/buildfromiterator.phar');
+unlink(dirname(__FILE__) . '/buildfromiterator1.phar');
 __HALT_COMPILER();
 ?>

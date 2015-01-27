@@ -15,8 +15,7 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-// TODO(#4489053) This could fairly easily be abstracted into a c++ class
-//                This should be prioritized as this is used everywhere
+// TODO(#3704) This could fairly easily be abstracted into a c++ class
 
 #ifndef incl_XDEBUG_XML_H_
 #define incl_XDEBUG_XML_H_

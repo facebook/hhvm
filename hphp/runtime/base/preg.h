@@ -56,27 +56,52 @@ class pcre_cache_entry {
   pcre_cache_entry& operator=(const pcre_cache_entry&);
 
 public:
-  pcre_cache_entry() {}
+  pcre_cache_entry() : subpat_names(nullptr) {}
   ~pcre_cache_entry();
 
   pcre *re;
   pcre_extra *extra; // Holds results of studying
-  int preg_options;
-  int compile_options;
+  int preg_options:1;
+  int compile_options:31;
+  int num_subpats;
+  mutable std::atomic<char**> subpat_names;
 };
 
-class PCREglobals {
-public:
-  PCREglobals() { }
+struct PCREglobals {
+  PCREglobals();
   ~PCREglobals();
-  void cleanupOnRequestEnd(const pcre_cache_entry* ent);
-  void onSessionExit();
+
   // pcre ini_settings
-  int64_t m_preg_backtrace_limit;
-  int64_t m_preg_recursion_limit;
-private:
-  smart::vector<const pcre_cache_entry*> m_overflow;
+  int64_t preg_backtrace_limit;
+  int64_t preg_recursion_limit;
+  pcre_jit_stack* jit_stack;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// Cache management
+
+/*
+ * Initialize PCRE cache.
+ */
+void pcre_init();
+
+/*
+ * Clear PCRE cache.  Not thread safe - call only after parsing options.
+ */
+void pcre_reinit();
+
+/*
+ * Clean up thread-local PCREs.
+ */
+void pcre_session_exit();
+
+/*
+ * Dump the contents of the PCRE cache to filename.
+ */
+void pcre_dump_cache(const std::string& filename);
+
+///////////////////////////////////////////////////////////////////////////////
+// PHP API
 
 Variant preg_grep(const String& pattern, const Array& input, int flags = 0);
 

@@ -1,11 +1,12 @@
 <?php
-$fp = fopen('SplFileObject_fgetcsv_escape_basic.csv', 'w+');
+$fp = fopen('SplFileObject__fgetcsv6.csv', 'w+');
 fwrite($fp, '"aaa","b""bb","ccc"');
 fclose($fp);
 
-$fo = new SplFileObject('SplFileObject_fgetcsv_escape_basic.csv');
+$fo = new SplFileObject('SplFileObject__fgetcsv6.csv');
 var_dump($fo->fgetcsv(',', '"', '"'));
 ?>
+<?php error_reporting(0); ?>
 <?php
-unlink('SplFileObject_fgetcsv_escape_basic.csv');
+unlink('SplFileObject__fgetcsv6.csv');
 ?>

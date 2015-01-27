@@ -28,17 +28,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Pre        {};
-struct InferTypes {};
-struct Post       {};
 
 template <typename When>
 inline int GetPhaseInterestMask() {
   return BlockScope::UseKindAny;
-}
-
-template <>
-inline int GetPhaseInterestMask<InferTypes>() {
-  return BlockScope::UseKindAny & ~BlockScope::UseKindCallerInline;
 }
 
 template <typename When,

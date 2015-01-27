@@ -1,0 +1,2 @@
+
+Fatal error: Invalid UTF-8 codepoint escape sequence in %s/test/slow/parser/unicode-literal-error.php on line 3

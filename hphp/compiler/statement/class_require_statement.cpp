@@ -78,9 +78,6 @@ void ClassRequireStatement::setNthKid(int n, ConstructPtr cp) {
   always_assert(false);
 }
 
-void ClassRequireStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassRequireStatement::outputCodeModel(CodeGenerator &cg) {

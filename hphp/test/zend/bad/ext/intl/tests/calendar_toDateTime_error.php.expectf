@@ -12,4 +12,4 @@ bool(false)
 Warning: %s
 string(77) "exception: DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
 
-Fatal error: %s
+Catchable fatal error: %s

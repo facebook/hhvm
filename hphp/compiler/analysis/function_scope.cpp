@@ -15,7 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/function_scope.h"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 #include <utility>
 #include <vector>
 #include "hphp/compiler/analysis/analysis_result.h"
@@ -176,6 +176,9 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
   }
   if (m_attribute & FileScope::ContainsExtract) {
     m_variables->setAttribute(VariableTable::ContainsExtract);
+  }
+  if (m_attribute & FileScope::ContainsAssert) {
+    m_variables->setAttribute(VariableTable::ContainsAssert);
   }
   if (m_attribute & FileScope::ContainsCompact) {
     m_variables->setAttribute(VariableTable::ContainsCompact);
@@ -375,14 +378,6 @@ bool FunctionScope::isReferenceVariableArgument() const {
   return res;
 }
 
-bool FunctionScope::isMixedVariableArgument() const {
-  bool res = (m_attribute & FileScope::MixedVariableArgument) && !m_overriding;
-  // If this method returns true, then isReferenceVariableArgument()
-  // must also return true.
-  assert(!res || isReferenceVariableArgument());
-  return res;
-}
-
 bool FunctionScope::noFCallBuiltin() const {
   bool res = (m_attribute & FileScope::NoFCallBuiltin);
   return res;
@@ -406,9 +401,6 @@ void FunctionScope::setVariableArgument(int reference) {
   m_attribute |= FileScope::VariableArgument;
   if (reference) {
     m_attribute |= FileScope::ReferenceVariableArgument;
-    if (reference < 0) {
-      m_attribute |= FileScope::MixedVariableArgument;
-    }
   }
 }
 
@@ -566,6 +558,7 @@ bool FunctionScope::mayUseVV() const {
      usesVariableArgumentFunc() ||
      variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
      variables->getAttribute(VariableTable::ContainsExtract) ||
+     variables->getAttribute(VariableTable::ContainsAssert) ||
      variables->getAttribute(VariableTable::ContainsCompact) ||
      variables->getAttribute(VariableTable::ContainsGetDefinedVars) ||
      (!Option::EnableHipHopSyntax &&
@@ -583,8 +576,7 @@ bool FunctionScope::matchParams(FunctionScopePtr func) {
   }
   if (hasVariadicParam() != func->hasVariadicParam() ||
       usesVariableArgumentFunc() != func->usesVariableArgumentFunc() ||
-      isReferenceVariableArgument() != func->isReferenceVariableArgument() ||
-      isMixedVariableArgument() != func->isMixedVariableArgument()) {
+      isReferenceVariableArgument() != func->isReferenceVariableArgument()) {
     return false;
   }
 
@@ -623,136 +615,6 @@ bool FunctionScope::needsClassParam() {
     return false;
   }
   return getVariables()->hasStatic();
-}
-
-int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
-                                   ExpressionListPtr params, bool &valid) {
-  if (!params) {
-    if (m_minParam > 0) {
-      if (exp->getScope()->isFirstPass()) {
-        Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
-      }
-      valid = false;
-      if (!Option::AllDynamic) setDynamic();
-    }
-    return 0;
-  }
-
-  int ret = 0;
-  if (params->getCount() < m_minParam) {
-    if (exp->getScope()->isFirstPass()) {
-      Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
-    }
-    valid = false;
-    if (!Option::AllDynamic) setDynamic();
-  }
-  if (params->getCount() > getDeclParamCount()) {
-    if (allowsVariableArguments()) {
-      ret = params->getCount() - getMaxParamCount();
-    } else {
-      if (exp->getScope()->isFirstPass()) {
-        Compiler::Error(Compiler::TooManyArgument, exp, m_stmt);
-      }
-      valid = false;
-      if (!Option::AllDynamic) setDynamic();
-    }
-  }
-
-  bool canSetParamType = isUserFunction() && !m_overriding && !m_perfectVirtual;
-  auto const numNonVariadicParams = getMaxParamCount();
-  for (int i = 0; i < params->getCount(); i++) {
-    ExpressionPtr param = (*params)[i];
-    if (i < numNonVariadicParams &&
-        param->hasContext(Expression::RefParameter)) {
-      /**
-       * This should be very un-likely, since call time pass by ref is a
-       * deprecated, not very widely used (at least in FB codebase) feature.
-       */
-      TRY_LOCK_THIS();
-      Symbol *sym = getVariables()->addSymbol(m_paramNames[i]);
-      sym->setLvalParam();
-      sym->setCallTimeRef();
-    }
-    if (valid && param->hasContext(Expression::InvokeArgument)) {
-      param->clearContext(Expression::InvokeArgument);
-      param->clearContext(Expression::RefValue);
-      param->clearContext(Expression::NoRefWrapper);
-    }
-    bool isRefVararg =
-      (i >= numNonVariadicParams && isReferenceVariableArgument());
-    if ((i < numNonVariadicParams && isRefParam(i)) || isRefVararg) {
-      param->setContext(Expression::LValue);
-      param->setContext(Expression::RefValue);
-      param->inferAndCheck(ar, Type::Variant, true);
-    } else if (!(param->getContext() & Expression::RefParameter)) {
-      param->clearContext(Expression::LValue);
-      param->clearContext(Expression::RefValue);
-      param->clearContext(Expression::InvokeArgument);
-      param->clearContext(Expression::NoRefWrapper);
-    }
-    TypePtr expType;
-    /**
-     * Duplicate the logic of getParamType(i), w/o the mutation
-     */
-    TypePtr paramType(i < numNonVariadicParams && !isParamCoerceMode() ?
-                      m_paramTypes[i] : TypePtr());
-    if (!paramType) paramType = Type::Some;
-    if (valid && !canSetParamType && i < numNonVariadicParams &&
-        (!Option::HardTypeHints || !m_paramTypeSpecs[i])) {
-      /**
-       * What is this magic, you might ask?
-       *
-       * Here, we take advantage of implicit conversion from every type to
-       * Variant. Essentially, we don't really care what type comes out of this
-       * expression since it'll just get converted anyways. Doing it this way
-       * allows us to generate less temporaries along the way.
-       */
-      TypePtr optParamType(paramType->is(Type::KindOfVariant) ?
-                           Type::Some : paramType);
-      expType = param->inferAndCheck(ar, optParamType, false);
-    } else {
-      expType = param->inferAndCheck(ar, Type::Some, false);
-    }
-    if (i < numNonVariadicParams) {
-      if (!Option::HardTypeHints || !m_paramTypeSpecs[i]) {
-        if (canSetParamType) {
-          if (!Type::SameType(paramType, expType) &&
-              !paramType->is(Type::KindOfVariant)) {
-            TRY_LOCK_THIS();
-            paramType = setParamType(ar, i, expType);
-          } else {
-            // do nothing - how is this safe?  well, if we ever observe
-            // paramType == expType, then this means at some point in the past,
-            // somebody called setParamType() with expType.  thus, by calling
-            // setParamType() again with expType, we contribute no "new"
-            // information. this argument also still applies in the face of
-            // concurrency
-          }
-        }
-        // See note above. If we have an implemented type, however, we
-        // should set the paramType to the implemented type to avoid an
-        // un-necessary cast
-        if (paramType->is(Type::KindOfVariant)) {
-          TypePtr it(param->getImplementedType());
-          paramType = it ? it : expType;
-        }
-        if (valid) {
-          if (!Type::IsLegalCast(ar, expType, paramType) &&
-              paramType->isNonConvertibleType()) {
-            param->inferAndCheck(ar, paramType, true);
-          }
-          param->setExpectedType(paramType);
-        }
-      }
-    }
-    // we do a best-effort check for bad pass-by-reference and do not report
-    // error for some vararg case (e.g., array_multisort can have either ref
-    // or value for the same vararg).
-    if (!isRefVararg || !isMixedVariableArgument()) {
-      Expression::CheckPassByReference(ar, param);
-    }
-  }
-  return ret;
 }
 
 TypePtr FunctionScope::setParamType(AnalysisResultConstPtr ar, int index,
@@ -985,10 +847,6 @@ std::string FunctionScope::getDocFullName() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void FunctionScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (Option::GenerateInferredTypes && m_returnType) {
-    cg_printf("// @return %s\n", m_returnType->toString().c_str());
-  }
-
   BlockScope::outputPHP(cg, ar);
 }
 

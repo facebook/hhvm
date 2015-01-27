@@ -58,10 +58,6 @@ typedef struct {
 int dladdr(const void *addr, Dl_info *info);
 int backtrace (void **buffer, int size);
 
-// From sys/param.h
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#define MAX(a,b) (((a)>(b))?(a):(b))
-
 #endif
 
 //////////////////////////////////////////////////////////////////////

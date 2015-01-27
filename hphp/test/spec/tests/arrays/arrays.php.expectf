@@ -1,0 +1,388 @@
+================= array of zero elements is possible =================
+array(0) {
+}
+array(0) {
+}
+================= array of 1 element is possible =================
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  bool(true)
+}
+================= array of 2 elements each having the same type =================
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+================= array of 5 elements each having different type =================
+array(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+array(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+array(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+array(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+array(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+array(5) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(false)
+  [2]=>
+  int(123)
+  [3]=>
+  float(34000000000000)
+  [4]=>
+  string(5) "Hello"
+}
+================= trailing comma permitted if list has at least one entry =================
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(1) {
+  [0]=>
+  bool(true)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(-56)
+}
+================= specify keys in arbitrary order, initial values of runtime expressions, leave gaps =================
+array(3) {
+  [7]=>
+  int(123)
+  [3]=>
+  int(6)
+  [6]=>
+  int(13)
+}
+array(3) {
+  [7]=>
+  int(123)
+  [3]=>
+  int(6)
+  [6]=>
+  int(13)
+}
+123 6 13 
+
+Notice: Undefined %s: 1 in %s/arrays/arrays.php on line 108
+$v[1] is ><
+
+Notice: Undefined variable: v1 in %s/arrays/arrays.php on line 108
+NULL
+
+Notice: Undefined %s: 4 in %s/arrays/arrays.php on line 109
+$v[4] is ><
+
+Notice: Undefined variable: v1 in %s/arrays/arrays.php on line 109
+NULL
+array(5) {
+  [7]=>
+  int(123)
+  [3]=>
+  int(6)
+  [6]=>
+  int(13)
+  [1]=>
+  bool(true)
+  [4]=>
+  int(99)
+}
+123 6 13 1 99 
+================= duplicate keys allowed, but lexically final one used =================
+array(2) {
+  [2]=>
+  int(46)
+  [1]=>
+  int(6)
+}
+================= string keys can be expressions too =================
+array(2) {
+  ["color"]=>
+  string(3) "red"
+  ["shape"]=>
+  string(6) "square"
+}
+================= can mix int and string keys =================
+array(5) {
+  ["red"]=>
+  int(10)
+  [4]=>
+  int(3)
+  [9]=>
+  int(5)
+  ["12.8"]=>
+  int(111)
+  [""]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(-4)
+}
+array(1) {
+  [""]=>
+  int(-3)
+}
+array(1) {
+  [%i]=>
+  int(21)
+}
+array(1) {
+  [-9223372036854775808]=>
+  int(-1)
+}
+array(1) {
+  [-9223372036854775808]=>
+  int(123)
+}
+================= arrays some of whose elements are arrays, and so on =================
+array(4) {
+  [0]=>
+  int(10)
+  [1]=>
+  array(3) {
+    [0]=>
+    string(3) "red"
+    [1]=>
+    string(5) "white"
+    [2]=>
+    string(4) "blue"
+  }
+  [2]=>
+  NULL
+  [3]=>
+  array(3) {
+    [0]=>
+    bool(false)
+    [1]=>
+    NULL
+    [2]=>
+    array(3) {
+      [0]=>
+      string(3) "red"
+      [1]=>
+      string(5) "white"
+      [2]=>
+      string(4) "blue"
+    }
+  }
+}
+array(3) {
+  [0]=>
+  array(4) {
+    [0]=>
+    int(2)
+    [1]=>
+    int(4)
+    [2]=>
+    int(6)
+    [3]=>
+    int(8)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(10)
+  }
+  [2]=>
+  array(3) {
+    [0]=>
+    int(100)
+    [1]=>
+    int(200)
+    [2]=>
+    int(300)
+  }
+}
+================= see if int keys can be specified in any base. =================
+array(4) {
+  [12]=>
+  int(10)
+  [16]=>
+  int(16)
+  [8]=>
+  int(8)
+  [3]=>
+  int(2)
+}
+================= what about int-looking strings? It appears not. =================
+array(4) {
+  [12]=>
+  int(10)
+  ["0x10"]=>
+  int(16)
+  ["010"]=>
+  int(8)
+  ["0b11"]=>
+  int(2)
+}
+================= iterate using foreach and compare with for loop =================
+array(4) {
+  [2]=>
+  bool(true)
+  [0]=>
+  int(123)
+  [1]=>
+  float(34.5)
+  [-1]=>
+  string(3) "red"
+}
+1 123 34.5 red 
+red 123 34.5 1 
+================= remove some elements from an array =================
+array(4) {
+  ["red"]=>
+  bool(true)
+  [0]=>
+  int(123)
+  [9]=>
+  float(34000000000000)
+  [10]=>
+  string(5) "Hello"
+}
+array(2) {
+  [9]=>
+  float(34000000000000)
+  [10]=>
+  string(5) "Hello"
+}

@@ -24,21 +24,18 @@ inline bool cellToBool(Cell cell) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
-  case KindOfUninit:
-  case KindOfNull:          return false;
-  case KindOfInt64:         return cell.m_data.num != 0;
-  case KindOfBoolean:       return cell.m_data.num;
-  case KindOfDouble:        return cell.m_data.dbl != 0;
-  case KindOfStaticString:
-  case KindOfString:        return cell.m_data.pstr->toBoolean();
-
-  // Note that this is intentionally incorrect for NameValueTableWrapper, for
-  // which getSize() will always return -1, empty or not.
-  case KindOfArray:         return !!cell.m_data.parr->getSize();
-
-  case KindOfObject:        return cell.m_data.pobj->o_toBoolean();
-  case KindOfResource:      return cell.m_data.pres->o_toBoolean();
-  default:                  break;
+    case KindOfUninit:
+    case KindOfNull:          return false;
+    case KindOfBoolean:       return cell.m_data.num;
+    case KindOfInt64:         return cell.m_data.num != 0;
+    case KindOfDouble:        return cell.m_data.dbl != 0;
+    case KindOfStaticString:
+    case KindOfString:        return cell.m_data.pstr->toBoolean();
+    case KindOfArray:         return !!cell.m_data.parr->size();
+    case KindOfObject:        return cell.m_data.pobj->toBoolean();
+    case KindOfResource:      return cell.m_data.pres->o_toBoolean();
+    case KindOfRef:
+    case KindOfClass:         break;
   }
   not_reached();
 }
@@ -47,17 +44,18 @@ inline int64_t cellToInt(Cell cell) {
   assert(cellIsPlausible(cell));
 
   switch (cell.m_type) {
-  case KindOfInt64:        return cell.m_data.num;
-  case KindOfDouble:       return toInt64(cell.m_data.dbl);
-  case KindOfString:
-  case KindOfStaticString: return cell.m_data.pstr->toInt64(10);
-  case KindOfArray:        return cell.m_data.parr->empty() ? 0 : 1;
-  case KindOfObject:       return cell.m_data.pobj->o_toInt64();
-  case KindOfResource:     return cell.m_data.pres->o_toInt64();
-  case KindOfBoolean:      return cell.m_data.num;
-  case KindOfUninit:
-  case KindOfNull:         return 0;
-  default:                 break;
+    case KindOfUninit:
+    case KindOfNull:          return 0;
+    case KindOfBoolean:       return cell.m_data.num;
+    case KindOfInt64:         return cell.m_data.num;
+    case KindOfDouble:        return toInt64(cell.m_data.dbl);
+    case KindOfStaticString:
+    case KindOfString:        return cell.m_data.pstr->toInt64(10);
+    case KindOfArray:         return cell.m_data.parr->empty() ? 0 : 1;
+    case KindOfObject:        return cell.m_data.pobj->toInt64();
+    case KindOfResource:      return cell.m_data.pres->o_toInt64();
+    case KindOfRef:
+    case KindOfClass:         break;
   }
   not_reached();
 }

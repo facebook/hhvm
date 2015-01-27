@@ -20,6 +20,8 @@
 #include <boost/intrusive/list.hpp>
 #include <boost/noncopyable.hpp>
 
+#include "hphp/runtime/vm/jit/containers.h"
+
 namespace HPHP { namespace jit {
 
 struct Block;
@@ -61,11 +63,14 @@ struct Edge : private boost::noncopyable {
   boost::intrusive::list_member_hook<> m_node; // for Block::m_preds
 };
 
-typedef boost::intrusive::member_hook<Edge,
-                                      boost::intrusive::list_member_hook<>,
-                                      &Edge::m_node>
-        EdgeHookOption;
-typedef boost::intrusive::list<Edge, EdgeHookOption> EdgeList;
+using EdgeHookOption = boost::intrusive::member_hook<
+  Edge,
+  boost::intrusive::list_member_hook<>,
+  &Edge::m_node
+>;
+
+using EdgeList = boost::intrusive::list<Edge, EdgeHookOption>;
+using EdgeSet = jit::flat_set<Edge*>;
 
 }}
 

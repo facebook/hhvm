@@ -21,7 +21,7 @@
 #include "hphp/hhbbc/misc.h"
 
 namespace HPHP { namespace HHBBC {
-namespace php { struct Func; }
+namespace php { struct Func; struct Local; }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -31,6 +31,21 @@ namespace php { struct Func; }
  * Pre: f->isClosureBody
  */
 uint32_t closure_num_use_vars(borrowed_ptr<const php::Func>);
+
+/*
+ * Returns whether a given php::Func is the pseudomain of its unit.
+ */
+bool is_pseudomain(borrowed_ptr<const php::Func>);
+
+/*
+ * Locals with certain special names can be set in the enclosing scope by
+ * various php routines.  We don't attempt to track their types.  Furthermore,
+ * in a pseudomain effectively all 'locals' are volatile, because any re-entry
+ * could modify them through $GLOBALS, so in a pseudomain we don't track any
+ * local types.
+ */
+bool is_volatile_local(borrowed_ptr<const php::Func>,
+                       borrowed_ptr<const php::Local>);
 
 //////////////////////////////////////////////////////////////////////
 

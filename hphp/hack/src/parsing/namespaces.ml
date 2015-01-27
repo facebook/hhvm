@@ -35,13 +35,34 @@ let autoimport_classes = [
   "KeyedIterable";
   "Collection";
   "Vector";
-  "Set";
   "ImmVector";
+  "Map";
+  "ImmMap";
+  "StableMap";
+  "Set";
   "ImmSet";
   "Pair";
-  "Map";
-  "StableMap";
-  "ImmMap"
+  "Awaitable";
+  "AsyncIterator";
+  "IMemoizeParam";
+  "AsyncKeyedIterator";
+  "InvariantException";
+  "AsyncGenerator";
+  "WaitHandle";
+  "StaticWaitHandle";
+  "WaitableWaitHandle";
+  "BlockableWaitHandle";
+  "ResumableWaitHandle";
+  "AsyncFunctionWaitHandle";
+  "AsyncGeneratorWaitHandle";
+  "AwaitAllWaitHandle";
+  "GenArrayWaitHandle";
+  "GenMapWaitHandle";
+  "GenVectorWaitHandle";
+  "ConditionWaitHandle";
+  "RescheduleWaitHandle";
+  "SleepWaitHandle";
+  "ExternalThreadEventWaitHandle"
 ]
 let autoimport_set =
   List.fold_left (fun s e -> SSet.add e s) SSet.empty autoimport_classes
@@ -116,11 +137,20 @@ module ElaborateDefs = struct
 
   let class_def nsenv = function
     | ClassUse h -> ClassUse (hint nsenv h)
+    | XhpAttrUse h -> XhpAttrUse (hint nsenv h)
     | other -> other
 
   let rec def nsenv = function
+    (*
+      The default namespace in php is the global namespace specified by
+      the empty string. In the case of an empty string, we model it as
+      the global namespace.
+    *)
     | Namespace ((_, nsname), prog) -> begin
-        let new_nsenv = {nsenv with ns_name = Some nsname} in
+        let nsname = match nsname with
+          | "" -> None
+          | _ -> Some nsname in
+        let new_nsenv = {nsenv with ns_name = nsname} in
         nsenv, program new_nsenv prog
       end
     | NamespaceUse l -> begin

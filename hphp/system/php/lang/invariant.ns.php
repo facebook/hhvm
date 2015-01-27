@@ -39,10 +39,9 @@ function invariant_callback_register(callable $callback) {
  * Ensure that an invariant is satisfied. If it fails, it calls
  * invariant_violation
  */
-function invariant(mixed $test, ...): void {
+function invariant(mixed $test, ...$args): void {
   if (!$test) {
-    $args = \array_slice(\func_get_args(), 1);
-    \call_user_func_array('\HH\invariant_violation', $args);
+    \HH\invariant_violation(...$args);
   }
 }
 

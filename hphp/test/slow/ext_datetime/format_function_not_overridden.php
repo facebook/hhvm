@@ -1,6 +1,6 @@
 <?php
 class TDate extends DateTime {
-  public function format($format, $local = false, $translate = true) {
+  public function format($format) {
     return "lol";
   }
 }

@@ -68,7 +68,7 @@ static Variant HHVM_FUNCTION(finfo_open,
     return false;
   }
 
-  return NEWOBJ(FileinfoResource)(magic);
+  return Variant(makeSmartPtr<FileinfoResource>(magic));
 }
 
 static bool HHVM_FUNCTION(finfo_close, const Resource& finfo) {
@@ -166,8 +166,7 @@ static Variant php_finfo_get_type(
         goto clean;
       }
 
-      auto resource = File::Open(buffer, "rb");
-      auto stream = resource.getTyped<File>(true);
+      auto stream = File::Open(buffer, "rb");
       if (!stream) {
         ret_val.reset();
         goto clean;
@@ -178,7 +177,7 @@ static Variant php_finfo_get_type(
         if (st.st_mode & S_IFDIR) {
           ret_val = mime_directory;
         } else {
-          ret_val = magic_stream(magic, stream);
+          ret_val = magic_stream(magic, stream.get());
         }
       }
       break;
@@ -255,10 +254,10 @@ const StaticString s_FILEINFO_CONTINUE("FILEINFO_CONTINUE");
 const StaticString s_FILEINFO_PRESERVE_ATIME("FILEINFO_PRESERVE_ATIME");
 const StaticString s_FILEINFO_RAW("FILEINFO_RAW");
 
-class fileinfoExtension : public Extension {
+class fileinfoExtension final : public Extension {
  public:
   fileinfoExtension() : Extension("fileinfo", "1.0.5-dev") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfInt64>(
       s_FILEINFO_NONE.get(), MAGIC_NONE
     );

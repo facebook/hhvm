@@ -1,0 +1,73 @@
+= reflection_class =
+Enum [ <user> enum TestEnum extends HH\BuiltinEnum ] {
+  @@ %s/enum.php %d-%d
+
+  - Constants [2] {
+    Constant [ integer FOO {2} ]
+    Constant [ integer BAR {1} ]
+  }
+
+  - Static properties [0] {
+  }
+
+  - Static methods [6] {
+    Method [ <internal, inherits HH\BuiltinEnum> final static public method getValues ] {
+    }
+    Method [ <internal, inherits HH\BuiltinEnum> final static public method getNames ] {
+    }
+    Method [ <internal, inherits HH\BuiltinEnum> final static public method isValid ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> HH\mixed $value ]
+      }
+    }
+    Method [ <internal, inherits HH\BuiltinEnum> final static public method coerce ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> HH\mixed $value ]
+      }
+    }
+    Method [ <internal, inherits HH\BuiltinEnum> final static public method assert ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> HH\mixed $value ]
+      }
+    }
+    Method [ <internal, inherits HH\BuiltinEnum> final static public method assertAll ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> HH\Traversable<HH\mixed> $values ]
+      }
+    }
+  }
+
+  - Properties [0] {
+  }
+
+  - Methods [0] {
+  }
+}
+
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+array(2) {
+  ["FOO"]=>
+  int(2)
+  ["BAR"]=>
+  int(1)
+}
+= reflection_funcs =
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+array(2) {
+  ["FOO"]=>
+  int(2)
+  ["BAR"]=>
+  int(1)
+}

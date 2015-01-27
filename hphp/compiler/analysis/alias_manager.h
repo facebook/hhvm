@@ -104,7 +104,6 @@ class AliasManager {
   void gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m);
   int optimize(AnalysisResultConstPtr ar, MethodStatementPtr s);
   void finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m);
-  int copyProp(MethodStatementPtr m);
 
   void setChanged() {
     if (!m_noAdd) {
@@ -116,7 +115,6 @@ class AliasManager {
   static bool parseOptimizations(const std::string &optimizations,
                                  std::string &errs);
 
-  ControlFlowGraph *graph() { return m_graph; }
   int checkAnyInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
                      int &depth, int &effects, bool forLval = false);
   bool hasWildRefs() const { return m_wildRefs; }
@@ -150,8 +148,6 @@ class AliasManager {
   };
 
   void performReferencedAndNeededAnalysis(MethodStatementPtr m);
-  void insertTypeAssertions(AnalysisResultConstPtr ar, MethodStatementPtr m);
-  void removeTypeAssertions(AnalysisResultConstPtr ar, MethodStatementPtr m);
 
   typedef std::set<std::string> StringSet;
 
@@ -210,14 +206,8 @@ class AliasManager {
   void invalidateChainRoots(StatementPtr s);
   void nullSafeDisableCSE(StatementPtr parent, ExpressionPtr kid);
   void disableCSE(StatementPtr s);
-  void createCFG(MethodStatementPtr m);
-  void deleteCFG();
 
   int collectAliasInfoRecur(ConstructPtr cs, bool unused);
-  void pushStringScope(StatementPtr s);
-  void popStringScope(StatementPtr s);
-  void stringOptsRecur(StatementPtr s);
-  void stringOptsRecur(ExpressionPtr s, bool ok);
 
   void beginInExpression(StatementPtr parent, ExpressionPtr kid);
   void endInExpression(StatementPtr requestor);
@@ -264,12 +254,7 @@ class AliasManager {
   bool                      m_genAttrs;
   bool                      m_hasDeadStore;
   bool                      m_hasChainRoot;
-  bool                      m_hasTypeAssertions;
   BlockScopeRawPtr          m_scope;
-
-  ControlFlowGraph          *m_graph;
-  std::map<std::string,int> m_gidMap;
-  std::map<std::string,SimpleVariablePtr> m_objMap;
 
   ExpressionPtr             m_expr;
   int                       m_exprIdx;

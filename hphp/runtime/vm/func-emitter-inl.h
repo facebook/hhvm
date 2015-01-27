@@ -21,6 +21,23 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+template<class SerDe>
+void EHEntEmitter::serde(SerDe& sd) {
+  sd(m_type)
+    (m_base)
+    (m_past)
+    (m_iterId)
+    (m_fault)
+    (m_itRef)
+    (m_parentIndex)
+    ;
+  if (m_type == EHEnt::Type::Catch) {
+    sd(m_catches);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 inline UnitEmitter& FuncEmitter::ue() const {
   return m_ue;
 }

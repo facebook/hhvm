@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/bcmath/bcmath.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include <folly/ScopeGuard.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -134,6 +135,11 @@ static Variant HHVM_FUNCTION(bcdiv, const String& left, const String& right,
   bc_init_num(&first);
   bc_init_num(&second);
   bc_init_num(&result);
+  SCOPE_EXIT {
+    bc_free_num(&first);
+    bc_free_num(&second);
+    bc_free_num(&result);
+  };
   php_str2num(&first, (char*)left.data());
   php_str2num(&second, (char*)right.data());
   if (bc_divide(first, second, &result, scale) == -1) {
@@ -141,9 +147,6 @@ static Variant HHVM_FUNCTION(bcdiv, const String& left, const String& right,
     return init_null();
   }
   String ret(bc_num2str(result), AttachString);
-  bc_free_num(&first);
-  bc_free_num(&second);
-  bc_free_num(&result);
   return ret;
 }
 
@@ -152,6 +155,11 @@ static Variant HHVM_FUNCTION(bcmod, const String& left, const String& right) {
   bc_init_num(&first);
   bc_init_num(&second);
   bc_init_num(&result);
+  SCOPE_EXIT {
+    bc_free_num(&first);
+    bc_free_num(&second);
+    bc_free_num(&result);
+  };
   php_str2num(&first, (char*)left.data());
   php_str2num(&second, (char*)right.data());
   if (bc_modulo(first, second, &result, 0) == -1) {
@@ -159,9 +167,6 @@ static Variant HHVM_FUNCTION(bcmod, const String& left, const String& right) {
     return init_null();
   }
   String ret(bc_num2str(result), AttachString);
-  bc_free_num(&first);
-  bc_free_num(&second);
-  bc_free_num(&result);
   return ret;
 }
 
@@ -172,6 +177,11 @@ static String HHVM_FUNCTION(bcpow, const String& left, const String& right,
   bc_init_num(&first);
   bc_init_num(&second);
   bc_init_num(&result);
+  SCOPE_EXIT {
+    bc_free_num(&first);
+    bc_free_num(&second);
+    bc_free_num(&result);
+  };
   php_str2num(&first, (char*)left.data());
   php_str2num(&second, (char*)right.data());
   bc_raise(first, second, &result, scale);
@@ -179,9 +189,6 @@ static String HHVM_FUNCTION(bcpow, const String& left, const String& right,
     result->n_scale = scale;
   }
   String ret(bc_num2str(result), AttachString);
-  bc_free_num(&first);
-  bc_free_num(&second);
-  bc_free_num(&result);
   return ret;
 }
 
@@ -193,6 +200,12 @@ static Variant HHVM_FUNCTION(bcpowmod, const String& left, const String& right,
   bc_init_num(&second);
   bc_init_num(&mod);
   bc_init_num(&result);
+  SCOPE_EXIT {
+    bc_free_num(&first);
+    bc_free_num(&second);
+    bc_free_num(&mod);
+    bc_free_num(&result);
+  };
   php_str2num(&first, (char*)left.data());
   php_str2num(&second, (char*)right.data());
   php_str2num(&mod, (char*)modulus.data());
@@ -203,10 +216,6 @@ static Variant HHVM_FUNCTION(bcpowmod, const String& left, const String& right,
     result->n_scale = scale;
   }
   String ret(bc_num2str(result), AttachString);
-  bc_free_num(&first);
-  bc_free_num(&second);
-  bc_free_num(&mod);
-  bc_free_num(&result);
   return ret;
 }
 
@@ -215,6 +224,9 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
   if (scale < 0) scale = BCG(bc_precision);
   bc_num result;
   bc_init_num(&result);
+  SCOPE_EXIT {
+    bc_free_num(&result);
+  };
   php_str2num(&result, (char*)operand.data());
   Variant ret;
   if (bc_sqrt(&result, scale) != 0) {
@@ -225,16 +237,15 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
   } else {
     raise_warning("Square root of negative number");
   }
-  bc_free_num(&result);
   return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bcmathExtension : public Extension {
+class bcmathExtension final : public Extension {
  public:
   bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(bcscale);
     HHVM_FE(bcadd);
     HHVM_FE(bcsub);
@@ -248,7 +259,7 @@ class bcmathExtension : public Extension {
     loadSystemlib();
   }
 
-  virtual void threadInit() {
+  void threadInit() override {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "bcmath.scale", "0",
                      &BCG(bc_precision));

@@ -32,7 +32,7 @@ OutputFile::OutputFile(const String& filename): File(true, s_php, s_output) {
   if (filename != s_php_output) {
     throw FatalErrorException("not a php://output file ");
   }
-  m_isLocal = true;
+  setIsLocal(true);
 }
 
 OutputFile::~OutputFile() {
@@ -54,9 +54,9 @@ bool OutputFile::close() {
 }
 
 bool OutputFile::closeImpl() {
-  s_file_data->m_pcloseRet = 0;
-  if (!m_closed) {
-    m_closed = true;
+  s_pcloseRet = 0;
+  if (!isClosed()) {
+    setIsClosed(true);
     return true;
   }
   return false;
@@ -77,7 +77,7 @@ int OutputFile::getc() {
 
 int64_t OutputFile::writeImpl(const char *buffer, int64_t length) {
   assert(length > 0);
-  if (m_closed) return 0;
+  if (isClosed()) return 0;
   g_context->write(buffer, length);
   return length;
 }
@@ -102,7 +102,7 @@ bool OutputFile::rewind() {
 }
 
 bool OutputFile::flush() {
-  if (!m_closed) {
+  if (!isClosed()) {
     g_context->flush();
     return true;
   }

@@ -22,7 +22,7 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -56,7 +56,7 @@ struct RegionDesc {
   struct TypePred;
   struct ReffinessPred;
   typedef std::shared_ptr<Block> BlockPtr;
-  typedef int32_t BlockId;
+  typedef TransID BlockId;
   // BlockId Encoding:
   //   - Non-negative numbers are blocks that correspond
   //     to the start of a TransProfile translation, and therefore can
@@ -84,6 +84,7 @@ struct RegionDesc {
   bool              isSideExitingBlock(BlockId bid) const;
   void              append(const RegionDesc&  other);
   void              prepend(const RegionDesc& other);
+  uint32_t          instrSize() const;
   std::string       toString() const;
 
   template<class Work>
@@ -261,6 +262,7 @@ public:
   void setId(BlockId id) {
     m_id = id;
   }
+  void setInitialSpOffset(int32_t sp) { m_initialSpOffset = sp; }
 
   /*
    * Set and get whether or not this block ends with an inlined FCall. Inlined

@@ -18,4 +18,3 @@ function magic_meh_builder(): void {
   $x = new Meh();
 }
 
-

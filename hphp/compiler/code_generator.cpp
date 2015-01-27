@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 #include <boost/format.hpp>
 #include <boost/scoped_array.hpp>
 #include <algorithm>
@@ -194,7 +194,7 @@ std::string CodeGenerator::getFormattedName(const std::string &file) {
   }
   string formatted = fn;
   free(fn);
-  int hash = hash_string(file.data(), file.size());
+  int hash = hash_string_unsafe(file.data(), file.size());
   formatted += boost::str(boost::format("%08x") % hash);
   return formatted;
 }

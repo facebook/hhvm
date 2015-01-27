@@ -3,7 +3,7 @@ ContainerTest::canMockClassesThatDescendFromInternalClasses
 ContainerTest::canMockClassesThatImplementSerializable
 .
 ContainerTest::canMockInternalClassesThatImplementSerializable
-FATAL
+.
 ContainerTest::testBlockForwardingToPartialObject
 .
 ContainerTest::testCallingSelfOnlyReturnsLastMockCreatedOrCurrentMockBeingProgrammedSinceTheyAreOneAndTheSame
@@ -727,7 +727,7 @@ Mockery_MockTest::testShouldAllowMockingProtectedMethodReturnsMockInstance
 NamedMockTest::itCreatesANamedMock
 .
 NamedMockTest::itCreatesPassesFurtherArgumentsJustLikeMock
-.
+FATAL
 NamedMockTest::itShouldThrowIfAttemptingToRedefineNamedMock
 .
 RecorderTest::testArgumentsAreMatchedExactlyUnderStrictMode

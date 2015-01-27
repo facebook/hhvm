@@ -1,41 +1,41 @@
 DOMComment
 object(DOMComment)#1 (18) {
-  ["length"]=>
-  int(0)
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["nodeType"]=>
-  int(8)
-  ["lastChild"]=>
-  NULL
   ["nodeName"]=>
   string(8) "#comment"
-  ["previousSibling"]=>
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(8)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
   NULL
   ["firstChild"]=>
   NULL
-  ["data"]=>
-  string(0) ""
-  ["childNodes"]=>
+  ["lastChild"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
+  ["previousSibling"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["data"]=>
+  string(0) ""
+  ["length"]=>
+  int(0)
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMComment in %s/test/quick/builtin_extensions.inc on line 8
@@ -102,42 +102,42 @@ A_DOMComment
 object(A_DOMComment)#2 (19) {
   ["___x"]=>
   NULL
-  ["length"]=>
-  int(0)
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["nodeType"]=>
-  int(8)
-  ["lastChild"]=>
-  NULL
   ["nodeName"]=>
   string(8) "#comment"
-  ["previousSibling"]=>
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(8)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
   NULL
   ["firstChild"]=>
   NULL
-  ["data"]=>
-  string(0) ""
-  ["childNodes"]=>
+  ["lastChild"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
+  ["previousSibling"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["data"]=>
+  string(0) ""
+  ["length"]=>
+  int(0)
 }
 
 Warning: Attempted to serialize unserializable builtin class A_DOMComment in %s/test/quick/builtin_extensions.inc on line 26

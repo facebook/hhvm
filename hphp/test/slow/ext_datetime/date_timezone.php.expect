@@ -20,3 +20,39 @@ string(16) "America/New_York"
 string(19) "America/Los_Angeles"
 string(15) "Pacific/Chatham"
 bool(true)
+array(5) {
+  ["ts"]=>
+  int(1000000)
+  ["time"]=>
+  string(24) "1970-01-12T05:46:40-0800"
+  ["offset"]=>
+  int(3600)
+  ["isdst"]=>
+  bool(true)
+  ["abbr"]=>
+  string(3) "BST"
+}
+array(5) {
+  ["ts"]=>
+  int(89172000)
+  ["time"]=>
+  string(24) "1972-10-28T19:00:00-0700"
+  ["offset"]=>
+  int(0)
+  ["isdst"]=>
+  bool(false)
+  ["abbr"]=>
+  string(3) "GMT"
+}
+array(5) {
+  ["ts"]=>
+  int(985482000)
+  ["time"]=>
+  string(24) "2001-03-24T17:00:00-0800"
+  ["offset"]=>
+  int(3600)
+  ["isdst"]=>
+  bool(true)
+  ["abbr"]=>
+  string(3) "BST"
+}

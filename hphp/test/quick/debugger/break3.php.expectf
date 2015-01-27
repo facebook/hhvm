@@ -27,6 +27,10 @@ Breakpoint 1 reached at TestNs\cls::pubObj() on line 13 of %s/break3.php
 
 variable
 $x = "test_break2"
+$this = TestNs\cls Object
+(
+)
+
 break clear all
 All breakpoints are cleared.
 break \TestNs\break8->pubObj()
@@ -74,6 +78,10 @@ Breakpoint 1 reached at TestNs\Nested\cls::pubObj() on line 29 of %s/break3.php
 
 variable
 $x = "test_break5"
+$this = TestNs\Nested\cls Object
+(
+)
+
 break clear all
 All breakpoints are cleared.
 continue

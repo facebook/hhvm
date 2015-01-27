@@ -11,6 +11,7 @@ var_dump(is_executable($initdir."/test/ok/../ok/ok.txt"));
 
 test_open_basedir_after("is_executable");
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once "open_basedir.inc";
 delete_directories();

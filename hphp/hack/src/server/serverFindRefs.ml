@@ -10,6 +10,8 @@
 
 open Utils
 
+type result = (string * Pos.absolute) list
+
 let add_ns name =
   if name.[0] = '\\' then name else "\\" ^ name
 
@@ -17,10 +19,9 @@ let strip_ns results =
   List.map begin fun (s, p) -> ((Utils.strip_ns s), p) end results
 
 let search class_names method_name include_defs files genv env =
-  let files_list = SSet.fold (fun x y -> x :: y) files [] in
   (* Get all the references to the provided method name and classes in the files *)
   let res = FindRefsService.find_references genv.ServerEnv.workers class_names
-      method_name include_defs files_list in
+      method_name include_defs env.ServerEnv.files_info files in
   strip_ns res
 
 let search_function function_name include_defs genv env =
@@ -62,5 +63,6 @@ let get_refs_with_defs action genv env =
 
 let go action genv env oc =
   let res = get_refs action false genv env in
-  Marshal.to_channel oc res [];
+  let res = rev_rev_map (fun (r, pos) -> (r, Pos.to_absolute pos)) res in
+  Marshal.to_channel oc (res : result) [];
   flush oc

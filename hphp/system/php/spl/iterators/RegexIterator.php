@@ -11,6 +11,7 @@ class RegexIterator extends FilterIterator
   const REPLACE = 4;
 
   const USE_KEY = 1;
+  const INVERT_MATCH = 2;
 
 
   /* Properties */
@@ -58,7 +59,7 @@ class RegexIterator extends FilterIterator
 
 
   /**
-   * ( excerpt from http://php.net/manual/en/regexiterator.construct.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.construct.php )
    *
    * Create a new RegexIterator which filters an Iterator using a regular
    * expression.
@@ -90,7 +91,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/regexiterator.accept.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.accept.php )
    *
    * Matches (string) RegexIterator::current() (or RegexIterator::key() if
    * the RegexIterator::USE_KEY flag is set) against the regular expression.
@@ -98,6 +99,10 @@ class RegexIterator extends FilterIterator
    * @return boolean TRUE if a match, FALSE otherwise.
    */
   public function accept() {
+    if (is_array(parent::current())) {
+      return false;
+    }
+
     $this->key     = parent::key();
     $this->current = parent::current();
 
@@ -109,52 +114,63 @@ class RegexIterator extends FilterIterator
 
     switch ($this->mode) {
       case self::MATCH:
-        return (preg_match($this->regex, $subject, $matches,
+        $ret = (preg_match($this->regex, $subject, $matches,
                            $this->pregFlags) > 0);
+        break;
       case self::GET_MATCH:
         $this->current = array();
 
-        return (preg_match($this->regex, $subject, $this->current,
+        $ret = (preg_match($this->regex, $subject, $this->current,
                            $this->pregFlags) > 0);
-
+        break;
       case self::ALL_MATCHES:
         $this->current = array();
 
-        preg_match_all($this->regex, $subject, $this->current,
+        $count = preg_match_all($this->regex, $subject, $this->current,
                        $this->pregFlags);
 
-        return count($this->current) > 0;
+        $ret = $count > 0;
+        break;
       case self::SPLIT:
         $this->current = preg_split($this->regex, $subject, null,
                                     $this->pregFlags);
 
-        return ($this->current && count($this->current) > 1);
-
+        $ret = ($this->current && count($this->current) > 1);
+        break;
       case self::REPLACE:
         $replace_count = 0;
         $result = preg_replace($this->regex, $this->replacement,
                                $subject, -1, $replace_count);
 
         if ($result === null || $replace_count == 0) {
-          return false;
+          $ret = false;
+          break;
         }
 
         if ($useKey) {
           $this->key = $result;
 
-          return true;
+          $ret = true;
+          break;
         }
 
         $this->current = $result;
 
-        return true;
+        $ret = true;
+        break;
+      default:
+        $ret = false;
+        break;
     }
-
-    return false;
+    if ($this->flags & self::INVERT_MATCH) {
+      return !$ret;
+    } else {
+      return $ret;
+    }
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/filteriterator.key.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/filteriterator.key.php )
    *
    * Get the current key.
    *
@@ -165,7 +181,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/filteriterator.current.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/filteriterator.current.php )
    *
    * Get the current element value.
    *
@@ -176,7 +192,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/regexiterator.getregex.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.getregex.php )
    *
    * Returns current regular expression.
    *
@@ -187,7 +203,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/regexiterator.getmode.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.getmode.php )
    *
    * Returns the operation mode, see RegexIterator::setMode() for the list
    * of operation modes.
@@ -199,7 +215,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/regexiterator.getflags.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.getflags.php )
    *
    * Returns the flags, see RegexIterator::setFlags() for a list of available
    * flags.
@@ -211,7 +227,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/regexiterator.getpregflags.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.getpregflags.php )
    *
    * Returns the regular expression flags, see RegexIterator::__construct()
    * for the list of flags.
@@ -223,7 +239,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/regexiterator.setmode.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.setmode.php )
    *
    * Sets the operation mode.
    *
@@ -250,7 +266,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/regexiterator.setflags.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.setflags.php )
    *
    * Sets the flags.
    *
@@ -265,7 +281,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://php.net/manual/en/regexiterator.setpregflags.php )
+   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.setpregflags.php )
    *
    * Sets the regular expression flags.
    *

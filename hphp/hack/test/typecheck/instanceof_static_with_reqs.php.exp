@@ -1,0 +1,10 @@
+object
+this<App \BaseField<T, >>
+App \INeedsFoo<[198]intersect(), >
+[227]intersect(App \INeedsFoo<[207]intersect(X), >, this<App \BaseField<T, >>)
+File "instanceof_static_with_reqs.php", line 31, characters 12-17:
+Invalid return type (Typing[4110])
+File "instanceof_static_with_reqs.php", line 7, characters 49-52:
+This is an object of type BaseField (compatible with the type 'this')
+File "instanceof_static_with_reqs.php", line 23, characters 27-35:
+It is incompatible with an object of type INeedsFoo

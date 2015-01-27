@@ -1,0 +1,444 @@
+Test begin
+--- getDocComment("f") ---
+string(35) "/**
+ * This is f's doc comment.
+ */"
+
+--- getStartLine("f") ---
+int(13)
+
+--- getEndLine("f") ---
+int(20)
+
+--- getFileName("f") ---
+string(%d) "%s/test/slow/lang/reflection.php"
+
+--- getName("f") ---
+string(1) "f"
+
+--- getNumberOfParameters("f") ---
+int(4)
+
+--- getNumberOfRequiredParameters("f") ---
+int(2)
+
+--- getParameters("f") ---
+array(4) {
+  [0]=>
+  object(ReflectionParameter)#2 (2) {
+    ["info"]=>
+    array(8) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(1) "a"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "a"
+  }
+  [1]=>
+  object(ReflectionParameter)#3 (2) {
+    ["info"]=>
+    array(9) {
+      ["index"]=>
+      int(1)
+      ["name"]=>
+      string(1) "b"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["ref"]=>
+      bool(true)
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "b"
+  }
+  [2]=>
+  object(ReflectionParameter)#4 (2) {
+    ["info"]=>
+    array(10) {
+      ["index"]=>
+      int(2)
+      ["name"]=>
+      string(1) "c"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(4) "NULL"
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(1) "c"
+  }
+  [3]=>
+  object(ReflectionParameter)#5 (2) {
+    ["info"]=>
+    array(10) {
+      ["index"]=>
+      int(3)
+      ["name"]=>
+      string(1) "d"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["function"]=>
+      string(1) "f"
+      ["nullable"]=>
+      bool(true)
+      ["default"]=>
+      array(3) {
+        [0]=>
+        int(1)
+        [1]=>
+        int(2)
+        [2]=>
+        string(11) "some string"
+      }
+      ["defaultText"]=>
+      string(26) "array(1, 2, SOME_CONSTANT)"
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(1) "d"
+  }
+}
+
+--- getStaticVariables("f") ---
+array(2) {
+  ["staticX"]=>
+  NULL
+  ["staticY"]=>
+  NULL
+}
+
+--- isInternal("f") ---
+bool(false)
+
+--- isUserDefined("f") ---
+bool(true)
+
+--- returnsReference("f") ---
+bool(true)
+
+--- export("f") ---
+string(%d) "/**
+ * This is f's doc comment.
+ */
+Function [ <user> function &f ] {
+  @@ %s/test/slow/lang/reflection.php 13 - 20
+
+  - Parameters [4] {
+    Parameter #0 [ <required> $a ]
+    Parameter #1 [ <required> &$b ]
+    Parameter #2 [ <optional> $c = NULL ]
+    Parameter #3 [ <optional> $d = array (
+    0 => 1,
+    1 => 2,
+    2 => 'some string',
+  ) ]
+  }
+}
+"
+
+--- invokeArgs("f") ---
+In f()
+int(5)
+In f()
+int(6)
+
+--- getStaticVariables("f") ---
+array(2) {
+  ["staticX"]=>
+  int(6)
+  ["staticY"]=>
+  NULL
+}
+
+--- invoke("g") ---
+In g(a, b, some string)
+NULL
+In g(a, b, some string)
+NULL
+
+--- export("g") ---
+string(%d) "/**
+ * This is g's doc comment.
+ */
+Function [ <user> function g ] {
+  @@ %s/test/slow/lang/reflection.php 92 - 94
+
+  - Parameters [3] {
+    Parameter #0 [ <optional> $a = NULL ]
+    Parameter #1 [ <optional> $b = array (
+    0 => 1,
+    1 => 2,
+    2 => 3,
+  ) ]
+    Parameter #2 [ <optional> $c = 'some string' ]
+  }
+}
+"
+
+--- export() ---
+string(%d) "/**
+ * This is B's doc comment.
+ */
+Class [ <user> class B extends A implements I, K, H, J ] {
+  @@ %s/test/slow/lang/reflection.php 131-147
+
+  - Constants [2] {
+    Constant [ string C0 {B::C0} ]
+    Constant [ string C1 {B::C1} ]
+  }
+
+  - Static properties [3] {
+    Property [ public static $s0 ]
+    Property [ public static $s1 ]
+    Property [ public static $s2 ]
+  }
+
+  - Static methods [2] {
+    Method [ <user> static public method smethB0 ] {
+      @@ %s/test/slow/lang/reflection.php 141 - 141
+    }
+    Method [ <user> static private method smethB1 ] {
+      @@ %s/test/slow/lang/reflection.php 142 - 142
+    }
+  }
+
+  - Properties [4] {
+    Property [ <default> private $p0 ]
+    Property [ <default> protected $p1 ]
+    Property [ <default> public $p2 ]
+    Property [ <default> public $p3 ]
+  }
+
+  - Methods [6] {
+    Method [ <user, implements I> public method methI ] {
+      @@ %s/test/slow/lang/reflection.php 143 - 143
+    }
+    Method [ <user, implements J> public method methJ ] {
+      @@ %s/test/slow/lang/reflection.php 144 - 144
+    }
+    Method [ <user, implements K> public method methK ] {
+      @@ %s/test/slow/lang/reflection.php 145 - 145
+    }
+    Method [ <user> private method methB ] {
+      @@ %s/test/slow/lang/reflection.php 146 - 146
+    }
+    Method [ <user, inherits A> public method methH ] {
+      @@ %s/test/slow/lang/reflection.php 125 - 125
+    }
+    Method [ <user, inherits A> protected method methA ] {
+      @@ %s/test/slow/lang/reflection.php 126 - 126
+    }
+  }
+}
+"
+
+--- getConstant() ---
+string(5) "B::C0"
+string(5) "B::C1"
+
+--- getConstants() ---
+array(2) {
+  ["C0"]=>
+  string(5) "B::C0"
+  ["C1"]=>
+  string(5) "B::C1"
+}
+
+--- getConstructor() ---
+NULL
+
+--- getDocComment() ---
+string(35) "/**
+ * This is B's doc comment.
+ */"
+
+--- getStartLine() ---
+int(131)
+
+--- getEndLine() ---
+int(147)
+
+--- getFileName() ---
+string(%d) "%s/test/slow/lang/reflection.php"
+
+--- getInterfaceNames() ---
+array(4) {
+  [0]=>
+  string(1) "I"
+  [1]=>
+  string(1) "K"
+  [2]=>
+  string(1) "H"
+  [3]=>
+  string(1) "J"
+}
+
+--- getInterfaces() ---
+
+--- getMethod() ---
+
+--- getMethods() ---
+
+--- getModifiers() ---
+int(0)
+
+--- getName() ---
+string(1) "B"
+
+--- getParentClass() ---
+object(ReflectionClass)#43 (2) {
+  ["name"]=>
+  string(1) "A"
+  ["obj":"ReflectionClass":private]=>
+  NULL
+}
+string(1) "A"
+
+--- getProperties() ---
+
+--- getProperty() ---
+
+--- getStaticProperties() ---
+
+--- setStaticPropertyValue() ---
+NULL
+
+--- getStaticPropertyValue() ---
+string(16) "new value for s0"
+NULL
+
+--- hasConstant() ---
+bool(true)
+bool(false)
+
+--- hasMethod() ---
+bool(true)
+bool(false)
+
+--- hasProperty() ---
+bool(true)
+bool(false)
+
+--- implementsInterface() ---
+bool(true)
+bool(false)
+
+--- isAbstract() ---
+bool(false)
+
+--- isFinal() ---
+bool(false)
+
+--- isInstance() ---
+bool(true)
+bool(false)
+
+--- isInstantiable() ---
+bool(true)
+
+--- isInterface() ---
+bool(false)
+
+--- isInternal() ---
+bool(false)
+
+--- isIterateable() ---
+bool(false)
+
+--- isSubclassOf() ---
+bool(true)
+bool(false)
+
+--- isUserDefined() ---
+bool(true)
+
+--- newInstance() ---
+object(B)#55 (4) {
+  ["p0":"B":private]=>
+  int(1)
+  ["p1":protected]=>
+  int(2)
+  ["p2"]=>
+  int(3)
+  ["p3"]=>
+  NULL
+}
+
+--- newInstanceArgs() ---
+object(B)#55 (4) {
+  ["p0":"B":private]=>
+  int(1)
+  ["p1":protected]=>
+  int(2)
+  ["p2"]=>
+  int(3)
+  ["p3"]=>
+  NULL
+}
+
+--- get_defined_functions() ---
+array(2) {
+  [0]=>
+  string(1) "f"
+  [1]=>
+  string(1) "g"
+}
+--- get_defined_constants() ---
+SOME_CONSTANT: some string
+SOME_CONSTANT: some string
+ANOTHER_CONSTANT: some other string
+--- get_declared_classes() ---
+Found class A
+Found class B
+Found class C
+--- get_declared_interfaces() ---
+Found interface H
+Found interface I
+Found interface J
+Found interface K
+Found interface L
+Test end

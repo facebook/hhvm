@@ -1,0 +1,97 @@
+--------- TRUE -------------
+bool(true)
+bool(false)
+--------- NULL -------------
+bool(false)
+bool(false)
+--------- TRUE, 12.3, NULL -------------
+bool(true)
+bool(false)
+--------- undefined parameter -------------
+
+Warning: %s
+
+Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_unset.php on line 36
+NULL
+bool(false)
+bool(false)
+NULL
+bool(false)
+bool(false)
+int(10)
+bool(true)
+bool(false)
+---------- dynamic property ------------
+bool(false)
+bool(true)
+bool(false)
+Inside X2::__isset with $name m
+bool(false)
+Inside X2::__unset with $name m
+Inside X2::__isset with $name m
+bool(false)
+---------- unsetting inside a function (global) ------------
+bool(true)
+bool(false)
+bool(true)
+---------- unsetting inside a function ($GLOBALS) ------------
+bool(true)
+bool(false)
+bool(false)
+---------- unsetting inside a function (pass-by-ref) ------------
+bool(true)
+bool(false)
+bool(true)
+int(10)
+bool(true)
+int(20)
+---------- unsetting inside a function (static) ------------
+count = 1
+bool(true)
+bool(false)
+count = 2
+bool(true)
+bool(false)
+---------- unsetting a property ------------
+object(C)#3 (1) {
+  ["prop"]=>
+  int(10)
+}
+bool(true)
+bool(false)
+object(C)#3 (0) {
+}
+-----------
+object(C)#4 (1) {
+  ["prop"]=>
+  int(10)
+}
+bool(true)
+---------- unsetting $this ------------
+Inside D::f
+bool(true)
+bool(false)
+Inside D::g
+bool(true)
+---------- unsetting array elements ------------
+Array
+(
+    [0] => 10
+    [1] => 20
+    [xx] => 30
+)
+Array
+(
+    [0] => 10
+    [xx] => 30
+)
+Array
+(
+    [0] => 10
+    [xx] => 30
+)
+Array
+(
+    [0] => 10
+    [xx] => 30
+)

@@ -36,7 +36,7 @@
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/parser/hphp.tab.hpp"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 using namespace HPHP;
 
@@ -557,71 +557,4 @@ ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr FunctionCall::postOptimize(AnalysisResultConstPtr ar) {
-  if (m_class) updateClassName();
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-
-TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
-                                           TypePtr type, bool coerce,
-                                           FunctionScopePtr func,
-                                           bool arrayParams) {
-#ifdef HPHP_DETAILED_TYPE_INF_ASSERT
-  assert(func->hasUser(getScope(), BlockScope::UseKindCaller));
-#endif /* HPHP_DETAILED_TYPE_INF_ASSERT */
-  ConstructPtr self = shared_from_this();
-  TypePtr frt;
-  {
-    TRY_LOCK(func);
-    func->getInferTypesMutex().assertOwnedBySelf();
-    assert(!func->inVisitScopes() || getScope() == func);
-    frt = func->getReturnType();
-  }
-
-  // fix return type for generators and async functions here, keep the
-  // infered return type in function scope to allow further optimizations
-  if (func->isGenerator()) {
-    frt = Type::GetType(Type::KindOfObject, "Generator");
-  } else if (func->isAsync()) {
-    frt = Type::GetType(Type::KindOfObject, "WaitHandle");
-  }
-
-  m_voidUsed = false;
-  if (!frt) {
-    m_voidReturn = true;
-    setActualType(TypePtr());
-    if (!isUnused() && !type->is(Type::KindOfAny)) {
-      if (!hasContext(ReturnContext) &&
-          !func->isFirstPass() && !func->isAbstract()) {
-        if (Option::WholeProgram || !func->getContainingClass() ||
-            func->isStatic() || func->isFinal() || func->isPrivate()) {
-          m_voidUsed = true;
-        }
-      }
-      if (!Type::IsMappedToVariant(type)) {
-        setExpectedType(type);
-      }
-    }
-  } else {
-    m_voidReturn = false;
-    type = checkTypesImpl(ar, type, frt, coerce);
-    assert(m_actualType);
-  }
-  if (arrayParams) {
-    m_extraArg = 0;
-    (*m_params)[0]->inferAndCheck(ar, Type::Array, false);
-  } else {
-    m_extraArg = func->inferParamTypes(ar, self, m_params, m_valid);
-  }
-  m_variableArgument = func->allowsVariableArguments();
-  if (m_valid) {
-    m_implementedType.reset();
-  } else {
-    m_implementedType = Type::Variant;
-  }
-  assert(type);
-
-  return type;
-}

@@ -41,7 +41,7 @@ let remove_function_arg_visit toks parsed_line (k, _) meth =
     match parsed_line.arg with
     | Argument arg ->
       (* Find the arg'th parameter. The f_params list contains other tokens, so
-       * we need to count the occurances of Left3, which represents an actual
+       * we need to count the occurrences of Left3, which represents an actual
        * argument definition. *)
       let (_, params, _) = meth.A.f_params in
       let rec find n = function
@@ -61,7 +61,7 @@ let remove_function_arg_visit toks parsed_line (k, _) meth =
       | None, _ ->
         (* This is the only place we want to raise Already_mutated -- everywhere
          * else should be impossible, i.e., it indicates that the log message
-         * refers to a function or paramter which doesn't exist at all. Here,
+         * refers to a function or parameter which doesn't exist at all. Here,
          * the parameter exists, we just don't have a soft typehint marker
          * there. Notably, we should never have a typehint marker without a soft
          * typehint marker or vice versa, so raising Impossible below is

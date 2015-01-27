@@ -14,5 +14,10 @@ function f((function(T): T) $g, T $x): T {
 }
 
 function test(): void {
-  f(function($x) { return $x + 1.0; }, 0);
+  f(
+    function ($x) {
+      return $x + 1.0;
+    },
+    0,
+  );
 }

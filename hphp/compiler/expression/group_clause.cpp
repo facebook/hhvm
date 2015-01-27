@@ -79,13 +79,6 @@ void GroupClause::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr GroupClause::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                bool coerce) {
-  m_coll->inferAndCheck(ar, Type::Some, false);
-  m_key->inferAndCheck(ar, Type::Some, false);
-  return Type::Object;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void GroupClause::outputCodeModel(CodeGenerator &cg) {

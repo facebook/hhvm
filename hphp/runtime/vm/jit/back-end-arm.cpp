@@ -16,9 +16,11 @@
 
 #include "hphp/runtime/vm/jit/back-end-arm.h"
 
+#include <iostream>
+
+#include "hphp/vixl/a64/disasm-a64.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 #include "hphp/util/text-color.h"
-#include "hphp/vixl/a64/disasm-a64.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -31,6 +33,11 @@
 #include "hphp/runtime/vm/jit/unwind-arm.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
+#include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 
 namespace HPHP { namespace jit { namespace arm {
 
@@ -61,16 +68,17 @@ struct BackEnd : public jit::BackEnd {
     return PhysReg(arm::rVmFp);
   }
 
-  Constraint srcConstraint(const IRInstruction& inst, unsigned i) override {
-    return arm::srcConstraint(inst, i);
+  PhysReg rVmTl() override {
+    return PhysReg(arm::rVmTl);
   }
 
-  Constraint dstConstraint(const IRInstruction& inst, unsigned i) override {
-    return arm::dstConstraint(inst, i);
+  bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
+    return false;
   }
 
-  RegPair precolorSrc(const IRInstruction& inst, unsigned i) override;
-  RegPair precolorDst(const IRInstruction& inst, unsigned i) override;
+  bool loadsCell(const IRInstruction& inst) override {
+    return false;
+  }
 
 #define CALLEE_SAVED_BARRIER() \
   asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", \
@@ -81,14 +89,14 @@ struct BackEnd : public jit::BackEnd {
    * A partial equivalent of enterTCHelper, used to set up the ARM simulator.
    */
   uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
-                                 uintptr_t saved_rStashedAr) {
+                                 ActRec* saved_rStashedAr) {
     sim.   set_xreg(arm::rGContextReg.code(), g_context.getNoCheck());
 
     auto& vmRegs = vmRegsUnsafe();
     sim.   set_xreg(arm::rVmFp.code(), vmRegs.fp);
     sim.   set_xreg(arm::rVmSp.code(), vmRegs.stack.top());
     sim.   set_xreg(arm::rVmTl.code(), RDS::tl_base);
-    sim.   set_xreg(arm::rStashedAR.code(), saved_rStashedAr);
+    sim.   set_xreg(arm::rStashedAR.code(), uintptr_t(saved_rStashedAr));
 
     // Leave space for register spilling and MInstrState.
     sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
@@ -107,11 +115,10 @@ struct BackEnd : public jit::BackEnd {
   }
 
  public:
-  void enterTCHelper(TCA start, TReqInfo& info) override {
+  void enterTCHelper(TCA start, ActRec* stashedAR) override {
     // This is a pseudo-copy of the logic in enterTCHelper: it sets up the
     // simulator's registers and stack, runs the translation, and gets the
     // necessary information out of the registers when it's done.
-
     vixl::PrintDisassembler disasm(std::cout);
     vixl::Decoder decoder;
     if (getenv("ARM_DISASM")) {
@@ -129,16 +136,14 @@ struct BackEnd : public jit::BackEnd {
     g_context->m_activeSims.push_back(&sim);
     SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
 
-    DEBUG_ONLY auto spOnEntry =
-      setupSimRegsAndStack(sim, info.saved_rStashedAr);
+    DEBUG_ONLY auto spOnEntry = setupSimRegsAndStack(sim, stashedAR);
 
-    // The handshake is different in the case of REQ_BIND_CALL. The code we're
-    // jumping to expects to find a return address in x30, and a saved return
-    // address on the stack.
-    if (info.requestNum == REQ_BIND_CALL) {
+    // The handshake is different when entering at a func prologue. The code
+    // we're jumping to expects to find a return address in x30, and a saved
+    // return address on the stack.
+    if (stashedAR) {
       // Put the call's return address in the link register.
-      auto* ar = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
-      sim.set_lr(ar->m_savedRip);
+      sim.set_lr(stashedAR->m_savedRip);
     }
 
     std::cout.flush();
@@ -147,24 +152,8 @@ struct BackEnd : public jit::BackEnd {
 
     assert(sim.sp() == spOnEntry);
 
-    info.requestNum = sim.xreg(0);
-    info.args[0] = sim.xreg(1);
-    info.args[1] = sim.xreg(2);
-    info.args[2] = sim.xreg(3);
-    info.args[3] = sim.xreg(4);
-    info.args[4] = sim.xreg(5);
-    info.saved_rStashedAr = sim.xreg(arm::rStashedAR.code());
-
-    info.stubAddr = reinterpret_cast<TCA>(sim.xreg(arm::rAsm.code()));
-  }
-
-  jit::CodeGenerator* newCodeGenerator(const IRUnit& unit,
-                                       CodeBlock& mainCode,
-                                       CodeBlock& coldCode,
-                                       CodeBlock& frozenCode,
-                                       CodegenState& state) override {
-    return new arm::CodeGenerator(unit, mainCode, coldCode,
-                                  frozenCode, state);
+    vmRegsUnsafe().fp = (ActRec*)sim.xreg(arm::rVmFp.code());
+    vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(arm::rVmSp.code());
   }
 
   void moveToAlign(CodeBlock& cb,
@@ -184,14 +173,14 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
-                     const SrcKey& sk) override {
+                     SrcKey sk) override {
     if (RuntimeOption::EvalJitTransCounters) {
       vixl::MacroAssembler a { mainCode };
       arm::emitTransCounterInc(a);
     }
     // This jump won't be smashed, but a far jump on ARM requires the same code
     // sequence.
-    mcg->backEnd().emitSmashableJump(
+    emitSmashableJump(
       mainCode,
       emitServiceReq(coldCode, REQ_INTERPRET, sk.offset()),
       CC_None
@@ -234,34 +223,6 @@ struct BackEnd : public jit::BackEnd {
 
   void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
     // TODO(2967396) implement properly
-  }
-
-  void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) override {
-    // This function always emits a smashable jump but every jump on ARM is
-    // smashable so it's free.
-    emitJumpToBlock(cb, target, CC_None, state);
-  }
-
-  void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) override {
-    auto dest = cb.frontier();
-    auto jump = reinterpret_cast<TCA>(state.patches[block]);
-
-    while (jump && jump != kEndOfTargetChain) {
-      auto nextIfJmp = mcg->backEnd().jmpTarget(jump);
-      auto nextIfJcc = mcg->backEnd().jccTarget(jump);
-
-      // Exactly one of them must be non-nullptr
-      assert(!(nextIfJmp && nextIfJcc));
-      assert(nextIfJmp || nextIfJcc);
-
-      if (nextIfJmp) {
-        mcg->backEnd().smashJmp(jump, dest);
-        jump = nextIfJmp;
-      } else {
-        mcg->backEnd().smashJcc(jump, dest);
-        jump = nextIfJcc;
-      }
-    }
   }
 
   bool isSmashable(Address frontier, int nBytes, int offset = 0) override {
@@ -371,6 +332,10 @@ struct BackEnd : public jit::BackEnd {
     }
   }
 
+  TCA smashableCallFromReturn(TCA retAddr) override {
+    return retAddr - 8;
+  }
+
   void emitSmashableCall(CodeBlock& cb, TCA dest) override {
     vixl::MacroAssembler a { cb };
     vixl::Label afterData;
@@ -428,6 +393,10 @@ struct BackEnd : public jit::BackEnd {
     return *reinterpret_cast<TCA*>(dest);
   }
 
+  ConditionCode jccCondCode(TCA) override {
+    not_implemented();
+  }
+
   TCA callTarget(TCA call) override {
     using namespace vixl;
     Instruction* ldr = Instruction::Cast(call);
@@ -473,7 +442,11 @@ struct BackEnd : public jit::BackEnd {
     a.   bind (&after);
   }
 
-  void streamPhysReg(std::ostream& os, PhysReg& reg) override {
+  void streamPhysReg(std::ostream& os, PhysReg reg) override {
+    if (reg.isSF()) {
+      os << "statusFlags";
+      return;
+    }
     auto prefix = reg.isGP() ? (vixl::Register(reg).size() == vixl::kXRegSize
                                 ? 'x' : 'w')
                   : (vixl::FPRegister(reg).size() == vixl::kSRegSize
@@ -493,18 +466,107 @@ struct BackEnd : public jit::BackEnd {
       dec.Decode(Instruction::Cast(begin));
     }
   }
+
+  void genCodeImpl(IRUnit& unit, AsmInfo*) override;
 };
 
 std::unique_ptr<jit::BackEnd> newBackEnd() {
   return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
 }
 
-RegPair BackEnd::precolorSrc(const IRInstruction& inst, unsigned i) {
-  return InvalidRegPair;
+static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {
+  FTRACE(6, "genBlock: {}\n", block->id());
+  CodeGenerator cg(state, v, vc);
+  size_t hhir_count{0};
+  for (IRInstruction& inst : *block) {
+    hhir_count++;
+    if (inst.is(EndGuards)) state.pastGuards = true;
+    v.setOrigin(&inst);
+    vc.setOrigin(&inst);
+    cg.cgInst(&inst);
+  }
+  return hhir_count;
 }
 
-RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
-  return InvalidRegPair;
+void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
+  Timer _t(Timer::codeGen);
+  CodeBlock& mainCodeIn   = mcg->code.main();
+  CodeBlock& coldCodeIn   = mcg->code.cold();
+  CodeBlock* frozenCode   = &mcg->code.frozen();
+
+  CodeBlock mainCode;
+  CodeBlock coldCode;
+  /*
+   * Use separate code blocks, so that attempts to use the mcg's
+   * code blocks directly will fail (eg by overwriting the same
+   * memory being written through these locals).
+   */
+  coldCode.init(coldCodeIn.frontier(), coldCodeIn.available(),
+                coldCodeIn.name().c_str());
+  mainCode.init(mainCodeIn.frontier(), mainCodeIn.available(),
+                mainCodeIn.name().c_str());
+
+  if (frozenCode == &coldCodeIn) {
+    frozenCode = &coldCode;
+  }
+  auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
+  auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
+  size_t hhir_count{0};
+
+  {
+    mcg->code.lock();
+    mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
+
+    SCOPE_EXIT {
+      mcg->cgFixups().setBlocks(nullptr, nullptr, nullptr);
+      mcg->code.unlock();
+    };
+
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitTraceCall(mainCode, unit.bcOff());
+    }
+
+    CodegenState state(unit, asmInfo, *frozenCode);
+    auto const blocks = rpoSortCfg(unit);
+    Vasm vasm;
+    auto& vunit = vasm.unit();
+    // create the initial set of vasm numbered the same as hhir blocks.
+    for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
+      state.labels[i] = vunit.makeBlock(AreaIndex::Main);
+    }
+    // create vregs for all relevant SSATmps
+    assignRegs(unit, vunit, state, blocks, this);
+    vunit.entry = state.labels[unit.entry()];
+    vasm.main(mainCode);
+    vasm.cold(coldCode);
+    vasm.frozen(*frozenCode);
+    for (auto block : blocks) {
+      auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
+               block->hint() == Block::Hint::Unused ? vasm.frozen() :
+               vasm.main();
+      FTRACE(6, "genBlock {} on {}\n", block->id(),
+             area_names[(unsigned)v.area()]);
+      auto b = state.labels[block];
+      vunit.blocks[b].area = v.area();
+      v.use(b);
+      hhir_count += genBlock(state, v, vasm.cold(), block);
+      assert(v.closed());
+      assert(vasm.main().empty() || vasm.main().closed());
+      assert(vasm.cold().empty() || vasm.cold().closed());
+      assert(vasm.frozen().empty() || vasm.frozen().closed());
+    }
+    printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
+    assert(check(vunit));
+    vasm.finishARM(arm::abi, state.asmInfo);
+  }
+
+  assert(coldCodeIn.frontier() == coldStart);
+  assert(mainCodeIn.frontier() == mainStart);
+  coldCodeIn.skip(coldCode.frontier() - coldCodeIn.frontier());
+  mainCodeIn.skip(mainCode.frontier() - mainCodeIn.frontier());
+  if (asmInfo) {
+    printUnit(kCodeGenLevel, unit, " after code gen ", asmInfo);
+  }
 }
 
 }}}

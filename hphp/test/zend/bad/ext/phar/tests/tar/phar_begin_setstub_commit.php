@@ -21,6 +21,7 @@ include 'phar://brandnewphar.phar/b.php';
 var_dump($p->getStub());
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/brandnewphar.phar.tar');
 ?>

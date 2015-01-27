@@ -5,7 +5,7 @@ function get_declared_user_traits() {
   foreach (get_declared_traits() as $v) {
     // exclude system traits
     $rc = new ReflectionClass($v);
-    if ('systemlib.php' !== basename($rc->getFileName())) {
+    if ($rc->getFileName() !== false) {
       $ret[] = $v;
     }
   }

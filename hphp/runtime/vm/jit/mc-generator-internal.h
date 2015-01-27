@@ -21,11 +21,12 @@
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
-
-static const DataType BitwiseKindOfString = KindOfString;
+///////////////////////////////////////////////////////////////////////////////
 
 // Generate an if-then block into a.  thenBlock is executed if cc is true.
 template <class Then>
@@ -37,11 +38,10 @@ void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
 }
 
 template <class Then>
-void ifThen(x64::Vout& v, ConditionCode cc, Then thenBlock) {
-  using namespace x64;
+void ifThen(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock) {
   auto then = v.makeBlock();
   auto done = v.makeBlock();
-  v << jcc{cc, {done, then}};
+  v << jcc{cc, sf, {done, then}};
   v = then;
   thenBlock(v);
   if (!v.closed()) v << jmp{done};
@@ -181,12 +181,12 @@ void emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  testb(src, toByte(tvOp));
 }
 
-inline void emitTestTVType(x64::Vout& v, Immed s0, x64::Vreg s1) {
-  v << x64::testbi{s0, s1};
+inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
+  v << testbi{s0, s1, sf};
 }
 
-inline void emitTestTVType(x64::Vout& v, Immed s0, x64::Vptr s1) {
-  v << x64::testbim{s0, s1};
+inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
+  v << testbim{s0, s1, sf};
 }
 
 template<typename SrcType, typename OpndType>
@@ -196,8 +196,8 @@ emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  loadzbl(src, toReg32(tvOp));
 }
 
-inline void emitLoadTVType(x64::Vout& v, x64::Vptr mem, x64::Vreg d) {
-  v << x64::loadzbl{mem, d};
+inline void emitLoadTVType(Vout& v, Vptr mem, Vreg d) {
+  v << loadzbq{mem, d};
 }
 
 template<typename SrcType, typename OpndType>
@@ -205,12 +205,12 @@ void emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  cmpb(src, toByte(tvOp));
 }
 
-inline void emitCmpTVType(x64::Vout& v, Immed s0, x64::Vptr s1) {
-  v << x64::cmpbim{s0, s1};
+inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
+  v << cmpbim{s0, s1, sf};
 }
 
-inline void emitCmpTVType(x64::Vout& v, Immed s0, x64::Vreg s1) {
-  v << x64::cmpbi{s0, s1};
+inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
+  v << cmpbi{s0, s1, sf};
 }
 
 template<typename DestType, typename OpndType>
@@ -218,13 +218,13 @@ void emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
   a.  storeb(toByte(tvOp), dest);
 }
 
-inline void emitStoreTVType(x64::Vout& v, x64::Vreg src, x64::Vptr dest) {
-  v << x64::storeb{src, dest};
+inline void emitStoreTVType(Vout& v, Vreg src, Vptr dest) {
+  v << storeb{src, dest};
 }
 
 inline void
-emitStoreTVType(x64::Vout& v, DataType src, x64::Vptr dest) {
-  v << x64::storebim{src, dest};
+emitStoreTVType(Vout& v, DataType src, Vptr dest) {
+  v << storebi{src, dest};
 }
 
 // emitDeref --
@@ -239,18 +239,6 @@ static inline void
 emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
   // src is a RefData, dest will be m_data field of inner gizmoom.
   a.    loadq (src[TVOFF(m_data)], dest);
-}
-
-inline void emitDerefIfVariant(x64::Vout& v, x64::Vreg reg) {
-  emitCmpTVType(v, KindOfRef, reg[TVOFF(m_type)]);
-  if (RefData::tvOffset() == 0) {
-    v << x64::cloadq{CC_E, reg[TVOFF(m_data)], reg};
-  } else {
-    ifThen(v, CC_E, [&](x64::Vout& v) {
-      v << x64::loadq{reg[TVOFF(m_data)], reg};
-      v << x64::addqi{RefData::tvOffset(), reg, reg};
-    });
-  }
 }
 
 // NB: leaves count field unmodified. Does not store to m_data if type
@@ -296,6 +284,7 @@ inline void emitPopRetIntoActRec(X64Assembler& a) {
   a.    pop  (x64::rStashedAR[AROFF(m_savedRip)]);
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }}
 
 #endif

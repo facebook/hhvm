@@ -45,6 +45,7 @@ TypePtr Type::Numeric     (new Type(Type::KindOfNumeric     ));
 TypePtr Type::PlusOperand (new Type(Type::KindOfPlusOperand ));
 TypePtr Type::Primitive   (new Type(Type::KindOfPrimitive   ));
 TypePtr Type::Sequence    (new Type(Type::KindOfSequence    ));
+TypePtr Type::ArrayKey    (new Type(Type::KindOfArrayKey    ));
 
 TypePtr Type::AutoSequence(new Type(Type::KindOfAutoSequence));
 TypePtr Type::AutoObject  (new Type(Type::KindOfAutoObject  ));
@@ -70,6 +71,7 @@ void Type::InitTypeHintMap() {
   // Type::Numeric doesn't include numeric strings; this is intentional
   s_HHTypeHintTypes["HH\\num"]      = Type::Numeric;
   s_HHTypeHintTypes["HH\\resource"] = Type::Resource;
+  s_HHTypeHintTypes["HH\\arraykey"] = Type::ArrayKey;
   s_HHTypeHintTypes["callable"] = Type::Variant;
 }
 
@@ -119,6 +121,7 @@ TypePtr Type::GetType(KindOf kindOf, const std::string &clsname /* = "" */) {
   case KindOfObject:      return Type::Object;
   case KindOfResource:    return Type::Resource;
   case KindOfNumeric:     return Type::Numeric;
+  case KindOfArrayKey:    return Type::ArrayKey;
   case KindOfPrimitive:   return Type::Primitive;
   case KindOfPlusOperand: return Type::PlusOperand;
   case KindOfSequence:    return Type::Sequence;
@@ -624,33 +627,6 @@ ClassScopePtr Type::getClass(AnalysisResultConstPtr ar,
   return cls;
 }
 
-DataType Type::getDataType() const {
-  switch (m_kindOf) {
-    case KindOfBoolean:     return HPHP::KindOfBoolean;
-    case KindOfInt32:
-    case KindOfInt64:       return HPHP::KindOfInt64;
-    case KindOfDouble:      return HPHP::KindOfDouble;
-    case KindOfString:      return HPHP::KindOfString;
-    case KindOfArray:       return HPHP::KindOfArray;
-    case KindOfObject:      return HPHP::KindOfObject;
-    case KindOfResource:    return HPHP::KindOfResource;
-    case KindOfNumeric:
-    case KindOfPrimitive:
-    case KindOfPlusOperand:
-    case KindOfSequence:
-    default:                return HPHP::KindOfUnknown;
-  }
-}
-
-// This is similar to getDataType() except that it returns
-// HPHP::KindOfNull for KindOfVoid;
-DataType Type::getHhvmDataType() const {
-  switch (m_kindOf) {
-    case KindOfVoid:        return HPHP::KindOfNull;
-    default:                return getDataType();
-  }
-}
-
 std::string Type::getPHPName() {
   switch (m_kindOf) {
   case KindOfArray:       return "array";
@@ -676,6 +652,7 @@ std::string Type::toString() const {
   case KindOfObject:      return string("Object - ") + m_name;
   case KindOfResource:    return "Resource";
   case KindOfNumeric:     return "Numeric";
+  case KindOfArrayKey:    return "ArrayKey";
   case KindOfPrimitive:   return "Primitive";
   case KindOfPlusOperand: return "PlusOperand";
   case KindOfSequence:    return "Sequence";
@@ -725,6 +702,7 @@ void Type::serialize(JSON::DocTarget::OutputStream &out) const {
   }
   case KindOfResource:    s = "resource"; break;
   case KindOfNumeric:     s = "numeric"; break;
+  case KindOfArrayKey:    s = "arraykey"; break;
   case KindOfPrimitive:   s = "primitive"; break;
   case KindOfPlusOperand: s = "any"; break;
   case KindOfSequence:    s = "sequence"; break;

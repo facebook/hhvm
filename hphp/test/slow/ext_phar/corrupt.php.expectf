@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 
 Fatal error: Uncaught exception 'PharException' with message 'phar has a broken signature' in :
 Stack trace:

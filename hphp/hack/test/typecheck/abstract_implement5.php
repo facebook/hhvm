@@ -26,5 +26,7 @@ abstract class AClass {
 }
 
 class CClass extends AClass {
-  public function foo(IFace<CClass> $x): CClass { return new CClass(); }
+  public function foo(IFace<CClass> $x): CClass {
+    return new CClass();
+  }
 }

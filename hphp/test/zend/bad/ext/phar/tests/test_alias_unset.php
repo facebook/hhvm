@@ -27,5 +27,6 @@ var_dump($phar2->getAlias());
 $a = file_get_contents($pname . '/file1.txt'); // this fails because $fname2 ref exists
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php'); ?>

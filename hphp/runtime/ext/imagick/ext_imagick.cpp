@@ -19,7 +19,8 @@
 
 #include <vector>
 
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 using std::pair;
 using std::string;
@@ -97,11 +98,11 @@ void imagickReadOp(MagickWand* wand,
   if (isMagickPseudoFormat(path, 'R')) {
     realpath = path;
   } else {
-    auto var = f_realpath(path);
+    auto var = HHVM_FN(realpath)(path);
     realpath = var.isString() ? var.toString() : String();
     if (realpath.empty() ||
-        !f_is_file(realpath) ||
-        !f_is_readable(realpath)) {
+        !HHVM_FN(is_file)(realpath) ||
+        !HHVM_FN(is_readable)(realpath)) {
       realpath.reset();
     }
   }
@@ -133,16 +134,16 @@ void imagickWriteOp(MagickWand* wand,
     realpath = path;
   } else {
     static const int PHP_PATHINFO_DIRNAME = 1;
-    String dirname = f_pathinfo(path, PHP_PATHINFO_DIRNAME).toString();
-    if (!f_is_dir(dirname)) {
+    String dirname = HHVM_FN(pathinfo)(path, PHP_PATHINFO_DIRNAME).toString();
+    if (!HHVM_FN(is_dir)(dirname)) {
       // nothing to do here
-    } else if (!f_is_file(path)) {
-      if (f_is_writable(dirname)) {
+    } else if (!HHVM_FN(is_file)(path)) {
+      if (HHVM_FN(is_writable)(dirname)) {
         realpath = path;
       }
     } else {
-      if (f_is_writable(path)) {
-        realpath = f_realpath(path).toString();
+      if (HHVM_FN(is_writable)(path)) {
+        realpath = HHVM_FN(realpath)(path).toString();
       }
     }
   }
@@ -317,7 +318,7 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
 //////////////////////////////////////////////////////////////////////////////
 // ImagickExtension
 ImagickExtension::ImagickExtension() :
-  Extension("imagick") {
+  Extension("imagick", "3.2.0b2") {
 }
 
 void ImagickExtension::moduleInit() {

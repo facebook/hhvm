@@ -1,0 +1,4 @@
+File "capitalization4.php--f2.php", line 4, characters 10-18:
+Name already bound: cAmelCase (Naming[2012])
+File "capitalization4.php--f1.php", line 4, characters 10-18:
+Previous definition CamelCase differs only in capitalization 

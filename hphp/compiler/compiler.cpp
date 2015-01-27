@@ -27,7 +27,6 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/json.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/db-conn.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-util.h"
@@ -56,6 +55,7 @@
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <exception>
 
 using namespace boost::program_options;
@@ -95,7 +95,6 @@ struct CompilerOptions {
   int revision;
   bool genStats;
   bool keepTempDir;
-  string dbStats;
   bool noTypeInference;
   int logLevel;
   bool force;
@@ -139,25 +138,20 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv);
 void createOutputDirectory(CompilerOptions &po);
 int process(const CompilerOptions &po);
 int lintTarget(const CompilerOptions &po);
-int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar);
 int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar);
 void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar);
-int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
+int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
                AsyncFileCacheSaver &fcThread);
-int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
+int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr&& ar,
                    AsyncFileCacheSaver &fcThread);
 int runTarget(const CompilerOptions &po);
+void pcre_init();
 
 ///////////////////////////////////////////////////////////////////////////////
-
-extern "C" void compiler_hook_initialize();
 
 int compiler_main(int argc, char **argv) {
   try {
     CompilerOptions po;
-#ifdef FACEBOOK
-    compiler_hook_initialize();
-#endif
 
     int ret = prepareOptions(po, argc, argv);
     if (ret == 1) return 0; // --help
@@ -214,15 +208,13 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("version", "display version number")
     ("target,t", value<string>(&po.target)->default_value("run"),
      "lint | "
-     "analyze | "
      "php | "
      "hhbc | "
      "filecache | "
      "run (default)")
     ("format,f", value<string>(&po.format),
      "lint: (none); \n"
-     "analyze: (none); \n"
-     "php: trimmed (default) | inlined | pickled | typeinfo |"
+     "php: trimmed (default) | inlined | pickled |"
      " <any combination of them by any separator>; \n"
      "hhbc: binary (default) | text; \n"
      "run: cluster (default) | file")
@@ -282,12 +274,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "whether to generate code errors")
     ("keep-tempdir,k", value<bool>(&po.keepTempDir)->default_value(false),
      "whether to keep the temporary directory")
-    ("db-stats", value<string>(&po.dbStats),
-     "database connection string to save code errors: "
-     "<username>:<password>@<host>:<port>/<db>")
-    ("no-type-inference",
-     value<bool>(&po.noTypeInference)->default_value(false),
-     "turn off type inference for C++ code generation")
     ("config,c", value<vector<string> >(&po.config)->composing(),
      "config file name")
     ("config-dir", value<string>(&po.configDir),
@@ -333,11 +319,38 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   p.add("inputs", -1);
   variables_map vm;
   try {
-    store(command_line_parser(argc, argv).options(desc).positional(p).run(),
-          vm);
-    notify(vm);
+    auto opts = command_line_parser(argc, argv).options(desc)
+                                               .positional(p).run();
+    try {
+      store(opts, vm);
+      notify(vm);
+#if defined(BOOST_VERSION) && BOOST_VERSION >= 105000 && BOOST_VERSION <= 105400
+    } catch (const error_with_option_name &e) {
+      std::string wrong_name = e.get_option_name();
+      std::string right_name = get_right_option_name(opts, wrong_name);
+      std::string message = e.what();
+      if (right_name != "") {
+        boost::replace_all(message, wrong_name, right_name);
+      }
+      Logger::Error("Error in command line: %s", message.c_str());
+      cout << desc << "\n";
+      return -1;
+#endif
+    } catch (const error& e) {
+      Logger::Error("Error in command line: %s", e.what());
+      cout << desc << "\n";
+      return -1;
+    }
   } catch (const unknown_option& e) {
-    Logger::Error("Error in command line: %s\n\n", e.what());
+    Logger::Error("Error in command line: %s", e.what());
+    cout << desc << "\n";
+    return -1;
+  } catch (const error& e) {
+    Logger::Error("Error in command line: %s", e.what());
+    cout << desc << "\n";
+    return -1;
+  } catch (...) {
+    Logger::Error("Error in command line parsing.");
     cout << desc << "\n";
     return -1;
   }
@@ -347,7 +360,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
   if (vm.count("version")) {
     cout << "HipHop Repo Compiler";
-    cout << " " << k_HHVM_VERSION.c_str();
+    cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
@@ -362,6 +375,18 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   if (vm.count("repo-schema")) {
     cout << kRepoSchemaId << "\n";
     return 1;
+  }
+
+  if (po.target != "run"
+      && po.target != "lint"
+      && po.target != "php"
+      && po.target != "hhbc"
+      && po.target != "filecache") {
+    Logger::Error("Error in command line: target '%s' is not supported.",
+                  po.target.c_str());
+    // desc[ription] is the --help output
+    cout << desc << "\n";
+    return -1;
   }
 
   if ((po.target == "hhbc" || po.target == "run") &&
@@ -380,21 +405,25 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::LogLevel = Logger::LogInfo;
   }
 
+  MemoryManager::TlsWrapper::getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
-  for (auto& c : po.config) {
-    Config::Parse(c, ini, config);
+  for (auto& file : po.config) {
+    Config::ParseConfigFile(file, ini, config);
+  }
+  for (unsigned int i = 0; i < po.iniStrings.size(); i++) {
+    Config::ParseIniString(po.iniStrings[i].c_str(), ini);
   }
   for (unsigned int i = 0; i < po.confStrings.size(); i++) {
-    config.fromString(po.confStrings[i].c_str());
+    Config::ParseHdfString(po.confStrings[i].c_str(), config, ini);
   }
   Option::Load(ini, config);
   IniSetting::Map iniR = IniSetting::Map::object;
   Hdf runtime = config["Runtime"];
+  // The configuration command line strings were already processed above
+  // Don't process them again.
   RuntimeOption::Load(iniR, runtime);
-  for (unsigned int i = 0; i < po.iniStrings.size(); i++) {
-    process_ini_settings(po.iniStrings[i].c_str(), "");
-  }
+
   initialize_repo();
 
   vector<string> badnodes;
@@ -460,11 +489,10 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   if (!po.docjson.empty()) {
     if (po.target != "run" &&
-        po.target != "hhbc" &&
-        po.target != "analyze") {
+        po.target != "hhbc") {
       Logger::Error(
         "Cannot generate doc JSON file unless target is "
-        "'hhbc', 'run', or 'analyze'");
+        "'hhbc', or 'run'");
     } else {
       Option::DocJson = po.docjson;
     }
@@ -528,11 +556,9 @@ int process(const CompilerOptions &po) {
   init_thread_locals();
 
   Timer timer(Timer::WallTime);
-  AnalysisResultPtr ar;
-
   // prepare a package
   Package package(po.inputDir.c_str());
-  ar = package.getAnalysisResult();
+  AnalysisResultPtr ar = package.getAnalysisResult();
 
   hhbcTargetInit(po, ar);
 
@@ -608,7 +634,7 @@ int process(const CompilerOptions &po) {
       if (!package.parse(!po.force)) {
         return 1;
       }
-      if (Option::WholeProgram || po.target == "analyze") {
+      if (Option::WholeProgram) {
         Timer timer(Timer::WallTime, "analyzeProgram");
         ar->analyzeProgram();
       }
@@ -617,7 +643,7 @@ int process(const CompilerOptions &po) {
 
   // saving file cache
   AsyncFileCacheSaver fileCacheThread(&package, po.filecache.c_str());
-  if (po.target != "analyze" && !po.filecache.empty()) {
+  if (!po.filecache.empty()) {
     fileCacheThread.start();
   }
 
@@ -625,54 +651,39 @@ int process(const CompilerOptions &po) {
     ar->dump();
   }
 
+  ar->setFinish([&po,&timer,&package](AnalysisResultPtr ar) {
+      if (Option::DumpAst) {
+        ar->dump();
+      }
+
+      if (!Option::DocJson.empty()) {
+        Timer timer(Timer::WallTime, "Saving doc JSON file");
+        ar->docJson(Option::DocJson);
+      }
+
+      // saving stats
+      if (po.genStats) {
+        int seconds = timer.getMicroSeconds() / 1000000;
+
+        Logger::Info("saving code errors and stats...");
+        Timer timer(Timer::WallTime, "saving stats");
+        package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
+      }
+      package.resetAr();
+    });
+
   int ret = 0;
-  if (po.target == "analyze") {
-    ret = analyzeTarget(po, ar);
-  } else if (po.target == "php") {
+  if (po.target == "php") {
     ret = phpTarget(po, ar);
   } else if (po.target == "hhbc") {
-    ret = hhbcTarget(po, ar, fileCacheThread);
+    ret = hhbcTarget(po, std::move(ar), fileCacheThread);
   } else if (po.target == "run") {
-    ret = runTargetCheck(po, ar, fileCacheThread);
+    ret = runTargetCheck(po, std::move(ar), fileCacheThread);
   } else if (po.target == "filecache") {
     // do nothing
   } else {
     Logger::Error("Unknown target: %s", po.target.c_str());
     return 1;
-  }
-
-  if (Option::DumpAst) {
-    ar->dump();
-  }
-
-  if (!Option::DocJson.empty()) {
-    Timer timer(Timer::WallTime, "Saving doc JSON file");
-    ar->docJson(Option::DocJson);
-  }
-
-  // saving stats
-  if (po.target == "analyze" || po.genStats || !po.dbStats.empty()) {
-    int seconds = timer.getMicroSeconds() / 1000000;
-
-    Logger::Info("saving code errors and stats...");
-    Timer timer(Timer::WallTime, "saving stats");
-
-    if (!po.dbStats.empty()) {
-      try {
-        ServerDataPtr server = ServerData::Create(po.dbStats);
-        int runId = package.saveStatsToDB(server, seconds, po.branch,
-                                          po.revision);
-        package.commitStats(server, runId);
-      } catch (const DatabaseException& e) {
-        Logger::Error("%s", e.what());
-      }
-    } else {
-      Compiler::SaveErrors(ar, (po.outputDir + "/CodeError.js").c_str());
-      package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
-    }
-  } else if (Compiler::HasError()) {
-    Logger::Info("saving code errors...");
-    Compiler::SaveErrors(ar, (po.outputDir + "/CodeError.js").c_str());
   }
 
   if (!po.filecache.empty()) {
@@ -708,12 +719,8 @@ int lintTarget(const CompilerOptions &po) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
-  int ret = 0;
-
-  if (!po.noTypeInference) {
-    Option::GenerateInferredTypes = true;
-  }
+static void wholeProgramPasses(const CompilerOptions& po,
+                               AnalysisResultPtr ar) {
   if (Option::PreOptimization) {
     Timer timer(Timer::WallTime, "pre-optimizing");
     ar->preOptimize();
@@ -723,18 +730,6 @@ int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
     Timer timer(Timer::WallTime, "analyze includes");
     ar->analyzeIncludes();
   }
-
-  if (Option::GenerateInferredTypes) {
-    Timer timer(Timer::WallTime, "inferring types");
-    ar->inferTypes();
-  }
-  if (Option::PostOptimization) {
-    Timer timer(Timer::WallTime, "post-optimizing");
-    ar->postOptimize();
-  }
-  ar->analyzeProgramFinal();
-
-  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -756,18 +751,9 @@ int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
     Option::GenerateTrimmedPHP = true;
     formatCount++;
   }
-  if (po.format.find("typeinfo") != string::npos) {
-    Option::GenerateInferredTypes = true;
-  }
   if (formatCount == 0) {
     Logger::Error("Unknown format for PHP target: %s", po.format.c_str());
     return 1;
-  }
-
-  // analyze
-  if (Option::GenerateInferredTypes || Option::ConvertSuperGlobals) {
-    Logger::Info("inferring types...");
-    ar->inferTypes();
   }
 
   // generate
@@ -819,6 +805,9 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
+  if (Option::HardReturnTypeHints) {
+    RuntimeOption::EvalCheckReturnTypeHints = 3;
+  }
   RuntimeOption::EnableZendCompat = Option::EnableZendCompat;
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
   RuntimeOption::IntsOverflowToInts = Option::IntsOverflowToInts;
@@ -830,7 +819,7 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoCommit = false;
 }
 
-int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
+int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
                AsyncFileCacheSaver &fcThread) {
   int ret = 0;
   int formatCount = 0;
@@ -863,11 +852,13 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
   Option::AutoInline = -1;
 
   if (po.optimizeLevel > 0) {
-    ret = analyzeTarget(po, ar);
+    ret = 0;
+    wholeProgramPasses(po, ar);
+    ar->analyzeProgramFinal();
   }
 
   Timer timer(Timer::WallTime, type);
-  Compiler::emitAllHHBC(ar);
+  Compiler::emitAllHHBC(std::move(ar));
 
   if (!po.syncDir.empty()) {
     if (!po.filecache.empty()) {
@@ -900,10 +891,10 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr ar,
+int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr&& ar,
                    AsyncFileCacheSaver &fcThread) {
   // generate code
-  if (hhbcTarget(po, ar, fcThread)) {
+  if (hhbcTarget(po, std::move(ar), fcThread)) {
     return 1;
   }
 
@@ -962,10 +953,9 @@ void createOutputDirectory(CompilerOptions &po) {
     }
     string temp = t;
     temp += "/hphp_XXXXXX";
-    char path[PATH_MAX + 1];
-    strncpy(path, temp.c_str(), PATH_MAX);
-    path[PATH_MAX] = '\0';
-    po.outputDir = mkdtemp(path);
+    std::vector<char> path(begin(temp), end(temp));
+    path.push_back('\0');
+    po.outputDir = mkdtemp(&path[0]);
     Logger::Info("creating temporary directory %s ...", po.outputDir.c_str());
   }
   mkdir(po.outputDir.c_str(), 0777);

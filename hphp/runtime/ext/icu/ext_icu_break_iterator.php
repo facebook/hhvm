@@ -10,7 +10,7 @@
  * implements Traversable. Traversing an IntlBreakIterator yields non-negative
  * integer values representing the successive locations of the text
  * boundaries, expressed as UTF-8 code units (byte) counts, taken from the
- * beggining of the text (which has the location 0). The keys yielded by the
+ * beginning of the text (which has the location 0). The keys yielded by the
  * iterator simply form the sequence of natural numbers {0, 1, 2, ...}.
  */
 <<__NativeData("IntlBreakIterator")>>

@@ -8,6 +8,7 @@
  *
  *)
 
+open Coverage_level
 open Utils
 
 (*****************************************************************************)
@@ -17,35 +18,46 @@ open Utils
 type options = {
   filename : string;
   suggest : bool;
+  color : bool;
+  coverage : bool;
+  prolog : bool;
   rest : string list
 }
 
 let builtins_filename = "builtins.hhi"
 let builtins = "<?hh // decl\n"^
-  "class Object {\n"^
-  "  public function get_class(): string {} \n"^
-  "  public function get_parent_class(): ?string {} \n"^
-  "}\n"^
   "interface Traversable<Tv> {}\n"^
   "interface Container<Tv> extends Traversable<Tv> {}\n"^
   "interface Iterator<Tv> extends Traversable<Tv> {}\n"^
   "interface Iterable<Tv> extends Traversable<Tv> {}\n"^
   "interface KeyedTraversable<Tk, Tv> extends Traversable<Tv> {}\n"^
   "interface KeyedContainer<Tk, Tv> extends Container<Tv>, KeyedTraversable<Tk,Tv> {}\n"^
-  "interface Indexish<Tk, Tv> extends KeyedContainer<Tk, Tv> {}\n"^
   "interface KeyedIterator<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterator<Tv> {}\n"^
   "interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {}\n"^
-  "interface Awaitable<T> {}\n"^
+  "interface Awaitable<T> {"^
+  "  public function getWaitHandle(): WaitHandle<T>;"^
+  "}\n"^
   "interface WaitHandle<T> extends Awaitable<T> {}\n"^
-  "interface ConstVector<Tv> extends KeyedIterable<int, Tv>, Indexish<int, Tv>{}\n"^
-  "interface ConstSet<Tv> extends Iterable<Tv>, Container<Tv>{}\n"^
-  "interface ConstMap<Tk, Tv> extends KeyedIterable<Tk, Tv>, Indexish<Tk, Tv>{}\n"^
+  "interface ConstVector<+Tv> extends KeyedIterable<int, Tv>, KeyedContainer<int, Tv>{"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): ConstVector<Tu>;"^
+  "}\n"^
+  "interface ConstSet<+Tv> extends KeyedIterable<mixed, Tv>, Container<Tv>{}\n"^
+  "interface ConstMap<Tk, +Tv> extends KeyedIterable<Tk, Tv>, KeyedContainer<Tk, Tv>{"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): ConstMap<Tk, Tu>;"^
+  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): ConstMap<Tk, Tu>;"^
+  "}\n"^
   "final class Vector<Tv> implements ConstVector<Tv>{\n"^
   "  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;\n"^
   "  public function filter((function(Tv): bool) $callback): Vector<Tv>;\n"^
+  "  public function reserve(int $sz): void;"^
+  "  public function add(Tv $value): Vector<Tv>;"^
+  "  public function addAll(?Traversable<Tv> $it): Vector<Tv>;"^
   "}\n"^
   "final class ImmVector<Tv> implements ConstVector<Tv> {}\n"^
-  "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {}\n"^
+  "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): Map<Tk, Tu>;"^
+  "  public function contains(Tk $k): bool;"^
+  "}\n"^
   "final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>{}\n"^
   "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {}\n"^
   "final class Set<Tv> extends ConstSet<Tv> {}\n"^
@@ -59,8 +71,7 @@ let builtins = "<?hh // decl\n"^
   "  public function valid(): bool;\n"^
   "  public function send(?Ts $v): void;\n"^
   "}\n"^
-  "type Continuation<Tv> = Generator<int, Tv, void>;\n"^
-  "final class Pair<Tk, Tv> extends Indexish<int,mixed> {public function isEmpty(): bool {}}\n"^
+  "final class Pair<Tk, Tv> extends KeyedContainer<int,mixed> {public function isEmpty(): bool {}}\n"^
   "interface Stringish {public function __toString(): string {}}\n"^
   "interface XHPChild {}\n"^
   "function hh_show($val) {}\n"^
@@ -72,6 +83,9 @@ let builtins = "<?hh // decl\n"^
   "  public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}\n"^
   "  public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}"^
   "}\n"^
+  "function isset($x): bool;"^
+  "function empty($x): bool;"^
+  "function unset($x): void;"^
   "namespace HH {\n"^
   "abstract class BuiltinEnum<T> {\n"^
   "  final public static function getValues(): array<string, T>;\n"^
@@ -81,7 +95,10 @@ let builtins = "<?hh // decl\n"^
   "  final public static function isValid(mixed $value): bool;\n"^
   "  final public static function assertAll(Traversable<mixed> $values): Container<T>;\n"^
   "}\n"^
-  "}\n"
+  "}\n"^
+  "function array_map($x, $y, ...);\n"^
+  "function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $c, $i, $d = null) {}\n"^
+  "final class stdClass {}\n"
 
 (*****************************************************************************)
 (* Helpers *)
@@ -93,11 +110,14 @@ let die str =
   close_out oc;
   exit 2
 
-let error l = die (Errors.to_string l)
+let error l = die (Errors.to_string (Errors.to_absolute l))
 
 let parse_options () =
   let fn_ref = ref None in
   let suggest = ref false in
+  let color = ref false in
+  let coverage = ref false in
+  let prolog = ref false in
   let rest_options = ref [] in
   let rest x = rest_options := x :: !rest_options in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -105,6 +125,15 @@ let parse_options () =
     "--suggest",
       Arg.Set suggest,
       "Suggest missing typehints";
+    "--color",
+      Arg.Set color,
+      "Produce color output";
+    "--coverage",
+      Arg.Set coverage,
+      "Produce coverage output";
+    "--prolog",
+      Arg.Set prolog,
+      "Produce prolog facts";
     "--",
       Arg.Rest rest,
       "";
@@ -113,9 +142,15 @@ let parse_options () =
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
-  { filename = fn; suggest = !suggest; rest = !rest_options }
+  { filename = fn;
+    suggest = !suggest;
+    color = !color;
+    coverage = !coverage;
+    prolog = !prolog;
+    rest = !rest_options;
+  }
 
-let suggest_and_print fn funs classes typedefs consts =
+let suggest_and_print fn { FileInfo.funs; classes; typedefs; consts; _ } =
   let make_set =
     List.fold_left (fun acc (_, x) -> SSet.add x acc) SSet.empty in
   let n_funs = make_set funs in
@@ -123,9 +158,9 @@ let suggest_and_print fn funs classes typedefs consts =
   let n_types = make_set typedefs in
   let n_consts = make_set consts in
   let names = { FileInfo.n_funs; n_classes; n_types; n_consts } in
-  let fast = SMap.add fn names SMap.empty in
+  let fast = Relative_path.Map.add fn names Relative_path.Map.empty in
   let patch_map = Typing_suggest_service.go None fast in
-  match SMap.get fn patch_map with
+  match Relative_path.Map.get fn patch_map with
     | None -> ()
     | Some l -> begin
       (* Sort so that the unit tests come out in a consistent order, normally
@@ -135,8 +170,8 @@ let suggest_and_print fn funs classes typedefs consts =
     end
 
 (* This allows to fake having multiple files in one file. This
- * is used only in unit test files. Indeed
- * There are some features that require mutliple files to be tested.
+ * is used only in unit test files.
+ * Indeed, there are some features that require mutliple files to be tested.
  * For example, newtype has a different meaning depending on the file.
  *)
 let rec make_files = function
@@ -149,24 +184,25 @@ let rec make_files = function
       (filename, content) :: make_files rl
   | _ -> assert false
 
-let parse_file fn =
-  let content = cat fn in
+let parse_file file =
+  let abs_fn = Relative_path.to_absolute file in
+  let content = cat abs_fn in
   let delim = Str.regexp "////.*" in
   if Str.string_match delim content 0
   then
     let contentl = Str.full_split delim content in
     let files = make_files contentl in
     List.fold_right begin fun (sub_fn, content) ast ->
-      Pos.file := fn^"--"^sub_fn ;
-      let {Parser_hack.is_hh_file; comments; ast = ast'} =
-        Parser_hack.program content
+      let file =
+        Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn) in
+      let {Parser_hack.file_mode; comments; ast = ast'} =
+        Parser_hack.program file content
       in
       ast' @ ast
     end files []
   else begin
-    Pos.file := fn ;
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
+    let {Parser_hack.file_mode; comments; ast} =
+      Parser_hack.program file content
     in
     ast
   end
@@ -182,6 +218,29 @@ let collect_defs ast =
     | _ -> funs, classes, typedefs, consts
   end ast ([], [], [], [])
 
+(* Make readable test output *)
+let replace_color input =
+  match input with
+  | (Some Unchecked, str) -> "<unchecked>"^str^"</unchecked>"
+  | (Some Checked, str) -> "<checked>"^str^"</checked>"
+  | (Some Partial, str) -> "<partial>"^str^"</partial>"
+  | (None, str) -> str
+
+let print_colored fn type_acc =
+  let content = cat (Relative_path.to_absolute fn) in
+  let results = ColorFile.go content type_acc in
+  if Unix.isatty Unix.stdout
+  then Tty.print (ClientColorFile.replace_colors results)
+  else print_string (List.map replace_color results |> String.concat "")
+
+let print_coverage fn type_acc =
+  let counts = ServerCoverageMetric.count_exprs fn type_acc in
+  ClientCoverageMetric.go ~json:false (Some (Leaf counts))
+
+let print_prolog { FileInfo.funs; classes; typedefs; consts; _ } =
+  let facts = Prolog.facts_of_defs [] funs classes typedefs consts in
+  PrologMain.output_facts stdout facts
+
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
@@ -192,36 +251,48 @@ let collect_defs ast =
  * a given file. You can then inspect this typing environment, e.g.
  * with 'Typing_env.Classes.get "Foo";;'
  *)
-let main_hack { filename; suggest; _ } =
+let main_hack { filename; suggest; color; coverage; prolog; _ } =
   ignore (Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos));
   SharedMem.init();
   Hhi.set_hhi_root_for_unit_test (Path.mk_path "/tmp/hhi");
-  let errors, () =
+  let builtins_filename =
+    Relative_path.create Relative_path.Dummy builtins_filename in
+  let filename = Relative_path.create Relative_path.Dummy filename in
+  let errors, fileinfo =
     Errors.do_ begin fun () ->
-      Pos.file := builtins_filename;
-      let {Parser_hack.is_hh_file; comments; ast = ast_builtins} =
-        Parser_hack.program builtins
+      let {Parser_hack.file_mode; comments; ast = ast_builtins} =
+        Parser_hack.program builtins_filename builtins
       in
-      Pos.file := filename;
       let ast_file = parse_file filename in
       let ast = ast_builtins @ ast_file in
       Parser_heap.ParserHeap.add filename ast;
       let funs, classes, typedefs, consts = collect_defs ast in
       let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
       let all_classes = List.fold_right begin fun (_, cname) acc ->
-        SMap.add cname (SSet.singleton filename) acc
+        SMap.add cname (Relative_path.Set.singleton filename) acc
       end classes SMap.empty in
       Typing_decl.make_env nenv all_classes filename;
-      List.iter (fun (_, fname) -> Typing_check_service.type_fun fname) funs;
-      List.iter (fun (_, cname) -> Typing_check_service.type_class cname) classes;
-      List.iter (fun (_, x) -> Typing_check_service.check_typedef x) typedefs;
-      if suggest
-      then suggest_and_print filename funs classes typedefs consts
-    end
-  in
-  if errors <> []
-  then error (List.hd errors)
-  else Printf.printf "No errors\n"
+      { FileInfo.
+        funs; classes; typedefs; consts; comments;
+        consider_names_just_for_autoload = false }
+    end in
+  if color then
+    let result = ServerColorFile.get_level_list
+      (fun () -> ignore (ServerIdeUtils.check_defs fileinfo); filename) in
+    print_colored filename result;
+  else if coverage then
+    let type_acc = ServerCoverageMetric.accumulate_types fileinfo in
+    print_coverage filename type_acc;
+  else if prolog then
+    print_prolog fileinfo
+  else begin
+    let errors = errors @ ServerIdeUtils.check_defs fileinfo in
+    if suggest
+    then suggest_and_print filename fileinfo;
+    if errors <> []
+    then error (List.hd errors)
+    else Printf.printf "No errors\n"
+  end
 
 (* command line driver *)
 let _ =

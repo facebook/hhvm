@@ -10,6 +10,7 @@ $s = new SplFileObject('csv_control_data.csv');
 $s->setFlags(SplFileObject::READ_CSV);
 $s->setCsvControl('||');
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink('csv_control_data.csv');
 ?>

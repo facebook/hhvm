@@ -38,8 +38,9 @@ const StaticString
   s_user_agent("user_agent"),
   s_User_Agent("User-Agent");
 
-File* HttpStreamWrapper::open(const String& filename, const String& mode,
-                              int options, const Variant& context) {
+SmartPtr<File>
+HttpStreamWrapper::open(const String& filename, const String& mode,
+                        int options, const Variant& context) {
   if (RuntimeOption::ServerHttpSafeMode) {
     return nullptr;
   }
@@ -49,7 +50,6 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
     return nullptr;
   }
 
-  std::unique_ptr<UrlFile> file;
   StreamContext *ctx = !context.isResource() ? nullptr :
                         context.toResource().getTyped<StreamContext>();
   Array headers;
@@ -76,7 +76,7 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
 
       for (ArrayIter it(lines); it; ++it) {
         Array parts = StringUtil::Explode(
-          it.second().toString(), ":").toArray();
+          it.second().toString(), ":", 2).toArray();
         headers.set(parts.rvalAt(0), parts.rvalAt(1));
       }
     }
@@ -102,16 +102,16 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
       headers.set(s_User_Agent, default_user_agent);
     }
   }
-  file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)(method.data(), headers,
-                                                  post_data, max_redirs,
-                                                  timeout, ignore_errors));
+  auto file = makeSmartPtr<UrlFile>(method.data(), headers,
+                                    post_data, max_redirs,
+                                    timeout, ignore_errors);
   bool ret = file->open(filename, mode);
   if (!ret) {
     raise_warning("Failed to open %s (%s)", filename.data(),
                   file->getLastError().c_str());
     return nullptr;
   }
-  return file.release();
+  return file;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

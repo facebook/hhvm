@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_REQUEST_INJECTION_DATA_H_
 #define incl_HPHP_REQUEST_INJECTION_DATA_H_
 
+#include "hphp/runtime/vm/pc-filter.h"
+
 #include <cinttypes>
 #include <cstdlib>
 #include <vector>
@@ -26,6 +28,35 @@
 #include <cstddef>
 
 namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////
+
+struct RequestInjectionData;
+
+//////////////////////////////////////////////////////////////////////
+
+struct RequestTimer {
+  friend class RequestInjectionData;
+
+  RequestTimer(RequestInjectionData*, clockid_t);
+  ~RequestTimer();
+
+  void setTimeout(int seconds);
+  void onTimeout();
+  int getRemainingTime() const;
+
+private:
+  RequestInjectionData* m_reqInjectionData;
+  clockid_t m_clockType;
+#ifndef __APPLE__
+  timer_t m_timer_id;      // id of our timer
+#endif
+  int m_timeoutSeconds;    // how many seconds to timeout
+  bool m_hasTimer;         // Whether we've created our timer yet
+  std::atomic<bool> m_timerActive;
+                           // Set true when we activate a timer,
+                           // cleared when the signal handler runs
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -42,22 +73,25 @@ struct RequestInjectionData {
   static const ssize_t DebuggerSignalFlag   = 1 << 8;
   // Set by the debugger hook handler to force function entry/exit events
   static const ssize_t DebuggerHookFlag     = 1 << 9;
-  static const ssize_t LastFlag             = DebuggerHookFlag;
+  static const ssize_t CPUTimedOutFlag      = 1 << 10;
+  static const ssize_t LastFlag             = CPUTimedOutFlag;
   // flags that shouldn't be cleared by fetchAndClearFlags, because:
   // fetchAndClearFlags is only supposed to touch flags related to PHP-visible
   // signals/exceptions and resource limits
+  static const ssize_t ResourceFlags = RequestInjectionData::MemExceededFlag |
+                                       RequestInjectionData::TimedOutFlag |
+                                       RequestInjectionData::CPUTimedOutFlag;
   static const ssize_t StickyFlags = RequestInjectionData::AsyncEventHookFlag |
                                      RequestInjectionData::DebuggerHookFlag |
                                      RequestInjectionData::EventHookFlag |
                                      RequestInjectionData::InterceptFlag |
-                                     RequestInjectionData::MemExceededFlag |
-                                     RequestInjectionData::XenonSignalFlag;
+                                     RequestInjectionData::XenonSignalFlag |
+                                     RequestInjectionData::ResourceFlags;
 
   RequestInjectionData()
       : cflagsPtr(nullptr),
-        m_timeoutSeconds(0), // no timeout by default
-        m_hasTimer(false),
-        m_timerActive(false),
+        m_timer(this, CLOCK_REALTIME),
+        m_cpuTimer(this, CLOCK_THREAD_CPUTIME_ID),
         m_debuggerAttached(false),
         m_coverage(false),
         m_jit(false),
@@ -65,10 +99,9 @@ struct RequestInjectionData {
         m_debuggerStepIn(false),
         m_debuggerStepOut(StepOutState::NONE),
         m_debuggerNext(false) {
-    threadInit();
   }
 
-  ~RequestInjectionData();
+  ~RequestInjectionData() = default;
 
   void threadInit();
 
@@ -80,15 +113,9 @@ struct RequestInjectionData {
   std::atomic<ssize_t>* cflagsPtr;  // this points to the real condition flags,
                                     // somewhere in the thread's targetcache
 
- private:
-#ifndef __APPLE__
-  timer_t m_timer_id;      // id of our timer
-#endif
-  int m_timeoutSeconds;    // how many seconds to timeout
-  bool m_hasTimer;         // Whether we've created our timer yet
-  std::atomic<bool> m_timerActive;
-                           // Set true when we activate a timer,
-                           // cleared when the signal handler runs
+private:
+  RequestTimer m_timer;
+  RequestTimer m_cpuTimer;
   bool m_debuggerAttached; // whether there is a debugger attached.
   bool m_coverage;         // is coverage being collected
   bool m_jit;              // is the jit enabled
@@ -96,9 +123,14 @@ struct RequestInjectionData {
   // Indicating we should force interrupts for debuggers. This is intended to be
   // used by debuggers for forcing onOpcode events. It shouldn't be modified
   // internally
-  bool m_debuggerIntr;
-
+  bool     m_debuggerIntr;
 public:
+  PCFilter m_breakPointFilter;
+  PCFilter m_flowFilter;
+  PCFilter m_lineBreakPointFilter;
+  PCFilter m_callBreakPointFilter;
+  PCFilter m_retBreakPointFilter;
+
   // The state of the step out command
   enum class StepOutState {
     NONE,     // Command is inactive
@@ -123,6 +155,8 @@ private:
   std::string m_argSeparatorInput;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
+  std::string m_gzipCompressionLevel = "-1";
+  std::string m_gzipCompression;
   std::vector<std::string> m_include_paths;
   int64_t m_errorReportingLevel;
   bool m_logErrors;
@@ -135,11 +169,15 @@ private:
 
  public:
   std::string getDefaultMimeType() { return m_defaultMimeType; }
-  int getTimeout() const { return m_timeoutSeconds; }
+  int getTimeout() const { return m_timer.m_timeoutSeconds; }
+  int getCPUTimeout() const { return m_cpuTimer.m_timeoutSeconds; }
   void setTimeout(int seconds);
+  void setCPUTimeout(int seconds);
   int getRemainingTime() const;
+  int getRemainingCPUTime() const;
   void resetTimer(int seconds = 0);
-  void onTimeout();
+  void resetCPUTimer(int seconds = 0);
+  void onTimeout(RequestTimer*);
   bool getJit() const { return m_jit; }
   void updateJit();
 
@@ -248,6 +286,8 @@ private:
   void clearMemExceededFlag();
   void setTimedOutFlag();
   void clearTimedOutFlag();
+  void setCPUTimedOutFlag();
+  void clearCPUTimedOutFlag();
   void setSignaledFlag();
   void setAsyncEventHookFlag();
   void clearAsyncEventHookFlag();

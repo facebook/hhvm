@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/base/atomic-countable.h"
 
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -65,22 +66,19 @@ using DVFuncletsVec = std::vector<std::pair<int, Offset>>;
  * Exception handler table entry.
  */
 struct EHEnt {
-  enum class Type {
+  enum class Type : uint8_t {
     Catch,
     Fault
   };
-  typedef std::vector<std::pair<Id, Offset>> CatchVec;
 
   Type m_type;
+  bool m_itRef;
   Offset m_base;
   Offset m_past;
   int m_iterId;
-  bool m_itRef;
   int m_parentIndex;
   Offset m_fault;
-  CatchVec m_catches;
-
-  template<class SerDe> void serde(SerDe& sd);
+  FixedVector<std::pair<Id,Offset>> m_catches;
 };
 
 /*
@@ -134,45 +132,28 @@ struct Func {
    * Parameter default value info.
    */
   struct ParamInfo {
-    ParamInfo()
-      : builtinType(KindOfInvalid)
-      , funcletOff(InvalidAbsoluteOffset)
-      , defaultValue(make_tv<KindOfUninit>())
-      , phpCode(nullptr)
-      , userType(nullptr)
-      , variadic(false)
-    {}
+    ParamInfo();
 
-    template<class SerDe>
-    void serde(SerDe& sd) {
-      sd(builtinType)
-        (funcletOff)
-        (defaultValue)
-        (phpCode)
-        (typeConstraint)
-        (variadic)
-        (userAttributes)
-        (userType)
-        ;
-    }
+    bool hasDefaultValue() const;
+    bool hasScalarDefaultValue() const;
+    bool isVariadic() const;
 
-    bool hasDefaultValue() const {
-      return funcletOff != InvalidAbsoluteOffset;
-    }
-    bool hasScalarDefaultValue() const {
-      return hasDefaultValue() && defaultValue.m_type != KindOfUninit;
-    }
-    bool isVariadic() const { return variadic; }
+    template<class SerDe> void serde(SerDe& sd);
 
-  public:
-    DataType builtinType;     // Typehint for builtins.
-    Offset funcletOff;
-    TypedValue defaultValue;  // Set to Uninit if there is no DV,
-                              // or if there's a nonscalar DV.
-    LowStringPtr phpCode;     // Eval'able PHP code.
-    LowStringPtr userType;    // User-annotated type.
+    // Typehint for builtins.
+    MaybeDataType builtinType{folly::none};
+    // True if this is a `...' parameter.
+    bool variadic{false};
+    // DV initializer funclet offset.
+    Offset funcletOff{InvalidAbsoluteOffset};
+    // Set to Uninit if there is no DV, or if there's a nonscalar DV.
+    TypedValue defaultValue;
+    // Eval-able PHP code.
+    LowStringPtr phpCode{nullptr};
+    // User-annotated type.
+    LowStringPtr userType{nullptr};
+
     TypeConstraint typeConstraint;
-    bool variadic;
     UserAttributeMap userAttributes;
   };
 
@@ -195,9 +176,7 @@ struct Func {
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
 
-  Func(Unit& unit, PreClass* preClass, int line1, int line2,
-       Offset base, Offset past, const StringData* name, Attr attrs,
-       bool top, const StringData* docComment, int numParams);
+  Func(Unit& unit, const StringData* name, Attr attrs);
   ~Func();
 
   /*
@@ -225,7 +204,10 @@ struct Func {
    * class's copy of the method.
    */
   Func* clone(Class* cls, const StringData* name = nullptr) const;
-  Func* cloneAndSetClass(Class* cls) const;
+  Func* cloneAndModify(Class* cls, Attr attrs) const;
+  Func* cloneAndSetClass(Class* cls) const {
+    return cloneAndModify(cls, attrs());
+  }
 
   /*
    * Rename a function and reload it.
@@ -407,6 +389,8 @@ struct Func {
    *
    * There are a number of caveats regarding this value:
    *
+   *    - If the returnType() is folly::none, the return is a Variant.
+   *
    *    - If the returnType() is KindOfString, KindOfArray, or KindOfObject,
    *      null may also be returned.
    *
@@ -418,7 +402,7 @@ struct Func {
    *
    *    - This list of caveats may be incorrect and/or incomplete.
    */
-  DataType returnType() const;
+  MaybeDataType returnType() const;
 
   /*
    * Whether this function returns by reference.
@@ -535,6 +519,11 @@ struct Func {
    *     specially in bytecode.cpp.
    */
   int maxStackCells() const;
+
+  /*
+   * Checks if $this belong to a class that is not a subclass of cls().
+   */
+  bool hasForeignThis() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -687,7 +676,7 @@ private:
    *
    * Return nullptr if this is not a closure or if no such clone exists.
    */
-  Func* findCachedClone(Class* cls) const;
+  Func* findCachedClone(Class* cls, Attr attrs) const;
 
 public:
 
@@ -969,26 +958,11 @@ public:
   char& maybeIntercepted() const;
 
   /*
-   * Populate the MethodInfo for this function in `mi'.
-   *
-   * If methInfo() is non-null, this just performs a deep copy.
+   * Access to the global vector of funcs.  This maps FuncID's back to Func*'s.
    */
-  void getFuncInfo(ClassInfo::MethodInfo* mi) const;
-
   static const AtomicVector<const Func*>& getFuncVec();
 
-  /*
-   * Profile-guided optimization linkage.
-   */
-  bool shouldPGO() const;
-  void incProfCounter();
-  uint32_t profCounter() const { return m_profCounter; }
   void setHot() { m_attrs = (Attr)(m_attrs | AttrHot); }
-
-  /*
-   * Does any HHBC block end at `off'?
-   */
-  bool anyBlockEndsAt(Offset off) const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1038,7 +1012,15 @@ public:
 private:
   typedef IndexedStringMap<LowStringPtr, true, Id> NamedLocalsMap;
 
-  struct SharedData : public AtomicCountable {
+  // Some 16-bit values in SharedData are stored as small deltas if they fit
+  // under this limit.  If not, they're set to the limit value and an
+  // ExtendedSharedData will be allocated for the full-width field.
+  static constexpr auto kSmallDeltaLimit = uint16_t(-1);
+
+  /*
+   * Properties shared by all clones of a Func.
+   */
+  struct SharedData : AtomicCountable {
     SharedData(PreClass* preClass, Offset base, Offset past,
                int line1, int line2, bool top, const StringData* docComment);
     ~SharedData();
@@ -1049,40 +1031,74 @@ private:
     void atomicRelease();
 
     /*
-     * Properties shared by all clones of a Func.
+     * Data fields are packed to minimize size.  Try not to add anything new
+     * here or reorder anything.
      */
-    PreClass* m_preClass;
+    // (There's a 32-bit integer in the AtomicCountable base class here.)
     Offset m_base;
-    Offset m_past;
+    PreClass* m_preClass;
     Id m_numLocals;
     Id m_numIterators;
     int m_line1;
-    int m_line2;
-    DataType m_returnType;
-    const ClassInfo::MethodInfo* m_info;
+    LowStringPtr m_docComment;
     // Bits 64 and up of the reffiness guards (the first 64 bits are in
     // Func::m_refBitVal for faster access).
     uint64_t* m_refBitPtr;
-    BuiltinFunction m_builtinFuncPtr;
-    BuiltinFunction m_nativeFuncPtr;
     ParamInfoVec m_params;
     NamedLocalsMap m_localNames;
     SVInfoVec m_staticVars;
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
-    // Cache for the anyBlockEndsAt() method.
-    hphp_hash_set<Offset> m_blockEnds;
-    LowStringPtr m_docComment;
+
+    // One byte worth of bools right now.  Check what it does to
+    // sizeof(SharedData) if you are trying to add more than one more ...
     bool m_top : 1;
     bool m_isClosureBody : 1;
     bool m_isAsync : 1;
     bool m_isGenerator : 1;
     bool m_isPairGenerator : 1;
     bool m_isGenerated : 1;
+    bool m_hasExtendedSharedData : 1;
+
+    MaybeDataType m_returnType;
+    LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;
     TypeConstraint m_retTypeConstraint;
-    LowStringPtr m_retUserType;
     LowStringPtr m_originalFilename;
+
+    /*
+     * The `past' offset and `line2' are likely to be small, particularly
+     * relative to m_base and m_line1.  So we encode each as a 16-bit
+     * difference.  If the delta doesn't fit, we need to have an
+     * ExtendedSharedData to hold the real values---in that case, the field
+     * here that overflowed is set to kSmallDeltaLimit and the corresponding
+     * field in ExtendedSharedData will be valid.
+     */
+    uint16_t m_line2Delta;
+    uint16_t m_pastDelta;
+  };
+
+  /*
+   * If a Func represents a C++ builtin, or is exceptionally large (either in
+   * line count or bytecode size), it requires extra information that most
+   * Funcs don't need, so it's SharedData is actually one of these extended
+   * SharedDatas.
+   */
+  struct ExtendedSharedData : SharedData {
+    template<class... Args>
+    explicit ExtendedSharedData(Args&&... args)
+      : SharedData(std::forward<Args>(args)...)
+    {
+      m_hasExtendedSharedData = true;
+    }
+    ExtendedSharedData(const ExtendedSharedData&) = delete;
+    ExtendedSharedData(ExtendedSharedData&&) = delete;
+
+    const ClassInfo::MethodInfo* m_info;
+    BuiltinFunction m_builtinFuncPtr;
+    BuiltinFunction m_nativeFuncPtr;
+    Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
+    int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
   };
 
   typedef AtomicSmartPtr<SharedData> SharedDataPtr;
@@ -1093,6 +1109,12 @@ private:
   const SharedData* shared() const { return m_shared.get(); }
         SharedData* shared()       { return m_shared.get(); }
 
+  /*
+   * Returns ExtendedSharedData if we have one, or else a nullptr.
+   */
+  const ExtendedSharedData* extShared() const;
+        ExtendedSharedData* extShared();
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
@@ -1100,6 +1122,8 @@ private:
   // These are all used at emit-time, and should be outsourced to FuncEmitter.
 
 private:
+  Func(const Func&) = default;  // used for clone()
+  Func& operator=(const Func&) = delete;
   void init(int numParams);
   void initPrologues(int numParams);
   void setFullName(int numParams);
@@ -1132,12 +1156,10 @@ private:
   // For asserts only.
   int m_magic;
 #endif
-  LowStringPtr m_fullName;
-  // Profile counter used to detect hot functions.
-  uint32_t m_profCounter{0};
   unsigned char* volatile m_funcBody;
   mutable RDS::Link<Func*> m_cachedFunc{RDS::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
+  LowStringPtr m_fullName;
   LowStringPtr m_name;
   // The first Class in the inheritance hierarchy that declared this method.
   // Note that this may be an abstract class that did not provide an
@@ -1169,12 +1191,12 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class EHEntVec>
-const EHEnt* findEH(const EHEntVec& ehtab, Offset o) {
+template<class Container>
+const typename Container::value_type* findEH(const Container& ehtab, Offset o) {
   uint32_t i;
   uint32_t sz = ehtab.size();
 
-  const EHEnt* eh = nullptr;
+  const typename Container::value_type* eh = nullptr;
   for (i = 0; i < sz; i++) {
     if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
       eh = &ehtab[i];
@@ -1182,6 +1204,7 @@ const EHEnt* findEH(const EHEntVec& ehtab, Offset o) {
   }
   return eh;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

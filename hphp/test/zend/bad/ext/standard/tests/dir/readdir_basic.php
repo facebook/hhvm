@@ -44,6 +44,7 @@ delete_files($path, 3);
 closedir($dh);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $path = dirname(__FILE__) . '/readdir_basic';
 rmdir($path);

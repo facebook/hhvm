@@ -47,7 +47,7 @@ class MongoClient {
    */
   <<__Native("ZendCompat")>>
   public function __construct(mixed $server,
-                              mixed $options): mixed;
+                              mixed $options);
 
   <<__Native("ZendCompat")>>
   public function dropDB(mixed $db): mixed;
@@ -139,7 +139,7 @@ class MongoDB {
    */
   <<__Native("ZendCompat")>>
   public function __construct(mixed $conn,
-                              mixed $name): mixed;
+                              mixed $name);
 
   /* This method is used to create capped collections and other collections
    * requiring special options. It is identical to running:  See
@@ -152,7 +152,7 @@ class MongoDB {
                                    mixed $size,
                                    mixed $max): mixed;
 
-  /* This method is a flexible interface for creating database refrences (see
+  /* This method is a flexible interface for creating database references (see
    * MongoDBRef).
    */
   <<__Native("ZendCompat")>>
@@ -169,7 +169,7 @@ class MongoDB {
   public function dropCollection(mixed $coll): mixed;
 
   /* The Mongo database server runs a JavaScript engine. This method allows you
-   * to run arbitary JavaScript on the database. This can be useful if you want
+   * to run arbitrary JavaScript on the database. This can be useful if you want
    * touch a number of collections lightly, or process some results on the
    * database side to reduce the amount that has to be sent to the client.
    * Running JavaScript in the database takes a write lock, meaning it blocks
@@ -325,7 +325,7 @@ class MongoCollection {
 
   <<__Native("ZendCompat")>>
   public function __construct(mixed $db,
-                              mixed $name): mixed;
+                              mixed $name);
 
   <<__Native("ZendCompat")>>
   public function count(mixed $query,
@@ -501,7 +501,7 @@ class MongoCursor {
    * causes the query to become a subfield of a bigger query object, like:
    * This method is for adding a top-level field to a query. It makes the query
    * a subobject (if it isn't already) and adds the key/value pair of your
-   * chosing to the top level. Warning  It cannot be used to add extra criteria
+   * choosing to the top level. Warning  It cannot be used to add extra criteria
    * to a query on the fly. For instance, this will not work:  This does not
    * query for a user named "joe" with an age of 20.
    */
@@ -529,7 +529,7 @@ class MongoCursor {
   public function __construct(mixed $connection,
                               mixed $ns,
                               mixed $query,
-                              mixed $fields): mixed;
+                              mixed $fields);
 
   /* This method does not affect the state of the cursor: if you haven't queried
    * yet, you can still apply limits, skips, etc. If you have started iterating
@@ -727,7 +727,7 @@ class MongoCursor {
 <<__NativeData("ZendCompat")>>
 class MongoId {
   <<__Native("ZendCompat")>>
-  public function __construct(mixed $id): mixed;
+  public function __construct(mixed $id);
 
   /* This returns the hostname MongoId is using to generate unique ids. This
    * should be the same value gethostname() returns.  It is identical to the
@@ -771,7 +771,7 @@ class MongoCode {
 
   <<__Native("ZendCompat")>>
   public function __construct(mixed $code,
-                              mixed $scope): mixed;
+                              mixed $scope);
 
   <<__Native("ZendCompat")>>
   public function __toString(): mixed;
@@ -794,7 +794,7 @@ class MongoDate {
    */
   <<__Native("ZendCompat")>>
   public function __construct(mixed $sec,
-                              mixed $usec): mixed;
+                              mixed $usec);
 
   /* Returns a string representation of this date, similar to the representation
    * returned by microtime().
@@ -821,7 +821,7 @@ class MongoRegex {
   /* Creates a new regular expression.
    */
   <<__Native("ZendCompat")>>
-  public function __construct(mixed $regex): mixed;
+  public function __construct(mixed $regex);
 
   /* Returns a string representation of this regular expression.
    */
@@ -857,7 +857,7 @@ class MongoBinData {
    */
   <<__Native("ZendCompat")>>
   public function __construct(mixed $data,
-                              mixed $type): mixed;
+                              mixed $type);
 
   <<__Native("ZendCompat")>>
   public function __toString(): mixed;
@@ -873,7 +873,7 @@ class MongoInt32 {
   /* Creates a new 32-bit number with the given value.
    */
   <<__Native("ZendCompat")>>
-  public function __construct(mixed $value): mixed;
+  public function __construct(mixed $value);
 
   <<__Native("ZendCompat")>>
   public function __toString(): mixed;
@@ -889,7 +889,7 @@ class MongoInt64 {
   /* Creates a new 64-bit number with the given value.
    */
   <<__Native("ZendCompat")>>
-  public function __construct(mixed $value): mixed;
+  public function __construct(mixed $value);
 
   <<__Native("ZendCompat")>>
   public function __toString(): mixed;
@@ -986,7 +986,7 @@ class MongoTimestamp {
    */
   <<__Native("ZendCompat")>>
   public function __construct(mixed $sec,
-                              mixed $inc): mixed;
+                              mixed $inc);
 
   /* Returns the "sec" field of this timestamp.
    */
@@ -1021,7 +1021,7 @@ class MongoGridFS extends MongoCollection {
    * uses myfiles.files and myfiles.chunks collections.
    */
   <<__Native("ZendCompat")>>
-  public function __construct(): mixed;
+  public function __construct();
 
   <<__Native("ZendCompat")>>
   public function delete(mixed $id): mixed;
@@ -1071,7 +1071,7 @@ class MongoGridFSFile {
 
   <<__Native("ZendCompat")>>
   public function __construct(mixed $gridfs,
-                              mixed $file): mixed;
+                              mixed $file);
 
   /* Warning: this will load the file into memory. If the file is bigger than
    * your memory, this will cause problems!
@@ -1109,7 +1109,7 @@ class MongoGridFSCursor extends MongoCursor {
                               mixed $connection,
                               mixed $ns,
                               mixed $query,
-                              mixed $fields): mixed;
+                              mixed $fields);
 
   <<__Native("ZendCompat")>>
   public function current(): mixed;
@@ -1219,7 +1219,7 @@ class Mongo extends MongoClient {
    * of the parameters.
    */
   <<__Native("ZendCompat")>>
-  public function __construct(mixed $server = null, mixed $options = null): mixed;
+  public function __construct(mixed $server = null, mixed $options = null);
 
   <<__Native("ZendCompat")>>
   public static function getPoolSize(): mixed;

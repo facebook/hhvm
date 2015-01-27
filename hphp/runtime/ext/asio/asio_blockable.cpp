@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 #include "hphp/runtime/ext/asio/await_all_wait_handle.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
+#include "hphp/runtime/ext/asio/condition_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
@@ -40,6 +41,7 @@ namespace {
       case Kind::GenMap:         wh->asGenMap()->onUnblocked(); break;
       case Kind::GenVector:      wh->asGenVector()->onUnblocked(); break;
       case Kind::Static:
+      case Kind::Condition:
       case Kind::Reschedule:
       case Kind::Sleep:
       case Kind::ExternalThreadEvent:
@@ -56,6 +58,14 @@ c_BlockableWaitHandle* AsioBlockable::getBlockableWaitHandle() const {
       c_BlockableWaitHandle::blockableOff()));
 }
 
+c_ConditionWaitHandle* AsioBlockable::getConditionWaitHandle() const {
+  assert(getKind() == Kind::ConditionWaitHandle);
+  return reinterpret_cast<c_ConditionWaitHandle*>(
+    const_cast<char*>(
+      reinterpret_cast<const char*>(this) -
+      c_ConditionWaitHandle::blockableOff()));
+}
+
 void AsioBlockableChain::unblock() {
   auto cur = m_firstParent;
   while (cur) {
@@ -65,6 +75,9 @@ void AsioBlockableChain::unblock() {
     switch (cur->getKind()) {
       case AsioBlockable::Kind::BlockableWaitHandle:
         dispatchUnblock(cur->getBlockableWaitHandle());
+        break;
+      case AsioBlockable::Kind::ConditionWaitHandle:
+        cur->getConditionWaitHandle()->onUnblocked();
         break;
     }
 
@@ -78,6 +91,9 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
       case AsioBlockable::Kind::BlockableWaitHandle:
         cur->getBlockableWaitHandle()->exitContextBlocked(ctx_idx);
         break;
+      case AsioBlockable::Kind::ConditionWaitHandle:
+        cur->getConditionWaitHandle()->exitContextBlocked(ctx_idx);
+        break;
     }
   }
 }
@@ -90,6 +106,9 @@ Array AsioBlockableChain::toArray() {
       case AsioBlockable::Kind::BlockableWaitHandle:
         result.append(cur->getBlockableWaitHandle());
         break;
+      case AsioBlockable::Kind::ConditionWaitHandle:
+        result.append(cur->getConditionWaitHandle());
+        break;
     }
   }
 
@@ -100,9 +119,13 @@ c_BlockableWaitHandle*
 AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
     switch (cur->getKind()) {
-      case AsioBlockable::Kind::BlockableWaitHandle:
+      case AsioBlockable::Kind::BlockableWaitHandle: {
         auto const wh = cur->getBlockableWaitHandle();
         if (wh->getContextIdx() == ctx_idx) return wh;
+        break;
+      }
+      case AsioBlockable::Kind::ConditionWaitHandle:
+        // ConditionWaitHandle not supported in legacy dependency stack.
         break;
     }
   }

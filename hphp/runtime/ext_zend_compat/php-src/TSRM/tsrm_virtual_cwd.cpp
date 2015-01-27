@@ -1,6 +1,6 @@
 #include "hphp/runtime/ext_zend_compat/php-src/TSRM/tsrm_virtual_cwd.h"
 
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 #define CWD_STATE_COPY(d, s)                       \
   (d)->cwd_length = (s)->cwd_length;               \
@@ -17,7 +17,7 @@ virtual_cwd_globals cwd_globals;
 #endif
 
 CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) {
-  HPHP::Variant rp = HPHP::f_realpath(path);
+  HPHP::Variant rp = HPHP::HHVM_FN(realpath)(path);
   if (rp.isBoolean()) {
     assert(!rp.toBoolean());
     return nullptr;

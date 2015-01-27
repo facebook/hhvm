@@ -15,8 +15,6 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-// TODO(#4489053) This is almost a direct copy-paste, but it could be abstracted
-//                and cleaned up relatively easily
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"

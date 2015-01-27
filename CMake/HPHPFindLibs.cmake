@@ -17,8 +17,6 @@
 
 include(CheckFunctionExists)
 
-add_definitions("-DHAVE_QUICKLZ")
-
 # libdl
 find_package(LibDL)
 if (LIBDL_INCLUDE_DIRS)
@@ -78,9 +76,10 @@ if (LIBMEMCACHED_VERSION VERSION_LESS "0.39")
   message(FATAL_ERROR "libmemcache is too old, found ${LIBMEMCACHED_VERSION} and we need 0.39")
 endif ()
 include_directories(${LIBMEMCACHED_INCLUDE_DIR})
+link_directories(${LIBMEMCACHED_LIBRARY_DIRS})
 
 # pcre checks
-find_package(PCRE REQUIRED)
+find_package(PCRE)
 include_directories(${PCRE_INCLUDE_DIR})
 
 # libevent checks
@@ -153,6 +152,12 @@ if (LZ4_INCLUDE_DIR)
   include_directories(${LZ4_INCLUDE_DIR})
 endif()
 
+# fastlz
+find_package(FastLZ)
+if (FASTLZ_INCLUDE_DIR)
+  include_directories(${FASTLZ_INCLUDE_DIR})
+endif()
+
 # libzip
 find_package(LibZip)
 if (LIBZIP_INCLUDE_DIR_ZIP AND LIBZIP_INCLUDE_DIR_ZIPCONF)
@@ -221,15 +226,17 @@ if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
     INCLUDE(CheckCXXSourceCompiles)
     CHECK_CXX_SOURCE_COMPILES("
 #include <jemalloc/jemalloc.h>
-int main(void) {
-#if !defined(JEMALLOC_VERSION_MAJOR) || (JEMALLOC_VERSION_MAJOR < 3)
-# error \"jemalloc version >= 3.0.0 required\"
+
+#define JEMALLOC_VERSION_NUMERIC ((JEMALLOC_VERSION_MAJOR << 24) | (JEMALLOC_VERSION_MINOR << 16) | (JEMALLOC_VERSION_BUGFIX << 8) | JEMALLOC_VERSION_NDEV)
+
+#if JEMALLOC_VERSION_NUMERIC < 0x03050100
+# error jemalloc version >= 3.5.1 required
 #endif
-  return 0;
-}" JEMALLOC_VERSION_3)
+
+int main(void) { return 0; }" JEMALLOC_VERSION_MINIMUM)
     set (CMAKE_REQUIRED_INCLUDES)
 
-    if (JEMALLOC_VERSION_3)
+    if (JEMALLOC_VERSION_MINIMUM)
       message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
       set(JEMALLOC_ENABLED 1)
     else()
@@ -283,6 +290,18 @@ include_directories(${Mcrypt_INCLUDE_DIR})
 # OpenSSL libs
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
+
+# LibreSSL explicitly refuses to support RAND_egd()
+SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("#include <openssl/rand.h>
+int main() {
+  return RAND_egd(\"/dev/null\");
+}" OPENSSL_HAVE_RAND_EGD)
+if (NOT OPENSSL_HAVE_RAND_EGD)
+  add_definitions("-DOPENSSL_NO_RAND_EGD")
+endif()
+
 
 # ZLIB
 find_package(ZLIB REQUIRED)
@@ -482,7 +501,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})
 
-  target_link_libraries(${target} ${LIBMEMCACHED_LIBRARIES})
+  target_link_libraries(${target} ${LIBMEMCACHED_LIBRARY})
 
   target_link_libraries(${target} ${CRYPT_LIB})
 
@@ -490,7 +509,7 @@ macro(hphp_link target)
     target_link_libraries(${target} ${RT_LIB})
   endif()
 
-  if (LIBSQLITE3_LIBRARY)
+  if (LIBSQLITE3_FOUND AND LIBSQLITE3_LIBRARY)
     target_link_libraries(${target} ${LIBSQLITE3_LIBRARY})
   else()
     target_link_libraries(${target} sqlite3)
@@ -520,7 +539,12 @@ macro(hphp_link target)
     target_link_libraries(${target} pcre)
   endif()
 
-  target_link_libraries(${target} fastlz)
+  if (LIBFASTLZ_LIBRARY)
+    target_link_libraries(${target} ${LIBFASTLZ_LIBRARY})
+  else()
+    target_link_libraries(${target} fastlz)
+  endif()
+
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
 
@@ -542,5 +566,9 @@ macro(hphp_link target)
 
   if (LIBLLVM_LIBRARY)
     target_link_libraries(${target} ${LIBLLVM_LIBRARY})
+  endif()
+
+  if (LINUX)
+    target_link_libraries(${target} -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
   endif()
 endmacro()

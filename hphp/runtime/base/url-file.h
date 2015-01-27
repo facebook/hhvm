@@ -43,7 +43,7 @@ public:
   virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool seekable() { return false; }
   virtual bool flush();
-  virtual Array getWrapperMetaData() { return m_responseHeaders; }
+  virtual Variant getWrapperMetaData() { return Variant(m_responseHeaders); }
   String getLastError();
 
 private:

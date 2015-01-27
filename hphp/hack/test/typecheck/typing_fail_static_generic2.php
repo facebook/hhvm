@@ -12,7 +12,7 @@
 class A<T> {
   public function foo(T $v): void {
     static $x = null;
-    if(is_null($x)) {
+    if (is_null($x)) {
       $x = $v;
     }
   }

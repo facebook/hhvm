@@ -1,0 +1,983 @@
+"Ballmer" 29-Jan-2015
+ - Miscellaneous fixes for clang dev build
+ - Make gd-jpeg compatible with jpeg-9
+ - [hh] typechecker: parse array-string-keys within interpolated strings
+ - [hh] T_FINALLY is a standard token
+ - [hack] Add option to format PHP and decl files
+ - [hhvm][easy] Care a little less about paths in filter_input_array.php
+ - Add HH\Asio\curl_exec() as an awaitable \curl_exec()
+ - Implement IntlChar class
+ - Add imagesetinterpolation to gd extension
+ - Add per-branch cli option support to benchy
+ - [hhvm] Restore -g to cmake debug builds
+ - Fix ReflectionClass method ordering
+ - Allow slightly malformed serialized strings, because PHP
+ - Use parameter coercing rather than explicit cast with chr()
+ - [hhvm] MySQLi: Set fetched fields prior calling a constructor
+ - Move Editor plugins to wiki
+ - Remove $ENV config from FindMySQL.cmake
+ - Fix bugs in floor and ceil behavior
+ - "Fix" tvCanBeCoercedToNumber() for malformed numeric strings
+ - Add missing file constants; use HNI for some existing ones too
+ - Fix SmartPtr move constructor on Variant.
+ - Trim values in Accept-Encoding: header filed
+ - Add "Vary: Accept-Encoding" to reposnse header when compression is enabled
+ - Fix memory leaks in MySQL common and MySQLi
+ - [hack] Various fixes for hh_format
+ - [hack] Allow array-get syntax for KeyedContainer
+ - [hack] Remove _tags file for Ocaml 3.12 compatibility
+ - Fix docs for DecodeCufIter
+ - Install hphp/runtime/version.h during make install
+ - Fix leak on bitwise string operations
+ - Improve test run to checking $_SERVER/$_ENV
+ - Cloning exceptions should raise a fatal error
+ - Disallow destructor/clone method be static
+ - [hhvm] Add version binary
+ - Update exception classes, fixes #4442
+ - Add a system profiler and hook some actions of interest to New Relic
+ - [hphp] Added NumberFormatter locale/rounding tests
+ - Add llvm/vasm bytecode counters
+ - [hack] Add support for immediately-executed async lambdas
+ - [hack] Add --no-load option, make load script path relative
+ - [hack] Have hh_server invoke the load script
+ - Add TYPO3 Unit tests to the OSS framework parity check
+ - Array multi sort
+ - Fix some stability issues in the server tests
+ - Remove Redis::SERIALIZER_IGBINARY constant
+ - Produce easier to handle HHVM version identifiers
+ - Fix bizarre memory corruption on exit
+ - Add Hack typing for array_values
+ - remove vim editor-plugin
+ - [hhvm] Fix mysqli segfault
+ - [hack] Improve position info in member-not-found error
+ - Update third party hash for small libmbfl change
+ - [hh] typechecker: canonicalize function names
+ - Capture full line ending for single-line comments
+ - Add a bunch of async helper functions
+ - [hack] Add --strict/--loose option to AT converter
+ - Autocomplete - don't suggest methods that aren't visible when class isn't fully known
+ - [hack] Fix return-in-finally check.
+ - [hack] Fix OSS tests
+ - [hack] Avoid relinking all of hh when format_hack changes
+ - [hh] updated various hhi files
+ - [hh] typechecker: parse "true", "false", "null", "array" more correctly
+ - [hh] hack build: don't generate newv calls in buildEgo
+ - [xenon] Fix attribution of CPU time spent in the asio scheduler
+ - Add StructArrays
+ - Don't let GD create images that would exceed the request memory limit
+ - [hack] Set up proper test scaffold for hh_format
+ - [hack] Allow "$c[] = .." when $c is declared as a collection w/o type params
+ - [hack] Fix race in declaration of BuiltinEnum
+
+"Austin" 15-Jan-2015
+ - [asio] Introduce ConditionWaitHandle
+ - [hack] `hh_server --version` should not require a root
+ - [hack] Log exceptions thrown in the master process.
+ - [hack] Enable unused var warnings under typing/
+ - [hh] typechecker: unbound name errors in partial/decl mode
+ - [hack] Disallow trailing comma in used trait list
+ - [hack] Have coverage / coloring use a hook
+ - [hack] Create lock file if it doesn't exist
+ - Fix std::terminate when debugger is not attached during unwind
+ - [hack] Make `trait ... extends ...` into a parse error
+ - [hack] Make multiple inheritance a parse error
+ - [hh] typechecker: support Enum in xhp attribute declarations
+ - [hack] Raise type errors on undefined static polymorphism lookups.
+ - Fix realpath lookup
+ - [hack] Let any user write to the saved state dir.
+ - [hack] Don't have an optional param that's an option type
+ - RequestInitDocument   404  friendly reminder
+ - Implement Phar::running()
+ - Make Redis utility methods public
+ - Contiguous Heap Prototype
+ - [hh_format] Don't add trailing commas in used trait lists
+ - [hh_format] Don't add trailing commas in template parameter lists
+ - [hh_format] Fix bug with hh_format --diff duplicating some lines.
+ - [hh_format] Don't destroy whitespace in files with "**/" in comments
+ - fix for iconv_mime_decode_headers function skipping headers
+ - Add CPU option for JIT (EvalJitCPU). Defaults to 'native'.
+ - Limit glob flags to only ones supported by php
+ - make recursion limit for unserialize
+ - Allow trailing commas in short-lamba expressions
+ - Fix some leaks in new_socket_connect
+ - fixed decoding utf8 strings so they correctly return '?' on invalid sequences
+ - Actually get the realpath first thing when searching for a file.
+ - Faster UnitCache
+ - Simple speedup for is_dir
+ - [hh] typechecker: demand consistent casing for primitive typehints
+ - Support timestamp begins and ends for getTransitions()
+ - Add global value numbering pass
+ - Support \u escape sequences in double-quoted strings
+ - ResourceLimit.SerializationSizeLimit can be overwriten from the vhost config
+ - Check Eval.JitAMaxUsage when deciding whether to start profiling a function
+ - Allow hex in mb_encode_numericentity
+ - [hhvm] Work around leak in boost flat_set
+ - Add stream_await() for async stream "blocking"
+ - [typechecker] Add support for reading XHP attributes via "->:"
+ - Modify rpoSortCfg to reduce memory usage in refcount-opts
+ - Fix #4380, making get code and get message final
+ - Add PHP_INT_MIN
+ - Disable PGO for pseudo-mains
+ - Mock date/time functions in Isolation.php
+ - Fix error_get_last() not cleared when error handle function entered
+ - [hhvm] RFC: Native Property Handlers
+ - [hack] Define proper constants for CURLOPT and friends
+ - Make newlines in http headers a fatal error.
+ - Add Hack typing to array_keys
+ - Use a custom implementation of strtoll for unserialize
+ - [hack] control whether unseen <?php code is assumed via .hhconfig
+
+Z* 18-Dec-2014
+ - Converted objprof extension to use heap parsing
+
+"Yelawolf" 4-Dec-2014
+ - Fix comparison of overflowing strings
+ - Fix potential memory corruption during ArrayData::set
+ - Introduce util to restart current process
+ - Share variable environment in eval'd assert
+ - [Find] Only escape spaces in paths for find
+ - Don't ignore Eval.JitAHotSize
+ - Fix checkCfg's defined-tmp checks to be aware of edge-defined tmps
+ - Fix bugs relating to edges in IRInstruction::become
+ - Fix insertPhis calls to IRUnit::replace()
+ - Use sha1sum for the repo-schema
+ - [hh] typechecker: add constants to hh_client --show
+ - [hack] Dump typedef info in `hh_client --show`
+ - Make BigNode parsable, extend HeapIter to visit BigNodes.
+ - Allow static invocation of DOMDocument::load* methods
+ - Allow "array" with type args to be used in XHP attribute declarations
+ - HTMLEncode strings in wddx_serialize_value()
+ - [hack] Make dependency on lz4 optional for OSS build.
+ - [hack] Have hh_server take the list of files to recheck as relative paths
+ - [hack] Docblock parser for AT
+ - Add version number to imagick extension
+ - Support Authorization header in apache_request_headers()
+ - [hack][build] Add needs_rerun hook for XController build step
+ - Fix call to fetchObject without class name
+ - Add possibility to create a DateTime object with timezone
+ - DateTimeImmutable::createFromFormat returns false on failure
+ - [hh] typechecker add PREG_* constants to hhi
+ - Raise warning when put_contents on non-regular file with exclusive lock.
+ - Use uncounted strings to cache non-static regexes
+ - Use specializeExact whenever we know AttrNoOverride from whole program analysis
+ - Fix some not-type-safe LdRef code generated in a situation with SetOpL
+ - Split inner ref type checks into a separate instruction from LdRef
+ - Add support for stream wrapper in include_path.
+ - cmake option to enable avx2 instruction support
+ - Add missing default to PharData::decompress()
+ - [hack] Add lz4 compression when saving server state.
+ - Fix leak in tvCoerce*
+ - Trie Search - optimizations for JS
+ - Don't throw an exception on unknown IP address for OSS
+ - [hh] parity: match php 5.6 in treatment of array_fill with num = 0
+ - Make ob_start function signature PHP 5.6 compatible
+ - Fix issues with private properties and apc
+ - Implement remaining straightforward vasm ops in llvm backend
+ - [hack] Type strlen's return value.
+ - [hack] add additional iterator interfaces
+ - Improve segaddr fixing for 32-bit destructors
+ - Fix parent::__cOnStRuCt and similar with PHP4 constructors
+ - Make stats.json on the admin server return valid json
+ - [hack] Simplify coverage JSON output, and add non-JSON output option.
+ - Remove kernel version assertions
+ - [hack] Fix bad escaping of directory names
+ - [hack] Add some hhi constants for pcntl.
+ - Fix problems in getCurrentPropertyOffset relating to m_ni.inputs
+ - Fix CSE to be aware of where SSATmps are known to be defined
+ - Add an analysis module for functions that query information about the IR
+ - Don't JIT functions that use $php_errormsg or $http_response_code
+ - Fix default SOAP HTTP client
+ - [hack] Member access is `->` followed by lvar, not word
+ - Fix comparison between doubles and hex numeric strings
+ - Implement a bunch more vasm instructions in llvm backend
+ - Enable ASAN for smart allocator
+ - Record the start time for every request
+ - Fix parsing of binary literals denoted with a capital '0B'
+ - Fix Symfony's it's not safe to rely on system timezone setting errors
+ - Allow non-static expressions in function parameter defaults
+ - Fix a bug in Index::lookup_constraint
+ - [hack] Add logging to server_options_cmd.
+ - Fix optional 'errorcode' parameter is not set up properly
+ - Fix PHP primitive default parameter type check
+ - Weaken assert in FileUtil::canonicalize
+ - [hack] Error when using "shape" as a type
+ - Fix getOldestStartTime
+ - Add zlib.output_compression ini option
+ - Add missing argument to DOMXPath::{query,execute}()
+ - htmlentities() should output valid ISO-8859-1 characeters to appropriate entities
+ - Remove bad assert from BaseVector::data()
+ - Cleanup sock and pid files on graceful exit from FastCGI
+ - [hack] Add script for determining server startup options
+ - [hack] Record init time in log output.
+ - Fix some bugs in intersecting specialized types
+ - [hack] Fix duplicate unbound name errors
+ - Update OCaml to 4.02.1
+ - [hhvm] Add per kind ArrayFunc counters for ArrayTracer
+ - Fix use-after-free in the access logs
+ - Wait for clean shutdown on SIGHUP
+ - [hhi] add at() to MysqlRow in hhi file
+ - [memoize] Go back to individual cache props for statics
+ - Break regions after FCall & friends when using LLVM
+ - Remove support for magic quotes (also removed in PHP 5.4)
+ - qlzcompress is not available everywhere, and there's no support for it in OSS
+ - Change the Profiler constructor to not necessarily force CPU affinity.
+ - Add getTypeText to ReflectionParameter
+ - Remove trailing junk from IP addresses for sockets
+ - Preserve index of sockets passed into/out-of socket_select()
+ - Fix lchown when no user found
+ - [hh] typechecker: split function bodies into named and unnamed
+ - [hack] fix error with capturing locals for a foreach using a ref
+ - guess root from supplied filename, where that makes sense
+ - Show a nice error when an invalid argument is passed to hphp -t
+ - Expose Imagick::getImageMimeType to userland
+ - SplFixedArray::FromArray() throws InvalidArgumentException not Exception
+ - Make default_socket_timeout match PHP 5.x
+ - VerifyRetTypeC optimizations for repo-mode
+ - Turn off refcount opts by default when HHIRBytecodeControlFlow is on
+ - Make profiled packed array gets not rejoin the main line
+ - Side exit on surprise flags for backward jumps
+ - Print edges with colors in IR dot graphs; make dotBodies usable
+ - Fix region-method support for loops
+ - Correct the return type of BaseG; fix some missing renames of Mem -> Memb
+ - Adopt PHP7's looser handling of return values in user session handler
+ - Honor the Redis timeout
+ - Fix mysqli_options. Stop asserting.
+ - Fix some bugs in hhbbc support for http_response_code, php_errormsg
+ - Introduce immediately executed async lambdas
+ - Allow nested namespaces with sane behavior
+ - Updated win32-cygwin patch Fixes Issue #4062
+ - [hh] typechecker: ReflectionClass hhi fixup
+ - [hack] Add hh_server --version
+ - Fix a few memory management issues in DOMDocument
+ - Prevent m_nextKI from going negative in MixedArray
+ - [hh] typechecker: declaration location in extend_final error
+ - [hack] Enable .hhconfig to control hh_server flags
+ - Respect status codes from `Status:` header in addition to `HTTP/` header
+ - Fix number_format() to deal with very large precisions/very large numbers
+ - Fix closure use var reflection for referenced vars
+ - Support self parameter typehint
+ - [h2tp] modify build to support h2tp
+ - [hh] hh_format: understand async lambdas
+ - [hack] added support for abstract class constants
+
+"Xzibit" 20-Nov-2014
+ - Fix readline request locals
+ - Don't leak HashContexts
+ - Fix a race freeing an APCHandle
+ - Don't clean up memory in AdminRequestHandler::abortRequest
+ - Fix setup/teardown for requests handled by WarmupRequestHandler
+ - Extend IR type system for more information about pointers
+ - Use proxygen as a git submodule
+ - Version of memcpy-x64 optimized for the tail end of 7,6,5,4 bytes in an N byte copy
+ - Eliminate default cases in DataType switches
+ - Match PHP5 backquote processing
+ - Add overflow info to is_numeric_string
+ - Add support for pre-built branches to benchy
+ - Allow calling closures inline
+ - Allow systemlib function declarations to use reserved words for function names
+ - Add HH\{int,float,bool} typehints to PHP
+ - Deep initialization for constant properties
+ - Enforce void return on native class constructors/destructors
+ - Replace NEWOBJ with newobj<T> and newres<T> functions
+ - Change default FCGI socket permissions
+ - Support openssl replacements which don't export RANG_egd()
+ - Fix use-after-free in TimeZone
+ - Support GCC/LLVM stack-smashing protection
+ - Make sure Type::Bottom is a subtype of everything
+ - Fix hphpd crash when printing systemlib classes
+ - Convert file extension to HNI
+ - Convert DOMDocument extension to HNI
+ - Convert POSIX extension to HNI
+ - Convert array_multisort to HNI
+ - Add fribidi extension for HHVM
+ - Mechanism for enabling request-local heap profiling
+ - Make prediction opts deal with arbitrary load/check instructions
+ - Add JSON output support to benchy
+ - HHIR pass to do dead store elimination on frame locals
+ - Adjust single parameter warnings for min()/max()
+ - Make AlwaysLogUnhandledExceptions=off and CallUserHandlerOnFatals=EnableHipHopSyntax
+ - Always use RuntimeOption::SourceRoot to resolve repo-auth lookups
+ - Refactor debugger tests
+ - Fix parser to allow "type" and "newtype" to be used as typevars
+ - Convert system/idl/function to HNI
+ - Remove type annotations for array_sum and array_product
+ - Don't populate the litstr-to-id map in RepoAuthoritative mode
+ - Move m_lineTable to a side table
+ - Only try to autoload classes with valid names
+ - Proper PDO connection errors
+ - Move hfsort linker script tool to OSS
+ - Move slow 'quick' tests to 'slow'
+ - Add option to make inconv actually match the docs
+ - Convert socket extension to HNI
+ - Convert stream extension to HNI
+ - Fix UserFile::access behavior to match PHP5
+ - Fix for wrong PATH_INFO and PATH_TRANSLATED (maybe)
+ - Move generated .h and .cpp to unique dir
+ - Fix for phat:// stream wrapper with no stub
+ - JSON encode closures as empty objects for PHP compat
+ - Disable parameter typehints for builtins to match PHP5
+ - Convert PDO extension to HNI
+ - Fix assert related to async return typehints
+ - Allow collections in array_sum() and array_product()
+ - Use the time in default xdebug output file
+ - Allow vxls to allocate vmsp during traces
+ - Only initialize sweepables on new threads
+ - Load Offset->line number mappings on demand
+ - Fix SOAP memory leak
+ - Add OSS support for benchy
+
+"Will.i.am" 13-Nov-2014
+ - Add benchy.py for benchmarking HHVM
+ - Tune and enable PGO for all functions
+ - Generate HHIR opcode table by extracting lines from ir.specification
+ - Convert a few more extensions to HNI
+ - Limit the maximum number of bytecode instructions in a region
+ - Improvements to <<__Memoize>>
+
+"Vanilla Ice" 27-Oct-2014
+ - Fix logging
+ - An async method's return annotation (if there is one) must be "Awaitable"
+ - Fix a bug in how __Memoize sets up FPI regions
+ - Fix issues with shutdown/postsend functions
+ - Fix is_callable for interface and abstract methods
+ - Added support for ReflectionFunction::getClosureThis()
+ - Add option to run perf to hhvm_wrapper
+ - Use a global cache for timezone info
+ - Implement readline_info()
+ - Fix NumberFormatter::format for string values
+ - Corrected socket connect for IPv6 hosts
+ - [hack] Fix parsing of postfix operators.
+ - Region selector improvements
+ - Disallow <<__Memoize>> on interfaces
+ - Convert APC to HNI
+ - Align recoverable fatal error's message with PHP
+ - [hack] Make hhi for some builtin constants.
+ - HHBBC improvements (enums, etc.)
+ - Properly shutdown debugger threads on exit
+ - [hack] support for 'abstract final' classes
+ - Convert string to HNI
+ - Fix SOAP extension type encoding
+ - make test runner not puke when run with xargs
+ - [hack] reflection support for first-class enums
+ - Make `yield;` a valid statement
+
+"Ultramagnetic" 9-Oct-2014
+ - Optimize strtr
+ - Closure::bind support
+ - Cleanup/shrink various runtime data structures
+ - Various jit performance optimizations
+ - Fix various debugger crashes
+ - Better handling of memory limits
+ - Hack: System user attributes will be prefixed with __, notably <<Override>> renamed to <<__Override>>
+ - Hack: Support for 'abstract final' non-instantiable non-inheritable "utility" classes
+
+"T-Pain" 25-Sep-2014
+ - Use vasm virtual registers in x64 backend, transition fully to vasm-xls
+ - 'arraykey' scalar typehint that accepts both ints and strings
+ - Add OSS benchmarking suite
+ - Fix PDO::bindColumn
+ - [resumable] Set resumed flag before suspending VarEnv
+ - Objprof for HHVM (Approx. instance counter)
+ - Make RUSAGE_THREAD available to getrusage PHP function
+ - clean up /tmp/test-run- files
+ - VASM register-coalescing via hinting
+ - Be more conservative about HNI types when there are InterceptableFunctions
+ - Add runtime support for null-safe method call operator "?->"
+ - Add sanity test system to OSS benchmarker
+ - Fix double deallocation of object in zend conversion of object to string
+ - [hhvm|memoize] Makes <<__Memoize>> work with arbitrary args
+ - Use raw troff encoding for official HHVM man page
+ - Add --php options to HHVM man page
+ - Fix GMP tests/crashes
+ - Implement posix_errno
+ - Xdebug remote debugging compatibility and bug fixes
+ - Add options parameter to DOMDocument::load/loadHTML()
+ - Add support for GNU tar symlinks to PharData
+ - Add max_file_uploads support
+ - Improve process error checking in perf runner
+ - posix_getgrgid()['members'] should be empty array if no users found
+ - Convert from jemalloc's obsolete *allocm() to *allocx()
+ - Use EqX instead of Eq for Obj/Num comparisons.
+ - make class closure consist with PHP
+ - Fix guard relaxation to work with bytecode control flow
+ - Allow vm-stack flushing in rpc threads
+ - stop killing LightProcesses while writing out stacktrace.log
+ - Get hhvm compiling with clang-3.5
+ - Update .hhi files for ConstSet, Set, and ImmSet
+ - Force the linker to keep symbols in lowmem on MacOSX
+ - Make guard relaxation work with unreachable code
+ - Add minimal hdf support to test runner
+ - Analyze/optimize pseudomains in hhbbc
+ - [hhvm|memoize] Fix segfault on certain memoized functions
+ - Support mappy ini configuration
+ - Xdebug cleanup and trivial features
+ - Abort the server if a request gets stuck
+ - Added support for Closure::bind()
+
+"Snoop Dogg" 11-Sep-2014
+ - VASM phase 1: emit vasm instructions, with existing register allocation
+ - More xdebug support
+ - [hack] Implement async lambdas.
+ - add process memory and code segment size to admin memory page
+ - Overhauled xdebug remote debugging testing
+ - Add a mechanism for building and testing a zend extension as a DSO.
+ - Support fast object allocation path when Eval.EnableObjDestruct call is on
+ - Static string table memory usage
+ - Implement parallel repo preloading.
+ - Add mcrypt constants to hhi
+ - Move var_dump() to HNI, kill off variable.idl.json
+ - JIT: Use std, boost, and folly instead of smart containers.
+ - Hack: Support for variance (+/-) annotations on type-parameters
+ - Implement APCIterator
+ - Convert v?s?printf() to HNI using Variadics
+ - Enable variadics for HNI functions/methods
+ - Smooth a wrinkle in HHVM's safesort impl
+ - Make Set implement KeyedIterable and support bracket syntax for reading
+ - Covariance fixes
+
+"RBX" 28-Aug-2014
+ - Make MemExceeded flag sticky
+ - Check for OOM during json decoding
+ - Check surprise flags when unserializing arrays and objects
+ - Limit curl timeout to remaining request timeout
+ - Add variant of openssl_pkcs7_verify that ignores cert expiration
+ - Numerous changes to support xdebug
+ - Remove use of non-threadsafe strtok()
+ - Numerous changes to normalize INI setting names
+ - update to new sqlite
+ - <<__Memoize>> support
+ - Hack: Print backtrace when worker dies
+ - Parser support for "varray(..)"
+ - Introduce kVPackedKind for vector-like arrays
+ - Move mailparse to HNI
+ - VASM start phase 1; emit vasm for some instructions
+ - Fix in headers defines for cygwin
+ - [hack] Parser: Fix decl mode's confusion of type hints and xhp.
+ - Create a unified stack for Xenon
+ - Move debugger from IDL to HNI
+ - Fix mcrypt_create_iv(..., MCRYPT_RAND) to auto-seed RNG
+ - Fix information leak in hash_equals() implementation
+ - don't statically link libgcc/libstdc++ by default on OSX
+ - Adds ssdeep module to HHVM
+ - added new raise_error family functions that skip the top frame of the backtrace.
+ - Add initial support for -d outside of --php mode
+ - Fix covariance for Const{Vector,Map,Set}, add tests
+ - GMP cleanup/fixes
+ - Implement SplDoublyLinkedList::add
+ - Link against LLVM library if present.
+ - Disallow multiple 'default:' blocks in a single switch
+ - Introduce async function lambdas
+ - Document the PHP profilers
+ - Fix sample profiler output; make it more efficient
+ - Properly shut down fastcgi worker threads when connection is closed
+ - Delete SimpleProfiler
+ - Create HHVM man page
+ - Improved PHP compatibility in the reflection API.
+
+"Queen Latifah" 14-Aug-2014
+ - Implement RecursiveCallbackFilterIterator
+ - cmake installations should no longer put files in hphp and now put them in hhvm
+ - Fix error for (Recursive)CachingIterator::ctor's param 1
+ - Force OOM check on large smart allocations
+ - Support stream wrappers in XML parser extensions, add external entity loader
+ - Fix LowPtr load in codegen
+ - Fix race condition in DebuggerProxy start/stop
+ - Log per request if oom or timeout triggered in dynostats
+ - Break out hhvm request timeout / memout counters for psp vs non-psp
+ - Support collections for third parameter of preg_replace() and friends
+ - Added functions imagewebp and imagecreatefromwebp
+ - Fix mb_convert_case when encoding set other than default
+ - Added function imagepalettecopy to ext_gd
+ - Remove reflection hacks for primitive typehints
+ - Fixed tempnam() creates paths with '//'
+ - Add LibGMP extension
+ - Fix heap overflow in sql_regcase() for input >1GB
+ - Add HHVM hookups for folly::Singleton
+ - Fix isset on classes extending ArrayObject
+ - Only track live objects that actually have destructors
+ - Specify ssl cipher list for curl with OpenSSL only
+ - Remove support for "service threads"
+ - PDO MySQL's getCode() didn't match errorInfo
+ - Run usercode before ending the request
+ - Make DynamicExtensions work in ini
+ - Provide backup utf8 sanitizer when UConverter is unavailable
+ - Pass duplicate flag to SNI Initial Handler Callback
+ - fb_intercept now accounts for variadic functions
+ - Add variadic function to fb_intercept test
+ - Implemented basic xdebug tracing
+ - Rename snappy methods
+ - Add sort_flags to ArrayObject::asort
+ - Changed CRYPT_BLOWFISH to 1 because apparently it is available
+ - Convert ext/mysql to HNI
+ - Add log when memory usage reached the MaxRSS
+ - Fix http headers parsing + Remove unused code + Fix indentation
+ - Fixed error output for json_encode
+ - Corrected the var_dump output for Exception class
+ - Relax restrictions on the typing of class constant shape field names.
+ - Fix file:// URL decoding in libxml functions and elsewhere
+
+"Public Enemy" 31-July-2014
+ - Interface requirements (similar to trait requirements) enforced
+ - Initial support for PHP5.6 argument unpacking: f($x, $y, ...$args)
+ - Hack: hhi files are embedded in the hh_server binary
+ - removed trampolines and the Eval.JitTrampolines option
+ - Hack: improved support for Generators, including async generators
+ - Documentation of PHP-level profiling in doc/profiling.md
+ - Cleanup of PHP-level profilers
+ - Change default for Eval.EnableObjDestructCall to true
+ - Bundle PCRE 8.32 with open-source HHVM, so we can use the JIT
+
+"Outkast" 17-July-2014
+  - PHP_VERSION is now 5.6
+  - Introduce Dbl specific relational IR opcodes
+  - Expose APC info to admin port
+  - Improve Zend compatibility in the reflection API
+  - Implement xdebug_call_class
+  - Hack: first version of formatter
+  - Convert ext/xsl to HNI
+  - Hack: improve init time
+  - Remove JIT::RuntimeType
+  - Fix floating-point overflow for binary, octal and hex literals
+  - Collections: Vector::addAllKeysOf
+  - Hack can build on OSX now
+  - Fix await/yield operator precedence
+  - Fix various xcontroller issues
+  - Enable HHIRBytecodeControlFlow by default
+  - Various changes/fixes to WholeCFG region selector
+  - Introduce async generators
+  - Kill clock_settime
+  - Fix Memcache::get($keys) when $keys is an array
+  - Implement xdebug_call_function
+  - Change order of wait handle processing from FIFO to LIFO
+  - Add Redis::_serialize()
+
+"Notorious B.I.G." 25-Jun-2014
+ - Remove Translator::analyze (replaced by tracelet region selector)
+ - Allow empty keys in hash_hmac() and hash_hmac_file()
+ - Interface requirements supported in parser
+ - Implement xdebug_{peak_,}memory_usage
+ - Inline singleton-pattern functions
+ - Cleanup in PhpFile and FileRepository
+ - Fix mysqli_query return value for query without result
+ - Implement xdebug_call_file
+ - Add fastlz support to memcached extension
+ - Fix ini_get to return false for non-supported settings
+ - Fix PHP version constants
+ - All numeric comparisons involving NAN, except != and !==, are now false.
+ - Implement xdebug_call_line
+ - Optimize ini_get
+ - Remove dump-file-repo admin command
+ - Fix stdclass promotion of static private properties
+ - Remove unused locals in global dce (HHBBC)
+ - Get mockery at 100%
+ - Fix casting resource to object
+ - Relocate code to arbitrary alignment
+ - Always let the first character through for camelcase searching
+ - Implement xdebug configuration options
+ - Convert ext/memcache to HNI
+ - Match php5's memcache getoption
+ - ./configure --help now has all the options
+ - mysqli: return false on non-selects
+ - Don't include bt_handler or killpg in backtraces
+ - Don't buffer overrun on bad DNS TXT records
+ - Fixed property access to DOM and XMLReader classes
+ - Add support for ParamCoerceModeFalse
+
+"Mos Def" 11-Jun-2014
+ - Turn on new tracelet region selector by default; analyze() is deprecated
+ - Fix a bug in debugBacktrace with NativeImpl methods
+ - Request local allocator now uses logarithmically spaced size classes
+ - Improvements to JIT'd FCallBuiltin to cause fewer spills
+ - Enable vtable-style dispatch on methods marked "abstract"
+ - JIT several instructions that were being punted:  Unbox, File, Dir
+ - Increase "hinted drop" time on write lease, improving JIT'd code layout
+ - Implemented __toString functions in reflection classes
+ - Several tc-print bug fixes
+ - Some improvements in hhbbc arithmetic type inference
+ - More service requests are "ephemeral", reducing wasted stubs space
+ - HH\Vector now has a packed array internally, for O(1) conversions to array
+ - current() and key() now support expressions that can't be taken by reference
+ - Fix a long-standing but very rare race condition with Closure class names
+ - gcc 4.8 is the new minimum to build
+ - Various bug/compat fixes in Soap, SimpleXML, ArrayObject, DOMNode, mysqli
+ - Add a scheme to extend support for efficient packed arrays w/ cap up to 2^32
+ - Move vmfp, vmsp, and vmpc into RDS
+ - Fix some hard-to-hit bugs in inlining relating to stack overflow checks
+ - Faster int to double conversion when calling builtins from the JIT
+ - Fix ReflectionParameter::getClass for scalar typehints
+ - better tuning of the PGO 'hot function' threshold
+ - performance improvements to calling native class methods
+ - improve performance of async functions that exit via exception
+ - several bug fixes in refcount optimization pass relating to async functions
+ - More hhir-related docs in the hackers-guide
+ - Initial support for relocating generated machine code
+ - JIT optimizations for count()
+ - Corrected the result of var_dump and print_r for ArrayObject
+ - fix HH\autoload_set_paths with nested maps
+ - make ReflectionClass serializable
+ - ext/standard/output HNI conversion
+ - allow usage of zend-qsort in user sorts with a runtime option
+
+"LL Cool J" 28-May-2014
+ - Over 200 other bug fixes (go lockdown!)
+ - Every HDF setting is now available as INI
+ - Cut session_id() size by 1/2
+ - Added 'Z' format string for pack/unpack
+ - We now build on clang
+ - Fix pcre cache to not fatal when full
+ - Implement $php_errormsg
+ - Adding -n CLI option to hhvm php mode
+ - Fix substitution of invalid UTF8 sequences in htmlspecialchars
+ - FastCGI: Use SCRIPT_FILENAME as the PHP script to run
+ - Can create DateTimeZone's from abbreviations
+ - Put all fastcgi params into $_SERVER
+ - Many DOM classes are now serializable
+ - Define the xhp tokens
+ - Many reflection changes for perf and compatibility
+ - Default fastcgi to listen on 127.0.0.1
+ - remove register_cleanup_function
+ - Map: reserve()
+ - Set: retain(), reserve(), addAllKeysOf()
+ - {Set|ImmSet|Vector|ImmVector}::fromKeysOf()
+
+"Kanye West"
+  - Backport fix for CVE-2011-2202
+  - Interfaces {Keyed}Container match arrays *and* collections, not iterables
+  - Added ** and **= operators to HHVM and more compatibility fixes with PHP5.6
+  - Fixes and improvements to collections
+  - Replace json decoder with json-c library
+  - Document VMRegAnchor and isVMFrame()
+  - Improvements to array iterator code
+  - Improvements to the type checker
+  - Allow parser to be generated with bison 3
+  - Improvements and speed up to reflection code
+
+"Jay-Z" 9-May-2014
+  - Make handling of code.hot overflows more robust
+  - Catch server errors sooner
+  - Fix segfault and infinite recursion in fileinfo extension
+  - Resolve systemlib constants at compile time
+  - Resume resumables natively
+  - Import round() table optimizations from php-src
+  - Delete bytecode Peephole optimizer
+  - Remove most of annotation.cpp, and some other code gated on !UsedHHBBC
+  - Create phis for locals
+  - Fix free of "" in rfc1867PostHandler
+  - Add firstValue(), firstKey(), lastValue(), lastKey() to collections
+  - Add concat() to collections
+  - Clarify Hack license
+  - Add CakePHP3 to test runner
+  - Better error when TC is full
+  - Add hash_equals() from PHP 5.6
+
+"Insane Poetry" 24-Apr-2014
+  - Support for PHP 5.6 variadic ...$args syntax for func declarations
+  - Open source HHMeasure, a simple and extensible microbenchmarking tool
+  - Added a new time-based sampling profiler (Project Xenon)
+  - Fix PCRE unicode handling
+  - Convert Zend compatibility layer and various extensions to HNI
+  - Encode execution mode (eager or resumed) into SrcKey
+  - Merge eager and resumed parts of async functions
+  - Rework various async / continuation bytecode instructions
+
+"House of PHPain" 1-Apr-2014
+  - Allow direct arg passing with up to 15 params (7 if at least one is a double)
+
+"Ghostface Killah" 17-Mar-2014
+  - Remove "HipHop" from error messages
+  - Add __IsFoldable user attribute for const-foldable functions
+  - Add __Native("NoFCallBuiltin") UA for builtins which need an actrec
+  - Add support for testing different outputs in repo mode
+  - Implement remaining functionality from intl extension
+  - Implement XSL extension
+  - Implement Stream Filters
+  - Improve php.ini support and get ready to kill HDF files
+  - Parse config files as ini files, unless filename contains '.hdf'
+  - Various fixes to Redis, JSON, SPL, DateTime, MySQLi, and others
+  - Remove C<T>Ref typedefs (use const T& now)
+  - JIT default on in command line mode
+  - gethostname() just returns what the syscall returns (Zend compat)
+  - HHBBC turned on in the build for facebook.com
+
+"Fifty Cent" 3-Mar-2014
+  - Array parameter type constraints implicitly cast collections to arrays
+  - Fix issues with feof and fwrite
+  - Fix issues with sleep and inaccessible properties
+  - Dump a jemalloc pprod dump when a request hits OOM
+  - Make method_exists work with interface inheritance
+  - Fix crash in preg_replace with /e
+  - Support filename and content type in Curl uploads
+  - MySQLi fixes
+  - Handle relative paths in is_dir
+  - Add string conversion for array_fill_keys
+  - Implement various Imagick functionality
+  - Implement CUROPT_PROGRESSFUNCTION
+  - Implement PHP 5.6 __debugInfo() magic method
+  - Raise warnings when return type annotations mismatch
+  - Fix nested ArrayObject assignment
+  - Switch many ini settings to thread-time binding
+  - Clean up memory stat tracking
+  - Immutable collections are now prefixed with Imm instead of Fixed/Frozen
+  - Clean up type parameter for CheckType-related IR opcodes
+  - Remove legacy linear-scan register allocator and Eval.HHIRXls option
+
+"Eminem" 18-Feb-2014
+  - reenabled jemalloc tcache flush for idle threads
+  - array_combine now performs __toString conversion on objects in $keys
+  - Allow streams in move_uploaded_file
+  - Fix a bug double closing a UserFile
+  - Warn when first arg to call_user_func is an object with no __invoke
+  - kill userland hdf functions
+  - Final method reports itself as final
+  - Implement IntlCalendar
+  - Disallow create_function in RepoAuthoritative mode
+  - Case-insensitive check for Accept-Encoding: gzip
+
+"Donald Glover" 3-Feb-2014
+  - Support for "::class"
+  - Enable FCallBuiltin for HNI functions
+  - json_decode parity with PHP 5.4
+  - Fix race condition with profiling vs. non-profiling functions prologues
+  - Implement ini_get_all()
+  - Begin conversion of runtime options to INI
+  - Fix potential PGO-mode crash
+  - Fixes and enhancement in IR printing
+  - Vector and Set now supported by:
+    array_{shift,unshift,fill_keys,reverse,flip,size,chunk}, min, and max
+  - StableMap is now an alias for Map, which retains insertion order
+  - Map moved to HH namespace
+  - Fixes in XLS spilling of SIMD registers
+  - Support SCRIPT_FILENAME in FastCGI
+  - Implement stream_context_{get,set}_default
+  - Support for Intel VTune Amplifier XE
+  - Rewrite of SimpleXML
+  - Several HNI conversions, and a helper script
+  - Move Pair to HH namespace
+  - Fix get_included_files ordering
+  - Fix $_SERVER and $_ENV in FastCGI
+  - Update timelib to php 5.5.8
+  - Some dead code removal
+
+"Coolio" 21-Jan-2014
+  - Turn on Region JIT
+  - FastCGI fixes, perf improvements
+  - ext_zend_compat fixes
+  - Turn on XLS Register Allocator by default
+  - Fix server stats reporting
+  - 'num' scalar typehint that accepts both ints and floats
+  - fix support for typedef'd namespaces
+  - don't swallow fatals when autoloading
+  - Map collections learned the in-place retain() and retainWithKey()
+  - rename Set::difference() to Set::removeAll()
+  - Update Set to retain element insertion order
+  - remove APC stats
+  - Fixes for ARM mode
+  - FrozenMap collection
+  - Deprecated Vector|Set|Map::put() method removed
+  - == between Frozen{Vector|Set|Map} and {Vector|Set|Map} now can return true
+
+"Beastie Boys" 6-Jan-2014
+  - Support lex-time binary constants (eg. 0b10111)
+  - StreamWrappers now support rmdir, mkdir, rename and unlink
+  - Miscellaneous PHP5 compatibility fixes
+  - Default StatCache to off
+  - Miscellaneous FastCGI fixes
+  - Miscellaneous region compiler fixes
+  - Map and StableMap collections use the same underlying implementation
+  - Trait requirements enforced
+  - hhprof performance improvements
+  - Add array to string conversion notice
+  - Add RaiseNotice IR opcode
+  - Fix VirtualHost.<name>.Pattern matching
+  - Fix various memory leaks (pdo_parse_params, Gen*WaitHandle)
+  - Import a lot more Zend tests that used to crash or hang
+  - Clean up base.h
+  - XLS register allocation cleanup
+  - Enable region compiler by default for JIT functions in ahot
+  - Fatal on eval() in RepoAuthoritative mode
+  - Enable LTO for HHVM
+  - Fix a few SPL compatibility issues
+
+"Appleseed" 23-Dec-2013
+  - Fix issues with DOCUMENT_ROOT in fastcgi
+  - Better type inference for collections and builtins in repo mode
+  - Shorter syntax for lambda expressions w/ automatic captures
+  - Parser support for trait require clauses
+  - Move FrozenVector and Set to the HH namespace
+  - Fix resource to array conversion
+  - Fix a request local memory leak in foreach of apc arrays
+  - Initial php_odbc API implementation
+  - Implement PHP's hash_copy() function
+  - Experimental tool: Memoization Opportunity Profiler
+  - Various small parity/behavior fixes (in phar, proc_open, filter_var)
+  - A Eval.DumpHhas=1 option to dump hhas for a php file
+  - Better warnings in Set::toArray
+  - Fix the behavior of foreach loops in finally blocks
+  - chmod -x runtime/vm/jit/*.{cpp,h}
+  - Changes to make hhvm build clean with clang-3.4
+  - Fix array_product to not be bug-compatible with PHP 5.2
+  - Change the Map datastructure---preserves order and does faster foreach
+  - FrozenSet collection
+  - Generate pid.map when we unmap text section, for the perf tool
+  - Implemented GlobIterator
+  - Implemented Reflection::export and Reflection::getModifierNames
+
+"Tom Yum" 9-Dec-2013
+  - support date.timezone in ini files
+  - implement fileinfo
+  - special comparisons for DateTime
+  - delete unimplemented functions
+  - support for the finally clause in try blocks
+
+"Huarache" 26-Nov-2013
+  - Linker re-ordering of hot functions
+  - Huge pages for hot functions
+  - Implement ZipArchive
+  - preg_replace /e support
+  - get_mem_usage() no longer can be negative
+  - Userland file system support
+  - Implement fileinfo extension
+  - wordwrap() fixes
+  - PDO::sqliteCreateFunction()
+  - Implement NumberFormatter
+  - Implement Locale
+  - Implement DatePeriod
+  - Many reflection fixes
+  - Stub out PharData
+  - A ton of performance fixes
+  - A ton of open source framework fixes
+  - FastCGI Server Support
+
+"Garlic Alfredo" 11-Nov-2013
+  - teach implode() about collections
+  - fix ini parsing leak
+  - Make array not an instanceof Traversable
+
+"Burrito" 28-Oct-2013
+  - Initial support for using FastCGI
+  - Initial support for php.ini configuration files
+  - Log when a nullable (e.g. ?int) is incorrect
+  - Add support for collections to array_diff, array_diff_key, array_intersect,
+    array_intersect_key
+  - tc-print improvements and fixes
+  - Several debugger fixes
+  - More improvements to the experimental PHP extension compat layer
+  - Fixed how parse errors are handled by eval()
+  - Support custom reason for status header
+  - Emit better error message when hhvm's systemlib doesn't load properly
+  - Fixes / clarifications added to the bytecode specification
+  - Lots of other bug fixes, clean up, PHP compat fixes, and JIT improvements
+
+"Sausage" 14-Oct-2013
+  - Direct invocation of callable arrays: $f = [$cls_or_obj, 'method']; $f()
+  - ASAN clean
+  - Support dynamically loadable extensions
+  - Support loading mini-systemlibs from extensions
+
+"Tabasco" 30-Sep-2013
+  - Fix issues with __toString() functions that return non-string values
+  - Don't allow mock classes to extend collection classes
+  - Smarter memory allocation and scheduling for NUMA systems
+  - Improve profiler performance in the jit
+  - Fix several Zend compatibility issues
+  - Fix several bugs uncovered by ASAN
+  - Add collection support to array_keys, array_values, and array_combine
+  - Return a set-like array from Set::toArray
+  - Add to(Vector|Map|StableMap|Set) methods to collections
+  - Collections convert to boolean false when empty
+  - get_class_vars invokes the autoloader when necessary
+  - Rework the Zend compatibility layer to be more robust
+  - Allow traits to implement interfaces
+  - Support arbitrary expressions inside empty()
+
+"Bobotie" 16-Sep-2013
+  - HNI (HipHop Native Interface) for calling C++ functions from PHP
+  - Fix PropertyAccessorMap::isset
+  - Expose more POSIX constants
+  - Fixed behavior of stream_get_contents when default args are used.
+  - Implement str_getcsv, and fix some fgetcsv related issues.
+  - [IPv6] Fix stream_socket_recvfrom & stream_socket_sendto.
+  - [IPv6] Fix socket_sentto_recvfrom_ipv6_udp Zend compatibility.
+  - Optimize closure invocation and __invoke (~3x faster to invoke)
+  - Import gettext extension
+  - string and object allocation optimizations (reduced memory usage for both)
+  - Import YAML extension
+  - Import ftp extension
+
+"Kimchi" 2-Sep-2013
+  - Fix order of custom attributes and visibility in ctor arg promotion
+  - Implement CachingIterator
+  - Implement RecursiveCachingIterator
+  - Generalized heuristic for choosing when to inline in the jit
+  - Introduced a Zend compatibility layer to compile extensions
+  - Imported calendar extension
+  - Use gcc-4.8.1 by default
+  - Improve hhvm command line parsing logic
+  - Fix register_shutdown in session_set_save_handler to match PHP 5.4
+  - Add "native" functions for use in Systemlib
+  - PHP extension source-compatitblility layer
+  - Fix ArrayIterator constructor PHP compatibility
+  - Enable building against libmemcached 1.0.8
+  - Debugger: $_ not cleared but still printed after exception
+  - Fix clone of SplPriorityQueue
+  - Debugger: Fix bugs when multiple threads hit the same breakpoint
+  - Fix several namespace bugs
+  - Several PHP compatibility fixes for ArrayObject and ArrayIterator
+  - Fix list assignment with collection literals
+  - support "tuple(...)" in initializer expressions
+  - HHVM should compile with libmemcached 1.0.9+
+  - Support "(new Vector {..})->method()" style syntax
+  - use trigger_error in PHP for Redis user errors
+  - multiple simplexml fixes
+  - fixed serialize/unserialize for SplObjectStorage
+  - Implement ReflectionParameter::IsCallable()
+
+"Achiote" 19-Aug-2013
+  - Async stack traces in the debugger via the "wa" command
+  - Fix late static binding in static closures
+  - Fix breakpoints on generators
+  - Add SplObserver and SplSubject interfaces
+  - Update Iterable interface and add toArray() method
+  - Allow __get for undefined properties
+  - Implement get_included_files()
+  - Limit use of huge pages
+
+"Churrasco" 05-Aug-2013
+  - Implement stream_is_local
+  - Implement read support for .phar
+  - Implement assert with string arguments
+  - Implement RecursiveArrayIterator
+  - Implement php_strip_whitespace()
+  - Support for timeouts in cli mode
+  - Closure allocation optimizations (~2x faster to allocate a closure)
+  - Implement Redis session handler
+  - New memory profiler, hhprof, with pprof compatible output
+  - Update isset($string[$k]) and empty($string[$k) to PHP 5.5 semantics
+  - Fixed a few parser bugs
+  - Fixed a few bugs with token_get_all()
+  - Fix (string)$obj semantics when __toString() is not defined
+
+"Tamale" 22-Jul-2013
+  - Optimize vector-shaped Arrays (arrays with keys in range 0..size-1)
+  - Enable HHBC by default in debug builds
+  - Implement SplObjectStorage::getInfo()
+  - Initial rough draft of xhpast2, a replacement for xhpast
+  - fix compilation on Ubuntu 13.04
+  - OSX changes, next round
+  - Modify PHP's ext/standard/math/tests/(pow|abs).phpt to be HHVM friendly
+  - add XHP comment syntax based on http://www.w3.org/TR/REC-xml/#sec-comments
+
+"Wasabi Peas" 08-Jul-2013
+  - always_assert when we run out of TC space
+  - Initial changes to get HHVM compiling on OSX
+  - Consolidate ObjectData and Instance
+  - Prototype heap tracing framework & Heap profiler
+  - Better JIT code generation for Mod and Div
+  - Fixes to enable compilation with clang
+  - Support for yield k => v
+  - Make HHVM's command line parsing closer to PHP
+  - Implement Redis extension
+  - Implement LimitIterator from SPL
+  - add SessionHandler from PHP 5.4
+  - Numerous Debugger fixes and new developer docs for Debugger
+  - Ported many extension tests to PHP

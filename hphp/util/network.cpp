@@ -21,7 +21,8 @@
 #include <resolv.h>
 #include <sys/utsname.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
+#include <folly/IPAddress.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/process.h"
@@ -45,13 +46,6 @@ public:
 static ResolverLibInitializer _resolver_lib_initializer;
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
-
-std::string safe_inet_ntoa(struct in_addr &in) {
-  char buf[256];
-  memset(buf, 0, sizeof(buf));
-  inet_ntop(AF_INET, &in, buf, sizeof(buf)-1);
-  return buf;
-}
 
 bool safe_gethostbyname(const char *address, HostEnt &result) {
 #if defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW__) || \
@@ -86,19 +80,50 @@ bool safe_gethostbyname(const char *address, HostEnt &result) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-std::string GetPrimaryIP() {
+std::string GetPrimaryIPImpl(int af) {
+  const static std::string s_empty;
   struct utsname buf;
+  struct addrinfo hints;
+  struct addrinfo *res = nullptr;
+  int error;
+
+  SCOPE_EXIT {
+    if (res) {
+      freeaddrinfo(res);
+    }
+  };
+
   uname((struct utsname *)&buf);
 
-  HostEnt result;
-  if (!safe_gethostbyname(buf.nodename, result)) {
-    return buf.nodename;
+  memset(&hints, 0, sizeof(struct addrinfo));
+  hints.ai_family = af;
+
+  error = getaddrinfo(buf.nodename, nullptr, &hints, &res);
+  if (error) {
+    return s_empty;
   }
 
-  struct in_addr in;
-  memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
-  return safe_inet_ntoa(in);
+  try {
+    return folly::IPAddress(res->ai_addr).toFullyQualified();
+  } catch (folly::IPAddressFormatException &e) {
+    return s_empty;
+  }
+}
+
+std::string GetPrimaryIPv4() {
+  return GetPrimaryIPImpl(AF_INET);
+}
+
+std::string GetPrimaryIPv6() {
+  return GetPrimaryIPImpl(AF_INET6);
+}
+
+std::string GetPrimaryIP() {
+  auto ipaddress = GetPrimaryIPv4();
+  if (ipaddress.empty()) {
+    ipaddress = GetPrimaryIPv6();
+  }
+  return ipaddress;
 }
 
 static std::string normalizeIPv6Address(const std::string& address) {
@@ -128,12 +153,16 @@ HostURL::HostURL(const std::string &hosturl, int port) :
     spos = 0;
   }
 
+  // strip off /EXTRA from prot://addr:port/EXTRA
+  auto extraPos = hosturl.find('/', spos);
+  auto validLen = extraPos != std::string::npos ? extraPos : hosturl.size();
+
   // IPv6 address?
   auto bpos = hosturl.find('[');
   if (bpos != std::string::npos) {
     // Extract out the IPAddress from [..]
     // Look for the ending position of ']'
-    auto epos = hosturl.rfind(']');
+    auto epos = hosturl.rfind(']', validLen - 1);
     if (epos == std::string::npos) {
       // This isn't a valid IPv6 address, so bail.
       m_valid = false;
@@ -157,13 +186,20 @@ HostURL::HostURL(const std::string &hosturl, int port) :
     auto cpos = hosturl.find(':', epos);
     if (cpos != std::string::npos) {
       try {
-        m_port = folly::to<uint16_t>(hosturl.substr(cpos + 1));
+        auto portLen = validLen - cpos - 1;
+        m_port = folly::to<uint16_t>(hosturl.substr(cpos + 1, portLen));
         m_hosturl += hosturl.substr(cpos);
       } catch (...) {
         m_port = 0;
       }
+    } else if (extraPos != std::string::npos) {
+      m_hosturl += hosturl.substr(extraPos);
     }
     m_ipv6 = true;
+  } else if (m_scheme == "unix") {
+    // unix socket
+    m_host = hosturl.substr(spos);
+    m_hosturl += m_host;
   } else {
     // IPv4 or hostname
     auto cpos = hosturl.find(':', spos);
@@ -171,14 +207,15 @@ HostURL::HostURL(const std::string &hosturl, int port) :
       m_host = hosturl.substr(spos, cpos - spos);
       m_hosturl += m_host;
       try {
-        m_port = folly::to<uint16_t>(hosturl.substr(cpos + 1));
+        auto portLen = validLen - cpos - 1;
+        m_port = folly::to<uint16_t>(hosturl.substr(cpos + 1, portLen));
         m_hosturl += hosturl.substr(cpos);
       } catch (...) {
         m_port = 0;
       }
     } else {
-      m_host = hosturl.substr(spos);
-      m_hosturl += m_host;
+      m_host = hosturl.substr(spos, validLen - spos);
+      m_hosturl += hosturl.substr(spos);
     }
     m_ipv6 = false;
   }

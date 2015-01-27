@@ -112,11 +112,23 @@ function get_required_files(): array {
  * that attempting to set magic_quotes_gpc at runtime will not work.  For more
  * information about magic_quotes, see this security section.
  */
-<<__Native>>
-function get_magic_quotes_gpc(): int;
+function get_magic_quotes_gpc(): ?bool {
+  if (($argc = func_num_args()) != 0) {
+    trigger_error(__FUNCTION__ . "() expects exactly 0 parameters," .
+                  " $argc given", E_USER_WARNING);
+    return null;
+  }
+  return false;
+}
 
-<<__Native>>
-function get_magic_quotes_runtime(): int;
+function get_magic_quotes_runtime(): ?bool {
+  if (($argc = func_num_args()) != 0) {
+    trigger_error(__FUNCTION__ . "() expects exactly 0 parameters," .
+                  " $argc given", E_USER_WARNING);
+    return null;
+  }
+  return false;
+}
 
 <<__Native>>
 function getenv(string $varname): mixed;
@@ -253,8 +265,16 @@ function hphp_memory_stop_interval(): bool;
 
 /* Retrieve a path to the loaded php.ini file.
  */
-<<__Native>>
-function php_ini_loaded_file(): mixed;
+function php_ini_loaded_file(): mixed {
+  return false;
+}
+
+/* Retrieve a comma-separated list of paths to any additionally loaded ini
+ * files after php.ini.
+ */
+function php_ini_scanned_files(): mixed {
+  return false;
+}
 
 <<__Native>>
 function php_sapi_name(): string;
@@ -312,8 +332,23 @@ function putenv(string $setting): bool;
  * WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this
  * feature is highly discouraged.
  */
-<<__Native>>
-function set_magic_quotes_runtime(bool $new_setting): bool;
+function set_magic_quotes_runtime(mixed $new_setting): bool {
+  trigger_error("Function set_magic_quotes_runtime() is deprecated",
+                E_USER_DEPRECATED);
+
+  if ($new_setting) {
+    trigger_error(__FUNCTION__ . "() is not supported anymore", E_USER_ERROR);
+  }
+
+  return false;
+}
+
+/*
+ * Alias of set_magic_quotes_runtime()
+ */
+function magic_quotes_runtime(mixed $new_setting): bool {
+  return set_magic_quotes_runtime($new_setting);
+}
 
 /* Set the number of seconds a script is allowed to run. If this is reached,
  * the script returns a fatal error. The default limit is 30 seconds or, if it
@@ -373,3 +408,8 @@ function gc_collect_cycles(): int;
  */
 <<__Native>>
 function zend_version(): string;
+
+namespace __SystemLib {
+  <<__Native>>
+  function assert(mixed $assertion, ?string $message = null): ?bool;
+}

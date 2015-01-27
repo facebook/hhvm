@@ -31,6 +31,7 @@ var_dump(mysql_field_seek($res, 0));
 mysql_close($link);
 print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once("clean_table.inc");
 ?>

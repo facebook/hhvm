@@ -20,20 +20,17 @@
 
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-FORWARD_DECLARE_CLASS(Continuation);
-FORWARD_DECLARE_CLASS(Generator);
-
-///////////////////////////////////////////////////////////////////////////////
 // class BaseGenerator
 
-class BaseGenerator : public ExtObjectDataFlags<ObjectData::HasClone> {
+class BaseGenerator : public
+      ExtObjectDataFlags<ObjectData::HasClone> {
 public:
   enum class State : uint8_t {
     Created = 0,  // generator was created but never iterated
@@ -53,10 +50,12 @@ public:
     return resumableOff() + Resumable::resumeOffsetOff();
   }
   static constexpr ptrdiff_t stateOff() {
-    return offsetof(BaseGenerator, o_subclassData.u8[0]);
+    return whStateOffset();
   }
 
-  explicit BaseGenerator(Class* cls) : ExtObjectDataFlags(cls) {}
+  explicit BaseGenerator(Class* cls)
+    : ExtObjectDataFlags(cls, HeaderKind::ResumableObj)
+  {}
 
   Resumable* resumable() const {
     return reinterpret_cast<Resumable*>(
@@ -68,11 +67,11 @@ public:
   }
 
   State getState() const {
-    return static_cast<State>(o_subclassData.u8[0]);
+    return static_cast<State>(subclass_u8());
   }
 
   void setState(State state) {
-    o_subclassData.u8[0] = static_cast<uint8_t>(state);
+    subclass_u8() = static_cast<uint8_t>(state);
   }
 
   void startedCheck() {
@@ -135,6 +134,7 @@ public:
 class c_Generator : public c_Continuation {
 public:
   DECLARE_CLASS_NO_SWEEP(Generator)
+  ~c_Generator();
 
   void t___construct();
   Variant t_current();
@@ -164,14 +164,12 @@ public:
     return gen;
   }
 
-  void yield(Offset resumeOffset, const Cell* key, const Cell& value);
+  void yield(Offset resumeOffset, const Cell* key, Cell value);
   void ret() { done(); }
   void fail() { done(); }
 
 private:
   explicit c_Generator(Class* cls = c_Generator::classof());
-  ~c_Generator();
-
   void copyVars(ActRec *fp);
   void done();
 

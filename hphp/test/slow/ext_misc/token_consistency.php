@@ -3,6 +3,7 @@
 // ensure legacy token name is returned
 var_dump(token_name(T_DOUBLE_COLON));
 
+// see also hphp/hack/hhi/stdlib/builtins_tokens.php
 $token_range = range(1, 1000);
 
 $undefined_tokens = array();
@@ -20,7 +21,6 @@ $expected_exceptions = array(
   'T_XHP_TAG_LT' => true,
   'T_XHP_TAG_GT' => true,
   'T_HH_ERROR' => true,
-  'T_FINALLY' => true,
   'T_TYPELIST_LT' => true,
   'T_TYPELIST_GT' => true,
   'T_UNRESOLVED_LT' => true,
@@ -54,6 +54,7 @@ $expected_exceptions = array(
   'T_LAMBDA_CP' => true,
   'T_NULLSAFE_OBJECT_OPERATOR' => true,
   'T_UNRESOLVED_OP' => true,
+  'T_HASHBANG' => true,
 );
 
 foreach ($token_range as $potential_token) {

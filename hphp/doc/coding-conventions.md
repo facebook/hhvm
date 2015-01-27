@@ -69,7 +69,7 @@ includes:
 
 - Always include the corresponding .h for a .cpp first, before even system
   headers.
-- Separate includes into groups: C++ standard library headers, exernal projects
+- Separate includes into groups: C++ standard library headers, external projects
   (such as Boost and Intel TBB), and finally headers within HHVM. Each group
   should be separated by a newline, for readability. (Whether to separate HHVM
   includes by subsystem (e.g., `jit`) is left up to the author.)

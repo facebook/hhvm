@@ -14,7 +14,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/enum-cache.h"
 
 namespace HPHP {
@@ -68,7 +70,7 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   const EnumCache::EnumValues* values = EnumCache::getValuesBuiltin(self_);
   if (!values->names.exists(value)) {
     res = Variant(Variant::NullInit{});
-  } else if (IS_STRING_TYPE(base) && value.isInteger()) {
+  } else if (base && IS_STRING_TYPE(*base) && value.isInteger()) {
     res = Variant(value.toString());
   }
 
@@ -77,10 +79,10 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class enumExtension : public Extension {
+class enumExtension final : public Extension {
  public:
   enumExtension() : Extension("enum", "1.0.0-dev") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getValues, BuiltinEnum, getValues);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getNames, BuiltinEnum, getNames);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);

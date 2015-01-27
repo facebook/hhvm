@@ -1,0 +1,142 @@
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+>Array< + >Array<, result: array(3) {
+  [0]=>
+  int(1)
+  [5]=>
+  bool(false)
+  [6]=>
+  string(3) "red"
+}
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+>Array< + >Array<, result: array(3) {
+  [0]=>
+  int(1)
+  [5]=>
+  bool(false)
+  [6]=>
+  string(3) "red"
+}
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+>Array< + >Array<, result: array(4) {
+  [0]=>
+  int(1)
+  [5]=>
+  bool(false)
+  [6]=>
+  string(3) "red"
+  [4]=>
+  int(-5)
+}
+-------------------------------------
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+>Array< + >Array<, result: array(3) {
+  [0]=>
+  NULL
+  [5]=>
+  bool(false)
+  [6]=>
+  string(3) "red"
+}
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+>Array< + >Array<, result: array(1) {
+  [0]=>
+  NULL
+}
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+>Array< + >Array<, result: array(3) {
+  [0]=>
+  NULL
+  [4]=>
+  int(-5)
+  [5]=>
+  float(1.23)
+}
+-------------------------------------
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+>Array< + >Array<, result: array(4) {
+  [4]=>
+  int(-5)
+  [5]=>
+  float(1.23)
+  [0]=>
+  int(1)
+  [6]=>
+  string(3) "red"
+}
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+>Array< + >Array<, result: array(3) {
+  [4]=>
+  int(-5)
+  [5]=>
+  float(1.23)
+  [0]=>
+  NULL
+}
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+
+Notice: Array to string conversion in %s/expressions/additive_operators/array_concatenation.php on line 18
+>Array< + >Array<, result: array(2) {
+  [4]=>
+  int(-5)
+  [5]=>
+  float(1.23)
+}
+-------------------------------------
+array(4) {
+  [0]=>
+  int(1)
+  [5]=>
+  bool(false)
+  [6]=>
+  string(3) "red"
+  [4]=>
+  int(-5)
+}
+array(4) {
+  [0]=>
+  int(11)
+  [5]=>
+  bool(false)
+  [6]=>
+  int(99)
+  [4]=>
+  int(-5)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [5]=>
+  bool(false)
+  [6]=>
+  string(3) "red"
+}
+array(2) {
+  [4]=>
+  int(-5)
+  [5]=>
+  float(1.23)
+}

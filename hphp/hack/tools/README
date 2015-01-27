@@ -1,3 +1,6 @@
+hackificator and remove_soft_types
+==================================
+
 These refactoring and conversion tools are based on pfff instead of the core
 hh_server code due to pfff's superior support for parsing, modifying, and then
 unparsing PHP code. However, this makes them more annoying to build.
@@ -13,3 +16,10 @@ To install:
    make clean && make depend && make
 3) Binaries are installed at hack/bin/tools, where hack is the directory for
    this repo
+
+
+augmented_types
+===============
+
+Converts Box's "augmented types" into Hack types. See
+https://github.com/box/augmented_types/wiki/The-Type-System for the AT spec.

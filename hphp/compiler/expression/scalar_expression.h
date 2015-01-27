@@ -39,7 +39,6 @@ public:
   void toLower(bool funcCall = false);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   virtual int getLocalEffects() const { return NoEffect; }
   virtual bool isScalar() const { return true;}
   virtual bool isLiteralString() const;
@@ -49,8 +48,6 @@ public:
   bool needsTranslation() const;
   TypePtr inferenceImpl(AnalysisResultConstPtr ar, TypePtr type,
                         bool coerce);
-  virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                bool coerce);
   virtual bool getScalarValue(Variant &value) {
     value = getVariant(); return true;
   }

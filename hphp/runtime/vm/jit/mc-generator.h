@@ -27,12 +27,13 @@
 #include "hphp/util/ringbuffer.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -44,13 +45,12 @@ typedef X64Assembler Asm;
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
 typedef hphp_hash_map<uint64_t,const uint64_t*> LiteralMap;
 
-struct TReqInfo;
 struct Label;
 struct MCGenerator;
 struct AsmInfo;
+struct HTS;
 
-extern MCGenerator* mcg;
-extern void* interpOneEntryPoints[];
+extern "C" MCGenerator* mcg;
 
 constexpr size_t kNonFallthroughAlign = 64;
 constexpr int kLeaRipLen = 7;
@@ -105,7 +105,11 @@ struct CodeGenFixups {
     m_tletFrozen = frozen;
   }
 
-  void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  void process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
+    process_only(inProgressTailBranches);
+    clear();
+  }
   bool empty() const;
   void clear();
 };
@@ -125,20 +129,20 @@ struct RelocationInfo {
     return adjustedAddressBefore(const_cast<TCA>(addr));
   }
   void rewind(TCA start, TCA end);
-  void markAddressImmediates(std::set<TCA> ai) {
+  void markAddressImmediates(const std::set<TCA>& ai) {
     m_addressImmediates.insert(ai.begin(), ai.end());
   }
   bool isAddressImmediate(TCA ip) {
     return m_addressImmediates.count(ip);
   }
   typedef std::vector<std::pair<TCA,TCA>> RangeVec;
-  RangeVec::iterator begin() { return m_dstRanges.begin(); }
-  RangeVec::iterator end() { return m_dstRanges.end(); }
+  const RangeVec& srcRanges() { return m_srcRanges; }
+  const RangeVec& dstRanges() { return m_dstRanges; }
  private:
   RangeVec m_srcRanges;
   RangeVec m_dstRanges;
   /*
-   * maps from src address, to range of destination addresse
+   * maps from src address, to range of destination address
    * This is because we could insert nops before the instruction
    * corresponding to src. Most things want the address of the
    * instruction corresponding to the src instruction; but eg
@@ -147,6 +151,13 @@ struct RelocationInfo {
   std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
   std::set<TCA> m_addressImmediates;
 };
+
+struct UsageInfo {
+  std::string m_name;
+  size_t m_used;
+  size_t m_capacity;
+  bool m_global;
+} ;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -166,7 +177,7 @@ struct MCGenerator : private boost::noncopyable {
     return !mcg || Translator::WriteLease().amOwner();
   }
 
-  static jit::CppCall getDtorCall(DataType type);
+  static CppCall getDtorCall(DataType type);
   static bool isPseudoEvent(const char* event);
 
 public:
@@ -198,7 +209,7 @@ public:
    * Handlers for function prologues.
    */
   TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
-                      bool ignoreTCLimit = false);
+                      bool forRegeneratePrologue = false);
   TCA getCallArrayPrologue(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
 
@@ -218,21 +229,21 @@ public:
   const uint64_t* allocLiteral(uint64_t val);
 
   /*
-   * enterTC is the main entry point for the translator from the
-   * bytecode interpreter (see enterVMWork).  It operates on behalf of
-   * a given nested invocation of the intepreter (calling back into it
-   * as necessary for blocks that need to be interpreted).
+   * enterTC is the main entry point for the translator from the bytecode
+   * interpreter (see enterVMWork).  It operates on behalf of a given nested
+   * invocation of the intepreter (calling back into it as necessary for blocks
+   * that need to be interpreted).
    *
-   * If start is not null, data will be used to initialize rStashedAr,
-   * to enable us to run a jitted prologue;
-   * otherwise, data should be a pointer to the SrcKey to start
-   * translating from.
+   * If start is the address of a func prologue, stashedAR should be the ActRec
+   * prepared for the call to that function, otherwise it should be nullptr.
    *
-   * But don't call this directly, use one of the helpers below
+   * But don't call it directly, use one of the helpers below.
    */
-  void enterTC(TCA start, void* data);
-  void enterTCAtSrcKey(SrcKey& sk) {
-    enterTC(nullptr, &sk);
+ private:
+  void enterTC(TCA start, ActRec* stashedAR);
+ public:
+  void enterTC() {
+    enterTC(m_tx.uniqueStubs.resumeHelper, nullptr);
   }
   void enterTCAtPrologue(ActRec *ar, TCA start) {
     assert(ar);
@@ -243,6 +254,7 @@ public:
     assert(start);
     enterTC(start, nullptr);
   }
+
   /*
    * Called before entering a new PHP "world."
    */
@@ -264,11 +276,22 @@ public:
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   TCA getTranslatedCaller() const;
   void setJmpTransID(TCA jmp);
-  bool profileSrcKey(const SrcKey& sk) const;
+  bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  void traceCodeGen();
+  void traceCodeGen(HTS&);
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
+
+  /*
+   * Set/get if we're going to try using LLVM as the codegen backend for the
+   * current translation.
+   */
+  void setUseLLVM(bool llvm) {
+    m_useLLVM = llvm;
+  }
+  bool useLLVM() const {
+    return m_useLLVM;
+  }
 
   /*
    * Dump translation cache.  True if successful.
@@ -278,8 +301,9 @@ public:
   /*
    * Return cache usage information as a string
    */
-  std::string getUsage();
+  std::string getUsageString();
   std::string getTCAddrs();
+  std::vector<UsageInfo> getUsageInfo();
 
   /*
    * Returns the total size of the TC now and at the beginning of this request,
@@ -294,6 +318,20 @@ public:
    */
   bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
+  /*
+   * This function is called by translated code to handle service requests,
+   * which usually involve some kind of jump smashing. The returned address
+   * will never be null, and indicates where the caller should resume
+   * execution. This function may call into the interpreter if necessary to
+   * make forward progress (if another thread has the write lease), and as a
+   * result it may throw exceptions.
+   *
+   * The forced symbol name is so we can call this from
+   * translator-asm-helpers.S without hardcoding a fragile mangled name.
+   */
+  TCA handleServiceRequest(ServiceReqInfo& info)
+    asm("MCGenerator_handleServiceRequest");
+
 private:
   /*
    * Service request handlers.
@@ -301,18 +339,14 @@ private:
   TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req,
               TransFlags trflags, bool& smashed);
   TCA bindJmpccFirst(TCA toSmash,
-                     Offset offTrue, Offset offFalse,
+                     SrcKey skTrue, SrcKey skFalse,
                      bool toTake,
-                     ConditionCode cc,
                      bool& smashed);
-  TCA bindJmpccSecond(TCA toSmash, const Offset off,
-                      ConditionCode cc,
-                      bool& smashed);
-  bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
+  TCA bindCall(ActRec* calleeFrame, bool isImmutable,
+               SrcKey& sk, ServiceRequest& ret);
 
-  bool shouldTranslate() const {
-    return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage;
-  }
+  bool shouldTranslate(const Func*) const;
+  bool shouldTranslateNoSizeLimit(const Func*) const;
 
   TCA getTopTranslation(SrcKey sk) {
     return m_tx.getSrcRec(sk)->getTopTranslation();
@@ -324,7 +358,7 @@ private:
   TCA createTranslation(const TranslArgs& args);
   TCA retranslate(const TranslArgs& args);
   TCA translate(const TranslArgs& args);
-  void translateWork(const TranslArgs& args);
+  TCA translateWork(const TranslArgs& args);
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
@@ -351,10 +385,11 @@ private:
 private:
   std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
+  bool               m_useLLVM{false};
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;
-  uint64_t           m_numHHIRTrans;
+  uint64_t           m_numTrans;
   FixupMap           m_fixupMap;
   UnwindInfoHandle   m_unwindRegistrar;
   CatchTraceMap      m_catchTraceMap;
@@ -374,10 +409,39 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 // Both emitIncStat()s push/pop flags but don't clobber any registers.
 extern void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
                         int n = 1, bool force = false);
+
 inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
                         bool force = false) {
   emitIncStat(cb, &Stats::tl_counters[0], stat, n, force);
 }
+
+extern void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
+                        bool force = false);
+
+void emitServiceReq(Vout& v, TCA stub_block, ServiceRequest req,
+                    const ServiceReqArgVec& argv);
+
+bool shouldPGOFunc(const Func& func);
+
+#define TRANS_PERF_COUNTERS \
+  TPC(translate) \
+  TPC(retranslate) \
+  TPC(interp_bb) \
+  TPC(interp_instr) \
+  TPC(interp_one) \
+  TPC(max_trans) \
+  TPC(enter_tc) \
+  TPC(service_req)
+
+#define TPC(n) tpc_ ## n,
+enum TransPerfCounter {
+  TRANS_PERF_COUNTERS
+  tpc_num_counters
+};
+#undef TPC
+
+extern __thread int64_t s_perfCounters[];
+#define INC_TPC(n) ++jit::s_perfCounters[jit::tpc_##n];
 
 }}
 

@@ -68,6 +68,7 @@ var_dump( compare_stats($file_stat, $new_file_stat, $all_stat_keys, "==", true) 
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_basic_link.tmp");

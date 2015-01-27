@@ -34,7 +34,11 @@ public:
   virtual void close() = 0;
   virtual Variant read() = 0;
   virtual void rewind() = 0;
-  void sweep() FOLLY_OVERRIDE { close(); }
+  virtual Array getMetaData();
+  virtual bool isEof() const {
+    return false; // Most implementations can't tell if they've reached EOF
+  }
+  void sweep() override { close(); }
 
   CLASSNAME_IS("Directory")
   // overriding ResourceData
@@ -70,8 +74,9 @@ public:
   virtual void close() {}
   virtual Variant read();
   virtual void rewind();
+  virtual bool isEof() const;
 
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     // Leave m_it alone
     Directory::sweep();
   }

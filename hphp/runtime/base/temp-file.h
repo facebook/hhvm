@@ -39,8 +39,13 @@ public:
   const String& o_getClassNameHook() const { return classnameof(); }
 
   // implementing File
-  virtual bool open(const String& filename, const String& mode);
-  virtual bool close();
+  bool open(const String& filename, const String& mode) override;
+  bool close() override;
+
+  Object await(uint16_t events, double timeout) override {
+    throw Object(SystemLib::AllocExceptionObject(
+      "Temporary stream does not support awaiting"));
+  }
 
 private:
   bool m_autoDelete;

@@ -49,7 +49,7 @@ bool TestUtil::RunTests(const std::string &which) {
 
 struct testhash {
   size_t operator()(const String& s) const {
-    return hash_string(s.data(), s.size());
+    return hash_string_unsafe(s.data(), s.size());
   }
 };
 
@@ -119,6 +119,8 @@ bool TestUtil::TestCanonicalize() {
   VERIFY(FileUtil::canonicalize(String("../foo")) == String("../foo"));
   VERIFY(FileUtil::canonicalize(String("foo/../../bar")) == String("../bar"));
   VERIFY(FileUtil::canonicalize(String("./../../")) == String("../../"));
+  VERIFY(FileUtil::canonicalize(String("/test\0", 6, CopyString))
+         == String("/test"));
   return Count(true);
 }
 

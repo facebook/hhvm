@@ -48,9 +48,13 @@ public:
 private:
   static DebuggerServer s_debugger_server;
 
+  SmartPtr<Socket> nthSocket(unsigned int i) const {
+    return makeSmartPtr<Socket>(m_socks[i]);
+  }
+
   AsyncFunc<DebuggerServer> m_serverThread;
   bool m_stopped;
-  std::vector<SmartPtr<Socket>> m_socks;
+  std::vector<std::shared_ptr<SocketData>> m_socks;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

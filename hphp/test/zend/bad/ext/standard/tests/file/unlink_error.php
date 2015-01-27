@@ -50,6 +50,7 @@ var_dump( unlink($dirname) );  // expected: false as unlink() does not work on d
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__)."/unlink_error.tmp");
 rmdir(dirname(__FILE__)."/unlink_error");

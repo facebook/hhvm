@@ -10,11 +10,15 @@
  */
 
 class CExplicit implements Stringish {
-  public function __toString(): string { return __CLASS__; }
+  public function __toString(): string {
+    return __CLASS__;
+  }
 }
 
 class CImplicit {
-  public function __toString(): string { return __CLASS__; }
+  public function __toString(): string {
+    return __CLASS__;
+  }
 }
 
 interface IImplicit {
@@ -41,7 +45,9 @@ function f3(IImplicit $i): void {
 }
 
 trait TStringish {
-  public function __toString(): string { return __TRAIT__; }
+  public function __toString(): string {
+    return __TRAIT__;
+  }
 
   private function foo(): void {
     echo 'foo'.$this;

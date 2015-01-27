@@ -20,7 +20,7 @@ function main() {
   $x = (int $y = 5): int ==> $y;
   var_dump($x());
   var_dump($x(8));
-  $x = (int $y = 7): int ==> (int $z = 4): int ==> $y + $z;
+  $x = (int $y = 7) ==> (int $z = 4): int ==> $y + $z;
   var_dump(($x())());
   var_dump(($x(5))(9));
   $c = new C;

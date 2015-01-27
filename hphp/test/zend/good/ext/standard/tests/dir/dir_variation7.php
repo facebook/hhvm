@@ -47,6 +47,7 @@ var_dump( $d ); // dump it
 
 echo "Done";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $parent_dir_path = $file_path."/dir_variation7";

@@ -15,8 +15,8 @@
 */
 #include "hphp/runtime/vm/as-shared.h"
 
-#include "folly/gen/Base.h"
-#include "folly/gen/String.h"
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include <vector>
 
@@ -33,23 +33,27 @@ constexpr auto F = static_cast<ContextMask>(AttrContext::Func);
 constexpr auto P = static_cast<ContextMask>(AttrContext::Prop);
 constexpr auto T = static_cast<ContextMask>(AttrContext::TraitImport);
 
-bool supported(ContextMask mask, AttrContext a) {
+constexpr bool supported(ContextMask mask, AttrContext a) {
   return mask & static_cast<ContextMask>(a);
 }
 
-#define HHAS_ATTRS                                  \
-  X(AttrPublic,        F|P|T,   "public");          \
-  X(AttrProtected,     F|P|T,   "protected");       \
-  X(AttrPrivate,       F|P|T,   "private");         \
-  X(AttrStatic,        F|P,     "static");          \
-  X(AttrInterface,     C,       "interface");       \
-  X(AttrNoExpandTrait, C,       "no_expand_trait"); \
-  X(AttrAbstract,      C|F|T,   "abstract");        \
-  X(AttrNoOverride,    C|F|T,   "no_override");     \
-  X(AttrFinal,         C|F|T,   "final");           \
-  X(AttrTrait,         C|F,     "trait");           \
-  X(AttrUnique,        C|F,     "unique");          \
-  X(AttrBuiltin,       C|F,     "builtin");
+#define HHAS_ATTRS                                          \
+  X(AttrPublic,               F|P|T,   "public");           \
+  X(AttrProtected,            F|P|T,   "protected");        \
+  X(AttrPrivate,              F|P|T,   "private");          \
+  X(AttrStatic,               F|P,     "static");           \
+  X(AttrInterface,            C,       "interface");        \
+  X(AttrNoExpandTrait,        C,       "no_expand_trait");  \
+  X(AttrAbstract,             C|F|T,   "abstract");         \
+  X(AttrNoOverride,           C|F|T,   "no_override");      \
+  X(AttrFinal,                C|F|T,   "final");            \
+  X(AttrTrait,                C|F,     "trait");            \
+  X(AttrUnique,               C|F,     "unique");           \
+  X(AttrBuiltin,              C|F,     "builtin");          \
+  X(AttrNoOverrideMagicGet,   C,       "nov_get");          \
+  X(AttrNoOverrideMagicSet,   C,       "nov_set");          \
+  X(AttrNoOverrideMagicIsset, C,       "nov_isset");        \
+  X(AttrNoOverrideMagicUnset, C,       "nov_unset");
 
 }
 

@@ -68,7 +68,7 @@ static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
     *prevPc = 0;
     return AsioSession::Get()->getContext(contextIdx)->getSavedFP();
   }
-  return g_context->getPrevVMState(fp, prevPc);
+  return g_context->getPrevVMStateUNSAFE(fp, prevPc);
 }
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
@@ -172,7 +172,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto const opAtPrevPc =
         *reinterpret_cast<const Op*>(prevUnit->at(prevPc));
       Offset pcAdjust = 0;
-      if (opAtPrevPc == OpPopR || opAtPrevPc == OpUnboxR) {
+      if (opAtPrevPc == Op::PopR ||
+          opAtPrevPc == Op::UnboxR ||
+          opAtPrevPc == Op::UnboxRNop) {
         pcAdjust = 1;
       }
       frame.set(s_line,
@@ -237,7 +239,12 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         auto func = fp->func();
         for (int i = 0; i < nformals; i++) {
           const StringData* argname = func->localVarName(i);
-          Variant val = withValues ? tvAsVariant(varEnv->lookup(argname)) : "";
+          TypedValue* tv = varEnv->lookup(argname);
+
+          Variant val;
+          if (tv != nullptr) { // the variable hasn't been unset
+            val = withValues ? tvAsVariant(tv) : "";
+          }
 
           if (withNames) {
             args.set(String(argname->data(), CopyString), val);

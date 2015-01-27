@@ -9,8 +9,7 @@
  *
  */
 
-function foo(mixed $bar): void {
-}
+function foo(mixed $bar): void {}
 
 function bar(): void {
   foo(null);

@@ -16,6 +16,9 @@
  */
 function array_key_exists<Tk, Tv>(mixed $key, ?KeyedContainer<Tk, Tv> $search): bool;
 
+function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
+function array_product/*<T>*/(/*Container<T>*/ $input)/*: num*/;
+
 function sort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
 function rsort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
 function asort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;

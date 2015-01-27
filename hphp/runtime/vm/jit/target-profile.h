@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_TARGET_PROFILE_H_
 #define incl_HPHP_TARGET_PROFILE_H_
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -131,7 +131,7 @@ private:
       );
 
     case TransKind::Optimize:
-      if (marker.m_profTransID != kInvalidTransID) {
+      if (isValidTransID(marker.m_profTransID)) {
         return RDS::attach<T>(
           RDS::Profile {
             marker.m_profTransID, // transId from profiling translation
@@ -225,6 +225,51 @@ struct NonPackedArrayProfile {
   int32_t count;
   static void reduce(NonPackedArrayProfile& a, const NonPackedArrayProfile& b) {
     a.count += b.count;
+  }
+};
+
+struct StructArrayProfile {
+  int32_t nonStructCount;
+  int32_t numShapesSeen;
+  Shape* shape{nullptr}; // Never access this directly. Use getShape instead.
+
+  bool isEmpty() const {
+    return !numShapesSeen;
+  }
+
+  bool isMonomorphic() const {
+    return numShapesSeen == 1;
+  }
+
+  bool isPolymorphic() const {
+    return numShapesSeen > 1;
+  }
+
+  void makePolymorphic() {
+    numShapesSeen = INT_MAX;
+    shape = nullptr;
+  }
+
+  Shape* getShape() const {
+    assert(isMonomorphic());
+    return shape;
+  }
+
+  static void reduce(StructArrayProfile& a, const StructArrayProfile& b) {
+    a.nonStructCount += b.nonStructCount;
+    if (a.isPolymorphic()) return;
+
+    if (a.isEmpty()) {
+      a.shape = b.shape;
+      a.numShapesSeen = b.numShapesSeen;
+      return;
+    }
+
+    assert(a.isMonomorphic());
+    if (b.isEmpty()) return;
+    if (b.isMonomorphic() && a.getShape() == b.getShape()) return;
+    a.makePolymorphic();
+    return;
   }
 };
 

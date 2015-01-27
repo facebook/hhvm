@@ -158,12 +158,6 @@ void ModifierExpression::analyzeProgram(AnalysisResultPtr ar) {
   // do nothing
 }
 
-TypePtr ModifierExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                       bool coerce) {
-  assert(false);
-  return TypePtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ModifierExpression::outputCodeModel(CodeGenerator &cg) {

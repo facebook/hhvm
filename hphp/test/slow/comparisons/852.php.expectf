@@ -1,22 +1,22 @@
-1	NNNN	null == true	
-2	YYYY	null == false	
-3	NNNN	null == 1	
-4	YYYY	null == 0	
-5	NNNN	null == -1	
-6	NNNN	null == '1'	
-7	NNNN	null == '0'	
-8	NNNN	null == '-1'	
-9	YYYY	null == null	
-10	YYYY	null == array()	
-11	NNNN	null == array(1)	
-12	NNNN	null == array(2)	
-13	NNNN	null == array('1')	
-14	NNNN	null == array('0' => '1')	
-15	NNNN	null == array('a')	
-16	NNNN	null == array('a' => 1)	
-17	NNNN	null == array('b' => 1)	
-18	NNNN	null == array('a' => 1, 'b' => 2)	
-19	NNNN	null == array(array('a' => 1))	
-20	NNNN	null == array(array('b' => 1))	
-21	NNNN	null == 'php'	
-22	YYYY	null == ''
+1%r\x09%rNNNN%r\x09%rnull == true%r\x09%r
+2%r\x09%rYYYY%r\x09%rnull == false%r\x09%r
+3%r\x09%rNNNN%r\x09%rnull == 1%r\x09%r
+4%r\x09%rYYYY%r\x09%rnull == 0%r\x09%r
+5%r\x09%rNNNN%r\x09%rnull == -1%r\x09%r
+6%r\x09%rNNNN%r\x09%rnull == '1'%r\x09%r
+7%r\x09%rNNNN%r\x09%rnull == '0'%r\x09%r
+8%r\x09%rNNNN%r\x09%rnull == '-1'%r\x09%r
+9%r\x09%rYYYY%r\x09%rnull == null%r\x09%r
+10%r\x09%rYYYY%r\x09%rnull == array()%r\x09%r
+11%r\x09%rNNNN%r\x09%rnull == array(1)%r\x09%r
+12%r\x09%rNNNN%r\x09%rnull == array(2)%r\x09%r
+13%r\x09%rNNNN%r\x09%rnull == array('1')%r\x09%r
+14%r\x09%rNNNN%r\x09%rnull == array('0' => '1')%r\x09%r
+15%r\x09%rNNNN%r\x09%rnull == array('a')%r\x09%r
+16%r\x09%rNNNN%r\x09%rnull == array('a' => 1)%r\x09%r
+17%r\x09%rNNNN%r\x09%rnull == array('b' => 1)%r\x09%r
+18%r\x09%rNNNN%r\x09%rnull == array('a' => 1, 'b' => 2)%r\x09%r
+19%r\x09%rNNNN%r\x09%rnull == array(array('a' => 1))%r\x09%r
+20%r\x09%rNNNN%r\x09%rnull == array(array('b' => 1))%r\x09%r
+21%r\x09%rNNNN%r\x09%rnull == 'php'%r\x09%r
+22%r\x09%rYYYY%r\x09%rnull == ''

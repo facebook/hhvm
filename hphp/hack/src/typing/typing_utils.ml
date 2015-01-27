@@ -11,6 +11,7 @@
 open Utils
 open Typing_defs
 
+module N = Nast
 module Reason = Typing_reason
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
@@ -45,7 +46,9 @@ let rec is_option env ty =
   | _, Toption _ -> true
   | _, Tunresolved tyl ->
       List.exists (is_option env) tyl
-  | _ -> false
+  | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tvar _
+    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
+    | Tobject | Tshape _ | Taccess (_, _, _)) -> false
 
 (*****************************************************************************)
 (* Unification error *)
@@ -59,24 +62,9 @@ let uerror r1 ty1 r2 ty2 =
 
 let process_static_find_ref cid mid =
   match cid with
-  | Nast.CI c -> Find_refs.process_class_ref (fst c) (snd c) (Some (snd mid))
+  | Nast.CI c ->
+    Typing_hooks.dispatch_class_id_hook c (Some mid);
   | _ -> ()
-
-(*****************************************************************************)
-(* Adding an infered type *)
-(*****************************************************************************)
-
-(* Remember (when we care) the type found at a position *)
-let save_infer env pos ty =
-  match !infer_target with
-  | None -> ()
-  | Some (line, char_pos) ->
-      if Pos.inside pos line char_pos && !infer_type = None
-      then begin
-        infer_type := Some (Typing_print.full_strip_ns env ty);
-        infer_pos := Some (Reason.to_pos (fst ty));
-      end
-      else ()
 
 (* Find the first defined position in a list of types *)
 let rec find_pos p_default tyl =
@@ -184,17 +172,18 @@ let unresolved env ty =
 
 let is_array_as_tuple env ty =
   let env, ety = Env.expand_type env ty in
-  let env, ty = fold_unresolved env ty in
+  let env, ety = fold_unresolved env ety in
   match ety with
-  | r, Tunresolved [_, Tarray (_, Some elt_type, None)]
-  | r, Tarray (_, Some elt_type, None) ->
+  | _, Tarray (Some elt_type, None) ->
       let env, normalized_elt_ty = Env.expand_type env elt_type in
-      let env, normalized_elt_ty = fold_unresolved env normalized_elt_ty in
+      let _env, normalized_elt_ty = fold_unresolved env normalized_elt_ty in
       (match normalized_elt_ty with
       | _, Tunresolved _ -> true
       | _ -> false
       )
-  | _ -> false
+  | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+    | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+    | Tfun _ | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _, _)) -> false
 
 (*****************************************************************************)
 (* Adds a new field to all the shapes found in a given type.
@@ -236,3 +225,24 @@ let min_vis_opt vis_opt1 vis_opt2 =
   | Some (pos1, x), Some (pos2, y) ->
       let pos = if pos1 = Pos.none then pos2 else pos1 in
       Some (pos, min_vis x y)
+
+(*****************************************************************************)
+(* Check if a type is not fully constrained *)
+(*****************************************************************************)
+
+module HasTany : sig
+  val check: ty -> bool
+end = struct
+  let visitor =
+    object(this)
+      inherit [bool] TypeVisitor.type_visitor
+      method! on_tany _ = true
+      method! on_tarray acc ty1_opt ty2_opt =
+        (* Check for array without its value type parameter specified *)
+        (match ty2_opt with
+        | None -> true
+        | Some ty -> this#on_type acc ty) ||
+        (opt_fold_left this#on_type acc ty1_opt)
+    end
+  let check ty = visitor#on_type false ty
+end

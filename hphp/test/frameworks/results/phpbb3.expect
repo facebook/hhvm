@@ -4142,8 +4142,6 @@ phpbb_version_helper_test::test_is_stable with data set #7
 .
 phpbb_version_helper_test::test_is_stable with data set #8
 .
-phpbb_wrapper_gmgetdate_test::test_gmgetdate
-.
 phpbb_wrapper_mt_rand_test::test_max_equals_min
 .
 phpbb_wrapper_mt_rand_test::test_max_equals_min_negative

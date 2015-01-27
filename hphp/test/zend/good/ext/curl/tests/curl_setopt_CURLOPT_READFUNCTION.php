@@ -31,6 +31,7 @@ $sOutput = file_get_contents($sWriteFile);
 var_dump($sOutput);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $sFileBase  = dirname(__FILE__).DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
 $sReadFile  = $sFileBase.'_in.tmp';

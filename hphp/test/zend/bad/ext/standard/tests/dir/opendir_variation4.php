@@ -67,6 +67,7 @@ function clean_dh($dh){
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 rmdir("$file_path/level_one/level_two");

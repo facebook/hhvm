@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/name-value-table.h"
 
 #include <limits>
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -27,20 +27,18 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-NameValueTable::NameValueTable()
-  : m_fp(nullptr)
-  , m_table(nullptr)
-  , m_tabMask(0)
-  , m_elms(0)
-{
+/*
+ * Dummy DT for named locals; keep out of conflict with actual DataTypes in
+ * base/datatype.h.
+ */
+constexpr DataType kNamedLocalDataType = kExtraInvalidDataType;
+
+NameValueTable::NameValueTable() {
   allocate(folly::nextPowTwo(RuntimeOption::EvalVMInitialGlobalTableSize));
 }
 
 NameValueTable::NameValueTable(ActRec* fp)
   : m_fp(fp)
-  , m_table(nullptr)
-  , m_tabMask(0)
-  , m_elms(0)
 {
   assert(m_fp);
   const auto func = m_fp->m_func;
@@ -56,16 +54,14 @@ NameValueTable::NameValueTable(ActRec* fp)
     assert(func->lookupVarId(func->localVarName(i)) == i);
 
     auto elm = insert(func->localVarName(i));
-    assert(elm && elm->m_tv.m_type == KindOfInvalid);
-    elm->m_tv.m_type = KindOfNamedLocal;
+    assert(elm && elm->m_tv.m_type == kInvalidDataType);
+    elm->m_tv.m_type = kNamedLocalDataType;
     elm->m_tv.m_data.num = i;
   }
 }
 
 NameValueTable::NameValueTable(const NameValueTable& nvTable, ActRec* fp)
   : m_fp(fp)
-  , m_table(nullptr)
-  , m_tabMask(0)
   , m_elms(nvTable.m_elms)
 {
   allocate(nvTable.m_tabMask + 1);
@@ -78,8 +74,8 @@ NameValueTable::NameValueTable(const NameValueTable& nvTable, ActRec* fp)
     dst.m_name = src.m_name;
     if (dst.m_name) {
       dst.m_name->incRefCount();
-      if (src.m_tv.m_type == KindOfNamedLocal) {
-        dst.m_tv.m_type = KindOfNamedLocal;
+      if (src.m_tv.m_type == kNamedLocalDataType) {
+        dst.m_tv.m_type = kNamedLocalDataType;
         dst.m_tv.m_data.num = src.m_tv.m_data.num;
       } else {
         tvDupFlattenVars(&src.m_tv, &dst.m_tv);
@@ -94,12 +90,12 @@ NameValueTable::~NameValueTable() {
   for (Elm* elm = &m_table[m_tabMask]; elm != &m_table[-1]; --elm) {
     if (elm->m_name) {
       decRefStr(const_cast<StringData*>(elm->m_name));
-      if (elm->m_tv.m_type != KindOfNamedLocal) {
+      if (elm->m_tv.m_type != kNamedLocalDataType) {
         tvRefcountedDecRef(elm->m_tv);
       }
     }
   }
-  free(m_table);
+  smart_free(m_table);
 }
 
 void NameValueTable::suspend(const ActRec* oldFP, ActRec* newFP) {
@@ -124,12 +120,12 @@ void NameValueTable::attach(ActRec* fp) {
 
     auto elm = insert(func->localVarName(i));
     assert(elm);
-    if (elm->m_tv.m_type != KindOfInvalid) {
-      assert(elm->m_tv.m_type != KindOfNamedLocal);
+    if (elm->m_tv.m_type != kInvalidDataType) {
+      assert(elm->m_tv.m_type != kNamedLocalDataType);
       tvCopy(elm->m_tv, *loc);
     }
 
-    elm->m_tv.m_type = KindOfNamedLocal;
+    elm->m_tv.m_type = kNamedLocalDataType;
     elm->m_tv.m_data.num = i;
   }
 }
@@ -146,7 +142,7 @@ void NameValueTable::detach(ActRec* fp) {
     assert(func->lookupVarId(func->localVarName(i)) == i);
 
     auto elm = findElm(func->localVarName(i));
-    assert(elm && elm->m_tv.m_type == KindOfNamedLocal);
+    assert(elm && elm->m_tv.m_type == kNamedLocalDataType);
     tvCopy(*loc, elm->m_tv);
     tvDebugTrash(loc);
   }
@@ -155,7 +151,7 @@ void NameValueTable::detach(ActRec* fp) {
 void NameValueTable::leak() {
   m_elms = 0;
   m_tabMask = 0;
-  free(m_table);
+  smart_free(m_table);
   m_table = nullptr;
 }
 
@@ -218,24 +214,24 @@ void NameValueTable::allocate(const size_t newCapac) {
   Elm* oldTab = m_table;
   const size_t oldMask = m_tabMask;
 
-  m_table = static_cast<Elm*>(calloc(sizeof(Elm), newCapac));
+  m_table = static_cast<Elm*>(smart_calloc(sizeof(Elm), newCapac));
   m_tabMask = uint32_t(newCapac - 1);
 
   if (oldTab) {
     rehash(oldTab, oldMask);
-    free(oldTab);
+    smart_free(oldTab);
   }
 }
 
 TypedValue* NameValueTable::derefNamedLocal(TypedValue* tv) const {
-  return tv->m_type == KindOfNamedLocal
+  return tv->m_type == kNamedLocalDataType
     ? frame_local(m_fp, tv->m_data.num)
     : tv;
 }
 
 TypedValue* NameValueTable::findTypedValue(const StringData* name) {
   Elm* elm = insert(name);
-  if (elm->m_tv.m_type == KindOfInvalid) {
+  if (elm->m_tv.m_type == kInvalidDataType) {
     tvWriteNull(&elm->m_tv);
     return &elm->m_tv;
   }
@@ -249,7 +245,7 @@ NameValueTable::Elm* NameValueTable::insertImpl(const StringData* name) {
     assert(numProbes++ < m_tabMask + 1);
     if (nullptr == elm->m_name) {
       elm->m_name = name;
-      elm->m_tv.m_type = KindOfInvalid;
+      elm->m_tv.m_type = kInvalidDataType;
       return elm;
     }
     if (name->same(elm->m_name)) {
@@ -264,7 +260,7 @@ NameValueTable::Elm* NameValueTable::insertImpl(const StringData* name) {
 NameValueTable::Elm* NameValueTable::insert(const StringData* name) {
   reserve(m_elms + 1);
   Elm* elm = insertImpl(name);
-  if (elm->m_tv.m_type == KindOfInvalid) {
+  if (elm->m_tv.m_type == kInvalidDataType) {
     ++m_elms;
     name->incRefCount();
   }
@@ -274,7 +270,7 @@ NameValueTable::Elm* NameValueTable::insert(const StringData* name) {
 void NameValueTable::rehash(Elm* const oldTab, const size_t oldMask) {
   for (Elm* srcElm = &oldTab[oldMask]; srcElm != &oldTab[-1]; --srcElm) {
     if (srcElm->m_name) {
-      assert(srcElm->m_tv.m_type == KindOfNamedLocal ||
+      assert(srcElm->m_tv.m_type == kNamedLocalDataType ||
              tvIsPlausible(srcElm->m_tv));
       Elm* dstElm = insertImpl(srcElm->m_name);
       dstElm->m_name = srcElm->m_name;

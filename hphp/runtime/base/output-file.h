@@ -32,7 +32,7 @@ public:
   explicit OutputFile(const String& filename);
   virtual ~OutputFile();
 
-  bool valid() const { return !m_closed;}
+  bool valid() const { return !isClosed(); }
 
   CLASSNAME_IS("OutputFile");
   // overriding ResourceData

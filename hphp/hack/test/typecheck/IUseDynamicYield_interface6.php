@@ -32,7 +32,7 @@ function get_ifoo(): IFoo {
   return new Foo();
 }
 
-function test(): int {
+function test(): Awaitable<int> {
   $ifoo = get_ifoo();
-  return $ifoo->getStuff();
+  return $ifoo->genStuff();
 }

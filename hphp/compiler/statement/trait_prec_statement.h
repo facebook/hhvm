@@ -17,9 +17,10 @@
 #ifndef incl_HPHP_TRAIT_PREC_STATEMENT_H_
 #define incl_HPHP_TRAIT_PREC_STATEMENT_H_
 
-#include "hphp/compiler/statement/statement.h"
-#include <set>
 #include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/statement/statement.h"
+
+#include <unordered_set>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +39,7 @@ public:
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   const std::string& getMethodName() const { return m_methodName->getString(); }
   const std::string& getTraitName()  const { return m_traitName->getString(); }
-  void getOtherTraitNames(std::set<std::string> &nameSet) const;
+  void getOtherTraitNames(std::unordered_set<std::string>& nameSet) const;
 
 private:
   ScalarExpressionPtr m_traitName;        // selected trait name

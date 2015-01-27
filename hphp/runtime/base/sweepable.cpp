@@ -39,33 +39,31 @@ void Sweepable::Node::delist() {
   p->next = n;
 }
 
+// Called once per thread initialization from ThreadInfo::init
 void Sweepable::InitSweepableList() {
   t_sweep.init();
 }
 
-void Sweepable::SweepAll() {
-  Node persist;
-  persist.init();
+unsigned Sweepable::SweepAll() {
+  unsigned count = 0;
   while (t_sweep.next != &t_sweep) {
+    count++;
     Node* n = t_sweep.next;
     n->delist();
     n->init();
     auto s = reinterpret_cast<Sweepable*>(uintptr_t(n)
                                           - offsetof(Sweepable, m_sweepNode));
-    if (s->m_persistentCount == 0) {
-      s->sweep();
-    } else {
-      n->enlist(persist);
-    }
+    s->sweep();
   }
-  // copy persist list to t_sweep
-  assert(t_sweep.next == &t_sweep && t_sweep.prev == &t_sweep);
-  t_sweep.enlist(persist); // stick t_sweep in persist list
-  persist.delist(); // remove persist; now t_sweep is "head"
+  assert(t_sweep.prev == &t_sweep);
+  return count;
 }
 
-Sweepable::Sweepable() : m_persistentCount(0) {
+Sweepable::Sweepable(HeaderKind kind)
+  : m_kind(kind) {
   m_sweepNode.enlist(t_sweep);
+  assert(m_kind == kind);
+  static_assert(offsetof(Sweepable, m_kind) == HeaderKindOffset, "");
 }
 
 Sweepable::~Sweepable() {

@@ -22,6 +22,16 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+inline APCLocalArray::APCLocalArray(const APCArray* source)
+  : ArrayData(kApcKind)
+  , m_arr(source)
+  , m_localCache(nullptr)
+{
+  m_size = m_arr->size();
+  source->getHandle()->reference();
+  MM().addApcArray(this);
+}
+
 template<class... Args>
 APCLocalArray* APCLocalArray::Make(Args&&... args) {
   return new (MM().smartMallocSize(sizeof(APCLocalArray)))
@@ -29,14 +39,14 @@ APCLocalArray* APCLocalArray::Make(Args&&... args) {
 }
 
 ALWAYS_INLINE
-APCLocalArray* APCLocalArray::asSharedArray(ArrayData* ad) {
-  assert(ad->kind() == kSharedKind);
+APCLocalArray* APCLocalArray::asApcArray(ArrayData* ad) {
+  assert(ad->kind() == kApcKind);
   return static_cast<APCLocalArray*>(ad);
 }
 
 ALWAYS_INLINE
-const APCLocalArray* APCLocalArray::asSharedArray(const ArrayData* ad) {
-  assert(ad->kind() == kSharedKind);
+const APCLocalArray* APCLocalArray::asApcArray(const ArrayData* ad) {
+  assert(ad->kind() == kApcKind);
   assert(checkInvariants(ad));
   return static_cast<const APCLocalArray*>(ad);
 }

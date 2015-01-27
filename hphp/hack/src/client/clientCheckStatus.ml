@@ -9,10 +9,11 @@
  *)
 open ClientEnv
 open ClientExceptions
+open Utils
 
 module C = Tty
 
-let print_reason_color ~(first:bool) ~(code:int) ((p, s): Pos.t * string) =
+let print_reason_color ~(first:bool) ~(code:int) ((p, s): Pos.absolute * string) =
   let line, start, end_ = Pos.info_pos p in
   let code_clr = C.Normal C.Yellow in
   let err_clr  = if first then C.Bold C.Red else C.Normal C.Green in
@@ -45,32 +46,39 @@ let print_reason_color ~(first:bool) ~(code:int) ((p, s): Pos.t * string) =
     let strings = List.map (fun (_,x) -> x) to_print in
     List.iter (Printf.printf "%s") strings
 
-let print_error_color (e:Errors.error) =
+let print_error_color e =
   let code = Errors.get_code e in
   let msg_list = Errors.to_list e in
   print_reason_color ~first:true ~code (List.hd msg_list);
   List.iter (print_reason_color ~first:false ~code) (List.tl msg_list)
 
 let check_status connect (args:client_check_env) =
-  Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ -> raise Server_busy));
-  ignore(Unix.alarm 6);
-
   let name = "hh_server" in
-
   (* Check if a server is up *)
   if not (ClientUtils.server_exists args.root)
   then begin
-    ignore (Unix.alarm 0);
     if args.autostart
     then
       (* fork the server and raise an exception *)
-      ClientStart.start_server args.root;
+      ClientStart.start_server { ClientStart.
+        root = args.root;
+        wait = false;
+        no_load = args.no_load;
+      };
     raise Server_missing
   end;
-  let ic, oc = connect args in
-  ServerMsg.cmd_to_channel oc (ServerMsg.STATUS args.root);
-  let response = ServerMsg.response_from_channel ic in
-  ignore (Unix.alarm 0);
+  let response = with_context
+    ~enter:(fun () ->
+      Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ ->
+        raise Server_busy));
+      ignore (Unix.alarm 6))
+    ~exit:(fun () ->
+      ignore (Unix.alarm 0);
+      Sys.set_signal Sys.sigalrm Sys.Signal_default)
+    ~do_:(fun () ->
+      let ic, oc = connect args in
+      ServerMsg.cmd_to_channel oc (ServerMsg.STATUS args.root);
+      ServerMsg.response_from_channel ic) in
   match response with
   | ServerMsg.SERVER_OUT_OF_DATE ->
     if args.autostart

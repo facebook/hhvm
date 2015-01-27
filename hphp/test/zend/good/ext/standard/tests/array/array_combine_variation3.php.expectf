@@ -30,16 +30,16 @@ array(1) {
 }
 -- Iteration 6 --
 array(6) {
-  ["a"]=>
-  string(3) "a"
+  ["a%r\x0b\x0c%r"]=>
+  string(3) "a%r\x0b\x0c%r"
   ["aaaa
 "]=>
   string(5) "aaaa
 "
   ["b"]=>
   string(1) "b"
-  ["b	bbb"]=>
-  string(5) "b	bbb"
+  ["b%r\x09%rbbb"]=>
+  string(5) "b%r\x09%rbbb"
   ["c"]=>
   string(1) "c"
   ["\[\]\!\@\#$\%\^\&\*\(\)\{\}"]=>
@@ -75,24 +75,24 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"]=>
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"]=>
   string(88) "hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
   ["11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.	 0000 = 0000
+2222 != 1111.%r\x09%r 0000 = 0000
 "]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.	 0000 = 0000
+2222 != 1111.%r\x09%r 0000 = 0000
 "
 }
 -- Iteration 9 --

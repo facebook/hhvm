@@ -196,7 +196,7 @@ void ThriftBuffer::throwInvalidStringSize(int size) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static Variant unserialize_with_no_notice(const String& str) {
-  VariableUnserializer vu(str.data(), str.data() + str.size(),
+  VariableUnserializer vu(str.data(), str.size(),
       VariableUnserializer::Type::Serialize, true);
   Variant v;
   try {

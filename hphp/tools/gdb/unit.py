@@ -2,6 +2,8 @@
 Set the target Unit; used implicitly by some other commands.
 """
 # @lint-avoid-python-3-compatibility-imports
+# @lint-avoid-pyflakes3
+# @lint-avoid-pyflakes2
 
 import gdb
 from gdbutils import *
@@ -29,7 +31,7 @@ Use `unit none` to unset.  Just `unit` displays the current Unit.
             if curunit is None:
                 print('unit: No Unit set.')
             else:
-                gdb.execute('print (%s)%s' % (curunit.type, curunit))
+                gdbprint(curunit)
             return
 
         if len(argv) > 1:
@@ -41,5 +43,7 @@ Use `unit none` to unset.  Just `unit` displays the current Unit.
         else:
             unit_type = T('HPHP::Unit').const().pointer()
             curunit = gdb.parse_and_eval(argv[0]).cast(unit_type)
+
+        gdbprint(curunit)
 
 UnitCommand()

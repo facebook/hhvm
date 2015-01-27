@@ -1,5 +1,5 @@
 <?php
-$depth0 = "depth0";
+$depth0 = "depth01";
 $depth1 = 'depth1';
 $depth2 = 'depth2';
 $targetDir = __DIR__ . DIRECTORY_SEPARATOR . $depth0 . DIRECTORY_SEPARATOR . $depth1 . DIRECTORY_SEPARATOR . $depth2;
@@ -18,6 +18,7 @@ foreach ($list as $item) {
 	echo $item . "\n";
 }
 ?>
+<?php error_reporting(0); ?>
 <?php
 function rrmdir($dir) {
     foreach(glob($dir . '/*') as $file) {
@@ -31,6 +32,6 @@ function rrmdir($dir) {
     rmdir($dir);
 }
 
-$targetDir = __DIR__.DIRECTORY_SEPARATOR . "depth0";
+$targetDir = __DIR__.DIRECTORY_SEPARATOR . "depth01";
 rrmdir($targetDir);
 ?>

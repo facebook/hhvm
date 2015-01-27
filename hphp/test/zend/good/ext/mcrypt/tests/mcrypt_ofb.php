@@ -1,5 +1,5 @@
 <?php
-$key      = "FooBar";
+$key      = "0123456789012345";
 $secret   = "PHP Testfest 2008";
 $cipher   = MCRYPT_RIJNDAEL_128;
 

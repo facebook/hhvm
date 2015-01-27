@@ -11,7 +11,7 @@
 
 function foo(): string {
   // good code
-  if(true) {
+  if (true) {
     // UNSAFE
     $x = 0;
   }

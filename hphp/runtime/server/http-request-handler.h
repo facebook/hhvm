@@ -21,6 +21,9 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/server.h"
+#include "hphp/runtime/server/source-root-info.h"
+
+#include <folly/Optional.h>
 
 namespace HPHP {
 
@@ -30,6 +33,12 @@ class RequestURI;
 namespace ServiceData {
 class ExportedTimeSeries;
 }
+
+/*
+ * Atomically (with respect to concurrent calls to shouldProxyPath()) set a new
+ * origin and proxy percentage. All other options are unmodified.
+ */
+void setProxyOriginPercentage(const std::string& origin, int percentage);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -41,8 +50,11 @@ public:
   explicit HttpRequestHandler(int timeout);
 
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport);
-  virtual void abortRequest(Transport *transport);
+  void setupRequest(Transport* transport) override;
+  void teardownRequest(Transport* transport) noexcept override;
+  void handleRequest(Transport* transport) override;
+  void abortRequest(Transport* transport) override;
+  void logToAccessLog(Transport* transport) override;
 
   // for internal invoke of a special URL
   void disablePathTranslation() { m_pathTranslation = false;}
@@ -50,8 +62,8 @@ public:
 private:
   bool m_pathTranslation;
   ServiceData::ExportedTimeSeries* m_requestTimedOutOnQueue;
+  folly::Optional<SourceRootInfo> m_sourceRootInfo;
 
-  void handleRequestImpl(Transport *transport);
   bool handleProxyRequest(Transport *transport, bool force);
   void sendStaticContent(Transport *transport, const char *data, int len,
                          time_t mtime, bool compressed,
@@ -59,9 +71,7 @@ private:
                          const char *ext);
   bool executePHPRequest(Transport *transport, RequestURI &reqURI,
                          SourceRootInfo &sourceRootInfo,
-                         bool cachableDynamicContent);
-  bool MatchAnyPattern(const std::string &path,
-                       const std::vector<std::string> &patterns);
+                         bool cacheableDynamicContent);
 
   static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;

@@ -38,6 +38,20 @@ namespace HPHP {
     ZendResourceData() {}
     ~ZendResourceData();
 
+    /*
+     * These operator new() overloads let us smart-allocate these ResourceDatas
+     * in the Zend compat layer without a profusion of #ifdef's.
+     *
+     * The second overload is used by `newres()`.
+     */
+    static void* operator new(size_t) {
+      return newres<ZendResourceData>();
+    }
+    static void* operator new(size_t sz, void* p) {
+      return ::operator new(sz, p);
+    }
+    DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZendResourceData)
+
     const String& o_getClassNameHook() const;
 
     void* ptr;

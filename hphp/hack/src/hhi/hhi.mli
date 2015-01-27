@@ -8,7 +8,7 @@
  *
  *)
 
-val get_hhi_root : unit -> Path.path option
+val get_hhi_root : unit -> Path.path
 
 val set_hhi_root_for_unit_test : Path.path -> unit
 

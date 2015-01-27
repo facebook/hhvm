@@ -8,8 +8,6 @@
  *
  *)
 
-open Utils
-
 external get_embedded_hhi_data : string -> string option =
   "get_embedded_hhi_data"
 
@@ -22,7 +20,7 @@ let touch_root r =
 
 let touch () =
   match !root with
-  | Some (Some r) -> touch_root r
+  | Some r -> touch_root r
   | _ -> ()
 
 (* There are several verify-use race conditions here (and in Hack's file
@@ -61,13 +59,16 @@ let get_hhi_root () =
   | Some r -> r
   | None ->
       let r = get_hhi_root_impl () in
-      root := Some r;
-      (* TODO(jezng) refactor this ugliness *)
-      Relative_path.set_path_prefix
-        Relative_path.Hhi
-        (Path.string_of_path (unsafe_opt r));
-      r
+      match r with
+      | None ->
+          print_endline "Could not locate hhi files";
+          exit 1
+      | Some r ->
+          root := Some r;
+          Relative_path.set_path_prefix
+            Relative_path.Hhi (Path.string_of_path r);
+          r
 
 let set_hhi_root_for_unit_test dir =
-  root := Some (Some dir);
+  root := Some dir;
   Relative_path.set_path_prefix Relative_path.Hhi (Path.string_of_path dir)

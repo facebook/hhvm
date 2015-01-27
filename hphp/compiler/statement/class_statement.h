@@ -51,9 +51,6 @@ public:
   bool ignored() const { return m_ignored;}
 
   virtual std::string getName() const;
-  virtual void getAllParents(AnalysisResultConstPtr ar,
-                             std::vector<std::string> &names);
-  void getCtorAndInitInfo(bool &needsCppCtor, bool &needsInit);
   StatementPtr addClone(StatementPtr origStmt);
 
   TypeAnnotationPtr getEnumBaseTy() { return m_enumBaseTy; }
@@ -65,9 +62,6 @@ private:
   std::string m_originalParent;
   bool m_ignored;
   TypeAnnotationPtr m_enumBaseTy;
-
-  static void GetCtorAndInitInfo(
-      StatementPtr s, bool &needsCppCtor, bool &needsInit);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

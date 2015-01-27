@@ -106,11 +106,8 @@ ClassScopePtr StaticClassName::resolveClass() {
   if (cls) {
     m_unknown = false;
     if (cls->isVolatile()) {
-      ClassScopeRawPtr c = scope->getContainingFile()->resolveClass(cls);
-      if (!c) {
-        c = scope->getContainingClass();
-        if (c && c->getName() != m_className) c.reset();
-      }
+      ClassScopeRawPtr c = scope->getContainingClass();
+      if (c && c->getName() != m_className) c.reset();
       m_present = c.get() != 0;
       if (cls->isRedeclaring()) {
         cls = c;
@@ -151,7 +148,6 @@ bool StaticClassName::checkPresent() {
     ClassScopeRawPtr cls = ar->findClass(m_className);
     if (!cls) return false;
     if (!cls->isVolatile()) return true;
-    if (currentFile->resolveClass(cls)) return true;
     if (currentFile->checkClass(m_className)) return true;
   }
 

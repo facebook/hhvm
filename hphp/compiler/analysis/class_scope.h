@@ -196,17 +196,6 @@ public:
     ClassScopePtr parent = getParentScope(ar);
     return parent && !parent->isRedeclaring() && parent->hasAttribute(attr, ar);
   }
-  void setKnownBase(int i) { assert(i < 32); m_knownBases |= 1u << i; }
-  bool hasUnknownBases() const {
-    int n = m_bases.size();
-    if (!n) return false;
-    if (n >= 32) n = 0;
-    return m_knownBases != (((1u << n) - 1) & 0xffffffff);
-  }
-  bool hasKnownBase(int i) const {
-    return m_knownBases & (1u << (i < 32 ? i : 31));
-  }
-
   const FunctionScopePtrVec &getFunctionsVec() const {
     return m_functionsVec;
   }
@@ -283,9 +272,6 @@ public:
   /**
    * Collect parent class names.
    */
-  void getAllParents(AnalysisResultConstPtr ar,
-                     std::vector<std::string> &names);
-
   void getInterfaces(AnalysisResultConstPtr ar,
                      std::vector<std::string> &names,
                      bool recursive = true) const;
@@ -578,11 +564,6 @@ private:
   unsigned m_derivedByDynamic:1;
   unsigned m_needsCppCtor:1;
   unsigned m_needsInit:1;
-  // m_knownBases has a bit for each base class saying whether
-  // its known to exist at the point of definition of this class.
-  // for classes with more than 31 bases, bit 31 is set iff
-  // bases 32 through n are all known.
-  unsigned m_knownBases;
   int32_t m_numDeclMethods{-1};
 
   // holds the fact that accessing this class declaration is a fatal error

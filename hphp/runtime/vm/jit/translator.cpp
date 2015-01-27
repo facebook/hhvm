@@ -755,8 +755,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
  *     Truncate the tracelet at the preceding instruction, which must
  *     exists because *something* modified something in it.
  */
-static void getInputsImpl(SrcKey startSk,
-                          NormalizedInstruction* ni,
+static void getInputsImpl(NormalizedInstruction* ni,
                           int& currentStackOffset,
                           InputInfoVec& inputs) {
 #ifdef USE_TRACE
@@ -860,14 +859,14 @@ static void getInputsImpl(SrcKey startSk,
   }
 }
 
-InputInfoVec getInputs(SrcKey startSk, NormalizedInstruction& inst) {
+InputInfoVec getInputs(NormalizedInstruction& inst) {
   InputInfoVec infos;
   // MCGenerator expected top of stack to be index -1, with indexes growing
   // down from there. hhir defines top of stack to be index 0, with indexes
   // growing up from there. To compensate we start with a stack offset of 1 and
   // negate the index of any stack input after the call to getInputs.
   int stackOff = 1;
-  getInputsImpl(startSk, &inst, stackOff, infos);
+  getInputsImpl(&inst, stackOff, infos);
   for (auto& info : infos) {
     if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
   }
@@ -1642,6 +1641,82 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Emit type and reffiness prediction guards.
+ */
+static void emitPredictionGuards(HTS& hts,
+                                 const RegionDesc& region,
+                                 const RegionDesc::BlockPtr block,
+                                 bool useGuards) {
+  auto sk = block->start();
+  auto bcOff = sk.offset();
+  auto typePreds = makeMapWalker(block->typePreds());
+  auto refPreds  = makeMapWalker(block->reffinessPreds());
+
+  if (useGuards) irgen::ringbuffer(hts, Trace::RBTypeTraceletGuards, sk);
+
+  // Emit type guards.
+  while (typePreds.hasNext(sk)) {
+    auto const& pred = typePreds.next();
+    auto type = pred.type;
+    auto loc  = pred.location;
+    if (type <= Type::Cls) {
+      // Do not generate guards for class; instead assert the type.
+      assert(loc.tag() == RegionDesc::Location::Tag::Stack);
+      irgen::assertTypeLocation(hts, loc, type);
+    } else if (useGuards) {
+      bool checkOuterTypeOnly = mcg->tx().mode() != TransKind::Profile;
+      irgen::guardTypeLocation(hts, loc, type, checkOuterTypeOnly);
+    } else {
+      irgen::checkTypeLocation(hts, loc, type, bcOff);
+    }
+  }
+
+  // Emit reffiness guards.
+  while (refPreds.hasNext(sk)) {
+    auto const& pred = refPreds.next();
+    if (useGuards) {
+      irgen::guardRefs(hts, pred.arSpOffset, pred.mask, pred.vals);
+    } else {
+      irgen::checkRefs(hts, pred.arSpOffset, pred.mask, pred.vals, bcOff);
+    }
+  }
+
+  // Finish emitting guards, and emit profiling counters.
+  if (useGuards) {
+    irgen::gen(hts, EndGuards);
+    if (RuntimeOption::EvalJitTransCounters) {
+      irgen::incTransCounter(hts);
+    }
+
+    if (mcg->tx().mode() == TransKind::Profile) {
+      if (block->func()->isEntry(bcOff)) {
+        irgen::checkCold(hts, mcg->tx().profData()->curTransID());
+      } else {
+        irgen::incProfCounter(hts, mcg->tx().profData()->curTransID());
+      }
+    }
+    irgen::ringbuffer(hts, Trace::RBTypeTraceletBody, sk);
+  }
+
+  // In the entry block, hhbc-translator gets a chance to emit some code
+  // immediately after the initial guards/checks on the first instruction.
+  if (block == region.entry()) {
+    switch (arch()) {
+      case Arch::X64:
+        irgen::prepareEntry(hts);
+        break;
+      case Arch::ARM:
+        // Don't do this for ARM, because it can lead to interpOne on the
+        // first SrcKey in a translation, which isn't allowed.
+        break;
+    }
+  }
+
+  assert(!typePreds.hasNext());
+  assert(!refPreds.hasNext());
+}
+
 TranslateResult translateRegion(HTS& hts,
                                 const RegionDesc& region,
                                 RegionBlacklist& toInterp,
@@ -1679,14 +1754,13 @@ TranslateResult translateRegion(HTS& hts,
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   auto& blocks = region.blocks();
   for (auto b = 0; b < blocks.size(); b++) {
-    auto const& block  = blocks[b];
-    auto const blockId = block->id();
-    auto sk            = block->start();
-    auto typePreds     = makeMapWalker(block->typePreds());
-    auto byRefs        = makeMapWalker(block->paramByRefs());
-    auto refPreds      = makeMapWalker(block->reffinessPreds());
-    auto knownFuncs    = makeMapWalker(block->knownFuncs());
-    auto skipTrans     = false;
+    auto const& block    = blocks[b];
+    auto const blockId   = block->id();
+    auto sk              = block->start();
+    auto byRefs          = makeMapWalker(block->paramByRefs());
+    auto knownFuncs      = makeMapWalker(block->knownFuncs());
+    auto skipTrans       = false;
+    auto const lastBlock = b == blocks.size() - 1;
 
     const Func* topFunc = nullptr;
     TransID profTransId = getTransId(blockId);
@@ -1709,76 +1783,20 @@ TranslateResult translateRegion(HTS& hts,
       setSuccIRBlocks(hts, region, blockId, blockIdToIRBlock);
     }
 
+    // Emit the type and reffiness predictions for this region block.
+    // If this is the first instruction in the region, and the
+    // region's entry block is not a loop header, the guards will go
+    // to a retranslate request.  Otherwise, they'll go to a side
+    // exit.
+    auto const useGuards = block == region.entry() && !isLoopHeader;
+    emitPredictionGuards(hts, region, block, useGuards);
+
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
+      auto const lastInstr = i == block->length() - 1;
+
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
       irgen::prepareForNextHHBC(hts, nullptr, sk.offset(), false);
-
-      // Emit prediction guards. If this is the first instruction in the
-      // region, and the region's entry block is not a loop header, the guards
-      // will go to a retranslate request. Otherwise, they'll go to a side
-      // exit.
-      auto const isEntry = block == region.entry();
-      auto const useGuards = (isEntry && !isLoopHeader && i == 0);
-      if (useGuards) irgen::ringbuffer(hts, Trace::RBTypeTraceletGuards, sk);
-
-      // Emit type guards.
-      while (typePreds.hasNext(sk)) {
-        auto const& pred = typePreds.next();
-        auto type = pred.type;
-        auto loc  = pred.location;
-        if (type <= Type::Cls) {
-          // Do not generate guards for class; instead assert the type.
-          assert(loc.tag() == RegionDesc::Location::Tag::Stack);
-          irgen::assertTypeLocation(hts, loc, type);
-        } else if (useGuards) {
-          bool checkOuterTypeOnly = mcg->tx().mode() != TransKind::Profile;
-          irgen::guardTypeLocation(hts, loc, type, checkOuterTypeOnly);
-        } else {
-          irgen::checkTypeLocation(hts, loc, type, sk.offset());
-        }
-      }
-
-      while (refPreds.hasNext(sk)) {
-        auto const& pred = refPreds.next();
-        if (useGuards) {
-          irgen::guardRefs(hts, pred.arSpOffset, pred.mask, pred.vals);
-        } else {
-          irgen::checkRefs(hts, pred.arSpOffset, pred.mask, pred.vals,
-            sk.offset());
-        }
-      }
-
-      // Finish emitting guards, and emit profiling counters.
-      if (useGuards) {
-        irgen::gen(hts, EndGuards);
-        if (RuntimeOption::EvalJitTransCounters) {
-          irgen::incTransCounter(hts);
-        }
-
-        if (mcg->tx().mode() == TransKind::Profile) {
-          if (block->func()->isEntry(block->start().offset())) {
-            irgen::checkCold(hts, mcg->tx().profData()->curTransID());
-          } else {
-            irgen::incProfCounter(hts, mcg->tx().profData()->curTransID());
-          }
-        }
-        irgen::ringbuffer(hts, Trace::RBTypeTraceletBody, sk);
-      }
-
-      // In the entry block, hhbc-translator gets a chance to emit some code
-      // immediately after the initial guards/checks on the first instruction.
-      if (isEntry && i == 0) {
-        switch (arch()) {
-        case Arch::X64:
-          irgen::prepareEntry(hts);
-          break;
-        case Arch::ARM:
-          // Don't do this for ARM, because it can lead to interpOne on the
-          // first SrcKey in a translation, which isn't allowed.
-          break;
-        }
-      }
 
       // Update the current funcd, if we have a new one.
       if (knownFuncs.hasNext(sk)) {
@@ -1788,13 +1806,13 @@ TranslateResult translateRegion(HTS& hts,
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
       inst.funcd = topFunc;
-      if (i == block->length() - 1) {
+      if (lastInstr) {
         inst.endsRegion = region.isExit(blockId);
         inst.nextIsMerge = nextIsMerge(inst, region);
         if (hts.mode == IRGenMode::Trace &&
             instrIsNonCallControlFlow(inst.op()) &&
-            b < blocks.size() - 1) {
-          inst.nextOffset = blocks[b+1]->start().offset();
+            !lastBlock) {
+          inst.nextOffset = blocks[b + 1]->start().offset();
         }
       }
 
@@ -1803,17 +1821,15 @@ TranslateResult translateRegion(HTS& hts,
       // this is true.
       inst.interp = toInterp.count(ProfSrcKey{profTransId, sk});
 
-      auto const inputInfos = getInputs(startSk, inst);
+      auto const inputInfos = getInputs(inst);
 
-      // Populate the NormalizedInstruction's input vector, using types from
-      // HhbcTranslator.
-      std::vector<DynLocation> dynLocs;
+      // Populate the NormalizedInstruction's input vector, using types
+      // from IRBuilder.
+      jit::vector<DynLocation> dynLocs;
       dynLocs.reserve(inputInfos.size());
       auto newDynLoc = [&] (const InputInfo& ii) {
-        dynLocs.emplace_back(
-          ii.loc,
-          irgen::predictedTypeFromLocation(hts, ii.loc)
-        );
+        dynLocs.emplace_back(ii.loc,
+                             irgen::predictedTypeFromLocation(hts, ii.loc));
         FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
                ii.loc.pretty(), dynLocs.back().rtt);
         return &dynLocs.back();
@@ -1830,9 +1846,8 @@ TranslateResult translateRegion(HTS& hts,
       // If this block ends with an inlined FCall, we don't emit anything for
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from
       // the callee will be next in the region.
-      if (i == block->length() - 1 &&
-          (inst.op() == Op::FCall || inst.op() == Op::FCallD) &&
-          block->inlinedCallee()) {
+      if (lastInstr && block->inlinedCallee()) {
+        always_assert(inst.op() == Op::FCall || inst.op() == Op::FCallD);
         auto const* callee = block->inlinedCallee();
         FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
                "and stack:\n{}\n",
@@ -1867,7 +1882,7 @@ TranslateResult translateRegion(HTS& hts,
           }
 
           // ...and also if this is the end of the block.
-          if (i == block->length() - 1) return false;
+          if (lastInstr) return false;
 
           auto nextSK = inst.nextSk();
 
@@ -1920,17 +1935,17 @@ TranslateResult translateRegion(HTS& hts,
       skipTrans = false;
 
       // In CFG mode, insert a fallthrough jump at the end of each block.
-      if (hts.mode == IRGenMode::CFG && i == block->length() - 1) {
+      if (hts.mode == IRGenMode::CFG && lastInstr) {
         if (instrAllowsFallThru(inst.op())) {
           auto nextOffset = inst.offset() + instrLen((Op*)(inst.pc()));
           // prepareForSideExit is done later in Trace mode, but it
           // needs to happen here or else we generate the SpillStack
           // after the fallthrough jump, which is just weird.
-          if (b < blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
+          if (!lastBlock && region.isSideExitingBlock(blockId)) {
             irgen::prepareForSideExit(hts);
           }
           irgen::endBlock(hts, nextOffset, inst.nextIsMerge);
-        } else if (b < blocks.size() - 1 &&
+        } else if (!lastBlock &&
                    (isRet(inst.op()) || inst.op() == OpNativeImpl)) {
           // "Fallthrough" from inlined return to the next block
           irgen::endBlock(hts, blocks[b + 1]->start().offset(),
@@ -1943,16 +1958,14 @@ TranslateResult translateRegion(HTS& hts,
     }
 
     if (hts.mode == IRGenMode::Trace) {
-      if (b < blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
+      if (!lastBlock && region.isSideExitingBlock(blockId)) {
         irgen::prepareForSideExit(hts);
       }
     }
 
     processedBlocks.insert(blockId);
 
-    assert(!typePreds.hasNext());
     assert(!byRefs.hasNext());
-    assert(!refPreds.hasNext());
     assert(!knownFuncs.hasNext());
   }
 

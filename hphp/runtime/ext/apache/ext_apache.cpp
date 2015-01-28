@@ -25,6 +25,7 @@
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/health-monitor-types.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,14 +47,14 @@ static Array get_headers(const HeaderMap& headers, bool allHeaders = false) {
   for (auto& iter : headers) {
     const auto& values = iter.second;
     if (auto size = values.size()) {
-      if (LIKELY(size == 1 || !allHeaders)) {
+      if (!allHeaders) {
         ret.set(String(iter.first), String(values.back()));
       } else {
         PackedArrayInit dups(size);
         for (auto& dup : values) {
           dups.append(String(dup));
         }
-        ret.set(String(iter.first), dups.toArray());
+        ret.set(String(toLower(iter.first)), dups.toArray());
       }
     }
   }

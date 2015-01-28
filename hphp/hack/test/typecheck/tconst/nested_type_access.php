@@ -6,9 +6,9 @@ abstract class A {
 
 class C {
   const type B as D = D;
-  const type Test = static::B::X;
+  const type Test = this::B::X;
 
-  public static function foo(): static::Test::T {
+  public static function foo(): this::Test::T {
     return array();
   }
 }

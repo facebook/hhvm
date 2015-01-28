@@ -2,7 +2,7 @@
 
 abstract class Base {
   abstract const type ID as arraykey;
-  const type ALIAS = static::ID;
+  const type ALIAS = this::ID;
 }
 
 class IntID extends Base {

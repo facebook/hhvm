@@ -1,7 +1,7 @@
 object
 generic this<App \BaseField<generic T, >>
-App \INeedsFoo<[198]intersect(), >
-[227]intersect(App \INeedsFoo<[207]intersect(X), >, generic this<App \BaseField<generic T, >>)
+App \INeedsFoo<[200]intersect(), >
+[233]intersect(App \INeedsFoo<[213]intersect(X), >, generic this<App \BaseField<generic T, >>)
 File "instanceof_static_with_reqs.php", line 31, characters 12-17:
 Invalid return type (Typing[4110])
 File "instanceof_static_with_reqs.php", line 7, characters 49-52:

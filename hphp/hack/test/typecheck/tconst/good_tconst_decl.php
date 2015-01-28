@@ -2,15 +2,15 @@
 abstract class A {
   abstract const type abs_class_by_class as arraykey;
 
-  public function __construct (
-    private static::abs_class_by_class $id,
+  final public function __construct (
+    private this::abs_class_by_class $id,
   ) {}
 
   public function overriding(): Aint::vec {
     return Vector {};
   }
 
-  public function getID(): static::abs_class_by_class {
+  public function getID(): this::abs_class_by_class {
     return $this->id;
   }
 
@@ -39,19 +39,19 @@ class Astr extends A {
 
 abstract class B {
   abstract const type AType as A;
-  abstract public static function getAID(): static::AType::abs_class_by_class;
+  abstract public static function getAID(): this::AType::abs_class_by_class;
 }
 
 class Bint extends B {
   const type AType = Aint;
-  public static function getAID(): static::AType::abs_class_by_class {
+  public static function getAID(): this::AType::abs_class_by_class {
     return 0;
   }
 }
 
 class Bstr extends B {
   const type AType = Astr;
-  public static function getAID(): static::AType::abs_class_by_class {
+  public static function getAID(): this::AType::abs_class_by_class {
     return '';
   }
 }

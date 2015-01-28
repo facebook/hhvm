@@ -1,0 +1,6 @@
+File "method_contravariant.php", line 43, characters 14-15:
+Invalid argument (Typing[4110])
+File "method_contravariant.php", line 15, characters 5-11:
+This is a value of generic type $171::T
+File "method_contravariant.php", line 43, characters 14-15:
+It is incompatible with a string

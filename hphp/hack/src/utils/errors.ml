@@ -316,6 +316,9 @@ module Typing                               = struct
   let strict_members_not_known              = 4123 (* DONT MODIFY!!!! *)
   let generic_at_runtime                    = 4124 (* DONT MODIFY!!!! *)
   let dynamic_class                         = 4125 (* DONT MODIFY!!!! *)
+  let attribute_arity                       = 4126 (* DONT MODIFY!!!! *)
+  let attribute_param_type                  = 4127 (* DONT MODIFY!!!! *)
+  let deprecated_use                        = 4128 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1491,6 +1494,23 @@ let trivial_strict_eq p b left right left_trail right_trail =
 let void_usage p reason =
   let msg = "You are attempting to use the return value of a void function" in
   add_list Typing.void_usage ((p, msg) :: reason)
+
+let attribute_arity pos x n =
+  let n = string_of_int n in
+  add Typing.attribute_arity pos (
+    "The attribute "^x^" expects "^n^" parameters"
+  )
+
+let attribute_param_type pos x =
+  add Typing.attribute_param_type pos (
+    "This attribute parameter should be "^x
+  )
+
+let deprecated_use pos pos_def msg =
+  add_list Typing.deprecated_use [
+    pos, msg;
+    pos_def, "Definition is here";
+  ]
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

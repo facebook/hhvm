@@ -318,8 +318,8 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     reason p, ty_ x
 
   and ty_ = function
-    | Tanon _
-    | Tvar _               -> failwith "Internal error"
+    | Tanon _              -> failwith "TraversePos: Unexpected Tanon"
+    | Tvar _               -> failwith "TraversePos: Unexpected Tvar"
     | Tany
     | Tmixed as x          -> x
     | Tarray (ty1, ty2)    -> Tarray (ty_opt ty1, ty_opt ty2)

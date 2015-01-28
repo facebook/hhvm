@@ -185,6 +185,7 @@ and static_class_id =
 and fun_type = {
   ft_pos       : Pos.t;
   ft_unsafe    : bool            ;
+  ft_deprecated: string option   ;
   ft_abstract  : bool            ;
   ft_arity     : fun_arity       ;
   ft_tparams   : tparam list     ;

@@ -170,6 +170,7 @@ let default_constructor_ce class_ =
   let r = Reason.Rwitness pos in (* reason doesn't get used in, e.g. arity checks *)
   let ft = { ft_pos      = pos;
              ft_unsafe   = false;
+             ft_deprecated = None;
              ft_abstract = false;
              ft_arity    = Fstandard (0, 0);
              ft_tparams  = [];

@@ -193,6 +193,7 @@ and fun_ = {
   f_params   : fun_param list;
   f_body     : body_block;
   f_fun_kind : fun_kind;
+  f_user_attributes : Ast.user_attribute list;
 }
 
 and typedef = tparam list * hint option * hint

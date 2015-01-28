@@ -340,7 +340,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
   }
 
   String s = String(outputsize, ReserveString);
-  char *output = s.bufferSlice().ptr;
+  char *output = s.mutableData();
   outputpos = 0;
   currentarg = 0;
 
@@ -751,7 +751,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           }
 
           String s = String(len, ReserveString);
-          buf = s.bufferSlice().ptr;
+          buf = s.mutableData();
 
           for (ipos = opos = 0; opos < len; opos++) {
             char c = (input[inputpos + ipos] >> nibbleshift) & 0xf;

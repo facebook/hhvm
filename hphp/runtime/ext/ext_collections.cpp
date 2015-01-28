@@ -68,7 +68,7 @@ static void throwIntOOB(int64_t key, bool isVector = false)
 void throwIntOOB(int64_t key, bool isVector /* = false */) {
   static const size_t reserveSize = 50;
   String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
+  char* buf = msg.mutableData();
   int sz = sprintf(buf, "Integer key %" PRId64 " is %s", key,
                    isVector ? "out of bounds" : "not defined");
   assert(sz <= reserveSize);
@@ -1546,7 +1546,7 @@ void HashCollection::throwTooLarge() {
   assert(getClassName().size() == 6);
   static const size_t reserveSize = 130;
   String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
+  char* buf = msg.mutableData();
   int sz = sprintf(
     buf,
     "%s object has reached its maximum capacity of %u element "
@@ -1565,7 +1565,7 @@ void HashCollection::throwReserveTooLarge() {
   assert(getClassName().size() == 6);
   static const size_t reserveSize = 80;
   String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
+  char* buf = msg.mutableData();
   int sz = sprintf(
     buf,
     "%s does not support reserving room for more than %u elements",

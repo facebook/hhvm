@@ -54,8 +54,7 @@ Variant HHVM_FUNCTION(wordwrap, const String& str, int64_t linewidth /* = 75 */,
     auto new_sd = StringData::Make(str.get(), CopyString);
     new_sd->invalidateHash();
     Variant ret = new_sd;
-    auto const bs = new_sd->bufferSlice();
-    char* newtext = bs.begin();
+    char* newtext = new_sd->mutableData();
     auto bc = brkstr[0];
     size_t current = 0, laststart = 0, lastspace = 0;
     for (; current < textlen; current++) {

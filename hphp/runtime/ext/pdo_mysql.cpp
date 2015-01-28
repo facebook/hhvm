@@ -566,7 +566,7 @@ int64_t PDOMySqlConnection::doer(const String& sql) {
 bool PDOMySqlConnection::quoter(const String& input, String &quoted,
                                 PDOParamType paramtype) {
   String s(2 * input.size() + 3, ReserveString);
-  char *buf = s.bufferSlice().ptr;
+  char *buf = s.mutableData();
   int len = mysql_real_escape_string(m_server, buf + 1,
                                      input.data(), input.size());
   len++;

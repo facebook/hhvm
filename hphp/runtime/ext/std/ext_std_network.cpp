@@ -500,7 +500,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     int l1 = 0, l2 = 0;
 
     String s = String(dlen, ReserveString);
-    tp = (unsigned char *)s.bufferSlice().ptr;
+    tp = (unsigned char *)s.mutableData();
 
     while (l1 < dlen) {
       n = cp[l1];

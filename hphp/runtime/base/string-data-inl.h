@@ -113,7 +113,11 @@ inline const char* StringData::data() const {
   return m_data;
 }
 
-inline char* StringData::mutableData() const { return m_data; }
+inline char* StringData::mutableData() const {
+  assert(!isImmutable());
+  return m_data;
+}
+
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {

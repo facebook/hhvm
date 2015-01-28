@@ -2648,7 +2648,7 @@ safe:
 rewrite:
     /* allocate output buffer */
     out = String(newbuffer_len, ReserveString);
-    newbuffer = out.bufferSlice().ptr;
+    newbuffer = out.mutableData();
 
     /* and build the query */
     plc = placeholders;

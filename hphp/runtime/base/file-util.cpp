@@ -401,7 +401,7 @@ String FileUtil::relativePath(const std::string& fromDir,
   }
 
   String ret(maxlen, ReserveString);
-  char* path = ret.bufferSlice().ptr;
+  char* path = ret.mutableData();
 
   const char* from_dir = fromDir.c_str();
   const char* to_file = toFile.c_str();
@@ -490,7 +490,7 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
     addpath = "";
 
   String ret(maxlen-1, ReserveString);
-  char *path = ret.bufferSlice().ptr;
+  char *path = ret.mutableData();
 
   if (addpath[0] == '/' && collapse_slashes) {
     /* Ignore the given root path, strip off leading

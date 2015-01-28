@@ -85,7 +85,7 @@ static SmartPtr<File> phpStreamOpenFilter(const char* sFilter,
   }
 
   String duppath(sFilter, CopyString);
-  char *path = duppath.bufferSlice().ptr;
+  char *path = duppath.mutableData();
   char *p = strstr(path, "/resource=");
   if (!p) {
     raise_recoverable_error("No URL resource specified");

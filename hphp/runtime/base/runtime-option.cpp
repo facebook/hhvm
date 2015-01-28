@@ -581,7 +581,7 @@ double RuntimeOption::ProfilerTraceExpansion = 1.2;
 int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
 #ifdef FACEBOOK
-bool RuntimeOption::EnableFb303Server = true;
+bool RuntimeOption::EnableFb303Server = false;
 int RuntimeOption::Fb303ServerPort = 0;
 int RuntimeOption::Fb303ServerThreadStackSizeMb = 8;
 int RuntimeOption::Fb303ServerWorkerThreads = 1;
@@ -1500,7 +1500,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 #ifdef FACEBOOK
   {
     Hdf fb303Server = config["Fb303Server"];
-    Config::Bind(EnableFb303Server, ini, fb303Server["Enable"], true);
+    Config::Bind(EnableFb303Server, ini,
+                 fb303Server["Enable"], EnableFb303Server);
     Config::Bind(Fb303ServerPort, ini, fb303Server["Port"], 0);
     Config::Bind(Fb303ServerThreadStackSizeMb, ini,
                  fb303Server["ThreadStackSizeMb"], 8);

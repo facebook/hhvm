@@ -12,9 +12,7 @@ module M = Map_ast
 module CE = Common_exns
 module List = List_ext
 open Ast
-open Utils
 open Ast_ext
-
 
 let map program =
   let errors = ref [] in
@@ -24,7 +22,7 @@ let map program =
     () in
 
   let detect_invalid_attributes p attributes =
-    if (SMap.mem "__Memoize" attributes)
+    if Attributes.mem "__Memoize" attributes
     then unsupported (p, "__Memoize is currently not supported.")
     else () in
 

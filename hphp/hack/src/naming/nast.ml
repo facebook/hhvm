@@ -8,7 +8,6 @@
  *
  *)
 
-
 open Utils
 
 module SN = Naming_special_names
@@ -104,7 +103,7 @@ and class_ = {
   c_constructor    : method_ option   ;
   c_static_methods : method_ list     ;
   c_methods        : method_ list     ;
-  c_user_attributes : Ast.user_attribute SMap.t;
+  c_user_attributes : Ast.user_attribute list;
   c_enum           : enum_ option     ;
 }
 
@@ -148,7 +147,7 @@ and method_ = {
   m_variadic        : fun_variadicity           ;
   m_params          : fun_param list            ;
   m_body            : body_block                ;
-  m_user_attributes : Ast.user_attribute SMap.t ;
+  m_user_attributes : Ast.user_attribute list   ;
   m_ret             : hint option               ;
   m_fun_kind        : fun_kind                  ;
 }

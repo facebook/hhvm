@@ -337,10 +337,10 @@ module PrintClass = struct
       "\n"^indent^sigil^" "^ty_str^kind^acc
     end m ""
 
-  let user_attribute_smap m =
-    SMap.fold begin fun field _ acc ->
-      "("^field^": expr) "^acc
-    end m ""
+  let user_attribute_list xs =
+    List.fold_left begin fun acc { Ast.ua_name; _ } ->
+      acc^"("^snd ua_name^": expr) "
+    end "" xs
 
   let constructor (ce_opt, consist) =
     let consist_str = if consist then " (consistent in hierarchy)" else "" in
@@ -370,7 +370,7 @@ module PrintClass = struct
     let tc_req_ancestors = ancestors_smap c.tc_req_ancestors in
     let tc_req_ancestors_extends = sset c.tc_req_ancestors_extends in
     let tc_extends = sset c.tc_extends in
-    let tc_user_attributes = user_attribute_smap c.tc_user_attributes in
+    let tc_user_attributes = user_attribute_list c.tc_user_attributes in
     "tc_need_init: "^tc_need_init^"\n"^
     "tc_members_fully_known: "^tc_members_fully_known^"\n"^
     "tc_abstract: "^tc_abstract^"\n"^

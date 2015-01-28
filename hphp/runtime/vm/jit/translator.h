@@ -457,11 +457,8 @@ public:
 /*
  * Get input location info and flags for a NormalizedInstruction.  Some flags
  * on `ni' may be updated.
- *
- * `startSk' should be the SrcKey for the first instruction in the region
- * containing the instruction.
  */
-InputInfoVec getInputs(SrcKey startSk, NormalizedInstruction&);
+InputInfoVec getInputs(NormalizedInstruction&);
 
 namespace InstrFlags {
 ///////////////////////////////////////////////////////////////////////////////

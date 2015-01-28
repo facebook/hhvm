@@ -73,13 +73,12 @@ bool merge_into(SlotState<Stack>& dst, const SlotState<Stack>& src) {
     changed = true;
   }
 
-  if (merge_util(dst.type, Type::unionOf(dst.type, src.type))) {
+  if (merge_util(dst.type, dst.type | src.type)) {
     changed = true;
   }
 
   return
-    merge_util(dst.predictedType,
-               Type::unionOf(dst.predictedType, src.predictedType)) ||
+    merge_util(dst.predictedType, dst.predictedType | src.predictedType) ||
     changed;
 }
 

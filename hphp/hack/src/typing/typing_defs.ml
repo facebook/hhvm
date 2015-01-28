@@ -185,6 +185,7 @@ and static_class_id =
 and fun_type = {
   ft_pos       : Pos.t;
   ft_unsafe    : bool            ;
+  ft_deprecated: string option   ;
   ft_abstract  : bool            ;
   ft_arity     : fun_arity       ;
   ft_tparams   : tparam list     ;
@@ -252,7 +253,7 @@ and class_type = {
   tc_req_ancestors       : ty SMap.t;
   tc_req_ancestors_extends : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
-  tc_user_attributes     : Ast.user_attribute SMap.t;
+  tc_user_attributes     : Ast.user_attribute list;
   tc_enum_type           : enum_type option;
 }
 

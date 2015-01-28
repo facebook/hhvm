@@ -89,7 +89,7 @@ type fun_common = {
   fc_name            : id;
   fc_params          : fun_param list;
   fc_body            : block;
-  fc_user_attributes : user_attribute SMap.t;
+  fc_user_attributes : user_attribute list;
   fc_fun_kind        : fun_kind;
 }
 
@@ -286,7 +286,8 @@ let unparser _env =
         u_todo_conds [
           (v_c_is_xhp, "c_is_xhp", (fun () -> u_of_bool v_c_is_xhp)) ;
           (List.not_empty v_c_tparams, "c_tparams", (fun () -> u_of_list_spc u_tparam v_c_tparams)) ;
-          (not (SMap.is_empty v_c_user_attributes), "c_user_attributes", (fun () -> u_of_smap u_user_attribute v_c_user_attributes)) ;
+          (v_c_user_attributes <> [], "c_user_attributes",
+            (fun () -> u_of_smap u_user_attribute v_c_user_attributes)) ;
           (Option.is_some v_c_enum, "c_enum", (fun () -> u_of_option u_enum_ v_c_enum))
         ] (fun () ->
           let u_elt = u_class_elt v_c_kind in
@@ -453,7 +454,8 @@ let unparser _env =
                   param_user_attributes = v_param_user_attributes
                 } =
      u_todo_conds [
-      (not (SMap.is_empty v_param_user_attributes), "param_user_attributes", fun () -> u_of_smap u_user_attribute v_param_user_attributes) ;
+       (v_param_user_attributes <> [], "param_user_attributes",
+         fun () -> u_of_smap u_user_attribute v_param_user_attributes);
      ] begin fun () ->
          let str_param_mod = u_of_option u_kind v_param_modifier
          and str_param_hint = u_of_option u_hint v_param_hint
@@ -488,7 +490,7 @@ let unparser _env =
     fc_fun_kind;
   } useStr u_of_name abstract =
     u_todo_conds [(
-      not (SMap.is_empty fc_user_attributes),
+      fc_user_attributes <> [],
       "m_user_attributes",
       (fun () -> u_of_smap u_user_attribute fc_user_attributes)
     )] begin fun () ->

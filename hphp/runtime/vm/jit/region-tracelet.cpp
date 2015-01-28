@@ -267,7 +267,7 @@ bool RegionFormer::prepareInstruction() {
   m_inst.funcd = m_arStates.back().knownFunc();
   irgen::prepareForNextHHBC(m_hts, &m_inst, m_sk.offset(), false);
 
-  auto const inputInfos = getInputs(m_startSk, m_inst);
+  auto const inputInfos = getInputs(m_inst);
 
   // Read types for all the inputs and apply MetaData.
   auto newDynLoc = [&](const InputInfo& ii) {

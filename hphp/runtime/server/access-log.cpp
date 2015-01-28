@@ -296,7 +296,12 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     }
     break;
   case 'h':
-    out << transport->getRemoteHost();
+    {
+       std::string host = transport->getRemoteHost();
+       if(host.empty())
+         host = transport->getRemoteAddr();
+       out << host;
+    }
     break;
   case 'i':
     if (arg.empty()) return false;

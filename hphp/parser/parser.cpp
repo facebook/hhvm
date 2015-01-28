@@ -47,13 +47,13 @@ std::string ParserBase::newClosureName(
   name += funcName;
 
   int id = ++m_seenClosures[name];
-
-  folly::format(&name, ";{}", hash);
-
   if (id > 1) {
     // we've seen the same name before, uniquify
     name = name + '#' + std::to_string(id);
   }
+
+  folly::format(&name, ";{}", hash);
+
   return name;
 }
 

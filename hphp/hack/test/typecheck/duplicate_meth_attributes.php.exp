@@ -1,0 +1,4 @@
+File "duplicate_meth_attributes.php", line 4, characters 24-35:
+You cannot reuse the attribute __Deprecated (Naming[2062])
+File "duplicate_meth_attributes.php", line 4, characters 5-16:
+__Deprecated was already used here

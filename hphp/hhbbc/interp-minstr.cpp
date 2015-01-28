@@ -643,7 +643,7 @@ Type mcodeKey(MIS& env) {
   case MEI:  return ival(melem.immInt);
 
   case MW:
-  case NumMemberCodes:
+  case InvalidMemberCode:
     always_assert(0);
     break;
   }
@@ -756,7 +756,7 @@ Base miBase(MIS& env) {
       return miBaseSProp(env, cls, prop);
     }
 
-  case NumLocationCodes:
+  case InvalidLocationCode:
     break;
   }
   not_reached();

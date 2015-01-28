@@ -188,14 +188,6 @@ TEST(Type, CanRunDtor) {
   }
 }
 
-TEST(Type, UnionOf) {
-  EXPECT_EQ(Type::PtrToGen, Type::unionOf(Type::PtrToCell, Type::PtrToGen));
-  EXPECT_EQ(Type::UncountedInit, Type::unionOf(Type::Int, Type::Dbl));
-  EXPECT_EQ(Type::Str, Type::unionOf(Type::StaticStr, Type::Str));
-  EXPECT_EQ(Type::Gen, Type::unionOf(Type::Cell, Type::BoxedInt));
-  EXPECT_EQ(Type::Bool, Type::unionOf(Type::cns(true), Type::cns(false)));
-}
-
 TEST(Type, Top) {
   for (auto t : allTypes()) {
     EXPECT_TRUE(t.subtypeOf(Type::Top));
@@ -457,7 +449,7 @@ TEST(Type, PtrKinds) {
   EXPECT_TRUE(!unknownBool.subtypeOf(frameBool));
   EXPECT_EQ(unknownBool, frameBool | unknownBool);
 
-  EXPECT_EQ(unknownGen, Type::unionOf(frameGen, unknownBool));
+  EXPECT_EQ(unknownGen, frameGen | unknownBool);
 
   EXPECT_EQ(Type::Bottom, frameBool & stackBool);
   EXPECT_EQ(frameBool, frameBool & unknownBool);

@@ -58,11 +58,15 @@ int main(int argc, char **argv) {
     IniSetting::Map ini = IniSetting::Map::object;
     Hdf empty;
     RuntimeOption::Load(ini, empty);
+    // This one's default value changed recently
+    RuntimeOption::AlwaysPopulateRawPostData = true;
   }
 
   // Initialize compiler state
   compile_file(0, 0, MD5(), 0);
   hphp_process_init();
   Test test;
-  return test.RunTests(suite, which, set) ? 0 : -1;
+  auto ret = test.RunTests(suite, which, set) ? 0 : -1;
+  hphp_process_exit();
+  return ret;
 }

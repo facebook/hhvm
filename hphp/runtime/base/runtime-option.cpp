@@ -190,7 +190,7 @@ bool RuntimeOption::ImplicitFlush = false;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
 int64_t RuntimeOption::MaxPostSize = 100;
-bool RuntimeOption::AlwaysPopulateRawPostData = true;
+bool RuntimeOption::AlwaysPopulateRawPostData = false;
 int64_t RuntimeOption::UploadMaxFileSize = 100;
 std::string RuntimeOption::UploadTmpDir = "/tmp";
 bool RuntimeOption::EnableFileUploads = true;
@@ -390,18 +390,6 @@ int RuntimeOption::GetScannerType() {
   if (EnableXHP) type |= Scanner::AllowXHPSyntax;
   if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
-}
-
-bool RuntimeOption::GetServerCustomBoolSetting(const std::string &settingName,
-                                               bool &val) {
-  auto it = RuntimeOption::CustomSettings.find(settingName);
-  if (it == RuntimeOption::CustomSettings.end()) {
-    // The value isn't present in the CustomSettings section
-    return false;
-  }
-
-  val = Hdf::convertRawConfigToBool(it->second.data());
-  return true;
 }
 
 static inline std::string regionSelectorDefault() {
@@ -1151,7 +1139,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(MaxPostSize, ini, server["MaxPostSize"], 100);
     MaxPostSize <<= 20;
     Config::Bind(AlwaysPopulateRawPostData, ini,
-                 server["AlwaysPopulateRawPostData"], true);
+                 server["AlwaysPopulateRawPostData"], false);
     Config::Bind(LibEventSyncSend, ini, server["LibEventSyncSend"], true);
     Config::Bind(TakeoverFilename, ini, server["TakeoverFilename"]);
     Config::Bind(ExpiresActive, ini, server["ExpiresActive"], true);

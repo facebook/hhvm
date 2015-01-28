@@ -50,9 +50,6 @@ def check_results(fnames, out_ext, expect_ext):
         print("Failures:\n" + " ".join(failures))
         for f in failures:
             print("mv {0}{1} {0}{2}".format(f, out_ext, expect_ext))
-        print()
-        for f in failures:
-            print_file(f + expect_ext)
         print("Failed %d out of %d tests." % (len(failures), total))
     return success
 
@@ -65,11 +62,6 @@ def check_result(fname, out_ext, expect_ext):
     with open(fname + out_ext) as fout:
         out = fout.read()
     return exp == out
-
-def print_file(fname):
-    print('%s:' % fname)
-    with open(fname) as f:
-        print(f.read())
 
 def get_hh_flags(test_dir):
     path = os.path.join(test_dir, 'HH_FLAGS')

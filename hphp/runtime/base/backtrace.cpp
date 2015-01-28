@@ -184,9 +184,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // check for include
     String funcname = const_cast<StringData*>(fp->m_func->name());
     if (fp->m_func->isClosureBody()) {
-      static StringData* s_closure_label =
-        makeStaticString("{closure}");
-      funcname = s_closure_label;
+      // Strip the file hash from the closure name
+      String fullName = const_cast<StringData*>(fp->m_func->baseCls()->name());
+      funcname = fullName.substr(0, fullName.find(';'));
     }
 
     // check for pseudomain

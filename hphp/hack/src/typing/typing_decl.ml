@@ -23,6 +23,7 @@ module Env = Typing_env
 module DynamicYield = Typing_dynamic_yield
 module Reason = Typing_reason
 module Inst = Typing_instantiate
+module Attrs = Attributes
 
 module SN = Naming_special_names
 
@@ -552,9 +553,10 @@ and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
 
 and constructor_decl env (pcstr, pconsist) class_ =
   (* constructors in children of class_ must be consistent? *)
-  let cconsist =
-    class_.c_final ||
-      SMap.mem SN.UserAttributes.uaConsistentConstruct class_.c_user_attributes in
+  let cconsist = class_.c_final ||
+    Attrs.mem
+      SN.UserAttributes.uaConsistentConstruct
+      class_.c_user_attributes in
   match class_.c_constructor, pcstr with
     | None, _ -> env, (pcstr, cconsist || pconsist)
     | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
@@ -581,7 +583,7 @@ and build_constructor env class_ method_ =
    * 'new static()' UNSAFE, potentially impacting the safety of a large
    * type hierarchy. *)
   let consist_override =
-    SMap.mem SN.UserAttributes.uaUnsafeConstruct method_.m_user_attributes in
+    Attrs.mem SN.UserAttributes.uaUnsafeConstruct method_.m_user_attributes in
   let cstr = {
     ce_final = method_.m_final;
     ce_is_xhp_attr = false;
@@ -808,6 +810,8 @@ and method_decl env m =
   let ft = {
     ft_pos      = fst m.m_name;
     ft_unsafe   = m.m_unsafe;
+    ft_deprecated =
+      Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
     ft_abstract = m.m_abstract;
     ft_arity    = arity;
     ft_tparams  = tparams;
@@ -820,7 +824,7 @@ and method_decl env m =
 and method_check_override c m acc =
   let pos, id = m.m_name in
   let _, class_id = c.c_name in
-  let override = SMap.mem SN.UserAttributes.uaOverride m.m_user_attributes in
+  let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   if m.m_visibility = Private && override then
     Errors.private_override pos class_id id;
   match SMap.get id acc with

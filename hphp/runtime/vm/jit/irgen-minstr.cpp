@@ -718,7 +718,8 @@ void emitBaseOp(MTS& env) {
   case LGL: case LGC:        emitBaseG(env);   break;
   case LNL: case LNC:        emitBaseN(env);   break;
   case LSL: case LSC:        emitBaseS(env);   break;
-  default:                   not_reached();
+  case InvalidLocationCode:
+    not_reached();
   }
 }
 
@@ -1054,7 +1055,8 @@ void emitIntermediateOp(MTS& env) {
       assert(env.mii.newElem());
       emitNewElem(env);
       break;
-    default: not_reached();
+    case InvalidMemberCode:
+      not_reached();
   }
 }
 
@@ -1911,7 +1913,8 @@ void emitFinalMOp(MTS& env) {
     newOps[env.mii.instr()](env);
     break;
 
-  default: not_reached();
+  case InvalidMemberCode:
+    not_reached();
   }
 }
 

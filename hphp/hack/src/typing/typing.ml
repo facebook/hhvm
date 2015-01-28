@@ -165,6 +165,8 @@ and fun_decl_in_env env f =
   let ft = {
     ft_pos         = fst f.f_name;
     ft_unsafe      = false;
+    ft_deprecated  =
+      Attributes.deprecated ~kind:"function" f.f_name f.f_user_attributes;
     ft_abstract    = false;
     ft_arity       = arity;
     ft_tparams     = tparams;
@@ -881,6 +883,9 @@ and expr_ in_cond is_lvalue env (p, e) =
       env, result
     else
       begin
+        (match result with
+        | _, Tfun fty -> check_deprecated p fty
+        | _ -> ());
         (match vis with
         | Some (method_pos, Vprivate _) ->
             Errors.private_inst_meth method_pos p
@@ -910,6 +915,7 @@ and expr_ in_cond is_lvalue env (p, e) =
                   meth_name (fun x -> x) in
         (match fty with
         | reason, Tfun fty ->
+            check_deprecated p fty;
             (* We are creating a fake closure:
              * function<T as Class>(T $x): return_type_of(Class:meth_name)
              *)
@@ -923,6 +929,7 @@ and expr_ in_cond is_lvalue env (p, e) =
             let caller = {
               ft_pos = pos;
               ft_unsafe = false;
+              ft_deprecated = None;
               ft_abstract = false;
               ft_arity = Fstandard (1, 1);
               ft_tparams = [];
@@ -954,6 +961,9 @@ and expr_ in_cond is_lvalue env (p, e) =
         smember_not_found p ~is_const:false ~is_method:true class_ (snd meth);
         env, (Reason.Rnone, Tany)
       | Some smethod ->
+        (match smethod.ce_type with
+        | _, Tfun fty -> check_deprecated p fty
+        | _ -> ());
         (match smethod.ce_type, smethod.ce_visibility with
         | (r, (Tfun _ as ty)), Vpublic ->
           env, (r, ty)
@@ -1733,7 +1743,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
               r_fty,
               Tfun {
                 ft_pos = fty.ft_pos;
-                ft_unsafe = false; ft_abstract = false;
+                ft_unsafe = false;
+                ft_deprecated = None;
+                ft_abstract = false;
                 ft_arity = Fstandard (arity, arity); ft_tparams = [];
                 ft_params = List.map (fun x -> (None, x)) vars;
                 ft_ret = tr;
@@ -1960,6 +1972,7 @@ and fun_type_of_id env x =
     match Env.get_fun env (snd x) with
     | None -> unbound_name env x
     | Some fty ->
+        check_deprecated (fst x) fty;
         let env, fty = Inst.instantiate_ft env fty in
         env, (Reason.Rwitness fty.ft_pos, Tfun fty)
   in
@@ -2765,6 +2778,11 @@ and check_arity ?(check_min=true) env pos pos_def (arity:int)
       then Errors.typing_too_many_args pos pos_def;
     | Fvariadic _ | Fellipsis _ -> ()
 
+and check_deprecated p { ft_pos; ft_deprecated; _ } =
+  match ft_deprecated with
+  | Some s -> Errors.deprecated_use p ft_pos s
+  | None -> ()
+
 (* The variadic capture argument is an array listing the passed
  * variable arguments for the purposes of the function body; callsites
  * should not unify with it *)
@@ -2807,6 +2825,7 @@ and call_ pos env fty el uel =
     let env, retl = lmap (fun env ty -> call pos env ty el uel) env tyl in
     TUtils.in_var env (r, Tunresolved retl)
   | r2, Tfun ft ->
+    check_deprecated pos ft;
     let pos_def = Reason.to_pos r2 in
     let () = check_arity ~check_min:(uel = [])
       env pos pos_def (List.length el + List.length uel) ft.ft_arity in

@@ -1,6 +1,6 @@
 garbanzo beans
 Fatal error: Uncaught exception 'Exception' with message 'chickpeas' in %s:%d
 Stack trace:
-#0 %s(%d): {closure}()
+#0 %s(%d): Closure$main()
 #1 %s(%d): main()
 #2 {main}

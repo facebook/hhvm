@@ -350,35 +350,6 @@ bool Type::checkValid() const {
   return true;
 }
 
-Type Type::unionOf(Type t1, Type t2) {
-  if (t1 == t2 || t2 < t1) return t1;
-  if (t1 < t2) return t2;
-
-  if (t1.isPtr() && t2.isPtr()) {
-    return unionOf(t1.deref(), t2.deref()).ptr(
-      ptr_union(t1.ptrKind(), t2.ptrKind())
-    );
-  }
-
-  static const Type union_types[] = {
-#   define IRT(name, ...) name,
-#   define IRTP(name, ...) IRT(name)
-    IRT_PHP(IRT_BOXES_AND_PTRS)
-    IRT_PHP_UNIONS(IRT_BOXES_AND_PTRS)
-#   undef IRT
-#   undef IRTP
-    Gen,
-    Cls,
-    StkElem,
-    PtrToGen,
-  };
-  Type t12 = t1 | t2;
-  for (auto u : union_types) {
-    if (t12 <= u) return u;
-  }
-  not_reached();
-}
-
 DataType Type::toDataType() const {
   assert(!isPtr());
   assert(isKnownDataType());

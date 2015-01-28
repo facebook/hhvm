@@ -4274,9 +4274,6 @@ void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {
     const UNUSED Func* f = StaticMethodCache::lookup(
       ch, ne, cls, method, fake_fp);
   }
-  if (inst->src(0)->isConst()) {
-    PUNT(LookupClsMethodCache_const_fp);
-  }
 
   // can raise an error if class is undefined
   cgCallHelper(vmain(),

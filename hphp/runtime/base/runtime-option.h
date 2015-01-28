@@ -529,6 +529,7 @@ public:
   F(string, PCRECacheType, std::string("static"))                       \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
+  F(bool, DisableStructArray, true)                                     \
   /* */
 
 private:

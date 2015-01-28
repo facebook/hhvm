@@ -5381,19 +5381,21 @@ void CodeGenerator::cgCIterFree(IRInstruction* inst) {
 
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   auto const data = inst->extra<NewStructData>();
-  if (auto shape = Shape::create(data->keys, data->numKeys)) {
-    StructArray* (*f)(uint32_t, const TypedValue*, Shape*) =
-      &MixedArray::MakeStructArray;
-    cgCallHelper(vmain(),
-      CppCall::direct(f),
-      callDest(inst),
-      SyncOptions::kNoSyncPoint,
-      argGroup(inst)
-        .imm(data->numKeys)
-        .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset))
-        .imm(shape)
-    );
-    return;
+  if (!RuntimeOption::EvalDisableStructArray) {
+    if (auto shape = Shape::create(data->keys, data->numKeys)) {
+      StructArray* (*f)(uint32_t, const TypedValue*, Shape*) =
+        &MixedArray::MakeStructArray;
+      cgCallHelper(vmain(),
+        CppCall::direct(f),
+        callDest(inst),
+        SyncOptions::kNoSyncPoint,
+        argGroup(inst)
+          .imm(data->numKeys)
+          .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset))
+          .imm(shape)
+      );
+      return;
+    }
   }
 
   StringData** table = mcg->allocData<StringData*>(sizeof(StringData*),

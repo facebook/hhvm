@@ -367,9 +367,6 @@ public:
 
   static int GetScannerType();
 
-  static bool GetServerCustomBoolSetting(const std::string &settingName,
-                                         bool &val);
-
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
   static const uint32_t kPCREInitialTableSize = 96 * 1024;

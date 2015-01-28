@@ -392,18 +392,6 @@ int RuntimeOption::GetScannerType() {
   return type;
 }
 
-bool RuntimeOption::GetServerCustomBoolSetting(const std::string &settingName,
-                                               bool &val) {
-  auto it = RuntimeOption::CustomSettings.find(settingName);
-  if (it == RuntimeOption::CustomSettings.end()) {
-    // The value isn't present in the CustomSettings section
-    return false;
-  }
-
-  val = Hdf::convertRawConfigToBool(it->second.data());
-  return true;
-}
-
 static inline std::string regionSelectorDefault() {
   return "tracelet";
 }

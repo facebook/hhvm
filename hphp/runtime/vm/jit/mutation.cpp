@@ -110,7 +110,7 @@ void retypeDst(IRInstruction* inst, int num) {
   if (inst->op() == DefLabel) {
     Type type = Type::Bottom;
     inst->block()->forEachSrc(num, [&](IRInstruction*, SSATmp* tmp) {
-        type = Type::unionOf(type, tmp->type());
+        type = type | tmp->type();
       });
     ssa->setType(type);
     return;

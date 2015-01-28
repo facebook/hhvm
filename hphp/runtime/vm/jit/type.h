@@ -492,15 +492,6 @@ public:
   Type operator-(Type other) const;
   Type& operator-=(Type other) { return *this = *this - other; }
 
-  /*
-   * Return the least common predefined supertype of `t1' and `t2', i.e., the
-   * most refined Type `t3' such that t1 <= t3 and t2 <= t3.
-   *
-   * Note that arbitrary union types are possible using operator| but this
-   * function always returns one of the predefined types.
-   */
-  static Type unionOf(Type t1, Type t2);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Is-a methods.                                                      [const]

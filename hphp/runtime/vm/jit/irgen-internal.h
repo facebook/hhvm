@@ -171,7 +171,7 @@ SSATmp* cond(HTS& env,
   );
   done_block->push_back(label);
   auto const result = label->dst(0);
-  result->setType(Type::unionOf(v1->type(), v2->type()));
+  result->setType(v1->type() | v2->type());
   return result;
 }
 

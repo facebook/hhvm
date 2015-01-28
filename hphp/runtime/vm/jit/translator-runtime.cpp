@@ -150,11 +150,14 @@ TypedValue setOpElem(TypedValue* base, TypedValue key,
   return ret;
 }
 
-TypedValue incDecElem(TypedValue* base, TypedValue key,
-                      MInstrState* mis, IncDecOp op) {
+TypedValue incDecElem(
+  TypedValue* base,
+  TypedValue key,
+  MInstrState* mis,
+  IncDecOp op
+) {
   TypedValue result;
-  HPHP::IncDecElem<true>(
-    mis->tvScratch, mis->tvRef, op, base, key, result);
+  HPHP::IncDecElem<true>(mis->tvRef, op, base, key, result);
   assert(result.m_type != KindOfRef);
   return result;
 }

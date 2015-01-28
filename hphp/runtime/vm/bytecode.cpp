@@ -3606,7 +3606,9 @@ OPTBLD_INLINE void iopNewStructArray(IOP_ARGS) {
   }
   // This constructor moves values, no inc/decref is necessary.
   ArrayData* a;
-  if (auto shape = Shape::create(names, n)) {
+  Shape* shape;
+  if (!RuntimeOption::EvalDisableStructArray &&
+      (shape = Shape::create(names, n))) {
     a = MixedArray::MakeStructArray(n, vmStack().topC(), shape);
   } else {
     a = MixedArray::MakeStruct(n, names, vmStack().topC())->asArrayData();

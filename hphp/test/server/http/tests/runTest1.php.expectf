@@ -34,10 +34,16 @@ string(%d) "array(5) {
   string(%s) "%s"
 }
 array(5) {
-  ["Host"]=>
-  string(%d) "%s"
+  ["host"]=>
+  array(1) {
+    [0]=>
+    string(%d) "%s"
+  }
   ["xxxxx "]=>
-  string(2) "45"
+  array(1) {
+    [0]=>
+    string(2) "45"
+  }
   ["xyzzy "]=>
   array(3) {
     [0]=>
@@ -47,8 +53,14 @@ array(5) {
     [2]=>
     string(2) "44"
   }
-  ["Accept"]=>
-  string(3) "*/*"
-  ["User-Agent"]=>
-  string(%d) "%s"
+  ["accept"]=>
+  array(1) {
+    [0]=>
+    string(3) "*/*"
+  }
+  ["user-agent"]=>
+  array(1) {
+    [0]=>
+    string(%d) "%s"
+  }
 }"

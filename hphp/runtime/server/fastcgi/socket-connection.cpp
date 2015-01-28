@@ -18,6 +18,7 @@
 #include "hphp/util/assertions.h"
 #include <folly/io/IOBuf.h>
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
+#include <thrift/lib/cpp/async/TAsyncTimeout.h>
 #include <folly/SocketAddress.h>
 #include "thrift/lib/cpp/transport/TTransportException.h"
 #include <folly/wangle/acceptor/ManagedConnection.h>

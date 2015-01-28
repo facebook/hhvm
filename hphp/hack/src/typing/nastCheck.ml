@@ -99,9 +99,9 @@ module CheckFunctionType = struct
     expr_ p f_type e
 
   and expr2 f_type (e1, e2) =
-  expr f_type e1;
-  expr f_type e2;
-  ()
+    expr f_type e1;
+    expr f_type e2;
+    ()
 
   and expr_ p f_type exp = match f_type, exp with
     | _, Any -> ()

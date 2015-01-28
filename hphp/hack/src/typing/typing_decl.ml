@@ -810,6 +810,8 @@ and method_decl env m =
   let ft = {
     ft_pos      = fst m.m_name;
     ft_unsafe   = m.m_unsafe;
+    ft_deprecated =
+      Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
     ft_abstract = m.m_abstract;
     ft_arity    = arity;
     ft_tparams  = tparams;

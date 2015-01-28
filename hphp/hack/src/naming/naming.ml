@@ -1564,6 +1564,7 @@ and fun_ genv f =
       f_body = body;
       f_variadic = variadicity;
       f_fun_kind = kind;
+      f_user_attributes = user_attributes f.f_user_attributes;
     }
   in
   Naming_hooks.dispatch_fun_named_hook named_fun;
@@ -2117,6 +2118,7 @@ and expr_lambda env f =
     f_body = body;
     f_variadic = variadicity;
     f_fun_kind = f_kind;
+    f_user_attributes = user_attributes f.f_user_attributes;
   }
 
 and casel env l =

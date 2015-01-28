@@ -1,0 +1,4 @@
+File "duplicate_fun_attributes.php", line 3, characters 22-33:
+You cannot reuse the attribute __Deprecated (Naming[2062])
+File "duplicate_fun_attributes.php", line 3, characters 3-14:
+__Deprecated was already used here

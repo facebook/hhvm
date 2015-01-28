@@ -5307,15 +5307,14 @@ OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
       VectorLeaveCode::LeaveLast>(pc, mstate)) {
     switch (mstate.mcode) {
       case MW:
-        IncDecNewElem<true>(mstate.scratch, *mstate.ref.asTypedValue(),
-                            op, mstate.base, to);
+        IncDecNewElem<true>(*mstate.ref.asTypedValue(), op, mstate.base, to);
         break;
       case MEL:
       case MEC:
       case MET:
       case MEI:
-        IncDecElem<true>(mstate.scratch, *mstate.ref.asTypedValue(),
-                         op, mstate.base, *mstate.curMember, to);
+        IncDecElem<true>(*mstate.ref.asTypedValue(), op, mstate.base,
+                         *mstate.curMember, to);
         break;
       case MPL:
       case MPC:

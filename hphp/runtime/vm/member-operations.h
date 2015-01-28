@@ -1364,10 +1364,14 @@ inline void IncDecBody(IncDecOp op, Cell* fr, TypedValue* to) {
 }
 
 template <bool setResult>
-inline void IncDecElemEmptyish(IncDecOp op, TypedValue* base,
-                               TypedValue key, TypedValue& dest) {
-  Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(&key));
+inline void IncDecElemEmptyish(
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue key,
+  TypedValue& dest
+) {
+  auto a = Array::Create();
+  auto result = (TypedValue*)&a.lvalAt(tvAsCVarRef(&key));
   tvAsVariant(base) = a;
   if (MoreWarnings) {
     raise_notice(Strings::UNDEFINED_INDEX,
@@ -1376,17 +1380,21 @@ inline void IncDecElemEmptyish(IncDecOp op, TypedValue* base,
   assert(result->m_type == KindOfNull);
   IncDecBody<setResult>(op, result, &dest);
 }
+
 template <bool setResult>
 inline void IncDecElemScalar(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  if (setResult) {
-    tvWriteNull(&dest);
-  }
+  if (setResult) tvWriteNull(&dest);
 }
+
 template <bool setResult>
-inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
-                       IncDecOp op, TypedValue* base,
-                       TypedValue key, TypedValue& dest) {
+inline void IncDecElem(
+  TypedValue& tvRef,
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue key,
+  TypedValue& dest
+) {
   DataType type;
   opPre(base, type);
 
@@ -1415,7 +1423,7 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
       return IncDecElemEmptyish<setResult>(op, base, key, dest);
 
     case KindOfArray: {
-      TypedValue* result =
+      auto result =
         ElemDArray<MoreWarnings, /* reffy */ false, KeyType::Any>(base, key);
       return IncDecBody<setResult>(op, tvToCell(result), &dest);
     }
@@ -1440,10 +1448,13 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool setResult>
-inline void IncDecNewElemEmptyish(IncDecOp op, TypedValue* base,
-                                  TypedValue& dest) {
-  Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt();
+inline void IncDecNewElemEmptyish(
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue& dest
+) {
+  auto a = Array::Create();
+  auto result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
   assert(result->m_type == KindOfNull);
   IncDecBody<setResult>(op, result, &dest);
@@ -1452,15 +1463,16 @@ inline void IncDecNewElemEmptyish(IncDecOp op, TypedValue* base,
 template <bool setResult>
 inline void IncDecNewElemScalar(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  if (setResult) {
-    tvWriteNull(&dest);
-  }
+  if (setResult) tvWriteNull(&dest);
 }
 
 template <bool setResult>
-inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                          IncDecOp op, TypedValue* base,
-                          TypedValue& dest) {
+inline void IncDecNewElem(
+  TypedValue& tvRef,
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue& dest
+) {
   DataType type;
   opPre(base, type);
 

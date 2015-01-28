@@ -20,7 +20,9 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
+#include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/util/logger.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 #include "mysql.h"
 
@@ -31,6 +33,8 @@ const StaticString
   s_connection("__connection"),
   s_link("__link"),
   s_result("__result"),
+  s_resulttype("__resulttype"),
+  s_done("__done"),
   s_stmt("__stmt"),
   s_charset("charset"),
   s_collation("collation"),
@@ -548,6 +552,90 @@ static Variant HHVM_METHOD(mysqli_result, fetch_field) {
   return obj;
 }
 
+static Variant* getRawProp(ObjectData* obj,
+                          const String& propName,
+                          const String& className) {
+  return obj->o_realProp(
+    propName,
+    ObjectData::RealPropUnchecked,
+    className.get()
+  );
+}
+
+// Consts to be used on PHP and C++ side.
+const int64_t _MYSQLI_STORE_RESULT = 0;
+const int64_t _MYSQLI_USE_RESULT = 1;
+
+// Native accessor properties of mysqli_result.
+
+Variant mysqli_result_current_field_get(ObjectData* this_) {
+  return HHVM_MN(mysqli_result, hh_field_tell)(this_);
+}
+
+Variant mysqli_result_field_count_get(ObjectData* this_) {
+  auto res = getResult(this_);
+  VALIDATE_RESULT(res)
+  return HHVM_FN(mysql_num_fields)(res);
+}
+
+Variant mysqli_result_lengths_get(ObjectData* this_) {
+  auto res = getResult(this_);
+  VALIDATE_RESULT(res)
+  auto lengths = HHVM_FN(mysql_fetch_lengths)(res);
+  if (!lengths.toBoolean()) {
+    return init_null_variant;
+  }
+  return lengths;
+}
+
+Variant mysqli_result_type_get(ObjectData* this_) {
+  return *getRawProp(this_, s_resulttype, s_mysqli_result);
+}
+
+Variant mysqli_result_num_rows_get(ObjectData* this_) {
+  auto res = getResult(this_);
+  VALIDATE_RESULT(res)
+
+  auto resultType = getRawProp(this_, s_resulttype, s_mysqli_result);
+  auto done = getRawProp(this_, s_done, s_mysqli_result)->toBoolean();
+
+  if (resultType->toInt64() == _MYSQLI_USE_RESULT && !done) {
+    raise_warning("Function can not be used with MYSQL_USE_RESULT");
+    return VarNR(0);
+  }
+
+  return HHVM_FN(mysql_num_rows)(res);
+}
+
+static Native::PropAccessor mysqli_result_Accessors[] = {
+  {"current_field", mysqli_result_current_field_get,
+                    nullptr, nullptr, nullptr},
+
+  {"field_count",   mysqli_result_field_count_get,
+                    nullptr, nullptr, nullptr},
+
+  {"lengths",       mysqli_result_lengths_get,
+                    nullptr, nullptr, nullptr},
+
+  {"type",          mysqli_result_type_get,
+                    nullptr, nullptr, nullptr},
+
+  {"num_rows",      mysqli_result_num_rows_get,
+                    nullptr, nullptr, nullptr},
+
+  {nullptr, nullptr, nullptr, nullptr, nullptr}
+};
+
+static Native::PropAccessorMap mysqli_result_accessorsMap
+((Native::PropAccessor*)mysqli_result_Accessors);
+
+// Prop handler for mysqli_result.
+struct mysqli_result_PropHandler :
+  Native::MapPropHandler<mysqli_result_PropHandler> {
+
+  static constexpr Native::PropAccessorMap& map = mysqli_result_accessorsMap;
+};
+
 #undef VALIDATE_RESULT
 
 //////////////////////////////////////////////////////////////////////////////
@@ -736,6 +824,9 @@ class mysqliExtension final : public Extension {
     HHVM_ME(mysqli_result, hh_field_tell);
     HHVM_ME(mysqli_result, fetch_field);
 
+    Native::registerNativeGuardedPropHandler
+      <mysqli_result_PropHandler>(s_mysqli_result.get());
+
     // mysqli_stmt
     HHVM_ME(mysqli_stmt, attr_get);
     HHVM_ME(mysqli_stmt, attr_set);
@@ -790,8 +881,8 @@ class mysqliExtension final : public Extension {
     REGISTER_CONST_MIRROR(DATA_TRUNCATED)
 
     // Result type
-    REGISTER_CONST_VALUE(STORE_RESULT, 0)
-    REGISTER_CONST_VALUE(USE_RESULT, 1)
+    REGISTER_CONST_VALUE(STORE_RESULT, _MYSQLI_STORE_RESULT)
+    REGISTER_CONST_VALUE(USE_RESULT, _MYSQLI_USE_RESULT)
 
     // Report options
     REGISTER_CONST_VALUE(REPORT_OFF, 0)

@@ -34,6 +34,10 @@
 
 namespace HPHP {
 
+Variant HHVM_FUNCTION(mysql_num_fields, const Resource& result);
+Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result);
+Variant HHVM_FUNCTION(mysql_num_rows, const Resource& result);
+
 class mysqlExtension final : public Extension {
 public:
   mysqlExtension() : Extension("mysql", "1.0") {}

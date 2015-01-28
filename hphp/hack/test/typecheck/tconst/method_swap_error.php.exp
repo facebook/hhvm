@@ -1,0 +1,10 @@
+File "method_swap_error.php", line 33, characters 12-21:
+Invalid argument (Typing[4110])
+File "method_swap_error.php", line 15, characters 5-11:
+This is a value of generic type $170::T
+File "method_swap_error.php", line 4, characters 19-26:
+It is incompatible with an array key (int/string)
+File "", line 0, characters 0--1:
+Considering the constraint on 'X::T'
+File "method_swap_error.php", line 10, characters 26-32:
+Considering the constraint on '$171::T'

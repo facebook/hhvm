@@ -471,7 +471,7 @@ let dynamic_new_in_strict_mode pos =
 
 let invalid_type_access_root (pos, id) =
   add Naming.invalid_type_access_root pos
-  (id ^ " must be an identifier for a class")
+  (id^" must be an identifier for a class, \"self\", or \"this\"")
 
 let duplicate_user_attribute (pos, name) existing_attr_pos =
   add_list Naming.duplicate_user_attribute [

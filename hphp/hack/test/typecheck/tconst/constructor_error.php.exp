@@ -1,0 +1,6 @@
+File "constructor_error.php", line 16, characters 25-26:
+Invalid argument (Typing[4110])
+File "constructor_error.php", line 9, characters 13-19:
+This is a value of generic type static::T
+File "constructor_error.php", line 16, characters 25-26:
+It is incompatible with a string

@@ -231,7 +231,7 @@ Array TimeZone::GetAbbreviations() {
 String TimeZone::AbbreviationToName(String abbr, int utcoffset /* = -1 */,
                                     bool isdst /* = true */) {
   return String(timelib_timezone_id_from_abbr(abbr.data(), utcoffset,
-                                              isdst ? -1 : 0),
+                                              isdst),
                 CopyString);
 }
 

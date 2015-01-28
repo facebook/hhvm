@@ -519,7 +519,8 @@ void emitFPushCtorD(HTS& env,
   bool const fastAlloc =
     persistentCls &&
     canInstantiate &&
-    !cls->callsCustomInstanceInit();
+    !cls->callsCustomInstanceInit() &&
+    !cls->hasNativePropHandler();
 
   const Func* func = uniqueCls ? cls->getCtor() : nullptr;
   if (func && !(func->attrs() & AttrPublic)) {

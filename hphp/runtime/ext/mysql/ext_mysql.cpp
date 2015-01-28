@@ -723,7 +723,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
   return false;
 }
 
-static Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
+Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
 
@@ -849,7 +849,7 @@ static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int row,
 ///////////////////////////////////////////////////////////////////////////////
 // result functions
 
-static Variant HHVM_FUNCTION(mysql_num_fields, const Resource& result) {
+Variant HHVM_FUNCTION(mysql_num_fields, const Resource& result) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res) {
     return res->getFieldCount();
@@ -857,7 +857,7 @@ static Variant HHVM_FUNCTION(mysql_num_fields, const Resource& result) {
   return false;
 }
 
-static Variant HHVM_FUNCTION(mysql_num_rows, const Resource& result) {
+Variant HHVM_FUNCTION(mysql_num_rows, const Resource& result) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res) {
     return res->getRowCount();

@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -60,6 +61,9 @@ void registerNativePropHandler(const StringData* className,
  * and `unsetProp`. If a method cannot handle property, it should
  * return sigil `Native::prop_not_handled` value.
  *
+ * If the guarded version of the handler is used, it's also supposed to
+ * implement `isPropSupported` method.
+ *
  * Example:
  *
  * class ElementPropHandler {
@@ -70,10 +74,23 @@ void registerNativePropHandler(const StringData* className,
  * }
  */
 
+// A guard to stop handling in case if the property is not supported
+// for this operation, and we should go to the user-level magic hooks.
+
+#define CHECK_NATIVE_PROP_SUPPORTED(name, op)                                  \
+  if (!T::isPropSupported(name, StringData::Make(op))) {                       \
+    return Native::prop_not_handled();                                         \
+  }
+
 // Default getProp.
 
 template<class T>
 Variant nativePropHandlerGet(ObjectData* obj, const StringData* name) {
+  return T::getProp(obj, name);
+}
+template<class T>
+Variant nativeGuardedPropHandlerGet(ObjectData* obj, const StringData* name) {
+  CHECK_NATIVE_PROP_SUPPORTED(name, "get")
   return T::getProp(obj, name);
 }
 
@@ -85,6 +102,13 @@ Variant nativePropHandlerSet(ObjectData* obj,
                              Variant& value) {
   return T::setProp(obj, name, value);
 }
+template<class T>
+Variant nativeGuardedPropHandlerSet(ObjectData* obj,
+                                    const StringData* name,
+                                    Variant& value) {
+  CHECK_NATIVE_PROP_SUPPORTED(name, "set")
+  return T::setProp(obj, name, value);
+}
 
 // Default issetProp.
 
@@ -92,11 +116,21 @@ template<class T>
 Variant nativePropHandlerIsset(ObjectData* obj, const StringData* name) {
   return T::issetProp(obj, name);
 }
+template<class T>
+Variant nativeGuardedPropHandlerIsset(ObjectData* obj, const StringData* name) {
+  CHECK_NATIVE_PROP_SUPPORTED(name, "isset")
+  return T::issetProp(obj, name);
+}
 
 // Default unsetProp.
 
 template<class T>
 Variant nativePropHandlerUnset(ObjectData* obj, const StringData* name) {
+  return T::unsetProp(obj, name);
+}
+template<class T>
+Variant nativeGuardedPropHandlerUnset(ObjectData* obj, const StringData* name) {
+  CHECK_NATIVE_PROP_SUPPORTED(name, "unset")
   return T::unsetProp(obj, name);
 }
 
@@ -114,6 +148,152 @@ void registerNativePropHandler(const StringData* className) {
     &nativePropHandlerUnset<T>
   );
 }
+
+/**
+ * The same as registerNativePropHandler<HandlerClassName>(className),
+ * but does explicit check whether a property is supported by a handler
+ * before actual handle call.
+ */
+template<class T>
+void registerNativeGuardedPropHandler(const StringData* className) {
+  registerNativePropHandler(
+    className,
+    &nativeGuardedPropHandlerGet<T>,
+    &nativeGuardedPropHandlerSet<T>,
+    &nativeGuardedPropHandlerIsset<T>,
+    &nativeGuardedPropHandlerUnset<T>
+  );
+}
+
+/**
+ * Base prop handler class, to be extended by actual prop handlers.
+ * By default handlers are "noop", that can be overridden by
+ * child classes.
+ */
+struct BasePropHandler {
+  static Variant getProp(ObjectData* this_, const StringData* name) {
+    return Native::prop_not_handled();
+  }
+  static Variant setProp(ObjectData* this_,
+                         const StringData* name,
+                         Variant& value) {
+    return Native::prop_not_handled();
+  }
+  static Variant issetProp(ObjectData* this_, const StringData* name) {
+    return Native::prop_not_handled();
+  }
+  static Variant unsetProp(ObjectData* this_, const StringData* name) {
+    return Native::prop_not_handled();
+  }
+  static bool isPropSupported(const StringData* name, const StringData* op) {
+    return false;
+  }
+};
+
+#define CHECK_ACCESSOR(accesor)                                                \
+  if (!accesor) {                                                              \
+    return Native::prop_not_handled();                                         \
+  }
+
+/**
+ * Base prop handler class, that uses `Native::PropAccessorMap`.
+ * Derived classes provide the handling map with accessort per each property.
+ */
+template <class Derived>
+struct MapPropHandler : BasePropHandler {
+
+  static Variant getProp(ObjectData* this_, const StringData* name) {
+    auto get = Derived::map.get(name);
+    CHECK_ACCESSOR(get)
+    return get(this_);
+  }
+
+  static Variant setProp(ObjectData* this_,
+                         const StringData* name,
+                         Variant& value) {
+    auto set = Derived::map.set(name);
+    CHECK_ACCESSOR(set)
+    set(this_, value);
+    return true;
+  }
+
+  static Variant issetProp(ObjectData* this_, const StringData* name) {
+    auto isset = Derived::map.isset(name);
+    // If there is special `isset`, call it.
+    if (isset) {
+      return isset(this_);
+    }
+    // Otherwise, fallback to `null` check of the result from `get`.
+    auto get = Derived::map.get(name);
+    CHECK_ACCESSOR(get)
+    return !get(this_).isNull();
+  }
+
+  static Variant unsetProp(ObjectData* this_, const StringData* name) {
+    auto unset = Derived::map.unset(name);
+    CHECK_ACCESSOR(unset)
+    unset(this_);
+    return true;
+  }
+
+  static bool isPropSupported(const StringData* name, const StringData* op) {
+    return Derived::map.isPropSupported(name);
+  }
+};
+
+/**
+ * An entry in the `PropAccessorMap`, contains handlers per property.
+ */
+struct PropAccessor {
+  const char* name;
+  Variant (*get)(ObjectData* this_);
+  void    (*set)(ObjectData* this_, Variant& value);
+  bool    (*isset)(ObjectData* this_);
+  void    (*unset)(ObjectData* this_);
+};
+
+struct hashNPA {
+  size_t operator()(const PropAccessor* pa) const {
+    return hash_string_i(pa->name, strlen(pa->name));
+  }
+};
+struct cmpNPA {
+  bool operator()(const PropAccessor* pa1,
+                  const PropAccessor* pa2) const {
+    return strcasecmp(pa1->name, pa2->name) == 0;
+  }
+};
+
+/**
+ * Map-based handling of property accessors. Callers may organize handlers
+ * into a map with handling function per each property. Example:
+ *
+ * static Native::PropAccessor elementPropAccessors[] = {
+ *   {"nodeValue", elementNodeValueGet, elementNodeValueSet, ...},
+ *   {"localName", elementLocaleNameGet, nullptr, ...},
+ *   ...
+ *   {nullptr, ...}
+ * };
+ */
+struct PropAccessorMap :
+      private hphp_hash_set<PropAccessor*, hashNPA, cmpNPA> {
+
+  explicit PropAccessorMap(PropAccessor* props,
+                           PropAccessorMap *base = nullptr);
+
+  bool isPropSupported(const StringData* name);
+
+  Variant (*get(const StringData* name))(ObjectData* this_);
+
+  void    (*set(const StringData* name))(ObjectData* this_,
+                                         Variant& value);
+
+  bool    (*isset(const StringData* name))(ObjectData* this_);
+  void    (*unset(const StringData* name))(ObjectData* this_);
+
+private:
+  const_iterator lookupProp(const StringData* name);
+};
 
 /**
  * API methods to call at property resolution (from `object-data`).

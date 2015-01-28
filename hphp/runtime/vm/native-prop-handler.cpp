@@ -50,6 +50,49 @@ NativePropHandler* getNativePropHandler(const StringData* className) {
   return &it->second;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// PropAccessorMap
+
+PropAccessorMap::PropAccessorMap(PropAccessor* props,
+                                 PropAccessorMap *base) {
+  if (base) {
+    *this = *base;
+  }
+  for (PropAccessor *p = props; p->name; p++) {
+    this->insert(p);
+  }
+}
+
+bool PropAccessorMap::isPropSupported(const StringData* name) {
+  return lookupProp(name) != end();
+}
+
+Variant (*PropAccessorMap::get(const StringData* name))(ObjectData* this_) {
+  return (*lookupProp(name))->get;
+}
+
+void (*PropAccessorMap::set(const StringData* name))
+     (ObjectData* this_, Variant& value) {
+  return (*lookupProp(name))->set;
+}
+
+bool (*PropAccessorMap::isset(const StringData* name))(ObjectData* this_) {
+  return (*lookupProp(name))->isset;
+}
+
+void (*PropAccessorMap::unset(const StringData* name))(ObjectData* this_) {
+  return (*lookupProp(name))->unset;
+}
+
+PropAccessorMap::const_iterator PropAccessorMap::lookupProp(
+  const StringData* name) {
+  auto pa = PropAccessor {
+    name->data(), nullptr, nullptr, nullptr, nullptr
+  };
+  return find(&pa);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // API to call from object-data at property resolution.
 
 Variant getProp(ObjectData* obj, const StringData* name) {

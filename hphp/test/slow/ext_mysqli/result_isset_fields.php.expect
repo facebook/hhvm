@@ -1,0 +1,19 @@
+bool(true)
+int(1)
+bool(true)
+int(1)
+bool(true)
+int(1)
+bool(true)
+array(1) {
+  [0]=>
+  int(4)
+}
+bool(true)
+int(0)
+bool(true)
+int(0)
+bool(true)
+int(1)
+bool(false)
+NULL

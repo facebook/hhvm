@@ -983,33 +983,6 @@ class mysqli_result {
   private ?int $__resulttype = null;
   private bool $__done = false;
 
-  public function __get(string $name): mixed {
-    if ($this->__result === null) {
-      trigger_error("supplied argument is not a valid MySQL result resource",
-                    E_WARNING);
-      return null;
-    }
-
-    switch ($name) {
-      case 'current_field':
-        return $this->hh_field_tell();
-      case 'field_count':
-        return mysql_num_fields($this->__result);
-      case 'lengths':
-        return mysql_fetch_lengths($this->__result);
-      case 'num_rows':
-        if ($this->__resulttype == MYSQLI_USE_RESULT && !$this->__done) {
-          trigger_error("Function can not be used with MYSQL_USE_RESULT",
-                        E_WARNING);
-          return 0;
-        }
-        return mysql_num_rows($this->__result);
-    }
-
-    trigger_error('Undefined property: mysqli_result::$'. $name, E_NOTICE);
-    return null;
-  }
-
   <<__Native>>
   private function get_mysqli_conn_resource(mysqli $connection): ?resource;
 

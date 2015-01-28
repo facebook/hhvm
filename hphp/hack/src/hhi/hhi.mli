@@ -8,8 +8,8 @@
  *
  *)
 
-val get_hhi_root : unit -> Path.path
+val get_hhi_root : unit -> string
 
-val set_hhi_root_for_unit_test : Path.path -> unit
+val set_hhi_root_for_unit_test : string -> unit
 
 val touch : unit -> unit

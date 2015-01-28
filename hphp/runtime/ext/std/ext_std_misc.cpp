@@ -413,7 +413,7 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
   int usec = (int)(tv.tv_usec % 0x100000);
 
   String uniqid(prefix.size() + 64, ReserveString);
-  auto ptr = uniqid.bufferSlice().ptr;
+  auto ptr = uniqid.mutableData();
   // StringData::capacity() returns the buffer size without the null
   // terminator. snprintf expects a the buffer capacity including room
   // for the null terminator, writes the null termintor, and returns

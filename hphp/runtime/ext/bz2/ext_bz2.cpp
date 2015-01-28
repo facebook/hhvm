@@ -178,7 +178,7 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
   // base
   bzs.avail_out = source_len * 2;
   String ret(bzs.avail_out, ReserveString);
-  bzs.next_out = ret.bufferSlice().ptr;
+  bzs.next_out = ret.mutableData();
 
   while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {
     /* compression is better then 2:1, need to allocate more memory */

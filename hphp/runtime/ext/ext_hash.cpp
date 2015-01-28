@@ -229,7 +229,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   }
 
   String raw = String(ops->digest_size, ReserveString);
-  char *digest = raw.bufferSlice().ptr;
+  char *digest = raw.mutableData();
   ops->hash_final((unsigned char *)digest, context);
   free(context);
 
@@ -339,7 +339,7 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
   }
 
   String raw = String(hash->ops->digest_size, ReserveString);
-  char *digest = raw.bufferSlice().ptr;
+  char *digest = raw.mutableData();
   hash->ops->hash_final((unsigned char *)digest, hash->context);
   if (hash->options & k_HASH_HMAC) {
     finalize_hmac_key(hash->key, hash->ops, hash->context, digest);

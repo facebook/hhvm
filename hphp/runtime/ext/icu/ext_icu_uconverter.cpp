@@ -386,7 +386,7 @@ static Variant HHVM_METHOD(UConverter, convert,
   }
 
   String destStr(dest_len, ReserveString);
-  char *dest = (char*) destStr.bufferSlice().ptr;
+  char *dest = (char*) destStr.mutableData();
   error = U_ZERO_ERROR;
   dest_len = ucnv_fromUChars(toCnv, dest, dest_len,
                              tmp.getBuffer(), tmp.length(), &error);

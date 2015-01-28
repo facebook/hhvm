@@ -489,14 +489,13 @@ StringData* StringData::append(StringSlice range) {
 
   auto const target = UNLIKELY(isShared()) ? escalate(newLen)
                                            : reserve(newLen);
-  auto const mslice = target->bufferSlice();
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
    * disjoint, since s can't point past the start of our source
    * pointer, and len is smaller than the old length.
    */
-  memcpy(mslice.ptr + m_len, s, len);
+  memcpy(target->mutableData() + m_len, s, len);
 
   target->setSize(newLen);
   assert(target->checkSane());
@@ -529,14 +528,13 @@ StringData* StringData::append(StringSlice r1, StringSlice r2) {
 
   auto const target = UNLIKELY(isShared()) ? escalate(newLen)
                                            : reserve(newLen);
-  auto const mslice = target->bufferSlice();
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
    * disjoint, since rN.ptr can't point past the start of our source
    * pointer, and rN.len is smaller than the old length.
    */
-  void* p = mslice.ptr;
+  void* p = target->mutableData();
   p = memcpy((char*)p + m_len,  r1.ptr, r1.len);
       memcpy((char*)p + r1.len, r2.ptr, r2.len);
 
@@ -574,14 +572,13 @@ StringData* StringData::append(StringSlice r1,
 
   auto const target = UNLIKELY(isShared()) ? escalate(newLen)
                                            : reserve(newLen);
-  auto const mslice = target->bufferSlice();
 
   /*
    * memcpy is safe even if it's a self append---the regions will be
    * disjoint, since rN.ptr can't point past the start of our source
    * pointer, and rN.len is smaller than the old length.
    */
-  void* p = mslice.ptr;
+  void* p = target->mutableData();
   p = memcpy((char*)p + m_len,  r1.ptr, r1.len);
   p = memcpy((char*)p + r1.len, r2.ptr, r2.len);
       memcpy((char*)p + r2.len, r3.ptr, r3.len);

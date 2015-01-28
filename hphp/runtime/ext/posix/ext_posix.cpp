@@ -161,7 +161,7 @@ bool HHVM_FUNCTION(posix_access,
 
 String HHVM_FUNCTION(posix_ctermid) {
   String s = String(L_ctermid, ReserveString);
-  char *buffer = s.bufferSlice().ptr;
+  char *buffer = s.mutableData();
   ctermid(buffer);
   s.setSize(strlen(buffer));
   return s;
@@ -177,7 +177,7 @@ int64_t HHVM_FUNCTION(posix_errno) {
 
 String HHVM_FUNCTION(posix_getcwd) {
   String s = String(PATH_MAX, ReserveString);
-  char *buffer = s.bufferSlice().ptr;
+  char *buffer = s.mutableData();
   if (getcwd(buffer, PATH_MAX) == NULL) {
     return "/";
   }
@@ -560,7 +560,7 @@ Variant HHVM_FUNCTION(posix_ttyname,
   }
 
   String ttyname(ttyname_maxlen, ReserveString);
-  char *p = ttyname.bufferSlice().ptr;
+  char *p = ttyname.mutableData();
   if (ttyname_r(php_posix_get_fd(fd), p, ttyname_maxlen)) {
     return false;
   }

@@ -215,6 +215,11 @@ public:
   const char *data() const {
     return m_px ? m_px->data() : "";
   }
+
+  char *mutableData() const {
+    return m_px->mutableData();
+  }
+
 public:
   const String& setSize(int len) {
     assert(m_px);

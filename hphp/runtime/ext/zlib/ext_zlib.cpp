@@ -168,7 +168,7 @@ static Variant hhvm_zlib_encode(const String& data,
     String ret(outlen, ReserveString);
 
     Z.next_in = (Bytef *) data.c_str();
-    Z.next_out = (Bytef *) ret.bufferSlice().ptr;
+    Z.next_out = (Bytef *) ret.mutableData();
     Z.avail_in = data.size();
     Z.avail_out = ret.capacity(); // not counting null terminator
 
@@ -224,11 +224,12 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
       break;
     }
 
-    char *retbuf = ret.reserve(retsize + 1).ptr;
-    Z->avail_out = ret.capacity() - retused;
+    auto const ms = ret.reserve(retsize + 1);
+    char *retbuf = ms.ptr;
+    Z->avail_out = ms.len - retused;
     Z->next_out = (Bytef *) (retbuf + retused);
     status = inflate(Z, Z_NO_FLUSH);
-    retused = ret.capacity() - Z->avail_out;
+    retused = ms.len - Z->avail_out;
     ret.setSize(retused);
 
     retsize += (retsize >> 3) + 1;
@@ -377,7 +378,7 @@ Variant HHVM_FUNCTION(snappy_uncompress, const String& data) {
 
   snappy::GetUncompressedLength(data.data(), data.size(), &dsize);
   String s = String(dsize, ReserveString);
-  char *uncompressed = s.bufferSlice().ptr;
+  char *uncompressed = s.mutableData();
 
   if (!snappy::RawUncompress(data.data(), data.size(), uncompressed)) {
     return false;
@@ -404,7 +405,7 @@ typedef struct nzlib_format_s {
 Variant HHVM_FUNCTION(nzcompress, const String& uncompressed) {
   size_t len = compressBound(uncompressed.size());
   String str(sizeof(nzlib_format_t) + len, ReserveString);
-  nzlib_format_t* format = (nzlib_format_t*)str.bufferSlice().ptr;
+  nzlib_format_t* format = (nzlib_format_t*)str.mutableData();
 
   format->magic = htonl(NZLIB_MAGIC);
   format->uncompressed_sz = htonl(uncompressed.size());
@@ -434,7 +435,7 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
   }
 
   String str(len, ReserveString);
-  char* uncompressed = str.bufferSlice().ptr;
+  char* uncompressed = str.mutableData();
   int rc = uncompress((Bytef*)uncompressed, &len, format->buf,
                       compressed.size() - sizeof(*format));
   if (rc != Z_OK) {
@@ -499,7 +500,7 @@ Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
   int headerSize = VarintSize(uncompressed.size());
   bufsize += headerSize;  // for the header
   String s = String(bufsize, ReserveString);
-  char *compressed = s.bufferSlice().ptr;
+  char *compressed = s.mutableData();
 
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
@@ -521,7 +522,7 @@ Variant HHVM_FUNCTION(lz4_hccompress, const String& uncompressed) {
   int headerSize = VarintSize(uncompressed.size());
   bufsize += headerSize;  // for the header
   String s = String(bufsize, ReserveString);
-  char *compressed = s.bufferSlice().ptr;
+  char *compressed = s.mutableData();
 
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
@@ -544,7 +545,7 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
 
   int inSize = compressed.size() - (compressed_ptr - compressed.data());
   String s = String(dsize, ReserveString);
-  char *uncompressed = s.bufferSlice().ptr;
+  char *uncompressed = s.mutableData();
 #ifdef LZ4_MAX_INPUT_SIZE
   int ret = LZ4_decompress_safe(compressed_ptr, uncompressed, inSize, dsize);
 
@@ -601,7 +602,7 @@ class __SystemLib_ChunkedInflator {
     do {
       int buffer_length = chunk.length() * (1 << factor);
       String buffer(buffer_length, ReserveString);
-      char* raw = buffer.bufferSlice().ptr;
+      char* raw = buffer.mutableData();
       m_zstream.next_out = (Bytef*) raw;
       m_zstream.avail_out = buffer_length;
 

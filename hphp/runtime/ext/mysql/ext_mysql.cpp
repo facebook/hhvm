@@ -125,7 +125,7 @@ static bool HHVM_FUNCTION(mysql_set_timeout, int query_timeout_ms /* = -1 */,
 static String HHVM_FUNCTION(mysql_escape_string,
                             const String& unescaped_string) {
   String new_str((size_t)unescaped_string.size() * 2 + 1, ReserveString);
-  unsigned long new_len = mysql_escape_string(new_str.bufferSlice().begin(),
+  unsigned long new_len = mysql_escape_string(new_str.mutableData(),
                                     unescaped_string.data(),
                                     unescaped_string.size());
   new_str.shrink(new_len);
@@ -139,7 +139,7 @@ static Variant HHVM_FUNCTION(mysql_real_escape_string,
   if (conn) {
     String new_str((size_t)unescaped_string.size() * 2 + 1, ReserveString);
     unsigned long new_len = mysql_real_escape_string(conn,
-                                      new_str.bufferSlice().begin(),
+                                      new_str.mutableData(),
                                       unescaped_string.data(),
                                       unescaped_string.size());
 

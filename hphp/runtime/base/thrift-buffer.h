@@ -200,7 +200,7 @@ public:
     read(size);
     if (size > 0 && size + 1 > 0) {
       data = String(size, ReserveString);
-      char *buf = data.bufferSlice().ptr;
+      char *buf = data.mutableData();
       read(buf, size);
       data.setSize(size);
     } else if (size) {

@@ -1881,7 +1881,9 @@ Variant HHVM_FUNCTION(setlocale,
       loc = NULL;
     }
     {
+#ifndef ENABLE_THREAD_SAFE_SETLOCALE
       Lock lock(s_mutex);
+#endif
       const char *retval = setlocale(category, loc);
       if (retval) {
         return String(retval, CopyString);
@@ -1914,7 +1916,9 @@ const StaticString
 Array HHVM_FUNCTION(localeconv) {
   struct lconv currlocdata;
   {
+#ifndef ENABLE_THREAD_SAFE_SETLOCALE
     Lock lock(s_mutex);
+#endif
     struct lconv *res = localeconv();
     currlocdata = *res;
   }

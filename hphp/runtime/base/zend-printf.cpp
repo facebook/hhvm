@@ -707,12 +707,20 @@ inline static void appenddouble(StringBuffer *buffer,
     return;
   }
 
+#if defined(HAVE_LOCALE_H) && defined(ENABLE_THREAD_SAFE_SETLOCALE)
+  struct lconv *lconv;
+  lconv = localeconv();
+# define APPENDDOUBLE_LCONV_DECIMAL_POINT (*lconv->decimal_point)
+#else
+# define APPENDDOUBLE_LCONV_DECIMAL_POINT '.'
+#endif
+
   switch (fmt) {
   case 'e':
   case 'E':
   case 'f':
   case 'F':
-    s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision, '.',
+    s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision, (fmt == 'f')?APPENDDOUBLE_LCONV_DECIMAL_POINT:'.',
                     &is_negative, &num_buf[1], &s_len);
     if (is_negative) {
       num_buf[0] = '-';
@@ -732,7 +740,7 @@ inline static void appenddouble(StringBuffer *buffer,
     /*
      * * We use &num_buf[ 1 ], so that we have room for the sign
      */
-    s = php_gcvt(number, precision, '.', (fmt == 'G')?'E':'e', &num_buf[1]);
+    s = php_gcvt(number, precision, APPENDDOUBLE_LCONV_DECIMAL_POINT, (fmt == 'G')?'E':'e', &num_buf[1]);
     is_negative = 0;
     if (*s == '-') {
       is_negative = 1;

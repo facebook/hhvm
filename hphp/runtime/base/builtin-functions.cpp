@@ -354,6 +354,9 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
   Variant ret;
   g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
                           nullptr, invName, ExecutionContext::InvokeCuf);
+  if (UNLIKELY(ret.getRawType()) == KindOfRef) {
+    tvUnbox(ret.asTypedValue());
+  }
   return ret;
 }
 
@@ -377,6 +380,9 @@ static Variant invoke(const String& function, const Variant& params,
   if (func && (isContainer(params) || params.isNull())) {
     Variant ret;
     g_context->invokeFunc(ret.asTypedValue(), func, params);
+    if (UNLIKELY(ret.getRawType()) == KindOfRef) {
+      tvUnbox(ret.asTypedValue());
+    }
     return ret;
   }
   return invoke_failed(function.c_str(), fatal);
@@ -405,6 +411,9 @@ Variant invoke_static_method(const String& s, const String& method,
   }
   Variant ret;
   g_context->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
+  if (UNLIKELY(ret.getRawType()) == KindOfRef) {
+    tvUnbox(ret.asTypedValue());
+  }
   return ret;
 }
 

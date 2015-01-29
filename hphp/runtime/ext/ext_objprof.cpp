@@ -53,9 +53,9 @@ struct cmpStringData {
 
 struct ObjprofMetrics {
 public:
-  uint64_t instances;
-  uint64_t bytes;
-  double bytes_rel;
+  uint64_t instances{0};
+  uint64_t bytes{0};
+  double bytes_rel{0};
 };
 
 struct ObjprofStringAgg {
@@ -654,48 +654,29 @@ static void HHVM_FUNCTION(objprof_start, void) {
 // Function that inits the scan of the memory and count of class pointers
 
 static Array HHVM_FUNCTION(objprof_get_data, void) {
-  // Iterate over all classes, prepare our whitelisted histogram buckets
-  std::unordered_map<Class*, ObjprofMetrics> histogram;
-  for (AllCachedClasses ac; !ac.empty(); ) {
-    Class* c = ac.popFront();
-    ObjprofMetrics empty_metrics;
-    empty_metrics.instances = 0;
-    empty_metrics.bytes = 0;
-    empty_metrics.bytes_rel = 0;
-    histogram[c] = empty_metrics;
-  }
+  if (!MM().getObjectTracking()) return empty_array();
 
-  if (MM().getObjectTracking()) {
-    MM().forEachObject([&](ObjectData* obj) {
-      Class* cls = obj->getVMClass();
-      auto it = histogram.find(cls);
-      if (it != histogram.end()) {
-        auto objsize_pair = getObjSize(obj);
-        ObjprofMetrics metrics = it->second;
-        metrics.instances += 1;
-        metrics.bytes += objsize_pair.first;
-        metrics.bytes_rel += objsize_pair.second;
-        histogram[cls] = metrics;
+  std::unordered_map<Class*,ObjprofMetrics> histogram;
+  MM().forEachObject([&](ObjectData* obj) {
+      auto cls = obj->getVMClass();
+      auto objsizePair = getObjSize(obj);
+      auto& metrics = histogram[cls];
+      metrics.instances += 1;
+      metrics.bytes += objsizePair.first;
+      metrics.bytes_rel += objsizePair.second;
 
-        FTRACE(1, "...................ObjectData* at {} ({}) size={}:{}\n",
-          obj,
-          obj->getClassName().data(),
-          objsize_pair.first,
-          objsize_pair.second
-        );
-      } else {
-        // This should never happen or we're not untracking something
-        FTRACE(1, "Class* not found in histogram!\n");
-      }
-    });
-  }
+      FTRACE(1, "...................ObjectData* at {} ({}) size={}:{}\n",
+             obj,
+             obj->getClassName().data(),
+             objsizePair.first,
+             objsizePair.second
+            );
+  });
 
   // Create response
-  Array objs;
-  for (auto& it : histogram) {
-    Class* c = it.first;
-
-    if (it.second.instances == 0) continue;
+  ArrayInit objs(histogram.size(), ArrayInit::Map{});
+  for (auto const& it : histogram) {
+    auto c = it.first;
 
     auto metrics_val = make_map_array(
       s_instances, Variant(it.second.instances),
@@ -703,10 +684,10 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
       s_bytes_rel, it.second.bytes_rel
     );
 
-    objs.set(c->nameStr(), Variant(metrics_val), true);
+    objs.set(c->nameStr(), Variant(metrics_val));
   }
 
-  return objs;
+  return objs.toArray();
 }
 
 class objprofExtension final : public Extension {

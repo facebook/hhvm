@@ -18,6 +18,6 @@ class Symfony extends Framework {
     $file = Options::$frameworks_root."/symfony/autoload.php.dist";
     $contents = explode("\n", file_get_contents($file));
     $contents[1] = $default_timezone_string;
-    file_put_contents($file, join("\n", $contents));
+    file_put_contents($file, implode("\n", $contents));
   }
 }

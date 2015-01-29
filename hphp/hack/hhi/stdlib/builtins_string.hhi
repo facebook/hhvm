@@ -50,6 +50,7 @@ function trim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
 function ltrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
 function rtrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
 function chop($str, $charlist = HPHP_TRIM_CHARLIST);
+<<__Deprecated('Use implode().')>>
 function join($glue, $pieces = null);
 function str_split($str, $split_length = 1);
 function chunk_split($body, $chunklen = 76, $end = "\r\n");

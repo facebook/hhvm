@@ -428,7 +428,7 @@ class Framework {
                                  "Skipped" => 0, "Incomplete" => 0 };
           foreach ($results_arr as $result) {
             // Strip spaces, then look for the : separator
-            $res_arr = split(":", str_replace(" ", "", $result));
+            $res_arr = explode(":", str_replace(" ", "", $result));
             // Remove any possible periods.
             $parsed_results[$res_arr[0]] =
                           (int)(str_replace(".", "", $res_arr[1]));

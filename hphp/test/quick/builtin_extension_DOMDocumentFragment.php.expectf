@@ -37,7 +37,7 @@ object(DOMDocumentFragment)#1 (16) {
 Warning: Attempted to serialize unserializable builtin class DOMDocumentFragment in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(23) {
+array(20) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -77,12 +77,6 @@ array(23) {
   [18]=>
   string(11) "getNodePath"
   [19]=>
-  string(5) "__get"
-  [20]=>
-  string(5) "__set"
-  [21]=>
-  string(7) "__isset"
-  [22]=>
   string(11) "__debuginfo"
 }
 ================
@@ -127,7 +121,7 @@ object(A_DOMDocumentFragment)#2 (17) {
 Warning: Attempted to serialize unserializable builtin class A_DOMDocumentFragment in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(23) {
+array(20) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -167,11 +161,5 @@ array(23) {
   [18]=>
   string(11) "getNodePath"
   [19]=>
-  string(5) "__get"
-  [20]=>
-  string(5) "__set"
-  [21]=>
-  string(7) "__isset"
-  [22]=>
   string(11) "__debuginfo"
 }

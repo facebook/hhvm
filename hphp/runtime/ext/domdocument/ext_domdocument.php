@@ -187,15 +187,6 @@ class DOMNode {
   <<__Native>>
   function getNodePath(): mixed;
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -225,15 +216,6 @@ class DOMAttr extends DOMNode {
    */
   <<__Native>>
   function isId(): bool;
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -317,15 +299,6 @@ class DOMCharacterData extends DOMNode {
   <<__Native>>
   function substringData(int $offset, int $count): string;
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -393,15 +366,6 @@ class DOMText extends DOMCharacterData {
    */
   <<__Native>>
   function splitText(int $offset): mixed;
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -854,15 +818,6 @@ class DOMDocument extends DOMNode {
   <<__Native>>
   function xinclude(int $options = 0): mixed;
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -901,15 +856,6 @@ class DOMDocumentFragment extends DOMNode {
  */
 <<__NativeData("DOMDocumentType")>>
 class DOMDocumentType extends DOMNode {
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -1165,16 +1111,6 @@ class DOMElement extends DOMNode {
                             string $localname,
                             bool $isid): mixed;
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name,
-                 mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -1191,15 +1127,6 @@ class DOMElement extends DOMNode {
  */
 <<__NativeData("DOMEntity")>>
 class DOMEntity extends DOMNode {
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -1219,15 +1146,6 @@ class DOMEntityReference extends DOMNode {
 <<__NativeData("DOMNotation")>>
 class DOMNotation extends DOMNode {
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -1241,15 +1159,6 @@ class DOMProcessingInstruction extends DOMNode {
 
   <<__Native>>
   function __construct(string $name, ?string $value = null): void;
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -1330,15 +1239,6 @@ class DOMNamedNodeMap implements IteratorAggregate {
   function item(int $index): mixed;
 
   <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
-  <<__Native>>
   function getIterator(): mixed;
 }
 
@@ -1361,15 +1261,6 @@ class DOMNodeList implements IteratorAggregate {
    */
   <<__Native>>
   function item(int $index): mixed;
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   <<__Native>>
   function getIterator(): mixed;
@@ -1521,15 +1412,6 @@ class DOMXPath {
    */
   <<__Native>>
   function registerPHPFunctions(mixed $funcs = null): mixed;
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   <<__Native>>
   function __debuginfo(): array;

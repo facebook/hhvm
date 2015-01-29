@@ -1,9 +1,10 @@
 <?hh
-
 abstract class A {
   abstract const type abs_class_by_class as arraykey;
 
-  public static::abs_class_by_class $id;
+  public function __construct (
+    private static::abs_class_by_class $id,
+  ) {}
 
   public function overriding(): Aint::vec {
     return Vector {};
@@ -23,12 +24,6 @@ class Aint extends A {
   const type hop = int;
   const type vec = ConstVector<int>;
 
-  public function __construct(
-    int $id,
-  ) {
-    $this->id = $id;
-  }
-
   public function test(): void {
     $this->testA(101);
   }
@@ -40,15 +35,10 @@ class Aint extends A {
 
 class Astr extends A {
   const type abs_class_by_class = string;
-  public function __construct(
-    string $id,
-  ) {
-    $this->id = $id;
-  }
 }
 
 abstract class B {
-  abstract const type AType = A;
+  abstract const type AType as A;
   abstract public static function getAID(): static::AType::abs_class_by_class;
 }
 

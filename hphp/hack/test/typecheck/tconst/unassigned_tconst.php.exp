@@ -1,2 +1,2 @@
 File "unassigned_tconst.php", line 4, characters 14-17:
-Please assign a value (Typing[4055])
+This type constant is not declared as abstract, it must have an assigned type (NastCheck[3026])

@@ -53,15 +53,16 @@ module ErrorString = struct
     | Tapply ((_, x), _) -> "an object of type "^(strip_ns x)
     | Tobject            -> "an object"
     | Tshape _           -> "a shape"
-    | Taccess (root, id, ids) ->
-        let root_str =
-          match root with
-          | SCI (_, class_id) -> class_id
-          | SCIstatic -> "static"
-        in
-        let base_str = "a value of type " ^ root_str in
-        let idl = id :: ids in
-        List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) base_str idl
+    | Taccess (root_ty, ids) ->
+        (match snd root_ty with
+        | Tgeneric (x, _)
+        | Tapply ((_, x), _)
+        | Tabstract ((_, x), _, _) ->
+            List.fold_left (fun acc (_, sid) -> acc^"::"^sid)
+              ("a value of type"^(strip_ns x)) ids
+        | _ ->
+            "an undefined value"
+        )
 
   and array = function
     | None, None     -> "an array"
@@ -121,14 +122,16 @@ module Suggest = struct
     | Tabstract ((_, cid), l, _)   -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tobject                -> "..."
     | Tshape _               -> "..."
-    | Taccess (root, id, ids) ->
-        let root_str =
-          match root with
-          | SCI (_, class_id) -> class_id
-          | SCIstatic -> "static"
-        in
-        let idl = id :: ids in
-        List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) root_str idl
+    | Taccess (root_ty, ids) ->
+        (match snd root_ty with
+        | Tgeneric (x, _)
+        | Tapply ((_, x), _)
+        | Tabstract ((_, x), _, _) ->
+            List.fold_left (fun acc (_, sid) -> acc^"::"^sid)
+              (strip_ns x) ids
+        | _ ->
+            "..."
+        )
 
   and list = function
     | []      -> ""
@@ -175,16 +178,9 @@ module Full = struct
     | Tabstract ((_, s), [], _)
     | Tapply ((_, s), [])
     | Tgeneric (s, _) -> o s
-    | Taccess (root, id, ids) ->
-        let root_str =
-          match root with
-          | SCI (_, class_id) -> class_id
-          | SCIstatic -> "static"
-        in
-        let idl = id :: ids in
-        let s =
-          List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) root_str idl in
-        o s
+    | Taccess (root_ty, ids) ->
+        k root_ty;
+        o (List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) "" ids)
     | Toption x -> o "?"; k x
     | Tprim x -> prim o x
     | Tvar n when ISet.mem n st -> o "[rec]"
@@ -318,6 +314,30 @@ module PrintClass = struct
       "\n"^indent^field^": "^(class_elt v)^acc
     end m ""
 
+  let typeconst {
+    ttc_name = tc_name;
+    ttc_constraint = tc_constraint;
+    ttc_type = tc_type;
+  } =
+    let name = snd tc_name in
+    let ty x = Full.to_string tenv x in
+    let constraint_ =
+      match tc_constraint with
+      | None -> ""
+      | Some x -> " as "^ty x
+    in
+    let type_ =
+      match tc_type with
+      | None -> ""
+      | Some x -> " = "^ty x
+    in
+    name^constraint_^type_
+
+  let typeconst_smap m =
+    SMap.fold begin fun _ v acc ->
+      "\n("^(typeconst v)^")"^acc
+    end m ""
+
   let ancestors_smap m =
     (* Format is as follows:
      *    ParentKnownToHack
@@ -358,7 +378,7 @@ module PrintClass = struct
     let tc_name = c.tc_name in
     let tc_tparams = tparam_list c.tc_tparams in
     let tc_consts = class_elt_smap c.tc_consts in
-    let tc_typeconsts = class_elt_smap c.tc_typeconsts in
+    let tc_typeconsts = typeconst_smap c.tc_typeconsts in
     let tc_cvars = class_elt_smap c.tc_cvars in
     let tc_scvars = class_elt_smap c.tc_scvars in
     let tc_methods = class_elt_smap_with_breaks c.tc_methods in

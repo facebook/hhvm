@@ -61,16 +61,20 @@ and hint_ =
   *
   * [self | static | Class]::TypeConst
   *
+  * Class  => Happly "Class"
+  * self   => Happly of the class of definition
+  * static => Habstr ("static", Habstr ("this", Happly of class of definition))
   * Type const access can be chained such as
   *
   * Class::TC1::TC2::TC3
   *
+  * We resolve the root of the type access chain as a type as follows.
+  *
   * This will result in the following representation
   *
-  * Haccess ("Class", "TC1", ["TC2", "TC3"])
-  *
+  * Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
   *)
-  | Haccess of class_id * sid * sid list
+  | Haccess of hint * sid list
 
 and tprim =
   | Tvoid
@@ -123,8 +127,8 @@ and class_const = hint option * sid * expr
  * If the type const is not abstract then a type must be specified.
  *)
 and class_typeconst = {
-  c_tconst_abstract : bool;
   c_tconst_name : sid;
+  c_tconst_constraint : hint option;
   c_tconst_type : hint option;
 }
 

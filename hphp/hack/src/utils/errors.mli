@@ -254,6 +254,7 @@ val duplicate_user_attribute : (Pos.t * string) -> Pos.t -> unit
 val attribute_arity : Pos.t -> string -> int -> unit
 val attribute_param_type : Pos.t -> string -> unit
 val deprecated_use : Pos.t -> Pos.t -> string -> unit
+val abstract_with_typeconst : (Pos.t * string) -> unit
 
 val to_json : Pos.absolute error_ -> Hh_json.json
 val to_string : Pos.absolute error_ -> string

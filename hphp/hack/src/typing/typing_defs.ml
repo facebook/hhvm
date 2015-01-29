@@ -107,7 +107,7 @@ and ty_ =
   | Ttuple        of ty list
 
   (* Name of class, name of type const, remaining names of type consts *)
-  | Taccess       of static_class_id * Nast.sid * Nast.sid list
+  | Taccess       of taccess_type
 
   (* An anonymous function, including the fun arity, and the identifier to
    * type the body of the function. (The actual closure is stored in
@@ -176,9 +176,7 @@ and ty_ =
   (* Shape and types of each of the arms. *)
   | Tshape of ty Nast.ShapeMap.t
 
-and static_class_id =
-  | SCI of Nast.sid
-  | SCIstatic
+and taccess_type = ty * Nast.sid list
 
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
@@ -238,7 +236,7 @@ and class_type = {
   tc_pos                 : Pos.t ;
   tc_tparams             : tparam list   ;
   tc_consts              : class_elt SMap.t;
-  tc_typeconsts          : class_elt SMap.t;
+  tc_typeconsts          : typeconst_type SMap.t;
   tc_cvars               : class_elt SMap.t;
   tc_scvars              : class_elt SMap.t;
   tc_methods             : class_elt SMap.t;
@@ -255,6 +253,12 @@ and class_type = {
   tc_extends             : SSet.t;
   tc_user_attributes     : Ast.user_attribute list;
   tc_enum_type           : enum_type option;
+}
+
+and typeconst_type = {
+  ttc_name        : Nast.sid;
+  ttc_constraint  : ty option;
+  ttc_type        : ty option;
 }
 
 and enum_type = {

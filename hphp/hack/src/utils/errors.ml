@@ -189,6 +189,7 @@ module NastCheck                            = struct
   let not_abstract_without_typeconst        = 3026 (* DONT MODIFY!!!! *)
   let typeconst_depends_on_external_tparam  = 3027 (* DONT MODIFY!!!! *)
   let typeconst_assigned_tparam             = 3028 (* DONT MODIFY!!!! *)
+  let abstract_with_typeconst               = 3029 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -713,6 +714,10 @@ let not_abstract_without_typeconst (p, _) =
   add NastCheck.not_abstract_without_typeconst p
     ("This type constant is not declared as abstract, it must have"^
      " an assigned type")
+
+let abstract_with_typeconst (p, _) =
+  add NastCheck.abstract_with_typeconst p
+    ("This type constant is declared as abstract, it cannot be assigned a type")
 
 let typeconst_depends_on_external_tparam pos ext_pos ext_name =
   add_list NastCheck.typeconst_depends_on_external_tparam [

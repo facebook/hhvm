@@ -465,9 +465,8 @@ and check_no_class_tparams class_tparams (pos, ty)  =
         check_tparams ty_
     | Happly (_, tyl) -> List.iter check_tparams tyl
     | Hshape fdl -> ShapeMap.iter (fun _ v -> check_tparams v) fdl
-    | Haccess (root, _, _) ->
-        let root_name = class_id_to_str root in
-        matches_class_tparam root_name
+    | Haccess (root_ty, _) ->
+        check_tparams root_ty
 
 and class_var env cv =
   let hint_env =

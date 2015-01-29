@@ -1,7 +1,7 @@
 <?hh // strict
 
 abstract class Base {
-  abstract const type ID = arraykey;
+  abstract const type ID as arraykey;
   const type ALIAS = static::ID;
 }
 

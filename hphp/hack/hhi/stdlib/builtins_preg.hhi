@@ -29,6 +29,7 @@ function ereg_replace($pattern, $replacement, $str) { }
 function eregi_replace($pattern, $replacement, $str) { }
 function ereg($pattern, $str, &$regs = null) { }
 function eregi($pattern, $str, &$regs = null) { }
+<<__Deprecated('Use explode() or preg_split().')>>
 function split($pattern, $str, $limit = -1) { }
 function spliti($pattern, $str, $limit = -1) { }
 function sql_regcase($str) { }

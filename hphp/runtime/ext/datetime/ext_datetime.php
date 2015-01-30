@@ -880,7 +880,7 @@ function timezone_location_get(DateTimeZone $timezone): array {
 <<__ParamCoerceModeFalse, __Native>>
 function timezone_name_from_abbr(string $abbr,
                                  int $gmtoffset = -1,
-                                 bool $isdst = true): mixed;
+                                 int $isdst = 1): mixed;
 
 function timezone_name_get(DateTimeZone $timezone): string {
   return $timezone->getName();

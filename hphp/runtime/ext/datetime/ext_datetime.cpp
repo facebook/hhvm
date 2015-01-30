@@ -789,7 +789,7 @@ bool HHVM_FUNCTION(date_default_timezone_set,
 Variant HHVM_FUNCTION(timezone_name_from_abbr,
                       const String& abbr,
                       int gmtoffset /* = -1 */,
-                      bool isdst /* = true */) {
+                      int isdst /* = 1 */) {
   String ret = TimeZone::AbbreviationToName(abbr, gmtoffset, isdst);
   if (ret.isNull()) {
     return false;

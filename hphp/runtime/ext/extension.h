@@ -18,14 +18,14 @@
 #ifndef incl_HPHP_EXTENSION_H_
 #define incl_HPHP_EXTENSION_H_
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/version.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/hdf.h"
-#include "hphp/runtime/version.h"
-#include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/bytecode.h"
 
 #include <set>
 #include <string>

@@ -22,7 +22,8 @@
 #include <set>
 #include <deque>
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/server-task-event.h"
 

@@ -17,9 +17,8 @@
 #ifndef incl_HPHP_BUILTIN_FUNCTIONS_H_
 #define incl_HPHP_BUILTIN_FUNCTIONS_H_
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/functional.h"

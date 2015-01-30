@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/base/array-common.h"
 
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/packed-array.h"

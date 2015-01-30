@@ -22,8 +22,9 @@
 #include <folly/ScopeGuard.h>
 #include <folly/Optional.h>
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/hhbbc/hhbbc.h"

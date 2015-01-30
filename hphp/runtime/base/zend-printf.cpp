@@ -16,13 +16,16 @@
 */
 
 #include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/base/zend-strtod.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/array-iterator.h"
+
 #include <math.h>
+
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-strtod.h"
 
 #if defined(__APPLE__)
 #ifndef isnan

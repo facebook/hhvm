@@ -16,24 +16,26 @@
 #ifndef incl_HHBBC_REPRESENTATION_H_
 #define incl_HHBBC_REPRESENTATION_H_
 
+#include <list>
+#include <memory>
 #include <string>
 #include <tuple>
-#include <vector>
-#include <memory>
 #include <unordered_map>
-#include <list>
+#include <utility>
+#include <vector>
 
 #include <boost/variant.hpp>
-#include <utility>
 
 #include "hphp/util/md5.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
+#include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/src-loc.h"
-#include "hphp/hhbbc/bc.h"
 
 namespace HPHP { namespace HHBBC {
 namespace php {

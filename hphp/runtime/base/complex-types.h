@@ -14,6 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
+/*
+ * DO NOT INCLUDE THIS FILE.
+ *
+ * WHAT YOU PROBABLY WANT IS TO INCLUDE type-string.h, type-array.h, or
+ * type-variant.h
+ *
+ * IF YOU REALLY NEED array-data-defs.h, THEN PLEASE INCLUDE IT MANUALLY.
+ */
+
 #ifndef incl_HPHP_COMPLEX_TYPES_H_
 #define incl_HPHP_COMPLEX_TYPES_H_
 

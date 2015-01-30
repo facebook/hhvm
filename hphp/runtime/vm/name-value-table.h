@@ -21,13 +21,14 @@
 
 #include <folly/Bits.h>
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 struct ActRec;
+struct StringData;
 
 /*
  * This class implements a name to TypedValue map.  Basically a hashtable from

@@ -29,12 +29,12 @@
 #include "hphp/util/either.h"
 #include "hphp/util/smalllocks.h"
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/server/server-stats.h"
 
 namespace HPHP {

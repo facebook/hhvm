@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_CONTAINER_FUNCTIONS_H_
 #define incl_HPHP_CONTAINER_FUNCTIONS_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {

@@ -14,22 +14,24 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/ext/array/ext_array.h"
 
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/zend-collator.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

@@ -16,20 +16,21 @@
 
 #include "hphp/runtime/vm/jit/simplify.h"
 
+#include <limits>
 #include <sstream>
 #include <type_traits>
-#include <limits>
 
-#include "hphp/util/overflow.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
-#include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/util/overflow.h"
 
 namespace HPHP { namespace jit {
 

@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_RUNTIME_BASE_ZENDINI_H_
 #define incl_HPHP_RUNTIME_BASE_ZENDINI_H_
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/ini-setting.h"
 
 ///////////////////////////////////////////////////////////////////////////////

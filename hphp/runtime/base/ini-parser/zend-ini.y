@@ -19,8 +19,6 @@
 #define YYERROR_VERBOSE
 #define YYSTYPE std::string
 
-#include "hphp/runtime/base/complex-types.h"
-
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "hphp/runtime/base/ini-setting.h"
@@ -64,7 +62,7 @@ statement_list:
 
 statement:
      TC_SECTION section_string_or_value ']' { zend_ini_on_section($2);}
-  |  TC_LABEL offset_list '=' 
+  |  TC_LABEL offset_list '='
      string_or_value                        { zend_ini_on_pop_entry($1, $4, $2);}
   |  TC_LABEL '=' string_or_value           { zend_ini_on_entry($1, $3);}
   |  TC_LABEL                               { zend_ini_on_label($1);}

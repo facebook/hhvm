@@ -18,7 +18,6 @@
 #ifndef incl_HPHP_FILEINFO_COMPAT_H_
 #define incl_HPHP_FILEINFO_COMPAT_H_
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/preg.h"

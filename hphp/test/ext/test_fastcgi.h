@@ -18,12 +18,11 @@
 #define incl_HPHP_TEST_FASTCGI_H_
 
 #include "hphp/test/ext/test_code_run.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-variant.h"
 
+#include <map>
 #include <tuple>
 #include <vector>
-#include <map>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -95,4 +94,3 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 #endif // incl_HPHP_TEST_FASTCGI_H_
-

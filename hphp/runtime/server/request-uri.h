@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_REQUEST_URI_H_
 #define incl_HPHP_REQUEST_URI_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

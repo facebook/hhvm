@@ -1,0 +1,7 @@
+<?php
+$memcache = new Memcache;
+$memcache->addServer('unix:///run/memcached/memcached.sock', 0);
+$version = $memcache->getVersion();
+if (!$version) {
+  echo "SKIP No Memcached running";
+}

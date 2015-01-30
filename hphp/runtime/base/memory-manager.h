@@ -666,14 +666,6 @@ struct MemoryManager {
   void removeApcArray(APCLocalArray*);
 
   /*
-   * Object tracking keeps instances of object data's by using track/untrack.
-   * It is then possible to iterate them by iterating the memory manager.
-   * This entire feature is enabled/disabled by using setObjectTracking(bool).
-   */
-  void setObjectTracking(bool val);
-  bool getObjectTracking();
-
-  /*
    * Iterating the memory manager tracked objects.
    */
   template<class Fn> void forEachObject(Fn);
@@ -792,7 +784,6 @@ private:
   std::vector<NativeNode*> m_natives;
 
   bool m_sweeping;
-  bool m_trackingInstances;
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;

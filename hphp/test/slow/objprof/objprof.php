@@ -35,15 +35,6 @@ function getStr(int $len): string {
 
 // TEST: tracking works when enabled and not when disabled
 class EmptyClass {}
-$myClass = new EmptyClass();
-$objs = objprof_get_data();
-echo get_instances("EmptyClass", $objs)
-  ? "(BAD) Tracking when disabled\n"
-  : "(GOOD) Not tracking when disabled\n";
-$objs = null;
-
-objprof_start();
-
 $myClass2 = new EmptyClass();              // ++
 $objs = objprof_get_data();
 $emptyCount = get_instances("EmptyClass", $objs);

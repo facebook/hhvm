@@ -150,7 +150,11 @@ void FastCGIConnection::writeError(size_t bytes,
 void FastCGIConnection::writeSuccess() noexcept {
   --m_writeCount;
   if (m_writeCount == 0 && m_shutdown) {
-    delete this;
+    // Call "destroy" instead of "delete this" to make sure the DestructorGuard
+    // in readDataAvailable is able to do its thing. Needing to do this, along
+    // with having a "delete this" at all, is indicitive of just how much all
+    // of this code lacks clear lines of ownership.
+    destroy();
   }
 }
 
@@ -162,7 +166,11 @@ void FastCGIConnection::onSessionClose() {
   close();
   m_shutdown = true;
   if (m_writeCount == 0) {
-    delete this;
+    // Call "destroy" instead of "delete this" to make sure the DestructorGuard
+    // in readDataAvailable is able to do its thing. Needing to do this, along
+    // with having a "delete this" at all, is indicitive of just how much all
+    // of this code lacks clear lines of ownership.
+    destroy();
   }
 }
 

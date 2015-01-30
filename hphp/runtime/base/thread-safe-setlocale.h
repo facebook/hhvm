@@ -14,9 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifdef ENABLE_THREAD_SAFE_SETLOCALE
 #ifndef incl_HPHP_SETLOCALE_H_
 #define incl_HPHP_SETLOCALE_H_
+
+#ifdef ENABLE_THREAD_SAFE_SETLOCALE
 
 #include <vector>
 #include <string>
@@ -51,5 +52,6 @@ extern DECLARE_THREAD_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handle
 
 }
 
-#endif // incl_HPHP_SETLOCALE_H_
 #endif // ENABLE_THREAD_SAFE_SETLOCALE
+
+#endif // incl_HPHP_SETLOCALE_H_

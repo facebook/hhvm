@@ -17,10 +17,9 @@
 #ifndef incl_HPHP_TYPE_CONVERSIONS_H_
 #define incl_HPHP_TYPE_CONVERSIONS_H_
 
-#include "hphp/runtime/base/types.h"
 #include <limits>
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/runtime-error.h"
+
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

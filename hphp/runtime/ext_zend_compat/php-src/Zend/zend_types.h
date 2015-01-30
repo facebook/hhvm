@@ -53,7 +53,7 @@ typedef unsigned long zend_uintptr_t;
 typedef unsigned int zend_object_handle;
 typedef struct _zend_object_handlers zend_object_handlers;
 #ifdef HHVM
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/ref-data.h"
 typedef struct HPHP::RefData zval;
 #else
 typedef struct _zval_struct zval;

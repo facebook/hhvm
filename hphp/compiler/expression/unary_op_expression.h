@@ -18,12 +18,13 @@
 #define incl_HPHP_UNARY_OP_EXPRESSION_H_
 
 #include "hphp/compiler/expression/expression.h"
-#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(UnaryOpExpression);
+
+struct Variant;
 
 class UnaryOpExpression : public Expression,
                           public LocalEffectsContainer {

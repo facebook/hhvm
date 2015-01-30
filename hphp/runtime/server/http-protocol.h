@@ -17,16 +17,17 @@
 #ifndef incl_HPHP_HTTP_PROTOCOL_H_
 #define incl_HPHP_HTTP_PROTOCOL_H_
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class Array;
 class RequestURI;
 class SourceRootInfo;
-class VirtualHost;
 class StringBuffer;
+class Variant;
+class VirtualHost;
 
 struct HttpProtocol {
   static const VirtualHost *GetVirtualHost(Transport *transport);

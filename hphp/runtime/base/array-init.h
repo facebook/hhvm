@@ -18,12 +18,12 @@
 
 #include <type_traits>
 
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 

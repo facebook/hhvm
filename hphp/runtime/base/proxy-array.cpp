@@ -15,9 +15,11 @@
 */
 
 #include "hphp/runtime/base/proxy-array.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/array-iterator.h"
+
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-custom-element.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 

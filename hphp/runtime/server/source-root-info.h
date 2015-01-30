@@ -17,7 +17,8 @@
 #ifndef incl_HPHP_SOURCE_ROOT_INFO_H_
 #define incl_HPHP_SOURCE_ROOT_INFO_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/debugger/debugger_base.h"
 
 namespace HPHP {

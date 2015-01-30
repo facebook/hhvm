@@ -29,7 +29,6 @@
 #include <folly/Hash.h>
 
 #include "hphp/util/either.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/type-constraint.h"
 

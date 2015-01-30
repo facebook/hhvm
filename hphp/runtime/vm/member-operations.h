@@ -19,14 +19,15 @@
 
 #include <type_traits>
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 

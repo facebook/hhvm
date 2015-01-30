@@ -20,12 +20,11 @@
 #include <array>
 #include <cstdint>
 
-#include "hphp/util/tls-pod-bag.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/util/tls-pod-bag.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,6 +37,7 @@ class c_ImmVector;
 class c_ImmSet;
 class c_Pair;
 struct Iter;
+struct MixedArray;
 
 enum class IterNextIndex : uint16_t {
   ArrayPacked = 0,

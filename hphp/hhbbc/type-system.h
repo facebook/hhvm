@@ -26,7 +26,6 @@
 
 #include "hphp/util/copy-ptr.h"
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 

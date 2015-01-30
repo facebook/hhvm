@@ -31,17 +31,20 @@ SOFTWARE.
 #ifndef HAVE_JSONC
 
 #include "hphp/runtime/ext/json/JSON_parser.h"
+
 #include <vector>
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/type-conversions.h"
+
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/utf8-decode.h"
-#include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/utf8-decode.h"
+#include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/zend-strtod.h"
+#include "hphp/system/systemlib.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";

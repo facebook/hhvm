@@ -16,12 +16,15 @@
 #ifndef incl_HPHP_PROXY_ARRAY_H
 #define incl_HPHP_PROXY_ARRAY_H
 
-#include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+struct RefData;
 
 /*
  * A proxy for an underlying ArrayData. The Zend compatibility layer needs
@@ -35,7 +38,7 @@ namespace HPHP {
  *
  * TODO: rename to ZendArray
  */
-struct ProxyArray : public ArrayData {
+struct ProxyArray : ArrayData {
   static ProxyArray* Make(ArrayData*);
 
 public:

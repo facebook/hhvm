@@ -22,7 +22,6 @@
 #include <string>
 
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
 
 namespace HPHP {
 

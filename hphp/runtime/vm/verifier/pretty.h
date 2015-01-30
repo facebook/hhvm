@@ -19,7 +19,8 @@
 
 #include <string>
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 

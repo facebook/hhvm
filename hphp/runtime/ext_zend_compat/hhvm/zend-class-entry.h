@@ -17,13 +17,14 @@
 #ifndef incl_ZEND_CLASS_ENTRY_H_
 #define incl_ZEND_CLASS_ENTRY_H_
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/class.h"
 
 typedef struct _zend_class_entry zend_class_entry;
 struct _zend_class_entry;
 
 namespace HPHP {
+
+struct StringData;
 
 zend_class_entry* zend_hphp_class_to_class_entry(Class* cls);
 Class * zend_hphp_class_entry_to_class(const zend_class_entry * ce);

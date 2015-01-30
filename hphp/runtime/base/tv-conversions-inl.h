@@ -16,6 +16,11 @@
 
 #include "hphp/runtime/base/type-conversions.h" // toInt64(double)
 
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/string-data.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

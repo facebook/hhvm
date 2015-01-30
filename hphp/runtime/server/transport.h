@@ -24,14 +24,16 @@
 
 #include "hphp/util/compression.h"
 #include "hphp/util/functional.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/string-holder.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-holder.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class Array;
+struct Variant;
 
 /**
  * For storing headers and cookies.

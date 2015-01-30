@@ -20,11 +20,12 @@
 #include <cinttypes>
 
 #include "hphp/util/either.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-string.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
+
+struct ObjectData;
 
 //////////////////////////////////////////////////////////////////////
 

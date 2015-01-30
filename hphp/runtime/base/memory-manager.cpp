@@ -196,6 +196,26 @@ MemoryManager::MemoryManager()
   m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
 }
 
+void MemoryManager::resetRuntimeOptions() {
+  if (debug) {
+    checkHeap();
+    // check that every allocation in heap has been freed before reset
+    for (auto h = begin(), lim = end(); h != lim; ++h) {
+      if (h->kind_ == HeaderKind::Debug) {
+        auto h2 = h; ++h2;
+        if (h2 != lim) {
+          assert(h2->kind_ == HeaderKind::Free);
+        }
+      } else {
+        assert(h->kind_ == HeaderKind::Free ||
+               h->kind_ == HeaderKind::Hole);
+      }
+    }
+  }
+  MemoryManager::TlsWrapper::destroy();
+  MemoryManager::TlsWrapper::getCheck();
+}
+
 void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #ifdef USE_JEMALLOC
   FTRACE(1, "resetStatsImpl({}) pre:\n", isInternalCall);
@@ -440,7 +460,6 @@ void MemoryManager::resetAllocator() {
   m_front = m_limit = 0;
 
   resetStatsImpl(true);
-  resetCouldOOM();
   TRACE(1, "reset: apc-arrays %lu strings %u\n", napcs, nstrings);
 }
 

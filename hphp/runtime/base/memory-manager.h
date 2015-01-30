@@ -31,6 +31,7 @@
 
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 // used for mmapping contiguous heap space
 // If used, anonymous pages are not cleared when mapped with mmap. It is not
@@ -676,6 +677,11 @@ struct MemoryManager {
    * Iterating the memory manager tracked objects.
    */
   template<class Fn> void forEachObject(Fn);
+
+  /*
+   * Reset all runtime options for Memory Manager
+   */
+  void resetRuntimeOptions();
 
   /////////////////////////////////////////////////////////////////////////////
   // Request profiling.

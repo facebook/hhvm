@@ -1456,6 +1456,8 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::SafeFileAccess = false;
   }
 
+  MM().resetRuntimeOptions();
+
   if (po.mode == "daemon") {
     if (RuntimeOption::LogFile.empty()) {
       Logger::Error("Log file not specified under daemon mode.\n\n");
@@ -2002,6 +2004,7 @@ void hphp_memory_cleanup() {
   g_context.destroy();
 
   mm.resetAllocator();
+  mm.resetCouldOOM();
 }
 
 void hphp_session_exit() {

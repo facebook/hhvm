@@ -10,11 +10,15 @@
  */
 function is_bool($var) { }
 function is_int($var) { }
+<<__Deprecated('Use is_int().')>>
 function is_integer($var) { }
+<<__Deprecated('Use is_int().')>>
 function is_long($var) { }
+<<__Deprecated('Use is_float().')>>
 function is_double($var) { }
 function is_float($var) { }
 function is_numeric($var) { }
+<<__Deprecated('Use is_float().')>>
 function is_real($var) { }
 function is_string($var) { }
 function is_scalar($var) { }

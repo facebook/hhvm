@@ -607,9 +607,8 @@ static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
 
   ObjprofStrings metrics;
 
-  if (MM().getObjectTracking()) {
-    std::set<void*> pointers;
-    MM().forEachObject([&](ObjectData* obj) {
+  std::set<void*> pointers;
+  MM().forEachObject([&](ObjectData* obj) {
       Class* cls = obj->getVMClass();
       auto it = histogram.find(cls);
       if (it != histogram.end()) {
@@ -619,8 +618,7 @@ static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
         // This should never happen or we're not untracking something
         FTRACE(1, "Class* not found in histogram!\n");
       }
-    });
-  }
+  });
 
   // Create response
   Array objs;
@@ -643,19 +641,9 @@ static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Function that inits object tracking
-
-static void HHVM_FUNCTION(objprof_start, void) {
-  MM().setObjectTracking(true);
-  FTRACE(2, "Tracking instances enabled\n");
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Function that inits the scan of the memory and count of class pointers
 
 static Array HHVM_FUNCTION(objprof_get_data, void) {
-  if (!MM().getObjectTracking()) return empty_array();
-
   std::unordered_map<Class*,ObjprofMetrics> histogram;
   MM().forEachObject([&](ObjectData* obj) {
       auto cls = obj->getVMClass();
@@ -696,7 +684,6 @@ class objprofExtension final : public Extension {
 
   void moduleInit() override {
     HHVM_FALIAS(HH\\objprof_get_data, objprof_get_data);
-    HHVM_FALIAS(HH\\objprof_start, objprof_start);
     HHVM_FALIAS(HH\\objprof_get_strings, objprof_get_strings);
     loadSystemlib();
   }

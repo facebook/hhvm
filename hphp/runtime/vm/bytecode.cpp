@@ -7650,7 +7650,6 @@ void ExecutionContext::requestInit() {
   profileRequestStart();
 
   MemoryProfile::startProfiling();
-  MM().setObjectTracking(false);
 
 #ifdef DEBUG
   Class* cls = NamedEntity::get(s_stdclass.get())->clsList();

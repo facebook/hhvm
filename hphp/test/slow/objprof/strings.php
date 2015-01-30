@@ -28,8 +28,6 @@ function getStr(int $len): string {
   return $ret;
 }
 
-objprof_start();
-
 // TEST: simple props
 $shared = getStr(4);
 class SimpleProps {

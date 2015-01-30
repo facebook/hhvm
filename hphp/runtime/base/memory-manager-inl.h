@@ -426,16 +426,6 @@ inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 //////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE
-void MemoryManager::setObjectTracking(bool val) {
-  m_trackingInstances = val;
-}
-
-ALWAYS_INLINE
-bool MemoryManager::getObjectTracking() {
-  return m_trackingInstances;
-}
-
 }
 
 #endif

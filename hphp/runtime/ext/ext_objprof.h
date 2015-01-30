@@ -19,7 +19,6 @@
 #define incl_HPHP_EXT_OBJPROF_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include <semaphore.h>
 
 /*
  *                       Project ObjProf

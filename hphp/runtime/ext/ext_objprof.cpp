@@ -16,21 +16,18 @@
 */
 
 #include "hphp/runtime/ext/ext_objprof.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/struct-array.h"
-#include "hphp/runtime/ext/ext_simplexml.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
-#include <signal.h>
-#include <vector>
-#include <time.h>
-#include <iostream>
 #include <set>
+#include <unordered_map>
+#include <vector>
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/unit.h"
 
 TRACE_SET_MOD(objprof);
 
@@ -44,12 +41,6 @@ const StaticString
   s_bytes("bytes"),
   s_bytes_rel("bytes_normalized"),
   s_instances("instances");
-
-struct cmpStringData {
-  bool operator()(const StringData* a, const StringData* b) const {
-    return a->compare(b) < 0;
-  }
-};
 
 struct ObjprofMetrics {
 public:
@@ -66,9 +57,13 @@ public:
   String path;
 };
 
-typedef typename std::map<StringData*, ObjprofStringAgg, cmpStringData>
-  ObjprofStrings;
-typedef typename std::vector<std::string> ObjprofStack;
+using ObjprofStrings = std::unordered_map<
+  StringData*,
+  ObjprofStringAgg,
+  string_data_hash,
+  string_data_same
+>;
+using ObjprofStack = std::vector<std::string>;
 
 std::pair<int, double> tvGetSize(const TypedValue* tv, int ref_adjust);
 void tvGetStrings(
@@ -474,7 +469,6 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
     return std::make_pair(size, sized);
   }
 
-
   bool adjust_val = true;
   if (cls == c_Map::classof() || cls == c_ImmMap::classof()) {
     adjust_val = false;
@@ -598,30 +592,16 @@ static void getObjStrings(
 // Function that traverses objects and counts metrics per strings
 
 static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
-  // Iterate over all classes, prepare our whitelisted histogram buckets
-  std::unordered_map<Class*, int> histogram;
-  for (AllCachedClasses ac; !ac.empty(); ) {
-    Class* c = ac.popFront();
-    histogram[c] = 1;
-  }
-
   ObjprofStrings metrics;
 
   std::set<void*> pointers;
   MM().forEachObject([&](ObjectData* obj) {
-      Class* cls = obj->getVMClass();
-      auto it = histogram.find(cls);
-      if (it != histogram.end()) {
-        ObjprofStack path;
-        getObjStrings(obj, &metrics, &path, &pointers);
-      } else {
-        // This should never happen or we're not untracking something
-        FTRACE(1, "Class* not found in histogram!\n");
-      }
+      ObjprofStack path;
+      getObjStrings(obj, &metrics, &path, &pointers);
   });
 
   // Create response
-  Array objs;
+  ArrayInit objs(metrics.size(), ArrayInit::Map{});
   for (auto& it : metrics) {
     if (it.second.dups < min_dup) continue;
 
@@ -633,10 +613,10 @@ static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
     );
 
     const Variant str = Variant(it.first);
-    objs.set(str, Variant(metrics_val), true);
+    objs.set(str, Variant(metrics_val));
   }
 
-  return objs;
+  return objs.toArray();
 }
 
 
@@ -653,7 +633,7 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
       metrics.bytes += objsizePair.first;
       metrics.bytes_rel += objsizePair.second;
 
-      FTRACE(1, "...................ObjectData* at {} ({}) size={}:{}\n",
+      FTRACE(1, "ObjectData* at {} ({}) size={}:{}\n",
              obj,
              obj->getClassName().data(),
              objsizePair.first,

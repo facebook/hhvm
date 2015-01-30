@@ -139,10 +139,10 @@ private:
  *
  * FastCGIServer
  *   FastCGIAcceptor
- *     FastCGIConnection (1 Acceptor owns many Connections)
+ *     FastCGIConnection/SocketConnection (1 Acceptor owns many Connections)
  *       FastCGISession
  *         FastCGITransaction (1 Session owns many Transactions)
- *           FastCGITransport
+ *           FastCGITransport/ProtocolSessionHandler
  */
 class FastCGIServer : public Server,
                       public apache::thrift::async::TAsyncTimeout {

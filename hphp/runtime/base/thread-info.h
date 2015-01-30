@@ -42,7 +42,7 @@ struct ThreadInfo {
     NetworkIO,
   };
 
-  static void GetExecutionSamples(std::map<Executing, int> &counts);
+  static void GetExecutionSamples(std::map<Executing, int>& counts);
   static void ExecutePerThread(std::function<void(ThreadInfo*)> f);
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
@@ -50,7 +50,7 @@ struct ThreadInfo {
 
   // For infinite recursion detection.  m_stacklimit is the lowest
   // address the stack can grow to.
-  char *m_stacklimit;
+  char* m_stacklimit{nullptr};
 
   // Either null, or populated by initialization of ThreadInfo as an
   // approximation of the highest address of the current thread's
@@ -60,19 +60,22 @@ struct ThreadInfo {
   // This is the amount of "slack" in stack usage checks - if the
   // stack pointer gets within this distance from the end (minus
   // overhead), throw an infinite recursion exception.
-  static const int StackSlack = 1024 * 1024;
+  static constexpr int StackSlack = 1024 * 1024;
 
   MemoryManager* m_mm;
 
   // This pointer is set by ProfilerFactory
-  Profiler *m_profiler;
-  CodeCoverage *m_coverage;
-  DebugHookHandler *m_debugHookHandler; // set by DebugHookHandler::attach()
+  Profiler* m_profiler{nullptr};
 
-  Executing m_executing;
+  CodeCoverage* m_coverage{nullptr};
+
+  // Set by DebugHookHandler::attach().
+  DebugHookHandler* m_debugHookHandler{nullptr};
+
+  Executing m_executing{Idling};
 
   // A C++ exception which will be thrown by the next surprise check.
-  Exception* m_pendingException;
+  Exception* m_pendingException{nullptr};
 
   ThreadInfo();
   ~ThreadInfo();

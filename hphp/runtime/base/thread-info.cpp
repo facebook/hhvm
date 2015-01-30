@@ -13,9 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/thread-info.h"
 
-#include <atomic>
+#include "hphp/runtime/base/thread-info.h"
 
 #include <sys/time.h>
 #include <sys/mman.h>
@@ -25,18 +24,17 @@
 #include <map>
 #include <set>
 
-#include "hphp/runtime/base/types.h"
+#include <folly/Format.h>
+
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
-#include <folly/String.h>
-
-using std::map;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,17 +46,12 @@ __thread char* ThreadInfo::t_stackbase = 0;
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
-ThreadInfo::ThreadInfo()
-    : m_stacklimit(0), m_executing(Idling) {
+ThreadInfo::ThreadInfo() {
   assert(!t_stackbase);
   t_stackbase = static_cast<char*>(stack_top_ptr());
 
   m_mm = &MM();
-
-  m_profiler = nullptr;
-  m_pendingException = nullptr;
   m_coverage = new CodeCoverage();
-  m_debugHookHandler = nullptr;
 }
 
 ThreadInfo::~ThreadInfo() {
@@ -85,17 +78,16 @@ bool ThreadInfo::valid(ThreadInfo* info) {
   return s_thread_infos.find(info) != s_thread_infos.end();
 }
 
-void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
+void ThreadInfo::GetExecutionSamples(std::map<Executing, int>& counts) {
   Lock lock(s_thread_info_mutex);
-  for (std::set<ThreadInfo*>::const_iterator iter = s_thread_infos.begin();
-       iter != s_thread_infos.end(); ++iter) {
-    ++counts[(*iter)->m_executing];
+  for (auto const info : s_thread_infos) {
+    ++counts[info->m_executing];
   }
 }
 
 void ThreadInfo::ExecutePerThread(std::function<void(ThreadInfo*)> f) {
   Lock lock(s_thread_info_mutex);
-  for (auto& thread : s_thread_infos) {
+  for (auto thread : s_thread_infos) {
     f(thread);
   }
 }
@@ -147,44 +139,44 @@ void ThreadInfo::onSessionExit() {
 void throw_infinite_recursion_exception() {
   if (!RuntimeOption::NoInfiniteRecursionDetection) {
     // Reset profiler otherwise it might recurse further causing segfault
-    DECLARE_THREAD_INFO
+    auto info = ThreadInfo::s_threadInfo.getNoCheck();
     info->m_profiler = nullptr;
     raise_error("infinite recursion detected");
   }
 }
 
 static Exception* generate_request_timeout_exception() {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  RequestInjectionData& data = info->m_reqInjectionData;
+  auto info = ThreadInfo::s_threadInfo.getNoCheck();
+  auto& data = info->m_reqInjectionData;
 
-  auto exceptionMsg = folly::format(
+  auto exceptionMsg = folly::sformat(
     RuntimeOption::ClientExecutionMode()
       ? "Maximum execution time of {} seconds exceeded"
       : "entire web request took longer than {} seconds and timed out",
-    data.getTimeout()).str();
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
+    data.getTimeout());
+  auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .withSelf()
+                                        .withThis());
   return new RequestTimeoutException(exceptionMsg, exceptionStack);
 }
 
 static Exception* generate_request_cpu_timeout_exception() {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  RequestInjectionData& data = info->m_reqInjectionData;
+  auto info = ThreadInfo::s_threadInfo.getNoCheck();
+  auto& data = info->m_reqInjectionData;
 
   auto exceptionMsg =
-    folly::format("Maximum CPU time of {} seconds exceeded",
-                  data.getCPUTimeout()).str();
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
+    folly::sformat("Maximum CPU time of {} seconds exceeded",
+                   data.getCPUTimeout());
+  auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .withSelf()
+                                        .withThis());
   return new RequestCPUTimeoutException(exceptionMsg, exceptionStack);
 }
 
 static Exception* generate_memory_exceeded_exception() {
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
+  auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .withSelf()
+                                        .withThis());
   return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack);
 }
@@ -193,7 +185,7 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   auto& p = info->m_reqInjectionData;
   bool do_timedout, do_cpuTimedOut, do_memExceeded, do_signaled;
 
-  ssize_t flags = p.fetchAndClearFlags();
+  auto const flags = p.fetchAndClearFlags();
   do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
     !p.getDebuggerAttached();
   do_cpuTimedOut = (flags & RequestInjectionData::CPUTimedOutFlag) &&
@@ -202,7 +194,7 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   do_signaled = (flags & RequestInjectionData::SignaledFlag);
 
   // Start with any pending exception that might be on the thread.
-  Exception* pendingException = info->m_pendingException;
+  auto pendingException = info->m_pendingException;
   info->m_pendingException = nullptr;
 
   if (do_timedout) {

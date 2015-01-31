@@ -63,6 +63,7 @@ if (OCAMLC_FOUND)
     # if the system does not have lz4, make sure that the one in public_tld
     # gets built
     add_dependencies(hack lz4)
+    add_dependencies(hack_test lz4)
   endif()
 
   install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client

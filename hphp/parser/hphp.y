@@ -2536,8 +2536,6 @@ common_scalar_ae:
     T_LNUMBER                          { _p->onScalar($$, T_LNUMBER,  $1);}
   | T_DNUMBER                          { _p->onScalar($$, T_DNUMBER,  $1);}
   | T_ONUMBER                          { _p->onScalar($$, T_ONUMBER,  $1);}
-  | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
-                                         T_CONSTANT_ENCAPSED_STRING,  $1);}
   | T_START_HEREDOC
     T_ENCAPSED_AND_WHITESPACE
     T_END_HEREDOC                      { _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $2);}
@@ -2550,8 +2548,19 @@ static_numeric_scalar_ae:
   | T_ONUMBER                          { _p->onScalar($$,T_ONUMBER,$1);}
   | ident                              { constant_ae(_p,$$,$1);}
 ;
+
+static_string_expr_ae:
+    T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
+                                         T_CONSTANT_ENCAPSED_STRING,$1);}
+  | T_CONSTANT_ENCAPSED_STRING '.' static_string_expr_ae
+                                       { _p->onScalar($$,
+                                         T_CONSTANT_ENCAPSED_STRING,
+                                         $1 + $3);}
+;
+
 static_scalar_ae:
-    common_scalar_ae                   { $$ = $1;}
+    common_scalar_ae
+  | static_string_expr_ae              { $$ = $1;}
   | ident                              { constant_ae(_p,$$,$1);}
   | '+' static_numeric_scalar_ae       { UEXP($$,$2,'+',1);}
   | '-' static_numeric_scalar_ae       { UEXP($$,$2,'-',1);}

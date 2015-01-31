@@ -415,7 +415,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Config::ParseIniString(po.iniStrings[i].c_str(), ini);
   }
   for (unsigned int i = 0; i < po.confStrings.size(); i++) {
-    Config::ParseHdfString(po.confStrings[i].c_str(), config, ini);
+    Config::ParseHdfString(po.confStrings[i].c_str(), config);
   }
   Option::Load(ini, config);
   IniSetting::Map iniR = IniSetting::Map::object;

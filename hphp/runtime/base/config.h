@@ -53,15 +53,13 @@ struct Config {
   static void ParseIniFile(const std::string &filename, IniSettingMap &ini,
                            const bool constants_only = false);
 
-  static void ParseHdfFile(const std::string &filename, Hdf &hdf,
-                           IniSettingMap &ini);
+  static void ParseHdfFile(const std::string &filename, Hdf &hdf);
 
   // Parse and process a .ini string (e.g., -d)
   static void ParseIniString(const std::string iniStr, IniSettingMap &ini);
 
   // Parse and process a .hdf string (e.g., -v)
-  static void ParseHdfString(const std::string hdfStr, Hdf &hdf,
-                             IniSettingMap &ini);
+  static void ParseHdfString(const std::string hdfStr, Hdf &hdf);
 
   /** Prefer the Bind() over the GetFoo() as it makes ini_get() work too. */
   static void Bind(bool& loc, const IniSettingMap &ini,

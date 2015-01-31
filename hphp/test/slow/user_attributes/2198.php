@@ -15,7 +15,7 @@ $attrs = $rm->getAttributes();
 ksort($attrs);
 var_dump($attrs);
 
-<<A(3),B('bar',array(44,75))>>
+<<A(3),B('bar',array(44,75)), C('concat'.'enate')>>
 function f() {
 }
 $rf = new ReflectionFunction('f');

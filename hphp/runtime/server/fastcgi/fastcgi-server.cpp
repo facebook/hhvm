@@ -130,7 +130,7 @@ bool FastCGIConnection::hasReadDataAvailable() {
   return ((chain != nullptr) && (chain->length() != 0));
 }
 
-std::shared_ptr<ProtocolSessionHandler>
+std::shared_ptr<FastCGITransport>
 FastCGIConnection::newSessionHandler(int transport_id) {
   auto transport = std::make_shared<FastCGITransport>(this, transport_id);
   m_transports[transport_id] = transport;

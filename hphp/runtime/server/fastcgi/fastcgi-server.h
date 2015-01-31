@@ -105,7 +105,7 @@ public:
     const apache::thrift::transport::TTransportException& ex)
     noexcept override;
 
-  std::shared_ptr<ProtocolSessionHandler>
+  std::shared_ptr<FastCGITransport>
     newSessionHandler(int handler_id) override;
   void onSessionEgress(std::unique_ptr<folly::IOBuf> chain) override;
   void writeError(size_t bytes,
@@ -148,7 +148,7 @@ private:
  *     FastCGIConnection/SocketConnection (1 Acceptor owns many Connections)
  *       FastCGISession
  *         FastCGITransaction (1 Session owns many Transactions)
- *           FastCGITransport/ProtocolSessionHandler
+ *           FastCGITransport
  */
 class FastCGIServer : public Server,
                       public apache::thrift::async::TAsyncTimeout {

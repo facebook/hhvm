@@ -18,7 +18,6 @@
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_TRANSPORT_H_
 
 #include "hphp/runtime/server/transport.h"
-#include "hphp/runtime/server/fastcgi/protocol-session-handler.h"
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
@@ -43,10 +42,17 @@ class FastCGIConnection;
  * the client.
  */
 class FastCGITransport
-  : public Transport,
-    public ProtocolSessionHandler {
+  : public Transport {
 
 public:
+  class Callback {
+  public:
+    virtual ~Callback() {}
+    virtual void onStdOut(std::unique_ptr<folly::IOBuf> chain) = 0;
+    virtual void onStdErr(std::unique_ptr<folly::IOBuf> chain) = 0;
+    virtual void onComplete() = 0;
+  };
+
   explicit FastCGITransport(FastCGIConnection *connection, int id);
   virtual ~FastCGITransport() {}
 
@@ -91,12 +97,15 @@ public:
   void sendResponseHeaders(folly::IOBufQueue& queue, int code);
   virtual void onSendEndImpl() override;
 
-  // Implementing ProtocolSessionHandler
-  virtual void onBody(std::unique_ptr<folly::IOBuf> chain) override;
-  virtual void onBodyComplete() override;
+  virtual void onBody(std::unique_ptr<folly::IOBuf> chain);
+  virtual void onBodyComplete();
   virtual void onHeader(std::unique_ptr<folly::IOBuf> key_chain,
-                       std::unique_ptr<folly::IOBuf> value_chain) override;
-  virtual void onHeadersComplete() override;
+                       std::unique_ptr<folly::IOBuf> value_chain);
+  virtual void onHeadersComplete();
+
+  void setCallback(Callback* callback) {
+    m_callback = callback;
+  }
 
 private:
   using ResponseHeaders =
@@ -147,6 +156,7 @@ private:
   apache::thrift::concurrency::Monitor m_monitor;
   int m_waiting;
   bool m_readComplete;
+  Callback* m_callback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

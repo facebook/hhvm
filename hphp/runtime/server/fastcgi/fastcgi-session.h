@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SESSION_H_
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SESSION_H_
 
-#include "hphp/runtime/server/fastcgi/protocol-session-handler.h"
+#include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
 #include <folly/io/IOBuf.h>
 #include <folly/io/Cursor.h>
 #include <unordered_map>
@@ -27,7 +27,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class FastCGISession;
-class ProtocolSessionHandler;
 
 /*
  * FastCGITransaction represents a single request, which may be one of many
@@ -36,13 +35,13 @@ class ProtocolSessionHandler;
  * thread executing the PHP for the request (FastCGITransport in m_handler).
  */
 class FastCGITransaction
-  : public ProtocolSessionHandler::Callback {
+  : public FastCGITransport::Callback {
 public:
   typedef uint16_t RequestId;
 
   FastCGITransaction(FastCGISession* session,
                      RequestId request_id,
-                     std::shared_ptr<ProtocolSessionHandler> handler);
+                     std::shared_ptr<FastCGITransport> handler);
   virtual ~FastCGITransaction();
 
   void onStdIn(std::unique_ptr<folly::IOBuf> chain);
@@ -98,7 +97,7 @@ private:
   folly::IOBufQueue m_valueBuf;
   FastCGISession* m_session;
   RequestId m_requestId;
-  std::shared_ptr<ProtocolSessionHandler> m_handler;
+  std::shared_ptr<FastCGITransport> m_handler;
 };
 
 /*
@@ -114,7 +113,7 @@ struct FastCGISession {
   struct Callback {
     virtual ~Callback() {}
 
-    virtual std::shared_ptr<ProtocolSessionHandler>
+    virtual std::shared_ptr<FastCGITransport>
       newSessionHandler(int handler_id) = 0;
     virtual void onSessionEgress(std::unique_ptr<folly::IOBuf> chain) = 0;
     virtual void onSessionError() = 0;

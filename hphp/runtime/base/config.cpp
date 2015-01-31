@@ -261,4 +261,22 @@ void Config::Bind(std::map<std::string, std::string>& loc,
                    &loc);
 }
 
+// Hdf takes precedence, as usual. No `ini` binding yet.
+void Config::Iterate(const IniSettingMap &ini, const Hdf &hdf,
+                     std::function<void (const IniSettingMap&,
+                                         const Hdf&)> cb) {
+    if (hdf.exists()) {
+      for (Hdf c = hdf.firstChild(); c.exists(); c = c.next()) {
+        cb(ini, c);
+      }
+    } else {
+      auto ini_name = IniName(hdf);
+      auto* ini_value = ini.get_ptr(ini_name);
+      if (ini_value && ini_value->isObject()) {
+        for (auto& val : ini_value->values()) {
+          cb(val, hdf);
+        }
+      }
+    }
+  }
 }

@@ -1344,11 +1344,10 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Get(ini, content["Generators"], StaticFileGenerators);
 
     Hdf matches = content["FilesMatch"];
-    if (matches.exists()) {
-      for (Hdf hdf = matches.firstChild(); hdf.exists(); hdf = hdf.next()) {
-        FilesMatches.push_back(std::make_shared<FilesMatch>(ini, hdf));
-      }
-    }
+    auto matches_callback = [] (const IniSettingMap &ini_m, const Hdf &hdf_m) {
+      FilesMatches.push_back(std::make_shared<FilesMatch>(ini_m, hdf_m));
+    };
+    Config::Iterate(ini, matches, matches_callback);
   }
   {
     Hdf phpfile = config["PhpFile"];

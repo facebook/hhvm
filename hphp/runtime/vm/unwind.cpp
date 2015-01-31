@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/unwind.h"
 
 #include <boost/implicit_cast.hpp>
@@ -20,7 +21,6 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator.h"

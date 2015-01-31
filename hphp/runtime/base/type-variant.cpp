@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/runtime-option.h"

@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"

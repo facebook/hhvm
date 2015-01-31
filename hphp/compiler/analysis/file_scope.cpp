@@ -37,7 +37,6 @@
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
-#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 

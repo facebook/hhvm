@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/mem-file.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/runtime-option.h"

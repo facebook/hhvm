@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-request-local.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend.h"
 

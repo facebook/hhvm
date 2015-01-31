@@ -17,7 +17,8 @@
 #include "hphp/compiler/expression/qop_expression.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/code_model_enums.h"
-#include "hphp/runtime/base/complex-types.h"
+
+#include "hphp/runtime/base/type-variant.h"
 
 using namespace HPHP;
 
@@ -159,4 +160,3 @@ void QOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf(" : ");
   m_expNo->outputPHP(cg, ar);
 }
-

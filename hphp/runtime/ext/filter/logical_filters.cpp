@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-functions.h"

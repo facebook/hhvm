@@ -20,8 +20,9 @@
 #include <folly/Hash.h>
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {

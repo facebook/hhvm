@@ -25,7 +25,6 @@
 
 #include <folly/Lazy.h>
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/array-init.h"
 
 #include "hphp/hhbbc/hhbbc.h"

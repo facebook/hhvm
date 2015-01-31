@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/ssl-socket.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/string-util.h"

@@ -25,7 +25,6 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/jit/translator.h"

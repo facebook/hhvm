@@ -33,7 +33,6 @@
 #include "hphp/util/maphuge.h"
 #include "hphp/util/logger.h"
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/debug/debug.h"
 

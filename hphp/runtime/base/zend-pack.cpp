@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/base/zend-pack.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/tiny-vector.h"

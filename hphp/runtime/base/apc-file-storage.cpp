@@ -21,7 +21,6 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/logger.h"
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"

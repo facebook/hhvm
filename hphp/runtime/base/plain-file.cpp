@@ -20,7 +20,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {

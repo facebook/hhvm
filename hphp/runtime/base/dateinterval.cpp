@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/dateinterval.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-conversions.h"

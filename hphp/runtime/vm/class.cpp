@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/mixed-array.h"

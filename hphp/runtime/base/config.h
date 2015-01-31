@@ -150,6 +150,20 @@ struct Config {
   static double GetDouble(const IniSettingMap &ini, const Hdf& config,
                           const double defValue = 0);
 
+  /**
+   * Use this for iterating over options that are stored as objects in
+   * runtime options (e.g. FilesMatch). This function iterates over the
+   * settings passed as ini/hdf, calls back to, generally, the constructor of
+   * the object in question.
+   *
+   * Note: For now, we are not `ini_get()` enabling these type of options as
+   * it is not trivial to come up with a non-hacky and workable way to store
+   * the data correctly. Also, as usual, Hdf takes priority.
+   */
+  static void Iterate(const IniSettingMap &ini, const Hdf &hdf,
+                      std::function<void (const IniSettingMap&,
+                                          const Hdf&)> cb);
+
   template<class T>
   static void Get(const IniSettingMap &ini, const Hdf& config, T &data) {
     config.configGet(data);

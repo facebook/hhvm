@@ -29,7 +29,7 @@ namespace HPHP {
 
 class FilesMatch {
 public:
-  explicit FilesMatch(const IniSetting::Map& ini, Hdf vh);
+  explicit FilesMatch(const IniSetting::Map& ini, const Hdf& vh);
 
   bool match(const std::string &filename) const;
   const std::vector<std::string> &getHeaders() const { return m_headers;}

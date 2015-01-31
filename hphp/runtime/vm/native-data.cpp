@@ -15,8 +15,10 @@
 */
 
 #include "hphp/runtime/vm/native-data.h"
-#include "hphp/runtime/base/complex-types.h"
+
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////

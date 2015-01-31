@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/base/zend-scanf.h"
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 

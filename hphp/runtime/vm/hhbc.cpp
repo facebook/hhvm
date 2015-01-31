@@ -20,7 +20,6 @@
 #include <sstream>
 #include <cstring>
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/base/zend-string.h"

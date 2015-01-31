@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/struct-array-defs.h"
 #include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/apc-local-array.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_collections.h"
 

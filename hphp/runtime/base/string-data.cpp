@@ -25,7 +25,6 @@
 
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"

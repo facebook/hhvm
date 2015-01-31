@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h" // f_serialize
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"

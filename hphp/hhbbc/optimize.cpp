@@ -29,7 +29,6 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/complex-types.h"
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/analyze.h"

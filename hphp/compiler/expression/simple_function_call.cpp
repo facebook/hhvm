@@ -36,7 +36,6 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/parser/parser.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/array-init.h"

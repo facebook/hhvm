@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/output-file.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
 

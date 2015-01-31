@@ -25,7 +25,6 @@
 #include "hphp/compiler/option.h"
 #include "hphp/util/hash.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/runtime/base/complex-types.h"
 
 using namespace HPHP;
 

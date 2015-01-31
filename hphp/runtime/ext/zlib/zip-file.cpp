@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/ext/zlib/zip-file.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/temp-file.h"
 #include "hphp/runtime/base/runtime-error.h"

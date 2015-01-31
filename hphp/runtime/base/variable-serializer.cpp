@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/zend-printf.h"

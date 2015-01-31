@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 
-#include "hphp/runtime/base/complex-types.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/util/dataflow-worklist.h"

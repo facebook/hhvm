@@ -34,7 +34,6 @@
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 
 using namespace HPHP;

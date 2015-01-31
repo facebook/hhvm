@@ -76,6 +76,10 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(MySQLRequestData, s_mysql_data);
 // class MySQL statics
 
 int MySQL::s_default_port = 0;
+bool MySQL::s_allow_reconnect = false;
+bool MySQL::s_allow_persistent = true;
+int MySQL::s_cur_num_persistent = 0;
+int MySQL::s_max_num_persistent = -1;
 
 std::shared_ptr<MySQL> MySQL::Get(const Variant& link_identifier) {
   if (link_identifier.isNull()) {
@@ -109,8 +113,12 @@ MYSQL* MySQL::GetConn(const Variant& link_identifier,
 
 bool MySQL::CloseConn(const Variant& link_identifier) {
   auto mySQL = Get(link_identifier);
-  if (mySQL && !mySQL->isPersistent()) {
-    mySQL->close();
+  if (mySQL) {
+    if (!mySQL->isPersistent()) {
+      mySQL->close();
+    } else {
+      s_cur_num_persistent--;
+    }
   }
   return true;
 }
@@ -566,7 +574,9 @@ Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
     socket = MySQL::GetDefaultSocket();
   }
 
-  if (persistent) {
+  if (MySQL::IsAllowPersistent() &&
+      MySQL::GetCurrentNumPersistent() < MySQL::GetMaxNumPersistent() &&
+      persistent) {
     auto p_mySQL = MySQL::GetPersistent(host, port, socket, username,
                                         password, client_flags);
 
@@ -603,6 +613,10 @@ Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
       }
     }
   } else {
+    if (!MySQL::IsAllowReconnect()) {
+      raise_warning("MySQL: Reconnects are not allowed");
+      return false;
+    }
     if (!mySQL->reconnect(host, port, socket, username, password,
                           database, client_flags, connect_timeout_ms)) {
       MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
@@ -614,6 +628,7 @@ Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
   if (savePersistent) {
     MySQL::SetPersistent(host, port, socket, username, password,
                          client_flags, mySQL);
+    MySQL::SetCurrentNumPersistent(MySQL::GetCurrentNumPersistent() + 1);
   }
   MySQL::SetDefaultConn(mySQL);
   return Resource(newres<MySQLResource>(mySQL));

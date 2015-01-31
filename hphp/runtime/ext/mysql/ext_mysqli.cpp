@@ -55,6 +55,24 @@ const StaticString
   s_def("def"),
   s_free("free");
 
+// ini settings settable anywhere -- PHP_INI_ALL
+struct MysqliIniSetting {
+  int m_default_port;
+  std::string m_default_socket;
+  std::string m_default_host;
+  std::string m_default_user;
+  std::string m_default_pw;
+};
+
+IMPLEMENT_THREAD_LOCAL(MysqliIniSetting, s_ini_setting);
+
+// System-wide ini settings -- PHP_INI_SYSTEM
+static bool allow_local_infile = true;
+static bool allow_persistent = true;
+static int max_persistent = -1;
+static int max_links = -1;
+static bool reconnect = false;
+
 //////////////////////////////////////////////////////////////////////////////
 // helper
 
@@ -792,8 +810,74 @@ static bool HHVM_FUNCTION(mysqli_thread_safe) {
 //////////////////////////////////////////////////////////////////////////////
 
 class mysqliExtension final : public Extension {
- public:
+public:
   mysqliExtension() : Extension("mysqli") {}
+  // Use moduleLoad() for settings that are system-wide and cannot
+  // change per request (e.g. PHP_INI_SYSTEM)
+  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+    // Not supporting local_infile yet. But this is the skeleton for
+    // when we do.
+    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
+                     "mysqli.allow_local_infile",
+                     IniSetting::SetAndGet<bool>(
+                       [](const bool value) { return false; },
+                       []() { return false; }
+                     ),
+                     &allow_local_infile);
+    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
+                     "mysqli.allow_persistent", "true",
+                     &allow_persistent);
+    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
+                     "mysqli.max_persistent", "-1",
+                     &max_persistent);
+    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
+                     "mysqli.max_links", "-1",
+                     &max_links);
+    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
+                     "mysqli.reconnect", "false",
+                     &reconnect);
+    // Requires mysqlnd. This setting is actually an int, but setting
+    // to a bool that returns false for now. If and when we support
+    // this, we set to an int and define and bind to &cache_size
+    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
+                     "mysqli.cache_size",
+                     IniSetting::SetAndGet<bool>(
+                       [](const bool value) { return false; },
+                       []() { return false; }
+                     ));
+
+    MySQL::SetAllowReconnect(reconnect);
+    MySQL::SetAllowPersistent(allow_persistent);
+    if (allow_persistent) {
+      // unlimited (0) is the default, if max_persistent is -1
+      if (max_persistent <= -1) {
+        MySQL::SetMaxNumPersistent(0);
+      } else {
+        MySQL::SetMaxNumPersistent(max_persistent);
+      }
+    }
+  }
+
+  // Use threadInit() for settings that can change per user request
+  // (e.g., PHP_INI_ALL, PHP_INI_USER)
+  void threadInit() override {
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "mysqli.default_port", "3306",
+                     &s_ini_setting->m_default_port);
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "mysqli.default_socket", nullptr,
+                     &s_ini_setting->m_default_socket);
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "mysqli.default_host", nullptr,
+                     &s_ini_setting->m_default_host);
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "mysqli.default_user", nullptr,
+                     &s_ini_setting->m_default_user);
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "mysqli.default_pw", nullptr,
+                     &s_ini_setting->m_default_pw);
+  }
+
   void moduleInit() override {
     // mysqli
     HHVM_ME(mysqli, autocommit);

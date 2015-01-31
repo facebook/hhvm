@@ -1,0 +1,15 @@
+Warning: mysql_connect(): Access denied for user 'foobar'@%s
+Failed to connect to MySQL: (1045) Access denied for user 'foobar'@%s
+Warning: invalid object or resource mysqli%S
+NULL
+string(0) ""
+string(1) "1"
+string(3) "100"
+string(2) "-1"
+string(4) "3306"
+string(0) ""
+string(0) ""
+string(6) "foobar"
+string(23) "dfkjldasjkldfakljasdkjl"
+string(1) "1"
+string(0) ""

@@ -250,7 +250,7 @@ function mysql_fetch_array(resource $result,
  * @param resource $result -
  *
  * @return array - Returns an associative array of strings that
- *   corresponds to the fetched row, or FALSE if there are no more rows. 
+ *   corresponds to the fetched row, or FALSE if there are no more rows.
  *   If two or more columns of the result have the same field names, the
  *   last column will take precedence. To access the other column(s) of the
  *   same name, you either need to access the result with numeric indices
@@ -274,10 +274,10 @@ function mysql_fetch_assoc(resource $result): mixed {
  *   of the table the column belongs to, which is the alias name if one is
  *   defined     max_length - maximum length of the column     not_null - 1
  *   if the column cannot be NULL     primary_key - 1 if the column is a
- *   primary key     unique_key - 1 if the column is a unique key   
+ *   primary key     unique_key - 1 if the column is a unique key
  *   multiple_key - 1 if the column is a non-unique key     numeric - 1 if
  *   the column is numeric     blob - 1 if the column is a BLOB     type -
- *   the type of the column     unsigned - 1 if the column is unsigned   
+ *   the type of the column     unsigned - 1 if the column is unsigned
  *   zerofill - 1 if the column is zero-filled
  */
 <<__Native>>
@@ -336,7 +336,7 @@ function mysql_fetch_result(?resource $link_identifier = NULL): mixed;
  * @param resource $result -
  *
  * @return array - Returns an numerical array of strings that corresponds
- *   to the fetched row, or FALSE if there are no more rows. 
+ *   to the fetched row, or FALSE if there are no more rows.
  *   mysql_fetch_row() fetches one row of data from the result associated
  *   with the specified result identifier. The row is returned as an array.
  *   Each result column is stored in an array offset, starting at offset 0.
@@ -532,7 +532,7 @@ function mysql_list_fields(string $database_name,
   throw new Exception(sprintf(
     '%s is not supported: %s',
     __FUNCTION__,
-    'Deprecated. Use mysql_query(SHOW COLUMNS FROM table [LIKE \'name\']) ' . 
+    'Deprecated. Use mysql_query(SHOW COLUMNS FROM table [LIKE \'name\']) ' .
       'instead.'
   ));
 }

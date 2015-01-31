@@ -111,8 +111,24 @@ class mysqli {
       return;
     }
 
+    // If any of the necessary mysqli properties come in as null, then we can
+    // use our default ini options.
+    $host = $this->get_ini_default_if_null($host, "host");
+    $username = $this->get_ini_default_if_null($username, "user");
+    $passwd = $this->get_ini_default_if_null($passwd, "pw");
+    $port = $this->get_ini_default_if_null($port, "port");
+    $socket = $this->get_ini_default_if_null($socket, "socket");
+
     // Connect
     $this->real_connect($host, $username, $passwd, $dbname, $port, $socket);
+  }
+
+  private function get_ini_default_if_null(mixed $connect_option,
+                                           string $name) {
+    if ($connect_option === null) {
+      $connect_option = ini_get("mysqli.default_" . $name);
+    }
+    return $connect_option;
   }
 
   public function __clone(): void {
@@ -921,6 +937,10 @@ class mysqli_driver {
 
   private bool $__reconnect = false;
   private int $__report_mode = 0;
+
+  public function __construct() {
+    $this->__reconnect = ini_get("mysqli.reconnect") === "1" ? true : false;
+  }
 
   public function __get(string $name): mixed {
     switch ($name) {

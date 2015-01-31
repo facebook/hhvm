@@ -148,11 +148,14 @@ struct MySQL {
   static void SetDefaultReadTimeout(int timeout_ms);
 
   static size_t NumCachedConnections();
-
   /////////////////////////////////////////////////////////////////////////////
 
 private:
   static int s_default_port;
+  static bool s_allow_reconnect;
+  static bool s_allow_persistent;
+  static int s_cur_num_persistent;
+  static int s_max_num_persistent;
   static const std::string s_persistent_type;
 
   static std::string GetHash(const String& host, int port,
@@ -175,7 +178,25 @@ private:
                             std::shared_ptr<MySQL> conn);
 
   /////////////////////////////////////////////////////////////////////////////
-
+public:
+  // Global MySQL settings
+  static bool IsAllowReconnect() { return s_allow_reconnect; }
+  static void SetAllowReconnect(bool allow_reconnect) {
+    s_allow_reconnect = allow_reconnect;
+  }
+  static bool IsAllowPersistent() { return s_allow_persistent; }
+  static void SetAllowPersistent(bool allow_persistent) {
+    s_allow_persistent = allow_persistent;
+  }
+  static int GetMaxNumPersistent() { return s_max_num_persistent; }
+  static void SetMaxNumPersistent(int max_num_persistent) {
+    s_max_num_persistent = max_num_persistent;
+  }
+  // Ongoing settings
+  static int GetCurrentNumPersistent() { return s_cur_num_persistent; }
+  static void SetCurrentNumPersistent(int num) {
+    s_cur_num_persistent = num;
+  }
 private:
   MYSQL* m_conn;
   bool m_persistent{false};

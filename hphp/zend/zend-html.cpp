@@ -20,6 +20,7 @@
 #include <unicode/utf8.h>
 
 #include "hphp/util/lock.h"
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 

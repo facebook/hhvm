@@ -179,6 +179,7 @@ flaky_tests = (
     '/ext/ftp/tests/ftp_nb_fget_basic1.php',
 
     # flaky: t3851970
+    '/ext/sockets/tests/socket_getpeername.php',
     '/ext/session/tests/009.php',
     '/ext/standard/tests/file/bug39538.php',
     '/ext/standard/tests/file/bug53848.php',

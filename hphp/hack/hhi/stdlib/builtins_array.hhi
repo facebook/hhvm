@@ -137,6 +137,8 @@ function array_walk_recursive(&$input, $funcname, $userdata = null);
 function array_walk(&$input, $funcname, $userdata = null);
 function compact($varname, ...);
 function shuffle(&$array);
+<<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
+  'doesn\'t suggest that it\'s counting bytes.')>>
 function sizeof($var, $recursive = false);
 function each(&$array);
 function current(&$array);

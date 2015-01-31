@@ -741,7 +741,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.log.level", IniSetting::SetAndGet<std::string>(
       [](const std::string& value) {
-        if (value == "None") {
+        // ini parsing treats "None" as ""
+        if (value == "None" || value == "") {
           Logger::LogLevel = Logger::LogNone;
         } else if (value == "Error") {
           Logger::LogLevel = Logger::LogError;

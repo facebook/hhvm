@@ -4,5 +4,5 @@
 function foo() {}
 
 function f() {
-  call_user_func(fun('foo'));
+  array_map(fun('foo'), array());
 }

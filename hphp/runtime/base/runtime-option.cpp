@@ -705,7 +705,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::ParseIniString(istr, ini);
   }
   for (auto& hstr : hdfClis) {
-    Config::ParseHdfString(hstr, config, ini);
+    Config::ParseHdfString(hstr, config);
   }
   // See if there are any Tier-based overrides
   getTierOverwrites(ini, config);
@@ -718,7 +718,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::ParseIniString(istr, ini);
   }
   for (auto& hstr : hdfClis) {
-    Config::ParseHdfString(hstr, config, ini);
+    Config::ParseHdfString(hstr, config);
   }
 
   Config::Bind(PidFile, ini, config["PidFile"], "www.pid");

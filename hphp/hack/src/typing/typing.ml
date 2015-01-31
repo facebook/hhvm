@@ -851,7 +851,12 @@ and expr_ in_cond is_lvalue env (p, e) =
       env, (Reason.Rwitness p, Tprim Tstring)
   | Fun_id x ->
       Typing_hooks.dispatch_id_hook x env;
-      fun_type_of_id env x
+      let env, fty = fun_type_of_id env x in
+      begin match fty with
+      | _, Tfun fty -> check_deprecated (fst x) fty;
+      | _ -> ()
+      end;
+      env, fty
   | Id ((cst_pos, cst_name) as id) ->
       Typing_hooks.dispatch_id_hook id env;
       (match Env.get_gconst env cst_name with
@@ -1979,7 +1984,6 @@ and fun_type_of_id env x =
     match Env.get_fun env (snd x) with
     | None -> unbound_name env x
     | Some fty ->
-        check_deprecated (fst x) fty;
         let env, fty = Inst.instantiate_ft env fty in
         env, (Reason.Rwitness fty.ft_pos, Tfun fty)
   in

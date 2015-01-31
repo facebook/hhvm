@@ -97,17 +97,17 @@ const char* ThreadSafeLocaleHandler::actuallySetLocale(int category, const char*
     return m_category_locale_map[category].locale_str.c_str();
   }
 
-  if ((category != LC_ALL && strstr(locale_cstr, "=") != nullptr) ||
-      (category == LC_ALL && strstr(locale_cstr, "LC_ALL=") != nullptr)) {
+  if (category != LC_ALL && strchr(locale_cstr, '=') != nullptr) {
     return nullptr;
   }
 
-  m_locale = newlocale(m_category_locale_map[category].category_mask, locale_cstr, m_locale);
+  locale_t new_locale = newlocale(m_category_locale_map[category].category_mask, locale_cstr, m_locale);
 
-  if (m_locale == s_null_locale) {
+  if (new_locale == s_null_locale) {
     return nullptr;
   }
 
+  m_locale = new_locale;
   uselocale(m_locale);
 
   if (category == LC_ALL) {

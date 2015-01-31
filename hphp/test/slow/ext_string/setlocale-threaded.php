@@ -7,14 +7,6 @@ $relative_file_path = str_replace($cwd, '', $file_path);
 $is_pagelet = !empty($_GET) && ($_GET['pagelet'] == 'true');
 
 if (!$is_pagelet) {
-  // Let's try some terrible locales to ensure they fail
-  var_dump(setlocale(LC_ALL, 'LC_ALL=it_IT'));
-  var_dump(setlocale(LC_ALL, 'LC_ALL=it_IT;'));
-  var_dump(setlocale(LC_CTYPE, 'LC_CTYPE=it_IT'));
-  var_dump(setlocale(LC_CTYPE, 'LC_CTYPE=it_IT;'));
-  var_dump(setlocale(LC_ALL, 'LC_CTYPE=it_IT'));
-  var_dump(setlocale(LC_ALL, 'LC_CTYPE=it_IT;'));
-
   // And now a good one that will work
   setlocale(LC_TIME, 'it_IT');
   setlocale(LC_NUMERIC, 'it_IT');

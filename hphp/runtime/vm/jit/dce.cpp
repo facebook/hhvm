@@ -152,9 +152,6 @@ bool canDCE(IRInstruction* inst) {
   case NewInstanceRaw:
   case NewArray:
   case NewMixedArray:
-  case NewMIArray:
-  case NewMSArray:
-  case NewVArray:
   case NewLikeArray:
   case NewCol:
   case FreeActRec:

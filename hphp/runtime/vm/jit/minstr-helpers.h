@@ -367,9 +367,8 @@ ELEM_HELPER_TABLE(X)
 
 inline const TypedValue* checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i))
-    ? a->nvGetConverted(i)
-    : a->nvGet(key);
+  return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) :
+         a->nvGet(key);
 }
 
 inline const TypedValue* checkedGet(ArrayData* a, int64_t key) {
@@ -396,43 +395,26 @@ const TypedValue* elemArrayNotFound(const StringData* k) {
   return null_variant.asTypedValue();
 }
 
-template<KeyType keyType, bool checkForInt, bool converted, bool warn>
-inline const TypedValue* elemArrayImpl(TypedValue* a,
-                                       key_type<keyType> key) {
-  static_assert((checkForInt && !converted) || !checkForInt,
-                "Can't both check for integer string and have been converted");
+template<KeyType keyType, bool checkForInt, bool warn>
+inline const TypedValue* elemArrayImpl(TypedValue* a, key_type<keyType> key) {
   assert(a->m_type == KindOfArray);
   auto const ad = a->m_data.parr;
-  if (converted) {
-    if (UNLIKELY(ad->isVPackedArrayOrIntMapArray())) {
-      if (ad->isVPackedArray()) {
-        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-      } else {
-        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                              ArrayData::kIntMapKind);
-      }
-    }
-  }
-  auto const ret = checkForInt ? checkedGet(ad, key)
-                               : ad->nvGet(key);
+  auto const ret = checkForInt ? checkedGet(ad, key) : ad->nvGet(key);
   return ret ? ret : elemArrayNotFound<warn>(key);
 }
 
 #define ELEM_ARRAY_HELPER_TABLE(m)                                  \
-  /* name               keyType  checkForInt   converted   warn */  \
-  m(elemArrayS,    KeyType::Str,       false,   false,    false)    \
-  m(elemArraySi,   KeyType::Str,        true,   false,    false)    \
-  m(elemArrayI,    KeyType::Int,       false,   false,    false)    \
-  m(elemArrayIc,   KeyType::Int,       false,    true,    false)    \
-  m(elemArraySW,   KeyType::Str,       false,   false,     true)    \
-  m(elemArraySiW,  KeyType::Str,        true,   false,     true)    \
-  m(elemArrayIW,   KeyType::Int,       false,   false,     true)    \
-  m(elemArrayIWc,  KeyType::Int,       false,    true,     true)
+  /* name               keyType  checkForInt   warn */  \
+  m(elemArrayS,    KeyType::Str,       false,  false)   \
+  m(elemArraySi,   KeyType::Str,        true,  false)   \
+  m(elemArrayI,    KeyType::Int,       false,  false)   \
+  m(elemArraySW,   KeyType::Str,       false,  true)    \
+  m(elemArraySiW,  KeyType::Str,        true,  true)    \
+  m(elemArrayIW,   KeyType::Int,       false,  true)    \
 
-#define X(nm, keyType, checkForInt, converted, warn)                \
+#define X(nm, keyType, checkForInt, warn)               \
 inline const TypedValue* nm(TypedValue* a, key_type<keyType> key) { \
-  return elemArrayImpl<keyType, checkForInt, converted, warn>(      \
-    a, key);                                                        \
+  return elemArrayImpl<keyType, checkForInt, warn>(a, key);\
 }
 ELEM_ARRAY_HELPER_TABLE(X)
 #undef X
@@ -443,18 +425,8 @@ ELEM_ARRAY_HELPER_TABLE(X)
 TypedValue arrayGetNotFound(int64_t k);
 TypedValue arrayGetNotFound(const StringData* k);
 
-template<KeyType keyType, bool checkForInt, bool converted>
+template<KeyType keyType, bool checkForInt>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
-  if (converted) {
-    if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
-      if (a->isVPackedArray()) {
-        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-      } else {
-        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                              ArrayData::kIntMapKind);
-      }
-    }
-  }
   auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
   if (ret) {
     ret = tvToCell(ret);
@@ -464,16 +436,15 @@ TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   return arrayGetNotFound(key);
 }
 
-#define ARRAYGET_HELPER_TABLE(m)                          \
-  /* name        keyType     checkForInt   converted  */  \
-  m(arrayGetS,   KeyType::Str,   false,    false)         \
-  m(arrayGetSi,  KeyType::Str,    true,    false)         \
-  m(arrayGetI,   KeyType::Int,   false,    false)         \
-  m(arrayGetIc,  KeyType::Int,   false,     true)
+#define ARRAYGET_HELPER_TABLE(m)               \
+  /* name        keyType     checkForInt   */  \
+  m(arrayGetS,   KeyType::Str,   false)        \
+  m(arrayGetSi,  KeyType::Str,    true)        \
+  m(arrayGetI,   KeyType::Int,   false)
 
-#define X(nm, keyType, checkForInt, converted)                  \
-inline TypedValue nm(ArrayData* a, key_type<keyType> key) {     \
-  return arrayGetImpl<keyType, checkForInt, converted>(a, key); \
+#define X(nm, keyType, checkForInt)                  \
+inline TypedValue nm(ArrayData* a, key_type<keyType> key) {\
+  return arrayGetImpl<keyType, checkForInt>(a, key);\
 }
 ARRAYGET_HELPER_TABLE(X)
 #undef X
@@ -549,21 +520,13 @@ inline ArrayData* uncheckedSet(ArrayData* a,
 }
 
 
-inline ArrayData* uncheckedSetConverted(ArrayData* a,
-                                        int64_t key,
-                                        Cell value,
-                                        bool copy) {
-  return g_array_funcs.setIntConverted[a->kind()](a, key, value, copy);
-}
-
 inline ArrayData* checkedSet(ArrayData* a,
                              StringData* key,
                              Cell value,
                              bool copy) {
   int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i))
-    ? uncheckedSetConverted(a, i, value, copy)
-    : uncheckedSet(a, key, value, copy);
+  return UNLIKELY(key->isStrictlyInteger(i)) ? uncheckedSet(a, i, value, copy) :
+         uncheckedSet(a, key, value, copy);
 }
 
 inline ArrayData* checkedSet(ArrayData*, int64_t, Cell, bool) {
@@ -572,7 +535,7 @@ inline ArrayData* checkedSet(ArrayData*, int64_t, Cell, bool) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<KeyType keyType, bool checkForInt, bool converted, bool setRef>
+template<KeyType keyType, bool checkForInt, bool setRef>
 typename ShuffleReturn<setRef>::return_type
 arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
@@ -581,36 +544,22 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   const bool copy = a->hasMultipleRefs();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : uncheckedSet(a, key, value, copy);
-  if (converted) {
-    if (UNLIKELY(ret->isVPackedArrayOrIntMapArray())) {
-      if (ret->isVPackedArray()) {
-        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-      } else {
-        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                              ArrayData::kIntMapKind);
-      }
-    }
-  }
-
   return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);
 }
 
-#define ARRAYSET_HELPER_TABLE(m)                                        \
-  /* name        keyType        checkForInt  converted  setRef */       \
-  m(arraySetS,   KeyType::Str,   false,      false,     false)          \
-  m(arraySetSi,  KeyType::Str,    true,      false,     false)          \
-  m(arraySetI,   KeyType::Int,   false,      false,     false)          \
-  m(arraySetIc,  KeyType::Int,   false,       true,     false)          \
-  m(arraySetSR,  KeyType::Str,   false,      false,     true)           \
-  m(arraySetSiR, KeyType::Str,    true,      false,     true)           \
-  m(arraySetIR,  KeyType::Int,   false,      false,     true)           \
-  m(arraySetIRc, KeyType::Int,   false,       true,     true)
+#define ARRAYSET_HELPER_TABLE(m)                             \
+  /* name        keyType        checkForInt  setRef */       \
+  m(arraySetS,   KeyType::Str,   false,      false)          \
+  m(arraySetSi,  KeyType::Str,    true,      false)          \
+  m(arraySetI,   KeyType::Int,   false,      false)          \
+  m(arraySetSR,  KeyType::Str,   false,      true)           \
+  m(arraySetSiR, KeyType::Str,    true,      true)           \
+  m(arraySetIR,  KeyType::Int,   false,      true)           \
 
-#define X(nm, keyType, checkForInt, converted, setRef)                  \
-typename ShuffleReturn<setRef>::return_type                             \
+#define X(nm, keyType, checkForInt, setRef)                  \
+typename ShuffleReturn<setRef>::return_type                  \
 inline nm(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) { \
-  return arraySetImpl<keyType, checkForInt, converted, setRef>(         \
-    a, key, value, ref);                                                \
+  return arraySetImpl<keyType, checkForInt, setRef>(a, key, value, ref);\
 }
 ARRAYSET_HELPER_TABLE(X)
 #undef X
@@ -618,8 +567,7 @@ ARRAYSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template <KeyType keyType>
-StringData* setElemImpl(TypedValue* base, key_type<keyType> key,
-                                      Cell val) {
+StringData* setElemImpl(TypedValue* base, key_type<keyType> key, Cell val) {
   return HPHP::SetElem<false, keyType>(base, key, &val);
 }
 
@@ -639,35 +587,22 @@ SETELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 
-template<KeyType keyType, bool checkForInt, bool converted>
+template<KeyType keyType, bool checkForInt>
 uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
-  static_assert(!converted || keyType == KeyType::Int,
-                "Should have only been converted if KeyType is now an int");
-  if (converted) {
-    if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
-      if (a->isVPackedArray()) {
-        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-      } else {
-        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                              ArrayData::kIntMapKind);
-      }
-    }
-  }
   auto const value = checkForInt ? checkedGet(a, key) : a->nvGet(key);
-  if (!value) return 0;
-  return !tvAsCVarRef(value).isNull();
+  return !value ? 0 :
+         !tvAsCVarRef(value).isNull();
 }
 
-#define ARRAY_ISSET_HELPER_TABLE(m)                               \
-  /* name           keyType       checkForInt  converted      */  \
-  m(arrayIssetS,    KeyType::Str,   false,      false)            \
-  m(arrayIssetSi,   KeyType::Str,    true,      false)            \
-  m(arrayIssetI,    KeyType::Int,   false,      false)            \
-  m(arrayIssetIc,   KeyType::Int,   false,      true)
+#define ARRAY_ISSET_HELPER_TABLE(m)                  \
+  /* name           keyType         checkForInt  */  \
+  m(arrayIssetS,    KeyType::Str,   false)           \
+  m(arrayIssetSi,   KeyType::Str,    true)           \
+  m(arrayIssetI,    KeyType::Int,   false)           \
 
-#define X(nm, keyType, checkForInt, converted)                    \
-inline uint64_t nm(ArrayData* a, key_type<keyType> key) {         \
-  return arrayIssetImpl<keyType, checkForInt, converted>(a, key); \
+#define X(nm, keyType, checkForInt)                    \
+inline uint64_t nm(ArrayData* a, key_type<keyType> key) {\
+  return arrayIssetImpl<keyType, checkForInt>(a, key);\
 }
 ARRAY_ISSET_HELPER_TABLE(X)
 #undef X

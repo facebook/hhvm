@@ -31,7 +31,6 @@
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/array-tracer/ext_array_tracer.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/server/http-request-handler.h"
@@ -413,18 +412,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       auto filename = transport->getParam("file");
       if (filename == "") filename = "/tmp/pcre_cache";
       pcre_dump_cache(filename);
-      transport->sendString("OK\n");
-      break;
-    }
-
-    if (cmd == "dump-array-info") {
-      if (!RuntimeOption::EvalTraceArrays) {
-        transport->sendString("Eval.TraceArrays not enabled.\n");
-        break;
-      }
-      auto filename = transport->getParam("file");
-      if (filename == "") filename = "/tmp/array_tracer_dump";
-      array_tracer_dump(filename);
       transport->sendString("OK\n");
       break;
     }

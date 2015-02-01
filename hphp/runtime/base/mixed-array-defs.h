@@ -279,9 +279,7 @@ struct MixedArray::ValIter {
 
   ALWAYS_INLINE
   static bool isMixed(const ArrayData::ArrayKind& kind) {
-    return kind == ArrayData::kMixedKind ||
-      kind == ArrayData::kIntMapKind ||
-      kind == ArrayData::kStrMapKind;
+    return kind == ArrayData::kMixedKind;
   }
 
   explicit ValIter(ArrayData* arr)

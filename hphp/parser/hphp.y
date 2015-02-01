@@ -701,9 +701,6 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 
 %token T_COLLECTION
 %token T_SHAPE
-%token T_VARRAY
-%token T_MIARRAY
-%token T_MSARRAY
 %token T_TYPE
 %token T_UNRESOLVED_TYPE
 %token T_NEWTYPE
@@ -1868,8 +1865,6 @@ expr_no_variable:
   | scalar                             { $$ = $1; }
   | array_literal                      { $$ = $1; }
   | shape_literal                      { $$ = $1; }
-  | map_array_literal                  { $$ = $1; }
-  | varray_literal                     { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
   | dim_expr                           { $$ = $1;}
@@ -2059,27 +2054,6 @@ collection_literal:
     '{' collection_init '}'            { Token t;
                                          _p->onName(t,$1,Parser::StringName);
                                          BEXP($$,t,$3,T_COLLECTION);}
-;
-
-map_array_literal:
-    T_MIARRAY '(' map_array_init ')'   { _p->onCheckedArray($$,$3,T_MIARRAY);}
-  | T_MSARRAY '(' map_array_init ')'   { _p->onCheckedArray($$,$3,T_MSARRAY);}
-;
-
-varray_literal:
-    T_VARRAY '(' varray_init ')'       { _p->onCheckedArray($$,$3,T_VARRAY);}
-;
-
-static_map_array_literal:
-    T_MIARRAY '('
-    static_map_array_init ')'          { _p->onCheckedArray($$,$3,T_MIARRAY);}
-  | T_MSARRAY '('
-    static_map_array_init ')'          { _p->onCheckedArray($$,$3,T_MSARRAY);}
-;
-
-static_varray_literal:
-    T_VARRAY '('
-    static_varray_init ')'             { _p->onCheckedArray($$,$3,T_VARRAY);}
 ;
 
 static_collection_literal:
@@ -2432,8 +2406,6 @@ static_expr:
     static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
-  | static_map_array_literal           { $$ = $1;}
-  | static_varray_literal              { $$ = $1;}
   | '(' static_expr ')'                { $$ = $2;}
   | static_expr T_BOOLEAN_OR
     static_expr                        { BEXP($$,$1,$3,T_BOOLEAN_OR);}
@@ -2869,49 +2841,6 @@ non_empty_static_collection_init:
   | static_expr T_DOUBLE_ARROW
     static_expr                        { _p->onCollectionPair($$,  0,&$1,$3);}
   | static_expr                        { _p->onCollectionPair($$,  0,  0,$1);}
-;
-
-map_array_init:
-    non_empty_map_array_init
-    possible_comma                     { $$ = $1;}
-  |                                    { _p->onEmptyCheckedArray($$);}
-;
-varray_init:
-    non_empty_varray_init
-    possible_comma                     { $$ = $1;}
-  |                                    { _p->onEmptyCheckedArray($$);}
-;
-non_empty_map_array_init:
-    non_empty_map_array_init
-    ',' expr T_DOUBLE_ARROW expr       { _p->onCheckedArrayPair($$,&$1,&$3,$5);}
-  | expr T_DOUBLE_ARROW expr           { _p->onCheckedArrayPair($$,  0,&$1,$3);}
-;
-non_empty_varray_init:
-    non_empty_varray_init ',' expr     { _p->onCheckedArrayPair($$,&$1,  0,$3);}
-  | expr                               { _p->onCheckedArrayPair($$,  0,  0,$1);}
-;
-
-static_map_array_init:
-    non_empty_static_map_array_init
-    possible_comma                     { $$ = $1;}
-  |                                    { _p->onEmptyCheckedArray($$);}
-;
-static_varray_init:
-    non_empty_static_varray_init
-    possible_comma                     { $$ = $1;}
-  |                                    { _p->onEmptyCheckedArray($$);}
-;
-non_empty_static_map_array_init:
-    non_empty_static_map_array_init
-    ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onCheckedArrayPair($$,&$1,&$3,$5);}
-  | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onCheckedArrayPair($$,  0,&$1,$3);}
-;
-non_empty_static_varray_init:
-    non_empty_static_varray_init
-    ',' static_expr                    { _p->onCheckedArrayPair($$,&$1,  0,$3);}
-  | static_expr                        { _p->onCheckedArrayPair($$,  0,  0,$1);}
 ;
 
 encaps_list:

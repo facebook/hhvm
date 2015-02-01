@@ -186,9 +186,6 @@ static const struct {
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
   { OpNewMixedArray,  {None,          Stack1,       OutArray,          1 }},
-  { OpNewVArray,   {None,             Stack1,       OutArray,          1 }},
-  { OpNewMIArray,  {None,             Stack1,       OutArray,          1 }},
-  { OpNewMSArray,  {None,             Stack1,       OutArray,          1 }},
   { OpNewLikeArrayL,  {None,          Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},
@@ -1036,9 +1033,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::NewCol:
   case Op::NewLikeArrayL:
   case Op::NewMixedArray:
-  case Op::NewVArray:
-  case Op::NewMIArray:
-  case Op::NewMSArray:
   case Op::NewPackedArray:
   case Op::Not:
   case Op::Null:

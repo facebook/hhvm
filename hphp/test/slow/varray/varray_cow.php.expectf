@@ -1,9 +1,0 @@
-Warning: Adding a string key to a varray, converting to array in %s on line 4
-
-Warning: Taking an element by reference from a varray, converting to array in %s on line 10
-
-Warning: Adding out-of-order integer key to a varray, converting array in %s on line 15
-
-Warning: Adding a string key to a varray, converting to array in %s on line 20
-
-Warning: Adding out-of-order integer key to a varray, converting array in %s on line 51

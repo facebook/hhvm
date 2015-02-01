@@ -245,18 +245,6 @@ void in(ISS& env, const bc::NewMixedArray& op) {
   push(env, op.arg1 == 0 ? aempty() : counted_aempty());
 }
 
-void in(ISS& env, const bc::NewVArray& op) {
-  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
-}
-
-void in(ISS& env, const bc::NewMIArray& op) {
-  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
-}
-
-void in(ISS& env, const bc::NewMSArray& op) {
-  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
-}
-
 void in(ISS& env, const bc::NewPackedArray& op) {
   auto elems = std::vector<Type>{};
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {

@@ -258,7 +258,6 @@ ArrayData* PackedArray::GrowHelper(ArrayData* old) {
   ArrayData* ad = MixedArray::MakeReserveSlow(cap); // pos=count=size=kind=0
   if (UNLIKELY(ad == nullptr)) return nullptr;
   // ad->m_packedCapCode is already set correctly in MakeReserveSlow
-  // Assuming VPackedArray and PackedArray are the same in implementation
   ad->m_sizeAndPos = old->m_sizeAndPos;
   ad->m_kind = old->m_kind;
   assert(ad->isPacked());
@@ -455,70 +454,6 @@ ArrayData* PackedArray::NonSmartConvertHelper(const ArrayData* arr) {
   return ad;
 }
 
-//////////////////////////////////////////////////////////////////////
-
-void PackedArray::downgradeAndWarn(ArrayData* ad, const Reason r) {
-  assert(ad->isVPackedArray());
-  PackedArray::warnUsage(r);
-  ad->m_kind = ArrayData::kPackedKind;
-}
-
-void PackedArray::warnUsage(const Reason r) {
-  if (!RuntimeOption::EvalHackArrayWarnFrequency) {
-    return;
-  }
-  static __thread uint32_t numWarnings = 0;
-  numWarnings++;
-  if (numWarnings % RuntimeOption::EvalHackArrayWarnFrequency != 0) {
-    return;
-  }
-  switch (r) {
-  case Reason::kForeachByRef:
-    raise_warning("Foreach by reference over a varray, converting to array");
-    break;
-  case Reason::kTakeByRef:
-    raise_warning("Taking an element by reference from a varray, converting "
-                  "to array");
-    break;
-  case Reason::kSetRef:
-    raise_warning("Adding a reference to a varray, converting to array");
-    break;
-  case Reason::kAppendRef:
-    raise_warning("Appending a reference to a varray, converting to array");
-    break;
-  case Reason::kOutOfOrderIntKey:
-    raise_warning("Adding out-of-order integer key to a varray, converting "
-                  "array");
-    break;
-  case Reason::kRemoveInt:
-    raise_warning("Removing an integer key from a varray, converting to array");
-    break;
-  case Reason::kGetStr:
-    raise_warning("Trying to read a string key from a varray");
-    break;
-  case Reason::kSetStr:
-    raise_warning("Adding a string key to a varray, converting to array");
-    break;
-  case Reason::kRemoveStr:
-    raise_warning("Trying to remove a string key from a varray");
-    break;
-  case Reason::kNumericString:
-    raise_warning("Using an integer-like string key with a varray");
-    break;
-  case Reason::kPlusNotSupported:
-    raise_warning("+ operator not supported for varray, converting to array");
-    break;
-  case Reason::kMergeNotSupported:
-    raise_warning("array_merge() not supported for varray, converting to "
-                  "array");
-    break;
-  case Reason::kSortNotSupported:
-    raise_warning("sort builtins are not supported for varray at present, "
-                  "converting to array");
-    break;
-  }
-}
-
 ArrayData* MixedArray::MakeReserve(uint32_t capacity) {
   ArrayData* ad;
   if (LIKELY(capacity <= kPackedCapCodeThreshold)) {
@@ -558,40 +493,6 @@ ArrayData* MixedArray::MakeReserveSlow(uint32_t capacity) {
   return ad;
 }
 
-ArrayData* MixedArray::MakeReserveVArray(uint32_t capacity) {
-  ArrayData* ad;
-  if (LIKELY(capacity <= kPackedCapCodeThreshold)) {
-    auto const kSmallSize = MixedArray::SmallSize;
-    auto const cap = std::max(capacity, kSmallSize);
-    ad = static_cast<ArrayData*>(
-      MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
-    );
-    assert(cap == packedCodeToCap(cap));
-    ad->m_sizeAndPos = 0; // size=0, pos=0
-    ad->m_kindAndCount = uint64_t{kVPackedKind} << 24 | cap |
-                         uint64_t{1} << 32; // count=1
-    assert(ad->isPacked());
-    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
-    assert(ad->m_size == 0);
-  } else {
-    ad = MakeReserveVArraySlow(capacity);
-  }
-
-  assert(ad->m_count == 1);
-  assert(ad->m_pos == 0);
-  assert(PackedArray::checkInvariants(ad));
-  return ad;
-}
-
-NEVER_INLINE
-ArrayData* MixedArray::MakeReserveVArraySlow(uint32_t capacity) {
-  // Avoid code duplication.
-  auto ad = MakeReserveSlow(capacity); // pos,count,size,kind=0
-  ad->m_kind = kVPackedKind;
-  ad->m_count = 1;
-  return ad;
-}
-
 NEVER_INLINE
 void PackedArray::Release(ArrayData* ad) {
   assert(checkInvariants(ad));
@@ -615,17 +516,7 @@ const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
 }
 
 const TypedValue*
-PackedArray::NvGetIntConverted(const ArrayData* ad, int64_t ki) {
-  assert(ad->isVPackedArray());
-  PackedArray::warnUsage(Reason::kNumericString);
-  return NvGetInt(ad, ki);
-}
-
-const TypedValue*
 PackedArray::NvGetStr(const ArrayData* ad, const StringData* s) {
-  if (ad->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-  }
   return nullptr;
 }
 
@@ -653,9 +544,6 @@ bool PackedArray::ExistsInt(const ArrayData* ad, int64_t k) {
 }
 
 bool PackedArray::ExistsStr(const ArrayData* ad, const StringData* s) {
-  if (ad->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-  }
   return false;
 }
 
@@ -675,10 +563,6 @@ ArrayData* PackedArray::LvalInt(ArrayData* adIn,
   // the same thing as LvalNew.
   if (size_t(k) == adIn->m_size) return LvalNew(adIn, ret, copy);
 
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kOutOfOrderIntKey);
-  }
-
   // Promote-to-mixed path, we know the key is new and should be using
   // findForNewInsert but aren't yet TODO(#2606310).
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
@@ -689,10 +573,6 @@ ArrayData* PackedArray::LvalStr(ArrayData* adIn,
                                 StringData* key,
                                 Variant*& ret,
                                 bool copy) {
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kSetStr);
-  }
-
   // We have to promote.  We know the key doesn't exist, but aren't
   // making use of that fact yet.  TODO(#2606310).
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
@@ -713,9 +593,6 @@ ArrayData* PackedArray::LvalNewRef(ArrayData* adIn, Variant*& ret, bool copy) {
   assert(checkInvariants(adIn));
   auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
                        : ResizeIfNeeded(adIn);
-  if (ad->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::downgradeAndWarn(ad, PackedArray::Reason::kTakeByRef);
-  }
   auto& tv = packedData(ad)[ad->m_size++];
   tv.m_type = KindOfNull;
   ret = &tvAsVariant(&tv);
@@ -745,44 +622,22 @@ PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
   // mode---it's the same as an append.
   if (size_t(k) == adIn->m_size) return Append(adIn, tvAsCVarRef(&v), copy);
 
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kOutOfOrderIntKey);
-  }
-
   // On the promote-to-mixed path, we can use addVal since we know the
   // key can't exist.
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
   return mixed->addVal(k, v);
 }
 
-ArrayData*
-PackedArray::SetIntConverted(ArrayData* adIn, int64_t k, Cell v, bool copy) {
-  assert(adIn->isVPackedArray());
-  PackedArray::warnUsage(Reason::kNumericString);
-  return PackedArray::SetInt(adIn, k, v, copy);
-}
-
-ArrayData* PackedArray::SetStr(ArrayData* adIn,
-                               StringData* k,
-                               Cell v,
+ArrayData* PackedArray::SetStr(ArrayData* adIn, StringData* k, Cell v,
                                bool copy) {
   // We must convert to mixed, but can call addVal since the key must
   // not exist.
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kSetStr);
-  }
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
   return mixed->addVal(k, v);
 }
 
-ArrayData* PackedArray::SetRefInt(ArrayData* adIn,
-                                  int64_t k,
-                                  Variant& v,
+ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k, Variant& v,
                                   bool copy) {
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::downgradeAndWarn(adIn, PackedArray::Reason::kSetRef);
-  }
-
   assert(checkInvariants(adIn));
 
   if (size_t(k) == adIn->m_size) return AppendRef(adIn, v, copy);
@@ -802,10 +657,6 @@ ArrayData* PackedArray::SetRefStr(ArrayData* adIn,
                                   StringData* k,
                                   Variant& v,
                                   bool copy) {
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kSetRef);
-  }
-
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
   // todo t2606310: key can't exist.  use add/findForNewInsert
   return mixed->updateRef(k, v);
@@ -813,9 +664,6 @@ ArrayData* PackedArray::SetRefStr(ArrayData* adIn,
 
 ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kRemoveInt);
-  }
   if (size_t(k) < adIn->m_size) {
     // Escalate to mixed for correctness; unset preserves m_nextKI.
     //
@@ -833,9 +681,6 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
 ArrayData*
 PackedArray::RemoveStr(ArrayData* adIn, const StringData*, bool) {
   assert(checkInvariants(adIn));
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kRemoveStr);
-  }
   return adIn;
 }
 
@@ -871,9 +716,6 @@ ssize_t PackedArray::IterRewind(const ArrayData* ad, ssize_t pos) {
 }
 
 bool PackedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
-  if (ad->isVPackedArray()) {
-    PackedArray::downgradeAndWarn(ad, Reason::kForeachByRef);
-  }
   assert(checkInvariants(ad));
   if (fp.getResetFlag()) {
     fp.setResetFlag(false);
@@ -906,10 +748,6 @@ ArrayData* PackedArray::Append(ArrayData* adIn, const Variant& v, bool copy) {
 ArrayData* PackedArray::AppendRef(ArrayData* adIn,
                                   Variant& v,
                                   bool copy) {
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::downgradeAndWarn(adIn, PackedArray::Reason::kSetRef);
-  }
-
   assert(checkInvariants(adIn));
   auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
                        : ResizeIfNeeded(adIn);
@@ -923,10 +761,6 @@ ArrayData* PackedArray::AppendRef(ArrayData* adIn,
 ArrayData* PackedArray::AppendWithRef(ArrayData* adIn,
                                       const Variant& v,
                                       bool copy) {
-  if (adIn->m_kind == ArrayData::kVPackedKind && v.isReferenced()) {
-    PackedArray::downgradeAndWarn(adIn, PackedArray::Reason::kSetRef);
-  }
-
   assert(checkInvariants(adIn));
   auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
                        : ResizeIfNeeded(adIn);
@@ -939,9 +773,6 @@ ArrayData* PackedArray::AppendWithRef(ArrayData* adIn,
 ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {
   assert(checkInvariants(adIn));
   auto const neededSize = adIn->size() + elems->size();
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kPlusNotSupported);
-  }
   auto const mixed = ToMixedCopyReserve(adIn, neededSize);
   try {
     auto const ret = MixedArray::PlusEq(mixed, elems);
@@ -956,9 +787,6 @@ ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {
 
 ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
   assert(checkInvariants(adIn));
-  if (adIn->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::warnUsage(PackedArray::Reason::kMergeNotSupported);
-  }
   auto const neededSize = adIn->m_size + elems->size();
   auto const ret = ToMixedCopyReserve(adIn, neededSize);
   return MixedArray::ArrayMergeGeneric(ret, elems);
@@ -1067,9 +895,6 @@ void PackedArray::OnSetEvalScalar(ArrayData* ad) {
 ArrayData* PackedArray::EscalateForSort(ArrayData* ad) {
   // Note: ToMixedCopy also grows so we have !isFull.  We could use
   // ToMixedCopyReserve?
-  if (ad->m_kind == ArrayData::kVPackedKind) {
-    PackedArray::downgradeAndWarn(ad, PackedArray::Reason::kSortNotSupported);
-  }
   assert(checkInvariants(ad));
   return ToMixedCopy(ad);
 }

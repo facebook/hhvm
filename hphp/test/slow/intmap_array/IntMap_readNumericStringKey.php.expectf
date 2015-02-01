@@ -1,5 +1,0 @@
-Warning: An integer-like string key used with a miarray in %s/IntMap_readNumericStringKey.php on line 6
-int(10)
-
-Warning: An integer-like string key used with a miarray in %s/IntMap_readNumericStringKey.php on line 12
-string(2) "10"

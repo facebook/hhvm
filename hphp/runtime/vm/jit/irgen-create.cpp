@@ -197,25 +197,6 @@ void emitNewMixedArray(HTS& env, int32_t capacity) {
   }
 }
 
-void emitNewVArray(HTS& env, int32_t capacity) {
-  // TODO(t4757263) staticEmptyArray() for VArray
-  if (auto newCap = PackedArray::getMaxCapInPlaceFast(capacity)) {
-    assert(newCap > static_cast<uint32_t>(capacity));
-    capacity = newCap;
-  }
-  push(env, gen(env, NewVArray, cns(env, capacity)));
-}
-
-void emitNewMIArray(HTS& env, int32_t capacity) {
-  // TODO(t4757263) staticEmptyArray() for IntMap
-  push(env, gen(env, NewMIArray, cns(env, capacity)));
-}
-
-void emitNewMSArray(HTS& env, int capacity) {
-  // TODO(t4757263) staticEmptyArray() for StrMap
-  push(env, gen(env, NewMSArray, cns(env, capacity)));
-}
-
 void emitNewLikeArrayL(HTS& env, int32_t id, int32_t capacity) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makeExit(env);

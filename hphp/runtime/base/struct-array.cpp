@@ -154,9 +154,6 @@ void StructArray::ReleaseUncounted(ArrayData* ad) {
 const TypedValue* StructArray::NvGetInt(const ArrayData*, int64_t) {
   return nullptr;
 }
-const TypedValue* StructArray::NvGetIntConverted(const ArrayData*, int64_t) {
-  return nullptr;
-}
 
 const TypedValue* StructArray::NvGetStr(
   const ArrayData* ad,
@@ -177,17 +174,6 @@ void StructArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
 }
 
 ArrayData* StructArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
-  auto structArray = asStructArray(ad);
-  auto mixedArray = copy ? ToMixedCopy(structArray) : ToMixed(structArray);
-  return mixedArray->addVal(k, v);
-}
-
-ArrayData* StructArray::SetIntConverted(
-  ArrayData* ad,
-  int64_t k,
-  Cell v,
-  bool copy
-) {
   auto structArray = asStructArray(ad);
   auto mixedArray = copy ? ToMixedCopy(structArray) : ToMixed(structArray);
   return mixedArray->addVal(k, v);

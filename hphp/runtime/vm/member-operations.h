@@ -168,7 +168,7 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
 inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   int64_t n;
   auto const result = !key->isStrictlyInteger(n) ? base->nvGet(key)
-                                                 : base->nvGetConverted(n);
+                                                 : base->nvGet(n);
   return result ? result : null_variant.asTypedValue();
 }
 
@@ -358,26 +358,13 @@ inline TypedValue* ElemDArrayPre<KeyType::Any>(Array& base, TypedValue key) {
 /**
  * ElemD when base is an Array
  */
+// XXX kill reffy flag
 template <bool warn, bool reffy, KeyType keyType>
 inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
   auto& baseArr = tvAsVariant(base).asArrRef();
   bool defined = !warn || baseArr.exists(keyAsValue(key));
 
   auto* result = ElemDArrayPre<keyType>(baseArr, key);
-
-  if (reffy) {
-    if (UNLIKELY(baseArr->isCheckedArray())) {
-      // Downgrade and warn after the operation in case we copied
-      if (baseArr->isVPackedArray()) {
-        PackedArray::downgradeAndWarn(baseArr.get(),
-                                      PackedArray::Reason::kSetRef);
-      } else {
-        MixedArray::downgradeAndWarn(baseArr.get(),
-                                     MixedArray::Reason::kSetRef);
-      }
-    }
-  }
-
   if (warn) {
     if (!defined) {
       TypedValue scratchKey = initScratchKey(key);
@@ -892,10 +879,8 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   Cell* value,
                                   bool copy) {
   int64_t n;
-  if (key->isStrictlyInteger(n)) {
-    return a->setConverted(n, cellAsCVarRef(*value), copy);
-  }
-  return a->set(StrNR(key), cellAsCVarRef(*value), copy);
+  return key->isStrictlyInteger(n) ? a->set(n, cellAsCVarRef(*value), copy) :
+         a->set(StrNR(key), cellAsCVarRef(*value), copy);
 }
 
 template<bool setResult>
@@ -1539,34 +1524,23 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key,
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
                                     bool copy) {
   int64_t n;
-  if (!key->isStrictlyInteger(n)) {
-    return a->remove(StrNR(key), copy);
-  } else {
-    if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
-      if (a->isVPackedArray()) {
-        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-      } else {
-        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                              ArrayData::kIntMapKind);
-      }
-    }
-    return a->remove(n, copy);
-  }
+  return !key->isStrictlyInteger(n) ? a->remove(StrNR(key), copy) :
+         a->remove(n, copy);
 }
 
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
                                     bool copy) {
   if (IS_STRING_TYPE(key.m_type)) {
     return UnsetElemArrayPre(a, key.m_data.pstr, copy);
-  } else if (key.m_type == KindOfInt64) {
-    return UnsetElemArrayPre(a, key.m_data.num, copy);
-  } else {
-    VarNR varKey = tvAsCVarRef(&key).toKey();
-    if (varKey.isNull()) {
-      return a;
-    }
-    return a->remove(varKey, copy);
   }
+  if (key.m_type == KindOfInt64) {
+    return UnsetElemArrayPre(a, key.m_data.num, copy);
+  }
+  VarNR varKey = tvAsCVarRef(&key).toKey();
+  if (varKey.isNull()) {
+    return a;
+  }
+  return a->remove(varKey, copy);
 }
 
 /**

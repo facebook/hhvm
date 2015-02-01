@@ -1,5 +1,0 @@
-Warning: Using an integer-like string key with a varray in %s on line 6
-int(10)
-
-Warning: Using an integer-like string key with a varray in %s on line 12
-string(1) "0"

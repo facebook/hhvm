@@ -101,7 +101,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // if appropriate
   int64_t intkey;
   ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
-                  ad->setConverted(intkey, tvAsCVarRef(&value), copy) :
+                  ad->set(intkey, tvAsCVarRef(&value), copy) :
                   ad->set(key, tvAsCVarRef(&value), copy);
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
@@ -510,14 +510,6 @@ ALWAYS_INLINE
 static bool ak_exist_string_impl(ArrayData* arr, StringData* key) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
-    if (UNLIKELY(arr->isVPackedArrayOrIntMapArray())) {
-      if (arr->isVPackedArray()) {
-        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-      } else {
-        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                              ArrayData::kIntMapKind);
-      }
-    }
     return arr->exists(n);
   }
   return arr->exists(key);
@@ -564,7 +556,7 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ?
-         getDefaultIfNullCell(a->nvGetConverted(i), def) :
+         getDefaultIfNullCell(a->nvGet(i), def) :
          getDefaultIfNullCell(a->nvGet(key), def);
 }
 
@@ -573,14 +565,6 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
 }
 
 TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
-  if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
-    if (a->isVPackedArray()) {
-      PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-    } else {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                            ArrayData::kIntMapKind);
-    }
-  }
   return arrayIdxI(a, key, def);
 }
 

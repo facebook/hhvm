@@ -49,14 +49,11 @@ struct ArrayData {
     kPackedKind = 0,  // PackedArray with keys in range [0..size)
     kStructKind = 1,  // StructArray with static string keys
     kMixedKind = 2,   // MixedArray arbitrary int or string keys, maybe holes
-    kStrMapKind = 3,  // StrMapArray, string keys, mixed values, like MixedArray
-    kIntMapKind = 4,  // IntMapArray, int keys, maybe holes, like MixedArray
-    kVPackedKind = 5, // PackedArray with extra warnings for certain operations
-    kEmptyKind = 6,   // The singleton static empty array
-    kApcKind = 7,     // APCLocalArray
-    kGlobalsKind = 8, // GlobalsArray
-    kProxyKind = 9,   // ProxyArray
-    kNumKinds = 10     // insert new values before kNumKinds.
+    kEmptyKind = 3,   // The singleton static empty array
+    kApcKind = 4,     // APCLocalArray
+    kGlobalsKind = 5, // GlobalsArray
+    kProxyKind = 6,   // ProxyArray
+    kNumKinds = 7     // insert new values before kNumKinds.
   };
 
 protected:
@@ -147,88 +144,9 @@ public:
    */
   bool noCopyOnWrite() const;
 
-  /*
-   * Returns true if this is a PackedArray or a varray
-   */
-  bool isPacked() const {
-    switch (m_kind) {
-    case kPackedKind:
-    case kVPackedKind:
-      return true;
-    default:
-      return false;
-    }
-  }
-
-  /*
-   * Returns true if this is a StructArray.
-   */
-  bool isStruct() const {
-    return m_kind == kStructKind;
-  }
-
-  /*
-   * Returns true if this is a MixedArray, msarray, or miarray
-   */
-  bool isMixed() const {
-    switch (m_kind) {
-    case kMixedKind:
-    case kStrMapKind:
-    case kIntMapKind:
-      return true;
-    default:
-      return false;
-    }
-  }
-
-  /*
-   * These three functions can be used to test if this array is a varray,
-   * msarray, or miarray respectively.
-   */
-  bool isVPackedArray() const { return m_kind == kVPackedKind; }
-  bool isStrMapArray() const { return m_kind == kStrMapKind; }
-  bool isIntMapArray() const { return m_kind == kIntMapKind; }
-
-  /*
-   * Returns true if this is any kind of "checked" array (varray, msarray,
-   * or miarray).
-   */
-  bool isCheckedArray() const {
-    switch (m_kind) {
-    case kVPackedKind:
-    case kStrMapKind:
-    case kIntMapKind:
-      return true;
-    default:
-      return false;
-    }
-  }
-
-  /*
-   * Returns true if this is a msarray or miarray.
-   */
-  bool isStrMapArrayOrIntMapArray() const {
-    switch (m_kind) {
-    case kStrMapKind:
-    case kIntMapKind:
-      return true;
-    default:
-      return false;
-    }
-  }
-  /*
-   * Returns true if this is a varray or miarray.
-   */
-  bool isVPackedArrayOrIntMapArray() const {
-    switch (m_kind) {
-    case kIntMapKind:
-    case kVPackedKind:
-      return true;
-    default:
-      return false;
-    }
-  }
-
+  bool isPacked() const { return m_kind == kPackedKind; }
+  bool isStruct() const { return m_kind == kStructKind; }
+  bool isMixed() const { return m_kind == kMixedKind; }
   bool isApcArray() const { return m_kind == kApcKind; }
   bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
@@ -276,7 +194,6 @@ public:
    * relying on this, but try not to in new code.)
    */
   const TypedValue* nvGet(int64_t k) const;
-  const TypedValue* nvGetConverted(int64_t k) const;
   const TypedValue* nvGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos) const;
 
@@ -307,7 +224,6 @@ public:
    * escalated array data.
    */
   ArrayData *set(int64_t k, const Variant& v, bool copy);
-  ArrayData *setConverted(int64_t k, const Variant& v, bool copy);
   ArrayData *set(StringData* k, const Variant& v, bool copy);
 
   ArrayData *setRef(int64_t k, Variant& v, bool copy);
@@ -537,9 +453,6 @@ protected:
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
 static_assert(ArrayData::kStructKind == uint8_t(HeaderKind::Struct), "");
 static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
-static_assert(ArrayData::kStrMapKind == uint8_t(HeaderKind::StrMap), "");
-static_assert(ArrayData::kIntMapKind == uint8_t(HeaderKind::IntMap), "");
-static_assert(ArrayData::kVPackedKind == uint8_t(HeaderKind::VPacked), "");
 static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
 static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
@@ -575,11 +488,9 @@ struct ArrayFunctions {
   static auto const NK = size_t(ArrayData::ArrayKind::kNumKinds);
   void (*release[NK])(ArrayData*);
   const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
-  const TypedValue* (*nvGetIntConverted[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
-  ArrayData* (*setIntConverted[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
                            bool copy);
   size_t (*vsize[NK])(const ArrayData*);

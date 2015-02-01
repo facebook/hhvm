@@ -1,8 +1,0 @@
-Creating about 400 PackedVectors via Appending
-Creating another 400 PackedVectors
-Verifying we created an additional 400 PackedVectors
-int(400)
-Verifying we performed an additional (200*5) = 1000 Appends on Packed
-int(1000)
-Verifying we performed an additional (200*1) = 200 Appends on Empty
-int(200)

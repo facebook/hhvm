@@ -80,12 +80,9 @@ Object c_AwaitAllWaitHandle::ti_fromarray(const Array& dependencies) {
 retry:
   switch (ad->kind()) {
     case ArrayData::kPackedKind:
-    case ArrayData::kVPackedKind:
       return FromPackedArray(ad);
 
     case ArrayData::kMixedKind:
-    case ArrayData::kIntMapKind:
-    case ArrayData::kStrMapKind:
     case ArrayData::kStructKind:
       return FromMixedArray(MixedArray::asMixed(ad));
 

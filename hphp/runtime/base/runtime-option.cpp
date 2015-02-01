@@ -1512,9 +1512,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 #endif
 
   {
-    Hdf hhprofServer = config["Xenon"];
-    Config::Bind(XenonPeriodSeconds, ini, hhprofServer["Period"], 0.0);
-    Config::Bind(XenonForceAlwaysOn, ini, hhprofServer["ForceAlwaysOn"], false);
+    Hdf xenon = config["Xenon"];
+    Config::Bind(XenonPeriodSeconds, ini, xenon["Period"], 0.0);
+    Config::Bind(XenonForceAlwaysOn, ini, xenon["ForceAlwaysOn"], false);
   }
 
   Config::Get(ini, config["CustomSettings"], CustomSettings);

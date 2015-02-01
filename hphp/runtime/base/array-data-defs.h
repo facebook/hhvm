@@ -162,10 +162,6 @@ inline const TypedValue* ArrayData::nvGet(int64_t ikey) const {
   return g_array_funcs.nvGetInt[m_kind](this, ikey);
 }
 
-inline const TypedValue* ArrayData::nvGetConverted(int64_t ikey) const {
-  return g_array_funcs.nvGetIntConverted[m_kind](this, ikey);
-}
-
 inline const TypedValue* ArrayData::nvGet(const StringData* skey) const {
   return g_array_funcs.nvGetStr[m_kind](this, skey);
 }
@@ -176,11 +172,6 @@ inline void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) const {
 
 inline ArrayData* ArrayData::set(int64_t k, const Variant& v, bool copy) {
   return g_array_funcs.setInt[m_kind](this, k, *v.asCell(), copy);
-}
-
-inline ArrayData* ArrayData::setConverted(int64_t k, const Variant& v,
-                                          bool copy) {
-  return g_array_funcs.setIntConverted[m_kind](this, k, *v.asCell(), copy);
 }
 
 inline ArrayData* ArrayData::set(StringData* k, const Variant& v, bool copy) {

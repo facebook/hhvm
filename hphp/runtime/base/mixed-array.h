@@ -118,8 +118,6 @@ public:
    */
   static ArrayData* MakeReserve(uint32_t capacity);
   static ArrayData* MakeReserveSlow(uint32_t capacity);
-  static ArrayData* MakeReserveVArray(uint32_t capacity);
-  static ArrayData* MakeReserveVArraySlow(uint32_t capacity);
 
   /*
    * Allocate a new, empty, request-local array in mixed mode, with
@@ -152,15 +150,6 @@ public:
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
   static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
   static ArrayData* MakePackedUninitialized(uint32_t size);
-
-  /*
-   * Allocate a new, empty, request-local array in int map/string map mode, with
-   * enough space reserved for `capacity' members.
-   *
-   * The returned array is already incref'd.
-   */
-  static ArrayData* MakeReserveIntMap(uint32_t capacity);
-  static ArrayData* MakeReserveStrMap(uint32_t capacity);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
@@ -232,7 +221,6 @@ public:
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
-  static const TypedValue* NvGetIntConverted(const ArrayData*, int64_t ki);
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ssize_t IterBegin(const ArrayData*);
@@ -248,7 +236,6 @@ public:
                             bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
-  static ArrayData* SetIntConverted(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
@@ -290,55 +277,6 @@ public:
   static bool Uksort(ArrayData*, const Variant& cmp_function);
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
-  static void WarnAndSort(ArrayData*, int sort_flags, bool ascending);
-  static bool WarnAndUsort(ArrayData*, const Variant& cmp_function);
-
-
-  template <ArrayKind aKind>
-  static const TypedValue* NvGetStrImpl(const ArrayData*, const StringData* k);
-  template <ArrayKind aKind>
-  static const TypedValue* NvGetIntImpl(const ArrayData*, int64_t ki);
-  template <ArrayKind aKind>
-  static bool ExistsIntImpl(const ArrayData*, int64_t k);
-  template <ArrayKind aKind>
-  static bool ExistsStrImpl(const ArrayData*, const StringData* k);
-  template <ArrayKind aKind>
-  static ArrayData* LvalIntImpl(ArrayData* ad, int64_t k, Variant*& ret,
-                                bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* LvalStrImpl(ArrayData* ad, StringData* k, Variant*& ret,
-                                bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* LvalNewImpl(ArrayData*, Variant*& ret, bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* SetStrImpl(ArrayData*, StringData* k, Cell v, bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* SetIntImpl(ArrayData*, int64_t k, Cell v, bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* SetRefIntImpl(ArrayData* ad, int64_t k, Variant& v,
-                                  bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* SetRefStrImpl(ArrayData* ad, StringData* k, Variant& v,
-                              bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* AddStrImpl(ArrayData*, StringData* k, Cell v, bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* RemoveIntImpl(ArrayData*, int64_t k, bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* RemoveStrImpl(ArrayData*, const StringData* k, bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* AppendImpl(ArrayData*, const Variant& v, bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* AppendRefImpl(ArrayData*, Variant& v, bool copy);
-  template <ArrayKind aKind>
-  static ArrayData* AppendWithRefImpl(ArrayData*, const Variant& v, bool copy);
-  template <ArrayData::ArrayKind aKind>
-  static ArrayData* PopImpl(ArrayData* ad, Variant& value);
-  template <ArrayData::ArrayKind aKind>
-  static ArrayData* DequeueImpl(ArrayData* adInput, Variant& value);
-
-  template <ArrayKind aKind>
-  static bool AdvanceMArrayIterImpl(ArrayData*, MArrayIter& fp);
 
 private:
   MixedArray* copyMixed() const;
@@ -416,31 +354,6 @@ public:
   // Safe downcast helpers
   static MixedArray* asMixed(ArrayData* ad);
   static const MixedArray* asMixed(const ArrayData* ad);
-
-  enum class Reason : uint8_t {
-    kForeachByRef,
-    kPrepend,
-    kPop,
-    kSetRef,
-    kAppendRef,
-    kAppend,
-    kNvGetInt,
-    kNvGetStr,
-    kExistsInt,
-    kExistsStr,
-    kSetInt,
-    kSetStr,
-    kRemoveInt,
-    kRemoveStr,
-    kDequeue,
-    kSort,
-    kUsort,
-    kNumericString,
-    kArraySplice,
-    kShuffle,
-  };
-  static void downgradeAndWarn(ArrayData* ad, const Reason r);
-  static void warnUsage(const Reason r, const ArrayKind kind);
 
 private:
   static void getElmKey(const Elm& e, TypedValue* out);

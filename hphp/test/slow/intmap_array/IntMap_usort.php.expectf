@@ -1,7 +1,0 @@
-Warning: Using usort on a miarray, converting to array in %s on line 14
-array(2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-}

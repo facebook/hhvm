@@ -455,19 +455,8 @@ const Variant& Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
     if (key.isNull()) return m_px->get(staticEmptyString(), error);
     int64_t n;
     if (!key.get()->isStrictlyInteger(n)) {
-      if (UNLIKELY(m_px->isVPackedArrayOrIntMapArray())) {
-        if (m_px->isVPackedArray()) {
-          PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-        } else {
-          MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                                ArrayData::kIntMapKind);
-        }
-      }
       return m_px->get(key, error);
     } else {
-      if (UNLIKELY(m_px->isVPackedArray())) {
-        PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-      }
       return m_px->get(n, error);
     }
   }
@@ -500,20 +489,8 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
         int64_t n;
         if (!(flags & AccessFlags::Key) &&
             key.asTypedValue()->m_data.pstr->isStrictlyInteger(n)) {
-          if (UNLIKELY(m_px->isVPackedArrayOrIntMapArray())) {
-            if (m_px->isVPackedArray()) {
-              PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-            } else {
-              MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                                    ArrayData::kIntMapKind);
-            }
-          }
-
           return m_px->get(n, flags & AccessFlags::Error);
         }
-      }
-      if (UNLIKELY(m_px->isVPackedArray())) {
-        PackedArray::warnUsage(PackedArray::Reason::kGetStr);
       }
       return m_px->get(key.asCStrRef(), flags & AccessFlags::Error);
 
@@ -946,11 +923,6 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
   for (unsigned int k = 0; k < data.size(); k++) {
     SortData &opaque = data[k];
     const Array& arr = *opaque.array;
-    if (renumber && (opaque.original->getArrayData()->isIntMapArray())) {
-      MixedArray::downgradeAndWarn(opaque.original->getArrayData(),
-                                   MixedArray::Reason::kSort);
-    }
-
     Array sorted;
     for (int i = 0; i < count; i++) {
       ssize_t pos = opaque.positions[indices[i]];

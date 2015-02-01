@@ -1754,9 +1754,6 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
     case ArrayData::kPackedKind:
     case ArrayData::kStructKind:
     case ArrayData::kMixedKind:
-    case ArrayData::kStrMapKind:
-    case ArrayData::kIntMapKind:
-    case ArrayData::kVPackedKind:
     case ArrayData::kEmptyKind:
     case ArrayData::kApcKind:
       return gen(env, CountArrayFast, src);

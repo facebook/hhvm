@@ -43,7 +43,6 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/array-tracer/ext_array_tracer.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/json/ext_json.h"
@@ -1752,8 +1751,6 @@ void hphp_process_init() {
   // start takes milliseconds, Period is a double in seconds
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
 
-  if (RuntimeOption::EvalTraceArrays) ArrayTracer::turnOnTracing();
-
   Process::InitProcessStatics();
   init_thread_locals();
 
@@ -1858,7 +1855,6 @@ void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
   MM().resetExternalStats();
-  if (RuntimeOption::EvalTraceArrays) getArrayTracer()->requestStart();
   Treadmill::startRequest();
 
 #ifdef ENABLE_SIMPLE_COUNTER
@@ -1983,8 +1979,6 @@ void hphp_thread_exit() {
 }
 
 void hphp_memory_cleanup() {
-  if (RuntimeOption::EvalTraceArrays) getArrayTracer()->requestEnd();
-
   auto& mm = MM();
   // sweep functions are allowed to access g_context,
   // so we can't destroy it yet

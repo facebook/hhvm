@@ -76,7 +76,8 @@ struct ArrayInit {
   ArrayInit& operator=(const ArrayInit&) = delete;
 
   ~ArrayInit() {
-    // Use non-specialized release call so ArrayTracer can track its destruction
+    // Use non-specialized release call so array instrumentation can track
+    // its destruction XXX rfc: keep this? what was it before?
     if (m_data) m_data->release();
   }
 

@@ -230,7 +230,6 @@ void CodeGenerator::cgElemArrayImpl(IRInstruction* inst) {
   BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt,
-              keyInfo.converted,
               warn);
 
   auto args = argGroup(inst).ssa(0);
@@ -257,8 +256,7 @@ void CodeGenerator::cgArrayGet(IRInstruction* inst) {
   auto const keyInfo = checkStrictlyInteger(key);
   BUILD_OPTAB(ARRAYGET_HELPER_TABLE,
               keyInfo.type,
-              keyInfo.checkForInt,
-              keyInfo.converted);
+              keyInfo.checkForInt);
 
   auto args = argGroup(inst).ssa(0);
   if (keyInfo.converted) {
@@ -362,7 +360,6 @@ void CodeGenerator::cgArraySetImpl(IRInstruction* inst) {
   BUILD_OPTAB(ARRAYSET_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt,
-              keyInfo.converted,
               setRef);
 
   auto args = argGroup(inst).ssa(0);
@@ -408,8 +405,7 @@ void CodeGenerator::cgArrayIsset(IRInstruction* inst) {
   auto const keyInfo = checkStrictlyInteger(key);
   BUILD_OPTAB(ARRAY_ISSET_HELPER_TABLE,
               keyInfo.type,
-              keyInfo.checkForInt,
-              keyInfo.converted);
+              keyInfo.checkForInt);
 
   auto args = argGroup(inst).ssa(0);
   if (keyInfo.converted) {
@@ -471,9 +467,7 @@ void CodeGenerator::cgArrayIdx(IRInstruction* inst) {
       return CppCall::direct(arrayIdxSi);
     }
     if (keyInfo.type == KeyType::Int) {
-      return keyInfo.converted
-        ? CppCall::direct(arrayIdxIc)
-        : CppCall::direct(arrayIdxI);
+      return CppCall::direct(arrayIdxI);
     }
     return CppCall::direct(arrayIdxS);
   }();

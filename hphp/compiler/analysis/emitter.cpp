@@ -3449,31 +3449,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             visit(ex);
           }
           return true;
-        } else if (op == T_VARRAY || op == T_MIARRAY || op == T_MSARRAY) {
-          assert(m_staticArrays.empty());
-          auto capacityHint = MixedArray::SmallSize;
-
-          ExpressionPtr ex = u->getExpression();
-          if (ex->getKindOf() == Expression::KindOfExpressionList) {
-            auto el = static_pointer_cast<ExpressionList>(ex);
-
-            int capacity = el->getCount();
-            if (capacity > 0) {
-              capacityHint = capacity;
-            }
-          }
-
-          if (op == T_VARRAY) {
-            e.NewVArray(capacityHint);
-          } else if (op == T_MIARRAY) {
-            e.NewMIArray(capacityHint);
-          } else {
-            assert(op == T_MSARRAY);
-            e.NewMSArray(capacityHint);
-          }
-          visit(ex);
-
-          return true;
         } else if (op == T_ISSET) {
           ExpressionListPtr list =
             dynamic_pointer_cast<ExpressionList>(u->getExpression());

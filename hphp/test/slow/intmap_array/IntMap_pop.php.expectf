@@ -1,7 +1,0 @@
-Warning: Using array_pop on a miarray, converting to array in %s/IntMap_pop.php on line 10
-int(10)
-
-Warning: Using array_pop on a miarray, converting to array in %s/IntMap_pop.php on line 4
-
-Warning: Appending to a miarray, converting to array in %s/IntMap_pop.php on line 17
-int(10)

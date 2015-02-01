@@ -894,10 +894,6 @@ Variant HHVM_FUNCTION(array_splice,
   getCheckedArray(input);
   Array ret(Array::Create());
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
-  if (arr_input->isIntMapArray() || arr_input->isStrMapArray()) {
-    MixedArray::downgradeAndWarn(arr_input.get(),
-                                 MixedArray::Reason::kArraySplice);
-  }
   input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
   return ret;
 }
@@ -1182,13 +1178,6 @@ bool HHVM_FUNCTION(shuffle,
     throw_expected_array_exception();
     return false;
   }
-  if (array.toArray()->isIntMapArray()) {
-    // ArrayUtil::Shuffle will overwrite array, so just raise warning
-    MixedArray::warnUsage(MixedArray::Reason::kShuffle, ArrayData::kIntMapKind);
-  } else if (array.toArray()->isStrMapArray()) {
-    MixedArray::warnUsage(MixedArray::Reason::kShuffle, ArrayData::kStrMapKind);
-  }
-
   array = ArrayUtil::Shuffle(array);
   return true;
 }
@@ -2543,17 +2532,6 @@ Variant HHVM_FUNCTION(hphp_array_idx,
   if (!key.isNull()) {
     if (LIKELY(search.isArray())) {
       ArrayData *arr = search.getArrayData();
-      if (UNLIKELY(arr->isVPackedArrayOrIntMapArray())) {
-        int64_t n;
-        if (key.isString() && key.getStringData()->isStrictlyInteger(n)) {
-          if (arr->isVPackedArray()) {
-            PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-          } else {
-            MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                                  ArrayData::kIntMapKind);
-          }
-        }
-      }
       VarNR index = key.toKey();
       if (!index.isNull()) {
         const Variant& ret = arr->get(index, false);

@@ -921,32 +921,6 @@ Parser::onCollectionPair(Token &out, Token *pairs, Token *name, Token &value) {
   out->exp = expList;
 }
 
-void Parser::onEmptyCheckedArray(Token &out) {
-  out->exp = NEW_EXP0(ExpressionList);
-}
-
-void
-Parser::onCheckedArrayPair(Token &out, Token *pairs, Token *name, Token &value) {
-  if (!value->exp) return;
-
-  ExpressionPtr expList;
-  if (pairs && pairs->exp) {
-    expList = pairs->exp;
-  } else {
-    expList = NEW_EXP0(ExpressionList);
-  }
-  ExpressionPtr nameExp = name ? name->exp : ExpressionPtr();
-  expList->addElement(NEW_EXP(ArrayPairExpression, nameExp, value->exp, false));
-  out->exp = expList;
-}
-
-void Parser::onCheckedArray(Token &out, Token &pairs, int op) {
-  if (!m_scanner.isHHSyntaxEnabled()) {
-    PARSE_ERROR("varray, miarray, and msarray are not enabled");
-  }
-  onUnaryOpExp(out, pairs, op, true);
-}
-
 void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
                              Token &value) {
   ExpressionPtr expList;

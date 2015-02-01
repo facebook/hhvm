@@ -1,9 +1,0 @@
-Warning: Adding an int key to a msarray, converting to array in %s/trait.php on line 16
-array(3) {
-  ["foo"]=>
-  bool(true)
-  ["bar"]=>
-  bool(false)
-  [-34]=>
-  string(7) "warning"
-}

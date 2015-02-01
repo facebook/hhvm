@@ -1,7 +1,0 @@
-Warning: Using sort on a miarray, converting to array in %s/IntMap_sort.php on line 7
-array(2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-}

@@ -1,7 +1,0 @@
-Warning: Foreach by reference over a varray, converting to array in %s on line 13
-array(2) {
-  [0]=>
-  &int(-1)
-  [123]=>
-  string(3) "sup"
-}

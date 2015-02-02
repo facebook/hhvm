@@ -268,6 +268,14 @@ template<class T> T decode_oa(PC& pc) {
   return decode<T>(pc);
 }
 
+inline Offset decode_ba(PC& pc) {
+  return decode<Offset>(pc);
+}
+
+inline Offset peek_ba(PC& pc) {
+  return peek<Offset>(pc);
+}
+
 //=============================================================================
 // Miscellaneous helpers.
 
@@ -4130,14 +4138,14 @@ OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
 
 OPTBLD_INLINE void iopJmp(IOP_ARGS) {
   pc++;
-  auto offset = peek<Offset>(pc);
+  auto offset = peek_ba(pc);
   jmpSurpriseCheck(offset);
   pc += offset - 1;
 }
 
 OPTBLD_INLINE void iopJmpNS(IOP_ARGS) {
   pc++;
-  auto offset = peek<Offset>(pc);
+  auto offset = peek_ba(pc);
   pc += offset - 1;
 }
 
@@ -4146,7 +4154,7 @@ OPTBLD_INLINE void jmpOpImpl(PC& pc) {
   static_assert(op == OpJmpZ || op == OpJmpNZ,
                 "jmpOpImpl should only be used by JmpZ and JmpNZ");
   pc++;
-  auto offset = peek<Offset>(pc);
+  auto offset = peek_ba(pc);
   jmpSurpriseCheck(offset);
 
   Cell* c1 = vmStack().topC();
@@ -4187,7 +4195,7 @@ OPTBLD_INLINE void iopIterBreak(IOP_ARGS) {
   Id* iterTypeList = (Id*)pc;
   Id* iterIdList   = (Id*)pc + 1;
   pc += 2 * veclen * sizeof(Id);
-  auto offset = peek<Offset>(pc);
+  auto offset = peek_ba(pc);
   for (auto i = 0; i < 2 * veclen; i += 2) {
     Id iterType = iterTypeList[i];
     Id iterId   = iterIdList[i];
@@ -5827,7 +5835,7 @@ OPTBLD_INLINE void iopDecodeCufIter(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
 
   Iter* it = frame_iter(vmfp(), itId);
   CufIter &cit = it->cuf();
@@ -6293,7 +6301,7 @@ OPTBLD_INLINE void iopIterInit(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   Cell* c1 = vmStack().topC();
   Iter* it = frame_iter(vmfp(), itId);
@@ -6307,7 +6315,7 @@ OPTBLD_INLINE void iopIterInitK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   auto key = decode_la(pc);
   Cell* c1 = vmStack().topC();
@@ -6324,7 +6332,7 @@ OPTBLD_INLINE void iopWIterInit(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   Cell* c1 = vmStack().topC();
   Iter* it = frame_iter(vmfp(), itId);
@@ -6338,7 +6346,7 @@ OPTBLD_INLINE void iopWIterInitK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   auto key = decode_la(pc);
   Cell* c1 = vmStack().topC();
@@ -6377,7 +6385,7 @@ OPTBLD_INLINE void iopMIterInit(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   Ref* r1 = vmStack().topV();
   assert(r1->m_type == KindOfRef);
@@ -6390,7 +6398,7 @@ OPTBLD_INLINE void iopMIterInitK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   auto key = decode_la(pc);
   Ref* r1 = vmStack().topV();
@@ -6405,7 +6413,7 @@ OPTBLD_INLINE void iopIterNext(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
@@ -6420,7 +6428,7 @@ OPTBLD_INLINE void iopIterNextK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   auto key = decode_la(pc);
   jmpSurpriseCheck(offset);
@@ -6438,7 +6446,7 @@ OPTBLD_INLINE void iopWIterNext(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
@@ -6453,7 +6461,7 @@ OPTBLD_INLINE void iopWIterNextK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   auto key = decode_la(pc);
   jmpSurpriseCheck(offset);
@@ -6471,7 +6479,7 @@ OPTBLD_INLINE void iopMIterNext(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
@@ -6485,7 +6493,7 @@ OPTBLD_INLINE void iopMIterNextK(IOP_ARGS) {
   PC origPc = pc;
   pc++;
   auto itId = decode_ia(pc);
-  auto offset = decode<Offset>(pc);
+  auto offset = decode_ba(pc);
   auto val = decode_la(pc);
   auto key = decode_la(pc);
   jmpSurpriseCheck(offset);

@@ -3476,12 +3476,12 @@ OPTBLD_INLINE void iopNullUninit(IOP_ARGS) {
 
 OPTBLD_INLINE void iopTrue(IOP_ARGS) {
   pc++;
-  vmStack().pushTrue();
+  vmStack().pushBool(true);
 }
 
 OPTBLD_INLINE void iopFalse(IOP_ARGS) {
   pc++;
-  vmStack().pushFalse();
+  vmStack().pushBool(false);
 }
 
 OPTBLD_INLINE void iopFile(IOP_ARGS) {
@@ -5905,10 +5905,10 @@ OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
   if (f == nullptr) {
     f = SystemLib::s_nullFunc;
     if (safe) {
-      vmStack().pushFalse();
+      vmStack().pushBool(false);
     }
   } else if (safe) {
-    vmStack().pushTrue();
+    vmStack().pushBool(true);
   }
 
   ActRec* ar = vmStack().allocA();
@@ -6557,7 +6557,7 @@ OPTBLD_INLINE void inclOp(PC& pc, InclOpFlags flags) {
     } else {
       raise_warning("File not found: %s", path.data());
     }
-    vmStack().pushFalse();
+    vmStack().pushBool(false);
     return;
   }
 
@@ -6565,7 +6565,7 @@ OPTBLD_INLINE void inclOp(PC& pc, InclOpFlags flags) {
     g_context->evalUnit(unit, pc, EventHook::PseudoMain);
   } else {
     Stats::inc(Stats::PseudoMain_Guarded);
-    vmStack().pushTrue();
+    vmStack().pushBool(true);
   }
 }
 
@@ -6629,7 +6629,7 @@ OPTBLD_INLINE void iopEval(IOP_ARGS) {
       );
     }
 
-    vmStack().pushFalse();
+    vmStack().pushBool(false);
     return;
   }
   vm->evalUnit(unit, pc, EventHook::Eval);
@@ -6741,11 +6741,7 @@ OPTBLD_INLINE void iopStaticLoc(IOP_ARGS) {
   auto const tvLocal = frame_local(vmfp(), localId);
   auto const tmpTV = make_tv<KindOfRef>(refData);
   tvBind(&tmpTV, tvLocal);
-  if (inited) {
-    vmStack().pushTrue();
-  } else {
-    vmStack().pushFalse();
-  }
+  vmStack().pushBool(inited);
 }
 
 OPTBLD_INLINE void iopStaticLocInit(IOP_ARGS) {
@@ -7163,11 +7159,7 @@ OPTBLD_INLINE void iopCheckProp(IOP_ARGS) {
   auto idx = ctx->lookupDeclProp(propName);
 
   auto& tv = (*propVec)[idx];
-  if (tv.m_type != KindOfUninit) {
-    vmStack().pushTrue();
-  } else {
-    vmStack().pushFalse();
-  }
+  vmStack().pushBool(tv.m_type != KindOfUninit);
 }
 
 OPTBLD_INLINE void iopInitProp(IOP_ARGS) {

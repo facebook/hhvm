@@ -2190,26 +2190,29 @@ void RelocationInfo::rewind(TCA start, TCA end) {
     m_srcRanges.pop_back();
     m_dstRanges.pop_back();
   }
-  // start and end could already exist (with start.first
-  // and end.second set respectively). In that case, we
-  // shouldn't remove those nodes.
   auto it = m_adjustedAddresses.lower_bound(start);
   if (it == m_adjustedAddresses.end()) return;
-  assert(it->first == start);
-  if (it->second.first) {
-    it++->second.second = 0;
-  } else {
-    m_adjustedAddresses.erase(it++);
+  if (it->first == start) {
+    // if it->second.first is set, start is also the end
+    // of an existing region. Don't erase it in that case
+    if (it->second.first) {
+      it++->second.second = 0;
+    } else {
+      m_adjustedAddresses.erase(it++);
+    }
   }
   while (it != m_adjustedAddresses.end() && it->first < end) {
     m_adjustedAddresses.erase(it++);
   }
   if (it == m_adjustedAddresses.end()) return;
-  assert(it->first == end);
-  if (it->second.second) {
-    it++->second.first = 0;
-  } else {
-    m_adjustedAddresses.erase(it++);
+  if (it->first == end) {
+    // Similar to start above, end could be the start of an
+    // existing region.
+    if (it->second.second) {
+      it++->second.first = 0;
+    } else {
+      m_adjustedAddresses.erase(it++);
+    }
   }
 }
 

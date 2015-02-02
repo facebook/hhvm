@@ -584,17 +584,21 @@ inline SSATmp* ldLocInner(HTS& env,
   // We only care if the local is KindOfRef or not. DataTypeCountness
   // gets us that.
   auto const loc = ldLoc(env, locId, ldPMExit, DataTypeCountness);
-  assert((loc->type().isBoxed() || loc->type().notBoxed()) &&
-         "Currently we don't handle traces where locals are maybeBoxed");
 
-  if (!loc->type().isBoxed()) {
+  if (loc->type().notBoxed()) {
     env.irb->constrainValue(loc, constraint);
     return loc;
   }
 
-  auto const predTy = env.irb->predictedInnerType(locId);
-  gen(env, CheckRefInner, predTy, ldrefExit, loc);
-  return gen(env, LdRef, predTy, loc);
+  // Handle the isBoxed() case manually outside of unbox() so we can use the
+  // local's predicted type.
+  if (loc->type().isBoxed()) {
+    auto const predTy = env.irb->predictedInnerType(locId);
+    gen(env, CheckRefInner, predTy, ldrefExit, loc);
+    return gen(env, LdRef, predTy, loc);
+  };
+
+  return unbox(env, loc, ldrefExit);
 }
 
 /*
@@ -619,28 +623,24 @@ inline SSATmp* ldLocInnerWarn(HTS& env,
   };
 
   env.irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
-  if (locVal->type() <= Type::Uninit) {
-    return warnUninit();
-  }
 
-  if (locVal->type().maybe(Type::Uninit)) {
-    // The local might be Uninit so we have to check at runtime.
-    return cond(
-      env,
-      0,
-      [&](Block* taken) {
-        gen(env, CheckInit, taken, locVal);
-      },
-      [&] { // Next: local is Init
-        return locVal;
-      },
-      [&] { // Taken: local is Uninit
-        return warnUninit();
-      }
-    );
-  }
+  if (locVal->type() <= Type::Uninit) return warnUninit();
+  if (locVal->type().not(Type::Uninit)) return locVal;
 
-  return locVal;
+  // The local might be Uninit so we have to check at runtime.
+  return cond(
+    env,
+    0,
+    [&] (Block* taken) {
+      gen(env, CheckInit, taken, locVal);
+    },
+    [&] { // Next: local is InitCell.
+      return gen(env, AssertType, Type::InitCell, locVal);
+    },
+    [&] { // Taken: local is Uninit
+      return warnUninit();
+    }
+  );
 }
 
 /*

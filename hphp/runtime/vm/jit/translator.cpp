@@ -1816,11 +1816,12 @@ TranslateResult irGenRegion(HTS& hts,
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
-  std::string errorMsg;
-  always_assert_log(check(region, errorMsg),
-                    [&] { return errorMsg + "\n" + show(region); });
+  SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
 
-  auto& irb = *hts.irb;
+  std::string errorMsg;
+  always_assert_flog(check(region, errorMsg), "{}", errorMsg);
+
+  SCOPE_ASSERT_DETAIL("IRUnit") { return hts.unit.toString(); };
 
   // Create a map from region blocks to their corresponding initial IR blocks.
   BlockIdToIRBlockMap blockIdToIRBlock;
@@ -1840,6 +1841,7 @@ TranslateResult irGenRegion(HTS& hts,
 
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   auto& blocks = region.blocks();
+
   for (auto b = 0; b < blocks.size(); b++) {
     auto const& block  = blocks[b];
     auto const blockId = block->id();
@@ -1847,6 +1849,8 @@ TranslateResult irGenRegion(HTS& hts,
     auto byRefs        = makeMapWalker(block->paramByRefs());
     auto knownFuncs    = makeMapWalker(block->knownFuncs());
     auto skipTrans     = false;
+
+    SCOPE_ASSERT_DETAIL("HTS") { return show(hts); };
 
     const Func* topFunc = nullptr;
     TransID profTransId = getTransId(blockId);
@@ -1940,14 +1944,9 @@ TranslateResult irGenRegion(HTS& hts,
         if (!skipTrans) translateInstr(hts, inst);
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk{profTransId, sk};
-        always_assert_log(
-          !toInterp.count(psk),
-          [&] {
-            std::ostringstream oss;
-            oss << folly::format("IR generation failed with {}\n", exn.what());
-            print(oss, hts.unit);
-            return oss.str();
-          });
+        always_assert_flog(!toInterp.count(psk),
+                           "IR generation failed with {}\n",
+                           exn.what());
         toInterp.insert(psk);
         return TranslateResult::Retry;
       }

@@ -18,9 +18,20 @@
 
 #include <folly/Format.h>
 
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <string>
+#include <vector>
+
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
 static AssertFailLogger s_logger;
+
+__thread AssertDetailImpl* AssertDetailImpl::s_head = nullptr;
+
+///////////////////////////////////////////////////////////////////////////////
 
 void assert_fail(const char* e, const char* file,
                  unsigned int line, const char* func) {
@@ -33,15 +44,34 @@ void assert_fail(const char* e, const char* file,
   std::abort();
 }
 
-void assert_fail_log(const char* title, const std::string& msg) {
+void assert_fail_log_detail(AssertDetailImpl* adi) {
+  if (!adi) return;
+  assert_fail_log_detail(adi->m_next);
+
+  auto out = adi->run();
+
   if (s_logger) {
-    s_logger(title, msg);
+    s_logger(folly::format(
+      "{:-^80}\n", adi->m_name
+    ).str().c_str(), out);
   }
-  fprintf(stderr, "\nAssertion failure: %s\n%s\n\n", title, msg.c_str());
+
+  fprintf(stderr, "%s", folly::format(
+    "\n{:-^80}\n{}\n", adi->m_name, out
+  ).str().c_str());
+}
+
+void assert_fail_log(const char* title, const std::string& msg) {
+  if (s_logger) s_logger(title, msg);
+  fprintf(stderr, "\nAssertion failure: %s\n%s\n", title, msg.c_str());
+
+  assert_fail_log_detail(AssertDetailImpl::s_head);
+  fprintf(stderr, "\n");
 }
 
 void register_assert_fail_logger(AssertFailLogger l) {
   s_logger = l;
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }

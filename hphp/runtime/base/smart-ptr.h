@@ -183,11 +183,6 @@ private:
   }
 };
 
-template <typename T, typename Y>
-inline bool operator==(const SmartPtr<T>& a, const SmartPtr<Y>& b) {
-  return a.get() == b.get();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // AtomicSmartPtr
 
@@ -296,6 +291,69 @@ protected:
 private:
   T* m_px;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// SmartPtr helper functions
+
+// Note: don't define the other relational (<,>,<=,=>) operators in
+// terms of the underlying pointer.  If the underlying pointer is
+// moved (e.g. by GC) the relation may no longer hold.
+
+template <typename T>
+struct isValidSmartPtrRelopArg {
+  enum { value = false };
+};
+
+template <>
+struct isValidSmartPtrRelopArg<std::nullptr_t> {
+  enum { value = true };
+};
+
+template <typename T>
+struct isValidSmartPtrRelopArg<SmartPtr<T>> {
+  enum { value = true };
+};
+
+template <typename T>
+struct isValidSmartPtrRelopArg<const T*> {
+  enum { value = true };
+};
+
+template <typename T>
+struct isSmartPtr {
+  enum { value = false };
+};
+
+template <typename T>
+struct isSmartPtr<SmartPtr<T>> {
+  enum { value = true };
+};
+
+template <typename T>
+inline const T* deref(const SmartPtr<T>& p) { return p.get(); }
+
+template <typename T>
+inline const T* deref(const T* p) { return p; }
+
+inline std::nullptr_t deref(std::nullptr_t) { return nullptr; }
+
+template <typename A, typename B>
+inline
+typename std::enable_if<
+  (isValidSmartPtrRelopArg<A>::value && isValidSmartPtrRelopArg<B>::value),
+  bool
+>::type operator==(const A& a, const B& b) {
+  return deref(a) == deref(b);
+}
+
+template <typename A, typename B>
+inline
+typename std::enable_if<
+  (isValidSmartPtrRelopArg<A>::value && isValidSmartPtrRelopArg<B>::value),
+  bool
+>::type operator!=(const A& a, const B& b) {
+  return !(a == b);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

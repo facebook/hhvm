@@ -146,6 +146,11 @@ else()
   message("Generating Release build")
 endif()
 
+if(LEAKY)
+  add_definitions(-DLEAKY=1)
+  message("Generating LEAKY build, collection turned off")
+endif()
+
 if(DEBUG_MEMORY_LEAK)
   add_definitions(-DDEBUG_MEMORY_LEAK=1)
 endif()

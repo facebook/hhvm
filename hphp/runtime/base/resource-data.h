@@ -69,7 +69,9 @@ class ResourceData {
 
   void release() {
     assert(!hasMultipleRefs());
-    delete this;
+    if (prepareForRelease()) {
+      delete this;
+    }
   }
 
   int32_t o_getId() const { return o_id; }

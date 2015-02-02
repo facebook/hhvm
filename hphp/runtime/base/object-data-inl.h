@@ -138,7 +138,9 @@ inline void ObjectData::instanceInit(Class* cls) {
 
 inline void ObjectData::release() {
   assert(!hasMultipleRefs());
-  if (LIKELY(destruct())) DeleteObject(this);
+  if (prepareForRelease()) {
+    if (LIKELY(destruct())) DeleteObject(this);
+  }
 }
 
 inline Class* ObjectData::getVMClass() const {

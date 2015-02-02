@@ -2550,7 +2550,7 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
                                          Vlabel done, Type type,
                                          Vreg dataReg, F destroyImpl) {
   always_assert(type.maybeCounted());
-  bool hasDestroy = CheckValid<F>::valid(destroyImpl);
+  bool hasDestroy = false; //CheckValid<F>::valid(destroyImpl);
 
   OptDecRefProfile profile;
   auto const unlikelyDestroy =
@@ -2670,12 +2670,13 @@ void CodeGenerator::cgDecRefStaticType(Vout& v,
   if (genZeroCheck) {
     cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg, [&] (Vout& v) {
         // Emit the call to release in m_acold
-        cgCallHelper(v,
+    	// Not sure if necessary to remove
+        /*cgCallHelper(v,
                      mcg->getDtorCall(type.toDataType()),
                      kVoidDest,
                      SyncOptions::kSyncPoint,
                      argGroup(inst)
-                     .reg(dataReg));
+                     .reg(dataReg)); */
       });
   } else {
     cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg);

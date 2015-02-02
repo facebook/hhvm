@@ -453,8 +453,12 @@ void StringData::releaseDataSlowPath() {
 
 void StringData::release() {
   assert(checkSane());
-  if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
-  freeForSize(this, capacity() + kCapOverhead);
+
+  if (prepareForRelease()) {
+	if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
+	freeForSize(this, capacity() + kCapOverhead);
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////////

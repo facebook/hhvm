@@ -508,6 +508,7 @@ NEVER_INLINE
 void MixedArray::Release(ArrayData* in) {
   assert(in->isRefCounted());
   auto const ad = asMixed(in);
+  if (ad->m_count == 1) --ad->m_count;
 
   if (!ad->isZombie()) {
     auto const data = ad->data();
@@ -523,7 +524,7 @@ void MixedArray::Release(ArrayData* in) {
       free_strong_iterators(ad);
     }
   }
-  MM().objFreeLogged(ad, ad->heapSize());
+  //MM().objFreeLogged(ad, ad->heapSize());
 }
 
 void MixedArray::ReleaseUncountedTypedValue(TypedValue& tv) {

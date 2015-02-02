@@ -1041,11 +1041,13 @@ void ObjectData::DeleteObject(ObjectData* objectData) {
 
   objectData->~ObjectData();
 
+
   auto const size = sizeForNProps(nProps);
   if (LIKELY(size <= kMaxSmartSize)) {
     return MM().smartFreeSizeLogged(objectData, size);
   }
   MM().smartFreeSizeBigLogged(objectData, size);
+
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {

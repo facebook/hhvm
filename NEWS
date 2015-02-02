@@ -1,3 +1,45 @@
+"Colbert" 12-Feb-2015
+ - Reduce size needed for reusable stubs
+ - Replaced uses of StringData::bufferSlice() with mutableData()
+ - [hhvm][ini] Provide mechanism to support collections of complex data structures
+ - [hhvm][ini] Support mysqli ini settings
+ - [hhvm/gdb] Enable hashing of strings w/o m_hash
+ - Fix Memcache::connect with unix socket
+ - fix bug #4727 with timezone_name_from_abbr()
+ - [hack] Deprecate is_integer, is_long, and other is_* aliases
+ - [hh] typechecker: check "inheritance" for class consts
+ - [hhvm] Move DOM extension to NPH
+ - [hh] typechecker: run (some) checks on abstract constants
+ - [hack] Deprecate join, split, and create_function.
+ - [hack][typeconst] Rework Type Consts to not use type defs
+ - [hhvm] MySQLi: Support isset() for result fields
+ - Fix memory leaks in CacheClient for getNextFinishedRequestID API
+ - Make access log %h behave more like Apache
+ - [hack] Recognize __Deprecated attribute on functions and methods
+ - [hhvm] get_resource_type of closed files is "Unknown"
+ - Implemented directives: variables_order&request_order
+ - Show meaningful closure names in backtraces
+ - [hh] typechecker: don't allow async blocks as lambda expressions
+ - Add HH\get_headers_secure
+ - [hhvm/gdb] Finish documenting GDB support
+ - [hhvm/gdb] Fix parts of `hhx' that got out of sync
+ - [hack][typeconst] Finalize Type Const syntax
+ - [hhvm/gdb] Add pretty-printer support for object properties
+ - [hhvm/gdb] Refactor lookup_func into component accessors
+ - [hhvm/gdb] Support {Fixed,Indexed}StringMap in `idx'
+ - [hhvm/gdb] Fix some bugs in `idx'
+ - [hhvm/gdb] Add rawtype() and rawptr() helpers
+ - [hh] add __Deprecated attribute wired to ReflectionFunction::isDeprecated
+ - [hh] hh_format: support abstract const syntax [2/2]
+ - [hh] h2tp: "support" abstract consts
+ - [hh] hh_format: support abstract const syntax
+ - [hh] typechecker: parse abstract const declarations
+ - [hh] typechecker: only look for __callStatic for static methods
+ - [hh] typechecker: fix references to `parent::constant`
+ - [hack] Allow subtypes in arithmetic modulo op
+ - Be more lenient in accepting extra ',' in icu date pattern gen.
+ - Accept image/png as a legal mimetype from ext_imagick.
+
 "Ballmer" 29-Jan-2015
  - Miscellaneous fixes for clang dev build
  - Make gd-jpeg compatible with jpeg-9

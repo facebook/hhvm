@@ -761,26 +761,14 @@ public:
     m_top->m_type = KindOfUninit;
   }
 
-  #define PUSH_METHOD(name, type, field, value)                               \
-  ALWAYS_INLINE void push##name() {                                           \
-    assert(m_top != m_elms);                                                  \
-    m_top--;                                                                  \
-    m_top->m_data.field = value;                                              \
-    m_top->m_type = type;                                                     \
+  template<DataType t, class T> void pushVal(T v) {
+    assert(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<t>(v);
   }
-  PUSH_METHOD(True, KindOfBoolean, num, 1)
-  PUSH_METHOD(False, KindOfBoolean, num, 0)
-
-  #define PUSH_METHOD_ARG(name, type, field, argtype, arg)                    \
-  ALWAYS_INLINE void push##name(argtype arg) {                                \
-    assert(m_top != m_elms);                                                  \
-    m_top--;                                                                  \
-    m_top->m_data.field = arg;                                                \
-    m_top->m_type = type;                                                     \
-  }
-  PUSH_METHOD_ARG(Bool, KindOfBoolean, num, bool, b)
-  PUSH_METHOD_ARG(Int, KindOfInt64, num, int64_t, i)
-  PUSH_METHOD_ARG(Double, KindOfDouble, dbl, double, d)
+  ALWAYS_INLINE void pushBool(bool v) { pushVal<KindOfBoolean>(v); }
+  ALWAYS_INLINE void pushInt(int64_t v) { pushVal<KindOfInt64>(v); }
+  ALWAYS_INLINE void pushDouble(double v) { pushVal<KindOfDouble>(v); }
 
   // This should only be called directly when the caller has
   // already adjusted the refcount appropriately

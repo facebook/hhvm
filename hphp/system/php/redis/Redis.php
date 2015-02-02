@@ -1580,7 +1580,7 @@ class Redis {
         $pid     = array('id' => array('persistent_id' => $persistent_id));
         $context = stream_context_create($pid);
         $sok     = $host;
-        if($port > 0) $sok .= ':' . $port;
+        if ($port > 0) $sok .= ':' . $port;
         $conn    = stream_socket_client(
           $sok, $errno, $errstr, $timeout, 2, $context);
       } else {

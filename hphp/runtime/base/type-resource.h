@@ -43,7 +43,6 @@ public:
   void reset() { ResourceBase::reset(); }
 
   ResourceData* operator->() const {
-    if (!m_px) throw_null_pointer_exception();
     return m_px;
   }
 

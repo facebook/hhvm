@@ -1113,6 +1113,7 @@ void Variant::unserialize(VariableUnserializer *uns,
         // without having it initialized completely.
         if (cls->instanceCtor() && !cls->isCppSerializable()) {
           assert(obj.isNull());
+          throw_null_pointer_exception();
         } else {
           obj = ObjectData::newInstance(cls);
           if (UNLIKELY(cls == c_Pair::classof() && size != 2)) {
@@ -1124,6 +1125,7 @@ void Variant::unserialize(VariableUnserializer *uns,
           SystemLib::s___PHP_Incomplete_ClassClass);
         obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
       }
+      assert(!obj.isNull());
       operator=(obj);
 
       if (size > 0) {

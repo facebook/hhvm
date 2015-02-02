@@ -106,15 +106,10 @@ enum class SRFlags {
   None = 0,
 
   /*
-   * Indicates the service request should be aligned.
-   */
-  Align = 1 << 0,
-
-  /*
    * Indicates if the service request is persistent. For non-persistent
    * requests, the service request stub may be reused.
    */
-  Persist = 1 << 1,
+  Persist = 1 << 0,
 };
 
 inline bool operator&(SRFlags a, SRFlags b) {

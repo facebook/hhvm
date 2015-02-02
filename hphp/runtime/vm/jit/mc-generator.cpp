@@ -935,7 +935,8 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
                                                  &mcg->cgFixups()),
                                      REQ_BIND_JCC,
                                      RipRelative(toSmash),
-                                     skWillDefer.toAtomicInt(), cc);
+                                     skWillDefer.toAtomicInt(),
+                                     TransFlags{}.packed);
 
   mcg->cgFixups().process(nullptr);
   smashed = true;

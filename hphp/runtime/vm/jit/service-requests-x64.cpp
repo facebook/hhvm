@@ -37,10 +37,6 @@ using jit::reg::rip;
 
 TRACE_SET_MOD(servicereq);
 
-TCA
-emitServiceReqImpl(CodeBlock& cb, SRFlags flags, ServiceRequest req,
-                   const ServiceReqArgVec& argv);
-
 namespace {
 
 static constexpr int kMovSize = 0xa;
@@ -96,10 +92,8 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
 
 const int kExtraRegs = 2; // we also set rdi and r10
 static constexpr int maxStubSpace() {
-  /* max space for moving to align plus emitting args */
-  return
-    kJmpTargetAlign - 1 +
-    (kNumServiceReqArgRegs + kExtraRegs) * (kMovSize + kRipLeaLen);
+  /* max space for emitting args */
+  return (kNumServiceReqArgRegs + kExtraRegs) * kMovSize;
 }
 
 // fill remaining space in stub with ud2 or int3
@@ -115,30 +109,27 @@ void padStub(CodeBlock& stub) {
 
 //////////////////////////////////////////////////////////////////////
 
-TCA
+void
 emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
                    const ServiceReqArgVec& argv) {
-  const bool align   = flags & SRFlags::Align;
   const bool persist = flags & SRFlags::Persist;
   Asm as{stub};
-  if (align) moveToAlign(stub);
-  TCA aligned_start = as.frontier();
-  TRACE(3, "Emit Service Req @%p %s(", stub.base(), serviceReqName(req));
+  FTRACE(2, "Emit Service Req @{} {}(", stub.base(), serviceReqName(req));
   /*
    * Move args into appropriate regs. Eager VMReg save may bash flags,
    * so set the CondCode arguments first.
    */
+  assert(argv.size() <= kNumServiceReqArgRegs);
   for (int i = 0; i < argv.size(); ++i) {
-    assert(i < kNumServiceReqArgRegs);
     auto reg = serviceReqArgRegs[i];
     const auto& argInfo = argv[i];
     switch (argInfo.m_kind) {
       case ServiceReqArgInfo::Immediate: {
-        TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
+        FTRACE(2, "{}, ", argInfo.m_imm);
         as.    emitImmReg(argInfo.m_imm, reg);
       } break;
       case ServiceReqArgInfo::RipRelative: {
-        TRACE(3, "$rip(%" PRIx64 "), ", argInfo.m_imm);
+        FTRACE(2, "{}(%rip), ", argInfo.m_imm);
         as.    lea(rip[argInfo.m_imm], reg);
       } break;
       case ServiceReqArgInfo::CondCode: {
@@ -146,17 +137,19 @@ emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
         DEBUG_ONLY TCA start = as.frontier();
         as.    setcc(argInfo.m_cc, rbyte(reg));
         assert(start - as.frontier() <= kMovSize);
-        TRACE(3, "cc(%x), ", argInfo.m_cc);
+        FTRACE(2, "cc({}), ", cc_names[argInfo.m_cc]);
       } break;
       default: not_reached();
     }
   }
   if (persist) {
+    FTRACE(2, "no stub");
     as.  emitImmReg(0, rAsm);
   } else {
+    FTRACE(2, "stub: {}", stub.base());
     as.  lea(rip[(int64_t)stub.base()], rAsm);
   }
-  TRACE(3, ")\n");
+  FTRACE(2, ")\n");
   as.    emitImmReg(req, reg::rdi);
 
   /*
@@ -179,19 +172,19 @@ emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
   if (!persist) {
     padStub(stub);
   }
-  return aligned_start;
 }
 
 TCA
 emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                    ServiceRequest req, const ServiceReqArgVec& argv) {
+  auto const is_reused = start != cb.frontier();
+
   CodeBlock stub;
   stub.init(start, maxStubSpace(), "stubTemp");
-  auto ret = emitServiceReqImpl(stub, flags, req, argv);
-  if (stub.base() == cb.frontier()) {
-    cb.skip(stub.used());
-  }
-  return ret;
+  emitServiceReqImpl(stub, flags, req, argv);
+  if (!is_reused) cb.skip(stub.used());
+
+  return start;
 }
 
 void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,

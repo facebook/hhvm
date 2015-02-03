@@ -24,6 +24,9 @@
 #include <utility>
 #include <vector>
 
+#include "hphp/util/lock.h"
+#include "hphp/util/thread-local.h"
+#include "hphp/util/tiny-vector.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -36,8 +39,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/pc-filter.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/thread-local.h"
 
 namespace vixl { class Simulator; }
 

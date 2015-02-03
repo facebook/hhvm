@@ -20,7 +20,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "hphp/util/tiny-vector.h"
 #include "hphp/util/pointer-list.h"
 #include "hphp/runtime/base/runtime-option.h"
 
@@ -113,7 +112,7 @@ class ArenaImpl {
  private:
   char* m_current;
   Frame m_frame;
-  TinyVector<char*> m_ptrs; // inlines 1 pointer, may not be optimal
+  std::vector<char*> m_ptrs;
   PointerList<char> m_externalPtrs;
   bool m_bypassSlabAlloc;
 #ifdef DEBUG

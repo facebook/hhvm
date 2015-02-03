@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,12 +15,15 @@
 */
 
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
+#include "hphp/runtime/server/fastcgi/fastcgi-server.h"
 #include "hphp/util/logger.h"
-#include <folly/io/IOBuf.h>
-#include <folly/io/Cursor.h>
+
 #include <folly/Memory.h>
+#include <folly/MoveWrapper.h>
+#include <folly/io/Cursor.h>
+#include <folly/io/IOBuf.h>
+
 #include <limits>
-#include <map>
 
 namespace HPHP {
 
@@ -29,130 +32,70 @@ using folly::IOBufQueue;
 using folly::io::Cursor;
 using folly::io::Appender;
 using folly::io::QueueAppender;
-using folly::io::RWPrivateCursor;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-FastCGITransaction::FastCGITransaction(FastCGISession* session,
-                                       RequestId request_id,
-                                       std::shared_ptr<FastCGITransport>
-                                         handler)
-  : m_phase(Phase::READ_KEY_LENGTH),
-    m_readBuf(IOBufQueue::cacheChainLength()),
-    m_keyBuf(IOBufQueue::cacheChainLength()),
-    m_valueBuf(IOBufQueue::cacheChainLength()),
-    m_session(session),
-    m_requestId(request_id),
-    m_handler(handler) {
-  if (handler) {
-    handler->setCallback(this);
-  }
+namespace fcgi {
+void KVParser::reset() {
+  m_phase = Phase::READ_KEY_LENGTH;
+  m_readBuf.clear();
+  m_keyBuf.clear();
+  m_valueBuf.clear();
 }
 
-FastCGITransaction::~FastCGITransaction() {}
+std::tuple<
+  std::unique_ptr<folly::IOBuf>,
+  std::unique_ptr<folly::IOBuf>
+> KVParser::readNext() {
+  assert(ready());
 
-void FastCGITransaction::onStdIn(std::unique_ptr<IOBuf> chain) {
-  if (m_requestId == 0) {
-    handleInvalidRecord();
-    return;
-  }
-  assert(m_handler);
+  m_phase = Phase::READ_KEY_LENGTH;
+  auto key = m_keyBuf.move();
+  auto val = m_valueBuf.move();
+  process(); // check for more data
 
-  if (chain->empty()) {
-    m_handler->onBodyComplete();
-  } else {
-    m_handler->onBody(std::move(chain));
-  }
+  return std::make_tuple(std::move(key), std::move(val));
 }
 
-void FastCGITransaction::onParams(std::unique_ptr<IOBuf> chain) {
-  if (m_requestId == 0) {
-    handleInvalidRecord();
-    return;
-  }
-  assert(m_handler);
-
+bool KVParser::consume(std::unique_ptr<IOBuf> chain) {
   if (chain == nullptr || chain->computeChainDataLength() == 0) {
-    if (m_readBuf.chainLength() != 0 ||
-        m_phase != Phase::READ_KEY_LENGTH) {
-      // We could just exit here, but we don't want to risk
-      // busy waiting.
-      handleInvalidRecord();
-    } else {
-      m_handler->onHeadersComplete();
+    if (m_readBuf.chainLength() != 0 || m_phase != Phase::READ_KEY_LENGTH) {
+      // Malformed stream
+      return false;
     }
-    return;
+    m_phase = Phase::COMPLETE;
+    return true;
   }
+
+  // The stream has been restarted
+  if (m_phase == Phase::COMPLETE) m_phase = Phase::READ_KEY_LENGTH;
 
   m_readBuf.append(std::move(chain));
+
+  // Can only process new data if we aren't currently waiting on a call to
+  // readNext() to free up the key/value beffers
+  if (m_phase != Phase::READY) {
+    process();
+  }
+
+  return true;
+}
+
+void KVParser::process() {
   size_t available = m_readBuf.chainLength();
   size_t avail = available;
   Cursor cursor(m_readBuf.front());
 
-  while (parseKeyValue(cursor, avail)) {
-    m_handler->onHeader(m_keyBuf.move(), m_valueBuf.move());
+  // if we can read a complete key/value then we are ready to be extracted
+  if (parseKeyValue(cursor, avail)) {
+    m_phase = Phase::READY;
   }
 
   m_readBuf.split(available - avail);
 }
 
-void FastCGITransaction::onData(std::unique_ptr<IOBuf> chain) {
-  // Since we act in the RESPONER role, we don't accept DATA stream.
-  handleInvalidRecord();
-}
 
-void FastCGITransaction::onGetValues(std::unique_ptr<IOBuf> chain) {
-  if (m_requestId != 0) {
-    handleInvalidRecord();
-    return;
-  }
-  assert(!m_handler);
-
-  if (chain == nullptr || chain->computeChainDataLength() == 0) {
-    if (m_readBuf.chainLength() != 0 ||
-        m_phase != Phase::READ_KEY_LENGTH) {
-      // We could just exit here, but we dont want to risk
-      // busy waiting.
-      handleInvalidRecord();
-    }
-    return;
-  }
-
-  m_readBuf.append(std::move(chain));
-  size_t available = m_readBuf.chainLength();
-  size_t avail = available;
-  Cursor cursor(m_readBuf.front());
-
-  while (parseKeyValue(cursor, avail)) {
-    if (m_valueBuf.chainLength() > 0) {
-      handleInvalidRecord();
-      return;
-    }
-    handleGetValue(m_keyBuf.move());
-  }
-
-  m_readBuf.split(available - avail);
-}
-
-void FastCGITransaction::onStdOut(std::unique_ptr<IOBuf> chain) {
-  m_session->handleStdOut(m_requestId, std::move(chain));
-}
-
-void FastCGITransaction::onStdErr(std::unique_ptr<IOBuf> chain) {
-  m_session->handleStdErr(m_requestId, std::move(chain));
-}
-
-void FastCGITransaction::onComplete() {
-  m_session->handleComplete(m_requestId);
-}
-
-void FastCGITransaction::onClose() {
-  // Indicate to our handler that no more data will be coming in. This prevents
-  // PHP threads from waiting indefinitely for the rest of their POST data.
-  if (m_requestId != 0) m_handler->onBodyComplete();
-}
-
-bool FastCGITransaction::parseKeyValue(Cursor& cursor, size_t& available) {
+bool KVParser::parseKeyValue(Cursor& cursor, size_t& available) {
   if (m_phase == Phase::READ_KEY_LENGTH) {
     if (parseKeyValueLength(cursor, available, m_keyLength)) {
       m_keyLeft = m_keyLength;
@@ -187,34 +130,31 @@ bool FastCGITransaction::parseKeyValue(Cursor& cursor, size_t& available) {
   return false;
 }
 
-const FastCGITransaction::ShortLength
-  FastCGITransaction::k_longLengthFlag = 1 << 7;
-
-bool FastCGITransaction::parseKeyValueLength(Cursor& cursor,
-                                             size_t& available,
-                                             size_t& lengthReturn) {
-  if (available < sizeof(ShortLength)) {
+bool KVParser::parseKeyValueLength(Cursor& cursor,
+                                   size_t& available,
+                                   size_t& lengthReturn) {
+  if (!available) {
     return false;
   }
   auto peeked = cursor.peek();
-  if (*peeked.first & k_longLengthFlag) {
-    if (available < sizeof(LongLength)) {
+  if (*peeked.first & 0x80) { // highest bit is set
+    if (available < sizeof(uint32_t)) {
       return false;
     }
-    lengthReturn = cursor.readBE<LongLength>();
-    lengthReturn &= ~(k_longLengthFlag << 24);
-    available -= sizeof(LongLength);
+    lengthReturn = cursor.readBE<uint32_t>();
+    lengthReturn &= ~(0x80 << 24);
+    available -= sizeof(uint32_t);
   } else {
-    lengthReturn = cursor.readBE<ShortLength>();
-    available -= sizeof(ShortLength);
+    lengthReturn = cursor.readBE<uint8_t>();
+    available--;
   }
   return true;
 }
 
-bool FastCGITransaction::parseKeyValueContent(Cursor& cursor,
-                                              size_t& available,
-                                              size_t& length,
-                                              IOBufQueue& queue) {
+bool KVParser::parseKeyValueContent(Cursor& cursor,
+                                    size_t& available,
+                                    size_t& length,
+                                    IOBufQueue& queue) {
   std::unique_ptr<IOBuf> buf;
   size_t len = cursor.cloneAtMost(buf, length);
   queue.append(std::move(buf));
@@ -224,531 +164,552 @@ bool FastCGITransaction::parseKeyValueContent(Cursor& cursor,
   available -= len;
   return (length == 0);
 }
+}
+////////////////////////////////////////////////////////////////////////////////
 
-void FastCGITransaction::handleGetValue(std::unique_ptr<IOBuf> key_chain) {
-  assert(m_requestId == 0);
-  size_t key_length = key_chain ? key_chain->computeChainDataLength() : 0;
-  Cursor cursor(key_chain.get());
-  std::string key = cursor.readFixedString(key_length);
-  m_session->handleGetValueResult(key);
+FastCGISession::FastCGISession(
+  folly::EventBase* evBase,
+  JobQueueDispatcher<FastCGIWorker>& dispatcher,
+  folly::AsyncSocket::UniquePtr sock,
+  const folly::SocketAddress& localAddr,
+  const folly::SocketAddress& peerAddr)
+  : m_eventBase(evBase)
+  , m_dispatcher(dispatcher)
+  , m_localAddr(localAddr)
+  , m_peerAddr(peerAddr)
+  , m_sock(std::move(sock))
+{
+  ++m_eventCount; // pending readEOF
+  m_sock->setReadCB(this);
 }
 
-void FastCGITransaction::handleInvalidRecord() {
-  m_session->handleInvalidRecord();
+void FastCGISession::timeoutExpired() noexcept {
+  // Hard shutdown; socket timed out
+  dropConnection();
+}
+
+void FastCGISession::describe(std::ostream& os) const {
+  os << "[peerAddr: " << m_peerAddr
+     << ", localAddr: " << m_localAddr
+     << ", request_id: " << m_requestId
+     << "]";
+}
+
+bool FastCGISession::isBusy() const {
+  // We are busy whenever we are actively serving a request
+  return m_requestId != 0;
+}
+
+void FastCGISession::notifyPendingShutdown() {
+  closeWhenIdle();
+}
+
+void FastCGISession::closeWhenIdle() {
+  if (!m_requestId) {
+    m_sock->close();   // Flush any pending writes and close, calling close()
+                       // will immediately call readEOF and prevent any further
+                       // attempts to write data.
+
+    // readEOF will call shutdown() which may free this out from under us, we
+    // could add a DestructorGuard, but we'd only end up calling shutdown()
+    // ourselves. Instead we return immediately.
+    return;
+  }
+  m_keepConn = false; // will shutdown when request completes
+}
+
+void FastCGISession::dropConnection() {
+  // Nothing else needs to be placed here. Calling closeWithReset() will cause
+  // readEOF to be called immediately which will call shutdown().
+  //
+  // NB: If there are any pending writes they will all be failed. The last one
+  // to fail will delete us.
+  m_sock->closeWithReset();
+}
+
+void FastCGISession::dumpConnectionState(uint8_t loglevel) { /* nop */ }
+
+////////////////////////////////////////////////////////////////////////////////
+
+// Borrowed from proxygen
+const uint32_t k_minReadSize = 1460;
+const uint32_t k_maxReadSize = 4000;
+void FastCGISession::getReadBuffer(void** bufReturn, size_t* lenReturn) {
+  std::tie(*bufReturn, *lenReturn) = m_readBuf.preallocate(k_minReadSize,
+                                                           k_maxReadSize);
+}
+
+/*
+ * readDataAvailable() - This is the primary entry point for FastCGI records.
+ *
+ * While processing FastCGI records it's possible that a socket error will
+ * cause us to begin destructing, we construct a DestructorGuard and check
+ * the value of m_shutdown periodically to guard against deadlock and use-
+ * after-free bugs.
+ */
+void FastCGISession::readDataAvailable(size_t len) noexcept {
+  DestructorGuard dg(this);
+
+  m_readBuf.postallocate(len);
+  resetTimeout();
+
+  // If we're shutting down don't process any further requests, we may be freed
+  if (m_shutdown) {
+    return;
+  }
+
+  auto origChain = m_readBuf.front();
+  size_t avail = origChain ? origChain->computeChainDataLength() : 0;
+  size_t total = avail;
+
+  SCOPE_EXIT {
+    m_readBuf.trimStart(total - avail);
+  };
+
+  if (!avail) return;
+  auto chain = origChain->clone();
+
+  while (!m_shutdown && avail >= sizeof(fcgi::record)) {
+    chain->gather(sizeof(fcgi::record));
+    auto const rec = reinterpret_cast<const fcgi::record*>(chain->data());
+
+    if (avail < rec->size()) {
+      return;
+    }
+
+    chain->gather(rec->size());
+    avail -= rec->size();
+
+    switch (rec->type) {
+    case fcgi::BEGIN_REQUEST:
+      onRecord(rec->getTyped<fcgi::begin_record>());
+      break;
+    case fcgi::ABORT_REQUEST:
+      onRecord(rec->getTyped<fcgi::abort_record>());
+      break;
+    case fcgi::PARAMS:
+      onStream(rec->getTyped<fcgi::params_record>(), chain.get());
+      break;
+    case fcgi::STDIN:
+      onStream(rec->getTyped<fcgi::stdin_record>(), chain.get());
+      break;
+    case fcgi::GET_VALUES:
+      onStream(rec->getTyped<fcgi::values_record>(), chain.get());
+      break;
+    case fcgi::GET_VALUES_RESULT:
+    case fcgi::UNKNOWN_TYPE:
+    case fcgi::END_REQUEST:
+    case fcgi::STDOUT:
+    case fcgi::STDERR:
+    case fcgi::DATA:
+      // Received malformed record data- bail out
+      dropConnection();
+      break;
+    default:
+      writeUnknownType(rec->type);
+    }
+
+    chain->trimStart(rec->size());
+  }
+}
+
+void FastCGISession::readEOF() noexcept {
+  ioStop();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-FastCGISession::FastCGISession()
-  : m_phase(Phase::AT_RECORD_BEGIN),
-    m_maxConns(0),
-    m_maxRequests(0) {
-  m_transactions[0] = folly::make_unique<FastCGITransaction>(
-                        this, 0, nullptr);
+void FastCGISession::readErr(const folly::AsyncSocketException&) noexcept {
+  ioStop();
 }
 
-FastCGISession::~FastCGISession() {}
+void FastCGISession::writeErr(size_t,
+    const folly::AsyncSocketException&) noexcept {
+  ioStop();
+}
 
-const FastCGISession::Version FastCGISession::k_version = 1;
-
-const size_t FastCGISession::k_writeGrowth = 256;
-
-size_t FastCGISession::onIngress(const IOBuf* chain) {
-  if (m_phase == Phase::INVALID) {
-    return 0;
+void FastCGISession::writeSuccess() noexcept {
+  if (--m_eventCount == 0 && m_shutdown) {
+    // If we were terminating and this was the last pending event then trigger
+    // the delete.
+    destroy();
   }
+}
 
-  size_t available = chain ? chain->computeChainDataLength() : 0;
-  size_t avail = available;
+////////////////////////////////////////////////////////////////////////////////
 
-  Cursor cursor(chain);
-  while (m_phase != Phase::INVALID) {
-    if (m_phase == Phase::AT_RECORD_BEGIN) {
-      if (parseRecordBegin(cursor, avail)) {
-        m_phase = Phase::INSIDE_RECORD_BODY;
-      } else break;
+void FastCGISession::onStdOut(std::unique_ptr<IOBuf> chain) {
+  // FastCGITransport doesn't run in the same event base. Calling into internal
+  // functions here is unsafe from other threads so we enqueue the work for the
+  // event base.
+  folly::MoveWrapper<std::unique_ptr<IOBuf>> chain_wrapper(std::move(chain));
+  m_eventBase->runInEventBaseThread([this, chain_wrapper]() mutable {
+    writeStream(fcgi::STDOUT, std::move(*chain_wrapper));
+  });
+}
+
+void FastCGISession::onComplete() {
+  // FastCGITransport doesn't run in the same event base. Calling into internal
+  // functions here is unsafe from other threads so we enqueue the work for the
+  // event base.
+  m_eventBase->runInEventBaseThread([&] {
+    if (!m_aborting && !m_shutdown) {
+      // If we're aborting we already wrote the end request. If we're shutting
+      // down the socket is closed.
+      writeEndRequest(m_requestId, 0, fcgi::REQUEST_COMPLETE);
     }
-    if (m_phase == Phase::INSIDE_RECORD_BODY) {
-      if (parseRecordBody(cursor, avail)) {
-        m_phase = Phase::AT_RECORD_BODY_END;
-      } else break;
+
+    // Reset state
+    m_requestId = 0;
+    m_paramsReader.reset();
+    m_headersComplete = false;
+    m_bodyComplete = false;
+    m_transport.reset();
+
+    --m_eventCount; // pending onComplete() received
+
+    // Check if we were waiting to shutdown
+    if (m_shutdown && !m_eventCount) {
+      destroy();
+      return; // not safe to continue after we delete ourselves
     }
-    if (m_phase == Phase::AT_RECORD_BODY_END) {
-      if (parseRecordEnd(cursor, avail)) {
-        m_phase = Phase::AT_RECORD_BEGIN;
-      } else break;
+
+    // Check if we were the last request on this channel
+    if (!m_keepConn) {
+      shutdown();
+      return; // cannot continue execution after deleting self
+    }
+
+    // Clear the persistence flag
+    m_keepConn = false;
+  });
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void FastCGISession::ioStop() noexcept {
+  if (m_transport) {
+    // We set m_shutdown here because if the transport reenters and attempts
+    // to write we will put the socket in a very bad state and fail all in
+    // flight data.
+    m_shutdown = true;
+
+    // If the headers have not been fully received we never started the
+    // transport and exiting without receiving an onComplete is safe.
+    if (m_headersComplete) {
+      m_bodyComplete = true;
+      m_transport->onBodyComplete();
     }
   }
-  return available - avail;
+
+  // We may have read an EOF because someone deliberately called close() in
+  // which case they may call shutdown() or we may already be inside shutdown()
+  --m_eventCount;
+  shutdown();
 }
 
-void FastCGISession::onClose() {
-  for (auto& pair : m_transactions) {
-    pair.second->onClose();
+void FastCGISession::shutdown() noexcept {
+  DestructorGuard dg(this); // close() may call destroy()
+
+  m_shutdown = true;
+  m_keepConn = false;
+
+  // We may have gotten here via close(); if not perform the close ourselves.
+  // close() may destroy() us, so we have the destructor guard
+  if (m_sock->good()) {
+    m_sock->close();
+  }
+
+  if (m_eventCount == 0) {
+    destroy();
   }
 }
 
-void FastCGISession::setMaxConns(int max_conns) {
-  assert(max_conns > 0);
-  m_maxConns = max_conns;
+void FastCGISession::enqueueWrite(std::unique_ptr<IOBuf> chain) {
+  if (m_shutdown) {
+    // If we're shutting down do not write any more data. Writing data to a
+    // socket that has been closed will leave it in a very bad state.
+    return;
+  }
+  ++m_eventCount;
+  m_sock->writeChain(this, std::move(chain));
 }
 
-void FastCGISession::setMaxRequests(int max_requests) {
-  assert(max_requests > 0);
-  m_maxRequests = max_requests;
-}
+////////////////////////////////////////////////////////////////////////////////
 
-const size_t FastCGISession::k_recordBeginLength = (
-    sizeof(Version) +
-    sizeof(FastCGISession::m_recordType) +
-    sizeof(FastCGISession::m_requestId) +
-    sizeof(FastCGISession::m_contentLength) +
-    sizeof(FastCGISession::m_paddingLength) +
-    k_recordReservedLength
-  );
-
-const size_t FastCGISession::k_recordReservedLength = 1;
-
-bool FastCGISession::parseRecordBegin(Cursor& cursor, size_t& available) {
-  assert(m_phase == Phase::AT_RECORD_BEGIN);
-  if (available < FastCGISession::k_recordBeginLength) {
-    return false;
-  }
-  Version version = cursor.readBE<Version>();
-  if (version != k_version) {
-    handleInvalidRecord();
-    return false;
-  }
-  m_recordType = static_cast<RecordType>(cursor.readBE<uint8_t>());
-  m_requestId = cursor.readBE<decltype(m_requestId)>();
-  m_contentLength = cursor.readBE<decltype(m_contentLength)>();
-  m_contentLeft = m_contentLength;
-  m_paddingLength = cursor.readBE<decltype(m_paddingLength)>();
-  cursor.skip(k_recordReservedLength);
-  available -= k_recordBeginLength;
-  return true;
-}
-
-bool FastCGISession::parseRecordBody(Cursor& cursor, size_t& available) {
-  assert(m_phase == Phase::INSIDE_RECORD_BODY);
-
-  if (m_contentLength > 0 && available == 0) {
-    return false;
+void FastCGISession::onRecordImpl(const fcgi::begin_record* rec) {
+  if (rec->requestId == 0) {
+    // Garbage record
+    dropConnection();
+    return;
   }
 
-  size_t avail = available;
-  bool unknown = false;
-
-  if (m_requestId == 0 ||
-      m_recordType == RecordType::BEGIN_REQUEST ||
-      hasTransaction(m_requestId)) {
-    switch (m_recordType) {
-      case RecordType::BEGIN_REQUEST:
-        parseBeginRequest(cursor, avail);
-        break;
-      case RecordType::ABORT_REQUEST:
-        parseAbortRequest(cursor, avail);
-        break;
-      case RecordType::PARAMS:
-        parseParams(cursor, avail);
-        break;
-      case RecordType::STDIN:
-        parseStdIn(cursor, avail);
-        break;
-      case RecordType::DATA:
-        parseData(cursor, avail);
-        break;
-      case RecordType::GET_VALUES:
-        parseGetValues(cursor, avail);
-        break;
-      default:
-        parseIgnoreRecord(cursor, avail);
-        if (m_requestId == 0) {
-          unknown = true;
-        } else {
-          handleInvalidRecord();
-        }
+  if (m_requestId) {
+    if (m_requestId == rec->requestId) {
+      // Malformed stream
+      dropConnection();
+      return;
     }
-  } else {
-    parseIgnoreRecord(cursor, avail);
-  }
-
-  size_t length = available - avail;
-  available = avail;
-  assert(m_contentLength >= m_contentLeft);
-  assert(m_contentLeft >= length);
-  m_contentLeft -= length;
-
-  if (unknown && m_contentLeft == 0) {
-    writeUnknownType(m_recordType);
-  }
-
-  return m_phase != Phase::INVALID && (m_contentLeft == 0);
-}
-
-bool FastCGISession::parseRecordEnd(Cursor& cursor, size_t& available) {
-  assert(m_phase == Phase::AT_RECORD_BODY_END);
-  size_t length = cursor.skipAtMost(m_paddingLength);
-  assert(available >= length);
-  available -= length;
-  assert(m_paddingLength >= length);
-  m_paddingLength -= length;
-  if (m_paddingLength != 0) {
-    return false;
-  }
-  return true;
-}
-
-const size_t FastCGISession::k_beginRequestLength = (
-    sizeof(Role) +
-    sizeof(ConnectionFlags) +
-    FastCGISession::k_beginRequestReservedLength
-  );
-
-const size_t FastCGISession::k_beginRequestReservedLength = 5;
-
-const size_t FastCGISession::k_endRequestLength = (
-    sizeof(AppStatus) +
-    sizeof(ProtoStatus) +
-    FastCGISession::k_endRequestReservedLength
-  );
-
-const size_t FastCGISession::k_endRequestReservedLength = 3;
-
-void FastCGISession::parseBeginRequest(Cursor& cursor, size_t& available) {
-  if (m_contentLeft != k_beginRequestLength) {
-    handleInvalidRecord();
+    // Already have an active connection
+    writeEndRequest(rec->requestId, 0, fcgi::CANT_MULTIPLEX_CONN);
     return;
   }
-  if (available < k_beginRequestLength) {
+
+  if (rec->role != fcgi::RESPONDER) {
+    // Invalid role
+    writeEndRequest(rec->requestId, 0, fcgi::UNKNOWN_ROLE);
     return;
   }
-  Role role = static_cast<Role>(cursor.readBE<uint16_t>());
-  ConnectionFlags flags = static_cast<ConnectionFlags>(
-                            cursor.readBE<uint8_t>());
-  cursor.skip(k_beginRequestReservedLength);
-  available -= k_beginRequestLength;
-  handleBeginRequest(role, flags);
+
+  // Until the job actually starts once we receive the headers we don't need
+  // to register a pending onComplete()
+  m_requestId = rec->requestId;
+  m_transport = std::make_shared<FastCGITransport>(this);
+  m_paramsReader.reset();
+
+  // Determine if the server needs us to keep the channel open after the
+  // request completes.
+  m_keepConn = rec->flags & fcgi::KEEP_CONN;
 }
 
-const size_t FastCGISession::k_abortRequestLength = 0;
-
-void FastCGISession::parseAbortRequest(Cursor& cursor, size_t& available) {
-  if (m_contentLeft != k_abortRequestLength) {
-    handleInvalidRecord();
+void FastCGISession::onRecordImpl(const fcgi::abort_record* rec) {
+  if (!m_requestId || rec->requestId != m_requestId) {
+    // Garbage record
+    dropConnection();
     return;
   }
-  // empty body
-  handleAbortRequest();
+
+  writeEndRequest(m_requestId, 1, fcgi::REQUEST_COMPLETE);
+  m_aborting = true; // don't try to write REQUEST_COMPLETE again
+
+  // There may still be a pending eventCount from an onComplete call from the
+  // open tranport. We can't clear it here as there is no way to abort the
+  // transport and we need to be around to receive any data it may try to send
+  shutdown();
 }
 
-void FastCGISession::parseParams(Cursor& cursor, size_t& available) {
-  std::unique_ptr<IOBuf> chain;
-  size_t length = cursor.cloneAtMost(chain, m_contentLeft);
-  available -= length;
-  handleParams(std::move(chain));
-}
-
-void FastCGISession::parseStdIn(Cursor& cursor, size_t& available) {
-  std::unique_ptr<IOBuf> chain;
-  size_t length = cursor.cloneAtMost(chain, m_contentLeft);
-  available -= length;
-  handleStdIn(std::move(chain));
-}
-
-void FastCGISession::parseData(Cursor& cursor, size_t& available) {
-  std::unique_ptr<IOBuf> chain;
-  size_t length = cursor.cloneAtMost(chain, m_contentLeft);
-  available -= length;
-  handleData(std::move(chain));
-}
-
-void FastCGISession::parseGetValues(Cursor& cursor, size_t& available) {
-  std::unique_ptr<IOBuf> chain;
-  size_t length = cursor.cloneAtMost(chain, m_contentLeft);
-  available -= length;
-  handleGetValues(std::move(chain));
-}
-
-void FastCGISession::parseIgnoreRecord(Cursor& cursor, size_t& available) {
-  size_t length = cursor.skipAtMost(m_contentLeft);
-  available -= length;
-}
-
-void FastCGISession::handleBeginRequest(Role role, ConnectionFlags flags) {
-  if (m_requestId == 0 || hasTransaction(m_requestId)) {
-    handleInvalidRecord();
+void FastCGISession::onStream(const fcgi::params_record* rec,
+                              const IOBuf* chain) {
+  if (!m_requestId || rec->requestId != m_requestId || m_headersComplete) {
+    // Garbage record
+    dropConnection();
     return;
   }
-  if (role != Role::RESPONDER) {
-    writeEndRequest(m_requestId, 0, ProtoStatus::UNKNOWN_ROLE);
+
+  Cursor cur(chain);
+  std::unique_ptr<IOBuf> segment;
+  cur.skip(sizeof(fcgi::record));
+
+  cur.cloneAtMost(segment, rec->contentLength);
+  if (!m_paramsReader.consume(std::move(segment))) {
+    // Malformed stream
+    dropConnection();
+  }
+
+  while (m_paramsReader.ready()) {
+    std::unique_ptr<IOBuf> key, val;
+
+    std::tie(key, val) = m_paramsReader.readNext();
+    m_transport->onHeader(std::move(key), std::move(val));
+  }
+
+  if (m_paramsReader.done()) {
+    // If we've started shutting down then don't start the transport job.
+    if (m_shutdown) {
+      return;
+    }
+
+    m_headersComplete = true;
+    m_transport->onHeadersComplete();
+
+    // Now that the job is running we need to wait for a call to onComplete()
+    ++m_eventCount;
+
+    // This enqueue call would be safe from any thread because as the
+    // JobQueueDispatcher is synchronized
+    m_dispatcher.enqueue(std::make_shared<FastCGIJob>(m_transport));
+  }
+}
+
+void FastCGISession::onStream(const fcgi::stdin_record* rec,
+                              const IOBuf* chain) {
+  if (!m_requestId || rec->requestId != m_requestId || m_bodyComplete) {
+    // Garbage record
+    dropConnection();
     return;
   }
-  beginTransaction(m_requestId);
-}
 
-void FastCGISession::handleAbortRequest() {
-  if (m_requestId == 0 || !hasTransaction(m_requestId)) {
-    handleInvalidRecord();
+  if (!rec->contentLength) {
+    m_bodyComplete = true;
+    m_transport->onBodyComplete();
     return;
   }
-  Logger::Verbose("FastCGI protocol: received an abort request");
-  endTransaction(m_requestId);
-  writeEndRequest(m_requestId, 1, ProtoStatus::REQUEST_COMPLETE);
-  handleClose();
+
+  Cursor cur(chain);
+  std::unique_ptr<IOBuf> segment;
+  cur.skip(sizeof(fcgi::record));
+
+  cur.cloneAtMost(segment, rec->contentLength);
+  m_transport->onBody(std::move(segment));
 }
 
-void FastCGISession::handleStdIn(std::unique_ptr<IOBuf> chain) {
-  if (m_requestId == 0 || !hasTransaction(m_requestId)) {
-    handleInvalidRecord();
-    return;
-  }
-  getTransaction(m_requestId)->onStdIn(std::move(chain));
-}
-
-void FastCGISession::handleData(std::unique_ptr<IOBuf> chain) {
-  if (m_requestId == 0 || !hasTransaction(m_requestId)) {
-    handleInvalidRecord();
-    return;
-  }
-  getTransaction(m_requestId)->onData(std::move(chain));
-}
-
-void FastCGISession::handleParams(std::unique_ptr<IOBuf> chain) {
-  getTransaction(m_requestId)->onParams(std::move(chain));
-}
-
-void FastCGISession::handleGetValues(std::unique_ptr<IOBuf> chain) {
+void FastCGISession::onStream(const fcgi::values_record* rec,
+                              const IOBuf* chain) {
   if (m_requestId != 0) {
-    handleInvalidRecord();
+    // Garbage record
+    dropConnection();
     return;
   }
-  getTransaction(m_requestId)->onGetValues(std::move(chain));
+
+  Cursor cur(chain);
+  std::unique_ptr<IOBuf> segment;
+  cur.skip(sizeof(fcgi::record));
+
+  cur.cloneAtMost(segment, rec->contentLength);
+  if (!m_capReader.consume(std::move(segment))) {
+    // Malformed stream
+    dropConnection();
+  }
+
+  while (m_capReader.ready()) {
+    std::unique_ptr<IOBuf> key, val;
+
+    std::tie(key, val) = m_capReader.readNext();
+
+    size_t key_length = key ? key->computeChainDataLength() : 0;
+    Cursor cursor(key.get());
+    auto keyStr = cursor.readFixedString(key_length);
+    writeCapability(keyStr);
+  }
 }
 
-void FastCGISession::handleStdOut(RequestId request_id,
-                                  std::unique_ptr<IOBuf> chain) {
-  writeStdOut(request_id, std::move(chain));
-}
+////////////////////////////////////////////////////////////////////////////////
 
-void FastCGISession::handleStdErr(RequestId request_id,
-                                  std::unique_ptr<IOBuf> chain) {
-  writeStdErr(request_id, std::move(chain));
-}
+const std::string k_getValueMaxConnKey        = "FCGI_MAX_CONNS";
+const std::string k_getValueMaxRequestsKey    = "FCGI_MAX_REQS";
+const std::string k_getValueMultiplexConnsKey = "FCGI_MPXS_CONNS";
 
-void FastCGISession::handleComplete(RequestId request_id) {
-  endTransaction(request_id);
-  writeEndRequest(request_id, 0, ProtoStatus::REQUEST_COMPLETE);
-  handleClose();
-}
-
-const std::string FastCGISession::k_getValueMaxConnKey =
-  "FCGI_MAX_CONNS";
-const std::string FastCGISession::k_getValueMaxRequestsKey =
-  "FCGI_MAX_REQS";
-const std::string FastCGISession::k_getValueMultiplexConnsKey =
-  "FCGI_MPXS_CONNS";
-
-void FastCGISession::handleGetValueResult(const std::string& key) {
+void FastCGISession::writeCapability(const std::string& key) {
   std::string value;
   if (key == k_getValueMaxConnKey) {
-    value = std::to_string(m_maxConns);
-    writeGetValueResult(key, value);
+    value = std::to_string(m_dispatcher.getTargetNumWorkers());
   } else if (key == k_getValueMaxRequestsKey) {
-    value = std::to_string(m_maxRequests);
-    writeGetValueResult(key, value);
+    value = std::to_string(m_dispatcher.getTargetNumWorkers());
   } else if (key == k_getValueMultiplexConnsKey) {
-    value = "0"; // The implementation does not support connection
-                 // multiplexing.
-    writeGetValueResult(key, value);
+    // multiplexed connections are not implemented
+    value = "0";
   } else {
     // No-op we are supposed to ignore the keys that we
     // don't understand.
+    return;
   }
+
+  std::unique_ptr<IOBuf> chain;
+  fcgi::values_result_record* rec;
+
+  std::tie(chain, rec) = createRecord<fcgi::values_result_record>(
+    fcgi::GET_VALUES_RESULT,
+    0, // management stream
+    key.size() + value.size() + 2 * sizeof(uint32_t) // size hint
+  );
+
+  size_t len = 0;
+  Appender cursor(chain.get(), 256);
+
+  // Lengths can be sent as either bytes or double words.
+  auto appendLength = [&] (const std::string& lenStr) {
+    if (lenStr.size() > 255) {
+      len += sizeof(uint32_t);
+      cursor.writeBE<uint32_t>(lenStr.size() | (0x80 << 24));
+    } else {
+      len += sizeof(uint8_t);
+      cursor.writeBE<uint8_t>(lenStr.size());
+    }
+  };
+
+  auto appendData = [&] (const std::string& data) {
+    len += data.size();
+    cursor.push(reinterpret_cast<const uint8_t*>(data.c_str()), data.size());
+  };
+
+  appendLength(key);
+  appendLength(value);
+  appendData(key);
+  appendData(value);
+
+  rec->paddingLength = ((len + 7) & ~7) - len;
+  rec->contentLength = len;
+
+  cursor.ensure(rec->paddingLength);
+  cursor.append(rec->paddingLength);
+
+  enqueueWrite(std::move(chain));
 }
 
-void FastCGISession::handleInvalidRecord() {
-  Logger::Error("FastCGI protocol: received an invalid record");
-  m_phase = Phase::INVALID;
+void FastCGISession::writeEndRequest(uint16_t request_id,
+                                     uint32_t app_status,
+                                     fcgi::Status proto_status) {
+  std::unique_ptr<IOBuf> chain;
+  fcgi::end_record* rec;
+
+  std::tie(chain, rec) = createRecord<fcgi::end_record>(
+    fcgi::END_REQUEST,
+    request_id
+  );
+
+  rec->appStatus = app_status;
+  rec->protStatus = proto_status;
+  enqueueWrite(std::move(chain));
 }
 
-void FastCGISession::handleClose() {
-  if (m_callback) {
-    m_callback->onSessionClose();
-  }
+void FastCGISession::writeUnknownType(fcgi::Type record_type) {
+  std::unique_ptr<IOBuf> chain;
+  fcgi::unknown_record* rec;
+
+  std::tie(chain, rec) = createRecord<fcgi::unknown_record>(
+    fcgi::UNKNOWN_TYPE,
+    0 // management record
+  );
+
+  rec->unknownType = record_type;
+  enqueueWrite(std::move(chain));
 }
 
-void FastCGISession::writeEgress(std::unique_ptr<IOBuf> chain) {
-  if (m_callback) {
-    m_callback->onSessionEgress(std::move(chain));
-  }
-}
-
-void FastCGISession::writeEndRequest(RequestId request_id,
-                                     AppStatus app_status,
-                                     ProtoStatus proto_status) {
-  std::unique_ptr<IOBuf> chain(IOBuf::create(0));
-  Appender appender(chain.get(), k_writeGrowth);
-  size_t content_length = k_endRequestLength;
-  size_t padding_length = getPaddingLength(content_length);
-  appendRecordBegin(appender,
-                    RecordType::END_REQUEST,
-                    request_id,
-                    content_length,
-                    padding_length);
-  appender.writeBE<AppStatus>(app_status);
-  appender.writeBE<uint8_t>(static_cast<uint8_t>(proto_status));
-  appender.ensure(k_endRequestReservedLength);
-  memset(appender.writableData(), 0, k_endRequestReservedLength);
-  appender.append(k_endRequestReservedLength);
-  appendRecordEnd(appender, padding_length);
-  writeEgress(std::move(chain));
-}
-
-void FastCGISession::writeStream(RequestId request_id,
-                                 RecordType record_type,
+void FastCGISession::writeStream(fcgi::Type type,
                                  std::unique_ptr<IOBuf> stream_chain) {
-  assert(record_type == RecordType::STDOUT ||
-        record_type == RecordType::STDERR);
+  assert(type == fcgi::STDOUT || type == fcgi::STDERR);
   if (stream_chain == nullptr) {
     return; // Nothing to do.
   }
-  assert(stream_chain != nullptr);
+
   IOBufQueue queue(IOBufQueue::cacheChainLength());
-  QueueAppender appender(&queue, k_writeGrowth);
+  QueueAppender appender(&queue, 256);
   Cursor cursor(stream_chain.get());
+
+  size_t maxChunk = std::numeric_limits<uint16_t>::max();
   size_t available = stream_chain->computeChainDataLength();
   while (available > 0) {
-    size_t content_length = std::min(
-      (size_t) std::numeric_limits<ContentLength>::max(), available);
-    size_t padding_length = getPaddingLength(content_length);
-    appendRecordBegin(appender,
-                      record_type,
-                      request_id,
-                      content_length,
-                      padding_length);
+    size_t len = std::min(maxChunk, available);
+    size_t pad = ((len + 7) & ~7) - len;
+    appender.ensure(sizeof(fcgi::record));
+
+    auto rec = reinterpret_cast<fcgi::record*>(appender.writableData());
+    rec->version = fcgi::Version::Current;
+    rec->type = type;
+    rec->requestId = m_requestId;
+    rec->contentLength = len;
+    rec->paddingLength = pad;
+
+    appender.append(sizeof(fcgi::record));
+
     std::unique_ptr<IOBuf> chunk;
-    cursor.clone(chunk, content_length);
-    available -= content_length;
+    cursor.clone(chunk, len);
+    available -= len;
     appender.insert(std::move(chunk));
-    appendRecordEnd(appender, padding_length);
+    appender.ensure(pad);
+    appender.append(pad);
   }
-  writeEgress(queue.move());
-}
-
-void FastCGISession::writeStdOut(RequestId request_id,
-                                 std::unique_ptr<IOBuf> chain) {
-  writeStream(request_id, RecordType::STDOUT, std::move(chain));
-}
-
-void FastCGISession::writeStdErr(RequestId request_id,
-                                 std::unique_ptr<IOBuf> chain) {
-  writeStream(request_id, RecordType::STDERR, std::move(chain));
-}
-
-const FastCGISession::ShortLength FastCGISession::k_longLengthFlag = 1 << 7;
-
-void FastCGISession::writeGetValueResult(const std::string& key,
-                                         const std::string& value) {
-  std::unique_ptr<IOBuf> chain(IOBuf::create(0));
-  Appender cursor(chain.get(), k_writeGrowth);
-  cursor.ensure(k_recordBeginLength);
-  memset(cursor.writableData(), 0, k_recordBeginLength);
-  cursor.append(k_recordBeginLength);
-  if (key.size() & k_longLengthFlag) {
-    cursor.writeBE<LongLength>(key.size() | (k_longLengthFlag << 24));
-  } else {
-    cursor.writeBE<ShortLength>(key.size());
-  }
-  if (value.size() & k_longLengthFlag) {
-    cursor.writeBE<LongLength>(value.size() | (k_longLengthFlag << 24));
-  } else {
-    cursor.writeBE<ShortLength>(value.size());
-  }
-  // These instructions perform copying internally
-  cursor.push(reinterpret_cast<const uint8_t*>(key.c_str()), key.size());
-  cursor.push(reinterpret_cast<const uint8_t*>(value.c_str()), value.size());
-  size_t content_length = chain->computeChainDataLength() - k_recordBeginLength;
-  size_t padding_length = getPaddingLength(content_length);
-  appendRecordEnd(cursor, padding_length);
-  RWPrivateCursor begin(chain.get());
-  prependRecordBegin(begin,
-                     RecordType::GET_VALUES_RESULT,
-                     0, // This is a management record
-                     content_length,
-                     padding_length);
-  writeEgress(std::move(chain));
-}
-
-const size_t FastCGISession::k_unknownTypeLength = (
-    sizeof(RecordType) +
-    k_unknownTypeReservedLength
-  );
-const size_t FastCGISession::k_unknownTypeReservedLength = 7;
-
-void FastCGISession::writeUnknownType(RecordType record_type) {
-  std::unique_ptr<IOBuf> chain(IOBuf::create(0));
-  Appender cursor(chain.get(), k_writeGrowth);
-  size_t padding_length = getPaddingLength(k_unknownTypeLength);
-  appendRecordBegin(cursor,
-                    RecordType::UNKNOWN_TYPE,
-                    0, // This is a management record
-                    k_unknownTypeLength,
-                    padding_length);
-  cursor.writeBE<uint8_t>(static_cast<uint8_t>(record_type));
-  cursor.ensure(k_unknownTypeReservedLength);
-  memset(cursor.writableData(), 0, k_unknownTypeReservedLength);
-  cursor.append(k_unknownTypeReservedLength);
-  appendRecordEnd(cursor, padding_length);
-  writeEgress(std::move(chain));
-}
-
-void FastCGISession::prependRecordBegin(RWPrivateCursor& cursor,
-                                        RecordType record_type,
-                                        RequestId request_id,
-                                        size_t content_length,
-                                        size_t padding_length) {
-  cursor.writeBE<Version>(k_version);
-  cursor.writeBE<uint8_t>(static_cast<uint8_t>(record_type));
-  cursor.writeBE<RequestId>(request_id);
-  assert(content_length <= std::numeric_limits<uint16_t>::max());
-  cursor.writeBE<uint16_t>(content_length);
-  assert(padding_length <= std::numeric_limits<uint8_t>::max());
-  cursor.writeBE<uint8_t>(padding_length);
-  cursor.skip(k_recordReservedLength);
-}
-
-size_t FastCGISession::getPaddingLength(size_t content_length) {
-  // Align to 8-byte boundry.
-  return (8 - ((k_recordBeginLength + content_length) % 8)) % 8;
-}
-
-void FastCGISession::beginTransaction(RequestId request_id) {
-  assert(request_id != 0);
-  assert(!m_transactions.count(request_id));
-  // TODO: Make transactions reusable for performance.
-  assert(m_callback != nullptr);
-  auto handler = m_callback->newSessionHandler(request_id);
-  m_transactions[request_id] =
-    folly::make_unique<FastCGITransaction>(this, request_id, handler);
-}
-
-bool FastCGISession::hasTransaction(RequestId request_id) {
-  return m_transactions.count(request_id);
-}
-
-std::unique_ptr<FastCGITransaction>& FastCGISession::getTransaction(
-  RequestId request_id
-) {
-  assert(m_transactions.count(request_id));
-  return m_transactions[request_id];
-}
-
-void FastCGISession::endTransaction(RequestId request_id) {
-  assert(request_id != 0);
-  assert(m_transactions.count(request_id));
-  // TODO: Make transactions reusable for performance.
-  m_transactions.erase(request_id);
+  enqueueWrite(queue.move());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

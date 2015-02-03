@@ -77,7 +77,7 @@ static void add_func_breakpoint(int id,
 static void add_line_breakpoint(int id,
                                 XDebugBreakpoint& bp,
                                 const Unit* unit) {
-  string filepath = unit->filepath()->toCppString();
+  auto filepath = unit->filepath()->toCppString();
   LINE_MAP[filepath].insert(std::make_pair(bp.line, id));
   bp.unit = unit;
 }
@@ -127,7 +127,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
   switch (bp.type) {
     case BreakType::EXCEPTION: {
       // Remove duplicates then insert the name
-      string exceptionName = bp.exceptionName.toCppString();
+      auto exceptionName = bp.exceptionName.toCppString();
       auto iter = EXCEPTION_MAP.find(exceptionName);
       if (iter != EXCEPTION_MAP.end()) {
         XDEBUG_REMOVE_BREAKPOINT(iter->second);
@@ -208,7 +208,7 @@ void XDebugThreadBreakpoints::removeBreakpoint(int id) {
         EXCEPTION_MAP.erase(bp.exceptionName.toCppString());
         break;
       case BreakType::LINE: {
-        string filepath = bp.unit->filepath()->toCppString();
+        auto filepath = bp.unit->filepath()->toCppString();
         auto& unit_map = LINE_MAP[filepath];
 
         // Need to ensure we don't delete breakpoints on the same line
@@ -242,7 +242,7 @@ bool XDebugThreadBreakpoints::updateBreakpointLine(int id, int newLine) {
   XDebugBreakpoint& bp = iter->second;
 
   // Determine if we need to unregister the line
-  string filepath = bp.unit->filepath()->toCppString();
+  auto filepath = bp.unit->filepath()->toCppString();
   if (LINE_MAP[filepath].count(bp.line) == 1) {
     phpRemoveBreakPointLine(bp.unit, bp.line);
   }
@@ -436,7 +436,7 @@ void XDebugHookHandler::onBreak(const BreakInfo& bi) {
 }
 
 // Exception::getMessage method name
-static const StaticString s_GET_MESSAGE("getMessage");
+const StaticString s_GET_MESSAGE("getMessage");
 
 void XDebugHookHandler::onExceptionThrown(ObjectData* exception) {
   // Grab the exception name and message

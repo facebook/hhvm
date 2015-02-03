@@ -17,7 +17,7 @@ trait DynamicYield {
 class A {
   use DynamicYield;
 
-  final public async function yieldFoo(): Awaitable<int> {
+  final public async function genFoo(): Awaitable<int> {
     return 42;
   }
 }

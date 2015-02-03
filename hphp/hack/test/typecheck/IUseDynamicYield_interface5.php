@@ -16,12 +16,12 @@ trait DynamicYield {
 interface IUseDynamicYield {}
 
 interface IFoo extends IUseDynamicYield {
-  public function yieldStuff(): Awaitable<int>;
+  public function genStuff(): Awaitable<int>;
 }
 
 class Foo implements IFoo {
   // Don't use DynamicYield
-  public async function yieldStuff(): Awaitable<int> {
+  public async function genStuff(): Awaitable<int> {
     return 42;
   }
 }

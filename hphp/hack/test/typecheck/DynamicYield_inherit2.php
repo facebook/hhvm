@@ -21,7 +21,7 @@ class Foo {
 class Bar extends Foo {
   use DynamicYield;
 
-  private async function yieldA(): Awaitable<int> {
+  private async function genA(): Awaitable<int> {
     return 42;
   }
 }

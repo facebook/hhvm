@@ -1,2 +1,0 @@
-File "DynamicYield_inherit1.php", line 22, characters 26-31:
-DynamicYield cannot see private methods in subclasses (Typing[4017])

@@ -1,8 +1,4 @@
-File "DynamicYield7.php", line 26, characters 10-30:
-Invalid return type (Typing[4110])
-File "DynamicYield7.php", line 25, characters 17-22:
-This is a string
-File "DynamicYield7.php", line 20, characters 25-32:
-It is incompatible with an object of type Awaitable
-File "DynamicYield7.php", line 20, characters 25-32:
-DynamicYield implicitly defines genInt() from the definition of yieldInt()
+File "DynamicYield7.php", line 25, characters 10-30:
+The pseudo-method genInt is deprecated; call getInt directly instead of relying on DynamicYield::__call (Typing[4128])
+File "DynamicYield7.php", line 19, characters 19-24:
+Definition is here

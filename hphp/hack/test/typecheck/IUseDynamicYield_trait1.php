@@ -20,7 +20,7 @@ trait TFoo {
 
   require implements IUseDynamicYield;
 
-  public async function yieldStuff(): Awaitable<bool> {
+  public async function genStuff(): Awaitable<bool> {
     return true;
   }
 }
@@ -29,7 +29,7 @@ class Foo {
   use DynamicYield;
   use TFoo;
 
-  public async function yieldEvenMoreStuff(): Awaitable<string> {
+  public async function genEvenMoreStuff(): Awaitable<string> {
     $stuff = await $this->genStuff();
     return 'llama';
   }

@@ -765,12 +765,6 @@ void CodeGenerator::cgDecRefStk(IRInstruction* inst) {
                 cellsToBytes(inst->extra<DecRefStk>()->offset));
 }
 
-void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
-  emitDecRefMem(vmain(), inst->typeParam(),
-                srcLoc(0).reg(),
-                0);
-}
-
 //////////////////////////////////////////////////////////////////////
 // Arithmetic Instructions
 

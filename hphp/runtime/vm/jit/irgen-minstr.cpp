@@ -1156,7 +1156,8 @@ void emitRatchetRefs(MTS& env) {
       auto const misRef2Addr = misLea(env, MISOFF(tvRef2));
       // Clean up tvRef2 before overwriting it.
       if (ratchetInd(env) > 0) {
-        gen(env, DecRefMem, Type::Gen, misRef2Addr);
+        auto const val = gen(env, LdMem, Type::Gen, misRef2Addr);
+        gen(env, DecRef, val);
       }
       // Copy tvRef to tvRef2.
       auto const tvRef = gen(env, LdMem, Type::Gen, misRefAddr);
@@ -1934,7 +1935,8 @@ void cleanTvRefs(MTS& env) {
   constexpr ptrdiff_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
     auto const addr = misLea(env, refOffs[env.failedSetBlock ? 1 - i : i]);
-    gen(env, DecRefMem, Type::Gen, addr);
+    auto const val  = gen(env, LdMem, Type::Gen, addr);
+    gen(env, DecRef, val);
   }
 }
 

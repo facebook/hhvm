@@ -2750,12 +2750,6 @@ void CodeGenerator::cgDecRefMem(const IRInstruction* inst, Type type,
   }
 }
 
-void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
-  cgDecRefMem(inst, inst->typeParam(),
-              srcLoc(inst, 0).reg(),
-              0);
-}
-
 void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   auto src = inst->src(0);
   if (!src->type().maybeCounted()) return;

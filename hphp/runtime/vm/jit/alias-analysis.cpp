@@ -190,12 +190,12 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      * The reason for this is that many instructions can have effects like
      * that, when they can re-enter and do things to the stack in some range
      * (below the re-entry depth, for example), but also affect some other type
-     * of memory (DecRefMem, for example).  In particular this means we want
-     * that AliasClass to have an entry in the must_alias_map, so we'll
-     * populate it later.  Currently most of these situations should probably
-     * bail at kMaxExpandedStackRange, although there are some situations that
-     * won't (e.g. instructions like CoerceStk, or DecRefStk, which will have
-     * an AHeapAny (from re-entry) unioned with a single stack slot).
+     * of memory (CastStk, for example).  In particular this means we want that
+     * AliasClass to have an entry in the must_alias_map, so we'll populate it
+     * later.  Currently most of these situations should probably bail at
+     * kMaxExpandedStackRange, although there are some situations that won't
+     * (e.g. instructions like CoerceStk, or DecRefStk, which will have an
+     * AHeapAny (from re-entry) unioned with a single stack slot).
      */
     if (auto const stk = acls.stack()) {
       if (stk->size > 1) {

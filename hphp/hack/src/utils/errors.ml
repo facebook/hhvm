@@ -322,6 +322,7 @@ module Typing                               = struct
   let deprecated_use                        = 4128 (* DONT MODIFY!!!! *)
   let abstract_const_usage                  = 4129 (* DONT MODIFY!!!! *)
   let cannot_declare_constant               = 4130 (* DONT MODIFY!!!! *)
+  let cyclic_typeconst                      = 4131 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -954,6 +955,10 @@ let explain_constraint pos name (error: error) =
       [pos, "Considering the constraint on '"^name^"'"]
   )
 
+let explain_type_constant reason_msgl (error: error) =
+  let code, msgl = error in
+  add_list code (msgl @ reason_msgl)
+
 let overflow p =
   add Typing.overflow p "Value is too large"
 
@@ -1439,6 +1444,10 @@ let declared_contravariant pos1 pos2 emsg =
    pos1, "This is where the parameter was declared as contravariant (-)"
  ] @ emsg
  )
+
+let cyclic_typeconst pos sl =
+  add Typing.cyclic_typeconst pos
+    ("Cyclic type constant:\n  "^String.concat " -> " sl)
 
 (*****************************************************************************)
 (* Typing decl errors *)

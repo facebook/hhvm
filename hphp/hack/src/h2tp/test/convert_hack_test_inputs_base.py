@@ -130,6 +130,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'tconst/cannot_use_class_tparams.php',
         'tconst/constructor_error.php',
         'tconst/constructors.php',
+        'tconst/cyclic_type_const.php',
         'tconst/good_tconst_decl.php',
         'tconst/method_contravariant.php',
         'tconst/method_return.php',

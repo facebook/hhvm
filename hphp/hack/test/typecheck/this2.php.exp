@@ -1,7 +1,8 @@
 File "this2.php", line 14, characters 12-18:
 Invalid return type (Typing[4110])
 File "this2.php", line 13, characters 26-29:
-This is an object of type X (compatible with the type 'this')
+This is the type 'this'
+  that is compatible with an object of type X
 File "this2.php", line 14, characters 12-18:
 It is incompatible with an object of type X
 File "this2.php", line 12, characters 7-7:

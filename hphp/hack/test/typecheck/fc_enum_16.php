@@ -1,0 +1,3 @@
+<?hh
+
+enum Foo : arraykey {}

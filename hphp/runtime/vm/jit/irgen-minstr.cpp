@@ -585,7 +585,7 @@ void emitBaseLCR(MTS& env) {
   // we do, it's constrained further.
   auto base = getBase(env, DataTypeGeneric);
   auto baseType = base->type();
-  assert(baseType.isBoxed() || baseType.notBoxed());
+  if (!(baseType.isBoxed() || baseType.notBoxed())) PUNT(MInstr-GenBase);
 
   if (baseDL.location.isLocal()) {
     // Check for Uninit and warn/promote to InitNull as appropriate

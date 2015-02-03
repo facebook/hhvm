@@ -226,6 +226,21 @@ interpOutputLocals(HTS& env,
       smashesAllLocals = true;
       break;
 
+    case OpFPassM:
+      switch (inst.immVec.locationCode()) {
+      case LL:
+      case LNL:
+      case LNC:
+        // FPassM may or may not affect local types, depending on whether it is
+        // passing to a parameter that is by reference.  If we're InterpOne'ing
+        // it, just assume it might be by reference and smash all the locals.
+        smashesAllLocals = true;
+        break;
+      default:
+        break;
+      }
+      break;
+
     case OpSetOpL:
     case OpIncDecL: {
       assert(pushedType.hasValue());
@@ -272,7 +287,6 @@ interpOutputLocals(HTS& env,
     case OpSetWithRefLM:
     case OpSetWithRefRM:
     case OpUnsetM:
-    case OpFPassM:
     case OpIncDecM:
       switch (inst.immVec.locationCode()) {
         case LL: {
@@ -318,6 +332,7 @@ interpOutputLocals(HTS& env,
     case OpMIterInitK:
     case OpMIterNextK:
       setImmLocType(3, Type::Cell);
+      /* fallthrough */
     case OpMIterInit:
     case OpMIterNext:
       setImmLocType(2, Type::BoxedInitCell);
@@ -328,6 +343,7 @@ interpOutputLocals(HTS& env,
     case OpIterNextK:
     case OpWIterNextK:
       setImmLocType(3, Type::Cell);
+      /* fallthrough */
     case OpIterInit:
     case OpWIterInit:
     case OpIterNext:

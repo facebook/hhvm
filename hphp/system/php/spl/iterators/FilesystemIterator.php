@@ -9,7 +9,6 @@
  */
 class FilesystemIterator extends DirectoryIterator {
 
-
   const CURRENT_AS_PATHNAME = 32;
   const CURRENT_AS_FILEINFO = 0;
   const CURRENT_AS_SELF = 16;

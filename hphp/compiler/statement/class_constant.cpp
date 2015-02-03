@@ -65,7 +65,13 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
                                    scope->getOriginalName().c_str(),
                                    name.c_str());
       }
-      // Unlike below, there's no reason to call parseRecur
+
+      // HACK: break attempts to write global constants here;
+      // see ConstantExpression::preOptimize
+      exp->setContext(Expression::LValue);
+
+      // Unlike with assignment expression below, nothing needs to be added
+      // to the scope's constant table
     }
   } else {
     for (int i = 0; i < m_exp->getCount(); i++) {
@@ -140,6 +146,9 @@ StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
       }
     }
   }
+
+  // abstract constants are not added to the constant table and don't have
+  // any values to propagate.
   return StatementPtr();
 }
 

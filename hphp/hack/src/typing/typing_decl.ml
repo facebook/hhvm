@@ -710,25 +710,27 @@ and visibility cid = function
   | Protected -> Vprotected cid
   | Private   -> Vprivate cid
 
-and typeconst_decl c (env, acc) typeconst =
+and typeconst_decl c (env, acc) {
+  c_tconst_name = (pos, name);
+  c_tconst_constraint = constr;
+  c_tconst_type = type_;
+} =
   match c.c_kind with
-  | Ast.Cinterface | Ast.Ctrait | Ast.Cenum ->
+  | Ast.Ctrait | Ast.Cenum ->
       let kind = match c.c_kind with
-        | Ast.Cinterface -> "an interface"
-        | Ast.Ctrait -> "a trait"
-        | Ast.Cenum -> "an enum"
+        | Ast.Ctrait -> `trait
+        | Ast.Cenum -> `enum
         | _ -> assert false in
-      Errors.requires_non_class (fst c.c_name) (snd c.c_name) kind;
+      Errors.cannot_declare_constant kind pos c.c_name;
       env, acc
-  | Ast.Cabstract | Ast.Cnormal ->
-      let name = snd typeconst.c_tconst_name in
-      let env, constr =
-        opt Typing_hint.hint env typeconst.c_tconst_constraint in
-      let env, ty = opt Typing_hint.hint env typeconst.c_tconst_type in
+  | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
+      let env, constr = opt Typing_hint.hint env constr in
+      let env, ty = opt Typing_hint.hint env type_ in
       let tc = {
-        ttc_name = typeconst.c_tconst_name;
+        ttc_name = (pos, name);
         ttc_constraint = constr;
         ttc_type = ty;
+        ttc_origin = snd c.c_name;
       } in
       let acc = SMap.add name tc acc in
       env, acc

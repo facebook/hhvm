@@ -137,6 +137,8 @@ UNSUPPORTED_FILES_UNPARSER = {
         'tconst/nested_type_access.php',
         'tconst/tconst_with_static.php',
         'tconst/unassigned_tconst.php',
+        'tconst/interface.php',
+        'tconst/interface2.php',
     ],
 }
 

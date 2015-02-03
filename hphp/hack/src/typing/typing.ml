@@ -3487,11 +3487,6 @@ and check_extend_abstract_meth p smap =
   end smap
 
 (* Type constants must be bound to a concrete type for non-abstract classes.
- * A concrete type for our purposes means it is not a generic.
- *
- * We encode abstract type constants as Tgeneric. We can use this encoding
- * because it is not valid to assign a generic type parameter to a type
- * constant.
  *)
 and check_extend_abstract_typeconst p smap =
   SMap.iter begin fun x tc ->

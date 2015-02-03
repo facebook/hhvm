@@ -321,6 +321,7 @@ module Typing                               = struct
   let attribute_param_type                  = 4127 (* DONT MODIFY!!!! *)
   let deprecated_use                        = 4128 (* DONT MODIFY!!!! *)
   let abstract_const_usage                  = 4129 (* DONT MODIFY!!!! *)
+  let cannot_declare_constant               = 4130 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1526,6 +1527,25 @@ let deprecated_use pos pos_def msg =
     pos_def, "Definition is here";
   ]
 
+let cannot_declare_constant kind pos (class_pos, class_name) =
+  let kind_str =
+    match kind with
+    | `enum -> "an enum"
+    | `trait -> "a trait"
+  in
+  add_list Typing.cannot_declare_constant [
+    pos, "Cannot declare a constant in "^kind_str;
+    class_pos, (strip_ns class_name)^" was defined as "^kind_str^" here";
+  ]
+
+let ambiguous_inheritance pos class_ origin (error: error) =
+  let origin = strip_ns origin in
+  let class_ = strip_ns class_ in
+  let message = "This declaration was inherited from an object of type "^origin^
+    ". Redeclare this member in "^class_^" with a compatible signature." in
+  let code, msgl = error in
+  add_list code (msgl @ [pos, message])
+
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)
 (*****************************************************************************)
@@ -1595,6 +1615,9 @@ let try_add_err pos err f1 f2 =
     add_list error_code ((pos, err) :: l);
     f2()
   end
+
+let has_no_errors f =
+  try_ (fun () -> f(); true) (fun _ -> false)
 
 (*****************************************************************************)
 (* Do. *)

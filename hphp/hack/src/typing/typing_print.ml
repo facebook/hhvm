@@ -320,6 +320,7 @@ module PrintClass = struct
     ttc_name = tc_name;
     ttc_constraint = tc_constraint;
     ttc_type = tc_type;
+    ttc_origin = origin;
   } =
     let name = snd tc_name in
     let ty x = Full.to_string tenv x in
@@ -333,7 +334,7 @@ module PrintClass = struct
       | None -> ""
       | Some x -> " = "^ty x
     in
-    name^constraint_^type_
+    name^constraint_^type_^" (origin:"^origin^")"
 
   let typeconst_smap m =
     SMap.fold begin fun _ v acc ->

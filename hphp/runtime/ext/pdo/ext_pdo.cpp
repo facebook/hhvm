@@ -2803,6 +2803,7 @@ static Variant HHVM_METHOD(PDOStatement, execute,
                            data->m_stmt->active_query_string);
     if (ret == 0) { /* no changes were made */
       data->m_stmt->active_query_string = data->m_stmt->query_string;
+      ret = 1;
     } else if (ret == -1) {
       /* something broke */
       PDO_HANDLE_STMT_ERR(data->m_stmt);

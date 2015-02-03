@@ -32,37 +32,60 @@ struct IRInstruction;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Has the effects of possibly loading from one alias class, possibly storing
- * to another.  The instruction may also have other side-effects, and generally
- * can't be either removed or moved based on load-store analysis only.
+ * General effect information used by most IR instructions.  The instruction
+ * may load or store to different alias classes, as well as have any other
+ * side-effects.
  *
- * A note about instructions that can re-enter the VM:
+ * Locations that contain PHP values are assumed (except for `moved', see
+ * below) to be affected with normal VM semantics with regard to memory
+ * barriers---that is, if the instruction loads from a `loads' location and
+ * keeps a pointer to the value, it must IncRef it, and if the instruction
+ * stores to a `stores' location, it must decref the old value that was in
+ * memory (if there could be any) and incref the one it is storing.  The reason
+ * to make this expectation clear is for the use of this module by refcount
+ * optimizations.  Note that this means that instructions which do nothing but
+ * store a php value to a location (without decreffing the old value that may
+ * have been there) cannot use GeneralEffects to represent that (they must use
+ * PureStore)---the same thing does not /quite/ apply to loads.
  *
- *   If an instruction can re-enter, it can both read and write to the eval
- *   stack below some depth.  However, it can only legally read those slots if
- *   it writes them first, so we only need to include them in the may-store
- *   set, not the may-load set.  This is sufficient to ensure those stack
- *   locations don't have upward-exposed uses through a potentially re-entering
- *   instruction, and also to ensure we don't consider those locations
- *   available for load elimination after the instruction.
+ * Furthermore, all locations that contain values the instruction may decref
+ * should be included in `stores', even if (as an "optimization") we don't need
+ * to store anything over it.  This requirement basically only applies to
+ * GenericRetDecRefs.
+ *
+ * The exception to the "normal VM semantics" is for values in the class
+ * `moved', which must always be a subclass of `loads'.  This set of locations
+ * may be loaded by the instruction, but in order to `transfer' them to another
+ * memory location (which must be somewhere in its `stores' set), without an
+ * IncRef.  Note: this set is also may-information---and it is required to
+ * contain any location this instruction may do this to for correct analysis in
+ * refcount optimizations (it must be conservatively "too big" rather than too
+ * small).
+ *
+ * Additionally, there is a set `killed'.  For this set of locations, when the
+ * instruction executes (before any of its other effects), it becomes
+ * semantically illegal for any part of the program to read from those
+ * locations again (without writing to them first).  This is used for the
+ * ReturnHook to prevent uses of the stack and frame, and eventually should
+ * have a use for killing stack slots below the re-entry depth for potentially
+ * re-entering instructions (but is not used this way at the time of this
+ * writing).
+ *
+ * A final note about instructions that can re-enter the VM:
+ *
+ *   If an instruction can re-enter, it can generally both read and write to
+ *   the eval stack below some depth.  However, it can only legally read those
+ *   slots if it writes them first, so we only need to include them in the
+ *   may-store set, not the may-load set.  This is sufficient to ensure those
+ *   stack locations don't have upward-exposed uses through a potentially
+ *   re-entering instruction, and also to ensure we don't consider those
+ *   locations available for load elimination after the instruction.
+ *
  */
-struct MayLoadStore   { AliasClass loads; AliasClass stores; };
-
-/*
- * Like MayLoadStore, except also provides a set of locations that are `killed'
- * via this instruction.  That is, when the instruction executes (before any of
- * its other effects), it becomes illegal for any part of the program to read
- * from those locations without first writing to them.
- *
- * If `killed' overlaps with either mls.loads or mls.stores, the locations in
- * the intersection may be assumed to be killed.
- *
- * This is used, for example, for ReturnHook, which has peculiar semantics---it
- * can re-enter and access various things in the heap, but the eval stack and
- * frame locals for the current function are required to be dead before we can
- * run this instruction.  (It calls setLocalsDecRefd on the ActRec.)
- */
-struct MayLoadStoreKill { MayLoadStore mls; AliasClass killed; };
+struct GeneralEffects   { AliasClass loads;
+                          AliasClass stores;
+                          AliasClass moved;
+                          AliasClass killed; };
 
 /*
  * The effect of definitely loading from an abstract location, without
@@ -175,8 +198,7 @@ struct IrrelevantEffects {};
  */
 struct UnknownEffects {};
 
-using MemEffects = boost::variant< MayLoadStore
-                                 , MayLoadStoreKill
+using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
                                  , PureStoreNT

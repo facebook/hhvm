@@ -231,10 +231,10 @@ void store(Local& env, AliasClass acls, SSATmp* value) {
   FTRACE(5, "       av: {}\n", show(env.state.avail));
 }
 
-void may_load_store(Local& env,
-                    const IRInstruction& inst,
-                    MayLoadStore m,
-                    Flags& flags) {
+void handle_general_effects(Local& env,
+                            const IRInstruction& inst,
+                            GeneralEffects m,
+                            Flags& flags) {
   store(env, m.stores, nullptr);
 
   switch (inst.op()) {
@@ -301,8 +301,7 @@ Flags analyze_inst(Local& env,
       std::tie(flags.replaceable, flags.knownType) = load(env, inst, m.src);
     },
 
-    [&] (MayLoadStoreKill m) { may_load_store(env, inst, m.mls, flags); },
-    [&] (MayLoadStore m)     { may_load_store(env, inst, m, flags); }
+    [&] (GeneralEffects m) { handle_general_effects(env, inst, m, flags); }
   );
 
   switch (inst.op()) {

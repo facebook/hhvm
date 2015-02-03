@@ -52,9 +52,9 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (CallEffects x)       { visit(x.killed); visit(x.stack); },
         [&] (IterEffects x)       { visit(x.killed); },
         [&] (IterEffects2 x)      { visit(x.killed); },
-        [&] (MayLoadStore x)      { visit(x.loads); visit(x.stores); },
-        [&] (MayLoadStoreKill x)  { visit(x.mls.loads);
-                                    visit(x.mls.stores);
+        [&] (GeneralEffects x)    { visit(x.loads);
+                                    visit(x.stores);
+                                    visit(x.moved);
                                     visit(x.killed); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
@@ -127,11 +127,7 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
 }
 
 ALocBits AliasAnalysis::must_alias(AliasClass acls) const {
-  if (auto const info = find(acls)) {
-    auto ret = ALocBits{};
-    ret.set(info->index);
-    return ret;
-  }
+  if (auto const info = find(acls)) return ALocBits{}.set(info->index);
 
   auto ret = ALocBits{};
 

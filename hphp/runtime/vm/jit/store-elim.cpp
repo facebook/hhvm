@@ -187,12 +187,8 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { addAllGen(env); },
     [&] (PureLoad l)        { load(env, l.src); },
-    [&] (MayLoadStore l)    { load(env, l.loads); },
-
-    [&] (MayLoadStoreKill l) {
-      load(env, l.mls.loads);
-      kill(env, l.killed);
-    },
+    [&] (GeneralEffects l)  { load(env, l.loads);
+                              kill(env, l.killed); },
 
     [&] (InterpOneEffects m) {
       addAllGen(env);

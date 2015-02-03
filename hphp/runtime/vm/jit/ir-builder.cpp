@@ -289,7 +289,8 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
   }
 
   // Asserting in these situations doesn't add any information.
-  if (oldType <= Type::Cls || typeParam == Type::Gen) return inst->src(0);
+  if (typeParam == Type::Cls && oldType <= Type::Cls) return inst->src(0);
+  if (typeParam == Type::Gen && oldType <= Type::Gen) return inst->src(0);
 
   auto const newType = refineType(oldType, typeParam);
 

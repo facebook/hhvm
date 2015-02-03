@@ -45,7 +45,17 @@ void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
 
 void freeLocalsAndThis(HTS& env) {
   auto const localCount = curFunc(env)->numLocals();
-  auto const shouldFreeInline = mcg->useLLVM() || [&]() -> bool {
+
+  auto const shouldFreeInline = [&]() -> bool {
+    // In a pseudomain, we have to do a non-inline DecRef, because we can't
+    // side-exit in the middle of the sequence of LdLocPseudoMains.  In LLVM,
+    // non-inline decrefs are not currently supported, so we have to punt.
+    if (mcg->useLLVM()) {
+      if (curFunc(env)->isPseudoMain()) PUNT(LLVMPsuedoMain-RetC);
+      return true;
+    }
+    if (curFunc(env)->isPseudoMain()) return false;
+
     auto const count = mcg->numTranslations(
       env.irb->unit().context().srcKey());
     constexpr int kTooPolyRet = 6;
@@ -58,6 +68,7 @@ void freeLocalsAndThis(HTS& env) {
     }
     return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
   }();
+
   if (shouldFreeInline) {
     decRefLocalsInline(env);
     for (unsigned i = 0; i < localCount; ++i) {

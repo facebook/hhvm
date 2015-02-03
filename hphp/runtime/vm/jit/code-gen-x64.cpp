@@ -2425,12 +2425,6 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
-  cgDecRefMem(inst, inst->typeParam(),
-              srcLoc(inst, 0).reg(),
-              localOffset(inst->extra<DecRefLoc>()->locId));
-}
-
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rFp       = srcLoc(inst, 0).reg();
   auto const numLocals = getFunc(inst->marker())->numLocals();
@@ -2478,9 +2472,8 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
   // This gives good uniqueness within a bytecode without requiring us to track
   // more complex things like "this is the 3rd DecRef in this bytecode".
   const int32_t profileId =
-    inst->is(DecRefLoc) ? inst->extra<DecRefLoc>()->locId
-  : inst->is(DecRefStk) ? inst->extra<DecRefStk>()->offset
-  : 0;
+    inst->is(DecRefStk) ? inst->extra<DecRefStk>()->offset
+                        : 0;
   auto const profileKey =
     makeStaticString(folly::to<std::string>("DecRefProfile-",
                                             opcodeName(inst->op()),

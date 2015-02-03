@@ -444,45 +444,6 @@ SSATmp* IRBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
-  auto const locId = inst->extra<DecRefLoc>()->locId;
-
-  /*
-   * Refine the type if we can.
-   *
-   * We can't really rely on the types held in the boxed values since aliasing
-   * stores may change them, and we only guard during LdRef.  So we have to
-   * change any boxed type to BoxedCell.
-   *
-   * DataTypeGeneric is used because we don't want a DecRef to be the only
-   * thing keeping a guard around. This code is designed to tolerate the
-   * incoming type being relaxed.
-   */
-  auto knownType = localType(locId, DataTypeGeneric);
-  if (knownType.isBoxed()) {
-    knownType = Type::BoxedInitCell;
-  }
-
-  /*
-   * If we have the local value in flight, use a DecRef on it instead of doing
-   * it in memory.
-   */
-  if (auto tmp = localValue(locId, DataTypeGeneric)) {
-    gen(DecRef, tmp);
-    inst->convertToNop();
-    return nullptr;
-  }
-
-  if (typeMightRelax()) return nullptr;
-
-  inst->setTypeParam(std::min(knownType, inst->typeParam()));
-  if (inst->typeParam().notCounted()) {
-    inst->convertToNop();
-  }
-
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   auto const locId = inst->extra<LdLoc>()->locId;
   if (auto tmp = localValue(locId, DataTypeGeneric)) return tmp;
@@ -661,7 +622,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CheckCtxThis)
   X(LdCtx)
   X(DecRefThis)
-  X(DecRefLoc)
   X(LdLoc)
   X(StLoc)
   X(CastStk)

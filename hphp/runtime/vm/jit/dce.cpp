@@ -316,7 +316,6 @@ bool canDCE(IRInstruction* inst) {
   case ReqRetranslateOpt:
   case IncRef:
   case IncRefCtx:
-  case DecRefLoc:
   case DecRefStk:
   case DecRefThis:
   case DecRef:
@@ -720,7 +719,6 @@ void performActRecFixups(const BlockList& blocks,
        * stomp on the caller's frame if it reenters.
        */
       case DecRef:
-      case DecRefLoc:
       case DecRefStk:
       case DecRefMem:
         if (inst.marker().func() != outerFunc) {

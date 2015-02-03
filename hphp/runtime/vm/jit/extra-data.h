@@ -864,7 +864,6 @@ X(AssertLoc,                    LocalId);
 X(LdLocAddr,                    LocalId);
 X(LdLoc,                        LocalId);
 X(LdLocPseudoMain,              LocalId);
-X(DecRefLoc,                    LocalId);
 X(StLoc,                        LocalId);
 X(StLocPseudoMain,              LocalId);
 X(StLocNT,                      LocalId);

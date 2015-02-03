@@ -534,12 +534,6 @@ inline SSATmp* ldCls(HTS& env, SSATmp* className) {
   return gen(env, LdCls, className, cns(env, curClass(env)));
 }
 
-inline void decRefLocalsInline(HTS& env) {
-  for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
-    gen(env, DecRefLoc, Type::Gen, LocalId(id), fp(env));
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 // Local variables
 
@@ -769,6 +763,14 @@ inline SSATmp* ldStkAddr(HTS& env, int32_t relOffset) {
     StackOffset { offset },
     sp(env)
   );
+}
+
+inline void decRefLocalsInline(HTS& env) {
+  assert(!curFunc(env)->isPseudoMain());
+  for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
+    auto const loc = ldLoc(env, id, nullptr, DataTypeGeneric);
+    gen(env, DecRef, loc);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

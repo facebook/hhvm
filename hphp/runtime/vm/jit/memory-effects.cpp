@@ -902,13 +902,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
     return IrrelevantEffects {};
 
-  case DecRefStk:
-    return MayLoadStore {
-      AHeapAny | AStack { inst.src(0), inst.extra<DecRefStk>()->offset, 1 }
-               | reentry_extra(),
-      ANonFrame
-    };
-
   case LdArrFPushCuf:  // autoloads
   case LdArrFuncCtx:   // autoloads
   case LdObjMethod:    // can't autoload, but can decref $this right now

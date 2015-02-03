@@ -343,22 +343,8 @@ inline void discard(HTS& env, uint32_t n) {
 inline void popDecRef(HTS& env,
                       Type type,
                       TypeConstraint tc = DataTypeCountness) {
-  if (auto const src = env.irb->evalStack().pop()) {
-    env.irb->constrainValue(src, tc);
-    gen(env, DecRef, src);
-    return;
-  }
-
-  auto const offset = offsetFromSP(env, 0);
-  env.irb->constrainStack(offset, tc);
-  gen(
-    env,
-    DecRefStk,
-    StackOffset { offset },
-    type,
-    sp(env)
-  );
-  env.irb->incStackDeficit();
+  auto const val = pop(env, type, tc);
+  gen(env, DecRef, val);
 }
 
 inline SSATmp* push(HTS& env, SSATmp* tmp) {

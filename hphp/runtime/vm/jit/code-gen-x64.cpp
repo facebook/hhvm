@@ -2394,12 +2394,6 @@ void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
   ifThen(v, CC_Z, sf, [&](Vout& v) { emitIncRef(v, src); });
 }
 
-void CodeGenerator::cgDecRefStk(IRInstruction* inst) {
-  cgDecRefMem(inst, inst->typeParam(),
-              srcLoc(inst, 0).reg(),
-              cellsToBytes(inst->extra<DecRefStk>()->offset));
-}
-
 void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   auto fpReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
@@ -2467,18 +2461,9 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
   auto const kind = mcg->tx().mode();
   if (kind != TransKind::Profile && kind != TransKind::Optimize) return true;
 
-  // For a profiling key, we use:
-  // "DecRefProfile-{opcode name}-{stack/local id if present}-{type}"
-  // This gives good uniqueness within a bytecode without requiring us to track
-  // more complex things like "this is the 3rd DecRef in this bytecode".
-  const int32_t profileId =
-    inst->is(DecRefStk) ? inst->extra<DecRefStk>()->offset
-                        : 0;
   auto const profileKey =
     makeStaticString(folly::to<std::string>("DecRefProfile-",
                                             opcodeName(inst->op()),
-                                            '-',
-                                            profileId,
                                             '-',
                                             type.toString()));
   profile.emplace(m_state.unit.context(), inst->marker(), profileKey);
@@ -2697,57 +2682,6 @@ void CodeGenerator::cgDecRefDynamicType(const IRInstruction* inst, Vreg typeReg,
   }
   if (!v.closed()) v << jmp{done};
   v = done;
-}
-
-//
-// Generates dec-ref of a typed value with dynamic (statically
-// unknown) type, when all we have is the baseReg and offset of
-// the typed value. This method assumes that baseReg is not the
-// scratch register.
-//
-void CodeGenerator::cgDecRefDynamicTypeMem(const IRInstruction* inst,
-                                           Vreg baseReg, int64_t offset) {
-  auto& v = vmain();
-  auto dataReg = v.makeReg();
-  auto done = v.makeBlock();
-
-  // Emit check for ref-counted type
-  cgCheckRefCountedType(baseReg, offset, done);
-
-  v << load{baseReg[offset + TVOFF(m_data)], dataReg};
-
-  // Emit check for UncountedValue or StaticValue and the actual DecRef
-  cgCheckStaticBitAndDecRef(v, inst, done, Type::Cell, dataReg, [&](Vout& v) {
-    // Emit call to release in stubsCode
-    auto tvPtr = v.makeReg();
-    v << lea{baseReg[offset], tvPtr};
-    cgCallHelper(v, CppCall::direct(tv_release_generic),
-                 kVoidDest,
-                 SyncOptions::kSyncPoint,
-                 argGroup(inst).reg(tvPtr));
-  });
-
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
-//
-// Generates the dec-ref of a typed value in memory address [baseReg + offset].
-// This handles cases where type is either static or dynamic.
-//
-void CodeGenerator::cgDecRefMem(const IRInstruction* inst, Type type,
-                                Vreg baseReg, int64_t offset) {
-  if (type.notCounted()) return;
-  auto& v = vmain();
-  if (type.needsReg()) {
-    // The type is dynamic, but we don't have two registers available
-    // to load the type and the data.
-    cgDecRefDynamicTypeMem(inst, baseReg, offset);
-  } else if (type.maybeCounted()) {
-    auto dataReg = v.makeReg();
-    v << load{baseReg[offset + TVOFF(m_data)], dataReg};
-    cgDecRefStaticType(v, inst, type, dataReg, true);
-  }
 }
 
 void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {

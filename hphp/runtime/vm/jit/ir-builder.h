@@ -307,7 +307,6 @@ private:
   SSATmp* preOptimizeCastStk(IRInstruction*);
   SSATmp* preOptimizeCoerceStk(IRInstruction*);
   SSATmp* preOptimizeLdStk(IRInstruction*);
-  SSATmp* preOptimizeDecRefStk(IRInstruction*);
   SSATmp* preOptimize(IRInstruction*);
 
 private:

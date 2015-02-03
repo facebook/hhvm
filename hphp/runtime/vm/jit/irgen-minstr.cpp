@@ -1946,25 +1946,12 @@ uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
     env.op == Op::SetM || env.op == Op::BindM ? 1 : 0;
   auto const stackCnt = env.stackInputs.size();
   for (auto i = startOff; i < stackCnt; ++i) {
-    switch (why) {
-    case DecRefStyle::FromCatch:
-      if (topType(env, i, DataTypeGeneric) <= Type::Gen) {
-        gen(env,
-            DecRefStk,
-            StackOffset { offsetFromSP(env, i) },
-            Type::Gen,
-            sp(env));
-      }
-      break;
-    case DecRefStyle::FromMain:
-      {
-        auto const input = top(env, Type::StkElem, i, DataTypeSpecific);
-        if (input->type() <= Type::Gen) {
-          gen(env, DecRef, input);
-        }
-      }
-      break;
-    }
+    auto const type = topType(env, i, DataTypeGeneric);
+    if (!(type <= Type::Gen)) continue;
+    auto const tc = why == DecRefStyle::FromMain ? DataTypeSpecific
+                                                 : DataTypeGeneric;
+    auto const input = top(env, Type::Gen, i, tc);
+    gen(env, DecRef, input);
   }
   return stackCnt;
 }
@@ -2032,8 +2019,8 @@ Block* makeCatchSet(MTS& env) {
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
   if (!isSetWithRef) {
-    gen(env, DecRefStk, StackOffset { offsetFromSP(env, 0) }, Type::Cell,
-      sp(env));
+    auto const val = top(env, Type::Cell, 0, DataTypeGeneric);
+    gen(env, DecRef, val);
   }
   auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromCatch);
   discard(env, stackCnt);

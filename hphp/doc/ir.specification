@@ -1418,10 +1418,6 @@ To string conversions:
 
   If the Ctx in S0 is a $this pointer, IncRef it.
 
-| DecRefStk<T,offset>, ND, S(StkPtr), NF
-
-  DecRef a value of type T at offset on the stack pointed to by S0.
-
 | DecRefThis, ND, S(FramePtr), NF
 
   DecRef the $this pointer in the ActRec S0, if it had one. Does nothing if

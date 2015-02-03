@@ -194,8 +194,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      * AliasClass to have an entry in the must_alias_map, so we'll populate it
      * later.  Currently most of these situations should probably bail at
      * kMaxExpandedStackRange, although there are some situations that won't
-     * (e.g. instructions like CoerceStk, or DecRefStk, which will have an
-     * AHeapAny (from re-entry) unioned with a single stack slot).
+     * (e.g. instructions like CoerceStk, which will have an AHeapAny (from
+     * re-entry) unioned with a single stack slot).
      */
     if (auto const stk = acls.stack()) {
       if (stk->size > 1) {

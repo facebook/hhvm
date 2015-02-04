@@ -40,8 +40,8 @@ let unix_socket sock_name =
 let max_addr_length = 103
 let min_name_length = 17
 
-let get_path ?user:(user=None) root =
-  let tmp_dir = Tmp.get_dir ~user () in
+let get_path root =
+  let tmp_dir = Tmp.get_dir () in
   (* Appened a "/" if necessary *)
   let tmp_dir = if tmp_dir.[String.length tmp_dir - 1] <> '/'
     then tmp_dir ^ "/"

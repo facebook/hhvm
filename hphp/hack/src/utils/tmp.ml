@@ -17,11 +17,8 @@ let temp_dir_name =
   let dir = Filename.temp_dir_name in
   if dir.[String.length dir - 1] <> '/' then dir ^ "/" else dir
 
-let get_dir ?user:(user=None) () =
-  let user = match user with
-    | None -> Sys_utils.logname
-    | Some user -> user in
-  let tmp_dir = temp_dir_name ^ SysConfig.temp_base ^ "_" ^ user in
+let get_dir () =
+  let tmp_dir = temp_dir_name ^ SysConfig.temp_base in
   (* Emulate "mkdir -p", i.e., no error if already exists. *)
   let old_umask = Unix.umask 0 in
   (* Don't set sticky bit since the socket opening code wants to remove any

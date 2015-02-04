@@ -132,51 +132,15 @@ struct TransContext {
  * to do after we're done, so it's distinct from the TransContext above.
  */
 struct TranslArgs {
-  TranslArgs(SrcKey sk, bool align)
-    : m_sk(sk)
-    , m_align(align)
-    , m_dryRun(false)
-    , m_setFuncBody(false)
-    , m_transId(kInvalidTransID)
-    , m_region(nullptr)
-  {}
+  TranslArgs(SrcKey sk, bool align) : sk{sk}, align{align} {}
 
-  TranslArgs& sk(SrcKey sk) {
-    m_sk = sk;
-    return *this;
-  }
-  TranslArgs& align(bool align) {
-    m_align = align;
-    return *this;
-  }
-  TranslArgs& dryRun(bool dry) {
-    m_dryRun = dry;
-    return *this;
-  }
-  TranslArgs& setFuncBody() {
-    m_setFuncBody = true;
-    return *this;
-  }
-  TranslArgs& flags(TransFlags flags) {
-    m_flags = flags;
-    return *this;
-  }
-  TranslArgs& transId(TransID transId) {
-    m_transId = transId;
-    return *this;
-  }
-  TranslArgs& region(RegionDescPtr region) {
-    m_region = region;
-    return *this;
-  }
-
-  SrcKey m_sk;
-  bool m_align;
-  bool m_dryRun;
-  bool m_setFuncBody;
-  TransFlags m_flags;
-  TransID m_transId;
-  RegionDescPtr m_region;
+  SrcKey sk;
+  bool align;
+  bool dryRun{false};
+  bool setFuncBody{false};
+  TransFlags flags{0};
+  TransID transId{kInvalidTransID};
+  RegionDescPtr region{nullptr};
 };
 
 

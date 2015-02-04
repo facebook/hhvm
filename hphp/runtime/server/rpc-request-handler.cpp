@@ -51,7 +51,7 @@ RPCRequestHandler::RPCRequestHandler(int timeout, bool info)
 }
 
 RPCRequestHandler::~RPCRequestHandler() {
-  cleanupState();
+  if (vmStack().isAllocated()) cleanupState();
 }
 
 void RPCRequestHandler::initState() {

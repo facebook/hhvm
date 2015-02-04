@@ -4757,7 +4757,8 @@ OPTBLD_INLINE void isSetEmptyM(PC& pc) {
     case MET:
     case MEI: {
       isSetEmptyResult = IssetEmptyElem<isEmpty>(
-        mstate.scratch, *mstate.ref.asTypedValue(), mstate.base,
+        *mstate.ref.asTypedValue(),
+        mstate.base,
         *mstate.curMember
       );
       break;
@@ -4767,7 +4768,9 @@ OPTBLD_INLINE void isSetEmptyM(PC& pc) {
     case MPT: {
       Class* ctx = arGetContextClass(vmfp());
       isSetEmptyResult = IssetEmptyProp<isEmpty>(
-        ctx, mstate.base, *mstate.curMember
+        ctx,
+        mstate.base,
+        *mstate.curMember
       );
       break;
     }
@@ -4776,8 +4779,7 @@ OPTBLD_INLINE void isSetEmptyM(PC& pc) {
       assert(false);
   }
   auto tvRet = getHelperPost(mstate.ndiscard);
-  tvRet->m_data.num = isSetEmptyResult;
-  tvRet->m_type = KindOfBoolean;
+  *tvRet = make_tv<KindOfBoolean>(isSetEmptyResult);
 }
 
 OPTBLD_INLINE void iopIssetM(IOP_ARGS) {

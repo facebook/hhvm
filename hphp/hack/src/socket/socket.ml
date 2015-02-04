@@ -22,11 +22,13 @@ let init_socket port =
 (* Initializes the unix domain socket *)
 let unix_socket sock_name =
   try
+    let old_umask = Unix.umask 0o111 in
     if Sys.file_exists sock_name then Sys.remove sock_name;
     let sock = Unix.socket Unix.PF_UNIX Unix.SOCK_STREAM 0 in
     let _ = Unix.setsockopt sock Unix.SO_REUSEADDR true in
     let _ = Unix.bind sock (Unix.ADDR_UNIX sock_name) in
     let _ = Unix.listen sock 10 in
+    ignore (Unix.umask old_umask);
     sock
   with Unix.Unix_error (err, _, _) ->
     Printf.fprintf stderr "%s\n" (Unix.error_message err);

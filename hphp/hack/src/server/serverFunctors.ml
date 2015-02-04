@@ -268,16 +268,18 @@ end = struct
     if pid == 0
     then begin
       ignore(Unix.setsid());
+      let old_umask = Unix.umask 0o111 in
       (* close stdin/stdout/stderr *)
       let fd = Unix.openfile "/dev/null" [Unix.O_RDONLY; Unix.O_CREAT] 0o777 in
       Unix.dup2 fd Unix.stdin;
       Unix.close fd;
       let file = get_log_file (ServerArgs.root options) in
       (try Sys.rename file (file ^ ".old") with _ -> ());
-      let fd = Unix.openfile file [Unix.O_WRONLY; Unix.O_CREAT; Unix.O_APPEND] 0o777 in
+      let fd = Unix.openfile file [Unix.O_WRONLY; Unix.O_CREAT; Unix.O_APPEND] 0o666 in
       Unix.dup2 fd Unix.stdout;
       Unix.dup2 fd Unix.stderr;
       Unix.close fd;
+      ignore (Unix.umask old_umask)
       (* child process is ready *)
     end else begin
       (* let original parent exit *)

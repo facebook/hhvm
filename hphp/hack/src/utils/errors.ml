@@ -1281,7 +1281,7 @@ let trait_final pos =
 let implement_abstract pos1 pos2 kind x =
   let name = "abstract "^kind^" '"^x^"'" in
   add_list Typing.implement_abstract [
-    pos1, "This class must provide an implementation for the "^name;
+    pos1, "This class must be declared abstract, or provide an implementation for the "^name;
     pos2, "Declaration is here";
   ]
 

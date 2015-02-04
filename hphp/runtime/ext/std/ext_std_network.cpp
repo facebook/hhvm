@@ -288,9 +288,10 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
   return (int64_t)ntohl(ip.s_addr);
 }
 
-String HHVM_FUNCTION(long2ip, int64_t proper_address) {
+String HHVM_FUNCTION(long2ip, const String& proper_address) {
   try {
-    return folly::IPAddress::fromLongHBO(proper_address).str();
+    unsigned long n = strtoul(proper_address.c_str(), NULL, 0);
+    return folly::IPAddress::fromLongHBO(n).str();
   } catch (folly::IPAddressFormatException &e) {
     return s_empty;
   }

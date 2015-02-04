@@ -449,6 +449,9 @@ struct Lt {
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
       return false;
     }
+    if (od1->getVMClass() != od2->getVMClass()) {
+      return false;
+    }
     auto ar1 = od1->toArray();
     auto ar2 = od2->toArray();
     return (*this)(ar1.get(), ar2.get());
@@ -490,6 +493,9 @@ struct Gt {
       return DateTimeData::getTimestamp(od1) > DateTimeData::getTimestamp(od2);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
+      return false;
+    }
+    if (od1->getVMClass() != od2->getVMClass()) {
       return false;
     }
     auto ar1 = od1->toArray();

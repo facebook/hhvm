@@ -59,6 +59,10 @@ void printUnit(int level,
                const std::string& caption,
                const Vunit& unit);
 
+void printInstrs(std::ostream& out,
+                 const Vunit& unit,
+                 const jit::vector<Vinstr>& code);
+
 // main, cold, frozen
 extern const char* area_names[];
 

@@ -260,6 +260,14 @@ void printBlock(std::ostream& out, const Vunit& unit,
   }
 }
 
+void printInstrs(std::ostream& out,
+                 const Vunit& unit,
+                 const jit::vector<Vinstr>& code) {
+  for (auto& inst : code) {
+    out << "        " << show(unit, inst) << '\n';
+  }
+}
+
 void printCfg(std::ostream& out, const Vunit& unit,
               const jit::vector<Vlabel>& blocks) {
   out << "digraph G {\n";
@@ -285,12 +293,27 @@ void printCfg(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
 }
 
 std::string show(const Vunit& unit) {
-  auto preds = computePreds(unit);
-  auto blocks = sortBlocks(unit);
-
   std::ostringstream out;
-  for (auto b : blocks) {
+  auto preds = computePreds(unit);
+  boost::dynamic_bitset<> reachableSet(unit.blocks.size());
+
+  // Print reachable blocks first.
+  auto reachableBlocks = sortBlocks(unit);
+  for (auto b : reachableBlocks) {
     printBlock(out, unit, preds, b);
+    reachableSet.set(b);
+  }
+
+  // Print unreachable blocks last.
+  bool printedMsg{false};
+  for (size_t b = 0; b < unit.blocks.size(); b++) {
+    if (!reachableSet.test(b)) {
+      if (!printedMsg) {
+        out << "\nUnreachable blocks:\n";
+        printedMsg = true;
+      }
+      printBlock(out, unit, preds, Vlabel{b});
+    }
   }
   return out.str();
 }

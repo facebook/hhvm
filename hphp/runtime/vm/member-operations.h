@@ -1621,14 +1621,13 @@ inline void UnsetElem(TypedValue* base, key_type<keyType> key) {
 template<bool useEmpty, KeyType keyType>
 inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
                               key_type<keyType> key) {
-  TypedValue scratchKey = initScratchKey(key);
+  auto scratchKey = initScratchKey(key);
 
   if (useEmpty) {
     if (LIKELY(instance->isCollection())) {
       return collectionEmpty(instance, &scratchKey);
-    } else {
-      return objOffsetEmpty(tvRef, instance, cellAsCVarRef(scratchKey));
     }
+    return objOffsetEmpty(tvRef, instance, cellAsCVarRef(scratchKey));
   } else {
     if (LIKELY(instance->isCollection())) {
       return collectionIsset(instance, &scratchKey);
@@ -1641,11 +1640,10 @@ inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
  * IssetEmptyElem when base is a String
  */
 template <bool useEmpty, KeyType keyType>
-inline bool IssetEmptyElemString(TypedValue& tvScratch, TypedValue* base,
-                                 key_type<keyType> key) {
+inline bool IssetEmptyElemString(TypedValue* base, key_type<keyType> key) {
   // TODO Task #2716479: Fix this so that the warnings raised match
   // PHP5.
-  TypedValue scratchKey = initScratchKey(key);
+  auto scratchKey = initScratchKey(key);
   int64_t x;
   if (LIKELY(scratchKey.m_type == KindOfInt64)) {
     x = scratchKey.m_data.num;
@@ -1681,10 +1679,10 @@ inline bool IssetEmptyElemString(TypedValue& tvScratch, TypedValue* base,
   if (!useEmpty) {
     return true;
   }
-  tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
-  assert(tvScratch.m_data.pstr->isStatic());
-  tvScratch.m_type = KindOfStaticString;
-  return !cellToBool(*tvToCell(&tvScratch));
+
+  auto str = base->m_data.pstr->getChar(x);
+  assert(str->isStatic());
+  return !str->toBoolean();
 }
 
 /**
@@ -1704,8 +1702,11 @@ inline bool IssetEmptyElemArray(TypedValue* base, key_type<keyType> key) {
  */
 template <bool useEmpty, KeyType keyType>
 NEVER_INLINE
-bool IssetEmptyElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
-                        TypedValue* base, key_type<keyType> key) {
+bool IssetEmptyElemSlow(
+  TypedValue& tvRef,
+  TypedValue* base,
+  key_type<keyType> key
+) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -1719,15 +1720,17 @@ bool IssetEmptyElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
 
     case KindOfStaticString:
     case KindOfString:
-      return IssetEmptyElemString<useEmpty, keyType>(tvScratch, base, key);
+      return IssetEmptyElemString<useEmpty, keyType>(base, key);
 
     case KindOfArray:
       return IssetEmptyElemArray<useEmpty, keyType>(base, key);
 
     case KindOfObject:
-      return IssetEmptyElemObj<useEmpty, keyType>(tvRef,
-                                                  base->m_data.pobj,
-                                                  key);
+      return IssetEmptyElemObj<useEmpty, keyType>(
+        tvRef,
+        base->m_data.pobj,
+        key
+      );
 
     case KindOfRef:
     case KindOfClass:
@@ -1740,12 +1743,15 @@ bool IssetEmptyElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
  * Fast path for IssetEmptyElem assuming base is an Array
  */
 template <bool useEmpty, KeyType keyType = KeyType::Any>
-inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
-                           TypedValue* base, key_type<keyType> key) {
+inline bool IssetEmptyElem(
+  TypedValue& tvRef,
+  TypedValue* base,
+  key_type<keyType> key
+) {
   if (LIKELY(base->m_type == KindOfArray)) {
     return IssetEmptyElemArray<useEmpty, keyType>(base, key);
   }
-  return IssetEmptyElemSlow<useEmpty, keyType>(tvScratch, tvRef, base, key);
+  return IssetEmptyElemSlow<useEmpty, keyType>(tvRef, base, key);
 }
 
 template <bool warn>
@@ -1862,14 +1868,12 @@ inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
 template <bool useEmpty>
 inline bool IssetEmptyPropObj(Class* ctx, ObjectData* instance,
                               TypedValue key) {
-  bool issetEmptyResult;
-  StringData* keySD = prepareKey(key);
+  auto keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
 
-  issetEmptyResult = useEmpty ?
+  return useEmpty ?
     instance->propEmpty(ctx, keySD) :
     instance->propIsset(ctx, keySD);
-  return issetEmptyResult;
 }
 
 template <bool useEmpty, bool isObj = false>

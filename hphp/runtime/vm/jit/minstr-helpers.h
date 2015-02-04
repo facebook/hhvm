@@ -632,11 +632,9 @@ template <KeyType keyType, bool isEmpty>
 bool issetEmptyElemImpl(TypedValue* base,
                         key_type<keyType> key,
                         MInstrState* mis) {
-  // mis == nullptr if we proved that it won't be used. mis->tvScratch and
-  // mis->tvRef are ok because those params are passed by
-  // reference.
-  return HPHP::IssetEmptyElem<isEmpty, keyType>(
-    mis->tvScratch, mis->tvRef, base, key);
+  // mis == nullptr if we proved that it won't be used.  mis->tvRef is ok
+  // because it gets passed by reference.
+  return HPHP::IssetEmptyElem<isEmpty, keyType>(mis->tvRef, base, key);
 }
 
 #define ISSET_EMPTY_ELEM_HELPER_TABLE(m)        \

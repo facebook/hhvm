@@ -196,20 +196,20 @@ void MCGenerator::invalidateFuncProfSrcKeys(const Func* func) {
 }
 
 TCA MCGenerator::retranslate(const TranslArgs& args) {
-  SrcRec* sr = m_tx.getSrcDB().find(args.m_sk);
+  auto sr = m_tx.getSrcDB().find(args.sk);
   always_assert(sr);
   bool locked = sr->tryLock();
   SCOPE_EXIT {
     if (locked) sr->freeLock();
   };
-  if (isDebuggerAttachedProcess() && m_tx.isSrcKeyInBL(args.m_sk)) {
+  if (isDebuggerAttachedProcess() && m_tx.isSrcKeyInBL(args.sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
-    SKTRACE(1, args.m_sk, "retranslate abort due to debugger\n");
+    SKTRACE(1, args.sk, "retranslate abort due to debugger\n");
     return nullptr;
   }
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate(args.m_sk.func())) return nullptr;
+  if (!writer || !shouldTranslate(args.sk.func())) return nullptr;
   if (!locked) {
     // Even though we knew above that we were going to skip
     // doing another translation, we wait until we get the
@@ -218,10 +218,9 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
     // to it.
     return sr->getTopTranslation();
   }
-  SKTRACE(1, args.m_sk, "retranslate\n");
+  SKTRACE(1, args.sk, "retranslate\n");
 
-  m_tx.setMode(profileSrcKey(args.m_sk) ? TransKind::Profile
-                                        : TransKind::Live);
+  m_tx.setMode(profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live);
   SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
 
   return translate(args);
@@ -265,12 +264,14 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
     m_tx.setMode(TransKind::Optimize);
     always_assert(!region->empty());
     auto regionSk = region->start();
-    auto translArgs = TranslArgs(regionSk, align).region(region);
+    auto translArgs = TranslArgs{regionSk, align};
+    translArgs.region = region;
+
     if (setFuncBody && regionSk.offset() == func->base()) {
-      translArgs.setFuncBody();
+      translArgs.setFuncBody = true;
       setFuncBody = false;
     }
-    TCA regionStart = translate(translArgs);
+    auto regionStart = translate(translArgs);
     if (start == nullptr && regionSk == sk) {
       start = regionStart;
     }
@@ -301,7 +302,7 @@ static bool liveFrameIsPseudoMain() {
  */
 TCA
 MCGenerator::getTranslation(const TranslArgs& args) {
-  auto sk = args.m_sk;
+  auto sk = args.sk;
   sk.func()->validate();
   SKTRACE(2, sk,
           "getTranslation: curUnit %s funcId %x offset %d\n",
@@ -408,7 +409,7 @@ static void populateLiveContext(RegionContext& ctx) {
 
 TCA
 MCGenerator::createTranslation(const TranslArgs& args) {
-  if (!shouldTranslate(args.m_sk.func())) return nullptr;
+  if (!shouldTranslate(args.sk.func())) return nullptr;
 
   /*
    * Try to become the writer. We delay this until we *know* we will have
@@ -416,11 +417,11 @@ MCGenerator::createTranslation(const TranslArgs& args) {
    * lottery at the dawn of time. Hopefully lots of requests won't require
    * any new translation.
    */
-  auto sk = args.m_sk;
+  auto sk = args.sk;
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate(args.m_sk.func())) return nullptr;
+  if (!writer || !shouldTranslate(args.sk.func())) return nullptr;
 
-  if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
+  if (auto sr = m_tx.getSrcDB().find(sk)) {
     TCA tca = sr->getTopTranslation();
     if (tca) {
       // Handle extremely unlikely race; someone may have just already
@@ -489,9 +490,9 @@ MCGenerator::translate(const TranslArgs& args) {
   assert(m_tx.mode() != TransKind::Invalid);
   SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
 
-  if (!shouldTranslate(args.m_sk.func())) return nullptr;
+  if (!shouldTranslate(args.sk.func())) return nullptr;
 
-  Func* func = const_cast<Func*>(args.m_sk.func());
+  auto func = const_cast<Func*>(args.sk.func());
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
                             .profile(m_tx.mode() == TransKind::Profile)
                             .hot(RuntimeOption::EvalHotFuncCount &&
@@ -499,11 +500,11 @@ MCGenerator::translate(const TranslArgs& args) {
 
   auto start = translateWork(args);
 
-  if (args.m_setFuncBody) {
+  if (args.setFuncBody) {
     func->setFuncBody(start);
   }
-  SKTRACE(1, args.m_sk, "translate moved head from %p to %p\n",
-          getTopTranslation(args.m_sk), start);
+  SKTRACE(1, args.sk, "translate moved head from %p to %p\n",
+          getTopTranslation(args.sk), start);
 
   return start;
 }
@@ -524,7 +525,9 @@ MCGenerator::getCallArrayPrologue(Func* func) {
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base(), false);
-    tca = mcg->getTranslation(TranslArgs(sk, false).setFuncBody());
+    auto args = TranslArgs{sk, false};
+    args.setFuncBody = true;
+    tca = mcg->getTranslation(args);
   }
 
   return tca;
@@ -607,7 +610,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   if (func->isClonedClosure()) {
     assert(ar);
     interp_set_regs(ar, (Cell*)ar - func->numSlotsInFrame(), entry);
-    TCA tca = getTranslation(TranslArgs(funcBody, false));
+    auto tca = getTranslation(TranslArgs{funcBody, false});
     tl_regState = VMRegState::DIRTY;
     if (tca) {
       // racy, but ok...
@@ -750,12 +753,13 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       m_tx.setMode(TransKind::Optimize);
-      SrcKey  funcletSK(func, paramInfo.funcletOff, false);
-      TransID funcletTransId = m_tx.profData()->dvFuncletTransId(func, nArgs);
+      SrcKey funcletSK(func, paramInfo.funcletOff, false);
+      auto funcletTransId = m_tx.profData()->dvFuncletTransId(func, nArgs);
       if (funcletTransId != kInvalidTransID) {
         invalidateSrcKey(funcletSK);
-        TCA dvStart = translate(TranslArgs(funcletSK, false).
-                                transId(funcletTransId));
+        auto args = TranslArgs{funcletSK, false};
+        args.transId = funcletTransId;
+        auto dvStart = translate(args);
         if (dvStart && !triggerSkStart && funcletSK == triggerSk) {
           triggerSkStart = dvStart;
         }
@@ -820,7 +824,9 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
 TCA
 MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
                      TransFlags trflags, bool& smashed) {
-  TCA tDest = getTranslation(TranslArgs(destSk, false).flags(trflags));
+  auto args = TranslArgs{destSk, false};
+  args.flags = trflags;
+  auto tDest = getTranslation(args);
   if (!tDest) return nullptr;
 
   LeaseHolder writer(Translator::WriteLease());
@@ -916,8 +922,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   bool fallThru = toSmash + kJmpccLen + kJmpLen == cb.frontier() &&
     !m_tx.getSrcDB().find(dest);
 
-  TCA tDest;
-  tDest = getTranslation(TranslArgs(dest, !fallThru));
+  auto tDest = getTranslation(TranslArgs{dest, !fallThru});
   if (!tDest) {
     return 0;
   }
@@ -1152,7 +1157,9 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
       INC_TPC(retranslate);
       sk = SrcKey{liveFunc(), info.args[0].offset, liveResumed()};
       auto trflags = info.args[1].trflags;
-      start = retranslate(TranslArgs{sk, true}.flags(trflags));
+      auto args = TranslArgs{sk, true};
+      args.flags = trflags;
+      start = retranslate(args);
       SKTRACE(2, sk, "retranslated @%p\n", start);
       break;
     }
@@ -1234,7 +1241,7 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
     HPHP::dispatchBB();
     if (!vmpc()) return callToExit();
     sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
-    start = getTranslation(TranslArgs(sk, true));
+    start = getTranslation(TranslArgs{sk, true});
   }
 
   if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
@@ -1459,12 +1466,12 @@ bool CodeGenFixups::empty() const {
 TCA
 MCGenerator::translateWork(const TranslArgs& args) {
   Timer _t(Timer::translate);
-  auto sk = args.m_sk;
+  auto sk = args.sk;
 
   SKTRACE(1, sk, "translateWork\n");
   assert(m_tx.getSrcDB().find(sk));
 
-  if (args.m_align) {
+  if (args.align) {
     mcg->backEnd().moveToAlign(code.main(),
                                MoveToAlignFlags::kNonFallthroughAlign);
   }
@@ -1512,13 +1519,12 @@ MCGenerator::translateWork(const TranslArgs& args) {
     // Attempt to create a region at this SrcKey
     if (m_tx.mode() == TransKind::Optimize) {
       assert(RuntimeOption::EvalJitPGO);
-      region = args.m_region;
+      region = args.region;
       if (region) {
         assert(!region->empty());
       } else {
-        TransID transId = args.m_transId;
-        assert(isValidTransID(transId));
-        region = selectHotRegion(transId, this);
+        assert(isValidTransID(args.transId));
+        region = selectHotRegion(args.transId, this);
         assert(region);
         if (region && region->empty()) region = nullptr;
       }
@@ -1557,8 +1563,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
       try {
         assertCleanState();
-        result = translateRegion(hhbcTrans, *region, regionInterps,
-          args.m_flags);
+        result = translateRegion(hhbcTrans, *region, regionInterps, args.flags);
 
         // If we're profiling, grab the postconditions so we can
         // use them in region selection whenever we decide to retranslate.
@@ -1614,7 +1619,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     }
   }
 
-  if (args.m_dryRun) {
+  if (args.dryRun) {
     resetState();
     return start;
   }
@@ -1626,7 +1631,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     // Fall through.
   }
 
-  if (args.m_align) {
+  if (args.align) {
     m_fixups.m_alignFixups.emplace(
       start, std::make_pair(backEnd().cacheLineSize() - 1, 0));
   }

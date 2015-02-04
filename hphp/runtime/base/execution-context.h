@@ -374,16 +374,26 @@ public:
   void pushVMState(Cell* savedSP);
   void popVMState();
 
-  /**
-   * If you call this, you might break some assumption that the JIT made.
-   * Ask a JIT expert if your use is ok. The most common use is covered by
-   * getPrevFunc so use that if you only want the Func*. That's safe.
+  /*
+   * Given a pointer to a VM frame, returns the previous VM frame in the call
+   * stack. This function will also pass back by reference the previous PC (if
+   * prevPc is non-null) and the previous SP (if prevSp is non-null).
+   *
+   * If there is no previous VM frame, this function returns NULL and does not
+   * set prevPc and prevSp.
+   *
+   * Inspecting live VM frames other than the current one can be dangerous, so
+   * use this function with care. If all you need is the Func that called a
+   * particular frame, use getPrevFunc() instead.
    */
-  ActRec* getPrevVMStateUNSAFE(const ActRec* fp,
-                               Offset* prevPc = nullptr,
-                               TypedValue** prevSp = nullptr,
-                               bool* fromVMEntry = nullptr);
+  ActRec* getPrevVMState(const ActRec* fp,
+                         Offset* prevPc = nullptr,
+                         TypedValue** prevSp = nullptr,
+                         bool* fromVMEntry = nullptr);
 
+  /*
+   * Returns the caller of the given frame.
+   */
   const Func* getPrevFunc(const ActRec*);
 
   VarEnv* getVarEnv(int frame = 0);

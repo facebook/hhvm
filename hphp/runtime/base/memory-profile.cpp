@@ -41,7 +41,7 @@ static ProfileStackTrace getStackTrace() {
   Offset off = pc - u->entry();
   for (;;) {
     trace.push_back({ f, off, fp->resumed() });
-    fp = g_context->getPrevVMStateUNSAFE(fp, &off);
+    fp = g_context->getPrevVMState(fp, &off);
     if (!fp) break;
     f = fp->m_func;
   }

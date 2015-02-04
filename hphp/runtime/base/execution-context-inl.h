@@ -183,7 +183,7 @@ inline bool ExecutionContext::hasRequestEventHandlers() const {
 }
 
 inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
-  auto state = getPrevVMStateUNSAFE(fp, nullptr, nullptr, nullptr);
+  auto state = getPrevVMState(fp, nullptr, nullptr, nullptr);
   return state ? state->func() : nullptr;
 }
 

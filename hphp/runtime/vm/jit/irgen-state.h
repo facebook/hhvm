@@ -35,11 +35,6 @@ struct SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 
-enum class IRGenMode {
-  Trace,
-  CFG,
-};
-
 struct FPIInfo {
   SSATmp* returnSP;
   int32_t returnSPOff;   // the return's logical sp offset; stkptr might differ
@@ -106,11 +101,6 @@ struct HTS {
    * popped during an FCall.
    */
   std::stack<std::pair<SSATmp*,int32_t>> fpiActiveStack;
-
-  /*
-   * Toggles some behavior based on runtime flags.
-   */
-  IRGenMode mode{IRGenMode::Trace};
 
   /*
    * The function to use to create catch blocks when instructions that can

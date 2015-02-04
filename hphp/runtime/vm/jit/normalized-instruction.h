@@ -51,8 +51,6 @@ struct NormalizedInstruction {
   // The member codes for the M-vector.
   std::vector<MemberCode> immVecM;
 
-  Offset nextOffset; // for intra-trace* non-call control-flow instructions,
-                     // this is the offset of the next instruction in the trace*
   bool endsRegion:1;
   bool nextIsMerge:1;
   bool preppedByRef:1;

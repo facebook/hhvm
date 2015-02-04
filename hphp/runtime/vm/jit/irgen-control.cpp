@@ -26,17 +26,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-// Right now information in m_currentNormalizedInstruction is how the region
-// translator tells us what to branch to.
-void condJmpInversion(HTS& env, Offset relOffset, bool isJmpZ) {
-  auto const takenOff = bcOff(env) + relOffset;
-  if (env.currentNormalizedInstruction->nextOffset == takenOff) {
-    always_assert(RuntimeOption::EvalJitPGORegionSelector == "hottrace");
-    return implCondJmp(env, nextBcOff(env), !isJmpZ, popC(env));
-  }
-  implCondJmp(env, takenOff, isJmpZ, popC(env));
-}
-
 // For EvalHHIRBytecodeControlFlow we need to make sure the spOffset is the
 // same on all incoming edges going to a merge point.  This would "just happen"
 // if we didn't still have instructions that redefine StkPtrs, but calls still
@@ -93,18 +82,13 @@ Block* getBlock(HTS& env, Offset offset) {
 //////////////////////////////////////////////////////////////////////
 
 void jmpImpl(HTS& env, Offset offset, JmpFlags flags) {
-  if (env.mode == IRGenMode::CFG) {
-    if (flags & JmpFlagNextIsMerge) {
-      spillStack(env);
-      bccfMergeSPHack(env);
-    }
-    auto target = getBlock(env, offset);
-    assert(target != nullptr);
-    gen(env, Jmp, target);
-    return;
+  if (flags & JmpFlagNextIsMerge) {
+    spillStack(env);
+    bccfMergeSPHack(env);
   }
-  if (!(flags & JmpFlagEndsRegion)) return;
-  gen(env, Jmp, makeExit(env, offset));
+  auto target = getBlock(env, offset);
+  assert(target != nullptr);
+  gen(env, Jmp, target);
 }
 
 void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
@@ -112,7 +96,7 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
   if (flags & JmpFlagEndsRegion) {
     spillStack(env);
   }
-  if (env.mode == IRGenMode::CFG && (flags & JmpFlagNextIsMerge)) {
+  if ((flags & JmpFlagNextIsMerge) != 0) {
     spillStack(env);
     bccfMergeSPHack(env);
   }
@@ -138,12 +122,14 @@ void emitJmpNS(HTS& env, Offset relOffset) {
 
 void emitJmpZ(HTS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
-  condJmpInversion(env, relOffset, true);
+  auto const takenOff = bcOff(env) + relOffset;
+  implCondJmp(env, takenOff, true, popC(env));
 }
 
 void emitJmpNZ(HTS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
-  condJmpInversion(env, relOffset, false);
+  auto const takenOff = bcOff(env) + relOffset;
+  implCondJmp(env, takenOff, false, popC(env));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -269,4 +255,3 @@ void emitSSwitch(HTS& env, const ImmVector& iv) {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

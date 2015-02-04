@@ -27,22 +27,12 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * This function returns the offset of instruction i's branch target.  This is
- * normally the offset corresponding to the branch being taken.  However, if i
- * does not break a trace and it's followed in the trace by the instruction in
- * the taken branch, then this function returns the offset of the i's
- * fall-through instruction.  In that case, the invertCond output argument is
- * set to true; otherwise it's set to false.
+ * This function returns the offset of instruction i's branch target,
+ * which is the offset corresponding to the branch being taken.
  */
-Offset iterBranchTarget(const NormalizedInstruction& i, bool& invertCond) {
+Offset iterBranchTarget(const NormalizedInstruction& i) {
   assert(instrJumpOffset(reinterpret_cast<const Op*>(i.pc())) != nullptr);
-  auto targetOffset = i.offset() + i.imm[1].u_BA;
-  invertCond = false;
-  if (!i.endsRegion && i.nextOffset == targetOffset) {
-    invertCond = true;
-    targetOffset = i.offset() + instrLen((Op*)i.pc());
-  }
-  return targetOffset;
+  return i.offset() + i.imm[1].u_BA;
 }
 
 template<class Lambda>
@@ -76,9 +66,7 @@ void emitIterInit(HTS& env,
                   int32_t iterId,
                   Offset relOffset,
                   int32_t valLocalId) {
-  bool invertCond = false;
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
-                                             invertCond);
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
   if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInit);
   auto const res = gen(
@@ -89,7 +77,7 @@ void emitIterInit(HTS& env,
     src,
     fp(env)
   );
-  implCondJmp(env, targetOffset, !invertCond, res);
+  implCondJmp(env, targetOffset, true, res);
 }
 
 void emitIterInitK(HTS& env,
@@ -97,10 +85,7 @@ void emitIterInitK(HTS& env,
                    Offset relOffset,
                    int32_t valLocalId,
                    int32_t keyLocalId) {
-  bool invertCond = false;
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
-                                             invertCond);
-
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
   if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInitK);
   auto const res = gen(
@@ -111,7 +96,7 @@ void emitIterInitK(HTS& env,
     src,
     fp(env)
   );
-  implCondJmp(env, targetOffset, !invertCond, res);
+  implCondJmp(env, targetOffset, true, res);
 }
 
 void emitIterNext(HTS& env,
@@ -119,9 +104,7 @@ void emitIterNext(HTS& env,
                   Offset relOffset,
                   int32_t valLocalId) {
   surpriseCheck(env, relOffset);
-  bool invertCond = false;
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
-                                             invertCond);
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const res = gen(
     env,
     IterNext,
@@ -129,7 +112,7 @@ void emitIterNext(HTS& env,
     IterData(iterId, -1, valLocalId),
     fp(env)
   );
-  implCondJmp(env, targetOffset, invertCond, res);
+  implCondJmp(env, targetOffset, false, res);
 }
 
 void emitIterNextK(HTS& env,
@@ -138,9 +121,7 @@ void emitIterNextK(HTS& env,
                    int32_t valLocalId,
                    int32_t keyLocalId) {
   surpriseCheck(env, relOffset);
-  bool invertCond = false;
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
-                                             invertCond);
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const res = gen(
     env,
     IterNextK,
@@ -148,16 +129,14 @@ void emitIterNextK(HTS& env,
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
-  implCondJmp(env, targetOffset, invertCond, res);
+  implCondJmp(env, targetOffset, false, res);
 }
 
 void emitWIterInit(HTS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
-  bool invertCond = false;
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
-                                             invertCond);
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
   if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(WIterInit);
   auto const res = gen(
@@ -168,7 +147,7 @@ void emitWIterInit(HTS& env,
     src,
     fp(env)
   );
-  implCondJmp(env, targetOffset, !invertCond, res);
+  implCondJmp(env, targetOffset, true, res);
 }
 
 void emitWIterInitK(HTS& env,
@@ -176,9 +155,7 @@ void emitWIterInitK(HTS& env,
                     Offset relOffset,
                     int32_t valLocalId,
                     int32_t keyLocalId) {
-  bool invertCond = false;
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
-                                             invertCond);
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
   if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(WIterInitK);
   auto const res = gen(
@@ -189,7 +166,7 @@ void emitWIterInitK(HTS& env,
     src,
     fp(env)
   );
-  implCondJmp(env, targetOffset, !invertCond, res);
+  implCondJmp(env, targetOffset, true, res);
 }
 
 void emitWIterNext(HTS& env,
@@ -197,9 +174,7 @@ void emitWIterNext(HTS& env,
                    Offset relOffset,
                    int32_t valLocalId) {
   surpriseCheck(env, relOffset);
-  bool invertCond = false;
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
-                                             invertCond);
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const res = gen(
     env,
     WIterNext,
@@ -207,7 +182,7 @@ void emitWIterNext(HTS& env,
     IterData(iterId, -1, valLocalId),
     fp(env)
   );
-  implCondJmp(env, targetOffset, invertCond, res);
+  implCondJmp(env, targetOffset, false, res);
 }
 
 void emitWIterNextK(HTS& env,
@@ -216,9 +191,7 @@ void emitWIterNextK(HTS& env,
                     int32_t valLocalId,
                     int32_t keyLocalId) {
   surpriseCheck(env, relOffset);
-  bool invertCond = false;
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
-                                             invertCond);
+  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const res = gen(
     env,
     WIterNextK,
@@ -226,7 +199,7 @@ void emitWIterNextK(HTS& env,
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
-  implCondJmp(env, targetOffset, invertCond, res);
+  implCondJmp(env, targetOffset, false, res);
 }
 
 void emitMIterInit(HTS& env,
@@ -349,4 +322,3 @@ void emitCIterFree(HTS& env, int32_t iterId) {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

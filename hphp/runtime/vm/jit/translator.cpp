@@ -1733,22 +1733,19 @@ TranslateResult translateRegion(HTS& hts,
 
   auto const startSk = region.start();
 
+  // Create a map from region blocks to their corresponding initial IR blocks.
   BlockIdToIRBlockMap blockIdToIRBlock;
-  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
-    hts.mode = IRGenMode::CFG;
-    createBlockMap(hts, region, blockIdToIRBlock);
+  createBlockMap(hts, region, blockIdToIRBlock);
 
-    // Make the IR entry block jump to the IR block we mapped the region entry
-    // block to (they are not the same!).
+  // Prepare to start translation of the first region block.
+  auto const entry = irb.unit().entry();
+  irb.startBlock(entry, entry->front().marker(), false /* isLoopHeader */);
 
-    auto const entry = irb.unit().entry();
-    irb.startBlock(entry, entry->front().marker(), false /* isLoopHeader */);
-
-    auto const irBlock = blockIdToIRBlock[region.entry()->id()];
-    always_assert(irBlock != entry);
-
-    irgen::gen(hts, Jmp, irBlock);
-  }
+  // Make the IR entry block jump to the IR block we mapped the region entry
+  // block to (they are not the same!).
+  auto const irBlock = blockIdToIRBlock[region.entry()->id()];
+  always_assert(irBlock != entry);
+  irgen::gen(hts, Jmp, irBlock);
 
   RegionDesc::BlockIdSet processedBlocks;
 
@@ -1761,28 +1758,26 @@ TranslateResult translateRegion(HTS& hts,
     auto byRefs          = makeMapWalker(block->paramByRefs());
     auto knownFuncs      = makeMapWalker(block->knownFuncs());
     auto skipTrans       = false;
-    auto const lastBlock = b == blocks.size() - 1;
 
     const Func* topFunc = nullptr;
     TransID profTransId = getTransId(blockId);
     hts.profTransID = profTransId;
 
-    bool isLoopHeader = false;
-
-    if (hts.mode == IRGenMode::CFG) {
-      Block* irBlock = blockIdToIRBlock[blockId];
-      isLoopHeader = blockIsLoopHeader(region, blockId, processedBlocks);
-      always_assert(IMPLIES(isLoopHeader, RuntimeOption::EvalJitLoops));
-
-      BCMarker marker(sk, block->initialSpOffset(), profTransId);
-      if (!irb.startBlock(irBlock, marker, isLoopHeader)) {
-        FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
-               blockId);
-        processedBlocks.insert(blockId);
-        continue;
-      }
-      setSuccIRBlocks(hts, region, blockId, blockIdToIRBlock);
+    // Prepare to start translating this region block.  This loads the
+    // FrameState for the IR block corresponding to the start of this
+    // region block, and it also sets the map from BC offsets to IR
+    // blocks for the successors of this block in the region.
+    Block* irBlock = blockIdToIRBlock[blockId];
+    bool isLoopHeader = blockIsLoopHeader(region, blockId, processedBlocks);
+    always_assert(IMPLIES(isLoopHeader, RuntimeOption::EvalJitLoops));
+    BCMarker marker(sk, block->initialSpOffset(), profTransId);
+    if (!irb.startBlock(irBlock, marker, isLoopHeader)) {
+      FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
+             blockId);
+      processedBlocks.insert(blockId);
+      continue;
     }
+    setSuccIRBlocks(hts, region, blockId, blockIdToIRBlock);
 
     // Emit the type and reffiness predictions for this region block.
     // If this is the first instruction in the region, and the
@@ -1811,11 +1806,6 @@ TranslateResult translateRegion(HTS& hts,
       if (lastInstr) {
         inst.endsRegion = region.isExit(blockId);
         inst.nextIsMerge = nextIsMerge(inst, region);
-        if (hts.mode == IRGenMode::Trace &&
-            instrIsNonCallControlFlow(inst.op()) &&
-            !lastBlock) {
-          inst.nextOffset = blocks[b + 1]->start().offset();
-        }
       }
 
       // We can get a more precise output type for interpOne if we know all of
@@ -1936,32 +1926,24 @@ TranslateResult translateRegion(HTS& hts,
 
       skipTrans = false;
 
-      // In CFG mode, insert a fallthrough jump at the end of each block.
-      if (hts.mode == IRGenMode::CFG && lastInstr) {
-        if (instrAllowsFallThru(inst.op())) {
-          auto nextOffset = inst.offset() + instrLen((Op*)(inst.pc()));
-          // prepareForSideExit is done later in Trace mode, but it
-          // needs to happen here or else we generate the SpillStack
-          // after the fallthrough jump, which is just weird.
-          if (!lastBlock && region.isSideExitingBlock(blockId)) {
-            irgen::prepareForSideExit(hts);
-          }
-          irgen::endBlock(hts, nextOffset, inst.nextIsMerge);
-        } else if (!lastBlock &&
-                   (isRet(inst.op()) || inst.op() == OpNativeImpl)) {
-          // "Fallthrough" from inlined return to the next block
-          irgen::endBlock(hts, blocks[b + 1]->start().offset(),
-                          inst.nextIsMerge);
-        }
+      // If this is the last instruction, handle block transitions.
+      // If the block ends the region, then call irgen::endRegion to
+      // sync the state and make a REQ_BIND_JMP service request.
+      // Otherwise, if the instruction has a fall-through, then insert
+      // a jump to the next offset, since it may not be the next block
+      // to be translated.
+      if (lastInstr) {
         if (region.isExit(blockId)) {
           irgen::endRegion(hts);
+        } else if (instrAllowsFallThru(inst.op())) {
+          if (region.isSideExitingBlock(blockId)) {
+            irgen::prepareForSideExit(hts);
+          }
+          irgen::endBlock(hts, inst.nextSk().offset(), inst.nextIsMerge);
+        } else if (isRet(inst.op()) || inst.op() == OpNativeImpl) {
+          // "Fallthrough" from inlined return to the next block
+          irgen::endBlock(hts, blocks[b+1]->start().offset(), inst.nextIsMerge);
         }
-      }
-    }
-
-    if (hts.mode == IRGenMode::Trace) {
-      if (!lastBlock && region.isSideExitingBlock(blockId)) {
-        irgen::prepareForSideExit(hts);
       }
     }
 
@@ -1970,8 +1952,6 @@ TranslateResult translateRegion(HTS& hts,
     assert(!byRefs.hasNext());
     assert(!knownFuncs.hasNext());
   }
-
-  if (hts.mode == IRGenMode::Trace) irgen::endRegion(hts);
 
   irGenTimer.end();
 

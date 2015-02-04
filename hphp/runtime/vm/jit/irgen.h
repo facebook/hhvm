@@ -147,9 +147,10 @@ void prepareForNextHHBC(HTS&,
                         bool lastBcOff);
 
 /*
- * This function causes ht to spill the stack, and is called for presumably
- * good reasons by the region translator, in situations that differ depending
- * on IRGenMode.
+ * This is called by the region translator to force the stack to be
+ * spilled due to a potential side exit.  This is just an
+ * optimization, which enables smashing a branch in the main code
+ * region.
  */
 void prepareForSideExit(HTS&);
 

@@ -44,7 +44,7 @@ void c_ResumableWaitHandle::ti_setonfailcallback(const Variant& callback) {
 }
 
 c_ResumableWaitHandle* c_ResumableWaitHandle::getRunning(ActRec* fp) {
-  for (; fp; fp = g_context->getPrevVMStateUNSAFE(fp)) {
+  for (; fp; fp = g_context->getPrevVMState(fp)) {
     if (fp->resumed() && fp->func()->isAsync()) {
       if (fp->func()->isGenerator()) {
         // async generator

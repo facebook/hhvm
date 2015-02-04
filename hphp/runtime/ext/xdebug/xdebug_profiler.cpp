@@ -72,7 +72,7 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
     // Need the previous frame in order to get the call line. If we cannot
     // get the previous frame, default to 1
     Offset offset;
-    const ActRec* prevFp = g_context->getPrevVMStateUNSAFE(fp, &offset);
+    const ActRec* prevFp = g_context->getPrevVMState(fp, &offset);
     if (prevFp != nullptr) {
       frameData.line = prevFp->unit()->getLineNumber(offset);
     } else {
@@ -192,7 +192,7 @@ void XDebugProfiler::enableTracing(const String& filename, int64_t opts) {
   VMRegAnchor _;
   Offset offset;
   ActRec* fp = vmfp();
-  while ((fp = g_context->getPrevVMStateUNSAFE(fp, &offset)) != nullptr) {
+  while ((fp = g_context->getPrevVMState(fp, &offset)) != nullptr) {
     FrameData frame;
     frame.func = fp->func();
     frame.line = fp->unit()->getLineNumber(offset);

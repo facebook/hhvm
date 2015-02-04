@@ -506,7 +506,7 @@ void unwindBuiltinFrame() {
 
   // Tear down the frame
   Offset pc = -1;
-  ActRec* sfp = g_context->getPrevVMStateUNSAFE(fp, &pc);
+  ActRec* sfp = g_context->getPrevVMState(fp, &pc);
   assert(pc != -1);
   fp = sfp;
   vmpc() = fp->m_func->unit()->at(pc);

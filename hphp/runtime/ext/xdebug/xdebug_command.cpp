@@ -954,7 +954,7 @@ public:
     int depth = 0;
     for (const ActRec* fp = g_context->getStackFrame();
          fp != nullptr && (m_clientDepth == -1 || depth <= m_clientDepth);
-         fp = g_context->getPrevVMStateUNSAFE(fp, &offset), depth++) {
+         fp = g_context->getPrevVMState(fp, &offset), depth++) {
       // If a depth was provided, we're only interested in that depth
       if (m_clientDepth < 0 || depth == m_clientDepth) {
         xdebug_xml_node* frame = getFrame(fp, offset, depth);
@@ -974,7 +974,7 @@ private:
     // include, we don't have access to that
     const char* func_name =
       func->isPseudoMain() ?
-        (g_context->getPrevVMStateUNSAFE(fp) == nullptr ? "{main}" : "include") :
+        (g_context->getPrevVMState(fp) == nullptr ? "{main}" : "include") :
         func->fullName()->data();
 
     // Create the frame node
@@ -1247,7 +1247,7 @@ public:
     // Get the correct stack frame
     ActRec* fp = g_context->getStackFrame();
     for (int depth = 0; fp != nullptr && depth < m_depth;
-         depth++, fp = g_context->getPrevVMStateUNSAFE(fp)) {}
+         depth++, fp = g_context->getPrevVMState(fp)) {}
 
     // If we don't have an actrec, the stack depth was invalid
     if (fp == nullptr) {

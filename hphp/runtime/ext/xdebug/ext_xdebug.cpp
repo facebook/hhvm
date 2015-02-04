@@ -53,9 +53,9 @@ const StaticString
 static ActRec *get_call_fp(Offset *off = nullptr) {
   // We want the frame of our callee's callee
   VMRegAnchor _; // Ensure consistent state for vmfp
-  ActRec* fp0 = g_context->getPrevVMStateUNSAFE(vmfp());
+  ActRec* fp0 = g_context->getPrevVMState(vmfp());
   assert(fp0);
-  ActRec* fp1 = g_context->getPrevVMStateUNSAFE(fp0, off);
+  ActRec* fp1 = g_context->getPrevVMState(fp0, off);
 
   // fp1 should only be NULL if fp0 is the top-level pseudo-main
   if (!fp1) {

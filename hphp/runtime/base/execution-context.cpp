@@ -735,7 +735,7 @@ void ExecutionContext::handleError(const std::string& msg,
       Variant varFrom(ee.getMessage());
       const auto tvFrom(varFrom.asTypedValue());
       if (fp->func()->isBuiltin()) {
-        fp = getPrevVMStateUNSAFE(fp);
+        fp = getPrevVMState(fp);
       }
       assert(fp);
       auto id = fp->func()->lookupVarId(s_php_errormsg.get());

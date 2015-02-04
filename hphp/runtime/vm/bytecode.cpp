@@ -186,10 +186,10 @@ Class* arGetContextClassImpl<true>(const ActRec* ar) {
   if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
     // Pseudomains inherit the context of their caller
     auto const context = g_context.getNoCheck();
-    ar = context->getPrevVMStateUNSAFE(ar);
+    ar = context->getPrevVMState(ar);
     while (ar != nullptr &&
              (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
-      ar = context->getPrevVMStateUNSAFE(ar);
+      ar = context->getPrevVMState(ar);
     }
     if (ar == nullptr) {
       return nullptr;
@@ -377,7 +377,7 @@ void VarEnv::enterFP(ActRec* oldFP, ActRec* newFP) {
     assert(isGlobalScope() && m_depth == 0);
   } else {
     assert(m_depth >= 1);
-    assert(g_context->getPrevVMStateUNSAFE(newFP) == oldFP);
+    assert(g_context->getPrevVMState(newFP) == oldFP);
     m_nvTable.detach(oldFP);
   }
 
@@ -402,7 +402,7 @@ void VarEnv::exitFP(ActRec* fp) {
       smart_delete(this);
     }
   } else {
-    m_nvTable.attach(g_context->getPrevVMStateUNSAFE(fp));
+    m_nvTable.attach(g_context->getPrevVMState(fp));
   }
 }
 
@@ -800,7 +800,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   {
     Offset prevPc = 0;
     TypedValue* prevStackTop = nullptr;
-    ActRec* prevFp = g_context->getPrevVMStateUNSAFE(fp, &prevPc, &prevStackTop);
+    ActRec* prevFp = g_context->getPrevVMState(fp, &prevPc, &prevStackTop);
     if (prevFp != nullptr) {
       toStringFrame(os, prevFp, prevPc, prevStackTop, prefix, false);
     }
@@ -1251,7 +1251,7 @@ ObjectData* ExecutionContext::getThis() {
   VMRegAnchor _;
   ActRec* fp = vmfp();
   if (fp->skipFrame()) {
-    fp = getPrevVMStateUNSAFE(fp);
+    fp = getPrevVMState(fp);
     if (!fp) return nullptr;
   }
   if (fp->hasThis()) {
@@ -1265,7 +1265,7 @@ Class* ExecutionContext::getContextClass() {
   ActRec* ar = vmfp();
   assert(ar != nullptr);
   if (ar->skipFrame()) {
-    ar = getPrevVMStateUNSAFE(ar);
+    ar = getPrevVMState(ar);
     if (!ar) return nullptr;
   }
   return ar->m_func->cls();
@@ -1283,7 +1283,7 @@ StringData* ExecutionContext::getContainingFileName() {
   ActRec* ar = vmfp();
   if (ar == nullptr) return staticEmptyString();
   if (ar->skipFrame()) {
-    ar = getPrevVMStateUNSAFE(ar);
+    ar = getPrevVMState(ar);
     if (ar == nullptr) return staticEmptyString();
   }
   Unit* unit = ar->m_func->unit();
@@ -1299,7 +1299,7 @@ int ExecutionContext::getLine() {
   Offset pc = unit ? pcOff() : 0;
   if (ar == nullptr) return -1;
   if (ar->skipFrame()) {
-    ar = getPrevVMStateUNSAFE(ar, &pc);
+    ar = getPrevVMState(ar, &pc);
   }
   if (ar == nullptr || (unit = ar->m_func->unit()) == nullptr) return -1;
   return unit->getLineNumber(pc);
@@ -1310,18 +1310,18 @@ Array ExecutionContext::getCallerInfo() {
   Array result = Array::Create();
   ActRec* ar = vmfp();
   if (ar->skipFrame()) {
-    ar = getPrevVMStateUNSAFE(ar);
+    ar = getPrevVMState(ar);
   }
   while (ar->m_func->name()->isame(s_call_user_func.get())
          || ar->m_func->name()->isame(s_call_user_func_array.get())) {
-    ar = getPrevVMStateUNSAFE(ar);
+    ar = getPrevVMState(ar);
     if (ar == nullptr) {
       return result;
     }
   }
 
   Offset pc = 0;
-  ar = getPrevVMStateUNSAFE(ar, &pc);
+  ar = getPrevVMState(ar, &pc);
   while (ar != nullptr) {
     if (!ar->m_func->name()->isame(s_call_user_func.get())
         && !ar->m_func->name()->isame(s_call_user_func_array.get())) {
@@ -1333,7 +1333,7 @@ Array ExecutionContext::getCallerInfo() {
         return result;
       }
     }
-    ar = getPrevVMStateUNSAFE(ar, &pc);
+    ar = getPrevVMState(ar, &pc);
   }
   return result;
 }
@@ -1344,11 +1344,11 @@ VarEnv* ExecutionContext::getVarEnv(int frame) {
   ActRec* fp = vmfp();
   for (; frame > 0; --frame) {
     if (!fp) break;
-    fp = getPrevVMStateUNSAFE(fp);
+    fp = getPrevVMState(fp);
   }
   if (UNLIKELY(!fp)) return NULL;
   if (fp->skipFrame()) {
-    fp = getPrevVMStateUNSAFE(fp);
+    fp = getPrevVMState(fp);
   }
   if (!fp) return nullptr;
   assert(!fp->hasInvName());
@@ -1362,7 +1362,7 @@ void ExecutionContext::setVar(StringData* name, const TypedValue* v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMStateUNSAFE(fp);
+  if (fp->skipFrame()) fp = getPrevVMState(fp);
   fp->getVarEnv()->set(name, v);
 }
 
@@ -1370,7 +1370,7 @@ void ExecutionContext::bindVar(StringData* name, TypedValue* v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMStateUNSAFE(fp);
+  if (fp->skipFrame()) fp = getPrevVMState(fp);
   fp->getVarEnv()->bind(name, v);
 }
 
@@ -1379,7 +1379,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
   ActRec *fp = vmfp();
   for (; frame > 0; --frame) {
     if (!fp) break;
-    fp = getPrevVMStateUNSAFE(fp);
+    fp = getPrevVMState(fp);
   }
   if (!fp) {
     return empty_array();
@@ -2377,18 +2377,10 @@ void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {
              m_globalVarEnv, nullptr, InvokePseudoMain);
 }
 
-/*
- * Given a pointer to a VM frame, returns the previous VM frame in the call
- * stack. This function will also pass back by reference the previous PC (if
- * prevPc is non-null) and the previous SP (if prevSp is non-null).
- *
- * If there is no previous VM frame, this function returns NULL and does not
- * set prevPc and prevSp.
- */
-ActRec* ExecutionContext::getPrevVMStateUNSAFE(const ActRec* fp,
-                                               Offset* prevPc /* = NULL */,
-                                               TypedValue** prevSp /* = NULL */,
-                                               bool* fromVMEntry /* = NULL */) {
+ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
+                                         Offset* prevPc /* = NULL */,
+                                         TypedValue** prevSp /* = NULL */,
+                                         bool* fromVMEntry /* = NULL */) {
   if (fp == nullptr) {
     return nullptr;
   }
@@ -2692,7 +2684,7 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
   ActRec *fp = vmfp();
   if (fp) {
     for (; frame > 0; --frame) {
-      ActRec* prevFp = getPrevVMStateUNSAFE(fp);
+      ActRec* prevFp = getPrevVMState(fp);
       if (!prevFp) {
         // To be safe in case we failed to get prevFp. This would mean we've
         // been asked to eval in a frame which is beyond the top of the stack.
@@ -2832,7 +2824,7 @@ void ExecutionContext::preventReturnsToTC() {
     ActRec *ar = vmfp();
     while (ar) {
       preventReturnToTC(ar);
-      ar = getPrevVMStateUNSAFE(ar);
+      ar = getPrevVMState(ar);
     }
   }
 }
@@ -7285,7 +7277,7 @@ void DumpCurUnit(int skip) {
   ActRec* fp = vmfp();
   Offset pc = fp->m_func->unit() ? pcOff() : 0;
   while (skip--) {
-    fp = g_context->getPrevVMStateUNSAFE(fp, &pc);
+    fp = g_context->getPrevVMState(fp, &pc);
   }
   if (fp == nullptr) {
     std::cout << "Don't have a valid fp\n";

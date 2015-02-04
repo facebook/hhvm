@@ -66,7 +66,7 @@ IF (WIN32)
     $ENV{ProgramFiles}/MySQL/*/lib/${libsuffixDist}
     $ENV{SystemDrive}/MySQL/*/lib/${libsuffixDist})
 ELSE (WIN32)
-  FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r
+  FIND_LIBRARY(WEBSCALESQL_LIB NAMES webscalesqlclient_r
     PATHS
     /usr/lib/mysql
     /usr/local/lib/mysql
@@ -76,6 +76,20 @@ ELSE (WIN32)
     /opt/local/lib/mysql5/mysql
     /opt/mysql/mysql/lib/mysql
     /opt/mysql/lib/mysql)
+  IF (WEBSCALESQL_LIB)
+    SET(MYSQL_LIB ${WEBSCALESQL_LIB})
+  ELSE (WEBSCALESQL_LIB)
+    FIND_LIBRARY(MYSQL_LIB NAMES webscalesqlclient_r mysqlclient_r
+      PATHS
+      /usr/lib/mysql
+      /usr/local/lib/mysql
+      /usr/local/mysql/lib
+      /usr/local/mysql/lib/mysql
+      /opt/local/mysql5/lib
+      /opt/local/lib/mysql5/mysql
+      /opt/mysql/mysql/lib/mysql
+      /opt/mysql/lib/mysql)
+  ENDIF (WEBSCALESQL_LIB)
 ENDIF (WIN32)
 
 IF(MYSQL_LIB)
@@ -91,7 +105,11 @@ IF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
   FIND_LIBRARY(MYSQL_ZLIB zlib PATHS ${MYSQL_LIB_DIR})
   FIND_LIBRARY(MYSQL_YASSL yassl PATHS ${MYSQL_LIB_DIR})
   FIND_LIBRARY(MYSQL_TAOCRYPT taocrypt PATHS ${MYSQL_LIB_DIR})
-  SET(MYSQL_CLIENT_LIBS mysqlclient_r)
+  IF (WEBSCALESQL_LIB)
+    SET(MYSQL_CLIENT_LIBS webscalesqlclient_r)
+  ELSE (WEBSCALESQL_LIB)
+    SET(MYSQL_CLIENT_LIBS mysqlclient_r)
+  ENDIF (WEBSCALESQL_LIB)
   IF (MYSQL_ZLIB)
     SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} zlib)
   ENDIF (MYSQL_ZLIB)

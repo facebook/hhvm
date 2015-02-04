@@ -577,6 +577,11 @@ class Redis {
     return $this->processBooleanResponse();
   }
 
+  public function unwatch() {
+    $this->processCommand("UNWATCH");
+    return $this->processBooleanResponse();
+  }
+
   /* Batch --------------------------------------------------------------- */
 
   protected function processMSetCommand($cmd, array $data) {

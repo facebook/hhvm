@@ -5198,7 +5198,7 @@ Object c_Pair::t_take(const Variant& n) {
     throw e;
   }
   int64_t len = n.toInt64();
-  auto* vec = newobj<c_Vector>();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   if (len <= 0) {
     return obj;
@@ -5221,7 +5221,7 @@ Object c_Pair::t_takewhile(const Variant& callback) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = newobj<c_Vector>();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   for (uint32_t i = 0; i < 2; ++i) {
     if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
@@ -5237,7 +5237,7 @@ Object c_Pair::t_skip(const Variant& n) {
     throw e;
   }
   int64_t len = n.toInt64();
-  auto* vec = newobj<c_Vector>();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   if (len <= 0) len = 0;
   size_t skipAmt = std::min<size_t>(len, 2);
@@ -5259,7 +5259,7 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = newobj<c_Vector>();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   uint32_t i = 0;
   for (; i < 2; ++i) {

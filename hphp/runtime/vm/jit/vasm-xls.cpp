@@ -165,7 +165,6 @@ struct Vxls {
   ~Vxls();
   // phases
   void allocate();
-  void splitCritEdges();
   void computePositions();
   void analyzeRsp();
   void buildIntervals();
@@ -194,7 +193,6 @@ struct Vxls {
                       const CopyPlan&, MemoryRef slots, unsigned pos);
   PhysReg findHint(Interval* current, const PosVec& free_until, RegSet allow);
   unsigned nearestSplitBefore(unsigned pos);
-  void forwardJmp(Vlabel middleLabel, Vlabel destLabel);
   // debugging
   void print(const char* caption);
   void printInstr(std::ostringstream& out, Vinstr* instr, unsigned pos, Vlabel);
@@ -476,9 +474,9 @@ Vxls::~Vxls() {
  */
 
 void Vxls::allocate() {
+  splitCriticalEdges(unit);
   blocks = sortBlocks(unit);
   assert(check(unit));
-  splitCritEdges();
   computePositions();
   analyzeRsp();
   buildIntervals();
@@ -499,53 +497,6 @@ void Vxls::allocate() {
     code.erase(end, code.end());
   }
   printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
-}
-
-void Vxls::forwardJmp(Vlabel middleLabel, Vlabel destLabel) {
-  auto& middle = unit.blocks[middleLabel];
-  auto& dest = unit.blocks[destLabel];
-  // We need to preserve any phidefs in the forwarding block if they're present
-  // in the original destination block.
-  auto& headInst = dest.code.front();
-  if (headInst.op == Vinstr::phidef) {
-    auto tuple = headInst.phidef_.defs;
-    auto forwardedRegs = unit.tuples[tuple];
-    VregList regs(forwardedRegs.size());
-    for (unsigned i = 0; i < forwardedRegs.size(); ++i) {
-      regs[i] = unit.makeReg();
-    }
-    auto newTuple = unit.makeTuple(regs);
-    middle.code.emplace_back(phidef{newTuple});
-    middle.code.emplace_back(phijmp{destLabel, newTuple});
-    return;
-  }
-  middle.code.emplace_back(jmp{destLabel});
-}
-
-void Vxls::splitCritEdges() {
-  jit::vector<unsigned> preds(unit.blocks.size());
-  for (auto pred : blocks) {
-    auto succlist = succs(unit.blocks[pred]);
-    for (auto succ : succlist) {
-      preds[succ]++;
-    }
-  }
-  auto resort = false;
-  for (auto pred : blocks) {
-    auto succlist = succs(unit.blocks[pred]);
-    if (succlist.size() <= 1) continue;
-    for (auto& succ : succlist) {
-      if (preds[succ] <= 1) continue;
-      // split the critical edge.
-      auto middle = unit.makeBlock(unit.blocks[succ].area);
-      forwardJmp(middle, succ);
-      succ = middle;
-      resort = true;
-    }
-  }
-  if (resort) {
-    blocks = sortBlocks(unit);
-  }
 }
 
 // compute the linear position range of each block

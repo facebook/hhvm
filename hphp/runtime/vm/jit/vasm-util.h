@@ -19,6 +19,7 @@
 namespace HPHP { namespace jit {
 
 struct Vinstr;
+struct Vunit;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -27,6 +28,11 @@ struct Vinstr;
  * program behavior.
  */
 bool is_trivial_nop(const Vinstr&);
+
+/*
+ * Splits any critical edges in `unit'.  Returns true iff the unit was modified.
+ */
+bool splitCriticalEdges(Vunit& unit);
 
 //////////////////////////////////////////////////////////////////////
 

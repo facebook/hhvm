@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
 
 namespace HPHP { namespace jit {
 
@@ -48,6 +49,62 @@ bool is_trivial_nop(const Vinstr& inst) {
     (inst.op == Vinstr::lea && is_nop(inst.lea_)) ||
     inst.op == Vinstr::nop;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+void forwardJmp(Vunit& unit, Vlabel middleLabel, Vlabel destLabel) {
+  auto& middle = unit.blocks[middleLabel];
+  auto& dest = unit.blocks[destLabel];
+  // We need to preserve any phidefs in the forwarding block if they're present
+  // in the original destination block.
+  auto& headInst = dest.code.front();
+  if (headInst.op == Vinstr::phidef) {
+    auto tuple = headInst.phidef_.defs;
+    auto forwardedRegs = unit.tuples[tuple];
+    VregList regs(forwardedRegs.size());
+    for (unsigned i = 0; i < forwardedRegs.size(); ++i) {
+      regs[i] = unit.makeReg();
+    }
+    auto newTuple = unit.makeTuple(regs);
+    middle.code.emplace_back(phidef{newTuple});
+    middle.code.emplace_back(phijmp{destLabel, newTuple});
+    return;
+  }
+  middle.code.emplace_back(jmp{destLabel});
+}
+
+}
+
+/*
+ * Splits the critical edges in `unit', if any.
+ * Returns true iff the unit was modified.
+ */
+bool splitCriticalEdges(Vunit& unit) {
+  jit::vector<unsigned> preds(unit.blocks.size());
+  for (size_t b = 0; b < unit.blocks.size(); b++) {
+    auto succlist = succs(unit.blocks[b]);
+    for (auto succ : succlist) {
+      preds[succ]++;
+    }
+  }
+  auto changed = false;
+  for (size_t pred = 0; pred < unit.blocks.size(); pred++) {
+    auto succlist = succs(unit.blocks[pred]);
+    if (succlist.size() <= 1) continue;
+    for (auto& succ : succlist) {
+      if (preds[succ] <= 1) continue;
+      // split the critical edge.
+      auto middle = unit.makeBlock(unit.blocks[succ].area);
+      forwardJmp(unit, middle, succ);
+      succ = middle;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 

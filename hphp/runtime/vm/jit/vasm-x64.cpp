@@ -31,6 +31,8 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-util.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include <algorithm>
 
@@ -930,10 +932,15 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
     // block.
     if (auto rspOffset = ((stkArgs.size() + 1) & ~1) * sizeof(uintptr_t)) {
       auto& taken = unit.blocks[targets[1]].code;
-      assert(taken.front().op == Vinstr::landingpad);
+      assert(taken.front().op == Vinstr::landingpad ||
+             taken.front().op == Vinstr::jmp);
       Vinstr v{lea{rsp[rspOffset], rsp}};
       v.origin = taken.front().origin;
-      taken.insert(taken.begin() + 1, v);
+      if (taken.front().op == Vinstr::jmp) {
+        taken.insert(taken.begin(), v);
+      } else {
+        taken.insert(taken.begin() + 1, v);
+      }
     }
 
     // Write out the code so far to the end of b. Remaining code will be
@@ -1004,11 +1011,15 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
 void lowerForX64(Vunit& unit, const Abi& abi) {
   Timer _t(Timer::vasm_lower);
 
+  // This pass relies on having no critical edges in the unit.
+  splitCriticalEdges(unit);
+
   // Scratch block can change blocks allocation, hence cannot use regular
   // iterators.
   auto& blocks = unit.blocks;
-  for (size_t ib = 0; ib < blocks.size(); ++ib) {
-    if (blocks[ib].code.empty()) continue;
+
+  PostorderWalker{unit}.dfs([&](Vlabel ib) {
+    assert(!blocks[ib].code.empty());
     if (blocks[ib].code.back().op == Vinstr::svcreq) {
       lower_svcreq(unit, Vlabel{ib}, blocks[ib].code.back());
     }
@@ -1073,7 +1084,7 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
           break;
       }
     }
-  }
+  });
 
   printUnit(kVasmLowerLevel, "after lower for X64", unit);
 }
@@ -1085,6 +1096,7 @@ void Vasm::optimizeX64() {
   removeTrivialNops(m_unit);
   fuseBranches(m_unit);
   if (RuntimeOption::EvalHHIRDirectExit) {
+    optimizeJmps(m_unit);
     optimizeExits(m_unit);
   }
 }

@@ -1,6 +1,6 @@
 File "array_map3.php", line 10, characters 13-33:
 Invalid argument (Typing[4110])
-File "array_map3.php", line 6, characters 26-29:
+File "array_map3.php", line 6, characters 27-30:
 This is a bool
 File "array_map3.php", line 3, characters 26-28:
 It is incompatible with an int

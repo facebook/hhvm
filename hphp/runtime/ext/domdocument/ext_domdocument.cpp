@@ -5373,6 +5373,12 @@ static Variant dom_xpath_document_read(const Object& obj) {
   if (ctx) {
     docp = (xmlDocPtr)ctx->doc;
   }
+  DOMDocument* doc_data = Native::data<DOMDocument>(xpath->m_doc.get());
+  // If document in the context is the same, return it.
+  if ((xmlDocPtr)doc_data->m_node == docp) {
+    return xpath->m_doc;
+  }
+  // Otherwise, create a new doc.
   return create_node_object((xmlNodePtr)docp, xpath->m_doc);
 }
 

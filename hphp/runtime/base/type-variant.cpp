@@ -86,19 +86,7 @@ Variant::Variant(litstr v) {
   m_data.pstr->incRefCount();
 }
 
-Variant::Variant(const String& v) {
-  StringData *s = v.get();
-  if (s) {
-    m_data.pstr = s;
-    if (s->isStatic()) {
-      m_type = KindOfStaticString;
-    } else {
-      m_type = KindOfString;
-      s->incRefCount();
-    }
-  } else {
-    m_type = KindOfNull;
-  }
+Variant::Variant(const String& v) noexcept : Variant(v.get()) {
 }
 
 Variant::Variant(const std::string & v) {
@@ -109,40 +97,13 @@ Variant::Variant(const std::string & v) {
   s->incRefCount();
 }
 
-Variant::Variant(const Array& v) {
-  ArrayData *a = v.get();
-  if (a) {
-    m_type = KindOfArray;
-    m_data.parr = a;
-    a->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
+Variant::Variant(const Array& v) noexcept : Variant(v.get()) {}
 
-Variant::Variant(const Object& v) {
-  ObjectData *o = v.get();
-  if (o) {
-    m_type = KindOfObject;
-    m_data.pobj = o;
-    o->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
+Variant::Variant(const Object& v) noexcept : Variant(v.get()) {}
 
-Variant::Variant(const Resource& v) {
-  ResourceData* o = v.get();
-  if (o) {
-    m_type = KindOfResource;
-    m_data.pres = o;
-    o->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
+Variant::Variant(const Resource& v) noexcept : Variant(v.get()) {}
 
-Variant::Variant(StringData *v) {
+Variant::Variant(StringData *v) noexcept {
   if (v) {
     m_data.pstr = v;
     if (v->isStatic()) {
@@ -156,7 +117,7 @@ Variant::Variant(StringData *v) {
   }
 }
 
-Variant::Variant(const StringData* v, StaticStrInit) {
+Variant::Variant(const StringData* v, StaticStrInit) noexcept {
   if (v) {
     assert(v->isStatic());
     m_data.pstr = const_cast<StringData*>(v);
@@ -166,7 +127,7 @@ Variant::Variant(const StringData* v, StaticStrInit) {
   }
 }
 
-Variant::Variant(ArrayData* v) {
+Variant::Variant(ArrayData* v) noexcept {
   if (v) {
     m_type = KindOfArray;
     m_data.parr = v;
@@ -176,7 +137,7 @@ Variant::Variant(ArrayData* v) {
   }
 }
 
-Variant::Variant(ObjectData* v) {
+Variant::Variant(ObjectData* v) noexcept {
   if (v) {
     m_type = KindOfObject;
     m_data.pobj = v;
@@ -186,7 +147,7 @@ Variant::Variant(ObjectData* v) {
   }
 }
 
-Variant::Variant(ResourceData* v) {
+Variant::Variant(ResourceData* v) noexcept {
   if (v) {
     m_type = KindOfResource;
     m_data.pres = v;
@@ -196,7 +157,7 @@ Variant::Variant(ResourceData* v) {
   }
 }
 
-Variant::Variant(RefData* r) {
+Variant::Variant(RefData* r) noexcept {
   if (r) {
     m_type = KindOfRef;
     m_data.pref = r;
@@ -206,7 +167,7 @@ Variant::Variant(RefData* r) {
   }
 }
 
-Variant::Variant(StringData* var, Attach) {
+Variant::Variant(StringData* var, Attach) noexcept {
   if (var) {
     m_type = var->isStatic() ? KindOfStaticString : KindOfString;
     m_data.pstr = var;
@@ -215,7 +176,7 @@ Variant::Variant(StringData* var, Attach) {
   }
 }
 
-Variant::Variant(ArrayData* var, Attach) {
+Variant::Variant(ArrayData* var, Attach) noexcept {
   if (var) {
     m_type = KindOfArray;
     m_data.parr = var;
@@ -224,7 +185,7 @@ Variant::Variant(ArrayData* var, Attach) {
   }
 }
 
-Variant::Variant(ObjectData* var, Attach) {
+Variant::Variant(ObjectData* var, Attach) noexcept {
   if (var) {
     m_type = KindOfObject;
     m_data.pobj = var;
@@ -233,7 +194,7 @@ Variant::Variant(ObjectData* var, Attach) {
   }
 }
 
-Variant::Variant(ResourceData* var, Attach) {
+Variant::Variant(ResourceData* var, Attach) noexcept {
   if (var) {
     m_type = KindOfResource;
     m_data.pres = var;
@@ -242,7 +203,7 @@ Variant::Variant(ResourceData* var, Attach) {
   }
 }
 
-Variant::Variant(RefData* var, Attach) {
+Variant::Variant(RefData* var, Attach) noexcept {
   if (var) {
     m_type = KindOfRef;
     m_data.pref = var;
@@ -252,7 +213,7 @@ Variant::Variant(RefData* var, Attach) {
 }
 
 // the version of the high frequency function that is not inlined
-Variant::Variant(const Variant& v) {
+Variant::Variant(const Variant& v) noexcept {
   constructValHelper(v);
 }
 
@@ -284,14 +245,14 @@ const RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&RefData::release),
 };
 
-Variant::~Variant() {
+Variant::~Variant() noexcept {
   tvRefcountedDecRef(asTypedValue());
   if (debug) {
     memset(this, kTVTrashFill2, sizeof(*this));
   }
 }
 
-void tvDecRefHelper(DataType type, uint64_t datum) {
+void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
   assert(type == KindOfString || type == KindOfArray ||
          type == KindOfObject || type == KindOfResource ||
          type == KindOfRef);
@@ -300,23 +261,23 @@ void tvDecRefHelper(DataType type, uint64_t datum) {
   }
 }
 
-Variant &Variant::assign(const Variant& v) {
+Variant &Variant::assign(const Variant& v) noexcept {
   AssignValHelper(this, &v);
   return *this;
 }
 
-Variant& Variant::assignRef(Variant& v) {
+Variant& Variant::assignRef(Variant& v) noexcept {
   assignRefHelper(v);
   return *this;
 }
 
-Variant& Variant::setWithRef(const Variant& v) {
+Variant& Variant::setWithRef(const Variant& v) noexcept {
   setWithRefHelper(v, IS_REFCOUNTED_TYPE(m_type));
   return *this;
 }
 
 #define IMPLEMENT_SET_IMPL(name, argType, argName, setOp) \
-  void Variant::name(argType argName) {                   \
+  void Variant::name(argType argName) noexcept {          \
     if (isPrimitive()) {                                  \
       setOp;                                              \
     } else if (m_type == KindOfRef) {                     \
@@ -350,7 +311,7 @@ IMPLEMENT_SET(const StaticString&,
 #undef IMPLEMENT_SET
 
 #define IMPLEMENT_PTR_SET(ptr, member, dtype)                           \
-  void Variant::set(ptr *v) {                                           \
+  void Variant::set(ptr *v) noexcept {                                  \
     Variant *self = m_type == KindOfRef ? m_data.pref->var() : this;    \
     if (UNLIKELY(!v)) {                                                 \
       self->setNull();                                                  \
@@ -372,7 +333,7 @@ IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
 
 #undef IMPLEMENT_PTR_SET
 
-int Variant::getRefCount() const {
+int Variant::getRefCount() const noexcept {
   switch (m_type) {
     DT_UNCOUNTED_CASE:
       return 1;
@@ -389,7 +350,7 @@ int Variant::getRefCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 
-bool Variant::isNumeric(bool checkString /* = false */) const {
+bool Variant::isNumeric(bool checkString /* = false */) const noexcept {
   int64_t ival;
   double dval;
   DataType t = toNumeric(ival, dval, checkString);
@@ -428,7 +389,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
   not_reached();
 }
 
-bool Variant::isScalar() const {
+bool Variant::isScalar() const noexcept {
   switch (getType()) {
     case KindOfUninit:
     case KindOfNull:

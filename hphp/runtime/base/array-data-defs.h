@@ -142,7 +142,7 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline void ArrayData::release() {
+inline void ArrayData::release() noexcept {
   return g_array_funcs.release[m_kind](this);
 }
 

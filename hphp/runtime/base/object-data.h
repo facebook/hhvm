@@ -144,7 +144,7 @@ struct ObjectData {
  public:
   static void DeleteObject(ObjectData*);
 
-  void release();
+  void release() noexcept;
 
   Class* getVMClass() const;
   StrNR getClassName() const;

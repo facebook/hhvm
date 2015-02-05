@@ -72,48 +72,61 @@ struct Variant : private TypedValue {
   enum class StrongBind {};
   enum class Attach {};
 
-  Variant() { m_type = KindOfUninit; }
-  explicit Variant(NullInit) { m_type = KindOfNull; }
-  explicit Variant(NoInit) {}
+  Variant() noexcept { m_type = KindOfUninit; }
+  explicit Variant(NullInit) noexcept { m_type = KindOfNull; }
+  explicit Variant(NoInit) noexcept {}
 
-  /* implicit */ Variant(bool    v) { m_type = KindOfBoolean; m_data.num = v; }
-  /* implicit */ Variant(int     v) { m_type = KindOfInt64; m_data.num = v; }
+  /* implicit */ Variant(bool    v) noexcept {
+    m_type = KindOfBoolean; m_data.num = v;
+  }
+  /* implicit */ Variant(int     v) noexcept {
+    m_type = KindOfInt64; m_data.num = v;
+  }
   // The following two overloads will accept int64_t whether it's
   // implemented as long or long long.
-  /* implicit */ Variant(long   v) { m_type = KindOfInt64; m_data.num = v; }
-  /* implicit */ Variant(long long v) { m_type = KindOfInt64; m_data.num = v; }
-  /* implicit */ Variant(uint64_t  v) { m_type = KindOfInt64; m_data.num = v; }
+  /* implicit */ Variant(long   v) noexcept {
+    m_type = KindOfInt64; m_data.num = v;
+  }
+  /* implicit */ Variant(long long v) noexcept {
+    m_type = KindOfInt64; m_data.num = v;
+  }
+  /* implicit */ Variant(uint64_t  v) noexcept {
+    m_type = KindOfInt64; m_data.num = v;
+  }
 
-  /* implicit */ Variant(double    v) { m_type = KindOfDouble; m_data.dbl = v; }
+  /* implicit */ Variant(double    v) noexcept {
+    m_type = KindOfDouble; m_data.dbl = v;
+  }
 
   /* implicit */ Variant(litstr  v);
   /* implicit */ Variant(const std::string &v);
-  /* implicit */ Variant(const StaticString &v) {
+  /* implicit */ Variant(const StaticString &v) noexcept {
     m_type = KindOfStaticString;
     StringData *s = v.get();
     assert(s);
     m_data.pstr = s;
   }
 
-  /* implicit */ Variant(const String& v);
-  /* implicit */ Variant(const Array& v);
-  /* implicit */ Variant(const Object& v);
-  /* implicit */ Variant(const Resource& v);
-  /* implicit */ Variant(StringData* v);
-  /* implicit */ Variant(ArrayData* v);
-  /* implicit */ Variant(ObjectData* v);
-  /* implicit */ Variant(ResourceData* v);
-  /* implicit */ Variant(RefData* r);
+  /* implicit */ Variant(const String& v) noexcept;
+  /* implicit */ Variant(const Array& v) noexcept;
+  /* implicit */ Variant(const Object& v) noexcept;
+  /* implicit */ Variant(const Resource& v) noexcept;
+  /* implicit */ Variant(StringData* v) noexcept;
+  /* implicit */ Variant(ArrayData* v) noexcept;
+  /* implicit */ Variant(ObjectData* v) noexcept;
+  /* implicit */ Variant(ResourceData* v) noexcept;
+  /* implicit */ Variant(RefData* r) noexcept;
 
   template <typename T>
   explicit Variant(const SmartPtr<T>& ptr) : Variant(ptr.get()) { }
   template <typename T>
-  explicit Variant(SmartPtr<T>&& ptr) : Variant(ptr.detach(), Attach{}) { }
+  explicit Variant(SmartPtr<T>&& ptr) noexcept
+    : Variant(ptr.detach(), Attach{}) { }
 
   /*
    * Creation constructor from ArrayInit that avoids a null check.
    */
-  explicit Variant(ArrayData* ad, ArrayInitCtor) {
+  explicit Variant(ArrayData* ad, ArrayInitCtor) noexcept {
     m_type = KindOfArray;
     m_data.parr = ad;
     ad->incRefCount();
@@ -121,7 +134,7 @@ struct Variant : private TypedValue {
 
   // for static strings only
   enum class StaticStrInit {};
-  explicit Variant(const StringData *v, StaticStrInit);
+  explicit Variant(const StringData *v, StaticStrInit) noexcept;
 
   // These are prohibited, but declared just to prevent accidentally
   // calling the bool constructor just because we had a pointer to
@@ -145,14 +158,14 @@ struct Variant : private TypedValue {
    * copies: they unbox refs and turn uninits to null.
    */
 
-  Variant(const Variant& v);
+  Variant(const Variant& v) noexcept;
 
-  Variant(const Variant& v, CellCopy) {
+  Variant(const Variant& v, CellCopy) noexcept {
     m_type = v.m_type;
     m_data = v.m_data;
   }
 
-  Variant(const Variant& v, CellDup) {
+  Variant(const Variant& v, CellDup) noexcept {
     m_type = v.m_type;
     m_data = v.m_data;
     tvRefcountedIncRef(asTypedValue());
@@ -160,7 +173,7 @@ struct Variant : private TypedValue {
 
   Variant(StrongBind, Variant& v) { constructRefHelper(v); }
 
-  Variant& operator=(const Variant& v) {
+  Variant& operator=(const Variant& v) noexcept {
     return assign(v);
   }
 
@@ -180,13 +193,17 @@ struct Variant : private TypedValue {
     }
 
     assert(this != &v);
-    m_type = v.m_type != KindOfUninit ? v.m_type : KindOfNull;
-    m_data = v.m_data;
-    v.m_type = KindOfNull;
+    if (v.m_type != KindOfUninit) {
+      m_type = v.m_type;
+      m_data = v.m_data;
+      v.m_type = KindOfNull;
+    } else {
+      m_type = KindOfNull;
+    }
   }
 
   // Move ctor for strings
-  /* implicit */ Variant(String&& v) {
+  /* implicit */ Variant(String&& v) noexcept {
     StringData *s = v.get();
     if (LIKELY(s != nullptr)) {
       m_data.pstr = s;
@@ -200,7 +217,7 @@ struct Variant : private TypedValue {
   }
 
   // Move ctor for arrays
-  /* implicit */ Variant(Array&& v) {
+  /* implicit */ Variant(Array&& v) noexcept {
     ArrayData *a = v.get();
     if (LIKELY(a != nullptr)) {
       m_type = KindOfArray;
@@ -212,7 +229,7 @@ struct Variant : private TypedValue {
   }
 
   // Move ctor for objects
-  /* implicit */ Variant(Object&& v) {
+  /* implicit */ Variant(Object&& v) noexcept {
     ObjectData *pobj = v.get();
     if (pobj) {
       m_type = KindOfObject;
@@ -224,7 +241,7 @@ struct Variant : private TypedValue {
   }
 
   // Move ctor for resources
-  /* implicit */ Variant(Resource&& v) {
+  /* implicit */ Variant(Resource&& v) noexcept {
     ResourceData *pres = v.get();
     if (pres) {
       m_type = KindOfResource;
@@ -241,7 +258,7 @@ struct Variant : private TypedValue {
    * Note: not semantically moves.  Like our "copies", these unbox
    * refs and turn uninits to null.
    */
-  Variant& operator=(Variant &&rhs) {
+  Variant& operator=(Variant &&rhs) noexcept {
     assert(this != &rhs); // TODO(#2484130): we end up as null on a
                           // self move-assign; decide if this is ok.
     if (rhs.m_type == KindOfRef) return *this = *rhs.m_data.pref->var();
@@ -252,15 +269,19 @@ struct Variant : private TypedValue {
     goner.m_data = lhs.m_data;
     goner.m_type = lhs.m_type;
 
-    lhs.m_data = rhs.m_data;
-    lhs.m_type = rhs.m_type == KindOfUninit ? KindOfNull : rhs.m_type;
+    if (rhs.m_type == KindOfUninit) {
+      lhs.m_type = KindOfNull;
+    } else {
+      lhs.m_type = rhs.m_type;
+      lhs.m_data = rhs.m_data;
+      rhs.m_type = KindOfNull;
+    }
 
-    rhs.m_type = KindOfNull;
     return *this;
   }
 
   // D462768 showed no gain from inlining, even just into mixed-array.o
-  ~Variant();
+  ~Variant() noexcept;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -289,7 +310,7 @@ struct Variant : private TypedValue {
   /**
    * set to null without breaking bindings (if any), faster than v_a = null;
    */
-  void setNull();
+  void setNull() noexcept;
 
   /**
    * Clear the original data, and set it to be the same as in v, and if
@@ -297,7 +318,7 @@ struct Variant : private TypedValue {
    * In order to correctly copy circular arrays, even if v is the only
    * strong reference to arr, we still keep the reference.
    */
-  Variant& setWithRef(const Variant& v);
+  Variant& setWithRef(const Variant& v) noexcept;
 
 ///////////////////////////////////////////////////////////////////////////////
 // int64
@@ -476,10 +497,10 @@ struct Variant : private TypedValue {
     return getType() == KindOfResource;
   }
 
-  bool isNumeric(bool checkString = false) const;
+  bool isNumeric(bool checkString = false) const noexcept;
   DataType toNumeric(int64_t &ival, double &dval, bool checkString = false)
     const;
-  bool isScalar() const;
+  bool isScalar() const noexcept;
   bool isObject() const {
     return getType() == KindOfObject;
   }
@@ -522,7 +543,7 @@ struct Variant : private TypedValue {
   /**
    * Get reference count of weak or strong binding. For debugging purpose.
    */
-  int getRefCount() const;
+  int getRefCount() const noexcept;
 
   bool getBoolean() const {
     assert(getType() == KindOfBoolean);
@@ -540,8 +561,8 @@ struct Variant : private TypedValue {
   /**
    * Operators
    */
-  Variant &assign(const Variant& v);
-  Variant &assignRef(Variant& v);
+  Variant &assign(const Variant& v) noexcept;
+  Variant &assignRef(Variant& v) noexcept;
 
   Variant &operator=(const StaticString &v) {
     set(v);
@@ -891,11 +912,11 @@ struct Variant : private TypedValue {
    * given types except that they do not increment the reference count
    * of the passed value.  They are used for the SmartPtr move constructor.
    */
-  Variant(StringData* var, Attach);
-  Variant(ArrayData* var, Attach);
-  Variant(ObjectData* var, Attach);
-  Variant(ResourceData* var, Attach);
-  Variant(RefData* var, Attach);
+  Variant(StringData* var, Attach) noexcept;
+  Variant(ArrayData* var, Attach) noexcept;
+  Variant(ObjectData* var, Attach) noexcept;
+  Variant(ResourceData* var, Attach) noexcept;
+  Variant(RefData* var, Attach) noexcept;
 
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
@@ -905,25 +926,25 @@ struct Variant : private TypedValue {
       (IS_STRING_TYPE(m_type) && m_data.pstr->empty());
   }
 
-  void set(bool    v);
-  void set(int     v);
-  void set(int64_t   v);
-  void set(double  v);
+  void set(bool    v) noexcept;
+  void set(int     v) noexcept;
+  void set(int64_t   v) noexcept;
+  void set(double  v) noexcept;
   void set(litstr  v) = delete;
   void set(const std::string & v) {
     return set(String(v));
   }
-  void set(StringData  *v);
-  void set(ArrayData   *v);
-  void set(ObjectData  *v);
-  void set(ResourceData  *v);
+  void set(StringData  *v) noexcept;
+  void set(ArrayData   *v) noexcept;
+  void set(ObjectData  *v) noexcept;
+  void set(ResourceData  *v) noexcept;
   void set(const StringData  *v) = delete;
   void set(const ArrayData   *v) = delete;
   void set(const ObjectData  *v) = delete;
   void set(const ResourceData  *v) = delete;
 
   void set(const String& v) { return set(v.get()); }
-  void set(const StaticString & v);
+  void set(const StaticString & v) noexcept;
   void set(const Array& v) { return set(v.get()); }
   void set(const Object& v) { return set(v.get()); }
   void set(const Resource& v) { return set(v.get()); }
@@ -997,9 +1018,13 @@ public:
     const Variant *other =
       UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
     assert(this != other);
-    tvRefcountedIncRef(other);
-    m_type = other->m_type != KindOfUninit ? other->m_type : KindOfNull;
-    m_data = other->m_data;
+    if (other->m_type == KindOfUninit) {
+      m_type = KindOfNull;
+    } else {
+      tvRefcountedIncRef(other);
+      m_type = other->m_type;
+      m_data = other->m_data;
+    }
   }
 
   void moveRefHelper(Variant&& v) {
@@ -1016,7 +1041,6 @@ public:
   ALWAYS_INLINE
   void setWithRefHelper(const Variant& v, bool destroy) {
     assert(tvIsPlausible(*this) && tvIsPlausible(v));
-
     assert(this != &v);
 
     const Variant& rhs =
@@ -1025,9 +1049,12 @@ public:
     tvRefcountedIncRef(rhs.asTypedValue());
     auto const d = m_data.num;
     auto const t = m_type;
-    m_type = rhs.m_type;
-    if (m_type == KindOfUninit) m_type = KindOfNull; // drop uninit
-    m_data.num = rhs.m_data.num;
+    if (rhs.m_type == KindOfUninit) {
+      m_type = KindOfNull; // drop uninit
+    } else {
+      m_type = rhs.m_type;
+      m_data.num = rhs.m_data.num;
+    }
     if (destroy) tvRefcountedDecRefHelper(t, d);
   }
 

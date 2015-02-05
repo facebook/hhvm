@@ -67,7 +67,7 @@ inline bool isUncounted(const TypedValue& tv) {
 
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
-void tvDecRefHelper(DataType type, uint64_t datum);
+void tvDecRefHelper(DataType type, uint64_t datum) noexcept;
 
 /*
  * Returns true if decreffing the specified TypedValue will free heap-allocated

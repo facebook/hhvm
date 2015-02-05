@@ -88,7 +88,7 @@ struct RefData {
   /*
    * Deallocate a RefData.
    */
-  void release() {
+  void release() noexcept {
     assert(!hasMultipleRefs());
     if (UNLIKELY(m_cow)) {
       m_count = 1;

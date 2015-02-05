@@ -67,7 +67,7 @@ class ResourceData {
     not_reached();
   }
 
-  void release() {
+  void release() noexcept {
     assert(!hasMultipleRefs());
     delete this;
   }

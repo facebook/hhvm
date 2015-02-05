@@ -13,7 +13,7 @@ function test(): int {
   $x = 0;
   $y = 1;
   $z = 2;
-  for($i = 0; $i < 3; $i++) {
+  for ($i = 0; $i < 3; $i++) {
     $x = (Vector {$y})[0];
     $y = (Vector {$z})[0];
     $z = (Vector {'hello'})[0];

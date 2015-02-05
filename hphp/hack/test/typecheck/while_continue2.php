@@ -11,7 +11,7 @@
 
 function test(): int {
   $x = null;
-  while(!$x) {
+  while (!$x) {
   }
   return $x;
 }

@@ -10,7 +10,6 @@
 
 (*****************************************************************************)
 (* Helper function, splits the content of a file into a list of lines.  *)
-(* join_lines is its inverse (modulo the trailing newline) *)
 (*****************************************************************************)
 
 let split_lines content =
@@ -20,17 +19,6 @@ let split_lines content =
   match List.rev lines with
   | "" :: rest -> List.rev rest
   | _ -> lines
-
-(* Always returns a string with a trailing newline *)
-let join_lines lines =
-  let buffer = Buffer.create 256 in
-  let rec loop = function
-    | [] -> Buffer.contents buffer
-    | line :: lines ->
-        Buffer.add_string buffer line;
-        Buffer.add_char buffer '\n';
-        loop lines in
-  loop lines
 
 (*****************************************************************************)
 (* Section building a list of intervals per file for a given diff.
@@ -351,11 +339,10 @@ let apply_blocks outc blocks lines =
         (* Cut the old content. *)
         let old_lines, lines =
           Core_list.split_n lines (end_block - start_block + 1) in
-        let old_content = join_lines old_lines in
         let new_lines = split_lines new_content in
         let acc =
           (* only add a hunk if it is nonempty *)
-          if old_content <> new_content
+          if old_lines <> new_lines
           then (start_block, new_lineno, old_lines, new_lines) :: acc
           else acc in
         let new_lineno = new_lineno + (List.length new_lines) in

@@ -14,7 +14,10 @@ class X {
   const string X2 = 'field2';
 }
 
-type myshape = shape(X::X1 => int, X::X2 => bool);
+type myshape = shape(
+  X::X1 => int,
+  X::X2 => bool,
+);
 
 function test(): myshape {
   $x = shape(X::X1 => 1, X::X2 => true);

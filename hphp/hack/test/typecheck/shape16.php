@@ -13,13 +13,14 @@ class A {}
 class B extends A {}
 class C extends A {}
 
-type myshape = shape('field' => A);
+type myshape = shape(
+  'field' => A,
+);
 
 function test(): myshape {
-  if(true) {
+  if (true) {
     $x = shape('field' => new B());
-  }
-  else {
+  } else {
     $x = shape('field' => new C());
   }
   return $x;

@@ -15,4 +15,7 @@ class X {
 }
 
 // Should fail for mixing class const and string literal
-type myshape = shape(X::X1 => int, 'field2' => bool);
+type myshape = shape(
+  X::X1 => int,
+  'field2' => bool,
+);

@@ -15,4 +15,7 @@ class X {
 }
 
 // Should fail for mixing int and string class consts
-type myshape = shape(X::X1 => int, X::X2 => bool);
+type myshape = shape(
+  X::X1 => int,
+  X::X2 => bool,
+);

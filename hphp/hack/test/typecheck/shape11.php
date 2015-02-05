@@ -9,5 +9,7 @@
  *
  */
 
-newtype myshape = shape('x' => myshape);
+newtype myshape = shape(
+  'x' => myshape,
+);
 

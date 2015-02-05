@@ -12,4 +12,9 @@ fi
 
 echo "Debugging with hhvm: $HHVM_BIN ..."
 
-gdb --command=$HHVM_LIB/gdb/hhvm.py --exec=$HHVM_BIN "$@"
+EXEC_CMD=--exec=$HHVM_BIN
+if [ "$1" = "--args" ]; then
+  EXEC_CMD=""
+fi
+
+exec gdb --command=$HHVM_LIB/gdb/hhvm.py $EXEC_CMD "$@"

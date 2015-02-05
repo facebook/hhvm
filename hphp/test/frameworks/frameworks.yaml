@@ -71,7 +71,7 @@
       # Assumes that calculating the current time in seconds twice will give
       # the same result. Not true if you're unlucky.
       - codeigniter/tests/codeigniter/helpers/date_helper_test.php
-      # Flakey test case. Already made a PR 
+      # Flakey test case. Already made a PR
       # at https://github.com/bcit-ci/CodeIgniter/pull/3399.
       - codeigniter/tests/codeigniter/libraries/Session_test.php
   composer:
@@ -97,6 +97,8 @@
       - doctrine2/tests/Doctrine/Tests/ORM/Cache/FileLockRegionTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/XmlDriverTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/YamlDriverTest.php
+    flakey:
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/YamlClassMetadataExporterTest.php
   drupal:
     url: https://github.com/drupal/drupal.git
     branch: 8.0-alpha13
@@ -723,7 +725,7 @@
   silex:
     # There are currently some broken tests and warnings caused by
     # vendors deprecating some classes. An issue has been opened in github
-    # at https://github.com/silexphp/Silex/issues/1085 and is currently 
+    # at https://github.com/silexphp/Silex/issues/1085 and is currently
     # waiting for a decision on what the proper fix should be
     url: https://github.com/silexphp/Silex.git
     branch: "v1.2.2"

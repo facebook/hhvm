@@ -1,4 +1,4 @@
- <?hh // strict
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,10 +9,10 @@
  *
  */
 
-async function fetch_db_results() : Awaitable<string> {
+async function fetch_db_results(): Awaitable<string> {
   return "Results!!!";
 }
 
-async function return_db_results() : Awaitable<string> {
+async function return_db_results(): Awaitable<string> {
   return "the results are".await fetch_db_results();
 }

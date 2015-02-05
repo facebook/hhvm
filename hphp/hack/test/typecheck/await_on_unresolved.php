@@ -1,4 +1,4 @@
- <?hh // partial
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,8 +9,10 @@
  *
  */
 
-async function something_complex(Awaitable<int> $i, Awaitable<string> $s)
-  : Awaitable<void> {
+async function something_complex(
+  Awaitable<int> $i,
+  Awaitable<string> $s,
+): Awaitable<void> {
   if (true) {
     $v = $i;
   } else {

@@ -1,2 +1,2 @@
-File "new_static_error.php", line 14, characters 7-12:
+File "new_static_error.php", line 13, characters 7-12:
 'static' is undefined outside of a class (Typing[4061])

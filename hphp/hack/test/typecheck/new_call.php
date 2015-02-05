@@ -10,7 +10,9 @@
  */
 
 class A {
-  public function foo(): int { return 0;}
+  public function foo(): int {
+    return 0;
+  }
 }
 
 function foo(): int {

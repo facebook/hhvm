@@ -22,6 +22,7 @@
 #include <string>
 
 #include "hphp/runtime/ext/ext_simplexml_include.h"
+#include "hphp/runtime/ext/libxml/ext_libxml.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

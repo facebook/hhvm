@@ -37,6 +37,8 @@ int libxml_streams_IO_close(void* context);
 void php_libxml_node_free(xmlNodePtr node);
 void php_libxml_node_free_resource(xmlNodePtr node);
 
+bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable = true);
+
 #define LIBXML_SAVE_NOEMPTYTAG 1<<2
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -5,8 +5,12 @@ This directory contains a collection of Python-GDB utilities for HHVM
 debugging, catered in particular towards debugging with a core, when no live
 inferior is present.
 
-To make use of them, simply execute the following line when running GDB, or add
-it to your ~/.gdbinit (substituting the path to your hphp directory as
+
+If you have installed `hhvm-dev` pacakge, there should be a `hhvm-gdb` command
+available, it will automatically load those library files for you.
+
+If you havn't install it, you can simply execute the following line when running
+GDB, or add it to your ~/.gdbinit (substituting the path to your hphp directory as
 appropriate):
 
     source <path-to-hphp>/tools/gdb/hhvm.py

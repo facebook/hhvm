@@ -59,7 +59,6 @@ public:
 
   virtual void beforeCheck(AnalysisResultPtr ar) {}
 
-  void addDependencies(AnalysisResultPtr ar);
   void addLateDependencies(AnalysisResultConstPtr ar);
   void setSafeCall(int flag) { m_safe = flag; }
   void setSafeDefault(ExpressionPtr def) { m_safeDef = def; }

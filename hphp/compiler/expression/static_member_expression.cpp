@@ -112,7 +112,6 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
-    addUserClass(ar, m_className);
   }
   m_exp->analyzeProgram(ar);
 }

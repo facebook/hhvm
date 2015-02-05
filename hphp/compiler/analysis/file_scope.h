@@ -138,15 +138,6 @@ public:
   void getConstantNames(std::vector<std::string> &names);
   TypePtr getConstantType(const std::string &name);
 
-  void addIncludeDependency(AnalysisResultPtr ar, const std::string &file,
-                            bool byInlined);
-  void addClassDependency(AnalysisResultPtr ar,
-                          const std::string &classname);
-  void addFunctionDependency(AnalysisResultPtr ar,
-                             const std::string &funcname, bool byInlined);
-  void addConstantDependency(AnalysisResultPtr ar,
-                             const std::string &decname);
-
   void addClassAlias(const std::string& target, const std::string& alias) {
     m_classAliasMap.insert(
       std::make_pair(

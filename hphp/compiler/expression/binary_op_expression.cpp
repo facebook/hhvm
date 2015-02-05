@@ -212,11 +212,6 @@ int BinaryOpExpression::getLocalEffects() const {
 }
 
 void BinaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal &&
-      m_op == T_INSTANCEOF && m_exp2->is(Expression::KindOfScalarExpression)) {
-    ScalarExpressionPtr s = dynamic_pointer_cast<ScalarExpression>(m_exp2);
-    addUserClass(ar, s->getString());
-  }
   m_exp1->analyzeProgram(ar);
   m_exp2->analyzeProgram(ar);
 }

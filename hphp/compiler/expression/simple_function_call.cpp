@@ -311,17 +311,6 @@ void SimpleFunctionCall::resolveNSFallbackFunc(
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void SimpleFunctionCall::addDependencies(AnalysisResultPtr ar) {
-  if (!m_class) {
-    if (m_className.empty()) {
-      addUserFunction(ar, m_name);
-    } else if ((!isParent() && !isSelf()) ||
-               getOriginalScope() != getScope()) {
-      addUserClass(ar, m_className);
-    }
-  }
-}
-
 void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
   FunctionScopePtr func;
   if (!m_class && m_className.empty()) {
@@ -378,8 +367,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     if (!Option::AllDynamic) {
       setDynamicByIdentifier(ar, m_name);
     }
-  } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-    addDependencies(ar);
   }
 
   if (m_safeDef) m_safeDef->analyzeProgram(ar);

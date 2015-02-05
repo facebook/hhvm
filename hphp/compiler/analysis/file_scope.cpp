@@ -236,9 +236,7 @@ ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void FileScope::declareConstant(AnalysisResultPtr ar, const string &name) {
-  if (!ar->declareConst(shared_from_this(), name)) {
-    addConstantDependency(ar, name);
-  }
+  ar->declareConst(shared_from_this(), name);
 }
 
 void FileScope::addConstant(const string &name, TypePtr type,
@@ -246,23 +244,6 @@ void FileScope::addConstant(const string &name, TypePtr type,
                             AnalysisResultPtr ar, ConstructPtr con) {
   BlockScopePtr f = ar->findConstantDeclarer(name);
   f->getConstants()->add(name, type, value, ar, con);
-}
-
-void FileScope::addIncludeDependency(AnalysisResultPtr ar,
-                                     const string &file, bool byInlined) {
-  ar->addIncludeDependency(shared_from_this(), file);
-}
-void FileScope::addClassDependency(AnalysisResultPtr ar,
-                                   const string &classname) {
-  ar->addClassDependency(shared_from_this(), classname);
-}
-void FileScope::addFunctionDependency(AnalysisResultPtr ar,
-                                      const string &funcname, bool byInlined) {
-  ar->addFunctionDependency(shared_from_this(), funcname);
-}
-void FileScope::addConstantDependency(AnalysisResultPtr ar,
-                                      const string &decname) {
-  ar->addConstantDependency(shared_from_this(), decname);
 }
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {

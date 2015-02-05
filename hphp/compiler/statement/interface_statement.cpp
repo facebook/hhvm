@@ -195,7 +195,6 @@ void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
   vector<string> bases;
   if (m_base) m_base->getStrings(bases);
   for (unsigned int i = 0; i < bases.size(); i++) {
-    addUserClass(ar, bases[i]);
     ClassScopePtr cls = ar->findClass(bases[i]);
     if (cls) {
       if (!cls->isInterface()) {

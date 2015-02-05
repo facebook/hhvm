@@ -135,9 +135,6 @@ void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_defaultValue) m_defaultValue->analyzeProgram(ar);
 
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (!m_type.empty()) {
-      addUserClass(ar, m_type);
-    }
     // Have to use non const ref params for magic methods
     FunctionScopePtr fs = getFunctionScope();
     if (fs->isMagicMethod() || fs->getName() == "offsetget") {

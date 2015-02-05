@@ -138,28 +138,6 @@ void Construct::serialize(JSON::CodeError::OutputStream &out) const {
   ls.done();
 }
 
-void Construct::addUserFunction(AnalysisResultPtr ar,
-                                const std::string &name) {
-  if (!name.empty()) {
-    if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
-        ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-      FunctionScopePtr func = getFunctionScope();
-      getFileScope()->addFunctionDependency(ar, name, func &&
-                                            func->isInlined());
-    }
-  }
-}
-
-void Construct::addUserClass(AnalysisResultPtr ar,
-                             const std::string &name) {
-  if (!name.empty()) {
-    if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
-        ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-      getFileScope()->addClassDependency(ar, name);
-    }
-  }
-}
-
 void Construct::printSource(CodeGenerator &cg) {
   if (m_loc) {
     cg_printf("/* SRC: %s line %d */\n", m_loc->file, m_loc->line0);

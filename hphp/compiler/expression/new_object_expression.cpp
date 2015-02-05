@@ -66,7 +66,6 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
       ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     FunctionScopePtr func;
     if (!m_name.empty()) {
-      addUserClass(ar, m_name);
       if (ClassScopePtr cls = resolveClass()) {
         m_name = m_className;
         func = cls->findConstructor(ar, true);

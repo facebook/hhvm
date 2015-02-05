@@ -29,7 +29,6 @@
 #include "hphp/util/string-bag.h"
 #include "hphp/util/thread-local.h"
 
-#include <boost/graph/adjacency_list.hpp>
 #include <tbb/concurrent_hash_map.h>
 #include <atomic>
 #include <map>
@@ -225,19 +224,6 @@ public:
   void declareUnknownClass(const std::string &name);
   bool declareConst(FileScopePtr fs, const std::string &name);
 
-  /**
-   * Dependencies
-   */
-  void link(FileScopePtr user, FileScopePtr provider);
-  bool addClassDependency(FileScopePtr usingFile,
-                          const std::string &className);
-  bool addFunctionDependency(FileScopePtr usingFile,
-                             const std::string &functionName);
-  bool addIncludeDependency(FileScopePtr usingFile,
-                            const std::string &includeFilename);
-  bool addConstantDependency(FileScopePtr usingFile,
-                             const std::string &constantName);
-
   ClassScopePtr findClass(const std::string &className) const;
   ClassScopePtr findClass(const std::string &className,
                           FindClassBy by);
@@ -359,14 +345,6 @@ public:
 
 private:
   BlockScopePtrVec m_ignoredScopes;
-
-  typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;
-  typedef boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
-  typedef boost::graph_traits<Graph>::adjacency_iterator adjacency_iterator;
-  Mutex m_depGraphMutex;
-  Graph m_depGraph;
-  typedef std::map<vertex_descriptor, FileScopePtr> VertexToFileScopePtrMap;
-  VertexToFileScopePtrMap m_fileVertMap;
 
   /**
    * Checks whether the file is in one of the on-demand parsing directories.

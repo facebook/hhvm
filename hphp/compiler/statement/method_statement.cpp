@@ -554,12 +554,6 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    TypePtr ret = funcScope->getReturnType();
-    if (ret && ret->isSpecificObject()) {
-      FileScopePtr fs = getFileScope();
-      if (fs) fs->addClassDependency(ar, ret->getName());
-    }
   }
 }
 

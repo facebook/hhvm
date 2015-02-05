@@ -137,14 +137,6 @@ public:
   const std::string &getOriginalParent() const { return m_parent; }
 
   /**
-   * Returns topmost parent class that has the method.
-   */
-  ClassScopePtr getRootParent(AnalysisResultConstPtr ar,
-                              const std::string &methodName = "");
-  void getRootParents(AnalysisResultConstPtr ar, const std::string &methodName,
-                      ClassScopePtrVec &roots, ClassScopePtr curClass);
-
-  /**
    * Whether this is a user-defined class.
    */
   bool isUserClass() const { return !getAttribute(System);}

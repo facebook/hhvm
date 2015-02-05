@@ -1227,39 +1227,6 @@ void ClassScope::setRedeclaring(AnalysisResultConstPtr ar, int redecId) {
   }
 }
 
-ClassScopePtr ClassScope::getRootParent(AnalysisResultConstPtr ar,
-                                        const std::string &methodName) {
-  ClassScopePtr root = dynamic_pointer_cast<ClassScope>(shared_from_this());
-  for (ClassScopePtr cls = getParentScope(ar); cls;
-       cls = cls->getParentScope(ar)) {
-    if (methodName.empty() ||
-        cls->m_functions.find(methodName) != cls->m_functions.end()) {
-      root = cls;
-    }
-  }
-  return root;
-}
-
-void ClassScope::getRootParents(AnalysisResultConstPtr ar,
-                                const std::string &methodName,
-                                ClassScopePtrVec &roots,
-                                ClassScopePtr curClass) {
-  ClassScopePtr root = dynamic_pointer_cast<ClassScope>(shared_from_this());
-  if (m_parent.empty()) {
-    roots.push_back(curClass);
-  } else {
-    ClassScopePtrVec parents = ar->findRedeclaredClasses(m_parent);
-    for (unsigned int i = 0; i < parents.size(); i++) {
-      ClassScopePtr cls = parents[i];
-      if (methodName.empty() ||
-          cls->m_functions.find(methodName) != cls->m_functions.end()) {
-        curClass = cls;
-      }
-      cls->getRootParents(ar, methodName, roots, curClass);
-    }
-  }
-}
-
 bool ClassScope::addFunction(AnalysisResultConstPtr ar,
                              FunctionScopePtr funcScope) {
   FunctionScopePtr &func = m_functions[funcScope->getName()];

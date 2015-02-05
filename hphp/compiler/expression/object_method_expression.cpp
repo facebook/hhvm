@@ -78,8 +78,7 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
             !(func->isVirtual() &&
               (func->isAbstract() ||
                (func->hasOverride() &&
-                cls->getAttribute(ClassScope::NotFinal))) &&
-              !func->isPerfectVirtual())) {
+                cls->getAttribute(ClassScope::NotFinal))))) {
           m_funcScope = func;
           func->addCaller(getScope());
         }

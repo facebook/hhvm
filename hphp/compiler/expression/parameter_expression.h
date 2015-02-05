@@ -52,7 +52,6 @@ public:
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
   ExpressionPtr userAttributeList() { return m_attributeList; }
-  TypePtr getTypeSpec(AnalysisResultPtr ar, bool forInference);
 
   bool hasTypeHint() const { return !m_type.empty(); }
   const std::string &getTypeHint() const {
@@ -71,9 +70,8 @@ public:
   void fixupSelfAndParentTypehints(ClassScopePtr cls);
   bool hhType() { return m_hhType; }
   TokenID getModifier() const { return m_modifier; }
-private:
-  TypePtr getTypeSpecForClass(AnalysisResultPtr ar, bool forInference);
 
+private:
   std::string m_type;
   TypeAnnotationPtr m_originalType;
   std::string m_name;

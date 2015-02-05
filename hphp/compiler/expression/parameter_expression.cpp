@@ -168,66 +168,6 @@ void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr ParameterExpression::getTypeSpecForClass(AnalysisResultPtr ar,
-                                                 bool forInference) {
-  TypePtr ret;
-  if (forInference) {
-    ClassScopePtr cls = ar->findClass(m_type);
-    if (!cls || cls->isRedeclaring() || cls->derivedByDynamic()) {
-      if (!cls && getScope()->isFirstPass() && !ar->isTypeAliasName(m_type)) {
-        ConstructPtr self = shared_from_this();
-        Compiler::Error(Compiler::UnknownClass, self);
-      }
-      ret = Type::Variant;
-    }
-    if (cls) {
-      // Classes must be redeclaring if there are also type aliases
-      // with the same name.
-      assert(!ar->isTypeAliasName(m_type) || cls->isRedeclaring());
-    }
-  }
-  if (!ret) {
-    ret = ar->isTypeAliasName(m_type) || !Option::WholeProgram
-      ? Type::Variant
-      : Type::CreateObjectType(m_type);
-  }
-  always_assert(ret);
-  return ret;
-}
-
-TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
-                                         bool forInference) {
-  const Type::TypePtrMap &types = Type::GetTypeHintTypes(m_hhType);
-  Type::TypePtrMap::const_iterator iter;
-
-  TypePtr ret;
-  if (m_type.empty()) {
-    ret = Type::Some;
-  } else if ((iter = types.find(m_type)) != types.end()) {
-    ret = iter->second;
-  } else {
-    ret = getTypeSpecForClass(ar, forInference);
-  }
-
-  ConstantExpressionPtr p;
-  if (ret->isPrimitive() &&
-      m_defaultValue &&
-      (p = dynamic_pointer_cast<ConstantExpression>(m_defaultValue)) &&
-      p->isNull()) {
-    // if we have a primitive type on the LHS w/ a default
-    // of null, then don't bother to infer it's type, since we will
-    // not specialize for this case
-    ret = Type::Some;
-  }
-
-  // we still want the above to run, so to record errors and infer defaults
-  if (m_ref && forInference) {
-    ret = Type::Variant;
-  }
-
-  return ret;
-}
-
 static bool useHackTypeHintErrorMessage(const char* hint) {
   String typeName(hint);
   MaybeDataType dt = TypeConstraint::typeNameToMaybeDataType(typeName.get());

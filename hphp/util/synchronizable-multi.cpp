@@ -16,6 +16,7 @@
 
 #include "hphp/util/synchronizable-multi.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/lock.h"
 #include "hphp/util/timer.h"
 
 #include <sys/errno.h>
@@ -23,14 +24,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-SynchronizableMulti::SynchronizableMulti(int size, int groups) :
+SynchronizableMulti::SynchronizableMulti(int size) :
     m_mutex(RankLeaf), m_group(0) {
-  assert(size > 0 && groups > 0);
+  assert(size > 0);
   m_conds.resize(size);
   for (unsigned int i = 0; i < m_conds.size(); i++) {
     pthread_cond_init(&m_conds[i], nullptr);
   }
-  m_cond_list_vec.resize(groups);
+  m_cond_list_vec.resize(1);
 }
 
 SynchronizableMulti::~SynchronizableMulti() {
@@ -89,6 +90,14 @@ bool SynchronizableMulti::waitImpl(int id, int q, bool front, timespec *ts) {
   }
 
   return ret != ETIMEDOUT;
+}
+
+void SynchronizableMulti::setNumGroups(int num_groups) {
+  Lock l(this);
+  if (num_groups != m_cond_list_vec.size()) {
+    assert(num_groups > m_cond_list_vec.size());
+    m_cond_list_vec.resize(num_groups);
+  }
 }
 
 void SynchronizableMulti::notify() {

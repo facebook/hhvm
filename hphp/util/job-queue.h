@@ -127,10 +127,10 @@ public:
    */
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
-           int maxJobQueuingMs = -1, int numPriorities = 1, int groups = 1,
+           int maxJobQueuingMs = -1, int numPriorities = 1,
            int queuedJobsReleaseRate = 3,
            IHostHealthObserver* healthStatus = nullptr)
-      : SynchronizableMulti(threadRoundRobin ? 1 : threadCount, groups),
+      : SynchronizableMulti(threadRoundRobin ? 1 : threadCount),
         m_jobCount(0), m_stopped(false), m_workerCount(0),
         m_dropCacheTimeout(dropCacheTimeout), m_dropStack(dropStack),
         m_lifoSwitchThreshold(lifoSwitchThreshold),
@@ -359,7 +359,7 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
            int maxJobQueuingMs = -1, int numPriorities = 1,
-           int groups = 1, int queuedJobsReleaseRate = 3,
+           int queuedJobsReleaseRate = 3,
            IHostHealthObserver* healthStatus = nullptr) :
     JobQueue<TJob,false,Policy>(threadCount,
                                 threadRoundRobin,
@@ -369,7 +369,6 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
                                 maxJobQueuingMs,
                                 numPriorities,
                                 queuedJobsReleaseRate,
-                                groups,
                                 healthStatus) {
     pthread_cond_init(&m_cond, nullptr);
   }
@@ -512,11 +511,11 @@ public:
                      typename TWorker::ContextType context,
                      int lifoSwitchThreshold = INT_MAX,
                      int maxJobQueuingMs = -1, int numPriorities = 1,
-                     int groups = 1, int queuedJobsReleaseRate = 3)
+                     int queuedJobsReleaseRate = 3)
       : m_stopped(true), m_healthStatus(HealthLevel::Bold), m_id(0),
         m_context(context), m_maxThreadCount(threadCount),
         m_queue(threadCount, threadRoundRobin, dropCacheTimeout, dropStack,
-                lifoSwitchThreshold, maxJobQueuingMs, numPriorities, groups,
+                lifoSwitchThreshold, maxJobQueuingMs, numPriorities,
                 queuedJobsReleaseRate, this),
         m_startReaperThread(maxJobQueuingMs > 0) {
     assert(threadCount >= 1);
@@ -567,6 +566,7 @@ public:
    */
   void start() {
     Lock lock(m_mutex);
+    m_queue.setNumGroups(num_numa_nodes());
     // Spin up more worker threads if appropriate
     int target = getTargetNumWorkers();
     for (int n = m_workers.size(); n < target; ++n) {

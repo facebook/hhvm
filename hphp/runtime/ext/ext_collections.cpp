@@ -1156,16 +1156,24 @@ Object c_Vector::t_setall(const Variant& iterable) {
   return this;
 }
 
-Object c_Vector::ti_fromitems(const Variant& iterable) {
-  if (iterable.isNull()) return newobj<c_Vector>();
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* target = newobj<c_Vector>();
+template<class TVector>
+ALWAYS_INLINE
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_fromItems(const Variant& iterable) {
+  auto* target = newobj<TVector>();
   Object ret = target;
-  for (uint32_t i = 0; iter; ++i, ++iter) {
-    target->addRaw(iter.second());
-  }
+  if (iterable.isNull()) return ret;
+  target->init(iterable);
   return ret;
+}
+
+Object c_Vector::ti_fromitems(const Variant& iterable) {
+  return BaseVector::php_fromItems<c_Vector>(iterable);
+}
+
+Object c_ImmVector::ti_fromitems(const Variant& iterable) {
+  return BaseVector::php_fromItems<c_ImmVector>(iterable);
 }
 
 Object c_Vector::ti_fromkeysof(const Variant& container) {

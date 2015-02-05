@@ -150,6 +150,11 @@ class BaseVector : public ExtCollectionObjectData {
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
+  static php_fromItems(const Variant& iterable);
+
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
   static php_fromKeysOf(const Variant& container);
 
   void zip(BaseVector* bvec, const Variant& iterable);
@@ -616,6 +621,7 @@ class c_ImmVector : public BaseVector {
   Object t_immutable();
   String t___tostring();
 
+  static Object ti_fromitems(const Variant& iterable);
   static Object ti_fromkeysof(const Variant& container);
 
  public:

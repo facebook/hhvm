@@ -8,8 +8,8 @@ $is_pagelet = !empty($_GET) && ($_GET['pagelet'] == 'true');
 
 if (!$is_pagelet) {
   // And now a good one that will work
-  setlocale(LC_TIME, 'it_IT');
-  setlocale(LC_NUMERIC, 'it_IT');
+  setlocale(LC_TIME, 'fr_FR');
+  setlocale(LC_NUMERIC, 'fr_FR');
 } else {
   if (!empty($_GET['locale'])) {
     setlocale(LC_TIME, $_GET['locale']);
@@ -29,7 +29,7 @@ if (!$is_pagelet) {
   // Send to pagelet multiple times to ensure the previously set locale does not linger into the next request.
   // We rely on the opt PageletServer.ThreadCount=1 to ensure the same thread gets the request.
   for ($i = 0; $i < 10; $i++) {
-    $locale = 'nl_NL';
+    $locale = 'de_DE';
     if ($i % 2 == 0) {
       $locale = '';
     }

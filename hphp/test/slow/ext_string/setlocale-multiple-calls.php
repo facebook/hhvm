@@ -1,11 +1,11 @@
 <?php
 
-test(LC_TIME, 'nl_NL');
+test(LC_TIME, 'fr_FR');
 
 // This will fail, but it shouldn't mess up the already set LC_TIME category
-test(LC_NUMERIC, 'nl_NL;');
+test(LC_NUMERIC, 'fr_FR;');
 
-test(LC_NUMERIC, 'nl_NL');
+test(LC_NUMERIC, 'fr_FR');
 
 function test($cat, $locale) {
   var_dump(setlocale($cat, $locale));

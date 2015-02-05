@@ -15,7 +15,7 @@ class A {
   private int $x;
 
   public function __construct(int $x) {
-    if(true) {
+    if (true) {
       $this->x = $x;
     } else {
       $y = $this->init();

@@ -1,4 +1,4 @@
-<?hh 
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,8 +9,7 @@
  *
  */
 
-class A {
-}
+class A {}
 
 function test(): void {
   $v = array('field1' => 1, 'field2' => new A());

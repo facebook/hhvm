@@ -1231,13 +1231,6 @@ and class_var env x acc =
              ints and strings, then fallback to mixed *)
           Some (pos, Happly ((pos, "mixed"), []))
       | _ -> h) in
-    (* If the typehint was "string", convert to "Stringish" for now *)
-    let h = if maybe_enum <> None
-      then h
-      else (match h with
-        | Some (pos1, Happly ((pos2, "string"), [])) ->
-            Some (pos1, Happly ((pos2, "Stringish"), []))
-        | x -> x) in
     let h = (match h with
       | Some (p, ((Hoption _) as x)) -> Some (p, x)
       | Some (p, ((Happly ((_, "mixed"), [])) as x)) -> Some (p, x)

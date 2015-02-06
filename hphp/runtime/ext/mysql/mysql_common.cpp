@@ -185,6 +185,9 @@ size_t MySQL::NumCachedConnections() {
 }
 
 std::shared_ptr<MySQL> MySQL::GetDefaultConn() {
+  if (s_mysql_data->defaultConn == nullptr) {
+    return nullptr;
+  }
   return s_mysql_data->defaultConn->mysql();
 }
 

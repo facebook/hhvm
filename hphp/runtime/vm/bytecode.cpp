@@ -633,7 +633,7 @@ void flush_evaluation_stack() {
   if (!t_se.isNull()) {
     t_se->flush();
   }
-  RDS::flush();
+  rds::flush();
 
   always_assert(MM().empty());
 }
@@ -6723,7 +6723,7 @@ static inline RefData* lookupStatic(StringData* name,
       frame_local(fp, func->numParams())->m_data.pobj, name, inited);
   }
 
-  auto const refData = RDS::bindStaticLocal(func, name);
+  auto const refData = rds::bindStaticLocal(func, name);
   inited = !refData->isUninitializedInRDS();
   if (!inited) refData->initInRDS();
   return refData.get();

@@ -559,17 +559,17 @@ public:
   /*
    * RDS handle of the request-local PropInitVec.
    */
-  RDS::Handle propHandle() const;
+  rds::Handle propHandle() const;
 
   /*
    * RDS handle for the static properties' is-initialized flag.
    */
-  RDS::Handle sPropInitHandle() const;
+  rds::Handle sPropInitHandle() const;
 
   /*
    * RDS handle for the static property at `index'.
    */
-  RDS::Handle sPropHandle(Slot index) const;
+  rds::Handle sPropHandle(Slot index) const;
 
   /*
    * Get the PropInitVec for the current request.
@@ -752,8 +752,8 @@ public:
    * We can burn these into the TC even when classes are not persistent, since
    * only a single name-to-class mapping will exist per request.
    */
-  RDS::Handle classHandle() const;
-  void setClassHandle(RDS::Link<Class*> link) const;
+  rds::Handle classHandle() const;
+  void setClassHandle(rds::Link<Class*> link) const;
 
   /*
    * Get and set the RDS-cached class with this class's name.
@@ -1046,7 +1046,7 @@ private:
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
   uint32_t m_numDeclInterfaces{0};
-  mutable RDS::Link<Array> m_nonScalarConstantCache{RDS::kInvalidHandle};
+  mutable rds::Link<Array> m_nonScalarConstantCache{rds::kInvalidHandle};
 
   LowFuncPtr m_toString;
   LowFuncPtr m_invoke; // __invoke, iff non-static (or closure)
@@ -1054,7 +1054,7 @@ private:
   ConstMap m_constants;
   ClassPtr m_parent;
   int32_t m_declPropNumAccessible;
-  mutable RDS::Link<Class*> m_cachedClass{RDS::kInvalidHandle};
+  mutable rds::Link<Class*> m_cachedClass{rds::kInvalidHandle};
 
   // Vector of 86pinit() methods that need to be called to complete instance
   // property initialization, and a pointer to a 86sinit() method that needs to
@@ -1085,8 +1085,8 @@ private:
   //    bound, defaulting to false.
   // 3. The RDS value at m_sPropCacheInit is set to true when initSProps() is
   //    called, and the values are actually initialized.
-  mutable RDS::Link<TypedValue>* m_sPropCache{nullptr};
-  mutable RDS::Link<bool> m_sPropCacheInit{RDS::kInvalidHandle};
+  mutable rds::Link<TypedValue>* m_sPropCache{nullptr};
+  mutable rds::Link<bool> m_sPropCacheInit{rds::kInvalidHandle};
 
   unsigned m_classVecLen;
   unsigned m_funcVecLen;
@@ -1103,7 +1103,7 @@ private:
 
   MaybeDataType m_enumBaseTy;
   uint16_t m_ODAttrs;
-  mutable RDS::Link<PropInitVec*> m_propDataCache{RDS::kInvalidHandle};
+  mutable rds::Link<PropInitVec*> m_propDataCache{rds::kInvalidHandle};
 
   unsigned m_needInitialization : 1;      // requires initialization,
                                           // due to [ps]init or simply

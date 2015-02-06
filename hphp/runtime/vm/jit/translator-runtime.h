@@ -212,7 +212,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar);
 
 void raiseMissingArgument(const Func* func, int got);
 
-RDS::Handle lookupClsRDSHandle(const StringData* name);
+rds::Handle lookupClsRDSHandle(const StringData* name);
 
 /*
  * Insert obj into the set of live objects to be destructed at the end of the

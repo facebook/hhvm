@@ -87,7 +87,7 @@ ssize_t EventHook::CheckSurprise() {
 }
 
 ssize_t EventHook::GetConditionFlags() {
-  return RDS::header()->conditionFlags.load();
+  return rds::header()->conditionFlags.load();
 }
 
 class ExecutingSetprofileCallbackGuard {

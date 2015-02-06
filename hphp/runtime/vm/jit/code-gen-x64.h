@@ -111,7 +111,7 @@ private:
   void emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx, bool staticCallee);
 
   Vreg emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
-                                    RDS::Handle ch);
+                                    rds::Handle ch);
 
   void emitCmpInt(IRInstruction* inst, ConditionCode cc);
   void emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred);
@@ -171,7 +171,7 @@ private:
   void cgMIterInitCommon(IRInstruction* inst);
   Vreg cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst);
   void cgLookupCnsCommon(IRInstruction* inst);
-  RDS::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
+  rds::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
                                   Vreg sf);
   void cgPropImpl(IRInstruction*);
   void cgIssetEmptyPropImpl(IRInstruction*);

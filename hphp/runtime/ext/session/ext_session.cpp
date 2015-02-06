@@ -1392,7 +1392,7 @@ static void php_session_reset_id() {
     if (handle == 0) {
       f_define(s_SID, v);
     } else {
-      TypedValue* cns = &RDS::handleToRef<TypedValue>(handle);
+      TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
 
       v.setEvalScalar();
       cns->m_data = v.asTypedValue()->m_data;

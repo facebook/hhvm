@@ -115,7 +115,7 @@ struct BackEnd : public jit::BackEnd {
     CALLEE_SAVED_BARRIER();
     auto& regs = vmRegsUnsafe();
     jit::enterTCHelper(regs.stack.top(), regs.fp, start,
-                       vmFirstAR(), RDS::tl_base, stashedAR);
+                       vmFirstAR(), rds::tl_base, stashedAR);
     CALLEE_SAVED_BARRIER();
   }
 

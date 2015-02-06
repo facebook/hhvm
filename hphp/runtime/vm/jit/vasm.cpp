@@ -27,8 +27,8 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-RDS::Link<uint64_t> g_bytecodesLLVM{RDS::kInvalidHandle};
-RDS::Link<uint64_t> g_bytecodesVasm{RDS::kInvalidHandle};
+rds::Link<uint64_t> g_bytecodesLLVM{rds::kInvalidHandle};
+rds::Link<uint64_t> g_bytecodesVasm{rds::kInvalidHandle};
 
 ///////////////////////////////////////////////////////////////////////////////
 

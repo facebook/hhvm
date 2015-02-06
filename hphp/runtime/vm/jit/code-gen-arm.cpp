@@ -1168,9 +1168,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     // Save VM registers
     PhysReg vmfp(rVmFp), vmsp(rVmSp), rds(rVmTl);
     auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff();
-    v << store{vmfp, rds[RDS::kVmfpOff]};
-    v << store{vmsp, rds[RDS::kVmspOff]};
-    v << store{v.cns(pc), rds[RDS::kVmpcOff]};
+    v << store{vmfp, rds[rds::kVmfpOff]};
+    v << store{vmsp, rds[rds::kVmspOff]};
+    v << store{v.cns(pc), rds[rds::kVmpcOff]};
   }
 
   PhysReg mis(rVmTl);
@@ -1437,8 +1437,8 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   cgInterpOneCommon(inst);
   auto& v = vmain();
   PhysReg rds(rVmTl), fp(rVmFp), sp(rVmSp);
-  v << load{rds[RDS::kVmfpOff], fp};
-  v << load{rds[RDS::kVmspOff], sp};
+  v << load{rds[rds::kVmfpOff], fp};
+  v << load{rds[rds::kVmspOff], sp};
   emitServiceReq(v, nullptr, REQ_RESUME, {});
 }
 

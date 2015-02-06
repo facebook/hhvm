@@ -163,7 +163,7 @@ struct IterData : IRExtraData {
 };
 
 struct RDSHandleData : IRExtraData {
-  explicit RDSHandleData(RDS::Handle handle)
+  explicit RDSHandleData(rds::Handle handle)
     : handle(handle)
   {}
 
@@ -173,7 +173,7 @@ struct RDSHandleData : IRExtraData {
     return folly::to<std::string>(handle);
   }
 
-  RDS::Handle handle;
+  rds::Handle handle;
 };
 
 struct ClassData : IRExtraData {

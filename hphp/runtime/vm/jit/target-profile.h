@@ -85,8 +85,8 @@ struct TargetProfile {
     assert(optimizing());
     auto const hand = handle();
     auto accum = T{};
-    for (auto& base : RDS::allTLBases()) {
-      reduce(accum, RDS::handleToRef<T>(base, hand));
+    for (auto& base : rds::allTLBases()) {
+      reduce(accum, rds::handleToRef<T>(base, hand));
     }
     return accum;
   }
@@ -108,32 +108,32 @@ struct TargetProfile {
    * Access the handle to the link.  You generally should only need to do this
    * if profiling().
    */
-  RDS::Handle handle() const { return m_link.handle(); }
+  rds::Handle handle() const { return m_link.handle(); }
 
 private:
-  RDS::Link<T> link() {
+  rds::Link<T> link() {
     if (!m_link) m_link = createLink();
     return *m_link;
   }
 
-  static RDS::Link<T> createLink(const TransContext& context,
+  static rds::Link<T> createLink(const TransContext& context,
                                  BCMarker marker,
                                  const StringData* name) {
     switch (mcg->tx().mode()) {
     case TransKind::Profile:
-      return RDS::bind<T>(
-        RDS::Profile {
+      return rds::bind<T>(
+        rds::Profile {
           context.transID,
           marker.bcOff(),
           name
         },
-        RDS::Mode::Local
+        rds::Mode::Local
       );
 
     case TransKind::Optimize:
       if (isValidTransID(marker.m_profTransID)) {
-        return RDS::attach<T>(
-          RDS::Profile {
+        return rds::attach<T>(
+          rds::Profile {
             marker.m_profTransID, // transId from profiling translation
             marker.bcOff(),
             name
@@ -147,13 +147,13 @@ private:
     case TransKind::Live:
     case TransKind::Proflogue:
     case TransKind::Invalid:
-      return RDS::Link<T>(RDS::kInvalidHandle);
+      return rds::Link<T>(rds::kInvalidHandle);
     }
     not_reached();
   }
 
 private:
-  RDS::Link<T> const m_link;
+  rds::Link<T> const m_link;
 };
 
 //////////////////////////////////////////////////////////////////////

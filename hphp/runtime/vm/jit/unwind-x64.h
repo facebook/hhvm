@@ -40,7 +40,7 @@ namespace HPHP { namespace jit {
 typedef TreadHashMap<CTCA, TCA, ctca_identity_hash> CatchTraceMap;
 
 /*
- * Information the unwinder needs stored in RDS, and the RDS::Link for
+ * Information the unwinder needs stored in RDS, and the rds::Link for
  * it.  Used to pass values between unwinder code and catch traces.
  */
 struct UnwindRDS {
@@ -48,7 +48,7 @@ struct UnwindRDS {
   TypedValue unwinderTv;
   bool doSideExit;
 };
-extern RDS::Link<UnwindRDS> unwindRdsInfo;
+extern rds::Link<UnwindRDS> unwindRdsInfo;
 
 inline ptrdiff_t unwinderExnOff() {
   return unwindRdsInfo.handle() + offsetof(UnwindRDS, exn);

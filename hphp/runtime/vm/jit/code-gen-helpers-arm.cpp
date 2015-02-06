@@ -138,7 +138,7 @@ void emitTestSurpriseFlags(vixl::MacroAssembler& a, PhysReg rds) {
   // Keep this in sync with vasm version below
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  a.  Ldr   (rAsm.W(), vixl::Register(rds)[RDS::kConditionFlagsOff]);
+  a.  Ldr   (rAsm.W(), vixl::Register(rds)[rds::kConditionFlagsOff]);
   a.  Tst   (rAsm.W(), rAsm.W());
 }
 
@@ -148,7 +148,7 @@ Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
   auto flags = v.makeReg();
   auto sf = v.makeReg();
-  v << loadl{rds[RDS::kConditionFlagsOff], flags};
+  v << loadl{rds[rds::kConditionFlagsOff], flags};
   v << testl{flags, flags, sf};
   return sf;
 }
@@ -191,9 +191,9 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, Vreg rds,
 
 void emitEagerVMRegSave(vixl::MacroAssembler& a, vixl::Register rds,
                         RegSaveFlags flags) {
-  a.    Str  (rVmSp, rds[RDS::kVmspOff]);
+  a.    Str  (rVmSp, rds[rds::kVmspOff]);
   if ((bool)(flags & RegSaveFlags::SaveFP)) {
-    a.  Str  (rVmFp, rds[RDS::kVmfpOff]);
+    a.  Str  (rVmFp, rds[rds::kVmfpOff]);
   }
 
   if ((bool)(flags & RegSaveFlags::SavePC)) {
@@ -202,7 +202,7 @@ void emitEagerVMRegSave(vixl::MacroAssembler& a, vixl::Register rds,
     a.  Ldr  (rAsm, rAsm[Func::unitOff()]);
     a.  Ldr  (rAsm, rAsm[Unit::bcOff()]);
     a.  Add  (rAsm, rAsm, vixl::Operand(argReg(0), vixl::UXTW));
-    a.  Str  (rAsm, rds[RDS::kVmpcOff]);
+    a.  Str  (rAsm, rds[rds::kVmpcOff]);
   }
 }
 

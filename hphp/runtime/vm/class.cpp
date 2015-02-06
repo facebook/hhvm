@@ -221,7 +221,7 @@ void Class::destroy() {
   // Need to recheck now we have the lock
   if (!m_cachedClass.bound()) return;
   // Only do this once.
-  m_cachedClass = RDS::Link<Class*>(RDS::kInvalidHandle);
+  m_cachedClass = rds::Link<Class*>(rds::kInvalidHandle);
 
   /*
    * Regardless of refCount, this Class is now unusable.  Remove it
@@ -558,7 +558,7 @@ void Class::initSPropHandles() const {
   Class* parent = this->parent();
   if (parent) {
     parent->initSPropHandles();
-    if (!RDS::isPersistentHandle(parent->sPropInitHandle())) {
+    if (!rds::isPersistentHandle(parent->sPropInitHandle())) {
       allPersistentHandles = false;
     }
   }
@@ -571,14 +571,14 @@ void Class::initSPropHandles() const {
     if (!propHandle.bound()) {
       if (sProp.m_class == this) {
         if (usePersistentHandles && (sProp.m_attrs & AttrPersistent)) {
-          propHandle.bind(RDS::Mode::Persistent);
+          propHandle.bind(rds::Mode::Persistent);
           *propHandle = sProp.m_val;
         } else {
-          propHandle.bind(RDS::Mode::Local);
+          propHandle.bind(rds::Mode::Local);
         }
 
         auto msg = name()->toCppString() + "::" + sProp.m_name->toCppString();
-        RDS::recordRds(propHandle.handle(),
+        rds::recordRds(propHandle.handle(),
                        sizeof(TypedValue), "SPropCache", msg);
       } else {
         auto realSlot = sProp.m_class->lookupSProp(sProp.m_name);
@@ -604,14 +604,14 @@ void Class::initSPropHandles() const {
     // We must make sure the value stored at the handle is correct before
     // setting m_sPropCacheInit in case another thread tries to read it at just
     // the wrong time.
-    RDS::Link<bool> tmp{RDS::kInvalidHandle};
-    tmp.bind(RDS::Mode::Persistent);
+    rds::Link<bool> tmp{rds::kInvalidHandle};
+    tmp.bind(rds::Mode::Persistent);
     *tmp = true;
     m_sPropCacheInit = tmp;
   } else {
     m_sPropCacheInit.bind();
   }
-  RDS::recordRds(m_sPropCacheInit.handle(),
+  rds::recordRds(m_sPropCacheInit.handle(),
                  sizeof(bool), "SPropCacheInit", name()->data());
 }
 
@@ -866,16 +866,16 @@ size_t Class::declPropOffset(Slot index) const {
 bool Class::verifyPersistent() const {
   if (!(attrs() & AttrPersistent)) return false;
   if (m_parent.get() &&
-      !RDS::isPersistentHandle(m_parent->classHandle())) {
+      !rds::isPersistentHandle(m_parent->classHandle())) {
     return false;
   }
   for (auto const& declInterface : declInterfaces()) {
-    if (!RDS::isPersistentHandle(declInterface->classHandle())) {
+    if (!rds::isPersistentHandle(declInterface->classHandle())) {
       return false;
     }
   }
   for (auto const& usedTrait : m_extra->m_usedTraits) {
-    if (!RDS::isPersistentHandle(usedTrait->classHandle())) {
+    if (!rds::isPersistentHandle(usedTrait->classHandle())) {
       return false;
     }
   }
@@ -1845,10 +1845,10 @@ void Class::setProperties() {
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
 
-  m_sPropCache = (RDS::Link<TypedValue>*)
+  m_sPropCache = (rds::Link<TypedValue>*)
     malloc(numStaticProperties() * sizeof(*m_sPropCache));
   for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
-    new (&m_sPropCache[i]) RDS::Link<TypedValue>(RDS::kInvalidHandle);
+    new (&m_sPropCache[i]) rds::Link<TypedValue>(rds::kInvalidHandle);
   }
 
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;

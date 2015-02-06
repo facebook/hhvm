@@ -252,15 +252,15 @@ inline void Class::initPropHandle() const {
   m_propDataCache.bind();
 }
 
-inline RDS::Handle Class::propHandle() const {
+inline rds::Handle Class::propHandle() const {
   return m_propDataCache.handle();
 }
 
-inline RDS::Handle Class::sPropInitHandle() const {
+inline rds::Handle Class::sPropInitHandle() const {
   return m_sPropCacheInit.handle();
 }
 
-inline RDS::Handle Class::sPropHandle(Slot index) const {
+inline rds::Handle Class::sPropHandle(Slot index) const {
   assert(m_sPropCacheInit.bound());
   assert(numStaticProperties() > index);
   return m_sPropCache[index].handle();
@@ -328,11 +328,11 @@ inline bool Class::callsCustomInstanceInit() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
-inline RDS::Handle Class::classHandle() const {
+inline rds::Handle Class::classHandle() const {
   return m_cachedClass.handle();
 }
 
-inline void Class::setClassHandle(RDS::Link<Class*> link) const {
+inline void Class::setClassHandle(rds::Link<Class*> link) const {
   assert(!m_cachedClass.bound());
   m_cachedClass = link;
 }
@@ -484,7 +484,7 @@ inline bool isAbstract(const Class* cls) {
 }
 
 inline bool classHasPersistentRDS(const Class* cls) {
-  return cls && RDS::isPersistentHandle(cls->classHandle());
+  return cls && rds::isPersistentHandle(cls->classHandle());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

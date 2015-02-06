@@ -216,7 +216,7 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   if (!src->isConst()) return nullptr;
 
   auto const cls = src->clsVal();
-  if (!RDS::isPersistentHandle(cls->classHandle())) return nullptr;
+  if (!rds::isPersistentHandle(cls->classHandle())) return nullptr;
 
   auto const meth = cls->getCachedInvoke();
   return meth == nullptr ? nullptr : cns(env, meth.get());

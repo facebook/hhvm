@@ -50,7 +50,7 @@ TRACE_SET_MOD(unwind);
 
 namespace HPHP { namespace jit {
 
-RDS::Link<UnwindRDS> unwindRdsInfo(RDS::kInvalidHandle);
+rds::Link<UnwindRDS> unwindRdsInfo(rds::kInvalidHandle);
 
 namespace {
 

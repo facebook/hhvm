@@ -21,7 +21,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline NamedEntity::NamedEntity(NamedEntity&& ne)
+inline NamedEntity::NamedEntity(NamedEntity&& ne) noexcept
   : m_cachedClass(ne.m_cachedClass)
   , m_cachedFunc(ne.m_cachedFunc)
   , m_cachedTypeAlias(ne.m_cachedTypeAlias)
@@ -30,12 +30,12 @@ inline NamedEntity::NamedEntity(NamedEntity&& ne)
                   std::memory_order_release);
 }
 
-inline RDS::Handle NamedEntity::getFuncHandle() const {
+inline rds::Handle NamedEntity::getFuncHandle() const {
   m_cachedFunc.bind();
   return m_cachedFunc.handle();
 }
 
-inline RDS::Handle NamedEntity::getClassHandle() const {
+inline rds::Handle NamedEntity::getClassHandle() const {
   m_cachedClass.bind();
   return m_cachedClass.handle();
 }

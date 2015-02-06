@@ -24,7 +24,7 @@ namespace HPHP {
 
 ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
   assert(!func->isMethod());
-  RDS::Link<Func*> funcLink(func->funcHandle());
+  rds::Link<Func*> funcLink(func->funcHandle());
   auto const funcAddr = funcLink.get();
   if (UNLIKELY(*funcAddr != nullptr)) {
     if (*funcAddr == func) return;

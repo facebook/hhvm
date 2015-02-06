@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_RUNTIME_BASE_RDS_INL_H_
 #define incl_HPHP_RUNTIME_BASE_RDS_INL_H_
 
-namespace HPHP { namespace RDS {
+namespace HPHP { namespace rds {
 
 //////////////////////////////////////////////////////////////////////
 

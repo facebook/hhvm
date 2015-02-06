@@ -43,8 +43,8 @@ struct Abi;
  * these two RDS values are used to count the number of bytecodes executed by
  * code emitted from their respective backends.
  */
-extern RDS::Link<uint64_t> g_bytecodesLLVM;
-extern RDS::Link<uint64_t> g_bytecodesVasm;
+extern rds::Link<uint64_t> g_bytecodesLLVM;
+extern rds::Link<uint64_t> g_bytecodesVasm;
 
 ///////////////////////////////////////////////////////////////////////////////
 

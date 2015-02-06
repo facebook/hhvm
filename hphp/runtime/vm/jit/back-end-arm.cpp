@@ -95,7 +95,7 @@ struct BackEnd : public jit::BackEnd {
     auto& vmRegs = vmRegsUnsafe();
     sim.   set_xreg(arm::rVmFp.code(), vmRegs.fp);
     sim.   set_xreg(arm::rVmSp.code(), vmRegs.stack.top());
-    sim.   set_xreg(arm::rVmTl.code(), RDS::tl_base);
+    sim.   set_xreg(arm::rVmTl.code(), rds::tl_base);
     sim.   set_xreg(arm::rStashedAR.code(), uintptr_t(saved_rStashedAr));
 
     // Leave space for register spilling and MInstrState.

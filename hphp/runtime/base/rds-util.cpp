@@ -18,7 +18,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/named-entity.h"
 
-namespace HPHP { namespace RDS {
+namespace HPHP { namespace rds {
 
 //////////////////////////////////////////////////////////////////////
 

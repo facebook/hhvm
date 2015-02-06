@@ -286,9 +286,9 @@ constexpr Slot kInvalidSlot = -1;
 
 /*
  * Handles into Request Data Segment.  These are offsets from
- * RDS::tl_base.  See rds.h.
+ * rds::tl_base.  See rds.h.
  */
-namespace RDS {
+namespace rds {
   using Handle = uint32_t;
   constexpr Handle kInvalidHandle = 0;
 }

@@ -541,9 +541,9 @@ void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   }
   v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
   // Save VM regs
-  PhysReg vmfp{rVmFp}, vmsp{rVmSp}, sp{vixl::sp}, rds{rVmTl};
-  v << store{vmfp, rds[RDS::kVmfpOff]};
-  v << store{vmsp, rds[RDS::kVmspOff]};
+  PhysReg vmfp{rVmFp}, vmsp{rVmSp}, sp{vixl::sp}, rdsp{rVmTl};
+  v << store{vmfp, rdsp[rds::kVmfpOff]};
+  v << store{vmsp, rdsp[rds::kVmspOff]};
   if (svcreq.stub_block) {
     always_assert(false && "use rip-rel addr to get ephemeral stub addr");
   } else {

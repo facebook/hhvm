@@ -1914,17 +1914,17 @@ std::vector<UsageInfo> MCGenerator::getUsageInfo() {
       true});
   tcUsageInfo.emplace_back(UsageInfo{
       "RDS",
-      RDS::usedBytes(),
+      rds::usedBytes(),
       RuntimeOption::EvalJitTargetCacheSize * 3 / 4,
       false});
   tcUsageInfo.emplace_back(UsageInfo{
       "RDSLocal",
-      RDS::usedLocalBytes(),
+      rds::usedLocalBytes(),
       RuntimeOption::EvalJitTargetCacheSize * 3 / 4,
       false});
   tcUsageInfo.emplace_back(UsageInfo{
       "persistentRDS",
-      RDS::usedPersistentBytes(),
+      rds::usedPersistentBytes(),
       RuntimeOption::EvalJitTargetCacheSize / 4,
       false});
   tcUsageInfo.emplace_back(UsageInfo{

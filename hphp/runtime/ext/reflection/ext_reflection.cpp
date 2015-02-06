@@ -523,7 +523,7 @@ static Array get_function_static_variables(const Func* func) {
 
   for (size_t i = 0; i < staticVars.size(); ++i) {
     const Func::SVInfo &sv = staticVars[i];
-    auto const refData = RDS::bindStaticLocal(func, sv.name);
+    auto const refData = rds::bindStaticLocal(func, sv.name);
     // FIXME: this should not require variant hops
     ai.setKeyUnconverted(
       VarNR(sv.name),

@@ -104,8 +104,8 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   uniqueStubs.resumeHelperRet = a.frontier();
   a.    pop   (rStashedAR[AROFF(m_savedRip)]);
   uniqueStubs.resumeHelper = a.frontier();
-  a.   loadq  (rVmTl[RDS::kVmfpOff], rVmFp);
-  a.   loadq  (rVmTl[RDS::kVmspOff], rVmSp);
+  a.   loadq  (rVmTl[rds::kVmfpOff], rVmFp);
+  a.   loadq  (rVmTl[rds::kVmspOff], rVmSp);
   emitServiceReq(mcg->code.main(), REQ_RESUME);
 
   uniqueStubs.add("resumeHelpers", uniqueStubs.resumeHelper);
@@ -290,8 +290,8 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   auto const rEC     = r15;
 
   emitGetGContext(a, rEC);
-  a.    storeq (rVmFp, rVmTl[RDS::kVmfpOff]);
-  a.    storeq (rVmSp, rVmTl[RDS::kVmspOff]);
+  a.    storeq (rVmFp, rVmTl[rds::kVmfpOff]);
+  a.    storeq (rVmSp, rVmTl[rds::kVmspOff]);
 
   // rBC := fp -> m_func -> m_unit -> m_bc
   a.    loadq  (rVmFp[AROFF(m_func)], rBC);
@@ -299,7 +299,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    loadq  (rBC[Unit::bcOff()],   rBC);
   // Convert offsets into PC's and sync the PC
   a.    addq   (rBC,    rPCOff);
-  a.    storeq (rPCOff, rVmTl[RDS::kVmpcOff]);
+  a.    storeq (rPCOff, rVmTl[rds::kVmpcOff]);
   a.    addq   (rBC,    rPCNext);
 
   a.    subq   (8, rsp);  // stack parity
@@ -307,13 +307,13 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   a.    movq   (rPCNext, argNumToRegName[0]);
   a.    call   (TCA(&doFCallArrayTC));
 
-  a.    loadq  (rVmTl[RDS::kVmspOff], rVmSp);
+  a.    loadq  (rVmTl[rds::kVmspOff], rVmSp);
 
   a.    testb  (rbyte(rax), rbyte(rax));
   a.    jz8    (noCallee);
 
   a.    addq   (8, rsp);
-  a.    loadq  (rVmTl[RDS::kVmfpOff], rVmFp);
+  a.    loadq  (rVmTl[rds::kVmfpOff], rVmFp);
   a.    pop    (rVmFp[AROFF(m_savedRip)]);
   a.    loadq  (rVmFp[AROFF(m_func)], rax);
   a.    loadq  (rax[Func::funcBodyOff()], rax);
@@ -376,8 +376,8 @@ asm_label(a, popAndXchg);
 
 asm_label(a, skip);
   a.    neg    (rax);
-  a.    loadq  (rVmTl[RDS::kVmfpOff], rVmFp);
-  a.    loadq  (rVmTl[RDS::kVmspOff], rVmSp);
+  a.    loadq  (rVmTl[rds::kVmfpOff], rVmFp);
+  a.    loadq  (rVmTl[rds::kVmspOff], rVmSp);
   a.    jmp    (rax);
   a.    ud2    ();
 
@@ -432,7 +432,7 @@ asm_label(a, skip);
   a.   pop     (rsi);
   a.   addq    (16, rsp); // drop our call frame
   emitGetGContext(a, rax);
-  a.   loadq   (rVmTl[RDS::kVmspOff], rVmSp);
+  a.   loadq   (rVmTl[rds::kVmspOff], rVmSp);
   a.   jmp     (rsi);
   a.   ud2     ();
 

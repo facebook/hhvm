@@ -149,7 +149,7 @@ void emitClsCnsD(HTS& env,
    * it is at least uncounted (this means a constant set to STDIN or something
    * will always side exit here).
    */
-  auto const link = RDS::bindClassConstant(clsNameStr, cnsNameStr);
+  auto const link = rds::bindClassConstant(clsNameStr, cnsNameStr);
   auto const prds = gen(
     env,
     LdRDSAddr,

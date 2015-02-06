@@ -52,7 +52,7 @@ void initProps(HTS& env, const Class* cls) {
 
 void initSProps(HTS& env, const Class* cls) {
   cls->initSPropHandles();
-  if (RDS::isPersistentHandle(cls->sPropInitHandle())) return;
+  if (rds::isPersistentHandle(cls->sPropInitHandle())) return;
   ifThen(
     env,
     [&] (Block* taken) {

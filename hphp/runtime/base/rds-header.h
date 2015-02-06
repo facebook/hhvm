@@ -28,7 +28,7 @@
 namespace HPHP {
 
 /*
- * Do not access this struct directly from RDS::header(). Use the accessors in
+ * Do not access this struct directly from rds::header(). Use the accessors in
  * runtime/vm/vm-regs.h.
  */
 struct VMRegs {
@@ -52,7 +52,7 @@ struct VMRegs {
   ActRec* firstAR;
 };
 
-namespace RDS {
+namespace rds {
 
 /*
  * Statically layed-out header that goes at the front of RDS.
@@ -86,13 +86,13 @@ constexpr ptrdiff_t kVmMInstrStateOff  = kVmRegsOff +
                                            offsetof(VMRegs, mInstrState);
 
 static_assert((kVmMInstrStateOff % 16) == 0,
-              "MInstrState should be 16-byte aligned in RDS::Header");
+              "MInstrState should be 16-byte aligned in rds::Header");
 static_assert(kVmspOff == 16, "Eager vm-reg save in translator-asm-helpers.S");
 static_assert(kVmfpOff == 32, "Eager vm-reg save in translator-asm-helpers.S");
 
 } }
 
-/* MInstrState is stored in VMRegs, at a constant offset from RDS::header(). */
-#define MISOFF(nm) (RDS::kVmMInstrStateOff + offsetof(MInstrState, nm))
+/* MInstrState is stored in VMRegs, at a constant offset from rds::header(). */
+#define MISOFF(nm) (rds::kVmMInstrStateOff + offsetof(MInstrState, nm))
 
 #endif

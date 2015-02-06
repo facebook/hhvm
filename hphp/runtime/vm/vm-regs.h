@@ -66,7 +66,7 @@ inline bool vmRegStateIsDirty() {
 }
 
 inline VMRegs& vmRegsUnsafe() {
-  return RDS::header()->vmRegs;
+  return rds::header()->vmRegs;
 }
 
 inline VMRegs& vmRegs() {

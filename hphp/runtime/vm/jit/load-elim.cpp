@@ -120,7 +120,7 @@ std::string show(TrackedLoc li) {
   );
 }
 
-std::string show(const State& state) {
+DEBUG_ONLY std::string show(const State& state) {
   auto ret = std::string{};
   if (!state.initialized) {
     ret = "  unreachable\n";

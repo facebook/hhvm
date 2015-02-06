@@ -115,7 +115,7 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
  * source chain are also always available.  Anything else requires more
  * complicated analysis than belongs in the simplifier right now.
  */
-bool validate(const State& env,
+DEBUG_ONLY bool validate(const State& env,
               SSATmp* newDst,
               const IRInstruction* origInst) {
   auto known_available = [&] (SSATmp* src) -> bool {

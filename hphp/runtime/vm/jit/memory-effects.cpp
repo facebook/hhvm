@@ -1019,7 +1019,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool check_effects(const IRInstruction& inst, MemEffects me) {
+DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
   auto check_fp = [&] (SSATmp* fp) {
     always_assert_flog(
       fp->type() <= Type::FramePtr,

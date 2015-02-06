@@ -423,6 +423,13 @@ struct Variant : private TypedValue {
     return *reinterpret_cast<const Resource*>(&m_data.pres);
   }
 
+  ALWAYS_INLINE const Resource& toCResRef() const {
+    assert(is(KindOfResource));
+    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pres : m_data.pres);
+    return *reinterpret_cast<const Resource*>(LIKELY(m_type == KindOfResource) ?
+        &m_data.pres : &m_data.pref->tv()->m_data.pres);
+  }
+
   ALWAYS_INLINE Resource & asResRef() {
     assert(m_type == KindOfResource && m_data.pres);
     return *reinterpret_cast<Resource*>(&m_data.pres);
@@ -653,6 +660,65 @@ struct Variant : private TypedValue {
     if (m_type == KindOfResource) return m_data.pres;
     return toResourceHelper();
   }
+
+  template <typename T>
+  bool isa() const {
+    static_assert((std::is_base_of<ObjectData,T>::value ||
+                   std::is_base_of<ResourceData,T>::value),
+                  "isa() only works for Resource and Object classes");
+    auto ptr = getRefForCast<T>();
+    return ptr && ptr->template instanceof<T>();
+  }
+
+  template <typename T>
+  SmartPtr<T> toSmartPtr(bool nullOk = false, bool badTypeOk = false) const {
+    static_assert((std::is_base_of<ObjectData,T>::value ||
+                   std::is_base_of<ResourceData,T>::value),
+                  "toSmartPtr() only works for Resource or Object classes");
+    if (const auto& ptr = getRefForCast<T>()) {
+      if (ptr->template instanceof<T>()) {
+        return *reinterpret_cast<const SmartPtr<T>*>(&ptr);
+      } else if (badTypeOk) {
+        return nullptr;
+      } else {
+        throw_invalid_object_type(getClassNameCstr(ptr.get()));
+      }
+    } else if (isNull()) {
+      if (nullOk) return nullptr;
+      throw_null_pointer_exception();
+    } else {
+      if (badTypeOk) return nullptr;
+      throw_invalid_object_type(tname(getType()).c_str());
+    }
+  }
+
+  template <typename T>
+  const SmartPtr<T>& toSmartPtrCRef(bool nullOk = false,
+                                    bool badTypeOk = false) const {
+    static_assert((std::is_base_of<ObjectData,T>::value ||
+                   std::is_base_of<ResourceData,T>::value),
+                  "toSmartPtrCRef() only works for Resource or Object classes");
+    if (const auto& ptr = getRefForCast<T>()) {
+      if (ptr->template instanceof<T>()) {
+        return *reinterpret_cast<const SmartPtr<T>*>(&ptr);
+      } else if (badTypeOk) {
+        return reinterpret_cast<const SmartPtr<T>&>(getNullRefForCast<T>());
+      } else {
+        throw_invalid_object_type(getClassNameCstr(ptr.get()));
+      }
+    } else if (isNull()) {
+      if (nullOk) {
+        return reinterpret_cast<const SmartPtr<T>&>(getNullRefForCast<T>());
+      }
+      throw_null_pointer_exception();
+    } else {
+      if (badTypeOk) {
+        return reinterpret_cast<const SmartPtr<T>&>(getNullRefForCast<T>());
+      }
+      throw_invalid_object_type(tname(getType()).c_str());
+    }
+  }
+
   /**
    * Whether or not calling toKey() will throw a bad type exception
    */
@@ -788,6 +854,38 @@ struct Variant : private TypedValue {
   Ref* asRef() { PromoteToRef(*this); return this; }
 
  private:
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ObjectData, T>::value,
+    const Object&
+  >::type getRefForCast() const {
+    return isObject() ? toCObjRef() : null_object;
+  }
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ResourceData, T>::value,
+    const Resource&
+  >::type getRefForCast() const {
+    return isResource() ? toCResRef() : null_resource;
+  }
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ObjectData, T>::value,
+    const Object&
+  >::type getNullRefForCast() const {
+    return null_object;
+  }
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ResourceData, T>::value,
+    const Resource&
+  >::type getNullRefForCast() const {
+    return null_resource;
+  }
+
   /*
    * This set of constructors act like the normal constructors for the
    * given types except that they do not increment the reference count
@@ -1196,6 +1294,48 @@ inline Variant toVariant(const SmartPtr<T>& p) {
 template <typename T>
 inline Variant toVariant(SmartPtr<T>&& p) {
   return p ? Variant(std::move(p)) : Variant(false);
+}
+
+// Does the v contain an Object or Resource that is castable to a T?
+template <typename T>
+inline bool isa(const Variant& v) {
+  return v.isa<T>();
+}
+
+// Is v null or does it contain an Object or Resource that is castable to a T?
+template <typename T>
+inline bool isa_or_null(const Variant& v) {
+  return v.isNull() || isa<T>(v);
+}
+
+// Perform a cast operation on v.  If v is null or not castable to
+// a T, an exception will be thrown.  v is assumed to be a Resource or Object.
+template <typename T>
+inline SmartPtr<T> cast(const Variant& v) {
+  return v.toSmartPtrCRef<T>();
+}
+
+// Perform a cast operation on p.  If p is not castable to
+// a T, an exception will be thrown.  Null pointers will be
+// passed through.  v is assumed to be a Resource or Object.
+template <typename T>
+inline SmartPtr<T> cast_or_null(const Variant& v) {
+  return v.toSmartPtrCRef<T>(true);
+}
+
+// Perform a cast operation on p.  If p not castable to
+// a T, a null value is returned.  If p is null, an exception
+// is thrown.  v is assumed to be a Resource or Object.
+template <typename T>
+inline SmartPtr<T> dyn_cast(const Variant& v) {
+  return v.toSmartPtrCRef<T>(false, true);
+}
+
+// Perform a cast operation on p.  If p is null or not castable to
+// a T, a null value is returned.  v is assumed to be a Resource or Object.
+template <typename T>
+inline SmartPtr<T> dyn_cast_or_null(const Variant& v) {
+  return v.toSmartPtrCRef<T>(true, true);
 }
 
 //////////////////////////////////////////////////////////////////////

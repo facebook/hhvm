@@ -91,6 +91,8 @@ public:
   /**
    * Informational
    */
+  explicit operator bool() const { return m_px != nullptr; }
+
   bool isNull() const {
     return m_px == nullptr;
   }
@@ -101,14 +103,15 @@ public:
     return m_px && m_px->instanceof(cls);
   }
 
-  template <class T> T& cast() { return *static_cast<T*>(this); }
-  template <class T> const T& cast() const {
-    return *static_cast<const T*>(this);
-  }
-
   /**
    * getTyped() and is() are intended for use with C++ classes that derive
    * from ObjectData.
+   *
+   * Prefer using the following functions instead of getTyped:
+   * o.getTyped<T>(false, false) -> cast<T>(o)
+   * o.getTyped<T>(true,  false) -> cast_or_null<T>(o)
+   * o.getTyped<T>(false, true) -> dyn_cast<T>(o)
+   * o.getTyped<T>(true,  true) -> dyn_cast_or_null<T>(o)
    */
   template<typename T>
   T *getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
@@ -133,12 +136,7 @@ public:
 
   template<typename T>
   bool is() const {
-    return getTyped<T>(true, true) != nullptr;
-  }
-
-  template<typename T>
-  T *cast() const {
-    return getTyped<T>();
+    return m_px && m_px->instanceof(T::classof());
   }
 
   /**

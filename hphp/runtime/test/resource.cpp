@@ -16,54 +16,61 @@
 
 #include <gtest/gtest.h>
 
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/type-object.h"
-#include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/type-resource.h"
+#include "hphp/runtime/base/dummy-resource.h"
+#include "hphp/runtime/base/file.h"
 
 namespace HPHP {
 
-TEST(Object, Serialization) {
-  String s = "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}";
-  Variant v = unserialize_from_string(s);
-  EXPECT_TRUE(v.isObject());
-  auto o = v.toObject();
-  EXPECT_TRUE(
-    !o->getClassName().asString().compare("__PHP_Incomplete_Class")
-  );
-  auto os = HHVM_FN(serialize)(o);
-  EXPECT_TRUE(
-    !os.compare( "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}")
-  );
+TEST(Resource, Refcounts) {
+  {
+    auto ptr = makeSmartPtr<DummyResource>();
+    EXPECT_TRUE(ptr->hasExactlyOneRef());
+    Resource r(std::move(ptr));
+    EXPECT_TRUE(r.get()->getCount() == 1);
+  }
+
+  {
+    auto ptr = makeSmartPtr<DummyResource>();
+    EXPECT_TRUE(ptr->hasExactlyOneRef());
+    {
+      Resource r(ptr);
+      EXPECT_TRUE(ptr->getCount() == 2);
+      EXPECT_TRUE(r.get()->getCount() == 2);
+    }
+    EXPECT_TRUE(ptr->hasExactlyOneRef());
+  }
 }
 
-TEST(Object, Casts) {
+TEST(Resource, Casts) {
   // Test cast operations
   {
-    EXPECT_FALSE(isa<c_Vector>(Object()));
-    EXPECT_TRUE(isa_or_null<c_Vector>(Object()));
+    EXPECT_FALSE(isa<DummyResource>(Resource()));
+    EXPECT_TRUE(isa_or_null<DummyResource>(Resource()));
 
-    auto dummy = makeSmartPtr<c_Vector>();
-    Object res(dummy);
-    Object empty;
-    EXPECT_TRUE(isa<c_Vector>(res));
-    EXPECT_TRUE(isa_or_null<c_Vector>(res));
+    auto dummy = makeSmartPtr<DummyResource>();
+    Resource res(dummy);
+    Resource empty;
+    EXPECT_TRUE(isa<DummyResource>(res));
+    EXPECT_TRUE(isa_or_null<DummyResource>(res));
 
-    EXPECT_FALSE(isa<c_Map>(res));
-    EXPECT_FALSE(isa_or_null<c_Map>(res));
+    EXPECT_FALSE(isa<File>(res));
+    EXPECT_FALSE(isa_or_null<File>(res));
 
     // cast tests
     // Bad types and null pointers should throw.
-    EXPECT_EQ(cast<c_Vector>(res), dummy);
-    EXPECT_EQ(cast<ObjectData>(res), dummy);
+    EXPECT_EQ(cast<DummyResource>(res), dummy);
+    EXPECT_EQ(cast<ResourceData>(res), dummy);
+
     try {
-      cast<c_Map>(res);
+      cast<File>(res);
       EXPECT_FALSE(true);
     } catch(...) {
       EXPECT_TRUE(true);
     }
+
     try {
-      cast<c_Vector>(empty);
+      cast<DummyResource>(empty);
       EXPECT_FALSE(true);
     } catch(...) {
       EXPECT_TRUE(true);
@@ -71,11 +78,11 @@ TEST(Object, Casts) {
 
     // cast_or_null tests
     // Bad types should throw, null pointers are ok.
-    EXPECT_EQ(cast_or_null<ObjectData>(empty), nullptr);
-    EXPECT_EQ(cast_or_null<ObjectData>(res), dummy);
+    EXPECT_EQ(cast_or_null<ResourceData>(empty), nullptr);
+    EXPECT_EQ(cast_or_null<ResourceData>(res), dummy);
 
     try {
-      cast_or_null<c_Map>(res);
+      cast_or_null<File>(res);
       EXPECT_FALSE(true);
     } catch(...) {
       EXPECT_TRUE(true);
@@ -83,12 +90,12 @@ TEST(Object, Casts) {
 
     // dyn_cast tests
     // Bad types are ok, null pointers should throw.
-    EXPECT_EQ(dyn_cast<c_Vector>(res), dummy);
-    EXPECT_EQ(dyn_cast<ObjectData>(res), dummy);
-    EXPECT_EQ(dyn_cast<c_Map>(res), nullptr);
+    EXPECT_EQ(dyn_cast<DummyResource>(res), dummy);
+    EXPECT_EQ(dyn_cast<ResourceData>(res), dummy);
+    EXPECT_EQ(dyn_cast<File>(res), nullptr);
 
     try {
-      dyn_cast<c_Vector>(empty);
+      dyn_cast<DummyResource>(empty);
       EXPECT_FALSE(true);
     } catch(...) {
       EXPECT_TRUE(true);
@@ -96,9 +103,9 @@ TEST(Object, Casts) {
 
     // dyn_cast_or_null
     // Bad types and null pointers are ok.  Should never throw.
-    EXPECT_EQ(dyn_cast_or_null<c_Map>(res), nullptr);
-    EXPECT_EQ(dyn_cast_or_null<ObjectData>(res), dummy);
-    EXPECT_EQ(dyn_cast_or_null<ObjectData>(empty), nullptr);
+    EXPECT_EQ(dyn_cast_or_null<File>(res), nullptr);
+    EXPECT_EQ(dyn_cast_or_null<ResourceData>(res), dummy);
+    EXPECT_EQ(dyn_cast_or_null<ResourceData>(empty), nullptr);
   }
 }
 

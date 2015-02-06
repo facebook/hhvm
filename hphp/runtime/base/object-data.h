@@ -154,6 +154,18 @@ struct ObjectData {
   bool instanceof(const String&) const;
   bool instanceof(const Class*) const;
 
+  template <typename T>
+  typename std::enable_if<
+    std::is_same<ObjectData,T>::value,
+    bool
+  >::type instanceof() { return true; }
+
+  template <typename T>
+  typename std::enable_if<
+    !std::is_same<ObjectData,T>::value,
+    bool
+  >::type instanceof() { return instanceof(T::classof()); }
+
   // Whether the object implements Iterator.
   bool isIterator() const;
 

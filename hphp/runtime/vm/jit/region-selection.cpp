@@ -173,7 +173,9 @@ folly::Optional<RegionDesc::BlockId> RegionDesc::nextRetrans(BlockId id) const {
 }
 
 void RegionDesc::setNextRetrans(BlockId id, BlockId next) {
+  assert(!data(id).nextRetrans);
   data(id).nextRetrans = next;
+  data(next).preds.insert(id);
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::sideExitingBlocks() const {

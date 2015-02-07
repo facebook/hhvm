@@ -43,6 +43,7 @@ const StaticString
   s_ceil("ceil"),
   s_floor("floor"),
   s_abs("abs"),
+  s_ord("ord"),
   s_empty("");
 
 //////////////////////////////////////////////////////////////////////
@@ -108,6 +109,18 @@ SSATmp* opt_count(HTS& env, uint32_t numArgs) {
   if (!mode->isConst(0)) return nullptr;
 
   return gen(env, Count, val);
+}
+
+SSATmp* opt_ord(HTS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+
+  auto const arg = topC(env, 0);
+  // a static string is passed in, resolve with a constant.
+  if (arg->type().isConst(Type::Str)) {
+    unsigned char first = arg->strVal()->data()[0];
+    return cns(env, int64_t(first));
+  }
+  return nullptr;
 }
 
 SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
@@ -293,6 +306,7 @@ bool optimizedFCallBuiltin(HTS& env,
     X(ceil);
     X(floor);
     X(abs);
+    X(ord);
 
 #undef X
 

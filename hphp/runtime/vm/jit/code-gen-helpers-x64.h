@@ -123,11 +123,15 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
  * address where TLS starts.
  */
 template<typename T>
+inline Vptr getTLSPtr(const T& data) {
+  uintptr_t virtualAddress = uintptr_t(&data) - tlsBase();
+  return Vptr{baseless(virtualAddress), Vptr::FS};
+}
+
+template<typename T>
 inline void
 emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg reg) {
-  uintptr_t virtualAddress = uintptr_t(&datum.m_node.m_p) - tlsBase();
-  Vptr addr{baseless(virtualAddress), Vptr::FS};
-  v << load{addr, reg};
+  v << load{getTLSPtr(datum.m_node.m_p), reg};
 }
 
 template<typename T>

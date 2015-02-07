@@ -543,6 +543,8 @@ struct LLVMEmitter {
     defineValue(x64::rVmFp, args++);
 
     // Commonly used types and values.
+    m_void = m_irb.getVoidTy();
+
     m_int8  = m_irb.getInt8Ty();
     m_int16 = m_irb.getInt16Ty();
     m_int32 = m_irb.getInt32Ty();
@@ -581,7 +583,7 @@ struct LLVMEmitter {
     m_tcMM->registerSymbolAddress("personality0", 0xbadbad);
 
     m_traceletFnTy = llvm::FunctionType::get(
-      m_irb.getVoidTy(),
+      m_void,
       std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
       false
     );
@@ -609,12 +611,12 @@ struct LLVMEmitter {
   ~LLVMEmitter() {
   }
 
-  std::string showModule() const {
+  std::string showModule(llvm::Module* module) const {
     std::string s;
     llvm::raw_string_ostream stream(s);
     VasmAnnotationWriter vw(m_instStrs);
-    m_module->print(stream,
-                    HPHP::Trace::moduleEnabled(Trace::llvm, 5) ? &vw : nullptr);
+    module->print(stream,
+                  HPHP::Trace::moduleEnabled(Trace::llvm, 5) ? &vw : nullptr);
     return stream.str();
   }
 
@@ -624,7 +626,7 @@ struct LLVMEmitter {
     always_assert_flog(!llvm::verifyModule(*m_module, &stream),
                        "LLVM verifier failed:\n{}\n{:-^80}\n{}\n{:-^80}\n{}",
                        stream.str(), " vasm unit ", show(m_unit),
-                       " llvm module ", showModule());
+                       " llvm module ", showModule(m_module.get()));
   }
 
   /*
@@ -632,7 +634,8 @@ struct LLVMEmitter {
    * m_module.
    */
   void finalize() {
-    FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ", showModule());
+    FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ",
+           showModule(m_module.get()));
     verifyModule();
 
     llvm::TargetOptions targetOptions;
@@ -690,7 +693,8 @@ struct LLVMEmitter {
       }
       fpm->doFinalization();
     }
-    FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ", showModule());
+    FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ",
+           showModule(module));
 
     {
       Timer _t(Timer::llvm_codegen);
@@ -1177,6 +1181,8 @@ VASM_OPCODES
   llvm::Function* m_fabs{nullptr};
 
   // Commonly used types. Some LLVM APIs require non-consts.
+  llvm::Type* m_void;
+
   llvm::IntegerType* m_int8;
   llvm::IntegerType* m_int16;
   llvm::IntegerType* m_int32;
@@ -1418,10 +1424,8 @@ O(countbytecode)
       case Vinstr::callstub:
       case Vinstr::contenter:
       case Vinstr::kpcall:
-      case Vinstr::ldpoint:
       case Vinstr::mccall:
       case Vinstr::mcprep:
-      case Vinstr::point:
       case Vinstr::cmpsd:
       case Vinstr::ucomisd:
       case Vinstr::unpcklpd:
@@ -1680,7 +1684,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   llvm::Type* returnType = nullptr;
   switch (destType) {
   case DestType::None:
-    returnType = m_irb.getVoidTy();
+    returnType = m_void;
     break;
   case DestType::SSA:
     returnType = m_int64;
@@ -2168,10 +2172,24 @@ void LLVMEmitter::emit(const jmpm& inst) {
 }
 
 void LLVMEmitter::emit(const jmpi& inst) {
-  auto func = emitFuncPtr(folly::sformat("jmpi_{}", inst.target),
-                          m_traceletFnTy,
-                          reinterpret_cast<uint64_t>(inst.target));
-  emitTraceletTailCall(func);
+  // These are the only two stubs we expect to call using jmpi. They don't care
+  // about rVmFp or rVmSp but we always have to preserve rVmTl.
+  assert_not_implemented(inst.target == mcg->tx().uniqueStubs.resumeHelper ||
+                         inst.target == mcg->tx().uniqueStubs.endCatchHelper);
+
+  std::vector<llvm::Value*> args{
+    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp)
+  };
+  std::vector<llvm::Type*> argTypes{m_int64, m_int64, m_int64};
+  auto func = emitFuncPtr(
+    folly::sformat("jmpi_{}", inst.target),
+    llvm::FunctionType::get(m_void, argTypes, false),
+    reinterpret_cast<uint64_t>(inst.target)
+  );
+  auto call = m_irb.CreateCall(func, args);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
+  call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  m_irb.CreateRetVoid();
 }
 
 void LLVMEmitter::emit(const ldimmb& inst) {
@@ -2380,7 +2398,7 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
                                  const std::string& asmConstraints,
                                  bool hasSideEffects) {
   auto const funcType =
-    llvm::FunctionType::get(m_irb.getVoidTy(), false);
+    llvm::FunctionType::get(m_void, false);
   auto const iasm = llvm::InlineAsm::get(funcType, asmStatement, asmConstraints,
                                          hasSideEffects);
   auto call = m_irb.CreateCall(iasm, "");
@@ -2569,7 +2587,7 @@ void LLVMEmitter::emit(const svcreq& inst) {
   }
 
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
-  auto funcType = llvm::FunctionType::get(m_irb.getVoidTy(), argTypes, false);
+  auto funcType = llvm::FunctionType::get(m_void, argTypes, false);
   auto func = emitFuncPtr(folly::to<std::string>("handleSRHelper_",
                                                  argTypes.size()),
                           funcType,

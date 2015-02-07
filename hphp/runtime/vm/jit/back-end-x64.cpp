@@ -155,7 +155,8 @@ struct BackEnd : public jit::BackEnd {
     if (RuntimeOption::EvalJitTransCounters) {
       x64::emitTransCounterInc(a);
     }
-    a.    jmp(emitServiceReq(coldCode, REQ_INTERPRET, sk.offset()));
+    a.    emitImmReg(uint64_t(sk.pc()), argNumToRegName[0]);
+    a.    jmp(mcg->tx().uniqueStubs.interpHelper);
   }
 
   bool funcPrologueHasGuard(TCA prologue, const Func* func) override {
@@ -787,10 +788,9 @@ struct BackEnd : public jit::BackEnd {
     a.   loadb  (rtmp[dbgOff], rbyte(rtmp));
     a.   testb  ((int8_t)0xff, rbyte(rtmp));
 
-    // Branch to a special REQ_INTERPRET if attached
-    auto const fallback =
-      emitServiceReq(codeCold, REQ_INTERPRET, sk.offset());
-    a.   jnz    (fallback);
+    // Branch to interpHelper if attached
+    a.   emitImmReg(uint64_t(sk.pc()), argNumToRegName[0]);
+    a.   jnz    (mcg->tx().uniqueStubs.interpHelper);
   }
 
   void streamPhysReg(std::ostream& os, PhysReg reg) override {

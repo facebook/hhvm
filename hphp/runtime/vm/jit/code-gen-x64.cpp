@@ -564,11 +564,8 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
   auto& v = vmain();
-  // NB: syncing rVmSp is not necessary at EndCatch, because the unwinder
-  // ignores it.
-  v << vcall{CppCall::direct(unwindResumeHelper), v.makeVcallArgs({{}}),
-             v.makeTuple({})};
-  v << ud2{};
+  v << syncvmsp{srcLoc(inst, 1).reg()};
+  v << jmpi{mcg->tx().uniqueStubs.endCatchHelper, kCrossTraceRegs};
 }
 
 void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
@@ -4858,7 +4855,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   v << load{rVmTl[rds::kVmfpOff], fp};
   v << load{rVmTl[rds::kVmspOff], sync_sp};
   v << syncvmsp{sync_sp};
-  emitServiceReq(v, nullptr, REQ_RESUME, {});
+  v << jmpi{mcg->tx().uniqueStubs.resumeHelper, kCrossTraceRegs};
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {
@@ -5503,7 +5500,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
   if (auto const msg = extra.msg) {
     assert(msg->isStatic());
     cgCallHelper(v,
-     CppCall::direct(reinterpret_cast<void (*)()>(Trace::ringbufferMsg)),
+                 CppCall::direct(Trace::ringbufferMsg),
                  kVoidDest,
                  SyncOptions::kNoSyncPoint,
                  argGroup(inst)
@@ -5511,18 +5508,14 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
                    .imm(msg->size())
                    .imm(extra.type));
   } else {
-    auto beforeArgs = v.makePoint();
-    v << point{beforeArgs};
-    v << ldpoint{beforeArgs, rAsm};
     auto args = argGroup(inst);
     cgCallHelper(v,
-      CppCall::direct(reinterpret_cast<void (*)()>(Trace::ringbufferEntry)),
-      kVoidDest,
-      SyncOptions::kNoSyncPoint,
-      argGroup(inst)
-        .imm(extra.type)
-        .imm(extra.sk.toAtomicInt())
-        .reg(rAsm));
+                 CppCall::direct(Trace::ringbufferEntryRip),
+                 kVoidDest,
+                 SyncOptions::kNoSyncPoint,
+                 argGroup(inst)
+                   .imm(extra.type)
+                   .imm(extra.sk.toAtomicInt()));
   }
 }
 

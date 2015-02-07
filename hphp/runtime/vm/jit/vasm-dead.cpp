@@ -74,7 +74,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::imul:
     case Vinstr::incl:
     case Vinstr::incq:
-    case Vinstr::ldpoint:
     case Vinstr::ldretaddr:
     case Vinstr::lea:
     case Vinstr::leap:
@@ -196,7 +195,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::phidef:
     case Vinstr::phijcc:
     case Vinstr::phijmp:
-    case Vinstr::point:
     case Vinstr::pop:
     case Vinstr::popm:
     case Vinstr::push:

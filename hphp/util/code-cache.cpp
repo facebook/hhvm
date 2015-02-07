@@ -25,10 +25,9 @@ namespace HPHP {
 
 TRACE_SET_MOD(mcg);
 
-// This value should be enough bytes to emit the "main" part of a
-// minimal translation, which consists of a single jump (for a
-// REQ_INTERPRET service request).
-static const int kMinTranslationBytes = 8;
+// This value should be enough bytes to emit the "main" part of a minimal
+// translation, which consists of a move and a jump.
+static const int kMinTranslationBytes = 16;
 
 CodeCache::Selector::Selector(const Args& args)
   : m_cache(args.m_cache)

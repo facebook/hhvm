@@ -38,9 +38,7 @@ class BackEnd;
 // Native stack layout:
 // |               |
 // +---------------+
-// |               |
-// | MInstr state  |
-// |               |
+// |  saved %rbp   |
 // +---------------+
 // |               |  <-- spill[kReservedRSPSpillSpace - 1]
 // |  spill slots  |  <-- spill[..]

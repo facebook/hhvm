@@ -28,8 +28,8 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 
-#define NO_VALUE_PLAINTEXT		"no value"
-#define NO_VALUE_HTML			"<i>no value</i>"
+#define NO_VALUE_PLAINTEXT "no value"
+#define NO_VALUE_HTML      "<i>no value</i>"
 
 /* {{{ */
 
@@ -177,7 +177,9 @@ ZEND_API int zend_register_ini_entries_of_certain_mode(
   return code;
 }
 
-ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int module_number TSRMLS_DC)
+ZEND_API int zend_register_ini_entries(
+  const zend_ini_entry *ini_entry,
+  int module_number TSRMLS_DC)
 {
   int acceptable_mode_mask = 0;
   acceptable_mode_mask |= ZEND_INI_USER;

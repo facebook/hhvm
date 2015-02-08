@@ -729,18 +729,23 @@ void IniSetting::Bind(
     );
 
   //
-  // There are cases where Extension::ModulesInitialised(), but the name
-  // appears in neither s_user_callbacks nor s_system_ini_callbacks.
-  // This was empirically observed for at least one non-Zend
-  // compatibility extension.
+  // When the debugger is loading its configuration, there will be some
+  // cases where Extension::ModulesInitialised(), but the name appears
+  // in neither s_user_callbacks nor s_system_ini_callbacks. The bottom
+  // line is that we can't really use ModulesInitialised() to help steer
+  // the choices here.
   //
+
   bool use_user = is_thread_local;
   if (!use_user) {
     //
-    // If it is already in the user callbacks, continue to use it from there.
+    // If it is already in the user callbacks, continue to use it from
+    // there. We don't expect it to be already there, but it has been
+    // observed during development.
     //
     bool in_user_callbacks =
       (s_user_callbacks->find(name) != s_user_callbacks->end());
+    assert (!in_user_callbacks);  // See note above
     use_user = in_user_callbacks;
   }
 
@@ -748,10 +753,19 @@ void IniSetting::Bind(
   // For now, we require the extensions to use their own thread local
   // memory for user-changeable settings. This means you need to use
   // the default field to Bind and can't statically initialize them.
+  // The main reasoning to do that is so that the extensions have the
+  // values already parsed into their types. If you are setting an int,
+  // it does the string parsing once and then when you read it, it is
+  // already an int. If we did some shared thing, we would just hand you
+  // back the strings and you'd have to parse them on every request or
+  // build some convoluted caching mechanism which is slower than just
+  // the int access.
+  //
   // We could conceivably let you use static memory and have our own
   // thread local here that users can change and then reset it back to
   // the default, but we haven't built that yet.
   //
+
   IniCallbackData &data =
     use_user ? (*s_user_callbacks)[name] : s_system_ini_callbacks[name];
 

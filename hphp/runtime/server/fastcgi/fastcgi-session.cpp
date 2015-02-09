@@ -552,15 +552,13 @@ const std::string FastCGISession::k_getValueMultiplexConnsKey =
 void FastCGISession::handleGetValueResult(const std::string& key) {
   std::string value;
   if (key == k_getValueMaxConnKey) {
-    assert(m_maxConns > 0);
     value = std::to_string(m_maxConns);
     writeGetValueResult(key, value);
   } else if (key == k_getValueMaxRequestsKey) {
-    assert(m_maxRequests > 0);
     value = std::to_string(m_maxRequests);
     writeGetValueResult(key, value);
   } else if (key == k_getValueMultiplexConnsKey) {
-    value = "1"; // The implementation does support connection
+    value = "0"; // The implementation does not support connection
                  // multiplexing.
     writeGetValueResult(key, value);
   } else {

@@ -48,25 +48,23 @@ bool ZipFile::open(const String& filename, const String& mode) {
   }
 
   m_innerFile = File::Open(filename, mode);
-  if (m_innerFile.is<MemFile>()) {
+  if (isa<MemFile>(m_innerFile)) {
     // We need an FD for the correct zlib APIs; MemFiles don't have an FD
     if (strchr(mode.c_str(), 'w')) {
       raise_warning("Cannot write to this stream type");
       return false;
     }
-    auto buffer = m_innerFile.getTyped<MemFile>();
-    auto file = newres<TempFile>();
-    while (!buffer->eof()) {
-      file->write(buffer->read(File::CHUNK_SIZE));
+    auto file = makeSmartPtr<TempFile>();
+    while (!m_innerFile->eof()) {
+      file->write(m_innerFile->read(File::CHUNK_SIZE));
     }
     file->rewind();
-    m_tempFile = Resource(file);
+    m_tempFile = file;
     return (m_gzFile = gzdopen(dup(file->fd()), mode.data()));
   }
-  if (m_innerFile.is<File>()) {
-    auto file = m_innerFile.getTyped<File>();
+  if(m_innerFile) {
     m_tempFile.reset();
-    return (m_gzFile = gzdopen(dup(file->fd()), mode.data()));
+    return (m_gzFile = gzdopen(dup(m_innerFile->fd()), mode.data()));
   }
   return false;
 }
@@ -86,11 +84,11 @@ bool ZipFile::closeImpl() {
       m_gzFile = nullptr;
     }
     setIsClosed(true);
-    if (m_innerFile.is<File>()) {
-      m_innerFile.getTyped<File>()->close();
+    if (m_innerFile) {
+      m_innerFile->close();
     }
-    if (m_tempFile.is<File>()) {
-      m_tempFile.getTyped<File>()->close();
+    if (m_tempFile) {
+      m_tempFile->close();
       m_tempFile.reset();
     }
   }

@@ -28,8 +28,10 @@ namespace HPHP {
 struct UserStreamWrapper final : Stream::Wrapper {
   UserStreamWrapper(const String& name, Class*, int flags);
 
-  SmartPtr<File> open(const String& filename, const String& mode,
-                      int options, const Variant& context) override;
+  SmartPtr<File> open(const String& filename,
+                      const String& mode,
+                      int options,
+                      const SmartPtr<StreamContext>& context) override;
   int access(const String& path, int mode) override;
   int lstat(const String& path, struct stat* buf) override;
   int stat(const String& path, struct stat* buf) override;

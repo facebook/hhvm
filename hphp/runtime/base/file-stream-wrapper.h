@@ -46,8 +46,10 @@ class FileStreamWrapper : public Stream::Wrapper {
  public:
   static SmartPtr<MemFile> openFromCache(
     const String& filename, const String& mode);
-  virtual SmartPtr<File> open(const String& filename, const String& mode,
-                              int options, const Variant& context);
+  virtual SmartPtr<File> open(const String& filename,
+                              const String& mode,
+                              int options,
+                              const SmartPtr<StreamContext>& context);
   virtual int access(const String& path, int mode) {
     return ::access(File::TranslatePath(path).data(), mode);
   }

@@ -48,7 +48,7 @@ SmartPtr<MemFile> FileStreamWrapper::openFromCache(const String& filename,
 
 SmartPtr<File>
 FileStreamWrapper::open(const String& filename, const String& mode,
-                        int options, const Variant& context) {
+                        int options, const SmartPtr<StreamContext>& context) {
   String fname;
   if (StringUtil::IsFileUrl(filename)) {
     fname = StringUtil::DecodeFileUrl(filename);

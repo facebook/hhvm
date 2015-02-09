@@ -143,11 +143,10 @@ bool File::IsVirtualDirectory(const String& filename) {
 
 SmartPtr<File> File::Open(const String& filename, const String& mode,
                           int options /* = 0 */,
-                          const Variant& context /* = null */) {
+                          const SmartPtr<StreamContext>& context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
   if (!wrapper) return nullptr;
-  Resource rcontext =
-    context.isNull() ? g_context->getStreamContext() : context.toResource();
+  auto rcontext = context ? context : g_context->getStreamContext();
   auto file = wrapper->open(filename, mode, options, rcontext);
   if (file) {
     file->m_data->m_name = filename.data();

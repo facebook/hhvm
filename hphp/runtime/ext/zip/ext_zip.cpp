@@ -97,8 +97,10 @@ void ZipStream::sweep() {
 
 class ZipStreamWrapper : public Stream::Wrapper {
  public:
-  virtual SmartPtr<File> open(const String& filename, const String& mode,
-                              int options, const Variant& context) {
+  virtual SmartPtr<File> open(const String& filename,
+                              const String& mode,
+                              int options,
+                              const SmartPtr<StreamContext>& context) {
     std::string url(filename.c_str());
     auto pound = url.find('#');
     if (pound == std::string::npos) {
@@ -246,7 +248,7 @@ class ZipDirectory: public SweepableResourceData {
       return false;
     }
 
-    auto zipEntry = newres<ZipEntry>(m_zip, m_curIndex);
+    auto zipEntry = makeSmartPtr<ZipEntry>(m_zip, m_curIndex);
 
     if (!zipEntry->isValid()) {
       return false;
@@ -254,7 +256,7 @@ class ZipDirectory: public SweepableResourceData {
 
     ++m_curIndex;
 
-    return Resource(zipEntry);
+    return Variant(std::move(zipEntry));
   }
 
   zip* getZip() {
@@ -1024,13 +1026,11 @@ static Variant HHVM_METHOD(ZipArchive, getStream, const String& name) {
   FAIL_IF_INVALID_ZIPARCHIVE(getStream, zipDir);
   FAIL_IF_EMPTY_STRING_ZIPARCHIVE(getStream, name);
 
-  auto zipStream    = newres<ZipStream>(zipDir->getZip(), name);
-  auto zipStreamRes = Resource(zipStream);
+  auto zipStream = makeSmartPtr<ZipStream>(zipDir->getZip(), name);
   if (zipStream->eof()) {
     return false;
   }
-
-  return zipStreamRes;
+  return Variant(std::move(zipStream));
 }
 
 static Variant HHVM_METHOD(ZipArchive, locateName, const String& name,
@@ -1056,9 +1056,9 @@ static Variant HHVM_METHOD(ZipArchive, open, const String& filename,
     return err;
   }
 
-  auto zipDir = newres<ZipDirectory>(z);
+  auto zipDir = makeSmartPtr<ZipDirectory>(z);
 
-  setVariable(this_, "zipDir", Resource(zipDir));
+  setVariable(this_, "zipDir", Variant(zipDir));
   setVariable(this_, "filename", filename);
 
   zip_error_clear(zipDir->getZip());
@@ -1351,9 +1351,7 @@ static Variant HHVM_FUNCTION(zip_open, const String& filename) {
     return err;
   }
 
-  auto zipDir = newres<ZipDirectory>(z);
-
-  return Resource(zipDir);
+  return Variant(makeSmartPtr<ZipDirectory>(z));
 }
 
 static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {

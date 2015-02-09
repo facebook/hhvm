@@ -146,11 +146,12 @@ inline void ExecutionContext::setExitCallback(Variant callback) {
   m_exitCallback = callback;
 }
 
-inline void ExecutionContext::setStreamContext(Resource& context) {
+inline void
+ExecutionContext::setStreamContext(const SmartPtr<StreamContext>& context) {
   m_streamContext = context;
 }
 
-inline Resource& ExecutionContext::getStreamContext() {
+inline const SmartPtr<StreamContext>& ExecutionContext::getStreamContext() {
   return m_streamContext;
 }
 

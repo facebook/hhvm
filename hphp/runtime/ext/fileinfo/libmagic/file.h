@@ -317,14 +317,14 @@ struct magic {
 #define PSTRING_LEN  \
     (PSTRING_1_BE|PSTRING_2_LE|PSTRING_2_BE|PSTRING_4_LE|PSTRING_4_BE)
 #define PSTRING_LENGTH_INCLUDES_ITSELF    BIT(12)
-#define  HHVM_FN(trim)        BIT(13)
+#define STRING_TRIM        BIT(13)
 #define CHAR_COMPACT_WHITESPACE      'W'
 #define CHAR_COMPACT_OPTIONAL_WHITESPACE  'w'
 #define CHAR_IGNORE_LOWERCASE      'c'
 #define CHAR_IGNORE_UPPERCASE      'C'
 #define CHAR_REGEX_OFFSET_START      's'
 #define CHAR_TEXTTEST        't'
-#define  CHAR_TRIM        'T'
+#define CHAR_TRIM        'T'
 #define CHAR_BINTEST        'b'
 #define CHAR_PSTRING_1_BE      'B'
 #define CHAR_PSTRING_1_LE      'B'

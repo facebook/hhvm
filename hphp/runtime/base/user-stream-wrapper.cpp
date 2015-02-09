@@ -33,7 +33,7 @@ UserStreamWrapper::UserStreamWrapper(const String& name,
 
 SmartPtr<File>
 UserStreamWrapper::open(const String& filename, const String& mode,
-                        int options, const Variant& context) {
+                        int options, const SmartPtr<StreamContext>& context) {
   auto file = makeSmartPtr<UserFile>(m_cls, context);
   auto ret = file->openImpl(filename, mode, options);
   if (!ret) {

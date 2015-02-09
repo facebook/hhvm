@@ -6326,6 +6326,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
   int tag, format, components;
   char *value_ptr, tagname[64], cbuf[32], *outside=NULL;
   size_t byte_count, offset_val, fpos, fgot;
+  int64_t byte_count_signed;
   xp_field_type *tmp_xp;
 
   /* Protect against corrupt headers */
@@ -6351,14 +6352,23 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
     /*return TRUE;*/
   }
 
-  byte_count = components * get_php_tiff_bytes_per_format(format);
+  if (components < 0) {
+    raise_warning("Process tag(x%04X=%s): Illegal components(%d)",
+                    tag, exif_get_tagname(tag, tagname, -12, tag_table),
+                    components);
+    return 1;
+  }
 
-  if ((ssize_t)byte_count < 0) {
+  byte_count_signed = (int64_t)components *
+                      get_php_tiff_bytes_per_format(format);
+
+  if (byte_count_signed < 0 || (byte_count_signed > 2147483648)) {
     raise_warning("Process tag(x%04X=%s): Illegal byte_count(%ld)",
                     tag, exif_get_tagname(tag, tagname, -12, tag_table),
-                    byte_count);
+                    byte_count_signed);
     return 1; // ignore that field, but don't abort parsing
   }
+  byte_count = (size_t)byte_count_signed;
 
   if (byte_count > 4) {
     CHECK_BUFFER_R(dir_entry+8, end, 4, 0);

@@ -89,7 +89,7 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
   if (mInd == 0) {
     auto const baseIndex = mii.valCount();
     baseClass = ni.inputs[baseIndex]->rtt < Type::Obj
-      ? ni.inputs[baseIndex]->rtt.getClass()
+      ? ni.inputs[baseIndex]->rtt.clsSpec().cls()
       : nullptr;
   }
   if (!baseClass) return PropInfo();

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/type-specialization.h"
 
 #include "hphp/util/data-block.h"
 
@@ -35,7 +36,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Func;
-class Shape;
+struct Shape;
 
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -308,6 +309,8 @@ struct ConstCctx {
   uintptr_t m_val;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Type is used to represent the types of values in the jit. Every Type
  * represents a set of types, with Type::Top being a superset of all Types and
@@ -336,7 +339,7 @@ struct Type {
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Type tags and metadata.
+  // Type tags.
 
 private:
   using bits_t = uint64_t;
@@ -351,33 +354,6 @@ private:
     IR_TYPES
 #undef IRT
 #undef IRTP
-  };
-
-  /*
-   * An ArrayKind in the top 16 bits, optional RepoAuthType::Array* in
-   * the lower 48 bits, and the low bit that says whether the kind is
-   * valid.
-   */
-  enum class ArrayInfo : uintptr_t {};
-
-  /*
-   * Tag that tells us if we're exactly equal to, or a subtype of, a Class*.
-   */
-  enum class ClassTag : uint8_t { Sub, Exact };
-
-  /*
-   * A const Class* with the low bit set if this is an exact type, otherwise a
-   * subtype.
-   */
-  struct ClassInfo {
-    ClassInfo(const Class* cls, ClassTag tag);
-
-    const Class* get() const;
-    bool isExact() const;
-    bool operator==(const ClassInfo& rhs) const;
-
-  private:
-    uintptr_t m_bits;
   };
 
 
@@ -425,15 +401,6 @@ public:
   bool subtypeOf(Type t2) const;
 
   /*
-   * Does this represent a non-strict subset of specialized Type `t2'?
-   *
-   * @requires: (m_bits & t2.m_bits) == m_bits
-   *            !t2.m_hasConstVal
-   *            t2.isSpecialized()
-   */
-  bool subtypeOfSpecialized(Type t2) const;
-
-  /*
    * Is this a subtype of any among a variadic list of Types?
    */
   template<typename... Types>
@@ -477,7 +444,7 @@ public:
    * Set operations: union, intersection, and difference.
    *
    * These operations may all return larger types than the "true" union,
-   * intersection, or difference. (They must be conservative in that direction
+   * intersection, or difference.  (They must be conservative in that direction
    * for types that are too hard for us to represent, or we could generate
    * incorrect code by assuming certain possible values are impossible.)
    *
@@ -684,14 +651,7 @@ public:
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Specialized types.                                                 [const]
-
-  /*
-   * Can this Type have a specialization for a class, array, or either?
-   */
-  bool canSpecializeClass() const;
-  bool canSpecializeArray() const;
-  bool canSpecializeAny() const;
+  // Specialized type creation.                                         [const]
 
   /*
    * Return a copy of this Type specialized with `klass'.
@@ -708,7 +668,7 @@ public:
    * @requires: canSpecializeArray()
    */
   Type specialize(ArrayData::ArrayKind arrayKind) const;
-  Type specialize(const RepoAuthType::Array* array) const;
+  Type specialize(const RepoAuthType::Array* arrayTy) const;
   Type specialize(const Shape* shape) const;
 
   /*
@@ -718,56 +678,44 @@ public:
    */
   Type unspecialize() const;
 
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Specialization introspection.                                      [const]
+
   /*
    * Does this Type have a specialization?
    */
   bool isSpecialized() const;
 
   /*
-   * Return the Type's Class specialization.
+   * Whether this type can meaningfully specialize along `kind'.
    *
-   * @requires: canSpecializeClass()
+   * For example, a Type only supports SpecKind::Class if its bits intersect
+   * nontrivially with kAnyObj.
    */
-  const Class* getClass() const;
+  bool supports(SpecKind kind) const;
 
   /*
-   * Return the Type's exact Class specialization, or nullptr if the
-   * specialization is non-exact.
+   * Return the corresponding type specialization.
    *
-   * @requirest: canSpecializeClass() || subtypeOf(Type::Cls)
-   */
-  const Class* getExactClass() const;
-
-  /*
-   * Whether the Type has an array kind specialization.
-   */
-  bool hasArrayKind() const;
-
-  /*
-   * Return the Type's array kind specialization.
+   * If the Type is able to support the specialization (i.e., supports()
+   * returns true for the corresponding SpecKind), but no specialization is
+   * present, Spec::Top will be returned.
    *
-   * getArrayKind: @requires: hasArrayKind()
-   * getOptArrayKind: Return folly::none if !hasArrayKind()
-   */
-  ArrayData::ArrayKind getArrayKind() const;
-  folly::Optional<ArrayData::ArrayKind> getOptArrayKind() const;
-
-  /*
-   * Return the Type's array type specialization.
-   */
-  const RepoAuthType::Array* getArrayType() const;
-
-  /*
-   * Return the Type's array Shape specialization.
-   */
-  const Shape* getArrayShape() const;
-
-  /*
-   * Project the Type onto those types which can be specialized, e.g.:
+   * If supports() would return false for the corresponding SpecKind,
+   * Spec::Bottom is returned.
    *
-   *  {Int|Str|Obj<C>|BoxedObj<C>}.specializedType() == {Obj<C>|BoxedObj<C>}
+   * The Spec objects cast (explicitly) to true iff they are neither Spec::Top
+   * nor Spec::Bottom, so these functions also answer the question, "Is this
+   * Type nontrivially specialized along the respective kind?"
    */
-  Type specializedType() const;
+  ArraySpec arrSpec() const;
+  ClassSpec clsSpec() const;
+
+  /*
+   * Return a discriminated TypeSpec for this Type's specialization.
+   */
+  TypeSpec spec() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -833,20 +781,14 @@ public:
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  struct Union;
-  struct Intersect;
-  struct ArrayOps;
-  struct ClassOps;
-
-private:
   /*
    * Raw constructors.
    */
-  explicit Type(bits_t bits, Ptr kind, uintptr_t extra = 0);
-  explicit Type(bits_t bits, Ptr kind, ClassInfo classInfo);
-  explicit Type(bits_t bits, Ptr kind, ArrayInfo arrayInfo);
+  Type(bits_t bits, Ptr kind, uintptr_t extra = 0);
+  Type(bits_t bits, Ptr kind, ArraySpec arraySpec);
+  Type(bits_t bits, Ptr kind, ClassSpec classSpec);
 
-  explicit Type(bits_t bits, ArrayData::ArrayKind) = delete;
+  Type(bits_t bits, ArrayData::ArrayKind) = delete;
 
   /*
    * Return false if a specialized type has a mismatching tag, else true.
@@ -859,35 +801,16 @@ private:
   static bits_t bitsFromDataType(DataType outer, DataType inner);
 
   /*
-   * Methods and types used for operator| and operator&.  See type.cpp for
-   * details.
+   * Return m_ptr cast to a Ptr, with no checks.
    */
-  template<typename Oper>
-  static Type combine(bits_t newBits, Ptr newPtrKind, Type a, Type b);
-
   Ptr rawPtrKind() const;
 
-  /////////////////////////////////////////////////////////////////////////////
-  // ArrayInfo helpers.                                                [static]
-
-private:
   /*
-   * Pack an ArrayInfo from a kind and a RAT.
-   */
-  static ArrayInfo makeArrayInfo(folly::Optional<ArrayData::ArrayKind> kind,
-                                 const RepoAuthType::Array* arrTy);
-  static ArrayInfo makeArrayInfo(const Shape* shape);
-
-  /*
-   * ArrayInfo accessors for the valid bit, kind, and RAT.
+   * Add specialization to a generic type via a TypeSpec.
    *
-   * arrayKind: @requires: arrayKindValid(info)
-   * arrayType: May return nullptr.
+   * Used as the finalization step for union and intersect.
    */
-  static bool arrayKindValid(ArrayInfo info);
-  static ArrayData::ArrayKind arrayKind(ArrayInfo info);
-  static const RepoAuthType::Array* arrayType(ArrayInfo info);
-  static const Shape* arrayShape(Type::ArrayInfo info);
+  Type specialize(TypeSpec spec) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -918,18 +841,13 @@ private:
     rds::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;
 
-    // Specialization for object classes and arrays.
-    ClassInfo m_class;
-    ArrayInfo m_arrayInfo;
+    // Specializations for object classes and arrays.
+    ClassSpec m_clsSpec;
+    ArraySpec m_arrSpec;
   };
 };
 
 typedef folly::Optional<Type> OptType;
-
-inline bool operator<(Type a, Type b) { return a.strictSubtypeOf(b); }
-inline bool operator>(Type a, Type b) { return b.strictSubtypeOf(a); }
-inline bool operator<=(Type a, Type b) { return a.subtypeOf(b); }
-inline bool operator>=(Type a, Type b) { return b.subtypeOf(a); }
 
 /*
  * jit::Type must be small enough for efficient pass-by-value.
@@ -937,6 +855,13 @@ inline bool operator>=(Type a, Type b) { return b.subtypeOf(a); }
 static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),
               "jit::Type should fit in (2 * sizeof(uint64_t))");
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline bool operator<(Type a, Type b) { return a.strictSubtypeOf(b); }
+inline bool operator>(Type a, Type b) { return b.strictSubtypeOf(a); }
+inline bool operator<=(Type a, Type b) { return a.subtypeOf(b); }
+inline bool operator>=(Type a, Type b) { return b.subtypeOf(a); }
 
 ///////////////////////////////////////////////////////////////////////////////
 

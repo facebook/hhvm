@@ -149,8 +149,7 @@ void fpushObjMethodCommon(HTS& env,
                           bool shouldFatal) {
   SSATmp* objOrCls = obj;
   const Class* baseClass = nullptr;
-  if (obj->type().isSpecialized()) {
-    auto cls = obj->type().getClass();
+  if (auto cls = obj->type().clsSpec().cls()) {
     if (!env.irb->constrainValue(obj, TypeConstraint(cls).setWeak())) {
       // If we know the class without having to specialize a guard any further,
       // use it.

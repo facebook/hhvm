@@ -277,8 +277,7 @@ TEST(Type, Specialized) {
   auto constArrayMixed = Type::cns(arrDataMixed);
   auto const spacked = Type::StaticArr.specialize(ArrayData::kPackedKind);
   EXPECT_EQ(spacked, spacked - constArray); // conservative
-  EXPECT_EQ(constArray, constArray - spacked); // conservative (could be
-                                               // bottom if we did better)
+  EXPECT_EQ(Type::Bottom, constArray - spacked);
 
   // Implemented conservatively right now, but the following better not return
   // bottom:
@@ -301,11 +300,11 @@ TEST(Type, SpecializedObjects) {
   auto const subA = obj.specialize(A);
   auto const subB = obj.specialize(B);
 
-  EXPECT_EQ(exactA.getClass(), A);
-  EXPECT_EQ(subA.getClass(), A);
+  EXPECT_EQ(exactA.clsSpec().cls(), A);
+  EXPECT_EQ(subA.clsSpec().cls(), A);
 
-  EXPECT_EQ(exactA.getExactClass(), A);
-  EXPECT_EQ(subA.getExactClass(), nullptr);
+  EXPECT_EQ(exactA.clsSpec().exactCls(), A);
+  EXPECT_EQ(subA.clsSpec().exactCls(), nullptr);
 
   EXPECT_LE(exactA, exactA);
   EXPECT_LE(subA, subA);

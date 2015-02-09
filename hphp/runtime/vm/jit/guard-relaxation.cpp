@@ -178,8 +178,8 @@ Type relaxCell(Type t, TypeConstraint tc) {
         // RATArrays always come from static analysis and never guards, so we
         // don't need to eliminate it here. Just make sure t actually fits the
         // constraint.
-        assert(t < Type::Arr && t.hasArrayKind());
-        assert(!tc.wantArrayShape() || t.getArrayShape());
+        assert(t < Type::Arr && t.arrSpec().kind());
+        assert(!tc.wantArrayShape() || t.arrSpec().shape());
       }
 
       return t;
@@ -317,15 +317,18 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       // specific requirements of tc.
 
       assert(tc.wantClass() ^ tc.wantArrayKind());
-      if (!t.isSpecialized()) return false;
-      if (t < Type::Obj) {
-        return tc.wantClass() && t.getClass()->classof(tc.desiredClass());
+
+      if (t < Type::Obj && t.clsSpec()) {
+        return tc.wantClass() &&
+               t.clsSpec().cls()->classof(tc.desiredClass());
       }
-      if (t < Type::Arr) {
-        if (tc.wantArrayShape() && !t.getArrayShape()) return false;
-        if (tc.wantArrayKind() && !t.hasArrayKind()) return false;
+      if (t < Type::Arr && t.arrSpec()) {
+        auto arrSpec = t.arrSpec();
+        if (tc.wantArrayShape() && !arrSpec.shape()) return false;
+        if (tc.wantArrayKind() && !arrSpec.kind()) return false;
         return true;
       }
+
       return false;
   }
 

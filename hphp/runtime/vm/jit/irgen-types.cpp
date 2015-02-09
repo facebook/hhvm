@@ -167,8 +167,8 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
    * would pass. If we don't know, we still have to emit them because valType
    * might be a subtype of its specialized object type.
    */
-  if (valType < Type::Obj) {
-    auto const cls = valType.getClass();
+  if (valType < Type::Obj && valType.clsSpec()) {
+    auto const cls = valType.clsSpec().cls();
     if (!env.irb->constrainValue(val, TypeConstraint(cls).setWeak()) &&
         ((knownConstraint && cls->classof(knownConstraint)) ||
          cls->name()->isame(clsName))) {

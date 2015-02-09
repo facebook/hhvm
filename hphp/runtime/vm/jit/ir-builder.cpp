@@ -320,9 +320,11 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
       // other useful information we can unconditionally eliminate this
       // instruction: RATArrays never come from guards so we can't miss out on
       // anything by doing so.
-      if (oldType < Type::Arr && oldType.getArrayType() &&
-          typeParam < Type::Arr && typeParam.getArrayType() &&
-          !typeParam.hasArrayKind()) {
+      if (oldType < Type::Arr &&
+          oldType.arrSpec().type() &&
+          typeParam < Type::Arr &&
+          typeParam.arrSpec().type() &&
+          !typeParam.arrSpec().kind()) {
         return fwdGuardSource(inst);
       }
     }

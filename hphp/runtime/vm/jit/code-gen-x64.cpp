@@ -1322,7 +1322,6 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
 template<class DataLoc, class JmpFn>
 void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
                                             JmpFn doJcc) {
-  assert(type.isSpecialized());
   if (type < Type::Res) {
     // No cls field in Resource
     always_assert(0 && "unexpected guard on specialized Resource");
@@ -1330,20 +1329,27 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
 
   auto& v = vmain();
   if (type < Type::Obj) {
-    // emit the specific class test
-    assert(type.getClass()->attrs() & AttrNoOverride);
+    // Emit the specific class test.
+    assert(type.clsSpec());
+    assert(type.clsSpec().cls()->attrs() & AttrNoOverride);
+
     auto reg = getDataPtrEnregistered(v, dataSrc);
-    emitCmpClass(v, sf, type.getClass(), reg[ObjectData::getVMClassOffset()]);
+    emitCmpClass(v, sf, type.clsSpec().cls(),
+                 reg[ObjectData::getVMClassOffset()]);
     doJcc(CC_E, sf);
   } else {
-    assert(type < Type::Arr);
+    assert(type < Type::Arr && type.arrSpec() && type.arrSpec().kind());
+
+    auto arrSpec = type.arrSpec();
     auto reg = getDataPtrEnregistered(v, dataSrc);
-    v << cmpbim{type.getArrayKind(), reg[ArrayData::offsetofKind()], sf};
+
+    v << cmpbim{*arrSpec.kind(), reg[ArrayData::offsetofKind()], sf};
     doJcc(CC_E, sf);
-    if (type.getArrayKind() == ArrayData::kStructKind && type.getArrayShape()) {
+
+    if (arrSpec.kind() == ArrayData::kStructKind && arrSpec.shape()) {
       auto newSf = v.makeReg();
       auto offset = StructArray::shapeOffset();
-      v << cmpqm{v.cns(type.getArrayShape()), reg[offset], newSf};
+      v << cmpqm{v.cns(arrSpec.shape()), reg[offset], newSf};
       doJcc(CC_E, newSf);
     }
   }
@@ -1722,8 +1728,8 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
 void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
   DEBUG_ONLY auto const ty = inst->src(0)->type();
   assert(ty < Type::Obj &&
-         ty.getClass() &&
-         ty.getClass()->isCollectionClass());
+         ty.clsSpec().cls() &&
+         ty.clsSpec().cls()->isCollectionClass());
   auto& v = vmain();
   auto const sf = v.makeReg();
   v << cmplim{0, srcLoc(inst, 0).reg()[FAST_COLLECTION_SIZE_OFFSET], sf};
@@ -1733,8 +1739,8 @@ void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
 void CodeGenerator::cgColIsNEmpty(IRInstruction* inst) {
   DEBUG_ONLY auto const ty = inst->src(0)->type();
   assert(ty < Type::Obj &&
-         ty.getClass() &&
-         ty.getClass()->isCollectionClass());
+         ty.clsSpec().cls() &&
+         ty.clsSpec().cls()->isCollectionClass());
   auto& v = vmain();
   auto const sf = v.makeReg();
   v << cmplim{0, srcLoc(inst, 0).reg()[FAST_COLLECTION_SIZE_OFFSET], sf};
@@ -3726,7 +3732,7 @@ void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
   auto vecReg = srcLoc(inst, 0).reg();
   auto dstReg = dstLoc(inst, 0).reg();
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::classof());
+         vec->type().clsSpec().cls() == c_Vector::classof());
   vmain() << loadzlq{vecReg[c_Vector::sizeOffset()], dstReg};
 }
 
@@ -3735,13 +3741,13 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   auto vecReg = srcLoc(inst, 0).reg();
   auto dstReg = dstLoc(inst, 0).reg();
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::classof());
+         vec->type().clsSpec().cls() == c_Vector::classof());
   vmain() << load{vecReg[c_Vector::dataOffset()], dstReg};
 }
 
 void CodeGenerator::cgLdColArray(IRInstruction* inst) {
   auto const src = inst->src(0);
-  auto const cls = src->type().getClass();
+  auto const cls = src->type().clsSpec().cls();
   auto const rsrc = srcLoc(inst, 0).reg();
   auto const rdst = dstLoc(inst, 0).reg();
   auto& v = vmain();
@@ -3770,7 +3776,7 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   auto& v = vmain();
 
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::classof());
+         vec->type().clsSpec().cls() == c_Vector::classof());
 
   // Vector::m_data field holds an address of an ArrayData plus
   // sizeof(ArrayData) bytes. We need to check this ArrayData's
@@ -3792,7 +3798,7 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
 void CodeGenerator::cgVectorDoCow(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::classof());
+         vec->type().clsSpec().cls() == c_Vector::classof());
   auto args = argGroup(inst);
   args.ssa(0); // vec
   cgCallHelper(vmain(), CppCall::direct(triggerCow),
@@ -3803,7 +3809,7 @@ void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
   DEBUG_ONLY auto pair = inst->src(0);
   auto pairReg = srcLoc(inst, 0).reg();
   assert(pair->type().strictSubtypeOf(Type::Obj) &&
-         pair->type().getClass() == c_Pair::classof());
+         pair->type().clsSpec().cls() == c_Pair::classof());
   vmain() << lea{pairReg[c_Pair::dataOffset()], dstLoc(inst, 0).reg()};
 }
 
@@ -5612,7 +5618,7 @@ void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
 void CodeGenerator::cgLdStructArrayElem(IRInstruction* inst) {
   auto const array = srcLoc(inst, 0).reg();
   auto const key = inst->src(1)->strVal();
-  auto const shape = inst->src(0)->type().getArrayShape();
+  auto const shape = inst->src(0)->type().arrSpec().shape();
   auto const offset = shape->offsetFor(key);
   assert(offset != PropertyTable::kInvalidOffset);
 

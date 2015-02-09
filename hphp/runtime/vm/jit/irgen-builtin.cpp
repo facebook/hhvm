@@ -885,8 +885,8 @@ void nativeImplInlined(HTS& env) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
-  if (src->isA(Type::Obj) && src->type().isSpecialized()) {
-    auto const cls = src->type().getClass();
+  if (src->isA(Type::Obj) && src->type().clsSpec()) {
+    auto const cls = src->type().clsSpec().cls();
     if (!env.irb->constrainValue(src, TypeConstraint(cls).setWeak())) {
       // If we know the class without having to specialize a guard
       // any further, use it.
@@ -1039,22 +1039,21 @@ void emitIdx(HTS& env) {
       return;
     }
 
-    if (baseType < Type::Obj && baseType.isSpecialized()) {
+    if (baseType < Type::Obj && baseType.clsSpec()) {
+      auto const cls = baseType.clsSpec().cls();
+
       // We must require either constant keys or known integer keys for Map,
       // because integer-like strings behave differently.
-      auto const okMap = baseType.getClass() == c_Map::classof() &&
-                           (keyType.isConst() || keyType <= Type::Int);
+      auto const okMap = cls == c_Map::classof() &&
+                         (keyType.isConst() || keyType <= Type::Int);
       // Similarly, Vector is only usable with int keys, so we can only do this
       // for Vector if it's an Int.
-      auto const okVector = baseType.getClass() == c_Vector::classof() &&
-                              keyType <= Type::Int;
+      auto const okVector = cls == c_Vector::classof() &&
+                            keyType <= Type::Int;
 
       auto const optimizableCollection = okMap || okVector;
       if (optimizableCollection) {
-        env.irb->constrainValue(
-          base,
-          TypeConstraint(baseType.getClass())
-        );
+        env.irb->constrainValue(base, TypeConstraint(cls));
         env.irb->constrainValue(key, DataTypeSpecific);
         auto const arr = gen(env, LdColArray, base);
         implArrayIdx(env, arr);

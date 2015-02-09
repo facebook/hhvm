@@ -440,6 +440,7 @@ void MemoryManager::sweep() {
   DEBUG_ONLY auto native = m_natives.size();
   Native::sweepNativeData(m_natives);
   TRACE(1, "sweep: sweepable %u native %lu\n", sweepable, native);
+  if (debug) checkHeap();
 }
 
 void MemoryManager::resetAllocator() {

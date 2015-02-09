@@ -64,11 +64,10 @@ static pthread_mutex_t cursor_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* Macro to check whether a cursor is dead, and if so, bailout */
 #define MONGO_CURSOR_CHECK_DEAD \
-	if (cursor->dead) { \
-		zend_throw_exception(mongo_ce_ConnectionException, "the connection has been terminated, and this cursor is dead", 12 TSRMLS_CC); \
-		return; \
-	}
-
+  if (cursor->dead) { \
+    zend_throw_exception(mongo_ce_ConnectionException, "the connection has been terminated, and this cursor is dead", 12 TSRMLS_CC); \
+    return; \
+  }
 
 /* externs */
 extern zend_class_entry *mongo_ce_Id, *mongo_ce_MongoClient, *mongo_ce_DB;
@@ -1749,12 +1748,11 @@ int php_mongo_create_le(mongo_cursor *cursor, char *name TSRMLS_DC)
 		prev->next = new_node;
 		new_node->prev = prev;
 	} else {
-		zend_rsrc_list_entry new_le;
-
-		new_le.ptr = new_node;
-		new_le.type = le_cursor_list;
-		new_le.refcount = 1;
-		zend_hash_add(&EG(persistent_list), name, strlen(name) + 1, &new_le, sizeof(zend_rsrc_list_entry), NULL);
+		auto new_le = HPHP::newres<zend_rsrc_list_entry>(new_node, le_cursor_list);
+    SCOPE_EXIT { delete new_le; };
+		new_le->refcount = 1;
+		zend_hash_add(&EG(persistent_list), name, strlen(name) + 1, new_le,
+                  sizeof(*new_le), nullptr);
 	}
 
 	UNLOCK(cursor);

@@ -62,9 +62,9 @@ class ResourceData {
   void operator delete(void* p) {
     ::operator delete(p);
   }
-  virtual size_t heapSize() const {
-    always_assert(false); // better not be in the smart-heap
-    not_reached();
+  size_t heapSize() const {
+    assert(m_size != 0);
+    return m_size;
   }
 
   void release() noexcept {
@@ -94,18 +94,15 @@ class ResourceData {
 
  private:
   static void compileTimeAssertions();
+  template<class T, class... Args> friend T* newres(Args&&...);
 
  private:
   //============================================================================
   // ResourceData fields
-  union {
-    struct {
-      UNUSED char m_pad[3];
-      UNUSED HeaderKind m_kind;
-      mutable RefCount m_count;
-    };
-    uint64_t m_kind_count;
-  };
+  uint16_t m_size;
+  UNUSED char m_pad;
+  UNUSED HeaderKind m_kind;
+  mutable RefCount m_count;
 
  protected:
   // Numeric identifier of resource object (used by var_dump() and other
@@ -201,11 +198,15 @@ ALWAYS_INLINE bool decRefRes(ResourceData* res) {
   return res->decRefAndRelease();
 }
 
+// allocate and construct a resource subclass type T
 template<class T, class... Args> T* newres(Args&&... args) {
+  static_assert(sizeof(T) <= 0xffff && sizeof(T) < kMaxSmartSize, "");
   static_assert(std::is_convertible<T*,ResourceData*>::value, "");
   auto const mem = MM().smartMallocSizeLogged(sizeof(T));
   try {
-    return new (mem) T(std::forward<Args>(args)...);
+    auto r = new (mem) T(std::forward<Args>(args)...);
+    r->m_size = sizeof(T);
+    return r;
   } catch (...) {
     MM().smartFreeSizeLogged(mem, sizeof(T));
     throw;
@@ -216,10 +217,9 @@ template<class T, class... Args> T* newres(Args&&... args) {
   public:                                                               \
   ALWAYS_INLINE void operator delete(void* p) {                         \
     static_assert(std::is_base_of<ResourceData,T>::value, "");          \
-    assert(sizeof(T) <= kMaxSmartSize);                                 \
+    assert(static_cast<T*>(p)->heapSize() == sizeof(T));                \
     MM().smartFreeSizeLogged(p, sizeof(T));                             \
-  }\
-  virtual size_t heapSize() const { return sizeof(T); }
+  }
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                                  \
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \

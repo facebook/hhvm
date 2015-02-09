@@ -65,11 +65,6 @@ struct Header {
 };
 
 inline size_t Header::size() const {
-  auto resourceSize = [](const ResourceData* r) {
-    // explicitly virtual-call ResourceData::heapSize() through a pointer
-    assert(r->heapSize());
-    return r->heapSize();
-  };
   switch (kind()) {
     case HeaderKind::Packed:
       return PackedArray::heapSize(&arr_);
@@ -93,7 +88,7 @@ inline size_t Header::size() const {
       return obj_.heapSize();
     case HeaderKind::Resource:
       // [ResourceData][subclass]
-      return resourceSize(&res_);
+      return res_.heapSize();
     case HeaderKind::Ref:
       return sizeof(RefData);
     case HeaderKind::SmallMalloc:

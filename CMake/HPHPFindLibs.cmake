@@ -152,6 +152,12 @@ if (LZ4_INCLUDE_DIR)
   include_directories(${LZ4_INCLUDE_DIR})
 endif()
 
+# fastlz
+find_package(FastLZ)
+if (FASTLZ_INCLUDE_DIR)
+  include_directories(${FASTLZ_INCLUDE_DIR})
+endif()
+
 # libzip
 find_package(LibZip)
 if (LIBZIP_INCLUDE_DIR_ZIP AND LIBZIP_INCLUDE_DIR_ZIPCONF)

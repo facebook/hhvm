@@ -1,4 +1,4 @@
-File "shapes_cc_5.php", line 18, characters 36-40:
+File "shapes_cc_5.php", line 20, characters 3-7:
 Shape field name is an int class constant (Typing[4086])
-File "shapes_cc_5.php", line 18, characters 22-26:
+File "shapes_cc_5.php", line 19, characters 3-7:
 But expected a string

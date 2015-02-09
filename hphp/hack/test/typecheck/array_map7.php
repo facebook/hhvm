@@ -1,7 +1,12 @@
 <?hh
 
-function f(string $_): bool { return true; };
-function g(string $_, string $__): bool { return true; };
+function f(string $_): bool {
+  return true;
+}
+
+function g(string $_, string $__): bool {
+  return true;
+}
 
 function test(
   array $array,

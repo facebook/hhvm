@@ -11,7 +11,7 @@
 
 function test(bool $b): Generator<int, int, void> {
   yield 0;
-  if($b) {
+  if ($b) {
     yield break;
   }
   yield 1;

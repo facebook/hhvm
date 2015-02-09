@@ -1,9 +1,7 @@
 <?hh
 
 abstract class FooParent {
-  protected function __construct(
-    private string $prop,
-  ) {}
+  protected function __construct(private string $prop) {}
 }
 
 trait TBar {

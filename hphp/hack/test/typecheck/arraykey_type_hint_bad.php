@@ -9,7 +9,7 @@
  *
  */
 
-class C {};
+class C {}
 
 function f(arraykey $k1, arraykey $k2): arraykey {
   return $k2;

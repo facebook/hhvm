@@ -310,13 +310,6 @@ protected:
   LocationPtr m_loc;
   mutable int m_containedEffects;
   mutable int m_effectsTag;
-
-  /**
-   * Called by analyzeProgram() to add a reference to a user class or
-   * function.
-   */
-  void addUserFunction(AnalysisResultPtr ar, const std::string &name);
-  void addUserClass(AnalysisResultPtr ar, const std::string &name);
 };
 
 class LocalEffectsContainer {

@@ -9,8 +9,9 @@
  *
  */
 
-async function array_return(array<Awaitable<int>> $gens)
-  : Awaitable<array<int>> {
+async function array_return(
+  array<Awaitable<int>> $gens,
+): Awaitable<array<int>> {
   $ret = await gena($gens);
   return $ret;
 }

@@ -1,5 +1,5 @@
 <?hh
 
 type foo = shape(
-  'bar' => array
+  'bar' => array,
 );

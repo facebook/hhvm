@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+HHVM_INSTALL_PREFIX="@CMAKE_INSTALL_PREFIX@"
+HHVM_INSTALL_LIBDIR="@CMAKE_INSTALL_LIBDIR@"
+HHVM_LIB="$HHVM_INSTALL_PREFIX/$HHVM_INSTALL_LIBDIR/hhvm"
+
+if [ -z "$HHVM_BIN" ] ; then
+  HHVM_BIN=$HHVM_INSTALL_PREFIX/bin/hhvm
+fi
+
+echo "Debugging with hhvm: $HHVM_BIN ..."
+
+EXEC_CMD=--exec=$HHVM_BIN
+if [ "$1" = "--args" ]; then
+  EXEC_CMD=""
+fi
+
+exec gdb --command=$HHVM_LIB/gdb/hhvm.py $EXEC_CMD "$@"

@@ -222,7 +222,7 @@ void rename_function(const String& old_name, const String& new_name) {
     return;
   }
 
-  always_assert(!RDS::isPersistentHandle(oldNe->getFuncHandle()));
+  always_assert(!rds::isPersistentHandle(oldNe->getFuncHandle()));
   oldNe->setCachedFunc(nullptr);
   newNe->m_cachedFunc.bind();
   newNe->setCachedFunc(func);

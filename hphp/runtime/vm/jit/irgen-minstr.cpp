@@ -216,7 +216,7 @@ SSATmp* misPtr(MTS& env) {
   assert(env.base.value && "misPtr called before emitBaseOp");
   if (env.needMIS) {
     return gen(env, LdMIStateAddr, env.misBase,
-      cns(env, RDS::kVmMInstrStateOff));
+      cns(env, rds::kVmMInstrStateOff));
   }
   return cns(env, Type::cns(nullptr, Type::PtrToMISUninit));
 }

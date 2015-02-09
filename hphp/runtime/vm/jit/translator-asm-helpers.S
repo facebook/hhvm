@@ -117,17 +117,19 @@ ETCH_NAME(handleSRHelper):
   add $0x40, %rsp
   CFI2(adjust_cfa_offset, -0x40)
 
+  // If we're coming back from a REQ_BIND_CALL, we have to push m_savedRip
+  // from rStashedAR for the func prologue we're about to jump to.
+  cmpl $0, %edi
+  jne ETCH_NAME(handleSRResumeTC)
+  push 0x8(%r15)
+
+  .globl ETCH_NAME(handleSRResumeTC)
+ETCH_NAME(handleSRResumeTC):
   // rVmTl and rStashedAR were preserved by the callee but vmsp and vmfp
   // might've changed if we interpreted anything. Reload them.
   mov 0x10(%r12), %rbx
   mov 0x20(%r12), %rbp
 
-  // If we're coming back from a REQ_BIND_CALL, we have to push m_savedRip
-  // from rStashedAR for the func prologue we're about to jump to.
-  cmpl $0, %edi
-  jne ETCH_LABEL(handleSRHelper$jumpToTC)
-  push 0x8(%r15)
-ETCH_LABEL(handleSRHelper$jumpToTC):
   jmp *%rax
   CFI(endproc)
   ETCH_SIZE(handleSRHelper)

@@ -88,7 +88,7 @@ LibEventServer::LibEventServer(const ServerOptions &options)
                  RuntimeOption::ServerThreadDropStack,
                  this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
                  RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
-                 kNumPriorities, num_numa_nodes()),
+                 kNumPriorities),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);

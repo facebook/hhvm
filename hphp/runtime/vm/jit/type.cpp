@@ -225,7 +225,7 @@ std::string Type::constValString() const {
     }
     return folly::format("TCA: {}({})", m_tcaVal, boost::trim_copy(name)).str();
   } else if (subtypeOf(RDSHandle)) {
-    return folly::format("RDS::Handle({:#x})", m_rdsHandleVal).str();
+    return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
   } else if (subtypeOfAny(Null, Nullptr) || isPtr()) {
     return toString();
   } else {

@@ -1,4 +1,4 @@
-<?hh 
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,6 +10,6 @@
  */
 
 function test($x): array<int, A> {
-  $v = (array)0;
+  $v = (array) 0;
   return $v;
 }

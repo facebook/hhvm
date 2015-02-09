@@ -95,7 +95,7 @@ struct BackEnd : public jit::BackEnd {
     auto& vmRegs = vmRegsUnsafe();
     sim.   set_xreg(arm::rVmFp.code(), vmRegs.fp);
     sim.   set_xreg(arm::rVmSp.code(), vmRegs.stack.top());
-    sim.   set_xreg(arm::rVmTl.code(), RDS::tl_base);
+    sim.   set_xreg(arm::rVmTl.code(), rds::tl_base);
     sim.   set_xreg(arm::rStashedAR.code(), uintptr_t(saved_rStashedAr));
 
     // Leave space for register spilling and MInstrState.
@@ -178,13 +178,7 @@ struct BackEnd : public jit::BackEnd {
       vixl::MacroAssembler a { mainCode };
       arm::emitTransCounterInc(a);
     }
-    // This jump won't be smashed, but a far jump on ARM requires the same code
-    // sequence.
-    emitSmashableJump(
-      mainCode,
-      emitServiceReq(coldCode, REQ_INTERPRET, sk.offset()),
-      CC_None
-    );
+    not_implemented();
   }
 
   bool funcPrologueHasGuard(TCA prologue, const Func* func) override {
@@ -436,9 +430,7 @@ struct BackEnd : public jit::BackEnd {
       assert(a.isFrontierAligned(8));
     }
     a.   bind (&interpReqAddr);
-    TCA interpReq =
-      emitServiceReq(codeCold, REQ_INTERPRET, sk.offset());
-    a.   dc64 (interpReq);
+    not_implemented();
     a.   bind (&after);
   }
 

@@ -172,7 +172,7 @@ struct StringData {
    * normally called when the reference count goes to zero (e.g. with
    * a helper like decRefStr).
    */
-  void release();
+  void release() noexcept;
   size_t heapSize() const;
 
   /*

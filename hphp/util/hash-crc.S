@@ -10,8 +10,8 @@ ETCH_ALIGN16
 ETCH_NAME(hash_string_i_crc):
 ETCH_LABEL(FB800):
         CFI(startproc)
+        or      $-1, %eax
         test    %esi, %esi
-        mov     $-1, %eax
         je      ETCH_LABEL(iend)
         mov     %esi, %ecx
         movabs  $0xdfdfdfdfdfdfdfdf, %r8
@@ -47,8 +47,8 @@ ETCH_ALIGN16
 ETCH_NAME(hash_string_i_unaligned_crc):
 ETCH_LABEL(FB801):
         CFI(startproc)
+        or      $-1, %eax
         sub     $8, %esi
-        mov     $-1, %eax
         movabs  $0xdfdfdfdfdfdfdfdf, %r8
         js      ETCH_LABEL(iutail)
 
@@ -90,8 +90,8 @@ ETCH_ALIGN16
 ETCH_NAME(hash_string_cs_crc):
 ETCH_LABEL(FB802):
         CFI(startproc)
+        or      $-1, %eax
         test    %esi, %esi
-        mov     $-1, %eax
         je      ETCH_LABEL(csend)
         mov     %esi, %ecx
         jmp     ETCH_LABEL(csheader)
@@ -125,8 +125,8 @@ ETCH_ALIGN16
 ETCH_NAME(hash_string_cs_unaligned_crc):
 ETCH_LABEL(FB803):
         CFI(startproc)
+        or      $-1, %eax
         sub     $8, %esi
-        mov     $-1, %eax
         js      ETCH_LABEL(csutail)
 
 ETCH_LABEL(csuloop):
@@ -167,7 +167,7 @@ ETCH_NAME(g_hashHelper_crc):
 ETCH_LABEL(FB804):
         CFI(startproc)
         mov     0x10(%rdi), %ecx
-        mov     $-1, %eax
+        or      $-1, %eax
         jecxz   ETCH_LABEL(hend)
         mov     (%rdi), %rdx
 

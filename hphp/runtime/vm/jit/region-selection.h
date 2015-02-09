@@ -242,12 +242,12 @@ inline bool operator==(const RegionDesc::ReffinessPred& a,
  * at various execution points, including at entry to the block.
  */
 class RegionDesc::Block {
+ public:
   typedef boost::container::flat_multimap<SrcKey, TypePred> TypePredMap;
   typedef boost::container::flat_map<SrcKey, bool> ParamByRefMap;
   typedef boost::container::flat_multimap<SrcKey, ReffinessPred> RefPredMap;
   typedef boost::container::flat_map<SrcKey, const Func*> KnownFuncMap;
 
-public:
   explicit Block(const Func* func, bool resumed, Offset start, int length,
                  Offset initSpOff);
 

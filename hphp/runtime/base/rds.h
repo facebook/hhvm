@@ -31,7 +31,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace HPHP { namespace RDS {
+namespace HPHP { namespace rds {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -78,17 +78,17 @@ namespace HPHP { namespace RDS {
  *   allocated space is associated with some unique key that allows it
  *   to be re-found for any new attempts to allocate that symbol.
  *
- *   Anonymous allocations are created with RDS::alloc.  Non-anonymous
+ *   Anonymous allocations are created with rds::alloc.  Non-anonymous
  *   allocations can be created in two ways:
  *
- *     RDS::bind(Symbol) uses an RDS-internal link table to find if
+ *     rds::bind(Symbol) uses an RDS-internal link table to find if
  *     there is an existing handle for the given symbol.
  *
- *     RDS::Link<T>::bind allows the caller to make use of the
+ *     rds::Link<T>::bind allows the caller to make use of the
  *     uniqueness of other runtime structure (e.g. the Class
  *     structure) to avoid having a special key and needing to do
  *     lookups in the internal RDS link table.  The "key" for the
- *     allocation is the RDS::Link<> object itself.
+ *     allocation is the rds::Link<> object itself.
  *
  *   Finally, you can allocate anonymous single bits at a time with
  *   allocBit().
@@ -186,7 +186,7 @@ using Symbol = boost::variant< StaticLocal
 enum class Mode { Normal, Local, Persistent };
 
 /*
- * RDS::Link<T> is a thin, typed wrapper around an RDS::Handle.
+ * rds::Link<T> is a thin, typed wrapper around an rds::Handle.
  *
  * Note that nothing prevents using non-POD types with this.  But
  * nothing here is going to run the constructor.  (In the
@@ -236,7 +236,7 @@ struct Link {
   bool bound() const;
 
   /*
-   * Access to the underlying RDS::Handle.
+   * Access to the underlying rds::Handle.
    */
   Handle handle() const;
 
@@ -288,7 +288,7 @@ Link<T> alloc(Mode mode = Mode::Normal);
  * Allocate a single anonymous bit from non-persistent RDS.  The bit
  * can be manipulated with testAndSetBit().
  *
- * Note: the returned integer is *not* an RDS::Handle.
+ * Note: the returned integer is *not* an rds::Handle.
  */
 size_t allocBit();
 bool testAndSetBit(size_t bit);
@@ -296,7 +296,7 @@ bool testAndSetBit(size_t bit);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Dereference an un-typed RDS::Handle, optionally specifying a
+ * Dereference an un-typed rds::Handle, optionally specifying a
  * specific RDS base to use.
  */
 template<class T> T& handleToRef(Handle h);

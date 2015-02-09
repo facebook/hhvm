@@ -61,9 +61,9 @@ private:
   }
 
 private:
-  const IRUnit& m_unit;
+  DEBUG_ONLY const IRUnit& m_unit;
   Trace::Module const m_mod;
-  const char* const m_name;
+  DEBUG_ONLY const char* const m_name;
   Trace::Bump m_bumper;
 };
 

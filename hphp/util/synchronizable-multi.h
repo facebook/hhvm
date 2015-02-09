@@ -36,7 +36,7 @@ namespace HPHP {
  */
 class SynchronizableMulti {
 public:
-  explicit SynchronizableMulti(int size, int groups);
+  explicit SynchronizableMulti(int size);
   virtual ~SynchronizableMulti();
 
   /**
@@ -52,6 +52,7 @@ public:
   bool wait(int id, int q, bool front, long seconds, long long nanosecs);
   void notify();
   void notifyAll();
+  void setNumGroups(int num_groups);
 
   Mutex &getMutex() { return m_mutex;}
 

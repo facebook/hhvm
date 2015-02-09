@@ -136,7 +136,7 @@ inline void ObjectData::instanceInit(Class* cls) {
   }
 }
 
-inline void ObjectData::release() {
+inline void ObjectData::release() noexcept {
   assert(!hasMultipleRefs());
   if (LIKELY(destruct())) DeleteObject(this);
 }

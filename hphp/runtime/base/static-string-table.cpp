@@ -95,7 +95,7 @@ struct strintern_hash {
 // The uint32_t is used to hold RDS offsets for constants
 typedef folly::AtomicHashMap<
   StrInternKey,
-  RDS::Link<TypedValue>,
+  rds::Link<TypedValue>,
   strintern_hash,
   strintern_eq
 > StringDataMap;
@@ -125,7 +125,7 @@ StringData** precomputed_chars = precompute_chars();
 StringData* insertStaticString(StringData* sd) {
   auto pair = s_stringDataMap->insert(
     make_intern_key(sd),
-    RDS::Link<TypedValue>(RDS::kInvalidHandle)
+    rds::Link<TypedValue>(rds::kInvalidHandle)
   );
 
   if (!pair.second) {
@@ -228,7 +228,7 @@ StringData* makeStaticString(char c) {
   return precomputed_chars[(uint8_t)c];
 }
 
-RDS::Handle lookupCnsHandle(const StringData* cnsName) {
+rds::Handle lookupCnsHandle(const StringData* cnsName) {
   assert(s_stringDataMap);
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   if (it != s_stringDataMap->end()) {
@@ -237,22 +237,22 @@ RDS::Handle lookupCnsHandle(const StringData* cnsName) {
   return 0;
 }
 
-RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
+rds::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
   auto const val = lookupCnsHandle(cnsName);
   if (val) return val;
   if (!cnsName->isStatic()) {
     // Its a dynamic constant, that doesn't correspond to
     // an already allocated handle. We'll allocate it in
-    // the request local RDS::s_constants instead.
+    // the request local rds::s_constants instead.
     return 0;
   }
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   assert(it != s_stringDataMap->end());
   if (!it->second.bound()) {
-    it->second.bind<kTVSimdAlign>(persistent ? RDS::Mode::Persistent
-                                             : RDS::Mode::Normal);
+    it->second.bind<kTVSimdAlign>(persistent ? rds::Mode::Persistent
+                                             : rds::Mode::Normal);
 
-    RDS::recordRds(it->second.handle(), sizeof(TypedValue),
+    rds::recordRds(it->second.handle(), sizeof(TypedValue),
                    "Cns", cnsName->data());
   }
   return it->second.handle();
@@ -263,14 +263,14 @@ const StaticString s_Core("Core");
 
 Array lookupDefinedConstants(bool categorize /*= false */) {
   assert(s_stringDataMap);
-  Array usr(RDS::s_constants());
+  Array usr(rds::s_constants());
   Array sys;
 
   for (auto it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
     if (it->second.bound()) {
       Array *tbl = (categorize &&
-                    RDS::isPersistentHandle(it->second.handle()))
+                    rds::isPersistentHandle(it->second.handle()))
                  ? &sys : &usr;
       auto& tv = *it->second;
       if (tv.m_type != KindOfUninit) {

@@ -1269,12 +1269,128 @@ const char* show(TranslateResult r) {
   not_reached();
 }
 
+//////////////////////////////////////////////////////////////////////
+
+#define IMM_MA(n)      0 /* ignored, but we need something (for commas) */
+#define IMM_BLA(n)     ni.immVec
+#define IMM_SLA(n)     ni.immVec
+#define IMM_ILA(n)     ni.immVec
+#define IMM_VSA(n)     ni.immVec
+#define IMM_IVA(n)     ni.imm[n].u_IVA
+#define IMM_I64A(n)    ni.imm[n].u_I64A
+#define IMM_LA(n)      ni.imm[n].u_LA
+#define IMM_IA(n)      ni.imm[n].u_IA
+#define IMM_DA(n)      ni.imm[n].u_DA
+#define IMM_SA(n)      ni.unit()->lookupLitstrId(ni.imm[n].u_SA)
+#define IMM_RATA(n)    ni.imm[n].u_RATA
+#define IMM_AA(n)      ni.unit()->lookupArrayId(ni.imm[n].u_AA)
+#define IMM_BA(n)      ni.imm[n].u_BA
+#define IMM_OA_IMPL(n) ni.imm[n].u_OA
+#define IMM_OA(subop)  (subop)IMM_OA_IMPL
+
+#define ONE(x0)           , IMM_##x0(0)
+#define TWO(x0,x1)        , IMM_##x0(0), IMM_##x1(1)
+#define THREE(x0,x1,x2)   , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2)
+#define FOUR(x0,x1,x2,x3) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
+#define NA                   /*  */
+
+static void translateDispatch(HTS& hts,
+                              const NormalizedInstruction& ni) {
+#define O(nm, imms, ...) case Op::nm: irgen::emit##nm(hts imms); return;
+  switch (ni.op()) { OPCODES }
+#undef O
+}
+
+#undef FOUR
+#undef THREE
+#undef TWO
+#undef ONE
+#undef NA
+
+#undef IMM_MA
+#undef IMM_BLA
+#undef IMM_SLA
+#undef IMM_ILA
+#undef IMM_IVA
+#undef IMM_I64A
+#undef IMM_LA
+#undef IMM_IA
+#undef IMM_DA
+#undef IMM_SA
+#undef IMM_RATA
+#undef IMM_AA
+#undef IMM_BA
+#undef IMM_OA_IMPL
+#undef IMM_OA
+#undef IMM_VSA
+
+//////////////////////////////////////////////////////////////////////
+
+static Type flavorToType(FlavorDesc f) {
+  switch (f) {
+    case NOV: not_reached();
+
+    case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
+    case UV: return Type::Uninit;
+    case VV: return Type::BoxedInitCell;
+    case AV: return Type::Cls;
+    case RV: case FV: case CVV: case CVUV: return Type::Gen;
+  }
+  not_reached();
+}
+
+void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
+  irgen::prepareForNextHHBC(
+    hts,
+    &ni,
+    ni.source.offset(),
+    ni.endsRegion && !irgen::isInlining(hts)
+  );
+
+  auto pc = reinterpret_cast<const Op*>(ni.pc());
+  for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
+    auto const type = flavorToType(instrInputFlavor(pc, i));
+    if (type != Type::Gen) {
+      // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
+      // is a little unsure of itself.
+      irgen::assertTypeStack(hts, i, type);
+    }
+  }
+
+  FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
+                                         ni.offset(), ni.toString(),
+                                         show(hts)));
+
+  irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
+  irgen::emitIncStat(hts, Stats::Instr_TC, 1);
+  if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
+      RuntimeOption::EvalJitLLVMCounters) {
+    irgen::gen(hts, CountBytecode);
+  }
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
+    irgen::gen(hts, DbgAssertRetAddr);
+  }
+
+  if (isAlwaysNop(ni.op())) {
+    // Do nothing
+  } else if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
+    irgen::interpOne(hts, ni);
+  } else {
+    translateDispatch(hts, ni);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace { // translateRegion helpers
+
 /*
  * Create a map from RegionDesc::BlockId -> IR Block* for all region blocks.
  */
-static void createBlockMap(HTS& hts,
-                           const RegionDesc& region,
-                           BlockIdToIRBlockMap& blockIdToIRBlock) {
+void createBlockMap(HTS& hts,
+                    const RegionDesc& region,
+                    BlockIdToIRBlockMap& blockIdToIRBlock) {
   auto& irb = *hts.irb;
   blockIdToIRBlock.clear();
   auto const& blocks = region.blocks();
@@ -1300,10 +1416,10 @@ static void createBlockMap(HTS& hts,
  * Set IRBuilder's Block associated to blockId's block according to
  * the mapping in blockIdToIRBlock.
  */
-static void setIRBlock(HTS& hts,
-                       RegionDesc::BlockId blockId,
-                       const RegionDesc& region,
-                       const BlockIdToIRBlockMap& blockIdToIRBlock) {
+void setIRBlock(HTS& hts,
+                RegionDesc::BlockId blockId,
+                const RegionDesc& region,
+                const BlockIdToIRBlockMap& blockIdToIRBlock) {
   auto& irb = *hts.irb;
   auto rBlock = region.block(blockId);
   Offset bcOffset = rBlock->start().offset();
@@ -1321,10 +1437,10 @@ static void setIRBlock(HTS& hts,
  * Set IRBuilder's Blocks for srcBlockId's successors' offsets within
  * the region.  It also sets the guard-failure block, if any.
  */
-static void setSuccIRBlocks(HTS& hts,
-                            const RegionDesc& region,
-                            RegionDesc::BlockId srcBlockId,
-                            const BlockIdToIRBlockMap& blockIdToIRBlock) {
+void setSuccIRBlocks(HTS& hts,
+                     const RegionDesc& region,
+                     RegionDesc::BlockId srcBlockId,
+                     const BlockIdToIRBlockMap& blockIdToIRBlock) {
   FTRACE(3, "setSuccIRBlocks: srcBlockId = {}\n", srcBlockId);
   auto& irb = *hts.irb;
   irb.resetOffsetMapping();
@@ -1341,13 +1457,220 @@ static void setSuccIRBlocks(HTS& hts,
 }
 
 /*
+ * Returns whether offset is a control-flow merge within region.
+ */
+bool isMergePoint(Offset offset, const RegionDesc& region) {
+  for (auto const block : region.blocks()) {
+    auto const bid = block->id();
+    if (block->start().offset() == offset) {
+      auto inCount = region.preds(bid).size();
+      // NB: The entry block is a merge point if it has one predecessor.
+      if (block == region.entry()) ++inCount;
+      if (inCount >= 2) return true;
+    }
+  }
+  return false;
+}
+
+bool blockIsLoopHeader(
+  const RegionDesc&             region,
+  RegionDesc::BlockId           blockId,
+  const RegionDesc::BlockIdSet& processedBlocks)
+{
+  for (auto predId : region.preds(blockId)) {
+    if (processedBlocks.count(predId) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * Returns whether any instruction following inst (whether by fallthrough or
+ * branch target) is a merge in region.
+ */
+bool nextIsMerge(const NormalizedInstruction& inst,
+                 const RegionDesc& region) {
+  Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
+  if (instrHasConditionalBranch(inst.op())) {
+    auto offsetPtr = instrJumpOffset((Op*)inst.pc());
+    Offset takenOffset = inst.offset() + *offsetPtr;
+    return fallthruOffset == takenOffset
+      || isMergePoint(takenOffset, region)
+      || isMergePoint(fallthruOffset, region);
+  }
+  if (isUnconditionalJmp(inst.op())) {
+    auto offsetPtr = instrJumpOffset((Op*)inst.pc());
+    Offset takenOffset = inst.offset() + *offsetPtr;
+    return isMergePoint(takenOffset, region);
+  }
+  return isMergePoint(fallthruOffset, region);
+}
+
+/*
+ * Emit type and reffiness prediction guards.
+ */
+void emitPredictionGuards(HTS& hts,
+                          const RegionDesc& region,
+                          const RegionDesc::BlockPtr block,
+                          bool useGuards) {
+  auto sk = block->start();
+  auto bcOff = sk.offset();
+  auto typePreds = makeMapWalker(block->typePreds());
+  auto refPreds  = makeMapWalker(block->reffinessPreds());
+
+  if (useGuards) irgen::ringbuffer(hts, Trace::RBTypeTraceletGuards, sk);
+
+  // Emit type guards.
+  while (typePreds.hasNext(sk)) {
+    auto const& pred = typePreds.next();
+    auto type = pred.type;
+    auto loc  = pred.location;
+    if (type <= Type::Cls) {
+      // Do not generate guards for class; instead assert the type.
+      assert(loc.tag() == RegionDesc::Location::Tag::Stack);
+      irgen::assertTypeLocation(hts, loc, type);
+    } else if (useGuards) {
+      bool checkOuterTypeOnly = mcg->tx().mode() != TransKind::Profile;
+      irgen::guardTypeLocation(hts, loc, type, checkOuterTypeOnly);
+    } else {
+      irgen::checkTypeLocation(hts, loc, type, bcOff);
+    }
+  }
+
+  // Emit reffiness guards.
+  while (refPreds.hasNext(sk)) {
+    auto const& pred = refPreds.next();
+    if (useGuards) {
+      irgen::guardRefs(hts, pred.arSpOffset, pred.mask, pred.vals);
+    } else {
+      irgen::checkRefs(hts, pred.arSpOffset, pred.mask, pred.vals, bcOff);
+    }
+  }
+
+  // Finish emitting guards, and emit profiling counters.
+  if (useGuards) {
+    irgen::gen(hts, EndGuards);
+    if (RuntimeOption::EvalJitTransCounters) {
+      irgen::incTransCounter(hts);
+    }
+
+    if (mcg->tx().mode() == TransKind::Profile) {
+      if (block->func()->isEntry(bcOff)) {
+        irgen::checkCold(hts, mcg->tx().profData()->curTransID());
+      } else {
+        irgen::incProfCounter(hts, mcg->tx().profData()->curTransID());
+      }
+    }
+    irgen::ringbuffer(hts, Trace::RBTypeTraceletBody, sk);
+  }
+
+  // In the entry block, hhbc-translator gets a chance to emit some code
+  // immediately after the initial guards/checks on the first instruction.
+  if (block == region.entry()) {
+    switch (arch()) {
+      case Arch::X64:
+        irgen::prepareEntry(hts);
+        break;
+      case Arch::ARM:
+        // Don't do this for ARM, because it can lead to interpOne on the
+        // first SrcKey in a translation, which isn't allowed.
+        break;
+    }
+  }
+
+  assert(!typePreds.hasNext());
+  assert(!refPreds.hasNext());
+}
+
+void initNormalizedInstruction(
+  NormalizedInstruction& inst,
+  jit::vector<DynLocation>& dynLocs,
+  MapWalker<RegionDesc::Block::ParamByRefMap>& byRefs,
+  HTS& hts,
+  const RegionDesc& region,
+  RegionDesc::BlockId blockId,
+  const Func* topFunc,
+  bool lastInstr,
+  bool toInterp) {
+
+  inst.funcd = topFunc;
+
+  if (lastInstr) {
+    inst.endsRegion  = region.isExit(blockId);
+    inst.nextIsMerge = nextIsMerge(inst, region);
+  }
+
+  // We can get a more precise output type for interpOne if we know all of
+  // its inputs, so we still populate the rest of the instruction even if
+  // this is true.
+  inst.interp = toInterp;
+
+  auto const inputInfos = getInputs(inst);
+
+  // Populate the NormalizedInstruction's input vector, using types
+  // from IRBuilder.
+  dynLocs.reserve(inputInfos.size());
+  auto newDynLoc = [&] (const InputInfo& ii) {
+    dynLocs.emplace_back(ii.loc,
+                         irgen::predictedTypeFromLocation(hts, ii.loc));
+    FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
+           ii.loc.pretty(), dynLocs.back().rtt);
+    return &dynLocs.back();
+  };
+
+  FTRACE(2, "populating inputs for {}\n", inst.toString());
+  for (auto const& ii : inputInfos) {
+    inst.inputs.push_back(newDynLoc(ii));
+  }
+
+  if (inputInfos.needsRefCheck) {
+    inst.preppedByRef = byRefs.next();
+  }
+}
+
+bool shouldTrySingletonInline(const RegionDesc& region,
+                              RegionDesc::BlockPtr block,
+                              const NormalizedInstruction& inst,
+                              unsigned instIdx,
+                              TransFlags trflags) {
+  if (!RuntimeOption::RepoAuthoritative) return false;
+
+  // I don't really want to inline my arm, thanks.
+  if (arch() != Arch::X64) return false;
+
+  // Don't inline if we're retranslating due to a side-exit from an
+  // inlined call.
+  auto const startSk = region.start();
+  if (trflags.noinlineSingleton && startSk == inst.source) return false;
+
+  // Bail early if this isn't a push.
+  if (inst.op() != Op::FPushFuncD &&
+      inst.op() != Op::FPushClsMethodD) {
+    return false;
+  }
+
+  auto nextOp = inst.nextSk().op();
+
+  // If the normal machinery is already inlining this function, don't
+  // do anything here.
+  if (instIdx == block->length() - 2 &&
+      (nextOp == Op::FCall || nextOp == Op::FCallD) &&
+      block->inlinedCallee()) {
+    return false;
+  }
+
+  return true;
+}
+
+/*
  * Check if `i' is an FPush{Func,ClsMethod}D followed by an FCall{,D} to a
  * function with a singleton pattern, and if so, inline it.  Returns true if
  * this succeeds, else false.
  */
-static bool tryTranslateSingletonInline(HTS& hts,
-                                        const NormalizedInstruction& ninst,
-                                        const Func* funcd) {
+bool tryTranslateSingletonInline(HTS& hts,
+                                 const NormalizedInstruction& ninst,
+                                 const Func* funcd) {
   using Atom = BCPattern::Atom;
   using Captures = BCPattern::CaptureVec;
 
@@ -1477,251 +1800,10 @@ static bool tryTranslateSingletonInline(HTS& hts,
   return false;
 }
 
-/*
- * Returns whether offset is a control-flow merge within region.
- */
-static bool isMergePoint(Offset offset, const RegionDesc& region) {
-  for (auto const block : region.blocks()) {
-    auto const bid = block->id();
-    if (block->start().offset() == offset) {
-      auto inCount = region.preds(bid).size();
-      // NB: The entry block is a merge point if it has one predecessor.
-      if (block == region.entry()) ++inCount;
-      if (inCount >= 2) return true;
-    }
-  }
-  return false;
-}
-
-static bool blockIsLoopHeader(
-  const RegionDesc&             region,
-  RegionDesc::BlockId           blockId,
-  const RegionDesc::BlockIdSet& processedBlocks)
-{
-  for (auto predId : region.preds(blockId)) {
-    if (processedBlocks.count(predId) == 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/*
- * Returns whether any instruction following inst (whether by fallthrough or
- * branch target) is a merge in region.
- */
-static bool nextIsMerge(const NormalizedInstruction& inst,
-                        const RegionDesc& region) {
-  Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
-  if (instrHasConditionalBranch(inst.op())) {
-    auto offsetPtr = instrJumpOffset((Op*)inst.pc());
-    Offset takenOffset = inst.offset() + *offsetPtr;
-    return fallthruOffset == takenOffset
-      || isMergePoint(takenOffset, region)
-      || isMergePoint(fallthruOffset, region);
-  }
-  if (isUnconditionalJmp(inst.op())) {
-    auto offsetPtr = instrJumpOffset((Op*)inst.pc());
-    Offset takenOffset = inst.offset() + *offsetPtr;
-    return isMergePoint(takenOffset, region);
-  }
-  return isMergePoint(fallthruOffset, region);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-#define IMM_MA(n)      0 /* ignored, but we need something (for commas) */
-#define IMM_BLA(n)     ni.immVec
-#define IMM_SLA(n)     ni.immVec
-#define IMM_ILA(n)     ni.immVec
-#define IMM_VSA(n)     ni.immVec
-#define IMM_IVA(n)     ni.imm[n].u_IVA
-#define IMM_I64A(n)    ni.imm[n].u_I64A
-#define IMM_LA(n)      ni.imm[n].u_LA
-#define IMM_IA(n)      ni.imm[n].u_IA
-#define IMM_DA(n)      ni.imm[n].u_DA
-#define IMM_SA(n)      ni.unit()->lookupLitstrId(ni.imm[n].u_SA)
-#define IMM_RATA(n)    ni.imm[n].u_RATA
-#define IMM_AA(n)      ni.unit()->lookupArrayId(ni.imm[n].u_AA)
-#define IMM_BA(n)      ni.imm[n].u_BA
-#define IMM_OA_IMPL(n) ni.imm[n].u_OA
-#define IMM_OA(subop)  (subop)IMM_OA_IMPL
-
-#define ONE(x0)           , IMM_##x0(0)
-#define TWO(x0,x1)        , IMM_##x0(0), IMM_##x1(1)
-#define THREE(x0,x1,x2)   , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2)
-#define FOUR(x0,x1,x2,x3) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
-#define NA                   /*  */
-
-static void translateDispatch(HTS& hts,
-                              const NormalizedInstruction& ni) {
-#define O(nm, imms, ...) case Op::nm: irgen::emit##nm(hts imms); return;
-  switch (ni.op()) { OPCODES }
-#undef O
-}
-
-#undef FOUR
-#undef THREE
-#undef TWO
-#undef ONE
-#undef NA
-
-#undef IMM_MA
-#undef IMM_BLA
-#undef IMM_SLA
-#undef IMM_ILA
-#undef IMM_IVA
-#undef IMM_I64A
-#undef IMM_LA
-#undef IMM_IA
-#undef IMM_DA
-#undef IMM_SA
-#undef IMM_RATA
-#undef IMM_AA
-#undef IMM_BA
-#undef IMM_OA_IMPL
-#undef IMM_OA
-#undef IMM_VSA
-
-//////////////////////////////////////////////////////////////////////
-
-static Type flavorToType(FlavorDesc f) {
-  switch (f) {
-    case NOV: not_reached();
-
-    case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
-    case UV: return Type::Uninit;
-    case VV: return Type::BoxedInitCell;
-    case AV: return Type::Cls;
-    case RV: case FV: case CVV: case CVUV: return Type::Gen;
-  }
-  not_reached();
-}
-
-void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
-  irgen::prepareForNextHHBC(
-    hts,
-    &ni,
-    ni.source.offset(),
-    ni.endsRegion && !irgen::isInlining(hts)
-  );
-
-  auto pc = reinterpret_cast<const Op*>(ni.pc());
-  for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
-    auto const type = flavorToType(instrInputFlavor(pc, i));
-    if (type != Type::Gen) {
-      // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
-      // is a little unsure of itself.
-      irgen::assertTypeStack(hts, i, type);
-    }
-  }
-
-  FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
-                                         ni.offset(), ni.toString(),
-                                         show(hts)));
-
-  irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
-  irgen::emitIncStat(hts, Stats::Instr_TC, 1);
-  if (Trace::moduleEnabledRelease(Trace::llvm, 1) ||
-      RuntimeOption::EvalJitLLVMCounters) {
-    irgen::gen(hts, CountBytecode);
-  }
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
-    irgen::gen(hts, DbgAssertRetAddr);
-  }
-
-  if (isAlwaysNop(ni.op())) {
-    // Do nothing
-  } else if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
-    irgen::interpOne(hts, ni);
-  } else {
-    translateDispatch(hts, ni);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Emit type and reffiness prediction guards.
- */
-static void emitPredictionGuards(HTS& hts,
-                                 const RegionDesc& region,
-                                 const RegionDesc::BlockPtr block,
-                                 bool useGuards) {
-  auto sk = block->start();
-  auto bcOff = sk.offset();
-  auto typePreds = makeMapWalker(block->typePreds());
-  auto refPreds  = makeMapWalker(block->reffinessPreds());
-
-  if (useGuards) irgen::ringbuffer(hts, Trace::RBTypeTraceletGuards, sk);
-
-  // Emit type guards.
-  while (typePreds.hasNext(sk)) {
-    auto const& pred = typePreds.next();
-    auto type = pred.type;
-    auto loc  = pred.location;
-    if (type <= Type::Cls) {
-      // Do not generate guards for class; instead assert the type.
-      assert(loc.tag() == RegionDesc::Location::Tag::Stack);
-      irgen::assertTypeLocation(hts, loc, type);
-    } else if (useGuards) {
-      bool checkOuterTypeOnly = mcg->tx().mode() != TransKind::Profile;
-      irgen::guardTypeLocation(hts, loc, type, checkOuterTypeOnly);
-    } else {
-      irgen::checkTypeLocation(hts, loc, type, bcOff);
-    }
-  }
-
-  // Emit reffiness guards.
-  while (refPreds.hasNext(sk)) {
-    auto const& pred = refPreds.next();
-    if (useGuards) {
-      irgen::guardRefs(hts, pred.arSpOffset, pred.mask, pred.vals);
-    } else {
-      irgen::checkRefs(hts, pred.arSpOffset, pred.mask, pred.vals, bcOff);
-    }
-  }
-
-  // Finish emitting guards, and emit profiling counters.
-  if (useGuards) {
-    irgen::gen(hts, EndGuards);
-    if (RuntimeOption::EvalJitTransCounters) {
-      irgen::incTransCounter(hts);
-    }
-
-    if (mcg->tx().mode() == TransKind::Profile) {
-      if (block->func()->isEntry(bcOff)) {
-        irgen::checkCold(hts, mcg->tx().profData()->curTransID());
-      } else {
-        irgen::incProfCounter(hts, mcg->tx().profData()->curTransID());
-      }
-    }
-    irgen::ringbuffer(hts, Trace::RBTypeTraceletBody, sk);
-  }
-
-  // In the entry block, hhbc-translator gets a chance to emit some code
-  // immediately after the initial guards/checks on the first instruction.
-  if (block == region.entry()) {
-    switch (arch()) {
-      case Arch::X64:
-        irgen::prepareEntry(hts);
-        break;
-      case Arch::ARM:
-        // Don't do this for ARM, because it can lead to interpOne on the
-        // first SrcKey in a translation, which isn't allowed.
-        break;
-    }
-  }
-
-  assert(!typePreds.hasNext());
-  assert(!refPreds.hasNext());
-}
-
-TranslateResult translateRegion(HTS& hts,
-                                const RegionDesc& region,
-                                RegionBlacklist& toInterp,
-                                TransFlags trflags) {
+TranslateResult irGenRegion(HTS& hts,
+                            const RegionDesc& region,
+                            RegionBlacklist& toInterp,
+                            TransFlags trflags) {
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
@@ -1730,8 +1812,6 @@ TranslateResult translateRegion(HTS& hts,
                     [&] { return errorMsg + "\n" + show(region); });
 
   auto& irb = *hts.irb;
-
-  auto const startSk = region.start();
 
   // Create a map from region blocks to their corresponding initial IR blocks.
   BlockIdToIRBlockMap blockIdToIRBlock;
@@ -1752,12 +1832,12 @@ TranslateResult translateRegion(HTS& hts,
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   auto& blocks = region.blocks();
   for (auto b = 0; b < blocks.size(); b++) {
-    auto const& block    = blocks[b];
-    auto const blockId   = block->id();
-    auto sk              = block->start();
-    auto byRefs          = makeMapWalker(block->paramByRefs());
-    auto knownFuncs      = makeMapWalker(block->knownFuncs());
-    auto skipTrans       = false;
+    auto const& block  = blocks[b];
+    auto const blockId = block->id();
+    auto sk            = block->start();
+    auto byRefs        = makeMapWalker(block->paramByRefs());
+    auto knownFuncs    = makeMapWalker(block->knownFuncs());
+    auto skipTrans     = false;
 
     const Func* topFunc = nullptr;
     TransID profTransId = getTransId(blockId);
@@ -1788,6 +1868,7 @@ TranslateResult translateRegion(HTS& hts,
     emitPredictionGuards(hts, region, block, useGuards);
     irb.resetGuardFailBlock();
 
+    // Generate IR for each bytecode instruction in this block.
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       auto const lastInstr = i == block->length() - 1;
 
@@ -1802,38 +1883,10 @@ TranslateResult translateRegion(HTS& hts,
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
-      inst.funcd = topFunc;
-      if (lastInstr) {
-        inst.endsRegion = region.isExit(blockId);
-        inst.nextIsMerge = nextIsMerge(inst, region);
-      }
-
-      // We can get a more precise output type for interpOne if we know all of
-      // its inputs, so we still populate the rest of the instruction even if
-      // this is true.
-      inst.interp = toInterp.count(ProfSrcKey{profTransId, sk});
-
-      auto const inputInfos = getInputs(inst);
-
-      // Populate the NormalizedInstruction's input vector, using types
-      // from IRBuilder.
       jit::vector<DynLocation> dynLocs;
-      dynLocs.reserve(inputInfos.size());
-      auto newDynLoc = [&] (const InputInfo& ii) {
-        dynLocs.emplace_back(ii.loc,
-                             irgen::predictedTypeFromLocation(hts, ii.loc));
-        FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
-               ii.loc.pretty(), dynLocs.back().rtt);
-        return &dynLocs.back();
-      };
-      FTRACE(2, "populating inputs for {}\n", inst.toString());
-      for (auto const& ii : inputInfos) {
-        inst.inputs.push_back(newDynLoc(ii));
-      }
-      if (inputInfos.needsRefCheck) {
-        assert(byRefs.hasNext(sk));
-        inst.preppedByRef = byRefs.next();
-      }
+      bool toInterpInst = toInterp.count(ProfSrcKey{profTransId, sk});
+      initNormalizedInstruction(inst, dynLocs, byRefs, hts, region, blockId,
+                                topFunc, lastInstr, toInterpInst);
 
       // If this block ends with an inlined FCall, we don't emit anything for
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from
@@ -1856,52 +1909,18 @@ TranslateResult translateRegion(HTS& hts,
       }
 
       // Singleton inlining optimization.
-      if (RuntimeOption::EvalHHIRInlineSingletons) {
-        bool didInlineSingleton = [&] {
-          if (!RuntimeOption::RepoAuthoritative) return false;
+      if (RuntimeOption::EvalHHIRInlineSingletons && !lastInstr &&
+          shouldTrySingletonInline(region, block, inst, i, trflags) &&
+          knownFuncs.hasNext(inst.nextSk())) {
 
-          // I don't really want to inline my arm, thanks.
-          if (arch() != Arch::X64) return false;
+        // This is safe to do even if singleton inlining fails; we just won't
+        // change topFunc in the next pass since hasNext() will return false.
+        topFunc = knownFuncs.next();
 
-          // Don't inline if we're retranslating due to a side-exit from an
-          // inlined call.
-          if (trflags.noinlineSingleton && startSk == inst.source) return false;
-
-          // Bail early if this isn't a push.
-          if (inst.op() != Op::FPushFuncD &&
-              inst.op() != Op::FPushClsMethodD) {
-            return false;
-          }
-
-          // ...and also if this is the end of the block.
-          if (lastInstr) return false;
-
-          auto nextSK = inst.nextSk();
-
-          // If the normal machinery is already inlining this function, don't
-          // do anything here.
-          if (i == block->length() - 2 &&
-              (nextSK.op() == Op::FCall || nextSK.op() == Op::FCallD) &&
-              block->inlinedCallee()) {
-            return false;
-          }
-
-          // This is safe to do even if singleton inlining fails; we just won't
-          // change topFunc in the next pass since hasNext() will return false.
-          if (knownFuncs.hasNext(nextSK)) {
-            topFunc = knownFuncs.next();
-
-            // Detect a singleton pattern and inline it if found.
-            return tryTranslateSingletonInline(hts, inst, topFunc);
-          }
-
-          return false;
-        }();
-
-        // Skip the translation of this instruction (the FPush) -and- the next
-        // instruction (the FCall) if we succeeded at singleton inlining.  We
-        // still want the fallthrough and prediction logic, though.
-        if (didInlineSingleton) {
+        if (tryTranslateSingletonInline(hts, inst, topFunc)) {
+          // Skip the translation of this instruction (the FPush) -and- the
+          // next instruction (the FCall) if singleton inlining succeeds.
+          // We still want the fallthrough and prediction logic, though.
           skipTrans = true;
           continue;
         }
@@ -1952,9 +1971,14 @@ TranslateResult translateRegion(HTS& hts,
     assert(!byRefs.hasNext());
     assert(!knownFuncs.hasNext());
   }
-
   irGenTimer.end();
+  return TranslateResult::Success;
+}
 
+TranslateResult mcGenRegion(HTS& hts,
+                            const RegionDesc& region,
+                            RegionBlacklist& toInterp) {
+  auto const startSk = region.start();
   try {
     mcg->traceCodeGen(hts);
     if (mcg->tx().mode() == TransKind::Profile) {
@@ -1986,6 +2010,17 @@ TranslateResult translateRegion(HTS& hts,
     }
   }
   return TranslateResult::Success;
+}
+
+} // translateRegion helpers
+
+TranslateResult translateRegion(HTS& hts,
+                                const RegionDesc& region,
+                                RegionBlacklist& toInterp,
+                                TransFlags trflags) {
+  auto irGenResult = irGenRegion(hts, region, toInterp, trflags);
+  if (irGenResult != TranslateResult::Success) return irGenResult;
+  return mcGenRegion(hts, region, toInterp);
 }
 
 uint64_t* Translator::getTransCounterAddr() {

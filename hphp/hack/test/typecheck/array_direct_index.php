@@ -20,11 +20,11 @@ class Toto {
   }
 
   public static function f3(): float {
-    $x = Map { 5 => 5.0 };
+    $x = Map {5 => 5.0};
     return $x[5];
   }
 
   public static function f4(): float {
-    return (Map { 5 => 5.0 })[5];
+    return (Map {5 => 5.0})[5];
   }
 }

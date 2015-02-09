@@ -9,7 +9,6 @@
  *
  */
 
-
 function foo(): void {
   new self();
 }

@@ -9,15 +9,17 @@
  *
  */
 
-type my_shape = shape('x' => int, 'y' => bool);
+type my_shape = shape(
+  'x' => int,
+  'y' => bool,
+);
 
 function foo(bool $cond): my_shape {
   $s = shape('x' => 0);
   try {
     careful_I_can_throw();
     $s['y'] = true;
-  }
-  catch (Exception $e) {
+  } catch (Exception $e) {
     return $s;
   }
 }

@@ -10,6 +10,6 @@
  */
 
 function test() {
-  $m = Pair{7, 'a'};
+  $m = Pair {7, 'a'};
   $m[4] = 100;
 }

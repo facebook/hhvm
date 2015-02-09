@@ -98,4 +98,73 @@ TEST(SmartPtr, Operators) {
   }
 }
 
+TEST(SmartPtr, Casts) {
+  // Test cast operations
+  {
+    EXPECT_FALSE(isa<DummyResource>(SmartPtr<DummyResource>(nullptr)));
+    EXPECT_TRUE(isa_or_null<DummyResource>(SmartPtr<DummyResource>(nullptr)));
+
+    auto dummy = makeSmartPtr<DummyResource>();
+    SmartPtr<ResourceData> res(dummy);
+    SmartPtr<ResourceData> empty;
+    SmartPtr<File> emptyFile;
+
+    EXPECT_TRUE(isa<DummyResource>(res));
+    EXPECT_TRUE(isa_or_null<DummyResource>(res));
+
+    EXPECT_FALSE(isa<File>(res));
+    EXPECT_FALSE(isa_or_null<File>(res));
+
+    // cast tests
+    // Bad types and null pointers should throw.
+    EXPECT_EQ(cast<DummyResource>(res), dummy);
+    EXPECT_EQ(cast<ResourceData>(res), dummy);
+
+    try {
+      cast<File>(res);
+      EXPECT_FALSE(true);
+    } catch(...) {
+      EXPECT_TRUE(true);
+    }
+
+    try {
+      cast<DummyResource>(empty);
+      EXPECT_FALSE(true);
+    } catch(...) {
+      EXPECT_TRUE(true);
+    }
+
+    // cast_or_null tests
+    // Bad types should throw, null pointers are ok.
+    EXPECT_EQ(cast_or_null<ResourceData>(empty),  nullptr);
+    EXPECT_EQ(cast_or_null<ResourceData>(dummy), dummy);
+
+    try {
+      cast_or_null<File>(res);
+      EXPECT_FALSE(true);
+    } catch(...) {
+      EXPECT_TRUE(true);
+    }
+
+    // dyn_cast tests
+    // Bad types are ok, null pointers should throw.
+    EXPECT_EQ(dyn_cast<DummyResource>(res), dummy);
+    EXPECT_EQ(dyn_cast<ResourceData>(res), dummy);
+    EXPECT_EQ(dyn_cast<File>(res), nullptr);
+    try {
+      dyn_cast<File>(emptyFile);
+      EXPECT_FALSE(true);
+    } catch(...) {
+      EXPECT_TRUE(true);
+    }
+
+    // dyn_cast_or_null
+    // Bad types and null pointers are ok.  Should never throw.
+    EXPECT_EQ(dyn_cast_or_null<DummyResource>(res), res);
+    EXPECT_EQ(dyn_cast_or_null<File>(res), nullptr);
+    EXPECT_EQ(dyn_cast_or_null<ResourceData>(empty), nullptr);
+    EXPECT_EQ(dyn_cast_or_null<ResourceData>(emptyFile), nullptr);
+  }
+}
+
 }

@@ -29,7 +29,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 inline bool checkConditionFlags() {
-  return RDS::header()->conditionFlags.load(std::memory_order_acquire);
+  return rds::header()->conditionFlags.load(std::memory_order_acquire);
 }
 
 //////////////////////////////////////////////////////////////////////

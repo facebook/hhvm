@@ -1,4 +1,4 @@
- <?hh // strict
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,6 +9,6 @@
  *
  */
 
-async function plus_three(Awaitable<string> $x) : Awaitable<int> {
+async function plus_three(Awaitable<string> $x): Awaitable<int> {
   return 3 + await $x;
 }

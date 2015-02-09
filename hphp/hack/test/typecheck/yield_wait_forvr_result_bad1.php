@@ -14,11 +14,5 @@ async function foo(): Awaitable<int> {
 }
 
 async function bar(): Awaitable<array<string>> {
-  return await gen_array_rec(
-    array(
-      foo(),
-      array(1, 2, 3),
-      foo()
-    )
-  );
+  return await gen_array_rec(array(foo(), array(1, 2, 3), foo()));
 }

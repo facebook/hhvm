@@ -9,14 +9,16 @@
  *
  */
 
-type my_shape = shape('x' => int, 'y' => bool);
+type my_shape = shape(
+  'x' => int,
+  'y' => bool,
+);
 
 function foo(bool $cond): my_shape {
   $s = shape('x' => 0);
-  if($cond) {
+  if ($cond) {
     $s['y'] = true;
-  }
-  else {
+  } else {
     $s['y'] = false;
   }
   return $s;

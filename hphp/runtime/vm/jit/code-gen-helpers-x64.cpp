@@ -72,9 +72,9 @@ void moveToAlign(CodeBlock& cb,
 }
 
 void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
-  v << store{vmfp, rds[RDS::kVmfpOff]};
-  v << store{vmsp, rds[RDS::kVmspOff]};
-  emitImmStoreq(v, intptr_t(pc), rds[RDS::kVmpcOff]);
+  v << store{vmfp, rds[rds::kVmfpOff]};
+  v << store{vmsp, rds[rds::kVmspOff]};
+  emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
 }
 
 // emitEagerVMRegSave --
@@ -90,7 +90,7 @@ void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags) {
   Reg64 pcReg = rdi;
   assert(!kCrossCallRegs.contains(rdi));
 
-  as.   storeq (rVmSp, rds[RDS::kVmspOff]);
+  as.   storeq (rVmSp, rds[rds::kVmspOff]);
   if (savePC) {
     // We're going to temporarily abuse rVmSp to hold the current unit.
     Reg64 rBC = rVmSp;
@@ -100,11 +100,11 @@ void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags) {
     as. loadq  (rBC[Func::unitOff()], rBC);
     as. loadq  (rBC[Unit::bcOff()], rBC);
     as. addq   (rBC, pcReg);
-    as. storeq (pcReg, rds[RDS::kVmpcOff]);
+    as. storeq (pcReg, rds[rds::kVmpcOff]);
     as. pop    (rBC);
   }
   if (saveFP) {
-    as. storeq (rVmFp, rds[RDS::kVmfpOff]);
+    as. storeq (rVmFp, rds[rds::kVmfpOff]);
   }
 }
 
@@ -118,7 +118,7 @@ void emitEagerVMRegSave(Vout& v, Vreg rds, RegSaveFlags flags) {
 
   assert(!kCrossCallRegs.contains(rdi));
 
-  v << store{rVmSp, rds[RDS::kVmspOff]};
+  v << store{rVmSp, rds[rds::kVmspOff]};
   if (savePC) {
     PhysReg pc{rdi};
     auto func = v.makeReg();
@@ -129,10 +129,10 @@ void emitEagerVMRegSave(Vout& v, Vreg rds, RegSaveFlags flags) {
     v << load{func[Func::unitOff()], unit};
     v << load{unit[Unit::bcOff()], bc};
     v << addq{bc, pc, pc, v.makeReg()};
-    v << store{pc, rds[RDS::kVmpcOff]};
+    v << store{pc, rds[rds::kVmpcOff]};
   }
   if (saveFP) {
-    v << store{rVmFp, rds[RDS::kVmfpOff]};
+    v << store{rVmFp, rds[rds::kVmfpOff]};
   }
 }
 
@@ -377,14 +377,14 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff) {
 void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  a.testl(-1, rds[RDS::kConditionFlagsOff]);
+  a.testl(-1, rds[rds::kConditionFlagsOff]);
 }
 
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
   auto const sf = v.makeReg();
-  v << testlim{-1, rds[RDS::kConditionFlagsOff], sf};
+  v << testlim{-1, rds[rds::kConditionFlagsOff], sf};
   return sf;
 }
 

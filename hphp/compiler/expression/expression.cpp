@@ -354,11 +354,6 @@ void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
       m_actualType->isSpecificObject()) {
     m_expectedType.reset();
   }
-
-  if (m_actualType->isSpecificObject()) {
-    std::const_pointer_cast<AnalysisResult>(ar)->
-      addClassDependency(getFileScope(), m_actualType->getName());
-  }
 }
 
 void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,

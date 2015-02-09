@@ -309,7 +309,7 @@ inline ConstCctx Type::cctxVal() const {
   return m_cctxVal;
 }
 
-inline RDS::Handle Type::rdsHandleVal() const {
+inline rds::Handle Type::rdsHandleVal() const {
   assert(subtypeOf(RDSHandle) && m_hasConstVal);
   return m_rdsHandleVal;
 }

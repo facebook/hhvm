@@ -60,12 +60,12 @@ ThreadInfo::~ThreadInfo() {
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
   delete m_coverage;
-  RDS::threadExit();
+  rds::threadExit();
 }
 
 void ThreadInfo::init() {
   m_reqInjectionData.threadInit();
-  RDS::threadInit();
+  rds::threadInit();
   onSessionInit();
 
   Lock lock(s_thread_info_mutex);
@@ -131,7 +131,7 @@ void ThreadInfo::onSessionExit() {
   m_reqInjectionData.setCPUTimeout(0);
 
   m_reqInjectionData.reset();
-  RDS::requestExit();
+  rds::requestExit();
 }
 
 //////////////////////////////////////////////////////////////////////

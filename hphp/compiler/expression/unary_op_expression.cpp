@@ -218,10 +218,6 @@ void UnaryOpExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 
 void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_exp) m_exp->analyzeProgram(ar);
-  if ((m_op == T_CLASS || m_op == T_FUNCTION) &&
-      ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    ar->link(getFileScope(), m_definedScope->getContainingFile());
-  }
 }
 
 bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {

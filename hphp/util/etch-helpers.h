@@ -30,7 +30,7 @@
 #define ETCH_ALIGN16    .align 16
 #define ETCH_ALIGN8     .align 8
 #define ETCH_ALIGN4     .align 4
-#define ETCH_SECTION(x) .section .text.x
+#define ETCH_SECTION(x) .section .text.x,"ax"
 #define ETCH_SIZE(x)    .size x, .-x
 #define ETCH_NAME(x)    x
 #define ETCH_LABEL(x)   .L##x

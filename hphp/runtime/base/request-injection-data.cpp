@@ -377,8 +377,8 @@ std::string RequestInjectionData::getDefaultIncludePath() {
 }
 
 void RequestInjectionData::onSessionInit() {
-  RDS::requestInit();
-  cflagsPtr = &RDS::header()->conditionFlags;
+  rds::requestInit();
+  cflagsPtr = &rds::header()->conditionFlags;
   reset();
 }
 

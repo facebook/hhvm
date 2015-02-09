@@ -115,7 +115,7 @@ CachedUnit lookupUnitRepoAuth(const StringData* path) {
 
   acc->second.unit = Repo::get().loadUnit(path->data(), md5).release();
   if (acc->second.unit) {
-    acc->second.rdsBitId = RDS::allocBit();
+    acc->second.rdsBitId = rds::allocBit();
   }
   return acc->second;
 }
@@ -202,10 +202,10 @@ CachedUnit createUnitFromString(const char* path,
   };
   // Try the repo; if it's not already there, invoke the compiler.
   if (auto unit = Repo::get().loadUnit(path, md5)) {
-    return CachedUnit { unit.release(), RDS::allocBit() };
+    return CachedUnit { unit.release(), rds::allocBit() };
   }
   auto const unit = compile_file(contents.data(), contents.size(), md5, path);
-  return CachedUnit { unit, RDS::allocBit() };
+  return CachedUnit { unit, rds::allocBit() };
 }
 
 CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
@@ -464,7 +464,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   if (cunit.unit && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
-    if (RDS::testAndSetBit(cunit.rdsBitId)) {
+    if (rds::testAndSetBit(cunit.rdsBitId)) {
       initial = false;
     }
     // if parsing was successful, update the mappings for spath and

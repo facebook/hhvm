@@ -127,10 +127,6 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
       f->setRefParam(idx);
     }
     f->setParamType(ar, idx, Type::FromDataType(pinfo->argType, Type::Any));
-    if (pinfo->valueLen) {
-      f->setParamDefault(idx, pinfo->value, pinfo->valueLen,
-                         std::string(pinfo->valueText, pinfo->valueTextLen));
-    }
   }
 
   if (method->returnType != KindOfNull) {

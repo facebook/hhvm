@@ -51,7 +51,7 @@ namespace HPHP {
  * DIRTY when the live register state is spread across the stack and Fixups.
  * CLEAN when it has been sync'ed into RDS.
  */
-enum class VMRegState {
+enum class VMRegState : uint8_t {
   CLEAN,
   DIRTY
 };
@@ -66,7 +66,7 @@ inline bool vmRegStateIsDirty() {
 }
 
 inline VMRegs& vmRegsUnsafe() {
-  return RDS::header()->vmRegs;
+  return rds::header()->vmRegs;
 }
 
 inline VMRegs& vmRegs() {
@@ -102,6 +102,10 @@ inline ActRec*& vmFirstAR() {
 inline MInstrState& vmMInstrState() {
   // This is safe because mInstrState is always updated directly.
   return vmRegsUnsafe().mInstrState;
+}
+
+inline ActRec*& vmJitCalledFrame() {
+  return vmRegsUnsafe().jitCalledFrame;
 }
 
 inline void assert_native_stack_aligned() {

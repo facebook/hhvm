@@ -19,11 +19,10 @@ class B extends A {
   public function __construct() {
     $this->x = 0;
     $this->y = 0;
-    if(true) {
+    if (true) {
       $this->foo();
     }
   }
 
-  public function foo(): void {
-  }
+  public function foo(): void {}
 }

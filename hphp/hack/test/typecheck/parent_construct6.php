@@ -26,7 +26,7 @@ class B extends A {
   public int $z;
 
   public function __construct() {
-    if(true) {
+    if (true) {
       $this->z = 0;
     }
   }

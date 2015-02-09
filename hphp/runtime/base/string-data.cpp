@@ -451,7 +451,7 @@ void StringData::releaseDataSlowPath() {
   freeForSize(this, sizeof(StringData) + sizeof(SharedPayload));
 }
 
-void StringData::release() {
+void StringData::release() noexcept {
   assert(checkSane());
   if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
   freeForSize(this, capacity() + kCapOverhead);

@@ -51,14 +51,6 @@ namespace HPHP { namespace jit {
   REQ(RETRANSLATE_OPT) \
   \
   /*
-   * If the max translations is reached for a SrcKey, the last translation in
-   * the chain will jump to an interpret request stub.  This instructs enterTC
-   * to punt to the interpreter for a basic block, then attempt to reenter
-   * translated code.
-   */ \
-  REQ(INTERPRET) \
-  \
-  /*
    * When the interpreter pushes an ActRec, the return address for
    * this ActRec will be set to a stub that raises POST_INTERP_RET,
    * since it doesn't have a TCA to return to.
@@ -71,14 +63,7 @@ namespace HPHP { namespace jit {
   /*
    * Raised when the execution stack overflowed.
    */ \
-  REQ(STACK_OVERFLOW) \
-  \
-  /*
-   * Resume restarts execution at the current PC.  This is used after
-   * an interpOne of an instruction that changes the PC, and in some
-   * cases with FCall.
-   */ \
-  REQ(RESUME)
+  REQ(STACK_OVERFLOW)
 
 enum ServiceRequest {
 #define REQ(nm) REQ_##nm,
@@ -175,6 +160,12 @@ struct ServiceReqInfo {
  * request.
  */
 extern "C" void handleSRHelper();
+
+/*
+ * Assembly stub used by the unwinder to reload vmsp() and vmfp() into their
+ * ABI registers then jump somewhere in the TC.
+ */
+extern "C" void handleSRResumeTC();
 
 }}
 

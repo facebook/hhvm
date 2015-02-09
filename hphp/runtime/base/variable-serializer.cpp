@@ -980,6 +980,7 @@ void VariableSerializer::writeCollectionKeylessPrefix() {
   case Type::PrintR:
   case Type::VarExport:
   case Type::PHPOutput:
+  case Type::DebuggerDump:
     indent();
     break;
   case Type::VarDump:
@@ -988,8 +989,7 @@ void VariableSerializer::writeCollectionKeylessPrefix() {
   case Type::Serialize:
   case Type::DebuggerSerialize:
     break;
-  case Type::JSON:
-  case Type::DebuggerDump: {
+  case Type::JSON: {
     ArrayInfo &info = m_arrayInfos.back();
     if (!info.first_element) {
       m_buf->append(',');

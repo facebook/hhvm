@@ -564,11 +564,8 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
   auto& v = vmain();
-  // NB: syncing rVmSp is not necessary at EndCatch, because the unwinder
-  // ignores it.
-  v << vcall{CppCall::direct(unwindResumeHelper), v.makeVcallArgs({{}}),
-             v.makeTuple({})};
-  v << ud2{};
+  v << syncvmsp{srcLoc(inst, 1).reg()};
+  v << jmpi{mcg->tx().uniqueStubs.endCatchHelper, kCrossTraceRegs};
 }
 
 void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
@@ -1907,7 +1904,7 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {
   auto const ch = FuncCache::alloc();
-  RDS::recordRds(ch, sizeof(FuncCache),
+  rds::recordRds(ch, sizeof(FuncCache),
                  "FuncCache", getFunc(inst->marker())->fullName()->data());
 
   // raises an error if function not found
@@ -1990,7 +1987,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   auto const extra     = inst->extra<LdObjMethodData>();
   auto& v = vmain();
 
-  auto const handle = RDS::alloc<Entry, sizeof(Entry)>().handle();
+  auto const handle = rds::alloc<Entry, sizeof(Entry)>().handle();
   if (RuntimeOption::EvalPerfDataMap) {
     auto const caddr_hand = reinterpret_cast<char*>(
       static_cast<intptr_t>(handle)
@@ -3484,7 +3481,7 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
 
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
   auto const extra = inst->extra<LdStaticLocCached>();
-  auto const link  = RDS::bindStaticLocal(extra->func, extra->name);
+  auto const link  = rds::bindStaticLocal(extra->func, extra->name);
   auto const dst   = dstLoc(inst, 0).reg();
   vmain() << lea{rVmTl[link.handle()], dst};
 }
@@ -4378,7 +4375,7 @@ void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
   );
 
   const Func* (*lookup)(
-    RDS::Handle, const Class*, const StringData*, TypedValue*) =
+    rds::Handle, const Class*, const StringData*, TypedValue*) =
     StaticMethodFCache::lookup;
   cgCallHelper(vmain(),
                CppCall::direct(lookup),
@@ -4392,7 +4389,7 @@ void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
 }
 
 Vreg CodeGenerator::emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
-                                                 RDS::Handle ch) {
+                                                 rds::Handle ch) {
   auto& v = vmain();
   // thisReg is holding $this. Should we pass it to the callee?
   auto const sf = v.makeReg();
@@ -4456,7 +4453,7 @@ void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
   });
 }
 
-RDS::Handle CodeGenerator::cgLdClsCachedCommon(Vout& v, IRInstruction* inst,
+rds::Handle CodeGenerator::cgLdClsCachedCommon(Vout& v, IRInstruction* inst,
                                                Vreg dst, Vreg sf) {
   const StringData* className = inst->src(0)->strVal();
   auto ch = NamedEntity::get(className)->getClassHandle();
@@ -4499,7 +4496,7 @@ void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {
 
 void CodeGenerator::cgLdCls(IRInstruction* inst) {
   auto const ch = ClassCache::alloc();
-  RDS::recordRds(ch, sizeof(ClassCache),
+  rds::recordRds(ch, sizeof(ClassCache),
                  "ClassCache", getFunc(inst->marker())->fullName()->data());
   cgCallHelper(vmain(),
                CppCall::direct(ClassCache::lookup),
@@ -4515,7 +4512,7 @@ void CodeGenerator::cgLdRDSAddr(IRInstruction* inst) {
 
 void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
   auto const extra = inst->extra<LookupClsCns>();
-  auto const link  = RDS::bindClassConstant(extra->clsName, extra->cnsName);
+  auto const link  = rds::bindClassConstant(extra->clsName, extra->cnsName);
   cgCallHelper(vmain(),
     CppCall::direct(jit::lookupClassConstantTv),
     callDestTV(inst),
@@ -4855,10 +4852,10 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   auto& v = vmain();
   auto fp = rVmFp;
   auto sync_sp = v.makeReg();
-  v << load{rVmTl[RDS::kVmfpOff], fp};
-  v << load{rVmTl[RDS::kVmspOff], sync_sp};
+  v << load{rVmTl[rds::kVmfpOff], fp};
+  v << load{rVmTl[rds::kVmspOff], sync_sp};
   v << syncvmsp{sync_sp};
-  emitServiceReq(v, nullptr, REQ_RESUME, {});
+  v << jmpi{mcg->tx().uniqueStubs.resumeHelper, kCrossTraceRegs};
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {
@@ -5503,7 +5500,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
   if (auto const msg = extra.msg) {
     assert(msg->isStatic());
     cgCallHelper(v,
-     CppCall::direct(reinterpret_cast<void (*)()>(Trace::ringbufferMsg)),
+                 CppCall::direct(Trace::ringbufferMsg),
                  kVoidDest,
                  SyncOptions::kNoSyncPoint,
                  argGroup(inst)
@@ -5511,18 +5508,14 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
                    .imm(msg->size())
                    .imm(extra.type));
   } else {
-    auto beforeArgs = v.makePoint();
-    v << point{beforeArgs};
-    v << ldpoint{beforeArgs, rAsm};
     auto args = argGroup(inst);
     cgCallHelper(v,
-      CppCall::direct(reinterpret_cast<void (*)()>(Trace::ringbufferEntry)),
-      kVoidDest,
-      SyncOptions::kNoSyncPoint,
-      argGroup(inst)
-        .imm(extra.type)
-        .imm(extra.sk.toAtomicInt())
-        .reg(rAsm));
+                 CppCall::direct(Trace::ringbufferEntryRip),
+                 kVoidDest,
+                 SyncOptions::kNoSyncPoint,
+                 argGroup(inst)
+                   .imm(extra.type)
+                   .imm(extra.sk.toAtomicInt()));
   }
 }
 
@@ -5536,7 +5529,7 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   auto clsReg = srcLoc(inst, 0).reg();
   auto dstReg = dstLoc(inst, 0).reg();
   auto offset = Class::propDataCacheOff() +
-                RDS::Link<Class::PropInitVec*>::handleOff();
+                rds::Link<Class::PropInitVec*>::handleOff();
   auto& v = vmain();
   auto handle = v.makeReg();
   auto vec = v.makeReg();

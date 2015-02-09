@@ -108,9 +108,7 @@ private:
   void emit(hostcall& i);
   void emit(ldimmq& i);
   void emit(ldimmb& i);
-  void emit(ldpoint& i);
   void emit(load& i);
-  void emit(point& i) { points[i.p] = a->frontier(); }
   void emit(store& i);
   void emit(syncpoint& i);
 
@@ -435,11 +433,6 @@ void Vgen::emit(ldimmb& i) {
   a->Mov(W(i.d), i.s.b());
 }
 
-void Vgen::emit(ldpoint& i) {
-  ldpoints.push_back({a->frontier(), i.s, i.d});
-  a->Mov(X(i.d), a->frontier()); // write a placeholder address
-}
-
 void Vgen::emit(load& i) {
   if (i.d.isGP()) {
     a->Ldr(X(i.d), M(i.s));
@@ -541,9 +534,9 @@ void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   }
   v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
   // Save VM regs
-  PhysReg vmfp{rVmFp}, vmsp{rVmSp}, sp{vixl::sp}, rds{rVmTl};
-  v << store{vmfp, rds[RDS::kVmfpOff]};
-  v << store{vmsp, rds[RDS::kVmspOff]};
+  PhysReg vmfp{rVmFp}, vmsp{rVmSp}, sp{vixl::sp}, rdsp{rVmTl};
+  v << store{vmfp, rdsp[rds::kVmfpOff]};
+  v << store{vmsp, rdsp[rds::kVmspOff]};
   if (svcreq.stub_block) {
     always_assert(false && "use rip-rel addr to get ephemeral stub addr");
   } else {

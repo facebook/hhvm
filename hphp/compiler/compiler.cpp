@@ -471,10 +471,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
       (format_pattern(po.excludeStaticPatterns[i], true));
   }
 
-  if (po.target == "hhbc" || po.target == "run") {
-    Option::AnalyzePerfectVirtuals = false;
-  }
-
   Option::ProgramName = po.program;
 
   if (po.format.empty()) {

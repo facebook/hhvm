@@ -366,7 +366,7 @@ void implFPushCufOp(HTS& env, Op op, int32_t numArgs) {
   auto func = cns(env, callee);
   if (cls) {
     auto const exitSlow = makeExitSlow(env);
-    if (!RDS::isPersistentHandle(cls->classHandle())) {
+    if (!rds::isPersistentHandle(cls->classHandle())) {
       // The miss path is complicated and rare.  Punt for now.  This must be
       // checked before we IncRef the context below, because the slow exit will
       // want to do that same IncRef via InterpOne.
@@ -382,7 +382,7 @@ void implFPushCufOp(HTS& env, Op op, int32_t numArgs) {
     }
   } else {
     ctx = cns(env, Type::Nullptr);
-    if (!RDS::isPersistentHandle(callee->funcHandle())) {
+    if (!rds::isPersistentHandle(callee->funcHandle())) {
       // The miss path is complicated and rare. Punt for now.
       func = gen(env, LdFuncCachedSafe, LdFuncCachedData(callee->name()));
       func = gen(env, CheckNonNull, makeExitSlow(env), func);

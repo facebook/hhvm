@@ -78,8 +78,7 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
             !(func->isVirtual() &&
               (func->isAbstract() ||
                (func->hasOverride() &&
-                cls->getAttribute(ClassScope::NotFinal))) &&
-              !func->isPerfectVirtual())) {
+                cls->getAttribute(ClassScope::NotFinal))))) {
           m_funcScope = func;
           func->addCaller(getScope());
         }
@@ -98,15 +97,6 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
     TypePtr at(m_object->getActualType());
     TypePtr it(m_object->getImplementedType());
     if (!m_object->isThis() && at && at->is(Type::KindOfObject)) {
-      if (at->isSpecificObject() && it && Type::IsMappedToVariant(it)) {
-        // fast-cast inference
-        ClassScopePtr scope(ar->findClass(at->getName()));
-        if (scope) {
-          // add a dependency to m_object's class type
-          // to allow the fast cast to succeed
-          addUserClass(ar, at->getName());
-        }
-      }
       m_object->setExpectedType(at);
     }
   }

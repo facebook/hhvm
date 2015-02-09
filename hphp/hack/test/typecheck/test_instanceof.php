@@ -10,7 +10,7 @@
  */
 
 function test(Exception $e): void {
-  if($e instanceof MyUnknownException) {
+  if ($e instanceof MyUnknownException) {
     $e->foo();
   }
 }

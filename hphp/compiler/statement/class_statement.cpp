@@ -210,10 +210,6 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
   vector<string> bases;
   if (!m_parent.empty()) bases.push_back(m_parent);
   if (m_base) m_base->getStrings(bases);
-  for (unsigned int i = 0; i < bases.size(); i++) {
-    string className = bases[i];
-    addUserClass(ar, bases[i]);
-  }
 
   checkVolatile(ar);
 

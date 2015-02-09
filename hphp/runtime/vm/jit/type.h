@@ -219,7 +219,7 @@ enum class Ptr : uint8_t {
   IRT(FramePtr,    1ULL << 51) /* Frame pointer */                      \
   IRT(TCA,         1ULL << 52)                                          \
   IRT(ABC,         1ULL << 53) /* AsioBlockableChain */                 \
-  IRT(RDSHandle,   1ULL << 54) /* RDS::Handle */                        \
+  IRT(RDSHandle,   1ULL << 54) /* rds::Handle */                        \
   IRT(Nullptr,     1ULL << 55)                                          \
   /* bits 58-62 are pointer kind */
 
@@ -642,7 +642,7 @@ public:
   const HPHP::Func* funcVal() const;
   const Class* clsVal() const;
   ConstCctx cctxVal() const;
-  RDS::Handle rdsHandleVal() const;
+  rds::Handle rdsHandleVal() const;
   jit::TCA tcaVal() const;
 
   /*
@@ -915,7 +915,7 @@ private:
     const Class* m_clsVal;
     ConstCctx m_cctxVal;
     jit::TCA m_tcaVal;
-    RDS::Handle m_rdsHandleVal;
+    rds::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;
 
     // Specialization for object classes and arrays.

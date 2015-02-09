@@ -61,10 +61,10 @@ void emitResumeHelpers(UniqueStubs& us) {
   us.resumeHelperRet = a.frontier();
   a.   Str   (vixl::x30, rStashedAR[AROFF(m_savedRip)]);
   us.resumeHelper = a.frontier();
-  a.   Ldr   (rVmFp, rVmTl[RDS::kVmfpOff]);
-  a.   Ldr   (rVmSp, rVmTl[RDS::kVmspOff]);
+  a.   Ldr   (rVmFp, rVmTl[rds::kVmfpOff]);
+  a.   Ldr   (rVmSp, rVmTl[rds::kVmspOff]);
 
-  emitServiceReq(mcg->code.main(), REQ_RESUME);
+  not_implemented();
 
   us.add("resumeHelper", us.resumeHelper);
   us.add("resumeHelperRet", us.resumeHelperRet);
@@ -176,8 +176,8 @@ void emitFCallHelperThunk(UniqueStubs& us) {
   a.   Cmp   (rReturnReg, 0);
   a.   B     (&jmpRet, vixl::gt);
   a.   Neg   (rReturnReg, rReturnReg);
-  a.   Ldr   (rVmFp, rVmTl[RDS::kVmfpOff]);
-  a.   Ldr   (rVmSp, rVmTl[RDS::kVmspOff]);
+  a.   Ldr   (rVmFp, rVmTl[rds::kVmfpOff]);
+  a.   Ldr   (rVmSp, rVmTl[rds::kVmspOff]);
 
   a.   bind  (&jmpRet);
 
@@ -237,7 +237,7 @@ void emitFunctionEnterHelper(UniqueStubs& us) {
   auto rIgnored = rAsm2;
   a.   Pop     (rVmFp, rAsm);
   a.   Pop     (rIgnored, rLinkReg);
-  a.   Ldr     (rVmSp, rVmTl[RDS::kVmspOff]);
+  a.   Ldr     (rVmSp, rVmTl[rds::kVmspOff]);
   a.   Br      (rAsm);
 
   us.add("functionEnterHelper", us.functionEnterHelper);

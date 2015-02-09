@@ -67,7 +67,7 @@ class ResourceData {
     not_reached();
   }
 
-  void release() {
+  void release() noexcept {
     assert(!hasMultipleRefs());
     delete this;
   }
@@ -79,6 +79,9 @@ class ResourceData {
   virtual const String& o_getClassNameHook() const;
   virtual const String& o_getResourceName() const;
   virtual bool isInvalid() const { return false; }
+
+  template <typename T>
+  bool instanceof() const { return dynamic_cast<const T*>(this) != nullptr; }
 
   bool o_toBoolean() const { return true; }
   int64_t o_toInt64() const { return o_id; }

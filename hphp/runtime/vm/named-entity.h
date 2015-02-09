@@ -83,22 +83,22 @@ struct NamedEntity {
   // Constructors.
 
   explicit NamedEntity()
-    : m_cachedClass(RDS::kInvalidHandle)
-    , m_cachedFunc(RDS::kInvalidHandle)
-    , m_cachedTypeAlias(RDS::kInvalidHandle)
+    : m_cachedClass(rds::kInvalidHandle)
+    , m_cachedFunc(rds::kInvalidHandle)
+    , m_cachedTypeAlias(rds::kInvalidHandle)
   {}
 
-  NamedEntity(NamedEntity&& ne);
+  NamedEntity(NamedEntity&& ne) noexcept;
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Func cache.
 
   /*
-   * Get the RDS::Handle that caches this Func*, creating a (non-persistent)
+   * Get the rds::Handle that caches this Func*, creating a (non-persistent)
    * one if it doesn't exist yet.
    */
-  RDS::Handle getFuncHandle() const;
+  rds::Handle getFuncHandle() const;
 
   /*
    * Set and get the cached Func*.
@@ -111,10 +111,10 @@ struct NamedEntity {
   // Class cache.
 
   /*
-   * Get the RDS::Handle that caches this Class*, creating a (non-persistent)
+   * Get the rds::Handle that caches this Class*, creating a (non-persistent)
    * one if it doesn't exist yet.
    */
-  RDS::Handle getClassHandle() const;
+  rds::Handle getClassHandle() const;
 
   /*
    * Set and get the cached Class*.
@@ -188,9 +188,9 @@ struct NamedEntity {
   // Data members.
 
 public:
-  mutable RDS::Link<Class*> m_cachedClass;
-  mutable RDS::Link<Func*> m_cachedFunc;
-  mutable RDS::Link<TypeAliasReq> m_cachedTypeAlias;
+  mutable rds::Link<Class*> m_cachedClass;
+  mutable rds::Link<Func*> m_cachedFunc;
+  mutable rds::Link<TypeAliasReq> m_cachedTypeAlias;
 
 private:
   std::atomic<Class*> m_clsList{nullptr};

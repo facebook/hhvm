@@ -83,12 +83,10 @@ private:
   void emit(fallback& i);
   void emit(fallbackcc i);
   void emit(kpcall& i);
-  void emit(ldpoint& i);
   void emit(load& i);
   void emit(mccall& i);
   void emit(mcprep& i);
   void emit(nothrow& i);
-  void emit(point& i) { points[i.p] = a->frontier(); }
   void emit(store& i);
   void emit(syncpoint i);
   void emit(unwind& i);
@@ -189,7 +187,7 @@ private:
   void emit(sqrtsd& i) { a->sqrtsd(i.s, i.d); }
   void emit(storedqu& i) { a->movdqu(i.s, i.m); }
   void emit(storeb& i) { a->storeb(i.s, i.m); }
-  void emit(storebi& i) { a->storeb(i.s, i.m); }
+  void emit(storebi& i);
   void emit(storel& i) { a->storel(i.s, i.m); }
   void emit(storeli& i) { a->storel(i.s, i.m); }
   void emit(storeqi& i) { a->storeq(i.s, i.m); }
@@ -494,11 +492,6 @@ void Vgen::emit(ldimmq& i) {
   }
 }
 
-void Vgen::emit(ldpoint& i) {
-  ldpoints.push_back({a->frontier(), i.s});
-  a->lea(rip[0], i.d);
-}
-
 void Vgen::emit(load& i) {
   if (i.s.seg == Vptr::FS) a->fs();
   auto mref = i.s.mr();
@@ -533,6 +526,11 @@ void Vgen::emit(mcprep& i) {
   after[-1] = (movAddrUInt << 1) | 1;
   mcg->cgFixups().m_addressImmediates.insert(
     reinterpret_cast<TCA>(~movAddrUInt));
+}
+
+void Vgen::emit(storebi& i) {
+  if (i.m.seg == Vptr::FS) a->fs();
+  a->storeb(i.s, i.m.mr());
 }
 
 void Vgen::emit(store& i) {

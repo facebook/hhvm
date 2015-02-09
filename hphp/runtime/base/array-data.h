@@ -97,7 +97,7 @@ public:
    * normally called when the reference count goes to zero (e.g. via a
    * helper like decRefArr).
    */
-  void release();
+  void release() noexcept;
 
   /**
    * Whether this array has any element.

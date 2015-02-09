@@ -17,4 +17,7 @@ class Y {
 }
 
 // Should reject this because it uses two classes
-type myshape = shape(X::X1 => int, Y::X2 => bool);
+type myshape = shape(
+  X::X1 => int,
+  Y::X2 => bool,
+);

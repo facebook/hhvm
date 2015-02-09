@@ -9,17 +9,17 @@
  *
  */
 
-class A{}
-class A1 extends A{}
-class A2 extends A{}
+class A {}
+class A1 extends A {}
+class A2 extends A {}
 
-async function gen1() : Awaitable<A1> {
+async function gen1(): Awaitable<A1> {
   return new A1();
 }
-async function gen2() : Awaitable<A2> {
+async function gen2(): Awaitable<A2> {
   return new A2();
 }
-async function gen() : Awaitable<A> {
+async function gen(): Awaitable<A> {
   if (coin_flip()) {
     return await gen1();
   } else {

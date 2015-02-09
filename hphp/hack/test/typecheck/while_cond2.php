@@ -10,7 +10,7 @@
  */
 
 function foo(?int $x): void {
-  while(!is_null($x)) {
+  while (!is_null($x)) {
     $x += 1;
     $x = null;
   }

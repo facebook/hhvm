@@ -53,8 +53,8 @@ inline bool stringMatches(const StringData* rowString, const StringData* sd) {
 }
 
 template<class T = void>
-T* handleToPtr(RDS::Handle h) {
-  return (T*)((char*)RDS::tl_base + h);
+T* handleToPtr(rds::Handle h) {
+  return (T*)((char*)rds::tl_base + h);
 }
 
 template<class Cache>
@@ -71,16 +71,16 @@ typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
 // Set of FuncCache handles for dynamic function callsites, used for
 // invalidation when a function is renamed.
 static std::mutex funcCacheMutex;
-static std::vector<RDS::Link<FuncCache> > funcCacheEntries;
+static std::vector<rds::Link<FuncCache> > funcCacheEntries;
 
-RDS::Handle FuncCache::alloc() {
-  auto const link = RDS::alloc<FuncCache,sizeof(Pair)>();
+rds::Handle FuncCache::alloc() {
+  auto const link = rds::alloc<FuncCache,sizeof(Pair)>();
   std::lock_guard<std::mutex> g(funcCacheMutex);
   funcCacheEntries.push_back(link);
   return link.handle();
 }
 
-const Func* FuncCache::lookup(RDS::Handle handle, StringData* sd) {
+const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
   Func* func;
   auto const thiz = handleToPtr<FuncCache>(handle);
   auto const pair = keyToPair(thiz, sd);
@@ -117,11 +117,11 @@ void invalidateForRenameFunction(const StringData* name) {
 //////////////////////////////////////////////////////////////////////
 // ClassCache
 
-RDS::Handle ClassCache::alloc() {
-  return RDS::alloc<ClassCache,sizeof(Pair)>().handle();
+rds::Handle ClassCache::alloc() {
+  return rds::alloc<ClassCache,sizeof(Pair)>().handle();
 }
 
-const Class* ClassCache::lookup(RDS::Handle handle, StringData* name) {
+const Class* ClassCache::lookup(rds::Handle handle, StringData* name) {
   auto const thiz = handleToPtr<ClassCache>(handle);
   auto const pair = keyToPair(thiz, name);
   const StringData* pairSd = pair->m_key;
@@ -536,24 +536,24 @@ static const StringData* mangleSmcName(const StringData* cls,
                      String(ctx));
 }
 
-RDS::Handle StaticMethodCache::alloc(const StringData* clsName,
+rds::Handle StaticMethodCache::alloc(const StringData* clsName,
                                      const StringData* methName,
                                      const char* ctxName) {
-  return RDS::bind<StaticMethodCache>(
-    RDS::StaticMethod { mangleSmcName(clsName, methName, ctxName) }
+  return rds::bind<StaticMethodCache>(
+    rds::StaticMethod { mangleSmcName(clsName, methName, ctxName) }
   ).handle();
 }
 
-RDS::Handle StaticMethodFCache::alloc(const StringData* clsName,
+rds::Handle StaticMethodFCache::alloc(const StringData* clsName,
                                       const StringData* methName,
                                       const char* ctxName) {
-  return RDS::bind<StaticMethodFCache>(
-    RDS::StaticMethodF { mangleSmcName(clsName, methName, ctxName) }
+  return rds::bind<StaticMethodFCache>(
+    rds::StaticMethodF { mangleSmcName(clsName, methName, ctxName) }
   ).handle();
 }
 
 const Func*
-StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
+StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
                           const StringData* clsName,
                           const StringData* methName, TypedValue* vmfp) {
   StaticMethodCache* thiz = static_cast<StaticMethodCache*>
@@ -593,7 +593,7 @@ StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
 }
 
 const Func*
-StaticMethodFCache::lookup(RDS::Handle handle, const Class* cls,
+StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
                            const StringData* methName, TypedValue* vmfp) {
   assert(cls);
   StaticMethodFCache* thiz = static_cast<StaticMethodFCache*>

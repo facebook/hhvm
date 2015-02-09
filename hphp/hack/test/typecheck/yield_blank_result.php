@@ -74,7 +74,6 @@ async function wfvrr_outer_tuple(): Awaitable<(array<int>, array<string>)> {
   return await gen_array_rec($deps);
 }
 
-
 async function wfvrr_inner_tuple(): Awaitable<array<(int, int, int)>> {
   $deps = array(
     tuple(wfr(), wfr(), wfr()),
@@ -86,15 +85,7 @@ async function wfvrr_inner_tuple(): Awaitable<array<(int, int, int)>> {
 
 async function wfvrr_deep(
 ): Awaitable<array<array<(int, array<string>, int)>>> {
-  $deps = array(
-    array(
-      tuple(
-        r(),
-        array(rstring(), rstring()),
-        r()
-      )
-    )
-  );
+  $deps = array(array(tuple(r(), array(rstring(), rstring()), r())));
   return await gen_array_rec($deps);
 }
 
@@ -102,7 +93,7 @@ async function wfvarr(): Awaitable<(array<int>, array<string>, int)> {
   return await gen_array_va_rec_DEPRECATED(
     array(wfr(), wfr(), wfr()),
     array(rstring(), rstring()),
-    r()
+    r(),
   );
 }
 
@@ -110,13 +101,7 @@ async function wfvarr_deep(
 ): Awaitable<(int, array<(int, array<string>, int)>, int)> {
   return await gen_array_va_rec_DEPRECATED(
     r(),
-    array(
-      tuple(
-        r(),
-        array(rstring(), rstring()),
-        r()
-      )
-    ),
-    r()
+    array(tuple(r(), array(rstring(), rstring()), r())),
+    r(),
   );
 }

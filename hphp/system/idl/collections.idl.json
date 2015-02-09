@@ -869,6 +869,22 @@
                 ]
             },
             {
+                "name": "fromItems",
+                "flags": [
+                    "IsStatic"
+                ],
+                "desc": "Returns an ImmVector built from the values produced by the specified Iterable.",
+                "return": {
+                    "type": "Object"
+                },
+                "args": [
+                    {
+                        "name": "iterable",
+                        "type": "Variant"
+                    }
+                ]
+            },
+            {
                 "name": "fromKeysOf",
                 "flags": [
                     "IsStatic"

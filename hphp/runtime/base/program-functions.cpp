@@ -748,7 +748,7 @@ NEVER_INLINE void copyHashFuncs() {
       return reinterpret_cast<void*>(x);
     };
     copyFunc(hash_func(hash_string_cs_unsafe),
-             hash_func(hash_string_cs_crc), 64);
+             hash_func(hash_string_cs_crc), 48);
     copyFunc(hash_func(hash_string_cs),
              hash_func(hash_string_cs_unaligned_crc), 64);
     copyFunc(hash_func(hash_string_i_unsafe),
@@ -1793,7 +1793,7 @@ void hphp_process_init() {
   apc_load(apcExtension::LoadThread);
   RuntimeOption::SerializationSizeLimit = save;
 
-  RDS::requestExit();
+  rds::requestExit();
   // Reset the preloaded g_context
   ExecutionContext *context = g_context.getNoCheck();
   context->~ExecutionContext();

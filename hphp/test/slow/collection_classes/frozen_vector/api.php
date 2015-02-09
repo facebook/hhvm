@@ -43,11 +43,9 @@ function search_methods() {
 }
 
 function static_methods() {
-
-  // for unclear reasons, this doesn't exist
-  // echo "\nfromItems...\n";
-  // show_elems(ImmVector::fromItems((Vector {1, 2, 3})->items()));
-  // show_elems(ImmVector::fromItems(Set {4, 5, 6}));
+  echo "\nfromItems...\n";
+  show_elems(ImmVector::fromItems((Vector {1, 2, 3})->items()));
+  show_elems(ImmVector::fromItems(Set {4, 5, 6}));
 
   echo "\nfromKeysOf...\n";
   show_elems(ImmVector::fromKeysOf(Vector {1, 2, 3}));
@@ -55,10 +53,6 @@ function static_methods() {
   show_elems(ImmVector::fromKeysOf(Map {'a' => 1, 'b' => 2}));
   show_elems(ImmVector::fromKeysOf(['a' => 1, 'b' => 2]));
   show_elems(ImmVector::fromKeysOf(Set {4, 5, 6}));
-
-  // for unclear reasons, this doesn't exist
-  // echo "\nfromArrays...\n";
-  // show_elems(ImmVector::fromArrays(array(), array(1, 2, 3), array(4, 5, 6)));
 }
 
 function main() {

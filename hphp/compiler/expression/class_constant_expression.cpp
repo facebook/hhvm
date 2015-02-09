@@ -80,7 +80,6 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
-    addUserClass(ar, m_className);
   }
 }
 

@@ -11,8 +11,8 @@
 
 function test(): int {
   $x = null;
-  while(true) {
-    if(true) {
+  while (true) {
+    if (true) {
       continue;
     }
     $x = 0;

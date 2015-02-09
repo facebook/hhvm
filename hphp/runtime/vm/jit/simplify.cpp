@@ -115,7 +115,7 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
  * source chain are also always available.  Anything else requires more
  * complicated analysis than belongs in the simplifier right now.
  */
-bool validate(const State& env,
+DEBUG_ONLY bool validate(const State& env,
               SSATmp* newDst,
               const IRInstruction* origInst) {
   auto known_available = [&] (SSATmp* src) -> bool {
@@ -216,7 +216,7 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   if (!src->isConst()) return nullptr;
 
   auto const cls = src->clsVal();
-  if (!RDS::isPersistentHandle(cls->classHandle())) return nullptr;
+  if (!rds::isPersistentHandle(cls->classHandle())) return nullptr;
 
   auto const meth = cls->getCachedInvoke();
   return meth == nullptr ? nullptr : cns(env, meth.get());

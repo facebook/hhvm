@@ -14,11 +14,11 @@ class A implements I {}
 class B implements I {}
 class Z {}
 
-function foo(Map<string,I> $x): void {}
+function foo(Map<string, I> $x): void {}
 function callA(A $x): void {}
 
 function bar(): void {
-  $x = Map { 'foo' => new A() };
+  $x = Map {'foo' => new A()};
   $x['f'] = new B();
   foo($x);
 }

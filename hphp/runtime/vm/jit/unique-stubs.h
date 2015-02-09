@@ -58,11 +58,30 @@ struct UniqueStubs {
   TCA retInlHelper;
 
   /*
-   * Helpers used for restarting execution based on the value of PC,
-   * after things like InterpOne of an instruction that changes PC.
+   * Helpers used for restarting execution based on the value of PC, after
+   * things like InterpOne of an instruction that changes PC. Assumes all VM
+   * regs are synced.
    */
   TCA resumeHelperRet;
   TCA resumeHelper;
+
+  /*
+   * Like resumeHelper, but interpret a basic block first to ensure we make
+   * forward progress. interpHelper expects the correct value of vmpc to be in
+   * the first argument register, and interpHelperSyncedPC expects vmpc to
+   * already be synced. Both stubs will sync rVmSp and rVmFp before
+   * interpreting.
+   */
+  TCA interpHelper;
+  TCA interpHelperSyncedPC;
+
+  /*
+   * Catch blocks jump here when they've finished executing. If the unwinder
+   * has set state indicating a return address to jump to, this stub will
+   * delete the current exception and jump there. Otherwise, it calls
+   * unwindResumeHelper.
+   */
+  TCA endCatchHelper;
 
   /*
    * Helper stubs for doing generic decrefs on a function return.  The
@@ -107,9 +126,11 @@ struct UniqueStubs {
 
   /*
    * Calls EventHook::onFunctionEnter, and handles the case where it requests
-   * that we skip the function.
+   * that we skip the function. functionEnterHelperReturn is used by unwinder
+   * code that needs to detect calls made from this stub.
    */
   TCA functionEnterHelper;
+  TCA functionEnterHelperReturn;
 
   /*
    * BindCall stubs for immutable/non-immutable calls

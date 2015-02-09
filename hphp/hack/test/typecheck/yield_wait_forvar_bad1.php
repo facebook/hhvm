@@ -16,7 +16,5 @@ function getA(): A {
 }
 
 async function f() {
-  list($x) = await gen_array_va_rec_DEPRECATED(
-    getA(),
-  );
+  list($x) = await gen_array_va_rec_DEPRECATED(getA());
 }

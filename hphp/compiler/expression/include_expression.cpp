@@ -227,11 +227,7 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (!m_include.empty()) {
     if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
         ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-      if (analyzeInclude(ar, m_include)) {
-        FunctionScopePtr func = getFunctionScope();
-        getFileScope()->addIncludeDependency(ar, m_include,
-                                             func && func->isInlined());
-      }
+      analyzeInclude(ar, m_include);
     }
   }
 

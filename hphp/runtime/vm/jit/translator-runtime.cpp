@@ -712,8 +712,8 @@ Cell lookupCnsHelper(const TypedValue* tv,
   }
 
   const Cell* cns = nullptr;
-  if (UNLIKELY(RDS::s_constants().get() != nullptr)) {
-    cns = RDS::s_constants()->nvGet(nm);
+  if (UNLIKELY(rds::s_constants().get() != nullptr)) {
+    cns = rds::s_constants()->nvGet(nm);
   }
   if (!cns) {
     cns = Unit::loadCns(const_cast<StringData*>(nm));
@@ -776,9 +776,9 @@ Cell lookupCnsUHelper(const TypedValue* tv,
   Cell c1;
 
   // lookup qualified name in thread-local constants
-  bool cacheConsts = RDS::s_constants().get() != nullptr;
+  bool cacheConsts = rds::s_constants().get() != nullptr;
   if (UNLIKELY(cacheConsts)) {
-    cns = RDS::s_constants()->nvGet(nm);
+    cns = rds::s_constants()->nvGet(nm);
   }
   if (!cns) {
     cns = Unit::loadCns(const_cast<StringData*>(nm));
@@ -792,7 +792,7 @@ Cell lookupCnsUHelper(const TypedValue* tv,
   // lookup unqualified name in thread-local constants
   if (UNLIKELY(!cns)) {
     if (UNLIKELY(cacheConsts)) {
-      cns = RDS::s_constants()->nvGet(fallback);
+      cns = rds::s_constants()->nvGet(fallback);
     }
     if (!cns) {
       cns = Unit::loadCns(const_cast<StringData*>(fallback));
@@ -1242,7 +1242,7 @@ void raiseMissingArgument(const Func* func, int got) {
   }
 }
 
-RDS::Handle lookupClsRDSHandle(const StringData* name) {
+rds::Handle lookupClsRDSHandle(const StringData* name) {
   return NamedEntity::get(name)->getClassHandle();
 }
 

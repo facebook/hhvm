@@ -617,13 +617,11 @@ StringData* StringData::reserve(size_t cap) {
 StringData* StringData::shrinkImpl(size_t len) {
   assert(!isImmutable() && !hasMultipleRefs());
   assert(isFlat());
-  assert(len <= m_len);
   assert(len <= capacity());
 
   auto const sd = Make(len);
   auto const src = slice();
   auto const dst = sd->mutableData();
-  assert(len <= src.len);
   sd->setSize(len);
 
   auto const mcret = memcpy(dst, src.ptr, len);
@@ -636,7 +634,7 @@ StringData* StringData::shrinkImpl(size_t len) {
 }
 
 StringData* StringData::shrink(size_t len) {
-  if (len < size() && size() - len > kMinShrinkThreshold) {
+  if (capacity() - len > kMinShrinkThreshold) {
     return shrinkImpl(len);
   }
   assert(len < MaxSize);

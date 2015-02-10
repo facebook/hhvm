@@ -677,8 +677,7 @@ static void CopyPathInfo(Array& server,
   if (r.rewritten()) {
     server.set(s_PHP_SELF, r.originalURL());
   } else {
-    //server.set(s_PHP_SELF, r.resolvedURL() + r.origPathInfo());
-    server.set(s_PHP_SELF, r.resolvedURL());
+    server.set(s_PHP_SELF, r.resolvedURL() + r.origPathInfo());
   }
 
   String documentRoot = transport->getDocumentRoot();

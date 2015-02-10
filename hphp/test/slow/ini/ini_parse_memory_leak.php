@@ -1,9 +1,11 @@
 <?php
 
-error_reporting();
-function test()
+error_reporting(0);
+$total_run = 10000;
+function leak_test()
 {
-    $count = 10000;
+    global $total_run;
+    $count = $total_run;
     $before = memory_get_usage(true);
     while ($count) {
         $count--;
@@ -12,16 +14,13 @@ function test()
 }
 
 $a = memory_get_usage(true);
-test();
+leak_test();
 $b = memory_get_usage(true);
-test();
-$c = memory_get_usage(true);
 
 $diff1 = $b - $a;
-$diff2 = $c - $b;
 
-if ($diff2 * 2 <= $diff1) {
+if ($diff1 < 8192) {
     echo "OK";
 } else {
-    echo "ini parse memory leak";
+    echo "ini parse memory leak, total:".$diff1;
 }

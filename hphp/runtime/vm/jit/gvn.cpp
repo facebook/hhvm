@@ -218,6 +218,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdAFWHActRec:
   case LdResumableArObj:
   case LdMIStateAddr:
+  case OrdStr:
     return true;
   default:
     return false;

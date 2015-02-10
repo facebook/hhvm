@@ -1810,6 +1810,15 @@ void CodeGenerator::cgConvBoolToInt(IRInstruction* inst) {
   vmain() << movzbq{srcReg, dstReg};
 }
 
+void CodeGenerator::cgOrdStr(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const sd = v.makeReg();
+  // sd = StringData->m_data;
+  v << load{srcLoc(inst, 0).reg()[StringData::dataOff()], sd};
+  // dst = (unsigned char)sd[0];
+  v << loadzbq{sd[0], dstLoc(inst, 0).reg()};
+}
+
 void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   auto srcReg = srcLoc(inst, 0).reg();

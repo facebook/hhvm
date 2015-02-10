@@ -783,6 +783,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CoerceStrToDbl:
   case CoerceStrToInt:
   case ConvStrToInt:
+  case OrdStr:
   case IncProfCounter:
   case IncStat:
   case IncStatGrouped:

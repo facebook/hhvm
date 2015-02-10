@@ -1831,6 +1831,16 @@ SSATmp* simplifyAdjustSP(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyOrdStr(State& env, const IRInstruction *inst) {
+  const auto src = inst->src(0);
+  if (src->isConst(Type::Str)) {
+    // a static string is passed in, resolve with a constant.
+    unsigned char first = src->strVal()->data()[0];
+    return cns(env, int64_t{first});
+  }
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -1941,6 +1951,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NSame)
   X(ArrayGet)
   X(AdjustSP)
+  X(OrdStr)
   default: break;
   }
 #undef X

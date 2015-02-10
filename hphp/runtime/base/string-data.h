@@ -156,8 +156,9 @@ struct StringData {
   static StringData* MakeEmpty();
 
   /*
-   * Offset accessor for the JIT compiler.
+   * Offset accessors for the JIT compiler.
    */
+  static constexpr ptrdiff_t dataOff() { return offsetof(StringData, m_data); }
   static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
 
   /*

@@ -117,11 +117,26 @@ SSATmp* opt_ord(HTS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
 
   auto const arg = topC(env, BCSPOffset{0});
-  // a static string is passed in, resolve with a constant.
-  if (arg->type().isConst(Type::Str)) {
-    unsigned char first = arg->strVal()->data()[0];
-    return cns(env, int64_t(first));
+  auto const arg_type = arg->type();
+  if (arg_type <= Type::Str) {
+    return gen(env, OrdStr, arg);
   }
+
+  // intercept constant, non-string ord() here instead of OrdStr simplify stage.
+  // OrdStr depends on a string as input for its vasm implementation.
+  if (arg->isConst(Type::Bool)) {
+    // ord((string)true)===ord("1"), ord((string)false)===ord("")
+    return cns(env, int64_t{arg_type.boolVal() ? '1' : 0});
+  } else if (arg_type <= Type::Null) {
+    return cns(env, int64_t{0});
+  } else if (arg->isConst(Type::Int)) {
+    const auto conv = folly::to<std::string>(arg_type.intVal());
+    return cns(env, int64_t{conv[0]});
+  } else if (arg->isConst(Type::Dbl)) {
+    const auto conv = folly::to<std::string>(arg_type.dblVal());
+    return cns(env, int64_t{conv[0]});
+  }
+
   return nullptr;
 }
 

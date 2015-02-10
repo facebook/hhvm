@@ -518,6 +518,7 @@ PUNT_OPCODE(LdContResumeAddr)
 PUNT_OPCODE(ContArIncIdx)
 PUNT_OPCODE(StContArState)
 PUNT_OPCODE(CheckTypePackedArrayElem)
+PUNT_OPCODE(OrdStr)
 
 #undef PUNT_OPCODE
 

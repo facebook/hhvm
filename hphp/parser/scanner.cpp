@@ -452,7 +452,7 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       nextLookahead(pos);
       return true;
     }
-    if (pos->t != T_NS_SEPARATOR) {
+    if (pos->t != T_NS_SEPARATOR && pos->t != T_DOUBLE_COLON) {
       return true;
     }
     nextLookahead(pos);

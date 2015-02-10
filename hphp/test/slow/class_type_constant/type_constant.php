@@ -21,10 +21,10 @@ final class C implements I {
   // Ensure you can define a constant named type
   const type = 400;
 
-  public static::X $x = ImmVector {};
-  public static static::Y $y = Map {};
+  public this::X $x = ImmVector {};
+  public static this::Y $y = Map {};
 
-  public static function test(self::me::Z $x): static::me::Z {
+  public static function test(self::me::Y $x): Map<int, this::me::Z> {
     return static::$y;
   }
 }

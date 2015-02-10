@@ -140,7 +140,7 @@ public:
   virtual const char *getServerAddr() {
     std::string ipv4 =  RuntimeOption::GetServerPrimaryIPv4();
     return ipv4.empty() ?
-       RuntimeOption::GetServerPrimaryIPv6() :
+       RuntimeOption::GetServerPrimaryIPv6().c_str() :
        ipv4.c_str();
   };
   virtual uint16_t getServerPort() {

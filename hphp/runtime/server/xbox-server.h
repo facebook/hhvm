@@ -104,9 +104,10 @@ public:
   virtual const char *getRemoteHost() { return "127.0.0.1"; }
   virtual uint16_t getRemotePort() { return 0; }
   virtual const char *getServerAddr() {
-    return RuntimeOption::ServerPrimaryIPv4.empty() ?
-      RuntimeOption::ServerPrimaryIPv6.c_str() :
-      RuntimeOption::ServerPrimaryIPv4.c_str();
+    std::string ipv4 = RuntimeOption::GetServerPrimaryIPv4();
+    return ipv4.empty() ?
+      RuntimeOption::GetServerPrimaryIPv6().c_str() :
+      ipv4.c_str();
   }
 
   /**

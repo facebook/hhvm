@@ -656,16 +656,14 @@ void MemoryManager::checkHeap() {
     }
   }
 
-  if (!contiguous_heap) {
-    // make sure everything in a free list was scanned exactly once.
-    for (size_t i = 0; i < kNumSmartSizes; i++) {
-      for (auto n = m_freelists[i].head; n; n = n->next) {
-        assert(free_blocks.find(n) != free_blocks.end());
-        free_blocks.erase(n);
-      }
+  // make sure everything in a free list was scanned exactly once.
+  for (size_t i = 0; i < kNumSmartSizes; i++) {
+    for (auto n = m_freelists[i].head; n; n = n->next) {
+      assert(free_blocks.find(n) != free_blocks.end());
+      free_blocks.erase(n);
     }
-    assert(free_blocks.empty());
   }
+  assert(free_blocks.empty());
 
   TRACE(1, "checkHeap: %lu objects %lu bytes\n", hdrs.size(), bytes);
   TRACE(1, "checkHeap-types: ");
@@ -1181,7 +1179,7 @@ void ContiguousHeap::flush() {
 MemBlock ContiguousHeap::allocSlab(size_t size) {
   size_t cap;
   void* slab = heapAlloc(size, cap);
-  m_slabs.push_back({slab, size});
+  m_slabs.push_back({slab, cap});
   return {slab, cap};
 }
 

@@ -436,10 +436,10 @@ Variant HHVM_FUNCTION(stream_select,
 
 Object HHVM_FUNCTION(stream_await,
                      const Resource& stream,
-                     uint16_t events,
+                     int64_t events,
                      double timeout /*= 0.0 */) {
   auto f = stream.getTyped<File>();
-  return f->await(events, timeout);
+  return f->await((uint16_t)events, timeout);
 }
 
 bool HHVM_FUNCTION(stream_set_blocking,

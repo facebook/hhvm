@@ -221,7 +221,7 @@ static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
 
 static String HHVM_STATIC_METHOD(IntlDateFormatter, formatObject,
                                  const Object& object, const Variant& format,
-                                 const String& locale) {
+                                 const Variant& locale) {
   // TODO: Need IntlCalendar implemented first
   throw_not_implemented("IntlDateFormatter::formatObject");
 }

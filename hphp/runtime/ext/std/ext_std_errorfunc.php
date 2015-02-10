@@ -87,8 +87,8 @@ function error_get_last(): array<string, mixed>;
 <<__Native>>
 function error_log(string $message,
                    int $message_type = 0,
-                   string $destination = null,
-                   string $extra_headers = null): bool;
+                   ?string $destination = null,
+                   ?string $extra_headers = null): bool;
 
 /**
  * Sets which PHP errors are reported

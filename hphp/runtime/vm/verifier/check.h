@@ -97,6 +97,26 @@ bool checkUnit(const Unit*, bool verbose = false);
  */
 bool checkFunc(const Func*, bool verbose = false);
 
+/**
+ * Checker for HNI native function signatures. Verifies that argument types
+ * declared for C++ native implementations match the corresponding PHP types
+ * in the systemlib unit.
+ *
+ * Checked:
+ * -- Primitive argument types are correct: int64_t, bool, and double
+ * -- Complex arguments use correct smart pointer wrapper: String, Object,
+ *    Resource, and Array
+ * -- Mixed arguments are taken as Variant
+ * -- By-reference arguments are taken as VRefParam
+ * -- Return types are also correct
+ * -- Functions declared as ActRec take an ActRec* as their sole argument
+ * -- Functions with a variadic parameter take an Array as the final argument,
+ *    and PHP 5 compatibility functions are registred appropriately.
+ * -- Methods take an ObjectData* as their first argument
+ * -- Static methods take a const Class* as their first argument
+ */
+bool checkNativeFunc(const Func*, bool verbose = false);
+
 }} // HPHP::Verifier
 
 #endif // incl_HPHP_VM_VERIFIER_CHECK_UNIT_H_

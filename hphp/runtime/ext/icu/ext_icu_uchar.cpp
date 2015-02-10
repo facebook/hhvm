@@ -268,7 +268,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, charAge, const Variant& arg) {
   return ret;
 }
 
-Variant HHVM_STATIC_METHOD(IntlChar, getUnicodeVersion) {
+Array HHVM_STATIC_METHOD(IntlChar, getUnicodeVersion) {
   UVersionInfo version;
   u_getUnicodeVersion(version);
   Array ret = Array::Create();
@@ -319,14 +319,14 @@ IC_INT_METHOD_CHAR(charDigitValue)
 
 /* All methods which take one UChar32 argument and return bool */
 template<UBool (*T)(UChar32)>
-Variant uchar_method(Class* self_, const Variant& arg) {
+Variant uchar_method(const Class* self_, const Variant& arg) {
   GETCP(arg, cp);
   return (bool)T(cp);
 }
 
 /* All methods which take one UChar32 argument and return same */
 template<UChar32 (*T)(UChar32)>
-Variant uchar_method(Class* self_, const Variant& arg) {
+Variant uchar_method(const Class* self_, const Variant& arg) {
   GETCP(arg, cp);
   auto ret = T(cp);
   if (arg.isString()) {

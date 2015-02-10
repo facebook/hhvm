@@ -170,7 +170,7 @@ function gmp_scan1(mixed $a,
 
 
 <<__Native>>
-function gmp_setbit(mixed $a,
+function gmp_setbit(mixed& $a,
                     int $index,
                     bool $bit_on = true): void;
 

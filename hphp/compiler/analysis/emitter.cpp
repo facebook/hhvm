@@ -6432,6 +6432,8 @@ void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
   }
 }
 
+const StaticString s_Void("HH\\void");
+
 void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
                                     FuncEmitter *fe) {
   if (SystemLib::s_inited &&
@@ -6489,8 +6491,9 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   FunctionScopePtr funcScope = meth->getFunctionScope();
   const char *funcname  = funcScope->getName().c_str();
   const char *classname = pce ? pce->name()->data() : nullptr;
-  BuiltinFunction nif = Native::GetBuiltinFunction(funcname, classname,
-                                                   modifiers->isStatic());
+  auto const& info = Native::GetBuiltinFunction(funcname, classname,
+                                                modifiers->isStatic());
+  BuiltinFunction nif = info.ptr;
   BuiltinFunction bif;
   if (!nif) {
     bif = Native::unimplementedWrapper;
@@ -6499,6 +6502,15 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     if (nativeAttrs & Native::AttrZendCompat) {
       bif = zend_wrap_func;
     } else {
+      if (retType) {
+        fe->retTypeConstraint = determine_type_constraint_from_annot(retType,
+                                                                     true);
+      } else {
+        fe->retTypeConstraint = TypeConstraint {
+          s_Void.get(),
+          TypeConstraint::ExtendedHint | TypeConstraint::HHType
+        };
+      }
       if (nativeAttrs & Native::AttrActRec) {
         // Call this native function with a raw ActRec*
         // rather than pulling out args for normal func calling

@@ -130,7 +130,7 @@ private:
   std::string m_dsoName;
 };
 
-#define HHVM_API_VERSION 20150112L
+#define HHVM_API_VERSION 20150212L
 
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \

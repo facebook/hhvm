@@ -199,7 +199,7 @@ Variant HHVM_FUNCTION(stream_select,
 
 Object HHVM_FUNCTION(stream_await,
                      const Resource& stream,
-                     uint16_t events,
+                     int64_t events,
                      double timeout = 0.0);
 
 bool HHVM_FUNCTION(stream_set_blocking,

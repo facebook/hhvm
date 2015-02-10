@@ -1313,18 +1313,20 @@ String HHVM_FUNCTION(socket_strerror,
 }
 
 int64_t HHVM_FUNCTION(socket_last_error,
-                      const Resource& socket /* = null_object */) {
+                      const Variant& socket /* = null */) {
   if (!socket.isNull()) {
-    Socket *sock = socket.getTyped<Socket>();
+    auto const resc = socket.toResource();
+    auto sock = resc.getTyped<Socket>();
     return sock->getError();
   }
   return Socket::getLastError();
 }
 
 void HHVM_FUNCTION(socket_clear_error,
-                   const Resource& socket /* = null_object */) {
+                   const Variant& socket /* = null */) {
   if (!socket.isNull()) {
-    Socket *sock = socket.getTyped<Socket>();
+    auto const resc = socket.toResource();
+    auto sock = resc.getTyped<Socket>();
     sock->setError(0);
   }
 }

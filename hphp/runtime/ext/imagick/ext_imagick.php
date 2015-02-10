@@ -2907,7 +2907,7 @@ class Imagick implements Countable, Iterator {
    */
   <<__Native>>
   function setImageColormapColor(int $index,
-                                 mixed $color): bool;
+                                 ImagickPixel $color): bool;
 
   /**
    * Sets the image colorspace

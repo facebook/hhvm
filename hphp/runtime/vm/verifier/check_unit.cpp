@@ -207,6 +207,11 @@ bool UnitChecker::checkFuncs() {
       }
       pseudo = i.front();
     }
+
+    if (i.front()->attrs() & AttrNative) {
+      ok &= checkNativeFunc(i.front(), m_verbose);
+    }
+
     ok &= checkFunc(i.popFront(), m_verbose);
   }
 

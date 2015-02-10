@@ -44,6 +44,7 @@ enum class AnnotMetaType : uint8_t {
 
 enum class AnnotType : uint16_t {
   Uninit   = (uint8_t)KindOfUninit   | (uint16_t)AnnotMetaType::Precise << 8,
+  Null     = (uint8_t)KindOfNull     | (uint16_t)AnnotMetaType::Precise << 8,
   Bool     = (uint8_t)KindOfBoolean  | (uint16_t)AnnotMetaType::Precise << 8,
   Int      = (uint8_t)KindOfInt64    | (uint16_t)AnnotMetaType::Precise << 8,
   Float    = (uint8_t)KindOfDouble   | (uint16_t)AnnotMetaType::Precise << 8,

@@ -466,7 +466,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function __initClosure(object $closure): void;
+  private function __initClosure(object $closure): bool;
 
   <<__Native>>
   private function __initName(string $name): bool;

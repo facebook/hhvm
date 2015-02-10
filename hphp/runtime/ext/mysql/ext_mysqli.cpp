@@ -702,9 +702,8 @@ struct mysqli_PropHandler : Native::MapPropHandler<mysqli_PropHandler> {
   }
 
 static Variant HHVM_METHOD(mysqli_result, get_mysqli_conn_resource,
-                           Variant connection) {
-  Object obj = connection.toObject();
-  auto res = get_connection_resource(obj.get());
+                           Object connection) {
+  auto res = get_connection_resource(connection.get());
   VALIDATE_RESOURCE(res, MySQLState::CONNECTED);
   return res;
 }
@@ -880,9 +879,8 @@ static Variant HHVM_METHOD(mysqli_stmt, hh_field_count) {
   return getStmt(this_)->field_count();
 }
 
-static void HHVM_METHOD(mysqli_stmt, hh_init, Variant connection) {
-  Object obj = connection.toObject();
-  auto data = makeSmartPtr<MySQLStmt>(get_connection(obj.get())->get());
+static void HHVM_METHOD(mysqli_stmt, hh_init, Object connection) {
+  auto data = makeSmartPtr<MySQLStmt>(get_connection(connection.get())->get());
   this_->o_set(s_stmt, Variant(std::move(data)), s_mysqli_stmt.get());
 }
 

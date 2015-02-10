@@ -26,6 +26,7 @@
 namespace HPHP {
 struct ActRec;
 struct Class;
+struct FuncEmitter;
 class Object;
 };
 
@@ -228,6 +229,91 @@ BuiltinFunction getWrapper(bool method, bool usesDoubles, bool variadic);
  */
 TypedValue* unimplementedWrapper(ActRec* ar);
 
+#define NATIVE_TYPES \
+  T(Int32,    int32_t) \
+  T(Int64,    int64_t) \
+  T(Double,   double) \
+  T(Bool,     bool) \
+  T(Object,   Object)   \
+  T(String,   String)   \
+  T(Array,    Array)    \
+  T(Resource, Resource) \
+  T(Mixed,    Variant) \
+  T(ARReturn, TypedValue*) \
+  T(MixedRef, VRefParamValue) \
+  T(VarArgs,  ActRec*) \
+  T(This,     ObjectData*) \
+  T(Class,    const Class*) \
+  T(Void,     void) \
+  T(Zend,     ZendFuncType) \
+  /**/
+
+enum class ZendFuncType {};
+
+struct NativeSig {
+  enum class Type : uint8_t {
+#define T(name, type) name,
+    NATIVE_TYPES
+#undef T
+  };
+
+  explicit NativeSig(ZendFuncType) : ret(Type::Zend) {}
+  NativeSig() : ret(Type::Void) {}
+
+  template<typename Ret>
+  explicit NativeSig(Ret(*ptr)());
+
+  template<typename Ret, typename... Args>
+  explicit NativeSig(Ret(*ptr)(Args...));
+
+  std::string toString(const char* classname, const char* fname) const;
+
+  Type ret;
+  std::vector<Type> args;
+};
+
+namespace detail {
+template<typename type> struct native_type {};
+#define T(name, type) \
+  template<> struct native_type<type> \
+    : std::integral_constant<NativeSig::Type, NativeSig::Type::name> {};
+NATIVE_TYPES
+#undef T
+
+template<typename... Args>
+std::vector<NativeSig::Type> build_args() {
+  return {
+    native_type<typename std::decay<Args>::type>::value...
+  };
+}
+}
+
+template<typename Ret>
+NativeSig::NativeSig(Ret(*ptr)())
+  : ret(detail::native_type<typename std::remove_cv<Ret>::type>::value)
+{}
+
+template<typename Ret, typename... Args>
+NativeSig::NativeSig(Ret(*ptr)(Args...))
+  : ret(detail::native_type<typename std::remove_cv<Ret>::type>::value)
+  , args(detail::build_args<Args...>())
+{}
+
+#undef NATIVE_TYPES
+
+struct BuiltinFunctionInfo {
+  BuiltinFunctionInfo() : ptr(nullptr) {}
+
+  template<typename Func>
+  explicit BuiltinFunctionInfo(Func f)
+    : sig(f)
+    , ptr((BuiltinFunction)f)
+  {}
+
+  NativeSig sig;
+  BuiltinFunction ptr;
+};
+
 /**
  * Case insensitive map of "name" to function pointer
  *
@@ -236,7 +322,7 @@ TypedValue* unimplementedWrapper(ActRec* ar);
  * be a static string because this table is shared and outlives
  * individual requests.
  */
-typedef hphp_hash_map<const StringData*, BuiltinFunction,
+typedef hphp_hash_map<const StringData*, BuiltinFunctionInfo,
                       string_data_hash, string_data_isame> BuiltinFunctionMap;
 
 extern BuiltinFunctionMap s_builtinFunctions;
@@ -247,7 +333,7 @@ inline void registerBuiltinFunction(const char* name, Fun func) {
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
     "You can only register pointers to function.");
-  s_builtinFunctions[makeStaticString(name)] = (BuiltinFunction)func;
+  s_builtinFunctions[makeStaticString(name)] = BuiltinFunctionInfo(func);
 }
 
 template <class Fun>
@@ -256,22 +342,50 @@ inline void registerBuiltinFunction(const String& name, Fun func) {
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
     "You can only register pointers to function.");
-  s_builtinFunctions[makeStaticString(name)] = (BuiltinFunction)func;
+  s_builtinFunctions[makeStaticString(name)] = BuiltinFunctionInfo(func);
 }
 
-inline BuiltinFunction GetBuiltinFunction(const StringData* fname,
-                                          const StringData* cname = nullptr,
-                                          bool isStatic = false) {
+template <class Fun>
+inline void registerBuiltinZendFunction(const char* name, Fun func) {
+  static_assert(
+    std::is_pointer<Fun>::value &&
+    std::is_function<typename std::remove_pointer<Fun>::type>::value,
+    "You can only register pointers to function.");
+  auto bfi = BuiltinFunctionInfo();
+  bfi.ptr = (BuiltinFunction)func;
+  bfi.sig = NativeSig(ZendFuncType{});
+  s_builtinFunctions[makeStaticString(name)] = bfi;
+}
+
+template <class Fun>
+inline void registerBuiltinZendFunction(const String& name, Fun func) {
+  static_assert(
+    std::is_pointer<Fun>::value &&
+    std::is_function<typename std::remove_pointer<Fun>::type>::value,
+    "You can only register pointers to function.");
+  auto bfi = BuiltinFunctionInfo();
+  bfi.ptr = (BuiltinFunction)func;
+  bfi.sig = NativeSig(ZendFuncType{});
+  s_builtinFunctions[makeStaticString(name)] = bfi;
+}
+
+const char* checkTypeFunc(const NativeSig& sig,
+                          const TypeConstraint& retType,
+                          const Func* func);
+
+inline BuiltinFunctionInfo GetBuiltinFunction(const StringData* fname,
+                                              const StringData* cname = nullptr,
+                                              bool isStatic = false) {
   auto it = s_builtinFunctions.find((cname == nullptr) ? fname :
                     (String(const_cast<StringData*>(cname)) +
                     (isStatic ? "::" : "->") +
                      String(const_cast<StringData*>(fname))).get());
-  return (it == s_builtinFunctions.end()) ? nullptr : it->second;
+  return (it == s_builtinFunctions.end()) ? BuiltinFunctionInfo() : it->second;
 }
 
-inline BuiltinFunction GetBuiltinFunction(const char* fname,
-                                          const char* cname = nullptr,
-                                          bool isStatic = false) {
+inline BuiltinFunctionInfo GetBuiltinFunction(const char* fname,
+                                              const char* cname = nullptr,
+                                              bool isStatic = false) {
   return GetBuiltinFunction(makeStaticString(fname),
                     cname ? makeStaticString(cname) : nullptr,
                     isStatic);

@@ -50,8 +50,8 @@ void HHVM_FUNCTION(debug_print_backtrace, int64_t options = 0,
                                           int64_t limit = 0);
 Array HHVM_FUNCTION(error_get_last);
 bool HHVM_FUNCTION(error_log, const String& message, int message_type = 0,
-                              const String& destination = null_string,
-                              const String& extra_headers = null_string);
+                              const Variant& destination = null_variant,
+                              const Variant& extra_headers = null_variant);
 int64_t HHVM_FUNCTION(error_reporting, const Variant& level = null_variant);
 bool HHVM_FUNCTION(restore_error_handler);
 bool HHVM_FUNCTION(restore_exception_handler);

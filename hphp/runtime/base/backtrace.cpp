@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,14 +15,13 @@
 */
 #include "hphp/runtime/base/backtrace.h"
 
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/class-info.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/runtime/vm/bytecode.h"
 
 namespace HPHP {
 
@@ -37,14 +36,13 @@ const StaticString s_include("include");
 const StaticString s_main("{main}");
 
 static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
-  ActRec* prevFp;
   if (fp && fp->func() && fp->resumed() && fp->func()->isAsyncFunction()) {
     c_BlockableWaitHandle* currentWaitHandle = frame_afwh(fp);
     auto const contextIdx = currentWaitHandle->getContextIdx();
     while (currentWaitHandle != nullptr) {
       if (currentWaitHandle->isFinished()) {
         /*
-         * is possible in very rare cases (it will returned a truancated stack):
+         * is possible in very rare cases (it will return a truncated stack):
          * 1) async function which WaitHandle is not referenced by anything
          *      else finishes
          * 2) its return value is an object with destructor
@@ -57,11 +55,11 @@ static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
       auto p = waitHandle->getParentChain().firstInContext(contextIdx);
       if (p == nullptr) {
         break;
-      } else if (p->getKind() == c_WaitHandle::Kind::AsyncFunction) {
+      }
+      if (p->getKind() == c_WaitHandle::Kind::AsyncFunction) {
         auto wh = p->asAsyncFunction();
-        prevFp = wh->actRec();
         *prevPc = wh->resumable()->resumeOffset();
-        return prevFp;
+        return wh->actRec();
       }
       currentWaitHandle = p;
     }
@@ -96,41 +94,40 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   Offset pc = 0;
 
   // Get the fp and pc of the top frame (possibly skipping one frame)
-  {
-    if (btArgs.m_skipTop) {
-      fp = getPrevActRec(vmfp(), &pc);
-      if (!fp) {
-        // We skipped over the only VM frame, we're done
-        return bt;
-      }
-    } else {
-      fp = vmfp();
-      Unit *unit = vmfp()->m_func->unit();
-      assert(unit);
-      pc = unit->offsetOf(vmpc());
+  if (btArgs.m_skipTop) {
+    fp = getPrevActRec(vmfp(), &pc);
+    if (!fp) {
+      // We skipped over the only VM frame, we're done
+      return bt;
     }
+  } else {
+    fp = vmfp();
+    Unit *unit = vmfp()->m_func->unit();
+    assert(unit);
+    pc = unit->offsetOf(vmpc());
+  }
 
-    // Handle the top frame
-    if (btArgs.m_withSelf) {
-      // Builtins don't have a file and line number
-      if (!fp->m_func->isBuiltin()) {
-        Unit* unit = fp->m_func->unit();
-        assert(unit);
-        const char* filename = fp->m_func->filename()->data();
-        Offset off = pc;
+  // Handle the top frame
+  if (btArgs.m_withSelf) {
+    // Builtins don't have a file and line number
+    if (!fp->m_func->isBuiltin()) {
+      Unit* unit = fp->m_func->unit();
+      assert(unit);
+      const char* filename = fp->m_func->filename()->data();
+      Offset off = pc;
 
-        ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
-        frame.set(s_file, filename);
-        frame.set(s_line, unit->getLineNumber(off));
-        if (btArgs.m_parserFrame) {
-          frame.set(s_function, s_include);
-          frame.set(s_args, Array::Create(btArgs.m_parserFrame->filename));
-        }
-        bt.append(frame.toVariant());
-        depth++;
+      ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
+      frame.set(s_file, filename);
+      frame.set(s_line, unit->getLineNumber(off));
+      if (btArgs.m_parserFrame) {
+        frame.set(s_function, s_include);
+        frame.set(s_args, Array::Create(btArgs.m_parserFrame->filename));
       }
+      bt.append(frame.toVariant());
+      depth++;
     }
   }
+
   // Handle the subsequent VM frames
   Offset prevPc = 0;
   for (ActRec* prevFp = getPrevActRec(fp, &prevPc);

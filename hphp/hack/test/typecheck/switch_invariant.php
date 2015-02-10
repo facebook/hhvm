@@ -10,12 +10,12 @@
  */
 
 function test(): void {
-  switch('') {
-    case 'a': 
+  switch ('') {
+    case 'a':
       $x = 0;
       break;
     default:
       invariant_violation('bad bad');
-    
+
   }
 }

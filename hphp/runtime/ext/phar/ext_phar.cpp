@@ -41,8 +41,10 @@ static const StaticString
 
 static class PharStreamWrapper : public Stream::Wrapper {
  public:
-  virtual SmartPtr<File> open(const String& filename, const String& mode,
-                              int options, const Variant& context) {
+  virtual SmartPtr<File> open(const String& filename,
+                              const String& mode,
+                              int options,
+                              const SmartPtr<StreamContext>& context) {
     static const char cz[] = "phar://";
     if (strncmp(filename.data(), cz, sizeof(cz) - 1)) {
       return nullptr;

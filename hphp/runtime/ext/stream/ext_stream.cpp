@@ -56,7 +56,8 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static StreamContext* get_stream_context(const Variant& stream_or_context);
+static
+SmartPtr<StreamContext> get_stream_context(const Variant& stream_or_context);
 
 #define REGISTER_CONSTANT(name, value)                                         \
   Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
@@ -214,14 +215,15 @@ Variant HHVM_FUNCTION(stream_context_create,
   if (!arrOptions.isNull() && !StreamContext::validateOptions(arrOptions)) {
     raise_warning("options should have the form "
                   "[\"wrappername\"][\"optionname\"] = $value");
-    return Resource(newres<StreamContext>(HPHP::null_array, HPHP::null_array));
+    return Variant(
+      makeSmartPtr<StreamContext>(HPHP::null_array, HPHP::null_array));
   }
-  return Resource(newres<StreamContext>(arrOptions, arrParams));
+  return Variant(makeSmartPtr<StreamContext>(arrOptions, arrParams));
 }
 
 Variant HHVM_FUNCTION(stream_context_get_options,
                       const Resource& stream_or_context) {
-  StreamContext* context = get_stream_context(stream_or_context);
+  auto context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
     return false;
@@ -229,7 +231,7 @@ Variant HHVM_FUNCTION(stream_context_get_options,
   return context->getOptions();
 }
 
-static bool stream_context_set_option0(StreamContext* context,
+static bool stream_context_set_option0(const SmartPtr<StreamContext>& context,
                                        const Array& options) {
   if (!StreamContext::validateOptions(options)) {
     raise_warning("options should have the form "
@@ -240,7 +242,7 @@ static bool stream_context_set_option0(StreamContext* context,
   return true;
 }
 
-static bool stream_context_set_option1(StreamContext* context,
+static bool stream_context_set_option1(const SmartPtr<StreamContext>& context,
                                        const String& wrapper,
                                        const String& option,
                                        const Variant& value) {
@@ -253,7 +255,7 @@ bool HHVM_FUNCTION(stream_context_set_option,
                    const Variant& wrapper_or_options,
                    const Variant& option /* = null_variant */,
                    const Variant& value /* = null_variant */) {
-  StreamContext* context = get_stream_context(stream_or_context);
+  auto context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
     return false;
@@ -277,28 +279,26 @@ bool HHVM_FUNCTION(stream_context_set_option,
 Variant HHVM_FUNCTION(stream_context_get_default,
                       const Variant& options /* = null_variant */) {
   const Array& arrOptions = options.isNull() ? null_array : options.toArray();
-  Resource &resource = g_context->getStreamContext();
-  if (resource.isNull()) {
-    resource = Resource(newres<StreamContext>(Array::Create(),
-                                              Array::Create()));
-    g_context->setStreamContext(resource);
+  auto context = g_context->getStreamContext();
+  if (!context) {
+    context = makeSmartPtr<StreamContext>(Array::Create(), Array::Create());
+    g_context->setStreamContext(context);
   }
-  StreamContext *context = resource.getTyped<StreamContext>();
   if (!arrOptions.isNull() &&
       !stream_context_set_option0(context, arrOptions)) {
     return false;
   }
-  return resource;
+  return Variant(std::move(context));
 }
 
 Variant HHVM_FUNCTION(stream_context_set_default,
-const Array& options) {
+                      const Array& options) {
   return HHVM_FN(stream_context_get_default)(options);
 }
 
 Variant HHVM_FUNCTION(stream_context_get_params,
                       const Resource& stream_or_context) {
-  StreamContext* context = get_stream_context(stream_or_context);
+  auto context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
     return false;
@@ -309,7 +309,7 @@ Variant HHVM_FUNCTION(stream_context_get_params,
 bool HHVM_FUNCTION(stream_context_set_params,
                    const Resource& stream_or_context,
                    const Array& params) {
-  StreamContext* context = get_stream_context(stream_or_context);
+  auto context = get_stream_context(stream_or_context);
   if (!context || !StreamContext::validateParams(params)) {
     raise_warning("Invalid stream/context parameter");
     return false;
@@ -764,24 +764,22 @@ bool HHVM_FUNCTION(stream_socket_shutdown,
   return HHVM_FN(socket_shutdown)(stream, how);
 }
 
-static StreamContext* get_stream_context(const Variant& stream_or_context) {
+static
+SmartPtr<StreamContext> get_stream_context(const Variant& stream_or_context) {
   if (!stream_or_context.isResource()) {
     return nullptr;
   }
   const Resource& resource = stream_or_context.asCResRef();
-  StreamContext* context = resource.getTyped<StreamContext>(true, true);
-  if (context != nullptr) {
-    return context;
-  }
-  File *file = resource.getTyped<File>(true, true);
+  auto context = dyn_cast_or_null<StreamContext>(resource);
+  if (context) return context;
+  auto file = dyn_cast_or_null<File>(resource);
   if (file != nullptr) {
-    Resource resource = file->getStreamContext();
-    if (file->getStreamContext().isNull()) {
-      resource =
-        Resource(newres<StreamContext>(Array::Create(), Array::Create()));
-      file->setStreamContext(resource);
+    auto context = file->getStreamContext();
+    if (!file->getStreamContext()) {
+      context = makeSmartPtr<StreamContext>(Array::Create(), Array::Create());
+      file->setStreamContext(context);
     }
-    return resource.getTyped<StreamContext>();
+    return context;
   }
   return nullptr;
 }

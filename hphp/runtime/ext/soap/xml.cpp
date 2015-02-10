@@ -85,7 +85,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   if (same(content, false)) {
     Variant cxt = HHVM_FN(stream_context_create)(make_map_array(
                   s_http, make_map_array(s_timeout, 1000)));
-    auto file = File::Open(filename, "rb", 0, cxt);
+    auto file = File::Open(filename, "rb", 0, cast_or_null<StreamContext>(cxt));
     if (file) {
       content = HHVM_FN(stream_get_contents)(Resource(file));
       if (!same(content, false)) {

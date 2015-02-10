@@ -6,7 +6,10 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/hhvm-gdb
   DESTINATION bin
   COMPONENT dev)
 
-install(FILES gdbutils.py hashes.py hhbc.py hhvm.py idx.py
-              lookup.py nameof.py pretty.py stack.py unit.py
+file(GLOB GDB_SCRIPTS
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  FOLLOW_SYMLINKS *.py)
+
+install(FILES ${GDB_SCRIPTS}
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/hhvm/gdb"
   COMPONENT dev)

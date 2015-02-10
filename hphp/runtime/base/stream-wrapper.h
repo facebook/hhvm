@@ -28,6 +28,7 @@
 struct stat;
 
 namespace HPHP {
+class StreamContext;
 namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -36,8 +37,10 @@ class Wrapper : boost::noncopyable {
   Wrapper() : m_isLocal(true) { }
   void registerAs(const std::string &scheme);
 
-  virtual SmartPtr<File> open(const String& filename, const String& mode,
-                              int options, const Variant& context) = 0;
+  virtual SmartPtr<File> open(const String& filename,
+                              const String& mode,
+                              int options,
+                              const SmartPtr<StreamContext>& context) = 0;
   virtual int access(const String& path, int mode) {
     return -1;
   }

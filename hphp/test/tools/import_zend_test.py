@@ -102,6 +102,8 @@ flaky_tests = (
 
     # Checking stat of ' ' races with mkdir_variation1
     '/ext/standard/tests/file/lstat_stat_variation22.php',
+    '/ext/standard/tests/file/copy_variation3.php',
+    '/ext/standard/tests/file/file_exists_variation1.php',
 
     # concurrency issues
     '/ext/mysql/tests/001.php',

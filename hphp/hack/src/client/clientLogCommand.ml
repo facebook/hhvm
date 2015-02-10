@@ -32,6 +32,5 @@ type build_kind =
   | LCStart of Path.path
   | LCStop of Path.path
   | LCRestart of Path.path
-  | LCStatus of Path.path option
   | LCBuild of Path.path * build_kind
   | LCProlog of Path.path

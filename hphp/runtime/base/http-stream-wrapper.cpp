@@ -39,8 +39,10 @@ const StaticString
   s_User_Agent("User-Agent");
 
 SmartPtr<File>
-HttpStreamWrapper::open(const String& filename, const String& mode,
-                        int options, const Variant& context) {
+HttpStreamWrapper::open(const String& filename,
+                        const String& mode,
+                        int options,
+                        const SmartPtr<StreamContext>& context) {
   if (RuntimeOption::ServerHttpSafeMode) {
     return nullptr;
   }
@@ -50,8 +52,6 @@ HttpStreamWrapper::open(const String& filename, const String& mode,
     return nullptr;
   }
 
-  StreamContext *ctx = !context.isResource() ? nullptr :
-                        context.toResource().getTyped<StreamContext>();
   Array headers;
   String method = s_GET;
   String post_data = null_string;
@@ -59,9 +59,9 @@ HttpStreamWrapper::open(const String& filename, const String& mode,
   int timeout = -1;
   bool ignore_errors = false;
 
-  if (ctx && !ctx->getOptions().isNull() &&
-      !ctx->getOptions()[s_http].isNull()) {
-    Array opts = ctx->getOptions()[s_http].toArray();
+  if (context && !context->getOptions().isNull() &&
+      !context->getOptions()[s_http].isNull()) {
+    Array opts = context->getOptions()[s_http].toArray();
     if (opts.exists(s_method)) {
       method = opts[s_method].toString();
     }

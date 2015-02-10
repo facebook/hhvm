@@ -943,7 +943,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 
   ms->file = fn;
   auto wrapper = HPHP::Stream::getWrapperFromURI(fn);
-  auto file = wrapper ? wrapper->open(fn, "rb", 0, HPHP::Variant())
+  auto file = wrapper ? wrapper->open(fn, "rb", 0, nullptr)
                       : HPHP::SmartPtr<HPHP::File>();
 
   if (!file) {
@@ -1816,7 +1816,7 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
           m->str_flags |= STRING_TEXTTEST;
           break;
         case CHAR_TRIM:
-          m->str_flags |= HHVM_FN(trim);
+          m->str_flags |= STRING_TRIM;
           break;
         case CHAR_PSTRING_1_LE:
           if (m->type != FILE_PSTRING)
@@ -2626,7 +2626,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
   if (!wrapper) {
     goto error;
   }
-  file = wrapper->open(fn, "rb", 0, HPHP::Variant());
+  file = wrapper->open(fn, "rb", 0, nullptr);
 
   if (!file) {
     goto error;
@@ -2754,7 +2754,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 
 /* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
   wrapper = HPHP::Stream::getWrapperFromURI(fn);
-  if (wrapper) file = wrapper->open(fn, "wb+", 0, HPHP::Variant());
+  if (wrapper) file = wrapper->open(fn, "wb+", 0, nullptr);
 
   if (!file) {
     file_error(ms, errno, "cannot open `%s'", dbname);

@@ -11,16 +11,16 @@
 
 function f(): void {
   switch (1) {
-  case 1:
-    switch (2) {
     case 1:
-      return;
+      switch (2) {
+        case 1:
+          return;
+        case 2:
+          break;
+        default:
+          throw new Exception('bye');
+      }
     case 2:
       break;
-    default:
-      throw new Exception('bye');
-    }
-  case 2:
-    break;
   }
 }

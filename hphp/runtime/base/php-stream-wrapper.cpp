@@ -72,9 +72,11 @@ static void phpStreamApplyFilterList(const Resource& fpres,
   }
 }
 
-static SmartPtr<File> phpStreamOpenFilter(const char* sFilter,
-                                          const String& modestr,
-                                          int options, const Variant& context) {
+static SmartPtr<File>
+phpStreamOpenFilter(const char* sFilter,
+                    const String& modestr,
+                    int options,
+                    const SmartPtr<StreamContext>& context) {
   const char *mode = modestr.c_str();
   int rwMode = 0;
   if (strchr(mode, 'r') || strchr(mode, '+')) {
@@ -115,7 +117,7 @@ static SmartPtr<File> phpStreamOpenFilter(const char* sFilter,
 
 SmartPtr<File>
 PhpStreamWrapper::open(const String& filename, const String& mode,
-                       int options, const Variant& context) {
+                       int options, const SmartPtr<StreamContext>& context) {
   if (strncasecmp(filename.c_str(), "php://", 6)) {
     return nullptr;
   }

@@ -211,7 +211,7 @@ CachedUnit createUnitFromString(const char* path,
 CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
   auto const w = Stream::getWrapperFromURI(StrNR(requestedPath));
   if (!w) return CachedUnit{};
-  auto const f = w->open(StrNR(requestedPath), "r", 0, null_variant);
+  auto const f = w->open(StrNR(requestedPath), "r", 0, nullptr);
   if (!f) return CachedUnit{};
   StringBuffer sb;
   sb.read(f.get());

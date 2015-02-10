@@ -99,7 +99,7 @@ struct File : SweepableResourceData {
   static String TranslateCommand(const String& cmd);
   static SmartPtr<File> Open(
     const String& filename, const String& mode,
-    int options = 0, const Variant& context = uninit_null());
+    int options = 0, const SmartPtr<StreamContext>& context = nullptr);
 
   static bool IsVirtualDirectory(const String& filename);
   static bool IsPlainFilePath(const String& filename) {
@@ -204,8 +204,10 @@ struct File : SweepableResourceData {
   virtual Variant getWrapperMetaData() { return Variant(); }
   String getWrapperType() const;
   String getStreamType() const { return m_streamType; }
-  Resource &getStreamContext() { return m_streamContext; }
-  void setStreamContext(Resource &context) { m_streamContext = context; }
+  const SmartPtr<StreamContext>& getStreamContext() { return m_streamContext; }
+  void setStreamContext(const SmartPtr<StreamContext>& context) {
+    m_streamContext = context;
+  }
   void appendReadFilter(const SmartPtr<StreamFilter>& filter);
   void appendWriteFilter(const SmartPtr<StreamFilter>& filter);
   void prependReadFilter(const SmartPtr<StreamFilter>& filter);
@@ -313,7 +315,7 @@ private:
   std::shared_ptr<FileData> m_data;
   StringData* m_wrapperType;
   StringData* m_streamType;
-  Resource m_streamContext;
+  SmartPtr<StreamContext> m_streamContext;
   smart::list<SmartPtr<StreamFilter>> m_readFilters;
   smart::list<SmartPtr<StreamFilter>> m_writeFilters;
 };

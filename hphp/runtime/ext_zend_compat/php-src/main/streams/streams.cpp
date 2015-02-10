@@ -285,7 +285,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) {
   HPHP::Stream::Wrapper* w = HPHP::Stream::getWrapperFromURI(path);
   if (!w) return nullptr;
-  auto file = w->open(path, mode, options, context);
+  // This was using the implicit Variant(bool) ctor.
+  // TODO: fixing this properly requires D1787768.
+  auto file = w->open(path, mode, options, nullptr/*context*/);
   if (!file) {
     return nullptr;
   }

@@ -1,6 +1,14 @@
 File "constructor_error.php", line 16, characters 25-26:
 Invalid argument (Typing[4110])
 File "constructor_error.php", line 9, characters 13-19:
-This is a value of generic type static::T
+This is the expression dependent type <static>::T
+  that is compatible with the abstract type constant this::T
+  that is compatible with the abstract type constant X::T
+  that is compatible with an array key (int/string)
+File "constructor_error.php", line 16, characters 14-27:
+  where '<static>' is a reference to this expression
+File "constructor_error.php", line 4, characters 14-14:
+  resulting from expanding the type constant this::T as follows:
+    X::T
 File "constructor_error.php", line 16, characters 25-26:
 It is incompatible with a string

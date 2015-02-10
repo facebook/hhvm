@@ -37,7 +37,7 @@ Variant HHVM_FUNCTION(getservbyport, int64_t port, const String& protocol);
 Variant HHVM_FUNCTION(inet_ntop, const String& in_addr);
 Variant HHVM_FUNCTION(inet_pton, const String& address);
 Variant HHVM_FUNCTION(ip2long, const String& ip_address);
-String HHVM_FUNCTION(long2ip, int64_t proper_address);
+String HHVM_FUNCTION(long2ip, const String& proper_address);
 bool HHVM_FUNCTION(checkdnsrr, const String& host,
                                const String& type = null_string);
 Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type = -1,

@@ -276,9 +276,7 @@ Variant HHVM_FUNCTION(fopen,
                       bool use_include_path /* = false */,
                       const Variant& context /* = null */) {
   CHECK_PATH_FALSE(filename, 1);
-  if (!context.isNull() &&
-      (!context.isResource() ||
-       !context.toResource().getTyped<StreamContext>())) {
+  if (!context.isNull() && dyn_cast<StreamContext>(context) == nullptr) {
     raise_warning("$context must be a valid Stream Context or NULL");
     return false;
   }
@@ -289,7 +287,7 @@ Variant HHVM_FUNCTION(fopen,
 
   auto file = File::Open(filename, mode,
                          use_include_path ? File::USE_INCLUDE_PATH : 0,
-                         context);
+                         cast_or_null<StreamContext>(context));
   if (!file) {
     return false;
   }
@@ -300,15 +298,14 @@ Variant HHVM_FUNCTION(popen,
                       const String& command,
                       const String& mode) {
   CHECK_PATH_FALSE(command, 1);
-  File *file = newres<Pipe>();
-  Resource handle(file);
+  auto file = makeSmartPtr<Pipe>();
   bool ret = CHECK_ERROR(file->open(File::TranslateCommand(command), mode));
   if (!ret) {
     raise_warning("popen(%s,%s): Invalid argument",
                   command.data(), mode.data());
     return false;
   }
-  return handle;
+  return Variant(std::move(file));
 }
 
 bool HHVM_FUNCTION(fclose,
@@ -592,7 +589,11 @@ Variant HHVM_FUNCTION(file_put_contents,
                       const Variant& context /* = null */) {
   CHECK_PATH(filename, 1);
   auto file = File::Open(
-    filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", flags, context);
+    filename,
+    (flags & PHP_FILE_APPEND) ? "ab" : "wb",
+    flags,
+    dyn_cast_or_null<StreamContext>(context)
+  );
 
   if (!file) {
     return false;
@@ -1758,7 +1759,7 @@ Variant HHVM_FUNCTION(tempnam,
 Variant HHVM_FUNCTION(tmpfile) {
   FILE *f = tmpfile();
   if (f) {
-    return Resource(newres<PlainFile>(f));
+    return Variant(makeSmartPtr<PlainFile>(f));
   }
   return false;
 }

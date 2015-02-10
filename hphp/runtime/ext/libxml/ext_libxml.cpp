@@ -72,20 +72,20 @@ struct LibXmlRequestData final : RequestEventHandler {
     m_suppress_error = false;
     m_errors = xmlErrorVec();
     m_entity_loader_disabled = false;
-    m_streams_context = uninit_null();
+    m_streams_context = nullptr;
   }
 
   void requestShutdown() override {
     m_use_error = false;
     m_errors = xmlErrorVec();
-    m_streams_context = uninit_null();
+    m_streams_context = nullptr;
   }
 
   bool m_entity_loader_disabled;
   bool m_suppress_error;
   bool m_use_error;
   xmlErrorVec m_errors;
-  Variant m_streams_context;
+  SmartPtr<StreamContext> m_streams_context;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, tl_libxml_request_data);
@@ -541,7 +541,8 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
 }
 
 void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
-  tl_libxml_request_data->m_streams_context = context;
+  tl_libxml_request_data->m_streams_context =
+    dyn_cast_or_null<StreamContext>(context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

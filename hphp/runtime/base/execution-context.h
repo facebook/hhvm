@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -257,8 +258,8 @@ public:
   Variant getExitCallback();
   void setExitCallback(Variant);
 
-  void setStreamContext(Resource&);
-  Resource& getStreamContext();
+  void setStreamContext(const SmartPtr<StreamContext>&);
+  const SmartPtr<StreamContext>& getStreamContext();
 
   int getPageletTasksStarted() const;
   void incrPageletTasksStarted();
@@ -510,7 +511,7 @@ private:
   String m_timezone;
   String m_timezoneDefault;
   bool m_throwAllErrors;
-  Resource m_streamContext;
+  SmartPtr<StreamContext> m_streamContext;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;

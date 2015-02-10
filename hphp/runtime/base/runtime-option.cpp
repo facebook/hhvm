@@ -130,8 +130,6 @@ std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerFileSocket;
-std::string RuntimeOption::ServerPrimaryIPv4;
-std::string RuntimeOption::ServerPrimaryIPv6;
 int RuntimeOption::ServerPort = 80;
 int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
@@ -393,22 +391,14 @@ int RuntimeOption::GetScannerType() {
 }
 
 std::string RuntimeOption::GetServerPrimaryIPv4() {
-   static bool once=true;
-   if (once) {
-      once=false;
-      RuntimeOption::ServerPrimaryIPv4 = GetPrimaryIPv4();
-   }
-   return RuntimeOption::ServerPrimaryIPv4;
-}
-std::string RuntimeOption::GetServerPrimaryIPv6() {
-   static bool once=ture;
-   if (once) {
-      once=false;
-      RuntimeOption::ServerPrimaryIPv6 = GetPrimaryIPv6();
-   }
-   return RuntimeOption::ServerPrimaryIPv6;
+   static std::string serverPrimaryIPv4 = GetPrimaryIPv4();
+   return serverPrimaryIPv4;
 }
 
+std::string RuntimeOption::GetServerPrimaryIPv6() {
+   static std::string serverPrimaryIPv6 = GetPrimaryIPv6(); 
+   return serverPrimaryIPv6;
+}
 
 static inline std::string regionSelectorDefault() {
   return "tracelet";
@@ -1071,9 +1061,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
 #ifdef FACEBOOK
     //Do not cause slowness on startup -- except for Facebook 
-    ServerPrimaryIPv4 = GetPrimaryIPv4();
-    ServerPrimaryIPv6 = GetPrimaryIPv6();
-    if (GetServerPrimaryIPv4.empty() && GetServerPrimaryIPv6.empty()) {
+    if (GetServerPrimaryIPv4().empty() && GetServerPrimaryIPv6().empty()) {
       throw std::runtime_error("Unable to resolve the server's "
           "IPv4 or IPv6 address");
     }

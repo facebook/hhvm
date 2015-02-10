@@ -25,14 +25,6 @@ class X {
     return (new static($this->val))->val;
   }
 
-  public function pass_through(this::T $x): this::T {
-    return $x;
-  }
-
-  public static function static_pass_through(this::T $x): this::T {
-    return $x;
-  }
-
   public static function static_get(): this::T {
     // UNSAFE
   }

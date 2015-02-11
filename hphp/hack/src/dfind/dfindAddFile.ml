@@ -77,9 +77,9 @@ module ISet = Set.Make (struct type t = int let compare = compare end)
 *)
 let blacklist = List.map Str.regexp [
   ".*/wiki/images/.*";
-  ".*/.git";
-  ".*/.svn";
-  ".*/.hg";
+  ".*/\\.git";
+  ".*/\\.svn";
+  ".*/\\.hg";
 ]
 
 let is_blacklisted path =

@@ -149,13 +149,22 @@ class PtrPrinter:
 
 
 class SmartPtrPrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::(SmartPtr<.*>|(Static)?String|Array|Object)$'
+    RECOGNIZE = '^HPHP::(SmartPtr<.*>|(Static)?String|Object)$'
 
     def __init__(self, val):
         self.val = val
 
     def _pointer(self):
         return self.val['m_px']
+
+class ArrayPrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::Array$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def _pointer(self):
+        return self.val['m_arr']['m_px']
 
 class LowPtrPrinter(PtrPrinter):
     RECOGNIZE = '^HPHP::(LowPtr<.*>|LowPtrImpl<.*>)$'
@@ -319,6 +328,7 @@ class RefDataPrinter:
 printer_classes = [
     TypedValuePrinter,
     SmartPtrPrinter,
+    ArrayPrinter,
     LowPtrPrinter,
     StringDataPrinter,
     ArrayDataPrinter,

@@ -325,6 +325,11 @@ struct isValidSmartPtrRelopArg<SmartPtr<T>> {
 };
 
 template <typename T>
+struct isValidSmartPtrRelopArg<T*> {
+  enum { value = true };
+};
+
+template <typename T>
 struct isValidSmartPtrRelopArg<const T*> {
   enum { value = true };
 };

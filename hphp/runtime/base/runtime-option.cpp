@@ -838,7 +838,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(MaxSerializedStringSize, ini,
                  error["MaxSerializedStringSize"], 64 * 1024 * 1024);
     Config::Bind(CallUserHandlerOnFatals, ini,
-                 error["CallUserHandlerOnFatals"], false);
+                 error["CallUserHandlerOnFatals"], true);
     Config::Bind(ThrowExceptionOnBadMethodCall, ini,
                  error["ThrowExceptionOnBadMethodCall"], true);
     Config::Bind(LogNativeStackOnOOM, ini,

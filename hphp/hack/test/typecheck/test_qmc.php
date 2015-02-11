@@ -10,13 +10,12 @@
  */
 
 class Foo {
-  
+
   private ?int $optional_param = null;
   private int $required_param = 0;
 
-
   public function test(): ?int {
-    
+
     $foo = $this->optional_param ?: $this->required_param;
     return $foo;
   }

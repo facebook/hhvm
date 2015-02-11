@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_DATEINTERVAL_H_
 #define incl_HPHP_DATEINTERVAL_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-resource.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/util/alloc.h"
 
 extern "C" {
@@ -103,7 +103,7 @@ public:
   String format(const String& format_spec);
 
   bool isValid() const { return get(); }
-  SmartResource<DateInterval> cloneDateInterval() const;
+  SmartPtr<DateInterval> cloneDateInterval() const;
 
 protected:
   friend class DateTime;

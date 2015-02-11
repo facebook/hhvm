@@ -17,11 +17,12 @@
 
 #include "hphp/runtime/ext/ipc/ext_ipc.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include <memory>
 
@@ -58,10 +59,10 @@ using HPHP::ScopedMem;
 
 namespace HPHP {
 
-static class SysvmsgExtension : public Extension {
+static class SysvmsgExtension final : public Extension {
 public:
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(ftok);
     HHVM_FE(msg_get_queue);
     HHVM_FE(msg_queue_exists);
@@ -75,10 +76,10 @@ public:
   }
 } s_sysvmsg_extension;
 
-static class SysvsemExtension : public Extension {
+static class SysvsemExtension final : public Extension {
 public:
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(sem_acquire);
     HHVM_FE(sem_get);
     HHVM_FE(sem_release);
@@ -88,10 +89,10 @@ public:
   }
 } s_sysvsem_extension;
 
-static class SysvshmExtension : public Extension {
+static class SysvshmExtension final : public Extension {
 public:
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(shm_attach);
     HHVM_FE(shm_detach);
     HHVM_FE(shm_remove);
@@ -148,10 +149,10 @@ Variant HHVM_FUNCTION(msg_get_queue,
       return false;
     }
   }
-  MessageQueue *q = newres<MessageQueue>();
+  auto q = makeSmartPtr<MessageQueue>();
   q->key = key;
   q->id = id;
-  return Resource(q);
+  return Variant(std::move(q));
 }
 
 bool HHVM_FUNCTION(msg_queue_exists,
@@ -307,10 +308,7 @@ bool HHVM_FUNCTION(msg_receive,
 
   int result = msgrcv(q->id, buffer, maxsize, desiredmsgtype, realflags);
   if (result < 0) {
-    int err = errno;
-    raise_warning("Unable to receive message: %s",
-                    folly::errnoStr(err).c_str());
-    errorcode = err;
+    errorcode = errno;
     return false;
   }
 
@@ -364,8 +362,7 @@ union semun {
   struct seminfo *__buf;    /* buffer for IPC_INFO */
 };
 
-class Semaphore : public SweepableResourceData {
-public:
+struct Semaphore : SweepableResourceData {
   int key;          // For error reporting.
   int semid;        // Returned by semget()
   int count;        // Acquire count for auto-release.
@@ -402,10 +399,6 @@ public:
   }
 
   ~Semaphore() {
-    Semaphore::sweep();
-  }
-
-  void sweep() override {
     /*
      * if count == -1, semaphore has been removed
      * Need better way to handle this
@@ -432,7 +425,10 @@ public:
 
     semop(semid, sop, opcount);
   }
+  DECLARE_RESOURCE_ALLOCATION(Semaphore);
 };
+
+IMPLEMENT_RESOURCE_ALLOCATION(Semaphore)
 
 bool HHVM_FUNCTION(sem_acquire,
                    const Resource& sem_identifier) {
@@ -527,7 +523,7 @@ Variant HHVM_FUNCTION(sem_get,
     }
   }
 
-  Semaphore *sem_ptr = new Semaphore();
+  auto sem_ptr = makeSmartPtr<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
   sem_ptr->count = 0;
@@ -683,7 +679,7 @@ Variant HHVM_FUNCTION(shm_attach,
   long shm_id;
 
   if (shm_size < 1) {
-    raise_warning("Segment size must be greater then zero.");
+    raise_warning("Segment size must be greater than zero.");
     return false;
   }
 
@@ -813,6 +809,9 @@ bool HHVM_FUNCTION(shm_put_var,
                    int64_t shm_identifier,
                    int64_t variable_key,
                    const Variant& variable) {
+  /* setup string-variable and serialize */
+  String serialized = HHVM_FN(serialize)(variable);
+
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -821,11 +820,8 @@ bool HHVM_FUNCTION(shm_put_var,
                   shm_identifier);
     return false;
   }
+
   sysvshm_shm *shm_list_ptr = *iter;
-
-  /* setup string-variable and serialize */
-  String serialized = HHVM_FN(serialize)(variable);
-
   /* insert serialized variable into shared memory */
   int ret = put_shm_data(shm_list_ptr->ptr, variable_key,
                          (char*)serialized.data(), serialized.size());

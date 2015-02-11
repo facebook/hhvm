@@ -1,9 +1,0 @@
-Warning: Removing an integer key from a varray, converting to array in %s on line 11
-array(1) {
-  [1]=>
-  int(2)
-}
-array(0) {
-}
-
-Warning: Removing an integer key from a varray, converting to array in %s on line 4

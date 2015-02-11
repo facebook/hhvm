@@ -6,11 +6,12 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-class StandardExtension : public Extension {
+class StandardExtension final : public Extension {
  public:
   StandardExtension() : Extension("standard") {}
 
   void moduleInit() override {
+    initStandard();
     initErrorFunc();
     initClassobj();
     initNetwork();
@@ -23,13 +24,15 @@ class StandardExtension : public Extension {
     initStreamUserFilters();
     initFile();
     initIntrinsics();
+    initMath();
   }
 
-  void threadInit() {
+  void threadInit() override {
     threadInitMisc();
   }
 
  private:
+  void initStandard();
   void initErrorFunc();
   void initClassobj();
   void initNetwork();
@@ -42,6 +45,7 @@ class StandardExtension : public Extension {
   void initStreamUserFilters();
   void initFile();
   void initIntrinsics();
+  void initMath();
 
   void threadInitMisc();
 };

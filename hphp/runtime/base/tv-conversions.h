@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
 #define incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 

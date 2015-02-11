@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/base/empty-array.h"
 
 #include <utility>
@@ -27,6 +28,8 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/shape.h"
+#include "hphp/runtime/base/struct-array.h"
 
 namespace HPHP {
 
@@ -121,7 +124,7 @@ ArrayData* EmptyArray::CopyWithStrongIterators(const ArrayData* ad) {
 
 /*
  * Helper for empty array -> packed transitions.  Creates an array
- * with one element.  The element is transfered into the array (should
+ * with one element.  The element is transferred into the array (should
  * already be incref'd).
  */
 ALWAYS_INLINE
@@ -329,7 +332,7 @@ ArrayData* EmptyArray::PlusEq(ArrayData*, const ArrayData* elems) {
 
 ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
   // Packed arrays don't need renumbering, so don't make a copy.
-  if (elems->isPacked()) {
+  if (elems->isPacked() || elems->isStruct()) {
     elems->incRefCount();
     return const_cast<ArrayData*>(elems);
   }

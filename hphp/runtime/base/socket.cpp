@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/util/logger.h"
@@ -30,31 +29,65 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SocketData final : RequestEventHandler {
-  SocketData() : m_lastErrno(0) {}
+struct SocketState final : RequestEventHandler {
+  SocketState() : m_lastErrno(0) {}
   void clear() { m_lastErrno = 0; }
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
   int m_lastErrno;
 };
 
-IMPLEMENT_STATIC_REQUEST_LOCAL(SocketData, s_socket_data);
+IMPLEMENT_STATIC_REQUEST_LOCAL(SocketState, s_socket_state);
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors and destructor
 
-Socket::Socket()
-  : File(true), m_port(0), m_type(-1), m_error(0), m_timeout(0),
-    m_timedOut(false), m_bytesSent(0) {
+SocketData::SocketData(
+  int port,
+  int type
+) : FileData(true), m_port(port), m_type(type) {
 }
 
-Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
-               int port /* = 0 */, double timeout /* = 0 */,
+bool SocketData::closeImpl() {
+  s_pcloseRet = 0;
+  if (valid() && !isClosed()) {
+    s_pcloseRet = ::close(getFd());
+    setIsClosed(true);
+    setFd(-1);
+  }
+  return FileData::closeImpl();
+}
+
+SocketData::~SocketData() {
+  SocketData::closeImpl();
+}
+
+Socket::Socket()
+: File(std::make_shared<SocketData>(0, -1)),
+  m_data(static_cast<SocketData*>(getFileData()))
+{
+}
+
+Socket::Socket(std::shared_ptr<SocketData> data)
+: File(data),
+  m_data(static_cast<SocketData*>(getFileData()))
+{
+  assert(data);
+  inferStreamType();
+}
+
+Socket::Socket(std::shared_ptr<SocketData> data,
+               int sockfd,
+               int type,
+               const char *address /* = NULL */,
+               int port /* = 0 */,
+               double timeout /* = 0 */,
                const StaticString& streamType /* = empty_string_ref */)
-  : File(true, null_string, streamType.get()), m_port(port), m_type(type),
-    m_error(0), m_timeout(0), m_timedOut(false), m_bytesSent(0) {
-  if (address) m_address = address;
-  m_fd = sockfd;
+: File(data, null_string, streamType),
+  m_data(data.get())
+{
+  if (address) m_data->m_address = address;
+  setFd(sockfd);
 
   struct timeval tv;
   if (timeout <= 0) {
@@ -65,39 +98,41 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
     tv.tv_sec = (int)timeout;
     tv.tv_usec = (timeout - tv.tv_sec) * 1e6;
   }
-  setsockopt(m_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-  s_socket_data->m_lastErrno = errno;
-  setsockopt(m_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
-  s_socket_data->m_lastErrno = errno;
+  setsockopt(getFd(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+  s_socket_state->m_lastErrno = errno;
+  setsockopt(getFd(), SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+  s_socket_state->m_lastErrno = errno;
   setTimeout(tv);
-  m_isLocal = (type == AF_UNIX);
+  setIsLocal(type == AF_UNIX);
 
   // Attempt to infer stream type only if it was not explicitly specified.
-  if (staticEmptyString() == streamType.get()) {
-    inferStreamType();
-  }
+  inferStreamType();
 }
 
-Socket::~Socket() {
-  closeImpl();
-}
+Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
+               int port /* = 0 */, double timeout /* = 0 */,
+               const StaticString& streamType /* = empty_string_ref */)
+: Socket(
+    std::make_shared<SocketData>(port, type),
+    sockfd, type, address, port, timeout, streamType)
+{ }
+
+Socket::~Socket() { }
 
 void Socket::sweep() {
   Socket::closeImpl();
-  using std::string;
-  m_address.~string();
   File::sweep();
-  Socket::operator delete(this);
+  m_data = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void Socket::setError(int err) {
-  s_socket_data->m_lastErrno = m_error = err;
+  s_socket_state->m_lastErrno = m_data->m_error = err;
 }
 
 int Socket::getLastError() {
-  return s_socket_data->m_lastErrno;
+  return s_socket_state->m_lastErrno;
 }
 
 bool Socket::open(const String& filename, const String& mode) {
@@ -109,37 +144,26 @@ bool Socket::close() {
   return closeImpl();
 }
 
-bool Socket::closeImpl() {
-  s_pcloseRet = 0;
-  if (valid() && !m_closed) {
-    s_pcloseRet = ::close(m_fd);
-    m_closed = true;
-    m_fd = -1;
-  }
-  File::closeImpl();
-  return true;
-}
-
 void Socket::setTimeout(struct timeval &tv) {
   if (tv.tv_sec >= 0 && tv.tv_usec >= 0) {
-    m_timeout = tv.tv_sec * 1000000 + tv.tv_usec;
+    m_data->m_timeout = tv.tv_sec * 1000000 + tv.tv_usec;
   } else {
-    m_timeout = 0;
+    m_data->m_timeout = 0;
   }
 }
 
 bool Socket::checkLiveness() {
-  if (m_fd == -1 || m_timedOut) {
+  if (getFd() == -1 || m_data->m_timedOut) {
     return false;
   }
 
   pollfd p;
-  p.fd = m_fd;
+  p.fd = getFd();
   p.events = POLLIN | POLLERR | POLLHUP | POLLPRI;
   p.revents = 0;
   if (poll(&p, 1, 0) > 0 && p.revents > 0) {
     char buf;
-    int64_t ret = recv(m_fd, &buf, sizeof(buf), MSG_PEEK);
+    int64_t ret = recv(getFd(), &buf, sizeof(buf), MSG_PEEK);
     if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR)) {
       return false;
     }
@@ -149,29 +173,29 @@ bool Socket::checkLiveness() {
 }
 
 bool Socket::setBlocking(bool blocking) {
-  int flags = fcntl(m_fd, F_GETFL, 0);
+  int flags = fcntl(getFd(), F_GETFL, 0);
   if (blocking) {
     flags &= ~O_NONBLOCK;
   } else {
     flags |= O_NONBLOCK;
   }
-  return fcntl(m_fd, F_SETFL, flags) != -1;
+  return fcntl(getFd(), F_SETFL, flags) != -1;
 }
 
 bool Socket::waitForData() {
-  m_timedOut = false;
+  m_data->m_timedOut = false;
   while (true) {
     struct pollfd fds[1];
-    fds[0].fd = m_fd;
+    fds[0].fd = getFd();
     fds[0].events = POLLIN|POLLERR|POLLHUP;
-    if (poll(fds, 1, m_timeout / 1000)) {
+    if (poll(fds, 1, m_data->m_timeout / 1000)) {
       socklen_t lon = sizeof(int);
       int valopt;
-      getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (void*)(&valopt), &lon);
+      getsockopt(getFd(), SOL_SOCKET, SO_ERROR, (void*)(&valopt), &lon);
       if (valopt == EINTR) continue;
       return valopt == 0;
     } else {
-      m_timedOut = true;
+      m_data->m_timedOut = true;
       return true;
     }
   }
@@ -179,55 +203,55 @@ bool Socket::waitForData() {
 }
 
 int64_t Socket::readImpl(char *buffer, int64_t length) {
-  assert(m_fd);
+  assert(getFd());
   assert(length > 0);
 
-  IOStatusHelper io("socket::recv", m_address.c_str(), m_port);
+  IOStatusHelper io("socket::recv", m_data->m_address.c_str(), m_data->m_port);
 
   int recvFlags = 0;
-  if (m_timeout > 0) {
-    int flags = fcntl(m_fd, F_GETFL, 0);
+  if (m_data->m_timeout > 0) {
+    int flags = fcntl(getFd(), F_GETFL, 0);
     if ((flags & O_NONBLOCK) == 0) {
       if (!waitForData()) {
-        m_eof = true;
+        setEof(true);
         return 0;
       }
       recvFlags = MSG_DONTWAIT; // polled, so no need to wait any more
     }
   }
 
-  int64_t ret = recv(m_fd, buffer, length, recvFlags);
+  int64_t ret = recv(getFd(), buffer, length, recvFlags);
   if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR)) {
-    m_eof = true;
+    setEof(true);
   }
   return (ret < 0) ? 0 : ret;
 }
 
 int64_t Socket::writeImpl(const char *buffer, int64_t length) {
-  assert(m_fd);
+  assert(getFd());
   assert(length > 0);
-  m_eof = false;
-  IOStatusHelper io("socket::send", m_address.c_str(), m_port);
-  int64_t ret = send(m_fd, buffer, length, 0);
+  setEof(false);
+  IOStatusHelper io("socket::send", m_data->m_address.c_str(), m_data->m_port);
+  int64_t ret = send(getFd(), buffer, length, 0);
   if (ret >= 0) {
-    m_bytesSent += ret;
+    m_data->m_bytesSent += ret;
   }
   return ret;
 }
 
 bool Socket::eof() {
-  if (!m_eof && valid() && bufferedLen() == 0) {
+  if (!getEof() && valid() && bufferedLen() == 0) {
     // Test if stream is EOF if the flag is not already set.
     // Attempt to peek at one byte from the stream, checking for:
     // i)  recv() closing gracefully, or
     // ii) recv() failed due to no waiting data on non-blocking socket.
     char ch;
-    int64_t ret = recv(m_fd, &ch, 1, MSG_PEEK | MSG_DONTWAIT);
+    int64_t ret = recv(getFd(), &ch, 1, MSG_PEEK | MSG_DONTWAIT);
     if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR)) {
-      m_eof = true;
+      setEof(true);
     }
   }
-  return m_eof;
+  return getEof();
 }
 
 const StaticString
@@ -236,8 +260,8 @@ const StaticString
 
 Array Socket::getMetaData() {
   Array ret = File::getMetaData();
-  ret.set(s_timed_out, m_timedOut);
-  ret.set(s_blocked, (bool)(fcntl(m_fd, F_GETFL, 0) & O_NONBLOCK));
+  ret.set(s_timed_out, m_data->m_timedOut);
+  ret.set(s_blocked, (bool)(fcntl(getFd(), F_GETFL, 0) & O_NONBLOCK));
   return ret;
 }
 
@@ -249,37 +273,39 @@ int64_t Socket::tell() {
 // If no conclusive match can be found, leaves m_streamType
 // as its default value of empty_string_ref.
 void Socket::inferStreamType() {
-  int result, type;
-  socklen_t len = sizeof(type);
-  result = getsockopt(m_fd, SOL_SOCKET, SO_TYPE, &type, &len);
-  if (result != 0) {
-    // getsockopt error.
-    // Nothing to do here because the default stream type is empty_string_ref.
-    return;
-  }
+  if (empty_string() == getStreamType()) {
+    int result, type;
+    socklen_t len = sizeof(type);
+    result = getsockopt(getFd(), SOL_SOCKET, SO_TYPE, &type, &len);
+    if (result != 0) {
+      // getsockopt error.
+      // Nothing to do here because the default stream type is empty_string_ref.
+      return;
+    }
 
-  if (m_type == AF_INET || m_type == AF_INET6) {
-    if (type == SOCK_STREAM) {
-      if (RuntimeOption::EnableHipHopSyntax) {
-        m_streamType = StaticString("tcp_socket").get();
-      } else {
-        // Note: PHP returns "tcp_socket/ssl" for this query,
-        // even though the socket is clearly not an SSL socket.
-        m_streamType = StaticString("tcp_socket/ssl").get();
+    if (m_data->m_type == AF_INET || m_data->m_type == AF_INET6) {
+      if (type == SOCK_STREAM) {
+        if (RuntimeOption::EnableHipHopSyntax) {
+          setStreamType(StaticString("tcp_socket"));
+        } else {
+          // Note: PHP returns "tcp_socket/ssl" for this query,
+          // even though the socket is clearly not an SSL socket.
+          setStreamType(StaticString("tcp_socket/ssl"));
+        }
+      } else if (type == SOCK_DGRAM) {
+        setStreamType(StaticString("udp_socket"));
       }
-    } else if (type == SOCK_DGRAM) {
-      m_streamType = StaticString("udp_socket").get();
+    } else if (m_data->m_type == AF_UNIX) {
+      if (type == SOCK_STREAM) {
+        setStreamType(StaticString("unix_socket"));
+      } else if (type == SOCK_DGRAM) {
+        setStreamType(StaticString("udg_socket"));
+      }
     }
-  } else if (m_type == AF_UNIX) {
-    if (type == SOCK_STREAM) {
-      m_streamType = StaticString("unix_socket").get();
-    } else if (type == SOCK_DGRAM) {
-      m_streamType = StaticString("udg_socket").get();
-    }
-  }
 
-  // Nothing to do in default case because the default stream type is
-  // empty_string_ref.
+    // Nothing to do in default case because the default stream type is
+    // empty_string_ref.
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,2 @@
+File "static_polymorphism_undefined.php", line 4, characters 3-4:
+Undefined variable: $a (Naming[2050])

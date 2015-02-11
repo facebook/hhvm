@@ -21,13 +21,15 @@
 #include <cxxabi.h>
 #include <boost/mpl/identity.hpp>
 
-#include "hphp/util/abi-cxx.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unwind.h"
+#include "hphp/util/abi-cxx.h"
 
 // on cygwin in 64 bit/SEH adding frame information needs to be
 // handled with rtladdfunctiontable and rtldeletefunctiontable
@@ -50,7 +52,7 @@ TRACE_SET_MOD(unwind);
 
 namespace HPHP { namespace jit {
 
-RDS::Link<UnwindRDS> unwindRdsInfo(RDS::kInvalidHandle);
+rds::Link<UnwindRDS> unwindRdsInfo(rds::kInvalidHandle);
 
 namespace {
 
@@ -89,7 +91,8 @@ void sync_regstate(_Unwind_Context* context) {
 }
 
 bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
-                         bool do_side_exit, TypedValue unwinder_tv) {
+                         bool do_side_exit, TypedValue unwinder_tv,
+                         uint64_t returnRip) {
   auto const rip = (TCA)_Unwind_GetIP(ctx);
   auto catchTraceOpt = mcg->getCatchTrace(rip);
   FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
@@ -124,15 +127,15 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
          "returning _URC_INSTALL_CONTEXT\n",
          catchTrace, rip, unwinder_tv.pretty());
 
-  // In theory the unwind api will let us set registers in the frame
-  // before executing our landing pad. In practice, trying to use
-  // their recommended scratch registers results in a SEGV inside
-  // _Unwind_SetGR, so we pass things to the handler using the
-  // RDS. This also simplifies the handler code because it doesn't
-  // have to worry about saving its arguments somewhere while
-  // executing the exit trace.
-  unwindRdsInfo->unwinderScratch = (int64_t)exn;
+  // In theory the unwind api will let us set registers in the frame before
+  // executing our landing pad. In practice, trying to use their recommended
+  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
+  // things to the handler using the RDS. This also simplifies the handler code
+  // because it doesn't have to worry about saving its arguments somewhere
+  // while executing the exit trace.
+  unwindRdsInfo->exn = exn;
   unwindRdsInfo->doSideExit = do_side_exit;
+  unwindRdsInfo->returnRip = returnRip;
   if (do_side_exit) {
     unwindRdsInfo->unwinderTv = unwinder_tv;
   }
@@ -166,14 +169,16 @@ tc_unwind_personality(int version,
   assert(version == 1);
 
   auto const& ti = typeInfoFromUnwindException(exceptionObj);
+  auto const std_exception = exceptionFromUnwindException(exceptionObj);
   InvalidSetMException* ism = nullptr;
   TVCoercionException* tce = nullptr;
+  VMResumeTC* resume_tc = nullptr;
   if (ti == typeid(InvalidSetMException)) {
-    ism = static_cast<InvalidSetMException*>(
-      exceptionFromUnwindException(exceptionObj));
+    ism = static_cast<InvalidSetMException*>(std_exception);
   } else if (ti == typeid(TVCoercionException)) {
-    tce = static_cast<TVCoercionException*>(
-      exceptionFromUnwindException(exceptionObj));
+    tce = static_cast<TVCoercionException*>(std_exception);
+  } else if (ti == typeid(VMResumeTC)) {
+    resume_tc = static_cast<VMResumeTC*>(std_exception);
   }
 
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
@@ -183,18 +188,17 @@ tc_unwind_personality(int version,
     auto* exnType = __cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
     assert(status == 0);
-    FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}.\n",
+    FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}\n",
            unwindType, exceptionObj,
            tl_regState == VMRegState::DIRTY ? "dirty" : "clean",
            (TCA)_Unwind_GetIP(context), exnType);
   }
 
   /*
-   * We don't do anything during the search phase---before attempting
-   * cleanup, we want all deeper frames to have run their object
-   * destructors (which can have side effects like setting
-   * tl_regState) and spilled any values they may have been holding in
-   * callee-saved regs.
+   * We don't do anything during the search phase---before attempting cleanup,
+   * we want all deeper frames to have run their object destructors (which can
+   * have side effects like setting tl_regState) and spilled any values they
+   * may have been holding in callee-saved regs.
    */
   if (actions & _UA_SEARCH_PHASE) {
     if (ism) {
@@ -203,7 +207,13 @@ tc_unwind_personality(int version,
       return _URC_HANDLER_FOUND;
     }
     if (tce) {
-      FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND");
+      FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND\n");
+      return _URC_HANDLER_FOUND;
+    }
+    if (resume_tc) {
+      FTRACE(1, "VMResumeTC thrown with address {:#x}, "
+             "returning _URC_HANDLER_FOUND\n",
+             resume_tc->where);
       return _URC_HANDLER_FOUND;
     }
   }
@@ -219,7 +229,43 @@ tc_unwind_personality(int version,
     if (tl_regState == VMRegState::DIRTY) {
       sync_regstate(context);
     }
-    if (install_catch_trace(context, exceptionObj, ism || tce, tv)) {
+
+    // When we're unwinding through a TC frame (as opposed to stopping at a
+    // handler frame), we need to make sure that if we later return from this
+    // VM frame in translated code, we don't resume after the bindcall that may
+    // be expecting things to still live in its spill space. If the return
+    // address is in functionEnterHelper or callToExit, rVmFp won't contain a
+    // real VM frame, so we skip those.
+    auto const fp  = reinterpret_cast<ActRec*>(_Unwind_GetGR(context,
+                                                             Debug::RBP));
+    if (!(actions & _UA_HANDLER_FRAME) && isVMFrame(fp)) {
+      auto const oldRip = fp->m_savedRip;
+      g_context->preventReturnToTC(fp);
+      if (fp->m_savedRip != oldRip) {
+        FTRACE(1, "Smashed m_savedRip of fp {} from {:#x} to {:#x}\n",
+               fp, oldRip, fp->m_savedRip);
+      }
+    }
+
+    if (install_catch_trace(context, exceptionObj, ism || tce, tv,
+                            resume_tc ? resume_tc->where : 0)) {
+      always_assert((ism || tce || resume_tc) ==
+                    bool(actions & _UA_HANDLER_FRAME));
+      return _URC_INSTALL_CONTEXT;
+    }
+
+    if (resume_tc) {
+      // We tried to interpret a return out of a frame that was entered in the
+      // TC and there's no catch trace for the current rip. Put the address
+      // after the call in rax, then resume execution at a stub that will load
+      // vmfp and vmsp, then jump to rax.
+      FTRACE(1, "Resuming TC @ {:#x}\n", resume_tc->where);
+      _Unwind_SetGR(context, __builtin_eh_return_data_regno(0),
+                    resume_tc->where);
+      _Unwind_SetIP(context, uint64_t(handleSRResumeTC));
+      tl_regState = VMRegState::DIRTY;
+
+      always_assert(actions & _UA_HANDLER_FRAME);
       return _URC_INSTALL_CONTEXT;
     }
   }

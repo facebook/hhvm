@@ -29,7 +29,9 @@
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -51,10 +53,9 @@ constexpr size_t kJmpTargetAlign = 16;
 
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
-void emitEagerSyncPoint(Asm& as, const Op* pc, PhysReg vmfp, PhysReg vmsp);
-void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg vmfp, Vreg vmsp);
-void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
-void emitEagerVMRegSave(Vout& as, RegSaveFlags flags);
+void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp);
+void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags);
+void emitEagerVMRegSave(Vout& as, Vreg rds, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 void emitGetGContext(Vout& as, Vreg dest);
 
@@ -92,12 +93,13 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff);
  * Tests the surprise flags for the current thread. Should be used
  * before a jnz to surprise handling code.
  */
-void emitTestSurpriseFlags(Asm& as);
-Vreg emitTestSurpriseFlags(Vout&);
+void emitTestSurpriseFlags(Asm& as, PhysReg rds);
+Vreg emitTestSurpriseFlags(Vout& v, Vreg rds);
 
-void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Fixup fixup);
-void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
+void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Vreg rds,
                                  Fixup fixup);
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
+                                 PhysReg rds, Fixup fixup);
 
 #ifdef USE_GCC_FAST_TLS
 
@@ -121,11 +123,15 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
  * address where TLS starts.
  */
 template<typename T>
+inline Vptr getTLSPtr(const T& data) {
+  uintptr_t virtualAddress = uintptr_t(&data) - tlsBase();
+  return Vptr{baseless(virtualAddress), Vptr::FS};
+}
+
+template<typename T>
 inline void
 emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg reg) {
-  uintptr_t virtualAddress = uintptr_t(&datum.m_node.m_p) - tlsBase();
-  Vptr addr{baseless(virtualAddress), Vptr::FS};
-  v << load{addr, reg};
+  v << load{getTLSPtr(datum.m_node.m_p), reg};
 }
 
 template<typename T>
@@ -141,12 +147,12 @@ template<typename T>
 inline void
 emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
   PhysRegSaver(v, kGPCallerSaved); // we don't know for sure what's alive
-  v << ldimm{datum.m_key, argNumToRegName[0]};
+  v << ldimmq{datum.m_key, argNumToRegName[0]};
   const CodeAddress addr = (CodeAddress)pthread_getspecific;
   if (deltaFits((uintptr_t)addr, sz::dword)) {
     v << call{addr, argSet(1)};
   } else {
-    v << ldimm{addr, reg::rax};
+    v << ldimmq{addr, reg::rax};
     v << callr{reg::rax, argSet(1)};
   }
   if (dest != Vreg(reg::rax)) {
@@ -180,12 +186,10 @@ void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem);
 void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem);
 void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2);
 
-void copyTV(Vout& v, Vloc src, Vloc dst);
+void copyTV(Vout& v, Vloc src, Vloc dst, Type destType);
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0);
 
 Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg);
-
-ConditionCode opToConditionCode(Opcode opc);
 
 template<ConditionCode Jcc, class Lambda>
 void jccBlock(Asm& a, Lambda body) {
@@ -217,7 +221,7 @@ inline MemoryRef lookupDestructor(X64Assembler& a, PhysReg typeReg) {
   return baseless(typeReg*8 + table);
 }
 
-inline MemoryRef lookupDestructor(Vout& v, PhysReg typeReg) {
+inline Vptr lookupDestructor(Vout& v, Vreg typeReg) {
   auto const table = reinterpret_cast<intptr_t>(g_destructors);
   always_assert_flog(deltaFits(table, sz::dword),
     "Destructor function table is expected to be in the data "
@@ -229,8 +233,9 @@ inline MemoryRef lookupDestructor(Vout& v, PhysReg typeReg) {
                 (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
                 (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
                 "lookup of destructors depends on KindOf* values");
-  v << shrli{kShiftDataTypeToDestrIndex, typeReg, typeReg, v.makeReg()};
-  return baseless(typeReg*8 + table);
+  auto shiftedType = v.makeReg();
+  v << shrli{kShiftDataTypeToDestrIndex, typeReg, shiftedType, v.makeReg()};
+  return Vptr{Vreg{}, shiftedType, 8, safe_cast<int>(table)};
 }
 
 //////////////////////////////////////////////////////////////////////

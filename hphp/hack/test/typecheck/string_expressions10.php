@@ -30,5 +30,4 @@ class Meh {
   }
 }
 
-
 Meh::foo(null);

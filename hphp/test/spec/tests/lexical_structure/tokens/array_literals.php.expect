@@ -1,0 +1,72 @@
+object(X)#1 (6) {
+  ["prop10":"X":private]=>
+  array(0) {
+  }
+  ["prop11":"X":private]=>
+  array(3) {
+    [0]=>
+    int(10)
+    ["a"]=>
+    string(3) "red"
+    [1]=>
+    bool(true)
+  }
+  ["prop12":"X":private]=>
+  array(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    string(3) "red"
+    ["xx"]=>
+    array(3) {
+      [0]=>
+      float(2.3)
+      [1]=>
+      NULL
+      ["zz"]=>
+      array(3) {
+        [0]=>
+        int(12)
+        [1]=>
+        bool(false)
+        [2]=>
+        string(3) "zzz"
+      }
+    }
+  }
+  ["prop20":"X":private]=>
+  array(0) {
+  }
+  ["prop21":"X":private]=>
+  array(3) {
+    [0]=>
+    int(10)
+    ["a"]=>
+    string(3) "red"
+    [1]=>
+    bool(true)
+  }
+  ["prop22":"X":private]=>
+  array(3) {
+    [0]=>
+    int(10)
+    [1]=>
+    string(3) "red"
+    ["xx"]=>
+    array(3) {
+      [0]=>
+      float(2.3)
+      [1]=>
+      NULL
+      ["zz"]=>
+      array(3) {
+        [0]=>
+        int(12)
+        [1]=>
+        bool(false)
+        [2]=>
+        string(3) "zzz"
+      }
+    }
+  }
+}

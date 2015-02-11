@@ -1,0 +1,66 @@
+Requesting 'test_get.php?name=Foo'
+string(15) "string(3) "Foo""
+Requesting 'test_get.php?name=Bar'
+string(15) "string(3) "Bar""
+Requesting 'apc_apache_note.php'
+string(14) "string(2) "OK""
+Requesting 'apc_apache_note.php'
+string(14) "string(2) "OK""
+Requesting 'apc_apache_note.php'
+string(14) "string(2) "OK""
+Requesting 'test_cookie.php?cookie_name=asdf&cookie_value=foo&cookie_path=BAR'
+string(16) "string(4) "asdf""
+Requesting 'test_cookie.php?cookie_name=as%%0d%%0adf&cookie_value=foo&cookie_path=BAR'
+NULL
+Requesting 'test_cookie.php?cookie_name=asdf&cookie_value=f%%0d%%0aoo&cookie_path=BAR'
+string(16) "string(4) "asdf""
+Requesting 'test_cookie.php?cookie_name=asdf&cookie_value=foo&cookie_path=B%%0d%%0aAR'
+NULL
+Requesting 'test_header.php?test_string=foo'
+string(14) "string(2) "OK""
+Requesting 'test_header.php?test_string=f%%0d%%0aoo'
+NULL
+Requesting 'test_duplicate_headers.php'
+string(%d) "array(5) {
+  ["Host"]=>
+  string(%d) "%s"
+  ["xxxxx "]=>
+  string(2) "45"
+  ["xyzzy "]=>
+  string(2) "44"
+  ["Accept"]=>
+  string(3) "*/*"
+  ["User-Agent"]=>
+  string(%s) "%s"
+}
+array(5) {
+  ["host"]=>
+  array(1) {
+    [0]=>
+    string(%d) "%s"
+  }
+  ["xxxxx "]=>
+  array(1) {
+    [0]=>
+    string(2) "45"
+  }
+  ["xyzzy "]=>
+  array(3) {
+    [0]=>
+    string(2) "42"
+    [1]=>
+    string(2) "43"
+    [2]=>
+    string(2) "44"
+  }
+  ["accept"]=>
+  array(1) {
+    [0]=>
+    string(3) "*/*"
+  }
+  ["user-agent"]=>
+  array(1) {
+    [0]=>
+    string(%d) "%s"
+  }
+}"

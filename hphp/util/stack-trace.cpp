@@ -24,9 +24,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "folly/String.h"
-#include "folly/ScopeGuard.h"
-#include "folly/Conv.h"
+#include <folly/String.h>
+#include <folly/ScopeGuard.h>
+#include <folly/Conv.h>
 
 #include "hphp/util/process.h"
 #include "hphp/util/lock.h"

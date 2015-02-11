@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
@@ -31,8 +32,55 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class StreamContext;
+class StreamFilter;
 
 extern int __thread s_pcloseRet;
+
+// This structure holds the non-smart allocated data members of File.  The
+// purpose of the class is to allow File (and subclasses) to be managed by
+// the smart allocator while also allowing them to be persisted beyond the
+// lifetime of a request.  The FileData is stored in a shared_ptr and managed
+// by new/delete, so it is safe to store in an object whose lifetime is longer
+// than a request.  A File (or subclass) can be reconstructed using a shared_ptr
+// to a FileData.  Note that subclasses of File that need to be persisted must
+// subclass FileData to add any persistent data members, e.g. see Socket.
+// Classes in the FileData hierarchy may not contain smart allocated data.
+struct FileData {
+  static const int CHUNK_SIZE;
+
+  FileData() { }
+  explicit FileData(bool nonblocking);
+  virtual bool closeImpl();
+  virtual ~FileData();
+
+ protected:
+  bool valid() const { return m_fd >= 0;}
+  bool isClosed() const { return m_closed; }
+  void setIsClosed(bool closed) { m_closed = closed; }
+  void setFd(int fd) { m_fd = fd; }
+  int getFd() { return m_fd; }
+
+ private:
+  friend class File;
+  int m_fd{-1};      // file descriptor
+  bool m_isLocal{false}; // is this on the local disk?
+  bool m_closed{false}; // whether close() was called
+  const bool m_nonblocking{true};
+
+  // fields useful for both reads and writes
+  bool m_eof{false};
+  int64_t m_position{0}; // the current cursor position
+
+  // fields only useful for buffered reads
+  int64_t m_writepos{0}; // where we have read from lower level
+  int64_t m_readpos{0};  // where we have given to upper level
+
+  std::string m_name;
+  std::string m_mode;
+
+  char *m_buffer{nullptr};
+  int64_t m_bufferSize{CHUNK_SIZE};
+};
 
 /**
  * This is PHP's "stream", base class of plain file, gzipped file, directory
@@ -40,8 +88,7 @@ extern int __thread s_pcloseRet;
  * but we will have PlainFile, ZipFile and Socket derive from this base class,
  * so they can share some minimal functionalities.
  */
-class File : public SweepableResourceData {
-public:
+struct File : SweepableResourceData {
   static const int CHUNK_SIZE;
 
   static String TranslatePath(const String& filename);
@@ -50,15 +97,15 @@ public:
   // Same as TranslatePath except checks the file cache on miss
   static String TranslatePathWithFileCache(const String& filename);
   static String TranslateCommand(const String& cmd);
-  static Resource Open(const String& filename, const String& mode,
-                       int options = 0, const Variant& context = uninit_null());
+  static SmartPtr<File> Open(
+    const String& filename, const String& mode,
+    int options = 0, const SmartPtr<StreamContext>& context = nullptr);
 
   static bool IsVirtualDirectory(const String& filename);
   static bool IsPlainFilePath(const String& filename) {
     return filename.find("://") == String::npos;
   }
 
-public:
   static const int USE_INCLUDE_PATH;
 
   explicit File(bool nonblocking = true,
@@ -74,12 +121,12 @@ public:
 
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
-  const String& o_getResourceName() const { return s_resource_name; }
-  virtual bool isInvalid() const { return m_closed; }
+  const String& o_getResourceName() const;
+  virtual bool isInvalid() const { return m_data->m_closed; }
 
-  int fd() const { return m_fd;}
-  bool valid() const { return m_fd >= 0;}
-  const std::string getName() const { return m_name;}
+  virtual int fd() const { return m_data->m_fd;}
+  bool valid() const { return m_data && m_data->m_fd >= 0; }
+  std::string getName() const { return m_data->m_name;}
 
   /**
    * How to open this type of file.
@@ -94,7 +141,7 @@ public:
    * and clean up.
    */
   virtual bool close() = 0;
-  virtual bool isClosed() const { return m_closed;}
+  virtual bool isClosed() const { return !m_data || m_data->m_closed; }
 
   /* Use:
    * - read() when fetching data to return to PHP
@@ -151,21 +198,25 @@ public:
   virtual bool lock(int operation, bool &wouldblock);
   virtual bool stat(struct stat *sb);
 
+  virtual Object await(uint16_t events, double timeout);
+
   virtual Array getMetaData();
   virtual Variant getWrapperMetaData() { return Variant(); }
   String getWrapperType() const;
   String getStreamType() const { return m_streamType; }
-  Resource &getStreamContext() { return m_streamContext; }
-  void setStreamContext(Resource &context) { m_streamContext = context; }
-  void appendReadFilter(Resource &filter);
-  void appendWriteFilter(Resource &filter);
-  void prependReadFilter(Resource &filter);
-  void prependWriteFilter(Resource &filter);
-  bool removeFilter(Resource &filter);
+  const SmartPtr<StreamContext>& getStreamContext() { return m_streamContext; }
+  void setStreamContext(const SmartPtr<StreamContext>& context) {
+    m_streamContext = context;
+  }
+  void appendReadFilter(const SmartPtr<StreamFilter>& filter);
+  void appendWriteFilter(const SmartPtr<StreamFilter>& filter);
+  void prependReadFilter(const SmartPtr<StreamFilter>& filter);
+  void prependWriteFilter(const SmartPtr<StreamFilter>& filter);
+  bool removeFilter(const SmartPtr<StreamFilter>& filter);
 
-  int64_t bufferedLen() { return m_writepos - m_readpos; }
+  int64_t bufferedLen() { return m_data->m_writepos - m_data->m_readpos; }
 
-  std::string getMode() { return m_mode; }
+  std::string getMode() { return m_data->m_mode; }
 
   /**
    * Read one line a time. Returns a null string on failure or eof.
@@ -190,7 +241,8 @@ public:
   /**
    * Write one line of csv record.
    */
-  int64_t writeCSV(const Array& fields, char delimiter = ',', char enclosure = '"');
+  int64_t writeCSV(const Array& fields, char delimiter = ',',
+                   char enclosure = '"');
 
   /**
    * Read one line of csv record.
@@ -203,36 +255,38 @@ public:
    */
   String getLastError();
 
-  /**
-   * Is this on the local disk?
-   */
-  bool m_isLocal;
+  bool isLocal() const { return m_data->m_isLocal; }
+
+  std::shared_ptr<FileData> getData() const { return m_data; }
 
 protected:
-  int m_fd;      // file descriptor
-  bool m_closed; // whether close() was called
-  bool m_nonblocking;
-
-  // fields only useful for buffered reads
-  int64_t m_writepos; // where we have read from lower level
-  int64_t m_readpos;  // where we have given to upper level
-
-  // fields useful for both reads and writes
-  int64_t m_position; // the current cursor position
-  bool m_eof;
-
-  std::string m_name;
-  std::string m_mode;
-
-  StringData* m_wrapperType;
-  StringData* m_streamType;
-  Resource m_streamContext;
-  smart::list<Resource> m_readFilters;
-  smart::list<Resource> m_writeFilters;
-
   void invokeFiltersOnClose();
-  void closeImpl();
+  bool closeImpl();
   virtual void sweep() override;
+
+  void setIsLocal(bool isLocal) { m_data->m_isLocal = isLocal; }
+  void setIsClosed(bool closed) { m_data->m_closed = closed; }
+
+  bool getEof() const { return m_data->m_eof; }
+  void setEof(bool eof) { m_data->m_eof = eof; }
+
+  int64_t getPosition() const { return m_data->m_position; }
+  void setPosition(int64_t pos) { m_data->m_position = pos; }
+
+  int64_t getWritePosition() const { return m_data->m_writepos; }
+  void setWritePosition(int64_t wpos) { m_data->m_writepos = wpos; }
+
+  int64_t getReadPosition() const { return m_data->m_readpos; }
+  void setReadPosition(int64_t rpos) { m_data->m_readpos = rpos; }
+
+  int getFd() const { return m_data->m_fd; }
+  void setFd(int fd) { m_data->m_fd = fd; }
+
+  void setName(std::string name) { m_data->m_name = name; }
+
+  void setStreamType(const StaticString& streamType) {
+    m_streamType = streamType.get();
+  }
 
   /**
    * call readImpl(m_buffer, CHUNK_SIZE), passing through stream filters if any.
@@ -243,14 +297,27 @@ protected:
    * call writeImpl, passing through stream filters if any.
    */
   int64_t filteredWrite(const char* buffer, int64_t length);
-private:
-  char *m_buffer;
-  int64_t m_bufferSize;
 
+  FileData* getFileData() { return m_data.get(); }
+  const FileData* getFileData() const { return m_data.get(); }
+
+protected:
+  explicit File(std::shared_ptr<FileData> data,
+                const String& wrapper_type = null_string,
+                const String& stream_type = empty_string_ref);
+
+private:
   template<class ResourceList>
   String applyFilters(const String& buffer,
                       ResourceList& filters,
                       bool closing);
+
+  std::shared_ptr<FileData> m_data;
+  StringData* m_wrapperType;
+  StringData* m_streamType;
+  SmartPtr<StreamContext> m_streamContext;
+  smart::list<SmartPtr<StreamFilter>> m_readFilters;
+  smart::list<SmartPtr<StreamFilter>> m_writeFilters;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

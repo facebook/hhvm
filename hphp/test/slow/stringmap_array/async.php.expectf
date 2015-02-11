@@ -1,7 +1,0 @@
-Warning: Adding an int key to a msarray, converting to array in %s/async.php on line 11
-array(2) {
-  ["key"]=>
-  string(5) "value"
-  [10]=>
-  string(7) "warning"
-}

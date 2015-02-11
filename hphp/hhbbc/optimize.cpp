@@ -22,14 +22,13 @@
 #include <cassert>
 #include <bitset>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/complex-types.h"
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/analyze.h"
@@ -178,9 +177,6 @@ bool hasObviousStackOutput(Op op) {
   case Op::NewArray:
   case Op::NewPackedArray:
   case Op::NewStructArray:
-  case Op::NewVArray:
-  case Op::NewMIArray:
-  case Op::NewMSArray:
   case Op::AddElemC:
   case Op::AddElemV:
   case Op::AddNewElemC:
@@ -225,8 +221,6 @@ bool hasObviousStackOutput(Op op) {
   case Op::IsTypeC:
   case Op::IsTypeL:
   case Op::OODeclExists:
-  case Op::Floor:
-  case Op::Ceil:
     return true;
 
   // Consider CGetL obvious because if we knew the type of the local,

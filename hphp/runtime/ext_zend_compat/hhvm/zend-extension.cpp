@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-extension.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-object.h"
-#include "folly/AtomicHashMap.h"
+#include <folly/AtomicHashMap.h>
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_modules.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_API.h"
 #include "hphp/runtime/vm/native.h"

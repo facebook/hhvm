@@ -1,0 +1,6 @@
+Inside namespace NS1
+Inside namespace NS1\Sub1
+Inside namespace NS2
+Inside namespace NS3\Sub1
+Inside function f
+Inside method NS3\Sub1\C1::f

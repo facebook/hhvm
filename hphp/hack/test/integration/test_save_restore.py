@@ -10,7 +10,7 @@ import tempfile
 import time
 import unittest
 
-from utils import touch, write_files, proc_call
+from utils import touch, write_files, proc_call, ensure_output_contains
 
 def write_load_config(repo_dir, saved_state_path, changed_files=[]):
     """
@@ -24,8 +24,10 @@ def write_load_config(repo_dir, saved_state_path, changed_files=[]):
     with open(os.path.join(repo_dir, 'server_options.sh'), 'w') as f:
         f.write(r"""
 #! /bin/sh
-echo --load \"%s\"
-        """ % " ".join([saved_state_path] + changed_files))
+echo %s
+""" % saved_state_path)
+        for fn in changed_files:
+            f.write("echo %s\n" % fn)
         os.fchmod(f.fileno(), 0o700)
 
     with open(os.path.join(repo_dir, '.hhconfig'), 'w') as f:
@@ -33,7 +35,7 @@ echo --load \"%s\"
         # be passing this command some command-line options
         f.write(r"""
 # some comment
-server_options_cmd = %s
+load_script = %s
         """ % os.path.join(repo_dir, 'server_options.sh'))
 
 class TestSaveRestore(unittest.TestCase):
@@ -114,6 +116,12 @@ class TestSaveRestore(unittest.TestCase):
         shutil.rmtree(cls.repo_dir)
         shutil.rmtree(cls.saved_state_dir)
 
+    @classmethod
+    def start_hh_server(cls):
+        return subprocess.Popen(
+                [cls.hh_server, cls.repo_dir],
+                stderr=subprocess.PIPE)
+
     def setUp(self):
         write_files(self.files, self.repo_dir)
 
@@ -144,9 +152,13 @@ class TestSaveRestore(unittest.TestCase):
         """
         Update mtimes of files and check that errors remain unchanged.
         """
+        state_fn = os.path.join(self.saved_state_dir, 'foo')
         write_load_config(
             self.repo_dir,
-            os.path.join(self.saved_state_dir, 'foo'))
+            state_fn)
+        server_proc = self.start_hh_server()
+        ensure_output_contains(server_proc.stderr,
+                'Load state found at %s.' % state_fn)
 
         self.check_cmd(self.initial_errors)
         touch(os.path.join(self.repo_dir, 'foo_1.php'))
@@ -169,7 +181,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_2.php')]
+            ['foo_2.php']
         )
 
         self.check_cmd([
@@ -190,7 +202,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_2.php')]
+            ['foo_2.php']
         )
 
         with open(os.path.join(self.repo_dir, 'foo_2.php'), 'w') as f:
@@ -225,7 +237,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_4.php')]
+            ['foo_4.php']
         )
 
         self.check_cmd(self.initial_errors + [
@@ -243,7 +255,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_3.php')]
+            ['foo_3.php']
         )
 
         self.check_cmd([
@@ -259,7 +271,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_3.php')]
+            ['foo_3.php']
         )
 
         os.remove(os.path.join(self.repo_dir, 'foo_3.php'))
@@ -287,10 +299,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_2.php'),
-             os.path.join(self.repo_dir, 'bar_2.php'),
-             os.path.join(self.repo_dir, 'foo_3.php'),
-             os.path.join(self.repo_dir, 'bar_3.php')]
+            ['foo_2.php', 'bar_2.php', 'foo_3.php', 'bar_3.php']
         )
 
         try:
@@ -350,6 +359,11 @@ class TestSaveRestore(unittest.TestCase):
             ], options=['--find-refs', 'h'])
 
         self.check_cmd([
+            'File "{root}foo_3.php", line 10, characters 13-21: Foo::__construct',
+            '1 total results'
+            ], options=['--find-refs', 'Foo::__construct'])
+
+        self.check_cmd([
             'File "{root}foo_3.php", line 10, characters 17-19: Foo::__construct',
             '1 total results'
             ], options=['--find-class-refs', 'Foo'])
@@ -379,6 +393,12 @@ class TestSaveRestore(unittest.TestCase):
             options=['--auto-complete', '--json'],
             stdin='<?hh function f() { some_AUTO332\n')
 
+        self.check_cmd([
+            'Foo::bar'
+            ],
+            options=['--identify-function', '1:51'],
+            stdin='<?hh class Foo { private function bar() { $this->bar() }}')
+
     def test_options_cmd(self):
         """
         Make sure we are invoking the server_options_cmd with the right flags
@@ -395,7 +415,7 @@ echo "$2" >> {out}
         with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
             f.write(r"""
 # some comment
-server_options_cmd = %s
+load_script = %s
             """ % os.path.join(self.repo_dir, 'server_options.sh'))
 
         proc_call([
@@ -406,7 +426,6 @@ server_options_cmd = %s
 
         version = proc_call([
             self.hh_server,
-            self.repo_dir,
             '--version'
         ])
 

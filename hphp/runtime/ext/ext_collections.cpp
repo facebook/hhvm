@@ -16,10 +16,11 @@
 */
 
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/sort-helpers.h"
+#include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/array/ext_array.h"
-#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/container-functions.h"
@@ -67,7 +68,7 @@ static void throwIntOOB(int64_t key, bool isVector = false)
 void throwIntOOB(int64_t key, bool isVector /* = false */) {
   static const size_t reserveSize = 50;
   String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
+  char* buf = msg.mutableData();
   int sz = sprintf(buf, "Integer key %" PRId64 " is %s", key,
                    isVector ? "out of bounds" : "not defined");
   assert(sz <= reserveSize);
@@ -740,7 +741,7 @@ c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
-  o_subclass_u8 = Collection::VectorType;
+  subclass_u8() = Collection::VectorType;
 }
 
 void BaseVector::t___construct(const Variant& iterable /* = null_variant */) {
@@ -1018,7 +1019,7 @@ void c_Vector::t_shuffle() {
   }
   mutateAndBump();
   for (uint32_t i = 1; i < m_size; ++i) {
-    uint32_t j = f_mt_rand(0, i);
+    uint32_t j = math_mt_rand(0, i);
     std::swap(m_data[i], m_data[j]);
   }
 }
@@ -1155,16 +1156,24 @@ Object c_Vector::t_setall(const Variant& iterable) {
   return this;
 }
 
-Object c_Vector::ti_fromitems(const Variant& iterable) {
-  if (iterable.isNull()) return newobj<c_Vector>();
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* target = newobj<c_Vector>();
+template<class TVector>
+ALWAYS_INLINE
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_fromItems(const Variant& iterable) {
+  auto* target = newobj<TVector>();
   Object ret = target;
-  for (uint32_t i = 0; iter; ++i, ++iter) {
-    target->addRaw(iter.second());
-  }
+  if (iterable.isNull()) return ret;
+  target->init(iterable);
   return ret;
+}
+
+Object c_Vector::ti_fromitems(const Variant& iterable) {
+  return BaseVector::php_fromItems<c_Vector>(iterable);
+}
+
+Object c_ImmVector::ti_fromitems(const Variant& iterable) {
+  return BaseVector::php_fromItems<c_ImmVector>(iterable);
 }
 
 Object c_Vector::ti_fromkeysof(const Variant& container) {
@@ -1433,7 +1442,7 @@ Object c_ImmVector::t_values() {
 // Non PHP methods.
 
 c_ImmVector::c_ImmVector(Class* cls) : BaseVector(cls) {
-  o_subclass_u8 = Collection::ImmVectorType;
+  subclass_u8() = Collection::ImmVectorType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1542,15 +1551,15 @@ void HashCollection::mutateImpl() {
 
 NEVER_INLINE
 void HashCollection::throwTooLarge() {
-  assert(o_getClassName().size() == 6);
+  assert(getClassName().size() == 6);
   static const size_t reserveSize = 130;
   String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
+  char* buf = msg.mutableData();
   int sz = sprintf(
     buf,
     "%s object has reached its maximum capacity of %u element "
     "slots and does not have room to add a new element",
-    o_getClassName().data() + 3, // strip "HH\" prefix
+    getClassName().data() + 3, // strip "HH\" prefix
     MaxSize
   );
   assert(sz <= reserveSize);
@@ -1561,14 +1570,14 @@ void HashCollection::throwTooLarge() {
 
 NEVER_INLINE
 void HashCollection::throwReserveTooLarge() {
-  assert(o_getClassName().size() == 6);
+  assert(getClassName().size() == 6);
   static const size_t reserveSize = 80;
   String msg(reserveSize, ReserveString);
-  char* buf = msg.bufferSlice().ptr;
+  char* buf = msg.mutableData();
   int sz = sprintf(
     buf,
     "%s does not support reserving room for more than %u elements",
-    o_getClassName().data() + 3, // strip "HH\" prefix
+    getClassName().data() + 3, // strip "HH\" prefix
     MaxReserveSize
   );
   assert(sz <= reserveSize);
@@ -1581,7 +1590,7 @@ NEVER_INLINE
 int32_t* HashCollection::warnUnbalanced(size_t n, int32_t* ei) const {
   if (n > size_t(RuntimeOption::MaxArrayChain)) {
     raise_error("%s is too unbalanced (%lu)",
-                o_getClassName().data() + 3, // strip "HH\" prefix
+                getClassName().data() + 3, // strip "HH\" prefix
                 n);
   }
   return ei;
@@ -1941,7 +1950,7 @@ HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Map::c_Map(Class* cls) : BaseMap(cls) {
-  o_subclass_u8 = Collection::MapType;
+  subclass_u8() = Collection::MapType;
 }
 
 // Protected (Internal)
@@ -3031,12 +3040,9 @@ retry:
   assert(p);
   if (validPos(*p)) {
     auto& e = *fetchElm(data(), *p);
-    DataType oldType = e.data.m_type;
-    uint64_t oldDatum = e.data.m_data.num;
+    TypedValue old = e.data;
     cellDup(*val, e.data);
-    if (IS_REFCOUNTED_TYPE(oldType)) {
-      tvDecRefHelper(oldType, oldDatum);
-    }
+    tvRefcountedDecRef(old);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -3065,12 +3071,9 @@ retry:
   assert(p);
   if (validPos(*p)) {
     auto& e = *fetchElm(data(), *p);
-    DataType oldType = e.data.m_type;
-    uint64_t oldDatum = e.data.m_data.num;
+    TypedValue old = e.data;
     cellDup(*val, e.data);
-    if (IS_REFCOUNTED_TYPE(oldType)) {
-      tvDecRefHelper(oldType, oldDatum);
-    }
+    tvRefcountedDecRef(old);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -3614,7 +3617,7 @@ void c_MapIterator::t_rewind() {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_ImmMap::c_ImmMap(Class* cb) : BaseMap(cb) {
-  o_subclass_u8 = Collection::ImmMapType;
+  subclass_u8() = Collection::ImmMapType;
 }
 
 c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
@@ -3626,7 +3629,7 @@ c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
 
 // Public
 
-void BaseSet::addAllKeysOf(const Cell& container) {
+void BaseSet::addAllKeysOf(const Cell container) {
   assert(isContainer(container));
 
   auto sz = getContainerSize(container);
@@ -4573,7 +4576,7 @@ void BaseSet::throwBadValueType() {
 // Set
 
 c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
-  o_subclass_u8 = Collection::SetType;
+  subclass_u8() = Collection::SetType;
 }
 
 void BaseSet::t___construct(const Variant& iterable /* = null_variant */) {
@@ -4844,7 +4847,7 @@ Object c_ImmSet::ti_fromarrays(int _argc, const Array& _argv) {
 }
 
 c_ImmSet::c_ImmSet(Class* cls) : BaseSet(cls) {
-  o_subclass_u8 = Collection::ImmSetType;
+  subclass_u8() = Collection::ImmSetType;
 }
 
 void c_ImmSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -4938,7 +4941,7 @@ c_Pair::c_Pair(Class* cb)
   : ExtObjectDataFlags(cb)
   , m_size(2)
 {
-  o_subclass_u8 = Collection::PairType;
+  subclass_u8() = Collection::PairType;
   tvWriteNull(&elm0);
   tvWriteNull(&elm1);
 }
@@ -4947,7 +4950,7 @@ c_Pair::c_Pair(NoInit, Class* cb)
   : ExtObjectDataFlags(cb)
   , m_size(0)
 {
-  o_subclass_u8 = Collection::PairType;
+  subclass_u8() = Collection::PairType;
 }
 
 c_Pair::~c_Pair() {
@@ -5203,7 +5206,7 @@ Object c_Pair::t_take(const Variant& n) {
     throw e;
   }
   int64_t len = n.toInt64();
-  auto* vec = newobj<c_Vector>();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   if (len <= 0) {
     return obj;
@@ -5226,7 +5229,7 @@ Object c_Pair::t_takewhile(const Variant& callback) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = newobj<c_Vector>();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   for (uint32_t i = 0; i < 2; ++i) {
     if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
@@ -5242,7 +5245,7 @@ Object c_Pair::t_skip(const Variant& n) {
     throw e;
   }
   int64_t len = n.toInt64();
-  auto* vec = newobj<c_Vector>();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   if (len <= 0) len = 0;
   size_t skipAmt = std::min<size_t>(len, 2);
@@ -5264,7 +5267,7 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = newobj<c_Vector>();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   uint32_t i = 0;
   for (; i < 2; ++i) {
@@ -5536,7 +5539,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   if (Collection::isVectorType(obj->getCollectionType()) ||
       Collection::isSetType(obj->getCollectionType()) ||
       obj->getCollectionType() == Collection::PairType) {
-    serializer->pushObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
+    serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'V');
     serializer->writeArrayHeader(sz, true);
     if (serializer->getType() == VariableSerializer::Type::Serialize ||
         serializer->getType() == VariableSerializer::Type::APCSerialize ||
@@ -5562,7 +5565,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
     serializer->writeArrayFooter();
   } else {
     assert(Collection::isMapType(obj->getCollectionType()));
-    serializer->pushObjectInfo(obj->o_getClassName(), obj->o_getId(), 'K');
+    serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'K');
     serializer->writeArrayHeader(sz, false);
     for (ArrayIter iter(obj); iter; ++iter) {
       serializer->writeCollectionKey(iter.first());
@@ -5631,25 +5634,13 @@ void collectionDeepCopyTV(TypedValue* tv) {
 }
 
 ArrayData* collectionDeepCopyArray(ArrayData* arr) {
-  if (arr->isStrMapArrayOrIntMapArray()) {
-    auto deepCopy = arr->isIntMapArray()
-      ? MixedArray::MakeReserveIntMap(arr->size())
-      : MixedArray::MakeReserveStrMap(arr->size());
-    for (ArrayIter iter(arr); iter; ++iter) {
-      Variant v = iter.secondRef();
-      collectionDeepCopyTV(v.asTypedValue());
-      deepCopy->set(iter.first(), std::move(v), false);
-    }
-    return deepCopy;
-  } else {
-    ArrayInit ai(arr->size(), ArrayInit::Mixed{});
-    for (ArrayIter iter(arr); iter; ++iter) {
-      Variant v = iter.secondRef();
-      collectionDeepCopyTV(v.asTypedValue());
-      ai.set(iter.first(), std::move(v));
-    }
-    return ai.toArray().detach();
+  ArrayInit ai(arr->size(), ArrayInit::Mixed{});
+  for (ArrayIter iter(arr); iter; ++iter) {
+    Variant v = iter.secondRef();
+    collectionDeepCopyTV(v.asTypedValue());
+    ai.set(iter.first(), std::move(v));
   }
+  return ai.toArray().detach();
 }
 
 template<typename TVector>
@@ -5801,7 +5792,7 @@ TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
   // in place (see "test/slow/collection_classes/invalid-operations.php"
   // for examples).
   if (ret->m_type != KindOfObject && ret->m_type != KindOfResource) {
-    throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+    throw_cannot_modify_immutable_object(obj->getClassName().data());
   }
   return ret;
 }
@@ -5826,7 +5817,7 @@ TypedValue* collectionAtRw(ObjectData* obj, const TypedValue* key) {
     case Collection::ImmVectorType:
     case Collection::ImmMapType:
     case Collection::PairType:
-      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+      throw_cannot_modify_immutable_object(obj->getClassName().data());
     case Collection::InvalidType:
       break;
   }
@@ -5862,7 +5853,7 @@ void collectionSet(ObjectData* obj, const TypedValue* key,
     case Collection::ImmVectorType:
     case Collection::ImmMapType:
     case Collection::PairType:
-      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+      throw_cannot_modify_immutable_object(obj->getClassName().data());
     case Collection::InvalidType:
       assert(false);
   }
@@ -5925,7 +5916,7 @@ void collectionUnset(ObjectData* obj, const TypedValue* key) {
     case Collection::ImmMapType:
     case Collection::ImmSetType:
     case Collection::PairType:
-      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+      throw_cannot_modify_immutable_object(obj->getClassName().data());
     case Collection::InvalidType:
       assert(false);
       break;
@@ -5950,7 +5941,7 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::ImmMapType:
     case Collection::ImmSetType:
     case Collection::PairType:
-      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+      throw_cannot_modify_immutable_object(obj->getClassName().data());
     case Collection::InvalidType:
       assert(false);
       break;

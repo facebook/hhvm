@@ -60,7 +60,7 @@ APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {
   assert(!objectData->instanceof(SystemLib::s_SerializableClass));
 
   Array odProps;
-  objectData->o_getArray(odProps, false);
+  objectData->o_getArray(odProps);
   auto const propCount = odProps.size();
 
   size = sizeof(APCObject) + sizeof(Prop) * propCount;

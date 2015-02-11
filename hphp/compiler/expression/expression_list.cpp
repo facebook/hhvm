@@ -15,8 +15,10 @@
 */
 
 #include "hphp/compiler/expression/expression_list.h"
+
 #include <set>
 #include <vector>
+
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
@@ -37,6 +39,31 @@ ExpressionList::ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ExpressionList)),
     m_arrayElements(false), m_collectionType(0), m_argUnpack(false),
     m_kind(kind) {
+}
+
+/*
+ * We can end up with chains of canonPtrs keeping the
+ * elements of an ExpressionList alive, with the result
+ * that when they are finally destroyed, they are destroyed
+ * one by one, recursively.
+ * This proactively clears them.
+ */
+static void clearCanonPtrs(ExpressionPtr e) {
+  e->setCanonPtr(ExpressionPtr{});
+  for (int i = e->getKidCount(); i--; ) {
+    ExpressionPtr kid = e->getNthExpr(i);
+    if (kid && !kid->is(Expression::KindOfExpressionList)) {
+      clearCanonPtrs(kid);
+    }
+  }
+}
+
+ExpressionList::~ExpressionList() {
+  for (auto e : m_exps) {
+    if (e) {
+      clearCanonPtrs(e);
+    }
+  }
 }
 
 ExpressionPtr ExpressionList::clone() {

@@ -20,4 +20,3 @@ function f1(int $k) {}
 
 function f2(string $v) {}
 
-

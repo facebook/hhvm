@@ -21,9 +21,9 @@
 #include <utility>
 #include <iostream>
 
-#include "folly/Memory.h"
-#include "folly/Conv.h"
-#include "folly/String.h"
+#include <folly/Memory.h>
+#include <folly/Conv.h>
+#include <folly/String.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/map-walker.h"
@@ -168,6 +168,14 @@ const RegionDesc::BlockIdSet& RegionDesc::preds(BlockId id) const {
   return const_cast<RegionDesc*>(this)->data(id).preds;
 }
 
+folly::Optional<RegionDesc::BlockId> RegionDesc::nextRetrans(BlockId id) const {
+  return const_cast<RegionDesc*>(this)->data(id).nextRetrans;
+}
+
+void RegionDesc::setNextRetrans(BlockId id, BlockId next) {
+  data(id).nextRetrans = next;
+}
+
 const RegionDesc::BlockIdSet& RegionDesc::sideExitingBlocks() const {
   return m_sideExitingBlocks;
 }
@@ -242,6 +250,196 @@ void RegionDesc::prepend(const RegionDesc& other) {
                              other.m_sideExitingBlocks.end());
 }
 
+/*
+ * Perform a DFS starting at block `bid', storing the post-order in
+ * `outVec'.
+ */
+void RegionDesc::postOrderSort(RegionDesc::BlockId     bid,
+                               RegionDesc::BlockIdSet& visited,
+                               RegionDesc::BlockIdVec& outVec) {
+  if (visited.count(bid)) return;
+  visited.insert(bid);
+
+  if (auto nextRetr = nextRetrans(bid)) {
+    postOrderSort(nextRetr.value(), visited, outVec);
+  }
+  for (auto succ : succs(bid)) {
+    postOrderSort(succ, visited, outVec);
+  }
+  outVec.push_back(bid);
+}
+
+/**
+ * Sort the m_blocks vector in reverse post order.  This enforces that
+ * m_blocks will be a topological order in case the region is acyclic.
+ * All region arcs are taken into account, including retranslation arcs.
+ */
+void RegionDesc::sortBlocks() {
+  RegionDesc::BlockIdSet visited;
+  RegionDesc::BlockIdVec reverse;
+
+  postOrderSort(entry()->id(), visited, reverse);
+  assert(m_blocks.size() == reverse.size());
+
+  // Update `m_blocks' vector.
+  m_blocks.clear();
+  auto size = reverse.size();
+  for (size_t i = 0; i < size; i++) {
+    m_blocks.push_back(block(reverse[size - i - 1]));
+  }
+}
+
+namespace {
+
+struct Chain {
+  size_t id;
+  jit::vector<RegionDesc::BlockId> blocks;
+};
+
+using BlockToChainMap = hphp_hash_map<RegionDesc::BlockId, size_t>;
+
+void mergeChains(Chain& dst, Chain& src, BlockToChainMap& b2c) {
+  if (dst.id == src.id) return;
+  dst.blocks.insert(dst.blocks.end(), src.blocks.begin(), src.blocks.end());
+  for (auto bid : src.blocks) {
+    b2c[bid] = dst.id;
+  }
+  src.blocks.clear();
+}
+
+RegionDesc::BlockId findFirstInSet(const Chain& c, RegionDesc::BlockIdSet s) {
+  for (auto bid : c.blocks) {
+    if (s.count(bid)) return bid;
+  }
+  always_assert(0);
+}
+
+}
+
+/**
+ * Chain the retranslation blocks.  This method enforces that, for
+ * each region block, all its successor have distinct SrcKeys.
+ */
+void RegionDesc::chainRetransBlocks() {
+
+  jit::vector<Chain> chains;
+  BlockToChainMap block2chain;
+
+  // 1. Initially assign each region block to its own chain.
+  for (auto b : blocks()) {
+    auto bid = b->id();
+    auto cid = chains.size();
+    chains.push_back({cid, {bid}});
+    block2chain[bid] = cid;
+  }
+
+  // 2. For each block, if it has 2 successors with the same SrcKey,
+  //    then merge the successors' chains into one.
+  for (auto b : blocks()) {
+    auto bid = b->id();
+    const auto& succSet = succs(bid);
+    for (auto it1 = succSet.begin(); it1 != succSet.end(); it1++) {
+      auto bid1 = *it1;
+      auto cid1 = block2chain[bid1];
+      for (auto it2 = it1 + 1; it2 != succSet.end(); it2++) {
+        auto bid2 = *it2;
+        auto cid2 = block2chain[bid2];
+        if (data(bid1).block->start() == data(bid2).block->start()) {
+          mergeChains(chains[cid1], chains[cid2], block2chain);
+        }
+      }
+    }
+  }
+
+  // 3. Sort each chain.  In general, we want to sort each chain in
+  //    decreasing order of profile weights.  However, note that this
+  //    transformation can turn acyclic graphs into cyclic ones (see
+  //    example below).  Therefore, if JitLoops are disabled, we
+  //    instead sort each chain following the original block order,
+  //    which prevents loops from being generated if the region was
+  //    originally acyclic.
+  //
+  //    Here's an example showing how an acyclic CFG can become cyclic
+  //    by chaining its retranslation blocks:
+  //
+  //      - Region before chaining retranslation blocks, where B2' and B2"
+  //        are retranslations starting at the same SrcKey:
+  //          B1  -> B2'
+  //          B1  -> B2"
+  //          B2' -> B3
+  //          B3  -> B2"
+  //
+  //      - Region after sorting the chain as B2" -R-> B2':
+  //          B1  ->   B2"
+  //          B2" -R-> B2'
+  //          B2' ->   B3
+  //          B3  ->   B2"
+  //        Note the cycle: B2" -R-> B2' -> B3 -> B2".
+  //
+  auto profData = mcg->tx().profData();
+
+  auto weight = [&](RegionDesc::BlockId bid) {
+    return hasTransId(bid) ? profData->absTransCounter(getTransId(bid)) : 0;
+  };
+
+  auto sortGeneral = [&](RegionDesc::BlockId bid1, RegionDesc::BlockId bid2) {
+    return weight(bid1) > weight(bid2);
+  };
+
+  using SortFun = std::function<bool(RegionDesc::BlockId, RegionDesc::BlockId)>;
+  SortFun sortFunc = sortGeneral;
+
+  hphp_hash_map<RegionDesc::BlockId, uint32_t> origBlockOrder;
+  if (!RuntimeOption::EvalJitLoops) {
+    for (uint32_t i = 0; i < m_blocks.size(); i++) {
+      origBlockOrder[m_blocks[i]->id()] = i;
+    }
+    auto sortAcyclic = [&](RegionDesc::BlockId bid1, RegionDesc::BlockId bid2) {
+      return origBlockOrder[bid1] < origBlockOrder[bid2];
+    };
+    sortFunc = sortAcyclic;
+  }
+
+  TRACE(1, "chainRetransBlocks: computed chains:\n");
+  for (auto& c : chains) {
+    std::sort(c.blocks.begin(), c.blocks.end(), sortFunc);
+
+    if (Trace::moduleEnabled(Trace::region, 1) && c.blocks.size() > 0) {
+      FTRACE(1, "  -> {} (w={})", c.blocks[0], weight(c.blocks[0]));
+      for (size_t i = 1; i < c.blocks.size(); i++) {
+        FTRACE(1, ", {} (w={})", c.blocks[i], weight(c.blocks[i]));
+      }
+      FTRACE(1, "\n");
+    }
+  }
+
+  // 4. Set the nextRetrans blocks according to the computed chains.
+  for (auto& c : chains) {
+    if (c.blocks.size() == 0) continue;
+    for (size_t i = 0; i < c.blocks.size() - 1; i++) {
+      setNextRetrans(c.blocks[i], c.blocks[i + 1]);
+    }
+  }
+
+  // 5. For each block with multiple successors in the same chain,
+  //    only keep the successor that first appears in the chain.
+  for (auto b : blocks()) {
+    auto& succSet = data(b->id()).succs;
+    for (auto s : succSet) {
+      auto& c = chains[block2chain[s]];
+      auto selectedSucc = findFirstInSet(c, succSet);
+      for (auto other : c.blocks) {
+        if (other == selectedSucc) continue;
+        succSet.erase(other);
+      }
+    }
+  }
+
+  // 6. Reorder the blocks in the region in topological order (if
+  //    region is acyclic), since the previous steps may break it.
+  sortBlocks();
+}
+
 std::string RegionDesc::toString() const {
   auto ret = show(*this);
   ret += "data:\n";
@@ -253,10 +451,16 @@ std::string RegionDesc::toString() const {
 
 //////////////////////////////////////////////////////////////////////
 
-RegionDesc::BlockId RegionDesc::Block::s_nextId = -1;
+/*
+ * We assign unique negative ID's to all new blocks---these correspond to
+ * invalid TransIDs.  To maintain this property, we have to start one past
+ * the sentinel kInvalidTransID, which is -1.
+ */
+RegionDesc::BlockId RegionDesc::Block::s_nextId = -2;
 
 TransID getTransId(RegionDesc::BlockId blockId) {
-  return blockId >= 0 ? blockId : kInvalidTransID;
+  assert(TransID(blockId) != kInvalidTransID);
+  return TransID(blockId);
 }
 
 bool hasTransId(RegionDesc::BlockId blockId) {
@@ -326,7 +530,7 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
 
 void RegionDesc::Block::addPredicted(SrcKey sk, TypePred pred) {
   FTRACE(2, "Block::addPredicted({}, {})\n", showShort(sk), show(pred));
-  assert(pred.type <= Type::StackElem);
+  assert(pred.type <= Type::StkElem);
   assert(contains(sk));
   m_typePreds.insert(std::make_pair(sk, pred));
 }
@@ -546,25 +750,26 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
 
 bool breaksRegion(Op opc) {
   switch (opc) {
-    case OpMIterNext:
-    case OpMIterNextK:
-    case OpSwitch:
-    case OpSSwitch:
-    case OpCreateCont:
-    case OpYield:
-    case OpYieldK:
-    case OpRetC:
-    case OpRetV:
-    case OpExit:
-    case OpFatal:
-    case OpMIterInit:
-    case OpMIterInitK:
-    case OpIterBreak:
-    case OpDecodeCufIter:
-    case OpThrow:
-    case OpUnwind:
-    case OpEval:
-    case OpNativeImpl:
+    case Op::MIterNext:
+    case Op::MIterNextK:
+    case Op::Switch:
+    case Op::SSwitch:
+    case Op::CreateCont:
+    case Op::Yield:
+    case Op::YieldK:
+    case Op::Await:
+    case Op::RetC:
+    case Op::RetV:
+    case Op::Exit:
+    case Op::Fatal:
+    case Op::MIterInit:
+    case Op::MIterInitK:
+    case Op::IterBreak:
+    case Op::DecodeCufIter:
+    case Op::Throw:
+    case Op::Unwind:
+    case Op::Eval:
+    case Op::NativeImpl:
       return true;
 
     default:
@@ -590,6 +795,9 @@ struct DFSChecker {
     if (m_visited.count(id) > 0) return true;
     m_visited.insert(id);
     m_visiting.insert(id);
+    if (auto nextRetrans = m_region.nextRetrans(id)) {
+      if (!check(nextRetrans.value())) return false;
+    }
     for (auto succ : m_region.succs(id)) {
       if (!check(succ)) return false;
     }
@@ -633,6 +841,8 @@ struct DFSChecker {
  *
  *   9) The region is topologically sorted unless loops are enabled.
  *
+ *  10) The block-retranslation chains cannot have cycles.
+ *
  */
 bool check(const RegionDesc& region, std::string& error) {
 
@@ -649,7 +859,7 @@ bool check(const RegionDesc& region, std::string& error) {
     auto bid = b->id();
     // 2) Each block in the region has a different id.
     if (blockSet.count(bid)) {
-      return bad(folly::format("many blocks with id {}", bid).str());
+      return bad(folly::sformat("many blocks with id {}", bid));
     }
     blockSet.insert(bid);
   }
@@ -666,8 +876,8 @@ bool check(const RegionDesc& region, std::string& error) {
 
       // 3) All arcs involve blocks within the region.
       if (blockSet.count(succ) == 0) {
-        return bad(folly::format("arc with dst not in the region: {} -> {}",
-                                 bid, succ).str());
+        return bad(folly::sformat("arc with dst not in the region: {} -> {}",
+                                  bid, succ));
       }
 
       // Checks 4) and 5) below don't make sense for arcs corresponding
@@ -678,22 +888,22 @@ bool check(const RegionDesc& region, std::string& error) {
       // 4) For each arc, the bytecode offset of the dst block must
       //    possibly follow the execution of the src block.
       if (validSuccOffsets.count(succOffset) == 0) {
-        return bad(folly::format("arc with impossible control flow: {} -> {}",
-                                 bid, succ).str());
+        return bad(folly::sformat("arc with impossible control flow: {} -> {}",
+                                  bid, succ));
       }
 
       // 5) Each block contains at most one successor corresponding to a
       //    given SrcKey.
       if (succOffsets.count(succOffset) > 0) {
-        return bad(folly::format("block {} has multiple successors with SK {}",
-                                 bid, show(succSk)).str());
+        return bad(folly::sformat("block {} has multiple successors with SK {}",
+                                  bid, show(succSk)));
       }
       succOffsets.insert(succOffset);
     }
     for (auto pred : region.preds(bid)) {
       if (blockSet.count(pred) == 0) {
-        return bad(folly::format("arc with src not in the region: {} -> {}",
-                                 pred, bid).str());
+        return bad(folly::sformat("arc with src not in the region: {} -> {}",
+                                  pred, bid));
       }
     }
   }
@@ -721,103 +931,36 @@ bool check(const RegionDesc& region, std::string& error) {
     // 8) For each block, there must be a path from the entry to it that
     //    includes only earlier blocks in the region.
     if (nVisited == 0 && i != 0) {
-      return bad(folly::format("block {} appears before all its predecessors",
-                               bid).str());
+      return bad(folly::sformat("block {} appears before all its predecessors",
+                                bid));
     }
     // 9) The region is topologically sorted unless loops are enabled.
     if (!RuntimeOption::EvalJitLoops && nVisited != region.preds(bid).size()) {
-      return bad(folly::format("non-topological order (bid: {})", bid).str());
+      return bad(folly::sformat("non-topological order (bid: {})", bid));
     }
     visited.insert(bid);
+  }
+
+  // 10) The block-retranslation chains cannot have cycles.
+  for (auto b : blocks) {
+    auto bid = b->id();
+    RegionDesc::BlockIdSet chainSet;
+    chainSet.insert(bid);
+    while (auto next = region.nextRetrans(bid)) {
+      auto nextId = next.value();
+      if (chainSet.count(nextId)) {
+        return bad(folly::sformat("cyclic retranslation chain for block {}",
+                                  bid));
+      }
+      chainSet.insert(nextId);
+      bid = nextId;
+    }
   }
 
   return true;
 }
 
 //////////////////////////////////////////////////////////////////////
-
-namespace {
-template<typename T>
-struct Ignore {
-  bool a(const T&) const { return false; }
-  bool b(const T&) const { return false; }
-};
-
-struct IgnoreTypePred {
-  explicit IgnoreTypePred(bool aLonger = false)
-    : m_aLonger(aLonger)
-  {}
-
-  // It's ok for a to have more TypePreds if it's longer.
-  bool a(const RegionDesc::TypePred& tp) const {
-    return m_aLonger;
-  }
-
-  // It's ok for b to have more TypePreds if it's for a type we can probably
-  // get from statically-known stack flavors.
-  bool b(const RegionDesc::TypePred& tp) const {
-    return tp.location.tag() == RegionDesc::Location::Tag::Stack &&
-      tp.location.stackOffset() == 0 &&
-      tp.type.isBoxed();
-  }
-
- private:
-  const bool m_aLonger;
-};
-
-struct IgnoreKnownFunc {
-  // It's ok for a to have known funcs that b doesn't but not the other way
-  // around.
-  bool a(const Func*) const { return true; }
-  bool b(const Func*) const { return false; }
-};
-
-template<typename M, typename Cmp = std::equal_to<typename M::mapped_type>,
-         typename IgnorePred = Ignore<typename M::mapped_type>>
-bool mapsEqual(const M& a, const M& b, SrcKey endSk, Cmp equal = Cmp(),
-               IgnorePred ignore = IgnorePred()) {
-  // Return true iff every value in aRange also exists in bRange. Leaves 'it'
-  // pointing to aRange.second either way.
-  using IterPair = std::pair<typename M::const_iterator,
-                             typename M::const_iterator>;
-  auto checkRange = [&](typename M::const_iterator& it, IterPair aRange,
-                        IterPair bRange, bool aFirst) {
-    for (it = aRange.first; it != aRange.second; ++it) {
-      if (aFirst ? ignore.a(it->second) : ignore.b(it->second)) continue;
-
-      auto bIt = bRange.first;
-      for (; bIt != bRange.second; ++bIt) {
-        if (equal(it->second, bIt->second)) break;
-      }
-      if (bIt == bRange.second) {
-        it = aRange.second;
-        return false;
-      }
-    }
-    return true;
-  };
-
-  // Check if b has anything a doesn't
-  for (auto it = b.begin(), end = b.end(); it != end; ) {
-    if (!checkRange(it, b.equal_range(it->first), a.equal_range(it->first),
-                    false)) {
-      return false;
-    }
-  }
-
-  // Check if a has anything b doesn't, up to b's end.
-  for (auto it = a.begin(), end = a.end(); it != end; ) {
-    if (it->first > endSk) break;
-
-    if (!checkRange(it, a.equal_range(it->first), b.equal_range(it->first),
-                    true)) {
-      return false;
-    }
-  }
-
-  return true;
-}
-}
 
 std::string show(RegionDesc::Location l) {
   switch (l.tag()) {
@@ -964,6 +1107,10 @@ std::string show(const RegionDesc& region) {
       std::string arcs;
       for (auto& b : region.blocks()) {
         folly::toAppend(show(*b), &ret);
+        if (auto r = region.nextRetrans(b->id())) {
+          folly::toAppend(folly::format("{} -R-> {}\n", b->id(), r.value()),
+                          &arcs);
+        }
         for (auto s : region.succs(b->id())) {
           folly::toAppend(folly::format("{} -> {}\n", b->id(), s), &arcs);
         }

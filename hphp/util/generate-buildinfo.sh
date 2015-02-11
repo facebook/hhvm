@@ -25,6 +25,7 @@ if git rev-parse --show-toplevel >& /dev/null; then
     scm=git
     root=$(git rev-parse --show-toplevel)
     compiler="git describe --all --long --abbrev=40 --always"
+    find_files="git ls-files -- hphp"
     alias scm_update='git fetch origin && git rebase origin/master'
 else
     if hg root >& /dev/null; then
@@ -32,10 +33,12 @@ else
         root=$(hg root)
         compiler="hg log -r . --template '{branch}-0-g{gitnode}' 2> /dev/null"
         compiler="$compiler || hg log -r . --template '{branch}-0-h{node}'"
+        find_files="hg files -I hphp/"
         alias scm_update='hg pull && hg rebase -d master'
     else
         scm=""
         root=$DIR/../../
+        find_files='find hphp \( -type f -o -type l \) \! -iregex ".*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)" | sort'
     fi
 fi
 
@@ -74,41 +77,9 @@ fi
 # schema), because for some work flows the added instability of schema IDs is a
 # cure worse than the disease.
 if [ x"$HHVM_REPO_SCHEMA" = x"" ] ; then
-  if [ "$scm" == "git" ]; then
-    repo_mods=$(git diff --name-only HEAD)
-    # find the sha1 of the tree-object corresponding to the HEAD commit
-    repo_tree=$(git log -n1 --pretty=format:%T HEAD)
-
-    # there were modified tracked files. add them to a temporary index
-    # and find the sha1 of the tree-object.
-    if [ x"$repo_mods" != x"" ] ; then
-        repo_tree=$( \
-            export GIT_INDEX_FILE=.git-index-$$; \
-            git read-tree $repo_tree; \
-            git update-index --add --remove $repo_mods; \
-            git write-tree; \
-            rm -f $GIT_INDEX_FILE \
-        )
-    fi
-
-    # use ls-tree to incorporate the sha1's of the various sub-tree's
-    # we care about into a unique sha1 representing the current state
-    # of the code-base (this avoids, eg updating the schema because a
-    # test was modified).
-    HHVM_REPO_SCHEMA=$(git ls-tree --full-tree $repo_tree hphp/ | \
-        grep -v hphp/test | \
-        git hash-object --stdin)
-  else
-    if [ "$scm" == "hg" ]; then
-        HHVM_REPO_SCHEMA=$(((hg manifest --debug | grep " hphp/" | grep -v " hphp/test") && \
-            (hg diff -- hphp)) | git hash-object --stdin)
-    else
-        # As with COMPILER_ID above, we're not in git so we have to
-        # use a fallback state where we assume to repo is constantly
-        # changing by using the system time
-        HHVM_REPO_SCHEMA=$(date +%N_%s)
-    fi
-  fi
+  HHVM_REPO_SCHEMA=$(sh -c "$find_files" | \
+      grep -v '^hphp/\(benchmarks\|bin\|hack\|hphp\|neo\|public_tld\|test\|tools\|util\|vixl\|zend\)' | \
+      xargs -d '\n' cat | sha1sum | cut -b-40)
 fi
 
 ######################################################################

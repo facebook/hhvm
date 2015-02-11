@@ -20,8 +20,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "folly/FBString.h"
-#include "folly/FBVector.h"
+#include <folly/FBString.h>
+#include <folly/FBVector.h>
 
 #include "hphp/tools/bootstrap/idl.h"
 
@@ -75,7 +75,7 @@ static fbstring genDocCommentPreamble(const fbstring& name,
   if (flags & HipHopSpecific) {
     ret = "( HipHop specific )";
   } else {
-    ret = "( excerpt from http://php.net/manual/en/";
+    ret = "( excerpt from http://docs.hhvm.com/manual/en/";
     if (classname.size()) {
       ret += classname + ".";
     } else {
@@ -155,6 +155,11 @@ static void declareConstants(std::ostream &out,
       fbstring val = c.value();
       out << "extern const StaticString " << c.varname()
           << "(\"" << escapeCpp(val) << "\"," << val.size() << ");\n";
+    } else if (c.kindOf() == KindOfInt64 &&
+               std::stoll(c.value().toStdString()) ==
+               std::numeric_limits<int64_t>::min()) {
+      out << "const " << c.getCppType() << " " << c.varname()
+          << " = int64_t(-1) << 63;\n";
     } else {
       out << "const " << c.getCppType() << " " << c.varname()
           << " = " << escapeCpp(c.value()) << ";\n";
@@ -334,6 +339,8 @@ static void outputClassMap(const fbstring &invocation_trace,
   brandOutputFile(out, "gen-class-map.cpp", invocation_trace);
 
   out << "#include \"hphp/runtime/base/base-includes.h\"\n"
+      << "#include \"hphp/runtime/base/externals.h\"\n"
+      << "#include \"hphp/runtime/base/plain-file.h\"\n"
       << "#include \"hphp/system/constants.h\"\n"
       << "#include \"hphp/runtime/ext/ext.h\"\n"
       << "namespace HPHP {\n";

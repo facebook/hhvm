@@ -16,8 +16,10 @@
 
 #include "hphp/test/ext/test_ext_curl.h"
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
@@ -217,6 +219,8 @@ bool TestExtCurl::test_curl_error() {
   Variant err = HHVM_FN(curl_error)(c.toResource());
   VERIFY(equal(err, String("Couldn't resolve host 'www.thereisnosuchanurl'")) ||
          equal(err, String("Could not resolve host: www.thereisnosuchanurl"
+                " (Domain name not found)")) ||
+         equal(err, String("Could not resolve: www.thereisnosuchanurl"
                 " (Domain name not found)")));
   return Count(true);
 }
@@ -337,4 +341,3 @@ bool TestExtCurl::test_curl_multi_close() {
   HHVM_FN(curl_multi_close)(mh);
   return Count(true);
 }
-

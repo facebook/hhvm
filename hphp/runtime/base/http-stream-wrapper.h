@@ -30,8 +30,10 @@ class HttpStreamWrapper : public Stream::Wrapper {
   HttpStreamWrapper() {
     m_isLocal = false;
   }
-  virtual File* open(const String& filename, const String& mode,
-                     int options, const Variant& context);
+  virtual SmartPtr<File> open(const String& filename,
+                              const String& mode,
+                              int options,
+                              const SmartPtr<StreamContext>& context);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

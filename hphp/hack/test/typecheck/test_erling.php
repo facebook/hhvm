@@ -9,8 +9,7 @@
  *
  */
 
-function bar(Vector<A> $x) {
-}
+function bar(Vector<A> $x) {}
 
 function foo(Vector<?A> $x): Vector<A> {
   bar($x);

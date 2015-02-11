@@ -30,8 +30,10 @@ class DataStreamWrapper : public Stream::Wrapper {
   DataStreamWrapper() {
     m_isLocal = true;
   }
-  virtual File* open(const String& filename, const String& mode,
-                     int options, const Variant& context);
+  virtual SmartPtr<File> open(const String& filename,
+                              const String& mode,
+                              int options,
+                              const SmartPtr<StreamContext>& context);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,7 +21,7 @@
 
 #include <boost/variant.hpp>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/match.h"
 #include "hphp/runtime/vm/as-shared.h"
@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h" // f_serialize
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
@@ -533,6 +532,7 @@ std::string member_tv_initializer(Cell cell) {
 }
 
 void print_constant(Output& out, const PreClass::Const* cns) {
+  if (cns->isAbstract()) { return; }
   out.fmtln(".const {} = {};", cns->name()->data(),
     member_tv_initializer(cns->val()));
 }

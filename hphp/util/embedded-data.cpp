@@ -24,7 +24,7 @@
 
 #include "hphp/util/current-executable.h"
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include <stdio.h>
 #include <sys/types.h>

@@ -18,7 +18,6 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/rds.h"
@@ -94,8 +93,6 @@ using IFaceSupportFn = bool (*)(const StringData*);
  */
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
-    {TypeProfileFunc,    profileOneArgument, DNone, SNone,
-                           {{TV,0}, extra(&TypeProfileData::param), {SSA, 1}}},
     {ConvBoolToArr,      convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
     {ConvDblToArr,       convCellToArrHelper, DSSA, SNone,
@@ -182,13 +179,8 @@ static CallMap s_callMap {
     {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
     {NewArray,           MixedArray::MakeReserve, DSSA, SNone, {{SSA, 0}}},
     {NewMixedArray,      MixedArray::MakeReserveMixed, DSSA, SNone, {{SSA, 0}}},
-    {NewVArray,         MixedArray::MakeReserveVArray, DSSA, SNone, {{SSA, 0}}},
-    {NewMIArray,        MixedArray::MakeReserveIntMap, DSSA, SNone, {{SSA, 0}}},
-    {NewMSArray,        MixedArray::MakeReserveStrMap, DSSA, SNone, {{SSA, 0}}},
     {NewLikeArray,       MixedArray::MakeReserveLike, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
-    {NewPackedArray,     MixedArray::MakePacked, DSSA, SNone,
-                           {{extra(&PackedArrayData::size)}, {SSA, 1}}},
     {AllocPackedArray,   MixedArray::MakePackedUninitialized, DSSA, SNone,
                            {{extra(&PackedArrayData::size)}}},
     {NewCol,             newColHelper, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
@@ -208,14 +200,6 @@ static CallMap s_callMap {
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}}},
     {LookupClsRDSHandle, lookupClsRDSHandle, DSSA, SNone, {{SSA, 0}}},
-    {LookupClsMethod,    lookupClsMethodHelper, DNone, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
-    {LdArrFuncCtx,       loadArrayFunctionContext, DNone, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {LdArrFPushCuf,      fpushCufHelperArray, DNone, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {LdStrFPushCuf,      fpushCufHelperString, DNone, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {PrintStr,           print_string, DNone, SSync, {{SSA, 0}}},
     {PrintInt,           print_int, DNone, SSync, {{SSA, 0}}},
     {PrintBool,          print_boolean, DNone, SSync, {{SSA, 0}}},
@@ -233,6 +217,8 @@ static CallMap s_callMap {
     {RaiseNotice,        raiseNotice, DNone, SSync, {{SSA, 0}}},
     {RaiseArrayIndexNotice,
                          raiseArrayIndexNotice, DNone, SSync, {{SSA, 0}}},
+    {RaiseArrayKeyNotice,
+                         raiseArrayKeyNotice, DNone, SSync, {{SSA, 0}}},
     {WarnNonObjProp,     raisePropertyOnNonObject, DNone, SSync, {}},
     {RaiseUndefProp,     raiseUndefProp, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}}},
@@ -272,7 +258,7 @@ static CallMap s_callMap {
     /* Async function support helpers */
     {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
-    {CreateSSWH,         &c_StaticWaitHandle::CreateSucceededVM, DSSA, SNone,
+    {CreateSSWH,         &c_StaticWaitHandle::CreateSucceeded, DSSA, SNone,
                            {{TV, 0}}},
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},
@@ -321,9 +307,11 @@ static CallMap s_callMap {
     {DbgAssertPtr, assertTv, DNone, SNone, {{SSA, 0}}},
 
     /* surprise flag support */
-    {FunctionSuspendHook, &EventHook::onFunctionSuspend, DNone, SSync,
+    {SuspendHookE, &EventHook::onFunctionSuspendE, DNone, SSync,
                             {{SSA, 0}, {SSA, 1}}},
-    {FunctionReturnHook,  &EventHook::onFunctionReturnJit, DNone, SSync,
+    {SuspendHookR, &EventHook::onFunctionSuspendR, DNone, SSync,
+                            {{SSA, 0}, {SSA, 1}}},
+    {ReturnHook,  &EventHook::onFunctionReturnJit, DNone, SSync,
                             {{SSA, 0}, {TV, 1}}},
 
     /* silence operator support */
@@ -335,21 +323,13 @@ static CallMap s_callMap {
 
     // count($array)
     {CountArray, &ArrayData::size, DSSA, SNone, {{SSA, 0}}},
+
+    {GetMemoKey, getMemoKeyHelper, DTV, SSync, {{TV, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {
   for (auto const& info : infos) {
     m_map[info.op] = info;
-
-    // Check for opcodes that have a version which modifies the stack,
-    // and add an entry to the table for that one.
-    if (opcodeHasFlags(info.op, HasStackVersion)) {
-      Opcode stkOp = getStackModifyingOpcode(info.op);
-      assert(opcodeHasFlags(stkOp, ModifiesStack));
-      auto& slot = m_map[stkOp];
-      slot = info;
-      slot.op = stkOp;
-    }
   }
 }
 

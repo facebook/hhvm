@@ -1,0 +1,3 @@
+string(4) "C::X"
+
+Fatal error: Couldn't find constant I::X in %stest/slow/class_constant/abstract_const3.php on line 6

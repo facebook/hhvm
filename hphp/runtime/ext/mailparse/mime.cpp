@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/mailparse/mime.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/runtime-error.h"
 
@@ -486,11 +488,7 @@ void MimePart::decoderFeed(const String& str) {
 const StaticString s_1_pt_0("1.0");
 
 bool MimePart::isVersion1() {
-  return m_mime_version == s_1_pt_0 || !m_parent.isNull();
-}
-
-MimePart *MimePart::getParent() {
-  return m_parent.getTyped<MimePart>();
+  return m_mime_version == s_1_pt_0 || m_parent;
 }
 
 const StaticString
@@ -528,7 +526,7 @@ Variant MimePart::getPartData() {
 
   ret.set(s_starting_pos, m_startpos);
   ret.set(s_starting_pos_body, m_bodystart);
-  if (m_parent.isNull()) {
+  if (!m_parent) {
     ret.set(s_ending_pos, m_endpos);
     ret.set(s_ending_pos_body, m_bodyend);
     ret.set(s_line_count, m_nlines);
@@ -607,7 +605,7 @@ bool MimePart::parse(const char *buf, int bufsize) {
     if (len < bufsize && buf[len] == '\n') {
       ++len;
       m_parsedata.workbuf += String(buf, len, CopyString);
-      ProcessLine(this, m_parsedata.workbuf);
+      ProcessLine(SmartPtr<MimePart>(this), m_parsedata.workbuf);
       m_parsedata.workbuf.clear();
     } else {
       m_parsedata.workbuf += String(buf, len, CopyString);
@@ -619,8 +617,8 @@ bool MimePart::parse(const char *buf, int bufsize) {
   return true;
 }
 
-MimePart *MimePart::createChild(int startpos, bool inherit) {
-  MimePart *child = newres<MimePart>();
+SmartPtr<MimePart> MimePart::createChild(int startpos, bool inherit) {
+  auto child = makeSmartPtr<MimePart>();
   m_parsedata.lastpart = child;
   child->m_parent = this;
 
@@ -731,7 +729,7 @@ bool MimePart::processHeader() {
   return true;
 }
 
-bool MimePart::ProcessLine(MimePart *workpart, const String& line) {
+bool MimePart::ProcessLine(SmartPtr<MimePart> workpart, const String& line) {
   /* sanity check */
   if (workpart->m_children.size() > MAXPARTS) {
     raise_warning("MIME message too complex");
@@ -748,8 +746,8 @@ bool MimePart::ProcessLine(MimePart *workpart, const String& line) {
   }
 
   /* Discover which part we were last working on */
-  while (!workpart->m_parsedata.lastpart.isNull()) {
-    MimePart *lastpart = workpart->m_parsedata.lastpart.getTyped<MimePart>();
+  while (workpart->m_parsedata.lastpart) {
+    auto lastpart = workpart->m_parsedata.lastpart;
 
     if (lastpart->m_parsedata.completed) {
       UpdatePositions(workpart, workpart->m_endpos + origcount,
@@ -774,7 +772,7 @@ bool MimePart::ProcessLine(MimePart *workpart, const String& line) {
         return true;
       }
 
-      MimePart *newpart =
+      auto newpart =
         workpart->createChild(workpart->m_endpos + origcount, true);
       UpdatePositions(workpart, workpart->m_endpos + origcount,
                       workpart->m_endpos + linelen, 1);
@@ -786,13 +784,12 @@ bool MimePart::ProcessLine(MimePart *workpart, const String& line) {
   }
 
   if (!workpart->m_parsedata.in_header) {
-    if (!workpart->m_parsedata.completed &&
-        workpart->m_parsedata.lastpart.isNull()) {
+    if (!workpart->m_parsedata.completed && !workpart->m_parsedata.lastpart) {
       /* update the body/part end positions.
        * For multipart messages, the final newline belongs to the boundary.
        * Otherwise it belongs to the body
        * */
-      if (!workpart->m_parent.isNull() &&
+      if (workpart->m_parent &&
           strncasecmp(workpart->getParent()->m_content_type.m_value.data(),
                       "multipart/", 10) == 0) {
         UpdatePositions(workpart, workpart->m_endpos + origcount,
@@ -852,7 +849,7 @@ bool MimePart::ProcessLine(MimePart *workpart, const String& line) {
          multipart/digest when in a multipart/rfc822 message */
       if (workpart->isVersion1() && workpart->m_content_type.empty()) {
         char *def_type = "text/plain";
-        if (!workpart->m_parent.isNull() &&
+        if (workpart->m_parent &&
             strcasecmp(workpart->getParent()->m_content_type.m_value.data(),
                        "multipart/digest") == 0) {
           def_type = "message/rfc822";
@@ -890,7 +887,7 @@ bool MimePart::ProcessLine(MimePart *workpart, const String& line) {
   return true;
 }
 
-void MimePart::UpdatePositions(MimePart *part, int newendpos,
+void MimePart::UpdatePositions(SmartPtr<MimePart> part, int newendpos,
                                int newbodyend, int deltanlines) {
   while (part) {
     part->m_endpos = newendpos;
@@ -899,28 +896,25 @@ void MimePart::UpdatePositions(MimePart *part, int newendpos,
     if (!part->m_parsedata.in_header) {
       part->m_nbodylines += deltanlines;
     }
-    part = part->m_parent.getTyped<MimePart>(true);
+    part = part->m_parent;
   }
 }
 
 Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, int decode,
                           bool isfile) {
   /* filename can be a filename or a stream */
-  Resource file;
-  File *f = NULL;
+  SmartPtr<File> file;
   if (filename.isResource()) {
-    f = filename.toResource().getTyped<File>();
+    file = filename.toResource().getTyped<File>();
   } else if (isfile) {
     file = File::Open(filename.toString(), "rb");
-    f = file.getTyped<File>(true);
   } else {
     /* filename is the actual data */
     String data = filename.toString();
-    f = newres<MemFile>(data.data(), data.size());
-    file = Resource(f);
+    file = makeSmartPtr<MemFile>(data.data(), data.size());
   }
 
-  if (f == NULL) {
+  if (!file) {
     return false;
   }
 
@@ -937,7 +931,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
     }
   }
 
-  if (extractImpl(decode, f)) {
+  if (extractImpl(decode, file.get())) {
     if (callbackfunc.isNull()) {
       return m_extract_context;
     }
@@ -953,7 +947,7 @@ int MimePart::extractImpl(int decode, File *src) {
   /* figure out where the message part starts/ends */
   int start_pos = (decode & DecodeNoHeaders) ? m_bodystart : m_startpos;
   int end = (decode & DecodeNoBody) ?
-    m_bodystart : (!m_parent.isNull() ? m_bodyend : m_endpos);
+    m_bodystart : (m_parent ? m_bodyend : m_endpos);
 
   decoderPrepare(decode & Decode8Bit);
 

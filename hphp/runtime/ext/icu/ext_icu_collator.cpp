@@ -1,4 +1,5 @@
 #include "hphp/runtime/ext/icu/ext_icu_collator.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-qsort.h"
 

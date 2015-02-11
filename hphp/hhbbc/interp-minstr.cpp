@@ -20,13 +20,13 @@
 #include <string>
 #include <utility>
 
-#include "folly/Optional.h"
-#include "folly/Format.h"
+#include <folly/Optional.h>
+#include <folly/Format.h>
 
 #include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-internal.h"
-#include "hphp/hhbbc/type-arith.h"
+#include "hphp/hhbbc/type-ops.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -37,6 +37,19 @@ namespace {
 const StaticString s_stdClass("stdClass");
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Note: the couldBe comparisons here with sempty() are asking "can this string
+ * be a non-reference counted empty string".  What actually matters is whether
+ * it can be an empty string at all.  Currently, all reference counted strings
+ * are TStr, which has no values and may also be non-reference
+ * counted---emptiness isn't separately tracked like it is for arrays, so if
+ * anything happened that could make it reference counted this check will
+ * return true.
+ *
+ * This means this code is fine for now, but if we implement #3837503
+ * (non-static strings with values in the type system) it will need to change.
+ */
 
 bool couldBeEmptyish(Type ty) {
   return ty.couldBe(TNull) ||
@@ -369,7 +382,7 @@ void handleInPublicStaticPropD(MIS& env) {
   auto const name = baseLocNameType(env.base);
   auto const ty = env.index.lookup_public_static(env.base.locTy, name);
   if (propCouldPromoteToObj(ty)) {
-    indexer->merge(env.base.locTy, name,
+    indexer->merge(env.ctx, env.base.locTy, name,
       objExact(env.index.builtin_class(s_stdClass.get())));
   }
 }
@@ -415,7 +428,7 @@ void handleInPublicStaticElemD(MIS& env) {
   auto const ty = env.index.lookup_public_static(env.base.locTy, name);
   if (elemCouldPromoteToArr(ty)) {
     // Might be possible to only merge a TArrE, but for now this is ok.
-    indexer->merge(env.base.locTy, name, TArr);
+    indexer->merge(env.ctx, env.base.locTy, name, TArr);
   }
 }
 
@@ -451,7 +464,7 @@ void handleInPublicStaticElemU(MIS& env) {
    * Merging InitCell is correct, but very conservative, for now.
    */
   auto const name = baseLocNameType(env.base);
-  indexer->merge(env.base.locTy, name, TInitCell);
+  indexer->merge(env.ctx, env.base.locTy, name, TInitCell);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -630,7 +643,7 @@ Type mcodeKey(MIS& env) {
   case MEI:  return ival(melem.immInt);
 
   case MW:
-  case NumMemberCodes:
+  case InvalidMemberCode:
     always_assert(0);
     break;
   }
@@ -743,7 +756,7 @@ Base miBase(MIS& env) {
       return miBaseSProp(env, cls, prop);
     }
 
-  case NumLocationCodes:
+  case InvalidLocationCode:
     break;
   }
   not_reached();
@@ -1025,7 +1038,7 @@ void miFinalSetOpProp(MIS& env, SetOpOp subop) {
   if (couldBeThisObj(env, env.base)) {
     if (name && mustBeThisObj(env, env.base)) {
       if (auto const lhsTy = thisPropAsCell(env, name)) {
-        resultTy = typeArithSetOp(subop, *lhsTy, rhsTy);
+        resultTy = typeSetOp(subop, *lhsTy, rhsTy);
       }
     }
 

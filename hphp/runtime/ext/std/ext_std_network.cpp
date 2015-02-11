@@ -16,22 +16,24 @@
 */
 #include "hphp/runtime/ext/std/ext_std_network.h"
 
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <resolv.h>
+#include <sys/socket.h>
 
-#include "folly/ScopeGuard.h"
-#include "folly/IPAddress.h"
+#include <folly/IPAddress.h>
+#include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/file.h"
 #include "hphp/util/network.h"
 
 #if defined(__APPLE__)
@@ -123,11 +125,13 @@ IMPLEMENT_THREAD_LOCAL(ResolverInit, ResolverInit::s_res);
 Variant HHVM_FUNCTION(gethostname) {
   char h_name[HOST_NAME_MAX];
 
-  if (gethostname(h_name, HOST_NAME_MAX) != 0) {
+  if (gethostname(h_name, sizeof(h_name)) != 0) {
     raise_warning(
         "gethostname() failed with errorno=%d: %s", errno, strerror(errno));
     return false;
   }
+  // gethostname may not null-terminate
+  h_name[sizeof(h_name) - 1] = '\0';
 
   return String(h_name, CopyString);
 }
@@ -247,7 +251,7 @@ Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
 
   char buffer[40];
   if (!inet_ntop(af, in_addr.data(), buffer, sizeof(buffer))) {
-    raise_warning("An unknown error occured");
+    raise_warning("An unknown error occurred");
     return false;
   }
   return String(buffer, CopyString);
@@ -284,9 +288,10 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
   return (int64_t)ntohl(ip.s_addr);
 }
 
-String HHVM_FUNCTION(long2ip, int64_t proper_address) {
+String HHVM_FUNCTION(long2ip, const String& proper_address) {
+  unsigned long ul = strtoul(proper_address.c_str(), nullptr, 0);
   try {
-    return folly::IPAddress::fromLongHBO(proper_address).str();
+    return folly::IPAddress::fromLongHBO(ul).str();
   } catch (folly::IPAddressFormatException &e) {
     return s_empty;
   }
@@ -497,7 +502,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     int l1 = 0, l2 = 0;
 
     String s = String(dlen, ReserveString);
-    tp = (unsigned char *)s.bufferSlice().ptr;
+    tp = (unsigned char *)s.mutableData();
 
     while (l1 < dlen) {
       n = cp[l1];
@@ -930,8 +935,8 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
   // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad
   // for security?
   if (header.find('\n') >= 0 || header.find('\r') >= 0) {
-    raise_warning("Header may not contain more than a single header, "
-                  "new line detected");
+    raise_error("Header may not contain more than a single header, "
+                "new line detected");
     return;
   }
 
@@ -1040,8 +1045,14 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
   return false;
 }
 
-bool HHVM_FUNCTION(header_register_callback, const Variant& callback) {
+Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
   Transport *transport = g_context->getTransport();
+
+  if (!HHVM_FN(is_callable)(callback)) {
+    raise_warning("First argument is expected to be a valid callback");
+    return init_null();
+  }
+
   if (!transport) {
     // fail if there is no transport
     return false;

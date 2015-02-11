@@ -148,7 +148,7 @@ void CmdFlowControl::setupStepOuts() {
   Offset returnOffset;
   bool fromVMEntry;
   while (!hasStepOuts()) {
-    fp = g_context->getPrevVMStateUNSAFE(fp, &returnOffset, nullptr, &fromVMEntry);
+    fp = g_context->getPrevVMState(fp, &returnOffset, nullptr, &fromVMEntry);
     // If we've run off the top of the stack, just return having setup no
     // step outs. This will cause cmds like Next and Out to just let the program
     // run, which is appropriate.
@@ -213,7 +213,7 @@ void CmdFlowControl::cleanupStepOuts() {
 // a StepDestination is constructed then it will not remove the
 // breakpoint when it is destructed. The move assignment operator
 // handles the transfer of ownership, and we delete the copy
-// constructor/assignment operators explictly to ensure no two
+// constructor/assignment operators explicitly to ensure no two
 // StepDestinations believe they can remove the same internal
 // breakpoint.
 //

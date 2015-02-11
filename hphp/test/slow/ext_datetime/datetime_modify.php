@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('America/Los_Angeles');
 $datetime = new DateTime();
 $datetime->modify("2014-09-20 20:30 -1 day");
 var_dump($datetime->format('c'));

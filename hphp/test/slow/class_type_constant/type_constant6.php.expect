@@ -1,0 +1,3 @@
+string(21) "HH\Awaitable<A::B::C>"
+string(9) "$x : X::T"
+string(43) "$v : ?HH\Vector<Z::Y::X<HH\int, HH\string>>"

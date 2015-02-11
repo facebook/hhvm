@@ -1,0 +1,20 @@
+f: $p1 = 0, $p2 = 1, $p3 = 1, $p4 = 12, $p5 = 11
+
+Notice: Use of undefined constant f - assumed 'f' in %s/functions/order_of_evaluation.php on line 34
+
+Notice: Use of undefined constant g - assumed 'g' in %s/functions/order_of_evaluation.php on line 34
+
+Notice: Use of undefined constant h - assumed 'h' in %s/functions/order_of_evaluation.php on line 34
+array(3) {
+  [0]=>
+  string(1) "f"
+  [1]=>
+  string(1) "g"
+  [2]=>
+  string(1) "h"
+}
+string(1) "f"
+f: $p1 = 1, $p2 = 2, $p3 = 3, $p4 = 4, $p5 = 5
+g: $p1 = 10, $p2 = 20, $p3 = 30, $p4 = 40, $p5 = 50
+h: $p1 = 100, $p2 = 200, $p3 = 300, $p4 = 400, $p5 = 500
+g: $p1 = 2, $p2 = 3, $p3 = 3, $p4 = 12, $p5 = 11

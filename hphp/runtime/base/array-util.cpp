@@ -16,16 +16,19 @@
 
 #include "hphp/runtime/base/array-util.h"
 
+#include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
 
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include <set>
 #include <utility>
@@ -290,7 +293,7 @@ static void php_array_data_shuffle(std::vector<ssize_t> &indices) {
   if (n_elems > 1) {
     int n_left = n_elems;
     while (--n_left) {
-      int rnd_idx = f_rand(0, n_left);
+      int rnd_idx = HHVM_FN(rand)(0, n_left);
       if (rnd_idx != n_left) {
         ssize_t temp = indices[n_left];
         indices[n_left] = indices[rnd_idx];
@@ -337,7 +340,7 @@ Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
     // but necessary for this code to be agnostic to the array's internal
     // representation.  Assuming uniform distribution, we'll expect to
     // iterate through half of the array's data.
-    ssize_t index = f_rand(0, count-1);
+    ssize_t index = HHVM_FN(rand)(0, count-1);
     ssize_t pos = input->iter_begin();
     while (index--) {
       pos = input->iter_advance(pos);

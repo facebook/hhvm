@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/libmemcached_portability.h"
@@ -91,6 +92,12 @@ const int64_t q_Memcached$$DISTRIBUTION_MODULA
           = MEMCACHED_DISTRIBUTION_MODULA;
 const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT
           = MEMCACHED_DISTRIBUTION_CONSISTENT;
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT_KETAMA
+          = MEMCACHED_DISTRIBUTION_CONSISTENT_KETAMA;
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT_WEIGHTED
+          = MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED;
+#endif
 const int64_t q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
           = MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED;
 const int64_t q_Memcached$$OPT_BUFFER_WRITES
@@ -198,6 +205,13 @@ const StaticString
   s_key("key"),
   s_value("value"),
   s_cas("cas");
+
+// INI settings
+struct MEMCACHEDGlobals final {
+  std::string sess_prefix;
+};
+static __thread MEMCACHEDGlobals* s_memcached_globals;
+#define MEMCACHEDG(name) s_memcached_globals->name
 
 namespace {
 class MemcachedResultWrapper {
@@ -582,6 +596,12 @@ void HHVM_METHOD(Memcached, __construct,
     if (!impl) impl.reset(new MemcachedData::Impl);
     data->m_impl = impl;
   }
+}
+
+bool HHVM_METHOD(Memcached, quit) {
+  auto data = Native::data<MemcachedData>(this_);
+  memcached_quit(&data->m_impl->memcached);
+  return true;
 }
 
 Variant HHVM_METHOD(Memcached, getallkeys) {
@@ -1135,12 +1155,14 @@ bool HHVM_METHOD(Memcached, setoption, int option, const Variant& value) {
        * options on false case, like it does for MEMCACHED_BEHAVIOR_KETAMA
        * (non-weighted) case. We have to clean up ourselves.
        */
-      memcached_behavior_set_key_hash(&data->m_impl->memcached,
-                                      MEMCACHED_HASH_DEFAULT);
-      memcached_behavior_set_distribution_hash(&data->m_impl->memcached,
-                                               MEMCACHED_HASH_DEFAULT);
-      memcached_behavior_set_distribution(&data->m_impl->memcached,
-                                          MEMCACHED_DISTRIBUTION_MODULA);
+      if (!lValue) {
+        memcached_behavior_set_key_hash(&data->m_impl->memcached,
+                                        MEMCACHED_HASH_DEFAULT);
+        memcached_behavior_set_distribution_hash(&data->m_impl->memcached,
+                                                 MEMCACHED_HASH_DEFAULT);
+        memcached_behavior_set_distribution(&data->m_impl->memcached,
+                                            MEMCACHED_DISTRIBUTION_MODULA);
+      }
       break;
     }
 
@@ -1201,6 +1223,10 @@ IMPLEMENT_THREAD_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
 
 const StaticString s_Memcached("Memcached");
 const StaticString s_DISTRIBUTION_CONSISTENT("DISTRIBUTION_CONSISTENT");
+const StaticString s_DISTRIBUTION_CONSISTENT_KETAMA("DISTRIBUTION_CONSISTENT_KETAMA");
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+const StaticString s_DISTRIBUTION_CONSISTENT_WEIGHTED("DISTRIBUTION_CONSISTENT_WEIGHTED");
+#endif
 const StaticString s_DISTRIBUTION_MODULA("DISTRIBUTION_MODULA");
 const StaticString s_GET_PRESERVE_ORDER("GET_PRESERVE_ORDER");
 const StaticString s_HASH_CRC("HASH_CRC");
@@ -1272,12 +1298,26 @@ const StaticString s_SERIALIZER_IGBINARY("SERIALIZER_IGBINARY");
 const StaticString s_SERIALIZER_JSON("SERIALIZER_JSON");
 const StaticString s_SERIALIZER_PHP("SERIALIZER_PHP");
 
-class MemcachedExtension : public Extension {
+class MemcachedExtension final : public Extension {
  public:
   MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
+  void threadInit() override {
+    if (s_memcached_globals) {
+      return;
+    }
+    s_memcached_globals = new MEMCACHEDGlobals;
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "memcached.sess_prefix", &MEMCACHEDG(sess_prefix));
+  }
 
-  virtual void moduleInit() {
+  void threadShutdown() override {
+    delete s_memcached_globals;
+    s_memcached_globals = nullptr;
+  }
+
+  void moduleInit() override {
     HHVM_ME(Memcached, __construct);
+    HHVM_ME(Memcached, quit);
     HHVM_ME(Memcached, getallkeys);
     HHVM_ME(Memcached, getbykey);
     HHVM_ME(Memcached, getmultibykey);
@@ -1320,6 +1360,16 @@ class MemcachedExtension : public Extension {
       s_Memcached.get(), s_DISTRIBUTION_CONSISTENT.get(),
       q_Memcached$$DISTRIBUTION_CONSISTENT
     );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_CONSISTENT_KETAMA.get(),
+      q_Memcached$$DISTRIBUTION_CONSISTENT_KETAMA
+    );
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_CONSISTENT_WEIGHTED.get(),
+      q_Memcached$$DISTRIBUTION_CONSISTENT_WEIGHTED
+    );
+#endif
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_DISTRIBUTION_MODULA.get(),
       q_Memcached$$DISTRIBUTION_MODULA
@@ -1535,7 +1585,6 @@ class MemcachedExtension : public Extension {
       s_Memcached.get(), s_RES_SERVER_TEMPORARILY_DISABLED.get(),
       q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
     );
-
 
 
     loadSystemlib();

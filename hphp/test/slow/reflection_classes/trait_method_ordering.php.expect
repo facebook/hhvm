@@ -1,0 +1,66 @@
+array(7) {
+  [0]=>
+  string(11) "B1::bmethod"
+  [1]=>
+  string(12) "A1::t1method"
+  [2]=>
+  string(12) "A1::a1method"
+  [3]=>
+  string(12) "A1::a3method"
+  [4]=>
+  string(12) "A1::a2method"
+  [5]=>
+  string(12) "A1::t2method"
+  [6]=>
+  string(12) "A1::t3method"
+}
+array(8) {
+  [0]=>
+  string(11) "B2::zmethod"
+  [1]=>
+  string(12) "A1::t1method"
+  [2]=>
+  string(12) "A1::a1method"
+  [3]=>
+  string(12) "A1::a3method"
+  [4]=>
+  string(11) "B2::bmethod"
+  [5]=>
+  string(12) "A1::a2method"
+  [6]=>
+  string(12) "A1::t2method"
+  [7]=>
+  string(12) "A1::t3method"
+}
+array(6) {
+  [0]=>
+  string(11) "B3::zmethod"
+  [1]=>
+  string(11) "A2::bmethod"
+  [2]=>
+  string(12) "B3::t1method"
+  [3]=>
+  string(12) "B3::a1method"
+  [4]=>
+  string(12) "B3::t2method"
+  [5]=>
+  string(12) "B3::t3method"
+}
+array(8) {
+  [0]=>
+  string(11) "B4::zmethod"
+  [1]=>
+  string(11) "B4::bmethod"
+  [2]=>
+  string(12) "B4::t1method"
+  [3]=>
+  string(12) "B4::a1method"
+  [4]=>
+  string(12) "B4::a3method"
+  [5]=>
+  string(12) "B4::a2method"
+  [6]=>
+  string(12) "B4::t2method"
+  [7]=>
+  string(12) "B4::t3method"
+}

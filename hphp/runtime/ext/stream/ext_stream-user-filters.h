@@ -60,7 +60,9 @@ public:
   explicit StreamFilter(const Object& filter, const Resource& stream):
       m_filter(filter), m_stream(stream) { }
 
-  int64_t invokeFilter(Resource in, Resource out, bool closing);
+  int64_t invokeFilter(const SmartPtr<BucketBrigade>& in,
+                       const SmartPtr<BucketBrigade>& out,
+                       bool closing);
   void invokeOnClose();
   bool remove();
 private:

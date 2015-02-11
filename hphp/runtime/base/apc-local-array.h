@@ -111,9 +111,9 @@ public:
   ArrayData* asArrayData() { return this; }
   const ArrayData* asArrayData() const { return this; }
 
-  // Pre: ad->isSharedArray()
-  static APCLocalArray* asSharedArray(ArrayData*);
-  static const APCLocalArray* asSharedArray(const ArrayData*);
+  // Pre: ad->isApcArray()
+  static APCLocalArray* asApcArray(ArrayData*);
+  static const APCLocalArray* asApcArray(const ArrayData*);
 
 private:
   explicit APCLocalArray(const APCArray* source);

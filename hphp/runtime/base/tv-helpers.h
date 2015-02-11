@@ -67,7 +67,7 @@ inline bool isUncounted(const TypedValue& tv) {
 
 // Assumes 'data' is live
 // Assumes 'IS_REFCOUNTED_TYPE(type)'
-void tvDecRefHelper(DataType type, uint64_t datum);
+void tvDecRefHelper(DataType type, uint64_t datum) noexcept;
 
 /*
  * Returns true if decreffing the specified TypedValue will free heap-allocated
@@ -83,14 +83,6 @@ bool tvDecRefWillRelease(TypedValue* tv);
 inline bool tvDecRefWillCallHelper(TypedValue* tv) {
   return IS_REFCOUNTED_TYPE(tv->m_type) &&
     !tv->m_data.pstr->hasMultipleRefs();
-}
-
-// Assumes 'tv' is live
-inline void tvRefcountedDecRefCell(TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  if (IS_REFCOUNTED_TYPE(tv->m_type)) {
-    tvDecRefHelper(tv->m_type, tv->m_data.num);
-  }
 }
 
 inline void tvDecRefStr(TypedValue* tv) {
@@ -235,11 +227,11 @@ inline void tvCopy(const TypedValue& fr, TypedValue& to) {
  * Equivalent of tvCopy for Cells and Vars.  These functions have the
  * same effects as tvCopy, but have some added assertions.
  */
-inline void cellCopy(const Cell& fr, Cell& to) {
+inline void cellCopy(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
 }
-inline void refCopy(const Ref& fr, Ref& to) {
+inline void refCopy(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
   tvCopy(fr, to);
 }
@@ -259,7 +251,7 @@ inline void tvDup(const TypedValue& fr, TypedValue& to) {
  * m_type fields, and increments the reference count. Does not perform
  * a decRef on the value that was overwritten.
  */
-inline void cellDup(const Cell& fr, Cell& to) {
+inline void cellDup(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
   tvRefcountedIncRef(&to);
@@ -270,7 +262,7 @@ inline void cellDup(const Cell& fr, Cell& to) {
  * m_type fields and increments the reference count. Does not perform
  * as decRef on the value that was overwritten.
  */
-inline void refDup(const Ref& fr, Ref& to) {
+inline void refDup(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
   to.m_data.num = fr.m_data.num;
   to.m_type = KindOfRef;
@@ -325,7 +317,7 @@ inline const Cell* tvAssertCell(const TypedValue* tv) {
  *
  * `to' must contain a live php value; use cellDup when it doesn't.
  */
-inline void tvSet(const Cell& fr, TypedValue& inTo) {
+inline void tvSet(const Cell fr, TypedValue& inTo) {
   assert(cellIsPlausible(fr));
   Cell* to = tvToCell(&inTo);
   auto const oldType = to->m_type;
@@ -368,7 +360,7 @@ inline void tvSetNull(TypedValue& to) {
  *
  * Post: `to' is a Cell.
  */
-inline void tvSetIgnoreRef(const Cell& fr, TypedValue& to) {
+inline void tvSetIgnoreRef(const Cell fr, TypedValue& to) {
   assert(cellIsPlausible(fr));
   auto const oldType = to.m_type;
   auto const oldDatum = to.m_data.num;
@@ -383,7 +375,7 @@ inline void tvSetIgnoreRef(const Cell& fr, TypedValue& to) {
  * This function has the same effects as tvSetIgnoreRef, with stronger
  * assertions on `to'.
  */
-inline void cellSet(const Cell& fr, Cell& to) {
+inline void cellSet(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   assert(cellIsPlausible(to));
   tvSetIgnoreRef(fr, to);
@@ -448,17 +440,15 @@ inline bool tvIsStatic(const TypedValue* tv) {
 }
 
 /**
- * tvAsVariant and tvAsconst Variant& serve as escape hatches that allow us to call
+ * tvAsVariant and tvAsCVarRef serve as escape hatches that allow us to call
  * into the Variant machinery. Ideally we will use these as little as possible
  * in the long term.
  */
 
 // Assumes 'tv' is live
 inline Variant& tvAsVariant(TypedValue* tv) {
-  // Avoid treating uninitialized TV's as variants. We have some slightly
-  // perverse, but defensible uses where we pass in NULL (and later check
-  // a Variant* against NULL) so tolerate it.
-  assert(nullptr == tv || tvIsPlausible(*tv));
+  assert(tv != nullptr);
+  assert(tvIsPlausible(*tv));
   return *(Variant*)(tv);
 }
 

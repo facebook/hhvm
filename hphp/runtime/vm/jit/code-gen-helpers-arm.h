@@ -19,15 +19,20 @@
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit { namespace arm {
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Intelligently chooses between Add, Mov, and no-op.
@@ -71,8 +76,9 @@ void emitRegRegMove(vixl::MacroAssembler& a,
  * Check the surprise flags. If surprised, call functionEnterHelper.
  */
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
+                                 PhysReg rds, jit::Fixup fixup);
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg rds,
                                  jit::Fixup fixup);
-void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, jit::Fixup fixup);
 
 /*
  * Increments the current (at translation time) translation counter.
@@ -83,7 +89,8 @@ void emitTransCounterInc(vixl::MacroAssembler& a);
  * Immediately saves the VM sp, fp and pc (the latter two contingent on the
  * flags argument) to the ExecutionContext.
  */
-void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags);
+void emitEagerVMRegSave(vixl::MacroAssembler& a, vixl::Register rds,
+                        RegSaveFlags flags);
 
 /*
  * Emits an incref after checking only the static bit, not the type.
@@ -158,6 +165,7 @@ inline void emitTLSLoad(vixl::MacroAssembler& a,
 }
 #endif // USE_GCC_FAST_TLS
 
+///////////////////////////////////////////////////////////////////////////////
 }}}
 
 #endif

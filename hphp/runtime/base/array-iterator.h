@@ -20,12 +20,11 @@
 #include <array>
 #include <cstdint>
 
-#include "hphp/util/tls-pod-bag.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/util/tls-pod-bag.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,10 +37,12 @@ class c_ImmVector;
 class c_ImmSet;
 class c_Pair;
 struct Iter;
+struct MixedArray;
 
 enum class IterNextIndex : uint16_t {
   ArrayPacked = 0,
   ArrayMixed,
+  ArrayStruct,
   Array,
   Vector,
   ImmVector,
@@ -94,7 +95,7 @@ struct ArrayIter {
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
   explicit ArrayIter(const Object& obj);
-  explicit ArrayIter(const Cell& c);
+  explicit ArrayIter(Cell);
   explicit ArrayIter(const Variant& v);
 
   // Copy ctor
@@ -297,7 +298,7 @@ private:
   template <bool incRef>
   void objInit(ObjectData* obj);
 
-  void cellInit(const Cell& c);
+  void cellInit(Cell);
 
   static void VectorInit(ArrayIter* iter, ObjectData* obj);
   static void MapInit(ArrayIter* iter, ObjectData* obj);

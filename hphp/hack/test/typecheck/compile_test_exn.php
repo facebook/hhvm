@@ -9,12 +9,10 @@
  *
  */
 
-
 function main(): void {
   try {
     throw new Exception('test');
-  }
-  catch(Exception $e) {
+  } catch (Exception $e) {
     echo 'OK';
   }
 }

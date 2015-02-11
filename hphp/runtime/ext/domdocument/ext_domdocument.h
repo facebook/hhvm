@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/ext/domdocument/ext_domdocument_includes.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,7 +37,7 @@ Variant php_dom_create_object(xmlNodePtr obj, Object doc, bool owner = false);
 template <class T>
 T* toDOMNativeData(ObjectData* obj) {
   if (!obj->instanceof(T::getClass())) {
-    throw_invalid_object_type(obj->o_getClassName().data());
+    throw_invalid_object_type(obj->getClassName().data());
   }
   return Native::data<T>(obj);
 }

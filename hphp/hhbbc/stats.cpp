@@ -29,10 +29,10 @@
 
 #include <tbb/concurrent_hash_map.h>
 
-#include "folly/Conv.h"
-#include "folly/String.h"
-#include "folly/Format.h"
-#include "folly/ScopeGuard.h"
+#include <folly/Conv.h>
+#include <folly/String.h>
+#include <folly/Format.h>
+#include <folly/ScopeGuard.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -309,7 +309,7 @@ bool in(StatsSS& env, const bc::CGetM& op) {
     case LSL:
     case LSC:
       return TTop;
-    case NumLocationCodes:
+    case InvalidLocationCode:
       break;
     }
     not_reached();

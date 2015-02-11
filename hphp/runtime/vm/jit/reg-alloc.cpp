@@ -18,8 +18,11 @@
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
+
+#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP { namespace jit {
 
@@ -43,27 +46,13 @@ PhysReg forceAlloc(const SSATmp& tmp) {
     assert_flog(
       opc == DefSP ||
       opc == ReDefSP ||
+      opc == ResetSP ||
+      opc == AdjustSP ||
       opc == Call ||
       opc == CallArray ||
       opc == ContEnter ||
-      opc == SpillStack ||
-      opc == SpillFrame ||
-      opc == CufIterSpillFrame ||
-      opc == ExceptionBarrier ||
-      opc == RetAdjustStack ||
-      opc == InterpOne ||
-      opc == InterpOneCF ||
-      opc == Mov ||
-      opc == CheckStk ||
-      opc == GuardStk ||
-      opc == AssertStk ||
-      opc == CastStk ||
-      opc == CastStkIntToDbl ||
-      opc == CoerceStk ||
-      opc == SideExitGuardStk  ||
-      opc == DefLabel ||
-      opc == HintStkInner ||
-      MInstrEffects::supported(opc),
+      opc == RetAdjustStk ||
+      opc == Mov,
       "unexpected StkPtr dest from {}",
       opcodeName(opc)
     );
@@ -92,7 +81,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
 void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
                 const BlockList& blocks, BackEnd* backend) {
   // visit instructions to find tmps eligible to use SIMD registers
-  auto const try_wide = !packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs;
+  auto const try_wide = RuntimeOption::EvalHHIRAllocSIMDRegs;
   boost::dynamic_bitset<> not_wide(unit.numTmps());
   StateVector<SSATmp,SSATmp*> tmps(unit, nullptr);
   for (auto block : blocks) {
@@ -113,7 +102,6 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
     }
   }
   // visit each tmp, assign 1 or 2 registers to each.
-  auto cns = [&](uint64_t c) { return vunit.makeConst(c); };
   for (auto tmp : tmps) {
     if (!tmp) continue;
     auto forced = forceAlloc(*tmp);
@@ -124,7 +112,8 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
       continue;
     }
     if (tmp->inst()->is(DefConst)) {
-      auto c = cns(tmp->rawVal());
+      auto c = tmp->isA(Type::Bool) ? vunit.makeConst(tmp->boolVal())
+                                    : vunit.makeConst(tmp->rawVal());
       state.locs[tmp] = Vloc{c};
       FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(), size_t(c));
     } else {

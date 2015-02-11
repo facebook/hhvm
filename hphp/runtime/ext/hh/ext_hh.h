@@ -26,7 +26,7 @@ bool HHVM_FUNCTION(autoload_set_paths,
                    const Variant& map,
                    const String& root);
 bool HHVM_FUNCTION(could_include, const String& file);
-String HHVM_FUNCTION(serialize_memoize_param, const Variant& param);
+Variant HHVM_FUNCTION(serialize_memoize_param, const Variant& param);
 ///////////////////////////////////////////////////////////////////////////////
 }
 

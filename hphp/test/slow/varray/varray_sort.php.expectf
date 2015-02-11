@@ -1,8 +1,0 @@
-
-Warning: sort builtins are not supported for varray at present, converting to array in %s on line 11
-array(2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-}

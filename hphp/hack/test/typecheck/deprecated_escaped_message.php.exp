@@ -1,0 +1,4 @@
+File "deprecated_escaped_message.php", line 7, characters 3-7:
+The function foo is deprecated: testing \n \t \ ' foo (Typing[4128])
+File "deprecated_escaped_message.php", line 4, characters 10-12:
+Definition is here

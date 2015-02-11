@@ -17,5 +17,4 @@ interface B {
   public function bar(): void;
 }
 
-interface C extends A, B {
-}
+interface C extends A, B {}

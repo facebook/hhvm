@@ -19,9 +19,9 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
@@ -327,7 +327,7 @@ public:
 private:
   PageletTransport *m_job;
 };
-IMPLEMENT_OBJECT_ALLOCATION(PageletTask)
+IMPLEMENT_RESOURCE_ALLOCATION(PageletTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 // implementing PageletServer

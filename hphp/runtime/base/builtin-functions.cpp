@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
-#include "folly/Format.h"
+#include <folly/Format.h>
 #include "hphp/util/text-util.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/file-util.h"
@@ -354,6 +354,9 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
   Variant ret;
   g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
                           nullptr, invName, ExecutionContext::InvokeCuf);
+  if (UNLIKELY(ret.getRawType()) == KindOfRef) {
+    tvUnbox(ret.asTypedValue());
+  }
   return ret;
 }
 
@@ -377,6 +380,9 @@ static Variant invoke(const String& function, const Variant& params,
   if (func && (isContainer(params) || params.isNull())) {
     Variant ret;
     g_context->invokeFunc(ret.asTypedValue(), func, params);
+    if (UNLIKELY(ret.getRawType()) == KindOfRef) {
+      tvUnbox(ret.asTypedValue());
+    }
     return ret;
   }
   return invoke_failed(function.c_str(), fatal);
@@ -405,6 +411,9 @@ Variant invoke_static_method(const String& s, const String& method,
   }
   Variant ret;
   g_context->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
+  if (UNLIKELY(ret.getRawType()) == KindOfRef) {
+    tvUnbox(ret.asTypedValue());
+  }
   return ret;
 }
 
@@ -505,6 +514,10 @@ void check_collection_cast_to_array() {
 
 Object create_object_only(const String& s) {
   return g_context->createObjectOnly(s.get());
+}
+
+Object init_object(const String& s, const Array& params, ObjectData* o) {
+  return g_context->initObject(s.get(), params, o);
 }
 
 Object create_object(const String& s, const Array& params, bool init /* = true */) {
@@ -623,32 +636,6 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
   return uninit_null();
 }
 
-Exception* generate_request_timeout_exception() {
-  Exception* ret = nullptr;
-  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
-  RequestInjectionData &data = info->m_reqInjectionData;
-
-  bool cli = RuntimeOption::ClientExecutionMode();
-  std::string exceptionMsg = cli ?
-    "Maximum execution time of " :
-    "entire web request took longer than ";
-  exceptionMsg += folly::to<std::string>(data.getTimeout());
-  exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
-  ret = new RequestTimeoutException(exceptionMsg, exceptionStack);
-  return ret;
-}
-
-Exception* generate_memory_exceeded_exception() {
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
-  return new RequestMemoryExceededException(
-    "request has exceeded memory limit", exceptionStack);
-}
-
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
                        const Array& class_whitelist /* = null_array */) {
@@ -682,10 +669,10 @@ String concat3(const String& s1, const String& s2, const String& s3) {
   StringSlice r3 = s3.slice();
   int len = r1.len + r2.len + r3.len;
   StringData* str = StringData::Make(len);
-  auto const r = str->bufferSlice();
-  memcpy(r.ptr,                   r1.ptr, r1.len);
-  memcpy(r.ptr + r1.len,          r2.ptr, r2.len);
-  memcpy(r.ptr + r1.len + r2.len, r3.ptr, r3.len);
+  auto const r = str->mutableData();
+  memcpy(r,                   r1.ptr, r1.len);
+  memcpy(r + r1.len,          r2.ptr, r2.len);
+  memcpy(r + r1.len + r2.len, r3.ptr, r3.len);
   str->setSize(len);
   return str;
 }
@@ -698,11 +685,11 @@ String concat4(const String& s1, const String& s2, const String& s3,
   StringSlice r4 = s4.slice();
   int len = r1.len + r2.len + r3.len + r4.len;
   StringData* str = StringData::Make(len);
-  auto const r = str->bufferSlice();
-  memcpy(r.ptr,                            r1.ptr, r1.len);
-  memcpy(r.ptr + r1.len,                   r2.ptr, r2.len);
-  memcpy(r.ptr + r1.len + r2.len,          r3.ptr, r3.len);
-  memcpy(r.ptr + r1.len + r2.len + r3.len, r4.ptr, r4.len);
+  auto const r = str->mutableData();
+  memcpy(r,                            r1.ptr, r1.len);
+  memcpy(r + r1.len,                   r2.ptr, r2.len);
+  memcpy(r + r1.len + r2.len,          r3.ptr, r3.len);
+  memcpy(r + r1.len + r2.len + r3.len, r4.ptr, r4.len);
   str->setSize(len);
   return str;
 }
@@ -818,8 +805,9 @@ String resolve_include(const String& file, const char* currentDir,
     for (int i = 0; i < (int)path_count; i++) {
       String path("");
       String includePath(includePaths[i]);
+      bool is_stream_wrapper = (includePath.find("://") > 0);
 
-      if (includePath[0] != '/') {
+      if (!is_stream_wrapper && includePath[0] != '/') {
         path += (g_context->getCwd() + "/");
       }
 
@@ -830,7 +818,13 @@ String resolve_include(const String& file, const char* currentDir,
       }
 
       path += file;
-      String can_path = FileUtil::canonicalize(path);
+
+      String can_path;
+      if (!is_stream_wrapper) {
+        can_path = FileUtil::canonicalize(path);
+      } else {
+        can_path = String(path.c_str());
+      }
 
       if (tryFile(can_path, ctx)) {
         return can_path;

@@ -1,184 +1,178 @@
 DOMDocument
 object(DOMDocument)#1 (35) {
-  ["recover"]=>
-  bool(false)
-  ["documentURI"]=>
-  NULL
-  ["strictErrorChecking"]=>
-  bool(true)
-  ["xmlStandalone"]=>
-  bool(true)
-  ["standalone"]=>
-  bool(true)
-  ["attributes"]=>
-  NULL
-  ["nodeValue"]=>
-  NULL
-  ["resolveExternals"]=>
-  bool(false)
-  ["childNodes"]=>
-  string(22) "(object value omitted)"
-  ["previousSibling"]=>
-  NULL
   ["nodeName"]=>
   string(9) "#document"
-  ["xmlVersion"]=>
-  string(3) "1.0"
-  ["lastChild"]=>
+  ["nodeValue"]=>
   NULL
   ["nodeType"]=>
   int(9)
-  ["formatOutput"]=>
-  bool(false)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
-  ["parentNode"]=>
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
   NULL
   ["ownerDocument"]=>
   NULL
-  ["config"]=>
+  ["namespaceURI"]=>
   NULL
   ["prefix"]=>
   string(0) ""
-  ["implementation"]=>
-  string(22) "(object value omitted)"
-  ["preserveWhiteSpace"]=>
-  bool(true)
-  ["documentElement"]=>
-  NULL
-  ["namespaceURI"]=>
+  ["localName"]=>
   NULL
   ["baseURI"]=>
   NULL
-  ["substituteEntities"]=>
-  bool(false)
   ["textContent"]=>
   string(0) ""
-  ["nextSibling"]=>
-  NULL
   ["doctype"]=>
   NULL
-  ["validateOnParse"]=>
-  bool(false)
-  ["version"]=>
-  string(3) "1.0"
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["documentElement"]=>
+  NULL
   ["actualEncoding"]=>
   NULL
   ["encoding"]=>
   NULL
-  ["localName"]=>
-  NULL
   ["xmlEncoding"]=>
   NULL
+  ["standalone"]=>
+  bool(true)
+  ["xmlStandalone"]=>
+  bool(true)
+  ["version"]=>
+  string(3) "1.0"
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["strictErrorChecking"]=>
+  bool(true)
+  ["documentURI"]=>
+  NULL
+  ["config"]=>
+  NULL
+  ["formatOutput"]=>
+  bool(false)
+  ["validateOnParse"]=>
+  bool(false)
+  ["resolveExternals"]=>
+  bool(false)
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["recover"]=>
+  bool(false)
+  ["substituteEntities"]=>
+  bool(false)
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMDocument in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(52) {
+array(49) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
-  [2]=>
-  string(5) "__set"
-  [3]=>
-  string(7) "__isset"
-  [4]=>
   string(11) "__debuginfo"
-  [5]=>
+  [2]=>
   string(15) "createAttribute"
-  [6]=>
+  [3]=>
   string(17) "createAttributeNS"
-  [7]=>
+  [4]=>
   string(18) "createCDATASection"
-  [8]=>
+  [5]=>
   string(13) "createComment"
-  [9]=>
+  [6]=>
   string(22) "createDocumentFragment"
-  [10]=>
+  [7]=>
   string(13) "createElement"
-  [11]=>
+  [8]=>
   string(15) "createElementNS"
-  [12]=>
+  [9]=>
   string(21) "createEntityReference"
-  [13]=>
+  [10]=>
   string(27) "createProcessingInstruction"
-  [14]=>
+  [11]=>
   string(14) "createTextNode"
-  [15]=>
+  [12]=>
   string(14) "getElementById"
-  [16]=>
+  [13]=>
   string(20) "getElementsByTagName"
-  [17]=>
+  [14]=>
   string(22) "getElementsByTagNameNS"
-  [18]=>
+  [15]=>
   string(10) "importNode"
-  [19]=>
+  [16]=>
   string(4) "load"
-  [20]=>
+  [17]=>
   string(8) "loadHTML"
-  [21]=>
+  [18]=>
   string(12) "loadHTMLFile"
-  [22]=>
+  [19]=>
   string(7) "loadXML"
-  [23]=>
+  [20]=>
   string(17) "normalizeDocument"
-  [24]=>
+  [21]=>
   string(17) "registerNodeClass"
-  [25]=>
+  [22]=>
   string(15) "relaxNGValidate"
-  [26]=>
+  [23]=>
   string(21) "relaxNGValidateSource"
-  [27]=>
+  [24]=>
   string(4) "save"
-  [28]=>
+  [25]=>
   string(8) "saveHTML"
-  [29]=>
+  [26]=>
   string(12) "saveHTMLFile"
-  [30]=>
+  [27]=>
   string(7) "saveXML"
-  [31]=>
+  [28]=>
   string(14) "schemaValidate"
-  [32]=>
+  [29]=>
   string(20) "schemaValidateSource"
-  [33]=>
+  [30]=>
   string(8) "validate"
-  [34]=>
+  [31]=>
   string(8) "xinclude"
-  [35]=>
+  [32]=>
   string(11) "appendChild"
-  [36]=>
+  [33]=>
   string(9) "cloneNode"
-  [37]=>
+  [34]=>
   string(9) "getLineNo"
-  [38]=>
+  [35]=>
   string(13) "hasAttributes"
-  [39]=>
+  [36]=>
   string(13) "hasChildNodes"
-  [40]=>
+  [37]=>
   string(12) "insertBefore"
-  [41]=>
+  [38]=>
   string(18) "isDefaultNamespace"
-  [42]=>
+  [39]=>
   string(10) "isSameNode"
-  [43]=>
+  [40]=>
   string(11) "isSupported"
-  [44]=>
+  [41]=>
   string(18) "lookupNamespaceUri"
-  [45]=>
+  [42]=>
   string(12) "lookupPrefix"
-  [46]=>
+  [43]=>
   string(9) "normalize"
-  [47]=>
+  [44]=>
   string(11) "removeChild"
-  [48]=>
+  [45]=>
   string(12) "replaceChild"
-  [49]=>
+  [46]=>
   string(4) "c14n"
-  [50]=>
+  [47]=>
   string(8) "c14nfile"
-  [51]=>
+  [48]=>
   string(11) "getNodePath"
 }
 ================
@@ -186,184 +180,178 @@ A_DOMDocument
 object(A_DOMDocument)#2 (36) {
   ["___x"]=>
   NULL
-  ["recover"]=>
-  bool(false)
-  ["documentURI"]=>
-  NULL
-  ["strictErrorChecking"]=>
-  bool(true)
-  ["xmlStandalone"]=>
-  bool(true)
-  ["standalone"]=>
-  bool(true)
-  ["attributes"]=>
-  NULL
-  ["nodeValue"]=>
-  NULL
-  ["resolveExternals"]=>
-  bool(false)
-  ["childNodes"]=>
-  string(22) "(object value omitted)"
-  ["previousSibling"]=>
-  NULL
   ["nodeName"]=>
   string(9) "#document"
-  ["xmlVersion"]=>
-  string(3) "1.0"
-  ["lastChild"]=>
+  ["nodeValue"]=>
   NULL
   ["nodeType"]=>
   int(9)
-  ["formatOutput"]=>
-  bool(false)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
-  ["parentNode"]=>
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
   NULL
   ["ownerDocument"]=>
   NULL
-  ["config"]=>
+  ["namespaceURI"]=>
   NULL
   ["prefix"]=>
   string(0) ""
-  ["implementation"]=>
-  string(22) "(object value omitted)"
-  ["preserveWhiteSpace"]=>
-  bool(true)
-  ["documentElement"]=>
-  NULL
-  ["namespaceURI"]=>
+  ["localName"]=>
   NULL
   ["baseURI"]=>
   NULL
-  ["substituteEntities"]=>
-  bool(false)
   ["textContent"]=>
   string(0) ""
-  ["nextSibling"]=>
-  NULL
   ["doctype"]=>
   NULL
-  ["validateOnParse"]=>
-  bool(false)
-  ["version"]=>
-  string(3) "1.0"
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["documentElement"]=>
+  NULL
   ["actualEncoding"]=>
   NULL
   ["encoding"]=>
   NULL
-  ["localName"]=>
-  NULL
   ["xmlEncoding"]=>
   NULL
+  ["standalone"]=>
+  bool(true)
+  ["xmlStandalone"]=>
+  bool(true)
+  ["version"]=>
+  string(3) "1.0"
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["strictErrorChecking"]=>
+  bool(true)
+  ["documentURI"]=>
+  NULL
+  ["config"]=>
+  NULL
+  ["formatOutput"]=>
+  bool(false)
+  ["validateOnParse"]=>
+  bool(false)
+  ["resolveExternals"]=>
+  bool(false)
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["recover"]=>
+  bool(false)
+  ["substituteEntities"]=>
+  bool(false)
 }
 
 Warning: Attempted to serialize unserializable builtin class A_DOMDocument in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(52) {
+array(49) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
-  [2]=>
-  string(5) "__set"
-  [3]=>
-  string(7) "__isset"
-  [4]=>
   string(11) "__debuginfo"
-  [5]=>
+  [2]=>
   string(15) "createAttribute"
-  [6]=>
+  [3]=>
   string(17) "createAttributeNS"
-  [7]=>
+  [4]=>
   string(18) "createCDATASection"
-  [8]=>
+  [5]=>
   string(13) "createComment"
-  [9]=>
+  [6]=>
   string(22) "createDocumentFragment"
-  [10]=>
+  [7]=>
   string(13) "createElement"
-  [11]=>
+  [8]=>
   string(15) "createElementNS"
-  [12]=>
+  [9]=>
   string(21) "createEntityReference"
-  [13]=>
+  [10]=>
   string(27) "createProcessingInstruction"
-  [14]=>
+  [11]=>
   string(14) "createTextNode"
-  [15]=>
+  [12]=>
   string(14) "getElementById"
-  [16]=>
+  [13]=>
   string(20) "getElementsByTagName"
-  [17]=>
+  [14]=>
   string(22) "getElementsByTagNameNS"
-  [18]=>
+  [15]=>
   string(10) "importNode"
-  [19]=>
+  [16]=>
   string(4) "load"
-  [20]=>
+  [17]=>
   string(8) "loadHTML"
-  [21]=>
+  [18]=>
   string(12) "loadHTMLFile"
-  [22]=>
+  [19]=>
   string(7) "loadXML"
-  [23]=>
+  [20]=>
   string(17) "normalizeDocument"
-  [24]=>
+  [21]=>
   string(17) "registerNodeClass"
-  [25]=>
+  [22]=>
   string(15) "relaxNGValidate"
-  [26]=>
+  [23]=>
   string(21) "relaxNGValidateSource"
-  [27]=>
+  [24]=>
   string(4) "save"
-  [28]=>
+  [25]=>
   string(8) "saveHTML"
-  [29]=>
+  [26]=>
   string(12) "saveHTMLFile"
-  [30]=>
+  [27]=>
   string(7) "saveXML"
-  [31]=>
+  [28]=>
   string(14) "schemaValidate"
-  [32]=>
+  [29]=>
   string(20) "schemaValidateSource"
-  [33]=>
+  [30]=>
   string(8) "validate"
-  [34]=>
+  [31]=>
   string(8) "xinclude"
-  [35]=>
+  [32]=>
   string(11) "appendChild"
-  [36]=>
+  [33]=>
   string(9) "cloneNode"
-  [37]=>
+  [34]=>
   string(9) "getLineNo"
-  [38]=>
+  [35]=>
   string(13) "hasAttributes"
-  [39]=>
+  [36]=>
   string(13) "hasChildNodes"
-  [40]=>
+  [37]=>
   string(12) "insertBefore"
-  [41]=>
+  [38]=>
   string(18) "isDefaultNamespace"
-  [42]=>
+  [39]=>
   string(10) "isSameNode"
-  [43]=>
+  [40]=>
   string(11) "isSupported"
-  [44]=>
+  [41]=>
   string(18) "lookupNamespaceUri"
-  [45]=>
+  [42]=>
   string(12) "lookupPrefix"
-  [46]=>
+  [43]=>
   string(9) "normalize"
-  [47]=>
+  [44]=>
   string(11) "removeChild"
-  [48]=>
+  [45]=>
   string(12) "replaceChild"
-  [49]=>
+  [46]=>
   string(4) "c14n"
-  [50]=>
+  [47]=>
   string(8) "c14nfile"
-  [51]=>
+  [48]=>
   string(11) "getNodePath"
 }

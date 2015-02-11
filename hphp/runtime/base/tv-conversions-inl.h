@@ -16,6 +16,11 @@
 
 #include "hphp/runtime/base/type-conversions.h" // toInt64(double)
 
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/string-data.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -32,7 +37,7 @@ inline bool cellToBool(Cell cell) {
     case KindOfStaticString:
     case KindOfString:        return cell.m_data.pstr->toBoolean();
     case KindOfArray:         return !!cell.m_data.parr->size();
-    case KindOfObject:        return cell.m_data.pobj->o_toBoolean();
+    case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->o_toBoolean();
     case KindOfRef:
     case KindOfClass:         break;
@@ -52,7 +57,7 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfStaticString:
     case KindOfString:        return cell.m_data.pstr->toInt64(10);
     case KindOfArray:         return cell.m_data.parr->empty() ? 0 : 1;
-    case KindOfObject:        return cell.m_data.pobj->o_toInt64();
+    case KindOfObject:        return cell.m_data.pobj->toInt64();
     case KindOfResource:      return cell.m_data.pres->o_toInt64();
     case KindOfRef:
     case KindOfClass:         break;

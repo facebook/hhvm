@@ -25,26 +25,28 @@
 #include <algorithm>
 #include <vector>
 
-#include "folly/ScopeGuard.h"
-#include "folly/String.h"
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
 
-#include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/process.h"
-#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,6 +142,11 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     return Variant(true);
   }
 
+  if (!curFP->hasVarEnv()) {
+    curFP->setVarEnv(VarEnv::createLocal(curFP));
+  }
+  auto varEnv = curFP->getVarEnv();
+
   auto const func = unit->getMain();
   TypedValue retVal;
   g_context->invokeFunc(
@@ -148,9 +155,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     init_null_variant,
     nullptr,
     nullptr,
-    // Zend appears to share the variable environment with the assert()
-    // builtin, but we deviate by having no shared env here.
-    nullptr /* VarEnv */,
+    varEnv,
     nullptr,
     ExecutionContext::InvokePseudoMain
   );
@@ -158,8 +163,9 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   return tvAsVariant(&retVal);
 }
 
-static Variant HHVM_FUNCTION(assert, const Variant& assertion,
-                                     const Variant& message/* = null */) {
+// assert_impl already defined in util/assertions.h
+static Variant impl_assert(const Variant& assertion,
+                           const Variant& message /* = null */) {
   if (!s_option_data->assertActive) return true;
 
   CallerFrame cf;
@@ -171,7 +177,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion,
       if (RuntimeOption::EvalAuthoritativeMode) {
         // We could support this with compile-time string literals,
         // but it's not yet implemented.
-        throw_not_supported(__func__,
+        throw_not_supported("assert()",
           "assert with strings argument in RepoAuthoritative mode");
       }
       return eval_for_assert(fp, assertion.toString()).toBoolean();
@@ -201,6 +207,17 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion,
   }
 
   return init_null();
+}
+
+static Variant HHVM_FUNCTION(SystemLib_assert, const Variant& assertion,
+                             const Variant& message = uninit_null()) {
+  return impl_assert(assertion, message);
+}
+
+static Variant HHVM_FUNCTION(assert, const Variant& assertion,
+                                     const Variant& message /* = null */) {
+  raise_disallowed_dynamic_call("assert should not be called dynamically");
+  return impl_assert(assertion, message);
 }
 
 static int64_t HHVM_FUNCTION(dl, const String& library) {
@@ -927,7 +944,11 @@ static bool HHVM_FUNCTION(putenv, const String& setting) {
 static void HHVM_FUNCTION(set_time_limit, int64_t seconds) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
   RequestInjectionData &data = info->m_reqInjectionData;
-  data.setTimeout(seconds);
+  if (RuntimeOption::TimeoutsUseWallTime) {
+    data.setTimeout(seconds);
+  } else {
+    data.setCPUTimeout(seconds);
+  }
 }
 
 String HHVM_FUNCTION(sys_get_temp_dir) {
@@ -1169,6 +1190,7 @@ static int64_t HHVM_FUNCTION(gc_collect_cycles) {
 void StandardExtension::initOptions() {
   HHVM_FE(assert_options);
   HHVM_FE(assert);
+  HHVM_FALIAS(__SystemLib\\assert, SystemLib_assert);
   HHVM_FE(dl);
   HHVM_FE(extension_loaded);
   HHVM_FE(get_loaded_extensions);

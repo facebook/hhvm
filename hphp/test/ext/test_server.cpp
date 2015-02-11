@@ -25,6 +25,8 @@
 #include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server.h"
@@ -32,7 +34,7 @@
 #include <memory>
 #include <vector>
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 using namespace HPHP;
 
@@ -49,10 +51,10 @@ static int s_admin_port = 0;
 static int s_rpc_port = 0;
 static int inherit_fd = -1;
 static std::unique_ptr<AsyncFunc<TestServer>> s_func;
-static char s_pidfile[MAXPATHLEN];
-static char s_repoFile[MAXPATHLEN];
-static char s_logFile[MAXPATHLEN];
-static char s_filename[MAXPATHLEN];
+static char s_pidfile[PATH_MAX];
+static char s_repoFile[PATH_MAX];
+static char s_logFile[PATH_MAX];
+static char s_filename[PATH_MAX];
 static int k_timeout = 30;
 
 bool TestServer::VerifyServerResponse(const char *input, const char **outputs,

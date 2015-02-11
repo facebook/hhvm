@@ -1,8 +1,8 @@
-File "array_filter2.php", line 7, characters 5-42:
+File "array_filter2.php", line 6, characters 12-37:
 Invalid argument (Typing[4110])
-File "array_filter2.php", line 13, characters 19-21:
+File "array_filter2.php", line 9, characters 19-21:
 This is an int
 File "array_filter2.php", line 5, characters 15-23:
 It is incompatible with an array key (int/string)
-File "array_filter2.php", line 8, characters 7-22:
+File "array_filter2.php", line 6, characters 21-36:
 array_filter converts KeyedContainer<Tk, Tv> to array<Tk, Tv>, and Container<Tv> to array<arraykey, Tv>. Single argument calls additionally remove nullability from Tv.

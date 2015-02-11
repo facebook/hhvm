@@ -18,7 +18,8 @@
 #define incl_HPHP_MEM_FILE_H_
 
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

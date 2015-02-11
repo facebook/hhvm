@@ -16,6 +16,7 @@ let log_command_of_command = function
   | C.CStart env -> LC.LCStart env.ClientStart.root
   | C.CStop env -> LC.LCStop env.ClientStop.root
   | C.CRestart env -> LC.LCRestart env.ClientStart.root
-  | C.CStatus env -> LC.LCStatus env.ClientStatus.root
-  | C.CBuild env -> LC.LCBuild env.ClientBuild.root
+  | C.CBuild env ->
+     LC.LCBuild (env.ClientBuild.root,
+                 ClientBuild.build_kind_of env.ClientBuild.build_opts)
   | C.CProlog env -> LC.LCProlog env.ClientProlog.root

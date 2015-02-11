@@ -31,7 +31,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(TimeZone)
+IMPLEMENT_RESOURCE_ALLOCATION(TimeZone)
 ///////////////////////////////////////////////////////////////////////////////
 
 class GuessedTimeZone {
@@ -87,8 +87,8 @@ struct ahm_eqstr {
 };
 
 using TimeZoneCache =
-  folly::AtomicHashArray<const char*, TimeZoneInfo, cstr_hash, ahm_eqstr>;
-using TimeZoneCacheEntry = std::pair<const char*, TimeZoneInfo>;
+  folly::AtomicHashArray<const char*, timelib_tzinfo*, cstr_hash, ahm_eqstr>;
+using TimeZoneCacheEntry = std::pair<const char*, timelib_tzinfo*>;
 
 TimeZoneCache* s_tzCache;
 
@@ -106,17 +106,18 @@ const timelib_tzdb *TimeZone::GetDatabase() {
   return Database;
 }
 
-TimeZoneInfo TimeZone::GetTimeZoneInfo(char* name, const timelib_tzdb* db) {
+timelib_tzinfo* TimeZone::GetTimeZoneInfoRaw(char* name,
+                                             const timelib_tzdb* db) {
   auto const it = s_tzCache->find(name);
   if (it != s_tzCache->end()) {
     return it->second;
   }
 
-  TimeZoneInfo tzi(timelib_parse_tzfile(name, db), tzinfo_deleter());
+  auto tzi = timelib_parse_tzfile(name, db);
   if (!tzi) {
     char* tzid = timelib_timezone_id_from_abbr(name, -1, 0);
     if (tzid) {
-      tzi = TimeZoneInfo(timelib_parse_tzfile(tzid, db), tzinfo_deleter());
+      tzi = timelib_parse_tzfile(tzid, db);
     }
   }
 
@@ -128,16 +129,12 @@ TimeZoneInfo TimeZone::GetTimeZoneInfo(char* name, const timelib_tzdb* db) {
       always_assert(result.first != s_tzCache->end());
       // A collision occurred, so we don't need our strdup'ed key.
       free(key);
+      timelib_tzinfo_dtor(tzi);
       tzi = result.first->second;
     }
   }
 
   return tzi;
-}
-
-timelib_tzinfo* TimeZone::GetTimeZoneInfoRaw(char* name,
-                                             const timelib_tzdb* db) {
-  return GetTimeZoneInfo(name, db).get();
 }
 
 bool TimeZone::IsValid(const String& name) {
@@ -168,8 +165,8 @@ String TimeZone::CurrentName() {
   return String(s_guessed_timezone.m_tzid);
 }
 
-SmartResource<TimeZone> TimeZone::Current() {
-  return newres<TimeZone>(CurrentName());
+SmartPtr<TimeZone> TimeZone::Current() {
+  return makeSmartPtr<TimeZone>(CurrentName());
 }
 
 bool TimeZone::SetCurrent(const String& zone) {
@@ -232,9 +229,12 @@ Array TimeZone::GetAbbreviations() {
 }
 
 String TimeZone::AbbreviationToName(String abbr, int utcoffset /* = -1 */,
-                                    bool isdst /* = true */) {
+                                    int isdst /* = 1 */) {
+  if (isdst != 0 && isdst != 1) {
+    isdst = -1;
+  }
   return String(timelib_timezone_id_from_abbr(abbr.data(), utcoffset,
-                                              isdst ? -1 : 0),
+                                              isdst),
                 CopyString);
 }
 
@@ -242,20 +242,19 @@ String TimeZone::AbbreviationToName(String abbr, int utcoffset /* = -1 */,
 // class TimeZone
 
 TimeZone::TimeZone() {
-  m_tzi = TimeZoneInfo();
+  m_tzi = nullptr;
 }
 
 TimeZone::TimeZone(const String& name) {
-  m_tzi = GetTimeZoneInfo((char*)name.data(), GetDatabase());
+  m_tzi = GetTimeZoneInfoRaw((char*)name.data(), GetDatabase());
 }
 
 TimeZone::TimeZone(timelib_tzinfo *tzi) {
-  m_tzi = TimeZoneInfo(tzi, tzinfo_deleter());
+  m_tzi = tzi;
 }
 
-SmartResource<TimeZone> TimeZone::cloneTimeZone() const {
-  if (!m_tzi) return newres<TimeZone>();
-  return newres<TimeZone>(timelib_tzinfo_clone(m_tzi.get()));
+SmartPtr<TimeZone> TimeZone::cloneTimeZone() const {
+  return makeSmartPtr<TimeZone>(m_tzi);
 }
 
 String TimeZone::name() const {
@@ -272,7 +271,7 @@ int TimeZone::offset(int64_t timestamp) const {
   if (!m_tzi) return 0;
 
   timelib_time_offset *offset =
-    timelib_get_time_zone_info(timestamp, m_tzi.get());
+    timelib_get_time_zone_info(timestamp, m_tzi);
   int ret = offset->offset;
   timelib_time_offset_dtor(offset);
   return ret;
@@ -282,29 +281,44 @@ bool TimeZone::dst(int64_t timestamp) const {
   if (!m_tzi) return false;
 
   timelib_time_offset *offset =
-    timelib_get_time_zone_info(timestamp, m_tzi.get());
+    timelib_get_time_zone_info(timestamp, m_tzi);
   bool ret = offset->is_dst;
   timelib_time_offset_dtor(offset);
   return ret;
 }
 
-Array TimeZone::transitions() const {
+Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
+                            int64_t timestamp_end /* = k_PHP_INT_MAX */) const {
   Array ret;
   if (m_tzi) {
-    for (unsigned int i = 0; i < m_tzi->timecnt; ++i) {
-      int index = m_tzi->trans_idx[i];
-      int timestamp = m_tzi->trans[i];
-      DateTime dt(timestamp);
-      ttinfo &offset = m_tzi->type[index];
-      const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
-
+    // If explicitly provided add the beginning timestamp to the ret array
+    if (timestamp_begin > k_PHP_INT_MIN) {
+      DateTime dt(timestamp_begin);
       ret.append(make_map_array(
-        s_ts, timestamp,
-        s_time, dt.toString(DateTime::DateFormat::ISO8601),
-        s_offset, offset.offset,
-        s_isdst, (bool)offset.isdst,
-        s_abbr, String(abbr, CopyString)
-      ));
+            s_ts, timestamp_begin,
+            s_time, dt.toString(DateTime::DateFormat::ISO8601),
+            s_offset, m_tzi->type[0].offset,
+            s_isdst, (bool)m_tzi->type[0].isdst,
+            s_abbr, String(m_tzi->timezone_abbr + m_tzi->type[0].abbr_idx,
+                           CopyString)
+          ));
+    }
+    for (unsigned int i = 0; i < m_tzi->timecnt; ++i) {
+      int timestamp = m_tzi->trans[i];
+      if (timestamp > timestamp_begin && timestamp <= timestamp_end) {
+        int index = m_tzi->trans_idx[i];
+        DateTime dt(timestamp);
+        ttinfo &offset = m_tzi->type[index];
+        const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
+
+        ret.append(make_map_array(
+          s_ts, timestamp,
+          s_time, dt.toString(DateTime::DateFormat::ISO8601),
+          s_offset, offset.offset,
+          s_isdst, (bool)offset.isdst,
+          s_abbr, String(abbr, CopyString)
+        ));
+      }
     }
   }
   return ret;

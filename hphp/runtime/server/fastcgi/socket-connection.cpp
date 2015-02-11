@@ -16,11 +16,12 @@
 
 #include "hphp/runtime/server/fastcgi/socket-connection.h"
 #include "hphp/util/assertions.h"
-#include "folly/io/IOBuf.h"
+#include <folly/io/IOBuf.h>
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
-#include "folly/SocketAddress.h"
+#include <thrift/lib/cpp/async/TAsyncTimeout.h>
+#include <folly/SocketAddress.h>
 #include "thrift/lib/cpp/transport/TTransportException.h"
-#include "folly/experimental/wangle/ManagedConnection.h"
+#include <folly/wangle/acceptor/ManagedConnection.h>
 
 namespace HPHP {
 
@@ -34,7 +35,7 @@ using apache::thrift::transport::TTransportException;
 ///////////////////////////////////////////////////////////////////////////////
 
 SocketConnection::SocketConnection(
-  TAsyncTransport::UniquePtr sock,
+  folly::AsyncSocket::UniquePtr sock,
   const SocketAddress& localAddr,
   const SocketAddress& peerAddr)
   : m_localAddr(localAddr),

@@ -17,7 +17,10 @@
 
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/system/constants.h"
@@ -120,13 +123,13 @@ private:
 
     // If it's ALL we create two resources, but only return one - this
     // matches Zend, and is the documented behavior.
-    Resource ret;
+    SmartPtr<StreamFilter> ret;
     if (mode & k_STREAM_FILTER_READ) {
       auto resource = createInstance(func_name,
                                      stream,
                                      filtername,
                                      params);
-      if (resource.isNull()) {
+      if (!resource) {
         return false;
       }
       ret = resource;
@@ -141,7 +144,7 @@ private:
                                      stream,
                                      filtername,
                                      params);
-      if (resource.isNull()) {
+      if (!resource) {
         return false;
       }
       ret = resource;
@@ -151,13 +154,13 @@ private:
         file->prependWriteFilter(resource);
       }
     }
-    return ret;
+    return Variant(std::move(ret));
   }
 
-  Resource createInstance(const char* php_func,
-                          const Resource& stream,
-                          const String& filter,
-                          const Variant& params) {
+  SmartPtr<StreamFilter> createInstance(const char* php_func,
+                                        const Resource& stream,
+                                        const String& filter,
+                                        const Variant& params) {
     auto class_name = m_registeredFilters.rvalAt(filter).asCStrRef();
     Class* class_ = Unit::getClass(class_name.get(), true);
     Object obj = Object();
@@ -189,10 +192,10 @@ private:
       raise_warning("%s: unable to create or locate filter \"%s\"",
                     php_func,
                     filter.data());
-      return Resource();
+      return nullptr;
     }
 
-    return Resource(newres<StreamFilter>(obj, stream));
+    return makeSmartPtr<StreamFilter>(obj, stream);
   }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(StreamUserFilters, s_stream_user_filters);
@@ -200,15 +203,15 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(StreamUserFilters, s_stream_user_filters);
 ///////////////////////////////////////////////////////////////////////////////
 // StreamFilter
 
-int64_t StreamFilter::invokeFilter(Resource in,
-                                   Resource out,
+int64_t StreamFilter::invokeFilter(const SmartPtr<BucketBrigade>& in,
+                                   const SmartPtr<BucketBrigade>& out,
                                    bool closing) {
   auto consumedTV = make_tv<KindOfInt64>(0);
   auto consumedRef = RefData::Make(consumedTV);
 
   PackedArrayInit params(4);
-  params.append(in);
-  params.append(out);
+  params.append(Variant(in));
+  params.append(Variant(out));
   params.append(consumedRef);
   params.append(closing);
   return m_filter->o_invoke(s_filter, params.toArray()).toInt64();
@@ -224,8 +227,7 @@ bool StreamFilter::remove() {
   }
   auto file = m_stream.getTyped<File>();
   assert(file);
-  Resource rthis(this);
-  auto ret = file->removeFilter(rthis);
+  auto ret = file->removeFilter(SmartPtr<StreamFilter>(this));
   m_stream.reset();
   return ret;
 }

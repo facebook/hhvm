@@ -16,7 +16,7 @@ module Classes = struct
   let cParent = "parent"
   let cStatic = "static"
   let cSelf   = "self"
-  let cUnknown = "*Unknown*"
+  let cUnknown = "\\*Unknown*" (* Used for dynamic classnames, e.g. new $foo(); *)
 
   let cAwaitable = "\\Awaitable"
   let cWaitHandle = "\\WaitHandle"
@@ -60,10 +60,8 @@ module Collections = struct
   let cIndexish         = "\\Indexish"
 
   let cCollection       = "\\Collection"
-  let cConstCollection  = "\\ConstCollection"
   let cConstVector      = "\\ConstVector"
   let cConstMap         = "\\ConstMap"
-  let cConstSet         = "\\ConstSet"
 
 end
 
@@ -87,7 +85,8 @@ module UserAttributes = struct
 
   let uaOverride            = "__Override"
   let uaConsistentConstruct = "__ConsistentConstruct"
-  let uaUnsafeConstruct    = "__UNSAFE_Construct"
+  let uaUnsafeConstruct     = "__UNSAFE_Construct"
+  let uaDeprecated          = "__Deprecated"
 
 end
 
@@ -115,6 +114,8 @@ module PseudoFunctions = struct
   let empty = "\\empty"
   let isset = "\\isset"
   let unset = "\\unset"
+  let exit_ = "\\exit"
+  let die = "\\die"
   let hh_show = "\\hh_show"
 
 end
@@ -144,6 +145,11 @@ module Typehints = struct
   let arraykey = "arraykey"
   let mixed    = "mixed"
   let this     = "this"
+
+  (* Place holder type that will be filled later. This is used for implementing
+   * the path dependent type for type accesses
+   *)
+  let type_hole = "<this>"
 
   let int     = "int"
   let bool    = "bool"
@@ -177,18 +183,20 @@ end
 
 module FB = struct
 
-  let cEnum                 = "\\Enum"
-  let cUncheckedEnum        = "\\UncheckedEnum"
+  let cEnum                  = "\\Enum"
+  let cUncheckedEnum         = "\\UncheckedEnum"
 
-  let cGenReadApi           = "\\GenReadApi"
-  let cGenReadIdxApi        = "\\GenReadIdxApi"
+  let cGenReadApi            = "\\GenReadApi"
+  let cGenReadIdxApi         = "\\GenReadIdxApi"
 
-  let cPrivacyPolicyBase    = "\\PrivacyPolicyBase"
-  let cDataType             = "\\DataType"
-  let cDataTypeImplProvider = "\\DataTypeImplProvider"
+  let cPrivacyPolicy         = "\\PrivacyPolicy"
+  let cPrivacyPolicyBase     = "\\PrivacyPolicyBase"
+  let cPrivacyPolicyBaseBase = "\\PrivacyPolicyBaseBase"
+  let cDataType              = "\\DataType"
+  let cDataTypeImplProvider  = "\\DataTypeImplProvider"
 
-  let cDynamicYield         = "\\DynamicYield"
-  let cIUseDynamicYield     = "\\IUseDynamicYield"
+  let cDynamicYield          = "\\DynamicYield"
+  let cIUseDynamicYield      = "\\IUseDynamicYield"
 
   let fgena                        = "gena"
   let fgenva                       = "genva"

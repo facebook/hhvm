@@ -14,5 +14,5 @@ async function foo(): Awaitable<void> {
 }
 
 async function gen_arr(): Awaitable<array> {
-  return array(1,2,3);
+  return array(1, 2, 3);
 }

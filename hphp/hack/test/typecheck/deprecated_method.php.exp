@@ -1,0 +1,4 @@
+File "deprecated_method.php", line 9, characters 3-10:
+The method foo is deprecated: use bar() instead (Typing[4128])
+File "deprecated_method.php", line 5, characters 26-28:
+Definition is here

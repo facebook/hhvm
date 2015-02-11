@@ -1,0 +1,24 @@
+---- EGPCS ----
+bool(true)
+bool(true)
+---- G ----
+bool(false)
+bool(false)
+---- P ----
+bool(false)
+bool(false)
+---- E ----
+bool(false)
+bool(true)
+---- S ----
+bool(true)
+bool(false)
+---- ES ----
+bool(true)
+bool(true)
+---- ESCGP ----
+bool(true)
+bool(true)
+---- CG ----
+bool(false)
+bool(false)

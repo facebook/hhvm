@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_RUNTIME_OPTION_H_
 #define incl_HPHP_RUNTIME_OPTION_H_
 
-#include "folly/dynamic.h"
+#include <folly/dynamic.h>
 
 #include <unordered_map>
 #include <vector>
@@ -116,7 +116,6 @@ public:
   static int ServerBacklog;
   static int ServerConnectionLimit;
   static int ServerThreadCount;
-  static int ProdServerPort;
   static int QueuedJobsReleaseRate;
   static int ServerWarmupThrottleRequestCount;
   static bool ServerThreadRoundRobin;
@@ -138,6 +137,7 @@ public:
 
   static int RequestTimeoutSeconds;
   static int PspTimeoutSeconds;
+  static int PspCpuTimeoutSeconds;
   static int64_t MaxRequestAgeFactor;
   static int64_t ServerMemoryHeadRoom;
   static int64_t RequestMemoryMaxBytes;
@@ -262,12 +262,17 @@ public:
   static std::string AdminPassword;
   static std::set<std::string> AdminPasswords;
 
-  static std::string ProxyOrigin;
+  /*
+   * Options related to reverse proxying. ProxyOriginRaw and ProxyPercentageRaw
+   * may be mutated by background threads and should only be read or written
+   * using the helper functions defined with HttpRequestHandler.
+   */
+  static std::string ProxyOriginRaw;
+  static int ProxyPercentageRaw;
   static int ProxyRetry;
   static bool UseServeURLs;
   static std::set<std::string> ServeURLs;
   static bool UseProxyURLs;
-  static int ProxyPercentage;
   static std::set<std::string> ProxyURLs;
   static std::vector<std::string> ProxyPatterns;
   static bool AlwaysUseRelativePath;
@@ -341,7 +346,6 @@ public:
   static bool EnableEmitterStats;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
-  static int MaxUserFunctionId;
   static bool EnableArgsInBacktraces;
   static bool EnableZendCompat;
   static bool EnableZendSorting;
@@ -355,10 +359,13 @@ public:
   static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
 
-  static int GetScannerType();
+  static int64_t HeapSizeMB;
+  static int64_t HeapResetCountBase;
+  static int64_t HeapResetCountMultiple;
+  static int64_t HeapLowWaterMark;
+  static int64_t HeapHighWaterMark;
 
-  static bool GetServerCustomBoolSetting(const std::string &settingName,
-                                         bool &val);
+  static int GetScannerType();
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
 
@@ -385,8 +392,14 @@ public:
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(uint32_t, JitLLVM,                 jitLLVMDefault())                \
+  F(bool,     JitLLVMFastISel,         false)                           \
+  F(bool,     JitLLVMBasicOpt,         true)                            \
+  F(uint32_t, JitLLVMOptLevel,         2)                               \
+  F(uint32_t, JitLLVMSizeLevel,        0)                               \
+  F(bool,     JitLLVMCounters,         false)                           \
+  F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
-  F(uint64_t, JitAHotSize,             4 << 20)                         \
+  F(uint64_t, JitAHotSize,             ahotDefault())                   \
   F(uint64_t, JitASize,                60 << 20)                        \
   F(uint64_t, JitAMaxUsage,            maxUsageDef())                   \
   F(uint64_t, JitAProfSize,            64 << 20)                        \
@@ -410,13 +423,12 @@ public:
          the runtime will throw a fatal error (this goes together
          with Option::HardReturnTypeHints). */                          \
   F(int32_t, CheckReturnTypeHints,     2)                               \
-  F(bool, SoftClosureReturnTypeHints,  true)                            \
+  F(bool, SoftClosureReturnTypeHints,  false)                           \
   /* HackArrayWarnFrequency:
      0 - no warnings
      [1-UINT32_MAX] - raise warning every X times
   */                                                                    \
   F(uint32_t, HackArrayWarnFrequency,  0)                               \
-  F(bool, TraceArrays,                 false)                           \
   F(bool, AllowScopeBinding,           true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
@@ -424,8 +436,6 @@ public:
   F(bool, PerfPidMap,                  true)                            \
   F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
-  F(bool, RuntimeTypeProfile,          false)                           \
-  F(int32_t, RuntimeTypeProfileLoggingFreq,  0)                         \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
@@ -436,9 +446,6 @@ public:
   F(uint32_t, JitMaxTranslations,      12)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(uint32_t, JitMaxRegionInstrs,      1000)                            \
-  F(string, JitProfilePath,            std::string(""))                 \
-  F(bool, JitTypePrediction,           true)                            \
-  F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \
@@ -457,10 +464,9 @@ public:
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitPseudomain,               jitPseudomainDefault())          \
   F(bool, HHIRBytecodeControlFlow,     controlFlowDefault())            \
-  F(bool, HHIRCse,                     true)                            \
+  F(bool, HHIRCse,                     false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
-  F(bool, HHIRJumpOpts,                true)                            \
   F(bool, HHIRRefcountOpts,            refcountOptsDefault())           \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \
@@ -476,6 +482,7 @@ public:
   F(uint32_t, HHIRGenerateAsserts,     debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
   F(bool, HHIRDeadCodeElim,            true)                            \
+  F(bool, HHIRGlobalValueNumbering,    true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
@@ -511,14 +518,17 @@ public:
   F(uint32_t, TCNumHugeHotMB,          16)                              \
   F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \
+  F(bool, CheckHeapOnAlloc,            false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \
                         kDefaultInitialStaticStringTableSize)           \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \
+  F(string, PCRECacheType, std::string("static"))                       \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
+  F(bool, DisableStructArray, true)                                     \
   /* */
 
 private:

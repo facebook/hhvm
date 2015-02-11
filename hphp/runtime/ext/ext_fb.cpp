@@ -27,11 +27,15 @@
 #include <utility>
 #include <vector>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -128,7 +132,7 @@ Variant f_fb_serialize(const Variant& thing) {
       HPHP::serialize::FBSerializer<VariantController>::serializedSize(thing);
     String s(len, ReserveString);
     HPHP::serialize::FBSerializer<VariantController>::serialize(
-      thing, s.bufferSlice().ptr);
+      thing, s.mutableData());
     s.setSize(len);
     return s;
   } catch (const HPHP::serialize::SerializeError&) {
@@ -460,7 +464,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
         Object obj = var.toObject();
 
         if (obj->isCollection()) {
-          fb_compact_serialize_variant(sb, obj->o_toArray(), depth, behavior);
+          fb_compact_serialize_variant(sb, obj->toArray(), depth, behavior);
           return 0;
         }
 
@@ -468,7 +472,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
           auto msg = folly::format(
             "Cannot serialize object of type {} because it does not implement "
             "HH\\IMemoizeParam",
-            obj->o_getClassName().data()).str();
+            obj->getClassName().data()).str();
 
           Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
           throw e;
@@ -515,7 +519,7 @@ String fb_compact_serialize(const Variant& thing,
     int64_t val = thing.toInt64();
     if (val >= 0 && (uint64_t)val <= kInt7Mask) {
       String s(2, ReserveString);
-      *(uint16_t*)(s.bufferSlice().ptr) = (uint16_t)htons(kInt13Prefix | val);
+      *(uint16_t*)(s.mutableData()) = (uint16_t)htons(kInt13Prefix | val);
       s.setSize(2);
       return s;
     }
@@ -814,7 +818,7 @@ bool f_fb_utf8ize(VRefParam input) {
     return false; // Too long.
   }
   String dstStr(dstMaxLenBytes, ReserveString);
-  char *dstBuf = dstStr.bufferSlice().ptr;
+  char *dstBuf = dstStr.mutableData();
 
   // Copy valid bytes found so far as one solid block.
   memcpy(dstBuf, srcBuf, srcPosBytes);
@@ -917,7 +921,7 @@ static String fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
     return empty_string(); // Too long.
   }
   String dstStr(dstMaxLenBytes, ReserveString);
-  char* dstBuf = dstStr.bufferSlice().ptr;
+  char* dstBuf = dstStr.mutableData();
   int32_t dstPosBytes = 0;
 
   // Iterate through src's codepoints; srcPosBytes is incremented by U8_NEXT.
@@ -986,6 +990,8 @@ bool f_fb_intercept(const String& name, const Variant& handler,
 
 const StaticString s_extract("extract");
 const StaticString s_extract_sl("__SystemLib\\extract");
+const StaticString s_assert("assert");
+const StaticString s_assert_sl("__SystemLib\\assert");
 const StaticString s_parse_str("parse_str");
 const StaticString s_parse_str_sl("__SystemLib\\parse_str");
 const StaticString s_compact("compact");
@@ -997,6 +1003,8 @@ bool is_dangerous_varenv_function(const StringData* name) {
   return
     name->isame(s_extract.get()) ||
     name->isame(s_extract_sl.get()) ||
+    name->isame(s_assert.get()) ||
+    name->isame(s_assert_sl.get()) ||
     name->isame(s_parse_str.get()) ||
     name->isame(s_parse_str_sl.get()) ||
     name->isame(s_compact.get()) ||

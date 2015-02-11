@@ -12,10 +12,9 @@
 // testing that names existing on both sides of if is defined
 
 function stmt(): void {
-  if(true) {
+  if (true) {
     $x = 0;
-  }
-  else {
+  } else {
     $x = 1;
   }
   $x += 1;

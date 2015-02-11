@@ -15,8 +15,8 @@
 */
 #include "parser.h"
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
+#include <folly/Conv.h>
+#include <folly/Format.h>
 
 #include "hphp/util/hash.h"
 
@@ -47,13 +47,13 @@ std::string ParserBase::newClosureName(
   name += funcName;
 
   int id = ++m_seenClosures[name];
-
-  folly::format(&name, ";{}", hash);
-
   if (id > 1) {
     // we've seen the same name before, uniquify
     name = name + '#' + std::to_string(id);
   }
+
+  folly::format(&name, ";{}", hash);
+
   return name;
 }
 
@@ -72,12 +72,18 @@ ParserBase::ParserBase(Scanner &scanner, const char *fileName)
 ParserBase::~ParserBase() {
 }
 
-std::string ParserBase::getMessage(bool filename /* = false */) const {
+std::string ParserBase::getMessage(bool filename /* = false */,
+                                   bool rawPosWhenNoError /* = false */
+                                  ) const {
   std::string ret = m_scanner.getError();
+
   if (!ret.empty()) {
     ret += " ";
   }
-  ret += getMessage(m_scanner.getLocation(), filename);
+  if (!ret.empty() || rawPosWhenNoError) {
+    ret += getMessage(m_scanner.getLocation(), filename);
+  }
+
   return ret;
 }
 
@@ -95,7 +101,7 @@ std::string ParserBase::getMessage(Location *loc,
 }
 
 LocationPtr ParserBase::getLocation() const {
-  LocationPtr location(new Location());
+  auto location = std::make_shared<Location>();
   location->file  = file();
   location->line0 = line0();
   location->char0 = char0();

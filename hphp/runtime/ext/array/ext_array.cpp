@@ -14,20 +14,24 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/ext/array/ext_array.h"
 
+#include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/zend-collator.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -251,8 +255,8 @@ Variant HHVM_FUNCTION(array_fill,
                       int start_index,
                       int num,
                       const Variant& value) {
-  if (num <= 0) {
-    throw_invalid_argument("num: [non-positive]");
+  if (num < 0) {
+    throw_invalid_argument("Number of elements can't be negative");
     return false;
   }
 
@@ -789,7 +793,7 @@ Variant HHVM_FUNCTION(array_reverse,
   assert(cell_input.m_type == KindOfObject);
   ObjectData* obj = cell_input.m_data.pobj;
   assert(obj && obj->isCollection());
-  return ArrayUtil::Reverse(obj->o_toArray(), preserve_keys);
+  return ArrayUtil::Reverse(obj->toArray(), preserve_keys);
 }
 
 Variant HHVM_FUNCTION(array_shift,
@@ -890,10 +894,6 @@ Variant HHVM_FUNCTION(array_splice,
   getCheckedArray(input);
   Array ret(Array::Create());
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
-  if (arr_input->isIntMapArray() || arr_input->isStrMapArray()) {
-    MixedArray::downgradeAndWarn(arr_input.get(),
-                                 MixedArray::Reason::kArraySplice);
-  }
   input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
   return ret;
 }
@@ -1178,13 +1178,6 @@ bool HHVM_FUNCTION(shuffle,
     throw_expected_array_exception();
     return false;
   }
-  if (array.toArray()->isIntMapArray()) {
-    // ArrayUtil::Shuffle will overwrite array, so just raise warning
-    MixedArray::warnUsage(MixedArray::Reason::kShuffle, ArrayData::kIntMapKind);
-  } else if (array.toArray()->isStrMapArray()) {
-    MixedArray::warnUsage(MixedArray::Reason::kShuffle, ArrayData::kStrMapKind);
-  }
-
   array = ArrayUtil::Shuffle(array);
   return true;
 }
@@ -1483,7 +1476,7 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
 ///////////////////////////////////////////////////////////////////////////////
 // diff functions
 
-static inline void addToSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
+static inline void addToSetHelper(c_Set* st, const Cell c, TypedValue* strTv,
                                   bool convertIntLikeStrs) {
   if (c.m_type == KindOfInt64) {
     st->add(c.m_data.num);
@@ -1505,7 +1498,7 @@ static inline void addToSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
   }
 }
 
-static inline bool checkSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
+static inline bool checkSetHelper(c_Set* st, const Cell c, TypedValue* strTv,
                                   bool convertIntLikeStrs) {
   if (c.m_type == KindOfInt64) {
     return st->contains(c.m_data.num);
@@ -1539,8 +1532,7 @@ static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = container.asCell()->m_type == KindOfArray;
   for (ArrayIter iter(container); iter; ++iter) {
-    auto const& c = *iter.first().asCell();
-    addToSetHelper(st, c, strTv, !isKey);
+    addToSetHelper(st, *iter.first().asCell(), strTv, !isKey);
   }
 }
 
@@ -1788,7 +1780,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
 }
 
 static inline void addToIntersectMapHelper(c_Map* mp,
-                                           const Cell& c,
+                                           const Cell c,
                                            TypedValue* intOneTv,
                                            TypedValue* strTv,
                                            bool convertIntLikeStrs) {
@@ -1813,7 +1805,7 @@ static inline void addToIntersectMapHelper(c_Map* mp,
 }
 
 static inline void updateIntersectMapHelper(c_Map* mp,
-                                            const Cell& c,
+                                            const Cell c,
                                             int pos,
                                             TypedValue* strTv,
                                             bool convertIntLikeStrs) {
@@ -2540,17 +2532,6 @@ Variant HHVM_FUNCTION(hphp_array_idx,
   if (!key.isNull()) {
     if (LIKELY(search.isArray())) {
       ArrayData *arr = search.getArrayData();
-      if (UNLIKELY(arr->isVPackedArrayOrIntMapArray())) {
-        int64_t n;
-        if (key.isString() && key.getStringData()->isStrictlyInteger(n)) {
-          if (arr->isVPackedArray()) {
-            PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-          } else {
-            MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                                  ArrayData::kIntMapKind);
-          }
-        }
-      }
       VarNR index = key.toKey();
       if (!index.isNull()) {
         const Variant& ret = arr->get(index, false);
@@ -2566,9 +2547,11 @@ Variant HHVM_FUNCTION(hphp_array_idx,
 static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   switch (sort_flags) {
   case SORT_NATURAL:
-    return Array::SortNatural;
+    return ascending ?
+      Array::SortNaturalAscending : Array::SortNaturalDescending;
   case SORT_NATURAL_CASE:
-    return Array::SortNaturalCase;
+    return ascending ?
+      Array::SortNaturalCaseAscending: Array::SortNaturalCaseDescending;
   case SORT_NUMERIC:
     return ascending ?
       Array::SortNumericAscending : Array::SortNumericDescending;
@@ -2641,10 +2624,10 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
 #define REGISTER_CONSTANT(name)                                                \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
 
-class ArrayExtension : public Extension {
+class ArrayExtension final : public Extension {
 public:
   ArrayExtension() : Extension("array") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_CONSTANT(UCOL_DEFAULT);
     REGISTER_CONSTANT(UCOL_PRIMARY);
     REGISTER_CONSTANT(UCOL_SECONDARY);

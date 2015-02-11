@@ -14,7 +14,7 @@ function whatever(mixed $heyo) {}
 function function_scope() {
   // Shouldn't try to capture $k
   $bar = () ==> {
-    foreach (array(1,2,3,4) as $k) {
+    foreach (array(1, 2, 3, 4) as $k) {
       var_dump($k);
     }
   };
@@ -24,7 +24,7 @@ function function_scope() {
   $baz = () ==> {
     $x = 12;
     $y = 13;
-    echo $x . $y . "\n";
+    echo $x.$y."\n";
   };
   $baz();
 
@@ -32,7 +32,9 @@ function function_scope() {
   // allocation time, emitting an undefined variable warning at the
   // allocation site (in non-repo mode).  It will also give an
   // ahead-of-type error from hh about $z not being defined.
-  $quux = () ==> { var_dump(whatever($z)); };
+  $quux = () ==> {
+    var_dump(whatever($z));
+  };
   $z = "function scope is weird\n";
   echo "z in parent is now: $z\n";
   $quux(); // print NULL

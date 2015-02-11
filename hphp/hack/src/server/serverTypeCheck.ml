@@ -106,20 +106,6 @@ let reparse fast files_info additional_files =
     | Some _ -> acc
   end additional_files fast
 
-(* The version with the definitions + their position *)
-let reparse_with_pos fast files_info additional_files =
-  SSet.fold (
-  fun x acc ->
-    match SMap.get x fast with
-    | None ->
-        (try
-          let info = SMap.find_unsafe x files_info in
-          SMap.add x info acc
-        with Not_found ->
-          acc)
-    | Some _ -> acc
- ) additional_files fast
-
 (*****************************************************************************)
 (* Removes the names that were defined in the files *)
 (*****************************************************************************)
@@ -134,7 +120,7 @@ let remove_decls env fast_parsed =
       | Some {FileInfo.
               funs = funl;
               classes = classel;
-              types = typel;
+              typedefs = typel;
               consts = constl;
               comments;
               consider_names_just_for_autoload} ->
@@ -214,7 +200,8 @@ let type_check genv env =
     (Relative_path.Set.cardinal env.failed_parsing);
   flush stdout;
   (* PARSING *)
-  let t = Unix.gettimeofday() in
+  let start_t = Unix.gettimeofday() in
+  let t = start_t in
   let fast_parsed, errorl, failed_parsing = parsing genv env in
   let t2 = Unix.gettimeofday() in
   Printf.printf "Parsing: %f\n%!" (t2 -. t);
@@ -280,6 +267,8 @@ let type_check genv env =
 
   let t2 = Unix.gettimeofday() in
   Printf.printf "Type-check: %f\n%!" (t2 -. t);
+
+  Printf.printf "Total: %f\n%!" (t2 -. start_t);
 
   (* Done, that's the new environment *)
   { files_info = files_info;

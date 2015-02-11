@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/base/type-string.h"
+
 #include <gtest/gtest.h>
 #include <limits>
 #include <iostream>
@@ -31,6 +33,7 @@ void testSerializationExactEquality(const T& val) {
   BlobDecoder decoder(encoder.data(), encoder.size());
 
   decoder(decodedVal);
+  decoder.assertDone();
 
   EXPECT_EQ(decodedVal, val);
 }
@@ -67,9 +70,11 @@ TEST(BlobHelperTest, TestInputs) {
   testSerializationExactEquality(false);
   testSerializationExactEquality(std::make_pair(false, 1));
   testSerializationExactEquality(std::make_pair(0xdeadbeef, 0xfaceb00c));
-  // Can't get StringData to link
-  //testSerializationExactEquality((const StringData*) nullptr);
 
+  testSerializationExactEquality((const StringData*) nullptr);
+  testSerializationExactEquality(const_cast<const StringData*>(staticEmptyString()));
+  const auto& heyo = makeStaticString("heyo");
+  testSerializationExactEquality(const_cast<const StringData*>(heyo));
 }
 
 }

@@ -151,4 +151,28 @@ PreClass::ClassRequirement::serde(SerDe& sd) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// PreClass::Const.
+
+/*
+ * Ser(ialization)-De(serialization).
+ */
+template<class SerDe>
+inline void PreClass::Const::serde(SerDe& sd) {
+  TypedValue sd_tv = m_val;
+  bool sd_is_abstract = m_val.isAbstractConst();
+  sd(m_name)
+    (m_phpCode)
+    (sd_tv)
+    (sd_is_abstract);
+
+  if (SerDe::deserializing) {
+    // tvCopy inlined here to avoid header dependency issues
+    m_val.m_data.num = sd_tv.m_data.num;
+    m_val.m_type = sd_tv.m_type;
+    m_val.isAbstractConst() = sd_is_abstract;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

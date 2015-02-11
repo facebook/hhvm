@@ -6,6 +6,8 @@ containing these scripts into sys.path.  We only do this here, so attempting to
 source the individual modules directly will fail.
 """
 # @lint-avoid-python-3-compatibility-imports
+# @lint-avoid-pyflakes3
+# @lint-avoid-pyflakes2
 
 from os import sys, path
 
@@ -17,6 +19,9 @@ if sys.path[0] != localdir:
 import hhbc
 import idx
 import lookup
-import stack
+import nameof
 import pretty
+import sizeof
+import stack
 import unit
+import util

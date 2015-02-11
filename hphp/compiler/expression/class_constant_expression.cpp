@@ -80,7 +80,6 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
-    addUserClass(ar, m_className);
   }
 }
 
@@ -161,8 +160,8 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
 
 unsigned ClassConstantExpression::getCanonHash() const {
   int64_t val =
-    hash_string(toLower(m_varName).c_str(), m_varName.size()) -
-    hash_string(toLower(m_className).c_str(), m_className.size());
+    hash_string_i_unsafe(m_varName.c_str(), m_varName.size()) -
+    hash_string_i_unsafe(m_className.c_str(), m_className.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 

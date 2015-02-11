@@ -57,7 +57,7 @@ BlocksWithIds rpoSortCfgWithIds(const IRUnit&);
 /*
  * Split the edge between "from" and "to", returning the new middle block.
  */
-Block* splitEdge(IRUnit& unit, Block* from, Block* to, BCMarker marker);
+Block* splitEdge(IRUnit& unit, Block* from, Block* to);
 
 /*
  * Removes unreachable blocks from the unit and then splits any critical edges.
@@ -90,17 +90,6 @@ typedef StateVector<Block,Block*> IdomVector;
 IdomVector findDominators(const IRUnit&, const BlocksWithIds& blocks);
 
 /*
- * A vector of children lists, indexed by block
- */
-typedef StateVector<Block,BlockList> DomChildren;
-
-/*
- * Compute the dominator tree, then populate a list of dominator children
- * for each block.
- */
-DomChildren findDomChildren(const IRUnit&, const BlocksWithIds& blocks);
-
-/*
  * return true if b1 == b2 or if b1 dominates b2.
  */
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
@@ -130,17 +119,6 @@ BlockSet findLoopHeaders(const IRUnit&);
 bool insertLoopPreHeaders(IRUnit&);
 
 /*
- * Visit basic blocks in a preorder traversal over the dominator tree.
- * The state argument is passed by value (copied) as we move down the tree,
- * so each child in the tree gets the state after the parent was processed.
- * The body lambda should take State& (by reference) so it can modify it
- * as each block is processed.
- */
-template <class State, class Body>
-void forPreorderDoms(Block* block, const DomChildren& children,
-                     State state, Body body);
-
-/*
  * Visit the instructions in this blocklist, in block order.
  */
 template <class BlockList, class Body>
@@ -162,23 +140,22 @@ namespace detail {
       // printing debug information, so we want to handle invalid Blocks
       // gracefully.
       if (!block->empty()) {
-        // If we're not cold but exactly one our successors is, we visit that
-        // one first so it appears as late as possible in an RPO
-        // sort. Otherwise we visit taken first so next appears before it when
-        // RPO sorted. Note that these are just heuristics; all possible
-        // outcomes are valid post-order traversals and should not affect
-        // correctness.
+        // If we're not cold but we have two successors and exactly one of them
+        // is cold, we visit the cold one last so it appears as early as
+        // possible in an RPO sort. This causes better memory usage patterns in
+        // traces with lots of exit blocks in certain optimization passes. Note
+        // that these are just heuristics; all possible outcomes are valid
+        // post-order traversals and should not affect correctness.
 
         auto next = block->next();
         auto taken = block->taken();
-        auto coldSuccs = (next && cold(next)) + (taken && cold(taken));
-        if (!cold(block) && coldSuccs == 1) {
-          if (next && cold(next)) {
-            walk(next);
-            next = nullptr;
-          } else if (taken && cold(taken)) {
+        if (!cold(block) && next && taken && (cold(next) ^ cold(taken))) {
+          if (cold(next)) {
             walk(taken);
             taken = nullptr;
+          } else {
+            walk(next);
+            next = nullptr;
           }
         }
 
@@ -206,15 +183,6 @@ template <class Visitor>
 void postorderWalk(const IRUnit& unit, Visitor visitor, Block* start) {
   detail::PostorderSort<Visitor> ps(visitor, unit.numBlocks());
   ps.walk(start ? start : unit.entry());
-}
-
-template <class State, class Body>
-void forPreorderDoms(Block* block, const DomChildren& children,
-                     State state, Body body) {
-  body(block, state);
-  for (Block* child : children[block]) {
-    forPreorderDoms(child, children, state, body);
-  }
 }
 
 template <class BlockList, class Body>

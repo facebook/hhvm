@@ -22,11 +22,13 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/word-mem.h"
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -141,9 +143,9 @@ struct StringData {
   static StringData* MakeStatic(StringSlice);
 
   /*
-   * Same as MakeStatic but the string alloated will *not* be in the static
-   * string table, will not be in low-memory, and will be deleted once the
-   * root goes out of scope. Currently only used by APC.
+   * Same as MakeStatic but the string allocated will *not* be in the static
+   * string table, will not be in low-memory, and should be deleted using
+   * destructUncounted once the root goes out of scope.
    */
   static StringData* MakeUncounted(StringSlice);
 
@@ -170,7 +172,8 @@ struct StringData {
    * normally called when the reference count goes to zero (e.g. with
    * a helper like decRefStr).
    */
-  void release();
+  void release() noexcept;
+  size_t heapSize() const;
 
   /*
    * StringData objects allocated with MakeStatic should be freed
@@ -390,6 +393,7 @@ struct StringData {
    * Returns: case insensitive hash value for this string.
    */
   strhash_t hash() const;
+  NEVER_INLINE strhash_t hashHelper() const;
 
   /*
    * Equality comparison, in the sense of php's string == operator.
@@ -455,7 +459,6 @@ private:
   void enlist();
   void delist();
   void incrementHelper();
-  strhash_t hashHelper() const NEVER_INLINE;
   bool checkSane() const;
   void preCompute() const;
   void setStatic() const;
@@ -470,7 +473,7 @@ private:
   union {
     struct {
       union {
-        struct { uint8_t m_pad[3], m_kind; };
+        struct { char m_pad[3]; HeaderKind m_kind; };
         uint32_t m_capCode;
       };
       mutable RefCount m_count;

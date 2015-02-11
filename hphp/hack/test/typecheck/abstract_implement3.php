@@ -26,7 +26,7 @@ abstract class AClass<T> {
 }
 
 class BClass extends AClass<int> {
-  public function foo(): int { 
+  public function foo(): int {
     return $this->foo();
   }
 }

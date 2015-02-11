@@ -19,8 +19,16 @@
 #define incl_HPHP_PDO_DRIVER_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+class PDOConnection;
+class PDODriver;
+class PDOResource;
+class PDOStatement;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define PDO_DRIVER_API  20080721
@@ -161,7 +169,7 @@ subclass for that SQLSTATE. The assignment of class and subclass values is
 defined by SQL-92.
 */
 
-typedef char PDOErrorType[6]; /* SQLSTATE */
+using PDOErrorType = char[6]; /* SQLSTATE */
 
 #define PDO_ERR_NONE  "00000"
 
@@ -203,22 +211,20 @@ enum PDOPlaceholderSupport {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDOConnection;
-class PDODriver;
-typedef hphp_const_char_map<PDODriver*> PDODriverMap;
+using PDODriverMap = hphp_const_char_map<PDODriver*>;
 
-class PDODriver {
-public:
-  static const PDODriverMap &GetDrivers() { return s_drivers;}
-
-public:
+struct PDODriver {
   explicit PDODriver(const char *name);
   virtual ~PDODriver() {}
 
   const char *getName() const { return m_name;}
 
-  PDOConnection *createConnection(const String& datasource, const String& username,
-                                  const String& password, const Array& options);
+  PDOResource* createResource(const String& datasource,
+                              const String& username,
+                              const String& password,
+                              const Array& options);
+
+  static const PDODriverMap& GetDrivers() { return s_drivers; }
 
 private:
   static PDODriverMap s_drivers;
@@ -226,21 +232,17 @@ private:
   const char *m_name;
 
   // Methods a driver needs to implement.
-  virtual PDOConnection *createConnectionObject() = 0;
+  virtual PDOResource* createResourceImpl() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDOStatement;
-typedef SmartResource<PDOStatement> sp_PDOStatement;
+using sp_PDOStatement = SmartPtr<PDOStatement>;
 
-/* represents a connection to a database */
-class PDOConnection : public SweepableResourceData {
-public:
-  // This is special and doesn't use DECLARE_RESOURCE_ALLOCATION because it has
-  // to live across requests. It is also the weirdest SweepableResourceData
-  // as it can't use any PHP objects and deletes itself during sweep().
-  static const char *PersistentKey;
+/*
+ * A connection to a database.
+ */
+struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
 
   enum SupportedMethod {
     MethodCloser,
@@ -254,140 +256,202 @@ public:
     MethodLastId,
     MethodFetchErr,
     MethodGetAttribute,
-    MethodCheckLiveness,
-    MethodPersistentShutdown
+    MethodCheckLiveness
   };
 
-public:
-  PDOConnection();
-  virtual ~PDOConnection();
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  PDOConnection() : m_bits{0} {}
+
+  virtual ~PDOConnection() {}
   virtual bool create(const Array& options) = 0;
-  virtual void sweep();
 
-  CLASSNAME_IS("PDOConnection")
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  // alloc/release persistent storage.
-  virtual void persistentSave();
-  virtual void persistentRestore();
+  /////////////////////////////////////////////////////////////////////////////
+  // Virtual DB methods.
 
   virtual bool support(SupportedMethod method);
 
-  /* close or otherwise disconnect the database */
+  /*
+   * Close or otherwise disconnect the database.
+   */
   virtual bool closer();
 
-  /* prepare a statement and stash driver specific portion into stmt */
-  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, const Variant& options);
+  /*
+   * Prepare a statement and stash driver specific portion into `stmt'.
+   */
+  virtual bool preparer(const String& sql,
+                        sp_PDOStatement *stmt,
+                        const Variant& options);
 
-  /* execute a statement (that does not return a result set) */
+  /*
+   * Execute a statement (that does not return a result set).
+   */
   virtual int64_t doer(const String& sql);
 
-  /* quote a string */
-  virtual bool quoter(const String& input, String &quoted, PDOParamType paramtype);
+  /*
+   * Quote a string.
+   */
+  virtual bool quoter(const String& input,
+                      String &quoted,
+                      PDOParamType paramtype);
 
-  /* transaction related */
+  /*
+   * Handle transactions.
+   */
   virtual bool begin();
   virtual bool commit();
   virtual bool rollback();
 
-  /* setting of attributes */
+  /*
+   * Set an attribute.
+   */
   virtual bool setAttribute(int64_t attr, const Variant& value);
 
-  /* return last insert id.  NULL indicates error condition, otherwise,
-     the return value MUST be an emalloc'd NULL terminated string. */
+  /*
+   * Return last insert ID.  Null indicates error condition; otherwise, the
+   * return value MUST be an emalloc'd NULL terminated string.
+   */
   virtual String lastId(const char *name);
 
-  /* fetch error information.  if stmt is not null, fetch information
-     pertaining to the statement, otherwise fetch global error information.
-     The driver should add the following information to the array "info" in
-     this order:
-     - native error code
-     - string representation of the error code
-     ... any other optional driver specific data ...  */
+  /*
+   * Fetch error information.  If `stmt' is not null, fetch information
+   * pertaining to the statement; otherwise fetch global error information.
+   *
+   * The driver should add the following information to the array `info' in
+   * this order:
+   *    - native error code
+   *    - string representation of the error code
+   *    ... any other optional driver specific data ...
+   */
   virtual bool fetchErr(PDOStatement *stmt, Array &info);
 
-  /* fetching of attributes: -1: error, 0: unsupported attribute */
+  /*
+   * Fetch an attribute.
+   *
+   * Returns -1 on error, 0 for unsupported attribute.
+   */
   virtual int getAttribute(int64_t attr, Variant &value);
 
-  /* checking/pinging persistent connections; return SUCCESS if the connection
-     is still alive and ready to be used, FAILURE otherwise.
-     You may set this handler to NULL, which is equivalent to returning
-     SUCCESS. */
+  /*
+   * Check/ping a persistent connection.
+   *
+   * Return SUCCESS if the connection is still alive and ready to be used,
+   * FAILURE otherwise.  You may set this handler to NULL, which is equivalent
+   * to returning SUCCESS.
+   */
   virtual bool checkLiveness();
 
-  /* called at request end for each persistent dbh; this gives the driver
-     the opportunity to safely release resources that only have per-request
-     scope */
-  virtual void persistentShutdown();
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Data members.
 
 public:
-  /* credentials */
+  // Credentials.
   std::string username;
   std::string password;
 
-  /* if true, then data stored and pointed at by this handle must all be
-   * persistently allocated */
-  unsigned is_persistent:1;
+  union {
+    struct {
+      // Whether then data stored and pointed at by this handle must all be
+      // persistently allocated.
+      unsigned is_persistent : 1;
 
-  /* if true, driver should act as though a COMMIT were executed between
-   * each executed statement; otherwise, COMMIT must be carried out manually
-   * */
-  unsigned auto_commit:1;
+      // Whether the driver should act as though a COMMIT were executed between
+      // each executed statement; otherwise, COMMIT must be carried out
+      // manually.
+      unsigned auto_commit : 1;
 
-  /* if true, the handle has been closed and will not function anymore */
-  unsigned is_closed:1;
+      // Whether the handle has been closed and will not function anymore.
+      unsigned is_closed : 1;
 
-  /* if true, the driver requires that memory be allocated explicitly for
-   * the columns that are returned */
-  unsigned alloc_own_columns:1;
+      // Whether the driver requires that memory be allocated explicitly for the
+      // columns that are returned.
+      unsigned alloc_own_columns : 1;
 
-  /* if true, commit or rollBack is allowed to be called */
-  unsigned in_txn:1;
+      // Whether commit and rollback are allowed to be called.
+      unsigned in_txn : 1;
 
-  /* max length a single character can become after correct quoting */
-  unsigned max_escaped_char_length:3;
+      // Max length a single character can become after correct quoting.
+      unsigned max_escaped_char_length : 3;
 
-  /* oracle compat; see enum pdo_null_handling */
-  unsigned oracle_nulls:2;
+      // Oracle compat; see enum pdo_null_handling.
+      unsigned oracle_nulls : 2;
 
-  /* when set, convert int/floats to strings */
-  unsigned stringify:1;
+      // When set, convert int/floats to strings.
+      unsigned stringify : 1;
+    };
+    uint16_t m_bits;
+  };
 
-  /* the sum of the number of bits here and the bit fields preceeding should
-   * equal 32 */
-  unsigned _reserved_flags:21;
-
-  /* data source string used to open this handle */
+  // Data source string used to open this handle.
   std::string data_source;
 
-  /* the global error code. */
-  PDOErrorType error_code;
+  // The global error code.
+  PDOErrorType error_code{0};
+  PDOErrorMode error_mode{PDO_ERRMODE_SILENT};
 
-  PDOErrorMode error_mode;
+  PDOCaseConversion native_case{PDO_CASE_NATURAL};
+  PDOCaseConversion desired_case{PDO_CASE_NATURAL};
 
-  PDOCaseConversion native_case, desired_case;
-
-  /* persistent hash key associated with this handle */
+  // Persistent hash key associated with this handle.
   std::string persistent_id;
 
-  PDODriver *driver;
+  PDODriver* driver{nullptr};
 
   std::string def_stmt_clsname;
-
   std::string serialized_def_stmt_ctor_args;
+
+  PDOFetchType default_fetch_type{PDO_FETCH_USE_DEFAULT};
+};
+
+using sp_PDOConnection = std::shared_ptr<PDOConnection>;
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Resource wrapper around PDOConnection.
+ */
+struct PDOResource : SweepableResourceData {
+  explicit PDOResource(sp_PDOConnection conn) : m_conn(conn) {
+    assert(m_conn);
+  }
+  virtual ~PDOResource() {}
+
+  CLASSNAME_IS("PDOConnection")
+  DECLARE_RESOURCE_ALLOCATION(PDOResource)
+
+  // overriding ResourceData
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
+
+  const sp_PDOConnection& conn() const { return m_conn; }
+
+  /*
+   * Serialize/unserialize between persistent data and runtime structures.
+   */
+  virtual void persistentSave();
+  virtual void persistentRestore();
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Data members.
+
+protected:
+  sp_PDOConnection m_conn;
+
+public:
   Variant def_stmt_ctor_args;
 
-  /* when calling PDO::query(), we need to keep the error
-   * context from the statement around until we next clear it.
-   * This will allow us to report the correct error message
-   * when PDO::query() fails */
-  PDOStatement *query_stmt;
-
-  /* defaults for fetches */
-  PDOFetchType default_fetch_type;
+  /*
+   * When calling PDO::query(), we need to keep the error context from the
+   * statement around until we next clear it.  This allows us to report the
+   * correct error message when PDO::query() fails.
+   */
+  PDOStatement* query_stmt{nullptr};
 };
-typedef SmartResource<PDOConnection> sp_PDOConnection;
+
+using sp_PDOResource = SmartPtr<PDOResource>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -443,12 +507,15 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 class c_pdo;
-typedef SmartObject<c_pdo> sp_pdo;
+using sp_pdo = SmartPtr<c_pdo>;
 
-/* represents a prepared statement */
-class PDOStatement : public SweepableResourceData {
-public:
+/*
+ * Represents a prepared statement.
+ */
+struct PDOStatement : SweepableResourceData {
+
   DECLARE_RESOURCE_ALLOCATION(PDOStatement);
+
   enum SupportedMethod {
     MethodExecuter,
     MethodFetcher,
@@ -565,7 +632,7 @@ public:
   long column_count;
 
   /* we want to keep the dbh alive while we live, so we own a reference */
-  sp_PDOConnection dbh;
+  sp_PDOResource dbh;
 
   /* keep track of bound input parameters.  Some drivers support
    * input/output parameters, but you can't rely on that working */
@@ -612,7 +679,9 @@ public:
 };
 
 int pdo_parse_params(PDOStatement *stmt, const String& in, String &out);
-void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
+void pdo_raise_impl_error(sp_PDOResource rsrc, sp_PDOStatement stmt,
+                          const char *sqlstate, const char *supp);
+void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,
                           const char *sqlstate, const char *supp);
 void throw_pdo_exception(const Variant& code, const Variant& info,
                          const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);

@@ -16,11 +16,16 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/arch.h"
-#include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
+
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/stack-trace.h"
@@ -80,6 +85,12 @@ struct FormatVisitor {
       str << sep() << folly::format("<virtual at 0x{:08x}>",
                                     cppcall.vtableOffset());
       break;
+    case CppCall::Kind::ArrayVirt:
+      str << sep() << folly::format("ArrayVirt({})", cppcall.arrayTable());
+      break;
+    case CppCall::Kind::Destructor:
+      str << sep() << folly::format("destructor({})", show(cppcall.reg()));
+      break;
     }
   }
   void imm(RingBufferType t) { str << sep() << ringbufferName(t); }
@@ -89,7 +100,6 @@ struct FormatVisitor {
   }
   void imm(Stats::StatCounter c) { str << sep() << Stats::g_counterNames[c]; }
   void imm(Vlabel b) { str << sep() << "B" << size_t(b); }
-  void imm(TransID id) { str << sep() << id; }
   void imm(const Func* func) {
     str << sep();
     if (func) {
@@ -110,6 +120,9 @@ struct FormatVisitor {
   }
   void imm(RIPRelativeRef r) {
     str << sep() << folly::format("ip[{:#x}]", r.r.disp);
+  }
+  void imm(RoundDirection rd) {
+    str << sep() << show(rd);
   }
 
   template<class R> void across(R r) { print(r); }
@@ -247,6 +260,14 @@ void printBlock(std::ostream& out, const Vunit& unit,
   }
 }
 
+void printInstrs(std::ostream& out,
+                 const Vunit& unit,
+                 const jit::vector<Vinstr>& code) {
+  for (auto& inst : code) {
+    out << "        " << show(unit, inst) << '\n';
+  }
+}
+
 void printCfg(std::ostream& out, const Vunit& unit,
               const jit::vector<Vlabel>& blocks) {
   out << "digraph G {\n";
@@ -272,12 +293,27 @@ void printCfg(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
 }
 
 std::string show(const Vunit& unit) {
-  auto preds = computePreds(unit);
-  auto blocks = sortBlocks(unit);
-
   std::ostringstream out;
-  for (auto b : blocks) {
+  auto preds = computePreds(unit);
+  boost::dynamic_bitset<> reachableSet(unit.blocks.size());
+
+  // Print reachable blocks first.
+  auto reachableBlocks = sortBlocks(unit);
+  for (auto b : reachableBlocks) {
     printBlock(out, unit, preds, b);
+    reachableSet.set(b);
+  }
+
+  // Print unreachable blocks last.
+  bool printedMsg{false};
+  for (size_t b = 0; b < unit.blocks.size(); b++) {
+    if (!reachableSet.test(b)) {
+      if (!printedMsg) {
+        out << "\nUnreachable blocks:\n";
+        printedMsg = true;
+      }
+      printBlock(out, unit, preds, Vlabel{b});
+    }
   }
   return out.str();
 }

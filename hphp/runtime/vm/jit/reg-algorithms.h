@@ -21,18 +21,25 @@
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
-// Compute a sequence of moves and swaps that will fill the dest registers in
-// the moves map with their correct source values, even if some sources are
-// also destinations. The moves map provides one source for each dest.  rTmp
-// will be used when necessary to break copy-cycles, so it is illegal to
-// specify a source for rTmp (rTmp cannot be a desination).  However, it
-// is legal for rTmp to be a source for some other destination. Since rTmp
-// cannot be a destination, it cannot be in a copy-cycle, so its value will
-// be read before we deal with cycles.
+struct Vunit;
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Compute a sequence of moves and swaps that will fill the dest registers in
+ * the moves map with their correct source values, even if some sources are
+ * also destinations. The moves map provides one source for each dest.  rTmp
+ * will be used when necessary to break copy-cycles, so it is illegal to
+ * specify a source for rTmp (rTmp cannot be a destination).  However, it is
+ * legal for rTmp to be a source for some other destination. Since rTmp cannot
+ * be a destination, it cannot be in a copy-cycle, so its value will be read
+ * before we deal with cycles.
+ */
 
 struct VMoveInfo {
   enum class Kind { Move, Xchg };
@@ -46,10 +53,11 @@ struct MoveInfo {
   PhysReg m_src, m_dst;
 };
 
-typedef PhysReg::Map<PhysReg> MovePlan;
+using MovePlan = PhysReg::Map<PhysReg>;
 jit::vector<VMoveInfo> doVregMoves(Vunit&, MovePlan& moves);
 jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
 
+///////////////////////////////////////////////////////////////////////////////
 }}
 
 #endif

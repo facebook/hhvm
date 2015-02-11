@@ -112,7 +112,6 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
-    addUserClass(ar, m_className);
   }
   m_exp->analyzeProgram(ar);
 }
@@ -164,7 +163,7 @@ ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
 
 unsigned StaticMemberExpression::getCanonHash() const {
   int64_t val = Expression::getCanonHash() +
-    hash_string(toLower(m_className).c_str(), m_className.size());
+    hash_string_i_unsafe(m_className.c_str(), m_className.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 

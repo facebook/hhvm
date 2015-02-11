@@ -29,7 +29,7 @@ void DataWalker::traverseData(ArrayData* data,
                               PointerSet& visited) const {
   // shared arrays by definition do not contain circular references or
   // collections
-  if (data->isSharedArray()) {
+  if (data->isApcArray()) {
     // If not looking for references to objects/resources OR
     // if one was already found we can bail out
     if (!(m_features & LookupFeature::HasObjectOrResource) ||
@@ -78,7 +78,7 @@ void DataWalker::traverseData(
     return; // avoid infinite recursion
   }
   if (!canStopWalk(features)) {
-    traverseData(data->o_toArray().get(), features, visited);
+    traverseData(data->toArray().get(), features, visited);
   }
 }
 

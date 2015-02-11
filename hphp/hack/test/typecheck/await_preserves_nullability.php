@@ -1,4 +1,4 @@
- <?hh // partial
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,15 +10,16 @@
  */
 
 class Foo<T> {
-  public async function print_if_possible(?Awaitable<T> $blah)
-    : Awaitable<void> {
+  public async function print_if_possible(
+    ?Awaitable<T> $blah,
+  ): Awaitable<void> {
     $x = await $blah;
     $this->doer($x);
   }
 
   private function doer(T $item): void {
     if ($item) {
-      print($item);
+      print $item;
     }
   }
 }

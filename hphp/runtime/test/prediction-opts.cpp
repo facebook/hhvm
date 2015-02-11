@@ -34,7 +34,7 @@ TEST(PredictionOpts, basic) {
   Block* end = unit.defBlock();
 
   auto ptr = unit.gen(Conjure, marker, Type::PtrToGen);
-  auto ldm = unit.gen(LdMem, marker, Type::Gen, ptr->dst(), unit.cns(0));
+  auto ldm = unit.gen(LdMem, marker, Type::Gen, ptr->dst());
   auto inc = unit.gen(IncRef, marker, ldm->dst());
   auto ckt = unit.gen(CheckType, marker, Type::Int, taken, ldm->dst());
   ckt->setNext(end);

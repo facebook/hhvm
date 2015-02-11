@@ -19,7 +19,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "folly/MapUtil.h"
+#include <folly/MapUtil.h>
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -198,7 +198,7 @@ uint32_t ProfData::numTrans() const {
 }
 
 TransID ProfData::curTransID() const {
-  return numTrans();
+  return static_cast<TransID>(numTrans());
 }
 
 bool ProfData::hasTransRec(TransID id) const {
@@ -263,6 +263,11 @@ bool ProfData::isKindProfile(TransID id) const {
   // we don't keep ProfTransRecs for non-profile translations
   if (m_transRecs[id] == nullptr) return false;
   return m_transRecs[id]->kind() == TransKind::Profile;
+}
+
+int64_t ProfData::absTransCounter(TransID id) const {
+  assert(id < m_numTrans);
+  return RuntimeOption::EvalJitPGOThreshold - m_counters.get(id);
 }
 
 int64_t ProfData::transCounter(TransID id) const {

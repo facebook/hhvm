@@ -9,7 +9,7 @@
 #define YYLEX_PARAM _p
 
 #include "hphp/compiler/parser/parser.h"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 
@@ -701,9 +701,6 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 
 %token T_COLLECTION
 %token T_SHAPE
-%token T_VARRAY
-%token T_MIARRAY
-%token T_MSARRAY
 %token T_TYPE
 %token T_UNRESOLVED_TYPE
 %token T_NEWTYPE
@@ -1495,6 +1492,10 @@ class_statement:
                                          ($$,&$1,$4,&$2);}
   | class_constant_declaration ';'     { _p->onClassVariableStart
                                          ($$,NULL,$1,NULL);}
+  | class_abstract_constant_declaration ';'
+                                       { _p->onClassVariableStart
+                                         ($$,NULL,$1,NULL, true);}
+  | class_type_constant_declaration ';' { $$ = $1; }
   | method_modifiers function_loc
     is_reference hh_name_with_typevar '('
                                        { _p->onNewLabelScope(true);
@@ -1581,6 +1582,10 @@ xhp_attribute_decl:
 
 xhp_attribute_decl_type:
     T_ARRAY                            { $$ = 4;}
+  | T_ARRAY T_TYPELIST_LT hh_type
+    T_TYPELIST_GT                      { $$ = 4;}
+  | T_ARRAY T_TYPELIST_LT hh_type ','
+    hh_type T_TYPELIST_GT              { $$ = 4;}
   | fully_qualified_class_name         { /* This case handles all types other
                                             than "array", "var" and "enum".
                                             For now we just use type code 5;
@@ -1710,6 +1715,23 @@ class_constant_declaration:
     hh_name_with_type '=' static_expr   { _p->onClassConstant($$,&$1,$3,$5);}
   | T_CONST hh_name_with_type '='
     static_expr                         { _p->onClassConstant($$,0,$2,$4);}
+;
+class_abstract_constant_declaration:
+    class_abstract_constant_declaration ','
+    hh_name_with_type                   { _p->onClassAbstractConstant($$,&$1,$3);}
+  | T_ABSTRACT T_CONST hh_name_with_type
+                                        { _p->onClassAbstractConstant($$,NULL,$3);}
+;
+class_type_constant_declaration:
+    T_ABSTRACT class_type_constant
+      hh_opt_constraint                 { Token t;
+                                          _p->onClassTypeConstant($$, $2, t);
+                                          _p->popTypeScope(); }
+  | class_type_constant
+      hh_opt_constraint '=' hh_type     { _p->onClassTypeConstant($$, $1, $4);
+                                          _p->popTypeScope(); }
+class_type_constant:
+    T_CONST T_TYPE hh_name_with_typevar { $$ = $3; }
 ;
 
 expr_with_parens:
@@ -1843,8 +1865,6 @@ expr_no_variable:
   | scalar                             { $$ = $1; }
   | array_literal                      { $$ = $1; }
   | shape_literal                      { $$ = $1; }
-  | map_array_literal                  { $$ = $1; }
-  | varray_literal                     { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
   | dim_expr                           { $$ = $1;}
@@ -2034,27 +2054,6 @@ collection_literal:
     '{' collection_init '}'            { Token t;
                                          _p->onName(t,$1,Parser::StringName);
                                          BEXP($$,t,$3,T_COLLECTION);}
-;
-
-map_array_literal:
-    T_MIARRAY '(' map_array_init ')'   { _p->onCheckedArray($$,$3,T_MIARRAY);}
-  | T_MSARRAY '(' map_array_init ')'   { _p->onCheckedArray($$,$3,T_MSARRAY);}
-;
-
-varray_literal:
-    T_VARRAY '(' varray_init ')'       { _p->onCheckedArray($$,$3,T_VARRAY);}
-;
-
-static_map_array_literal:
-    T_MIARRAY '('
-    static_map_array_init ')'          { _p->onCheckedArray($$,$3,T_MIARRAY);}
-  | T_MSARRAY '('
-    static_map_array_init ')'          { _p->onCheckedArray($$,$3,T_MSARRAY);}
-;
-
-static_varray_literal:
-    T_VARRAY '('
-    static_varray_init ')'             { _p->onCheckedArray($$,$3,T_VARRAY);}
 ;
 
 static_collection_literal:
@@ -2407,8 +2406,6 @@ static_expr:
     static_shape_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
-  | static_map_array_literal           { $$ = $1;}
-  | static_varray_literal              { $$ = $1;}
   | '(' static_expr ')'                { $$ = $2;}
   | static_expr T_BOOLEAN_OR
     static_expr                        { BEXP($$,$1,$3,T_BOOLEAN_OR);}
@@ -2511,8 +2508,6 @@ common_scalar_ae:
     T_LNUMBER                          { _p->onScalar($$, T_LNUMBER,  $1);}
   | T_DNUMBER                          { _p->onScalar($$, T_DNUMBER,  $1);}
   | T_ONUMBER                          { _p->onScalar($$, T_ONUMBER,  $1);}
-  | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
-                                         T_CONSTANT_ENCAPSED_STRING,  $1);}
   | T_START_HEREDOC
     T_ENCAPSED_AND_WHITESPACE
     T_END_HEREDOC                      { _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $2);}
@@ -2525,8 +2520,19 @@ static_numeric_scalar_ae:
   | T_ONUMBER                          { _p->onScalar($$,T_ONUMBER,$1);}
   | ident                              { constant_ae(_p,$$,$1);}
 ;
+
+static_string_expr_ae:
+    T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
+                                         T_CONSTANT_ENCAPSED_STRING,$1);}
+  | T_CONSTANT_ENCAPSED_STRING '.' static_string_expr_ae
+                                       { _p->onScalar($$,
+                                         T_CONSTANT_ENCAPSED_STRING,
+                                         $1 + $3);}
+;
+
 static_scalar_ae:
-    common_scalar_ae                   { $$ = $1;}
+    common_scalar_ae
+  | static_string_expr_ae              { $$ = $1;}
   | ident                              { constant_ae(_p,$$,$1);}
   | '+' static_numeric_scalar_ae       { UEXP($$,$2,'+',1);}
   | '-' static_numeric_scalar_ae       { UEXP($$,$2,'-',1);}
@@ -2773,7 +2779,7 @@ dimmable_variable_no_calls:
                                     { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
     object_operator
-    object_property_name_no_variables 
+    object_property_name_no_variables
                                     { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | '(' variable ')'                   { $$ = $2;}
 ;
@@ -2835,49 +2841,6 @@ non_empty_static_collection_init:
   | static_expr T_DOUBLE_ARROW
     static_expr                        { _p->onCollectionPair($$,  0,&$1,$3);}
   | static_expr                        { _p->onCollectionPair($$,  0,  0,$1);}
-;
-
-map_array_init:
-    non_empty_map_array_init
-    possible_comma                     { $$ = $1;}
-  |                                    { _p->onEmptyCheckedArray($$);}
-;
-varray_init:
-    non_empty_varray_init
-    possible_comma                     { $$ = $1;}
-  |                                    { _p->onEmptyCheckedArray($$);}
-;
-non_empty_map_array_init:
-    non_empty_map_array_init
-    ',' expr T_DOUBLE_ARROW expr       { _p->onCheckedArrayPair($$,&$1,&$3,$5);}
-  | expr T_DOUBLE_ARROW expr           { _p->onCheckedArrayPair($$,  0,&$1,$3);}
-;
-non_empty_varray_init:
-    non_empty_varray_init ',' expr     { _p->onCheckedArrayPair($$,&$1,  0,$3);}
-  | expr                               { _p->onCheckedArrayPair($$,  0,  0,$1);}
-;
-
-static_map_array_init:
-    non_empty_static_map_array_init
-    possible_comma                     { $$ = $1;}
-  |                                    { _p->onEmptyCheckedArray($$);}
-;
-static_varray_init:
-    non_empty_static_varray_init
-    possible_comma                     { $$ = $1;}
-  |                                    { _p->onEmptyCheckedArray($$);}
-;
-non_empty_static_map_array_init:
-    non_empty_static_map_array_init
-    ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onCheckedArrayPair($$,&$1,&$3,$5);}
-  | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onCheckedArrayPair($$,  0,&$1,$3);}
-;
-non_empty_static_varray_init:
-    non_empty_static_varray_init
-    ',' static_expr                    { _p->onCheckedArrayPair($$,&$1,  0,$3);}
-  | static_expr                        { _p->onCheckedArrayPair($$,  0,  0,$1);}
 ;
 
 encaps_list:
@@ -3048,6 +3011,16 @@ hh_shape_type:
      '(' hh_shape_member_list ')'      { $$.setText("array"); }
 ;
 
+hh_access_type_start:
+    class_namespace_string_typeargs         { $$ = $1; }
+;
+hh_access_type:
+    ident T_DOUBLE_COLON hh_access_type { Token t; t.reset();
+                                          _p->onTypeAnnotation($$, $1, t);
+                                          _p->onTypeList($$, $3); }
+  | ident hh_typeargs_opt               { _p->onTypeAnnotation($$, $1, $2); }
+;
+
 /* extends non_empty_type_decl with some more types */
 hh_type:
     /* double-optional types will be rejected by the typechecker; we
@@ -3066,6 +3039,11 @@ hh_type:
                                          $1.setText("callable");
                                          _p->onTypeAnnotation($$, $1, t); }
   | hh_shape_type                      { $$ = $1; }
+  | hh_access_type_start
+    T_DOUBLE_COLON
+    hh_access_type                     { only_in_hh_syntax(_p);
+                                         _p->onTypeAnnotation($$, $1, $3);
+                                         _p->onTypeSpecialization($$, 'a'); }
   | T_ARRAY T_TYPELIST_LT hh_type
     T_TYPELIST_GT                      { $1.setText("array");
                                          _p->onTypeAnnotation($$, $1, $3); }

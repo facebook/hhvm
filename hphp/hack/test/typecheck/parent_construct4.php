@@ -35,6 +35,5 @@ abstract class B extends A {
 
 class C extends B {
 
-  public function __construct() {
-  }
+  public function __construct() {}
 }

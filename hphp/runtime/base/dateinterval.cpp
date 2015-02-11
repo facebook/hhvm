@@ -15,17 +15,17 @@
 */
 
 #include "hphp/runtime/base/dateinterval.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(DateInterval)
+IMPLEMENT_RESOURCE_ALLOCATION(DateInterval)
 ///////////////////////////////////////////////////////////////////////////////
 
 DateInterval::DateInterval() {
@@ -165,9 +165,9 @@ String DateInterval::format(const String& format_spec) {
   return s.detach();
 }
 
-SmartResource<DateInterval> DateInterval::cloneDateInterval() const {
-  if (!m_di) return newres<DateInterval>();
-  return newres<DateInterval>(timelib_rel_time_clone(m_di.get()));
+SmartPtr<DateInterval> DateInterval::cloneDateInterval() const {
+  if (!m_di) return makeSmartPtr<DateInterval>();
+  return makeSmartPtr<DateInterval>(timelib_rel_time_clone(m_di.get()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

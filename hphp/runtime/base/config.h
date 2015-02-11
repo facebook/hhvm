@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_CONFIG_H_
 #define incl_HPHP_CONFIG_H_
 
-#include "folly/dynamic.h"
+#include <folly/dynamic.h>
 #include "hphp/util/hdf.h"
 
 namespace HPHP {
@@ -53,15 +53,13 @@ struct Config {
   static void ParseIniFile(const std::string &filename, IniSettingMap &ini,
                            const bool constants_only = false);
 
-  static void ParseHdfFile(const std::string &filename, Hdf &hdf,
-                           IniSettingMap &ini);
+  static void ParseHdfFile(const std::string &filename, Hdf &hdf);
 
   // Parse and process a .ini string (e.g., -d)
   static void ParseIniString(const std::string iniStr, IniSettingMap &ini);
 
   // Parse and process a .hdf string (e.g., -v)
-  static void ParseHdfString(const std::string hdfStr, Hdf &hdf,
-                             IniSettingMap &ini);
+  static void ParseHdfString(const std::string hdfStr, Hdf &hdf);
 
   /** Prefer the Bind() over the GetFoo() as it makes ini_get() work too. */
   static void Bind(bool& loc, const IniSettingMap &ini,
@@ -151,6 +149,20 @@ struct Config {
                             const uint64_t defValue = 0);
   static double GetDouble(const IniSettingMap &ini, const Hdf& config,
                           const double defValue = 0);
+
+  /**
+   * Use this for iterating over options that are stored as objects in
+   * runtime options (e.g. FilesMatch). This function iterates over the
+   * settings passed as ini/hdf, calls back to, generally, the constructor of
+   * the object in question.
+   *
+   * Note: For now, we are not `ini_get()` enabling these type of options as
+   * it is not trivial to come up with a non-hacky and workable way to store
+   * the data correctly. Also, as usual, Hdf takes priority.
+   */
+  static void Iterate(const IniSettingMap &ini, const Hdf &hdf,
+                      std::function<void (const IniSettingMap&,
+                                          const Hdf&)> cb);
 
   template<class T>
   static void Get(const IniSettingMap &ini, const Hdf& config, T &data) {

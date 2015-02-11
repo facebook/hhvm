@@ -1,0 +1,22 @@
+----------------------
+declared: 1
+declared: 987
+----------------------
+Getting 'hidden'
+
+Notice: Undefined property via __get(): hidden in %s/classes/overloading_play.php on line 71 in %s/classes/overloading_play.php on line 34
+NULL
+----------------------
+Is 'hidden' set?
+bool(false)
+----------------------
+Setting 'hidden' to 'Hello'
+Getting 'hidden'
+hidden: Hello
+----------------------
+Is 'hidden' set?
+bool(true)
+----------------------
+Unsetting 'hidden'
+Is 'hidden' set?
+bool(false)

@@ -65,7 +65,7 @@ const int FILTER_FLAG_NO_PRIV_RANGE = 0;
 
 function filter_has_var(int $type, string $variable_name): bool {}
 function filter_id(string $name) {}
-function filter_input_array(int $type, mixed $defintion, bool $add_empty) {}
+function filter_input_array(int $type, mixed $definition, bool $add_empty) {}
 function filter_input(int $type, string $variable_name, int $filter = FILTER_DEFAULT, mixed $options = null) {}
 function filter_list(): array<string> {}
 function filter_var_array(array $data, mixed $definition = null, bool $allow_empty = true) {}

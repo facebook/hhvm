@@ -9,16 +9,14 @@
  *
  */
 
-class A {
-}
+class A {}
 
-class B extends A {
-}
+class B extends A {}
 
 class C {
-  public function foo(B $x): void { }
+  public function foo(B $x): void {}
 }
 
 class D extends C {
-  public function foo(A $x): void { }
+  public function foo(A $x): void {}
 }

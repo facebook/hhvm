@@ -23,6 +23,7 @@
 #include <unicode/translit.h>
 #include <unicode/uregex.h>
 #include <unicode/ustring.h>
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/icu/LifeEventTokenizer.h"
 #include "hphp/runtime/ext/icu/ICUMatcher.h"
 #include "hphp/runtime/ext/icu/ICUTransliterator.h"

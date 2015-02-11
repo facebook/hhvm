@@ -1,0 +1,9 @@
+bool(false)
+string(%d) "%s/test/slow/autoload/systemlib-duplicate-autoload-2.inc"
+bool(true)
+bool(false)
+string(%d) "%s/test/slow/autoload/systemlib-duplicate-autoload-3.inc"
+bool(true)
+string(%d) "%d.%d.%d%S"
+string(%d) "%s/test/slow/autoload/systemlib-duplicate-autoload-4.inc"
+string(7) "Foo Bar"

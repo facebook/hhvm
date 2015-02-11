@@ -84,8 +84,7 @@ void Config::ParseIniString(const std::string iniStr, IniSetting::Map &ini) {
   Config::SetParsedIni(ini, iniStr, "", false);
 }
 
-void Config::ParseHdfString(const std::string hdfStr, Hdf &hdf,
-                            IniSetting::Map &ini) {
+void Config::ParseHdfString(const std::string hdfStr, Hdf &hdf) {
   hdf.fromString(hdfStr.c_str());
 }
 
@@ -98,7 +97,7 @@ void Config::ParseConfigFile(const std::string &filename, IniSetting::Map &ini,
     // For now, assume anything else is an hdf file
     // TODO(#5151773): Have a non-invasive warning if HDF file does not end
     // .hdf
-    Config::ParseHdfFile(filename, hdf, ini);
+    Config::ParseHdfFile(filename, hdf);
   }
 }
 
@@ -115,8 +114,7 @@ void Config::ParseIniFile(const std::string &filename, IniSetting::Map &ini,
     Config::SetParsedIni(ini, str, filename, constants_only);
 }
 
-void Config::ParseHdfFile(const std::string &filename, Hdf &hdf,
-                          IniSetting::Map &ini) {
+void Config::ParseHdfFile(const std::string &filename, Hdf &hdf) {
   hdf.append(filename);
 }
 
@@ -263,4 +261,22 @@ void Config::Bind(std::map<std::string, std::string>& loc,
                    &loc);
 }
 
+// Hdf takes precedence, as usual. No `ini` binding yet.
+void Config::Iterate(const IniSettingMap &ini, const Hdf &hdf,
+                     std::function<void (const IniSettingMap&,
+                                         const Hdf&)> cb) {
+    if (hdf.exists()) {
+      for (Hdf c = hdf.firstChild(); c.exists(); c = c.next()) {
+        cb(ini, c);
+      }
+    } else {
+      auto ini_name = IniName(hdf);
+      auto* ini_value = ini.get_ptr(ini_name);
+      if (ini_value && ini_value->isObject()) {
+        for (auto& val : ini_value->values()) {
+          cb(val, hdf);
+        }
+      }
+    }
+  }
 }

@@ -1,4 +1,4 @@
- <?hh // strict
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,13 +9,17 @@
  *
  */
 
-class Tokyo implements Awaitable<string> {}
+class Tokyo implements Awaitable<string> {
+  public function getWaitHandle(): WaitHandle<string> {
+    // UNSAFE
+  }
+}
 
-async function apocalypse_now() : Awaitable<string> {
+async function apocalypse_now(): Awaitable<string> {
   $x = await new Tokyo();
   return $x;
 }
 
-async function apocalypse_abrdgd() : Awaitable<string> {
+async function apocalypse_abrdgd(): Awaitable<string> {
   return await new Tokyo();
 }

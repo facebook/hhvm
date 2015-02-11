@@ -16,12 +16,13 @@
 */
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
-#include "folly/Likely.h"
+#include <folly/Likely.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/server/http-protocol.h"
 
@@ -35,6 +36,7 @@ const StaticString
   s_integer("integer"),
   s_int("int"),
   s_float("float"),
+  s_double("double"),
   s_string("string"),
   s_object("object"),
   s_array("array"),
@@ -73,6 +75,7 @@ bool HHVM_FUNCTION(settype, VRefParam var, const String& type) {
   else if (type == s_integer) var = var.toInt64();
   else if (type == s_int    ) var = var.toInt64();
   else if (type == s_float  ) var = var.toDouble();
+  else if (type == s_double ) var = var.toDouble();
   else if (type == s_string ) var = var.toString();
   else if (type == s_array  ) var = var.toArray();
   else if (type == s_object ) var = var.toObject();
@@ -263,10 +266,10 @@ static const Func* arGetContextFunc(const ActRec* ar) {
   if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
     // Pseudomains inherit the context of their caller
     auto const context = g_context.getNoCheck();
-    ar = context->getPrevVMStateUNSAFE(ar);
+    ar = context->getPrevVMState(ar);
     while (ar != nullptr &&
              (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
-      ar = context->getPrevVMStateUNSAFE(ar);
+      ar = context->getPrevVMState(ar);
     }
     if (ar == nullptr) {
       return nullptr;

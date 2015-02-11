@@ -1,0 +1,2 @@
+File "deprecated_attr_bad_arity.php", line 3, characters 3-14:
+The attribute __Deprecated expects 1 parameters (Typing[4126])

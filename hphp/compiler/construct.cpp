@@ -24,6 +24,7 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/ast_walker.h"
 #include "hphp/compiler/analysis/exceptions.h"
+#include "hphp/parser/parse-time-fatal-exception.h"
 
 #include "hphp/compiler/statement/function_statement.h"
 
@@ -135,28 +136,6 @@ void Construct::serialize(JSON::CodeError::OutputStream &out) const {
   ls << m_loc->file << m_loc->line0 << m_loc->char0 <<
                        m_loc->line1 << m_loc->char1;
   ls.done();
-}
-
-void Construct::addUserFunction(AnalysisResultPtr ar,
-                                const std::string &name) {
-  if (!name.empty()) {
-    if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
-        ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-      FunctionScopePtr func = getFunctionScope();
-      getFileScope()->addFunctionDependency(ar, name, func &&
-                                            func->isInlined());
-    }
-  }
-}
-
-void Construct::addUserClass(AnalysisResultPtr ar,
-                             const std::string &name) {
-  if (!name.empty()) {
-    if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
-        ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-      getFileScope()->addClassDependency(ar, name);
-    }
-  }
 }
 
 void Construct::printSource(CodeGenerator &cg) {

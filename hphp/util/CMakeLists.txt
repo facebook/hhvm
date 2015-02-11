@@ -2,6 +2,10 @@ set(CXX_SOURCES)
 auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND CXX_SOURCES ${files})
 
+set(ASM_SOURCES)
+auto_sources(asmfiles "*.S" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND ASM_SOURCES ${asmfiles})
+
 foreach (file ${files})
   if (${file} MATCHES "/test/")
     list(REMOVE_ITEM CXX_SOURCES ${file})
@@ -34,7 +38,7 @@ add_custom_command(
 #  include_directories(${LIBNUMA_INCLUDE_DIRS})
 #endif()
 
-add_library(hphp_util STATIC ${CXX_SOURCES}
+add_library(hphp_util STATIC ${CXX_SOURCES} ${ASM_SOURCES}
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp")
 if (ENABLE_COTIRE)

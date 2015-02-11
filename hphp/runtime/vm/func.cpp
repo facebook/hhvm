@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
@@ -240,13 +241,8 @@ void Func::init(int numParams) {
   }
   if (isSpecial(m_name)) {
     /*
-     * i)  We dont want these compiler generated functions to
-     *     appear in backtraces.
-     *
-     * ii) 86sinit and 86pinit construct NameValueTableWrappers
-     *     on the stack. So we MUST NOT allow those to leak into
-     *     the backtrace (since the backtrace will outlive the
-     *     variables).
+     * We dont want these compiler generated functions to
+     * appear in backtraces.
      */
     m_attrs = m_attrs | AttrNoInjection;
   }
@@ -729,24 +725,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << '\n';
     }
   }
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Other methods.
-
-bool Func::shouldPGO() const {
-  if (!RuntimeOption::EvalJitPGO) return false;
-
-  // Non-cloned closures simply contain prologues that redispacth to
-  // cloned closures.  They don't contain a translation for the
-  // function entry, which is what triggers an Optimize retranslation.
-  // So don't generate profiling translations for them -- there's not
-  // much to do with PGO anyway here, since they just have prologues.
-  if (isClosureBody() && !isClonedClosure()) return false;
-
-  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
-  return attrs() & AttrHot;
 }
 
 

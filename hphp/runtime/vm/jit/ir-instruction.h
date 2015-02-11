@@ -137,42 +137,27 @@ struct IRInstruction {
    */
   const IRExtraData* rawExtra() const { return m_extra; }
 
-   /*
-    * Clear the extra data pointer in a IRInstruction.  Used during
-    * IRUnit::gen to avoid having dangling IRExtraData*'s into stack
-    * memory.
-    */
+  /*
+   * Clear the extra data pointer in a IRInstruction.  Used during IRUnit::gen
+   * to avoid having dangling IRExtraData*'s into stack memory.
+   */
   void clearExtra() { m_extra = nullptr; }
 
   /*
-   * Replace an instruction in place with a Nop.  This sometimes may
-   * be a result of a simplification pass.
+   * Replace an instruction in place with a Nop.  This is less general than the
+   * become() function below, but it is fairly common, and doesn't require
+   * access to an IRUnit so it might be more convenient in some cases.
    */
   void convertToNop();
 
   /*
-   * Replace a branch with a Jmp; used when we have proven the branch
-   * is always taken.
-   */
-  void convertToJmp();
-  void convertToJmp(Block* target);
-
-  /*
-   * Replace an instruction in place with a Mov. Used when we have
-   * proven that the instruction's side effects are not needed.
+   * Turns this instruction into the target instruction, without changing
+   * stable fields (id, current block, list fields).  The existing destination
+   * SSATmp(s) will continue to think they came from this instruction, and the
+   * instruction's marker will not change.
    *
-   * TODO: replace with become
-   */
-  void convertToMov();
-
-  /*
-   * Turns this instruction into the target instruction, without
-   * changing stable fields (id, current block, list fields).  The
-   * existing destination SSATmp(s) will continue to think they came
-   * from this instruction.
-   *
-   * The target instruction may be transient---we'll clone anything we
-   * need to keep, using IRUnit for any needed memory.
+   * The target instruction may be transient---we'll clone anything we need to
+   * keep, using IRUnit for any needed memory.
    *
    * Pre: other->isTransient() || numDsts() == other->numDsts()
    */
@@ -300,7 +285,6 @@ struct IRInstruction {
   bool consumesReference(int srcNo) const;
   bool producesReference(int dstNo) const;
   bool mayRaiseError() const;
-  bool isEssential() const;
   bool isTerminal() const;
   bool hasEdges() const { return jit::hasEdges(op()); }
   bool isPassthrough() const;
@@ -309,9 +293,6 @@ struct IRInstruction {
   bool killsSources() const;
   bool killsSource(int srcNo) const;
 
-  bool modifiesStack() const;
-  SSATmp* modifiedStkPtr() const;
-  SSATmp* previousStkPtr() const;
   // hasMainDst provides raw access to the HasDest flag, for instructions with
   // ModifiesStack set.
   bool hasMainDst() const;

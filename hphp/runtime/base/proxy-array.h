@@ -16,12 +16,15 @@
 #ifndef incl_HPHP_PROXY_ARRAY_H
 #define incl_HPHP_PROXY_ARRAY_H
 
-#include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+struct RefData;
 
 /*
  * A proxy for an underlying ArrayData. The Zend compatibility layer needs
@@ -35,7 +38,7 @@ namespace HPHP {
  *
  * TODO: rename to ZendArray
  */
-struct ProxyArray : public ArrayData {
+struct ProxyArray : ArrayData {
   static ProxyArray* Make(ArrayData*);
 
 public:
@@ -112,14 +115,14 @@ private:
    * Zend compat caller. This will retrieve the underlying data pointer from
    * the ZendCustomElement resource, if applicable.
    */
-  void * elementToData(Variant* v) const;
+  void* elementToData(Variant* v) const;
 
   /**
    * Make a ZendCustomElement resource wrapping the given data block. If pDest
    * is non-null, it will be set to the newly-allocated location for the block.
    */
-  ResourceData * makeElementResource(void *pData, uint nDataSize,
-                                     void **pDest) const;
+  SmartPtr<ResourceData> makeElementResource(void *pData, uint nDataSize,
+                                             void **pDest) const;
 
   DtorFunc m_destructor;
 
@@ -223,8 +226,8 @@ void ProxyArray::proxySet(K k,
       *dest = (void*)(&r->nvGet(k)->m_data.pref);
     }
   } else {
-    ResourceData * elt = makeElementResource(data, data_size, dest);
-    r = innerArr(this)->set(k, elt, false);
+    auto elt = makeElementResource(data, data_size, dest);
+    r = innerArr(this)->set(k, Variant(std::move(elt)), false);
   }
   reseatable(this, r);
 }

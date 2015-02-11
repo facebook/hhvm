@@ -1,0 +1,9 @@
+string(3) "Bar"
+__get userMagic: string(9) "userMagic"
+__get nonExisting: NULL
+__get nodeValue: string(15) "nodeValue-value"
+__get nonExisting: string(17) "nonExisting-value"
+int(10)
+
+Notice: Undefined property: MyElementDirect::$nonExisting in %s/test/slow/dom_document/native_magic_props_domelement.php on line 60
+NULL

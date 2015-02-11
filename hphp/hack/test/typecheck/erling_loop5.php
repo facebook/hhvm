@@ -10,8 +10,7 @@
  */
 
 class X<T> {
-  public function __construct(private T $data) {
-  }
+  public function __construct(private T $data) {}
   public function set(T $x): void {
     $this->data = $x;
   }
@@ -25,7 +24,7 @@ function test(): int {
   $x = 0;
   $y = 1;
   $z = 2;
-  for($i = 0; $i < 3; $i++) {
+  for ($i = 0; $i < 3; $i++) {
     $obj->set($y);
     $x = $obj->get();
     $obj->set($z);

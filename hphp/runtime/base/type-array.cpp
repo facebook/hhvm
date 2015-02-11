@@ -16,15 +16,16 @@
 
 #include "hphp/runtime/base/type-array.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -454,19 +455,8 @@ const Variant& Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
     if (key.isNull()) return m_px->get(staticEmptyString(), error);
     int64_t n;
     if (!key.get()->isStrictlyInteger(n)) {
-      if (UNLIKELY(m_px->isVPackedArrayOrIntMapArray())) {
-        if (m_px->isVPackedArray()) {
-          PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-        } else {
-          MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                                ArrayData::kIntMapKind);
-        }
-      }
       return m_px->get(key, error);
     } else {
-      if (UNLIKELY(m_px->isVPackedArray())) {
-        PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-      }
       return m_px->get(n, error);
     }
   }
@@ -499,20 +489,8 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
         int64_t n;
         if (!(flags & AccessFlags::Key) &&
             key.asTypedValue()->m_data.pstr->isStrictlyInteger(n)) {
-          if (UNLIKELY(m_px->isVPackedArrayOrIntMapArray())) {
-            if (m_px->isVPackedArray()) {
-              PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-            } else {
-              MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                                    ArrayData::kIntMapKind);
-            }
-          }
-
           return m_px->get(n, flags & AccessFlags::Error);
         }
-      }
-      if (UNLIKELY(m_px->isVPackedArray())) {
-        PackedArray::warnUsage(PackedArray::Reason::kGetStr);
       }
       return m_px->get(key.asCStrRef(), flags & AccessFlags::Error);
 
@@ -773,14 +751,8 @@ void Array::serialize(VariableSerializer *serializer,
 
 void Array::unserialize(VariableUnserializer *uns) {
   int64_t size = uns->readInt();
-  char sep = uns->readChar();
-  if (sep != ':') {
-    throw Exception("Expected ':' but got '%c'", sep);
-  }
-  sep = uns->readChar();
-  if (sep != '{') {
-    throw Exception("Expected '{' but got '%c'", sep);
-  }
+  uns->expectChar(':');
+  uns->expectChar('{');
 
   if (size == 0) {
     operator=(Create());
@@ -797,24 +769,29 @@ void Array::unserialize(VariableUnserializer *uns) {
     // middle, which breaks references.
     operator=(ArrayInit(size, ArrayInit::Mixed{}).toArray());
     for (int64_t i = 0; i < size; i++) {
-      Variant key(uns->unserializeKey());
+      Variant key;
+      key.unserialize(uns, Uns::Mode::Key);
       if (!key.isString() && !key.isInteger()) {
         throw Exception("Invalid key");
       }
       // for apc, we know the key can't exist, but ignore that optimization
-      assert(uns->getType() != VariableUnserializer::Type::APCSerialize ||
+      assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
              !exists(key, true));
       Variant &value = lvalAt(key, AccessFlags::Key);
       value.unserialize(uns);
+
+      if (i < (size - 1)) {
+        auto lastChar = uns->peekBack();
+        if ((lastChar != ';' && lastChar != '}')) {
+          throw Exception("Array element not terminated properly");
+        }
+      }
     }
   }
 
   check_request_surprise_unlikely();
 
-  sep = uns->readChar();
-  if (sep != '}') {
-    throw Exception("Expected '}' but got '%c'", sep);
-  }
+  uns->expectChar('}');
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -946,11 +923,6 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
   for (unsigned int k = 0; k < data.size(); k++) {
     SortData &opaque = data[k];
     const Array& arr = *opaque.array;
-    if (renumber && (opaque.original->getArrayData()->isIntMapArray())) {
-      MixedArray::downgradeAndWarn(opaque.original->getArrayData(),
-                                   MixedArray::Reason::kSort);
-    }
-
     Array sorted;
     for (int i = 0; i < count; i++) {
       ssize_t pos = opaque.positions[indices[i]];
@@ -970,25 +942,29 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
   return true;
 }
 
-int Array::SortRegularAscending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortRegularAscending(const Variant& v1, const Variant& v2,
+                                const void *data) {
   if (HPHP::less(v1, v2)) return -1;
   if (tvEqual(*v1.asTypedValue(), *v2.asTypedValue())) return 0;
   return 1;
 }
-int Array::SortRegularDescending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortRegularDescending(const Variant& v1, const Variant& v2,
+                                 const void *data) {
   if (HPHP::less(v1, v2)) return 1;
   if (tvEqual(*v1.asTypedValue(), *v2.asTypedValue())) return 0;
   return -1;
 }
 
-int Array::SortNumericAscending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNumericAscending(const Variant& v1, const Variant& v2,
+                                const void *data) {
   double d1 = v1.toDouble();
   double d2 = v2.toDouble();
   if (d1 < d2) return -1;
   if (d1 == d2) return 0;
   return 1;
 }
-int Array::SortNumericDescending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNumericDescending(const Variant& v1, const Variant& v2,
+                                 const void *data) {
   double d1 = v1.toDouble();
   double d2 = v2.toDouble();
   if (d1 < d2) return 1;
@@ -996,25 +972,29 @@ int Array::SortNumericDescending(const Variant& v1, const Variant& v2, const voi
   return -1;
 }
 
-int Array::SortStringAscending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortStringAscending(const Variant& v1, const Variant& v2,
+                               const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_strcmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
 
-int Array::SortStringAscendingCase(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortStringAscendingCase(const Variant& v1, const Variant& v2,
+                                   const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
 
-int Array::SortStringDescending(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortStringDescending(const Variant& v1, const Variant& v2,
+                                const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_strcmp(s2.data(), s2.size(), s1.data(), s1.size());
 }
 
-int Array::SortStringDescendingCase(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortStringDescendingCase(const Variant& v1, const Variant& v2,
+                                    const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return bstrcasecmp(s2.data(), s2.size(), s1.data(), s1.size());
@@ -1036,16 +1016,32 @@ int Array::SortLocaleStringDescending(const Variant& v1, const Variant& v2,
   return strcoll(s2.data(), s1.data());
 }
 
-int Array::SortNatural(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNaturalAscending(const Variant& v1, const Variant& v2,
+                                const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 0);
 }
 
-int Array::SortNaturalCase(const Variant& v1, const Variant& v2, const void *data) {
+int Array::SortNaturalDescending(const Variant& v1, const Variant& v2,
+                                 const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return string_natural_cmp(s2.data(), s2.size(), s1.data(), s1.size(), 0);
+}
+
+int Array::SortNaturalCaseAscending(const Variant& v1, const Variant& v2,
+                                    const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 1);
+}
+
+int Array::SortNaturalCaseDescending(const Variant& v1, const Variant& v2,
+                                     const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return string_natural_cmp(s2.data(), s2.size(), s1.data(), s1.size(), 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

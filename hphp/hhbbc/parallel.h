@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <exception>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/program-functions.h"
 

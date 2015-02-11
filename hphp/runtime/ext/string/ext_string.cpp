@@ -16,23 +16,27 @@
 */
 
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/base/bstring.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/base/zend-scanf.h"
-#include "hphp/runtime/base/bstring.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/util/lock.h"
-#include <locale.h>
-#include "hphp/runtime/server/http-request-handler.h"
-#include "hphp/runtime/server/http-protocol.h"
-#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "folly/Unicode.h"
-#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/util/lock.h"
 #include "hphp/zend/html-table.h"
-#include "hphp/runtime/base/container-functions.h"
+
+#include <folly/Unicode.h>
+#include <locale.h>
 
 namespace HPHP {
 
@@ -58,12 +62,11 @@ String stringForEach(uint32_t len, const String& str, Op action) {
   String ret = mutate ? str : String(len, ReserveString);
 
   StringSlice srcSlice = str.slice();
-  auto const dstSlice = ret.bufferSlice();
 
   const char* src = srcSlice.begin();
   const char* end = srcSlice.end();
 
-  char* dst = dstSlice.begin();
+  char* dst = ret.mutableData();
 
   for (; src != end; ++src, ++dst) {
     *dst = action(*src);
@@ -360,7 +363,7 @@ String HHVM_FUNCTION(str_shuffle,
   int left   = ret.size();
 
   while (--left) {
-    int idx = f_rand(0, left);
+    int idx = HHVM_FN(rand)(0, left);
     if (idx != left) {
       char temp = buf[left];
       buf[left] = buf[idx];
@@ -472,7 +475,7 @@ String stringTrim(String& str, const String& charlist) {
   if (str.get()->hasExactlyOneRef()) {
     int slen = end - start + 1;
     if (start) {
-      char* sdata = str.bufferSlice().ptr;
+      char* sdata = str.mutableData();
       for (int idx = 0; start < len;) sdata[idx++] = sdata[start++];
     }
     return String(str.get()->shrink(slen));
@@ -846,7 +849,7 @@ String HHVM_FUNCTION(str_repeat,
   if (input.size() == 1) {
     String ret(multiplier, ReserveString);
 
-    memset(ret.bufferSlice().ptr, *input.data(), multiplier);
+    memset(ret.mutableData(), *input.data(), multiplier);
     ret.setSize(multiplier);
     return ret;
   }
@@ -897,9 +900,16 @@ TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
   return arReturn(ar, sscanfImpl(str, format, args));
 }
 
-String HHVM_FUNCTION(chr,
-                     Variant ascii) {
-  return String(makeStaticString((char)ascii.toInt64()));
+String HHVM_FUNCTION(chr, const Variant& ascii) {
+  // This is the only known occurance of ParamCoerceModeNullByte,
+  // so we treat it specially using an explicit tvCoerce call
+  Variant v(ascii);
+  auto tv = v.asTypedValue();
+  char c = 0;
+  if (tvCoerceParamToInt64InPlace(tv)) {
+    c = tv->m_data.num & 0xFF;
+  }
+  return String::FromChar(c);
 }
 
 int64_t HHVM_FUNCTION(ord,
@@ -1447,7 +1457,7 @@ Variant HHVM_FUNCTION(count_chars,
     chars[*buf++]++;
   }
 
-  Array retarr;
+  Array retarr = Array::Create();
   char retstr[256];
   int retlen = 0;
   switch (mode) {
@@ -1723,7 +1733,7 @@ String HHVM_FUNCTION(sha1,
 bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
                 const char*s, int& pos, int minlen, int maxlen) {
 
-  memcpy(key.bufferSlice().ptr, s + pos, maxlen);
+  memcpy(key.mutableData(), s + pos, maxlen);
   for (int len = maxlen; len >= minlen; len--) {
     key.setSize(len);
     auto const& var = arr->get(key.toKey());
@@ -2110,7 +2120,7 @@ String HHVM_FUNCTION(hebrevc,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StringExtension : public Extension {
+class StringExtension final : public Extension {
 public:
   StringExtension() : Extension("string") {}
   void moduleInit() override {

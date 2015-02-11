@@ -1,8 +1,0 @@
-array(3) {
-  [1]=>
-  string(3) "foo"
-  [2]=>
-  string(3) "bar"
-  ["ffff"]=>
-  string(7) "warning"
-}

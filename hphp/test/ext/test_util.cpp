@@ -17,7 +17,6 @@
 #include "hphp/test/ext/test_util.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/config.h"
@@ -49,7 +48,7 @@ bool TestUtil::RunTests(const std::string &which) {
 
 struct testhash {
   size_t operator()(const String& s) const {
-    return hash_string(s.data(), s.size());
+    return hash_string_unsafe(s.data(), s.size());
   }
 };
 

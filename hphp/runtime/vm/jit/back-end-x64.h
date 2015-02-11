@@ -24,6 +24,7 @@ constexpr int kJmpLen = 5;
 constexpr int kCallLen = 5;
 constexpr int kJmpccLen = 6;
 constexpr int kJmpImmBytes = 4;
+constexpr int kRipLeaLen = 7;
 
 std::unique_ptr<BackEnd> newBackEnd();
 

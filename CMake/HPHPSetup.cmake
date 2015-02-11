@@ -137,13 +137,13 @@ if(MSVC OR CYGWIN OR MINGW)
   add_definitions(-DWIN32_LEAN_AND_MEAN)
 endif()
 
-if(${CMAKE_BUILD_TYPE} MATCHES "Release")
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+  add_definitions(-DDEBUG)
+  message("Generating DEBUG build")
+else()
   add_definitions(-DRELEASE=1)
   add_definitions(-DNDEBUG)
   message("Generating Release build")
-else()
-  add_definitions(-DDEBUG)
-  message("Generating DEBUG build")
 endif()
 
 if(DEBUG_MEMORY_LEAK)
@@ -200,11 +200,6 @@ if(ENABLE_AVX2)
   add_definitions(-DENABLE_AVX2=1)
 endif()
 
-if(PACKED_TV)
-  # Allows a packed tv build
-  add_definitions(-DPACKED_TV=1)
-endif()
-
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)
 
@@ -231,7 +226,10 @@ if (NOT PCRE_LIBRARY)
   include_directories("${TP_DIR}/pcre")
 endif()
 
-include_directories("${TP_DIR}/fastlz")
+if (NOT FASTLZ_LIBRARY)
+  include_directories("${TP_DIR}/fastlz")
+endif()
+
 include_directories("${TP_DIR}/timelib")
 include_directories("${TP_DIR}/libafdt/src")
 include_directories("${TP_DIR}/libmbfl")

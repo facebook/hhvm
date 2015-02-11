@@ -1,38 +1,38 @@
 object(DOMElement)#3 (18) {
-  ["schemaTypeInfo"]=>
-  NULL
-  ["tagName"]=>
-  string(4) "root"
-  ["textContent"]=>
-  string(13) "$1 - SITENAME"
-  ["baseURI"]=>
-  string(%d) "%s"
-  ["localName"]=>
-  string(4) "root"
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
-  ["parentNode"]=>
-  string(22) "(object value omitted)"
-  ["namespaceURI"]=>
-  NULL
-  ["nodeType"]=>
-  int(1)
-  ["lastChild"]=>
-  string(22) "(object value omitted)"
   ["nodeName"]=>
   string(4) "root"
-  ["previousSibling"]=>
-  NULL
-  ["firstChild"]=>
+  ["nodeValue"]=>
+  string(13) "$1 - SITENAME"
+  ["nodeType"]=>
+  int(1)
+  ["parentNode"]=>
   string(22) "(object value omitted)"
   ["childNodes"]=>
   string(22) "(object value omitted)"
-  ["nodeValue"]=>
-  string(13) "$1 - SITENAME"
+  ["firstChild"]=>
+  string(22) "(object value omitted)"
+  ["lastChild"]=>
+  string(22) "(object value omitted)"
+  ["previousSibling"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   string(22) "(object value omitted)"
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  string(4) "root"
+  ["baseURI"]=>
+  string(%d) "%s/"
+  ["textContent"]=>
+  string(13) "$1 - SITENAME"
+  ["tagName"]=>
+  string(4) "root"
+  ["schemaTypeInfo"]=>
+  NULL
 }

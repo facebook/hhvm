@@ -16,20 +16,20 @@
 
 #include "hphp/runtime/vm/jit/simplify.h"
 
+#include <limits>
 #include <sstream>
 #include <type_traits>
-#include <limits>
 
-#include "hphp/runtime/vm/jit/mc-generator.h" // TODO(#5593564): temporary
-
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
+#include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/util/overflow.h"
 
 namespace HPHP { namespace jit {
@@ -115,16 +115,9 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
  * source chain are also always available.  Anything else requires more
  * complicated analysis than belongs in the simplifier right now.
  */
-bool validate(const State& env,
+DEBUG_ONLY bool validate(const State& env,
               SSATmp* newDst,
               const IRInstruction* origInst) {
-  // Certain opcodes that read stack locations have valid simplification
-  // rules (we know values are available because they are on the eval
-  // stack) that are not easy to double check here.
-  if (origInst->op() == LdStack || origInst->op() == DecRefStack) {
-    return true;
-  }
-
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybeCounted()) return true;
     for (auto& oldSrc : origInst->srcs()) {
@@ -176,36 +169,20 @@ bool validate(const State& env,
  * value of the simplified instruction sequence.
  */
 
-SSATmp* simplifySpillStack(State& env, const IRInstruction* inst) {
-  auto const sp           = inst->src(0);
-  auto const spDeficit    = inst->src(1)->intVal();
-  auto const numSpillSrcs = inst->srcs().subpiece(2).size();
-
-  // If there's nothing to spill, and no stack adjustment, we don't
-  // need the instruction; the old stack is still accurate.
-  if (!numSpillSrcs && spDeficit == 0) return sp;
-
+SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
+  auto const func = inst->marker().func();
+  auto const srcTy = inst->src(0)->type();
+  if (srcTy <= Type::Obj) return gen(env, Nop);
+  if (!func->mayHaveThis() || !srcTy.maybe(Type::Obj)) {
+    return gen(env, Jmp, inst->taken());
+  }
   return nullptr;
 }
 
-SSATmp* simplifyLdCtx(State& env, const IRInstruction* inst) {
-  auto const func = inst->extra<LdCtx>()->func;
-  if (func->isStatic()) {
-    auto const src = inst->src(0);
-    auto const srcInst = src->inst();
-    if (srcInst->is(DefInlineFP)) {
-      auto const stackPtr = srcInst->src(0);
-      if (auto const spillFrame = findSpillFrame(stackPtr)) {
-        auto const cls = spillFrame->src(2);
-        if (cls->isConst(Type::Cls)) {
-          return cns(env, ConstCctx::cctx(cls->clsVal()));
-        }
-      }
-    }
-    // ActRec->m_cls of a static function is always a valid class pointer with
-    // the bottom bit set
-    return gen(env, LdCctx, src);
-  }
+SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
+  // TODO(#5623596): this transformation is required for correctness in
+  // refcount opts right now.
+  if (inst->src(0)->type() <= Type::Obj) return inst->src(0);
   return nullptr;
 }
 
@@ -239,17 +216,15 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   if (!src->isConst()) return nullptr;
 
   auto const cls = src->clsVal();
-  if (!RDS::isPersistentHandle(cls->classHandle())) return nullptr;
+  if (!rds::isPersistentHandle(cls->classHandle())) return nullptr;
 
-  auto const meth = cls->lookupMethod(s_invoke.get());
-  return meth != nullptr ? cns(env, meth) : nullptr;
+  auto const meth = cls->getCachedInvoke();
+  return meth == nullptr ? nullptr : cns(env, meth.get());
 }
 
 SSATmp* simplifyGetCtxFwdCall(State& env, const IRInstruction* inst) {
-  SSATmp* srcCtx = inst->src(0);
-  if (srcCtx->isA(Type::Cctx)) {
-    return srcCtx;
-  }
+  auto const srcCtx = inst->src(0);
+  if (srcCtx->isA(Type::Cctx)) return srcCtx;
   return nullptr;
 }
 
@@ -567,22 +542,19 @@ SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
 
   if (!src2->isConst()) return nullptr;
 
-  int64_t src2Val = src2->intVal();
-  auto const min = std::numeric_limits<int64_t>::min();
-
-  // refrain from generating undefined IR
-  assert(src2Val != 0);
-  // simplify const
-  if (src1->isConst()) {
-    // still don't want undefined IR
-    assert(src1->intVal() != min || src2Val != -1);
-    return cns(env, src1->intVal() % src2Val);
+  auto const src2Val = src2->intVal();
+  if (src2Val == 0 || src2Val == -1) {
+    // Undefined behavior, so we might as well constant propagate whatever we
+    // want. If we're being asked to simplify this, it better be dynamically
+    // unreachable code.
+    return cns(env, 0);
   }
-  // X % 1, X % -1 --> 0
-  if (src2Val == 1 || src2Val == -1) return cns(env, 0);
 
-  // X % LONG_MIN = X (largest magnitude possible as rhs)
-  return src2Val == min ? src1 : nullptr;
+  if (src1->isConst()) return cns(env, src1->intVal() % src2Val);
+  // X % 1 --> 0
+  if (src2Val == 1) return cns(env, 0);
+
+  return nullptr;
 }
 
 SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
@@ -955,7 +927,7 @@ SSATmp* cmpImpl(State& env,
 
   // ---------------------------------------------------------------------
   // Perform type juggling and type canonicalization for different types
-  // see http://www.php.net/manual/en/language.operators.comparison.php
+  // see http://docs.hhvm.com/manual/en/language.operators.comparison.php
   // ---------------------------------------------------------------------
 
   // nulls get canonicalized to the right
@@ -1072,46 +1044,6 @@ X(NSame)
 
 #undef X
 
-SSATmp* queryJmpImpl(State& env, const IRInstruction* inst) {
-  auto const src1 = inst->src(0);
-  auto const src2 = inst->src(1);
-  auto const opc = inst->op();
-  // reuse the logic in cmpImpl
-  auto const newCmp = cmpImpl(
-    env,
-    queryJmpToQueryOp(opc),
-    nullptr,
-    src1,
-    src2
-  );
-  if (!newCmp) return nullptr;
-
-  // Become an equivalent conditional jump and reuse that logic.
-  return gen(env, JmpNZero, inst->taken(), newCmp);
-}
-
-#define X(x)                                                \
-  SSATmp* simplify##x(State& env, const IRInstruction* i) { \
-    return queryJmpImpl(env, i);                            \
-  }
-
-X(JmpGt)
-X(JmpGte)
-X(JmpLt)
-X(JmpLte)
-X(JmpEq)
-X(JmpNeq)
-X(JmpGtInt)
-X(JmpGteInt)
-X(JmpLtInt)
-X(JmpLteInt)
-X(JmpEqInt)
-X(JmpNeqInt)
-X(JmpSame)
-X(JmpNSame)
-
-#undef X
-
 SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   bool const trueSense = inst->op() == IsType;
   auto const type      = inst->typeParam();
@@ -1144,6 +1076,30 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   // are non-disjoint but neither is a subtype of the other. We can't simplify
   // this away.
   return nullptr;
+}
+
+SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
+  if (src2->isA(Type::Nullptr)) return cns(env, false);
+
+  if (!src1->isConst() || !src2->isConst()) return nullptr;
+
+  return cns(env, src1->clsVal()->classof(src2->clsVal()));
+}
+
+SSATmp* simplifyExtendsClass(State& env, const IRInstruction* i) {
+  return simplifyInstanceOf(env, i);
+}
+
+SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
+  if (!src1->isConst() || !src2->isConst()) return nullptr;
+
+  return cns(env, src1->clsVal()->ifaceofDirect(src2->strVal()));
 }
 
 SSATmp* simplifyIsType(State& env, const IRInstruction* i) {
@@ -1254,16 +1210,6 @@ SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  // This is trying to get some information about a bug that's in another
-  // module:
-  auto show_failure = [&]() -> std::string {
-    auto msg = std::string{};
-    msg += show(*mcg->tx().region()) + "\n";
-    msg += "ConvArrToBool issue:\n";
-    msg += env.unit.toString();
-    return msg;
-  };
-  always_assert_log(inst->src(0)->type() <= Type::Arr, show_failure);
   if (src->isConst()) {
     // const_cast is safe. We're only making use of a cell helper.
     auto arr = const_cast<ArrayData*>(src->arrVal());
@@ -1480,7 +1426,11 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
-  if (ty < Type::Obj && ty.getClass() && ty.getClass()->isCollectionClass()) {
+
+  if (!typeMightRelax(inst->src(0)) &&
+      ty < Type::Obj &&
+      ty.getClass() &&
+      ty.getClass()->isCollectionClass()) {
     return gen(env, ColIsNEmpty, inst->src(0));
   }
   return nullptr;
@@ -1684,25 +1634,6 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
     // We can just check the int or ptr directly. Borrow the Conv's src.
     return gen(env, inst->op(), inst->taken(), srcInst->src(0));
   }
-
-  auto canCompareFused = [&]() {
-    auto src1Type = srcInst->src(0)->type();
-    auto src2Type = srcInst->src(1)->type();
-    return ((src1Type <= Type::Int && src2Type <= Type::Int) ||
-            (src1Type <= Type::Bool && src2Type <= Type::Bool) ||
-            (src1Type <= Type::Cls && src2Type <= Type::Cls));
-  };
-
-  // Fuse jumps with query operators.
-  if (isFusableQueryOp(srcOpcode) && canCompareFused()) {
-    auto opc = queryToJmpOp(inst->op() == JmpZero
-                            ? negateQueryOp(srcOpcode) : srcOpcode);
-    SrcRange ssas = srcInst->srcs();
-
-    return gen(env, opc, inst->maybeTypeParam(), inst->taken(),
-               std::make_pair(ssas.size(), ssas.begin()));
-  }
-
   return nullptr;
 }
 
@@ -1713,100 +1644,12 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
   return condJmpImpl(env, i);
 }
 
-SSATmp* simplifyCastStk(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<CastStk>()->offset);
-  if (inst->typeParam() == Type::NullableObj && info.knownType <= Type::Null) {
-    // If we're casting Null to NullableObj, we still need to call
-    // tvCastToNullableObjectInPlace. See comment there and t3879280 for
-    // details.
-    return nullptr;
-  } else if (info.knownType <= inst->typeParam()) {
-    return inst->src(0);
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyCoerceStk(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<CoerceStk>()->offset);
-  if (info.knownType <= inst->typeParam()) {
-    // No need to cast---the type was as good or better.
-    return gen(env, Nop);
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyLdStack(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<LdStack>()->offset);
-
-  // We don't want to extend live ranges of tmps across calls, so we
-  // don't get the value if spansCall is true; however, we can use
-  // any type information known.
-  auto* value = info.value;
-  if (value && (!info.spansCall || info.value->inst()->is(DefConst))) {
-    // The refcount optimizations depend on reliably tracking refcount
-    // producers and consumers. LdStack and other raw loads are special cased
-    // during the analysis, so if we're going to replace this LdStack with a
-    // value that isn't from another raw load, we need to leave something in
-    // its place to preserve that information.
-    if (!value->inst()->isRawLoad() &&
-        (value->type().maybeCounted() || mightRelax(env, info.value))) {
-      gen(env, TakeStack, info.value);
-    }
-    return info.value;
-  }
-
-  if (info.knownType < inst->typeParam()) {
-    return gen(
-      env,
-      LdStack,
-      *inst->extra<LdStack>(),
-      info.knownType,
-      inst->src(0)
-    );
-  }
-
-  return nullptr;
-}
-
-SSATmp* simplifyTakeStack(State& env, const IRInstruction* inst) {
+SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
   if (inst->src(0)->type().notCounted() &&
       !mightRelax(env, inst->src(0))) {
     return gen(env, Nop);
   }
 
-  return nullptr;
-}
-
-SSATmp* simplifyDecRefStack(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<StackOffset>()->offset);
-  if (info.value && !info.spansCall) {
-    if (info.value->type().maybeCounted() || mightRelax(env, info.value)) {
-      gen(env, TakeStack, info.value);
-    }
-    return gen(env, DecRef, info.value);
-  }
-  if (mightRelax(env, info.value)) {
-    return nullptr;
-  }
-
-  // NB: strict subtype relation. Non-strict results in infinite recursion.
-  if (info.knownType < inst->typeParam()) {
-    return gen(
-      env,
-      DecRefStack,
-      *inst->extra<StackOffset>(),
-      info.knownType,
-      inst->src(0)
-    );
-  }
-
-  if (inst->typeParam().notCounted()) {
-    return gen(env, Nop);
-  }
   return nullptr;
 }
 
@@ -1905,14 +1748,18 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
   if (src->isConst()) return cns(env, src->arrVal()->size());
 
-  auto const notNvtw =
-    ty.hasArrayKind() && ty.getArrayKind() != ArrayData::kNvtwKind;
+  if (!ty.hasArrayKind() || mightRelax(env, src)) return nullptr;
 
-  if (!mightRelax(env, src) && notNvtw) {
-    return gen(env, CountArrayFast, src);
+  switch (ty.getArrayKind()) {
+    case ArrayData::kPackedKind:
+    case ArrayData::kStructKind:
+    case ArrayData::kMixedKind:
+    case ArrayData::kEmptyKind:
+    case ArrayData::kApcKind:
+      return gen(env, CountArrayFast, src);
+    default:
+      return nullptr;
   }
-
-  return nullptr;
 }
 
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
@@ -1952,6 +1799,11 @@ SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyAdjustSP(State& env, const IRInstruction* inst) {
+  if (inst->extra<AdjustSP>()->offset == 0) return inst->src(0);
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -1969,14 +1821,12 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(AssertNonNull)
   X(BoxPtr)
   X(CallBuiltin)
-  X(CastStk)
   X(Ceil)
   X(CheckInit)
   X(CheckPackedArrayBounds)
   X(CoerceCellToBool)
   X(CoerceCellToDbl)
   X(CoerceCellToInt)
-  X(CoerceStk)
   X(ConcatCellCell)
   X(ConcatStrStr)
   X(ConvArrToBool)
@@ -2009,41 +1859,28 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CountArray)
   X(DecRef)
   X(DecRefNZ)
-  X(DecRefStack)
   X(DivDbl)
+  X(ExtendsClass)
   X(Floor)
   X(GetCtxFwdCall)
   X(IncRef)
   X(IncRefCtx)
+  X(InstanceOf)
+  X(InstanceOfIface)
   X(IsNType)
   X(IsScalarType)
   X(IsType)
   X(IsWaitHandle)
   X(LdClsCtx)
   X(LdClsName)
-  X(LdCtx)
+  X(CheckCtxThis)
+  X(CastCtxThis)
   X(LdObjClass)
   X(LdObjInvoke)
   X(LdPackedArrayElem)
-  X(LdStack)
   X(Mov)
-  X(SpillStack)
-  X(TakeStack)
+  X(TakeStk)
   X(UnboxPtr)
-  X(JmpGt)
-  X(JmpGte)
-  X(JmpLt)
-  X(JmpLte)
-  X(JmpEq)
-  X(JmpNeq)
-  X(JmpGtInt)
-  X(JmpGteInt)
-  X(JmpLtInt)
-  X(JmpLteInt)
-  X(JmpEqInt)
-  X(JmpNeqInt)
-  X(JmpSame)
-  X(JmpNSame)
   X(JmpZero)
   X(JmpNZero)
   X(OrInt)
@@ -2075,6 +1912,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Same)
   X(NSame)
   X(ArrayGet)
+  X(AdjustSP)
   default: break;
   }
 #undef X
@@ -2094,291 +1932,6 @@ SimplifyResult simplify(IRUnit& unit,
   auto const newDst = simplifyWork(env, origInst);
   assert(validate(env, newDst, origInst));
   return SimplifyResult { std::move(env.newInsts), newDst };
-}
-
-//////////////////////////////////////////////////////////////////////
-
-StackValueInfo::StackValueInfo(SSATmp* value)
-  : value(value)
-  , knownType(value->type())
-  , predictedInner(Type::Bottom)
-  , spansCall(false)
-  , typeSrc(value->inst())
-{
-  ITRACE(5, "{} created\n", show(*this));
-}
-
-StackValueInfo::StackValueInfo(IRInstruction* inst,
-                               Type type,
-                               Type predictedInner)
-  : value(nullptr)
-  , knownType(type)
-  , predictedInner(predictedInner)
-  , spansCall(false)
-  , typeSrc(inst)
-{
-  ITRACE(5, "{} created\n", show(*this));
-}
-
-std::string show(const StackValueInfo& info) {
-  std::string out = "StackValueInfo {";
-
-  if (info.value) {
-    out += info.value->inst()->toString();
-  } else {
-    folly::toAppend(
-      info.knownType.toString(),
-      info.knownType <= Type::BoxedInitCell
-        ? folly::sformat(" ({})", info.predictedInner.toString())
-        : std::string{},
-      " from ",
-      info.typeSrc ? info.typeSrc->toString() : "N/A",
-      &out
-    );
-  }
-
-  if (info.spansCall) out += ", spans call";
-  out += "}";
-
-  return out;
-}
-
-StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
-  ITRACE(5, "getStackValue: idx = {}, {}\n", index, sp->inst()->toString());
-  Trace::Indent _i;
-
-  assert(sp->isA(Type::StkPtr));
-  IRInstruction* inst = sp->inst();
-
-  switch (inst->op()) {
-  case DefSP:
-    // You aren't really allowed to look above your current stack.  We
-    // can't assert fail here if the index is too high right now
-    // though, because it's currently legal to call getStackValue with
-    // invalid stack offsets.  (And this is done in ir-builder; see
-    // TODO(#4355796)).
-    return StackValueInfo { inst, Type::StackElem };
-
-  case ReDefSP: {
-    auto const extra = inst->extra<ReDefSP>();
-    auto info = getStackValue(inst->src(0), index);
-    if (extra->spansCall) info.spansCall = true;
-    return info;
-  }
-
-  case ExceptionBarrier:
-  case Mov:
-    return getStackValue(inst->src(0), index);
-
-  case SideExitGuardStk:
-    if (inst->extra<SideExitGuardData>()->checkedSlot == index) {
-      return StackValueInfo { inst, inst->typeParam() };
-    }
-    return getStackValue(inst->src(0), index);
-
-  case CastStk:
-  case CastStkIntToDbl:
-    // fallthrough
-  case GuardStk:
-    // We don't have a value, but we may know the type due to guarding
-    // on it.
-    if (inst->extra<StackOffset>()->offset == index) {
-      return StackValueInfo { inst, inst->typeParam() };
-    }
-    return getStackValue(inst->src(0), index);
-
-  case CoerceStk:
-    if (inst->extra<CoerceStk>()->offset == index) {
-      return StackValueInfo { inst, inst->typeParam() };
-    }
-    return getStackValue(inst->src(0), index);
-
-  case AssertStk:
-    // fallthrough
-  case CheckStk:
-    // CheckStk's and AssertStk's resulting type is the intersection
-    // of its typeParam with whatever type preceded it.
-    if (inst->extra<StackOffset>()->offset == index) {
-      auto const prev = getStackValue(inst->src(0), index);
-      return StackValueInfo {
-        inst,
-        refineTypeNoCheck(prev.knownType, inst->typeParam()),
-        prev.predictedInner
-      };
-    }
-    return getStackValue(inst->src(0), index);
-
-  case HintStkInner:
-    if (inst->extra<HintStkInner>()->offset == index) {
-      return StackValueInfo {
-        nullptr, Type::BoxedInitCell, inst->typeParam()
-      };
-    }
-    return getStackValue(inst->src(0), index);
-
-  case CallArray: {
-    if (index == 0) {
-      // return value from call
-      return StackValueInfo { inst, Type::Gen };
-    }
-    auto info =
-      getStackValue(inst->src(0),
-                    // Pushes a return value, pops an ActRec and args Array
-                    index -
-                      (1 /* pushed */ - (kNumActRecCells + 1) /* popped */));
-    info.spansCall = true;
-    return info;
-  }
-
-  case Call: {
-    if (index == 0) {
-      // return value from call
-      return StackValueInfo { inst, Type::Gen };
-    }
-    auto info =
-      getStackValue(
-        inst->src(0),
-        index - (1 /* pushed */ -
-                 (kNumActRecCells +
-                   inst->extra<Call>()->numParams) /* popped */)
-      );
-    info.spansCall = true;
-    return info;
-  }
-
-  case ContEnter: {
-    if (index == 0) {
-      // return value from call
-      return StackValueInfo { inst, Type::Gen };
-    }
-    auto info = getStackValue(inst->src(0), index);
-    info.spansCall = true;
-    return info;
-  }
-
-  case SpillStack: {
-    int64_t numPushed    = 0;
-    int32_t numSpillSrcs = inst->numSrcs() - 2;
-
-    for (int i = 0; i < numSpillSrcs; ++i) {
-      SSATmp* tmp = inst->src(i + 2);
-      if (index == numPushed) {
-        return StackValueInfo { tmp };
-      }
-      ++numPushed;
-    }
-
-    // This is not one of the values pushed onto the stack by this
-    // spillstack instruction, so continue searching.
-    SSATmp* prevSp = inst->src(0);
-    int64_t numPopped = inst->src(1)->intVal();
-    return getStackValue(prevSp,
-                         // pop values pushed by spillstack
-                         index - (numPushed - numPopped));
-  }
-
-  case InterpOne:
-  case InterpOneCF: {
-    SSATmp* prevSp = inst->src(0);
-    auto const& extra = *inst->extra<InterpOneData>();
-    int64_t spAdjustment = extra.cellsPopped - extra.cellsPushed;
-    switch (extra.opcode) {
-    // some instructions are kinda funny and mess with the stack
-    // in places other than the top
-    case Op::CGetL2:
-      if (index == 1) return StackValueInfo { inst, inst->typeParam() };
-      if (index == 0) return getStackValue(prevSp, index);
-      break;
-    case Op::CGetL3:
-      if (index == 2) return StackValueInfo { inst, inst->typeParam() };
-      if (index < 2)  return getStackValue(prevSp, index);
-      break;
-    case Op::FPushCufSafe:
-      if (index == kNumActRecCells) return StackValueInfo { inst, Type::Bool };
-      if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
-      break;
-    case Op::FPushCtor:
-    case Op::FPushCtorD:
-      if (index == kNumActRecCells) return StackValueInfo { inst, Type::Obj };
-      if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
-      break;
-
-    default:
-      if (index == 0 && inst->hasTypeParam()) {
-        return StackValueInfo { inst, inst->typeParam() };
-      }
-      break;
-    }
-
-    // If the index we're looking for is a cell pushed by the InterpOne (other
-    // than top of stack), we know nothing about its type.
-    if (index < extra.cellsPushed) {
-      return StackValueInfo{ inst, Type::StackElem };
-    }
-    return getStackValue(prevSp, index + spAdjustment);
-  }
-
-  case SpillFrame:
-  case CufIterSpillFrame:
-    // pushes an ActRec
-    if (index < kNumActRecCells) {
-      return StackValueInfo { inst, Type::StackElem };
-    }
-    return getStackValue(inst->src(0), index - kNumActRecCells);
-
-  case DefLabel:
-    // We could keep tracing back through all the preds of inst's block but
-    // there aren't currently any situations where that will add information we
-    // wouldn't otherwise have.
-    return StackValueInfo { inst, Type::StackElem };
-
-  default:
-    {
-      // Assume it's a vector instruction.  This will assert in minstrBaseIdx
-      // if not.
-      auto const base = inst->src(minstrBaseIdx(inst));
-      // Currently we require that the stack address is the immediate source of
-      // the base tmp.
-      always_assert(base->inst()->is(LdStackAddr));
-      if (base->inst()->extra<LdStackAddr>()->offset == index) {
-        auto const prev = getStackValue(base->inst()->src(0), index);
-        MInstrEffects effects(inst->op(), prev.knownType.ptr(Ptr::Stk));
-        assert(effects.baseTypeChanged || effects.baseValChanged);
-        auto const ty = effects.baseType;
-        if (ty.isBoxed()) {
-          return StackValueInfo { inst, Type::BoxedInitCell, ty };
-        }
-        return StackValueInfo { inst, ty.derefIfPtr() };
-      }
-      return getStackValue(base->inst()->src(0), index);
-    }
-  }
-
-  not_reached();
-}
-
-Type getStackInnerTypePrediction(SSATmp* sp, uint32_t offset) {
-  auto const info = getStackValue(sp, offset);
-  assert(info.knownType <= Type::BoxedInitCell);
-  if (info.predictedInner <= Type::Bottom) {
-    ITRACE(2, "no boxed stack prediction {}\n", offset);
-    return Type::BoxedInitCell;
-  }
-  auto t = ldRefReturn(info.predictedInner.unbox());
-  ITRACE(2, "stack {} prediction: {}\n", offset, t);
-  return t;
-}
-
-jit::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth) {
-  jit::vector<SSATmp*> ret;
-  ret.reserve(stackDepth);
-  for (uint32_t i = 0; i < stackDepth; ++i) {
-    auto const value = getStackValue(sp, i).value;
-    if (value) {
-      ret.push_back(value);
-    }
-  }
-  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -45,8 +45,6 @@ typedef enum {
   SXE_ITER_ATTRLIST = 3
 } SXE_ITER;
 
-FORWARD_DECLARE_CLASS(SimpleXMLElement);
-
 class c_SimpleXMLElement :
       public ExtObjectDataFlags<ObjectData::UseGet|
                                 ObjectData::UseSet|
@@ -114,8 +112,6 @@ class c_SimpleXMLElement :
 
 ///////////////////////////////////////////////////////////////////////////////
 // class SimpleXMLElementIterator
-
-FORWARD_DECLARE_CLASS(SimpleXMLElementIterator);
 
 class c_SimpleXMLElementIterator : public ExtObjectData {
  public:

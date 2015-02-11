@@ -160,8 +160,7 @@ interface Stringish {
 }
 
 /**
-  * Classes that implement IMemoizeParam may be passed to
-  * serialize_memoize_param() and may be used as params on
+  * Classes that implement IMemoizeParam may be used as params on
   * <<__Memoize>> functions
   */
 interface IMemoizeParam {

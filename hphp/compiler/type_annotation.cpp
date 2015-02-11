@@ -32,11 +32,12 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_tuple(false),
                                 m_function(false),
                                 m_xhp(false),
-                                m_typevar(false) { }
+                                m_typevar(false),
+                                m_typeaccess(false) { }
 
 std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime
-  if (m_nullable || m_soft || m_typevar || m_function) {
+  if (m_nullable || m_soft || m_typevar || m_function || m_typeaccess) {
     return "";
   }
   if (!strcasecmp(m_name.c_str(), "HH\\mixed") ||
@@ -57,6 +58,8 @@ std::string TypeAnnotation::fullName() const {
 
   if (m_function) {
     functionTypeName(name);
+  } else if (m_typeaccess) {
+    accessTypeName(name);
   } else if (m_xhp) {
     xhpTypeName(name);
   } else if (m_tuple) {
@@ -164,6 +167,16 @@ void TypeAnnotation::genericTypeName(std::string &name) const {
   }
   // replace the trailing ", " with ">"
   name.replace(name.size() - 2, 2, ">");
+}
+
+void TypeAnnotation::accessTypeName(std::string &name) const {
+  name += m_name;
+  TypeAnnotationPtr typeEl = m_typeArgs;
+  while (typeEl) {
+    name += "::";
+    name += typeEl->fullName();
+    typeEl = typeEl->m_typeList;
+  }
 }
 
 void TypeAnnotation::appendToTypeList(TypeAnnotationPtr typeList) {

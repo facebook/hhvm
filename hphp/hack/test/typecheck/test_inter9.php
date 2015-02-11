@@ -13,13 +13,12 @@ interface I {}
 class A implements I {
   public function get(): void {}
 }
-class B implements I {
-}
+class B implements I {}
 class Z {}
 
 function bar(): B {
-  $x = true? null: new B();
-  if($x === null) {
+  $x = true ? null : new B();
+  if ($x === null) {
     return new B();
   }
   return $x;

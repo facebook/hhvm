@@ -103,28 +103,37 @@ class PreClassEmitter {
     Const()
       : m_name(nullptr)
       , m_typeConstraint(nullptr)
+      , m_val(make_tv<KindOfUninit>())
       , m_phpCode(nullptr)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
           const TypedValue* val, const StringData* phpCode)
       : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode) {
-      memcpy(&m_val, val, sizeof(TypedValue));
+      if (!val) {
+        m_val.clear();
+      } else {
+        m_val = *val;
+      }
     }
     ~Const() {}
 
     const StringData* name() const { return m_name; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
-    const TypedValue& val() const { return m_val; }
+    const TypedValue& val() const { return m_val.value(); }
+    const folly::Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
+    bool isAbstract()       const { return !m_val.hasValue(); }
 
     template<class SerDe> void serde(SerDe& sd) {
-      sd(m_name)(m_val)(m_phpCode);
+      sd(m_name)
+        (m_val)
+        (m_phpCode);
     }
 
    private:
     LowStringPtr m_name;
     LowStringPtr m_typeConstraint;
-    TypedValue m_val;
+    folly::Optional<TypedValue> m_val;
     LowStringPtr m_phpCode;
   };
 
@@ -146,10 +155,10 @@ class PreClassEmitter {
   PreClass::Hoistable hoistability() const { return m_hoistable; }
   void setOffset(Offset off) { m_offset = off; }
   void setEnumBaseTy(TypeConstraint ty) { m_enumBaseTy = ty; }
-  const TypeConstraint &enumBaseTy() const {
-    return m_enumBaseTy;
-  }
+  const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
   Id id() const { return m_id; }
+  int32_t numDeclMethods() const { return m_numDeclMethods; }
+  void setNumDeclMethods(uint32_t n) { m_numDeclMethods = n; }
   const MethodVec& methods() const { return m_methods; }
   const PropMap::Builder& propMap() const { return m_propMap; }
   const ConstMap::Builder& constMap() const { return m_constMap; }
@@ -171,6 +180,8 @@ class PreClassEmitter {
   const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode);
+  bool addAbstractConstant(const StringData* n,
+                           const StringData* typeConstraint);
   void addUsedTrait(const StringData* traitName);
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);
@@ -235,7 +246,9 @@ class PreClassEmitter {
   BuiltinCtorFunction m_instanceCtor{nullptr};
   BuiltinDtorFunction m_instanceDtor{nullptr};
   uint32_t m_builtinObjSize{0};
-  int32_t  m_builtinODOffset{0};
+  int32_t m_builtinODOffset{0};
+  int32_t m_numDeclMethods{-1};
+  int m_memoizeInstanceSerial{0};
 
   std::vector<LowStringPtr> m_interfaces;
   std::vector<LowStringPtr> m_usedTraits;
@@ -247,8 +260,6 @@ class PreClassEmitter {
   MethodMap m_methodMap;
   PropMap::Builder m_propMap;
   ConstMap::Builder m_constMap;
-
-  int m_memoizeInstanceSerial = 0;
 };
 
 class PreClassRepoProxy : public RepoProxy {

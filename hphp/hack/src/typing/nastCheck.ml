@@ -99,9 +99,9 @@ module CheckFunctionType = struct
     expr_ p f_type e
 
   and expr2 f_type (e1, e2) =
-  expr f_type e1;
-  expr f_type e2;
-  ()
+    expr f_type e1;
+    expr f_type e2;
+    ()
 
   and expr_ p f_type exp = match f_type, exp with
     | _, Any -> ()
@@ -124,7 +124,7 @@ module CheckFunctionType = struct
         liter expr2 f_type fdl;
         ()
     | _, Clone e -> expr f_type e; ()
-    | _, Obj_get (e, (_, Id s), _) ->
+    | _, Obj_get (e, (_, Id _s), _) ->
         expr f_type e;
         ()
     | _, Obj_get (e1, e2, _) ->
@@ -173,7 +173,7 @@ module CheckFunctionType = struct
     | _, Cast (_, e) ->
         expr f_type e;
         ()
-    | _, Efun (f, _) -> ()
+    | _, Efun _ -> ()
 
     | FGenerator, Yield_break
     | FAsyncGenerator, Yield_break -> ()
@@ -225,7 +225,7 @@ type control_context =
   | SwitchContext
 
 type env = {
-  t_is_finally: bool ref;
+  t_is_finally: bool;
   class_name: string option;
   class_kind: Ast.class_kind option;
   imm_ctrl_ctx: control_context;
@@ -248,7 +248,7 @@ let rec fun_ tenv f named_body =
   if f.f_mode = Ast.Mdecl || !auto_complete then ()
   else begin
     let tenv = Typing_env.set_root tenv (Dep.Fun (snd f.f_name)) in
-    let env = { t_is_finally = ref false;
+    let env = { t_is_finally = false;
                 class_name = None; class_kind = None;
                 imm_ctrl_ctx = Toplevel;
                 tenv = tenv } in
@@ -259,7 +259,10 @@ and func env f named_body =
   let p, fname = f.f_name in
   if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
   then Errors.illegal_function_name p fname;
-  let env = { env with tenv = Env.set_mode env.tenv f.f_mode } in
+  let env = { env with
+    tenv = Env.set_mode env.tenv f.f_mode;
+    t_is_finally = false;
+  } in
   maybe hint env f.f_ret;
   List.iter (fun_param env) f.f_params;
   block env named_body;
@@ -269,7 +272,7 @@ and hint env (p, h) =
   hint_ env p h
 
 and hint_ env p = function
-  | Hany  | Hmixed  | Habstr _ | Hprim _ ->
+  | Hany  | Hmixed  | Habstr _ | Hprim _  | Haccess _ ->
       ()
   | Harray (ty1, ty2) ->
       maybe hint env ty1;
@@ -281,7 +284,7 @@ and hint_ env p = function
       List.iter (hint env) hl;
       hint env h;
       ()
-  | Happly ((_, x), hl) when Typing_env.is_typedef env.tenv x ->
+  | Happly ((_, x), hl) when Typing_env.is_typedef x ->
       let tdef = Typing_env.Typedefs.find_unsafe x in
       let params =
         match tdef with
@@ -290,8 +293,7 @@ and hint_ env p = function
       in
       check_params env p x params hl
   | Happly ((_, x), hl) ->
-      let _, class_ = Env.get_class env.tenv x in
-      (match class_ with
+      (match Env.get_class env.tenv x with
       | None -> ()
       | Some class_ ->
           check_params env p x class_.tc_tparams hl
@@ -315,14 +317,14 @@ and class_ tenv c =
   if c.c_mode = Ast.Mdecl || !auto_complete then () else begin
   let cname = Some (snd c.c_name) in
   let tenv = Typing_env.set_root tenv (Dep.Class (snd c.c_name)) in
-  let env = { t_is_finally = ref false;
+  let env = { t_is_finally = false;
               class_name = cname;
               class_kind = Some c.c_kind;
               imm_ctrl_ctx = Toplevel;
               tenv = tenv } in
   let env = { env with tenv = Env.set_mode env.tenv c.c_mode } in
   if c.c_kind = Ast.Cinterface then begin
-    interface env c;
+    interface c;
   end
   else begin
     maybe method_ (env, true) c.c_constructor;
@@ -330,6 +332,7 @@ and class_ tenv c =
   liter hint env c.c_extends;
   liter hint env c.c_implements;
   liter class_const env c.c_consts;
+  liter typeconst (env, c.c_tparams) c.c_typeconsts;
   liter class_var env c.c_static_vars;
   liter class_var env c.c_vars;
   liter method_ (env, true) c.c_static_methods;
@@ -345,8 +348,7 @@ and class_ tenv c =
 and check_is_interface (env, error_verb) (x : hint) =
   match (snd x) with
     | Happly (id, _) ->
-      let _, class_ = Env.get_class env.tenv (snd id) in
-      (match class_ with
+      (match Env.get_class env.tenv (snd id) with
         | None ->
           (* in partial mode, we can fail to find the class if it's
              defined in PHP. *)
@@ -363,8 +365,7 @@ and check_is_interface (env, error_verb) (x : hint) =
 and check_is_class env (x : hint) =
   match (snd x) with
     | Happly (id, _) ->
-      let _, class_ = Env.get_class env.tenv (snd id) in
-      (match class_ with
+      (match Env.get_class env.tenv (snd id) with
         | None ->
           (* in partial mode, we can fail to find the class if it's
              defined in PHP. *)
@@ -389,7 +390,7 @@ and check_is_trait env (h : hint) =
   (* do not care about at this time *)
   | Happly (pos_and_name, _) ->
     (* Env.get_class will get the type info associated with the name *)
-    let _, type_info = Env.get_class env.tenv (snd pos_and_name) in
+    let type_info = Env.get_class env.tenv (snd pos_and_name) in
     (match type_info with
       (* in partial mode, it's possible to not find the trait, because the *)
       (* trait may live in PHP land. In strict mode, we catch the unknown *)
@@ -406,16 +407,16 @@ and check_is_trait env (h : hint) =
   | _ -> failwith "assertion failure: trait isn't an Happly"
   )
 
-and interface env c =
+and interface c =
   (* make sure that interfaces only have empty public methods *)
-  liter begin fun env m ->
+  List.iter begin fun m ->
     if m.m_body <> (UnnamedBody []) && m.m_body <> (NamedBody [])
     then Errors.abstract_body (fst m.m_name)
     else ();
     if m.m_visibility <> Public
     then Errors.not_public_interface (fst m.m_name)
     else ()
-  end env (c.c_static_methods @ c.c_methods);
+  end (c.c_static_methods @ c.c_methods);
   (* make sure that interfaces don't have any member variables *)
   match c.c_vars with
   | hd::_ ->
@@ -431,10 +432,56 @@ and interface env c =
 
 and class_const env (h, _, e) =
   maybe hint env h;
-  expr env e
+  maybe expr env e;
+  ()
+
+and typeconst (env, class_tparams) tconst =
+  maybe hint env tconst.c_tconst_type;
+  maybe hint env tconst.c_tconst_constraint;
+  (* need to ensure that tconst.c_tconst_type is not Habstr *)
+  maybe check_no_class_tparams class_tparams tconst.c_tconst_type;
+  maybe check_no_class_tparams class_tparams tconst.c_tconst_constraint
+
+(* Check to make sure we are not using class type params for type const decls *)
+and check_no_class_tparams class_tparams (pos, ty)  =
+  let check_tparams = check_no_class_tparams class_tparams in
+  let maybe_check_tparams = maybe check_no_class_tparams class_tparams in
+  let matches_class_tparam tp_name =
+    List.iter begin fun (_, (c_tp_pos, c_tp_name), _) ->
+      if c_tp_name = tp_name
+      then Errors.typeconst_depends_on_external_tparam pos c_tp_pos c_tp_name
+    end class_tparams in
+  match ty with
+    | Hany | Hmixed | Hprim _ -> ()
+    (* We have found a type parameter. Make sure its name does not match
+     * a name in class_tparams *)
+    | Habstr (tparam_name, ty_) ->
+        maybe_check_tparams ty_;
+        matches_class_tparam tparam_name
+    | Harray (ty1, ty2) ->
+        maybe_check_tparams ty1;
+        maybe_check_tparams ty2
+    | Htuple tyl -> List.iter check_tparams tyl
+    | Hoption ty_ -> check_tparams ty_
+    | Hfun (tyl, _, ty_) ->
+        List.iter check_tparams tyl;
+        check_tparams ty_
+    | Happly (_, tyl) -> List.iter check_tparams tyl
+    | Hshape fdl -> ShapeMap.iter (fun _ v -> check_tparams v) fdl
+    | Haccess (root_ty, _) ->
+        check_tparams root_ty
 
 and class_var env cv =
-  maybe hint env cv.cv_type;
+  let hint_env =
+    (* If this is an XHP attribute and we're in strict mode,
+       relax to partial mode to allow the use of generic
+       classes without specifying type parameters. This is
+       a temporary hack to support existing code for now. *)
+    (* Task #5815945: Get rid of this Hack *)
+    if cv.cv_is_xhp && (Typing_env.is_strict env.tenv)
+      then { env with tenv = Typing_env.set_mode env.tenv Ast.Mpartial }
+      else env in
+  maybe hint hint_env cv.cv_type;
   maybe expr env cv.cv_expr;
   ()
 
@@ -481,7 +528,7 @@ and fun_param_opt env (h, _, e) =
   ()
 
 and stmt env = function
-  | Return (p, _) when !(env.t_is_finally) ->
+  | Return (p, _) when env.t_is_finally ->
     Errors.return_in_finally p; ()
   | Return (_, None)
   | Noop
@@ -533,10 +580,7 @@ and stmt env = function
   | Try (b, cl, fb) ->
       block env b;
       liter catch env cl;
-      let is_fin_copy = !(env.t_is_finally) in
-      env.t_is_finally := true;
-      block env fb;
-      env.t_is_finally := is_fin_copy;
+      block { env with t_is_finally = true } fb;
       ()
 
 and as_expr env = function
@@ -688,11 +732,9 @@ and attribute env (_, e) =
   expr env e;
   ()
 
-let typedef tenv name (_, _, h) =
-  let env = { t_is_finally = ref false;
+let typedef tenv (_, _, h) =
+  let env = { t_is_finally = false;
               class_name = None; class_kind = None;
               imm_ctrl_ctx = Toplevel;
               tenv = tenv } in
-  hint env h;
-  let tenv, ty = Typing_hint.hint tenv h in
-  Typing_tdef.check_typedef name tenv ty
+  hint env h

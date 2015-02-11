@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 #define incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 
@@ -72,7 +72,8 @@ Cell cellPow(Cell, Cell);
  * PHP operators &, |, and ^.
  *
  * These operators return a KindOfInt64, unless both arguments are
- * KindOfString, in which case they return a KindOfString.
+ * KindOfString, in which case they return a KindOfString that the caller owns
+ * a reference to.
  */
 Cell cellBitAnd(Cell, Cell);
 Cell cellBitOr(Cell, Cell);

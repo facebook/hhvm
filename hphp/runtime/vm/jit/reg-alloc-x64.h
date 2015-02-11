@@ -38,7 +38,7 @@ namespace x64 {
  */
 bool loadsCell(Opcode op) {
   switch (op) {
-    case LdStack:
+    case LdStk:
     case LdLoc:
     case LdMem:
     case LdContField:
@@ -50,12 +50,10 @@ bool loadsCell(Opcode op) {
     case LookupClsCns:
     case CGetProp:
     case VGetProp:
-    case VGetPropStk:
     case ArrayGet:
     case MapGet:
     case CGetElem:
     case VGetElem:
-    case VGetElemStk:
     case ArrayIdx:
     case GenericIdx:
       return true;
@@ -83,12 +81,11 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
     case StLocNT:
       return srcIdx == 1;
 
-    case StProp:
     case StElem:
       return srcIdx == 2;
 
-    case SpillStack:
-      return srcIdx >= 2 && srcIdx < inst.numSrcs();
+    case StStk:
+      return srcIdx == 1;
 
     case CallBuiltin:
       return srcIdx < inst.numSrcs();

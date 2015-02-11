@@ -1,4 +1,4 @@
- <?hh // strict
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,10 +9,10 @@
  *
  */
 
-async function slow_print(Awaitable<string> $x) : Awaitable<void> {
+async function slow_print(Awaitable<string> $x): Awaitable<void> {
   display(await $x);
 }
 
 function display(string $y): void {
-  print($y);
+  print $y;
 }

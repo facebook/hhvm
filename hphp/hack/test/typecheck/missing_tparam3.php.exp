@@ -1,4 +1,4 @@
-File "missing_tparam3.php", line 18, characters 17-17:
+File "missing_tparam3.php", line 22, characters 17-17:
 The class A expects 1 arguments (Typing[4010])
 File "missing_tparam3.php", line 12, characters 7-7:
 Definition is here

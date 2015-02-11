@@ -12,20 +12,6 @@ ApiTest::testUnregisterFunction
 .
 ApiTest::testUserFunction
 .
-ErrorHandlingTest::testGuardUnmatchedType
-.
-ErrorHandlingTest::testGuardUnmatchedValue
-.
-ErrorHandlingTest::testMixinMissing
-.
-ErrorHandlingTest::testRequiredArgumentsMissing
-.
-ErrorHandlingTest::testRequiredParametersMissing
-.
-ErrorHandlingTest::testTooManyParameters
-.
-ErrorHandlingTest::testVariableMissing
-.
 InputTest::testInputFile with data set #0
 .
 InputTest::testInputFile with data set #1
@@ -69,8 +55,6 @@ InputTest::testInputFile with data set #26
 InputTest::testInputFile with data set #27
 .
 InputTest::testInputFile with data set #28
-.
-InputTest::testInputFile with data set #29
 .
 InputTest::testInputFile with data set #3
 .

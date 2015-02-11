@@ -17,8 +17,8 @@
 
 #include <string>
 
-#include "folly/Format.h"
-#include "folly/Conv.h"
+#include <folly/Format.h>
+#include <folly/Conv.h>
 
 #include "hphp/util/match.h"
 #include "hphp/hhbbc/analyze.h"

@@ -15,6 +15,7 @@ module TUtils = Typing_utils
 module TDef = Typing_tdef
 module Inst = Typing_instantiate
 module TUEnv = Typing_unification_env
+module TAccess = Typing_taccess
 
 (* Most code -- notably the cases in unify_ -- do *not* need to thread through
  * the uenv, since for example just because we know an array<foo, bar> can't
@@ -73,11 +74,17 @@ and unify_with_uenv env (uenv1, ty1) (uenv2, ty2) =
    * if both sides are a Tapply the "when" guard will only check ty1, so if ty2
    * is a typedef it won't get expanded. So we need an explicit check for both.
    *)
-  | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef env x ->
+  | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef x ->
       let env, ty1 = TDef.expand_typedef env r x argl in
       unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
-  | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
+  | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef x ->
       let env, ty1 = TDef.expand_typedef env r x argl in
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
+  | (r, Taccess taccess), _ ->
+      let env, ty1 = TAccess.expand env r taccess in
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
+  | _, (r, Taccess taccess) ->
+      let env, ty2 = TAccess.expand env r taccess in
       unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | (r1, ty1), (r2, ty2) ->
       let r = unify_reason r1 r2 in
@@ -177,7 +184,7 @@ and unify_ env r1 ty1 r2 ty2 =
       let env, ty = unify env ty1 ty2 in
       env, Tgeneric (x1, Some ty)
   | Tgeneric ("this", Some ((_, Tapply ((_, x) as id, _) as ty))), _ ->
-      let env, class_ = Env.get_class env x in
+      let class_ = Env.get_class env x in
       (* For final class C, there is no difference between this<X> and X *)
       (match class_ with
       | Some {tc_final = true; _} ->
@@ -192,13 +199,13 @@ and unify_ env r1 ty1 r2 ty2 =
                | Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
                 | Toption _ | Tvar _ | Tabstract (_, _, _) | Ttuple _
                 | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
-                | Tshape _ -> false
+                | Tshape _ | Taccess (_, _) -> false
              end
              ~do_:(fun error -> Errors.this_final id (Reason.to_pos r1) error)
           );
           env, Tany
         )
-  | _, Tgeneric ("this", Some (_, Tapply ((_, x), _))) ->
+  | _, Tgeneric ("this", Some (_, Tapply _)) ->
       unify_ env r2 ty2 r1 ty1
   | (Ttuple _ as ty), Tarray (None, None)
   | Tarray (None, None), (Ttuple _ as ty) ->
@@ -244,6 +251,12 @@ and unify_ env r1 ty1 r2 ty2 =
       let env = TUtils.apply_shape ~f env (r1, fdm1) (r2, fdm2) in
       let env = TUtils.apply_shape ~f env (r2, fdm2) (r1, fdm1) in
       env, Tshape fdm1
+  | Taccess taccess, _ ->
+      let env, fty1 = TAccess.expand env r1 taccess in
+      let env, fty = unify env fty1 (r2, ty2) in
+      env, snd fty
+  | _, Taccess _ ->
+      unify_ env r2 ty2 r1 ty1
   | (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
       | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
@@ -286,7 +299,7 @@ and unify_funs env r1 ft1 r2 ft2 =
     | Fvariadic (_, (n1, var_ty1)), Fvariadic (min, (_n2, var_ty2)) ->
       let env, var = unify env var_ty1 var_ty2 in
       env, Some (n1, var), Fvariadic (min, (n1, var))
-    | ar1, ar2 ->
+    | ar1, _ar2 ->
       env, None, ar1
   in
   let env, params = unify_params env ft1.ft_params ft2.ft_params var_opt in
@@ -313,16 +326,6 @@ and unify_params env l1 l2 var1_opt =
     let env, _ = unify env x2 x1 in
     let env, rl = unify_params env rl1 rl2 var1_opt in
     env, (name, x2) :: rl
-
-let unify_nofail env ty1 ty2 =
-  Errors.try_
-    (fun () -> unify env ty1 ty2)
-    (fun _ ->
-      let res = Env.fresh_type() in
-      (* TODO: this can produce an unresolved of unresolved *)
-      let env, res = unify env res (fst ty1, Tunresolved [ty1; ty2]) in
-      env, res
-    )
 
 (*****************************************************************************)
 (* Exporting *)

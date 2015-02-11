@@ -2,6 +2,8 @@
 GDB commands for inspecting HHVM bytecode.
 """
 # @lint-avoid-python-3-compatibility-imports
+# @lint-avoid-pyflakes3
+# @lint-avoid-pyflakes2
 
 import gdb
 import unit
@@ -31,7 +33,7 @@ def iva_imm_types():
 
 @memoized
 def vec_imm_types():
-    return [V('HPHP::' + t) for t in ['MA', 'BLA', 'SLA', 'ILA', 'VSA']]
+    return [V('HPHP::' + t) for t in ['MA', 'BLA', 'ILA', 'VSA', 'SLA']]
 
 @memoized
 def vec_elm_sizes():
@@ -45,12 +47,12 @@ def vec_elm_sizes():
 
 @memoized
 def rata_arrs():
-    return [V('HPHP::RepoAuthType::' + t) for t in
+    return [V('HPHP::RepoAuthType::Tag::' + t) for t in
             ['SArr', 'Arr', 'OptSArr', 'OptArr']]
 
 @memoized
 def rata_objs():
-    return [V('HPHP::RepoAuthType::' + t) for t in
+    return [V('HPHP::RepoAuthType::Tag::' + t) for t in
             ['ExactObj', 'SubObj', 'OptExactObj', 'OptSubObj']]
 
 @memoized
@@ -64,6 +66,14 @@ class HHBC:
     """
     Namespace for HHBC inspection helpers.
     """
+
+    @staticmethod
+    def op_name(op):
+        """Return the name of HPHP::Op `op'."""
+
+        table_name = 'HPHP::opcodeToName(HPHP::Op)::namesArr'
+        table_type = T('char').pointer().pointer()
+        return op_table(table_name).cast(table_type)[as_idx(op)]
 
     @staticmethod
     def num_imms(op):
@@ -89,12 +99,14 @@ class HHBC:
 
         if immtype in iva_imm_types():
             imm = ptr.cast(T('unsigned char').pointer()).dereference()
-            if imm & 0x1:
-                imm = ptr.cast(T('int32_t').pointer()).dereference()
-                info['size'] = T('int32_t').sizeof
-            else:
-                info['size'] = T('unsigned char').sizeof
 
+            if imm & 0x1:
+                iva_type = T('int32_t')
+            else:
+                iva_type = T('unsigned char')
+
+            imm = ptr.cast(iva_type.pointer()).dereference()
+            info['size'] = iva_type.sizeof
             info['value'] = imm >> 1
 
         elif immtype in vec_imm_types():
@@ -105,7 +117,7 @@ class HHBC:
 
             info['size'] = prefixes * T('int32_t').sizeof + \
                            elm_size * num_elms
-            info['value'] = 'vector'
+            info['value'] = '<vector>'
 
         elif immtype == V('HPHP::RATA'):
             imm = ptr.cast(T('unsigned char').pointer()).dereference()
@@ -122,7 +134,7 @@ class HHBC:
             else:
                 info['size'] = 1
 
-            info['value'] = str(tag)[len('HPHP::RepoAuthType::'):]
+            info['value'] = str(tag)[len('HPHP::RepoAuthType::Tag::'):]
 
         else:
             table_name = 'HPHP::immSize(HPHP::Op const*, int)::argTypeToSizes'
@@ -147,8 +159,8 @@ class HHBC:
         return info
 
     @staticmethod
-    def instr_info(bc, off=0):
-        bc = (bc + off).cast(T('HPHP::Op').pointer())
+    def instr_info(bc):
+        bc = bc.cast(T('HPHP::Op').pointer())
         op = bc.dereference()
 
         if op <= V('HPHP::OpLowInvalid') or op >= V('HPHP::OpHighInvalid'):
@@ -181,8 +193,8 @@ omit these argument to print the same number of opcodes starting wherever the
 previous call left off.
 
 If only a single argument is provided, if it is in the range for bytecode
-allocations (i.e., > 0xffffffff), it replaces the saved PC and defaults
-the count to 1 before printing.  Otherwise, it replaces the count and the PC
+allocations (i.e., > 0xffffffff), it replaces the saved PC and defaults the
+count to 1 before printing.  Otherwise, it replaces the count and the PC
 remains where it left off after the previous call.
 """
 
@@ -209,17 +221,14 @@ remains where it left off after the previous call.
             self.bcoff = 0
             self.count = int(argv[1])
 
-        bctype = gdb.lookup_type('HPHP::Op').const().pointer()
+        bctype = T('HPHP::Op').const().pointer()
         self.bcpos = self.bcpos.cast(bctype)
 
         bcstart = self.bcpos - self.bcoff
 
-        op_names = gdb.parse_and_eval(
-            "(char **)*(uint32_t*)('HPHP::opcodeToName(HPHP::Op)' + 10)")
-
         for i in xrange(0, self.count):
             instr = HHBC.instr_info(self.bcpos)
-            name = op_names[as_idx(self.bcpos.dereference())].string()
+            name = HHBC.op_name(self.bcpos.dereference()).string()
 
             out = "%s+%d: %s" % (str(bcstart), self.bcoff, name)
             for imm in instr['imms']:

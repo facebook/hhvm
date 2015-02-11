@@ -33,7 +33,7 @@ const StaticString s_input("Input");
 const StaticString s_temp("TEMP");
 const StaticString s_memory("MEMORY");
 
-File *PhpStreamWrapper::openFD(const char *sFD) {
+SmartPtr<File> PhpStreamWrapper::openFD(const char *sFD) {
   if (!RuntimeOption::ClientExecutionMode()) {
     raise_warning("Direct access to file descriptors "
                   "is only available from command-line");
@@ -54,7 +54,7 @@ File *PhpStreamWrapper::openFD(const char *sFD) {
     return nullptr;
   }
 
-  return newres<PlainFile>(dup(nFD), true, s_php);
+  return makeSmartPtr<PlainFile>(dup(nFD), true, s_php);
 }
 
 static void phpStreamApplyFilterList(const Resource& fpres,
@@ -72,9 +72,11 @@ static void phpStreamApplyFilterList(const Resource& fpres,
   }
 }
 
-static File* phpStreamOpenFilter(const char* sFilter,
-                                 const String& modestr,
-                                 int options, const Variant& context) {
+static SmartPtr<File>
+phpStreamOpenFilter(const char* sFilter,
+                    const String& modestr,
+                    int options,
+                    const SmartPtr<StreamContext>& context) {
   const char *mode = modestr.c_str();
   int rwMode = 0;
   if (strchr(mode, 'r') || strchr(mode, '+')) {
@@ -85,17 +87,16 @@ static File* phpStreamOpenFilter(const char* sFilter,
   }
 
   String duppath(sFilter, CopyString);
-  char *path = duppath.bufferSlice().ptr;
+  char *path = duppath.mutableData();
   char *p = strstr(path, "/resource=");
   if (!p) {
     raise_recoverable_error("No URL resource specified");
     return nullptr;
   }
-  Resource fpres = File::Open(String(p + sizeof("/resource=") - 1, CopyString),
-                              modestr, options, context);
-  if (fpres.isNull()) {
-    return nullptr;
-  }
+  auto fp = File::Open(String(p + sizeof("/resource=") - 1, CopyString),
+                       modestr, options, context);
+  if (!fp) return nullptr;
+  Resource fpres(fp);
   *p = 0;
   char *token = nullptr;
   p = strtok_r(path + 1, "/", &token);
@@ -111,11 +112,12 @@ static File* phpStreamOpenFilter(const char* sFilter,
     }
     p = strtok_r(nullptr, "/", &token);
   }
-  return dynamic_cast<File*>(fpres.detach());
+  return fp;
 }
 
-File* PhpStreamWrapper::open(const String& filename, const String& mode,
-                             int options, const Variant& context) {
+SmartPtr<File>
+PhpStreamWrapper::open(const String& filename, const String& mode,
+                       int options, const SmartPtr<StreamContext>& context) {
   if (strncasecmp(filename.c_str(), "php://", 6)) {
     return nullptr;
   }
@@ -123,13 +125,13 @@ File* PhpStreamWrapper::open(const String& filename, const String& mode,
   const char *req = filename.c_str() + sizeof("php://") - 1;
 
   if (!strcasecmp(req, "stdin")) {
-    return newres<PlainFile>(dup(STDIN_FILENO), true, s_php);
+    return makeSmartPtr<PlainFile>(dup(STDIN_FILENO), true, s_php);
   }
   if (!strcasecmp(req, "stdout")) {
-    return newres<PlainFile>(dup(STDOUT_FILENO), true, s_php);
+    return makeSmartPtr<PlainFile>(dup(STDOUT_FILENO), true, s_php);
   }
   if (!strcasecmp(req, "stderr")) {
-    return newres<PlainFile>(dup(STDERR_FILENO), true, s_php);
+    return makeSmartPtr<PlainFile>(dup(STDERR_FILENO), true, s_php);
   }
   if (!strncasecmp(req, "fd/", sizeof("fd/") - 1)) {
     return openFD(req + sizeof("fd/") - 1);
@@ -140,29 +142,30 @@ File* PhpStreamWrapper::open(const String& filename, const String& mode,
   }
 
   if (!strncasecmp(req, "temp", sizeof("temp") - 1)) {
-    std::unique_ptr<TempFile> file(newres<TempFile>(true, s_php, s_temp));
+    auto file = makeSmartPtr<TempFile>(true, s_php, s_temp);
     if (!file->valid()) {
       raise_warning("Unable to create temporary file");
       return nullptr;
     }
-    return file.release();
+    return file;
   }
   if (!strcasecmp(req, "memory")) {
-    std::unique_ptr<TempFile> file(newres<TempFile>(true, s_php, s_memory));
+    auto file = makeSmartPtr<TempFile>(true, s_php, s_memory);
     if (!file->valid()) {
       raise_warning("Unable to create temporary file");
       return nullptr;
     }
-    return file.release();
+    return file;
   }
 
   if (!strcasecmp(req, "input")) {
     auto raw_post = g_context->getRawPostData();
-    return newres<MemFile>(raw_post.c_str(), raw_post.size(), s_php, s_input);
+    return makeSmartPtr<MemFile>(
+      raw_post.c_str(), raw_post.size(), s_php, s_input);
   }
 
   if (!strcasecmp(req, "output")) {
-    return newres<OutputFile>(filename);
+    return makeSmartPtr<OutputFile>(filename);
   }
 
   return nullptr;

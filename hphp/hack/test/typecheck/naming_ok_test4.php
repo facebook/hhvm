@@ -15,8 +15,7 @@ function stmt(): void {
   try {
     $x = 0;
     throw new Exception('this is a test');
-  }
-  catch(Exception $e) {
+  } catch (Exception $e) {
     $x = 1;
   }
   $x += 1;

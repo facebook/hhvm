@@ -17,16 +17,19 @@
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/simple-counter.h"
@@ -39,7 +42,6 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
-#include "hphp/runtime/ext/array-tracer/ext_array_tracer.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/extension.h"
@@ -61,7 +63,6 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/constants.h"
@@ -72,6 +73,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/shm-counter.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/timer.h"
 
@@ -81,7 +83,7 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/program_options/parsers.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <libgen.h>
 #include <oniguruma.h>
 #include <signal.h>
@@ -125,7 +127,6 @@ void timezone_init();
 
 void pcre_init();
 void pcre_reinit();
-void pcre_session_exit();
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -368,6 +369,19 @@ void bump_counter_and_rethrow(bool isPsp) {
       ServerStats::Log("request.timed_out.non_psp", 1);
     }
     throw;
+  } catch (const RequestCPUTimeoutException& e) {
+    if (isPsp) {
+      static auto requestCPUTimeoutPSPCounter = ServiceData::createTimeseries(
+        "requests_cpu_timed_out_psp", {ServiceData::StatsType::COUNT});
+      requestCPUTimeoutPSPCounter->addValue(1);
+      ServerStats::Log("request.cpu_timed_out.psp", 1);
+    } else {
+      static auto requestCPUTimeoutCounter = ServiceData::createTimeseries(
+        "requests_cpu_timed_out_non_psp", {ServiceData::StatsType::COUNT});
+      requestCPUTimeoutCounter->addValue(1);
+      ServerStats::Log("request.cpu_timed_out.non_psp", 1);
+    }
+    throw;
   } catch (const RequestMemoryExceededException& e) {
     if (isPsp) {
       static auto requestMemoryExceededPSPCounter =
@@ -398,6 +412,16 @@ static void handle_exception_helper(bool& ret,
                                     ContextOfException where,
                                     bool& error,
                                     bool richErrorMsg) {
+  // Clear oom/timeout while handling exception and restore them afterwards.
+  auto& data = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto flags = data.getConditionFlags();
+  auto origFlags = flags->load() & RequestInjectionData::ResourceFlags;
+  flags->fetch_and(~RequestInjectionData::ResourceFlags);
+
+  SCOPE_EXIT {
+    flags->fetch_or(origFlags);
+  };
+
   try {
     bump_counter_and_rethrow(false /* isPsp */);
   } catch (const Eval::DebuggerException &e) {
@@ -512,6 +536,8 @@ static void handle_resource_exceeded_exception() {
     throw;
   } catch (RequestTimeoutException&) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setTimedOutFlag();
+  } catch (RequestCPUTimeoutException&) {
+    ThreadInfo::s_threadInfo->m_reqInjectionData.setCPUTimedOutFlag();
   } catch (RequestMemoryExceededException&) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setMemExceededFlag();
   } catch (...) {}
@@ -573,7 +599,11 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
 
-  {
+  auto variablesOrder = ThreadInfo::s_threadInfo.getNoCheck()
+    ->m_reqInjectionData.getVariablesOrder();
+
+  if (variablesOrder.find('e') != std::string::npos ||
+      variablesOrder.find('E') != std::string::npos) {
     Array envArr(Array::Create());
     process_env_variables(envArr);
     envArr.set(s_HPHP, 1);
@@ -594,7 +624,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
 
   process_cmd_arguments(argc, argv);
 
-  {
+  if (variablesOrder.find('s') != std::string::npos ||
+      variablesOrder.find('S') != std::string::npos) {
     Array serverArr(Array::Create());
     process_env_variables(serverArr);
     time_t now;
@@ -622,7 +653,10 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     serverArr.set(s_argc, php_global(s_argc));
     serverArr.set(s_PWD, g_context->getCwd());
     char hostname[1024];
-    if (RuntimeOption::ServerExecutionMode() && !gethostname(hostname, 1024)) {
+    if (RuntimeOption::ServerExecutionMode() &&
+        !gethostname(hostname, sizeof(hostname))) {
+      // gethostname may not null-terminate
+      hostname[sizeof(hostname) - 1] = '\0';
       serverArr.set(s_HOSTNAME, String(hostname, CopyString));
     }
 
@@ -667,7 +701,10 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 
   if (xhprof) {
-    HHVM_FN(var_dump)(HHVM_FN(json_encode)(f_xhprof_disable()));
+    Variant profileData = f_xhprof_disable();
+    if (!profileData.isNull()) {
+      HHVM_FN(var_dump)(HHVM_FN(json_encode)(f_xhprof_disable()));
+    }
   }
   g_context->onShutdownPostSend();
   Eval::Debugger::InterruptPSPEnded(program);
@@ -686,6 +723,40 @@ const void* __hot_end = nullptr;
 extern "C" {
 void __attribute__((__weak__)) __hot_start();
 void __attribute__((__weak__)) __hot_end();
+}
+#endif
+
+#if FACEBOOK && defined USE_SSECRC
+// Overwrite the functiosn
+NEVER_INLINE void copyFunc(void* dst, void* src, uint32_t sz = 64) {
+  if (dst >= reinterpret_cast<void*>(__hot_start) &&
+      dst < reinterpret_cast<void*>(__hot_end)) {
+    memcpy(dst, src, sz);
+    Logger::Info("Successfully overwrite function at %p.", dst);
+  } else {
+    Logger::Info("Failed to patch code at %p.", dst);
+  }
+}
+
+NEVER_INLINE void copyHashFuncs() {
+#ifdef __OPTIMIZE__
+  if (IsSSEHashSupported()) {
+    copyFunc(getMethodPtr(&HPHP::StringData::hashHelper),
+             reinterpret_cast<void*>(g_hashHelper_crc), 64);
+    typedef strhash_t (*HashFunc) (const char*, uint32_t);
+    auto hash_func = [](HashFunc x) {
+      return reinterpret_cast<void*>(x);
+    };
+    copyFunc(hash_func(hash_string_cs_unsafe),
+             hash_func(hash_string_cs_crc), 48);
+    copyFunc(hash_func(hash_string_cs),
+             hash_func(hash_string_cs_unaligned_crc), 64);
+    copyFunc(hash_func(hash_string_i_unsafe),
+             hash_func(hash_string_i_crc), 64);
+    copyFunc(hash_func(hash_string_i),
+             hash_func(hash_string_i_unaligned_crc), 80);
+  }
+#endif
 }
 #endif
 
@@ -725,6 +796,11 @@ hugifyText(char* from, char* to) {
   // Needs the attribute((optimize("2")) to prevent
   // g++ from turning this back into memcpy(!)
   wordcpy((uint64_t*)from, (uint64_t*)mem, sz / sizeof(uint64_t));
+  // When supported, string hash functions using SSE 4.2 CRC32 instruction will
+  // be used, so we don't have to check every time.
+#ifdef USE_SSECRC
+  copyHashFuncs();
+#endif
   mprotect(from, sz, PROT_READ | PROT_EXEC);
   free(mem);
   mlock(from, to - from);
@@ -815,7 +891,7 @@ static void set_execution_mode(string mode) {
   }
 }
 
-static int start_server(const std::string &username) {
+static int start_server(const std::string &username, int xhprof) {
   // Before we start the webserver, make sure the entire
   // binary is paged into memory.
   pagein_self();
@@ -843,6 +919,10 @@ static int start_server(const std::string &username) {
   // Create the HttpServer before any warmup requests to properly
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
+
+  if (xhprof) {
+    f_xhprof_enable(xhprof, uninit_null().toArray());
+  }
 
   if (RuntimeOption::RepoPreload) {
     Timer timer(Timer::WallTime, "Preloading Repo");
@@ -1076,7 +1156,11 @@ static void set_stack_size() {
   struct rlimit rlim;
   if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
 
-  if (rlim.rlim_cur < AsyncFuncImpl::kStackSizeMinimum) {
+  if (rlim.rlim_cur < AsyncFuncImpl::kStackSizeMinimum
+#ifndef __CYGWIN__
+      || rlim.rlim_cur == RLIM_INFINITY
+#endif
+      ) {
 #ifdef __CYGWIN__
     Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
                   AsyncFuncImpl::kStackSizeMinimum);
@@ -1089,6 +1173,26 @@ static void set_stack_size() {
 #endif
   }
 }
+
+#if defined(BOOST_VERSION) && BOOST_VERSION <= 105400
+std::string get_right_option_name(const basic_parsed_options<char>& opts,
+                                  std::string& wrong_name) {
+  // Remove any - from the wrong name for better comparing
+  // since it will probably come prepended with --
+  wrong_name.erase(
+    std::remove(wrong_name.begin(), wrong_name.end(), '-'), wrong_name.end());
+  for (basic_option<char> opt : opts.options) {
+    std::string s_opt = opt.string_key;
+    // We are only dealing with options that have a - in them.
+    if (s_opt.find("-") != std::string::npos) {
+      if (s_opt.find(wrong_name) != std::string::npos) {
+        return s_opt;
+      }
+    }
+  }
+  return "";
+}
+#endif
 
 static int execute_program_impl(int argc, char** argv) {
   string usage = "Usage:\n\n   ";
@@ -1177,7 +1281,8 @@ static int execute_program_impl(int argc, char** argv) {
   // is necessary so that the boost command line parser doesn't choke on
   // args intended for the PHP application.
   int hhvm_argc = compute_hhvm_argc(desc, argc, argv);
-
+  // Need to have a parent try for opts so I can use opts in the catch of
+  // one of the sub-tries below.
   try {
     // Invoke the boost command line parser to parse the args for HHVM.
     auto opts = command_line_parser(hhvm_argc, argv)
@@ -1190,61 +1295,86 @@ static int execute_program_impl(int argc, char** argv) {
              ~command_line_style::allow_sticky &
              ~command_line_style::long_allow_adjacent)
       .run();
-    // Manually append the args for the PHP application.
-    int pos = 0;
-    for (unsigned m = 0; m < opts.options.size(); ++m) {
-      const auto& bo = opts.options[m];
-      if (bo.string_key == "arg") {
-        ++pos;
+    try {
+      // Manually append the args for the PHP application.
+      int pos = 0;
+      for (unsigned m = 0; m < opts.options.size(); ++m) {
+        const auto& bo = opts.options[m];
+        if (bo.string_key == "arg") {
+          ++pos;
+        }
       }
-    }
-    for (unsigned m = hhvm_argc; m < argc; ++m) {
-      string str = argv[m];
-      basic_option<char> bo;
-      bo.string_key = "arg";
-      bo.position_key = pos++;
-      bo.value.push_back(str);
-      bo.original_tokens.push_back(str);
-      bo.unregistered = false;
-      bo.case_insensitive = false;
-      opts.options.push_back(bo);
-    }
-    // Process the options
-    store(opts, vm);
-    notify(vm);
-    if (vm.count("interactive") /* or -a */) {
-      po.mode = "debug";
-    }
-    if (po.mode == "d") po.mode = "debug";
-    if (po.mode == "s") po.mode = "server";
-    if (po.mode == "t") po.mode = "translate";
-    if (po.mode == "")  po.mode = "run";
-    if (po.mode == "daemon" || po.mode == "server" || po.mode == "replay" ||
-        po.mode == "run" || po.mode == "debug"|| po.mode == "translate") {
-      set_execution_mode(po.mode);
-    } else {
-      Logger::Error("Error in command line: invalid mode: %s", po.mode.c_str());
+      for (unsigned m = hhvm_argc; m < argc; ++m) {
+        string str = argv[m];
+        basic_option<char> bo;
+        bo.string_key = "arg";
+        bo.position_key = pos++;
+        bo.value.push_back(str);
+        bo.original_tokens.push_back(str);
+        bo.unregistered = false;
+        bo.case_insensitive = false;
+        opts.options.push_back(bo);
+      }
+      // Process the options
+      store(opts, vm);
+      notify(vm);
+      if (vm.count("interactive") /* or -a */) {
+        po.mode = "debug";
+      }
+      if (po.mode == "d") po.mode = "debug";
+      if (po.mode == "s") po.mode = "server";
+      if (po.mode == "t") po.mode = "translate";
+      if (po.mode == "")  po.mode = "run";
+      if (po.mode == "daemon" || po.mode == "server" || po.mode == "replay" ||
+          po.mode == "run" || po.mode == "debug"|| po.mode == "translate") {
+        set_execution_mode(po.mode);
+      } else {
+        Logger::Error("Error in command line: invalid mode: %s",
+                      po.mode.c_str());
+        cout << desc << "\n";
+        return -1;
+      }
+      if (po.config.empty() && !vm.count("no-config")) {
+        auto default_config_file = "/etc/hhvm/php.ini";
+        if (access(default_config_file, R_OK) != -1) {
+          Logger::Verbose("Using default config file: %s", default_config_file);
+          po.config.push_back(default_config_file);
+        }
+        default_config_file = "/etc/hhvm/config.hdf";
+        if (access(default_config_file, R_OK) != -1) {
+          Logger::Verbose("Using default config file: %s", default_config_file);
+          po.config.push_back(default_config_file);
+        }
+      }
+// When we upgrade boost, we can remove this and also get rid of the parent
+// try statement and move opts back into the original try block
+#if defined(BOOST_VERSION) && BOOST_VERSION >= 105000 && BOOST_VERSION <= 105400
+    } catch (const error_with_option_name &e) {
+      std::string wrong_name = e.get_option_name();
+      std::string right_name = get_right_option_name(opts, wrong_name);
+      std::string message = e.what();
+      if (right_name != "") {
+        boost::replace_all(message, wrong_name, right_name);
+      }
+      Logger::Error("Error in command line: %s", message.c_str());
+      cout << desc << "\n";
+      return -1;
+#endif
+    } catch (const error &e) {
+      Logger::Error("Error in command line: %s", e.what());
+      cout << desc << "\n";
+      return -1;
+    } catch (...) {
+      Logger::Error("Error in command line.");
       cout << desc << "\n";
       return -1;
     }
-    if (po.config.empty() && !vm.count("no-config")) {
-      auto default_config_file = "/etc/hhvm/php.ini";
-      if (access(default_config_file, R_OK) != -1) {
-        Logger::Verbose("Using default config file: %s", default_config_file);
-        po.config.push_back(default_config_file);
-      }
-      default_config_file = "/etc/hhvm/config.hdf";
-      if (access(default_config_file, R_OK) != -1) {
-        Logger::Verbose("Using default config file: %s", default_config_file);
-        po.config.push_back(default_config_file);
-      }
-    }
-  } catch (error &e) {
+  } catch (const error &e) {
     Logger::Error("Error in command line: %s", e.what());
     cout << desc << "\n";
     return -1;
   } catch (...) {
-    Logger::Error("Error in command line.");
+    Logger::Error("Error in command line parsing.");
     cout << desc << "\n";
     return -1;
   }
@@ -1255,11 +1385,10 @@ static int execute_program_impl(int argc, char** argv) {
   }
   if (vm.count("version")) {
     cout << "HipHop VM";
-    cout << " " << k_HHVM_VERSION.c_str();
+    cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
-    cout << "Extension API: " << std::to_string(HHVM_API_VERSION) << "\n";
     return 0;
   }
   if (vm.count("compiler-id")) {
@@ -1273,14 +1402,14 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (!po.show.empty()) {
-    PlainFile f;
-    f.open(po.show, "r");
-    if (!f.valid()) {
+    auto f = makeSmartPtr<PlainFile>();
+    f->open(po.show, "r");
+    if (!f->valid()) {
       Logger::Error("Unable to open file %s", po.show.c_str());
       return 1;
     }
-    f.print();
-    f.close();
+    f->print();
+    f->close();
     return 0;
   }
 
@@ -1308,9 +1437,6 @@ static int execute_program_impl(int argc, char** argv) {
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    HPHP::initTypeProfileStructure();
-  }
   vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;
@@ -1331,6 +1457,8 @@ static int execute_program_impl(int argc, char** argv) {
   if (po.noSafeAccessCheck) {
     RuntimeOption::SafeFileAccess = false;
   }
+
+  MM().resetRuntimeOptions();
 
   if (po.mode == "daemon") {
     if (RuntimeOption::LogFile.empty()) {
@@ -1505,7 +1633,7 @@ static int execute_program_impl(int argc, char** argv) {
 
   if (po.mode == "daemon" || po.mode == "server") {
     if (!po.user.empty()) RuntimeOption::ServerUser = po.user;
-    return start_server(RuntimeOption::ServerUser);
+    return start_server(RuntimeOption::ServerUser, po.xhprofFlags);
   }
 
   if (po.mode == "replay" && !po.args.empty()) {
@@ -1599,7 +1727,7 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
 
 static void on_timeout(int sig, siginfo_t* info, void* context) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
-    auto data = (RequestInjectionData*)info->si_value.sival_ptr;
+    auto data = (RequestTimer*)info->si_value.sival_ptr;
     if (data) {
       data->onTimeout();
     } else {
@@ -1625,8 +1753,6 @@ void hphp_process_init() {
   sigaction(SIGVTALRM, &action, nullptr);
   // start takes milliseconds, Period is a double in seconds
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
-
-  if (RuntimeOption::EvalTraceArrays) ArrayTracer::turnOnTracing();
 
   Process::InitProcessStatics();
   init_thread_locals();
@@ -1667,7 +1793,7 @@ void hphp_process_init() {
   apc_load(apcExtension::LoadThread);
   RuntimeOption::SerializationSizeLimit = save;
 
-  RDS::requestExit();
+  rds::requestExit();
   // Reset the preloaded g_context
   ExecutionContext *context = g_context.getNoCheck();
   context->~ExecutionContext();
@@ -1732,7 +1858,6 @@ void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
   MM().resetExternalStats();
-  if (RuntimeOption::EvalTraceArrays) getArrayTracer()->requestStart();
   Treadmill::startRequest();
 
 #ifdef ENABLE_SIMPLE_COUNTER
@@ -1784,6 +1909,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   }
 
   MM().resetCouldOOM(isStandardRequest());
+  ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.resetTimer();
 
   LitstrTable::get().setReading();
 
@@ -1856,8 +1982,6 @@ void hphp_thread_exit() {
 }
 
 void hphp_memory_cleanup() {
-  if (RuntimeOption::EvalTraceArrays) getArrayTracer()->requestEnd();
-
   auto& mm = MM();
   // sweep functions are allowed to access g_context,
   // so we can't destroy it yet
@@ -1877,6 +2001,7 @@ void hphp_memory_cleanup() {
   g_context.destroy();
 
   mm.resetAllocator();
+  mm.resetCouldOOM();
 }
 
 void hphp_session_exit() {
@@ -1893,9 +2018,6 @@ void hphp_session_exit() {
 
   {
     ServerStatsHelper ssh("rollback");
-
-    // Clean up pcre state at the end of the request.
-    pcre_session_exit();
 
     hphp_memory_cleanup();
     // Do any post-sweep cleanup necessary for global variables

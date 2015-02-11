@@ -14,7 +14,7 @@ class A implements I {}
 class B implements I {}
 class Z {}
 
-function foo(Vector<I> $x): void { 
+function foo(Vector<I> $x): void {
   $x[32] = new A();
 }
 function callA(A $x): void {}

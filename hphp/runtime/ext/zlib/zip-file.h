@@ -50,12 +50,11 @@ public:
 
   // Proxy the lock to the underlying stream
   bool lock(int operation, bool &wouldblock) override {
-    auto inner = m_innerFile.getTyped<File>(true, true);
-    if (!inner || inner->isClosed()) {
+    if (!m_innerFile || m_innerFile->isClosed()) {
       raise_warning("Inner file descriptor is closed");
       return false;
     }
-    return inner->lock(operation, wouldblock);
+    return m_innerFile->lock(operation, wouldblock);
   }
   bool lock(int operation) override {
     bool wouldBlock = false;
@@ -64,8 +63,8 @@ public:
 
 private:
   gzFile m_gzFile;
-  Resource m_innerFile;
-  Resource m_tempFile;
+  SmartPtr<File> m_innerFile;
+  SmartPtr<File> m_tempFile;
 
   bool closeImpl();
 };

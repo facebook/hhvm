@@ -13,14 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/unwind.h"
 
 #include <boost/implicit_cast.hpp>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator.h"
@@ -282,23 +282,24 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   return action;
 }
 
+const StaticString s_previous("previous");
+
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
-  static const StaticString nProp("previous");
-  bool visible, accessible, unset;
   while (true) {
-    TypedValue* top_tv = top->getProp(
+    auto const lookup = top->getProp(
       SystemLib::s_ExceptionClass,
-      nProp.get(),
-      visible, accessible, unset
+      s_previous.get()
     );
-    assert(visible && accessible && !unset);
+    auto const top_tv = lookup.prop;
+    assert(top_tv != nullptr);
+
+    assert(top_tv->m_type != KindOfUninit && lookup.accessible);
     if (top_tv->m_type != KindOfObject ||
-        !top_tv->m_data.pobj->instanceof(
-                                SystemLib::s_ExceptionClass)) {
+        !top_tv->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)) {
       // Since we are overwriting, decref.
       tvRefcountedDecRef(top_tv);
-      // Objects held in m_faults are not refcounted, therefore
-      // we need to increase the ref count here.
+      // Objects held in m_faults are not refcounted, therefore we need to
+      // increase the ref count here.
       top_tv->m_type = KindOfObject;
       top_tv->m_data.pobj = prev;
       prev->incRefCount();
@@ -505,7 +506,7 @@ void unwindBuiltinFrame() {
 
   // Tear down the frame
   Offset pc = -1;
-  ActRec* sfp = g_context->getPrevVMStateUNSAFE(fp, &pc);
+  ActRec* sfp = g_context->getPrevVMState(fp, &pc);
   assert(pc != -1);
   fp = sfp;
   vmpc() = fp->m_func->unit()->at(pc);
@@ -572,35 +573,47 @@ UnwindAction exception_handler() noexcept {
   }
 
   catch (const Object& o) {
+    ITRACE(1, "unwind: Object of class {}\n", o->getVMClass()->name()->data());
     pushFault(o);
     return enterUnwinder();
   }
 
   catch (VMSwitchMode&) {
+    ITRACE(1, "unwind: VMSwitchMode\n");
     return UnwindAction::ResumeVM;
   }
 
   catch (VMSwitchModeBuiltin&) {
+    ITRACE(1, "unwind: VMSwitchModeBuiltin from {}\n",
+           vmfp()->m_func->fullName()->data());
     unwindBuiltinFrame();
     return UnwindAction::ResumeVM;
   }
 
+  catch (VMResumeTC&) {
+    always_assert(false && "VMResumeTC exception escaped the TC");
+  }
+
   catch (VMReenterStackOverflow&) {
+    ITRACE(1, "unwind: VMReenterStackOverflow\n");
     pushFault(new FatalErrorException("Stack overflow"));
     return UnwindAction::Propagate;
   }
 
   catch (Exception& e) {
+    ITRACE(1, "unwind: Exception: {}\n", e.what());
     pushFault(e.clone());;
     return enterUnwinder();
   }
 
   catch (std::exception& e) {
+    ITRACE(1, "unwind: std::exception: {}\n", e.what());
     pushFault(new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
     return enterUnwinder();
   }
 
   catch (...) {
+    ITRACE(1, "unwind: unknown\n");
     pushFault(new Exception("unknown exception"));
     return enterUnwinder();
   }

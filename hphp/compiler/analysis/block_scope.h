@@ -21,7 +21,6 @@
 
 #include "hphp/util/bits.h"
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/macros.h"
 
 #include <tbb/concurrent_hash_map.h>
 #include <list>
@@ -192,7 +191,6 @@ public:
   AnalysisResultRawPtr getContainingProgram();
 
   ClassScopeRawPtr findExactClass(ClassScopeRawPtr cls);
-  FunctionScopeRawPtr findExactFunction(FunctionScopeRawPtr func);
 
   bool hasUser(BlockScopeRawPtr user, int useFlags) const;
   void addUse(BlockScopeRawPtr user, int useFlags);

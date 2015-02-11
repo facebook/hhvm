@@ -19,12 +19,13 @@
 #include <limits>
 #include <algorithm>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/util/overflow.h"
 
 namespace HPHP {
@@ -63,7 +64,7 @@ TypedNum numericConvHelper(Cell cell) {
       throw_bad_array_operand();
 
     case KindOfObject:
-      return make_int(cell.m_data.pobj->o_toInt64());
+      return make_int(cell.m_data.pobj->toInt64());
 
     case KindOfResource:
       return make_int(cell.m_data.pres->o_toInt64());
@@ -328,7 +329,10 @@ Cell cellBitOp(StrLenOp strLenOp, Cell c1, Cell c2) {
 template<class Op>
 void cellBitOpEq(Op op, Cell& c1, Cell c2) {
   auto const result = op(c1, c2);
-  cellSet(result, c1);
+  auto const type = c1.m_type;
+  auto const data = c1.m_data.num;
+  tvCopy(result, c1);
+  tvRefcountedDecRefHelper(type, data);
 }
 
 // Op must implement the interface described for cellIncDecOp.
@@ -514,7 +518,7 @@ Cell cellDiv(Cell c1, Cell c2) {
 }
 
 Cell cellPow(Cell c1, Cell c2) {
-  return *f_pow(tvAsVariant(&c1), tvAsVariant(&c2)).asCell();
+  return *HHVM_FN(pow)(tvAsVariant(&c1), tvAsVariant(&c2)).asCell();
 }
 
 Cell cellMod(Cell c1, Cell c2) {

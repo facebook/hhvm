@@ -113,7 +113,9 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   classScope->setPersistent(false);
 
   if (m_stmt) {
-    MethodStatementPtr constructor;
+    MethodStatementPtr constructor = nullptr;
+    MethodStatementPtr destructor = nullptr;
+    MethodStatementPtr clone = nullptr;
 
     // flatten continuation StatementList into MethodStatements
     for (int i = 0; i < m_stmt->getCount(); i++) {
@@ -130,11 +132,25 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     for (int i = 0; i < m_stmt->getCount(); i++) {
       MethodStatementPtr meth =
         dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
-      if (meth && meth->getName() == "__construct") {
-        constructor = meth;
+      if (meth) {
+        if (meth->getName() == "__construct") {
+          constructor = meth;
+          continue;
+        }
+        if (meth->getName() == "__destruct") {
+          destructor = meth;
+          continue;
+        }
+        if (meth->getName() == "__clone") {
+          clone = meth;
+          continue;
+        }
+      }
+      if (constructor && destructor && clone) {
         break;
       }
     }
+
     for (int i = 0; i < m_stmt->getCount(); i++) {
       if (!constructor) {
         MethodStatementPtr meth =
@@ -154,6 +170,18 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
                                   "Constructor %s::%s() cannot be static",
                                   classScope->getOriginalName().c_str(),
                                   constructor->getOriginalName().c_str());
+    }
+    if (destructor && destructor->getModifiers()->isStatic()) {
+      destructor->parseTimeFatal(Compiler::InvalidAttribute,
+                                  "Destructor %s::%s() cannot be static",
+                                  classScope->getOriginalName().c_str(),
+                                  destructor->getOriginalName().c_str());
+    }
+    if (clone && clone->getModifiers()->isStatic()) {
+      clone->parseTimeFatal(Compiler::InvalidAttribute,
+                                  "Clone method %s::%s() cannot be static",
+                                  classScope->getOriginalName().c_str(),
+                                  clone->getOriginalName().c_str());
     }
   }
 }
@@ -182,10 +210,6 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
   vector<string> bases;
   if (!m_parent.empty()) bases.push_back(m_parent);
   if (m_base) m_base->getStrings(bases);
-  for (unsigned int i = 0; i < bases.size(); i++) {
-    string className = bases[i];
-    addUserClass(ar, bases[i]);
-  }
 
   checkVolatile(ar);
 
@@ -279,31 +303,6 @@ void ClassStatement::outputCodeModel(CodeGenerator &cg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
-
-void ClassStatement::getAllParents(AnalysisResultConstPtr ar,
-                                   std::vector<std::string> &names) {
-  if (!m_parent.empty()) {
-    ClassScopePtr cls = ar->findClass(m_parent);
-    if (cls) {
-      if (!cls->isRedeclaring()) {
-        cls->getAllParents(ar, names);
-      }
-      names.push_back(m_originalParent);
-    }
-  }
-
-  if (m_base) {
-    vector<string> bases;
-    m_base->getStrings(bases);
-    for (unsigned int i = 0; i < bases.size(); i++) {
-      ClassScopePtr cls = ar->findClass(bases[i]);
-      if (cls) {
-        cls->getAllParents(ar, names);
-        names.push_back(cls->getOriginalName());
-      }
-    }
-  }
-}
 
 void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();

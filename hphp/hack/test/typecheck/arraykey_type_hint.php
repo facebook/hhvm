@@ -18,7 +18,7 @@ function generic<T as arraykey>(T $k1, T $k2): T {
 }
 
 function cast(arraykey $k1, arraykey $k2): (string, int) {
-  return tuple((string) $k1, (int)$k2);
+  return tuple((string) $k1, (int) $k2);
 }
 
 function f_opt(?arraykey $k1, arraykey $k2): arraykey {

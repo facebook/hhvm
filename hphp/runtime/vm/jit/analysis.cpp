@@ -43,37 +43,8 @@ SSATmp* canonical(SSATmp* value) {
 
 //////////////////////////////////////////////////////////////////////
 
-IRInstruction* findSpillFrame(SSATmp* sp) {
-  auto inst = sp->inst();
-  while (!inst->is(SpillFrame)) {
-    if (debug) {
-      [&] {
-        for (auto const& dst : inst->dsts()) {
-          if (dst.isA(Type::StkPtr)) return;
-        }
-        assert(false);
-      }();
-    }
-
-    assert(!inst->is(RetAdjustStack));
-    if (inst->is(DefSP)) return nullptr;
-    if (inst->is(InterpOne) && isFPush(inst->extra<InterpOne>()->opcode)) {
-      // A non-punted translation of this bytecode would contain a SpillFrame.
-      return nullptr;
-    }
-
-    // M-instr support opcodes have the previous sp in varying sources.
-    if (inst->modifiesStack()) inst = inst->previousStkPtr()->inst();
-    else                       inst = inst->src(0)->inst();
-  }
-
-  return inst;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 Block* findDefiningBlock(const SSATmp* t) {
-  assert(!t->isConst());
+  assert(!t->inst()->is(DefConst));
   auto const srcInst = t->inst();
 
   /*
@@ -85,19 +56,12 @@ Block* findDefiningBlock(const SSATmp* t) {
   if (srcInst->hasEdges()) {
     auto const next = srcInst->next();
     UNUSED auto const taken = srcInst->taken();
-    if (taken) {
-      always_assert_flog(
-        next != nullptr,
-        "Instruction defining a dst had a taken but no next:\n  {}\n",
-        srcInst->toString()
-      );
-    }
-    if (next) {
-      return next && next->numPreds() == 1 ? next : nullptr;
-    }
-    // Not acting as a control flow instruction, fall through.  Some
-    // instructions like LdThis have this property of conditionally having
-    // edges.
+    always_assert_flog(
+      next && taken,
+      "hasEdges instruction defining a dst had no edges:\n  {}\n",
+      srcInst->toString()
+    );
+    return next->numPreds() == 1 ? next : nullptr;
   }
 
   return srcInst->block();

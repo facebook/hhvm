@@ -37,6 +37,8 @@ hphp.log
 *.ext_hhvm.h
 
 /hphp/tools/shmw/shmw
+/hphp/tools/version/version
+/hphp/tools/gdb/hhvm-gdb
 
 /hphp/ffi/java/classes
 /hphp/ffi/java/hphp_ffi_java.h

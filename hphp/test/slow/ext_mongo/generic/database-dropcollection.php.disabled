@@ -13,7 +13,7 @@ var_dump($ns->findOne(array('name' => 'phpunit.dropcoltest')));
 $d->dropCollection('dropcoltest');
 var_dump($ns->findOne(array('name' => 'phpunit.dropcoltest')));
 
-// dropping the new non-existant collection
+// dropping the new non-existent collection
 $d->dropCollection('dropcoltest');
 var_dump($ns->findOne(array('name' => 'phpunit.dropcoltest')));
 ?>

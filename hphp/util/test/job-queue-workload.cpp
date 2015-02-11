@@ -22,7 +22,7 @@
 #include <thread>
 #include <vector>
 
-#include "folly/Random.h"
+#include <folly/Random.h>
 
 #include <gtest/gtest.h>
 

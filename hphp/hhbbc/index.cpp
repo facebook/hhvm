@@ -27,15 +27,15 @@
 #include <vector>
 #include <utility>
 
-#include <boost/range/iterator_range.hpp>
 #include <tbb/concurrent_hash_map.h>
 
-#include <folly/String.h>
 #include <folly/Format.h>
 #include <folly/Hash.h>
+#include <folly/Lazy.h>
 #include <folly/Memory.h>
 #include <folly/Optional.h>
-#include <folly/Lazy.h>
+#include <folly/Range.h>
+#include <folly/String.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/match.h"
@@ -106,10 +106,10 @@ template<class T> using ISStringToOne = ISStringToOneT<borrowed_ptr<T>>;
 using G = std::lock_guard<std::mutex>;
 
 template<class MultiMap>
-boost::iterator_range<typename MultiMap::const_iterator>
+folly::Range<typename MultiMap::const_iterator>
 find_range(const MultiMap& map, typename MultiMap::key_type key) {
   auto const pair = map.equal_range(key);
-  return boost::make_iterator_range(pair.first, pair.second);
+  return folly::range(pair.first, pair.second);
 }
 
 // Like find_range, but copy them into a temporary buffer instead of
@@ -317,6 +317,12 @@ struct ClassInfo {
   std::vector<borrowed_ptr<const ClassInfo>> declInterfaces;
 
   /*
+   * A (case-insensitive) map from interface names supported by this class to
+   * their ClassInfo structures, flattened across the hierarchy.
+   */
+  ISStringToOneT<borrowed_ptr<const ClassInfo>> implInterfaces;
+
+  /*
    * A (case-sensitive) map from class constant name to the php::Const
    * that it came from.  This map is flattened across the inheritance
    * hierarchy.
@@ -436,6 +442,16 @@ bool Class::subtypeOf(const Class& o) const {
   if (s1 || s2) return s1 == s2;
   auto c1 = val.right();
   auto c2 = o.val.right();
+
+  // If c2 is an interface, see if c1 declared it.
+  if (c2->cls->attrs & AttrInterface) {
+    if (c1->implInterfaces.count(c2->cls->name)) {
+      return true;
+    }
+    return false;
+  }
+
+  // Otherwise check for direct inheritance.
   if (c1->baseList.size() >= c2->baseList.size()) {
     return c1->baseList[c2->baseList.size() - 1] == c2;
   }
@@ -467,6 +483,15 @@ SString Class::name() const {
   return val.match(
     [] (SString s) { return s; },
     [] (borrowed_ptr<ClassInfo> ci) { return ci->cls->name; }
+  );
+}
+
+bool Class::couldBeInterfaceOrTrait() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return (cinfo->cls->attrs & (AttrInterface | AttrTrait));
+    }
   );
 }
 
@@ -710,6 +735,13 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
   }
 
   auto const isIface = rparent->cls->attrs & AttrInterface;
+
+  /*
+   * Make a flattened table of all the interfaces implemented by the class.
+   */
+  if (isIface) {
+    rleaf->implInterfaces[rparent->cls->name] = rparent;
+  }
 
   /*
    * Make a table of all the constants on this class.
@@ -1590,7 +1622,7 @@ res::Func Index::resolve_method(Context ctx,
    * called as long, as we only do so in cases where it will fatal at
    * runtime.
    *
-   * So, in the presense of magic methods, we must handle the fact
+   * So, in the presence of magic methods, we must handle the fact
    * that attempting to call an inaccessible method will instead call
    * the magic method, if it exists.  Note that if any class derives
    * from a class and adds magic methods, it can change still change
@@ -1860,12 +1892,16 @@ Type Index::lookup_class_constant(Context ctx,
 
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
-    if (it->second->val.m_type == KindOfUninit) {
+    if (!it->second->val.hasValue()) {
+      // This is an abstract class constant.
+      return TInitCell;
+    }
+    if (it->second->val.value().m_type == KindOfUninit) {
       // This is a class constant that needs an 86cinit to run.  It
       // would be good to eventually be able to analyze these.
       return TInitCell;
     }
-    return from_cell(it->second->val);
+    return from_cell(it->second->val.value());
   }
   return TInitCell;
 }
@@ -2296,16 +2332,16 @@ Index::could_be_related(borrowed_ptr<const php::Class> cls,
 
 //////////////////////////////////////////////////////////////////////
 
-void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
+void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
   auto const vname = tv(name);
 
   FTRACE(2, "merge_public_static: {} {} {}\n",
     show(tcls), show(name), show(val));
 
-  // Figure out which class this can affect.  If we have a DCls::Sub we assume
-  // it could affect any class (we could chase the inheritance hierarchy
-  // downward to try to limit it, but don't currently).
-  auto const cinfo = [&]() -> borrowed_ptr<ClassInfo> {
+  // Figure out which class this can affect.  If we have a DCls::Sub we have to
+  // assume it could affect any subclass, so we repeat this merge for all exact
+  // class types deriving from that base.
+  auto const maybe_cinfo = [&]() -> folly::Optional<borrowed_ptr<ClassInfo>> {
     if (!is_specialized_cls(tcls)) {
       return nullptr;
     }
@@ -2314,11 +2350,18 @@ void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
     case DCls::Exact:
       return dcls.cls.val.right();
     case DCls::Sub:
-      return nullptr;
+      if (!dcls.cls.val.right()) return nullptr;
+      for (auto& sub : dcls.cls.val.right()->subclassList) {
+        auto const rcls = res::Class { m_index, sub };
+        merge(ctx, clsExact(rcls), name, val);
+      }
+      return folly::none;
     }
     not_reached();
   }();
+  if (!maybe_cinfo) return;
 
+  auto const cinfo = *maybe_cinfo;
   bool const unknownName = !vname ||
     (vname && vname->m_type != KindOfStaticString);
 
@@ -2339,6 +2382,8 @@ void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
         "NOTE: had to mark everything unknown for public static "
         "property types due to dynamic code.  -fanalyze-public-statics "
         "will not help for this program.\n"
+        "NOTE: The offending code occured in this context: %s\n",
+        show(ctx).c_str()
       );
       m_everything_bad = true;
       return;
@@ -2360,7 +2405,7 @@ void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
   if (unknownName) {
     for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
       for (auto& kv : ci->publicStaticProps) {
-        merge(tcls, sval(kv.first), val);
+        merge(ctx, tcls, sval(kv.first), val);
       }
     }
     return;

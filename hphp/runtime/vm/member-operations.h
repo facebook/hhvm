@@ -19,14 +19,15 @@
 
 #include <type_traits>
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 
@@ -167,7 +168,7 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
 inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   int64_t n;
   auto const result = !key->isStrictlyInteger(n) ? base->nvGet(key)
-                                                 : base->nvGetConverted(n);
+                                                 : base->nvGet(n);
   return result ? result : null_variant.asTypedValue();
 }
 
@@ -357,26 +358,13 @@ inline TypedValue* ElemDArrayPre<KeyType::Any>(Array& base, TypedValue key) {
 /**
  * ElemD when base is an Array
  */
+// XXX kill reffy flag
 template <bool warn, bool reffy, KeyType keyType>
 inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
   auto& baseArr = tvAsVariant(base).asArrRef();
   bool defined = !warn || baseArr.exists(keyAsValue(key));
 
   auto* result = ElemDArrayPre<keyType>(baseArr, key);
-
-  if (reffy) {
-    if (UNLIKELY(baseArr->isCheckedArray())) {
-      // Downgrade and warn after the operation in case we copied
-      if (baseArr->isVPackedArray()) {
-        PackedArray::downgradeAndWarn(baseArr.get(),
-                                      PackedArray::Reason::kSetRef);
-      } else {
-        MixedArray::downgradeAndWarn(baseArr.get(),
-                                     MixedArray::Reason::kSetRef);
-      }
-    }
-  }
-
   if (warn) {
     if (!defined) {
       TypedValue scratchKey = initScratchKey(key);
@@ -694,7 +682,7 @@ inline void SetElemScalar(Cell* value) {
   if (!setResult) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
-  tvRefcountedDecRefCell((TypedValue*)value);
+  tvRefcountedDecRef((TypedValue*)value);
   tvWriteNull((TypedValue*)value);
 }
 
@@ -796,7 +784,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
     }
   } else {
     StringData* sd = StringData::Make(slen);
-    char* s = sd->bufferSlice().ptr;
+    char* s = sd->mutableData();
     memcpy(s, base->m_data.pstr->data(), baseLen);
     if (x > baseLen) {
       memset(&s[baseLen], ' ', slen - baseLen - 1);
@@ -891,10 +879,8 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   Cell* value,
                                   bool copy) {
   int64_t n;
-  if (key->isStrictlyInteger(n)) {
-    return a->setConverted(n, cellAsCVarRef(*value), copy);
-  }
-  return a->set(StrNR(key), cellAsCVarRef(*value), copy);
+  return key->isStrictlyInteger(n) ? a->set(n, cellAsCVarRef(*value), copy) :
+         a->set(StrNR(key), cellAsCVarRef(*value), copy);
 }
 
 template<bool setResult>
@@ -1012,7 +998,7 @@ inline void SetNewElemScalar(Cell* value) {
   if (!setResult) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
-  tvRefcountedDecRefCell((TypedValue*)value);
+  tvRefcountedDecRef((TypedValue*)value);
   tvWriteNull((TypedValue*)value);
 }
 
@@ -1364,10 +1350,14 @@ inline void IncDecBody(IncDecOp op, Cell* fr, TypedValue* to) {
 }
 
 template <bool setResult>
-inline void IncDecElemEmptyish(IncDecOp op, TypedValue* base,
-                               TypedValue key, TypedValue& dest) {
-  Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt(tvAsCVarRef(&key));
+inline void IncDecElemEmptyish(
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue key,
+  TypedValue& dest
+) {
+  auto a = Array::Create();
+  auto result = (TypedValue*)&a.lvalAt(tvAsCVarRef(&key));
   tvAsVariant(base) = a;
   if (MoreWarnings) {
     raise_notice(Strings::UNDEFINED_INDEX,
@@ -1376,17 +1366,21 @@ inline void IncDecElemEmptyish(IncDecOp op, TypedValue* base,
   assert(result->m_type == KindOfNull);
   IncDecBody<setResult>(op, result, &dest);
 }
+
 template <bool setResult>
 inline void IncDecElemScalar(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  if (setResult) {
-    tvWriteNull(&dest);
-  }
+  if (setResult) tvWriteNull(&dest);
 }
+
 template <bool setResult>
-inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
-                       IncDecOp op, TypedValue* base,
-                       TypedValue key, TypedValue& dest) {
+inline void IncDecElem(
+  TypedValue& tvRef,
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue key,
+  TypedValue& dest
+) {
   DataType type;
   opPre(base, type);
 
@@ -1415,7 +1409,7 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
       return IncDecElemEmptyish<setResult>(op, base, key, dest);
 
     case KindOfArray: {
-      TypedValue* result =
+      auto result =
         ElemDArray<MoreWarnings, /* reffy */ false, KeyType::Any>(base, key);
       return IncDecBody<setResult>(op, tvToCell(result), &dest);
     }
@@ -1440,10 +1434,13 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
 }
 
 template <bool setResult>
-inline void IncDecNewElemEmptyish(IncDecOp op, TypedValue* base,
-                                  TypedValue& dest) {
-  Array a = Array::Create();
-  TypedValue* result = (TypedValue*)&a.lvalAt();
+inline void IncDecNewElemEmptyish(
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue& dest
+) {
+  auto a = Array::Create();
+  auto result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
   assert(result->m_type == KindOfNull);
   IncDecBody<setResult>(op, result, &dest);
@@ -1452,15 +1449,16 @@ inline void IncDecNewElemEmptyish(IncDecOp op, TypedValue* base,
 template <bool setResult>
 inline void IncDecNewElemScalar(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  if (setResult) {
-    tvWriteNull(&dest);
-  }
+  if (setResult) tvWriteNull(&dest);
 }
 
 template <bool setResult>
-inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
-                          IncDecOp op, TypedValue* base,
-                          TypedValue& dest) {
+inline void IncDecNewElem(
+  TypedValue& tvRef,
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue& dest
+) {
   DataType type;
   opPre(base, type);
 
@@ -1526,34 +1524,23 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key,
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
                                     bool copy) {
   int64_t n;
-  if (!key->isStrictlyInteger(n)) {
-    return a->remove(StrNR(key), copy);
-  } else {
-    if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
-      if (a->isVPackedArray()) {
-        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-      } else {
-        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                              ArrayData::kIntMapKind);
-      }
-    }
-    return a->remove(n, copy);
-  }
+  return !key->isStrictlyInteger(n) ? a->remove(StrNR(key), copy) :
+         a->remove(n, copy);
 }
 
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
                                     bool copy) {
   if (IS_STRING_TYPE(key.m_type)) {
     return UnsetElemArrayPre(a, key.m_data.pstr, copy);
-  } else if (key.m_type == KindOfInt64) {
-    return UnsetElemArrayPre(a, key.m_data.num, copy);
-  } else {
-    VarNR varKey = tvAsCVarRef(&key).toKey();
-    if (varKey.isNull()) {
-      return a;
-    }
-    return a->remove(varKey, copy);
   }
+  if (key.m_type == KindOfInt64) {
+    return UnsetElemArrayPre(a, key.m_data.num, copy);
+  }
+  VarNR varKey = tvAsCVarRef(&key).toKey();
+  if (varKey.isNull()) {
+    return a;
+  }
+  return a->remove(varKey, copy);
 }
 
 /**
@@ -1634,14 +1621,13 @@ inline void UnsetElem(TypedValue* base, key_type<keyType> key) {
 template<bool useEmpty, KeyType keyType>
 inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
                               key_type<keyType> key) {
-  TypedValue scratchKey = initScratchKey(key);
+  auto scratchKey = initScratchKey(key);
 
   if (useEmpty) {
     if (LIKELY(instance->isCollection())) {
       return collectionEmpty(instance, &scratchKey);
-    } else {
-      return objOffsetEmpty(tvRef, instance, cellAsCVarRef(scratchKey));
     }
+    return objOffsetEmpty(tvRef, instance, cellAsCVarRef(scratchKey));
   } else {
     if (LIKELY(instance->isCollection())) {
       return collectionIsset(instance, &scratchKey);
@@ -1654,11 +1640,10 @@ inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
  * IssetEmptyElem when base is a String
  */
 template <bool useEmpty, KeyType keyType>
-inline bool IssetEmptyElemString(TypedValue& tvScratch, TypedValue* base,
-                                 key_type<keyType> key) {
+inline bool IssetEmptyElemString(TypedValue* base, key_type<keyType> key) {
   // TODO Task #2716479: Fix this so that the warnings raised match
   // PHP5.
-  TypedValue scratchKey = initScratchKey(key);
+  auto scratchKey = initScratchKey(key);
   int64_t x;
   if (LIKELY(scratchKey.m_type == KindOfInt64)) {
     x = scratchKey.m_data.num;
@@ -1694,10 +1679,10 @@ inline bool IssetEmptyElemString(TypedValue& tvScratch, TypedValue* base,
   if (!useEmpty) {
     return true;
   }
-  tvScratch.m_data.pstr = base->m_data.pstr->getChar(x);
-  assert(tvScratch.m_data.pstr->isStatic());
-  tvScratch.m_type = KindOfStaticString;
-  return !cellToBool(*tvToCell(&tvScratch));
+
+  auto str = base->m_data.pstr->getChar(x);
+  assert(str->isStatic());
+  return !str->toBoolean();
 }
 
 /**
@@ -1717,8 +1702,11 @@ inline bool IssetEmptyElemArray(TypedValue* base, key_type<keyType> key) {
  */
 template <bool useEmpty, KeyType keyType>
 NEVER_INLINE
-bool IssetEmptyElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
-                        TypedValue* base, key_type<keyType> key) {
+bool IssetEmptyElemSlow(
+  TypedValue& tvRef,
+  TypedValue* base,
+  key_type<keyType> key
+) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -1732,15 +1720,17 @@ bool IssetEmptyElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
 
     case KindOfStaticString:
     case KindOfString:
-      return IssetEmptyElemString<useEmpty, keyType>(tvScratch, base, key);
+      return IssetEmptyElemString<useEmpty, keyType>(base, key);
 
     case KindOfArray:
       return IssetEmptyElemArray<useEmpty, keyType>(base, key);
 
     case KindOfObject:
-      return IssetEmptyElemObj<useEmpty, keyType>(tvRef,
-                                                  base->m_data.pobj,
-                                                  key);
+      return IssetEmptyElemObj<useEmpty, keyType>(
+        tvRef,
+        base->m_data.pobj,
+        key
+      );
 
     case KindOfRef:
     case KindOfClass:
@@ -1753,12 +1743,15 @@ bool IssetEmptyElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
  * Fast path for IssetEmptyElem assuming base is an Array
  */
 template <bool useEmpty, KeyType keyType = KeyType::Any>
-inline bool IssetEmptyElem(TypedValue& tvScratch, TypedValue& tvRef,
-                           TypedValue* base, key_type<keyType> key) {
+inline bool IssetEmptyElem(
+  TypedValue& tvRef,
+  TypedValue* base,
+  key_type<keyType> key
+) {
   if (LIKELY(base->m_type == KindOfArray)) {
     return IssetEmptyElemArray<useEmpty, keyType>(base, key);
   }
-  return IssetEmptyElemSlow<useEmpty, keyType>(tvScratch, tvRef, base, key);
+  return IssetEmptyElemSlow<useEmpty, keyType>(tvRef, base, key);
 }
 
 template <bool warn>
@@ -1857,31 +1850,30 @@ inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,
     instance = instanceFromTv(base);
   }
 
-  StringData* keySD = prepareKey(key);
+  auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
   // Get property.
-  result = &tvScratch;
-#define ARGS result, tvRef, ctx, keySD
-  if (!warn && !(define || unset)) instance->prop  (ARGS);
-  if (!warn &&  (define || unset)) instance->propD (ARGS);
-  if ( warn && !define           ) instance->propW (ARGS);
-  if ( warn &&  define           ) instance->propWD(ARGS);
-#undef ARGS
-  return result;
+
+  if (warn) {
+    return define ?
+      instance->propWD(&tvScratch, &tvRef, ctx, keySD) :
+      instance->propW(&tvScratch, &tvRef, ctx, keySD);
+  }
+
+  if (define || unset) return instance->propD(&tvScratch, &tvRef, ctx, keySD);
+  return instance->prop(&tvScratch, &tvRef, ctx, keySD);
 }
 
 template <bool useEmpty>
 inline bool IssetEmptyPropObj(Class* ctx, ObjectData* instance,
                               TypedValue key) {
-  bool issetEmptyResult;
-  StringData* keySD = prepareKey(key);
+  auto keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
 
-  issetEmptyResult = useEmpty ?
+  return useEmpty ?
     instance->propEmpty(ctx, keySD) :
     instance->propIsset(ctx, keySD);
-  return issetEmptyResult;
 }
 
 template <bool useEmpty, bool isObj = false>
@@ -1910,7 +1902,7 @@ template <bool setResult>
 inline void SetPropNull(Cell* val) {
   raise_warning("Cannot access property on non-object");
   if (setResult) {
-    tvRefcountedDecRefCell(val);
+    tvRefcountedDecRef(val);
     tvWriteNull(val);
   } else {
     throw InvalidSetMException(make_tv<KindOfNull>());
@@ -2103,23 +2095,27 @@ inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
 }
 
 template <bool setResult>
-inline void IncDecPropObj(TypedValue& tvRef, Class* ctx,
-                          IncDecOp op, ObjectData* base,
-                          TypedValue key, TypedValue& dest) {
-  StringData* keySD = prepareKey(key);
+inline void IncDecPropObj(Class* ctx,
+                          IncDecOp op,
+                          ObjectData* base,
+                          TypedValue key,
+                          TypedValue& dest) {
+  auto keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
-  base->incDecProp<setResult>(tvRef, ctx, op, keySD, dest);
+  base->incDecProp<setResult>(ctx, op, keySD, dest);
 }
 
 template <bool setResult, bool isObj = false>
-inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
-                       Class* ctx, IncDecOp op,
-                       TypedValue* base, TypedValue key,
-                       TypedValue& dest) {
+inline void IncDecProp(
+  Class* ctx,
+  IncDecOp op,
+  TypedValue* base,
+  TypedValue key,
+  TypedValue& dest
+) {
   if (isObj) {
-    IncDecPropObj<setResult>(tvRef, ctx, op,
-                             reinterpret_cast<ObjectData*>(base),
-                             key, dest);
+    auto obj = reinterpret_cast<ObjectData*>(base);
+    IncDecPropObj<setResult>(ctx, op, obj, key, dest);
     return;
   }
 
@@ -2151,8 +2147,7 @@ inline void IncDecProp(TypedValue& tvScratch, TypedValue& tvRef,
       return IncDecPropStdclass<setResult>(op, base, key, dest);
 
     case KindOfObject:
-      return IncDecPropObj<setResult>(tvRef, ctx, op, instanceFromTv(base),
-                                      key, dest);
+      return IncDecPropObj<setResult>(ctx, op, instanceFromTv(base), key, dest);
 
     case KindOfRef:
     case KindOfClass:

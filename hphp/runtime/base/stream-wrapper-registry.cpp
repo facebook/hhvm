@@ -200,7 +200,7 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 }
 
 String getWrapperProtocol(const char* uri_string, int* pathIndex) {
-  /* Special case for PHP4 Backward Compatability */
+  /* Special case for PHP4 Backward Compatibility */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
     return s_compress_zlib;
   }

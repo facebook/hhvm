@@ -17,12 +17,13 @@
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
 #include <vector>
 
-#include "folly/dynamic.h"
-#include "folly/json.h"
+#include <folly/dynamic.h>
+#include <folly/json.h>
 
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/logger.h"
 

@@ -19,12 +19,15 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -98,7 +101,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // if appropriate
   int64_t intkey;
   ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
-                  ad->setConverted(intkey, tvAsCVarRef(&value), copy) :
+                  ad->set(intkey, tvAsCVarRef(&value), copy) :
                   ad->set(key, tvAsCVarRef(&value), copy);
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
@@ -147,11 +150,14 @@ TypedValue setOpElem(TypedValue* base, TypedValue key,
   return ret;
 }
 
-TypedValue incDecElem(TypedValue* base, TypedValue key,
-                      MInstrState* mis, IncDecOp op) {
+TypedValue incDecElem(
+  TypedValue* base,
+  TypedValue key,
+  MInstrState* mis,
+  IncDecOp op
+) {
   TypedValue result;
-  HPHP::IncDecElem<true>(
-    mis->tvScratch, mis->tvRef, op, base, key, result);
+  HPHP::IncDecElem<true>(mis->tvRef, op, base, key, result);
   assert(result.m_type != KindOfRef);
   return result;
 }
@@ -164,6 +170,7 @@ void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
 }
 
 RefData* boxValue(TypedValue tv) {
+  assert(tv.m_type != KindOfRef);
   if (tv.m_type == KindOfUninit) tv = make_tv<KindOfNull>();
   return RefData::Make(tv);
 }
@@ -253,6 +260,13 @@ StringData* convResToStrHelper(ResourceData* o) {
   auto r = s.get();
   if (!r->isStatic()) r->incRefCount();
   return r;
+}
+
+TypedValue getMemoKeyHelper(TypedValue tv) {
+  auto var = HHVM_FN(serialize_memoize_param)(tvAsCVarRef(&tv));
+  auto res = var.asTypedValue();
+  tvRefcountedIncRef(res);
+  return *res;
 }
 
 inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
@@ -496,14 +510,6 @@ ALWAYS_INLINE
 static bool ak_exist_string_impl(ArrayData* arr, StringData* key) {
   int64_t n;
   if (key->isStrictlyInteger(n)) {
-    if (UNLIKELY(arr->isVPackedArrayOrIntMapArray())) {
-      if (arr->isVPackedArray()) {
-        PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-      } else {
-        MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                              ArrayData::kIntMapKind);
-      }
-    }
     return arr->exists(n);
   }
   return arr->exists(key);
@@ -517,7 +523,7 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collectionContains(obj, key);
   }
-  const Array& arr = obj->o_toArray();
+  auto arr = obj->toArray();
   return ak_exist_string_impl(arr.get(), key);
 }
 
@@ -525,7 +531,7 @@ bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collectionContains(obj, key);
   }
-  const Array& arr = obj->o_toArray();
+  auto arr = obj->toArray();
   return arr.get()->exists(key);
 }
 
@@ -550,7 +556,7 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ?
-         getDefaultIfNullCell(a->nvGetConverted(i), def) :
+         getDefaultIfNullCell(a->nvGet(i), def) :
          getDefaultIfNullCell(a->nvGet(key), def);
 }
 
@@ -559,14 +565,6 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
 }
 
 TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
-  if (UNLIKELY(a->isVPackedArrayOrIntMapArray())) {
-    if (a->isVPackedArray()) {
-      PackedArray::warnUsage(PackedArray::Reason::kNumericString);
-    } else {
-      MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                            ArrayData::kIntMapKind);
-    }
-  }
   return arrayIdxI(a, key, def);
 }
 
@@ -592,13 +590,11 @@ int32_t arrayVsize(ArrayData* ad) {
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx) {
-  bool visible, accessible;
-  TypedValue* val = cls->getSProp(ctx, name, visible, accessible);
+  auto const lookup = cls->getSProp(ctx, name);
 
-  if (UNLIKELY(!visible || !accessible)) {
-    return nullptr;
-  }
-  return val;
+  if (UNLIKELY(!lookup.prop || !lookup.accessible)) return nullptr;
+
+  return lookup.prop;
 }
 
 TypedValue* getSPropOrRaise(const Class* cls,
@@ -677,7 +673,7 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
 }
 
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
-  int64_t ival = o->o_toInt64();
+  auto const ival = o->toInt64();
   decRefObj(o);
   return switchBoundsCheck(ival, base, nTargets);
 }
@@ -716,8 +712,8 @@ Cell lookupCnsHelper(const TypedValue* tv,
   }
 
   const Cell* cns = nullptr;
-  if (UNLIKELY(RDS::s_constants().get() != nullptr)) {
-    cns = RDS::s_constants()->nvGet(nm);
+  if (UNLIKELY(rds::s_constants().get() != nullptr)) {
+    cns = rds::s_constants()->nvGet(nm);
   }
   if (!cns) {
     cns = Unit::loadCns(const_cast<StringData*>(nm));
@@ -780,9 +776,9 @@ Cell lookupCnsUHelper(const TypedValue* tv,
   Cell c1;
 
   // lookup qualified name in thread-local constants
-  bool cacheConsts = RDS::s_constants().get() != nullptr;
+  bool cacheConsts = rds::s_constants().get() != nullptr;
   if (UNLIKELY(cacheConsts)) {
-    cns = RDS::s_constants()->nvGet(nm);
+    cns = rds::s_constants()->nvGet(nm);
   }
   if (!cns) {
     cns = Unit::loadCns(const_cast<StringData*>(nm));
@@ -796,7 +792,7 @@ Cell lookupCnsUHelper(const TypedValue* tv,
   // lookup unqualified name in thread-local constants
   if (UNLIKELY(!cns)) {
     if (UNLIKELY(cacheConsts)) {
-      cns = RDS::s_constants()->nvGet(fallback);
+      cns = rds::s_constants()->nvGet(fallback);
     }
     if (!cns) {
       cns = Unit::loadCns(const_cast<StringData*>(fallback));
@@ -903,7 +899,7 @@ void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   try {
     loadFuncContextImpl<OnFail::Fatal>(ArrNR(arr), preLiveAR, fp);
   } catch (...) {
-    arPreliveOverwriteCells(preLiveAR);
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
     throw;
   }
 }
@@ -962,7 +958,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
     inst->incRefCount();
     preLiveAR->setThis(inst);
   } catch (...) {
-    arPreliveOverwriteCells(preLiveAR);
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
     throw;
   }
 }
@@ -992,7 +988,7 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
       return fpushStringFail(sd, preLiveAR);
     }
   } catch (...) {
-    arPreliveOverwriteCells(preLiveAR);
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfString>(sd);
     throw;
   }
 }
@@ -1246,7 +1242,7 @@ void raiseMissingArgument(const Func* func, int got) {
   }
 }
 
-RDS::Handle lookupClsRDSHandle(const StringData* name) {
+rds::Handle lookupClsRDSHandle(const StringData* name) {
   return NamedEntity::get(name)->getClassHandle();
 }
 
@@ -1255,9 +1251,9 @@ void registerLiveObj(ObjectData* obj) {
   g_context->m_liveBCObjs.insert(obj);
 }
 
-void unwindResumeHelper(_Unwind_Exception* data) {
+void unwindResumeHelper() {
   tl_regState = VMRegState::CLEAN;
-  _Unwind_Resume(data);
+  _Unwind_Resume(unwindRdsInfo->exn);
 }
 
 namespace MInstrHelpers {

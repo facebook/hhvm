@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/statement/break_statement.h"
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/runtime/base/complex-types.h"
 
 using namespace HPHP;
 

@@ -1,100 +1,94 @@
 DOMComment
 object(DOMComment)#1 (18) {
-  ["length"]=>
-  int(0)
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["nodeType"]=>
-  int(8)
-  ["lastChild"]=>
-  NULL
   ["nodeName"]=>
   string(8) "#comment"
-  ["previousSibling"]=>
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(8)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
   NULL
   ["firstChild"]=>
   NULL
-  ["data"]=>
-  string(0) ""
-  ["childNodes"]=>
+  ["lastChild"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
+  ["previousSibling"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["data"]=>
+  string(0) ""
+  ["length"]=>
+  int(0)
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMComment in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(27) {
+array(24) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
-  [2]=>
-  string(5) "__set"
-  [3]=>
-  string(7) "__isset"
-  [4]=>
   string(11) "__debuginfo"
-  [5]=>
+  [2]=>
   string(10) "appendData"
-  [6]=>
+  [3]=>
   string(10) "deleteData"
-  [7]=>
+  [4]=>
   string(10) "insertData"
-  [8]=>
+  [5]=>
   string(11) "replaceData"
-  [9]=>
+  [6]=>
   string(13) "substringData"
-  [10]=>
+  [7]=>
   string(11) "appendChild"
-  [11]=>
+  [8]=>
   string(9) "cloneNode"
-  [12]=>
+  [9]=>
   string(9) "getLineNo"
-  [13]=>
+  [10]=>
   string(13) "hasAttributes"
-  [14]=>
+  [11]=>
   string(13) "hasChildNodes"
-  [15]=>
+  [12]=>
   string(12) "insertBefore"
-  [16]=>
+  [13]=>
   string(18) "isDefaultNamespace"
-  [17]=>
+  [14]=>
   string(10) "isSameNode"
-  [18]=>
+  [15]=>
   string(11) "isSupported"
-  [19]=>
+  [16]=>
   string(18) "lookupNamespaceUri"
-  [20]=>
+  [17]=>
   string(12) "lookupPrefix"
-  [21]=>
+  [18]=>
   string(9) "normalize"
-  [22]=>
+  [19]=>
   string(11) "removeChild"
-  [23]=>
+  [20]=>
   string(12) "replaceChild"
-  [24]=>
+  [21]=>
   string(4) "c14n"
-  [25]=>
+  [22]=>
   string(8) "c14nfile"
-  [26]=>
+  [23]=>
   string(11) "getNodePath"
 }
 ================
@@ -102,100 +96,94 @@ A_DOMComment
 object(A_DOMComment)#2 (19) {
   ["___x"]=>
   NULL
-  ["length"]=>
-  int(0)
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["nodeType"]=>
-  int(8)
-  ["lastChild"]=>
-  NULL
   ["nodeName"]=>
   string(8) "#comment"
-  ["previousSibling"]=>
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(8)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
   NULL
   ["firstChild"]=>
   NULL
-  ["data"]=>
-  string(0) ""
-  ["childNodes"]=>
+  ["lastChild"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
+  ["previousSibling"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["data"]=>
+  string(0) ""
+  ["length"]=>
+  int(0)
 }
 
 Warning: Attempted to serialize unserializable builtin class A_DOMComment in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(27) {
+array(24) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
-  [2]=>
-  string(5) "__set"
-  [3]=>
-  string(7) "__isset"
-  [4]=>
   string(11) "__debuginfo"
-  [5]=>
+  [2]=>
   string(10) "appendData"
-  [6]=>
+  [3]=>
   string(10) "deleteData"
-  [7]=>
+  [4]=>
   string(10) "insertData"
-  [8]=>
+  [5]=>
   string(11) "replaceData"
-  [9]=>
+  [6]=>
   string(13) "substringData"
-  [10]=>
+  [7]=>
   string(11) "appendChild"
-  [11]=>
+  [8]=>
   string(9) "cloneNode"
-  [12]=>
+  [9]=>
   string(9) "getLineNo"
-  [13]=>
+  [10]=>
   string(13) "hasAttributes"
-  [14]=>
+  [11]=>
   string(13) "hasChildNodes"
-  [15]=>
+  [12]=>
   string(12) "insertBefore"
-  [16]=>
+  [13]=>
   string(18) "isDefaultNamespace"
-  [17]=>
+  [14]=>
   string(10) "isSameNode"
-  [18]=>
+  [15]=>
   string(11) "isSupported"
-  [19]=>
+  [16]=>
   string(18) "lookupNamespaceUri"
-  [20]=>
+  [17]=>
   string(12) "lookupPrefix"
-  [21]=>
+  [18]=>
   string(9) "normalize"
-  [22]=>
+  [19]=>
   string(11) "removeChild"
-  [23]=>
+  [20]=>
   string(12) "replaceChild"
-  [24]=>
+  [21]=>
   string(4) "c14n"
-  [25]=>
+  [22]=>
   string(8) "c14nfile"
-  [26]=>
+  [23]=>
   string(11) "getNodePath"
 }

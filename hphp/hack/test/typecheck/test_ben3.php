@@ -10,7 +10,7 @@
  */
 
 function foo(mixed $x): bool {
-  if(!is_bool($x)) {
+  if (!is_bool($x)) {
     $x = false;
   }
   return $x;

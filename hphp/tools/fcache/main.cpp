@@ -21,16 +21,15 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
-  if (argc <= 1) {
-    printf("fcache filename [version=1]\n");
+  if (argc != 2) {
+    printf("fcache filename\n");
     return 0;
   }
 
-  const char *name =  argc > 1 ? argv[1] : "";
-  int version = atoi(argc > 2 ? argv[2] : "1");
+  const char *name =  argv[1];
 
   FileCache fc;
-  fc.load(name, true, version);
+  fc.loadMmap(name);
   fc.dump();
   return 0;
 }

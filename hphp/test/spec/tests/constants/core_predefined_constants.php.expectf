@@ -1,0 +1,57 @@
+__LINE__: int(17)
+__FILE__: string(%d) "%s/constants/core_predefined_constants.php"
+__DIR__: string(%d) "%s/constants"
+string(%d) "%s/constants"
+__LINE__: int(24)
+__NAMESPACE__: string(0) ""
+-----------------------------------------
+At the top level of a script
+__FUNCTION__: string(0) ""
+-----------------------------------------
+At the top level of a script and outside all classes
+__METHOD__: string(0) ""
+-----------------------------------------
+Outside all classes
+__CLASS__: string(0) ""
+-----------------------------------------
+Outside all classes
+__TRAIT__: string(0) ""
+-----------------------------------------
+Inside ComputeResult
+__FUNCTION__: string(13) "ComputeResult"
+__METHOD__: string(13) "ComputeResult"
+__CLASS__: string(0) ""
+__TRAIT__: string(0) ""
+__NAMESPACE__: string(0) ""
+Inside ComputeResult
+__FUNCTION__: string(5) "Inner"
+__METHOD__: string(5) "Inner"
+-----------------------------------------
+Inside Date::__construct
+__CLASS__: string(4) "Date"
+__FUNCTION__: string(11) "__construct"
+__TRAIT__: string(0) ""
+__NAMESPACE__: string(0) ""
+Inside Date::setDay
+__FUNCTION__: string(6) "setDay"
+__LINE__: int(98)
+Inside Date::priv1
+__FUNCTION__: string(5) "priv1"
+Inside Date::spf1
+__FUNCTION__: string(4) "spf1"
+-----------------------------------------
+Inside Date::__construct
+__CLASS__: string(4) "Date"
+__FUNCTION__: string(11) "__construct"
+__TRAIT__: string(0) ""
+__NAMESPACE__: string(0) ""
+__CLASS__: string(8) "DatePlus"
+Inside DatePlus::xx
+__FUNCTION__: string(2) "xx"
+Inside includefile.php
+string(%d) "%s/constants/includefile.inc"
+string(%d) "%s/constants"
+Inside Date::__destruct
+__FUNCTION__: string(10) "__destruct"
+Inside Date::__destruct
+__FUNCTION__: string(10) "__destruct"

@@ -17,10 +17,10 @@
 #ifndef HPHP_IDL_H
 #define HPHP_IDL_H
 
-#include "folly/Conv.h"
-#include "folly/DynamicConverter.h"
-#include "folly/FBString.h"
-#include "folly/FBVector.h"
+#include <folly/Conv.h>
+#include <folly/DynamicConverter.h>
+#include <folly/FBString.h>
+#include <folly/FBVector.h>
 
 #include "hphp/runtime/base/datatype.h"
 

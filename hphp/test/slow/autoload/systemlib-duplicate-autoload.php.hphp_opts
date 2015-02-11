@@ -1,0 +1,4 @@
+--ffile=hphp/test/slow/autoload/systemlib-duplicate-autoload-1.inc --ffile=test/slow/autoload/systemlib-duplicate-autoload-1.inc --ffile=slow/autoload/systemlib-duplicate-autoload-1.inc
+--ffile=hphp/test/slow/autoload/systemlib-duplicate-autoload-2.inc --ffile=test/slow/autoload/systemlib-duplicate-autoload-2.inc --ffile=slow/autoload/systemlib-duplicate-autoload-2.inc
+--ffile=hphp/test/slow/autoload/systemlib-duplicate-autoload-3.inc --ffile=test/slow/autoload/systemlib-duplicate-autoload-3.inc --ffile=slow/autoload/systemlib-duplicate-autoload-3.inc
+--ffile=hphp/test/slow/autoload/systemlib-duplicate-autoload-4.inc --ffile=test/slow/autoload/systemlib-duplicate-autoload-4.inc --ffile=slow/autoload/systemlib-duplicate-autoload-4.inc

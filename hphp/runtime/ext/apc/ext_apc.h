@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class apcExtension : public Extension {
+class apcExtension final : public Extension {
  public:
   apcExtension() : Extension("apc", "4.0.2") {}
 

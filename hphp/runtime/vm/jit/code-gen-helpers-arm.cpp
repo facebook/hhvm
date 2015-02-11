@@ -20,6 +20,10 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit { namespace arm {
 
@@ -76,7 +80,7 @@ Vpoint emitCall(Vout& v, CppCall call, RegSet args) {
   PhysReg rHostCall(rHostCallReg);
   switch (call.kind()) {
   case CppCall::Kind::Direct:
-    v << ldimm{reinterpret_cast<intptr_t>(call.address()), rHostCall};
+    v << ldimmq{reinterpret_cast<intptr_t>(call.address()), rHostCall};
     break;
   case CppCall::Kind::Virtual:
     v << load{arg0[0], rHostCall};
@@ -130,33 +134,32 @@ void emitRegRegMove(vixl::MacroAssembler& a, const vixl::CPURegister& dst,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
+void emitTestSurpriseFlags(vixl::MacroAssembler& a, PhysReg rds) {
   // Keep this in sync with vasm version below
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  a.  Ldr   (rAsm.W(), rVmTl[RDS::kConditionFlagsOff]);
+  a.  Ldr   (rAsm.W(), vixl::Register(rds)[rds::kConditionFlagsOff]);
   a.  Tst   (rAsm.W(), rAsm.W());
 }
 
-Vreg emitTestSurpriseFlags(Vout& v) {
+Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
   // Keep this in sync with arm version above
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  PhysReg rds{rVmTl};
   auto flags = v.makeReg();
   auto sf = v.makeReg();
-  v << loadl{rds[RDS::kConditionFlagsOff], flags};
+  v << loadl{rds[rds::kConditionFlagsOff], flags};
   v << testl{flags, flags, sf};
   return sf;
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
-                                 jit::Fixup fixup) {
+                                 PhysReg rds, jit::Fixup fixup) {
   // keep this in sync with vasm version below
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler acold { coldCode };
 
-  emitTestSurpriseFlags(a);
+  emitTestSurpriseFlags(a, rds);
   mcg->backEnd().emitSmashableJump(mainCode, coldCode.frontier(), CC_NZ);
 
   acold.  Mov  (argReg(0), rVmFp);
@@ -167,12 +170,13 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   mcg->backEnd().emitSmashableJump(coldCode, mainCode.frontier(), CC_None);
 }
 
-void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, jit::Fixup fixup) {
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, Vreg rds,
+                                 jit::Fixup fixup) {
   // keep this in sync with arm version above
   PhysReg fp{rVmFp}, arg0{argReg(0)};
   auto surprise = vc.makeBlock();
   auto done = v.makeBlock();
-  auto sf = emitTestSurpriseFlags(v);
+  auto sf = emitTestSurpriseFlags(v, rds);
   v << jcc{CC_NZ, sf, {done, surprise}};
 
   vc = surprise;
@@ -185,10 +189,11 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, jit::Fixup fixup) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
-  a.    Str  (rVmSp, rVmTl[RDS::kVmspOff]);
+void emitEagerVMRegSave(vixl::MacroAssembler& a, vixl::Register rds,
+                        RegSaveFlags flags) {
+  a.    Str  (rVmSp, rds[rds::kVmspOff]);
   if ((bool)(flags & RegSaveFlags::SaveFP)) {
-    a.  Str  (rVmFp, rVmTl[RDS::kVmfpOff]);
+    a.  Str  (rVmFp, rds[rds::kVmfpOff]);
   }
 
   if ((bool)(flags & RegSaveFlags::SavePC)) {
@@ -197,7 +202,7 @@ void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
     a.  Ldr  (rAsm, rAsm[Func::unitOff()]);
     a.  Ldr  (rAsm, rAsm[Unit::bcOff()]);
     a.  Add  (rAsm, rAsm, vixl::Operand(argReg(0), vixl::UXTW));
-    a.  Str  (rAsm, rVmTl[RDS::kVmpcOff]);
+    a.  Str  (rAsm, rds[rds::kVmpcOff]);
   }
 }
 

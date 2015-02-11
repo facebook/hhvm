@@ -18,7 +18,7 @@
 #define incl_HPHP_SCALAR_EXPRESSION_H_
 
 #include "hphp/compiler/expression/expression.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,6 @@ public:
 
   void setComment(const std::string &comment) { m_comment = comment;}
   std::string getComment() { return m_comment;}
-
 
   bool getString(const std::string *&s) const;
   bool getInt(int64_t &i) const;

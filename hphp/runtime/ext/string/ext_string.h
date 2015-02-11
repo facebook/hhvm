@@ -219,8 +219,7 @@ Variant sscanfImpl(const String& str,
                    const String& format,
                    const std::vector<Variant*>& args);
 TypedValue* HHVM_FN(sscanf)(ActRec* ar);
-String HHVM_FUNCTION(chr,
-                     Variant ascii);
+String HHVM_FUNCTION(chr, const Variant& ascii);
 int64_t HHVM_FUNCTION(ord,
                       const String& str);
 Variant HHVM_FUNCTION(money_format,

@@ -1,0 +1,4 @@
+File "cannot_use_class_tparams.php", line 4, characters 30-30:
+A type constant can only use type parameters declared in its own type parameter list (NastCheck[3027])
+File "cannot_use_class_tparams.php", line 3, characters 9-9:
+T was declared as a type parameter here

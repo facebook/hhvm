@@ -1,0 +1,1 @@
+Fatal error: Call to private Asd::__construct() from invalid context in %s/slow/object/ctor_fail2.php on line 14

@@ -22,18 +22,32 @@
 
 #include "hphp/util/portability.h"
 
+#if defined __x86_64__
+#  if (!defined USE_SSECRC)
+#    define USE_SSECRC
+#  endif
+#else
+#  undef USE_SSECRC
+#endif
+
+// Killswitch
+#if NO_SSECRC
+#  undef USE_SSECRC
+#endif
+
 namespace HPHP {
+
+bool IsSSEHashSupported();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef int32_t strhash_t;
 const strhash_t STRHASH_MASK = 0x7fffffff;
 const strhash_t STRHASH_MSB  = 0x80000000;
 
-/*
- * "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
- * http://www.concentric.net/~ttwang/tech/inthash.htm
- */
 inline long long hash_int64(long long key) {
+  // "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
+  // http://www.concentric.net/~ttwang/tech/inthash.htm
   key = (~key) + (key << 21); // key = (key << 21) - key - 1;
   key = key ^ ((unsigned long long)key >> 24);
   key = (key + (key << 3)) + (key << 8); // key * 265
@@ -236,33 +250,50 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace MurmurHash3
 
-inline strhash_t hash_string_cs(const char *arKey, int nKeyLength) {
-  if (MurmurHash3::useHash128) {
-    uint64_t h[2];
-    MurmurHash3::hash128<true>(arKey, nKeyLength, 0, h);
-    return strhash_t(h[0] & STRHASH_MASK);
-  } else {
-    uint32_t h = MurmurHash3::hash32<true>(arKey, nKeyLength, 0);
-    return strhash_t(h & STRHASH_MASK);
-  }
+// Four functions for hashing: hash_string_(cs|i)(_unsafe)?.
+//   cs: case-sensitive;
+//   i: case-insensitive;
+//   unsafe: safe for strings aligned at 8-byte boundary;
+
+// Fallback versions uses CRC hash when supported, and use MurmurHash otherwise.
+strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength);
+
+#if FACEBOOK && defined USE_SSECRC
+
+strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength);
+strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength);
+
+#else
+
+inline strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_cs_fallback(arKey, nKeyLength);
 }
 
-strhash_t hash_string_i(const char *arKey, int nKeyLength);
-strhash_t hash_string(const char *arKey, int nKeyLength);
-
-inline strhash_t hash_string_i_inline(const char *arKey, int nKeyLength) {
-  if (MurmurHash3::useHash128) {
-    uint64_t h[2];
-    MurmurHash3::hash128<false>(arKey, nKeyLength, 0, h);
-    return strhash_t(h[0] & STRHASH_MASK);
-  } else {
-    uint32_t h = MurmurHash3::hash32<false>(arKey, nKeyLength, 0);
-    return strhash_t(h & STRHASH_MASK);
-  }
+inline
+strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_cs_fallback(arKey, nKeyLength);
 }
 
-inline strhash_t hash_string_inline(const char *arKey, int nKeyLength) {
+inline strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_fallback(arKey, nKeyLength);
+}
+
+inline
+strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_fallback(arKey, nKeyLength);
+}
+
+#endif
+
+inline strhash_t hash_string(const char *arKey, uint32_t nKeyLength) {
   return hash_string_i(arKey, nKeyLength);
+}
+
+inline strhash_t hash_string_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_unsafe(arKey, nKeyLength);
 }
 
 /**
@@ -273,6 +304,7 @@ inline strhash_t hash_string_inline(const char *arKey, int nKeyLength) {
 inline strhash_t hash_string(const char *arKey) {
   return hash_string(arKey, strlen(arKey));
 }
+
 inline strhash_t hash_string_i(const char *arKey) {
   return hash_string_i(arKey, strlen(arKey));
 }
@@ -334,7 +366,19 @@ inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
   return false;
 }
 
+class StringData;
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#ifdef USE_SSECRC
+// The following functions are implemented in ASM directly for x86_64.
+extern "C" {
+  HPHP::strhash_t hash_string_cs_crc(const char*, uint32_t);
+  HPHP::strhash_t hash_string_i_crc(const char*, uint32_t);
+  HPHP::strhash_t hash_string_cs_unaligned_crc(const char*, uint32_t);
+  HPHP::strhash_t hash_string_i_unaligned_crc(const char*, uint32_t);
+  HPHP::strhash_t g_hashHelper_crc(const HPHP::StringData*);
+}
+#endif
 
 #endif // incl_HPHP_HASH_H_

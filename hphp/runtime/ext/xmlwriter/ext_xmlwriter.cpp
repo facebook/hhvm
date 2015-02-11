@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/vm/native-data.h"
 
 #include <libxml/tree.h>
@@ -861,11 +862,11 @@ XMLWRITER_METHOD_AND_FUNCTION(String, xmlwriter_output_memory, outputMemory,
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension
-class XMLWriterExtension : public Extension {
+class XMLWriterExtension final : public Extension {
   public:
     XMLWriterExtension() : Extension("xmlwriter", "0.1") {};
 
-    virtual void moduleInit() {
+    void moduleInit() override {
       HHVM_ME(XMLWriter, openMemory);
       HHVM_ME(XMLWriter, openURI);
       HHVM_ME(XMLWriter, setIndentString);

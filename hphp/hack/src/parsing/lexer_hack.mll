@@ -268,7 +268,7 @@ let alphanumeric = digit | letter
 let varname = letter alphanumeric*
 let word_part = (letter alphanumeric*) | (['a'-'z'] (alphanumeric | '-')* alphanumeric)
 let word = ('\\' | word_part)+ (* Namespaces *)
-let xhpname = ('%')? letter (alphanumeric | ':' [^':''>'] | '-')*
+let xhpname = ('%')? varname ([':' '-'] varname)*
 let otag = '<' ['a'-'z''A'-'Z'] (alphanumeric | ':' | '-')*
 let ctag = '<' '/' (alphanumeric | ':' | '-')+ '>'
 let lvar = '$' varname
@@ -601,11 +601,29 @@ and look_for_open_cb = parse
   | '{'                { () }
   | _                  { look_for_open_cb lexbuf }
 
-and format_token = parse
-  | ' '                { Tspace        }
-  | '\n'               { Tnewline      }
-  | "/*"               { Topen_comment }
+(* Normally you can just use "token" and get back Tlvar, but specifically for
+ * member variable accesses, the part to the right of the "->" isn't a word
+ * (cannot contain '-' for example) but doesn't start with '$' so isn't an lvar
+ * either. *)
+and varname = parse
+  | varname            { Tword  }
+  | _                  { Terror }
+
+(****************************************************************************)
+(* hh_format tokenizers. *)
+(****************************************************************************)
+
+and format_comment = parse
+  | [' '  '\t']        { Tspace         }
+  | ws* '\n'           { Tnewline       } (* eat up trailing spaces *)
+  | eof                { Teof           }
   | "*/"               { Tclose_comment }
+  | _                  { Tany           }
+
+and format_token = parse
+  | [' '  '\t']        { Tspace        }
+  | ws* '\n'           { Tnewline      } (* eat up trailing spaces *)
+  | "/*"               { Topen_comment }
   | "//"               { Tline_comment }
   | "#"                { Tline_comment }
   | '\"'               { Tdquote       }
@@ -681,7 +699,7 @@ and format_token = parse
 
 and format_xhptoken = parse
   | eof                { Teof        }
-  | '\n'               { Tnewline    }
+  | ws* '\n'           { Tnewline    } (* eat up trailing spaces *)
   | ' '                { Tspace      }
   | '<'                { Tlt         }
   | '>'                { Tgt         }
@@ -696,11 +714,3 @@ and format_xhptoken = parse
   | "<!--"             { Topen_xhp_comment  }
   | "-->"              { Tclose_xhp_comment }
   | _                  { Terror             }
-
-(* Normally you can just use "token" and get back Tlvar, but specifically for
- * member variable accesses, the part to the right of the "->" isn't a word
- * (cannot contain '-' for example) but doesn't start with '$' so isn't an lvar
- * either. *)
-and varname = parse
-  | varname            { Tword  }
-  | _                  { Terror }

@@ -35,6 +35,7 @@ class type ['a] hint_visitor_type = object
   method on_fun    : 'a -> Nast.hint list -> bool -> Nast.hint -> 'a
   method on_apply  : 'a -> Nast.sid -> Nast.hint list -> 'a
   method on_shape  : 'a -> Nast.hint ShapeMap.t -> 'a
+  method on_access : 'a -> Nast.hint -> Nast.sid list -> 'a
 end
 
 (*****************************************************************************)
@@ -43,7 +44,7 @@ end
 
 class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
 
-  method on_hint acc (p, h) = this#on_hint_ acc h
+  method on_hint acc (_, h) = this#on_hint_ acc h
 
   method on_hint_ acc h = match h with
     | Hany                  -> this#on_any    acc
@@ -56,13 +57,14 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     | Hfun (hl, b, h)       -> this#on_fun    acc hl b h
     | Happly (i, hl)        -> this#on_apply  acc i hl
     | Hshape hm             -> this#on_shape  acc hm
+    | Haccess (h, il)       -> this#on_access acc h il
 
   method on_any acc = acc
   method on_mixed acc = acc
   method on_tuple acc hl =
     List.fold_left this#on_hint acc (hl:Nast.hint list)
 
-  method on_abstr acc s hopt =
+  method on_abstr acc _ hopt =
     match hopt with
       | None -> acc
       | Some h -> this#on_hint acc h
@@ -78,16 +80,16 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     in
     acc
 
-  method on_prim acc p = acc
+  method on_prim acc _ = acc
 
   method on_option acc h = this#on_hint acc h
 
-  method on_fun acc hl b h =
+  method on_fun acc hl _ h =
     let acc = List.fold_left this#on_hint acc hl in
     let acc = this#on_hint acc h in
     acc
 
-  method on_apply acc id (hl:Nast.hint list) =
+  method on_apply acc _ (hl:Nast.hint list) =
     let acc = List.fold_left this#on_hint acc hl in
     acc
 
@@ -97,37 +99,38 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
       acc
     end hm acc
 
+  method on_access acc h _ =
+    this#on_hint acc h
+
 end
 
-(* For checking whether hint refers to a construct that cannot ever
- * have instances. To avoid race conditions with typing, only look up
- * class info in the naming heap (and run only after the naming heap is
- * complete) *)
+(* For checking whether hint refers to a construct that cannot ever have
+ * instances. To avoid race conditions, only look up class info after the decl
+ * phase is complete. *)
 module CheckInstantiability = struct
 
   let visitor =
-  object(this)
-    inherit [Env.env] hint_visitor
+  object
+    inherit [Env.env] hint_visitor as super
 
-    method on_apply env (usage_pos, n) hl =
-      let () = (match Naming_heap.ClassHeap.get n with
-        | Some {c_kind = Ast.Cabstract; c_final = true;
-                c_name = (decl_pos, decl_name); _}
-        | Some {c_kind = Ast.Ctrait; c_name = (decl_pos, decl_name); _} ->
-          Errors.uninstantiable_class usage_pos decl_pos decl_name
+    method! on_apply env (usage_pos, n) hl =
+      let () = (match Typing_env.Classes.get n with
+        | Some {tc_kind = Ast.Cabstract; tc_final = true;
+                tc_name; tc_pos; _}
+        | Some {tc_kind = Ast.Ctrait; tc_name; tc_pos; _} ->
+          Errors.uninstantiable_class usage_pos tc_pos tc_name
         | _ -> ()) in
-      let env = List.fold_left this#on_hint env hl in
-      env
+      super#on_apply env (usage_pos, n) hl
 
-    method on_abstr env s hopt =
+    method! on_abstr _env _ _ =
         (* there should be no need to descend into abstract params, as
          * the necessary param checks happen on the declaration of the
          * constraint *)
-      env
+      _env
 
   end
 
-let check env h : Env.env = visitor#on_hint env h
+  let check env h : Env.env = visitor#on_hint env h
 
 end
 
@@ -150,6 +153,7 @@ let check_tparams_instantiable (env:Env.env) (tparams:Nast.tparam list) =
 
 (* Unpacking a hint for typing *)
 
+(* ensure_instantiable should only be set after the decl phase is done *)
 let rec hint ?(ensure_instantiable=false) env (p, h) =
   let env = if not ensure_instantiable then env
     else check_instantiable env (p, h) in
@@ -192,6 +196,7 @@ and hint_ p env = function
       env, Tfun {
         ft_pos = p;
         ft_unsafe = false;
+        ft_deprecated = None;
         ft_abstract = false;
         ft_arity = arity;
         ft_tparams = [];
@@ -202,11 +207,14 @@ and hint_ p env = function
   | Happly ((p, "\\tuple"), _) ->
       Errors.tuple_syntax p;
       env, Tany
-  | Happly (((p, c) as id), argl) ->
-      Find_refs.process_class_ref p c None;
-      let env = Env.add_wclass env c in
+  | Happly (((_p, c) as id), argl) ->
+      Typing_hooks.dispatch_class_id_hook id None;
+      Env.add_wclass env c;
       let env, argl = lfold hint env argl in
       env, Tapply (id, argl)
+  | Haccess (root_ty, ids) ->
+      let env, root_ty = hint env root_ty in
+      env, Taccess (root_ty, ids)
   | Htuple hl ->
       let env, tyl = lfold hint env hl in
       env, Ttuple tyl

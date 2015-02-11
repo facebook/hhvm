@@ -1,0 +1,27 @@
+object(MyRangeException)#1 (10) {
+  ["badValue":"MyRangeException":private]=>
+  int(5)
+  ["lowerValue":"MyRangeException":private]=>
+  int(20)
+  ["upperValue":"MyRangeException":private]=>
+  int(30)
+  ["message":protected]=>
+  string(3) "xxx"
+  ["string":"Exception":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(%d) "%s/exception_handling/myrangeexception_test1.php"
+  ["line":protected]=>
+  int(13)
+  ["trace":"Exception":private]=>
+  array(0) {
+  }
+  ["previous":"Exception":private]=>
+  NULL
+}
+=======
+$re = >exception 'MyRangeException' with message 'xxx' in %s/exception_handling/myrangeexception_test1.php:13
+Stack trace:
+#0 {main}, badValue: 5, lowerValue: 20, upperValue: 30<

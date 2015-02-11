@@ -236,6 +236,8 @@ void raise_param_type_warning(
     func_name += 4;
   } else if (strncmp(func_name, "__SystemLib\\extract", 19) == 0) {
     func_name = "extract";
+  } else if (strncmp(func_name, "__SystemLib\\assert", 18) == 0) {
+    func_name = "assert";
   } else if (strncmp(func_name, "__SystemLib\\parse_str", 21) == 0) {
     func_name = "parse_str";
   } else if (strncmp(func_name, "__SystemLib\\compact_sl", 22) == 0) {

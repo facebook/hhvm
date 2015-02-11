@@ -22,8 +22,8 @@
 #include <sstream>
 #include <type_traits>
 
-#include "folly/Format.h"
-#include "folly/Traits.h"
+#include <folly/Format.h>
+#include <folly/Traits.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/string-data.h"
@@ -44,7 +44,6 @@ TRACE_SET_MOD(hhir);
 
 #define NF     0
 #define C      CanCSE
-#define E      Essential
 #define Er     MayRaiseError
 #define PRc    ProducesRC
 #define CRc    ConsumesRC
@@ -52,15 +51,14 @@ TRACE_SET_MOD(hhir);
 #define B      Branch
 #define P      Passthrough
 #define K      KillsSources
-#define StkFlags(f) HasStackVersion|(f)
 #define MProp  MInstrProp
 #define MElem  MInstrElem
 
 #define ND             0
 #define D(n)           HasDest
 #define DofS(n)        HasDest
-#define DBox(n)        HasDest
 #define DRefineS(n)    HasDest
+#define DParamMayRelax HasDest
 #define DParam         HasDest
 #define DParamPtr(k)   HasDest
 #define DUnboxPtr      HasDest
@@ -68,11 +66,9 @@ TRACE_SET_MOD(hhir);
 #define DAllocObj      HasDest
 #define DArrElem       HasDest
 #define DArrPacked     HasDest
-#define DLdRef         HasDest
 #define DThis          HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
-#define DStk(x)        ModifiesStack|(x)
 #define DPtrToParam    HasDest
 #define DBuiltin       HasDest
 #define DSubtract(n,t) HasDest
@@ -99,15 +95,14 @@ OpInfo g_opInfo[] = {
 #undef B
 #undef P
 #undef K
-#undef StkFlags
 #undef MProp
 #undef MElem
 
 #undef ND
 #undef D
 #undef DofS
-#undef DBox
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
 #undef DUnboxPtr
@@ -115,24 +110,15 @@ OpInfo g_opInfo[] = {
 #undef DArrElem
 #undef DArrPacked
 #undef DAllocObj
-#undef DLdRef
 #undef DThis
 #undef DMulti
 #undef DSetElem
-#undef DStk
 #undef DPtrToParam
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
 
 //////////////////////////////////////////////////////////////////////
-
-Opcode getStackModifyingOpcode(Opcode opc) {
-  assert(opcodeHasFlags(opc, HasStackVersion));
-  opc = Opcode(uint64_t(opc) + 1);
-  assert(opcodeHasFlags(opc, ModifiesStack));
-  return opc;
-}
 
 const StringData* findClassName(SSATmp* cls) {
   assert(cls->isA(Type::Cls));
@@ -150,6 +136,19 @@ const StringData* findClassName(SSATmp* cls) {
     }
   }
   return nullptr;
+}
+
+bool isCallOp(Opcode opc) {
+  // CallBuiltin doesn't count because it is not a php-level call.  (It will
+  // call a C++ helper and we can push/pop around it normally.)
+  switch (opc) {
+  case Call:
+  case CallArray:
+  case ContEnter:
+    return true;
+  default:
+    return false;
+  }
 }
 
 bool isGuardOp(Opcode opc) {
@@ -223,131 +222,6 @@ bool isDblQueryOp(Opcode opc) {
     return true;
   default:
     return false;
-  }
-}
-
-bool isFusableQueryOp(Opcode opc) {
-  return isQueryOp(opc) && !isDblQueryOp(opc) &&
-    opc != IsType && opc != IsNType;
-}
-
-bool isQueryJmpOp(Opcode opc) {
-  switch (opc) {
-  case JmpGt:
-  case JmpGte:
-  case JmpLt:
-  case JmpLte:
-  case JmpEq:
-  case JmpNeq:
-  case JmpGtInt:
-  case JmpGteInt:
-  case JmpLtInt:
-  case JmpLteInt:
-  case JmpEqInt:
-  case JmpNeqInt:
-  case JmpSame:
-  case JmpNSame:
-  case JmpInstanceOfBitmask:
-  case JmpNInstanceOfBitmask:
-  case JmpZero:
-  case JmpNZero:
-    return true;
-  default:
-    return false;
-  }
-}
-
-Opcode queryToJmpOp(Opcode opc) {
-  assert(isFusableQueryOp(opc));
-  switch (opc) {
-  case Gt:                 return JmpGt;
-  case Gte:                return JmpGte;
-  case Lt:                 return JmpLt;
-  case Lte:                return JmpLte;
-  case Eq:                 return JmpEq;
-  case Neq:                return JmpNeq;
-  case GtInt:              return JmpGtInt;
-  case GteInt:             return JmpGteInt;
-  case LtInt:              return JmpLtInt;
-  case LteInt:             return JmpLteInt;
-  case EqInt:              return JmpEqInt;
-  case NeqInt:             return JmpNeqInt;
-  case Same:               return JmpSame;
-  case NSame:              return JmpNSame;
-  case InstanceOfBitmask:  return JmpInstanceOfBitmask;
-  case NInstanceOfBitmask: return JmpNInstanceOfBitmask;
-  default:                 always_assert(0);
-  }
-}
-
-Opcode queryJmpToQueryOp(Opcode opc) {
-  assert(isQueryJmpOp(opc));
-  switch (opc) {
-  case JmpGt:                 return Gt;
-  case JmpGte:                return Gte;
-  case JmpLt:                 return Lt;
-  case JmpLte:                return Lte;
-  case JmpEq:                 return Eq;
-  case JmpNeq:                return Neq;
-  case JmpGtInt:              return GtInt;
-  case JmpGteInt:             return GteInt;
-  case JmpLtInt:              return LtInt;
-  case JmpLteInt:             return LteInt;
-  case JmpEqInt:              return EqInt;
-  case JmpNeqInt:             return NeqInt;
-  case JmpSame:               return Same;
-  case JmpNSame:              return NSame;
-  case JmpInstanceOfBitmask:  return InstanceOfBitmask;
-  case JmpNInstanceOfBitmask: return NInstanceOfBitmask;
-  default:                    always_assert(0);
-  }
-}
-
-Opcode jmpToSideExitJmp(Opcode opc) {
-  switch (opc) {
-  case JmpGt:                 return SideExitJmpGt;
-  case JmpGte:                return SideExitJmpGte;
-  case JmpLt:                 return SideExitJmpLt;
-  case JmpLte:                return SideExitJmpLte;
-  case JmpEq:                 return SideExitJmpEq;
-  case JmpNeq:                return SideExitJmpNeq;
-  case JmpGtInt:              return SideExitJmpGtInt;
-  case JmpGteInt:             return SideExitJmpGteInt;
-  case JmpLtInt:              return SideExitJmpLtInt;
-  case JmpLteInt:             return SideExitJmpLteInt;
-  case JmpEqInt:              return SideExitJmpEqInt;
-  case JmpNeqInt:             return SideExitJmpNeqInt;
-  case JmpSame:               return SideExitJmpSame;
-  case JmpNSame:              return SideExitJmpNSame;
-  case JmpInstanceOfBitmask:  return SideExitJmpInstanceOfBitmask;
-  case JmpNInstanceOfBitmask: return SideExitJmpNInstanceOfBitmask;
-  case JmpZero:               return SideExitJmpZero;
-  case JmpNZero:              return SideExitJmpNZero;
-  default:                    always_assert(0);
-  }
-}
-
-Opcode jmpToReqBindJmp(Opcode opc) {
-  switch (opc) {
-  case JmpGt:                 return ReqBindJmpGt;
-  case JmpGte:                return ReqBindJmpGte;
-  case JmpLt:                 return ReqBindJmpLt;
-  case JmpLte:                return ReqBindJmpLte;
-  case JmpEq:                 return ReqBindJmpEq;
-  case JmpNeq:                return ReqBindJmpNeq;
-  case JmpGtInt:              return ReqBindJmpGtInt;
-  case JmpGteInt:             return ReqBindJmpGteInt;
-  case JmpLtInt:              return ReqBindJmpLtInt;
-  case JmpLteInt:             return ReqBindJmpLteInt;
-  case JmpEqInt:              return ReqBindJmpEqInt;
-  case JmpNeqInt:             return ReqBindJmpNeqInt;
-  case JmpSame:               return ReqBindJmpSame;
-  case JmpNSame:              return ReqBindJmpNSame;
-  case JmpInstanceOfBitmask:  return ReqBindJmpInstanceOfBitmask;
-  case JmpNInstanceOfBitmask: return ReqBindJmpNInstanceOfBitmask;
-  case JmpZero:               return ReqBindJmpZero;
-  case JmpNZero:              return ReqBindJmpNZero;
-  default:                    always_assert(0);
   }
 }
 
@@ -427,24 +301,6 @@ Opcode queryToIntQueryOp(Opcode opc) {
   case LteDbl:return LteInt;
   case EqDbl: return EqInt;
   case NeqDbl:return NeqInt;
-  case JmpGt:    return JmpGtInt;
-  case JmpGte:   return JmpGteInt;
-  case JmpLt:    return JmpLtInt;
-  case JmpLte:   return JmpLteInt;
-  case JmpEq:    return JmpEqInt;
-  case JmpNeq:   return JmpNeqInt;
-  case SideExitJmpGt:   return SideExitJmpGtInt;
-  case SideExitJmpGte:  return SideExitJmpGteInt;
-  case SideExitJmpLt:   return SideExitJmpLtInt;
-  case SideExitJmpLte:  return SideExitJmpLteInt;
-  case SideExitJmpEq:   return SideExitJmpEqInt;
-  case SideExitJmpNeq:  return SideExitJmpNeqInt;
-  case ReqBindJmpGt:    return ReqBindJmpGtInt;
-  case ReqBindJmpGte:   return ReqBindJmpGteInt;
-  case ReqBindJmpLt:    return ReqBindJmpLtInt;
-  case ReqBindJmpLte:   return ReqBindJmpLteInt;
-  case ReqBindJmpEq:    return ReqBindJmpEqInt;
-  case ReqBindJmpNeq:   return ReqBindJmpNeqInt;
   default: always_assert(0);
   }
 }
@@ -466,12 +322,6 @@ Opcode queryToDblQueryOp(Opcode opc) {
   case NeqInt:return NeqDbl;
   default: always_assert(0);
   }
-}
-
-int32_t spillValueCells(const IRInstruction* spillStack) {
-  assert(spillStack->op() == SpillStack);
-  int32_t numSrcs = spillStack->numSrcs();
-  return numSrcs - 2;
 }
 
 }}

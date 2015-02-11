@@ -297,7 +297,7 @@ private:
       unsigned referenced_valid    : 1; // is the above flag is valid
       unsigned needed              : 1;
       unsigned needed_valid        : 1; // is the above flag is valid
-      unsigned chainRoot           : 1; // is this the begining of a
+      unsigned chainRoot           : 1; // is this the beginning of a
                                         // CSE chain
       unsigned noRemove            : 1; // DCE should NOT remove this node
       unsigned guarded             : 1; // previously used
@@ -310,13 +310,6 @@ protected:
   LocationPtr m_loc;
   mutable int m_containedEffects;
   mutable int m_effectsTag;
-
-  /**
-   * Called by analyzeProgram() to add a reference to a user class or
-   * function.
-   */
-  void addUserFunction(AnalysisResultPtr ar, const std::string &name);
-  void addUserClass(AnalysisResultPtr ar, const std::string &name);
 };
 
 class LocalEffectsContainer {

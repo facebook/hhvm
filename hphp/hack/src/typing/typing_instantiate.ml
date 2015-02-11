@@ -12,6 +12,7 @@ open Utils
 open Typing_defs
 
 module Env    = Typing_env
+module SN     = Naming_special_names
 module TUtils = Typing_utils
 
 type env   = Env.env
@@ -41,7 +42,8 @@ let rec make_subst tparams tyl =
   !subst
 
 and make_subst_with_this ~this tparams tyl =
-  make_subst ((Ast.Invariant, (Pos.none, "this"), None)::tparams) (this::tyl)
+  make_subst ((Ast.Invariant, (Pos.none, SN.Typehints.this), None)::tparams)
+    (this::tyl)
 
 and make_subst_tparam subst tyl (_, (_, tparam_name), _) =
   let ty =
@@ -66,12 +68,12 @@ let rec instantiate_fun env fty el =
       let env, ft = instantiate_ft env ft in
       let fty = r, Tfun ft in
       env, fty
-  | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+  | r, Tapply ((_, x), argl) when Typing_env.is_typedef x ->
       let env, fty = TUtils.expand_typedef env r x argl in
       instantiate_fun env fty el
   | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
     | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
-    | Tunresolved _ | Tobject | Tshape _) -> env, fty
+    | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _)) -> env, fty
 
 and instantiate_ft env ft =
   let env, tvarl = List.fold_left begin fun (env, vars) (_, (pos, _), _) ->
@@ -91,7 +93,7 @@ and instantiate_ft env ft =
       env, Fvariadic (min, (name, var_ty))
     | _ -> env, ft.ft_arity
   in
-  let env, ret  = instantiate subst env ft.ft_ret in
+  let env, ret = instantiate subst env ft.ft_ret in
   let params = List.map2 (fun x y -> x, y) names params in
   env, { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
 
@@ -107,7 +109,8 @@ and check_constraint env ty x_ty =
   | Tany, _ -> fst (TUtils.unify env ty x_ty)
   | (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _ | Tvar _
     | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tunresolved _ | Tobject | Tshape _), _ -> TUtils.sub_type env ty x_ty
+    | Tunresolved _ | Tobject | Tshape _
+    | Taccess _), _ -> TUtils.sub_type env ty x_ty
 
 and instantiate subst env (r, ty) =
   match ty with
@@ -140,14 +143,19 @@ and instantiate subst env (r, ty) =
               env, (r, Tgeneric (x, Some ty))
       )
   | Tany | Tmixed | Tarray (_, _) | Tprim _ | Toption _ | Tvar _
-    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tunresolved _ | Tobject | Tshape _->
-      let p = Reason.to_pos r in
-      let env, ty = instantiate_ p subst env ty in
+  | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
+  | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _) ->
+      let env, ty = instantiate_ subst env ty in
       env, (r, ty)
 
-and instantiate_ p subst env = function
+and instantiate_ subst env = function
   | Tgeneric _ -> assert false
+  (* IMPORTANT: We cannot expand Taccess during instantiation because this can
+   * be called before all type consts have been declared and inherited
+   *)
+  | Taccess (ty, ids) ->
+      let env, ty = instantiate subst env ty in
+      env, Taccess (ty, ids)
   | Tanon _ as x -> env, x
   | Tarray (ty1, ty2) ->
       let env, ty1 = opt (instantiate subst) env ty1 in
@@ -187,7 +195,7 @@ and instantiate_ p subst env = function
           env, Fvariadic (min, (name, var_ty))
         | _ -> env, ft.ft_arity
       in
-      let env, ret  = instantiate subst env ft.ft_ret in
+      let env, ret = instantiate subst env ft.ft_ret in
       let params = List.map2 (fun x y -> x, y) names params in
       env, Tfun { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
   | Tabstract (x, tyl, tcstr) ->
@@ -212,6 +220,12 @@ and instantiate_ p subst env = function
 and instantiate_ce subst env ({ ce_type = x; _ } as ce) =
   let env, x = instantiate subst env x in
   env, { ce with ce_type = x }
+
+and instantiate_typeconst subst env (
+  { ttc_constraint = x; ttc_type = y; _ } as tc) =
+    let env, x = opt (instantiate subst) env x in
+    let env, y = opt (instantiate subst) env y in
+    env, { tc with ttc_constraint = x; ttc_type = y }
 
 let instantiate_this env ty this_ty =
   let subst = make_subst_with_this this_ty [] [] in

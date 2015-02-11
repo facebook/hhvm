@@ -9,20 +9,18 @@
  *
  */
 
+class A {
 
-
-class A{
-
-  public function myfun($a){
+  public function myfun($a) {
     $a[] = 'my_value';
     return $a;
   }
-  
-  public function myfun2($a){
+
+  public function myfun2($a) {
     return $a['a'];
   }
-  
-  public function main($a){
+
+  public function main($a) {
     $x = $this->myfun($a);
     $t = array('e' => 1);
     $z = $t['f'];

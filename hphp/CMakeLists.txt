@@ -64,8 +64,11 @@ endif()
 add_definitions("-DHHVM")
 add_definitions("-DUSE_CMAKE")
 
+enable_language(ASM)
+
 add_subdirectory(tools/bootstrap)
 add_subdirectory(tools/hfsort)
+add_subdirectory(tools/version)
 
 add_subdirectory(compiler)
 add_subdirectory(hack)
@@ -90,6 +93,8 @@ option(TEST_BIN "Create the HHVM test binary" OFF)
 if (TEST_BIN)
   add_subdirectory(test)
 endif ()
+
+add_subdirectory(tools/gdb)
 
 # Keep this last
 add_subdirectory(tools/hphpize)

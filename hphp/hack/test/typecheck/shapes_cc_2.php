@@ -16,4 +16,8 @@ class X {
   const string X2 = 'field2';
 }
 
-type myshape = shape(X::X1 => int, X::X2 => bool, X::X3 => bool);
+type myshape = shape(
+  X::X1 => int,
+  X::X2 => bool,
+  X::X3 => bool,
+);

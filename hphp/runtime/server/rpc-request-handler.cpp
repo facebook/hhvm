@@ -17,6 +17,9 @@
 #include "hphp/runtime/server/rpc-request-handler.h"
 
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -32,7 +35,7 @@
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/system/constants.h"
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 using std::set;
 
@@ -48,7 +51,7 @@ RPCRequestHandler::RPCRequestHandler(int timeout, bool info)
 }
 
 RPCRequestHandler::~RPCRequestHandler() {
-  cleanupState();
+  if (vmStack().isAllocated()) cleanupState();
 }
 
 void RPCRequestHandler::initState() {
@@ -157,6 +160,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   reqData.setTimeout(vhost->getRequestTimeoutSeconds(getDefaultTimeout()));
   SCOPE_EXIT {
     reqData.setTimeout(0);  // can't throw when you pass zero
+    reqData.setCPUTimeout(0);
     reqData.reset();
   };
 

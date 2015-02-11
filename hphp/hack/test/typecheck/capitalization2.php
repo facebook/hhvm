@@ -5,7 +5,7 @@ class CamelCase {
   final public function foo(int $x): void {}
 }
 
-//// f3.php
+//// f2.php
 <?hh
 function foo(cAmelCase $arg): :xhp {
   hh_show($arg);

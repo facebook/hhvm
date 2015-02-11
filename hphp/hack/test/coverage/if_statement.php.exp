@@ -1,6 +1,12 @@
+== lvar ==
 Unchecked: 0
 Partial: 0
-Checked: 3
+Checked: 2
 Checked / Total: 1.000000
 (Checked + Partial * 0.5) / Total: 1.000000
-No errors
+== total ==
+Unchecked: 0
+Partial: 0
+Checked: 2
+Checked / Total: 1.000000
+(Checked + Partial * 0.5) / Total: 1.000000

@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_ASIO_SESSION_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -27,12 +28,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ActRec;
-FORWARD_DECLARE_CLASS(WaitHandle);
-FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
-FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
-FORWARD_DECLARE_CLASS(GenMapWaitHandle);
-FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
-FORWARD_DECLARE_CLASS(ResumableWaitHandle);
+class c_WaitHandle;
+class c_AwaitAllWaitHandle;
+class c_GenArrayWaitHandle;
+class c_GenMapWaitHandle;
+class c_GenVectorWaitHandle;
+class c_ConditionWaitHandle;
+class c_ResumableWaitHandle;
 
 class AsioSession final {
   public:
@@ -156,6 +158,11 @@ class AsioSession final {
     bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
     void onGenVectorCreate(c_GenVectorWaitHandle* waitHandle, const Variant& dependencies);
 
+    // ConditionWaitHandle callbacks:
+    void setOnConditionCreateCallback(const Variant& callback);
+    bool hasOnConditionCreateCallback() { return m_onConditionCreateCallback.get(); }
+    void onConditionCreate(c_ConditionWaitHandle* waitHandle, c_WaitableWaitHandle* child);
+
     // ExternalThreadEventWaitHandle callbacks:
     void setOnExternalThreadEventCreateCallback(const Variant& callback);
     void setOnExternalThreadEventSuccessCallback(const Variant& callback);
@@ -198,6 +205,7 @@ class AsioSession final {
     Object m_onGenArrayCreateCallback;
     Object m_onGenMapCreateCallback;
     Object m_onGenVectorCreateCallback;
+    Object m_onConditionCreateCallback;
     Object m_onExternalThreadEventCreateCallback;
     Object m_onExternalThreadEventSuccessCallback;
     Object m_onExternalThreadEventFailCallback;

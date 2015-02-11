@@ -10,7 +10,9 @@
  */
 
 function test(): void {
-  $f = function($y) { return $y; };
+  $f = function ($y) {
+    return $y;
+  };
   $f('');
   $f(0);
 }

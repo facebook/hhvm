@@ -26,7 +26,7 @@
 #include <dirent.h>
 #include <vector>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -34,7 +34,9 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/request-local.h"
@@ -499,6 +501,18 @@ static class RedisSessionModule : public SystemlibSessionModule {
     SystemlibSessionModule("redis", "RedisSessionModule") { }
 } s_redis_session_module;
 
+static class MemcacheSessionModule : public SystemlibSessionModule {
+ public:
+  MemcacheSessionModule() :
+    SystemlibSessionModule("memcache", "MemcacheSessionModule") { }
+} s_memcache_session_module;
+
+static class MemcachedSessionModule : public SystemlibSessionModule {
+ public:
+  MemcachedSessionModule() :
+    SystemlibSessionModule("memcached", "MemcachedSessionModule") { }
+} s_memcached_session_module;
+
 //////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 
@@ -580,7 +594,7 @@ public:
     }
 
     String s = String(m_st_size, ReserveString);
-    char *val = s.bufferSlice().ptr;
+    char *val = s.mutableData();
 
 #if defined(HAVE_PREAD)
     long n = pread(m_fd, val, m_st_size, 0);
@@ -1000,8 +1014,7 @@ public:
 
   virtual bool decode(const String& value) {
     const char *endptr = value.data() + value.size();
-    VariableUnserializer vu(nullptr, nullptr,
-                            VariableUnserializer::Type::Serialize);
+    VariableUnserializer vu(nullptr, 0, VariableUnserializer::Type::Serialize);
     for (const char *p = value.data(); p < endptr; ) {
       int namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
       if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -1059,8 +1072,7 @@ public:
   virtual bool decode(const String& value) {
     const char *p = value.data();
     const char *endptr = value.data() + value.size();
-    VariableUnserializer vu(nullptr, nullptr,
-                            VariableUnserializer::Type::Serialize);
+    VariableUnserializer vu(nullptr, 0, VariableUnserializer::Type::Serialize);
     while (p < endptr) {
       const char *q = p;
       while (*q != PS_DELIMITER) {
@@ -1135,8 +1147,7 @@ public:
       }
     }
 
-    string spacket = wddxPacket->packet_end();
-    return String(spacket);
+    return wddxPacket->packet_end();
   }
 
   virtual bool decode(const String& value) {
@@ -1301,7 +1312,7 @@ new_session:
   /* Read data */
   /* Question: if you create a SID here, should you also try to read data?
    * I'm not sure, but while not doing so will remove one session operation
-   * it could prove usefull for those sites which wish to have "default"
+   * it could prove useful for those sites which wish to have "default"
    * session information
    */
 
@@ -1381,7 +1392,7 @@ static void php_session_reset_id() {
     if (handle == 0) {
       f_define(s_SID, v);
     } else {
-      TypedValue* cns = &RDS::handleToRef<TypedValue>(handle);
+      TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
 
       v.setEvalScalar();
       cns->m_data = v.asTypedValue()->m_data;
@@ -1877,10 +1888,10 @@ const StaticString s_PHP_SESSION_DISABLED("PHP_SESSION_DISABLED");
 const StaticString s_PHP_SESSION_NONE("PHP_SESSION_NONE");
 const StaticString s_PHP_SESSION_ACTIVE("PHP_SESSION_ACTIVE");
 
-static class SessionExtension : public Extension {
+static class SessionExtension final : public Extension {
  public:
   SessionExtension() : Extension("session", NO_EXTENSION_VERSION_YET) { }
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfInt64>(
       s_PHP_SESSION_DISABLED.get(), k_PHP_SESSION_DISABLED
     );
@@ -1915,7 +1926,7 @@ static class SessionExtension : public Extension {
     loadSystemlib();
   }
 
-  virtual void threadInit() {
+  void threadInit() override {
     // TODO: t5226715 We shouldn't need to check s_session here, but right now
     // this is called for every request.
     if (s_session) return;
@@ -2003,12 +2014,12 @@ static class SessionExtension : public Extension {
                      &PS(hash_bits_per_character));
   }
 
-  virtual void threadShutdown() override {
+  void threadShutdown() override {
     delete s_session;
     s_session = nullptr;
   }
 
-  virtual void requestInit() override {
+  void requestInit() override {
     s_session->init();
   }
 

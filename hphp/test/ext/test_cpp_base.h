@@ -40,24 +40,6 @@ class TestCppBase : public TestBase {
 
   // building blocks
   bool TestIpBlockMap();
-
-  /**
-   * Date types. This in turn tests StringData, ArrayData, String,
-   * ArrayIter, and other classes.
-   *
-   * Some of the classes are not tested here, including Object/ObjectData/
-   * SmartObject<T>. They are a lot more covered in TestCodeRun with better
-   * checking against PHP execution.
-   *
-   * Comparisons are not directly tested here, either, becuase TestCodeRun has
-   * a thorough list of comparisons and it's better to directly compare with
-   * PHP's results.
-   */
-  bool TestString();
-  bool TestArray();
-  bool TestObject();
-  bool TestVariant();
-  bool TestListAssignment();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

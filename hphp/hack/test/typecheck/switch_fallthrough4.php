@@ -13,11 +13,11 @@ function do_stuff(): void {}
 
 function f(): void {
   switch (1) {
-  case 1:
-    break;
-  case 2:
-    do_stuff();
-  default:
-    break;
+    case 1:
+      break;
+    case 2:
+      do_stuff();
+    default:
+      break;
   }
 }

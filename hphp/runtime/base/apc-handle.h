@@ -17,12 +17,13 @@
 #ifndef incl_HPHP_APC_HANDLE_H_
 #define incl_HPHP_APC_HANDLE_H_
 
-#include "hphp/runtime/base/types.h"
 #include <atomic>
-#include "hphp/util/lock.h"
-#include "hphp/util/hash.h"
+
 #include "hphp/util/atomic.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/util/hash.h"
+#include "hphp/util/lock.h"
+
+#include "hphp/runtime/base/type-variant.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
 # if defined(__LITTLE_ENDIAN__)
@@ -218,17 +219,10 @@ private:
   void deleteShared();
 
 private:
-#if PACKED_TV
-  std::atomic<uint8_t> m_obj_attempted{false};
-  DataType m_type;
-  uint8_t m_flags{0};
-  mutable std::atomic<uint32_t> m_count{1};
-#else
   DataType m_type;
   std::atomic<uint8_t> m_obj_attempted{false};
   uint8_t m_flags{0};
   mutable std::atomic<uint32_t> m_count{1};
-#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -10,5 +10,7 @@
  */
 
 class B<T as B> {
-  public function get(): T { return $this; }
+  public function get(): T {
+    return $this;
+  }
 }

@@ -89,7 +89,7 @@ type fun_common = {
   fc_name            : id;
   fc_params          : fun_param list;
   fc_body            : block;
-  fc_user_attributes : user_attribute SMap.t;
+  fc_user_attributes : user_attribute list;
   fc_fun_kind        : fun_kind;
 }
 
@@ -286,7 +286,8 @@ let unparser _env =
         u_todo_conds [
           (v_c_is_xhp, "c_is_xhp", (fun () -> u_of_bool v_c_is_xhp)) ;
           (List.not_empty v_c_tparams, "c_tparams", (fun () -> u_of_list_spc u_tparam v_c_tparams)) ;
-          (not (SMap.is_empty v_c_user_attributes), "c_user_attributes", (fun () -> u_of_smap u_user_attribute v_c_user_attributes)) ;
+          (v_c_user_attributes <> [], "c_user_attributes",
+            (fun () -> u_of_smap u_user_attribute v_c_user_attributes)) ;
           (Option.is_some v_c_enum, "c_enum", (fun () -> u_of_option u_enum_ v_c_enum))
         ] (fun () ->
           let u_elt = u_class_elt v_c_kind in
@@ -335,6 +336,10 @@ let unparser _env =
       and declsStr = u_of_list_comma (fun (id, expr) ->
         StrWords [ u_id id; Str "="; u_expr expr]) decls
       in StrStatement [ Str "const" ; hOptionStr; declsStr ]
+    | AbsConst (hOption, name) ->
+      let hOptionStr = u_of_option u_hint hOption
+      and nameStr = u_id name
+      in StrStatement [ Str "abstract const" ; hOptionStr; nameStr ]
     | Attributes v2 ->
         u_todo "Attributes"
           (fun () ->
@@ -343,6 +348,8 @@ let unparser _env =
              in StrWords [ v1; v2 ])
     | ClassUse hint ->
         StrStatement [Str "use"; u_hint hint]
+    | XhpAttrUse hint ->
+        StrStatement [Str "attribute"; u_hint hint]
     | ClassTraitRequire (trait_req_kind, hint) ->
         StrStatement [
           Str "require";
@@ -354,7 +361,11 @@ let unparser _env =
         and hintStr = u_of_option u_hint hintOption
         and varStr = u_of_list_comma u_class_var classVars in
         StrStatement [kindStr; hintStr; varStr]
+    | XhpAttr _ ->
+        u_todo "XhpAttr" (fun () -> StrEmpty)
     | Method m -> u_method_ kind m
+    | TypeConst _ -> u_todo "TypeConst" (fun () -> StrEmpty)
+
   and u_class_attr =
     function
     | CA_name v2 ->
@@ -443,7 +454,8 @@ let unparser _env =
                   param_user_attributes = v_param_user_attributes
                 } =
      u_todo_conds [
-      (not (SMap.is_empty v_param_user_attributes), "param_user_attributes", fun () -> u_of_smap u_user_attribute v_param_user_attributes) ;
+       (v_param_user_attributes <> [], "param_user_attributes",
+         fun () -> u_of_smap u_user_attribute v_param_user_attributes);
      ] begin fun () ->
          let str_param_mod = u_of_option u_kind v_param_modifier
          and str_param_hint = u_of_option u_hint v_param_hint
@@ -478,7 +490,7 @@ let unparser _env =
     fc_fun_kind;
   } useStr u_of_name abstract =
     u_todo_conds [(
-      not (SMap.is_empty fc_user_attributes),
+      fc_user_attributes <> [],
       "m_user_attributes",
       (fun () -> u_of_smap u_user_attribute fc_user_attributes)
     )] begin fun () ->
@@ -572,6 +584,7 @@ let unparser _env =
              let v1 = Str "Hshape"
              and v2 = u_of_list_spc u_shape_field v2
              in StrWords [ v1; v2 ])
+    | Haccess _ -> u_todo "Haccess" (fun () -> StrEmpty)
   and u_shape_field_name =
     function
     | SFlit v2 ->
@@ -951,8 +964,10 @@ let unparse :
   to_string |>
   fun s ->
     dn s;
-    let s' = match Format_hack.program file ~no_trailing_commas:true s with
-    | Format_hack.Php_or_decl -> raise Impossible
+    let modes = [Some Ast.Mstrict; Some Ast.Mpartial] in
+    let formatted = Format_hack.program modes file ~no_trailing_commas:true s in
+    let s' = match formatted with
+    | Format_hack.Disabled_mode -> raise Impossible
     | Format_hack.Internal_error -> raise (FormatterError "")
     | Format_hack.Success s' -> s'
     | Format_hack.Parsing_error error -> raise (FormatterError

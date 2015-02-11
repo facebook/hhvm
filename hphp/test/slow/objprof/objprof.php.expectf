@@ -1,4 +1,3 @@
-(GOOD) Not tracking when disabled
 (GOOD) Tracking when enabled
 (GOOD) Tracking works
 (GOOD) Untracking works
@@ -14,4 +13,3 @@
 (GOOD) Bytes (SharedArray) works
 (GOOD) Bytes (NestedArray) works
 (GOOD) Got here without crashing
-

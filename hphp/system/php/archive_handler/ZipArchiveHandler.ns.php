@@ -52,7 +52,7 @@ namespace __SystemLib {
       return $data;
     }
 
-    public function extractAllTo(string $path): bool {
+    public function extractAllTo(string $path) {
       return $this->za->extractTo($path);
     }
 

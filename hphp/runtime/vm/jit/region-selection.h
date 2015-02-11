@@ -22,7 +22,8 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
+#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -56,7 +57,7 @@ struct RegionDesc {
   struct TypePred;
   struct ReffinessPred;
   typedef std::shared_ptr<Block> BlockPtr;
-  typedef int32_t BlockId;
+  typedef TransID BlockId;
   // BlockId Encoding:
   //   - Non-negative numbers are blocks that correspond
   //     to the start of a TransProfile translation, and therefore can
@@ -65,6 +66,7 @@ struct RegionDesc {
   //     to blocks created by inlining and which don't correspond to
   //     the beginning of a profiling translation.
   typedef boost::container::flat_set<BlockId> BlockIdSet;
+  typedef std::vector<BlockId>  BlockIdVec;
   typedef std::vector<BlockPtr> BlockVec;
 
   bool              empty() const;
@@ -82,8 +84,11 @@ struct RegionDesc {
   void              addArc(BlockId src, BlockId dst);
   void              setSideExitingBlock(BlockId bid);
   bool              isSideExitingBlock(BlockId bid) const;
+  folly::Optional<BlockId> nextRetrans(BlockId id) const;
+  void              setNextRetrans(BlockId id, BlockId next);
   void              append(const RegionDesc&  other);
   void              prepend(const RegionDesc& other);
+  void              chainRetransBlocks();
   uint32_t          instrSize() const;
   std::string       toString() const;
 
@@ -92,9 +97,10 @@ struct RegionDesc {
 
  private:
   struct BlockData {
-    BlockPtr   block;
-    BlockIdSet preds;
-    BlockIdSet succs;
+    BlockPtr                 block;
+    BlockIdSet               preds;
+    BlockIdSet               succs;
+    folly::Optional<BlockId> nextRetrans;
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
   };
 
@@ -103,6 +109,10 @@ struct RegionDesc {
   void       copyBlocksFrom(const RegionDesc& other,
                             BlockVec::iterator where);
   void       copyArcsFrom(const RegionDesc& other);
+  void       sortBlocks();
+  void       postOrderSort(RegionDesc::BlockId     bid,
+                           RegionDesc::BlockIdSet& visited,
+                           RegionDesc::BlockIdVec& outVec);
 
   std::vector<BlockPtr>             m_blocks;
   hphp_hash_map<BlockId, BlockData> m_data;
@@ -232,12 +242,12 @@ inline bool operator==(const RegionDesc::ReffinessPred& a,
  * at various execution points, including at entry to the block.
  */
 class RegionDesc::Block {
+ public:
   typedef boost::container::flat_multimap<SrcKey, TypePred> TypePredMap;
   typedef boost::container::flat_map<SrcKey, bool> ParamByRefMap;
   typedef boost::container::flat_multimap<SrcKey, ReffinessPred> RefPredMap;
   typedef boost::container::flat_map<SrcKey, const Func*> KnownFuncMap;
 
-public:
   explicit Block(const Func* func, bool resumed, Offset start, int length,
                  Offset initSpOff);
 

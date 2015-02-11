@@ -1,0 +1,7 @@
+f: not deprecated
+fDep: deprecated
+C::f: not deprecated
+C::fDep: deprecated
+C::sf: not deprecated
+C::sfDep: deprecated
+Done

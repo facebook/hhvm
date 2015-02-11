@@ -1,0 +1,6 @@
+<?php
+
+require_once(dirname(__FILE__) . '/../skip_unless_locale_fa_IR_present.inc');
+require_once(dirname(__FILE__) . '/skip_unless_icu_52_or_newer.inc');
+
+?>

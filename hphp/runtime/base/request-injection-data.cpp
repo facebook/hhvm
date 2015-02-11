@@ -24,6 +24,7 @@
 #include <signal.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -38,7 +39,17 @@ const StaticString s_dot(".");
 
 //////////////////////////////////////////////////////////////////////
 
-RequestInjectionData::~RequestInjectionData() {
+RequestTimer::RequestTimer(
+  RequestInjectionData* data,
+  clockid_t clockType)
+    : m_reqInjectionData(data)
+    , m_clockType(clockType)
+    , m_timeoutSeconds(0)  // no timeout by default
+    , m_hasTimer(false)
+    , m_timerActive(false)
+{}
+
+RequestTimer::~RequestTimer() {
 #ifndef __APPLE__
   if (m_hasTimer) {
     timer_delete(m_timer_id);
@@ -46,20 +57,106 @@ RequestInjectionData::~RequestInjectionData() {
 #endif
 }
 
+/*
+ * NB: this function must be nothrow when `seconds' is zero.  RPCRequestHandler
+ * makes use of this.
+ */
+void RequestTimer::setTimeout(int seconds) {
+#ifndef __APPLE__
+  m_timeoutSeconds = seconds > 0 ? seconds : 0;
+  if (!m_hasTimer) {
+    if (!m_timeoutSeconds) {
+      // we don't have a timer, and we don't have a timeout
+      return;
+    }
+    sigevent sev;
+    memset(&sev, 0, sizeof(sev));
+    sev.sigev_notify = SIGEV_SIGNAL;
+    sev.sigev_signo = SIGVTALRM;
+    sev.sigev_value.sival_ptr = this;
+    if (timer_create(m_clockType, &sev, &m_timer_id)) {
+      raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
+    }
+    m_hasTimer = true;
+  }
+
+  /*
+   * There is a potential race here. Callers want to assume that
+   * if they cancel the timeout (seconds = 0), they *wont* get
+   * a signal after they call this (although they may get a signal
+   * during the call).
+   * So we need to clear the timeout, wait (if necessary) for a
+   * pending signal to be handled, and then set the new timeout
+   */
+  itimerspec ts = {};
+  itimerspec old;
+  timer_settime(m_timer_id, 0, &ts, &old);
+  if (!old.it_value.tv_sec && !old.it_value.tv_nsec) {
+    // the timer has gone off...
+    if (m_timerActive.load(std::memory_order_acquire)) {
+      // but m_timerActive is still set, so we haven't processed
+      // the signal yet.
+      // spin until its done.
+      while (m_timerActive.load(std::memory_order_relaxed)) {
+      }
+    }
+  }
+  if (m_timeoutSeconds) {
+    m_timerActive.store(true, std::memory_order_relaxed);
+    ts.it_value.tv_sec = m_timeoutSeconds;
+    timer_settime(m_timer_id, 0, &ts, nullptr);
+  } else {
+    m_timerActive.store(false, std::memory_order_relaxed);
+  }
+#endif
+}
+
+void RequestTimer::onTimeout() {
+  m_reqInjectionData->onTimeout(this);
+}
+
+int RequestTimer::getRemainingTime() const {
+#ifndef __APPLE__
+  if (m_hasTimer) {
+    itimerspec ts;
+    if (!timer_gettime(m_timer_id, &ts)) {
+      int remaining = ts.it_value.tv_sec;
+      return remaining > 1 ? remaining : 1;
+    }
+  }
+#endif
+  return m_timeoutSeconds;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void RequestInjectionData::threadInit() {
   // phpinfo
   {
-    auto setAndGet = IniSetting::SetAndGet<int64_t>(
+    auto setAndGetWall = IniSetting::SetAndGet<int64_t>(
       [this](const int64_t &limit) {
         setTimeout(limit);
         return true;
       },
       [this] { return getTimeout(); }
     );
+    auto setAndGetCPU = IniSetting::SetAndGet<int64_t>(
+      [this](const int64_t &limit) {
+        setCPUTimeout(limit);
+        return true;
+      },
+      [this] { return getCPUTimeout(); }
+    );
+    auto setAndGet = RuntimeOption::TimeoutsUseWallTime
+      ? setAndGetWall : setAndGetCPU;
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                      "max_execution_time", setAndGet);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                      "maximum_execution_time", setAndGet);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                     "hhvm.max_wall_time", setAndGetWall);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                     "hhvm.max_cpu_time", setAndGetCPU);
   }
 
   // Resource Limits
@@ -91,6 +188,12 @@ void RequestInjectionData::threadInit() {
                    "arg_separator.input", "&",
                    &m_argSeparatorInput);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "variables_order", "EGPCS",
+                   &m_variablesOrder);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "request_order", "",
+                   &m_requestOrder);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
@@ -102,11 +205,35 @@ void RequestInjectionData::threadInit() {
                    "include_path", getDefaultIncludePath().c_str(),
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
-                       auto paths = HHVM_FN(explode)(":", value);
                        m_include_paths.clear();
-                       for (ArrayIter iter(paths); iter; ++iter) {
-                         m_include_paths.push_back(
-                           iter.second().toString().toCppString());
+                       int pos = value.find(':');
+                       if (pos < 0) {
+                         m_include_paths.push_back(value);
+                       } else {
+                         int pos0 = 0;
+                         do {
+                           // Check for stream wrapper
+                           if (value.length() > pos + 2 &&
+                               value[pos + 1] == '/' &&
+                               value[pos + 2] == '/') {
+                             // .:// or ..:// is not stream wrapper
+                             if (((pos - pos0) >= 1 && value[pos - 1] != '.') ||
+                                 ((pos - pos0) >= 2 && value[pos - 2] != '.') ||
+                                 (pos - pos0) > 2) {
+                               pos += 3;
+                               continue;
+                             }
+                           }
+                           m_include_paths.push_back(
+                             value.substr(pos0, pos - pos0));
+                           pos++;
+                           pos0 = pos;
+                         } while ((pos = value.find(':', pos)) >= 0);
+
+                         if (pos0 <= value.length()) {
+                           m_include_paths.push_back(
+                             value.substr(pos0));
+                         }
                        }
                        return true;
                      },
@@ -250,84 +377,37 @@ std::string RequestInjectionData::getDefaultIncludePath() {
 }
 
 void RequestInjectionData::onSessionInit() {
-  RDS::requestInit();
-  cflagsPtr = &RDS::header()->conditionFlags;
+  rds::requestInit();
+  cflagsPtr = &rds::header()->conditionFlags;
   reset();
 }
 
-void RequestInjectionData::onTimeout() {
-  setTimedOutFlag();
-  m_timerActive.store(false, std::memory_order_relaxed);
+void RequestInjectionData::onTimeout(RequestTimer* timer) {
+  if (timer == &m_timer) {
+    setTimedOutFlag();
+    m_timer.m_timerActive.store(false, std::memory_order_relaxed);
+  } else if (timer == &m_cpuTimer) {
+    setCPUTimedOutFlag();
+    m_cpuTimer.m_timerActive.store(false, std::memory_order_relaxed);
+  } else {
+    always_assert(false && "Unknown timer fired");
+  }
 }
 
-/*
- * NB: this function must be nothrow when `seconds' is zero.  RPCRequestHandler
- * makes use of this.
- */
 void RequestInjectionData::setTimeout(int seconds) {
-#ifndef __APPLE__
-  m_timeoutSeconds = seconds > 0 ? seconds : 0;
-  if (!m_hasTimer) {
-    if (!m_timeoutSeconds) {
-      // we don't have a timer, and we don't have a timeout
-      return;
-    }
-    sigevent sev;
-    memset(&sev, 0, sizeof(sev));
-    sev.sigev_notify = SIGEV_SIGNAL;
-    sev.sigev_signo = SIGVTALRM;
-    sev.sigev_value.sival_ptr = this;
-    auto const& clockType =
-      RuntimeOption::TimeoutsUseWallTime ? CLOCK_REALTIME :
-                                           CLOCK_THREAD_CPUTIME_ID;
-    if (timer_create(clockType, &sev, &m_timer_id)) {
-      raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
-    }
-    m_hasTimer = true;
-  }
+  m_timer.setTimeout(seconds);
+}
 
-  /*
-   * There is a potential race here. Callers want to assume that
-   * if they cancel the timeout (seconds = 0), they *wont* get
-   * a signal after they call this (although they may get a signal
-   * during the call).
-   * So we need to clear the timeout, wait (if necessary) for a
-   * pending signal to be handled, and then set the new timeout
-   */
-  itimerspec ts = {};
-  itimerspec old;
-  timer_settime(m_timer_id, 0, &ts, &old);
-  if (!old.it_value.tv_sec && !old.it_value.tv_nsec) {
-    // the timer has gone off...
-    if (m_timerActive.load(std::memory_order_acquire)) {
-      // but m_timerActive is still set, so we haven't processed
-      // the signal yet.
-      // spin until its done.
-      while (m_timerActive.load(std::memory_order_relaxed)) {
-      }
-    }
-  }
-  if (m_timeoutSeconds) {
-    m_timerActive.store(true, std::memory_order_relaxed);
-    ts.it_value.tv_sec = m_timeoutSeconds;
-    timer_settime(m_timer_id, 0, &ts, nullptr);
-  } else {
-    m_timerActive.store(false, std::memory_order_relaxed);
-  }
-#endif
+void RequestInjectionData::setCPUTimeout(int seconds) {
+  m_cpuTimer.setTimeout(seconds);
 }
 
 int RequestInjectionData::getRemainingTime() const {
-#ifndef __APPLE__
-  if (m_hasTimer) {
-    itimerspec ts;
-    if (!timer_gettime(m_timer_id, &ts)) {
-      int remaining = ts.it_value.tv_sec;
-      return remaining > 1 ? remaining : 1;
-    }
-  }
-#endif
-  return m_timeoutSeconds;
+  return m_timer.getRemainingTime();
+}
+
+int RequestInjectionData::getRemainingCPUTime() const {
+  return m_cpuTimer.getRemainingTime();
 }
 
 /*
@@ -347,6 +427,19 @@ void RequestInjectionData::resetTimer(int seconds /* = 0 */) {
   }
   data->setTimeout(seconds);
   data->clearTimedOutFlag();
+}
+
+void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
+  auto data = &ThreadInfo::s_threadInfo->m_reqInjectionData;
+  if (seconds == 0) {
+    seconds = data->getCPUTimeout();
+  } else if (seconds < 0) {
+    if (!data->getCPUTimeout()) return;
+    seconds = -seconds;
+    if (seconds < data->getRemainingCPUTime()) return;
+  }
+  data->setCPUTimeout(seconds);
+  data->clearCPUTimedOutFlag();
 }
 
 void RequestInjectionData::reset() {
@@ -391,6 +484,14 @@ void RequestInjectionData::setTimedOutFlag() {
 
 void RequestInjectionData::clearTimedOutFlag() {
   getConditionFlags()->fetch_and(~RequestInjectionData::TimedOutFlag);
+}
+
+void RequestInjectionData::setCPUTimedOutFlag() {
+  getConditionFlags()->fetch_or(RequestInjectionData::CPUTimedOutFlag);
+}
+
+void RequestInjectionData::clearCPUTimedOutFlag() {
+  getConditionFlags()->fetch_and(~RequestInjectionData::CPUTimedOutFlag);
 }
 
 void RequestInjectionData::setSignaledFlag() {

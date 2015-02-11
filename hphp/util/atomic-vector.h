@@ -19,7 +19,7 @@
 
 #include <atomic>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/trace.h"
 

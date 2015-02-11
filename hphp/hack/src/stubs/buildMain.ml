@@ -9,3 +9,5 @@
  *)
 
 let go _ _ _ _ _ _ = ()
+let incremental_update _ _ _ = ()
+let get_all_targets () = []

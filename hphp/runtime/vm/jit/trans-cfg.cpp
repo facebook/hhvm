@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include <algorithm>
 
-#include "folly/MapUtil.h"
+#include <folly/MapUtil.h>
 
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
@@ -98,8 +98,7 @@ TransCFG::TransCFG(FuncId funcId,
     // This will skip DV Funclets if they were already
     // retranslated w/ the prologues:
     if (!profData->optimized(profData->transSrcKey(tid))) {
-      int64_t counter = profData->transCounter(tid);
-      int64_t weight  = RuntimeOption::EvalJitPGOThreshold - counter;
+      int64_t weight = profData->absTransCounter(tid);
       addNode(tid, weight);
     }
   }
@@ -136,7 +135,7 @@ TransCFG::TransCFG(FuncId funcId,
     }
   } while (changed);
 
-  // guess weight or non-inferred arcs
+  // guess weight for non-inferred arcs
   for (TransID tid : nodes()) {
     for (auto arc : outArcs(tid)) {
       if (arc->weight() == Arc::kUnknownWeight) {

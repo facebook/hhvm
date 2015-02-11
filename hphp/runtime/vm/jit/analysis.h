@@ -42,13 +42,6 @@ const SSATmp* canonical(const SSATmp*);
 SSATmp* canonical(SSATmp*);
 
 /*
- * Assuming sp is the VM stack pointer either from inside an FPI region or an
- * inlined call, find the SpillFrame instruction that defined the current
- * frame. Returns nullptr if the frame can't be found.
- */
-IRInstruction* findSpillFrame(SSATmp* sp);
-
-/*
  * Given a non-const SSATmp `t', return the earliest block B such that `t' is
  * defined on all of B's outgoing edges, and `t' is defined in all blocks
  * dominated by B.
@@ -64,10 +57,11 @@ IRInstruction* findSpillFrame(SSATmp* sp);
  * A normal use for this function is when you have computed that an SSATmp has
  * the same value as another computation, but want to know if it is defined at
  * some program point so you can add a new use to it.  The precondition that
- * `t' is not const is because this function makes no sense for that use case
- * for constants, which are defined everywhere.
+ * `t' is not the result of a DefConst is because this function makes no sense
+ * for that instruction, which is used to produce values that are defined
+ * everywhere.
  *
- * Pre: !t->isConst()
+ * Pre: !t->inst()->is(DefConst)
  */
 Block* findDefiningBlock(const SSATmp* t);
 

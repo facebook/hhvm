@@ -27,8 +27,7 @@ class B extends A {
   public function __construct() {
     if (true) {
       parent::__construct();
-    }
-    else {
+    } else {
       $this->init();
     }
   }

@@ -18,11 +18,13 @@
 #define incl_HPHP_STRING_H_
 
 #include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/functional.h"
 
 #include <algorithm>
 
@@ -52,7 +54,7 @@ constexpr int kMinShrinkThreshold = 1024;
 //////////////////////////////////////////////////////////////////////
 
 StringData* buildStringData(int     n);
-StringData* buildStringData(int64_t   n);
+StringData* buildStringData(int64_t n);
 StringData* buildStringData(double  n);
 
 std::string convDblToStrWithPhpFormat(double n);
@@ -213,6 +215,11 @@ public:
   const char *data() const {
     return m_px ? m_px->data() : "";
   }
+
+  char *mutableData() const {
+    return m_px->mutableData();
+  }
+
 public:
   const String& setSize(int len) {
     assert(m_px);
@@ -221,7 +228,7 @@ public:
   }
   const String& shrink(size_t len) {
     assert(m_px);
-    if (len < m_px->size() && m_px->size() - len > kMinShrinkThreshold) {
+    if (m_px->capacity() - len > kMinShrinkThreshold) {
       StringBase::operator=(m_px->shrinkImpl(len));
     } else {
       assert(len < StringData::MaxSize);
@@ -385,6 +392,9 @@ public:
   bool more (const Object& v2) const;
   bool more (const Resource& v2) const;
 
+  int compare(litstr v2) const;
+  int compare(const String& v2) const;
+
   /**
    * Offset
    */
@@ -531,7 +541,11 @@ public:
   explicit StrNR(const StringData *sd) : m_px(const_cast<StringData*>(sd)) {}
   explicit StrNR(const String &s) : m_px(s.get()) {} // XXX
 
-  ~StrNR() {}
+  ~StrNR() {
+    if (debug) {
+      m_px = reinterpret_cast<StringData*>(0xdeadbeeffaceb004);
+    }
+  }
 
   /* implicit */ operator const String&() const { return asString(); }
   const char* data() const { return m_px ? m_px->data() : ""; }
@@ -551,7 +565,6 @@ public:
   }
 
   StringData* get() const { return m_px; }
-  StringData* operator->() const { return get(); }
 
 private:
   static void compileTimeAssertions() {
@@ -583,6 +596,8 @@ public:
 private:
   void insert();
 };
+
+#define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
 
 String getDataTypeString(DataType t);
 

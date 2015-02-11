@@ -1,0 +1,19 @@
+if (FASTLZ_LIBRARY AND FASTLZ_INCLUDE_DIR)
+  set (FASTLZ_FIND_QUIETLY TRUE)
+endif (FASTLZ_LIBRARY AND FASTLZ_INCLUDE_DIR)
+
+find_path(FASTLZ_INCLUDE_DIR NAMES fastlz.h)
+find_library(FASTLZ_LIBRARY NAMES fastlz)
+
+include (FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(FastLZ DEFAULT_MSG
+  FASTLZ_LIBRARY
+  FASTLZ_INCLUDE_DIR)
+
+if (NOT FASTLZ_FOUND)
+  message(STATUS "Using third-party bundled fastlz")
+else()
+  message(STATUS "Found fastlz: ${FASTLZ_LIBRARY}")
+endif (NOT FASTLZ_FOUND)
+
+mark_as_advanced(FASTLZ_INCLUDE_DIR FASTLZ_LIBRARY)

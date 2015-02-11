@@ -10,7 +10,9 @@ import shlex
 import subprocess
 import sys
 
-def run_command(cmd, verbose=False, env=None, stdout=None, stderr=None):
+import benchy_config as config
+
+def run_command(cmd, env=None, stdout=None, stderr=None):
     """Runs a command and checks the return code for errors. If stdout is not
     specified, redirects stdout of command to stderr.
 
@@ -19,7 +21,7 @@ def run_command(cmd, verbose=False, env=None, stdout=None, stderr=None):
     try:
         saved_stdout = sys.stdout
         sys.stdout = sys.stderr
-        if verbose:
+        if config.verbose():
             print(cmd)
         subprocess.check_call(
             cmd,

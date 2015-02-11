@@ -15,4 +15,7 @@ class X {
 }
 
 // Should fail for using a non int/string key
-type myshape = shape(X::X1 => int, X::X2 => bool);
+type myshape = shape(
+  X::X1 => int,
+  X::X2 => bool,
+);

@@ -16,12 +16,13 @@
 */
 #include "hphp/runtime/ext/server/ext_server.h"
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -35,10 +36,10 @@ static const StaticString s_PAGELET_NOT_READY("PAGELET_NOT_READY");
 static const StaticString s_PAGELET_READY("PAGELET_READY");
 static const StaticString s_PAGELET_DONE("PAGELET_DONE");
 
-static class ServerExtension : public Extension {
+static class ServerExtension final : public Extension {
 public:
   ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfInt64>(s_PAGELET_NOT_READY.get(),
                                           k_PAGELET_NOT_READY);
     Native::registerConstant<KindOfInt64>(s_PAGELET_READY.get(),

@@ -7,7 +7,8 @@ var_dump(extension_loaded("bcmath"));
 var_dump(extension_loaded("curl"));
 var_dump(extension_loaded("simplexml"));
 var_dump(extension_loaded("mysql"));
-
+var_dump(extension_loaded("date"));
+var_dump(extension_loaded("datetime"));
 $x = get_loaded_extensions();
 var_dump(empty($x));
 

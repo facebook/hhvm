@@ -18,13 +18,15 @@
 #ifndef incl_HPHP_JSON_PARSER_H_
 #define incl_HPHP_JSON_PARSER_H_
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/string-buffer.h"
+#include <cstdint>
 
 namespace HPHP {
 
-void utf16_to_utf8(HPHP::StringBuffer &buf, unsigned short utf16);
-bool JSON_parser(HPHP::Variant &z, const char *p, int length,
+struct StringBuffer;
+struct Variant;
+
+void utf16_to_utf8(StringBuffer& buf, unsigned short utf16);
+bool JSON_parser(Variant& z, const char *p, int length,
                  bool assoc, int depth, int64_t options);
 
 enum json_error_codes {
@@ -40,7 +42,7 @@ enum json_error_codes {
 };
 
 json_error_codes json_get_last_error_code();
-const char *json_get_last_error_msg();
+const char* json_get_last_error_msg();
 void json_set_last_error_code(json_error_codes ec);
 
 }

@@ -17,15 +17,17 @@
 
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
-#include "folly/FBVector.h"
+#include <folly/FBVector.h>
 
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
@@ -70,20 +72,20 @@ struct LibXmlRequestData final : RequestEventHandler {
     m_suppress_error = false;
     m_errors = xmlErrorVec();
     m_entity_loader_disabled = false;
-    m_streams_context = uninit_null();
+    m_streams_context = nullptr;
   }
 
   void requestShutdown() override {
     m_use_error = false;
     m_errors = xmlErrorVec();
-    m_streams_context = uninit_null();
+    m_streams_context = nullptr;
   }
 
   bool m_entity_loader_disabled;
   bool m_suppress_error;
   bool m_use_error;
   xmlErrorVec m_errors;
-  Variant m_streams_context;
+  SmartPtr<StreamContext> m_streams_context;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, tl_libxml_request_data);
@@ -132,7 +134,7 @@ const StaticString
 // stream wrapper. The VM state should be synced using VMRegAnchor by the
 // caller, before entering libxml2.
 
-static Resource libxml_streams_IO_open_wrapper(
+static SmartPtr<File> libxml_streams_IO_open_wrapper(
     const char *filename, const char* mode, bool read_only)
 {
   ITRACE(1, "libxml_open_wrapper({}, {}, {})\n", filename, mode, read_only);
@@ -151,7 +153,7 @@ static Resource libxml_streams_IO_open_wrapper(
                                                           &pathIndex);
     if (dynamic_cast<FileStreamWrapper*>(wrapper)) {
       if (!HHVM_FN(file_exists)(strFilename)) {
-        return Resource();
+        return nullptr;
       }
     }
   }
@@ -255,14 +257,13 @@ libxml_create_input_buffer(const char* URI, xmlCharEncoding enc) {
 
  if (tl_libxml_request_data->m_entity_loader_disabled || !URI) return nullptr;
 
-  Resource stream = libxml_streams_IO_open_wrapper(URI, "rb", true);
-  if (stream.isInvalid()) return nullptr;
+  auto stream = libxml_streams_IO_open_wrapper(URI, "rb", true);
+  if (!stream || stream->isInvalid()) return nullptr;
 
   // Allocate the Input buffer front-end.
   xmlParserInputBufferPtr ret = xmlAllocParserInputBuffer(enc);
   if (ret != nullptr) {
-    stream.get()->incRefCount();
-    ret->context = stream.get();
+    ret->context = stream.detach();
     ret->readcallback = libxml_streams_IO_read;
     ret->closecallback = libxml_streams_IO_close;
   }
@@ -284,15 +285,14 @@ libxml_create_output_buffer(const char *URI,
   }
   // PHP unescapes the URI here, but that should properly be done by the
   // wrapper.  The wrapper should expect a valid URI, e.g. file:///foo%20bar
-  Resource stream = libxml_streams_IO_open_wrapper(URI, "wb", false);
-  if (stream.isInvalid()) {
+  auto stream = libxml_streams_IO_open_wrapper(URI, "wb", false);
+  if (!stream || stream->isInvalid()) {
     return nullptr;
   }
   // Allocate the Output buffer front-end.
   xmlOutputBufferPtr ret = xmlAllocOutputBuffer(encoder);
   if (ret != nullptr) {
-    stream.get()->incRefCount();
-    ret->context = stream.get();
+    ret->context = stream.detach();
     ret->writecallback = libxml_streams_IO_write;
     ret->closecallback = libxml_streams_IO_close;
   }
@@ -541,13 +541,14 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
 }
 
 void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
-  tl_libxml_request_data->m_streams_context = context;
+  tl_libxml_request_data->m_streams_context =
+    dyn_cast_or_null<StreamContext>(context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Extension
 
-class LibXMLExtension : public Extension {
+class LibXMLExtension final : public Extension {
   public:
     LibXMLExtension() : Extension("libxml") {}
 

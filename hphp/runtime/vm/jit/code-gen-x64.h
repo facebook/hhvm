@@ -21,12 +21,18 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
+
+struct Vout;
 namespace NativeCalls { struct CallInfo; }
 namespace arm { struct CodeGenerator; }
+
 namespace x64 {
+///////////////////////////////////////////////////////////////////////////////
 
 // Cache alignment is required for mutable instructions to make sure
 // mutations don't "tear" on remote cpus.
@@ -70,14 +76,12 @@ private:
   void cgInterpOneCommon(IRInstruction* inst);
 
   enum class Width { Value, Full };
-  void cgStore(Vptr dst, SSATmp* src, Vloc src_loc, Width);
-  void cgStoreTypedValue(Vptr dst, SSATmp* src, Vloc src_loc);
+  void emitStore(Vptr dst, SSATmp* src, Vloc src_loc, Width);
+  void emitStoreTypedValue(Vptr dst, SSATmp* src, Vloc src_loc);
+  void emitTrashTV(Vreg, int32_t, char fillByte);
 
-  // helpers to load a value in dst. When label is not null a type check
-  // is performed against value to ensure it is of the type expected by dst
-  void cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base, Block* label = nullptr);
-  void cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
-                        Block* label = nullptr);
+  void emitLoad(SSATmp* dst, Vloc dstLoc, Vptr base);
+  void emitLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref);
 
   template <class JmpFn>
   void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
@@ -107,14 +111,8 @@ private:
   void emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx, bool staticCallee);
 
   Vreg emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
-                                    RDS::Handle ch);
+                                    rds::Handle ch);
 
-  void cgJcc(IRInstruction* inst);          // helper
-  void cgReqBindJcc(IRInstruction* inst);   // helper
-  void cgExitJcc(IRInstruction* inst);      // helper
-  void cgJccInt(IRInstruction* inst);         // helper
-  void cgReqBindJccInt(IRInstruction* inst);  // helper
-  void cgExitJccInt(IRInstruction* inst); // helper
   void emitCmpInt(IRInstruction* inst, ConditionCode cc);
   void emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred);
   void emitCmpRelDbl(IRInstruction* inst, ConditionCode cc, bool flipOperands);
@@ -126,14 +124,7 @@ private:
                    int64_t (*obj_cmp_int)(ObjectData*, int64_t),
                    int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
-  template<class Loc>
-  void emitSideExitGuard(const IRInstruction* inst, Type type, Loc typeLoc,
-                         Loc dataLoc, Offset taken);
-  void emitReqBindJcc(Vout& v, ConditionCode cc, Vreg sf,
-                      const ReqBindJccData*);
-
   Vreg emitCompare(Vout& v, IRInstruction* inst);
-  Vreg emitCompareInt(Vout& v, IRInstruction* inst);
   Vreg emitTestZero(Vout& v, SSATmp* src, Vloc srcLoc);
   template<class Inst>
   bool emitIncDec(Vout& v, Vloc dst, SSATmp* src0, Vloc loc0,
@@ -180,22 +171,13 @@ private:
   void cgMIterInitCommon(IRInstruction* inst);
   Vreg cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst);
   void cgLookupCnsCommon(IRInstruction* inst);
-  RDS::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
+  rds::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
                                   Vreg sf);
-  void cgDefineModifiedStkPtr(IRInstruction*);
   void cgPropImpl(IRInstruction*);
-  void cgVGetPropImpl(IRInstruction*);
-  void cgBindPropImpl(IRInstruction*);
-  void cgSetPropImpl(IRInstruction*);
-  void cgSetOpPropImpl(IRInstruction*);
-  void cgIncDecPropImpl(IRInstruction*);
   void cgIssetEmptyPropImpl(IRInstruction*);
   void cgElemImpl(IRInstruction*);
   void cgElemArrayImpl(IRInstruction*);
-  void cgVGetElemImpl(IRInstruction*);
   void cgArraySetImpl(IRInstruction*);
-  void cgSetElemImpl(IRInstruction*);
-  void cgUnsetElemImpl(IRInstruction*);
   void cgIssetEmptyElemImpl(IRInstruction*);
 
   Vlabel label(Block*);
@@ -292,6 +274,7 @@ inline Vptr refTVData(Vptr ref) {
   return ref + TVOFF(m_data);
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }}}
 
 #endif

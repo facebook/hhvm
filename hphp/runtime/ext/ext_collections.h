@@ -19,11 +19,15 @@
 #define incl_HPHP_EXT_COLLECTION_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include <limits>
-#include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/system/systemlib.h"
+
+
+#include <limits>
 
 #define DECLARE_COLLECTION_MAGIC_METHODS()           \
   Variant t___get(Variant name);                     \
@@ -143,6 +147,11 @@ class BaseVector : public ExtCollectionObjectData {
   Variant t_lastkey();
 
  protected:
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  static php_fromItems(const Variant& iterable);
+
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
@@ -469,7 +478,6 @@ class BaseVector : public ExtCollectionObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class Vector
 
-FORWARD_DECLARE_CLASS(Vector);
 class c_Vector : public BaseVector {
  public:
   DECLARE_CLASS_NO_SWEEP(Vector)
@@ -554,7 +562,6 @@ class c_Vector : public BaseVector {
 ///////////////////////////////////////////////////////////////////////////////
 // class VectorIterator
 
-FORWARD_DECLARE_CLASS(VectorIterator);
 class c_VectorIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
                                                    ObjectData::HasClone> {
  public:
@@ -582,7 +589,6 @@ class c_VectorIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmVector
 
-FORWARD_DECLARE_CLASS(ImmVector);
 class c_ImmVector : public BaseVector {
  public:
   DECLARE_CLASS_NO_SWEEP(ImmVector)
@@ -615,6 +621,7 @@ class c_ImmVector : public BaseVector {
   Object t_immutable();
   String t___tostring();
 
+  static Object ti_fromitems(const Variant& iterable);
   static Object ti_fromkeysof(const Variant& container);
 
  public:
@@ -876,8 +883,8 @@ class HashCollection : public ExtCollectionObjectData {
     return b;
   }
 
-  static constexpr uint32_t sizeOffset() {
-    return offsetof(HashCollection, m_size);
+  static constexpr ptrdiff_t dataOffset() {
+    return offsetof(HashCollection, m_data);
   }
 
   static bool validPos(ssize_t pos) {
@@ -1436,7 +1443,6 @@ class BaseMap : public HashCollection {
 ///////////////////////////////////////////////////////////////////////////////
 // class Map
 
-FORWARD_DECLARE_CLASS(Map);
 class c_Map : public BaseMap {
  public:
   DECLARE_CLASS_NO_SWEEP(Map)
@@ -1485,7 +1491,6 @@ class c_Map : public BaseMap {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmMap
 
-FORWARD_DECLARE_CLASS(ImmMap);
 class c_ImmMap : public BaseMap {
  public:
   DECLARE_CLASS_NO_SWEEP(ImmMap)
@@ -1521,7 +1526,6 @@ class c_ImmMap : public BaseMap {
 ///////////////////////////////////////////////////////////////////////////////
 // class MapIterator
 
-FORWARD_DECLARE_CLASS(MapIterator);
 class c_MapIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
                                                 ObjectData::HasClone> {
  public:
@@ -1554,7 +1558,7 @@ class c_MapIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
  */
 class BaseSet : public HashCollection {
  public:
-  void addAllKeysOf(const Cell& container);
+  void addAllKeysOf(Cell container);
   void addAll(const Variant& t);
 
   void init(const Variant& t);
@@ -1762,7 +1766,6 @@ class BaseSet : public HashCollection {
 ///////////////////////////////////////////////////////////////////////////////
 // class Set
 
-FORWARD_DECLARE_CLASS(Set);
 class c_Set : public BaseSet {
  public:
   DECLARE_CLASS_NO_SWEEP(Set)
@@ -1815,7 +1818,6 @@ class c_Set : public BaseSet {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmSet
 
-FORWARD_DECLARE_CLASS(ImmSet);
 class c_ImmSet : public BaseSet {
  public:
   DECLARE_CLASS_NO_SWEEP(ImmSet)
@@ -1858,7 +1860,6 @@ class c_ImmSet : public BaseSet {
 ///////////////////////////////////////////////////////////////////////////////
 // class SetIterator
 
-FORWARD_DECLARE_CLASS(SetIterator);
 class c_SetIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
                                                 ObjectData::HasClone> {
  public:
@@ -1886,7 +1887,6 @@ class c_SetIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
 ///////////////////////////////////////////////////////////////////////////////
 // class Pair
 
-FORWARD_DECLARE_CLASS(Pair);
 class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
                                          ObjectData::UseGet|
                                          ObjectData::UseSet|
@@ -2029,7 +2029,6 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
 ///////////////////////////////////////////////////////////////////////////////
 // class PairIterator
 
-FORWARD_DECLARE_CLASS(PairIterator);
 class c_PairIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
                                                  ObjectData::HasClone> {
  public:
@@ -2087,11 +2086,6 @@ ObjectData* collectionDeepCopyPair(c_Pair* pair);
 ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-inline bool isOptimizableCollectionClass(const Class* klass) {
-  return klass == c_Vector::classof() || klass == c_Map::classof() ||
-    klass == c_Pair::classof();
-}
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 

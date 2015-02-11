@@ -24,8 +24,8 @@
 #include <random>
 #include <string>
 
-#include "folly/Format.h"
-#include "folly/ScopeGuard.h"
+#include <folly/Format.h>
+#include <folly/ScopeGuard.h>
 #include "hphp/util/cache/cache-saver.h"
 #include "hphp/util/cache/magic-numbers.h"
 #include "hphp/util/cache/mmap-file.h"
@@ -187,7 +187,7 @@ bool CacheData::loadFromMmap(MmapFile* mmap_file, string* name) {
 }
 
 bool CacheData::save(CacheSaver* cs) const {
-  CacheSaver::DirEntry de = { 0 };
+  CacheSaver::DirEntry de;
 
   de.id = id_;
   de.flags = flags_;

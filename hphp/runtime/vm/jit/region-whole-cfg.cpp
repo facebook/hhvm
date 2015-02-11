@@ -47,6 +47,11 @@ struct DFS {
     for (auto& arc : m_arcs) {
       m_region->addArc(arc.src, arc.dst);
     }
+    FTRACE(3, "selectWholeCFG: before chainRetransBlocks:\n{}\n",
+           show(*m_region));
+    m_region->chainRetransBlocks();
+    FTRACE(3, "selectWholeCFG: after chainRetransBlocks:\n{}\n",
+           show(*m_region));
     return m_region;
   }
 
@@ -63,9 +68,6 @@ struct DFS {
     m_visited.insert(tid);
     m_visiting.insert(tid);
 
-    auto sk = m_profData->transSrcKey(tid);
-    m_srcKeyToTransID[sk] = tid;
-
     if (!breaksRegion(*(m_profData->transLastInstr(tid)))) {
 
       auto srcBlockId = tidRegion->blocks().back().get()->id();
@@ -77,13 +79,8 @@ struct DFS {
         // include it unless we've asked for loops.
         if (!RuntimeOption::EvalJitLoops && m_visiting.count(dst)) continue;
 
-        // Skip dst if region already has another block with the same SrcKey.
-        // Task #4157613: add support for regions with multiple blocks with
-        // the same SrcKey.
-        auto dstSK = m_profData->transSrcKey(dst);
-        if (folly::get_default(m_srcKeyToTransID, dstSK, dst) != dst) continue;
-
         // Skip dst if we already generated a region starting at that SrcKey.
+        auto dstSK = m_profData->transSrcKey(dst);
         if (m_profData->optimized(dstSK)) continue;
 
         auto dstBlockId = m_profData->transRegion(dst)->entry()->id();
@@ -107,16 +104,15 @@ struct DFS {
 
 
  private:
-  const ProfData*                m_profData;
-  const TransCFG&                m_cfg;
-  TransIDSet&                    m_selectedSet;
-  TransIDVec*                    m_selectedVec;
-  RegionDescPtr                  m_region;
-  uint32_t                       m_numBCInstrs;
-  jit::hash_set<TransID>         m_visiting;
-  jit::hash_set<TransID>         m_visited;
-  jit::flat_map<SrcKey, TransID> m_srcKeyToTransID;
-  jit::vector<RegionDesc::Arc>   m_arcs;
+  const ProfData*              m_profData;
+  const TransCFG&              m_cfg;
+  TransIDSet&                  m_selectedSet;
+  TransIDVec*                  m_selectedVec;
+  RegionDescPtr                m_region;
+  uint32_t                     m_numBCInstrs;
+  jit::hash_set<TransID>       m_visiting;
+  jit::hash_set<TransID>       m_visited;
+  jit::vector<RegionDesc::Arc> m_arcs;
 };
 
 /*

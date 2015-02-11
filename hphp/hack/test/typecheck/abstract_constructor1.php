@@ -5,6 +5,5 @@ abstract class C {
 }
 
 class D extends C {
-  public function __construct() {
-  }
+  public function __construct() {}
 }

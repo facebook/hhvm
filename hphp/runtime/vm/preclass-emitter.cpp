@@ -17,7 +17,7 @@
 
 #include <limits>
 
-#include "folly/Memory.h"
+#include <folly/Memory.h>
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/repo.h"
@@ -130,6 +130,17 @@ PreClassEmitter::lookupProp(const StringData* propName) const {
   return m_propMap[idx];
 }
 
+bool PreClassEmitter::addAbstractConstant(const StringData* n,
+                                          const StringData* typeConstraint) {
+  auto it = m_constMap.find(n);
+  if (it != m_constMap.end()) {
+    return false;
+  }
+  PreClassEmitter::Const const_(n, typeConstraint, nullptr, nullptr);
+  m_constMap.add(const_.name(), const_);
+  return true;
+}
+
 bool PreClassEmitter::addConstant(const StringData* n,
                                   const StringData* typeConstraint,
                                   const TypedValue* val,
@@ -221,6 +232,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_traitPrecRules = m_traitPrecRules;
   pc->m_traitAliasRules = m_traitAliasRules;
   pc->m_enumBaseTy = m_enumBaseTy;
+  pc->m_numDeclMethods = m_numDeclMethods;
 
   // Set user attributes.
   [&] {
@@ -271,17 +283,25 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   PreClass::ConstMap::Builder constBuild;
   for (unsigned i = 0; i < m_constMap.size(); ++i) {
     const Const& const_ = m_constMap[i];
+    TypedValueAux tvaux;
+    if (const_.isAbstract()) {
+      tvWriteUninit(&tvaux);
+      tvaux.isAbstractConst() = true;
+    } else {
+      tvCopy(const_.val(), tvaux);
+      tvaux.isAbstractConst() = false;
+    }
     constBuild.add(const_.name(), PreClass::Const(const_.name(),
-                                                  const_.typeConstraint(),
-                                                  const_.val(),
+                                                  tvaux,
                                                   const_.phpCode()));
   }
   if (auto nativeConsts = Native::getClassConstants(m_name)) {
     for (auto cnsMap : *nativeConsts) {
-      auto tv = cnsMap.second;
+      TypedValueAux tvaux;
+      tvCopy(cnsMap.second, tvaux);
+      tvaux.isAbstractConst() = false;
       constBuild.add(cnsMap.first, PreClass::Const(cnsMap.first,
-                                                   staticEmptyString(),
-                                                   tv,
+                                                   tvaux,
                                                    staticEmptyString()));
     }
   }
@@ -299,6 +319,7 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_attrs)
     (m_parent)
     (m_docComment)
+    (m_numDeclMethods)
 
     (m_interfaces)
     (m_usedTraits)

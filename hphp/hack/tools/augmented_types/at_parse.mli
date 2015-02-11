@@ -8,4 +8,5 @@
  *
  *)
 
+exception Parse_error
 val parse : string -> At_ty.at_ty

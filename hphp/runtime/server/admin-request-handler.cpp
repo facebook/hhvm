@@ -31,9 +31,9 @@
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/array-tracer/ext_array_tracer.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
+#include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/pagelet-server.h"
@@ -240,6 +240,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  /tmp/tc_dump_astub\n"
         "/vm-namedentities:show size of the NamedEntityTable\n"
         "/thread-mem-usage:show memory usage per thread\n"
+        "/proxy:           set up request proxy\n"
+        "    origin        URL to proxy requests to\n"
+        "    percentage    percentage of requests to proxy\n"
         ;
 #ifdef USE_TCMALLOC
         if (MallocExtensionInstance) {
@@ -389,6 +392,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleVMRequest(cmd, transport)) {
       break;
     }
+    if (cmd == "proxy") {
+      handleProxyRequest(cmd, transport);
+      break;
+    }
     if (!strcmp(cmd.c_str(), "thread-mem")) {
       transport->sendString(get_thread_mem_usage());
       break;
@@ -405,18 +412,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       auto filename = transport->getParam("file");
       if (filename == "") filename = "/tmp/pcre_cache";
       pcre_dump_cache(filename);
-      transport->sendString("OK\n");
-      break;
-    }
-
-    if (cmd == "dump-array-info") {
-      if (!RuntimeOption::EvalTraceArrays) {
-        transport->sendString("Eval.TraceArrays not enabled.\n");
-        break;
-      }
-      auto filename = transport->getParam("file");
-      if (filename == "") filename = "/tmp/array_tracer_dump";
-      array_tracer_dump(filename);
       transport->sendString("OK\n");
       break;
     }
@@ -728,8 +723,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                isMain ? "" : name).str(),
                  a.used());
     });
-    appendStat("targetcache", RDS::usedBytes());
-    appendStat("rds", RDS::usedBytes()); // TODO(#2966387): temp double logging
+    appendStat("targetcache", rds::usedBytes());
+    appendStat("rds", rds::usedBytes()); // TODO(#2966387): temp double logging
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
     out << "}" << endl;
@@ -1006,6 +1001,22 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   return false;
+}
+
+void AdminRequestHandler::handleProxyRequest(const std::string& cmd,
+                                             Transport* transport) {
+  try {
+    auto const percentStr = transport->getParam("percentage");
+    auto const percent    = percentStr.empty() ? 0 : folly::to<int>(percentStr);
+    if (percent < 0 || percent > 100) {
+      throw std::range_error("must be in [0, 100]");
+    }
+
+    setProxyOriginPercentage(transport->getParam("origin"), percent);
+    transport->sendString("Origin and percentage updated");
+  } catch (const std::range_error& re) {
+    transport->sendString(folly::sformat("Invalid percentage: {}", re.what()));
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

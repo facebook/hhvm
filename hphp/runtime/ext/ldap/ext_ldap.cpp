@@ -17,9 +17,10 @@
 
 #include "hphp/runtime/ext/ldap/ext_ldap.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/thread-local.h"
-#include "folly/String.h"
+#include <folly/String.h>
 #include <lber.h>
 #include "hphp/util/text-util.h"
 
@@ -32,10 +33,23 @@
 
 namespace HPHP {
 
-static class LdapExtension : public Extension {
+const int64_t
+  k_LDAP_ESCAPE_FILTER  = 1<<0,
+  k_LDAP_ESCAPE_DN      = 1<<1;
+
+const StaticString
+  s_LDAP_ESCAPE_FILTER("LDAP_ESCAPE_FILTER"),
+  s_LDAP_ESCAPE_DN("LDAP_ESCAPE_DN");
+
+static class LdapExtension final : public Extension {
 public:
   LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
+    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_FILTER.get(),
+                                          k_LDAP_ESCAPE_FILTER);
+    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_DN.get(),
+                                          k_LDAP_ESCAPE_DN);
+
     HHVM_FE(ldap_connect);
     HHVM_FE(ldap_explode_dn);
     HHVM_FE(ldap_dn2ufn);
@@ -78,6 +92,7 @@ public:
     HHVM_FE(ldap_get_values);
     HHVM_FE(ldap_control_paged_result);
     HHVM_FE(ldap_control_paged_result_response);
+    HHVM_FE(ldap_escape);
 
     loadSystemlib();
   }
@@ -151,7 +166,7 @@ public:
 
   LDAPMessage *data;
 };
-IMPLEMENT_OBJECT_ALLOCATION(LdapResult)
+IMPLEMENT_RESOURCE_ALLOCATION(LdapResult)
 
 class LdapResultEntry : public SweepableResourceData {
 public:
@@ -457,7 +472,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
                              NULL, &ldap_res);
       }
       if (rcs[i] != -1) {
-        ret.append(Resource(newres<LdapResult>(ldap_res)));
+        ret.append(Variant(makeSmartPtr<LdapResult>(ldap_res)));
       } else {
         ret.append(false);
       }
@@ -510,7 +525,7 @@ cleanup_parallel:
       }
 #endif
       parallel_search = 0;
-      ret.append(Resource(newres<LdapResult>(ldap_res)));
+      ret.append(Variant(makeSmartPtr<LdapResult>(ldap_res)));
     }
   }
 cleanup:
@@ -573,8 +588,9 @@ static void get_attributes(Array &ret, LDAP *ldap,
     }
     ldap_value_free_len(ldap_value);
 
-    String sAttribute(attribute, CopyString);
-    ret.set(to_lower ? String(toLower(attribute)) : sAttribute, tmp);
+    String sAttribute = to_lower ? String(toLower(attribute))
+                                 : String(attribute, CopyString);
+    ret.set(sAttribute, tmp);
     ret.set(num_attrib, sAttribute);
 
     num_attrib++;
@@ -602,8 +618,7 @@ Variant HHVM_FUNCTION(ldap_connect,
     return false;
   }
 
-  LdapLink *ld = newres<LdapLink>();
-  Resource ret(ld);
+  auto ld = makeSmartPtr<LdapLink>();
 
   LDAP *ldap = NULL;
   if (!str_hostname.empty() && str_hostname.find('/') >= 0) {
@@ -620,7 +635,7 @@ Variant HHVM_FUNCTION(ldap_connect,
   if (ldap) {
     LDAPG(num_links)++;
     ld->link = ldap;
-    return ret;
+    return Variant(std::move(ld));
   }
   raise_warning("Unable to initialize LDAP: %s",
                 folly::errnoStr(errno).c_str());
@@ -1211,7 +1226,7 @@ Variant HHVM_FUNCTION(ldap_first_entry,
     return false;
   }
 
-  return newres<LdapResultEntry>(entry, res);
+  return Variant(makeSmartPtr<LdapResultEntry>(entry, res));
 }
 
 Variant HHVM_FUNCTION(ldap_next_entry,
@@ -1225,7 +1240,7 @@ Variant HHVM_FUNCTION(ldap_next_entry,
     return false;
   }
 
-  return newres<LdapResultEntry>(msg, entry->result.get());
+  return Variant(makeSmartPtr<LdapResultEntry>(msg, entry->result.get()));
 }
 
 Array HHVM_FUNCTION(ldap_get_attributes,
@@ -1291,7 +1306,7 @@ Variant HHVM_FUNCTION(ldap_first_reference,
     return false;
   }
 
-  return newres<LdapResultEntry>(entry, res);
+  return Variant(makeSmartPtr<LdapResultEntry>(entry, res));
 }
 
 Variant HHVM_FUNCTION(ldap_next_reference,
@@ -1305,7 +1320,8 @@ Variant HHVM_FUNCTION(ldap_next_reference,
     return false;
   }
 
-  return newres<LdapResultEntry>(entry_next, entry->result.get());
+  return Variant(
+    makeSmartPtr<LdapResultEntry>(entry_next, entry->result.get()));
 }
 
 bool HHVM_FUNCTION(ldap_parse_reference,
@@ -1542,6 +1558,49 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
 
   ber_memfree(lcookie.bv_val);
   return true;
+}
+
+String HHVM_FUNCTION(ldap_escape,
+                     const String& value,
+                     const String& ignores /* = "" */,
+                     int flags /* = 0 */) {
+  char esc[256] = {};
+
+  if (flags & k_LDAP_ESCAPE_FILTER) { // llvm.org/bugs/show_bug.cgi?id=18389
+    esc['*'*1u] = esc['('*1u] = esc[')'*1u] = esc['\0'*1u] = esc['\\'*1u] = 1;
+  }
+
+  if (flags & k_LDAP_ESCAPE_DN) {
+    esc[','*1u] = esc['='*1u] = esc['+'*1u] = esc['<'*1u] = esc['\\'*1u] = 1;
+    esc['>'*1u] = esc[';'*1u] = esc['"'*1u] = esc['#'*1u] = 1;
+  }
+
+  if (!flags) {
+    memset(esc, 1, sizeof(esc));
+  }
+
+  for (int i = 0; i < ignores.size(); i++) {
+    esc[(unsigned char)ignores[i]] = 0;
+  }
+
+  char hex[] = "0123456789abcdef";
+
+  String result(3 * value.size(), ReserveString);
+  char *rdata = result.get()->mutableData(), *r = rdata;
+
+  for (int i = 0; i < value.size(); i++) {
+    auto c = (unsigned char)value[i];
+    if (esc[c]) {
+      *r++ = '\\';
+      *r++ = hex[c >> 4];
+      *r++ = hex[c & 0xf];
+    } else {
+      *r++ = c;
+    }
+  }
+
+  result.setSize(r - rdata);
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

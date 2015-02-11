@@ -1,4 +1,6 @@
-File "new_self3.php", line 19, characters 9-11:
-The method xxx is undefined in an object of type A (Typing[4053])
+File "new_self3.php", line 18, characters 9-11:
+Could not find method xxx in an object of type A (Typing[4053])
+File "new_self3.php", line 17, characters 10-19:
+This is why I think it is an object of type A
 File "new_self3.php", line 12, characters 7-7:
 Declaration of A is here

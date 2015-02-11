@@ -78,3 +78,18 @@ TMP_PATH = _get('TMP_PATH')
 VERSION = _get('VERSION')
 WORK_DIR = _get('WORK_DIR')
 WRAPPER_PATH = _get('WRAPPER_PATH')
+
+
+def verbose():
+    """Returns the current verbosity level.
+
+    """
+    return verbose.level
+verbose.level = 0
+
+
+def set_verbose_level(level):
+    """Sets the verbosity level for debugging.
+
+    """
+    verbose.level = level

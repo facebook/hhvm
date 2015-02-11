@@ -10,8 +10,7 @@
  */
 
 class B {
-  public function foo(): void {
-  }
+  public function foo(): void {}
 }
 
 class A extends B {

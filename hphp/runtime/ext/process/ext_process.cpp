@@ -27,18 +27,20 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/light-process.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -120,10 +122,10 @@ static bool check_cmd(const char *cmd) {
 ///////////////////////////////////////////////////////////////////////////////
 // pcntl
 
-static class ProcessExtension : public Extension {
+static class ProcessExtension final : public Extension {
 public:
   ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(pcntl_alarm);
     HHVM_FE(pcntl_exec);
     HHVM_FE(pcntl_fork);
@@ -193,7 +195,7 @@ void HHVM_FUNCTION(pcntl_exec,
   std::vector<String> senvs; // holding those char *
   char **envp = build_envp(envs, senvs);
   if (execve(path.c_str(), argv, envp) == -1) {
-    raise_warning("Error has occured: (errno %d) %s",
+    raise_warning("Error has occurred: (errno %d) %s",
                     errno, folly::errnoStr(errno).c_str());
   }
 
@@ -241,7 +243,7 @@ Variant HHVM_FUNCTION(pcntl_getpriority,
       raise_warning("Error %d: Invalid identifier flag", errno);
       break;
     default:
-      raise_warning("Unknown error %d has occured", errno);
+      raise_warning("Unknown error %d has occurred", errno);
       break;
     }
     return false;
@@ -279,7 +281,7 @@ bool HHVM_FUNCTION(pcntl_setpriority,
                       "the process priority", errno);
       break;
     default:
-      raise_warning("Unknown error %d has occured", errno);
+      raise_warning("Unknown error %d has occurred", errno);
       break;
     }
     return false;
@@ -287,7 +289,7 @@ bool HHVM_FUNCTION(pcntl_setpriority,
   return true;
 }
 
-/* php_signal using sigaction is derrived from Advanced Programing
+/* php_signal using sigaction is derived from Advanced Programing
  * in the Unix Environment by W. Richard Stevens p 298. */
 typedef void Sigfunc(int);
 static Sigfunc *php_signal(int signo, Sigfunc *func, bool restart) {

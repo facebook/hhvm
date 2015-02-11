@@ -1,4 +1,6 @@
 File "encapsed2.php", line 7, characters 13-13:
-The member x is undefined in an object of type C (Typing[4053])
-File "encapsed2.php", line 6, characters 12-12:
+Could not find member x in an object of type C (Typing[4053])
+File "encapsed2.php", line 6, characters 8-14:
+This is why I think it is an object of type C
+File "encapsed2.php", line 3, characters 7-7:
 Declaration of C is here

@@ -14,22 +14,9 @@
    +----------------------------------------------------------------------+
 */
 #include <gtest/gtest.h>
-#include <string>
 #include "hphp/hhvm/process-init.h"
-#include "hphp/util/current-executable.h"
 
 int main(int argc, char** argv) {
-  auto const buf = HPHP::current_executable_path();
-  if (!buf.empty()) {
-    auto idx = buf.length();
-    for (auto i = int{0}; i < 3; ++i) {
-      idx = buf.find_last_of('/', idx - 1);
-      assert(idx != std::string::npos);
-    }
-    auto slib = buf.substr(0, idx);
-    slib += "/runtime/ext_hhvm/systemlib.php";
-    setenv("HHVM_SYSTEMLIB", slib.c_str(), true);
-  }
   testing::InitGoogleTest(&argc, argv);
   HPHP::init_for_unit_test();
   return RUN_ALL_TESTS();

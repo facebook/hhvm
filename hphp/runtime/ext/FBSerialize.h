@@ -38,20 +38,23 @@ namespace HPHP { namespace serialize {
  *  8 (INT64): data is 8 bytes, network order signed int64
  *      All of these represent an int64 value.
  *
- *  9 (STRING): followed by 1 byte n (unsigned int8), followed by n characters
- *      All of these represent a string value.
+ *  9 (STRING): followed by 4 byte n (network order unsigned int32), followed
+ *      by n characters. All of these represent a string value.
  *
  *  10 (STRUCT): followed by serialized key/value pairs until STOP
  *      is seen.  Represents a map with arbitrary int64 or string keys.
  *
  *  14 (NULL): no data, null value
  *
- *  15 (VARCHAR): followed by 4 byte n (network order unsigned int32), followed
- *      by n characters. All of these represent a string value.
+ *  15 (VARCHAR): followed by 1 byte n (unsigned int8), followed by n characters
+ *      All of these represent a string value.
  *
  *  16 (DOUBLE): data is 8 bytes, double value
  *
  *  17 (BOOLEAN): data is 1 byte
+ *
+ *  18 (VECTOR): followed by a list of values until STOP is seen. Represents a
+ *  vector.
  */
 
 enum class Type {
@@ -78,6 +81,7 @@ struct FBSerializeBase {
     FB_SERIALIZE_VARCHAR = 15,
     FB_SERIALIZE_DOUBLE  = 16,
     FB_SERIALIZE_BOOLEAN = 17,
+    FB_SERIALIZE_VECTOR = 18,
   };
 
   static const size_t CODE_SIZE = 1;
@@ -140,6 +144,7 @@ class FBUnserializer : private FBSerializeBase {
   typename V::StringType unserializeString();
   folly::StringPiece unserializeStringPiece();
   typename V::MapType unserializeMap();
+  typename V::VectorType unserializeVector();
   // read the next map but don't unserialze it (for lazy or delay
   // unserialization)
   folly::StringPiece getSerializedMap();

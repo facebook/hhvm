@@ -5,50 +5,44 @@ object(DOMDocumentType)#1 (0) {
 Warning: Attempted to serialize unserializable builtin class DOMDocumentType in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(22) {
+array(19) {
   [0]=>
-  string(5) "__get"
-  [1]=>
-  string(5) "__set"
-  [2]=>
-  string(7) "__isset"
-  [3]=>
   string(11) "__debuginfo"
-  [4]=>
+  [1]=>
   string(11) "__construct"
-  [5]=>
+  [2]=>
   string(11) "appendChild"
-  [6]=>
+  [3]=>
   string(9) "cloneNode"
-  [7]=>
+  [4]=>
   string(9) "getLineNo"
-  [8]=>
+  [5]=>
   string(13) "hasAttributes"
-  [9]=>
+  [6]=>
   string(13) "hasChildNodes"
-  [10]=>
+  [7]=>
   string(12) "insertBefore"
-  [11]=>
+  [8]=>
   string(18) "isDefaultNamespace"
-  [12]=>
+  [9]=>
   string(10) "isSameNode"
-  [13]=>
+  [10]=>
   string(11) "isSupported"
-  [14]=>
+  [11]=>
   string(18) "lookupNamespaceUri"
-  [15]=>
+  [12]=>
   string(12) "lookupPrefix"
-  [16]=>
+  [13]=>
   string(9) "normalize"
-  [17]=>
+  [14]=>
   string(11) "removeChild"
-  [18]=>
+  [15]=>
   string(12) "replaceChild"
-  [19]=>
+  [16]=>
   string(4) "c14n"
-  [20]=>
+  [17]=>
   string(8) "c14nfile"
-  [21]=>
+  [18]=>
   string(11) "getNodePath"
 }
 ================
@@ -61,49 +55,43 @@ object(A_DOMDocumentType)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_DOMDocumentType in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(22) {
+array(19) {
   [0]=>
-  string(5) "__get"
-  [1]=>
-  string(5) "__set"
-  [2]=>
-  string(7) "__isset"
-  [3]=>
   string(11) "__debuginfo"
-  [4]=>
+  [1]=>
   string(11) "__construct"
-  [5]=>
+  [2]=>
   string(11) "appendChild"
-  [6]=>
+  [3]=>
   string(9) "cloneNode"
-  [7]=>
+  [4]=>
   string(9) "getLineNo"
-  [8]=>
+  [5]=>
   string(13) "hasAttributes"
-  [9]=>
+  [6]=>
   string(13) "hasChildNodes"
-  [10]=>
+  [7]=>
   string(12) "insertBefore"
-  [11]=>
+  [8]=>
   string(18) "isDefaultNamespace"
-  [12]=>
+  [9]=>
   string(10) "isSameNode"
-  [13]=>
+  [10]=>
   string(11) "isSupported"
-  [14]=>
+  [11]=>
   string(18) "lookupNamespaceUri"
-  [15]=>
+  [12]=>
   string(12) "lookupPrefix"
-  [16]=>
+  [13]=>
   string(9) "normalize"
-  [17]=>
+  [14]=>
   string(11) "removeChild"
-  [18]=>
+  [15]=>
   string(12) "replaceChild"
-  [19]=>
+  [16]=>
   string(4) "c14n"
-  [20]=>
+  [17]=>
   string(8) "c14nfile"
-  [21]=>
+  [18]=>
   string(11) "getNodePath"
 }

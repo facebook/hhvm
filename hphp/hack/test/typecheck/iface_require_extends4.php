@@ -4,25 +4,24 @@ class C1 {}
 class C2 extends C1 {}
 class C3 extends C2 {}
 
-// being used to test covariance
-class PrivacyPolicyBase<Tv> {}
+class BaseClass<+Tv> {}
 
 interface I1 {
-  require extends PrivacyPolicyBase<C1>;
+  require extends BaseClass<C1>;
 }
 interface I2 extends I1 {
-  require extends PrivacyPolicyBase<C2>;
+  require extends BaseClass<C2>;
 }
 interface I3 extends I2 {
-  require extends PrivacyPolicyBase<C3>;
+  require extends BaseClass<C3>;
 }
 
-class Test1 extends PrivacyPolicyBase<C2> implements
+class Test1 extends BaseClass<C2> implements
   I1,
   I2 {
 }
 
-class Test2 extends PrivacyPolicyBase<C3> implements
+class Test2 extends BaseClass<C3> implements
   I1,
   I2,
   I3 {

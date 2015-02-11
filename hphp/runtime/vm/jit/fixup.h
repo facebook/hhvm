@@ -145,6 +145,12 @@ public:
     m_fixups.insert(tca, FixupEntry(fixup));
   }
 
+  const Fixup* findFixup(CTCA tca) const {
+    auto ent = m_fixups.find(tca);
+    if (!ent) return nullptr;
+    return &ent->fixup;
+  }
+
   bool getFrameRegs(const ActRec* ar, const ActRec* prevAr,
                     VMRegs* outVMRegs) const;
 

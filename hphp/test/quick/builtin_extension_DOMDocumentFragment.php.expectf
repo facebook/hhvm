@@ -1,43 +1,43 @@
 DOMDocumentFragment
 object(DOMDocumentFragment)#1 (16) {
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
+  ["nodeName"]=>
+  string(18) "#document-fragment"
+  ["nodeValue"]=>
   NULL
   ["nodeType"]=>
   int(11)
-  ["lastChild"]=>
-  NULL
-  ["nodeName"]=>
-  string(18) "#document-fragment"
-  ["previousSibling"]=>
-  NULL
-  ["firstChild"]=>
+  ["parentNode"]=>
   NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
-  ["nodeValue"]=>
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
   NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMDocumentFragment in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(23) {
+array(20) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -77,12 +77,6 @@ array(23) {
   [18]=>
   string(11) "getNodePath"
   [19]=>
-  string(5) "__get"
-  [20]=>
-  string(5) "__set"
-  [21]=>
-  string(7) "__isset"
-  [22]=>
   string(11) "__debuginfo"
 }
 ================
@@ -90,44 +84,44 @@ A_DOMDocumentFragment
 object(A_DOMDocumentFragment)#2 (17) {
   ["___x"]=>
   NULL
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
+  ["nodeName"]=>
+  string(18) "#document-fragment"
+  ["nodeValue"]=>
   NULL
   ["nodeType"]=>
   int(11)
-  ["lastChild"]=>
-  NULL
-  ["nodeName"]=>
-  string(18) "#document-fragment"
-  ["previousSibling"]=>
-  NULL
-  ["firstChild"]=>
+  ["parentNode"]=>
   NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
-  ["nodeValue"]=>
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
   NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
 }
 
 Warning: Attempted to serialize unserializable builtin class A_DOMDocumentFragment in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(23) {
+array(20) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -167,11 +161,5 @@ array(23) {
   [18]=>
   string(11) "getNodePath"
   [19]=>
-  string(5) "__get"
-  [20]=>
-  string(5) "__set"
-  [21]=>
-  string(7) "__isset"
-  [22]=>
   string(11) "__debuginfo"
 }

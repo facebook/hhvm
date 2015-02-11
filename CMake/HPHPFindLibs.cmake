@@ -79,7 +79,7 @@ include_directories(${LIBMEMCACHED_INCLUDE_DIR})
 link_directories(${LIBMEMCACHED_LIBRARY_DIRS})
 
 # pcre checks
-find_package(PCRE REQUIRED)
+find_package(PCRE)
 include_directories(${PCRE_INCLUDE_DIR})
 
 # libevent checks
@@ -150,6 +150,12 @@ endif ()
 find_package(LZ4)
 if (LZ4_INCLUDE_DIR)
   include_directories(${LZ4_INCLUDE_DIR})
+endif()
+
+# fastlz
+find_package(FastLZ)
+if (FASTLZ_INCLUDE_DIR)
+  include_directories(${FASTLZ_INCLUDE_DIR})
 endif()
 
 # libzip
@@ -285,7 +291,7 @@ include_directories(${Mcrypt_INCLUDE_DIR})
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
-# reSSL explicitly refuses to support RAND_egd()
+# LibreSSL explicitly refuses to support RAND_egd()
 SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("#include <openssl/rand.h>
@@ -495,7 +501,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})
 
-  target_link_libraries(${target} ${LIBMEMCACHED_LIBRARIES})
+  target_link_libraries(${target} ${LIBMEMCACHED_LIBRARY})
 
   target_link_libraries(${target} ${CRYPT_LIB})
 
@@ -533,7 +539,12 @@ macro(hphp_link target)
     target_link_libraries(${target} pcre)
   endif()
 
-  target_link_libraries(${target} fastlz)
+  if (LIBFASTLZ_LIBRARY)
+    target_link_libraries(${target} ${LIBFASTLZ_LIBRARY})
+  else()
+    target_link_libraries(${target} fastlz)
+  endif()
+
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
 

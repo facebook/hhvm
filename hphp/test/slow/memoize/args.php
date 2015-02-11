@@ -74,6 +74,16 @@ function generics<T>(T $a, T $b): T {
 <<__Memoize>>
 function boolNoRet(bool $a) {static $i = 140; return ($a ? 42 : -42) + $i++;}
 
+interface I extends HH\IMemoizeParam {}
+
+class O implements I {
+  public function __construct(public string $a) {}
+  public function getInstanceKey(): string { return $this->a; }
+}
+
+<<__Memoize>>
+function memoizeObj(I $obj) { static $i = 150; return $i++; }
+
 echo "Test each kind of function call with one and many args\n";
 $a = new A();
 echo $a->oneArgMeth(1).' ';
@@ -163,4 +173,10 @@ echo "Test bool without return type (test for issue in #5307125)\n";
 echo boolNoRet(true).' ';
 echo boolNoRet(true).' ';
 echo boolNoRet(false).' ';
-echo boolNoRet(false);
+echo boolNoRet(false)."\n";
+
+echo "Test objects\n";
+echo memoizeObj(new O('a')).' ';
+echo memoizeObj(new O('a')).' ';
+echo memoizeObj(new O('b')).' ';
+echo memoizeObj(new O('b')).' ';

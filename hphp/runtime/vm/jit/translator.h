@@ -61,6 +61,7 @@ struct Block;
 struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
+struct HTS;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -116,6 +117,12 @@ struct TransContext {
   Offset initSpOffset;
   bool resumed;
   const Func* func;
+
+  /*
+   * If available, the RegionDesc that we're compiling.  Might be
+   * nullptr---only used for debug output.
+   */
+  const RegionDesc* regionDesc;
 };
 
 /*
@@ -125,51 +132,15 @@ struct TransContext {
  * to do after we're done, so it's distinct from the TransContext above.
  */
 struct TranslArgs {
-  TranslArgs(SrcKey sk, bool align)
-    : m_sk(sk)
-    , m_align(align)
-    , m_dryRun(false)
-    , m_setFuncBody(false)
-    , m_transId(kInvalidTransID)
-    , m_region(nullptr)
-  {}
+  TranslArgs(SrcKey sk, bool align) : sk{sk}, align{align} {}
 
-  TranslArgs& sk(SrcKey sk) {
-    m_sk = sk;
-    return *this;
-  }
-  TranslArgs& align(bool align) {
-    m_align = align;
-    return *this;
-  }
-  TranslArgs& dryRun(bool dry) {
-    m_dryRun = dry;
-    return *this;
-  }
-  TranslArgs& setFuncBody() {
-    m_setFuncBody = true;
-    return *this;
-  }
-  TranslArgs& flags(TransFlags flags) {
-    m_flags = flags;
-    return *this;
-  }
-  TranslArgs& transId(TransID transId) {
-    m_transId = transId;
-    return *this;
-  }
-  TranslArgs& region(RegionDescPtr region) {
-    m_region = region;
-    return *this;
-  }
-
-  SrcKey m_sk;
-  bool m_align;
-  bool m_dryRun;
-  bool m_setFuncBody;
-  TransFlags m_flags;
-  TransID m_transId;
-  RegionDescPtr m_region;
+  SrcKey sk;
+  bool align;
+  bool dryRun{false};
+  bool setFuncBody{false};
+  TransFlags flags{0};
+  TransID transId{kInvalidTransID};
+  RegionDescPtr region{nullptr};
 };
 
 
@@ -186,55 +157,7 @@ struct Translator {
   Translator();
 
   /////////////////////////////////////////////////////////////////////////////
-  // Types.
-
-  /*
-   * Blacklisted instruction set.
-   *
-   * Used by translateRegion() to track instructions that must be interpreted.
-   */
-  typedef ProfSrcKeySet RegionBlacklist;
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Main translation API.
-
-  enum TranslateResult {
-    Failure,
-    Retry,
-    Success
-  };
-  static const char* ResultName(TranslateResult r);
-
-  /*
-   * Start, end, or free a trace of code to be translated.
-   */
-  void traceStart(TransContext context);
-  void traceEnd();
-  void traceFree();
-
-  /*
-   * Translate `region'.
-   *
-   * The `toInterp' RegionBlacklist is a set of instructions which must be
-   * interpreted.  When an instruction fails in translation, Retry is returned,
-   * and the instruction is added to `interp' so that it will be interpreted on
-   * the next attempt.
-   */
-  TranslateResult translateRegion(const RegionDesc& region,
-                                  RegionBlacklist& interp,
-                                  TransFlags trflags = TransFlags{});
-
-
-  /////////////////////////////////////////////////////////////////////////////
   // Accessors.
-
-  /*
-   * Get the IRTranslator for the current translation.
-   *
-   * This is reset whenever traceStart() is called.
-   */
-  IRTranslator* irTrans() const;
 
   /*
    * Get the Translator's ProfData.
@@ -255,10 +178,6 @@ struct Translator {
    */
   SrcRec* getSrcRec(SrcKey sk);
 
-  /*
-   * Current region being translated, if any.
-   */
-  const RegionDesc* region() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Configuration.
@@ -369,25 +288,6 @@ struct Translator {
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Other methods.
-
-public:
-  static bool liveFrameIsPseudoMain();
-
-private:
-  void createBlockMap(const RegionDesc&    region,
-                      BlockIdToIRBlockMap& blockIdToIRBlock);
-
-  void setSuccIRBlocks(const RegionDesc&          region,
-                       RegionDesc::BlockId        srcBlockId,
-                       const BlockIdToIRBlockMap& blockIdToIRBlock);
-
-  void setIRBlock(RegionDesc::BlockId        blockId,
-                  const RegionDesc&          region,
-                  const BlockIdToIRBlockMap& blockIdToIRBlock);
-
-
-  /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 public:
@@ -397,11 +297,9 @@ private:
   int64_t m_createdTime;
 
   TransKind m_mode;
-  const RegionDesc* m_region{nullptr};
   std::unique_ptr<ProfData> m_profData;
   bool m_useAHot;
 
-  std::unique_ptr<IRTranslator> m_irTrans;
   SrcDB m_srcDB;
 
   // Translation DB.
@@ -523,11 +421,8 @@ public:
 /*
  * Get input location info and flags for a NormalizedInstruction.  Some flags
  * on `ni' may be updated.
- *
- * `startSk' should be the SrcKey for the first instruction in the region
- * containing the instruction.
  */
-InputInfoVec getInputs(SrcKey startSk, NormalizedInstruction&);
+InputInfoVec getInputs(NormalizedInstruction&);
 
 namespace InstrFlags {
 ///////////////////////////////////////////////////////////////////////////////
@@ -554,7 +449,6 @@ enum OutTypeConstraints {
   OutFDesc,             // Blows away the current function desc
 
   OutUnknown,           // Not known at tracelet compile-time
-  OutPred,              // Unknown, but give prediction a whirl.
   OutPredBool,          // Boolean value predicted to be True or False
   OutCns,               // Constant; may be known at compile-time
   OutVUnknown,          // type is V(unknown)
@@ -639,13 +533,6 @@ struct InstrInfo {
 const InstrInfo& getInstrInfo(Op op);
 
 /*
- * Is the output of `inst' predicted?
- *
- * Flags on `inst' may be updated.
- */
-bool outputIsPredicted(NormalizedInstruction& inst);
-
-/*
  * If this returns true, we dont generate guards for any of the inputs to this
  * instruction.
  *
@@ -673,7 +560,8 @@ struct PropInfo {
 };
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
-                           Class* ctx, const Class*& baseClass,
+                           const Class* ctx,
+                           const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd);
 
@@ -689,13 +577,6 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
 * stack flavor safety).
  */
 bool isAlwaysNop(Op op);
-
-/*
- * Return true if we have absolutely no JIT support for `inst'.
- *
- * Always returns true if JitAlwaysInterpOne is set.
- */
-bool instrMustInterp(const NormalizedInstruction& inst);
 
 /*
  * Could `inst' clobber the locals in the environment of `caller'?
@@ -732,7 +613,7 @@ bool builtinFuncDestroysLocals(const Func* callee);
  */
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup,
-                                  Class* ctx);
+                                  const Class* ctx);
 
 /*
  * Return true if type is passed in/out of C++ as String&/Array&/Object&.
@@ -758,6 +639,12 @@ inline bool isNativeImplCall(const Func* funcd, int numArgs) {
  * in a non-default `f'.
  */
 int locPhysicalOffset(Location l, const Func* f = nullptr);
+
+/*
+ * Take a NormalizedInstruction and turn it into a call to the appropriate ht
+ * functions.  Updates the bytecode marker, handles interp one flags, etc.
+ */
+void translateInstr(HTS&, const NormalizedInstruction&);
 
 extern bool tc_dump();
 

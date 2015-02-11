@@ -1,2 +1,3 @@
-*.out
 *.diff
+*.format_out
+*.out

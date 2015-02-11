@@ -1,0 +1,174 @@
+Warning: %s
+$p is not set
+$q is not set
+$p is set
+int(-10)
+
+Notice: Undefined variable: x in %s/functions/using_byrefs_to_undefined_variables.php on line 33
+NULL
+$p is not set
+$q is not set
+$p is set
+int(-10)
+int(-10)
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+}
+$p is set
+$q is set
+$p is set
+int(-10)
+array(3) {
+  [0]=>
+  int(-10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+}
+$p is not set
+$q is not set
+$p is set
+int(-10)
+array(4) {
+  [0]=>
+  int(-10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+  [5]=>
+  int(-10)
+}
+$p is not set
+$q is not set
+$p is set
+int(-10)
+array(5) {
+  [0]=>
+  int(-10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+  [5]=>
+  int(-10)
+  ["red"]=>
+  int(-10)
+}
+
+Warning: %s
+$p is not set
+$p is not set
+NULL
+NULL
+int(-10)
+$p is set
+$p is set
+int(-10)
+int(-10)
+int(-10)
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+}
+$p is set
+$p is set
+int(10)
+int(10)
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+}
+$p is not set
+$p is not set
+NULL
+NULL
+array(4) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+  [5]=>
+  NULL
+}
+$p is not set
+$p is not set
+NULL
+NULL
+array(5) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+  [5]=>
+  NULL
+  ["red"]=>
+  NULL
+}
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+}
+$p is set
+int(10)
+int(10)
+array(3) {
+  [0]=>
+  &int(10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+}
+$p is not set
+NULL
+NULL
+array(4) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+  [5]=>
+  &NULL
+}
+$p is not set
+NULL
+NULL
+array(5) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+  [2]=>
+  int(30)
+  [5]=>
+  NULL
+  ["red"]=>
+  &NULL
+}
+%ANULL
+%Aint(1234)

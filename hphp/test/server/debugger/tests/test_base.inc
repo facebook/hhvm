@@ -39,22 +39,13 @@ function startDebuggerClient($debugPort, $input_path, &$pipes) {
 
 function runTest($testName, $testController) {
   try {
-    $serverPort = get_random_port();
-    $adminPort = get_random_port();
-    while ($adminPort === $serverPort) {
-      $adminPort = get_random_port();
-    }
-    $debugPort = get_random_port();
-    while ($debugPort === $serverPort || $debugPort === $adminPort) {
-      $debugPort = get_random_port();
-    }
-
     $pid = posix_getpid();
     $serverProc = null;
     $clientProcessId = 0;
+
+    $serverPort = $adminPort = $debugPort = null;
     $serverProc = startServer($serverPort, $adminPort, $debugPort,
                               __DIR__.'/..', __DIR__.'/../debugger');
-    waitForServerToGetGoing($serverPort);
     startDebuggerClient($debugPort, "/debugger/$testName.in", $pipes);
     $clientProcessId = getClientProcessId($pipes[1]);
     if (!$clientProcessId ||
@@ -67,10 +58,11 @@ function runTest($testName, $testController) {
     // Echo stderr, just in case.
     // (It was redirected to stdout, so this should be empty).
     echo stream_get_contents($pipes[2]);
-    stopServer($adminPort);
+    stopServer($adminPort, $serverProc);
   } catch (Exception $e) {
     error_log("Caught exception, test failed, pid=$pid");
     killChildren(posix_getpid());
+    if ($serverProc) proc_close($serverProc);
     error_log('test failed');
   }
 }

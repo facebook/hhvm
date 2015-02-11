@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
@@ -52,7 +52,7 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
     if (e.isNull()) {
       thrift.write("");
     } else if (e.isObject()) {
-      thrift.write(e.toObject()->o_getClassName());
+      thrift.write(e.toObject()->getClassName());
     } else {
       String ex(BreakPointInfo::ErrorClassName);
       thrift.write(ex);

@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/timer.h"
@@ -75,7 +76,7 @@ static const char* getXDebugErrorString(XDebugServer::ErrorCode error) {
       return "error evaluating code";
     case XDebugServer::ERROR_INVALID_EXPRESSION:
       return "invalid expression";
-    case XDebugServer::ERROR_PROPERTY_NON_EXISTANT:
+    case XDebugServer::ERROR_PROPERTY_NON_EXISTENT:
       return "can not get property";
     case XDebugServer::ERROR_STACK_DEPTH_INVALID:
       return "stack depth invalid";

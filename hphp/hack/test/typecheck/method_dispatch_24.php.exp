@@ -1,6 +1,8 @@
-File "method_dispatch_24.php", line 29, characters 12-13:
-The method f2 is undefined in an object of type B (Typing[4053])
-File "method_dispatch_24.php", line 26, characters 26-27:
+File "method_dispatch_24.php", line 25, characters 12-13:
+Could not find method f2 in an object of type B (Typing[4053])
+File "method_dispatch_24.php", line 23, characters 26-27:
 The closest thing is f2 but it's a static method
-File "method_dispatch_24.php", line 23, characters 7-7:
+File "method_dispatch_24.php", line 25, characters 5-9:
+This is why I think it is an object of type B
+File "method_dispatch_24.php", line 21, characters 7-7:
 Declaration of B is here

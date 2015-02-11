@@ -19,6 +19,10 @@
 #define incl_HPHP_EXT_FILE_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
+
+// To get the values of the SEEK constants
+#include <stdio.h>
 
 #undef basename
 
@@ -29,9 +33,41 @@ namespace HPHP {
 #define k_STDIN (BuiltinFiles::GetSTDIN())
 #define k_STDOUT (BuiltinFiles::GetSTDOUT())
 #define k_STDERR (BuiltinFiles::GetSTDERR())
-extern const int64_t k_STREAM_URL_STAT_LINK;
-extern const int64_t k_STREAM_URL_STAT_QUIET;
-extern const int64_t k_SEEK_SET;
+const StaticString s_DIRECTORY_SEPARATOR("/");
+const int64_t k_FILE_USE_INCLUDE_PATH = 1;
+const int64_t k_FILE_IGNORE_NEW_LINES = 2;
+const int64_t k_FILE_SKIP_EMPTY_LINES = 4;
+const int64_t k_FILE_APPEND = 8;
+const int64_t k_FILE_NO_DEFAULT_CONTEXT = 16;
+const int64_t k_FILE_TEXT = 0;
+const int64_t k_FILE_BINARY = 0;
+const int64_t k_FNM_NOESCAPE = 2;
+const int64_t k_FNM_CASEFOLD = 16;
+const int64_t k_FNM_PERIOD = 4;
+const int64_t k_FNM_PATHNAME = 1;
+const int64_t k_GLOB_AVAILABLE_FLAGS = 9303;
+const int64_t k_GLOB_BRACE = 1024;
+const int64_t k_GLOB_ERR = 1;
+const int64_t k_GLOB_MARK = 2;
+const int64_t k_GLOB_NOCHECK = 16;
+const int64_t k_GLOB_NOESCAPE = 64;
+const int64_t k_GLOB_NOSORT = 4;
+const int64_t k_GLOB_ONLYDIR = 8192;
+const int64_t k_LOCK_SH = 1;
+const int64_t k_LOCK_EX = 2;
+const int64_t k_LOCK_UN = 3;
+const int64_t k_LOCK_NB = 4;
+const StaticString s_PATH_SEPARATOR(":");
+const int64_t k_SCANDIR_SORT_ASCENDING = 0;
+const int64_t k_SCANDIR_SORT_DESCENDING = 1;
+const int64_t k_SCANDIR_SORT_NONE = 2;
+// These are defined in stdio.h
+const int64_t k_SEEK_SET = SEEK_SET;
+const int64_t k_SEEK_CUR = SEEK_CUR;
+const int64_t k_SEEK_END = SEEK_END;
+
+// This can probably be removed when we register this constant via HNI
+// in the appropriate extension or global constants file
 extern const int64_t k_INI_SCANNER_NORMAL;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +121,7 @@ Variant HHVM_FUNCTION(fputs,
                       const String& data,
                       int64_t length = 0);
 Variant HHVM_FUNCTION(fprintf,
-                      const Resource& handle,
+                      const Variant& handle,
                       const String& format,
                       const Array& args = null_array);
 Variant HHVM_FUNCTION(vfprintf,

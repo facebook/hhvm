@@ -88,7 +88,7 @@ LibEventServer::LibEventServer(const ServerOptions &options)
                  RuntimeOption::ServerThreadDropStack,
                  this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
                  RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
-                 kNumPriorities, num_numa_nodes()),
+                 kNumPriorities),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);
@@ -361,7 +361,7 @@ void LibEventServer::stop() {
   // stop event loop
   setStatus(RunStatus::STOPPED);
   if (write(m_pipeStop.getIn(), "", 1) < 0) {
-    // an error occured but we're in shutdown already, so ignore
+    // an error occurred but we're in shutdown already, so ignore
   }
   m_dispatcherThread.waitForEnd();
   for (auto listener: m_listeners) {
@@ -591,7 +591,7 @@ void PendingResponseQueue::enqueue(int worker,
 
   // signal to call process()
   if (write(m_ready.getIn(), &response, 1) < 0) {
-    // an error occured but nothing we can really do
+    // an error occurred but nothing we can really do
   }
 }
 
@@ -627,7 +627,7 @@ void PendingResponseQueue::process() {
   // clean up the pipe for next signals
   char buf[512];
   if (read(m_ready.getOut(), buf, sizeof(buf)) < 0) {
-    // an error occured but nothing we can really do
+    // an error occurred but nothing we can really do
   }
 
   // making a copy so we don't hold up the mutex very long

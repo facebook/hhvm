@@ -1,0 +1,5 @@
+bool(true)
+Inside C::__invoke with arg 123
+string(3) "xxx"
+Inside C::__invoke with arg Hello
+string(3) "xxx"

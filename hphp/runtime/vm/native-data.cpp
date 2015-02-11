@@ -15,8 +15,10 @@
 */
 
 #include "hphp/runtime/vm/native-data.h"
-#include "hphp/runtime/base/complex-types.h"
+
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -78,13 +80,10 @@ void sweepNativeData(std::vector<NativeNode*>& natives) {
     assert(natives.back()->sweep_index == natives.size() - 1);
     auto node = natives.back();
     natives.pop_back();
-    auto obj = reinterpret_cast<ObjectData*>(
-      reinterpret_cast<char*>(node) + node->obj_offset
-    );
+    auto obj = Native::obj(node);
     auto ndi = obj->getVMClass()->getNativeDataInfo();
     assert(ndi->sweep);
-    assert(reinterpret_cast<char*>(obj) - reinterpret_cast<char*>(node) ==
-           ndsize(ndi));
+    assert(node->obj_offset == ndsize(ndi));
     ndi->sweep(obj);
     assert(invalidateNativeData(obj, ndi));
   }
@@ -117,6 +116,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     MM().objMallocLogged(size)
   );
   node->obj_offset = nativeDataSize;
+  node->kind = HeaderKind::Native;
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls);
   obj->setAttribute(static_cast<ObjectData::Attribute>(ndi->odattrs));
@@ -128,6 +128,9 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   }
   if (UNLIKELY(cls->callsCustomInstanceInit())) {
     obj->callCustomInstanceInit();
+  }
+  if (UNLIKELY(cls->hasNativePropHandler())) {
+    obj->setAttribute(ObjectData::Attribute::HasNativePropHandler);
   }
   return obj;
 }

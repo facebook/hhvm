@@ -23,9 +23,6 @@ type ObjprofStringStats = shape(
 );
 
 <<__Native>>
-function objprof_start(): void;
-
-<<__Native>>
 function objprof_get_data(): array<string, ObjprofObjectStats>;
 
 <<__Native>>

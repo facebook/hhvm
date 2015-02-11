@@ -17,13 +17,6 @@ if(NOT HAVE_CUSTOM_LIBEVENT)
        "${CMAKE_CURRENT_SOURCE_DIR}/ext/test_ext_curl.cpp")
 endif()
 
-if (NOT ENABLE_FASTCGI)
-  list(REMOVE_ITEM CXX_SOURCES
-       "${CMAKE_CURRENT_SOURCE_DIR}/ext/test_fastcgi.cpp")
-  list(REMOVE_ITEM CXX_SOURCES
-       "${CMAKE_CURRENT_SOURCE_DIR}/ext/test_fastcgi_protocol.cpp")
-endif()
-
 add_executable(test ${CXX_SOURCES})
 target_link_libraries(test ${HHVM_LINK_LIBRARIES})
 embed_all_systemlibs(test "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/test")

@@ -38,8 +38,8 @@
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
+#include <folly/Conv.h>
+#include <folly/Format.h>
 
 #include <sys/types.h>
 #include <signal.h>
@@ -140,7 +140,7 @@ HttpServer::HttpServer()
   }
 
   if (RuntimeOption::XboxServerPort != 0) {
-    std::shared_ptr<SatelliteServerInfo> xboxInfo(new XboxServerInfo());
+    auto xboxInfo = std::make_shared<XboxServerInfo>();
     auto satellite = SatelliteServer::Create(xboxInfo);
     if (satellite) {
       m_satellites.push_back(std::move(satellite));
@@ -382,18 +382,6 @@ void HttpServer::stop(const char* stopReason) {
   m_stopped = true;
   m_stopReason = stopReason;
   notify();
-}
-
-void HttpServer::abortServers() {
-  for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    m_satellites[i]->stop();
-  }
-  if (RuntimeOption::AdminServerPort) {
-    m_adminServer->stop();
-  }
-  if (RuntimeOption::ServerPort) {
-    m_pageServer->stop();
-  }
 }
 
 void HttpServer::stopOnSignal(int sig) {

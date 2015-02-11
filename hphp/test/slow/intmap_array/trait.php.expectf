@@ -1,9 +1,0 @@
-Warning: Adding a string key to a miarray, converting to array in %s/trait.php on line 16
-array(3) {
-  [1]=>
-  int(2)
-  [3]=>
-  int(4)
-  ["warning"]=>
-  bool(true)
-}

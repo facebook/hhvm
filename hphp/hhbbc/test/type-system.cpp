@@ -23,9 +23,8 @@
 #include <utility>
 #include <vector>
 
-#include "folly/Lazy.h"
+#include <folly/Lazy.h>
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/array-init.h"
 
 #include "hphp/hhbbc/hhbbc.h"
@@ -1300,22 +1299,18 @@ TEST(Type, Interface) {
   auto const subObjAATy  = subObj(*clsAA);
   auto const subClsAATy  = subCls(*clsAA);
 
-  // we don't support interfaces quite yet so let's put few tests
-  // that will fail once interfaces are supported
-
-  // first 2 are "not precise" - should be true
-  EXPECT_FALSE(subClsATy.subtypeOf(objcls(subObjIATy)));
-  EXPECT_FALSE(objcls(subObjATy).strictSubtypeOf(subClsIATy));
+  EXPECT_TRUE(subClsATy.subtypeOf(objcls(subObjIATy)));
   EXPECT_TRUE(subClsATy.couldBe(objcls(subObjIATy)));
-
-  // first 2 are "not precise" - should be true
-  EXPECT_FALSE(subClsAATy.subtypeOf(objcls(subObjIAATy)));
-  EXPECT_FALSE(objcls(subObjAATy).strictSubtypeOf(objcls(subObjIAATy)));
+  EXPECT_TRUE(objcls(subObjATy).strictSubtypeOf(subClsIATy));
+  EXPECT_TRUE(subClsAATy.subtypeOf(objcls(subObjIAATy)));
   EXPECT_TRUE(subClsAATy.couldBe(objcls(subObjIAATy)));
+  EXPECT_TRUE(objcls(subObjAATy).strictSubtypeOf(objcls(subObjIAATy)));
 
-  // 3rd one is not precise - should be false
   EXPECT_FALSE(subClsATy.subtypeOf(objcls(subObjIAATy)));
   EXPECT_FALSE(objcls(subObjATy).strictSubtypeOf(objcls(subObjIAATy)));
+
+  // We don't support couldBe intelligently for interfaces quite yet, so here's
+  // a test that will start failing if we ever do:
   EXPECT_TRUE(clsExactATy.couldBe(objcls(subObjIAATy)));
 }
 

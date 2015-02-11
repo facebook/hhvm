@@ -19,6 +19,7 @@
 #define incl_HPHP_THRIFT_TRANSPORT_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/logger.h"
 
 #include <sys/types.h>

@@ -133,7 +133,7 @@ struct TokenStore {
     LookaheadSlab* s = m_head;
     LookaheadSlab* next;
     while (s) {
-      next = m_head->m_next;
+      next = s->m_next;
       delete s;
       s = next;
     }

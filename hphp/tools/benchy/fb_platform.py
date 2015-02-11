@@ -5,8 +5,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import benchy_config as config
 import benchy_utils as utils
+import multiprocessing
 import os
 import shlex
+import shutil
 import subprocess
 
 
@@ -34,8 +36,13 @@ class Platform(object):
 
         """
         build_dir = branch.build_dir()
-        utils.run_command('fbmake clean')
+        build_link = os.path.join(config.SRCROOT_PATH, '_build')
+        if os.path.islink(build_link):
+            os.remove(build_link)
+        else:
+            shutil.rmtree(build_link, ignore_errors=True)
         env = os.environ.copy()
         env['FBMAKE_BUILD_ROOT'] = build_dir
+        cpus = multiprocessing.cpu_count()
         utils.run_command('/usr/local/bin/fbmake --build-root "%s" '
-                     '--ccache=off --distcc=on opt -j9000' % build_dir, env=env)
+                        '--distcc=off opt -j%d' % (build_dir, cpus), env=env)

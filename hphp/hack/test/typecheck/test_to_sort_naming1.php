@@ -9,8 +9,7 @@
  *
  */
 
-
-function f($r){
+function f($r) {
   if ($r) {
     $y = 0;
   }
@@ -18,7 +17,7 @@ function f($r){
   return $r;
 }
 
-function g(){
+function g() {
   $t = g();
   $t = 'd';
 }

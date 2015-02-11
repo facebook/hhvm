@@ -20,8 +20,11 @@
 #include <map>
 #include <memory>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/server/http-protocol.h"
@@ -2035,7 +2038,7 @@ void HHVM_METHOD(SoapServer, setclass,
     data->m_soap_class.argv = argv;
     data->m_soap_class.persistance = SOAP_PERSISTENCE_REQUEST;
   } else {
-    raise_warning("Tried to set a non existant class (%s)", name.data());
+    raise_warning("Tried to set a non existent class (%s)", name.data());
   }
 }
 
@@ -2076,7 +2079,7 @@ void HHVM_METHOD(SoapServer, addfunction,
       }
       String function_name = iter.second().toString();
       if (!HHVM_FN(function_exists)(function_name)) {
-        raise_warning("Tried to add a non existant function '%s'",
+        raise_warning("Tried to add a non existent function '%s'",
                         function_name.data());
         return;
       }
@@ -2092,7 +2095,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
 
   String class_name;
   if (data->m_type == SOAP_OBJECT) {
-    class_name = data->m_soap_object->o_getClassName();
+    class_name = data->m_soap_object->getClassName();
   } else if (data->m_type == SOAP_CLASS) {
     class_name = data->m_soap_class.name;
   } else if (data->m_soap_functions.functions_all) {
@@ -2311,8 +2314,8 @@ void HHVM_METHOD(SoapServer, handle,
                                          data->m_uri.c_str(), retval,
                                          data->m_soap_headers,
                                          soap_version);
-  } catch (Object &e) {
-    if (e->o_instanceof("SoapFault")) {
+  } catch (Object& e) {
+    if (e->instanceof(SystemLib::s_SoapFaultClass)) {
       send_soap_server_fault(function, e, nullptr);
       return;
     }
@@ -2946,9 +2949,17 @@ bool HHVM_METHOD(SoapClient, __setsoapheaders,
 // class SoapVar
 
 Class* SoapVar::s_class = nullptr;
-const StaticString SoapVar::s_className("SoapVar");
 
 IMPLEMENT_GET_CLASS(SoapVar)
+
+const StaticString
+  s_enc_type("enc_type"),
+  s_enc_value("enc_value"),
+  s_enc_stype("enc_stype"),
+  s_enc_ns("enc_ns"),
+  s_enc_name("enc_name"),
+  s_enc_namens("enc_namens"),
+  SoapVar::s_className("SoapVar");
 
 void HHVM_METHOD(SoapVar, __construct,
                  const Variant& data,
@@ -2957,26 +2968,24 @@ void HHVM_METHOD(SoapVar, __construct,
                  const String& type_namespace /* = null_string */,
                  const String& node_name /* = null_string */,
                  const String& node_namespace /* = null_string */) {
-  auto* nativeData = Native::data<SoapVar>(this_);
   USE_SOAP_GLOBAL;
+  int64_t ntype;
   if (type.isNull()) {
-    nativeData->m_type = UNKNOWN_TYPE;
+    ntype = UNKNOWN_TYPE;
   } else {
     std::map<int, encodePtr> &defEncIndex = SOAP_GLOBAL(defEncIndex);
-    int64_t ntype = type.toInt64();
-    if (defEncIndex.find(ntype) != defEncIndex.end()) {
-      nativeData->m_type = ntype;
-    } else {
+    ntype = type.toInt64();
+    if (defEncIndex.find(ntype) == defEncIndex.end()) {
       raise_warning("Invalid type ID");
       return;
     }
   }
-
-  if (data.toBoolean())        nativeData->m_value  = data;
-  if (!type_name.empty())      nativeData->m_stype  = type_name;
-  if (!type_namespace.empty()) nativeData->m_ns     = type_namespace;
-  if (!node_name.empty())      nativeData->m_name   = node_name;
-  if (!node_namespace.empty()) nativeData->m_namens = node_namespace;
+  this_->o_set(s_enc_type, ntype);
+  if (data.toBoolean())        this_->o_set(s_enc_value,  data);
+  if (!type_name.empty())      this_->o_set(s_enc_stype,  type_name);
+  if (!type_namespace.empty()) this_->o_set(s_enc_ns,     type_namespace);
+  if (!node_name.empty())      this_->o_set(s_enc_name,   node_name);
+  if (!node_namespace.empty()) this_->o_set(s_enc_namens, node_namespace);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3053,10 +3062,10 @@ void HHVM_METHOD(SoapHeader, __construct,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class SoapExtension : public Extension {
+static class SoapExtension final : public Extension {
 public:
   SoapExtension() : Extension("soap", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(SoapServer, __construct);
     HHVM_ME(SoapServer, setclass);
     HHVM_ME(SoapServer, setobject);
@@ -3086,8 +3095,6 @@ public:
                                                Native::NDIFlags::NO_SWEEP);
 
     HHVM_ME(SoapVar, __construct);
-    Native::registerNativeDataInfo<SoapVar>(SoapVar::s_className.get(),
-                                            Native::NDIFlags::NO_SWEEP);
 
     HHVM_ME(SoapParam, __construct);
     Native::registerNativeDataInfo<SoapParam>(SoapParam::s_className.get(),

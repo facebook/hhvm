@@ -9,11 +9,9 @@
  *
  */
 
-class A {
-}
+class A {}
 
-class B extends A {
-}
+class B extends A {}
 
 function f((A, bool) $x): void {
   // subtyping works with tuples

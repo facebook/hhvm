@@ -38,11 +38,9 @@ enum {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDOMySql : public PDODriver {
-public:
+struct PDOMySql : PDODriver {
   PDOMySql();
-
-  virtual PDOConnection *createConnectionObject();
+  PDOResource* createResourceImpl() override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

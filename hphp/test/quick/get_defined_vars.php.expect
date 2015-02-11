@@ -3,12 +3,12 @@ array(1) {
   int(500)
 }
 array(3) {
+  ["arg1"]=>
+  int(1)
   ["local"]=>
   int(0)
   ["usevar"]=>
   int(0)
-  ["arg1"]=>
-  int(1)
 }
 array(2) {
   ["a"]=>

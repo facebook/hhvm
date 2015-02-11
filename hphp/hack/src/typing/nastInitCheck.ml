@@ -74,7 +74,7 @@ module Env = struct
   let add_parent_construct c tenv cvars parent_hint =
     match parent_hint with
       | (_, Happly ((_, parent), _)) ->
-        let _, class_ = Typing_env.get_class tenv parent in
+        let class_ = Typing_env.get_class tenv parent in
         (match class_ with
           | Some class_ when
               class_.Typing_defs.tc_need_init && c.c_constructor <> None
@@ -107,18 +107,20 @@ module Env = struct
       acc
 
   and cvar acc cv =
-    let cname = snd cv.cv_id in
-    match cv.cv_type with
-      | Some (_, Hoption _) | Some (_, Hmixed) | None -> acc
-      | _ ->
-        match cv.cv_expr with
-          | Some _ -> acc
-          | _ -> SSet.add cname acc
+    if cv.cv_is_xhp then acc else begin
+      let cname = snd cv.cv_id in
+      match cv.cv_type with
+        | Some (_, Hoption _) | Some (_, Hmixed) | None -> acc
+        | _ ->
+          match cv.cv_expr with
+            | Some _ -> acc
+            | _ -> SSet.add cname acc
+    end
 
   and parent_cvars tenv acc c =
     List.fold_left begin fun acc parent ->
       match parent with _, Happly ((_, parent), _) ->
-        let _, tc = Typing_env.get_class tenv parent in
+        let tc = Typing_env.get_class tenv parent in
         (match tc with
           | None -> acc
           | Some { tc_members_init = members; _ } -> SSet.union members acc)
@@ -195,7 +197,7 @@ and constructor env cstr =
         | NamedBody b -> toplevel env SSet.empty b
         | UnnamedBody _ -> (* FIXME FIXME *) SSet.empty
 
-and assign env acc x =
+and assign _env acc x =
   SSet.add x acc
 
 and assign_expr env acc e1 =
@@ -212,18 +214,18 @@ and stmt env acc st =
   let catch = catch env in
   let case = case env in
   match st with
-    | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), el, uel)) ->
+    | Expr (_, Call (Cnormal, (_, Class_const (CIparent, _)), el, _uel)) ->
       let acc = List.fold_left expr acc el in
       assign env acc parent_init_cvar
     | Expr e -> expr acc e
     | Break _ -> acc
     | Continue _ -> acc
     | Throw (_, e) -> expr acc e
-    | Return (p, None) ->
+    | Return (_, None) ->
       if are_all_init env acc
       then acc
       else raise (InitReturn acc)
-    | Return (p, Some x) ->
+    | Return (_, Some x) ->
       let acc = expr acc x in
       if are_all_init env acc
       then acc
@@ -339,7 +341,7 @@ and expr_ env acc p e =
             method_ := Done;
             (match b with
               | NamedBody b -> toplevel env acc b
-              | UnnamedBody b -> (* FIXME *) acc
+              | UnnamedBody _b -> (* FIXME *) acc
             )
           )
       )

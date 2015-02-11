@@ -59,17 +59,6 @@ TEST(Simplifier, JumpConstFold) {
     EXPECT_SINGLE_OP(resultFalseZero, Jmp);
     EXPECT_SINGLE_OP(resultTrueNZero, Jmp);
   }
-
-  // Folding query jumps.
-  {
-    auto jmpeqTaken = unit.gen(JmpEq, dummy, unit.cns(10), unit.cns(10));
-    auto result = simplify(unit, jmpeqTaken, false);
-    EXPECT_SINGLE_OP(result, Jmp);
-
-    auto jmpeqNTaken = unit.gen(JmpEq, dummy, unit.cns(10), unit.cns(400));
-    result = simplify(unit, jmpeqNTaken, false);
-    EXPECT_SINGLE_OP(result, Nop);
-  }
 }
 
 TEST(Simplifier, CondJmp) {
@@ -100,61 +89,6 @@ TEST(Simplifier, CondJmp) {
     EXPECT_EQ(nullptr, result.dst);
     ASSERT_EQ(1, result.instrs.size());
     EXPECT_MATCH(result.instrs[0], JmpNZero, val->dst());
-  }
-}
-
-TEST(Simplifier, JumpFuse) {
-  BCMarker dummy = BCMarker::Dummy();
-  IRUnit unit(test_context);
-
-  {
-    // JmpZero(Eq(X, true)) --> JmpEq(X, false)
-    auto taken = unit.defBlock();
-    auto lhs = unit.cns(true);
-    auto rhs = unit.gen(Conjure, dummy, Type::Bool);
-    auto eq  = unit.gen(Eq, dummy, lhs, rhs->dst());
-    auto jmp = unit.gen(JmpZero, dummy, taken, eq->dst());
-    auto result = simplify(unit, jmp, false);
-
-    EXPECT_EQ(nullptr, result.dst);
-    EXPECT_EQ(2, result.instrs.size());
-
-    // This is a dead Eq instruction; an artifact of weirdness in the
-    // implementation. Should go away.
-    EXPECT_FALSE(result.instrs[0]->isControlFlow());
-
-    EXPECT_MATCH(result.instrs[1], JmpEq, taken, rhs->dst(), unit.cns(false));
-  }
-
-  {
-    // JmpNZero(Neq(X:Int, Y:Int)) --> JmpNeqInt(X, Y)
-    auto taken = unit.defBlock();
-    auto x = unit.gen(Conjure, dummy, Type::Int);
-    auto y = unit.gen(Conjure, dummy, Type::Int);
-
-    auto neq = unit.gen(Neq, dummy, x->dst(), y->dst());
-    auto jmp = unit.gen(JmpNZero, dummy, taken, neq->dst());
-    auto result = simplify(unit, jmp, false);
-
-    EXPECT_EQ(nullptr, result.dst);
-    EXPECT_EQ(2, result.instrs.size());
-    EXPECT_FALSE(result.instrs[0]->isControlFlow());  // dead Neq
-    EXPECT_MATCH(result.instrs[1], JmpNeqInt, taken, x->dst(), y->dst());
-  }
-
-  {
-    // JmpNZero(Neq(X:Cls, Y:Cls)) --> JmpNeq(X, Y)
-    auto taken = unit.defBlock();
-    auto x = unit.gen(Conjure, dummy, Type::Bool);
-    auto y = unit.gen(Conjure, dummy, Type::Bool);
-
-    auto neq = unit.gen(Neq, dummy, x->dst(), y->dst());
-    auto jmp = unit.gen(JmpNZero, dummy, taken, neq->dst());
-    auto result = simplify(unit, jmp, false);
-
-    EXPECT_EQ(nullptr, result.dst);
-    EXPECT_EQ(1, result.instrs.size());
-    EXPECT_MATCH(result.instrs[0], JmpNeq, taken, x->dst(), y->dst());
   }
 }
 
@@ -223,7 +157,7 @@ TEST(Simplifier, Count) {
     EXPECT_MATCH(result.instrs[0], CountArray, arr->dst());
   }
 
-  // Count($array_not_nvtw) --> CountArrayFast($array_not_nvtw)
+  // Count($array_packed) --> CountArrayFast($array_packed)
   {
     auto ty = Type::Arr.specialize(ArrayData::kPackedKind);
     auto arr = unit.gen(Conjure, dummy, ty);

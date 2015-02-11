@@ -26,7 +26,7 @@
 
 #include "hphp/util/data-block.h"
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include <cstdint>
 #include <cstring>
@@ -35,6 +35,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Func;
+class Shape;
 
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -119,6 +120,10 @@ enum class Ptr : uint8_t {
    * we don't have a RClsInit type.
    */
   ClsInit = 0x09,
+  /*
+   * Pointer to class constant values in RDS.
+   */
+  ClsCns  = 0x0a,
 
   RFrame  = 0x11,
   RStk    = 0x12,
@@ -213,10 +218,9 @@ enum class Ptr : uint8_t {
   IRT(StkPtr,      1ULL << 50) /* Stack pointer */                      \
   IRT(FramePtr,    1ULL << 51) /* Frame pointer */                      \
   IRT(TCA,         1ULL << 52)                                          \
-  IRT(ActRec,      1ULL << 53)                                          \
-  IRT(RDSHandle,   1ULL << 54) /* RDS::Handle */                        \
+  IRT(ABC,         1ULL << 53) /* AsioBlockableChain */                 \
+  IRT(RDSHandle,   1ULL << 54) /* rds::Handle */                        \
   IRT(Nullptr,     1ULL << 55)                                          \
-  IRT(ABC,         1ULL << 56) /* AsioBlockableChain */
   /* bits 58-62 are pointer kind */
 
 #define IRT_UNIONS                                                      \
@@ -233,7 +237,7 @@ enum class Ptr : uint8_t {
   IRT(Counted,      kCountedStr|kCountedArr|kObj|kRes|kBoxedCell) \
   IRT(PtrToCounted, kCounted << kPtrShift)                        \
   IRT(Gen,          kCell|kBoxedCell)                             \
-  IRT(StackElem,    kGen|kCls)                                    \
+  IRT(StkElem,      kGen|kCls)                                    \
   IRT(Init,         kGen & ~kUninit)                              \
   IRT(PtrToGen,     kGen << kPtrShift)                            \
   IRT(PtrToInit,    kInit << kPtrShift)                           \
@@ -309,7 +313,7 @@ struct ConstCctx {
  * represents a set of types, with Type::Top being a superset of all Types and
  * Type::Bottom being a subset of all Types. The elements forming these sets of
  * types come from the types of PHP-visible values (Str, Obj, Int, ...) and
- * runtime-internal types (Func, TCA, ActRec, ...).
+ * runtime-internal types (Func, TCA, ...).
  *
  * Types can be constructed from the predefined constants or by composing
  * existing Types in various ways. Unions, intersections, and subtractions are
@@ -488,15 +492,6 @@ public:
   Type operator-(Type other) const;
   Type& operator-=(Type other) { return *this = *this - other; }
 
-  /*
-   * Return the least common predefined supertype of `t1' and `t2', i.e., the
-   * most refined Type `t3' such that t1 <= t3 and t2 <= t3.
-   *
-   * Note that arbitrary union types are possible using operator| but this
-   * function always returns one of the predefined types.
-   */
-  static Type unionOf(Type t1, Type t2);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Is-a methods.                                                      [const]
@@ -546,7 +541,7 @@ public:
    * Return true iff there exists a DataType in the range [KindOfUninit,
    * KindOfRef] that represents a non-strict supertype of this type.
    *
-   * @requires: subtypeOf(StackElem)
+   * @requires: subtypeOf(StkElem)
    */
   bool isKnownDataType() const;
 
@@ -647,7 +642,7 @@ public:
   const HPHP::Func* funcVal() const;
   const Class* clsVal() const;
   ConstCctx cctxVal() const;
-  RDS::Handle rdsHandleVal() const;
+  rds::Handle rdsHandleVal() const;
   jit::TCA tcaVal() const;
 
   /*
@@ -701,7 +696,8 @@ public:
   /*
    * Return a copy of this Type specialized with `klass'.
    *
-   * @requires: canSpecializeClass() && getClass()
+   * Pre: canSpecializeClass() && getClass() == nullptr
+   *      `klass' != nullptr
    */
   Type specialize(const Class* klass) const;
   Type specializeExact(const Class* klass) const;
@@ -713,6 +709,7 @@ public:
    */
   Type specialize(ArrayData::ArrayKind arrayKind) const;
   Type specialize(const RepoAuthType::Array* array) const;
+  Type specialize(const Shape* shape) const;
 
   /*
    * Return a copy of this Type with the specialization dropped.
@@ -759,6 +756,11 @@ public:
    * Return the Type's array type specialization.
    */
   const RepoAuthType::Array* getArrayType() const;
+
+  /*
+   * Return the Type's array Shape specialization.
+   */
+  const Shape* getArrayShape() const;
 
   /*
    * Project the Type onto those types which can be specialized, e.g.:
@@ -874,6 +876,7 @@ private:
    */
   static ArrayInfo makeArrayInfo(folly::Optional<ArrayData::ArrayKind> kind,
                                  const RepoAuthType::Array* arrTy);
+  static ArrayInfo makeArrayInfo(const Shape* shape);
 
   /*
    * ArrayInfo accessors for the valid bit, kind, and RAT.
@@ -884,7 +887,7 @@ private:
   static bool arrayKindValid(ArrayInfo info);
   static ArrayData::ArrayKind arrayKind(ArrayInfo info);
   static const RepoAuthType::Array* arrayType(ArrayInfo info);
-
+  static const Shape* arrayShape(Type::ArrayInfo info);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -912,7 +915,7 @@ private:
     const Class* m_clsVal;
     ConstCctx m_cctxVal;
     jit::TCA m_tcaVal;
-    RDS::Handle m_rdsHandleVal;
+    rds::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;
 
     // Specialization for object classes and arrays.
@@ -977,7 +980,6 @@ Type refineTypeNoCheck(Type oldType, Type newType);
  */
 Type ldRefReturn(Type typeParam);
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -1022,6 +1024,7 @@ struct TypeConstraint {
   // Specialization.
 
   static constexpr uint8_t kWantArrayKind = 0x1;
+  static constexpr uint8_t kWantArrayShape = 0x2;
 
   /*
    * Is this TypeConstraint for a specialized type?
@@ -1035,6 +1038,15 @@ struct TypeConstraint {
    */
   TypeConstraint& setWantArrayKind();
   bool wantArrayKind() const;
+
+  /*
+   * Set or check the kWantArrayShape bit in 'm_specialized'. kWantArrayShape
+   * implies kWantArrayKind.
+   *
+   * @requires: isSpecialized()
+   */
+  TypeConstraint& setWantArrayShape();
+  bool wantArrayShape() const;
 
   /*
    * Set, check, or return the specialized Class.
@@ -1076,17 +1088,6 @@ private:
    */
   uintptr_t m_specialized;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-const int kTypeWordOffset = offsetof(TypedValue, m_type) % 8;
-const int kTypeShiftBits = kTypeWordOffset * CHAR_BIT;
-
-// left shift an immediate DataType, for type, to the correct position
-// within one of the registers used to pass a TypedValue by value.
-inline uint64_t toDataTypeForCall(Type type) {
-  return uint64_t(type.toDataType()) << kTypeShiftBits;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

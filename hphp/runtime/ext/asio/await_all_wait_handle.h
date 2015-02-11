@@ -31,7 +31,6 @@ namespace HPHP {
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
 class c_AwaitAllWaitHandle final : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AwaitAllWaitHandle)

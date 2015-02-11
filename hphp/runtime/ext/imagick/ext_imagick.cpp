@@ -19,6 +19,7 @@
 
 #include <vector>
 
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
 using std::pair;
@@ -317,7 +318,7 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
 //////////////////////////////////////////////////////////////////////////////
 // ImagickExtension
 ImagickExtension::ImagickExtension() :
-  Extension("imagick") {
+  Extension("imagick", "3.2.0b2") {
 }
 
 void ImagickExtension::moduleInit() {

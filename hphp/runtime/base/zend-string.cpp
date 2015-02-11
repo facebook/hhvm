@@ -26,7 +26,6 @@
 
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -292,7 +291,7 @@ int string_natural_cmp(char const *a, size_t a_len,
 void string_to_case(String& s, int (*tocase)(int)) {
   assert(!s.isNull());
   assert(tocase);
-  auto data = s.bufferSlice().ptr;
+  auto data = s.mutableData();
   auto len = s.size();
   for (int i = 0; i < len; i++) {
     data[i] = tocase(data[i]);
@@ -324,7 +323,7 @@ String string_pad(const char *input, int len, int pad_length,
   }
 
   String ret(pad_length, ReserveString);
-  char *result = ret.bufferSlice().ptr;
+  char *result = ret.mutableData();
 
   /* We need to figure out the left/right padding lengths. */
   int left_pad, right_pad;
@@ -512,7 +511,7 @@ String string_replace(const char *s, int len, int start, int length,
   }
 
   String retString(len + len_repl - length, ReserveString);
-  char *ret = retString.bufferSlice().ptr;
+  char *ret = retString.mutableData();
 
   int ret_len = 0;
   if (start) {
@@ -589,7 +588,7 @@ String string_replace(const char *input, int len,
   }
 
   String retString(reserve, ReserveString);
-  char *ret = retString.bufferSlice().ptr;
+  char *ret = retString.mutableData();
   char *p = ret;
   int pos = 0; // last position in input that hasn't been copied over yet
   int n;
@@ -634,7 +633,7 @@ String string_chunk_split(const char *src, int srclen, const char *end,
     ),
     ReserveString
   );
-  char *dest = ret.bufferSlice().ptr;
+  char *dest = ret.mutableData();
 
   const char *p; char *q;
   const char *pMax = src + srclen - chunklen + 1;
@@ -756,7 +755,7 @@ String string_strip_tags(const char *s, const int len,
   assert(allow);
 
   String retString(s, len, CopyString);
-  rbuf = retString.bufferSlice().ptr;
+  rbuf = retString.mutableData();
   String allowString;
 
   c = *s;
@@ -768,7 +767,7 @@ String string_strip_tags(const char *s, const int len,
     assert(allow);
 
     allowString = String(allow_len, ReserveString);
-    char *atmp = allowString.bufferSlice().ptr;
+    char *atmp = allowString.mutableData();
     for (const char *tmp = allow; *tmp; tmp++, atmp++) {
       *atmp = tolower((int)*(const unsigned char *)tmp);
     }
@@ -1006,7 +1005,7 @@ String string_addslashes(const char *str, int length) {
   }
 
   String retString((length << 1) + 1, ReserveString);
-  char *new_str = retString.bufferSlice().ptr;
+  char *new_str = retString.mutableData();
   const char *source = str;
   const char *end = source + length;
   char *target = new_str;
@@ -1065,7 +1064,7 @@ String string_quoted_printable_encode(const char *input, int len) {
       1),
     ReserveString
   );
-  d = buffer = ret.bufferSlice().ptr;
+  d = buffer = ret.mutableData();
 
   while (length--) {
     if (((c = *str++) == '\015') && (*str == '\012') && length > 0) {
@@ -1114,7 +1113,7 @@ String string_quoted_printable_decode(const char *input, int len, bool is_q) {
   int i = 0, j = 0, k;
   const char *str_in = input;
   String ret(len, ReserveString);
-  char *str_out = ret.bufferSlice().ptr;
+  char *str_out = ret.mutableData();
   while (i < len && str_in[i]) {
     switch (str_in[i]) {
     case '=':
@@ -1283,9 +1282,9 @@ String string_uuencode(const char *src, int src_len) {
   const char *s, *e, *ee;
   char *dest;
 
-  /* encoded length is ~ 38% greater then the original */
+  /* encoded length is ~ 38% greater than the original */
   String ret((int)ceil(src_len * 1.38) + 45, ReserveString);
-  p = dest = ret.bufferSlice().ptr;
+  p = dest = ret.mutableData();
   s = src;
   e = src + src_len;
 
@@ -1345,7 +1344,7 @@ String string_uudecode(const char *src, int src_len) {
   char *p, *dest;
 
   String ret(ceil(src_len * 0.75), ReserveString);
-  p = dest = ret.bufferSlice().ptr;
+  p = dest = ret.mutableData();
   s = src;
   e = src + src_len;
 
@@ -1442,7 +1441,7 @@ static String php_base64_encode(const unsigned char *str, int length) {
   }
 
   String ret(((length + 2) / 3) * 4, ReserveString);
-  p = result = (unsigned char *)ret.bufferSlice().ptr;
+  p = result = (unsigned char *)ret.mutableData();
 
   while (length > 2) { /* keep going until we have less than 24 bits */
     *p++ = base64_table[current[0] >> 2];
@@ -1477,7 +1476,7 @@ static String php_base64_decode(const char *str, int length, bool strict) {
   /* this sucks for threaded environments */
 
   String retString(length, ReserveString);
-  unsigned char* result = (unsigned char*)retString.bufferSlice().ptr;
+  unsigned char* result = (unsigned char*)retString.mutableData();
 
   /* run through the whole string, converting as we go */
   while ((ch = *current++) != '\0' && length-- > 0) {
@@ -1557,7 +1556,7 @@ String string_escape_shell_arg(const char *str) {
   l = strlen(str);
 
   String ret(safe_address(l, 4, 3), ReserveString); /* worst case */
-  cmd = ret.bufferSlice().ptr;
+  cmd = ret.mutableData();
 
   cmd[y++] = '\'';
 
@@ -1584,7 +1583,7 @@ String string_escape_shell_cmd(const char *str) {
 
   l = strlen(str);
   String ret(safe_address(l, 2, 1), ReserveString);
-  cmd = ret.bufferSlice().ptr;
+  cmd = ret.mutableData();
 
   for (x = 0, y = 0; x < l; x++) {
     switch (str[x]) {
@@ -1747,7 +1746,7 @@ String string_money_format(const char *format, double value) {
   int format_len = strlen(format);
   int str_len = safe_address(format_len, 1, 1024);
   String ret(str_len, ReserveString);
-  char *str = ret.bufferSlice().ptr;
+  char *str = ret.mutableData();
   if ((str_len = strfmon(str, str_len, format, value)) < 0) {
     return String();
   }
@@ -1778,7 +1777,7 @@ String string_number_format(double d, int dec,
 
   // departure from PHP: we got rid of dependencies on spprintf() here.
   String tmpstr(63, ReserveString);
-  tmpbuf = tmpstr.bufferSlice().ptr;
+  tmpbuf = tmpstr.mutableData();
   tmplen = snprintf(tmpbuf, 64, "%.*F", dec, d);
   if (tmpbuf == nullptr || !isdigit((int)tmpbuf[0])) {
     tmpstr.setSize(tmplen);
@@ -1787,7 +1786,7 @@ String string_number_format(double d, int dec,
   if (tmplen >= 64) {
     // Uncommon, asked for more than 64 chars worth of precision
     tmpstr = String(tmplen, ReserveString);
-    tmpbuf = tmpstr.bufferSlice().ptr;
+    tmpbuf = tmpstr.mutableData();
     tmplen = snprintf(tmpbuf, tmplen + 1, "%.*F", dec, d);
     if (tmpbuf == nullptr || !isdigit((int)tmpbuf[0])) {
       tmpstr.setSize(tmplen);
@@ -1830,7 +1829,7 @@ String string_number_format(double d, int dec,
     reslen++;
   }
   String resstr(reslen, ReserveString);
-  resbuf = resstr.bufferSlice().ptr;
+  resbuf = resstr.mutableData();
 
   s = tmpbuf+tmplen-1;
   t = resbuf+reslen-1;
@@ -1891,7 +1890,7 @@ String string_soundex(const String& str) {
   assert(!str.empty());
   int _small, code, last;
   String retString(4, ReserveString);
-  char* soundex = retString.bufferSlice().ptr;
+  char* soundex = retString.mutableData();
 
   static char soundex_table[26] = {
     0,              /* A */
@@ -2522,7 +2521,7 @@ String string_convert_cyrillic_string(const String& input, char from, char to) {
   unsigned char tmp;
   const unsigned char *uinput = (unsigned char *)input.slice().ptr;
   String retString(input.size(), ReserveString);
-  unsigned char *str = (unsigned char *)retString.bufferSlice().ptr;
+  unsigned char *str = (unsigned char *)retString.mutableData();
 
   from_table = nullptr;
   to_table   = nullptr;
@@ -2660,7 +2659,7 @@ String string_convert_hebrew_string(const String& inStr,
   } while (block_end < str_len-1);
 
   String brokenStr(str_len, ReserveString);
-  broken_str = brokenStr.bufferSlice().ptr;
+  broken_str = brokenStr.mutableData();
   begin=end=str_len-1;
   target = broken_str;
 

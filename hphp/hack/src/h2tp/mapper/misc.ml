@@ -23,6 +23,10 @@ open Ast_ext
        Example:
         old: $foo?->bar()
         new: \\hacklib_nullsafe($foo)->bar()
+    3. convert a couple of previously autoimported functions such as
+       "invariant" and "invariant_violation" to their new namespaced names.
+       TODO: these could be called with "fun()" I suppose, but that's not
+       terribly useful.
 *)
 
 let process_expr (k, _) = function
@@ -32,6 +36,10 @@ let process_expr (k, _) = function
   | Obj_get ((p, New (klass, pargs, uargs)), v2, OG_nullthrows) ->
       let new_call = (p, New (klass, pargs, uargs)) in
       k (Obj_get (call_func p "\\hacklib_id" [new_call], v2, OG_nullthrows))
+  | Call ((p, Id (p2, "invariant")), el, uel) ->
+      k (Call ((p, Id (p2, "\\HH\\invariant")), el, uel))
+  | Call ((p, Id (p2, "invariant_violation")), el, uel) ->
+      k (Call ((p, Id (p2, "\\HH\\invariant_violation")), el, uel))
   | e -> k e
 
 let map =

@@ -20,11 +20,11 @@
 #include <climits>
 #include <vector>
 
-#include "folly/Likely.h"
+#include <folly/Likely.h>
 
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -43,19 +43,17 @@ struct ArrayData {
   //
   // Beware if you change the order or the numerical values, as there are
   // a few places in the code that depends on the order or the numeric
-  // values. Also, all of the values need to be continguous from 0 to =
+  // values. Also, all of the values need to be continuous from 0 to =
   // kNumKinds-1 since we use these values to index into a table.
   enum ArrayKind : uint8_t {
     kPackedKind = 0,  // PackedArray with keys in range [0..size)
-    kMixedKind = 1,   // MixedArray arbitrary int or string keys, maybe holes
-    kStrMapKind = 2,  // StrMapArray, string keys, mixed values, like MixedArray
-    kIntMapKind = 3,  // IntMapArray, int keys, maybe holes, like MixedArray
-    kVPackedKind = 4, // PackedArray with extra warnings for certain operations
-    kEmptyKind = 5,   // The singleton static empty array
-    kSharedKind = 6,  // SharedArray
-    kNvtwKind = 7,    // NameValueTableWrapper
-    kProxyKind = 8,   // ProxyArray
-    kNumKinds = 9     // insert new values before kNumKinds.
+    kStructKind = 1,  // StructArray with static string keys
+    kMixedKind = 2,   // MixedArray arbitrary int or string keys, maybe holes
+    kEmptyKind = 3,   // The singleton static empty array
+    kApcKind = 4,     // APCLocalArray
+    kGlobalsKind = 5, // GlobalsArray
+    kProxyKind = 6,   // ProxyArray
+    kNumKinds = 7     // insert new values before kNumKinds.
   };
 
 protected:
@@ -64,11 +62,13 @@ protected:
    * it, change the MixedArray::Make functions as appropriate.
    */
   explicit ArrayData(ArrayKind kind)
-    : m_size(-1)
-    , m_pos(0)
-    , m_kind(kind)
-    , m_count(0)
-  {}
+    : m_sizeAndPos(uint32_t(-1))
+    , m_kindAndCount(kind << 24) {
+    assert(m_size == -1);
+    assert(m_pos == 0);
+    assert(m_kind == kind);
+    assert(m_count == 0);
+  }
 
   /*
    * NOTE: MixedArray no longer calls this destructor.  If you need to
@@ -97,7 +97,7 @@ public:
    * normally called when the reference count goes to zero (e.g. via a
    * helper like decRefArr).
    */
-  void release();
+  void release() noexcept;
 
   /**
    * Whether this array has any element.
@@ -121,9 +121,9 @@ public:
     return m_size;
   }
 
-  // unlike ArrayData::size(), this functions doesn't delegate
+  // Unlike ArrayData::size(), this function doesn't delegate
   // to the vsize() function, so its more efficient to use this when
-  // you know you don't have a NameValueTableWrapper or ProxyArray
+  // you know you don't have a GlobalsArray or ProxyArray.
   size_t getSize() const {
     return m_size;
   }
@@ -144,63 +144,13 @@ public:
    */
   bool noCopyOnWrite() const;
 
-  /*
-   * Returns true if this is a PackedArray or a varray
-   */
-  bool isPacked() const {
-    bool b = !(m_kind & ~uint8_t{4});
-    assert(b == (m_kind == kPackedKind || m_kind == kVPackedKind));
-    return b;
-  }
-  /*
-   * Returns true if this is a MixedArray, msarray, or miarray
-   */
-  bool isMixed() const {
-    bool b = ((uint64_t{m_kind} - uint64_t{1}) <= uint64_t{2});
-    assert(b == (m_kind == kMixedKind || m_kind == kStrMapKind ||
-                 m_kind == kIntMapKind));
-    return b;
-  }
-
-  /*
-   * These three functions can be used to test if this array is a varray,
-   * msarray, or miarray respectively.
-   */
-  bool isVPackedArray() const { return m_kind == kVPackedKind; }
-  bool isStrMapArray() const { return m_kind == kStrMapKind; }
-  bool isIntMapArray() const { return m_kind == kIntMapKind; }
-
-  /*
-   * Returns true if this is any kind of "checked" array (varray, msarray,
-   * or miarray).
-   */
-  bool isCheckedArray() const {
-    bool b = ((uint64_t{m_kind} - uint64_t{2}) <= uint64_t{2});
-    assert(b == (m_kind == kStrMapKind || m_kind == kIntMapKind ||
-                 m_kind == kVPackedKind));
-    return b;
-  }
-
-  /*
-   * Returns true if this is a msarray or miarray.
-   */
-  bool isStrMapArrayOrIntMapArray() const {
-    bool b = ((uint64_t{m_kind} - uint64_t{2}) <= uint64_t{1});
-    assert(b == (m_kind == kStrMapKind || m_kind == kIntMapKind));
-    return b;
-  }
-  /*
-   * Returns true if this is a varray or miarray.
-   */
-  bool isVPackedArrayOrIntMapArray() const {
-    bool b = ((uint64_t{m_kind} - uint64_t{3}) <= uint64_t{1});
-    assert(b == (m_kind == kIntMapKind || m_kind == kVPackedKind));
-    return b;
-  }
-
-  bool isSharedArray() const { return m_kind == kSharedKind; }
-  bool isNameValueTableWrapper() const { return m_kind == kNvtwKind; }
+  bool isPacked() const { return m_kind == kPackedKind; }
+  bool isStruct() const { return m_kind == kStructKind; }
+  bool isMixed() const { return m_kind == kMixedKind; }
+  bool isApcArray() const { return m_kind == kApcKind; }
+  bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
+  bool isEmptyArray() const { return m_kind == kEmptyKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -244,7 +194,6 @@ public:
    * relying on this, but try not to in new code.)
    */
   const TypedValue* nvGet(int64_t k) const;
-  const TypedValue* nvGetConverted(int64_t k) const;
   const TypedValue* nvGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos) const;
 
@@ -275,7 +224,6 @@ public:
    * escalated array data.
    */
   ArrayData *set(int64_t k, const Variant& v, bool copy);
-  ArrayData *setConverted(int64_t k, const Variant& v, bool copy);
   ArrayData *set(StringData* k, const Variant& v, bool copy);
 
   ArrayData *setRef(int64_t k, Variant& v, bool copy);
@@ -443,6 +391,7 @@ private:
   void serializeImpl(VariableSerializer *serializer) const;
   friend size_t getMemSize(const ArrayData*);
   static void compileTimeAssertions() {
+    static_assert(offsetof(ArrayData, m_kind) == HeaderKindOffset, "");
     static_assert(offsetof(ArrayData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
@@ -463,6 +412,7 @@ protected:
   friend struct PackedArray;
   friend struct EmptyArray;
   friend struct MixedArray;
+  friend struct StructArray;
   friend class BaseVector;
   friend class c_Vector;
   friend class c_ImmVector;
@@ -500,6 +450,14 @@ protected:
   };
 };
 
+static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
+static_assert(ArrayData::kStructKind == uint8_t(HeaderKind::Struct), "");
+static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
+static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
+static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
+static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
+static_assert(ArrayData::kProxyKind == uint8_t(HeaderKind::Proxy), "");
+
 //////////////////////////////////////////////////////////////////////
 
 extern std::aligned_storage<
@@ -530,11 +488,9 @@ struct ArrayFunctions {
   static auto const NK = size_t(ArrayData::ArrayKind::kNumKinds);
   void (*release[NK])(ArrayData*);
   const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
-  const TypedValue* (*nvGetIntConverted[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
-  ArrayData* (*setIntConverted[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
                            bool copy);
   size_t (*vsize[NK])(const ArrayData*);

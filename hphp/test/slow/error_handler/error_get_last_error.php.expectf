@@ -1,0 +1,8 @@
+NULL
+Undefined variable: x
+NULL
+no x
+NULL
+
+Fatal error: Call to undefined function nosuchfunc() in %s on line %d
+bool(true)

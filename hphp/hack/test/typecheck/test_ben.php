@@ -10,7 +10,7 @@
  */
 
 function foo(mixed $x): mixed {
-  if(is_int($x)) {
+  if (is_int($x)) {
     $x = false;
   }
   return $x;

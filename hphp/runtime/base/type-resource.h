@@ -43,7 +43,6 @@ public:
   void reset() { ResourceBase::reset(); }
 
   ResourceData* operator->() const {
-    if (!m_px) throw_null_pointer_exception();
     return m_px;
   }
 
@@ -52,17 +51,31 @@ public:
    */
   /* implicit */ Resource(ResourceData *data) : ResourceBase(data) { }
   /* implicit */ Resource(const Resource& src) : ResourceBase(src.m_px) { }
+  template <typename T>
+  explicit Resource(SmartPtr<T>&& src) : ResourceBase(std::move(src)) { }
+  template <typename T>
+  explicit Resource(const SmartPtr<T>& src) : ResourceBase(src) { }
 
   // Move ctor
-  Resource(Resource&& src) : ResourceBase(std::move(src)) { }
+  Resource(Resource&& src) noexcept : ResourceBase(std::move(src)) { }
 
   // Regular assign
   Resource& operator=(const Resource& src) {
     ResourceBase::operator=(src);
     return *this;
   }
+  template <typename T>
+  Resource& operator=(const SmartPtr<T>& src) {
+    ResourceBase::operator=(src);
+    return *this;
+  }
   // Move assign
   Resource& operator=(Resource&& src) {
+    ResourceBase::operator=(std::move(src));
+    return *this;
+  }
+  template <typename T>
+  Resource& operator=(SmartPtr<T>&& src) {
     ResourceBase::operator=(std::move(src));
     return *this;
   }
@@ -72,6 +85,8 @@ public:
   /**
    * Informational
    */
+  explicit operator bool() const { return m_px != nullptr; }
+
   bool isNull() const {
     return m_px == nullptr;
   }
@@ -80,14 +95,15 @@ public:
     return m_px == nullptr || m_px->isInvalid();
   }
 
-  template <class T> T& cast() { return *static_cast<T*>(this); }
-  template <class T> const T& cast() const {
-    return *static_cast<const T*>(this);
-  }
-
   /**
    * getTyped() and is() are intended for use with C++ classes that derive
    * from ResourceData.
+   *
+   * Prefer using the following functions instead of getTyped:
+   * r.getTyped<T>(false, false) -> cast<T>(r)
+   * r.getTyped<T>(true,  false) -> cast_or_null<T>(r)
+   * r.getTyped<T>(false, true) -> dyn_cast<T>(r)
+   * r.getTyped<T>(true,  true) -> dyn_cast_or_null<T>(r)
    */
   template<typename T>
   T* getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
@@ -115,12 +131,7 @@ public:
 
   template<typename T>
   bool is() const {
-    return getTyped<T>(true, true) != nullptr;
-  }
-
-  template<typename T>
-  T *cast() const {
-    return getTyped<T>();
+    return dynamic_cast<T*>(m_px) != nullptr;
   }
 
   /**

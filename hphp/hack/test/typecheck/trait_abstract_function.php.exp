@@ -1,4 +1,4 @@
 File "trait_abstract_function.php", line 16, characters 7-7:
-This class must provide an implementation for the abstract method f1 (Typing[4047])
+This class must be declared abstract, or provide an implementation for the abstract method 'f1' (Typing[4047])
 File "trait_abstract_function.php", line 13, characters 28-29:
-The abstract method f1 is defined here
+Declaration is here

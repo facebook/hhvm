@@ -1,28 +1,28 @@
 Overview
-benchy.py is a harness for building, running benchmarks, processing benchmark 
-measurments, and displaying results for HHVM. The various pieces are:
+benchy.py is a harness for building, running benchmarks, processing benchmark
+measurements, and displaying results for HHVM. The various pieces are:
 
-benchy.py: The main interaction point with the tool. It coordinates all the 
-  other phases of the process (e.g. checking out branches, building, running 
+benchy.py: The main interaction point with the tool. It coordinates all the
+  other phases of the process (e.g. checking out branches, building, running
   the harness, and processing the results).
 
-benchy_harness.py: The main benchmark harness. It is responsible for actually 
+benchy_harness.py: The main benchmark harness. It is responsible for actually
   running HHVM on the specified benchmarks.
 
 benchy_config.py: The central config file for all of the other benchy scripts.
 
-platform.py: Dynamically loads a Platform object based on the .benchy config 
-  file which knows how to perform any platform-specific duties that benchy 
-  needs. Any file of the form *_platform.py contains an implementation of one 
+platform.py: Dynamically loads a Platform object based on the .benchy config
+  file which knows how to perform any platform-specific duties that benchy
+  needs. Any file of the form *_platform.py contains an implementation of one
   of these Platform objects.
 
-any_mean.py: Responsible for consuming the raw benchmark measurments and 
+any_mean.py: Responsible for consuming the raw benchmark measurements and
   aggregating them into means and confidence intervals.
 
-confidence_interval.py: Generic library for calculating mean confidence 
+confidence_interval.py: Generic library for calculating mean confidence
   intervals.
 
-significance.py: Parses benchmark measurment results, comparing measurements 
+significance.py: Parses benchmark measurment results, comparing measurements
   for significant changes, and printing the results.
 
 table.py: Builds and prints nicely formatted tables.
@@ -30,31 +30,31 @@ table.py: Builds and prints nicely formatted tables.
 dot-benchy: This is an example of the file that should be added as ~/.benchy
   It includes important settings that benchy needs to know to run properly.
 
-tab-complete.sh: This is a shell script that can be added to the user's shell 
+tab-complete.sh: This is a shell script that can be added to the user's shell
   init file (e.g. .bashrc) that will allow for tab completion of branch names.
 
 
 Settings
 There are a few settings that are useful to know to effectively use benchy.py.
-Each benchmark runs in its own isolated VM. The number of times benchy runs a 
+Each benchmark runs in its own isolated VM. The number of times benchy runs a
 benchmark is determined by the inner, outer, and warmup settings.
 
 inner: The number of benchmark iterations run in a single invocation of the VM.
 outer: The number of VM invocations for each benchmark.
-warmup: Additional inner iterations that run at the beginning of a VM 
+warmup: Additional inner iterations that run at the beginning of a VM
   invocation whose results are ignored in the final results.
 
 So, e.g., if one were to run the following invocation of benchy:
 
 hphp/tools/benchy.py --inner 3 --outer 5 --warmup 2 master
 
-Then each benchmark would be run 3 * 5 * 2 = 30 times, but only 3 * 5 = 15 of 
-those measurements would be used for final computation of the mean and 
+Then each benchmark would be run 3 * 5 * 2 = 30 times, but only 3 * 5 = 15 of
+those measurements would be used for final computation of the mean and
 confidence interval.
 
-Additionally, subsets of the total set of benchmarks can be run using the 
-'--suite' and '--benchmark' options. Each of these options is followed by a 
-regular expression. Any suite or benchmark that matches one of these regular 
+Additionally, subsets of the total set of benchmarks can be run using the
+'--suite' and '--benchmark' options. Each of these options is followed by a
+regular expression. Any suite or benchmark that matches one of these regular
 expressions will be run. So, if we only wanted to run the 'Splay' benchmark,
 we would use the following command:
 

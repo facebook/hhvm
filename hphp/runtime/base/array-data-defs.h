@@ -18,8 +18,10 @@
 #define incl_HPHP_ARRAY_DEFS_H_
 
 #include "hphp/runtime/base/array-data.h"
+
 #include <algorithm>
-#include "hphp/runtime/base/complex-types.h"
+
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,7 +142,7 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline void ArrayData::release() {
+inline void ArrayData::release() noexcept {
   return g_array_funcs.release[m_kind](this);
 }
 
@@ -160,10 +162,6 @@ inline const TypedValue* ArrayData::nvGet(int64_t ikey) const {
   return g_array_funcs.nvGetInt[m_kind](this, ikey);
 }
 
-inline const TypedValue* ArrayData::nvGetConverted(int64_t ikey) const {
-  return g_array_funcs.nvGetIntConverted[m_kind](this, ikey);
-}
-
 inline const TypedValue* ArrayData::nvGet(const StringData* skey) const {
   return g_array_funcs.nvGetStr[m_kind](this, skey);
 }
@@ -174,11 +172,6 @@ inline void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) const {
 
 inline ArrayData* ArrayData::set(int64_t k, const Variant& v, bool copy) {
   return g_array_funcs.setInt[m_kind](this, k, *v.asCell(), copy);
-}
-
-inline ArrayData* ArrayData::setConverted(int64_t k, const Variant& v,
-                                          bool copy) {
-  return g_array_funcs.setIntConverted[m_kind](this, k, *v.asCell(), copy);
 }
 
 inline ArrayData* ArrayData::set(StringData* k, const Variant& v, bool copy) {
@@ -206,8 +199,8 @@ inline const Variant& ArrayData::getValueRef(ssize_t pos) const {
 }
 
 inline bool ArrayData::noCopyOnWrite() const {
-  // NameValueTableWrapper doesn't support COW.
-  return m_kind == kNvtwKind;
+  // GlobalsArray doesn't support COW.
+  return m_kind == kGlobalsKind;
 }
 
 inline bool ArrayData::isVectorData() const {

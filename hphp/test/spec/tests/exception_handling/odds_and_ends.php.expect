@@ -1,0 +1,9 @@
+L0: In try-block
+L0: In catch-block Exception
+Try catch byRef
+$o->prop = 0
+In try-block
+In catch-block Except
+$e->prop = 0
+$e->prop = 999
+$o->prop = 0

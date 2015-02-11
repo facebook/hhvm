@@ -298,7 +298,7 @@ char *oauth_generate_sig_base(php_so_object *soo, const char *http_method, const
 #define SO_MALIAS(func, alias, arg_info, flags) PHP_MALIAS(oauth, func, alias, arg_info, flags)
 #define SO_METHOD(func) PHP_METHOD(oauth, func)
 #define FREE_ARGS_HASH(a)  \
-  if (a) { \
+  if ((bool)a) {           \
     zend_hash_destroy(a);  \
     FREE_HASHTABLE(a); \
   }

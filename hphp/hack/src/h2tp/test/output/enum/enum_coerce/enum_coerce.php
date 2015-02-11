@@ -13,8 +13,7 @@ namespace Meh {
     echo ("($t) : $i\n");
   }
   final class E1 {
-    private function __construct() {
-    }
+    private function __construct() {}
     private static $hacklib_values = array('Blue' => 12, 'Red' => 15);
     use \HH\HACKLIB_ENUM_LIKE;
     const Blue = 12;
@@ -24,8 +23,7 @@ namespace Meh {
   display(E1::coerce(12));
   display(E1::coerce(15));
   final class E2 {
-    private function __construct() {
-    }
+    private function __construct() {}
     private static
       $hacklib_values = array(
         'Fly' => "15",

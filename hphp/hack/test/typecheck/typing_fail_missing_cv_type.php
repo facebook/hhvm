@@ -14,7 +14,7 @@ class Foo {
   protected $b;
   public $c;
 
-  public function x() : int {
+  public function x(): int {
     return $this->c;
   }
 

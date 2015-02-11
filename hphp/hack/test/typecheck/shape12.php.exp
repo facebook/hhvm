@@ -1,4 +1,4 @@
-File "shape12.php", line 14, characters 23-24:
+File "shape12.php", line 16, characters 23-24:
 Wrong type hint (Typing[4014])
-File "shape12.php", line 12, characters 32-38:
+File "shape12.php", line 13, characters 10-16:
 Cyclic typedef

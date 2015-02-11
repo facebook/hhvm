@@ -1,0 +1,56 @@
+Inside file >%s/expressions/source_file_inclusion/include.php< at line >11< with namespace ><
+
+Warning: %a
+include file does not exist
+================= xxx =================
+Inside file >%s/expressions/source_file_inclusion/limits.php< at line >14< with namespace >MyInclude<
+int(1)
+Inside file >%s/expressions/source_file_inclusion/include.php< at line >29< with namespace ><
+Inside file >%s/expressions/source_file_inclusion/mycolors.php< at line >13< with namespace >MyColors<
+int(1)
+Inside file >%s/expressions/source_file_inclusion/include.php< at line >37< with namespace ><
+----------------------------------
+MY_MIN is not defined
+----------------------------------
+int(1)
+NULL
+int(987)
+----------------------------------
+----------------------------------
+Inside file >%s/expressions/source_file_inclusion/include.php< at line >86<
+----------------------------------
+int(100)
+====
+Array
+(
+    [0] => %s/expressions/source_file_inclusion/include.php
+    [1] => %s/expressions/source_file_inclusion/limits.php
+    [2] => %s/expressions/source_file_inclusion/mycolors.php
+    [3] => %s/expressions/source_file_inclusion/return_none.php
+    [4] => %s/expressions/source_file_inclusion/return_without_value.php
+    [5] => %s/expressions/source_file_inclusion/return_with_value.php
+    [6] => %s/expressions/source_file_inclusion/test.php
+)
+====
+int(1)
+----------------------------------
+Inside file >%s/expressions/source_file_inclusion/include.php< at line >95<
+Inside test() in %s/expressions/source_file_inclusion/test.php
+
+Notice: Undefined variable: v1 in %s/expressions/source_file_inclusion/test.php on line 14
+
+Notice: Undefined variable: v2 in %s/expressions/source_file_inclusion/test.php on line 14
+$v1: , $v2: 
+$local1: 100
+Inside file >%s/expressions/source_file_inclusion/include.php< at line >99<
+----------------------------------
+Array
+(
+    [0] => %s/expressions/source_file_inclusion/include.php
+    [1] => %s/expressions/source_file_inclusion/limits.php
+    [2] => %s/expressions/source_file_inclusion/mycolors.php
+    [3] => %s/expressions/source_file_inclusion/return_none.php
+    [4] => %s/expressions/source_file_inclusion/return_without_value.php
+    [5] => %s/expressions/source_file_inclusion/return_with_value.php
+    [6] => %s/expressions/source_file_inclusion/test.php
+)

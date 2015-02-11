@@ -1,6 +1,6 @@
-File "null_type.php", line 14, characters 8-9:
+File "null_type.php", line 15, characters 8-9:
 Typing error (Typing[4110])
-File "null_type.php", line 14, characters 8-9:
+File "null_type.php", line 15, characters 8-9:
 This is a num (int/float) because this is used in an arithmetic operation
 File "null_type.php", line 12, characters 14-17:
 It is incompatible with a nullable type

@@ -24,10 +24,10 @@
 #include <unistd.h>
 
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 
 namespace HPHP {
 
@@ -37,6 +37,16 @@ namespace HPHP {
 #define PHP_LOCK_EX 2
 #define PHP_LOCK_UN 3
 #define PHP_LOCK_NB 4
+
+/* coerce the stream into some other form */
+  /* cast as a stdio FILE * */
+#define PHP_STREAM_AS_STDIO         0
+  /* cast as a POSIX fd or socketd */
+#define PHP_STREAM_AS_FD            1
+  /* cast as a socketd */
+#define PHP_STREAM_AS_SOCKETD       2
+  /* cast as fd/socket for select purposes */
+#define PHP_STREAM_AS_FD_FOR_SELECT 3
 
 StaticString s_stream_open("stream_open");
 StaticString s_stream_close("stream_close");
@@ -50,6 +60,7 @@ StaticString s_stream_truncate("stream_truncate");
 StaticString s_stream_lock("stream_lock");
 StaticString s_stream_stat("stream_stat");
 StaticString s_stream_metadata("stream_metadata");
+StaticString s_stream_cast("stream_cast");
 StaticString s_url_stat("url_stat");
 StaticString s_unlink("unlink");
 StaticString s_rename("rename");
@@ -58,7 +69,9 @@ StaticString s_rmdir("rmdir");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UserFile::UserFile(Class *cls, const Variant& context /*= null */) : UserFSNode(cls, context) {
+UserFile::UserFile(Class *cls,
+                   const SmartPtr<StreamContext>& context /*= null */)
+: UserFSNode(cls, context) {
   m_StreamOpen  = lookupMethod(s_stream_open.get());
   m_StreamClose = lookupMethod(s_stream_close.get());
   m_StreamRead  = lookupMethod(s_stream_read.get());
@@ -76,18 +89,19 @@ UserFile::UserFile(Class *cls, const Variant& context /*= null */) : UserFSNode(
   m_Mkdir       = lookupMethod(s_mkdir.get());
   m_Rmdir       = lookupMethod(s_rmdir.get());
   m_StreamMetadata = lookupMethod(s_stream_metadata.get());
+  m_StreamCast  = lookupMethod(s_stream_cast.get());
 
-  m_isLocal = true;
+  setIsLocal(true);
 
   // UserFile, to match Zend, should not call stream_close() unless it was ever
   // opened. This is a bit of a misuse of this field but the API doesn't allow
   // one direct access to an not-yet-opened stream resource so it should be
   // safe.
-  m_closed = true;
+  setIsClosed(true);
 }
 
 UserFile::~UserFile() {
-  if (!m_closed) {
+  if (!isClosed()) {
     close();
   }
 }
@@ -97,6 +111,57 @@ void UserFile::sweep() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+Resource UserFile::invokeCast(int castas) {
+  bool invoked = false;
+  Variant ret = invoke(
+    m_StreamCast,
+    s_stream_cast,
+    PackedArrayInit(1)
+      .append(castas)
+      .toArray(),
+    invoked
+  );
+
+  if (!invoked) {
+    raise_warning(
+      "%s::stream_cast is not implemented!",
+      m_cls->name()->data()
+    );
+    return Resource();
+  }
+  if (ret.toBoolean() == false) {
+    return Resource();
+  }
+  Resource handle = ret.toResource();
+  File *f = handle.getTyped<File>(true, true);
+  if (!f) {
+    raise_warning(
+      "%s::stream_cast must return a stream resource",
+      m_cls->name()->data()
+    );
+    return Resource();
+  }
+  if (f == this) {
+    raise_warning(
+      "%s::stream_cast must not return itself",
+      m_cls->name()->data()
+    );
+    return Resource();
+  }
+
+  return handle;
+}
+
+int UserFile::fd() const {
+  Resource handle = const_cast<UserFile*>(this)->invokeCast(
+    PHP_STREAM_AS_FD_FOR_SELECT);
+  if (handle.isNull()) {
+    return -1;
+  }
+  File *f = handle.getTyped<File>();
+  return f->fd();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -117,7 +182,7 @@ bool UserFile::openImpl(const String& filename, const String& mode,
     invoked
   );
   if (invoked && (ret.toBoolean() == true)) {
-    m_closed = false;
+    setIsClosed(false);
     return true;
   }
 
@@ -127,7 +192,7 @@ bool UserFile::openImpl(const String& filename, const String& mode,
 
 bool UserFile::close() {
   // fclose() should prevent this from being called on a closed stream
-  assert(!m_closed);
+  assert(!isClosed());
 
   // PHP's streams layer explicitly flushes on close
   // Mimick that for user-wrappers by pushing the flush here
@@ -136,7 +201,7 @@ bool UserFile::close() {
 
   // void stream_close()
   invoke(m_StreamClose, s_stream_close, Array::Create());
-  m_closed = true;
+  setIsClosed(true);
   return ret;
 }
 
@@ -205,23 +270,23 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
 
   // Seek within m_buffer if we can, otherwise kill it and call user stream_seek / stream_tell
   if (whence == SEEK_CUR &&
-      0 <= m_readpos + offset &&
-           m_readpos + offset < m_writepos) {
-    m_readpos += offset;
-    m_position += offset;
+      0 <= getReadPosition() + offset &&
+           getReadPosition() + offset < getWritePosition()) {
+    setReadPosition(getReadPosition() + offset);
+    setPosition(getPosition() + offset);
     return true;
   } else if (whence == SEEK_SET &&
-             0 <= offset - m_position + m_readpos &&
-                  offset - m_position + m_readpos < m_writepos) {
-    m_readpos = offset - m_position + m_readpos;
-    m_position = offset;
+             0 <= offset - getPosition() + getReadPosition() &&
+             offset - getPosition() + getReadPosition() < getWritePosition()) {
+    setReadPosition(offset - getPosition() + getReadPosition());
+    setPosition(offset);
     return true;
   } else {
     if (whence == SEEK_CUR) {
-      offset += m_readpos - m_writepos;
+      offset += getReadPosition() - getWritePosition();
     }
-    m_readpos = 0;
-    m_writepos = 0;
+    setReadPosition(0);
+    setWritePosition(0);
   }
 
   // bool stream_seek($offset, $whence)
@@ -242,17 +307,17 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
     raise_warning("%s::stream_tell is not implemented!", m_cls->name()->data());
     return false;
   }
-  m_position = ret.isInteger() ? ret.toInt64() : -1;
+  setPosition(ret.isInteger() ? ret.toInt64() : -1);
   return true;
 }
 
 int64_t UserFile::tell() {
-  return m_position;
+  return getPosition();
 }
 
 bool UserFile::eof() {
   // If there's data in the read buffer, then we're clearly not EOF
-  if ((m_writepos - m_readpos) > 0) {
+  if (bufferedLen() > 0) {
     return false;
   }
 
@@ -379,7 +444,6 @@ static inline int simulateAccessResult(bool allowed) {
   }
 }
 
-extern const int64_t k_STREAM_URL_STAT_QUIET;
 int UserFile::access(const String& path, int mode) {
   struct stat buf;
   auto ret = urlStat(path, &buf, k_STREAM_URL_STAT_QUIET);
@@ -412,7 +476,6 @@ int UserFile::access(const String& path, int mode) {
   }
 }
 
-extern const int64_t k_STREAM_URL_STAT_LINK;
 int UserFile::lstat(const String& path, struct stat* buf) {
   return urlStat(path, buf, k_STREAM_URL_STAT_LINK);
 }

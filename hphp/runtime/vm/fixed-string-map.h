@@ -18,8 +18,14 @@
 #define incl_HPHP_FIXED_STRING_MAP_H_
 
 #include <cstdint>
+#include <limits>
+#include <vector>
 
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/string-data.h"
+
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 
@@ -56,15 +62,16 @@ private:
   };
 
   /*
-   * The fields we need here are just m_mask and m_table.  This would
-   * leave 4 byte padding hole, though, which some users
-   * (e.g. IndexedStringMap) might have a use for, so we expose it as
-   * a slot for our users.
+   * The fields we need here are just m_mask and m_table.  This would leave 4
+   * byte padding hole, though, which some users (e.g. IndexedStringMap) might
+   * have a use for, so we expose it as a slot for our users.
    */
   uint32_t  m_mask;
   ExtraType m_extra;  // not ours
   Elm*      m_table;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 template<class T, class V, bool case_sensitive, class ExtraType = int32_t>
 struct FixedStringMapBuilder {
@@ -77,8 +84,8 @@ struct FixedStringMapBuilder {
   using Map = hphp_hash_map<const StringData*, V, string_data_hash, EqObject>;
   using FSMap = FixedStringMap<V, case_sensitive, ExtraType>;
 
-  typedef typename Map::const_iterator const_iterator;
-  typedef typename Map::iterator iterator;
+  using const_iterator = typename Map::const_iterator;
+  using iterator = typename Map::iterator;
 
   iterator find(const StringData* key) { return m_map.find(key); }
   iterator begin()                     { return m_map.begin(); }
@@ -91,50 +98,23 @@ struct FixedStringMapBuilder {
   const_iterator begin() const { return m_map.begin(); }
   const_iterator end()   const { return m_map.end(); }
 
-  T& operator[](V idx) {
-    assert(idx >= 0);
-    assert(size_t(idx) < m_list.size());
-    return m_list[idx];
-  }
-
-  const T& operator[](V idx) const {
-    return (*const_cast<FixedStringMapBuilder*>(this))[idx];
-  }
+  T& operator[](V idx);
+  const T& operator[](V idx) const;
 
   /*
-   * Add an object to the position on the end, and allow lookup by
-   * `name'.
+   * Add an object to the position on the end, and allow lookup by `name'.
    */
-  void add(const StringData* name, const T& t) {
-    if (m_list.size() >= size_t(std::numeric_limits<V>::max())) {
-      assert(false && "FixedStringMap::Builder overflowed");
-      abort();
-    }
-
-    m_map[name] = m_list.size();
-    m_list.push_back(t);
-  }
+  void add(const StringData* name, const T& t);
 
   /*
-   * Adds objects that occupy indexes but can't be located by name.
+   * Add an object that occupies an index but can't be located by name.
    */
-  void addUnnamed(const T& t) {
-    m_list.push_back(t);
-  }
+  void addUnnamed(const T& t);
 
   /*
    * Create a FixedStringMap from the builder.
    */
-  void create(FSMap& map) {
-    map.extra() = size();
-    map.init(size(), 0);
-    if (!size()) {
-      return;
-    }
-    for (const_iterator it = begin(); it != end(); ++it) {
-      map.add(it->first, it->second);
-    }
-  }
+  void create(FSMap& map);
 
 private:
   std::vector<T> m_list;
@@ -144,5 +124,7 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
+
+#include "hphp/runtime/vm/fixed-string-map-inl.h"
 
 #endif

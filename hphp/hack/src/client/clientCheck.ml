@@ -83,7 +83,7 @@ let rec main args retries =
         ServerMsg.cmd_to_channel oc command;
         let counts_opt : ServerCoverageMetric.result =
           Marshal.from_channel ic in
-        ClientCoverageMetric.go args.output_json counts_opt;
+        ClientCoverageMetric.go ~json:args.output_json counts_opt;
         exit 0
     | MODE_FIND_CLASS_REFS name ->
         let ic, oc = connect args in
@@ -127,9 +127,6 @@ let rec main args retries =
       let command = ServerMsg.IDENTIFY_FUNCTION (content, line, char) in
       ServerMsg.cmd_to_channel oc command;
       print_all ic
-    | MODE_SHOW_TYPES file ->
-        Printf.printf "option disabled (sorry!)";
-        exit 0
     | MODE_TYPE_AT_POS arg ->
       let tpos = Str.split (Str.regexp ":") arg in
       let fn, line, char =
@@ -201,12 +198,6 @@ let rec main args retries =
     | MODE_STATUS -> ClientCheckStatus.check_status connect args
     | MODE_VERSION ->
       Printf.printf "%s\n" (Build_id.build_id_ohai);
-    | MODE_SAVE_STATE filename ->
-        let ic, oc = connect args in
-        ServerMsg.cmd_to_channel oc (ServerMsg.SAVE_STATE filename);
-        let response = input_line ic in
-        Printf.printf "%s\n" response;
-        flush stdout
     | MODE_SHOW classname ->
         let ic, oc = connect args in
         ServerMsg.cmd_to_channel oc (ServerMsg.SHOW classname);
@@ -300,7 +291,9 @@ let rec main args retries =
         Unix.sleep(1);
         main args (retries-1)
       end else begin
-        Printf.fprintf stderr "Error: hh_server disconnected or crashed, giving up!\n";
+        prerr_string
+          ("Error: hh_server disconnected or crashed, giving up!\n"^
+          "Server may have entered a bad state: Try `hh_client restart`\n");
         flush stderr;
         exit 5;
       end

@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
@@ -174,7 +174,7 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::Obj | Type::Func);
   expectTrue(Type::Init);
   expectTrue(Type::Top);
-  expectTrue(Type::StackElem);
+  expectTrue(Type::StkElem);
   expectTrue(Type::AnyObj);
   expectTrue(Type::AnyNullableObj);
   expectTrue(Type::AnyRes);
@@ -186,14 +186,6 @@ TEST(Type, CanRunDtor) {
   for (Type t : types) {
     EXPECT_FALSE(t.canRunDtor()) << t.toString() << ".canRunDtor == false";
   }
-}
-
-TEST(Type, UnionOf) {
-  EXPECT_EQ(Type::PtrToGen, Type::unionOf(Type::PtrToCell, Type::PtrToGen));
-  EXPECT_EQ(Type::UncountedInit, Type::unionOf(Type::Int, Type::Dbl));
-  EXPECT_EQ(Type::Str, Type::unionOf(Type::StaticStr, Type::Str));
-  EXPECT_EQ(Type::Gen, Type::unionOf(Type::Cell, Type::BoxedInt));
-  EXPECT_EQ(Type::Bool, Type::unionOf(Type::cns(true), Type::cns(false)));
 }
 
 TEST(Type, Top) {
@@ -291,6 +283,11 @@ TEST(Type, Specialized) {
   // Implemented conservatively right now, but the following better not return
   // bottom:
   EXPECT_EQ(constArrayMixed, constArrayMixed - spacked);
+
+  // Checking specialization dropping.
+  EXPECT_EQ(Type::Arr | Type::BoxedInitCell, packed | Type::BoxedInitCell);
+  auto specializedObj = Type::Obj.specialize(SystemLib::s_IteratorClass);
+  EXPECT_EQ(Type::Arr | Type::Obj, packed | specializedObj);
 }
 
 TEST(Type, SpecializedObjects) {
@@ -452,7 +449,7 @@ TEST(Type, PtrKinds) {
   EXPECT_TRUE(!unknownBool.subtypeOf(frameBool));
   EXPECT_EQ(unknownBool, frameBool | unknownBool);
 
-  EXPECT_EQ(unknownGen, Type::unionOf(frameGen, unknownBool));
+  EXPECT_EQ(unknownGen, frameGen | unknownBool);
 
   EXPECT_EQ(Type::Bottom, frameBool & stackBool);
   EXPECT_EQ(frameBool, frameBool & unknownBool);

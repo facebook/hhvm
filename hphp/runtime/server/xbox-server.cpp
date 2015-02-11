@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
@@ -346,7 +348,7 @@ public:
 private:
   XboxTransport *m_job;
 };
-IMPLEMENT_OBJECT_ALLOCATION(XboxTask)
+IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 

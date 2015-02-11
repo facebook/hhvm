@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_HTTP_SERVER_TAKEOVER_AGENT_H_
 #define incl_HPHP_HTTP_SERVER_TAKEOVER_AGENT_H_
 
-#include "hphp/runtime/base/complex-types.h"
-
 #include <event.h>
 
 #include <chrono>
 #include <set>
 #include <string>
+
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

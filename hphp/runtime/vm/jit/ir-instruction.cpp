@@ -55,16 +55,12 @@ bool IRInstruction::hasExtra() const {
   return m_extra;
 }
 
-// Instructions with ModifiesStack are always naryDst regardless of
-// the inner dest.
-
 bool IRInstruction::hasDst() const {
-  return opcodeHasFlags(op(), HasDest) &&
-    !opcodeHasFlags(op(), ModifiesStack);
+  return opcodeHasFlags(op(), HasDest);
 }
 
 bool IRInstruction::naryDst() const {
-  return opcodeHasFlags(op(), NaryDest | ModifiesStack);
+  return opcodeHasFlags(op(), NaryDest);
 }
 
 bool IRInstruction::producesReference(int dstNo) const {
@@ -109,19 +105,14 @@ bool IRInstruction::consumesReference(int srcNo) const {
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
 
-    case StProp:
     case StMem:
-      // StProp|StMem <base>, <offset>, <value>
-      return srcNo == 2;
+      // StMem <base>, <value>
+      return srcNo == 1;
 
     case ArraySet:
     case ArraySetRef:
       // Only consumes the reference to its input array
       return srcNo == 0;
-
-    case SpillStack:
-      // Inputs 2+ are values to store
-      return srcNo >= 2;
 
     case SpillFrame:
       // Consumes the $this/Class field of the ActRec
@@ -156,11 +147,6 @@ bool IRInstruction::mayRaiseError() const {
   return opcodeHasFlags(op(), MayRaiseError);
 }
 
-bool IRInstruction::isEssential() const {
-  return isControlFlow() ||
-         opcodeHasFlags(op(), Essential);
-}
-
 bool IRInstruction::isTerminal() const {
   return opcodeHasFlags(op(), Terminal);
 }
@@ -179,7 +165,7 @@ bool IRInstruction::isRawLoad() const {
   switch (m_op) {
     case LdMem:
     case LdRef:
-    case LdStack:
+    case LdStk:
     case LdElem:
     case LdContField:
     case LdPackedArrayElem:
@@ -210,16 +196,7 @@ bool IRInstruction::killsSource(int idx) const {
     case DecRef:
     case ConvObjToArr:
     case ConvCellToArr:
-    case ConvCellToBool:
-    case ConvObjToDbl:
-    case ConvStrToDbl:
-    case ConvCellToDbl:
-    case ConvObjToInt:
-    case ConvCellToInt:
     case ConvCellToObj:
-    case ConvObjToStr:
-    case ConvResToStr:
-    case ConvCellToStr:
       assert(idx == 0);
       return true;
     case ArraySet:
@@ -229,22 +206,6 @@ bool IRInstruction::killsSource(int idx) const {
       not_reached();
       break;
   }
-}
-
-bool IRInstruction::modifiesStack() const {
-  return opcodeHasFlags(op(), ModifiesStack);
-}
-
-SSATmp* IRInstruction::modifiedStkPtr() const {
-  assert(modifiesStack());
-  SSATmp* sp = dst(hasMainDst() ? 1 : 0);
-  assert(sp->isA(Type::StkPtr));
-  return sp;
-}
-
-SSATmp* IRInstruction::previousStkPtr() const {
-  assert(modifiesStack());
-  return src(numSrcs() - 1);
 }
 
 bool IRInstruction::hasMainDst() const {
@@ -269,65 +230,36 @@ folly::Range<const SSATmp*> IRInstruction::dsts() const {
 void IRInstruction::convertToNop() {
   if (hasEdges()) clearEdges();
   IRInstruction nop(Nop, marker());
-  // copy all but m_id, m_edges, m_listNode
-  m_op = nop.m_op;
+  m_op        = nop.m_op;
   m_typeParam = nop.m_typeParam;
-  m_numSrcs = nop.m_numSrcs;
-  m_srcs = nop.m_srcs;
-  m_numDsts = nop.m_numDsts;
-  m_dst = nop.m_dst;
-  m_extra = nullptr;
-}
-
-void IRInstruction::convertToJmp() {
-  assert(isControlFlow());
-  assert(IMPLIES(block(), &block()->back() == this));
-  m_op = Jmp;
-  m_typeParam.clear();
-  m_numSrcs = 0;
-  m_numDsts = 0;
-  m_srcs = nullptr;
-  m_dst = nullptr;
-  m_extra = nullptr;
-  // Instructions in the simplifier don't have blocks yet.
-  setNext(nullptr);
-}
-
-void IRInstruction::convertToJmp(Block* target) {
-  convertToJmp();
-  setTaken(target);
-}
-
-void IRInstruction::convertToMov() {
-  assert(!isControlFlow());
-  m_op = Mov;
-  m_typeParam.clear();
-  m_extra = nullptr;
-  if (m_numDsts == 1) m_dst->setInstruction(this); // recompute type
-  assert(m_numSrcs == 1);
-  // Instructions in the simplifier don't have dests yet
-  assert((m_numDsts == 1) != isTransient());
+  m_numSrcs   = nop.m_numSrcs;
+  m_srcs      = nop.m_srcs;
+  m_numDsts   = nop.m_numDsts;
+  m_dst       = nop.m_dst;
+  m_extra     = nullptr;
 }
 
 void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = unit.arena();
 
-  // Copy all but m_id, m_edges[].from, m_listNode, m_marker, and don't clone
-  // dests---the whole point of become() is things still point to us.
-  if (hasEdges() && !other->hasEdges()) {
-    clearEdges();
-  } else if (!hasEdges() && other->hasEdges()) {
-    m_edges = new (arena) Edge[2];
-    setNext(other->next());
-    setTaken(other->taken());
-  }
+  if (hasEdges()) clearEdges();
+
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
   m_numSrcs = other->m_numSrcs;
   m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
   m_srcs = new (arena) SSATmp*[m_numSrcs];
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
+
+  if (hasEdges()) {
+    assert(other->hasEdges());  // m_op is from other now
+    m_edges = new (arena) Edge[2];
+    m_edges[0].setInst(this);
+    m_edges[1].setInst(this);
+    setNext(other->next());
+    setTaken(other->taken());
+  }
 }
 
 void IRInstruction::setOpcode(Opcode newOpc) {
@@ -365,11 +297,14 @@ bool IRInstruction::cseEquals(IRInstruction* inst) const {
     return false;
   }
   /*
-   * Don't CSE on the edges--it's ok to use the destination of some
-   * earlier guarded load even though the instruction we may have
-   * generated here would've exited to a different trace.
+   * Don't CSE on the edges--it's ok to use the destination of some earlier
+   * branching instruction even though the instruction we may have generated
+   * here would've exited to a different block.
    *
-   * For example, we use this to cse LdThis regardless of its label.
+   * This is currently only used for CSE'ing some instructions that can take a
+   * branch deterministically, based on thier inputs, like DivDbl. If we CSE
+   * the result, it's safe because the place we would have had second one is
+   * dominated by the first one, so it can't exit.
    */
   return true;
 }

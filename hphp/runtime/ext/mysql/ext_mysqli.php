@@ -111,8 +111,24 @@ class mysqli {
       return;
     }
 
+    // If any of the necessary mysqli properties come in as null, then we can
+    // use our default ini options.
+    $host = $this->get_ini_default_if_null($host, "host");
+    $username = $this->get_ini_default_if_null($username, "user");
+    $passwd = $this->get_ini_default_if_null($passwd, "pw");
+    $port = $this->get_ini_default_if_null($port, "port");
+    $socket = $this->get_ini_default_if_null($socket, "socket");
+
     // Connect
     $this->real_connect($host, $username, $passwd, $dbname, $port, $socket);
+  }
+
+  private function get_ini_default_if_null(mixed $connect_option,
+                                           string $name) {
+    if ($connect_option === null) {
+      $connect_option = ini_get("mysqli.default_" . $name);
+    }
+    return $connect_option;
   }
 
   public function __clone(): void {
@@ -477,7 +493,7 @@ class mysqli {
    *
    * @param array $read - List of connections to check for outstanding
    *   results that can be read.
-   * @param array $error - List of connections on which an error occured,
+   * @param array $error - List of connections on which an error occurred,
    *   for example, query failure or lost connection.
    * @param array $reject - List of connections rejected because no
    *   asynchronous query has been run on for which the function could poll
@@ -922,6 +938,10 @@ class mysqli_driver {
   private bool $__reconnect = false;
   private int $__report_mode = 0;
 
+  public function __construct() {
+    $this->__reconnect = ini_get("mysqli.reconnect") === "1" ? true : false;
+  }
+
   public function __get(string $name): mixed {
     switch ($name) {
       case 'client_info':
@@ -982,33 +1002,6 @@ class mysqli_result {
   private $__result = null;
   private ?int $__resulttype = null;
   private bool $__done = false;
-
-  public function __get(string $name): mixed {
-    if ($this->__result === null) {
-      trigger_error("supplied argument is not a valid MySQL result resource",
-                    E_WARNING);
-      return null;
-    }
-
-    switch ($name) {
-      case 'current_field':
-        return $this->hh_field_tell();
-      case 'field_count':
-        return mysql_num_fields($this->__result);
-      case 'lengths':
-        return mysql_fetch_lengths($this->__result);
-      case 'num_rows':
-        if ($this->__resulttype == MYSQLI_USE_RESULT && !$this->__done) {
-          trigger_error("Function can not be used with MYSQL_USE_RESULT",
-                        E_WARNING);
-          return 0;
-        }
-        return mysql_num_rows($this->__result);
-    }
-
-    trigger_error('Undefined property: mysqli_result::$'. $name, E_NOTICE);
-    return null;
-  }
 
   <<__Native>>
   private function get_mysqli_conn_resource(mysqli $connection): ?resource;
@@ -1704,8 +1697,8 @@ function mysqli_autocommit(mysqli $link, bool $mode): bool {
  * @return bool -
  */
 function mysqli_begin_transaction(mysqli $link,
-                                  int $flags,
-                                  string $name): bool {
+                                  int $flags = 0,
+                                  ?string $name = null): bool {
   return $link->begin_transaction($flags, $name);
 }
 
@@ -2119,7 +2112,7 @@ function mysqli_ping(mysqli $link): ?bool {
  *
  * @param array $read - List of connections to check for outstanding
  *   results that can be read.
- * @param array $error - List of connections on which an error occured,
+ * @param array $error - List of connections on which an error occurred,
  *   for example, query failure or lost connection.
  * @param array $reject - List of connections rejected because no
  *   asynchronous query has been run on for which the function could poll

@@ -10,7 +10,7 @@
  */
 
 function foo(?int $x): int {
-  if($x === null) {
+  if ($x === null) {
     $x = 0;
   }
   return $x;

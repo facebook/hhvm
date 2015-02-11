@@ -150,7 +150,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function addAll(?Traversable<Pair<Tk, Tv>> $it): Map<Tk, Tv>;
 
   /**
-   * Reserves enough memory to accomodate 'sz' key/value pairs. If 'sz' is less
+   * Reserves enough memory to accommodate 'sz' key/value pairs. If 'sz' is less
    * than or equal to the current capacity of this Map, does nothing.
    */
   public function reserve(int $sz): void;

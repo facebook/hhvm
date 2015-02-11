@@ -51,8 +51,6 @@ class Variant;
  * the documentation at "doc/php.extension.compat.layer".
  */
 struct RefData {
-  enum class Magic : uint64_t { kMagic = 0xfacefaceb00cb00c };
-
   /*
    * Some RefData's (static locals) are allocated in RDS, and
    * live until the end of the request.  In this case, we start with a
@@ -63,16 +61,14 @@ struct RefData {
    */
   void initInRDS() {
     assert(isUninitializedInRDS());
+    m_kind = HeaderKind::Ref;
     m_count = 1;
-#ifndef NDEBUG
-    m_magic = Magic::kMagic;
-#endif
     assert(!m_cow && !m_z); // because RDS is pre-zeroed
   }
 
   /*
    * For RefDatas in RDS, we need a way to check if they are
-   * initialized while avoiding the usual m_magic assertions (m_magic
+   * initialized while avoiding the usual m_kind assertions (m_kind
    * will be zero if it's not initialized).  This function does that.
    */
   bool isUninitializedInRDS() const {
@@ -92,7 +88,7 @@ struct RefData {
   /*
    * Deallocate a RefData.
    */
-  void release() {
+  void release() noexcept {
     assert(!hasMultipleRefs());
     if (UNLIKELY(m_cow)) {
       m_count = 1;
@@ -113,28 +109,21 @@ struct RefData {
    * Note, despite the name, this can never return a non-Cell.
    */
   const Cell* tv() const {
-    assert(m_magic == Magic::kMagic);
+    assert(m_kind == HeaderKind::Ref);
     return &m_tv;
   }
   Cell* tv() {
-    assert(m_magic == Magic::kMagic);
+    assert(m_kind == HeaderKind::Ref);
     return &m_tv;
   }
 
   const Variant* var() const { return (const Variant*)tv(); }
   Variant* var() { return reinterpret_cast<Variant*>(tv()); }
 
-  static ptrdiff_t magicOffset() {
-#ifndef NDEBUG
-    return offsetof(RefData, m_magic);
-#else
-    not_reached();
-#endif
-  }
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
 
   void assertValid() const {
-    assert(m_magic == Magic::kMagic);
+    assert(m_kind == HeaderKind::Ref);
   }
 
   int32_t getRealCount() const {
@@ -153,10 +142,7 @@ struct RefData {
 
   // Default constructor, provided so that the PHP extension compatibility
   // layer can stack-allocate RefDatas when needed
-  RefData() {
-#ifndef NDEBUG
-    m_magic = Magic::kMagic;
-#endif
+  RefData() : m_kind(HeaderKind::Ref) {
     m_tv.m_type = KindOfNull;
     m_count = 0;
     m_cow = m_z = 0;
@@ -246,10 +232,7 @@ struct RefData {
   }
 
 private:
-  RefData(DataType t, int64_t datum) {
-#ifndef NDEBUG
-    m_magic = Magic::kMagic;
-#endif
+  RefData(DataType t, int64_t datum) : m_kind(HeaderKind::Ref) {
     // Initialize this value by laundering uninitNull -> Null.
     m_count = 1;
     m_cow = m_z = 0;
@@ -261,31 +244,26 @@ private:
     }
   }
 
-  static void compileTimeAsserts();
+  static void compileTimeAsserts() {
+    static_assert(offsetof(RefData, m_kind) == HeaderKindOffset, "");
+    static_assert(offsetof(RefData, m_count) == FAST_REFCOUNT_OFFSET, "");
+    static_assert(sizeof(RefData::m_count) == TypedValueAux::auxSize, "");
+    static_assert(sizeof(DataType) == 1, "required for m_cow/z packing");
+  }
 
 private:
-#if defined(DEBUG) || defined(PACKED_TV)
-  Magic m_magic;
-  UNUSED uint8_t m_padding;
-  mutable uint8_t m_cow;
-  mutable uint8_t m_z;
-  UNUSED uint8_t m_kind;
-  mutable RefCount m_count;
-  TypedValue m_tv;
-#else
-// count comes after actual TypedValue, overlapping TypedValue.m_aux
+  // count and kind overlap TypedValue.m_aux
   union {
-    TypedValueAux m_tv;
+    TypedValue m_tv;
     struct {
       void* shadow_data;
       DataType shadow_type;
       mutable uint8_t m_cow;
       mutable uint8_t m_z;
-      UNUSED uint8_t m_kind;
+      HeaderKind m_kind;
       mutable RefCount m_count; // refcount field
     };
   };
-#endif
 };
 
 ALWAYS_INLINE void decRefRef(RefData* ref) {

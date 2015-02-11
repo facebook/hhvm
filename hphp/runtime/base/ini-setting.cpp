@@ -16,8 +16,9 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -410,7 +411,7 @@ void IniSetting::ParserCallback::makeArray(Variant& hash,
                                            const std::string& offset,
                                            const std::string& value) {
   assert(!offset.empty());
-  Variant val(hash, Variant::StrongBind{});
+  Variant val(Variant::StrongBind{}, hash);
   auto start = offset.c_str();
   auto p = start;
   bool last = false;
@@ -657,11 +658,11 @@ static SettingMap s_system_settings;
 // Changed during the course of the request
 static IMPLEMENT_THREAD_LOCAL(SettingMap, s_saved_defaults);
 
-class IniSettingExtension : public Extension {
+class IniSettingExtension final : public Extension {
 public:
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
 
-  void requestShutdown() {
+  void requestShutdown() override {
     // Put all the defaults back to the way they were before any ini_set()
     for (auto &item : *s_saved_defaults) {
       IniSetting::SetUser(item.first, item.second, IniSetting::FollyDynamic());

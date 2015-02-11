@@ -99,16 +99,60 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const StaticString
+  s_enc_type, s_enc_value, s_enc_stype,
+  s_enc_ns, s_enc_name, s_enc_namens;
+
 class SoapVar {
 public:
   static Class* getClass();
 
-  Variant                     m_value;
-  int64_t                     m_type;
-  String                      m_stype;
-  String                      m_ns;
-  String                      m_name;
-  String                      m_namens;
+  static int64_t getEncType(ObjectData* obj) {
+    auto enc_type = obj->o_get(s_enc_type, false);
+    if (!enc_type.isInitialized()) {
+      raise_error("Encoding: SoapVar has no 'enc_type' property");
+      not_reached();
+      assert(false);
+    }
+    return enc_type.toInt64();
+  }
+
+  static void setEncType(ObjectData* obj, int64_t t) {
+    obj->o_set(s_enc_type, t);
+  }
+
+  static Variant getEncValue(ObjectData* obj) {
+    return obj->o_get(s_enc_value, false);
+  }
+
+  static void setEncValue(ObjectData* obj, const Variant& val) {
+    obj->o_set(s_enc_value, val);
+  }
+
+#define X(Name, str_name) \
+  static void setEnc##Name(ObjectData* obj, const String& str) { \
+    obj->o_set(s_enc_##str_name, str); \
+  } \
+  static String getEnc##Name(ObjectData* obj) { \
+    return getStrValue(obj, s_enc_##str_name); \
+  }
+
+  X(SType, stype)
+  X(NS, ns)
+  X(Name, name)
+  X(NameNS, namens)
+
+#undef X
+
+ private:
+  static String getStrValue(ObjectData* obj, const String& prop) {
+    auto str = obj->o_get(prop, false);
+    if (str.isString()) {
+      return str.toString();
+    } else {
+      return String();
+    }
+  }
 
   static Class*               s_class;
   static const StaticString   s_className;

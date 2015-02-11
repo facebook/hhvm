@@ -3,8 +3,8 @@ Enum [ <user> enum TestEnum extends HH\BuiltinEnum ] {
   @@ %s/enum.php %d-%d
 
   - Constants [2] {
-    Constant [ integer FOO {2}
-    Constant [ integer BAR {1}
+    Constant [ integer FOO {2} ]
+    Constant [ integer BAR {1} ]
   }
 
   - Static properties [0] {

@@ -20,7 +20,7 @@
 #include <stack>
 #include <vector>
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
@@ -811,7 +811,7 @@ int DebuggerProxy::getRealStackDepth() {
   if (!fp) return 0;
 
   while (fp != nullptr) {
-    fp = context->getPrevVMStateUNSAFE(fp, nullptr, nullptr);
+    fp = context->getPrevVMState(fp, nullptr, nullptr);
     depth++;
   }
   return depth;

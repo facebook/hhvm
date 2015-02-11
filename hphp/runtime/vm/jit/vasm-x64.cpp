@@ -14,128 +14,41 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
-#include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-util.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include <algorithm>
 
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
+
 using namespace reg;
 using namespace x64;
 
 namespace x64 { struct ImmFolder; }
 
-#define O(name, ...)                                                    \
-  static_assert(sizeof(name) <= 48, "vasm struct " #name " is too big");
-VASM_OPCODES
-#undef O
-static_assert(sizeof(Vinstr) <= 64, "Vinstr should be <= 64 bytes");
-
-const char* vinst_names[] = {
-#define O(name, imms, uses, defs) #name,
-  VASM_OPCODES
-#undef O
-};
-
-Vlabel Vunit::makeBlock(AreaIndex area) {
-  auto i = blocks.size();
-  blocks.emplace_back(area);
-  return Vlabel{i};
-}
-
-Vlabel Vunit::makeScratchBlock() {
-  return makeBlock(AreaIndex::Main);
-}
-
-void Vunit::freeScratchBlock(Vlabel l) {
-  // This will leak blocks if anything's been added since the corresponding
-  // call to makeScratchBlock(), but it's harmless.
-  if (l == blocks.size() - 1) blocks.pop_back();
-}
-
-Vreg Vunit::makeConst(uint64_t v) {
-  auto it = cpool.find(v);
-  if (it != cpool.end()) return it->second;
-  auto r = makeReg();
-  cpool[v] = r;
-  return r;
-}
-
-Vreg Vunit::makeConst(double d) {
-  union { double d; uint64_t i; } u;
-  u.d = d;
-  return makeConst(u.i);
-}
-
-Vtuple Vunit::makeTuple(VregList&& regs) {
-  auto i = tuples.size();
-  tuples.emplace_back(std::move(regs));
-  return Vtuple{i};
-}
-
-Vtuple Vunit::makeTuple(const VregList& regs) {
-  auto i = tuples.size();
-  tuples.emplace_back(regs);
-  return Vtuple{i};
-}
-
-VcallArgsId Vunit::makeVcallArgs(VcallArgs&& args) {
-  VcallArgsId i(vcallArgs.size());
-  vcallArgs.emplace_back(std::move(args));
-  return i;
-}
-
-bool Vunit::needsRegAlloc() const {
-  if (next_vr > Vreg::V0) return true;
-
-  for (auto& block : blocks) {
-    for (auto& inst : block.code) {
-      if (inst.op == Vinstr::copyargs) return true;
-    }
-  }
-
-  return false;
-}
-
-Vout& Vout::operator<<(const Vinstr& inst) {
-  assert(!closed());
-  auto& code = m_unit.blocks[m_block].code;
-  code.emplace_back(inst);
-  code.back().origin = m_origin;
-  return *this;
-}
-
-Vout Vout::makeBlock() {
-  return {m_unit, m_unit.makeBlock(area()), m_origin};
-}
-
-// implicit cast to label for initializing branch instructions
-Vout::operator Vlabel() const {
-  return m_block;
-}
-
-bool Vout::empty() const {
-  return m_unit.blocks[m_block].code.empty();
-}
-
-bool Vout::closed() const {
-  return !empty() && isBlockEnd(m_unit.blocks[m_block].code.back());
-}
-
 namespace {
+///////////////////////////////////////////////////////////////////////////////
+
 struct Vgen {
   Vgen(Vunit& u, Vasm::AreaList& areas, AsmInfo* asmInfo)
     : unit(u)
@@ -155,9 +68,8 @@ private:
   // intrinsics
   void emit(bindaddr& i);
   void emit(bindcall& i);
-  void emit(bindexit& i);
   void emit(bindjcc1st& i);
-  void emit(bindjcc2nd& i);
+  void emit(bindjcc& i);
   void emit(bindjmp& i);
   void emit(callstub& i);
   void emit(contenter& i);
@@ -165,16 +77,16 @@ private:
   void emit(copy2& i);
   void emit(debugtrap& i) { a->int3(); }
   void emit(fallthru& i) {}
-  void emit(ldimm& i);
+  void emit(ldimmb& i);
+  void emit(ldimml& i);
+  void emit(ldimmq& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
   void emit(kpcall& i);
-  void emit(ldpoint& i);
   void emit(load& i);
   void emit(mccall& i);
   void emit(mcprep& i);
   void emit(nothrow& i);
-  void emit(point& i) { points[i.p] = a->frontier(); }
   void emit(store& i);
   void emit(syncpoint i);
   void emit(unwind& i);
@@ -232,20 +144,27 @@ private:
   void emit(jmp i);
   void emit(jmpr& i) { a->jmp(i.target); }
   void emit(jmpm& i) { a->jmp(i.target); }
+  void emit(jmpi& i) { a->jmp(i.target); }
   void emit(lea& i);
   void emit(leap& i) { a->lea(i.s, i.d); }
   void emit(loaddqu& i) { a->movdqu(i.s, i.d); }
+  void emit(loadtqb& i) { a->loadb(i.s, i.d); }
   void emit(loadl& i) { a->loadl(i.s, i.d); }
   void emit(loadqp& i) { a->loadq(i.s, i.d); }
   void emit(loadsd& i) { a->movsd(i.s, i.d); }
   void emit(loadzbl& i) { a->loadzbl(i.s, i.d); }
+  void emit(loadzbq& i) { a->loadzbl(i.s, Reg32(i.d)); }
+  void emit(loadzlq& i) { a->loadl(i.s, Reg32(i.d)); }
   void emit(movb& i) { a->movb(i.s, i.d); }
   void emit(movl& i) { a->movl(i.s, i.d); }
   void emit(movzbl& i) { a->movzbl(i.s, i.d); }
+  void emit(movzbq& i) { a->movzbl(i.s, Reg32(i.d)); }
   void emit(mulsd& i) { commute(i); a->mulsd(i.s0, i.d); }
   void emit(neg& i) { unary(i); a->neg(i.d); }
   void emit(nop& i) { a->nop(); }
   void emit(not& i) { unary(i); a->not(i.d); }
+  void emit(notb& i) { unary(i); a->notb(i.d); }
+  void emit(orwim& i) { a->orw(i.s0, i.m); }
   void emit(orq& i) { commuteSF(i); a->orq(i.s0, i.d); }
   void emit(orqi& i) { binary(i); a->orq(i.s0, i.d); }
   void emit(orqim& i) { a->orq(i.s0, i.m); }
@@ -254,13 +173,11 @@ private:
   void emit(psllq& i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq& i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(push& i) { a->push(i.s); }
-  void emit(pushl& i) { a->pushl(i.s); }
   void emit(pushm& i) { a->push(i.s); }
   void emit(roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(ret& i) { a->ret(); }
   void emit(sarq& i) { unary(i); a->sarq(i.d); }
   void emit(sarqi& i) { binary(i); a->sarq(i.s0, i.d); }
-  void emit(sbbl& i) { noncommute(i); a->sbbl(i.s0, i.d); }
   void emit(setcc& i) { a->setcc(i.cc, i.d); }
   void emit(shlli& i) { binary(i); a->shll(i.s0, i.d); }
   void emit(shlq& i) { unary(i); a->shlq(i.d); }
@@ -270,13 +187,14 @@ private:
   void emit(sqrtsd& i) { a->sqrtsd(i.s, i.d); }
   void emit(storedqu& i) { a->movdqu(i.s, i.m); }
   void emit(storeb& i) { a->storeb(i.s, i.m); }
-  void emit(storebi& i) { a->storeb(i.s, i.m); }
+  void emit(storebi& i);
   void emit(storel& i) { a->storel(i.s, i.m); }
   void emit(storeli& i) { a->storel(i.s, i.m); }
   void emit(storeqi& i) { a->storeq(i.s, i.m); }
   void emit(storesd& i) { a->movsd(i.s, i.m); }
   void emit(storew& i) { a->storew(i.s, i.m); }
   void emit(storewi& i) { a->storew(i.s, i.m); }
+  void emit(subbi& i) { binary(i); a->subb(i.s0, i.d); }
   void emit(subl& i) { noncommute(i); a->subl(i.s0, i.d); }
   void emit(subli& i) { binary(i); a->subl(i.s0, i.d); }
   void emit(subq& i) { noncommute(i); a->subq(i.s0, i.d); }
@@ -284,13 +202,14 @@ private:
   void emit(subsd& i) { noncommute(i); a->subsd(i.s0, i.d); }
   void emit(testb& i) { a->testb(i.s0, i.s1); }
   void emit(testbi& i) { a->testb(i.s0, i.s1); }
-  void emit(testbim& i) { a->testb(i.s0, i.s1); }
+  void emit(testbim i) { a->testb(i.s0, i.s1); }
+  void emit(testwim& i);
   void emit(testl& i) { a->testl(i.s0, i.s1); }
   void emit(testli& i) { a->testl(i.s0, i.s1); }
-  void emit(testlim& i) { a->testl(i.s0, i.s1); }
+  void emit(testlim i);
   void emit(testq& i) { a->testq(i.s0, i.s1); }
   void emit(testqm& i) { a->testq(i.s0, i.s1); }
-  void emit(testqim& i) { a->testq(i.s0, i.s1); }
+  void emit(testqim& i);
   void emit(ucomisd& i) { a->ucomisd(i.s0, i.s1); }
   void emit(ud2& i) { a->ud2(); }
   void emit(unpcklpd& i) { noncommute(i); a->unpcklpd(i.s0, i.d); }
@@ -335,7 +254,7 @@ private:
   jit::vector<CodeAddress> addrs, points;
   jit::vector<LabelPatch> jccs, jmps, calls, catches;
   jit::vector<PointPatch> ldpoints;
-  jit::hash_map<uint64_t,uint64_t*> cpool;
+  jit::hash_map<uint64_t,uint64_t*> constants;
 };
 
 // prepare a binary op that is not commutative.  s0 must be a different
@@ -479,10 +398,6 @@ void Vgen::emit(bindcall& i) {
   a->call(i.stub);
 }
 
-void Vgen::emit(bindexit& i) {
-  emitBindSideExit(a->code(), frozen(), i.cc, i.target, i.trflags);
-}
-
 void Vgen::emit(bindjcc1st& i) {
   backend.prepareForTestAndSmash(a->code(), 0,
                                  TestAndSmashFlags::kAlignJccAndJmp);
@@ -492,9 +407,8 @@ void Vgen::emit(bindjcc1st& i) {
                             mcg->getFreeStub(frozen(), &mcg->cgFixups()),
                             REQ_BIND_JMPCC_FIRST,
                             RipRelative(patchAddr),
-                            i.targets[1],
-                            i.targets[0],
-                            i.cc,
+                            i.targets[1].toAtomicInt(),
+                            i.targets[0].toAtomicInt(),
                             ccServiceReqArgInfo(i.cc));
 
   mcg->setJmpTransID(a->frontier());
@@ -503,16 +417,8 @@ void Vgen::emit(bindjcc1st& i) {
   a->jmp(jccStub);
 }
 
-void Vgen::emit(bindjcc2nd& i) {
-  backend.prepareForSmash(a->code(), kJmpccLen);
-  auto def = emitEphemeralServiceReq(frozen(),
-                                     mcg->getFreeStub(frozen(),
-                                                      &mcg->cgFixups()),
-                                     REQ_BIND_JMPCC_SECOND,
-                                     RipRelative(a->frontier()),
-                                     i.target, i.cc);
-  mcg->setJmpTransID(a->frontier());
-  a->jcc(i.cc, def);
+void Vgen::emit(bindjcc& i) {
+  emitBindJcc(a->code(), frozen(), i.cc, i.target, i.trflags);
 }
 
 void Vgen::emit(bindjmp& i) {
@@ -545,7 +451,27 @@ void Vgen::emit(kpcall& i) {
   a->call(i.target);
 }
 
-void Vgen::emit(ldimm& i) {
+void Vgen::emit(ldimmb& i) {
+  auto val = i.s.b();
+  assert_not_implemented(i.d.isGP());
+  if (val == 0 && !i.saveflags) {
+    a->xorb(i.d, i.d);
+  } else {
+    a->movb(val, i.d);
+  }
+}
+
+void Vgen::emit(ldimml& i) {
+  auto val = i.s.l();
+  assert_not_implemented(i.d.isGP());
+  if (val == 0 && !i.saveflags) {
+    a->xorl(i.d, i.d);
+  } else {
+    a->movl(val, i.d);
+  }
+}
+
+void Vgen::emit(ldimmq& i) {
   auto val = i.s.q();
   if (i.d.isGP()) {
     if (val == 0) {
@@ -564,11 +490,6 @@ void Vgen::emit(ldimm& i) {
     auto addr = mcg->allocLiteral(i.s.q());
     a->movsd(rip[(intptr_t)addr], i.d);
   }
-}
-
-void Vgen::emit(ldpoint& i) {
-  ldpoints.push_back({a->frontier(), i.s});
-  a->lea(rip[0], i.d);
 }
 
 void Vgen::emit(load& i) {
@@ -607,6 +528,11 @@ void Vgen::emit(mcprep& i) {
     reinterpret_cast<TCA>(~movAddrUInt));
 }
 
+void Vgen::emit(storebi& i) {
+  if (i.m.seg == Vptr::FS) a->fs();
+  a->storeb(i.s, i.m.mr());
+}
+
 void Vgen::emit(store& i) {
   if (i.s.isGP()) {
     a->storeq(i.s, i.d);
@@ -621,6 +547,37 @@ void Vgen::emit(syncpoint i) {
          i.fix.pcOffset, i.fix.spOffset);
   mcg->recordSyncPoint(a->frontier(), i.fix.pcOffset,
                        i.fix.spOffset);
+}
+
+void Vgen::emit(testwim& i) {
+  // If there's only 1 byte of meaningful bits in the mask, we can adjust the
+  // pointer offset and use testbim instead.
+  int off = 0;
+  uint16_t newMask = i.s0.w();
+  while (newMask > 0xff && !(newMask & 0xff)) {
+    off++;
+    newMask >>= 8;
+  }
+
+  if (newMask > 0xff) {
+    a->testw(i.s0, i.s1);
+  } else {
+    emit(testbim{int8_t(newMask), i.s1 + off, i.sf});
+  }
+}
+
+void Vgen::emit(testlim i) {
+  a->testl(i.s0, i.s1);
+}
+
+void Vgen::emit(testqim& i) {
+  // The immediate is 32 bits, sign-extended to 64. If the sign bit isn't set,
+  // we can get the same results by emitting a testlim.
+  if (i.s0.l() < 0) {
+    a->testq(i.s0, i.s1);
+  } else {
+    emit(testlim{i.s0, i.s1, i.sf});
+  }
 }
 
 void Vgen::emit(nothrow& i) {
@@ -649,8 +606,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 
   // This is under the printir tracemod because it mostly shows you IR and
   // machine code, not vasm and machine code (not implemented).
-  bool shouldUpdateAsmInfo = !!m_asmInfo
-    && Trace::moduleEnabledRelease(HPHP::Trace::printir, kCodeGenLevel);
+  bool shouldUpdateAsmInfo = !!m_asmInfo;
 
   std::vector<TransBCMapping>* bcmap = nullptr;
   if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {
@@ -820,33 +776,6 @@ void Vgen::emit(lea& i) {
   }
 }
 
-}
-
-Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
-  assert(size_t(area) == m_areas.size());
-  auto b = m_unit.makeBlock(area);
-  Vout v{m_unit, b};
-  m_areas.push_back(Area{v, cb, cb.frontier()});
-  return m_areas.back().out;
-}
-
-jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
-  auto blocks = sortBlocks(unit);
-  // partition into main/cold/frozen areas without changing relative order,
-  // and the end{} block will be last.
-  auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Main &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
-    });
-  std::stable_partition(coldIt, blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Cold &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
-    });
-  return blocks;
-}
-
 /*
  * Move all the elements of in into out, replacing count elements of out
  * starting at idx. in be will be cleared at the end.
@@ -855,7 +784,7 @@ jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
  * to [1, 2, 10, 11, 12, 4, 5].
  */
 template<typename V>
-static void vector_splice(V& out, size_t idx, size_t count, V& in) {
+void vector_splice(V& out, size_t idx, size_t count, V& in) {
   auto out_size = out.size();
 
   // Start by making room in out for the new elements.
@@ -874,7 +803,7 @@ static void vector_splice(V& out, size_t idx, size_t count, V& in) {
 // vm regs, and returning to the VM. svcreq{} is guaranteed to be
 // at the end of a block, so we can just keep appending to the same
 // block.
-static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
+void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   assert(unit.tuples[inst.svcreq_.args].size() < kNumServiceReqArgRegs);
   auto svcreq = inst.svcreq_; // copy it
   auto origin = inst.origin;
@@ -893,20 +822,15 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   if (svcreq.stub_block) {
     v << leap{rip[(int64_t)svcreq.stub_block], rAsm};
   } else {
-    v << ldimm{0, rAsm}; // because persist flag
+    v << ldimmq{0, rAsm}; // because persist flag
   }
-  v << ldimm{svcreq.req, rdi};
+  v << ldimmq{svcreq.req, rdi};
   arg_regs |= rAsm | rdi | rVmFp | rVmSp;
 
-  // Weird hand-shaking with enterTC: reverse-call a service routine.
-  // In the case of some special stubs (m_callToExit, m_retHelper), we
-  // have already unbalanced the return stack by doing a ret to
-  // something other than enterTCHelper.  In that case
-  // SRJmpInsteadOfRet indicates to fake the return.
-  v << ret{arg_regs};
+  v << jmpi{TCA(handleSRHelper), arg_regs};
 }
 
-static void lowerSrem(Vunit& unit, Vlabel b, size_t iInst) {
+void lowerSrem(Vunit& unit, Vlabel b, size_t iInst) {
   auto const& inst = unit.blocks[b].code[iInst];
   auto const& srem = inst.srem_;
   auto scratch = unit.makeScratchBlock();
@@ -921,7 +845,7 @@ static void lowerSrem(Vunit& unit, Vlabel b, size_t iInst) {
 }
 
 template<typename FromOp, typename ToOp>
-static void lowerShift(Vunit& unit, Vlabel b, size_t iInst) {
+void lowerShift(Vunit& unit, Vlabel b, size_t iInst) {
   auto const& inst = unit.blocks[b].code[iInst];
   auto const& shift = inst.get<FromOp>();
   auto scratch = unit.makeScratchBlock();
@@ -933,7 +857,22 @@ static void lowerShift(Vunit& unit, Vlabel b, size_t iInst) {
   vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
 }
 
-static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
+void lowerAbsdbl(Vunit& unit, Vlabel b, size_t iInst) {
+  auto const& inst = unit.blocks[b].code[iInst];
+  auto const& absdbl = inst.absdbl_;
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, inst.origin);
+
+  // clear the high bit
+  auto tmp = v.makeReg();
+  v << psllq{1, absdbl.s, tmp};
+  v << psrlq{1, tmp, absdbl.d};
+
+  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+}
+
+void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
   auto& blocks = unit.blocks;
   auto& inst = blocks[b].code[iInst];
   auto const is_vcall = inst.op == Vinstr::vcall;
@@ -987,6 +926,21 @@ static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
     auto& targets = vinvoke.targets;
     v << unwind{{targets[0], targets[1]}};
 
+    // Insert an lea fixup for any stack args at the beginning of the catch
+    // block.
+    if (auto rspOffset = ((stkArgs.size() + 1) & ~1) * sizeof(uintptr_t)) {
+      auto& taken = unit.blocks[targets[1]].code;
+      assert(taken.front().op == Vinstr::landingpad ||
+             taken.front().op == Vinstr::jmp);
+      Vinstr v{lea{rsp[rspOffset], rsp}};
+      v.origin = taken.front().origin;
+      if (taken.front().op == Vinstr::jmp) {
+        taken.insert(taken.begin(), v);
+      } else {
+        taken.insert(taken.begin() + 1, v);
+      }
+    }
+
     // Write out the code so far to the end of b. Remaining code will be
     // emitted to the next block.
     vector_splice(blocks[b].code, iInst, 1, blocks[scratch].code);
@@ -999,28 +953,23 @@ static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
     case DestType::TV: {
       // rax contains m_type and m_aux but we're expecting just the type in
       // the lower bits, so shift the type result register.
-      auto rval = packed_tv ? reg::rdx : reg::rax;
-      auto rtyp = packed_tv ? reg::rax : reg::rdx;
-      if (kTypeShiftBits > 0) {
-        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
-      }
+      static_assert(offsetof(TypedValue, m_data) == 0, "");
+      static_assert(offsetof(TypedValue, m_type) == 8, "");
       assert(dests.size() == 2);
-      v << copy2{rval, rtyp, dests[0], dests[1]};
+      v << copy2{reg::rax, reg::rdx, dests[0], dests[1]};
       break;
     }
     case DestType::SIMD: {
       // rax contains m_type and m_aux but we're expecting just the type in
       // the lower bits, so shift the type result register.
-      auto rval = packed_tv ? reg::rdx : reg::rax;
-      auto rtyp = packed_tv ? reg::rax : reg::rdx;
-      if (kTypeShiftBits > 0) {
-        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
-      }
+      static_assert(offsetof(TypedValue, m_data) == 0, "");
+      static_assert(offsetof(TypedValue, m_type) == 8, "");
       assert(dests.size() == 1);
-      pack2(v, rval, rtyp, dests[0]);
+      pack2(v, reg::rax, reg::rdx, dests[0]);
       break;
     }
     case DestType::SSA:
+    case DestType::Byte:
       // copy the single-register result to dests[0]
       assert(dests.size() == 1);
       assert(dests[0].isValid());
@@ -1057,14 +1006,18 @@ static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
-static void lowerForX64(Vunit& unit, const Abi& abi) {
+void lowerForX64(Vunit& unit, const Abi& abi) {
   Timer _t(Timer::vasm_lower);
+
+  // This pass relies on having no critical edges in the unit.
+  splitCriticalEdges(unit);
 
   // Scratch block can change blocks allocation, hence cannot use regular
   // iterators.
   auto& blocks = unit.blocks;
-  for (size_t ib = 0; ib < blocks.size(); ++ib) {
-    if (blocks[ib].code.empty()) continue;
+
+  PostorderWalker{unit}.dfs([&](Vlabel ib) {
+    assert(!blocks[ib].code.empty());
     if (blocks[ib].code.back().op == Vinstr::svcreq) {
       lower_svcreq(unit, Vlabel{ib}, blocks[ib].code.back());
     }
@@ -1088,6 +1041,10 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
           lowerShift<shl, shlq>(unit, Vlabel{ib}, ii);
           break;
 
+        case Vinstr::absdbl:
+          lowerAbsdbl(unit, Vlabel{ib}, ii);
+          break;
+
         case Vinstr::defvmsp:
           inst = copy{rVmSp, inst.defvmsp_.d};
           break;
@@ -1096,17 +1053,50 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
           inst = copy{inst.syncvmsp_.s, rVmSp};
           break;
 
-        case Vinstr::syncvmfp:
-          inst = copy{inst.syncvmfp_.s, rVmFp};
+        case Vinstr::movtqb:
+          inst = copy{inst.movtqb_.s, inst.movtqb_.d};
+          break;
+
+        case Vinstr::movtql:
+          inst = copy{inst.movtql_.s, inst.movtql_.d};
+          break;
+
+        case Vinstr::ldretaddr:
+          inst = pushm{inst.ldretaddr_.s};
+          break;
+
+        case Vinstr::movretaddr:
+          inst = load{*rsp, inst.movretaddr_.d};
+          break;
+
+        case Vinstr::retctrl:
+          inst = ret{kCrossTraceRegs};
+          break;
+
+        case Vinstr::countbytecode:
+          inst = incqm{inst.countbytecode_.base[g_bytecodesVasm.handle()],
+                       inst.countbytecode_.sf};
           break;
 
         default:
           break;
       }
     }
-  }
+  });
 
   printUnit(kVasmLowerLevel, "after lower for X64", unit);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
+void Vasm::optimizeX64() {
+  removeTrivialNops(m_unit);
+  fuseBranches(m_unit);
+  if (RuntimeOption::EvalHHIRDirectExit) {
+    optimizeJmps(m_unit);
+    optimizeExits(m_unit);
+  }
 }
 
 void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
@@ -1116,7 +1106,7 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   SCOPE_EXIT { busy = false; };
   lowerForX64(m_unit, abi);
 
-  if (!m_unit.cpool.empty()) {
+  if (!m_unit.constants.empty()) {
     foldImms<x64::ImmFolder>(m_unit);
   }
   if (m_unit.needsRegAlloc()) {
@@ -1134,39 +1124,5 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   Vgen(m_unit, m_areas, asmInfo).emit(blocks);
 }
 
-auto const vauto_gp = rAsm | r11;
-auto const vauto_simd = xmm5 | xmm6 | xmm7;
-UNUSED const Abi vauto_abi {
-  .gpUnreserved = vauto_gp,
-  .gpReserved = x64::abi.gp() - vauto_gp,
-  .simdUnreserved = vauto_simd,
-  .simdReserved = x64::abi.simd() - vauto_simd,
-  .calleeSaved = x64::abi.calleeSaved,
-  .sf = x64::abi.sf
-};
-
-Vauto::~Vauto() {
-  UNUSED auto& areas = this->areas();
-  for (auto& b : unit().blocks) {
-    if (!b.code.empty()) {
-      // found at least one nonempty block. finish up.
-      if (!main().closed()) main() << fallthru{};
-      assert(areas.size() < 2 || cold().empty() || cold().closed());
-      assert(areas.size() < 3 || frozen().empty() || frozen().closed());
-      Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
-      switch (arch()) {
-        case Arch::X64: finishX64(vauto_abi, nullptr); break;
-        case Arch::ARM: finishARM(vauto_abi, nullptr); break;
-      }
-      return;
-    }
-  }
-}
-
-Vtuple findDefs(const Vunit& unit, Vlabel b) {
-  assert(!unit.blocks[b].code.empty() &&
-         unit.blocks[b].code.front().op == Vinstr::phidef);
-  return unit.blocks[b].code.front().phidef_.defs;
-}
-
+///////////////////////////////////////////////////////////////////////////////
 }}

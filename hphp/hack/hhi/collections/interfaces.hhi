@@ -1,6 +1,6 @@
 <?hh // decl
 
-interface ConstCollection<Te> extends Countable {
+interface ConstCollection<+Te> extends Countable {
   public function isEmpty(): bool;
   public function count(): int;
   public function items(): Iterable<Te>;
@@ -16,7 +16,7 @@ interface Collection<Te> extends ConstCollection<Te>,
   public function clear();
 }
 
-interface ConstSetAccess<Tm> {
+interface ConstSetAccess<+Tm> {
   public function contains(Tm $m): bool;
 }
 
@@ -24,7 +24,7 @@ interface SetAccess<Tm> extends ConstSetAccess<Tm> {
   public function remove(Tm $m): this;
 }
 
-interface ConstIndexAccess<Tk, Tv> {
+interface ConstIndexAccess<Tk, +Tv> {
   public function at(Tk $k): Tv;
   public function get(Tk $k): ?Tv;
   public function containsKey(Tk $k): bool;
@@ -36,8 +36,8 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
   public function removeKey(Tk $k): this;
 }
 
-interface ConstMapAccess<Tk, Tv> extends ConstSetAccess<Tk>,
-                                         ConstIndexAccess<Tk, Tv> {
+interface ConstMapAccess<Tk, +Tv> extends ConstSetAccess<Tk>,
+                                          ConstIndexAccess<Tk, Tv> {
 }
 
 interface MapAccess<Tk, Tv> extends ConstMapAccess<Tk, Tv>,
@@ -45,10 +45,10 @@ interface MapAccess<Tk, Tv> extends ConstMapAccess<Tk, Tv>,
                                     IndexAccess<Tk, Tv> {
 }
 
-interface ConstVector<Tv> extends ConstCollection<Tv>,
-                                  ConstIndexAccess<int, Tv>,
-                                  KeyedIterable<int, Tv>,
-                                  Indexish<int, Tv> {
+interface ConstVector<+Tv> extends ConstCollection<Tv>,
+                                   ConstIndexAccess<int, Tv>,
+                                   KeyedIterable<int, Tv>,
+                                   Indexish<int, Tv> {
   public function values(): ConstVector<Tv>;
   public function keys(): ConstVector<int>;
   public function map<Tu>((function(Tv): Tu) $fn): ConstVector<Tu>;
@@ -97,10 +97,10 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
   public function linearSearch(Tv $search_value): int;
 }
 
-interface ConstMap<Tk, Tv> extends ConstCollection<Pair<Tk, Tv>>,
-                                   ConstMapAccess<Tk, Tv>,
-                                   KeyedIterable<Tk, Tv>,
-                                   Indexish<Tk, Tv> {
+interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
+                                    ConstMapAccess<Tk, Tv>,
+                                    KeyedIterable<Tk, Tv>,
+                                    Indexish<Tk, Tv> {
   public function values(): ConstVector<Tv>;
   public function keys(): ConstVector<Tk>;
   public function map<Tu>((function(Tv): Tu) $fn): ConstMap<Tk, Tu>;
@@ -148,10 +148,10 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
   public function lastKey(): ?Tk;
 }
 
-interface ConstSet<Tv> extends ConstCollection<Tv>,
-                               ConstSetAccess<Tv>,
-                               KeyedIterable<mixed, Tv>,
-                               Container<Tv> {
+interface ConstSet<+Tv> extends ConstCollection<Tv>,
+                                ConstSetAccess<Tv>,
+                                KeyedIterable<mixed, Tv>,
+                                Container<Tv> {
   public function values(): ConstVector<Tv>;
   public function keys(): ConstVector<mixed>;
   public function map<Tu>((function(Tv): Tu) $fn): ConstSet<Tu>;

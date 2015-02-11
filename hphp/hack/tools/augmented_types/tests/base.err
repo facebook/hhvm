@@ -1,0 +1,4 @@
+hphp/hack/tools/augmented_types/tests/base.php:15:25 function/method index_by param $b does not convert cleanly: Hack doesn't have a generic object type
+hphp/hack/tools/augmented_types/tests/base.php:21:18 function/method more_stuff param $a has no type
+hphp/hack/tools/augmented_types/tests/base.php:21:18 function/method more_stuff has no return type
+hphp/hack/tools/augmented_types/tests/base.php:24:18 function/method no_docblock has no AT docblock

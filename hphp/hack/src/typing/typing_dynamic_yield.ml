@@ -37,7 +37,8 @@ let rec decl env methods =
           | r, Tfun ft -> r, ft
           | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
             | Toption _ | Tvar _ | Tabstract (_, _, _) | Tapply (_, _)
-            | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _) ->
+            | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
+            | Taccess (_, _)) ->
               assert false in
         let r = fst ft.ft_ret in
         let p = Reason.to_pos r in
@@ -74,7 +75,7 @@ let rec decl env methods =
                 | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
                   | Toption _ | Tvar _ | Tabstract (_, _, _) | Tapply (_, _)
                   | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject
-                  | Tshape _) -> assert false in
+                  | Tshape _ | Taccess (_, _)) -> assert false in
               let p = Reason.to_pos (fst ft.ft_ret) in
               let gen_r = Reason.Rdynamic_yield (p, ft.ft_pos, gen_name, name) in
               let gen_ty = ce_r, Tfun {ft with
@@ -151,11 +152,11 @@ let clean_dynamic_yield env methods =
   end methods
 
 let method_def env name hret =
-  let env, class_ = Env.get_class env (Env.get_self_id env) in
+  let class_ = Env.get_class env (Env.get_self_id env) in
   match class_, parse_yield_name (snd name) with
     | None, _
     | _, None -> env
-    | Some c, Some base_name ->
+    | Some c, Some _ ->
       if contains_dynamic_yield c.tc_extends
       then fst (check_yield_types env (fst name) hret)
       else env
@@ -163,10 +164,10 @@ let method_def env name hret =
 let check_yield_visibility env c =
   let uses_dy_directly = List.exists begin fun trait ->
     match trait with
-      | (_, Happly ((pos, name), _)) -> begin
+      | (_, Happly ((_, name), _)) -> begin
           (* Either you directly use DynamicYield, or something you directly
            * use itself uses DynamicYield. *)
-          is_dynamic_yield name || match snd (Env.get_class_dep env name) with
+          is_dynamic_yield name || match Env.get_class_dep env name with
             | Some parent_type -> contains_dynamic_yield parent_type.tc_extends
             | None -> false
           end

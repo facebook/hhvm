@@ -306,7 +306,7 @@ bool coerceFCallArgs(TypedValue* args,
 #undef CASE
 #undef COERCE_OR_CAST
 
-static inline int32_t minNumArgs(ActRec *ar) {
+static inline int32_t minNumArgs(ActRec* ar) {
   auto func = ar->m_func;
   auto numArgs = func->numNonVariadicParams();
   int32_t num = numArgs;
@@ -318,7 +318,7 @@ static inline int32_t minNumArgs(ActRec *ar) {
   return num;
 }
 
-static const StringData* getInvokeName(ActRec *ar) {
+const StringData* getInvokeName(ActRec* ar) {
   if (ar->hasInvName()) {
     return ar->getInvName();
   }

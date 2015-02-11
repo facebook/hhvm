@@ -1,10 +1,10 @@
-object(mysqli)#%d (1) {
+object(mysqli)#%d (%d) {
   ["__connection":"mysqli":private]=>
-  resource(4) of type (mysql link)
+  resource(%d) of type (mysql link)
 }
-object(mysqli_result)#2 (3) {
+object(mysqli_result)#%d (%d) {
   ["__result":"mysqli_result":private]=>
-  resource(4) of type (mysql link)
+  resource(%d) of type (mysql link)
   ["__resulttype":"mysqli_result":private]=>
   int(0)
   ["__done":"mysqli_result":private]=>

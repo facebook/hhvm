@@ -17,7 +17,8 @@
 #define incl_HPHP_RUNTIME_BASE_RDS_UTIL_H_
 
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
   struct NamedEntity;
@@ -25,7 +26,7 @@ namespace HPHP {
   struct StringData;
 }
 
-namespace HPHP { namespace RDS {
+namespace HPHP { namespace rds {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -53,4 +54,3 @@ Link<TypedValue> bindClassConstant(const StringData* className,
 }}
 
 #endif
-

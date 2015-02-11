@@ -18,12 +18,12 @@
 
 #include <type_traits>
 
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 
@@ -76,7 +76,8 @@ struct ArrayInit {
   ArrayInit& operator=(const ArrayInit&) = delete;
 
   ~ArrayInit() {
-    // Use non-specialized release call so ArrayTracer can track its destruction
+    // Use non-specialized release call so array instrumentation can track
+    // its destruction XXX rfc: keep this? what was it before?
     if (m_data) m_data->release();
   }
 

@@ -166,6 +166,8 @@ class ProfTransRec {
 typedef std::unique_ptr<ProfTransRec> ProfTransRecPtr;
 typedef std::unordered_map<FuncId, TransIDVec> FuncProfTransMap;
 
+using FuncIdSet = hphp_hash_set<FuncId>;
+
 /**
  * ProfData encapsulates the profiling data kept by the JIT.
  */
@@ -176,7 +178,7 @@ public:
   ProfData(const ProfData&)            = delete;
   ProfData& operator=(const ProfData&) = delete;
 
-  TransID                 numTrans()                  const;
+  uint32_t                numTrans()                  const;
   TransID                 curTransID()                const;
 
   bool                    hasTransRec(TransID id)     const;
@@ -192,7 +194,10 @@ public:
   RegionDescPtr           transRegion(TransID id)     const;
   TransKind               transKind(TransID id)       const;
   bool                    isKindProfile(TransID id)   const;
+  // The actual counter value, which starts at JitPGOThreshold and goes down.
   int64_t                 transCounter(TransID id)    const;
+  // The absolute number of times that a translation executed.
+  int64_t                 absTransCounter(TransID id) const;
   int64_t*                transCounterAddr(TransID id);
   TransID                 prologueTransId(const Func* func,
                                           int nArgs)  const;

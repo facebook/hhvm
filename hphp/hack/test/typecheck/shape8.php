@@ -9,8 +9,13 @@
  *
  */
 
-type myshape = shape('field1' => int, 'field2' => bool);
-type smaller_shape = shape('field1' => int);
+type myshape = shape(
+  'field1' => int,
+  'field2' => bool,
+);
+type smaller_shape = shape(
+  'field1' => int,
+);
 
 function test(smaller_shape $x): myshape {
   return $x;

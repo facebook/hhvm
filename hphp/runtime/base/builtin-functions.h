@@ -17,18 +17,11 @@
 #ifndef incl_HPHP_BUILTIN_FUNCTIONS_H_
 #define incl_HPHP_BUILTIN_FUNCTIONS_H_
 
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/util/functional.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/util/functional.h"
 
 #if defined(__APPLE__) || defined(__USE_BSD)
 /**
@@ -141,6 +134,7 @@ void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);
 Object create_object(const String& s, const Array &params, bool init = true);
+Object init_object(const String& s, const Array &params, ObjectData* o);
 
 /**
  * Argument count handling.
@@ -185,12 +179,6 @@ void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2)
  * Unsetting ClassName::StaticProperty.
  */
 Variant throw_fatal_unset_static_property(const char *s, const char *prop);
-
-/**
- * Exceptions injected code throws
- */
-Exception* generate_request_timeout_exception();
-Exception* generate_memory_exceeded_exception();
 
 // unserializable default value arguments such as TimeStamp::Current()
 // are serialized as "\x01"

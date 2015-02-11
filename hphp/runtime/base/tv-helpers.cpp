@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/tv-helpers.h"
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -53,11 +52,11 @@ bool cellIsPlausible(const Cell cell) {
         return;
       case KindOfString:
         assertPtr(cell.m_data.pstr);
-        assert_refcount_realistic(cell.m_data.pstr->getCount());
+        assert(check_refcount(cell.m_data.pstr->getCount()));
         return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
-        assert_refcount_realistic(cell.m_data.parr->getCount());
+        assert(check_refcount(cell.m_data.parr->getCount()));
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);
@@ -84,7 +83,7 @@ bool tvIsPlausible(TypedValue tv) {
   if (tv.m_type == KindOfRef) {
     assert(tv.m_data.pref);
     assert(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
-    assert_refcount_realistic(tv.m_data.pref->getRealCount());
+    assert(check_refcount(tv.m_data.pref->getRealCount()));
     tv = *tv.m_data.pref->tv();
   }
   return cellIsPlausible(tv);
@@ -143,7 +142,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         continue;
 
       case KindOfObject:
-        b = tv->m_data.pobj->o_toBoolean();
+        b = tv->m_data.pobj->toBoolean();
         tvDecRefObj(tv);
         continue;
 
@@ -199,7 +198,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         continue;
 
       case KindOfObject:
-        d = tv->m_data.pobj->o_toDouble();
+        d = tv->m_data.pobj->toDouble();
         tvDecRefObj(tv);
         continue;
 
@@ -255,7 +254,7 @@ void cellCastToInt64InPlace(Cell* cell) {
         continue;
 
       case KindOfObject:
-        i = cell->m_data.pobj->o_toInt64();
+        i = cell->m_data.pobj->toInt64();
         tvDecRefObj(cell);
         continue;
 
@@ -309,7 +308,7 @@ double tvCastToDouble(TypedValue* tv) {
       return tv->m_data.parr->empty() ? 0.0 : 1.0;
 
     case KindOfObject:
-      return tv->m_data.pobj->o_toDouble();
+      return tv->m_data.pobj->toDouble();
 
     case KindOfResource:
       return tv->m_data.pres->o_toDouble();
@@ -468,7 +467,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 
       case KindOfObject:
         // For objects, we fall back on the Variant machinery
-        tvAsVariant(tv) = tv->m_data.pobj->o_toArray();
+        tvAsVariant(tv) = tv->m_data.pobj->toArray();
         return;
 
       case KindOfResource:
@@ -610,11 +609,15 @@ bool tvCanBeCoercedToNumber(TypedValue* tv) {
 
     case KindOfStaticString:
     case KindOfString: {
-      StringData* s;
-      DataType type;
-      s = tv->m_data.pstr;
-      type = is_numeric_string(s->data(), s->size(), nullptr, nullptr);
-      return type == KindOfInt64 || type == KindOfDouble;
+      // Simplified version of is_numeric_string
+      // which also allows for non-numeric garbage
+      // Because PHP
+      auto p = tv->m_data.pstr->data();
+      auto l = tv->m_data.pstr->size();
+      while (l && isspace(*p)) { ++p; --l; }
+      if (l && (*p == '+' || *p == '-')) { ++p; --l; }
+      if (l && *p == '.') { ++p; --l; }
+      return l && isdigit(*p);
     }
 
     case KindOfArray:
@@ -692,7 +695,7 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
       return true;
 
     case KindOfObject:
-      tvAsVariant(tv) = tv->m_data.pobj->o_toArray();
+      tvAsVariant(tv) = tv->m_data.pobj->toArray();
       return true;
 
     case KindOfResource:

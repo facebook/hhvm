@@ -1,1 +1,1 @@
-Fatal error: syntax error, unexpected T_STATIC, expecting %s in %s/test/slow/ctor_param_promotion_bad_mod.php on line 7
+Fatal error: syntax error, unexpected T_STATIC, expecting '&' or T_VARIABLE or ... in %stest/slow/ctor_param_promotion_bad_mod.php on line 7

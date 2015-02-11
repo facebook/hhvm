@@ -1,0 +1,2 @@
+File "invalid_access_root.php", line 5, characters 9-9:
+T must be an identifier for a class, "self", or "this" (Naming[2061])

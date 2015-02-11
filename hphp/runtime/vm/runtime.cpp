@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -260,6 +259,10 @@ void raiseNotice(const StringData* sd) {
 
 void raiseArrayIndexNotice(const int64_t index) {
   raise_notice("Undefined index: %" PRId64, index);
+}
+
+void raiseArrayKeyNotice(const StringData* key) {
+  raise_notice("Undefined key: %s", key->data());
 }
 
 //////////////////////////////////////////////////////////////////////

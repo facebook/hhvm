@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/util/logger.h"
-#include "folly/io/IOBuf.h"
-#include "folly/io/Cursor.h"
-#include "folly/Memory.h"
+#include <folly/io/IOBuf.h>
+#include <folly/io/Cursor.h>
+#include <folly/Memory.h>
 #include <limits>
 #include <map>
 
@@ -35,7 +35,7 @@ using folly::io::RWPrivateCursor;
 
 FastCGITransaction::FastCGITransaction(FastCGISession* session,
                                        RequestId request_id,
-                                       std::shared_ptr<ProtocolSessionHandler>
+                                       std::shared_ptr<FastCGITransport>
                                          handler)
   : m_phase(Phase::READ_KEY_LENGTH),
     m_readBuf(IOBufQueue::cacheChainLength()),
@@ -383,7 +383,7 @@ bool FastCGISession::parseRecordBody(Cursor& cursor, size_t& available) {
     writeUnknownType(m_recordType);
   }
 
-  return (m_contentLeft == 0);
+  return m_phase != Phase::INVALID && (m_contentLeft == 0);
 }
 
 bool FastCGISession::parseRecordEnd(Cursor& cursor, size_t& available) {
@@ -572,9 +572,6 @@ void FastCGISession::handleGetValueResult(const std::string& key) {
 void FastCGISession::handleInvalidRecord() {
   Logger::Error("FastCGI protocol: received an invalid record");
   m_phase = Phase::INVALID;
-  if (m_callback) {
-    m_callback->onSessionError();
-  }
 }
 
 void FastCGISession::handleClose() {

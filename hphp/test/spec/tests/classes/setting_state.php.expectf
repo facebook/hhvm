@@ -1,0 +1,108 @@
+---------------- start -------------------
+
+Inside Point::__construct, (3,5), point count = 1
+
+---------------- calling var_export -------------------
+string(%d) "Point::__set_state(array(
+%w 'x' => 3,
+%w 'y' => 5,
+%w 'proti' => NULL,
+%w 'pubi' => NULL,
+))"
+---------------- calling eval -------------------
+Inside Point::__set_state
+array(4) {
+  ["x"]=>
+  int(3)
+  ["y"]=>
+  int(5)
+  ["proti"]=>
+  NULL
+  ["pubi"]=>
+  NULL
+}
+
+Inside Point::__construct, (0,0), point count = 2
+
+object(Point)#2 (4) {
+  ["x":"Point":private]=>
+  int(3)
+  ["y":"Point":private]=>
+  int(5)
+  ["proti":protected]=>
+  NULL
+  ["pubi"]=>
+  NULL
+}
+Point $z is (3,5)
+
+Inside Point::__destruct, (3,5), point count = 1
+
+
+Inside Point::__destruct, (3,5), point count = 0
+
+---------------- test with inheritance -------------------
+---------------- test with type B -------------------
+string(%d) "B::__set_state(array(
+%w 'bprop' => 10,
+))"
+Inside B::__set_state
+array(1) {
+  ["bprop"]=>
+  int(10)
+}
+object(B)#%d (1) {
+  ["bprop":"B":private]=>
+  int(10)
+}
+about to return from B::__set_state
+object(B)#%d (1) {
+  ["bprop":"B":private]=>
+  int(10)
+}
+---------------- test with type D -------------------
+string(%d) "D::__set_state(array(
+%w 'dprop' => 30,
+%w 'bprop' => 20,
+))"
+Inside D::__set_state
+array(2) {
+  ["dprop"]=>
+  int(30)
+  ["bprop"]=>
+  int(20)
+}
+Inside B::__set_state
+array(2) {
+  ["dprop"]=>
+  int(30)
+  ["bprop"]=>
+  int(20)
+}
+object(D)#%d (2) {
+  ["dprop":"D":private]=>
+  NULL
+  ["bprop":"B":private]=>
+  int(20)
+}
+about to return from B::__set_state
+object(D)#%d (2) {
+  ["dprop":"D":private]=>
+  NULL
+  ["bprop":"B":private]=>
+  int(20)
+}
+object(D)#%d (2) {
+  ["dprop":"D":private]=>
+  int(30)
+  ["bprop":"B":private]=>
+  int(20)
+}
+about to return from D::__set_state
+object(D)#%d (2) {
+  ["dprop":"D":private]=>
+  int(30)
+  ["bprop":"B":private]=>
+  int(20)
+}
+---------------- end -------------------

@@ -1,0 +1,6 @@
+File "async_block2.php", line 12, characters 10-17:
+Invalid return type (Typing[4110])
+File "async_block2.php", line 3, characters 31-33:
+This is an int
+File "async_block2.php", line 7, characters 31-36:
+It is incompatible with a string

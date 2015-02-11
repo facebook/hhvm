@@ -1,0 +1,12 @@
+File "ambiguous_inheritance.php", line 11, characters 16-16:
+This object is of type C (Typing[4110])
+File "ambiguous_inheritance.php", line 11, characters 33-34:
+It is incompatible with this object of type I2
+because some declarations are incompatible.
+Read the following to see why:
+File "ambiguous_inheritance.php", line 8, characters 35-37:
+This is an int
+File "ambiguous_inheritance.php", line 4, characters 35-39:
+It is incompatible with a mixed value
+File "ambiguous_inheritance.php", line 4, characters 28-30:
+This declaration was inherited from an object of type I1. Redeclare this member in C with a compatible signature.

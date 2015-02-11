@@ -55,6 +55,7 @@
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <exception>
 
 using namespace boost::program_options;
@@ -318,11 +319,38 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   p.add("inputs", -1);
   variables_map vm;
   try {
-    store(command_line_parser(argc, argv).options(desc).positional(p).run(),
-          vm);
-    notify(vm);
+    auto opts = command_line_parser(argc, argv).options(desc)
+                                               .positional(p).run();
+    try {
+      store(opts, vm);
+      notify(vm);
+#if defined(BOOST_VERSION) && BOOST_VERSION >= 105000 && BOOST_VERSION <= 105400
+    } catch (const error_with_option_name &e) {
+      std::string wrong_name = e.get_option_name();
+      std::string right_name = get_right_option_name(opts, wrong_name);
+      std::string message = e.what();
+      if (right_name != "") {
+        boost::replace_all(message, wrong_name, right_name);
+      }
+      Logger::Error("Error in command line: %s", message.c_str());
+      cout << desc << "\n";
+      return -1;
+#endif
+    } catch (const error& e) {
+      Logger::Error("Error in command line: %s", e.what());
+      cout << desc << "\n";
+      return -1;
+    }
   } catch (const unknown_option& e) {
-    Logger::Error("Error in command line: %s\n\n", e.what());
+    Logger::Error("Error in command line: %s", e.what());
+    cout << desc << "\n";
+    return -1;
+  } catch (const error& e) {
+    Logger::Error("Error in command line: %s", e.what());
+    cout << desc << "\n";
+    return -1;
+  } catch (...) {
+    Logger::Error("Error in command line parsing.");
     cout << desc << "\n";
     return -1;
   }
@@ -332,7 +360,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
   if (vm.count("version")) {
     cout << "HipHop Repo Compiler";
-    cout << " " << k_HHVM_VERSION.c_str();
+    cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
@@ -387,7 +415,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Config::ParseIniString(po.iniStrings[i].c_str(), ini);
   }
   for (unsigned int i = 0; i < po.confStrings.size(); i++) {
-    Config::ParseHdfString(po.confStrings[i].c_str(), config, ini);
+    Config::ParseHdfString(po.confStrings[i].c_str(), config);
   }
   Option::Load(ini, config);
   IniSetting::Map iniR = IniSetting::Map::object;
@@ -441,10 +469,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   for (unsigned int i = 0; i < po.excludeStaticPatterns.size(); i++) {
     Option::PackageExcludeStaticPatterns.insert
       (format_pattern(po.excludeStaticPatterns[i], true));
-  }
-
-  if (po.target == "hhbc" || po.target == "run") {
-    Option::AnalyzePerfectVirtuals = false;
   }
 
   Option::ProgramName = po.program;
@@ -697,11 +721,6 @@ static void wholeProgramPasses(const CompilerOptions& po,
     Timer timer(Timer::WallTime, "pre-optimizing");
     ar->preOptimize();
   }
-
-  if (!Option::AllVolatile) {
-    Timer timer(Timer::WallTime, "analyze includes");
-    ar->analyzeIncludes();
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -779,7 +798,6 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
   if (Option::HardReturnTypeHints) {
     RuntimeOption::EvalCheckReturnTypeHints = 3;
-    RuntimeOption::EvalSoftClosureReturnTypeHints = false;
   }
   RuntimeOption::EnableZendCompat = Option::EnableZendCompat;
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;

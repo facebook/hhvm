@@ -18,12 +18,11 @@
 #ifndef incl_HPHP_EXT_MYSQL_H_
 #define incl_HPHP_EXT_MYSQL_H_
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/base-includes.h"
 #include "mysql.h"
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/base/persistent-resource-store.h"
 #include "hphp/runtime/base/config.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
@@ -35,24 +34,17 @@
 
 namespace HPHP {
 
-class mysqlExtension : public Extension {
+Variant HHVM_FUNCTION(mysql_num_fields, const Resource& result);
+Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result);
+Variant HHVM_FUNCTION(mysql_num_rows, const Resource& result);
+
+class mysqlExtension final : public Extension {
 public:
   mysqlExtension() : Extension("mysql", "1.0") {}
 
   // implementing IDebuggable
-  virtual int  debuggerSupport() {
-    return SupportInfo;
-  }
-  virtual void debuggerInfo(InfoVec &info) {
-    int count = g_persistentResources->getMap("mysql::persistent_conns").size();
-    Add(info, "Persistent", FormatNumber("%" PRId64, count));
-
-    AddServerStats(info, "sql.conn"       );
-    AddServerStats(info, "sql.reconn_new" );
-    AddServerStats(info, "sql.reconn_ok"  );
-    AddServerStats(info, "sql.reconn_old" );
-    AddServerStats(info, "sql.query"      );
-  }
+  virtual int debuggerSupport() override;
+  virtual void debuggerInfo(InfoVec &info) override;
 
   static bool ReadOnly;
 #ifdef FACEBOOK
@@ -68,24 +60,8 @@ public:
   static std::string Socket;
   static bool TypedResults;
 
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
-    Hdf mysql = config["MySQL"];
-    Config::Bind(ReadOnly, ini, mysql["ReadOnly"], false);
-#ifdef FACEBOOK
-    Config::Bind(Localize, ini, mysql["Localize"], false);
-#endif
-    Config::Bind(ConnectTimeout, ini, mysql["ConnectTimeout"], 1000);
-    Config::Bind(ReadTimeout, ini, mysql["ReadTimeout"], 60000);
-    Config::Bind(WaitTimeout, ini, mysql["WaitTimeout"], -1);
-    Config::Bind(SlowQueryThreshold, ini, mysql["SlowQueryThreshold"], 1000);
-    Config::Bind(KillOnTimeout, ini, mysql["KillOnTimeout"], false);
-    Config::Bind(MaxRetryOpenOnFail, ini, mysql["MaxRetryOpenOnFail"], 1);
-    Config::Bind(MaxRetryQueryOnFail, ini, mysql["MaxRetryQueryOnFail"], 1);
-    Config::Bind(Socket, ini, mysql["Socket"], "");
-    Config::Bind(TypedResults, ini, mysql["TypedResults"], true);
-  }
-
-  void moduleInit();
+  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
+  void moduleInit() override;
 };
 
 extern mysqlExtension s_mysql_extension;

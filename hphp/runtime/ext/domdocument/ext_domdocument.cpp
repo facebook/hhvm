@@ -16,19 +16,23 @@
 */
 
 #include "hphp/runtime/ext/domdocument/ext_domdocument.h"
+
 #include <map>
-#include "hphp/runtime/ext/std/ext_std_file.h"
-#include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/system/systemlib.h"
-
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/string-vsnprintf.h"
@@ -118,7 +122,7 @@ DOMNode* toDOMNode(ObjectData* obj) {
     return Native::data<DOMNode>(obj);
   }
 
-  throw_invalid_object_type(obj->o_getClassName().data());
+  throw_invalid_object_type(obj->getClassName().data());
 }
 
 static void php_libxml_internal_error_handler(int error_type, void *ctx,
@@ -717,7 +721,7 @@ static xmlDocPtr dom_document_parser(DOMDocument* domdoc, int mode,
       // entity loading path, which is locked down by default for security
       // reasons.
       auto stream = File::Open(file_dest, "rb");
-      if (!stream.isInvalid()) {
+      if (!stream->isInvalid()) {
         ctxt = xmlCreateIOParserCtxt(nullptr, nullptr,
                                      libxml_streams_IO_read,
                                      libxml_streams_IO_close,
@@ -805,7 +809,7 @@ static xmlDocPtr dom_document_parser(DOMDocument* domdoc, int mode,
   return ret;
 }
 
-static Variant dom_parse_document(DOMDocument* domdoc, const String& source,
+static bool dom_parse_document(DOMDocument* domdoc, const String& source,
                                   int options, int mode) {
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
@@ -1525,8 +1529,68 @@ struct DOMPropertyAccessor {
 
 const StaticString s_object_value_omitted("(object value omitted)");
 
+struct hashdpa {
+  size_t operator()(const DOMPropertyAccessor* da) const {
+    return hash_string_i(da->name, strlen(da->name));
+  }
+};
+struct cmpdpa {
+  bool operator()(const DOMPropertyAccessor* da1,
+                  const DOMPropertyAccessor* da2) const {
+    return strcasecmp(da1->name, da2->name) == 0;
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Base native property handler class, that is reused
+ * by derived DOM classes with the similar handling.
+ */
+template <class Derived>
+struct DOMPropHandler {
+  static Variant getProp(ObjectData* this_, const StringData* name) {
+    return guardedPropertyResult(name, [&]() {
+      return Derived::map.getter(VarNR(name))(this_);
+    });
+  }
+
+  static Variant setProp(ObjectData* this_,
+                         const StringData* name,
+                         Variant& value) {
+    return guardedPropertyResult(name, [&]() {
+      Derived::map.setter(VarNR(name))(this_, value);
+      return true;
+    });
+  }
+
+  static Variant issetProp(ObjectData* this_, const StringData* name) {
+    return guardedPropertyResult(name, [&]() {
+      return Derived::map.isset(this_, StrNR(name));
+    });
+  }
+
+  static Variant unsetProp(ObjectData* this_, const StringData* name) {
+    return Native::prop_not_handled();
+  }
+
+private:
+  // If the property is not supported, returns sigil
+  // Native::prop_not_handled(), otherwise - the result from accessor.
+  static Variant guardedPropertyResult(const StringData* name,
+                                       std::function<Variant()> onHandle) {
+    if (Derived::map.isPropertySupported(VarNR(name))) {
+      return onHandle();
+    }
+
+    return Native::prop_not_handled();
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 class DOMPropertyAccessorMap :
-      private hphp_const_char_map<DOMPropertyAccessor*> {
+      private hphp_hash_set<DOMPropertyAccessor*, hashdpa, cmpdpa> {
 public:
   explicit DOMPropertyAccessorMap(DOMPropertyAccessor* props,
                                   DOMPropertyAccessorMap *base = nullptr) {
@@ -1534,22 +1598,34 @@ public:
       *this = *base;
     }
     for (DOMPropertyAccessor *p = props; p->name; p++) {
-      (*this)[p->name] = p;
-      m_imap[p->name] = p;
+      this->insert(p);
+      m_props.push_back(p);
     }
+  }
+
+  bool isPropertySupported(const Variant& name) {
+    if (name.isString()) {
+      auto dpa = DOMPropertyAccessor {
+        name.toString().data(), nullptr, nullptr
+      };
+      const_iterator iter = find(&dpa);
+      return iter != end();
+    }
+    return false;
   }
 
   Variant (*getter(const Variant& name))(const Object&) {
     if (name.isString()) {
-      const char* name_data = name.toString().data();
-      const_iterator iter = find(name_data);
-      const_iterator iiter = m_imap.find(name_data);
-      if (iter != end() && iter->second->getter) {
-        return iter->second->getter;
-      } else if (iiter != end() && iiter->second->getter) {
-        raise_warning("Accessing DOMNode derived property '%s' with the "
-                      "incorrect casing", name_data);
-        return iiter->second->getter;
+      auto dpa = DOMPropertyAccessor {
+        name.toString().data(), nullptr, nullptr
+      };
+      const_iterator iter = find(&dpa);
+      if (iter != end() && (*iter)->getter) {
+        if (strcmp(dpa.name, (*iter)->name)) {
+          raise_warning("Accessing DOMNode derived property '%s' with the "
+                        "incorrect casing", dpa.name);
+        }
+        return (*iter)->getter;
       }
     }
     return dummy_getter;
@@ -1557,53 +1633,50 @@ public:
 
   void (*setter(const Variant& name))(const Object&, const Variant&) {
     if (name.isString()) {
-      const char* name_data = name.toString().data();
-      const_iterator iter = find(name_data);
-      const_iterator iiter = m_imap.find(name_data);
-      if (iter != end() && iter->second->setter) {
-        return iter->second->setter;
-      } else if (iiter != end() && iiter->second->setter) {
-        raise_warning("Setting DOMNode derived property '%s' with the "
-                      "incorrect casing", name_data);
-        return iiter->second->setter;
+      auto dpa = DOMPropertyAccessor {
+        name.toString().data(), nullptr, nullptr
+      };
+      const_iterator iter = find(&dpa);
+      if (iter != end() && (*iter)->setter) {
+        if (strcmp(dpa.name, (*iter)->name)) {
+          raise_warning("Setting DOMNode derived property '%s' with the "
+                        "incorrect casing", dpa.name);
+        }
+        return (*iter)->setter;
       }
     }
     return dummy_setter;
   }
 
   bool isset(ObjectData *obj, const String& name) {
-    const_iterator iter = find(name.data());
-    const_iterator iiter = m_imap.find(name.data());
-    if (iter == end() && iiter == m_imap.end()) {
-      return false;
-    } else if (iter != end()) {
-      return !iter->second->getter(obj).isNull();
-    } else {
-      raise_warning("Accessing DOMNode derived property '%s' with the "
-                    "incorrect casing", name.data());
-      return !iiter->second->getter(obj).isNull();
+    auto dpa = DOMPropertyAccessor {
+      name.data(), nullptr, nullptr
+    };
+    const_iterator iter = find(&dpa);
+    if (iter != end() && (*iter)->getter) {
+      if (strcmp(dpa.name, (*iter)->name)) {
+        raise_warning("Accessing DOMNode derived property '%s' with the "
+                      "incorrect casing", dpa.name);
+      }
+      return !(*iter)->getter(obj).isNull();
     }
+    return false;
   }
 
   Array debugInfo(ObjectData* obj) {
-    Array ret = obj->o_toArray();
-    for (auto it : *this) {
-      auto value = it.second->getter(obj);
+    auto ret = obj->toArray();
+    for (auto it : m_props) {
+      auto value = it->getter(obj);
       if (value.isObject()) {
         value = s_object_value_omitted;
       }
-      ret.set(String(it.first, CopyString), value);
+      ret.set(String(it->name, CopyString), value);
     }
     return ret;
   }
 
 private:
-  // Previously, this class was backed by an imap. This led to a lot of
-  // code relying on accessing properties that were improperly cased.
-  // Since removing this functionality could cause a lot of functionality
-  // to break, instead we continue to allow access case-insensitively, but
-  // with a warning
-  hphp_const_char_imap<DOMPropertyAccessor*> m_imap;
+  std::vector<DOMPropertyAccessor*> m_props;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1984,28 +2057,16 @@ static DOMPropertyAccessor domnode_properties[] = {
 static DOMPropertyAccessorMap domnode_properties_map
 ((DOMPropertyAccessor*)domnode_properties);
 
+struct DOMNodePropHandler : public DOMPropHandler<DOMNodePropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domnode_properties_map;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
-
-Variant HHVM_METHOD(DOMNode, __get,
-                    Variant name) {
-  return domnode_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMNode, __set,
-                    Variant name,
-                    Variant value) {
-  domnode_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMNode, __isset, Variant name) {
-  return domnode_properties_map.isset(this_, name.toString());
-}
 
 Array HHVM_METHOD(DOMNode, __debuginfo) {
   auto* data = toDOMNode(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domnode_properties_map.debugInfo(this_);
 }
@@ -2592,6 +2653,10 @@ static DOMPropertyAccessor domattr_properties[] = {
 static DOMPropertyAccessorMap domattr_properties_map
 ((DOMPropertyAccessor*)domattr_properties, &domnode_properties_map);
 
+struct DOMAttrPropHandler : public DOMPropHandler<DOMAttrPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domattr_properties_map;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_METHOD(DOMAttr, __construct,
@@ -2611,27 +2676,10 @@ void HHVM_METHOD(DOMAttr, __construct,
   }
 }
 
-Variant HHVM_METHOD(DOMAttr, __get,
-                    Variant name) {
-  return domattr_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMAttr, __set,
-                    Variant name,
-                    Variant value) {
-  domattr_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMAttr, __isset,
-                 Variant name) {
-  return domattr_properties_map.isset(this_, name.toString());
-}
-
 Array HHVM_METHOD(DOMAttr, __debuginfo) {
   auto* data = Native::data<DOMAttr>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domattr_properties_map.debugInfo(this_);
 }
@@ -2683,29 +2731,18 @@ static DOMPropertyAccessor domcharacterdata_properties[] = {
 static DOMPropertyAccessorMap domcharacterdata_properties_map
 ((DOMPropertyAccessor*)domcharacterdata_properties, &domnode_properties_map);
 
+struct DOMCharacterDataPropHandler :
+  public DOMPropHandler<DOMCharacterDataPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map =
+    domcharacterdata_properties_map;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
-
-Variant HHVM_METHOD(DOMCharacterData, __get,
-                    Variant name) {
-  return domcharacterdata_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMCharacterData, __set,
-                    Variant name,
-                    Variant value) {
-  domcharacterdata_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMCharacterData, __isset,
-                 Variant name) {
-  return domcharacterdata_properties_map.isset(this_, name.toString());
-}
 
 Array HHVM_METHOD(DOMCharacterData, __debuginfo) {
   auto* data = Native::data<DOMCharacterData>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domcharacterdata_properties_map.debugInfo(this_);
 }
@@ -2714,7 +2751,7 @@ bool HHVM_METHOD(DOMCharacterData, appendData,
                  const String& arg) {
   auto* data = Native::data<DOMCharacterData>(this_);
   xmlNodePtr nodep = data->m_node;
-  // Implement logic from libxml xmlTextConcat to add suport for
+  // Implement logic from libxml xmlTextConcat to add support for
   // comments and PI
   if ((nodep->content == (xmlChar *) &(nodep->properties)) ||
       ((nodep->doc != nullptr) && (nodep->doc->dict != nullptr) &&
@@ -2909,6 +2946,11 @@ static DOMPropertyAccessor domtext_properties[] = {
 static DOMPropertyAccessorMap domtext_properties_map
 ((DOMPropertyAccessor*)domtext_properties, &domcharacterdata_properties_map);
 
+struct DOMTextPropHandler :
+  public DOMPropHandler<DOMTextPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domtext_properties_map;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_METHOD(DOMText, __construct,
@@ -2921,27 +2963,10 @@ void HHVM_METHOD(DOMText, __construct,
   }
 }
 
-Variant HHVM_METHOD(DOMText, __get,
-                    Variant name) {
-  return domtext_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMText, __set,
-                    Variant name,
-                    Variant value) {
-  domtext_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMText, __isset,
-                 Variant name) {
-  return domtext_properties_map.isset(this_, name.toString());
-}
-
 Array HHVM_METHOD(DOMText, __debuginfo) {
   auto* data = Native::data<DOMText>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domtext_properties_map.debugInfo(this_);
 }
@@ -3200,6 +3225,10 @@ static DOMPropertyAccessor domdocument_properties[] = {
 static DOMPropertyAccessorMap domdocument_properties_map
 ((DOMPropertyAccessor*)domdocument_properties, &domnode_properties_map);
 
+struct DOMDocumentPropHandler : public DOMPropHandler<DOMDocumentPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domdocument_properties_map;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 DOMDocument::DOMDocument() :
@@ -3269,27 +3298,10 @@ void HHVM_METHOD(DOMDocument, __construct,
   data->m_self = this_;
 }
 
-Variant HHVM_METHOD(DOMDocument, __get,
-                    Variant name) {
-  return domdocument_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMDocument, __set,
-                    Variant name,
-                    Variant value) {
-  domdocument_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMDocument, __isset,
-                 Variant name) {
-  return domdocument_properties_map.isset(this_, name.toString());
-}
-
 Array HHVM_METHOD(DOMDocument, __debuginfo) {
   auto* data = Native::data<DOMDocument>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domdocument_properties_map.debugInfo(this_);
 }
@@ -3590,42 +3602,53 @@ Variant HHVM_METHOD(DOMDocument, importNode,
   return create_node_object(retnodep, data->doc(), owner);
 }
 
-Variant HHVM_METHOD(DOMDocument, load,
-                    const String& filename,
-                    int64_t options /* = 0 */) {
+template<typename L>
+static TypedValue* dom_load(ActRec* ar, L fn) {
   SYNC_VM_REGS_SCOPED();
-  auto* data = Native::data<DOMDocument>(this_);
-  return dom_parse_document(data, filename, options, DOM_LOAD_FILE);
-}
 
-Variant HHVM_METHOD(DOMDocument, loadHTML,
-                    const String& source,
-                    int64_t options /* = 0 */) {
-  SYNC_VM_REGS_SCOPED();
-  auto* data = Native::data<DOMDocument>(this_);
-  if (dom_load_html(data, source, options, DOM_LOAD_STRING)) {
-    return this_;
+  StringData* sd;
+  int64_t options = 0;
+
+  if (!parseArgs(ar, "s|l", &sd, &options)) {
+    return arReturn(ar, init_null());
   }
-  return false;
-}
 
-Variant HHVM_METHOD(DOMDocument, loadHTMLFile,
-                    const String& filename,
-                    int64_t options /* = 0 */) {
-  SYNC_VM_REGS_SCOPED();
-  auto* data = Native::data<DOMDocument>(this_);
-  if (dom_load_html(data, filename, options, DOM_LOAD_FILE)) {
-    return this_;
+  ObjectData* od = ar->hasThis()
+    ? ar->getThis()
+    : DOMDocument::newInstance().detach();
+
+  auto* data = Native::data<DOMDocument>(od);
+  bool res = fn(data, sd, options);
+
+  if (ar->hasThis()) {
+    return arReturn(ar, res);
   }
-  return false;
+
+  return arReturn(ar, od);
 }
 
-Variant HHVM_METHOD(DOMDocument, loadXML,
-                    const String& source,
-                    int64_t options /* = 0 */) {
-  SYNC_VM_REGS_SCOPED();
-  auto* data = Native::data<DOMDocument>(this_);
-  return dom_parse_document(data, source, options, DOM_LOAD_STRING);
+TypedValue* HHVM_MN(DOMDocument, load)(ActRec* ar) {
+  return dom_load(ar, [] (DOMDocument* data, const String& str, int64_t opts) {
+    return dom_parse_document(data, str, opts, DOM_LOAD_FILE);
+  });
+}
+
+TypedValue* HHVM_MN(DOMDocument, loadHTML)(ActRec* ar) {
+  return dom_load(ar, [] (DOMDocument* data, const String& str, int64_t opts) {
+    return dom_load_html(data, str, opts, DOM_LOAD_STRING);
+  });
+}
+
+TypedValue* HHVM_MN(DOMDocument, loadHTMLFile)(ActRec* ar) {
+  return dom_load(ar, [] (DOMDocument* data, const String& str, int64_t opts) {
+    return dom_load_html(data, str, opts, DOM_LOAD_FILE);
+  });
+}
+
+TypedValue* HHVM_MN(DOMDocument, loadXML)(ActRec* ar) {
+  return dom_load(ar, [] (DOMDocument* data, const String& str, int64_t opts) {
+    return dom_parse_document(data, str, opts, DOM_LOAD_STRING);
+  });
 }
 
 void HHVM_METHOD(DOMDocument, normalizeDocument) {
@@ -3969,29 +3992,17 @@ static DOMPropertyAccessor domdocumenttype_properties[] = {
 static DOMPropertyAccessorMap domdocumenttype_properties_map
 ((DOMPropertyAccessor*)domdocumenttype_properties, &domnode_properties_map);
 
+struct DOMDocumentTypePropHandler :
+  public DOMPropHandler<DOMDocumentTypePropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domdocumenttype_properties_map;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
-
-Variant HHVM_METHOD(DOMDocumentType, __get,
-                    Variant name) {
-  return domdocumenttype_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMDocumentType, __set,
-                    Variant name,
-                    Variant value) {
-  domdocumenttype_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMDocumentType, __isset,
-                 Variant name) {
-  return domdocumenttype_properties_map.isset(this_, name.toString());
-}
 
 Array HHVM_METHOD(DOMDocumentType, __debuginfo) {
   auto* data = Native::data<DOMDocumentType>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domdocumenttype_properties_map.debugInfo(this_);
 }
@@ -4030,6 +4041,10 @@ static DOMPropertyAccessorMap domelement_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct DOMElementPropHandler : public DOMPropHandler<DOMElementPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domelement_properties_map;
+};
+
 void HHVM_METHOD(DOMElement, __construct,
                  const String& name,
                  const Variant& value /* = null_string */,
@@ -4046,7 +4061,7 @@ void HHVM_METHOD(DOMElement, __construct,
     return;
   }
 
-  /* Namespace logic is seperate and only when uri passed in to insure
+  /* Namespace logic is separate and only when uri passed in to insure
      no BC breakage */
   const String& str_namespaceuri = namespaceuri.isNull()
                                  ? null_string
@@ -4097,27 +4112,10 @@ void HHVM_METHOD(DOMElement, __construct,
   data->m_node = nodep;
 }
 
-Variant HHVM_METHOD(DOMElement, __get,
-                    Variant name) {
-  return domelement_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMElement, __set,
-                    Variant name,
-                    Variant value) {
-  domelement_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMElement, __isset,
-                 Variant name) {
-  return domelement_properties_map.isset(this_, name.toString());
-}
-
 Array HHVM_METHOD(DOMElement, __debuginfo) {
   auto* data = Native::data<DOMElement>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domelement_properties_map.debugInfo(this_);
 }
@@ -4722,29 +4720,16 @@ static DOMPropertyAccessor domentity_properties[] = {
 static DOMPropertyAccessorMap domentity_properties_map
 ((DOMPropertyAccessor*)domentity_properties, &domnode_properties_map);
 
+struct DOMEntityPropHandler : public DOMPropHandler<DOMEntityPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domentity_properties_map;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
-
-Variant HHVM_METHOD(DOMEntity, __get,
-                    Variant name) {
-  return domentity_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMEntity, __set,
-                    Variant name,
-                    Variant value) {
-  domentity_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMEntity, __isset,
-                 Variant name) {
-  return domentity_properties_map.isset(this_, name.toString());
-}
 
 Array HHVM_METHOD(DOMEntity, __debuginfo) {
   auto* data = Native::data<DOMEntity>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domentity_properties_map.debugInfo(this_);
 }
@@ -4809,29 +4794,16 @@ static DOMPropertyAccessor domnotation_properties[] = {
 static DOMPropertyAccessorMap domnotation_properties_map
 ((DOMPropertyAccessor*)domnotation_properties);
 
+struct DOMNotationPropHandler : public DOMPropHandler<DOMNotationPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domnotation_properties_map;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
-
-Variant HHVM_METHOD(DOMNotation, __get,
-                    Variant name) {
-  return domnotation_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMNotation, __set,
-                    Variant name,
-                    Variant value) {
-  domnotation_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMNotation, __isset,
-                 Variant name) {
-  return domnotation_properties_map.isset(this_, name.toString());
-}
 
 Array HHVM_METHOD(DOMNotation, __debuginfo) {
   auto* data = Native::data<DOMNotation>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domnotation_properties_map.debugInfo(this_);
 }
@@ -4875,6 +4847,12 @@ static DOMPropertyAccessorMap domprocessinginstruction_properties_map
 ((DOMPropertyAccessor*)domprocessinginstruction_properties,
  &domnode_properties_map);
 
+struct DOMProcessingInstructionPropHandler :
+  public DOMPropHandler<DOMProcessingInstructionPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map =
+    domprocessinginstruction_properties_map;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_METHOD(DOMProcessingInstruction, __construct,
@@ -4894,27 +4872,10 @@ void HHVM_METHOD(DOMProcessingInstruction, __construct,
   }
 }
 
-Variant HHVM_METHOD(DOMProcessingInstruction, __get,
-                    Variant name) {
-  return domprocessinginstruction_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMProcessingInstruction, __set,
-                    Variant name,
-                    Variant value) {
-  domprocessinginstruction_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMProcessingInstruction, __isset,
-                 Variant name) {
-  return domprocessinginstruction_properties_map.isset(this_, name.toString());
-}
-
 Array HHVM_METHOD(DOMProcessingInstruction, __debuginfo) {
   auto* data = Native::data<DOMProcessingInstruction>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domprocessinginstruction_properties_map.debugInfo(this_);
 }
@@ -4955,6 +4916,11 @@ static DOMPropertyAccessor domnamednodemap_properties[] = {
 };
 static DOMPropertyAccessorMap domnamednodemap_properties_map
 ((DOMPropertyAccessor*)domnamednodemap_properties);
+
+struct DOMNamedNodeMapPropHandler :
+  public DOMPropHandler<DOMNamedNodeMapPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domnamednodemap_properties_map;
+};
 
 Object DOMNamedNodeMap::newInstance(Object doc, Object base,
                                         int node_type, xmlHashTable* ht) {
@@ -5092,23 +5058,6 @@ Variant HHVM_METHOD(DOMNamedNodeMap, item,
   return init_null();
 }
 
-Variant HHVM_METHOD(DOMNamedNodeMap, __get,
-                    Variant name) {
-  return domnamednodemap_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMNamedNodeMap, __set,
-                    Variant name,
-                    Variant value) {
-  domnamednodemap_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMNamedNodeMap, __isset,
-                 Variant name) {
-  return domnamednodemap_properties_map.isset(this_, name.toString());
-}
-
 Array HHVM_METHOD(DOMNamedNodeMap, __debuginfo) {
   return domnamednodemap_properties_map.debugInfo(this_);
 }
@@ -5173,6 +5122,10 @@ static DOMPropertyAccessor domnodelist_properties[] = {
 static DOMPropertyAccessorMap domnodelist_properties_map
 ((DOMPropertyAccessor*)domnodelist_properties);
 
+struct DOMNodeListPropHandler : public DOMPropHandler<DOMNodeListPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domnodelist_properties_map;
+};
+
 Object DOMNodeList::newInstance(Object doc, Object base, int node_type,
                                     String local, String ns) {
   ObjectData* ret = ObjectData::newInstance(getClass());
@@ -5187,23 +5140,6 @@ Object DOMNodeList::newInstance(Object doc, Object base, int node_type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-Variant HHVM_METHOD(DOMNodeList, __get,
-                    Variant name) {
-  return domnodelist_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMNodeList, __set,
-                    Variant name,
-                    Variant value) {
-  domnodelist_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMNodeList, __isset,
-                 Variant name) {
-  return domnodelist_properties_map.isset(this_, name.toString());
-}
 
 Array HHVM_METHOD(DOMNodeList, __debuginfo) {
   return domnodelist_properties_map.debugInfo(this_);
@@ -5437,6 +5373,12 @@ static Variant dom_xpath_document_read(const Object& obj) {
   if (ctx) {
     docp = (xmlDocPtr)ctx->doc;
   }
+  DOMDocument* doc_data = Native::data<DOMDocument>(xpath->m_doc.get());
+  // If document in the context is the same, return it.
+  if ((xmlDocPtr)doc_data->m_node == docp) {
+    return xpath->m_doc;
+  }
+  // Otherwise, create a new doc.
   return create_node_object((xmlNodePtr)docp, xpath->m_doc);
 }
 
@@ -5446,6 +5388,10 @@ static DOMPropertyAccessor domxpath_properties[] = {
 };
 static DOMPropertyAccessorMap domxpath_properties_map
 ((DOMPropertyAccessor*)domxpath_properties);
+
+struct DOMXPathPropHandler : public DOMPropHandler<DOMXPathPropHandler> {
+  static constexpr DOMPropertyAccessorMap& map = domxpath_properties_map;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -5608,27 +5554,10 @@ void HHVM_METHOD(DOMXPath, __construct,
   ctx->userData = data;
 }
 
-Variant HHVM_METHOD(DOMXPath, __get,
-                    Variant name) {
-  return domxpath_properties_map.getter(name)(this_);
-}
-
-Variant HHVM_METHOD(DOMXPath, __set,
-                    Variant name,
-                    Variant value) {
-  domxpath_properties_map.setter(name)(this_, value);
-  return init_null();
-}
-
-bool HHVM_METHOD(DOMXPath, __isset,
-                 Variant name) {
-  return domxpath_properties_map.isset(this_, name.toString());
-}
-
 Array HHVM_METHOD(DOMXPath, __debuginfo) {
   auto* data = Native::data<DOMXPath>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domxpath_properties_map.debugInfo(this_);
 }
@@ -5870,10 +5799,10 @@ Variant HHVM_FUNCTION(dom_import_simplexml,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DOMDocumentExtension : public Extension {
+class DOMDocumentExtension final : public Extension {
 public:
   DOMDocumentExtension() : Extension("domdocument") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(DOMNode, appendChild);
     HHVM_ME(DOMNode, cloneNode);
     HHVM_ME(DOMNode, getLineNo);
@@ -5891,33 +5820,30 @@ public:
     HHVM_ME(DOMNode, c14n);
     HHVM_ME(DOMNode, c14nfile);
     HHVM_ME(DOMNode, getNodePath);
-    HHVM_ME(DOMNode, __get);
-    HHVM_ME(DOMNode, __set);
-    HHVM_ME(DOMNode, __isset);
     HHVM_ME(DOMNode, __debuginfo);
     Native::registerNativeDataInfo<DOMNode>(DOMNode::c_ClassName.get(),
                                             Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMNodePropHandler>(
+      DOMNode::c_ClassName.get());
 
     HHVM_ME(DOMAttr, __construct);
     HHVM_ME(DOMAttr, isId);
-    HHVM_ME(DOMAttr, __get);
-    HHVM_ME(DOMAttr, __set);
-    HHVM_ME(DOMAttr, __isset);
     HHVM_ME(DOMAttr, __debuginfo);
     Native::registerNativeDataInfo<DOMAttr>(DOMAttr::c_ClassName.get(),
                                             Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMAttrPropHandler>(
+      DOMAttr::c_ClassName.get());
 
     HHVM_ME(DOMCharacterData, appendData);
     HHVM_ME(DOMCharacterData, deleteData);
     HHVM_ME(DOMCharacterData, insertData);
     HHVM_ME(DOMCharacterData, replaceData);
     HHVM_ME(DOMCharacterData, substringData);
-    HHVM_ME(DOMCharacterData, __get);
-    HHVM_ME(DOMCharacterData, __set);
-    HHVM_ME(DOMCharacterData, __isset);
     HHVM_ME(DOMCharacterData, __debuginfo);
     Native::registerNativeDataInfo<DOMCharacterData>(
         DOMCharacterData::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMCharacterDataPropHandler>(
+      DOMCharacterData::c_ClassName.get());
 
     HHVM_ME(DOMComment, __construct);
     Native::registerNativeDataInfo<DOMComment>(
@@ -5927,12 +5853,11 @@ public:
     HHVM_ME(DOMText, isWhitespaceInElementContent);
     HHVM_ME(DOMText, isElementContentWhitespace);
     HHVM_ME(DOMText, splitText);
-    HHVM_ME(DOMText, __get);
-    HHVM_ME(DOMText, __set);
-    HHVM_ME(DOMText, __isset);
     HHVM_ME(DOMText, __debuginfo);
     Native::registerNativeDataInfo<DOMText>(DOMText::c_ClassName.get(),
                                             Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMTextPropHandler>(
+      DOMText::c_ClassName.get());
 
     HHVM_ME(DOMCdataSection, __construct);
     Native::registerNativeDataInfo<DOMCdataSection>(
@@ -5969,11 +5894,11 @@ public:
     HHVM_ME(DOMDocument, schemaValidateSource);
     HHVM_ME(DOMDocument, validate);
     HHVM_ME(DOMDocument, xinclude);
-    HHVM_ME(DOMDocument, __get);
-    HHVM_ME(DOMDocument, __set);
-    HHVM_ME(DOMDocument, __isset);
     HHVM_ME(DOMDocument, __debuginfo);
     Native::registerNativeDataInfo<DOMDocument>(DOMDocument::c_ClassName.get());
+    Native::registerNativePropHandler<DOMDocumentPropHandler>(
+      DOMDocument::c_ClassName.get());
+
 
     HHVM_ME(DOMDocumentFragment, __construct);
     HHVM_ME(DOMDocumentFragment, appendXML);
@@ -5981,12 +5906,11 @@ public:
         DOMDocumentFragment::c_ClassName.get(),
         Native::NDIFlags::NO_SWEEP);
 
-    HHVM_ME(DOMDocumentType, __get);
-    HHVM_ME(DOMDocumentType, __set);
-    HHVM_ME(DOMDocumentType, __isset);
     HHVM_ME(DOMDocumentType, __debuginfo);
     Native::registerNativeDataInfo<DOMDocumentType>(
         DOMDocumentType::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMDocumentTypePropHandler>(
+      DOMDocumentType::c_ClassName.get());
 
     HHVM_ME(DOMElement, __construct);
     HHVM_ME(DOMElement, getAttribute);
@@ -6007,39 +5931,35 @@ public:
     HHVM_ME(DOMElement, setIDAttribute);
     HHVM_ME(DOMElement, setIDAttributeNode);
     HHVM_ME(DOMElement, setIDAttributeNS);
-    HHVM_ME(DOMElement, __get);
-    HHVM_ME(DOMElement, __set);
-    HHVM_ME(DOMElement, __isset);
     HHVM_ME(DOMElement, __debuginfo);
     Native::registerNativeDataInfo<DOMElement>(
         DOMElement::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMElementPropHandler>(
+      DOMElement::c_ClassName.get());
 
-    HHVM_ME(DOMEntity, __get);
-    HHVM_ME(DOMEntity, __set);
-    HHVM_ME(DOMEntity, __isset);
     HHVM_ME(DOMEntity, __debuginfo);
     Native::registerNativeDataInfo<DOMEntity>(
         DOMEntity::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMEntityPropHandler>(
+      DOMEntity::c_ClassName.get());
 
     HHVM_ME(DOMEntityReference, __construct);
     Native::registerNativeDataInfo<DOMEntityReference>(
         DOMEntityReference::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
 
-    HHVM_ME(DOMNotation, __get);
-    HHVM_ME(DOMNotation, __set);
-    HHVM_ME(DOMNotation, __isset);
     HHVM_ME(DOMNotation, __debuginfo);
     Native::registerNativeDataInfo<DOMNotation>(
         DOMNotation::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMNotationPropHandler>(
+      DOMNotation::c_ClassName.get());
 
     HHVM_ME(DOMProcessingInstruction, __construct);
-    HHVM_ME(DOMProcessingInstruction, __get);
-    HHVM_ME(DOMProcessingInstruction, __set);
-    HHVM_ME(DOMProcessingInstruction, __isset);
     HHVM_ME(DOMProcessingInstruction, __debuginfo);
     Native::registerNativeDataInfo<DOMProcessingInstruction>(
         DOMProcessingInstruction::c_ClassName.get(),
         Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMProcessingInstructionPropHandler>(
+      DOMProcessingInstruction::c_ClassName.get());
 
     Native::registerNativeDataInfo<DOMNameSpaceNode>(
         DOMNameSpaceNode::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
@@ -6055,21 +5975,19 @@ public:
     HHVM_ME(DOMNamedNodeMap, getNamedItem);
     HHVM_ME(DOMNamedNodeMap, getNamedItemNS);
     HHVM_ME(DOMNamedNodeMap, item);
-    HHVM_ME(DOMNamedNodeMap, __get);
-    HHVM_ME(DOMNamedNodeMap, __set);
-    HHVM_ME(DOMNamedNodeMap, __isset);
     HHVM_ME(DOMNamedNodeMap, getIterator);
     Native::registerNativeDataInfo<DOMNamedNodeMap>(
         DOMNamedNodeMap::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMNamedNodeMapPropHandler>(
+      DOMNamedNodeMap::c_ClassName.get());
 
     HHVM_ME(DOMNodeList, item);
-    HHVM_ME(DOMNodeList, __get);
-    HHVM_ME(DOMNodeList, __set);
-    HHVM_ME(DOMNodeList, __isset);
     HHVM_ME(DOMNodeList, getIterator);
     HHVM_ME(DOMNodeList, __debuginfo);
     Native::registerNativeDataInfo<DOMNodeList>(
         DOMNodeList::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMNodeListPropHandler>(
+      DOMNodeList::c_ClassName.get());
 
     HHVM_ME(DOMImplementation, createDocument);
     HHVM_ME(DOMImplementation, createDocumentType);
@@ -6082,12 +6000,11 @@ public:
     HHVM_ME(DOMXPath, query);
     HHVM_ME(DOMXPath, registerNamespace);
     HHVM_ME(DOMXPath, registerPHPFunctions);
-    HHVM_ME(DOMXPath, __get);
-    HHVM_ME(DOMXPath, __set);
-    HHVM_ME(DOMXPath, __isset);
     HHVM_ME(DOMXPath, __debuginfo);
     Native::registerNativeDataInfo<DOMXPath>(
         DOMXPath::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMXPathPropHandler>(
+      DOMXPath::c_ClassName.get());
 
     HHVM_FE(dom_import_simplexml);
 

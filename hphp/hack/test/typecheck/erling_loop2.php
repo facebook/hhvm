@@ -18,7 +18,7 @@ function test(): int {
   $obj->x = 0;
   $obj->y = 1;
   $obj->z = 2;
-  for($i = 0; $i < 3; $i++) {
+  for ($i = 0; $i < 3; $i++) {
     $obj->x = $obj->y;
     $obj->y = $obj->z;
     $obj->z = 'hello';

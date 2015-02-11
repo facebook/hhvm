@@ -354,11 +354,6 @@ void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
       m_actualType->isSpecificObject()) {
     m_expectedType.reset();
   }
-
-  if (m_actualType->isSpecificObject()) {
-    std::const_pointer_cast<AnalysisResult>(ar)->
-      addClassDependency(getFileScope(), m_actualType->getName());
-  }
 }
 
 void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
@@ -600,10 +595,7 @@ void Expression::computeLocalExprAltered() {
 
 bool Expression::isArray() const {
   if (is(KindOfUnaryOpExpression)) {
-    return static_cast<const UnaryOpExpression*>(this)->getOp() == T_ARRAY ||
-      static_cast<const UnaryOpExpression*>(this)->getOp() == T_VARRAY ||
-      static_cast<const UnaryOpExpression*>(this)->getOp() == T_MIARRAY ||
-      static_cast<const UnaryOpExpression*>(this)->getOp() == T_MSARRAY;
+    return static_cast<const UnaryOpExpression*>(this)->getOp() == T_ARRAY;
   }
   return false;
 }

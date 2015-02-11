@@ -100,6 +100,11 @@ flaky_tests = (
     # our build machines have no members in group 0...
     '/ext/posix/tests/posix_getgrgid.php',
 
+    # Checking stat of ' ' races with mkdir_variation1
+    '/ext/standard/tests/file/lstat_stat_variation22.php',
+    '/ext/standard/tests/file/copy_variation3.php',
+    '/ext/standard/tests/file/file_exists_variation1.php',
+
     # concurrency issues
     '/ext/mysql/tests/001.php',
     '/ext/mysql/tests/bug47438.php',
@@ -176,6 +181,8 @@ flaky_tests = (
     '/ext/ftp/tests/ftp_nb_fget_basic1.php',
 
     # flaky: t3851970
+    '/ext/sockets/tests/socket_bind_params.php',
+    '/ext/sockets/tests/socket_getpeername.php',
     '/ext/session/tests/009.php',
     '/ext/standard/tests/file/bug39538.php',
     '/ext/standard/tests/file/bug53848.php',
@@ -535,6 +542,9 @@ norepo_tests = (
     '/tests/lang/include_variation3.php',
     '/tests/lang/static_variation_001.php',
     '/tests/lang/static_variation_002.php',
+
+    # This test passes "by accident".
+    'ext/dom/tests/DOMNode_hasChildNodes.php',
 
     # These tests use eval(), which is banned in repo mode.
     '/Zend/tests/bug31102.php',
@@ -1277,6 +1287,8 @@ def walk(filename, dest_subdir):
         test = test.replace('"*"', '__DIR__."/../../../../../../sample_dir/*"')
         test = test.replace('opendir(".")', 'opendir(__DIR__."/../../../../../../sample_dir/")')
         test = test.replace('is_dir($file)', 'is_dir(__DIR__."/../../../../../../sample_dir/".$file)')
+    if '/ext/standard/tests/file/touch_variation1.php' in full_dest_filename:
+        test = test.replace('touch.dat', 'touch_variation1.dat')
     if '/ext/standard/tests/file/bug45181.php' in full_dest_filename:
         test = test.replace('chdir("bug45181_x");', '$origdir = getcwd();\nchdir("bug45181_x");')
         test = test.replace('rmdir("bug45181_x");', 'rmdir($origdir . "/bug45181_x");')

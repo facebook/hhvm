@@ -1,0 +1,91 @@
+red
+white
+blue
+blue
+Index: 0; Color: red
+int(0)
+Index: 1; Color: white
+int(1)
+Index: 2; Color: blue
+int(2)
+Index: 2; Color: blue
+red
+black
+white
+black
+blue
+black
+array(3) {
+  [0]=>
+  string(3) "red"
+  [1]=>
+  string(5) "white"
+  [2]=>
+  string(4) "blue"
+}
+red
+black
+white
+black
+blue
+black
+array(3) {
+  [0]=>
+  string(5) "black"
+  [1]=>
+  string(5) "black"
+  [2]=>
+  &string(5) "black"
+}
+black
+green
+black
+green
+black
+green
+array(3) {
+  [0]=>
+  string(5) "green"
+  [1]=>
+  string(5) "green"
+  [2]=>
+  &string(5) "green"
+}
+  abc  ij
+  mnop  xyz
+------
+int(0)
+array(2) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(20)
+}
+------
+int(1)
+array(2) {
+  [0]=>
+  float(1.2)
+  [1]=>
+  float(4.5)
+}
+------
+int(2)
+array(2) {
+  [0]=>
+  bool(true)
+  [1]=>
+  string(3) "abc"
+}
+------
+int(0)
+int(10)
+int(20)
+------
+int(1)
+float(1.2)
+float(4.5)
+------
+int(2)
+bool(true)
+string(3) "abc"

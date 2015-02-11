@@ -12,6 +12,8 @@
 function test(): void {
   $v = Vector {};
   $f = $v[0];
-  $f = function($y) use ($f) { return $f($y); };
+  $f = function ($y) use ($f) {
+    return $f($y);
+  };
   $f('');
 }

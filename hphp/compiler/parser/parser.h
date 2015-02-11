@@ -30,6 +30,7 @@
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/util/logger.h"
+#include "hphp/parser/parse-time-fatal-exception.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
@@ -140,9 +141,11 @@ public:
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassVariableModifer(Token &mod) {}
   void onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                            Token *type);
+                            Token *type, bool abstract = false);
   void onClassVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassConstant(Token &out, Token *exprs, Token &var, Token &value);
+  void onClassAbstractConstant(Token &out, Token *exprs, Token &var);
+  void onClassTypeConstant(Token &out, Token &var, Token &value);
   void onSimpleVariable(Token &out, Token &var);
   void onSynthesizedVariable(Token &out, Token &var) {
     onSimpleVariable(out, var);
@@ -186,9 +189,6 @@ public:
                    bool ref);
   void onEmptyCollection(Token &out);
   void onCollectionPair(Token &out, Token *pairs, Token *name, Token &value);
-  void onEmptyCheckedArray(Token &out);
-  void onCheckedArrayPair(Token &out, Token *pairs, Token *name, Token &value);
-  void onCheckedArray(Token &out, Token &pairs, int op);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void onClassClass(Token &out, Token &cls, Token &name, bool text);

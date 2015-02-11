@@ -16,7 +16,8 @@
 #ifndef incl_HPHP_PORTABILITY_H_
 #define incl_HPHP_PORTABILITY_H_
 
-#include "folly/Likely.h" // defining LIKELY/UNLIKELY is part of this header
+#include <folly/Likely.h> // defining LIKELY/UNLIKELY is part of this header
+#include <folly/CPortability.h> // defining FOLLY_DISABLE_ADDRESS_SANITIZER
 
 namespace HPHP {
 

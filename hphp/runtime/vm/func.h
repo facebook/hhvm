@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/base/atomic-countable.h"
 
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -878,7 +879,7 @@ public:
    * We can burn these into the TC even when functions are not persistent,
    * since only a single name-to-function mapping will exist per request.
    */
-  RDS::Handle funcHandle() const;
+  rds::Handle funcHandle() const;
 
   /*
    * Get and set the function body code pointer.
@@ -961,10 +962,6 @@ public:
    */
   static const AtomicVector<const Func*>& getFuncVec();
 
-  /*
-   * Profile-guided optimization linkage.
-   */
-  bool shouldPGO() const;
   void setHot() { m_attrs = (Attr)(m_attrs | AttrHot); }
 
 
@@ -979,7 +976,7 @@ public:
 
   void setAttrs(Attr attrs);
   void setBaseCls(Class* baseCls);
-  void setFuncHandle(RDS::Link<Func*> l);
+  void setFuncHandle(rds::Link<Func*> l);
   void setHasPrivateAncestor(bool b);
   void setMethodSlot(Slot s);
 
@@ -1160,7 +1157,7 @@ private:
   int m_magic;
 #endif
   unsigned char* volatile m_funcBody;
-  mutable RDS::Link<Func*> m_cachedFunc{RDS::kInvalidHandle};
+  mutable rds::Link<Func*> m_cachedFunc{rds::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
   LowStringPtr m_fullName;
   LowStringPtr m_name;

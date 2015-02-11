@@ -49,83 +49,83 @@ array(5) {
 int(4)
 string(29) "Generator is already finished"
 array(12) {
+  ["a"]=>
+  int(1)
   ["b"]=>
   int(2)
-  ["g"]=>
-  int(7)
-  ["f"]=>
-  int(6)
-  ["i"]=>
-  int(9)
+  ["c"]=>
+  int(3)
   ["d"]=>
   int(4)
   ["e"]=>
   int(5)
-  ["c"]=>
-  int(3)
+  ["f"]=>
+  int(6)
+  ["g"]=>
+  int(7)
+  ["h"]=>
+  int(8)
+  ["i"]=>
+  int(9)
   ["j"]=>
   int(10)
   ["k"]=>
   int(11)
-  ["h"]=>
-  int(8)
-  ["a"]=>
-  int(1)
   ["l"]=>
   int(12)
 }
 array(12) {
-  ["b"]=>
-  int(3735928559)
-  ["g"]=>
-  int(7)
-  ["f"]=>
-  int(6)
-  ["i"]=>
-  int(9)
-  ["d"]=>
-  int(4)
-  ["e"]=>
-  int(5)
-  ["c"]=>
-  int(3)
-  ["j"]=>
-  int(10)
-  ["k"]=>
-  int(11)
-  ["h"]=>
-  int(8)
   ["a"]=>
   object(stdClass)#6 (0) {
   }
+  ["b"]=>
+  int(3735928559)
+  ["c"]=>
+  int(3)
+  ["d"]=>
+  int(4)
+  ["e"]=>
+  int(5)
+  ["f"]=>
+  int(6)
+  ["g"]=>
+  int(7)
+  ["h"]=>
+  int(8)
+  ["i"]=>
+  int(9)
+  ["j"]=>
+  int(10)
+  ["k"]=>
+  int(11)
   ["l"]=>
   int(12)
 }
 array(12) {
+  ["a"]=>
+  object(stdClass)#6 (0) {
+  }
   ["b"]=>
   int(3735928559)
-  ["g"]=>
-  int(7)
-  ["f"]=>
-  int(6)
-  ["i"]=>
-  int(9)
-  ["d"]=>
-  int(3126047761)
-  ["e"]=>
-  int(3126047761)
   ["c"]=>
   object(Generator)#5 (0) {
   }
+  ["d"]=>
+  int(3126047761)
+  ["e"]=>
+  int(3126047761)
+  ["f"]=>
+  int(6)
+  ["g"]=>
+  int(7)
+  ["h"]=>
+  int(8)
+  ["i"]=>
+  int(9)
   ["j"]=>
   int(10)
   ["k"]=>
   int(11)
-  ["h"]=>
-  int(8)
-  ["a"]=>
-  object(stdClass)#6 (0) {
-  }
   ["l"]=>
   int(12)
 }

@@ -9,5 +9,6 @@
  *
  */
 
-type myshape = shape();
+type myshape = shape(
+);
 

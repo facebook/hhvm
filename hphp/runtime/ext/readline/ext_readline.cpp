@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -257,7 +258,7 @@ static bool HHVM_FUNCTION(readline_write_history,
   }
 }
 
-static class ReadlineExtension : public Extension {
+static class ReadlineExtension final : public Extension {
   public:
     ReadlineExtension() : Extension("readline") {}
     void moduleInit() override {

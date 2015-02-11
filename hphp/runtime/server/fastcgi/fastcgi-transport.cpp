@@ -19,14 +19,14 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "folly/io/IOBuf.h"
-#include "folly/io/IOBufQueue.h"
+#include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
 #include "thrift/lib/cpp/async/TAsyncTimeout.h" // @nolint
-#include "folly/SocketAddress.h"
+#include <folly/SocketAddress.h>
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
-#include "folly/MoveWrapper.h"
+#include <folly/MoveWrapper.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -179,6 +179,18 @@ const char *FastCGITransport::getServerObject() {
 }
 
 std::string FastCGITransport::unmangleHeader(const std::string& name) {
+  if (name == "Authorization") {
+    return name; // Already unmangled
+  }
+
+  if (name == "CONTENT_LENGTH") {
+    return "Content-Length";
+  }
+
+  if (name == "CONTENT_TYPE") {
+    return "Content-Type";
+  }
+
   if (!boost::istarts_with(name, "HTTP_")) {
     return "";
   }
@@ -210,6 +222,7 @@ std::string FastCGITransport::mangleHeader(const std::string& name) {
 }
 
 static const std::string
+  s_authorization("Authorization"),
   s_contentLength("CONTENT_LENGTH"),
   s_contentType("CONTENT_TYPE");
 
@@ -220,6 +233,9 @@ std::string FastCGITransport::getHeader(const char *name) {
   auto *header = getRawHeaderPtr(mangleHeader(name));
   if (header) {
     return *header;
+  }
+  if (strcasecmp(name, "Authorization") == 0) {
+    return getRawHeader(s_authorization); // No HTTP_ prefix for Authorization
   }
   if (strcasecmp(name, "Content-Length") == 0) {
     return getRawHeader(s_contentLength); // No HTTP_ prefix for CONTENT_LENGTH
@@ -239,7 +255,6 @@ std::string FastCGITransport::getRawHeader(const std::string& name) {
 }
 
 std::string* FastCGITransport::getRawHeaderPtr(const std::string& name) {
-  assert(boost::to_upper_copy(name) == name);
   auto it = m_requestHeaders.find(name);
   return (it == m_requestHeaders.end()) ? nullptr : &it->second;
 }

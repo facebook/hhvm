@@ -2,7 +2,7 @@ File "generic_incompatible_implementation.php", line 6, characters 7-9:
 This object is of type Foo (Typing[4110])
 File "generic_incompatible_implementation.php", line 6, characters 22-24:
 It is incompatible with this object of type Bar
-because some of their methods are incompatible.
+because some declarations are incompatible.
 Read the following to see why:
 File "generic_incompatible_implementation.php", line 7, characters 21-21:
 This is an object of type D

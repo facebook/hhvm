@@ -16,5 +16,3 @@ function bad() {
   $fv[] = 42;
 }
 
-
-

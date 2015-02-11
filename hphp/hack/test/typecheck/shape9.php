@@ -9,8 +9,14 @@
  *
  */
 
-type myshape = shape('field1' => int, 'field2' => bool);
-type smaller_shape = shape('field1' => int, 'field2' => bool);
+type myshape = shape(
+  'field1' => int,
+  'field2' => bool,
+);
+type smaller_shape = shape(
+  'field1' => int,
+  'field2' => bool,
+);
 
 function cmp<T>(T $x, T $y): void {}
 

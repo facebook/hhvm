@@ -54,9 +54,6 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     if (!m_className.empty()) {
       resolveClass();
     }
-    if (!m_class) {
-      addUserClass(ar, m_className);
-    }
     if (m_params) {
       m_params->markParams(canInvokeFewArgs());
     }
@@ -71,26 +68,6 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
 ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   if (ExpressionPtr rep = FunctionCall::preOptimize(ar)) return rep;
-
-  if (m_nameExp->isScalar()) {
-    Variant v;
-    if (m_nameExp->getScalarValue(v) &&
-        v.isString()) {
-      string name = v.toString().c_str();
-      // if the name starts with a '\' give up any early optimizations and
-      // let FPushFunc manage the namespace normalizations at runtime
-      // (some static analyzer may still be able to optimize it - e.g. HHBBC)
-      if (name[0] != '\\') {
-        ExpressionPtr cls = m_class;
-        if (!cls && !m_className.empty()) {
-          cls = makeScalarExpression(ar, m_className);
-        }
-        return ExpressionPtr(NewSimpleFunctionCall(
-          getScope(), getLocation(),
-          name, false, m_params, cls));
-      }
-    }
-  }
   return ExpressionPtr();
 }
 

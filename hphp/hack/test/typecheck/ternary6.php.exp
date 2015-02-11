@@ -1,0 +1,6 @@
+File "ternary6.php", line 22, characters 16-20:
+Invalid argument (Typing[4110])
+File "ternary6.php", line 3, characters 23-28:
+This is a string
+File "ternary6.php", line 5, characters 15-21:
+It is incompatible with a nullable type

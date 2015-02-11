@@ -15,15 +15,17 @@
 */
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-static __thread GlobalVariables* g_variables;
+static __thread GlobalsArray* g_variables;
 static __thread EnvConstants* g_envConstants;
 
-GlobalVariables* get_global_variables() {
+GlobalsArray* get_global_variables() {
   assert(g_variables);
   return g_variables;
 }
@@ -48,9 +50,10 @@ void EnvConstants::requestExit() {
   g_envConstants = nullptr;
 }
 
-GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
-  NameValueTable* tab) : NameValueTableWrapper(tab) {
-
+GlobalsArray::GlobalsArray(NameValueTable* tab)
+  : ArrayData(kGlobalsKind)
+  , m_tab(tab)
+{
   Variant arr(staticEmptyArray());
 #define X(s,v) tab->set(makeStaticString(#s), v.asTypedValue());
 
@@ -73,4 +76,3 @@ GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
 //////////////////////////////////////////////////////////////////////
 
 }
-

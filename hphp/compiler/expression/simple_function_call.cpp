@@ -15,7 +15,7 @@
 */
 
 #include "hphp/compiler/expression/simple_function_call.h"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 #include <map>
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -36,7 +36,6 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/parser/parser.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/array-init.h"
@@ -70,6 +69,11 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["__systemlib\\compact_sl"]
                                             = FunType::Compact;
     FunctionTypeMap["compact"]              = FunType::Compact;
+
+    FunctionTypeMap["assert"]               = FunType::Assert;
+    FunctionTypeMap["__systemlib\\assert"]  = FunType::Assert;
+    FunctionTypeMap["__systemlib\\assert_sl"]
+                                            = FunType::Assert;
 
     FunctionTypeMap["shell_exec"]           = FunType::ShellExec;
     FunctionTypeMap["exec"]                 = FunType::ShellExec;
@@ -252,6 +256,11 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
       fs->setAttribute(FileScope::ContainsExtract);
       break;
 
+    case FunType::Assert:
+      fs->setAttribute(FileScope::ContainsLDynamicVariable);
+      fs->setAttribute(FileScope::ContainsAssert);
+      break;
+
     case FunType::Compact: {
       // If all the parameters in the compact() call are statically known,
       // there is no need to create a variable table.
@@ -301,17 +310,6 @@ void SimpleFunctionCall::resolveNSFallbackFunc(
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void SimpleFunctionCall::addDependencies(AnalysisResultPtr ar) {
-  if (!m_class) {
-    if (m_className.empty()) {
-      addUserFunction(ar, m_name);
-    } else if ((!isParent() && !isSelf()) ||
-               getOriginalScope() != getScope()) {
-      addUserClass(ar, m_className);
-    }
-  }
-}
 
 void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
   FunctionScopePtr func;
@@ -369,8 +367,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     if (!Option::AllDynamic) {
       setDynamicByIdentifier(ar, m_name);
     }
-  } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-    addDependencies(ar);
   }
 
   if (m_safeDef) m_safeDef->analyzeProgram(ar);
@@ -561,7 +557,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
 bool SimpleFunctionCall::readsLocals() const {
   return m_type == FunType::GetDefinedVars ||
-    m_type == FunType::Compact;
+    m_type == FunType::Compact || m_type == FunType::Assert;
 }
 
 bool SimpleFunctionCall::writesLocals() const {
@@ -595,6 +591,9 @@ void SimpleFunctionCall::updateVtFlags() {
         vt->setAttribute(VariableTable::ContainsLDynamicVariable);
         vt->setAttribute(VariableTable::ContainsExtract);
         break;
+      case FunType::Assert:
+        vt->setAttribute(VariableTable::ContainsLDynamicVariable);
+        vt->setAttribute(VariableTable::ContainsAssert);
       case FunType::Compact:
         vt->setAttribute(VariableTable::ContainsDynamicVariable);
       case FunType::StaticCompact:

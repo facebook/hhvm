@@ -15,7 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-local.h"
@@ -72,7 +75,7 @@ typedef enum _php_iconv_err_t {
 } php_iconv_err_t;
 
 static void _php_iconv_show_error(const char *func, php_iconv_err_t &err,
-                                  const char *out_charset, 
+                                  const char *out_charset,
                                   const char *in_charset) {
   switch (err) {
   case PHP_ICONV_ERR_SUCCESS:
@@ -912,17 +915,24 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
 
         if (cd == (iconv_t)(-1)) {
           if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+            auto qmarks = 2;
+            while (qmarks > 0 && str_left > 1) {
+              p1++;
+              qmarks -= *p1 == '?' ? 1 : 0 ;
+              str_left--;
+            }
+
+            if (*(p1+1) == '=') {
+              ++p1;
+              --str_left;
+            }
+
             err = _php_iconv_appendl(retval, encoded_word,
                                      (size_t)((p1 + 1) - encoded_word), cd_pl);
             if (err != PHP_ICONV_ERR_SUCCESS) {
               goto out;
             }
-            encoded_word = NULL;
-            if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-              scan_stat = 12;
-            } else {
-              scan_stat = 0;
-            }
+            scan_stat = 12;
             break;
           } else {
 #if ICONV_SUPPORTS_ERRNO
@@ -1777,7 +1787,7 @@ static Variant HHVM_FUNCTION(iconv, const String& in_charset,
   php_iconv_err_t err =
     php_iconv_string(str.data(), str.size(), &out_buffer, &out_len,
                      out_charset.data(), in_charset.data());
-  _php_iconv_show_error(__FUNCTION__+2, err, 
+  _php_iconv_show_error(__FUNCTION__+2, err,
                         out_charset.data(), in_charset.data());
   if (err == PHP_ICONV_ERR_SUCCESS && out_buffer != nullptr) {
     return String(out_buffer, out_len, AttachString);
@@ -1893,11 +1903,11 @@ const StaticString
   s_glibc("glibc"),
   s_2_5("2.5");
 
-class iconvExtension : public Extension {
+class iconvExtension final : public Extension {
 public:
   iconvExtension() : Extension("iconv") {}
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfStaticString>(
         s_ICONV_IMPL.get(), s_glibc.get()
     );

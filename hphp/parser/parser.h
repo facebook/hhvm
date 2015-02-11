@@ -113,7 +113,8 @@ public:
    * Public accessors.
    */
   const char *file() const { return m_fileName;}
-  std::string getMessage(bool filename = false) const;
+  std::string getMessage(bool filename = false,
+                         bool rawPosWhenNoError = false) const;
   std::string getMessage(Location *loc, bool filename = false) const;
   LocationPtr getLocation() const;
   void getLocation(Location &loc) const {

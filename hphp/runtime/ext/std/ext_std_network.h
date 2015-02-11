@@ -37,7 +37,7 @@ Variant HHVM_FUNCTION(getservbyport, int64_t port, const String& protocol);
 Variant HHVM_FUNCTION(inet_ntop, const String& in_addr);
 Variant HHVM_FUNCTION(inet_pton, const String& address);
 Variant HHVM_FUNCTION(ip2long, const String& ip_address);
-String HHVM_FUNCTION(long2ip, int64_t proper_address);
+String HHVM_FUNCTION(long2ip, const String& proper_address);
 bool HHVM_FUNCTION(checkdnsrr, const String& host,
                                const String& type = null_string);
 Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type = -1,
@@ -52,7 +52,7 @@ Variant HHVM_FUNCTION(http_response_code, int response_code = 0);
 Array HHVM_FUNCTION(headers_list);
 bool HHVM_FUNCTION(headers_sent, VRefParam file = null_variant,
                                  VRefParam line = null_variant);
-bool HHVM_FUNCTION(header_register_callback, const Variant& callback);
+Variant HHVM_FUNCTION(header_register_callback, const Variant& callback);
 void HHVM_FUNCTION(header_remove, const Variant& name = null_string);
 int64_t HHVM_FUNCTION(get_http_request_size);
 bool HHVM_FUNCTION(setcookie, const String& name,

@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/user-directory.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 
 namespace HPHP {
 
@@ -33,6 +34,10 @@ UserDirectory::UserDirectory(Class* cls) : UserFSNode(cls) {
   m_DirClose = lookupMethod(s_dir_closedir.get());
   m_DirRead  = lookupMethod(s_dir_readdir.get());
   m_DirRewind  = lookupMethod(s_dir_rewinddir.get());
+}
+
+void UserDirectory::sweep() {
+  // Don't close like the parent, 'cause that's what zend does
 }
 
 bool UserDirectory::open(const String& path) {

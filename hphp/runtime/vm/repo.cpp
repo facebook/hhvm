@@ -83,6 +83,7 @@ bool Repo::prefork() {
 void Repo::postfork(pid_t pid) {
   folly::SingletonVault::singleton()->reenableInstances();
   if (pid == 0) {
+    Logger::ResetPid();
     new (&s_lock) SimpleMutex();
   } else {
     s_lock.unlock();
@@ -712,15 +713,13 @@ void Repo::pragmas(int repoId) {
 }
 
 void Repo::getIntPragma(int repoId, const char* name, int& val) {
-  RepoTxn txn(*this);
   std::stringstream ssPragma;
   ssPragma << "PRAGMA " << dbName(repoId) << "." << name << ";";
   RepoStmt stmt(*this);
   stmt.prepare(ssPragma.str());
-  RepoTxnQuery query(txn, stmt);
+  RepoQuery query(stmt);
   query.step();
   query.getInt(0, val);
-  txn.commit();
 }
 
 void Repo::setIntPragma(int repoId, const char* name, int val) {
@@ -741,24 +740,23 @@ void Repo::setIntPragma(int repoId, const char* name, int val) {
 }
 
 void Repo::getTextPragma(int repoId, const char* name, std::string& val) {
-  RepoTxn txn(*this);
   std::stringstream ssPragma;
   ssPragma << "PRAGMA " << dbName(repoId) << "." << name << ";";
   RepoStmt stmt(*this);
   stmt.prepare(ssPragma.str());
-  RepoTxnQuery query(txn, stmt);
+  RepoQuery query(stmt);
   const char* s;
   query.step();
   query.getText(0, s);
   val = s;
-  txn.commit();
 }
 
 void Repo::setTextPragma(int repoId, const char* name, const char* val) {
   // Pragma writes must be executed outside transactions, since they may change
   // transaction behavior.
   std::stringstream ssPragma;
-  ssPragma << "PRAGMA " << dbName(repoId) << "." << name << " = " << val << ";";
+  ssPragma <<
+    "PRAGMA " << dbName(repoId) << "." << name << " = '" << val << "';";
   exec(ssPragma.str());
   if (debug) {
     // Verify that the pragma had the desired effect.

@@ -1,7 +1,0 @@
-Warning: Foreach by reference over a miarray, converting to array in %s/IntMap_foreachByRef.php on line 13
-array(2) {
-  [0]=>
-  &int(-1)
-  [1]=>
-  string(3) "sup"
-}

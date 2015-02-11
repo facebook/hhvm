@@ -15,8 +15,8 @@
 */
 #include "hphp/runtime/vm/as-shared.h"
 
-#include "folly/gen/Base.h"
-#include "folly/gen/String.h"
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include <vector>
 

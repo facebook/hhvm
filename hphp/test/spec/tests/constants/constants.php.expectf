@@ -1,0 +1,45 @@
+define STATUS1 succeeded; value is >1<
+define MIN succeeded; value is >10<
+define MAX succeeded; value is >20<
+define MY_PI succeeded; value is >3.1415926<
+define MY_COLOR succeeded; value is >red<
+define C1 succeeded; value is ><
+define CON1 succeeded; value is >35.3<
+define CON2 succeeded; value is >15<
+define CON3 succeeded; value is >15<
+define CON4 succeeded; value is >15<
+define CON5 succeeded; value is >16<
+define CON6 succeeded; value is >16<
+define CON7 succeeded; value is >15<
+define CON8 succeeded; value is >1024<
+define CON9 succeeded; value is ><
+define CON10 succeeded; value is >123<
+define CON11 succeeded; value is >150<
+define CON21 succeeded; value is >36.3<
+define CON22 succeeded; value is >65.3<
+define 36ABC succeeded; value is >100<
+define #%& succeeded; value is >200<
+
+Notice: Constant MY_COLOR already defined in %s/constants/constants.php on line 13
+define MY_COLOR failed; value is >red<
+define TRUE succeeded; value is >999<
+    TRUE's value:1
+
+Warning: Constants may only evaluate to scalar values in %s/constants/constants.php on line 13
+define COLORS failed; not defined
+
+Warning: Constants may only evaluate to scalar values in %s/constants/constants.php on line 13
+define MY_OBJECT failed; not defined
+
+Warning: fopen(Testfile.txt): failed to open stream: No such file or directory in %s/constants/constants.php on line 90
+Can't open file
+define MY_RESOURCE succeeded; value is ><
+
+Notice: Constant MY_RESOURCE already defined in %s/constants/constants.php on line 13
+define MY_RESOURCE failed; value is ><
+define CON61 succeeded; value is >321<
+define CON63 succeeded; value is >321<
+define CON70B succeeded; value is >10<
+define CON71B succeeded; value is >101<
+define FOR succeeded; value is >100<
+CON1: 123

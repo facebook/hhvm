@@ -195,7 +195,6 @@ void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
   vector<string> bases;
   if (m_base) m_base->getStrings(bases);
   for (unsigned int i = 0; i < bases.size(); i++) {
-    addUserClass(ar, bases[i]);
     ClassScopePtr cls = ar->findClass(bases[i]);
     if (cls) {
       if (!cls->isInterface()) {
@@ -284,21 +283,6 @@ void InterfaceStatement::outputCodeModel(CodeGenerator &cg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
-
-void InterfaceStatement::getAllParents(AnalysisResultConstPtr ar,
-                                       std::vector<std::string> &names) {
-  vector<string> bases;
-  if (m_base) {
-    m_base->getStrings(bases);
-    for (unsigned int i = 0; i < bases.size(); i++) {
-      ClassScopePtr cls = ar->findClass(bases[i]);
-      if (cls) {
-        cls->getAllParents(ar, names);
-        names.push_back(cls->getOriginalName());
-      }
-    }
-  }
-}
 
 void InterfaceStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();

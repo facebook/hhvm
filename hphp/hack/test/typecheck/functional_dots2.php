@@ -14,5 +14,9 @@ function f((function(int, string, ...): string) $g): string {
 }
 
 function test(): void {
-  f(function(int $x, ...): string { return $x . "<-"; });
+  f(
+    function (int $x, ...): string {
+      return $x."<-";
+    },
+  );
 }

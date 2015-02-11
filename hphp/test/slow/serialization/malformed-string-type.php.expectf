@@ -1,0 +1,34 @@
+string(5) "Hello"
+string(5) "Hello"
+string(5) "Hello"
+string(5) "Hello"
+array(2) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+}
+array(2) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+}
+
+Notice: Unable to unserialize: [a:2:{i:0;s:5:"hello"Xi:1;s:5:"world";}]. Array element not terminated properly. in %s/test/slow/serialization/malformed-string-type.php on line 22
+bool(false)
+object(Foo)#1 (2) {
+  ["bar"]=>
+  string(3) "baz"
+  ["bling"]=>
+  string(5) "blong"
+}
+object(Foo)#1 (2) {
+  ["bar"]=>
+  string(3) "baz"
+  ["bling"]=>
+  string(5) "blong"
+}
+
+Notice: Unable to unserialize: [O:3:"Foo":2:{s:3:"bar";s:3:"baz"Xs:5:"bling";s:5:"blong";}]. Object property not terminated properly. in %s/test/slow/serialization/malformed-string-type.php on line 22
+bool(false)

@@ -40,6 +40,8 @@ def build_fixmes(raw_json_obj):
 
     return fixmes
 
+WHITESPACE_PATTERN = re.compile(r"\s*")
+
 def patch(path, patches, explanation):
     with open(path, 'r') as f:
         file_lines = f.readlines()
@@ -48,11 +50,11 @@ def patch(path, patches, explanation):
     # later in the file.
     for line, codes in sorted(patches.items(), reverse=True):
         target_line = file_lines[line]
-        whitespace = re.match(r"\s*", target_line).group()
+        whitespace = WHITESPACE_PATTERN.match(target_line).group()
 
         for code in codes:
             fixme_line = \
-                    "%s/* HH_FIXME[%d] %s */\n" % \
+                    "%s/* HH_FIXME[%d]: %s */\n" % \
                     (whitespace, code, explanation)
             file_lines.insert(line, fixme_line)
 
@@ -74,6 +76,7 @@ def main(args):
 
     for path, patches in fixmes.iteritems():
         patch(path, patches, explanation)
+    print('Patched %d files with HH_FIXME' % len(fixmes))
 
     return 0
 

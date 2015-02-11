@@ -38,14 +38,16 @@ module AddDeps = struct
 
   and class_def root = function
     | ClassUse h -> hint root h
+    | XhpAttrUse h -> hint root h
     | ClassTraitRequire (_, h) -> hint root h
-    | Attributes _  | Const _ | ClassVars _ | Method _-> ()
+    | Attributes _  | Const _ | AbsConst _ | ClassVars _ | XhpAttr _ | Method _
+    | TypeConst _ -> ()
 
   and hint root (_, h) =
     match h with
     | Happly ((_, parent), _) ->
         Typing_deps.add_idep (Some (Dep.Class root)) (Dep.Extends parent)
-    | Hoption _ | Hfun _ | Htuple _ | Hshape _ -> ()
+    | Hoption _ | Hfun _ | Htuple _ | Hshape _ | Haccess _ -> ()
 
 
 end
@@ -63,25 +65,11 @@ let neutral = (
 let empty_file_info : FileInfo.t = {
   FileInfo.funs = [];
   classes = [];
-  types = [];
+  typedefs = [];
   consts = [];
   comments = [];
   consider_names_just_for_autoload = false;
 }
-
-(* Given a Ast.program, give me the list of entities it defines *)
-let get_defs ast =
-  List.fold_left begin fun (acc1, acc2, acc3, acc4) def ->
-    match def with
-    | Ast.Fun f -> f.Ast.f_name :: acc1, acc2, acc3, acc4
-    | Ast.Class c -> acc1, c.Ast.c_name :: acc2, acc3, acc4
-    | Ast.Typedef t -> acc1, acc2, t.Ast.t_id :: acc3, acc4
-    | Ast.Constant cst -> acc1, acc2, acc3, cst.Ast.cst_name :: acc4
-    | Ast.Namespace _
-    | Ast.NamespaceUse _ -> assert false
-     (* toplevel statements are ignored *)
-    | Ast.Stmt _ -> acc1, acc2, acc3, acc4
-  end ([], [], [], []) ast
 
 let legacy_php_file_info = ref (fun fn ->
   empty_file_info
@@ -93,18 +81,18 @@ let legacy_php_file_info = ref (fun fn ->
  * error_files is Relative_path.Set.t of files that we failed to parse
  *)
 let parse (acc, errorl, error_files, php_files) fn =
-  let errorl', {Parser_hack.is_hh_file; comments; ast} =
+  let errorl', {Parser_hack.file_mode; comments; ast} =
     Errors.do_ begin fun () ->
       Parser_hack.from_file fn
     end
   in
   Parsing_hooks.dispatch_file_parsed_hook fn ast;
-  if is_hh_file then begin
+  if file_mode <> None then begin
     AddDeps.program ast;
-    let funs, classes, types, consts = get_defs ast in
+    let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
     Parser_heap.ParserHeap.add fn ast;
     let defs =
-      {FileInfo.funs; classes; types; consts; comments;
+      {FileInfo.funs; classes; typedefs; consts; comments;
        consider_names_just_for_autoload = false}
     in
     let acc = Relative_path.Map.add fn defs acc in
@@ -136,6 +124,17 @@ let merge_parse
   Relative_path.Set.union pfiles1 pfiles2
 
 let parse_files acc fnl =
+  let parse =
+    if !Utils.profile
+    then (fun acc fn ->
+      let t = Unix.gettimeofday () in
+      let result = parse acc fn in
+      let t' = Unix.gettimeofday () in
+      let msg =
+        Printf.sprintf "%f %s [parsing]" (t' -. t) (Relative_path.suffix fn) in
+      !Utils.log msg;
+      result)
+    else parse in
   List.fold_left parse acc fnl
 
 let parse_parallel workers get_next =

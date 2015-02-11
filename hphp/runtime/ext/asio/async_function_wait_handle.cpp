@@ -31,11 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void delete_AsyncFunctionWaitHandle(ObjectData* od, const Class*) {
-  auto const waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(od);
-  auto const size = waitHandle->resumable()->size();
-  auto const base = (char*)(waitHandle + 1) - size;
-  waitHandle->~c_AsyncFunctionWaitHandle();
-  smart_free(base);
+  Resumable::Destroy(static_cast<c_AsyncFunctionWaitHandle*>(od));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

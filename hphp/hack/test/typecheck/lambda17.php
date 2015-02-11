@@ -10,5 +10,5 @@
  */
 
 function foo(): void {
-  $bar = $x ==> $k;  // $k isn't defined to be captured ...
+  $bar = $x ==> $k; // $k isn't defined to be captured ...
 }

@@ -12,7 +12,7 @@
 // testing loops scoping
 
 function stmt(): void {
-  for($i = 0; $i < 100; $i++) {
+  for ($i = 0; $i < 100; $i++) {
   }
-  $i+=1;
+  $i += 1;
 }

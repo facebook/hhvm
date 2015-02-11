@@ -1,0 +1,3 @@
+bool(true)
+
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s

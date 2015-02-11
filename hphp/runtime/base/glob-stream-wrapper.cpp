@@ -22,10 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-File* GlobStreamWrapper::open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const Variant& context) {
+SmartPtr<File> GlobStreamWrapper::open(const String& filename,
+                                       const String& mode,
+                                       int options,
+                                       const SmartPtr<StreamContext>& context) {
   // Can't open a glob as a file, it's meant to be opened as a directory
 
   // if the function was called via FCallBuiltin, we'll get a bogus name as
@@ -40,7 +40,7 @@ File* GlobStreamWrapper::open(const String& filename,
   return nullptr;
 }
 
-Directory* GlobStreamWrapper::opendir(const String& path) {
+SmartPtr<Directory> GlobStreamWrapper::opendir(const String& path) {
   const char* prefix = "glob://";
   const char* path_str = path.data();
   int path_len = path.length();
@@ -57,7 +57,7 @@ Directory* GlobStreamWrapper::opendir(const String& path) {
   if (!glob.isArray()) {
     return nullptr;
   }
-  return newres<ArrayDirectory>(glob.toArray());
+  return makeSmartPtr<ArrayDirectory>(glob.toArray());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
- <?hh // strict
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -18,5 +18,5 @@ async function tweedledee(): Awaitable<Awaitable<string>> {
 }
 
 async function whats_in_the_rabbit_hole(): Awaitable<void> {
-  print(await await tweedledee());
+  print (await await tweedledee());
 }

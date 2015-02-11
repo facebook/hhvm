@@ -76,6 +76,12 @@ hphp/system/php/phar/PharData.php
 hphp/system/php/date/datetimeinterface.php
 hphp/system/php/date/datetimeimmutable.php
 
+hphp/system/php/collections/collections.ns.php
+hphp/system/php/async/ResultOrExceptionWrapper.ns.php
+hphp/system/php/async/WrappedResult.ns.php
+hphp/system/php/async/WrappedException.ns.php
+hphp/system/php/async/util.ns.php
+
 # If you have no inheritance relationship, go here in alphabetical order
 hphp/system/php/XhprofFrame.php
 hphp/system/php/array_filter.hhas
@@ -83,7 +89,6 @@ hphp/system/php/array_map.hhas
 hphp/system/php/apc/APCIterator.php
 hphp/system/php/asio/Awaitable.php
 hphp/system/php/asio/InvalidOperationException.php
-hphp/system/php/collections/collections.ns.php
 hphp/system/php/curl/CURLFile.php
 hphp/system/php/date/dateperiod.php
 hphp/system/php/date/datetime_funcs.php

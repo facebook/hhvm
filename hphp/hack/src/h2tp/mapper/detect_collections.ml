@@ -35,7 +35,8 @@ let map program =
         then error p;
         List.iter detect_collection_hint hs
     | (_, Hshape sfields) ->
-        List.iter (fun (_, h) -> detect_collection_hint h) sfields in
+        List.iter (fun (_, h) -> detect_collection_hint h) sfields
+    | (_, Haccess (_, _, _)) -> () in
 
   let in_hintOpt = function
     | None -> ()

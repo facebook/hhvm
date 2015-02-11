@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -216,7 +217,7 @@ class CompactWriter {
       lastFieldNum = 0;
 
       // Get field specification
-      const Array& spec = HHVM_FN(hphp_get_static_property)(obj->o_getClassName(),
+      const Array& spec = HHVM_FN(hphp_get_static_property)(obj->getClassName(),
                                                        "_TSPEC", false)
         .toArray();
 
@@ -236,7 +237,7 @@ class CompactWriter {
         TType fieldType = (TType)fieldSpec
           .rvalAt(PHPTransport::s_type, AccessFlags::Error_Key).toByte();
 
-        Variant fieldVal = obj->o_get(fieldName, true, obj->o_getClassName());
+        Variant fieldVal = obj->o_get(fieldName, true, obj->getClassName());
 
         if (!fieldVal.isNull()) {
           writeFieldBegin(fieldNo, fieldType);
@@ -563,7 +564,7 @@ class CompactReader {
           if (typesAreCompatible(fieldType, expectedType)) {
             readComplete = true;
             Variant fieldValue = readField(fieldSpec, fieldType);
-            dest->o_set(fieldName, fieldValue, dest->o_getClassName());
+            dest->o_set(fieldName, fieldValue, dest->getClassName());
           }
         }
 
@@ -898,7 +899,7 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        p_Set set_ret = newobj<c_Set>();
+        auto set_ret = makeSmartPtr<c_Set>();
         if (size) set_ret->reserve(size);
 
         for (uint32_t i = 0; i < size; i++) {
@@ -906,7 +907,7 @@ class CompactReader {
           set_ret->t_add(value);
         }
 
-        ret = Variant(set_ret);
+        ret = Variant(std::move(set_ret));
       } else {
         // Note: the Mixed{} is just out of uncertainty right now.
         // These probably are generally string keys and this should
@@ -991,7 +992,7 @@ class CompactReader {
 
       if (size && (size + 1)) {
         String s = String(size, ReserveString);
-        char* buf = s.bufferSlice().ptr;
+        char* buf = s.mutableData();
 
         transport.readBytes(buf, size);
         s.setSize(size);

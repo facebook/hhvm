@@ -104,9 +104,6 @@ function determine_flags(OptionMap $opts): string {
   }
 
   if ($opts->containsKey('region-mode')) {
-    $flags .=
-      '-v Eval.JitRegionSelector='.((string)$opts['region-mode']).' '.
-      '';
     if ($opts['region-mode'] == 'method') {
       $flags .=
         '-v Eval.JitLoops=1 '.
@@ -117,6 +114,17 @@ function determine_flags(OptionMap $opts): string {
         echo 'Reminder: running region-mode=method without --compile is '.
              "almost never going to work...\n";
       }
+    }
+    if ($opts['region-mode'] == 'wholecfg') {
+      $flags .=
+        '-v Eval.JitPGORegionSelector='.((string)$opts['region-mode']).' '.
+        '-v Eval.JitLoops=1 '.
+        '-v Eval.HHIRBytecodeControlFlow=1 '.
+        '';
+    } else {
+      $flags .=
+        '-v Eval.JitRegionSelector='.((string)$opts['region-mode']).' '.
+        '';
     }
   }
 

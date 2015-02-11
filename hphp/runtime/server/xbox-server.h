@@ -17,14 +17,16 @@
 #ifndef incl_HPHP_XBOX_SERVER_H_
 #define incl_HPHP_XBOX_SERVER_H_
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/server-task-event.h"
+#include "hphp/runtime/server/transport.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class Array;
 struct XboxServerInfo;
 class RPCRequestHandler;
 class XboxTransport;

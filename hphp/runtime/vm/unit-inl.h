@@ -260,7 +260,7 @@ inline Class* Unit::lookupClass(const StringData* name) {
   return lookupClass(NamedEntity::get(name));
 }
 
-inline Class* Unit::lookupUniqueClass(const NamedEntity* ne) {
+inline Class* Unit::lookupClassOrUniqueClass(const NamedEntity* ne) {
   Class* cls = ne->clsList();
   if (LIKELY(cls != nullptr)) {
     if (cls->attrs() & AttrUnique && RuntimeOption::RepoAuthoritative) {
@@ -271,8 +271,8 @@ inline Class* Unit::lookupUniqueClass(const NamedEntity* ne) {
   return nullptr;
 }
 
-inline Class* Unit::lookupUniqueClass(const StringData* name) {
-  return lookupUniqueClass(NamedEntity::get(name));
+inline Class* Unit::lookupClassOrUniqueClass(const StringData* name) {
+  return lookupClassOrUniqueClass(NamedEntity::get(name));
 }
 
 inline Class* Unit::loadClass(const StringData* name) {

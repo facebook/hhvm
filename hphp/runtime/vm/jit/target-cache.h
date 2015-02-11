@@ -45,8 +45,8 @@ struct FuncCache {
     const Func*  m_value;
   };
 
-  static RDS::Handle alloc();
-  static const Func* lookup(RDS::Handle, StringData* lookup);
+  static rds::Handle alloc();
+  static const Func* lookup(rds::Handle, StringData* lookup);
 
   Pair m_pairs[kNumLines];
 };
@@ -72,8 +72,8 @@ struct ClassCache {
     const Class* m_value;
   };
 
-  static RDS::Handle alloc();
-  static const Class* lookup(RDS::Handle, StringData* lookup);
+  static rds::Handle alloc();
+  static const Class* lookup(rds::Handle, StringData* lookup);
 
   Pair m_pairs[kNumLines];
 };
@@ -84,10 +84,10 @@ struct StaticMethodCache {
   const Func* m_func;
   const Class* m_cls;
 
-  static RDS::Handle alloc(const StringData* cls,
+  static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
                       const char* ctxName);
-  static const Func* lookup(RDS::Handle chand,
+  static const Func* lookup(rds::Handle chand,
                             const NamedEntity* ne, const StringData* cls,
                             const StringData* meth, TypedValue* vmfp);
 };
@@ -96,10 +96,10 @@ struct StaticMethodFCache {
   const Func* m_func;
   int m_static;
 
-  static RDS::Handle alloc(const StringData* cls,
+  static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
                       const char* ctxName);
-  static const Func* lookup(RDS::Handle chand, const Class* cls,
+  static const Func* lookup(rds::Handle chand, const Class* cls,
                             const StringData* meth, TypedValue* vmfp);
 };
 

@@ -10,8 +10,7 @@
  */
 
 class A {
-  public function f(): void {
-  }
+  public function f(): void {}
 }
 
 function test(): void {

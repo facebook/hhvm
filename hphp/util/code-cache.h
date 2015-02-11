@@ -51,6 +51,9 @@ struct CodeCache {
   // so the value may be stale by the time this function returns.
   size_t totalUsed() const;
 
+  size_t mainUsed() const { return m_main.used(); }
+  size_t profUsed() const { return m_prof.used(); }
+
   CodeAddress base() const { return m_base; }
   bool isValidCodeAddress(CodeAddress addr) const;
 
@@ -83,7 +86,7 @@ struct CodeCache {
 
   void lock() { m_lock = true; }
   void unlock() { m_lock = false; }
-  size_t mainUsed() const { return m_main.used(); }
+
 private:
   CodeAddress m_base;
   CodeAddress m_mainBase;

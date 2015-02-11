@@ -24,14 +24,122 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/mutex.h"
 
+namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+
+ThreadMap threadMap;
+static Mutex threadMap_lock;
+
+PthreadInfo::PthreadInfo(start_routine_t start, void* arg) :
+    start_routine(start), start_routine_arg(arg) {
+  pid = getpid();
+
+  num_frames = backtrace(reinterpret_cast<void **>(&parent_bt),
+                         max_num_frames);
+  parent_bt_names = backtrace_symbols(
+    reinterpret_cast<void *const*>(&parent_bt),
+    num_frames);
+  if (!parent_bt_names) {
+    Logger::Error("pthread_create: unable to get backtrace symbols");
+  }
+  start_name_ptr = backtrace_symbols(
+    reinterpret_cast<void *const *>(&start_routine), 1);
+  if (!start_name_ptr) {
+    Logger::Error("pthread_create: unable to get start_routine name");
+  }
+}
+
+PthreadInfo::~PthreadInfo() {
+  free(parent_bt_names);
+  free(start_name_ptr);
+}
+
+std::string get_thread_mem_usage() {
+  std::string result;
+  Lock lock(threadMap_lock);
+
+  result = "Thread memory usage:\n\tProcess Id\tThread Id"
+           "\t\tBytes allocated\t\tThread Name\n";
+  for (auto it : threadMap) {
+    if (!it.second->mm) continue;
+    auto& stats = it.second->mm->getStats();
+    result += folly::sformat("\t{:10}\t{:9}\t{:13}\t\t{}\n", it.second->pid,
+                             it.second->tid, stats.usage,
+                             *it.second->start_name_ptr);
+  }
+  return result;
+}
+
+/*
+ * We need to intercept the start routine in order to make sure each
+ * thread has a MemoryManager.
+ */
+
+void* start_routine_wrapper(void *arg) {
+  pthread_t self = pthread_self();
+  auto& info = *reinterpret_cast<PthreadInfo*>(arg);
+
+  MemoryManager::TlsWrapper::getCheck();
+  info.mm = &MM();
+  assert(info.mm);
+  info.mm->resetExternalStats();
+#ifdef __linux__
+  info.tid = syscall(SYS_gettid);
+#else
+  info.tid = getpid();
+#endif
+
+  auto ret = info.start_routine(info.start_routine_arg);
+  log_pthread_event(PTHREAD_EXIT, &self);
+  return ret;
+}
+
+void log_pthread_event(pthread_event event, pthread_t* thread) {
+  Lock lock(threadMap_lock);
+  auto it = threadMap.find(*thread);
+
+  switch (event) {
+    case PTHREAD_CREATE: {
+      always_assert(!"All logging handled elsewhere");
+      break;
+    }
+    case PTHREAD_EXIT: {
+      if (it == threadMap.end()) {
+        Logger::Warning("pthread_exit: thread does not exist");
+        return;
+      }
+      delete it->second;
+      threadMap.erase(it);
+      break;
+    }
+    case PTHREAD_JOIN: {
+      // Thread might have already exited. So, it is not guaranteed to be
+      // found in the thread-map.
+      break;
+    }
+  }
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 #ifdef __linux__
 extern "C" {
 
 int __wrap_pthread_create(pthread_t* thread, const pthread_attr_t* attr,
                            void *(*start_routine) (void *), void* arg) {
+  auto info = new HPHP::PthreadInfo(start_routine, arg);
   int ret = __real_pthread_create(thread, attr,
-                                  HPHP::start_routine_wrapper, arg);
-  log_pthread_event(HPHP::PTHREAD_CREATE, thread, start_routine);
+                                  HPHP::start_routine_wrapper, info);
+  {
+    HPHP::Lock lock(HPHP::threadMap_lock);
+    auto res = HPHP::threadMap.emplace(*thread, info);
+    if (!res.second) {
+      HPHP::Logger::Error("pthread_create: thread already exists");
+    }
+  }
   return ret;
 }
 
@@ -48,132 +156,3 @@ int __wrap_pthread_join(pthread_t thread, void **retval) {
 
 }
 #endif // __linux__
-
-namespace HPHP {
-
-///////////////////////////////////////////////////////////////////////////////
-
-ThreadMap threadMap;
-static Mutex m_threadmap_lock;
-
-std::string get_thread_mem_usage() {
-  std::string result;
-  Lock lock(m_threadmap_lock);
-
-  result = "Thread memory usage:\n\tProcess Id\tThread Id"
-           "\t\tBytes allocated\t\tThread Name\n";
-  for (auto it : threadMap) {
-    if (!it.second.mm) continue;
-    auto& stats = it.second.mm->getStats();
-    result += folly::format("\t{:10}\t{:9}\t{:13}\t\t{}\n", it.second.pid,
-                            it.second.tid, stats.usage,
-                            *it.second.start_name_ptr).str();
-  }
-  return result;
-}
-
-/*
- * We need to intercept the start routine in order to make sure each
- * thread has a MemoryManager.
- */
-
-void* start_routine_wrapper(void *arg) {
-  pthread_t self = pthread_self();
-  start_routine_t start_routine;
-
-retry:
-  {
-  Lock lock(m_threadmap_lock);
-
-  auto it = threadMap.find(self);
-  if (it == threadMap.end()) {
-    goto sleep_wait;
-  }
-
-  auto& info = it->second;
-  MemoryManager::TlsWrapper::getCheck();
-  info.mm = &MM();
-  assert(info.mm);
-  info.mm->resetExternalStats();
-#ifdef __linux__
-  info.tid = syscall(SYS_gettid);
-#else
-  info.tid = getpid();
-#endif
-  info.pid = getpid();
-  start_routine = info.start_routine;
-  goto done;
-  }
-
-sleep_wait:
-  usleep(100);
-  goto retry;
-
-done:
-  auto ret = start_routine(arg);
-  log_pthread_event(PTHREAD_EXIT, &self);
-  return ret;
-}
-
-void log_pthread_event(pthread_event event, pthread_t* thread,
-                       start_routine_t start_routine) {
-  struct PthreadInfo info;
-
-  memset(&info, 0, sizeof(info));
-  switch (event) {
-  case PTHREAD_CREATE: {
-    info.num_frames = backtrace(reinterpret_cast<void **>(&info.parent_bt),
-                                max_num_frames);
-    info.parent_bt_names = backtrace_symbols(
-                             reinterpret_cast<void *const*>(&info.parent_bt),
-                             info.num_frames);
-    if (!info.parent_bt_names) {
-      Logger::Error("pthread_create: unable to get backtrace symbols");
-    }
-    assert(start_routine);
-    info.start_routine = start_routine;
-    info.start_name_ptr = backtrace_symbols(
-                            reinterpret_cast<void *const *>(&start_routine), 1);
-    if (!info.start_name_ptr) {
-      Logger::Error("pthread_create: unable to get start_routine name");
-    }
-    break;
-  }
-  case PTHREAD_EXIT:
-    break;
-  case PTHREAD_JOIN:
-    break;
-  }
-
-  {
-  Lock lock(m_threadmap_lock);
-  auto it = threadMap.find(*thread);
-
-  switch (event) {
-  case PTHREAD_CREATE: {
-    if (it != threadMap.end()) {
-      Logger::Error("pthread_create: thread already exists");
-    }
-    threadMap[*thread] = info;
-    break;
-  }
-  case PTHREAD_EXIT: {
-    if (it == threadMap.end()) {
-      Logger::Warning("pthread_exit: thread does not exist");
-      return;
-    }
-    threadMap.erase(it);
-    break;
-  }
-  case PTHREAD_JOIN: {
-    // Thread might have already exited. So, it is not guaranteed to be
-    // found in the thread-map.
-    break;
-  }
-  }
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-}

@@ -51,7 +51,7 @@ namespace HPHP {
  * DIRTY when the live register state is spread across the stack and Fixups.
  * CLEAN when it has been sync'ed into RDS.
  */
-enum class VMRegState {
+enum class VMRegState : uint8_t {
   CLEAN,
   DIRTY
 };
@@ -66,7 +66,7 @@ inline bool vmRegStateIsDirty() {
 }
 
 inline VMRegs& vmRegsUnsafe() {
-  return RDS::header()->vmRegs;
+  return rds::header()->vmRegs;
 }
 
 inline VMRegs& vmRegs() {
@@ -104,8 +104,20 @@ inline MInstrState& vmMInstrState() {
   return vmRegsUnsafe().mInstrState;
 }
 
+inline ActRec*& vmJitCalledFrame() {
+  return vmRegsUnsafe().jitCalledFrame;
+}
+
 inline void assert_native_stack_aligned() {
   assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
+}
+
+inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
+  assert(tl_regState == VMRegState::DIRTY);
+  tl_regState = VMRegState::CLEAN;
+  vmfp() = ar;
+  vmsp() = sp;
+  vmpc() = ar->unit()->at(pcOff);
 }
 
 /**
@@ -168,13 +180,13 @@ struct EagerVMRegAnchor {
 inline ActRec* regAnchorFP(Offset* pc = nullptr) {
   // In builtins, m_fp points to the caller's frame if called through
   // FCallBuiltin, else it points to the builtin's frame, in which case,
-  // getPrevVMStateUNSAFE() gets the caller's frame.  In addition, we need to skip
+  // getPrevVMState() gets the caller's frame.  In addition, we need to skip
   // over php-defined builtin functions in order to find the true context.
   auto const context = g_context.getNoCheck();
   auto cur = vmfp();
   if (pc) *pc = cur->m_func->unit()->offsetOf(vmpc());
   while (cur && cur->skipFrame()) {
-    cur = context->getPrevVMStateUNSAFE(cur, pc);
+    cur = context->getPrevVMState(cur, pc);
   }
   return cur;
 }
@@ -184,7 +196,7 @@ inline ActRec* regAnchorFPForArgs() {
   auto const context = g_context.getNoCheck();
   ActRec* cur = vmfp();
   if (cur && cur->m_func->isCPPBuiltin()) {
-    cur = context->getPrevVMStateUNSAFE(cur);
+    cur = context->getPrevVMState(cur);
   }
   return cur;
 }

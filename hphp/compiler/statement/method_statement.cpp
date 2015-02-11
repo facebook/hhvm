@@ -15,7 +15,7 @@
 */
 
 #include "hphp/compiler/statement/method_statement.h"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 #include <map>
 #include <set>
 #include "hphp/compiler/statement/return_statement.h"
@@ -48,7 +48,6 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/alias_manager.h"
 
-#include "hphp/runtime/base/complex-types.h"
 
 #include "hphp/parser/parser.h"
 #include "hphp/util/text-util.h"
@@ -491,8 +490,6 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    funcScope->setParamSpecs(ar);
-
     if (Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
     }
@@ -554,12 +551,6 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
           funcScope->setOverriding(Type::Variant, Type::Variant);
         }
       }
-    }
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    TypePtr ret = funcScope->getReturnType();
-    if (ret && ret->isSpecificObject()) {
-      FileScopePtr fs = getFileScope();
-      if (fs) fs->addClassDependency(ar, ret->getName());
     }
   }
 }

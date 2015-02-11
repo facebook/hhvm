@@ -1,0 +1,2 @@
+
+Fatal error: Class ThisShouldFatal cannot implement both IteratorAggregate and Iterator at the same time in %s/ext_class/iteratoraggregate_iterator_both.php on line %s

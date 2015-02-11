@@ -171,7 +171,7 @@ void phpDebuggerRequestShutdownHook();
 void phpDebuggerFuncEntryHook(const ActRec* ar);
 void phpDebuggerFuncExitHook(const ActRec* ar);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);
-void phpDebuggerExceptionHandlerHook();
+void phpDebuggerExceptionHandlerHook() noexcept;
 void phpDebuggerErrorHook(const ExtendedException &ee,
                           int errnum,
                           const std::string& message);

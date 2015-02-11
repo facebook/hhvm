@@ -36,15 +36,15 @@ let revive funs classes =
   Typing_env.Classes.revive_batch classes;
   ()
 
-let declare content =
+let declare path content =
   Autocomplete.auto_complete := false;
   Autocomplete.auto_complete_for_global := "";
   let declared_funs = ref SSet.empty in
   let declared_classes = ref SSet.empty in
   try
     Errors.ignore_ begin fun () ->
-      let {Parser_hack.is_hh_file; comments; ast} =
-        Parser_hack.program Relative_path.default content
+      let {Parser_hack.file_mode; comments; ast} =
+        Parser_hack.program path content
       in
       let funs, classes = List.fold_left begin fun (funs, classes) def ->
         match def with
@@ -59,31 +59,13 @@ let declare content =
         | Ast.Fun f ->
             let nenv = Naming.empty in
             let f = Naming.fun_ nenv f in
-            if !Find_refs.find_method_at_cursor_target <> None then
-              Find_refs.process_find_refs None
-                (snd f.Nast.f_name) (fst f.Nast.f_name);
             let fname = (snd f.Nast.f_name) in
             Typing.fun_decl f;
             declared_funs := SSet.add fname !declared_funs;
         | Ast.Class c ->
             let nenv = Naming.empty in
             let c = Naming.class_ nenv c in
-            if !Find_refs.find_method_at_cursor_target <> None then
-              Find_refs.process_class_ref (fst c.Nast.c_name)
-                (snd c.Nast.c_name) None;
             let cname = snd c.Nast.c_name in
-            let all_methods = c.Nast.c_methods @ c.Nast.c_static_methods in
-            if !Find_refs.find_method_at_cursor_target <> None then
-            List.iter begin fun method_ ->
-              Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                (snd method_.Nast.m_name) (fst method_.Nast.m_name)
-            end all_methods;
-            (match c.Nast.c_constructor with
-            | Some method_ ->
-                Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                  Naming_special_names.Members.__construct
-                  (fst method_.Nast.m_name)
-            | None -> ());
             declared_classes := SSet.add cname !declared_classes;
             Typing_decl.class_decl c;
             ()
@@ -95,10 +77,10 @@ let declare content =
     report_error e;
     SSet.empty, SSet.empty
 
-let fix_file_and_def content = try
+let fix_file_and_def path content = try
   Errors.ignore_ begin fun () ->
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program Relative_path.default content in
+    let {Parser_hack.file_mode; comments; ast} =
+      Parser_hack.program path content in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -121,37 +103,28 @@ with e ->
   report_error e;
   ()
 
-let check_def = function
-  | Ast.Fun f ->
-      (try Typing_check_service.type_fun (snd f.Ast.f_name)
-      with _ -> ())
-  | Ast.Class c ->
-      (try Typing_check_service.type_class (snd c.Ast.c_name)
-      with _ -> ())
-  | Ast.Stmt _ -> ()
-  | Ast.Typedef { Ast.t_id = (_, tname); _ } ->
-      (try Typing_check_service.check_typedef tname
-      with _ -> ()
-      )
-  | Ast.Constant _ -> ()
-  | Ast.Namespace _
-  | Ast.NamespaceUse _ -> assert false
+let check_defs {FileInfo.funs; classes; typedefs; _} =
+  fst (Errors.do_ (fun () ->
+    List.iter (fun (_, x) -> Typing_check_service.type_fun x) funs;
+    List.iter (fun (_, x) -> Typing_check_service.type_class x) classes;
+    List.iter (fun (_, x) -> Typing_check_service.check_typedef x) typedefs;
+  ))
 
-let recheck file_names =
+let recheck fileinfo_l =
   SharedMem.invalidate_caches();
-  Errors.ignore_ begin fun () ->
-    List.iter begin fun fn ->
-      match Parser_heap.ParserHeap.get fn with
-      | None -> ()
-      | Some defs -> List.iter check_def defs
-    end file_names
-  end
+  List.iter (fun defs -> ignore (check_defs defs)) fileinfo_l
 
-let check_file_input fi =
+let check_file_input files_info fi =
   match fi with
-    | ServerMsg.FileContent content ->
-        let funs, classes = declare content in
-        fix_file_and_def content;
-        revive funs classes;
-    | ServerMsg.FileName fn ->
-        recheck [Relative_path.create Relative_path.Root fn];
+  | ServerMsg.FileContent content ->
+      let path = Relative_path.default in
+      let funs, classes = declare path content in
+      fix_file_and_def path content;
+      revive funs classes;
+      path
+  | ServerMsg.FileName fn ->
+      let path = Relative_path.create Relative_path.Root fn in
+      let () = match Relative_path.Map.get path files_info with
+      | Some fileinfo -> recheck [fileinfo]
+      | None -> () in
+      path

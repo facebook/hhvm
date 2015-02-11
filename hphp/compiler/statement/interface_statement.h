@@ -52,8 +52,6 @@ public:
 
   virtual std::string getName() const;
   const std::string &getOriginalName() const { return m_originalName;}
-  virtual void getAllParents(AnalysisResultConstPtr ar,
-                             std::vector<std::string> &names);
   ClassScopeRawPtr getClassScope() const {
     BlockScopeRawPtr b = getScope();
     assert(b->is(BlockScope::ClassScope));

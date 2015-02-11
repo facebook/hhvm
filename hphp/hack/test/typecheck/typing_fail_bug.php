@@ -18,4 +18,4 @@ function f(mixed $arg): void {
   g($tmp);
 }
 
-function g(string $s): void { }
+function g(string $s): void {}

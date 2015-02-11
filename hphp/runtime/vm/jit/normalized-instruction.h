@@ -44,7 +44,6 @@ struct NormalizedInstruction {
   const Unit* m_unit;
 
   std::vector<DynLocation*> inputs;
-  Type outPred;
   ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
@@ -52,12 +51,9 @@ struct NormalizedInstruction {
   // The member codes for the M-vector.
   std::vector<MemberCode> immVecM;
 
-  Offset nextOffset; // for intra-trace* non-call control-flow instructions,
-                     // this is the offset of the next instruction in the trace*
   bool endsRegion:1;
   bool nextIsMerge:1;
   bool preppedByRef:1;
-  bool outputPredicted:1;
   bool ignoreInnerType:1;
 
   /*

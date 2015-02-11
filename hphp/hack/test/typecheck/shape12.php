@@ -9,7 +9,9 @@
  *
  */
 
-newtype myshape = shape('x' => myshape);
+newtype myshape = shape(
+  'x' => myshape,
+);
 
 function test(myshape $x): myshape {
   return shape('x' => $x);

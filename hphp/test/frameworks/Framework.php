@@ -428,7 +428,7 @@ class Framework {
                                  "Skipped" => 0, "Incomplete" => 0 };
           foreach ($results_arr as $result) {
             // Strip spaces, then look for the : separator
-            $res_arr = split(":", str_replace(" ", "", $result));
+            $res_arr = explode(":", str_replace(" ", "", $result));
             // Remove any possible periods.
             $parsed_results[$res_arr[0]] =
                           (int)(str_replace(".", "", $res_arr[1]));
@@ -520,14 +520,14 @@ class Framework {
 
   public function clean(): void {
     // Get rid of any old data, except the expect file and test info, of course.
-    unlink($this->out_file);
-    unlink($this->diff_file);
-    unlink($this->errors_file);
-    unlink($this->stats_file);
-    unlink($this->fatals_file);
+    delete_file($this->out_file);
+    delete_file($this->diff_file);
+    delete_file($this->errors_file);
+    delete_file($this->stats_file);
+    delete_file($this->fatals_file);
 
     if (Options::$generate_new_expect_file) {
-      unlink($this->expect_file);
+      delete_file($this->expect_file);
       human("Resetting the expect file for ".$this->name.". ".
             "Establishing new baseline with gray dots...\n");
     }
@@ -572,8 +572,8 @@ class Framework {
     // Get rid of any test file and test information. Why? Well, for example,
     // just in case the frameworks are being installed in a different directory
     // path. The tests files file would have the wrong path information then.
-    unlink($this->tests_file);
-    unlink($this->test_files_file);
+    delete_file($this->tests_file);
+    delete_file($this->test_files_file);
 
     $cache_tarball = null;
     if (Options::$cache_directory) {
@@ -793,8 +793,8 @@ class Framework {
         proc_close($proc);
         if (!pcntl_wifexited($child_status) ||
             pcntl_wexitstatus($child_status) !== 0) {
-          unlink($this->tests_file);
-          unlink($this->test_files_file);
+          delete_file($this->tests_file);
+          delete_file($this->test_files_file);
           error_and_exit("Could not get tests for ".$this->name);
         }
       } else {

@@ -29,10 +29,10 @@
 #include <utility>
 #include <vector>
 
-#include "folly/gen/Base.h"
-#include "folly/gen/String.h"
-#include "folly/ScopeGuard.h"
-#include "folly/Memory.h"
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
+#include <folly/ScopeGuard.h>
+#include <folly/Memory.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
@@ -808,6 +808,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->traitPrecRules    = pce.traitPrecRules();
   ret->traitAliasRules   = pce.traitAliasRules();
   ret->requirements      = pce.requirements();
+  ret->numDeclMethods    = pce.numDeclMethods();
 
   parse_methods(puState, borrow(ret), unit, pce);
 
@@ -832,7 +833,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
       php::Const {
         cconst.name(),
         borrow(ret),
-        cconst.val(),
+        cconst.valOption(),
         cconst.phpCode(),
         cconst.typeConstraint()
       }

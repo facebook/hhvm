@@ -18,9 +18,8 @@
 #define incl_HPHP_REPLAY_TRANSPORT_H_
 
 #include "hphp/runtime/server/transport.h"
-#include "hphp/util/hdf.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/util/hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

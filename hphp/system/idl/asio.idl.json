@@ -185,6 +185,18 @@
                     ]
                 },
                 {
+                    "name": "result",
+                    "desc": "Return the wait handle's result if it is already finished (and valid), throw an exception otherwise",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "A result of the operation represented by given wait handle"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "isFinished",
                     "desc": "Check if this wait handle finished (succeeded or failed)",
                     "flags": [
@@ -721,6 +733,87 @@
                             "name": "callback",
                             "type": "Variant",
                             "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "HH\\ConditionWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
+            "desc": "A wait handle representing a condition variable waiting for a notification",
+            "flags": [
+                "IsFinal",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that waits for a notification",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A WaitHandle that will wait for a notification"
+                    },
+                    "args": [
+                        {
+                            "name": "child",
+                            "type": "Variant",
+                            "desc": "A WaitHandle representing job responsible for notifying the condition variable"
+                        }
+                    ]
+                },
+                {
+                    "name": "setOnCreateCallback",
+                    "desc": "Set callback for when a ConditionWaitHandle is created",
+                    "flags": [
+                        "IsStatic",
+                        "HipHopSpecific"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "A Closure to be called on creation"
+                        }
+                    ]
+                },
+                {
+                    "name": "succeed",
+                    "desc": "Notify the condition variable and mark the ConditionWaitHandle as succeeded",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "result",
+                            "type": "Variant",
+                            "desc": "A result to be set"
+                        }
+                    ]
+                },
+                {
+                    "name": "fail",
+                    "desc": "Notify the condition variable and mark the ConditionWaitHandle as failed",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "exception",
+                            "type": "Variant",
+                            "desc": "An exception to be set"
                         }
                     ]
                 }

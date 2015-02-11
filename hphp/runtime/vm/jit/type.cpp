@@ -18,20 +18,24 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
-#include "folly/MapUtil.h"
-#include "folly/gen/Base.h"
+#include <folly/Conv.h>
+#include <folly/Format.h>
+#include <folly/MapUtil.h>
+#include <folly/gen/Base.h>
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/shape.h"
+#include "hphp/runtime/base/struct-array.h"
+#include "hphp/runtime/base/struct-array-defs.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 
 #include <vector>
 
@@ -54,9 +58,9 @@ namespace {
  *
  *                            Unk
  *                             |
- *         +-------------------+----+--------+
- *         |                        |        |
- *       RMemb                      |     ClsInit
+ *         +-------------------+----+--------+-------+
+ *         |                        |        |       |
+ *       RMemb                      |     ClsInit  ClsCns
  *         |                        |
  *  +------+---------+              |
  *  |      |         |              |
@@ -86,7 +90,9 @@ bool has_ref(Ptr p) {
 }
 
 Ptr add_ref(Ptr p) {
-  if (p == Ptr::Unk || p == Ptr::ClsInit) return p;
+  if (p == Ptr::Unk || p == Ptr::ClsInit || p == Ptr::ClsCns) {
+    return p;
+  }
   return static_cast<Ptr>(static_cast<uint32_t>(p) | kPtrRefBit);
 }
 
@@ -219,7 +225,7 @@ std::string Type::constValString() const {
     }
     return folly::format("TCA: {}({})", m_tcaVal, boost::trim_copy(name)).str();
   } else if (subtypeOf(RDSHandle)) {
-    return folly::format("RDS::Handle({:#x})", m_rdsHandleVal).str();
+    return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
   } else if (subtypeOfAny(Null, Nullptr) || isPtr()) {
     return toString();
   } else {
@@ -258,6 +264,7 @@ std::string Type::toString() const {
     case Ptr::MIS:      ret += "MIS"; break;
     case Ptr::Memb:     ret += "Memb"; break;
     case Ptr::ClsInit:  ret += "ClsInit"; break;
+    case Ptr::ClsCns:   ret += "ClsCns"; break;
     case Ptr::RFrame:   ret += "RFrame"; break;
     case Ptr::RStk:     ret += "RStk"; break;
     case Ptr::RGbl:     ret += "RGbl"; break;
@@ -301,6 +308,9 @@ std::string Type::toString() const {
       if (auto ty = getArrayType()) {
         str += folly::to<std::string>(':', show(*ty));
       }
+      if (const auto shape = getArrayShape()) {
+        str += folly::to<std::string>(":", show(*shape));
+      }
       parts.push_back(str);
       t -= AnyArr;
     } else {
@@ -338,33 +348,6 @@ bool Type::checkValid() const {
   static_assert(static_cast<uint32_t>(Ptr::Unk) == 0, "");
 
   return true;
-}
-
-Type Type::unionOf(Type t1, Type t2) {
-  if (t1 == t2 || t2 < t1) return t1;
-  if (t1 < t2) return t2;
-
-  if (t1.isPtr() && t2.isPtr()) {
-    return unionOf(t1.deref(), t2.deref()).ptr(
-      ptr_union(t1.ptrKind(), t2.ptrKind())
-    );
-  }
-
-  static const Type union_types[] = {
-#   define IRT(name, ...) name,
-#   define IRTP(name, ...) IRT(name)
-    IRT_PHP(IRT_BOXES_AND_PTRS)
-    IRT_PHP_UNIONS(IRT_BOXES_AND_PTRS)
-#   undef IRT
-#   undef IRTP
-    Gen,
-    PtrToGen,
-  };
-  Type t12 = t1 | t2;
-  for (auto u : union_types) {
-    if (t12 <= u) return u;
-  }
-  not_reached();
 }
 
 DataType Type::toDataType() const {
@@ -663,9 +646,10 @@ Type Type::combine(bits_t newBits, Ptr newPtrKind, Type a, Type b) {
     auto const specType = a.isSpecialized() ? a.specializedType()
                                             : b.specializedType();
 
-    // If the specialized type doesn't exist in newBits, drop the
-    // specialization.
-    if (newBits & specType.m_bits) {
+    // If the specialized type doesn't exist in newBits, or newBits can be
+    // specialized as an object or as an array, then drop the specialization.
+    auto const either = (newBits & kAnyObj) && (newBits & kAnyArr);
+    if ((newBits & specType.m_bits) && !either) {
       return Type(newBits, newPtrKind, specType.m_extra);
     }
     return Type(newBits, newPtrKind);
@@ -902,6 +886,10 @@ Type liveTVType(const TypedValue* tv) {
     return Type::Obj.specializeExact(cls);
   }
   if (tv->m_type == KindOfArray) {
+    ArrayData* ar = tv->m_data.parr;
+    if (ar->kind() == ArrayData::kStructKind) {
+      return Type::Arr.specialize(StructArray::asStructArray(ar)->shape());
+    }
     return Type::Arr.specialize(tv->m_data.parr->kind());
   }
 
@@ -934,8 +922,8 @@ Type Type::relaxToGuardable() const {
 namespace {
 
 Type setElemReturn(const IRInstruction* inst) {
-  assert(inst->op() == SetElem || inst->op() == SetElemStk);
-  auto baseType = inst->src(minstrBaseIdx(inst))->type().strip();
+  assert(inst->op() == SetElem);
+  auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
 
   // If the base is a Str, the result will always be a CountedStr (or
   // an exception). If the base might be a str, the result wil be
@@ -961,35 +949,17 @@ Type builtinReturn(const IRInstruction* inst) {
   not_reached();
 }
 
-Type stkReturn(const IRInstruction* inst, int dstId,
-               std::function<Type()> inner) {
-  assert(inst->modifiesStack());
-  if (dstId == 0 && inst->hasMainDst()) {
-    // Return the type of the main dest (if one exists) as dst 0
-    return inner();
-  }
-  // The instruction modifies the stack and this isn't the main dest,
-  // so it's a StkPtr.
-  return Type::StkPtr;
-}
-
 Type thisReturn(const IRInstruction* inst) {
-  auto fpInst = inst->src(0)->inst();
-
-  // Find the instruction that created the current frame and grab the context
-  // class from it. $this, if present, is always going to be the context class
-  // or a subclass of the context.
-  always_assert(fpInst->is(DefFP, DefInlineFP));
-  auto const func = fpInst->is(DefFP) ? fpInst->marker().func()
-                                      : fpInst->extra<DefInlineFP>()->target;
-  func->validate();
-  assert(func->isMethod() || func->isPseudoMain());
+  auto const func = inst->marker().func();
 
   // If the function is a cloned closure which may have a re-bound $this which
   // is not a subclass of the context return an unspecialized type.
   if (func->hasForeignThis()) return Type::Obj;
 
-  return Type::Obj.specialize(func->cls());
+  if (auto const cls = func->cls()) {
+    return Type::Obj.specialize(cls);
+  }
+  return Type::Obj;
 }
 
 Type allocObjReturn(const IRInstruction* inst) {
@@ -1011,7 +981,7 @@ Type allocObjReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  assert(inst->op() == LdPackedArrayElem);
+  assert(inst->op() == LdPackedArrayElem || inst->op() == LdStructArrayElem);
   auto const tyParam = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
   assert(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
 
@@ -1042,7 +1012,9 @@ Type unboxPtr(Type t) {
 }
 
 Type boxPtr(Type t) {
-  return t.deref().unbox().box().ptr(remove_ref(t.ptrKind()));
+  auto const rawBoxed = t.deref().unbox().box();
+  auto const noNull = rawBoxed - Type::BoxedUninit;
+  return noNull.ptr(remove_ref(t.ptrKind()));
 }
 
 }
@@ -1052,18 +1024,6 @@ Type ldRefReturn(Type typeParam) {
   // Guarding on specialized types and uncommon unions like {Int|Bool} is
   // expensive enough that we only want to do it in situations where we've
   // manually confirmed the benefit.
-
-  if (typeParam.strictSubtypeOf(Type::Obj) &&
-      typeParam.isSpecialized() &&
-      typeParam.getClass()->attrs() & AttrFinal &&
-      typeParam.getClass()->isCollectionClass()) {
-    /*
-     * This case is needed for the minstr-translator.
-     * see MInstrTranslator::checkMIState().
-     */
-    return typeParam;
-  }
-
   auto const type = typeParam.unspecialize();
 
   if (type.isKnownDataType())      return type;
@@ -1117,7 +1077,7 @@ Type convertToType(RepoAuthType ty) {
   case T::Obj:            return Type::Obj;
 
   case T::Cell:           return Type::Cell;
-  case T::Ref:            return Type::BoxedCell;
+  case T::Ref:            return Type::BoxedInitCell;
   case T::InitUnc:        return Type::UncountedInit;
   case T::Unc:            return Type::Uncounted;
   case T::InitCell:       return Type::InitCell;
@@ -1138,7 +1098,7 @@ Type convertToType(RepoAuthType ty) {
   case T::SubObj:
   case T::ExactObj: {
     auto const base = Type::Obj;
-    if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
+    if (auto const cls = Unit::lookupClassOrUniqueClass(ty.clsName())) {
       return ty.tag() == T::ExactObj ?
         base.specializeExact(cls) :
         base.specialize(cls);
@@ -1148,7 +1108,7 @@ Type convertToType(RepoAuthType ty) {
   case T::OptSubObj:
   case T::OptExactObj: {
     auto const base = Type::Obj | Type::InitNull;
-    if (auto const cls = Unit::lookupUniqueClass(ty.clsName())) {
+    if (auto const cls = Unit::lookupClassOrUniqueClass(ty.clsName())) {
       return ty.tag() == T::OptExactObj ?
         base.specializeExact(cls) :
         base.specialize(cls);
@@ -1183,9 +1143,9 @@ Type outputType(const IRInstruction* inst, int dstId) {
   using TypeNames::TCA;
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
-#define DBox(n)         return Type::BoxedInitCell;
 #define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
                                                  inst->typeParam());
+#define DParamMayRelax  return inst->typeParam();
 #define DParam          return inst->typeParam();
 #define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
                         return inst->typeParam();
@@ -1194,11 +1154,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
 #define DArrPacked      return Type::Arr.specialize(ArrayData::kPackedKind);
-#define DLdRef          return ldRefReturn(inst->typeParam());
 #define DThis           return thisReturn(inst);
 #define DMulti          return Type::Bottom;
-#define DStk(in)        return stkReturn(inst, dstId, \
-                                   [&]() -> Type { in not_reached(); });
 #define DSetElem        return setElemReturn(inst);
 #define ND              assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin        return builtinReturn(inst);
@@ -1217,8 +1174,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 
 #undef D
 #undef DofS
-#undef DBox
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
 #undef DUnboxPtr
@@ -1226,10 +1183,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
-#undef DLdRef
 #undef DThis
 #undef DMulti
-#undef DStk
 #undef DSetElem
 #undef ND
 #undef DBuiltin
@@ -1271,8 +1226,19 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   auto bail = [&] (const std::string& msg) {
     FTRACE(1, "{}", msg);
     fprintf(stderr, "%s\n", msg.c_str());
-    if (unit) print(*unit);
-    always_assert(false && "instruction operand type check failure");
+
+    // Just print the message if the unit doesn't exist.
+    always_assert_log(unit != nullptr, [&] { return msg; });
+
+    always_assert_flog(
+      false,
+      "{}\n\n"
+      "{:-^80}\n{}{:-^80}\n",
+      msg,
+      " unit ",
+      *unit,
+      ""
+    );
   };
 
   if (opHasExtraData(inst->op()) != (bool)inst->rawExtra()) {
@@ -1406,24 +1372,21 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));
 #define ND
 #define DMulti
-#define DStk(...)
 #define DSetElem
 #define D(...)
 #define DBuiltin
 #define DSubtract(src, t)checkDst(src < inst->numSrcs(),  \
-                             "invalid src num");
-#define DBox(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DRefineS(src) checkDst(src < inst->numSrcs(),  \
                                "invalid src num");     \
                       requireTypeParam();
-#define DParam       requireTypeParam();
-#define DParamPtr(k) requireTypeParamPtr(Ptr::k);
+#define DParamMayRelax requireTypeParam();
+#define DParam         requireTypeParam();
+#define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
 #define DUnboxPtr
 #define DBoxPtr
-#define DLdRef       requireTypeParam();
 #define DAllocObj
 #define DArrElem
 #define DArrPacked
@@ -1452,11 +1415,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DBuiltin
 #undef DSubtract
 #undef DMulti
-#undef DStk
 #undef DSetElem
-#undef DBox
 #undef DofS
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
 #undef DUnboxPtr
@@ -1464,7 +1426,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
-#undef DLdRef
 #undef DThis
 #undef DCns
 
@@ -1476,6 +1437,7 @@ std::string TypeConstraint::toString() const {
 
   if (category == DataTypeSpecialized) {
     if (wantArrayKind()) ret += ",ArrayKind";
+    if (wantArrayShape()) ret += ",ArrayShape";
     if (wantClass()) {
       folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
     }

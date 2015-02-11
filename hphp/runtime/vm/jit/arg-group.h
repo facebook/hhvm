@@ -18,16 +18,14 @@
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
 
 namespace HPHP { namespace jit {
 
 class SSATmp;
 struct IRInstruction;
 
-namespace NativeCalls {
-struct CallInfo;
-}
+namespace NativeCalls { struct CallInfo; }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -43,11 +41,21 @@ struct CallInfo;
 
 //////////////////////////////////////////////////////////////////////
 
+enum class DestType : uint8_t {
+  None,  // return void (no valid registers)
+  SSA,   // return a single-register value
+  Byte,  // return a single-byte register value
+  TV,    // return a TypedValue packed in two registers
+  Dbl,   // return scalar double in a single FP register
+  SIMD,  // return a TypedValue in one SIMD register
+};
+const char* destTypeName(DestType);
+
 struct CallDest {
   DestType type;
   Vreg reg0, reg1;
 };
-const CallDest kVoidDest { DestType::None };
+UNUSED const CallDest kVoidDest { DestType::None };
 
 class ArgDesc {
 public:
@@ -183,7 +191,9 @@ struct ArgGroup {
     if (m_gpArgs.size() == x64::kNumRegisterArgs - 1) {
       m_override = &m_stkArgs;
     }
-    packed_tv ? type(i).ssa(i) : ssa(i).type(i);
+    static_assert(offsetof(TypedValue, m_data) == 0, "");
+    static_assert(offsetof(TypedValue, m_type) == 8, "");
+    ssa(i).type(i);
     m_override = nullptr;
     return *this;
   }

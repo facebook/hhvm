@@ -10,9 +10,8 @@
  */
 
 function test(): void {
-  if(true) {
+  if (true) {
   } elseif (false) {
-  }
-  else {
+  } else {
   }
 }

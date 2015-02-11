@@ -60,7 +60,7 @@ let add_type env pos k type_ =
 let save_type hint_kind env x arg =
   if !is_suggest_mode then begin
     match Typing_expand.fully_expand env x with
-    | r, Tany ->
+    | _, Tany ->
         let earg = Typing_expand.fully_expand env arg in
         (match earg with
         | _, Tany -> ()
@@ -70,7 +70,7 @@ let save_type hint_kind env x arg =
         )
     | _, (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
       | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
-      | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
+      | Tfun _ | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _)) -> ()
   end
 
 let save_return env x arg = save_type Kreturn env x arg
@@ -147,7 +147,7 @@ let get_implements (_, x) =
         | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
           | Toption _ | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
-          | Tshape _) -> raise Exit
+          | Tshape _ | Taccess (_, _)) -> raise Exit
       end tyl SSet.empty
 
 (** normalizes a "guessed" type. We basically want to bailout whenever
@@ -158,7 +158,7 @@ and normalize_ = function
   | Tunresolved [x] -> snd (normalize x)
   | Tunresolved tyl
     when List.exists (function _, Toption _ -> true | _ -> false) tyl ->
-      let tyl = List.map (function r, Toption ty -> ty | x -> x) tyl in
+      let tyl = List.map (function _, Toption ty -> ty | x -> x) tyl in
       normalize_ (Toption (Reason.Rnone, Tunresolved tyl))
   | Tunresolved tyl
     when List.exists (function _, (Tany | Tunresolved []) -> true | _ -> false) tyl ->
@@ -166,10 +166,11 @@ and normalize_ = function
         |  _, (Tany |  Tunresolved []) -> false
         | _, (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
           | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
-          | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> true
+          | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _
+          | Taccess (_, _)) -> true
       end tyl in
       normalize_ (Tunresolved tyl)
-  | Tunresolved ((r, Tapply (x, [])) :: rl) ->
+  | Tunresolved ((_, Tapply (x, [])) :: rl) ->
       (* If we have A & B & C where all the elements are classes
        * we try to find a unique common ancestor.
        *)
@@ -178,7 +179,7 @@ and normalize_ = function
         | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
           | Toption _ | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
-          | Tshape _) -> raise Exit
+          | Tshape _ | Taccess (_, _)) -> raise Exit
       end rl in
       let x_imp = get_implements x in
       let set = List.fold_left begin fun x_imp x ->
@@ -203,6 +204,7 @@ and normalize_ = function
   | Tprim _ as ty -> ty
   | Tvar _ -> raise Exit
   | Tfun _ -> raise Exit
+  | Taccess (_, _) -> raise Exit
   | Tapply ((pos, name), tyl) when name.[0] = '\\' && String.rindex name '\\' = 0 ->
       (* TODO this transform isn't completely legit; can cause a reference into
        * the global namespace to suddenly refer to a different class in the

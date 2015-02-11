@@ -1,4 +1,6 @@
-File "new_parent2.php", line 22, characters 9-11:
-The method foo is undefined in an object of type B (Typing[4053])
-File "new_parent2.php", line 15, characters 17-17:
+File "new_parent2.php", line 20, characters 9-11:
+Could not find method foo in an object of type B (Typing[4053])
+File "new_parent2.php", line 19, characters 10-21:
+This is why I think it is an object of type B
+File "new_parent2.php", line 12, characters 7-7:
 Declaration of B is here

@@ -16,14 +16,14 @@
 #ifndef incl_HPHP_CONTAINER_FUNCTIONS_H_
 #define incl_HPHP_CONTAINER_FUNCTIONS_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline bool isContainer(const Cell& c) {
+inline bool isContainer(const Cell c) {
   assert(cellIsPlausible(c));
   return c.m_type == KindOfArray ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
@@ -33,7 +33,7 @@ inline bool isContainer(const Variant& v) {
   return isContainer(*v.asCell());
 }
 
-inline bool isContainerOrNull(const Cell& c) {
+inline bool isContainerOrNull(const Cell c) {
   assert(cellIsPlausible(c));
   return IS_NULL_TYPE(c.m_type) || c.m_type == KindOfArray ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
@@ -43,7 +43,7 @@ inline bool isContainerOrNull(const Variant& v) {
   return isContainerOrNull(*v.asCell());
 }
 
-inline bool isMutableContainer(const Cell& c) {
+inline bool isMutableContainer(const Cell c) {
   assert(cellIsPlausible(c));
   return c.m_type == KindOfArray ||
          (c.m_type == KindOfObject && c.m_data.pobj->isMutableCollection());
@@ -53,7 +53,7 @@ inline bool isMutableContainer(const Variant& v) {
   return isMutableContainer(*v.asCell());
 }
 
-inline size_t getContainerSize(const Cell& c) {
+inline size_t getContainerSize(const Cell c) {
   assert(isContainer(c));
   if (c.m_type == KindOfArray) {
     return c.m_data.parr->size();

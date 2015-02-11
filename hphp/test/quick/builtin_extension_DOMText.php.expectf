@@ -1,108 +1,102 @@
 DOMText
 object(DOMText)#1 (19) {
-  ["length"]=>
-  int(0)
-  ["wholeText"]=>
-  string(0) ""
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["nodeType"]=>
-  int(3)
-  ["lastChild"]=>
-  NULL
   ["nodeName"]=>
   string(5) "#text"
-  ["previousSibling"]=>
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(3)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
   NULL
   ["firstChild"]=>
   NULL
-  ["data"]=>
-  string(0) ""
-  ["childNodes"]=>
+  ["lastChild"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
+  ["previousSibling"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["data"]=>
+  string(0) ""
+  ["length"]=>
+  int(0)
+  ["wholeText"]=>
+  string(0) ""
 }
 
-Warning: Attempted to serialize unserializable builtin class DOMText in %s/quick/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class DOMText in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(30) {
+array(27) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
-  [2]=>
-  string(5) "__set"
-  [3]=>
-  string(7) "__isset"
-  [4]=>
   string(11) "__debuginfo"
-  [5]=>
+  [2]=>
   string(28) "isWhitespaceInElementContent"
-  [6]=>
+  [3]=>
   string(26) "isElementContentWhitespace"
-  [7]=>
+  [4]=>
   string(9) "splitText"
-  [8]=>
+  [5]=>
   string(10) "appendData"
-  [9]=>
+  [6]=>
   string(10) "deleteData"
-  [10]=>
+  [7]=>
   string(10) "insertData"
-  [11]=>
+  [8]=>
   string(11) "replaceData"
-  [12]=>
+  [9]=>
   string(13) "substringData"
-  [13]=>
+  [10]=>
   string(11) "appendChild"
-  [14]=>
+  [11]=>
   string(9) "cloneNode"
-  [15]=>
+  [12]=>
   string(9) "getLineNo"
-  [16]=>
+  [13]=>
   string(13) "hasAttributes"
-  [17]=>
+  [14]=>
   string(13) "hasChildNodes"
-  [18]=>
+  [15]=>
   string(12) "insertBefore"
-  [19]=>
+  [16]=>
   string(18) "isDefaultNamespace"
-  [20]=>
+  [17]=>
   string(10) "isSameNode"
-  [21]=>
+  [18]=>
   string(11) "isSupported"
-  [22]=>
+  [19]=>
   string(18) "lookupNamespaceUri"
-  [23]=>
+  [20]=>
   string(12) "lookupPrefix"
-  [24]=>
+  [21]=>
   string(9) "normalize"
-  [25]=>
+  [22]=>
   string(11) "removeChild"
-  [26]=>
+  [23]=>
   string(12) "replaceChild"
-  [27]=>
+  [24]=>
   string(4) "c14n"
-  [28]=>
+  [25]=>
   string(8) "c14nfile"
-  [29]=>
+  [26]=>
   string(11) "getNodePath"
 }
 ================
@@ -110,108 +104,102 @@ A_DOMText
 object(A_DOMText)#2 (20) {
   ["___x"]=>
   NULL
-  ["length"]=>
-  int(0)
-  ["wholeText"]=>
-  string(0) ""
-  ["textContent"]=>
-  string(0) ""
-  ["baseURI"]=>
-  NULL
-  ["localName"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["ownerDocument"]=>
-  NULL
-  ["parentNode"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["nodeType"]=>
-  int(3)
-  ["lastChild"]=>
-  NULL
   ["nodeName"]=>
   string(5) "#text"
-  ["previousSibling"]=>
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(3)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
   NULL
   ["firstChild"]=>
   NULL
-  ["data"]=>
-  string(0) ""
-  ["childNodes"]=>
+  ["lastChild"]=>
   NULL
-  ["nodeValue"]=>
-  string(0) ""
+  ["previousSibling"]=>
+  NULL
   ["nextSibling"]=>
   NULL
   ["attributes"]=>
   NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["data"]=>
+  string(0) ""
+  ["length"]=>
+  int(0)
+  ["wholeText"]=>
+  string(0) ""
 }
 
-Warning: Attempted to serialize unserializable builtin class A_DOMText in %s/quick/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_DOMText in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(30) {
+array(27) {
   [0]=>
   string(11) "__construct"
   [1]=>
-  string(5) "__get"
-  [2]=>
-  string(5) "__set"
-  [3]=>
-  string(7) "__isset"
-  [4]=>
   string(11) "__debuginfo"
-  [5]=>
+  [2]=>
   string(28) "isWhitespaceInElementContent"
-  [6]=>
+  [3]=>
   string(26) "isElementContentWhitespace"
-  [7]=>
+  [4]=>
   string(9) "splitText"
-  [8]=>
+  [5]=>
   string(10) "appendData"
-  [9]=>
+  [6]=>
   string(10) "deleteData"
-  [10]=>
+  [7]=>
   string(10) "insertData"
-  [11]=>
+  [8]=>
   string(11) "replaceData"
-  [12]=>
+  [9]=>
   string(13) "substringData"
-  [13]=>
+  [10]=>
   string(11) "appendChild"
-  [14]=>
+  [11]=>
   string(9) "cloneNode"
-  [15]=>
+  [12]=>
   string(9) "getLineNo"
-  [16]=>
+  [13]=>
   string(13) "hasAttributes"
-  [17]=>
+  [14]=>
   string(13) "hasChildNodes"
-  [18]=>
+  [15]=>
   string(12) "insertBefore"
-  [19]=>
+  [16]=>
   string(18) "isDefaultNamespace"
-  [20]=>
+  [17]=>
   string(10) "isSameNode"
-  [21]=>
+  [18]=>
   string(11) "isSupported"
-  [22]=>
+  [19]=>
   string(18) "lookupNamespaceUri"
-  [23]=>
+  [20]=>
   string(12) "lookupPrefix"
-  [24]=>
+  [21]=>
   string(9) "normalize"
-  [25]=>
+  [22]=>
   string(11) "removeChild"
-  [26]=>
+  [23]=>
   string(12) "replaceChild"
-  [27]=>
+  [24]=>
   string(4) "c14n"
-  [28]=>
+  [25]=>
   string(8) "c14nfile"
-  [29]=>
+  [26]=>
   string(11) "getNodePath"
 }

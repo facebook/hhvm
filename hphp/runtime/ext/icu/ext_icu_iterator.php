@@ -55,7 +55,7 @@ class IntlIterator implements Iterator {
   public function rewind(): mixed;
 
   /**
-   * Check if curent position is valid
+   * Check if current position is valid
    *
    * @return ReturnType -
    */

@@ -20,7 +20,8 @@
 
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/debugger/cmd/all.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/preg.h"
@@ -34,7 +35,7 @@
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/config.h"
 #include <boost/scoped_ptr.hpp>
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #define USE_VARARGS
 #define PREFER_STDARG
@@ -81,7 +82,7 @@ static String wordwrap(const String& str, int width /* = 75 */,
   return vm_call_user_func("wordwrap", args);
 }
 
-class DebuggerExtension : public Extension {
+class DebuggerExtension final : public Extension {
  public:
   DebuggerExtension() : Extension("hhvm.debugger", NO_EXTENSION_VERSION_YET) {}
 } s_debugger_extension;
@@ -335,7 +336,7 @@ void DebuggerClient::LoadCodeColor(CodeColor index, const IniSetting::Map& ini,
 
 SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
   TRACE(2, "DebuggerClient::Start\n");
-  SmartPtr<Socket> ret = getStaticDebuggerClient().connectLocal();
+  auto ret = getStaticDebuggerClient().connectLocal();
   getStaticDebuggerClient().start(options);
   return ret;
 }
@@ -546,8 +547,8 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
     throw Exception("unable to create socket pair for local debugging");
   }
-  SmartPtr<Socket> socket1(new Socket(fds[0], AF_UNIX));
-  SmartPtr<Socket> socket2(new Socket(fds[1], AF_UNIX));
+  auto socket1 = makeSmartPtr<Socket>(fds[0], AF_UNIX);
+  auto socket2 = makeSmartPtr<Socket>(fds[1], AF_UNIX);
 
   socket1->unregister();
   socket2->unregister();
@@ -617,11 +618,14 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   /* try possible families (v4, v6) until we get a connection */
   struct addrinfo *cur;
   for (cur = ai; cur; cur = ai->ai_next) {
-    Socket *sock = new Socket(socket(cur->ai_family, cur->ai_socktype, 0),
-                              cur->ai_family, cur->ai_addr->sa_data, port);
+    auto sock = makeSmartPtr<Socket>(
+      socket(cur->ai_family, cur->ai_socktype, 0),
+      cur->ai_family,
+      cur->ai_addr->sa_data,
+      port
+    );
     sock->unregister();
-    Resource obj(sock); // Destroy sock if we don't connect.
-    if (HHVM_FN(socket_connect)(sock, String(host), port)) {
+    if (HHVM_FN(socket_connect)(Resource(sock), String(host), port)) {
       if (clearmachines) {
         for (unsigned int i = 0; i < m_machines.size(); i++) {
           if (m_machines[i] == m_machine) {
@@ -633,7 +637,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
       auto machine = std::make_shared<DMachineInfo>();
       machine->m_name = host;
       machine->m_port = port;
-      machine->m_thrift.create(SmartPtr<Socket>(sock));
+      machine->m_thrift.create(sock);
       m_machines.push_back(machine);
       switchMachine(machine);
       return true;
@@ -1175,7 +1179,18 @@ void DebuggerClient::console() {
         strcasecmp(line, "Q") != 0) {
       // even if line is bad command, we still want to remember it, so
       // people can go back and fix typos
-      add_history(line);
+      HIST_ENTRY *last_entry = nullptr;
+      if (history_length > 0 &&
+          (last_entry = history_get(history_length + history_base - 1))) {
+        // Make sure we aren't duplicating history entries
+        if (strcmp(line, last_entry->line)) {
+          add_history(line);
+        }
+      } else {
+        // Add history regardless, since we know that there are no
+        // duplicate entries.
+        add_history(line);
+      }
     }
 
     AdjustScreenMetrics();
@@ -1633,7 +1648,7 @@ do {                                         \
 
 // Parses the current command string. If invalid return false.
 // Otherwise, carry out the command and return true.
-// NB: the command may throw a variety of exceptions derrived from
+// NB: the command may throw a variety of exceptions derived from
 // DebuggerClientException.
 bool DebuggerClient::process() {
   TRACE(2, "DebuggerClient::process\n");

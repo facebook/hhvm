@@ -1,4 +1,4 @@
-File "trait_instanceof.php", line 8, characters 24-24:
+File "trait_instanceof.php", line 10, characters 24-24:
 X is uninstantiable (Typing[4002])
 File "trait_instanceof.php", line 3, characters 7-7:
 Declaration is here

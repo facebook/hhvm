@@ -1,0 +1,4 @@
+File "test_consts12.php", line 2, characters 7-8:
+This class must be declared abstract, or provide an implementation for the abstract constant 'X' (Typing[4047])
+File "test_consts12.php", line 3, characters 18-18:
+Declaration is here

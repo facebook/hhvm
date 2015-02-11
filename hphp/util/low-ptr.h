@@ -19,59 +19,52 @@
 
 #include "hphp/util/assertions.h"
 
-#include "folly/CPortability.h" // FOLLY_SANITIZE_ADDRESS
+#include <folly/CPortability.h> // FOLLY_SANITIZE_ADDRESS
 
 #include <cstddef>
 #include <cstdint>
 #include <algorithm>
 #include <utility>
 
-#ifdef FOLLY_SANITIZE_ADDRESS
-#undef USE_LOWPTR
-#endif
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Low memory pointer template.
- *
- * Defaults to a 4-byte pointer, but can be configured.
  */
-template <typename T, typename S = uint32_t>
-class LowPtr {
-public:
+template <typename T, typename S>
+struct LowPtrImpl {
   /**
    * Constructors.
    */
-  LowPtr() {}
+  LowPtrImpl() {}
 
-  /* implicit */ LowPtr(T* px) : m_raw(toLow(px)) {}
+  /* implicit */ LowPtrImpl(T* px) : m_raw(toLow(px)) {}
 
-  /* implicit */ LowPtr(std::nullptr_t px) : m_raw(0) {}
+  /* implicit */ LowPtrImpl(std::nullptr_t px) : m_raw(0) {}
 
-  LowPtr(const LowPtr<T, S>& r) : m_raw(r.raw()) {}
+  LowPtrImpl(const LowPtrImpl<T, S>& r) : m_raw(r.raw()) {}
 
-  LowPtr(LowPtr<T>&& r) : m_raw(r.raw()) {
+  LowPtrImpl(LowPtrImpl<T, S>&& r) : m_raw(r.raw()) {
     r.m_raw = 0;
   }
 
   /**
    * Assignments.
    */
-  LowPtr& operator=(T* px) {
+  LowPtrImpl& operator=(T* px) {
     return operator=(toLow(px));
   }
 
-  LowPtr& operator=(std::nullptr_t px) {
+  LowPtrImpl& operator=(std::nullptr_t px) {
     return operator=((S)0);
   }
 
-  LowPtr& operator=(const LowPtr<T, S>& r) {
+  LowPtrImpl& operator=(const LowPtrImpl<T, S>& r) {
     return operator=(r.raw());
   }
 
-  LowPtr& operator=(LowPtr<T, S>&& r) {
+  LowPtrImpl& operator=(LowPtrImpl<T, S>&& r) {
     assert(this != &r);
     m_raw = std::move(r.m_raw);
     return *this;
@@ -107,7 +100,7 @@ public:
     operator=(nullptr);
   }
 
-  void swap(LowPtr& r) {
+  void swap(LowPtrImpl& r) {
     std::swap(m_raw, r.m_raw);
   }
 
@@ -119,7 +112,7 @@ private:
     return m_raw;
   }
 
-  LowPtr& operator=(S raw) {
+  LowPtrImpl& operator=(S raw) {
     m_raw = raw;
     return *this;
   }
@@ -138,6 +131,26 @@ private:
 protected:
   S m_raw;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+#ifdef FOLLY_SANITIZE_ADDRESS
+#undef USE_LOWPTR
+#endif
+
+#ifdef USE_LOWPTR
+constexpr bool use_lowptr = true;
+
+template<class T>
+using LowPtr = LowPtrImpl<T, uint32_t>;
+
+#else
+constexpr bool use_lowptr = false;
+
+template<class T>
+using LowPtr = LowPtrImpl<T, uintptr_t>;
+
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

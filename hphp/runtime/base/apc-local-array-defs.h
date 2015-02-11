@@ -23,7 +23,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 inline APCLocalArray::APCLocalArray(const APCArray* source)
-  : ArrayData(kSharedKind)
+  : ArrayData(kApcKind)
   , m_arr(source)
   , m_localCache(nullptr)
 {
@@ -39,14 +39,14 @@ APCLocalArray* APCLocalArray::Make(Args&&... args) {
 }
 
 ALWAYS_INLINE
-APCLocalArray* APCLocalArray::asSharedArray(ArrayData* ad) {
-  assert(ad->kind() == kSharedKind);
+APCLocalArray* APCLocalArray::asApcArray(ArrayData* ad) {
+  assert(ad->kind() == kApcKind);
   return static_cast<APCLocalArray*>(ad);
 }
 
 ALWAYS_INLINE
-const APCLocalArray* APCLocalArray::asSharedArray(const ArrayData* ad) {
-  assert(ad->kind() == kSharedKind);
+const APCLocalArray* APCLocalArray::asApcArray(const ArrayData* ad) {
+  assert(ad->kind() == kApcKind);
   assert(checkInvariants(ad));
   return static_cast<const APCLocalArray*>(ad);
 }

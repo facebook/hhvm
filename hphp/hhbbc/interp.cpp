@@ -20,7 +20,7 @@
 #include <string>
 #include <iterator>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -30,8 +30,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/runtime/ext/ext_math.h" // f_abs
-
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
@@ -39,7 +37,7 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/interp-state.h"
-#include "hphp/hhbbc/type-arith.h"
+#include "hphp/hhbbc/type-ops.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
@@ -68,6 +66,8 @@ const StaticString s_empty("");
 const StaticString s_construct("__construct");
 const StaticString s_86ctor("86ctor");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
+const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
+const StaticString s_getInstanceKey("getInstanceKey");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -242,18 +242,6 @@ void in(ISS& env, const bc::NewArray& op) {
 }
 
 void in(ISS& env, const bc::NewMixedArray& op) {
-  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
-}
-
-void in(ISS& env, const bc::NewVArray& op) {
-  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
-}
-
-void in(ISS& env, const bc::NewMIArray& op) {
-  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
-}
-
-void in(ISS& env, const bc::NewMSArray& op) {
   push(env, op.arg1 == 0 ? aempty() : counted_aempty());
 }
 
@@ -433,10 +421,7 @@ void sameImpl(ISS& env) {
   if (v1 && v2) {
     return push(env, cellSame(*v2, *v1) != Negate ? TTrue : TFalse);
   }
-  if (!t1.couldBe(t2) && !t2.couldBe(t1)) {
-    return push(env, false != Negate ? TTrue : TFalse);
-  }
-  push(env, TBool);
+  push(env, Negate ? typeNSame(t1, t2) : typeSame(t1, t2));
 }
 
 void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }
@@ -847,7 +832,7 @@ void in(ISS& env, const bc::VGetS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TRef);
+    c->merge(env.ctx, tcls, tname, TRef);
   }
 
   push(env, TRef);
@@ -882,6 +867,31 @@ void in(ISS& env, const bc::AKExists& op) {
                     t2.subtypeOf(TStr);
   if (t1Ok && t2Ok) nothrow(env);
   push(env, TBool);
+}
+
+void in(ISS& env, const bc::GetMemoKey& op) {
+  auto const tyIMemoizeParam =
+    subObj(env.index.builtin_class(s_IMemoizeParam.get()));
+  auto const t = topC(env);
+
+  if (t.subtypeOf(TInt) || t.subtypeOf(TStr) || t.subtypeOf(TOptInt)) {
+    return reduce(env, bc::Nop {});
+  }
+  if (t.subtypeOf(TBool)) {
+    return reduce(env, bc::CastInt {});
+  }
+  if (t.subtypeOf(tyIMemoizeParam)) {
+    return reduce(
+      env,
+      bc::FPushObjMethodD { 0, s_getInstanceKey.get(),
+                            ObjMethodOp::NullThrows },
+      bc::FCall { 0 },
+      bc::UnboxR {}
+    );
+  }
+
+  popC(env);
+  push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::IssetL& op) {
@@ -1088,7 +1098,7 @@ void in(ISS& env, const bc::SetS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, t1);
+    c->merge(env.ctx, tcls, tname, t1);
   }
 
   push(env, t1);
@@ -1121,7 +1131,7 @@ void in(ISS& env, const bc::SetOpL& op) {
     return;
   }
 
-  auto const resultTy = typeArithSetOp(op.subop, loc, t1);
+  auto const resultTy = typeSetOp(op.subop, loc, t1);
   setLoc(env, op.loc1, resultTy);
   push(env, resultTy);
 }
@@ -1154,7 +1164,7 @@ void in(ISS& env, const bc::SetOpS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TInitCell);
+    c->merge(env.ctx, tcls, tname, TInitCell);
   }
 
   push(env, TInitCell);
@@ -1208,7 +1218,7 @@ void in(ISS& env, const bc::IncDecS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TInitCell);
+    c->merge(env.ctx, tcls, tname, TInitCell);
   }
 
   push(env, TInitCell);
@@ -1259,7 +1269,7 @@ void in(ISS& env, const bc::BindS&) {
   }
 
   if (auto c = env.collect.publicStatics) {
-    c->merge(tcls, tname, TRef);
+    c->merge(env.ctx, tcls, tname, TRef);
   }
 
   push(env, TRef);
@@ -1493,7 +1503,7 @@ void in(ISS& env, const bc::FPassS& op) {
         }
       }
       if (auto c = env.collect.publicStatics) {
-        c->merge(tcls, tname, TInitGen);
+        c->merge(env.ctx, tcls, tname, TInitGen);
       }
     }
     return push(env, TInitGen);
@@ -1700,7 +1710,10 @@ void in(ISS& env, const bc::CufSafeReturn&) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::DecodeCufIter&) { popC(env); }
+void in(ISS& env, const bc::DecodeCufIter& op) {
+  popC(env); // func
+  env.propagate(*op.target, env.state); // before iter is modifed
+}
 
 void in(ISS& env, const bc::IterInit& op) {
   auto const t1 = popC(env);
@@ -1988,17 +2001,36 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
   // is not soft.  We can safely assume that either VerifyRetTypeC will
   // throw or it will produce a value whose type is compatible with the
   // return type constraint.
-  auto const tcT =
+  auto tcT =
     remove_uninit(env.index.lookup_constraint(env.ctx, constraint));
-  // If stackT is a subtype of tcT, use stackT. Otherwise, if tc is an opt
+
+  // Below we compute retT, which is a rough conservative approximate of the
+  // intersection of stackT and tcT.
+  // TODO(4441939): We could do better if we had an intersect_of() function
+  // that provided a formal way to compute the intersection of two Types.
+
+  // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
+  // Why?  Because we want uphold the invariant that we only refine return
+  // types and never widen them, and if we allow tcT to be an interface then
+  // it's possible for violations of this invariant to arise.  For an example,
+  // see "hphp/test/slow/hhbbc/return-type-opt-bug.php".
+  // Note: It's safe to use TObj/TOptObj because lookup_constraint() only
+  // returns classes or interfaces or traits (it never returns something that
+  // could be an enum or type alias) and it never returns anything that could
+  // be a "magic" interface that supports non-objects.  (For traits the return
+  // typehint will always throw at run time, so it's safe to use TObj/TOptObj.)
+  if (is_specialized_obj(tcT) && dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
+    tcT = is_opt(tcT) ? TOptObj : TObj;
+  }
+  // If stackT is a subtype of tcT, use stackT.  Otherwise, if tc is an opt
   // type and stackT cannot be InitNull, then we can safely use unopt(tcT).
   // In all other cases, use tcT.
-  // TODO(4441939): We could do better here if we had an intersect_of()
-  // function that provided a formal way to compute the intersection of
-  // two Types.
   auto const retT = stackT.subtypeOf(tcT) ? stackT :
-                    is_opt(tcT) && !TInitNull.subtypeOf(stackT) ? unopt(tcT) :
+                    is_opt(tcT) && !stackT.couldBe(TInitNull) ? unopt(tcT) :
                     tcT;
+
+  // Update the top of stack with the rough conservative approximate of the
+  // intersection of stackT and tcT
   popC(env);
   push(env, retT);
 }
@@ -2097,24 +2129,6 @@ void in(ISS& env, const bc::Strlen&) {
 
 void in(ISS& env, const bc::IncStat&) {}
 
-void in(ISS& env, const bc::Abs&) {
-  auto const t1 = popC(env);
-  auto const v1 = tv(t1);
-  if (v1) {
-    constprop(env);
-    auto const cell = eval_cell([&] {
-      auto const cell = *v1;
-      auto const ret = f_abs(tvAsCVarRef(&cell));
-      assert(!IS_REFCOUNTED_TYPE(ret.asCell()->m_type));
-      return *ret.asCell();
-    });
-    return push(env, cell ? *cell : TInitCell);
-  }
-  if (t1.subtypeOf(TInt)) return push(env, TInt);
-  if (t1.subtypeOf(TDbl)) return push(env, TDbl);
-  return push(env, TInitUnc);
-}
-
 void in(ISS& env, const bc::Idx&) {
   popC(env); popC(env); popC(env);
   push(env, TInitCell);
@@ -2124,27 +2138,6 @@ void in(ISS& env, const bc::ArrayIdx&) {
   popC(env); popC(env); popC(env);
   push(env, TInitCell);
 }
-
-template<class Op>
-void floatFnImpl(ISS& env, Op op, Type nonConstType) {
-  auto const t1 = popC(env);
-  auto const v1 = tv(t1);
-  if (v1) {
-    if (v1->m_type == KindOfDouble) {
-      constprop(env);
-      return push(env, dval(op(v1->m_data.dbl)));
-    }
-    if (v1->m_type == KindOfInt64) {
-      constprop(env);
-      return push(env, dval(op(static_cast<double>(v1->m_data.num))));
-    }
-  }
-  push(env, nonConstType);
-}
-
-void in(ISS& env, const bc::Floor&) { floatFnImpl(env, floor, TDbl); }
-void in(ISS& env, const bc::Ceil&)  { floatFnImpl(env, ceil, TDbl); }
-void in(ISS& env, const bc::Sqrt&)  { floatFnImpl(env, sqrt, TInitUnc); }
 
 void in(ISS& env, const bc::CheckProp&) { push(env, TBool); }
 
@@ -2156,7 +2149,7 @@ void in(ISS& env, const bc::InitProp& op) {
     if (auto c = env.collect.publicStatics) {
       auto const cls = selfClsExact(env);
       always_assert(!!cls);
-      c->merge(*cls, sval(op.str1), t);
+      c->merge(env.ctx, *cls, sval(op.str1), t);
     }
     break;
   case InitPropOp::NonStatic:

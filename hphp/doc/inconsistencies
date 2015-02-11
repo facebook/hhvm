@@ -77,7 +77,7 @@ cursor) that can be used to iterate over the object's properties. Under HipHop
 VM, objects do not have internal cursors, and the next(), prev(), current(),
 key(), reset(), end(), and each() builtin functions do not support objects.
 
-(5) Supressing errors for params to default constructors
+(5) Suppressing errors for params to default constructors
 
 If a class doesn't define a constructor then you construct that object passing
 whatever you want, including things that would fatal the runtime. HHVM doesn't

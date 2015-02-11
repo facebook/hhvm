@@ -1,0 +1,12 @@
+<?php
+
+if (!getenv('REDIS_TEST_HOST')) {
+  echo 'skip';
+} else {
+  // Some people might have this variable set, but don't have the server running
+  $output = array();
+  exec("redis-cli ping", $output);
+  if ($output[0] !== "PONG") {
+    echo 'skip';
+  }
+}

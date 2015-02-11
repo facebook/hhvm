@@ -17,13 +17,16 @@
 
 #include <iostream>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace Trace {
 
 void dumpEntry(const RingBufferEntry* e) {
+  if (e->m_type == RBTypeUninit) return;
+
   std::cerr <<
     folly::format("{:#x} {:10} {:20}",
                   e->m_threadId, e->m_seq, ringbufferName(e->m_type));
@@ -31,14 +34,17 @@ void dumpEntry(const RingBufferEntry* e) {
   switch (e->m_type) {
     case RBTypeUninit: return;
     case RBTypeMsg:
-    case RBTypeFuncPrologueTry: {
+    case RBTypeFuncPrologue: {
       // The strings in thread-private ring buffers are not null-terminated;
       // we also can't trust their length, since they might wrap around.
-      fwrite(e->m_msg,
-             std::min(size_t(e->m_len), strlen(e->m_msg)),
-             1,
-             stderr);
-      fprintf(stderr, "\n");
+      auto len = std::min(size_t(e->m_len), strlen(e->m_msg));
+
+      // We append our own newline so ignore any newlines in the msg.
+      while (len > 0 && e->m_msg[len - 1] == '\n') --len;
+      std::cerr <<
+        folly::format("{:50} {:#16x}\n",
+                      folly::StringPiece(e->m_msg, e->m_msg + len),
+                      e->m_truncatedRip);
       break;
     }
     case RBTypeFuncEntry:
@@ -60,6 +66,12 @@ void dumpEntry(const RingBufferEntry* e) {
       std::cerr << folly::format("{}{}\n",
                                  std::string(indentDepth * 4, ' '), e->m_msg);
       indentDepth += e->m_type == RBTypeFuncEntry;
+      break;
+    }
+    case RBTypeServiceReq: {
+      auto req = static_cast<jit::ServiceRequest>(e->m_sk);
+      std::cerr << folly::format("{:50} {:#16x}\n",
+                                 jit::serviceReqName(req), e->m_data);
       break;
     }
     default: {

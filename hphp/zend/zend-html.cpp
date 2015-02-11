@@ -20,6 +20,7 @@
 #include <unicode/utf8.h>
 
 #include "hphp/util/lock.h"
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 
@@ -732,40 +733,50 @@ char *string_html_encode(const char *input, int &len,
 
       auto avail = end - p;
       auto utf8_trail = [](unsigned char c) { return c >= 0x80 && c <= 0xbf; };
+      auto utf8_lead = [](unsigned char c) {
+        return c < 0x80 || (c >= 0xC2 && c <= 0xF4);
+      };
 
       // This has to be a macro since it needs to be able to break away from
       // the for loop we're in.
       // ENT_IGNORE has higher precedence than ENT_SUBSTITUTE
       // \uFFFD is Unicode Replacement Character (U+FFFD)
-      #define UTF8_ERROR_IF(cond) \
+      #define UTF8_ERROR_IF_LEN(cond, len) \
         if (cond) { \
+          p += (len) - 1; \
           if (should_skip) { break; } \
           else if (should_replace) { strcpy(q, "\uFFFD"); q += 3; break; } \
           else { goto exit_error; } \
         }
 
+      #define UTF8_ERROR_IF(cond) UTF8_ERROR_IF_LEN(cond, 1)
+
       if (utf8) {
         if (c < 0xc2) {
           UTF8_ERROR_IF(true);
         } else if (c < 0xe0) {
-          UTF8_ERROR_IF(avail < 2 || !utf8_trail(*(p + 1)));
+          UTF8_ERROR_IF(avail < 2);
+          UTF8_ERROR_IF_LEN(!utf8_trail(*(p + 1)), utf8_lead(*(p + 1)) ? 1 : 2);
 
           uint16_t tc = ((c & 0x1f) << 6) | (p[1] & 0x3f);
-          UTF8_ERROR_IF(tc < 0x80); // non-shortest form
+          UTF8_ERROR_IF_LEN(tc < 0x80, 2); // non-shortest form
 
           codeLength = 2;
           entity[0] = *p;
           entity[1] = *(p + 1);
           entity[2] = '\0';
         } else if (c < 0xf0) {
-          UTF8_ERROR_IF(avail < 3);
-          UTF8_ERROR_IF(!utf8_trail(*(p + 1)) || !utf8_trail(*(p + 2)));
+          if (avail < 3 || !utf8_trail(*(p + 1)) || !utf8_trail(*(p + 2))) {
+            UTF8_ERROR_IF_LEN(avail < 2 || utf8_lead(*(p + 1)), 1);
+            UTF8_ERROR_IF_LEN(avail < 3 || utf8_lead(*(p + 2)), 2);
+            UTF8_ERROR_IF_LEN(true, 3);
+          }
 
           uint32_t tc = ((c & 0x0f) << 12) |
                         ((*(p+1) & 0x3f) << 6) |
                         (*(p+2) & 0x3f);
-          UTF8_ERROR_IF(tc < 0x800); // non-shortest form
-          UTF8_ERROR_IF(tc >= 0xd800 && tc <= 0xdfff); // surrogate
+          UTF8_ERROR_IF_LEN(tc < 0x800, 3); // non-shortest form
+          UTF8_ERROR_IF_LEN(tc >= 0xd800 && tc <= 0xdfff, 3); // surrogate
 
           codeLength = 3;
           entity[0] = *p;
@@ -773,10 +784,13 @@ char *string_html_encode(const char *input, int &len,
           entity[2] = *(p + 2);
           entity[3] = '\0';
         } else if (c < 0xf5) {
-          UTF8_ERROR_IF(avail < 4);
-          UTF8_ERROR_IF(!utf8_trail(*(p + 1)));
-          UTF8_ERROR_IF(!utf8_trail(*(p + 2)));
-          UTF8_ERROR_IF(!utf8_trail(*(p + 3)));
+          if (avail < 4 || !utf8_trail(*(p + 1)) || !utf8_trail(*(p + 2)) ||
+              !utf8_trail(*(p + 3))) {
+            UTF8_ERROR_IF_LEN(avail < 2 || utf8_lead(*(p + 1)), 1);
+            UTF8_ERROR_IF_LEN(avail < 3 || utf8_lead(*(p + 2)), 2);
+            UTF8_ERROR_IF_LEN(avail < 4 || utf8_lead(*(p + 3)), 3);
+            UTF8_ERROR_IF_LEN(true, 4);
+          }
 
           uint32_t tc = ((c & 0x07) << 18) |
                         ((*(p+1) & 0x3f) << 12) |
@@ -784,7 +798,7 @@ char *string_html_encode(const char *input, int &len,
                         (*(p+3) & 0x3f);
 
           // non-shortest form or outside range
-          UTF8_ERROR_IF(tc < 0x10000 || tc > 0x10ffff);
+          UTF8_ERROR_IF_LEN(tc < 0x10000 || tc > 0x10ffff, 4);
 
           codeLength = 4;
           entity[0] = *p;
@@ -832,6 +846,7 @@ char *string_html_encode(const char *input, int &len,
   }
 
   #undef UTF8_ERROR_IF
+  #undef UTF8_ERROR_IF_LEN
 
   if (q - ret > INT_MAX) {
     goto exit_error;

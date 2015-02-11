@@ -110,12 +110,14 @@ void retypeDst(IRInstruction* inst, int num) {
   if (inst->op() == DefLabel) {
     Type type = Type::Bottom;
     inst->block()->forEachSrc(num, [&](IRInstruction*, SSATmp* tmp) {
-        type = Type::unionOf(type, tmp->type());
+        type = type | tmp->type();
       });
     ssa->setType(type);
     return;
   }
 
+  // TODO: Task #6058731: remove this check and make things work with Bottom.
+  //
   // Update the type of the SSATmp.  However, avoid generating type Bottom,
   // which can happen when refining type of CheckType and AssertType.  In
   // such cases, the code will be unreachable anyway.
@@ -125,8 +127,6 @@ void retypeDst(IRInstruction* inst, int num) {
   } else {
     always_assert(inst->op() == CheckType || inst->op() == AssertType ||
                   inst->op() == AssertNonNull);
-    // This type doesn't matter, as long as it's not Bottom.
-    ssa->setType(Type::cns(0));
   }
 }
 }

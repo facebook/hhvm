@@ -17,9 +17,8 @@
 #include "hphp/runtime/vm/name-value-table.h"
 
 #include <limits>
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 

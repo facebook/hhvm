@@ -1,6 +1,6 @@
 App \CamelCase<>
 App \CamelCase<>
-File "capitalization2.php--f3.php", line 3, characters 14-22:
+File "capitalization2.php--f2.php", line 3, characters 14-22:
 Could not find cAmelCase (Naming[2006])
 File "capitalization2.php--f1.php", line 4, characters 7-15:
 Did you mean CamelCase?

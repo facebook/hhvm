@@ -179,7 +179,7 @@ const int kNumSIMDRegisterArgs = sizeof(argNumToSIMDRegName) / sizeof(PhysReg);
  */
 constexpr PhysReg serviceReqArgRegs[] = {
   // rdi: contains request number
-  reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
+  reg::rsi, reg::rdx, reg::rcx, reg::r8
 };
 constexpr int kNumServiceReqArgRegs =
   sizeof(serviceReqArgRegs) / sizeof(PhysReg);

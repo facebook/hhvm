@@ -1,0 +1,44 @@
+----------------- simple assignment of value types ----------------------
+After '$a = 123', $a is 123
+After '$b = $a', $b is 123
+After '++$b', $b is 124, and $a is 123
+After '$a = 99', $b is 124, and $a is 99
+Done
+----------------- byRef assignment of value types ----------------------
+After '$a = 123', $a is 123
+After '$c =& $a', $c is 123, and $a is 123
+After '++$c', $c is 124, and $a is 124
+After '$a = 99', $c is 99, and $a is 99
+After 'unset($a)', $c is 99, and $a is undefined
+Done
+----------------- value argument passing of value types ----------------------
+After '$a = 123', $a is 123
+	Inside function f1, $b is 123
+After '$b = "abc"', $b is abc
+After 'f1($a)', $a is 123
+	Inside function f1, $b is 125
+After '$b = "abc"', $b is abc
+	Inside function f1, $b is 999
+After '$b = "abc"', $b is abc
+	Inside function f1, $b is 1
+After '$b = "abc"', $b is abc
+Done
+-----------------  byRef argument passing of value types ----------------------
+After '$a = 123', $a is 123
+	Inside function g1, $b is 123
+After '$b = "abc"', $b is abc
+After 'g1($a)', $a is abc
+Done
+----------------- value returning of value types ----------------------
+After '$b = "abc"', $b is abc
+After '$a = f2()', $a is abc
+Done
+----------------- byRef returning of value types ----------------------
+After '$b = "abc"', $b is abc
+After '$a = f2()', $a is abc
+Done
+----- test using literals, constants, and arbitrary-complex expressions ----
+After '=&', $a is 10, $b is 10
+After '=&', $a is 10, $b is 10
+h1() is 15%A
+Done

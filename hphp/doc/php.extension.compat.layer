@@ -101,11 +101,11 @@ we need to change RefData somehow so that we can keep track of when the RefData
 is being shared "by value" by 2 or more value slots vs. when it is being shared
 by reference. Adding an "is_ref" flag directly poses some challenges in terms
 of performance, because it means that when a value's refcount decreases from 2
-to 1 we'll need to make sure the "is_ref" flag gets cleared. Instead, add two
+to 1 we'll need to make sure the "is_ref" flag gets cleared. Instead, we add two
 new flags "m_cow" and "m_z", and we employ a scheme that maps the 3-tuple
 (m_count, m_cow, m_z) to the 2-tuple (realRefcount, reffy). Under this scheme
 decRef continues to work as it does today, decrementing the m_count field and
-calling a helper m_count reaches zero. Another neat thing about this scheme is
+calling a helper when m_count reaches zero. Another neat thing about this scheme is
 that m_cow is set to 1 iff the RefData is being shared by 2 or more value slots
 "by value".
 
@@ -163,7 +163,7 @@ zval's is_ref flag is set to 0. This is how PHP honors copy-on-write semantics.
 HHVM, on the other hand, allows multiple things to point to the same array, and
 the array has a refcount field to keep track of how many things are pointing at
 it. When the HHVM runtime or an HHVM extension wants to mutate an array, it
-checks the refcount of the array and makes a copy of the array's refcount is 2
+checks the refcount of the array and makes a copy if the array's refcount is 2
 or greater.
 
 PHP extensions simply assume that a zval exclusively owns its array, so if the
@@ -200,7 +200,7 @@ retrieve an object or resource using an ID alone.
 HHVM, on the other hand, does not have request-local tables for looking up
 objects and resources by ID. The problem that must be solved here is how HHVM's
 PHP Extension Compatibility Layer will represent object IDs and resource IDs,
-and how it will convert an object/resource IDs to a pointer as needed. One of
+and how it will convert an object or resource ID to a pointer as needed. One of
 two approaches may prevail:
 
  (1) It may be possible for HHVM to simply use the object/resource pointer as

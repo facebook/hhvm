@@ -13,4 +13,3 @@ interface I {
   private function foobar();
 }
 
-

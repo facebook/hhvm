@@ -16,9 +16,10 @@
 */
 
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
+
 #include "hphp/runtime/ext/filter/ext_filter.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/system/constants.h"
 

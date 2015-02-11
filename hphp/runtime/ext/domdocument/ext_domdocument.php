@@ -187,15 +187,6 @@ class DOMNode {
   <<__Native>>
   function getNodePath(): mixed;
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -225,15 +216,6 @@ class DOMAttr extends DOMNode {
    */
   <<__Native>>
   function isId(): bool;
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -317,15 +299,6 @@ class DOMCharacterData extends DOMNode {
   <<__Native>>
   function substringData(int $offset, int $count): string;
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -394,15 +367,6 @@ class DOMText extends DOMCharacterData {
   <<__Native>>
   function splitText(int $offset): mixed;
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -436,7 +400,7 @@ class DOMDocument extends DOMNode {
    *
    * @param string $name - The name of the attribute.
    *
-   * @return mixed - The new DOMAttr or FALSE if an error occured.
+   * @return mixed - The new DOMAttr or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -451,7 +415,7 @@ class DOMDocument extends DOMNode {
    * @param string $qualifiedname - The tag name and prefix of the attribute,
    *   as prefix:tagname.
    *
-   * @return mixed - The new DOMAttr or FALSE if an error occured.
+   * @return mixed - The new DOMAttr or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -465,7 +429,7 @@ class DOMDocument extends DOMNode {
    *
    * @param string $data - The content of the cdata.
    *
-   * @return mixed - The new DOMCDATASection or FALSE if an error occured.
+   * @return mixed - The new DOMCDATASection or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -478,7 +442,7 @@ class DOMDocument extends DOMNode {
    *
    * @param string $data - The content of the comment.
    *
-   * @return mixed - The new DOMComment or FALSE if an error occured.
+   * @return mixed - The new DOMComment or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -489,7 +453,7 @@ class DOMDocument extends DOMNode {
    *   node will not show up in the document unless it is inserted with (e.g.)
    *   DOMNode->appendChild().
    *
-   * @return mixed - The new DOMDocumentFragment or FALSE if an error occured.
+   * @return mixed - The new DOMDocumentFragment or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -506,7 +470,7 @@ class DOMDocument extends DOMNode {
    *   DOMElement->nodeValue.
    *
    * @return mixed - Returns a new instance of class DOMElement or FALSE if an
-   *   error occured.
+   *   error occurred.
    *
    */
   <<__Native>>
@@ -524,7 +488,7 @@ class DOMDocument extends DOMNode {
    *   element will be created. You can also set the value later with
    *   DOMElement->nodeValue.
    *
-   * @return mixed - The new DOMElement or FALSE if an error occured.
+   * @return mixed - The new DOMElement or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -540,7 +504,7 @@ class DOMDocument extends DOMNode {
    * @param string $name - The content of the entity reference, e.g. the
    *   entity reference minus the leading & and the trailing ; characters.
    *
-   * @return mixed - The new DOMEntityReference or FALSE if an error occured.
+   * @return mixed - The new DOMEntityReference or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -555,7 +519,7 @@ class DOMDocument extends DOMNode {
    * @param string $data - The content of the processing instruction.
    *
    * @return mixed - The new DOMProcessingInstruction or FALSE if an error
-   *   occured.
+   *   occurred.
    *
    */
   <<__Native>>
@@ -569,7 +533,7 @@ class DOMDocument extends DOMNode {
    *
    * @param string $data - The content of the text.
    *
-   * @return mixed - The new DOMText or FALSE if an error occured.
+   * @return mixed - The new DOMText or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -651,7 +615,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function load(string $filename, int $options = 0): mixed;
 
   /**
@@ -669,7 +633,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function loadHTML(string $source, int $options = 0): mixed;
 
   /**
@@ -688,7 +652,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function loadHTMLFile(string $filename, int $options = 0): mixed;
 
   /**
@@ -704,7 +668,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function loadXML(string $source, int $options = 0): mixed;
 
   /**
@@ -854,15 +818,6 @@ class DOMDocument extends DOMNode {
   <<__Native>>
   function xinclude(int $options = 0): mixed;
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -901,15 +856,6 @@ class DOMDocumentFragment extends DOMNode {
  */
 <<__NativeData("DOMDocumentType")>>
 class DOMDocumentType extends DOMNode {
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -1075,7 +1021,7 @@ class DOMElement extends DOMNode {
    * @param string $name - The name of the attribute.
    * @param string $value - The value of the attribute.
    *
-   * @return mixed - The new DOMAttr or FALSE if an error occured.
+   * @return mixed - The new DOMAttr or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -1165,16 +1111,6 @@ class DOMElement extends DOMNode {
                             string $localname,
                             bool $isid): mixed;
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name,
-                 mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -1191,15 +1127,6 @@ class DOMElement extends DOMNode {
  */
 <<__NativeData("DOMEntity")>>
 class DOMEntity extends DOMNode {
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -1219,15 +1146,6 @@ class DOMEntityReference extends DOMNode {
 <<__NativeData("DOMNotation")>>
 class DOMNotation extends DOMNode {
 
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
   /**
    * @return array - var_dump() compat output helper.
    *
@@ -1241,15 +1159,6 @@ class DOMProcessingInstruction extends DOMNode {
 
   <<__Native>>
   function __construct(string $name, ?string $value = null): void;
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   /**
    * @return array - var_dump() compat output helper.
@@ -1330,15 +1239,6 @@ class DOMNamedNodeMap implements IteratorAggregate {
   function item(int $index): mixed;
 
   <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
-
-  <<__Native>>
   function getIterator(): mixed;
 }
 
@@ -1361,15 +1261,6 @@ class DOMNodeList implements IteratorAggregate {
    */
   <<__Native>>
   function item(int $index): mixed;
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   <<__Native>>
   function getIterator(): mixed;
@@ -1521,15 +1412,6 @@ class DOMXPath {
    */
   <<__Native>>
   function registerPHPFunctions(mixed $funcs = null): mixed;
-
-  <<__Native>>
-  function __get(mixed $name): mixed;
-
-  <<__Native>>
-  function __set(mixed $name, mixed $value): mixed;
-
-  <<__Native>>
-  function __isset(mixed $name): bool;
 
   <<__Native>>
   function __debuginfo(): array;

@@ -22,7 +22,6 @@
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/code_model_enums.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -213,11 +212,6 @@ int BinaryOpExpression::getLocalEffects() const {
 }
 
 void BinaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal &&
-      m_op == T_INSTANCEOF && m_exp2->is(Expression::KindOfScalarExpression)) {
-    ScalarExpressionPtr s = dynamic_pointer_cast<ScalarExpression>(m_exp2);
-    addUserClass(ar, s->getString());
-  }
   m_exp1->analyzeProgram(ar);
   m_exp2->analyzeProgram(ar);
 }

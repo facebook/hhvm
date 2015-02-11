@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/expression/ordering.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/compiler/code_model_enums.h"
 
 using namespace HPHP;

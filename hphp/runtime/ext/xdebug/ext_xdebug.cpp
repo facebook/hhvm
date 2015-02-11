@@ -16,19 +16,24 @@
 */
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
-#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
-#include "hphp/runtime/ext/xdebug/xdebug_server.h"
 
 #include "hphp/runtime/base/array-util.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
+#include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/timer.h"
+
+// TODO(#3704) Remove when xdebug fully implemented
+#define XDEBUG_NOTIMPLEMENTED  { throw_not_implemented(__FUNCTION__); }
 
 namespace HPHP {
 
@@ -36,7 +41,7 @@ namespace HPHP {
 // Helpers
 
 // Globals
-static const StaticString
+const StaticString
   s_SERVER("_SERVER"),
   s_COOKIE("_COOKIE");
 
@@ -48,9 +53,9 @@ static const StaticString
 static ActRec *get_call_fp(Offset *off = nullptr) {
   // We want the frame of our callee's callee
   VMRegAnchor _; // Ensure consistent state for vmfp
-  ActRec* fp0 = g_context->getPrevVMStateUNSAFE(vmfp());
+  ActRec* fp0 = g_context->getPrevVMState(vmfp());
   assert(fp0);
-  ActRec* fp1 = g_context->getPrevVMStateUNSAFE(fp0, off);
+  ActRec* fp1 = g_context->getPrevVMState(fp0, off);
 
   // fp1 should only be NULL if fp0 is the top-level pseudo-main
   if (!fp1) {
@@ -61,7 +66,7 @@ static ActRec *get_call_fp(Offset *off = nullptr) {
 }
 
 // Keys in $_SERVER used by format_filename
-static const StaticString
+const StaticString
   s_HTTP_HOST("HTTP_HOST"),
   s_REQUEST_URI("REQUEST_URI"),
   s_SCRIPT_NAME("SCRIPT_NAME"),
@@ -128,7 +133,7 @@ static String format_filename(String* dir,
         break;
       // Random number
       case 'r':
-        buf.printf("%lx", (uint64_t) f_rand());
+        buf.printf("%lx", (uint64_t) HHVM_FN(rand)());
         break;
       // Script name
       case 's': {
@@ -393,7 +398,7 @@ static int64_t HHVM_FUNCTION(xdebug_call_line) {
 }
 
 // php5 xdebug main function string equivalent
-static const StaticString s_CALL_FN_MAIN("{main}");
+const StaticString s_CALL_FN_MAIN("{main}");
 
 static Variant HHVM_FUNCTION(xdebug_call_function) {
   // PHP5 xdebug returns false if the callee is top-level
@@ -448,7 +453,7 @@ static Array HHVM_FUNCTION(xdebug_get_collected_errors,
                            bool clean /* = false */)
   XDEBUG_NOTIMPLEMENTED
 
-static const StaticString s_closure_varname("0Closure");
+const StaticString s_closure_varname("0Closure");
 
 static Array HHVM_FUNCTION(xdebug_get_declared_vars) {
   if (RuntimeOption::RepoAuthoritative) {
@@ -655,7 +660,7 @@ static void HHVM_FUNCTION(_xdebug_check_trigger_vars) {
 // Module implementation
 
 // XDebug constants
-static const StaticString
+const StaticString
   s_XDEBUG_CC_UNUSED("XDEBUG_CC_UNUSED"),
   s_XDEBUG_CC_DEAD_CODE("XDEBUG_CC_DEAD_CODE"),
   s_XDEBUG_TRACE_APPEND("XDEBUG_TRACE_APPEND"),
@@ -667,7 +672,7 @@ static const StaticString
 // option.
 template <typename T>
 static inline T xdebug_init_opt(const char* name, T defVal,
-                                map<string, string>& envCfg) {
+                                std::map<std::string, std::string>& envCfg) {
   // First try to load the ini setting
   folly::dynamic ini_val = folly::dynamic::object();
   if (IniSetting::Get(XDEBUG_INI(name), ini_val)) {
@@ -677,7 +682,7 @@ static inline T xdebug_init_opt(const char* name, T defVal,
   }
 
   // Then try to load from the environment
-  map<string, string>::const_iterator env_iter = envCfg.find(name);
+  auto const env_iter = envCfg.find(name);
   if (env_iter != envCfg.end()) {
     T val;
     ini_on_update(env_iter->second, val);
@@ -689,13 +694,13 @@ static inline T xdebug_init_opt(const char* name, T defVal,
 }
 
 // Environment variables the idekey is grabbed from
-const static StaticString
+const StaticString
   s_DBGP_IDEKEY("DBGP_IDEKEY"),
   s_USER("USER"),
   s_USERNAME("USERNAME");
 
 // Attempts to load the default idekey from environment variables
-static void loadIdeKey(map<string, string>& envCfg) {
+static void loadIdeKey(std::map<std::string, std::string>& envCfg) {
   const String dbgp_idekey = g_context->getenv(s_DBGP_IDEKEY);
   if (!dbgp_idekey.empty()) {
     envCfg["idekey"] = dbgp_idekey.toCppString();
@@ -715,10 +720,10 @@ static void loadIdeKey(map<string, string>& envCfg) {
 }
 
 // Environment variable that can be used for certain settings
-const static StaticString s_XDEBUG_CONFIG("XDEBUG_CONFIG");
+const StaticString s_XDEBUG_CONFIG("XDEBUG_CONFIG");
 
 // Loads the "XDEBUG_CONFIG" environment variables.
-static void loadEnvConfig(map<string, string>& envCfg) {
+static void loadEnvConfig(std::map<std::string, std::string>& envCfg) {
   const String cfg_raw = g_context->getenv(s_XDEBUG_CONFIG);
   if (cfg_raw.empty()) {
     return;
@@ -734,8 +739,8 @@ static void loadEnvConfig(map<string, string>& envCfg) {
       continue;
     }
 
-    string key = keyval[0].toString().toCppString();
-    string val = keyval[1].toString().toCppString();
+    auto key = keyval[0].toString().toCppString();
+    auto val = keyval[1].toString().toCppString();
     if (key == "remote_enable" ||
         key == "remote_port" ||
         key == "remote_host" ||
@@ -824,7 +829,7 @@ void XDebugExtension::requestInit() {
   }
 
   // Load the settings passed in environment variables
-  map<string, string> env_cfg;
+  std::map<std::string, std::string> env_cfg;
   loadIdeKey(env_cfg);
   loadEnvConfig(env_cfg);
 

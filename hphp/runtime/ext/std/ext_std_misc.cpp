@@ -18,21 +18,22 @@
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include <limits>
 
-#include "hphp/runtime/server/server-stats.h"
+#include "hphp/parser/scanner.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/zend-pack.h"
-#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/base/zend-pack.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/type-profile.h"
-#include "hphp/parser/scanner.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
 #include <sys/param.h> // MAXPATHLEN is here
@@ -412,7 +413,7 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
   int usec = (int)(tv.tv_usec % 0x100000);
 
   String uniqid(prefix.size() + 64, ReserveString);
-  auto ptr = uniqid.bufferSlice().ptr;
+  auto ptr = uniqid.mutableData();
   // StringData::capacity() returns the buffer size without the null
   // terminator. snprintf expects a the buffer capacity including room
   // for the null terminator, writes the null termintor, and returns
@@ -624,12 +625,9 @@ const int UserTokenId_T_CALLABLE = 430;
 const int UserTokenId_T_ONUMBER = 431;
 const int UserTokenId_T_POW = 432;
 const int UserTokenId_T_POW_EQUAL = 433;
-const int UserTokenId_T_MIARRAY = 434;
-const int UserTokenId_T_MSARRAY = 435;
-const int UserTokenId_T_VARRAY = 436;
-const int UserTokenId_T_NULLSAFE_OBJECT_OPERATOR = 437;
-const int UserTokenId_T_HASHBANG = 438;
-const int MaxUserTokenId = 439; // Marker, not a real user token ID
+const int UserTokenId_T_NULLSAFE_OBJECT_OPERATOR = 434;
+const int UserTokenId_T_HASHBANG = 435;
+const int MaxUserTokenId = 436; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

@@ -104,8 +104,16 @@ RegionDescPtr selectMethod(const RegionContext& context) {
 
   // Compute stack depths for each block.
   for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
-    uint32_t sp = ret->block(blockMap[b])->initialSpOffset();
-    assert(sp != -1);
+    auto const myId = blockMap[b];
+    auto rblock = ret->block(myId);
+    uint32_t sp = rblock->initialSpOffset();
+
+    // Don't add unreachable blocks to the region.
+    if (sp == -1) {
+      ret->deleteBlock(myId);
+      continue;
+    }
+
     for (InstrRange inst = blockInstrs(b); !inst.empty();) {
       auto const pc   = inst.popFront();
       auto const info = instrStackTransInfo(reinterpret_cast<const Op*>(pc));

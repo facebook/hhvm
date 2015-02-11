@@ -6,6 +6,8 @@
  */
 <<__NativeData("MemcachedData")>>
 class Memcached {
+  // Signifies we have provide a session handler
+  const HAVE_SESSION = true;
   /**
    * Create a Memcached instance
    *
@@ -204,12 +206,11 @@ class Memcached {
    *
    * @return int - Returns item's new value on success.
    */
+  <<__Native>>
   public function decrement(string $key,
                             int $offset = 1,
                             int $initial_value = 0,
-                            int $expiry = 0): mixed {
-    return $this->decrementByKey('', $key, $offset, $initial_value, $expiry);
-  }
+                            int $expiry = 0): mixed;
 
   /**
    * Decrement numeric item's value, stored on a specific server
@@ -536,6 +537,13 @@ class Memcached {
                                string $value): bool;
 
   /**
+   * Memcached::quit() closes any open connections to the memcache servers. 
+   * @return bool TRUE on success or FALSE on failure
+  */
+  <<__Native>>
+  public function quit(): bool;
+
+  /**
    * Replace the item under an existing key
    *
    * @param string $key -
@@ -666,4 +674,129 @@ class Memcached {
 }
 
 class MemcachedException {
+}
+
+
+class MemcachedSessionModule implements SessionHandlerInterface {
+
+  const CONFIG_PERSISTENT = 'PERSISTENT=';
+
+  private $memcached;
+  private $persistentKey;
+
+  public function close() {
+    $this->memcached = null;
+    $this->persistentKey = null;
+    return true;
+  }
+
+  public function destroy($sessionId) {
+    $this->memcached->delete($sessionId);
+    return true;
+  }
+
+  public function gc($maxLifetime) {
+    return true;
+  }
+
+  public function open($savePath, $name) {
+    $serverList = self::parseSavePath($savePath);
+    if (!$serverList) {
+      return false;
+    }
+
+    $keyPrefix = trim((string)ini_get('memcached.sess_prefix'));
+    // Validate non-empty values (empty values are accepted)
+    if (strlen($keyPrefix) == 0 ||
+        strlen($keyPrefix) > 218 ||
+        !ctype_graph($keyPrefix)) {
+        trigger_error("Bad memcached key prefix in memcached.sess_prefix",
+                      E_WARNING);
+        return false;
+    }
+
+    $memcached = new Memcached($this->persistentKey);
+    foreach ($serverList as $serverInfo) {
+      $memcached->addServer($serverInfo['host'], $serverInfo['port']);
+    }
+
+    if (!$memcached->setOption(Memcached::OPT_PREFIX_KEY,
+                               $keyPrefix)) {
+      // setOption already throws a warning for bad values
+      return false;
+    }
+
+    $this->memcached = $memcached;
+
+    return true;
+  }
+
+  public function read($sessionId) {
+    $data = $this->memcached->get($sessionId);
+    if (!$data) {
+      // Return an empty string instead of false for new sessions as
+      // false values cause sessions to fail to init
+      return '';
+    }
+    return $data;
+  }
+
+  public function write($sessionId, $data) {
+    return $this->memcached->set($sessionId,
+                                 $data,
+                                 ini_get('session.gc_maxlifetime'));
+  }
+
+  private static function parseSavePath($savePath) {
+    $savePath = trim($savePath);
+    if (empty($savePath)) {
+      trigger_error("Failed to initialize memcached session storage",
+                    E_WARNING);
+      return false;
+    }
+
+    // Handle persistent key at front of save_path
+    if (strncasecmp($savePath,
+                    self::CONFIG_PERSISTENT,
+                    strlen(self::CONFIG_PERSISTENT)) === 0) {
+      $savePath = substr($savePath, strlen(self::CONFIG_PERSISTENT) - 1);
+      if (empty($savePath)) {
+        trigger_error("Invalid persistent id for session storage",
+                      E_WARNING);
+        return false;
+      }
+
+      $explode = explode(' ', $savePath, 2);
+      if (count($explode) !== 2) {
+        trigger_error("Invalid persistent id for session storage",
+                      E_WARNING);
+        return false;
+      }
+
+      $this->persistentKey = $explode[0];
+      $savePath = $explode[1];
+    }
+
+    $serverList = explode(',', $savePath);
+
+    $return = array();
+    foreach ($serverList as $url) {
+      $url = trim($url);
+
+      // Skip empty servers
+      if (empty($url)) {
+        continue;
+      }
+      $explode = explode(':', $url, 2);
+
+      $serverInfo = array('host' => $explode[0]);
+
+      // When port is missing (e.g. unix socket) use port of 0
+      $serverInfo['port'] = (isset($explode[1])) ? (int)$explode[1] : 0;
+
+      $return[] = $serverInfo;
+    }
+
+    return $return;
+  }
 }

@@ -18,9 +18,7 @@
 #include <vector>
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/array-util.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/extension.h"

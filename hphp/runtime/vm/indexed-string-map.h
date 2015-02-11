@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 
-#include <boost/range/iterator_range.hpp>
+#include <folly/Range.h>
 
 namespace HPHP {
 
@@ -116,8 +116,8 @@ struct IndexedStringMap {
     return (*const_cast<IndexedStringMap*>(this))[index];
   }
 
-  boost::iterator_range<const T*> range() const {
-    return boost::make_iterator_range(accessList(), accessList() + size());
+  folly::Range<const T*> range() const {
+    return folly::range(accessList(), accessList() + size());
   }
 
   static constexpr ptrdiff_t vecOff() {

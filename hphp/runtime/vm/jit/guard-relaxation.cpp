@@ -35,6 +35,7 @@ using Trace::Indent;
 bool shouldHHIRRelaxGuards() {
   return RuntimeOption::EvalHHIRRelaxGuards &&
     (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
+     RuntimeOption::EvalJitRegionSelector == "method" ||
      mcg->tx().mode() == TransKind::Optimize);
 }
 
@@ -42,13 +43,12 @@ bool shouldHHIRRelaxGuards() {
 #define ND             always_assert(false);
 #define D(t)           return false; // fixed type
 #define DofS(n)        return typeMightRelax(inst->src(n));
-#define DBox(n)        return false;
 #define DRefineS(n)    return true;  // typeParam may relax
-#define DParam         return true;  // typeParam may relax
+#define DParamMayRelax return true;  // typeParam may relax
+#define DParam         return false;
 #define DParamPtr(k)   return false;
 #define DUnboxPtr      return false;
 #define DBoxPtr        return false;
-#define DLdRef         return false;
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
 #define DArrElem       assert(inst->is(LdPackedArrayElem));     \
@@ -56,7 +56,6 @@ bool shouldHHIRRelaxGuards() {
 #define DThis          return false; // fixed type from ctx class
 #define DMulti         return true;  // DefLabel; value could be anything
 #define DSetElem       return false; // fixed type
-#define DStk(x)        x;
 #define DBuiltin       return false; // from immutable typeParam
 #define DSubtract(n,t) DofS(n)
 #define DCns           return false; // fixed type
@@ -81,20 +80,18 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef ND
 #undef D
 #undef DofS
-#undef DBox
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
 #undef DUnboxPtr
 #undef DBoxPtr
-#undef DLdRef
 #undef DAllocObj
 #undef DArrPacked
 #undef DArrElem
 #undef DThis
 #undef DMulti
 #undef DSetElem
-#undef DStk
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
@@ -124,21 +121,25 @@ void retypeLoad(IRInstruction* load, Type newType) {
  * only changes the load's type param; the caller is responsible for retyping
  * the dest if needed.
  */
-void visitLoad(IRInstruction* inst, const FrameState& state) {
+void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
   switch (inst->op()) {
-    case LdLoc:
-    case LdLocPseudoMain: {
+    case LdLoc: {
       auto const id = inst->extra<LocalId>()->locId;
       auto const newType = state.localType(id);
-
       retypeLoad(inst, newType);
       break;
     }
 
-    case LdStack: {
+    case LdStk: {
       auto idx = inst->extra<StackOffset>()->offset;
-      auto newType = getStackValue(inst->src(0), idx).knownType;
-
+      auto newType = state.stackType(idx);
+      // We know from hhbc invariants that stack slots are always either Cls or
+      // Gen flavors---there's no need to relax beyond that.
+      if (newType == Type::StkElem) {
+        newType = inst->typeParam() <= Type::Gen ? Type::Gen :
+                  inst->typeParam() <= Type::Cls ? Type::Cls :
+                  Type::StkElem;
+      }
       retypeLoad(inst, newType);
       break;
     }
@@ -178,6 +179,7 @@ Type relaxCell(Type t, TypeConstraint tc) {
         // don't need to eliminate it here. Just make sure t actually fits the
         // constraint.
         assert(t < Type::Arr && t.hasArrayKind());
+        assert(!tc.wantArrayShape() || t.getArrayShape());
       }
 
       return t;
@@ -200,8 +202,8 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   Timer _t(Timer::optimize_relaxGuards);
   ITRACE(2, "entering relaxGuards\n");
   Indent _i;
-  bool simple = flags & RelaxSimple;
-  bool reflow = flags & RelaxReflow;
+  bool const simple = flags & RelaxSimple;
+  bool const reflow = flags & RelaxReflow;
   splitCriticalEdges(unit);
   auto& guards = constraints.guards;
   auto blocks = rpoSortCfg(unit);
@@ -238,14 +240,16 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   if (!reflow) return true;
 
   // Make a second pass to reflow types, with some special logic for loads.
-  FrameState state{unit, unit.entry()->front().marker()};
-  for (auto* block : blocks) {
+  FrameStateMgr state{unit.entry()->front().marker()};
+  // TODO(#5678127): this code is wrong for HHIRBytecodeControlFlow
+  state.setLegacyReoptimize();
+
+  for (auto block : blocks) {
     ITRACE(2, "relaxGuards reflow entering B{}\n", block->id());
     Indent _i;
     state.startBlock(block, block->front().marker());
 
     for (auto& inst : *block) {
-      state.setMarker(inst.marker());
       copyProp(&inst);
       visitLoad(&inst, state);
       retypeDests(&inst, &unit);
@@ -318,7 +322,9 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
         return tc.wantClass() && t.getClass()->classof(tc.desiredClass());
       }
       if (t < Type::Arr) {
-        return tc.wantArrayKind() && t.hasArrayKind();
+        if (tc.wantArrayShape() && !t.getArrayShape()) return false;
+        if (tc.wantArrayKind() && !t.hasArrayKind()) return false;
+        return true;
       }
       return false;
   }
@@ -381,6 +387,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
       // We need to ask for the right kind of specialization, so grab it from
       // origTc.
       if (origTc.wantArrayKind()) newTc.setWantArrayKind();
+      if (origTc.wantArrayShape()) newTc.setWantArrayShape();
       if (origTc.wantClass()) newTc.setDesiredClass(origTc.desiredClass());
     }
 
@@ -406,6 +413,7 @@ TypeConstraint applyConstraint(TypeConstraint tc, const TypeConstraint newTc) {
   tc.category = std::max(newTc.category, tc.category);
 
   if (newTc.wantArrayKind()) tc.setWantArrayKind();
+  if (newTc.wantArrayShape()) tc.setWantArrayShape();
 
   if (newTc.wantClass()) {
     if (tc.wantClass()) {

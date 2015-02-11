@@ -38,8 +38,11 @@ const StaticString
   s_user_agent("user_agent"),
   s_User_Agent("User-Agent");
 
-File* HttpStreamWrapper::open(const String& filename, const String& mode,
-                              int options, const Variant& context) {
+SmartPtr<File>
+HttpStreamWrapper::open(const String& filename,
+                        const String& mode,
+                        int options,
+                        const SmartPtr<StreamContext>& context) {
   if (RuntimeOption::ServerHttpSafeMode) {
     return nullptr;
   }
@@ -49,9 +52,6 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
     return nullptr;
   }
 
-  std::unique_ptr<UrlFile> file;
-  StreamContext *ctx = !context.isResource() ? nullptr :
-                        context.toResource().getTyped<StreamContext>();
   Array headers;
   String method = s_GET;
   String post_data = null_string;
@@ -59,9 +59,9 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
   int timeout = -1;
   bool ignore_errors = false;
 
-  if (ctx && !ctx->getOptions().isNull() &&
-      !ctx->getOptions()[s_http].isNull()) {
-    Array opts = ctx->getOptions()[s_http].toArray();
+  if (context && !context->getOptions().isNull() &&
+      !context->getOptions()[s_http].isNull()) {
+    Array opts = context->getOptions()[s_http].toArray();
     if (opts.exists(s_method)) {
       method = opts[s_method].toString();
     }
@@ -102,16 +102,16 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
       headers.set(s_User_Agent, default_user_agent);
     }
   }
-  file = std::unique_ptr<UrlFile>(newres<UrlFile>(method.data(), headers,
-                                                  post_data, max_redirs,
-                                                  timeout, ignore_errors));
+  auto file = makeSmartPtr<UrlFile>(method.data(), headers,
+                                    post_data, max_redirs,
+                                    timeout, ignore_errors);
   bool ret = file->open(filename, mode);
   if (!ret) {
     raise_warning("Failed to open %s (%s)", filename.data(),
                   file->getLastError().c_str());
     return nullptr;
   }
-  return file.release();
+  return file;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -9,12 +9,12 @@
  *
  */
 
-function foo(?int $x, int $y) : int {
+function foo(?int $x, int $y): int {
   if ($x === null) {
     switch ($y) {
-    case 2:
-      return 2;
-    case 0:
+      case 2:
+        return 2;
+      case 0:
     }
   }
   return $x;

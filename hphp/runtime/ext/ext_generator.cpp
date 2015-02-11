@@ -17,10 +17,8 @@
 
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-
-#include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-
+#include "hphp/runtime/ext/spl/ext_spl.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -30,11 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void delete_Generator(ObjectData* od, const Class*) {
-  auto const cont = static_cast<c_Generator*>(od);
-  auto const size = cont->resumable()->size();
-  auto const base = (char*)(cont + 1) - size;
-  cont->~c_Generator();
-  smart_free(base);
+  Resumable::Destroy(static_cast<c_Generator*>(od));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -142,7 +136,7 @@ c_Generator *c_Generator::Clone(ObjectData* obj) {
 }
 
 void c_Generator::yield(Offset resumeOffset,
-                        const Cell* key, const Cell& value) {
+                        const Cell* key, const Cell value) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
 

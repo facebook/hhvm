@@ -30,10 +30,19 @@
 namespace HPHP { namespace jit {
 
 struct CodeGenFixups;
+struct RelocationInfo;
 
 template<typename T>
 struct GrowableVector {
   GrowableVector() {}
+  GrowableVector(GrowableVector&& other) noexcept : m_vec(other.m_vec) {
+    other.m_vec = nullptr;
+  }
+  GrowableVector& operator=(GrowableVector&& other) {
+    m_vec = other.m_vec;
+    other.m_vec = nullptr;
+    return *this;
+  }
   GrowableVector(const GrowableVector&) = delete;
   GrowableVector& operator=(const GrowableVector&) = delete;
 
@@ -128,10 +137,12 @@ struct IncomingBranch {
 
   Tag type()        const { return m_ptr.tag(); }
   TCA toSmash()     const { return TCA(m_ptr.ptr()); }
+  void relocate(RelocationInfo& rel);
   void adjust(TCA addr) {
     m_ptr.set(m_ptr.tag(), addr);
   }
-
+  void patch(TCA dest);
+  TCA target() const;
 private:
   explicit IncomingBranch(Tag type, TCA toSmash) {
     m_ptr.set(type, toSmash);
@@ -175,8 +186,10 @@ struct SrcRec {
   void setFuncInfo(const Func* f);
   void chainFrom(IncomingBranch br);
   void emitFallbackJump(CodeBlock& cb, ConditionCode cc = CC_None);
+  void registerFallbackJump(TCA from, ConditionCode cc = CC_None);
   void emitFallbackJumpCustom(CodeBlock& cb, CodeBlock& frozen, SrcKey sk,
                               TransFlags trflags, ConditionCode cc = CC_None);
+  TCA getFallbackTranslation() const;
   void newTranslation(TCA newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
   void replaceOldTranslations();
@@ -186,6 +199,10 @@ struct SrcRec {
 
   const GrowableVector<TCA>& translations() const {
     return m_translations;
+  }
+
+  const GrowableVector<IncomingBranch>& tailFallbackJumps() {
+    return m_tailFallbackJumps;
   }
 
   /*
@@ -201,6 +218,8 @@ struct SrcRec {
   const GrowableVector<IncomingBranch>& incomingBranches() const {
     return m_incomingBranches;
   }
+
+  void relocate(RelocationInfo& rel);
 
   /*
    * There is an unlikely race in retranslate, where two threads
@@ -221,14 +240,12 @@ struct SrcRec {
   }
 
 private:
-  TCA getFallbackTranslation() const;
-  void patch(IncomingBranch branch, TCA dest);
   void patchIncomingBranches(TCA newStart);
 
 private:
   // This either points to the most recent translation in the
   // translations vector, or if hasDebuggerGuard() it points to the
-  // debug guard.  Read/write with atomic primitives only.
+  // debug guard.
   std::atomic<TCA> m_topTranslation;
 
   /*

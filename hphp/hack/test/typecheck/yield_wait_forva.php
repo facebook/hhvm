@@ -10,10 +10,7 @@
  */
 
 async function as_tuple(): Awaitable<(int, string)> {
-  $ret = await genva(
-    gen_int(),
-    gen_string()
-  );
+  $ret = await genva(gen_int(), gen_string());
   return $ret;
 }
 
@@ -22,20 +19,13 @@ async function maybe_null(): Awaitable<(int, ?int)> {
   if (flip_coin()) {
     $gen = gen_int();
   }
-  $ret = await genva(
-    gen_int(),
-    $gen
-  );
+  $ret = await genva(gen_int(), $gen);
   return $ret;
 }
 
 async function def_null(): Awaitable<(int, ?int, ?string, ?int)> {
-  $ret = await genva(
-    gen_int(),
-    gen_int_opt(),
-    null,
-    coin_flip() ? gen_int() : null
-  );
+  $ret = await
+    genva(gen_int(), gen_int_opt(), null, coin_flip() ? gen_int() : null);
   return $ret;
 }
 

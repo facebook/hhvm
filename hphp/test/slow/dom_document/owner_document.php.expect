@@ -1,0 +1,145 @@
+object(DOMDocument)#1 (35) {
+  ["nodeName"]=>
+  string(9) "#document"
+  ["nodeValue"]=>
+  NULL
+  ["nodeType"]=>
+  int(9)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["doctype"]=>
+  NULL
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["documentElement"]=>
+  NULL
+  ["actualEncoding"]=>
+  NULL
+  ["encoding"]=>
+  NULL
+  ["xmlEncoding"]=>
+  NULL
+  ["standalone"]=>
+  bool(true)
+  ["xmlStandalone"]=>
+  bool(true)
+  ["version"]=>
+  string(3) "1.0"
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["strictErrorChecking"]=>
+  bool(true)
+  ["documentURI"]=>
+  NULL
+  ["config"]=>
+  NULL
+  ["formatOutput"]=>
+  bool(false)
+  ["validateOnParse"]=>
+  bool(false)
+  ["resolveExternals"]=>
+  bool(false)
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["recover"]=>
+  bool(false)
+  ["substituteEntities"]=>
+  bool(false)
+}
+object(DOMDocument)#1 (35) {
+  ["nodeName"]=>
+  string(9) "#document"
+  ["nodeValue"]=>
+  NULL
+  ["nodeType"]=>
+  int(9)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["doctype"]=>
+  NULL
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["documentElement"]=>
+  NULL
+  ["actualEncoding"]=>
+  NULL
+  ["encoding"]=>
+  NULL
+  ["xmlEncoding"]=>
+  NULL
+  ["standalone"]=>
+  bool(true)
+  ["xmlStandalone"]=>
+  bool(true)
+  ["version"]=>
+  string(3) "1.0"
+  ["xmlVersion"]=>
+  string(3) "1.0"
+  ["strictErrorChecking"]=>
+  bool(true)
+  ["documentURI"]=>
+  NULL
+  ["config"]=>
+  NULL
+  ["formatOutput"]=>
+  bool(false)
+  ["validateOnParse"]=>
+  bool(false)
+  ["resolveExternals"]=>
+  bool(false)
+  ["preserveWhiteSpace"]=>
+  bool(true)
+  ["recover"]=>
+  bool(false)
+  ["substituteEntities"]=>
+  bool(false)
+}
+bool(true)

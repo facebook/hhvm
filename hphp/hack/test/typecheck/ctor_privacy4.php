@@ -22,5 +22,3 @@ class Bar extends Foo {
 
 }
 
-
-

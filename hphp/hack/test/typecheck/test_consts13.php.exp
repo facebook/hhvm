@@ -1,0 +1,10 @@
+File "test_consts13.php", line 6, characters 7-8:
+This object is of type C2 (Typing[4110])
+File "test_consts13.php", line 6, characters 18-19:
+It is incompatible with this object of type C1
+because some declarations are incompatible.
+Read the following to see why:
+File "test_consts13.php", line 4, characters 18-20:
+This is an int
+File "test_consts13.php", line 7, characters 9-14:
+It is incompatible with a string

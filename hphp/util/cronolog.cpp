@@ -79,19 +79,27 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
   }
 
   if (linkname) {
-    /* Create a relative symlink to logs under linkname's directory */
-    std::string dir = fs::path(linkname).parent_path().native();
-    if (dir != "/") {
-      dir.append("/");
-    }
-    std::string filename;
-    if (!strncmp(pfilename, dir.c_str(), dir.length())) {
-      filename = pfilename + dir.length();
-    } else {
-      filename = pfilename;
-    }
+    struct stat stat_buf;
+    struct stat stat_buf2;
+    if (fstat(log_fd, &stat_buf) ||
+        stat(linkname, &stat_buf2) ||
+        stat_buf.st_ino != stat_buf2.st_ino ||
+        stat_buf.st_dev != stat_buf2.st_dev) {
 
-    create_link(filename.c_str(), linkname, linktype, prevlinkname);
+      /* Create a relative symlink to logs under linkname's directory */
+      std::string dir = fs::path(linkname).parent_path().native();
+      if (dir != "/") {
+        dir.append("/");
+      }
+      std::string filename;
+      if (!strncmp(pfilename, dir.c_str(), dir.length())) {
+        filename = pfilename + dir.length();
+      } else {
+        filename = pfilename;
+      }
+
+      create_link(filename.c_str(), linkname, linktype, prevlinkname);
+    }
   }
   return fdopen(log_fd, "a");
 }

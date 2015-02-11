@@ -23,7 +23,6 @@
 #include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -502,8 +501,9 @@ bool parseArgPointer(TypedValue *tv,
 bool parseArgs(ActRec *ar, const char *format, ...) {
   unsigned min, max, count = ar->numArgs();
   countArgs(format, min, max);
-  if (count < min) {
-    throw_wrong_arguments_nr(ar->func()->name()->data(), count, min, max);
+  if (count < min || max < count) {
+    throw_wrong_arguments_nr(Native::getInvokeName(ar)->data(),
+                             count, min, max);
     return false;
   }
 

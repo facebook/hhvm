@@ -19,6 +19,6 @@ class B implements I {
 class Z {}
 
 function bar(): void {
-  $x = true? new A(): new B();
+  $x = true ? new A() : new B();
   $x->get();
 }

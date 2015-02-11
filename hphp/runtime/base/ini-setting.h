@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/type-variant.h"
 
-#include "folly/dynamic.h"
+#include <folly/dynamic.h>
 
 #include <cstdint>
 #include <functional>

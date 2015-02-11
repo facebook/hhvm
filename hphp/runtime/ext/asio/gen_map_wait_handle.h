@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_ASIO_GEN_MAP_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 
 namespace HPHP {
@@ -31,8 +32,7 @@ namespace HPHP {
  * preserves the keys of the original map. If one of the wait handles failed,
  * the exception is propagated by failure.
  */
-FORWARD_DECLARE_CLASS(GenMapWaitHandle);
-FORWARD_DECLARE_CLASS(Map);
+class c_Map;
 class c_GenMapWaitHandle final : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenMapWaitHandle)
@@ -57,7 +57,7 @@ class c_GenMapWaitHandle final : public c_BlockableWaitHandle {
                   ssize_t iter_pos, c_WaitableWaitHandle* child);
 
   Object m_exception;
-  p_Map m_deps;
+  SmartPtr<c_Map> m_deps;
   ssize_t m_iterPos;
 };
 

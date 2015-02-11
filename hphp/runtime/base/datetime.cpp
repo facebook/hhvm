@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/dateinterval.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -99,8 +98,8 @@ bool DateTime::IsValid(int y, int m, int d) {
     d <= timelib_days_in_month(y, m);
 }
 
-SmartResource<DateTime> DateTime::Current(bool utc /* = false */) {
-  return newres<DateTime>(time(0), utc);
+SmartPtr<DateTime> DateTime::Current(bool utc /* = false */) {
+  return makeSmartPtr<DateTime>(time(0), utc);
 }
 
 const StaticString
@@ -274,6 +273,11 @@ DateTime::DateTime(int64_t timestamp, bool utc /* = false */) {
   fromTimeStamp(timestamp, utc);
 }
 
+DateTime::DateTime(int64_t timestamp, SmartPtr<TimeZone> tz): m_tz(tz) {
+  fromTimeStamp(timestamp);
+}
+
+
 void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
   m_timestamp = timestamp;
   m_timestampSet = true;
@@ -424,8 +428,8 @@ void DateTime::setTime(int hour, int minute, int second) {
   update();
 }
 
-void DateTime::setTimezone(SmartResource<TimeZone> timezone) {
-  if (!timezone.isNull()) {
+void DateTime::setTimezone(SmartPtr<TimeZone> timezone) {
+  if (timezone) {
     m_tz = timezone->cloneTimeZone();
     if (m_tz.get() && m_tz->get()) {
       timelib_set_timezone(m_time.get(), m_tz->get());
@@ -489,12 +493,12 @@ void DateTime::internalModifyRelative(timelib_rel_time *rel,
   timelib_update_from_sse(m_time.get());
 }
 
-void DateTime::add(const SmartResource<DateInterval> &interval) {
+void DateTime::add(const SmartPtr<DateInterval>& interval) {
   timelib_rel_time *rel = interval->get();
   internalModifyRelative(rel, true, TIMELIB_REL_INVERT(rel) ? -1 :  1);
 }
 
-void DateTime::sub(const SmartResource<DateInterval> &interval) {
+void DateTime::sub(const SmartPtr<DateInterval>& interval) {
   timelib_rel_time *rel = interval->get();
   internalModifyRelative(rel, true, TIMELIB_REL_INVERT(rel) ?  1 : -1);
 }
@@ -733,6 +737,17 @@ String DateTime::stdcFormat(const String& format) const {
     ta.tm_zone = offset->abbr;
   }
 
+  if ((ta.tm_sec < 0 || ta.tm_sec > 60) ||
+      (ta.tm_min < 0 || ta.tm_min > 59) ||
+      (ta.tm_hour < 0 || ta.tm_hour > 23) ||
+      (ta.tm_mday < 1 || ta.tm_mday > 31) ||
+      (ta.tm_mon < 0 || ta.tm_mon > 11) ||
+      (ta.tm_wday < 0 || ta.tm_wday > 6) ||
+      (ta.tm_yday < 0 || ta.tm_yday > 365)) {
+    throw_invalid_argument("argument: invalid time");
+    return String();
+  }
+
   int max_reallocs = 5;
   size_t buf_len = 256, real_len;
   char *buf = (char *)malloc(buf_len);
@@ -809,7 +824,7 @@ Array DateTime::toArray(ArrayFormat format) const {
   return empty_array();
 }
 
-bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
+bool DateTime::fromString(const String& input, SmartPtr<TimeZone> tz,
                           const char* format /*=NUL*/,
                           bool throw_on_error /*= true*/) {
   struct timelib_error_container *error;
@@ -848,7 +863,7 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
   if (m_timestamp == -1) {
     fromTimeStamp(0);
   }
-  if (tz.get()) {
+  if (tz.get() && (input.size() <= 0 || input[0] != '@')) {
     setTimezone(tz);
   } else {
     setTimezone(TimeZone::Current());
@@ -868,14 +883,14 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
 
   m_time = TimePtr(t, time_deleter());
   if (t->tz_info != m_tz->get()) {
-    m_tz = newres<TimeZone>(timelib_tzinfo_clone(t->tz_info));
+    m_tz = makeSmartPtr<TimeZone>(t->tz_info);
   }
   return true;
 }
 
-SmartResource<DateTime> DateTime::cloneDateTime() const {
+SmartPtr<DateTime> DateTime::cloneDateTime() const {
   bool err;
-  SmartResource<DateTime> ret(newres<DateTime>(toTimeStamp(err), true));
+  auto ret = makeSmartPtr<DateTime>(toTimeStamp(err), true);
   ret->setTimezone(m_tz);
   return ret;
 }
@@ -883,15 +898,14 @@ SmartResource<DateTime> DateTime::cloneDateTime() const {
 ///////////////////////////////////////////////////////////////////////////////
 // comparison
 
-SmartResource<DateInterval>
-DateTime::diff(SmartResource<DateTime> datetime2, bool absolute) {
+SmartPtr<DateInterval>
+DateTime::diff(SmartPtr<DateTime> datetime2, bool absolute) {
 #ifdef TIMELIB_HAVE_INTERVAL
   timelib_rel_time *rel = timelib_diff(m_time.get(), datetime2.get()->m_time.get());
   if (absolute) {
     TIMELIB_REL_INVERT_SET(rel, 0);
   }
-  SmartResource<DateInterval> di(newres<DateInterval>(rel));
-  return di;
+  return makeSmartPtr<DateInterval>(rel);
 #else
   throw_not_implemented("timelib version too old");
 #endif

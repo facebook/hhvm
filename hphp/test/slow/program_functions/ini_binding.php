@@ -2,15 +2,12 @@
 // These are set in our custom ini file for this test
 var_dump(ini_get("hhvm.allow_hhas"));
 var_dump(ini_get("hhvm.jit_timer"));
-var_dump(ini_get("hhvm.simulate_arm"));
-var_dump(ini_get("hhvm.jit_type_prediction"));
 var_dump(ini_get("hhvm.gdb_sync_chunks"));
 var_dump(ini_get("hhvm.server.apc.ttl_limit"));
 
 // These are not in our custom ini file for this test,
 // but should be bound to a default value
 var_dump(ini_get("hhvm.hot_func_count"));
-var_dump(ini_get("hhvm.jit_a_hot_size"));
 var_dump(ini_get("hhvm.jit_always_interp_one"));
 var_dump(ini_get("hhvm.log.use_log_file"));
 var_dump(ini_get("hhvm.server.type"));

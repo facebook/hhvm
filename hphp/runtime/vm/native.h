@@ -40,7 +40,7 @@ class Object;
  *   }
  *
  * Then register it from your Extension's moduleLoad() hook:
- *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
+ *   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
  *     HHVM_FE(sum);
  *   }
  *
@@ -199,6 +199,12 @@ bool coerceFCallArgs(TypedValue* args,
 template<bool usesDoubles, bool variadic>
 void callFunc(const Func* func, void* ctx,
               TypedValue* args, TypedValue& ret);
+
+/**
+ * Extract the name used to invoke the function from the ActRec where name
+ * maybe be stored in invName, or may include the classname (e.g. Class::func)
+ */
+const StringData* getInvokeName(ActRec* ar);
 
 /**
  * Returns a specialization of either functionWrapper or methodWrapper

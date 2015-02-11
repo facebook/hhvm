@@ -1,0 +1,34 @@
+Program %s/printThis-ob.php loaded. Type '[r]un' or '[c]ontinue' to go.
+break printThis-ob.php:7
+Breakpoint 1 set on line 7 of printThis-ob.php
+But wont break until file printThis-ob.php has been loaded.
+run
+ob: I am going to see if this ob: chunking works well
+Breakpoint 1 reached at Foo::method() on line 7 of %s/printThis-ob.php
+   6   function method() {
+   7*    $other = $this; // breakpoint is set here
+   8   }
+
+print $this
+Foo Object
+(
+    [prop] => "Hello\n"
+)
+
+continue
+Breakpoint 1 reached at Foo::method() on line 7 of %s/printThis-ob.php
+   6   function method() {
+   7*    $other = $this; // breakpoint is set here
+   8   }
+
+print $this
+Foo Object
+(
+    [prop] => "Hello\n"
+    [prop2] => "\tThere"
+)
+
+continue
+ob: I sure hope it does; ob: otherwise we debug!
+ob: Program %s/printThis-ob.php exited normally.
+quit

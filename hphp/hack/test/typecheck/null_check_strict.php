@@ -13,7 +13,7 @@ class X {
   private ?int $x;
 
   public function foo(): int {
-    if($this->x) {
+    if ($this->x) {
       return $this->x;
     }
     return 0;

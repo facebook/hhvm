@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_SOCKET_CONNECTION_H_
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_SOCKET_CONNECTION_H_
 
-#include "folly/io/IOBuf.h"
-#include "folly/experimental/wangle/ManagedConnection.h"
+#include <folly/io/IOBuf.h>
+#include <folly/wangle/acceptor/ManagedConnection.h>
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
-#include "folly/SocketAddress.h"
+#include <folly/SocketAddress.h>
 #include "thrift/lib/cpp/transport/TTransportException.h"
 
 namespace HPHP {
@@ -30,7 +30,7 @@ namespace HPHP {
 class SocketConnection : public ::folly::wangle::ManagedConnection {
 public:
   SocketConnection(
-    apache::thrift::async::TAsyncTransport::UniquePtr sock,
+    folly::AsyncSocket::UniquePtr sock,
     const folly::SocketAddress& localAddr,
     const folly::SocketAddress& peerAddr);
   virtual ~SocketConnection();
@@ -51,7 +51,7 @@ protected:
   folly::SocketAddress m_localAddr;
   folly::SocketAddress m_peerAddr;
 
-  apache::thrift::async::TAsyncTransport::UniquePtr m_sock;
+  folly::AsyncSocket::UniquePtr m_sock;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

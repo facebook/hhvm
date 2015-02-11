@@ -1,4 +1,6 @@
-File "typing_fail_private_access2.php", line 19, characters 19-19:
-The method f is undefined in an object of type Bar (Typing[4053])
-File "typing_fail_private_access2.php", line 17, characters 7-9:
+File "typing_fail_private_access2.php", line 18, characters 19-19:
+Could not find method f in an object of type Bar (Typing[4053])
+File "typing_fail_private_access2.php", line 18, characters 12-16:
+This is why I think it is an object of type Bar
+File "typing_fail_private_access2.php", line 16, characters 7-9:
 Declaration of Bar is here

@@ -23,9 +23,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "folly/Conv.h"
-#include "folly/ScopeGuard.h"
-#include "folly/String.h"
+#include <folly/Conv.h>
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
@@ -227,7 +227,7 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
   }
   if (pid == 0) {
     /**
-     * I don't know why, but things work alot better if this process ignores
+     * I don't know why, but things work a lot better if this process ignores
      * the tstp signal (ctrl-Z). If not, it locks up if you hit ctrl-Z then
      * "bg" the program.
      */
@@ -534,8 +534,8 @@ std::string Process::GetAppName() {
 std::string Process::GetHostName() {
   char hostbuf[128];
   hostbuf[0] = '\0'; // for cleaner valgrind output when gethostname() fails
-  gethostname(hostbuf, 127);
-  hostbuf[127] = '\0';
+  gethostname(hostbuf, sizeof(hostbuf));
+  hostbuf[sizeof(hostbuf) - 1] = '\0';
   return hostbuf;
 }
 

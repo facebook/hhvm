@@ -275,14 +275,17 @@ if (UNLIKELY(g_context->m_dbgNoBreak)) {
 
 // Hook called from exception unwind to signal that we are about to handle an
 // exception.
-void phpDebuggerExceptionHandlerHook() {
-  TRACE(5, "in phpDebuggerExceptionHandlerHook()\n");
-  if (UNLIKELY(g_context->m_dbgNoBreak)) {
-    TRACE(5, "NoBreak flag is on\n");
-    return;
+void phpDebuggerExceptionHandlerHook() noexcept {
+  try {
+    TRACE(5, "in phpDebuggerExceptionHandlerHook()\n");
+    if (UNLIKELY(g_context->m_dbgNoBreak)) {
+      TRACE(5, "NoBreak flag is on\n");
+      return;
+    }
+    getHookHandler()->onExceptionHandle();
+    TRACE(5, "out phpDebuggerExceptionHandlerHook()\n");
+  } catch (...) {
   }
-  getHookHandler()->onExceptionHandle();
-  TRACE(5, "out phpDebuggerExceptionHandlerHook()\n");
 }
 
 // Hook called when the VM raises an error.

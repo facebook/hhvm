@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/php-globals.h"
 
 #include "hphp/util/logger.h"

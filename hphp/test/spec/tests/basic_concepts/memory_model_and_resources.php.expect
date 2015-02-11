@@ -1,0 +1,31 @@
+----------------- resource value assignment ----------------------
+After '$a = STDIN', $a is Resource id #1
+After '$b = $a', $b is Resource id #1
+After '$a = STDOUT', $b is Resource id #1, and $a is Resource id #2
+Done
+----------------- resource byRef assignment ----------------------
+After '$a = STDIN', $a is Resource id #1
+After '$c =& $a', $c is Resource id #1, and $a is Resource id #1
+After '$a = STDOUT', $c is Resource id #2, and $a is Resource id #2
+After 'unset($a)', $c is Resource id #2, and $a is undefined
+Done
+----------------- resource value argument passing ----------------------
+After '$a = STDIN', $a is Resource id #1
+	Inside function f1, $b is Resource id #1
+After '$b = STDOUT', $b is Resource id #2
+After 'f1($a)', $a is Resource id #1
+Done
+----------------- resource byRef argument passing ----------------------
+After '$a = STDIN', $a is Resource id #1
+	Inside function g1, $b is Resource id #1
+After '$b = STDOUT', $b is Resource id #2
+After 'g1($a)', $a is Resource id #2
+Done
+----------------- resource value returning ----------------------
+After '$b = STDOUT', $b is Resource id #2
+After '$a = f2()', $a is Resource id #2
+Done
+----------------- resource byRef returning ----------------------
+After '$b = STDOUT', $b is Resource id #2
+After '$a = f2()', $a is Resource id #2
+Done

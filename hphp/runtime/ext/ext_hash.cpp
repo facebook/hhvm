@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_hash.h"
 #include <algorithm>
 #include <memory>
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_md.h"
@@ -43,10 +44,10 @@
 
 namespace HPHP {
 
-static class HashExtension : public Extension {
+static class HashExtension final : public Extension {
  public:
   HashExtension() : Extension("hash", "1.0") { }
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
+  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     HHVM_FE(hash);
     HHVM_FE(hash_algos);
     HHVM_FE(hash_file);
@@ -98,14 +99,9 @@ public:
     HashEngines["snefru"]     = HashEnginePtr(new hash_snefru());
     HashEngines["gost"]       = HashEnginePtr(new hash_gost());
 #ifdef FACEBOOK
-    // Temporarily leave adler32 algo inverting its hash output
-    // to retain BC pending conversion of user code to correct endianness
-    // sgolemon(2014-01-30)
     HashEngines["adler32-fb"] = HashEnginePtr(new hash_adler32(true));
-    HashEngines["adler32"]    = HashEnginePtr(new hash_adler32(true));
-#else
-    HashEngines["adler32"]    = HashEnginePtr(new hash_adler32());
 #endif
+    HashEngines["adler32"]    = HashEnginePtr(new hash_adler32(false));
     HashEngines["crc32"]      = HashEnginePtr(new hash_crc32(false));
     HashEngines["crc32b"]     = HashEnginePtr(new hash_crc32(true));
     HashEngines["haval128,3"] = HashEnginePtr(new hash_haval(3,128));
@@ -135,12 +131,7 @@ static HashEngineMapInitializer s_engine_initializer;
 ///////////////////////////////////////////////////////////////////////////////
 // hash context
 
-class HashContext : public SweepableResourceData {
-public:
-  CLASSNAME_IS("Hash Context")
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
-
+struct HashContext : SweepableResourceData {
   HashContext(HashEnginePtr ops_, void *context_, int options_)
     : ops(ops_), context(context_), options(options_), key(nullptr) {
   }
@@ -172,11 +163,19 @@ public:
     free(key);
   }
 
+  CLASSNAME_IS("Hash Context")
+  DECLARE_RESOURCE_ALLOCATION(HashContext)
+
+  // overriding ResourceData
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
+
   HashEnginePtr ops;
   void *context;
   int options;
   char *key;
 };
+
+IMPLEMENT_RESOURCE_ALLOCATION(HashContext)
 
 ///////////////////////////////////////////////////////////////////////////////
 // hash functions
@@ -230,7 +229,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   }
 
   String raw = String(ops->digest_size, ReserveString);
-  char *digest = raw.bufferSlice().ptr;
+  char *digest = raw.mutableData();
   ops->hash_final((unsigned char *)digest, context);
   free(context);
 
@@ -314,7 +313,7 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
   void *context = malloc(ops->context_size);
   ops->hash_init(context);
 
-  const auto hash = new HashContext(ops, context, options);
+  const auto hash = newres<HashContext>(ops, context, options);
   if (options & k_HASH_HMAC) {
     hash->key = prepare_hmac_key(ops, context, key);
   }
@@ -340,7 +339,7 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
   }
 
   String raw = String(hash->ops->digest_size, ReserveString);
-  char *digest = raw.bufferSlice().ptr;
+  char *digest = raw.mutableData();
   hash->ops->hash_final((unsigned char *)digest, hash->context);
   if (hash->options & k_HASH_HMAC) {
     finalize_hmac_key(hash->key, hash->ops, hash->context, digest);
@@ -358,7 +357,7 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
 
 Resource HHVM_FUNCTION(hash_copy, const Resource& context) {
   HashContext *oldhash = context.getTyped<HashContext>();
-  auto const hash = new HashContext(oldhash);
+  auto const hash = newres<HashContext>(oldhash);
   return Resource(hash);
 }
 

@@ -70,7 +70,7 @@ inline bool Func::ParamInfo::isVariadic() const {
 
 inline void Func::validate() const {
 #ifdef DEBUG
-  assert(this && m_magic == kMagic);
+  assert(m_magic == kMagic);
 #endif
   assert(m_name != nullptr);
 }
@@ -504,7 +504,7 @@ inline const Func::FPIEntVec& Func::fpitab() const {
 ///////////////////////////////////////////////////////////////////////////////
 // JIT data.
 
-inline RDS::Handle Func::funcHandle() const {
+inline rds::Handle Func::funcHandle() const {
   return m_cachedFunc.handle();
 }
 
@@ -555,7 +555,7 @@ inline void Func::setBaseCls(Class* baseCls) {
   m_baseCls = baseCls;
 }
 
-inline void Func::setFuncHandle(RDS::Link<Func*> l) {
+inline void Func::setFuncHandle(rds::Link<Func*> l) {
   // TODO(#2950356): This assertion fails for create_function with an existing
   // declared function named __lambda_func.
   //assert(!m_cachedFunc.valid());

@@ -1,8 +1,8 @@
 
-Warning: %s
+Warning: Process tag(x0205=UndefinedTa): Illegal byte_count(%d) in %sbug54002.php on line %d
 
-Warning: %s
+Warning: Process tag(xA000=FlashPixVer): Illegal pointer offset(%s) in %sbug54002.php on line %d
 
-Warning: %s
+Warning: Process tag(x0205=UndefinedTa): Illegal byte_count(%d) in %sbug54002.php on line %d
 
-Warning: %s
+Warning: Process tag(xA000=FlashPixVer): Illegal pointer offset(%s) in %sbug54002.php on line %d

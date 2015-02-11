@@ -16,20 +16,18 @@
 */
 
 #include "hphp/runtime/ext/ext_objprof.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/ext/ext_simplexml.h"
-#include "hphp/runtime/ext/ext_datetime.h"
-#include "hphp/runtime/ext/ext_collections.h"
 
-#include <signal.h>
-#include <vector>
-#include <time.h>
-#include <iostream>
 #include <set>
+#include <unordered_map>
+#include <vector>
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/unit.h"
 
 TRACE_SET_MOD(objprof);
 
@@ -44,17 +42,11 @@ const StaticString
   s_bytes_rel("bytes_normalized"),
   s_instances("instances");
 
-struct cmpStringData {
-  bool operator()(const StringData* a, const StringData* b) const {
-    return a->compare(b) < 0;
-  }
-};
-
 struct ObjprofMetrics {
 public:
-  uint64_t instances;
-  uint64_t bytes;
-  double bytes_rel;
+  uint64_t instances{0};
+  uint64_t bytes{0};
+  double bytes_rel{0};
 };
 
 struct ObjprofStringAgg {
@@ -65,10 +57,13 @@ public:
   String path;
 };
 
-typedef typename std::map<StringData*, ObjprofStringAgg, cmpStringData>
-  ObjprofStrings;
-typedef typename std::vector<std::string> ObjprofStack;
-
+using ObjprofStrings = std::unordered_map<
+  StringData*,
+  ObjprofStringAgg,
+  string_data_hash,
+  string_data_same
+>;
+using ObjprofStack = std::vector<std::string>;
 
 std::pair<int, double> tvGetSize(const TypedValue* tv, int ref_adjust);
 void tvGetStrings(
@@ -93,7 +88,7 @@ String pathString(ObjprofStack* stack) {
  * These are not measured:
  * kEmptyKind   // The singleton static empty array
  * kSharedKind  // SharedArray
- * kNvtwKind    // NameValueTableWrapper
+ * kGlobalsKind // GlobalsArray
  * kProxyKind   // ProxyArray
  * kNumKinds    // insert new values before kNumKinds.
  */
@@ -102,6 +97,14 @@ std::pair<int, double> sizeOfArray(const ArrayData* props) {
   auto pos_limit = props->iter_end();
   int size = 0;
   double sized = 0;
+
+  auto handle_dense_array_item = [&] () {
+    const TypedValue* val = props->getValueRef(iter).asTypedValue();
+    auto val_size_pair = tvGetSize(val, 0);
+    size += val_size_pair.first;
+    sized += val_size_pair.second;
+    FTRACE(2, "Value size for item was {}\n", val_size_pair.first);
+  };
 
   if (props->isMixed()) {
     FTRACE(2, "Iterating mixed array\n");
@@ -152,12 +155,14 @@ std::pair<int, double> sizeOfArray(const ArrayData* props) {
   } else if (props->isPacked()) {
     FTRACE(2, "Iterating packed array\n");
     while (iter != pos_limit) {
-      const TypedValue* val = props->getValueRef(iter).asTypedValue();
-      auto val_size_pair = tvGetSize(val, 0);
-      size += val_size_pair.first;
-      sized += val_size_pair.second;
-      FTRACE(2, "Value size for item was {}\n", val_size_pair.first);
+      handle_dense_array_item();
       iter = PackedArray::IterAdvance(props, iter);
+    }
+  } else if (props->isStruct()) {
+    FTRACE(2, "Iterating struct array\n");
+    while (iter != pos_limit) {
+      handle_dense_array_item();
+      iter = StructArray::IterAdvance(props, iter);
     }
   }
 
@@ -173,6 +178,11 @@ void stringsOfArray(
   ssize_t iter = props->iter_begin();
   auto pos_limit = props->iter_end();
   path->push_back(std::string("array()"));
+
+  auto handle_dense_array_item = [&]() {
+    const TypedValue* val = props->getValueRef(iter).asTypedValue();
+    tvGetStrings(val, metrics, path, pointers);
+  };
 
   if (props->isMixed()) {
     while (iter != pos_limit) {
@@ -212,16 +222,21 @@ void stringsOfArray(
   } else if (props->isPacked()) {
     path->push_back(std::string("[]"));
     while (iter != pos_limit) {
-      const TypedValue* val = props->getValueRef(iter).asTypedValue();
-      tvGetStrings(val, metrics, path, pointers);
+      handle_dense_array_item();
       iter = PackedArray::IterAdvance(props, iter);
+    }
+    path->pop_back();
+  } else if (props->isStruct()) {
+    path->push_back(std::string("[]"));
+    while (iter != pos_limit) {
+      handle_dense_array_item();
+      iter = StructArray::IterAdvance(props, iter);
     }
     path->pop_back();
   }
 
   path->pop_back();
 }
-
 
 /**
  * Measures the size of the typed value and referenced objects without going
@@ -230,7 +245,7 @@ void stringsOfArray(
  * These are not measured:
  * kEmptyKind   // The singleton static empty array
  * kSharedKind  // SharedArray
- * kNvtwKind    // NameValueTableWrapper
+ * kGlobalsKind // GlobalsArray
  * kProxyKind   // ProxyArray
  * kNumKinds    // insert new values before kNumKinds.
  */
@@ -430,7 +445,7 @@ static bool supportsToArray(ObjectData* obj) {
     return true;
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
     return true;
-  } else if (UNLIKELY(obj->instanceof(c_DateTime::classof()))) {
+  } else if (UNLIKELY(obj->instanceof(DateTimeData::getClass()))) {
     return true;
   } else {
     if (LIKELY(!obj->getAttribute(ObjectData::InstanceDtor))) {
@@ -441,11 +456,10 @@ static bool supportsToArray(ObjectData* obj) {
   }
 }
 
-
 static std::pair<int, double> getObjSize(ObjectData* obj) {
   Class* cls = obj->getVMClass();
   FTRACE(1, "Getting object size for type {} at {}\n",
-    obj->o_getClassName()->data(),
+    obj->getClassName().data(),
     obj
   );
   int size = getClassSize(cls);
@@ -455,36 +469,33 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
     return std::make_pair(size, sized);
   }
 
-
   bool adjust_val = true;
   if (cls == c_Map::classof() || cls == c_ImmMap::classof()) {
     adjust_val = false;
   }
 
   // We're increasing ref count by calling toArray, need to adjust it later
-  auto arr = obj->o_toArray(false);
+  auto arr = obj->toArray();
   bool is_packed = arr->isPacked();
 
   for (ArrayIter iter(arr); iter; ++iter) {
-    auto key = iter.first().toString();
-    auto key_tv = iter.first().asTypedValue();
-    auto val_tv = iter.second().asTypedValue();
-
-    if (key_tv->m_type == HPHP::KindOfString) {
+    TypedValue key_tv = *iter.first().asTypedValue();
+    auto val_tv = iter.secondRef().asTypedValue();
+    auto key = tvAsVariant(&key_tv).toString();
+    if (key_tv.m_type == HPHP::KindOfString) {
       // If the key begins with a NUL, it's a private or protected property.
       // Read the class name from between the two NUL bytes.
       //
       // Note: Copied from object-data.cpp
       if (!key.empty() && key[0] == '\0') {
         int subLen = key.find('\0', 1) + 1;
-        String subkey = key.substr(1, subLen - 2);
         key = key.substr(subLen);
         FTRACE(3, "Resolved private prop name: {}\n", key.c_str());
       }
     }
 
     bool is_declared =
-        key_tv->m_type == HPHP::KindOfString &&
+        key_tv.m_type == HPHP::KindOfString &&
         cls->lookupDeclProp(key.get()) != kInvalidSlot;
 
     int key_size = 0;
@@ -492,7 +503,7 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
     if (!is_declared && !is_packed) {
       FTRACE(2, "Counting string key {} because it's non-declared/packed\n",
         key.c_str());
-      auto key_size_pair = tvGetSize(key_tv, -1);
+      auto key_size_pair = tvGetSize(&key_tv, -1);
       key_size = key_size_pair.first;
       key_sized = key_size_pair.second;
     } else {
@@ -512,7 +523,7 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
    size += val_size_pair.first + key_size;
    sized += val_size_pair.second + key_sized;
   }
-  return std::make_pair(size, sized);;
+  return std::make_pair(size, sized);
 }
 
 static void getObjStrings(
@@ -523,7 +534,7 @@ static void getObjStrings(
 ) {
   Class* cls = obj->getVMClass();
   FTRACE(1, "Getting strings for type {} at {}\n",
-    obj->o_getClassName()->data(),
+    obj->getClassName().data(),
     obj
   );
 
@@ -532,13 +543,14 @@ static void getObjStrings(
   }
 
   path->push_back(std::string(cls->name()->data()));
-  auto arr = obj->o_toArray(false);
+  auto arr = obj->toArray();
   bool is_packed = arr->isPacked();
 
   for (ArrayIter iter(arr); iter; ++iter) {
-    auto key = iter.first().toString();
-    auto key_tv = iter.first().asTypedValue();
-    auto val_tv = iter.second().asTypedValue();
+    auto first = iter.first();
+    auto key = first.toString();
+    auto key_tv = first.asTypedValue();
+    auto val_tv = iter.secondRef().asTypedValue();
 
     if (key_tv->m_type == HPHP::KindOfString) {
       // If the key begins with a NUL, it's a private or protected property.
@@ -547,7 +559,6 @@ static void getObjStrings(
       // Note: Copied from object-data.cpp
       if (!key.empty() && key[0] == '\0') {
         int subLen = key.find('\0', 1) + 1;
-        String subkey = key.substr(1, subLen - 2);
         key = key.substr(subLen);
       }
     }
@@ -581,34 +592,16 @@ static void getObjStrings(
 // Function that traverses objects and counts metrics per strings
 
 static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
-  // Iterate over all classes, prepare our whitelisted histogram buckets
-  std::unordered_map<Class*, int> histogram;
-  for (AllCachedClasses ac; !ac.empty(); ) {
-    Class* c = ac.popFront();
-    histogram[c] = 1;
-  }
-
   ObjprofStrings metrics;
 
-  if (MM().getObjectTracking()) {
-    std::set<void*> pointers;
-    for (auto ptr = MM().objects_begin(); ptr != MM().objects_end(); ++ptr) {
-      ObjectData* obj = (ObjectData*)(*ptr);
-      Class* cls = obj->getVMClass();
-
-      auto it = histogram.find(cls);
-      if (it != histogram.end()) {
-        ObjprofStack path;
-        getObjStrings(obj, &metrics, &path, &pointers);
-      } else {
-        // This should never happen or we're not untracking something
-        FTRACE(1, "Class* not found in histogram!\n");
-      }
-    }
-  }
+  std::set<void*> pointers;
+  MM().forEachObject([&](ObjectData* obj) {
+      ObjprofStack path;
+      getObjStrings(obj, &metrics, &path, &pointers);
+  });
 
   // Create response
-  Array objs;
+  ArrayInit objs(metrics.size(), ArrayInit::Map{});
   for (auto& it : metrics) {
     if (it.second.dups < min_dup) continue;
 
@@ -620,70 +613,38 @@ static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
     );
 
     const Variant str = Variant(it.first);
-    objs.set(str, Variant(metrics_val), true);
+    objs.set(str, Variant(metrics_val));
   }
 
-  return objs;
+  return objs.toArray();
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Function that inits object tracking
-
-static void HHVM_FUNCTION(objprof_start, void) {
-  MM().setObjectTracking(true);
-  FTRACE(2, "Tracking instances enabled\n");
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Function that inits the scan of the memory and count of class pointers
 
 static Array HHVM_FUNCTION(objprof_get_data, void) {
-  // Iterate over all classes, prepare our whitelisted histogram buckets
-  std::unordered_map<Class*, ObjprofMetrics> histogram;
-  for (AllCachedClasses ac; !ac.empty(); ) {
-    Class* c = ac.popFront();
-    ObjprofMetrics empty_metrics;
-    empty_metrics.instances = 0;
-    empty_metrics.bytes = 0;
-    empty_metrics.bytes_rel = 0;
-    histogram[c] = empty_metrics;
-  }
+  std::unordered_map<Class*,ObjprofMetrics> histogram;
+  MM().forEachObject([&](ObjectData* obj) {
+      auto cls = obj->getVMClass();
+      auto objsizePair = getObjSize(obj);
+      auto& metrics = histogram[cls];
+      metrics.instances += 1;
+      metrics.bytes += objsizePair.first;
+      metrics.bytes_rel += objsizePair.second;
 
-  //auto tracker = ObjectTracker::get();
-  if (MM().getObjectTracking()) {
-    for (auto ptr = MM().objects_begin(); ptr != MM().objects_end(); ++ptr) {
-      ObjectData* obj = (ObjectData*)(*ptr);
-      Class* cls = obj->getVMClass();
-
-      auto it = histogram.find(cls);
-      if (it != histogram.end()) {
-        auto objsize_pair = getObjSize(obj);
-        ObjprofMetrics metrics = it->second;
-        metrics.instances += 1;
-        metrics.bytes += objsize_pair.first;
-        metrics.bytes_rel += objsize_pair.second;
-        histogram[cls] = metrics;
-
-        FTRACE(1, "...................ObjectData* at {} ({}) size={}:{}\n",
-          obj,
-          obj->o_getClassName()->data(),
-          objsize_pair.first,
-          objsize_pair.second
-        );
-      } else {
-        // This should never happen or we're not untracking something
-        FTRACE(1, "Class* not found in histogram!\n");
-      }
-    }
-  }
+      FTRACE(1, "ObjectData* at {} ({}) size={}:{}\n",
+             obj,
+             obj->getClassName().data(),
+             objsizePair.first,
+             objsizePair.second
+            );
+  });
 
   // Create response
-  Array objs;
-  for (auto& it : histogram) {
-    Class* c = it.first;
-
-    if (it.second.instances == 0) continue;
+  ArrayInit objs(histogram.size(), ArrayInit::Map{});
+  for (auto const& it : histogram) {
+    auto c = it.first;
 
     auto metrics_val = make_map_array(
       s_instances, Variant(it.second.instances),
@@ -691,19 +652,18 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
       s_bytes_rel, it.second.bytes_rel
     );
 
-    objs.set(c->nameStr(), Variant(metrics_val), true);
+    objs.set(c->nameStr(), Variant(metrics_val));
   }
 
-  return objs;
+  return objs.toArray();
 }
 
-class objprofExtension : public Extension {
+class objprofExtension final : public Extension {
  public:
   objprofExtension() : Extension("objprof", "1.0") { }
 
   void moduleInit() override {
     HHVM_FALIAS(HH\\objprof_get_data, objprof_get_data);
-    HHVM_FALIAS(HH\\objprof_start, objprof_start);
     HHVM_FALIAS(HH\\objprof_get_strings, objprof_get_strings);
     loadSystemlib();
   }

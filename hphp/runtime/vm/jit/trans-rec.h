@@ -60,6 +60,7 @@ struct TransRec {
   Offset                 bcStart;
   TransID                id;
   TransKind              kind;
+  bool                   isLLVM;
 
   TransRec() {}
 
@@ -73,7 +74,8 @@ struct TransRec {
            uint32_t                    _afrozenLen,
            RegionDescPtr               region = RegionDescPtr(),
            std::vector<TransBCMapping> _bcMapping =
-             std::vector<TransBCMapping>());
+             std::vector<TransBCMapping>(),
+           bool                        _isLLVM = false);
 
   std::string print(uint64_t profCount) const;
   Offset bcPast() const;

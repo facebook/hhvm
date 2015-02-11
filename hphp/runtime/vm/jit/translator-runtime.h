@@ -148,6 +148,8 @@ TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 TypedValue genericIdx(TypedValue, TypedValue, TypedValue);
 
+TypedValue getMemoKeyHelper(TypedValue tv);
+
 int32_t arrayVsize(ArrayData*);
 
 TypedValue* ldGblAddrHelper(StringData* name);
@@ -210,7 +212,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar);
 
 void raiseMissingArgument(const Func* func, int got);
 
-RDS::Handle lookupClsRDSHandle(const StringData* name);
+rds::Handle lookupClsRDSHandle(const StringData* name);
 
 /*
  * Insert obj into the set of live objects to be destructed at the end of the
@@ -219,9 +221,9 @@ RDS::Handle lookupClsRDSHandle(const StringData* name);
 void registerLiveObj(ObjectData* obj);
 
 /*
- * Set tl_regState to DIRTY and call _Unwind_Resume.
+ * Set tl_regState to CLEAN and call _Unwind_Resume.
  */
-void unwindResumeHelper(_Unwind_Exception* data);
+void unwindResumeHelper();
 
 namespace MInstrHelpers {
 StringData* stringGetI(StringData*, uint64_t);

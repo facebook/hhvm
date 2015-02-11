@@ -2,10 +2,10 @@ DOMNode
 object(DOMNode)#%d (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class DOMNode in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class DOMNode in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(22) {
+array(19) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -43,12 +43,6 @@ array(22) {
   [17]=>
   string(11) "getNodePath"
   [18]=>
-  string(5) "__get"
-  [19]=>
-  string(5) "__set"
-  [20]=>
-  string(7) "__isset"
-  [21]=>
   string(11) "__debuginfo"
 }
 ================
@@ -58,10 +52,10 @@ object(A_DOMNode)#%d (1) {
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_DOMNode in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_DOMNode in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(22) {
+array(19) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -99,11 +93,5 @@ array(22) {
   [17]=>
   string(11) "getNodePath"
   [18]=>
-  string(5) "__get"
-  [19]=>
-  string(5) "__set"
-  [20]=>
-  string(7) "__isset"
-  [21]=>
   string(11) "__debuginfo"
 }

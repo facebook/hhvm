@@ -12,6 +12,9 @@ include Sys_utils
 
 let () = Random.self_init ()
 let debug = ref false
+let profile = ref false
+
+let log = ref (fun (_ : string)  -> ())
 
 let d s =
   if !debug
@@ -154,6 +157,11 @@ let opt f env = function
 let opt_map f = function
   | None -> None
   | Some x -> Some (f x)
+
+let opt_map_default f default x =
+  match x with
+  | None -> default
+  | Some x -> f x
 
 let opt_fold_left f x y =
   match y with
@@ -372,3 +380,11 @@ let fold_fun_list acc fl =
   List.fold_left (|>) acc fl
 
 let compose f g x = f (g x)
+
+let with_context ~enter ~exit ~do_ =
+  enter ();
+  let result = try do_ () with e ->
+    exit ();
+    raise e in
+  exit ();
+  result

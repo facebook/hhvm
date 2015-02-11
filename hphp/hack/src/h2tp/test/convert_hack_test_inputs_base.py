@@ -140,6 +140,10 @@ UNSUPPORTED_FILES_UNPARSER = {
         'tconst/unassigned_tconst.php',
         'tconst/interface.php',
         'tconst/interface2.php',
+        'tconst/unsupported_this1.php',
+        'tconst/unsupported_this2.php',
+        'tconst/unsupported_this3.php',
+        'tconst/unsupported_this4.php',
     ],
 }
 

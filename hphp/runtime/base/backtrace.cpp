@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,36 +15,37 @@
 */
 #include "hphp/runtime/base/backtrace.h"
 
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/class-info.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/runtime/vm/bytecode.h"
 
 namespace HPHP {
 
-const StaticString s_file("file");
-const StaticString s_line("line");
-const StaticString s_function("function");
-const StaticString s_args("args");
-const StaticString s_class("class");
-const StaticString s_object("object");
-const StaticString s_type("type");
-const StaticString s_include("include");
-const StaticString s_main("{main}");
+const StaticString
+  s_file("file"),
+  s_line("line"),
+  s_function("function"),
+  s_args("args"),
+  s_class("class"),
+  s_object("object"),
+  s_type("type"),
+  s_include("include"),
+  s_main("{main}"),
+  s_arrow("->"),
+  s_double_colon("::");
 
 static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
-  ActRec* prevFp;
   if (fp && fp->func() && fp->resumed() && fp->func()->isAsyncFunction()) {
     c_BlockableWaitHandle* currentWaitHandle = frame_afwh(fp);
     auto const contextIdx = currentWaitHandle->getContextIdx();
     while (currentWaitHandle != nullptr) {
       if (currentWaitHandle->isFinished()) {
         /*
-         * is possible in very rare cases (it will returned a truancated stack):
+         * It's possible in very rare cases (it will return a truncated stack):
          * 1) async function which WaitHandle is not referenced by anything
          *      else finishes
          * 2) its return value is an object with destructor
@@ -53,15 +54,13 @@ static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
         */
         break;
       }
-      auto waitHandle = currentWaitHandle;
-      auto p = waitHandle->getParentChain().firstInContext(contextIdx);
-      if (p == nullptr) {
-        break;
-      } else if (p->getKind() == c_WaitHandle::Kind::AsyncFunction) {
+      auto p = currentWaitHandle->getParentChain().firstInContext(contextIdx);
+      if (p == nullptr) break;
+
+      if (p->getKind() == c_WaitHandle::Kind::AsyncFunction) {
         auto wh = p->asAsyncFunction();
-        prevFp = wh->actRec();
         *prevPc = wh->resumable()->resumeOffset();
-        return prevFp;
+        return wh->actRec();
       }
       currentWaitHandle = p;
     }
@@ -72,10 +71,9 @@ static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
 }
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
-  Array bt = Array::Create();
+  auto bt = Array::Create();
 
-  // If there is a parser frame, put it at the beginning of
-  // the backtrace
+  // If there is a parser frame, put it at the beginning of the backtrace.
   if (btArgs.m_parserFrame) {
     bt.append(
       make_map_array(
@@ -86,61 +84,54 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   }
 
   VMRegAnchor _;
-  if (!vmfp()) {
-    // If there are no VM frames, we're done
-    return bt;
-  }
+  // If there are no VM frames, we're done.
+  if (!vmfp()) return bt;
 
   int depth = 0;
   ActRec* fp = nullptr;
   Offset pc = 0;
 
-  // Get the fp and pc of the top frame (possibly skipping one frame)
-  {
-    if (btArgs.m_skipTop) {
-      fp = getPrevActRec(vmfp(), &pc);
-      if (!fp) {
-        // We skipped over the only VM frame, we're done
-        return bt;
-      }
-    } else {
-      fp = vmfp();
-      Unit *unit = vmfp()->m_func->unit();
+  // Get the fp and pc of the top frame (possibly skipping one frame).
+
+  if (btArgs.m_skipTop) {
+    fp = getPrevActRec(vmfp(), &pc);
+    // We skipped over the only VM frame, we're done.
+    if (!fp) return bt;
+  } else {
+    fp = vmfp();
+    auto const unit = fp->m_func->unit();
+    assert(unit);
+    pc = unit->offsetOf(vmpc());
+  }
+
+  // Handle the top frame.
+  if (btArgs.m_withSelf) {
+    // Builtins don't have a file and line number.
+    if (!fp->m_func->isBuiltin()) {
+      auto const unit = fp->m_func->unit();
       assert(unit);
-      pc = unit->offsetOf(vmpc());
-    }
+      auto const filename = fp->m_func->filename();
 
-    // Handle the top frame
-    if (btArgs.m_withSelf) {
-      // Builtins don't have a file and line number
-      if (!fp->m_func->isBuiltin()) {
-        Unit* unit = fp->m_func->unit();
-        assert(unit);
-        const char* filename = fp->m_func->filename()->data();
-        Offset off = pc;
-
-        ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
-        frame.set(s_file, filename);
-        frame.set(s_line, unit->getLineNumber(off));
-        if (btArgs.m_parserFrame) {
-          frame.set(s_function, s_include);
-          frame.set(s_args, Array::Create(btArgs.m_parserFrame->filename));
-        }
-        bt.append(frame.toVariant());
-        depth++;
+      ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
+      frame.set(s_file, const_cast<StringData*>(filename));
+      frame.set(s_line, unit->getLineNumber(pc));
+      if (btArgs.m_parserFrame) {
+        frame.set(s_function, s_include);
+        frame.set(s_args, Array::Create(btArgs.m_parserFrame->filename));
       }
+      bt.append(frame.toVariant());
+      depth++;
     }
   }
-  // Handle the subsequent VM frames
+
+  // Handle the subsequent VM frames.
   Offset prevPc = 0;
-  for (ActRec* prevFp = getPrevActRec(fp, &prevPc);
+  for (auto prevFp = getPrevActRec(fp, &prevPc);
        fp != nullptr && (btArgs.m_limit == 0 || depth < btArgs.m_limit);
        fp = prevFp, pc = prevPc,
          prevFp = getPrevActRec(fp, &prevPc)) {
-    // do not capture frame for HPHP only functions
-    if (fp->m_func->isNoInjection()) {
-      continue;
-    }
+    // Do not capture frame for HPHP only functions.
+    if (fp->m_func->isNoInjection()) continue;
 
     ArrayInit frame(7, ArrayInit::Map{});
 
@@ -181,15 +172,15 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
                 prevFp->m_func->unit()->getLineNumber(prevPc - pcAdjust));
     }
 
-    // check for include
+    // Check for include.
     String funcname = const_cast<StringData*>(fp->m_func->name());
     if (fp->m_func->isClosureBody()) {
-      // Strip the file hash from the closure name
+      // Strip the file hash from the closure name.
       String fullName = const_cast<StringData*>(fp->m_func->baseCls()->name());
       funcname = fullName.substr(0, fullName.find(';'));
     }
 
-    // check for pseudomain
+    // Check for pseudomain.
     if (funcname.empty()) {
       if (!prevFp && !btArgs.m_withPseudoMain) continue;
       else if (!prevFp) funcname = s_main;
@@ -199,38 +190,38 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     frame.set(s_function, funcname);
 
     if (!funcname.same(s_include)) {
-      // Closures have an m_this but they aren't in object context
-      Class* ctx = arGetContextClass(fp);
+      // Closures have an m_this but they aren't in object context.
+      auto ctx = arGetContextClass(fp);
       if (ctx != nullptr && !fp->m_func->isClosureBody()) {
-        frame.set(s_class, ctx->name()->data());
+        frame.set(s_class, const_cast<StringData*>(ctx->name()));
         if (fp->hasThis() && !isReturning) {
           if (btArgs.m_withThis) {
             frame.set(s_object, Object(fp->getThis()));
           }
-          frame.set(s_type, "->");
+          frame.set(s_type, s_arrow);
         } else {
-          frame.set(s_type, "::");
+          frame.set(s_type, s_double_colon);
         }
       }
     }
 
-    Array args = Array::Create();
-    bool withNames = btArgs.m_withArgNames;
-    bool withValues = btArgs.m_withArgValues;
+    auto const withNames = btArgs.m_withArgNames;
+    auto const withValues = btArgs.m_withArgValues;
     if (!btArgs.m_withArgNames && !btArgs.m_withArgValues) {
       // do nothing
     } else if (funcname.same(s_include)) {
-      if (depth) {
-        args.append(const_cast<StringData*>(curUnit->filepath()));
-        frame.set(s_args, args);
+      if (depth != 0) {
+        auto filepath = const_cast<StringData*>(curUnit->filepath());
+        frame.set(s_args, make_packed_array(filepath));
       }
     } else if (!RuntimeOption::EnableArgsInBacktraces || isReturning) {
-      // Provide an empty 'args' array to be consistent with hphpc
-      frame.set(s_args, args);
+      // Provide an empty 'args' array to be consistent with hphpc.
+      frame.set(s_args, empty_array());
     } else {
-      const int nparams = fp->m_func->numNonVariadicParams();
-      int nargs = fp->numArgs();
-      int nformals = std::min(nparams, nargs);
+      auto args = Array::Create();
+      auto const nparams = fp->m_func->numNonVariadicParams();
+      auto const nargs = fp->numArgs();
+      auto const nformals = std::min<int>(nparams, nargs);
 
       if (UNLIKELY(fp->hasVarEnv() && fp->getVarEnv()->getFP() != fp)) {
         // VarEnv is attached to eval or debugger frame, other than the current
@@ -238,8 +229,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         auto varEnv = fp->getVarEnv();
         auto func = fp->func();
         for (int i = 0; i < nformals; i++) {
-          const StringData* argname = func->localVarName(i);
-          TypedValue* tv = varEnv->lookup(argname);
+          auto const argname = func->localVarName(i);
+          auto const tv = varEnv->lookup(argname);
 
           Variant val;
           if (tv != nullptr) { // the variable hasn't been unset
@@ -247,29 +238,28 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
           }
 
           if (withNames) {
-            args.set(String(argname->data(), CopyString), val);
+            args.set(String(const_cast<StringData*>(argname)), val);
           } else {
             args.append(val);
           }
         }
       } else {
         for (int i = 0; i < nformals; i++) {
-          const StringData* argname = withNames ? fp->func()->localVarName(i)
-                                                : nullptr;
           Variant val = withValues ? tvAsVariant(frame_local(fp, i)) : "";
 
           if (withNames) {
-            args.set(String(argname->data(), CopyString), val);
+            auto const argname = fp->func()->localVarName(i);
+            args.set(String(const_cast<StringData*>(argname)), val);
           } else {
             args.append(val);
           }
         }
       }
 
-      /* builtin extra args are not stored in varenv */
+      // Builtin extra args are not stored in varenv.
       if (nargs > nparams && fp->hasExtraArgs()) {
         for (int i = nparams; i < nargs; i++) {
-          TypedValue *arg = fp->getExtraArg(i - nparams);
+          auto arg = fp->getExtraArg(i - nparams);
           args.append(tvAsVariant(arg));
         }
       }
@@ -279,8 +269,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     bt.append(frame.toVariant());
     depth++;
   }
-  return bt;
 
+  return bt;
 }
 
 

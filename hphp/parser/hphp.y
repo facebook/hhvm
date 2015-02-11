@@ -3012,8 +3012,7 @@ hh_shape_type:
 ;
 
 hh_access_type_start:
-    fully_qualified_class_name         { $$ = $1; }
-  | T_STATIC                           { $1.setText("static"); $$ = $1; }
+    class_namespace_string_typeargs         { $$ = $1; }
 ;
 hh_access_type:
     ident T_DOUBLE_COLON hh_access_type { Token t; t.reset();
@@ -3043,9 +3042,7 @@ hh_type:
   | hh_access_type_start
     T_DOUBLE_COLON
     hh_access_type                     { only_in_hh_syntax(_p);
-                                         Token t; t.reset();
-                                         _p->onTypeAnnotation($$, $1, t);
-                                         _p->onTypeList($$, $3);
+                                         _p->onTypeAnnotation($$, $1, $3);
                                          _p->onTypeSpecialization($$, 'a'); }
   | T_ARRAY T_TYPELIST_LT hh_type
     T_TYPELIST_GT                      { $1.setText("array");

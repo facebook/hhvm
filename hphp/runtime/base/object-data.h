@@ -484,16 +484,6 @@ template<class T, class... Args> T* newobj(Args&&... args) {
   }
 }
 
-#define DECLARE_OBJECT_ALLOCATION(T)                                    \
-  static void typeCheck() {                                             \
-    static_assert(std::is_base_of<ObjectData,T>::value, "");            \
-  }                                                                     \
-  virtual void sweep() override;
-
-#define IMPLEMENT_OBJECT_ALLOCATION(T) \
-  static_assert(std::is_base_of<ObjectData,T>::value, ""); \
-  void HPHP::T::sweep() { this->~T(); }
-
 #define DECLARE_CLASS_NO_SWEEP(originalName)                    \
   public:                                                       \
   CLASSNAME_IS(#originalName)                                   \
@@ -504,18 +494,7 @@ template<class T, class... Args> T* newobj(Args&&... args) {
     return result;                                              \
   }
 
-/**
- * By this declaration a class introduced with DECLARE_CLASS can only
- * be smart-allocated.
- */
-#define DECLARE_CLASS(cls)                      \
-  DECLARE_OBJECT_ALLOCATION(c_##cls)            \
-  DECLARE_CLASS_NO_SWEEP(cls)
-
 #define IMPLEMENT_CLASS_NO_SWEEP(cls)
-
-#define IMPLEMENT_CLASS(cls)                    \
-  IMPLEMENT_OBJECT_ALLOCATION(c_##cls)
 
 template<class T, class... Args>
 typename std::enable_if<

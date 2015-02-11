@@ -133,6 +133,13 @@ void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
     case LdStk: {
       auto idx = inst->extra<StackOffset>()->offset;
       auto newType = state.stackType(idx);
+      // We know from hhbc invariants that stack slots are always either Cls or
+      // Gen flavors---there's no need to relax beyond that.
+      if (newType == Type::StkElem) {
+        newType = inst->typeParam() <= Type::Gen ? Type::Gen :
+                  inst->typeParam() <= Type::Cls ? Type::Cls :
+                  Type::StkElem;
+      }
       retypeLoad(inst, newType);
       break;
     }

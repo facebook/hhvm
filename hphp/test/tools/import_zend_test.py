@@ -543,6 +543,9 @@ norepo_tests = (
     '/tests/lang/static_variation_001.php',
     '/tests/lang/static_variation_002.php',
 
+    # This test passes "by accident".
+    'ext/dom/tests/DOMNode_hasChildNodes.php',
+
     # These tests use eval(), which is banned in repo mode.
     '/Zend/tests/bug31102.php',
     '/Zend/tests/bug33116.php',

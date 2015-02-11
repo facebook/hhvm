@@ -11,10 +11,14 @@ class X {
     return $this->val;
   }
 
-  public function set(
+  private function set(
     this::T $x
   ): void {
     $this->val = $x;
+  }
+
+  public static function swap(X $x1, X $x2): void {
+    $x1->set($x2->get());
   }
 }
 
@@ -26,9 +30,5 @@ function test(
   Y $y,
   X $x,
 ): void {
-  swap($y, $x);
-}
-
-function swap(X $x1, X $x2): void {
-  $x1->set($x2->get());
+  X::swap($y, $x);
 }

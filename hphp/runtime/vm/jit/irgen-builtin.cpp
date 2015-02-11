@@ -559,14 +559,20 @@ private:
   void decRefForSideExit() const {
     spillStack(env);
     auto stackIdx = m_params.numThroughStack;
+
+    // Make sure we have loads for all of the stack elements.  We need to do
+    // this in forward order before we decref in backward order because
+    // extendStack will end up with values that are of type StkElem
+    // TODO(#6156498).
+    for (auto i = 0; i < stackIdx; ++i) {
+      top(env, Type::Gen, i, DataTypeGeneric);
+    }
+
     for (auto i = m_params.size(); i-- > 0;) {
       if (m_params[i].throughStack) {
         --stackIdx;
-        gen(env,
-            DecRefStk,
-            StackOffset { offsetFromSP(env, stackIdx) },
-            Type::Gen,
-            sp(env));
+        auto const val = top(env, Type::Gen, stackIdx, DataTypeGeneric);
+        gen(env, DecRef, val);
       } else {
         gen(env, DecRef, m_params[i].value);
       }

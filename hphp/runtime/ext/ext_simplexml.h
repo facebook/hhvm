@@ -45,19 +45,22 @@ typedef enum {
   SXE_ITER_ATTRLIST = 3
 } SXE_ITER;
 
-class c_SimpleXMLElement :
-      public ExtObjectDataFlags<ObjectData::UseGet|
-                                ObjectData::UseSet|
-                                ObjectData::UseIsset|
-                                ObjectData::UseUnset|
-                                ObjectData::CallToImpl|
-                                ObjectData::HasClone|
-                                ObjectData::HasPropEmpty>,
-      public Sweepable {
- public:
-  DECLARE_CLASS(SimpleXMLElement)
+using SimpleXMLElementBase = ExtObjectDataFlags<
+  ObjectData::UseGet|
+  ObjectData::UseSet|
+  ObjectData::UseIsset|
+  ObjectData::UseUnset|
+  ObjectData::CallToImpl|
+  ObjectData::HasClone|
+  ObjectData::HasPropEmpty
+>;
 
-  public: c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::classof());
+struct c_SimpleXMLElement : SweepableObj<SimpleXMLElementBase> {
+  DECLARE_CLASS_NO_SWEEP(SimpleXMLElement)
+  static void Sweep(ObjectData*);
+  void sweep();
+
+  explicit c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::classof());
   public: ~c_SimpleXMLElement();
   public: void t___construct(const String& data, int64_t options = 0,
                              bool data_is_url = false, const String& ns = "",

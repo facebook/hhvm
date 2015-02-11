@@ -977,8 +977,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
       auto frame = m_inst->src(0)->inst();
       consumeFrame(m_state.frames.live.at(frame));
       defineOutputs();
-    } else if (m_inst->is(DecRefLoc)) {
-      consumeLocal(m_inst->extra<DecRefLoc>()->locId);
     } else if (m_inst->is(DecRefThis)) {
       // This only happens during a RetC, and it happens instead of a normal
       // DecRef on $this.

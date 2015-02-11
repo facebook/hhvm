@@ -396,14 +396,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckInitMem:
     return MayLoadStore { pointee(inst.src(0)), AEmpty };
 
-  case DecRefMem:
-    return MayLoadStore {
-      // DecRefMem can re-enter to run a destructor.  We also need to union in
-      // the pointee because it may point to a non-heap location.
-      pointee(inst.src(0)) | AHeapAny | reentry_extra(),
-      ANonFrame
-    };
-
   //////////////////////////////////////////////////////////////////////
   // Object/Ref loads/stores
 
@@ -909,20 +901,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return MayLoadStore { AHeapAny | reentry_extra(), ANonFrame };
     }
     return IrrelevantEffects {};
-
-  case DecRefStk:
-    return MayLoadStore {
-      AHeapAny | AStack { inst.src(0), inst.extra<DecRefStk>()->offset, 1 }
-               | reentry_extra(),
-      ANonFrame
-    };
-
-  case DecRefLoc:
-    return MayLoadStore {
-      AHeapAny | AFrame { inst.src(0), inst.extra<LocalId>()->locId }
-               | reentry_extra(),
-      ANonFrame
-    };
 
   case LdArrFPushCuf:  // autoloads
   case LdArrFuncCtx:   // autoloads

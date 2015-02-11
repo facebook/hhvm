@@ -301,14 +301,12 @@ private:
   SSATmp* preOptimizeCheckCtxThis(IRInstruction*);
   SSATmp* preOptimizeLdCtx(IRInstruction*);
   SSATmp* preOptimizeDecRefThis(IRInstruction*);
-  SSATmp* preOptimizeDecRefLoc(IRInstruction*);
   SSATmp* preOptimizeLdLocPseudoMain(IRInstruction*);
   SSATmp* preOptimizeLdLoc(IRInstruction*);
   SSATmp* preOptimizeStLoc(IRInstruction*);
   SSATmp* preOptimizeCastStk(IRInstruction*);
   SSATmp* preOptimizeCoerceStk(IRInstruction*);
   SSATmp* preOptimizeLdStk(IRInstruction*);
-  SSATmp* preOptimizeDecRefStk(IRInstruction*);
   SSATmp* preOptimize(IRInstruction*);
 
 private:

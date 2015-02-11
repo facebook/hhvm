@@ -249,6 +249,18 @@ void prepareForNextHHBC(HTS& env,
   env.irb->prepareForNextHHBC();
 }
 
+void prepareForHHBCMergePoint(HTS& env) {
+  spillStack(env);
+
+  // For EvalHHIRBytecodeControlFlow we need to make sure the spOffset
+  // is the same on all incoming edges going to a merge point.  This
+  // would "just happen" if we didn't still have instructions that
+  // redefine StkPtrs, but calls still need to do that for now, so we
+  // need this hack.
+  auto spOff = StackOffset{-(env.irb->syncedSpLevel() - env.irb->spOffset())};
+  gen(env, AdjustSP, spOff, sp(env));
+}
+
 size_t logicalStackDepth(const HTS& env) {
   // Negate the offsetFromSP because it is an offset from the actual StkPtr (so
   // negative values go deeper on the stack), but this function deals with

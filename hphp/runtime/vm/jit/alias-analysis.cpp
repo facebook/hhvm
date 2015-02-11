@@ -67,12 +67,18 @@ void visit_locations(const BlockList& blocks, Visit visit) {
   }
 }
 
-uint32_t add_class(AliasAnalysis& ret, AliasClass acls) {
+folly::Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
   auto const ins = ret.locations.insert(std::make_pair(acls, ALocMeta{}));
   if (!ins.second) return ins.first->second.index;
+  if (ret.locations.size() > kMaxTrackedALocs) {
+    always_assert(ret.locations.size() == kMaxTrackedALocs + 1);
+    ret.locations.erase(acls);
+    return folly::none;
+  }
   FTRACE(1, "    new: {}\n", show(acls));
   auto& meta = ins.first->second;
   meta.index = ret.locations.size() - 1;
+  always_assert(meta.index < kMaxTrackedALocs);
   return meta.index;
 };
 
@@ -155,15 +161,17 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
   auto conflict_stkptrs = jit::hash_map<SSATmp*,ALocBits>{};
 
   visit_locations(blocks, [&] (AliasClass acls) {
-    if (blocks.size() >= kMaxTrackedALocs) return;
-
     if (auto const prop = acls.is_prop()) {
-      conflict_prop_offset[prop->offset].set(add_class(ret, acls));
+      if (auto const index = add_class(ret, acls)) {
+        conflict_prop_offset[prop->offset].set(*index);
+      }
       return;
     }
 
     if (auto const elemI = acls.is_elemI()) {
-      conflict_array_index[elemI->idx].set(add_class(ret, acls));
+      if (auto const index = add_class(ret, acls)) {
+        conflict_array_index[elemI->idx].set(*index);
+      }
       return;
     }
 
@@ -182,12 +190,12 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      * The reason for this is that many instructions can have effects like
      * that, when they can re-enter and do things to the stack in some range
      * (below the re-entry depth, for example), but also affect some other type
-     * of memory (DecRefMem, for example).  In particular this means we want
-     * that AliasClass to have an entry in the must_alias_map, so we'll
-     * populate it later.  Currently most of these situations should probably
-     * bail at kMaxExpandedStackRange, although there are some situations that
-     * won't (e.g. instructions like CoerceStk, or DecRefStk, which will have
-     * an AHeapAny (from re-entry) unioned with a single stack slot).
+     * of memory (CastStk, for example).  In particular this means we want that
+     * AliasClass to have an entry in the must_alias_map, so we'll populate it
+     * later.  Currently most of these situations should probably bail at
+     * kMaxExpandedStackRange, although there are some situations that won't
+     * (e.g. instructions like CoerceStk, which will have an AHeapAny (from
+     * re-entry) unioned with a single stack slot).
      */
     if (auto const stk = acls.stack()) {
       if (stk->size > 1) {
@@ -196,14 +204,18 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       if (stk->size > kMaxExpandedStackRange) return;
 
       ALocBits conf_set;
-      for (auto idx = int32_t{0}; idx < stk->size; ++idx) {
-        AliasClass const single = AStack { stk->base, stk->offset - idx, 1 };
-        auto const id = add_class(ret, single);
-        conf_set.set(id);
-        conflict_stkptrs[stk->base].set(id);
+      bool complete = true;
+      for (auto stkidx = int32_t{0}; stkidx < stk->size; ++stkidx) {
+        AliasClass single = AStack { stk->base, stk->offset - stkidx, 1 };
+        if (auto const index = add_class(ret, single)) {
+          conf_set.set(*index);
+          conflict_stkptrs[stk->base].set(*index);
+        } else {
+          complete = false;
+        }
       }
 
-      if (stk->size > 1) {
+      if (stk->size > 1 && complete) {
         FTRACE(2, "    range {}:  {}\n", show(acls), show(conf_set));
         ret.stack_ranges[acls] = conf_set;
       }
@@ -212,6 +224,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     }
   });
 
+  always_assert(ret.locations.size() <= kMaxTrackedALocs);
   if (ret.locations.size() == kMaxTrackedALocs) {
     FTRACE(1, "max locations limit was reached\n");
   }

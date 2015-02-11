@@ -343,22 +343,8 @@ inline void discard(HTS& env, uint32_t n) {
 inline void popDecRef(HTS& env,
                       Type type,
                       TypeConstraint tc = DataTypeCountness) {
-  if (auto const src = env.irb->evalStack().pop()) {
-    env.irb->constrainValue(src, tc);
-    gen(env, DecRef, src);
-    return;
-  }
-
-  auto const offset = offsetFromSP(env, 0);
-  env.irb->constrainStack(offset, tc);
-  gen(
-    env,
-    DecRefStk,
-    StackOffset { offset },
-    type,
-    sp(env)
-  );
-  env.irb->incStackDeficit();
+  auto const val = pop(env, type, tc);
+  gen(env, DecRef, val);
 }
 
 inline SSATmp* push(HTS& env, SSATmp* tmp) {
@@ -532,12 +518,6 @@ inline SSATmp* ldCls(HTS& env, SSATmp* className) {
     return gen(env, LdClsCached, className);
   }
   return gen(env, LdCls, className, cns(env, curClass(env)));
-}
-
-inline void decRefLocalsInline(HTS& env) {
-  for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
-    gen(env, DecRefLoc, Type::Gen, LocalId(id), fp(env));
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -769,6 +749,14 @@ inline SSATmp* ldStkAddr(HTS& env, int32_t relOffset) {
     StackOffset { offset },
     sp(env)
   );
+}
+
+inline void decRefLocalsInline(HTS& env) {
+  assert(!curFunc(env)->isPseudoMain());
+  for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
+    auto const loc = ldLoc(env, id, nullptr, DataTypeGeneric);
+    gen(env, DecRef, loc);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

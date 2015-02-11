@@ -39,12 +39,13 @@ class ArrayIter;
  * type of ArrayData to accomplish the task. This "upgrade" is called
  * escalation.
  */
-class Array : protected SmartPtr<ArrayData> {
-  typedef SmartPtr<ArrayData> ArrayBase;
+class Array {
+  SmartPtr<ArrayData> m_arr;
 
-  explicit Array(ArrayData* ad, ArrayBase::NoIncRef)
-   : ArrayBase(ad, ArrayBase::NoIncRef{})
-  {}
+  typedef SmartPtr<ArrayData>::NoIncRef NoIncRef;
+  typedef SmartPtr<ArrayData>::NonNull NonNull;
+
+  Array(ArrayData* ad, NoIncRef) : m_arr(ad, NoIncRef{}) {}
 
 public:
   /*
@@ -67,24 +68,18 @@ public:
 
   // Take ownership of this ArrayData.
   static ALWAYS_INLINE Array attach(ArrayData* ad) {
-    return Array(ad, ArrayBase::NoIncRef{});
+    return Array(ad, NoIncRef{});
   }
 
   // Transfer ownership of our reference to this ArrayData.
-  ArrayData* detach() {
-    ArrayData* ret = m_px;
-    m_px = nullptr;
-    return ret;
-  }
+  ArrayData* detach() { return m_arr.detach(); }
 
-  ArrayData* get() const { return m_px; }
-  void reset() { ArrayBase::reset(); }
+  ArrayData* get() const { return m_arr.get(); }
+  void reset() { m_arr.reset(); }
 
   // Deliberately doesn't throw_null_pointer_exception as a perf
   // optimization.
-  ArrayData* operator->() const {
-    return m_px;
-  }
+  ArrayData* operator->() const { return m_arr.get(); }
 
   void escalate();
 
@@ -93,8 +88,8 @@ public:
    * array value from the parameter, and they are NOT constructing an array
    * with that single value (then one should use Array::Create() functions).
    */
-  explicit Array(ArrayData* data) : ArrayBase(data) { }
-  /* implicit */ Array(const Array& arr) : ArrayBase(arr.m_px) { }
+  explicit Array(ArrayData* data) : m_arr(data) { }
+  /* implicit */ Array(const Array& arr) : m_arr(arr.m_arr) { }
 
   /*
    * Special constructor for use from ArrayInit that creates an Array
@@ -102,15 +97,15 @@ public:
    */
   enum class ArrayInitCtor { Tag };
   explicit Array(ArrayData* ad, ArrayInitCtor)
-    : ArrayBase(ad, ArrayBase::NonNull::Tag)
+    : m_arr(ad, NonNull::Tag)
   {}
 
   // Move ctor
-  Array(Array&& src) noexcept : ArrayBase(std::move(src)) { }
+  Array(Array&& src) noexcept : m_arr(std::move(src.m_arr)) { }
 
   // Move assign
   Array& operator=(Array&& src) {
-    ArrayBase::operator=(std::move(src));
+    m_arr = std::move(src.m_arr);
     return *this;
   }
 
@@ -118,34 +113,40 @@ public:
    * Informational
    */
   bool empty() const {
-    return m_px == nullptr || m_px->empty();
+    return !m_arr || m_arr->empty();
   }
   ssize_t size() const {
-    return m_px ? m_px->size() : 0;
+    return m_arr ? m_arr->size() : 0;
   }
   ssize_t length() const {
-    return m_px ? m_px->size() : 0;
+    return m_arr ? m_arr->size() : 0;
   }
   bool isNull() const {
-    return m_px == nullptr;
+    return !m_arr;
   }
   Array values() const;
 
   /*
    * Operators
    */
-  Array& operator =  (ArrayData* data);
-  Array& operator =  (const Array& v);
-  Array& operator =  (const Variant& v);
-  Array  operator +  (ArrayData* data) const;
-  Array  operator +  (const Array& v) const;
-  Array  operator +  (const Variant& v) const = delete;
-  Array& operator += (ArrayData* data);
-  Array& operator += (const Array& v);
-  Array& operator += (const Variant& v);
+  Array& operator=(ArrayData* data) {
+    m_arr = data;
+    return *this;
+  }
+  Array& operator=(const Array& arr) {
+    m_arr = arr.m_arr;
+    return *this;
+  }
+  Array& operator=(const Variant& v);
+  Array  operator+(ArrayData* data) const;
+  Array  operator+(const Array& v) const;
+  Array  operator+(const Variant& v) const = delete;
+  Array& operator+=(ArrayData* data);
+  Array& operator+=(const Array& v);
+  Array& operator+=(const Variant& v);
 
   // Move assignment
-  Array& operator =  (Variant&& v);
+  Array& operator=(Variant&& v);
 
   /*
    * Returns the entries that have keys and/or values that are not present in
@@ -253,12 +254,12 @@ public:
   /*
    * Type conversions
    */
-  bool    toBoolean() const { return  m_px && !m_px->empty(); }
-  char    toByte   () const { return (m_px && !m_px->empty()) ? 1 : 0; }
-  short   toInt16  () const { return (m_px && !m_px->empty()) ? 1 : 0; }
-  int     toInt32  () const { return (m_px && !m_px->empty()) ? 1 : 0; }
-  int64_t toInt64  () const { return (m_px && !m_px->empty()) ? 1 : 0; }
-  double  toDouble () const { return (m_px && !m_px->empty()) ? 1.0 : 0.0; }
+  bool    toBoolean() const { return  m_arr && !m_arr->empty(); }
+  char    toByte   () const { return (m_arr && !m_arr->empty()) ? 1 : 0; }
+  short   toInt16  () const { return (m_arr && !m_arr->empty()) ? 1 : 0; }
+  int     toInt32  () const { return (m_arr && !m_arr->empty()) ? 1 : 0; }
+  int64_t toInt64  () const { return (m_arr && !m_arr->empty()) ? 1 : 0; }
+  double  toDouble () const { return (m_arr && !m_arr->empty()) ? 1.0 : 0.0; }
   String  toString () const;
 
   /*
@@ -415,24 +416,24 @@ public:
 
   template<typename T>
   bool existsImpl(const T& key) const {
-    if (m_px) return m_px->exists(key);
+    if (m_arr) return m_arr->exists(key);
     return false;
   }
 
   template<typename T>
   void removeImpl(const T& key) {
-    if (m_px) {
-      ArrayData* escalated = m_px->remove(key, (m_px->hasMultipleRefs()));
-      if (escalated != m_px) ArrayBase::operator=(escalated);
+    if (m_arr) {
+      ArrayData* escalated = m_arr->remove(key, (m_arr->hasMultipleRefs()));
+      if (escalated != m_arr) m_arr = escalated;
     }
   }
 
   template<typename T>
   Variant& lvalAtImpl(const T& key, ACCESSPARAMS_DECL) {
-    if (!m_px) ArrayBase::operator=(ArrayData::Create());
+    if (!m_arr) m_arr = ArrayData::Create();
     Variant* ret = nullptr;
-    ArrayData* escalated = m_px->lval(key, ret, m_px->hasMultipleRefs());
-    if (escalated != m_px) ArrayBase::operator=(escalated);
+    ArrayData* escalated = m_arr->lval(key, ret, m_arr->hasMultipleRefs());
+    if (escalated != m_arr) m_arr = escalated;
     assert(ret);
     return *ret;
   }

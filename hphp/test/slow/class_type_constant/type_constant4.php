@@ -17,5 +17,11 @@ function not_enforced(C::T $x): C::T {
   return 0;
 }
 
+async function gen_not_enforced(Awaitable<C::T> $x): Awaitable<C::T> {
+  return 0;
+}
+
 C::not_enforced(null);
 not_enforced(null);
+
+gen_not_enforced(async { return null; })->join();

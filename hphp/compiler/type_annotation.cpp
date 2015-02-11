@@ -171,7 +171,7 @@ void TypeAnnotation::genericTypeName(std::string &name) const {
 
 void TypeAnnotation::accessTypeName(std::string &name) const {
   name += m_name;
-  TypeAnnotationPtr typeEl = m_typeList;
+  TypeAnnotationPtr typeEl = m_typeArgs;
   while (typeEl) {
     name += "::";
     name += typeEl->fullName();

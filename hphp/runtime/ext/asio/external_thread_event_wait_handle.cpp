@@ -32,15 +32,21 @@ namespace {
   StaticString s_externalThreadEvent("<external-thread-event>");
 }
 
-void c_ExternalThreadEventWaitHandle::ti_setoncreatecallback(const Variant& callback) {
+void c_ExternalThreadEventWaitHandle::ti_setoncreatecallback(
+  const Variant& callback
+) {
   AsioSession::Get()->setOnExternalThreadEventCreateCallback(callback);
 }
 
-void c_ExternalThreadEventWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
+void c_ExternalThreadEventWaitHandle::ti_setonsuccesscallback(
+  const Variant& callback
+) {
   AsioSession::Get()->setOnExternalThreadEventSuccessCallback(callback);
 }
 
-void c_ExternalThreadEventWaitHandle::ti_setonfailcallback(const Variant& callback) {
+void c_ExternalThreadEventWaitHandle::ti_setonfailcallback(
+  const Variant& callback
+) {
   AsioSession::Get()->setOnExternalThreadEventFailCallback(callback);
 }
 
@@ -61,13 +67,23 @@ void c_ExternalThreadEventWaitHandle::sweep() {
   }
 }
 
-c_ExternalThreadEventWaitHandle* c_ExternalThreadEventWaitHandle::Create(AsioExternalThreadEvent* event, ObjectData* priv_data) {
+void c_ExternalThreadEventWaitHandle::Sweep(ObjectData* p) {
+  static_cast<c_ExternalThreadEventWaitHandle*>(p)->sweep();
+}
+
+c_ExternalThreadEventWaitHandle* c_ExternalThreadEventWaitHandle::Create(
+  AsioExternalThreadEvent* event,
+  ObjectData* priv_data
+) {
   auto wh = newobj<c_ExternalThreadEventWaitHandle>();
   wh->initialize(event, priv_data);
   return wh;
 }
 
-void c_ExternalThreadEventWaitHandle::initialize(AsioExternalThreadEvent* event, ObjectData* priv_data) {
+void c_ExternalThreadEventWaitHandle::initialize(
+  AsioExternalThreadEvent* event,
+  ObjectData* priv_data
+) {
   setState(STATE_WAITING);
   m_event = event;
   m_privData = priv_data;
@@ -90,7 +106,7 @@ void c_ExternalThreadEventWaitHandle::destroyEvent(bool sweeping /*= false */) {
   m_event->release();
   m_event = nullptr;
 
-  // unregister from sweep()
+  // unregister SweepableObj
   unregister();
 
   if (LIKELY(!sweeping)) {

@@ -147,6 +147,13 @@ void prepareForNextHHBC(HTS&,
                         bool lastBcOff);
 
 /*
+ * This is called before emitting instructions that can jump to a
+ * block corresponding to a control-flow merge point at the bytecode
+ * level.
+ */
+void prepareForHHBCMergePoint(HTS&);
+
+/*
  * This is called by the region translator to force the stack to be
  * spilled due to a potential side exit.  This is just an
  * optimization, which enables smashing a branch in the main code

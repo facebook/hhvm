@@ -316,11 +316,8 @@ bool canDCE(IRInstruction* inst) {
   case ReqRetranslateOpt:
   case IncRef:
   case IncRefCtx:
-  case DecRefLoc:
-  case DecRefStk:
   case DecRefThis:
   case DecRef:
-  case DecRefMem:
   case DecRefNZ:
   case DefFP:
   case DefSP:
@@ -720,9 +717,6 @@ void performActRecFixups(const BlockList& blocks,
        * stomp on the caller's frame if it reenters.
        */
       case DecRef:
-      case DecRefLoc:
-      case DecRefStk:
-      case DecRefMem:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
           inst.marker().setSpOff(safeDepth);

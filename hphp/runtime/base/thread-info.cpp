@@ -70,7 +70,7 @@ void ThreadInfo::init() {
 
   Lock lock(s_thread_info_mutex);
   s_thread_infos.insert(this);
-  Sweepable::InitSweepableList();
+  Sweepable::InitList();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {

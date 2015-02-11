@@ -1323,8 +1323,6 @@ To string conversions:
   Does decrefs of all the current function's locals, where S0 is a pointer to
   the relevant activation record.
 
-  Semantically similar to a series of DecRefLoc.
-
 
 10. Stores
 
@@ -1420,14 +1418,6 @@ To string conversions:
 
   If the Ctx in S0 is a $this pointer, IncRef it.
 
-| DecRefLoc<localId>, ND, S(FramePtr), NF
-
-  DecRef the local given by localId on the frame S0.
-
-| DecRefStk<T,offset>, ND, S(StkPtr), NF
-
-  DecRef a value of type T at offset on the stack pointed to by S0.
-
 | DecRefThis, ND, S(FramePtr), NF
 
   DecRef the $this pointer in the ActRec S0, if it had one. Does nothing if
@@ -1443,11 +1433,6 @@ To string conversions:
   inner types of a BoxedCell except when doing LdRef. For any S0 that is a
   strict subtype of BoxedCell, the DecRef must just decref it as if it were a
   BoxedCell.
-
-| DecRefMem<offset>, ND, S(PtrToGen), CRc
-
-  Decref the value pointed to by S0 + offset (in bytes), calling any
-  appropriate destructor if the refcount goes to zero.
 
 | DecRefNZ, ND, S(Gen), CRc
 

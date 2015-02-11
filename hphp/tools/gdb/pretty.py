@@ -140,7 +140,7 @@ class PtrPrinter:
 
 
 class SmartPtrPrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::(SmartPtr<.*>|(Static)?String|Object)$'
+    RECOGNIZE = '^HPHP::(SmartPtr<.*>|(Static)?String)$'
 
     def __init__(self, val):
         self.val = val
@@ -159,6 +159,15 @@ class ArrayPrinter(PtrPrinter):
 
     def _pointer(self):
         return self.val['m_arr']['m_px']
+
+class ObjectPrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::Object$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def _pointer(self):
+        return self.val['m_obj']['m_px']
 
 class ResourcePrinter(PtrPrinter):
     RECOGNIZE = '^HPHP::Resource$'
@@ -335,6 +344,7 @@ printer_classes = [
     TypedValuePrinter,
     SmartPtrPrinter,
     ArrayPrinter,
+    ObjectPrinter,
     ResourcePrinter,
     LowPtrPrinter,
     StringDataPrinter,

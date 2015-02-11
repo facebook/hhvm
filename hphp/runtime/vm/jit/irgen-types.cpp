@@ -277,12 +277,12 @@ folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
 
   case T::SArr:
     if (auto const arr = rat.array()) {
-      return Type::StaticArr.specialize(arr);
+      return Type::StaticArray(arr);
     }
     return Type::StaticArr;
   case T::Arr:
     if (auto const arr = rat.array()) {
-      return Type::Arr.specialize(arr);
+      return Type::Array(arr);
     }
     return Type::Arr;
 
@@ -295,13 +295,13 @@ folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
       auto const cls = Unit::lookupClassOrUniqueClass(rat.clsName());
       if (classIsUniqueOrCtxParent(env, cls)) {
         if (rat.tag() == T::OptExactObj || rat.tag() == T::ExactObj) {
-          ty = ty.specializeExact(cls);
+          ty = Type::ExactObj(cls);
         } else {
-          ty = ty.specialize(cls);
+          ty = Type::SubObj(cls);
         }
       }
       if (rat.tag() == T::OptExactObj || rat.tag() == T::OptSubObj) {
-        ty = ty | Type::InitNull;
+        ty |= Type::InitNull;
       }
       return ty;
     }

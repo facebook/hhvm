@@ -424,11 +424,13 @@ Type Type::specialize(TypeSpec spec) const {
     arr_okay = false;
   }
 
+  auto generic = Type(bits, ptr);
+
   // If we support a nonsingular number of specializations, we're done.
   if (arr_okay == cls_okay) return *this;
 
-  if (cls_okay && spec.clsSpec()) return Type(bits, ptr, spec.clsSpec());
-  if (arr_okay && spec.arrSpec()) return Type(bits, ptr, spec.arrSpec());
+  if (cls_okay && spec.clsSpec()) return Type(generic, spec.clsSpec());
+  if (arr_okay && spec.arrSpec()) return Type(generic, spec.arrSpec());
 
   return *this;
 }
@@ -529,14 +531,14 @@ Type liveTVType(const TypedValue* tv) {
     // overridden for now. If this changes, then this will need to
     // specialize on sub object types instead.
     if (!cls || !(cls->attrs() & AttrNoOverride)) return Type::Obj;
-    return Type::Obj.specializeExact(cls);
+    return Type::ExactObj(cls);
   }
   if (tv->m_type == KindOfArray) {
     ArrayData* ar = tv->m_data.parr;
     if (ar->kind() == ArrayData::kStructKind) {
-      return Type::Arr.specialize(StructArray::asStructArray(ar)->shape());
+      return Type::Array(StructArray::asStructArray(ar)->shape());
     }
-    return Type::Arr.specialize(tv->m_data.parr->kind());
+    return Type::Array(tv->m_data.parr->kind());
   }
 
   auto outer = tv->m_type;
@@ -603,7 +605,7 @@ Type thisReturn(const IRInstruction* inst) {
   if (func->hasForeignThis()) return Type::Obj;
 
   if (auto const cls = func->cls()) {
-    return Type::Obj.specialize(cls);
+    return Type::SubObj(cls);
   }
   return Type::Obj;
 }
@@ -611,14 +613,14 @@ Type thisReturn(const IRInstruction* inst) {
 Type allocObjReturn(const IRInstruction* inst) {
   switch (inst->op()) {
     case ConstructInstance:
-      return Type::Obj.specialize(inst->extra<ConstructInstance>()->cls);
+      return Type::SubObj(inst->extra<ConstructInstance>()->cls);
 
     case NewInstanceRaw:
-      return Type::Obj.specializeExact(inst->extra<NewInstanceRaw>()->cls);
+      return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
 
     case AllocObj:
       return inst->src(0)->isConst()
-        ? Type::Obj.specializeExact(inst->src(0)->clsVal())
+        ? Type::ExactObj(inst->src(0)->clsVal())
         : Type::Obj;
 
     default:
@@ -736,29 +738,27 @@ Type convertToType(RepoAuthType ty) {
   case T::OptSArr:        return Type::StaticArr | Type::InitNull;
 
   case T::SArr:
-    if (auto const ar = ty.array()) return Type::StaticArr.specialize(ar);
+    if (auto const ar = ty.array()) return Type::StaticArray(ar);
     return Type::StaticArr;
   case T::Arr:
-    if (auto const ar = ty.array()) return Type::Arr.specialize(ar);
+    if (auto const ar = ty.array()) return Type::Array(ar);
     return Type::Arr;
 
   case T::SubObj:
-  case T::ExactObj: {
-    auto const base = Type::Obj;
-    if (auto const cls = Unit::lookupClassOrUniqueClass(ty.clsName())) {
-      return ty.tag() == T::ExactObj ?
-        base.specializeExact(cls) :
-        base.specialize(cls);
-    }
-    return base;
-  }
+  case T::ExactObj:
   case T::OptSubObj:
   case T::OptExactObj: {
-    auto const base = Type::Obj | Type::InitNull;
+    auto base = Type::Obj;
+
     if (auto const cls = Unit::lookupClassOrUniqueClass(ty.clsName())) {
-      return ty.tag() == T::OptExactObj ?
-        base.specializeExact(cls) :
-        base.specialize(cls);
+      if (ty.tag() == T::ExactObj || ty.tag() == T::OptExactObj) {
+        base = Type::ExactObj(cls);
+      } else {
+        base = Type::SubObj(cls);
+      }
+    }
+    if (ty.tag() == T::OptSubObj || ty.tag() == T::OptExactObj) {
+      base |= Type::InitNull;
     }
     return base;
   }
@@ -800,7 +800,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DBoxPtr         return boxPtr(inst->src(0)->type());
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
-#define DArrPacked      return Type::Arr.specialize(ArrayData::kPackedKind);
+#define DArrPacked      return Type::Array(ArrayData::kPackedKind);
 #define DThis           return thisReturn(inst);
 #define DMulti          return Type::Bottom;
 #define DSetElem        return setElemReturn(inst);
@@ -994,8 +994,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
                         ++curSrc;                         \
                       }
 #define AK(kind)      {                                                 \
-                        Type t = Type::Arr.specialize(                  \
-                          ArrayData::k##kind##Kind);                    \
+                        Type t = Type::Array(ArrayData::k##kind##Kind); \
                         check(src()->isA(t), t, nullptr);               \
                         ++curSrc;                                       \
                       }

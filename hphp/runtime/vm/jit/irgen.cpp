@@ -207,7 +207,7 @@ Type predictedTypeFromLocation(HTS& env, const Location& loc) {
       // Don't specialize $this for cloned closures which may have been re-bound
       if (curFunc(env)->hasForeignThis()) return Type::Obj;
       if (auto const cls = curFunc(env)->cls()) {
-        return Type::Obj.specialize(cls);
+        return Type::SubObj(cls);
       }
       return Type::Obj;
 

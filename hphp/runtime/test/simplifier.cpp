@@ -159,7 +159,7 @@ TEST(Simplifier, Count) {
 
   // Count($array_packed) --> CountArrayFast($array_packed)
   {
-    auto ty = Type::Arr.specialize(ArrayData::kPackedKind);
+    auto ty = Type::Array(ArrayData::kPackedKind);
     auto arr = unit.gen(Conjure, dummy, ty);
     auto count = unit.gen(Count, dummy, arr->dst());
     auto result = simplify(unit, count, false);
@@ -186,7 +186,7 @@ TEST(Simplifier, LdObjClass) {
 
   // LdObjClass t1:Obj<=C doesn't simplify
   {
-    auto sub = Type::Obj.specialize(cls);
+    auto sub = Type::SubObj(cls);
     auto obj = unit.gen(Conjure, dummy, sub);
     auto load = unit.gen(LdObjClass, dummy, obj->dst());
     auto result = simplify(unit, load, false);
@@ -195,7 +195,7 @@ TEST(Simplifier, LdObjClass) {
 
   // LdObjClass t1:Obj=C --> Cls(C)
   {
-    auto exact = Type::Obj.specializeExact(cls);
+    auto exact = Type::ExactObj(cls);
     auto obj = unit.gen(Conjure, dummy, exact);
     auto load = unit.gen(LdObjClass, dummy, obj->dst());
     auto result = simplify(unit, load, false);

@@ -389,7 +389,7 @@ static void populateLiveContext(RegionContext& ctx) {
       // TODO(#2466980): when it's a Cls, we should pass the Class* in
       // the Type.
       auto const objOrCls =
-        ar->hasThis()  ? Type::Obj.specialize(ar->getThis()->getVMClass()) :
+        ar->hasThis()  ? Type::SubObj(ar->getThis()->getVMClass()) :
         ar->hasClass() ? Type::Cls
                        : Type::Nullptr;
 

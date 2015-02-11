@@ -220,7 +220,7 @@ inline Type Type::forConst(const StringData* sd) {
 
 inline Type Type::forConst(const ArrayData* ad) {
   assert(ad->isStatic());
-  return StaticArr.specialize(ad->kind());
+  return StaticArray(ad->kind());
 }
 
 inline bool Type::isConst() const {
@@ -296,7 +296,7 @@ inline Type Type::dropConstVal() const {
   assert(!isUnion());
 
   if (subtypeOf(StaticArr)) {
-    return Type::StaticArr.specialize(arrVal()->kind());
+    return Type::StaticArray(arrVal()->kind());
   }
   return Type(m_bits, rawPtrKind());
 }
@@ -366,34 +366,37 @@ inline Type Type::cns(const TypedValue& tv) {
 ///////////////////////////////////////////////////////////////////////////////
 // Specialized type creation.
 
-inline Type Type::specialize(const Class* klass) const {
-  assert(klass != nullptr);
-  assert(supports(SpecKind::Class) && !clsSpec());
-
-  if (klass->attrs() & AttrNoOverride) return specializeExact(klass);
-  return Type(m_bits, rawPtrKind(), ClassSpec(klass, ClassSpec::SubTag{}));
+inline Type Type::Array(ArrayData::ArrayKind kind) {
+  return Type(Type::Arr, ArraySpec(kind));
 }
 
-inline Type Type::specializeExact(const Class* klass) const {
-  assert(klass != nullptr);
-  assert(supports(SpecKind::Class) && !clsSpec());
-
-  return Type(m_bits, rawPtrKind(), ClassSpec(klass, ClassSpec::ExactTag{}));
+inline Type Type::Array(const RepoAuthType::Array* rat) {
+  return Type(Type::Arr, ArraySpec(rat));
 }
 
-inline Type Type::specialize(ArrayData::ArrayKind arrayKind) const {
-  assert(supports(SpecKind::Array));
-  return Type(m_bits, rawPtrKind(), ArraySpec(arrayKind));
+inline Type Type::Array(const Shape* shape) {
+  return Type(Type::Arr, ArraySpec(shape));
 }
 
-inline Type Type::specialize(const RepoAuthType::Array* arrayTy) const {
-  assert(supports(SpecKind::Array));
-  return Type(m_bits, rawPtrKind(), ArraySpec(arrayTy));
+inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
+  return Type(Type::StaticArr, ArraySpec(kind));
 }
 
-inline Type Type::specialize(const Shape* shape) const {
-  assert(supports(SpecKind::Array));
-  return Type(m_bits, rawPtrKind(), ArraySpec(shape));
+inline Type Type::StaticArray(const RepoAuthType::Array* rat) {
+  return Type(Type::StaticArr, ArraySpec(rat));
+}
+
+inline Type Type::StaticArray(const Shape* shape) {
+  return Type(Type::StaticArr, ArraySpec(shape));
+}
+
+inline Type Type::SubObj(const Class* cls) {
+  if (cls->attrs() & AttrNoOverride) return ExactObj(cls);
+  return Type(Type::Obj, ClassSpec(cls, ClassSpec::SubTag{}));
+}
+
+inline Type Type::ExactObj(const Class* cls) {
+  return Type(Type::Obj, ClassSpec(cls, ClassSpec::ExactTag{}));
 }
 
 inline Type Type::unspecialize() const {
@@ -488,8 +491,6 @@ inline Type Type::derefIfPtr() const {
   return isPtr() ? deref() : *this;
 }
 
-// Returns the "stripped" version of this: dereferenced and unboxed,
-// if applicable.
 inline Type Type::strip() const {
   return derefIfPtr().unbox();
 }
@@ -521,24 +522,24 @@ inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra /* = 0 */)
   assert(checkValid());
 }
 
-inline Type::Type(bits_t bits, Ptr kind, ClassSpec classSpec)
-  : m_bits(bits)
-  , m_ptrKind(static_cast<std::underlying_type<Ptr>::type>(kind))
-  , m_hasConstVal(false)
-  , m_clsSpec(classSpec)
-{
-  assert(checkValid());
-  assert(m_clsSpec != ClassSpec::Bottom);
-}
-
-inline Type::Type(bits_t bits, Ptr kind, ArraySpec arraySpec)
-  : m_bits(bits)
-  , m_ptrKind(static_cast<std::underlying_type<Ptr>::type>(kind))
+inline Type::Type(Type t, ArraySpec arraySpec)
+  : m_bits(t.m_bits)
+  , m_ptrKind(t.m_ptrKind)
   , m_hasConstVal(false)
   , m_arrSpec(arraySpec)
 {
   assert(checkValid());
   assert(m_arrSpec != ArraySpec::Bottom);
+}
+
+inline Type::Type(Type t, ClassSpec classSpec)
+  : m_bits(t.m_bits)
+  , m_ptrKind(t.m_ptrKind)
+  , m_hasConstVal(false)
+  , m_clsSpec(classSpec)
+{
+  assert(checkValid());
+  assert(m_clsSpec != ClassSpec::Bottom);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

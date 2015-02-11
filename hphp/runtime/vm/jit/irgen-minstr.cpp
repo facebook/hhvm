@@ -1334,7 +1334,7 @@ void emitProfiledPackedArrayGet(MTS& env, SSATmp* key) {
     auto const data = prof.data(NonPackedArrayProfile::reduce);
     // NonPackedArrayProfile data counts how many times a non-packed array was
     // observed.  Zero means it was monomorphic (or never executed).
-    auto const typePackedArr = Type::Arr.specialize(ArrayData::kPackedKind);
+    auto const typePackedArr = Type::Array(ArrayData::kPackedKind);
     if (env.base.type.maybe(typePackedArr) &&
         (data.count == 0 || RuntimeOption::EvalJitPGOArrayGetStress)) {
       // It's safe to side-exit still because we only do these profiled array
@@ -1384,16 +1384,15 @@ void emitProfiledStructArrayGet(MTS& env, SSATmp* key) {
     // monomorphic, we'll emit a check for that specific Shape. If we're
     // polymorphic, we'll also fall back to generic get. Eventually we'd like
     // to emit an inline cache, which should be faster than calling out of line.
-    auto typeStructArr = Type::Arr.specialize(ArrayData::kStructKind);
-    if (env.base.type.maybe(typeStructArr)) {
+    if (env.base.type.maybe(Type::Array(ArrayData::kStructKind))) {
       if (data.nonStructCount == 0 && data.isMonomorphic()) {
-        typeStructArr = Type::Arr.specialize(data.getShape());
         // It's safe to side-exit still because we only do these profiled array
         // gets on the first element, with simple bases and single-element dims.
         // See computeSimpleCollectionOp.
         auto const exit = makeExit(env);
-        setBase(env,
-          gen(env, CheckType, typeStructArr, exit, env.base.value));
+        auto const ssa = gen(
+          env, CheckType, Type::Array(data.getShape()), exit, env.base.value);
+        setBase(env, ssa);
         env.irb.constrainValue(
           env.base.value,
           TypeConstraint(DataTypeSpecialized).setWantArrayShape()

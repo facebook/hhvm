@@ -651,25 +651,27 @@ public:
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Specialized type creation.                                         [const]
+  // Specialized type creation.                                  [const/static]
 
   /*
-   * Return a copy of this Type specialized with `klass'.
-   *
-   * Pre: canSpecializeClass() && getClass() == nullptr
-   *      `klass' != nullptr
+   * Return a specialized Type::Arr.
    */
-  Type specialize(const Class* klass) const;
-  Type specializeExact(const Class* klass) const;
+  static Type Array(ArrayData::ArrayKind kind);
+  static Type Array(const RepoAuthType::Array* rat);
+  static Type Array(const Shape* shape);
 
   /*
-   * Return a copy of this Type specialized with array information.
-   *
-   * @requires: canSpecializeArray()
+   * Return a specialized Type::StaticArr.
    */
-  Type specialize(ArrayData::ArrayKind arrayKind) const;
-  Type specialize(const RepoAuthType::Array* arrayTy) const;
-  Type specialize(const Shape* shape) const;
+  static Type StaticArray(ArrayData::ArrayKind kind);
+  static Type StaticArray(const RepoAuthType::Array* rat);
+  static Type StaticArray(const Shape* shape);
+
+  /*
+   * Return a specialized Type::Obj.
+   */
+  static Type SubObj(const Class* cls);
+  static Type ExactObj(const Class* cls);
 
   /*
    * Return a copy of this Type with the specialization dropped.
@@ -782,13 +784,11 @@ public:
 
 private:
   /*
-   * Raw constructors.
+   * Specialized type internal constructors.
    */
   Type(bits_t bits, Ptr kind, uintptr_t extra = 0);
-  Type(bits_t bits, Ptr kind, ArraySpec arraySpec);
-  Type(bits_t bits, Ptr kind, ClassSpec classSpec);
-
-  Type(bits_t bits, ArrayData::ArrayKind) = delete;
+  Type(Type t, ArraySpec arraySpec);
+  Type(Type t, ClassSpec classSpec);
 
   /*
    * Return false if a specialized type has a mismatching tag, else true.

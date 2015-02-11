@@ -102,8 +102,8 @@ TEST(Type, ToString) {
   EXPECT_EQ("BoxedDbl", Type::BoxedDbl.toString());
 
 
-  auto const sub = Type::Obj.specialize(SystemLib::s_IteratorClass);
-  auto const exact = Type::Obj.specializeExact(SystemLib::s_IteratorClass);
+  auto const sub = Type::SubObj(SystemLib::s_IteratorClass);
+  auto const exact = Type::ExactObj(SystemLib::s_IteratorClass);
 
   EXPECT_EQ("Obj<=Iterator", sub.toString());
   EXPECT_EQ("Obj=Iterator", exact.toString());
@@ -219,7 +219,7 @@ TEST(Type, TypeConstraints) {
 
   EXPECT_FALSE(fits(Type::Arr,
                     TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
-  EXPECT_TRUE(fits(Type::Arr.specialize(ArrayData::kPackedKind),
+  EXPECT_TRUE(fits(Type::Array(ArrayData::kPackedKind),
                    TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
 }
 
@@ -233,7 +233,7 @@ TEST(Type, RelaxType) {
   auto tc = TypeConstraint{DataTypeSpecialized};
   tc.setDesiredClass(SystemLib::s_IteratorClass);
   tc.category = DataTypeSpecialized;
-  auto type = Type::Obj.specialize(SystemLib::s_IteratorClass);
+  auto type = Type::SubObj(SystemLib::s_IteratorClass);
   EXPECT_EQ("Obj<=Iterator", type.toString());
   EXPECT_EQ(type, relaxType(type, tc));
 
@@ -256,7 +256,7 @@ TEST(Type, RelaxConstraint) {
 }
 
 TEST(Type, Specialized) {
-  auto packed = Type::Arr.specialize(ArrayData::kPackedKind);
+  auto packed = Type::Array(ArrayData::kPackedKind);
   EXPECT_LE(packed, Type::Arr);
   EXPECT_LT(packed, Type::Arr);
   EXPECT_FALSE(Type::Arr <= packed);
@@ -275,7 +275,7 @@ TEST(Type, Specialized) {
   auto const arrDataMixed = ArrayData::GetScalarArray(mixed.get());
   auto constArray = Type::cns(arrData);
   auto constArrayMixed = Type::cns(arrDataMixed);
-  auto const spacked = Type::StaticArr.specialize(ArrayData::kPackedKind);
+  auto const spacked = Type::StaticArray(ArrayData::kPackedKind);
   EXPECT_EQ(spacked, spacked - constArray); // conservative
   EXPECT_EQ(Type::Bottom, constArray - spacked);
 
@@ -285,7 +285,7 @@ TEST(Type, Specialized) {
 
   // Checking specialization dropping.
   EXPECT_EQ(Type::Arr | Type::BoxedInitCell, packed | Type::BoxedInitCell);
-  auto specializedObj = Type::Obj.specialize(SystemLib::s_IteratorClass);
+  auto specializedObj = Type::SubObj(SystemLib::s_IteratorClass);
   EXPECT_EQ(Type::Arr | Type::Obj, packed | specializedObj);
 }
 
@@ -295,10 +295,10 @@ TEST(Type, SpecializedObjects) {
   EXPECT_TRUE(A->classof(B));
 
   auto const obj = Type::Obj;
-  auto const exactA = obj.specializeExact(A);
-  auto const exactB = obj.specializeExact(B);
-  auto const subA = obj.specialize(A);
-  auto const subB = obj.specialize(B);
+  auto const exactA = Type::ExactObj(A);
+  auto const exactB = Type::ExactObj(B);
+  auto const subA = Type::SubObj(A);
+  auto const subB = Type::SubObj(B);
 
   EXPECT_EQ(exactA.clsSpec().cls(), A);
   EXPECT_EQ(subA.clsSpec().cls(), A);
@@ -382,8 +382,8 @@ TEST(Type, Const) {
   auto array = make_packed_array(1, 2, 3, 4);
   auto arrData = ArrayData::GetScalarArray(array.get());
   auto constArray = Type::cns(arrData);
-  auto packedArray = Type::Arr.specialize(ArrayData::kPackedKind);
-  auto mixedArray = Type::Arr.specialize(ArrayData::kMixedKind);
+  auto packedArray = Type::Array(ArrayData::kPackedKind);
+  auto mixedArray = Type::Array(ArrayData::kMixedKind);
 
   EXPECT_TRUE(constArray <= packedArray);
   EXPECT_TRUE(constArray < packedArray);
@@ -397,10 +397,10 @@ TEST(Type, Const) {
   ArrayTypeTable::Builder ratBuilder;
   auto rat1 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
                                  RepoAuthType(RepoAuthType::Tag::Str));
-  auto ratArray1 = Type::Arr.specialize(rat1);
+  auto ratArray1 = Type::Array(rat1);
   auto rat2 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
                                  RepoAuthType(RepoAuthType::Tag::Int));
-  auto ratArray2 = Type::Arr.specialize(rat2);
+  auto ratArray2 = Type::Array(rat2);
   EXPECT_EQ(Type::Arr, ratArray1 & ratArray2);
   EXPECT_TRUE(ratArray1 < Type::Arr);
   EXPECT_TRUE(ratArray1 <= ratArray1);

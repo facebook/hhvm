@@ -838,9 +838,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(MaxSerializedStringSize, ini,
                  error["MaxSerializedStringSize"], 64 * 1024 * 1024);
     Config::Bind(CallUserHandlerOnFatals, ini,
-                 error["CallUserHandlerOnFatals"], false);
+                 error["CallUserHandlerOnFatals"], true);
     Config::Bind(ThrowExceptionOnBadMethodCall, ini,
-                 error["ThrowExceptionOnBadMethodCall"], true);
+                 error["ThrowExceptionOnBadMethodCall"], false);
     Config::Bind(LogNativeStackOnOOM, ini,
                  error["LogNativeStackOnOOM"], false);
     Config::Bind(MaxLoopCount, ini, error["MaxLoopCount"], 0);

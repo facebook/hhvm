@@ -218,6 +218,11 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
     // to it.
     return sr->getTopTranslation();
   }
+  if (sr->translations().size() > RuntimeOption::EvalJitMaxTranslations) {
+    always_assert(sr->translations().size() ==
+                  RuntimeOption::EvalJitMaxTranslations + 1);
+    return sr->getTopTranslation();
+  }
   SKTRACE(1, args.sk, "retranslate\n");
 
   m_tx.setMode(profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live);

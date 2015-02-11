@@ -183,9 +183,20 @@ void StackTraceNoHeap::printStackTrace(int fd) const {
   // then *2 for tolerable hash table behavior
   unsigned int bfds_size = m_btpointers_cnt * 2;
   const std::unique_ptr<NamedBfd[]> bfds (new NamedBfd[bfds_size]);
+  bool jemalloc_crashed = false;
   for (unsigned int i = 0; i < bfds_size; i++) bfds.get()[i].key[0]='\0';
+  // jemalloc is most likely crashed and acquired its lock if it's found in the
+  // stacktrace. Be conservative and avoid malloc again and deadlock.
   for (unsigned int i = 0; i < m_btpointers_cnt; i++) {
-    if (Translate(fd, m_btpointers[i], frame, bfds.get(), bfds_size)) {
+    Dl_info dlInfo;
+    if (dladdr(m_btpointers[i], &dlInfo) != 0 && dlInfo.dli_fname &&
+        strstr(dlInfo.dli_fname, "libjemalloc.so")) {
+      jemalloc_crashed = true;
+    }
+  }
+  for (unsigned int i = 0; i < m_btpointers_cnt; i++) {
+    if (Translate(fd, m_btpointers[i], frame, bfds.get(), bfds_size,
+                  jemalloc_crashed)) {
       frame++;
     }
   }
@@ -271,7 +282,8 @@ struct addr2line_data {
 
 bool StackTraceBase::Translate(void *frame, StackTraceBase::Frame * f,
                                Dl_info &dlInfo, void* data,
-                               void *bfds, unsigned bfds_size) {
+                               void *bfds, unsigned bfds_size,
+                               bool avoid_malloc) {
   char sframe[32];
   snprintf(sframe, sizeof(sframe), "%p", frame);
 
@@ -282,7 +294,7 @@ bool StackTraceBase::Translate(void *frame, StackTraceBase::Frame * f,
   // frame pointer offset in previous frame
   f->offset = (char*)frame - (char*)dlInfo.dli_saddr;
 
-  if (dlInfo.dli_fname) {
+  if (dlInfo.dli_fname && !avoid_malloc) {
 
     // 1st attempt without offsetting base address
     if (!Addr2line(dlInfo.dli_fname, sframe, f, data, bfds, bfds_size) &&
@@ -363,13 +375,18 @@ void StackTrace::TranslateFromPerfMap(void* bt, Frame* f) {
 }
 
 bool StackTraceNoHeap::Translate(int fd, void *frame, int frame_num,
-                                 void *bfds, unsigned bfds_size) {
+                                 void *bfds, unsigned bfds_size,
+                                 bool avoid_malloc) {
   // frame pointer offset in previous frame
   Dl_info dlInfo;
   addr2line_data adata;
   Frame f(frame);
+
+  adata.filename = nullptr;
+  adata.functionname = nullptr;
+
   if (!StackTraceBase::Translate(frame, &f, dlInfo, &adata, bfds,
-                                 bfds_size))  {
+                                 bfds_size, avoid_malloc)) {
     return false;
   }
 
@@ -388,6 +405,8 @@ bool StackTraceNoHeap::Translate(int fd, void *frame, int frame_num,
   }
 
   dprintf(fd, "# %d%s ", frame_num, frame_num < 10 ? " " : "");
+  if (avoid_malloc)
+    dprintf(fd, "%p in ", frame);
   Demangle(fd, funcname);
   dprintf(fd, " at %s:%u\n", filename, f.lineno);
 

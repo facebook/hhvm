@@ -166,6 +166,15 @@ class ArrayPrinter(PtrPrinter):
     def _pointer(self):
         return self.val['m_arr']['m_px']
 
+class ResourcePrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::Resource$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def _pointer(self):
+        return self.val['m_res']['m_px']
+
 class LowPtrPrinter(PtrPrinter):
     RECOGNIZE = '^HPHP::(LowPtr<.*>|LowPtrImpl<.*>)$'
 
@@ -329,6 +338,7 @@ printer_classes = [
     TypedValuePrinter,
     SmartPtrPrinter,
     ArrayPrinter,
+    ResourcePrinter,
     LowPtrPrinter,
     StringDataPrinter,
     ArrayDataPrinter,

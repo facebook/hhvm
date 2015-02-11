@@ -243,7 +243,7 @@ public:
    * Caller deletes data, callee must copy
    */
   virtual void sendImpl(const void *data, int size, int code,
-                        bool chunked) = 0;
+                        bool chunked, bool eom) = 0;
 
   /**
    * Override to implement more send end logic.

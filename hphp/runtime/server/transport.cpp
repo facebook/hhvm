@@ -913,7 +913,7 @@ void Transport::sendRawInternal(const void *data, int size,
 
   m_responseSize += response.size();
   ServerStats::SetThreadMode(ServerStats::ThreadMode::Writing);
-  sendImpl(response.data(), response.size(), m_responseCode, chunked);
+  sendImpl(response.data(), response.size(), m_responseCode, chunked, false);
   ServerStats::SetThreadMode(ServerStats::ThreadMode::Processing);
 
   ServerStats::LogBytes(size);
@@ -924,12 +924,14 @@ void Transport::sendRawInternal(const void *data, int size,
 }
 
 void Transport::onSendEnd() {
+  bool eomSent = false;
   if (m_compressor && m_chunkedEncoding) {
+    assert(m_headerSent);
     bool compressed = false;
     StringHolder response = prepareResponse("", 0, compressed, true);
-    sendImpl(response.data(), response.size(), m_responseCode, true);
-  }
-  if (!m_headerSent) {
+    sendImpl(response.data(), response.size(), m_responseCode, true, true);
+    eomSent = true;
+  } else if (!m_headerSent) {
     m_compressionDecision = CompressionDecision::ShouldNot;
     sendRawInternal("", 0);
   }
@@ -937,7 +939,9 @@ void Transport::onSendEnd() {
     folly::to<std::string>(HTTP_RESPONSE_STATS_PREFIX, getResponseCode()),
     {ServiceData::StatsType::SUM});
   httpResponseStats->addValue(1);
-  onSendEndImpl();
+  if (!eomSent) {
+    onSendEndImpl();
+  }
   // Record that we have ended the request so any further output is discarded.
   m_sendEnded = true;
 }

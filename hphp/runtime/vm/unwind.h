@@ -59,7 +59,7 @@ UnwindAction exception_handler() noexcept;
  * will reraise the current fault and resume propagating it.
  */
 struct VMPrepareUnwind : std::exception {
-  const char* what() const throw() { return "VMPrepareUnwind"; }
+  const char* what() const noexcept override { return "VMPrepareUnwind"; }
 };
 
 /*
@@ -68,7 +68,7 @@ struct VMPrepareUnwind : std::exception {
  * enable code coverage mode.
  */
 struct VMSwitchMode : std::exception {
-  const char* what() const throw() { return "VMSwitchMode"; }
+  const char* what() const noexcept override { return "VMSwitchMode"; }
 };
 
 /*
@@ -77,7 +77,7 @@ struct VMSwitchMode : std::exception {
  */
 struct VMResumeTC : std::exception {
   explicit VMResumeTC(uint64_t where) : where(where) {}
-  const char* what() const throw() { return "VMResumeTC"; }
+  const char* what() const noexcept override { return "VMResumeTC"; }
 
   uint64_t where;
 };
@@ -87,7 +87,9 @@ struct VMResumeTC : std::exception {
  * re-entering
  */
 struct VMReenterStackOverflow : std::exception {
-  const char* what() const throw() { return "VMReenterStackOverflow"; }
+  const char* what() const noexcept override {
+    return "VMReenterStackOverflow";
+  }
 };
 
 /*
@@ -95,7 +97,7 @@ struct VMReenterStackOverflow : std::exception {
  * the builtin function should be unwound before resuming the VM.
  */
 struct VMSwitchModeBuiltin : std::exception {
-  const char* what() const throw() { return "VMSwitchModeBuiltin"; }
+  const char* what() const noexcept override { return "VMSwitchModeBuiltin"; }
 };
 
 //////////////////////////////////////////////////////////////////////

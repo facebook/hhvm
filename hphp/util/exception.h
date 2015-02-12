@@ -47,8 +47,8 @@ struct Exception : std::exception {
 
   void setMessage(const char *msg) { m_msg = msg ? msg : "";}
 
-  virtual ~Exception() throw();
-  virtual const char *what() const throw();
+  ~Exception() noexcept override {}
+  const char* what() const noexcept override;
 
   struct Deleter {
     Exception* m_e;
@@ -71,8 +71,7 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FileOpenException : public Exception {
-public:
+struct FileOpenException : Exception {
   explicit FileOpenException(const std::string& filename)
       : Exception("Unable to open file %s", filename.c_str()) {
   }

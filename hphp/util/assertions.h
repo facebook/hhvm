@@ -155,8 +155,7 @@ private:
 /*
  * Exception class for throwing assertions.
  */
-class FailedAssertion : public std::exception {
- public:
+struct FailedAssertion : std::exception {
   FailedAssertion(const char* msg, const char* file, unsigned line,
                   const char* func)
       : msg(msg)
@@ -165,9 +164,7 @@ class FailedAssertion : public std::exception {
       , func(func)
       , summary(makeSummary()) {}
 
-  ~FailedAssertion() throw() {}
-
-  const char* what() const throw() {
+  const char* what() const noexcept override {
     return summary.c_str();
   }
 

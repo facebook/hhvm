@@ -43,8 +43,7 @@ enum RepoId {
   RepoIdCount   =  2 // Number of database IDs.
 };
 
-class RepoExc : public std::exception {
- public:
+struct RepoExc : std::exception {
   RepoExc(const char* fmt, ...) ATTRIBUTE_PRINTF(2, 3) {
     va_list(ap);
     va_start(ap, fmt);
@@ -57,9 +56,8 @@ class RepoExc : public std::exception {
     }
     va_end(ap);
   }
-  ~RepoExc() throw() {}
   const std::string& msg() const { return m_msg; }
-  const char* what() const throw() { return m_msg.c_str(); }
+  const char* what() const noexcept override { return m_msg.c_str(); }
 
  private:
   std::string m_msg;

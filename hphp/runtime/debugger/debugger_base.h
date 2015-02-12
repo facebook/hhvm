@@ -47,25 +47,25 @@ struct DebuggerClientOptions {
 // exceptions
 
 // Client-side exceptions
-class DebuggerClientException : public Exception {};
+struct DebuggerClientException : Exception {};
 
 // Exception used to force the debugger client to exit the command prompt loop
 // implemented in DebuggerClient::console(). Commands throw this when they do
 // something that causes the server to start running code again, so we pop out
 // of the command prompt loop and go back to waiting for interrupt messages from
 // the server.
-class DebuggerConsoleExitException : public DebuggerClientException {};
+struct DebuggerConsoleExitException : DebuggerClientException {};
 
 // Exception thrown when the client detects an error in the communication
 // protocol with the server, but believes the connection is still alive.
 // I.e., bad command type back, missing fields, etc.
-class DebuggerProtocolException : public DebuggerClientException {};
+struct DebuggerProtocolException : DebuggerClientException {};
 
 // Exception thrown when the client loses its connection to the server.
-class DebuggerServerLostException : public DebuggerClientException {};
+struct DebuggerServerLostException : DebuggerClientException {};
 
 // Both client- and server-side exceptions
-class DebuggerException : public Exception {
+struct DebuggerException : Exception {
   EXCEPTION_COMMON_IMPL(DebuggerException);
 };
 
@@ -79,20 +79,18 @@ class DebuggerException : public Exception {
 // causes a thread which is currently interrupted to terminate it's request with
 // this exception. The message attempts to reflect that a request which was
 // being debugged has been terminated.
-class DebuggerClientExitException  : public DebuggerException {
-  virtual const char *what() const throw() {
+struct DebuggerClientExitException : DebuggerException {
+  const char *what() const noexcept override {
     return "Debugger client has just quit, request (if any) terminated.";
   }
   EXCEPTION_COMMON_IMPL(DebuggerClientExitException);
 };
 
-class DebuggerRestartException     : public DebuggerException {
-public:
+struct DebuggerRestartException : DebuggerException {
   explicit DebuggerRestartException(
     std::shared_ptr<std::vector<std::string>> args) : m_args(args) {}
-  ~DebuggerRestartException() throw() {}
 
-  virtual const char *what() const throw() {
+  const char *what() const noexcept override {
     return "Debugger restarting program or aborting web request.";
   }
   EXCEPTION_COMMON_IMPL(DebuggerRestartException);

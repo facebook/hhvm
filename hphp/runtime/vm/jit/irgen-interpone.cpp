@@ -104,7 +104,7 @@ folly::Optional<Type> interpOutputType(HTS& env,
   };
 
   auto boxed = [&] (Type t) -> Type {
-    if (t.equals(Type::Gen)) return Type::BoxedInitCell;
+    if (t == Type::Gen) return Type::BoxedInitCell;
     assert(t.isBoxed() || t.notBoxed());
     checkTypeType = t.isBoxed() ? t : boxType(t); // inner type is predicted
     return Type::BoxedInitCell;
@@ -172,7 +172,7 @@ folly::Optional<Type> interpOutputType(HTS& env,
       if (ttype.notBoxed()) return ttype;
       // All instructions that are OutCInput or OutCInputL cannot push uninit or
       // a ref, so only specific inner types need to be checked.
-      if (ttype.unbox().strictSubtypeOf(Type::InitCell)) {
+      if (ttype.unbox() < Type::InitCell) {
         checkTypeType = ttype.unbox();
       }
       return Type::Cell;
@@ -181,7 +181,7 @@ folly::Optional<Type> interpOutputType(HTS& env,
     case OutCInputL: {
       auto ltype = localType();
       if (ltype.notBoxed()) return ltype;
-      if (ltype.unbox().strictSubtypeOf(Type::InitCell)) {
+      if (ltype.unbox() < Type::InitCell) {
         checkTypeType = ltype.unbox();
       }
       return Type::Cell;

@@ -187,39 +187,47 @@ IR_TYPES
 std::string Type::constValString() const {
   assert(isConst());
 
-  if (subtypeOf(Int)) {
+  if (*this <= Bool) {
+    return m_boolVal ? "true" : "false";
+  }
+  if (*this <= Int) {
     return folly::format("{}", m_intVal).str();
-  } else if (subtypeOf(Dbl)) {
+  }
+  if (*this <= Dbl) {
     // don't format doubles as integers.
     auto s = folly::format("{}", m_dblVal).str();
     if (!strchr(s.c_str(), '.') && !strchr(s.c_str(), 'e')) {
       return folly::format("{:.1f}", m_dblVal).str();
     }
     return s;
-  } else if (subtypeOf(Bool)) {
-    return m_boolVal ? "true" : "false";
-  } else if (subtypeOf(StaticStr)) {
+  }
+  if (*this <= StaticStr) {
     auto str = m_strVal;
     return folly::format("\"{}\"", escapeStringForCPP(str->data(),
                                                       str->size())).str();
-  } else if (subtypeOf(StaticArr)) {
+  }
+  if (*this <= StaticArr) {
     if (m_arrVal->empty()) {
       return "array()";
     }
     return folly::format("Array({})", m_arrVal).str();
-  } else if (subtypeOf(Func)) {
+  }
+  if (*this <= Func) {
     return folly::format("Func({})", m_funcVal ? m_funcVal->fullName()->data()
                                                : "nullptr").str();
-  } else if (subtypeOf(Cls)) {
+  }
+  if (*this <= Cls) {
     return folly::format("Cls({})", m_clsVal ? m_clsVal->name()->data()
                                              : "nullptr").str();
-  } else if (subtypeOf(Cctx)) {
+  }
+  if (*this <= Cctx) {
     if (!m_intVal) {
       return "Cctx(Cls(nullptr))";
     }
     const Class* cls = m_cctxVal.cls();
     return folly::format("Cctx(Cls({}))", cls->name()->data()).str();
-  } else if (subtypeOf(TCA)) {
+  }
+  if (*this <= TCA) {
     auto name = getNativeFunctionName(m_tcaVal);
     const char* hphp = "HPHP::";
 
@@ -231,13 +239,15 @@ std::string Type::constValString() const {
       name = name.substr(0, pos);
     }
     return folly::format("TCA: {}({})", m_tcaVal, boost::trim_copy(name)).str();
-  } else if (subtypeOf(RDSHandle)) {
-    return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
-  } else if (subtypeOfAny(Null, Nullptr) || isPtr()) {
-    return toString();
-  } else {
-    not_reached();
   }
+  if (*this <= RDSHandle) {
+    return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
+  }
+  if (subtypeOfAny(Null, Nullptr) || isPtr()) {
+    return toString();
+  }
+
+  not_reached();
 }
 
 std::string Type::toString() const {
@@ -361,18 +371,18 @@ DataType Type::toDataType() const {
 
   // Order is important here: types must progress from more specific
   // to less specific to return the most specific DataType.
-  if (subtypeOf(Uninit))        return KindOfUninit;
-  if (subtypeOf(InitNull))      return KindOfNull;
-  if (subtypeOf(Bool))          return KindOfBoolean;
-  if (subtypeOf(Int))           return KindOfInt64;
-  if (subtypeOf(Dbl))           return KindOfDouble;
-  if (subtypeOf(StaticStr))     return KindOfStaticString;
-  if (subtypeOf(Str))           return KindOfString;
-  if (subtypeOf(Arr))           return KindOfArray;
-  if (subtypeOf(Obj))           return KindOfObject;
-  if (subtypeOf(Res))           return KindOfResource;
-  if (subtypeOf(BoxedCell))     return KindOfRef;
-  if (subtypeOf(Cls))           return KindOfClass;
+  if (*this <= Uninit)      return KindOfUninit;
+  if (*this <= InitNull)    return KindOfNull;
+  if (*this <= Bool)        return KindOfBoolean;
+  if (*this <= Int)         return KindOfInt64;
+  if (*this <= Dbl)         return KindOfDouble;
+  if (*this <= StaticStr)   return KindOfStaticString;
+  if (*this <= Str)         return KindOfString;
+  if (*this <= Arr)         return KindOfArray;
+  if (*this <= Obj)         return KindOfObject;
+  if (*this <= Res)         return KindOfResource;
+  if (*this <= BoxedCell)   return KindOfRef;
+  if (*this <= Cls)         return KindOfClass;
   always_assert_flog(false,
                      "Bad Type {} in Type::toDataType()", *this);
 }
@@ -557,11 +567,11 @@ Type Type::relaxToGuardable() const {
 
   if (ty.isKnownDataType()) return ty;
 
-  if (ty.subtypeOf(UncountedInit)) return Type::UncountedInit;
-  if (ty.subtypeOf(Uncounted)) return Type::Uncounted;
-  if (ty.subtypeOf(Cell)) return Type::Cell;
-  if (ty.subtypeOf(BoxedCell)) return Type::BoxedCell;
-  if (ty.subtypeOf(Gen)) return Type::Gen;
+  if (ty <= UncountedInit)  return Type::UncountedInit;
+  if (ty <= Uncounted)      return Type::Uncounted;
+  if (ty <= Cell)           return Type::Cell;
+  if (ty <= BoxedCell)      return Type::BoxedCell;
+  if (ty <= Gen)            return Type::Gen;
   not_reached();
 }
 
@@ -576,7 +586,7 @@ Type setElemReturn(const IRInstruction* inst) {
   // If the base is a Str, the result will always be a CountedStr (or
   // an exception). If the base might be a str, the result wil be
   // CountedStr or Nullptr. Otherwise, the result is always Nullptr.
-  if (baseType.subtypeOf(Type::Str)) {
+  if (baseType <= Type::Str) {
     return Type::CountedStr;
   } else if (baseType.maybe(Type::Str)) {
     return Type::CountedStr | Type::Nullptr;
@@ -588,10 +598,10 @@ Type builtinReturn(const IRInstruction* inst) {
   assert(inst->op() == CallBuiltin);
 
   Type t = inst->typeParam();
-  if (t.isSimpleType() || t.equals(Type::Cell)) {
+  if (t.isSimpleType() || t == Type::Cell) {
     return t;
   }
-  if (t.isReferenceType() || t.equals(Type::BoxedCell)) {
+  if (t.isReferenceType() || t == Type::BoxedCell) {
     return t | Type::InitNull;
   }
   not_reached();
@@ -688,9 +698,9 @@ Type boxType(Type t) {
   // a BoxedStr, and we never guard on staticness for strings, so
   // boxing a string needs to forget this detail.  Same thing for
   // arrays.
-  if (t.subtypeOf(Type::Str)) {
+  if (t <= Type::Str) {
     t = Type::Str;
-  } else if (t.subtypeOf(Type::Arr)) {
+  } else if (t <= Type::Arr) {
     t = Type::Arr;
   }
   // When boxing an Object, if the inner class does not have AttrNoOverride,

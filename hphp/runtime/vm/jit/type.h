@@ -312,19 +312,19 @@ struct ConstCctx {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Type is used to represent the types of values in the jit. Every Type
+ * Type is used to represent the types of values in the jit.  Every Type
  * represents a set of types, with Type::Top being a superset of all Types and
- * Type::Bottom being a subset of all Types. The elements forming these sets of
- * types come from the types of PHP-visible values (Str, Obj, Int, ...) and
+ * Type::Bottom being a subset of all Types.  The elements forming these sets
+ * of types come from the types of PHP-visible values (Str, Obj, Int, ...) and
  * runtime-internal types (Func, TCA, ...).
  *
  * Types can be constructed from the predefined constants or by composing
- * existing Types in various ways. Unions, intersections, and subtractions are
+ * existing Types in various ways.  Unions, intersections, and subtractions are
  * all supported, though for implementation-specific reasons certain
- * combinations of specialized types cannot be represented. A type is
+ * combinations of specialized types cannot be represented.  A type is
  * considered specialized if it refers to a specific Class or a
- * ArrayData::ArrayKind. As an example, if A and B are unrelated Classes,
- * Obj<A> | Obj<B> is impossible to represent. However, if B is a subclass of
+ * ArrayData::ArrayKind.  As an example, if A and B are unrelated Classes,
+ * Obj<A> | Obj<B> is impossible to represent.  However, if B is a subclass of
  * A, Obj<A> | Obj<B> == Obj<B>, which can be represented as a Type.
  */
 struct Type {
@@ -396,45 +396,34 @@ public:
   // Comparisons.                                                       [const]
 
   /*
-   * Does this represent a non-strict subset of `t2'?
+   * Return true if this is exactly equal to `rhs'.
+   *
+   * Be careful---you probably mean `<='.
    */
-  bool subtypeOf(Type t2) const;
+  bool operator==(Type rhs) const;
+  bool operator!=(Type rhs) const;
 
   /*
-   * Is this a subtype of any among a variadic list of Types?
+   * Does this represent a subset (or superset) of `t2'?
+   *
+   * All operators are implemented in terms of operator==() and operator<=().
+   */
+  bool operator<=(Type rhs) const;
+  bool operator>=(Type rhs) const;
+  bool operator<(Type rhs) const;
+  bool operator>(Type rhs) const;
+
+  /*
+   * Is this a non-strict subtype of any among a variadic list of Types?
    */
   template<typename... Types>
   bool subtypeOfAny(Type t2, Types... ts) const;
   bool subtypeOfAny() const;
 
   /*
-   * Is this is a strict subset of `t2'?
-   */
-  bool strictSubtypeOf(Type t2) const;
-
-  /*
-   * Return true if any subtype of this is a subtype of t2, i.e., if the
-   * intersection of the two is nontrivial.
+   * Return true if this has nontrivial intersection with `t2'.
    */
   bool maybe(Type t2) const;
-
-  /*
-   * Return true if no subtypes of this are subtypes of t2, i.e., if the
-   * intersection of the two is trivial.
-   *
-   * @returns: !maybe(t2)
-   */
-  bool not(Type t2) const;
-
-  /*
-   * Return true if this is exactly equal to t2.
-   *
-   * Be careful: you probably mean subtypeOf().
-   */
-  bool equals(Type t2) const;
-
-  bool operator==(Type t2) const;
-  bool operator!=(Type t2) const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -479,7 +468,7 @@ public:
    *
    * Note that this is different from !isBoxed().
    *
-   * @requires: subtypeOf(Type::Gen)
+   * @requires: *this <= Gen
    */
   bool notBoxed() const;
 
@@ -508,7 +497,7 @@ public:
    * Return true iff there exists a DataType in the range [KindOfUninit,
    * KindOfRef] that represents a non-strict supertype of this type.
    *
-   * @requires: subtypeOf(StkElem)
+   * @requires: *this <= StkElem
    */
   bool isKnownDataType() const;
 
@@ -577,14 +566,14 @@ public:
   /*
    * Does this Type represent a known value subtyping `t'?
    *
-   * @returns: isConst() && subtypeOf(t)
+   * @returns: isConst() && *this <= t
    */
   bool isConst(Type t) const;
 
   /*
    * Does this Type represent the constant val `val'?
    *
-   * @returns: subtypeOf(cns(val))
+   * @returns: *this <= cns(val)
    */
   template<typename T>
   bool isConst(T val) const;
@@ -599,7 +588,7 @@ public:
   /*
    * Return the const value for a const Type.
    *
-   * @requires: subtypeOf(Type::T) && m_hasConstVal
+   * @requires: *this <= Type::T && m_hasConstVal
    */
   bool boolVal() const;
   int64_t intVal() const;
@@ -727,9 +716,9 @@ public:
    * Box or unbox a Type.
    *
    * @requires:
-   *    box:    subtypeOf(Cell)
-   *            not(Uninit) || equals(Cell)
-   *    unbox:  subtypeOf(Gen)
+   *    box:    *this <= Cell
+   *            !maybe(Uninit) || *this == Cell
+   *    unbox:  *this <= Gen
    */
   Type box() const;
   Type unbox() const;
@@ -745,9 +734,9 @@ public:
    * Get a pointer to, or dereference, a Type.
    *
    * @requires:
-   *    ptr:        !isPtr() && subtypeOf(Gen)
+   *    ptr:        !isPtr() && *this <= Gen
    *    deref:      isPtr()
-   *    derefIfPtr: subtypeOf(Gen | PtrToGen)
+   *    derefIfPtr: *this <= (Gen | PtrToGen)
    */
   Type ptr(Ptr kind) const;
   Type deref() const;
@@ -855,13 +844,6 @@ typedef folly::Optional<Type> OptType;
 static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),
               "jit::Type should fit in (2 * sizeof(uint64_t))");
 
-
-///////////////////////////////////////////////////////////////////////////////
-
-inline bool operator<(Type a, Type b) { return a.strictSubtypeOf(b); }
-inline bool operator>(Type a, Type b) { return b.strictSubtypeOf(a); }
-inline bool operator<=(Type a, Type b) { return a.subtypeOf(b); }
-inline bool operator>=(Type a, Type b) { return b.subtypeOf(a); }
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -74,7 +74,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     return;
   }
 
-  if (tc.isNullable() && valType.subtypeOf(Type::InitNull)) return;
+  if (tc.isNullable() && valType <= Type::InitNull) return;
 
   if (!isReturnType && tc.isArray() && !tc.isSoft() && !func->mustBeRef(id) &&
       valType <= Type::Obj) {
@@ -338,7 +338,7 @@ SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className) {
    * types, but if it's Gen/Cell we're going to PUNT because it's
    * natural to translate that case with control flow TODO(#2020251)
    */
-  if (Type::Obj.strictSubtypeOf(src->type())) {
+  if (Type::Obj < src->type()) {
     PUNT(InstanceOfD_MaybeObj);
   }
   if (!src->isA(Type::Obj)) {

@@ -605,7 +605,7 @@ inline SSATmp* ldLocInnerWarn(HTS& env,
   env.irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
 
   if (locVal->type() <= Type::Uninit) return warnUninit();
-  if (locVal->type().not(Type::Uninit)) return locVal;
+  if (!locVal->type().maybe(Type::Uninit)) return locVal;
 
   // The local might be Uninit so we have to check at runtime.
   return cond(

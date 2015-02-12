@@ -64,7 +64,18 @@ inline size_t Type::hash() const {
 
 bool ptr_subtype(Ptr, Ptr);
 
-inline bool Type::subtypeOf(Type rhs) const {
+inline bool Type::operator==(Type rhs) const {
+  return m_bits == rhs.m_bits &&
+         m_ptrKind == rhs.m_ptrKind &&
+         m_hasConstVal == rhs.m_hasConstVal &&
+         m_extra == rhs.m_extra;
+}
+
+inline bool Type::operator!=(Type rhs) const {
+  return !operator==(rhs);
+}
+
+inline bool Type::operator<=(Type rhs) const {
   auto lhs = *this;
 
   // Check for any members in lhs.m_bits that aren't in rhs.m_bits.
@@ -94,39 +105,28 @@ inline bool Type::subtypeOf(Type rhs) const {
   return !rhs.isSpecialized() || lhs.spec() <= rhs.spec();
 }
 
+inline bool Type::operator>=(Type rhs) const {
+  return rhs <= *this;
+}
+
+inline bool Type::operator<(Type rhs) const {
+  return *this != rhs && *this <= rhs;
+}
+
+inline bool Type::operator>(Type rhs) const {
+  return rhs < *this;
+}
+
 template<typename... Types>
 bool Type::subtypeOfAny(Type t2, Types... ts) const {
-  return subtypeOf(t2) || subtypeOfAny(ts...);
+  return *this <= t2 || subtypeOfAny(ts...);
 }
 inline bool Type::subtypeOfAny() const {
   return false;
 }
 
-inline bool Type::strictSubtypeOf(Type t2) const {
-  return *this != t2 && subtypeOf(t2);
-}
-
 inline bool Type::maybe(Type t2) const {
   return (*this & t2) != Bottom;
-}
-
-inline bool Type::not(Type t2) const {
-  return !maybe(t2);
-}
-
-inline bool Type::equals(Type t2) const {
-  return m_bits == t2.m_bits &&
-         m_ptrKind == t2.m_ptrKind &&
-         m_hasConstVal == t2.m_hasConstVal &&
-         m_extra == t2.m_extra;
-}
-
-inline bool Type::operator==(Type t2) const {
-  return equals(t2);
-}
-
-inline bool Type::operator!=(Type t2) const {
-  return !operator==(t2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -137,7 +137,7 @@ inline bool Type::isZeroValType() const {
 }
 
 inline bool Type::isBoxed() const {
-  return subtypeOf(BoxedCell);
+  return *this <= BoxedCell;
 }
 
 inline bool Type::maybeBoxed() const {
@@ -145,20 +145,20 @@ inline bool Type::maybeBoxed() const {
 }
 
 inline bool Type::notBoxed() const {
-  assert(subtypeOf(Gen));
-  return subtypeOf(Cell);
+  assert(*this <= Gen);
+  return *this <= Cell;
 }
 
 inline bool Type::isPtr() const {
-  return subtypeOf(PtrToGen);
+  return *this <= PtrToGen;
 }
 
 inline bool Type::notPtr() const {
-  return not(PtrToGen);
+  return !maybe(PtrToGen);
 }
 
 inline bool Type::isCounted() const {
-  return subtypeOf(Counted);
+  return *this <= Counted;
 }
 
 inline bool Type::maybeCounted() const {
@@ -166,7 +166,7 @@ inline bool Type::maybeCounted() const {
 }
 
 inline bool Type::notCounted() const {
-  return not(Counted);
+  return !maybe(Counted);
 }
 
 inline bool Type::isUnion() const {
@@ -175,7 +175,7 @@ inline bool Type::isUnion() const {
 }
 
 inline bool Type::isKnownDataType() const {
-  assert(subtypeOf(StkElem));
+  assert(*this <= StkElem);
 
   // Some unions correspond to single KindOfs.
   return subtypeOfAny(Str, Arr, BoxedCell) || !isUnion();
@@ -186,7 +186,7 @@ inline bool Type::isKnownUnboxedDataType() const {
 }
 
 inline bool Type::needsReg() const {
-  return subtypeOf(StkElem) && !isKnownDataType();
+  return *this <= StkElem && !isKnownDataType();
 }
 
 inline bool Type::needsValueReg() const {
@@ -228,12 +228,12 @@ inline bool Type::isConst() const {
 }
 
 inline bool Type::isConst(Type t) const {
-  return isConst() && subtypeOf(t);
+  return isConst() && *this <= t;
 }
 
 template<typename T>
 bool Type::isConst(T val) const {
-  return subtypeOf(cns(val));
+  return *this <= cns(val);
 }
 
 inline uint64_t Type::rawVal() const {
@@ -242,52 +242,52 @@ inline uint64_t Type::rawVal() const {
 }
 
 inline bool Type::boolVal() const {
-  assert(subtypeOf(Bool) && m_hasConstVal);
+  assert(*this <= Bool && m_hasConstVal);
   return m_boolVal;
 }
 
 inline int64_t Type::intVal() const {
-  assert(subtypeOf(Int) && m_hasConstVal);
+  assert(*this <= Int && m_hasConstVal);
   return m_intVal;
 }
 
 inline double Type::dblVal() const {
-  assert(subtypeOf(Dbl) && m_hasConstVal);
+  assert(*this <= Dbl && m_hasConstVal);
   return m_dblVal;
 }
 
 inline const StringData* Type::strVal() const {
-  assert(subtypeOf(StaticStr) && m_hasConstVal);
+  assert(*this <= StaticStr && m_hasConstVal);
   return m_strVal;
 }
 
 inline const ArrayData* Type::arrVal() const {
-  assert(subtypeOf(StaticArr) && m_hasConstVal);
+  assert(*this <= StaticArr && m_hasConstVal);
   return m_arrVal;
 }
 
 inline const HPHP::Func* Type::funcVal() const {
-  assert(subtypeOf(Func) && m_hasConstVal);
+  assert(*this <= Func && m_hasConstVal);
   return m_funcVal;
 }
 
 inline const Class* Type::clsVal() const {
-  assert(subtypeOf(Cls) && m_hasConstVal);
+  assert(*this <= Cls && m_hasConstVal);
   return m_clsVal;
 }
 
 inline ConstCctx Type::cctxVal() const {
-  assert(subtypeOf(Cctx) && m_hasConstVal);
+  assert(*this <= Cctx && m_hasConstVal);
   return m_cctxVal;
 }
 
 inline rds::Handle Type::rdsHandleVal() const {
-  assert(subtypeOf(RDSHandle) && m_hasConstVal);
+  assert(*this <= RDSHandle && m_hasConstVal);
   return m_rdsHandleVal;
 }
 
 inline jit::TCA Type::tcaVal() const {
-  assert(subtypeOf(TCA) && m_hasConstVal);
+  assert(*this <= TCA && m_hasConstVal);
   return m_tcaVal;
 }
 
@@ -295,7 +295,7 @@ inline Type Type::dropConstVal() const {
   if (!m_hasConstVal) return *this;
   assert(!isUnion());
 
-  if (subtypeOf(StaticArr)) {
+  if (*this <= StaticArr) {
     return Type::StaticArray(arrVal()->kind());
   }
   return Type(m_bits, rawPtrKind());
@@ -458,22 +458,22 @@ inline TypeSpec Type::spec() const {
 // Inner types.
 
 inline Type Type::box() const {
-  assert(subtypeOf(Cell));
+  assert(*this <= Cell);
   // Boxing Uninit returns InitNull but that logic doesn't belong here.
-  assert(not(Uninit) || equals(Cell));
+  assert(!maybe(Uninit) || *this == Cell);
   return Type(m_bits << kBoxShift,
               rawPtrKind(),
               isSpecialized() && !m_hasConstVal ? m_extra : 0);
 }
 
 inline Type Type::unbox() const {
-  assert(subtypeOf(Gen));
+  assert(*this <= Gen);
   return (*this & Cell) | (*this & BoxedCell).innerType();
 }
 
 inline Type Type::ptr(Ptr kind) const {
   assert(!isPtr());
-  assert(subtypeOf(Gen));
+  assert(*this <= Gen);
   return Type(m_bits << kPtrShift,
               kind,
               isSpecialized() && !m_hasConstVal ? m_extra : 0);
@@ -487,7 +487,7 @@ inline Type Type::deref() const {
 }
 
 inline Type Type::derefIfPtr() const {
-  assert(subtypeOf(Gen | PtrToGen));
+  assert(*this <= (Gen | PtrToGen));
   return isPtr() ? deref() : *this;
 }
 

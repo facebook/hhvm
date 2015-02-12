@@ -243,7 +243,7 @@ SSATmp* ptrToUninit(HTS& env) {
 
 bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
                               PropInfo propInfo) {
-  if (convertToType(propInfo.repoAuthType).not(Type::Uninit)) {
+  if (!convertToType(propInfo.repoAuthType).maybe(Type::Uninit)) {
     return false;
   }
   if (!cls) return true;
@@ -343,7 +343,7 @@ void checkMIState(MTS& env) {
   // CGetM on an array with a base that won't use MInstrState. Str
   // will use tvScratch and Obj will fatal or use tvRef.
   const bool simpleArrayGet = isCGetM && singleElem &&
-    baseType.not(Type::Str | Type::Obj);
+    !baseType.maybe(Type::Str | Type::Obj);
   const bool simpleCollectionGet =
     isCGetM && singleElem && baseType < Type::Obj &&
     isOptimizableCollectionClass(baseType.clsSpec().cls());
@@ -545,7 +545,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
           return SimpleOp::String;
         }
       }
-    } else if (baseType.strictSubtypeOf(Type::Obj)) {
+    } else if (baseType < Type::Obj) {
       const Class* klass = baseType.clsSpec().cls();
       auto const isVector = klass == c_Vector::classof();
       auto const isPair   = klass == c_Pair::classof();
@@ -933,7 +933,7 @@ void emitPropGeneric(MTS& env) {
   auto const mCode = env.immVecM[env.mInd];
   auto const mia = MInstrAttr(env.mii.getAttr(mCode) & MIA_intermediate_prop);
 
-  if ((mia & MIA_unset) && env.base.type.strip().not(Type::Obj)) {
+  if ((mia & MIA_unset) && !env.base.type.strip().maybe(Type::Obj)) {
     constrainBase(env, DataTypeSpecific);
     setBase(env, ptrToInitNull(env));
     return;
@@ -1011,7 +1011,7 @@ void emitElem(MTS& env) {
       setBase(env, uninit);
       return;
     }
-    if (baseType.not(Type::Arr | Type::Obj)) {
+    if (!baseType.maybe(Type::Arr | Type::Obj)) {
       setBase(env, uninit);
       return;
     }
@@ -1647,7 +1647,7 @@ void emitBindProp(MTS& env) {
 
 void emitUnsetProp(MTS& env) {
   auto const key = getKey(env);
-  if (env.base.type.strip().not(Type::Obj)) {
+  if (!env.base.type.strip().maybe(Type::Obj)) {
     // Noop
     constrainBase(env, DataTypeSpecific);
     return;
@@ -1796,7 +1796,7 @@ void emitSetElem(MTS& env) {
       env.result = result;
       gen(env, DecRef, value);
     } else {
-      assert(t.equals(Type::CountedStr | Type::Nullptr));
+      assert(t == (Type::CountedStr | Type::Nullptr));
       // Base might be a string. Assume the result is value, then inform
       // emitMPost that it needs to test the actual result.
       env.result = value;
@@ -1852,7 +1852,7 @@ void emitUnsetElem(MTS& env) {
         cns(env, makeStaticString(Strings::CANT_UNSET_STRING)));
     return;
   }
-  if (baseType.not(Type::Arr | Type::Obj)) {
+  if (!baseType.maybe(Type::Arr | Type::Obj)) {
     // Noop
     return;
   }

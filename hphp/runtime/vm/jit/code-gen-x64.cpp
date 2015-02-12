@@ -448,7 +448,7 @@ Vlabel CodeGenerator::label(Block* b) {
 void CodeGenerator::emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
                                         Vloc src, Type srcType) {
   if (srcType.needsValueReg()) {
-    if (srcType.subtypeOf(Type::Bool)) {
+    if (srcType <= Type::Bool) {
       auto extended = v.makeReg();
       v << movzbq{src.reg(0), extended};
       v << store{extended, base[offset + TVOFF(m_data)]};
@@ -3731,7 +3731,7 @@ void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(inst, 0).reg();
   auto dstReg = dstLoc(inst, 0).reg();
-  assert(vec->type().strictSubtypeOf(Type::Obj) &&
+  assert(vec->type() < Type::Obj &&
          vec->type().clsSpec().cls() == c_Vector::classof());
   vmain() << loadzlq{vecReg[c_Vector::sizeOffset()], dstReg};
 }
@@ -3740,7 +3740,7 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(inst, 0).reg();
   auto dstReg = dstLoc(inst, 0).reg();
-  assert(vec->type().strictSubtypeOf(Type::Obj) &&
+  assert(vec->type() < Type::Obj &&
          vec->type().clsSpec().cls() == c_Vector::classof());
   vmain() << load{vecReg[c_Vector::dataOffset()], dstReg};
 }
@@ -3775,7 +3775,7 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   auto vecReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
 
-  assert(vec->type().strictSubtypeOf(Type::Obj) &&
+  assert(vec->type() < Type::Obj &&
          vec->type().clsSpec().cls() == c_Vector::classof());
 
   // Vector::m_data field holds an address of an ArrayData plus
@@ -3797,7 +3797,7 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
  */
 void CodeGenerator::cgVectorDoCow(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
-  assert(vec->type().strictSubtypeOf(Type::Obj) &&
+  assert(vec->type() < Type::Obj &&
          vec->type().clsSpec().cls() == c_Vector::classof());
   auto args = argGroup(inst);
   args.ssa(0); // vec
@@ -3808,7 +3808,7 @@ void CodeGenerator::cgVectorDoCow(IRInstruction* inst) {
 void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
   DEBUG_ONLY auto pair = inst->src(0);
   auto pairReg = srcLoc(inst, 0).reg();
-  assert(pair->type().strictSubtypeOf(Type::Obj) &&
+  assert(pair->type() < Type::Obj &&
          pair->type().clsSpec().cls() == c_Pair::classof());
   vmain() << lea{pairReg[c_Pair::dataOffset()], dstLoc(inst, 0).reg()};
 }
@@ -3979,7 +3979,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     // src is the target type or better. do nothing.
     doMov();
     return;
-  } else if (src->type().not(typeParam)) {
+  } else if (!src->type().maybe(typeParam)) {
     // src is definitely not the target type. always jump.
     v << jmp{label(inst->taken())};
     return;
@@ -4012,7 +4012,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
 
       if (srcType <= typeParam) {
         // This will always succeed. Do nothing.
-      } else if (srcType.not(typeParam)) {
+      } else if (!srcType.maybe(typeParam)) {
         // This will always fail. Emit an unconditional jmp.
         v << jmp{label(inst->taken())};
         return;
@@ -4633,7 +4633,7 @@ void CodeGenerator::cgCheckInit(IRInstruction* inst) {
   assert(taken);
   SSATmp* src = inst->src(0);
 
-  if (src->type().not(Type::Uninit)) return;
+  if (!src->type().maybe(Type::Uninit)) return;
 
   auto typeReg = srcLoc(inst, 0).reg(1);
   assert(typeReg != InvalidReg);
@@ -4650,7 +4650,7 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
   assert(taken);
   SSATmp* base = inst->src(0);
   Type t = base->type().deref();
-  if (t.not(Type::Uninit)) return;
+  if (!t.maybe(Type::Uninit)) return;
   auto basereg = srcLoc(inst, 0).reg();
   auto& v = vmain();
   auto const sf = v.makeReg();

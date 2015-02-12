@@ -108,7 +108,7 @@ void retypeLoad(IRInstruction* load, Type newType) {
   // instruction that is always going to fail but wasn't simplified
   // during IR generation.  In this case, this code is unreacheble and
   // will be eliminated later.
-  if (!newType.equals(load->typeParam()) && newType != Type::Bottom) {
+  if (newType != load->typeParam() && newType != Type::Bottom) {
     ITRACE(2, "retypeLoad changing type param of {} to {}\n",
            *load, newType);
     load->setTypeParam(newType);
@@ -160,7 +160,7 @@ Type relaxCell(Type t, TypeConstraint tc) {
 
     case DataTypeCountnessInit:
       if (t <= Type::Uninit) return Type::Uninit;
-      return (t.notCounted() && t.not(Type::Uninit))
+      return (t.notCounted() && !t.maybe(Type::Uninit))
         ? Type::UncountedInit : t.unspecialize();
 
     case DataTypeSpecific:
@@ -305,7 +305,7 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
 
     case DataTypeCountnessInit:
       return typeFitsConstraint(t, DataTypeCountness) &&
-             (t <= Type::Uninit || t.not(Type::Uninit));
+             (t <= Type::Uninit || !t.maybe(Type::Uninit));
 
     case DataTypeSpecific:
       return t.isKnownDataType();

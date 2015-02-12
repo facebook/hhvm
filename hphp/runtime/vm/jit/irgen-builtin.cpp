@@ -894,7 +894,7 @@ SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
     }
   }
 
-  if (src->type().not(Type::Obj)) {
+  if (!src->type().maybe(Type::Obj)) {
     return cns(env, false);
   }
 

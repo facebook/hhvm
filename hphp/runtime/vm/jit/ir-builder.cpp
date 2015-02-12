@@ -198,7 +198,7 @@ Block* IRBuilder::guardFailBlock() const {
 SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType) {
   auto const typeParam = inst->typeParam();
 
-  if (oldType.not(typeParam)) {
+  if (!oldType.maybe(typeParam)) {
     /* This check will always fail. It's probably due to an incorrect
      * prediction. Generate a Jmp and return the src. The fact that the type
      * will be slightly off is ok because all the code after the Jmp is
@@ -254,7 +254,7 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 
 SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
   auto const locId = inst->extra<HintLocInner>()->locId;
-  if (!localType(locId, DataTypeGeneric).subtypeOf(Type::BoxedCell) ||
+  if (!(localType(locId, DataTypeGeneric) <= Type::BoxedCell) ||
       predictedInnerType(locId).box() <= inst->typeParam()) {
     inst->convertToNop();
     return nullptr;
@@ -272,7 +272,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
          typeSrc ? typeSrc->toString() : "nullptr");
   auto const typeParam = inst->typeParam();
 
-  if (oldType.not(typeParam)) {
+  if (!oldType.maybe(typeParam)) {
     // If both types are boxed this is ok and even expected as a means to
     // update the hint for the inner type.
     if (oldType.isBoxed() && typeParam.isBoxed()) return nullptr;
@@ -456,7 +456,7 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   // The types may not be compatible in the presence of unreachable code.
   // Don't try to optimize the code in this case, and just let
   // unreachable code elimination take care of it later.
-  if (type.not(inst->typeParam())) return nullptr;
+  if (!type.maybe(inst->typeParam())) return nullptr;
 
   // If FrameStateMgr's type isn't as good as the type param, we're missing
   // information in the IR.
@@ -560,7 +560,7 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   // Don't try to optimize the code in this case, and just let
   // unreachable code elimination take care of it later.
   auto const type = stackType(offset, DataTypeGeneric);
-  if (type.not(inst->typeParam())) return nullptr;
+  if (!type.maybe(inst->typeParam())) return nullptr;
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;

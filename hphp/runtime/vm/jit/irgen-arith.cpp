@@ -197,7 +197,7 @@ SSATmp* implIncDec(HTS& env, bool pre, bool inc, bool over, SSATmp* src) {
  * 3. Array comparisons can throw if recursion is detected.
  */
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
-  assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
+  assert(t0 != Type::Gen && t1 != Type::Gen);
   auto const badObjConvs = Type::Int | Type::Dbl | Type::Str;
   return (t0.maybe(Type::Obj) && t1.maybe(badObjConvs)) ||
          (t0.maybe(badObjConvs) && t1.maybe(Type::Obj)) ||

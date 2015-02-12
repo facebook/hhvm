@@ -54,7 +54,7 @@ TEST(Type, Null) {
   EXPECT_TRUE(Type::Uninit <= Type::Null);
   EXPECT_TRUE(Type::InitNull <= Type::Null);
   EXPECT_FALSE(Type::Bool <= Type::Null);
-  EXPECT_FALSE(Type::Null.subtypeOf(Type::InitNull));
+  EXPECT_FALSE(Type::Null <= Type::InitNull);
   EXPECT_NE(Type::Null, Type::Uninit);
   EXPECT_NE(Type::Null, Type::InitNull);
 
@@ -127,7 +127,7 @@ TEST(Type, Ptr) {
   EXPECT_TRUE(Type::PtrToInt.isPtr());
   EXPECT_TRUE(Type::PtrToBoxedInt.isPtr());
   EXPECT_TRUE(Type::PtrToBoxedCell.isPtr());
-  EXPECT_TRUE(Type::PtrToInt.subtypeOf(Type::PtrToCell));
+  EXPECT_TRUE(Type::PtrToInt <= Type::PtrToCell);
 
   EXPECT_EQ(Type::PtrToInt, Type::Int.ptr(Ptr::Unk));
   EXPECT_EQ(Type::PtrToCell, Type::Cell.ptr(Ptr::Unk));
@@ -138,14 +138,14 @@ TEST(Type, Ptr) {
 TEST(Type, Subtypes) {
   Type numbers = Type::Dbl | Type::Int;
   EXPECT_EQ("{Int|Dbl}", numbers.toString());
-  EXPECT_TRUE(Type::Dbl.subtypeOf(numbers));
-  EXPECT_TRUE(Type::Int.subtypeOf(numbers));
-  EXPECT_FALSE(Type::Bool.subtypeOf(numbers));
+  EXPECT_TRUE(Type::Dbl <= numbers);
+  EXPECT_TRUE(Type::Int <= numbers);
+  EXPECT_FALSE(Type::Bool <= numbers);
 
-  EXPECT_FALSE(Type::Func.subtypeOf(Type::Cell));
-  EXPECT_FALSE(Type::TCA.subtypeOf(Type::Gen));
+  EXPECT_FALSE(Type::Func <= Type::Cell);
+  EXPECT_FALSE(Type::TCA <= Type::Gen);
 
-  EXPECT_TRUE(Type::PtrToCell.strictSubtypeOf(Type::PtrToGen));
+  EXPECT_TRUE(Type::PtrToCell < Type::PtrToGen);
 }
 
 TEST(Type, CanRunDtor) {
@@ -190,11 +190,11 @@ TEST(Type, CanRunDtor) {
 
 TEST(Type, Top) {
   for (auto t : allTypes()) {
-    EXPECT_TRUE(t.subtypeOf(Type::Top));
+    EXPECT_TRUE(t <= Type::Top);
   }
   for (auto t : allTypes()) {
-    if (t.equals(Type::Top)) continue;
-    EXPECT_FALSE(Type::Top.subtypeOf(t));
+    if (t == Type::Top) continue;
+    EXPECT_FALSE(Type::Top <= t);
   }
 }
 
@@ -357,7 +357,7 @@ TEST(Type, Const) {
   EXPECT_EQ(Type::PtrToGen,
             (Type::PtrToGen|Type::Nullptr) - Type::Nullptr);
   EXPECT_EQ(Type::Int, five.dropConstVal());
-  EXPECT_TRUE(five.not(Type::cns(2)));
+  EXPECT_TRUE(!five.maybe(Type::cns(2)));
 
   auto True = Type::cns(true);
   EXPECT_EQ("Bool<true>", True.toString());
@@ -369,7 +369,7 @@ TEST(Type, Const) {
   EXPECT_FALSE(five <= True);
   EXPECT_FALSE(five > True);
 
-  EXPECT_TRUE(five.not(True));
+  EXPECT_TRUE(!five.maybe(True));
   EXPECT_EQ(Type::Int | Type::Bool, five | True);
   EXPECT_EQ(Type::Bottom, five & True);
 
@@ -436,16 +436,16 @@ TEST(Type, PtrKinds) {
 
   EXPECT_EQ(Ptr::Frame, (frameUninit|frameBool).ptrKind());
 
-  EXPECT_TRUE(frameBool.subtypeOf(unknownBool));
-  EXPECT_TRUE(frameBool.subtypeOf(frameGen));
-  EXPECT_TRUE(!frameBool.subtypeOf(frameUninit));
+  EXPECT_TRUE(frameBool <= unknownBool);
+  EXPECT_TRUE(frameBool <= frameGen);
+  EXPECT_FALSE(frameBool <= frameUninit);
   EXPECT_TRUE(frameBool.maybe(frameGen));
   EXPECT_TRUE(frameBool.maybe(unknownBool));
   EXPECT_TRUE(!frameUninit.maybe(frameBool));
   EXPECT_TRUE(frameUninit.maybe(frameGen));
   EXPECT_TRUE(!frameUninit.maybe(unknownBool));
   EXPECT_TRUE(!Type::PtrToUninit.maybe(Type::PtrToBool));
-  EXPECT_TRUE(!unknownBool.subtypeOf(frameBool));
+  EXPECT_FALSE(unknownBool <= frameBool);
   EXPECT_EQ(unknownBool, frameBool | unknownBool);
 
   EXPECT_EQ(unknownGen, frameGen | unknownBool);

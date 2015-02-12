@@ -680,7 +680,7 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
     // have below).
     auto const unsafeTypes = Type::Dbl|Type::Arr;
     auto const safeToFold =
-      s0->type().not(unsafeTypes) && s1->type().not(unsafeTypes) &&
+      !s0->type().maybe(unsafeTypes) && !s1->type().maybe(unsafeTypes) &&
       // We can't add new uses to reference counted types without a more
       // advanced availability analysis.
       !s0->type().maybeCounted() && !s1->type().maybeCounted();
@@ -796,7 +796,7 @@ SSATmp* cmpImpl(State& env,
   auto const type2 = src2->type();
 
   // Identity optimization
-  if (src1 == src2 && type1.not(Type::Dbl)) {
+  if (src1 == src2 && !type1.maybe(Type::Dbl)) {
     // (val1 == val1) does not simplify to true when val1 is a NaN
     return cns(env, bool(cmpOp(opName, 0, 0)));
   }
@@ -1063,7 +1063,7 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   assert(IMPLIES(type <= Type::Arr, type == Type::Arr));
 
   // The types are disjoint; the result must be false.
-  if (srcType.not(type)) {
+  if (!srcType.maybe(type)) {
     return cns(env, !trueSense);
   }
 
@@ -1534,7 +1534,7 @@ SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
   assert(srcType.notPtr());
   assert(inst->taken());
-  if (srcType.not(Type::Uninit)) return gen(env, Nop);
+  if (!srcType.maybe(Type::Uninit)) return gen(env, Nop);
   return nullptr;
 }
 
@@ -1654,7 +1654,7 @@ SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->type().not(Type::Nullptr)) {
+  if (!inst->src(0)->type().maybe(Type::Nullptr)) {
     return inst->src(0);
   }
   return nullptr;

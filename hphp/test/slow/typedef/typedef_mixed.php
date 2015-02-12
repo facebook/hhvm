@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 type Foo = mixed;
 

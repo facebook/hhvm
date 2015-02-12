@@ -880,22 +880,18 @@ namespace {
 
 TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
   TypeAliasReq req;
-
+  req.name = thisType->name;
+  req.nullable = thisType->nullable;
   if (isEnum(klass)) {
     // If the class is an enum, pull out the actual base type.
     if (auto const enumType = klass->enumBaseTy()) {
-      req.kind     = *enumType;
-      req.nullable = thisType->nullable;
-      req.name     = thisType->name;
+      req.type = dataTypeToAnnotType(*enumType);
     } else {
-      req.any  = true;
-      req.name = thisType->name;
+      req.type = AnnotType::Mixed;
     }
   } else {
-    req.kind     = KindOfObject;
-    req.nullable = thisType->nullable;
-    req.klass    = klass;
-    req.name     = thisType->name;
+    req.type = AnnotType::Object;
+    req.klass = klass;
   }
   return req;
 }
@@ -912,8 +908,9 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
    * If the right hand side was a class, we need to autoload and
    * ensure it exists at this point.
    */
-
-  if (thisType->kind != KindOfObject) {
+  if (thisType->type != AnnotType::Object &&
+      thisType->type != AnnotType::Self &&
+      thisType->type != AnnotType::Parent) {
     return TypeAliasReq::From(*thisType);
   }
 

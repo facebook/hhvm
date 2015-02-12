@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/annot-type.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,7 +34,7 @@ struct StringData;
  * This is the runtime representation of a type alias.  Type aliases are only
  * allowed when HipHop extensions are enabled.
  *
- * The m_kind field is KindOfObject whenever the type alias is basically just a
+ * The `type' field is Object whenever the type alias is basically just a
  * name.  At runtime we still might resolve this name to another type alias,
  * becoming a type alias for KindOfArray or something in that request.
  *
@@ -42,16 +43,14 @@ struct StringData;
 struct TypeAlias {
   LowStringPtr name;
   LowStringPtr value;
-  DataType     kind;
-  bool         any;       // overrides `kind' for mixed aliases
-  bool         nullable;  // null is allowed; for ?Foo aliases
   Attr         attrs;
+  AnnotType    type;
+  bool         nullable;  // null is allowed; for ?Foo aliases
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(name)
       (value)
-      (kind)
-      (any)
+      (type)
       (nullable)
       (attrs)
       ;
@@ -87,14 +86,12 @@ struct TypeAliasReq {
   // Data members.
 
   // The alised type.
-  DataType kind{KindOfUninit};
-  // Overrides `kind' if the alias is invalid (e.g., for a nonexistent class).
+  AnnotType type{AnnotType::Uninit};
+  // Overrides `type' if the alias is invalid (e.g., for a nonexistent class).
   bool invalid{false};
-  // Overrides `kind' for "HH\\mixed".
-  bool any{false};
   // For option types, like ?Foo.
   bool nullable{false};
-  // Aliased Class; nullptr if kind != KindOfObject.
+  // Aliased Class; nullptr if type != Object.
   LowClassPtr klass{nullptr};
   // Needed for error messages; nullptr if not defined.
   LowStringPtr name{nullptr};

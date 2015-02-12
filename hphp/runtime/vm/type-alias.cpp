@@ -22,9 +22,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TypeAliasReq::compat(const TypeAlias& alias) const {
-  return (alias.any && any) ||
-         (alias.kind == kind &&
-          alias.nullable == nullable &&
+  return (alias.type == AnnotType::Mixed && type == AnnotType::Mixed) ||
+         (alias.type == type && alias.nullable == nullable &&
           Unit::lookupClass(alias.value) == klass);
 }
 

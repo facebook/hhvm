@@ -1747,15 +1747,15 @@ void hphp_process_init() {
   init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
 
+  Process::InitProcessStatics();
+  init_thread_locals();
+
   struct sigaction action = {};
   action.sa_sigaction = on_timeout;
   action.sa_flags = SA_SIGINFO | SA_NODEFER;
   sigaction(SIGVTALRM, &action, nullptr);
   // start takes milliseconds, Period is a double in seconds
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
-
-  Process::InitProcessStatics();
-  init_thread_locals();
 
   // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
   k_PHP_BINARY = makeStaticString(current_executable_path());

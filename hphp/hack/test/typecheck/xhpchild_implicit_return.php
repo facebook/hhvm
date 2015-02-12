@@ -9,7 +9,7 @@
  *
  */
 
-class :div {}
+class :div implements XHPChild {}
 
 function foo(): XHPChild {
   if (1) {

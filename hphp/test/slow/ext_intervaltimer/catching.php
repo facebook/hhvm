@@ -1,7 +1,7 @@
 <?hh
 
 $t = new IntervalTimer(
-  0.6, 0.6,
+  200, 0.6,
   () ==> {
     throw new Exception('buffalo');
   });

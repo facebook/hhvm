@@ -2059,28 +2059,6 @@ int64_t HashCollection::t_count() {
   return size();
 }
 
-Object BaseMap::t_keys() {
-  // Task #5517643: ImmMap::keys() is supposed to return
-  // an ImmVector, not a Vector
-  auto* vec = newobj<c_Vector>();
-  Object obj = vec;
-  vec->reserve(m_size);
-  assert(vec->canMutateBuffer());
-  auto* e = firstElm();
-  auto* eLimit = elmLimit();
-  ssize_t j = 0;
-  for (; e != eLimit; e = nextElm(e, eLimit), vec->incSize(), ++j) {
-    if (e->hasIntKey()) {
-      vec->m_data[j].m_data.num = e->ikey;
-      vec->m_data[j].m_type = KindOfInt64;
-    } else {
-      assert(e->hasStrKey());
-      cellDup(make_tv<KindOfString>(e->skey), vec->m_data[j]);
-    }
-  }
-  return obj;
-}
-
 Object HashCollection::t_lazy() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
@@ -2163,21 +2141,12 @@ Object c_Map::t_remove(const Variant& key) {
 
 Object c_Map::t_removekey(const Variant& key) { return t_remove(key); }
 
-Object BaseMap::t_values() {
-  // Task #5517643: ImmMap::values() is supposed to return
-  // an ImmVector, not a Vector
-  auto* target = newobj<c_Vector>();
-  Object ret = target;
-  int64_t sz = m_size;
-  target->reserve(sz);
-  assert(target->canMutateBuffer());
-  target->setSize(sz);
-  auto* out = target->m_data;
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit), ++out) {
-    cellDup(e->data, *out);
-  }
-  return ret;
+Object c_Map::t_values() {
+  return BaseMap::php_values<c_Vector>();
+}
+
+Object c_Map::t_keys() {
+  return BaseMap::php_keys<c_Vector>();
 }
 
 Array HashCollection::t_tokeysarray() {
@@ -2332,6 +2301,14 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
     }
   }
   return obj;
+}
+
+Object c_ImmMap::t_values() {
+  return BaseMap::php_values<c_ImmVector>();
+}
+
+Object c_ImmMap::t_keys() {
+  return BaseMap::php_keys<c_ImmVector>();
 }
 
 Object c_ImmMap::t_map(const Variant& callback) {

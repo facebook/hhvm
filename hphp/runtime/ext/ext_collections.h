@@ -1351,6 +1351,44 @@ class BaseMap : public HashCollection {
                   == FAST_COLLECTION_SIZE_OFFSET, "");
   }
 
+ protected:
+  template<class TVector>
+  Object php_values() {
+    auto* target = newobj<TVector>();
+    Object ret = target;
+    int64_t sz = m_size;
+    target->reserve(sz);
+    assert(target->canMutateBuffer());
+    target->setSize(sz);
+    auto* out = target->m_data;
+    auto* eLimit = elmLimit();
+    for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit), ++out) {
+      cellDup(e->data, *out);
+    }
+    return ret;
+  }
+
+  template<class TVector>
+  Object php_keys() {
+    auto* vec = newobj<TVector>();
+    Object obj = vec;
+    vec->reserve(m_size);
+    assert(vec->canMutateBuffer());
+    auto* e = firstElm();
+    auto* eLimit = elmLimit();
+    ssize_t j = 0;
+    for (; e != eLimit; e = nextElm(e, eLimit), vec->incSize(), ++j) {
+      if (e->hasIntKey()) {
+        vec->m_data[j].m_data.num = e->ikey;
+        vec->m_data[j].m_type = KindOfInt64;
+      } else {
+        assert(e->hasStrKey());
+        cellDup(make_tv<KindOfString>(e->skey), vec->m_data[j]);
+      }
+    }
+    return obj;
+  }
+
  public:
   void t___construct(const Variant& iterable = null_variant);
 
@@ -1358,7 +1396,6 @@ class BaseMap : public HashCollection {
   Variant t_get(const Variant& key);
   bool t_containskey(const Variant& key);
   bool t_contains(const Variant& key);
-  Object t_values();
   Object t_keys();
   Object t_items();
   Object t_getiterator();
@@ -1462,6 +1499,8 @@ class c_Map : public BaseMap {
   Object t_removekey(const Variant& key);
   Object t_tomap();
   Object t_toimmmap();
+  Object t_values();
+  Object t_keys();
   Object t_map(const Variant& callback);
   Object t_mapwithkey(const Variant& callback);
   Object t_filter(const Variant& callback);
@@ -1504,6 +1543,8 @@ class c_ImmMap : public BaseMap {
   Object t_tomap();
   Object t_toimmmap();
   Object t_differencebykey(const Variant& it);
+  Object t_values();
+  Object t_keys();
   Object t_map(const Variant& callback);
   Object t_mapwithkey(const Variant& callback);
   Object t_filter(const Variant& callback);

@@ -262,6 +262,7 @@ tc_unwind_personality(int version,
       FTRACE(1, "Resuming TC @ {:#x}\n", resume_tc->where);
       _Unwind_SetGR(context, __builtin_eh_return_data_regno(0),
                     resume_tc->where);
+      _Unwind_DeleteException(exceptionObj);
       _Unwind_SetIP(context, uint64_t(handleSRResumeTC));
       tl_regState = VMRegState::DIRTY;
 

@@ -89,5 +89,6 @@ let exit_if_unused() =
 let init (root_dir:Path.path) =
   let jobs = [
     Periodical.one_day  , exit_if_unused;
+    Periodical.one_day  , Hhi.touch;
   ] in
   List.iter (fun (period, cb) -> Periodical.register_callback period cb) jobs

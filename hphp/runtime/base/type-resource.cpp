@@ -31,19 +31,20 @@ Resource::~Resource() {
 }
 
 String Resource::toString() const {
-  return m_px ? m_px->o_toString() : String();
+  return m_res ? m_res->o_toString() : String();
 }
 
 Array Resource::toArray() const {
-  return m_px ? m_px->o_toArray() : Array();
+  return m_res ? m_res->o_toArray() : Array();
 }
 
 const char* Resource::classname_cstr() const {
-  return m_px->o_getClassName().c_str();
+  return m_res->o_getClassName().c_str();
 }
 
 void Resource::compileTimeAssertions() {
-  static_assert(sizeof(Resource) == sizeof(ResourceBase), "Fix this.");
+  static_assert(
+    sizeof(Resource) == sizeof(SmartPtr<ResourceData>), "Fix this.");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

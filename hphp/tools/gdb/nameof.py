@@ -29,7 +29,7 @@ def nameof(val):
     if sd is None:
         return None
 
-    return '"' + string_data_val(deref(sd)) + '"'
+    return string_data_val(deref(sd))
 
 
 #------------------------------------------------------------------------------
@@ -51,6 +51,6 @@ class NameOfCommand(gdb.Command):
         name = nameof(argv[0])
 
         if name is not None:
-            print(name)
+            print('"' + name + '"')
 
 NameOfCommand()

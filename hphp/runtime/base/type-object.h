@@ -32,57 +32,57 @@ namespace HPHP {
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
-class Object : protected SmartPtr<ObjectData> {
-  typedef SmartPtr<ObjectData> ObjectBase;
+class Object {
+  SmartPtr<ObjectData> m_obj;
 
 public:
   Object() {}
 
   static const Object s_nullObject;
 
-  ObjectData* get() const { return m_px; }
-  void reset() { ObjectBase::reset(); }
+  ObjectData* get() const { return m_obj.get(); }
+  void reset() { m_obj.reset(); }
 
   ObjectData* operator->() const {
-    return m_px;
+    return m_obj.get();
   }
 
   /**
    * Constructors
    */
-  /* implicit */ Object(ObjectData *data) : ObjectBase(data) { }
-  /* implicit */ Object(const Object& src) : ObjectBase(src.m_px) { }
+  /* implicit */ Object(ObjectData *data) : m_obj(data) { }
+  /* implicit */ Object(const Object& src) : m_obj(src.m_obj) { }
 
   template <typename T>
-  explicit Object(const SmartPtr<T> &ptr) : ObjectBase(ptr) { }
+  explicit Object(const SmartPtr<T> &ptr) : m_obj(ptr) { }
 
   template <typename T>
-  explicit Object(SmartPtr<T>&& ptr) : ObjectBase(std::move(ptr)) { }
+  explicit Object(SmartPtr<T>&& ptr) : m_obj(std::move(ptr)) { }
 
   // Move ctor
-  Object(Object&& src) noexcept : ObjectBase(std::move(src)) { }
+  Object(Object&& src) noexcept : m_obj(std::move(src.m_obj)) { }
 
   // Regular assign
   Object& operator=(const Object& src) {
-    ObjectBase::operator=(src);
+    m_obj = src.m_obj;
     return *this;
   }
 
   template <typename T>
   Object& operator=(const SmartPtr<T>& src) {
-    ObjectBase::operator=(src);
+    m_obj = src;
     return *this;
   }
 
   // Move assign
   Object& operator=(Object&& src) {
-    ObjectBase::operator=(std::move(src));
+    m_obj = std::move(src.m_obj);
     return *this;
   }
 
   template <typename T>
   Object& operator=(SmartPtr<T>&& src) {
-    ObjectBase::operator=(std::move(src));
+    m_obj = std::move(src);
     return *this;
   }
 
@@ -91,16 +91,14 @@ public:
   /**
    * Informational
    */
-  explicit operator bool() const { return m_px != nullptr; }
+  explicit operator bool() const { return (bool)m_obj; }
 
-  bool isNull() const {
-    return m_px == nullptr;
-  }
+  bool isNull() const { return !m_obj; }
   bool instanceof(const String& s) const {
-    return m_px && m_px->instanceof(s);
+    return m_obj && m_obj->instanceof(s);
   }
   bool instanceof(const Class* cls) const {
-    return m_px && m_px->instanceof(cls);
+    return m_obj && m_obj->instanceof(cls);
   }
 
   /**
@@ -117,7 +115,7 @@ public:
   T *getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
     static_assert(std::is_base_of<ObjectData, T>::value, "");
 
-    ObjectData *cur = m_px;
+    ObjectData *cur = get();
     if (!cur) {
       if (!nullOkay) {
         throw_null_pointer_exception();
@@ -136,18 +134,18 @@ public:
 
   template<typename T>
   bool is() const {
-    return m_px && m_px->instanceof(T::classof());
+    return m_obj && m_obj->instanceof(T::classof());
   }
 
   /**
    * Type conversions
    */
-  bool    toBoolean() const { return m_px ? m_px->toBoolean() : false; }
+  bool    toBoolean() const { return m_obj ? m_obj->toBoolean() : false; }
   char    toByte   () const { return toInt64(); }
   int16_t toInt16  () const { return toInt64(); }
   int32_t toInt32  () const { return toInt64(); }
-  int64_t toInt64  () const { return m_px ? m_px->toInt64() : 0; }
-  double  toDouble () const { return m_px ? m_px->toDouble() : 0; }
+  int64_t toInt64  () const { return m_obj ? m_obj->toInt64() : 0; }
+  double  toDouble () const { return m_obj ? m_obj->toDouble() : 0; }
   String  toString () const;
   Array   toArray  () const;
 
@@ -157,10 +155,10 @@ public:
   /**
    * Comparisons
    */
-  bool same (const Object& v2) const { return m_px == v2.get();}
+  bool same(const Object& v2) const { return m_obj == v2.m_obj; }
   bool equal(const Object& v2) const;
-  bool less (const Object& v2) const;
-  bool more (const Object& v2) const;
+  bool less(const Object& v2) const;
+  bool more(const Object& v2) const;
 
   Variant o_get(const String& propName, bool error = true,
                 const String& context = null_string) const;
@@ -175,17 +173,11 @@ public:
   void setToDefaultObject();
 
   // Transfer ownership of our reference to this object.
-  ObjectData *detach() {
-    ObjectData *ret = m_px;
-    m_px = nullptr;
-    return ret;
-  }
+  ObjectData *detach() { return m_obj.detach(); }
 
   // Take ownership of a reference without touching the ref count
   static Object attach(ObjectData *object) {
-    Object o;
-    o.m_px = object;
-    return o;
+    return Object(SmartPtr<ObjectData>::attach(object));
   }
 
 private:

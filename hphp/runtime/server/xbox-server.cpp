@@ -57,16 +57,21 @@ std::string XboxTransport::getHeader(const char *name) {
 }
 
 void XboxTransport::sendImpl(const void *data, int size, int code,
-                             bool chunked) {
+                             bool chunked, bool eom) {
   m_response.append((const char*)data, size);
   if (code) {
     m_code = code;
+  }
+  if (eom) {
+    onSendEndImpl();
   }
 }
 
 void XboxTransport::onSendEndImpl() {
   Lock lock(this);
-
+  if (m_done) {
+    return;
+  }
   m_done = true;
   if (m_event) {
     m_event->finish();

@@ -93,7 +93,8 @@ public:
   virtual void sendImpl(const void *data,
                         int size,
                         int code,
-                        bool chunked) override;
+                        bool chunked,
+                        bool eom) override;
   void sendResponseHeaders(folly::IOBufQueue& queue, int code);
   virtual void onSendEndImpl() override;
 

@@ -90,7 +90,7 @@ class EventHook {
       onFunctionSuspendR(suspending, child);
     }
   }
-  static inline void FunctionReturn(ActRec* ar, const TypedValue& retval) {
+  static inline void FunctionReturn(ActRec* ar, TypedValue retval) {
     ringbufferExit(ar);
     if (UNLIKELY(checkConditionFlags())) { onFunctionReturn(ar, retval); }
   }
@@ -105,9 +105,7 @@ class EventHook {
   static bool onFunctionCall(const ActRec* ar, int funcType);
   static void onFunctionSuspendE(ActRec*, const ActRec*);
   static void onFunctionSuspendR(ActRec*, ObjectData*);
-  static void onFunctionReturnJit(ActRec* ar, const TypedValue retval) {
-    onFunctionReturn(ar, retval);
-  }
+  static void onFunctionReturn(ActRec* ar, TypedValue retval);
 
 private:
   enum {
@@ -117,7 +115,6 @@ private:
 
   static void onFunctionResumeAwait(const ActRec* ar);
   static void onFunctionResumeYield(const ActRec* ar);
-  static void onFunctionReturn(ActRec* ar, const TypedValue& retval);
   static void onFunctionUnwind(const ActRec* ar, const Fault& fault);
 
   static void onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags);

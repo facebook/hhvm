@@ -595,6 +595,8 @@ next requests.
     CoreDumpEmail = email address
     CoreDumpReport = true
     CoreDumpReportDirectory = /tmp
+
+    StackTraceTimeout = 0
   }
 
 - FullBacktrace, ServerErrorMessage, TranslateSource
@@ -611,6 +613,12 @@ We can easily gdb that way to debug any problems. Watch error log for recorded
 file's location. ClearInputOnSuccess can automatically delete requests that
 had 200 responses and it's useful to capture 500 errors on production without
 capturing good responses.
+
+- StackTraceTimeout
+
+This specifies the maximum number of seconds spent for generating a stack trace
+when hhvm is crashed. The default is 0 which means no timeout. This can be set
+to prevent from deadlocks in the backtrace handler.
 
 - APCSize
 

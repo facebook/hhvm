@@ -40,5 +40,14 @@ c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
   enterContextImpl(ctx_idx);
 }
 
+// Throws if establishing a dependency from this to child would form a cycle.
+inline void
+c_WaitableWaitHandle::detectCycle(c_WaitableWaitHandle* child) const {
+  if (UNLIKELY(isDescendantOf(child))) {
+    Object e(createCycleException(child));
+    throw e;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

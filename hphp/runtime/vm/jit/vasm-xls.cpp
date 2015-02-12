@@ -32,7 +32,6 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/ringbuffer.h"
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -41,17 +40,15 @@
 // future work
 //  - #3098509 streamline code, vectors vs linked lists, etc
 //  - #3098685 Optimize lifetime splitting
-//  - #3098712 reuse spill slots
 //  - #3098739 new features now possible with XLS
 
 TRACE_SET_MOD(xls);
 
 namespace HPHP { namespace jit {
-using Trace::RingBufferType;
-using Trace::ringbufferName;
+///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-using namespace Stats;
+///////////////////////////////////////////////////////////////////////////////
 
 size_t s_counter;
 
@@ -68,13 +65,15 @@ struct Use {
 struct LiveRange {
   bool contains(unsigned pos) const { return pos >= start && pos < end; }
   bool intersects(LiveRange r) const { return r.start < end && start < r.end; }
-  bool contains(LiveRange r) const;
+  bool contains(LiveRange r) const { return r.start >= start && r.end <= end; }
 public:
   unsigned start, end;
 };
 
 typedef jit::vector<LiveRange> RangeList;
 typedef jit::vector<Use> UseList;
+
+constexpr int kInvalidSpillSlot = -1;
 
 // An Interval stores the lifetime of an Vreg as a sorted list of disjoint
 // ranges, and a sorted list of use positions. If this interval was split,
@@ -121,7 +120,7 @@ public:
   UseList uses;
   const Vreg vreg;
   unsigned def_pos;
-  int slot{-1};
+  int slot{kInvalidSpillSlot};
   bool wide{false};
   PhysReg reg;
   bool constant{false};
@@ -146,7 +145,8 @@ struct Vxls {
   Vxls(Vunit& unit, const Abi& abi)
     : unit(unit)
     , m_abi(abi)
-    , m_sp(mcg->backEnd().rSp()) {
+    , m_sp(mcg->backEnd().rSp())
+  {
     switch (arch()) {
       case Arch::X64:
         m_tmp = reg::xmm15; // reserve xmm15 to break shuffle cycles
@@ -163,17 +163,19 @@ struct Vxls {
     assert(!m_abi.gpUnreserved.contains(m_tmp));
   }
   ~Vxls();
+
   // phases
   void allocate();
   void computePositions();
   void analyzeRsp();
   void buildIntervals();
   void walkIntervals();
-  void renameOperands();
   void resolveSplits();
   void lowerCopyargs();
   void resolveEdges();
+  void renameOperands();
   void insertCopies();
+
   // utilities
   void update(unsigned pos);
   void allocate(Interval*);
@@ -193,50 +195,68 @@ struct Vxls {
                       const CopyPlan&, MemoryRef slots, unsigned pos);
   PhysReg findHint(Interval* current, const PosVec& free_until, RegSet allow);
   unsigned nearestSplitBefore(unsigned pos);
+
   // debugging
   void print(const char* caption);
   void printInstr(std::ostringstream& out, Vinstr* instr, unsigned pos, Vlabel);
   void dumpIntervals();
   int spEffect(Vinstr& inst) const;
   void getEffects(const Vinstr& i, RegSet& uses, RegSet& across, RegSet& defs);
+
 public:
-  struct Compare { bool operator()(const Interval*, const Interval*); };
+  /*
+   * Comparison function for pending priority queue.
+   *
+   * std::priority_queue requires a less operation, but sorts the heap
+   * highest-first; we need the opposite (lowest-first), so use greater-than.
+   */
+  struct Compare {
+    bool operator()(const Interval* i1, const Interval* i2) {
+      return i1->start() > i2->start();
+    }
+  };
+
 public:
   Vunit& unit;
   Abi m_abi;
-  PhysReg m_sp; // arch-dependent stack pointer
-  PhysReg m_tmp; // only for breaking cycles
-  RegSet m_srkill; // killed by service requests
-  jit::vector<Vlabel> blocks;          // sorted blocks
-  jit::vector<LiveRange> block_ranges; // [start,end) position of each block
-  jit::vector<int> spill_offsets;      // per-block sp[offset] to spill-slots
-  jit::vector<LiveSet> livein;         // per-block live-in sets
-  jit::vector<Interval*> intervals;    // parent intervals, null if unused
-  jit::priority_queue<Interval*,Compare> pending; // sorted by Interval start
-  jit::vector<Interval*> active, inactive; // intervals that overlap
-  jit::hash_map<unsigned,CopyPlan> copies; // where to insert copies
-  jit::hash_map<unsigned,CopyPlan> spills; // where to insert spills
-  jit::hash_map<EdgeKey,CopyPlan,EdgeHasher> edge_copies; // copies on edges
-  unsigned m_nextSlot{0}; // next available spill slot
+
+  // Arch-dependent stack pointer.
+  PhysReg m_sp;
+  // Temp register only for breaking cycles.
+  PhysReg m_tmp;
+  // Registers killed by service requests.
+  RegSet m_srkill;
+
+  // Sorted blocks.
+  jit::vector<Vlabel> blocks;
+  // [start,end) position of each block.
+  jit::vector<LiveRange> block_ranges;
+  // Per-block sp[offset] to spill-slots.
+  jit::vector<int> spill_offsets;
+  // Per-block live-in sets.
+  jit::vector<LiveSet> livein;
+
+  // Parent intervals, null if unused.
+  jit::vector<Interval*> intervals;
+  // Intervals sorted by Interval start.
+  jit::priority_queue<Interval*,Compare> pending;
+  // Intervals that overlap.
+  jit::vector<Interval*> active, inactive;
+
+  // Where to insert copies.
+  jit::hash_map<unsigned,CopyPlan> copies;
+  // Where to insert spills.
+  jit::hash_map<unsigned,CopyPlan> spills;
+  // Copies on edges.
+  jit::hash_map<EdgeKey,CopyPlan,EdgeHasher> edge_copies;
+
+  // Number of spills.
+  unsigned num_spills{0};
+  // Last position each spill slot was owned; kMaxPos means currently used.
+  jit::array<unsigned, NumPreAllocatedSpillLocs> spill_slots{{0}};
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
 const unsigned kMaxPos = UINT_MAX; // "infinity" use position
-
-// comparison function for pending priority queue. priority_queue
-// requires a less operation, but sorts the heap highest-first; we
-// need the opposite (lowest-first), so use greater-than.
-bool Vxls::Compare::operator()(const Interval* i1, const Interval* i2) {
-  return i1->start() > i2->start();
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-// returns true if this range contains r
-bool LiveRange::contains(LiveRange r) const {
-  return r.start >= start && r.end <= end;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -325,7 +345,7 @@ Interval* Interval::childAt(unsigned pos) {
 
 // Return the next intersection point between current and other, or kMaxPos
 // if they never intersect.
-unsigned nextIntersect(Interval* current, Interval* other) {
+unsigned nextIntersect(const Interval* current, const Interval* other) {
   assert(!current->fixed());
   if (!current->parent && !other->parent && !other->fixed()) {
     // Since other is inactive, it cannot cover current's start, and
@@ -459,7 +479,7 @@ Vxls::~Vxls() {
  *
  * 5. Once intervals have been walked and split, every interval has an assigned
  * operand (register or spill location) for all positions where its alive.
- * visit every instruction and modify its Vreg operands to the physical
+ * Visit every instruction and modify its Vreg operands to the physical
  * register that was assigned.
  *
  * 6. Splitting creates sub-intervals that are assigned to different registers
@@ -469,7 +489,7 @@ Vxls::~Vxls() {
  * in a position, they are parallel-copies (all sources read before any dest
  * is written).
  *
- * If any sub-interval was spilled, we a single store is generated after each
+ * If any sub-interval was spilled, a single store is generated after each
  * definition point.
  */
 
@@ -882,11 +902,26 @@ void erase(jit::vector<Interval*>& list, jit::vector<Interval*>::iterator i) {
 
 // Update active and inactive lists based on pos
 void Vxls::update(unsigned pos) {
+  auto free_spill_slot = [this] (Interval* ivl) {
+    assert(!ivl->next);
+    auto slot = ivl->leader()->slot;
+
+    if (slot != kInvalidSpillSlot) {
+      if (ivl->wide) {
+        assert(spill_slots[slot + 1]);
+        spill_slots[slot + 1] = ivl->end();
+      }
+      assert(spill_slots[slot]);
+      spill_slots[slot] = ivl->end();
+    }
+  };
+
   // check for active intervals in that are expired or inactive
   for (auto i = active.begin(); i != active.end();) {
     auto ivl = *i;
     if (pos >= ivl->end()) {
       erase(active, i);
+      if (!ivl->next) free_spill_slot(ivl);
     } else if (!ivl->covers(pos)) {
       erase(active, i);
       inactive.push_back(ivl);
@@ -899,6 +934,7 @@ void Vxls::update(unsigned pos) {
     auto ivl = *i;
     if (pos >= ivl->end()) {
       erase(inactive, i);
+      if (!ivl->next) free_spill_slot(ivl);
     } else if (ivl->covers(pos)) {
       erase(inactive, i);
       active.push_back(ivl);
@@ -1143,24 +1179,43 @@ void Vxls::spillOthers(Interval* current, PhysReg r) {
 // Assign the next available spill slot to interval
 void Vxls::assignSpill(Interval* ivl) {
   assert(!ivl->fixed() && ivl->parent && ivl->uses.empty());
+
   auto leader = ivl->parent;
-  if (leader->slot < 0) {
-    if (!leader->wide) {
-      leader->slot = m_nextSlot++;
-    } else {
-      assert(leader->reg.isSIMD());
-      if (!isSlotAligned(m_nextSlot)) m_nextSlot++;
-      leader->slot = m_nextSlot;
-      m_nextSlot += 2;
+
+  if (leader->slot != kInvalidSpillSlot) {
+    ivl->slot = leader->slot;
+    return;
+  }
+
+  auto assign_slot = [&] (size_t slot) {
+    ivl->slot = leader->slot = slot;
+    ++num_spills;
+
+    if (ivl->wide) {
+      spill_slots[slot + 1] = kMaxPos;
     }
-    if (m_nextSlot > NumPreAllocatedSpillLocs) {
-      // ran out of spill slots
-      ONTRACE(kRegAllocLevel, dumpIntervals());
-      TRACE(1, "vxls-punt TooManySpills\n");
-      PUNT(LinearScan_TooManySpills);
+    spill_slots[slot] = kMaxPos;
+  };
+
+  if (!ivl->wide) {
+    for (size_t slot = 0, n = spill_slots.size(); slot < n; ++slot) {
+      if (leader->start() >= spill_slots[slot]) {
+        return assign_slot(slot);
+      }
+    }
+  } else {
+    for (size_t slot = 0, n = spill_slots.size() - 1; slot < n; slot += 2) {
+      if (leader->start() >= spill_slots[slot] &&
+          leader->start() >= spill_slots[slot + 1]) {
+        return assign_slot(slot);
+      }
     }
   }
-  ivl->slot = leader->slot;
+
+  // Ran out of spill slots.
+  ONTRACE(kRegAllocLevel, dumpIntervals());
+  TRACE(1, "vxls-punt TooManySpills\n");
+  PUNT(LinearScan_TooManySpills);
 }
 
 // Visitor class for renaming registers. Visit every virtual-register
@@ -1586,13 +1641,13 @@ std::string Interval::toString() {
 }
 
 void Vxls::dumpIntervals() {
-  Trace::traceRelease("Spills %u\n", m_nextSlot);
+  Trace::traceRelease("Spills %u\n", num_spills);
   for (auto ivl : intervals) {
     if (!ivl || ivl->fixed()) continue;
-    HPHP::Trace::traceRelease("%%%-2lu %s\n", size_t(ivl->vreg),
+    Trace::traceRelease("%%%-2lu %s\n", size_t(ivl->vreg),
                               ivl->toString().c_str());
     for (ivl = ivl->next; ivl; ivl = ivl->next) {
-      HPHP::Trace::traceRelease("    %s\n", ivl->toString().c_str());
+      Trace::traceRelease("    %s\n", ivl->toString().c_str());
     }
   }
 }
@@ -1661,6 +1716,7 @@ void Vxls::print(const char* caption) {
   HPHP::Trace::traceRelease("%s\n", str.str().c_str());
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }
 
 void allocateRegisters(Vunit& unit, const Abi& abi) {
@@ -1669,4 +1725,5 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
   a.allocate();
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }}

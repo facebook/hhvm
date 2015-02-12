@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_CONTAINERS_H_
 #define incl_HPHP_VM_CONTAINERS_H_
 
+#include <array>
 #include <deque>
 #include <functional>
 #include <list>
@@ -71,26 +72,29 @@ using sparse_idptr_map = sparse_id_map<
 
 //////////////////////////////////////////////////////////////////////
 
+template<class T, std::size_t N>
+using array = std::array<T, N>;
+
 template<class T>
 using vector = std::vector<T>;
 
-template <class T, class Container = std::deque<T>>
+template<class T, class Container = std::deque<T>>
 using stack = std::stack<T,Container>;
 
-template <class T, class Compare = std::less<T>>
+template<class T, class Compare = std::less<T>>
 using priority_queue = std::priority_queue<T,vector<T>,Compare>;
 
-template <class T>
+template<class T>
 using list = std::list<T>;
 
 // subclass and pass 0 to the constructor to override the default
 // (large) buckets size.
-template <class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
+template<class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
 struct hash_map: std::unordered_map<T,U,V,W> {
   hash_map() : std::unordered_map<T,U,V,W>(0) {}
 };
 
-template <class T, class V = std::hash<T>, class W = std::equal_to<T>>
+template<class T, class V = std::hash<T>, class W = std::equal_to<T>>
 struct hash_set: std::unordered_set<T,V,W> {
   hash_set() : std::unordered_set<T,V,W>(0) {}
 };

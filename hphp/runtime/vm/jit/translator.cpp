@@ -1823,6 +1823,8 @@ TranslateResult irGenRegion(HTS& hts,
 
   SCOPE_ASSERT_DETAIL("IRUnit") { return hts.unit.toString(); };
 
+  auto& irb = *hts.irb;
+
   // Create a map from region blocks to their corresponding initial IR blocks.
   BlockIdToIRBlockMap blockIdToIRBlock;
   createBlockMap(hts, region, blockIdToIRBlock);

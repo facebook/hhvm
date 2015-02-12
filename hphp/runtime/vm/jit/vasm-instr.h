@@ -74,6 +74,7 @@ struct Vunit;
   O(fallback, I(dest), U(args), Dn)\
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
   O(kpcall, I(target) I(callee) I(prologIndex), U(args), Dn)\
+  O(ldpoint, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -81,6 +82,7 @@ struct Vunit;
   O(phidef, Inone, Un, D(defs))\
   O(phijmp, Inone, U(uses), Dn)\
   O(phijcc, I(cc), U(uses) U(sf), Dn)\
+  O(point, I(p), Un, Dn)\
   O(store, Inone, U(s) U(d), Dn)\
   O(svcreq, I(req) I(stub_block), U(args), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
@@ -272,6 +274,7 @@ struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
                     TransFlags trflags; RegSet args; };
 struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex;
                 RegSet args; };
+struct ldpoint { Vpoint s; Vreg64 d; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
@@ -279,6 +282,7 @@ struct nothrow {};
 struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
 struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
+struct point { Vpoint p; };
 struct store { Vreg s; Vptr d; };
 struct svcreq { ServiceRequest req; Vtuple args; TCA stub_block; };
 struct syncpoint { Fixup fix; };

@@ -461,12 +461,6 @@ struct ActRec {
 static_assert(offsetof(ActRec, m_sfp) == 0,
               "m_sfp should be at offset 0 of ActRec");
 
-/*
- * Returns true iff ar represents a frame on the VM eval stack or a Resumable
- * object on the PHP heap.
- */
-bool isVMFrame(const ActRec* ar);
-
 inline int32_t arOffset(const ActRec* ar, const ActRec* other) {
   return (intptr_t(other) - intptr_t(ar)) / sizeof(TypedValue);
 }

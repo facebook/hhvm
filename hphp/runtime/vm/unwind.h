@@ -72,17 +72,6 @@ struct VMSwitchMode : std::exception {
 };
 
 /*
- * Thrown by the interpreter to indicate that we should resume in a translated
- * caller.
- */
-struct VMResumeTC : std::exception {
-  explicit VMResumeTC(uint64_t where) : where(where) {}
-  const char* what() const noexcept override { return "VMResumeTC"; }
-
-  uint64_t where;
-};
-
-/*
  * Thrown for stack overflow thrown from a prolog while
  * re-entering
  */

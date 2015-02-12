@@ -50,14 +50,6 @@ struct VMRegs {
 
   /* First ActRec of this VM instance. */
   ActRec* firstAR;
-
-  /* If the current VM nesting level is dispatchBB() as called by
-   * MCGenerator::handleResume(), this is set to what vmfp() was on the first
-   * entry to dispatchBB(). Otherwise, it's nullptr. See jitReturnPre() and
-   * jitReturnPost() in bytecode.cpp for usage. Note that we will have at most
-   * one active call to handleResume() in each VM nesting level, which is why
-   * this is just a single pointer. */
-  ActRec* jitCalledFrame;
 };
 
 namespace rds {

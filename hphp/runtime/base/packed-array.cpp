@@ -892,35 +892,22 @@ void PackedArray::OnSetEvalScalar(ArrayData* ad) {
   }
 }
 
-ArrayData* PackedArray::EscalateForSort(ArrayData* ad) {
-  // Note: ToMixedCopy also grows so we have !isFull.  We could use
-  // ToMixedCopyReserve?
-  assert(checkInvariants(ad));
-  return ToMixedCopy(ad);
+void PackedArray::Ksort(ArrayData* ad, int flags, bool ascending) {
+  assert(ad->getSize() <= 1 || ascending);
 }
 
-void PackedArray::Ksort(ArrayData*, int, bool) {
-  not_reached();
+void PackedArray::Asort(ArrayData* ad, int, bool) {
+  assert(ad->getSize() <= 1);
 }
 
-void PackedArray::Sort(ArrayData*, int, bool) {
-  not_reached();
+bool PackedArray::Uksort(ArrayData* ad, const Variant&) {
+  assert(ad->getSize() <= 1);
+  return true;
 }
 
-void PackedArray::Asort(ArrayData*, int, bool) {
-  not_reached();
-}
-
-bool PackedArray::Uksort(ArrayData*, const Variant&) {
-  not_reached();
-}
-
-bool PackedArray::Usort(ArrayData*, const Variant&) {
-  not_reached();
-}
-
-bool PackedArray::Uasort(ArrayData*, const Variant&) {
-  not_reached();
+bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
+  assert(ad->getSize() <= 1);
+  return true;
 }
 
 ArrayData* PackedArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {

@@ -270,7 +270,7 @@ public:
     return const_cast<ArrayData*>(ad);
   }
 
-  static ArrayData* EscalateForSort(ArrayData* ad);
+  static ArrayData* EscalateForSort(ArrayData* ad, SortFunction sf);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
   static void Sort(ArrayData*, int sort_flags, bool ascending);
   static void Asort(ArrayData*, int sort_flags, bool ascending);
@@ -346,7 +346,6 @@ private:
   friend class c_AwaitAllWaitHandle;
   enum class ClonePacked {};
   enum class CloneMixed {};
-  enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
   friend size_t getMemSize(const ArrayData*);
 

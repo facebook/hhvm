@@ -526,8 +526,6 @@ class c_Vector : public BaseVector {
 
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
-  enum SortFlavor { IntegerSort, StringSort, GenericSort };
-
   void sort(int sort_flags, bool ascending);
   bool usort(const Variant& cmp_function);
 
@@ -1204,9 +1202,6 @@ class HashCollection : public ExtCollectionObjectData {
  private:
   struct EmptyMixedInitializer;
   static EmptyMixedInitializer s_empty_mixed_initializer;
-
- public:
-  enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
  private:
   template <typename AccessorT>

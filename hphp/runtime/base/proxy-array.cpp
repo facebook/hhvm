@@ -350,39 +350,42 @@ bool ProxyArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   return innerArr(ad)->advanceMArrayIter(fp);
 }
 
-ArrayData* ProxyArray::EscalateForSort(ArrayData* ad) {
-  auto r = innerArr(ad)->escalateForSort();
+ArrayData* ProxyArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
+  auto r = innerArr(ad)->escalateForSort(sf);
   reseatable(ad, r);
   return ad;
 }
 
 void ProxyArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
-reseatable(ad, innerArr(ad)->escalateForSort());
+  auto const sf = getSortFunction(SORTFUNC_KSORT, ascending);
+  reseatable(ad, innerArr(ad)->escalateForSort(sf));
   return innerArr(ad)->ksort(sort_flags, ascending);
 }
 
 void ProxyArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
-  reseatable(ad, innerArr(ad)->escalateForSort());
+  auto const sf = getSortFunction(SORTFUNC_SORT, ascending);
+  reseatable(ad, innerArr(ad)->escalateForSort(sf));
   return innerArr(ad)->sort(sort_flags, ascending);
 }
 
 void ProxyArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
-  reseatable(ad, innerArr(ad)->escalateForSort());
+  auto const sf = getSortFunction(SORTFUNC_ASORT, ascending);
+  reseatable(ad, innerArr(ad)->escalateForSort(sf));
   return innerArr(ad)->asort(sort_flags, ascending);
 }
 
 bool ProxyArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
-  reseatable(ad, innerArr(ad)->escalateForSort());
+  reseatable(ad, innerArr(ad)->escalateForSort(SORTFUNC_UKSORT));
   return innerArr(ad)->uksort(cmp_function);
 }
 
 bool ProxyArray::Usort(ArrayData* ad, const Variant& cmp_function) {
-  reseatable(ad, innerArr(ad)->escalateForSort());
+  reseatable(ad, innerArr(ad)->escalateForSort(SORTFUNC_USORT));
   return innerArr(ad)->usort(cmp_function);
 }
 
 bool ProxyArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
-  reseatable(ad, innerArr(ad)->escalateForSort());
+  reseatable(ad, innerArr(ad)->escalateForSort(SORTFUNC_UASORT));
   return innerArr(ad)->uasort(cmp_function);
 }
 

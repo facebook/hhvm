@@ -116,7 +116,7 @@ public:
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
 
-  static ArrayData* EscalateForSort(ArrayData*);
+  static ArrayData* EscalateForSort(ArrayData*, SortFunction sf);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
   static void Sort(ArrayData*, int sort_flags, bool ascending);
   static void Asort(ArrayData*, int sort_flags, bool ascending);

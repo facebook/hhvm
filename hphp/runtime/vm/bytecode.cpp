@@ -464,15 +464,17 @@ Array VarEnv::getDefinedVariables() const {
       ret.add(StrNR(sd).asString(), tvAsCVarRef(tv));
     }
   }
-  // ksort the array, result is independent of the hashtable implementation.
-  ArrayData* sorted = ret.get()->escalateForSort();
-  sorted->incRefCount();
-  sorted->ksort(0, true);
-  if (sorted != ret.get()) {
-    ret = sorted;
+  {
+    // Make result independent of the hashtable implementation.
+    ArrayData* sorted = ret.get()->escalateForSort(SORTFUNC_KSORT);
+    assert(sorted == ret.get() || sorted->getCount() == 0);
+    SCOPE_EXIT {
+      if (sorted != ret.get()) {
+        ret = sorted;
+      }
+    };
+    sorted->ksort(0, true);
   }
-  sorted->decRefCount();
-
   return ret;
 }
 

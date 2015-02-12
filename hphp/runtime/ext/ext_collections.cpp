@@ -1210,14 +1210,7 @@ void c_Vector::throwOOB(int64_t key) {
   throwIntOOB(key, true);
 }
 
-struct VectorValAccessor {
-  typedef const TypedValue& ElmT;
-  bool isInt(ElmT elm) const { return elm.m_type == KindOfInt64; }
-  bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm.m_type); }
-  int64_t getInt(ElmT elm) const { return elm.m_data.num; }
-  StringData* getStr(ElmT elm) const { return elm.m_data.pstr; }
-  Variant getValue(ElmT elm) const { return tvAsCVarRef(&elm); }
-};
+using VectorValAccessor = TVAccessor;
 
 /**
  * preSort() does an initial pass over the array to do some preparatory work
@@ -1227,7 +1220,7 @@ struct VectorValAccessor {
  * and avoid performing type checks during the actual sort.
  */
 template <typename AccessorT>
-c_Vector::SortFlavor c_Vector::preSort(const AccessorT& acc) {
+SortFlavor c_Vector::preSort(const AccessorT& acc) {
   assert(m_size > 0);
   uint32_t sz = m_size;
   bool allInts = true;
@@ -3099,30 +3092,6 @@ bool BaseMap::ToBool(const ObjectData* obj) {
   return static_cast<const BaseMap*>(obj)->toBoolImpl();
 }
 
-struct AssocKeyAccessor {
-  typedef const HashCollection::Elm& ElmT;
-  bool isInt(ElmT elm) const { return elm.hasIntKey(); }
-  bool isStr(ElmT elm) const { return elm.hasStrKey(); }
-  int64_t getInt(ElmT elm) const { return elm.ikey; }
-  StringData* getStr(ElmT elm) const { return elm.skey; }
-  Variant getValue(ElmT elm) const {
-    if (isInt(elm)) {
-      return getInt(elm);
-    }
-    assert(isStr(elm));
-    return getStr(elm);
-  }
-};
-
-struct AssocValAccessor {
-  typedef const HashCollection::Elm& ElmT;
-  bool isInt(ElmT elm) const { return elm.data.m_type == KindOfInt64; }
-  bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm.data.m_type); }
-  int64_t getInt(ElmT elm) const { return elm.data.m_data.num; }
-  StringData* getStr(ElmT elm) const { return elm.data.m_data.pstr; }
-  Variant getValue(ElmT elm) const { return tvAsCVarRef(&elm.data); }
-};
-
 /**
  * preSort() does an initial pass to do some preparatory work before the
  * sort algorithm runs. For sorts that use builtin comparators, the types
@@ -3131,8 +3100,7 @@ struct AssocValAccessor {
  * comparator and avoid performing type checks during the actual sort.
  */
 template <typename AccessorT>
-BaseMap::SortFlavor
-HashCollection::preSort(const AccessorT& acc, bool checkTypes) {
+SortFlavor HashCollection::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
   if (!checkTypes && !hasTombstones()) {
     // No need to loop over the elements, we're done
@@ -3192,15 +3160,7 @@ HashCollection::preSort(const AccessorT& acc, bool checkTypes) {
  * postSort() handles rebuilding the hash.
  */
 void HashCollection::postSort() {  // Must provide the nothrow guarantee
-  assert(m_size > 0);
-  auto const table = hashTab();
-  initHash(table, hashSize());
-  auto mask = tableMask();
-  auto data = this->data();
-  for (uint32_t pos = 0; pos < posLimit(); ++pos) {
-    auto& e = data[pos];
-    *findForNewInsert(table, mask, e.probe()) = pos;
-  }
+  arrayData()->postSort(false);
 }
 
 #define SORT_CASE(flag, cmp_type, acc_type)                     \
@@ -3248,13 +3208,13 @@ void HashCollection::postSort() {  // Must provide the nothrow guarantee
 void HashCollection::asort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
   mutateAndBump();
-  SORT_BODY(AssocValAccessor);
+  SORT_BODY(AssocValAccessor<HashCollection::Elm>);
 }
 
 void HashCollection::ksort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
   mutateAndBump();
-  SORT_BODY(AssocKeyAccessor);
+  SORT_BODY(AssocKeyAccessor<HashCollection::Elm>);
 }
 
 #undef SORT_CASE
@@ -3284,13 +3244,13 @@ void HashCollection::ksort(int sort_flags, bool ascending) {
 bool HashCollection::uasort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
   mutateAndBump();
-  USER_SORT_BODY(AssocValAccessor);
+  USER_SORT_BODY(AssocValAccessor<HashCollection::Elm>);
 }
 
 bool HashCollection::uksort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
   mutateAndBump();
-  USER_SORT_BODY(AssocKeyAccessor);
+  USER_SORT_BODY(AssocKeyAccessor<HashCollection::Elm>);
 }
 
 #undef USER_SORT_BODY

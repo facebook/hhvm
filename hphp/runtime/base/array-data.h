@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/sort-flags.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -297,7 +298,7 @@ public:
    */
   bool advanceMArrayIter(MArrayIter& fp);
 
-  ArrayData* escalateForSort();
+  ArrayData* escalateForSort(SortFunction sort_function);
   void ksort(int sort_flags, bool ascending);
   void sort(int sort_flags, bool ascending);
   void asort(int sort_flags, bool ascending);
@@ -517,7 +518,7 @@ struct ArrayFunctions {
   ssize_t (*iterRewind[NK])(const ArrayData*, ssize_t pos);
   bool (*validMArrayIter[NK])(const ArrayData*, const MArrayIter&);
   bool (*advanceMArrayIter[NK])(ArrayData*, MArrayIter&);
-  ArrayData* (*escalateForSort[NK])(ArrayData*);
+  ArrayData* (*escalateForSort[NK])(ArrayData*, SortFunction);
   void (*ksort[NK])(ArrayData* ad, int sort_flags, bool ascending);
   void (*sort[NK])(ArrayData* ad, int sort_flags, bool ascending);
   void (*asort[NK])(ArrayData* ad, int sort_flags, bool ascending);

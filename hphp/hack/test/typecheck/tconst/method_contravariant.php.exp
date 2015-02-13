@@ -7,7 +7,7 @@ This is the expression dependent type <expr#202>::T
 File "method_contravariant.php", line 43, characters 3-4:
   where '<expr#202>' is a reference to this expression
 File "method_contravariant.php", line 4, characters 14-14:
-  resulting from expanding the type constant this::T as follows:
-    X::T
+  resulting from expanding a type constant as follows:
+    <expr#202>::T -> X::T
 File "method_contravariant.php", line 43, characters 14-15:
 It is incompatible with a string

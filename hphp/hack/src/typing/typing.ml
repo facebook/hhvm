@@ -876,8 +876,7 @@ and expr_ in_cond is_lvalue env (p, e) =
     let env, ty1 = expr env instance in
     let env, result, vis =
       obj_get_with_visibility ~is_method:true ~nullsafe:None env ty1
-                              meth (fun x -> x) in
-    let env, result = TAccess.fill_with_expr env instance ty1 result in
+                              (CIvar instance) meth (fun x -> x) in
     let has_lost_info = Env.FakeMembers.is_invalid env instance (snd meth) in
     if has_lost_info
     then
@@ -915,9 +914,7 @@ and expr_ in_cond is_lvalue env (p, e) =
          *)
         let env, fty =
           obj_get ~is_method:true ~nullsafe:None env obj_type
-                  meth_name (fun x -> x) in
-        let env, fty = TAccess.fill_with_class_id env
-          (CI (pos, class_name)) obj_type fty in
+                 (CI (pos, class_name)) meth_name (fun x -> x) in
         (match fty with
         | reason, Tfun fty ->
             check_deprecated p fty;
@@ -1092,8 +1089,7 @@ and expr_ in_cond is_lvalue env (p, e) =
         ) in
       let env, ty1 = expr env e1 in
       let env, result =
-        obj_get ~is_method:false ~nullsafe env ty1 m (fun x -> x) in
-      let env, result = TAccess.fill_with_expr env e1 ty1 result in
+        obj_get ~is_method:false ~nullsafe env ty1 (CIvar e1) m (fun x -> x) in
       let has_lost_info = Env.FakeMembers.is_invalid env e1 (snd m) in
       if has_lost_info
       then
@@ -1917,12 +1913,10 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
               Reason.Rwitness fpos, Tgeneric (SN.Typehints.this, Some (Env.get_self env))
             in
             let env, method_, _ =
-              obj_get_ ~is_method:true ~nullsafe:None env ty1 m
+              obj_get_ ~is_method:true ~nullsafe:None env ty1 CIparent m
               begin fun (env, fty, _) ->
                 let env, fty = Env.expand_type env fty in
                 let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
-                let env, fty = TAccess.fill_with_class_id
-                  env CIparent (k_lhs()) fty in
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 let env, method_ = call p env fty el uel in
                 env, method_, None
@@ -1956,7 +1950,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       let fn = (fun (env, fty, _) ->
         let env, fty = Env.expand_type env fty in
         let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
-        let env, fty = TAccess.fill_with_expr env e1 ty1 fty in
         let env, method_ = call p env fty el uel in
         env, method_, None) in
       let env =
@@ -1969,7 +1962,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
              r);
           env
         end else env in
-      obj_get ~is_method ~nullsafe env ty1 m fn
+      obj_get ~is_method ~nullsafe env ty1 (CIvar e1) m fn
   | Fun_id x
   | Id x ->
       Typing_hooks.dispatch_id_hook x env;
@@ -2269,7 +2262,7 @@ and class_get ~is_method ~is_const env cty (p, mid) cid =
   let env, ty = class_get_ ~is_method ~is_const env cty (p, mid) cid in
   (* Replace the SN.Typehints.this type in the resulting type *)
   let env, ty = Inst.instantiate_this env ty cty in
-  TAccess.fill_with_class_id env cid cty ty
+  TAccess.fill_type_hole env cid cty ty
 
 and class_get_ ~is_method ~is_const env cty (p, mid) cid =
   match cty with
@@ -2380,16 +2373,16 @@ and member_not_found pos ~is_method class_ member_name r =
     | Some (def_pos, v) ->
         error (`did_you_mean (def_pos, v))
 
-and obj_get ~is_method ~nullsafe env ty1 id k =
+and obj_get ~is_method ~nullsafe env ty1 cid id k =
   let env, method_, _ =
-    obj_get_with_visibility ~is_method ~nullsafe env ty1 id k in
+    obj_get_with_visibility ~is_method ~nullsafe env ty1 cid id k in
   env, method_
 
 and obj_get_with_visibility ~is_method ~nullsafe env ty1
-                            id k =
-  obj_get_ ~is_method ~nullsafe env ty1 id k (fun ty -> ty)
+                            cid id k =
+  obj_get_ ~is_method ~nullsafe env ty1 cid id k (fun ty -> ty)
 
-and obj_get_ ~is_method ~nullsafe env ty1 (p, s as id)
+and obj_get_ ~is_method ~nullsafe env ty1 cid (p, s as id)
              k k_lhs =
   let env, ety1 = Env.expand_type env ty1 in
   match ety1 with
@@ -2398,7 +2391,7 @@ and obj_get_ ~is_method ~nullsafe env ty1 (p, s as id)
         lfold
           (fun (env, vis) ty ->
             let env, ty, vis' =
-              obj_get_ ~is_method ~nullsafe env ty id k k_lhs in
+              obj_get_ ~is_method ~nullsafe env ty cid id k k_lhs in
             (* There is one special case where we need to expose the
              * visibility outside of obj_get (checkout inst_meth special
              * function).
@@ -2414,14 +2407,14 @@ and obj_get_ ~is_method ~nullsafe env ty1 (p, s as id)
       env, method_, vis
   | p, Tgeneric (x, Some ty) ->
       let k_lhs' ty = k_lhs (p, Tgeneric (x, Some ty)) in
-      obj_get_ ~is_method ~nullsafe env ty id k k_lhs'
+      obj_get_ ~is_method ~nullsafe env ty cid id k k_lhs'
   | p, Tapply ((_, x) as c, argl) when Env.is_typedef x ->
       let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       let k_lhs' _ty = k_lhs (p, Tapply (c, argl)) in
-      obj_get_ ~is_method ~nullsafe env ty1 id k k_lhs'
+      obj_get_ ~is_method ~nullsafe env ty1 cid id k k_lhs'
   | r, Taccess taccess ->
       let env, ty1 = TAccess.expand env r taccess in
-      obj_get_ ~is_method ~nullsafe env ty1 id k k_lhs
+      obj_get_ ~is_method ~nullsafe env ty1 cid id k k_lhs
   | _, Toption ty -> begin match nullsafe with
     | Some p1 ->
         let k' (env, fty, x) = begin
@@ -2429,7 +2422,7 @@ and obj_get_ ~is_method ~nullsafe env ty1 (p, s as id)
           let env, method_ = non_null env method_ in
           env, (Reason.Rwitness p1, Toption method_), x
         end in
-        obj_get_ ~is_method ~nullsafe env ty id k' k_lhs
+        obj_get_ ~is_method ~nullsafe env ty cid id k' k_lhs
     | None ->
         Errors.null_member s p
           (Reason.to_string
@@ -2498,6 +2491,8 @@ and obj_get_ ~is_method ~nullsafe env ty1 (p, s as id)
                     } in
                     let env, member_ = TGen.rename env new_name
                       SN.Typehints.this (r, Tfun ft) in
+                    let env, member_ =
+                      TAccess.fill_type_hole env cid this_ty member_ in
                     env, member_, Some (mem_pos, vis)
                   | _ -> assert false
                 )
@@ -2526,6 +2521,8 @@ and obj_get_ ~is_method ~nullsafe env ty1 (p, s as id)
                 (* Now this has been substituted, we can de-alpha-vary *)
                 let env, member_ =
                   TGen.rename env new_name SN.Typehints.this member_ in
+                let env, member_ =
+                      TAccess.fill_type_hole env cid this_ty member_ in
                 env, member_, Some (mem_pos, vis)
             )
         )
@@ -2696,7 +2693,7 @@ and call_construct p env class_ params el uel cid =
       let subst = Inst.make_subst class_.tc_tparams params in
       let env, m = Inst.instantiate subst env m in
       let env, cid_ty = static_class_id p env cid in
-      let env, m = TAccess.fill_with_class_id env cid cid_ty m in
+      let env, m = TAccess.fill_type_hole env cid cid_ty m in
       fst (call p env m el uel)
 
 and check_visibility p env (p_vis, vis) cid =
@@ -3616,7 +3613,7 @@ and method_def env m =
   let env, cid_ty = static_class_id (fst m.m_name) env CIstatic in
   let env, params =
       lfold (fun env (x, ty) ->
-        let env, ty = TAccess.fill_with_class_id env CIstatic cid_ty ty in
+        let env, ty = TAccess.fill_type_hole env CIstatic cid_ty ty in
         env, (x, ty)
       ) env params
   in

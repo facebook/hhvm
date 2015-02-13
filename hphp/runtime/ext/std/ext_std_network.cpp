@@ -421,7 +421,7 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
   int64_t n, i;
   unsigned short s;
   unsigned char *tp, *p;
-  char name[MAXHOSTNAMELEN];
+  char name[255 + 2];  // IETF STD 13 section 3.1; 255 bytes
   int have_v6_break = 0, in_v6_break = 0;
 
   n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, sizeof(name) - 2);
@@ -853,7 +853,7 @@ bool HHVM_FUNCTION(getmxrr, const String& hostname,
   int count, qdc;
   unsigned short type, weight;
   unsigned char ans[MAXPACKET];
-  char buf[MAXHOSTNAMELEN];
+  char buf[255 + 1];  // IETF STD 13 section 3.1; 255 bytes
   unsigned char *cp, *end;
 
   Array mxhosts;

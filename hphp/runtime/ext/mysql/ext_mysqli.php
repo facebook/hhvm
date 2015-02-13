@@ -13,59 +13,6 @@ class mysqli {
   <<__Native>>
   private function hh_get_connection(int $state = 0): ?resource;
 
-  public function __get(string $name): mixed {
-    switch ($name) {
-      case 'client_info':
-        return mysqli_get_client_info();
-      case 'client_version':
-        return mysqli_get_client_version();
-      case 'connect_errno':
-        return self::$__connection_errno;
-      case 'connect_error':
-        return self::$__connection_error;
-    }
-
-    // The following properties only work if we are connected
-    $conn = $this->hh_get_connection(1);
-    if (!$conn) {
-      return null;
-    }
-
-    switch ($name) {
-      case 'affected_rows':
-        return mysql_affected_rows($conn);
-      case 'error':
-        return mysql_error($conn);
-      case 'errno':
-        return mysql_errno($conn);
-      case 'field_count':
-        return $this->hh_field_count();
-      case 'host_info':
-        return mysql_get_host_info($conn);
-      case 'info':
-        return mysql_info($conn);
-      case 'insert_id':
-        return mysql_insert_id($conn);
-      case 'protocol_version':
-        return mysql_get_proto_info($conn);
-      case 'server_info':
-        return mysql_get_server_info($conn);
-      case 'server_version':
-        return $this->hh_server_version();
-      case 'sqlstate':
-        return $this->hh_sqlstate();
-      case 'thread_id':
-        return mysql_thread_id($conn);
-      case 'warning_count':
-        return mysql_warning_count($conn);
-      case 'error_list':
-        return $this->__get_error_list();
-    }
-
-    trigger_error('Undefined property: mysqli::$'. $name, E_NOTICE);
-    return null;
-  }
-
   <<__Native>>
   private function hh_field_count(): mixed;
 
@@ -340,19 +287,6 @@ class mysqli {
    */
   public function get_client_info(): string {
     return mysqli_get_client_info();
-  }
-
-  // The implementation of the getter for $error_list
-  private function __get_error_list(): array {
-    $result = array();
-    if ($this->errno) {
-      $result[] = array(
-        'errno' => $this->errno,
-        'sqlstate' => $this->sqlstate,
-        'error' => $this->error,
-      );
-    }
-    return $result;
   }
 
   /**

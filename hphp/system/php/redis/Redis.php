@@ -225,8 +225,8 @@ class Redis {
         count($optionArrayOrExpiration) > 0) {
       $ex = array_key_exists('ex', $optionArrayOrExpiration);
       $px = array_key_exists('px', $optionArrayOrExpiration);
-      $nx = in_array('nx', $optionArrayOrExpiration);
-      $xx = in_array('xx', $optionArrayOrExpiration);
+      $nx = in_array('nx', $optionArrayOrExpiration, true);
+      $xx = in_array('xx', $optionArrayOrExpiration, true);
       if ($nx && $xx) {
         throw new RedisException(
           "Invalid set options: nx and xx may not be specified at the same time"

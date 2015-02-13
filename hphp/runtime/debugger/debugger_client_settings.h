@@ -25,8 +25,7 @@
   HPHPD_CLIENT_SETTING(SmallStep,           bool,  false)         \
   HPHPD_CLIENT_SETTING(ShortPrintCharCount, int,   200)           \
 
-class DebuggerClientSettings {
-public:
+struct DebuggerClientSettings {
 #define HPHPD_CLIENT_SETTING(name, type, defval) type m_s##name;
   HPHPD_CLIENT_SETTINGS
 #undef HPHPD_CLIENT_SETTING
@@ -56,8 +55,8 @@ void setDebuggerClient##name (const type &in##name) {   \
 HPHPD_CLIENT_SETTINGS
 
 
-// leaving HPHPD_CLIENT_SETTING defined so that DECLARE_DBG_SETTING_ACCESSORS is
-// effective
+// Leaving HPHPD_CLIENT_SETTING defined so that DECLARE_DBG_SETTING_ACCESSORS is
+// effective.
 
 ///////////////////////////////////////////////////////////////////////////////
 

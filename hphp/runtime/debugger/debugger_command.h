@@ -19,25 +19,26 @@
 
 #include <memory>
 
-#include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 #include "hphp/runtime/debugger/debugger_client.h"
+#include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
-// DebuggerCommand is the base of all commands executed by the debugger. It
-// also represents the base binary communication format between DebuggerProxy
-// and DebuggerClient.
-//
-// Each command has serialization logic, plus client- and server-side logic.
-// Client-side logic is implemented in the onClient* methods, while server-side
-// is in the onServer* methods.
-//
 
 struct DebuggerCommand;
 using DebuggerCommandPtr = std::shared_ptr<DebuggerCommand>;
-class DebuggerCommand {
-public:
-  /**
+
+/*
+ * DebuggerCommand is the base of all commands executed by the debugger. It
+ * also represents the base binary communication format between DebuggerProxy
+ * and DebuggerClient.
+ *
+ * Each command has serialization logic, plus client- and server-side logic.
+ * Client-side logic is implemented in the onClient* methods, while server-side
+ * is in the onServer* methods.
+ */
+struct DebuggerCommand {
+  /*
    * Warning: Do NOT modify exists values, as they are used in binary network
    * protocol, and changing them may create incompatibility between different
    * versions of debugger and server!
@@ -92,13 +93,11 @@ public:
                       const char *caller);
 
 public:
-  explicit DebuggerCommand(Type type)
-    : m_type(type), m_version(0), m_exitInterrupt(false),
-      m_incomplete(false) {}
+  explicit DebuggerCommand(Type type): m_type(type) {}
   virtual ~DebuggerCommand() {}
 
-  bool is(Type type) const { return m_type == type;}
-  Type getType() const { return m_type;}
+  bool is(Type type) const { return m_type == type; }
+  Type getType() const { return m_type; }
   bool send(DebuggerThriftBuffer &thrift);
   bool recv(DebuggerThriftBuffer &thrift);
   virtual void list(DebuggerClient &client);
@@ -109,7 +108,7 @@ public:
   // This seems to be confined to eval and print commands.
   // It is not clear that it belongs in this interface or that the
   // assert is safe.
-  virtual void handleReply(DebuggerClient &client) { assert(false); }
+  virtual void handleReply(DebuggerClient& client) { not_reached(); }
 
   // Returns true if DebuggerProxy::processInterrupt() should return
   // to its caller instead of processing further commands from the client.
@@ -127,11 +126,16 @@ protected:
   Type m_type;
   std::string m_class; // for CmdExtended
   std::string m_body;
-  int m_version;
+  int m_version{0};
 
-  bool m_exitInterrupt; // server side breaking out of message loop
-  String m_wireError; // used to save temporary error happened on the wire
-  bool m_incomplete; // another interrupt comes before the command could finish
+  // Used to save temporary error happened on the wire.
+  String m_wireError;
+
+  // Server side breaking out of message loop.
+  bool m_exitInterrupt{false};
+
+  // Another interrupt comes before the command could finish.
+  bool m_incomplete{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

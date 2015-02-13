@@ -18,12 +18,12 @@
 #define incl_HPHP_EVAL_DEBUGGER_BASE_H_
 
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 #include "hphp/util/hdf.h"
 
 namespace HPHP { namespace Eval {
@@ -32,15 +32,13 @@ namespace HPHP { namespace Eval {
 
 struct DebuggerClientOptions {
   std::string host;
-  int port;
+  int port{-1};
   std::string extension;
   std::vector<std::string> cmds;
   std::string sandbox;
   std::string user;
   std::string configFName;
   std::string fileName;
-
-  DebuggerClientOptions() : port(-1) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,7 +78,7 @@ struct DebuggerException : Exception {
 // this exception. The message attempts to reflect that a request which was
 // being debugged has been terminated.
 struct DebuggerClientExitException : DebuggerException {
-  const char *what() const noexcept override {
+  const char* what() const noexcept override {
     return "Debugger client has just quit, request (if any) terminated.";
   }
   EXCEPTION_COMMON_IMPL(DebuggerClientExitException);
@@ -88,9 +86,9 @@ struct DebuggerClientExitException : DebuggerException {
 
 struct DebuggerRestartException : DebuggerException {
   explicit DebuggerRestartException(
-    std::shared_ptr<std::vector<std::string>> args) : m_args(args) {}
+    std::shared_ptr<std::vector<std::string>>& args): m_args(args) {}
 
-  const char *what() const noexcept override {
+  const char* what() const noexcept override {
     return "Debugger restarting program or aborting web request.";
   }
   EXCEPTION_COMMON_IMPL(DebuggerRestartException);
@@ -126,54 +124,49 @@ String highlight_code(const String& source, int line = 0, int lineFocus0 = 0,
                       int charFocus0 = 0, int lineFocus1 = 0,
                       int charFocus1 = 0);
 
-extern const char *PHP_KEYWORDS[];
+extern const char* PHP_KEYWORDS[];
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct BreakPointInfo;
 struct DSandboxInfo;
 struct DMachineInfo;
 
 using DSandboxInfoPtr = std::shared_ptr<DSandboxInfo>;
 
-class DMachineInfo {
-public:
-  DMachineInfo()
-      : m_port(0), m_interrupting(false), m_sandboxAttached(false),
-        m_initialized(false), m_rpcPort(0) {}
-
+struct DMachineInfo {
   std::string m_name;
-  int m_port;
+  int m_port{0};
   DebuggerThriftBuffer m_thrift;
 
-  bool m_interrupting; // True if the machine is paused at an interrupt
-  bool m_sandboxAttached;
   DSandboxInfoPtr m_sandbox;
-  bool m_initialized; // True if the initial connection protocol is complete
   std::string m_rpcHost;
-  int m_rpcPort;
+  bool m_interrupting{false}; // If the machine is paused at an interrupt
+  bool m_sandboxAttached{false};
+  bool m_initialized{false}; // If the initial connection protocol is complete
+  int m_rpcPort{0};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DSandboxInfo {
-public:
+struct DSandboxInfo {
   DSandboxInfo() {}
-  explicit DSandboxInfo(const std::string &id) { set(id);}
+  explicit DSandboxInfo(const std::string &id) { set(id); }
 
   std::string m_user;
   std::string m_name;
   std::string m_path;
 
-  const std::string &id() const;
+  const std::string& id() const;
   const std::string desc() const;
   static DSandboxInfo CreateDummyInfo(uint64_t unique);
 
   bool valid() const { return !m_user.empty(); }
-  void set(const std::string &id);
-  void update(const DSandboxInfo &src);
+  void set(const std::string& id);
+  void update(const DSandboxInfo& src);
 
-  void sendImpl(ThriftBuffer &thrift);
-  void recvImpl(ThriftBuffer &thrift);
+  void sendImpl(ThriftBuffer& thrift);
+  void recvImpl(ThriftBuffer& thrift);
 
 private:
   mutable std::string m_cached_id;
@@ -181,8 +174,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DThreadInfo {
-public:
+struct DThreadInfo {
   int64_t m_id;
   std::string m_desc;
   std::string m_type;
@@ -190,17 +182,15 @@ public:
 
   int m_index; // used by DebuggerClient
 
-  void sendImpl(ThriftBuffer &thrift);
-  void recvImpl(ThriftBuffer &thrift);
+  void sendImpl(ThriftBuffer& thrift);
+  void recvImpl(ThriftBuffer& thrift);
 };
 
 using DThreadInfoPtr = std::shared_ptr<DThreadInfo>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class BreakPointInfo;
-class DFunctionInfo {
-public:
+struct DFunctionInfo {
   std::string m_namespace;
   std::string m_class;
   std::string m_function;
@@ -215,12 +205,11 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Macro {
-public:
+struct Macro {
   std::string m_name;
   std::vector<std::string> m_cmds;
 
-  unsigned int m_index; // currently playing position
+  unsigned m_index; // currently playing position
 
   std::string desc(const char *indent);
   void load(const IniSetting::Map& ini, Hdf node);
@@ -231,8 +220,7 @@ public:
 // Simple base class which can be overridden to provide implementation-specific
 // usage logging for the debugger from both client- and server-side.
 
-class DebuggerUsageLogger {
-public:
+struct DebuggerUsageLogger {
   virtual ~DebuggerUsageLogger() {}
   virtual void init() {}
   virtual void log(const std::string &mode, const std::string &sandboxId,

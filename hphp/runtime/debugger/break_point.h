@@ -17,18 +17,28 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
 #define incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
 
-#include <memory>
-#include <vector>
 #include <list>
+#include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
-#include "hphp/runtime/debugger/debugger_thrift_buffer.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/unit.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// The type of interrupt that is sent from the server to notify the debugger
-// client about a notable event during execution.
+struct ActRec;
+struct DebuggerThriftBuffer;
+
+namespace Eval {
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * The type of interrupt that is sent from the server to notify the debugger
+ * client about a notable event during execution.
+ */
 enum InterruptType : int8_t {
   // The server is now ready to interact with the debugger
   SessionStarted,
@@ -60,11 +70,12 @@ enum InterruptType : int8_t {
   // We have assertions that check that these interrupts stays server-side.
 };
 
-// Represents a site in the code, at the source level.
-// Forms an InterruptSite by looking at the current thread's current PC and
-// grabbing source data out of the corresponding Unit.
-class InterruptSite {
-public:
+/*
+ * Represents a site in the code, at the source level.  Forms an InterruptSite
+ * by looking at the current thread's current PC and grabbing source data out of
+ * the corresponding Unit.
+ */
+struct InterruptSite {
   InterruptSite(bool hardBreakPoint, const Variant& e);
 
   const InterruptSite *getCallingSite() const;
@@ -87,7 +98,7 @@ public:
   std::string &url() const { return m_url; }
   std::string desc() const;
 
-  const SourceLoc *getSourceLoc() const { return &m_sourceLoc; }
+  const SourceLoc* getSourceLoc() const { return &m_sourceLoc; }
   const Offset getCurOffset() const { return m_offset; }
   const Unit* getUnit() const { return m_unit; }
 

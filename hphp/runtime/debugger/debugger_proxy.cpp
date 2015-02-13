@@ -28,6 +28,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_machine.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
+#include "hphp/runtime/debugger/dummy_sandbox.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
@@ -42,10 +43,9 @@ namespace HPHP { namespace Eval {
 TRACE_SET_MOD(debugger);
 
 DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
-    : m_stopped(false), m_local(local), m_dummySandbox(nullptr),
-      m_hasBreakPoints(false), m_threadMode(Normal), m_thread(0),
+    : m_local(local),
       m_signalThread(this, &DebuggerProxy::pollSignal),
-      m_okayToPoll(true), m_signum(CmdSignal::SignalNone) {
+      m_signum(CmdSignal::SignalNone) {
   TRACE(2, "DebuggerProxy::DebuggerProxy\n");
   m_thrift.create(socket);
   m_dummyInfo = DSandboxInfo::CreateDummyInfo((int64_t)this);

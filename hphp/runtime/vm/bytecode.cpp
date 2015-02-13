@@ -2578,7 +2578,7 @@ void ExecutionContext::destructObjects() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     while (!m_liveBCObjs.empty()) {
       ObjectData* obj = *m_liveBCObjs.begin();
-      obj->destruct(); // Let the instance remove the node.
+      obj->destructForExit(); // Let the instance remove the node.
     }
     m_liveBCObjs.clear();
   }
@@ -5391,8 +5391,7 @@ OPTBLD_INLINE void iopUnsetL(IOP_ARGS) {
   auto local = decode_la(pc);
   assert(local < vmfp()->m_func->numLocals());
   TypedValue* tv = frame_local(vmfp(), local);
-  tvRefcountedDecRef(tv);
-  tvWriteUninit(tv);
+  tvUnset(tv);
 }
 
 OPTBLD_INLINE void iopUnsetN(IOP_ARGS) {
@@ -5403,8 +5402,7 @@ OPTBLD_INLINE void iopUnsetN(IOP_ARGS) {
   lookup_var(vmfp(), name, tv1, tv);
   assert(!vmfp()->hasInvName());
   if (tv != nullptr) {
-    tvRefcountedDecRef(tv);
-    tvWriteUninit(tv);
+    tvUnset(tv);
   }
   vmStack().popC();
   decRefStr(name);

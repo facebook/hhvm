@@ -2507,8 +2507,6 @@ struct CheckValid<void(*)(Vout&)> {
 //
 // Using the given dataReg, this method generates code that checks the static
 // bit out of dataReg, and emits a DecRef if needed.
-// NOTE: the flags are left with the result of the DecRef's subtraction,
-//       which can then be tested immediately after this.
 //
 // We've tried a variety of tweaks to this and found the current state of
 // things optimal, at least when the measurements were made:
@@ -2564,12 +2562,10 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
   }
 
   auto static_check_and_decl = [&](Vout& v) {
-    if (type.needsStaticBitCheck()) {
-      auto next = v.makeBlock();
-      assert(sf!= InvalidReg);
-      v << jcc{CC_L, sf, {next, done}};
-      v = next;
-    }
+    auto next = v.makeBlock();
+    assert(sf != InvalidReg);
+    v << jcc{CC_L, sf, {next, done}};
+    v = next;
 
     // Decrement _count
     sf = v.makeReg();
@@ -2587,11 +2583,9 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
                unlikelyDestroy);
     return;
   }
-  if (type.needsStaticBitCheck()) {
-    sf = v.makeReg();
-    v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET], sf};
-  }
 
+  sf = v.makeReg();
+  v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET], sf};
   static_check_and_decl(v);
 }
 

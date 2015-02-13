@@ -1,0 +1,10 @@
+object(blob)#1 (0) {
+}
+Running destructor
+bool(true)
+bool(false)
+object(blob)#1 (0) {
+}
+Running destructor
+bool(true)
+bool(false)

@@ -2002,7 +2002,6 @@ TranslateResult mcGenRegion(HTS& hts,
       [&] {
         std::ostringstream oss;
         oss << folly::format("code generation failed with {}\n", exn.what());
-        print(oss, hts.irb->unit());
         return oss.str();
       });
     toInterp.insert(psk);

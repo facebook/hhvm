@@ -1715,7 +1715,7 @@ void MCGenerator::traceCodeGen(HTS& hts) {
 
   always_assert_flog(
     IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops),
-    "IRUnit has loop but Eval.JitLoops=0:\n{}\n", unit
+    "IRUnit has loop but Eval.JitLoops=0"
   );
 
   optimize(unit, *hts.irb, m_tx.mode());

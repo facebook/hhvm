@@ -234,12 +234,9 @@ void prepareForNextHHBC(HTS& env,
   FTRACE(1, "------------------- prepareForNextHHBC ------------------\n");
   env.currentNormalizedInstruction = ni;
 
-  always_assert_log(
+  always_assert_flog(
     IMPLIES(isInlining(env), !env.lastBcOff),
-    [&] {
-      return folly::format("Tried to end trace while inlining:\n{}",
-                           env.unit).str();
-    }
+    "Tried to end trace while inlining."
   );
 
   env.bcStateStack.back().setOffset(newOff);

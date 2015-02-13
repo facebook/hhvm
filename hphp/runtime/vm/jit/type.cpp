@@ -1227,18 +1227,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
     FTRACE(1, "{}", msg);
     fprintf(stderr, "%s\n", msg.c_str());
 
-    // Just print the message if the unit doesn't exist.
-    always_assert_log(unit != nullptr, [&] { return msg; });
-
-    always_assert_flog(
-      false,
-      "{}\n\n"
-      "{:-^80}\n{}{:-^80}\n",
-      msg,
-      " unit ",
-      *unit,
-      ""
-    );
+    always_assert_log(false, [&] { return msg; });
   };
 
   if (opHasExtraData(inst->op()) != (bool)inst->rawExtra()) {

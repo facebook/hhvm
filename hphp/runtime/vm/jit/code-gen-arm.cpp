@@ -835,8 +835,8 @@ void CodeGenerator::cgCallHelper(Vout& v,
   }
   always_assert_flog(
     args.numStackArgs() == 0,
-    "Stack arguments not yet supported on ARM: `{}'\n\n{}",
-    *m_curInst, m_state.unit
+    "Stack arguments not yet supported on ARM: `{}'",
+    *m_curInst
   );
   shuffleArgs(v, args, call);
 

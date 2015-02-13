@@ -912,7 +912,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     // use it to track down the guard.
 
     always_assert_flog(m_constraints.typeSrcs.count(inst),
-                       "No typeSrcs found for {}\n\n{}", *inst, m_unit);
+                       "No typeSrcs found for {}", *inst);
 
     auto const typeSrcs = get_required(m_constraints.typeSrcs, inst);
 

@@ -34,8 +34,8 @@ static void bt_handler(int sig) {
   if (RuntimeOption::StackTraceTimeout > 0) {
     if (IsCrashing && sig == SIGALRM) {
       // Raising the previous signal does not terminate the program.
-      raise(SIGTERM);
-      return;
+      signal(SIGABRT, SIG_DFL);
+      abort();
     } else {
       signal(SIGALRM, bt_handler);
       alarm(RuntimeOption::StackTraceTimeout);

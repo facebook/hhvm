@@ -963,10 +963,14 @@ and expr_ in_cond is_lvalue env (p, e) =
         smember_not_found p ~is_const:false ~is_method:true class_ (snd meth);
         env, (Reason.Rnone, Tany)
       | Some smethod ->
-        (match smethod.ce_type with
+        let cid = CI c in
+        let env, cid_ty = static_class_id (fst c) env cid in
+        let env, smethod_type =
+          TAccess.fill_type_hole env cid cid_ty smethod.ce_type in
+        (match smethod_type with
         | _, Tfun fty -> check_deprecated p fty
         | _ -> ());
-        (match smethod.ce_type, smethod.ce_visibility with
+        (match smethod_type, smethod.ce_visibility with
         | (r, (Tfun _ as ty)), Vpublic ->
           env, (r, ty)
         | (r, Tfun _), Vprivate _ ->

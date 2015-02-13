@@ -132,6 +132,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'tconst/constructor_error.php',
         'tconst/constructors.php',
         'tconst/cyclic_type_const.php',
+        'tconst/func_pointer.php',
         'tconst/good_tconst_decl.php',
         'tconst/local_inference.php',
         'tconst/method_contravariant.php',

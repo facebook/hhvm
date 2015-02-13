@@ -358,7 +358,7 @@ IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 ///////////////////////////////////////////////////////////////////////////////
 
 Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = "" */,
-    ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
+  ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
   {
     Lock l(s_dispatchMutex);
     if (s_dispatcher &&
@@ -366,8 +366,7 @@ Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = 
          RuntimeOption::XboxServerThreadCount ||
          s_dispatcher->getQueuedJobs() <
          RuntimeOption::XboxServerMaxQueueLength)) {
-      XboxTask *task = newres<XboxTask>(msg, reqInitDoc);
-      Resource ret(task);
+      auto task = makeSmartPtr<XboxTask>(msg, reqInitDoc);
       XboxTransport *job = task->getJob();
       job->incRefCount(); // paired with worker's decRefCount()
 
@@ -384,7 +383,7 @@ Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = 
       assert(s_dispatcher);
       s_dispatcher->enqueue(job);
 
-      return ret;
+      return Resource(std::move(task));
     }
   }
   const char* errMsg =
@@ -399,13 +398,11 @@ Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = 
 }
 
 bool XboxServer::TaskStatus(const Resource& task) {
-  XboxTask *ptask = task.getTyped<XboxTask>();
-  return ptask->getJob()->isDone();
+  return cast<XboxTask>(task)->getJob()->isDone();
 }
 
 int XboxServer::TaskResult(const Resource& task, int timeout_ms, Variant &ret) {
-  XboxTask *ptask = task.getTyped<XboxTask>();
-  return TaskResult(ptask->getJob(), timeout_ms, ret);
+  return TaskResult(cast<XboxTask>(task)->getJob(), timeout_ms, ret);
 }
 
 int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant &ret) {

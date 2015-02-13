@@ -1,0 +1,8 @@
+BEGIN
+PHP ezc_test.integer 42
+PHP ezc_test.string  foobar
+SET int
+SET string
+PHP ezc_test.integer 57
+PHP ezc_test.string  helium
+END

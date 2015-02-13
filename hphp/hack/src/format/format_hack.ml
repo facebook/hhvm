@@ -462,7 +462,8 @@ let rec aligned last_tok count lexbuf =
   | _ ->
       let tok = Lexing.lexeme lexbuf in
       if last_tok = ")" && tok = "->" then -100 else
-      let count = if last_tok = tok then count + 1 else count in
+      let count = if last_tok = tok && last_tok = "->"
+        then count + 1 else count in
       aligned_look_for_newline tok count lexbuf
 
 and aligned_look_for_newline last_tok count lexbuf =

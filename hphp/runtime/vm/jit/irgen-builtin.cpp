@@ -138,8 +138,13 @@ SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
   // settings can be overridden during the execution of a request.
   auto const settingName = top(env, Type::Str, 0)->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
-  if (!IniSetting::GetMode(settingName, mode) ||
-      !(mode & IniSetting::PHP_INI_SYSTEM)) {
+  if (!IniSetting::GetMode(settingName, mode)) {
+    return nullptr;
+  }
+  if (mode & ~IniSetting::PHP_INI_SYSTEM) {
+    return nullptr;
+  }
+  if (mode == IniSetting::PHP_INI_ALL) {  /* PHP_INI_ALL has a weird encoding */
     return nullptr;
   }
 

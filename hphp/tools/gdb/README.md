@@ -5,7 +5,7 @@ This directory contains a collection of Python-GDB utilities for HHVM
 debugging, catered in particular towards debugging with a core, when no live
 inferior is present.
 
-If you have installed the `hhvm-dev` pacakge, there should be an `hhvm-gdb`
+If you have installed the `hhvm-dev` package, there should be an `hhvm-gdb`
 command available, which will automatically load these library files for you.
 
 Otherwise, you can simply execute the following line when running GDB, or add

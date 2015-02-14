@@ -18,8 +18,8 @@
 #define incl_HPHP_SMART_PTR_H_
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/countable.h"
+#include "hphp/util/portability.h"
 #include "hphp/util/compilation-flags.h"
 #include <algorithm>
 
@@ -372,6 +372,8 @@ typename std::enable_if<
 
 const char* getClassNameCstr(const ResourceData* p);
 const char* getClassNameCstr(const ObjectData* p);
+extern void throw_null_pointer_exception() ATTRIBUTE_NORETURN;
+extern void throw_invalid_object_type(const char* clsName) ATTRIBUTE_NORETURN;
 
 // Is pointer contained in p castable to a T?
 template <typename T, typename P>

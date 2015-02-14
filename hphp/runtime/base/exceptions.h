@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 #define incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 
-#include <boost/intrusive_ptr.hpp>
 #include <string>
 #include <atomic>
 #include <utility>
@@ -26,19 +25,13 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/util/exception.h"
+#include "hphp/runtime/base/type-array.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Array;
-struct ArrayData;
 struct String;
-
-//////////////////////////////////////////////////////////////////////
-
-void intrusive_ptr_add_ref(ArrayData* a);
-void intrusive_ptr_release(ArrayData* a);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -81,7 +74,7 @@ private:
   void computeBacktrace(bool skipFrame = false);
 
 private:
-  boost::intrusive_ptr<ArrayData> m_btp;
+  Array m_btp;
   bool m_silent{false};
 };
 

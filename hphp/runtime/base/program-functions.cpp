@@ -1864,7 +1864,6 @@ void hphp_session_init() {
   g_thread_safe_locale_handler->reset();
 #endif
 
-  if (RuntimeOption::EvalTraceArrays) getArrayTracer()->requestStart();
   Treadmill::startRequest();
 
 #ifdef ENABLE_SIMPLE_COUNTER

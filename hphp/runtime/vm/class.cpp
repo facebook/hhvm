@@ -1125,9 +1125,16 @@ void checkDeclarationCompat(const PreClass* preClass,
       if (p.isVariadic()) { raiseIncompat(preClass, imeth); }
       auto const& ip = iparams[i];
       if (!relaxedCheck) {
+        // If the interface parameter is a type constant we require the
+        // implementer to specify a type
+        if (!p.userType && ip.typeConstraint.isTypeConstant()) {
+          raiseIncompat(preClass, imeth);
+        }
+
         if (!checkTypeConstraint(preClass, imeth->cls(),
                                  p.typeConstraint, ip.typeConstraint)) {
-          if (!ip.typeConstraint.isTypeVar()) {
+          if (!ip.typeConstraint.isTypeVar() &&
+              !ip.typeConstraint.isTypeConstant()) {
             raiseIncompat(preClass, imeth);
           }
         }

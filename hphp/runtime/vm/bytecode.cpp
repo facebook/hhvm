@@ -6783,7 +6783,7 @@ OPTBLD_INLINE void iopVerifyParamType(IOP_ARGS) {
   assert(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[paramId].typeConstraint;
   assert(tc.hasConstraint());
-  if (!tc.isTypeVar()) {
+  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
     tc.verifyParam(frame_local(vmfp(), paramId), func, paramId);
   }
 }
@@ -6797,7 +6797,7 @@ OPTBLD_INLINE void implVerifyRetType(PC& pc) {
   pc++;
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
-  if (!tc.isTypeVar()) {
+  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
     tc.verifyReturn(vmStack().topTV(), func);
   }
 }

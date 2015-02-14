@@ -338,7 +338,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
                    rax);
     a.    jmp     (rax);
   } else {
-    emitBindJmp(mcg->code.main(), mcg->code.frozen(), funcBody);
+    emitBindJ(mcg->code.main(), mcg->code.frozen(), CC_None, funcBody);
   }
   return funcBody;
 }
@@ -355,17 +355,16 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   assert(mcg->cgFixups().empty());
   if (dvs.size() == 1) {
     a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndFlags)]);
-    emitBindJcc(mainCode, frozenCode, CC_LE,
-                SrcKey(func, dvs[0].second, false));
-    emitBindJmp(mainCode, frozenCode, SrcKey(func, func->base(), false));
+    emitBindJ(mainCode, frozenCode, CC_LE, SrcKey(func, dvs[0].second, false));
+    emitBindJ(mainCode, frozenCode, CC_None, SrcKey(func, func->base(), false));
   } else {
     a.    loadl  (rVmFp[AROFF(m_numArgsAndFlags)], reg::eax);
     for (unsigned i = 0; i < dvs.size(); i++) {
       a.  cmpl   (dvs[i].first, reg::eax);
-      emitBindJcc(mainCode, frozenCode, CC_LE,
-                  SrcKey(func, dvs[i].second, false));
+      emitBindJ(mainCode, frozenCode, CC_LE,
+                SrcKey(func, dvs[i].second, false));
     }
-    emitBindJmp(mainCode, frozenCode, SrcKey(func, func->base(), false));
+    emitBindJ(mainCode, frozenCode, CC_None, SrcKey(func, func->base(), false));
   }
   mcg->cgFixups().process(nullptr);
   return start;

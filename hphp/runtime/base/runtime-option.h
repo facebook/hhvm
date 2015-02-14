@@ -393,11 +393,14 @@ public:
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(uint32_t, JitLLVM,                 jitLLVMDefault())                \
-  F(bool,     JitLLVMFastISel,         false)                           \
   F(bool,     JitLLVMBasicOpt,         true)                            \
-  F(uint32_t, JitLLVMOptLevel,         2)                               \
-  F(uint32_t, JitLLVMSizeLevel,        0)                               \
+  F(bool,     JitLLVMCondTail,         true)                            \
   F(bool,     JitLLVMCounters,         false)                           \
+  F(bool,     JitLLVMDiscard,          false)                           \
+  F(bool,     JitLLVMFastISel,         false)                           \
+  F(uint32_t, JitLLVMOptLevel,         2)                               \
+  F(bool,     JitLLVMOptSize,          true)                            \
+  F(uint32_t, JitLLVMSizeLevel,        0)                               \
   F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             ahotDefault())                   \

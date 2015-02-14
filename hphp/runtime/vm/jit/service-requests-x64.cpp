@@ -78,18 +78,6 @@ void emitBindJPost(CodeBlock& cb, CodeBlock& frozen,
   }
 }
 
-void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
-               SrcKey dest, ServiceRequest req, TransFlags trflags) {
-  auto toSmash = emitBindJPre(cb, frozen, cc);
-  TCA sr = emitEphemeralServiceReq(frozen,
-                                   mcg->getFreeStub(frozen,
-                                                    &mcg->cgFixups()),
-                                   req, RipRelative(toSmash),
-                                   dest.toAtomicInt(),
-                                   trflags.packed);
-  emitBindJPost(cb, frozen, cc, toSmash, sr);
-}
-
 const int kExtraRegs = 2; // we also set rdi and r10
 static constexpr int maxStubSpace() {
   /* max space for emitting args */
@@ -187,14 +175,17 @@ emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
   return start;
 }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-                 SrcKey dest, TransFlags trflags) {
-  emitBindJ(cb, frozen, cc, dest, REQ_BIND_JCC, trflags);
-}
-
-void emitBindJmp(CodeBlock& cb, CodeBlock& frozen,
-                 SrcKey dest, TransFlags trflags) {
-  emitBindJ(cb, frozen, CC_None, dest, REQ_BIND_JMP, trflags);
+void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
+               SrcKey dest, TransFlags trflags) {
+  auto toSmash = emitBindJPre(cb, frozen, cc);
+  TCA sr = emitEphemeralServiceReq(frozen,
+                                   mcg->getFreeStub(frozen,
+                                                    &mcg->cgFixups()),
+                                   REQ_BIND_JMP,
+                                   RipRelative(toSmash),
+                                   dest.toAtomicInt(),
+                                   trflags.packed);
+  emitBindJPost(cb, frozen, cc, toSmash, sr);
 }
 
 TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,

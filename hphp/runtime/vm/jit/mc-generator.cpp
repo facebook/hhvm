@@ -41,6 +41,7 @@
 #include <folly/String.h>
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
 #include "hphp/util/cycles.h"
 #include "hphp/util/debug.h"
@@ -852,22 +853,25 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
       return tDest;
     }
     sr->chainFrom(IncomingBranch::addr(addr));
-  } else if (req == REQ_BIND_JCC) {
-    auto jt = backEnd().jccTarget(toSmash);
-    assert(jt);
-    if (jt == tDest) {
-      // Already smashed
-      return tDest;
-    }
-    sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
-    assert(!backEnd().jccTarget(toSmash));
-    if (!backEnd().jmpTarget(toSmash)
-        || backEnd().jmpTarget(toSmash) == tDest) {
-      // Already smashed
-      return tDest;
+    DecodedInstruction di(toSmash);
+    if (di.isBranch() && !di.isJmp()) {
+      auto jt = backEnd().jccTarget(toSmash);
+      assert(jt);
+      if (jt == tDest) {
+        // Already smashed
+        return tDest;
+      }
+      sr->chainFrom(IncomingBranch::jccFrom(toSmash));
+    } else {
+      assert(!backEnd().jccTarget(toSmash));
+      if (!backEnd().jmpTarget(toSmash)
+          || backEnd().jmpTarget(toSmash) == tDest) {
+        // Already smashed
+        return tDest;
+      }
+      sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
     }
-    sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
   }
   smashed = true;
   return tDest;
@@ -943,7 +947,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   TCA stub = emitEphemeralServiceReq(code.frozen(),
                                      getFreeStub(code.frozen(),
                                                  &mcg->cgFixups()),
-                                     REQ_BIND_JCC,
+                                     REQ_BIND_JMP,
                                      RipRelative(toSmash),
                                      skWillDefer.toAtomicInt(),
                                      TransFlags{}.packed);
@@ -1139,7 +1143,6 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
     }
 
     case REQ_BIND_JMP:
-    case REQ_BIND_JCC:
     case REQ_BIND_ADDR: {
       auto const toSmash = info.args[0].tca;
       sk = SrcKey::fromAtomicInt(info.args[1].sk);

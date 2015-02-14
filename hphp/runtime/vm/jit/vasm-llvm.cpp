@@ -275,6 +275,8 @@ std::string showNewCode(const Vasm::AreaList& areas) {
     auto const start = area.start;
     auto const end = area.code.frontier();
 
+    if (i > 0 && start == areas[i-1].start) continue;
+
     if (start != end) {
       str << folly::format("emitted {} bytes of code into area {}:\n",
                            end - start, i);
@@ -507,8 +509,9 @@ struct LLVMEmitter {
     m_function->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
     m_function->setAlignment(1);
 
-    // TODO(#5398968): find a better way to disable 16-byte alignment.
-    m_function->addFnAttr(llvm::Attribute::OptimizeForSize);
+    if (RuntimeOption::EvalJitLLVMOptSize) {
+      m_function->addFnAttr(llvm::Attribute::OptimizeForSize);
+    }
 
     m_irb.SetInsertPoint(
       llvm::BasicBlock::Create(m_context,
@@ -596,12 +599,22 @@ struct LLVMEmitter {
     // till a better debug option control library is implemented.
     static bool isCLSet = false;
     if (!isCLSet) {
-      const char* pseudoCL[] = {
+      std::vector<std::string> pseudoCL = {
         "hhvm",
         "-disable-block-placement"
       };
-      constexpr size_t numArgs = sizeof(pseudoCL) / sizeof(*pseudoCL);
-      llvm::cl::ParseCommandLineOptions(numArgs, pseudoCL, "");
+
+      if (RuntimeOption::EvalJitLLVMCondTail) {
+        pseudoCL.push_back("-cond-tail-dup");
+      }
+
+      auto const numArgs = pseudoCL.size();
+      std::unique_ptr<const char*[]> pseudoCLArray(new const char*[numArgs]);
+      for(size_t i = 0; i < pseudoCL.size(); ++i) {
+        pseudoCLArray[i] = pseudoCL[i].c_str();
+      }
+
+      llvm::cl::ParseCommandLineOptions(numArgs, pseudoCLArray.get(), "");
       isCLSet = true;
     }
   }
@@ -662,7 +675,7 @@ struct LLVMEmitter {
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
 
     module->addModuleFlag(llvm::Module::Error, "code_skew",
-                            tcMM->computeCodeSkew(x64::kCacheLineSize));
+                          tcMM->computeCodeSkew(x64::kCacheLineSize));
 
     auto fpm = folly::make_unique<llvm::FunctionPassManager>(module);
     fpm->add(new llvm::DataLayoutPass(module));
@@ -697,6 +710,8 @@ struct LLVMEmitter {
       ee->setProcessAllSections(true);
       ee->finalizeObject();
     }
+
+    if (RuntimeOption::EvalJitLLVMDiscard) return;
 
     // Now that codegen is done, we need to parse location records and
     // gcc_except_table sections and update our own metadata.
@@ -749,18 +764,20 @@ struct LLVMEmitter {
     for (auto& record : records) {
       uint8_t* ip = record.address;
       DecodedInstruction di(ip);
-      if (di.isJmp()) body(ip);
+      if (di.isBranch()) {
+        body(ip, di.isJmp() ? CC_None : di.jccCondCode());
+      }
     }
   }
 
   void processSvcReqs(const LocRecs& locRecs) {
     for (auto& req : m_bindjmps) {
       bool found = false;
-      auto doBindJmp = [&] (uint8_t* jmpIp) {
+      auto doBindJmp = [&] (uint8_t* jmpIp, ConditionCode cc) {
         FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
-        mcg->cgFixups().m_alignFixups.emplace(
-          jmpIp, std::make_pair(x64::kJmpLen, 0));
+        auto jmpLen = (cc == CC_None) ? x64::kJmpLen : x64::kJmpccLen;
+        mcg->cgFixups().m_alignFixups.emplace(jmpIp, std::make_pair(jmpLen, 0));
         mcg->setJmpTransID(jmpIp);
 
         if (found) {
@@ -780,7 +797,7 @@ struct LLVMEmitter {
                  jmpIp, newStub);
 
           // Patch the jmp to point to the new stub.
-          auto afterJmp = jmpIp + x64::kJmpLen;
+          auto afterJmp = jmpIp + jmpLen;
           auto delta = safe_cast<int32_t>(newStub - afterJmp);
           memcpy(afterJmp - sizeof(delta), &delta, sizeof(delta));
         } else {
@@ -795,6 +812,7 @@ struct LLVMEmitter {
         }
       };
 
+      FTRACE(2, "Processing bindjmp {}, stub {}\n", req.id, req.stub);
       auto it = locRecs.records.find(req.id);
       if (it != locRecs.records.end()) {
         visitJmps(it->second, doBindJmp);
@@ -802,14 +820,15 @@ struct LLVMEmitter {
 
       // The jump was optimized out. Free the stub.
       if (!found) {
+        FTRACE(2, "  no corresponding code found. Freeing stub.\n");
         mcg->freeRequestStub(req.stub);
       }
     }
 
     for (auto& req : m_fallbacks) {
-      auto doFallback = [&] (uint8_t* jmpIp) {
+      auto doFallback = [&] (uint8_t* jmpIp, ConditionCode cc) {
         auto destSR = mcg->tx().getSrcRec(req.dest);
-        destSR->registerFallbackJump(jmpIp);
+        destSR->registerFallbackJump(jmpIp, cc);
       };
       auto it = locRecs.records.find(req.id);
       if (it != locRecs.records.end()) {
@@ -1463,6 +1482,10 @@ O(countbytecode)
 
   _t.end();
   finalize();
+
+  if (RuntimeOption::EvalJitLLVMDiscard) {
+    throw FailedLLVMCodeGen("Discarding all hard work");
+  }
 }
 
 llvm::Value* LLVMEmitter::getGlobal(const std::string& name,

@@ -338,12 +338,12 @@ void Vgen::emit(bindcall& i) {
 }
 
 void Vgen::emit(bindjcc& i) {
-  emitBindJcc(*codeBlock, frozen(), i.cc, i.target);
+  emitBindJ(*codeBlock, frozen(), i.cc, i.target);
 }
 
 void Vgen::emit(bindjmp& i) {
   // XXX what about trflags
-  emitBindJmp(*codeBlock, frozen(), i.target);
+  emitBindJ(*codeBlock, frozen(), CC_None, i.target);
 }
 
 void Vgen::emit(copy& i) {

@@ -55,7 +55,6 @@ inline void packServiceReqArgs(ServiceReqArgVec& argv) {
 inline bool isEphemeralServiceReq(ServiceRequest sr) {
   return sr == REQ_BIND_JMPCC_FIRST ||
          sr == REQ_BIND_JMP ||
-         sr == REQ_BIND_JCC ||
          sr == REQ_BIND_ADDR;
 }
 

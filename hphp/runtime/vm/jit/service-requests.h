@@ -34,7 +34,6 @@ namespace HPHP { namespace jit {
    */ \
   REQ(BIND_CALL)         \
   REQ(BIND_JMP)          \
-  REQ(BIND_JCC)          \
   REQ(BIND_ADDR)         \
   REQ(BIND_JMPCC_FIRST)  \
   \

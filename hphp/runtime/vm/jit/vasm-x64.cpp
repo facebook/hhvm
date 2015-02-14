@@ -420,11 +420,11 @@ void Vgen::emit(bindjcc1st& i) {
 }
 
 void Vgen::emit(bindjcc& i) {
-  emitBindJcc(a->code(), frozen(), i.cc, i.target, i.trflags);
+  emitBindJ(a->code(), frozen(), i.cc, i.target, i.trflags);
 }
 
 void Vgen::emit(bindjmp& i) {
-  emitBindJmp(a->code(), frozen(), i.target, i.trflags);
+  emitBindJ(a->code(), frozen(), CC_None, i.target, i.trflags);
 }
 
 void Vgen::emit(callstub& i) {

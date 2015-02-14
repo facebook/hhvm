@@ -41,7 +41,7 @@ TRACE_SET_MOD(runtime);
 const StaticString s___invoke("__invoke");
 
 void TypeConstraint::init() {
-  if (m_typeName == nullptr || isTypeVar()) {
+  if (m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
     m_type = Type::Mixed;
     return;
   }
@@ -200,7 +200,9 @@ std::pair<const TypeAliasReq*, Class*> getTypeAliasOrClassWithAutoload(
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   assert(!isSelf() && !isParent() && !isCallable());
-  assert(IMPLIES(!hasConstraint() || isTypeVar(), isMixed()));
+  assert(IMPLIES(
+    !hasConstraint() || isTypeVar() || isTypeConstant(),
+    isMixed()));
 
   if (!isPrecise()) return folly::none;
 
@@ -307,7 +309,7 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
 }
 
 bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
-  assert(hasConstraint() && !isTypeVar() && !isMixed());
+  assert(hasConstraint() && !isTypeVar() && !isMixed() && !isTypeConstant());
 
   // This is part of the interpreter runtime; perf matters.
   if (tv->m_type == KindOfRef) {

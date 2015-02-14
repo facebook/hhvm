@@ -6243,8 +6243,11 @@ determine_type_constraint_from_annot(const TypeAnnotationPtr annot,
     //
     // For everything else, we return {}. We also return {} for annotations
     // we don't know how to handle.
-    if (annot->isFunction() || annot->isMixed() || annot->isTypeAccess()) {
+    if (annot->isFunction() || annot->isMixed()) {
       return {};
+    }
+    if (annot->isTypeAccess()) {
+      flags = flags | TypeConstraint::TypeConstant;
     }
     if (annot->isTypeVar()) {
       flags = flags | TypeConstraint::TypeVar;

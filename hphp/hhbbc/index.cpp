@@ -1753,7 +1753,9 @@ Index::resolve_func_fallback(Context ctx,
 }
 
 Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
-  assert(IMPLIES(!tc.hasConstraint() || tc.isTypeVar(), tc.isMixed()));
+  assert(IMPLIES(
+    !tc.hasConstraint() || tc.isTypeVar() || tc.isTypeConstant(),
+    tc.isMixed()));
 
   /*
    * Soft hints (@Foo) are not checked.
@@ -1831,7 +1833,9 @@ bool Index::satisfies_constraint(Context ctx, const Type t,
 
 Type Index::satisfies_constraint_helper(Context ctx,
                                         const TypeConstraint& tc) const {
-  assert(IMPLIES(!tc.hasConstraint() || tc.isTypeVar(), tc.isMixed()));
+  assert(IMPLIES(
+    !tc.hasConstraint() || tc.isTypeVar() || tc.isTypeConstant(),
+    tc.isMixed()));
 
   switch (tc.metaType()) {
     case AnnotMetaType::Precise: {

@@ -1814,7 +1814,7 @@ static void HHVM_FUNCTION(session_unset) {
   if (s_session->session_status == Session::None) {
     return;
   }
-  php_global_set(s__SESSION, init_null());
+  php_global_set(s__SESSION, empty_array());
   return;
 }
 

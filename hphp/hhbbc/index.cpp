@@ -1753,13 +1753,7 @@ Index::resolve_func_fallback(Context ctx,
 }
 
 Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
-  if (!tc.hasConstraint()) return TCell;
-
-  /*
-   * Type variable constraints are not used at runtime to enforce
-   * anything.
-   */
-  if (tc.isTypeVar()) return TCell;
+  assert(IMPLIES(!tc.hasConstraint() || tc.isTypeVar(), tc.isMixed()));
 
   /*
    * Soft hints (@Foo) are not checked.
@@ -1767,11 +1761,10 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   if (tc.isSoft()) return TCell;
 
   switch (tc.metaType()) {
-  case TypeConstraint::MetaType::Precise:
-    {
+    case AnnotMetaType::Precise: {
       auto const mainType = [&]() -> const Type {
         auto const dt = tc.underlyingDataType();
-        if (!dt) return TInitCell;
+        assert(dt);
 
         switch (*dt) {
         case KindOfBoolean:      return TBool;
@@ -1807,18 +1800,25 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         return TInitCell;
       }();
 
-      return (mainType == TInitCell || !tc.isNullable()) ? mainType
+      return (mainType == TInitCell || !tc.isNullable())
+        ? mainType
         : opt(mainType);
     }
-  case TypeConstraint::MetaType::Self:
-  case TypeConstraint::MetaType::Parent:
-  case TypeConstraint::MetaType::Callable:
-    break;
-  case TypeConstraint::MetaType::Number:
-    return tc.isNullable() ? TOptNum : TNum;
-  case TypeConstraint::MetaType::ArrayKey:
-    // TODO(3774082): Support TInt | TStr type constraint
-    return TInitCell;
+    case AnnotMetaType::Mixed:
+      /*
+       * Here we handle "mixed", typevars, and some other ignored
+       * typehints (ex. "(function(..): ..)" typehints).
+       */
+      return TCell;
+    case AnnotMetaType::Self:
+    case AnnotMetaType::Parent:
+    case AnnotMetaType::Callable:
+      break;
+    case AnnotMetaType::Number:
+      return tc.isNullable() ? TOptNum : TNum;
+    case AnnotMetaType::ArrayKey:
+      // TODO(3774082): Support TInt | TStr type constraint
+      return TInitCell;
   }
 
   return TCell;
@@ -1831,17 +1831,13 @@ bool Index::satisfies_constraint(Context ctx, const Type t,
 
 Type Index::satisfies_constraint_helper(Context ctx,
                                         const TypeConstraint& tc) const {
-  if (!tc.hasConstraint() || tc.isTypeVar()) {
-    return TGen;
-  }
+  assert(IMPLIES(!tc.hasConstraint() || tc.isTypeVar(), tc.isMixed()));
 
   switch (tc.metaType()) {
-  case TypeConstraint::MetaType::Precise:
-    {
+    case AnnotMetaType::Precise: {
       auto const mainType = [&]() -> const Type {
         auto const dt = tc.underlyingDataType();
-        if (!dt) return TBottom;
-
+        assert(dt);
         switch (*dt) {
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
@@ -1867,20 +1863,26 @@ Type Index::satisfies_constraint_helper(Context ctx,
         }
         return TBottom;
       }();
-
       return (mainType == TBottom || !tc.isNullable()) ? mainType
         : opt(mainType);
     }
-  case TypeConstraint::MetaType::Self:
-  case TypeConstraint::MetaType::Parent:
-  case TypeConstraint::MetaType::Callable:
-    break;
-  case TypeConstraint::MetaType::Number:
-    return tc.isNullable() ? TOptNum : TNum;
-  case TypeConstraint::MetaType::ArrayKey:
-    // TODO(3774082): Support TInt | TStr type constraint
-    break;
+    case AnnotMetaType::Mixed:
+      /*
+       * Here we handle "mixed", typevars, and some other ignored
+       * typehints (ex. "(function(..): ..)" typehints).
+       */
+      return TGen;
+    case AnnotMetaType::Self:
+    case AnnotMetaType::Parent:
+    case AnnotMetaType::Callable:
+      break;
+    case AnnotMetaType::Number:
+      return tc.isNullable() ? TOptNum : TNum;
+    case AnnotMetaType::ArrayKey:
+      // TODO(3774082): Support TInt | TStr type constraint
+      break;
   }
+
   return TBottom;
 }
 

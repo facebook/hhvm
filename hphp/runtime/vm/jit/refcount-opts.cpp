@@ -163,8 +163,8 @@ struct Value {
   void merge(const Value& other, const IRUnit& unit) {
     auto showFailure = [&] {
       return folly::format(
-        "Failed to merge values in unit:\n{}\n{}\n{}\n",
-        show(*this), show(other), unit
+        "Failed to merge values in unit:\n{}\n{}\n",
+        show(*this), show(other)
       ).str();
     };
 
@@ -578,8 +578,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
           ret += folly::format("Unconsumed reference(s) leaving B{}\n",
                                block->id()).str();
           ret += show(m_state);
-          ret += folly::format("{:-^80}\n{}{:-^80}\n",
-                               " unit ", m_unit.toString(), "").str();
           return ret;
         };
 
@@ -744,11 +742,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
           always_assert_flog(
             inBlock.value.realCount == 0 && inBlock.value.optDelta() == 0,
             "While merging incoming states for B{}, value {} not provided by"
-            " all preds but has nontrivial state `{}' from B{}."
-            "\n\n{:-^80}\n{}{:-^80}\n",
+            " all preds but has nontrivial state `{}' from B{}.",
             m_block->id(), *pair.first->inst(),
-            show(inBlock.value), inBlock.from->id(),
-            " unit ", m_unit, ""
+            show(inBlock.value), inBlock.from->id()
           );
         }
       }
@@ -1348,8 +1344,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
       ret += folly::format("'{}' wants to consume {} but {}\n",
                            *m_inst, *value, what).str();
       ret += show(m_state);
-      ret += folly::format("{:-^80}\n{}{:-^80}\n",
-                           " unit ", m_unit.toString(), "").str();
       return ret;
     };
 

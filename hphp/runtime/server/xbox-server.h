@@ -126,7 +126,8 @@ public:
   virtual void addHeaderImpl(const char *name, const char *value) {}
   virtual void removeHeaderImpl(const char *name) {}
 
-  virtual void sendImpl(const void *data, int size, int code, bool chunked);
+  virtual void sendImpl(const void *data, int size, int code, bool chunked,
+                        bool eom);
   virtual void onSendEndImpl();
 
   /**

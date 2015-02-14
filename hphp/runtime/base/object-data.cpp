@@ -83,25 +83,40 @@ static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 24),
 
 //////////////////////////////////////////////////////////////////////
 
-bool ObjectData::destruct() {
+template<bool forExit>
+ALWAYS_INLINE bool ObjectData::destructImpl() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {
     g_context->m_liveBCObjs.erase(this);
   }
+
   if (!noDestruct()) {
     setNoDestruct();
     if (auto meth = m_cls->getDtor()) {
-      // We don't run PHP destructors while we're unwinding for a C++ exception.
-      // We want to minimize the PHP code we run while propagating fatals, so
-      // we do this check here on a very common path, in the relativley slower
-      // case.
-      auto& faults = g_context->m_faults;
-      if (!faults.empty()) {
-        if (faults.back().m_faultType == Fault::Type::CppException) return true;
+      if (!forExit) {
+        // We don't run PHP destructors while we're unwinding for a C++
+        // exception.  We want to minimize the PHP code we run while propagating
+        // fatals, so we do this check here on a very common path, in the
+        // relativley slower case.
+        auto& faults = g_context->m_faults;
+        if (!faults.empty()) {
+          if (faults.back().m_faultType == Fault::Type::CppException) {
+            return true;
+          }
+        }
+
+        // Some decref paths call release() when --m_count == 0 and some call it
+        // when m_count == 1. This difference only matters for objects that
+        // resurrect themselves in their destructors, so make sure m_count is
+        // consistent here.
+        assert(m_count <= 1);
+        m_count = 0;
+      } else {
+        assert(g_context->m_faults.empty());
       }
+
       // We raise the refcount around the call to __destruct(). This is to
       // prevent the refcount from going to zero when the destructor returns.
       CountableHelper h(this);
-      RefCount c = this->getCount();
       try {
         // Call the destructor method
         g_context->invokeMethodV(this, meth);
@@ -110,10 +125,18 @@ bool ObjectData::destruct() {
         handle_destructor_exception();
       }
 
-      return c == this->getCount();
+      return getCount() == 1;
     }
   }
   return true;
+}
+
+bool ObjectData::destruct() {
+  return destructImpl<false>();
+}
+
+void ObjectData::destructForExit() {
+  destructImpl<true>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

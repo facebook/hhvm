@@ -24,6 +24,7 @@
 #include <utility>
 #include <vector>
 
+#include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client_settings.h"
 #include "hphp/runtime/base/debuggable.h"
@@ -32,11 +33,11 @@
 #include "hphp/util/mutex.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-class StringBuffer;
+struct StringBuffer;
 
 namespace Eval {
-
 ///////////////////////////////////////////////////////////////////////////////
 
 struct DebuggerCommand;
@@ -44,8 +45,7 @@ struct CmdInterrupt;
 
 using DebuggerCommandPtr = std::shared_ptr<DebuggerCommand>;
 
-class DebuggerClient {
-public:
+struct DebuggerClient {
   static int LineWidth;
   static int CodeBlockSize;
   static int ScrollBlockSize;
@@ -105,12 +105,12 @@ public:
   };
   static const char **GetCommands();
 
-  typedef std::vector<std::string> LiveList;
-  typedef boost::shared_array<LiveList> LiveListsPtr;
+  using LiveList = std::vector<std::string>;
+  using LiveListsPtr = boost::shared_array<LiveList>;
   static LiveListsPtr CreateNewLiveLists() {
     return LiveListsPtr(new LiveList[DebuggerClient::AutoCompleteCount]);
   }
-  std::vector<std::string> getAllCompletions(std::string const &text);
+  std::vector<std::string> getAllCompletions(const std::string& text);
 
   /**
    * Helpers
@@ -261,9 +261,9 @@ public:
   /**
    * Watch expressions.
    */
-  typedef std::pair<const char *, std::string> Watch;
-  typedef std::shared_ptr<Watch> WatchPtr;
-  typedef std::vector<WatchPtr> WatchPtrVec;
+  using Watch = std::pair<const char*, std::string>;
+  using WatchPtr = std::shared_ptr<Watch>;
+  using WatchPtrVec = std::vector<WatchPtr>;
   WatchPtrVec &getWatches() { return m_watches;}
   void addWatch(const char *fmt, const std::string &php);
 
@@ -378,8 +378,9 @@ private:
   std::shared_ptr<Macro> m_macroRecording;
   std::shared_ptr<Macro> m_macroPlaying;
 
-  std::vector<std::shared_ptr<DMachineInfo>>
-    m_machines; // All connected machines. 0th is local.
+  // All connected machines. 0th is local.
+  std::vector<std::shared_ptr<DMachineInfo>> m_machines;
+
   std::shared_ptr<DMachineInfo> m_machine; // Current machine
   std::string m_rpcHost; // Current RPC host
 

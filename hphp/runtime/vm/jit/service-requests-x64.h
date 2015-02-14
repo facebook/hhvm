@@ -46,10 +46,8 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
 /*
  * "cb" may be either the main section or frozen section.
  */
-void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
-                 TransFlags trflags = TransFlags{});
-void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-                 SrcKey dest, TransFlags trflags = TransFlags{});
+void emitBindJ(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
+               SrcKey dest, TransFlags trflags = TransFlags{});
 
 /*
  * Similar to the emitBindJ() series.  The address of the jmp is returned.

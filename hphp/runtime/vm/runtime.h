@@ -266,22 +266,6 @@ void assertTv(const TypedValue* tv);
 // returns the number of things it put on sp
 int init_closure(ActRec* ar, TypedValue* sp);
 
-/*
- * Returns whether the interface named `s' supports any non-object
- * types.
- */
-bool interface_supports_non_objects(const StringData* s);
-
-bool interface_supports_array(const StringData* s);
-bool interface_supports_string(const StringData* s);
-bool interface_supports_int(const StringData* s);
-bool interface_supports_double(const StringData* s);
-
-bool interface_supports_array(std::string const&);
-bool interface_supports_string(std::string const&);
-bool interface_supports_int(std::string const&);
-bool interface_supports_double(std::string const&);
-
 int64_t zero_error_level();
 void restore_error_level(int64_t oldLevel);
 

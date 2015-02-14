@@ -1,6 +1,0 @@
-File "IUseDynamicYield_trait6.php", line 23, characters 33-45:
-Could not find method genOtherStuff in an object of type TFoo (Typing[4053])
-File "IUseDynamicYield_trait6.php", line 23, characters 26-30:
-This is why I think it is an object of type TFoo
-File "IUseDynamicYield_trait6.php", line 19, characters 7-10:
-Declaration of TFoo is here

@@ -564,8 +564,11 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
   auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 1).reg()};
-  v << jmpi{mcg->tx().uniqueStubs.endCatchHelper, kCrossTraceRegs};
+  // NB: syncing rVmSp is not necessary at EndCatch, because the unwinder
+  // ignores it.
+  v << vcall{CppCall::direct(unwindResumeHelper), v.makeVcallArgs({{}}),
+             v.makeTuple({})};
+  v << ud2{};
 }
 
 void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
@@ -2504,8 +2507,6 @@ struct CheckValid<void(*)(Vout&)> {
 //
 // Using the given dataReg, this method generates code that checks the static
 // bit out of dataReg, and emits a DecRef if needed.
-// NOTE: the flags are left with the result of the DecRef's subtraction,
-//       which can then be tested immediately after this.
 //
 // We've tried a variety of tweaks to this and found the current state of
 // things optimal, at least when the measurements were made:
@@ -2561,12 +2562,10 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
   }
 
   auto static_check_and_decl = [&](Vout& v) {
-    if (type.needsStaticBitCheck()) {
-      auto next = v.makeBlock();
-      assert(sf!= InvalidReg);
-      v << jcc{CC_L, sf, {next, done}};
-      v = next;
-    }
+    auto next = v.makeBlock();
+    assert(sf != InvalidReg);
+    v << jcc{CC_L, sf, {next, done}};
+    v = next;
 
     // Decrement _count
     sf = v.makeReg();
@@ -2584,11 +2583,9 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
                unlikelyDestroy);
     return;
   }
-  if (type.needsStaticBitCheck()) {
-    sf = v.makeReg();
-    v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET], sf};
-  }
 
+  sf = v.makeReg();
+  v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET], sf};
   static_check_and_decl(v);
 }
 
@@ -4776,7 +4773,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   v << load{rVmTl[rds::kVmfpOff], fp};
   v << load{rVmTl[rds::kVmspOff], sync_sp};
   v << syncvmsp{sync_sp};
-  v << jmpi{mcg->tx().uniqueStubs.resumeHelper, kCrossTraceRegs};
+  emitServiceReq(v, nullptr, REQ_RESUME, {});
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {
@@ -5421,7 +5418,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
   if (auto const msg = extra.msg) {
     assert(msg->isStatic());
     cgCallHelper(v,
-                 CppCall::direct(Trace::ringbufferMsg),
+     CppCall::direct(reinterpret_cast<void (*)()>(Trace::ringbufferMsg)),
                  kVoidDest,
                  SyncOptions::kNoSyncPoint,
                  argGroup(inst)
@@ -5429,14 +5426,18 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
                    .imm(msg->size())
                    .imm(extra.type));
   } else {
+    auto beforeArgs = v.makePoint();
+    v << point{beforeArgs};
+    v << ldpoint{beforeArgs, rAsm};
     auto args = argGroup(inst);
     cgCallHelper(v,
-                 CppCall::direct(Trace::ringbufferEntryRip),
-                 kVoidDest,
-                 SyncOptions::kNoSyncPoint,
-                 argGroup(inst)
-                   .imm(extra.type)
-                   .imm(extra.sk.toAtomicInt()));
+      CppCall::direct(reinterpret_cast<void (*)()>(Trace::ringbufferEntry)),
+      kVoidDest,
+      SyncOptions::kNoSyncPoint,
+      argGroup(inst)
+        .imm(extra.type)
+        .imm(extra.sk.toAtomicInt())
+        .reg(rAsm));
   }
 }
 

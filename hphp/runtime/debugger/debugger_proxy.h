@@ -18,45 +18,48 @@
 #define incl_HPHP_EVAL_DEBUGGER_PROXY_H_
 
 #include <string>
+#include <map>
 #include <memory>
 #include <vector>
-#include <map>
 
-#include "hphp/util/synchronizable.h"
-#include "hphp/util/async-func.h"
 #include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/debugger/dummy_sandbox.h"
+#include "hphp/runtime/debugger/break_point.h"
+#include "hphp/runtime/debugger/debugger_base.h"
+#include "hphp/runtime/debugger/debugger_thrift_buffer.h"
+#include "hphp/util/async-func.h"
+#include "hphp/util/synchronizable.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
-// A DebuggerProxy provides a conection thru which a client may talk to a VM
-// which is being debugged. The VM can also send messages to the client via the
-// proxy, either in reponse to messages from the client, or to poll the client
-// for information.
-//
-// In an basic scenario where a client is debugging a remote VM, the VM will
-// create a proxy when the client connects (via DebuggerServer) and listen for
-// commands via this proxy. It will use this proxy when completing control flow
-// commands to interrupt the client. The client sends and receives messages over
-// a socket directly to this proxy. Thus we have:
-//
-//   Client <---> Proxy <---> VM
-//
-// The client always creates its own "local proxy", which allows debugging any
-// code running on the VM within the client. The two are easily confused.
-//
 
-class CmdInterrupt;
+struct CmdFlowControl;
+struct CmdInterrupt;
 struct DebuggerProxy;
 struct DebuggerCommand;
-struct CmdFlowControl;
+struct DummySandbox;
 
 using DebuggerProxyPtr = std::shared_ptr<DebuggerProxy>;
 using DebuggerCommandPtr = std::shared_ptr<DebuggerCommand>;
 
-class DebuggerProxy : public Synchronizable,
-                      public std::enable_shared_from_this<DebuggerProxy> {
-public:
+/*
+ * A DebuggerProxy provides a conection thru which a client may talk to a VM
+ * which is being debugged.  The VM can also send messages to the client via the
+ * proxy, either in reponse to messages from the client, or to poll the client
+ * for information.
+ *
+ * In an basic scenario where a client is debugging a remote VM, the VM will
+ * create a proxy when the client connects (via DebuggerServer) and listen for
+ * commands via this proxy.  It will use this proxy when completing control flow
+ * commands to interrupt the client.  The client sends and receives messages
+ * over a socket directly to this proxy. Thus we have:
+ *
+ *   Client <---> Proxy <---> VM
+ *
+ * The client always creates its own "local proxy", which allows debugging any
+ * code running on the VM within the client.  The two are easily confused.
+ */
+struct DebuggerProxy : Synchronizable,
+                       std::enable_shared_from_this<DebuggerProxy> {
   enum ThreadMode {
     Normal,
     Sticky,
@@ -127,21 +130,25 @@ private:
 
   DThreadInfoPtr createThreadInfo(const std::string &desc);
 
-
-  bool m_stopped;
+  /////////////////////////////////////////////////////////////////////////////
+  bool m_stopped{false};
 
   bool m_local;
+  bool m_hasBreakPoints{false};
+
+  // Whether the polling thread can send polls to the client.
+  bool m_okayToPoll{true};
+
   DebuggerThriftBuffer m_thrift;
-  DummySandbox* m_dummySandbox;
+  DummySandbox* m_dummySandbox{nullptr};
 
   ReadWriteMutex m_breakMutex;
-  bool m_hasBreakPoints;
   std::vector<BreakPointInfoPtr> m_breakpoints;
   DSandboxInfo m_sandbox;
   DSandboxInfo m_dummyInfo;
 
-  ThreadMode m_threadMode;
-  int64_t m_thread; // Thread allowed to process interrupts
+  ThreadMode m_threadMode{Normal};
+  int64_t m_thread{0}; // Thread allowed to process interrupts
   DThreadInfoPtr m_newThread; // Used by CmdThread to switch threads
   std::map<int64_t, DThreadInfoPtr> m_threads; // Threads in blockUntilOwn
 
@@ -154,7 +161,6 @@ private:
   // thread vs. other threads who want to send an interrupt). Protects
   // m_signum, m_okayToPoll.
   Mutex m_signalMutex;
-  bool m_okayToPoll; // whether the polling thread can send polls to the client
   int m_signum;
 };
 

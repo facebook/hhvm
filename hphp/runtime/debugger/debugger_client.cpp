@@ -22,9 +22,10 @@
 #include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -61,8 +62,6 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
-
-using std::string;
 
 static boost::scoped_ptr<DebuggerClient> debugger_client;
 
@@ -579,7 +578,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
 bool DebuggerClient::reconnect() {
   TRACE(2, "DebuggerClient::reconnect\n");
   assert(m_machine);
-  string &host = m_machine->m_name;
+  auto& host = m_machine->m_name;
   int port = m_machine->m_port;
   if (port <= 0) {
     return false;
@@ -651,13 +650,13 @@ std::string DebuggerClient::getPrompt() {
   if (NoPrompt || !RuntimeOption::EnableDebuggerPrompt) {
     return "";
   }
-  string *name = &m_machine->m_name;
+  auto name = &m_machine->m_name;
   if (!m_rpcHost.empty()) {
     name = &m_rpcHost;
   }
   if (m_inputState == TakingCode) {
-    string prompt = " ";
-    for (unsigned int i = 2; i < name->size() + 2; i++) {
+    std::string prompt = " ";
+    for (unsigned i = 2; i < name->size() + 2; i++) {
       prompt += '.';
     }
     prompt += ' ';
@@ -808,13 +807,13 @@ void DebuggerClient::promptFunctionPrototype() {
   while (p >= p0 && (isalnum(*p) || *p == '_')) --p;
   if (p == pLast) return;
 
-  string cls;
-  string func(p + 1, pLast - p);
+  std::string cls;
+  std::string func(p + 1, pLast - p);
   if (p > p0 && *p-- == ':' && *p-- == ':') {
     pLast = p;
     while (p >= p0 && (isalnum(*p) || *p == '_')) --p;
     if (pLast > p) {
-      cls = string(p + 1, pLast - p);
+      cls = std::string(p + 1, pLast - p);
     }
   }
 
@@ -1095,7 +1094,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
           cmd->is((DebuggerCommand::Type)expectedCmd)) {
         // For the nested cases, the caller has sent a cmd to the server and is
         // expecting a specific response. When we get it, return it.
-        usageLogEvent("command done", folly::to<string>(expectedCmd));
+        usageLogEvent("command done", folly::to<std::string>(expectedCmd));
         m_machine->m_interrupting = true; // Machine is stopped
         m_inputState = TakingCommand;
         return cmd;
@@ -1149,7 +1148,7 @@ void DebuggerClient::console() {
   while (true) {
     const char *line = nullptr;
 
-    string holder;
+    std::string holder;
     if (m_macroPlaying) {
       if (m_macroPlaying->m_index < m_macroPlaying->m_cmds.size()) {
         holder = m_macroPlaying->m_cmds[m_macroPlaying->m_index++];
@@ -1322,7 +1321,7 @@ bool DebuggerClient::code(const String& source, int line1 /*= 0*/,
 
 char DebuggerClient::ask(const char *fmt, ...) {
   TRACE(2, "DebuggerClient::ask\n");
-  string msg;
+  std::string msg;
   va_list ap;
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap); va_end(ap);
@@ -1354,7 +1353,7 @@ do {                                                                    \
 
 void DebuggerClient::print(const char *fmt, ...) {
   TRACE(2, "DebuggerClient::print(const char *fmt, ...)\n");
-  string msg;
+  std::string msg;
   va_list ap;
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap); va_end(ap);
@@ -1388,7 +1387,7 @@ void DebuggerClient::print(const String& msg) {
     fflush(where);                                                      \
   }                                                                     \
   void DebuggerClient::name(const char *fmt, ...) {                     \
-    string msg;                                                         \
+    std::string msg;                                                    \
     va_list ap;                                                         \
     va_start(ap, fmt);                                                  \
     string_vsnprintf(msg, fmt, ap); va_end(ap);                         \
@@ -1406,11 +1405,11 @@ IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
 #undef DWRITE
 #undef IMPLEMENT_COLOR_OUTPUT
 
-string DebuggerClient::wrap(const std::string &s) {
+std::string DebuggerClient::wrap(const std::string &s) {
   TRACE(2, "DebuggerClient::wrap\n");
   String ret = wordwrap(String(s.c_str(), s.size(), CopyString), LineWidth - 4,
                         "\n", true);
-  return string(ret.data(), ret.size());
+  return std::string(ret.data(), ret.size());
 }
 
 void DebuggerClient::helpTitle(const char *title) {
@@ -1719,7 +1718,7 @@ void DebuggerClient::parseCommand(const char *line) {
   m_args.clear();
 
   char quote = 0;
-  string token;
+  std::string token;
   m_argIdx.clear();
   int i = 0;
   for (i = 0; line[i]; i++) {
@@ -1862,7 +1861,7 @@ void DebuggerClient::sendToServer(DebuggerCommand *cmd) {
 int DebuggerClient::checkEvalEnd() {
   TRACE(2, "DebuggerClient::checkEvalEnd\n");
   size_t pos = m_line.rfind("?>");
-  if (pos == string::npos) {
+  if (pos == std::string::npos) {
     return -1;
   }
 
@@ -1886,7 +1885,7 @@ void DebuggerClient::processTakeCode() {
   char first = m_line[0];
   if (first == '@') {
     usageLogCommand("@", m_line);
-    m_code = string("<?php ") + (m_line.c_str() + 1) + ";";
+    m_code = std::string("<?php ") + (m_line.c_str() + 1) + ";";
     processEval();
     return;
   } else if (first == '=') {
@@ -1895,7 +1894,7 @@ void DebuggerClient::processTakeCode() {
       // strip the trailing ;
       m_line = m_line.substr(0, m_line.size() - 1);
     }
-    m_code = string("<?php $_=(") + m_line.substr(1) + "); ";
+    m_code = std::string("<?php $_=(") + m_line.substr(1) + "); ";
     if (processEval()) CmdVariable::PrintVariable(*this, s_UNDERSCORE);
     return;
   } else if (first != '<') {
@@ -2489,9 +2488,8 @@ void DebuggerClient::saveConfig() {
   stream << "hhvm.never_save_config = " << m_neverSaveConfig << std::endl;
   stream << "hhvm.tutorial = " << m_tutorial << std::endl;
   unsigned int i = 0;
-  for (std::set<string>::const_iterator iter = m_tutorialVisited.begin();
-       iter != m_tutorialVisited.end(); ++iter) {
-    stream << "hhvm.tutorial.visited[" << i++ << "] = " << *iter << std::endl;
+  for (auto const& str : m_tutorialVisited) {
+    stream << "hhvm.tutorial.visited[" << i++ << "] = " << str << std::endl;
   }
 
   for (i = 0; i < m_macros.size(); i++) {

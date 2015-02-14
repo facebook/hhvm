@@ -1,0 +1,1 @@
+Warning: IntervalTimer::__construct() expects exactly 3 parameters, 2 given in %s/badconstruct.php on line 3

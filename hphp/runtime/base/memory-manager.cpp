@@ -440,6 +440,7 @@ void MemoryManager::sweep() {
   DEBUG_ONLY auto native = m_natives.size();
   Native::sweepNativeData(m_natives);
   TRACE(1, "sweep: sweepable %u native %lu\n", sweepable, native);
+  if (debug) checkHeap();
 }
 
 void MemoryManager::resetAllocator() {
@@ -468,6 +469,7 @@ void MemoryManager::flush() {
   m_heap.flush();
   m_apc_arrays = std::vector<APCLocalArray*>();
   m_natives = std::vector<NativeNode*>();
+  Sweepable::FlushList();
 }
 
 /*
@@ -505,7 +507,7 @@ void MemoryManager::flush() {
  *     through a different entry point.  (E.g. MM().smartFreeSize or
  *     MM().smartFreeSizeBig.)
  *
- * When small blocks are freed (case b and c), they're placed the
+ * When small blocks are freed (case b and c), they're placed in the
  * appropriate size-segregated freelist.  Large blocks are immediately
  * passed back to libc via free.
  *
@@ -571,7 +573,7 @@ namespace {
 DEBUG_ONLY const char* header_names[] = {
   "Packed", "Struct", "Mixed", "Empty", "Apc", "Globals", "Proxy",
   "String", "Object", "ResumableObj", "Resource", "Ref",
-  "Resumable", "Native", "Sweepable", "SmallMalloc", "BigMalloc", "BigObj",
+  "Resumable", "Native", "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole", "Debug"
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");

@@ -257,7 +257,7 @@ bool LibEventTransport::isServerStopping() {
 }
 
 void LibEventTransport::sendImpl(const void *data, int size, int code,
-                                 bool chunked) {
+                                 bool chunked, bool eom) {
   assert(data);
   assert(!m_sendStarted || chunked);
   if (m_sendEnded) {
@@ -293,11 +293,16 @@ void LibEventTransport::sendImpl(const void *data, int size, int code,
     m_sendEnded = true;
   }
   m_sendStarted = true;
+  if (eom) {
+    onSendEndImpl();
+  }
 }
 
 void LibEventTransport::onSendEndImpl() {
   if (m_chunkedEncoding) {
-    m_server->onChunkedResponseEnd(m_workerId, m_request);
+    if (!m_sendEnded) {
+      m_server->onChunkedResponseEnd(m_workerId, m_request);
+    }
     m_sendEnded = true;
   } else {
     assert(m_sendEnded); // otherwise, we didn't call send for this request

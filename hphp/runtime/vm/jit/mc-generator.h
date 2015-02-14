@@ -322,24 +322,15 @@ public:
    * This function is called by translated code to handle service requests,
    * which usually involve some kind of jump smashing. The returned address
    * will never be null, and indicates where the caller should resume
-   * execution.
+   * execution. This function may call into the interpreter if necessary to
+   * make forward progress (if another thread has the write lease), and as a
+   * result it may throw exceptions.
    *
    * The forced symbol name is so we can call this from
    * translator-asm-helpers.S without hardcoding a fragile mangled name.
    */
   TCA handleServiceRequest(ServiceReqInfo& info)
     asm("MCGenerator_handleServiceRequest");
-
-  /*
-   * Look up (or create) and return the address of a translation for the
-   * current VM location. If no translation can be found or created, this
-   * function will interpret until it finds one, possibly throwing exceptions
-   * or reentering the VM. If interpFirst is true, at least one basic block
-   * will be interpreted before attempting to look up a translation. This is
-   * necessary to ensure forward progress in certain situations, such as
-   * hitting the translation limit for a SrcKey.
-   */
-  TCA handleResume(bool interpFirst);
 
 private:
   /*

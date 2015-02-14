@@ -122,7 +122,6 @@ enum class HeaderKind : uint8_t {
   String, Object, ResumableObj, Resource, Ref,
   Resumable, // ResumableNode followed by Frame, Resumable, ObjectData
   Native, // a NativeData header preceding an HNI ObjectData
-  Sweepable, // a Sweepable header preceding an ObjectData ResourceData
   SmallMalloc, // small smart_malloc'd block
   BigMalloc, // big smart_malloc'd block
   BigObj, // big size-tracked object (valid header follows BigNode)

@@ -449,7 +449,7 @@ ArrayData* StructArray::NonSmartCopy(const ArrayData* ad) {
   return ret;
 }
 
-ArrayData* StructArray::EscalateForSort(ArrayData* ad) {
+ArrayData* StructArray::EscalateForSort(ArrayData* ad, SortFunction) {
   return ToMixedCopy(asStructArray(ad));
 }
 

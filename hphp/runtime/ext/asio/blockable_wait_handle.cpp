@@ -43,43 +43,5 @@ void c_BlockableWaitHandle::exitContextBlocked(context_idx_t ctx_idx) {
   getParentChain().exitContext(ctx_idx);
 }
 
-// throws if establishing a dependency from this to child would form a cycle
-void c_BlockableWaitHandle::detectCycle(c_WaitableWaitHandle* child) const {
-  if (UNLIKELY(isDescendantOf(child))) {
-    Object e(createCycleException(child));
-    throw e;
-  }
-}
-
-ObjectData*
-c_BlockableWaitHandle::createCycleException(c_WaitableWaitHandle* child) const {
-  assert(isDescendantOf(child));
-
-  smart::vector<std::string> exception_msg_items;
-  exception_msg_items.push_back("Encountered dependency cycle.\n");
-  exception_msg_items.push_back("Existing stack:\n");
-
-  exception_msg_items.push_back(folly::stringPrintf(
-    "  %s (%" PRId64 ")\n", child->getName().data(), child->t_getid()));
-
-  assert(child->instanceof(c_BlockableWaitHandle::classof()));
-  auto current = static_cast<c_BlockableWaitHandle*>(child);
-
-  while (current != this) {
-    assert(current->getState() == STATE_BLOCKED);
-    assert(current->getChild()->instanceof(c_BlockableWaitHandle::classof()));
-    current = static_cast<c_BlockableWaitHandle*>(current->getChild());
-
-    exception_msg_items.push_back(folly::stringPrintf(
-      "  %s (%" PRId64 ")\n", current->getName().data(), current->t_getid()));
-  }
-
-  exception_msg_items.push_back("Trying to introduce dependency on:\n");
-  exception_msg_items.push_back(folly::stringPrintf(
-    "  %s (%" PRId64 ") (dupe)\n", child->getName().data(), child->t_getid()));
-  return SystemLib::AllocInvalidOperationExceptionObject(
-      folly::join("", exception_msg_items));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

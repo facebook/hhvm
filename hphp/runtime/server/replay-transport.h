@@ -50,7 +50,8 @@ public:
   virtual void getHeaders(HeaderMap &headers);
   virtual void addHeaderImpl(const char *name, const char *value);
   virtual void removeHeaderImpl(const char *name);
-  virtual void sendImpl(const void *data, int size, int code, bool chunked);
+  virtual void sendImpl(const void *data, int size, int code, bool chunked,
+                        bool eom);
 
   int getResponseCode() const { return m_code;}
   const std::string &getResponse() const { return m_response;}

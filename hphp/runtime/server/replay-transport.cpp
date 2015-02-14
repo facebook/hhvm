@@ -134,7 +134,7 @@ void ReplayTransport::removeHeaderImpl(const char *name) {
 }
 
 void ReplayTransport::sendImpl(const void *data, int size, int code,
-                               bool chunked) {
+                               bool chunked, bool eom) {
   m_code = code;
 
   m_response = "HTTP/1.1 ";
@@ -156,6 +156,9 @@ void ReplayTransport::sendImpl(const void *data, int size, int code,
   m_response += "\r\n";
   m_response.append((const char *)data, size);
   m_response += "\r\n";
+  if (eom) {
+    onSendEndImpl();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -93,7 +93,6 @@ val strict_members_not_known : Pos.t -> string -> unit
 val nullable_void : Pos.t -> unit
 val tuple_syntax : Pos.t -> unit
 val class_arity : Pos.t -> Pos.t -> string -> int -> unit
-val dynamic_yield_private : Pos.t -> unit
 val expecting_type_hint : Pos.t -> unit
 val expecting_type_hint_suggest : Pos.t -> string -> unit
 val expecting_return_type_hint : Pos.t -> unit

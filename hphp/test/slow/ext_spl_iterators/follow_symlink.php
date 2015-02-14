@@ -1,5 +1,5 @@
 <?php
-$p = sys_get_temp_dir() . '/recursivedirectoryiterator_followsymlink_test/';
+$p = dirname(__FILE__) . '/recursivedirectoryiterator_followsymlink_test/';
 
 mkdir($p . "test/dir1", 0777, true);
 touch($p . "test/dir1/file1.txt");

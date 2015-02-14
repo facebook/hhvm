@@ -93,15 +93,15 @@ class TypedValuePrinter:
             val = data['pref'].dereference()
 
         else:
-            t = "Invalid(%d)" % t.cast(T('int8_t'))
+            t = 'Invalid(%d)' % t.cast(T('int8_t'))
             val = "0x%x" % data['num']
 
         if val is None:
-            out = "{ %s }" % t
+            out = '{ %s }' % t
         elif name is None:
-            out = "{ %s, %s }" % (t, str(val))
+            out = '{ %s, %s }' % (t, str(val))
         else:
-            out = "{ %s, %s (%s) }" % (t, str(val), name)
+            out = '{ %s, %s ("%s") }' % (t, str(val), name)
 
         return out
 
@@ -130,38 +130,71 @@ class PtrPrinter:
 
         if inner_type.tag == 'HPHP::StringData':
             return string_data_val(inner)
-        return None
+        return nameof(inner)
 
     def to_string(self):
         s = self._string()
 
-        if s is not None:
-            return '0x%s "%s"' % (str(self._pointer()), s)
-        return self._pointer()
-
-    def children(self):
-        ptr = self._pointer()
-        s = self._string()
-
-        if ptr and s is None:
-            return self._iterator(ptr, ptr + 1)
-        return self._iterator(0, 0)
+        out = '(%s) %s'  % (str(self._ptype()), str(self._pointer()))
+        return '%s "%s"' % (out, s) if s is not None else out
 
 
 class SmartPtrPrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::(SmartPtr<.*>|(Static)?String|Array|Object)$'
+    RECOGNIZE = '^HPHP::(SmartPtr<.*>)$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def _ptype(self):
+        return self.val.type
+
+    def _pointer(self):
+        return self.val['m_px']
+
+class ArrayPrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::Array$'
 
     def __init__(self, val):
         self.val = val
 
     def _pointer(self):
-        return self.val['m_px']
+        return self.val['m_arr']['m_px']
+
+class ObjectPrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::Object$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def _pointer(self):
+        return self.val['m_obj']['m_px']
+
+class ResourcePrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::Resource$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def _pointer(self):
+        return self.val['m_res']['m_px']
+
+class StringPrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::(Static)?String$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def _pointer(self):
+        return self.val['m_str']['m_px']
 
 class LowPtrPrinter(PtrPrinter):
     RECOGNIZE = '^HPHP::(LowPtr<.*>|LowPtrImpl<.*>)$'
 
     def __init__(self, val):
         self.val = val
+
+    def _ptype(self):
+        return self.val.type
 
     def _pointer(self):
         inner = self.val.type.template_argument(0)
@@ -292,7 +325,7 @@ class ObjectDataPrinter:
         self.cls = deref(val['m_cls'])
 
     def to_string(self):
-        return "Object of class %s @ %s" % (
+        return 'Object of class "%s" @ %s' % (
             nameof(self.cls),
             self.val.address)
 
@@ -319,6 +352,10 @@ class RefDataPrinter:
 printer_classes = [
     TypedValuePrinter,
     SmartPtrPrinter,
+    ArrayPrinter,
+    ObjectPrinter,
+    StringPrinter,
+    ResourcePrinter,
     LowPtrPrinter,
     StringDataPrinter,
     ArrayDataPrinter,

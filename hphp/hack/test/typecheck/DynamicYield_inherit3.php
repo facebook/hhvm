@@ -20,5 +20,5 @@ trait MyTrait {
 
 class A {
   use MyTrait;
-  private function yieldFoo() {}
+  private function genFoo() {}
 }

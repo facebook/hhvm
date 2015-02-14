@@ -492,15 +492,13 @@ public:
     return m_retLocal;
   }
 
-  class IncludeTimeFatalException : public Exception {
-  public:
+  struct IncludeTimeFatalException : Exception {
     ConstructPtr m_node;
     bool m_parseFatal;
     IncludeTimeFatalException(ConstructPtr node, const char* fmt, ...)
         : Exception(), m_node(node), m_parseFatal(false) {
       va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
     }
-    virtual ~IncludeTimeFatalException() throw() {}
     EXCEPTION_COMMON_IMPL(IncludeTimeFatalException);
     void setParseFatal(bool b = true) { m_parseFatal = b; }
   };

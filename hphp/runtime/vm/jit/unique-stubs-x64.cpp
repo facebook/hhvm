@@ -97,53 +97,18 @@ void emitReturnHelpers(UniqueStubs& us) {
   us.retInlHelper = us.add("retInlHelper", emitRetFromInterpretedFrame());
 }
 
-void emitResumeInterpHelpers(UniqueStubs& uniqueStubs) {
+void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.main() };
   moveToAlign(mcg->code.main());
-  Label resumeHelper;
-
-  uniqueStubs.interpHelper = a.frontier();
-  a.    storeq (argNumToRegName[0], rVmTl[rds::kVmpcOff]);
-  uniqueStubs.interpHelperSyncedPC = a.frontier();
-  a.    storeq (rVmSp, rVmTl[rds::kVmspOff]);
-  a.    storeq (rVmFp, rVmTl[rds::kVmfpOff]);
-  a.    movb   (1, rbyte(argNumToRegName[1])); // interpFirst
-  a.    jmp8   (resumeHelper);
 
   uniqueStubs.resumeHelperRet = a.frontier();
   a.    pop   (rStashedAR[AROFF(m_savedRip)]);
   uniqueStubs.resumeHelper = a.frontier();
-  a.    movb  (0, rbyte(argNumToRegName[1])); // interpFirst
-asm_label(a, resumeHelper);
-  a.    loadq (rVmTl[rds::kVmfpOff], rVmFp);
-  a.    loadq (rip[intptr_t(&mcg)], argNumToRegName[0]);
-  a.    call  (TCA(getMethodPtr(&MCGenerator::handleResume)));
-  a.    loadq (rVmTl[rds::kVmspOff], rVmSp);
-  a.    loadq (rVmTl[rds::kVmfpOff], rVmFp);
-  a.    jmp   (rax);
+  a.   loadq  (rVmTl[rds::kVmfpOff], rVmFp);
+  a.   loadq  (rVmTl[rds::kVmspOff], rVmSp);
+  emitServiceReq(mcg->code.main(), REQ_RESUME);
 
-  uniqueStubs.add("resumeInterpHelpers", uniqueStubs.interpHelper);
-}
-
-void emitCatchHelper(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.frozen() };
-  moveToAlign(mcg->code.frozen());
-  Label callUnwindResume;
-
-  uniqueStubs.endCatchHelper = a.frontier();
-  a.    cmpq (0, rVmTl[unwinderReturnRipOff()]);
-  a.    je8  (callUnwindResume);
-  a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);
-  a.    call(TCA(_Unwind_DeleteException));
-  a.    loadq(rVmTl[rds::kVmspOff], rVmSp);
-  a.    loadq(rVmTl[rds::kVmfpOff], rVmFp);
-  a.    jmp  (rVmTl[unwinderReturnRipOff()]);
-
-asm_label(a, callUnwindResume);
-  a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);
-  a.    call(TCA(unwindResumeHelper));
-
-  uniqueStubs.add("endCatchHelper", uniqueStubs.endCatchHelper);
+  uniqueStubs.add("resumeHelpers", uniqueStubs.resumeHelper);
 }
 
 void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
@@ -454,13 +419,11 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   a.   push    (ar[AROFF(m_sfp)]);
   a.   movq    (EventHook::NormalFunc, argNumToRegName[1]);
   emitCall(a, CppCall::direct(helper), argSet(2));
-  uniqueStubs.functionEnterHelperReturn = a.frontier();
   a.   testb   (al, al);
   a.   je8     (skip);
   a.   addq    (16, rsp);
   a.   pop     (rVmFp);
   a.   ret     ();
-
 asm_label(a, skip);
   // The event hook has already cleaned up the stack/actrec so that we're ready
   // to continue from the original call site.  Just need to grab the fp/rip
@@ -468,6 +431,7 @@ asm_label(a, skip);
   a.   pop     (rVmFp);
   a.   pop     (rsi);
   a.   addq    (16, rsp); // drop our call frame
+  emitGetGContext(a, rax);
   a.   loadq   (rVmTl[rds::kVmspOff], rVmSp);
   a.   jmp     (rsi);
   a.   ud2     ();
@@ -504,8 +468,7 @@ UniqueStubs emitUniqueStubs() {
   auto functions = {
     emitCallToExit,
     emitReturnHelpers,
-    emitResumeInterpHelpers,
-    emitCatchHelper,
+    emitResumeHelpers,
     emitStackOverflowHelper,
     emitFreeLocalsHelpers,
     emitFuncPrologueRedispatch,

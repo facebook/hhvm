@@ -19,19 +19,19 @@
 
 #include "hphp/util/async-func.h"
 #include "hphp/util/synchronizable.h"
-#include "hphp/runtime/debugger/debugger_base.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+struct DebuggerProxy;
+struct DSandboxInfo;
+
+/*
  * Serves as execution thread when remote debugger is not attached to a web
  * request.
  */
-class DebuggerProxy;
-class DummySandbox : public Synchronizable {
-public:
-  DummySandbox(DebuggerProxy *proxy, const std::string &defaultPath,
+struct DummySandbox : Synchronizable {
+  DummySandbox(DebuggerProxy* proxy, const std::string &defaultPath,
                const std::string &startupFile);
   void start();
   bool stop(int timeout);
@@ -42,7 +42,7 @@ public:
   void notifySignal(int signum);
 
 private:
-  DebuggerProxy *m_proxy;
+  DebuggerProxy* m_proxy;
   std::string m_defaultPath;
   std::string m_startupFile;
 
@@ -50,7 +50,7 @@ private:
   bool m_stopped;
   int m_signum;
 
-  std::string getStartupDoc(const DSandboxInfo &sandbox);
+  std::string getStartupDoc(const DSandboxInfo& sandbox);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

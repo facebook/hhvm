@@ -311,7 +311,7 @@ static CallMap s_callMap {
                             {{SSA, 0}, {SSA, 1}}},
     {SuspendHookR, &EventHook::onFunctionSuspendR, DNone, SSync,
                             {{SSA, 0}, {SSA, 1}}},
-    {ReturnHook,  &EventHook::onFunctionReturnJit, DNone, SSync,
+    {ReturnHook,  &EventHook::onFunctionReturn, DNone, SSync,
                             {{SSA, 0}, {TV, 1}}},
 
     /* silence operator support */

@@ -449,7 +449,7 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
   }
 }
 
-void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
+void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
   // Null out $this for the exiting function, it has been decref'd so it's
   // garbage.
   ar->setThisOrClassAllowNull(nullptr);

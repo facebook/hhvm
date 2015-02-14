@@ -22,27 +22,6 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-
-// For EvalHHIRBytecodeControlFlow we need to make sure the spOffset is the
-// same on all incoming edges going to a merge point.  This would "just happen"
-// if we didn't still have instructions that redefine StkPtrs, but calls still
-// need to do that for now, so we need this hack.
-void bccfMergeSPHack(HTS& env) {
-  gen(
-    env,
-    AdjustSP,
-    StackOffset { -(env.irb->syncedSpLevel() - env.irb->spOffset()) },
-    sp(env)
-  );
-}
-
-//////////////////////////////////////////////////////////////////////
-
-}
-
 void surpriseCheck(HTS& env, Offset relOffset) {
   if (relOffset < 0) {
     auto const exit = makeExitSlow(env);
@@ -83,8 +62,7 @@ Block* getBlock(HTS& env, Offset offset) {
 
 void jmpImpl(HTS& env, Offset offset, JmpFlags flags) {
   if (flags & JmpFlagNextIsMerge) {
-    spillStack(env);
-    bccfMergeSPHack(env);
+    prepareForHHBCMergePoint(env);
   }
   auto target = getBlock(env, offset);
   assert(target != nullptr);
@@ -97,8 +75,7 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
     spillStack(env);
   }
   if ((flags & JmpFlagNextIsMerge) != 0) {
-    spillStack(env);
-    bccfMergeSPHack(env);
+    prepareForHHBCMergePoint(env);
   }
   auto const target = getBlock(env, taken);
   assert(target != nullptr);

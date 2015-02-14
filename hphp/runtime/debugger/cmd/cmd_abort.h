@@ -23,7 +23,7 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 class CmdAbort : public DebuggerCommand {
-public:
+ public:
   CmdAbort() : DebuggerCommand(KindOfAbort) {}
 
   virtual void help(DebuggerClient &client);

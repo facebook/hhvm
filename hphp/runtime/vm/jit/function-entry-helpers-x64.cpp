@@ -66,8 +66,9 @@ TCA fcallHelper(ActRec* ar, void* sp) {
       if (doFCall(ar, vmpc())) {
         return mcg->tx().uniqueStubs.resumeHelperRet;
       }
-      // We've been asked to skip the function body (fb_intercept). frame,
-      // stack and pc have already been fixed - flag that with a negative
+      // We've been asked to skip the function body
+      // (fb_intercept). frame, stack and pc have
+      // already been fixed - flag that with a negative
       // return address.
       return (TCA)-ar->m_savedRip;
     }

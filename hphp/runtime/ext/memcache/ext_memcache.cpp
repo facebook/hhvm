@@ -227,7 +227,8 @@ static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
 }
 
 static String memcache_prepare_key(const String& var) {
-  auto data = var.get()->mutableData();
+  String var_mutable(var, CopyString);
+  auto data = var_mutable.get()->mutableData();
   for (int i = 0; i < var.length(); i++) {
     // This is a stupid encoding since it causes collisions but it matches php5
     if (data[i] <= ' ') {

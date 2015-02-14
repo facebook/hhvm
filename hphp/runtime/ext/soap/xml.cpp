@@ -121,7 +121,9 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size,
     ctxt->sax->warning = NULL;
     ctxt->sax->error = NULL;
     /*ctxt->sax->fatalError = NULL;*/
+    auto old = HHVM_FN(libxml_disable_entity_loader)(true);
     xmlParseDocument(ctxt);
+    HHVM_FN(libxml_disable_entity_loader)(old);
     if (ctxt->wellFormed) {
       ret = ctxt->myDoc;
       if (ret->URL == NULL && ctxt->directory != NULL) {

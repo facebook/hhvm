@@ -83,7 +83,7 @@ struct StructArray : public ArrayData {
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* NonSmartCopy(const ArrayData*);
   static ArrayData* NonSmartCopyHelper(const ArrayData*);
-  static ArrayData* EscalateForSort(ArrayData*);
+  static ArrayData* EscalateForSort(ArrayData*, SortFunction);
   static void Ksort(ArrayData*, int, bool);
   static void Sort(ArrayData*, int, bool);
   static void Asort(ArrayData*, int, bool);

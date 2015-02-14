@@ -69,12 +69,6 @@ inline NativeNode* getSweepNode(ObjectData *obj, const NativeDataInfo* ndi) {
   );
 }
 
-DEBUG_ONLY
-static bool invalidateNativeData(ObjectData* obj, const NativeDataInfo* ndi) {
-  memset(getSweepNode(obj, ndi), kSmartFreeFill, ndsize(ndi));
-  return true;
-}
-
 void sweepNativeData(std::vector<NativeNode*>& natives) {
   while (!natives.empty()) {
     assert(natives.back()->sweep_index == natives.size() - 1);
@@ -85,7 +79,8 @@ void sweepNativeData(std::vector<NativeNode*>& natives) {
     assert(ndi->sweep);
     assert(node->obj_offset == ndsize(ndi));
     ndi->sweep(obj);
-    assert(invalidateNativeData(obj, ndi));
+    // trash the payload but leave the header and object parsable
+    assert(memset(node + 1, kSmartFreeFill, node->obj_offset - sizeof(*node)));
   }
 }
 

@@ -29,7 +29,6 @@ namespace HPHP {
 
 // union of all the possible header types, and some utilities
 struct Header {
-  struct DummySweepable: Sweepable, ObjectData { void sweep() {} };
   size_t size() const;
   HeaderKind kind() const {
     assert(unsigned(kind_) <= NumHeaderKinds);
@@ -53,7 +52,6 @@ struct Header {
     ResumableNode resumable_;
     NativeNode native_;
     DebugHeader debug_;
-    DummySweepable sweepable_;
   };
 
   Resumable* resumable() const {
@@ -67,11 +65,6 @@ struct Header {
 };
 
 inline size_t Header::size() const {
-  auto resourceSize = [](const ResourceData* r) {
-    // explicitly virtual-call ResourceData::heapSize() through a pointer
-    assert(r->heapSize());
-    return r->heapSize();
-  };
   switch (kind()) {
     case HeaderKind::Packed:
       return PackedArray::heapSize(&arr_);
@@ -95,7 +88,7 @@ inline size_t Header::size() const {
       return obj_.heapSize();
     case HeaderKind::Resource:
       // [ResourceData][subclass]
-      return resourceSize(&res_);
+      return res_.heapSize();
     case HeaderKind::Ref:
       return sizeof(RefData);
     case HeaderKind::SmallMalloc:
@@ -113,10 +106,6 @@ inline size_t Header::size() const {
     case HeaderKind::Native:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
       return native_.obj_offset + Native::obj(&native_)->heapSize();
-    case HeaderKind::Sweepable:
-      // [Sweepable][ObjectData][subclass][props] or
-      // [Sweepable][ResourceData][subclass]
-      return sizeof(Sweepable) + sweepable_.heapSize();
     case HeaderKind::Hole:
       return free_.size;
     case HeaderKind::Debug:
@@ -243,7 +232,6 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::String:
       case HeaderKind::Resource:
       case HeaderKind::Ref:
-      case HeaderKind::Sweepable:
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
       case HeaderKind::Free:

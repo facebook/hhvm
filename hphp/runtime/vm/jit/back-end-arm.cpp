@@ -178,7 +178,13 @@ struct BackEnd : public jit::BackEnd {
       vixl::MacroAssembler a { mainCode };
       arm::emitTransCounterInc(a);
     }
-    not_implemented();
+    // This jump won't be smashed, but a far jump on ARM requires the same code
+    // sequence.
+    emitSmashableJump(
+      mainCode,
+      emitServiceReq(coldCode, REQ_INTERPRET, sk.offset()),
+      CC_None
+    );
   }
 
   bool funcPrologueHasGuard(TCA prologue, const Func* func) override {
@@ -430,7 +436,9 @@ struct BackEnd : public jit::BackEnd {
       assert(a.isFrontierAligned(8));
     }
     a.   bind (&interpReqAddr);
-    not_implemented();
+    TCA interpReq =
+      emitServiceReq(codeCold, REQ_INTERPRET, sk.offset());
+    a.   dc64 (interpReq);
     a.   bind (&after);
   }
 

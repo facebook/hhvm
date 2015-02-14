@@ -550,6 +550,10 @@ void RequestInjectionData::setDebuggerSignalFlag() {
   getConditionFlags()->fetch_or(RequestInjectionData::DebuggerSignalFlag);
 }
 
+void RequestInjectionData::setIntervalTimerFlag() {
+  getConditionFlags()->fetch_or(RequestInjectionData::IntervalTimerFlag);
+}
+
 ssize_t RequestInjectionData::fetchAndClearFlags() {
   return getConditionFlags()->fetch_and(RequestInjectionData::StickyFlags);
 }

@@ -43,6 +43,7 @@ const StaticString
   s_ceil("ceil"),
   s_floor("floor"),
   s_abs("abs"),
+  s_ord("ord"),
   s_empty("");
 
 //////////////////////////////////////////////////////////////////////
@@ -110,6 +111,18 @@ SSATmp* opt_count(HTS& env, uint32_t numArgs) {
   return gen(env, Count, val);
 }
 
+SSATmp* opt_ord(HTS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+
+  auto const arg = topC(env, 0);
+  // a static string is passed in, resolve with a constant.
+  if (arg->type().isConst(Type::Str)) {
+    unsigned char first = arg->strVal()->data()[0];
+    return cns(env, int64_t(first));
+  }
+  return nullptr;
+}
+
 SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
 
@@ -125,8 +138,13 @@ SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
   // settings can be overridden during the execution of a request.
   auto const settingName = top(env, Type::Str, 0)->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
-  if (!IniSetting::GetMode(settingName, mode) ||
-      !(mode & IniSetting::PHP_INI_SYSTEM)) {
+  if (!IniSetting::GetMode(settingName, mode)) {
+    return nullptr;
+  }
+  if (mode & ~IniSetting::PHP_INI_SYSTEM) {
+    return nullptr;
+  }
+  if (mode == IniSetting::PHP_INI_ALL) {  /* PHP_INI_ALL has a weird encoding */
     return nullptr;
   }
 
@@ -293,6 +311,7 @@ bool optimizedFCallBuiltin(HTS& env,
     X(ceil);
     X(floor);
     X(abs);
+    X(ord);
 
 #undef X
 

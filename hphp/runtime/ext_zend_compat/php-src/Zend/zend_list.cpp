@@ -75,7 +75,7 @@ static zend_rsrc_list_entry *zend_list_id_to_entry(int id TSRMLS_DC) {
 ///////////////////////////////////////////////////////////////////////////////////
 
 ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC) {
-  zend_rsrc_list_entry* le = new zend_rsrc_list_entry(ptr, type);
+  auto le = HPHP::newres<zend_rsrc_list_entry>(ptr, type);
   le->incRefCount();
   RL().push_back(le);
   int id = RL().size() - 1;

@@ -1334,7 +1334,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   PhysReg rds(rVmTl), fp(rVmFp), sp(rVmSp);
   v << load{rds[rds::kVmfpOff], fp};
   v << load{rds[rds::kVmspOff], sp};
-  v << jmpi{mcg->tx().uniqueStubs.resumeHelper};
+  emitServiceReq(v, nullptr, REQ_RESUME, {});
 }
 
 void CodeGenerator::cgLdClsName(IRInstruction* inst) {

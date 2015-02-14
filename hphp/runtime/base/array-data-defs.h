@@ -283,8 +283,8 @@ inline bool ArrayData::advanceMArrayIter(MArrayIter& fp) {
   return g_array_funcs.advanceMArrayIter[m_kind](this, fp);
 }
 
-inline ArrayData* ArrayData::escalateForSort() {
-  return g_array_funcs.escalateForSort[m_kind](this);
+inline ArrayData* ArrayData::escalateForSort(SortFunction sf) {
+  return g_array_funcs.escalateForSort[m_kind](this, sf);
 }
 
 inline void ArrayData::ksort(int sort_flags, bool ascending) {

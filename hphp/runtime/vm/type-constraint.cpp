@@ -38,87 +38,26 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-TypeConstraint::TypeMap TypeConstraint::s_typeNamesToTypes;
-
-MaybeDataType TypeConstraint::typeNameToMaybeDataType(
-    const StringData* typeName) {
-  const Type* type = typeNameToType(typeName);
-  return type ? type->dt : folly::none;
-}
-
-const TypeConstraint::Type* TypeConstraint::typeNameToType(
-    const StringData* typeName) {
-  if (UNLIKELY(s_typeNamesToTypes.empty())) {
-    const struct Pair {
-      const StringData* name;
-      Type type;
-    } pairs[] = {
-      { makeStaticString("HH\\bool"),   { KindOfBoolean, MetaType::Precise }},
-      { makeStaticString("HH\\int"),    { KindOfInt64,   MetaType::Precise }},
-      { makeStaticString("HH\\float"),  { KindOfDouble,  MetaType::Precise }},
-      { makeStaticString("HH\\string"), { KindOfString,  MetaType::Precise }},
-      { makeStaticString("array"),      { KindOfArray,   MetaType::Precise }},
-      { makeStaticString("HH\\resource"), { KindOfResource,
-                                                         MetaType::Precise }},
-      { makeStaticString("HH\\num"),    { KindOfDouble,  MetaType::Number }},
-      { makeStaticString("HH\\arraykey"), { KindOfString, MetaType::ArrayKey }},
-      { makeStaticString("self"),       { KindOfObject,  MetaType::Self }},
-      { makeStaticString("parent"),     { KindOfObject,  MetaType::Parent }},
-      { makeStaticString("callable"),   { KindOfObject,  MetaType::Callable }},
-    };
-    for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
-      s_typeNamesToTypes[pairs[i].name] = pairs[i].type;
-    }
-  }
-  return folly::get_ptr(s_typeNamesToTypes, typeName);
-}
-
-//////////////////////////////////////////////////////////////////////
+const StaticString s___invoke("__invoke");
 
 void TypeConstraint::init() {
-  if (isTypeVar()) {
-    // We kept the type variable type constraint to correctly check child
-    // classes implementing abstract methods or interfaces.
-    m_type.dt = folly::none;
-    m_type.metatype = MetaType::Precise;
+  if (m_typeName == nullptr || isTypeVar()) {
+    m_type = Type::Mixed;
     return;
   }
-
-  if (m_typeName == nullptr) {
-    m_type.dt = folly::none;
-    m_type.metatype = MetaType::Precise;
-    return;
-  }
-
-  Type dtype;
   TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
         this, m_typeName->data(), isNullable());
-  auto const mptr = typeNameToType(m_typeName);
-  if (mptr) dtype = *mptr;
-  if (!mptr ||
-      !(isHHType() || dtype.dt == KindOfArray ||
-        dtype.dt == KindOfBoolean ||
-        dtype.dt == KindOfString ||
-        dtype.dt == KindOfInt64 ||
-        dtype.dt == KindOfDouble ||
-        dtype.dt == KindOfResource ||
-        dtype.metatype == MetaType::ArrayKey ||
-        dtype.metatype == MetaType::Number ||
-        dtype.metatype == MetaType::Parent ||
-        dtype.metatype == MetaType::Self ||
-        dtype.metatype == MetaType::Callable)) {
-    TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
-          this, m_typeName->data());
-    m_type = { KindOfObject, MetaType::Precise };
-    m_namedEntity = NamedEntity::get(m_typeName);
-    TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
+  auto const mptr = nameToAnnotType(m_typeName);
+  if (mptr) {
+    m_type = *mptr;
+    assert(getAnnotDataType(m_type) != KindOfStaticString);
     return;
   }
-  m_type = dtype;
-  assert(m_type.dt != KindOfStaticString);
-  assert(IMPLIES(isParent(), m_type.dt == KindOfObject));
-  assert(IMPLIES(isSelf(), m_type.dt == KindOfObject));
-  assert(IMPLIES(isCallable(), m_type.dt == KindOfObject));
+  TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
+        this, m_typeName->data());
+  m_type = Type::Object;
+  m_namedEntity = NamedEntity::get(m_typeName);
+  TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
 }
 
 std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
@@ -211,6 +150,7 @@ const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
                                              const StringData* name) {
   auto def = ne->getCachedTypeAlias();
   if (!def) {
+    VMRegAnchor _;
     String nameStr(const_cast<StringData*>(name));
     if (!AutoloadHandler::s_instance->autoloadType(nameStr)) {
       return nullptr;
@@ -229,6 +169,7 @@ const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
  * type alias or an enum class; enum classes are strange in that it
  * *is* possible to have an instance of them even if they are not defined.
  */
+static
 std::pair<const TypeAliasReq*, Class*> getTypeAliasOrClassWithAutoload(
     const NamedEntity* ne,
     const StringData* name) {
@@ -251,28 +192,34 @@ std::pair<const TypeAliasReq*, Class*> getTypeAliasOrClassWithAutoload(
     }
   }
 
+  assert(!def || !klass);
   return std::make_pair(def, klass);
 }
 
 }
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
-  assert(!isSelf() && !isParent());
-  if (!hasConstraint()) return folly::none;
+  assert(!isSelf() && !isParent() && !isCallable());
+  assert(IMPLIES(!hasConstraint() || isTypeVar(), isMixed()));
+
+  if (!isPrecise()) return folly::none;
 
   auto t = underlyingDataType();
+  assert(t);
 
   // If we aren't a class or type alias, nothing special to do.
-  if (!isObjectOrTypeAlias()) return t;
+  if (!isObject()) return t;
 
+  assert(t == KindOfObject);
   auto p = getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName);
   auto td = p.first;
   auto c = p.second;
 
   // See if this is a type alias.
   if (td) {
-    if (td->kind != KindOfObject) {
-      t = td->kind;
+    if (td->type != Type::Object) {
+      t = (getAnnotMetaType(td->type) != MetaType::Precise)
+        ? folly::none : MaybeDataType(getAnnotDataType(td->type));
     } else {
       c = td->klass;
     }
@@ -287,8 +234,8 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
 }
 
 bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
-  assert(tv->m_type != KindOfObject); // this checks when tv is not an object
-  assert(!isSelf() && !isParent());
+  assert(tv->m_type != KindOfObject);
+  assert(isObject());
 
   auto p = getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName);
   auto td = p.first;
@@ -297,7 +244,20 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
   // Common case is that we actually find the alias:
   if (td) {
     if (td->nullable && tv->m_type == KindOfNull) return true;
-    return td->any || equivDataTypes(td->kind, tv->m_type);
+    auto result = annotCompat(tv->m_type, td->type,
+      td->klass ? td->klass->name() : nullptr);
+    switch (result) {
+      case AnnotAction::Pass: return true;
+      case AnnotAction::Fail: return false;
+      case AnnotAction::CallableCheck:
+        return HHVM_FN(is_callable)(tvAsCVarRef(tv));
+      case AnnotAction::ObjectCheck: break;
+    }
+    assert(result == AnnotAction::ObjectCheck);
+    assert(td->type == AnnotType::Object);
+    // Fall through to the check below, since this could be a type
+    // alias to an enum type
+    c = td->klass;
   }
 
   // Otherwise, this isn't a proper type alias, but it *might* be a
@@ -317,58 +277,79 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
   return false;
 }
 
-bool TypeConstraint::checkTypeAliasObj(const TypedValue* tv) const {
-  assert(tv->m_type == KindOfObject); // this checks when tv is an object
-  assert(!isSelf() && !isParent() && !isCallable());
-
+bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
+  assert(isObject() && m_namedEntity && m_typeName);
+  // Look up the type alias (autoloading if necessary)
+  // and fail if we can't find it
   auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
-  if (!td) return false;
-  if (td->nullable && tv->m_type == KindOfNull) return true;
-  if (td->kind != KindOfObject) return td->any;
-  return td->klass && tv->m_data.pobj->instanceof(td->klass);
+  if (!td) {
+    return false;
+  }
+  // We found the type alias, check if an object of type cls
+  // is compatible
+  switch (getAnnotMetaType(td->type)) {
+    case AnnotMetaType::Precise:
+      return td->type == AnnotType::Object && td->klass &&
+             cls->classof(td->klass);
+    case AnnotMetaType::Mixed:
+      return true;
+    case AnnotMetaType::Callable:
+      return cls->lookupMethod(s___invoke.get()) != nullptr;
+    case AnnotMetaType::Self:
+    case AnnotMetaType::Parent:
+    case AnnotMetaType::Number:
+    case AnnotMetaType::ArrayKey:
+      // Self and Parent should never happen, because type
+      // aliases are not allowed to use those MetaTypes
+      return false;
+  }
+  not_reached();
 }
 
 bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
-  assert(hasConstraint());
+  assert(hasConstraint() && !isTypeVar() && !isMixed());
 
   // This is part of the interpreter runtime; perf matters.
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
-  if (isNullable() && tv->m_type == KindOfNull) return true;
 
-  if (isNumber()) {
-    return IS_INT_TYPE(tv->m_type) || IS_DOUBLE_TYPE(tv->m_type);
-  }
-
-  if (isArrayKey()) {
-    return IS_INT_TYPE(tv->m_type) || IS_STRING_TYPE(tv->m_type);
+  if (isNullable() && tv->m_type == KindOfNull) {
+    return true;
   }
 
   if (tv->m_type == KindOfObject) {
-    if (!isObjectOrTypeAlias()) return false;
     // Perfect match seems common enough to be worth skipping the hash
     // table lookup.
-    if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
-      if (isProfileRequest()) InstanceBits::profile(m_typeName);
-      return true;
-    }
     const Class *c = nullptr;
-    const bool selfOrParentOrCallable = isSelf() || isParent() || isCallable();
-    if (selfOrParentOrCallable) {
-      if (isSelf()) {
-        selfToClass(func, &c);
-      } else if (isParent()) {
-        parentToClass(func, &c);
-      } else {
-        assert(isCallable());
-        return HHVM_FN(is_callable)(tvAsCVarRef(tv));
+    if (isObject()) {
+      if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
+        if (isProfileRequest()) InstanceBits::profile(m_typeName);
+        return true;
       }
-    } else {
       // We can't save the Class* since it moves around from request
       // to request.
       assert(m_namedEntity);
       c = Unit::lookupClass(m_namedEntity);
+    } else {
+      switch (metaType()) {
+        case MetaType::Self:
+          selfToClass(func, &c);
+          break;
+        case MetaType::Parent:
+          parentToClass(func, &c);
+          break;
+        case MetaType::Callable:
+          return HHVM_FN(is_callable)(tvAsCVarRef(tv));
+        case MetaType::Precise:
+        case MetaType::Number:
+        case MetaType::ArrayKey:
+          return false;
+        case MetaType::Mixed:
+          // We assert'd at the top of this function that the
+          // metatype cannot be Mixed
+          not_reached();
+      }
     }
     if (isProfileRequest() && c) {
       InstanceBits::profile(c->preClass()->name());
@@ -376,67 +357,20 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     if (c && tv->m_data.pobj->instanceof(c)) {
       return true;
     }
-    return !selfOrParentOrCallable && checkTypeAliasObj(tv);
+    return isObject() && checkTypeAliasObj(tv->m_data.pobj->getVMClass());
   }
 
-  if (isObjectOrTypeAlias()) {
-    do {
-      switch (tv->m_type) {
-        case KindOfInt64:
-          if (interface_supports_int(m_typeName)) {
-            return true;
-          }
-          continue;
-
-        case KindOfDouble:
-          if (interface_supports_double(m_typeName)) {
-            return true;
-          }
-          continue;
-
-        case KindOfStaticString:
-        case KindOfString:
-          if (interface_supports_string(m_typeName)) {
-            return true;
-          }
-          continue;
-
-        case KindOfArray:
-          if (interface_supports_array(m_typeName)) {
-            return true;
-          }
-          continue;
-
-        case KindOfUninit:
-        case KindOfNull:
-        case KindOfBoolean:
-        case KindOfObject:
-        case KindOfResource:
-          continue;
-
-        case KindOfRef:
-        case KindOfClass:
-          break;
-      }
-      not_reached();
-    } while (0);
-
-    if (isCallable()) {
+  auto const result = annotCompat(tv->m_type, m_type, m_typeName);
+  switch (result) {
+    case AnnotAction::Pass: return true;
+    case AnnotAction::Fail: return false;
+    case AnnotAction::CallableCheck:
       return HHVM_FN(is_callable)(tvAsCVarRef(tv));
-    }
-    return isPrecise() && checkTypeAliasNonObj(tv);
+    case AnnotAction::ObjectCheck:
+      assert(isObject());
+      return checkTypeAliasNonObj(tv);
   }
-
-  return m_type.dt && equivDataTypes(*m_type.dt, tv->m_type);
-}
-
-bool TypeConstraint::checkPrimitive(DataType dt) const {
-  assert(m_type.dt != KindOfObject);
-  assert(dt != KindOfRef);
-  if (isNullable() && dt == KindOfNull) return true;
-  if (isNumber()) { return IS_INT_TYPE(dt) || IS_DOUBLE_TYPE(dt); }
-  if (isArrayKey()) { return IS_INT_TYPE(dt) || IS_STRING_TYPE(dt); }
-  return m_type.dt && equivDataTypes(*m_type.dt, dt);
+  not_reached();
 }
 
 static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {

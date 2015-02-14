@@ -28,53 +28,168 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 
-#define NO_VALUE_PLAINTEXT		"no value"
-#define NO_VALUE_HTML			"<i>no value</i>"
+#define NO_VALUE_PLAINTEXT "no value"
+#define NO_VALUE_HTML      "<i>no value</i>"
 
-ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int module_number TSRMLS_DC) /* {{{ */
+/* {{{ */
+
+namespace HPHP {
+
+class ZendUserIniData : public UserIniData {
+public:
+
+  ZendUserIniData (zend_ini_entry *p) : UserIniData(), p(p) {
+  }
+
+  virtual ~ZendUserIniData () {
+    if (p) {
+      /*
+       * The string p->value was allocated by estrndup, which calls*
+       * through to MemoryManager::smartMalloc.
+       * As such, the string will be freed at the end of the request.
+       *
+       * This destructor is called, for example, in the course
+       * of deleting the CallbackMap s_system_ini_callbacks,
+       * which happens after the end of the request.
+       * So at this point we may not actually own p->value,
+       * and its referent may already have been freed.
+       *
+       * Just be overly fussy here and have us forget about p->value.
+       */
+      p->value = nullptr;
+      p->value_length = -1;
+    }
+    delete p;
+    p = nullptr;
+  }
+
+public:
+  zend_ini_entry *p;
+};
+
+} /* namespace HPHP */
+
+static int hhvm_register_ini_entries_do_work(
+  const zend_ini_entry *ini_entry,
+  int module_number,
+  int acceptable_mode_mask
+  TSRMLS_DC)
 {
-  const zend_ini_entry *p = ini_entry;
-
   auto extension = HPHP::ZendExtension::GetByModuleNumber(module_number);
   assert(extension);
 
-  while (p->name) {
+  for (const zend_ini_entry *constp = ini_entry; constp->name; constp++) {
+    /*
+     * Make a copy of the const version of zend_ini_entry.
+     * This const version is static const in the compiled php extension.
+     *
+     * Copy the given (default) value into a freeable string,
+     * so that assignments to the setting will consistently free the
+     * previous string.
+     *
+     * This copy will have its ownership in the 1:1 corresponding
+     * ZendUserIniData structure.
+     */
+    zend_ini_entry *p = new zend_ini_entry();
+    *p = *constp;
+    p->value = estrndup(p->value, p->value_length);
+
+    /*
+     * A factory to generate a unique instance of a UserIniData
+     * which will eventually end up in either the per-request or system-wide
+     * table that maps ini settings to their callbacks.
+     */
+    auto userDataCallback = [p]() -> HPHP::UserIniData * {
+      return new HPHP::ZendUserIniData(p);
+    };
+
     auto updateCallback = [p](const std::string& value) -> bool {
       TSRMLS_FETCH();
-      // TODO Who is supposed to free this?
       char* data = estrndup(value.data(), value.size());
       int ret = FAILURE;
+      /*
+       * Store the data as the current value of this extension's ini setting.
+       *
+       * It should be safe to free the string we previously allocated,
+       * since we have not got to the end of the request when the
+       * MemoryManager::smartMalloc engine will free these strings.
+       */
+      efree(p->value);
+      p->value = data;
+      p->value_length = value.size();
       if (p->on_modify) {
         ret = p->on_modify(
-          const_cast<zend_ini_entry*>(p), data, value.size(),
+          p, p->value, p->value_length,
           p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP TSRMLS_CC
         );
       }
       return (ret == SUCCESS);
     };
+
     auto getCallback = [p]() {
       return std::string(p->value, p->value_length);
     };
 
     int mode_mask = 0;
     assert(HPHP::IniSetting::Mode::PHP_INI_NONE == 0);
-    if (p->modifiable & ZEND_INI_USER) {
+    if (p->modifiable & ZEND_INI_USER & acceptable_mode_mask) {
       mode_mask |= HPHP::IniSetting::Mode::PHP_INI_USER;
     }
-    if (p->modifiable & ZEND_INI_PERDIR) {
+    if (p->modifiable & ZEND_INI_PERDIR & acceptable_mode_mask) {
       mode_mask |= HPHP::IniSetting::Mode::PHP_INI_PERDIR;
     }
-    if (p->modifiable & ZEND_INI_SYSTEM) {
+    if (p->modifiable & ZEND_INI_SYSTEM & acceptable_mode_mask) {
       mode_mask |= HPHP::IniSetting::Mode::PHP_INI_SYSTEM;
     }
-    HPHP::IniSetting::Mode mode = (HPHP::IniSetting::Mode) mode_mask;
-    HPHP::IniSetting::Bind(
+    if (mode_mask) {
+      HPHP::IniSetting::Mode mode = (HPHP::IniSetting::Mode) mode_mask;
+      /*
+       * Calls HPHP::IniSetting::Bind<std::string> from/near
+       *   hphp/runtime/base/ini-setting.h:205
+       * The default value is p->value, which is assigned back
+       * by an immediate call to the updateCallback
+       *
+       */
+      HPHP::IniSetting::Bind(
         extension, mode,
         p->name, p->value,
-        HPHP::IniSetting::SetAndGet<std::string>(updateCallback, getCallback));
-    p++;
+        HPHP::IniSetting::SetAndGet<std::string>(
+          updateCallback,
+          getCallback,
+          userDataCallback));
+    }
   }
   return SUCCESS;
+}
+
+ZEND_API int zend_register_ini_entries_of_certain_mode(
+  const zend_ini_entry *ini_entry,
+  int module_number,
+  int acceptable_mode_mask
+  TSRMLS_DC)
+{
+  int code = 0;
+  code = hhvm_register_ini_entries_do_work(
+    ini_entry,
+    module_number,
+    acceptable_mode_mask
+    TSRMLS_CC);
+  return code;
+}
+
+ZEND_API int zend_register_ini_entries(
+  const zend_ini_entry *ini_entry,
+  int module_number TSRMLS_DC)
+{
+  int acceptable_mode_mask = 0;
+  acceptable_mode_mask |= ZEND_INI_USER;
+  acceptable_mode_mask |= ZEND_INI_PERDIR;
+  acceptable_mode_mask |= ZEND_INI_SYSTEM;
+  return zend_register_ini_entries_of_certain_mode(
+    ini_entry,
+    module_number,
+    acceptable_mode_mask
+    TSRMLS_CC);
 }
 
 ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC) {

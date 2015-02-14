@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
@@ -70,7 +71,7 @@ void ThreadInfo::init() {
 
   Lock lock(s_thread_info_mutex);
   s_thread_infos.insert(this);
-  Sweepable::InitSweepableList();
+  Sweepable::InitList();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {
@@ -183,15 +184,15 @@ static Exception* generate_memory_exceeded_exception() {
 
 ssize_t check_request_surprise(ThreadInfo* info) {
   auto& p = info->m_reqInjectionData;
-  bool do_timedout, do_cpuTimedOut, do_memExceeded, do_signaled;
 
   auto const flags = p.fetchAndClearFlags();
-  do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
+  bool do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
     !p.getDebuggerAttached();
-  do_cpuTimedOut = (flags & RequestInjectionData::CPUTimedOutFlag) &&
+  bool do_cpuTimedOut = (flags & RequestInjectionData::CPUTimedOutFlag) &&
     !p.getDebuggerAttached();
-  do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
-  do_signaled = (flags & RequestInjectionData::SignaledFlag);
+  bool do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
+  bool do_signaled = (flags & RequestInjectionData::SignaledFlag);
+  bool do_intervalTimer = (flags & RequestInjectionData::IntervalTimerFlag);
 
   // Start with any pending exception that might be on the thread.
   auto pendingException = info->m_pendingException;
@@ -224,6 +225,9 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   if (do_signaled) {
     extern bool HHVM_FN(pcntl_signal_dispatch)();
     HHVM_FN(pcntl_signal_dispatch)();
+  }
+  if (do_intervalTimer) {
+    IntervalTimer::RunCallbacks();
   }
 
   if (pendingException) {

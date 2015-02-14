@@ -171,6 +171,34 @@ c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
   return wait_handle == this;
 }
 
+ObjectData*
+c_WaitableWaitHandle::createCycleException(c_WaitableWaitHandle* child) const {
+  assert(isDescendantOf(child));
+
+  smart::vector<std::string> exception_msg_items;
+  exception_msg_items.push_back("Encountered dependency cycle.\n");
+  exception_msg_items.push_back("Existing stack:\n");
+
+  exception_msg_items.push_back(folly::stringPrintf(
+    "  %s (%" PRId64 ")\n", child->getName().data(), child->t_getid()));
+
+  auto current = child;
+
+  while (current != this) {
+    current = current->getChild();
+    assert(current);
+
+    exception_msg_items.push_back(folly::stringPrintf(
+      "  %s (%" PRId64 ")\n", current->getName().data(), current->t_getid()));
+  }
+
+  exception_msg_items.push_back("Trying to introduce dependency on:\n");
+  exception_msg_items.push_back(folly::stringPrintf(
+    "  %s (%" PRId64 ") (dupe)\n", child->getName().data(), child->t_getid()));
+  return SystemLib::AllocInvalidOperationExceptionObject(
+      folly::join("", exception_msg_items));
+}
+
 Array c_WaitableWaitHandle::t_getdependencystack() {
   if (isFinished()) return empty_array();
   Array result = Array::Create();

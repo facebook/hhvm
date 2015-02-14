@@ -34,7 +34,7 @@ const Object Object::s_nullObject = Object();
 ///////////////////////////////////////////////////////////////////////////////
 
 void Object::compileTimeAssertions() {
-  static_assert(sizeof(Object) == sizeof(ObjectBase), "Fix this.");
+  static_assert(sizeof(Object) == sizeof(SmartPtr<ObjectData>), "Fix this.");
 }
 
 void ObjNR::compileTimeAssertions() {
@@ -46,45 +46,45 @@ Object::~Object() {
 }
 
 Array Object::toArray() const {
-  return m_px ? m_px->toArray() : Array();
+  return m_obj ? m_obj->toArray() : Array();
 }
 
 String Object::toString() const {
-  return m_px ? m_px->invokeToString() : String();
+  return m_obj ? m_obj->invokeToString() : String();
 }
 
 int64_t Object::toInt64ForCompare() const {
-  check_collection_compare(m_px);
+  check_collection_compare(get());
   return toInt64();
 }
 
 double Object::toDoubleForCompare() const {
-  check_collection_compare(m_px);
+  check_collection_compare(get());
   return toDouble();
 }
 
 bool Object::equal(const Object& v2) const {
-  if (m_px == v2.get()) {
+  if (m_obj == v2.m_obj) {
     return true;
   }
-  if (!m_px || !v2.get()) {
+  if (!m_obj || !v2) {
     return false;
   }
-  if (m_px->isCollection()) {
-    return collectionEquals(m_px, v2.get());
+  if (m_obj->isCollection()) {
+    return collectionEquals(get(), v2.get());
   }
-  if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+  if (UNLIKELY(m_obj->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
     return DateTimeData::getTimestamp(*this) ==
         DateTimeData::getTimestamp(v2);
   }
-  if (v2.get()->getVMClass() != m_px->getVMClass()) {
+  if (v2.get()->getVMClass() != m_obj->getVMClass()) {
     return false;
   }
-  if (UNLIKELY(m_px->instanceof(SystemLib::s_ArrayObjectClass))) {
+  if (UNLIKELY(m_obj->instanceof(SystemLib::s_ArrayObjectClass))) {
     // Compare the whole object, not just the array representation
     Array ar1(ArrayData::Create());
     Array ar2(ArrayData::Create());
-    m_px->o_getArray(ar1);
+    m_obj->o_getArray(ar1);
     v2->o_getArray(ar2);
     return ar1->equal(ar2.get(), false);
   }
@@ -92,21 +92,21 @@ bool Object::equal(const Object& v2) const {
 }
 
 bool Object::less(const Object& v2) const {
-  check_collection_compare(m_px, v2.get());
-  if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+  check_collection_compare(get(), v2.get());
+  if (UNLIKELY(m_obj->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
     return DateTimeData::getTimestamp(*this) <
         DateTimeData::getTimestamp(v2);
   }
-  return m_px != v2.m_px && toArray().less(v2.toArray());
+  return m_obj != v2.m_obj && toArray().less(v2.toArray());
 }
 
 bool Object::more(const Object& v2) const {
-  check_collection_compare(m_px, v2.get());
-  if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+  check_collection_compare(get(), v2.get());
+  if (UNLIKELY(m_obj->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
     return DateTimeData::getTimestamp(*this) >
         DateTimeData::getTimestamp(v2);
   }
-  return m_px != v2.m_px && toArray().more(v2.toArray());
+  return m_obj != v2.m_obj && toArray().more(v2.toArray());
 }
 
 static Variant warn_non_object() {
@@ -116,28 +116,28 @@ static Variant warn_non_object() {
 
 Variant Object::o_get(const String& propName, bool error /* = true */,
                       const String& context /* = null_string */) const {
-  if (UNLIKELY(!m_px)) return warn_non_object();
-  return m_px->o_get(propName, error, context);
+  if (UNLIKELY(!m_obj)) return warn_non_object();
+  return m_obj->o_get(propName, error, context);
 }
 
 Variant Object::o_set(const String& propName, const Variant& val,
                       const String& context /* = null_string */) {
-  if (!m_px) {
+  if (!m_obj) {
     setToDefaultObject();
   }
-  return m_px->o_set(propName, val, context);
+  return m_obj->o_set(propName, val, context);
 }
 
 const char* Object::classname_cstr() const {
-  return m_px->getClassName().c_str();
+  return m_obj->getClassName().c_str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // output
 
 void Object::serialize(VariableSerializer *serializer) const {
-  if (m_px) {
-    m_px->serialize(serializer);
+  if (m_obj) {
+    m_obj->serialize(serializer);
   } else {
     serializer->writeNull();
   }

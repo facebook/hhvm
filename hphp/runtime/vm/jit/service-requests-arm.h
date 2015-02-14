@@ -26,9 +26,8 @@ namespace arm {
 
 TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
-void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest);
-void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-                 SrcKey dest);
+void emitBindJ(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
+               SrcKey dest);
 
 }}}
 

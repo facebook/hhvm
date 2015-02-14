@@ -8,7 +8,7 @@ trait THasProtectedFunc {
   require implements IUseDynamicYield;
 
   // These should be visible through C
-  protected async function yieldFoo(): Awaitable<void> {}
+  protected async function genFoo(): Awaitable<void> {}
   protected function bar(): void {}
 }
 

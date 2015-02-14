@@ -65,11 +65,14 @@ std::string convDblToStrWithPhpFormat(double n);
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
-class String : protected SmartPtr<StringData> {
-  typedef SmartPtr<StringData> StringBase;
+class String {
+  SmartPtr<StringData> m_str;
 
-  explicit String(StringData* sd, StringBase::NoIncRef) :
-    StringBase(sd, StringBase::NoIncRef{}) { }
+protected:
+  using IsUnowned = SmartPtr<StringData>::IsUnowned;
+  using NoIncRef = SmartPtr<StringData>::NoIncRef;
+
+  String(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
 
 public:
   typedef hphp_hash_map<int64_t, const StringData *, int64_hash>
@@ -115,30 +118,24 @@ public:
   String() {}
   ~String();
 
-  StringData* get() const { return m_px; }
-  void reset() { StringBase::reset(); }
+  StringData* get() const { return m_str.get(); }
+  void reset() { m_str.reset(); }
 
   // Transfer ownership of our reference to this StringData.
-  StringData* detach() {
-    StringData* ret = m_px;
-    m_px = 0;
-    return ret;
-  }
+  StringData* detach() { return m_str.detach(); }
 
   /**
    * Constructors
    */
-  /* implicit */ String(StringData *data) : StringBase(data) { }
+  /* implicit */ String(StringData *data) : m_str(data) { }
   /* implicit */ String(int     n);
   /* implicit */ String(int64_t n);
   /* implicit */ String(double  n);
-  /* implicit */ String(litstr  s) {
-    if (s) {
-      m_px = StringData::Make(s, CopyString);
-      m_px->setRefCount(1);
-    }
-  }
-  String(const String& str) : StringBase(str.m_px) { }
+  /* implicit */ String(litstr  s)
+  : m_str(LIKELY((bool)s) ? StringData::Make(s, CopyString)
+                          : nullptr, IsUnowned{}) { }
+
+  String(const String& str) : m_str(str.m_str) { }
   /* implicit */ String(const StaticString& str);
   /* implicit */ String(char) = delete; // prevent unintentional promotion
 
@@ -147,65 +144,49 @@ public:
   /* implicit */ String(const StringData*) = delete;
 
   // Move ctor
-  /* implicit */ String(String&& str) noexcept : StringBase(std::move(str)) {}
+  /* implicit */ String(String&& str) noexcept : m_str(std::move(str.m_str)) {}
   /* implicit */ String(Variant&& src);
   // Move assign
   String& operator=(String&& src) {
-    static_assert(sizeof(String) == sizeof(StringBase),"Fix this.");
-    StringBase::operator=(std::move(src));
+    m_str = std::move(src.m_str);
     return *this;
   }
 
   // Move assign from Variant
   String& operator=(Variant&& src);
 
-  /* implicit */ String(const std::string &s) { // always make a copy
-    m_px = StringData::Make(s.data(), s.size(), CopyString);
-    m_px->setRefCount(1);
-  }
+  /* implicit */ String(const std::string &s)
+  : m_str(StringData::Make(s.data(), s.size(), CopyString), IsUnowned{}) { }
+
   // attach to null terminated malloc'ed string, maybe free it now.
-  String(char* s, AttachStringMode mode) {
-    if (s) {
-      m_px = StringData::Make(s, mode);
-      m_px->setRefCount(1);
-    }
-  }
+  String(char* s, AttachStringMode mode)
+  : m_str(LIKELY((bool)s) ? StringData::Make(s, mode) : nullptr, IsUnowned{}) {}
+
   // copy a null terminated string
-  String(const char *s, CopyStringMode mode) {
-    if (s) {
-      m_px = StringData::Make(s, mode);
-      m_px->setRefCount(1);
-    }
-  }
+  String(const char *s, CopyStringMode mode)
+  : m_str(LIKELY((bool)s) ? StringData::Make(s, mode) : nullptr, IsUnowned{}) {}
+
   // attach to binary malloc'ed string
-  String(char* s, size_t length, AttachStringMode mode) {
-    if (s) {
-      m_px = StringData::Make(s, length, mode);
-      m_px->setRefCount(1);
-    }
-  }
+  String(char* s, size_t length, AttachStringMode mode)
+  : m_str(LIKELY((bool)s) ? StringData::Make(s, length, mode)
+                          : nullptr, IsUnowned{}) { }
+
   // make copy of binary binary string
-  String(const char *s, size_t length, CopyStringMode mode) {
-    if (s) {
-      m_px = StringData::Make(s, length, mode);
-      m_px->setRefCount(1);
-    }
-  }
+  String(const char *s, size_t length, CopyStringMode mode)
+  : m_str(LIKELY((bool)s) ? StringData::Make(s, length, mode)
+                          : nullptr, IsUnowned{}) { }
+
   // force a copy of a String
-  String(const String& s, CopyStringMode mode) {
-    if (s.m_px) {
-      m_px = StringData::Make(s.c_str(), s.size(), mode);
-      m_px->setRefCount(1);
-    }
-  }
+  String(const String& s, CopyStringMode mode)
+  : m_str(LIKELY((bool)s) ? StringData::Make(s.c_str(), s.size(), mode)
+                          : nullptr, IsUnowned{}) {}
+
   // make an empty string with cap reserve bytes, plus 1 for '\0'
-  String(size_t cap, ReserveStringMode mode) {
-    m_px = StringData::Make(cap);
-    m_px->setRefCount(1);
-  }
+  String(size_t cap, ReserveStringMode mode)
+  : m_str(StringData::Make(cap), IsUnowned{}) { }
 
   static String attach(StringData* sd) {
-    return String(sd, StringBase::NoIncRef{});
+    return String(sd, NoIncRef{});
   }
 
   void clear() { reset();}
@@ -213,67 +194,65 @@ public:
    * Informational
    */
   const char *data() const {
-    return m_px ? m_px->data() : "";
+    return m_str ? m_str->data() : "";
   }
 
   char *mutableData() const {
-    return m_px->mutableData();
+    return m_str->mutableData();
   }
 
 public:
   const String& setSize(int len) {
-    assert(m_px);
-    m_px->setSize(len);
+    assert(m_str);
+    m_str->setSize(len);
     return *this;
   }
   const String& shrink(size_t len) {
-    assert(m_px);
-    if (m_px->capacity() - len > kMinShrinkThreshold) {
-      StringBase::operator=(m_px->shrinkImpl(len));
+    assert(m_str);
+    if (m_str->capacity() - len > kMinShrinkThreshold) {
+      m_str = m_str->shrinkImpl(len);
     } else {
       assert(len < StringData::MaxSize);
-      m_px->setSize(len);
+      m_str->setSize(len);
     }
     return *this;
   }
   MutableSlice reserve(size_t size) {
-    if (!m_px) return MutableSlice("", 0);
-    auto const tmp = m_px->reserve(size);
-    if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);
-    return m_px->bufferSlice();
+    if (!m_str) return MutableSlice("", 0);
+    auto const tmp = m_str->reserve(size);
+    if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
+    return m_str->bufferSlice();
   }
   const char *c_str() const {
-    return m_px ? m_px->data() : "";
+    return m_str ? m_str->data() : "";
   }
   bool empty() const {
-    return m_px ? m_px->empty() : true;
+    return m_str ? m_str->empty() : true;
   }
   int size() const {
-    return m_px ? m_px->size() : 0;
+    return m_str ? m_str->size() : 0;
   }
   int length() const {
-    return m_px ? m_px->size() : 0;
+    return m_str ? m_str->size() : 0;
   }
   uint32_t capacity() const {
-    return m_px->capacity(); // intentionally skip nullptr check
+    return m_str->capacity(); // intentionally skip nullptr check
   }
   StringSlice slice() const {
-    return m_px ? m_px->slice() : StringSlice("", 0);
+    return m_str ? m_str->slice() : StringSlice("", 0);
   }
   MutableSlice bufferSlice() {
-    return m_px ? m_px->bufferSlice() : MutableSlice("", 0);
+    return m_str ? m_str->bufferSlice() : MutableSlice("", 0);
   }
-  bool isNull() const {
-    return m_px == nullptr;
-  }
+  bool isNull() const { return !m_str; }
   bool isNumeric() const {
-    return m_px ? m_px->isNumeric() : false;
+    return m_str ? m_str->isNumeric() : false;
   }
   bool isInteger() const {
-    return m_px ? m_px->isInteger() : false;
+    return m_str ? m_str->isInteger() : false;
   }
   bool isZero() const {
-    return m_px ? m_px->isZero() : false;
+    return m_str ? m_str->isZero() : false;
   }
 
   /**
@@ -298,12 +277,18 @@ public:
   /**
    * Operators
    */
-  String &operator =  (StringData *data);
-  String &operator =  (litstr  v);
-  String &operator =  (const String& v);
-  String &operator =  (const StaticString& v);
-  String &operator =  (const Variant& v);
-  String &operator =  (const std::string &s);
+  String& operator=(StringData *data) {
+    m_str = data;
+    return *this;
+  }
+  String& operator=(const String& v) {
+    m_str = v.m_str;
+    return *this;
+  }
+  String& operator=(const StaticString& v);
+  String& operator=(litstr v);
+  String& operator=(const Variant& v);
+  String& operator=(const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
   // reference notation on lhs (http://goo.gl/LuCTo).
   friend String&& operator+(String&& lhs, litstr rhs);
@@ -324,9 +309,7 @@ public:
   String &operator ^= (const String& v) = delete;
   String  operator ~  () const = delete;
   explicit operator std::string () const { return toCppString(); }
-  explicit operator bool() const {
-    return m_px != nullptr;
-  }
+  explicit operator bool() const { return (bool)m_str; }
 
   /**
    * These are convenient functions for writing extensions, since code
@@ -355,12 +338,12 @@ public:
   /**
    * Type conversions
    */
-  bool   toBoolean() const { return m_px ? m_px->toBoolean() : false;}
-  char   toByte   () const { return m_px ? m_px->toByte   () : 0;}
-  short  toInt16  () const { return m_px ? m_px->toInt16  () : 0;}
-  int    toInt32  () const { return m_px ? m_px->toInt32  () : 0;}
-  int64_t  toInt64  () const { return m_px ? m_px->toInt64  () : 0;}
-  double toDouble () const { return m_px ? m_px->toDouble () : 0;}
+  bool   toBoolean() const { return m_str ? m_str->toBoolean() : false;}
+  char   toByte   () const { return m_str ? m_str->toByte   () : 0;}
+  short  toInt16  () const { return m_str ? m_str->toInt16  () : 0;}
+  int    toInt32  () const { return m_str ? m_str->toInt32  () : 0;}
+  int64_t  toInt64  () const { return m_str ? m_str->toInt64  () : 0;}
+  double toDouble () const { return m_str ? m_str->toDouble () : 0;}
   VarNR  toKey   () const;
   std::string toCppString() const { return std::string(c_str(), size()); }
 
@@ -433,16 +416,18 @@ public:
   void dump() const;
 
  private:
+  static SmartPtr<StringData> buildString(int n);
+  static SmartPtr<StringData> buildString(int64_t n);
 
   String rvalAtImpl(int key) const {
-    if (m_px) {
-      return m_px->getChar(key);
+    if (m_str) {
+      return m_str->getChar(key);
     }
     return String();
   }
 
   static void compileTimeAssertions() {
-    static_assert(offsetof(String, m_px) == kExpectedMPxOffset, "");
+    static_assert(sizeof(String) == sizeof(SmartPtr<StringData>), "");
   }
 };
 
@@ -588,8 +573,8 @@ public:
   StaticString(litstr s, int length); // binary string
   explicit StaticString(std::string s);
   ~StaticString() {
-    // prevent ~SmartPtr from calling decRefCount after data is released
-    m_px = nullptr;
+    // prevent ~SmartPtr from destroying contents.
+    detach();
   }
   StaticString& operator=(const StaticString &str);
 
@@ -604,8 +589,13 @@ String getDataTypeString(DataType t);
 //////////////////////////////////////////////////////////////////////
 
 inline String::String(const StaticString& str) :
-  StringBase(str.m_px, StringBase::NoIncRef{}) {
-  assert(str.m_px->isStatic());
+  m_str(str.m_str.get(), NoIncRef{}) {
+  assert(str.m_str->isStatic());
+}
+
+inline String& String::operator=(const StaticString& v) {
+  m_str = SmartPtr<StringData>::attach(v.m_str.get());
+  return *this;
 }
 
 //////////////////////////////////////////////////////////////////////

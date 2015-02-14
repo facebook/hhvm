@@ -1,0 +1,7 @@
+E_RECOVERABLE_ERROR: Argument 1 passed to a() must be an instance of A, null given
+E_RECOVERABLE_ERROR: Argument 1 passed to a() must be an instance of A, int given
+E_RECOVERABLE_ERROR: Argument 1 passed to b() must be an instance of B, int given
+E_RECOVERABLE_ERROR: Argument 1 passed to c() must be an instance of C, null given
+E_RECOVERABLE_ERROR: Argument 1 passed to c() must be an instance of C, int given
+E_RECOVERABLE_ERROR: Argument 1 passed to d() must be an instance of D, int given
+Done

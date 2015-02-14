@@ -126,10 +126,13 @@ void PageletTransport::removeHeaderImpl(const char *name) {
 }
 
 void PageletTransport::sendImpl(const void *data, int size, int code,
-                      bool chunked) {
+                                bool chunked, bool eom) {
   m_response.append((const char*)data, size);
   if (code) {
     m_code = code;
+  }
+  if (eom) {
+    onSendEndImpl();
   }
 }
 
@@ -388,10 +391,9 @@ Resource PageletServer::TaskStart(
       return Resource();
     }
   }
-  PageletTask *task = newres<PageletTask>(url, headers, remote_host, post_data,
-                                          get_uploaded_files(), files,
-                                          timeoutSeconds);
-  Resource ret(task);
+  auto task = makeSmartPtr<PageletTask>(url, headers, remote_host, post_data,
+                                        get_uploaded_files(), files,
+                                        timeoutSeconds);
   PageletTransport *job = task->getJob();
   Lock l(s_dispatchMutex);
   if (s_dispatcher) {
@@ -404,14 +406,13 @@ Resource PageletServer::TaskStart(
 
     s_dispatcher->enqueue(job);
     g_context->incrPageletTasksStarted();
-    return ret;
+    return Resource(std::move(task));
   }
   return Resource();
 }
 
 int64_t PageletServer::TaskStatus(const Resource& task) {
-  PageletTask *ptask = task.getTyped<PageletTask>();
-  PageletTransport *job = ptask->getJob();
+  PageletTransport *job = cast<PageletTask>(task)->getJob();
   if (!job->isPipelineEmpty()) {
     return PAGELET_READY;
   }
@@ -423,7 +424,7 @@ int64_t PageletServer::TaskStatus(const Resource& task) {
 
 String PageletServer::TaskResult(const Resource& task, Array &headers, int &code,
                                  int64_t timeout_ms) {
-  PageletTask *ptask = task.getTyped<PageletTask>();
+  auto ptask = cast<PageletTask>(task);
   return ptask->getJob()->getResults(headers, code, timeout_ms);
 }
 

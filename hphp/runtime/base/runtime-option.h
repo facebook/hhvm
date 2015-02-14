@@ -293,6 +293,7 @@ public:
   static std::string StackTraceFilename;
   static bool LocalMemcache;
   static bool MemcacheReadOnly;
+  static int StackTraceTimeout;
 
   static bool EnableStats;
   static bool EnableAPCStats;

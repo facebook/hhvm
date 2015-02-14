@@ -38,9 +38,17 @@ class SmartPtr {
 public:
   SmartPtr() : m_px(nullptr) {}
   /* implicit */ SmartPtr(std::nullptr_t) : m_px(nullptr) { }
-  explicit SmartPtr(T* px) : m_px(px) { if (m_px) m_px->incRefCount(); }
+  explicit SmartPtr(T* px) : m_px(px) {
+    if (LIKELY(m_px != nullptr)) m_px->incRefCount();
+  }
   SmartPtr(const SmartPtr<T>& src) : m_px(src.get()) {
-    if (m_px) m_px->incRefCount();
+    if (LIKELY(m_px != nullptr)) m_px->incRefCount();
+  }
+
+  enum class IsUnowned {};
+  SmartPtr(T* px, IsUnowned) : m_px(px) {
+    assert(!m_px || m_px->getCount() == 0);
+    if (LIKELY(m_px != nullptr)) m_px->setRefCount(1);
   }
 
   enum class NoIncRef {};
@@ -59,7 +67,7 @@ public:
 
   template<class Y>
   SmartPtr(const SmartPtr<Y>& src) : m_px(src.get()) {
-    if (m_px) m_px->incRefCount();
+    if (LIKELY(m_px != nullptr)) m_px->incRefCount();
   }
   // Move ctor for derived types
   template<class Y>
@@ -105,7 +113,7 @@ public:
   SmartPtr& operator=(T* px) {
     // Works with self-assignment because incRefCount is
     // called before decRefCount.
-    if (px) px->incRefCount();
+    if (LIKELY(px != nullptr)) px->incRefCount();
     auto goner = m_px;
     m_px = px;
     decRefPtr(goner);
@@ -115,7 +123,7 @@ public:
   /**
    * Swap two smart pointers
    */
-  void swap(SmartPtr & rhs) {
+  void swap(SmartPtr& rhs) {
     std::swap(m_px, rhs.m_px);
   }
 
@@ -186,7 +194,7 @@ public:
 
 private:
   static ALWAYS_INLINE void decRefPtr(T* ptr) {
-    if (ptr) ptr->decRefAndRelease();
+    if (LIKELY(ptr != nullptr)) ptr->decRefAndRelease();
   }
   static void compileTimeAssertions() {
     static_assert(offsetof(SmartPtr, m_px) == kExpectedMPxOffset, "");

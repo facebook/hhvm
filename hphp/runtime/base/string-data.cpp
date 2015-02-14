@@ -269,6 +269,7 @@ StringData* StringData::Make(size_t reserveLen) {
   sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
   sd->m_lenAndHash  = 0; // len=hash=0
 
+  assert(sd->m_count == 0);
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -301,6 +302,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   memcpy(data + r1.len, r2.ptr, r2.len);
   data[len] = 0;
 
+  assert(sd->m_count == 0);
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -328,6 +330,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
       memcpy((char*)p + r2.len, r3.ptr, r3.len);
   data[len] = 0;
 
+  assert(sd->m_count == 0);
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -352,6 +355,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
       memcpy((char*)p + r3.len, r4.ptr, r4.len);
   data[len] = 0;
 
+  assert(sd->m_count == 0);
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;

@@ -213,10 +213,7 @@ unsigned StringData::sweepAll() {
     next = n->next;
     assert(next && uintptr_t(next) != kSmartFreeWord);
     assert(next && uintptr_t(next) != kMallocFreeWord);
-    auto const s = reinterpret_cast<StringData*>(
-      uintptr_t(n) - offsetof(SharedPayload, node)
-                   - sizeof(StringData)
-    );
+    auto const s = node2str(n);
     assert(s->isShared());
     s->sharedPayload()->shared->getHandle()->unreference();
   }

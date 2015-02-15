@@ -47,9 +47,8 @@ type genv = {
   (* strict? decl? partial? *)
   in_mode: Ast.mode;
 
-  (* when encountering an unknown name outside of strict, should we
-   * assume that it's implemented by <?php code that we can't see? *)
-  assume_php: bool;
+  (* various options that control the strictness of the typechecker *)
+  tcopt: TypecheckerOptions.t;
 
   (* are we in the body of a try statement? *)
   in_try: bool;
@@ -151,7 +150,7 @@ type lenv = {
 
 (* The environment VISIBLE to the outside world. *)
 type env = {
-  iassume_php: bool;
+  itcopt: TypecheckerOptions.t;
   iclasses: map * canon_names_map;
   ifuns: map * canon_names_map;
   itypedefs: map;
@@ -196,7 +195,7 @@ let predef_tests = List.fold_right SSet.add predef_tests_list SSet.empty
 (*****************************************************************************)
 
 let empty = {
-  iassume_php = true;
+  itcopt    = TypecheckerOptions.empty;
   iclasses  = SMap.empty, SMap.empty;
   ifuns     = !predef_funs, !predef_funnames;
   itypedefs = SMap.empty;
@@ -217,7 +216,7 @@ module Env = struct
 
   let empty_global nenv = {
     in_mode       = Ast.Mstrict;
-    assume_php    = nenv.iassume_php;
+    tcopt         = nenv.itcopt;
     in_try        = false;
     in_non_static_method = false;
     type_params   = SMap.empty;
@@ -234,7 +233,7 @@ module Env = struct
   let make_class_genv nenv params c = {
     in_mode       =
       (if !Autocomplete.auto_complete then Ast.Mpartial else c.c_mode);
-    assume_php    = nenv.iassume_php;
+    tcopt         = nenv.itcopt;
     in_try        = false;
     in_non_static_method = false;
     type_params   = params;
@@ -256,7 +255,7 @@ module Env = struct
 
   let make_typedef_genv nenv cstrs tdef = {
     in_mode       = (if !Ide.is_ide_mode then Ast.Mpartial else Ast.Mstrict);
-    assume_php    = nenv.iassume_php;
+    tcopt         = nenv.itcopt;
     in_try        = false;
     in_non_static_method = false;
     type_params   = cstrs;
@@ -278,7 +277,7 @@ module Env = struct
 
   let make_fun_genv nenv params f = {
     in_mode       = f.f_mode;
-    assume_php    = nenv.iassume_php;
+    tcopt         = nenv.itcopt;
     in_try        = false;
     in_non_static_method = false;
     type_params   = params;
@@ -294,7 +293,7 @@ module Env = struct
 
   let make_const_genv nenv cst = {
     in_mode       = cst.cst_mode;
-    assume_php    = nenv.iassume_php;
+    tcopt         = nenv.itcopt;
     in_try        = false;
     in_non_static_method = false;
     type_params   = SMap.empty;
@@ -330,7 +329,8 @@ module Env = struct
     | None ->
       (match genv.in_mode with
         | Ast.Mstrict -> Errors.unbound_name p x `const
-        | Ast.Mpartial | Ast.Mdecl when not genv.assume_php ->
+        | Ast.Mpartial | Ast.Mdecl when not
+          (TypecheckerOptions.assume_php genv.tcopt) ->
           Errors.unbound_name p x `const
         | Ast.Mdecl | Ast.Mpartial -> ()
       );
@@ -359,7 +359,8 @@ module Env = struct
         | None ->
           (match genv.in_mode with
             | Ast.Mpartial | Ast.Mdecl
-                when genv.assume_php || name = SN.Classes.cUnknown -> ()
+                when TypecheckerOptions.assume_php genv.tcopt
+                || name = SN.Classes.cUnknown -> ()
             | Ast.Mstrict -> Errors.unbound_name p name kind
             | Ast.Mpartial | Ast.Mdecl -> Errors.unbound_name p name kind
           );
@@ -702,7 +703,7 @@ let make_env old_env ~funs ~classes ~typedefs ~consts =
   List.iter (Env.new_typedef_id genv) typedefs;
   List.iter (Env.new_global_const_id genv) consts;
   let new_env = {
-    iassume_php = old_env.iassume_php;
+    itcopt = old_env.itcopt;
     iclasses = !(genv.classes);
     ifuns = !(genv.funs);
     itypedefs = !(genv.typedefs);
@@ -1502,6 +1503,8 @@ and extend_params genv paraml =
     SMap.add x hopt acc
   end paraml genv.type_params in
   { genv with type_params = params }
+
+and typechecker_options env = env.itcopt
 
 and uselist_lambda f =
   (* semantic duplication: This is copied from the implementation of the

@@ -41,6 +41,7 @@
 #include <folly/String.h>
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
 #include "hphp/util/cycles.h"
 #include "hphp/util/debug.h"
@@ -388,7 +389,7 @@ static void populateLiveContext(RegionContext& ctx) {
       // TODO(#2466980): when it's a Cls, we should pass the Class* in
       // the Type.
       auto const objOrCls =
-        ar->hasThis()  ? Type::Obj.specialize(ar->getThis()->getVMClass()) :
+        ar->hasThis()  ? Type::SubObj(ar->getThis()->getVMClass()) :
         ar->hasClass() ? Type::Cls
                        : Type::Nullptr;
 
@@ -852,22 +853,25 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
       return tDest;
     }
     sr->chainFrom(IncomingBranch::addr(addr));
-  } else if (req == REQ_BIND_JCC) {
-    auto jt = backEnd().jccTarget(toSmash);
-    assert(jt);
-    if (jt == tDest) {
-      // Already smashed
-      return tDest;
-    }
-    sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
-    assert(!backEnd().jccTarget(toSmash));
-    if (!backEnd().jmpTarget(toSmash)
-        || backEnd().jmpTarget(toSmash) == tDest) {
-      // Already smashed
-      return tDest;
+    DecodedInstruction di(toSmash);
+    if (di.isBranch() && !di.isJmp()) {
+      auto jt = backEnd().jccTarget(toSmash);
+      assert(jt);
+      if (jt == tDest) {
+        // Already smashed
+        return tDest;
+      }
+      sr->chainFrom(IncomingBranch::jccFrom(toSmash));
+    } else {
+      assert(!backEnd().jccTarget(toSmash));
+      if (!backEnd().jmpTarget(toSmash)
+          || backEnd().jmpTarget(toSmash) == tDest) {
+        // Already smashed
+        return tDest;
+      }
+      sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
     }
-    sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
   }
   smashed = true;
   return tDest;
@@ -943,7 +947,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   TCA stub = emitEphemeralServiceReq(code.frozen(),
                                      getFreeStub(code.frozen(),
                                                  &mcg->cgFixups()),
-                                     REQ_BIND_JCC,
+                                     REQ_BIND_JMP,
                                      RipRelative(toSmash),
                                      skWillDefer.toAtomicInt(),
                                      TransFlags{}.packed);
@@ -1119,16 +1123,17 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
   assert_native_stack_aligned();
   tl_regState = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
 
-  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
-    Trace::ringbufferEntry(
-      RBTypeServiceReq, (uint64_t)info.req, (uint64_t)info.args[0].tca
-    );
-  }
+  auto callToExit = [&] {
+    tl_regState = VMRegState::DIRTY;
+    return m_tx.uniqueStubs.callToExit;
+  };
 
   TCA start = nullptr;
   SrcKey sk;
   auto smashed = false;
 
+  // If start is still nullptr at the end of this switch, we will enter the
+  // interpreter at sk.
   switch (info.req) {
     case REQ_BIND_CALL: {
       auto calleeFrame = info.stashedAR;
@@ -1138,7 +1143,6 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
     }
 
     case REQ_BIND_JMP:
-    case REQ_BIND_JCC:
     case REQ_BIND_ADDR: {
       auto const toSmash = info.args[0].tca;
       sk = SrcKey::fromAtomicInt(info.args[1].sk);
@@ -1177,6 +1181,11 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
       break;
     }
 
+    case REQ_INTERPRET:
+      // Leave start as nullptr and let the dispatchBB() happen down below.
+      sk = SrcKey{liveFunc(), info.args[0].offset, liveResumed()};
+      break;
+
     case REQ_POST_INTERP_RET: {
       // This is only responsible for the control-flow aspect of the Ret:
       // getting to the destination's translation, if any.
@@ -1191,6 +1200,13 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
             ar->m_func->fullName()->data(),
             caller->m_func->fullName()->data());
+      break;
+    }
+
+    case REQ_RESUME: {
+      if (UNLIKELY(vmpc() == 0)) return callToExit();
+      sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
+      start = getTranslation(TranslArgs{sk, true});
       break;
     }
 
@@ -1224,39 +1240,14 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
     Treadmill::enqueue(FreeRequestStubTrigger(info.stub));
   }
 
-  if (start == nullptr) {
-    vmpc() = sk.unit()->at(sk.offset());
-    start = m_tx.uniqueStubs.interpHelperSyncedPC;
-  }
-
-  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
-    auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
-    Trace::ringbufferEntry(RBTypeResumeTC, skData, (uint64_t)start);
-  }
-
-  tl_regState = VMRegState::DIRTY;
-  return start;
-}
-
-TCA MCGenerator::handleResume(bool interpFirst) {
-  if (!vmRegsUnsafe().pc) return m_tx.uniqueStubs.callToExit;
-
-  tl_regState = VMRegState::CLEAN;
-  auto sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
-  TCA start = interpFirst ? nullptr : getTranslation(TranslArgs(sk, true));
-
-  vmJitCalledFrame() = vmfp();
-  SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
-  // If we can't get a translation at the current SrcKey, interpret basic
-  // blocks until we end up somewhere with a translation (which we may have
-  // created, if the lease holder dropped it).
+  // If we don't have a starting address, interpret basic blocks until we end
+  // up somewhere with a translation (which we may have created, if the lease
+  // holder dropped it).
   while (!start) {
+    vmpc() = sk.unit()->at(sk.offset());
     INC_TPC(interp_bb);
     HPHP::dispatchBB();
-    if (!vmpc()) {
-      start = m_tx.uniqueStubs.callToExit;
-      break;
-    }
+    if (!vmpc()) return callToExit();
     sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
     start = getTranslation(TranslArgs{sk, true});
   }
@@ -1724,7 +1715,7 @@ void MCGenerator::traceCodeGen(HTS& hts) {
 
   always_assert_flog(
     IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops),
-    "IRUnit has loop but Eval.JitLoops=0:\n{}\n", unit
+    "IRUnit has loop but Eval.JitLoops=0"
   );
 
   optimize(unit, *hts.irb, m_tx.mode());
@@ -1763,7 +1754,7 @@ MCGenerator::MCGenerator()
     Trace::traceRelease("TRACE=printir is set but the jit isn't on. "
                         "Did you mean to run with -vEval.Jit=1?\n");
   }
-  if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
+  if (Trace::moduleEnabledRelease(Trace::llvm, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {
     g_bytecodesVasm.bind();
     g_bytecodesLLVM.bind();
@@ -1823,7 +1814,7 @@ void MCGenerator::requestExit() {
     Trace::traceRelease("\n");
   }
 
-  if (Trace::moduleEnabledRelease(Trace::llvm_count, 1)) {
+  if (Trace::moduleEnabledRelease(Trace::llvm, 1)) {
     auto llvm = *g_bytecodesLLVM;
     auto total = llvm + *g_bytecodesVasm;
     Trace::ftraceRelease(

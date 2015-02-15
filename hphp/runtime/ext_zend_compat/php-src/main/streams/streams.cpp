@@ -116,16 +116,13 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const 
   }
 
   if (persistent_id) {
-    zend_rsrc_list_entry le;
-
-    le.type = le_pstream;
-    le.ptr = ret;
-    le.refcount = 0;
+    auto le = HPHP::newres<zend_rsrc_list_entry>(ret, le_pstream);
+    SCOPE_EXIT { delete le; };
+    le->refcount = 0;
 
     if (FAILURE == zend_hash_update(&EG(persistent_list), (char *)persistent_id,
           strlen(persistent_id) + 1,
-          (void *)&le, sizeof(le), NULL)) {
-
+          (void*)le, sizeof(*le), NULL)) {
       pefree(ret, 1);
       return NULL;
     }

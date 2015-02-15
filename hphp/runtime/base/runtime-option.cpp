@@ -309,6 +309,7 @@ bool RuntimeOption::CoreDumpReport = true;
 std::string RuntimeOption::StackTraceFilename;
 bool RuntimeOption::LocalMemcache = false;
 bool RuntimeOption::MemcacheReadOnly = false;
+int RuntimeOption::StackTraceTimeout = 0; // seconds; 0 means unlimited
 
 bool RuntimeOption::EnableStats = false;
 bool RuntimeOption::EnableAPCStats = false;
@@ -1409,6 +1410,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
     Config::Bind(LocalMemcache, ini, debug["LocalMemcache"]);
     Config::Bind(MemcacheReadOnly, ini, debug["MemcacheReadOnly"]);
+    Config::Bind(StackTraceTimeout, ini, debug["StackTraceTimeout"], 0);
 
     {
       Hdf simpleCounter = debug["SimpleCounter"];

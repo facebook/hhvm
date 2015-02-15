@@ -2240,14 +2240,13 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 namespace {
 class ArraySortTmp {
  public:
-  explicit ArraySortTmp(Array& arr) : m_arr(arr) {
-    m_ad = arr.get()->escalateForSort();
-    m_ad->incRefCount();
+  explicit ArraySortTmp(Array& arr, SortFunction sf) : m_arr(arr) {
+    m_ad = arr.get()->escalateForSort(sf);
+    assert(m_ad == arr.get() || m_ad->getCount() == 0);
   }
   ~ArraySortTmp() {
     if (m_ad != m_arr.get()) {
       m_arr = m_ad;
-      m_ad->decRefCount();
     }
   }
   ArrayData* operator->() { return m_ad; }
@@ -2270,7 +2269,8 @@ php_sort(VRefParam container, int sort_flags,
                              coll, &errcode);
       }
     }
-    ArraySortTmp ast(arr_array);
+    SortFunction sf = getSortFunction(SORTFUNC_SORT, ascending);
+    ArraySortTmp ast(arr_array, sf);
     ast->sort(sort_flags, ascending);
     return true;
   }
@@ -2302,7 +2302,8 @@ php_asort(VRefParam container, int sort_flags,
                               coll, &errcode);
       }
     }
-    ArraySortTmp ast(arr_array);
+    SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
+    ArraySortTmp ast(arr_array, sf);
     ast->asort(sort_flags, ascending);
     return true;
   }
@@ -2332,7 +2333,8 @@ php_ksort(VRefParam container, int sort_flags, bool ascending,
                               coll, &errcode);
       }
     }
-    ArraySortTmp ast(arr_array);
+    SortFunction sf = getSortFunction(SORTFUNC_KRSORT, ascending);
+    ArraySortTmp ast(arr_array, sf);
     ast->ksort(sort_flags, ascending);
     return true;
   }
@@ -2414,7 +2416,7 @@ bool HHVM_FUNCTION(usort,
       arr_array.sort(cmp_func, false, true, &cmp_function);
       return true;
     } else {
-      ArraySortTmp ast(arr_array);
+      ArraySortTmp ast(arr_array, SORTFUNC_USORT);
       return ast->usort(cmp_function);
     }
   }
@@ -2441,7 +2443,7 @@ bool HHVM_FUNCTION(uasort,
       arr_array.sort(cmp_func, false, false, &cmp_function);
       return true;
     } else {
-      ArraySortTmp ast(arr_array);
+      ArraySortTmp ast(arr_array, SORTFUNC_UASORT);
       return ast->uasort(cmp_function);
     }
   }
@@ -2465,7 +2467,7 @@ bool HHVM_FUNCTION(uksort,
                    const Variant& cmp_function) {
   if (container.isArray()) {
     Array& arr_array = container.wrapped().toArrRef();
-    ArraySortTmp ast(arr_array);
+    ArraySortTmp ast(arr_array, SORTFUNC_UKSORT);
     return ast->uksort(cmp_function);
   }
   if (container.isObject()) {

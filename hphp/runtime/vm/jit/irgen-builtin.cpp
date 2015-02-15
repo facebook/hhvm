@@ -43,6 +43,7 @@ const StaticString
   s_ceil("ceil"),
   s_floor("floor"),
   s_abs("abs"),
+  s_ord("ord"),
   s_empty("");
 
 //////////////////////////////////////////////////////////////////////
@@ -110,6 +111,18 @@ SSATmp* opt_count(HTS& env, uint32_t numArgs) {
   return gen(env, Count, val);
 }
 
+SSATmp* opt_ord(HTS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+
+  auto const arg = topC(env, 0);
+  // a static string is passed in, resolve with a constant.
+  if (arg->type().isConst(Type::Str)) {
+    unsigned char first = arg->strVal()->data()[0];
+    return cns(env, int64_t(first));
+  }
+  return nullptr;
+}
+
 SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
 
@@ -125,8 +138,13 @@ SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
   // settings can be overridden during the execution of a request.
   auto const settingName = top(env, Type::Str, 0)->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
-  if (!IniSetting::GetMode(settingName, mode) ||
-      !(mode & IniSetting::PHP_INI_SYSTEM)) {
+  if (!IniSetting::GetMode(settingName, mode)) {
+    return nullptr;
+  }
+  if (mode & ~IniSetting::PHP_INI_SYSTEM) {
+    return nullptr;
+  }
+  if (mode == IniSetting::PHP_INI_ALL) {  /* PHP_INI_ALL has a weird encoding */
     return nullptr;
   }
 
@@ -293,6 +311,7 @@ bool optimizedFCallBuiltin(HTS& env,
     X(ceil);
     X(floor);
     X(abs);
+    X(ord);
 
 #undef X
 
@@ -866,8 +885,8 @@ void nativeImplInlined(HTS& env) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
-  if (src->isA(Type::Obj) && src->type().isSpecialized()) {
-    auto const cls = src->type().getClass();
+  if (src->isA(Type::Obj) && src->type().clsSpec()) {
+    auto const cls = src->type().clsSpec().cls();
     if (!env.irb->constrainValue(src, TypeConstraint(cls).setWeak())) {
       // If we know the class without having to specialize a guard
       // any further, use it.
@@ -875,7 +894,7 @@ SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
     }
   }
 
-  if (src->type().not(Type::Obj)) {
+  if (!src->type().maybe(Type::Obj)) {
     return cns(env, false);
   }
 
@@ -1020,22 +1039,21 @@ void emitIdx(HTS& env) {
       return;
     }
 
-    if (baseType < Type::Obj && baseType.isSpecialized()) {
+    if (baseType < Type::Obj && baseType.clsSpec()) {
+      auto const cls = baseType.clsSpec().cls();
+
       // We must require either constant keys or known integer keys for Map,
       // because integer-like strings behave differently.
-      auto const okMap = baseType.getClass() == c_Map::classof() &&
-                           (keyType.isConst() || keyType <= Type::Int);
+      auto const okMap = cls == c_Map::classof() &&
+                         (keyType.isConst() || keyType <= Type::Int);
       // Similarly, Vector is only usable with int keys, so we can only do this
       // for Vector if it's an Int.
-      auto const okVector = baseType.getClass() == c_Vector::classof() &&
-                              keyType <= Type::Int;
+      auto const okVector = cls == c_Vector::classof() &&
+                            keyType <= Type::Int;
 
       auto const optimizableCollection = okMap || okVector;
       if (optimizableCollection) {
-        env.irb->constrainValue(
-          base,
-          TypeConstraint(baseType.getClass())
-        );
+        env.irb->constrainValue(base, TypeConstraint(cls));
         env.irb->constrainValue(key, DataTypeSpecific);
         auto const arr = gen(env, LdColArray, base);
         implArrayIdx(env, arr);

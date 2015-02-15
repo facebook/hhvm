@@ -462,7 +462,7 @@ class Redis {
                                        $start,
                                        $end,
                                        array $opts = null) {
-    $args = [$this->_prefix($key), (int)$start, (int)$end];
+    $args = [$this->_prefix($key), $start, $end];
     if (isset($opts['limit']) AND
         is_array($opts['limit']) AND
         (count($opts['limit']) == 2)) {
@@ -574,6 +574,11 @@ class Redis {
   public function watch($key/* ... */) {
     $args = array_map([$this, '_prefix'], func_get_args());
     $this->processArrayCommand("WATCH", $args);
+    return $this->processBooleanResponse();
+  }
+
+  public function unwatch() {
+    $this->processCommand("UNWATCH");
     return $this->processBooleanResponse();
   }
 

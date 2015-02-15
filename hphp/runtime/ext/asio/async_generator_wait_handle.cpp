@@ -112,10 +112,7 @@ void c_AsyncGeneratorWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
   child->enterContext(getContextIdx());
 
   // detect cycles
-  if (UNLIKELY(isDescendantOf(child))) {
-    Object e(createCycleException(child));
-    throw e;
-  }
+  detectCycle(child);
 }
 
 void c_AsyncGeneratorWaitHandle::onUnblocked() {

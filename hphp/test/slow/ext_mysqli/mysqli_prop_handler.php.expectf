@@ -1,0 +1,30 @@
+string(%d) "%s"
+int(%d)
+int(%d)
+NULL
+int(%d)
+string(0) ""
+int(%d)
+int(%d)
+string(%d) "%s"
+NULL
+int(%d)
+int(%d)
+string(%d) "%s"
+int(%d)
+string(%d) "%s"
+int(%d)
+int(%d)
+array(%d) {
+  [0]=>
+  array(3) {
+    ["errno"]=>
+    int(%d)
+    ["sqlstate"]=>
+    string(%d) "%s"
+    ["error"]=>
+    string(38) "Unknown column 'test1' in 'field list'"
+  }
+}
+ExtMySQLi::__get(nonExisting);
+NULL

@@ -260,7 +260,7 @@ bool GlobalsArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   return true;
 }
 
-ArrayData* GlobalsArray::EscalateForSort(ArrayData* ad) {
+ArrayData* GlobalsArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   raise_warning("Sorting the $GLOBALS array is not supported");
   return ad;
 }
@@ -268,13 +268,13 @@ void GlobalsArray::Ksort(ArrayData*, int sort_flags, bool ascending) {}
 void GlobalsArray::Sort(ArrayData*, int sort_flags, bool ascending) {}
 void GlobalsArray::Asort(ArrayData*, int sort_flags, bool ascending) {}
 bool GlobalsArray::Uksort(ArrayData*, const Variant& cmp_function) {
-  return true;
+  return false;
 }
 bool GlobalsArray::Usort(ArrayData*, const Variant& cmp_function) {
-  return true;
+  return false;
 }
 bool GlobalsArray::Uasort(ArrayData*, const Variant& cmp_function) {
-  return true;
+  return false;
 }
 
 bool GlobalsArray::IsVectorData(const ArrayData*) {

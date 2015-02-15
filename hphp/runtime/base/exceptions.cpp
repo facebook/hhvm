@@ -101,13 +101,5 @@ void throw_not_supported(const char* feature, const char* reason) {
   throw ExtendedException("%s is not supported: %s", feature, reason);
 }
 
-void intrusive_ptr_add_ref(ArrayData* a) {
-  a->incRefCount();
-}
-
-void intrusive_ptr_release(ArrayData* a) {
-  decRefArr(a);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

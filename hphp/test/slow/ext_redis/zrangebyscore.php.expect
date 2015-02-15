@@ -1,0 +1,24 @@
+array(3) {
+  [0]=>
+  string(5) "three"
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(3) "two"
+}
+array(3) {
+  [0]=>
+  string(3) "two"
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(5) "three"
+}
+array(1) {
+  [0]=>
+  string(3) "one"
+}
+array(1) {
+  [0]=>
+  string(3) "one"
+}

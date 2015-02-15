@@ -143,7 +143,7 @@ std::string show(const HTS& hts) {
                           : localTy.toString();
     if (localTy.isBoxed()) {
       auto const pred = hts.irb->predictedInnerType(i);
-      if (!pred.subtypeOf(Type::Bottom)) {
+      if (pred != Type::Bottom) {
         str += folly::sformat(" (predict inner: {})", pred.toString());
       }
     }

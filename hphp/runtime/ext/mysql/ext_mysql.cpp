@@ -149,7 +149,7 @@ static Variant HHVM_FUNCTION(mysql_real_escape_string,
   return false;
 }
 
-static String HHVM_FUNCTION(mysql_get_client_info) {
+String HHVM_FUNCTION(mysql_get_client_info) {
   return String(mysql_get_client_info(), CopyString);
 }
 
@@ -177,7 +177,7 @@ static bool HHVM_FUNCTION(mysql_close,
   return MySQL::CloseConn(link_identifier);
 }
 
-static Variant HHVM_FUNCTION(mysql_errno,
+Variant HHVM_FUNCTION(mysql_errno,
                       const Variant& link_identifier /* = null */) {
   auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
@@ -194,7 +194,7 @@ static Variant HHVM_FUNCTION(mysql_errno,
   return false;
 }
 
-static Variant HHVM_FUNCTION(mysql_error,
+Variant HHVM_FUNCTION(mysql_error,
                       const Variant& link_identifier /* = null */) {
   auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
@@ -211,7 +211,7 @@ static Variant HHVM_FUNCTION(mysql_error,
   return false;
 }
 
-static Variant HHVM_FUNCTION(mysql_warning_count,
+Variant HHVM_FUNCTION(mysql_warning_count,
                       const Variant& link_identifier /* = null */) {
   auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
@@ -225,31 +225,31 @@ static Variant HHVM_FUNCTION(mysql_warning_count,
   return false;
 }
 
-static Variant HHVM_FUNCTION(mysql_get_host_info,
+Variant HHVM_FUNCTION(mysql_get_host_info,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return String(mysql_get_host_info(conn), CopyString);
 }
-static Variant HHVM_FUNCTION(mysql_get_proto_info,
+Variant HHVM_FUNCTION(mysql_get_proto_info,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return (int64_t)mysql_get_proto_info(conn);
 }
-static Variant HHVM_FUNCTION(mysql_get_server_info,
+Variant HHVM_FUNCTION(mysql_get_server_info,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return String(mysql_get_server_info(conn), CopyString);
 }
-static Variant HHVM_FUNCTION(mysql_info,
+Variant HHVM_FUNCTION(mysql_info,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return String(mysql_info(conn), CopyString);
 }
-static Variant HHVM_FUNCTION(mysql_insert_id,
+Variant HHVM_FUNCTION(mysql_insert_id,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
@@ -261,7 +261,7 @@ static Variant HHVM_FUNCTION(mysql_stat,
   if (!conn) return false;
   return String(mysql_stat(conn), CopyString);
 }
-static Variant HHVM_FUNCTION(mysql_thread_id,
+Variant HHVM_FUNCTION(mysql_thread_id,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
@@ -275,7 +275,7 @@ static bool HHVM_FUNCTION(mysql_select_db, const String& db,
   return mysql_select_db(conn, db.data()) == 0;
 }
 
-static Variant HHVM_FUNCTION(mysql_affected_rows,
+Variant HHVM_FUNCTION(mysql_affected_rows,
                       const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;

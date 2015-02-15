@@ -89,7 +89,7 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
   if (mInd == 0) {
     auto const baseIndex = mii.valCount();
     baseClass = ni.inputs[baseIndex]->rtt < Type::Obj
-      ? ni.inputs[baseIndex]->rtt.getClass()
+      ? ni.inputs[baseIndex]->rtt.clsSpec().cls()
       : nullptr;
   }
   if (!baseClass) return PropInfo();
@@ -1363,7 +1363,7 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
 
   irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(hts, Stats::Instr_TC, 1);
-  if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
+  if (Trace::moduleEnabledRelease(Trace::llvm, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {
     irgen::gen(hts, CountBytecode);
   }
@@ -1816,9 +1816,12 @@ TranslateResult irGenRegion(HTS& hts,
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
+  SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
+
   std::string errorMsg;
-  always_assert_log(check(region, errorMsg),
-                    [&] { return errorMsg + "\n" + show(region); });
+  always_assert_flog(check(region, errorMsg), "{}", errorMsg);
+
+  SCOPE_ASSERT_DETAIL("IRUnit") { return hts.unit.toString(); };
 
   auto& irb = *hts.irb;
 
@@ -1840,6 +1843,7 @@ TranslateResult irGenRegion(HTS& hts,
 
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   auto& blocks = region.blocks();
+
   for (auto b = 0; b < blocks.size(); b++) {
     auto const& block  = blocks[b];
     auto const blockId = block->id();
@@ -1847,6 +1851,8 @@ TranslateResult irGenRegion(HTS& hts,
     auto byRefs        = makeMapWalker(block->paramByRefs());
     auto knownFuncs    = makeMapWalker(block->knownFuncs());
     auto skipTrans     = false;
+
+    SCOPE_ASSERT_DETAIL("HTS") { return show(hts); };
 
     const Func* topFunc = nullptr;
     TransID profTransId = getTransId(blockId);
@@ -1940,14 +1946,9 @@ TranslateResult irGenRegion(HTS& hts,
         if (!skipTrans) translateInstr(hts, inst);
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk{profTransId, sk};
-        always_assert_log(
-          !toInterp.count(psk),
-          [&] {
-            std::ostringstream oss;
-            oss << folly::format("IR generation failed with {}\n", exn.what());
-            print(oss, hts.unit);
-            return oss.str();
-          });
+        always_assert_flog(!toInterp.count(psk),
+                           "IR generation failed with {}\n",
+                           exn.what());
         toInterp.insert(psk);
         return TranslateResult::Retry;
       }
@@ -2001,7 +2002,6 @@ TranslateResult mcGenRegion(HTS& hts,
       [&] {
         std::ostringstream oss;
         oss << folly::format("code generation failed with {}\n", exn.what());
-        print(oss, hts.irb->unit());
         return oss.str();
       });
     toInterp.insert(psk);

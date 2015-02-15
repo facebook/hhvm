@@ -71,67 +71,51 @@ static bool mod_is_open();
 // global data
 
 class SessionSerializer;
-class Session {
-public:
+struct Session {
   enum Status {
     Disabled,
     None,
     Active
   };
 
-  std::string m_save_path;
-  std::string m_session_name;
-  std::string m_extern_referer_chk;
-  std::string m_entropy_file;
-  int64_t     m_entropy_length;
-  std::string m_cache_limiter;
-  int64_t     m_cookie_lifetime;
-  std::string m_cookie_path;
-  std::string m_cookie_domain;
-  bool        m_cookie_secure;
-  bool        m_cookie_httponly;
-  bool        m_mod_data = false;
-  bool        m_mod_user_implemented = false;
+  std::string save_path;
+  std::string session_name;
+  std::string extern_referer_chk;
+  std::string entropy_file;
+  int64_t     entropy_length{0};
+  std::string cache_limiter;
+  int64_t     cookie_lifetime{0};
+  std::string cookie_path;
+  std::string cookie_domain;
+  Status      session_status{None};
+  bool        cookie_secure{false};
+  bool        cookie_httponly{false};
+  bool        mod_data{false};
+  bool        mod_user_implemented{false};
 
-  SessionModule *m_mod;
-  SessionModule *m_default_mod;
+  SessionModule* mod{nullptr};
+  SessionModule* default_mod{nullptr};
 
-  Status   m_session_status;
-  int64_t  m_gc_probability;
-  int64_t  m_gc_divisor;
-  int64_t  m_gc_maxlifetime;
-  int      m_module_number;
-  int64_t  m_cache_expire;
+  int64_t  gc_probability{0};
+  int64_t  gc_divisor{0};
+  int64_t  gc_maxlifetime{0};
+  int64_t  cache_expire{0};
 
-  ObjectData *m_ps_session_handler;
+  ObjectData* ps_session_handler{nullptr};
+  SessionSerializer* serializer{nullptr};
 
-  SessionSerializer *m_serializer;
+  bool auto_start{false};
+  bool use_cookies{false};
+  bool use_only_cookies{false};
+  bool use_trans_sid{false}; // contains INI value of whether to use trans-sid
+  bool apply_trans_sid{false}; // whether to enable trans-sid for current req
+  bool send_cookie{false};
+  bool define_sid{false};
+  bool invalid_session_id{false};  /* allows the driver to report about an
+                              invalid session id and request id regeneration */
 
-  bool m_auto_start;
-  bool m_use_cookies;
-  bool m_use_only_cookies;
-  bool m_use_trans_sid;   // contains the INI value of whether to use trans-sid
-  bool m_apply_trans_sid; // whether to enable trans-sid for current request
-
-  std::string m_hash_func;
-  int64_t m_hash_bits_per_character;
-
-  int  m_send_cookie;
-  int  m_define_sid;
-  bool m_invalid_session_id;  /* allows the driver to report about an invalid
-                                 session id and request id regeneration */
-
-  Session()
-    : m_entropy_length(0), m_cookie_lifetime(0), m_cookie_secure(false),
-      m_cookie_httponly(false), m_mod(nullptr), m_default_mod(nullptr),
-      m_session_status(None), m_gc_probability(0), m_gc_divisor(0),
-      m_gc_maxlifetime(0), m_module_number(0), m_cache_expire(0),
-      m_ps_session_handler(nullptr),
-      m_serializer(nullptr), m_auto_start(false), m_use_cookies(false),
-      m_use_only_cookies(false), m_use_trans_sid(false),
-      m_apply_trans_sid(false), m_hash_bits_per_character(0), m_send_cookie(0),
-      m_define_sid(0), m_invalid_session_id(false) {
-  }
+  std::string hash_func;
+  int64_t hash_bits_per_character{0};
 };
 
 const int64_t k_PHP_SESSION_DISABLED = Session::Disabled;
@@ -140,40 +124,37 @@ const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
 const StaticString s_session_ext_name("session");
 
 struct SessionRequestData final : Session {
-  SessionRequestData() {}
-
   void init() {
-    m_id.detach();
-    m_session_status = Session::None;
-    m_ps_session_handler = nullptr;
+    id.detach();
+    session_status = Session::None;
+    ps_session_handler = nullptr;
   }
 
   void destroy() {
-    m_id.reset();
-    m_session_status = Session::None;
-    m_ps_session_handler = nullptr;
+    id.reset();
+    session_status = Session::None;
+    ps_session_handler = nullptr;
   }
 
   void requestShutdownImpl();
 
 public:
-  String m_id;
-
+  String id;
 };
+
 static __thread SessionRequestData* s_session;
-#define PS(name) s_session->m_ ## name
 
 void SessionRequestData::requestShutdownImpl() {
   if (mod_is_open()) {
     try {
-      m_mod->close();
+      mod->close();
     } catch (...) {}
   }
-  if (ObjectData* obj = m_ps_session_handler) {
-    m_ps_session_handler = nullptr;
+  if (ObjectData* obj = ps_session_handler) {
+    ps_session_handler = nullptr;
     decRefObj(obj);
   }
-  m_id.reset();
+  id.reset();
 }
 
 std::vector<SessionModule*> SessionModule::RegisteredModules;
@@ -226,22 +207,23 @@ String SessionModule::create_sid() {
     .toArray()[s_REMOTE_ADDR].toString();
 
   struct timeval tv;
-  gettimeofday(&tv, NULL);
+  gettimeofday(&tv, nullptr);
 
   StringBuffer buf;
   buf.printf("%.15s%ld%ld%0.8F", remote_addr.data(),
              tv.tv_sec, (long int)tv.tv_usec, math_combined_lcg() * 10);
 
-  if (String(PS(hash_func)).isNumeric()) {
-    switch (String(PS(hash_func)).toInt64()) {
-    case md5:  PS(hash_func) = "md5";  break;
-    case sha1: PS(hash_func) = "sha1"; break;
+  if (String(s_session->hash_func).isNumeric()) {
+    switch (String(s_session->hash_func).toInt64()) {
+    case md5:  s_session->hash_func = "md5";  break;
+    case sha1: s_session->hash_func = "sha1"; break;
     }
   }
 
-  Variant context = HHVM_FN(hash_init)(PS(hash_func));
+  Variant context = HHVM_FN(hash_init)(s_session->hash_func);
   if (same(context, false)) {
-    Logger::Error("Invalid session hash function: %s", PS(hash_func).c_str());
+    Logger::Error("Invalid session hash function: %s",
+                  s_session->hash_func.c_str());
     return String();
   }
   if (!HHVM_FN(hash_update)(context.toResource(), buf.detach())) {
@@ -249,12 +231,12 @@ String SessionModule::create_sid() {
     return String();
   }
 
-  if (PS(entropy_length) > 0) {
-    int fd = ::open(PS(entropy_file).c_str(), O_RDONLY);
+  if (s_session->entropy_length > 0) {
+    int fd = ::open(s_session->entropy_file.c_str(), O_RDONLY);
     if (fd >= 0) {
       unsigned char rbuf[2048];
       int n;
-      int to_read = PS(entropy_length);
+      int to_read = s_session->entropy_length;
       while (to_read > 0) {
         n = ::read(fd, rbuf, (to_read < (int)sizeof(rbuf) ?
                               to_read : (int)sizeof(buf)));
@@ -273,14 +255,15 @@ String SessionModule::create_sid() {
 
   String hashed = HHVM_FN(hash_final)(context.toResource(), /* raw */ true);
 
-  if (PS(hash_bits_per_character) < 4 || PS(hash_bits_per_character) > 6) {
-    PS(hash_bits_per_character) = 4;
+  if (s_session->hash_bits_per_character < 4 ||
+      s_session->hash_bits_per_character > 6) {
+    s_session->hash_bits_per_character = 4;
     raise_warning("The ini setting hash_bits_per_character is out of range "
                   "(should be 4, 5, or 6) - using 4 for now");
   }
 
   StringBuffer readable;
-  bin_to_readable(hashed, readable, PS(hash_bits_per_character));
+  bin_to_readable(hashed, readable, s_session->hash_bits_per_character);
   return readable.detach();
 }
 
@@ -394,7 +377,7 @@ bool SystemlibSessionModule::open(const char *save_path,
                              nullptr, 2, args);
 
   if (ret.isBoolean() && ret.toBoolean()) {
-    PS(mod_data) = true;
+    s_session->mod_data = true;
     return true;
   }
 
@@ -406,7 +389,7 @@ bool SystemlibSessionModule::close() {
   auto obj = s_obj->getObject();
   if (!obj) {
     // close() can be called twice in some circumstances
-    PS(mod_data) = false;
+    s_session->mod_data = false;
     return true;
   }
 
@@ -541,7 +524,7 @@ public:
 
     if (argc > 1) {
       errno = 0;
-      m_dirdepth = (size_t) strtol(argv[0], NULL, 10);
+      m_dirdepth = (size_t) strtol(argv[0], nullptr, 10);
       if (errno == ERANGE) {
         raise_warning("The first parameter in session.save_path is invalid");
         return false;
@@ -550,7 +533,7 @@ public:
 
     if (argc > 2) {
       errno = 0;
-      m_filemode = strtol(argv[1], NULL, 8);
+      m_filemode = strtol(argv[1], nullptr, 8);
       if (errno == ERANGE || m_filemode < 0 || m_filemode > 07777) {
         raise_warning("The second parameter in session.save_path is invalid");
         return false;
@@ -565,7 +548,7 @@ public:
 
     m_fd = -1;
     m_basedir = save_path;
-    PS(mod_data) = true;
+    s_session->mod_data = true;
     return true;
   }
 
@@ -573,7 +556,7 @@ public:
     closeImpl();
     m_lastkey.clear();
     m_basedir.clear();
-    PS(mod_data) = false;
+    s_session->mod_data = false;
     return true;
   }
 
@@ -771,7 +754,7 @@ private:
       if (!IsValid(key)) {
         raise_warning("The session id contains illegal characters, "
                       "valid characters are a-z, A-Z, 0-9 and '-,'");
-        PS(invalid_session_id) = true;
+        s_session->invalid_session_id = true;
         return;
       }
 
@@ -885,26 +868,28 @@ class UserSessionModule : public SessionModule {
   UserSessionModule() : SessionModule("user") {}
 
   bool open(const char *save_path, const char *session_name) override {
-    auto func = make_packed_array(Object(PS(ps_session_handler)), s_open);
+    auto func = make_packed_array(Object(s_session->ps_session_handler),
+                                  s_open);
     auto args = make_packed_array(String(save_path), String(session_name));
 
     auto res = vm_call_user_func(func, args);
-    PS(mod_user_implemented) = true;
+    s_session->mod_user_implemented = true;
     return handleReturnValue(res);
   }
 
   bool close() override {
-    auto func = make_packed_array(Object(PS(ps_session_handler)), s_close);
+    auto func = make_packed_array(Object(s_session->ps_session_handler),
+                                  s_close);
     auto args = Array::Create();
 
     auto res = vm_call_user_func(func, args);
-    PS(mod_user_implemented) = false;
+    s_session->mod_user_implemented = false;
     return handleReturnValue(res);
   }
 
   bool read(const char *key, String &value) override {
     Variant ret = vm_call_user_func(
-       make_packed_array(Object(PS(ps_session_handler)), s_read),
+       make_packed_array(Object(s_session->ps_session_handler), s_read),
        make_packed_array(String(key))
     );
     if (ret.isString()) {
@@ -916,21 +901,21 @@ class UserSessionModule : public SessionModule {
 
   bool write(const char *key, const String& value) override {
     return handleReturnValue(vm_call_user_func(
-       make_packed_array(Object(PS(ps_session_handler)), s_write),
+       make_packed_array(Object(s_session->ps_session_handler), s_write),
        make_packed_array(String(key, CopyString), value)
     ));
   }
 
   bool destroy(const char *key) override {
     return handleReturnValue(vm_call_user_func(
-       make_packed_array(Object(PS(ps_session_handler)), s_destroy),
+       make_packed_array(Object(s_session->ps_session_handler), s_destroy),
        make_packed_array(String(key))
     ));
   }
 
   bool gc(int maxlifetime, int *nrdels) override {
     return handleReturnValue(vm_call_user_func(
-       make_packed_array(Object(PS(ps_session_handler)), s_gc),
+       make_packed_array(Object(s_session->ps_session_handler), s_gc),
        make_packed_array((int64_t)maxlifetime)
     ));
   }
@@ -974,7 +959,7 @@ public:
         return ss;
       }
     }
-    return NULL;
+    return nullptr;
   }
 
 private:
@@ -1172,25 +1157,27 @@ static WddxSessionSerializer s_wddx_session_serializer;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define SESSION_CHECK_ACTIVE_STATE                                      \
-  if (PS(session_status) == Session::Active) {                          \
-    raise_warning("A session is active. You cannot change the session"  \
-                  " module's ini settings at this time");               \
-    return false;                                                       \
+static bool session_check_active_state() {
+  if (s_session->session_status == Session::Active) {
+    raise_warning("A session is active. You cannot change the session"
+                  " module's ini settings at this time");
+    return false;
   }
+  return true;
+}
 
 static bool mod_is_open() {
-  return PS(mod_data) || PS(mod_user_implemented);
+  return s_session->mod_data || s_session->mod_user_implemented;
 }
 
 static bool ini_on_update_save_handler(const std::string& value) {
-  SESSION_CHECK_ACTIVE_STATE;
-  PS(mod) = SessionModule::Find(value.c_str());
+  if (!session_check_active_state()) return false;
+  s_session->mod = SessionModule::Find(value.c_str());
   return true;
 }
 
 static std::string ini_get_save_handler() {
-  auto &mod = PS(mod);
+  auto &mod = s_session->mod;
   if (mod == nullptr) {
     return "";
   }
@@ -1198,19 +1185,19 @@ static std::string ini_get_save_handler() {
 }
 
 static bool ini_on_update_serializer(const std::string& value) {
-  SESSION_CHECK_ACTIVE_STATE;
+  if (!session_check_active_state()) return false;
   SessionSerializer *serializer = SessionSerializer::Find(value.data());
   if (serializer == nullptr) {
     raise_warning("ini_set(): Cannot find serialization handler '%s'",
                   value.data());
     return false;
   }
-  PS(serializer) = serializer;
+  s_session->serializer = serializer;
   return true;
 }
 
 static std::string ini_get_serializer() {
-  auto &serializer = PS(serializer);
+  auto &serializer = s_session->serializer;
   if (serializer == nullptr) {
     return "";
   }
@@ -1218,8 +1205,7 @@ static std::string ini_get_serializer() {
 }
 
 static bool ini_on_update_trans_sid(const bool& value) {
-  SESSION_CHECK_ACTIVE_STATE;
-  return true;
+  return session_check_active_state();
 }
 
 static bool ini_on_update_save_dir(const std::string& value) {
@@ -1230,7 +1216,7 @@ static bool ini_on_update_save_dir(const std::string& value) {
   if (File::TranslatePath(path).empty()) {
     return false;
   }
-  PS(save_path) = path;
+  s_session->save_path = path;
   return true;
 }
 
@@ -1239,12 +1225,12 @@ static bool ini_on_update_save_dir(const std::string& value) {
 static int php_session_destroy() {
   int retval = true;
 
-  if (PS(session_status) != Session::Active) {
+  if (s_session->session_status != Session::Active) {
     raise_warning("Trying to destroy uninitialized session");
     return false;
   }
 
-  if (PS(mod)->destroy(PS(id).data()) == false) {
+  if (s_session->mod->destroy(s_session->id.data()) == false) {
     retval = false;
     raise_warning("Session object destruction failed");
   }
@@ -1256,21 +1242,21 @@ static int php_session_destroy() {
 }
 
 static String php_session_encode() {
-  if (!PS(serializer)) {
+  if (!s_session->serializer) {
     raise_warning("Unknown session.serialize_handler. "
                   "Failed to encode session object");
     return String();
   }
-  return PS(serializer)->encode();
+  return s_session->serializer->encode();
 }
 
 static void php_session_decode(const String& value) {
-  if (!PS(serializer)) {
+  if (!s_session->serializer) {
     raise_warning("Unknown session.serialize_handler. "
                   "Failed to decode session object");
     return;
   }
-  if (!PS(serializer)->decode(value)) {
+  if (!s_session->serializer->decode(value)) {
     php_session_destroy();
     raise_warning("Failed to decode session object. "
                   "Session has been destroyed");
@@ -1279,33 +1265,34 @@ static void php_session_decode(const String& value) {
 
 static void php_session_initialize() {
   /* check session name for invalid characters */
-  if (strpbrk(PS(id).data(), "\r\n\t <>'\"\\")) {
-    PS(id).reset();
+  if (strpbrk(s_session->id.data(), "\r\n\t <>'\"\\")) {
+    s_session->id.reset();
   }
 
-  if (!PS(mod)) {
+  if (!s_session->mod) {
     raise_error("No storage module chosen - failed to initialize session");
     return;
   }
 
   /* Open session handler first */
-  if (!PS(mod)->open(PS(save_path).c_str(), PS(session_name).c_str())) {
+  if (!s_session->mod->open(s_session->save_path.c_str(),
+                            s_session->session_name.c_str())) {
     raise_error("Failed to initialize storage module: %s (path: %s)",
-                PS(mod)->getName(), PS(save_path).c_str());
+                s_session->mod->getName(), s_session->save_path.c_str());
     return;
   }
 
   /* If there is no ID, use session module to create one */
   int attempts = 3;
-  if (PS(id).empty()) {
+  if (s_session->id.empty()) {
 new_session:
-    PS(id) = PS(mod)->create_sid();
-    if (PS(id).empty()) {
-      raise_error("Failed to create session id: %s", PS(mod)->getName());
+    s_session->id = s_session->mod->create_sid();
+    if (s_session->id.empty()) {
+      raise_error("Failed to create session id: %s", s_session->mod->getName());
       return;
     }
-    if (PS(use_cookies)) {
-      PS(send_cookie) = 1;
+    if (s_session->use_cookies) {
+      s_session->send_cookie = true;
     }
   }
 
@@ -1319,14 +1306,14 @@ new_session:
   /* Unconditionally destroy existing arrays -- possible dirty data */
   php_global_set(s__SESSION, staticEmptyArray());
 
-  PS(invalid_session_id) = false;
+  s_session->invalid_session_id = false;
   String value;
-  if (PS(mod)->read(PS(id).data(), value)) {
+  if (s_session->mod->read(s_session->id.data(), value)) {
     php_session_decode(value);
-  } else if (PS(invalid_session_id)) {
+  } else if (s_session->invalid_session_id) {
     /* address instances where the session read fails due to an invalid id */
-    PS(invalid_session_id) = false;
-    PS(id).reset();
+    s_session->invalid_session_id = false;
+    s_session->id.reset();
     if (--attempts > 0) {
       goto new_session;
     }
@@ -1338,16 +1325,16 @@ static void php_session_save_current_state() {
   if (mod_is_open()) {
     String value = php_session_encode();
     if (!value.isNull()) {
-      ret = PS(mod)->write(PS(id).data(), value);
+      ret = s_session->mod->write(s_session->id.data(), value);
     }
   }
   if (!ret) {
     raise_warning("Failed to write session data (%s). Please verify that the "
                   "current setting of session.save_path is correct (%s)",
-                  PS(mod)->getName(), PS(save_path).c_str());
+                  s_session->mod->getName(), s_session->save_path.c_str());
   }
   if (mod_is_open()) {
-    PS(mod)->close();
+    s_session->mod->close();
   }
 }
 
@@ -1364,50 +1351,44 @@ static void php_session_send_cookie() {
   }
 
   int64_t expire = 0;
-  if (PS(cookie_lifetime) > 0) {
+  if (s_session->cookie_lifetime > 0) {
     struct timeval tv;
-    gettimeofday(&tv, NULL);
-    expire = tv.tv_sec + PS(cookie_lifetime);
+    gettimeofday(&tv, nullptr);
+    expire = tv.tv_sec + s_session->cookie_lifetime;
   }
-  transport->setCookie(PS(session_name), PS(id), expire, PS(cookie_path),
-                       PS(cookie_domain), PS(cookie_secure),
-                       PS(cookie_httponly), true);
+  transport->setCookie(s_session->session_name,
+                       s_session->id,
+                       expire,
+                       s_session->cookie_path,
+                       s_session->cookie_domain,
+                       s_session->cookie_secure,
+                       s_session->cookie_httponly, true);
 }
 
 static void php_session_reset_id() {
-  if (PS(use_cookies) && PS(send_cookie)) {
+  if (s_session->use_cookies && s_session->send_cookie) {
     php_session_send_cookie();
-    PS(send_cookie) = 0;
+    s_session->send_cookie = false;
   }
 
-  if (PS(define_sid)) {
+  if (s_session->define_sid) {
     StringBuffer var;
-    var.append(String(PS(session_name)));
+    var.append(String(s_session->session_name));
     var.append('=');
-    var.append(PS(id));
+    var.append(s_session->id);
     Variant v = var.detach();
 
     static const auto s_SID = makeStaticString("SID");
     auto const handle = lookupCnsHandle(s_SID);
-    if (handle == 0) {
+    if (!handle) {
       f_define(s_SID, v);
     } else {
       TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
-
       v.setEvalScalar();
       cns->m_data = v.asTypedValue()->m_data;
       cns->m_type = v.asTypedValue()->m_type;
     }
   }
-
-  // hzhao: not sure how to support this yet
-#if 0
-  if (PS(apply_trans_sid)) {
-    php_url_scanner_reset_vars();
-    php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)),
-                            PS(id), strlen(PS(id)), 1);
-  }
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1479,14 +1460,14 @@ CACHE_LIMITER_FUNC(public) {
   struct timeval tv;
   time_t now;
 
-  gettimeofday(&tv, NULL);
-  now = tv.tv_sec + PS(cache_expire) * 60;
+  gettimeofday(&tv, nullptr);
+  now = tv.tv_sec + s_session->cache_expire * 60;
   memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
   strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
   ADD_HEADER(buf);
 
   snprintf(buf, sizeof(buf) , "Cache-Control: public, max-age=%" PRId64,
-           PS(cache_expire) * 60); /* SAFE */
+           s_session->cache_expire * 60); /* SAFE */
   ADD_HEADER(buf);
 
   last_modified();
@@ -1496,8 +1477,8 @@ CACHE_LIMITER_FUNC(private_no_expire) {
   char buf[MAX_STR + 1];
 
   snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=%" PRId64 ", "
-           "pre-check=%" PRId64, PS(cache_expire) * 60,
-           PS(cache_expire) * 60); /* SAFE */
+           "pre-check=%" PRId64, s_session->cache_expire * 60,
+           s_session->cache_expire * 60); /* SAFE */
   ADD_HEADER(buf);
 
   last_modified();
@@ -1528,7 +1509,7 @@ static php_session_cache_limiter_t php_session_cache_limiters[] = {
 };
 
 static int php_session_cache_limiter() {
-  if (PS(cache_limiter)[0] == '\0') return 0;
+  if (s_session->cache_limiter[0] == '\0') return 0;
 
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -1540,7 +1521,7 @@ static int php_session_cache_limiter() {
 
     php_session_cache_limiter_t *lim;
     for (lim = php_session_cache_limiters; lim->name; lim++) {
-      if (!strcasecmp(lim->name, PS(cache_limiter).c_str())) {
+      if (!strcasecmp(lim->name, s_session->cache_limiter.c_str())) {
         lim->func();
         return 0;
       }
@@ -1553,14 +1534,14 @@ static int php_session_cache_limiter() {
 ///////////////////////////////////////////////////////////////////////////////
 
 static int64_t HHVM_FUNCTION(session_status) {
-  return PS(session_status);
+  return s_session->session_status;
 }
 
 static Variant HHVM_FUNCTION(session_module_name,
                 const Variant& newname /* = null_string */) {
   String oldname;
-  if (PS(mod) && PS(mod)->getName()) {
-    oldname = String(PS(mod)->getName(), CopyString);
+  if (s_session->mod && s_session->mod->getName()) {
+    oldname = String(s_session->mod->getName(), CopyString);
   }
 
   if (!newname.isNull()) {
@@ -1570,9 +1551,9 @@ static Variant HHVM_FUNCTION(session_module_name,
       return false;
     }
     if (mod_is_open()) {
-      PS(mod)->close();
+      s_session->mod->close();
     }
-    PS(mod_data) = false;
+    s_session->mod_data = false;
 
     HHVM_FN(ini_set)("session.save_handler", newname.toString());
   }
@@ -1586,26 +1567,26 @@ static bool HHVM_FUNCTION(session_set_save_handler,
     const Object& sessionhandler,
     bool register_shutdown /* = true */) {
 
-  if (PS(mod) &&
-      PS(session_status) != Session::None &&
-      PS(mod) != &s_user_session_module) {
+  if (s_session->mod &&
+      s_session->session_status != Session::None &&
+      s_session->mod != &s_user_session_module) {
     return false;
   }
 
-  if (PS(session_status) == Session::Active) {
+  if (s_session->session_status == Session::Active) {
     return false;
   }
 
-  if (PS(default_mod) == nullptr) {
-    PS(default_mod) = PS(mod);
+  if (s_session->default_mod == nullptr) {
+    s_session->default_mod = s_session->mod;
   }
 
-  if (ObjectData* obj = PS(ps_session_handler)) {
-    PS(ps_session_handler) = nullptr;
+  if (ObjectData* obj = s_session->ps_session_handler) {
+    s_session->ps_session_handler = nullptr;
     decRefObj(obj);
   }
-  PS(ps_session_handler) = sessionhandler.get();
-  PS(ps_session_handler)->incRefCount();
+  s_session->ps_session_handler = sessionhandler.get();
+  s_session->ps_session_handler->incRefCount();
 
   // remove previous shutdown function
   g_context->removeShutdownFunction(s_session_write_close,
@@ -1622,13 +1603,13 @@ static bool HHVM_FUNCTION(session_set_save_handler,
 
 static String HHVM_FUNCTION(session_id,
                             const Variant& newid /* = null_string */) {
-  String ret = PS(id);
+  String ret = s_session->id;
   if (ret.isNull()) {
     ret = empty_string();
   }
 
   if (!newid.isNull()) {
-    PS(id) = newid;
+    s_session->id = newid;
   }
 
   return ret;
@@ -1642,17 +1623,18 @@ static bool HHVM_FUNCTION(session_regenerate_id,
     return false;
   }
 
-  if (PS(session_status) == Session::Active) {
-    if (!PS(id).empty()) {
-      if (delete_old_session && !PS(mod)->destroy(PS(id).data())) {
+  if (s_session->session_status == Session::Active) {
+    if (!s_session->id.empty()) {
+      if (delete_old_session &&
+          !s_session->mod->destroy(s_session->id.data())) {
         raise_warning("Session object destruction failed");
         return false;
       }
-      PS(id).reset();
+      s_session->id.reset();
     }
 
-    PS(id) = PS(mod)->create_sid();
-    PS(send_cookie) = 1;
+    s_session->id = s_session->mod->create_sid();
+    s_session->send_cookie = true;
     php_session_reset_id();
     return true;
   }
@@ -1668,7 +1650,7 @@ static Variant HHVM_FUNCTION(session_encode) {
 }
 
 static bool HHVM_FUNCTION(session_decode, const String& data) {
-  if (PS(session_status) != Session::None) {
+  if (s_session->session_status != Session::None) {
     php_session_decode(data);
     return true;
   }
@@ -1680,130 +1662,130 @@ const StaticString
   s_HTTP_REFERER("HTTP_REFERER");
 
 static bool HHVM_FUNCTION(session_start) {
-  PS(apply_trans_sid) = PS(use_trans_sid);
+  s_session->apply_trans_sid = s_session->use_trans_sid;
 
   String value;
-  switch (PS(session_status)) {
+  switch (s_session->session_status) {
   case Session::Active:
     raise_notice("A session had already been started - "
                  "ignoring session_start()");
     return false;
   case Session::Disabled:
     {
-      if (!PS(mod) && IniSetting::Get("session.save_handler", value)) {
-        PS(mod) = SessionModule::Find(value.data());
-        if (!PS(mod)) {
+      if (!s_session->mod && IniSetting::Get("session.save_handler", value)) {
+        s_session->mod = SessionModule::Find(value.data());
+        if (!s_session->mod) {
           raise_warning("Cannot find save handler '%s' - "
                         "session startup failed", value.data());
           return false;
         }
       }
-      if (!PS(serializer) &&
+      if (!s_session->serializer &&
           IniSetting::Get("session.serialize_handler", value)) {
-        PS(serializer) = SessionSerializer::Find(value.data());
-        if (!PS(serializer)) {
+        s_session->serializer = SessionSerializer::Find(value.data());
+        if (!s_session->serializer) {
           raise_warning("Cannot find serialization handler '%s' - "
                         "session startup failed", value.data());
           return false;
         }
       }
-      PS(session_status) = Session::None;
+      s_session->session_status = Session::None;
       /* fallthrough */
     }
   default:
-    assert(PS(session_status) == Session::None);
-    PS(define_sid) = 1;
-    PS(send_cookie) = 1;
+    assert(s_session->session_status == Session::None);
+    s_session->define_sid = true;
+    s_session->send_cookie = true;
   }
 
   /*
    * Cookies are preferred, because initially
    * cookie and get variables will be available.
    */
-  if (PS(id).empty()) {
-    if (PS(use_cookies)) {
+  if (s_session->id.empty()) {
+    if (s_session->use_cookies) {
       auto cookies = php_global(s__COOKIE).toArray();
-      if (cookies.exists(String(PS(session_name)))) {
-        PS(id) = cookies[String(PS(session_name))].toString();
-        PS(apply_trans_sid) = 0;
-        PS(send_cookie) = 0;
-        PS(define_sid) = 0;
+      if (cookies.exists(String(s_session->session_name))) {
+        s_session->id = cookies[String(s_session->session_name)].toString();
+        s_session->apply_trans_sid = false;
+        s_session->send_cookie = false;
+        s_session->define_sid = false;
       }
     }
 
-    if (!PS(use_only_cookies) && !PS(id)) {
+    if (!s_session->use_only_cookies && !s_session->id) {
       auto get = php_global(s__GET).toArray();
-      if (get.exists(String(PS(session_name)))) {
-        PS(id) = get[String(PS(session_name))].toString();
-        PS(send_cookie) = 0;
+      if (get.exists(String(s_session->session_name))) {
+        s_session->id = get[String(s_session->session_name)].toString();
+        s_session->send_cookie = false;
       }
     }
 
-    if (!PS(use_only_cookies) && !PS(id)) {
+    if (!s_session->use_only_cookies && !s_session->id) {
       auto post = php_global(s__POST).toArray();
-      if (post.exists(String(PS(session_name)))) {
-        PS(id) = post[String(PS(session_name))].toString();
-        PS(send_cookie) = 0;
+      if (post.exists(String(s_session->session_name))) {
+        s_session->id = post[String(s_session->session_name)].toString();
+        s_session->send_cookie = false;
       }
     }
   }
 
-  int lensess = PS(session_name).size();
+  int lensess = s_session->session_name.size();
 
   /* check the REQUEST_URI symbol for a string of the form
      '<session-name>=<session-id>' to allow URLs of the form
      http://yoursite/<session-name>=<session-id>/script.php */
-  if (!PS(use_only_cookies) && PS(id).empty()) {
+  if (!s_session->use_only_cookies && s_session->id.empty()) {
     value = php_global(s__SERVER).toArray()[s_REQUEST_URI].toString();
-    const char *p = strstr(value.data(), PS(session_name).c_str());
+    const char *p = strstr(value.data(), s_session->session_name.c_str());
     if (p && p[lensess] == '=') {
       p += lensess + 1;
       const char *q;
       if ((q = strpbrk(p, "/?\\"))) {
-        PS(id) = String(p, q - p, CopyString);
-        PS(send_cookie) = 0;
+        s_session->id = String(p, q - p, CopyString);
+        s_session->send_cookie = false;
       }
     }
   }
 
   /* check whether the current request was referred to by
      an external site which invalidates the previously found id */
-  if (!PS(id).empty() && PS(extern_referer_chk)[0] != '\0') {
+  if (!s_session->id.empty() && s_session->extern_referer_chk[0] != '\0') {
     value = php_global(s__SERVER).toArray()[s_HTTP_REFERER].toString();
-    if (strstr(value.data(), PS(extern_referer_chk).c_str()) == NULL) {
-      PS(id).reset();
-      PS(send_cookie) = 1;
-      if (PS(use_trans_sid)) {
-        PS(apply_trans_sid) = 1;
+    if (!strstr(value.data(), s_session->extern_referer_chk.c_str())) {
+      s_session->id.reset();
+      s_session->send_cookie = true;
+      if (s_session->use_trans_sid) {
+        s_session->apply_trans_sid = true;
       }
     }
   }
 
   php_session_initialize();
 
-  if (!PS(use_cookies) && PS(send_cookie)) {
-    if (PS(use_trans_sid)) {
-      PS(apply_trans_sid) = 1;
+  if (!s_session->use_cookies && s_session->send_cookie) {
+    if (s_session->use_trans_sid) {
+      s_session->apply_trans_sid = true;
     }
-    PS(send_cookie) = 0;
+    s_session->send_cookie = false;
   }
 
   php_session_reset_id();
 
-  PS(session_status) = Session::Active;
+  s_session->session_status = Session::Active;
 
   php_session_cache_limiter();
 
-  if (mod_is_open() && PS(gc_probability) > 0) {
+  if (mod_is_open() && s_session->gc_probability > 0) {
     int nrdels = -1;
 
-    int nrand = (int) ((float) PS(gc_divisor) * math_combined_lcg());
-    if (nrand < PS(gc_probability)) {
-      PS(mod)->gc(PS(gc_maxlifetime), &nrdels);
+    int nrand = (int) ((float) s_session->gc_divisor * math_combined_lcg());
+    if (nrand < s_session->gc_probability) {
+      s_session->mod->gc(s_session->gc_maxlifetime, &nrdels);
     }
   }
 
-  if (PS(session_status) != Session::Active) {
+  if (s_session->session_status != Session::Active) {
     return false;
   }
   return true;
@@ -1812,12 +1794,12 @@ static bool HHVM_FUNCTION(session_start) {
 static bool HHVM_FUNCTION(session_destroy) {
   bool retval = true;
 
-  if (PS(session_status) != Session::Active) {
+  if (s_session->session_status != Session::Active) {
     raise_warning("Trying to destroy uninitialized session");
     return false;
   }
 
-  if (!PS(mod)->destroy(PS(id).data())) {
+  if (!s_session->mod->destroy(s_session->id.data())) {
     retval = false;
     raise_warning("Session object destruction failed");
   }
@@ -1829,33 +1811,34 @@ static bool HHVM_FUNCTION(session_destroy) {
 }
 
 static void HHVM_FUNCTION(session_unset) {
-  if (PS(session_status) == Session::None) {
+  if (s_session->session_status == Session::None) {
     return;
   }
-  php_global_set(s__SESSION, init_null());
+  php_global_set(s__SESSION, empty_array());
   return;
 }
 
 static void HHVM_FUNCTION(session_write_close) {
-  if (PS(session_status) == Session::Active) {
-    PS(session_status) = Session::None;
+  if (s_session->session_status == Session::Active) {
+    s_session->session_status = Session::None;
     php_session_save_current_state();
   }
 }
 
 static bool HHVM_METHOD(SessionHandler, hhopen,
                         const String& save_path, const String& session_id) {
-  return PS(default_mod) &&
-    PS(default_mod)->open(save_path.data(), session_id.data());
+  return s_session->default_mod &&
+    s_session->default_mod->open(save_path.data(), session_id.data());
 }
 
 static bool HHVM_METHOD(SessionHandler, hhclose) {
-  return PS(default_mod) && PS(default_mod)->close();
+  return s_session->default_mod && s_session->default_mod->close();
 }
 
 static Variant HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
   String value;
-  if (PS(default_mod) && PS(default_mod)->read(PS(id).data(), value)) {
+  if (s_session->default_mod &&
+      s_session->default_mod->read(s_session->id.data(), value)) {
     php_session_decode(value);
     return value;
   }
@@ -1864,17 +1847,19 @@ static Variant HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
 
 static bool HHVM_METHOD(SessionHandler, hhwrite,
                         const String& session_id, const String& session_data) {
-  return PS(default_mod) &&
-    PS(default_mod)->write(session_id.data(), session_data.data());
+  return s_session->default_mod &&
+    s_session->default_mod->write(session_id.data(), session_data.data());
 }
 
 static bool HHVM_METHOD(SessionHandler, hhdestroy, const String& session_id) {
-  return PS(default_mod) && PS(default_mod)->destroy(session_id.data());
+  return s_session->default_mod &&
+    s_session->default_mod->destroy(session_id.data());
 }
 
 static bool HHVM_METHOD(SessionHandler, hhgc, int maxlifetime) {
   int nrdels = -1;
-  return PS(default_mod) && PS(default_mod)->gc(maxlifetime, &nrdels);
+  return s_session->default_mod &&
+    s_session->default_mod->gc(maxlifetime, &nrdels);
 }
 
 void ext_session_request_shutdown() {
@@ -1938,10 +1923,10 @@ static class SessionExtension final : public Extension {
                      IniSetting::SetAndGet<std::string>(
                        ini_on_update_save_dir, nullptr
                      ),
-                     &PS(save_path));
+                     &s_session->save_path);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.name",                    "PHPSESSID",
-                     &PS(session_name));
+                     &s_session->session_name);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.save_handler",            "files",
                      IniSetting::SetAndGet<std::string>(
@@ -1949,16 +1934,16 @@ static class SessionExtension final : public Extension {
                      ));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.auto_start",              "0",
-                     &PS(auto_start));
+                     &s_session->auto_start);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.gc_probability",          "1",
-                     &PS(gc_probability));
+                     &s_session->gc_probability);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.gc_divisor",              "100",
-                     &PS(gc_divisor));
+                     &s_session->gc_divisor);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.gc_maxlifetime",          "1440",
-                     &PS(gc_maxlifetime));
+                     &s_session->gc_maxlifetime);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.serialize_handler",       "php",
                      IniSetting::SetAndGet<std::string>(
@@ -1966,52 +1951,52 @@ static class SessionExtension final : public Extension {
                      ));
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.cookie_lifetime",         "0",
-                     &PS(cookie_lifetime));
+                     &s_session->cookie_lifetime);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.cookie_path",             "/",
-                     &PS(cookie_path));
+                     &s_session->cookie_path);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.cookie_domain",           "",
-                     &PS(cookie_domain));
+                     &s_session->cookie_domain);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.cookie_secure",           "",
-                     &PS(cookie_secure));
+                     &s_session->cookie_secure);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.cookie_httponly",         "",
-                     &PS(cookie_httponly));
+                     &s_session->cookie_httponly);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.use_cookies",             "1",
-                     &PS(use_cookies));
+                     &s_session->use_cookies);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.use_only_cookies",        "1",
-                     &PS(use_only_cookies));
+                     &s_session->use_only_cookies);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.referer_check",           "",
-                     &PS(extern_referer_chk));
+                     &s_session->extern_referer_chk);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.entropy_file",            "",
-                     &PS(entropy_file));
+                     &s_session->entropy_file);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.entropy_length",          "0",
-                     &PS(entropy_length));
+                     &s_session->entropy_length);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.cache_limiter",           "nocache",
-                     &PS(cache_limiter));
+                     &s_session->cache_limiter);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.cache_expire",            "180",
-                     &PS(cache_expire));
+                     &s_session->cache_expire);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.use_trans_sid",           "0",
                      IniSetting::SetAndGet<bool>(
                        ini_on_update_trans_sid, nullptr
                      ),
-                     &PS(use_trans_sid));
+                     &s_session->use_trans_sid);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.hash_function",           "0",
-                     &PS(hash_func));
+                     &s_session->hash_func);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.hash_bits_per_character", "4",
-                     &PS(hash_bits_per_character));
+                     &s_session->hash_bits_per_character);
   }
 
   void threadShutdown() override {

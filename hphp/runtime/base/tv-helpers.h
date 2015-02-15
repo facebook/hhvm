@@ -424,9 +424,11 @@ void tvDupWithRef(const TypedValue& frIn, TypedValue& dst) {
 }
 
 // Assumes 'to' is live
-inline void tvUnset(TypedValue * to) {
-  tvRefcountedDecRef(to);
+inline void tvUnset(TypedValue* to) {
+  auto const oldType = to->m_type;
+  auto const oldDatum = to->m_data.num;
   tvWriteUninit(to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
 /*

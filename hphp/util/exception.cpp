@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/util/exception.h"
 
 #include "hphp/util/string-vsnprintf.h"
@@ -36,12 +37,9 @@ void Exception::format(const char *fmt, va_list ap) {
   string_vsnprintf(m_msg, fmt, ap);
 }
 
-Exception::~Exception() throw() {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
-const char *Exception::what() const throw() {
+const char* Exception::what() const noexcept {
   if (m_what.empty()) {
     m_what = m_msg + "\n";
   }

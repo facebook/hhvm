@@ -25,12 +25,10 @@ namespace HPHP {
 
 class File;
 
-class StringBufferLimitException : public FatalErrorException {
-public:
+struct StringBufferLimitException : FatalErrorException {
   StringBufferLimitException(int size, const String& partialResult)
     : FatalErrorException(0, "StringBuffer exceeded %d bytes of memory", size),
       m_result(partialResult) {}
-  virtual ~StringBufferLimitException() throw() {}
 
   String m_result;
 };
@@ -42,7 +40,7 @@ public:
  * per-request smart allocated memory) based on sweeping-related assumptions.
  */
 struct StringBuffer {
-  static const int kDefaultOutputLimit = StringData::MaxSize;
+  static constexpr int kDefaultOutputLimit = StringData::MaxSize;
 
   /*
    * Construct a string buffer with some initial size, subsequent allocation

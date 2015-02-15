@@ -46,17 +46,12 @@ typedef TreadHashMap<CTCA, TCA, ctca_identity_hash> CatchTraceMap;
 struct UnwindRDS {
   _Unwind_Exception* exn;
   TypedValue unwinderTv;
-  uint64_t returnRip;
   bool doSideExit;
 };
 extern rds::Link<UnwindRDS> unwindRdsInfo;
 
 inline ptrdiff_t unwinderExnOff() {
   return unwindRdsInfo.handle() + offsetof(UnwindRDS, exn);
-}
-
-inline ptrdiff_t unwinderReturnRipOff() {
-  return unwindRdsInfo.handle() + offsetof(UnwindRDS, returnRip);
 }
 
 inline ptrdiff_t unwinderSideExitOff() {

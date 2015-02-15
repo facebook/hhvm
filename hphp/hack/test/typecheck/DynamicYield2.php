@@ -17,7 +17,7 @@ trait DynamicYield {
 class Foo {
   use DynamicYield;
 
-  private async function yieldSomeString(): Awaitable<string> {
+  private async function genSomeString(): Awaitable<string> {
     return 'hello';
   }
 }

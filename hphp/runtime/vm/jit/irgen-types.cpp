@@ -38,10 +38,12 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   const bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
   if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) return;
 
-  auto const ldPMExit = makePseudoMainExit(env);
   auto func = curFunc(env);
   auto const& tc = isReturnType ? func->returnTypeConstraint()
                                 : func->params()[id].typeConstraint;
+  if (tc.isMixed()) return;
+
+  auto const ldPMExit = makePseudoMainExit(env);
   auto val = isReturnType ? topR(env)
                           : ldLoc(env, id, ldPMExit, DataTypeSpecific);
   assert(val->type().isBoxed() || val->type().notBoxed());
@@ -72,83 +74,69 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     return;
   }
 
-  if (tc.isTypeVar()) return;
-  if (tc.isNullable() && valType.subtypeOf(Type::InitNull)) return;
+  if (tc.isNullable() && valType <= Type::InitNull) return;
 
   if (!isReturnType && tc.isArray() && !tc.isSoft() && !func->mustBeRef(id) &&
       valType <= Type::Obj) {
     PUNT(VerifyParamType-collectionToArray);
     return;
   }
-  if (tc.isCallable()) {
-    if (isReturnType) {
-      gen(env, VerifyRetCallable, val);
-    } else {
-      gen(env, VerifyParamCallable, val, cns(env, id));
-    }
-    return;
-  }
 
-  // For non-object guards, we rely on what we know from the tracelet
-  // guards and never have to do runtime checks.
-  if (!tc.isObjectOrTypeAlias()) {
-    if (!tc.checkPrimitive(valType.toDataType())) {
+  auto result = annotCompat(valType.toDataType(), tc.type(), tc.typeName());
+  switch (result) {
+    case AnnotAction::Pass:
+      return;
+    case AnnotAction::Fail:
       if (isReturnType) {
         gen(env, VerifyRetFail, val);
       } else {
         gen(env, VerifyParamFail, cns(env, id));
       }
-    }
-    return;
+      return;
+    case AnnotAction::CallableCheck:
+      if (isReturnType) {
+        gen(env, VerifyRetCallable, val);
+      } else {
+        gen(env, VerifyParamCallable, val, cns(env, id));
+      }
+      return;
+    case AnnotAction::ObjectCheck:
+      break;
   }
-  // If val is not an object, it still might pass the type constraint
-  // if the constraint is a typedef. For now we just interp that case.
-  auto const typeName = tc.typeName();
-  if (valType <= Type::Arr && interface_supports_array(typeName)) {
-    return;
-  }
-  if (valType <= Type::Str && interface_supports_string(typeName)) {
-    return;
-  }
-  if (valType <= Type::Int && interface_supports_int(typeName)) {
-    return;
-  }
-  if (valType <= Type::Dbl && interface_supports_double(typeName)) {
-    return;
-  }
+  assert(result == AnnotAction::ObjectCheck);
+
   if (!(valType <= Type::Obj)) {
-    if (tc.isObjectOrTypeAlias()
-        && RuntimeOption::RepoAuthoritative
-        && !tc.isCallable()
-        && tc.isPrecise()) {
+    // For RepoAuthoritative mode, if tc is a type alias we can optimize
+    // in some cases
+    if (tc.isObject() && RuntimeOption::RepoAuthoritative) {
       auto const td = tc.namedEntity()->getCachedTypeAlias();
-      if (tc.namedEntity()->isPersistentTypeAlias() && td) {
-        if ((td->nullable && valType <= Type::Null)
-            || td->any
-            || equivDataTypes(td->kind, valType.toDataType())) {
-          env.irb->constrainValue(val, TypeConstraint(DataTypeSpecific));
-          return;
-        }
+      if (tc.namedEntity()->isPersistentTypeAlias() && td &&
+          ((td->nullable && valType <= Type::Null) ||
+           annotCompat(valType.toDataType(), td->type,
+             td->klass ? td->klass->name() : nullptr) == AnnotAction::Pass)) {
+        env.irb->constrainValue(val, TypeConstraint(DataTypeSpecific));
+        return;
       }
     }
+    // Give up and call the interpreter
     interpOne(env, 0);
     return;
   }
 
+  // If we reach here then valType is Obj and tc is Object, Self, or Parent
   const StringData* clsName;
   const Class* knownConstraint = nullptr;
-  if (!tc.isSelf() && !tc.isParent()) {
+  if (tc.isObject()) {
     clsName = tc.typeName();
     knownConstraint = Unit::lookupClass(clsName);
   } else {
     if (tc.isSelf()) {
       tc.selfToClass(curFunc(env), &knownConstraint);
-    } else if (tc.isParent()) {
+    } else {
+      assert(tc.isParent());
       tc.parentToClass(curFunc(env), &knownConstraint);
     }
-    if (knownConstraint) {
-      clsName = knownConstraint->preClass()->name();
-    } else {
+    if (!knownConstraint) {
       // The hint was self or parent and there's no corresponding
       // class for the current func. This typehint will always fail.
       if (isReturnType) {
@@ -158,6 +146,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
       }
       return;
     }
+    clsName = knownConstraint->preClass()->name();
   }
   assert(clsName);
 
@@ -168,14 +157,18 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     knownConstraint = nullptr;
   }
 
+  // For "self" and "parent", knownConstraint should always be
+  // non-null at this point
+  assert(IMPLIES(tc.isSelf() || tc.isParent(), knownConstraint != nullptr));
+
   /*
    * If the local is a specialized object type and we don't have to constrain a
    * guard to get it, we can avoid emitting runtime checks if we know the thing
    * would pass. If we don't know, we still have to emit them because valType
    * might be a subtype of its specialized object type.
    */
-  if (valType < Type::Obj) {
-    auto const cls = valType.getClass();
+  if (valType < Type::Obj && valType.clsSpec()) {
+    auto const cls = valType.clsSpec().cls();
     if (!env.irb->constrainValue(val, TypeConstraint(cls).setWeak()) &&
         ((knownConstraint && cls->classof(knownConstraint)) ||
          cls->name()->isame(clsName))) {
@@ -284,12 +277,12 @@ folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
 
   case T::SArr:
     if (auto const arr = rat.array()) {
-      return Type::StaticArr.specialize(arr);
+      return Type::StaticArray(arr);
     }
     return Type::StaticArr;
   case T::Arr:
     if (auto const arr = rat.array()) {
-      return Type::Arr.specialize(arr);
+      return Type::Array(arr);
     }
     return Type::Arr;
 
@@ -302,13 +295,13 @@ folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
       auto const cls = Unit::lookupClassOrUniqueClass(rat.clsName());
       if (classIsUniqueOrCtxParent(env, cls)) {
         if (rat.tag() == T::OptExactObj || rat.tag() == T::ExactObj) {
-          ty = ty.specializeExact(cls);
+          ty = Type::ExactObj(cls);
         } else {
-          ty = ty.specialize(cls);
+          ty = Type::SubObj(cls);
         }
       }
       if (rat.tag() == T::OptExactObj || rat.tag() == T::OptSubObj) {
-        ty = ty | Type::InitNull;
+        ty |= Type::InitNull;
       }
       return ty;
     }
@@ -345,7 +338,7 @@ SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className) {
    * types, but if it's Gen/Cell we're going to PUNT because it's
    * natural to translate that case with control flow TODO(#2020251)
    */
-  if (Type::Obj.strictSubtypeOf(src->type())) {
+  if (Type::Obj < src->type()) {
     PUNT(InstanceOfD_MaybeObj);
   }
   if (!src->isA(Type::Obj)) {

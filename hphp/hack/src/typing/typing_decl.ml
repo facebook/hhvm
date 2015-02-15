@@ -51,10 +51,6 @@ let report_class_ready class_name =
 let remove_classes class_set =
   ClassStatus.remove_batch class_set
 
-(* For somewhat silly historical reasons having to do with the lack of
- * .hhi's for fairly core XHP classes, we unfortunately mark all XHP
- * classes as not having their members fully known *)
-let xhp_is_not_strict = true
 
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
@@ -343,11 +339,11 @@ and class_decl_if_missing class_env c =
       class_naming_and_decl class_env cid c
   end
 
-and class_naming_and_decl class_env cid c =
+and class_naming_and_decl (class_env:class_env) cid c =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
   let c = Naming.class_ class_env.nenv c in
   class_parents_decl class_env c;
-  class_decl c;
+  class_decl (Naming.typechecker_options class_env.nenv) c;
   (* It is important to add the "named" ast (nast.ml) only
    * AFTER we are done declaring the type type of the class.
    * Otherwise there is a subtle race condition.
@@ -397,7 +393,7 @@ and class_is_abstract c =
     | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
     | _ -> false
 
-and class_decl c =
+and class_decl tcopt c =
   let is_abstract = class_is_abstract c in
   let cls_pos, cls_name = c.c_name in
   let env = Typing_env.empty (Pos.filename cls_pos) in
@@ -467,9 +463,15 @@ and class_decl c =
        || DynamicYield.contains_dynamic_yield_interface req_ancestors_extends
        || DynamicYield.contains_dynamic_yield req_ancestors_extends)
   in
-  let env, m = if dy_check then DynamicYield.decl env m else env, m in
+  let env, m = if dy_check
+    then
+      (* let () = Printf.printf "DynamicYield.decl %s\n" cls_name in  *)
+      DynamicYield.decl env m
+    else env, m
+  in
   let ext_strict = List.fold_left (trait_exists env) ext_strict c.c_uses in
-  let not_strict_because_xhp = xhp_is_not_strict && c.c_is_xhp in
+  let unsafe_xhp = TypecheckerOptions.unsafe_xhp tcopt in
+  let not_strict_because_xhp = unsafe_xhp && c.c_is_xhp in
   if not ext_strict && not not_strict_because_xhp && (Env.is_strict env) then
     let p, name = c.c_name in
     Errors.strict_members_not_known p name

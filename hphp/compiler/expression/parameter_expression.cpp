@@ -170,7 +170,7 @@ void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
 
 static bool useHackTypeHintErrorMessage(const char* hint) {
   String typeName(hint);
-  MaybeDataType dt = TypeConstraint::typeNameToMaybeDataType(typeName.get());
+  MaybeDataType dt = nameToMaybeDataType(typeName.get());
   if (!dt.hasValue()) {
     return false;
   }

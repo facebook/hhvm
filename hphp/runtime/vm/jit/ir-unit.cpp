@@ -67,7 +67,7 @@ SSATmp* IRUnit::findConst(Type type) {
   IRInstruction inst(DefConst, BCMarker{});
   inst.setTypeParam(type);
   if (SSATmp* tmp = m_constTable.lookup(&inst)) {
-    assert(tmp->type().equals(type));
+    assert(tmp->type() == type);
     return tmp;
   }
   return m_constTable.insert(cloneInstruction(&inst)->dst());
@@ -164,7 +164,7 @@ void IRUnit::collectPostConditions() {
       auto const fpRelative    = spOffset - instRelative;
       int32_t const spRelative = physSPOff - fpRelative;
       auto const t = state.stackType(spRelative);
-      if (!t.equals(Type::StkElem)) {
+      if (t != Type::StkElem) {
         FTRACE(1, "Stack({}, {}): {}\n", instRelative, fpRelative, t);
         m_postConds.push_back({
           RegionDesc::Location::Stack{instRelative, fpRelative},
@@ -177,7 +177,7 @@ void IRUnit::collectPostConditions() {
   if (state.fp() != nullptr) {
     for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
       auto t = state.localType(i);
-      if (!t.equals(Type::Gen)) {
+      if (t != Type::Gen) {
         FTRACE(1, "Local {}: {}\n", i, t.toString());
         m_postConds.push_back({ RegionDesc::Location::Local{i}, t });
       }

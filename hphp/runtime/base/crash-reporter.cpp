@@ -31,6 +31,17 @@ namespace HPHP {
 bool IsCrashing = false;
 
 static void bt_handler(int sig) {
+  if (RuntimeOption::StackTraceTimeout > 0) {
+    if (IsCrashing && sig == SIGALRM) {
+      // Raising the previous signal does not terminate the program.
+      signal(SIGABRT, SIG_DFL);
+      abort();
+    } else {
+      signal(SIGALRM, bt_handler);
+      alarm(RuntimeOption::StackTraceTimeout);
+    }
+  }
+
   // In case we crash again in the signal hander or something
   signal(sig, SIG_DFL);
   IsCrashing = true;

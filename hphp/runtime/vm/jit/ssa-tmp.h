@@ -61,13 +61,12 @@ public:
   Variant            variantVal() const;
 
   /*
-   * Returns: Type::subtypeOf(type(), tag).
+   * @returns: type() <= tag
    *
-   * This should be used for most checks on the types of IRInstruction
-   * sources.
+   * This should be used for most checks on the types of IRInstruction sources.
    */
   bool isA(Type tag) const {
-    return type().subtypeOf(tag);
+    return type() <= tag;
   }
 
   /*

@@ -412,35 +412,22 @@ ALWAYS_INLINE
 static bool VerifyTypeSlowImpl(const Class* cls,
                                const Class* constraint,
                                const HPHP::TypeConstraint* expected) {
-  if (LIKELY(constraint && cls->classof(constraint))) {
-    return true;
+  // This helper should only be called for the Object, Self, and Parent cases
+  assert(expected->isObject() || expected->isSelf() || expected->isParent());
+  // For the Self and Parent cases, we must always have a resolved class for
+  // the constraint
+  assert(IMPLIES(
+    expected->isSelf() || expected->isParent(), constraint != nullptr));
+  // If we have a resolved class for the constraint, all we have to do is
+  // check if the value's class is compatible with it
+  if (LIKELY(constraint != nullptr)) {
+    return cls->classof(constraint);
   }
-  // Check a typedef for a class.  We interp'd if the param wasn't an
-  // object, so if it's a typedef for something non-objecty we're
-  // failing anyway.
-  if (auto namedEntity = expected->namedEntity()) {
-    auto def = namedEntity->getCachedTypeAlias();
-    if (UNLIKELY(!def)) {
-      VMRegAnchor _;
-      String nameStr(const_cast<StringData*>(expected->typeName()));
-      if (AutoloadHandler::s_instance->autoloadType(nameStr)) {
-        def = namedEntity->getCachedTypeAlias();
-      }
-    }
-    if (def) {
-      // There's no need to handle nullable typedefs specially here:
-      // we already know we're checking a non-null object with the
-      // class `cls'.  We do however need to check for typedefs to
-      // mixed.
-      if (def->any) {
-        return true;
-      } else if (def->kind == KindOfObject) {
-        constraint = def->klass;
-        if (constraint && cls->classof(constraint)) return true;
-      }
-    }
-  }
-  return false;
+  // The Self and Parent cases should never reach here because they were
+  // handled above
+  assert(expected->isObject());
+  // Handle the case where the constraint is a type alias
+  return expected->checkTypeAliasObj(cls);
 }
 
 void VerifyParamTypeSlow(const Class* cls,

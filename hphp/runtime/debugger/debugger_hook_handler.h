@@ -43,9 +43,11 @@ struct DebuggerHookHandler : DebugHookHandler {
     Debugger::InterruptVMHook(ExceptionHandler);
   }
 
-  void onError(const ExtendedException &ee,
-                       int errnum,
-                       const std::string& message) override {
+  void onError(
+    const ExtendedException& ee,
+    int errnum,
+    const std::string& message
+  ) override {
     Debugger::InterruptVMHook(ExceptionThrown, String(message));
   }
 

@@ -17,22 +17,20 @@
 #ifndef incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
 #define incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
 
-#include "hphp/runtime/base/thrift-buffer.h"
 #include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/base/thrift-buffer.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+/*
  * Wire format and buffer for socket communication between DebuggerClient and
  * DebuggerProxy.
  */
-class DebuggerThriftBuffer: public ThriftBuffer {
-public:
-  static const int BUFFER_SIZE = 1024;
+struct DebuggerThriftBuffer : ThriftBuffer {
+  static constexpr int BUFFER_SIZE = 1024;
 
-public:
   DebuggerThriftBuffer()
     : ThriftBuffer(BUFFER_SIZE, VariableSerializer::Type::DebuggerSerialize) {}
 
@@ -50,7 +48,7 @@ public:
 protected:
   virtual String readImpl();
   virtual void flushImpl(const String& data);
-  virtual void throwError(const char *msg, int code);
+  virtual void throwError(const char* msg, int code);
 
 private:
   char m_buffer[BUFFER_SIZE + 1];
@@ -59,14 +57,14 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DebuggerWireHelpers {
-public:
+struct DebuggerWireHelpers {
   enum SError { // SerializationError
     NoError,
     HitLimit,
     UnknownError,
     TypeMismatch,
   };
+
   // Serialization functions for Array, Object, and Variant
   // Return true on success, false on error
   // On error, the result would be a special string indicating the error

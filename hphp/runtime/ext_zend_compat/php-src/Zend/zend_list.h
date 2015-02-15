@@ -35,21 +35,8 @@ BEGIN_EXTERN_C()
 namespace HPHP {
   struct ZendResourceData : ResourceData {
     ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
-    ZendResourceData() {}
     ~ZendResourceData();
 
-    /*
-     * These operator new() overloads let us smart-allocate these ResourceDatas
-     * in the Zend compat layer without a profusion of #ifdef's.
-     *
-     * The second overload is used by `newres()`.
-     */
-    static void* operator new(size_t) {
-      return newres<ZendResourceData>();
-    }
-    static void* operator new(size_t sz, void* p) {
-      return ::operator new(sz, p);
-    }
     DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZendResourceData)
 
     const String& o_getClassNameHook() const;
@@ -61,8 +48,9 @@ namespace HPHP {
   };
 
   struct ZendNormalResourceDataHolder : ZendResourceData {
-    explicit ZendNormalResourceDataHolder(ResourceData* rd) :
-        ZendResourceData(nullptr, -1), m_rd(rd) {}
+    explicit ZendNormalResourceDataHolder(ResourceData* rd)
+      : ZendResourceData(nullptr, -1), m_rd(rd) {
+    }
     ~ZendNormalResourceDataHolder() {}
 
     DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZendNormalResourceDataHolder)
@@ -73,9 +61,10 @@ namespace HPHP {
   };
 };
 
-typedef HPHP::ZendResourceData zend_rsrc_list_entry;
+using zend_rsrc_list_entry = HPHP::ZendResourceData;
 
 #else
+#error This should only build with HHVM defined. old code follows as docs.
 
 typedef struct _zend_rsrc_list_entry {
   void *ptr;

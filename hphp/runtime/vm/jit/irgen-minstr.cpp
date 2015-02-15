@@ -192,8 +192,8 @@ bool constrainCollectionOpBase(MTS& env) {
     case SimpleOp::Map:
     case SimpleOp::Pair:
       always_assert(env.base.type < Type::Obj &&
-                    env.base.type.isSpecialized());
-      constrainBase(env, TypeConstraint(env.base.type.getClass()));
+                    env.base.type.clsSpec());
+      constrainBase(env, TypeConstraint(env.base.type.clsSpec().cls()));
       return true;
   }
 
@@ -203,9 +203,9 @@ bool constrainCollectionOpBase(MTS& env) {
 
 void specializeBaseIfPossible(MTS& env, Type baseType) {
   if (constrainCollectionOpBase(env)) return;
-  if (baseType >= Type::Obj) return;
-  if (!baseType.isSpecialized()) return;
-  constrainBase(env, TypeConstraint(baseType.getClass()));
+  if (baseType < Type::Obj && baseType.clsSpec()) {
+    constrainBase(env, TypeConstraint(baseType.clsSpec().cls()));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -243,7 +243,7 @@ SSATmp* ptrToUninit(HTS& env) {
 
 bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
                               PropInfo propInfo) {
-  if (convertToType(propInfo.repoAuthType).not(Type::Uninit)) {
+  if (!convertToType(propInfo.repoAuthType).maybe(Type::Uninit)) {
     return false;
   }
   if (!cls) return true;
@@ -332,8 +332,9 @@ void checkMIState(MTS& env) {
   const bool simpleArrayIsset = isIssetM && singleElem && baseArr;
 
   // IssetM with one vector array element and a collection type
-  const bool simpleCollectionIsset = isIssetM && singleElem &&
-    baseType < Type::Obj && isOptimizableCollectionClass(baseType.getClass());
+  const bool simpleCollectionIsset =
+    isIssetM && singleElem && baseType < Type::Obj &&
+    isOptimizableCollectionClass(baseType.clsSpec().cls());
 
   // UnsetM on an array with one vector element
   const bool simpleArrayUnset = isUnsetM && singleElem &&
@@ -342,9 +343,10 @@ void checkMIState(MTS& env) {
   // CGetM on an array with a base that won't use MInstrState. Str
   // will use tvScratch and Obj will fatal or use tvRef.
   const bool simpleArrayGet = isCGetM && singleElem &&
-    baseType.not(Type::Str | Type::Obj);
-  const bool simpleCollectionGet = isCGetM && singleElem &&
-    baseType < Type::Obj && isOptimizableCollectionClass(baseType.getClass());
+    !baseType.maybe(Type::Str | Type::Obj);
+  const bool simpleCollectionGet =
+    isCGetM && singleElem && baseType < Type::Obj &&
+    isOptimizableCollectionClass(baseType.clsSpec().cls());
   const bool simpleStringOp = (isCGetM || isIssetM) && isSingle &&
     isSimpleBase(env) && mcodeMaybeArrayIntKey(env.immVecM[0]) &&
     baseType <= Type::Str;
@@ -355,7 +357,7 @@ void checkMIState(MTS& env) {
       simpleArrayIsset || simpleStringOp) {
     env.needMIS = false;
     if (simpleCollectionGet || simpleCollectionIsset) {
-      constrainBase(env, TypeConstraint(baseType.getClass()));
+      constrainBase(env, TypeConstraint(baseType.clsSpec().cls()));
     } else {
       constrainBase(env, DataTypeSpecific);
     }
@@ -511,10 +513,10 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
     if (baseType <= Type::Arr) {
       auto isPacked = false;
       auto isStruct = false;
-      if (baseType.isSpecialized() && baseType.hasArrayKind()) {
-        isPacked = baseType.getArrayKind() == ArrayData::kPackedKind;
-        isStruct = baseType.getArrayKind() == ArrayData::kStructKind
-          && !!baseType.getArrayShape();
+      if (auto arrSpec = baseType.arrSpec()) {
+        isPacked = arrSpec.kind() == ArrayData::kPackedKind;
+        isStruct = arrSpec.kind() == ArrayData::kStructKind &&
+                   arrSpec.shape() != nullptr;
       }
       if (mcodeIsElem(env.immVecM[0])) {
         SSATmp* key = getInput(env, env.mii.valCount() + 1, DataTypeGeneric);
@@ -524,7 +526,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
               return isPacked ? SimpleOp::PackedArray
                               : SimpleOp::ProfiledPackedArray;
             } else if (key->isConst(Type::StaticStr)) {
-              if (!isStruct || !baseType.getArrayShape()) {
+              if (!isStruct || !baseType.arrSpec().shape()) {
                 return SimpleOp::ProfiledStructArray;
               }
               return SimpleOp::StructArray;
@@ -543,11 +545,11 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
           return SimpleOp::String;
         }
       }
-    } else if (baseType.strictSubtypeOf(Type::Obj)) {
-      const Class* klass = baseType.getClass();
-      auto const isVector    = klass == c_Vector::classof();
-      auto const isPair      = klass == c_Pair::classof();
-      auto const isMap       = klass == c_Map::classof();
+    } else if (baseType < Type::Obj) {
+      const Class* klass = baseType.clsSpec().cls();
+      auto const isVector = klass == c_Vector::classof();
+      auto const isPair   = klass == c_Pair::classof();
+      auto const isMap    = klass == c_Map::classof();
 
       if (isVector || isPair) {
         if (mcodeMaybeVectorKey(env.immVecM[0])) {
@@ -729,8 +731,8 @@ void emitBaseOp(MTS& env) {
 PropInfo getCurrentPropertyOffset(MTS& env, const Class*& knownCls) {
   auto const baseType = env.base.type.derefIfPtr();
   if (!knownCls) {
-    if (baseType < (Type::Obj|Type::InitNull) && baseType.isSpecialized()) {
-      knownCls = baseType.getClass();
+    if (baseType < (Type::Obj|Type::InitNull) && baseType.clsSpec()) {
+      knownCls = baseType.clsSpec().cls();
     }
   }
 
@@ -746,7 +748,7 @@ PropInfo getCurrentPropertyOffset(MTS& env, const Class*& knownCls) {
                                       env.mii, env.mInd, env.iInd);
   if (info.offset == -1) return info;
 
-  auto const baseCls = baseType.getClass();
+  auto const baseCls = baseType.clsSpec().cls();
 
   /*
    * baseCls and knownCls may differ due to a number of factors but they must
@@ -931,7 +933,7 @@ void emitPropGeneric(MTS& env) {
   auto const mCode = env.immVecM[env.mInd];
   auto const mia = MInstrAttr(env.mii.getAttr(mCode) & MIA_intermediate_prop);
 
-  if ((mia & MIA_unset) && env.base.type.strip().not(Type::Obj)) {
+  if ((mia & MIA_unset) && !env.base.type.strip().maybe(Type::Obj)) {
     constrainBase(env, DataTypeSpecific);
     setBase(env, ptrToInitNull(env));
     return;
@@ -1009,7 +1011,7 @@ void emitElem(MTS& env) {
       setBase(env, uninit);
       return;
     }
-    if (baseType.not(Type::Arr | Type::Obj)) {
+    if (!baseType.maybe(Type::Arr | Type::Obj)) {
       setBase(env, uninit);
       return;
     }
@@ -1068,8 +1070,8 @@ bool needFirstRatchet(const MTS& env) {
     if (mcodeIsElem(env.immVecM[0])) return false;
     return true;
   }
-  if (firstTy < Type::Obj && firstTy.isSpecialized()) {
-    auto const klass = firstTy.getClass();
+  if (firstTy < Type::Obj && firstTy.clsSpec()) {
+    auto const klass = firstTy.clsSpec().cls();
     auto const no_overrides = AttrNoOverrideMagicGet|
                               AttrNoOverrideMagicSet|
                               AttrNoOverrideMagicIsset|
@@ -1259,7 +1261,7 @@ void numberStackInputs(MTS& env) {
 
 SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
   assert(base->isA(Type::Arr) &&
-         base->type().getArrayKind() == ArrayData::kPackedKind);
+         base->type().arrSpec().kind() == ArrayData::kPackedKind);
 
   auto doLdElem = [&] {
     auto res = gen(env, LdPackedArrayElem, base, key);
@@ -1292,13 +1294,13 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
 
 SSATmp* emitStructArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
   assert(base->isA(Type::Arr));
-  assert(base->type().getArrayKind() == ArrayData::kStructKind);
-  assert(base->type().getArrayShape());
+  assert(base->type().arrSpec().kind() == ArrayData::kStructKind);
+  assert(base->type().arrSpec().shape());
   assert(key->isConst(Type::Str));
   assert(key->strVal()->isStatic());
 
   const auto keyStr = key->strVal();
-  const auto shape = base->type().getArrayShape();
+  const auto shape = base->type().arrSpec().shape();
   auto offset = shape->offsetFor(keyStr);
 
   if (offset == PropertyTable::kInvalidOffset) {
@@ -1332,7 +1334,7 @@ void emitProfiledPackedArrayGet(MTS& env, SSATmp* key) {
     auto const data = prof.data(NonPackedArrayProfile::reduce);
     // NonPackedArrayProfile data counts how many times a non-packed array was
     // observed.  Zero means it was monomorphic (or never executed).
-    auto const typePackedArr = Type::Arr.specialize(ArrayData::kPackedKind);
+    auto const typePackedArr = Type::Array(ArrayData::kPackedKind);
     if (env.base.type.maybe(typePackedArr) &&
         (data.count == 0 || RuntimeOption::EvalJitPGOArrayGetStress)) {
       // It's safe to side-exit still because we only do these profiled array
@@ -1382,16 +1384,15 @@ void emitProfiledStructArrayGet(MTS& env, SSATmp* key) {
     // monomorphic, we'll emit a check for that specific Shape. If we're
     // polymorphic, we'll also fall back to generic get. Eventually we'd like
     // to emit an inline cache, which should be faster than calling out of line.
-    auto typeStructArr = Type::Arr.specialize(ArrayData::kStructKind);
-    if (env.base.type.maybe(typeStructArr)) {
+    if (env.base.type.maybe(Type::Array(ArrayData::kStructKind))) {
       if (data.nonStructCount == 0 && data.isMonomorphic()) {
-        typeStructArr = Type::Arr.specialize(data.getShape());
         // It's safe to side-exit still because we only do these profiled array
         // gets on the first element, with simple bases and single-element dims.
         // See computeSimpleCollectionOp.
         auto const exit = makeExit(env);
-        setBase(env,
-          gen(env, CheckType, typeStructArr, exit, env.base.value));
+        auto const ssa = gen(
+          env, CheckType, Type::Array(data.getShape()), exit, env.base.value);
+        setBase(env, ssa);
         env.irb.constrainValue(
           env.base.value,
           TypeConstraint(DataTypeSpecialized).setWantArrayShape()
@@ -1449,7 +1450,7 @@ void emitPairGet(MTS& env, SSATmp* key) {
 }
 
 void emitPackedArrayIsset(MTS& env) {
-  assert(env.base.type.getArrayKind() == ArrayData::kPackedKind);
+  assert(env.base.type.arrSpec().kind() == ArrayData::kPackedKind);
   auto const key = getKey(env);
   env.result = cond(
     env,
@@ -1646,7 +1647,7 @@ void emitBindProp(MTS& env) {
 
 void emitUnsetProp(MTS& env) {
   auto const key = getKey(env);
-  if (env.base.type.strip().not(Type::Obj)) {
+  if (!env.base.type.strip().maybe(Type::Obj)) {
     // Noop
     constrainBase(env, DataTypeSpecific);
     return;
@@ -1795,7 +1796,7 @@ void emitSetElem(MTS& env) {
       env.result = result;
       gen(env, DecRef, value);
     } else {
-      assert(t.equals(Type::CountedStr | Type::Nullptr));
+      assert(t == (Type::CountedStr | Type::Nullptr));
       // Base might be a string. Assume the result is value, then inform
       // emitMPost that it needs to test the actual result.
       env.result = value;
@@ -1851,7 +1852,7 @@ void emitUnsetElem(MTS& env) {
         cns(env, makeStaticString(Strings::CANT_UNSET_STRING)));
     return;
   }
-  if (baseType.not(Type::Arr | Type::Obj)) {
+  if (!baseType.maybe(Type::Arr | Type::Obj)) {
     // Noop
     return;
   }

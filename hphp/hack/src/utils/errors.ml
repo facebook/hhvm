@@ -211,7 +211,7 @@ module Typing                               = struct
   let cyclic_typedef                        = 4014 (* DONT MODIFY!!!! *)
   let discarded_awaitable                   = 4015 (* DONT MODIFY!!!! *)
   let isset_empty_unset_in_strict           = 4016 (* DONT MODIFY!!!! *)
-  let dynamic_yield_private                 = 4017 (* DONT MODIFY!!!! *)
+  (* DEPRECATED dynamic_yield_private       = 4017 *)
   let enum_constant_type_bad                = 4018 (* DONT MODIFY!!!! *)
   let enum_switch_nonexhaustive             = 4019 (* DONT MODIFY!!!! *)
   let enum_switch_not_const                 = 4020 (* DONT MODIFY!!!! *)
@@ -995,10 +995,6 @@ let class_arity usage_pos class_pos class_name arity =
     [usage_pos, ("The class "^(Utils.strip_ns class_name)^" expects "^
                     soi arity^" arguments");
      class_pos, "Definition is here"]
-
-let dynamic_yield_private pos =
-  add_list Typing.dynamic_yield_private
-    [pos, "DynamicYield cannot see private methods in subclasses"]
 
 let expecting_type_hint p =
   add Typing.expecting_type_hint p "Was expecting a type hint"

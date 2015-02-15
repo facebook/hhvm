@@ -92,6 +92,10 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D);
 ZEND_API void zend_ini_sort_entries(TSRMLS_D);
 
 ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int module_number TSRMLS_DC);
+ZEND_API int zend_register_ini_entries_of_certain_mode(
+  const zend_ini_entry *ini_entry,
+  int module_number,
+  int acceptable_mode_mask TSRMLS_DC);
 ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC);
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC);
 ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage);

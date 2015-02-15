@@ -194,7 +194,25 @@ struct ObjectData {
   double toDouble() const;
   Array toArray(bool pubOnly = false) const;
 
+  /*
+   * Call this object's destructor, if it has one. The object's refcount must
+   * be be 0 or 1 on entry to this function.
+   *
+   * Returns true iff the object should be deleted (meaning it wasn't
+   * resurrected in the destructor).
+   */
   bool destruct();
+
+  /*
+   * Call this object's destructor, if it has one. No restrictions are placed
+   * on the object's refcount, since this is used on objects still alive at
+   * request shutdown.
+   */
+  void destructForExit();
+
+ private:
+  template<bool forExit> bool destructImpl();
+ public:
 
   Array o_toIterArray(const String& context, bool getRef = false);
 

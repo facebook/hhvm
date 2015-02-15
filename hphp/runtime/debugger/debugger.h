@@ -17,36 +17,37 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_H_
 #define incl_HPHP_EVAL_DEBUGGER_H_
 
+#include <set>
 #include <vector>
 
-#include "hphp/util/lock.h"
-#include "hphp/runtime/debugger/debugger_proxy.h"
-#include "hphp/runtime/base/program-functions.h"
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_queue.h>
-#include <set>
+
+#include "hphp/runtime/debugger/debugger_proxy.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 struct ThreadInfo;
 }
 
 namespace HPHP { namespace Eval {
+///////////////////////////////////////////////////////////////////////////////
+
+struct CmdInterrupt;
+struct DebuggerClientOptions;
 
 // Tag used on server log messages to highlight that they are likely useful to
 // show to users.
 #define DEBUGGER_LOG_TAG "[DBGINFO] "
 
-///////////////////////////////////////////////////////////////////////////////
-// The Debugger generally manages proxies, sandboxes, and is the inital handler
-// of interrupts from the VM. It associates VM threads with sandboxes, and
-// sandboxes with proxies. Interrupts get minimal handling before being handed
-// off to the proper proxy.
-
-struct CmdInterrupt;
-
-class Debugger {
-public:
-  Debugger() : m_usageLogger(nullptr) {}
+/*
+ * The Debugger generally manages proxies, sandboxes, and is the inital handler
+ * of interrupts from the VM. It associates VM threads with sandboxes, and
+ * sandboxes with proxies. Interrupts get minimal handling before being handed
+ * off to the proper proxy.
+ */
+struct Debugger {
+  Debugger() {}
 
   // Start/stop Debugger for remote debugging.
   static bool StartServer();
@@ -57,7 +58,7 @@ public:
   static void RegisterSandbox(const DSandboxInfo &sandbox);
   static void UnregisterSandbox(const String& id);
 
-  //  Add/remove/change DebuggerProxy.
+  // Add/remove/change DebuggerProxy.
   static DebuggerProxyPtr CreateProxy(SmartPtr<Socket> socket, bool local);
   static void RemoveProxy(DebuggerProxyPtr proxy);
   static bool SwitchSandbox(DebuggerProxyPtr proxy, const std::string &newId,
@@ -118,8 +119,10 @@ private:
   static Debugger s_debugger;
   static bool s_clientStarted;
 
-  static void Interrupt(int type, const char *program,
-                        InterruptSite *site = nullptr, const char *error = nullptr);
+  static void Interrupt(int type,
+                        const char* program,
+                        InterruptSite* site = nullptr,
+                        const char* error = nullptr);
   static void InterruptWithUrl(int type, const char *url);
 
   static const char *InterruptTypeName(CmdInterrupt &cmd);
@@ -131,8 +134,11 @@ private:
   // proxy attached to this process, keyed by the sandbox being debugged. It
   // also contains an entry for the proxy's dummy sandbox, keyed by the dummy
   // sandbox id which is basically the proxy pointer rendered as a string.
-  typedef tbb::concurrent_hash_map<const StringData*, DebuggerProxyPtr,
-                                   StringDataHashCompare> ProxyMap;
+  using ProxyMap = tbb::concurrent_hash_map<
+    const StringData*,
+    DebuggerProxyPtr,
+    StringDataHashCompare
+  >;
   ProxyMap m_proxyMap;
 
   // Map of "sandbox id"->"sandbox info" for any sandbox the process has seen.
@@ -140,22 +146,28 @@ private:
   // to a new sandbox id is made via CmdMachine. The latter alows a debugger to
   // "pre-attach" to a sandbox before the first request is every received.
   // Entries are never removed.
-  typedef tbb::concurrent_hash_map<const StringData*, DSandboxInfoPtr,
-                                   StringDataHashCompare> SandboxMap;
+  using SandboxMap = tbb::concurrent_hash_map<
+    const StringData*,
+    DSandboxInfoPtr,
+    StringDataHashCompare
+  >;
   SandboxMap m_sandboxMap;
 
   // Map of "sandbox id"->"set of threads executing requests in the sandbox".
-  typedef std::set<ThreadInfo*> ThreadInfoSet;
-  typedef tbb::concurrent_hash_map<const StringData*, ThreadInfoSet,
-                                   StringDataHashCompare> SandboxThreadInfoMap;
+  using ThreadInfoSet = std::set<ThreadInfo*>;
+  using SandboxThreadInfoMap = tbb::concurrent_hash_map<
+    const StringData*,
+    ThreadInfoSet,
+    StringDataHashCompare
+  >;
   SandboxThreadInfoMap m_sandboxThreadInfoMap;
 
   // "thread id"->"thread info". Each thread which is being debugged is
   // added to this map.
-  typedef tbb::concurrent_hash_map<int64_t, ThreadInfo*> ThreadInfoMap;
+  using ThreadInfoMap = tbb::concurrent_hash_map<int64_t, ThreadInfo*>;
   ThreadInfoMap m_threadInfos;
 
-  typedef tbb::concurrent_queue<DebuggerProxyPtr> RetiredProxyQueue;
+  using RetiredProxyQueue = tbb::concurrent_queue<DebuggerProxyPtr>;
   RetiredProxyQueue m_retiredProxyQueue;
 
   bool isThreadDebugging(int64_t id);
@@ -189,20 +201,20 @@ private:
 
   // A usage logger which is set by a provider to an implementation-specific
   // subclass if usage logging is enabled.
-  DebuggerUsageLogger *m_usageLogger;
+  DebuggerUsageLogger* m_usageLogger{nullptr};
 };
 
-class DebuggerDummyEnv {
-public:
+struct DebuggerDummyEnv {
   DebuggerDummyEnv();
   ~DebuggerDummyEnv();
 };
 
-// Suppress the debugger's ability to get interrupted while executing PHP.
-// Primarily used to suppress debugger events while evaling PHP in response
-// to commands like print, or for expressions in conditional breakpoints.
-class EvalBreakControl {
-public:
+/*
+ * Suppress the debugger's ability to get interrupted while executing PHP.
+ * Primarily used to suppress debugger events while evaling PHP in response to
+ * commands like print, or for expressions in conditional breakpoints.
+ */
+struct EvalBreakControl {
   explicit EvalBreakControl(bool noBreak);
   ~EvalBreakControl();
 private:

@@ -448,7 +448,7 @@ Vlabel CodeGenerator::label(Block* b) {
 void CodeGenerator::emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
                                         Vloc src, Type srcType) {
   if (srcType.needsValueReg()) {
-    if (srcType.subtypeOf(Type::Bool)) {
+    if (srcType <= Type::Bool) {
       auto extended = v.makeReg();
       v << movzbq{src.reg(0), extended};
       v << store{extended, base[offset + TVOFF(m_data)]};
@@ -564,8 +564,11 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
   auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 1).reg()};
-  v << jmpi{mcg->tx().uniqueStubs.endCatchHelper, kCrossTraceRegs};
+  // NB: syncing rVmSp is not necessary at EndCatch, because the unwinder
+  // ignores it.
+  v << vcall{CppCall::direct(unwindResumeHelper), v.makeVcallArgs({{}}),
+             v.makeTuple({})};
+  v << ud2{};
 }
 
 void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
@@ -1319,7 +1322,6 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
 template<class DataLoc, class JmpFn>
 void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
                                             JmpFn doJcc) {
-  assert(type.isSpecialized());
   if (type < Type::Res) {
     // No cls field in Resource
     always_assert(0 && "unexpected guard on specialized Resource");
@@ -1327,20 +1329,27 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
 
   auto& v = vmain();
   if (type < Type::Obj) {
-    // emit the specific class test
-    assert(type.getClass()->attrs() & AttrNoOverride);
+    // Emit the specific class test.
+    assert(type.clsSpec());
+    assert(type.clsSpec().cls()->attrs() & AttrNoOverride);
+
     auto reg = getDataPtrEnregistered(v, dataSrc);
-    emitCmpClass(v, sf, type.getClass(), reg[ObjectData::getVMClassOffset()]);
+    emitCmpClass(v, sf, type.clsSpec().cls(),
+                 reg[ObjectData::getVMClassOffset()]);
     doJcc(CC_E, sf);
   } else {
-    assert(type < Type::Arr);
+    assert(type < Type::Arr && type.arrSpec() && type.arrSpec().kind());
+
+    auto arrSpec = type.arrSpec();
     auto reg = getDataPtrEnregistered(v, dataSrc);
-    v << cmpbim{type.getArrayKind(), reg[ArrayData::offsetofKind()], sf};
+
+    v << cmpbim{*arrSpec.kind(), reg[ArrayData::offsetofKind()], sf};
     doJcc(CC_E, sf);
-    if (type.getArrayKind() == ArrayData::kStructKind && type.getArrayShape()) {
+
+    if (arrSpec.kind() == ArrayData::kStructKind && arrSpec.shape()) {
       auto newSf = v.makeReg();
       auto offset = StructArray::shapeOffset();
-      v << cmpqm{v.cns(type.getArrayShape()), reg[offset], newSf};
+      v << cmpqm{v.cns(arrSpec.shape()), reg[offset], newSf};
       doJcc(CC_E, newSf);
     }
   }
@@ -1719,8 +1728,8 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
 void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
   DEBUG_ONLY auto const ty = inst->src(0)->type();
   assert(ty < Type::Obj &&
-         ty.getClass() &&
-         ty.getClass()->isCollectionClass());
+         ty.clsSpec().cls() &&
+         ty.clsSpec().cls()->isCollectionClass());
   auto& v = vmain();
   auto const sf = v.makeReg();
   v << cmplim{0, srcLoc(inst, 0).reg()[FAST_COLLECTION_SIZE_OFFSET], sf};
@@ -1730,8 +1739,8 @@ void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
 void CodeGenerator::cgColIsNEmpty(IRInstruction* inst) {
   DEBUG_ONLY auto const ty = inst->src(0)->type();
   assert(ty < Type::Obj &&
-         ty.getClass() &&
-         ty.getClass()->isCollectionClass());
+         ty.clsSpec().cls() &&
+         ty.clsSpec().cls()->isCollectionClass());
   auto& v = vmain();
   auto const sf = v.makeReg();
   v << cmplim{0, srcLoc(inst, 0).reg()[FAST_COLLECTION_SIZE_OFFSET], sf};
@@ -2504,8 +2513,6 @@ struct CheckValid<void(*)(Vout&)> {
 //
 // Using the given dataReg, this method generates code that checks the static
 // bit out of dataReg, and emits a DecRef if needed.
-// NOTE: the flags are left with the result of the DecRef's subtraction,
-//       which can then be tested immediately after this.
 //
 // We've tried a variety of tweaks to this and found the current state of
 // things optimal, at least when the measurements were made:
@@ -2561,12 +2568,10 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
   }
 
   auto static_check_and_decl = [&](Vout& v) {
-    if (type.needsStaticBitCheck()) {
-      auto next = v.makeBlock();
-      assert(sf!= InvalidReg);
-      v << jcc{CC_L, sf, {next, done}};
-      v = next;
-    }
+    auto next = v.makeBlock();
+    assert(sf != InvalidReg);
+    v << jcc{CC_L, sf, {next, done}};
+    v = next;
 
     // Decrement _count
     sf = v.makeReg();
@@ -2584,11 +2589,9 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
                unlikelyDestroy);
     return;
   }
-  if (type.needsStaticBitCheck()) {
-    sf = v.makeReg();
-    v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET], sf};
-  }
 
+  sf = v.makeReg();
+  v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET], sf};
   static_check_and_decl(v);
 }
 
@@ -3728,8 +3731,8 @@ void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(inst, 0).reg();
   auto dstReg = dstLoc(inst, 0).reg();
-  assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::classof());
+  assert(vec->type() < Type::Obj &&
+         vec->type().clsSpec().cls() == c_Vector::classof());
   vmain() << loadzlq{vecReg[c_Vector::sizeOffset()], dstReg};
 }
 
@@ -3737,14 +3740,14 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(inst, 0).reg();
   auto dstReg = dstLoc(inst, 0).reg();
-  assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::classof());
+  assert(vec->type() < Type::Obj &&
+         vec->type().clsSpec().cls() == c_Vector::classof());
   vmain() << load{vecReg[c_Vector::dataOffset()], dstReg};
 }
 
 void CodeGenerator::cgLdColArray(IRInstruction* inst) {
   auto const src = inst->src(0);
-  auto const cls = src->type().getClass();
+  auto const cls = src->type().clsSpec().cls();
   auto const rsrc = srcLoc(inst, 0).reg();
   auto const rdst = dstLoc(inst, 0).reg();
   auto& v = vmain();
@@ -3772,8 +3775,8 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   auto vecReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
 
-  assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::classof());
+  assert(vec->type() < Type::Obj &&
+         vec->type().clsSpec().cls() == c_Vector::classof());
 
   // Vector::m_data field holds an address of an ArrayData plus
   // sizeof(ArrayData) bytes. We need to check this ArrayData's
@@ -3794,8 +3797,8 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
  */
 void CodeGenerator::cgVectorDoCow(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
-  assert(vec->type().strictSubtypeOf(Type::Obj) &&
-         vec->type().getClass() == c_Vector::classof());
+  assert(vec->type() < Type::Obj &&
+         vec->type().clsSpec().cls() == c_Vector::classof());
   auto args = argGroup(inst);
   args.ssa(0); // vec
   cgCallHelper(vmain(), CppCall::direct(triggerCow),
@@ -3805,8 +3808,8 @@ void CodeGenerator::cgVectorDoCow(IRInstruction* inst) {
 void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
   DEBUG_ONLY auto pair = inst->src(0);
   auto pairReg = srcLoc(inst, 0).reg();
-  assert(pair->type().strictSubtypeOf(Type::Obj) &&
-         pair->type().getClass() == c_Pair::classof());
+  assert(pair->type() < Type::Obj &&
+         pair->type().clsSpec().cls() == c_Pair::classof());
   vmain() << lea{pairReg[c_Pair::dataOffset()], dstLoc(inst, 0).reg()};
 }
 
@@ -3976,7 +3979,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     // src is the target type or better. do nothing.
     doMov();
     return;
-  } else if (src->type().not(typeParam)) {
+  } else if (!src->type().maybe(typeParam)) {
     // src is definitely not the target type. always jump.
     v << jmp{label(inst->taken())};
     return;
@@ -4009,7 +4012,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
 
       if (srcType <= typeParam) {
         // This will always succeed. Do nothing.
-      } else if (srcType.not(typeParam)) {
+      } else if (!srcType.maybe(typeParam)) {
         // This will always fail. Emit an unconditional jmp.
         v << jmp{label(inst->taken())};
         return;
@@ -4630,7 +4633,7 @@ void CodeGenerator::cgCheckInit(IRInstruction* inst) {
   assert(taken);
   SSATmp* src = inst->src(0);
 
-  if (src->type().not(Type::Uninit)) return;
+  if (!src->type().maybe(Type::Uninit)) return;
 
   auto typeReg = srcLoc(inst, 0).reg(1);
   assert(typeReg != InvalidReg);
@@ -4647,7 +4650,7 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
   assert(taken);
   SSATmp* base = inst->src(0);
   Type t = base->type().deref();
-  if (t.not(Type::Uninit)) return;
+  if (!t.maybe(Type::Uninit)) return;
   auto basereg = srcLoc(inst, 0).reg();
   auto& v = vmain();
   auto const sf = v.makeReg();
@@ -4776,7 +4779,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   v << load{rVmTl[rds::kVmfpOff], fp};
   v << load{rVmTl[rds::kVmspOff], sync_sp};
   v << syncvmsp{sync_sp};
-  v << jmpi{mcg->tx().uniqueStubs.resumeHelper, kCrossTraceRegs};
+  emitServiceReq(v, nullptr, REQ_RESUME, {});
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {
@@ -5421,7 +5424,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
   if (auto const msg = extra.msg) {
     assert(msg->isStatic());
     cgCallHelper(v,
-                 CppCall::direct(Trace::ringbufferMsg),
+     CppCall::direct(reinterpret_cast<void (*)()>(Trace::ringbufferMsg)),
                  kVoidDest,
                  SyncOptions::kNoSyncPoint,
                  argGroup(inst)
@@ -5429,14 +5432,18 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
                    .imm(msg->size())
                    .imm(extra.type));
   } else {
+    auto beforeArgs = v.makePoint();
+    v << point{beforeArgs};
+    v << ldpoint{beforeArgs, rAsm};
     auto args = argGroup(inst);
     cgCallHelper(v,
-                 CppCall::direct(Trace::ringbufferEntryRip),
-                 kVoidDest,
-                 SyncOptions::kNoSyncPoint,
-                 argGroup(inst)
-                   .imm(extra.type)
-                   .imm(extra.sk.toAtomicInt()));
+      CppCall::direct(reinterpret_cast<void (*)()>(Trace::ringbufferEntry)),
+      kVoidDest,
+      SyncOptions::kNoSyncPoint,
+      argGroup(inst)
+        .imm(extra.type)
+        .imm(extra.sk.toAtomicInt())
+        .reg(rAsm));
   }
 }
 
@@ -5611,7 +5618,7 @@ void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
 void CodeGenerator::cgLdStructArrayElem(IRInstruction* inst) {
   auto const array = srcLoc(inst, 0).reg();
   auto const key = inst->src(1)->strVal();
-  auto const shape = inst->src(0)->type().getArrayShape();
+  auto const shape = inst->src(0)->type().arrSpec().shape();
   auto const offset = shape->offsetFor(key);
   assert(offset != PropertyTable::kInvalidOffset);
 

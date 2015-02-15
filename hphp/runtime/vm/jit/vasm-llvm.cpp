@@ -275,6 +275,8 @@ std::string showNewCode(const Vasm::AreaList& areas) {
     auto const start = area.start;
     auto const end = area.code.frontier();
 
+    if (i > 0 && start == areas[i-1].start) continue;
+
     if (start != end) {
       str << folly::format("emitted {} bytes of code into area {}:\n",
                            end - start, i);
@@ -507,8 +509,9 @@ struct LLVMEmitter {
     m_function->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
     m_function->setAlignment(1);
 
-    // TODO(#5398968): find a better way to disable 16-byte alignment.
-    m_function->addFnAttr(llvm::Attribute::OptimizeForSize);
+    if (RuntimeOption::EvalJitLLVMOptSize) {
+      m_function->addFnAttr(llvm::Attribute::OptimizeForSize);
+    }
 
     m_irb.SetInsertPoint(
       llvm::BasicBlock::Create(m_context,
@@ -543,8 +546,6 @@ struct LLVMEmitter {
     defineValue(x64::rVmFp, args++);
 
     // Commonly used types and values.
-    m_void = m_irb.getVoidTy();
-
     m_int8  = m_irb.getInt8Ty();
     m_int16 = m_irb.getInt16Ty();
     m_int32 = m_irb.getInt32Ty();
@@ -583,7 +584,7 @@ struct LLVMEmitter {
     m_tcMM->registerSymbolAddress("personality0", 0xbadbad);
 
     m_traceletFnTy = llvm::FunctionType::get(
-      m_void,
+      m_irb.getVoidTy(),
       std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
       false
     );
@@ -598,12 +599,22 @@ struct LLVMEmitter {
     // till a better debug option control library is implemented.
     static bool isCLSet = false;
     if (!isCLSet) {
-      const char* pseudoCL[] = {
+      std::vector<std::string> pseudoCL = {
         "hhvm",
         "-disable-block-placement"
       };
-      constexpr size_t numArgs = sizeof(pseudoCL) / sizeof(*pseudoCL);
-      llvm::cl::ParseCommandLineOptions(numArgs, pseudoCL, "");
+
+      if (RuntimeOption::EvalJitLLVMCondTail) {
+        pseudoCL.push_back("-cond-tail-dup");
+      }
+
+      auto const numArgs = pseudoCL.size();
+      std::unique_ptr<const char*[]> pseudoCLArray(new const char*[numArgs]);
+      for(size_t i = 0; i < pseudoCL.size(); ++i) {
+        pseudoCLArray[i] = pseudoCL[i].c_str();
+      }
+
+      llvm::cl::ParseCommandLineOptions(numArgs, pseudoCLArray.get(), "");
       isCLSet = true;
     }
   }
@@ -611,12 +622,12 @@ struct LLVMEmitter {
   ~LLVMEmitter() {
   }
 
-  std::string showModule(llvm::Module* module) const {
+  std::string showModule() const {
     std::string s;
     llvm::raw_string_ostream stream(s);
     VasmAnnotationWriter vw(m_instStrs);
-    module->print(stream,
-                  HPHP::Trace::moduleEnabled(Trace::llvm, 5) ? &vw : nullptr);
+    m_module->print(stream,
+                    HPHP::Trace::moduleEnabled(Trace::llvm, 5) ? &vw : nullptr);
     return stream.str();
   }
 
@@ -626,7 +637,7 @@ struct LLVMEmitter {
     always_assert_flog(!llvm::verifyModule(*m_module, &stream),
                        "LLVM verifier failed:\n{}\n{:-^80}\n{}\n{:-^80}\n{}",
                        stream.str(), " vasm unit ", show(m_unit),
-                       " llvm module ", showModule(m_module.get()));
+                       " llvm module ", showModule());
   }
 
   /*
@@ -634,8 +645,7 @@ struct LLVMEmitter {
    * m_module.
    */
   void finalize() {
-    FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ",
-           showModule(m_module.get()));
+    FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ", showModule());
     verifyModule();
 
     llvm::TargetOptions targetOptions;
@@ -665,7 +675,7 @@ struct LLVMEmitter {
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
 
     module->addModuleFlag(llvm::Module::Error, "code_skew",
-                            tcMM->computeCodeSkew(x64::kCacheLineSize));
+                          tcMM->computeCodeSkew(x64::kCacheLineSize));
 
     auto fpm = folly::make_unique<llvm::FunctionPassManager>(module);
     fpm->add(new llvm::DataLayoutPass(module));
@@ -693,14 +703,15 @@ struct LLVMEmitter {
       }
       fpm->doFinalization();
     }
-    FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ",
-           showModule(module));
+    FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ", showModule());
 
     {
       Timer _t(Timer::llvm_codegen);
       ee->setProcessAllSections(true);
       ee->finalizeObject();
     }
+
+    if (RuntimeOption::EvalJitLLVMDiscard) return;
 
     // Now that codegen is done, we need to parse location records and
     // gcc_except_table sections and update our own metadata.
@@ -753,18 +764,20 @@ struct LLVMEmitter {
     for (auto& record : records) {
       uint8_t* ip = record.address;
       DecodedInstruction di(ip);
-      if (di.isJmp()) body(ip);
+      if (di.isBranch()) {
+        body(ip, di.isJmp() ? CC_None : di.jccCondCode());
+      }
     }
   }
 
   void processSvcReqs(const LocRecs& locRecs) {
     for (auto& req : m_bindjmps) {
       bool found = false;
-      auto doBindJmp = [&] (uint8_t* jmpIp) {
+      auto doBindJmp = [&] (uint8_t* jmpIp, ConditionCode cc) {
         FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
-        mcg->cgFixups().m_alignFixups.emplace(
-          jmpIp, std::make_pair(x64::kJmpLen, 0));
+        auto jmpLen = (cc == CC_None) ? x64::kJmpLen : x64::kJmpccLen;
+        mcg->cgFixups().m_alignFixups.emplace(jmpIp, std::make_pair(jmpLen, 0));
         mcg->setJmpTransID(jmpIp);
 
         if (found) {
@@ -784,7 +797,7 @@ struct LLVMEmitter {
                  jmpIp, newStub);
 
           // Patch the jmp to point to the new stub.
-          auto afterJmp = jmpIp + x64::kJmpLen;
+          auto afterJmp = jmpIp + jmpLen;
           auto delta = safe_cast<int32_t>(newStub - afterJmp);
           memcpy(afterJmp - sizeof(delta), &delta, sizeof(delta));
         } else {
@@ -799,6 +812,7 @@ struct LLVMEmitter {
         }
       };
 
+      FTRACE(2, "Processing bindjmp {}, stub {}\n", req.id, req.stub);
       auto it = locRecs.records.find(req.id);
       if (it != locRecs.records.end()) {
         visitJmps(it->second, doBindJmp);
@@ -806,14 +820,15 @@ struct LLVMEmitter {
 
       // The jump was optimized out. Free the stub.
       if (!found) {
+        FTRACE(2, "  no corresponding code found. Freeing stub.\n");
         mcg->freeRequestStub(req.stub);
       }
     }
 
     for (auto& req : m_fallbacks) {
-      auto doFallback = [&] (uint8_t* jmpIp) {
+      auto doFallback = [&] (uint8_t* jmpIp, ConditionCode cc) {
         auto destSR = mcg->tx().getSrcRec(req.dest);
-        destSR->registerFallbackJump(jmpIp);
+        destSR->registerFallbackJump(jmpIp, cc);
       };
       auto it = locRecs.records.find(req.id);
       if (it != locRecs.records.end()) {
@@ -1181,8 +1196,6 @@ VASM_OPCODES
   llvm::Function* m_fabs{nullptr};
 
   // Commonly used types. Some LLVM APIs require non-consts.
-  llvm::Type* m_void;
-
   llvm::IntegerType* m_int8;
   llvm::IntegerType* m_int16;
   llvm::IntegerType* m_int32;
@@ -1424,8 +1437,10 @@ O(countbytecode)
       case Vinstr::callstub:
       case Vinstr::contenter:
       case Vinstr::kpcall:
+      case Vinstr::ldpoint:
       case Vinstr::mccall:
       case Vinstr::mcprep:
+      case Vinstr::point:
       case Vinstr::cmpsd:
       case Vinstr::ucomisd:
       case Vinstr::unpcklpd:
@@ -1467,6 +1482,10 @@ O(countbytecode)
 
   _t.end();
   finalize();
+
+  if (RuntimeOption::EvalJitLLVMDiscard) {
+    throw FailedLLVMCodeGen("Discarding all hard work");
+  }
 }
 
 llvm::Value* LLVMEmitter::getGlobal(const std::string& name,
@@ -1684,7 +1703,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   llvm::Type* returnType = nullptr;
   switch (destType) {
   case DestType::None:
-    returnType = m_void;
+    returnType = m_irb.getVoidTy();
     break;
   case DestType::SSA:
     returnType = m_int64;
@@ -2172,24 +2191,10 @@ void LLVMEmitter::emit(const jmpm& inst) {
 }
 
 void LLVMEmitter::emit(const jmpi& inst) {
-  // These are the only two stubs we expect to call using jmpi. They don't care
-  // about rVmFp or rVmSp but we always have to preserve rVmTl.
-  assert_not_implemented(inst.target == mcg->tx().uniqueStubs.resumeHelper ||
-                         inst.target == mcg->tx().uniqueStubs.endCatchHelper);
-
-  std::vector<llvm::Value*> args{
-    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp)
-  };
-  std::vector<llvm::Type*> argTypes{m_int64, m_int64, m_int64};
-  auto func = emitFuncPtr(
-    folly::sformat("jmpi_{}", inst.target),
-    llvm::FunctionType::get(m_void, argTypes, false),
-    reinterpret_cast<uint64_t>(inst.target)
-  );
-  auto call = m_irb.CreateCall(func, args);
-  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
-  call->setTailCallKind(llvm::CallInst::TCK_Tail);
-  m_irb.CreateRetVoid();
+  auto func = emitFuncPtr(folly::sformat("jmpi_{}", inst.target),
+                          m_traceletFnTy,
+                          reinterpret_cast<uint64_t>(inst.target));
+  emitTraceletTailCall(func);
 }
 
 void LLVMEmitter::emit(const ldimmb& inst) {
@@ -2398,7 +2403,7 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
                                  const std::string& asmConstraints,
                                  bool hasSideEffects) {
   auto const funcType =
-    llvm::FunctionType::get(m_void, false);
+    llvm::FunctionType::get(m_irb.getVoidTy(), false);
   auto const iasm = llvm::InlineAsm::get(funcType, asmStatement, asmConstraints,
                                          hasSideEffects);
   auto call = m_irb.CreateCall(iasm, "");
@@ -2587,7 +2592,7 @@ void LLVMEmitter::emit(const svcreq& inst) {
   }
 
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
-  auto funcType = llvm::FunctionType::get(m_void, argTypes, false);
+  auto funcType = llvm::FunctionType::get(m_irb.getVoidTy(), argTypes, false);
   auto func = emitFuncPtr(folly::to<std::string>("handleSRHelper_",
                                                  argTypes.size()),
                           funcType,

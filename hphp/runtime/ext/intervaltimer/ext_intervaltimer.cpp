@@ -30,9 +30,13 @@ struct TimerPool final : RequestEventHandler {
   }
 
   void requestShutdown() override {
-    for (auto timer : timers) {
-      timer->~IntervalTimer();
-    }
+    do {
+      for (auto it = timers.begin(); it != timers.end(); ) {
+        auto timer = *it;
+        it = timers.erase(it);
+        timer->~IntervalTimer();
+      }
+    } while (!timers.empty());
   }
 
   std::unordered_set<IntervalTimer*> timers;

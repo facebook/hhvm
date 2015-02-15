@@ -71,9 +71,12 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
   c_WaitableWaitHandle* getChild();
   bool isDescendantOf(c_WaitableWaitHandle* wait_handle) const;
+  void detectCycle(c_WaitableWaitHandle* child) const;
   void enterContextImpl(context_idx_t ctx_idx);
 
  private:
+  ObjectData* createCycleException(c_WaitableWaitHandle* child) const;
+
   context_idx_t m_context_idx;
 };
 

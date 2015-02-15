@@ -7622,16 +7622,8 @@ void EmitterVisitor::emitClassUseTrait(PreClassEmitter* pce,
 
 void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   auto const nullable = td->annot->isNullable();
-  auto const valueStr = td->annot->stripNullable().vanillaName();
-  auto const any = td->annot->stripNullable().isFunction() ||
-                   td->annot->stripNullable().isMixed();
-  auto const kind = any ? KindOfUninit :
-    !strcasecmp(valueStr.c_str(), "array")   ? KindOfArray :
-    !strcasecmp(valueStr.c_str(), "HH\\int") ? KindOfInt64 :
-    !strcasecmp(valueStr.c_str(), "HH\\bool") ? KindOfBoolean :
-    !strcasecmp(valueStr.c_str(), "HH\\string") ? KindOfString :
-    !strcasecmp(valueStr.c_str(), "HH\\float") ? KindOfDouble :
-    KindOfObject;
+  auto const annot = td->annot->stripNullable();
+  auto const valueStr = annot.vanillaName();
 
   // We have to merge the strings as litstrs to ensure namedentity
   // creation.
@@ -7640,11 +7632,28 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   m_ue.mergeLitstr(name);
   m_ue.mergeLitstr(value);
 
+  AnnotType type;
+  if (annot.isFunction() || annot.isMixed()) {
+    type = AnnotType::Mixed;
+  } else {
+    auto const at = nameToAnnotType(value);
+    type = at ? *at : AnnotType::Object;
+    // Type aliases are always defined at top-level scope, so
+    // they're not allowed to reference "self" or "parent" (and
+    // "static" is already disallowed by the parser, so we don't
+    // need to worry about it here).
+    if (UNLIKELY(type == AnnotType::Self || type == AnnotType::Parent)) {
+      throw IncludeTimeFatalException(
+        e.getNode(),
+        "Cannot access %s when no class scope is active",
+        type == AnnotType::Self ? "self" : "parent");
+    }
+  }
+
   TypeAlias record;
   record.name     = name;
   record.value    = value;
-  record.kind     = kind;
-  record.any      = any;
+  record.type     = type;
   record.nullable = nullable;
   record.attrs    = AttrNone;
   Id id = m_ue.addTypeAlias(record);

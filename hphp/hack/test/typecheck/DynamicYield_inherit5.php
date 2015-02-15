@@ -16,11 +16,11 @@ trait DynamicYield {
 
 abstract class A {
   use DynamicYield;
-  abstract public function yieldFoo(): Awaitable<int>;
+  abstract public function genFoo(): Awaitable<int>;
 }
 
 class B extends A {
-  public async function yieldFoo(): Awaitable<int> {
+  public async function genFoo(): Awaitable<int> {
     return 42;
   }
 }

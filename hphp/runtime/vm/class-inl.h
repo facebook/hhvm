@@ -475,7 +475,7 @@ inline bool isInterface(const Class* cls) {
   return cls->attrs() & AttrInterface;
 }
 
-inline bool isNormalClass(const Class* cls ) {
+inline bool isNormalClass(const Class* cls) {
   return !(cls->attrs() & (AttrTrait | AttrInterface | AttrEnum));
 }
 

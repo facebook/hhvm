@@ -17,9 +17,9 @@ trait DynamicYield {
 interface IUseDynamicYield {}
 
 trait TFoo implements IUseDynamicYield {
-  abstract public function yieldOtherStuff(): Awaitable<int>;
+  abstract public function genOtherStuff(): Awaitable<int>;
 
-  public async function yieldStuff(): Awaitable<bool> {
+  public async function genStuff(): Awaitable<bool> {
     $other_stuff = await $this->genOtherStuff();
     return true;
   }
@@ -29,7 +29,7 @@ class Foo {
   use DynamicYield;
   use TFoo;
 
-  public async function yieldEvenMoreStuff(): Awaitable<string> {
+  public async function genEvenMoreStuff(): Awaitable<string> {
     $stuff = await $this->genStuff();
     $other_stuff = await $this->genOtherStuff();
     return 'llama';

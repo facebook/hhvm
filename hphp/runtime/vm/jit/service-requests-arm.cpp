@@ -30,39 +30,6 @@ namespace HPHP { namespace jit { namespace arm {
 
 using namespace vixl;
 
-namespace {
-
-void emitBindJ(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
-               ConditionCode cc, ServiceRequest req, TransFlags trflags) {
-
-  TCA toSmash = cb.frontier();
-  if (cb.base() == frozen.base()) {
-    // This is just to reserve space. We'll overwrite with the real dest later.
-    mcg->backEnd().emitSmashableJump(cb, toSmash, cc);
-  }
-
-  mcg->setJmpTransID(toSmash);
-
-  TCA sr = emitEphemeralServiceReq(frozen,
-                                   mcg->getFreeStub(frozen,
-                                                    &mcg->cgFixups()),
-                                   req, toSmash,
-                                   dest.toAtomicInt(),
-                                   trflags.packed);
-
-  MacroAssembler a { cb };
-  if (cb.base() == frozen.base()) {
-    UndoMarker um {cb};
-    cb.setFrontier(toSmash);
-    mcg->backEnd().emitSmashableJump(cb, sr, cc);
-    um.undo();
-  } else {
-    mcg->backEnd().emitSmashableJump(cb, sr, cc);
-  }
-}
-
-} // anonymous namespace
-
 //////////////////////////////////////////////////////////////////////
 
 TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
@@ -118,13 +85,33 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
   return start;
 }
 
-void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest) {
-  emitBindJ(cb, frozen, dest, jit::CC_None, REQ_BIND_JMP, TransFlags{});
-}
+void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
+               SrcKey dest) {
+  TCA toSmash = cb.frontier();
+  if (cb.base() == frozen.base()) {
+    // This is just to reserve space. We'll overwrite with the real dest later.
+    mcg->backEnd().emitSmashableJump(cb, toSmash, cc);
+  }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-                 SrcKey dest) {
-  emitBindJ(cb, frozen, dest, cc, REQ_BIND_JCC, TransFlags{});
+  mcg->setJmpTransID(toSmash);
+
+  TCA sr = emitEphemeralServiceReq(frozen,
+                                   mcg->getFreeStub(frozen,
+                                                    &mcg->cgFixups()),
+                                   REQ_BIND_JMP,
+                                   toSmash,
+                                   dest.toAtomicInt(),
+                                   TransFlags{}.packed);
+
+  MacroAssembler a { cb };
+  if (cb.base() == frozen.base()) {
+    UndoMarker um {cb};
+    cb.setFrontier(toSmash);
+    mcg->backEnd().emitSmashableJump(cb, sr, cc);
+    um.undo();
+  } else {
+    mcg->backEnd().emitSmashableJump(cb, sr, cc);
+  }
 }
 
 }}}

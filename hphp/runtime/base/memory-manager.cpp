@@ -440,6 +440,7 @@ void MemoryManager::sweep() {
   DEBUG_ONLY auto native = m_natives.size();
   Native::sweepNativeData(m_natives);
   TRACE(1, "sweep: sweepable %u native %lu\n", sweepable, native);
+  if (debug) checkHeap();
 }
 
 void MemoryManager::resetAllocator() {
@@ -506,7 +507,7 @@ void MemoryManager::flush() {
  *     through a different entry point.  (E.g. MM().smartFreeSize or
  *     MM().smartFreeSizeBig.)
  *
- * When small blocks are freed (case b and c), they're placed the
+ * When small blocks are freed (case b and c), they're placed in the
  * appropriate size-segregated freelist.  Large blocks are immediately
  * passed back to libc via free.
  *

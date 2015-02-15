@@ -207,7 +207,7 @@ Type predictedTypeFromLocation(HTS& env, const Location& loc) {
       // Don't specialize $this for cloned closures which may have been re-bound
       if (curFunc(env)->hasForeignThis()) return Type::Obj;
       if (auto const cls = curFunc(env)->cls()) {
-        return Type::Obj.specialize(cls);
+        return Type::SubObj(cls);
       }
       return Type::Obj;
 
@@ -234,12 +234,9 @@ void prepareForNextHHBC(HTS& env,
   FTRACE(1, "------------------- prepareForNextHHBC ------------------\n");
   env.currentNormalizedInstruction = ni;
 
-  always_assert_log(
+  always_assert_flog(
     IMPLIES(isInlining(env), !env.lastBcOff),
-    [&] {
-      return folly::format("Tried to end trace while inlining:\n{}",
-                           env.unit).str();
-    }
+    "Tried to end trace while inlining."
   );
 
   env.bcStateStack.back().setOffset(newOff);

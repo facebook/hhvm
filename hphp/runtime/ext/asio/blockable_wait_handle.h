@@ -52,8 +52,6 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
 
  protected:
   void blockOn(c_WaitableWaitHandle* child);
-  void detectCycle(c_WaitableWaitHandle* child) const;
-  ObjectData* createCycleException(c_WaitableWaitHandle* child) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

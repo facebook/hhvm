@@ -90,8 +90,8 @@ void beginInlining(HTS& env,
   always_assert_flog(
     env.fpiStack.top().spillFrame != nullptr,
     "Couldn't find SpillFrame for inlined call on sp {}."
-    " Was the FPush instruction interpreted?\n{}",
-    *calleeSP->inst(), env.irb->unit()
+    " Was the FPush instruction interpreted?",
+    *calleeSP->inst()
   );
 
   auto const sframe = env.fpiStack.top().spillFrame;

@@ -10,14 +10,13 @@
  */
 
 trait DynamicYield {
-  public function __call(string $name, array $args = array()) {
-  }
+  public function __call(string $name, array $args = array()) {}
 }
 
 class Foo {
   use DynamicYield;
 
-  public async function yieldInt() {
+  public function getInt() {
     return 123;
   }
 }

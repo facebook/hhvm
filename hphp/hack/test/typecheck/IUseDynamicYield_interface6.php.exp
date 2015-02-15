@@ -8,5 +8,5 @@ File "IUseDynamicYield_interface6.php", line 24, characters 7-9:
 This object doesn't implement the method genMoreStuff
 File "IUseDynamicYield_interface6.php", line 24, characters 22-25:
 Which is required by this interface
-File "IUseDynamicYield_interface6.php", line 21, characters 19-32:
+File "IUseDynamicYield_interface6.php", line 21, characters 19-30:
 As defined here

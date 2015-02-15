@@ -730,7 +730,7 @@ RegionDescPtr selectHotRegion(TransID transId,
 static bool postCondMismatch(const RegionDesc::TypePred& postCond,
                              const RegionDesc::TypePred& preCond) {
   return postCond.location == preCond.location &&
-         preCond.type.not(postCond.type);
+         !preCond.type.maybe(postCond.type);
 }
 
 bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,

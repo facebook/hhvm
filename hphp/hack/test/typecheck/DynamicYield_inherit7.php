@@ -7,19 +7,19 @@ interface IFeedObjectIdentifier {}
 interface IStoryIdentifier extends IFeedObjectIdentifier {}
 
 interface IEntStory extends IUseDynamicYield {
-  public function yieldX(): Awaitable<IStoryIdentifier>;
+  public function genX(): Awaitable<IStoryIdentifier>;
 }
 
 abstract class FeedObjectPreview {
   use DynamicYield;
 
-  public async function yieldX(): Awaitable<IFeedObjectIdentifier> {
+  public async function genX(): Awaitable<IFeedObjectIdentifier> {
     // UNSAFE
   }
 }
 
 abstract class StoryPreview extends FeedObjectPreview implements IEntStory {
-  public async function yieldX(): Awaitable<IStoryIdentifier> {
+  public async function genX(): Awaitable<IStoryIdentifier> {
     // UNSAFE
   }
 }

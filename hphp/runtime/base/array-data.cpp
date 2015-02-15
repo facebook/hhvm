@@ -392,11 +392,13 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
   DISPATCH(AdvanceMArrayIter)
 
   /*
-   * ArrayData* EscalateForSort(ArrayData*)
+   * ArrayData* EscalateForSort(ArrayData*, SortFunction)
    *
    *   Must be called before calling any of the sort routines on an
-   *   array.  This gives arrays a chance to change to a kind that
-   *   supports sorting.
+   *   array. This gives arrays a chance to change to a kind that
+   *   supports sorting. If the original ArrayData is returned, the
+   *   refcount is unchanged; otherwise the returned ArrayData has
+   *   refcount of 0.
    */
   DISPATCH(EscalateForSort)
 

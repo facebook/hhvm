@@ -26,7 +26,6 @@ module Env          = Typing_env
 module LEnv         = Typing_lenv
 module Dep          = Typing_deps.Dep
 module Async        = Typing_async
-module DynamicYield = Typing_dynamic_yield
 module SubType      = Typing_subtype
 module Unify        = Typing_unify
 module TGen         = Typing_generic
@@ -3471,9 +3470,7 @@ and class_def_ env_up c tc =
   class_constr_def env c;
   let env = Env.set_static env in
   List.iter (class_var_def env true c) c.c_static_vars;
-  List.iter (method_def env) c.c_static_methods;
-  if DynamicYield.contains_dynamic_yield tc.tc_extends
-  then DynamicYield.check_yield_visibility env c
+  List.iter (method_def env) c.c_static_methods
 
 and check_extend_abstract_meth p smap =
   SMap.iter begin fun x ce ->
@@ -3581,7 +3578,6 @@ and method_def env m =
   let env, ret = (match m.m_ret with
     | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
     | Some ret -> Typing_hint.hint ~ensure_instantiable:true env ret) in
-  let env = DynamicYield.method_def env m.m_name ret in
   let m_params = match m.m_variadic with
     | FVvariadicArg param -> param :: m.m_params
     | _ -> m.m_params

@@ -279,9 +279,14 @@ void APCLocalArray::NvGetKey(const ArrayData* ad,
   if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
 }
 
-ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad) {
+ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   auto a = asApcArray(ad);
-  auto ret = a->loadElems()->escalateForSort();
+  ArrayData* elems = a->loadElems();
+  ArrayData* ret = elems->escalateForSort(sf);
+  if (ret != elems) {
+    elems->release();
+  }
+  assert(ret->getCount() == 0);
   assert(!ret->isStatic());
   return ret;
 }

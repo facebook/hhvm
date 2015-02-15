@@ -207,7 +207,7 @@ SSATmp* simplifyLdObjClass(State& env, const IRInstruction* inst) {
 
   if (mightRelax(env, inst->src(0)) || !(ty < Type::Obj)) return nullptr;
 
-  if (auto const exact = ty.getExactClass()) return cns(env, exact);
+  if (auto const exact = ty.clsSpec().exactCls()) return cns(env, exact);
   return nullptr;
 }
 
@@ -680,7 +680,7 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
     // have below).
     auto const unsafeTypes = Type::Dbl|Type::Arr;
     auto const safeToFold =
-      s0->type().not(unsafeTypes) && s1->type().not(unsafeTypes) &&
+      !s0->type().maybe(unsafeTypes) && !s1->type().maybe(unsafeTypes) &&
       // We can't add new uses to reference counted types without a more
       // advanced availability analysis.
       !s0->type().maybeCounted() && !s1->type().maybeCounted();
@@ -796,7 +796,7 @@ SSATmp* cmpImpl(State& env,
   auto const type2 = src2->type();
 
   // Identity optimization
-  if (src1 == src2 && type1.not(Type::Dbl)) {
+  if (src1 == src2 && !type1.maybe(Type::Dbl)) {
     // (val1 == val1) does not simplify to true when val1 is a NaN
     return cns(env, bool(cmpOp(opName, 0, 0)));
   }
@@ -1063,7 +1063,7 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   assert(IMPLIES(type <= Type::Arr, type == Type::Arr));
 
   // The types are disjoint; the result must be false.
-  if (srcType.not(type)) {
+  if (!srcType.maybe(type)) {
     return cns(env, !trueSense);
   }
 
@@ -1349,7 +1349,7 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
   if (srcType <= Type::Int)  return gen(env, ConvIntToBool, src);
   if (srcType <= Type::Str)  return gen(env, ConvStrToBool, src);
   if (srcType <= Type::Obj) {
-    if (auto cls = srcType.getClass()) {
+    if (auto cls = srcType.clsSpec().cls()) {
       // We need to exclude interfaces like ConstSet.  For now, just
       // skip anything that's an interface.
       if (!(cls->attrs() & AttrInterface)) {
@@ -1429,8 +1429,8 @@ SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
 
   if (!typeMightRelax(inst->src(0)) &&
       ty < Type::Obj &&
-      ty.getClass() &&
-      ty.getClass()->isCollectionClass()) {
+      ty.clsSpec().cls() &&
+      ty.clsSpec().cls()->isCollectionClass()) {
     return gen(env, ColIsNEmpty, inst->src(0));
   }
   return nullptr;
@@ -1534,7 +1534,7 @@ SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
   assert(srcType.notPtr());
   assert(inst->taken());
-  if (srcType.not(Type::Uninit)) return gen(env, Nop);
+  if (!srcType.maybe(Type::Uninit)) return gen(env, Nop);
   return nullptr;
 }
 
@@ -1654,7 +1654,7 @@ SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->type().not(Type::Nullptr)) {
+  if (!inst->src(0)->type().maybe(Type::Nullptr)) {
     return inst->src(0);
   }
   return nullptr;
@@ -1733,7 +1733,7 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   if (ty <= Type::Arr) return gen(env, CountArray, val);
 
   if (ty < Type::Obj) {
-    auto const cls = ty.getClass();
+    auto const cls = ty.clsSpec().cls();
     if (!mightRelax(env, val) && cls != nullptr && cls->isCollectionClass()) {
       return gen(env, CountCollection, val);
     }
@@ -1748,9 +1748,11 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
   if (src->isConst()) return cns(env, src->arrVal()->size());
 
-  if (!ty.hasArrayKind() || mightRelax(env, src)) return nullptr;
+  auto const kind = ty.arrSpec().kind();
 
-  switch (ty.getArrayKind()) {
+  if (!kind || mightRelax(env, src)) return nullptr;
+
+  switch (*kind) {
     case ArrayData::kPackedKind:
     case ArrayData::kStructKind:
     case ArrayData::kMixedKind:
@@ -1771,10 +1773,11 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
   auto const callee = inst->extra<CallBuiltin>()->callee;
   auto const args = inst->srcs();
 
+  auto const cls = args[0]->type().clsSpec().cls();
   bool const arg0Collection = args.size() >= 1 &&
                               args[0]->type() < Type::Obj &&
-                              args[0]->type().getClass() &&
-                              args[0]->type().getClass()->isCollectionClass();
+                              cls != nullptr &&
+                              cls->isCollectionClass();
 
   switch (args.size()) {
   case 1:
@@ -1791,7 +1794,7 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
   if (inst->src(0)->type() < Type::Obj) {
-    auto const cls = inst->src(0)->type().getClass();
+    auto const cls = inst->src(0)->type().clsSpec().cls();
     if (cls && cls->classof(c_WaitHandle::classof())) {
       return cns(env, true);
     }
@@ -1952,7 +1955,7 @@ void copyProp(IRInstruction* inst) {
 }
 
 bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t idxVal) {
-  auto const at = arrayType.getArrayType();
+  auto const at = arrayType.arrSpec().type();
   if (!at) return false;
   using A = RepoAuthType::Array;
   switch (at->tag()) {

@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/sort-flags.h"
 
 namespace HPHP {
 
@@ -86,7 +87,7 @@ struct PackedArray {
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* NonSmartCopy(const ArrayData*);
   static ArrayData* NonSmartCopyHelper(const ArrayData*);
-  static ArrayData* EscalateForSort(ArrayData*);
+  static ArrayData* EscalateForSort(ArrayData*, SortFunction);
   static void Ksort(ArrayData*, int, bool);
   static void Sort(ArrayData*, int, bool);
   static void Asort(ArrayData*, int, bool);
@@ -137,6 +138,7 @@ private:
   static ArrayData* CopyAndResizeIfNeeded(const ArrayData*);
   static ArrayData* ResizeIfNeeded(ArrayData*);
 
+  static SortFlavor preSort(ArrayData*);
 public:
   enum class Reason : uint8_t {
     kForeachByRef,

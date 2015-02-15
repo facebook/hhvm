@@ -19,7 +19,6 @@
 
 #include <folly/Format.h>
 
-#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace Trace {
@@ -41,10 +40,8 @@ void dumpEntry(const RingBufferEntry* e) {
 
       // We append our own newline so ignore any newlines in the msg.
       while (len > 0 && e->m_msg[len - 1] == '\n') --len;
-      std::cerr <<
-        folly::format("{:50} {:#16x}\n",
-                      folly::StringPiece(e->m_msg, e->m_msg + len),
-                      e->m_truncatedRip);
+      fwrite(e->m_msg, len, 1, stderr);
+      fprintf(stderr, "\n");
       break;
     }
     case RBTypeFuncEntry:
@@ -66,12 +63,6 @@ void dumpEntry(const RingBufferEntry* e) {
       std::cerr << folly::format("{}{}\n",
                                  std::string(indentDepth * 4, ' '), e->m_msg);
       indentDepth += e->m_type == RBTypeFuncEntry;
-      break;
-    }
-    case RBTypeServiceReq: {
-      auto req = static_cast<jit::ServiceRequest>(e->m_sk);
-      std::cerr << folly::format("{:50} {:#16x}\n",
-                                 jit::serviceReqName(req), e->m_data);
       break;
     }
     default: {

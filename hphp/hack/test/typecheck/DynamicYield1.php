@@ -24,19 +24,19 @@ class B extends A {}
 class Foo {
   use DynamicYield;
 
-  public async function yieldA(): Awaitable<A> {
+  public async function genA(): Awaitable<A> {
     return new A();
   }
 
-  public async function yieldB(): Awaitable<B> {
+  public async function genB(): Awaitable<B> {
     return new B();
   }
 
-  protected async function yieldSomeInt(): Awaitable<int> {
+  protected async function genSomeInt(): Awaitable<int> {
     return 123;
   }
 
-  private async function yieldSomeString(): Awaitable<string> {
+  private async function genSomeString(): Awaitable<string> {
     return 'hello';
   }
 
@@ -75,5 +75,6 @@ function buck(): int {
 }
 
 function goose(): Awaitable<string> {
+  /* HH_FIXME[4128]: gen-via-get */
   return (new Foo())->genAnotherString();
 }

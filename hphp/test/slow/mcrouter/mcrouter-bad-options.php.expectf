@@ -1,0 +1,12 @@
+string(23) "Failure parsing options"
+array(1) {
+  [0]=>
+  array(3) {
+    ["option"]=>
+    string(16) "asynclog_disable"
+    ["value"]=>
+    string(6) "purple"
+    ["error"]=>
+    string(%d) "couldn't convert value to integer. Exception: %s Invalid value for bool: 'purple'"
+  }
+}

@@ -378,6 +378,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // currently only used for collections and class property inits, so we aren't
   // hooked up yet.
   case StElem:
+    if (inst.src(0)->type() <= Type::PtrToMembCell) {
+      return MayLoadStore { AEmpty, AHeapAny };
+    }
+    return MayLoadStore { AEmpty, AUnknown };
   case LdElem:
     if (inst.src(0)->type() <= Type::PtrToMembCell) {
       return MayLoadStore { AHeapAny, AEmpty };
@@ -895,8 +899,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvObjToInt:
   case CountCollection:
   case LdVectorSize:
-  case LdClsPropAddrOrNull:
-  case LdClsPropAddrOrRaise:
   case VectorHasImmCopy:
   case CheckPackedArrayBounds:
   case LdColArray:
@@ -932,6 +934,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      */
     return MayLoadStore { ANonFrame | reentry_extra(), ANonFrame };
 
+  case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
+  case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
   case BaseG:
   case Clone:
   case WarnNonObjProp:

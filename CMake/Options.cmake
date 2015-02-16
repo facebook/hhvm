@@ -26,3 +26,5 @@ IF (NOT APPLE AND NOT CYGWIN)
 ENDIF (NOT APPLE AND NOT CYGWIN)
 
 option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)
+
+option(ENABLE_THREAD_SAFE_SETLOCALE "Use the thread-safe setlocale/localeconv implementations" ON)

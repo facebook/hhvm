@@ -62,12 +62,11 @@ endif()
 # third-party/ instead
 if (ENABLE_ASYNC_MYSQL)
   include_directories(
+    ${TP_DIR}/re2/src/
     ${TP_DIR}/squangle/src/
     ${TP_DIR}/webscalesqlclient/src/include/
-    ${TP_DIR}/webscalesqlclient/build/src/webscalesqlclient-build/include/
   )
-  set(MYSQL_CLIENT_LIB_DIR
-    ${TP_DIR}/webscalesqlclient/build/src/webscalesqlclient-build/)
+  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
   # Unlike the .so, the static library intentionally does not link against
   # yassl, despite building it :/
   set(MYSQL_CLIENT_LIBS

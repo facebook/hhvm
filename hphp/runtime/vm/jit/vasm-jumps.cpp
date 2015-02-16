@@ -152,6 +152,7 @@ void optimizeExits(Vunit& unit) {
       fold_exit(ccNegate(ijcc.cc), t0, t1);
     }
   });
+  printUnit(kVasmExitsLevel, "after vasm-exits", unit);
 }
 
 void optimizeJmps(Vunit& unit) {

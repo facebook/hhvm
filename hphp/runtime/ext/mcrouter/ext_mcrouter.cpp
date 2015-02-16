@@ -325,8 +325,7 @@ static Object mcr_str_delta(ObjectData* this_,
 }
 
 template<mc_op_t op>
-static Object mcr_int(ObjectData* this_,
-                          const String& key, int64_t val) {
+static Object mcr_int(ObjectData* this_, int64_t val) {
   mcr::mcrouter_msg_t msg;
   msg.req = mc_msg_new(0);
   msg.req->number = val;

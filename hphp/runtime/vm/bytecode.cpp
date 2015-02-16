@@ -4154,22 +4154,12 @@ OPTBLD_INLINE void jmpOpImpl(PC& pc) {
   Cell* c1 = vmStack().topC();
   if (c1->m_type == KindOfInt64 || c1->m_type == KindOfBoolean) {
     int64_t n = c1->m_data.num;
-    if (op == OpJmpZ ? n == 0 : n != 0) {
-      pc += offset - 1;
-      vmStack().popX();
-    } else {
-      pc += sizeof(Offset);
-      vmStack().popX();
-    }
+    pc += (op == OpJmpZ ? n == 0 : n != 0) ? offset - 1 : sizeof(Offset);
+    vmStack().popX();
   } else {
-    auto const condition = toBoolean(cellAsCVarRef(*c1));
-    if (op == OpJmpZ ? !condition : condition) {
-      pc += offset - 1;
-      vmStack().popC();
-    } else {
-      pc += sizeof(Offset);
-      vmStack().popC();
-    }
+    auto const cond = toBoolean(cellAsCVarRef(*c1));
+    pc += (op == OpJmpZ ? !cond : cond) ? offset - 1 : sizeof(offset);
+    vmStack().popC();
   }
 }
 
@@ -4213,9 +4203,8 @@ static SwitchMatch doubleCheck(double d, int64_t& out) {
   if (int64_t(d) == d) {
     out = d;
     return SwitchMatch::NORMAL;
-  } else {
-    return SwitchMatch::DEFAULT;
   }
+  return SwitchMatch::DEFAULT;
 }
 
 OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
@@ -4352,13 +4341,12 @@ OPTBLD_INLINE void iopSSwitch(IOP_ARGS) {
     const StringData* str = u->lookupLitstrId(item.str);
     if (cellEqual(*val, str)) {
       pc = origPC + item.dest;
-      break;
+      vmStack().popC();
+      return;
     }
   }
-  if (i == cases) {
-    // default case
-    pc = origPC + jmptab[veclen-1].dest;
-  }
+  // default case
+  pc = origPC + jmptab[veclen-1].dest;
   vmStack().popC();
 }
 

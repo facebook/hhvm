@@ -1,12 +1,15 @@
 "Ditko" 26-Feb-2015
- - Make printf use HH\FormatString instead of FormatString
- - Release the HHVM async mysql extension
- - MCRouter extension for HHVM
- - [HNI][RFC] Add native signature type-checker
+ - Make printf use HH\FormatString instead of FormatString (we're planning to
+   un-reserve \FormatString in a future version).
+ - Release the async mysql extension
+ - Release an async MCRouter extension
+ - FastCGI largely re-written; should fix several rare crashes
+ - Make sure that C++ method signatures match the HNI
+ - Make the typechecker be as strict about XHP classes as other classes. This
+   can be reverted by putting 'unsafe_xhp=true' in your .hhconfig
  - The ZRANGEBYSCORE and ZREVRANGEBYSCORE need to take in start/end scores as strings
  - [asio] Move cycle detection from BlockableWaitHandle to WaitableWaitHandle
  - Add a StackTraceTimeout option to set the timeout for the backtrace handler.
- - Expose C++ queryf implementation to PHP
  - Define FOLLY_HAVE_PTHREAD_SPINLOCK (for ppc port)
  - [hh_format] Change scoring function to match developers expectations better
  - update libmagic CVE-2014-0236
@@ -18,7 +21,6 @@
  - optimize ord('static string')
  - Reuse spill slots in vasm XLS
  - Fix ImmMap::values() and ImmMap::keys() to return ImmVector
- - [FastCGI] Turn off multiplex flag
  - Fix rare race between setting timeout and initializing thread locals
  - Fix exception leak in tc_unwind_personality
  - [hack] Fix load script time offset
@@ -26,25 +28,21 @@
  - Create an IntervalTimer extension
  - [hhvm] Pass eom flag to Transport::sendImpl
  - [hack] Fix tmp dir creation
- - Change path of some @/common/db to @/squangle
  - [hh][typeconst] Fix Parser Bug for Type Constant
  - Fix a bad bug in alias-analysis.cpp
  - remove obsolete libevent patch
  - Matched PHP's clowniness in long2ip()
  - Modified StringData::shrink() to check against the capacity
- - Backport PHP bug #54002
+ - Backport PHP bug #54002 - crash in exif_read_data
  - Fix hhvm number formatter fa_IR tests
  - Better numa scheduling
  - Reduce code size in crc hash functions
  - Fix DebuggerDump serialization of keyless collections
- - Add AsyncMysqlConnection::escapeString()
  - Fix persistent redis connection using unix socket.
  - Fix segfault in mysql_escape_string without connection
  - Remove logic for perfectvirtuals from compiler
- - Stop treating XHP "string" attributes as if they were "Stringish"
  - Implemented `hhvm-gdb` command and distribute gdb scripts
  - Add missing static method ImmVector::fromItems()
- - [HHVM] Rename AsyncConnectionPool to AsyncMysqlConnectionPool
  - Don't cleanup RPC state in destructor if there's nothing to cleanup
  - Fix object comparison bug in HHVM
  - Fix Pair::{skip,skipWhile,take,takeWhile}() to return ImmVector

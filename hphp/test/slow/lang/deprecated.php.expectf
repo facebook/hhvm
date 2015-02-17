@@ -1,0 +1,33 @@
+= basic =
+E_USER_DEPRECATED: f: message for %s/lang/deprecated.php:43
+f
+E_USER_DEPRECATED: C::stMeth: message for %s/lang/deprecated.php:31
+C::stMeth
+E_USER_DEPRECATED: C::__callStatic: message for %s/lang/deprecated.php:33
+C::__callStatic
+E_USER_DEPRECATED: C::meth: message for %s/lang/deprecated.php:29
+C::meth
+E_USER_DEPRECATED: C::__call: message for %s/lang/deprecated.php:35
+C::__call
+E_USER_DEPRECATED: f_gen: message for %s/lang/deprecated.php:45
+
+= via_trait =
+E_USER_DEPRECATED: C_T::stMeth: message for %s/lang/deprecated.php:20
+Tr::stMeth
+E_USER_DEPRECATED: C_T::__callStatic: message for %s/lang/deprecated.php:22
+Tr::__callStatic
+E_USER_DEPRECATED: C_T::meth: message for %s/lang/deprecated.php:18
+Tr::meth
+E_USER_DEPRECATED: C_T::__call: message for %s/lang/deprecated.php:24
+Tr::__call
+
+= memoized =
+E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:49
+fMem
+E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:49
+fMem
+
+= builtin =
+E_DEPRECATED: ereg: As of PHP 5.3.0, preg_match is suggested instead for %s/lang/deprecated.php:72
+
+Done

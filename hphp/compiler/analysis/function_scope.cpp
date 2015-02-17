@@ -654,6 +654,7 @@ void FunctionScope::setOverriding(TypePtr returnType,
 
 std::vector<std::string> FunctionScope::getUserAttributeStringParams(
     const std::string& key) {
+
   std::vector<std::string> ret;
   auto native = m_userAttributes.find(key);
   if (native == m_userAttributes.end()) {

@@ -61,6 +61,8 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Deprecated: ereg: As of PHP 5.3.0, preg_match is suggested instead in %s/test/slow/ext_preg/ext_preg.php on line 312
 bool(true)
 bool(true)
 bool(true)

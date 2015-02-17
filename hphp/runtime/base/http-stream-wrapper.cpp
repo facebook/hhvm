@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
+#include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include <memory>
 
@@ -34,6 +35,7 @@ const StaticString
   s_ignore_errors("ignore_errors"),
   s_max_redirects("max_redirects"),
   s_timeout("timeout"),
+  s_proxy("proxy"),
   s_content("content"),
   s_user_agent("user_agent"),
   s_User_Agent("User-Agent");
@@ -55,6 +57,10 @@ HttpStreamWrapper::open(const String& filename,
   Array headers;
   String method = s_GET;
   String post_data = null_string;
+  String proxy_host = null_string;
+  String proxy_user = null_string;
+  String proxy_pass = null_string;
+  int proxy_port = -1;
   int max_redirs = 20;
   int timeout = -1;
   bool ignore_errors = false;
@@ -92,6 +98,20 @@ HttpStreamWrapper::open(const String& filename,
     if (opts.exists(s_ignore_errors)) {
       ignore_errors = opts[s_ignore_errors].toBoolean();
     }
+    if (opts.exists(s_proxy)) {
+      Variant host = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_HOST);
+      Variant port = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_PORT);
+      if (!same(host, false) && !same(port, false)) {
+        proxy_host = host.toString();
+        proxy_port = port.toInt64();
+        Variant user = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_USER);
+        Variant pass = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_PASS);
+        if (!same(user, false) && !same(pass, false)) {
+          proxy_user = user.toString();
+          proxy_pass = pass.toString();
+        }
+      }
+    }
     post_data = opts[s_content].toString();
   }
 
@@ -105,6 +125,7 @@ HttpStreamWrapper::open(const String& filename,
   auto file = makeSmartPtr<UrlFile>(method.data(), headers,
                                     post_data, max_redirs,
                                     timeout, ignore_errors);
+  file->setProxy(proxy_host, proxy_port, proxy_user, proxy_pass);
   bool ret = file->open(filename, mode);
   if (!ret) {
     raise_warning("Failed to open %s (%s)", filename.data(),

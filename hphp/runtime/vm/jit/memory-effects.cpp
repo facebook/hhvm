@@ -121,12 +121,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * The ReturnHook sets up the ActRec so the unwinder knows everything is
    * already released (i.e. it calls ar->setLocalsDecRefd()).
    *
-   * So it has no upward exposed uses of locals, even though it has a catch
-   * block as a successor that looks like it can use any locals (and in fact it
-   * can, if it weren't for this instruction).
+   * This means it can block upward exposed uses of locals, even though it has
+   * a catch block as a successor that looks like it can use any locals (and in
+   * fact it can, if it weren't for this instruction).  It also should be able
+   * to block uses of the stack below the depth at the ReturnHook.
+   *
+   * Not implemented right now because we tried and it had a bug.
+   * TODO(#6264177).
    */
   case ReturnHook:
-    return KillFrameLocals { inst.src(0) };
+    return MayLoadStore { ANonFrame | reentry_extra(), ANonFrame };
 
   // The suspend hooks can load anything (re-entering the VM), but can't write
   // to frame locals.

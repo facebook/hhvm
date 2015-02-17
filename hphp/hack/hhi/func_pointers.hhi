@@ -24,10 +24,12 @@ function fun(string $func_name); // becomes:
  * which must be of type $class.
  *
  * For example:
- * $v = Vector {
- *   Vector {1, 2, 3},
- *   Vector {1, 2}
- * };
+ *
+ *   $v = Vector {
+ *     Vector {1, 2, 3},
+ *     Vector {1, 2}
+ *   };
+ *
  * $v->map(meth_caller('Vector', 'count'))  // returns Vector {3, 2}
  * ...calls the 'count' method on the inner vectors, and return a vector
  * of the results of that.
@@ -45,6 +47,7 @@ function meth_caller(string $cls_name, string $meth_name); // becomes:
  * Both arguments must be constant strings.
  *
  * Example:
+ *
  *   class C {
  *     public static function isOdd(int $i): bool { return $i % 2 == 1;}
  *   }
@@ -62,6 +65,7 @@ function class_meth(string $cls_name, string $meth_name); // becomes:
  * Both arguments of inst_meth must be be a constant strings.
  *
  * Example:
+ *
  *   class C {
  *     public function isOdd(int $i): bool { return $i % 2 == 1; }
  *     public function filter(Vector<int> $data): Vector<int> {

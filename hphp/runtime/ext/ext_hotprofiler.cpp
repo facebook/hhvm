@@ -1181,8 +1181,7 @@ class MemoProfiler : public Profiler {
     // now. There's no reason not to do more later.
     if (!g_context->m_faults.empty()) return;
     if (ar->m_func->isCPPBuiltin() || ar->resumed()) return;
-    auto ret_tv = vmStack().topTV();
-    auto ret = tvAsCVarRef(ret_tv);
+    auto ret = tvAsCVarRef(retval);
     if (ret.isNull()) return;
     if (!(ret.isString() || ret.isObject() || ret.isArray())) return;
     VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
@@ -1201,12 +1200,12 @@ class MemoProfiler : public Profiler {
       if (member_memo.m_return_value.length() == 0) { // First time
         member_memo.m_return_value = sdata;
         // Intentionally copy the raw pointer value
-        member_memo.m_ret_tv = *ret_tv;
+        member_memo.m_ret_tv = *retval;
         memo.m_ignore = false;
       } else if (member_memo.m_return_value == sdata) { // Same
         memo.m_ignore = false;
-        if ((member_memo.m_ret_tv.m_data.num != ret_tv->m_data.num) ||
-            (member_memo.m_ret_tv.m_type != ret_tv->m_type)) {
+        if ((member_memo.m_ret_tv.m_data.num != retval->m_data.num) ||
+            (member_memo.m_ret_tv.m_type != retval->m_type)) {
           memo.m_ret_tv_same = false;
         }
       } else {
@@ -1216,12 +1215,12 @@ class MemoProfiler : public Profiler {
       if (memo.m_return_value.length() == 0) { // First time
         memo.m_return_value = sdata;
         // Intentionally copy the raw pointer value
-        memo.m_ret_tv = *ret_tv;
+        memo.m_ret_tv = *retval;
         memo.m_ignore = false;
       } else if (memo.m_return_value == sdata) { // Same
         memo.m_ignore = false;
-        if ((memo.m_ret_tv.m_data.num != ret_tv->m_data.num) ||
-            (memo.m_ret_tv.m_type != ret_tv->m_type)) {
+        if ((memo.m_ret_tv.m_data.num != retval->m_data.num) ||
+            (memo.m_ret_tv.m_type != retval->m_type)) {
           memo.m_ret_tv_same = false;
         }
       } else {

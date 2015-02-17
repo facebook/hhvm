@@ -71,6 +71,7 @@
 #include "hphp/util/capability.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/embedded-data.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/process.h"
 #include "hphp/util/repo-schema.h"
@@ -1425,7 +1426,12 @@ static int execute_program_impl(int argc, char** argv) {
   pcre_init();
 
   MemoryManager::TlsWrapper::getCheck();
-
+  if (RuntimeOption::ServerExecutionMode()) {
+    // Create the hardware counter before reading options,
+    // so that the main thread never has inherit set in server
+    // mode
+    HardwareCounter::s_counter.getCheck();
+  }
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   // Start with .hdf and .ini files
@@ -1544,6 +1550,10 @@ static int execute_program_impl(int argc, char** argv) {
     }
 
     set_execution_mode("run");
+    /* recreate the hardware counters for the main thread now that we know
+     * whether to include subprocess times */
+    HardwareCounter::s_counter.destroy();
+    HardwareCounter::s_counter.getCheck();
 
     int new_argc;
     char **new_argv;

@@ -18,15 +18,13 @@
 #define incl_HPHP_UTIL_HARDWARE_COUNTER_H_
 
 #include "hphp/util/thread-local.h"
+#include "hphp/util/slice.h"
 
 #include <cstdint>
 #include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-class Array;
-class String;
 
 #ifndef NO_HARDWARE_COUNTERS
 
@@ -51,10 +49,12 @@ public:
   static int64_t GetInstructionCount();
   static int64_t GetLoadCount();
   static int64_t GetStoreCount();
-  static bool SetPerfEvents(const String& events);
-  static void GetPerfEvents(Array& ret);
-  static void ClearPerfEvents();
+  static bool SetPerfEvents(const StringSlice& events);
 
+  typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
+  static void GetPerfEvents(PerfEventCallback f, void* data);
+  static void ClearPerfEvents();
+  static void Init(bool enable, const std::string& events, bool subProc);
   static DECLARE_THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
   bool m_countersSet{false};
 private:
@@ -63,15 +63,15 @@ private:
   int64_t getLoadCount();
   int64_t getStoreCount();
   bool eventExists(const char* event);
-  bool addPerfEvent(const String& event);
-  bool setPerfEvents(const String& events);
-  void getPerfEvents(Array& ret);
+  bool addPerfEvent(const char* event);
+  bool setPerfEvents(const StringSlice& events);
+  void getPerfEvents(PerfEventCallback f, void* data);
   void clearPerfEvents();
 
-  InstructionCounter* m_instructionCounter{nullptr};
-  LoadCounter* m_loadCounter{nullptr};
-  StoreCounter* m_storeCounter{nullptr};
-  std::vector<HardwareCounterImpl*> m_counters;
+  std::unique_ptr<InstructionCounter> m_instructionCounter;
+  std::unique_ptr<LoadCounter> m_loadCounter;
+  std::unique_ptr<StoreCounter> m_storeCounter;
+  std::vector<std::unique_ptr<HardwareCounterImpl>> m_counters;
 };
 
 #else // NO_HARDWARE_COUNTERS
@@ -90,13 +90,15 @@ public:
   static int64_t GetInstructionCount() { return 0; }
   static int64_t GetLoadCount() { return 0; }
   static int64_t GetStoreCount() { return 0; }
-  static bool SetPerfEvents(const String& events) { return false; }
-  static void GetPerfEvents(Array& ret) { }
+  static bool SetPerfEvents(const StringSlice& events) { return false; }
+  typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
+  static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }
+  static void Init(bool enable, const std::string& events, bool subProc) {}
 
   // Normally exposed by DECLARE_THREAD_LOCAL_NO_CHECK
   void getCheck() { }
-
+  void destroy() { }
   static HardwareCounter s_counter;
   bool m_countersSet;
 };

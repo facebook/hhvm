@@ -1846,16 +1846,6 @@ void MCGenerator::requestExit() {
   tl_debuggerCatches = nullptr;
 }
 
-bool
-MCGenerator::isPseudoEvent(const char* event) {
-  for (auto name : kPerfCounterNames) {
-    if (!strcmp(event, name)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 void
 MCGenerator::getPerfCounters(Array& ret) {
   for (int i = 0; i < tpc_num_counters; i++) {

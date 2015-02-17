@@ -32,6 +32,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
@@ -52,13 +53,13 @@
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/extension-registry.h"
 
 namespace HPHP {
@@ -988,6 +989,11 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     EVALFLAGS()
 #undef F
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
+    HardwareCounter::Init(EvalProfileHWEnable,
+                          url_decode(EvalProfileHWEvents.data(),
+                                     EvalProfileHWEvents.size()).toCppString(),
+                          EvalRecordSubprocessTimes);
+
     Config::Bind(EnableEmitSwitch, ini, eval["EnableEmitSwitch"], true);
     Config::Bind(EnableEmitterStats, ini, eval["EnableEmitterStats"],
                  EnableEmitterStats);

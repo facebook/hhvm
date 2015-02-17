@@ -273,6 +273,7 @@ int main(int argc, char** argv) try {
 
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
+  MemoryManager::TlsWrapper::getCheck();
   RuntimeOption::Load(ini, config);
   RuntimeOption::RepoLocalPath       = "/tmp/hhbbc.repo";
   RuntimeOption::RepoCentralPath     = input_repo;

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/hardware-counter.h"
+#include "hphp/util/hardware-counter.h"
 
 #ifndef NO_HARDWARE_COUNTERS
 
@@ -35,11 +35,8 @@
 #include <asm/unistd.h>
 #include <sys/prctl.h>
 #include <linux/perf_event.h>
-#include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include <folly/String.h>
+#include <folly/Memory.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,11 +44,15 @@ namespace HPHP {
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(HardwareCounter,
     HardwareCounter::s_counter);
 
+static bool s_recordSubprocessTimes = false;
+static bool s_profileHWEnable;
+static std::string s_profileHWEvents;
+
 static inline bool useCounters() {
 #ifdef VALGRIND
   return false;
 #else
-  return RuntimeOption::EvalProfileHWEnable;
+  return s_profileHWEnable;
 #endif
 }
 
@@ -64,6 +65,7 @@ public:
     pe.type = type;
     pe.size = sizeof (struct perf_event_attr);
     pe.config = config;
+    pe.inherit = s_recordSubprocessTimes;
     pe.disabled = 1;
     pe.pinned = 0;
     pe.exclude_kernel = 0;
@@ -151,7 +153,7 @@ public:
   }
 
 public:
-  StaticString m_desc;
+  std::string m_desc;
   int m_err;
 private:
   int m_fd;
@@ -189,33 +191,32 @@ public:
 
 HardwareCounter::HardwareCounter()
   : m_countersSet(false) {
-  m_instructionCounter = new InstructionCounter();
-  if (RuntimeOption::EvalProfileHWEvents == "") {
-    m_loadCounter = new LoadCounter();
-    m_storeCounter = new StoreCounter();
+  m_instructionCounter.reset(new InstructionCounter());
+  if (s_profileHWEvents.empty()) {
+    m_loadCounter.reset(new LoadCounter());
+    m_storeCounter.reset(new StoreCounter());
   } else {
     m_countersSet = true;
-    setPerfEvents(RuntimeOption::EvalProfileHWEvents);
+    setPerfEvents(StringSlice(s_profileHWEvents.data(),
+                              s_profileHWEvents.size()));
   }
 }
 
 HardwareCounter::~HardwareCounter() {
-  delete m_instructionCounter;
-  if (!m_countersSet) {
-    delete m_loadCounter;
-    delete m_storeCounter;
-  }
-  for (unsigned i = 0; i < m_counters.size(); i++) {
-    delete m_counters[i];
-  }
-  m_counters.clear();
 }
 
-void HardwareCounter::Reset(void) {
+void HardwareCounter::Init(bool enable, const std::string& events,
+                           bool subProc) {
+  s_profileHWEnable = enable;
+  s_profileHWEvents = events;
+  s_recordSubprocessTimes = subProc;
+}
+
+void HardwareCounter::Reset() {
   s_counter->reset();
 }
 
-void HardwareCounter::reset(void) {
+void HardwareCounter::reset() {
   m_instructionCounter->reset();
   if (!m_countersSet) {
     m_storeCounter->reset();
@@ -325,13 +326,12 @@ static void checkLLCHack(const char* event, uint32_t& type, uint64_t& config) {
   }
 }
 
-bool HardwareCounter::addPerfEvent(const String& event) {
+bool HardwareCounter::addPerfEvent(const char* event) {
   uint32_t type = 0;
   uint64_t config = 0;
   int i, match_len;
   bool found = false;
-  const char *ev = event.data();
-  HardwareCounterImpl* hwc;
+  const char* ev = event;
 
   while ((i = findEvent(ev, perfTable,
                         sizeof(perfTable)/sizeof(struct PerfTable),
@@ -341,32 +341,31 @@ bool HardwareCounter::addPerfEvent(const String& event) {
       found = true;
       type = perfTable[i].type;
     } else if (type != perfTable[i].type) {
-      Logger::Warning("failed to find perf event: %s", event.data());
+      Logger::Warning("failed to find perf event: %s", event);
       return false;
     }
     config |= perfTable[i].config;
     ev = &ev[match_len];
   }
 
-  checkLLCHack(event.data(), type, config);
+  checkLLCHack(event, type, config);
 
   if (!found || *ev) {
-    Logger::Warning("failed to find perf event: %s", event.data());
+    Logger::Warning("failed to find perf event: %s", event);
     return false;
   }
-  hwc = new HardwareCounterImpl(type, config, event.data());
+  auto hwc = folly::make_unique<HardwareCounterImpl>(type, config, event);
   if (hwc->m_err) {
-    Logger::Warning("failed to set perf event: %s", event.data());
-    delete hwc;
+    Logger::Warning("failed to set perf event: %s", event);
     return false;
   }
-  m_counters.push_back(hwc);
+  m_counters.emplace_back(std::move(hwc));
   if (!m_countersSet) {
-    // delete load and store counters. This is because
+    // reset load and store counters. This is because
     // perf does not seem to handle more than three counters
     // very well.
-    delete m_loadCounter;
-    delete m_storeCounter;
+    m_loadCounter.reset();
+    m_storeCounter.reset();
     m_countersSet = true;
   }
   return true;
@@ -382,21 +381,17 @@ bool HardwareCounter::eventExists(const char *event) {
   return false;
 }
 
-bool HardwareCounter::setPerfEvents(const String& events) {
+bool HardwareCounter::setPerfEvents(const StringSlice& sevents) {
   // Make a copy of the string for use with strtok.
-  auto const sevents = events.get()->slice();
-  auto const sevents_buf = static_cast<char*>(smart_malloc(sevents.len + 1));
-  SCOPE_EXIT { smart_free(sevents_buf); };
+  auto const sevents_buf = static_cast<char*>(malloc(sevents.len + 1));
+  SCOPE_EXIT { free(sevents_buf); };
   memcpy(sevents_buf, sevents.ptr, sevents.len);
   sevents_buf[sevents.len] = '\0';
 
   char* strtok_buf = nullptr;
   char* s = strtok_r(sevents_buf, ",", &strtok_buf);
   while (s) {
-    int len = strlen(s);
-    String event = url_decode(s, len);
-    bool isPseudoEvent = jit::MCGenerator::isPseudoEvent(event.data());
-    if (!isPseudoEvent && !eventExists(event.data()) && !addPerfEvent(event)) {
+    if (!eventExists(s) && !addPerfEvent(s)) {
       return false;
     }
     s = strtok_r(nullptr, ",", &strtok_buf);
@@ -404,14 +399,11 @@ bool HardwareCounter::setPerfEvents(const String& events) {
   return true;
 }
 
-bool HardwareCounter::SetPerfEvents(const String& events) {
+bool HardwareCounter::SetPerfEvents(const StringSlice& events) {
   return s_counter->setPerfEvents(events);
 }
 
 void HardwareCounter::clearPerfEvents() {
-  for (unsigned i = 0; i < m_counters.size(); i++) {
-    delete m_counters[i];
-  }
   m_counters.clear();
 }
 
@@ -419,25 +411,24 @@ void HardwareCounter::ClearPerfEvents() {
   s_counter->clearPerfEvents();
 }
 
-const StaticString
+const std::string
   s_instructions("instructions"),
   s_loads("loads"),
   s_stores("stores");
 
-void HardwareCounter::getPerfEvents(Array& ret) {
-  ret.set(s_instructions, getInstructionCount());
+void HardwareCounter::getPerfEvents(PerfEventCallback f, void* data) {
+  f(s_instructions, getInstructionCount(), data);
   if (!m_countersSet) {
-    ret.set(s_loads, getLoadCount());
-    ret.set(s_stores, getStoreCount());
+    f(s_loads, getLoadCount(), data);
+    f(s_stores, getStoreCount(), data);
   }
   for (unsigned i = 0; i < m_counters.size(); i++) {
-    ret.set(m_counters[i]->m_desc, m_counters[i]->read());
+    f(m_counters[i]->m_desc, m_counters[i]->read(), data);
   }
-  jit::mcg->getPerfCounters(ret);
 }
 
-void HardwareCounter::GetPerfEvents(Array& ret) {
-  s_counter->getPerfEvents(ret);
+void HardwareCounter::GetPerfEvents(PerfEventCallback f, void* data) {
+  s_counter->getPerfEvents(f, data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

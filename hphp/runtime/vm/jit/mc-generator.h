@@ -178,7 +178,6 @@ struct MCGenerator : private boost::noncopyable {
   }
 
   static CppCall getDtorCall(DataType type);
-  static bool isPseudoEvent(const char* event);
 
 public:
   MCGenerator();

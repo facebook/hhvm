@@ -402,7 +402,7 @@ OffsetSet instrSuccOffsets(Op* opc, const Unit* unit) {
 
   if (isSwitch(*opc)) {
     foreachSwitchTarget(opc, [&](Offset& offset) {
-        succBcOffs.insert(offset);
+        succBcOffs.insert(offset + opc - bcStart);
       });
   } else {
     Offset target = instrJumpTarget(bcStart, opc - bcStart);

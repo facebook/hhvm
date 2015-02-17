@@ -1,0 +1,21 @@
+# Test Simplifier
+
+## Overview
+Test simplifier reduces test script by comparing the results of running a php
+script against two seperate command lines and removing statements from the
+script until the results agree. It attempts to return the smallest possible php
+script that still reproduces the inconsistent behavior. The output comparison
+is based on stdout only.
+
+The simplifier currently works at php statement granularity and will do an
+exhaustive search of the possible programs created by removing statements from
+the original.
+
+## Usage
+
+php simplifier.php [php script] [command 1] [command 2]
+
+Example: comparing HHVM jit vs interp
+php simplifier.php test/quick/ReadVar.php "hhvm -vEval.Jit=0 --file " "hhvm -vEval.Jit=1 --file "
+
+This tools used PHP-Parser to parse php into an object

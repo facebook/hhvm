@@ -186,19 +186,18 @@ public:
     return sp;
   }
 
- protected:
+private:
   // For templatized SmartPtr<Y> move constructor.
   template <typename Y> friend class SmartPtr;
 
-  T* m_px;  // raw pointer
-
-private:
   static ALWAYS_INLINE void decRefPtr(T* ptr) {
     if (LIKELY(ptr != nullptr)) ptr->decRefAndRelease();
   }
   static void compileTimeAssertions() {
     static_assert(offsetof(SmartPtr, m_px) == kExpectedMPxOffset, "");
   }
+
+  T* m_px;  // raw pointer
 };
 
 ///////////////////////////////////////////////////////////////////////////////

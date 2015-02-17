@@ -98,7 +98,7 @@ struct AliasAnalysis {
    * Note: right now this is only populated for stack locations.  You will have
    * to add more to collect_aliases if you have a new use case.
    */
-  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> must_alias_map;
+  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stk_must_alias_map;
 
   /*
    * Return a set of locations that we've assigned ids to that may be affected
@@ -124,6 +124,11 @@ struct AliasAnalysis {
    * Return a set of locations that we've assigned ids to that must be
    * contained in `acls'.  This function will conservatively return an empty
    * set.
+   *
+   * Right now, this function will work for specific AliasClasses we've
+   * assigned ids---for larger classes, it only supports stack ranges observed
+   * during alias collection, AFrameAny, and some cases of unions of those---if
+   * you need more, it will need some additions.
    */
   ALocBits must_alias(AliasClass acls) const;
 

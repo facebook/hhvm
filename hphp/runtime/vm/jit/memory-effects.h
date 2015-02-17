@@ -49,6 +49,22 @@ struct IRInstruction;
 struct MayLoadStore   { AliasClass loads; AliasClass stores; };
 
 /*
+ * Like MayLoadStore, except also provides a set of locations that are `killed'
+ * via this instruction.  That is, when the instruction executes (before any of
+ * its other effects), it becomes illegal for any part of the program to read
+ * from those locations without first writing to them.
+ *
+ * If `killed' overlaps with either mls.loads or mls.stores, the locations in
+ * the intersection may be assumed to be killed.
+ *
+ * This is used, for example, for ReturnHook, which has peculiar semantics---it
+ * can re-enter and access various things in the heap, but the eval stack and
+ * frame locals for the current function are required to be dead before we can
+ * run this instruction.  (It calls setLocalsDecRefd on the ActRec.)
+ */
+struct MayLoadStoreKill { MayLoadStore mls; AliasClass killed; };
+
+/*
  * The effect of definitely loading from an abstract location, without
  * performing any other work.  Instructions with these memory effects can be
  * removed and replaced with a Mov if we have a value available that's known to
@@ -108,16 +124,20 @@ struct CallEffects    { bool destroys_locals;
                         AliasClass stack; };
 
 /*
- * ReturnEffects is a real return from the php function.  It does not cover
- * things like suspending a resumable or "returning" from an inlined function.
- * But it may cover returning from a suspended resumable.
+ * ReturnEffects is a return, either from the php function or an inlined
+ * function.  You may assume if the instruction it came from is not an
+ * InlineReturn, it is a return from the entire region.  It does not cover
+ * suspending a resumable, but it covers returning from a suspended resumable.
  *
- * All locals may be considered dead after ReturnEffects.  However, the stack
- * is a little more complicated.  The `killed' set is an additional alias class
- * of locations that cannot be read after the return, which is used to provide
- * the range of stack that can be considered dead.  In normal functions it will
- * effectively be AStackAny, but in generators a return may still leave part of
- * the eval stack alive for the caller.
+ * All locals on the returning frame may be considered dead after
+ * ReturnEffects.  However, the stack is a little more complicated.  The
+ * `killed' set is an additional alias class of locations that cannot be read
+ * after the return, which is used to provide the range of stack that can be
+ * considered dead.  In normal functions it will effectively be AStackAny, but
+ * in generators a return may still leave part of the eval stack alive for the
+ * caller.  When returning from an inlined function, the locals may all be
+ * considered dead, and `killed' will contain the whole inlined function's
+ * stack.
  */
 struct ReturnEffects  { AliasClass killed; };
 
@@ -143,15 +163,6 @@ struct ExitEffects    { AliasClass live; AliasClass kill; };
 struct InterpOneEffects { AliasClass killed; };
 
 /*
- * An instruction that does KillFrameLocals prevents any upward exposed uses of
- * frame local slots, and stack slots related to that frame, with no other
- * memory effects.  This effect means that the instruction semantically
- * prevents any future loads from locals on that frame or stack slots below
- * that frame.
- */
-struct KillFrameLocals { SSATmp* fp; };
-
-/*
  * "Irrelevant" effects means it doesn't do anything we currently care about
  * for consumers of this module.  If you want to care about a new kind of
  * memory effect, you get to re-audit everything---have fun. :)
@@ -165,11 +176,11 @@ struct IrrelevantEffects {};
 struct UnknownEffects {};
 
 using MemEffects = boost::variant< MayLoadStore
+                                 , MayLoadStoreKill
                                  , PureLoad
                                  , PureStore
                                  , PureStoreNT
                                  , PureSpillFrame
-                                 , KillFrameLocals
                                  , IterEffects
                                  , IterEffects2
                                  , CallEffects

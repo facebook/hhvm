@@ -172,12 +172,6 @@ void kill(Local& env, AliasClass acls) {
   addKillSet(env, env.global.ainfo.must_alias(canonicalize(acls)));
 }
 
-void killFrame(Local& env, SSATmp* fp) {
-  auto const killSet = env.global.ainfo.per_frame_bits[fp];
-  addKillSet(env, killSet);
-  kill(env, AStack { fp, 2, std::numeric_limits<int32_t>::max() });
-}
-
 folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
   if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
     return meta->index;
@@ -193,8 +187,12 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { addAllGen(env); },
     [&] (PureLoad l)        { load(env, l.src); },
-    [&] (KillFrameLocals l) { killFrame(env, l.fp); },
     [&] (MayLoadStore l)    { load(env, l.loads); },
+
+    [&] (MayLoadStoreKill l) {
+      load(env, l.mls.loads);
+      kill(env, l.killed);
+    },
 
     [&] (InterpOneEffects m) {
       addAllGen(env);
@@ -202,8 +200,20 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     [&] (ReturnEffects l) {
-      // Locations other than the frame and stack (e.g. object properties and
-      // whatnot) are live on a function return.
+      if (inst.is(InlineReturn)) {
+        // Returning from an inlined function.  This adds nothing to gen, but
+        // kills frame and stack locations for the callee.
+        auto const fp = inst.src(0);
+        auto const killSet = env.global.ainfo.per_frame_bits[fp];
+        addKillSet(env, killSet);
+        kill(env, l.killed);
+        return;
+      }
+
+      // Return from the main function.  Locations other than the frame and
+      // stack (e.g. object properties and whatnot) are always live on a
+      // function return---so add everything to gen before we start killing
+      // things.
       addAllGen(env);
       addKillSet(env, env.global.ainfo.all_frame);
       kill(env, l.killed);

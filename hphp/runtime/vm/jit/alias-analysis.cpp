@@ -53,15 +53,14 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (IterEffects x)       { visit(x.killed); },
         [&] (IterEffects2 x)      { visit(x.killed); },
         [&] (MayLoadStore x)      { visit(x.loads); visit(x.stores); },
+        [&] (MayLoadStoreKill x)  { visit(x.mls.loads);
+                                    visit(x.mls.stores);
+                                    visit(x.killed); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
         [&] (PureStoreNT x)       { visit(x.dst); },
         [&] (PureSpillFrame x)    { visit(x.dst); },
-        [&] (ExitEffects x)       { visit(x.live); visit(x.kill); },
-
-        [&] (KillFrameLocals x) {
-          visit(AStack { x.fp, 2, std::numeric_limits<int32_t>::max() });
-        }
+        [&] (ExitEffects x)       { visit(x.live); visit(x.kill); }
       );
     }
   }
@@ -134,9 +133,14 @@ ALocBits AliasAnalysis::must_alias(AliasClass acls) const {
     return ret;
   }
 
-  auto const it = must_alias_map.find(acls);
-  if (it == end(must_alias_map)) return ALocBits{};
-  return it->second;
+  auto ret = ALocBits{};
+
+  auto const it = stk_must_alias_map.find(acls);
+  if (it != end(stk_must_alias_map)) ret |= it->second;
+
+  if (AFrameAny <= acls) ret |= all_frame;
+
+  return ret;
 }
 
 AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
@@ -191,15 +195,15 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      * that, when they can re-enter and do things to the stack in some range
      * (below the re-entry depth, for example), but also affect some other type
      * of memory (CastStk, for example).  In particular this means we want that
-     * AliasClass to have an entry in the must_alias_map, so we'll populate it
-     * later.  Currently most of these situations should probably bail at
+     * AliasClass to have an entry in the stk_must_alias_map, so we'll populate
+     * it later.  Currently most of these situations should probably bail at
      * kMaxExpandedStackRange, although there are some situations that won't
      * (e.g. instructions like CoerceStk, which will have an AHeapAny (from
      * re-entry) unioned with a single stack slot).
      */
     if (auto const stk = acls.stack()) {
       if (stk->size > 1) {
-        ret.must_alias_map[acls];
+        ret.stk_must_alias_map[AliasClass { *stk }];
       }
       if (stk->size > kMaxExpandedStackRange) return;
 
@@ -270,14 +274,14 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     /*
      * Note: this is probably more complex than it needs to be, because we're
-     * iterating the must_alias_map for each location.  Since kMaxTrackedALocs
-     * is bounded by a constant, it's kinda O(must_alias_map), but not in a
-     * good way.  The number of locations is currently generally small, so this
-     * is probably ok for now---but if we remove the limit we may need to
-     * revisit this so it can't blow up.
+     * iterating the stk_must_alias_map for each location.  Since
+     * kMaxTrackedALocs is bounded by a constant, it's kinda
+     * O(stk_must_alias_map), but not in a good way.  The number of locations
+     * is currently generally small, so this is probably ok for now---but if we
+     * remove the limit we may need to revisit this so it can't blow up.
      */
     if (kv.first.is_stack()) {
-      for (auto& maEnt : ret.must_alias_map) {
+      for (auto& maEnt : ret.stk_must_alias_map) {
         if (kv.first <= maEnt.first) {
           FTRACE(2, "  ({}) {} must_alias {}\n",
             kv.second.index,
@@ -323,7 +327,7 @@ std::string show(const AliasAnalysis& linfo) {
     "all frame",  show(linfo.all_frame),
     "all stack",  show(linfo.all_stack)
   );
-  for (auto& kv : linfo.must_alias_map) {
+  for (auto& kv : linfo.stk_must_alias_map) {
     folly::format(&ret, " ma {: <17}       : {}\n",
       show(kv.first),
       show(kv.second));

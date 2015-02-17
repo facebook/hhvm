@@ -122,16 +122,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * The ReturnHook sets up the ActRec so the unwinder knows everything is
    * already released (i.e. it calls ar->setLocalsDecRefd()).
    *
-   * This means it can block upward exposed uses of locals, even though it has
-   * a catch block as a successor that looks like it can use any locals (and in
-   * fact it can, if it weren't for this instruction).  It also should be able
-   * to block uses of the stack below the depth at the ReturnHook.
-   *
-   * Not implemented right now because we tried and it had a bug.
-   * TODO(#6264177).
+   * This means it can block upward exposed uses of locals via kills, even
+   * though it has a catch block as a successor that looks like it can use any
+   * locals (and in fact it can, if it weren't for this instruction).  It also
+   * can block uses of the stack below the depth at the ReturnHook.
    */
   case ReturnHook:
-    return MayLoadStore { ANonFrame | reentry_extra(), ANonFrame };
+    return MayLoadStoreKill {
+      MayLoadStore { AHeapAny, AHeapAny },
+      stack_below(inst.src(0), 2) | AFrameAny
+    };
 
   // The suspend hooks can load anything (re-entering the VM), but can't write
   // to frame locals.
@@ -202,7 +202,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   case InlineReturn:
-    return KillFrameLocals { inst.src(0) };
+    return ReturnEffects { stack_below(inst.src(0), 2) };
 
   case InterpOne:
   case InterpOneCF:
@@ -1045,20 +1045,22 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
   // argument numbers.
   match<void>(
     me,
-    [&] (MayLoadStore x)    { check(x.loads); check(x.stores); },
-    [&] (PureLoad x)        { check(x.src); },
-    [&] (PureStore x)       { check(x.dst); },
-    [&] (PureStoreNT x)     { check(x.dst); },
-    [&] (PureSpillFrame x)  { check(x.dst); },
-    [&] (IterEffects x)     { check_fp(x.fp); check(x.killed); },
-    [&] (IterEffects2 x)    { check_fp(x.fp); check(x.killed); },
-    [&] (KillFrameLocals x) { check_fp(x.fp); },
-    [&] (ExitEffects x)     { check(x.live); check(x.kill); },
-    [&] (IrrelevantEffects) {},
-    [&] (UnknownEffects)    {},
-    [&] (InterpOneEffects x){ check(x.killed); },
-    [&] (CallEffects x)     { check(x.killed); check(x.stack); },
-    [&] (ReturnEffects x)   { check(x.killed); }
+    [&] (MayLoadStore x)     { check(x.loads); check(x.stores); },
+    [&] (MayLoadStoreKill x) { check(x.mls.loads);
+                               check(x.mls.stores);
+                               check(x.killed); },
+    [&] (PureLoad x)         { check(x.src); },
+    [&] (PureStore x)        { check(x.dst); },
+    [&] (PureStoreNT x)      { check(x.dst); },
+    [&] (PureSpillFrame x)   { check(x.dst); },
+    [&] (IterEffects x)      { check_fp(x.fp); check(x.killed); },
+    [&] (IterEffects2 x)     { check_fp(x.fp); check(x.killed); },
+    [&] (ExitEffects x)      { check(x.live); check(x.kill); },
+    [&] (IrrelevantEffects)  {},
+    [&] (UnknownEffects)     {},
+    [&] (InterpOneEffects x) { check(x.killed); },
+    [&] (CallEffects x)      { check(x.killed); check(x.stack); },
+    [&] (ReturnEffects x)    { check(x.killed); }
   );
 
   return true;
@@ -1082,6 +1084,12 @@ MemEffects canonicalize(MemEffects me) {
     me,
     [&] (MayLoadStore x) -> R {
       return MayLoadStore { canonicalize(x.loads), canonicalize(x.stores) };
+    },
+    [&] (MayLoadStoreKill x) -> R {
+      return MayLoadStoreKill {
+        MayLoadStore { canonicalize(x.mls.loads), canonicalize(x.mls.stores) },
+        canonicalize(x.killed)
+      };
     },
     [&] (PureLoad x) -> R {
       return PureLoad { canonicalize(x.src) };
@@ -1117,7 +1125,6 @@ MemEffects canonicalize(MemEffects me) {
     [&] (InterpOneEffects x) -> R {
       return InterpOneEffects { canonicalize(x.killed) };
     },
-    [&] (KillFrameLocals x)   -> R { return x; },
     [&] (IrrelevantEffects x) -> R { return x; },
     [&] (UnknownEffects x)    -> R { return x; }
   );
@@ -1131,6 +1138,10 @@ std::string show(MemEffects effects) {
     effects,
     [&] (MayLoadStore x) {
       return sformat("mls({} ; {})", show(x.loads), show(x.stores));
+    },
+    [&] (MayLoadStoreKill x) {
+      return sformat("mlsk({} ; {} ; {})", show(x.mls.loads),
+        show(x.mls.stores), show(x.killed));
     },
     [&] (ExitEffects x) {
       return sformat("exit({} ; {})", show(x.live), show(x.kill));
@@ -1148,7 +1159,6 @@ std::string show(MemEffects effects) {
     [&] (ReturnEffects x)   { return sformat("return({})", show(x.killed)); },
     [&] (IterEffects)       { return "IterEffects"; },
     [&] (IterEffects2)      { return "IterEffects2"; },
-    [&] (KillFrameLocals)   { return "KillFrameLocals"; },
     [&] (IrrelevantEffects) { return "IrrelevantEffects"; },
     [&] (UnknownEffects)    { return "UnknownEffects"; }
   );

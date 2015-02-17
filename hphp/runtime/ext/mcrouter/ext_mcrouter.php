@@ -10,8 +10,8 @@ class MCRouterException extends Exception {
 
   public function __construct(
     string $message,
-    protected int $op = self::mc_op_unknown,
-    int $reply = self::mc_res_unknown,
+    protected int $op = MCRouter::mc_op_unknown,
+    int $reply = MCRouter::mc_res_unknown,
     protected string $key = "",
   ) {
     parent::__construct($message, $reply);

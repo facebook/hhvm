@@ -80,7 +80,7 @@ class UConverter {
    * @return string - (null on error)
    */
   <<__Native>>
-  public function getDestinationEncoding(): mixed;
+  public function getDestinationEncoding(): ?string;
 
   /**
    * Get the destination converter type
@@ -112,7 +112,7 @@ class UConverter {
    * @return string - (null on error)
    */
   <<__Native>>
-  public function getSourceEncoding(): mixed;
+  public function getSourceEncoding(): ?string;
 
   /**
    * Get the source convertor type

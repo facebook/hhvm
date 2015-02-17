@@ -32,6 +32,9 @@ void c_StaticWaitHandle::t___construct() {
  *
  * - consumes reference of the given cell
  * - produces reference for the returned StaticWaitHandle object
+ *
+ * Both the JIT and bytecode.cpp assume this function gives the nothrow
+ * guarantee.
  */
 c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const Cell result) {
   auto waitHandle = newobj<c_StaticWaitHandle>();

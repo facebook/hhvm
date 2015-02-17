@@ -1069,6 +1069,10 @@ struct SinkPointAnalyzer : private LocalStateHook {
         consumeValue(inst.src(1)->inst()->src(0));
       }
       break;
+    case ReturnHook:
+      // Return hook decrefs the return value if it throws.
+      consumeValue(inst.src(1));
+      break;
     default:
       break;
     }

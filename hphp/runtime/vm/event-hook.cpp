@@ -481,18 +481,27 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
 
   // TODO(#5758054): does this need setVarEnv(nullptr) ?
 
-  ssize_t flags = CheckSurprise();
-  onFunctionExit(ar, &retval, nullptr, flags);
+  try {
+    ssize_t flags = CheckSurprise();
+    onFunctionExit(ar, &retval, nullptr, flags);
 
-  // Async profiler
-  if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
-      ar->func()->isAsyncFunction() && ar->resumed()) {
-    auto session = AsioSession::Get();
-    // Return @ resumed execution => AsyncFunctionWaitHandle succeeded.
-    if (session->hasOnResumableSuccessCallback()) {
-      auto afwh = frame_afwh(ar);
-      session->onResumableSuccess(afwh, cellAsCVarRef(retval));
+    // Async profiler
+    if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+        ar->func()->isAsyncFunction() && ar->resumed()) {
+      auto session = AsioSession::Get();
+      // Return @ resumed execution => AsyncFunctionWaitHandle succeeded.
+      if (session->hasOnResumableSuccessCallback()) {
+        auto afwh = frame_afwh(ar);
+        session->onResumableSuccess(afwh, cellAsCVarRef(retval));
+      }
     }
+  } catch (...) {
+    /*
+     * We're responsible for freeing the return value if we exit with an
+     * exception.  See irgen-ret.
+     */
+    tvRefcountedDecRef(retval);
+    throw;
   }
 }
 

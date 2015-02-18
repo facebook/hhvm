@@ -18,7 +18,13 @@ function fb_cs_test($v) {
   var_dump($ret === true);
 }
 
+function error_handler($errno, $errstr) {
+  echo "$errstr\n";
+}
+
 function main() {
+  set_error_handler('error_handler');
+
   fb_cs_test(null);
   fb_cs_test(true);
   fb_cs_test(false);
@@ -39,6 +45,7 @@ function main() {
   fb_cs_test(array(1, array("a")));
   fb_cs_test(array(array("a"), 1));
   fb_cs_test(array(array("a"), array(1)));
+  fb_cs_test(array(42 => new stdclass(), 47 => new stdclass()));
 
   // Test skips
   fb_cs_test(array(0 => "a", 1 => "b", 3 => "c"));

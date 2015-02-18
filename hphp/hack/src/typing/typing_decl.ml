@@ -492,8 +492,7 @@ and class_decl tcopt c =
       env, Some
         { te_base       = base_hint;
           te_constraint = constraint_hint } in
-  let consts = Typing_enum.enum_class_decl_rewrite
-    env c.c_name enum impl consts in
+  let consts = Typing_enum.enum_class_decl_rewrite c.c_name enum impl consts in
   let tc = {
     tc_final = c.c_final;
     tc_abstract = is_abstract;

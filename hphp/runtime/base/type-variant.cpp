@@ -808,8 +808,11 @@ static void unserializeProp(VariableUnserializer* uns,
     t = &tvAsVariant(lookup.prop);
   }
 
-  t->unserialize(uns);
+  if (UNLIKELY(IS_REFCOUNTED_TYPE(t->getRawType()))) {
+    uns->putInOverwrittenList(*t);
+  }
 
+  t->unserialize(uns);
   if (!RuntimeOption::RepoAuthoritative) return;
   if (!Repo::get().global().HardPrivatePropInference) return;
 

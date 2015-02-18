@@ -191,7 +191,8 @@ String WddxPacket::wrapValue(const String& start,
 //////////////////////////////////////////////////////////////////////////////
 // helpers
 
-void find_var_recursive(const TypedValue* tv, WddxPacket* wddxPacket) {
+void find_var_recursive(const TypedValue* tv,
+                        const SmartPtr<WddxPacket>& wddxPacket) {
   if (tvIsString(tv)) {
     String var_name = tvCastToString(tv);
     wddxPacket->add_var(var_name, true);
@@ -206,7 +207,7 @@ void find_var_recursive(const TypedValue* tv, WddxPacket* wddxPacket) {
 static TypedValue* add_vars_helper(ActRec* ar) {
   int start_index = 1;
   Resource packet_id = getArg<KindOfResource>(ar, 0);
-  auto wddxPacket = packet_id.getTyped<WddxPacket>();
+  auto wddxPacket = cast<WddxPacket>(packet_id);
 
   for (int i = start_index; i < ar->numArgs(); i++) {
     auto const tv = getArg(ar, i);
@@ -216,8 +217,8 @@ static TypedValue* add_vars_helper(ActRec* ar) {
 }
 
 static TypedValue* serialize_vars_helper(ActRec* ar) {
-  WddxPacket* wddxPacket = newres<WddxPacket>(empty_string_variant_ref,
-                                              true, true);
+  auto wddxPacket = makeSmartPtr<WddxPacket>(empty_string_variant_ref,
+                                             true, true);
   int start_index = 0;
   for (int i = start_index; i < ar->numArgs(); i++) {
     auto const tv = getArg(ar, i);
@@ -239,18 +240,16 @@ static TypedValue* HHVM_FN(wddx_serialize_vars)(ActRec* ar) {
 }
 
 static String HHVM_FUNCTION(wddx_packet_end, const Resource& packet_id) {
-  auto wddxPacket = packet_id.getTyped<WddxPacket>();
-  return wddxPacket->packet_end();
+  return cast<WddxPacket>(packet_id)->packet_end();
 }
 
 static Resource HHVM_FUNCTION(wddx_packet_start, const Variant& comment) {
-  auto wddxPacket = newres<WddxPacket>(comment, true, false);
-  return Resource(wddxPacket);
+  return Resource(makeSmartPtr<WddxPacket>(comment, true, false));
 }
 
 static String HHVM_FUNCTION(wddx_serialize_value, const Variant& var,
                             const Variant& comment) {
-  WddxPacket* wddxPacket = newres<WddxPacket>(comment, false, false);
+  auto wddxPacket = makeSmartPtr<WddxPacket>(comment, false, false);
   wddxPacket->serialize_value(var);
   return wddxPacket->packet_end();
 }

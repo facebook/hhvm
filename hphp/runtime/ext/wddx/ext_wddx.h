@@ -60,7 +60,8 @@ class WddxPacket: public ResourceData {
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
-void find_var_recursive(const TypedValue* tv, WddxPacket* wddxPacket);
+void find_var_recursive(const TypedValue* tv,
+                        const SmartPtr<WddxPacket>& wddxPacket);
 
 }
 

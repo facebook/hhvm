@@ -85,26 +85,16 @@ private:
 // SystemlibSessionModule
 
 struct SystemlibSessionInstance final : RequestEventHandler {
-  SystemlibSessionInstance() : m_obj(nullptr) { }
+  SystemlibSessionInstance() { }
 
-  ObjectData *getObject() { return m_obj; }
-  void setObject(ObjectData *obj) {
-    destroy();
-    obj->incRefCount();
-    m_obj = obj;
-  }
-
-  void destroy() {
-    if (!m_obj) return;
-    decRefObj(m_obj);
-    m_obj = nullptr;
-  }
-
+  const Object& getObject() { return m_obj; }
+  void setObject(Object&& obj) { m_obj = std::move(obj); }
+  void destroy() { m_obj = nullptr; }
   void requestInit() override { m_obj = nullptr; }
-  void requestShutdown() override { destroy(); }
+  void requestShutdown() override { m_obj = nullptr; }
 
 private:
-  ObjectData* m_obj;
+  Object m_obj;
 };
 
 class SystemlibSessionModule : public SessionModule {
@@ -133,7 +123,7 @@ private:
 
   void lookupClass();
   Func* lookupFunc(Class *cls, StringData *fname);
-  ObjectData *getObject();
+  const Object& getObject();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

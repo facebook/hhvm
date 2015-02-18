@@ -120,8 +120,8 @@ void HHVM_METHOD(DateTime, __construct,
                              ? null_object
                              : timezone.toObject();
   DateTimeData* data = Native::data<DateTimeData>(this_);
-  data->m_dt = newres<DateTime>(TimeStamp::Current(),
-                                DateTimeZoneData::unwrap(obj_timezone));
+  data->m_dt = makeSmartPtr<DateTime>(TimeStamp::Current(),
+                                      DateTimeZoneData::unwrap(obj_timezone));
   if (!time.empty()) {
     data->m_dt->fromString(time, DateTimeZoneData::unwrap(obj_timezone));
   } else if (!timezone.isNull()) {
@@ -141,7 +141,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
   ObjectData* obj = ObjectData::newInstance(DateTimeData::getClass());
   DateTimeData* data = Native::data<DateTimeData>(obj);
   const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
-  data->m_dt = newres<DateTime>(curr, false);
+  data->m_dt = makeSmartPtr<DateTime>(curr, false);
   if (!data->m_dt->fromString(time, DateTimeZoneData::unwrap(obj_timezone),
                               format.data(), false)) {
     return false;
@@ -358,7 +358,7 @@ const StaticString DateTimeZoneData::s_className("DateTimeZone");
 void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone) {
   DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
-  data->m_tz = newres<TimeZone>(timezone);
+  data->m_tz = makeSmartPtr<TimeZone>(timezone);
   if (!data->m_tz->isValid()) {
     std::string msg = "DateTimeZone::__construct(): Unknown or bad timezone (";
     msg += timezone.data();
@@ -453,7 +453,7 @@ const StaticString DateIntervalData::s_className("DateInterval");
 void HHVM_METHOD(DateInterval, __construct,
                  const String& interval_spec) {
   DateIntervalData* data = Native::data<DateIntervalData>(this_);
-  data->m_di = newres<DateInterval>(interval_spec);
+  data->m_di = makeSmartPtr<DateInterval>(interval_spec);
   if (!data->m_di->isValid()) {
     std::string msg = "DateInterval::__construct: Invalid interval (";
     msg += interval_spec.data();

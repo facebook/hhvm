@@ -978,7 +978,6 @@ static std::shared_ptr<sdlFunction> deserialize_function_call
 
   headers = Array::Create();
   if (head) {
-    soapHeader *h = nullptr;
     attr = head->properties;
     while (attr != nullptr) {
       if (attr->ns == nullptr) {
@@ -1053,8 +1052,7 @@ static std::shared_ptr<sdlFunction> deserialize_function_call
                                     "mustUnderstand value is not boolean");
           }
         }
-        h = newres<soapHeader>();
-        Resource hobj(h);
+        auto h = makeSmartPtr<soapHeader>();
         h->function = find_function(sdl, hdr_func, h->function_name).get();
         h->mustUnderstand = mustUnderstand;
         h->hdr = nullptr;
@@ -1087,7 +1085,7 @@ static std::shared_ptr<sdlFunction> deserialize_function_call
           }
           deserialize_parameters(hdr_func, h->function, h->parameters);
         }
-        headers.append(hobj);
+        headers.append(Variant(std::move(h)));
       }
 ignore_header:
       trav = trav->next;
@@ -1258,7 +1256,7 @@ static xmlDocPtr serialize_response_call(
       encodePtr hdr_enc;
       int hdr_use = SOAP_LITERAL;
       Variant hdr_ret = obj->o_get("headerfault");
-      soapHeader *h = headers[0].toResource().getTyped<soapHeader>();
+      auto h = cast<soapHeader>(headers[0]);
       const char *hdr_ns   = h->hdr ? h->hdr->ns.c_str() : nullptr;
       const char *hdr_name = h->function_name.data();
 
@@ -1463,7 +1461,7 @@ static xmlDocPtr serialize_response_call(
     if (!headers.empty()) {
       head = xmlNewChild(envelope, ns, BAD_CAST("Header"), nullptr);
       for (ArrayIter iter(headers); iter; ++iter) {
-        soapHeader *h = iter.second().toResource().getTyped<soapHeader>();
+        auto h = cast<soapHeader>(iter.second());
         if (!h->retval.isNull()) {
           encodePtr hdr_enc;
           int hdr_use = SOAP_LITERAL;
@@ -1821,7 +1819,7 @@ const StaticString
 static void send_soap_server_fault(
     std::shared_ptr<sdlFunction> function,
     Variant fault,
-    soapHeader *hdr) {
+    const SmartPtr<soapHeader>& hdr) {
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
   if (php_global(s__SERVER).toArray()[s_HTTP_USER_AGENT].toString() ==
@@ -1852,7 +1850,7 @@ static void send_soap_server_fault(
 static void send_soap_server_fault(
     std::shared_ptr<sdlFunction> function,
     Exception &e,
-    soapHeader *hdr) {
+    const SmartPtr<soapHeader>& hdr) {
   USE_SOAP_GLOBAL;
   if (SOAP_GLOBAL(use_soap_error_handler)) {
     send_soap_server_fault(
@@ -2246,7 +2244,7 @@ void HHVM_METHOD(SoapServer, handle,
 
   // 4. process soap headers
   for (ArrayIter iter(data->m_soap_headers); iter; ++iter) {
-    soapHeader *h = iter.second().toResource().getTyped<soapHeader>();
+    auto h = cast<soapHeader>(iter.second());
     if (data->m_sdl && !h->function && !h->hdr) {
       if (h->mustUnderstand) {
         throw_soap_server_fault("MustUnderstand","Header not understood");
@@ -2386,13 +2384,12 @@ void HHVM_METHOD(SoapServer, addsoapheader,
                  const Variant& fault) {
   auto* data = Native::data<SoapServer>(this_);
   SoapServerScope ss(this_);
-  soapHeader *p = newres<soapHeader>();
-  Resource obj(p);
+  auto p = makeSmartPtr<soapHeader>();
   p->function = nullptr;
   p->mustUnderstand = false;
   p->retval = fault.toObject();
   p->hdr = nullptr;
-  data->m_soap_headers.append(obj);
+  data->m_soap_headers.append(Variant(std::move(p)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2450,10 +2447,9 @@ void HHVM_METHOD(SoapClient, __construct,
     }
 
     if (options.exists(s_stream_context)) {
-      StreamContext *sc = nullptr;
+      SmartPtr<StreamContext> sc;
       if (options[s_stream_context].isResource()) {
-        sc = options[s_stream_context].toResource()
-                                      .getTyped<StreamContext>();
+        sc = cast<StreamContext>(options[s_stream_context]);
       }
       if (!sc) {
         throw SoapException("'stream_context' is not a StreamContext");

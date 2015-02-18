@@ -110,20 +110,6 @@ class TypedValuePrinter:
 # Pointers.
 
 class PtrPrinter:
-    class _iterator(_BaseIterator):
-        """Pretty printer `children()` iterator for pointer ranges."""
-        def __init__(self, begin, end):
-            self.cur = begin
-            self.end = end
-
-        def __next__(self):
-            if self.cur == self.end:
-                raise StopIteration
-            key = self.cur
-            elt = self.cur.dereference()
-            self.cur = self.cur + 1
-            return ("0x%x" % key.cast(T('long')), elt)
-
     def _string(self):
         inner = self._pointer().dereference()
         inner_type = rawtype(inner.type)
@@ -219,7 +205,11 @@ class ArrayDataPrinter:
 
             elt = self.cur
             key = '%d' % self.count
-            data = elt.dereference()
+
+            try:
+                data = elt.dereference()
+            except gdb.MemoryError:
+                data = '<invalid>'
 
             self.cur = self.cur + 1
             self.count = self.count + 1
@@ -236,12 +226,18 @@ class ArrayDataPrinter:
 
             elt = self.cur
 
-            if elt['data']['m_aux']['u_hash'] == 0:
-                key = '%d' % elt['ikey']
-            else:
-                key = '"%s"' % string_data_val(elt['skey'].dereference())
+            try:
+                if elt['data']['m_aux']['u_hash'] == 0:
+                    key = '%d' % elt['ikey']
+                else:
+                    key = '"%s"' % string_data_val(elt['skey'].dereference())
+            except gdb.MemoryError:
+                key = '<invalid>'
 
-            data = elt['data'].cast(T('HPHP::TypedValue'))
+            try:
+                data = elt['data'].cast(T('HPHP::TypedValue'))
+            except gdb.MemoryError:
+                data = '<invalid>'
 
             self.cur = self.cur + 1
             return (key, data)
@@ -310,8 +306,14 @@ class ObjectDataPrinter:
 
             decl_props = self.cls['m_declProperties']
 
-            name = idx.indexed_string_map_at(decl_props, self.cur)['m_name']
-            val = idx.object_data_at(self.obj, name)
+            try:
+                name = idx.indexed_string_map_at(decl_props, self.cur)['m_name']
+                try:
+                    val = idx.object_data_at(self.obj, name)
+                except gdb.MemoryError:
+                    val = None
+            except gdb.MemoryError:
+                name = '<invalid>'
 
             self.cur = self.cur + 1
 

@@ -91,5 +91,9 @@ bool VariableUnserializer::isWhitelistedClass(const String& cls_name) const {
   return false;
 }
 
+void VariableUnserializer::putInOverwrittenList(const Variant& v) {
+  m_overwrittenList.append(v);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

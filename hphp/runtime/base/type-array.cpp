@@ -807,7 +807,11 @@ void Array::unserialize(VariableUnserializer *uns) {
       // for apc, we know the key can't exist, but ignore that optimization
       assert(uns->getType() != VariableUnserializer::Type::APCSerialize ||
              !exists(key, true));
+
       Variant &value = lvalAt(key, AccessFlags::Key);
+      if (UNLIKELY(IS_REFCOUNTED_TYPE(value.getRawType()))) {
+        uns->putInOverwrittenList(value);
+      }
       value.unserialize(uns);
     }
   }

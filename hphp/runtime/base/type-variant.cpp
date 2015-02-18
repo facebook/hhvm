@@ -721,8 +721,11 @@ static void unserializeProp(VariableUnserializer *uns,
     t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
   }
 
-  t->unserialize(uns);
+  if (UNLIKELY(IS_REFCOUNTED_TYPE(t->getRawType()))) {
+    uns->putInOverwrittenList(*t);
+  }
 
+  t->unserialize(uns);
   if (!RuntimeOption::EvalCheckRepoAuthDeserialize) return;
   if (!RuntimeOption::RepoAuthoritative) return;
   if (!Repo::get().global().HardPrivatePropInference) return;

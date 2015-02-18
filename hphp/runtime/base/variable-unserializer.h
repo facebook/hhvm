@@ -115,6 +115,12 @@ public:
   const char *head() { return m_buf; }
   Variant &addVar();
 
+  /*
+   * Store properties/array elements that get overwritten incase they are
+   * referenced later during unserialization
+   */
+  void putInOverwrittenList(const Variant& v);
+
  private:
   struct RefInfo {
     explicit RefInfo(Variant* v) : m_data(reinterpret_cast<uintptr_t>(v)) {}
@@ -130,6 +136,8 @@ public:
   private:
     uintptr_t m_data;
   };
+
+  Array m_overwrittenList;
 
   Type m_type;
   const char *m_buf;

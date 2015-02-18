@@ -2686,10 +2686,13 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
           "declaration");
       expr_import r env pos
   | x when not class_const && String.lowercase x = "true" ->
+      Lint.lowercase_constant pos x;
       pos, True
   | x when not class_const && String.lowercase x = "false" ->
+      Lint.lowercase_constant pos x;
       pos, False
   | x when not class_const && String.lowercase x = "null" ->
+      Lint.lowercase_constant pos x;
       pos, Null
   | x when String.lowercase x = "array" ->
       expr_array env pos

@@ -1,0 +1,2 @@
+File "lowercase_constants.php", line 4, characters 10-13:
+Please use 'null' instead of 'NULL' (Lint[5001])

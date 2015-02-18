@@ -152,7 +152,14 @@ let parse_check_args cmd =
       " (mode) prints a list of all related classes or methods to the given class";
     "--show", Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
       " (mode) show human-readable type info for the given name; output is not meant for machine parsing";
-     "--version", Arg.Unit (set_mode MODE_VERSION),
+    "--lint", Arg.Rest begin fun fn ->
+        mode := match !mode with
+          | MODE_UNSPECIFIED -> MODE_LINT [fn]
+          | MODE_LINT fnl -> MODE_LINT (fn :: fnl)
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+      end,
+      " (mode) lint the given list of files";
+    "--version", Arg.Unit (set_mode MODE_VERSION),
       " (mode) show version and exit\n";
 
     (* flags *)

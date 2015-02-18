@@ -208,6 +208,12 @@ let rec main args retries =
         let results : ServerSearch.result = Marshal.from_channel ic in
         ClientSearch.go results args.output_json;
         exit 0
+    | MODE_LINT fnl ->
+        let ic, oc = connect args in
+        ServerMsg.cmd_to_channel oc (ServerMsg.LINT fnl);
+        let results : ServerLint.result = Marshal.from_channel ic in
+        ClientLint.go results args.output_json;
+        exit 0
     | MODE_UNSPECIFIED -> assert false
   with
   | Server_initializing ->

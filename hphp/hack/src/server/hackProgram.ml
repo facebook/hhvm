@@ -199,6 +199,8 @@ module Program : Server.SERVER_PROGRAM = struct
         ServerSearch.go query type_ oc
     | ServerMsg.CALC_COVERAGE path ->
         ServerCoverageMetric.go path genv env oc
+    | ServerMsg.LINT fnl ->
+        ServerLint.go fnl oc
 
   let handle_connection_ genv env socket =
     let cli, _ = Unix.accept socket in

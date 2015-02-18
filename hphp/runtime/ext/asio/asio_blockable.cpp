@@ -115,7 +115,7 @@ Array AsioBlockableChain::toArray() {
   return result;
 }
 
-c_BlockableWaitHandle*
+c_WaitableWaitHandle*
 AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
     switch (cur->getKind()) {
@@ -124,9 +124,11 @@ AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
         if (wh->getContextIdx() == ctx_idx) return wh;
         break;
       }
-      case AsioBlockable::Kind::ConditionWaitHandle:
-        // ConditionWaitHandle not supported in legacy dependency stack.
+      case AsioBlockable::Kind::ConditionWaitHandle: {
+        auto const wh = cur->getConditionWaitHandle();
+        if (wh->getContextIdx() == ctx_idx) return wh;
         break;
+      }
     }
   }
   return nullptr;

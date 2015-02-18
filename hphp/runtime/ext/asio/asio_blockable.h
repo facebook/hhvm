@@ -81,7 +81,7 @@ class AsioBlockableChain final {
     void unblock();
     void exitContext(context_idx_t ctx_idx);
     Array toArray();
-    c_BlockableWaitHandle* firstInContext(context_idx_t ctx_idx);
+    c_WaitableWaitHandle* firstInContext(context_idx_t ctx_idx);
 
   private:
     AsioBlockable* m_firstParent;

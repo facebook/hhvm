@@ -33,8 +33,6 @@ void SSATmp::setInstruction(IRInstruction* inst, int dstId) {
 
 namespace {
 int typeNeededWords(Type t) {
-  assert(t != Type::Bottom);
-
   if (t.subtypeOfAny(Type::Uninit,
                      Type::InitNull,
                      Type::RetAddr,

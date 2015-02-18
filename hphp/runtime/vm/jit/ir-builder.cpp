@@ -207,7 +207,7 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType) {
     return fwdGuardSource(inst);
   }
 
-  auto const newType = refineType(oldType, inst->typeParam());
+  auto const newType = oldType & inst->typeParam();
 
   if (oldType <= newType) {
     /* The type of the src is the same or more refined than type, so the guard
@@ -292,7 +292,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
   if (typeParam == Type::Cls && oldType <= Type::Cls) return inst->src(0);
   if (typeParam == Type::Gen && oldType <= Type::Gen) return inst->src(0);
 
-  auto const newType = refineType(oldType, typeParam);
+  auto const newType = oldType & typeParam;
 
   if (oldType <= newType) {
     // oldType is at least as good as the new type. Eliminate this
@@ -454,10 +454,11 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   auto const type = localType(locId, DataTypeGeneric);
 
   // The types may not be compatible in the presence of unreachable code.
-  // Don't try to optimize the code in this case, and just let
-  // unreachable code elimination take care of it later.
-  if (!type.maybe(inst->typeParam())) return nullptr;
-
+  // Unreachable code elimination will take care of it later.
+  if (!type.maybe(inst->typeParam())) {
+    inst->setTypeParam(Type::Bottom);
+    return nullptr;
+  }
   // If FrameStateMgr's type isn't as good as the type param, we're missing
   // information in the IR.
   assert(inst->typeParam() >= type);
@@ -1054,7 +1055,7 @@ bool IRBuilder::constrainSlot(int32_t idOrOffset,
   // If the dest of the Assert/Check doesn't fit tc there's no point in
   // continuing.
   auto prevType = get_required(m_constraints.prevTypes, guard);
-  if (!typeFitsConstraint(refineType(prevType, guard->typeParam()), tc)) {
+  if (!typeFitsConstraint(prevType & guard->typeParam(), tc)) {
     return false;
   }
 

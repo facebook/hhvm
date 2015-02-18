@@ -289,8 +289,6 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
 }
 
 bool typeFitsConstraint(Type t, TypeConstraint tc) {
-  always_assert(t != Type::Bottom);
-
   switch (tc.category) {
     case DataTypeGeneric:
       return true;
@@ -376,7 +374,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
          origTc, knownType, toRelax);
   Trace::Indent _i;
 
-  auto const dstType = refineType(knownType, toRelax);
+  auto const dstType = knownType & toRelax;
   always_assert_flog(typeFitsConstraint(dstType, origTc),
                      "refine({}, {}) doesn't fit {}",
                      knownType, toRelax, origTc);
@@ -395,7 +393,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
     }
 
     auto const relaxed = relaxType(toRelax, newTc);
-    auto const newDstType = refineType(relaxed, knownType);
+    auto const newDstType = relaxed & knownType;
     if (typeFitsConstraint(newDstType, origTc)) break;
 
     ITRACE(5, "newDstType = {}, newTc = {}; incrementing constraint\n",

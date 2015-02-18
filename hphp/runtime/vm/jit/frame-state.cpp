@@ -869,7 +869,7 @@ void FrameStateMgr::refineStackType(int32_t offset,
                                     Type ty,
                                     TypeSource typeSrc) {
   auto& state = stackState(offset);
-  auto const newType = refineTypeNoCheck(state.type, ty);
+  auto const newType = state.type & ty;
   ITRACE(2, "stk[{}] updating type {} as {} -> {}\n", offset,
     state.type, ty, newType);
   state.type = newType;
@@ -945,7 +945,7 @@ void FrameStateMgr::refineLocalType(uint32_t id,
                                     TypeSource typeSrc) {
   always_assert(id < cur().locals.size());
   auto& local = cur().locals[id];
-  auto const newType = refineTypeNoCheck(local.type, type);
+  auto const newType = local.type & type;
   ITRACE(2, "updating local {}'s type: {} -> {}\n", id, local.type, newType);
   local.type = newType;
   local.predictedType = newType;

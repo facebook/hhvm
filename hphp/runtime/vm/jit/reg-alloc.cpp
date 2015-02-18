@@ -32,6 +32,8 @@ using NativeCalls::CallMap;
 TRACE_SET_MOD(hhir);
 
 PhysReg forceAlloc(const SSATmp& tmp) {
+  if (tmp.type() <= Type::Bottom) return InvalidReg;
+
   auto inst = tmp.inst();
   auto opc = inst->op();
 

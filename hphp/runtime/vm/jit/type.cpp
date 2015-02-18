@@ -366,7 +366,7 @@ bool Type::checkValid() const {
 }
 
 DataType Type::toDataType() const {
-  assert(!isPtr());
+  assert(!isPtr() || m_bits == kBottom);
   assert(isKnownDataType());
 
   // Order is important here: types must progress from more specific
@@ -776,17 +776,6 @@ Type convertToType(RepoAuthType ty) {
   not_reached();
 }
 
-Type refineTypeNoCheck(Type oldType, Type newType) {
-  return oldType & newType;
-}
-
-Type refineType(Type oldType, Type newType) {
-  Type result = refineTypeNoCheck(oldType, newType);
-  always_assert_flog(result != Type::Bottom,
-                     "refineType({}, {}) failed", oldType, newType);
-  return result;
-}
-
 namespace TypeNames {
 #define IRT(name, ...) UNUSED const Type name = Type::name;
 #define IRTP(name, ...) IRT(name)
@@ -800,8 +789,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
   using TypeNames::TCA;
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
-#define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
-                                                 inst->typeParam());
+#define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
 #define DParamMayRelax  return inst->typeParam();
 #define DParam          return inst->typeParam();
 #define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
@@ -969,10 +957,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   auto requireTypeParam = [&] {
     checkDst(inst->hasTypeParam() || inst->is(DefConst),
              "Missing paramType for DParam instruction");
-    if (inst->hasTypeParam()) {
-      checkDst(inst->typeParam() != Type::Bottom,
-             "Invalid paramType for DParam instruction");
-    }
   };
 
   auto requireTypeParamPtr = [&] (Ptr kind) {

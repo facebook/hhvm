@@ -1539,6 +1539,27 @@ SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
+  auto const typeParam = inst->typeParam();
+  auto const srcType = inst->src(0)->type();
+
+  if (!srcType.maybe(typeParam)) {
+    /* This check will always fail. Convert the check into a Jmp. The rest of
+     * the block will be unreachable. */
+    gen(env, Jmp, inst->taken());
+    return inst->src(0);
+  }
+
+  auto const newType = srcType & typeParam;
+  if (srcType <= newType) {
+    /* The type of the src is the same or more refined than type, so the guard
+     * is unnecessary. */
+    return inst->src(0);
+  }
+
+  return nullptr;
+}
+
 SSATmp* decRefImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!mightRelax(env, src) && !src->type().maybeCounted()) {
@@ -1738,7 +1759,6 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
     if (!mightRelax(env, val) && cls != nullptr && cls->isCollectionClass()) {
       return gen(env, CountCollection, val);
     }
-    return nullptr;
   }
   return nullptr;
 }
@@ -1827,6 +1847,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CallBuiltin)
   X(Ceil)
   X(CheckInit)
+  X(CheckType)
   X(CheckPackedArrayBounds)
   X(CoerceCellToBool)
   X(CoerceCellToDbl)

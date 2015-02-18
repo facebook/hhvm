@@ -400,7 +400,6 @@ public:
    */
   bool maybe(Type t2) const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Combinators.
 
@@ -823,22 +822,6 @@ Type boxType(Type);
  * Create a Type from a RepoAuthType.
  */
 Type convertToType(RepoAuthType ty);
-
-/*
- * Return the type resulting from refining oldType with the fact that it also
- * belongs to newType.
- *
- * This essentially intersects the two types, except that it has special logic
- * for boxed types.  This function always_asserts that the resulting type isn't
- * Bottom.
- */
-Type refineType(Type oldType, Type newType);
-
-/*
- * Similar to refineType above, but this one doesn't get angry if the resulting
- * type is Bottom.
- */
-Type refineTypeNoCheck(Type oldType, Type newType);
 
 /*
  * Return the dest type for a LdRef with the given typeParam.

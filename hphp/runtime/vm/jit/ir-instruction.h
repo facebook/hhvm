@@ -175,7 +175,6 @@ struct IRInstruction {
   Type       typeParam() const         { return m_typeParam.value(); }
   folly::Optional<Type> maybeTypeParam() const { return m_typeParam; }
   void       setTypeParam(Type t) {
-    always_assert(t != Type::Bottom);
     m_typeParam.assign(t);
   }
   uint32_t   numSrcs()  const          { return m_numSrcs; }

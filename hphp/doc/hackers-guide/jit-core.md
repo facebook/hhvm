@@ -118,12 +118,12 @@ string at the PHP level).
   Dbl            | `double` (IEEE 754 64-bit binary floating point)
   StaticStr      | `StringData*` where `isStatic() == true`
   CountedStr     | `StringData*` where `isStatic() == false`
-  UncountedInit  | `TypedValue`: `{Null+Bool+Int+Dbl+StaticStr+StaticArr}`
-  Uncounted      | `TypedValue`: `{Uninit+Null+Bool+Int+Dbl+StaticStr+StaticArr}`
   Str            | `StringData*` `{CountedStr+StaticStr}`
   StaticArr      | `ArrayData*` where `isStatic() == true`
   CountedArr     | `ArrayData*` where `isStatic() == false`
   Arr            | `ArrayData*` `{CountedArr+StaticArr}`
+  UncountedInit  | `TypedValue`: `{Null+Bool+Int+Dbl+StaticStr+StaticArr}`
+  Uncounted      | `TypedValue`: `{Uninit+Null+Bool+Int+Dbl+StaticStr+StaticArr}`
   Obj            | `ObjectData*`
   Obj<Class>     | `ObjectData*` of the specific type Class
   Counted        | `{CountedStr+CountedArr+Obj+BoxedCell}`

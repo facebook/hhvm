@@ -616,7 +616,6 @@ SSATmp* coerce_value(HTS& env,
                      uint32_t paramIdx,
                      const CatchMaker& maker) {
   auto const targetTy = param_coerce_type(callee, paramIdx);
-  always_assert(targetTy != Type::Bottom);
   if (!callee->isParamCoerceMode()) {
     if (targetTy <= Type::Int) {
       return gen(env, ConvCellToInt, maker.makeUnusualCatch(), oldVal);
@@ -665,7 +664,6 @@ void coerce_stack(HTS& env,
     }
     return param_coerce_type(callee, paramIdx);
   }();
-  always_assert(targetTy != Type::Bottom);
 
   if (callee->isParamCoerceMode()) {
     gen(env,

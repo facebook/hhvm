@@ -188,11 +188,11 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (UnknownEffects)    { addAllGen(env); },
     [&] (PureLoad l)        { load(env, l.src); },
     [&] (GeneralEffects l)  { load(env, l.loads);
-                              kill(env, l.killed); },
+                              kill(env, l.kills); },
 
     [&] (InterpOneEffects m) {
       addAllGen(env);
-      kill(env, m.killed);
+      kill(env, m.kills);
     },
 
     [&] (ReturnEffects l) {
@@ -202,7 +202,7 @@ void visit(Local& env, IRInstruction& inst) {
         auto const fp = inst.src(0);
         auto const killSet = env.global.ainfo.per_frame_bits[fp];
         addKillSet(env, killSet);
-        kill(env, l.killed);
+        kill(env, l.kills);
         return;
       }
 
@@ -212,12 +212,12 @@ void visit(Local& env, IRInstruction& inst) {
       // things.
       addAllGen(env);
       addKillSet(env, env.global.ainfo.all_frame);
-      kill(env, l.killed);
+      kill(env, l.kills);
     },
 
     [&] (ExitEffects l) {
       load(env, l.live);
-      kill(env, l.kill);
+      kill(env, l.kills);
     },
 
     /*
@@ -231,7 +231,7 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, AFrameAny);  // Not necessary for some builtin calls, but it
                              // depends which builtin...
       load(env, l.stack);
-      kill(env, l.killed);
+      kill(env, l.kills);
     },
 
     [&] (IterEffects l) {
@@ -240,7 +240,7 @@ void visit(Local& env, IRInstruction& inst) {
       }
       load(env, AFrame { l.fp, l.id });
       load(env, AHeapAny);
-      kill(env, l.killed);
+      kill(env, l.kills);
     },
     [&] (IterEffects2 l) {
       if (RuntimeOption::EnableArgsInBacktraces) {
@@ -249,7 +249,7 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, AFrame { l.fp, l.id1 });
       load(env, AFrame { l.fp, l.id2 });
       load(env, AHeapAny);
-      kill(env, l.killed);
+      kill(env, l.kills);
     },
 
     [&] (PureStore l) {

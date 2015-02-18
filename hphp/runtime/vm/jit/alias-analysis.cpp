@@ -47,20 +47,20 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         effects,
         [&] (IrrelevantEffects)   {},
         [&] (UnknownEffects)      {},
-        [&] (InterpOneEffects x)  { visit(x.killed); },
-        [&] (ReturnEffects x)     { visit(x.killed); },
-        [&] (CallEffects x)       { visit(x.killed); visit(x.stack); },
-        [&] (IterEffects x)       { visit(x.killed); },
-        [&] (IterEffects2 x)      { visit(x.killed); },
+        [&] (InterpOneEffects x)  { visit(x.kills); },
+        [&] (ReturnEffects x)     { visit(x.kills); },
+        [&] (CallEffects x)       { visit(x.kills); visit(x.stack); },
+        [&] (IterEffects x)       { visit(x.kills); },
+        [&] (IterEffects2 x)      { visit(x.kills); },
         [&] (GeneralEffects x)    { visit(x.loads);
                                     visit(x.stores);
-                                    visit(x.moved);
-                                    visit(x.killed); },
+                                    visit(x.moves);
+                                    visit(x.kills); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
         [&] (PureStoreNT x)       { visit(x.dst); },
         [&] (PureSpillFrame x)    { visit(x.dst); },
-        [&] (ExitEffects x)       { visit(x.live); visit(x.kill); }
+        [&] (ExitEffects x)       { visit(x.live); visit(x.kills); }
       );
     }
   }

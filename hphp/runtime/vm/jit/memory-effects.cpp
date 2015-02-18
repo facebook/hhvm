@@ -1072,21 +1072,21 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     me,
     [&] (GeneralEffects x)  { check(x.loads);
                               check(x.stores);
-                              check(x.moved);
-                              assert(x.moved <= x.loads);
-                              check(x.killed); },
+                              check(x.moves);
+                              assert(x.moves <= x.loads);
+                              check(x.kills); },
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst); },
     [&] (PureStoreNT x)      { check(x.dst); },
     [&] (PureSpillFrame x)   { check(x.dst); },
-    [&] (IterEffects x)      { check_fp(x.fp); check(x.killed); },
-    [&] (IterEffects2 x)     { check_fp(x.fp); check(x.killed); },
-    [&] (ExitEffects x)      { check(x.live); check(x.kill); },
+    [&] (IterEffects x)      { check_fp(x.fp); check(x.kills); },
+    [&] (IterEffects2 x)     { check_fp(x.fp); check(x.kills); },
+    [&] (ExitEffects x)      { check(x.live); check(x.kills); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
-    [&] (InterpOneEffects x) { check(x.killed); },
-    [&] (CallEffects x)      { check(x.killed); check(x.stack); },
-    [&] (ReturnEffects x)    { check(x.killed); }
+    [&] (InterpOneEffects x) { check(x.kills); },
+    [&] (CallEffects x)      { check(x.kills); check(x.stack); },
+    [&] (ReturnEffects x)    { check(x.kills); }
   );
 
   return true;
@@ -1112,8 +1112,8 @@ MemEffects canonicalize(MemEffects me) {
       return GeneralEffects {
         canonicalize(x.loads),
         canonicalize(x.stores),
-        canonicalize(x.moved),
-        canonicalize(x.killed)
+        canonicalize(x.moves),
+        canonicalize(x.kills)
       };
     },
     [&] (PureLoad x) -> R {
@@ -1129,26 +1129,26 @@ MemEffects canonicalize(MemEffects me) {
       return PureSpillFrame { canonicalize(x.dst) };
     },
     [&] (ExitEffects x) -> R {
-      return ExitEffects { canonicalize(x.live), canonicalize(x.kill) };
+      return ExitEffects { canonicalize(x.live), canonicalize(x.kills) };
     },
     [&] (CallEffects x) -> R {
       return CallEffects {
         x.destroys_locals,
-        canonicalize(x.killed),
+        canonicalize(x.kills),
         canonicalize(x.stack)
       };
     },
     [&] (ReturnEffects x) -> R {
-      return ReturnEffects { canonicalize(x.killed) };
+      return ReturnEffects { canonicalize(x.kills) };
     },
     [&] (IterEffects x) -> R {
-      return IterEffects { x.fp, x.id, canonicalize(x.killed) };
+      return IterEffects { x.fp, x.id, canonicalize(x.kills) };
     },
     [&] (IterEffects2 x) -> R {
-      return IterEffects2 { x.fp, x.id1, x.id2, canonicalize(x.killed) };
+      return IterEffects2 { x.fp, x.id1, x.id2, canonicalize(x.kills) };
     },
     [&] (InterpOneEffects x) -> R {
-      return InterpOneEffects { canonicalize(x.killed) };
+      return InterpOneEffects { canonicalize(x.kills) };
     },
     [&] (IrrelevantEffects x) -> R { return x; },
     [&] (UnknownEffects x)    -> R { return x; }
@@ -1165,24 +1165,24 @@ std::string show(MemEffects effects) {
       return sformat("mlsmk({} ; {} ; {} ; {})",
         show(x.loads),
         show(x.stores),
-        show(x.moved),
-        show(x.killed)
+        show(x.moves),
+        show(x.kills)
       );
     },
     [&] (ExitEffects x) {
-      return sformat("exit({} ; {})", show(x.live), show(x.kill));
+      return sformat("exit({} ; {})", show(x.live), show(x.kills));
     },
     [&] (CallEffects x) {
-      return sformat("call({} ; {})", show(x.killed), show(x.stack));
+      return sformat("call({} ; {})", show(x.kills), show(x.stack));
     },
     [&] (InterpOneEffects x) {
-      return sformat("interp({})", show(x.killed));
+      return sformat("interp({})", show(x.kills));
     },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
     [&] (PureStore x)       { return sformat("st({})", show(x.dst)); },
     [&] (PureStoreNT x)     { return sformat("stNT({})", show(x.dst)); },
     [&] (PureSpillFrame x)  { return sformat("stFrame({})", show(x.dst)); },
-    [&] (ReturnEffects x)   { return sformat("return({})", show(x.killed)); },
+    [&] (ReturnEffects x)   { return sformat("return({})", show(x.kills)); },
     [&] (IterEffects)       { return "IterEffects"; },
     [&] (IterEffects2)      { return "IterEffects2"; },
     [&] (IrrelevantEffects) { return "IrrelevantEffects"; },

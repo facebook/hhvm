@@ -36,7 +36,7 @@ struct IRInstruction;
  * may load or store to different alias classes, as well as have any other
  * side-effects.
  *
- * Locations that contain PHP values are assumed (except for `moved', see
+ * Locations that contain PHP values are assumed (except for `moves', see
  * below) to be affected with normal VM semantics with regard to memory
  * barriers---that is, if the instruction loads from a `loads' location and
  * keeps a pointer to the value, it must IncRef it, and if the instruction
@@ -54,7 +54,7 @@ struct IRInstruction;
  * GenericRetDecRefs.
  *
  * The exception to the "normal VM semantics" is for values in the class
- * `moved', which must always be a subclass of `loads'.  This set of locations
+ * `moves', which must always be a subclass of `loads'.  This set of locations
  * may be loaded by the instruction, but in order to `transfer' them to another
  * memory location (which must be somewhere in its `stores' set), without an
  * IncRef.  Note: this set is also may-information---and it is required to
@@ -62,7 +62,7 @@ struct IRInstruction;
  * refcount optimizations (it must be conservatively "too big" rather than too
  * small).
  *
- * Additionally, there is a set `killed'.  For this set of locations, when the
+ * Additionally, there is a set `kills'.  For this set of locations, when the
  * instruction executes (before any of its other effects), it becomes
  * semantically illegal for any part of the program to read from those
  * locations again (without writing to them first).  This is used for the
@@ -84,8 +84,8 @@ struct IRInstruction;
  */
 struct GeneralEffects   { AliasClass loads;
                           AliasClass stores;
-                          AliasClass moved;
-                          AliasClass killed; };
+                          AliasClass moves;
+                          AliasClass kills; };
 
 /*
  * The effect of definitely loading from an abstract location, without
@@ -117,14 +117,14 @@ struct PureSpillFrame { AliasClass dst; };
  * Iterator instructions are special enough that they just have their own
  * top-level memory effect type.  In general, they can both read and write to
  * the relevant locals, and can re-enter the VM and read and write anything on
- * the heap.  The `killed' set is an AliasClass that is killed by virtue of the
+ * the heap.  The `kills' set is an AliasClass that is killed by virtue of the
  * potential VM re-entry (i.e. the eval stack below some depth).
  */
-struct IterEffects    { SSATmp* fp; uint32_t id; AliasClass killed; };
+struct IterEffects    { SSATmp* fp; uint32_t id; AliasClass kills; };
 struct IterEffects2   { SSATmp* fp;
                         uint32_t id1;
                         uint32_t id2;
-                        AliasClass killed; };
+                        AliasClass kills; };
 
 /*
  * Calls are somewhat special enough that they get a top-level effect.
@@ -132,18 +132,18 @@ struct IterEffects2   { SSATmp* fp;
  * The `destroys_locals' flag indicates whether the call can change locals in
  * the calling frame (e.g. extract() or parse_str().)
  *
- * The `killed' set are locations that cannot be read by this instruction
- * unless it writes to them first, and which it generally may write to.  (This
- * is used for killing stack slots below the call depth.)
+ * The `kills' set are locations that cannot be read by this instruction unless
+ * it writes to them first, and which it generally may write to.  (This is used
+ * for killing stack slots below the call depth.)
  *
  * The `stack' set contains stack locations the call will read as arguments, as
  * well as stack locations it may read or write via other means
  * (e.g. debug_backtrace, or pointers to stack slots to a CallBuiltin).
- * Locations in any intersection between `stack' and `killed' may be assumed to
+ * Locations in any intersection between `stack' and `kills' may be assumed to
  * be killed.
  */
 struct CallEffects    { bool destroys_locals;
-                        AliasClass killed;
+                        AliasClass kills;
                         AliasClass stack; };
 
 /*
@@ -154,36 +154,36 @@ struct CallEffects    { bool destroys_locals;
  *
  * All locals on the returning frame may be considered dead after
  * ReturnEffects.  However, the stack is a little more complicated.  The
- * `killed' set is an additional alias class of locations that cannot be read
+ * `kills' set is an additional alias class of locations that cannot be read
  * after the return, which is used to provide the range of stack that can be
  * considered dead.  In normal functions it will effectively be AStackAny, but
  * in generators a return may still leave part of the eval stack alive for the
  * caller.  When returning from an inlined function, the locals may all be
- * considered dead, and `killed' will contain the whole inlined function's
+ * considered dead, and `kills' will contain the whole inlined function's
  * stack.
  */
-struct ReturnEffects  { AliasClass killed; };
+struct ReturnEffects  { AliasClass kills; };
 
 /*
  * ExitEffects contains two sets of alias classes, representing locations that
  * are considered live exiting the region, and locations that will never be
- * read (unless written again) after exiting the region (`kill').  Various
+ * read (unless written again) after exiting the region (`kills').  Various
  * instructions that exit regions populate these in different ways.
  *
- * If there is an overlap between `live' and `kill', then `kill' takes
+ * If there is an overlap between `live' and `kills', then `kills' takes
  * precedence for locations that are contained in both (i.e. those locations
  * should be treated as actually killed).
  */
-struct ExitEffects    { AliasClass live; AliasClass kill; };
+struct ExitEffects    { AliasClass live; AliasClass kills; };
 
 /*
  * InterpOne instructions carry a bunch of information about how they may
  * affect locals.  It's special enough that we just pass it through.
  *
  * We don't make use of it in consumers of this module yet, except that the
- * `killed' set can't have upward exposed uses.
+ * `kills' set can't have upward exposed uses.
  */
-struct InterpOneEffects { AliasClass killed; };
+struct InterpOneEffects { AliasClass kills; };
 
 /*
  * "Irrelevant" effects means it doesn't do anything we currently care about

@@ -66,6 +66,16 @@ c_ConditionWaitHandle* AsioBlockable::getConditionWaitHandle() const {
       c_ConditionWaitHandle::blockableOff()));
 }
 
+c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
+  switch (getKind()) {
+    case AsioBlockable::Kind::BlockableWaitHandle:
+      return getBlockableWaitHandle();
+    case AsioBlockable::Kind::ConditionWaitHandle:
+      return getConditionWaitHandle();
+  }
+  not_reached();
+}
+
 void AsioBlockableChain::unblock() {
   auto cur = m_firstParent;
   while (cur) {
@@ -100,36 +110,17 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
 
 Array AsioBlockableChain::toArray() {
   Array result = Array::Create();
-
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
-    switch (cur->getKind()) {
-      case AsioBlockable::Kind::BlockableWaitHandle:
-        result.append(cur->getBlockableWaitHandle());
-        break;
-      case AsioBlockable::Kind::ConditionWaitHandle:
-        result.append(cur->getConditionWaitHandle());
-        break;
-    }
+    result.append(cur->getWaitHandle());
   }
-
   return result;
 }
 
 c_WaitableWaitHandle*
 AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
-    switch (cur->getKind()) {
-      case AsioBlockable::Kind::BlockableWaitHandle: {
-        auto const wh = cur->getBlockableWaitHandle();
-        if (wh->getContextIdx() == ctx_idx) return wh;
-        break;
-      }
-      case AsioBlockable::Kind::ConditionWaitHandle: {
-        auto const wh = cur->getConditionWaitHandle();
-        if (wh->getContextIdx() == ctx_idx) return wh;
-        break;
-      }
-    }
+    auto const wh = cur->getWaitHandle();
+    if (wh->getContextIdx() == ctx_idx) return wh;
   }
   return nullptr;
 }

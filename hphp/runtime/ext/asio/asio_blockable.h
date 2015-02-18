@@ -49,6 +49,7 @@ class AsioBlockable final {
 
     c_BlockableWaitHandle* getBlockableWaitHandle() const;
     c_ConditionWaitHandle* getConditionWaitHandle() const;
+    c_WaitableWaitHandle* getWaitHandle() const;
 
     void setNextParent(AsioBlockable* parent, Kind kind) {
       assert(!(reinterpret_cast<intptr_t>(parent) & 7));

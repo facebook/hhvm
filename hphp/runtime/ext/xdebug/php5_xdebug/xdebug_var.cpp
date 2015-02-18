@@ -197,18 +197,20 @@ static char* prepare_variable_name(const char* name) {
 // Return an array of prop name => prop val. This is taken (and modified) from
 // ext_reflection.cpp
 static Array get_object_props(ObjectData* obj) {
-  // Grab the propeties on the object. o_toIterArray does this for us
-  Class* cls = obj->getVMClass();
-  Array props = obj->o_toIterArray(String(cls->name()->data(), CopyString));
+  // Grab the properties on the object. o_toIterArray does this for us.
+  auto const cls = obj->getVMClass();
+  auto const cls_name = cls->name();
+  auto props = obj->o_toIterArray(String(const_cast<StringData*>(cls_name)));
 
-  // Grab the  static properties from the class
-  const Class::SProp* staticProperties = cls->staticProperties();
-  const size_t nSProps = cls->numStaticProperties();
+  // Grab the static properties from the class.
+  auto const staticProperties = cls->staticProperties();
+  auto const nSProps = cls->numStaticProperties();
   for (Slot i = 0; i < nSProps; ++i) {
     auto const& prop = staticProperties[i];
-    TypedValue* val = cls->getSPropData(i);
+    auto val = cls->getSPropData(i);
     if (val != nullptr) {
-      props.set(String(prop.m_name->data(), CopyString), tvAsVariant(val));
+      auto const prop_name = prop.m_name.get();
+      props.set(String(const_cast<StringData*>(prop_name)), tvAsVariant(val));
     }
   }
 

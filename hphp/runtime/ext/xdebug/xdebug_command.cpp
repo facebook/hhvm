@@ -101,13 +101,13 @@ namespace HPHP {
 // Helpers
 
 // These are used a lot, prevent unnecessary verbosity
-typedef XDebugServer::Status Status;
-typedef XDebugServer::Reason Reason;
+using Status = XDebugServer::Status;
+using Reason = XDebugServer::Reason;
 
 // Compiles the given evaluation string and returns its unit. Throws
 // XDebugServer::ERROR_EVALUATING_CODE on failure.
 static Unit* compile(const String& evalStr) {
-  Unit* unit = compile_string(evalStr.data(), evalStr.size());
+  auto unit = compile_string(evalStr.data(), evalStr.size());
   if (unit == nullptr) {
     throw XDebugServer::ERROR_EVALUATING_CODE;
   }
@@ -127,13 +127,13 @@ static Unit* compile_expression(const String& expr) {
 // and error on failure.
 static Variant do_eval(Unit* evalUnit, int depth) {
   // Set the error reporting level to 0 to ensure non-fatal errors are hidden
-  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
-  int64_t old_level = req_data.getErrorReportingLevel();
+  auto& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto const old_level = req_data.getErrorReportingLevel();
   req_data.setErrorReportingLevel(0);
 
   // Do the eval
   Variant result;
-  bool failure = g_context->evalPHPDebugger((TypedValue*) &result,
+  bool failure = g_context->evalPHPDebugger((TypedValue*)&result,
                                             evalUnit, depth);
 
   // Restore the error reporting level and then either return or throw
@@ -154,7 +154,7 @@ static Variant do_eval(const String& evalStr, int depth) {
 static xdebug_xml_node* breakpoint_xml_node(int id,
                                             const XDebugBreakpoint& bp) {
   // Initialize the xml node
-  xdebug_xml_node* xml = xdebug_xml_node_init("breakpoint");
+  auto xml = xdebug_xml_node_init("breakpoint");
   xdebug_xml_add_attribute(xml, "id", id);
 
   // It looks like php5 xdebug used to consider "temporary" as a state. It's
@@ -234,10 +234,10 @@ static Variant find_symbol(const String& name, int depth) {
   // semantics to select the symbol. However, there is no evidence so far of an
   // IDE using these, plus they are not documented anywhere. Thus, this
   // implementation just accepts php expressions.
-  Unit* eval_unit = compile_expression(name);
+  auto eval_unit = compile_expression(name);
 
   // If the result is unitialized, the property must be undefined
-  Variant result = do_eval(eval_unit, depth);
+  auto result = do_eval(eval_unit, depth);
   if (!result.isInitialized()) {
     throw XDebugServer::ERROR_PROPERTY_NON_EXISTENT;
   }
@@ -245,7 +245,7 @@ static Variant find_symbol(const String& name, int depth) {
 }
 
 // $GLOBALS variable
-const static StaticString s_GLOBALS("GLOBALS");
+const StaticString s_GLOBALS("GLOBALS");
 
 // Returns true if the given variable name is a superglobal. This matches
 // BuiltinSymbols::IsSuperGlobal with the addition of $GLOBALS
@@ -257,8 +257,7 @@ bool is_superglobal(const String& name) {
 // status -i #
 // Returns the status of the server
 
-class StatusCmd : public XDebugCommand {
-public:
+struct StatusCmd : XDebugCommand {
   StatusCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~StatusCmd() {}
@@ -275,8 +274,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // feature_get -i # -n NAME
 
-class FeatureGetCmd : public XDebugCommand {
-public:
+struct FeatureGetCmd : XDebugCommand {
   FeatureGetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // Feature name is required
@@ -326,14 +324,13 @@ public:
   }
 
 private:
-  string m_feature;
+  std::string m_feature;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // feature_set -i # -n NAME -v VALUE
 
-class FeatureSetCmd : public XDebugCommand {
-public:
+struct FeatureSetCmd : XDebugCommand {
   FeatureSetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // Feature name is required
@@ -380,16 +377,15 @@ public:
   }
 
 private:
-  string m_feature;
-  string m_value;
+  std::string m_feature;
+  std::string m_value;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // run -i #
 // Runs the program until a breakpoint is hit or the script is finished
 
-class RunCmd : public XDebugCommand {
-public:
+struct RunCmd : XDebugCommand {
   RunCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~RunCmd() {}
@@ -434,8 +430,7 @@ public:
 // steps to the next statement, if there is a function call involved it will
 // break on the first statement in that function
 
-class StepIntoCmd : public XDebugCommand {
-public:
+struct StepIntoCmd : XDebugCommand {
   StepIntoCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~StepIntoCmd() {}
@@ -461,8 +456,7 @@ public:
 // steps out of the current scope and breaks on the statement after returning
 // from the current function.
 
-class StepOutCmd : public XDebugCommand {
-public:
+struct StepOutCmd : XDebugCommand {
   StepOutCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~StepOutCmd() {}
@@ -487,8 +481,7 @@ public:
 // step_over -i #
 // steps to the next line. Steps over function calls.
 
-class StepOverCmd : public XDebugCommand {
-public:
+struct StepOverCmd : XDebugCommand {
   StepOverCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~StepOverCmd() {}
@@ -513,8 +506,7 @@ public:
 // stop -i #
 // Stops execution of the script by exiting
 
-class StopCmd : public XDebugCommand {
-public:
+struct StopCmd : XDebugCommand {
   StopCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~StopCmd() {}
@@ -536,8 +528,7 @@ public:
 // Detaches the xdebug server. In php5 xdebug this just means the user cannot
 // input commands.
 
-class DetachCmd : public XDebugCommand {
-public:
+struct DetachCmd : XDebugCommand {
   DetachCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~DetachCmd() {}
@@ -568,8 +559,7 @@ static const StaticString
   s_EQUAL("=="),
   s_MOD("%");
 
-class BreakpointSetCmd : public XDebugCommand {
-public:
+struct BreakpointSetCmd : XDebugCommand {
   BreakpointSetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     XDebugBreakpoint& bp = m_breakpoint;
@@ -715,8 +705,7 @@ private:
 // breakpoint_get -i # -d ID
 // Returns information about the breakpoint with the given id
 
-class BreakpointGetCmd : public XDebugCommand {
-public:
+struct BreakpointGetCmd : XDebugCommand {
   BreakpointGetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // Breakpoint id must be provided
@@ -744,8 +733,7 @@ private:
 // breakpoint_list -i #
 // Returns all the registered breakpoints
 
-class BreakpointListCmd : public XDebugCommand {
-public:
+struct BreakpointListCmd : XDebugCommand {
   BreakpointListCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~BreakpointListCmd() {}
@@ -767,8 +755,7 @@ public:
 //                              [-o HIT_CONDITION]
 // Updates the breakpoint with the given id using the given arguments
 
-class BreakpointUpdateCmd : public XDebugCommand {
-public:
+struct BreakpointUpdateCmd : XDebugCommand {
   BreakpointUpdateCmd(XDebugServer& server,
                       const String& cmd,
                       const Array& args)
@@ -874,8 +861,7 @@ private:
 // breakpoint_remove -i # -d ID
 // Removes the breakpoint with the given id
 
-class BreakpointRemoveCmd : public XDebugCommand {
-public:
+struct BreakpointRemoveCmd : XDebugCommand {
   BreakpointRemoveCmd(XDebugServer& server,
                       const String& cmd,
                       const Array& args)
@@ -911,8 +897,7 @@ private:
 // stack_depth -i #
 // Returns the current stack depth
 
-class StackDepthCmd : public XDebugCommand {
-public:
+struct StackDepthCmd : XDebugCommand {
   StackDepthCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~StackDepthCmd() {}
@@ -928,10 +913,9 @@ public:
 // Returns the stack at the given depth, or the entire stack if no depth is
 // provided
 
-const static StaticString s_FILE("file");
+const StaticString s_FILE("file");
 
-class StackGetCmd : public XDebugCommand {
-public:
+struct StackGetCmd : XDebugCommand {
   StackGetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // Grab the optional depth argument
@@ -985,8 +969,8 @@ private:
 
     // Grab the file/line for the frame. For level 0, this is the current
     // file/line, for all other frames this is the stored file/line #
-    String file =
-      XDebugUtils::pathToUrl(String(unit->filepath()->data(), CopyString));
+    auto file =
+      XDebugUtils::pathToUrl(String(const_cast<StringData*>(unit->filepath())));
     int line = level == 0 ? g_context->getLine() : unit->getLineNumber(offset);
 
     // Add the call file/line. Duplication is necessary due to xml api
@@ -1010,8 +994,7 @@ enum class XDebugContext : int {
   USER_CONSTANTS = 2
 };
 
-class ContextNamesCmd : public XDebugCommand {
-public:
+struct ContextNamesCmd : XDebugCommand {
   ContextNamesCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~ContextNamesCmd() {}
@@ -1044,10 +1027,9 @@ public:
 // Returns the variables in scope within the passed context
 
 // Needed to look up user constants
-const static StaticString s_USER("user");
+const StaticString s_USER("user");
 
-class ContextGetCmd : public XDebugCommand {
-public:
+struct ContextGetCmd : XDebugCommand {
   ContextGetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // Grab the context if it was passed
@@ -1160,8 +1142,7 @@ static const char* s_TYPEMAP[XDEBUG_TYPES_COUNT][3] = {
   {"resource", "resource", nullptr}
 };
 
-class TypemapGetCmd : public XDebugCommand {
-public:
+struct TypemapGetCmd : XDebugCommand {
   TypemapGetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~TypemapGetCmd() {}
@@ -1201,8 +1182,7 @@ public:
 // is left out in other arbitrary places as well. So in this implementation,
 // property_value is implemented as property_get
 
-class PropertyGetCmd : public XDebugCommand {
-public:
+struct PropertyGetCmd : XDebugCommand {
   PropertyGetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // A name is required
@@ -1308,14 +1288,13 @@ private:
 // expression and LONGNAME must be some (possibly new) variable.
 
 // Allowed datatypes for property_set
-static const StaticString
+const StaticString
   s_BOOL("bool"),
   s_INT("int"),
   s_FLOAT("float"),
   s_STRING("string");
 
-class PropertySetCmd : public XDebugCommand {
-public:
+struct PropertySetCmd : XDebugCommand {
   PropertySetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // A name is required
@@ -1388,8 +1367,7 @@ private:
 // Grabs the given source file starting at the optionally given begin and end
 // lines.
 
-class SourceCmd : public XDebugCommand {
-public:
+struct SourceCmd : XDebugCommand {
   SourceCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // Either grab the passed filename or get the current one
@@ -1474,8 +1452,7 @@ static void onStdoutWrite(const char* bytes, int len, void* copy) {
   }
 }
 
-class StdoutCmd : public XDebugCommand {
-public:
+struct StdoutCmd : XDebugCommand {
   StdoutCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // "c" must be provided
@@ -1529,8 +1506,7 @@ private:
 // stderr -i #
 // This "required" dbgp-core feature is not implemented by php5 xdebug :)
 
-class StderrCmd : public XDebugCommand {
-public:
+struct StderrCmd : XDebugCommand {
   StderrCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~StderrCmd() {}
@@ -1546,8 +1522,7 @@ public:
 // xdebug claims non-expressions are allowed in their eval code, but the
 // implementation calls zend_eval_string which wraps EXPR in "return EXPR;"
 
-class EvalCmd : public XDebugCommand {
-public:
+struct EvalCmd : XDebugCommand {
   EvalCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
     // An evaluation string must be provided
@@ -1591,8 +1566,7 @@ private:
 // xcmd_profiler_name_get -i #
 // Returns the profiler filename if profiling has started
 
-class ProfilerNameGetCmd : public XDebugCommand {
-public:
+struct ProfilerNameGetCmd : XDebugCommand {
   ProfilerNameGetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {}
   ~ProfilerNameGetCmd() {}
@@ -1631,7 +1605,7 @@ XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
                                          const Array& args) {
   // Match will be set true once there is a match.
   bool match = false;
-  string cmd_cpp = cmdStr.toCppString();
+  auto cmd_cpp = cmdStr.toCppString();
 
   // Check each command
   XDebugCommand* cmd;

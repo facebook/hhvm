@@ -42,8 +42,7 @@ struct FrameData {
 };
 
 // TODO(#3704) Allow user to set maximum buffer size
-class XDebugProfiler : public Profiler {
-public:
+struct XDebugProfiler : Profiler {
   explicit XDebugProfiler() : Profiler(true) {}
   ~XDebugProfiler() {
     if (m_profilingEnabled) {

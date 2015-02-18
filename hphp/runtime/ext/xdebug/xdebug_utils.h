@@ -28,8 +28,7 @@ namespace HPHP {
 
 // Class containing generic utility routines used by xdebug. Similar to
 // xdebug's "usefulstuff.c"
-class XDebugUtils {
-public:
+struct XDebugUtils {
   // Helper that writes a timestamp in the given file in the format used by
   // xdebug
   static void fprintTimestamp(FILE* f) {
@@ -49,7 +48,7 @@ public:
 
   // HHVM interface for pathToUrl
   static String pathToUrl(const String& fileurl) {
-    char* url = pathToUrl(const_cast<char*>(fileurl.data()));
+    auto url = pathToUrl(const_cast<char*>(fileurl.data()));
     String url_str = String(url, CopyString);
     xdfree(url); // xdfree needed since allocated with xdmalloc
     return url_str;

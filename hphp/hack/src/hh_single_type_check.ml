@@ -284,6 +284,9 @@ let main_hack { filename; suggest; color; coverage; prolog; lint; _ } =
   else if prolog then
     print_prolog fileinfo
   else if lint then
+    let lint_errors = lint_errors @ fst (Lint.do_ begin fun () ->
+      Linter.lint fileinfo
+    end) in
     if lint_errors <> []
     then error (List.hd lint_errors)
     else Printf.printf "No lint errors\n"

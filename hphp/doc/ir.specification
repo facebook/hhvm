@@ -687,10 +687,10 @@ To string conversions:
 
   Suprise flag hook for function returns.
 
-| SuspendHookE, ND, S(FramePtr) S(FramePtr), Er
+| SuspendHookE, ND, S(FramePtr) S(FramePtr) S(Obj), Er
 
   Suprise flag hook for suspending eagerly executing async functions or
-  generators.
+  generators.  Decrefs S2 if it throws an exception.
 
 | SuspendHookR, ND, S(FramePtr) S(Obj|Nullptr), Er
 

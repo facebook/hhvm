@@ -1061,13 +1061,10 @@ struct SinkPointAnalyzer : private LocalStateHook {
     case LdArrFPushCuf:   consumeValueAfter(inst.src(0)); break;
     case LdStrFPushCuf:   consumeValueAfter(inst.src(0)); break;
     case SuspendHookE:
-      // In this situation, the suspend hook is going to decref the wait
-      // handle while it's throwing.  XXX: it's not that cool to do this by
-      // chasing a LdAFWHActRec.  (note: we also run through this codepath
-      // for continuations, but we threw NotWorthOptimizing for those.)
-      if (inst.src(1)->inst()->is(LdAFWHActRec)) {
-        consumeValue(inst.src(1)->inst()->src(0));
-      }
+      // In this situation, the suspend hook is going to decref the wait handle
+      // while it's throwing.  (Note: we also run through this codepath for
+      // continuations, but we bailed early for generators.)
+      consumeValue(inst.src(2));
       break;
     case ReturnHook:
       // Return hook decrefs the return value if it throws.

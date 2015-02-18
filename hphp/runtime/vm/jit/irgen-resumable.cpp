@@ -30,7 +30,10 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void suspendHookImpl(HTS& env, SSATmp* frame, SSATmp* other, bool eager) {
+void suspendHookE(HTS& env,
+                  SSATmp* frame,
+                  SSATmp* resumableAR,
+                  SSATmp* resumable) {
   ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
   ifThen(
     env,
@@ -39,17 +42,23 @@ void suspendHookImpl(HTS& env, SSATmp* frame, SSATmp* other, bool eager) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      gen(env, eager ? SuspendHookE : SuspendHookR, frame, other);
+      gen(env, SuspendHookE, frame, resumableAR, resumable);
     }
   );
 }
 
-void suspendHookE(HTS& env, SSATmp* frame, SSATmp* resumableAR) {
-  return suspendHookImpl(env, frame, resumableAR, true);
-}
-
 void suspendHookR(HTS& env, SSATmp* frame, SSATmp* objOrNullptr) {
-  return suspendHookImpl(env, frame, objOrNullptr, false);
+  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckSurpriseFlags, taken);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, SuspendHookR, frame, objOrNullptr);
+    }
+  );
 }
 
 void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
@@ -79,7 +88,7 @@ void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   // it.
   push(env, cns(env, Type::InitNull));
   env.irb->exceptionStackBoundary();
-  suspendHookE(env, fp(env), asyncAR);
+  suspendHookE(env, fp(env), asyncAR, waitHandle);
   discard(env, 1);
 
   // Grab caller info from ActRec, free ActRec, store the return value
@@ -224,7 +233,7 @@ void emitCreateCont(HTS& env) {
 
   // The suspend hook will decref the newly created generator if it throws.
   auto const contAR = gen(env, LdContActRec, cont);
-  suspendHookE(env, fp(env), contAR);
+  suspendHookE(env, fp(env), contAR, cont);
 
   // Grab caller info from ActRec, free ActRec, store the return value
   // and return control to the caller.

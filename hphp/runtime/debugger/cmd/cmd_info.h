@@ -58,7 +58,7 @@ private:
   int8_t   m_type;
   String m_symbol;
   Array  m_info;
-  DebuggerClient::LiveListsPtr m_acLiveLists;
+  std::shared_ptr<DebuggerClient::LiveLists> m_acLiveLists;
 
   static String GetParams(const Array& params, bool varg, bool detailed = false);
   static String GetParam(const Array& params, int index);

@@ -864,26 +864,26 @@ void DebuggerClient::addCompletion(AutoComplete type) {
   }
 }
 
-void DebuggerClient::addCompletion(const char **list) {
+void DebuggerClient::addCompletion(const char** list) {
   TRACE(2, "DebuggerClient::addCompletion(const char **list)\n");
   m_acLists.push_back(list);
 }
 
-void DebuggerClient::addCompletion(const char *name) {
+void DebuggerClient::addCompletion(const char* name) {
   TRACE(2, "DebuggerClient::addCompletion(const char *name)\n");
   m_acStrings.push_back(name);
 }
 
-void DebuggerClient::addCompletion(const std::vector<std::string> &items) {
+void DebuggerClient::addCompletion(const std::vector<std::string>& items) {
   TRACE(2, "DebuggerClient::addCompletion(const std::vector<std::string>)\n");
   m_acItems.insert(m_acItems.end(), items.begin(), items.end());
 }
 
-char *DebuggerClient::getCompletion(const std::vector<std::string> &items,
-                                    const char *text) {
+char* DebuggerClient::getCompletion(const std::vector<std::string>& items,
+                                    const char* text) {
   TRACE(2, "DebuggerClient::getCompletion(const std::vector<std::string>\n");
   while (++m_acPos < (int)items.size()) {
-    const char *p = items[m_acPos].c_str();
+    auto const p = items[m_acPos].c_str();
     if (m_acLen == 0 || strncasecmp(p, text, m_acLen) == 0) {
       return strdup(p);
     }
@@ -893,7 +893,8 @@ char *DebuggerClient::getCompletion(const std::vector<std::string> &items,
 }
 
 std::vector<std::string> DebuggerClient::getAllCompletions(
-  std::string const &text) {
+  const std::string& text
+) {
   TRACE(2, "DebuggerClient::getAllCompletions\n");
   std::vector<std::string> res;
 
@@ -902,9 +903,9 @@ std::vector<std::string> DebuggerClient::getAllCompletions(
   }
 
   for (int i = 0; i < AutoCompleteCount; ++i) {
-    const std::vector<std::string> &items = m_acLiveLists[i];
+    auto const& items = m_acLiveLists->get(i);
     for (size_t j = 0; j < items.size(); ++j) {
-      const char *p = items[j].c_str();
+      auto const p = items[j].c_str();
       if (strncasecmp(p, text.c_str(), text.length()) == 0) {
         res.push_back(std::string(p));
       }
@@ -913,11 +914,11 @@ std::vector<std::string> DebuggerClient::getAllCompletions(
   return res;
 }
 
-char *DebuggerClient::getCompletion(const std::vector<const char *> &items,
-                                    const char *text) {
+char* DebuggerClient::getCompletion(const std::vector<const char*>& items,
+                                    const char* text) {
   TRACE(2, "DebuggerClient::getCompletion(const std::vector<const char *>\n");
   while (++m_acPos < (int)items.size()) {
-    const char *p = items[m_acPos];
+    auto const p = items[m_acPos];
     if (m_acLen == 0 || strncasecmp(p, text, m_acLen) == 0) {
       return strdup(p);
     }
@@ -926,13 +927,13 @@ char *DebuggerClient::getCompletion(const std::vector<const char *> &items,
   return nullptr;
 }
 
-static char first_non_whitespace(const char *s) {
+static char first_non_whitespace(const char* s) {
   TRACE(2, "DebuggerClient::first_non_whitespace\n");
   while (*s && isspace(*s)) s++;
   return *s;
 }
 
-char *DebuggerClient::getCompletion(const char *text, int state) {
+char* DebuggerClient::getCompletion(const char* text, int state) {
   TRACE(2, "DebuggerClient::getCompletion\n");
   if (state == 0) {
     m_acLen = strlen(text);
@@ -963,7 +964,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
             addCompletion("<?php");
             addCompletion("?>");
           } else {
-            DebuggerCommand *cmd = createCommand();
+            auto cmd = createCommand();
             if (cmd) {
               if (cmd->is(DebuggerCommand::KindOfRun)) playMacro("startup");
               DebuggerCommandPtr deleter(cmd);
@@ -993,7 +994,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
         updateLiveLists();
         assert(!m_acLiveListsDirty);
       }
-      char *p = getCompletion(m_acLiveLists[(int64_t)list], text);
+      char *p = getCompletion(m_acLiveLists->get(int64_t(list)), text);
       if (p) return p;
     } else {
       for (const char *p = list[++m_acPos]; p; p = list[++m_acPos]) {

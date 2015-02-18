@@ -106,10 +106,27 @@ public:
   static const char **GetCommands();
 
   using LiveList = std::vector<std::string>;
-  using LiveListsPtr = boost::shared_array<LiveList>;
-  static LiveListsPtr CreateNewLiveLists() {
-    return LiveListsPtr(new LiveList[DebuggerClient::AutoCompleteCount]);
-  }
+
+  /*
+   * Exists just so that we can do:
+   *
+   *   std::shared_ptr<LiveLists> m_acLiveLists;
+   *   auto& list = m_acLiveLists->get(i);
+   *
+   * instead of:
+   *
+   *   std::shared_ptr<std::array<LiveList, AutoCompleteCount>> m_acLiveLists;
+   *   auto& list = (*m_acLiveLists)[i];
+   */
+  struct LiveLists {
+    LiveList& get(size_t i) {
+      assert(i < DebuggerClient::AutoCompleteCount);
+      return lists[i];
+    }
+
+    LiveList lists[DebuggerClient::AutoCompleteCount];
+  };
+
   std::vector<std::string> getAllCompletions(const std::string& text);
 
   /**
@@ -287,7 +304,9 @@ public:
   void addCompletion(const char **list);
   void addCompletion(const char *name);
   void addCompletion(const std::vector<std::string> &items);
-  void setLiveLists(LiveListsPtr liveLists) { m_acLiveLists = liveLists; }
+  void setLiveLists(const std::shared_ptr<LiveLists>& liveLists) {
+    m_acLiveLists = liveLists;
+  }
 
   void init(const DebuggerClientOptions &options);
   void clearCachedLocal() {
@@ -357,12 +376,30 @@ private:
   int m_acLen;
   int m_acIndex;
   int m_acPos;
-  std::vector<const char **> m_acLists;
-  std::vector<const char *> m_acStrings;
+
+  /*
+   * XXX: This type sits on a throne of lies.
+   *
+   * This is actually:
+   *
+   * union Terrible {
+   *   const char** list;
+   *   AutoComplete ac;
+   * };
+   *
+   * std::vector<Terrible> m_acLists;
+   *
+   * There is no tag to differentiate the two cases of Terrible, the const
+   * char** elements are cast to ints and compared to AutoComplete values
+   * directly.
+   */
+  std::vector<const char**> m_acLists;
+
+  std::vector<const char*> m_acStrings;
   std::vector<std::string> m_acItems;
   bool m_acLiveListsDirty;
-  LiveListsPtr m_acLiveLists;
   bool m_acProtoTypePrompted;
+  std::shared_ptr<LiveLists> m_acLiveLists;
 
   std::string m_line;
   // The current command to process.

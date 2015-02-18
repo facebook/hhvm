@@ -11,5 +11,6 @@
 val add : int -> Pos.t -> string -> unit
 
 val lowercase_constant : Pos.t -> string -> unit
+val use_collection_literal : Pos.t -> string -> unit
 
 val do_ : (unit -> 'a) -> Errors.error list * 'a

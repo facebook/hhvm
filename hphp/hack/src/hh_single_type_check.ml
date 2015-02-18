@@ -270,7 +270,7 @@ let main_hack { filename; suggest; color; coverage; prolog; lint; _ } =
         end classes SMap.empty in
         Typing_decl.make_env nenv all_classes filename;
         { FileInfo.
-          funs; classes; typedefs; consts; comments;
+          file_mode; funs; classes; typedefs; consts; comments;
           consider_names_just_for_autoload = false }
       end
     end in

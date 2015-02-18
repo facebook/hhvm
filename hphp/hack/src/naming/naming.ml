@@ -45,7 +45,7 @@ type type_constraint = hint option
 type genv = {
 
   (* strict? decl? partial? *)
-  in_mode: Ast.mode;
+  in_mode: FileInfo.mode;
 
   (* various options that control the strictness of the typechecker *)
   tcopt: TypecheckerOptions.t;
@@ -215,7 +215,7 @@ module Env = struct
   }
 
   let empty_global nenv = {
-    in_mode       = Ast.Mstrict;
+    in_mode       = FileInfo.Mstrict;
     tcopt         = nenv.itcopt;
     in_try        = false;
     in_non_static_method = false;
@@ -232,7 +232,7 @@ module Env = struct
 
   let make_class_genv nenv params c = {
     in_mode       =
-      (if !Autocomplete.auto_complete then Ast.Mpartial else c.c_mode);
+      (if !Autocomplete.auto_complete then FileInfo.Mpartial else c.c_mode);
     tcopt         = nenv.itcopt;
     in_try        = false;
     in_non_static_method = false;
@@ -254,7 +254,7 @@ module Env = struct
     env
 
   let make_typedef_genv nenv cstrs tdef = {
-    in_mode       = (if !Ide.is_ide_mode then Ast.Mpartial else Ast.Mstrict);
+    in_mode       = FileInfo.(if !Ide.is_ide_mode then Mpartial else Mstrict);
     tcopt         = nenv.itcopt;
     in_try        = false;
     in_non_static_method = false;
@@ -328,11 +328,11 @@ module Env = struct
     match v with
     | None ->
       (match genv.in_mode with
-        | Ast.Mstrict -> Errors.unbound_name p x `const
-        | Ast.Mpartial | Ast.Mdecl when not
-          (TypecheckerOptions.assume_php genv.tcopt) ->
+        | FileInfo.Mstrict -> Errors.unbound_name p x `const
+        | FileInfo.Mpartial | FileInfo.Mdecl when not
+            (TypecheckerOptions.assume_php genv.tcopt) ->
           Errors.unbound_name p x `const
-        | Ast.Mdecl | Ast.Mpartial -> ()
+        | FileInfo.Mdecl | FileInfo.Mpartial -> ()
       );
       p, Ident.make x
     | Some v -> p, snd v
@@ -358,11 +358,12 @@ module Env = struct
           p, canonical
         | None ->
           (match genv.in_mode with
-            | Ast.Mpartial | Ast.Mdecl
+            | FileInfo.Mpartial | FileInfo.Mdecl
                 when TypecheckerOptions.assume_php genv.tcopt
                 || name = SN.Classes.cUnknown -> ()
-            | Ast.Mstrict -> Errors.unbound_name p name kind
-            | Ast.Mpartial | Ast.Mdecl -> Errors.unbound_name p name kind
+            | FileInfo.Mstrict -> Errors.unbound_name p name kind
+            | FileInfo.Mpartial | FileInfo.Mdecl ->
+                Errors.unbound_name p name kind
           );
           p, name
     )
@@ -425,7 +426,7 @@ module Env = struct
   (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
     let p, ident =
-      if is_superglobal x && genv.in_mode = Ast.Mpartial
+      if is_superglobal x && genv.in_mode = FileInfo.Mpartial
       then p, Ident.tmp()
       else
         let lcl = SMap.get x !(env.locals) in
@@ -544,8 +545,8 @@ module Env = struct
   let new_const (genv, env) x =
     try ignore (new_var env.consts x); x with exn ->
       match genv.in_mode with
-      | Ast.Mstrict -> raise exn
-      | Ast.Mpartial | Ast.Mdecl -> x
+      | FileInfo.Mstrict -> raise exn
+      | FileInfo.Mpartial | FileInfo.Mdecl -> x
 
   let resilient_new_canon_var env_and_names (p, name) =
     let env, canon_names = !env_and_names in
@@ -1327,11 +1328,11 @@ and const_def h env (x, e) =
   check_constant_expr e;
   let new_const = Env.new_const env x in
   match (fst env).in_mode with
-  | Ast.Mstrict
-  | Ast.Mpartial ->
+  | FileInfo.Mstrict
+  | FileInfo.Mpartial ->
       let h = opt_map (hint ~allow_this:true env) h in
       h, new_const, Some (expr env e)
-  | Ast.Mdecl ->
+  | FileInfo.Mdecl ->
       let h = opt_map (hint ~allow_this:true env) h in
       h, new_const, Some (fst e, N.Any)
 
@@ -1344,7 +1345,7 @@ and class_var_ env (x, e) =
   let id = Env.new_const env x in
   let e =
     match (fst env).in_mode with
-    | Ast.Mstrict | Ast.Mpartial -> opt_map (expr env) e
+    | FileInfo.Mstrict | FileInfo.Mpartial -> opt_map (expr env) e
     (* Consider every member variable defined in a class in decl mode to be
      * initalized by giving it a magic value of type Tany (you can't actually
      * write this cast in PHP). Classes might inherit from our decl mode class
@@ -1352,7 +1353,7 @@ and class_var_ env (x, e) =
      * variables are initalized in a decl class without typechecking its
      * initalizers and constructor, which we don't want to do, so just assume
      * we're covered. *)
-    | Ast.Mdecl ->
+    | FileInfo.Mdecl ->
       let p = match e with
         | None -> fst id
         | Some (p, _) -> p in
@@ -1429,9 +1430,9 @@ and method_ env m =
   let unsafe = is_unsafe_body m.m_body in
   let body =
     match genv.in_mode with
-    | Ast.Mpartial | Ast.Mstrict ->
+    | FileInfo.Mpartial | FileInfo.Mstrict ->
         block env m.m_body
-    | Ast.Mdecl -> [] in
+    | FileInfo.Mdecl -> [] in
   let body = N.NamedBody body in
   (* If not naming: ... *)
   (* let body = N.UnnamedBody m.m_body in *)
@@ -1535,8 +1536,8 @@ and fun_ genv f =
   let unsafe = is_unsafe_body f.f_body in
   let body =
     match genv.in_mode with
-    | Ast.Mstrict | Ast.Mpartial -> block env f.f_body
-    | Ast.Mdecl -> []
+    | FileInfo.Mstrict | FileInfo.Mpartial -> block env f.f_body
+    | FileInfo.Mdecl -> []
   in
   let body = N.NamedBody body in
   (* If not naming: ... *)
@@ -1729,9 +1730,9 @@ and expr_obj_get_name env = function
   | p, Id x -> p, N.Id x
   | p, e ->
       (match (fst env).in_mode with
-        | Ast.Mstrict ->
+        | FileInfo.Mstrict ->
             Errors.dynamic_method_call p
-        | Ast.Mpartial | Ast.Mdecl ->
+        | FileInfo.Mpartial | FileInfo.Mdecl ->
             ()
       );
       expr env (p, e)
@@ -2048,7 +2049,7 @@ and expr_ env = function
   | New ((_, Id x), el, uel) ->
       N.New (make_class_id env x, exprl env el, exprl env uel)
   | New ((p, e_), el, uel) ->
-      if (fst env).in_mode = Mstrict
+      if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
       N.New (make_class_id env (p, SN.Classes.cUnknown), exprl env el, exprl env uel)
   | Efun (f, idl) ->
@@ -2204,7 +2205,7 @@ let typedef genv tdef =
 
 let check_constant cst =
   (match cst.cst_type with
-  | None when cst.cst_mode = Ast.Mstrict ->
+  | None when cst.cst_mode = FileInfo.Mstrict ->
       Errors.add_a_typehint (fst cst.cst_name)
   | None
   | Some _ -> ());
@@ -2240,7 +2241,7 @@ let add_files_to_rename nenv failed defl defs_in_env =
   end failed defl
 
 let ndecl_file fn
-    {FileInfo.funs;
+    {FileInfo.file_mode; funs;
      classes; typedefs; consts; consider_names_just_for_autoload; comments}
     (errorl, failed, nenv) =
   let errors, nenv = Errors.do_ begin fun () ->

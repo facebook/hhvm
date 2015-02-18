@@ -67,6 +67,7 @@ type command =
 | ERROR_OUT_OF_DATE
 | STATUS of Path.path
 | LIST_FILES
+| LIST_MODES
 | AUTOCOMPLETE of string
 | SHOW of string
 | KILL

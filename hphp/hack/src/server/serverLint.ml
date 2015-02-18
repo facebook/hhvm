@@ -31,7 +31,7 @@ let go fnl oc =
         Parser_heap.ParserHeap.add fn ast;
         (* naming and typing currently don't produce any lint errors *)
         let fi =
-          {FileInfo.funs; classes; typedefs; consts; comments;
+          {FileInfo.file_mode; funs; classes; typedefs; consts; comments;
            consider_names_just_for_autoload = false} in
         Linter.lint fi
       end in

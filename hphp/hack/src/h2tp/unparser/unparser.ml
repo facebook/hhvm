@@ -74,7 +74,7 @@ let u_todo_conds todos else_fn =
   Examples are modes and namespaces. Currently I've introduced mode as an example.
 *)
 type unparse_env = {
-  mutable mode: mode
+  mutable mode: FileInfo.mode
 }
 
 (*
@@ -142,8 +142,8 @@ let dummy_unparse_fn = fun () -> StrEmpty
 
 let u_file_type =
   function
-  | PhpFile -> Str "<?php"
-  | HhFile -> Str "<?hh"
+  | FileInfo.PhpFile -> Str "<?php"
+  | FileInfo.HhFile -> Str "<?hh"
 
 let u_pos_t _ = StrEmpty
 
@@ -955,16 +955,19 @@ let unparse_internal program =
     we feed the output of the unparser to the hack formatter which only
     accepts files with hh prefix, so we have to fake it.
   *)
-  StrWords [(u_file_type HhFile); (unparser {mode = Mdecl} program)]
+  StrWords [
+    u_file_type FileInfo.HhFile;
+    unparser {mode = FileInfo.Mdecl} program
+  ]
 
 let unparse :
-    file_type -> Relative_path.t -> program -> string =
+    FileInfo.file_type -> Relative_path.t -> program -> string =
     fun filetype file program ->
   unparse_internal program |>
   to_string |>
   fun s ->
     dn s;
-    let modes = [Some Ast.Mstrict; Some Ast.Mpartial] in
+    let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
     let formatted = Format_hack.program modes file ~no_trailing_commas:true s in
     let s' = match formatted with
     | Format_hack.Disabled_mode -> raise Impossible
@@ -974,6 +977,6 @@ let unparse :
       ("parsing error \n" ^ (Errors.to_string (Errors.to_absolute
       (List.hd error))))) in
     match filetype with
-     | HhFile -> s'
-     | PhpFile ->  let r = R.regexp "<\\?hh" in
+     | FileInfo.HhFile -> s'
+     | FileInfo.PhpFile ->  let r = R.regexp "<\\?hh" in
                    R.replace_first r "<?php" s'

@@ -87,7 +87,7 @@ and tprim =
   | Tarraykey
 
 and class_ = {
-  c_mode           : Ast.mode         ;
+  c_mode           : FileInfo.mode    ;
   c_final          : bool             ;
   c_is_xhp         : bool;
   c_kind           : Ast.class_kind   ;
@@ -189,7 +189,7 @@ and fun_variadicity = (* does function take varying number of args? *)
   | FVnonVariadic (* standard non variadic function *)
 
 and fun_ = {
-  f_mode     : Ast.mode;
+  f_mode     : FileInfo.mode;
   f_unsafe   : bool;
   f_ret      : hint option;
   f_name     : sid;
@@ -204,7 +204,7 @@ and fun_ = {
 and typedef = tparam list * hint option * hint
 
 and gconst = {
-  cst_mode: Ast.mode;
+  cst_mode: FileInfo.mode;
   cst_name: Ast.id;
   cst_type: hint option;
   cst_value: expr option;

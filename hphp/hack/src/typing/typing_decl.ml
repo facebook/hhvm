@@ -623,7 +623,7 @@ and class_const_decl c (env, acc) (h, id, e) =
              * Also note that a number of expressions are considered invalid
              * as constant initializers, even if we can infer their type; see
              * Naming.check_constant_expr. *)
-            if c.c_mode = Ast.Mstrict && c.c_kind <> Ast.Cenum
+            if c.c_mode = FileInfo.Mstrict && c.c_kind <> Ast.Cenum
             then Errors.missing_typehint (fst id);
             Reason.Rwitness (fst id), Tany
         in
@@ -631,7 +631,7 @@ and class_const_decl c (env, acc) (h, id, e) =
       end
       | None, None ->
         let pos, name = id in
-        if c.c_mode = Ast.Mstrict then Errors.missing_typehint pos;
+        if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
         let r = Reason.Rwitness pos in
         let const_ty = r, Tgeneric (c_name^"::"^name, Some (r, Tany)) in
         env, const_ty
@@ -670,7 +670,7 @@ and class_var_decl c (env, acc) cv =
          hack to support existing code for now. *)
       (* Task #5815945: Get rid of this Hack *)
       let env = if (Env.is_strict env)
-        then Env.set_mode env Ast.Mpartial
+        then Env.set_mode env FileInfo.Mpartial
         else env
       in
       Typing_hint.hint env ty'
@@ -697,7 +697,7 @@ and static_class_var_decl c (env, acc) cv =
              ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add ("$"^id) ce acc in
-  if cv.cv_expr = None && (c.c_mode = Ast.Mstrict || c.c_mode = Ast.Mpartial)
+  if cv.cv_expr = None && FileInfo.(c.c_mode = Mstrict || c.c_mode = Mpartial)
   then begin match cv.cv_type with
     | None
     | Some (_, Hmixed)

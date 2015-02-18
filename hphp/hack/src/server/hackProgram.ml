@@ -81,7 +81,19 @@ module Program : Server.SERVER_PROGRAM = struct
         infer env (fn, line, char) oc
     | ServerMsg.SUGGEST (files) -> suggest files oc
     | ServerMsg.STATUS client_root -> print_status genv env client_root oc
-    | ServerMsg.LIST_FILES    -> ServerEnv.list_files env oc
+    | ServerMsg.LIST_FILES -> ServerEnv.list_files env oc
+    | ServerMsg.LIST_MODES ->
+        Relative_path.Map.iter begin fun fn fileinfo ->
+          match Relative_path.prefix fn with
+          | Relative_path.Root ->
+            let mode = match fileinfo.FileInfo.file_mode with
+              | None -> "php"
+              | Some FileInfo.Mdecl -> "decl"
+              | Some FileInfo.Mpartial -> "partial"
+              | Some FileInfo.Mstrict -> "strict" in
+            Printf.fprintf oc "%s\t%s\n%!" mode (Relative_path.to_absolute fn)
+          | _ -> ()
+        end env.ServerEnv.files_info
     | ServerMsg.AUTOCOMPLETE content ->
         ServerAutoComplete.auto_complete env content oc
     | ServerMsg.IDENTIFY_FUNCTION (content, line, char) ->

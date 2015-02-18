@@ -103,6 +103,12 @@ struct VariableUnserializer {
    */
   Variant* getByRef(int id);
 
+  /*
+   * Store properties/array elements that get overwritten incase they are
+   * referenced later during unserialization
+   */
+  void putInOverwrittenList(const Variant& v);
+
 private:
   /*
    * Hold references to previously-unserialized data, along with bits telling
@@ -116,6 +122,8 @@ private:
   private:
     uintptr_t m_data;
   };
+
+  Array m_overwrittenList;
 
   void check() const;
 

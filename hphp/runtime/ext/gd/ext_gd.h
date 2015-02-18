@@ -39,7 +39,7 @@ public:
   explicit Image(gdImagePtr gdImage) : m_gdImage(gdImage) {}
   ~Image();
   gdImagePtr get() { return m_gdImage;}
-  void reset() { m_gdImage = nullptr;}
+  void reset();
 
   CLASSNAME_IS("gd")
   // overriding ResourceData

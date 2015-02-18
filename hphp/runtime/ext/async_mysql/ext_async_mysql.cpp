@@ -520,12 +520,14 @@ Variant HHVM_METHOD(AsyncMysqlConnection, releaseConnection) {
   auto database = data->m_conn->database();
   data->m_conn.reset();
   data->m_closed = true;
-  return new MySQL(host.c_str(),
-                   port,
-                   username.c_str(),
-                   "",
-                   database.c_str(),
-                   raw_connection);
+  return Variant(
+    makeSmartPtr<MySQLResource>(
+      std::make_shared<MySQL>(host.c_str(),
+                              port,
+                              username.c_str(),
+                              "",
+                              database.c_str(),
+                              raw_connection)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -139,17 +139,13 @@ struct Variant : private TypedValue {
   // These are prohibited, but declared just to prevent accidentally
   // calling the bool constructor just because we had a pointer to
   // const.
-  /* implicit */ Variant(const StringData* v) = delete;
-  /* implicit */ Variant(const ArrayData *v) = delete;
-  /* implicit */ Variant(const ObjectData *v) = delete;
-  /* implicit */ Variant(const ResourceData *v) = delete;
-  /* implicit */ Variant(const RefData *v) = delete;
-  /* implicit */ Variant(const TypedValue *v) = delete;
-  /* implicit */ Variant(TypedValue *v) = delete;
-  /* implicit */ Variant(const /* implicit */ Variant *v) = delete;
-  /* implicit */ Variant(/* implicit */ Variant *v) = delete;
+  /* implicit */ Variant(const void*) = delete;
   template<typename Ret, typename... Args>
   /* implicit */ Variant(Ret (*)(Args...)) = delete;
+  template<class Class, typename Ret, typename... Args>
+  /* implicit */ Variant(Ret (Class::*)(Args...)) = delete;
+  template<class Class, typename Ret, typename... Args>
+  /* implicit */ Variant(Ret (Class::*)(Args...) const) = delete;
 
   //////////////////////////////////////////////////////////////////////
 

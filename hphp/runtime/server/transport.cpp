@@ -679,10 +679,6 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     addHeaderImpl("Set-Cookie", iter->c_str());
   }
 
-  if (isCompressionEnabled()) {
-    addHeaderImpl("Vary", "Accept-Encoding");
-  }
-
   if (compressed) {
     addHeaderImpl("Content-Encoding", "gzip");
     removeHeaderImpl("Content-Length");

@@ -74,18 +74,13 @@ let rec connect env retries =
     end
 
 let rec wait_for_response ic =
-  try Utils.with_context
-    ~enter:(fun () ->
-      Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ ->
-        raise ClientExceptions.Server_busy));
-      ignore (Unix.alarm 1))
-    ~exit:(fun () ->
-      ignore (Unix.alarm 0);
-      Sys.set_signal Sys.sigalrm Sys.Signal_default)
-    ~do_:(fun () ->
-      let response = ServerMsg.response_from_channel ic in
-      if Tty.spinner_used() then Tty.print_clear_line stdout;
-      response)
+  try
+    ServerMsg.with_timeout 1
+      ~on_timeout:(fun _ -> raise ClientExceptions.Server_busy)
+      ~do_:(fun () ->
+        let response = ServerMsg.response_from_channel ic in
+        if Tty.spinner_used() then Tty.print_clear_line stdout;
+        response)
   with
   | End_of_file ->
      prerr_string "Server disconnected or crashed. Try `hh_client restart`\n";

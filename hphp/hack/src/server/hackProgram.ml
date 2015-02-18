@@ -56,8 +56,10 @@ module Program : Server.SERVER_PROGRAM = struct
     (* TODO: check status.directory *)
     status_log env;
     let errors = get_errors env in
-    EventLogger.check_response errors;
-    ServerError.send_errorl errors oc
+    ServerError.send_errorl errors oc;
+    (* check_response takes a while, so do it last. We don't want the client to
+     * time out waiting for our response. *)
+    EventLogger.check_response errors
 
   let die_nicely oc =
     ServerMsg.response_to_channel oc ServerMsg.SERVER_DYING;

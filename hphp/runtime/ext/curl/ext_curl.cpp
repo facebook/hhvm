@@ -26,10 +26,12 @@
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include <boost/variant.hpp>
 #include <folly/Optional.h>
+#include "hphp/util/lock.h"
 #include <openssl/ssl.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -89,6 +91,116 @@ void throwException(ExceptionType&& e) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/**
+ * This is a helper class used to wrap Curl handles that are pooled.
+ * Operations on this class are _NOT_ thread safe!
+ */
+class PooledCurlHandle {
+public:
+  static int connRecycleAfter;
+
+  explicit PooledCurlHandle()
+  : m_handle(nullptr), m_numUsages(0) { }
+
+  CURL* useHandle() {
+    if (m_handle == nullptr) {
+      m_handle = curl_easy_init();
+    }
+
+    if (connRecycleAfter > 0 &&
+        m_numUsages % connRecycleAfter == 0) {
+      curl_easy_cleanup(m_handle); 
+      m_handle = curl_easy_init();
+      m_numUsages = 0;
+    }
+
+    m_numUsages++;
+    return m_handle;
+  }
+
+  void resetHandle() {
+    if (m_handle != nullptr) {
+      curl_easy_reset(m_handle);
+    }
+  }
+
+  ~PooledCurlHandle() {
+    if (m_handle != nullptr) {
+      curl_easy_cleanup(m_handle);
+    }
+  }
+
+private:
+  CURL* m_handle;
+  int m_numUsages;
+};
+
+int PooledCurlHandle::connRecycleAfter = 100;
+
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * This is a helper class used to implement a process-wide pool of libcurl
+ * handles. This provides very large performance benefits, as libcurl handles
+ * hold connections open and cache SSL session ids over their lifetimes.
+ * All operations on this class are thread safe.
+ */
+class CurlHandlePool {
+public:
+  static int standardPoolSize;
+  static int waitTimeout;
+
+  explicit CurlHandlePool(int poolSize) {
+    for (int i = 0; i < poolSize; i++) {
+      m_handleStack.push(new PooledCurlHandle());
+    }
+    pthread_cond_init(&m_cond, nullptr);
+  }
+
+  PooledCurlHandle* fetch() {
+    Lock lock(m_mutex);
+
+    // wait until the user-specified timeout for a new handle to become available
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    ts.tv_sec += waitTimeout;
+    while (m_handleStack.empty()) {
+      if ( ETIMEDOUT == pthread_cond_timedwait(&m_cond, &m_mutex.getRaw(), &ts) ) {
+        raise_error("Timeout reached for waiting for a pooled curl connection!");
+      }
+    }
+    
+    PooledCurlHandle* ret = m_handleStack.top();
+    assert(ret);
+    m_handleStack.pop();
+    return ret;
+  }
+
+  void store(PooledCurlHandle* handle) {
+    Lock lock(m_mutex);
+    handle->resetHandle();
+    m_handleStack.push(handle);
+    pthread_cond_signal(&m_cond);
+  }
+
+  ~CurlHandlePool() {
+    Lock lock(m_mutex);
+    while (!m_handleStack.empty()) {
+      PooledCurlHandle *handle = m_handleStack.top();
+      m_handleStack.pop();
+      delete handle;
+    }
+  }
+
+private:
+  std::stack<PooledCurlHandle*> m_handleStack;
+  Mutex m_mutex;
+  pthread_cond_t m_cond;
+};
+
+int CurlHandlePool::standardPoolSize = 0;
+int CurlHandlePool::waitTimeout = 3;
+
+///////////////////////////////////////////////////////////////////////////////
 // helper data structure
 
 class CurlResource : public SweepableResourceData {
@@ -136,13 +248,20 @@ private:
   };
 
 public:
+  static CurlHandlePool* handlePool;
+
   CLASSNAME_IS("curl")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
-  explicit CurlResource(const String& url)
-  : m_emptyPost(true) {
-    m_cp = curl_easy_init();
+  explicit CurlResource(const String& url, bool useConnPool = false)
+  : m_emptyPost(true), m_useConnPool(useConnPool), m_pooledHandle(nullptr) {
+    if (m_useConnPool) {
+      m_pooledHandle = handlePool->fetch();
+      m_cp = m_pooledHandle->useHandle();
+    } else {
+      m_cp = curl_easy_init();
+    }
     m_url = url;
 
     memset(m_error_str, 0, sizeof(m_error_str));
@@ -209,7 +328,14 @@ public:
   void closeForSweep() {
     assert(!m_exception);
     if (m_cp) {
-      curl_easy_cleanup(m_cp);
+      if (m_useConnPool) {
+        // reuse this curl handle if we're pooling
+        assert(m_pooledHandle);
+        handlePool->store(m_pooledHandle); 
+        m_pooledHandle = nullptr;
+      } else {
+        curl_easy_cleanup(m_cp);
+      }
       m_cp = nullptr;
     }
     m_to_free.reset();
@@ -919,6 +1045,8 @@ private:
   Variant      m_progress_callback;
 
   bool m_emptyPost;
+  bool m_useConnPool;
+  PooledCurlHandle* m_pooledHandle;
 
   static CURLcode ssl_ctx_callback(CURL *curl, void *sslctx, void *parm);
 };
@@ -928,6 +1056,8 @@ void CurlResource::sweep() {
   m_write_header.buf.release();
   closeForSweep();
 }
+
+CurlHandlePool* CurlResource::handlePool = nullptr;
 
 CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
   // Set defaults from config.hdf
@@ -1013,6 +1143,19 @@ Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
     return Variant(makeSmartPtr<CurlResource>(null_string));
   } else {
     return Variant(makeSmartPtr<CurlResource>(url.toString()));
+  }
+}
+
+Variant HHVM_FUNCTION(curl_init_pooled, const Variant& url /* = null_string */) {
+  bool useConnPool = (CurlHandlePool::standardPoolSize > 0);
+  if (!useConnPool) {
+    raise_warning("attempting to use connection pooling without a connection pool! adjust the curl.connectionPoolSize ini setting above 0");
+  }
+
+  if (url.isNull()) {
+    return Variant(makeSmartPtr<CurlResource>(null_string, useConnPool));
+  } else {
+    return Variant(makeSmartPtr<CurlResource>(url.toString(), useConnPool));
   }
 }
 
@@ -3047,6 +3190,7 @@ class CurlExtension final : public Extension {
     );
 
     HHVM_FE(curl_init);
+    HHVM_FE(curl_init_pooled);
     HHVM_FE(curl_copy_handle);
     HHVM_FE(curl_version);
     HHVM_FE(curl_setopt);
@@ -3070,8 +3214,28 @@ class CurlExtension final : public Extension {
     HHVM_FE(curl_multi_close);
     HHVM_FE(curl_strerror);
 
+    Extension* ext = ExtensionRegistry::get("curl");
+    assert(ext);
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL, "curl.connectionPoolSize",
+      "0", &CurlHandlePool::standardPoolSize);
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL, "curl.pooledConnGetTimeout",
+      "3", &CurlHandlePool::waitTimeout);
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL, "curl.numUsagesToRecycle",
+      "100", &PooledCurlHandle::connRecycleAfter);
+
+    String value;
+    if (IniSetting::Get("curl.connectionPoolSize", value)) {}
+    CurlResource::handlePool = new CurlHandlePool(CurlHandlePool::standardPoolSize);
+
     loadSystemlib();
   }
+
+  virtual void moduleShutdown() {
+    if (CurlResource::handlePool) {
+      delete CurlResource::handlePool;
+    }
+  }
+
 } s_curl_extension;
 
 }

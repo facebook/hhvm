@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_GUARD_CONSTRAINTS_H_
 
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type-source.h"
 #include "hphp/runtime/vm/jit/type.h"
 

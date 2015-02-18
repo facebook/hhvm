@@ -17,54 +17,29 @@
 #ifndef incl_HPHP_JIT_TYPE_H_
 #define incl_HPHP_JIT_TYPE_H_
 
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/type-specialization.h"
-
-#include "hphp/util/data-block.h"
 
 #include <folly/Optional.h>
 
 #include <cstdint>
-#include <cstring>
+#include <type_traits>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ArrayData;
+struct Class;
 struct Func;
 struct Shape;
+struct StringData;
+struct TypedValue;
 
 namespace jit {
-///////////////////////////////////////////////////////////////////////////////
-
-struct DynLocation;
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace constToBits_detail {
-  template<class T>
-  struct needs_promotion
-    : std::integral_constant<
-        bool,
-        std::is_integral<T>::value ||
-          std::is_same<T,bool>::value ||
-          std::is_enum<T>::value
-      >
-  {};
-
-  template<class T>
-  typename std::enable_if<needs_promotion<T>::value,uint64_t>::type
-  promoteIfNeeded(T t) { return static_cast<uint64_t>(t); }
-
-  template<class T>
-  typename std::enable_if<!needs_promotion<T>::value,T>::type
-  promoteIfNeeded(T t) { return t; }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -533,31 +508,49 @@ public:
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Constants types.                                            [const/static]
+  // Constant type creation.                                     [const/static]
 
-private:
   /*
-   * Return the Type to use for a given C++ value.
-   *
-   * The only interesting case is int/bool disambiguation.  Enums are treated
-   * as ints.
+   * Return a const copy of `ret' with constant value `val'.
    */
-  template<class T>
-  static typename std::enable_if<
-    std::is_integral<T>::value || std::is_enum<T>::value,
-    Type
-  >::type forConst(T) {
-    return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
-  }
-  static Type forConst(double)            { return Dbl; }
-  static Type forConst(const StringData* sd);
-  static Type forConst(const ArrayData* ad);
-  static Type forConst(const HPHP::Func*) { return Func; }
-  static Type forConst(const Class*)      { return Cls; }
-  static Type forConst(ConstCctx)         { return Cctx; }
-  static Type forConst(jit::TCA)          { return TCA; }
+  template<typename T>
+  static Type cns(T val, Type ret);
 
-public:
+  /*
+   * Return a const type corresponding to `val'.
+   *
+   * @returns: cns(val, forConst(val))
+   */
+  template<typename T>
+  static Type cns(T val);
+
+  /*
+   * @returns: Type::Nullptr
+   */
+  static Type cns(std::nullptr_t);
+
+  /*
+   * Return a const type for `tv'.
+   */
+  static Type cns(const TypedValue& tv);
+
+  /*
+   * If this represents a constant value, return the most specific strict
+   * supertype of this we can represent, else return *this.
+   *
+   * In most cases this just erases the constant value:
+   *    Int<4> -> Int
+   *    Dbl<2.5> -> Dbl
+   *
+   * Arrays are special since they can be both constant and specialized, so
+   * keep the array's kind in the resulting type.
+   */
+  Type dropConstVal() const;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Constant introspection.                                            [const]
+
   /*
    * Does this Type represent a known value?
    */
@@ -600,43 +593,6 @@ public:
   ConstCctx cctxVal() const;
   rds::Handle rdsHandleVal() const;
   jit::TCA tcaVal() const;
-
-  /*
-   * If this represents a constant value, return the most specific strict
-   * supertype of this we can represent, else return *this.
-   *
-   * In most cases this just erases the constant value:
-   *    Int<4> -> Int
-   *    Dbl<2.5> -> Dbl
-   *
-   * Arrays are special since they can be both constant and specialized, so
-   * keep the array's kind in the resulting type.
-   */
-  Type dropConstVal() const;
-
-  /*
-   * Return a const copy of `ret' with constant value `val'.
-   */
-  template<typename T>
-  static Type cns(T val, Type ret);
-
-  /*
-   * Return a const type corresponding to `val'.
-   *
-   * @returns: cns(val, forConst(val))
-   */
-  template<typename T>
-  static Type cns(T val);
-
-  /*
-   * @returns: Type::Nullptr
-   */
-  static Type cns(std::nullptr_t);
-
-  /*
-   * Return a const type for `tv'.
-   */
-  static Type cns(const TypedValue& tv);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -754,6 +710,7 @@ public:
    */
   Ptr ptrKind() const;
 
+
   /////////////////////////////////////////////////////////////////////////////
   // Other methods.                                                     [const]
 
@@ -769,25 +726,27 @@ public:
    */
   Type relaxToGuardable() const;
 
+
   /////////////////////////////////////////////////////////////////////////////
+  // Internal methods.
 
 private:
   /*
-   * Specialized type internal constructors.
+   * Internal constructors.
    */
   Type(bits_t bits, Ptr kind, uintptr_t extra = 0);
   Type(Type t, ArraySpec arraySpec);
   Type(Type t, ClassSpec classSpec);
 
   /*
-   * Return false if a specialized type has a mismatching tag, else true.
-   */
-  bool checkValid() const;
-
-  /*
    * Bit-pack an `outer' and an `inner' DataType for a Type.
    */
   static bits_t bitsFromDataType(DataType outer, DataType inner);
+
+  /*
+   * Return false if a specialized type has a mismatching tag, else true.
+   */
+  bool checkValid() const;
 
   /*
    * Return m_ptr cast to a Ptr, with no checks.
@@ -800,6 +759,7 @@ private:
    * Used as the finalization step for union and intersect.
    */
   Type specialize(TypeSpec spec) const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -817,7 +777,7 @@ private:
   union {
     uintptr_t m_extra;
 
-    // Constant values. Validity determined by m_hasConstVal and m_bits.
+    // Constant values.  Validity determined by m_hasConstVal and m_bits.
     bool m_boolVal;
     int64_t m_intVal;
     double m_dblVal;
@@ -886,115 +846,6 @@ Type refineTypeNoCheck(Type oldType, Type newType);
  * @requires: typeParam.notBoxed()
  */
 Type ldRefReturn(Type typeParam);
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Type information used by guard relaxation code to track the properties of a
- * type that consumers care about.
- */
-struct TypeConstraint {
-
-  /*
-   * Constructors.
-   */
-  /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric);
-  explicit TypeConstraint(const Class* cls);
-
-  /*
-   * Stringify the TypeConstraint.
-   */
-  std::string toString() const;
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Basic info.
-
-  /*
-   * Mark the TypeConstraint as weak; see documentation for `weak'.
-   */
-  TypeConstraint& setWeak(bool w = true);
-
-  /*
-   * Is this a trivial constraint?
-   */
-  bool empty() const;
-
-  /*
-   * Comparison.
-   */
-  bool operator==(TypeConstraint tc2) const;
-  bool operator!=(TypeConstraint tc2) const;
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Specialization.
-
-  static constexpr uint8_t kWantArrayKind = 0x1;
-  static constexpr uint8_t kWantArrayShape = 0x2;
-
-  /*
-   * Is this TypeConstraint for a specialized type?
-   */
-  bool isSpecialized() const;
-
-  /*
-   * Set or check the kWantArrayKind bit in `m_specialized'.
-   *
-   * @requires: isSpecialized()
-   */
-  TypeConstraint& setWantArrayKind();
-  bool wantArrayKind() const;
-
-  /*
-   * Set or check the kWantArrayShape bit in 'm_specialized'. kWantArrayShape
-   * implies kWantArrayKind.
-   *
-   * @requires: isSpecialized()
-   */
-  TypeConstraint& setWantArrayShape();
-  bool wantArrayShape() const;
-
-  /*
-   * Set, check, or return the specialized Class.
-   *
-   * @requires:
-   *    setDesiredClass: isSpecialized()
-   *                     desiredClass() is either nullptr, a parent of `cls',
-   *                     or a child of `cls'
-   *    desiredClass:    wantClass()
-   */
-  TypeConstraint& setDesiredClass(const Class* cls);
-  bool wantClass() const;
-  const Class* desiredClass() const;
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Data members.
-
-  /*
-   * `category' starts as DataTypeGeneric and is refined to more specific
-   * values by consumers of the type.
-   */
-  DataTypeCategory category;
-
-  /*
-   * If weak is true, the consumer of the value being constrained doesn't
-   * actually want to constrain the guard (if found).
-   *
-   * Most often used to figure out if a type can be used without further
-   * constraining guards.
-   */
-  bool weak;
-
-private:
-  /*
-   * `m_specialized' either holds a Class* or a 1 in its low bit, indicating
-   * that for a DataTypeSpecialized constraint, we require the specified class
-   * or an array kind, respectively.
-   */
-  uintptr_t m_specialized;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/jit/irgen-inlining.h"

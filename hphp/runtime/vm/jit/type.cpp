@@ -1077,22 +1077,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   return true;
 }
 
-std::string TypeConstraint::toString() const {
-  std::string ret = "<" + typeCategoryName(category);
-
-  if (category == DataTypeSpecialized) {
-    if (wantArrayKind()) ret += ",ArrayKind";
-    if (wantArrayShape()) ret += ",ArrayShape";
-    if (wantClass()) {
-      folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
-    }
-  }
-
-  if (weak) ret += ",weak";
-
-  return ret + '>';
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }}

@@ -568,7 +568,10 @@ macro(hphp_link target)
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
 
-  target_link_libraries(${target} mcrouter)
+  if (ENABLE_MCROUTER)
+    target_link_libraries(${target} mcrouter)
+  endif()
+
   target_link_libraries(${target} afdt)
   target_link_libraries(${target} mbfl)
 

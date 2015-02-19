@@ -137,6 +137,15 @@ gdImagePtr gdImageCreate (int sx, int sy)
 		return NULL;
 	}
 
+	// Check for OOM before doing a potentially large allocation.
+	auto allocsz = sizeof(gdImage)
+		+ 2 * sy * sizeof(unsigned char *)
+		+ 2 * sx * sy * sizeof(unsigned char);
+	if (UNLIKELY(precheckOOM(allocsz))) {
+		// Don't throw here because GD might need to do its own cleanup.
+		return NULL;
+	}
+
 	im = (gdImage *) gdCalloc(1, sizeof(gdImage));
 
 	/* Row-major ever since gd 1.3 */
@@ -196,10 +205,9 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 
 	// Check for OOM before doing a potentially large allocation.
 	auto allocsz = sizeof(gdImage)
-	  + sy * (sizeof(int *) + sizeof(unsigned char *))
-	  + sx * sy * (sizeof(int) + sizeof(unsigned char));
-	if (UNLIKELY(allocsz > HPHP::kMaxSmartSize
-		     && HPHP::MM().preAllocOOM(allocsz))) {
+		+ sy * (sizeof(int *) + sizeof(unsigned char *))
+		+ sx * sy * (sizeof(int) + sizeof(unsigned char));
+	if (UNLIKELY(precheckOOM(allocsz))) {
 		// Don't throw here because GD might need to do its own cleanup.
 		return NULL;
 	}
@@ -2371,6 +2379,9 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 		return;
 	}
 	if (overflow2(sizeof(int), srcH)) {
+		return;
+	}
+	if (UNLIKELY(precheckOOM(sizeof(int) * (srcW + srcH)))) {
 		return;
 	}
 

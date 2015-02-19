@@ -4,9 +4,16 @@
 #include <sys/types.h>
 #include "php.h"
 
+#include "hphp/runtime/base/memory-manager.h"
+
 /* TBB: strtok_r is not universal; provide an implementation of it. */
 
 extern char *gd_strtok_r(char *s, char *sep, char **state);
+
+/* Check for request OOM.  Call before allocating a lot of memory. */
+inline bool precheckOOM(size_t allocsz) {
+  return allocsz > HPHP::kMaxSmartSize && HPHP::MM().preAllocOOM(allocsz);
+}
 
 /* These functions wrap memory management. gdFree is
 	in gd.h, where callers can utilize it to correctly
@@ -43,4 +50,3 @@ int overflow2(int a, int b);
 #endif
 
 #endif /* GDHELPERS_H */
-

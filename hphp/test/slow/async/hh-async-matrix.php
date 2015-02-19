@@ -1,6 +1,5 @@
 <?hh
-/* Tests the 16 function matrix of:
- *   a(),  ac(),  aw(),  acw(),
+/* Tests the 12 function matrix of:
  *   v(),  vc(),  vw(),  vcw(),
  *   m(),  mc(),  mw(),  mcw(),
  *   va(), vac(), vaw(), vacw(),
@@ -20,7 +19,6 @@ $vals = array(
 );
 
 $typeMap = array(
-  'a'  => ($a ==> $a),
   'v'  => ($a ==> Vector::fromArray($a)),
   'm'  => ($a ==> Map::fromArray($a)),
   'va' => null,

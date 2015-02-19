@@ -1,6 +1,5 @@
 <?hh
-/* Tests the 12 function matrix of:
- *   af(), afk(), am(), amk(),
+/* Tests the 8 function matrix of:
  *   vf(), vfk(), vm(), vmk(),
  *   mf(), mfk(), mm(), mmk(),
  *
@@ -19,7 +18,6 @@ $vals = array(
 );
 
 $typeMap = array(
-  'a'  => ($a ==> $a),
   'v'  => ($a ==> Vector::fromArray($a)),
   'm'  => ($a ==> Map::fromArray($a)),
 );

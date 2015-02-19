@@ -147,6 +147,7 @@ bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFixPathInfo = false;
+bool RuntimeOption::ServerAddVaryEncoding = true;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
@@ -1084,6 +1085,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ServerHttpSafeMode, ini, server["HttpSafeMode"]);
     Config::Bind(ServerStatCache, ini, server["StatCache"], false);
     Config::Bind(ServerFixPathInfo, ini, server["FixPathInfo"], false);
+    Config::Bind(ServerAddVaryEncoding, ini, server["AddVaryEncoding"],
+                 ServerAddVaryEncoding);
     Config::Get(ini, server["WarmupRequests"], ServerWarmupRequests);
     Config::Get(ini, server["HighPriorityEndPoints"],
                 ServerHighPriorityEndPoints);

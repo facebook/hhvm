@@ -679,8 +679,17 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     addHeaderImpl("Set-Cookie", iter->c_str());
   }
 
-  if (isCompressionEnabled()) {
-    addHeaderImpl("Vary", "Accept-Encoding");
+  if (RuntimeOption::ServerAddVaryEncoding) {
+    /*
+     * Our response may vary depending on the Accept-Encoding header if
+     *  - we compressed it, and compression was not forced; or
+     *  - we didn't compress it because the client does not accept gzip
+     */
+    if (compressed ?
+        m_compressionDecision != CompressionDecision::HasTo :
+        (isCompressionEnabled() && !acceptEncoding("gzip"))) {
+      addHeaderImpl("Vary", "Accept-Encoding");
+    }
   }
 
   if (compressed) {
@@ -790,26 +799,23 @@ StringHolder Transport::prepareResponse(const void *data, int size,
     return std::move(response);
   }
 
-  String compression;
-  int compressionLevel = RuntimeOption::GzipCompressionLevel;
-  IniSetting::Get("zlib.output_compression", compression);
-  String on = makeStaticString("on");
-  if (HHVM_FN(strtolower)(compression) == on) {
-    String compressionLevelStr;
-    IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
-    int level = compressionLevelStr.toInt64();
-    if (level > compressionLevel
-        && level <= RuntimeOption::GzipMaxCompressionLevel) {
-      compressionLevel = level;
-    }
-  }
-
-
   // There isn't that much need to gzip response, when it can fit into one
   // Ethernet packet (1500 bytes), unless we are doing chunked encoding,
-  // where we don't really know if next chunk will benefit from compresseion.
+  // where we don't really know if next chunk will benefit from compression.
   if (m_chunkedEncoding || size > 1000 ||
       m_compressionDecision == CompressionDecision::HasTo) {
+    String compression;
+    int compressionLevel = RuntimeOption::GzipCompressionLevel;
+    IniSetting::Get("zlib.output_compression", compression);
+    if (compression.size() == 2 && bstrcaseeq(compression.data(), "on", 2)) {
+      String compressionLevelStr;
+      IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
+      int level = compressionLevelStr.toInt64();
+      if (level > compressionLevel &&
+          level <= RuntimeOption::GzipMaxCompressionLevel) {
+        compressionLevel = level;
+      }
+    }
     if (m_compressor == nullptr) {
       m_compressor = new StreamCompressor(compressionLevel,
                                           CODING_GZIP, true);

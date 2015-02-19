@@ -126,6 +126,7 @@ public:
   static bool ServerHttpSafeMode;
   static bool ServerStatCache;
   static bool ServerFixPathInfo;
+  static bool ServerAddVaryEncoding;
   static std::vector<std::string> ServerWarmupRequests;
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
   static bool ServerExitOnBindFail;

@@ -31,7 +31,7 @@ interface ResultOrExceptionWrapper<T> {
    * - if the operation succeeded: fails with invariant violation
    * - if the operation failed: returns the exception indicating failure
    */
-  public function getException(): Exception;
+  public function getException(): \Exception;
 }
 
 } // namespace HH\Asio

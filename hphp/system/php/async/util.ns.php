@@ -15,7 +15,6 @@
  * The remaining methods are named according to a matrix of their attributes:
  *
  * First, how they take and return arguments according to types:
- *   a - Array
  *   v - Vector
  *   m - Map
  *   va - Variadic args, Array return value
@@ -26,8 +25,7 @@
  * Next, methods which wrap their results in a ResultOrExceptionWrapper
  *   are denoted with a 'w'
  *
- * This yields 16 methods:
- *   a(),  ac(),  aw(),  acw(),
+ * This yields 12 methods:
  *   v(),  vc(),  vw(),  vcw(),
  *   m(),  mc(),  mw(),  mcw(),
  *   va(), vac(), vaw(), vacw(),
@@ -37,7 +35,6 @@
  *   an awaitable.
  *
  * First comes the container type, which excludes Variadics
- *   'a' - Array
  *   'v' - Vector
  *   'm' - Map
  *
@@ -47,8 +44,7 @@
  *
  * Finally, an optional 'k' modifier to indicate callback takes a key as well
  *
- * This yields 12 methods:
- *   af(), afk(), am(), amk(),
+ * This yields 8 methods:
  *   vf(), vfk(), vm(), vmk(),
  *   mf(), mfk(), mm(), mmk(),
  *
@@ -81,7 +77,7 @@ async function wrap<Tv>(
   try {
     $result = await $awaitable;
     return new WrappedResult($result);
-  } catch (Exception $e) {
+  } catch (\Exception $e) {
     return new WrappedException($e);
   }
 }
@@ -126,174 +122,6 @@ async function usleep(
   int $usecs,
 ): Awaitable<void> {
   return await SleepWaitHandle::create($usecs);
-}
-
-//
-// Array
-//
-
-/**
- * Translate an array of Awaitables into a single Awaitable<array>.
- */
-async function a<Tk, Tv>(
-  KeyedTraversable<Tk, Awaitable<Tv>> $awaitables
-): Awaitable<array<Tk, Tv>> {
-  $wait_handles = array();
-  foreach ($awaitables as $index => $awaitable) {
-    $wait_handles[$index] = $awaitable->getWaitHandle();
-  }
-
-  await AwaitAllWaitHandle::fromArray($wait_handles);
-  // TODO: When systemlib supports closures:
-  // return array_map($o ==> $o->result(), $wait_handles);
-  $ret = array();
-  foreach($wait_handles as $key => $value) {
-    $ret[$key] = $value->result();
-  }
-  return $ret;
-}
-
-/**
- * Same as a(), but wrap results into ResultOrExceptionWrappers.
- */
-async function aw<Tk, Tv>(
-  KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
-): Awaitable<array<Tk, ResultOrExceptionWrapper<Tv>>> {
-  $wait_handles = array();
-  foreach ($awaitables as $index => $awaitable) {
-    $wait_handles[$index] = wrap($awaitable)->getWaitHandle();
-  }
-  await AwaitAllWaitHandle::fromArray($wait_handles);
-  // TODO: When systemlib supports closures
-  // return array_map($o ==> $o->result(), $wait_handles);
-  $ret = array();
-  foreach ($wait_handles as $key => $value) {
-    $ret[$key] = $value->result();
-  }
-  return $ret;
-}
-
-/**
- * Yield an array of values indexed by key for Awaitables
- *   produced by a factory function.
- */
-async function ac<Tk, Tv>(
-  (function (Tk): Awaitable<Tv>) $gen,
-  Traversable<Tk> $keys,
-): Awaitable<array<Tk, Tv>> {
-  $gens = array();
-  foreach ($keys as $key) {
-    $gens[$key] = $gen($key)->getWaitHandle();
-  }
-  await AwaitAllWaitHandle::fromArray($gens);
-  // TODO: When systemlib supports closures
-  // return array_map($o ==> $o->result(), $gens);
-  $ret = array();
-  foreach($gens as $key => $value) {
-    $ret[$key] = $value->result();
-  }
-  return $ret;
-}
-
-/**
- * Same as ac(), but wrap results into ResultOrExceptionWrappers.
- */
-async function acw<Tk, Tv>(
-  (function (Tk): Awaitable<Tv>) $gen,
-  Traversable<Tk> $keys,
-): Awaitable<array<Tk, ResultOrExceptionWrapper<Tv>>> {
-  $gens = array();
-  foreach ($keys as $key) {
-    $gens[$key] = wrap($gen($key))->getWaitHandle();
-  }
-  await AwaitAllWaitHandle::fromArray($gens);
-  // TODO: When systemlib supports closures
-  // return array_map($o ==> $o->result(), $gens);
-  $ret = array();
-  foreach($gens as $key => $value) {
-    $ret[$key] = $value->result();
-  }
-  return $ret;
-}
-
-/**
- * Like array_filter, but the test function is async.
- *
- * Example:
- *
- *   $things = array(...);
- *   $valid_things = await af(
- *     $things,
- *     async $thing ==> await $thing->genIsValid(),
- *   );
- */
-async function af<Tk, Tv>(
-  KeyedTraversable<Tk, Tv> $inputs,
-  (function (Tv): Awaitable<bool>) $callable,
-): Awaitable<array<Tk, Tv>> {
-  $gens = array();
-  foreach ($inputs as $key => $value) {
-    $gens[$key] = $callable($value);
-  }
-  $tests = await a($gens);
-  $results = array();
-  foreach ($inputs as $key => $value) {
-    if ($tests[$key]) {
-      // array_filter preserves keys, so we do the same.
-      $results[$key] = $value;
-    }
-  }
-  return $results;
-}
-
-/**
- * Similar to af(), but passes the element's key as well
- */
-async function afk<Tk, Tv>(
-  KeyedTraversable<Tk, Tv> $inputs,
-  (function (Tk, Tv): Awaitable<bool>) $callable,
-): Awaitable<array<Tk, Tv>> {
-  $gens = array();
-  foreach ($inputs as $key => $value) {
-    $gens[$key] = $callable($key, $value);
-  }
-  $tests = await a($gens);
-  $results = array();
-  foreach ($inputs as $key => $value) {
-    if ($tests[$key]) {
-      // array_filter preserves keys, so we do the same.
-      $results[$key] = $value;
-    }
-  }
-  return $results;
-}
-
-/**
- * Similar to array_map, but maps the values using awaitables
- */
-async function am<Tk, Tv>(
-  KeyedTraversable<Tk, Tv> $inputs,
-  (function (Tv): Awaitable<Tv>) $callable,
-): Awaitable<array<Tk, Tv>> {
-  $gens = array();
-  foreach ($inputs as $key => $value) {
-    $gens[$key] = $callable($value);
-  }
-  return await a($gens);
-}
-
-/**
- * Similar to am(), but passes element keys as well
- */
-async function amk<Tk, Tv>(
-  KeyedTraversable<Tk, Tv> $inputs,
-  (function (Tv): Awaitable<Tv>) $callable,
-): Awaitable<array<Tk, Tv>> {
-  $gens = array();
-  foreach ($inputs as $key => $value) {
-    $gens[$key] = $callable($key, $value);
-  }
-  return await a($gens);
 }
 
 //
@@ -384,7 +212,7 @@ async function mcw<Tk, Tv>(
 }
 
 /**
- * Map version of af()
+ * Filter a Map with an Awaitable callback
  */
 async function mf<Tk, Tv>(
   \ConstMap<Tk, Tv> $inputs,
@@ -424,20 +252,20 @@ async function mfk<Tk, Tv>(
 /**
  * Similar to Map::map, but maps the values using awaitables
  */
-async function mm<Tk, Tv>(
+async function mm<Tk, Tv, Tr>(
   \ConstMap<Tk, Tv> $inputs,
-  (function (Tv): Awaitable<Tv>) $callable,
-): Awaitable<Map<Tk, Tv>> {
+  (function (Tv): Awaitable<Tr>) $callable,
+): Awaitable<Map<Tk, Tr>> {
   return await m($inputs->map($callable));
 }
 
 /**
  * Similar to mm(), but passes element keys as well
  */
-async function mmk<Tk, Tv>(
+async function mmk<Tk, Tv, Tr>(
   \ConstMap<Tk, Tv> $inputs,
-  (function (Tk, Tv): Awaitable<Tv>) $callable,
-): Awaitable<Map<Tk, Tv>> {
+  (function (Tk, Tv): Awaitable<Tr>) $callable,
+): Awaitable<Map<Tk, Tr>> {
   return await m($inputs->mapWithKey($callable));
 }
 
@@ -533,7 +361,7 @@ async function vcw<Tk, Tv>(
 }
 
 /**
- * Vector version of af()
+ * Vector version of mf()
  */
 async function vf<T>(
   \ConstVector<T> $inputs,
@@ -544,7 +372,6 @@ async function vf<T>(
   $results = Vector {};
   foreach ($inputs as $key => $value) {
     if ($tests[$key]) {
-      // array_filter preserves keys, so we do the same.
       $results[] = $value;
     }
   }
@@ -563,7 +390,6 @@ async function vfk<T>(
   $results = Vector {};
   foreach ($inputs as $key => $value) {
     if ($tests[$key]) {
-      // array_filter preserves keys, so we do the same.
       $results[] = $value;
     }
   }
@@ -573,20 +399,20 @@ async function vfk<T>(
 /**
  * Similar to Vector::map, but maps the values using awaitables
  */
-async function vm<T>(
-  \ConstVector<T> $inputs,
-  (function (T): Awaitable<T>) $callable,
-): Awaitable<Vector<T>> {
+async function vm<Tv, Tr>(
+  \ConstVector<Tv> $inputs,
+  (function (Tv): Awaitable<Tr>) $callable,
+): Awaitable<Vector<Tr>> {
   return await v($inputs->map($callable));
 }
 
 /**
  * Similar to vm(), but passes element keys as well
  */
-async function vmk<T>(
-  \ConstVector<T> $inputs,
-  (function (int, T): Awaitable<T>) $callable,
-): Awaitable<Vector<T>> {
+async function vmk<Tv, Tr>(
+  \ConstVector<Tv> $inputs,
+  (function (int, Tv): Awaitable<Tr>) $callable,
+): Awaitable<Vector<Tr>> {
   return await v($inputs->mapWithKey($callable));
 }
 
@@ -595,28 +421,29 @@ async function vmk<T>(
 //
 
 /**
- * Translate a varargs of Awaitables into a single Awaitable<array>.
+ * Translate a varargs of Awaitables into a single Awaitable<Vector>.
  */
-async function va<T>(...$args): Awaitable<array<T>> {
-  return await a($args);
+async function va<T>(...$args): Awaitable<Vector<T>> {
+  return await v($args);
 }
 
 /**
  * Same as va(), but wrap results into ResultOrExceptionWrappers.
  */
-async function vaw<T>(...$args): Awaitable<array<ResultOrExceptionWrapper<T>>> {
-  return await aw($args);
+async function vaw<T>(
+  ...$args
+): Awaitable<Vector<ResultOrExceptionWrapper<T>>> {
+  return await vw($args);
 }
 
 /**
- * Yield an array of values indexed by key for Awaitables
- *   produced by a factory function.
+ * Yield a Vector of values for Awaitables produced by a factory function.
  */
 async function vac<Tk, Tv>(
   (function (Tk): Awaitable<Tv>) $gen,
   ...$keys
-): Awaitable<array<Tk, Tv>> {
-  return await ac($gen, $keys);
+): Awaitable<Vector<Tv>> {
+  return await vc($gen, $keys);
 }
 
 /**
@@ -625,8 +452,8 @@ async function vac<Tk, Tv>(
 async function vacw<Tk, Tv>(
   (function (Tk): Awaitable<Tv>) $gen,
   ...$keys
-): Awaitable<array<Tk, ResultOrExceptionWrapper<Tv>>> {
-  return await acw($gen, $keys);
+): Awaitable<Vector<ResultOrExceptionWrapper<Tv>>> {
+  return await vcw($gen, $keys);
 }
 
 } // namespace HH\Asio

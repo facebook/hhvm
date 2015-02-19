@@ -21,7 +21,7 @@ final class WrappedResult<T> implements ResultOrExceptionWrapper<T> {
     return $this->result;
   }
 
-  public function getException(): Exception {
+  public function getException(): \Exception {
     invariant_violation('Unable to get exception from WrappedResult');
   }
 }

@@ -42,6 +42,11 @@ function f3(?:xhp:hello $x) {
 }
 $rf = new ReflectionFunction('f3');
 printFunc($rf);
+function f4(): noreturn {
+  throw Exception('f4 doesn\'t return');
+}
+$rf = new ReflectionFunction('f4');
+printFunc($rf);
 function f100(): int {
 }
 $rf = new ReflectionFunction('f100');

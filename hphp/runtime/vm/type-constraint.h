@@ -151,7 +151,9 @@ struct TypeConstraint {
    */
   MaybeDataType underlyingDataType() const {
     auto const dt = getAnnotDataType(m_type);
-    return dt != KindOfUninit ? MaybeDataType(dt) : folly::none;
+    return (dt != KindOfUninit || isPrecise())
+      ? MaybeDataType(dt)
+      : folly::none;
   }
 
   /*

@@ -1766,9 +1766,11 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
     case AnnotMetaType::Precise: {
       auto const mainType = [&]() -> const Type {
         auto const dt = tc.underlyingDataType();
-        assert(dt);
+        assert(dt.hasValue());
 
         switch (*dt) {
+        case KindOfUninit:       return TCell;
+        case KindOfNull:         return TNull;
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
@@ -1795,7 +1797,8 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
               : subObj(*rcls);
           }
           return TInitCell;
-        default:
+        case KindOfClass:
+        case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");
           break;
         }
@@ -1841,8 +1844,10 @@ Type Index::satisfies_constraint_helper(Context ctx,
     case AnnotMetaType::Precise: {
       auto const mainType = [&]() -> const Type {
         auto const dt = tc.underlyingDataType();
-        assert(dt);
+        assert(dt.hasValue());
         switch (*dt) {
+        case KindOfUninit:       return TBottom;
+        case KindOfNull:         return TNull;
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
@@ -1861,7 +1866,8 @@ Type Index::satisfies_constraint_helper(Context ctx,
             return subObj(*rcls);
           }
           return TBottom;
-        default:
+        case KindOfClass:
+        case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");
           break;
         }

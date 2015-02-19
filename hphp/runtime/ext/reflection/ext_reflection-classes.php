@@ -282,6 +282,7 @@ class ReflectionParameter implements Reflector {
       'hh\\resource' => 1,
       'hh\\mixed' => 1,
       'hh\\void' => 1,
+      'hh\\noreturn' => 1,
       'hh\\this' => 1,
       'hh\\arraykey' => 1,
       'array' => 1,

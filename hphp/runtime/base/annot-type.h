@@ -161,10 +161,11 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
 
   assert(metatype == AnnotMetaType::Precise);
   if (at != AnnotType::Object) {
-    // If `at' is "bool", "int", "float", "string", "array", or
-    // "resource", then equivDataTypes() can definitively tell us
-    // whether or not `dt' is compatible
-    return equivDataTypes(getAnnotDataType(at), dt)
+    // If `at' is "bool", "int", "float", "string", "array", or "resource",
+    // then equivDataTypes() can definitively tell us whether or not `dt'
+    // is compatible. Uninit, to which 'HH\noreturn' maps, is special-cased
+    // because uninit and null are equivalent due to IS_NULL_TYPE.
+    return equivDataTypes(getAnnotDataType(at), dt) && (at != AnnotType::Uninit)
       ? AnnotAction::Pass : AnnotAction::Fail;
   }
 

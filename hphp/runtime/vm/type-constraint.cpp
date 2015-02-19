@@ -92,6 +92,7 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
         case 6: strip = !strcasecmp(stripped, "string"); break;
         case 8:
           strip = (!strcasecmp(stripped, "resource") ||
+                   !strcasecmp(stripped, "noreturn") ||
                    !strcasecmp(stripped, "arraykey"));
           break;
         default:

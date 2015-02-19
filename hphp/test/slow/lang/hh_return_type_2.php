@@ -60,6 +60,8 @@ function f19($p): (function(int): int) { return $p; }
 function f19_soft($p): @(function(int): int) { return $p; }
 function f20($p): callable { return $p; }
 function f20_soft($p): @callable { return $p; }
+function f21($p): noreturn { return $p; }
+function f21_soft($p): noreturn { return $p; }
 
 class Shapes {}
 class Square extends Shapes {}
@@ -91,7 +93,7 @@ function call_wrapper($fn, $arg) {
 }
 
 function main() {
-  for ($i = 1; $i <= 20; $i++) {
+  for ($i = 1; $i <= 21; $i++) {
     foreach (array('', '_soft') as $suffix) {
       if ($suffix !== '' && $i === 1) {
         // f1_soft() does not exist

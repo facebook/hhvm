@@ -50,6 +50,7 @@ static const AnnotTypeMap& getAnnotTypeMap() {
       const StringData* name;
       AnnotType type;
     } pairs[] = {
+      { makeStaticString("HH\\noreturn"), AnnotType::Uninit },
       { makeStaticString("HH\\void"),     AnnotType::Null },
       { makeStaticString("HH\\bool"),     AnnotType::Bool },
       { makeStaticString("HH\\int"),      AnnotType::Int },

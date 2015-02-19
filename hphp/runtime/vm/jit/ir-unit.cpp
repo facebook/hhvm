@@ -153,21 +153,22 @@ void IRUnit::collectPostConditions() {
 
   FTRACE(1, "mainExit: B{}, spOff: {}, sp: {}, fp: {}\n",
     mainExit->id(),
-    spOffset,
+    spOffset.offset,
     state.sp() ? state.sp()->toString() : "null",
     state.fp() ? state.fp()->toString() : "null");
 
   if (state.sp() != nullptr) {
     auto const skipCells = m_context.resumed ? 0 : curFunc->numSlotsInFrame();
-    for (unsigned i = 0; i < skipCells; ++i) {
-      auto const instRelative  = i;
+    for (int32_t i = 0; i < skipCells; ++i) {
+      auto const instRelative  = BCSPOffset{i};
       auto const fpRelative    = spOffset - instRelative;
-      int32_t const spRelative = physSPOff - fpRelative;
+      auto const spRelative    = IRSPOffset{physSPOff - fpRelative};
       auto const t = state.stackType(spRelative);
       if (t != Type::StkElem) {
-        FTRACE(1, "Stack({}, {}): {}\n", instRelative, fpRelative, t);
+        FTRACE(1, "Stack({}, {}): {}\n", instRelative.offset,
+          fpRelative.offset, t);
         m_postConds.push_back({
-          RegionDesc::Location::Stack{instRelative, fpRelative},
+          RegionDesc::Location::Stack{fpRelative},
           t
         });
       }

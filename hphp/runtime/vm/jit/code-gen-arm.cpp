@@ -26,6 +26,8 @@
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/stack-offsets-def.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
@@ -600,7 +602,7 @@ Vlabel CodeGenerator::label(Block* b) {
 void CodeGenerator::recordHostCallSyncPoint(Vout& v, Vpoint p) {
   auto stackOff = m_curInst->marker().spOff();
   auto pcOff = m_curInst->marker().bcOff() - m_curInst->marker().func()->base();
-  v << hcsync{Fixup{pcOff, stackOff}, p};
+  v << hcsync{Fixup{pcOff, stackOff.offset}, p};
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1027,7 +1029,7 @@ void CodeGenerator::cgCheckRefs(IRInstruction* inst) {
 
 void CodeGenerator::cgStStk(IRInstruction* inst) {
   auto const spReg = srcLoc(0).reg();
-  auto const offset = cellsToBytes(inst->extra<StStk>()->offset);
+  auto const offset = cellsToBytes(inst->extra<StStk>()->offset.offset);
   emitStore(vmain(), spReg, offset, inst->src(1), srcLoc(1));
 }
 
@@ -1035,7 +1037,7 @@ void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
   auto const rsrc = srcLoc(0).reg();
   auto const rdst = dstLoc(0).reg();
   auto const off  = inst->extra<AdjustSP>()->offset;
-  vmain() << lea{rsrc[cellsToBytes(off)], rdst};
+  vmain() << lea{rsrc[cellsToBytes(off.offset)], rdst};
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
@@ -1251,7 +1253,7 @@ void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
 void CodeGenerator::cgLdStk(IRInstruction* inst) {
   assert(inst->taken() == nullptr);
   auto src = srcLoc(0).reg();
-  auto offset = cellsToBytes(inst->extra<LdStk>()->offset);
+  auto offset = cellsToBytes(inst->extra<LdStk>()->offset.offset);
   emitLoad(vmain(), inst->dst()->type(), dstLoc(0), src, offset);
 }
 
@@ -1301,7 +1303,7 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
 void CodeGenerator::cgLdStkAddr(IRInstruction* inst) {
   auto const dst     = dstLoc(0).reg();
   auto const base    = srcLoc(0).reg();
-  auto const offset  = cellsToBytes(inst->extra<LdStkAddr>()->offset);
+  auto const offset  = cellsToBytes(inst->extra<LdStkAddr>()->offset.offset);
   vmain() << lea{base[offset], dst};
 }
 
@@ -1319,7 +1321,7 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
     SyncOptions::kSyncPoint,
     argGroup()
       .ssa(1/*fp*/)
-      .addr(srcLoc(0).reg()/*sp*/, cellsToBytes(spOff))
+      .addr(srcLoc(0).reg()/*sp*/, cellsToBytes(spOff.offset))
       .imm(pcOff)
   );
 }

@@ -227,8 +227,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       a.  B     (&loopTop, vixl::ne);
     } else {
       for (auto k = numLocals; k < func->numLocals(); ++k) {
-        int disp =
-          cellsToBytes(locPhysicalOffset(Location(Location::Local, k), func));
+        int disp = cellsToBytes(locPhysicalOffset(k));
         a.Strb  (vixl::xzr, rVmFp[disp + TVOFF(m_type)]);
       }
     }

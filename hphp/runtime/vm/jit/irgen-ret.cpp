@@ -86,7 +86,8 @@ void normalReturn(HTS& env, SSATmp* retval) {
   gen(env, RetAdjustStk, fp(env));
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData { 0, false }, sp(env), fp(env), retAddr);
+  gen(env, RetCtrl, RetCtrlData { IRSPOffset{0}, false },
+    sp(env), fp(env), retAddr);
 }
 
 void asyncFunctionReturn(HTS& env, SSATmp* retval) {
@@ -119,7 +120,7 @@ void asyncFunctionReturn(HTS& env, SSATmp* retval) {
   gen(
     env,
     RetCtrl,
-    RetCtrlData { offsetFromSP(env, 0), false },
+    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), false },
     sp(env),
     fp(env),
     retAddr
@@ -151,7 +152,7 @@ void generatorReturn(HTS& env, SSATmp* retval) {
   gen(
     env,
     RetCtrl,
-    RetCtrlData { offsetFromSP(env, 0), false },
+    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), false },
     sp(env),
     fp(env),
     retAddr

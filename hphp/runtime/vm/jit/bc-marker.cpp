@@ -28,7 +28,7 @@ std::string BCMarker::show() const {
     "--- bc {}{}, spOff {} ({}){}",
     m_sk.offset(),
     m_sk.resumed() ? "r" : "",
-    m_spOff,
+    m_spOff.offset,
     m_sk.func()->fullName()->data(),
     m_profTransID != kInvalidTransID
       ? folly::format(" [profTrans={}]", m_profTransID).str()
@@ -45,7 +45,8 @@ bool BCMarker::valid() const {
     // When inlining is on, we may modify markers to weird values in
     // case reentry happens.
     (RuntimeOption::EvalHHIREnableGenTimeInlining ||
-     m_spOff <= m_sk.func()->numSlotsInFrame() + m_sk.func()->maxStackCells());
+     m_spOff.offset <= m_sk.func()->numSlotsInFrame() +
+        m_sk.func()->maxStackCells());
 }
 
 }}

@@ -58,7 +58,7 @@ void insertStStkAssert(IRInstruction& inst, IRUnit& unit) {
     LdStkAddr,
     inst.marker(),
     Type::PtrToStkGen,
-    StackOffset { inst.extra<StStk>()->offset },
+    IRSPOffsetData { inst.extra<StStk>()->offset },
     inst.src(0)
   );
   auto const block = inst.block();
@@ -75,7 +75,7 @@ void insertCallAssert(IRInstruction& inst, IRUnit& unit) {
     LdStkAddr,
     inst.marker(),
     Type::PtrToStkGen,
-    StackOffset { 0 },
+    IRSPOffsetData { IRSPOffset{0} },
     sp
   );
   insertAfter(&inst, addr);

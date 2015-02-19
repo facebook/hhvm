@@ -124,14 +124,14 @@ void retypeLoad(IRInstruction* load, Type newType) {
 void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
   switch (inst->op()) {
     case LdLoc: {
-      auto const id = inst->extra<LocalId>()->locId;
+      auto const id = inst->extra<LdLoc>()->locId;
       auto const newType = state.localType(id);
       retypeLoad(inst, newType);
       break;
     }
 
     case LdStk: {
-      auto idx = inst->extra<StackOffset>()->offset;
+      auto idx = inst->extra<LdStk>()->offset;
       auto newType = state.stackType(idx);
       // We know from hhbc invariants that stack slots are always either Cls or
       // Gen flavors---there's no need to relax beyond that.
@@ -277,10 +277,9 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
     case HintStkInner:
     case GuardStk:
       {
-        uint32_t offsetFromSp =
-          safe_cast<uint32_t>(inst.extra<StackOffset>()->offset);
-        uint32_t offsetFromFp = inst.marker().spOff() - offsetFromSp;
-        func(L::Stack{offsetFromSp, offsetFromFp}, inst.typeParam());
+        auto bcSpOffset = inst.extra<RelOffsetData>()->bcSpOffset;
+        auto offsetFromFp = inst.marker().spOff() - bcSpOffset;
+        func(L::Stack{offsetFromFp}, inst.typeParam());
       }
       break;
     default: break;

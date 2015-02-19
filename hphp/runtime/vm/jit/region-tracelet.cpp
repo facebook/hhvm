@@ -78,7 +78,7 @@ private:
 
   const Func* curFunc() const;
   const Unit* curUnit() const;
-  Offset curSpOffset() const;
+  FPAbsOffset curSpOffset() const;
   bool resumed() const;
 
   bool prepareInstruction();
@@ -123,7 +123,7 @@ const Unit* RegionFormer::curUnit() const {
   return irgen::curUnit(m_hts);
 }
 
-Offset RegionFormer::curSpOffset() const {
+FPAbsOffset RegionFormer::curSpOffset() const {
   return irgen::logicalStackDepth(m_hts);
 }
 
@@ -304,8 +304,8 @@ bool RegionFormer::prepareInstruction() {
       (irgen::logicalStackDepth(m_hts) - m_ctx.spOffset);
     FTRACE(5, "entryArDelta info: {} {} {}\n",
       instrSpToArDelta((Op*)m_inst.pc()),
-      irgen::logicalStackDepth(m_hts),
-      m_ctx.spOffset);
+      irgen::logicalStackDepth(m_hts).offset,
+      m_ctx.spOffset.offset);
     try {
       m_inst.preppedByRef = m_arStates.back().checkByRef(argNum, entryArDelta,
                                                          &m_refDeps);
@@ -357,7 +357,7 @@ bool RegionFormer::traceThroughJmp() {
   // inputs while inlining.
   if (!isUnconditionalJmp(m_inst.op()) &&
       !(inlining && isConditionalJmp(m_inst.op()) &&
-        irgen::publicTopType(m_hts, 0).isConst())) {
+        irgen::publicTopType(m_hts, BCSPOffset{0}).isConst())) {
     return false;
   }
 
@@ -436,10 +436,10 @@ bool RegionFormer::tryInline(uint32_t& instrSize) {
   RegionContext ctx;
   ctx.func = callee;
   ctx.bcOffset = callee->getEntryForNumArgs(numArgs);
-  ctx.spOffset = callee->numSlotsInFrame();
+  ctx.spOffset = FPAbsOffset{safe_cast<int32_t>(callee->numSlotsInFrame())};
   ctx.resumed = false;
   for (int i = 0; i < numArgs; ++i) {
-    auto type = irgen::publicTopType(m_hts, i);
+    auto type = irgen::publicTopType(m_hts, BCSPOffset{i});
     uint32_t paramIdx = numArgs - 1 - i;
     ctx.liveTypes.push_back({RegionDesc::Location::Local{paramIdx}, type});
   }

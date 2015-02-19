@@ -140,35 +140,37 @@ folly::Optional<Type> interpOutputType(HTS& env,
     case OutCns:         return Type::Cell;
     case OutVUnknown:    return Type::BoxedInitCell;
 
-    case OutSameAsInput: return topType(env, 0);
-    case OutVInput:      return boxed(topType(env, 0));
+    case OutSameAsInput: return topType(env, BCSPOffset{0});
+    case OutVInput:      return boxed(topType(env, BCSPOffset{0}));
     case OutVInputL:     return boxed(localType());
     case OutFInputL:
     case OutFInputR:     not_reached();
 
-    case OutArith:       return arithOpResult(topType(env, 0),
-                                              topType(env, 1));
-    case OutArithO:      return arithOpOverResult(topType(env, 0),
-                                                  topType(env, 1));
+    case OutArith:       return arithOpResult(topType(env, BCSPOffset{0}),
+                                              topType(env, BCSPOffset{1}));
+    case OutArithO:      return arithOpOverResult(topType(env, BCSPOffset{0}),
+                                                  topType(env, BCSPOffset{1}));
     case OutBitOp:
-      return bitOpResult(topType(env, 0),
-                         inst.op() == HPHP::OpBitNot ? Type::Bottom
-                                                     : topType(env, 1));
-    case OutSetOp:      return setOpResult(localType(), topType(env, 0),
-                                           SetOpOp(inst.imm[1].u_OA));
+      return bitOpResult(topType(env, BCSPOffset{0}),
+                         inst.op() == HPHP::OpBitNot ?
+                            Type::Bottom : topType(env, BCSPOffset{1}));
+    case OutSetOp:      return setOpResult(localType(),
+                          topType(env, BCSPOffset{0}),
+                          SetOpOp(inst.imm[1].u_OA));
     case OutIncDec: {
       auto ty = localType().unbox();
       return ty <= Type::Dbl ? ty : Type::Cell;
     }
     case OutStrlen:
-      return topType(env, 0) <= Type::Str ? Type::Int : Type::UncountedInit;
+      return topType(env, BCSPOffset{0}) <= Type::Str ?
+        Type::Int : Type::UncountedInit;
     case OutClassRef:   return Type::Cls;
     case OutFPushCufSafe: return folly::none;
 
     case OutNone:       return folly::none;
 
     case OutCInput: {
-      auto ttype = topType(env, 0);
+      auto ttype = topType(env, BCSPOffset{0});
       if (ttype.notBoxed()) return ttype;
       // All instructions that are OutCInput or OutCInputL cannot push uninit or
       // a ref, so only specific inner types need to be checked.
@@ -262,7 +264,7 @@ interpOutputLocals(HTS& env,
 
     case OpSetL: {
       auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
-      auto stackType = topType(env, 0);
+      auto stackType = topType(env, BCSPOffset{0});
       // SetL preserves reffiness of a local.
       setImmLocType(0, handleBoxiness(locType, stackType));
       break;
@@ -389,7 +391,7 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
          stackType.hasValue() ? stackType->toString() : "<none>",
          popped, pushed);
 
-  InterpOneData idata { offsetFromSP(env, 0) };
+  InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   auto locals = interpOutputLocals(env, inst, idata.smashesAllLocals,
     stackType);
   idata.nChangedLocals = locals.size();
@@ -398,20 +400,20 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
   interpOne(env, stackType, popped, pushed, idata);
   if (checkTypeType) {
     auto const out = getInstrInfo(inst.op()).out;
-    auto const checkIdx = (out & InstrFlags::StackIns2) ? 2
+    auto const checkIdx = BCSPOffset{(out & InstrFlags::StackIns2) ? 2
                         : (out & InstrFlags::StackIns1) ? 1
-                        : 0;
+                        : 0};
     checkTypeStack(env, checkIdx, *checkTypeType, inst.nextSk().offset());
   }
 }
 
 void interpOne(HTS& env, int popped) {
-  InterpOneData idata { offsetFromSP(env, 0) };
+  InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   interpOne(env, folly::none, popped, 0, idata);
 }
 
 void interpOne(HTS& env, Type outType, int popped) {
-  InterpOneData idata { offsetFromSP(env, 0) };
+  InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   interpOne(env, outType, popped, 1, idata);
 }
 

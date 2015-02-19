@@ -164,13 +164,13 @@ struct FrameState {
    */
   uint32_t stackDeficit{0};
   EvalStack evalStack;
-  int32_t syncedSpLevel{0};
+  FPAbsOffset syncedSpLevel{0};
 
   /*
    * Tracking of in-memory state of the evaluation stack.
    */
   SSATmp* spValue{nullptr};
-  int32_t spOffset;   // delta from vmfp to spvalue
+  FPAbsOffset spOffset;   // delta from vmfp to spvalue
 
   /*
    * The values in the eval stack that are already in memory, either above or
@@ -298,7 +298,7 @@ struct FrameStateMgr final : private LocalStateHook {
   void loadBlock(Block*);
 
   const Func* func() const { return cur().curFunc; }
-  Offset spOffset() const { return cur().spOffset; }
+  FPAbsOffset spOffset() const { return cur().spOffset; }
   SSATmp* sp() const { return cur().spValue; }
   SSATmp* fp() const { return cur().fpValue; }
   bool thisAvailable() const { return cur().thisAvailable; }
@@ -310,7 +310,7 @@ struct FrameStateMgr final : private LocalStateHook {
   void clearStackDeficit() { cur().stackDeficit = 0; }
   void setStackDeficit(uint32_t d) { cur().stackDeficit = d; }
   EvalStack& evalStack() { return cur().evalStack; }
-  int32_t syncedSpLevel() const { return cur().syncedSpLevel; }
+  FPAbsOffset syncedSpLevel() const { return cur().syncedSpLevel; }
   void syncEvalStack();
 
   Type localType(uint32_t id) const;
@@ -318,10 +318,10 @@ struct FrameStateMgr final : private LocalStateHook {
   SSATmp* localValue(uint32_t id) const;
   TypeSourceSet localTypeSources(uint32_t id) const;
 
-  Type stackType(int32_t) const;
-  Type predictedStackType(int32_t) const;
-  SSATmp* stackValue(int32_t) const;
-  TypeSourceSet stackTypeSources(int32_t) const;
+  Type stackType(IRSPOffset) const;
+  Type predictedStackType(IRSPOffset) const;
+  SSATmp* stackValue(IRSPOffset) const;
+  TypeSourceSet stackTypeSources(IRSPOffset) const;
 
   /*
    * Call a function with const access to the LocalState& for each local we're
@@ -381,8 +381,8 @@ private:
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
   void loopHeaderClear(BCMarker);
-  StackState& stackState(int32_t offset);
-  const StackState& stackState(int32_t offset) const;
+  StackState& stackState(IRSPOffset offset);
+  const StackState& stackState(IRSPOffset offset) const;
 
 private:
   FrameState& cur() {
@@ -407,13 +407,13 @@ private: // LocalStateHook overrides
   void clearLocals() override;
 
 private: // stack tracking helpers
-  void setStackValue(int32_t offset, SSATmp*);
-  void setStackType(int32_t offset, Type);
+  void setStackValue(IRSPOffset, SSATmp*);
+  void setStackType(IRSPOffset, Type);
   void refineStackValues(SSATmp* oldval, SSATmp* newVal);
-  void refineStackType(int32_t offset, Type, TypeSource typeSrc);
+  void refineStackType(IRSPOffset, Type, TypeSource typeSrc);
   void clearStackForCall();
-  void setBoxedStkPrediction(int32_t offset, Type type);
-  void spillFrameStack(int32_t offset);
+  void setBoxedStkPrediction(IRSPOffset, Type type);
+  void spillFrameStack(IRSPOffset);
 
 private:
   Status m_status{Status::None};

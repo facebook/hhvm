@@ -93,7 +93,7 @@ struct MTS {
   IRUnit& unit;
   MInstrInfo mii;
 
-  hphp_hash_map<unsigned,unsigned> stackInputs;
+  hphp_hash_map<unsigned,BCSPOffset> stackInputs;
 
   unsigned mInd;
   unsigned iInd;
@@ -665,9 +665,9 @@ void emitBaseLCR(MTS& env) {
     spillStack(env);
     env.irb.exceptionStackBoundary();
     assert(env.stackInputs.count(env.iInd));
-    auto const stkType =
-      env.irb.stackType(offsetFromSP(env, env.stackInputs[env.iInd]),
-                        DataTypeGeneric);
+    auto const stkType = env.irb.stackType(
+      offsetFromIRSP(env, env.stackInputs[env.iInd]),
+      DataTypeGeneric);
     setBase(
       env,
       ldStkAddr(env, env.stackInputs[env.iInd]),
@@ -1241,7 +1241,7 @@ void numberStackInputs(MTS& env) {
     switch (l.space) {
       case Location::Stack:
         assert(stackIdx >= 0);
-        env.stackInputs[i] = stackIdx--;
+        env.stackInputs[i] = BCSPOffset{stackIdx--};
         break;
 
       default:
@@ -1254,7 +1254,7 @@ void numberStackInputs(MTS& env) {
     // If this instruction does have an RHS, it will be input 0 at
     // stack offset 0.
     assert(env.mii.valCount() == 1);
-    env.stackInputs[0] = 0;
+    env.stackInputs[0] = BCSPOffset{0};
   }
 }
 
@@ -1945,8 +1945,8 @@ void cleanTvRefs(MTS& env) {
 
 enum class DecRefStyle { FromCatch, FromMain };
 uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
-  uint32_t const startOff =
-    env.op == Op::SetM || env.op == Op::BindM ? 1 : 0;
+  auto const startOff = BCSPOffset{
+    env.op == Op::SetM || env.op == Op::BindM ? 1 : 0};
   auto const stackCnt = env.stackInputs.size();
   for (auto i = startOff; i < stackCnt; ++i) {
     auto const type = topType(env, i, DataTypeGeneric);
@@ -1987,7 +1987,8 @@ Block* makeMISCatch(MTS& env) {
   gen(env, BeginCatch);
   cleanTvRefs(env);
   spillStack(env);
-  gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env), sp(env));
+  gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    fp(env), sp(env));
   return exit;
 }
 
@@ -2009,8 +2010,8 @@ Block* makeCatchSet(MTS& env) {
     [&] {
       hint(env, Block::Hint::Unused);
       cleanTvRefs(env);
-      gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env),
-        sp(env));
+      gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+        fp(env), sp(env));
     }
   );
   hint(env, Block::Hint::Unused);
@@ -2022,7 +2023,7 @@ Block* makeCatchSet(MTS& env) {
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
   if (!isSetWithRef) {
-    auto const val = top(env, Type::Cell, 0, DataTypeGeneric);
+    auto const val = top(env, Type::Cell, BCSPOffset{0}, DataTypeGeneric);
     gen(env, DecRef, val);
   }
   auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromCatch);

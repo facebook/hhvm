@@ -28,6 +28,8 @@
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/stack-offsets-def.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -263,11 +265,11 @@ void ifElse(HTS& env, Branch branch, Next next) {
 //////////////////////////////////////////////////////////////////////
 
 inline BCMarker makeMarker(HTS& env, Offset bcOff) {
-  int32_t stackOff = env.irb->syncedSpLevel() +
+  auto stackOff = env.irb->syncedSpLevel() +
     env.irb->evalStack().size() - env.irb->stackDeficit();
 
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
-         bcOff, stackOff, curFunc(env)->fullName()->data());
+         bcOff, stackOff.offset, curFunc(env)->fullName()->data());
 
   return BCMarker {
     SrcKey { curFunc(env), bcOff, resumed(env) },
@@ -283,26 +285,26 @@ inline void updateMarker(HTS& env) {
 //////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
-// Convert stack offsets that are relative to the current HHBC instruction
-// (positive is higher on the stack) to offsets that are relative to the
-// currently defined StkPtr.
-inline int32_t offsetFromSP(const HTS& env, int32_t offsetFromInstr) {
+inline IRSPOffset offsetFromIRSP(const HTS& env, BCSPOffset offsetFromInstr) {
   int32_t const virtDelta = env.irb->evalStack().size() -
     env.irb->stackDeficit();
   auto const curSPTop = env.irb->syncedSpLevel() + virtDelta;
-  auto const absSPOff = curSPTop - offsetFromInstr;
-  auto const ret = -static_cast<int32_t>(absSPOff - env.irb->spOffset());
+  auto const ret = toIRSPOffset(offsetFromInstr, curSPTop, env.irb->spOffset());
   FTRACE(1,
-    "offsetFromSP({}) --> spOff: {}, virtDelta: {}, curTop: {}, abs: {}, "
-      "ret: {}\n",
-    offsetFromInstr,
-    env.irb->spOffset(),
+    "offsetFromIRSP({}) --> spOff: {}, virtDelta: {}, curTop: {}, ret: {}\n",
+    offsetFromInstr.offset,
+    env.irb->spOffset().offset,
     virtDelta,
-    curSPTop,
-    absSPOff,
-    ret
+    curSPTop.offset,
+    ret.offset
   );
   return ret;
+}
+
+inline BCSPOffset offsetFromBCSP(const HTS& env, FPAbsOffset offsetFromFP) {
+  auto const curSPTop = env.irb->syncedSpLevel() +
+    env.irb->evalStack().size() - env.irb->stackDeficit();
+  return toBCSPOffset(offsetFromFP, curSPTop);
 }
 
 inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
@@ -310,12 +312,12 @@ inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
   env.irb->constrainValue(opnd, tc);
 
   if (opnd == nullptr) {
-    env.irb->constrainStack(offsetFromSP(env, 0), tc);
+    env.irb->constrainStack(offsetFromIRSP(env, BCSPOffset{0}), tc);
     auto value = gen(
       env,
       LdStk,
       type,
-      StackOffset { offsetFromSP(env, 0) },
+      IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
       sp(env)
     );
     env.irb->incStackDeficit();
@@ -379,12 +381,12 @@ inline void extendStack(HTS& env, uint32_t index, Type type) {
 
 inline SSATmp* top(HTS& env,
                    Type type,
-                   uint32_t index = 0,
+                   BCSPOffset index = BCSPOffset{0},
                    TypeConstraint tc = DataTypeSpecific) {
-  auto tmp = env.irb->evalStack().top(index);
+  auto tmp = env.irb->evalStack().top(index.offset);
   if (!tmp) {
-    extendStack(env, index, type);
-    tmp = env.irb->evalStack().top(index);
+    extendStack(env, index.offset, type);
+    tmp = env.irb->evalStack().top(index.offset);
   }
   assert(tmp);
   env.irb->constrainValue(tmp, tc);
@@ -392,35 +394,35 @@ inline SSATmp* top(HTS& env,
 }
 
 inline SSATmp* topC(HTS& env,
-                    uint32_t i = 0,
+                    BCSPOffset i = BCSPOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
   return top(env, Type::Cell, i, tc);
 }
 
 inline SSATmp* topF(HTS& env,
-                    uint32_t i = 0,
+                    BCSPOffset i = BCSPOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
   return top(env, Type::Gen, i, tc);
 }
 
-inline SSATmp* topV(HTS& env, uint32_t i = 0) {
+inline SSATmp* topV(HTS& env, BCSPOffset i = BCSPOffset{0}) {
   return top(env, Type::BoxedInitCell, i);
 }
 
-inline SSATmp* topR(HTS& env, uint32_t i = 0) {
+inline SSATmp* topR(HTS& env, BCSPOffset i = BCSPOffset{0}) {
   return top(env, Type::Gen, i);
 }
 
 inline Type topType(HTS& env,
-                    uint32_t idx,
+                    BCSPOffset idx,
                     TypeConstraint constraint = DataTypeSpecific) {
-  FTRACE(5, "Asking for type of stack elem {}\n", idx);
-  if (idx < env.irb->evalStack().size()) {
-    auto const tmp = env.irb->evalStack().top(idx);
+  FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);
+  if (idx.offset < env.irb->evalStack().size()) {
+    auto const tmp = env.irb->evalStack().top(idx.offset);
     env.irb->constrainValue(tmp, constraint);
     return tmp->type();
   }
-  return env.irb->stackType(offsetFromSP(env, idx), constraint);
+  return env.irb->stackType(offsetFromIRSP(env, idx), constraint);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -431,7 +433,7 @@ inline void spillStack(HTS& env) {
   for (auto idx = toSpill.size(); idx-- > 0;) {
     gen(env,
         StStk,
-        StackOffset { offsetFromSP(env, idx) },
+        IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{idx}) },
         sp(env),
         toSpill.top(idx));
   }
@@ -750,17 +752,17 @@ inline SSATmp* ldLocAddr(HTS& env, uint32_t locId) {
   return gen(env, LdLocAddr, Type::PtrToFrameGen, LocalId(locId), fp(env));
 }
 
-inline SSATmp* ldStkAddr(HTS& env, int32_t relOffset) {
+inline SSATmp* ldStkAddr(HTS& env, BCSPOffset relOffset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in irb->evalStack().
   assert(relOffset >= static_cast<int32_t>(env.irb->evalStack().size()));
-  auto const offset = offsetFromSP(env, relOffset);
+  auto const offset = offsetFromIRSP(env, relOffset);
   env.irb->constrainStack(offset, DataTypeSpecific);
   return gen(
     env,
     LdStkAddr,
     Type::PtrToStkGen,
-    StackOffset { offset },
+    IRSPOffsetData { offset },
     sp(env)
   );
 }

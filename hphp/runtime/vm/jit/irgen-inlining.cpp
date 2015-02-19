@@ -102,7 +102,7 @@ void beginInlining(HTS& env,
   data.fromFPushCtor = sframe->extra<ActRecInfo>()->isFromFPushCtor();
   data.ctx           = sframe->src(2);
   data.retSPOff      = prevSPOff;
-  data.spOffset      = offsetFromSP(env, 0);
+  data.spOffset      = offsetFromIRSP(env, BCSPOffset{0}).offset;
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
@@ -157,7 +157,7 @@ void endInlinedCommon(HTS& env) {
   env.fpiActiveStack.pop();
 
   updateMarker(env);
-  gen(env, ResetSP, StackOffset{env.irb->spOffset()}, fp(env));
+  gen(env, ResetSP, StackOffset{env.irb->spOffset().offset}, fp(env));
 
   /*
    * After the end of inlining, we are restoring to a previously defined stack

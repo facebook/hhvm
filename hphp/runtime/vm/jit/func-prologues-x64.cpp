@@ -293,7 +293,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.xorl (eax, eax);
       }
       for (k = numLocals; k < func->numLocals(); ++k) {
-        locToRegDisp(Location(Location::Local, k), &base, &disp, func);
+        locToRegDisp(k, &base, &disp);
         emitStoreTVType(a, eax, base[disp + TVOFF(m_type)]);
       }
     }

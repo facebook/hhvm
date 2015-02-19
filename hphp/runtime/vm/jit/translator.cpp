@@ -72,14 +72,8 @@ namespace HPHP { namespace jit {
 
 Lease Translator::s_writeLease;
 
-int locPhysicalOffset(Location l, const Func* f) {
-  f = f ? f : liveFunc();
-  assert_not_implemented(l.space == Location::Stack ||
-                         l.space == Location::Local ||
-                         l.space == Location::Iter);
-  int localsToSkip = l.space == Location::Iter ? f->numLocals() : 0;
-  int iterInflator = l.space == Location::Iter ? kNumIterCells : 1;
-  return -((l.offset + 1) * iterInflator + localsToSkip);
+int locPhysicalOffset(int32_t localIndex) {
+  return -(localIndex + 1);
 }
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
@@ -650,7 +644,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 
   auto push_stack = [&] {
     ++stackCount;
-    inputs.emplace_back(Location(Location::Stack, localStackOffset++));
+    inputs.emplace_back(Location(BCSPOffset{localStackOffset++}));
   };
   auto push_local = [&] (int imm) {
     ++localCount;
@@ -781,14 +775,14 @@ static void getInputsImpl(NormalizedInstruction* ni,
   if (input & IgnoreInnerType) ni->ignoreInnerType = true;
   if (input & Stack1) {
     SKTRACE(1, sk, "getInputs: stack1 %d\n", currentStackOffset - 1);
-    inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
+    inputs.emplace_back(Location(BCSPOffset{--currentStackOffset}));
     if (input & DontGuardStack1) inputs.back().dontGuard = true;
     if (input & Stack2) {
       SKTRACE(1, sk, "getInputs: stack2 %d\n", currentStackOffset - 1);
-      inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
+      inputs.emplace_back(Location(BCSPOffset{--currentStackOffset}));
       if (input & Stack3) {
         SKTRACE(1, sk, "getInputs: stack3 %d\n", currentStackOffset - 1);
-        inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
+        inputs.emplace_back(Location(BCSPOffset{--currentStackOffset}));
       }
     }
   }
@@ -801,7 +795,7 @@ static void getInputsImpl(NormalizedInstruction* ni,
     SKTRACE(1, sk, "getInputs: stackN %d %d\n",
             currentStackOffset - 1, numArgs);
     for (int i = 0; i < numArgs; i++) {
-      inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
+      inputs.emplace_back(Location(BCSPOffset{--currentStackOffset}));
       inputs.back().dontGuard = true;
       inputs.back().dontBreak = true;
     }
@@ -811,7 +805,7 @@ static void getInputsImpl(NormalizedInstruction* ni,
     SKTRACE(1, sk, "getInputs: BStackN %d %d\n", currentStackOffset - 1,
             numArgs);
     for (int i = 0; i < numArgs; i++) {
-      inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
+      inputs.emplace_back(Location(BCSPOffset{--currentStackOffset}));
     }
   }
   if (input & MVector) {
@@ -865,7 +859,8 @@ InputInfoVec getInputs(NormalizedInstruction& inst) {
   int stackOff = 1;
   getInputsImpl(&inst, stackOff, infos);
   for (auto& info : infos) {
-    if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
+    if (!info.loc.isStack()) continue;
+    info.loc.bcRelOffset = -info.loc.bcRelOffset;
   }
   return infos;
 }
@@ -1353,7 +1348,7 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
     if (type != Type::Gen) {
       // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
       // is a little unsure of itself.
-      irgen::assertTypeStack(hts, i, type);
+      irgen::assertTypeStack(hts, BCSPOffset{i}, type);
     }
   }
 

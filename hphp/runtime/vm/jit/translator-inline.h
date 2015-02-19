@@ -20,6 +20,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/base/execution-context.h"
 
@@ -35,12 +36,12 @@ inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* liveClass() { return liveFunc()->cls(); }
 inline bool liveResumed() { return liveFrame()->resumed(); }
 
-inline Offset liveSpOff() {
+inline jit::FPAbsOffset liveSpOff() {
   Cell* fp = reinterpret_cast<Cell*>(vmfp());
   if (liveFrame()->resumed()) {
     fp = (Cell*)Stack::resumableStackBase((ActRec*)fp);
   }
-  return fp - vmsp();
+  return jit::FPAbsOffset{safe_cast<int32_t>(fp - vmsp())};
 }
 
 namespace jit {

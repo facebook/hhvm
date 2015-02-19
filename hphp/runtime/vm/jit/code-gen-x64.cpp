@@ -59,6 +59,8 @@
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/stack-offsets-def.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -1939,7 +1941,7 @@ void CodeGenerator::cgLdArrFuncCtx(IRInstruction* inst) {
     argGroup(inst)
       .ssa(0)
       .addr(srcLoc(inst, 1).reg(),
-            cellsToBytes(inst->extra<LdArrFuncCtx>()->offset))
+            cellsToBytes(inst->extra<LdArrFuncCtx>()->offset.offset))
       .ssa(2)
   );
 }
@@ -1953,7 +1955,7 @@ void CodeGenerator::cgLdArrFPushCuf(IRInstruction* inst) {
     argGroup(inst)
       .ssa(0)
       .addr(srcLoc(inst, 1).reg(),
-            cellsToBytes(inst->extra<LdArrFPushCuf>()->offset))
+            cellsToBytes(inst->extra<LdArrFPushCuf>()->offset.offset))
       .ssa(2)
   );
 }
@@ -1967,7 +1969,7 @@ void CodeGenerator::cgLdStrFPushCuf(IRInstruction* inst) {
     argGroup(inst)
       .ssa(0)
       .addr(srcLoc(inst, 1).reg(),
-            cellsToBytes(inst->extra<LdStrFPushCuf>()->offset))
+            cellsToBytes(inst->extra<LdStrFPushCuf>()->offset.offset))
       .ssa(2)
   );
 }
@@ -1982,7 +1984,7 @@ void CodeGenerator::cgLookupClsMethod(IRInstruction* inst) {
       .ssa(0)
       .ssa(1)
       .addr(srcLoc(inst, 2).reg(),
-            cellsToBytes(inst->extra<LookupClsMethod>()->offset))
+            cellsToBytes(inst->extra<LookupClsMethod>()->offset.offset))
       .ssa(3)
   );
 }
@@ -2032,7 +2034,8 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   v = fast_path;
   auto funcptr = v.makeReg();
   v << shrqi{32, func_class, funcptr, v.makeReg()};
-  v << store{funcptr, actRecReg[cellsToBytes(extra->offset) + AROFF(m_func)]};
+  v << store{funcptr, actRecReg[cellsToBytes(extra->offset.offset) +
+    AROFF(m_func)]};
   v << jmp{done};
 
   v = slow_path;
@@ -2042,7 +2045,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
     SyncOptions::kSmashableAndSyncPoint,
     argGroup(inst)
       .addr(rVmTl, safe_cast<int32_t>(handle))
-      .addr(srcLoc(inst, 1).reg(), cellsToBytes(extra->offset))
+      .addr(srcLoc(inst, 1).reg(), cellsToBytes(extra->offset.offset))
       .immPtr(extra->method)
       .ssa(0/*cls*/)
       .immPtr(getClass(inst->marker()))
@@ -2098,7 +2101,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   auto const sp = srcLoc(inst, 0).reg();
   auto const fp = srcLoc(inst, 1).reg();
   auto const sync_sp = v.makeReg();
-  v << lea{sp[cellsToBytes(inst->extra<RetCtrl>()->spOffset)], sync_sp};
+  v << lea{sp[cellsToBytes(inst->extra<RetCtrl>()->spOffset.offset)], sync_sp};
   v << syncvmsp{sync_sp};
 
   // Return control to caller
@@ -2283,7 +2286,7 @@ void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
   auto const rsrc = srcLoc(inst, 0).reg();
   auto const rdst = dstLoc(inst, 0).reg();
   auto const off  = inst->extra<AdjustSP>()->offset;
-  vmain() << lea{rsrc[cellsToBytes(off)], rdst};
+  vmain() << lea{rsrc[cellsToBytes(off.offset)], rdst};
 }
 
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
@@ -2451,7 +2454,7 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto kills = (abi.all() - abi.calleeSaved) | RegSet(r14) | RegSet(r15);
 
   auto& marker = inst->marker();
-  auto fix = Fixup{marker.bcOff()-marker.func()->base(), marker.spOff()};
+  auto fix = Fixup{marker.bcOff()-marker.func()->base(), marker.spOff().offset};
 
   v << lea{rFp[-numLocals * sizeof(TypedValue)], r14};
   v << callstub{target, args, kills, fix};
@@ -2718,7 +2721,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   auto const itOff = iterOffset(inst->marker(), iterId);
 
   auto const spOffset = cellsToBytes(
-    inst->extra<CufIterSpillFrame>()->spOffset);
+    inst->extra<CufIterSpillFrame>()->spOffset.offset);
   auto spReg = srcLoc(inst, 0).reg();
   auto fpReg = srcLoc(inst, 1).reg();
   auto& v = vmain();
@@ -2767,7 +2770,8 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   auto const nArgs     = inst->extra<SpillFrame>()->numArgs;
   auto& v              = vmain();
 
-  auto const spOffset = cellsToBytes(inst->extra<SpillFrame>()->spOffset);
+  auto const spOffset = cellsToBytes(
+    inst->extra<SpillFrame>()->spOffset.offset);
 
   auto spReg = srcLoc(inst, 0).reg();
   // actRec->m_this
@@ -2982,7 +2986,7 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   auto const target = mcg->tx().uniqueStubs.fcallArrayHelper;
   auto const rSP    = srcLoc(inst, 0 /* sp */).reg();
   auto const syncSP = v.makeReg();
-  v << lea{rSP[cellsToBytes(extra->spOffset)], syncSP};
+  v << lea{rSP[cellsToBytes(extra->spOffset.offset)], syncSP};
   v << syncvmsp{syncSP};
   v << copy2{pc, after, argNumToRegName[0], argNumToRegName[1]};
   v << callstub{target, argSet(2) | kCrossTraceRegs,
@@ -3002,12 +3006,13 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto& vc = vcold();
 
   auto const ar = argc * sizeof(TypedValue);
-  v << store{rFP, rSP[cellsToBytes(extra->spOffset) + ar + AROFF(m_sfp)]};
+  v << store{rFP, rSP[cellsToBytes(extra->spOffset.offset) +
+    ar + AROFF(m_sfp)]};
   v << storeli{safe_cast<int32_t>(extra->after),
-               rSP[cellsToBytes(extra->spOffset) + ar + AROFF(m_soff)]};
+               rSP[cellsToBytes(extra->spOffset.offset) + ar + AROFF(m_soff)]};
 
   auto const sync_sp = v.makeReg();
-  v << lea{rSP[cellsToBytes(extra->spOffset)], sync_sp};
+  v << lea{rSP[cellsToBytes(extra->spOffset.offset)], sync_sp};
 
   if (isNativeImplCall(callee, argc)) {
     // The assumption here is that for builtins, the generated func contains
@@ -3062,10 +3067,10 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
 void CodeGenerator::cgCastStk(IRInstruction *inst) {
   Type type       = inst->typeParam();
-  uint32_t offset = inst->extra<CastStk>()->offset;
+  auto offset     = inst->extra<CastStk>()->offset;
   auto spReg      = srcLoc(inst, 0).reg();
   auto args = argGroup(inst);
-  args.addr(spReg, cellsToBytes(offset));
+  args.addr(spReg, cellsToBytes(offset.offset));
 
   TCA tvCastHelper;
   if (type <= Type::Bool) {
@@ -3098,7 +3103,7 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
   Type type       = inst->typeParam();
   auto extra      = inst->extra<CoerceStk>();
   auto spReg      = srcLoc(inst, 0).reg();
-  auto offset     = cellsToBytes(extra->offset);
+  auto offset     = cellsToBytes(extra->offset.offset);
 
   auto& v = vmain();
 
@@ -3171,7 +3176,8 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   if (FixupMap::eagerRecord(callee)) {
     auto const rSP       = srcLoc(inst, 1).reg();
-    auto const spOffset  = cellsToBytes(inst->extra<CallBuiltin>()->spOffset);
+    auto const spOffset  = cellsToBytes(
+      inst->extra<CallBuiltin>()->spOffset.offset);
     auto const& marker   = inst->marker();
     auto const pc        = getUnit(marker)->entry() + marker.bcOff();
     auto const synced_sp = v.makeReg();
@@ -3278,7 +3284,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
 void CodeGenerator::cgStStk(IRInstruction* inst) {
   auto const spReg = srcLoc(inst, 0).reg();
-  auto const offset = cellsToBytes(inst->extra<StStk>()->offset);
+  auto const offset = cellsToBytes(inst->extra<StStk>()->offset.offset);
   emitStore(spReg[offset], inst->src(1), srcLoc(inst, 1), Width::Full);
 }
 
@@ -3298,14 +3304,14 @@ void CodeGenerator::emitTrashTV(Vreg ptr, int32_t offset, char fillByte) {
 void CodeGenerator::cgDbgTrashStk(IRInstruction* inst) {
   emitTrashTV(
     srcLoc(inst, 0).reg(),
-    cellsToBytes(inst->extra<DbgTrashStk>()->offset),
+    cellsToBytes(inst->extra<DbgTrashStk>()->offset.offset),
     kTVTrashJITStk
   );
 }
 
 void CodeGenerator::cgDbgTrashFrame(IRInstruction* inst) {
   auto const reg = srcLoc(inst, 0).reg();
-  auto const offset = cellsToBytes(inst->extra<DbgTrashFrame>()->offset);
+  auto const offset = cellsToBytes(inst->extra<DbgTrashFrame>()->offset.offset);
   for (auto i = 0; i < kNumActRecCells; ++i) {
     emitTrashTV(reg, offset + cellsToBytes(i), kTVTrashJITFrame);
   }
@@ -3838,7 +3844,7 @@ void CodeGenerator::cgStElem(IRInstruction* inst) {
 
 Fixup CodeGenerator::makeFixup(const BCMarker& marker, SyncOptions sync) {
   assert(marker.valid());
-  Offset stackOff = marker.spOff();
+  auto stackOff = marker.spOff();
   switch (sync) {
   case SyncOptions::kSyncPointAdjustOne:
     stackOff -= 1;
@@ -3854,7 +3860,7 @@ Fixup CodeGenerator::makeFixup(const BCMarker& marker, SyncOptions sync) {
   }
 
   Offset pcOff = marker.bcOff() - marker.func()->base();
-  return Fixup{pcOff, stackOff};
+  return Fixup{pcOff, stackOff.offset};
 }
 
 void CodeGenerator::cgLdMIStateAddr(IRInstruction* inst) {
@@ -3896,7 +3902,7 @@ void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
 
 void CodeGenerator::cgLdStkAddr(IRInstruction* inst) {
   auto const base   = srcLoc(inst, 0).reg();
-  auto const offset = cellsToBytes(inst->extra<LdStkAddr>()->offset);
+  auto const offset = cellsToBytes(inst->extra<LdStkAddr>()->offset.offset);
   auto const dst    = dstLoc(inst, 0).reg();
   vmain() << lea{base[offset], dst};
 }
@@ -3906,13 +3912,13 @@ void CodeGenerator::cgLdStk(IRInstruction* inst) {
   emitLoad(
     inst->dst(),
     dstLoc(inst, 0),
-    srcLoc(inst, 0).reg()[cellsToBytes(inst->extra<LdStk>()->offset)]
+    srcLoc(inst, 0).reg()[cellsToBytes(inst->extra<LdStk>()->offset.offset)]
   );
 }
 
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
   auto const rSP = srcLoc(inst, 0).reg();
-  auto const baseOff = cellsToBytes(inst->extra<GuardStk>()->offset);
+  auto const baseOff = cellsToBytes(inst->extra<GuardStk>()->irSpOffset.offset);
   auto& v = vmain();
   v << syncvmsp{srcLoc(inst, 0).reg()};
   emitTypeGuard(inst->marker(), inst->typeParam(),
@@ -3922,7 +3928,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   auto const rbase = srcLoc(inst, 0).reg();
-  auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset);
+  auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset.offset);
   emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
                 rbase[baseOff + TVOFF(m_data)], inst->taken());
 }
@@ -4762,7 +4768,7 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
     SyncOptions::kSyncPoint,
     argGroup(inst)
       .ssa(1/*fp*/)
-      .addr(srcLoc(inst, 0).reg(), cellsToBytes(spOff))
+      .addr(srcLoc(inst, 0).reg(), cellsToBytes(spOff.offset))
       .imm(pcOff)
   );
 }
@@ -4796,7 +4802,7 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   v << storeli{returnOff, genFpReg[AROFF(m_soff)]};
   v << copy{genFpReg, curFpReg};
   auto const sync_sp = v.makeReg();
-  v << lea{curSpReg[cellsToBytes(spOff)], sync_sp};
+  v << lea{curSpReg[cellsToBytes(spOff.offset)], sync_sp};
   v << syncvmsp{sync_sp};
   v << contenter{curFpReg, addrReg, kCrossTraceRegs};
   // curFpReg->m_savedRip will point here, and the next HHIR opcode must
@@ -5305,7 +5311,7 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
         SyncOptions::kNoSyncPoint,
         argGroup(inst)
           .imm(data->numKeys)
-          .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset))
+          .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset.offset))
           .imm(shape)
       );
       return;
@@ -5325,7 +5331,7 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
     argGroup(inst)
       .imm(data->numKeys)
       .imm(uintptr_t(table))
-      .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset))
+      .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset.offset))
   );
 }
 
@@ -5581,7 +5587,7 @@ void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
   auto const firstEntry = PackedArray::entriesOffset();
 
   auto const sp = v.makeReg();
-  v << lea{spIn[cellsToBytes(offset)], sp};
+  v << lea{spIn[cellsToBytes(offset.offset)], sp};
 
   // Initialize loop variables and jump to the first condition check.
   Vreg i0 = v.makeReg(), i1 = v.makeReg(), i2 = v.makeReg(), i3 = v.makeReg();

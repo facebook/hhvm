@@ -525,7 +525,7 @@ void emitAssertRATL(HTS& env, int32_t loc, RepoAuthType rat) {
 
 void emitAssertRATStk(HTS& env, int32_t offset, RepoAuthType rat) {
   if (auto const t = ratToAssertType(env, rat)) {
-    assertTypeStack(env, offset, *t);
+    assertTypeStack(env, BCSPOffset{offset}, *t);
   }
 }
 

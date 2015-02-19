@@ -96,7 +96,7 @@ void removeDead(Local& env, IRInstruction& inst) {
       env.global.unit.replace(
         &inst,
         DbgTrashStk,
-        StackOffset { inst.extra<StStk>()->offset },
+        IRSPOffsetData { inst.extra<StStk>()->offset },
         inst.src(0)
       );
       return;
@@ -104,7 +104,7 @@ void removeDead(Local& env, IRInstruction& inst) {
       env.global.unit.replace(
         &inst,
         DbgTrashFrame,
-        StackOffset { inst.extra<SpillFrame>()->spOffset },
+        IRSPOffsetData { inst.extra<SpillFrame>()->spOffset },
         inst.src(0)
       );
       return;

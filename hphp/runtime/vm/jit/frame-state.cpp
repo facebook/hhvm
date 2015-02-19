@@ -219,7 +219,7 @@ FrameStateMgr::FrameStateMgr(BCMarker marker) {
   cur().spOffset      = marker.spOff();
   cur().syncedSpLevel = marker.spOff();
   cur().locals.resize(marker.func()->numLocals());
-  cur().memoryStack.resize(marker.spOff());
+  cur().memoryStack.resize(marker.spOff().offset);
 }
 
 bool FrameStateMgr::update(const IRInstruction* inst) {
@@ -274,8 +274,9 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       }
       clearStackForCall();
       // The return value is known to be at least a Gen.
-      setStackType(extra->spOffset + kNumActRecCells + extra->numParams - 1,
-                   Type::Gen);
+      setStackType(
+        extra->spOffset + kNumActRecCells + extra->numParams - 1,
+        Type::Gen);
       // What we're considering sync'd to memory is popping an actrec, popping
       // args, and pushing a return value.
       if (m_status == Status::Building) {
@@ -340,7 +341,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case RetAdjustStk:
     cur().spValue = inst->dst();
-    cur().spOffset = -2;
+    cur().spOffset = FPAbsOffset{-2};
     cur().memoryStack.clear();
     break;
 
@@ -351,18 +352,18 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case ReDefSP:
     cur().spValue = inst->dst();
-    cur().spOffset = inst->extra<ReDefSP>()->offset;
+    cur().spOffset = FPAbsOffset{inst->extra<ReDefSP>()->offset};
     break;
 
   case DefSP:
   case ResetSP:
     cur().spValue = inst->dst();
-    cur().spOffset = inst->extra<StackOffset>()->offset;
+    cur().spOffset = FPAbsOffset{inst->extra<StackOffset>()->offset};
     break;
 
   case AdjustSP:
     cur().spValue = inst->dst();
-    cur().spOffset += -inst->extra<AdjustSP>()->offset;
+    cur().spOffset += -inst->extra<AdjustSP>()->offset.offset;
     break;
 
   case StStk:
@@ -374,16 +375,21 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     refineStackValues(inst->src(0), inst->dst());
     break;
 
-  case AssertStk:
   case GuardStk:
+    refineStackType(inst->extra<GuardStk>()->irSpOffset,
+                    inst->typeParam(),
+                    TypeSource::makeGuard(inst));
+    break;
+
+  case AssertStk:
   case CheckStk:
-    refineStackType(inst->extra<StackOffset>()->offset,
+    refineStackType(inst->extra<IRSPOffsetData>()->offset,
                     inst->typeParam(),
                     TypeSource::makeGuard(inst));
     break;
 
   case HintStkInner:
-    setBoxedStkPrediction(inst->extra<HintStkInner>()->offset,
+    setBoxedStkPrediction(inst->extra<HintStkInner>()->irSpOffset,
                           inst->typeParam());
     break;
 
@@ -402,7 +408,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
      * the unwinder won't see what we expect.
      */
     always_assert_flog(
-      cur().spOffset + -inst->extra<EndCatch>()->offset ==
+      cur().spOffset + -inst->extra<EndCatch>()->offset.offset ==
           inst->marker().spOff() &&
         cur().stackDeficit == 0 &&
         cur().evalStack.size() == 0,
@@ -411,9 +417,9 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       "       EndCatch offset: {}\n"
       "        marker's spOff: {}\n"
       "  eval stack def, size: {}, {}\n",
-      cur().spOffset,
-      inst->extra<EndCatch>()->offset,
-      inst->marker().spOff(),
+      cur().spOffset.offset,
+      inst->extra<EndCatch>()->offset.offset,
+      inst->marker().spOff().offset,
       cur().stackDeficit,
       cur().evalStack.size()
     );
@@ -438,7 +444,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     for (auto i = uint32_t{0}; i < extra.cellsPushed; ++i) {
       setStackValue(spOffset + extra.cellsPopped - 1 - i, nullptr);
     }
-    auto const adjustedTop = spOffset + extra.cellsPopped - extra.cellsPushed;
+    auto adjustedTop = spOffset + extra.cellsPopped - extra.cellsPushed;
 
     switch (extra.opcode) {
     case Op::CGetL2:
@@ -454,8 +460,8 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       break;
     }
 
-    cur().syncedSpLevel -= extra.cellsPopped;
     cur().syncedSpLevel += extra.cellsPushed;
+    cur().syncedSpLevel -= extra.cellsPopped;
     assert(cur().evalStack.size() == 0);
     assert(cur().stackDeficit == 0);
     break;
@@ -639,7 +645,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().thisAvailable    = target->cls() != nullptr && !target->isStatic();
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
-  cur().syncedSpLevel    = target->numLocals();
+  cur().syncedSpLevel    = FPAbsOffset{target->numLocals()};
 
   // XXX: we're setting spOffset to keep some invariants about it true,
   // although, we don't really define it as part of the DefInlineFP---there's
@@ -650,7 +656,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().locals.clear();
   cur().locals.resize(target->numLocals());
   cur().memoryStack.clear();
-  cur().memoryStack.resize(cur().syncedSpLevel);
+  cur().memoryStack.resize(cur().syncedSpLevel.offset);
 }
 
 void FrameStateMgr::trackInlineReturn() {
@@ -705,15 +711,15 @@ void FrameStateMgr::loopHeaderClear(BCMarker marker) {
   clearLocals();
 }
 
-StackState& FrameStateMgr::stackState(int32_t offset) {
-  auto const idx = cur().spOffset - offset;
+StackState& FrameStateMgr::stackState(IRSPOffset offset) {
+  auto const idx = cur().spOffset.offset - offset.offset;
   FTRACE(6, "stackState offset: {} (@ spOff {}) --> idx={}\n",
-    offset, cur().spOffset, idx);
+    offset.offset, cur().spOffset.offset, idx);
   always_assert_flog(
     idx >= 0,
     "idx went negative: curSpOffset: {}, offset: {}\n",
-    cur().spOffset,
-    offset
+    cur().spOffset.offset,
+    offset.offset
   );
   if (idx >= cur().memoryStack.size()) {
     cur().memoryStack.resize(idx + 1);
@@ -721,7 +727,7 @@ StackState& FrameStateMgr::stackState(int32_t offset) {
   return cur().memoryStack[idx];
 }
 
-const StackState& FrameStateMgr::stackState(int32_t offset) const {
+const StackState& FrameStateMgr::stackState(IRSPOffset offset) const {
   // We consider it logically const to extend with default-constructed stack
   // values.
   return const_cast<FrameStateMgr&>(*this).stackState(offset);
@@ -780,7 +786,7 @@ void FrameStateMgr::syncEvalStack() {
   cur().syncedSpLevel += cur().evalStack.size() - cur().stackDeficit;
   cur().evalStack.clear();
   cur().stackDeficit = 0;
-  FTRACE(2, "syncEvalStack --- level {}\n", cur().syncedSpLevel);
+  FTRACE(2, "syncEvalStack --- level {}\n", cur().syncedSpLevel.offset);
 }
 
 SSATmp* FrameStateMgr::localValue(uint32_t id) const {
@@ -805,25 +811,25 @@ Type FrameStateMgr::predictedLocalType(uint32_t id) const {
   return ty;
 }
 
-Type FrameStateMgr::stackType(int32_t offset) const {
+Type FrameStateMgr::stackType(IRSPOffset offset) const {
   return stackState(offset).type;
 }
 
-Type FrameStateMgr::predictedStackType(int32_t offset) const {
+Type FrameStateMgr::predictedStackType(IRSPOffset offset) const {
   return stackState(offset).predictedType;
 }
 
-SSATmp* FrameStateMgr::stackValue(int32_t offset) const {
+SSATmp* FrameStateMgr::stackValue(IRSPOffset offset) const {
   return stackState(offset).value;
 }
 
-TypeSourceSet FrameStateMgr::stackTypeSources(int32_t offset) const {
+TypeSourceSet FrameStateMgr::stackTypeSources(IRSPOffset offset) const {
   return stackState(offset).typeSrcs;
 }
 
-void FrameStateMgr::setStackValue(int32_t offset, SSATmp* value) {
+void FrameStateMgr::setStackValue(IRSPOffset offset, SSATmp* value) {
   auto& stk = stackState(offset);
-  FTRACE(2, "stk[{}] := {}\n", offset,
+  FTRACE(2, "stk[{}] := {}\n", offset.offset,
     value ? value->toString() : std::string("<>"));
   stk.value         = value;
   stk.type          = value ? value->type() : Type::StkElem;
@@ -834,21 +840,21 @@ void FrameStateMgr::setStackValue(int32_t offset, SSATmp* value) {
   }
 }
 
-void FrameStateMgr::setStackType(int32_t offset, Type type) {
+void FrameStateMgr::setStackType(IRSPOffset offset, Type type) {
   auto& stk = stackState(offset);
-  FTRACE(2, "stk[{}] :: {}\n", offset, type.toString());
+  FTRACE(2, "stk[{}] :: {}\n", offset.offset, type.toString());
   stk.value = nullptr;
   stk.type = type;
   stk.predictedType = type;
   stk.typeSrcs.clear();
 }
 
-void FrameStateMgr::setBoxedStkPrediction(int32_t offset, Type type) {
+void FrameStateMgr::setBoxedStkPrediction(IRSPOffset offset, Type type) {
   auto& state = stackState(offset);
   always_assert_flog(
     state.type.maybe(Type::BoxedCell),
     "HintStkInner {} with base type {}",
-    offset,
+    offset.offset,
     state.type
   );
   if (state.type <= Type::BoxedCell) {
@@ -858,19 +864,19 @@ void FrameStateMgr::setBoxedStkPrediction(int32_t offset, Type type) {
   }
 }
 
-void FrameStateMgr::spillFrameStack(int32_t offset) {
+void FrameStateMgr::spillFrameStack(IRSPOffset offset) {
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
     setStackValue(offset + i, nullptr);
   }
   cur().syncedSpLevel += kNumActRecCells;
 }
 
-void FrameStateMgr::refineStackType(int32_t offset,
+void FrameStateMgr::refineStackType(IRSPOffset offset,
                                     Type ty,
                                     TypeSource typeSrc) {
   auto& state = stackState(offset);
   auto const newType = state.type & ty;
-  ITRACE(2, "stk[{}] updating type {} as {} -> {}\n", offset,
+  ITRACE(2, "stk[{}] updating type {} as {} -> {}\n", offset.offset,
     state.type, ty, newType);
   state.type = newType;
   state.predictedType = newType;
@@ -1088,7 +1094,7 @@ std::string show(const FrameStateMgr& state) {
   return folly::format(
     "func: {}, spOff: {}{}{}",
     funcName->data(),
-    state.spOffset(),
+    state.spOffset().offset,
     state.thisAvailable() ? ", thisAvailable" : "",
     state.frameMaySpanCall() ? ", frameMaySpanCall" : ""
   ).str();

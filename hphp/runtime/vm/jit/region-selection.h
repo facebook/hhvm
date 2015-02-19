@@ -26,6 +26,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/func.h"
@@ -78,7 +79,7 @@ struct RegionDesc {
   const BlockIdSet& preds(BlockId bid) const;
   const BlockIdSet& sideExitingBlocks() const;
   bool              isExit(BlockId bid) const;
-  Block*            addBlock(SrcKey sk, int length, Offset spOffset);
+  Block*            addBlock(SrcKey sk, int length, FPAbsOffset spOffset);
   void              deleteBlock(BlockId bid);
   void              renumberBlock(BlockId oldId, BlockId newId);
   void              addArc(BlockId src, BlockId dst);
@@ -142,8 +143,7 @@ struct RegionDesc::Location {
   };
   struct Local { uint32_t locId;  };
   struct Stack {
-    uint32_t offset;   // offset from SP
-    uint32_t fpOffset; // offset from FP
+    FPAbsOffset offsetFromFP;
   };
 
   /* implicit */ Location(Local l) : m_tag{Tag::Local}, m_local(l) {}
@@ -156,21 +156,22 @@ struct RegionDesc::Location {
     return m_local.locId;
   }
 
-  uint32_t stackOffset() const {
+  FPAbsOffset offsetFromFP() const {
     assert(m_tag == Tag::Stack);
-    return m_stack.offset;
-  }
-
-  uint32_t stackOffsetFromFp() const {
-    assert(m_tag == Tag::Stack);
-    return m_stack.fpOffset;
+    return m_stack.offsetFromFP;
   }
 
   bool operator==(const Location& other) const {
-    return (m_tag == other.m_tag) &&
-      ((m_tag == Tag::Local && localId() == other.localId()) ||
-       (m_tag == Tag::Stack &&
-        stackOffsetFromFp() == other.stackOffsetFromFp()));
+    if (m_tag != other.m_tag) return false;
+
+    switch (m_tag) {
+    case Tag::Local:
+      return localId() == other.localId();
+    case Tag::Stack:
+      return offsetFromFP() == other.offsetFromFP();
+    }
+    not_reached();
+    return false;
   }
 
   bool operator!=(const Location& other) const {
@@ -178,8 +179,16 @@ struct RegionDesc::Location {
   }
 
   bool operator<(const Location& other) const {
-    return m_tag < other.m_tag ||
-      (m_tag == other.m_tag && m_local.locId < other.m_local.locId);
+    if (m_tag < other.m_tag) return true;
+    if (m_tag > other.m_tag) return false;
+    switch (m_tag) {
+    case Tag::Local:
+      return localId() < other.localId();
+    case Tag::Stack:
+      return offsetFromFP() < other.offsetFromFP();
+    }
+    not_reached();
+    return false;
   }
 
 private:
@@ -249,7 +258,7 @@ class RegionDesc::Block {
   typedef boost::container::flat_map<SrcKey, const Func*> KnownFuncMap;
 
   explicit Block(const Func* func, bool resumed, Offset start, int length,
-                 Offset initSpOff);
+                 FPAbsOffset initSpOff);
 
   Block& operator=(const Block&) = delete;
 
@@ -267,12 +276,12 @@ class RegionDesc::Block {
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
   bool        contains(SrcKey sk) const;
-  Offset      initialSpOffset()   const { return m_initialSpOffset; }
+  FPAbsOffset initialSpOffset()   const { return m_initialSpOffset; }
 
   void setId(BlockId id) {
     m_id = id;
   }
-  void setInitialSpOffset(int32_t sp) { m_initialSpOffset = sp; }
+  void setInitialSpOffset(FPAbsOffset sp) { m_initialSpOffset = sp; }
 
   /*
    * Set and get whether or not this block ends with an inlined FCall. Inlined
@@ -352,7 +361,7 @@ private:
   const Offset   m_start;
   Offset         m_last;
   int            m_length;
-  Offset         m_initialSpOffset;
+  FPAbsOffset    m_initialSpOffset;
   const Func*    m_inlinedCallee;
 
   TypePredMap    m_typePreds;
@@ -378,7 +387,7 @@ struct RegionContext {
 
   const Func* func;
   Offset bcOffset;
-  Offset spOffset;
+  FPAbsOffset spOffset;
   bool resumed;
   jit::vector<LiveType> liveTypes;
   jit::vector<PreLiveAR> preLiveARs;
@@ -399,7 +408,7 @@ struct RegionContext::LiveType {
  * objOrClass.
  */
 struct RegionContext::PreLiveAR {
-  uint32_t    stackOff;
+  int32_t stackOff;
   const Func* func;
   Type        objOrCls;
 };

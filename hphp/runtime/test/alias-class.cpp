@@ -135,7 +135,8 @@ TEST(AliasClass, StackBasics) {
   auto const marker = BCMarker::Dummy();
   auto const FP = unit.gen(DefFP, marker)->dst();
   auto const SP = unit.gen(DefSP, marker, StackOffset { 5 }, FP)->dst();
-  auto const SP2 = unit.gen(AdjustSP, marker, StackOffset { -2 }, SP)->dst();
+  auto const SP2 = unit.gen(AdjustSP, marker,
+    IRSPOffsetData { IRSPOffset{-2} }, SP)->dst();
 
   // Some basic canonicalization and maybe.
   {

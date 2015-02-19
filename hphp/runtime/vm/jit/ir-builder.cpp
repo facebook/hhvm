@@ -99,7 +99,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
       }
     }
     if (inst->is(AssertStk, CheckStk, LdStk)) {
-      auto const offset = inst->extra<StackOffset>()->offset;
+      auto const offset = inst->extra<IRSPOffsetData>()->offset;
       m_constraints.typeSrcs[inst] = stackTypeSources(offset);
       if (inst->is(AssertStk, CheckStk)) {
         m_constraints.prevTypes[inst] = stackType(offset, DataTypeGeneric);
@@ -923,12 +923,12 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     for (auto typeSrc : typeSrcs) {
       if (typeSrc.isGuard()) {
         if (inst->is(LdLoc)) {
-          changed = constrainSlot(inst->extra<LdLoc>()->locId, typeSrc, tc,
-                                  "constrainValueLoc") || changed;
+          changed = constrainSlot(inst->extra<LdLoc>()->locId, typeSrc,
+            tc, "constrainValueLoc") || changed;
         } else {
           assert(inst->is(LdStk));
-          changed = constrainSlot(inst->extra<LdStk>()->offset, typeSrc, tc,
-                                  "constrainValueStk") || changed;
+          changed = constrainSlot(inst->extra<LdStk>()->offset.offset, typeSrc,
+            tc, "constrainValueStk") || changed;
         }
       } else {
         // Keep chasing down the source of val.
@@ -1020,11 +1020,11 @@ bool IRBuilder::constrainLocal(uint32_t locId,
   return changed;
 }
 
-bool IRBuilder::constrainStack(int32_t offset, TypeConstraint tc) {
+bool IRBuilder::constrainStack(IRSPOffset offset, TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
   auto changed = false;
   for (auto typeSrc : stackTypeSources(offset)) {
-    changed = constrainSlot(offset, typeSrc, tc, "Stk") || changed;
+    changed = constrainSlot(offset.offset, typeSrc, tc, "Stk") || changed;
   }
   return changed;
 }
@@ -1112,7 +1112,7 @@ Type IRBuilder::predictedInnerType(uint32_t id) {
   return ldRefReturn(ty.unbox());
 }
 
-Type IRBuilder::stackInnerTypePrediction(int32_t offset) const {
+Type IRBuilder::stackInnerTypePrediction(IRSPOffset offset) const {
   auto const ty = m_state.predictedStackType(offset);
   assert(ty.isBoxed());
   return ldRefReturn(ty.unbox());
@@ -1127,13 +1127,13 @@ SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
   return m_state.localValue(id);
 }
 
-SSATmp* IRBuilder::stackValue(int32_t offset, TypeConstraint tc) {
+SSATmp* IRBuilder::stackValue(IRSPOffset offset, TypeConstraint tc) {
   auto const val = m_state.stackValue(offset);
   if (val) constrainValue(val, tc);
   return val;
 }
 
-Type IRBuilder::stackType(int32_t offset, TypeConstraint tc) {
+Type IRBuilder::stackType(IRSPOffset offset, TypeConstraint tc) {
   constrainStack(offset, tc);
   return m_state.stackType(offset);
 }
@@ -1170,7 +1170,7 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_curBlock = block;
 
   m_state.startBlock(m_curBlock, marker, isLoopHeader);
-  if (sp() == nullptr) gen(DefSP, StackOffset{spOffset()}, fp());
+  if (sp() == nullptr) gen(DefSP, StackOffset{spOffset().offset}, fp());
   always_assert(fp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),

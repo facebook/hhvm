@@ -796,7 +796,7 @@ static void pcre_log_error(const char* func, int line, int pcre_code,
     (pcre_code == PCRE_ERROR_MATCHLIMIT) ? "PCRE_ERROR_MATCHLIMIT" :
     (pcre_code == PCRE_ERROR_RECURSIONLIMIT) ? "PCRE_ERROR_RECURSIONLIMIT" :
     "UNKNOWN";
-  raise_debugging(
+  raise_warning_unsampled(
     "REGEXERR: %s/%d: err=%d(%s), pattern='%s', subject='%s', repl='%s', "
     "limits=(%" PRId64 ", %" PRId64 "), extra=(%d, %d, %d, %d)",
     func, line, pcre_code, errString,

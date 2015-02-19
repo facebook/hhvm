@@ -6181,7 +6181,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
       case CallArrOnInvalidContainer::WarnAndContinue:
         tvRefcountedDecRef(c1);
         // argument_unpacking RFC dictates "containers and Traversables"
-        raise_debugging("Only containers may be unpacked");
+        raise_warning_unsampled("Only containers may be unpacked");
         c1->m_type = KindOfArray;
         c1->m_data.parr = staticEmptyArray();
         break;

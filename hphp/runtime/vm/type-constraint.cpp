@@ -426,7 +426,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
       raise_return_typehint_error(msg);
     } else {
-      raise_debugging(msg);
+      raise_warning_unsampled(msg);
     }
     return;
   }
@@ -454,7 +454,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
   if (isExtended() && isSoft()) {
     // Soft extended type hints raise warnings instead of recoverable
     // errors, to ease migration.
-    raise_debugging(
+    raise_warning_unsampled(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
         id + 1, func->fullName()->data(), name, givenType

@@ -575,7 +575,7 @@ void handle_destructor_exception(const char* situation) {
   // If there is a user error handler it will be invoked, otherwise
   // the default error handler will be invoked.
   try {
-    raise_debugging("%s", errorMsg.c_str());
+    raise_warning_unsampled("%s", errorMsg.c_str());
   } catch (...) {
     handle_resource_exceeded_exception();
 

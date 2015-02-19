@@ -188,3 +188,19 @@ class AsyncMysqlException extends Exception {
 }
 class AsyncMysqlConnectException extends AsyncMysqlException {}
 class AsyncMysqlQueryException extends AsyncMysqlException {}
+
+namespace HH {
+  interface SQLFormatter extends SQLScalarFormatter {
+    public function format_0x25(): string; // %%
+    public function format_0x3d(): SQLScalarFormatter; // %=[f,d,s] - comparison
+
+    public function format_upcase_t(string $s): string; // table name
+    public function format_upcase_c(string $s): string; // column name
+  }
+
+  interface SQLScalarFormatter {
+    public function format_f(?float $s): string;
+    public function format_d(?int $int): string;
+    public function format_s(?string $string): string;
+  }
+}

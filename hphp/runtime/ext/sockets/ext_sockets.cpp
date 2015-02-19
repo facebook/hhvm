@@ -508,8 +508,9 @@ Variant HHVM_FUNCTION(socket_create,
   check_socket_parameters(domain, type);
   int socketId = socket(domain, type, protocol);
   if (socketId == -1) {
-    Socket dummySock; // for setting last socket error
-    SOCKET_ERROR((&dummySock), "Unable to create socket", errno);
+    SOCKET_ERROR(makeSmartPtr<Socket>(),
+                 "Unable to create socket",
+                 errno);
     return false;
   }
   return Resource(makeSmartPtr<Socket>(socketId, domain));
@@ -562,8 +563,9 @@ bool HHVM_FUNCTION(socket_create_pair,
 
   int fds_array[2];
   if (socketpair(domain, type, protocol, fds_array) != 0) {
-    Socket dummySock; // for setting last socket error
-    SOCKET_ERROR((&dummySock), "unable to create socket pair", errno);
+    SOCKET_ERROR(makeSmartPtr<Socket>(),
+                 "unable to create socket pair",
+                 errno);
     return false;
   }
 

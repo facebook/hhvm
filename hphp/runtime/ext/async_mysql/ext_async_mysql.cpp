@@ -130,7 +130,7 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient, connect,
 
 Object HHVM_STATIC_METHOD(AsyncMysqlClient, adoptConnection,
                           const Variant& connection) {
-  auto conn = connection.toResource().getTyped<MySQLResource>()->mysql();
+  auto conn = cast<MySQLResource>(connection)->mysql();
   // mysql connection from ext/mysql/mysql_common.h
   auto raw_conn = conn->eject_mysql();
   auto adopted = getDefaultClient()->adoptConnection(raw_conn,

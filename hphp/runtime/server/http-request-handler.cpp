@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -153,12 +154,14 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
     snprintf(age, sizeof(age), "max-age=%d", RuntimeOption::ExpiresDefault);
     transport->addHeader("Cache-Control", age);
     transport->addHeader("Expires",
-      DateTime(exp, true).toString(DateTime::DateFormat::HttpHeader).c_str());
+      makeSmartPtr<DateTime>(exp, true)->toString(
+        DateTime::DateFormat::HttpHeader).c_str());
   }
 
   if (mtime) {
     transport->addHeader("Last-Modified",
-      DateTime(mtime, true).toString(DateTime::DateFormat::HttpHeader).c_str());
+      makeSmartPtr<DateTime>(mtime, true)->toString(
+        DateTime::DateFormat::HttpHeader).c_str());
   }
   transport->addHeader("Accept-Ranges", "bytes");
 

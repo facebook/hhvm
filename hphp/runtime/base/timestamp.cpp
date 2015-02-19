@@ -22,6 +22,7 @@ extern "C" {
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 
@@ -72,12 +73,12 @@ String TimeStamp::CurrentMicroTime() {
 
 int64_t TimeStamp::Get(bool &error, int hou, int min, int sec, int mon, int day,
                    int yea, bool gmt) {
-  DateTime dt(Current());
+  auto dt = makeSmartPtr<DateTime>(Current());
   if (gmt) {
-    dt.setTimezone(makeSmartPtr<TimeZone>("UTC"));
+    dt->setTimezone(makeSmartPtr<TimeZone>("UTC"));
   }
-  dt.set(hou, min, sec, mon, day, yea);
-  return dt.toTimeStamp(error);
+  dt->set(hou, min, sec, mon, day, yea);
+  return dt->toTimeStamp(error);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

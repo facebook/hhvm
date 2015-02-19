@@ -662,34 +662,46 @@ inline SSATmp* stLocImpl(HTS& env,
 
   auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
   auto const oldLoc = ldLoc(env, id, ldPMExit, cat);
-  assert(oldLoc->type().isBoxed() || oldLoc->type().notBoxed());
 
-  if (oldLoc->type().notBoxed()) {
+  auto unboxed_case = [&] {
     stLocRaw(env, id, fp(env), newVal);
     if (incRefNew) gen(env, IncRef, newVal);
     if (decRefOld) gen(env, DecRef, oldLoc);
     return newVal;
-  }
+  };
 
-  // It's important that the IncRef happens after the guard on the inner type
-  // of the ref, since it may side-exit.
-  auto const predTy = env.irb->predictedInnerType(id);
+  auto boxed_case = [&] (SSATmp* box) {
+    // It's important that the IncRef happens after the guard on the inner type
+    // of the ref, since it may side-exit.
+    auto const predTy = env.irb->predictedInnerType(id);
 
-  // We may not have a ldrefExit, but if so we better not be loading the inner
-  // ref.
-  if (ldrefExit == nullptr) always_assert(!decRefOld);
-  if (ldrefExit != nullptr) {
-    gen(env, CheckRefInner, predTy, ldrefExit, oldLoc);
-  }
-  auto const innerCell = decRefOld ? gen(env, LdRef, predTy, oldLoc) : nullptr;
-  gen(env, StRef, oldLoc, newVal);
-  if (incRefNew) gen(env, IncRef, newVal);
-  if (decRefOld) {
-    gen(env, DecRef, innerCell);
-    env.irb->constrainValue(oldLoc, DataTypeCountness);
-  }
+    // We may not have a ldrefExit, but if so we better not be loading the inner
+    // ref.
+    if (ldrefExit == nullptr) always_assert(!decRefOld);
+    if (ldrefExit != nullptr) gen(env, CheckRefInner, predTy, ldrefExit, box);
 
-  return newVal;
+    auto const innerCell = decRefOld ? gen(env, LdRef, predTy, box) : nullptr;
+    gen(env, StRef, box, newVal);
+    if (incRefNew) gen(env, IncRef, newVal);
+    if (decRefOld) {
+      gen(env, DecRef, innerCell);
+      env.irb->constrainValue(box, DataTypeCountness);
+    }
+    return newVal;
+  };
+
+  if (oldLoc->type().notBoxed()) return unboxed_case();
+  if (oldLoc->type().isBoxed()) return boxed_case(oldLoc);
+
+  return cond(
+    env,
+    0,
+    [&] (Block* taken) {
+      return gen(env, CheckType, Type::BoxedCell, taken, oldLoc);
+    },
+    boxed_case,
+    unboxed_case
+  );
 }
 
 inline SSATmp* stLoc(HTS& env,

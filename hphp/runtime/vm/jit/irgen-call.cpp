@@ -563,6 +563,11 @@ void emitFPushFuncU(HTS& env,
                     int32_t nargs,
                     const StringData* name,
                     const StringData* fallback) {
+  auto const fallbackFunc = Unit::lookupFunc(fallback);
+  if (fallbackFunc && (fallbackFunc->attrs() & AttrMayUseVV)) {
+    const_cast<Func*>(curFunc(env))->setAttrs(
+        curFunc(env)->attrs() | AttrMayUseVV);
+  }
   fpushFuncCommon(env, nargs, name, fallback);
 }
 

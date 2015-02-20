@@ -255,6 +255,11 @@ function curl_multi_add_handle($mh, $ch);
 function curl_multi_remove_handle($mh, $ch);
 function curl_multi_exec($mh, &$still_running);
 function curl_multi_select($mh, $timeout = 1.0);
+function curl_multi_await($mh, float $timeout = 1.0): Awaitable<int>;
 function curl_multi_getcontent($ch);
 function curl_multi_info_read($mh, &$msgs_in_queue = null);
 function curl_multi_close($mh);
+
+namespace HH\Asio {
+  function curl_exec(mixed $url_or_handle): Awaitable<string>;
+}

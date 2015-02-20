@@ -31,6 +31,11 @@ inline uint64_t cpuCycles() {
   uint64_t lo, hi;
   asm volatile("rdtsc" : "=a"((lo)),"=d"(hi));
   return lo | (hi << 32);
+#elif __powerpc64__
+  // This returns a time-base
+  uint64_t tb;
+  asm volatile("mfspr %0, 268" : "=r" (tb));
+  return tb;
 #else
   not_implemented();
 #endif
@@ -39,6 +44,8 @@ inline uint64_t cpuCycles() {
 inline void cpuRelax() {
 #ifdef __x86_64__
   asm volatile("pause");
+#elif __powerpc64__
+  asm volatile("or 31,31,31");
 #endif
 }
 

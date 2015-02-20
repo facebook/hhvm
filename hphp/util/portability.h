@@ -114,6 +114,14 @@ namespace HPHP {
 # define DECLARE_STACK_POINTER(sp) register void*   sp asm("sp");
 # define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29");
 
+#elif defined(__powerpc64__)
+
+# if defined(__clang__)
+#  error Clang implementation not done for PPC64
+# endif
+# define DECLARE_STACK_POINTER(sp) register void*   sp asm("r1");
+# define DECLARE_FRAME_POINTER(fp) register ActRec* fp = (ActRec*) __builtin_frame_address(0);
+
 #else
 
 # error What are the stack and frame pointers called on your architecture?

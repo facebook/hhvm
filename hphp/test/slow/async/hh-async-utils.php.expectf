@@ -1,0 +1,28 @@
+object(HH\Vector)#%d (3) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(456)
+  [2]=>
+  int(789)
+}
+object(HH\Map)#%d (3) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(456)
+  [2]=>
+  int(789)
+}
+object(HH\Vector)#%d (2) {
+  [0]=>
+  string(3) "456"
+  [1]=>
+  string(4) "derp"
+}
+object(HH\Map)#%d (2) {
+  ["123"]=>
+  string(3) "456"
+  ["herp"]=>
+  string(4) "derp"
+}

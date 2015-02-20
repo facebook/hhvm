@@ -11,24 +11,45 @@
 open ServerEnv
 open Utils
 
+module RP = Relative_path
+
 type result = Pos.absolute Errors.error_ list
 
 let lint _acc fnl =
   List.fold_left begin fun acc fn ->
     let errs, ()  =
       Lint.do_ begin fun () ->
-        let {Parser_hack.file_mode; comments; ast} =
-          Parser_hack.from_file fn in
-        let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
-        Parser_heap.ParserHeap.add fn ast;
-        (* naming and typing currently don't produce any lint errors *)
-        let fi =
-          {FileInfo.file_mode; funs; classes; typedefs; consts; comments;
-           consider_names_just_for_autoload = false} in
-        Linter.lint fi
+        Errors.ignore_ begin fun () ->
+          let {Parser_hack.file_mode; comments; ast} =
+            Parser_hack.from_file fn in
+          let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
+          Parser_heap.ParserHeap.add fn ast;
+          (* naming and typing currently don't produce any lint errors *)
+          let fi =
+            {FileInfo.file_mode; funs; classes; typedefs; consts; comments;
+             consider_names_just_for_autoload = false} in
+          Linter.lint fi
+        end
       end in
     errs @ acc
   end [] fnl
+
+let lint_all genv code oc =
+  let root = ServerArgs.root genv.options in
+  let next = compose
+    (rev_rev_map (RP.create RP.Root))
+    (Find.make_next_files_php root) in
+  let errs = MultiWorker.call
+    genv.workers
+    ~job:(fun acc fnl ->
+      let errs = lint acc fnl in
+      List.filter (fun err -> Errors.get_code err = code) errs)
+    ~merge:List.rev_append
+    ~neutral:[]
+    ~next in
+  let errs = rev_rev_map Errors.to_absolute errs in
+  Marshal.to_channel oc (errs : result) [];
+  flush oc
 
 let go genv fnl oc =
   let fnl = List.fold_left begin fun acc fn ->

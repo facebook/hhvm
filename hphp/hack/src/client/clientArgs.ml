@@ -161,6 +161,8 @@ let parse_check_args cmd =
           | _ -> raise (Arg.Bad "only a single mode should be specified")
       end,
       " (mode) lint the given list of files";
+    "--lint-all", Arg.Int (fun x -> set_mode (MODE_LINT_ALL x) ()),
+      " (mode) find all occurrences of lint with the given error code";
     "--version", Arg.Unit (set_mode MODE_VERSION),
       " (mode) show version and exit\n";
 

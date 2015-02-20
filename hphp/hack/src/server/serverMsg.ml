@@ -86,6 +86,7 @@ type command =
 | CALC_COVERAGE of string
 | PRINT_COVERAGE_LEVELS of file_input
 | LINT of string list
+| LINT_ALL of int
 
 let cmd_to_channel (oc:out_channel) (cmd:command): unit =
   Printf.fprintf oc "%s\n" Build_id.build_id_ohai;

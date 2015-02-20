@@ -221,6 +221,12 @@ let rec main args retries =
         let results : ServerLint.result = Marshal.from_channel ic in
         ClientLint.go results args.output_json;
         exit 0
+    | MODE_LINT_ALL code ->
+        let ic, oc = connect args in
+        ServerMsg.cmd_to_channel oc (ServerMsg.LINT_ALL code);
+        let results : ServerLint.result = Marshal.from_channel ic in
+        ClientLint.go results args.output_json;
+        exit 0
     | MODE_UNSPECIFIED -> assert false
   with
   | Server_initializing ->

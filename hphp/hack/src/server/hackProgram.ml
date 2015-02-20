@@ -213,6 +213,8 @@ module Program : Server.SERVER_PROGRAM = struct
         ServerCoverageMetric.go path genv env oc
     | ServerMsg.LINT fnl ->
         ServerLint.go genv fnl oc
+    | ServerMsg.LINT_ALL code ->
+        ServerLint.lint_all genv code oc
 
   let handle_connection_ genv env socket =
     let cli, _ = Unix.accept socket in

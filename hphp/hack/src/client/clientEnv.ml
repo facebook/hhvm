@@ -31,6 +31,7 @@ type client_mode =
 (* TODO figure out why we can't reference FuzzySearchService from here *)
 | MODE_SEARCH of string * string
 | MODE_LINT of string list
+| MODE_LINT_ALL of int
 
 type client_check_env = {
   mode: client_mode;

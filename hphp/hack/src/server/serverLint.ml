@@ -8,21 +8,13 @@
  *
  *)
 
+open ServerEnv
 open Utils
 
 type result = Pos.absolute Errors.error_ list
 
-let go fnl oc =
-  let fnl = List.fold_left begin fun acc fn ->
-    match realpath fn with
-    | Some path -> path :: acc
-    | None ->
-        Printf.fprintf stderr "Could not find file '%s'" fn;
-        acc
-  end [] fnl in
-  let fnl = rev_rev_map (Relative_path.create Relative_path.Root) fnl in
-  (* XXX(jezng): multiprocess this? *)
-  let errs = List.fold_left begin fun acc fn ->
+let lint _acc fnl =
+  List.fold_left begin fun acc fn ->
     let errs, ()  =
       Lint.do_ begin fun () ->
         let {Parser_hack.file_mode; comments; ast} =
@@ -36,7 +28,28 @@ let go fnl oc =
         Linter.lint fi
       end in
     errs @ acc
+  end [] fnl
+
+let go genv fnl oc =
+  let fnl = List.fold_left begin fun acc fn ->
+    match realpath fn with
+    | Some path -> path :: acc
+    | None ->
+        Printf.fprintf stderr "Could not find file '%s'" fn;
+        acc
   end [] fnl in
+  let fnl = rev_rev_map (Relative_path.create Relative_path.Root) fnl in
+  let errs =
+    if List.length fnl > 10
+    then
+      MultiWorker.call
+        genv.workers
+        ~job:lint
+        ~merge:List.rev_append
+        ~neutral:[]
+        ~next:(Bucket.make fnl)
+    else
+      lint [] fnl in
   let errs = rev_rev_map Errors.to_absolute errs in
   Marshal.to_channel oc (errs : result) [];
   flush oc

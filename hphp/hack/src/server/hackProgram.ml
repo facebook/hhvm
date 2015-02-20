@@ -212,7 +212,7 @@ module Program : Server.SERVER_PROGRAM = struct
     | ServerMsg.CALC_COVERAGE path ->
         ServerCoverageMetric.go path genv env oc
     | ServerMsg.LINT fnl ->
-        ServerLint.go fnl oc
+        ServerLint.go genv fnl oc
 
   let handle_connection_ genv env socket =
     let cli, _ = Unix.accept socket in

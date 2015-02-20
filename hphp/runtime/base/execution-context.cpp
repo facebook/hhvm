@@ -391,6 +391,8 @@ const StaticString
   s_type("type"),
   s_name("name"),
   s_args("args"),
+  s_chunk_size("chunk_size"),
+  s_buffer_used("buffer_used"),
   s_default_output_handler("default output handler");
 
 Array ExecutionContext::obGetStatus(bool full) {
@@ -398,14 +400,16 @@ Array ExecutionContext::obGetStatus(bool full) {
   int level = 0;
   for (auto& buffer : m_buffers) {
     Array status;
-    status.set(s_level, level);
-    if (level < m_protectedLevel) {
-      status.set(s_type, 1);
+    if (level < m_protectedLevel || buffer.handler.isNull()) {
       status.set(s_name, s_default_output_handler);
-    } else {
       status.set(s_type, 0);
+    } else {
       status.set(s_name, buffer.handler);
+      status.set(s_type, 1);
     }
+    status.set(s_level, level);
+    status.set(s_chunk_size, buffer.chunk_size);
+    status.set(s_buffer_used, buffer.oss.size());
 
     if (full) {
       ret.append(status);

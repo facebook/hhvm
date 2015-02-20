@@ -78,7 +78,9 @@ inline AnnotType dataTypeToAnnotType(DataType dt) {
 }
 
 const AnnotType* nameToAnnotType(const StringData* typeName);
+const AnnotType* nameToAnnotType(const std::string& typeName);
 MaybeDataType nameToMaybeDataType(const StringData* typeName);
+MaybeDataType nameToMaybeDataType(const std::string& typeName);
 
 /*
  * Returns true if the interface with the specified name

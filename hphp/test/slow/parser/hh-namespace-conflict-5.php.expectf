@@ -1,0 +1,2 @@
+
+Fatal error: Cannot use Foo\string as string because the name is already in use: (Line: 4, Char: 17) in %s on line 4

@@ -7835,7 +7835,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1064 "hphp.y"
-    { (yyvsp[(2) - (2)]).setText(_p->nsDecl((yyvsp[(2) - (2)]).text()));
+    { (yyvsp[(2) - (2)]).setText(_p->nsClassDecl((yyvsp[(2) - (2)]).text()));
                                          _p->onClassStart(T_ENUM,(yyvsp[(2) - (2)]));;}
     break;
 
@@ -7850,7 +7850,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1072 "hphp.y"
-    { (yyvsp[(3) - (3)]).setText(_p->nsDecl((yyvsp[(3) - (3)]).text()));
+    { (yyvsp[(3) - (3)]).setText(_p->nsClassDecl((yyvsp[(3) - (3)]).text()));
                                          _p->onClassStart(T_ENUM,(yyvsp[(3) - (3)]));;}
     break;
 
@@ -7865,7 +7865,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1082 "hphp.y"
-    { (yyvsp[(2) - (2)]).setText(_p->nsDecl((yyvsp[(2) - (2)]).text()));
+    { (yyvsp[(2) - (2)]).setText(_p->nsClassDecl((yyvsp[(2) - (2)]).text()));
                                          _p->onClassStart((yyvsp[(1) - (2)]).num(),(yyvsp[(2) - (2)]));;}
     break;
 
@@ -7892,7 +7892,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1100 "hphp.y"
-    { (yyvsp[(3) - (3)]).setText(_p->nsDecl((yyvsp[(3) - (3)]).text()));
+    { (yyvsp[(3) - (3)]).setText(_p->nsClassDecl((yyvsp[(3) - (3)]).text()));
                                          _p->onClassStart((yyvsp[(2) - (3)]).num(),(yyvsp[(3) - (3)]));;}
     break;
 
@@ -7919,7 +7919,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1117 "hphp.y"
-    { (yyvsp[(2) - (2)]).setText(_p->nsDecl((yyvsp[(2) - (2)]).text()));
+    { (yyvsp[(2) - (2)]).setText(_p->nsClassDecl((yyvsp[(2) - (2)]).text()));
                                          _p->onClassStart(T_INTERFACE,(yyvsp[(2) - (2)]));;}
     break;
 
@@ -7936,7 +7936,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1125 "hphp.y"
-    { (yyvsp[(3) - (3)]).setText(_p->nsDecl((yyvsp[(3) - (3)]).text()));
+    { (yyvsp[(3) - (3)]).setText(_p->nsClassDecl((yyvsp[(3) - (3)]).text()));
                                          _p->onClassStart(T_INTERFACE,(yyvsp[(3) - (3)]));;}
     break;
 
@@ -7953,7 +7953,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1135 "hphp.y"
-    { (yyvsp[(2) - (2)]).setText(_p->nsDecl((yyvsp[(2) - (2)]).text()));
+    { (yyvsp[(2) - (2)]).setText(_p->nsClassDecl((yyvsp[(2) - (2)]).text()));
                                          _p->onClassStart(T_TRAIT, (yyvsp[(2) - (2)]));;}
     break;
 
@@ -7973,7 +7973,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1146 "hphp.y"
-    { (yyvsp[(3) - (3)]).setText(_p->nsDecl((yyvsp[(3) - (3)]).text()));
+    { (yyvsp[(3) - (3)]).setText(_p->nsClassDecl((yyvsp[(3) - (3)]).text()));
                                          _p->onClassStart(T_TRAIT, (yyvsp[(3) - (3)]));;}
     break;
 
@@ -13249,7 +13249,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2911 "hphp.y"
-    { (yyvsp[(2) - (5)]).setText(_p->nsDecl((yyvsp[(2) - (5)]).text()));
+    { (yyvsp[(2) - (5)]).setText(_p->nsClassDecl((yyvsp[(2) - (5)]).text()));
                                          _p->onTypedef((yyval), (yyvsp[(2) - (5)]), (yyvsp[(4) - (5)]));
                                          _p->popTypeScope(); ;}
     break;
@@ -13258,7 +13258,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 2915 "hphp.y"
-    { (yyvsp[(2) - (6)]).setText(_p->nsDecl((yyvsp[(2) - (6)]).text()));
+    { (yyvsp[(2) - (6)]).setText(_p->nsClassDecl((yyvsp[(2) - (6)]).text()));
                                          _p->onTypedef((yyval), (yyvsp[(2) - (6)]), (yyvsp[(5) - (6)]));
                                          _p->popTypeScope(); ;}
     break;

@@ -9332,7 +9332,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     Option::RecordErrors = false;
     Option::ParseTimeOpts = false;
     Option::WholeProgram = false;
-    Type::InitTypeHintMap();
     BuiltinSymbols::LoadSuperGlobals();
     TypeConstraint tc;
     return nullptr;

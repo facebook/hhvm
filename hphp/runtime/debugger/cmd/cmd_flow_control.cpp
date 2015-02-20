@@ -18,6 +18,7 @@
 
 #include <algorithm>
 
+#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
 

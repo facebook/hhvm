@@ -17,19 +17,17 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_VARIABLE_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_VARIABLE_H_
 
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdVariable : public DebuggerCommand {
-public:
+struct CmdVariable : DebuggerCommand {
   static Array GetGlobalVariables();
   static void PrintVariable(DebuggerClient &client, const String& varName);
   static void PrintVariables(DebuggerClient &client, const Array& variables,
                               int frame, const String& text, int version);
-
-public:
 
   explicit CmdVariable(Type type = KindOfVariable) : DebuggerCommand(type) {
     m_frame = 0;
@@ -37,18 +35,18 @@ public:
     m_global = false;
   }
 
-  virtual void help(DebuggerClient &client);
+  void help(DebuggerClient&) override;
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
-  int m_frame;
   Array m_variables;
+  int m_frame;
   bool m_global; // Set true by onServer if it used g_context->m_globalVarEnv
   String m_varName;
   String m_filter;

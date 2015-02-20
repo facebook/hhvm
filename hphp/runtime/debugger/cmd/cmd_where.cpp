@@ -15,13 +15,15 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
+
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/ext/ext_generator.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

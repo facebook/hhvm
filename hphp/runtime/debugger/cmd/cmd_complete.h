@@ -22,8 +22,7 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdComplete : public DebuggerCommand {
-public:
+struct CmdComplete : DebuggerCommand {
   CmdComplete() : DebuggerCommand(KindOfComplete) {}
 
   virtual void list(DebuggerClient &client);

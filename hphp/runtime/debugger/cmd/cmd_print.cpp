@@ -15,21 +15,22 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
+
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/vm/debugger-hook.h"
-#include "hphp/runtime/base/array-init.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
 
-const char *CmdPrint::Formats[] = {
+const char* formats[] = {
   "r", "v", "x", "hex", "oct", "dec", "unsigned", "time", nullptr
 };
 
-std::string CmdPrint::FormatResult(const char *format, const Variant& ret) {
+std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
   if (format == nullptr) {
     String sret = DebuggerClient::FormatVariable(ret, -1);
     return std::string(sret.data(), sret.size());
@@ -178,12 +179,12 @@ void CmdPrint::list(DebuggerClient &client) {
   client.addCompletion(DebuggerClient::AutoCompleteCode);
 
   if (client.argCount() == 0) {
-    client.addCompletion(Formats);
+    client.addCompletion(formats);
     client.addCompletion("always");
     client.addCompletion("list");
     client.addCompletion("clear");
   } else if (client.argCount() == 1 && client.arg(1, "always")) {
-    client.addCompletion(Formats);
+    client.addCompletion(formats);
   }
 }
 
@@ -284,13 +285,6 @@ Variant CmdPrint::processWatch(DebuggerClient &client, const char *format,
   return res->m_ret;
 }
 
-void CmdPrint::handleReply(DebuggerClient &client) {
-  if (!m_output.empty()) {
-    client.output(m_output);
-  }
-  client.output(m_ret.toString());
-}
-
 void CmdPrint::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
@@ -317,7 +311,7 @@ void CmdPrint::onClient(DebuggerClient &client) {
   }
 
   const char *format = nullptr;
-  for (const char **fmt = Formats; *fmt; fmt++) {
+  for (const char **fmt = formats; *fmt; fmt++) {
     if (client.arg(index, *fmt)) {
       format = *fmt;
       index++;
@@ -346,7 +340,7 @@ void CmdPrint::onClient(DebuggerClient &client) {
 // can occur while we're doing the server-side work for a print.
 bool CmdPrint::onServer(DebuggerProxy &proxy) {
   PCFilter locSave;
-  RequestInjectionData &rid = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& rid = ThreadInfo::s_threadInfo->m_reqInjectionData;
   locSave.swap(rid.m_flowFilter);
   g_context->debuggerSettings.bypassCheck = m_bypassAccessCheck;
   {

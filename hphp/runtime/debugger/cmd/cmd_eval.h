@@ -22,27 +22,29 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdEval : public DebuggerCommand {
-public:
-  CmdEval() : DebuggerCommand(KindOfEval), m_bypassAccessCheck(false) {
+struct CmdEval : DebuggerCommand {
+  CmdEval() : DebuggerCommand(KindOfEval) {
     m_version = 1;
   }
 
-  virtual void onClient(DebuggerClient &client);
-  virtual bool onServer(DebuggerProxy &proxy);
+  void onClient(DebuggerClient&) override;
+  bool onServer(DebuggerProxy&) override;
 
-  virtual void handleReply(DebuggerClient &client);
-  bool failed() { return m_failed; }
+  bool failed() const {
+    return m_failed;
+  }
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
+  void handleReply(DebuggerClient&);
+
   String m_output;
   int m_frame;
-  bool m_bypassAccessCheck;
-  bool m_failed;
+  bool m_bypassAccessCheck{false};
+  bool m_failed{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

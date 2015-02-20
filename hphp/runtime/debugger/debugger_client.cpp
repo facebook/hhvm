@@ -1057,15 +1057,14 @@ bool DebuggerClient::initializeMachine() {
   return true;
 }
 
-// The main execution loop of DebuggerClient. This waits for interrupts from
-// the server (and responds to polls for signals). On interrupt, it presents
-// a command prompt, and continues pumping interrupts when a command lets the
-// machine run again.
-// For nested loops it returns the command that completed the loop, which will
-// match the exptectedCmd passed in.
-// For all loop types, throws one of a variety of exceptions for various errors,
-// and throws DebuggerClientExitException when the event loop is terminated
-// due to the client stopping.
+// The main execution loop of DebuggerClient.  This waits for interrupts from
+// the server (and responds to polls for signals).  On interrupt, it presents a
+// command prompt, and continues pumping interrupts when a command lets the
+// machine run again.  For nested loops it returns the command that completed
+// the loop, which will match the expectedCmd passed in.  For all loop types,
+// throws one of a variety of exceptions for various errors, and throws
+// DebuggerClientExitException when the event loop is terminated due to the
+// client stopping.
 DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
                                              int expectedCmd,
                                              const char *caller) {

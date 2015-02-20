@@ -17,29 +17,30 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_LIST_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_LIST_H_
 
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdList : public DebuggerCommand {
-public:
+struct CmdList : DebuggerCommand {
+  static Variant GetSourceFile(DebuggerClient& client, const std::string& file);
+
   CmdList() : DebuggerCommand(KindOfList) {}
-  static Variant GetSourceFile(DebuggerClient &client,
-                               const std::string &file);
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+
+  void list(DebuggerClient&) override;
+  void help(DebuggerClient&) override;
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
   void getListLocation(DebuggerClient &client, int &line,
-                            int &charFocus0, int &lineFocus1,
-                            int &charFocus1);
+                       int &charFocus0, int &lineFocus1,
+                       int &charFocus1);
   void listEvalCode(DebuggerClient &client);
   bool listFileRange(DebuggerClient &client, int line,
                      int charFocus0, int lineFocus1,
@@ -60,7 +61,6 @@ private:
   // Otherwise, this contains an HPHP::String instance representing the
   // range of source text to be listed by this command.
   Variant m_code;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

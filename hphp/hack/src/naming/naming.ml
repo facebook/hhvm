@@ -1050,22 +1050,28 @@ and class_ genv c =
       N.c_constructor    = constructor;
       N.c_static_methods = smethods;
       N.c_methods        = methods;
-      N.c_user_attributes = user_attributes c.c_user_attributes;
+      N.c_user_attributes = user_attributes env c.c_user_attributes;
       N.c_enum           = enum
     }
   in
   Naming_hooks.dispatch_class_named_hook named_class;
   named_class
 
-and user_attributes attrl =
+and user_attributes env attrl =
   let seen = Hashtbl.create 0 in
-  List.iter (fun { ua_name = (pos, name) as ua_name; _ } ->
+  List.fold_left begin fun acc {ua_name = (pos, name) as ua_name; ua_params} ->
     let existing_attr_pos =
       try Some (Hashtbl.find seen name) with Not_found -> None in
     match existing_attr_pos with
-    | Some p -> Errors.duplicate_user_attribute ua_name p
-    | None -> Hashtbl.add seen name pos) attrl;
-  attrl
+    | Some p -> Errors.duplicate_user_attribute ua_name p; acc
+    | None ->
+        Hashtbl.add seen name pos;
+        let attr = {
+          N.ua_name = ua_name;
+          N.ua_params = List.map (expr env) ua_params
+        } in
+        attr :: acc
+  end [] attrl
 
 and enum_ env e =
   { N.e_base       = hint env e.e_base;
@@ -1438,7 +1444,7 @@ and method_ env m =
   (* let body = N.UnnamedBody m.m_body in *)
   (* ... and don't forget that fun_kind (generators) and unsafe
    * both depend upon the processing of the unnamed ast *)
-  let attrs = user_attributes m.m_user_attributes in
+  let attrs = user_attributes env m.m_user_attributes in
   let method_type = fun_kind env m.m_fun_kind in
   let ret = opt_map (hint ~allow_this:true env) m.m_ret in
   N.({ m_unsafe     = unsafe ;
@@ -1557,7 +1563,7 @@ and fun_ genv f =
       f_body = body;
       f_variadic = variadicity;
       f_fun_kind = kind;
-      f_user_attributes = user_attributes f.f_user_attributes;
+      f_user_attributes = user_attributes env f.f_user_attributes;
     }
   in
   Naming_hooks.dispatch_fun_named_hook named_fun;
@@ -2111,7 +2117,7 @@ and expr_lambda env f =
     f_body = body;
     f_variadic = variadicity;
     f_fun_kind = f_kind;
-    f_user_attributes = user_attributes f.f_user_attributes;
+    f_user_attributes = user_attributes env f.f_user_attributes;
   }
 
 and make_class_id env (p, x as cid) =

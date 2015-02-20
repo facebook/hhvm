@@ -24,6 +24,7 @@ let add code pos msg =
 module Codes = struct
   let lowercase_constant                    = 5001 (* DONT MODIFY!!!! *)
   let use_collection_literal                = 5002 (* DONT MODIFY!!!! *)
+  let single_quoted_string                  = 5003 (* DONT MODIFY!!!! *)
 
   (* Values 5501 - 5999 are reserved for FB-internal use *)
 
@@ -39,6 +40,11 @@ let use_collection_literal pos coll =
   let coll = strip_ns coll in
   add Codes.use_collection_literal pos
     (spf "Use `%s {...}` instead of `new %s(...)`" coll coll)
+
+let single_quoted_string pos =
+  add Codes.single_quoted_string pos
+    ("This should be a single-quoted string so that lint can analyze it "^
+    "statically")
 
 let do_ f =
   let list_copy = !lint_list in

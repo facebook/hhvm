@@ -107,13 +107,18 @@ and class_ = {
   c_constructor    : method_ option   ;
   c_static_methods : method_ list     ;
   c_methods        : method_ list     ;
-  c_user_attributes : Ast.user_attribute list;
+  c_user_attributes : user_attribute list;
   c_enum           : enum_ option     ;
 }
 
 and enum_ = {
   e_base       : hint;
   e_constraint : hint option;
+}
+
+and user_attribute = {
+  ua_name: sid;
+  ua_params: expr list (* user attributes are restricted to scalar values *)
 }
 
 and tparam = Ast.variance * sid * hint option
@@ -152,7 +157,7 @@ and method_ = {
   m_variadic        : fun_variadicity           ;
   m_params          : fun_param list            ;
   m_body            : body_block                ;
-  m_user_attributes : Ast.user_attribute list   ;
+  m_user_attributes : user_attribute list   ;
   m_ret             : hint option               ;
   m_fun_kind        : fun_kind                  ;
 }
@@ -198,7 +203,7 @@ and fun_ = {
   f_params   : fun_param list;
   f_body     : body_block;
   f_fun_kind : fun_kind;
-  f_user_attributes : Ast.user_attribute list;
+  f_user_attributes : user_attribute list;
 }
 
 and typedef = tparam list * hint option * hint

@@ -11,13 +11,36 @@
 open ServerEnv
 open Utils
 
+module Json = Hh_json
 module RP = Relative_path
 
-type result = Pos.absolute Errors.error_ list
+type result = string Lint.t list
+
+let output_json oc el =
+  let errors_json = List.map Lint.to_json el in
+  let res =
+    Json.JAssoc [ "errors", Json.JList errors_json;
+                  "version", Json.JString Build_id.build_id_ohai;
+                ] in
+  output_string oc (Json.json_to_string res);
+  flush stderr
+
+let output_text oc el =
+  (* Essentially the same as type error output, except that we only have one
+   * message per error, and no additional 'typing reasons' *)
+  if el = []
+  then output_string oc "No lint errors!\n"
+  else begin
+    let sl = List.map Lint.to_string el in
+    List.iter begin fun s ->
+      Printf.fprintf oc "%s\n%!" s;
+    end sl
+  end;
+  flush oc
 
 let lint _acc fnl =
   List.fold_left begin fun acc fn ->
-    let errs, ()  =
+    let errs, () =
       Lint.do_ begin fun () ->
         Errors.ignore_ begin fun () ->
           let {Parser_hack.file_mode; comments; ast} =
@@ -42,12 +65,12 @@ let lint_all genv code oc =
   let errs = MultiWorker.call
     genv.workers
     ~job:(fun acc fnl ->
-      let errs = lint acc fnl in
-      List.filter (fun err -> Errors.get_code err = code) errs)
+      let lint_errs = lint acc fnl in
+      List.filter (fun err -> Lint.get_code err = code) lint_errs)
     ~merge:List.rev_append
     ~neutral:[]
     ~next in
-  let errs = rev_rev_map Errors.to_absolute errs in
+  let errs = rev_rev_map Lint.to_absolute errs in
   Marshal.to_channel oc (errs : result) [];
   flush oc
 
@@ -71,6 +94,6 @@ let go genv fnl oc =
         ~next:(Bucket.make fnl)
     else
       lint [] fnl in
-  let errs = rev_rev_map Errors.to_absolute errs in
+  let errs = rev_rev_map Lint.to_absolute errs in
   Marshal.to_channel oc (errs : result) [];
   flush oc

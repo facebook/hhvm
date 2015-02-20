@@ -288,7 +288,11 @@ let main_hack { filename; suggest; color; coverage; prolog; lint; _ } =
       Linter.lint fileinfo
     end) in
     if lint_errors <> []
-    then (List.iter error lint_errors; exit 2)
+    then begin
+      let lint_errors = List.map Lint.to_absolute lint_errors in
+      ServerLint.output_text stdout lint_errors;
+      exit 2
+    end
     else Printf.printf "No lint errors\n"
   else begin
     let errors = errors @ ServerIdeUtils.check_defs fileinfo in

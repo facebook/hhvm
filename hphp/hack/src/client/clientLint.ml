@@ -9,4 +9,7 @@
  *)
 
 let go (results : ServerLint.result) output_json =
-  ServerError.print_errorl output_json results stdout
+  if output_json then
+    ServerLint.output_json stdout results
+  else
+    ServerLint.output_text stdout results

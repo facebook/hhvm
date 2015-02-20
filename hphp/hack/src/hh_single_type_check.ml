@@ -285,7 +285,7 @@ let main_hack { filename; suggest; color; coverage; prolog; lint; _ } =
     print_prolog fileinfo
   else if lint then
     let lint_errors = lint_errors @ fst (Lint.do_ begin fun () ->
-      Linter.lint fileinfo
+      Linter.lint filename fileinfo
     end) in
     if lint_errors <> []
     then begin

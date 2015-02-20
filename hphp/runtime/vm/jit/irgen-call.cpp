@@ -776,12 +776,26 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * All fpass instructions spill the stack after they execute, because we are
+ * sure to need that value in memory, regardless of whether we side-exit or
+ * throw.  At the level of HHBC semantics, it's illegal to pop them from the
+ * stack until we've left the FPI region, and we will be spilling the whole
+ * stack when we get to the FCall{D,} at the end of the region.  This should
+ * also potentially reduce the number of live registers during call sequences.
+ *
+ * Note: there is a general problem with the spillStack mechanism, in that it
+ * may sink stores that are not profitable to sink, but in this case we can
+ * work around it easily.
+ */
+
 void emitFPassL(HTS& env, int32_t argNum, int32_t id) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     emitVGetL(env, id);
   } else {
     emitCGetL(env, id);
   }
+  spillStack(env);
 }
 
 void emitFPassS(HTS& env, int32_t argNum) {
@@ -790,6 +804,7 @@ void emitFPassS(HTS& env, int32_t argNum) {
   } else {
     emitCGetS(env);
   }
+  spillStack(env);
 }
 
 void emitFPassG(HTS& env, int32_t argNum) {
@@ -798,6 +813,7 @@ void emitFPassG(HTS& env, int32_t argNum) {
   } else {
     emitCGetG(env);
   }
+  spillStack(env);
 }
 
 void emitFPassR(HTS& env, int32_t argNum) {
@@ -806,6 +822,7 @@ void emitFPassR(HTS& env, int32_t argNum) {
   }
 
   implUnboxR(env);
+  spillStack(env);
 }
 
 void emitFPassM(HTS& env, int32_t, int x) {
@@ -814,6 +831,7 @@ void emitFPassM(HTS& env, int32_t, int x) {
   } else {
     emitCGetM(env, x);
   }
+  spillStack(env);
 }
 
 void emitUnboxR(HTS& env) { implUnboxR(env); }
@@ -827,6 +845,7 @@ void emitFPassV(HTS& env, int32_t argNum) {
   auto const tmp = popV(env);
   pushIncRef(env, gen(env, LdRef, Type::InitCell, tmp));
   gen(env, DecRef, tmp);
+  spillStack(env);
 }
 
 void emitFPassCE(HTS& env, int32_t argNum) {
@@ -834,6 +853,7 @@ void emitFPassCE(HTS& env, int32_t argNum) {
     // Need to raise an error
     PUNT(FPassCE-byRef);
   }
+  spillStack(env);
 }
 
 void emitFPassCW(HTS& env, int32_t argNum) {
@@ -841,6 +861,7 @@ void emitFPassCW(HTS& env, int32_t argNum) {
     // Need to raise a warning
     PUNT(FPassCW-byRef);
   }
+  spillStack(env);
 }
 
 //////////////////////////////////////////////////////////////////////

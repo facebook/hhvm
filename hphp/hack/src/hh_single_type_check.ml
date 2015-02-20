@@ -111,7 +111,7 @@ let die str =
   close_out oc;
   exit 2
 
-let error l = die (Errors.to_string (Errors.to_absolute l))
+let error l = output_string stderr (Errors.to_string (Errors.to_absolute l))
 
 let parse_options () =
   let fn_ref = ref None in
@@ -288,14 +288,14 @@ let main_hack { filename; suggest; color; coverage; prolog; lint; _ } =
       Linter.lint fileinfo
     end) in
     if lint_errors <> []
-    then error (List.hd lint_errors)
+    then (List.iter error lint_errors; exit 2)
     else Printf.printf "No lint errors\n"
   else begin
     let errors = errors @ ServerIdeUtils.check_defs fileinfo in
     if suggest
     then suggest_and_print filename fileinfo;
     if errors <> []
-    then error (List.hd errors)
+    then (error (List.hd errors); exit 2)
     else Printf.printf "No errors\n"
   end
 

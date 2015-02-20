@@ -477,12 +477,8 @@ TranslateResult irGenRegion(HTS& hts,
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
-  SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
-
   std::string errorMsg;
   always_assert_flog(check(region, errorMsg), "{}", errorMsg);
-
-  SCOPE_ASSERT_DETAIL("IRUnit") { return hts.unit.toString(); };
 
   auto& irb = *hts.irb;
 
@@ -691,6 +687,9 @@ TranslateResult translateRegion(HTS& hts,
                                 const RegionDesc& region,
                                 RegionBlacklist& toInterp,
                                 TransFlags trflags) {
+  SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
+  SCOPE_ASSERT_DETAIL("IRUnit") { return hts.unit.toString(); };
+
   auto irGenResult = irGenRegion(hts, region, toInterp, trflags);
   if (irGenResult != TranslateResult::Success) return irGenResult;
   return mcGenRegion(hts, region, toInterp);

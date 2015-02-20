@@ -14,11 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -34,6 +35,7 @@ ResourceData::ResourceData()
   int& pmax = os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;
+  assert(MM().contains(this));
 }
 
 void ResourceData::o_setId(int id) {

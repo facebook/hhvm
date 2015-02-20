@@ -20,7 +20,9 @@ interface IFoo extends IUseDynamicYield {
 }
 
 class Foo implements IFoo {
-  // Don't use DynamicYield
+
+  // use DynamicYield; // error: no getStuff without DynamicYield
+
   public async function genStuff(): Awaitable<int> {
     return 42;
   }

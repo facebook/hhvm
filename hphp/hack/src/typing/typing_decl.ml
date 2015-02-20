@@ -465,9 +465,7 @@ and class_decl tcopt c =
        || DynamicYield.contains_dynamic_yield req_ancestors_extends)
   in
   let env, m = if dy_check
-    then
-      (* let () = Printf.printf "DynamicYield.decl %s\n" cls_name in  *)
-      DynamicYield.decl env m
+    then DynamicYield.decl env m
     else env, m
   in
   let ext_strict = List.fold_left (trait_exists env) ext_strict c.c_uses in

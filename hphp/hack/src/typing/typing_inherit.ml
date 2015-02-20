@@ -63,34 +63,42 @@ let is_abstract_method x =
   | _ ->  false
 
 let add_method name sig_ methods =
-  match SMap.get name methods with
-  | None ->
-      (* The method didn't exist so far, let's add it *)
-      SMap.add name sig_ methods
-  | Some old_sig ->
-      if ((not (is_abstract_method old_sig) && is_abstract_method sig_)
-          || (is_abstract_method old_sig = is_abstract_method sig_
-          && not (old_sig.ce_synthesized) && sig_.ce_synthesized))
+  match (fst sig_.ce_type), sig_.ce_synthesized with
+    | Reason.Rdynamic_yield _, true ->
+      (* DynamicYield::__call-derived pseudo-methods need to be
+       * rederived at each level *)
+      methods
+    | _ ->
+      (
+        match SMap.get name methods with
+          | None ->
+            (* The method didn't exist so far, let's add it *)
+            SMap.add name sig_ methods
+          | Some old_sig ->
+            if ((not (is_abstract_method old_sig) && is_abstract_method sig_)
+                || (is_abstract_method old_sig = is_abstract_method sig_
+                   && not (old_sig.ce_synthesized) && sig_.ce_synthesized))
 
-      (* The then-branch of this if is encountered when the method being
-       * added shouldn't *actually* be added. When's that?
-       * In isolation, we can say that
-       *   - We don't want to override a concrete method with
-       *     an abstract one.
-       *   - We don't want to override a method that's actually
-       *     implemented by the programmer with one that's "synthetic",
-       *     e.g. arising merely from a require-extends declaration in
-       *     a trait.
-       * When these two considerations conflict, we give precedence to
-       * abstractness for determining priority of the method.
-       *)
-      then methods
+            (* The then-branch of this if is encountered when the method being
+             * added shouldn't *actually* be added. When's that?
+             * In isolation, we can say that
+             *   - We don't want to override a concrete method with
+             *     an abstract one.
+             *   - We don't want to override a method that's actually
+             *     implemented by the programmer with one that's "synthetic",
+             *     e.g. arising merely from a require-extends declaration in
+             *     a trait.
+             * When these two considerations conflict, we give precedence to
+             * abstractness for determining priority of the method.
+             *)
+            then methods
 
-      (* Otherwise, we *are* overwriting a method definition. This is
-       * OK when a naming conflict is parent class vs trait (trait
-       * wins!), but not really OK when the naming conflict is trait vs
-       * trait (we rely on HHVM to catch the error at runtime) *)
-      else SMap.add name {sig_ with ce_override = false} methods
+            (* Otherwise, we *are* overwriting a method definition. This is
+             * OK when a naming conflict is parent class vs trait (trait
+             * wins!), but not really OK when the naming conflict is trait vs
+             * trait (we rely on HHVM to catch the error at runtime) *)
+            else SMap.add name {sig_ with ce_override = false} methods
+      )
 
 let add_methods methods' acc =
   SMap.fold add_method methods' acc

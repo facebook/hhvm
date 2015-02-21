@@ -96,7 +96,9 @@ folly::Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
 }
 
 ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
-  assert(!find(acls));
+  if (auto const meta = find(acls)) {
+    return ALocBits{meta->conflicts}.set(meta->index);
+  }
 
   auto ret = ALocBits{};
 

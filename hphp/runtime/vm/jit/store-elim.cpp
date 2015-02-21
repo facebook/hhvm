@@ -119,14 +119,6 @@ void removeDead(Local& env, IRInstruction& inst) {
   inst.block()->erase(&inst);
 }
 
-void addGen(Local& env, folly::Optional<uint32_t> bit) {
-  if (!bit) return;
-  FTRACE(4, "      gen:  {}\n", *bit);
-  env.gen[*bit]  = 1;
-  env.kill[*bit] = 0;
-  env.live[*bit] = 1;
-}
-
 void addGenSet(Local& env, const ALocBits& bits) {
   FTRACE(4, "      gen:  {}\n", show(bits));
   env.gen |= bits;
@@ -158,14 +150,7 @@ void addKillSet(Local& env, const ALocBits& bits) {
 //////////////////////////////////////////////////////////////////////
 
 void load(Local& env, AliasClass acls) {
-  acls = canonicalize(acls);
-  if (auto const meta = env.global.ainfo.find(acls)) {
-    addGen(env, meta->index);
-    addGenSet(env, meta->conflicts);
-    return;
-  }
-
-  addGenSet(env, env.global.ainfo.may_alias(acls));
+  addGenSet(env, env.global.ainfo.may_alias(canonicalize(acls)));
 }
 
 void kill(Local& env, AliasClass acls) {

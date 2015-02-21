@@ -54,6 +54,7 @@ bool shouldHHIRRelaxGuards() {
 #define DArrElem       assert(inst->is(LdPackedArrayElem));     \
                          return typeMightRelax(inst->src(0));
 #define DThis          return false; // fixed type from ctx class
+#define DCtx           return false;
 #define DMulti         return true;  // DefLabel; value could be anything
 #define DSetElem       return false; // fixed type
 #define DBuiltin       return false; // from immutable typeParam
@@ -90,6 +91,7 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef DArrPacked
 #undef DArrElem
 #undef DThis
+#undef DCtx
 #undef DMulti
 #undef DSetElem
 #undef DBuiltin

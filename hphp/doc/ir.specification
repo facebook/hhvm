@@ -823,7 +823,7 @@ To string conversions:
   inner type of S0 must be a subtype of T (usually ensured with a previous
   CheckRefInner).
 
-| LdCtx, D(Ctx), S(FramePtr), C
+| LdCtx, DCtx, S(FramePtr), C
 
   Loads into D the value of the m_this/m_cls field out of the frame pointer S0,
   which must be a frame for the function in the LdCtx's Marker. The result

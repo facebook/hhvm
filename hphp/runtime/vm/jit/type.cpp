@@ -630,6 +630,10 @@ Type thisReturn(const IRInstruction* inst) {
   return Type::Obj;
 }
 
+Type ctxReturn(const IRInstruction* inst) {
+  return thisReturn(inst) | Type::Cctx;
+}
+
 Type allocObjReturn(const IRInstruction* inst) {
   switch (inst->op()) {
     case ConstructInstance:
@@ -810,6 +814,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DArrElem        return arrElemReturn(inst);
 #define DArrPacked      return Type::Array(ArrayData::kPackedKind);
 #define DThis           return thisReturn(inst);
+#define DCtx            return ctxReturn(inst);
 #define DMulti          return Type::Bottom;
 #define DSetElem        return setElemReturn(inst);
 #define ND              assert(0 && "outputType requires HasDest or NaryDest");
@@ -839,6 +844,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DArrElem
 #undef DArrPacked
 #undef DThis
+#undef DCtx
 #undef DMulti
 #undef DSetElem
 #undef ND
@@ -1030,6 +1036,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DArrElem
 #define DArrPacked
 #define DThis
+#define DCtx
 #define DCns
 
 #define O(opcode, dstinfo, srcinfo, flags) \
@@ -1066,6 +1073,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DArrElem
 #undef DArrPacked
 #undef DThis
+#undef DCtx
 #undef DCns
 
   return true;

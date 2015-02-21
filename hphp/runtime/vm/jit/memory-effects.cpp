@@ -197,10 +197,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * It's logically `publishing' a pointer to a pre-live ActRec, making it
    * live.  It doesn't actually load from this ActRec, but after it's done this
    * the set of things that can load from it is large enough that the easiest
-   * way to model this is to consider `publishing' it the load.  This works
-   * because once it's publish, it's an activation record, and doesn't get
-   * written to as if it were a stack slot anymore (we've effectively converted
-   * AStack locations into a frame until the InlineReturn).
+   * way to model this is to consider it as a load on behalf of `publishing'
+   * the ActRec.  Once it's published, it's a live activation record, and
+   * doesn't get written to as if it were a stack slot anymore (we've
+   * effectively converted AStack locations into a frame until the
+   * InlineReturn).
    *
    * TODO(#3634984): Additionally, DefInlineFP is marking may-load on all the
    * locals of the outer frame.  This is probably not necessary anymore, but we
@@ -211,12 +212,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    */
   case DefInlineFP:
     return may_load_store(
-      AFrameAny |
-        AStack {
-          inst.src(0),
-          inst.extra<DefInlineFP>()->spOffset + int32_t{kNumActRecCells} - 1,
-          int32_t{kNumActRecCells}
-        },
+      AFrameAny | inline_fp_frame(&inst),
      /*
       * Note that although DefInlineFP is going to store some things into the
       * memory for the new frame (m_soff, etc), it's as part of converting it
@@ -631,6 +627,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // store.
         spOffset.offset + int32_t{kNumActRecCells} - 1,
         kNumActRecCells
+      },
+      AStack {
+        inst.src(0),
+        // The context is in the highest slot.
+        spOffset.offset + int32_t{kNumActRecCells} - 1,
+        1
       }
     };
   }
@@ -1070,15 +1072,17 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
   // argument numbers.
   match<void>(
     me,
-    [&] (GeneralEffects x)  { check(x.loads);
-                              check(x.stores);
-                              check(x.moves);
-                              assert(x.moves <= x.loads);
-                              check(x.kills); },
+    [&] (GeneralEffects x)   { check(x.loads);
+                               check(x.stores);
+                               check(x.moves);
+                               assert(x.moves <= x.loads);
+                               check(x.kills); },
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst); },
     [&] (PureStoreNT x)      { check(x.dst); },
-    [&] (PureSpillFrame x)   { check(x.dst); },
+    [&] (PureSpillFrame x)   { check(x.dst);
+                               check(x.ctx);
+                               assert(x.ctx <= x.dst); },
     [&] (IterEffects x)      { check_fp(x.fp); check(x.kills); },
     [&] (IterEffects2 x)     { check_fp(x.fp); check(x.kills); },
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
@@ -1126,7 +1130,7 @@ MemEffects canonicalize(MemEffects me) {
       return PureStoreNT { canonicalize(x.dst), x.value };
     },
     [&] (PureSpillFrame x) -> R {
-      return PureSpillFrame { canonicalize(x.dst) };
+      return PureSpillFrame { canonicalize(x.dst), canonicalize(x.ctx) };
     },
     [&] (ExitEffects x) -> R {
       return ExitEffects { canonicalize(x.live), canonicalize(x.kills) };
@@ -1178,16 +1182,28 @@ std::string show(MemEffects effects) {
     [&] (InterpOneEffects x) {
       return sformat("interp({})", show(x.kills));
     },
+    [&] (PureSpillFrame x) {
+      return sformat("stFrame({} ; {})", show(x.dst), show(x.ctx));
+    },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
     [&] (PureStore x)       { return sformat("st({})", show(x.dst)); },
     [&] (PureStoreNT x)     { return sformat("stNT({})", show(x.dst)); },
-    [&] (PureSpillFrame x)  { return sformat("stFrame({})", show(x.dst)); },
     [&] (ReturnEffects x)   { return sformat("return({})", show(x.kills)); },
     [&] (IterEffects)       { return "IterEffects"; },
     [&] (IterEffects2)      { return "IterEffects2"; },
     [&] (IrrelevantEffects) { return "IrrelevantEffects"; },
     [&] (UnknownEffects)    { return "UnknownEffects"; }
   );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+AliasClass inline_fp_frame(const IRInstruction* inst) {
+  return AStack {
+    inst->src(0),
+    inst->extra<DefInlineFP>()->spOffset + int32_t{kNumActRecCells} - 1,
+    int32_t{kNumActRecCells}
+  };
 }
 
 //////////////////////////////////////////////////////////////////////

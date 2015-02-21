@@ -109,9 +109,12 @@ struct PureStoreNT  { AliasClass dst; SSATmp* value; };
 /*
  * Spilling pre-live ActRecs are somewhat unusual, but effectively still just
  * pure stores.  They store to a range of stack slots, and don't store a PHP
- * value, so they get their own branch of the union.
+ * value, so they get their own branch of the union.  The `dst' class is the
+ * entire stack range the instruction stores to, and the `ctx' class is a
+ * subclass of `dst' that is the stack slot where it'll store the context for
+ * the pre-live ActRec.
  */
-struct PureSpillFrame { AliasClass dst; };
+struct PureSpillFrame { AliasClass dst; AliasClass ctx; };
 
 /*
  * Iterator instructions are special enough that they just have their own
@@ -238,6 +241,19 @@ MemEffects canonicalize(MemEffects);
  * Produces a string about some MemEffects for debug-printing.
  */
 std::string show(MemEffects);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Get the frame from a DefInlineFP.
+ *
+ * Returns: an (uncanonicalized) AliasClass containing the stack slots
+ * corresponding to the ActRec that is being converted from a pre-live to a
+ * live ActRec by this instruction.
+ *
+ * Pre: inst->is(DefInlineFP)
+ */
+AliasClass inline_fp_frame(const IRInstruction* inst);
 
 //////////////////////////////////////////////////////////////////////
 

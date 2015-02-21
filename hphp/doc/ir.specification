@@ -2359,12 +2359,12 @@ fields of that struct for holding intermediate values.
   Given a vector, check if it has a immutable copy and jump to the taken branch
   if so.
 
-| ColAddNewElemC, D(Obj), S(Obj) S(Cell), Er|CRc|P
+| ColAddNewElemC, DofS(0), S(Obj) S(Cell), Er|CRc|P
 
   Adds item S0 to the end of collection S0. Throws a fatal error if S0 is not a
   collection. Returns S0.
 
-| ColAddElemC, D(Obj), S(Obj) S(Cell) S(Cell), Er|CRc|P
+| ColAddElemC, DofS(0), S(Obj) S(Cell) S(Cell), Er|CRc|P
 
   Adds item to collection. Inserts item S2 into collection S0 at key S1.
   Throws a fatal error if S0 is not a collection. Returns S0.

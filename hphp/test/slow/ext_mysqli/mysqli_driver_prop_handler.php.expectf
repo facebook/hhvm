@@ -1,0 +1,13 @@
+string(%d) "%s"
+bool(true)
+int(%d)
+bool(true)
+int(101009)
+bool(false)
+bool(true)
+int(0)
+bool(true)
+bool(true)
+ExtMySQLiDriver::__get(nonExisting);
+NULL
+ExtMySQLiDriver::__set(nonExisting, 1);

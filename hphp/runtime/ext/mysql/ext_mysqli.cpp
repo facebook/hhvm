@@ -36,6 +36,8 @@ const StaticString
   s_link("__link"),
   s_result("__result"),
   s_resulttype("__resulttype"),
+  s_reconnect("__reconnect"),
+  s_report_mode("__report_mode"),
   s_done("__done"),
   s_stmt("__stmt"),
   s_charset("charset"),
@@ -521,6 +523,10 @@ static Variant getStaticProp(ObjectData* obj, const StaticString& prop) {
   return tvAsVariant(cls->getSPropData(cls->lookupSProp(prop.get())));
 }
 
+static String HHVM_FUNCTION(mysqli_get_client_info) {
+  return HHVM_FN(mysql_get_client_info)();
+}
+
 static int64_t HHVM_FUNCTION(mysqli_get_client_version) {
   return mysql_get_client_version();
 }
@@ -528,7 +534,7 @@ static int64_t HHVM_FUNCTION(mysqli_get_client_version) {
 // Native accessor properties of mysqli.
 
 static Variant mysqli_client_info_get(ObjectData* this_) {
-  return HHVM_FN(mysql_get_client_info)();
+  return HHVM_FN(mysqli_get_client_info)();
 }
 
 static Variant mysqli_client_version_get(ObjectData* this_) {
@@ -691,6 +697,75 @@ struct mysqli_PropHandler : Native::MapPropHandler<mysqli_PropHandler> {
 //                        const Array& arguments, const Array& groups) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
+
+static Variant mysqli_driver_client_info_get(ObjectData* this_) {
+  return HHVM_FN(mysqli_get_client_info)();
+}
+
+static Variant mysqli_driver_client_version_get(ObjectData* this_) {
+  return HHVM_FN(mysqli_get_client_version)();
+}
+
+static Variant mysqli_driver_driver_version_get(ObjectData* this_) {
+  // Lets pretend we are the same version as PHP. Taken from here
+  // http://git.io/wY2WPw
+  return 101009;
+}
+
+static Variant mysqli_driver_embedded_get(ObjectData* this_) {
+  return false;
+}
+
+static Variant mysqli_driver_reconnect_get(ObjectData* this_) {
+  return *getRawProp(this_, s_reconnect, s_mysqli_driver);
+}
+
+void mysqli_driver_reconnect_set(ObjectData* this_, Variant& value) {
+  this_->o_set(s_reconnect, value, s_mysqli_driver);
+}
+
+static Variant mysqli_driver_report_mode_get(ObjectData* this_) {
+  return *getRawProp(this_, s_report_mode, s_mysqli_driver);
+}
+
+void mysqli_driver_report_mode_set(ObjectData* this_, Variant& value) {
+  this_->o_set(s_report_mode, value, s_mysqli_driver);
+}
+
+static Native::PropAccessor mysqli_driver_Accessors[] = {
+  {"client_info",    mysqli_driver_client_info_get,
+                     nullptr, nullptr, nullptr},
+
+  {"client_version", mysqli_driver_client_version_get,
+                     nullptr, nullptr, nullptr},
+
+  {"driver_version", mysqli_driver_driver_version_get,
+                     nullptr, nullptr, nullptr},
+
+  {"embedded",       mysqli_driver_embedded_get,
+                     nullptr, nullptr, nullptr},
+
+  {"reconnect",      mysqli_driver_reconnect_get,
+                     mysqli_driver_reconnect_set,
+                     nullptr, nullptr},
+
+  {"report_mode",    mysqli_driver_report_mode_get,
+                     mysqli_driver_report_mode_set,
+                     nullptr, nullptr},
+
+  {nullptr, nullptr, nullptr, nullptr, nullptr}
+};
+
+static Native::PropAccessorMap mysqli_driver_accessorsMap
+((Native::PropAccessor*)mysqli_driver_Accessors);
+
+// Prop handler for mysqli_result.
+struct mysqli_driver_PropHandler :
+  Native::MapPropHandler<mysqli_driver_PropHandler> {
+
+  static constexpr Native::PropAccessorMap& map = mysqli_driver_accessorsMap;
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 // class mysqli_result
@@ -1065,6 +1140,10 @@ public:
     Native::registerNativeGuardedPropHandler
       <mysqli_PropHandler>(s_mysqli.get());
 
+    // mysqli_driver
+    Native::registerNativeGuardedPropHandler
+      <mysqli_driver_PropHandler>(s_mysqli_driver.get());
+
     // mysqli_result
     HHVM_ME(mysqli_result, get_mysqli_conn_resource);
     HHVM_ME(mysqli_result, hh_field_tell);
@@ -1099,6 +1178,7 @@ public:
     HHVM_ME(mysqli_stmt, result_metadata);
     HHVM_ME(mysqli_stmt, send_long_data);
 
+    HHVM_FE(mysqli_get_client_info);
     HHVM_FE(mysqli_get_client_version);
     //HHVM_FE(mysqli_get_client_stats);
     //HHVM_FE(mysqli_set_local_infile_default);

@@ -465,22 +465,6 @@ SSATmp* getValue(MTS& env) {
   return getInput(env, kValIdx, DataTypeSpecific);
 }
 
-SSATmp* getValAddr(MTS& env) {
-  assert(env.mii.valCount() == 1);
-  auto const& dl = *env.ni.inputs[0];
-  auto const& l = dl.location;
-  if (l.space == Location::Local) {
-    assert(!env.stackInputs.count(0));
-    return ldLocAddr(env, l.offset);
-  }
-
-  assert(l.space == Location::Stack);
-  assert(env.stackInputs.count(0));
-  spillStack(env);
-  env.irb.exceptionStackBoundary();
-  return ldStkAddr(env, env.stackInputs[0]);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 // Compute whether the current instruction a 1-element simple collection
@@ -1759,14 +1743,8 @@ void emitSetWithRefLProp(MTS& env) { SPUNT(__func__); }
 void emitSetWithRefRProp(MTS& env) { emitSetWithRefLProp(env); }
 
 void emitSetWithRefNewElem(MTS& env) {
-  if (env.base.type.strip() <= Type::Arr &&
-      getValue(env)->type() <= Type::Cell) {
-    constrainBase(env, DataTypeSpecific);
-    emitSetNewElem(env);
-  } else {
-    gen(env, SetWithRefNewElem, env.base.value, getValAddr(env),
-      misPtr(env));
-  }
+  auto const val = getValue(env);
+  gen(env, SetWithRefNewElem, env.base.value, val, misPtr(env));
   env.result = nullptr;
 }
 
@@ -1817,20 +1795,15 @@ void emitSetElem(MTS& env) {
   }
 }
 
-void emitSetWithRefLElem(MTS& env) {
+void emitSetWithRefElem(MTS& env) {
   auto const key = getKey(env);
-  auto const locAddr = getValAddr(env);
-  if (env.base.type.strip() <= Type::Arr &&
-      !locAddr->type().deref().maybe(Type::BoxedCell)) {
-    constrainBase(env, DataTypeSpecific);
-    emitSetElem(env);
-    assert(env.strTestResult == nullptr);
-  } else {
-    gen(env, SetWithRefElem, env.base.value, key, locAddr, misPtr(env));
-  }
+  auto const val = getValue(env);
+  gen(env, SetWithRefElem, env.base.value, key, val, misPtr(env));
   env.result = nullptr;
 }
-void emitSetWithRefRElem(MTS& env) { emitSetWithRefLElem(env); }
+
+void emitSetWithRefLElem(MTS& env) { emitSetWithRefElem(env); }
+void emitSetWithRefRElem(MTS& env) { emitSetWithRefElem(env); }
 
 void emitSetOpElem(MTS& env) {
   auto const op = static_cast<SetOpOp>(env.ni.imm[0].u_OA);

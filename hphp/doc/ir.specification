@@ -2230,7 +2230,7 @@ fields of that struct for holding intermediate values.
   InvalidSetMException (see discussion above).
 
 | SetWithRefElem, ND,
-|                 S(PtrToGen) S(Cell) S(PtrToGen) S(PtrToMISGen),
+|                 S(PtrToGen) S(Cell) S(Gen) S(PtrToMISGen),
 |                 MElem|Er
 
   Set element with key S1 in S0 to S2.

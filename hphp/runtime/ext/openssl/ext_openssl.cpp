@@ -143,9 +143,12 @@ public:
       snprintf(default_ssl_conf_filename, sizeof(default_ssl_conf_filename),
                "%s/%s", X509_get_default_cert_area(), "openssl.cnf");
     } else {
-      // TODO: See task #6245135.
-      strncpy(default_ssl_conf_filename, config_filename,
-              sizeof(default_ssl_conf_filename));
+      if(strlen(config_filename) < sizeof(default_ssl_conf_filename)) {
+        strcpy(default_ssl_conf_filename, config_filename);
+      } else {
+        always_assert(false &&
+          "configuration path too long, must be less than PATH_MAX bytes.");
+      }
     }
   }
 

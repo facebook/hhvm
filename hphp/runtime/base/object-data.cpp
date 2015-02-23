@@ -1382,6 +1382,7 @@ TypedValue* ObjectData::propImpl(
       key->data()
     );
 
+    *tvScratch = make_tv<KindOfUninit>();
     return tvScratch;
   }
 
@@ -1397,6 +1398,7 @@ TypedValue* ObjectData::propImpl(
 
   if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
+    *tvScratch = make_tv<KindOfUninit>();
     return tvScratch;
   }
 

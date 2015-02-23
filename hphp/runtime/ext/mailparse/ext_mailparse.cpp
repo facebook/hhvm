@@ -51,14 +51,14 @@ Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
 bool HHVM_FUNCTION(mailparse_msg_parse,
                    const Resource& mimemail,
                    const String& data) {
-  return mimemail.getTyped<MimePart>()->parse(data.data(), data.size());
+  return cast<MimePart>(mimemail)->parse(data.data(), data.size());
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_extract_part_file,
                       const Resource& mimemail,
                       const Variant& filename,
                       const Variant& callbackfunc /* = "" */) {
-  return mimemail.getTyped<MimePart>()->
+  return cast<MimePart>(mimemail)->
     extract(filename, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, true);
 }
@@ -67,7 +67,7 @@ Variant HHVM_FUNCTION(mailparse_msg_extract_whole_part_file,
                       const Resource& mimemail,
                       const Variant& filename,
                       const Variant& callbackfunc /* = "" */) {
-  return mimemail.getTyped<MimePart>()->
+  return cast<MimePart>(mimemail)->
     extract(filename, callbackfunc, MimePart::DecodeNone, true);
 }
 
@@ -75,20 +75,20 @@ Variant HHVM_FUNCTION(mailparse_msg_extract_part,
                       const Resource& mimemail,
                       const Variant& msgbody,
                       const Variant& callbackfunc /* = "" */) {
-  return mimemail.getTyped<MimePart>()->
+  return cast<MimePart>(mimemail)->
     extract(msgbody, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, false);
 }
 
 Array HHVM_FUNCTION(mailparse_msg_get_part_data, const Resource& mimemail) {
-  return mimemail.getTyped<MimePart>()->getPartData().toArray();
+  return cast<MimePart>(mimemail)->getPartData().toArray();
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_get_part,
                       const Resource& mimemail,
                       const String& mimesection) {
   Resource part =
-    mimemail.getTyped<MimePart>()->findByName(mimesection.c_str());
+    cast<MimePart>(mimemail)->findByName(mimesection.c_str());
   if (part.isNull()) {
     raise_warning("cannot find section %s in message", mimesection.data());
     return false;
@@ -97,7 +97,7 @@ Variant HHVM_FUNCTION(mailparse_msg_get_part,
 }
 
 Array HHVM_FUNCTION(mailparse_msg_get_structure, const Resource& mimemail) {
-  return mimemail.getTyped<MimePart>()->getStructure();
+  return cast<MimePart>(mimemail)->getStructure();
 }
 
 const StaticString
@@ -143,9 +143,9 @@ bool HHVM_FUNCTION(mailparse_stream_encode,
                    const Resource& sourcefp,
                    const Resource& destfp,
                    const String& encoding) {
-  File *srcstream = sourcefp.getTyped<File>(true, true);
-  File *deststream = destfp.getTyped<File>(true, true);
-  if (srcstream == NULL || deststream == NULL) {
+  auto srcstream = dyn_cast_or_null<File>(sourcefp);
+  auto deststream = dyn_cast_or_null<File>(destfp);
+  if (!srcstream || !deststream) {
     return false;
   }
 
@@ -158,7 +158,7 @@ bool HHVM_FUNCTION(mailparse_stream_encode,
   mbfl_convert_filter *conv =
     mbfl_convert_filter_new(mbfl_no_encoding_8bit, enc,
                             mailparse_stream_output, mailparse_stream_flush,
-                            deststream);
+                            deststream.get());
 
   if (enc == mbfl_no_encoding_qprint) {
     /* If the qp encoded section is going to be digitally signed,
@@ -259,7 +259,7 @@ const StaticString
   s_origfilename("origfilename");
 
 Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
-  SmartPtr<File> instream(fp.getTyped<File>());
+  auto instream = cast<File>(fp);
   instream->rewind();
 
   auto outstream = makeSmartPtr<TempFile>(false);
@@ -321,7 +321,7 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
 
 Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
                       const Resource& fp) {
-  File *stream = fp.getTyped<File>();
+  auto stream = cast<File>(fp);
   stream->rewind();
 
   int linelen = 0;

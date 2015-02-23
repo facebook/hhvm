@@ -4378,7 +4378,7 @@ void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
     emitGetCtxFwdCallWithThisDyn(destCtxReg, srcCtxReg, make_cache());
     return;
   }
-  assert(t <= Type::Ctx);
+
   // dynamically check if we have a This pointer and call
   // emitGetCtxFwdCallWithThisDyn below
   auto const sf = v.makeReg();

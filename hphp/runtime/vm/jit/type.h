@@ -200,7 +200,7 @@ enum class Ptr : uint8_t {
   /* bits 58-62 are pointer kind */
 
 #define IRT_UNIONS                                                      \
-  IRT(Ctx,         kObj|kCctx)                                          \
+  IRT(Ctx,         kObj|kCctx|kNullptr)
 
 /*
  * Gen, Counted, PtrToGen, and PtrToCounted are here instead of IRT_PHP_UNIONS

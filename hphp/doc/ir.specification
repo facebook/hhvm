@@ -843,7 +843,7 @@ To string conversions:
 
   Loads into D the value of the m_cls field out of the frame pointer S0. The
   compiler should generate this only if it can prove that the frame does not
-  contain a $this pointer.
+  contain a nullptr or $this pointer.
 
 | LdClsCtx, D(Cls), S(Ctx), C
 
@@ -944,8 +944,8 @@ To string conversions:
 
   If S0 is a Cctx, return S0. If S0 is an object, check if clsName::methodName
   is a static method. If it is, return S0's class as a Ctx pointer. If not,
-  return S0. If S0 is a Ctx, dynamically check if it is an object or Cctx at
-  runtime and perform the operations described above.
+  return S0. If S0 is a Ctx, dynamically check if it is a non-null object
+  pointer or Cctx at runtime and perform the operations described above.
 
 | GetCtxFwdCall, D(Ctx), S(Ctx) C(Func), PRc
 

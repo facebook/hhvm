@@ -193,7 +193,7 @@ Type predictedTypeFromLocation(HTS& env, const Location& loc) {
           offsetFromIRSP(env, i),
           DataTypeGeneric
         );
-        if (stackTy.isBoxed()) {
+        if (stackTy <= Type::BoxedCell) {
           return env.irb->stackInnerTypePrediction(
             offsetFromIRSP(env, i)).box();
         }

@@ -641,7 +641,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   auto loc = srcLoc(0);
   Type type = src->type();
-  if (type.notCounted()) return;
+  if (!type.maybe(Type::Counted)) return;
 
   auto increfMaybeStatic = [&](Vout& v) {
     auto base = loc.reg(0);

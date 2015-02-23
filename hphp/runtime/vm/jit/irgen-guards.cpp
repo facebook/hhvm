@@ -136,18 +136,18 @@ void guardTypeStack(
   Type type,
   bool outerOnly
 ) {
-  assert(type <= Type::Gen);
-  // This should only be called at the beginning of a trace, with a
-  // clean stack
+  assert(type <= Type::Cell || type <= Type::BoxedCell);
+
+  // This should only be called at the beginning of a trace, with a clean
+  // stack.
   assert(env.irb->evalStack().size() == 0);
   assert(env.irb->stackDeficit() == 0);
   auto const stackOff = RelOffsetData {
     stackIndex,
     offsetFromIRSP(env, stackIndex)
   };
-  assert(type.isBoxed() || type.notBoxed());
 
-  if (!type.isBoxed()) {
+  if (type <= Type::Cell) {
     profiledGuard(env, type, ProfGuard::GuardStk, stackIndex.offset, nullptr);
     return;
   }
@@ -157,7 +157,7 @@ void guardTypeStack(
   env.irb->constrainStack(stackOff.irSpOffset, DataTypeSpecific);
   gen(env, HintStkInner, type & Type::BoxedInitCell, stackOff, sp(env));
 
-  if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
+  if (!outerOnly && type <= Type::BoxedCell && type.inner() < Type::Cell) {
     auto stk = gen(env, LdStk, Type::BoxedInitCell,
       IRSPOffsetData{stackOff.irSpOffset}, sp(env));
     gen(env,
@@ -169,7 +169,9 @@ void guardTypeStack(
 }
 
 void guardTypeLocal(HTS& env, uint32_t locId, Type type, bool outerOnly) {
-  if (!type.isBoxed()) {
+  assert(type <= Type::Cell || type <= Type::BoxedCell);
+
+  if (type <= Type::Cell) {
     profiledGuard(env, type, ProfGuard::GuardLoc, locId, nullptr);
     return;
   }
@@ -181,7 +183,7 @@ void guardTypeLocal(HTS& env, uint32_t locId, Type type, bool outerOnly) {
       LocalId { locId },
       fp(env));
 
-  if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
+  if (!outerOnly && type <= Type::BoxedCell && type.inner() < Type::Cell) {
     auto const ldrefExit = makeExit(env);
     auto const ldPMExit = makePseudoMainExit(env);
     auto const val = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
@@ -194,7 +196,9 @@ void guardTypeLocal(HTS& env, uint32_t locId, Type type, bool outerOnly) {
 }
 
 void checkTypeLocal(HTS& env, uint32_t locId, Type type, Offset dest) {
-  if (!type.isBoxed()) {
+  assert(type <= Type::Cell || type <= Type::BoxedCell);
+
+  if (type <= Type::Cell) {
     profiledGuard(env, type, ProfGuard::CheckLoc, locId, makeExit(env, dest));
     return;
   }
@@ -309,7 +313,7 @@ void assertTypeStack(HTS& env, BCSPOffset idx, Type type) {
 void checkTypeStack(HTS& env, BCSPOffset idx, Type type, Offset dest) {
   assert(type <= Type::Gen);
 
-  if (type.isBoxed()) {
+  if (type <= Type::BoxedCell) {
     spillStack(env); // don't bother with the case that it's not spilled.
     auto const exit = makeExit(env, dest);
     auto const soff = RelOffsetData { idx, offsetFromIRSP(env, idx) };

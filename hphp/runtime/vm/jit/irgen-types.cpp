@@ -48,10 +48,10 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto val = isReturnType ? topR(env)
                           : ldLoc(env, id, ldPMExit, DataTypeSpecific);
-  assert(val->type().isBoxed() || val->type().notBoxed());
+  assert(val->type() <= Type::Cell || val->type() <= Type::BoxedCell);
 
   auto const valType = [&]() -> Type {
-    if (!val->type().isBoxed()) return val->type();
+    if (val->type() <= Type::Cell) return val->type();
     if (isReturnType) PUNT(VerifyReturnTypeBoxed);
     auto const pred = env.irb->predictedInnerType(id);
     gen(env, CheckRefInner, pred, makeExit(env), val);

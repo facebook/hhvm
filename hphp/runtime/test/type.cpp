@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <unordered_set>
+
 #include <gtest/gtest.h>
 
 #include <folly/ScopeGuard.h>
@@ -32,10 +34,8 @@ namespace HPHP { namespace jit {
 
 namespace {
 
-typedef hphp_hash_set<Type> TypeSet;
-
-TypeSet allTypes() {
-  TypeSet r;
+std::unordered_set<Type> allTypes() {
+  std::unordered_set<Type> r;
 # define IRT(name, ...) r.insert(Type::name);
 # define IRTP(name, ...) IRT(name)
   IR_TYPES
@@ -111,9 +111,9 @@ TEST(Type, ToString) {
 
 TEST(Type, Boxes) {
   EXPECT_EQ(Type::BoxedDbl, Type::Dbl.box());
-  EXPECT_TRUE(Type::BoxedDbl.isBoxed());
+  EXPECT_TRUE(Type::BoxedDbl <= Type::BoxedCell);
   EXPECT_EQ(Type::Dbl, Type::BoxedDbl.unbox());
-  EXPECT_FALSE(Type::Dbl.isBoxed());
+  EXPECT_FALSE(Type::Dbl <= Type::BoxedCell);
   EXPECT_EQ(Type::Cell, Type::Gen.unbox());
   EXPECT_EQ((Type::BoxedCell - Type::BoxedUninit),
             (Type::Cell - Type::Uninit).box());
@@ -124,9 +124,9 @@ TEST(Type, Boxes) {
 }
 
 TEST(Type, Ptr) {
-  EXPECT_TRUE(Type::PtrToInt.isPtr());
-  EXPECT_TRUE(Type::PtrToBoxedInt.isPtr());
-  EXPECT_TRUE(Type::PtrToBoxedCell.isPtr());
+  EXPECT_TRUE(Type::PtrToInt <= Type::PtrToGen);
+  EXPECT_TRUE(Type::PtrToBoxedInt <= Type::PtrToGen);
+  EXPECT_TRUE(Type::PtrToBoxedCell <= Type::PtrToGen);
   EXPECT_TRUE(Type::PtrToInt <= Type::PtrToCell);
 
   EXPECT_EQ(Type::PtrToInt, Type::Int.ptr(Ptr::Unk));
@@ -146,46 +146,6 @@ TEST(Type, Subtypes) {
   EXPECT_FALSE(Type::TCA <= Type::Gen);
 
   EXPECT_TRUE(Type::PtrToCell < Type::PtrToGen);
-}
-
-TEST(Type, CanRunDtor) {
-  TypeSet types = allTypes();
-  auto expectTrue = [&](Type t) {
-    EXPECT_TRUE(t.canRunDtor()) << t.toString() << ".canRunDtor() == true";
-    types.erase(t);
-  };
-  expectTrue(Type::Arr);
-  expectTrue(Type::CountedArr);
-  expectTrue(Type::Obj);
-  expectTrue(Type::NullableObj);
-  expectTrue(Type::Res);
-  expectTrue(Type::Counted);
-  expectTrue(Type::BoxedArr);
-  expectTrue(Type::BoxedCountedArr);
-  expectTrue(Type::BoxedObj);
-  expectTrue(Type::BoxedNullableObj);
-  expectTrue(Type::BoxedRes);
-  expectTrue(Type::BoxedInitCell);
-  expectTrue(Type::BoxedCell);
-  expectTrue(Type::InitCell);
-  expectTrue(Type::Cell);
-  expectTrue(Type::Gen);
-  expectTrue(Type::Ctx);
-  expectTrue(Type::Obj | Type::Func);
-  expectTrue(Type::Init);
-  expectTrue(Type::Top);
-  expectTrue(Type::StkElem);
-  expectTrue(Type::AnyObj);
-  expectTrue(Type::AnyNullableObj);
-  expectTrue(Type::AnyRes);
-  expectTrue(Type::AnyArr);
-  expectTrue(Type::AnyCountedArr);
-  expectTrue(Type::AnyInitCell);
-  expectTrue(Type::AnyCell);
-
-  for (Type t : types) {
-    EXPECT_FALSE(t.canRunDtor()) << t.toString() << ".canRunDtor == false";
-  }
 }
 
 TEST(Type, Top) {

@@ -275,7 +275,10 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
   if (!oldType.maybe(typeParam)) {
     // If both types are boxed this is ok and even expected as a means to
     // update the hint for the inner type.
-    if (oldType.isBoxed() && typeParam.isBoxed()) return nullptr;
+    if (oldType <= Type::BoxedCell &&
+        typeParam <= Type::BoxedCell) {
+      return nullptr;
+    }
 
     // We got external information (probably from static analysis) that
     // conflicts with what we've built up so far. There's no reasonable way to
@@ -488,7 +491,8 @@ SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
    * vs. KindOfString, and a Type::Null might mean KindOfUninit or
    * KindOfNull.
    */
-  auto const bothBoxed = curType.isBoxed() && newType.isBoxed();
+  auto const bothBoxed = curType <= Type::BoxedCell &&
+                         newType <= Type::BoxedCell;
   auto const sameUnboxed = [&] {
     auto avoidable = { Type::Uninit,
                        Type::InitNull,
@@ -1108,13 +1112,13 @@ Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
 
 Type IRBuilder::predictedInnerType(uint32_t id) {
   auto const ty = m_state.predictedLocalType(id);
-  assert(ty.isBoxed());
+  assert(ty <= Type::BoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
 Type IRBuilder::stackInnerTypePrediction(IRSPOffset offset) const {
   auto const ty = m_state.predictedStackType(offset);
-  assert(ty.isBoxed());
+  assert(ty <= Type::BoxedCell);
   return ldRefReturn(ty.unbox());
 }
 

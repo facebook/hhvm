@@ -456,15 +456,15 @@ inline SSATmp* ldCtx(HTS& env) {
 inline SSATmp* unbox(HTS& env, SSATmp* val, Block* exit) {
   auto const type = val->type();
   // If we don't have an exit the LdRef can't be a guard.
-  auto const inner = exit ? (type & Type::BoxedCell).innerType() : Type::Cell;
+  auto const inner = exit ? (type & Type::BoxedCell).inner() : Type::Cell;
 
-  if (type.isBoxed() || type.notBoxed()) {
+  if (type <= Type::Cell) {
     env.irb->constrainValue(val, DataTypeCountness);
-    if (type.isBoxed()) {
-      gen(env, CheckRefInner, inner, exit, val);
-      return gen(env, LdRef, inner, val);
-    }
     return val;
+  }
+  if (type <= Type::BoxedCell) {
+    gen(env, CheckRefInner, inner, exit, val);
+    return gen(env, LdRef, inner, val);
   }
 
   return cond(
@@ -569,14 +569,14 @@ inline SSATmp* ldLocInner(HTS& env,
   // gets us that.
   auto const loc = ldLoc(env, locId, ldPMExit, DataTypeCountness);
 
-  if (loc->type().notBoxed()) {
+  if (loc->type() <= Type::Cell) {
     env.irb->constrainValue(loc, constraint);
     return loc;
   }
 
-  // Handle the isBoxed() case manually outside of unbox() so we can use the
+  // Handle the Boxed case manually outside of unbox() so we can use the
   // local's predicted type.
-  if (loc->type().isBoxed()) {
+  if (loc->type() <= Type::BoxedCell) {
     auto const predTy = env.irb->predictedInnerType(locId);
     gen(env, CheckRefInner, predTy, ldrefExit, loc);
     return gen(env, LdRef, predTy, loc);
@@ -650,7 +650,7 @@ inline SSATmp* stLocRaw(HTS& env, uint32_t id, SSATmp* fp, SSATmp* newVal) {
  * stack, it should set 'incRefNew' so that 'newVal' will have its ref-count
  * incremented.
  *
- * Pre: !newVal->type().isBoxed() && !newVal->type().maybeBoxed()
+ * Pre: !newVal->type().maybe(Type::BoxedCell)
  * Pre: exit != nullptr if the local may be boxed
  */
 inline SSATmp* stLocImpl(HTS& env,
@@ -660,7 +660,7 @@ inline SSATmp* stLocImpl(HTS& env,
                          SSATmp* newVal,
                          bool decRefOld,
                          bool incRefNew) {
-  assert(!newVal->type().maybeBoxed());
+  assert(!newVal->type().maybe(Type::BoxedCell));
 
   auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
   auto const oldLoc = ldLoc(env, id, ldPMExit, cat);
@@ -692,8 +692,8 @@ inline SSATmp* stLocImpl(HTS& env,
     return newVal;
   };
 
-  if (oldLoc->type().notBoxed()) return unboxed_case();
-  if (oldLoc->type().isBoxed()) return boxed_case(oldLoc);
+  if (oldLoc->type() <= Type::Cell) return unboxed_case();
+  if (oldLoc->type() <= Type::BoxedCell) return boxed_case(oldLoc);
 
   return cond(
     env,

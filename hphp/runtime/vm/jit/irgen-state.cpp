@@ -142,7 +142,7 @@ std::string show(const HTS& hts) {
                                     : hts.irb->localType(i, DataTypeGeneric);
     auto str = localValue ? localValue->inst()->toString()
                           : localTy.toString();
-    if (localTy.isBoxed()) {
+    if (localTy <= Type::BoxedCell) {
       auto const pred = hts.irb->predictedInnerType(i);
       if (pred != Type::Bottom) {
         str += folly::sformat(" (predict inner: {})", pred.toString());

@@ -149,18 +149,18 @@ void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
 }
 
 Type relaxCell(Type t, TypeConstraint tc) {
-  assert(t.notBoxed());
+  assert(t <= Type::Cell);
 
   switch (tc.category) {
     case DataTypeGeneric:
       return Type::Gen;
 
     case DataTypeCountness:
-      return t.notCounted() ? Type::Uncounted : t.unspecialize();
+      return !t.maybe(Type::Counted) ? Type::Uncounted : t.unspecialize();
 
     case DataTypeCountnessInit:
       if (t <= Type::Uninit) return Type::Uninit;
-      return (t.notCounted() && !t.maybe(Type::Uninit))
+      return (!t.maybe(Type::Counted) && !t.maybe(Type::Uninit))
         ? Type::UncountedInit : t.unspecialize();
 
     case DataTypeSpecific:
@@ -296,7 +296,7 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       // Consumers using this constraint expect the type to be relaxed to
       // Uncounted or left alone, so something like Arr|Obj isn't specific
       // enough.
-      return t.notCounted() ||
+      return !t.maybe(Type::Counted) ||
              t.subtypeOfAny(Type::Str, Type::Arr, Type::Obj,
                             Type::Res, Type::BoxedCell);
 
@@ -342,7 +342,7 @@ Type relaxType(Type t, TypeConstraint tc) {
   auto const relaxed =
     (t & Type::Cell) <= Type::Bottom ? Type::Bottom
                                      : relaxCell(t & Type::Cell, tc);
-  return t.notBoxed() ? relaxed : relaxed | Type::BoxedInitCell;
+  return t <= Type::Cell ? relaxed : relaxed | Type::BoxedInitCell;
 }
 
 static void incCategory(DataTypeCategory& c) {

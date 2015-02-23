@@ -2362,7 +2362,7 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc) {
-  assert(type.maybeCounted());
+  assert(type.maybe(Type::Counted));
   auto& v = vmain();
   auto increfMaybeStatic = [&](Vout& v) {
     auto base = srcLoc.reg(0);
@@ -2390,7 +2390,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   Type type   = src->type();
 
-  if (type.notCounted()) return;
+  if (!type.maybe(Type::Counted)) return;
 
   cgIncRefWork(type, src, srcLoc(inst, 0));
 }
@@ -2531,7 +2531,7 @@ template <typename F> void
 CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
                                          Vlabel done, Type type,
                                          Vreg dataReg, F destroyImpl) {
-  always_assert(type.maybeCounted());
+  always_assert(type.maybe(Type::Counted));
   bool hasDestroy = CheckValid<F>::valid(destroyImpl);
 
   OptDecRefProfile profile;
@@ -2639,7 +2639,7 @@ void CodeGenerator::cgDecRefStaticType(Vout& v,
   assert(type != Type::Cell && type != Type::Gen);
   assert(type.isKnownDataType());
 
-  if (type.notCounted()) return;
+  if (!type.maybe(Type::Counted)) return;
 
   // Check for UncountedValue or StaticValue if needed,
   // do the actual DecRef, and leave flags set based on the subtract result,
@@ -2692,7 +2692,7 @@ void CodeGenerator::cgDecRefDynamicType(const IRInstruction* inst, Vreg typeReg,
 
 void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   auto src = inst->src(0);
-  if (!src->type().maybeCounted()) return;
+  if (!src->type().maybe(Type::Counted)) return;
   Type type = src->type();
   auto ptr_reg = srcLoc(inst, 0).reg(0);
   if (type.isKnownDataType()) {
@@ -3231,7 +3231,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
     if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {
-      assert(inst->src(srcNum)->type().isPtr());
+      assert(inst->src(srcNum)->type() <= Type::PtrToGen);
       callArgs.addr(srcLoc(inst, srcNum).reg(), TVOFF(m_data));
     } else {
       callArgs.ssa(srcNum, pi.builtinType == KindOfDouble);
@@ -3995,7 +3995,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     emitTypeTest(typeParam, rType, rData, sf, doJcc);
   } else {
     Type srcType = src->type();
-    if (srcType.isBoxed() && typeParam.isBoxed()) {
+    if (srcType <= Type::BoxedCell && typeParam <= Type::BoxedCell) {
       // Nothing to do here, since we check the inner type at the uses
     } else if (typeParam.isSpecialized()) {
       // We're just checking the array kind or object class of a value with a
@@ -4013,8 +4013,8 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       // We should only get here if this CheckType should've been simplified
       // away but wasn't for some reason, so do a simple version of what it
       // would've. Widen inner types first since CheckType ignores them.
-      if (srcType.maybeBoxed()) srcType |= Type::BoxedCell;
-      if (typeParam.maybeBoxed()) typeParam |= Type::BoxedCell;
+      if (srcType.maybe(Type::BoxedCell)) srcType |= Type::BoxedCell;
+      if (typeParam.maybe(Type::BoxedCell)) typeParam |= Type::BoxedCell;
 
       if (srcType <= typeParam) {
         // This will always succeed. Do nothing.

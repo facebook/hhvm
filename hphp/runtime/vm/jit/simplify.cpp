@@ -120,7 +120,7 @@ DEBUG_ONLY bool validate(const State& env,
               SSATmp* newDst,
               const IRInstruction* origInst) {
   auto known_available = [&] (SSATmp* src) -> bool {
-    if (!src->type().maybeCounted()) return true;
+    if (!src->type().maybe(Type::Counted)) return true;
     for (auto& oldSrc : origInst->srcs()) {
       if (oldSrc == src) return true;
     }
@@ -684,7 +684,7 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
       !s0->type().maybe(unsafeTypes) && !s1->type().maybe(unsafeTypes) &&
       // We can't add new uses to reference counted types without a more
       // advanced availability analysis.
-      !s0->type().maybeCounted() && !s1->type().maybeCounted();
+      !s0->type().maybe(Type::Counted) && !s1->type().maybe(Type::Counted);
     if (safeToFold) {
       return gen(env, negateQueryOp(op), s0, s1);
     }
@@ -694,8 +694,8 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
     // This is safe because instanceofs don't take reference counted arguments.
-    assert(!inst->src(0)->type().maybeCounted() &&
-           !inst->src(1)->type().maybeCounted());
+    assert(!inst->src(0)->type().maybe(Type::Counted) &&
+           !inst->src(1)->type().maybe(Type::Counted));
     return gen(
       env,
       negateQueryOp(op),
@@ -802,9 +802,12 @@ SSATmp* cmpImpl(State& env,
     return cns(env, bool(cmpOp(opName, 0, 0)));
   }
 
+  assert(type1 <= Type::Gen && type2 <= Type::Gen);
+
   // Need both types to be unboxed to simplify, and the code below assumes the
   // types are known DataTypes.
-  if (!type1.isKnownUnboxedDataType() || !type2.isKnownUnboxedDataType()) {
+  if (!type1.isKnownDataType() || type1.maybe(Type::BoxedCell) ||
+      !type2.isKnownDataType() || type2.maybe(Type::BoxedCell)) {
     return nullptr;
   }
 
@@ -1533,7 +1536,7 @@ SSATmp* simplifyBoxPtr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
-  assert(srcType.notPtr());
+  assert(!srcType.maybe(Type::PtrToGen));
   assert(inst->taken());
   if (!srcType.maybe(Type::Uninit)) return gen(env, Nop);
   return nullptr;
@@ -1562,7 +1565,7 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
 
 SSATmp* decRefImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!mightRelax(env, src) && !src->type().maybeCounted()) {
+  if (!mightRelax(env, src) && !src->type().maybe(Type::Counted)) {
     return gen(env, Nop);
   }
   return nullptr;
@@ -1578,7 +1581,7 @@ SSATmp* simplifyDecRefNZ(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyIncRef(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!mightRelax(env, src) && !src->type().maybeCounted()) {
+  if (!mightRelax(env, src) && !src->type().maybe(Type::Counted)) {
     return gen(env, Nop);
   }
   return nullptr;
@@ -1588,7 +1591,7 @@ SSATmp* simplifyIncRefCtx(State& env, const IRInstruction* inst) {
   auto const ctx = inst->src(0);
   if (ctx->isA(Type::Obj)) {
     return gen(env, IncRef, ctx);
-  } else if (!mightRelax(env, ctx) && ctx->type().notCounted()) {
+  } else if (!mightRelax(env, ctx) && !ctx->type().maybe(Type::Counted)) {
     return gen(env, Nop);
   }
 
@@ -1620,7 +1623,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
 
   // Pull negations into the jump.
   if (srcOpcode == XorBool && srcInst->src(1)->isConst(true)) {
-    if (!srcInst->src(0)->type().maybeCounted()) {
+    if (!srcInst->src(0)->type().maybe(Type::Counted)) {
       return gen(
         env,
         inst->op() == JmpZero ? JmpNZero : JmpZero,
@@ -1636,7 +1639,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
    * may have dec refs between the src instruction and the jump.
    */
   for (auto& src : srcInst->srcs()) {
-    if (src->type().maybeCounted()) return nullptr;
+    if (src->type().maybe(Type::Counted)) return nullptr;
   }
 
   // If the source is conversion of an int or pointer to boolean, we
@@ -1667,7 +1670,7 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
 }
 
 SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->type().notCounted() &&
+  if (!inst->src(0)->type().maybe(Type::Counted) &&
       !mightRelax(env, inst->src(0))) {
     return gen(env, Nop);
   }

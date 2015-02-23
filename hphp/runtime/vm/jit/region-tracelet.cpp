@@ -499,7 +499,7 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
   auto& rtt = m_inst.inputs[i]->rtt;
   if (ii.dontGuard) return true;
 
-  if (m_profiling && rtt.isBoxed() &&
+  if (m_profiling && rtt <= Type::BoxedCell &&
       (m_region->blocks().size() > 1 || !m_region->entry()->empty())) {
     // We don't want side exits when profiling, so only allow instructions that
     // consume refs at the beginning of the region.
@@ -513,11 +513,13 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
     return false;
   }
 
-  if (!rtt.isBoxed() || m_inst.ignoreInnerType || ii.dontGuardInner) {
+  if (!(rtt <= Type::BoxedCell) ||
+      m_inst.ignoreInnerType ||
+      ii.dontGuardInner) {
     return true;
   }
 
-  if (!rtt.innerType().isKnownDataType()) {
+  if (!rtt.inner().isKnownDataType()) {
     // Trying to consume a boxed value without a guess for the inner type.
     FTRACE(1, "selectTracelet: {} tried to consume ref {}\n",
            m_inst.toString(), m_inst.inputs[i]->pretty());

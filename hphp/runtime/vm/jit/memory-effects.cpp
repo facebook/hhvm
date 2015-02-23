@@ -30,7 +30,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 AliasClass pointee(const SSATmp* ptr) {
-  always_assert(ptr->type().isPtr());
+  always_assert(ptr->type() <= Type::PtrToGen);
 
   if (ptr->type() <= Type::PtrToFrameGen) {
     auto const sinst = canonical(ptr)->inst();

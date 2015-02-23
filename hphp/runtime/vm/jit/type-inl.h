@@ -151,8 +151,8 @@ inline bool Type::operator<=(Type rhs) const {
   // kinds or we're not a subtype.  (If `lhs' can't be a pointer, we found out
   // above when we intersected the bits.)  If neither can be a pointer, it's an
   // invariant that `m_ptrKind' will be Ptr::Unk so this will pass.
-  if (lhs.rawPtrKind() != rhs.rawPtrKind() &&
-      !ptr_subtype(lhs.rawPtrKind(), rhs.rawPtrKind())) {
+  if (lhs.ptrKind() != rhs.ptrKind() &&
+      !ptr_subtype(lhs.ptrKind(), rhs.ptrKind())) {
     return false;
   }
 
@@ -187,43 +187,6 @@ inline bool Type::maybe(Type t2) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Is-a methods.
 
-inline bool Type::isZeroValType() const {
-  return subtypeOfAny(Uninit, InitNull, Nullptr);
-}
-
-inline bool Type::isBoxed() const {
-  return *this <= BoxedCell;
-}
-
-inline bool Type::maybeBoxed() const {
-  return maybe(BoxedCell);
-}
-
-inline bool Type::notBoxed() const {
-  assert(*this <= Gen);
-  return *this <= Cell;
-}
-
-inline bool Type::isPtr() const {
-  return *this <= PtrToGen;
-}
-
-inline bool Type::notPtr() const {
-  return !maybe(PtrToGen);
-}
-
-inline bool Type::isCounted() const {
-  return *this <= Counted;
-}
-
-inline bool Type::maybeCounted() const {
-  return maybe(Counted);
-}
-
-inline bool Type::notCounted() const {
-  return !maybe(Counted);
-}
-
 inline bool Type::isUnion() const {
   // This will return true iff more than 1 bit is set in m_bits.
   return (m_bits & (m_bits - 1)) != 0;
@@ -236,10 +199,6 @@ inline bool Type::isKnownDataType() const {
   return subtypeOfAny(Str, Arr, BoxedCell) || !isUnion();
 }
 
-inline bool Type::isKnownUnboxedDataType() const {
-  return isKnownDataType() && notBoxed();
-}
-
 inline bool Type::needsReg() const {
   return *this <= StkElem && !isKnownDataType();
 }
@@ -250,11 +209,6 @@ inline bool Type::needsValueReg() const {
 
 inline bool Type::needsStaticBitCheck() const {
   return maybe(StaticStr | StaticArr);
-}
-
-inline bool Type::canRunDtor() const {
-  return maybe(CountedArr | BoxedCountedArr | Obj | BoxedObj |
-               Res | BoxedRes);
 }
 
 inline bool Type::isSimpleType() const {
@@ -337,14 +291,14 @@ inline Type Type::dropConstVal() const {
   if (*this <= StaticArr) {
     return Type::StaticArray(arrVal()->kind());
   }
-  return Type(m_bits, rawPtrKind());
+  return Type(m_bits, ptrKind());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constant introspection.
 
 inline bool Type::isConst() const {
-  return m_hasConstVal || isZeroValType();
+  return m_hasConstVal || subtypeOfAny(Uninit, InitNull, Nullptr);
 }
 
 inline bool Type::isConst(Type t) const {
@@ -358,7 +312,7 @@ bool Type::isConst(T val) const {
 
 inline uint64_t Type::rawVal() const {
   assert(isConst());
-  return isZeroValType() ? 0 : m_intVal;
+  return m_extra;
 }
 
 #define IMPLEMENT_CNS_VAL(TypeName, name, valtype)  \
@@ -417,7 +371,7 @@ inline Type Type::ExactObj(const Class* cls) {
 }
 
 inline Type Type::unspecialize() const {
-  return Type(m_bits, rawPtrKind());
+  return Type(m_bits, ptrKind());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -479,17 +433,21 @@ inline Type Type::box() const {
   // Boxing Uninit returns InitNull but that logic doesn't belong here.
   assert(!maybe(Uninit) || *this == Cell);
   return Type(m_bits << kBoxShift,
-              rawPtrKind(),
+              ptrKind(),
               isSpecialized() && !m_hasConstVal ? m_extra : 0);
+}
+
+inline Type Type::inner() const {
+  assert(*this <= BoxedCell);
+  return Type(m_bits >> kBoxShift, Ptr::Unk, m_extra);
 }
 
 inline Type Type::unbox() const {
   assert(*this <= Gen);
-  return (*this & Cell) | (*this & BoxedCell).innerType();
+  return (*this & Cell) | (*this & BoxedCell).inner();
 }
 
 inline Type Type::ptr(Ptr kind) const {
-  assert(!isPtr());
   assert(*this <= Gen);
   return Type(m_bits << kPtrShift,
               kind,
@@ -497,7 +455,7 @@ inline Type Type::ptr(Ptr kind) const {
 }
 
 inline Type Type::deref() const {
-  assert(isPtr());
+  assert(*this <= PtrToGen);
   return Type(m_bits >> kPtrShift,
               Ptr::Unk /* no longer a pointer */,
               isSpecialized() ? m_extra : 0);
@@ -505,7 +463,7 @@ inline Type Type::deref() const {
 
 inline Type Type::derefIfPtr() const {
   assert(*this <= (Gen | PtrToGen));
-  return isPtr() ? deref() : *this;
+  return *this <= PtrToGen ? deref() : *this;
 }
 
 inline Type Type::strip() const {
@@ -513,18 +471,7 @@ inline Type Type::strip() const {
 }
 
 inline Ptr Type::ptrKind() const {
-  assert(maybe(PtrToGen));
-  return rawPtrKind();
-}
-
-inline Ptr Type::rawPtrKind() const {
   return static_cast<Ptr>(m_ptrKind);
-}
-
-inline Type Type::innerType() const {
-  assert(isBoxed());
-  assert(*this == Bottom || !isPtr());
-  return Type(m_bits >> kBoxShift, Ptr::Unk, m_extra);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

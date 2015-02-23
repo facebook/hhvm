@@ -105,8 +105,8 @@ folly::Optional<Type> interpOutputType(HTS& env,
 
   auto boxed = [&] (Type t) -> Type {
     if (t == Type::Gen) return Type::BoxedInitCell;
-    assert(t.isBoxed() || t.notBoxed());
-    checkTypeType = t.isBoxed() ? t : boxType(t); // inner type is predicted
+    assert(t <= Type::Cell || t <= Type::BoxedCell);
+    checkTypeType = t <= Type::BoxedCell ? t : boxType(t);
     return Type::BoxedInitCell;
   };
 
@@ -171,7 +171,7 @@ folly::Optional<Type> interpOutputType(HTS& env,
 
     case OutCInput: {
       auto ttype = topType(env, BCSPOffset{0});
-      if (ttype.notBoxed()) return ttype;
+      if (ttype <= Type::Cell) return ttype;
       // All instructions that are OutCInput or OutCInputL cannot push uninit or
       // a ref, so only specific inner types need to be checked.
       if (ttype.unbox() < Type::InitCell) {
@@ -182,7 +182,7 @@ folly::Optional<Type> interpOutputType(HTS& env,
 
     case OutCInputL: {
       auto ltype = localType();
-      if (ltype.notBoxed()) return ltype;
+      if (ltype <= Type::Cell) return ltype;
       if (ltype.unbox() < Type::InitCell) {
         checkTypeType = ltype.unbox();
       }
@@ -213,8 +213,8 @@ interpOutputLocals(HTS& env,
   auto const func = curFunc(env);
 
   auto handleBoxiness = [&] (Type testTy, Type useTy) {
-    return testTy.isBoxed() ? Type::BoxedInitCell :
-           testTy.maybeBoxed() ? Type::Gen :
+    return testTy <= Type::BoxedCell ? Type::BoxedInitCell :
+           testTy.maybe(Type::BoxedCell) ? Type::Gen :
            useTy;
   };
 
@@ -272,7 +272,7 @@ interpOutputLocals(HTS& env,
     case OpVGetL:
     case OpBindL: {
       assert(pushedType.hasValue());
-      assert(pushedType->isBoxed());
+      assert(*pushedType <= Type::BoxedCell);
       setImmLocType(0, pushedType.value());
       break;
     }
@@ -313,8 +313,8 @@ interpOutputLocals(HTS& env,
           MInstrEffects effects(op, baseType);
           if (effects.baseValChanged) {
             auto const ty = effects.baseType.deref();
-            assert((ty.isBoxed() ||
-                    ty.notBoxed()) ||
+            assert((ty <= Type::Cell ||
+                    ty <= Type::BoxedCell) ||
                     curFunc(env)->isPseudoMain());
             setLocType(base.offset, handleBoxiness(ty, ty));
           }
@@ -358,7 +358,7 @@ interpOutputLocals(HTS& env,
       auto const& tc = func->params()[paramId].typeConstraint;
       auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
       if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
-          (locType <= Type::Obj || locType.maybeBoxed())) {
+          (locType <= Type::Obj || locType.maybe(Type::BoxedCell))) {
         setImmLocType(0, handleBoxiness(locType, Type::Cell));
       }
       break;

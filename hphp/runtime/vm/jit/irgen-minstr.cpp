@@ -159,7 +159,7 @@ void constrainBase(MTS& env, TypeConstraint tc) {
   // Member operations only care about the inner type of the base if it's
   // boxed, so this handles the logic of using the inner constraint when
   // appropriate.
-  if (env.base.type.maybeBoxed()) {
+  if (env.base.type.maybe(Type::BoxedCell)) {
     tc.category = DataTypeCountness;
   }
   env.irb.constrainValue(env.base.value, tc);
@@ -313,11 +313,12 @@ void checkMIState(MTS& env) {
   const bool isSingle       = env.immVecM.size() == 1;
   const bool unknownOffsets = mInstrHasUnknownOffsets(env);
 
-  if (baseType.maybeBoxed() && !baseType.isBoxed()) {
+  if (baseType.maybe(Type::Cell) &&
+      baseType.maybe(Type::BoxedCell)) {
     // We don't need to bother with weird base types.
     return;
   }
-  if (baseType.isBoxed()) {
+  if (baseType <= Type::BoxedCell) {
     baseType = ldRefReturn(baseType.unbox());
   }
 
@@ -453,8 +454,8 @@ SSATmp* getKey(MTS& env) {
   auto key = getInput(env, env.iInd, DataTypeSpecific);
   auto const keyType = key->type();
 
-  assert(keyType.isBoxed() || keyType.notBoxed());
-  if (keyType.isBoxed()) {
+  assert(keyType <= Type::Cell || keyType <= Type::BoxedCell);
+  if (keyType <= Type::BoxedCell) {
     key = gen(env, LdRef, Type::InitCell, key);
   }
   return key;
@@ -492,7 +493,8 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
   // end up not caring about the type. Consumers of the return value must
   // constrain the base as appropriate.
   auto const base = getBase(env, DataTypeGeneric); // XXX: gens unneeded instrs
-  if (!base->type().isBoxed() && base->type().maybeBoxed()) {
+  if (base->type().maybe(Type::Cell) &&
+      base->type().maybe(Type::BoxedCell)) {
     // We might be doing a Base NL or something similar.  Either way we can't
     // do a simple op if we have a mixed boxed/unboxed type.
     return SimpleOp::None;
@@ -503,7 +505,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
     // Before we do any simpleCollectionOp on a local base, we will always emit
     // the appropriate CheckRefInner guard to allow us to use a predicted inner
     // type.  So when calculating the SimpleOp assume that type.
-    if (base->type().maybeBoxed() && baseDL.location.isLocal()) {
+    if (base->type().maybe(Type::BoxedCell) && baseDL.location.isLocal()) {
       return env.irb.predictedInnerType(baseDL.location.offset);
     }
     return base->type();
@@ -589,7 +591,11 @@ void emitBaseLCR(MTS& env) {
   // we do, it's constrained further.
   auto base = getBase(env, DataTypeGeneric);
   auto baseType = base->type();
-  if (!(baseType.isBoxed() || baseType.notBoxed())) PUNT(MInstr-GenBase);
+
+  if (!(baseType <= Type::Cell ||
+        baseType <= Type::BoxedCell)) {
+    PUNT(MInstr-GenBase);
+  }
 
   if (baseDL.location.isLocal()) {
     // Check for Uninit and warn/promote to InitNull as appropriate
@@ -625,8 +631,8 @@ void emitBaseLCR(MTS& env) {
    * type.  This is the first code emitted for the minstr so it's ok to
    * side-exit here.
    */
-  Block* failedRef = baseType.isBoxed() ? makeExit(env) : nullptr;
-  if (baseType.isBoxed() && baseDL.location.isLocal()) {
+  Block* failedRef = baseType <= Type::BoxedCell ? makeExit(env) : nullptr;
+  if (baseType <= Type::BoxedCell && baseDL.location.isLocal()) {
     auto const predTy = env.irb.predictedInnerType(baseDL.location.offset);
     gen(env, CheckRefInner, predTy, failedRef, base);
     base = gen(env, LdRef, predTy, base);
@@ -674,8 +680,8 @@ void emitBaseLCR(MTS& env) {
       stkType.ptr(Ptr::Stk)
     );
   }
-  assert(env.base.value->type().isPtr());
-  assert(env.base.type.isPtr());
+  assert(env.base.value->type() <= Type::PtrToGen);
+  assert(env.base.type <= Type::PtrToGen);
 
   // TODO(t2598894): We do this for consistency with the old guard relaxation
   // code, but may change it in the future.
@@ -791,7 +797,7 @@ SSATmp* checkInitProp(MTS& env,
   auto const key = getKey(env);
   assert(key->isA(Type::StaticStr));
   assert(baseAsObj->isA(Type::Obj));
-  assert(propAddr->type().isPtr());
+  assert(propAddr->type() <= Type::PtrToGen);
 
   auto const needsCheck =
     Type::Uninit <= propAddr->type().deref() &&
@@ -836,7 +842,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
   SCOPE_EXIT {
     // After this function, m_base is either a pointer to init_null_variant or
     // a property in the object that we've verified isn't uninit.
-    assert(env.base.type.isPtr());
+    assert(env.base.type <= Type::PtrToGen);
   };
 
   /*
@@ -1170,7 +1176,7 @@ void emitRatchetRefs(MTS& env) {
       gen(env, StMem, misRefAddr, cns(env, Type::Uninit));
 
       // Adjust base pointer.
-      assert(env.base.type.isPtr());
+      assert(env.base.type <= Type::PtrToGen);
       return misRef2Addr;
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
@@ -1472,11 +1478,11 @@ void emitPackedArrayIsset(MTS& env) {
 void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
   assert(env.iInd == env.mii.valCount() + 1);
   const int baseStkIdx = env.mii.valCount();
-  assert(key->type().notBoxed());
-  assert(value->type().notBoxed());
+  assert(key->type() <= Type::Cell);
+  assert(value->type() <= Type::Cell);
 
   auto const& base = *env.ni.inputs[env.mii.valCount()];
-  bool const setRef = base.rtt.isBoxed();
+  bool const setRef = base.rtt <= Type::BoxedCell;
 
   // No catch trace below because the helper can't throw. It may reenter to
   // call destructors so it has a sync point in nativecalls.cpp, but exceptions
@@ -1563,9 +1569,11 @@ void emitCGetProp(MTS& env) {
       return;
     }
 
-    auto const ty      = env.base.type.deref();
-    auto const cellPtr = ty.maybeBoxed() ? gen(env, UnboxPtr, env.base.value)
-                                         : env.base.value;
+    auto const ty = env.base.type.deref();
+    auto const cellPtr = ty.maybe(Type::BoxedCell)
+      ? gen(env, UnboxPtr, env.base.value)
+      : env.base.value;
+
     env.result = gen(env, LdMem, ty.unbox(), cellPtr);
     gen(env, IncRef, env.result);
     return;
@@ -1607,10 +1615,13 @@ void emitSetProp(MTS& env) {
       !mightCallMagicPropMethod(MIA_define, knownCls, propInfo)) {
     emitPropSpecialized(env, MIA_define, propInfo);
 
-    auto const propTy  = env.base.type.deref();
-    auto const cellTy  = propTy.maybeBoxed() ? propTy.unbox() : propTy;
-    auto const cellPtr = propTy.maybeBoxed() ? gen(env, UnboxPtr, env.base.value)
-                                             : env.base.value;
+    auto cellTy = env.base.type.deref();
+    auto cellPtr = env.base.value;
+
+    if (cellTy.maybe(Type::BoxedCell)) {
+      cellTy = cellTy.unbox();
+      cellPtr = gen(env, UnboxPtr, cellPtr);
+    }
     auto const oldVal  = gen(env, LdMem, cellTy, cellPtr);
 
     gen(env, IncRef, value);
@@ -1751,7 +1762,8 @@ void emitSetWithRefLProp(MTS& env) { SPUNT(__func__); }
 void emitSetWithRefRProp(MTS& env) { emitSetWithRefLProp(env); }
 
 void emitSetWithRefNewElem(MTS& env) {
-  if (env.base.type.strip() <= Type::Arr && getValue(env)->type().notBoxed()) {
+  if (env.base.type.strip() <= Type::Arr &&
+      getValue(env)->type() <= Type::Cell) {
     constrainBase(env, DataTypeSpecific);
     emitSetNewElem(env);
   } else {
@@ -1812,7 +1824,7 @@ void emitSetWithRefLElem(MTS& env) {
   auto const key = getKey(env);
   auto const locAddr = getValAddr(env);
   if (env.base.type.strip() <= Type::Arr &&
-      !locAddr->type().deref().maybeBoxed()) {
+      !locAddr->type().deref().maybe(Type::BoxedCell)) {
     constrainBase(env, DataTypeSpecific);
     emitSetElem(env);
     assert(env.strTestResult == nullptr);

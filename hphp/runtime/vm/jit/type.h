@@ -427,39 +427,6 @@ public:
   // Is-a methods.                                                      [const]
 
   /*
-   * Is this a PHP null type, or a null pointer?
-   */
-  bool isZeroValType() const;
-
-  /*
-   * Is this (maybe) a boxed PHP type?
-   */
-  bool isBoxed() const;
-  bool maybeBoxed() const;
-
-  /*
-   * Is this an unboxed PHP type?
-   *
-   * Note that this is different from !isBoxed().
-   *
-   * @requires: *this <= Gen
-   */
-  bool notBoxed() const;
-
-  /*
-   * Is this (not) a pointer to a PHP type?
-   */
-  bool isPtr() const;
-  bool notPtr() const;
-
-  /*
-   * Is this (maybe/not) a refcounted PHP type?
-   */
-  bool isCounted() const;
-  bool maybeCounted() const;
-  bool notCounted() const;
-
-  /*
    * Is this a union type?
    *
    * Note that this is the plain old set definition of union, so Type::Str,
@@ -476,11 +443,6 @@ public:
   bool isKnownDataType() const;
 
   /*
-   * @returns: isKnownDataType() && notBoxed()
-   */
-  bool isKnownUnboxedDataType() const;
-
-  /*
    * Does this require a register to hold a DataType or value at runtime?
    */
   bool needsReg() const;
@@ -491,12 +453,6 @@ public:
    * StaticArr)?
    */
   bool needsStaticBitCheck() const;
-
-  /*
-   * Might this be a type which can run destructors (i.e., an (optionally
-   * boxed) array, object, or resource)?
-   */
-  bool canRunDtor() const;
 
   /*
    * Return true if this corresponds to a type that is passed by (value/
@@ -670,27 +626,35 @@ public:
   /*
    * Box or unbox a Type.
    *
+   * The box() and inner() methods are inverses---they (respectively) take the
+   * the {Cell, BoxedCell} bits of the Type and coerce them into the
+   * {BoxedCell, Cell} sides of the lattice, replacing whatever was there
+   * before; e.g.,
+   *
+   *    box(Int|BoxedDbl)   -> BoxedInt
+   *    inner(BoxedInt|Dbl) -> Int
+   *
+   * Meanwhile, unbox() is like inner(), but rather than replacing the Cell
+   * component of the Type, it unions it with the shifted BoxedCell bits, e.g.,
+   *
+   *    unbox(BoxedInt|Dbl) -> Int|Dbl
+   *
    * @requires:
    *    box:    *this <= Cell
    *            !maybe(Uninit) || *this == Cell
+   *    inner:  *this <= BoxedCell
    *    unbox:  *this <= Gen
    */
   Type box() const;
+  Type inner() const;
   Type unbox() const;
-
-  /*
-   * Get the inner Type of a boxed Type.
-   *
-   * @requires: isBoxed()
-   */
-  Type innerType() const;
 
   /*
    * Get a pointer to, or dereference, a Type.
    *
    * @requires:
-   *    ptr:        !isPtr() && *this <= Gen
-   *    deref:      isPtr()
+   *    ptr:        *this <= Gen
+   *    deref:      *this <= PtrToGen
    *    derefIfPtr: *this <= (Gen | PtrToGen)
    */
   Type ptr(Ptr kind) const;
@@ -703,9 +667,7 @@ public:
   Type strip() const;
 
   /*
-   * Return the pointer category of a possibly-pointer type.
-   *
-   * Pre: maybe(Type::PtrToGen)
+   * Return the pointer category of a Type.
    */
   Ptr ptrKind() const;
 
@@ -746,11 +708,6 @@ private:
    * Return false if a specialized type has a mismatching tag, else true.
    */
   bool checkValid() const;
-
-  /*
-   * Return m_ptr cast to a Ptr, with no checks.
-   */
-  Ptr rawPtrKind() const;
 
   /*
    * Add specialization to a generic type via a TypeSpec.
@@ -826,7 +783,7 @@ Type convertToType(RepoAuthType ty);
 /*
  * Return the dest type for a LdRef with the given typeParam.
  *
- * @requires: typeParam.notBoxed()
+ * @requires: typeParam <= Type::Cell
  */
 Type ldRefReturn(Type typeParam);
 

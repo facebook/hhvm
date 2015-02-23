@@ -482,9 +482,13 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
         auto const offset = base->inst()->extra<LdStkAddr>()->offset;
         auto const prevTy = stackType(offset);
         MInstrEffects effects(inst->op(), prevTy.ptr(Ptr::Stk));
+
         if (effects.baseTypeChanged || effects.baseValChanged) {
           auto const ty = effects.baseType.derefIfPtr();
-          setStackType(offset, ty.isBoxed() ? Type::BoxedInitCell : ty);
+          setStackType(
+            offset,
+            ty <= Type::BoxedCell ? Type::BoxedInitCell : ty
+          );
         }
       }
     }
@@ -915,7 +919,7 @@ void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
       auto const inst = value->inst();
       switch (inst->op()) {
       case LdLoc:
-        if (value->type().isBoxed()) {
+        if (value->type() <= Type::BoxedCell) {
           // Keep the same prediction as this local.
           return cur().locals[inst->extra<LdLoc>()->locId].predictedType;
         }
@@ -999,7 +1003,7 @@ void FrameStateMgr::setBoxedLocalPrediction(uint32_t id, Type type) {
  * point to that cell can have their inner type predictions updated.
  */
 void FrameStateMgr::updateLocalRefPredictions(SSATmp* boxedCell, SSATmp* val) {
-  assert(boxedCell->type().isBoxed());
+  assert(boxedCell->type() <= Type::BoxedCell);
   for (auto id = uint32_t{0}; id < cur().locals.size(); ++id) {
     if (canonical(cur().locals[id].value) == canonical(boxedCell)) {
       setBoxedLocalPrediction(id, boxType(val->type()));
@@ -1077,7 +1081,7 @@ void FrameStateMgr::killLocalsForCall(bool callDestroysLocals) {
 void FrameStateMgr::dropLocalRefsInnerTypes() {
   for (auto& frame : m_stack) {
     for (auto& local : frame.locals) {
-      if (local.type.isBoxed()) {
+      if (local.type <= Type::BoxedCell) {
         local.type          = Type::BoxedInitCell;
         local.predictedType = Type::BoxedInitCell;
       }

@@ -6217,6 +6217,7 @@ static int exif_process_unicode(image_info_type *ImageInfo,
                                 xp_field_type *xp_field, int tag,
                                 char *szValuePtr, int ByteCount) {
   xp_field->tag = tag;
+  xp_field->value = nullptr;
 
   /* Copy the comment */
 #if EXIF_USE_MBSTRING

@@ -829,7 +829,7 @@ static bool HHVM_METHOD(ReflectionFunction, __initClosure,
 // helper for getClosureScopeClass
 static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
                           const Object& closure) {
-  auto clos = closure.getTyped<c_Closure>();
+  auto clos = unsafe_cast<c_Closure>(closure);
   if (clos->getScope()) {
     return String(const_cast<StringData*>(clos->getScope()->name()));
   }
@@ -837,8 +837,8 @@ static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
 }
 
 static Object HHVM_METHOD(ReflectionFunction, getClosureThisObject,
-                           const Object& closure) {
-  auto clos = closure.getTyped<c_Closure>();
+                          const Object& closure) {
+  auto clos = unsafe_cast<c_Closure>(closure);
   if (clos->hasThis()) {
     return clos->getThis();
   }
@@ -1020,8 +1020,7 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
 static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
-  c_Set* st;
-  Object o = st = newobj<c_Set>(); // Object ensures set is freed
+  auto st = makeSmartPtr<c_Set>();
   auto const& allIfaces = cls->allInterfaces();
   st->reserve(allIfaces.size());
 
@@ -1036,7 +1035,7 @@ static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   }
 
   PackedArrayInit ai(st->size());
-  for (ArrayIter iter(st); iter; ++iter) {
+  for (ArrayIter iter(st.get()); iter; ++iter) {
     ai.append(iter.secondRefPlus());
   }
   return ai.toArray();
@@ -1087,7 +1086,7 @@ static bool HHVM_METHOD(ReflectionClass, hasMethod, const String& name) {
   return (get_method_func(cls, name) != nullptr);
 }
 
-static void addInterfaceMethods(const Class* iface, c_Set* st) {
+static void addInterfaceMethods(const Class* iface, const SmartPtr<c_Set>& st) {
   assert(iface && st);
   assert(AttrInterface & iface->attrs());
 
@@ -1118,8 +1117,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
-  c_Set* st;
-  Object ret = st = newobj<c_Set>();
+  auto st = makeSmartPtr<c_Set>();
   st->reserve(cls->numMethods());
 
   auto add = [&] (const Func* m) {
@@ -1172,7 +1170,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
       }
     }
   }
-  return ret;
+  return Object(std::move(st));
 }
 
 static bool HHVM_METHOD(ReflectionClass, hasConstant, const String& name) {
@@ -1186,7 +1184,10 @@ static Variant HHVM_METHOD(ReflectionClass, getConstant, const String& name) {
   return (value.m_type == KindOfUninit) ? false_varNR : cellAsCVarRef(value);
 }
 
-static void addClassConstantNames(const Class* cls, c_Set* st, size_t limit) {
+static
+void addClassConstantNames(const Class* cls,
+                           const SmartPtr<c_Set>& st,
+                           size_t limit) {
   assert(cls && st && (st->size() < limit));
 
   auto numConsts = cls->numConstants();
@@ -1217,15 +1218,14 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
     return Array::Create();
   }
 
-  c_Set* st;
-  Object o = st = newobj<c_Set>();
+  auto st = makeSmartPtr<c_Set>();
   st->reserve(numConsts);
 
   addClassConstantNames(cls, st, numConsts);
   assert(st->size() <= numConsts);
 
   ArrayInit ai(numConsts, ArrayInit::Mixed{});
-  for (ArrayIter iter(st); iter; ++iter) {
+  for (ArrayIter iter(st.get()); iter; ++iter) {
     auto constName = iter.first().getStringData();
     Cell value = cls->clsCnsGet(constName);
     assert(value.m_type != KindOfUninit);
@@ -1243,8 +1243,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
     return Array::Create();
   }
 
-  c_Set* st;
-  Object o = st = newobj<c_Set>();
+  auto st = makeSmartPtr<c_Set>();
   st->reserve(numConsts);
 
   const Class::Const* consts = cls->constants();

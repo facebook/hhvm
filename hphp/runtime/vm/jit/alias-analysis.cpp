@@ -121,9 +121,10 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     ret |= all_stack;
   }
 
-  if (acls.maybe(APropAny))   ret |= all_props;
-  if (acls.maybe(AElemIAny))  ret |= all_elemIs;
-  if (acls.maybe(AFrameAny))  ret |= all_frame;
+  if (acls.maybe(APropAny))    ret |= all_props;
+  if (acls.maybe(AElemIAny))   ret |= all_elemIs;
+  if (acls.maybe(AFrameAny))   ret |= all_frame;
+  if (acls.maybe(AMIStateAny)) ret |= all_mistate;
 
   return ret;
 }
@@ -177,7 +178,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (auto const frame = acls.is_frame()) {
+    if (acls.is_frame() || acls.is_mis()) {
       add_class(ret, acls);
       return;
     }
@@ -238,17 +239,20 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       ret.all_props.set(meta.index);
       return;
     }
+
     if (auto const elemI = acls.is_elemI()) {
       meta.conflicts = conflict_array_index[elemI->idx];
       meta.conflicts.reset(meta.index);
       ret.all_elemIs.set(meta.index);
       return;
     }
+
     if (auto const frame = acls.is_frame()) {
       ret.all_frame.set(meta.index);
       ret.per_frame_bits[frame->fp].set(meta.index);
       return;
     }
+
     if (auto const stk = acls.is_stack()) {
       ret.all_stack.set(meta.index);
       for (auto& kv : conflict_stkptrs) {
@@ -261,6 +265,12 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       }
       return;
     }
+
+    if (auto const mis = acls.is_mis()) {
+      ret.all_mistate.set(meta.index);
+      return;
+    }
+
     always_assert_flog(0, "AliasAnalysis assigned an AliasClass an id "
       "but it didn't match a situation we undestood: {}\n", show(acls));
   };

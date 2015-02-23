@@ -80,6 +80,9 @@ namespace {
  *                   |
  *                  Ref
  *
+ * Note: if you add a new pointer type, you very likely need to update
+ * pointee() in memory-effects.cpp for it to remain correct.
+ *
  */
 
 constexpr auto kPtrRefBit = static_cast<uint32_t>(Ptr::Ref);

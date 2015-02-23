@@ -234,6 +234,8 @@ enum class Ptr : uint8_t {
   IRTP(PtrToMISInit,       MIS, kInit << kPtrShift)               \
   IRTP(PtrToMemGen,       Memb, kGen << kPtrShift)                \
   IRTP(PtrToMemInit,      Memb, kInit << kPtrShift)               \
+  IRTP(PtrToClsInitGen,ClsInit, kGen << kPtrShift)                \
+  IRTP(PtrToClsCnsGen,  ClsCns, kGen << kPtrShift)                \
                                                                   \
   IRTP(PtrToRFrameGen,  RFrame, kGen << kPtrShift)                \
   IRTP(PtrToRFrameInit, RFrame, kInit << kPtrShift)               \

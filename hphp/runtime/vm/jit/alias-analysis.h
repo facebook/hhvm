@@ -91,6 +91,7 @@ struct AliasAnalysis {
   ALocBits all_elemIs;
   ALocBits all_frame;
   ALocBits all_stack;
+  ALocBits all_mistate;
 
   /*
    * Sets of alias classes that are used by must_alias.

@@ -15,17 +15,22 @@ open Utils
 (* Types, constants *)
 (*****************************************************************************)
 
+type mode =
+  | Suggest
+  | Color
+  | Coverage
+  | Prolog
+  | Lint
+  | Errors
+
 type options = {
   filename : string;
-  suggest : bool;
-  color : bool;
-  coverage : bool;
-  prolog : bool;
-  lint : bool;
-  rest : string list
+  mode : mode;
 }
 
-let builtins_filename = "builtins.hhi"
+let builtins_filename =
+  Relative_path.create Relative_path.Dummy "builtins.hhi"
+
 let builtins = "<?hh // decl\n"^
   "interface Traversable<Tv> {}\n"^
   "interface Container<Tv> extends Traversable<Tv> {}\n"^
@@ -115,45 +120,36 @@ let error l = output_string stderr (Errors.to_string (Errors.to_absolute l))
 
 let parse_options () =
   let fn_ref = ref None in
-  let suggest = ref false in
-  let color = ref false in
-  let coverage = ref false in
-  let prolog = ref false in
-  let lint = ref false in
-  let rest_options = ref [] in
-  let rest x = rest_options := x :: !rest_options in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
+  let mode = ref Errors in
+  let set_mode x () =
+    if !mode <> Errors
+    then raise (Arg.Bad "only a single mode should be specified")
+    else mode := x
+  in
   let options = [
     "--suggest",
-      Arg.Set suggest,
+      Arg.Unit (set_mode Suggest),
       "Suggest missing typehints";
     "--color",
-      Arg.Set color,
+      Arg.Unit (set_mode Color),
       "Produce color output";
     "--coverage",
-      Arg.Set coverage,
+      Arg.Unit (set_mode Coverage),
       "Produce coverage output";
     "--prolog",
-      Arg.Set prolog,
+      Arg.Unit (set_mode Prolog),
       "Produce prolog facts";
     "--lint",
-      Arg.Set lint,
+      Arg.Unit (set_mode Lint),
       "Produce lint errors";
-    "--",
-      Arg.Rest rest,
-      "";
   ] in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
   { filename = fn;
-    suggest = !suggest;
-    color = !color;
-    coverage = !coverage;
-    prolog = !prolog;
-    lint = !lint;
-    rest = !rest_options;
+    mode = !mode;
   }
 
 let suggest_and_print fn { FileInfo.funs; classes; typedefs; consts; _ } =
@@ -232,22 +228,58 @@ let print_prolog files_info =
   end files_info [] in
   PrologMain.output_facts stdout facts
 
+let handle_mode mode files_info errors lint_errors =
+  match mode with
+  | Color ->
+      Relative_path.Map.iter begin fun fn fileinfo ->
+        if fn = builtins_filename then () else begin
+          let result = ServerColorFile.get_level_list
+            (fun () -> ignore (ServerIdeUtils.check_defs fileinfo); fn) in
+          print_colored fn result;
+        end
+      end files_info
+  | Coverage ->
+      Relative_path.Map.iter begin fun fn fileinfo ->
+        if fn = builtins_filename then () else begin
+          let type_acc = ServerCoverageMetric.accumulate_types fileinfo in
+          print_coverage fn type_acc;
+        end
+      end files_info
+  | Prolog ->
+      print_prolog files_info
+  | Lint ->
+      let lint_errors =
+        Relative_path.Map.fold begin fun fn fileinfo lint_errors ->
+          lint_errors @ fst (Lint.do_ begin fun () ->
+            Linting_service.lint fn fileinfo
+          end)
+        end files_info lint_errors in
+      if lint_errors <> []
+      then begin
+        let lint_errors = List.map Lint.to_absolute lint_errors in
+        ServerLint.output_text stdout lint_errors;
+        exit 2
+      end
+      else Printf.printf "No lint errors\n"
+  | Suggest
+  | Errors ->
+      let errors = Relative_path.Map.fold begin fun _ fileinfo errors ->
+        errors @ ServerIdeUtils.check_defs fileinfo
+      end files_info errors in
+      if mode = Suggest
+      then Relative_path.Map.iter suggest_and_print files_info;
+      if errors <> []
+      then (error (List.hd errors); exit 2)
+      else Printf.printf "No errors\n"
+
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
 
-(* This was the original main ... before there was a daemon.
- * This function can also be called interactively from top_single to
- * populate the global typing environment (see typing_env.ml) for
- * a given file. You can then inspect this typing environment, e.g.
- * with 'Typing_env.Classes.get "Foo";;'
- *)
-let main_hack { filename; suggest; color; coverage; prolog; lint; _ } =
+let main_hack { filename; mode; } =
   ignore (Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos));
   SharedMem.init();
   Hhi.set_hhi_root_for_unit_test "/tmp/hhi";
-  let builtins_filename =
-    Relative_path.create Relative_path.Dummy builtins_filename in
   let filename = Relative_path.create Relative_path.Dummy filename in
   let lint_errors, (errors, files_info) =
     Lint.do_ begin fun () ->
@@ -287,48 +319,7 @@ let main_hack { filename; suggest; color; coverage; prolog; lint; _ } =
         files_info
       end
     end in
-
-  if color then
-    Relative_path.Map.iter begin fun fn fileinfo ->
-      if fn = builtins_filename then () else begin
-        let result = ServerColorFile.get_level_list
-          (fun () -> ignore (ServerIdeUtils.check_defs fileinfo); fn) in
-        print_colored fn result;
-      end
-    end files_info
-  else if coverage then
-    Relative_path.Map.iter begin fun fn fileinfo ->
-      if fn = builtins_filename then () else begin
-        let type_acc = ServerCoverageMetric.accumulate_types fileinfo in
-        print_coverage fn type_acc;
-      end
-    end files_info
-  else if prolog then
-    print_prolog files_info
-  else if lint then
-    let lint_errors =
-      Relative_path.Map.fold begin fun fn fileinfo lint_errors ->
-        lint_errors @ fst (Lint.do_ begin fun () ->
-          Linting_service.lint fn fileinfo
-        end)
-      end files_info lint_errors in
-    if lint_errors <> []
-    then begin
-      let lint_errors = List.map Lint.to_absolute lint_errors in
-      ServerLint.output_text stdout lint_errors;
-      exit 2
-    end
-    else Printf.printf "No lint errors\n"
-  else begin
-    let errors = Relative_path.Map.fold begin fun _ fileinfo errors ->
-      errors @ ServerIdeUtils.check_defs fileinfo
-    end files_info errors in
-    if suggest
-    then Relative_path.Map.iter suggest_and_print files_info;
-    if errors <> []
-    then (error (List.hd errors); exit 2)
-    else Printf.printf "No errors\n"
-  end
+  handle_mode mode files_info errors lint_errors
 
 (* command line driver *)
 let _ =

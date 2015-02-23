@@ -3960,7 +3960,7 @@ void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
-  assert(dstLoc(inst, 0).reg() == rVmTl);
+  vmain() << lea{rVmTl[rds::kVmMInstrStateOff], dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {

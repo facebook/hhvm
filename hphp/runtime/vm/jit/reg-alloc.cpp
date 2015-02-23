@@ -67,10 +67,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
     return mcg->backEnd().rVmFp();
   }
 
-  if (opc == DefMIStateBase) {
-    assert(tmp.isA(Type::PtrToGen));
-    return mcg->backEnd().rVmTl();
-  }
   return InvalidReg;
 }
 

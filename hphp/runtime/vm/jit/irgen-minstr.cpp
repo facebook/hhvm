@@ -216,10 +216,7 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
 // pointer if it's not needed.
 SSATmp* misPtr(MTS& env) {
   assert(env.base.value && "misPtr called before emitBaseOp");
-  if (env.needMIS) {
-    return gen(env, LdMIStateAddr, env.misBase,
-      cns(env, rds::kVmMInstrStateOff));
-  }
+  if (env.needMIS) return env.misBase;
   return cns(env, Type::cns(nullptr, Type::PtrToMISUninit));
 }
 
@@ -1154,7 +1151,7 @@ void emitRatchetRefs(MTS& env) {
     return;
   }
 
-  auto const misRefAddr = misLea(env, MISOFF(tvRef));
+  auto const misRefAddr = misLea(env, offsetof(MInstrState, tvRef));
 
   setBase(env, cond(
     env,
@@ -1163,7 +1160,7 @@ void emitRatchetRefs(MTS& env) {
       gen(env, CheckInitMem, taken, misRefAddr);
     },
     [&] { // Next: tvRef isn't Uninit. Ratchet the refs
-      auto const misRef2Addr = misLea(env, MISOFF(tvRef2));
+      auto const misRef2Addr = misLea(env, offsetof(MInstrState, tvRef2));
       // Clean up tvRef2 before overwriting it.
       if (ratchetInd(env) > 0) {
         auto const val = gen(env, LdMem, Type::Gen, misRef2Addr);
@@ -1203,8 +1200,8 @@ void emitMPre(MTS& env) {
     env.misBase = gen(env, DefMIStateBase);
     auto const uninit = cns(env, Type::Uninit);
     if (nLogicalRatchets(env) > 0) {
-      gen(env, StMem, misLea(env, MISOFF(tvRef)), uninit);
-      gen(env, StMem, misLea(env, MISOFF(tvRef2)), uninit);
+      gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef)), uninit);
+      gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef2)), uninit);
     }
 
     // If we're using an MInstrState, all the default-created catch blocks for
@@ -1947,7 +1944,10 @@ void emitFinalMOp(MTS& env) {
  * weird right?
  */
 void cleanTvRefs(MTS& env) {
-  constexpr ptrdiff_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
+  constexpr ptrdiff_t refOffs[] = {
+    offsetof(MInstrState, tvRef),
+    offsetof(MInstrState, tvRef2)
+  };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
     auto const addr = misLea(env, refOffs[env.failedSetBlock ? 1 - i : i]);
     auto const val  = gen(env, LdMem, Type::Gen, addr);

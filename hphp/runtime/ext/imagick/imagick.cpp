@@ -33,13 +33,13 @@ static const StaticString s_imagePending("imagePending");
 
 ALWAYS_INLINE
 static bool getImagePending(const Object& imagick) {
-  auto var = imagick->o_get(s_imagePending.get(), true, s_Imagick.get());
+  auto var = imagick->o_get(s_imagePending, true, s_Imagick);
   return var.toBoolean();
 }
 
 ALWAYS_INLINE
 static void setImagePending(const Object& imagick, bool imagePending) {
-  imagick->o_set(s_imagePending.get(), imagePending, s_Imagick.get());
+  imagick->o_set(s_imagePending, imagePending, s_Imagick);
 }
 
 // class ImageGeometry
@@ -203,7 +203,7 @@ using MagickQueryFunction = char** (*)(const char*, size_t*);
 
 Object createImagick(MagickWand* wand) {
   Object ret = Imagick::allocObject();
-  setWandResource(s_Imagick, ret.get(), wand);
+  setWandResource(s_Imagick, ret, wand);
   return ret;
 }
 
@@ -291,7 +291,7 @@ static bool HHVM_METHOD(Imagick, adaptiveThresholdImage,
 
 static bool HHVM_METHOD(Imagick, addImage, const Object& source) {
   auto wand = getMagickWandResource(this_);
-  auto magick = getMagickWandResource(source.get());
+  auto magick = getMagickWandResource(source);
   auto status = MagickAddImage(wand->getWand(), magick->getWand());
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to add image");
@@ -313,7 +313,7 @@ static bool HHVM_METHOD(Imagick, addNoiseImage,
 
 static bool HHVM_METHOD(Imagick, affineTransformImage, const Object& matrix) {
   auto wand = getMagickWandResource(this_);
-  auto drawing = getDrawingWandResource(matrix.get());
+  auto drawing = getDrawingWandResource(matrix);
   auto status = MagickAffineTransformImage(
     wand->getWand(), drawing->getWand());
   if (status == MagickFalse) {
@@ -335,7 +335,7 @@ static bool HHVM_METHOD(Imagick, animateImages, const String& x_server) {
 static bool HHVM_METHOD(Imagick, annotateImage, const Object& draw_settings,
     double x, double y, double angle, const String& text) {
   auto wand = getMagickWandResource(this_);
-  auto drawing = getDrawingWandResource(draw_settings.get());
+  auto drawing = getDrawingWandResource(draw_settings);
   auto status = MagickAnnotateImage(
     wand->getWand(), drawing->getWand(), x, y, angle, text.c_str());
   if (status == MagickFalse) {
@@ -465,7 +465,7 @@ static void HHVM_METHOD(Imagick, __clone) {
 static bool HHVM_METHOD(Imagick, clutImage,
     const Object& lookup_table, int64_t channel) {
   auto wand = getMagickWandResource(this_);
-  auto magick = getMagickWandResource(lookup_table.get());
+  auto magick = getMagickWandResource(lookup_table);
   auto status = MagickClutImageChannel(
     wand->getWand(), (ChannelType)channel, magick->getWand());
   if (status == MagickFalse) {
@@ -549,7 +549,7 @@ static bool HHVM_METHOD(Imagick, commentImage, const String& comment) {
 static Array HHVM_METHOD(Imagick, compareImageChannels,
     const Object& image, int64_t channelType, int64_t metricType) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(image.get());
+  auto wand2 = getMagickWandResource(image);
   double distortion;
   auto magick = MagickCompareImageChannels(
     wand->getWand(), wand2->getWand(),
@@ -575,7 +575,7 @@ static Object HHVM_METHOD(Imagick, compareImageLayers, int64_t method) {
 static Array HHVM_METHOD(Imagick, compareImages,
     const Object& compare, int64_t metric) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(compare.get());
+  auto wand2 = getMagickWandResource(compare);
   double distortion;
   auto magick = MagickCompareImages(
     wand->getWand(), wand2->getWand(),
@@ -592,7 +592,7 @@ static bool HHVM_METHOD(Imagick, compositeImage,
     const Object& composite_object, int64_t composite,
     int64_t x, int64_t y, int64_t channel) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(composite_object.get());
+  auto wand2 = getMagickWandResource(composite_object);
   MagickCompositeImageChannel(
     wand->getWand(), (ChannelType)channel,
     wand2->getWand(), (CompositeOperator)composite, x, y);
@@ -792,7 +792,7 @@ static bool HHVM_METHOD(Imagick, distortImage,
 
 static bool HHVM_METHOD(Imagick, drawImage, const Object& draw) {
   auto wand = getMagickWandResource(this_);
-  auto drawing = getDrawingWandResource(draw.get());
+  auto drawing = getDrawingWandResource(draw);
   auto status = withMagickLocaleFix([&wand, &drawing](){
     return MagickDrawImage(wand->getWand(), drawing->getWand());
   });
@@ -861,7 +861,7 @@ static bool HHVM_METHOD(Imagick, evaluateImage,
 template<StorageType T>
 ALWAYS_INLINE
 static vector<typename StorageTypeCPPType<T>::T> exportImagePixels(
-    WandResource<MagickWand>* wand, int64_t x, int64_t y,
+    SmartPtr<WandResource<MagickWand>> wand, int64_t x, int64_t y,
     int64_t width, int64_t height, const String& map) {
   size_t size = width * height * map.length();
   vector<typename StorageTypeCPPType<T>::T> ret(size);
@@ -1129,7 +1129,7 @@ static int64_t HHVM_METHOD(Imagick, getImageChannelDepth, int64_t channel) {
 static double HHVM_METHOD(Imagick, getImageChannelDistortion,
     const Object& reference, int64_t channel, int64_t metric) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(reference.get());
+  auto wand2 = getMagickWandResource(reference);
   double distortion;
   auto status = MagickGetImageChannelDistortion(
     wand->getWand(), wand2->getWand(),
@@ -1143,7 +1143,7 @@ static double HHVM_METHOD(Imagick, getImageChannelDistortion,
 static double HHVM_METHOD(Imagick, getImageChannelDistortions,
     const Object& reference, int64_t metric, int64_t channel) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(reference.get());
+  auto wand2 = getMagickWandResource(reference);
   double distortion;
   auto status = MagickGetImageChannelDistortion(
     wand->getWand(), wand2->getWand(),
@@ -1290,7 +1290,7 @@ static int64_t HHVM_METHOD(Imagick, getImageDispose) {
 static double HHVM_METHOD(Imagick, getImageDistortion,
     const Object& reference, int64_t metric) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(reference.get());
+  auto wand2 = getMagickWandResource(reference);
   double distortion;
   auto status = MagickGetImageDistortion(
     wand->getWand(), wand2->getWand(), (MetricType)metric, &distortion);
@@ -1770,7 +1770,7 @@ static Array HHVM_STATIC_METHOD(Imagick, getVersion) {
 static bool HHVM_METHOD(Imagick, haldClutImage,
     const Object& clut, int64_t channel) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(clut.get());
+  auto wand2 = getMagickWandResource(clut);
   auto status = MagickHaldClutImageChannel(
     wand->getWand(), (ChannelType)channel, wand2->getWand());
   if (status == MagickFalse) {
@@ -1829,7 +1829,7 @@ static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
     convertMagickString(MagickGetImageFilename(wand->getWand())));
 
   String mimetype = HHVM_MN(Imagick, getImageMimeType)(this_);
-  ret.set(s_mimetype, mimetype.empty() ? s_unknown.get() : mimetype);
+  ret.set(s_mimetype, mimetype.empty() ? String(s_unknown) : mimetype);
 
   for (const auto& i: parsedIdentify) {
     ret.setKeyUnconverted(i.first, i.second);
@@ -1863,7 +1863,7 @@ static bool HHVM_METHOD(Imagick, implodeImage, double radius) {
 
 template<StorageType T>
 ALWAYS_INLINE
-static void importImagePixels(WandResource<MagickWand>* wand,
+static void importImagePixels(SmartPtr<WandResource<MagickWand>> wand,
     int64_t x, int64_t y, int64_t width, int64_t height,
     const String& map, const vector<double>& array) {
   vector<typename StorageTypeCPPType<T>::T> data(array.begin(), array.end());
@@ -1957,7 +1957,7 @@ static bool HHVM_METHOD(Imagick, mapImage, const Object& map, bool dither) {
   raiseDeprecated(s_Imagick.c_str(), "mapImage");
 
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(map.get());
+  auto wand2 = getMagickWandResource(map);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   auto status = MagickMapImage(
@@ -2036,7 +2036,7 @@ static Object HHVM_METHOD(Imagick, montageImage, const Object& draw,
     const String& tile_geometry, const String& thumbnail_geometry,
     int64_t montage_mode, const String& frame) {
   auto wand = getMagickWandResource(this_);
-  auto drawing = getDrawingWandResource(draw.get());
+  auto drawing = getDrawingWandResource(draw);
   auto magick = MagickMontageImage(
     wand->getWand(), drawing->getWand(),
     tile_geometry.c_str(), thumbnail_geometry.c_str(),
@@ -2275,7 +2275,7 @@ static bool HHVM_METHOD(Imagick, pingImageFile,
 static bool HHVM_METHOD(Imagick, polaroidImage,
     const Object& properties, double angle) {
   auto wand = getMagickWandResource(this_);
-  auto drawing = getDrawingWandResource(properties.get());
+  auto drawing = getDrawingWandResource(properties);
   auto status = MagickPolaroidImage(
     wand->getWand(), drawing->getWand(), angle);
   if (status == MagickFalse) {
@@ -2352,7 +2352,7 @@ static Array HHVM_METHOD(Imagick, queryFontMetrics,
     const Object& properties, const String& text,
     const Variant& query_multiline) {
   auto wand = getMagickWandResource(this_);
-  auto drawing = getDrawingWandResource(properties.get());
+  auto drawing = getDrawingWandResource(properties);
 
   // No parameter passed, this means we should autodetect
   bool multiline = query_multiline.isNull()
@@ -2544,7 +2544,7 @@ static bool HHVM_METHOD(Imagick, reduceNoiseImage, double radius) {
 static bool HHVM_METHOD(Imagick, remapImage,
     const Object& replacement, int64_t dither) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(replacement.get());
+  auto wand2 = getMagickWandResource(replacement);
   auto status = MagickRemapImage(
     wand->getWand(), wand2->getWand(), (DitherMethod)dither);
   if (status == MagickFalse) {
@@ -2854,7 +2854,7 @@ static bool HHVM_METHOD(Imagick, setGravity, int64_t gravity) {
 
 static bool HHVM_METHOD(Imagick, setImage, const Object& replace) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(replace.get());
+  auto wand2 = getMagickWandResource(replace);
   auto status = MagickSetImage(wand->getWand(), wand2->getWand());
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to set the image");
@@ -2936,7 +2936,7 @@ static bool HHVM_METHOD(Imagick, setImageChannelDepth,
 
 static bool HHVM_METHOD(Imagick, setImageClipMask, const Object& clip_mask) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(clip_mask.get());
+  auto wand2 = getMagickWandResource(clip_mask);
   auto status = MagickSetImageClipMask(wand->getWand(), wand2->getWand());
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to set image clip mask");
@@ -3524,7 +3524,7 @@ static bool HHVM_METHOD(Imagick, spreadImage, double radius) {
 static Object HHVM_METHOD(Imagick, steganoImage,
     const Object& watermark_wand, int64_t offset) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(watermark_wand.get());
+  auto wand2 = getMagickWandResource(watermark_wand);
   auto magick = MagickSteganoImage(wand->getWand(), wand2->getWand(), offset);
   if (magick == nullptr) {
     IMAGICK_THROW("Stegano image failed");
@@ -3534,7 +3534,7 @@ static Object HHVM_METHOD(Imagick, steganoImage,
 
 static Object HHVM_METHOD(Imagick, stereoImage, const Object& offset_wand) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(offset_wand.get());
+  auto wand2 = getMagickWandResource(offset_wand);
   auto magick = MagickStereoImage(wand->getWand(), wand2->getWand());
   if (magick == nullptr) {
     IMAGICK_THROW("Stereo image failed");
@@ -3562,7 +3562,7 @@ static bool HHVM_METHOD(Imagick, swirlImage, double degrees) {
 
 static Object HHVM_METHOD(Imagick, textureImage, const Object& texture_wand) {
   auto wand = getMagickWandResource(this_);
-  auto wand2 = getMagickWandResource(texture_wand.get());
+  auto wand2 = getMagickWandResource(texture_wand);
   auto magick = MagickTextureImage(wand->getWand(), wand2->getWand());
   if (magick == nullptr) {
     IMAGICK_THROW("Texture image failed");

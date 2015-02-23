@@ -182,33 +182,29 @@ void WandResource<PixelIterator>::destroyWand() {
 template<typename Wand>
 ALWAYS_INLINE
 void setWandResource(const StaticString& className,
-                     ObjectData* obj,
+                     const Object& obj,
                      Wand* wand,
                      bool owner = true) {
   auto res = makeSmartPtr<WandResource<Wand>>(wand, owner);
-  obj->o_set("wand", Variant(std::move(res)), className.get());
+  obj->o_set("wand", Variant(std::move(res)), className);
 }
 
 template<typename Wand>
 ALWAYS_INLINE
-WandResource<Wand>* getWandResource(const StaticString& className,
-                                    ObjectData* obj) {
-  if (!ObjNR(obj).asObject().instanceof(className)) {
+SmartPtr<WandResource<Wand>> getWandResource(const StaticString& className,
+                                             const Object& obj) {
+  if (!obj.instanceof(className)) {
     return nullptr;
   }
-  auto var = obj->o_get("wand", true, className.get());
-  if (var.isNull()) {
-    return nullptr;
-  } else {
-    return var.asCResRef().getTyped<WandResource<Wand>>();
-  }
+  auto var = obj->o_get("wand", true, className);
+  return cast_or_null<WandResource<Wand>>(var);
 }
 
 template<typename Wand, typename T>
 ALWAYS_INLINE
-WandResource<Wand>* getWandResource(const StaticString& className,
-                                    ObjectData* obj,
-                                    const std::string& msg) {
+SmartPtr<WandResource<Wand>> getWandResource(const StaticString& className,
+                                             const Object& obj,
+                                             const std::string& msg) {
   auto ret = getWandResource<Wand>(className, obj);
   if (ret == nullptr || ret->getWand() == nullptr) {
     throw T::allocObject(msg);
@@ -218,28 +214,29 @@ WandResource<Wand>* getWandResource(const StaticString& className,
 }
 
 ALWAYS_INLINE
-WandResource<MagickWand>* getMagickWandResource(ObjectData* obj) {
+SmartPtr<WandResource<MagickWand>> getMagickWandResource(const Object& obj) {
   return getWandResource<MagickWand, ImagickException>(
     s_Imagick, obj,
     "Can not process invalid Imagick object");
 }
 
 ALWAYS_INLINE
-WandResource<DrawingWand>* getDrawingWandResource(ObjectData* obj) {
+SmartPtr<WandResource<DrawingWand>> getDrawingWandResource(const Object& obj) {
   return getWandResource<DrawingWand, ImagickDrawException>(
     s_ImagickDraw, obj,
     "Can not process invalid ImagickDraw object");
 }
 
 ALWAYS_INLINE
-WandResource<PixelWand>* getPixelWandResource(ObjectData* obj) {
+SmartPtr<WandResource<PixelWand>> getPixelWandResource(const Object& obj) {
   auto ret = getWandResource<PixelWand>(s_ImagickPixel, obj);
   assert(ret != nullptr && ret->getWand() != nullptr);
   return ret;
 }
 
 ALWAYS_INLINE
-WandResource<PixelIterator>* getPixelIteratorResource(ObjectData* obj) {
+SmartPtr<WandResource<PixelIterator>>
+getPixelIteratorResource(const Object& obj) {
   return getWandResource<PixelIterator, ImagickPixelIteratorException>(
     s_ImagickPixelIterator, obj,
     "ImagickPixelIterator is not initialized correctly");

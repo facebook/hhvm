@@ -3181,7 +3181,8 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto const funcReturnType = callee->returnType();
   auto& v = vmain();
 
-  int returnOffset = MISOFF(tvBuiltinReturn);
+  int returnOffset = rds::kVmMInstrStateOff +
+    offsetof(MInstrState, tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(callee)) {
     auto const rSP       = srcLoc(inst, 1).reg();
@@ -3199,8 +3200,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
       synced_sp
     );
   }
-  // The MInstrState we need to use is at a constant offset from the base of the
-  // RDS header.
+
+  // The MInstrState we need to use is at a constant offset from the base of
+  // the RDS header.
   PhysReg rdsReg(rVmTl);
 
   auto callArgs = argGroup(inst);

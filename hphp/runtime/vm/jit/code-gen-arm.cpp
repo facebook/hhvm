@@ -1059,8 +1059,10 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto const func           = inst->extra<CallBuiltinData>()->callee;
   auto const numArgs        = func->numParams();
   auto const funcReturnType = func->returnType();
-  int returnOffset          = MISOFF(tvBuiltinReturn);
   auto& v = vmain();
+
+  int returnOffset = rds::kVmMInstrStateOff +
+    offsetof(MInstrState, tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers

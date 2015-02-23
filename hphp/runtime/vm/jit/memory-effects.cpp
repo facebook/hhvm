@@ -826,7 +826,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // we currently care about.
 
   case CheckRefs:
-  case ABCUnblock:
   case AFWHBlockOn:
   case LdClsCctx:
   case BeginCatch:
@@ -957,7 +956,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHResult:
   case LdWHState:
   case LookupClsRDSHandle:
-  case AFWHPrepareChild:
   case CoerceCellToDbl:
   case CoerceCellToInt:
     return IrrelevantEffects {};
@@ -1072,6 +1070,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArraySetRef:    // kVPackedKind warnings
   case GetMemoKey:  // re-enters to call getInstanceKey() in some cases
     return may_reenter(may_load_store(AHeapAny, AHeapAny));
+
+  // These two instructions don't touch memory we track, except that they may
+  // re-enter to construct php Exception objects.  During this re-entry
+  // anything can happen (e.g. a suprise flag check could cause a php signal
+  // handler to run arbitrary code).
+  case ABCUnblock:
+  case AFWHPrepareChild:
+    return may_reenter(may_load_store(AEmpty, AEmpty));
 
   //////////////////////////////////////////////////////////////////////
   // The following instructions are used for debugging memory optimizations, so

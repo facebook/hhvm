@@ -120,6 +120,19 @@ uint32_t RegionDesc::instrSize() const {
   return size;
 }
 
+SrcKey RegionDesc::lastSrcKey() const {
+  assert(!empty());
+  FuncId startFuncId = start().getFuncId();
+  for (int i = m_blocks.size() - 1; i >= 0; i--) {
+    SrcKey sk = m_blocks[i]->last();
+    if (sk.getFuncId() == startFuncId) {
+      return sk;
+    }
+  }
+  always_assert(0);
+}
+
+
 RegionDesc::Block* RegionDesc::addBlock(SrcKey sk,
                                         int    length,
                                         FPAbsOffset spOffset) {

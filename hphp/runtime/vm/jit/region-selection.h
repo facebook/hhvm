@@ -79,6 +79,20 @@ struct RegionDesc {
   const BlockIdSet& preds(BlockId bid) const;
   const BlockIdSet& sideExitingBlocks() const;
   bool              isExit(BlockId bid) const;
+
+  /*
+   * Returns the last BC offset in the region that corresponds to the
+   * function where the region starts.  This will normally be the offset
+   * of the last instruction in the last block, except if the function
+   * ends with an inlined call.  In this case, the offset of the
+   * corresponding FCall* in the function that starts the region is
+   * returned.
+   *
+   * Note that the notion of "last BC offset" only makes sense for
+   * regions that are linear traces.
+   */
+  SrcKey            lastSrcKey() const;
+
   Block*            addBlock(SrcKey sk, int length, FPAbsOffset spOffset);
   void              deleteBlock(BlockId bid);
   void              renumberBlock(BlockId oldId, BlockId newId);

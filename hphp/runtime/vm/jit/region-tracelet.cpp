@@ -47,6 +47,37 @@ TRACE_SET_MOD(region);
 typedef hphp_hash_set<SrcKey, SrcKey::Hasher> InterpSet;
 
 namespace {
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool isMainExit(const Block* block, SrcKey lastSk) {
+  if (!block->isExit()) return false;
+
+  auto& lastInst = block->back();
+
+  // This captures cases where we end the region with a terminal
+  // instruction, e.g. RetCtrl, RaiseError, InterpOneCF.
+  if (lastInst.isTerminal() && lastInst.marker().sk() == lastSk) return true;
+
+  // Otherwise, the region must contain a ReqBindJmp to a bytecode
+  // offset than will follow the execution of lastSk.
+  if (lastInst.op() != ReqBindJmp) return false;
+
+  auto succOffsets = lastSk.succOffsets();
+
+  FTRACE(6, "isMainExit: instrSuccOffsets({}): {}\n",
+         show(lastSk), folly::join(", ", succOffsets));
+
+  return succOffsets.count(lastInst.marker().bcOff());
+}
+
+Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
+  for (auto block : rpoSortCfg(unit)) {
+    if (isMainExit(block, lastSk)) return block;
+  }
+  return nullptr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct RegionFormer {
@@ -72,6 +103,10 @@ private:
   uint32_t m_numJmps;
   uint32_t m_numBCInstrs{0};
   uint32_t m_pendingInlinedInstrs{0};
+  // This map memoizes reachability of IR blocks during tracelet
+  // formation.  A block won't have it's reachability stored in this
+  // map until it's been computed.
+  jit::hash_map<unsigned,bool> m_irReachableBlocks;
 
   InliningDecider& m_inl;
   const bool m_profiling;
@@ -88,6 +123,7 @@ private:
   bool tryInline(uint32_t& instrSize);
   void recordDependencies();
   void truncateLiterals();
+  bool irBlockReachable(Block* block);
 };
 
 RegionFormer::RegionFormer(const RegionContext& ctx,
@@ -131,7 +167,27 @@ bool RegionFormer::resumed() const {
   return irgen::resumed(m_hts);
 }
 
+bool RegionFormer::irBlockReachable(Block* block) {
+  auto const blockId = block->id();
+  auto it = m_irReachableBlocks.find(blockId);
+  if (it != m_irReachableBlocks.end()) return it->second;
+  bool result = block == m_hts.irb->unit().entry();
+  for (auto& pred : block->preds()) {
+    if (irBlockReachable(pred.from())) {
+      result = true;
+      break;
+    }
+  }
+  m_irReachableBlocks[blockId] = result;
+  return result;
+}
+
 RegionDescPtr RegionFormer::go() {
+  SCOPE_ASSERT_DETAIL("Tracelet Selector") {
+    return folly::sformat("Region:\n{}\n\nUnit:\n{}\n",
+                          *m_region, m_hts.irb->unit());
+  };
+
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
     if (t <= Type::Cls) {
@@ -217,6 +273,24 @@ RegionDescPtr RegionFormer::go() {
       assert(m_sk.func() == curFunc());
     }
 
+    auto const curIRBlock = m_hts.irb->curBlock();
+    if (!irBlockReachable(curIRBlock)) {
+      FTRACE(1,
+        "selectTracelet: tracelet broken due to unreachable code (block {})\n",
+        curIRBlock->id());
+      break;
+    }
+
+    if (!curIRBlock->empty()) {
+      auto& lastInst = curIRBlock->back();
+      if (lastInst.isTerminal() &&
+          (lastInst.taken() == nullptr || lastInst.taken()->isCatch())) {
+        FTRACE(1, "selectTracelet: tracelet broken due to terminal/non-jumpy "
+               "IR instruction: {}\n", lastInst.toString());
+        break;
+      }
+    }
+
     if (isFCallStar(m_inst.op())) m_arStates.back().pop();
   }
 
@@ -244,6 +318,17 @@ RegionDescPtr RegionFormer::go() {
     );
 
     recordDependencies();
+
+    // Make sure that the IR unit contains a main exit corresponding
+    // to the last bytecode instruction in the region.  Note that this
+    // check has to happen before the call to truncateLiterals()
+    // because that updates the region but not the IR unit.
+    if (!m_region->blocks().back()->empty()) {
+      auto lastSk = m_region->lastSrcKey();
+      always_assert_flog(findMainExitBlock(m_hts.irb->unit(), lastSk),
+                         "No main exits found!");
+    }
+
     truncateLiterals();
   }
 

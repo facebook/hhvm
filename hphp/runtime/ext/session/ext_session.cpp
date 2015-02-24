@@ -47,6 +47,7 @@
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/wddx/ext_wddx.h"
@@ -1905,7 +1906,7 @@ static class SessionExtension final : public Extension {
     // this is called for every request.
     if (s_session) return;
     s_session = new SessionRequestData;
-    Extension* ext = Extension::GetExtension(s_session_ext_name);
+    Extension* ext = ExtensionRegistry::get(s_session_ext_name);
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.save_path",               "",

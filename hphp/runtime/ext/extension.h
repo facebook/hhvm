@@ -59,23 +59,9 @@ namespace HPHP {
 
 class Extension : public IDebuggable {
 public:
-  static bool IsLoaded(const String& name);
   static bool IsSystemlibPath(const std::string& path);
-  static Array GetLoadedExtensions();
-  static Extension *GetExtension(const String& name);
 
-  // called by RuntimeOption to initialize all configurations of extension
-  static void LoadModules(const IniSetting::Map& ini, Hdf hdf);
-
-  // called by hphp_process_init/exit
-  static void InitModules();
   static void MergeSystemlib();
-  static void ShutdownModules();
-  static bool ModulesInitialised();
-  static void ThreadInitModules();
-  static void ThreadShutdownModules();
-  static void RequestInitModules();
-  static void RequestShutdownModules();
 
   // Look for "ext.{namehash}" in the binary and compile/merge it
   void loadSystemlib(const std::string& name = "");
@@ -119,27 +105,38 @@ public:
   }
 
 private:
-  static void SortDependencies();
-
-  // Indicates which version of the HHVM Extension API
-  // this module was built against.
-  int64_t m_hhvmAPIVersion;
-
   std::string m_name;
   std::string m_version;
   std::string m_dsoName;
 };
 
-#define HHVM_API_VERSION 20150212L
+struct ExtensionBuildInfo {
+  uint64_t dso_version;
+  uint64_t branch_id;
+};
+
+
+// Versioned ID for Extension class, do not use for feature selection
+#define HHVM_DSO_VERSION 20150223L
 
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \
-extern "C" Extension *getModule() { \
+static ExtensionBuildInfo s_##name##_extension_build_info = { \
+  HHVM_DSO_VERSION, \
+  HHVM_VERISON_BRANCH, \
+}; \
+extern "C" ExtensionBuildInfo* getModuleBuildInfo() { \
+  return &s_##name##_extension_build_info; \
+} \
+extern "C" Extension* getModule() { \
   return &s_##name##_extension; \
 }
 #else
 #define HHVM_GET_MODULE(name)
 #endif
+
+// Deprecated: Use HHVM_VERSION_BRANCH for source compat checks
+#define HHVM_API_VERSION 20150212L
 
 /////////////////////////////////////////////////////////////////////////////
 // Extension argument API

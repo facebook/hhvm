@@ -59,6 +59,7 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/ext/extension-registry.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1639,7 +1640,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
               RuntimeOption::DynamicExtensions);
 
 
-  Extension::LoadModules(ini, config);
+  ExtensionRegistry::moduleLoad(ini, config);
   extern void initialize_apc();
   initialize_apc();
 }

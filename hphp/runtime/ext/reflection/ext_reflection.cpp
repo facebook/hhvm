@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/extension-registry.h"
 
 #include "hphp/parser/parser.h"
 #include "hphp/system/systemlib.h"
@@ -149,7 +150,7 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
 Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
   Array ret;
 
-  Extension *ext = Extension::GetExtension(name);
+  Extension *ext = ExtensionRegistry::get(name);
 
   ret.set(s_name,      name);
   ret.set(s_version,   ext ? ext->getVersion() : "");

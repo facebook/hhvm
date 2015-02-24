@@ -4089,9 +4089,10 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
     }
 
     if (vals64 == 0 || (mask64 & (mask64 - 1)) == 0) {
-      // If vals64 is zero, or we're testing a single
-      // bit, we can get away with a single test,
-      // rather than mask-and-compare
+      // If vals64 is zero, or we're testing a single bit, we can get away with
+      // a single test, rather than mask-and-compare. The use of testbim and
+      // testlim here is little-endian specific but it's "ok" for now as long
+      // as nothing else is read or written using the same pointer.
       if (mask64 <= 0xff) {
         v << testbim{(int8_t)mask64, bitsPtrReg[bitsOff], sf};
       } else if (mask64 <= 0xffffffff) {
@@ -4104,23 +4105,19 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
       auto bitsValReg = v.makeReg();
       v << load{bitsPtrReg[bitsOff], bitsValReg};
 
-      //     bitsVal2 <- bitsValReg & mask64
-      auto bitsVal2 = v.makeReg();
-      if (mask64 <= 0xff) {
-        v << andbi{(int8_t)mask64, bitsValReg, bitsVal2, v.makeReg()};
-      } else if (mask64 <= 0xffffffff) {
-        v << andli{(int32_t)mask64, bitsValReg, bitsVal2, v.makeReg()};
+      auto truncBits = v.makeReg();
+      auto maskedBits = v.makeReg();
+      if (mask64 <= 0xff && vals64 <= 0xff) {
+        v << movtqb{bitsValReg, truncBits};
+        v << andbi{(int8_t)mask64, truncBits, maskedBits, v.makeReg()};
+        v << cmpbi{(int8_t)vals64, maskedBits, sf};
+      } else if (mask64 <= 0xffffffff && vals64 <= 0xffffffff) {
+        v << movtql{bitsValReg, truncBits};
+        v << andli{(int32_t)mask64, truncBits, maskedBits, v.makeReg()};
+        v << cmpli{(int32_t)vals64, maskedBits, sf};
       } else {
-        v << andq{mask64Reg, bitsValReg, bitsVal2, v.makeReg()};
-      }
-
-      //   If bitsVal2 != vals64, then goto Exit
-      if (vals64 <= 0xff) {
-        v << cmpbi{(int8_t)vals64, bitsVal2, sf};
-      } else if (vals64 <= 0xffffffff) {
-        v << cmpli{(int32_t)vals64, bitsVal2, sf};
-      } else {
-        v << cmpq{vals64Reg, bitsVal2, sf};
+        v << andq{mask64Reg, bitsValReg, maskedBits, v.makeReg()};
+        v << cmpq{vals64Reg, maskedBits, sf};
       }
     }
     doJcc(v, cond, sf);

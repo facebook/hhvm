@@ -39,8 +39,8 @@ public:
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
 
-  virtual void setProxy(const String& proxy_host, int proxy_port,
-                        const String& proxy_user, const String& proxy_pass);
+  void setProxy(const String& proxy_host, int proxy_port,
+                const String& proxy_user, const String& proxy_pass);
   virtual bool open(const String& filename, const String& mode);
   virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool seekable() { return false; }

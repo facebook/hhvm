@@ -355,6 +355,8 @@ void IntlExtension::initUChar() {
                                (s_IntlChar.get(), makeStaticString(name), val);
   IC_CONSTL("CODEPOINT_MIN", UCHAR_MIN_VALUE)
   IC_CONSTL("CODEPOINT_MAX", UCHAR_MAX_VALUE)
+  IC_CONSTL("FOLD_CASE_DEFAULT", U_FOLD_CASE_DEFAULT)
+  IC_CONSTL("FOLD_CASE_EXCLUDE_SPECIAL_I", U_FOLD_CASE_EXCLUDE_SPECIAL_I)
 
   /* All enums used by the uchar APIs.  There are a LOT of them,
    * so they're separated out into include files,

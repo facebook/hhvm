@@ -48,30 +48,34 @@ namespace {
         not_reached();
     }
   }
-}
 
-c_BlockableWaitHandle* AsioBlockable::getBlockableWaitHandle() const {
-  assert(getKind() == Kind::BlockableWaitHandle);
-  return reinterpret_cast<c_BlockableWaitHandle*>(
-    const_cast<char*>(
-      reinterpret_cast<const char*>(this) -
-      c_BlockableWaitHandle::blockableOff()));
-}
+  inline c_BlockableWaitHandle* getBlockableWaitHandle(
+    const AsioBlockable* blockable
+  ) {
+    assert(blockable->getKind() == AsioBlockable::Kind::BlockableWaitHandle);
+    return reinterpret_cast<c_BlockableWaitHandle*>(
+      const_cast<char*>(
+        reinterpret_cast<const char*>(blockable) -
+        c_BlockableWaitHandle::blockableOff()));
+  }
 
-c_ConditionWaitHandle* AsioBlockable::getConditionWaitHandle() const {
-  assert(getKind() == Kind::ConditionWaitHandle);
-  return reinterpret_cast<c_ConditionWaitHandle*>(
-    const_cast<char*>(
-      reinterpret_cast<const char*>(this) -
-      c_ConditionWaitHandle::blockableOff()));
+  inline c_ConditionWaitHandle* getConditionWaitHandle(
+    const AsioBlockable* blockable
+  ) {
+    assert(blockable->getKind() == AsioBlockable::Kind::ConditionWaitHandle);
+    return reinterpret_cast<c_ConditionWaitHandle*>(
+      const_cast<char*>(
+        reinterpret_cast<const char*>(blockable) -
+        c_ConditionWaitHandle::blockableOff()));
+  }
 }
 
 c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
   switch (getKind()) {
     case AsioBlockable::Kind::BlockableWaitHandle:
-      return getBlockableWaitHandle();
+      return getBlockableWaitHandle(this);
     case AsioBlockable::Kind::ConditionWaitHandle:
-      return getConditionWaitHandle();
+      return getConditionWaitHandle(this);
   }
   not_reached();
 }
@@ -84,10 +88,10 @@ void AsioBlockableChain::unblock() {
     // May free cur.
     switch (cur->getKind()) {
       case AsioBlockable::Kind::BlockableWaitHandle:
-        dispatchUnblock(cur->getBlockableWaitHandle());
+        dispatchUnblock(getBlockableWaitHandle(cur));
         break;
       case AsioBlockable::Kind::ConditionWaitHandle:
-        cur->getConditionWaitHandle()->onUnblocked();
+        getConditionWaitHandle(cur)->onUnblocked();
         break;
     }
 
@@ -99,10 +103,10 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
     switch (cur->getKind()) {
       case AsioBlockable::Kind::BlockableWaitHandle:
-        cur->getBlockableWaitHandle()->exitContextBlocked(ctx_idx);
+        getBlockableWaitHandle(cur)->exitContextBlocked(ctx_idx);
         break;
       case AsioBlockable::Kind::ConditionWaitHandle:
-        cur->getConditionWaitHandle()->exitContextBlocked(ctx_idx);
+        getConditionWaitHandle(cur)->exitContextBlocked(ctx_idx);
         break;
     }
   }

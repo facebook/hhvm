@@ -1,0 +1,2498 @@
+diff --git include/llvm/Bitcode/LLVMBitCodes.h include/llvm/Bitcode/LLVMBitCodes.h
+index c42ecfe..ef795d7 100644
+--- include/llvm/Bitcode/LLVMBitCodes.h
++++ include/llvm/Bitcode/LLVMBitCodes.h
+@@ -376,7 +376,8 @@ namespace bitc {
+     ATTR_KIND_IN_ALLOCA = 38,
+     ATTR_KIND_NON_NULL = 39,
+     ATTR_KIND_JUMP_TABLE = 40,
+-    ATTR_KIND_DEREFERENCEABLE = 41
++    ATTR_KIND_DEREFERENCEABLE = 41,
++    ATTR_KIND_SMASHABLE = 42
+   };
+ 
+   enum ComdatSelectionKindCodes {
+diff --git include/llvm/CodeGen/FastISel.h include/llvm/CodeGen/FastISel.h
+index 7af25db..47cc8f4 100644
+--- include/llvm/CodeGen/FastISel.h
++++ include/llvm/CodeGen/FastISel.h
+@@ -81,6 +81,7 @@ class FastISel {
+     bool IsInReg           : 1;
+     bool DoesNotReturn     : 1;
+     bool IsReturnValueUsed : 1;
++    bool Smashable         : 1;
+ 
+     // IsTailCall should be modified by implementations of
+     // FastLowerCall that perform tail call conversions.
+@@ -105,6 +106,7 @@ class FastISel {
+     CallLoweringInfo()
+       : RetTy(nullptr), RetSExt(false), RetZExt(false), IsVarArg(false),
+         IsInReg(false), DoesNotReturn(false), IsReturnValueUsed(true),
++        Smashable(false),
+         IsTailCall(false), NumFixedArgs(-1), CallConv(CallingConv::C),
+         Callee(nullptr), SymName(nullptr), CS(nullptr), Call(nullptr),
+         ResultReg(0), NumResultRegs(0)
+@@ -122,6 +124,7 @@ class FastISel {
+       IsReturnValueUsed = !Call.getInstruction()->use_empty();
+       RetSExt = Call.paramHasAttr(0, Attribute::SExt);
+       RetZExt = Call.paramHasAttr(0, Attribute::ZExt);
++      Smashable = Call.smashable();
+ 
+       CallConv = Call.getCallingConv();
+       NumFixedArgs = FuncTy->getNumParams();
+@@ -146,6 +149,7 @@ class FastISel {
+       IsReturnValueUsed = !Call.getInstruction()->use_empty();
+       RetSExt = Call.paramHasAttr(0, Attribute::SExt);
+       RetZExt = Call.paramHasAttr(0, Attribute::ZExt);
++      Smashable = Call.smashable();
+ 
+       CallConv = Call.getCallingConv();
+       NumFixedArgs = (FixedArgs == ~0U) ? FuncTy->getNumParams() : FixedArgs;
+diff --git include/llvm/CodeGen/MachineInstr.h include/llvm/CodeGen/MachineInstr.h
+index d7f5341..e481362 100644
+--- include/llvm/CodeGen/MachineInstr.h
++++ include/llvm/CodeGen/MachineInstr.h
+@@ -65,7 +65,8 @@ public:
+     FrameSetup   = 1 << 0,              // Instruction is used as a part of
+                                         // function frame setup code.
+     BundledPred  = 1 << 1,              // Instruction has bundled predecessors.
+-    BundledSucc  = 1 << 2               // Instruction has bundled successors.
++    BundledSucc  = 1 << 2,              // Instruction has bundled successors.
++    Smashable    = 1 << 3               // Instruction is marked as smashable.
+   };
+ private:
+   const MCInstrDesc *MCID;              // Instruction descriptor.
+diff --git include/llvm/CodeGen/MachineModuleInfo.h include/llvm/CodeGen/MachineModuleInfo.h
+index 6d8d056..186b64f 100644
+--- include/llvm/CodeGen/MachineModuleInfo.h
++++ include/llvm/CodeGen/MachineModuleInfo.h
+@@ -153,6 +153,11 @@ class MachineModuleInfo : public ImmutablePass {
+   /// the specified basic block's address of label.
+   MMIAddrLabelMap *AddrLabelSymbols;
+ 
++
++  /// ColdFragmentStart - This is the beginning of the cold fragment for
++  /// a function.
++  const MachineBasicBlock *ColdFragmentStart;
++
+   bool CallsEHReturn;
+   bool CallsUnwindInit;
+ 
+@@ -215,6 +220,15 @@ public:
+   ///
+   void AnalyzeModule(const Module &M);
+ 
++  /// getColdFragmentStart - Get block that marks the beginning of the cold
++  /// fragment for the function.
++  const MachineBasicBlock *getColdFragmentStart() { return ColdFragmentStart; }
++
++  /// setColdFragmentStart - Mark the beginning of the cold fragment.
++  void setColdFragmentStart(const MachineBasicBlock *MBB) {
++    ColdFragmentStart = MBB;
++  }
++
+   /// hasDebugInfo - Returns true if valid debug info is present.
+   ///
+   bool hasDebugInfo() const { return DbgInfoAvailable; }
+diff --git include/llvm/CodeGen/SelectionDAGNodes.h include/llvm/CodeGen/SelectionDAGNodes.h
+index 9ab60ff..6162301 100644
+--- include/llvm/CodeGen/SelectionDAGNodes.h
++++ include/llvm/CodeGen/SelectionDAGNodes.h
+@@ -134,6 +134,10 @@ public:
+   /// set the SDNode
+   void setNode(SDNode *N) { Node = N; }
+ 
++  inline bool getSmashable() const;
++
++  inline void setSmashable(bool v = true);
++
+   inline SDNode *operator->() const { return Node; }
+ 
+   bool operator==(const SDValue &O) const {
+@@ -355,11 +359,14 @@ private:
+   /// nodes corresponding to it.
+   uint16_t HasDebugValue : 1;
+ 
++  /// Smashable - The resulting code for this node should be smashable.
++  uint16_t Smashable : 1;
++
+ protected:
+   /// SubclassData - This member is defined by this class, but is not used for
+   /// anything.  Subclasses can use it to hold whatever state they find useful.
+   /// This field is initialized to zero by the ctor.
+-  uint16_t SubclassData : 14;
++  uint16_t SubclassData : 13;
+ 
+ private:
+   /// NodeId - Unique id per SDNode in the DAG.
+@@ -435,6 +442,10 @@ public:
+   /// setHasDebugValue - set this bit.
+   void setHasDebugValue(bool b) { HasDebugValue = b; }
+ 
++  bool getSmashable() const { return Smashable; }
++
++  void setSmashable(bool v = true) { Smashable = v; }
++
+   /// use_empty - Return true if there are no uses of this node.
+   ///
+   bool use_empty() const { return UseList == nullptr; }
+@@ -747,7 +758,7 @@ protected:
+   SDNode(unsigned Opc, unsigned Order, const DebugLoc dl, SDVTList VTs,
+          ArrayRef<SDValue> Ops)
+     : NodeType(Opc), OperandsNeedDelete(true), HasDebugValue(false),
+-      SubclassData(0), NodeId(-1),
++      Smashable(false), SubclassData(0), NodeId(-1),
+       OperandList(Ops.size() ? new SDUse[Ops.size()] : nullptr),
+       ValueList(VTs.VTs), UseList(nullptr),
+       NumOperands(Ops.size()), NumValues(VTs.NumVTs),
+@@ -763,6 +774,7 @@ protected:
+   /// set later with InitOperands.
+   SDNode(unsigned Opc, unsigned Order, const DebugLoc dl, SDVTList VTs)
+     : NodeType(Opc), OperandsNeedDelete(false), HasDebugValue(false),
++      Smashable(false),
+       SubclassData(0), NodeId(-1), OperandList(nullptr), ValueList(VTs.VTs),
+       UseList(nullptr), NumOperands(0), NumValues(VTs.NumVTs), debugLoc(dl),
+       IROrder(Order) {}
+@@ -893,6 +905,12 @@ inline SDValue::SDValue(SDNode *node, unsigned resno)
+ inline unsigned SDValue::getOpcode() const {
+   return Node->getOpcode();
+ }
++inline bool SDValue::getSmashable() const {
++  return Node->getSmashable();
++}
++inline void SDValue::setSmashable(bool v) {
++  Node->setSmashable(v);
++}
+ inline EVT SDValue::getValueType() const {
+   return Node->getValueType(ResNo);
+ }
+diff --git include/llvm/CodeGen/TargetLoweringObjectFileImpl.h include/llvm/CodeGen/TargetLoweringObjectFileImpl.h
+index 87f1401..5096886 100644
+--- include/llvm/CodeGen/TargetLoweringObjectFileImpl.h
++++ include/llvm/CodeGen/TargetLoweringObjectFileImpl.h
+@@ -41,6 +41,11 @@ public:
+   void emitPersonalityValue(MCStreamer &Streamer, const TargetMachine &TM,
+                             const MCSymbol *Sym) const override;
+ 
++  /// Make use of module flags.
++  void emitModuleFlags(MCStreamer &Streamer,
++                       ArrayRef<Module::ModuleFlagEntry> ModuleFlags,
++                       Mangler &Mang, const TargetMachine &TM) const override;
++
+   /// Given a constant with the SectionKind, return a section that it should be
+   /// placed in.
+   const MCSection *getSectionForConstant(SectionKind Kind,
+diff --git include/llvm/ExecutionEngine/RTDyldMemoryManager.h include/llvm/ExecutionEngine/RTDyldMemoryManager.h
+index b1d6810..b7db02c 100644
+--- include/llvm/ExecutionEngine/RTDyldMemoryManager.h
++++ include/llvm/ExecutionEngine/RTDyldMemoryManager.h
+@@ -66,6 +66,9 @@ public:
+   /// Override to return true to enable the reserveAllocationSpace callback.
+   virtual bool needsToReserveAllocationSpace() { return false; }
+ 
++  /// Override to prevent stub allocation in JIT.
++  virtual bool allowStubAllocation() const { return true; }
++
+   /// Register the EH frames with the runtime so that c++ exceptions work.
+   ///
+   /// \p Addr parameter provides the local address of the EH frame section
+diff --git include/llvm/IR/Attributes.h include/llvm/IR/Attributes.h
+index 5ff48d6..05f4fa4 100644
+--- include/llvm/IR/Attributes.h
++++ include/llvm/IR/Attributes.h
+@@ -99,6 +99,7 @@ public:
+     Returned,              ///< Return value is always equal to this argument
+     ReturnsTwice,          ///< Function can return twice
+     SExt,                  ///< Sign extended before/after call
++    Smashable,             ///< Mark the function as smashable
+     StackAlignment,        ///< Alignment of stack for function (3 bits)
+                            ///< stored as log2 of alignment with +1 bias 0
+                            ///< means unaligned (different from
+diff --git include/llvm/IR/CallSite.h include/llvm/IR/CallSite.h
+index df08257..a8f4334 100644
+--- include/llvm/IR/CallSite.h
++++ include/llvm/IR/CallSite.h
+@@ -269,6 +269,15 @@ public:
+     CALLSITE_DELEGATE_SETTER(setDoesNotThrow());
+   }
+ 
++  /// @brief Determine if the call is smashable.
++  bool smashable() const {
++    CALLSITE_DELEGATE_GETTER(smashable());
++  }
++  void setSmashable() {
++    CALLSITE_DELEGATE_SETTER(setSmashable());
++  }
++
++
+ #undef CALLSITE_DELEGATE_GETTER
+ #undef CALLSITE_DELEGATE_SETTER
+ 
+diff --git include/llvm/IR/CallingConv.h include/llvm/IR/CallingConv.h
+index 1eaf4f7..c6fed7d 100644
+--- include/llvm/IR/CallingConv.h
++++ include/llvm/IR/CallingConv.h
+@@ -137,7 +137,24 @@ namespace CallingConv {
+     /// convention differs from the more common \c X86_64_SysV convention
+     /// in a number of ways, most notably in that XMM registers used to pass
+     /// arguments are shadowed by GPRs, and vice versa.
+-    X86_64_Win64 = 79
++    X86_64_Win64 = 79,
++
++    /// \brief HHVM calling convention for invoking C/C++ functions.
++    X86_64_HHVM_C = 80,
++
++    /// \brief HHVM calling convention for invoking PHP functions.
++    /// Supports tail call elimination.
++    X86_64_HHVM_PHP = 81,
++
++    /// \brief HHVM calling convention used for service requests.
++    /// Supports tail call elimination.
++    X86_64_HHVM_SR = 82,
++      //
++    /// \brief Calling convention used by HipHop Virtual Machine (HHVM) to
++    /// perform calls to and from translation cache. No registers are preserved.
++    /// It supports tail/sibling call elimination.
++    X86_64_HHVM_TC = 83
++
+   };
+ } // End CallingConv namespace
+ 
+diff --git include/llvm/IR/DebugLoc.h include/llvm/IR/DebugLoc.h
+index 3d969a8..bd72214 100644
+--- include/llvm/IR/DebugLoc.h
++++ include/llvm/IR/DebugLoc.h
+@@ -16,6 +16,7 @@
+ #define LLVM_IR_DEBUGLOC_H
+ 
+ #include "llvm/Support/DataTypes.h"
++#include <cassert>
+ 
+ namespace llvm {
+   template <typename T> struct DenseMapInfo;
+@@ -45,9 +46,9 @@ namespace llvm {
+       return DL;
+     }
+ 
+-    /// LineCol - This 32-bit value encodes the line and column number for the
+-    /// location, encoded as 24-bits for line and 8 bits for col.  A value of 0
+-    /// for either means unknown.
++    /// LineCol - Temporarily we encode line+column numbers and locrec ID.
++    /// The 16-bit column field effectively becomes a union with major bit indicating
++    /// if it's locrec or not.
+     uint32_t LineCol;
+ 
+     /// ScopeIdx - This is an opaque ID# for Scope/InlinedAt information,
+@@ -61,9 +62,17 @@ namespace llvm {
+     static DebugLoc get(unsigned Line, unsigned Col,
+                         MDNode *Scope, MDNode *InlinedAt = nullptr);
+ 
++    static DebugLoc get(unsigned Line, unsigned Col, unsigned LocRecID,
++                        MDNode *Scope, MDNode *InlinedAt = nullptr);
++
++    static DebugLoc get(unsigned LocRecID);
++
+     /// getFromDILocation - Translate the DILocation quad into a DebugLoc.
+     static DebugLoc getFromDILocation(MDNode *N);
+ 
++    /// getFromLocRec  - Translate !locrec into DebugLoc.
++    static DebugLoc getFromLocRec(MDNode *N);
++
+     /// getFromDILexicalBlock - Translate the DILexicalBlock into a DebugLoc.
+     static DebugLoc getFromDILexicalBlock(MDNode *N);
+ 
+@@ -71,11 +80,17 @@ namespace llvm {
+     bool isUnknown() const { return ScopeIdx == 0; }
+ 
+     unsigned getLine() const {
+-      return (LineCol << 8) >> 8;  // Mask out column.
++      return (LineCol << 16) >> 16;  // Mask out column or locrec.
+     }
+ 
+     unsigned getCol() const {
+-      return LineCol >> 24;
++      assert(LineCol >> 31 == 0 && "column field taken by locrec");
++      return (LineCol >> 16);
++    }
++
++    unsigned getLocRec() const {
++      // Return bits 30-16 if bit 31 is set or 0 otherwise.
++      return ((LineCol << 1) >> 17) & ((int32_t)LineCol >> 31);
+     }
+ 
+     /// getScope - This returns the scope pointer for this DebugLoc, or null if
+diff --git include/llvm/IR/Function.h include/llvm/IR/Function.h
+index ad4b139..9badc95 100644
+--- include/llvm/IR/Function.h
++++ include/llvm/IR/Function.h
+@@ -276,6 +276,15 @@ public:
+     addFnAttr(Attribute::NoUnwind);
+   }
+ 
++  /// @brief Determine if the function is smashable.
++  bool smashable() const {
++    return AttributeSets.hasAttribute(AttributeSet::FunctionIndex,
++                                      Attribute::Smashable);
++  }
++  void setSmashable() {
++    addFnAttr(Attribute::Smashable);
++  }
++
+   /// @brief Determine if the call cannot be duplicated.
+   bool cannotDuplicate() const {
+     return AttributeSets.hasAttribute(AttributeSet::FunctionIndex,
+diff --git include/llvm/IR/Instructions.h include/llvm/IR/Instructions.h
+index 308467f..04ed996 100644
+--- include/llvm/IR/Instructions.h
++++ include/llvm/IR/Instructions.h
+@@ -1431,6 +1431,12 @@ public:
+     addAttribute(AttributeSet::FunctionIndex, Attribute::NoUnwind);
+   }
+ 
++  /// \brief Determine if the call is smashable.
++  bool smashable() const { return hasFnAttr(Attribute::Smashable); }
++  void setSmashable() {
++    addAttribute(AttributeSet::FunctionIndex, Attribute::Smashable);
++  }
++
+   /// \brief Determine if the call cannot be duplicated.
+   bool cannotDuplicate() const {return hasFnAttr(Attribute::NoDuplicate); }
+   void setCannotDuplicate() {
+@@ -3100,6 +3106,12 @@ public:
+     addAttribute(AttributeSet::FunctionIndex, Attribute::NoReturn);
+   }
+ 
++  /// \brief Determine if the call is smashable.
++  bool smashable() const { return hasFnAttr(Attribute::Smashable); }
++  void setSmashable() {
++    addAttribute(AttributeSet::FunctionIndex, Attribute::Smashable);
++  }
++
+   /// \brief Determine if the call cannot unwind.
+   bool doesNotThrow() const { return hasFnAttr(Attribute::NoUnwind); }
+   void setDoesNotThrow() {
+diff --git include/llvm/IR/LLVMContext.h include/llvm/IR/LLVMContext.h
+index 2914caa..82d314e 100644
+--- include/llvm/IR/LLVMContext.h
++++ include/llvm/IR/LLVMContext.h
+@@ -54,7 +54,8 @@ public:
+     MD_tbaa_struct = 5, // "tbaa.struct"
+     MD_invariant_load = 6, // "invariant.load"
+     MD_alias_scope = 7, // "alias.scope"
+-    MD_noalias = 8 // "noalias"
++    MD_noalias = 8,// "noalias"
++    MD_locrec = 9 // "locrec"
+   };
+ 
+   /// getMDKindID - Return a unique non-zero ID for the specified metadata kind.
+diff --git include/llvm/MC/MCAssembler.h include/llvm/MC/MCAssembler.h
+index 1cb34c2..b9afd4a 100644
+--- include/llvm/MC/MCAssembler.h
++++ include/llvm/MC/MCAssembler.h
+@@ -83,6 +83,10 @@ private:
+   /// LayoutOrder - The layout order of this fragment.
+   unsigned LayoutOrder;
+ 
++  /// BundleAlignSize - The size of bundle-type alignment to use for this
++  /// fragment.
++  uint8_t  BundleAlignSize;
++
+   /// @}
+ 
+ protected:
+@@ -108,6 +112,12 @@ public:
+   /// this is false, but specific fragment types may set it to true.
+   virtual bool hasInstructions() const { return false; }
+ 
++  /// \brief Bundling rules for the fragment. If the bundle align size is
++  /// set to 0, then no alignment will be applied.
++  virtual unsigned getBundleAlignSize() const { return BundleAlignSize; }
++  virtual void setBundleAlignSize(unsigned Size) { BundleAlignSize = Size; }
++  virtual bool isBundlingEnabled() const { return BundleAlignSize != 0; }
++
+   /// \brief Should this fragment be placed at the end of an aligned bundle?
+   virtual bool alignToBundleEnd() const { return false; }
+   virtual void setAlignToBundleEnd(bool V) { }
+@@ -920,6 +930,10 @@ private:
+   // which flags to be set.
+   unsigned ELFHeaderEFlags;
+ 
++  /// Skew to be applied to code section alignment.
++  uint64_t CodeSkew;
++  uint64_t ColdCodeSkew;
++
+   /// Used to communicate Linker Optimization Hint information between
+   /// the Streamer and the .o writer
+   MCLOHContainer LOHContainer;
+@@ -1040,6 +1054,12 @@ public:
+ 
+   MCObjectWriter &getWriter() const { return Writer; }
+ 
++  void setCodeSkew(uint64_t Skew) { CodeSkew = Skew; }
++  uint64_t getCodeSkew() const { return CodeSkew; }
++
++  void setColdCodeSkew(uint64_t Skew) { ColdCodeSkew = Skew; }
++  uint64_t getColdCodeSkew() const { return ColdCodeSkew; }
++
+   /// Finish - Do final processing and write the object to the output stream.
+   /// \p Writer is used for custom object writer (as the MCJIT does),
+   /// if not specified it is automatically created from backend.
+diff --git include/llvm/MC/MCELFStreamer.h include/llvm/MC/MCELFStreamer.h
+index 66729fe..b2ab458 100644
+--- include/llvm/MC/MCELFStreamer.h
++++ include/llvm/MC/MCELFStreamer.h
+@@ -71,6 +71,7 @@ public:
+                       uint64_t Size, unsigned ByteAlignment = 0) override;
+   void EmitValueImpl(const MCExpr *Value, unsigned Size,
+                      const SMLoc &Loc = SMLoc()) override;
++  void EmitIntValue(uint64_t Value, unsigned Size) override;
+ 
+   void EmitFileDirective(StringRef Filename) override;
+ 
+diff --git include/llvm/MC/MCObjectFileInfo.h include/llvm/MC/MCObjectFileInfo.h
+index 5e7c770..45569b9 100644
+--- include/llvm/MC/MCObjectFileInfo.h
++++ include/llvm/MC/MCObjectFileInfo.h
+@@ -57,6 +57,10 @@ protected:
+   ///
+   const MCSection *TextSection;
+ 
++  /// ColdTextSection - Section directive for cold text.
++  ///
++  const MCSection *ColdTextSection;
++
+   /// DataSection - Section directive for standard data.
+   ///
+   const MCSection *DataSection;
+@@ -146,6 +150,9 @@ protected:
+   /// StackMap section.
+   const MCSection *StackMapSection;
+ 
++  /// LocRecs section.
++  const MCSection *LocRecsSection;
++
+   /// EHFrameSection - EH frame section. It is initialized on demand so it
+   /// can be overwritten (with uniquing).
+   const MCSection *EHFrameSection;
+@@ -216,6 +223,7 @@ public:
+   }
+ 
+   const MCSection *getTextSection() const { return TextSection; }
++  const MCSection *getColdTextSection() const { return ColdTextSection; }
+   const MCSection *getDataSection() const { return DataSection; }
+   const MCSection *getBSSSection() const { return BSSSection; }
+   const MCSection *getLSDASection() const { return LSDASection; }
+@@ -296,6 +304,8 @@ public:
+ 
+   const MCSection *getStackMapSection() const { return StackMapSection; }
+ 
++  const MCSection *getLocRecsSection() const { return LocRecsSection; }
++
+   /// ELF specific sections.
+   ///
+   const MCSection *getDataRelSection() const { return DataRelSection; }
+diff --git include/llvm/MC/MCObjectStreamer.h include/llvm/MC/MCObjectStreamer.h
+index 8d37c85..a7f9f96 100644
+--- include/llvm/MC/MCObjectStreamer.h
++++ include/llvm/MC/MCObjectStreamer.h
+@@ -10,6 +10,7 @@
+ #ifndef LLVM_MC_MCOBJECTSTREAMER_H
+ #define LLVM_MC_MCOBJECTSTREAMER_H
+ 
++#include "llvm/ADT/SmallVector.h"
+ #include "llvm/MC/MCAssembler.h"
+ #include "llvm/MC/MCStreamer.h"
+ 
+@@ -37,11 +38,16 @@ class MCObjectStreamer : public MCStreamer {
+   MCSectionData::iterator CurInsertionPoint;
+   bool EmitEHFrame;
+   bool EmitDebugFrame;
++  SmallVector<MCSymbolData *, 2> PendingLabels;
+ 
+   virtual void EmitInstToData(const MCInst &Inst, const MCSubtargetInfo&) = 0;
+   void EmitCFIStartProcImpl(MCDwarfFrameInfo &Frame) override;
+   void EmitCFIEndProcImpl(MCDwarfFrameInfo &Frame) override;
+ 
++  // If any labels have been emitted but not assigned fragments, ensure that
++  // they get assigned, either to F if possible or to a new data fragment.
++  void flushPendingLabels(MCFragment *F);
++
+ protected:
+   MCObjectStreamer(MCContext &Context, MCAsmBackend &TAB, raw_ostream &_OS,
+                    MCCodeEmitter *_Emitter);
+@@ -69,14 +75,15 @@ protected:
+ 
+   MCFragment *getCurrentFragment() const;
+ 
+-  void insert(MCFragment *F) const {
++  void insert(MCFragment *F) {
++    flushPendingLabels(F);
+     CurSectionData->getFragmentList().insert(CurInsertionPoint, F);
+     F->setParent(CurSectionData);
+   }
+ 
+   /// Get a data fragment to write into, creating a new one if the current
+   /// fragment is not a data fragment.
+-  MCDataFragment *getOrCreateDataFragment() const;
++  MCDataFragment *getOrCreateDataFragment();
+ 
+ public:
+   void visitUsedSymbol(const MCSymbol &Sym) override;
+diff --git include/llvm/MC/MCStreamer.h include/llvm/MC/MCStreamer.h
+index 2ffdb84..2d7ee52 100644
+--- include/llvm/MC/MCStreamer.h
++++ include/llvm/MC/MCStreamer.h
+@@ -193,6 +193,13 @@ class MCStreamer {
+   /// values saved by PushSection.
+   SmallVector<std::pair<MCSectionSubPair, MCSectionSubPair>, 4> SectionStack;
+ 
++  /// BundleAlignMode - Current bundle align mode used by the streamer.
++  unsigned BundleAlignMode;
++
++  /// CodeSkew - Skew to be applied to code alignment.
++  uint64_t CodeSkew;
++  uint64_t ColdCodeSkew;
++
+ protected:
+   MCStreamer(MCContext &Ctx);
+ 
+@@ -215,6 +222,12 @@ protected:
+ public:
+   virtual ~MCStreamer();
+ 
++  void setCodeSkew(uint64_t Skew) { CodeSkew = Skew; }
++  uint64_t getCodeSkew() const { return CodeSkew; }
++
++  void setColdCodeSkew(uint64_t Skew) { ColdCodeSkew = Skew; }
++  uint64_t getColdCodeSkew() const { return ColdCodeSkew; }
++
+   void visitUsedExpr(const MCExpr &Expr);
+   virtual void visitUsedSymbol(const MCSymbol &Sym);
+ 
+@@ -244,6 +257,9 @@ public:
+ 
+   void generateCompactUnwindEncodings(MCAsmBackend *MAB);
+ 
++  /// \brief Return current bundle alignment mode for the stream.
++  unsigned getBundleAlignMode() const { return BundleAlignMode; }
++
+   /// @name Assembly File Formatting.
+   /// @{
+ 
+@@ -714,7 +730,7 @@ public:
+   /// section.
+   virtual void EmitInstruction(const MCInst &Inst, const MCSubtargetInfo &STI);
+ 
+-  /// \brief Set the bundle alignment mode from now on in the section.
++  /// \brief Set the bundle alignment mode from now on in the file.
+   /// The argument is the power of 2 to which the alignment is set. The
+   /// value 0 means turn the bundle alignment off.
+   virtual void EmitBundleAlignMode(unsigned AlignPow2);
+diff --git include/llvm/MC/MCTargetOptions.h include/llvm/MC/MCTargetOptions.h
+index eb4348e..8a61867 100644
+--- include/llvm/MC/MCTargetOptions.h
++++ include/llvm/MC/MCTargetOptions.h
+@@ -29,6 +29,7 @@ public:
+   bool ShowMCEncoding : 1;
+   bool ShowMCInst : 1;
+   bool AsmVerbose : 1;
++  bool SplitHotCold : 1;
+   int DwarfVersion;
+   MCTargetOptions();
+ };
+@@ -43,6 +44,7 @@ inline bool operator==(const MCTargetOptions &LHS, const MCTargetOptions &RHS) {
+           ARE_EQUAL(ShowMCEncoding) &&
+           ARE_EQUAL(ShowMCInst) &&
+           ARE_EQUAL(AsmVerbose) &&
++          ARE_EQUAL(SplitHotCold) &&
+ 	  ARE_EQUAL(DwarfVersion));
+ #undef ARE_EQUAL
+ }
+diff --git include/llvm/MC/MCTargetOptionsCommandFlags.h include/llvm/MC/MCTargetOptionsCommandFlags.h
+index 6d4eb0e..170f742 100644
+--- include/llvm/MC/MCTargetOptionsCommandFlags.h
++++ include/llvm/MC/MCTargetOptionsCommandFlags.h
+@@ -40,6 +40,17 @@ cl::opt<bool> ShowMCInst("asm-show-inst",
+                          cl::desc("Emit internal instruction representation to "
+                                   "assembly file"));
+ 
++static cl::opt<bool>
++SplitHotCold("split-hot-cold",
++             cl::desc("Split hot and cold code during emission"),
++             cl::init(false));
++
++// FIXME: unused at the moment.
++static cl::opt<bool>
++ColdExceptions("cold-exceptions",
++               llvm::cl::desc("Always assume exception-handling code is cold"),
++               cl::init(false));
++
+ static inline MCTargetOptions InitMCTargetOptionsFromFlags() {
+   MCTargetOptions Options;
+   Options.SanitizeAddress =
+@@ -47,6 +58,7 @@ static inline MCTargetOptions InitMCTargetOptionsFromFlags() {
+   Options.MCRelaxAll = RelaxAll;
+   Options.DwarfVersion = DwarfVersion;
+   Options.ShowMCInst = ShowMCInst;
++  Options.SplitHotCold = SplitHotCold;
+   return Options;
+ }
+ 
+diff --git include/llvm/MC/SectionKind.h include/llvm/MC/SectionKind.h
+index 85a91c6..0a25d15 100644
+--- include/llvm/MC/SectionKind.h
++++ include/llvm/MC/SectionKind.h
+@@ -33,6 +33,9 @@ class SectionKind {
+     /// Text - Text section, used for functions and other executable code.
+     Text,
+ 
++    /// ColdText - Text section, used for rarely executed code.
++    ColdText,
++
+     /// ReadOnly - Data that is never written to at program runtime by the
+     /// program or the dynamic linker.  Things in the top-level readonly
+     /// SectionKind are not mergeable.
+@@ -135,7 +138,9 @@ class SectionKind {
+ public:
+ 
+   bool isMetadata() const { return K == Metadata; }
+-  bool isText() const { return K == Text; }
++  bool isText() const { return K == Text || K == ColdText; }
++  bool isNormalText() const { return K == Text; }
++  bool isColdText() const { return K == ColdText; }
+ 
+   bool isReadOnly() const {
+     return K == ReadOnly || isMergeableCString() ||
+@@ -206,6 +211,7 @@ public:
+ 
+   static SectionKind getMetadata() { return get(Metadata); }
+   static SectionKind getText() { return get(Text); }
++  static SectionKind getColdText() { return get(ColdText); }
+   static SectionKind getReadOnly() { return get(ReadOnly); }
+   static SectionKind getMergeable1ByteCString() {
+     return get(Mergeable1ByteCString);
+diff --git include/llvm/Target/TargetLowering.h include/llvm/Target/TargetLowering.h
+index 0f90961..1e27628 100644
+--- include/llvm/Target/TargetLowering.h
++++ include/llvm/Target/TargetLowering.h
+@@ -2158,6 +2158,7 @@ public:
+     bool IsInReg           : 1;
+     bool DoesNotReturn     : 1;
+     bool IsReturnValueUsed : 1;
++    bool Smashable         : 1;
+ 
+     // IsTailCall should be modified by implementations of
+     // TargetLowering::LowerCall that perform tail call conversions.
+@@ -2177,6 +2178,7 @@ public:
+     CallLoweringInfo(SelectionDAG &DAG)
+       : RetTy(nullptr), RetSExt(false), RetZExt(false), IsVarArg(false),
+         IsInReg(false), DoesNotReturn(false), IsReturnValueUsed(true),
++        Smashable(false),
+         IsTailCall(false), NumFixedArgs(-1), CallConv(CallingConv::C),
+         DAG(DAG), CS(nullptr) {}
+ 
+@@ -2213,6 +2215,7 @@ public:
+       IsReturnValueUsed = !Call.getInstruction()->use_empty();
+       RetSExt = Call.paramHasAttr(0, Attribute::SExt);
+       RetZExt = Call.paramHasAttr(0, Attribute::ZExt);
++      Smashable = Call.smashable();
+ 
+       Callee = Target;
+ 
+@@ -2235,6 +2238,11 @@ public:
+       return *this;
+     }
+ 
++    CallLoweringInfo &setSmashable(bool Value = true) {
++      Smashable = Value;
++      return *this;
++    }
++
+     CallLoweringInfo &setVarArg(bool Value = true) {
+       IsVarArg = Value;
+       return *this;
+diff --git lib/AsmParser/LLLexer.cpp lib/AsmParser/LLLexer.cpp
+index 04dcd2b..3cb19e9 100644
+--- lib/AsmParser/LLLexer.cpp
++++ lib/AsmParser/LLLexer.cpp
+@@ -599,6 +599,10 @@ lltok::Kind LLLexer::LexIdentifier() {
+   KEYWORD(anyregcc);
+   KEYWORD(preserve_mostcc);
+   KEYWORD(preserve_allcc);
++  KEYWORD(hhvm_c);
++  KEYWORD(hhvm_php);
++  KEYWORD(hhvm_sr);
++  KEYWORD(hhvm_tc);
+ 
+   KEYWORD(cc);
+   KEYWORD(c);
+@@ -642,6 +646,7 @@ lltok::Kind LLLexer::LexIdentifier() {
+   KEYWORD(sanitize_address);
+   KEYWORD(sanitize_thread);
+   KEYWORD(sanitize_memory);
++  KEYWORD(smashable);
+   KEYWORD(uwtable);
+   KEYWORD(zeroext);
+ 
+diff --git lib/AsmParser/LLParser.cpp lib/AsmParser/LLParser.cpp
+index 0fa5301..f7d67cb 100644
+--- lib/AsmParser/LLParser.cpp
++++ lib/AsmParser/LLParser.cpp
+@@ -1030,6 +1030,7 @@ bool LLParser::ParseFnAttributeValuePairs(AttrBuilder &B,
+     case lltok::kw_readnone:          B.addAttribute(Attribute::ReadNone); break;
+     case lltok::kw_readonly:          B.addAttribute(Attribute::ReadOnly); break;
+     case lltok::kw_returns_twice:     B.addAttribute(Attribute::ReturnsTwice); break;
++    case lltok::kw_smashable:         B.addAttribute(Attribute::Smashable); break;
+     case lltok::kw_ssp:               B.addAttribute(Attribute::StackProtect); break;
+     case lltok::kw_sspreq:            B.addAttribute(Attribute::StackProtectReq); break;
+     case lltok::kw_sspstrong:         B.addAttribute(Attribute::StackProtectStrong); break;
+@@ -1331,6 +1332,7 @@ bool LLParser::ParseOptionalParamAttrs(AttrBuilder &B) {
+     case lltok::kw_sanitize_address:
+     case lltok::kw_sanitize_memory:
+     case lltok::kw_sanitize_thread:
++    case lltok::kw_smashable:
+     case lltok::kw_ssp:
+     case lltok::kw_sspreq:
+     case lltok::kw_sspstrong:
+@@ -1400,6 +1402,7 @@ bool LLParser::ParseOptionalReturnAttrs(AttrBuilder &B) {
+     case lltok::kw_sanitize_address:
+     case lltok::kw_sanitize_memory:
+     case lltok::kw_sanitize_thread:
++    case lltok::kw_smashable:
+     case lltok::kw_ssp:
+     case lltok::kw_sspreq:
+     case lltok::kw_sspstrong:
+@@ -1507,6 +1510,10 @@ bool LLParser::ParseOptionalDLLStorageClass(unsigned &Res) {
+ ///   ::= 'anyregcc'
+ ///   ::= 'preserve_mostcc'
+ ///   ::= 'preserve_allcc'
++///   ::= 'hhvm_c'
++///   ::= 'hhvm_php'
++///   ::= 'hhvm_sr'
++///   ::= 'hhvm_tc'
+ ///   ::= 'cc' UINT
+ ///
+ bool LLParser::ParseOptionalCallingConv(CallingConv::ID &CC) {
+@@ -1533,6 +1540,10 @@ bool LLParser::ParseOptionalCallingConv(CallingConv::ID &CC) {
+   case lltok::kw_anyregcc:       CC = CallingConv::AnyReg; break;
+   case lltok::kw_preserve_mostcc:CC = CallingConv::PreserveMost; break;
+   case lltok::kw_preserve_allcc: CC = CallingConv::PreserveAll; break;
++  case lltok::kw_hhvm_c:         CC = CallingConv::X86_64_HHVM_C; break;
++  case lltok::kw_hhvm_php:       CC = CallingConv::X86_64_HHVM_PHP; break;
++  case lltok::kw_hhvm_sr:        CC = CallingConv::X86_64_HHVM_SR; break;
++  case lltok::kw_hhvm_tc:        CC = CallingConv::X86_64_HHVM_TC; break;
+   case lltok::kw_cc: {
+       unsigned ArbitraryCC;
+       Lex.Lex();
+diff --git lib/AsmParser/LLToken.h lib/AsmParser/LLToken.h
+index b28699e..41b4990 100644
+--- lib/AsmParser/LLToken.h
++++ lib/AsmParser/LLToken.h
+@@ -95,6 +95,8 @@ namespace lltok {
+     kw_x86_64_sysvcc, kw_x86_64_win64cc,
+     kw_webkit_jscc, kw_anyregcc,
+     kw_preserve_mostcc, kw_preserve_allcc,
++    kw_hhvm_c, kw_hhvm_php,
++    kw_hhvm_sr, kw_hhvm_tc,
+ 
+     // Attributes:
+     kw_attributes,
+@@ -129,6 +131,7 @@ namespace lltok {
+     kw_returned,
+     kw_returns_twice,
+     kw_signext,
++    kw_smashable,
+     kw_ssp,
+     kw_sspreq,
+     kw_sspstrong,
+diff --git lib/Bitcode/Writer/BitcodeWriter.cpp lib/Bitcode/Writer/BitcodeWriter.cpp
+index feb9a42..8c35473 100644
+--- lib/Bitcode/Writer/BitcodeWriter.cpp
++++ lib/Bitcode/Writer/BitcodeWriter.cpp
+@@ -202,6 +202,8 @@ static uint64_t getAttrKindEncoding(Attribute::AttrKind Kind) {
+     return bitc::ATTR_KIND_NO_RED_ZONE;
+   case Attribute::NoReturn:
+     return bitc::ATTR_KIND_NO_RETURN;
++  case Attribute::Smashable:
++    return bitc::ATTR_KIND_SMASHABLE;
+   case Attribute::NoUnwind:
+     return bitc::ATTR_KIND_NO_UNWIND;
+   case Attribute::OptimizeForSize:
+diff --git lib/CodeGen/AsmPrinter/AsmPrinter.cpp lib/CodeGen/AsmPrinter/AsmPrinter.cpp
+index a030c5c..d6268f6 100644
+--- lib/CodeGen/AsmPrinter/AsmPrinter.cpp
++++ lib/CodeGen/AsmPrinter/AsmPrinter.cpp
+@@ -40,6 +40,7 @@
+ #include "llvm/MC/MCSection.h"
+ #include "llvm/MC/MCStreamer.h"
+ #include "llvm/MC/MCSymbol.h"
++#include "llvm/Support/CommandLine.h"
+ #include "llvm/Support/ErrorHandling.h"
+ #include "llvm/Support/Format.h"
+ #include "llvm/Support/MathExtras.h"
+@@ -726,10 +727,37 @@ void AsmPrinter::EmitFunctionBody() {
+ 
+   bool ShouldPrintDebugScopes = MMI->hasDebugInfo();
+ 
++  // For hot-cold splitting perhaps we should add a pass that guarantees that
++  // we are writing hot blocks before emitting cold. Thus we would have 
++  // at most two fragments to take care off.
++
+   // Print out code for the function.
+   bool HasAnyRealCode = false;
+   const MachineInstr *LastMI = nullptr;
++  const auto HotSection =
++    getObjFileLowering().SectionForGlobal(MF->getFunction(), *Mang, TM);
++  const auto ColdSection = getObjFileLowering().getColdTextSection();
++  auto CurrentSection = HotSection;
++  const MachineBasicBlock *predMBB = nullptr;
+   for (auto &MBB : *MF) {
++    // Switch to cold  section if we are splitting hot and cold code.
++    if (TM.Options.MCOptions.SplitHotCold && MBB.getBasicBlock() &&
++        MBB.getBasicBlock()->getName().endswith(".cold") &&
++        CurrentSection != ColdSection) {
++      // Switch only if the previous block is not a fall-through.
++      if (!predMBB ||
++          !const_cast<MachineBasicBlock *>(predMBB)->canFallThrough()) {
++        OutStreamer.SwitchSection(ColdSection);
++        CurrentSection = ColdSection;
++        // Special marker for exception ranges table that fall in cold code.
++        // FIXME: should only emit if we need EH.
++        //    Handler->beginFragment() ? 
++        OutStreamer.EmitLabel(GetTempSymbol("eh_func_begin_cold",
++                                            getFunctionNumber()));
++        MMI->setColdFragmentStart(&MBB);
++      }
++    }
++
+     // Print a label for the basic block.
+     EmitBasicBlockStart(MBB);
+     for (auto &MI : MBB) {
+@@ -792,6 +820,14 @@ void AsmPrinter::EmitFunctionBody() {
+     }
+ 
+     EmitBasicBlockEnd(MBB);
++    predMBB = &MBB;
++  }
++
++  // Switch back to regular code section if we were emitting to cold.
++  if (CurrentSection == ColdSection) {
++    OutStreamer.EmitLabel(GetTempSymbol("eh_func_end_cold",
++                                        getFunctionNumber()));
++    OutStreamer.SwitchSection(HotSection);
+   }
+ 
+   // If the last instruction was a prolog label, then we have a situation where
+diff --git lib/CodeGen/AsmPrinter/AsmPrinterDwarf.cpp lib/CodeGen/AsmPrinter/AsmPrinterDwarf.cpp
+index 05f6a68..c71849a 100644
+--- lib/CodeGen/AsmPrinter/AsmPrinterDwarf.cpp
++++ lib/CodeGen/AsmPrinter/AsmPrinterDwarf.cpp
+@@ -44,7 +44,7 @@ void AsmPrinter::EmitSLEB128(int64_t Value, const char *Desc) const {
+   OutStreamer.EmitSLEB128IntValue(Value);
+ }
+ 
+-/// EmitULEB128 - emit the specified signed leb128 value.
++/// EmitULEB128 - emit the specified unsigned leb128 value.
+ void AsmPrinter::EmitULEB128(uint64_t Value, const char *Desc,
+                              unsigned PadTo) const {
+   if (isVerbose() && Desc)
+diff --git lib/CodeGen/AsmPrinter/EHStreamer.cpp lib/CodeGen/AsmPrinter/EHStreamer.cpp
+index 73f62bf..d033517 100644
+--- lib/CodeGen/AsmPrinter/EHStreamer.cpp
++++ lib/CodeGen/AsmPrinter/EHStreamer.cpp
+@@ -18,10 +18,13 @@
+ #include "llvm/CodeGen/MachineModuleInfo.h"
+ #include "llvm/IR/Function.h"
+ #include "llvm/MC/MCAsmInfo.h"
++#include "llvm/MC/MCSection.h"
+ #include "llvm/MC/MCStreamer.h"
+ #include "llvm/MC/MCSymbol.h"
++#include "llvm/MC/MCTargetOptions.h"
+ #include "llvm/Support/LEB128.h"
+ #include "llvm/Target/TargetLoweringObjectFile.h"
++#include "llvm/Target/TargetMachine.h"
+ 
+ using namespace llvm;
+ 
+@@ -208,8 +211,31 @@ computeCallSiteTable(SmallVectorImpl<CallSiteEntry> &CallSites,
+   // Whether the last CallSite entry was for an invoke.
+   bool PreviousIsInvoke = false;
+ 
++  const MachineBasicBlock *prevMBB = nullptr;
++
++  bool SwitchedSections = false;
++
+   // Visit all instructions in order of address.
+   for (const auto &MBB : *Asm->MF) {
++    if (prevMBB && MMI->getColdFragmentStart() == &MBB) {
++      if (SwitchedSections)
++        llvm::report_fatal_error("2nd hot-cold split detected", false);
++      // We are switching from hot to cold. This should only happen outside of
++      // try-range.
++      // FIXME: add assertion.
++      SwitchedSections = true;
++      if (SawPotentiallyThrowing && Asm->MAI->isExceptionHandlingDwarf()) {
++        auto EndHot = 
++          Asm->GetTempSymbol("eh_func_end", Asm->getFunctionNumber());
++        CallSiteEntry Site = { LastLabel, EndHot, nullptr, 0 };
++        CallSites.push_back(Site);
++        SawPotentiallyThrowing = false;
++        PreviousIsInvoke = false;
++      }
++      LastLabel =
++        Asm->GetTempSymbol("eh_func_begin_cold", Asm->getFunctionNumber());
++    }
++
+     for (const auto &MI : MBB) {
+       if (!MI.isEHLabel()) {
+         if (MI.isCall())
+@@ -282,6 +308,7 @@ computeCallSiteTable(SmallVectorImpl<CallSiteEntry> &CallSites,
+         PreviousIsInvoke = true;
+       }
+     }
++    prevMBB = &MBB;
+   }
+ 
+   // If some instruction between the previous try-range and the end of the
+@@ -442,7 +469,14 @@ void EHStreamer::emitExceptionTable() {
+                                                   Asm->getFunctionNumber()));
+ 
+   // Emit the LSDA header.
+-  Asm->EmitEncodingByte(dwarf::DW_EH_PE_omit, "@LPStart");
++  bool SplitHotCold = Asm->TM.Options.MCOptions.SplitHotCold;
++  if (!SplitHotCold) {
++    Asm->EmitEncodingByte(dwarf::DW_EH_PE_omit, "@LPStart");
++  } else {
++    Asm->EmitEncodingByte(dwarf::DW_EH_PE_udata8, "@LPStart");
++    Asm->OutStreamer.EmitSymbolValue(
++      Asm->GetTempSymbol("eh_func_begin_cold", Asm->getFunctionNumber()), 8);
++  }
+   Asm->EmitEncodingByte(TTypeEncoding, "@TType");
+ 
+   // The type infos need to be aligned. GCC does this by inserting padding just
+@@ -546,28 +580,56 @@ void EHStreamer::emitExceptionTable() {
+     // Add extra padding if it wasn't added to the TType base offset.
+     Asm->EmitULEB128(CallSiteTableLength, "Call site table length", SizeAlign);
+ 
++    bool IsInCold = false;
++
++    //    HOT Fragment
++    //    ---------------------
++    //   | eh_func_begin:      |
++    //   |                     |
++    //   | ...                 |
++    //   |                     |
++    //   | eh_func_end:        |
++    //    ---------------------
++    //
++    //       ..............
++    //
++    //    COLD Fragment
++    //    ---------------------
++    //   | eh_func_begin_cold: |
++    //   |                     |
++    //   | ...                 |
++    //   |                     |
++    //   | eh_func_end_cold:   |
++    //    ---------------------
++
++    const auto EHBeginFunc = Asm->GetTempSymbol("eh_func_begin",
++                                                Asm->getFunctionNumber());
++    const auto EHEndFunc   = Asm->GetTempSymbol("eh_func_end",
++                                                Asm->getFunctionNumber());
++    const auto EHBeginCold = Asm->GetTempSymbol("eh_func_begin_cold",
++                                                Asm->getFunctionNumber());
++    const auto EHEndCold   = Asm->GetTempSymbol("eh_func_end_cold",
++                                                Asm->getFunctionNumber());
+     unsigned Entry = 0;
+     for (SmallVectorImpl<CallSiteEntry>::const_iterator
+          I = CallSites.begin(), E = CallSites.end(); I != E; ++I) {
+       const CallSiteEntry &S = *I;
+ 
+-      MCSymbol *EHFuncBeginSym =
+-        Asm->GetTempSymbol("eh_func_begin", Asm->getFunctionNumber());
++      if (S.BeginLabel && S.BeginLabel->getSection().getKind().isColdText())
++        IsInCold = true;
+ 
+-      MCSymbol *BeginLabel = S.BeginLabel;
+-      if (!BeginLabel)
+-        BeginLabel = EHFuncBeginSym;
+-      MCSymbol *EndLabel = S.EndLabel;
+-      if (!EndLabel)
+-        EndLabel = Asm->GetTempSymbol("eh_func_end", Asm->getFunctionNumber());
++      const auto EHBeginFrag = IsInCold ? EHBeginCold : EHBeginFunc;
++      const auto EHEndFrag   = IsInCold ? EHEndCold : EHEndFunc;
+ 
++      auto BeginLabel = S.BeginLabel ? S.BeginLabel : EHBeginFrag;
++      auto EndLabel = S.EndLabel ? S.EndLabel : EHEndFrag;
+ 
+       // Offset of the call site relative to the previous call site, counted in
+       // number of 16-byte bundles. The first call site is counted relative to
+       // the start of the procedure fragment.
+       if (VerboseAsm)
+         Asm->OutStreamer.AddComment(">> Call Site " + Twine(++Entry) + " <<");
+-      Asm->EmitLabelDifference(BeginLabel, EHFuncBeginSym, 4);
++      Asm->EmitLabelDifference(BeginLabel, EHBeginFrag, 4);
+       if (VerboseAsm)
+         Asm->OutStreamer.AddComment(Twine("  Call between ") +
+                                     BeginLabel->getName() + " and " +
+@@ -579,12 +641,23 @@ void EHStreamer::emitExceptionTable() {
+       if (!S.PadLabel) {
+         if (VerboseAsm)
+           Asm->OutStreamer.AddComment("    has no landing pad");
+-        Asm->OutStreamer.EmitIntValue(0, 4/*size*/);
++        if (SplitHotCold) {
++          // For fragmented code the real offset of landing pad could be 0.
++          // Thus we mark the absence of it with maximum integer value.
++          // Note: we rely on compatible runtime.
++          Asm->OutStreamer.EmitIntValue(0xffffffff, 4/*size*/);
++        } else {
++          Asm->OutStreamer.EmitIntValue(0, 4/*size*/);
++        }
+       } else {
+         if (VerboseAsm)
+           Asm->OutStreamer.AddComment(Twine("    jumps to ") +
+                                       S.PadLabel->getName());
+-        Asm->EmitLabelDifference(S.PadLabel, EHFuncBeginSym, 4);
++        // If we have hot-cold split, landing pads should always fall into cold.
++        assert(!SplitHotCold ||
++               S.PadLabel->getSection().getKind().isColdText());
++        auto PadBaseLabel = SplitHotCold ? EHBeginCold : EHBeginFunc;
++        Asm->EmitLabelDifference(S.PadLabel, PadBaseLabel, 4);
+       }
+ 
+       // Offset of the first associated action record, relative to the start of
+@@ -597,7 +670,9 @@ void EHStreamer::emitExceptionTable() {
+           Asm->OutStreamer.AddComment("  On action: " +
+                                       Twine((S.Action - 1) / 2 + 1));
+       }
+-      Asm->EmitULEB128(S.Action);
++      // FIXME: To properly mark ranges in cold we need to generate
++      // a separate LSDA for cold fragment.
++      Asm->EmitULEB128(IsInCold ? 127 : S.Action);
+     }
+   }
+ 
+diff --git lib/CodeGen/CMakeLists.txt lib/CodeGen/CMakeLists.txt
+index 2a247c1..ba25bd0 100644
+--- lib/CodeGen/CMakeLists.txt
++++ lib/CodeGen/CMakeLists.txt
+@@ -43,6 +43,7 @@ add_llvm_library(LLVMCodeGen
+   LiveStackAnalysis.cpp
+   LiveVariables.cpp
+   LocalStackSlotAllocation.cpp
++  LocRecs.cpp
+   MachineBasicBlock.cpp
+   MachineBlockFrequencyInfo.cpp
+   MachineBlockPlacement.cpp
+diff --git lib/CodeGen/MachineFunction.cpp lib/CodeGen/MachineFunction.cpp
+index 2129288..50e5597 100644
+--- lib/CodeGen/MachineFunction.cpp
++++ lib/CodeGen/MachineFunction.cpp
+@@ -32,6 +32,7 @@
+ #include "llvm/MC/MCContext.h"
+ #include "llvm/Support/Debug.h"
+ #include "llvm/Support/GraphWriter.h"
++#include "llvm/Support/MathExtras.h"
+ #include "llvm/Support/raw_ostream.h"
+ #include "llvm/Target/TargetFrameLowering.h"
+ #include "llvm/Target/TargetLowering.h"
+@@ -75,12 +76,13 @@ MachineFunction::MachineFunction(const Function *F, const TargetMachine &TM,
+   Alignment =
+       TM.getSubtargetImpl()->getTargetLowering()->getMinFunctionAlignment();
+ 
+-  // FIXME: Shouldn't use pref alignment if explicit alignment is set on Fn.
++  auto PrefAlignment = Fn->getAlignment() > 0
++    ? Log2_32(Fn->getAlignment())
++    : TM.getSubtargetImpl()->getTargetLowering()->getPrefFunctionAlignment();
++
+   if (!Fn->getAttributes().hasAttribute(AttributeSet::FunctionIndex,
+                                         Attribute::OptimizeForSize))
+-    Alignment = std::max(
+-        Alignment,
+-        TM.getSubtargetImpl()->getTargetLowering()->getPrefFunctionAlignment());
++    Alignment = std::max(Alignment, PrefAlignment);
+ 
+   FunctionNumber = FunctionNum;
+   JumpTableInfo = nullptr;
+diff --git lib/CodeGen/MachineInstr.cpp lib/CodeGen/MachineInstr.cpp
+index 06af6f8..9a75a9c 100644
+--- lib/CodeGen/MachineInstr.cpp
++++ lib/CodeGen/MachineInstr.cpp
+@@ -877,6 +877,7 @@ bool MachineInstr::isIdenticalTo(const MachineInstr *Other,
+     if (!getDebugLoc().isUnknown() && !Other->getDebugLoc().isUnknown()
+         && getDebugLoc() != Other->getDebugLoc())
+       return false;
++  // FIXME: needs more code?
+   return true;
+ }
+ 
+diff --git lib/CodeGen/MachineModuleInfo.cpp lib/CodeGen/MachineModuleInfo.cpp
+index 4976e35..587eefb 100644
+--- lib/CodeGen/MachineModuleInfo.cpp
++++ lib/CodeGen/MachineModuleInfo.cpp
+@@ -274,6 +274,7 @@ bool MachineModuleInfo::doInitialization(Module &M) {
+   CurCallSite = 0;
+   CallsEHReturn = 0;
+   CallsUnwindInit = 0;
++  ColdFragmentStart = nullptr;
+   DbgInfoAvailable = UsesVAFloatArgument = false; 
+   // Always emit some info, by default "no personality" info.
+   Personalities.push_back(nullptr);
+@@ -312,6 +313,7 @@ void MachineModuleInfo::EndFunction() {
+   FilterEnds.clear();
+   CallsEHReturn = 0;
+   CallsUnwindInit = 0;
++  ColdFragmentStart = nullptr;
+   CompactUnwindEncoding = 0;
+   VariableDbgInfos.clear();
+ }
+diff --git lib/CodeGen/PrologEpilogInserter.cpp lib/CodeGen/PrologEpilogInserter.cpp
+index 9d332ca..74a15c0 100644
+--- lib/CodeGen/PrologEpilogInserter.cpp
++++ lib/CodeGen/PrologEpilogInserter.cpp
+@@ -656,8 +656,14 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+     // If the frame pointer is eliminated, all frame offsets will be relative to
+     // SP not FP. Align to MaxAlign so this works.
+     StackAlign = std::max(StackAlign, MaxAlign);
++    unsigned Adjustment = 0;
++    if (LLVM_UNLIKELY(Fn.getFunction()->getCallingConv() ==
++                      CallingConv::X86_64_HHVM_TC)) {
++      Adjustment = 8;
++    }
+     unsigned AlignMask = StackAlign - 1;
+-    Offset = (Offset + AlignMask) & ~uint64_t(AlignMask);
++    Offset = (Offset - Adjustment + AlignMask) & ~uint64_t(AlignMask);
++    Offset += Adjustment;
+   }
+ 
+   // Update frame info to pretend that this is part of the stack...
+diff --git lib/CodeGen/SelectionDAG/InstrEmitter.cpp lib/CodeGen/SelectionDAG/InstrEmitter.cpp
+index 6661aca..dd6f04e 100644
+--- lib/CodeGen/SelectionDAG/InstrEmitter.cpp
++++ lib/CodeGen/SelectionDAG/InstrEmitter.cpp
+@@ -775,6 +775,8 @@ EmitMachineNode(SDNode *Node, bool IsClone, bool IsCloned,
+ 
+   // Create the new machine instruction.
+   MachineInstrBuilder MIB = BuildMI(*MF, Node->getDebugLoc(), II);
++  if (Node->getSmashable())
++    MIB.setMIFlag(MachineInstr::Smashable);
+ 
+   // Add result register values for things that are defined by this
+   // instruction.
+diff --git lib/CodeGen/TailDuplication.cpp lib/CodeGen/TailDuplication.cpp
+index 4377236..fd92a0a 100644
+--- lib/CodeGen/TailDuplication.cpp
++++ lib/CodeGen/TailDuplication.cpp
+@@ -38,6 +38,7 @@ using namespace llvm;
+ 
+ STATISTIC(NumTails     , "Number of tails duplicated");
+ STATISTIC(NumTailDups  , "Number of tail duplicated blocks");
++STATISTIC(NumCondTailDups  , "Number of conditional tail calls");
+ STATISTIC(NumInstrDups , "Additional instructions due to tail duplication");
+ STATISTIC(NumDeadBlocks, "Number of dead blocks removed");
+ STATISTIC(NumAddedPHIs , "Number of phis added");
+@@ -53,6 +54,11 @@ TailDupVerify("tail-dup-verify",
+               cl::desc("Verify sanity of PHI instructions during taildup"),
+               cl::init(false), cl::Hidden);
+ 
++static cl::opt<bool>
++CondTailDup("cond-tail-dup",
++            cl::desc("Create conditional tail calls via duplication"),
++            cl::init(false), cl::Hidden);
++
+ static cl::opt<unsigned>
+ TailDupLimit("tail-dup-limit", cl::init(~0U), cl::Hidden);
+ 
+@@ -773,6 +779,77 @@ TailDuplicatePass::TailDuplicate(MachineBasicBlock *TailBB,
+     assert(TailBB != PredBB &&
+            "Single-block loop should have been rejected earlier!");
+     // EH edges are ignored by AnalyzeBranch.
++
++    // For blocks with 2 successors attempt conditional tail duplication.
++    if (PredBB->succ_size() == 2 && CondTailDup) {
++      
++      // Only try after register allocation.
++      if (PreRegAlloc)
++        continue;
++
++      // Ignore invoke with a landing pad successor.
++      if (PredBB->getLandingPadSuccessor())
++        continue;
++
++      // Skip to 'real' instructions.
++      auto I = TailBB->SkipPHIsAndLabels(TailBB->begin());
++
++      // Blocks ending with unreachable IR instruction are considered for
++      // tail call optimization. They could become empty and we ignore them.
++      if (I == TailBB->end())
++        continue;
++
++      auto &TailCall = *I;
++      auto &CondJump = *PredBB->getLastNonDebugInstr();
++
++      // Ignore switch with 2 targets.
++      if (CondJump.isIndirectBranch())
++        continue;
++
++      if (PredBB->isLayoutSuccessor(TailBB)) {
++        // TODO(#6211350): if TailBB is a fallthrough we can reverse
++        // the branch condition and do optimization.
++        continue;
++      }
++
++      // If the only instruction in TailBB is a direct tail call, we can
++      // substitute conditional instruction destination.
++      if (TailCall.isCall() && TailCall.isReturn() &&
++          !TailCall.isIndirectBranch()) {
++
++        // 'jmp *$dst(%rip)' is considered a direct branch when it's
++        // a tail call. We catch it here.
++        auto& CallOperand = TailCall.getOperand(0);
++        if (CallOperand.isReg())
++          continue;
++
++        DEBUG(dbgs() << "\nTail-duplicating (with condition) into PredBB: "
++                     << *PredBB << "From Succ: " << *TailBB);
++        TDBBs.push_back(PredBB);
++
++        CondJump.getOperand(0) = CallOperand;
++
++        if (TailCall.getFlag(MachineInstr::Smashable))
++          CondJump.setFlag(MachineInstr::Smashable);
++
++        // Ideally we would like to merge debug info here.
++        if (!CondJump.getDebugLoc().getLocRec() &&
++            TailCall.getDebugLoc().getLocRec())
++          CondJump.setDebugLoc(TailCall.getDebugLoc());
++
++        // Update CFG.
++        PredBB->removeSuccessor(TailBB);
++        for (MachineBasicBlock::succ_iterator I = TailBB->succ_begin(),
++               E = TailBB->succ_end(); I != E; ++I)
++          PredBB->addSuccessor(*I, MBPI->getEdgeWeight(TailBB, I));
++
++        Changed = true;
++        ++NumCondTailDups;
++      }
++
++      continue;
++    }
++
+     if (PredBB->succ_size() > 1)
+       continue;
+ 
+diff --git lib/CodeGen/TargetLoweringObjectFileImpl.cpp lib/CodeGen/TargetLoweringObjectFileImpl.cpp
+index 55e1756..0d8e467 100644
+--- lib/CodeGen/TargetLoweringObjectFileImpl.cpp
++++ lib/CodeGen/TargetLoweringObjectFileImpl.cpp
+@@ -85,6 +85,30 @@ void TargetLoweringObjectFileELF::emitPersonalityValue(MCStreamer &Streamer,
+   Streamer.EmitSymbolValue(Sym, Size);
+ }
+ 
++void TargetLoweringObjectFileELF::emitModuleFlags(
++    MCStreamer &Streamer,
++    ArrayRef<Module::ModuleFlagEntry> ModuleFlags,
++    Mangler &Mang, const TargetMachine &TM) const {
++  uint64_t CodeSkew = 0;
++  uint64_t ColdCodeSkew = 0;
++
++  // Look for the "code_skew" flag.
++  for (ArrayRef<Module::ModuleFlagEntry>::iterator
++       i = ModuleFlags.begin(), e = ModuleFlags.end(); i != e; ++i) {
++    const Module::ModuleFlagEntry &MFE = *i;
++    StringRef Key = MFE.Key->getString();
++    if (Key == "code_skew") {
++      if (ConstantInt *CI = dyn_cast_or_null<ConstantInt>(MFE.Val))
++        CodeSkew = CI->getZExtValue();
++    } else if (Key == "cold_code_skew") {
++      if (ConstantInt *CI = dyn_cast_or_null<ConstantInt>(MFE.Val))
++        ColdCodeSkew = CI->getZExtValue();
++    }
++  }
++  Streamer.setCodeSkew(CodeSkew);
++  Streamer.setColdCodeSkew(ColdCodeSkew);
++}
++
+ const MCExpr *TargetLoweringObjectFileELF::getTTypeGlobalReference(
+     const GlobalValue *GV, unsigned Encoding, Mangler &Mang,
+     const TargetMachine &TM, MachineModuleInfo *MMI,
+diff --git lib/ExecutionEngine/MCJIT/MCJIT.h lib/ExecutionEngine/MCJIT/MCJIT.h
+index 83e3321..54f75c7 100644
+--- lib/ExecutionEngine/MCJIT/MCJIT.h
++++ lib/ExecutionEngine/MCJIT/MCJIT.h
+@@ -56,6 +56,10 @@ public:
+     return ClientMM->needsToReserveAllocationSpace();
+   }
+ 
++  bool allowStubAllocation() const override {
++    return ClientMM->allowStubAllocation();
++  }
++
+   void notifyObjectLoaded(ExecutionEngine *EE,
+                           const ObjectImage *Obj) override {
+     ClientMM->notifyObjectLoaded(EE, Obj);
+diff --git lib/ExecutionEngine/RuntimeDyld/GDBRegistrar.cpp lib/ExecutionEngine/RuntimeDyld/GDBRegistrar.cpp
+index 8546571..4c343a2 100644
+--- lib/ExecutionEngine/RuntimeDyld/GDBRegistrar.cpp
++++ lib/ExecutionEngine/RuntimeDyld/GDBRegistrar.cpp
+@@ -15,6 +15,9 @@
+ #include "llvm/Support/MutexGuard.h"
+ #include "llvm/Support/ManagedStatic.h"
+ 
++#define __jit_debug_descriptor LLVM__jit_debug_descriptor
++#define __jit_debug_register_code LLVM__jit_debug_register_code
++
+ using namespace llvm;
+ 
+ // This must be kept in sync with gdb/gdb/jit.h .
+diff --git lib/ExecutionEngine/RuntimeDyld/RuntimeDyld.cpp lib/ExecutionEngine/RuntimeDyld/RuntimeDyld.cpp
+index 4be1691..2734728 100644
+--- lib/ExecutionEngine/RuntimeDyld/RuntimeDyld.cpp
++++ lib/ExecutionEngine/RuntimeDyld/RuntimeDyld.cpp
+@@ -325,6 +325,10 @@ void RuntimeDyldImpl::computeTotalAllocSize(ObjectImage &Obj,
+ // compute stub buffer size for the given section
+ unsigned RuntimeDyldImpl::computeSectionStubBufSize(ObjectImage &Obj,
+                                                     const SectionRef &Section) {
++  if (!MemMgr->allowStubAllocation()) {
++    return 0;
++  }
++
+   unsigned StubSize = getMaxStubSize();
+   if (StubSize == 0) {
+     return 0;
+diff --git lib/ExecutionEngine/RuntimeDyld/RuntimeDyldELF.cpp lib/ExecutionEngine/RuntimeDyld/RuntimeDyldELF.cpp
+index 526fe55..04e4699 100644
+--- lib/ExecutionEngine/RuntimeDyld/RuntimeDyldELF.cpp
++++ lib/ExecutionEngine/RuntimeDyld/RuntimeDyldELF.cpp
+@@ -1020,6 +1020,8 @@ relocation_iterator RuntimeDyldELF::processRelocationRef(
+       (RelType == ELF::R_AARCH64_CALL26 || RelType == ELF::R_AARCH64_JUMP26)) {
+     // This is an AArch64 branch relocation, need to use a stub function.
+     DEBUG(dbgs() << "\t\tThis is an AArch64 branch relocation.");
++    if (!MemMgr->allowStubAllocation())
++      llvm_unreachable("stubs are prohibited by runtime");
+     SectionEntry &Section = Sections[SectionID];
+ 
+     // Look for an existing stub.
+@@ -1077,6 +1079,8 @@ relocation_iterator RuntimeDyldELF::processRelocationRef(
+     } else {
+       // Create a new stub function.
+       DEBUG(dbgs() << " Create a new stub function\n");
++      if (!MemMgr->allowStubAllocation())
++        llvm_unreachable("stubs are prohibited by runtime");
+       Stubs[Value] = Section.StubOffset;
+       uint8_t *StubTargetAddr =
+           createStubFunction(Section.Address + Section.StubOffset);
+@@ -1096,6 +1100,8 @@ relocation_iterator RuntimeDyldELF::processRelocationRef(
+              RelType == ELF::R_MIPS_26) {
+     // This is an Mips branch relocation, need to use a stub function.
+     DEBUG(dbgs() << "\t\tThis is a Mips branch relocation.");
++    if (!MemMgr->allowStubAllocation())
++      llvm_unreachable("stubs are prohibited by runtime");
+     SectionEntry &Section = Sections[SectionID];
+     uint8_t *Target = Section.Address + Offset;
+     uint32_t *TargetAddress = (uint32_t *)Target;
+@@ -1177,6 +1183,8 @@ relocation_iterator RuntimeDyldELF::processRelocationRef(
+       if (SymType == SymbolRef::ST_Unknown || RangeOverflow == true) {
+         // It is an external symbol (SymbolRef::ST_Unknown) or within a range
+         // larger than 24-bits.
++        if (!MemMgr->allowStubAllocation())
++          llvm_unreachable("stubs are prohibited by runtime");
+         StubMap::const_iterator i = Stubs.find(Value);
+         if (i != Stubs.end()) {
+           // Symbol function stub already created, just relocate to it
+@@ -1299,6 +1307,8 @@ relocation_iterator RuntimeDyldELF::processRelocationRef(
+     // a stub for every relocation, so using a GOT in JIT code should be
+     // no less space efficient than using an explicit constant pool.
+     DEBUG(dbgs() << "\t\tThis is a SystemZ indirect relocation.");
++    if (!MemMgr->allowStubAllocation())
++      llvm_unreachable("stubs are prohibited by runtime");
+     SectionEntry &Section = Sections[SectionID];
+ 
+     // Look for an existing stub.
+@@ -1353,6 +1363,8 @@ relocation_iterator RuntimeDyldELF::processRelocationRef(
+     if (Value.SymbolName) {
+       // This is a call to an external function.
+       // Look for an existing stub.
++      if (!MemMgr->allowStubAllocation())
++        llvm_unreachable("stubs are prohibited by runtime");
+       SectionEntry &Section = Sections[SectionID];
+       StubMap::const_iterator i = Stubs.find(Value);
+       uintptr_t StubAddress;
+diff --git lib/IR/AsmWriter.cpp lib/IR/AsmWriter.cpp
+index 8f91225..35d1f01 100644
+--- lib/IR/AsmWriter.cpp
++++ lib/IR/AsmWriter.cpp
+@@ -89,6 +89,10 @@ static void PrintCallingConv(unsigned cc, raw_ostream &Out) {
+   case CallingConv::X86_64_Win64:  Out << "x86_64_win64cc"; break;
+   case CallingConv::SPIR_FUNC:     Out << "spir_func"; break;
+   case CallingConv::SPIR_KERNEL:   Out << "spir_kernel"; break;
++  case CallingConv::X86_64_HHVM_C: Out<< "hhvm_c"; break;
++  case CallingConv::X86_64_HHVM_PHP:  Out<< "hhvm_php"; break;
++  case CallingConv::X86_64_HHVM_SR:   Out << "hhvm_sr"; break;
++  case CallingConv::X86_64_HHVM_TC:   Out << "hhvm_tc"; break;
+   }
+ }
+ 
+@@ -2104,6 +2108,9 @@ void AssemblyWriter::printInstruction(const Instruction &I) {
+                              TheModule);
+     }
+   }
++  if (auto LocRecID = I.getDebugLoc().getLocRec()) {
++    Out << ", !locrec !{i32 " << LocRecID << "}";
++  }
+   printInfoComment(I);
+ }
+ 
+diff --git lib/IR/Attributes.cpp lib/IR/Attributes.cpp
+index 04545ea..f93a793 100644
+--- lib/IR/Attributes.cpp
++++ lib/IR/Attributes.cpp
+@@ -231,6 +231,8 @@ std::string Attribute::getAsString(bool InAttrGrp) const {
+     return "returns_twice";
+   if (hasAttribute(Attribute::SExt))
+     return "signext";
++  if (hasAttribute(Attribute::Smashable))
++    return "smashable";
+   if (hasAttribute(Attribute::StackProtect))
+     return "ssp";
+   if (hasAttribute(Attribute::StackProtectReq))
+@@ -426,6 +428,7 @@ uint64_t AttributeImpl::getAttrMask(Attribute::AttrKind Val) {
+   case Attribute::InAlloca:        return 1ULL << 43;
+   case Attribute::NonNull:         return 1ULL << 44;
+   case Attribute::JumpTable:       return 1ULL << 45;
++  case Attribute::Smashable:       return 1ULL << 46;
+   case Attribute::Dereferenceable:
+     llvm_unreachable("dereferenceable attribute not supported in raw format");
+   }
+diff --git lib/IR/DebugLoc.cpp lib/IR/DebugLoc.cpp
+index e8bdcce..a4840ca 100644
+--- lib/IR/DebugLoc.cpp
++++ lib/IR/DebugLoc.cpp
+@@ -99,9 +99,9 @@ DebugLoc DebugLoc::get(unsigned Line, unsigned Col,
+   if (!Scope) return Result;
+ 
+   // Saturate line and col to "unknown".
+-  if (Col > 255) Col = 0;
+-  if (Line >= (1 << 24)) Line = 0;
+-  Result.LineCol = Line | (Col << 24);
++  if (Line >= (1 << 16)) Line = 0;
++  if (Col >= (1 << 15)) Col = 0;
++  Result.LineCol = Line | (Col << 16);
+   
+   LLVMContext &Ctx = Scope->getContext();
+   
+@@ -115,6 +115,28 @@ DebugLoc DebugLoc::get(unsigned Line, unsigned Col,
+   return Result;
+ }
+ 
++DebugLoc DebugLoc::get(unsigned Line, unsigned Col, unsigned LocRecID,
++                       MDNode *Scope, MDNode *InlinedAt) {
++  DebugLoc Result = get(Line, Col, Scope, InlinedAt);
++  
++  assert((LocRecID == 0 || Result.LineCol >> 16 == 0) &&
++         "column and locrec could not be set at the same time");
++  assert(LocRecID >> 15 == 0 && "locrec ID too large");
++  Result.LineCol |= (LocRecID << 16) | (1 << 31);
++
++  return Result;
++}
++
++DebugLoc DebugLoc::get(unsigned LocRecID) {
++  DebugLoc Result;
++  
++  assert(LocRecID > 0 && "locrec ID must be positive");
++  assert(LocRecID >> 15 == 0 && "locrec ID too large");
++  Result.LineCol = (LocRecID << 16) | (1 << 31);
++  
++  return Result;
++}
++
+ /// getAsMDNode - This method converts the compressed DebugLoc node into a
+ /// DILocation-compatible MDNode.
+ MDNode *DebugLoc::getAsMDNode(const LLVMContext &Ctx) const {
+@@ -151,6 +173,13 @@ DebugLoc DebugLoc::getFromDILexicalBlock(MDNode *N) {
+              nullptr);
+ }
+ 
++/// getFromLocRec - Translate location record metadata into a DebugLoc.
++DebugLoc DebugLoc::getFromLocRec(MDNode *N) {
++  if (ConstantInt *CI = dyn_cast_or_null<ConstantInt>(N->getOperand(0)))
++    return get(CI->getZExtValue());
++  return DebugLoc();
++}
++
+ void DebugLoc::dump(const LLVMContext &Ctx) const {
+ #ifndef NDEBUG
+   if (!isUnknown()) {
+diff --git lib/IR/LLVMContext.cpp lib/IR/LLVMContext.cpp
+index d4ba83d..285e43c 100644
+--- lib/IR/LLVMContext.cpp
++++ lib/IR/LLVMContext.cpp
+@@ -76,6 +76,11 @@ LLVMContext::LLVMContext() : pImpl(new LLVMContextImpl(*this)) {
+   unsigned NoAliasID = getMDKindID("noalias");
+   assert(NoAliasID == MD_noalias && "noalias kind id drifted");
+   (void)NoAliasID;
++
++  // Create the 'locrec' metadata kind.
++  unsigned LocRecID = getMDKindID("locrec");
++  assert(LocRecID == MD_locrec && "locrec kind id drifted");
++  (void)LocRecID;
+ }
+ LLVMContext::~LLVMContext() { delete pImpl; }
+ 
+diff --git lib/IR/Metadata.cpp lib/IR/Metadata.cpp
+index a017bd3..6cff9b9 100644
+--- lib/IR/Metadata.cpp
++++ lib/IR/Metadata.cpp
+@@ -675,6 +675,12 @@ void Instruction::setMetadata(unsigned KindID, MDNode *Node) {
+     return;
+   }
+   
++  // Handle 'locrec" specially, same as 'dbg' above.
++  if (KindID == LLVMContext::MD_locrec) {
++    DbgLoc = DebugLoc::getFromLocRec(Node);
++    return;
++  }
++  
+   // Handle the case when we're adding/updating metadata on an instruction.
+   if (Node) {
+     LLVMContextImpl::MDMapTy &Info = getContext().pImpl->MetadataStore[this];
+diff --git lib/IR/Verifier.cpp lib/IR/Verifier.cpp
+index 9cf911b..382a451 100644
+--- lib/IR/Verifier.cpp
++++ lib/IR/Verifier.cpp
+@@ -775,7 +775,8 @@ void Verifier::VerifyAttributeTypes(AttributeSet Attrs, unsigned Idx,
+         I->getKindAsEnum() == Attribute::NoBuiltin ||
+         I->getKindAsEnum() == Attribute::Cold ||
+         I->getKindAsEnum() == Attribute::OptimizeNone ||
+-        I->getKindAsEnum() == Attribute::JumpTable) {
++        I->getKindAsEnum() == Attribute::JumpTable ||
++        I->getKindAsEnum() == Attribute::Smashable) {
+       if (!isFunction) {
+         CheckFailed("Attribute '" + I->getAsString() +
+                     "' only applies to functions!", V);
+diff --git lib/MC/MCAsmStreamer.cpp lib/MC/MCAsmStreamer.cpp
+index dc6133e..b05a13d 100644
+--- lib/MC/MCAsmStreamer.cpp
++++ lib/MC/MCAsmStreamer.cpp
+@@ -1265,6 +1265,7 @@ void MCAsmStreamer::EmitInstruction(const MCInst &Inst, const MCSubtargetInfo &S
+ }
+ 
+ void MCAsmStreamer::EmitBundleAlignMode(unsigned AlignPow2) {
++  MCStreamer::EmitBundleAlignMode(AlignPow2);
+   OS << "\t.bundle_align_mode " << AlignPow2;
+   EmitEOL();
+ }
+diff --git lib/MC/MCAssembler.cpp lib/MC/MCAssembler.cpp
+index 512f695..f427c7a 100644
+--- lib/MC/MCAssembler.cpp
++++ lib/MC/MCAssembler.cpp
+@@ -220,7 +220,7 @@ uint64_t MCAsmLayout::getSectionFileSize(const MCSectionData *SD) const {
+ 
+ uint64_t MCAsmLayout::computeBundlePadding(const MCFragment *F,
+                                            uint64_t FOffset, uint64_t FSize) {
+-  uint64_t BundleSize = Assembler.getBundleAlignSize();
++  uint64_t BundleSize = F->getBundleAlignSize();
+   assert(BundleSize > 0 &&
+          "computeBundlePadding should only be called if bundling is enabled");
+   uint64_t BundleMask = BundleSize - 1;
+@@ -260,14 +260,20 @@ uint64_t MCAsmLayout::computeBundlePadding(const MCFragment *F,
+ 
+ /* *** */
+ 
+-MCFragment::MCFragment() : Kind(FragmentType(~0)) {
++MCFragment::MCFragment()
++  : Kind(FragmentType(~0))
++  , BundleAlignSize(0) {
+ }
+ 
+ MCFragment::~MCFragment() {
+ }
+ 
+ MCFragment::MCFragment(FragmentType _Kind, MCSectionData *_Parent)
+-  : Kind(_Kind), Parent(_Parent), Atom(nullptr), Offset(~UINT64_C(0))
++  : Kind(_Kind)
++  , Parent(_Parent)
++  , Atom(nullptr)
++  , Offset(~UINT64_C(0))
++  , BundleAlignSize(0)
+ {
+   if (Parent)
+     Parent->getFragmentList().push_back(this);
+@@ -350,7 +356,8 @@ MCAssembler::MCAssembler(MCContext &Context_, MCAsmBackend &Backend_,
+                          raw_ostream &OS_)
+   : Context(Context_), Backend(Backend_), Emitter(Emitter_), Writer(Writer_),
+     OS(OS_), BundleAlignSize(0), RelaxAll(false), NoExecStack(false),
+-    SubsectionsViaSymbols(false), ELFHeaderEFlags(0) {
++    SubsectionsViaSymbols(false), ELFHeaderEFlags(0), CodeSkew(0),
++    ColdCodeSkew(0) {
+   VersionMinInfo.Major = 0; // Major version == 0 for "none specified"
+ }
+ 
+@@ -536,6 +543,15 @@ uint64_t MCAssembler::computeFragmentSize(const MCAsmLayout &Layout,
+   case MCFragment::FT_Align: {
+     const MCAlignFragment &AF = cast<MCAlignFragment>(F);
+     unsigned Offset = Layout.getFragmentOffset(&AF);
++    // Apply code skew to all alignment fragments except the first one.
++    // The very first alignment fragment is for the section, and it's always
++    // set to 4 and there is no way to override it.
++    if (F.getPrevNode()) {
++      if (F.getParent()->getSection().getKind().isNormalText())
++        Offset += getCodeSkew();
++      else if (F.getParent()->getSection().getKind().isColdText())
++        Offset += getColdCodeSkew();
++    }
+     unsigned Size = OffsetToAlignment(Offset, AF.getAlignment());
+     // If we are padding with nops, force the padding to be larger than the
+     // minimum nop size.
+@@ -607,15 +623,20 @@ void MCAsmLayout::layoutFragment(MCFragment *F) {
+   // The fragment's offset will point to after the padding, and its computed
+   // size won't include the padding.
+   //
+-  if (Assembler.isBundlingEnabled() && F->hasInstructions()) {
++  if (F->isBundlingEnabled() && F->hasInstructions()) {
+     assert(isa<MCEncodedFragment>(F) &&
+            "Only MCEncodedFragment implementations have instructions");
+     uint64_t FSize = Assembler.computeFragmentSize(*this, *F);
+ 
+-    if (FSize > Assembler.getBundleAlignSize())
++    if (FSize > F->getBundleAlignSize())
+       report_fatal_error("Fragment can't be larger than a bundle size");
+ 
+-    uint64_t RequiredBundlePadding = computeBundlePadding(F, F->Offset, FSize);
++    uint64_t Offset = F->Offset;
++    if (F->getParent()->getSection().getKind().isNormalText())
++      Offset += getAssembler().getCodeSkew();
++    else if (F->getParent()->getSection().getKind().isColdText())
++      Offset += getAssembler().getColdCodeSkew();
++    uint64_t RequiredBundlePadding = computeBundlePadding(F, Offset, FSize);
+     if (RequiredBundlePadding > UINT8_MAX)
+       report_fatal_error("Padding cannot exceed 255 bytes");
+     F->setBundlePadding(static_cast<uint8_t>(RequiredBundlePadding));
+@@ -641,13 +662,13 @@ static void writeFragment(const MCAssembler &Asm, const MCAsmLayout &Layout,
+   // Should NOP padding be written out before this fragment?
+   unsigned BundlePadding = F.getBundlePadding();
+   if (BundlePadding > 0) {
+-    assert(Asm.isBundlingEnabled() &&
++    assert(F.isBundlingEnabled() &&
+            "Writing bundle padding with disabled bundling");
+     assert(F.hasInstructions() &&
+            "Writing bundle padding for a fragment without instructions");
+ 
+     unsigned TotalLength = BundlePadding + static_cast<unsigned>(FragmentSize);
+-    if (F.alignToBundleEnd() && TotalLength > Asm.getBundleAlignSize()) {
++    if (F.alignToBundleEnd() && TotalLength > F.getBundleAlignSize()) {
+       // If the padding itself crosses a bundle boundary, it must be emitted
+       // in 2 pieces, since even nop instructions must not cross boundaries.
+       //             v--------------v   <- BundleAlignSize
+@@ -656,7 +677,7 @@ static void writeFragment(const MCAssembler &Asm, const MCAsmLayout &Layout,
+       // | Prev |####|####|    F    |
+       // ----------------------------
+       //        ^-------------------^   <- TotalLength
+-      unsigned DistanceToBoundary = TotalLength - Asm.getBundleAlignSize();
++      unsigned DistanceToBoundary = TotalLength - F.getBundleAlignSize();
+       if (!Asm.getBackend().writeNopData(DistanceToBoundary, OW))
+           report_fatal_error("unable to write NOP sequence of " +
+                              Twine(DistanceToBoundary) + " bytes");
+diff --git lib/MC/MCELFStreamer.cpp lib/MC/MCELFStreamer.cpp
+index 7c70540..c2e5203 100644
+--- lib/MC/MCELFStreamer.cpp
++++ lib/MC/MCELFStreamer.cpp
+@@ -279,6 +279,12 @@ void MCELFStreamer::EmitValueImpl(const MCExpr *Value, unsigned Size,
+   MCObjectStreamer::EmitValueImpl(Value, Size, Loc);
+ }
+ 
++void MCELFStreamer::EmitIntValue(uint64_t Value, unsigned Size) {
++  if (getCurrentSectionData()->isBundleLocked())
++    report_fatal_error("Emitting values inside a locked bundle is forbidden");
++  MCStreamer::EmitIntValue(Value, Size);
++}
++
+ void MCELFStreamer::EmitValueToAlignment(unsigned ByteAlignment,
+                                          int64_t Value,
+                                          unsigned ValueSize,
+@@ -400,6 +406,7 @@ void MCELFStreamer::EmitInstToFragment(const MCInst &Inst,
+ 
+   for (unsigned i = 0, e = F.getFixups().size(); i != e; ++i)
+     fixSymbolsInTLSFixups(F.getFixups()[i].getValue());
++  F.setBundleAlignSize(getAssembler().getBundleAlignSize());
+ }
+ 
+ void MCELFStreamer::EmitInstToData(const MCInst &Inst,
+@@ -443,11 +450,13 @@ void MCELFStreamer::EmitInstToData(const MCInst &Inst,
+       // there are no fixups registered.
+       MCCompactEncodedInstFragment *CEIF = new MCCompactEncodedInstFragment();
+       insert(CEIF);
++      CEIF->setBundleAlignSize(Assembler.getBundleAlignSize());
+       CEIF->getContents().append(Code.begin(), Code.end());
+       return;
+     } else {
+       DF = new MCDataFragment();
+       insert(DF);
++      DF->setBundleAlignSize(Assembler.getBundleAlignSize());
+       if (SD->getBundleLockState() == MCSectionData::BundleLockedAlignToEnd) {
+         // If this is a new fragment created for a bundle-locked group, and the
+         // group was marked as "align_to_end", set a flag in the fragment.
+@@ -473,11 +482,9 @@ void MCELFStreamer::EmitInstToData(const MCInst &Inst,
+ 
+ void MCELFStreamer::EmitBundleAlignMode(unsigned AlignPow2) {
+   assert(AlignPow2 <= 30 && "Invalid bundle alignment");
++  MCStreamer::EmitBundleAlignMode(AlignPow2);
+   MCAssembler &Assembler = getAssembler();
+-  if (Assembler.getBundleAlignSize() == 0 && AlignPow2 > 0)
+-    Assembler.setBundleAlignSize(1 << AlignPow2);
+-  else
+-    report_fatal_error(".bundle_align_mode should be only set once per file");
++  Assembler.setBundleAlignSize(AlignPow2 ? (1 << AlignPow2) : 0);
+ }
+ 
+ void MCELFStreamer::EmitBundleLock(bool AlignToEnd) {
+diff --git lib/MC/MCObjectFileInfo.cpp lib/MC/MCObjectFileInfo.cpp
+index da707d8..ec93639 100644
+--- lib/MC/MCObjectFileInfo.cpp
++++ lib/MC/MCObjectFileInfo.cpp
+@@ -419,6 +419,12 @@ void MCObjectFileInfo::InitELFMCObjectFileInfo(Triple T) {
+                        ELF::SHF_ALLOC,
+                        SectionKind::getText());
+ 
++  ColdTextSection =
++    Ctx->getELFSection(".text.cold", ELF::SHT_PROGBITS,
++                       ELF::SHF_EXECINSTR |
++                       ELF::SHF_ALLOC,
++                       SectionKind::getColdText());
++
+   DataSection =
+     Ctx->getELFSection(".data", ELF::SHT_PROGBITS,
+                        ELF::SHF_WRITE |ELF::SHF_ALLOC,
+@@ -589,6 +595,11 @@ void MCObjectFileInfo::InitELFMCObjectFileInfo(Triple T) {
+                        ELF::SHF_ALLOC,
+                        SectionKind::getMetadata());
+ 
++  LocRecsSection =
++    Ctx->getELFSection(".llvm_locrecs", ELF::SHT_PROGBITS,
++                       ELF::SHF_ALLOC,
++                       SectionKind::getMetadata());
++
+ }
+ 
+ 
+diff --git lib/MC/MCObjectStreamer.cpp lib/MC/MCObjectStreamer.cpp
+index a721b59..b93cf2f 100644
+--- lib/MC/MCObjectStreamer.cpp
++++ lib/MC/MCObjectStreamer.cpp
+@@ -42,6 +42,21 @@ MCObjectStreamer::~MCObjectStreamer() {
+   delete Assembler;
+ }
+ 
++void MCObjectStreamer::flushPendingLabels(MCFragment *F) {
++  if (PendingLabels.size()) {
++    if (!F) {
++      F = new MCDataFragment();
++      CurSectionData->getFragmentList().insert(CurInsertionPoint, F);
++      F->setParent(CurSectionData);
++    }
++    for (MCSymbolData *SD : PendingLabels) {
++      SD->setFragment(F);
++      SD->setOffset(0);
++    }
++    PendingLabels.clear();
++  }
++}
++
+ void MCObjectStreamer::reset() {
+   if (Assembler)
+     Assembler->reset();
+@@ -49,6 +64,7 @@ void MCObjectStreamer::reset() {
+   CurInsertionPoint = MCSectionData::iterator();
+   EmitEHFrame = true;
+   EmitDebugFrame = false;
++  PendingLabels.clear();
+   MCStreamer::reset();
+ }
+ 
+@@ -72,11 +88,11 @@ MCFragment *MCObjectStreamer::getCurrentFragment() const {
+   return nullptr;
+ }
+ 
+-MCDataFragment *MCObjectStreamer::getOrCreateDataFragment() const {
++MCDataFragment *MCObjectStreamer::getOrCreateDataFragment() {
+   MCDataFragment *F = dyn_cast_or_null<MCDataFragment>(getCurrentFragment());
+   // When bundling is enabled, we don't want to add data to a fragment that
+   // already has instructions (see MCELFStreamer::EmitInstToData for details)
+-  if (!F || (Assembler->isBundlingEnabled() && F->hasInstructions())) {
++  if (!F || (F->isBundlingEnabled() && F->hasInstructions())) {
+     F = new MCDataFragment();
+     insert(F);
+   }
+@@ -127,15 +143,24 @@ void MCObjectStreamer::EmitLabel(MCSymbol *Symbol) {
+   MCStreamer::EmitLabel(Symbol);
+ 
+   MCSymbolData &SD = getAssembler().getOrCreateSymbolData(*Symbol);
+-
+-  // FIXME: This is wasteful, we don't necessarily need to create a data
+-  // fragment. Instead, we should mark the symbol as pointing into the data
+-  // fragment if it exists, otherwise we should just queue the label and set its
+-  // fragment pointer when we emit the next fragment.
+-  MCDataFragment *F = getOrCreateDataFragment();
+   assert(!SD.getFragment() && "Unexpected fragment on symbol data!");
+-  SD.setFragment(F);
+-  SD.setOffset(F->getContents().size());
++
++  // If there is a current fragment, mark the symbol as pointing into it.
++  // Otherwise queue the label and set its fragment pointer when we emit the
++  // next fragment.
++  //
++  // In file-scope bundling mode each instruction will be emittted in a special
++  // fragment and we will always queue the label. However, if the bundling
++  // is changing on and off, as e.g. in case of smashable instructions,
++  // then we need to do an extra check for a label immediately following
++  // the bundling directive as a previous fragment can be MCDataFragment.
++  auto *F = dyn_cast_or_null<MCDataFragment>(getCurrentFragment());
++  if (F && !getAssembler().getBundleAlignSize()) {
++    SD.setFragment(F);
++    SD.setOffset(F->getContents().size());
++  } else {
++    PendingLabels.push_back(&SD);
++  }
+ }
+ 
+ void MCObjectStreamer::EmitULEB128Value(const MCExpr *Value) {
+@@ -166,6 +191,7 @@ void MCObjectStreamer::EmitWeakReference(MCSymbol *Alias,
+ void MCObjectStreamer::ChangeSection(const MCSection *Section,
+                                      const MCExpr *Subsection) {
+   assert(Section && "Cannot switch to a null section!");
++  flushPendingLabels(nullptr);
+ 
+   CurSectionData = &getAssembler().getOrCreateSectionData(*Section);
+ 
+@@ -379,5 +405,8 @@ void MCObjectStreamer::FinishImpl() {
+   // Dump out the dwarf file & directory tables and line tables.
+   MCDwarfLineTable::Emit(this);
+ 
++  flushPendingLabels(nullptr);
++  getAssembler().setCodeSkew(getCodeSkew());
++  getAssembler().setColdCodeSkew(getColdCodeSkew());
+   getAssembler().Finish();
+ }
+diff --git lib/MC/MCStreamer.cpp lib/MC/MCStreamer.cpp
+index 9ee5dec..8e21a67 100644
+--- lib/MC/MCStreamer.cpp
++++ lib/MC/MCStreamer.cpp
+@@ -38,7 +38,8 @@ void MCTargetStreamer::finish() {}
+ void MCTargetStreamer::emitAssignment(MCSymbol *Symbol, const MCExpr *Value) {}
+ 
+ MCStreamer::MCStreamer(MCContext &Ctx)
+-    : Context(Ctx), CurrentWinFrameInfo(nullptr) {
++    : Context(Ctx), CurrentWinFrameInfo(nullptr), BundleAlignMode(0),
++      CodeSkew(0), ColdCodeSkew(0) {
+   SectionStack.push_back(std::pair<MCSectionSubPair, MCSectionSubPair>());
+ }
+ 
+@@ -690,7 +691,7 @@ void MCStreamer::EmitCodeAlignment(unsigned ByteAlignment,
+ bool MCStreamer::EmitValueToOffset(const MCExpr *Offset, unsigned char Value) {
+   return false;
+ }
+-void MCStreamer::EmitBundleAlignMode(unsigned AlignPow2) {}
++void MCStreamer::EmitBundleAlignMode(unsigned AlignPow2) { BundleAlignMode = AlignPow2; }
+ void MCStreamer::EmitBundleLock(bool AlignToEnd) {}
+ void MCStreamer::FinishImpl() {}
+ void MCStreamer::EmitBundleUnlock() {}
+diff --git lib/MC/MCTargetOptions.cpp lib/MC/MCTargetOptions.cpp
+index efd724a..e692bd1 100644
+--- lib/MC/MCTargetOptions.cpp
++++ lib/MC/MCTargetOptions.cpp
+@@ -15,6 +15,6 @@ MCTargetOptions::MCTargetOptions()
+     : SanitizeAddress(false), MCRelaxAll(false), MCNoExecStack(false),
+       MCSaveTempLabels(false), MCUseDwarfDirectory(false),
+       ShowMCEncoding(false), ShowMCInst(false), AsmVerbose(false),
+-      DwarfVersion(0) {}
++      SplitHotCold(false), DwarfVersion(0) {}
+ 
+ } // end namespace llvm
+diff --git lib/Target/X86/X86AsmPrinter.cpp lib/Target/X86/X86AsmPrinter.cpp
+index 44c123f..fb264fb 100644
+--- lib/Target/X86/X86AsmPrinter.cpp
++++ lib/Target/X86/X86AsmPrinter.cpp
+@@ -739,6 +739,7 @@ void X86AsmPrinter::EmitEndOfAsmFile(Module &M) {
+     }
+ 
+     SM.serializeToStackMapSection();
++    LR.serializeToLocRecsSection();
+   }
+ }
+ 
+diff --git lib/Target/X86/X86AsmPrinter.h lib/Target/X86/X86AsmPrinter.h
+index fdec333..ec9ee65 100644
+--- lib/Target/X86/X86AsmPrinter.h
++++ lib/Target/X86/X86AsmPrinter.h
+@@ -12,6 +12,7 @@
+ 
+ #include "X86Subtarget.h"
+ #include "llvm/CodeGen/AsmPrinter.h"
++#include "llvm/CodeGen/LocRecs.h"
+ #include "llvm/CodeGen/StackMaps.h"
+ #include "llvm/Target/TargetMachine.h"
+ 
+@@ -27,6 +28,10 @@ class MCSymbol;
+ class LLVM_LIBRARY_VISIBILITY X86AsmPrinter : public AsmPrinter {
+   const X86Subtarget *Subtarget;
+   StackMaps SM;
++  LocRecs   LR;
++
++  // Sadly there's no way to find target CPU's cacheline length.
++  static LLVM_CONSTEXPR unsigned CacheLinePow2 = 6;
+ 
+   void GenerateExportDirective(const MCSymbol *Sym, bool IsData);
+ 
+@@ -43,7 +48,8 @@ class LLVM_LIBRARY_VISIBILITY X86AsmPrinter : public AsmPrinter {
+     StackMapShadowTracker(TargetMachine &TM);
+     ~StackMapShadowTracker();
+     void startFunction(MachineFunction &MF);
+-    void count(MCInst &Inst, const MCSubtargetInfo &STI);
++    void count(MCInst &Inst, const MCSubtargetInfo &STI,
++               uint8_t *Size = nullptr);
+ 
+     // Called to signal the start of a shadow of RequiredSize bytes.
+     void reset(unsigned RequiredSize) {
+@@ -76,7 +82,7 @@ class LLVM_LIBRARY_VISIBILITY X86AsmPrinter : public AsmPrinter {
+   // This helper function invokes the SMShadowTracker on each instruction before
+   // outputting it to the OutStream. This allows the shadow tracker to minimise
+   // the number of NOPs used for stackmap padding.
+-  void EmitAndCountInstruction(MCInst &Inst);
++  void EmitAndCountInstruction(MCInst &Inst, unsigned LocRecID = 0);
+ 
+   void InsertStackMapShadows(MachineFunction &MF);
+   void LowerSTACKMAP(const MachineInstr &MI);
+@@ -86,7 +92,7 @@ class LLVM_LIBRARY_VISIBILITY X86AsmPrinter : public AsmPrinter {
+ 
+  public:
+   explicit X86AsmPrinter(TargetMachine &TM, MCStreamer &Streamer)
+-    : AsmPrinter(TM, Streamer), SM(*this), SMShadowTracker(TM) {
++    : AsmPrinter(TM, Streamer), SM(*this), LR(*this), SMShadowTracker(TM) {
+     Subtarget = &TM.getSubtarget<X86Subtarget>();
+   }
+ 
+diff --git lib/Target/X86/X86CallingConv.td lib/Target/X86/X86CallingConv.td
+index 899a960..77214a4 100644
+--- lib/Target/X86/X86CallingConv.td
++++ lib/Target/X86/X86CallingConv.td
+@@ -162,6 +162,15 @@ def RetCC_X86_64_WebKit_JS : CallingConv<[
+   CCIfType<[i64], CCAssignToReg<[RAX]>>
+ ]>;
+ 
++// HHVM return-value convention.
++def RetCC_X86_64_HHVM: CallingConv<[
++  // Promote all types to i64
++  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
++
++  // Return: RBX
++  CCIfType<[i64], CCAssignToReg<[RBX]>>
++]>;
++
+ // X86-64 AnyReg return-value convention. No explicit register is specified for
+ // the return-value. The register allocator is allowed and expected to choose
+ // any free register.
+@@ -197,6 +206,11 @@ def RetCC_X86_64 : CallingConv<[
+   CCIfCC<"CallingConv::X86_64_Win64", CCDelegateTo<RetCC_X86_Win64_C>>,
+   CCIfCC<"CallingConv::X86_64_SysV", CCDelegateTo<RetCC_X86_64_C>>,
+ 
++  // Handle HHVM calls.
++  CCIfCC<"CallingConv::X86_64_HHVM_PHP", CCDelegateTo<RetCC_X86_64_HHVM>>,
++  CCIfCC<"CallingConv::X86_64_HHVM_SR", CCDelegateTo<RetCC_X86_64_HHVM>>,
++  CCIfCC<"CallingConv::X86_64_HHVM_TC", CCDelegateTo<RetCC_X86_64_HHVM>>,
++
+   // Mingw64 and native Win64 use Win64 CC
+   CCIfSubtarget<"isTargetWin64()", CCDelegateTo<RetCC_X86_Win64_C>>,
+ 
+@@ -278,6 +292,33 @@ def CC_X86_64_C : CallingConv<[
+            CCAssignToStack<64, 64>>
+ ]>;
+ 
++// Calling convention for helper functions in HHVM.
++def CC_X86_64_HHVM_C : CallingConv<[
++  // Pass the first argument in RBP.
++  CCIfType<[i64], CCAssignToReg<[RBP]>>,
++
++  // Otherwise it's the same as the regular C calling convention.
++  CCDelegateTo<CC_X86_64_C>
++]>;
++
++// Calling convention for PHP calls in HHVM.
++def CC_X86_64_HHVM_PHP : CallingConv<[
++  // Pass HHVM's rVmSp, rVmTl, rVmFp, and rStashedAR.
++  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP, R15]>>
++]>;
++
++// Calling convention for HHVM's service requests on X86-64
++def CC_X86_64_HHVM_SR : CallingConv<[
++  // Pass HHVM's rVmSp, rVmTl, rVmFp, rAsm, and X64 ABI args regs.
++  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP, R10, RDI, RSI, RDX, RCX, R8, R9]>>
++]>;
++
++// Calling convention for HHVM's TC on X86-64
++def CC_X86_64_HHVM_TC : CallingConv<[
++  // Pass HHVM's rVmSp, rVmTl, and rVmFp.
++  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP]>>
++]>;
++
+ // Calling convention used on Win64
+ def CC_X86_Win64_C : CallingConv<[
+   // FIXME: Handle byval stuff.
+@@ -592,6 +633,10 @@ def CC_X86_64 : CallingConv<[
+   CCIfCC<"CallingConv::AnyReg", CCDelegateTo<CC_X86_64_AnyReg>>,
+   CCIfCC<"CallingConv::X86_64_Win64", CCDelegateTo<CC_X86_Win64_C>>,
+   CCIfCC<"CallingConv::X86_64_SysV", CCDelegateTo<CC_X86_64_C>>,
++  CCIfCC<"CallingConv::X86_64_HHVM_C", CCDelegateTo<CC_X86_64_HHVM_C>>,
++  CCIfCC<"CallingConv::X86_64_HHVM_PHP", CCDelegateTo<CC_X86_64_HHVM_PHP>>,
++  CCIfCC<"CallingConv::X86_64_HHVM_SR", CCDelegateTo<CC_X86_64_HHVM_SR>>,
++  CCIfCC<"CallingConv::X86_64_HHVM_TC", CCDelegateTo<CC_X86_64_HHVM_TC>>,
+ 
+   // Mingw64 and native Win64 use Win64 CC
+   CCIfSubtarget<"isTargetWin64()", CCDelegateTo<CC_X86_Win64_C>>,
+@@ -662,3 +707,6 @@ def CSR_64_Intel_OCL_BI_AVX    : CalleeSavedRegs<(add CSR_64,
+ def CSR_64_Intel_OCL_BI_AVX512 : CalleeSavedRegs<(add RBX, RDI, RSI, R14, R15,
+                                                   (sequence "ZMM%u", 16, 31),
+                                                   K4, K5, K6, K7)>;
++
++// rVmTl and rVmFp are preserved for PHP calls in HHVM.
++def CSR_64_HHVM_PHP : CalleeSavedRegs<(add R12, RBP)>;
+diff --git lib/Target/X86/X86FastISel.cpp lib/Target/X86/X86FastISel.cpp
+index a5bbf72..6bbec33 100644
+--- lib/Target/X86/X86FastISel.cpp
++++ lib/Target/X86/X86FastISel.cpp
+@@ -2650,7 +2650,7 @@ static unsigned computeBytesPoppedByCallee(const X86Subtarget *Subtarget,
+   if (Subtarget->getTargetTriple().isOSMSVCRT())
+     return 0;
+   if (CC == CallingConv::Fast || CC == CallingConv::GHC ||
+-      CC == CallingConv::HiPE)
++      CC == CallingConv::HiPE || CC == CallingConv::X86_64_HHVM_TC)
+     return 0;
+   if (CS && !CS->paramHasAttr(1, Attribute::StructRet))
+     return 0;
+diff --git lib/Target/X86/X86FrameLowering.cpp lib/Target/X86/X86FrameLowering.cpp
+index 58e15c7..0425f02 100644
+--- lib/Target/X86/X86FrameLowering.cpp
++++ lib/Target/X86/X86FrameLowering.cpp
+@@ -1034,6 +1034,9 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
+     MachineInstr *NewMI = std::prev(MBBI);
+     NewMI->copyImplicitOps(MF, MBBI);
+ 
++    if (MBBI->getFlag(MachineInstr::Smashable))
++      NewMI->setFlag(MachineInstr::Smashable);
++
+     // Delete the pseudo instruction TCRETURN.
+     MBB.erase(MBBI);
+   } else if ((RetOpcode == X86::RETQ || RetOpcode == X86::RETL ||
+diff --git lib/Target/X86/X86ISelLowering.cpp lib/Target/X86/X86ISelLowering.cpp
+index 70760c1..176f226 100644
+--- lib/Target/X86/X86ISelLowering.cpp
++++ lib/Target/X86/X86ISelLowering.cpp
+@@ -2190,7 +2190,9 @@ CreateCopyOfByValArgument(SDValue Src, SDValue Dst, SDValue Chain,
+ /// supports tail call optimization.
+ static bool IsTailCallConvention(CallingConv::ID CC) {
+   return (CC == CallingConv::Fast || CC == CallingConv::GHC ||
+-          CC == CallingConv::HiPE);
++          CC == CallingConv::HiPE || CC == CallingConv::X86_64_HHVM_PHP ||
++          CC == CallingConv::X86_64_HHVM_SR ||
++          CC == CallingConv::X86_64_HHVM_TC);
+ }
+ 
+ /// \brief Return true if the calling convention is a C calling convention.
+@@ -3028,10 +3030,16 @@ X86TargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
+     // This isn't right, although it's probably harmless on x86; liveouts
+     // should be computed from returns not tail calls.  Consider a void
+     // function making a tail call to a function returning int.
+-    return DAG.getNode(X86ISD::TC_RETURN, dl, NodeTys, Ops);
++
++    // Propagate attribute
++    SDValue result = DAG.getNode(X86ISD::TC_RETURN, dl, NodeTys, Ops);
++    result.setSmashable(CLI.Smashable);
++    return result;
+   }
+ 
++  // Propagate attribute
+   Chain = DAG.getNode(X86ISD::CALL, dl, NodeTys, Ops);
++  Chain.setSmashable(CLI.Smashable);
+   InFlag = Chain.getValue(1);
+ 
+   // Create the CALLSEQ_END node.
+@@ -3540,6 +3548,9 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
+   if (IsVarArg)
+     return false;
+ 
++  if (IsTailCallConvention(CallingConv))
++    return TailCallOpt;
++
+   switch (CallingConv) {
+   default:
+     return false;
+@@ -3549,12 +3560,6 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
+     return !is64Bit;
+   case CallingConv::X86_ThisCall:
+     return !is64Bit;
+-  case CallingConv::Fast:
+-    return TailCallOpt;
+-  case CallingConv::GHC:
+-    return TailCallOpt;
+-  case CallingConv::HiPE:
+-    return TailCallOpt;
+   }
+ }
+ 
+diff --git lib/Target/X86/X86InstrInfo.cpp lib/Target/X86/X86InstrInfo.cpp
+index 0d46f70..3130db8 100644
+--- lib/Target/X86/X86InstrInfo.cpp
++++ lib/Target/X86/X86InstrInfo.cpp
+@@ -2790,6 +2790,10 @@ bool X86InstrInfo::AnalyzeBranch(MachineBasicBlock &MBB,
+     if (!I->isBranch())
+       return true;
+ 
++    // Destination is not a basic block
++    if (!I->getOperand(0).isMBB())
++      return true;
++
+     // Handle unconditional branches.
+     if (I->getOpcode() == X86::JMP_4) {
+       UnCondBrIter = I;
+diff --git lib/Target/X86/X86MCInstLower.cpp lib/Target/X86/X86MCInstLower.cpp
+index 892396b..187ada4 100644
+--- lib/Target/X86/X86MCInstLower.cpp
++++ lib/Target/X86/X86MCInstLower.cpp
+@@ -65,10 +65,10 @@ private:
+ 
+ // Emit a minimal sequence of nops spanning NumBytes bytes.
+ static void EmitNops(MCStreamer &OS, unsigned NumBytes, bool Is64Bit,
+-                     const MCSubtargetInfo &STI);
++                     const MCSubtargetInfo &STI, bool UseBytes = true);
+ 
+ namespace llvm {
+-   X86AsmPrinter::StackMapShadowTracker::StackMapShadowTracker(TargetMachine &TM)
++  X86AsmPrinter::StackMapShadowTracker::StackMapShadowTracker(TargetMachine &TM)
+      : TM(TM), InShadow(false), RequiredShadowSize(0), CurrentShadowSize(0) {}
+ 
+   X86AsmPrinter::StackMapShadowTracker::~StackMapShadowTracker() {}
+@@ -82,16 +82,21 @@ namespace llvm {
+   }
+ 
+   void X86AsmPrinter::StackMapShadowTracker::count(MCInst &Inst,
+-                                                   const MCSubtargetInfo &STI) {
+-    if (InShadow) {
++                                                   const MCSubtargetInfo &STI,
++                                                   uint8_t *Size) {
++    if (InShadow || Size) {
+       SmallString<256> Code;
+       SmallVector<MCFixup, 4> Fixups;
+       raw_svector_ostream VecOS(Code);
+       CodeEmitter->EncodeInstruction(Inst, VecOS, Fixups, STI);
+       VecOS.flush();
+-      CurrentShadowSize += Code.size();
+-      if (CurrentShadowSize >= RequiredShadowSize)
+-        InShadow = false; // The shadow is big enough. Stop counting.
++      if (InShadow) {
++        CurrentShadowSize += Code.size();
++        if (CurrentShadowSize >= RequiredShadowSize)
++          InShadow = false; // The shadow is big enough. Stop counting.
++      }
++      if (Size)
++        *Size = Code.size();
+     }
+   }
+ 
+@@ -104,9 +109,18 @@ namespace llvm {
+     }
+   }
+ 
+-  void X86AsmPrinter::EmitAndCountInstruction(MCInst &Inst) {
+-    OutStreamer.EmitInstruction(Inst, getSubtargetInfo());
+-    SMShadowTracker.count(Inst, getSubtargetInfo());
++  void X86AsmPrinter::EmitAndCountInstruction(MCInst &Inst, unsigned LocRecID) {
++    if (LocRecID) {
++      uint8_t  Size;
++      MCSymbol *MILabel = OutStreamer.getContext().CreateTempSymbol();
++      OutStreamer.EmitLabel(MILabel);
++      OutStreamer.EmitInstruction(Inst, getSubtargetInfo());
++      SMShadowTracker.count(Inst, getSubtargetInfo(), &Size);
++      LR.addRecord(LocRecID, MILabel, Size);
++    } else {
++      OutStreamer.EmitInstruction(Inst, getSubtargetInfo());
++      SMShadowTracker.count(Inst, getSubtargetInfo());
++    }
+   }
+ } // end llvm namespace
+ 
+@@ -733,7 +747,7 @@ void X86AsmPrinter::LowerTlsAddr(X86MCInstLower &MCInstLowering,
+ }
+ 
+ /// \brief Emit the optimal amount of multi-byte nops on X86.
+-static void EmitNops(MCStreamer &OS, unsigned NumBytes, bool Is64Bit, const MCSubtargetInfo &STI) {
++static void EmitNops(MCStreamer &OS, unsigned NumBytes, bool Is64Bit, const MCSubtargetInfo &STI, bool UseBytes) {
+   // This works only for 64bit. For 32bit we have to do additional checking if
+   // the CPU supports multi-byte nops.
+   assert(Is64Bit && "EmitNops only supports X86-64");
+@@ -760,10 +774,12 @@ static void EmitNops(MCStreamer &OS, unsigned NumBytes, bool Is64Bit, const MCSu
+              IndexReg = X86::RAX; SegmentReg = X86::CS; break;
+     }
+ 
+-    unsigned NumPrefixes = std::min(NumBytes, 5U);
+-    NumBytes -= NumPrefixes;
+-    for (unsigned i = 0; i != NumPrefixes; ++i)
+-      OS.EmitBytes("\x66");
++    if (UseBytes) {
++      unsigned NumPrefixes = std::min(NumBytes, 5U);
++      NumBytes -= NumPrefixes;
++      for (unsigned i = 0; i != NumPrefixes; ++i)
++        OS.EmitBytes("\x66");
++    }
+ 
+     switch (Opc) {
+     default: llvm_unreachable("Unexpected opcode"); break;
+@@ -801,6 +817,18 @@ void X86AsmPrinter::LowerPATCHPOINT(const MachineInstr &MI) {
+ 
+   SM.recordPatchPoint(MI);
+ 
++  // Prevent patchpoint from crossing 64-byte (2^6) cachline boundary.
++  //
++  // If effective bundle alignment restrictions are more strict then we are
++  // fine. Otherwise we need to temporarily enforce our own.
++  //
++  unsigned CurrentBundleAlignMode = OutStreamer.getBundleAlignMode();
++  bool UseBundleAlign = !CurrentBundleAlignMode ||
++                        CurrentBundleAlignMode > CacheLinePow2;
++  if (UseBundleAlign)
++    OutStreamer.EmitBundleAlignMode(CacheLinePow2);
++  OutStreamer.EmitBundleLock(false);
++
+   PatchPointOpers opers(&MI);
+   unsigned ScratchIdx = opers.getNextScratchIdx();
+   unsigned EncodedBytes = 0;
+@@ -823,7 +851,12 @@ void X86AsmPrinter::LowerPATCHPOINT(const MachineInstr &MI) {
+          "Patchpoint can't request size less than the length of a call.");
+ 
+   EmitNops(OutStreamer, NumBytes - EncodedBytes, Subtarget->is64Bit(),
+-           getSubtargetInfo());
++           getSubtargetInfo(), false);
++
++  // Restore bundle alignment.
++  OutStreamer.EmitBundleUnlock();
++  if (UseBundleAlign)
++    OutStreamer.EmitBundleAlignMode(CurrentBundleAlignMode);
+ }
+ 
+ // Returns instruction preceding MBBI in MachineFunction.
+@@ -863,12 +896,6 @@ void X86AsmPrinter::EmitInstruction(const MachineInstr *MI) {
+                            X86ATTInstPrinter::getRegisterName(Reg));
+     break;
+   }
+-  case X86::TAILJMPr:
+-  case X86::TAILJMPd:
+-  case X86::TAILJMPd64:
+-    // Lower these as normal, but add some comments.
+-    OutStreamer.AddComment("TAILCALL");
+-    break;
+ 
+   case X86::TLS_addr32:
+   case X86::TLS_addr64:
+@@ -1076,7 +1103,26 @@ void X86AsmPrinter::EmitInstruction(const MachineInstr *MI) {
+     break;
+   }
+ 
++  bool UseBundleAlign = false;
++  unsigned CurrentBundleAlignMode;
++  if (MI->getFlag(MachineInstr::Smashable)) {
++    CurrentBundleAlignMode = OutStreamer.getBundleAlignMode();
++    UseBundleAlign = !CurrentBundleAlignMode ||
++                     CurrentBundleAlignMode > CacheLinePow2;
++    if (UseBundleAlign)
++      OutStreamer.EmitBundleAlignMode(CacheLinePow2);
++  }
++  if (MI->getOpcode() == X86::TAILJMPr ||
++      MI->getOpcode() == X86::TAILJMPd ||
++      MI->getOpcode() == X86::TAILJMPd64) {
++    OutStreamer.AddComment("TAILCALL");
++  }
++  if (auto ID = MI->getDebugLoc().getLocRec()) {
++    OutStreamer.AddComment(Twine("!locrec ") + Twine(ID));
++  }
+   MCInst TmpInst;
+   MCInstLowering.Lower(MI, TmpInst);
+-  EmitAndCountInstruction(TmpInst);
++  EmitAndCountInstruction(TmpInst, MI->getDebugLoc().getLocRec());
++  if (UseBundleAlign)
++    OutStreamer.EmitBundleAlignMode(CurrentBundleAlignMode);
+ }
+diff --git lib/Target/X86/X86RegisterInfo.cpp lib/Target/X86/X86RegisterInfo.cpp
+index 97f86e2..a6d128a 100644
+--- lib/Target/X86/X86RegisterInfo.cpp
++++ lib/Target/X86/X86RegisterInfo.cpp
+@@ -224,7 +224,11 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
+   switch (MF->getFunction()->getCallingConv()) {
+   case CallingConv::GHC:
+   case CallingConv::HiPE:
++  case CallingConv::X86_64_HHVM_SR:
++  case CallingConv::X86_64_HHVM_TC:
+     return CSR_NoRegs_SaveList;
++  case CallingConv::X86_64_HHVM_PHP:
++    return CSR_64_HHVM_PHP_SaveList;
+   case CallingConv::AnyReg:
+     if (HasAVX)
+       return CSR_64_AllRegs_AVX_SaveList;
+@@ -277,7 +281,11 @@ X86RegisterInfo::getCallPreservedMask(CallingConv::ID CC) const {
+   switch (CC) {
+   case CallingConv::GHC:
+   case CallingConv::HiPE:
++  case CallingConv::X86_64_HHVM_SR:
++  case CallingConv::X86_64_HHVM_TC:
+     return CSR_NoRegs_RegMask;
++  case CallingConv::X86_64_HHVM_PHP:
++    return CSR_64_HHVM_PHP_RegMask;
+   case CallingConv::AnyReg:
+     if (HasAVX)
+       return CSR_64_AllRegs_AVX_RegMask;
+diff --git test/CodeGen/X86/patchpoint-webkit_jscc.ll test/CodeGen/X86/patchpoint-webkit_jscc.ll
+index 03f662c..eca79b6 100644
+--- test/CodeGen/X86/patchpoint-webkit_jscc.ll
++++ test/CodeGen/X86/patchpoint-webkit_jscc.ll
+@@ -11,6 +11,8 @@ entry:
+ ; CHECK:      movq %r{{.+}}, (%rsp)
+ ; CHECK:      movq %r{{.+}}, %rax
+ ; CHECK:      Ltmp
++; CHECK-NEXT: .bundle_align_mode
++; CHECK-NEXT: .bundle_lock
+ ; CHECK-NEXT: movabsq $-559038736, %r11
+ ; CHECK-NEXT: callq *%r11
+ ; CHECK:      movq %rax, (%rsp)
+@@ -20,6 +22,8 @@ entry:
+ ; FAST:       movq %r{{.+}}, (%rsp)
+ ; FAST:       movq %r{{.+}}, %rax
+ ; FAST:       Ltmp
++; FAST-NEXT:  .bundle_align_mode
++; FAST-NEXT:  .bundle_lock
+ ; FAST-NEXT:  movabsq $-559038736, %r11
+ ; FAST-NEXT:  callq *%r11
+ ; FAST:       movq %rax, (%rsp)
+@@ -40,6 +44,8 @@ entry:
+ ; CHECK-NEXT: movl $4, 16(%rsp)
+ ; CHECK-NEXT: movq $2, (%rsp)
+ ; CHECK:      Ltmp
++; CHECK-NEXT: .bundle_align_mode
++; CHECK-NEXT: .bundle_lock
+ ; CHECK-NEXT: movabsq $-559038736, %r11
+ ; CHECK-NEXT: callq *%r11
+ ; FAST-LABEL: jscall_patchpoint_codegen2:
+@@ -48,6 +54,8 @@ entry:
+ ; FAST-NEXT:  movl $4, 16(%rsp)
+ ; FAST-NEXT:  movq $6, 24(%rsp)
+ ; FAST:       Ltmp
++; FAST-NEXT:  .bundle_align_mode
++; FAST-NEXT:  .bundle_lock
+ ; FAST-NEXT:  movabsq $-559038736, %r11
+ ; FAST-NEXT:  callq *%r11
+   %call = inttoptr i64 -559038736 to i8*
+@@ -66,6 +74,8 @@ entry:
+ ; CHECK-NEXT: movl  $4, 16(%rsp)
+ ; CHECK-NEXT: movq  $2, (%rsp)
+ ; CHECK:      Ltmp
++; CHECK-NEXT: .bundle_align_mode
++; CHECK-NEXT: .bundle_lock
+ ; CHECK-NEXT: movabsq $-559038736, %r11
+ ; CHECK-NEXT: callq *%r11
+ ; FAST-LABEL: jscall_patchpoint_codegen3:
+@@ -76,6 +86,8 @@ entry:
+ ; FAST-NEXT:  movl  $8, 36(%rsp)
+ ; FAST-NEXT:  movq $10, 48(%rsp)
+ ; FAST:       Ltmp
++; FAST-NEXT:  .bundle_align_mode
++; FAST-NEXT:  .bundle_lock
+ ; FAST-NEXT:  movabsq $-559038736, %r11
+ ; FAST-NEXT:  callq *%r11
+   %call = inttoptr i64 -559038736 to i8*
+diff --git test/CodeGen/X86/patchpoint.ll test/CodeGen/X86/patchpoint.ll
+index 53d05ef..bf550a2 100644
+--- test/CodeGen/X86/patchpoint.ll
++++ test/CodeGen/X86/patchpoint.ll
+@@ -6,9 +6,13 @@
+ define i64 @trivial_patchpoint_codegen(i64 %p1, i64 %p2, i64 %p3, i64 %p4) {
+ entry:
+ ; CHECK-LABEL: trivial_patchpoint_codegen:
+-; CHECK:      movabsq $-559038736, %r11
++; CHECK:      .bundle_align_mode
++; CHECK-NEXT: .bundle_lock
++; CHECK-NEXT: movabsq $-559038736, %r11
+ ; CHECK-NEXT: callq *%r11
+ ; CHECK-NEXT: xchgw %ax, %ax
++; CHECK-NEXT: .bundle_unlock
++; CHECK-NEXT: .bundle_align_mode 0
+ ; CHECK:      movq %rax, %[[REG:r.+]]
+ ; CHECK:      callq *%r11
+ ; CHECK-NEXT: xchgw %ax, %ax
+@@ -65,6 +69,8 @@ entry:
+ ; CHECK-LABEL: small_patchpoint_codegen:
+ ; CHECK:      Ltmp
+ ; CHECK:      nopl 8(%rax,%rax)
++; CHECK-NEXT: .bundle_unlock
++; CHECK-NEXT: .bundle_align_mode 0
+ ; CHECK-NEXT: popq
+ ; CHECK-NEXT: ret
+   %result = tail call i64 (i64, i32, i8*, i32, ...)* @llvm.experimental.patchpoint.i64(i64 5, i32 5, i8* null, i32 2, i64 %p1, i64 %p2)
+diff --git test/MC/X86/AlignedBundling/autogen-inst-offset-align-to-end.s test/MC/X86/AlignedBundling/autogen-inst-offset-align-to-end.s
+index fbf5b52..aed965b 100644
+--- test/MC/X86/AlignedBundling/autogen-inst-offset-align-to-end.s
++++ test/MC/X86/AlignedBundling/autogen-inst-offset-align-to-end.s
+@@ -2542,7 +2542,7 @@ INSTRLEN_15_OFFSET_0:
+   inc %eax
+   .endr
+   .bundle_unlock
+-# CHECK: 1c00: nop
++# CHECK-NOT: 1c00: incl
+ # CHECK: 1c01: incl
+ 
+   .align 32, 0x90
+diff --git test/MC/X86/AlignedBundling/long-nop-pad.s test/MC/X86/AlignedBundling/long-nop-pad.s
+index ea33e28..9b1ec11 100644
+--- test/MC/X86/AlignedBundling/long-nop-pad.s
++++ test/MC/X86/AlignedBundling/long-nop-pad.s
+@@ -14,7 +14,7 @@ foo:
+ # To align this group to a bundle end, we need a 15-byte NOP and a 12-byte NOP.
+ # CHECK:        0:  nop
+ # CHECK-NEXT:   f:  nop
+-# CHECK-NEXT:   1b: callq
++# CHECK:   1b: callq
+ 
+ # This push instruction is 1 byte long
+   .bundle_lock align_to_end
+diff --git utils/vim/llvm.vim utils/vim/llvm.vim
+index 2b91823..8d245bd 100644
+--- utils/vim/llvm.vim
++++ utils/vim/llvm.vim
+@@ -16,7 +16,7 @@ syn case match
+ " benefit as much from having dedicated highlighting rules.
+ syn keyword llvmType void half float double x86_fp80 fp128 ppc_fp128
+ syn keyword llvmType label metadata x86_mmx
+-syn keyword llvmType type label opaque
++syn keyword llvmType type label locrec opaque
+ syn match   llvmType /\<i\d\+\>/
+ 
+ " Instructions.
+@@ -42,17 +42,18 @@ syn keyword llvmKeyword arm_aapcscc arm_apcscc asm atomic available_externally
+ syn keyword llvmKeyword blockaddress byval c catch cc ccc cleanup coldcc common
+ syn keyword llvmKeyword constant datalayout declare default define deplibs
+ syn keyword llvmKeyword dllexport dllimport except extern_weak external fastcc
+-syn keyword llvmKeyword filter gc global hidden initialexec inlinehint inreg
++syn keyword llvmKeyword filter gc global hhvm_c hhvm_php hhvm_sr hhvm_tc
++syn keyword llvmKeyword hidden initialexec inlinehint inreg
+ syn keyword llvmKeyword intel_ocl_bicc inteldialect internal
+ syn keyword llvmKeyword linkonce linkonce_odr
+ syn keyword llvmKeyword localdynamic localexec minsize module monotonic
+-syn keyword llvmKeyword msp430_intrcc naked nest noalias nocapture
++syn keyword llvmKeyword msp430_intrcc musttail naked nest noalias nocapture
+ syn keyword llvmKeyword noimplicitfloat noinline nonlazybind noredzone noreturn
+ syn keyword llvmKeyword nounwind optnone optsize personality private protected
+ syn keyword llvmKeyword ptx_device ptx_kernel readnone readonly release
+ syn keyword llvmKeyword returns_twice sanitize_thread sanitize_memory
+ syn keyword llvmKeyword section seq_cst sideeffect signext singlethread
+-syn keyword llvmKeyword spir_func spir_kernel sret ssp sspreq sspstrong
++syn keyword llvmKeyword smashable spir_func spir_kernel sret ssp sspreq sspstrong
+ syn keyword llvmKeyword tail target thread_local to triple unnamed_addr
+ syn keyword llvmKeyword unordered uwtable volatile weak weak_odr
+ syn keyword llvmKeyword x86_fastcallcc x86_stdcallcc x86_thiscallcc x86_64_sysvcc

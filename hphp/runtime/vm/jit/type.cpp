@@ -415,7 +415,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
 ///////////////////////////////////////////////////////////////////////////////
 // Combinators.
 
-Type Type::specialize(TypeSpec spec) const {
+Type Type::specialize(TypeSpec spec, bits_t killable /* = kTop */) const {
   auto bits = m_bits;
   auto ptr = ptrKind();
 
@@ -428,18 +428,18 @@ Type Type::specialize(TypeSpec spec) const {
   // Remove the bits corresponding to any Bottom specializations---the
   // specializations intersected to zero, so the type component is impossible.
   if (spec.clsSpec() == ClassSpec::Bottom) {
-    bits &= ~kAnyObj;
+    bits &= ~(kAnyObj & killable);
     cls_okay = false;
   }
   if (spec.arrSpec() == ArraySpec::Bottom) {
-    bits &= ~kAnyArr;
+    bits &= ~(kAnyArr & killable);
     arr_okay = false;
   }
 
   auto generic = Type(bits, ptr);
 
   // If we support a nonsingular number of specializations, we're done.
-  if (arr_okay == cls_okay) return *this;
+  if (arr_okay == cls_okay) return generic;
 
   if (cls_okay && spec.clsSpec()) return Type(generic, spec.clsSpec());
   if (arr_okay && spec.arrSpec()) return Type(generic, spec.arrSpec());
@@ -515,10 +515,18 @@ Type Type::operator-(Type rhs) const {
   // Put back any bits for which `rhs' admitted a nontrivial specialization.
   // If these specializations would be subtracted out of lhs's specializations,
   // the finalization below will take care of re-eliminating it.
-  if (rhs.arrSpec()) bits |= (rhs.m_bits & kAnyArr);
-  if (rhs.clsSpec()) bits |= (rhs.m_bits & kAnyObj);
+  if (rhs.arrSpec()) bits |= (lhs.m_bits & rhs.m_bits & kAnyArr);
+  if (rhs.clsSpec()) bits |= (lhs.m_bits & rhs.m_bits & kAnyObj);
 
-  auto ty = Type(bits, ptr).specialize(lhs.spec() - rhs.spec());
+  // Perform the specialization finalization step twice:
+  //
+  // 1. If any of the specializations went to Bottom, kill the corresponding
+  //    bits, but only ones present in `rhs'.
+  // 2. If any specialized bits of `lhs' remain, reintroduce the `lhs'
+  //    specializations.
+  auto ty = Type(bits, ptr)
+    .specialize(lhs.spec() - rhs.spec(), rhs.m_bits)
+    .specialize(lhs.spec());
 
   if (lhs.m_hasConstVal) {
     // If `lhs' was a constant, we should not have somehow developed a

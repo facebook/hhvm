@@ -227,7 +227,10 @@ TEST(Type, Specialized) {
 
   EXPECT_TRUE(Type::Int <= (packed | Type::Int));
 
+  EXPECT_EQ(Type::Bottom, packed & Type::Array(ArrayData::kMixedKind));
   EXPECT_EQ(Type::Bottom, packed - Type::Arr);
+
+  EXPECT_EQ(Type::PtrToSPropCell, Type::PtrToSPropGen - Type::PtrToBoxedCell);
 
   auto const array = make_packed_array(1, 2, 3, 4);
   auto const mixed = make_map_array(1, 1, 2, 2);

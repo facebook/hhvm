@@ -712,9 +712,11 @@ private:
   /*
    * Add specialization to a generic type via a TypeSpec.
    *
-   * Used as the finalization step for union and intersect.
+   * Used as the finalization step for union and intersect.  The `killable'
+   * bits are the components of the Type which can be killed by components of
+   * `spec' that are Bottom.
    */
-  Type specialize(TypeSpec spec) const;
+  Type specialize(TypeSpec spec, bits_t killable = kTop) const;
 
 
   /////////////////////////////////////////////////////////////////////////////

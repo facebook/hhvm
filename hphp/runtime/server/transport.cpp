@@ -587,7 +587,8 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
      * so in order to force cookies to be deleted, even on MSIE, we
      * pick an expiry date in the past
      */
-    String sdt = DateTime(1, true).toString(DateTime::DateFormat::Cookie);
+    String sdt = makeSmartPtr<DateTime>(1, true)->
+      toString(DateTime::DateFormat::Cookie);
     cookie += name.data();
     cookie += "=deleted; expires=";
     cookie += sdt.data();
@@ -602,8 +603,8 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
         return false;
       }
       cookie += "; expires=";
-      String sdt =
-        DateTime(expire, true).toString(DateTime::DateFormat::Cookie);
+      String sdt = makeSmartPtr<DateTime>(expire, true)->
+        toString(DateTime::DateFormat::Cookie);
       cookie += sdt.data();
       cookie += "; Max-Age=";
       String sdelta = toString( expire - time(0) );

@@ -343,11 +343,7 @@ void optimize_block(Local& env, Block* blk) {
         FTRACE(2, "      knownType wasn't substitutable; not right now\n");
         return false;
       }
-
-      if (what->inst()->is(DefConst)) return true;
-      auto const defBlock = findDefiningBlock(what);
-      if (!defBlock) return false;
-      return dominates(defBlock, inst.block(), env.global.idoms);
+      return is_tmp_usable(env.global.idoms, what, inst.block());
     };
 
     if (flags.replaceable && can_replace(flags.replaceable, flags.knownType)) {

@@ -402,15 +402,12 @@ void runAnalysis(IRUnit& unit, BlockList& blocks, ValueNumberTable& vnTable) {
 }
 
 bool canReplaceWith(
-  IdomVector& idoms,
-  SSATmp* dst,
-  SSATmp* other
+  const IdomVector& idoms,
+  const SSATmp* dst,
+  const SSATmp* other
 ) {
   assert(other->type() <= dst->type());
-  if (other->inst()->is(DefConst)) return true;
-  auto const definingBlock = findDefiningBlock(other);
-  if (!definingBlock) return false;
-  return dominates(definingBlock, dst->inst()->block(), idoms);
+  return is_tmp_usable(idoms, other, dst->inst()->block());
 }
 
 void tryReplaceInstruction(

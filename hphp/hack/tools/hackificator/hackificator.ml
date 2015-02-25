@@ -117,6 +117,10 @@ let visit ast =
         ii.PI.transfo <- PI.AddAfter (PI.AddStr "()");
       | InstanceOf (_, ii, _) ->
         ii.PI.transfo <- PI.Replace (PI.AddStr "instanceof");
+      | Binary (_, (Logical NotEq, ii), _) ->
+        (* In PHP, `<>` is an alias for `!=`. Hack standardizes on the latter.
+         *)
+        ii.PI.transfo <- PI.Replace (PI.AddStr "!=");
       | Binary (e1, (Logical (AndLog | OrLog as op), ii), e2) ->
         (* get rid of 'and' and 'or' *)
         let needs_parens = function

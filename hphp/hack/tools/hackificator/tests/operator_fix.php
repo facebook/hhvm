@@ -16,4 +16,6 @@ function f($a, $b, $c) {
   if ($a = $b and $c) {}
   if ($a and $b || $c) {}
   if ($a or $b xor $c) {}
+
+  return $a <> $b;
 }

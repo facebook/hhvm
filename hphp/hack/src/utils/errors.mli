@@ -75,7 +75,6 @@ val assert_arity : Pos.t -> unit
 val gena_arity : Pos.t -> unit
 val genva_arity : Pos.t -> unit
 val gen_array_rec_arity : Pos.t -> unit
-val gen_array_va_rec_arity : Pos.t -> unit
 val dynamic_class : Pos.t -> unit
 val uninstantiable_class : Pos.t -> Pos.t -> string -> unit
 val abstract_const_usage: Pos.t -> Pos.t -> string -> unit

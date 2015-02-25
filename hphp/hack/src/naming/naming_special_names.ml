@@ -214,9 +214,8 @@ module FB = struct
   let cDynamicYield          = "\\DynamicYield"
   let cIUseDynamicYield      = "\\IUseDynamicYield"
 
-  let fgena                        = "gena"
-  let fgenva                       = "genva"
-  let fgen_array_rec               = "gen_array_rec"
-  let fgen_array_va_rec_DEPRECATED = "gen_array_va_rec_DEPRECATED"
+  let fgena                  = "gena"
+  let fgenva                 = "genva"
+  let fgen_array_rec         = "gen_array_rec"
 
 end

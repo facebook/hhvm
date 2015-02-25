@@ -116,7 +116,7 @@ module Naming                               = struct
   let expected_variable                     = 2014 (* DONT MODIFY!!!! *)
   let fd_name_already_bound                 = 2015 (* DONT MODIFY!!!! *)
   let gen_array_rec_arity                   = 2016 (* DONT MODIFY!!!! *)
-  let gen_array_va_rec_arity                = 2017 (* DONT MODIFY!!!! *)
+  (* let gen_array_va_rec_arity             = 2017 *)
   let gena_arity                            = 2018 (* DONT MODIFY!!!! *)
   let generic_class_var                     = 2019 (* DONT MODIFY!!!! *)
   let genva_arity                           = 2020 (* DONT MODIFY!!!! *)
@@ -617,10 +617,6 @@ let genva_arity pos =
 let gen_array_rec_arity pos =
   add Naming.gen_array_rec_arity pos
     "gen_array_rec() expects exactly 1 argument"
-
-let gen_array_va_rec_arity pos =
-  add Naming.gen_array_va_rec_arity pos
-    "gen_array_va_rec_DEPRECATED() expects at least 1 argument"
 
 let dynamic_class pos =
   add Typing.dynamic_class pos

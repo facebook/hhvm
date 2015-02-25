@@ -1969,14 +1969,6 @@ and expr_ env = function
       | [e] -> N.Special_func (N.Gen_array_rec (expr env e))
       | _ -> Errors.gen_array_rec_arity p; N.Any
       )
-  | Call ((p, Id (_, cn)), el, uel) when cn = SN.FB.fgen_array_va_rec_DEPRECATED ->
-      splat_unexpected uel ;
-      if List.length el < 1
-      then begin
-        Errors.gen_array_va_rec_arity p;
-        N.Any
-      end
-      else N.Special_func (N.Gen_array_va_rec (exprl env el))
   | Call ((p, Id f), el, uel) ->
       N.Call (N.Cnormal, (p, N.Id (Env.fun_id env f)),
               exprl env el, exprl env uel)

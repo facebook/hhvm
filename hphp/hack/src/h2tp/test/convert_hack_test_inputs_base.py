@@ -290,7 +290,6 @@ UNSUPPORTED_FILES_CONVERTER = {
         'yield_wait_forv_result_bad3.php',
         'yield_wait_forva.php',
         'yield_wait_forva_bad1.php',
-        'yield_wait_forvar_bad1.php',
         'yield_wait_forvr.php',
         'yield_wait_forvr_result_bad1.php',
     ],
@@ -348,7 +347,6 @@ UNSUPPORTED_FILES_CONVERTER = {
         'yield_wait_forv_result_bad3.php',
         'yield_wait_forva.php',
         'yield_wait_forva_bad1.php',
-        'yield_wait_forvar_bad1.php',
         'yield_wait_forvr.php',
         'yield_wait_forvr_result_bad1.php'
     ],

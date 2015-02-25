@@ -23,6 +23,7 @@
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
+#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"

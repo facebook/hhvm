@@ -21,6 +21,7 @@
 #define incl_XDEBUG_VAR_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/smart-containers.h"
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"

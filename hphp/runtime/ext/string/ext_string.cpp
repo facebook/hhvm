@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"

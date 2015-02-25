@@ -17,6 +17,7 @@
 
 #include <vector>
 
+#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"

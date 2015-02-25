@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/wddx/ext_wddx.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/actrec-args.h"
 
 namespace HPHP {
 

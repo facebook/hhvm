@@ -18,6 +18,7 @@
 #ifndef incl_HPHP_EXT_DOMDOCUMENT_H_
 #define incl_HPHP_EXT_DOMDOCUMENT_H_
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/base-includes.h"
 
 #include <memory>

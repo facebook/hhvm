@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 
+#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/native-data.h"

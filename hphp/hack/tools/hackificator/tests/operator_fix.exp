@@ -17,5 +17,5 @@ function f($a, $b, $c) {
   if ($a && ($b || $c)) {}
   if ($a || ($b xor $c)) {}
 
-  return $a <> $b;
+  return $a != $b;
 }

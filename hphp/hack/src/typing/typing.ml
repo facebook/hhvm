@@ -191,8 +191,7 @@ and make_param env mandatory arity param =
       assert(param.param_expr = None);
       false
     end else begin
-      if Env.is_decl env then ()
-      else check_default (fst param.param_id) mandatory param.param_expr;
+      check_default (fst param.param_id) mandatory param.param_expr;
       mandatory && param.param_expr = None
     end
   in

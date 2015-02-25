@@ -110,7 +110,7 @@ class SplFileObject extends SplFileInfo
     string $filename,
     string $open_mode = "r",
     bool $use_include_path = false,
-    resource $context,
+    ?resource $context = null,
   );
   public function eof(): bool;
   public function fflush(): bool;

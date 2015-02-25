@@ -155,6 +155,10 @@ let visit ast =
         in
         if needs_parens e1 then parenthesize e1;
         if needs_parens e2 then parenthesize e2;
+      | HashGet (_, (open_b, _, close_b)) ->
+        (* PHP allows $a{1}, Hack insists on $a[1] *)
+        open_b.PI.transfo <- PI.Replace (PI.AddStr "[");
+        close_b.PI.transfo <- PI.Replace (PI.AddStr "]");
       | _ -> ()
       );
       k x

@@ -66,8 +66,8 @@ let builtins = "<?hh // decl\n"^
   "}\n"^
   "final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>{}\n"^
   "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {}\n"^
-  "final class Set<Tv> extends ConstSet<Tv> {}\n"^
-  "final class ImmSet<Tv> extends ConstSet<Tv> {}\n"^
+  "final class Set<Tv> implements ConstSet<Tv> {}\n"^
+  "final class ImmSet<Tv> implements ConstSet<Tv> {}\n"^
   "class Exception { public function __construct(string $x) {} }\n"^
   "class Generator<Tk, Tv, Ts> implements KeyedIterator<Tk, Tv> {\n"^
   "  public function next(): void;\n"^
@@ -77,7 +77,7 @@ let builtins = "<?hh // decl\n"^
   "  public function valid(): bool;\n"^
   "  public function send(?Ts $v): void;\n"^
   "}\n"^
-  "final class Pair<Tk, Tv> extends KeyedContainer<int,mixed> {public function isEmpty(): bool {}}\n"^
+  "final class Pair<Tk, Tv> implements KeyedContainer<int,mixed> {public function isEmpty(): bool {}}\n"^
   "interface Stringish {public function __toString(): string {}}\n"^
   "interface XHPChild {}\n"^
   "function hh_show($val) {}\n"^

@@ -28,6 +28,8 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include <boost/variant.hpp>
+#include <folly/Optional.h>
 #include <openssl/ssl.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -54,9 +56,37 @@ namespace HPHP {
 using std::string;
 using std::vector;
 
+namespace {
+
 const StaticString
   s_exception("exception"),
   s_previous("previous");
+
+using ExceptionType = folly::Optional<boost::variant<Object,Exception*>>;
+
+bool isPhpException(const ExceptionType& e) {
+  return e && boost::get<Object>(&e.value()) != nullptr;
+}
+
+Object getPhpException(const ExceptionType& e) {
+  assert(e && isPhpException(e));
+  return boost::get<Object>(*e);
+}
+
+Exception* getCppException(const ExceptionType& e) {
+  assert(e && !isPhpException(e));
+  return boost::get<Exception*>(*e);
+}
+
+void throwException(ExceptionType&& e) {
+  if (isPhpException(e)) {
+    throw getPhpException(e);
+  } else {
+    getCppException(e)->throwException();
+  }
+}
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper data structure
@@ -111,7 +141,7 @@ public:
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   explicit CurlResource(const String& url)
-    : m_exception(nullptr), m_phpException(false), m_emptyPost(true) {
+  : m_emptyPost(true) {
     m_cp = curl_easy_init();
     m_url = url;
 
@@ -139,8 +169,7 @@ public:
     }
   }
 
-  explicit CurlResource(CurlResource *src)
-    : m_exception(nullptr), m_phpException(false) {
+  explicit CurlResource(SmartPtr<CurlResource> src) {
     assert(src && src != this);
     assert(!src->m_exception);
 
@@ -193,35 +222,12 @@ public:
 
   void check_exception() {
     if (m_exception) {
-      if (m_phpException) {
-        Object e((ObjectData*)m_exception);
-        m_exception = nullptr;
-        e.get()->decRefCount();
-        throw e;
-      } else {
-        Exception *e = (Exception*)m_exception;
-        m_exception = nullptr;
-        e->throwException();
-      }
+      throwException(std::move(m_exception));
     }
   }
 
-  ObjectData* getAndClearPhpException() {
-    if (m_exception && m_phpException) {
-      ObjectData* ret = (ObjectData*)m_exception;
-      m_exception = nullptr;
-      return ret;
-    }
-    return nullptr;
-  }
-
-  Exception* getAndClearCppException() {
-    if (!m_phpException) {
-      Exception* e = (Exception*)m_exception;
-      m_exception = nullptr;
-      return e;
-    }
-    return nullptr;
+  ExceptionType getAndClearException() {
+    return std::move(m_exception);
   }
 
   static int64_t minTimeout(int64_t timeout) {
@@ -464,12 +470,7 @@ public:
     case CURLOPT_WRITEHEADER:
     case CURLOPT_STDERR:
       {
-        if (!value.isResource()) {
-          return false;
-        }
-
-        Resource obj = value.toResource();
-        auto fp = obj.getTyped<File>(true);
+        auto fp = dyn_cast_or_null<File>(value);
         if (!fp) return false;
 
         switch (option) {
@@ -486,10 +487,11 @@ public:
             m_emptyPost = false;
             break;
           default: {
-            if (obj.getTyped<PlainFile>(true) == nullptr) {
+            auto pf = dyn_cast<PlainFile>(fp);
+            if (!pf) {
               return false;
             }
-            FILE *fp = obj.getTyped<PlainFile>()->getStream();
+            FILE *fp = pf->getStream();
             if (!fp) {
               return false;
             }
@@ -738,14 +740,10 @@ public:
     assert(!m_exception);
     try {
       return vm_call_user_func(cb, args);
-    } catch (Object &e) {
-      ObjectData *od = e.get();
-      od->incRefCount();
-      m_exception = od;
-      m_phpException = true;
+    } catch (const Object &e) {
+      m_exception.assign(e);
     } catch (Exception &e) {
-      m_exception = e.clone();
-      m_phpException = false;
+      m_exception.assign(e.clone());
     }
     return init_null();
   }
@@ -893,7 +891,7 @@ public:
 
 private:
   CURL *m_cp;
-  void *m_exception;
+  ExceptionType m_exception;
 
   char m_error_str[CURL_ERROR_SIZE + 1];
   CURLcode m_error_no;
@@ -909,7 +907,6 @@ private:
   ReadHandler  m_read;
   Variant      m_progress_callback;
 
-  bool m_phpException;
   bool m_emptyPost;
 
   static CURLcode ssl_ctx_callback(CURL *curl, void *sslctx, void *parm);
@@ -987,14 +984,14 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CHECK_RESOURCE(curl)                                                \
-  CurlResource *curl = ch.getTyped<CurlResource>(true, true);               \
+  auto curl = dyn_cast_or_null<CurlResource>(ch);                           \
   if (curl == nullptr) {                                                    \
     raise_warning("supplied argument is not a valid cURL handle resource"); \
     return false;                                                           \
   }                                                                         \
 
 #define CHECK_RESOURCE_RETURN_VOID(curl)                                    \
-  CurlResource *curl = ch.getTyped<CurlResource>(true, true);               \
+  auto curl = dyn_cast_or_null<CurlResource>(ch);                           \
   if (curl == nullptr) {                                                    \
     raise_warning("supplied argument is not a valid cURL handle resource"); \
     return;                                                                 \
@@ -1302,9 +1299,9 @@ public:
     m_easyh.append(ch);
   }
 
-  void remove(CurlResource *curle) {
+  void remove(SmartPtr<CurlResource> curle) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      if (iter.second().toResource().getTyped<CurlResource>()->get(true) ==
+      if (cast<CurlResource>(iter.second())->get(true) ==
           curle->get()) {
         m_easyh.remove(iter.first());
         return;
@@ -1314,8 +1311,7 @@ public:
 
   Resource find(CURL *cp) {
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      if (iter.second().toResource().
-            getTyped<CurlResource>()->get(true) == cp) {
+      if (cast<CurlResource>(iter.second())->get(true) == cp) {
         return iter.second().toResource();
       }
     }
@@ -1323,29 +1319,20 @@ public:
   }
 
   void check_exceptions() {
-    ObjectData* phpException = 0;
-    Exception* cppException = 0;
+    ExceptionType ex;
+    Object lastPhpException;
     for (ArrayIter iter(m_easyh); iter; ++iter) {
-      CurlResource* curl = iter.second().toResource().getTyped<CurlResource>();
-      if (ObjectData* e = curl->getAndClearPhpException()) {
-        if (phpException) {
-          e->o_set(s_previous, Variant(phpException), s_exception);
-          phpException->decRefCount();
-        }
-        phpException = e;
-      } else if (Exception *e = curl->getAndClearCppException()) {
-        delete cppException;
-        cppException = e;
+      auto curl = cast<CurlResource>(iter.second());
+      ExceptionType nextException(curl->getAndClearException());
+      if (isPhpException(nextException)) {
+        Object phpException(getPhpException(nextException));
+        phpException->o_set(s_previous, lastPhpException, s_exception);
+        lastPhpException = std::move(phpException);
       }
+      ex = std::move(nextException);
     }
-    if (cppException) {
-      if (phpException) decRefObj(phpException);
-      cppException->throwException();
-    }
-    if (phpException) {
-      Object e(phpException);
-      phpException->decRefCount();
-      throw e;
+    if (ex) {
+      throwException(std::move(ex));
     }
   }
 
@@ -1376,21 +1363,21 @@ void CurlMultiResource::sweep() {
 #define CURLM_ARG_WARNING "expects parameter 1 to be cURL multi resource"
 
 #define CHECK_MULTI_RESOURCE(curlm)                                      \
-  CurlMultiResource *curlm = mh.getTyped<CurlMultiResource>(true, true); \
+  auto curlm = dyn_cast_or_null<CurlMultiResource>(mh);                  \
   if (!curlm || curlm->isInvalid()) {                                    \
     raise_warning(CURLM_ARG_WARNING);                                    \
     return init_null();                                                  \
   }
 
 #define CHECK_MULTI_RESOURCE_RETURN_VOID(curlm) \
-  CurlMultiResource *curlm = mh.getTyped<CurlMultiResource>(true, true); \
+  auto curlm = dyn_cast_or_null<CurlMultiResource>(mh);                  \
   if (!curlm || curlm->isInvalid()) {                                    \
     raise_warning(CURLM_ARG_WARNING);                                    \
     return;                                                              \
   }
 
 #define CHECK_MULTI_RESOURCE_THROW(curlm)                                \
-  CurlMultiResource *curlm = mh.getTyped<CurlMultiResource>(true, true); \
+  auto curlm = dyn_cast_or_null<CurlMultiResource>(mh);                  \
   if (!curlm || curlm->isInvalid()) {                                    \
     throw Object(SystemLib::AllocExceptionObject(CURLM_ARG_WARNING));    \
   }
@@ -1401,14 +1388,14 @@ Resource HHVM_FUNCTION(curl_multi_init) {
 
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
-  CurlResource *curle = ch.getTyped<CurlResource>();
+  auto curle = cast<CurlResource>(ch);
   curlm->add(ch);
   return curl_multi_add_handle(curlm->get(), curle->get());
 }
 
 Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
-  CurlResource *curle = ch.getTyped<CurlResource>();
+  auto curle = cast<CurlResource>(ch);
   curlm->remove(curle);
   return curl_multi_remove_handle(curlm->get(), curle->get());
 }
@@ -1504,7 +1491,7 @@ class CurlTimeoutHandler : public AsioTimeoutHandler {
 
 class CurlMultiAwait : public AsioExternalThreadEvent {
  public:
-  CurlMultiAwait(CurlMultiResource* multi, double timeout) {
+  CurlMultiAwait(SmartPtr<CurlMultiResource> multi, double timeout) {
     if ((addLowHandles(multi) + addHighHandles(multi)) == 0) {
       // Nothing to do
       markAsFinished();
@@ -1562,7 +1549,7 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
   // Ask curl_multi for its handles directly
   // This is preferable as we get to know which
   // are blocking on reads, and which on writes.
-  int addLowHandles(CurlMultiResource* multi) {
+  int addLowHandles(SmartPtr<CurlMultiResource> multi) {
     fd_set read_fds, write_fds;
     int max_fd = -1, count = 0;
     FD_ZERO(&read_fds); FD_ZERO(&write_fds);
@@ -1586,12 +1573,12 @@ class CurlMultiAwait : public AsioExternalThreadEvent {
   // Check for file descriptors >= FD_SETSIZE
   // which can't be returned in an fdset
   // This is a little hacky, but necessary given cURL's APIs
-  int addHighHandles(CurlMultiResource* multi) {
+  int addHighHandles(SmartPtr<CurlMultiResource> multi) {
     int count = 0;
     auto easy_handles = multi->getEasyHandles();
     for (ArrayIter iter(easy_handles); iter; ++iter) {
       Variant easy_handle = iter.second();
-      auto easy = easy_handle.toResource().getTyped<CurlResource>(true, true);
+      auto easy = dyn_cast_or_null<CurlResource>(easy_handle);
       if (!easy) continue;
       long sock;
       if ((curl_easy_getinfo(easy->get(),

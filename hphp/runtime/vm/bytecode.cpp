@@ -1489,15 +1489,17 @@ static void shuffleMagicArgs(ActRec* ar) {
   ar->setNumArgs(2);
 }
 
-// This helper only does a stack overflow check for the native stack
+/*
+ * This helper only does a stack overflow check for the native stack.
+ *
+ * Both native and VM stack overflows are independently possible.
+ */
 static inline void checkNativeStack() {
-  auto const info = ThreadInfo::s_threadInfo.getNoCheck();
-  // Check whether func's maximum stack usage would overflow the stack.
-  // Both native and VM stack overflows are independently possible.
-  if (!stack_in_bounds(info)) {
-    TRACE(1, "Maximum stack depth exceeded.\n");
-    raise_error("Stack overflow");
-  }
+  // Check whether we're going out of bounds of our native stack.
+  if (LIKELY(stack_in_bounds())) return;
+
+  TRACE(1, "Maximum stack depth exceeded.\n");
+  raise_error("Stack overflow");
 }
 
 /*
@@ -1511,7 +1513,7 @@ static inline void checkNativeStack() {
 ALWAYS_INLINE
 static void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
   assert(f);
-  auto const info = ThreadInfo::s_threadInfo.getNoCheck();
+
   /*
    * Check whether func's maximum stack usage would overflow the stack.
    * Both native and VM stack overflows are independently possible.
@@ -1522,10 +1524,10 @@ static void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
    * kStackCheckLeafPadding.)
    */
   auto limit = f->maxStackCells() + kStackCheckPadding + extraCells;
-  if (!stack_in_bounds(info) || stk.wouldOverflow(limit)) {
-    TRACE(1, "Maximum stack depth exceeded.\n");
-    raise_error("Stack overflow");
-  }
+  if (LIKELY(stack_in_bounds() && !stk.wouldOverflow(limit))) return;
+
+  TRACE(1, "Maximum stack depth exceeded.\n");
+  raise_error("Stack overflow");
 }
 
 // This helper is meant to be called if an exception or invalidation takes

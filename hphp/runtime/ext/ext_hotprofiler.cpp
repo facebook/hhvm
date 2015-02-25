@@ -855,10 +855,9 @@ class TraceProfiler : public Profiler {
                    m_traceBuffer[m_nextTraceEntry++]);
     }
     {
-      DECLARE_THREAD_INFO
-      MemoryManager::MaskAlloc masker(*info->m_mm);
-      TraceEntry *r = (TraceEntry*)realloc((void *)m_traceBuffer,
-                                           new_array_size * sizeof(TraceEntry));
+      MemoryManager::MaskAlloc masker(MM());
+      auto r = (TraceEntry*)realloc((void*)m_traceBuffer,
+                                    new_array_size * sizeof(TraceEntry));
 
       if (!r) {
         m_traceBufferFilled = true;

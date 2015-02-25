@@ -20,7 +20,6 @@
 #include <map>
 #include <functional>
 
-#include "hphp/util/portability.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/request-injection-data.h"
 
@@ -96,38 +95,40 @@ struct ThreadInfo {
 
 //////////////////////////////////////////////////////////////////////
 
+void raise_infinite_recursion_error();
+
 inline void* stack_top_ptr() {
-  DECLARE_STACK_POINTER(sp);
-  return sp;
-}
-
-inline bool stack_in_bounds(const ThreadInfo* info) {
-  return stack_top_ptr() >= info->m_stacklimit;
-}
-
-inline void check_recursion(const ThreadInfo* info) {
-  extern void throw_infinite_recursion_exception();
-  if (!stack_in_bounds(info)) {
-    throw_infinite_recursion_exception();
-  }
-}
-
-ssize_t check_request_surprise(ThreadInfo *info);
-ssize_t check_request_surprise_unlikely();
-
-inline void check_native_recursion() {
   char marker;
-  if (UNLIKELY(uintptr_t(&marker) < s_stackLimit + ThreadInfo::StackSlack)) {
-    throw Exception("Maximum stack size reached");
-  }
-}
-///////////////////////////////////////////////////////////////////////////////
-// code instrumentation or injections
 
-#define DECLARE_THREAD_INFO                     \
-  ThreadInfo *info ATTRIBUTE_UNUSED =           \
-    ThreadInfo::s_threadInfo.getNoCheck();      \
-  int lc ATTRIBUTE_UNUSED = 0;
+  // gcc warns about directly returning pointers to local variables.
+  auto to_trick_gcc = static_cast<void*>(&marker);
+  return to_trick_gcc;
+}
+
+inline bool stack_in_bounds() {
+  return uintptr_t(stack_top_ptr()) >= s_stackLimit + ThreadInfo::StackSlack;
+}
+
+/*
+ * Raises an error when infinite recursion is detected.
+ *
+ * It's recommended to use check_recursion_throw() instead of this, as raising
+ * an error will use much more stack than throwing an exception, making this
+ * have a higher chance of blowing out what little stack the thread has left.
+ */
+inline void check_recursion_error() {
+  if (LIKELY(stack_in_bounds())) return;
+  raise_infinite_recursion_error();
+}
+
+/* Throws exception when infinite recursion is detected. */
+inline void check_recursion_throw() {
+  if (LIKELY(stack_in_bounds())) return;
+  throw Exception("Maximum stack size reached");
+}
+
+ssize_t check_request_surprise(ThreadInfo*);
+ssize_t check_request_surprise_unlikely();
 
 //////////////////////////////////////////////////////////////////////
 

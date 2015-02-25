@@ -95,9 +95,6 @@ namespace HPHP {
 
 #if defined(__x86_64__)
 
-# define DECLARE_STACK_POINTER(sp)                \
-    void* sp;                                     \
-    asm volatile("mov %%rsp, %0" : "=r" (sp) ::)
 # if defined(__clang__)
 #  define DECLARE_FRAME_POINTER(fp)               \
     ActRec* fp;                                   \
@@ -111,7 +108,6 @@ namespace HPHP {
 # if defined(__clang__)
 #  error Clang implementation not done for ARM
 # endif
-# define DECLARE_STACK_POINTER(sp) register void*   sp asm("sp");
 # define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29");
 
 #elif defined(__powerpc64__)
@@ -119,7 +115,6 @@ namespace HPHP {
 # if defined(__clang__)
 #  error Clang implementation not done for PPC64
 # endif
-# define DECLARE_STACK_POINTER(sp) register void*   sp asm("r1");
 # define DECLARE_FRAME_POINTER(fp) register ActRec* fp = (ActRec*) __builtin_frame_address(0);
 
 #else

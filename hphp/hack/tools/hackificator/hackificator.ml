@@ -111,15 +111,32 @@ let visit ast =
     );
 
     V.kexpr = (fun (k, _) x ->
-      match x with
+      (match x with
       | New (_, id, None) ->
         let ii = (Lib_parsing_php.ii_of_any (Expr id)) +> List.rev +> List.hd in
         ii.PI.transfo <- PI.AddAfter (PI.AddStr "()");
-      | _ -> k x
+      | InstanceOf (_, ii, _) ->
+        ii.PI.transfo <- PI.Replace (PI.AddStr "instanceof");
+      | _ -> ()
+      );
+      k x
+    );
+
+    V.kstmt = (fun (k, _) x ->
+      (match x with
+      | Foreach (_, _, _, _, ii, _, _, _) ->
+        ii.PI.transfo <- PI.Replace (PI.AddStr "as");
+      | _ -> ()
+      );
+      k x
     );
 
     V.kclass_stmt = (fun (k, _) x ->
-      match x with
+      (match x with
+      | ClassConstants (_, ii, _, _, _) ->
+        ii.PI.transfo <- PI.Replace (PI.AddStr "const");
+      | ClassVariables (NoModifiers ii, _, _, _) ->
+        ii.PI.transfo <- PI.Replace (PI.AddStr "public");
       (* Methods without modifiers, we'll give a "public" modifier. *)
       | Method (method_def) -> (
           let visibility_modifiers =
@@ -134,9 +151,19 @@ let visit ast =
               | [] -> method_def.f_tok in
             ii.PI.transfo <- PI.AddBefore (PI.AddStr "public ");
           end;
-          k x
-      )
-      | _ -> k x
+        )
+      | _ -> ()
+      );
+      k x
+    );
+
+    V.ktop = (fun (k, _) x ->
+      (match x with
+      | ConstantDef { cst_toks = (ii, _, _); _ } ->
+        ii.PI.transfo <- PI.Replace (PI.AddStr "const");
+      | _ -> ();
+      );
+      k x
     );
   }
   in

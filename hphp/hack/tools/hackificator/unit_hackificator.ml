@@ -23,7 +23,7 @@ let unittest testdir =
         | None ->
           assert_failure (spf "hackificator should at least modify %s" phpfile)
         | Some new_content ->
-          let tmpfile = Common.new_temp_file "hackifiy" "php" in
+          let tmpfile = Common.new_temp_file "hackify" "php" in
           Common.write_file ~file:tmpfile new_content;
         
           let diff = Common2.unix_diff tmpfile expfile in

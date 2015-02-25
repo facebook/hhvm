@@ -1,2 +1,2 @@
-File "enum_4.php", line 8, characters 24-27:
+File "enum_4.php", line 7, characters 24-27:
 Enums must be int or string, not a bool (Typing[4024])

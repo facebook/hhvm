@@ -2787,14 +2787,14 @@ and is_visible env vis cid =
             | _, _ -> None
         )
 
-and check_arity ?(check_min=true) env pos pos_def (arity:int)
+and check_arity ?(check_min=true) pos pos_def (arity:int)
     (exp_arity:fun_arity) =
   let exp_min = (Typing_defs.arity_min exp_arity) in
   if check_min && arity < exp_min then
     Errors.typing_too_few_args pos pos_def;
   match exp_arity with
     | Fstandard (_, exp_max) ->
-      if (arity > exp_max) && (Env.get_mode env <> FileInfo.Mdecl)
+      if (arity > exp_max)
       then Errors.typing_too_many_args pos pos_def;
     | Fvariadic _ | Fellipsis _ -> ()
 
@@ -2848,7 +2848,7 @@ and call_ pos env fty el uel =
     check_deprecated pos ft;
     let pos_def = Reason.to_pos r2 in
     let () = check_arity ~check_min:(uel = [])
-      env pos pos_def (List.length el + List.length uel) ft.ft_arity in
+      pos pos_def (List.length el + List.length uel) ft.ft_arity in
     let env, var_param = variadic_param env ft in
     let env, tyl = lmap expr env el in
     let pos_tyl = List.combine (List.map fst el) tyl in
@@ -2868,7 +2868,7 @@ and call_ pos env fty el uel =
         Errors.anonymous_recursive_call pos;
         env, (Reason.Rnone, Tany)
       | Some anon ->
-        let () = check_arity env pos fpos (List.length tyl) arity in
+        let () = check_arity pos fpos (List.length tyl) arity in
         let tyl = List.map (fun x -> None, x) tyl in
         anon env tyl)
   | _, Tarray _ when not (Env.is_strict env) ->

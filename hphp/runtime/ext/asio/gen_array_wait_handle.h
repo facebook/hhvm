@@ -36,8 +36,7 @@ class c_GenArrayWaitHandle final : public c_BlockableWaitHandle {
   DECLARE_CLASS_NO_SWEEP(GenArrayWaitHandle)
 
   explicit c_GenArrayWaitHandle(Class* cls = c_GenArrayWaitHandle::classof())
-    : c_BlockableWaitHandle(cls)
-  {}
+    : c_BlockableWaitHandle(cls) {}
   ~c_GenArrayWaitHandle() {}
 
   static void ti_setoncreatecallback(const Variant& callback);

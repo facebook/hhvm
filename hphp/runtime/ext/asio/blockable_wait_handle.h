@@ -37,8 +37,7 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
 
   explicit c_BlockableWaitHandle(Class* cls = c_BlockableWaitHandle::classof(),
                                  HeaderKind kind = HeaderKind::Object)
-    : c_WaitableWaitHandle(cls, kind)
-  {}
+    : c_WaitableWaitHandle(cls, kind) {}
   ~c_BlockableWaitHandle() {}
 
  public:

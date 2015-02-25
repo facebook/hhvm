@@ -39,9 +39,7 @@ struct c_ExternalThreadEventWaitHandle final
 
   explicit c_ExternalThreadEventWaitHandle(Class* cls =
       c_ExternalThreadEventWaitHandle::classof())
-    : SweepableObj<c_WaitableWaitHandle>(Sweep, cls)
-  {}
-
+    : SweepableObj<c_WaitableWaitHandle>(Sweep, cls) {}
   ~c_ExternalThreadEventWaitHandle() {}
 
   static void ti_setoncreatecallback(const Variant& callback);

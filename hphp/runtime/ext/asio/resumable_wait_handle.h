@@ -39,8 +39,7 @@ class c_ResumableWaitHandle : public c_BlockableWaitHandle {
 
   explicit c_ResumableWaitHandle(Class* cls = c_ResumableWaitHandle::classof(),
                                  HeaderKind kind = HeaderKind::Object)
-    : c_BlockableWaitHandle(cls, kind)
-  {}
+    : c_BlockableWaitHandle(cls, kind) {}
   ~c_ResumableWaitHandle() {}
   static void ti_setoncreatecallback(const Variant& callback);
   static void ti_setonawaitcallback(const Variant& callback);

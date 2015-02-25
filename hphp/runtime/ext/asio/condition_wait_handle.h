@@ -36,8 +36,7 @@ class c_ConditionWaitHandle final : public c_WaitableWaitHandle {
   DECLARE_CLASS_NO_SWEEP(ConditionWaitHandle)
 
   explicit c_ConditionWaitHandle(Class* cls = c_ConditionWaitHandle::classof())
-    : c_WaitableWaitHandle(cls)
-  {}
+    : c_WaitableWaitHandle(cls) {}
   ~c_ConditionWaitHandle() {}
 
   static void ti_setoncreatecallback(const Variant& callback);

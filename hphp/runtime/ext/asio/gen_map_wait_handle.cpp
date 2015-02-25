@@ -153,9 +153,7 @@ void c_GenMapWaitHandle::onUnblocked() {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {
-        if (isInContext()) {
-          child_wh->enterContext(getContextIdx());
-        }
+        child_wh->enterContext(getContextIdx());
         detectCycle(child_wh);
         blockOn(child_wh);
         return;

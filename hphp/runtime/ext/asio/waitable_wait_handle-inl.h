@@ -42,7 +42,7 @@ inline c_WaitableWaitHandle::~c_WaitableWaitHandle() {
 
 inline void
 c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
+  assert(ctx_idx <= AsioSession::Get()->getCurrentContextIdx());
 
   // Already in a more specific context?
   if (LIKELY(getContextIdx() >= ctx_idx)) {

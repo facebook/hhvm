@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 function main($arr, $a, $b) {
   return $arr[$a + $b];

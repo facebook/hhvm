@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 // A reduced version of Exception::__toString(). The type of $elem before the
 // while loop is Obj<=C, but then it changes to Obj<=C | InitNull inside the

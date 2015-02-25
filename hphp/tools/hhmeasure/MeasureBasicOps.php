@@ -1,5 +1,4 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 /*
  * Measures and reports on the relative cost of basic HHVM operations.

@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 require_once(__DIR__.'/namespacefoo.php.inc');
 require_once(__DIR__.'/namespacebar.php.inc');

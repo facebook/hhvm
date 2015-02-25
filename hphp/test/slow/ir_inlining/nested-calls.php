@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 function get_region($s) {
   echo "get_region\n";
   return $s ? 1 : 0;

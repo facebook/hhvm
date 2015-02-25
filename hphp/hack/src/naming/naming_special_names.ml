@@ -85,12 +85,24 @@ module Members = struct
 
 end
 
+open Utils
+
 module UserAttributes = struct
 
   let uaOverride            = "__Override"
   let uaConsistentConstruct = "__ConsistentConstruct"
   let uaUnsafeConstruct     = "__UNSAFE_Construct"
   let uaDeprecated          = "__Deprecated"
+  let uaMemoize             = "__Memoize"
+
+  let as_set : SSet.t =
+    let s = SSet.empty in
+    let s = SSet.add uaOverride s in
+    let s = SSet.add uaConsistentConstruct s in
+    let s = SSet.add uaUnsafeConstruct s in
+    let s = SSet.add uaDeprecated s in
+    let s = SSet.add uaMemoize s in
+    s
 
 end
 

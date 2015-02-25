@@ -300,6 +300,7 @@ let main_hack { filename; mode; } =
               consider_names_just_for_autoload = false }
           end parsed_files in
 
+        (* Note that nenv.Naming.itcopt remains TypecheckerOptions.empty *)
         let nenv = Relative_path.Map.fold begin fun fn fileinfo nenv ->
           let {FileInfo.funs; classes; typedefs; consts; _} = fileinfo in
           Naming.make_env nenv ~funs ~classes ~typedefs ~consts

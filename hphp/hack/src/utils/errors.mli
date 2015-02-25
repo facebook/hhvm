@@ -252,6 +252,7 @@ val typeconst_depends_on_external_tparam : Pos.t -> Pos.t -> string -> unit
 val typeconst_assigned_tparam : Pos.t -> string -> unit
 val invalid_type_access_root : (Pos.t * string) -> unit
 val duplicate_user_attribute : (Pos.t * string) -> Pos.t -> unit
+val unbound_user_attribute_name : Pos.t -> string -> unit
 val attribute_arity : Pos.t -> string -> int -> unit
 val attribute_param_type : Pos.t -> string -> unit
 val deprecated_use : Pos.t -> Pos.t -> string -> unit

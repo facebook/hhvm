@@ -117,6 +117,40 @@ let visit ast =
         ii.PI.transfo <- PI.AddAfter (PI.AddStr "()");
       | InstanceOf (_, ii, _) ->
         ii.PI.transfo <- PI.Replace (PI.AddStr "instanceof");
+      | Binary (e1, (Logical (AndLog | OrLog as op), ii), e2) ->
+        (* get rid of 'and' and 'or' *)
+        let needs_parens = function
+          | Assign _
+          | AssignOp _
+          | CondExpr _ ->
+              (* these three expressions have lower precedence than && and ||
+               * but higher precedence than 'and' and 'or' *)
+              true
+          | Binary (_, (Logical OrBool, _), _) when op = AndLog ->
+              (* ||'s precedence is higher than 'and' but lower than '&&',
+               * so we must add parens. *)
+              true
+          | Binary (_, (Logical XorLog, _), _) when op = OrLog ->
+              (* xor's precedence is between 'and' and 'or',
+               * so we must add parens when fixing the latter. *)
+              true
+          | _ ->
+              (* note that short-circuit operators have associative semantics,
+               * so we don't have to add parens when fixing `$a and $b && $c`.
+               *)
+              false in
+        let s = match op with
+          | AndLog -> "&&"
+          | OrLog -> "||"
+          | _ -> assert false in
+        ii.PI.transfo <- PI.Replace (PI.AddStr s);
+        let parenthesize e =
+          let iis = (Lib_parsing_php.ii_of_any (Expr e)) in
+          (List.hd iis).PI.transfo <- PI.AddBefore (PI.AddStr "(");
+          (List.hd (List.rev iis)).PI.transfo <- PI.AddAfter (PI.AddStr ")");
+        in
+        if needs_parens e1 then parenthesize e1;
+        if needs_parens e2 then parenthesize e2;
       | _ -> ()
       );
       k x

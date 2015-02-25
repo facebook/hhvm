@@ -48,6 +48,66 @@ index 7af25db..47cc8f4 100644
  
        CallConv = Call.getCallingConv();
        NumFixedArgs = (FixedArgs == ~0U) ? FuncTy->getNumParams() : FixedArgs;
+diff --git include/llvm/CodeGen/LocRecs.h include/llvm/CodeGen/LocRecs.h
+new file mode 100644
+index 0000000..8cba261
+--- /dev/null
++++ include/llvm/CodeGen/LocRecs.h
+@@ -0,0 +1,54 @@
++//===-------------------- LocRecs.h - Location Records ----------*- C++ -*-===//
++
++//
++//                     The LLVM Compiler Infrastructure
++//
++// This file is distributed under the University of Illinois Open Source
++// License. See LICENSE.TXT for details.
++//
++//===----------------------------------------------------------------------===//
++
++#ifndef LLVM_LOCRECS
++#define LLVM_LOCRECS
++
++#include "llvm/ADT/MapVector.h"
++#include "llvm/ADT/SmallVector.h"
++#include <vector>
++
++namespace llvm {
++
++class AsmPrinter;
++class MCExpr;
++class MCSymbol;
++
++/// \brief Location Records
++class LocRecs {
++private:
++  struct LocationRecord {
++    uint64_t ID;
++    const MCSymbol *Address;
++    uint8_t Size;
++    LocationRecord(uint64_t ID, const MCSymbol *Address, uint8_t Size)
++      : ID(ID), Address(Address), Size(Size) {}
++  };
++
++  std::vector<LocationRecord> LocationRecords;
++
++  AsmPrinter &AP;
++
++public:
++
++  LocRecs(AsmPrinter &AP);
++
++  /// Add location record for instruction referenced by Label.
++  void addRecord(uint64_t ID, const MCSymbol *Label, uint8_t Size) {
++    LocationRecords.emplace_back(LocationRecord(ID, Label, Size));
++  }
++
++  /// Serialize location records into section and destroy afterwards.
++  void serializeToLocRecsSection();
++};
++
++}
++
++#endif // LLVM_LOCRECS
 diff --git include/llvm/CodeGen/MachineInstr.h include/llvm/CodeGen/MachineInstr.h
 index d7f5341..e481362 100644
 --- include/llvm/CodeGen/MachineInstr.h
@@ -1085,6 +1145,84 @@ index 2a247c1..ba25bd0 100644
    MachineBasicBlock.cpp
    MachineBlockFrequencyInfo.cpp
    MachineBlockPlacement.cpp
+diff --git lib/CodeGen/LocRecs.cpp lib/CodeGen/LocRecs.cpp
+new file mode 100644
+index 0000000..38db2d9
+--- /dev/null
++++ lib/CodeGen/LocRecs.cpp
+@@ -0,0 +1,72 @@
++//===----------------------------- LocRecs.cpp ----------------------------===//
++//
++//                     The LLVM Compiler Infrastructure
++//
++// This file is distributed under the University of Illinois Open Source
++// License. See LICENSE.TXT for details.
++//
++//===----------------------------------------------------------------------===//
++
++#include "llvm/CodeGen/LocRecs.h"
++#include "llvm/CodeGen/AsmPrinter.h"
++#include "llvm/MC/MCContext.h"
++#include "llvm/MC/MCExpr.h"
++#include "llvm/MC/MCObjectFileInfo.h"
++#include "llvm/MC/MCStreamer.h"
++#include "llvm/Support/CommandLine.h"
++#include "llvm/Support/Debug.h"
++#include "llvm/Support/raw_ostream.h"
++#include <iterator>
++
++using namespace llvm;
++
++#define DEBUG_TYPE "locrecs"
++
++static cl::opt<int> LocRecsVersion("locrecs-version", cl::init(1),
++  cl::desc("Specify the locrecs major encoding version (default = 1)"));
++
++LocRecs::LocRecs(AsmPrinter &AP) : AP(AP) {
++  if (LocRecsVersion != 1)
++    llvm_unreachable("Unsupported locrecs version!");
++}
++
++/// Serialize location records data.
++void LocRecs::serializeToLocRecsSection() {
++  if (LocationRecords.empty())
++    return;
++
++  MCContext &OutContext = AP.OutStreamer.getContext();
++  MCStreamer &OS = AP.OutStreamer;
++
++  // Create the section.
++  const MCSection *LocRecsSection =
++    OutContext.getObjectFileInfo()->getLocRecsSection();
++  OS.SwitchSection(LocRecsSection);
++
++  // Emit a dummy symbol to force section inclusion.
++  OS.EmitLabel(OutContext.GetOrCreateSymbol(Twine("__LLVM_LocRecs")));
++
++  // Serialize data.
++  DEBUG(dbgs() << "********** Location Records Output **********\n");
++
++  // Header.
++  OS.EmitIntValue(LocRecsVersion, 1);         // Major Version.
++  OS.EmitIntValue(0, 1);                      // Minor Version.
++  OS.EmitIntValue(0, 2);                      // Reserved.
++  OS.EmitIntValue(LocationRecords.size(), 4); // NumFunctions.
++
++  // Location records for every function.
++  DEBUG(dbgs() << "LocRecs { address, size, id }: " << LocationRecords.size() << '\n');
++  for (auto &LR : LocationRecords) {
++    DEBUG(dbgs() << "  { " << LR.Address << ", " << (int)LR.Size << ", "
++                 << LR.ID << " }\n");
++    OS.EmitSymbolValue(LR.Address, 8);
++    OS.EmitIntValue(LR.ID, 4);
++    OS.EmitIntValue(LR.Size, 1);
++    OS.EmitIntValue(0, 1); // Reserved
++    OS.EmitIntValue(0, 2); // Reserved.
++  }
++  LocationRecords.clear();
++
++  OS.AddBlankLine();
++}
 diff --git lib/CodeGen/MachineFunction.cpp lib/CodeGen/MachineFunction.cpp
 index 2129288..50e5597 100644
 --- lib/CodeGen/MachineFunction.cpp
@@ -2349,6 +2487,367 @@ index 97f86e2..a6d128a 100644
    case CallingConv::AnyReg:
      if (HasAVX)
        return CSR_64_AllRegs_AVX_RegMask;
+diff --git test/CodeGen/X86/cond-tail.ll test/CodeGen/X86/cond-tail.ll
+new file mode 100644
+index 0000000..d0a132d
+--- /dev/null
++++ test/CodeGen/X86/cond-tail.ll
+@@ -0,0 +1,59 @@
++; RUN: llc -cond-tail-dup -mtriple=x86_64-unknown-linux -mcpu=corei7 < %s | FileCheck %s
++
++; Check that conditional tail call is created with all the
++; appropriate attributes such as smashable and !locrec.
++
++define i32 @bar(i32 %a, i32 %b) nounwind {
++; CHECK-LABEL: bar
++; CHECK:       .bundle_align_mode 6
++; CHECK:       jle goo
++; CHECK:       .bundle_align_mode 0
++; CHECK:       jmp foo
++
++entry:
++  %cmp = icmp sgt i32 %a, %b
++  br i1 %cmp, label %if.then, label %if.else
++
++if.then:
++  %call = tail call i32 @foo(i32 %a) nounwind smashable, !locrec !{i32 42}
++
++  ret i32 %call
++
++if.else:
++  %call1 = tail call i32 @goo(i32 %a) nounwind smashable, !locrec !{i32 43}
++
++  ret i32 %call1
++
++}
++
++declare i32 @foo(i32) nounwind
++
++declare i32 @goo(i32) nounwind
++
++; We should not attempt to optimize indirect ail call.
++@far = external global i32 (...)*
++@car = external global i32 (...)*
++
++; CHECK-LABEL: baz
++; CHECK:       jmpq *far
++; CHECK:       jmpq *car
++define i32 @baz(i32 %a) nounwind {
++entry:
++  %tobool = icmp eq i32 %a, 0
++  br i1 %tobool, label %if.end, label %if.then
++
++if.then:                                          ; preds = %entry
++  %0 = load i32 (...)** @far, align 8
++  %call = tail call i32 (...)* %0() nounwind
++  br label %return
++
++if.end:                                           ; preds = %entry
++  %1 = load i32 (...)** @car, align 8
++  %call1 = tail call i32 (...)* %1() nounwind
++  br label %return
++
++return:                                           ; preds = %if.end, %if.then
++  %retval.0 = phi i32 [ %call, %if.then ], [ %call1, %if.end ]
++  ret i32 %retval.0
++}
++
+diff --git test/CodeGen/X86/func_align.ll test/CodeGen/X86/func_align.ll
+new file mode 100644
+index 0000000..b0fb073
+--- /dev/null
++++ test/CodeGen/X86/func_align.ll
+@@ -0,0 +1,22 @@
++; RUN: llc -mtriple=x86_64-unknown-linux -mcpu=corei7 < %s | FileCheck %s
++
++declare i64 @callee(i64, i64)
++
++; Verify alignment is not enforced if set to 1.
++define i64 @foo(i64 %a, i64 %b) nounwind align 1 {
++entry:
++; CHECK-LABEL: .globl foo
++; CHECK-NOT:   .align
++  %tmp = call i64 @callee(i64 %a, i64 %b) smashable
++  ret i64 %tmp
++}
++
++; Verify alignment is set to 2.
++define i64 @bar(i64 %a, i64 %b) nounwind align 2 {
++entry:
++; CHECK-LABEL: .globl bar
++; CHECK-NEXT:  .align 2
++  %tmp = call i64 @callee(i64 %a, i64 %b) smashable
++  ret i64 %tmp
++}
++
+diff --git test/CodeGen/X86/hhvm-cc.ll test/CodeGen/X86/hhvm-cc.ll
+new file mode 100644
+index 0000000..a34201e
+--- /dev/null
++++ test/CodeGen/X86/hhvm-cc.ll
+@@ -0,0 +1,90 @@
++; RUN: llc -stack-alignment=8 < %s | FileCheck %s
++
++; 80 - HHVM_C
++; 81 - HHVM_PHP
++; 82 - HHVM_SR
++; 83 - HHVM_TC
++target triple = "x86_64-linux-gnu"
++
++declare hhvm_tc void @bar(i64, i64, i64)
++
++define hhvm_tc void @foo(i64 %a, i64 %b, i64 %c) {
++entry:
++; CHECK-LABEL:  foo:
++; CHECK-DAG:    movl $1, %ebx
++; CHECK-DAG:    movl $2, %r12
++; CHECK-DAG:    movl $3, %ebp
++; CHECK:        jmp bar
++  tail call hhvm_tc void @bar(i64 1, i64 2, i64 3)
++  ret void
++}
++
++
++declare hhvm_tc i64 @baz(i64, i64, i64)
++
++define hhvm_tc i64 @faz(i64 %t0, i64 %t1, i64 %t2) nounwind {
++entry:
++; CHECK-LABEL:  faz:
++; CHECK-NEXT:   {{^#.*}}
++; CHECK-NEXT:   jmp baz
++  %tmp = tail call hhvm_tc i64 @baz(i64 %t0, i64 %t1, i64 %t2)
++  ret i64 %tmp
++}
++
++define hhvm_tc i64 @mod_return(i64 %t0, i64 %t1, i64 %t2) nounwind {
++entry:
++; CHECK-LABEL:  mod_return:
++; CHECK-NEXT:   {{^#.*}}
++; CHECK-NEXT:   callq baz
++; CHECK-NEXT:   incq %rbx
++  %tmp = tail call hhvm_tc i64 @baz(i64 %t0, i64 %t1, i64 %t2)
++  %retval = add i64 %tmp, 1
++  ret i64 %retval
++}
++
++declare hhvm_php void @php_func(i64, i64, i64, i64)
++
++define hhvm_tc void @test_php(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_php:
++; CHECK-NEXT:   {{^#.*}}
++; CHECK-NEXT:   movl $42, %r15
++; CHECK-NEXT:   jmp php_func
++  tail call hhvm_php void @php_func(i64 %a, i64 %b, i64 %c, i64 42)
++  ret void
++}
++
++declare hhvm_sr void @svcreq(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)
++
++define hhvm_tc void @test_svcreq(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_svcreq:
++; CHECK-NEXT:   {{^#.*}}
++; CHECK-NEXT:   movl $42, %r10
++; CHECK-NEXT:   movl $1, %edi
++; CHECK-NEXT:   movl $2, %esi
++; CHECK-NEXT:   movl $3, %edx
++; CHECK-NEXT:   movl $4, %ecx
++; CHECK-NEXT:   movl $5, %r8
++; CHECK-NEXT:   movl $6, %r9
++; CHECK-NEXT:   jmp svcreq
++  tail call hhvm_sr void @svcreq(i64 %a, i64 %b, i64 %c, i64 42, i64 1, i64 2, i64 3, i64 4, i64 5, i64 6)
++  ret void
++}
++
++declare hhvm_c void @helper(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)
++
++define hhvm_tc void @test_helper(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_helper:
++; CHECK-DAG:    movl $1, %edi
++; CHECK-DAG:    movl $2, %esi
++; CHECK-DAG:    movl $3, %edx
++; CHECK-DAG:    movl $4, %ecx
++; CHECK-DAG:    movl $5, %r8
++; CHECK-DAG:    movl $6, %r9
++; CHECK-DAG:    callq helper
++  call hhvm_c void @helper(i64 %c, i64 1, i64 2, i64 3, i64 4, i64 5, i64 6, i64 7, i64 8, i64 9)
++  ret void
++}
++
+diff --git test/CodeGen/X86/hhvm-stack.ll test/CodeGen/X86/hhvm-stack.ll
+new file mode 100644
+index 0000000..6112c05
+--- /dev/null
++++ test/CodeGen/X86/hhvm-stack.ll
+@@ -0,0 +1,13 @@
++; RUN: llc < %s | FileCheck %s
++
++declare hhvm_c void @helper(i64, i64, i64)
++
++define hhvm_tc void @test_helper(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_helper:
++; CHECK-NOT:    push
++; CHECK:        callq helper
++  call hhvm_c void @helper(i64 %c, i64 7, i64 42)
++  ret void
++}
++
+diff --git test/CodeGen/X86/locrec.ll test/CodeGen/X86/locrec.ll
+new file mode 100644
+index 0000000..37ba8d8
+--- /dev/null
++++ test/CodeGen/X86/locrec.ll
+@@ -0,0 +1,90 @@
++; RUN: llc < %s -mtriple=x86_64-unknown-linux -mcpu=corei7 | FileCheck %s
++
++; CHECK-LABEL:  .section .llvm_locrecs,"a"
++; CHECK-NEXT:  __LLVM_LocRecs:
++;
++; Header
++; CHECK-NEXT:   .byte 1
++; CHECK-NEXT:   .byte 0
++; CHECK-NEXT:   .short 0
++;   Num Records
++; CHECK-NEXT:   .long 6
++;
++; Location Record 1
++; CHECK-NEXT:   .quad  .Ltmp0
++; CHECK-NEXT:   .long  42
++; CHECK-NEXT:   .byte  4
++; CHECK-NEXT:   .byte  0
++; CHECK-NEXT:   .short 0
++;
++; Location Record 2
++; CHECK-NEXT:   .quad  .Ltmp1
++; CHECK-NEXT:   .long  42
++; CHECK-NEXT:   .byte  2
++; CHECK-NEXT:   .byte  0
++; CHECK-NEXT:   .short 0
++;
++declare void @callee(i64, i64)
++
++define void @test_tailcall(i64 %a, i64 %b) nounwind {
++entry:
++  ; Create tmp on the stack to force frame creation
++  %tmp = alloca i64, i32 4, align 8
++  %val = load i64* %tmp
++  musttail call void @callee(i64 %val, i64 %b) readonly noreturn, !locrec !{i32 42}
++  ret void
++}
++
++; Location Record 3
++; CHECK-NEXT:   .quad  .Ltmp3
++; CHECK-NEXT:   .long  99
++; CHECK-NEXT:   .byte  5
++; CHECK-NEXT:   .byte  0
++; CHECK-NEXT:   .short 0
++;
++; Location Record 4
++; CHECK-NEXT:   .quad  .Ltmp4
++; CHECK-NEXT:   .long  32767
++; CHECK-NEXT:   .byte  4
++; CHECK-NEXT:   .byte  0
++; CHECK-NEXT:   .short 0
++;
++; Location Record 5
++; CHECK-NEXT:   .quad  .Ltmp5
++; CHECK-NEXT:   .long  32767
++; CHECK-NEXT:   .byte  1
++; CHECK-NEXT:   .byte  0
++; CHECK-NEXT:   .short 0
++define void @test_call(i64 %a, i64 %b) nounwind {
++entry:
++  ; Create tmp on the stack to force frame creation
++  %tmp = alloca i64, i32 4, align 8
++  %val = load i64* %tmp
++  call void @callee(i64 %val, i64 %b), !locrec !{i32 99}
++  ret void, !locrec !{i32 32767}
++}
++
++; Only one of the call instructions will get recorded
++;
++; Location Record 6
++; CHECK-NEXT:   .quad  .Ltmp7
++; CHECK-NEXT:   .long  77
++; CHECK-NEXT:   .byte  5
++; CHECK-NEXT:   .byte  0
++; CHECK-NEXT:   .short 0
++define void @test_call_merge(i64 %a, i64 %b) nounwind {
++entry:
++  ; Create tmp on the stack to force frame creation
++  %tmp = alloca i64, i32 4, align 8
++  %val = load i64* %tmp
++  %cond = icmp ult i64 %a, 1
++  br i1 %cond, label %L1, label %L2
++L1:
++  call void @callee(i64 %val, i64 %b), !locrec !{i32 76}
++  br label %L3
++L2:
++  call void @callee(i64 %val, i64 %b), !locrec !{i32 77}
++  br label %L3
++L3:
++  ret void
++}
+diff --git test/CodeGen/X86/patchpoint-bundle-preserve.ll test/CodeGen/X86/patchpoint-bundle-preserve.ll
+new file mode 100644
+index 0000000..19b5462
+--- /dev/null
++++ test/CodeGen/X86/patchpoint-bundle-preserve.ll
+@@ -0,0 +1,22 @@
++; RUN: llc -mtriple=x86_64-unknown-linux -mcpu=corei7 -disable-fp-elim                             < %s | FileCheck %s
++
++module asm ".bundle_align_mode 7"
++
++; Check that existing file align bundle settings are preserved after patchpoint.
++;
++define i64 @trivial_patchpoint_codegen(i64 %p1, i64 %p2, i64 %p3, i64 %p4) {
++entry:
++; CHECK-LABEL: trivial_patchpoint_codegen:
++; CHECK:      .bundle_align_mode 6
++; CHECK-NEXT: .bundle_lock
++; CHECK-NEXT: movabsq $-559038736, %r11
++; CHECK-NEXT: callq *%r11
++; CHECK-NEXT: xchgw %ax, %ax
++; CHECK-NEXT: .bundle_unlock
++; CHECK-NEXT: .bundle_align_mode 7
++  %resolveCall = inttoptr i64 -559038736 to i8*
++  %result = tail call i64 (i64, i32, i8*, i32, ...)* @llvm.experimental.patchpoint.i64(i64 2, i32 15, i8* %resolveCall, i32 4, i64 %p1, i64 %p2, i64 %p3, i64 %p4)
++  ret i64 %result
++}
++
++declare i64 @llvm.experimental.patchpoint.i64(i64, i32, i8*, i32, ...)
+diff --git test/CodeGen/X86/patchpoint-bundle-skip.ll test/CodeGen/X86/patchpoint-bundle-skip.ll
+new file mode 100644
+index 0000000..389b1c4
+--- /dev/null
++++ test/CodeGen/X86/patchpoint-bundle-skip.ll
+@@ -0,0 +1,23 @@
++; RUN: llc -mtriple=x86_64-unknown-linux -mcpu=corei7 -disable-fp-elim < %s | FileCheck %s
++
++module asm ".bundle_align_mode 5"
++
++; Check that bundle alignment is not changed if existing setting
++; is stricter than needed for patchpoint.
++;
++define i64 @trivial_patchpoint_codegen(i64 %p1, i64 %p2, i64 %p3, i64 %p4) {
++entry:
++; CHECK-LABEL: trivial_patchpoint_codegen:
++; CHECK-NOT:  .bundle_align_mode
++; CHECK: .bundle_lock
++; CHECK-NEXT: movabsq $-559038736, %r11
++; CHECK-NEXT: callq *%r11
++; CHECK-NEXT: xchgw %ax, %ax
++; CHECK-NEXT: .bundle_unlock
++; CHECK-NEXT: popq %rbp
++  %resolveCall = inttoptr i64 -559038736 to i8*
++  %result = tail call i64 (i64, i32, i8*, i32, ...)* @llvm.experimental.patchpoint.i64(i64 2, i32 15, i8* %resolveCall, i32 4, i64 %p1, i64 %p2, i64 %p3, i64 %p4)
++  ret i64 %result
++}
++
++declare i64 @llvm.experimental.patchpoint.i64(i64, i32, i8*, i32, ...)
 diff --git test/CodeGen/X86/patchpoint-webkit_jscc.ll test/CodeGen/X86/patchpoint-webkit_jscc.ll
 index 03f662c..eca79b6 100644
 --- test/CodeGen/X86/patchpoint-webkit_jscc.ll
@@ -2435,6 +2934,60 @@ index 53d05ef..bf550a2 100644
  ; CHECK-NEXT: popq
  ; CHECK-NEXT: ret
    %result = tail call i64 (i64, i32, i8*, i32, ...)* @llvm.experimental.patchpoint.i64(i64 5, i32 5, i8* null, i32 2, i64 %p1, i64 %p2)
+diff --git test/CodeGen/X86/smashable.ll test/CodeGen/X86/smashable.ll
+new file mode 100644
+index 0000000..08c45cb
+--- /dev/null
++++ test/CodeGen/X86/smashable.ll
+@@ -0,0 +1,48 @@
++; RUN: llc -mtriple=x86_64-unknown-linux -mcpu=corei7 < %s | FileCheck %s
++
++declare i64 @callee(i64, i64)
++
++define i64 @smashable_call(i64 %a, i64 %b) nounwind {
++entry:
++; CHECK-LABEL: smashable_call
++; CHECK:        .bundle_align_mode 6
++; CHECK-NEXT:   callq callee
++; CHECK-NEXT:   .bundle_align_mode 0
++
++  %tmp = call i64 @callee(i64 %a, i64 %b) smashable
++  ret i64 %tmp
++}
++
++define i64 @smashable_tailcall(i64 %a, i64 %b) nounwind {
++entry:
++; CHECK-LABEL: smashable_tailcall
++; CHECK:        .bundle_align_mode 6
++; CHECK-NEXT:   jmp callee
++; CHECK-NEXT:   .bundle_align_mode 0
++
++  %tmp = tail call i64 @callee(i64 %a, i64 %b) smashable
++  ret i64 %tmp
++}
++
++define i64 @smashable_invoke(i64 %a, i64 %b) nounwind {
++entry:
++; CHECK-LABEL: smashable_invoke
++; CHECK:        .bundle_align_mode 6
++; CHECK-NEXT:   callq callee
++; CHECK-NEXT:   .bundle_align_mode 0
++
++  %tmp = invoke i64 @callee(i64 %a, i64 %b) smashable
++          to label %ret unwind label %unw
++ret:
++  ret i64 %tmp
++unw:
++  landingpad { i64, i8 } personality i32 ()* @personality0
++          cleanup
++  call void @llvm.trap()
++  unreachable
++}
++
++declare i32 @personality0()
++
++declare void @llvm.trap() noreturn nounwind
++
 diff --git test/MC/X86/AlignedBundling/autogen-inst-offset-align-to-end.s test/MC/X86/AlignedBundling/autogen-inst-offset-align-to-end.s
 index fbf5b52..aed965b 100644
 --- test/MC/X86/AlignedBundling/autogen-inst-offset-align-to-end.s
@@ -2448,6 +3001,134 @@ index fbf5b52..aed965b 100644
  # CHECK: 1c01: incl
  
    .align 32, 0x90
+diff --git test/MC/X86/AlignedBundling/bundle-change-align.s test/MC/X86/AlignedBundling/bundle-change-align.s
+new file mode 100644
+index 0000000..5cf691b
+--- /dev/null
++++ test/MC/X86/AlignedBundling/bundle-change-align.s
+@@ -0,0 +1,33 @@
++# RUN: llvm-mc -filetype=obj -triple x86_64-pc-linux-gnu %s -o - \
++# RUN:   | llvm-objdump -disassemble -no-show-raw-insn - | FileCheck %s
++
++# Test bundle alignment values could be changed.
++
++  .bundle_align_mode 3
++  imull $17, %ebx, %ebp
++  imull $17, %ebx, %ebp
++
++  imull $17, %ebx, %ebp
++# CHECK:      6: nop
++# CHECK-NEXT: 8: imull
++
++  .align 8
++  .bundle_align_mode 0
++  imull $17, %ebx, %ebp
++  imull $17, %ebx, %ebp
++
++  imull $17, %ebx, %ebp
++# CHECK:      16: imull
++
++  .align 8
++  .bundle_align_mode 2
++  imull $17, %ebx, %ebp
++
++  imull $17, %ebx, %ebp
++# CHECK:      23: nop
++# CHECK:      24: imull
++
++  imull $17, %ebx, %ebp
++# CHECK:      27: nop
++# CHECK:      28: imull
++
+diff --git test/MC/X86/AlignedBundling/labeloffset.s test/MC/X86/AlignedBundling/labeloffset.s
+new file mode 100644
+index 0000000..65a0086
+--- /dev/null
++++ test/MC/X86/AlignedBundling/labeloffset.s
+@@ -0,0 +1,83 @@
++# RUN: llvm-mc -triple=i686-linux -filetype=obj %s -o - | \
++# RUN: llvm-objdump -disassemble -no-show-raw-insn -r - | FileCheck %s
++# RUN: llvm-mc -triple=i686-nacl -filetype=obj %s -o - | \
++# RUN: llvm-objdump -disassemble -no-show-raw-insn -r - | FileCheck %s
++
++        .bundle_align_mode 5
++        .text
++        .globl  main
++        .align  32, 0x90
++        .type   main,@function
++main:                                   # @main
++# CHECK-LABEL: main:
++# Call + pop sequence for determining the PIC base.
++        .bundle_lock align_to_end
++        calll   .L0$pb
++        .bundle_unlock
++.L0$pb:
++        popl    %eax
++# CHECK: 20: popl
++# 26 bytes of instructions between the pop and the use of the pic base symbol.
++        movl    $3, 2(%ebx, %ebx)
++        movl    $3, 2(%ebx, %ebx)
++        movl    $3, 2(%ebx, %ebx)
++        hlt
++        hlt
++# CHECK: nop
++.Ltmp0:
++        addl    (.Ltmp0-.L0$pb), %eax
++# The addl has bundle padding to push it from 0x3b to 0x40.
++# The difference between the labels should be 0x20 (0x40-0x20) not 0x1b
++# (0x3b-0x20)
++# CHECK: 40: addl 32, %eax
++        popl    %ecx
++        jmp     *%ecx
++
++
++# Also make sure it works with a non-relaxable instruction (cmp vs add)
++# and for 2 adjacent labels that both point to the correct instruction
++        .section .text.bar, "ax"
++        .globl  bar
++        .align  32, 0x90
++        .type   bar,@function
++bar:
++# CHECK-LABEL: bar:
++        .bundle_lock align_to_end
++        calll   .L1$pb
++        .bundle_unlock
++.L1$pb:
++        popl %eax
++# CHECK: 20: popl
++# 26 bytes of instructions between the pop and the use of the pic base symbol.
++        movl    $3, 2(%ebx, %ebx)
++        movl    $3, 2(%ebx, %ebx)
++        movl    $3, 2(%ebx, %ebx)
++        hlt
++        hlt
++# CHECK: nop
++.Ltmp1:
++.Ltmp2:
++        cmpl    %eax, .Ltmp1
++# CHECK: 40: cmpl %eax, 64
++        cmpl     %eax, (.Ltmp2-.L1$pb)
++# CHECK: 46: cmpl %eax, 32
++        popl    %ecx
++        jmp *%ecx
++
++
++# Switch sections in the middle of a function
++        .section .text.foo, "ax"
++        .globl  foo
++        .align  32, 0x90
++        .type   foo,@function
++# CHECK-LABEL: foo:
++foo:
++        inc %eax
++tmp3:
++        .rodata
++        .type   obj,@object
++        .comm   obj,4,4
++        .section .text.foo
++        inc %eax
++# CHECK: tmp3:
++# CHECK-NEXT: 1: incl
 diff --git test/MC/X86/AlignedBundling/long-nop-pad.s test/MC/X86/AlignedBundling/long-nop-pad.s
 index ea33e28..9b1ec11 100644
 --- test/MC/X86/AlignedBundling/long-nop-pad.s
@@ -2461,6 +3142,54 @@ index ea33e28..9b1ec11 100644
  
  # This push instruction is 1 byte long
    .bundle_lock align_to_end
+diff --git test/MC/X86/code_skew.ll test/MC/X86/code_skew.ll
+new file mode 100644
+index 0000000..1b8d8ca
+--- /dev/null
++++ test/MC/X86/code_skew.ll
+@@ -0,0 +1,18 @@
++; RUN: llc -mtriple=x86_64-unknown-linux -mcpu=corei7 -filetype=obj < %s | llvm-objdump -disassemble -no-show-raw-insn - | FileCheck %s
++
++; Check that code skew is applied so that alignment for smashable 
++; instruction happens at a different location.
++
++declare i64 @callee(i64, i64)
++
++define i64 @smashable_call(i64 %a, i64 %b) nounwind optsize {
++entry:
++; CHECK:        nop
++; CHECK-NEXT:   callq 
++
++  %tmp = call i64 @callee(i64 %a, i64 %b) smashable
++  ret i64 %tmp
++}
++
++!0 = metadata !{i32 1, metadata !"code_skew", i32 60}
++!llvm.module.flags = !{ !0 }
+diff --git test/MC/X86/smashable_locrec.ll test/MC/X86/smashable_locrec.ll
+new file mode 100644
+index 0000000..006fe54
+--- /dev/null
++++ test/MC/X86/smashable_locrec.ll
+@@ -0,0 +1,18 @@
++; RUN: llc -mtriple=x86_64-unknown-linux -mcpu=corei7 -filetype=obj < %s | llvm-objdump -disassemble -no-show-raw-insn - | FileCheck %s
++
++; Check that code skew is applied so that alignment for smashable 
++; instruction happens at a different location.
++
++declare i64 @callee(i64, i64)
++
++define i64 @smashable_call(i64 %a, i64 %b) nounwind optsize {
++entry:
++; CHECK:        nop
++; CHECK-NEXT:   callq 
++
++  %tmp = call i64 @callee(i64 %a, i64 %b) smashable, !locrec !{i32 42}
++  ret i64 %tmp
++}
++
++!0 = metadata !{i32 1, metadata !"code_skew", i32 60}
++!llvm.module.flags = !{ !0 }
 diff --git utils/vim/llvm.vim utils/vim/llvm.vim
 index 2b91823..8d245bd 100644
 --- utils/vim/llvm.vim

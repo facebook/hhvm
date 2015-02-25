@@ -1,5 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 class X {
   public function foo() { }

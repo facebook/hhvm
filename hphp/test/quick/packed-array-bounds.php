@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 function main($a, $i) {
   var_dump(isset($a[1 << 32]));

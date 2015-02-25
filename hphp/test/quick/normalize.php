@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 function utf8_strtolower($str): string {
   return mb_strtolower($str, 'utf-8');

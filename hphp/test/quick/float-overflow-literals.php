@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 var_dump(0x8000000000000000);
 var_dump(01000000000000000000000);

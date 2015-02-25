@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 function log_me() {
   $message = call_user_func_array('sprintf', func_get_args());

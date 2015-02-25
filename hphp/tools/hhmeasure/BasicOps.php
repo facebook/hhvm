@@ -1,5 +1,4 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 // Add code snippets here
 // Call them from MeasureBasicOps.php to collect relative CPU time stats

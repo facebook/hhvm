@@ -49,8 +49,6 @@ const StaticString
   s_number("number"),
   s_state("state"),
   s_comment("comment"),
-  s_param_count("param_count"),
-  s_field_count("field_count"),
   s_mysqli_driver("mysqli_driver"),
   s_mysqli_result("mysqli_result"),
   s_mysqli_sql_exception("mysqli_sql_exception"),
@@ -126,6 +124,9 @@ static MySQLResult *getResult(ObjectData* obj) {
   return res->toResource().getTyped<MySQLResult>(true, false);
 }
 
+Variant mysqli_stmt_param_count_get(ObjectData* this_);
+Variant mysqli_stmt_field_count_get(ObjectData* this_);
+
 static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
                                      int start_index) {
   String types(getArg<KindOfString>(ar, start_index));
@@ -141,7 +142,7 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
                   "number of bind variables");
     return arReturn(ar, false);
   }
-  if (type_size != obj->o_get(s_param_count.get()).toInt64()) {
+  if (type_size != mysqli_stmt_param_count_get(obj).toInt64()) {
     raise_warning("Number of variables doesn't match number of parameters in "
                   "prepared statement");
     return arReturn(ar, false);
@@ -168,7 +169,7 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
 
 static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
                                       int start_index) {
-  int64_t fields = obj->o_get(s_field_count.get()).toInt64();
+  int64_t fields = mysqli_stmt_field_count_get(obj).toInt64();
   if (ar->numArgs() - start_index != fields) {
     raise_warning("Number of bind variables doesn't match number of fields in "
                   "prepared statement");
@@ -260,12 +261,6 @@ static Variant HHVM_METHOD(mysqli, get_charset) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 
-static Variant HHVM_METHOD(mysqli, hh_field_count) {
-  auto conn = get_connection(this_);
-  VALIDATE_CONN_CONNECTED(conn);
-  return (int64_t)mysql_field_count(conn->get());
-}
-
 static Variant HHVM_METHOD(mysqli, hh_get_connection, int64_t state) {
   auto res = get_connection_resource(this_);
   VALIDATE_RESOURCE(res, state)
@@ -312,18 +307,6 @@ static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
   auto res = get_connection_resource(this_);
   VALIDATE_RESOURCE(res, MySQLState::CONNECTED)
   return php_mysql_do_query(query, res, false);
-}
-
-static Variant HHVM_METHOD(mysqli, hh_server_version) {
-  auto conn = get_connection(this_);
-  VALIDATE_CONN_CONNECTED(conn);
-  return (int64_t)mysql_get_server_version(conn->get());
-}
-
-static Variant HHVM_METHOD(mysqli, hh_sqlstate) {
-  auto conn = get_connection(this_);
-  VALIDATE_CONN_CONNECTED(conn);
-  return String(mysql_sqlstate(conn->get()), CopyString);
 }
 
 static void HHVM_METHOD(mysqli, hh_update_last_error, Object stmt_obj) {
@@ -569,7 +552,9 @@ static Variant mysqli_errno_get(ObjectData* this_) {
 }
 
 static Variant mysqli_field_count_get(ObjectData* this_) {
-  return HHVM_MN(mysqli, hh_field_count)(this_);
+  auto conn = get_connection(this_);
+  VALIDATE_CONN_CONNECTED(conn);
+  return (int64_t)mysql_field_count(conn->get());
 }
 
 static Variant mysqli_host_info_get(ObjectData* this_) {
@@ -603,11 +588,15 @@ static Variant mysqli_server_info_get(ObjectData* this_) {
 }
 
 static Variant mysqli_server_version_get(ObjectData* this_) {
-  return HHVM_MN(mysqli, hh_server_version)(this_);
+  auto conn = get_connection(this_);
+  VALIDATE_CONN_CONNECTED(conn);
+  return (int64_t)mysql_get_server_version(conn->get());
 }
 
 static Variant mysqli_sqlstate_get(ObjectData* this_) {
-  return HHVM_MN(mysqli, hh_sqlstate)(this_);
+  auto conn = get_connection(this_);
+  VALIDATE_CONN_CONNECTED(conn);
+  return String(mysql_sqlstate(conn->get()), CopyString);
 }
 
 static Variant mysqli_thread_id_get(ObjectData* this_) {
@@ -787,12 +776,6 @@ static Variant HHVM_METHOD(mysqli_result, get_mysqli_conn_resource,
 #undef VALIDATE_CONN
 #undef VALIDATE_CONN_CONNECTED
 
-static Variant HHVM_METHOD(mysqli_result, hh_field_tell) {
-  auto res = getResult(this_);
-  VALIDATE_RESULT(res)
-  return res->tellField();
-}
-
 static Variant HHVM_METHOD(mysqli_result, fetch_field) {
   auto res = getResult(this_);
   VALIDATE_RESULT(res)
@@ -827,7 +810,9 @@ const int64_t _MYSQLI_USE_RESULT = 1;
 // Native accessor properties of mysqli_result.
 
 Variant mysqli_result_current_field_get(ObjectData* this_) {
-  return HHVM_MN(mysqli_result, hh_field_tell)(this_);
+  auto res = getResult(this_);
+  VALIDATE_RESULT(res)
+  return res->tellField();
 }
 
 Variant mysqli_result_field_count_get(ObjectData* this_) {
@@ -939,41 +924,9 @@ static void HHVM_METHOD(mysqli_stmt, free_result) {
 //  throw NotImplementedException("mysqli_stmt::get_result");
 //}
 
-static Variant HHVM_METHOD(mysqli_stmt, hh_affected_rows) {
-  return getStmt(this_)->affected_rows();
-}
-
-static Variant HHVM_METHOD(mysqli_stmt, hh_errno) {
-  return getStmt(this_)->get_errno();
-}
-
-static Variant HHVM_METHOD(mysqli_stmt, hh_error) {
-  return getStmt(this_)->get_error();
-}
-
-static Variant HHVM_METHOD(mysqli_stmt, hh_field_count) {
-  return getStmt(this_)->field_count();
-}
-
 static void HHVM_METHOD(mysqli_stmt, hh_init, Object connection) {
   auto data = makeSmartPtr<MySQLStmt>(get_connection(connection.get())->get());
   this_->o_set(s_stmt, Variant(std::move(data)), s_mysqli_stmt.get());
-}
-
-static Variant HHVM_METHOD(mysqli_stmt, hh_insert_id) {
-  return getStmt(this_)->insert_id();
-}
-
-static Variant HHVM_METHOD(mysqli_stmt, hh_num_rows) {
-  return getStmt(this_)->num_rows();
-}
-
-static Variant HHVM_METHOD(mysqli_stmt, hh_param_count) {
-  return getStmt(this_)->param_count();
-}
-
-static Variant HHVM_METHOD(mysqli_stmt, hh_sqlstate) {
-  return getStmt(this_)->sqlstate();
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, hh_store_result) {
@@ -996,6 +949,93 @@ static Variant HHVM_METHOD(mysqli_stmt, send_long_data, int64_t param_nr,
                            const String& data) {
   return getStmt(this_)->send_long_data(param_nr, data);
 }
+
+Variant mysqli_stmt_affected_rows_get(ObjectData* this_) {
+  return getStmt(this_)->affected_rows();
+}
+
+Variant mysqli_stmt_errno_get(ObjectData* this_) {
+  return getStmt(this_)->get_errno();
+}
+
+Variant mysqli_stmt_error_get(ObjectData* this_) {
+  return getStmt(this_)->get_error();
+}
+
+Variant mysqli_stmt_field_count_get(ObjectData* this_) {
+  return getStmt(this_)->field_count();
+}
+
+Variant mysqli_stmt_insert_id_get(ObjectData* this_) {
+  return getStmt(this_)->insert_id();
+}
+
+Variant mysqli_stmt_num_rows_get(ObjectData* this_) {
+  return getStmt(this_)->num_rows();
+}
+
+Variant mysqli_stmt_param_count_get(ObjectData* this_) {
+  return getStmt(this_)->param_count();
+}
+
+Variant mysqli_stmt_sqlstate_get(ObjectData* this_) {
+  return getStmt(this_)->sqlstate();
+}
+
+Variant mysqli_stmt_error_list_get(ObjectData* this_) {
+  Array ret = Array::Create();
+  Variant errorNumber = mysqli_stmt_errno_get(this_);
+
+  if (errorNumber.asInt64Val()) {
+    Array errorList = Array::Create();
+    errorList.set(String("errno"), errorNumber);
+    errorList.set(String("sqlstate"), mysqli_stmt_sqlstate_get(this_));
+    errorList.set(String("error"), mysqli_stmt_error_get(this_));
+    ret.set(0, errorList);
+  }
+
+  return ret;
+}
+
+static Native::PropAccessor mysqli_stmt_Accessors[] = {
+  {"affected_rows", mysqli_stmt_affected_rows_get,
+                    nullptr, nullptr, nullptr},
+
+  {"errno",         mysqli_stmt_errno_get,
+                    nullptr, nullptr, nullptr},
+
+  {"error_list",    mysqli_stmt_error_list_get,
+                    nullptr, nullptr, nullptr},
+
+  {"error",         mysqli_stmt_error_get,
+                    nullptr, nullptr, nullptr},
+
+  {"field_count",   mysqli_stmt_field_count_get,
+                    nullptr, nullptr, nullptr},
+
+  {"insert_id",     mysqli_stmt_insert_id_get,
+                    nullptr, nullptr, nullptr},
+
+  {"num_rows",      mysqli_stmt_num_rows_get,
+                    nullptr, nullptr, nullptr},
+
+  {"param_count",   mysqli_stmt_param_count_get,
+                    nullptr, nullptr, nullptr},
+
+  {"sqlstate",      mysqli_stmt_sqlstate_get,
+                    nullptr, nullptr, nullptr},
+
+  {nullptr, nullptr, nullptr, nullptr, nullptr}
+};
+
+static Native::PropAccessorMap mysqli_stmt_accessorsMap
+((Native::PropAccessor*)mysqli_stmt_Accessors);
+
+struct mysqli_stmt_PropHandler :
+  Native::MapPropHandler<mysqli_stmt_PropHandler> {
+
+  static constexpr Native::PropAccessorMap& map = mysqli_stmt_accessorsMap;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 // class mysqli_warning
@@ -1121,14 +1161,11 @@ public:
     HHVM_ME(mysqli, dump_debug_info);
     HHVM_ME(mysqli, get_charset);
     //HHVM_ME(mysqli, get_connection_stats); // MYSQLND
-    HHVM_ME(mysqli, hh_field_count);
     HHVM_ME(mysqli, hh_get_connection);
     HHVM_ME(mysqli, hh_get_result);
     HHVM_ME(mysqli, hh_init);
     HHVM_ME(mysqli, hh_real_connect);
     HHVM_ME(mysqli, hh_real_query);
-    HHVM_ME(mysqli, hh_server_version);
-    HHVM_ME(mysqli, hh_sqlstate);
     HHVM_ME(mysqli, hh_update_last_error);
     HHVM_ME(mysqli, kill);
     HHVM_ME(mysqli, options);
@@ -1147,7 +1184,6 @@ public:
 
     // mysqli_result
     HHVM_ME(mysqli_result, get_mysqli_conn_resource);
-    HHVM_ME(mysqli_result, hh_field_tell);
     HHVM_ME(mysqli_result, fetch_field);
 
     Native::registerNativeGuardedPropHandler
@@ -1164,20 +1200,15 @@ public:
     HHVM_ME(mysqli_stmt, fetch);
     HHVM_ME(mysqli_stmt, free_result);
     //HHVM_ME(mysqli_stmt, get_result); // MYSQLND
-    HHVM_ME(mysqli_stmt, hh_affected_rows);
-    HHVM_ME(mysqli_stmt, hh_errno);
-    HHVM_ME(mysqli_stmt, hh_error);
-    HHVM_ME(mysqli_stmt, hh_field_count);
     HHVM_ME(mysqli_stmt, hh_init);
-    HHVM_ME(mysqli_stmt, hh_insert_id);
-    HHVM_ME(mysqli_stmt, hh_num_rows);
-    HHVM_ME(mysqli_stmt, hh_param_count);
-    HHVM_ME(mysqli_stmt, hh_sqlstate);
     HHVM_ME(mysqli_stmt, hh_store_result);
     HHVM_ME(mysqli_stmt, prepare);
     HHVM_ME(mysqli_stmt, reset);
     HHVM_ME(mysqli_stmt, result_metadata);
     HHVM_ME(mysqli_stmt, send_long_data);
+
+    Native::registerNativeGuardedPropHandler
+      <mysqli_stmt_PropHandler>(s_mysqli_stmt.get());
 
     HHVM_FE(mysqli_get_client_info);
     HHVM_FE(mysqli_get_client_version);

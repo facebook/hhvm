@@ -1,5 +1,7 @@
 <?hh
 
+function busy() {}
+
 $t = new IntervalTimer(
   200, 0.6,
   () ==> {
@@ -8,5 +10,6 @@ $t = new IntervalTimer(
 $t->start();
 $n = microtime(true);
 while (microtime(true) < $n + 1) {
+  busy();
 }
 $t->stop();

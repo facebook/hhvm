@@ -21,9 +21,10 @@
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/ext_hotprofiler.h"
+#include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
-#include "hphp/runtime/ext/ext_hotprofiler.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -312,6 +313,14 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     Xenon::getInstance().log(Xenon::ExitSample);
   }
 
+  // Run IntervalTimer callbacks only if it's safe to do so, i.e., not when
+  // there's a pending exception or we're unwinding from a C++ exception.
+  if (flags & RequestInjectionData::IntervalTimerFlag
+      && ThreadInfo::s_threadInfo->m_pendingException == nullptr
+      && (!fault || fault->m_faultType == Fault::Type::UserException)) {
+    IntervalTimer::RunCallbacks(IntervalTimer::ExitSample);
+  }
+
   // Inlined calls normally skip the function enter and exit events. If we
   // side exit in an inlined callee, we short-circuit here in order to skip
   // exit events that could unbalance the call stack.
@@ -365,6 +374,10 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
     Xenon::getInstance().log(Xenon::EnterSample);
   }
 
+  if (flags & RequestInjectionData::IntervalTimerFlag) {
+    IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
+  }
+
   onFunctionEnter(ar, funcType, flags);
   return true;
 }
@@ -377,6 +390,10 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
     Xenon::getInstance().log(Xenon::ResumeAwaitSample);
   }
 
+  if (flags & RequestInjectionData::IntervalTimerFlag) {
+    IntervalTimer::RunCallbacks(IntervalTimer::ResumeAwaitSample);
+  }
+
   onFunctionEnter(ar, EventHook::NormalFunc, flags);
 }
 
@@ -386,6 +403,10 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
   // Xenon
   if (flags & RequestInjectionData::XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::EnterSample);
+  }
+
+  if (flags & RequestInjectionData::IntervalTimerFlag) {
+    IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
   }
 
   onFunctionEnter(ar, EventHook::NormalFunc, flags);

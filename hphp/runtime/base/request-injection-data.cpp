@@ -554,6 +554,10 @@ void RequestInjectionData::setIntervalTimerFlag() {
   getConditionFlags()->fetch_or(RequestInjectionData::IntervalTimerFlag);
 }
 
+void RequestInjectionData::clearIntervalTimerFlag() {
+  getConditionFlags()->fetch_and(~RequestInjectionData::IntervalTimerFlag);
+}
+
 ssize_t RequestInjectionData::fetchAndClearFlags() {
   return getConditionFlags()->fetch_and(RequestInjectionData::StickyFlags);
 }

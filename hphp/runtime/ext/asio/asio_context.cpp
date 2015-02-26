@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle-defs.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
@@ -72,6 +73,9 @@ namespace {
       ssize_t flags = EventHook::CheckSurprise();
       if (flags & RequestInjectionData::XenonSignalFlag) {
         Xenon::getInstance().log(Xenon::IOWaitSample);
+      }
+      if (flags & RequestInjectionData::IntervalTimerFlag) {
+        IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample);
       }
     }
 

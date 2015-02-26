@@ -646,7 +646,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
       return cseResult;
     }
     if (doClone == CloneFlag::Yes) {
-      inst = m_unit.cloneInstruction(inst);
+      inst = m_unit.clone(inst);
     }
     appendInstruction(inst);
     return inst->dst(0);
@@ -693,8 +693,8 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
 
       auto cseResult = doCse(newInst);
       if (cseResult) {
-        appendInstruction(m_unit.mov(newInst->dst(), cseResult,
-                                     newInst->marker()));
+        appendInstruction(m_unit.gen(newInst->dst(), Mov,
+                                     newInst->marker(), cseResult));
       } else {
         appendInstruction(newInst);
       }
@@ -843,9 +843,9 @@ void IRBuilder::reoptimize() {
           // fall-through edge (inst->next()).
           auto nextBlk = inst->next();
           nextBlk->insert(nextBlk->begin(),
-                          m_unit.mov(dst, src, inst->marker()));
+                          m_unit.gen(dst, Mov, inst->marker(), src));
         } else {
-          appendInstruction(m_unit.mov(dst, src, inst->marker()));
+          appendInstruction(m_unit.gen(dst, Mov, inst->marker(), src));
         }
       }
 

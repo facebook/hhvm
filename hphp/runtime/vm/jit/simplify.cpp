@@ -89,7 +89,7 @@ SSATmp* gen(State& env, Opcode op, BCMarker marker, Args&&... args) {
         return newDest;
       } else {
         assert(inst->isTransient());
-        inst = env.unit.cloneInstruction(inst);
+        inst = env.unit.clone(inst);
         env.newInsts.push_back(inst);
 
         return inst->dst(0);
@@ -117,8 +117,8 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
  * complicated analysis than belongs in the simplifier right now.
  */
 DEBUG_ONLY bool validate(const State& env,
-              SSATmp* newDst,
-              const IRInstruction* origInst) {
+                         SSATmp* newDst,
+                         const IRInstruction* origInst) {
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybe(Type::Counted)) return true;
     for (auto& oldSrc : origInst->srcs()) {

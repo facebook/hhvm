@@ -380,8 +380,7 @@ void runAnalysis(IRUnit& unit, BlockList& blocks, ValueNumberTable& vnTable) {
     // iteration of the fixed point. If we change the global ValueNumberTable
     // during the pass, the hash values of the SSATmps will change which is
     // apparently a no-no for unordered_map.
-    ValueNumberTable localUpdates(unit,
-      ValueNumberMetadata { nullptr, nullptr });
+    ValueNumberTable localUpdates(unit, ValueNumberMetadata{});
     {
       CongruenceHasher hash(vnTable);
       CongruenceComparator pred(vnTable);
@@ -456,7 +455,7 @@ void gvn(IRUnit& unit) {
   auto rpoBlocksWithIds = rpoSortCfgWithIds(unit);
   auto& rpoBlocks = rpoBlocksWithIds.blocks;
   auto dominators = findDominators(unit, rpoBlocksWithIds);
-  ValueNumberTable vnTable(unit, ValueNumberMetadata { nullptr, nullptr });
+  ValueNumberTable vnTable(unit, ValueNumberMetadata{});
 
   // This is an implementation of the RPO version of the global value numbering
   // algorithm presented in the 1996 paper "SCC-based Value Numbering" by

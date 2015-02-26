@@ -118,12 +118,13 @@ int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 int64_t RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
 
 std::string RuntimeOption::AccessLogDefaultFormat = "%h %l %u %t \"%r\" %>s %b";
-std::vector<AccessLogFileData> RuntimeOption::AccessLogs;
+std::map<std::string, AccessLogFileData> RuntimeOption::AccessLogs;
 
 std::string RuntimeOption::AdminLogFormat = "%h %t %s %U";
 std::string RuntimeOption::AdminLogFile;
 std::string RuntimeOption::AdminLogSymLink;
 
+std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
 
 std::string RuntimeOption::Tier;
 std::string RuntimeOption::Host;
@@ -813,19 +814,25 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(AccessLogDefaultFormat, ini, logger["AccessLogDefaultFormat"],
                  "%h %l %u %t \"%r\" %>s %b");
 
-    {
-      Hdf access = logger["Access"];
-      for (Hdf hdf = access.firstChild(); hdf.exists();
-           hdf = hdf.next()) {
+    auto parseLogs = [](Hdf root, IniSetting::Map& ini,
+                        std::map<std::string, AccessLogFileData>& logs) {
+      for (Hdf hdf = root.firstChild(); hdf.exists(); hdf = hdf.next()) {
+        string logName = hdf.getName();
         string fname = Config::GetString(ini, hdf["File"]);
         if (fname.empty()) {
           continue;
         }
         string symLink = Config::GetString(ini, hdf["SymLink"]);
-        AccessLogs.push_back(AccessLogFileData(fname, symLink,
-          Config::GetString(ini, hdf["Format"], AccessLogDefaultFormat)));
+        string format = Config::GetString(ini, hdf["Format"],
+          AccessLogDefaultFormat);
+
+        logs[logName] = AccessLogFileData(fname, symLink, format);
       }
-    }
+    };
+
+    parseLogs(logger["Access"], ini, AccessLogs);
+    RPCLogs = AccessLogs;
+    parseLogs(logger["RPC"], ini, RPCLogs);
 
     Config::Bind(AdminLogFormat, ini, logger["AdminLog.Format"], "%h %t %s %U");
     Config::Bind(AdminLogFile, ini, logger["AdminLog.File"]);

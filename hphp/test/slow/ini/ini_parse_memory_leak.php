@@ -23,7 +23,7 @@ function leak_test()
     $second_leak = $c - $b;
 
     $count = $second_leak / $first_leak;
-    if ($count <= 1) {
+    if ($count <= 1 || $second_leak < 10*1024*1024) {
         echo "OK";
     } else {
         echo "leak first:".$first_leak.", leak second:".$second_leak.", times:".$count."\n";

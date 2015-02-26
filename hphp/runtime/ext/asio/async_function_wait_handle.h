@@ -39,8 +39,7 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
 
   explicit c_AsyncFunctionWaitHandle(Class* cls =
       c_AsyncFunctionWaitHandle::classof())
-    : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj)
-  {}
+    : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj) {}
   ~c_AsyncFunctionWaitHandle();
   void t___construct();
 

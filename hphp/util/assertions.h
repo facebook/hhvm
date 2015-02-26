@@ -70,12 +70,13 @@ namespace HPHP {
  *
  * These are intended for use primarily by the assert macros below.
  */
-void assert_fail(const char* exp,
+void assert_fail(const char* e,
                  const char* file,
                  unsigned int line,
-                 const char* func) __attribute__((__noreturn__));
+                 const char* func,
+                 const std::string& msg) __attribute__((__noreturn__));
 
-void assert_fail_log(const char* title, const std::string& msg);
+void assert_log_failure(const char* title, const std::string& msg);
 
 /*
  * Register a function for auxiliary assert logging.
@@ -98,8 +99,8 @@ struct AssertDetailImpl {
 
   virtual std::string run() = 0;
 
-  friend void assert_fail_log(const char* title, const std::string& msg);
-  friend void assert_fail_log_detail(AssertDetailImpl*);
+  friend void assert_log_failure(const char* title, const std::string& msg);
+  friend void assert_log_detail(AssertDetailImpl*);
 
 protected:
   ~AssertDetailImpl() { s_head = m_next; }
@@ -196,23 +197,20 @@ struct FailedAssertion : std::exception {
 #define assert_impl(cond, fail) \
   ((cond) ? static_cast<void>(0) : ((fail), static_cast<void>(0)))
 
-#define assert_log_impl(cond, fail, str) \
-  assert_impl(cond, (::HPHP::assert_fail_log(#cond, str), (fail)))
-
-#define assert_fail_impl(e) \
-  ::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__)
-
-#define always_assert(e)          assert_impl(e, assert_fail_impl(e))
-#define always_assert_log(e, l)   assert_log_impl(e, assert_fail_impl(e), l())
-#define always_assert_flog(e, ...) \
-  assert_log_impl(e, assert_fail_impl(e), ::folly::format(__VA_ARGS__).str())
+#define assert_fail_impl(e, msg) \
+  ::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
 
 #define assert_throw_fail_impl(e) \
   throw ::HPHP::FailedAssertion(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__)
-#define always_assert_throw(e) \
-  assert_impl(e, assert_throw_fail_impl(e))
-#define always_assert_throw_log(e, l) \
-  assert_log_impl(e, assert_throw_fail_impl(e), l)
+
+#define always_assert(e)            assert_impl(e, assert_fail_impl(e, ""))
+#define always_assert_log(e, l)     assert_impl(e, assert_fail_impl(e, l()))
+#define always_assert_flog(e, ...)  assert_impl(e, assert_fail_impl(e,        \
+                                        ::folly::format(__VA_ARGS__).str()))
+#define always_assert_throw(e)      assert_impl(e, assert_throw_fail_impl(e))
+#define always_assert_throw_log(e, l)                   \
+  assert_impl(e, (::HPHP::assert_log_failure(#e, l()),  \
+                  assert_throw_fail_impl(e)))
 
 #undef assert
 

@@ -1,0 +1,2 @@
+File "user_attributes_naming.php", line 3, characters 3-12:
+Unrecognized user attribute: __Whatever starts with __ but is not a standard attribute (Naming[2049])

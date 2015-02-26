@@ -2352,6 +2352,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"classname", "HH\\string"}, // for ::class
     (AliasEntry){"resource", "HH\\resource"},
     (AliasEntry){"mixed", "HH\\mixed"},
+    (AliasEntry){"noreturn", "HH\\noreturn"},
     (AliasEntry){"void", "HH\\void"},
     (AliasEntry){"this", "HH\\this"},
   };
@@ -2417,6 +2418,15 @@ void Parser::onNamespaceEnd() {
 }
 
 void Parser::onUse(const std::string &ns, const std::string &as) {
+  if (ns == "strict") {
+    if (m_scanner.isHHSyntaxEnabled()) {
+      error("To use strict hack, place // strict after the open tag. "
+            "If it's already there, remove this line. "
+            "Hack is strict already.");
+    }
+    error("You seem to be trying to use a different language. "
+          "May I recommend Hack? http://hacklang.org");
+  }
   string key = fully_qualified_name_as_alias_key(ns, as);
 
   // It's not an error if the alias already exists but is auto-imported.

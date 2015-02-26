@@ -266,8 +266,8 @@ struct debugtrap {};
  */
 struct fallthru {};
 
-struct ldimmb { Immed s; Vreg8 d; bool saveflags; };
-struct ldimml { Immed s; Vreg32 d; bool saveflags; };
+struct ldimmb { Immed s; Vreg d; bool saveflags; };
+struct ldimml { Immed s; Vreg d; bool saveflags; };
 struct ldimmq { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;

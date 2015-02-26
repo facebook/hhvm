@@ -23,7 +23,7 @@
 // Don't do the do { ... } while(0) trick here because we need 'f' outside of
 // the macro
 #define CHECK_BZFILE(handle, f)                               \
-  BZ2File *f = handle.getTyped<BZ2File>(true, true);          \
+  auto f = dyn_cast_or_null<BZ2File>(handle);                 \
   if (f == nullptr || f->isClosed()) {                        \
     raise_warning("Not a valid stream resource");             \
     return (false);                                           \
@@ -74,7 +74,7 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
       raise_warning("first parameter has to be string or file-resource");
       return false;
     }
-    SmartPtr<PlainFile> f(filename.toResource().getTyped<PlainFile>());
+    auto f = cast<PlainFile>(filename);
     if (!f) {
       return false;
     }

@@ -18,12 +18,20 @@
 #define incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
 
 #include <memory>
+#include <string>
 
-#include "hphp/runtime/debugger/debugger_client.h"
-#include "hphp/runtime/debugger/debugger_thrift_buffer.h"
+#include "hphp/runtime/base/type-string.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+struct DebuggerThriftBuffer;
+
+namespace Eval {
+///////////////////////////////////////////////////////////////////////////////
+
+struct DebuggerClient;
+struct DebuggerProxy;
 
 struct DebuggerCommand;
 using DebuggerCommandPtr = std::shared_ptr<DebuggerCommand>;
@@ -96,37 +104,45 @@ public:
   explicit DebuggerCommand(Type type): m_type(type) {}
   virtual ~DebuggerCommand() {}
 
-  bool is(Type type) const { return m_type == type; }
-  Type getType() const { return m_type; }
-  bool send(DebuggerThriftBuffer &thrift);
-  bool recv(DebuggerThriftBuffer &thrift);
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
-  virtual void onClient(DebuggerClient &client) = 0;
-  virtual bool onServer(DebuggerProxy &proxy);
+  bool is(Type type) const {
+    return m_type == type;
+  }
 
-  // This seems to be confined to eval and print commands.
-  // It is not clear that it belongs in this interface or that the
-  // assert is safe.
-  virtual void handleReply(DebuggerClient& client) { not_reached(); }
+  Type getType() const {
+    return m_type;
+  }
+
+  bool send(DebuggerThriftBuffer&);
+  bool recv(DebuggerThriftBuffer&);
+
+  virtual void list(DebuggerClient&);
+  virtual void help(DebuggerClient&);
+
+  virtual void onClient(DebuggerClient&) = 0;
+  virtual bool onServer(DebuggerProxy&);
 
   // Returns true if DebuggerProxy::processInterrupt() should return
   // to its caller instead of processing further commands from the client.
-  bool shouldExitInterrupt() { return m_exitInterrupt;}
+  bool shouldExitInterrupt() const {
+    return m_exitInterrupt;
+  }
 
   // Returns a non empty error message if the receipt of this command
   // did not complete successfully.
-  String getWireError() const { return m_wireError; }
+  const String& getWireError() const {
+    return m_wireError;
+  }
 
 protected:
-  bool displayedHelp(DebuggerClient &client);
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  bool displayedHelp(DebuggerClient&);
+  virtual void sendImpl(DebuggerThriftBuffer&);
+  virtual void recvImpl(DebuggerThriftBuffer&);
 
   Type m_type;
+  int m_version{0};
+
   std::string m_class; // for CmdExtended
   std::string m_body;
-  int m_version{0};
 
   // Used to save temporary error happened on the wire.
   String m_wireError;

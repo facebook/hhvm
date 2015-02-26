@@ -120,9 +120,22 @@ uint32_t RegionDesc::instrSize() const {
   return size;
 }
 
+SrcKey RegionDesc::lastSrcKey() const {
+  assert(!empty());
+  FuncId startFuncId = start().getFuncId();
+  for (int i = m_blocks.size() - 1; i >= 0; i--) {
+    SrcKey sk = m_blocks[i]->last();
+    if (sk.getFuncId() == startFuncId) {
+      return sk;
+    }
+  }
+  always_assert(0);
+}
+
+
 RegionDesc::Block* RegionDesc::addBlock(SrcKey sk,
                                         int    length,
-                                        Offset spOffset) {
+                                        FPAbsOffset spOffset) {
   m_blocks.push_back(
     std::make_shared<Block>(sk.func(), sk.resumed(), sk.offset(), length,
                             spOffset));
@@ -470,7 +483,7 @@ bool hasTransId(RegionDesc::BlockId blockId) {
 }
 
 RegionDesc::Block::Block(const Func* func, bool resumed, Offset start,
-                         int length, Offset initSpOff)
+                         int length, FPAbsOffset initSpOff)
   : m_id(s_nextId--)
   , m_func(func)
   , m_resumed(resumed)
@@ -969,8 +982,7 @@ std::string show(RegionDesc::Location l) {
   case RegionDesc::Location::Tag::Local:
     return folly::format("Local{{{}}}", l.localId()).str();
   case RegionDesc::Location::Tag::Stack:
-    return folly::format("Stack{{{},{}}}",
-                         l.stackOffset(), l.stackOffsetFromFp()).str();
+    return folly::format("Stack{{{}}}", l.offsetFromFP().offset).str();
   }
   not_reached();
 }
@@ -1033,7 +1045,7 @@ std::string show(const RegionDesc::Block& b) {
                   b.func()->fullName()->data(), '@', b.start().offset(),
                   b.start().resumed() ? "r" : "",
                   " length ", b.length(),
-                  " initSpOff ", b.initialSpOffset(), '\n',
+                  " initSpOff ", b.initialSpOffset().offset, '\n',
                   &ret
                  );
 

@@ -33,40 +33,38 @@ __thread AssertDetailImpl* AssertDetailImpl::s_head = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void assert_fail(const char* e, const char* file,
-                 unsigned int line, const char* func) {
-  auto const msg = folly::format("{}:{}: {}: assertion `{}' failed.",
-                                 file, line, func, e).str();
-  fprintf(stderr, "%s\n", msg.c_str());
-  if (s_logger) {
-    s_logger("Failed Assertion", msg);
-  }
-  std::abort();
-}
-
-void assert_fail_log_detail(AssertDetailImpl* adi) {
+void assert_log_detail(AssertDetailImpl* adi) {
   if (!adi) return;
-  assert_fail_log_detail(adi->m_next);
+  assert_log_detail(adi->m_next);
 
-  auto out = adi->run();
+  auto const title = folly::format("{:-^80}\n", adi->m_name).str();
+  auto const msg = adi->run();
 
-  if (s_logger) {
-    s_logger(folly::format(
-      "{:-^80}\n", adi->m_name
-    ).str().c_str(), out);
-  }
-
-  fprintf(stderr, "%s", folly::format(
-    "\n{:-^80}\n{}\n", adi->m_name, out
-  ).str().c_str());
+  fprintf(stderr, "\n%s%s\n", title.c_str(), msg.c_str());
+  if (s_logger) s_logger(title.c_str(), msg);
 }
 
-void assert_fail_log(const char* title, const std::string& msg) {
-  if (s_logger) s_logger(title, msg);
-  fprintf(stderr, "\nAssertion failure: %s\n%s\n", title, msg.c_str());
+void assert_log_failure(const char* e, const std::string& msg) {
+  fprintf(stderr, "\nAssertion failure: %s\n%s\n", e, msg.c_str());
 
-  assert_fail_log_detail(AssertDetailImpl::s_head);
+  if (s_logger) {
+    s_logger("Assertion Failure", e);
+    if (!msg.empty()) {
+      s_logger("Assertion Message", msg);
+    }
+  }
+  assert_log_detail(AssertDetailImpl::s_head);
   fprintf(stderr, "\n");
+}
+
+void assert_fail(const char* e, const char* file,
+                 unsigned int line, const char* func,
+                 const std::string& msg) {
+  auto const assertion = folly::format("{}:{}: {}: assertion `{}' failed.",
+                                       file, line, func, e).str();
+  assert_log_failure(assertion.c_str(), msg);
+
+  std::abort();
 }
 
 void register_assert_fail_logger(AssertFailLogger l) {

@@ -17,46 +17,44 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_PRINT_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_PRINT_H_
 
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdPrint : public DebuggerCommand {
-public:
-  static const char *Formats[];
-  static std::string FormatResult(const char *format, const Variant& ret);
+struct CmdPrint : DebuggerCommand {
+  static std::string FormatResult(const char* format, const Variant& ret);
 
-public:
-  CmdPrint() : DebuggerCommand(KindOfPrint), m_bypassAccessCheck(false),
-               m_isForWatch(false), m_noBreak(false) {}
+  CmdPrint(): DebuggerCommand(KindOfPrint) {}
 
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
+  void list(DebuggerClient&) override;
+  void help(DebuggerClient&) override;
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
-  Variant processWatch(DebuggerClient &client, const char *format,
-                    const std::string &php);
-
-  virtual void handleReply(DebuggerClient &client);
+  Variant processWatch(
+    DebuggerClient& client,
+    const char* format,
+    const std::string& php
+  );
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
   Variant m_ret;
   String m_output;
   int m_frame;
-  bool m_bypassAccessCheck;
   int m_printLevel;
-  bool m_isForWatch;
-  bool m_noBreak;
+  bool m_bypassAccessCheck{false};
+  bool m_isForWatch{false};
+  bool m_noBreak{false};
 
-  void processList(DebuggerClient &client);
-  void processClear(DebuggerClient &client);
+  void processList(DebuggerClient&);
+  void processClear(DebuggerClient&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

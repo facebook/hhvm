@@ -524,6 +524,11 @@ To string conversions:
   Convert a class to a class context (i.e. the class with a 1 or'd into the low
   bit).
 
+| OrdStr,                       D(Int), S(Str),                           NF
+
+  Convert the first byte in a string to an unsigned integer.
+
+
 4. Boolean predicates
 
 | Gt,                          D(Bool), S(Gen) S(Gen), C

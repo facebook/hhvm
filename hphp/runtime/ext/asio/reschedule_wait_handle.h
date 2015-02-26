@@ -40,8 +40,7 @@ class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
 
   explicit c_RescheduleWaitHandle(Class* cls =
       c_RescheduleWaitHandle::classof())
-    : c_WaitableWaitHandle(cls)
-  {}
+    : c_WaitableWaitHandle(cls) {}
   ~c_RescheduleWaitHandle() {}
 
   static Object ti_create(int64_t queue, int priority);

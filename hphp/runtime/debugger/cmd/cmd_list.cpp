@@ -13,14 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/debugger/cmd/cmd_list.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "hphp/runtime/debugger/cmd/cmd_info.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/debugger/cmd/cmd_info.h"
+#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP { namespace Eval {

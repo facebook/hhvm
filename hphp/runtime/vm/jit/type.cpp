@@ -243,7 +243,7 @@ std::string Type::constValString() const {
   if (*this <= RDSHandle) {
     return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
   }
-  if (subtypeOfAny(Null, Nullptr) || isPtr()) {
+  if (subtypeOfAny(Null, Nullptr) || *this <= PtrToGen) {
     return toString();
   }
 
@@ -258,17 +258,17 @@ std::string Type::toString() const {
 # undef IRT
 # undef IRTP
 
-  if (maybe(Type::Nullptr)) {
+  if (maybe(Nullptr)) {
     return folly::to<std::string>(
       "Nullptr|",
       (*this - Type::Nullptr).toString()
     );
   }
 
-  if (isBoxed()) {
-    return folly::to<std::string>("Boxed", innerType().toString());
+  if (*this <= BoxedCell) {
+    return folly::to<std::string>("Boxed", inner().toString());
   }
-  if (isPtr()) {
+  if (*this <= PtrToGen) {
     std::string ret = "PtrTo";
     switch (ptrKind()) {
     case Ptr::Unk:      break;
@@ -350,6 +350,8 @@ std::string Type::debugString(Type t) {
   return t.toString();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 bool Type::checkValid() const {
   // Note: be careful, the Type::Foo objects aren't all constructed yet in this
   // function.
@@ -366,7 +368,7 @@ bool Type::checkValid() const {
 }
 
 DataType Type::toDataType() const {
-  assert(!isPtr());
+  assert(!maybe(PtrToGen) || m_bits == kBottom);
   assert(isKnownDataType());
 
   // Order is important here: types must progress from more specific
@@ -413,9 +415,9 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
 ///////////////////////////////////////////////////////////////////////////////
 // Combinators.
 
-Type Type::specialize(TypeSpec spec) const {
+Type Type::specialize(TypeSpec spec, bits_t killable /* = kTop */) const {
   auto bits = m_bits;
-  auto ptr = rawPtrKind();
+  auto ptr = ptrKind();
 
   bool arr_okay = supports(SpecKind::Array);
   bool cls_okay = supports(SpecKind::Class);
@@ -426,18 +428,18 @@ Type Type::specialize(TypeSpec spec) const {
   // Remove the bits corresponding to any Bottom specializations---the
   // specializations intersected to zero, so the type component is impossible.
   if (spec.clsSpec() == ClassSpec::Bottom) {
-    bits &= ~kAnyObj;
+    bits &= ~(kAnyObj & killable);
     cls_okay = false;
   }
   if (spec.arrSpec() == ArraySpec::Bottom) {
-    bits &= ~kAnyArr;
+    bits &= ~(kAnyArr & killable);
     arr_okay = false;
   }
 
   auto generic = Type(bits, ptr);
 
   // If we support a nonsingular number of specializations, we're done.
-  if (arr_okay == cls_okay) return *this;
+  if (arr_okay == cls_okay) return generic;
 
   if (cls_okay && spec.clsSpec()) return Type(generic, spec.clsSpec());
   if (arr_okay && spec.arrSpec()) return Type(generic, spec.arrSpec());
@@ -461,9 +463,9 @@ Type Type::operator|(Type rhs) const {
     // Handle cases where one of the types has no intersection with pointer
     // types.  We don't need to widen the resulting pointer kind at all in that
     // case.
-    if (!lhs.maybe(Type::PtrToGen)) return rhs.rawPtrKind();
-    if (!rhs.maybe(Type::PtrToGen)) return lhs.rawPtrKind();
-    return lhs.rawPtrKind() | rhs.rawPtrKind();
+    if (!lhs.maybe(Type::PtrToGen)) return rhs.ptrKind();
+    if (!rhs.maybe(Type::PtrToGen)) return lhs.ptrKind();
+    return lhs.ptrKind() | rhs.ptrKind();
   }();
   auto const bits = lhs.m_bits | rhs.m_bits;
 
@@ -480,7 +482,7 @@ Type Type::operator&(Type rhs) const {
   if (rhs.m_hasConstVal) return rhs <= lhs ? rhs : Bottom;
 
   auto const bits = lhs.m_bits & rhs.m_bits;
-  auto const opt_ptr = lhs.rawPtrKind() & rhs.rawPtrKind();
+  auto const opt_ptr = lhs.ptrKind() & rhs.ptrKind();
   bool const is_ptr = bits & Type::PtrToGen.m_bits;
 
   if (!opt_ptr) return Bottom;
@@ -502,21 +504,29 @@ Type Type::operator-(Type rhs) const {
   // If we have pointers to different kinds of things, be conservative unless
   // `rhs' is an unknown pointer type, in which case we can just subtract the
   // pointers but keep our kind.
-  if (lhs.rawPtrKind() != rhs.rawPtrKind() &&
-      rhs.rawPtrKind() != Ptr::Unk) {
+  if (lhs.ptrKind() != rhs.ptrKind() &&
+      rhs.ptrKind() != Ptr::Unk) {
     return lhs;
   }
 
   auto bits = lhs.m_bits & ~rhs.m_bits;
-  auto const ptr = lhs.rawPtrKind();
+  auto const ptr = lhs.ptrKind();
 
   // Put back any bits for which `rhs' admitted a nontrivial specialization.
   // If these specializations would be subtracted out of lhs's specializations,
   // the finalization below will take care of re-eliminating it.
-  if (rhs.arrSpec()) bits |= (rhs.m_bits & kAnyArr);
-  if (rhs.clsSpec()) bits |= (rhs.m_bits & kAnyObj);
+  if (rhs.arrSpec()) bits |= (lhs.m_bits & rhs.m_bits & kAnyArr);
+  if (rhs.clsSpec()) bits |= (lhs.m_bits & rhs.m_bits & kAnyObj);
 
-  auto ty = Type(bits, ptr).specialize(lhs.spec() - rhs.spec());
+  // Perform the specialization finalization step twice:
+  //
+  // 1. If any of the specializations went to Bottom, kill the corresponding
+  //    bits, but only ones present in `rhs'.
+  // 2. If any specialized bits of `lhs' remain, reintroduce the `lhs'
+  //    specializations.
+  auto ty = Type(bits, ptr)
+    .specialize(lhs.spec() - rhs.spec(), rhs.m_bits)
+    .specialize(lhs.spec());
 
   if (lhs.m_hasConstVal) {
     // If `lhs' was a constant, we should not have somehow developed a
@@ -678,7 +688,7 @@ Type boxPtr(Type t) {
 }
 
 Type ldRefReturn(Type typeParam) {
-  assert(typeParam.notBoxed());
+  assert(typeParam <= Type::Cell);
   // Guarding on specialized types and uncommon unions like {Int|Bool} is
   // expensive enough that we only want to do it in situations where we've
   // manually confirmed the benefit.
@@ -776,17 +786,6 @@ Type convertToType(RepoAuthType ty) {
   not_reached();
 }
 
-Type refineTypeNoCheck(Type oldType, Type newType) {
-  return oldType & newType;
-}
-
-Type refineType(Type oldType, Type newType) {
-  Type result = refineTypeNoCheck(oldType, newType);
-  always_assert_flog(result != Type::Bottom,
-                     "refineType({}, {}) failed", oldType, newType);
-  return result;
-}
-
 namespace TypeNames {
 #define IRT(name, ...) UNUSED const Type name = Type::name;
 #define IRTP(name, ...) IRT(name)
@@ -800,8 +799,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
   using TypeNames::TCA;
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
-#define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
-                                                 inst->typeParam());
+#define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
 #define DParamMayRelax  return inst->typeParam();
 #define DParam          return inst->typeParam();
 #define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
@@ -969,10 +967,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   auto requireTypeParam = [&] {
     checkDst(inst->hasTypeParam() || inst->is(DefConst),
              "Missing paramType for DParam instruction");
-    if (inst->hasTypeParam()) {
-      checkDst(inst->typeParam() != Type::Bottom,
-             "Invalid paramType for DParam instruction");
-    }
   };
 
   auto requireTypeParamPtr = [&] (Ptr kind) {
@@ -1075,22 +1069,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DCns
 
   return true;
-}
-
-std::string TypeConstraint::toString() const {
-  std::string ret = "<" + typeCategoryName(category);
-
-  if (category == DataTypeSpecialized) {
-    if (wantArrayKind()) ret += ",ArrayKind";
-    if (wantArrayShape()) ret += ",ArrayShape";
-    if (wantClass()) {
-      folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
-    }
-  }
-
-  if (weak) ret += ",weak";
-
-  return ret + '>';
 }
 
 //////////////////////////////////////////////////////////////////////

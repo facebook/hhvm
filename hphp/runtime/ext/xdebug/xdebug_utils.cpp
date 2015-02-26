@@ -28,21 +28,22 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Globals
-const static StaticString
+const StaticString
   s_COOKIE("_COOOKIE"),
   s_GET("_GET"),
   s_POST("_POST");
 
 bool XDebugUtils::isTriggerSet(const String& trigger) {
-  const ArrayData* globals = get_global_variables()->asArrayData();
-  Array get = globals->get(s_GET).toArray();
-  Array post = globals->get(s_POST).toArray();
-  Array cookies = globals->get(s_COOKIE).toArray();
-  return cookies.exists(trigger) || get.exists(trigger) || post.exists(trigger);
+  auto const globals = get_global_variables()->asArrayData();
+  auto const exists = [&] (const StaticString& str) {
+    auto global = globals->get(str).toArray();
+    return global.exists(trigger);
+  };
+  return exists(s_COOKIE) || exists(s_GET) || exists(s_POST);
 }
 
 // TODO(#3704) Clean this up-- this was taken from php5 xdebug
-static char *xdebug_raw_url_encode(char const *s, int len, int *new_length,
+static char* xdebug_raw_url_encode(const char* s, int len, int *new_length,
                                    int skip_slash) {
   static unsigned char hexchars[] = "0123456789ABCDEF";
 
@@ -87,7 +88,7 @@ char* XDebugUtils::pathToUrl(const char* fileurl) {
     String path(fileurl, CopyString);
     Variant realpath = HHVM_FN(realpath)(path);
     if (realpath.isString()) {
-      char* realpath_str = realpath.toString().get()->mutableData();
+      auto realpath_str = realpath.toString().get()->mutableData();
       tmp = xdebug_sprintf("file://%s", realpath_str);
     } else {
       // Couldn't convert, use raw path
@@ -120,13 +121,13 @@ char* XDebugUtils::pathToUrl(const char* fileurl) {
 
 String XDebugUtils::pathFromUrl(const String& fileurl) {
   // Decode the url.
-  String decoded = HHVM_FN(rawurldecode)(fileurl);
+  auto decoded = HHVM_FN(rawurldecode)(fileurl);
 
-  // We want to remove "file://" if it exists. If it doesn't
-  // just return fileurl
-  int loc = decoded.find("file://");
+  // We want to remove "file://" if it exists.  If it doesn't just return
+  // fileurl.
+  auto loc = decoded.find("file://");
   if (loc < 0) {
-    return String(fileurl.data(), CopyString);
+    return fileurl;
   }
 
   // php5 special cases this.
@@ -139,7 +140,7 @@ String XDebugUtils::pathFromUrl(const String& fileurl) {
 
 int XDebugUtils::stackDepth() {
   int depth = 0;
-  for (ActRec* fp = g_context->getStackFrame();
+  for (auto fp = g_context->getStackFrame();
       fp != nullptr;
       fp = g_context->getPrevVMState(fp), depth++) {}
   return depth;

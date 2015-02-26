@@ -179,9 +179,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
 
       try {
         m_iterPos = arrIter.currentPos();
-        if (isInContext()) {
-          child_wh->enterContext(getContextIdx());
-        }
+        child_wh->enterContext(getContextIdx());
         detectCycle(child_wh);
         blockOn(child_wh);
         return;

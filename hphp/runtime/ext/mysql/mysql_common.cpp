@@ -644,9 +644,7 @@ MySQLResult::MySQLResult(MYSQL_RES *res, bool localized /* = false */)
   : m_res(res)
   , m_current_async_row(nullptr)
   , m_localized(localized)
-  , m_fields(nullptr)
   , m_current_field(-1)
-  , m_field_count(0)
   , m_conn(nullptr)
 {
   if (localized) {
@@ -660,10 +658,6 @@ MySQLResult::MySQLResult(MYSQL_RES *res, bool localized /* = false */)
 
 MySQLResult::~MySQLResult() {
   close();
-  if (m_fields) {
-    smart_delete_array(m_fields, m_field_count);
-    m_fields = nullptr;
-  }
   if (m_conn) {
     m_conn = nullptr;
   }
@@ -687,9 +681,8 @@ void MySQLResult::addField(Variant&& value) {
 }
 
 void MySQLResult::setFieldCount(int64_t fields) {
-  m_field_count = fields;
-  assert(!m_fields);
-  m_fields = smart_new_array<MySQLFieldInfo>(fields);
+  assert(m_fields.empty());
+  m_fields.resize(fields);
 }
 
 void MySQLResult::setFieldInfo(int64_t f, MYSQL_FIELD *field) {
@@ -713,7 +706,7 @@ MySQLFieldInfo *MySQLResult::getFieldInfo(int64_t field) {
     return NULL;
   }
 
-  if (!m_localized && !m_fields) {
+  if (!m_localized && m_fields.empty()) {
     if (m_res->fields == NULL) return NULL;
     // cache field info
     setFieldCount(getFieldCount());
@@ -721,7 +714,7 @@ MySQLFieldInfo *MySQLResult::getFieldInfo(int64_t field) {
       setFieldInfo(i, m_res->fields + i);
     }
   }
-  return m_fields + field;
+  return &m_fields[field];
 }
 
 Variant MySQLResult::getField(int64_t field) const {
@@ -735,7 +728,7 @@ int64_t MySQLResult::getFieldCount() const {
   if (!m_localized) {
     return (int64_t)mysql_num_fields(m_res);
   }
-  return m_field_count;
+  return m_fields.size();
 }
 
 int64_t MySQLResult::getRowCount() const {

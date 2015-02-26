@@ -77,9 +77,6 @@ hphp/system/php/date/datetimeinterface.php
 hphp/system/php/date/datetimeimmutable.php
 
 hphp/system/php/collections/collections.ns.php
-hphp/system/php/async/ResultOrExceptionWrapper.ns.php
-hphp/system/php/async/WrappedResult.ns.php
-hphp/system/php/async/WrappedException.ns.php
 hphp/system/php/async/util.ns.php
 
 # If you have no inheritance relationship, go here in alphabetical order

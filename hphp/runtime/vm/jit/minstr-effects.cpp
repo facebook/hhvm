@@ -38,7 +38,7 @@ Opcode canonicalOp(Opcode op) {
 
 void getBaseType(Opcode rawOp, bool predict,
                  Type& baseType, bool& baseValChanged) {
-  always_assert(baseType.notBoxed());
+  always_assert(baseType <= Type::Cell);
   auto const op = canonicalOp(rawOp);
 
   // Deal with possible promotion to stdClass or array
@@ -120,7 +120,7 @@ void MInstrEffects::get(const IRInstruction* inst,
   MInstrEffects effects(inst->op(), baseType.ptr(Ptr::Frame));
   if (effects.baseTypeChanged || effects.baseValChanged) {
     auto const ty = effects.baseType.derefIfPtr();
-    if (ty.isBoxed()) {
+    if (ty <= Type::BoxedCell) {
       hook.setLocalType(locId, Type::BoxedInitCell);
       hook.setBoxedLocalPrediction(locId, ty);
     } else {
@@ -131,38 +131,37 @@ void MInstrEffects::get(const IRInstruction* inst,
 }
 
 MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
-  baseType = origBase;
   // Note: MInstrEffects wants to manipulate pointer types in some situations
   // for historical reasons.  We'll eventually change that.
-  always_assert(baseType.isPtr() ^ baseType.notPtr());
-  auto const basePtr = baseType.isPtr();
-  auto const basePtrKind = basePtr ? baseType.ptrKind() : Ptr::Unk;
-  baseType = baseType.derefIfPtr();
+  bool const is_ptr = origBase <= Type::PtrToGen;
+  auto const basePtr = is_ptr ? origBase.ptrKind() : Ptr::Unk;
+  baseType = origBase.derefIfPtr();
 
   // Only certain types of bases are supported now but this list may expand in
   // the future.
-  assert_not_implemented(basePtr ||
-                         baseType.subtypeOfAny(Type::Obj, Type::Arr));
+  assert_not_implemented(
+      is_ptr || baseType.subtypeOfAny(Type::Obj, Type::Arr));
 
   baseTypeChanged = baseValChanged = false;
 
   // Process the inner and outer types separately and then recombine them,
-  // since the minstr operations all operate on the inner cell of boxed
-  // bases. We treat the new inner type as a prediction because it will be
-  // verified the next time we load from the box.
-  auto inner = (baseType & Type::BoxedCell).innerType();
+  // since the minstr operations all operate on the inner cell of boxed bases.
+  // We treat the new inner type as a prediction because it will be verified
+  // the next time we load from the box.
+  auto inner = (baseType & Type::BoxedCell).inner();
   auto outer = baseType & Type::Cell;
   getBaseType(rawOp, false, outer, baseValChanged);
   getBaseType(rawOp, true, inner, baseValChanged);
 
   baseType = inner.box() | outer;
-  baseType = basePtr ? baseType.ptr(basePtrKind) : baseType;
+  baseType = is_ptr ? baseType.ptr(basePtr) : baseType;
 
   baseTypeChanged = baseType != origBase;
 
   /* Boxed bases may have their inner value changed but the value of the box
    * will never change. */
-  baseValChanged = !origBase.isBoxed() && (baseValChanged || baseTypeChanged);
+  baseValChanged = !(origBase <= Type::BoxedCell) &&
+                   (baseValChanged || baseTypeChanged);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@ namespace {
 
 struct StkPtrInfo {
   SSATmp* fp;
-  int32_t offset;
+  FPRelOffset offset;
 };
 
 /*
@@ -51,20 +51,23 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
   auto const inst = sp->inst();
   switch (inst->op()) {
   case DefSP:
-    return StkPtrInfo { inst->src(0), -inst->extra<DefSP>()->offset };
+    return StkPtrInfo { inst->src(0),
+      FPRelOffset{-inst->extra<DefSP>()->offset} };
   case ResetSP:
-    return StkPtrInfo { inst->src(0), -inst->extra<ResetSP>()->offset };
+    return StkPtrInfo { inst->src(0),
+      FPRelOffset{-inst->extra<ResetSP>()->offset} };
   case ReDefSP:
-    return StkPtrInfo { inst->src(0), -inst->extra<ReDefSP>()->offset };
+    return StkPtrInfo { inst->src(0),
+      FPRelOffset{-inst->extra<ReDefSP>()->offset} };
   case RetAdjustStk:
-    return StkPtrInfo { inst->src(0), 2 };
+    return StkPtrInfo { inst->src(0), FPRelOffset{2} };
 
   case AdjustSP:
     {
       auto const prev = canonicalize_stkptr(inst->src(0));
       return StkPtrInfo {
         prev.fp,
-        prev.offset + inst->extra<AdjustSP>()->offset
+        prev.offset + inst->extra<AdjustSP>()->offset.offset
       };
     }
 
@@ -74,7 +77,7 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
       auto const extra = inst->extra<Call>();
       return StkPtrInfo {
         prev.fp,
-        prev.offset + extra->spOffset +
+        prev.offset + extra->spOffset.offset +
           safe_cast<int32_t>(extra->numParams) +
           int32_t{kNumActRecCells} - 1
       };
@@ -86,7 +89,7 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
       auto const extra = inst->extra<CallArray>();
       return StkPtrInfo {
         prev.fp,
-        prev.offset + extra->spOffset + int32_t{kNumActRecCells} + 1 - 1
+        prev.offset + extra->spOffset.offset + int32_t{kNumActRecCells} + 1 - 1
       };
     }
 
@@ -96,7 +99,7 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
       auto const extra = inst->extra<ContEnter>();
       return StkPtrInfo {
         prev.fp,
-        prev.offset + extra->spOffset + 1 - 1
+        prev.offset + extra->spOffset.offset + 1 - 1
       };
     }
 
@@ -108,7 +111,7 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
 AStack canonicalize_stk(AStack stk) {
   if (stk.base->type() <= Type::FramePtr) return stk;
   auto const info = canonicalize_stkptr(stk.base);
-  return AStack { info.fp, stk.offset + info.offset, stk.size };
+  return AStack { info.fp, stk.offset + info.offset.offset, stk.size };
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -88,20 +88,3 @@ async function wfvrr_deep(
   $deps = array(array(tuple(r(), array(rstring(), rstring()), r())));
   return await gen_array_rec($deps);
 }
-
-async function wfvarr(): Awaitable<(array<int>, array<string>, int)> {
-  return await gen_array_va_rec_DEPRECATED(
-    array(wfr(), wfr(), wfr()),
-    array(rstring(), rstring()),
-    r(),
-  );
-}
-
-async function wfvarr_deep(
-): Awaitable<(int, array<(int, array<string>, int)>, int)> {
-  return await gen_array_va_rec_DEPRECATED(
-    r(),
-    array(tuple(r(), array(rstring(), rstring()), r())),
-    r(),
-  );
-}

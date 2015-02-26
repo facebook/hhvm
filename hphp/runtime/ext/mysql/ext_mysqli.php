@@ -876,44 +876,6 @@ class mysqli_driver {
     $this->__reconnect = ini_get("mysqli.reconnect") === "1" ? true : false;
   }
 
-  public function __get(string $name): mixed {
-    switch ($name) {
-      case 'client_info':
-        return mysqli_get_client_info();
-      case 'client_version':
-        return mysqli_get_client_version();
-      case 'driver_version':
-        // Lets pretend we are the same version as PHP. Taken from here
-        // http://git.io/wY2WPw
-        return 101009;
-      case 'embedded':
-        return false;
-      case 'reconnect':
-        return $this->__reconnect;
-      case 'report_mode':
-        return $this->__report_mode;
-    }
-
-    trigger_error('Undefined property: mysqli_driver::$'. $name, E_NOTICE);
-    return null;
-  }
-
-  public function __set(string $name, mixed $value): void {
-    switch ($name) {
-      case 'reconnect':
-        $this->__reconnect = (bool)$value;
-        break;
-      case 'report_mode':
-        $this->__report_mode = (int)$value;
-        break;
-      default:
-        trigger_error(
-          'Undefined property: mysqli_driver::$'. $name,
-          E_NOTICE
-        );
-    }
-  }
-
   public function __clone(): void {
     throw new Exception(
       'Trying to clone an uncloneable object of class mysqli_driver'
@@ -1689,9 +1651,8 @@ function mysqli_character_set_name(mysqli $link): string {
  * @return string - A string that represents the MySQL client library
  *   version
  */
-function mysqli_get_client_info(): string {
-  return mysql_get_client_info();
-}
+<<__Native>>
+function mysqli_get_client_info(): string;
 
 /**
  * Returns the MySQL client version as an integer

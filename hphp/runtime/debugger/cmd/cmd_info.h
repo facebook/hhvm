@@ -17,34 +17,38 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_
 
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdInfo : public DebuggerCommand {
-public:
+struct CmdInfo : DebuggerCommand {
   static void UpdateLiveLists(DebuggerClient &client);
   static String GetProtoType(DebuggerClient &client, const std::string &cls,
                              const std::string &func);
 
-public:
   CmdInfo() : DebuggerCommand(KindOfInfo) {}
 
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
+  void list(DebuggerClient&) override;
+  void help(DebuggerClient&) override;
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
   bool parseZeroArg(DebuggerClient &client);
   void parseOneArg(DebuggerClient &client, std::string &subsymbol);
-  Array getInfo() { return m_info; }
+
+  Array getInfo() const {
+    return m_info;
+  }
+
   static String FindSubSymbol(const Array& symbols, const std::string &symbol);
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
   enum SymbolType {
@@ -55,10 +59,10 @@ private:
     KindOfLiveLists, // for auto-complete
   };
 
-  int8_t   m_type;
+  int8_t m_type;
   String m_symbol;
   Array  m_info;
-  DebuggerClient::LiveListsPtr m_acLiveLists;
+  std::shared_ptr<DebuggerClient::LiveLists> m_acLiveLists;
 
   static String GetParams(const Array& params, bool varg, bool detailed = false);
   static String GetParam(const Array& params, int index);

@@ -263,11 +263,13 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (attrs & AttrNative) {
     auto const ex = f->extShared();
 
-    auto const nif = Native::GetBuiltinFunction(
+    auto const& info = Native::GetBuiltinFunction(
       name,
       m_pce ? m_pce->name() : nullptr,
       f->isStatic()
     );
+
+    auto const nif = info.ptr;
     if (nif) {
       Attr dummy = AttrNone;
       int nativeAttrs = parseNativeAttributes(dummy);

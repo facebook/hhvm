@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 error_reporting(-1);
 require_once __DIR__.'/variadic_funcs.inc';

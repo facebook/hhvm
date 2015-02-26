@@ -19,6 +19,7 @@
 #include <limits>
 
 #include "hphp/parser/scanner.h"
+#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/class-info.h"

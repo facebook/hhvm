@@ -34,8 +34,7 @@ class c_SleepWaitHandle final : public c_WaitableWaitHandle {
   DECLARE_CLASS_NO_SWEEP(SleepWaitHandle);
 
   explicit c_SleepWaitHandle(Class* cls = c_SleepWaitHandle::classof())
-    : c_WaitableWaitHandle(cls)
-  {}
+    : c_WaitableWaitHandle(cls) {}
   ~c_SleepWaitHandle() {}
   static void ti_setoncreatecallback(const Variant& callback);
   static void ti_setonsuccesscallback(const Variant& callback);

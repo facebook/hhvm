@@ -43,6 +43,7 @@ struct Header {
     StringData str_;
     ArrayData arr_;
     MixedArray mixed_;
+    APCLocalArray apc_;
     ObjectData obj_;
     ResourceData res_;
     RefData ref_;

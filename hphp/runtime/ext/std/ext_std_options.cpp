@@ -41,6 +41,7 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
@@ -225,12 +226,12 @@ static int64_t HHVM_FUNCTION(dl, const String& library) {
 }
 
 static bool HHVM_FUNCTION(extension_loaded, const String& name) {
-  return Extension::IsLoaded(name);
+  return ExtensionRegistry::isLoaded(name);
 }
 
 static Array HHVM_FUNCTION(get_loaded_extensions,
                            bool zend_extensions /*=false */) {
-  return Extension::GetLoadedExtensions();
+  return ExtensionRegistry::getLoaded();
 }
 
 static Array HHVM_FUNCTION(get_extension_funcs,
@@ -921,7 +922,7 @@ static Variant HHVM_FUNCTION(phpversion, const String& extension /*="" */) {
     return k_PHP_VERSION;
   }
 
-  if ((ext = Extension::GetExtension(extension)) != nullptr &&
+  if ((ext = ExtensionRegistry::get(extension)) != nullptr &&
       strcmp(ext->getVersion(), NO_EXTENSION_VERSION_YET) != 0) {
     return ext->getVersion();
   }

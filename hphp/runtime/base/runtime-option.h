@@ -126,6 +126,7 @@ public:
   static bool ServerHttpSafeMode;
   static bool ServerStatCache;
   static bool ServerFixPathInfo;
+  static bool ServerAddVaryEncoding;
   static std::vector<std::string> ServerWarmupRequests;
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
   static bool ServerExitOnBindFail;
@@ -401,6 +402,7 @@ public:
   F(uint32_t, JitLLVMOptLevel,         2)                               \
   F(bool,     JitLLVMOptSize,          true)                            \
   F(uint32_t, JitLLVMSizeLevel,        0)                               \
+  F(uint32_t, JitLLVMSplitHotCold,     1)                               \
   F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             ahotDefault())                   \

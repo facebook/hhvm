@@ -39,7 +39,8 @@ Block* create_catch_block(HTS& env) {
 
   gen(env, BeginCatch);
   spillStack(env);
-  gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env), sp(env));
+  gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    fp(env), sp(env));
   return catchBlock;
 }
 
@@ -58,8 +59,8 @@ void check_catch_stack_state(HTS& env, const IRInstruction* inst) {
     inst->toString(),
     sp(env)->toString(),
     exnStack.sp->toString(),
-    exnStack.syncedSpLevel,
-    env.irb->syncedSpLevel()
+    exnStack.syncedSpLevel.offset,
+    env.irb->syncedSpLevel().offset
   );
 }
 
@@ -172,7 +173,8 @@ void endRegion(HTS& env, Offset nextPc) {
   prepareForNextHHBC(env, nullptr, nextPc, true);
   spillStack(env);
   auto dest = SrcKey{curSrcKey(env), nextPc};
-  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    sp(env));
   gen(env, ReqBindJmp, ReqBindJmpData { dest }, sp(env));
 }
 
@@ -182,17 +184,18 @@ void endRegion(HTS& env, Offset nextPc) {
 Type predictedTypeFromLocation(HTS& env, const Location& loc) {
   switch (loc.space) {
     case Location::Stack: {
-      auto i = loc.offset;
+      auto i = loc.bcRelOffset;
       assert(i >= 0);
       if (i < env.irb->evalStack().size()) {
         return topType(env, i, DataTypeGeneric);
       } else {
         auto stackTy = env.irb->stackType(
-          offsetFromSP(env, i),
+          offsetFromIRSP(env, i),
           DataTypeGeneric
         );
-        if (stackTy.isBoxed()) {
-          return env.irb->stackInnerTypePrediction(offsetFromSP(env, i)).box();
+        if (stackTy <= Type::BoxedCell) {
+          return env.irb->stackInnerTypePrediction(
+            offsetFromIRSP(env, i)).box();
         }
         return stackTy;
       }
@@ -254,18 +257,18 @@ void prepareForHHBCMergePoint(HTS& env) {
   // would "just happen" if we didn't still have instructions that
   // redefine StkPtrs, but calls still need to do that for now, so we
   // need this hack.
-  auto spOff = StackOffset{-(env.irb->syncedSpLevel() - env.irb->spOffset())};
-  gen(env, AdjustSP, spOff, sp(env));
+  auto spOff = IRSPOffset{-(env.irb->syncedSpLevel() - env.irb->spOffset())};
+  gen(env, AdjustSP, IRSPOffsetData{ spOff }, sp(env));
 }
 
-size_t logicalStackDepth(const HTS& env) {
-  // Negate the offsetFromSP because it is an offset from the actual StkPtr (so
-  // negative values go deeper on the stack), but this function deals with
+FPAbsOffset logicalStackDepth(const HTS& env) {
+  // Negate the offsetFromIRSP because it is an offset from the actual StkPtr
+  // (so negative values go deeper on the stack), but this function deals with
   // logical stack depths (where more positive values are deeper).
-  return env.irb->spOffset() + -offsetFromSP(env, 0);
+  return env.irb->spOffset() - offsetFromIRSP(env, BCSPOffset{0});
 }
 
-Type publicTopType(const HTS& env, int32_t idx) {
+Type publicTopType(const HTS& env, BCSPOffset idx) {
   // It's logically const, because we're using DataTypeGeneric.
   return topType(const_cast<HTS&>(env), idx, DataTypeGeneric);
 }

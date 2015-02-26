@@ -712,8 +712,7 @@ BIO *Certificate::ReadData(const Variant& var, bool *file /* = NULL */) {
 
 SmartPtr<Certificate> Certificate::Get(const Variant& var) {
   if (var.isResource()) {
-    return SmartPtr<Certificate>(
-      var.toResource().getTyped<Certificate>(true, true));
+    return dyn_cast_or_null<Certificate>(var);
   }
   if (var.isString() || var.isObject()) {
     bool file;

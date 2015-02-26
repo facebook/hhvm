@@ -16,8 +16,9 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_out.h"
 
-#include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

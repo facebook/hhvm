@@ -77,10 +77,10 @@ class UConverter {
   /**
    * Get the destination encoding
    *
-   * @return string -
+   * @return string - (null on error)
    */
   <<__Native>>
-  public function getDestinationEncoding(): string;
+  public function getDestinationEncoding(): ?string;
 
   /**
    * Get the destination converter type
@@ -109,10 +109,10 @@ class UConverter {
   /**
    * Get the source encoding
    *
-   * @return string -
+   * @return string - (null on error)
    */
   <<__Native>>
-  public function getSourceEncoding(): string;
+  public function getSourceEncoding(): ?string;
 
   /**
    * Get the source convertor type
@@ -190,10 +190,10 @@ class UConverter {
    *
    * @param string $encoding -
    *
-   * @return void -
+   * @return bool -
    */
   <<__Native>>
-  public function setDestinationEncoding(string $encoding): void;
+  public function setDestinationEncoding(string $encoding): bool;
 
   /**
    * Set the source encoding

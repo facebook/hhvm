@@ -82,8 +82,8 @@ SSATmp* cns(HTS& env, Args&&... args) {
  * TODO(#5706706): the stack versions should not be exported, except that
  * RegionDesc::Location::Stack needs some fixes first.
  */
-void assertTypeStack(HTS&, uint32_t idx, Type);
-void checkTypeStack(HTS&, uint32_t idx, Type, Offset dest);
+void assertTypeStack(HTS&, BCSPOffset, Type);
+void checkTypeStack(HTS&, BCSPOffset, Type, Offset dest);
 void assertTypeLocation(HTS&, const RegionDesc::Location&, Type);
 void checkTypeLocation(HTS&, const RegionDesc::Location&, Type, Offset dest);
 void guardTypeLocation(HTS&, const RegionDesc::Location& loc, Type,
@@ -205,13 +205,13 @@ void inlSingletonSLoc(HTS&, const Func*, const Op* op);
 /*
  * The logical stack depth (from an hhbc perspective) in the current situation.
  */
-size_t logicalStackDepth(const HTS& env);
+FPAbsOffset logicalStackDepth(const HTS& env);
 
 /*
  * Access the type of the top of the stack, without making any change to the
  * HTS.  This means that the type returned is /not/ necessarily constrained.
  */
-Type publicTopType(const HTS& env, int32_t);
+Type publicTopType(const HTS& env, BCSPOffset);
 
 /*
  * Returns a predicted Type for the given location, used for tracelet analysis.

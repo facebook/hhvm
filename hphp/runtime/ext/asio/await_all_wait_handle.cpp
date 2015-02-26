@@ -314,9 +314,7 @@ void c_AwaitAllWaitHandle::blockOnCurrent() {
   assert(!child->isFinished());
 
   try {
-    if (isInContext()) {
-      child->enterContext(getContextIdx());
-    }
+    child->enterContext(getContextIdx());
     if (checkCycle) {
       detectCycle(child);
     }

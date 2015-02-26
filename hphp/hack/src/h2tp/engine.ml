@@ -59,7 +59,7 @@ let convert ast src dest =
     let ast = List.fold_left fold_fn ast maps in
     let src_path = Relative_path.create Relative_path.Dummy src in
     let ast = Prepend_require.prepend ast src_path in
-    let str = Unparser.unparse Ast.PhpFile src_path ast in
+    let str = Unparser.unparse FileInfo.PhpFile src_path ast in
     let dest = Sys.set_extension dest ".php" in
     Sys.write_file str dest
   with e ->

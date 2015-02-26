@@ -32,6 +32,8 @@ bool ArraySpec::operator<=(const ArraySpec& rhs) const {
   if (lhs == Bottom || rhs == Top) return true;
   if (lhs == Top || rhs == Bottom) return false;
 
+  // It's possible to subtype RAT::Array types, but it's potentially O(n), so
+  // we just don't do it.
   return (!rhs.kind()  || lhs.kind()  == rhs.kind()) &&
          (!rhs.type()  || lhs.type()  == rhs.type()) &&
          (!rhs.shape() || lhs.shape() == rhs.shape());
@@ -66,8 +68,9 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
   if (rhs <= lhs) return rhs;
 
   // Take the intersection componentwise.  If one component is unspecialized,
-  // the intersection is the other component.  Otherwise, they intersect to
-  // either component if they are equal, else to Bottom.
+  // it behaves like Top, and the intersection is the other component (the
+  // Bottom case is handled by the subtype checks above).  Otherwise, they
+  // intersect to either component if they are equal, else to Bottom.
 #define NEW_COMPONENT(name, defval)                   \
   (lhs.name() && !rhs.name() ? lhs.name() :           \
    rhs.name() && !lhs.name() ? rhs.name() :           \
@@ -82,10 +85,12 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
 #undef NEW_COMPONENT
 
   if ((!new_kind  && lhs.kind()) ||
-      (!new_type  && lhs.type()) ||
       (!new_shape && lhs.shape())) {
     // If there's no new_x, but lhs.x() is nontrivial, then rhs.x() is not
     // equal to it and also nontrivial.  The intersection is thus Bottom.
+    //
+    // Note that we ignore this check for type(), because we don't subtype RAT
+    // types precisely.
     return Bottom;
   }
 

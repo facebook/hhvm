@@ -21,6 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP { namespace jit {

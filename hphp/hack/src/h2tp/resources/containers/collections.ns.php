@@ -1,5 +1,13 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+/**
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the "hack" directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ */
 
 // This is largely a copy of '/hphp/system/php/collections/collections.ns.php'
 // it has been modified to work with php. Usage of literal syntax for collections

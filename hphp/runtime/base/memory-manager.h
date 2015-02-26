@@ -570,9 +570,14 @@ struct MemoryManager {
   StringDataNode& getStringList() { return m_strings; }
 
   /*
-   * Returns true if there are no allocated slabs
+   * Return true if there are no allocated slabs.
    */
   bool empty() const { return m_heap.empty(); }
+
+  /*
+   * Whether `p' points into memory owned by `m_heap'.
+   */
+  bool contains(void* p) const { return m_heap.contains(p); }
 
   /*
    * Release all the request-local allocations.  Zeros all the free

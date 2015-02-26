@@ -382,7 +382,7 @@ static void populateLiveContext(RegionContext& ctx) {
     );
   }
 
-  uint32_t stackOff = 0;
+  int32_t stackOff = 0;
   visitStackElems(
     fp, sp, ctx.bcOffset,
     [&](const ActRec* ar) {
@@ -393,19 +393,17 @@ static void populateLiveContext(RegionContext& ctx) {
         ar->hasClass() ? Type::Cls
                        : Type::Nullptr;
 
-      ctx.preLiveARs.push_back(
-        { stackOff,
-          ar->m_func,
-          objOrCls
-        }
-      );
+      ctx.preLiveARs.push_back({
+        stackOff,
+        ar->m_func,
+        objOrCls
+      });
       FTRACE(2, "added prelive ActRec {}\n", show(ctx.preLiveARs.back()));
-
       stackOff += kNumActRecCells;
     },
     [&](const TypedValue* tv) {
       ctx.liveTypes.push_back(
-        { L::Stack{stackOff, ctx.spOffset - stackOff}, liveTVType(tv) }
+        { L::Stack{ctx.spOffset - stackOff}, liveTVType(tv) }
       );
       stackOff++;
       FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
@@ -1548,7 +1546,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
     auto result = TranslateResult::Retry;
     auto regionInterps = RegionBlacklist{};
-    Offset const initSpOffset = region ? region->entry()->initialSpOffset()
+    auto const initSpOffset = region ? region->entry()->initialSpOffset()
                                        : liveSpOff();
 
     while (region && result == TranslateResult::Retry) {

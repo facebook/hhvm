@@ -159,7 +159,7 @@ void imagickWriteOp(MagickWand* wand,
 
 ALWAYS_INLINE
 FILE* getFILE(const Resource& res, bool isWrite) {
-  File* f = res.getTyped<File>(true, true);
+  auto f = dyn_cast_or_null<File>(res);
   if (f == nullptr || f->isClosed()) {
     IMAGICK_THROW("Invalid stream resource");
   }

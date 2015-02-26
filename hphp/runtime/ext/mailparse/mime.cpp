@@ -326,7 +326,7 @@ bool MimePart::enumeratePartsImpl(Enumerator *top, Enumerator **child,
 
   for (ArrayIter iter(m_children); iter; ++iter) {
     if (next.id) {
-      MimePart *childpart = iter.second().toResource().getTyped<MimePart>();
+      auto childpart = cast<MimePart>(iter.second());
       if (!childpart->enumeratePartsImpl(top, &next.next, callback, ptr)) {
         return false;
       }
@@ -905,7 +905,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
   /* filename can be a filename or a stream */
   SmartPtr<File> file;
   if (filename.isResource()) {
-    file = filename.toResource().getTyped<File>();
+    file = cast<File>(filename);
   } else if (isfile) {
     file = File::Open(filename.toString(), "rb");
   } else {
@@ -931,7 +931,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
     }
   }
 
-  if (extractImpl(decode, file.get())) {
+  if (extractImpl(decode, file)) {
     if (callbackfunc.isNull()) {
       return m_extract_context;
     }
@@ -943,7 +943,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
   return init_null();
 }
 
-int MimePart::extractImpl(int decode, File *src) {
+int MimePart::extractImpl(int decode, SmartPtr<File> src) {
   /* figure out where the message part starts/ends */
   int start_pos = (decode & DecodeNoHeaders) ? m_bodystart : m_startpos;
   int end = (decode & DecodeNoBody) ?
@@ -982,7 +982,7 @@ void MimePart::outputToStdout(const String& s) {
 }
 
 void MimePart::outputToFile(const String& s) {
-  m_extract_context.toResource().getTyped<File>()->write(s);
+  cast<File>(m_extract_context)->write(s);
 }
 
 void MimePart::outputToString(const String& s) {

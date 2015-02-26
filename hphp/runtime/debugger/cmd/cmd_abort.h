@@ -22,12 +22,11 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdAbort : public DebuggerCommand {
- public:
+struct CmdAbort : DebuggerCommand {
   CmdAbort() : DebuggerCommand(KindOfAbort) {}
 
-  virtual void help(DebuggerClient &client);
-  virtual void onClient(DebuggerClient &client);
+  void help(DebuggerClient&) override;
+  void onClient(DebuggerClient&) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

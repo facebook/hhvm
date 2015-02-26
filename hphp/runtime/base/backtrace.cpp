@@ -40,7 +40,7 @@ const StaticString
 
 static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
   if (fp && fp->func() && fp->resumed() && fp->func()->isAsyncFunction()) {
-    c_BlockableWaitHandle* currentWaitHandle = frame_afwh(fp);
+    c_WaitableWaitHandle* currentWaitHandle = frame_afwh(fp);
     auto const contextIdx = currentWaitHandle->getContextIdx();
     while (currentWaitHandle != nullptr) {
       if (currentWaitHandle->isFinished()) {

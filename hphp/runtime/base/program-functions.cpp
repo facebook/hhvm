@@ -44,7 +44,7 @@
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -575,7 +575,7 @@ void handle_destructor_exception(const char* situation) {
   // If there is a user error handler it will be invoked, otherwise
   // the default error handler will be invoked.
   try {
-    raise_debugging("%s", errorMsg.c_str());
+    raise_warning_unsampled("%s", errorMsg.c_str());
   } catch (...) {
     handle_resource_exceeded_exception();
 
@@ -680,7 +680,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     Xenon::getInstance().surpriseAll();
   }
 
-  Extension::RequestInitModules();
+  ExtensionRegistry::requestInit();
   // If extension constants were used in the ini files, they would have come
   // out as 0 in the previous pass. We will re-import only the constants that
   // have been later bound. All other non-constant configs should remain as they
@@ -1784,7 +1784,7 @@ void hphp_process_init() {
   PageletServer::Restart();
   XboxServer::Restart();
   Stream::RegisterCoreWrappers();
-  Extension::InitModules();
+  ExtensionRegistry::moduleInit();
   for (InitFiniNode *in = extra_process_init; in; in = in->next) {
     in->func();
   }
@@ -1958,7 +1958,7 @@ void hphp_context_shutdown() {
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestShutdownHook());
 
   // Extensions could have shutdown handlers
-  Extension::RequestShutdownModules();
+  ExtensionRegistry::requestShutdown();
 
   // Extension shutdown could have re-initialized some
   // request locals
@@ -2038,7 +2038,7 @@ void hphp_process_exit() {
   g_context.getCheck();
   Eval::Debugger::Stop();
   g_context.destroy();
-  Extension::ShutdownModules();
+  ExtensionRegistry::moduleShutdown();
   LightProcess::Close();
   for (InitFiniNode *in = extra_process_exit; in; in = in->next) {
     in->func();

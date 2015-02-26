@@ -1489,15 +1489,17 @@ static void shuffleMagicArgs(ActRec* ar) {
   ar->setNumArgs(2);
 }
 
-// This helper only does a stack overflow check for the native stack
+/*
+ * This helper only does a stack overflow check for the native stack.
+ *
+ * Both native and VM stack overflows are independently possible.
+ */
 static inline void checkNativeStack() {
-  auto const info = ThreadInfo::s_threadInfo.getNoCheck();
-  // Check whether func's maximum stack usage would overflow the stack.
-  // Both native and VM stack overflows are independently possible.
-  if (!stack_in_bounds(info)) {
-    TRACE(1, "Maximum stack depth exceeded.\n");
-    raise_error("Stack overflow");
-  }
+  // Check whether we're going out of bounds of our native stack.
+  if (LIKELY(stack_in_bounds())) return;
+
+  TRACE(1, "Maximum stack depth exceeded.\n");
+  raise_error("Stack overflow");
 }
 
 /*
@@ -1511,7 +1513,7 @@ static inline void checkNativeStack() {
 ALWAYS_INLINE
 static void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
   assert(f);
-  auto const info = ThreadInfo::s_threadInfo.getNoCheck();
+
   /*
    * Check whether func's maximum stack usage would overflow the stack.
    * Both native and VM stack overflows are independently possible.
@@ -1522,10 +1524,10 @@ static void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
    * kStackCheckLeafPadding.)
    */
   auto limit = f->maxStackCells() + kStackCheckPadding + extraCells;
-  if (!stack_in_bounds(info) || stk.wouldOverflow(limit)) {
-    TRACE(1, "Maximum stack depth exceeded.\n");
-    raise_error("Stack overflow");
-  }
+  if (LIKELY(stack_in_bounds() && !stk.wouldOverflow(limit))) return;
+
+  TRACE(1, "Maximum stack depth exceeded.\n");
+  raise_error("Stack overflow");
 }
 
 // This helper is meant to be called if an exception or invalidation takes
@@ -4154,22 +4156,12 @@ OPTBLD_INLINE void jmpOpImpl(PC& pc) {
   Cell* c1 = vmStack().topC();
   if (c1->m_type == KindOfInt64 || c1->m_type == KindOfBoolean) {
     int64_t n = c1->m_data.num;
-    if (op == OpJmpZ ? n == 0 : n != 0) {
-      pc += offset - 1;
-      vmStack().popX();
-    } else {
-      pc += sizeof(Offset);
-      vmStack().popX();
-    }
+    pc += (op == OpJmpZ ? n == 0 : n != 0) ? offset - 1 : sizeof(Offset);
+    vmStack().popX();
   } else {
-    auto const condition = toBoolean(cellAsCVarRef(*c1));
-    if (op == OpJmpZ ? !condition : condition) {
-      pc += offset - 1;
-      vmStack().popC();
-    } else {
-      pc += sizeof(Offset);
-      vmStack().popC();
-    }
+    auto const cond = toBoolean(cellAsCVarRef(*c1));
+    pc += (op == OpJmpZ ? !cond : cond) ? offset - 1 : sizeof(offset);
+    vmStack().popC();
   }
 }
 
@@ -4213,9 +4205,8 @@ static SwitchMatch doubleCheck(double d, int64_t& out) {
   if (int64_t(d) == d) {
     out = d;
     return SwitchMatch::NORMAL;
-  } else {
-    return SwitchMatch::DEFAULT;
   }
+  return SwitchMatch::DEFAULT;
 }
 
 OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
@@ -4352,13 +4343,12 @@ OPTBLD_INLINE void iopSSwitch(IOP_ARGS) {
     const StringData* str = u->lookupLitstrId(item.str);
     if (cellEqual(*val, str)) {
       pc = origPC + item.dest;
-      break;
+      vmStack().popC();
+      return;
     }
   }
-  if (i == cases) {
-    // default case
-    pc = origPC + jmptab[veclen-1].dest;
-  }
+  // default case
+  pc = origPC + jmptab[veclen-1].dest;
   vmStack().popC();
 }
 
@@ -6193,7 +6183,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
       case CallArrOnInvalidContainer::WarnAndContinue:
         tvRefcountedDecRef(c1);
         // argument_unpacking RFC dictates "containers and Traversables"
-        raise_debugging("Only containers may be unpacked");
+        raise_warning_unsampled("Only containers may be unpacked");
         c1->m_type = KindOfArray;
         c1->m_data.parr = staticEmptyArray();
         break;
@@ -6795,7 +6785,7 @@ OPTBLD_INLINE void iopVerifyParamType(IOP_ARGS) {
   assert(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[paramId].typeConstraint;
   assert(tc.hasConstraint());
-  if (!tc.isTypeVar()) {
+  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
     tc.verifyParam(frame_local(vmfp(), paramId), func, paramId);
   }
 }
@@ -6809,7 +6799,7 @@ OPTBLD_INLINE void implVerifyRetType(PC& pc) {
   pc++;
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
-  if (!tc.isTypeVar()) {
+  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
     tc.verifyReturn(vmStack().topTV(), func);
   }
 }

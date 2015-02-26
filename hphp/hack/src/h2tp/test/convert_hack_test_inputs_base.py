@@ -98,6 +98,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'xhp_attr_11.php',
         'xhp_attr_12.php',
         'xhp_attr_13.php',
+        'xhp_hint.php',
     ],
     "XhpAttr": [
         'lexing_stack_fail.php',
@@ -131,7 +132,9 @@ UNSUPPORTED_FILES_UNPARSER = {
         'tconst/constructor_error.php',
         'tconst/constructors.php',
         'tconst/cyclic_type_const.php',
+        'tconst/func_pointer.php',
         'tconst/good_tconst_decl.php',
+        'tconst/local_inference.php',
         'tconst/method_contravariant.php',
         'tconst/method_return.php',
         'tconst/method_swap_error.php',
@@ -289,7 +292,6 @@ UNSUPPORTED_FILES_CONVERTER = {
         'yield_wait_forv_result_bad3.php',
         'yield_wait_forva.php',
         'yield_wait_forva_bad1.php',
-        'yield_wait_forvar_bad1.php',
         'yield_wait_forvr.php',
         'yield_wait_forvr_result_bad1.php',
     ],
@@ -347,7 +349,6 @@ UNSUPPORTED_FILES_CONVERTER = {
         'yield_wait_forv_result_bad3.php',
         'yield_wait_forva.php',
         'yield_wait_forva_bad1.php',
-        'yield_wait_forvar_bad1.php',
         'yield_wait_forvr.php',
         'yield_wait_forvr_result_bad1.php'
     ],

@@ -268,7 +268,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, charAge, const Variant& arg) {
   return ret;
 }
 
-Variant HHVM_STATIC_METHOD(IntlChar, getUnicodeVersion) {
+Array HHVM_STATIC_METHOD(IntlChar, getUnicodeVersion) {
   UVersionInfo version;
   u_getUnicodeVersion(version);
   Array ret = Array::Create();
@@ -319,14 +319,14 @@ IC_INT_METHOD_CHAR(charDigitValue)
 
 /* All methods which take one UChar32 argument and return bool */
 template<UBool (*T)(UChar32)>
-Variant uchar_method(Class* self_, const Variant& arg) {
+Variant uchar_method(const Class* self_, const Variant& arg) {
   GETCP(arg, cp);
   return (bool)T(cp);
 }
 
 /* All methods which take one UChar32 argument and return same */
 template<UChar32 (*T)(UChar32)>
-Variant uchar_method(Class* self_, const Variant& arg) {
+Variant uchar_method(const Class* self_, const Variant& arg) {
   GETCP(arg, cp);
   auto ret = T(cp);
   if (arg.isString()) {
@@ -355,6 +355,8 @@ void IntlExtension::initUChar() {
                                (s_IntlChar.get(), makeStaticString(name), val);
   IC_CONSTL("CODEPOINT_MIN", UCHAR_MIN_VALUE)
   IC_CONSTL("CODEPOINT_MAX", UCHAR_MAX_VALUE)
+  IC_CONSTL("FOLD_CASE_DEFAULT", U_FOLD_CASE_DEFAULT)
+  IC_CONSTL("FOLD_CASE_EXCLUDE_SPECIAL_I", U_FOLD_CASE_EXCLUDE_SPECIAL_I)
 
   /* All enums used by the uchar APIs.  There are a LOT of them,
    * so they're separated out into include files,

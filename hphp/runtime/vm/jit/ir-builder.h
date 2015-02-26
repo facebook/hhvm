@@ -22,25 +22,27 @@
 #include <folly/ScopeGuard.h>
 #include <folly/Optional.h>
 
-#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
 struct ExnStackState {
-  int32_t spOffset;
-  int32_t syncedSpLevel;
+  FPAbsOffset spOffset;
+  FPAbsOffset syncedSpLevel;
   uint32_t stackDeficit;
   EvalStack evalStack;
   SSATmp* sp;
@@ -125,7 +127,7 @@ struct IRBuilder {
   IRUnit& unit() const { return m_unit; }
   BCMarker curMarker() const { return m_curMarker; }
   const Func* curFunc() const { return m_state.func(); }
-  int32_t spOffset() { return m_state.spOffset(); }
+  FPAbsOffset spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }
   SSATmp* fp() const { return m_state.fp(); }
   uint32_t stackDeficit() const { return m_state.stackDeficit(); }
@@ -134,23 +136,23 @@ struct IRBuilder {
   void setStackDeficit(uint32_t d) { m_state.setStackDeficit(d); }
   void syncEvalStack() { m_state.syncEvalStack(); }
   EvalStack& evalStack() { return m_state.evalStack(); }
-  int32_t syncedSpLevel() const { return m_state.syncedSpLevel(); }
+  FPAbsOffset syncedSpLevel() const { return m_state.syncedSpLevel(); }
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
   Type localType(uint32_t id, TypeConstraint tc);
-  Type stackType(int32_t offset, TypeConstraint tc);
+  Type stackType(IRSPOffset, TypeConstraint tc);
   Type predictedInnerType(uint32_t id);
   Type predictedLocalType(uint32_t id);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
-  SSATmp* stackValue(int32_t offset, TypeConstraint tc);
+  SSATmp* stackValue(IRSPOffset offset, TypeConstraint tc);
   TypeSourceSet localTypeSources(uint32_t id) const {
     return m_state.localTypeSources(id);
   }
-  TypeSourceSet stackTypeSources(int32_t offset) const {
+  TypeSourceSet stackTypeSources(IRSPOffset offset) const {
     return m_state.stackTypeSources(offset);
   }
   bool frameMaySpanCall() const { return m_state.frameMaySpanCall(); }
-  Type stackInnerTypePrediction(int32_t offset) const;
+  Type stackInnerTypePrediction(IRSPOffset) const;
 
   /*
    * Support for guard relaxation.
@@ -165,7 +167,7 @@ struct IRBuilder {
   bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
   bool constrainValue(SSATmp* const val, TypeConstraint tc);
   bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
-  bool constrainStack(int32_t offset, TypeConstraint tc);
+  bool constrainStack(IRSPOffset offset, TypeConstraint tc);
   bool typeMightRelax(SSATmp* val = nullptr) const;
   const GuardConstraints* guards() const { return &m_constraints; }
 
@@ -338,7 +340,13 @@ private:
    */
   jit::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
-  ExnStackState m_exnStack{0, 0, 0, EvalStack{}, nullptr};
+  ExnStackState m_exnStack{
+    FPAbsOffset{0},
+    FPAbsOffset{0},
+    0,
+    EvalStack{},
+    nullptr
+  };
 
   bool m_enableSimplification{false};
   bool m_constrainGuards;

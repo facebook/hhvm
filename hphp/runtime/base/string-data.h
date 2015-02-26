@@ -156,8 +156,9 @@ struct StringData {
   static StringData* MakeEmpty();
 
   /*
-   * Offset accessor for the JIT compiler.
+   * Offset accessors for the JIT compiler.
    */
+  static constexpr ptrdiff_t dataOff() { return offsetof(StringData, m_data); }
   static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
 
   /*
@@ -429,6 +430,14 @@ struct StringData {
    */
   void dump() const;
 
+  static StringData* node2str(StringDataNode* node) {
+    return reinterpret_cast<StringData*>(
+      uintptr_t(node) - offsetof(SharedPayload, node)
+                   - sizeof(StringData)
+    );
+  }
+  bool isShared() const;
+
 private:
   struct SharedPayload {
     StringDataNode node;
@@ -449,7 +458,6 @@ private:
   const SharedPayload* sharedPayload() const;
   SharedPayload* sharedPayload();
 
-  bool isShared() const;
   bool isFlat() const;
   bool isImmutable() const;
 

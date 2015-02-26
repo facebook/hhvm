@@ -1,3 +1,4 @@
+
 calling f1
 
 calling f2
@@ -471,6 +472,38 @@ Triggered E_WARNING: Value returned from function f20_soft() must be of type @ca
 Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, Square given
 Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, Fractal given
 Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, xhp_div given
+
+calling f21
+Caught exception: Value returned from function f21() must be of type noreturn, null given
+Caught exception: Value returned from function f21() must be of type noreturn, int given
+Caught exception: Value returned from function f21() must be of type noreturn, string given
+Caught exception: Value returned from function f21() must be of type noreturn, bool given
+Caught exception: Value returned from function f21() must be of type noreturn, float given
+Caught exception: Value returned from function f21() must be of type noreturn, gd given
+Caught exception: Value returned from function f21() must be of type noreturn, array given
+Caught exception: Value returned from function f21() must be of type noreturn, Closure given
+Caught exception: Value returned from function f21() must be of type noreturn, Shapes given
+Caught exception: Value returned from function f21() must be of type noreturn, Square given
+Caught exception: Value returned from function f21() must be of type noreturn, Fractal given
+Caught exception: Value returned from function f21() must be of type noreturn, xhp_div given
+Caught exception: Value returned from function f21() must be of type noreturn, string given
+Caught exception: Value returned from function f21() must be of type noreturn, array given
+
+calling f21_soft
+Caught exception: Value returned from function f21_soft() must be of type noreturn, null given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, int given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, string given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, bool given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, float given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, gd given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, array given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, Closure given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, Shapes given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, Square given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, Fractal given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, xhp_div given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, string given
+Caught exception: Value returned from function f21_soft() must be of type noreturn, array given
 
 calling f21
 

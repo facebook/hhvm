@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 error_reporting(-1);
 var_dump(substr_replace(array("x", "y"), array(), array(), 0));

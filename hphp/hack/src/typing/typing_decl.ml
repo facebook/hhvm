@@ -59,7 +59,7 @@ let remove_classes class_set =
  *)
 (*****************************************************************************)
 
-let check_extend_kind env parent_pos parent_kind child_pos child_kind =
+let check_extend_kind parent_pos parent_kind child_pos child_kind =
   match parent_kind, child_kind with
     (* What is allowed *)
   | (Ast.Cabstract | Ast.Cnormal), (Ast.Cabstract | Ast.Cnormal)
@@ -67,13 +67,11 @@ let check_extend_kind env parent_pos parent_kind child_pos child_kind =
   | Ast.Ctrait, Ast.Ctrait
   | Ast.Cinterface, Ast.Cinterface ->
       ()
-  | _ when not (Env.is_decl env) (* Don't check in decl mode *) ->
-      (* What is dissallowed *)
+  | _ ->
+      (* What is disallowed *)
       let parent = Ast.string_of_class_kind parent_kind in
       let child  = Ast.string_of_class_kind child_kind in
       Errors.wrong_extend_kind child_pos child parent_pos parent
-  | _ -> ()
-
 
 (*****************************************************************************)
 (* Functions used retrieve everything implemented in parent classes
@@ -113,7 +111,7 @@ let add_grand_parents_or_traits parent_pos class_nast acc parent_type =
   let class_pos = fst class_nast.c_name in
   let class_kind = class_nast.c_kind in
   if not is_trait
-  then check_extend_kind env parent_pos parent_type.tc_kind class_pos class_kind;
+  then check_extend_kind parent_pos parent_type.tc_kind class_pos class_kind;
   let extends = SSet.union extends parent_type.tc_extends in
   env, extends, parent_type.tc_members_fully_known && is_complete, is_trait
 
@@ -492,8 +490,7 @@ and class_decl tcopt c =
       env, Some
         { te_base       = base_hint;
           te_constraint = constraint_hint } in
-  let consts = Typing_enum.enum_class_decl_rewrite
-    env c.c_name enum impl consts in
+  let consts = Typing_enum.enum_class_decl_rewrite c.c_name enum impl consts in
   let tc = {
     tc_final = c.c_final;
     tc_abstract = is_abstract;
@@ -624,7 +621,7 @@ and class_const_decl c (env, acc) (h, id, e) =
              * Also note that a number of expressions are considered invalid
              * as constant initializers, even if we can infer their type; see
              * Naming.check_constant_expr. *)
-            if c.c_mode = Ast.Mstrict && c.c_kind <> Ast.Cenum
+            if c.c_mode = FileInfo.Mstrict && c.c_kind <> Ast.Cenum
             then Errors.missing_typehint (fst id);
             Reason.Rwitness (fst id), Tany
         in
@@ -632,7 +629,7 @@ and class_const_decl c (env, acc) (h, id, e) =
       end
       | None, None ->
         let pos, name = id in
-        if c.c_mode = Ast.Mstrict then Errors.missing_typehint pos;
+        if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
         let r = Reason.Rwitness pos in
         let const_ty = r, Tgeneric (c_name^"::"^name, Some (r, Tany)) in
         env, const_ty
@@ -671,7 +668,7 @@ and class_var_decl c (env, acc) cv =
          hack to support existing code for now. *)
       (* Task #5815945: Get rid of this Hack *)
       let env = if (Env.is_strict env)
-        then Env.set_mode env Ast.Mpartial
+        then Env.set_mode env FileInfo.Mpartial
         else env
       in
       Typing_hint.hint env ty'
@@ -698,7 +695,7 @@ and static_class_var_decl c (env, acc) cv =
              ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add ("$"^id) ce acc in
-  if cv.cv_expr = None && (c.c_mode = Ast.Mstrict || c.c_mode = Ast.Mpartial)
+  if cv.cv_expr = None && FileInfo.(c.c_mode = Mstrict || c.c_mode = Mpartial)
   then begin match cv.cv_type with
     | None
     | Some (_, Hmixed)

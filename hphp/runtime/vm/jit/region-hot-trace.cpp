@@ -28,10 +28,13 @@ TRACE_SET_MOD(pgo);
  * Remove from pConds the elements that correspond to stack positions
  * that have been popped given the current SP offset from FP.
  */
-static void discardPoppedTypes(PostConditions& pConds, int curSpOffset) {
+static void discardPoppedTypes(
+  PostConditions& pConds,
+  FPAbsOffset curSpOffset
+) {
   for (auto it = pConds.begin(); it != pConds.end(); ) {
     if (it->location.tag() == RegionDesc::Location::Tag::Stack &&
-        it->location.stackOffsetFromFp() > curSpOffset) {
+        it->location.offsetFromFP() > curSpOffset) {
       it = pConds.erase(it);
     } else {
       it++;

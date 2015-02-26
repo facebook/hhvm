@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/pipe.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-error.h"

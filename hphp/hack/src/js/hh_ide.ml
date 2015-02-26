@@ -456,7 +456,7 @@ let hh_arg_info fn line char =
   to_js_object (JAssoc json_res)
 
 let hh_format contents start end_ =
-  let modes = [Some Ast.Mstrict; Some Ast.Mpartial] in
+  let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
   let result =
     Format_hack.region modes Relative_path.default start end_ contents in
   let error, result, internal_error = match result with

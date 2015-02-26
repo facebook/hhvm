@@ -30,7 +30,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 AliasClass pointee(const SSATmp* ptr) {
-  always_assert(ptr->type().isPtr());
+  always_assert(ptr->type() <= Type::PtrToGen);
 
   if (ptr->type() <= Type::PtrToFrameGen) {
     auto const sinst = canonical(ptr)->inst();
@@ -43,7 +43,8 @@ AliasClass pointee(const SSATmp* ptr) {
   if (ptr->type() <= Type::PtrToStkGen) {
     auto const sinst = canonical(ptr)->inst();
     if (sinst->is(LdStkAddr)) {
-      return AStack { sinst->src(0), sinst->extra<LdStkAddr>()->offset, 1 };
+      return AStack { sinst->src(0),
+        sinst->extra<LdStkAddr>()->offset.offset, 1 };
     }
     return AStackAny;
   }
@@ -121,12 +122,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * The ReturnHook sets up the ActRec so the unwinder knows everything is
    * already released (i.e. it calls ar->setLocalsDecRefd()).
    *
-   * So it has no upward exposed uses of locals, even though it has a catch
-   * block as a successor that looks like it can use any locals (and in fact it
-   * can, if it weren't for this instruction).
+   * This means it can block upward exposed uses of locals, even though it has
+   * a catch block as a successor that looks like it can use any locals (and in
+   * fact it can, if it weren't for this instruction).  It also should be able
+   * to block uses of the stack below the depth at the ReturnHook.
+   *
+   * Not implemented right now because we tried and it had a bug.
+   * TODO(#6264177).
    */
   case ReturnHook:
-    return KillFrameLocals { inst.src(0) };
+    return MayLoadStore { ANonFrame | reentry_extra(), ANonFrame };
 
   // The suspend hooks can load anything (re-entering the VM), but can't write
   // to frame locals.
@@ -146,7 +151,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      stack_below(inst.src(0), inst.extra<RetCtrl>()->spOffset - 1)
+      stack_below(inst.src(0), inst.extra<RetCtrl>()->spOffset.offset - 1)
     };
 
   case GenericRetDecRefs:
@@ -155,7 +160,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EndCatch:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1), inst.extra<EndCatch>()->offset - 1)
+      stack_below(inst.src(1), inst.extra<EndCatch>()->offset.offset - 1)
     };
 
   /*
@@ -205,7 +210,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       // We could be more precise about which stack locations (or which locals)
       // an InterpOne may read (this information is in its extra data), but
       // this hasn't been implemented.
-      stack_below(inst.src(1), -inst.marker().spOff() - 1)
+      stack_below(inst.src(1), -inst.marker().spOff().offset - 1)
     };
 
   case NativeImpl:
@@ -244,7 +249,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const extra = inst.extra<Call>();
       return CallEffects {
         extra->destroyLocals,
-        stack_below(inst.src(0), extra->spOffset - 1), // kill
+        stack_below(inst.src(0), extra->spOffset.offset - 1), // kill
         // We might side-exit inside the callee, and interpret a return.  So we
         // can read anything anywhere on the eval stack above the call's entry
         // depth here.
@@ -272,7 +277,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       }
       return CallEffects {
         extra->destroyLocals,
-        stack_below(inst.src(1), extra->spOffset - 1),
+        stack_below(inst.src(1), extra->spOffset.offset - 1),
         stk
       };
     }
@@ -296,7 +301,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return IterEffects {
       inst.src(1),
       inst.extra<IterData>()->valId,
-      stack_below(inst.src(1), -inst.marker().spOff() - 1)
+      stack_below(inst.src(1), -inst.marker().spOff().offset - 1)
     };
   case IterNext:
   case MIterNext:
@@ -304,7 +309,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return IterEffects {
       inst.src(0),
       inst.extra<IterData>()->valId,
-      stack_below(inst.src(0), -inst.marker().spOff() - 1)
+      stack_below(inst.src(0), -inst.marker().spOff().offset - 1)
     };
 
   case IterInitK:
@@ -314,7 +319,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(1),
       inst.extra<IterData>()->keyId,
       inst.extra<IterData>()->valId,
-      stack_below(inst.src(1), -inst.marker().spOff() - 1)
+      stack_below(inst.src(1), -inst.marker().spOff().offset - 1)
     };
 
   case IterNextK:
@@ -324,7 +329,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(0),
       inst.extra<IterData>()->keyId,
       inst.extra<IterData>()->valId,
-      stack_below(inst.src(0), -inst.marker().spOff() - 1)
+      stack_below(inst.src(0), -inst.marker().spOff().offset - 1)
     };
 
   //////////////////////////////////////////////////////////////////////
@@ -453,7 +458,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return MayLoadStore {
         AStack {
           inst.src(1),
-          extra->offset + static_cast<int32_t>(extra->size) - 1,
+          extra->offset.offset + static_cast<int32_t>(extra->size) - 1,
           static_cast<int32_t>(extra->size)
         },
         AElemIAny
@@ -468,7 +473,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return MayLoadStore {
         AStack {
           inst.src(0),
-          extra->offset + static_cast<int32_t>(extra->numKeys) - 1,
+          extra->offset.offset + static_cast<int32_t>(extra->numKeys) - 1,
           static_cast<int32_t>(extra->numKeys)
         },
         AEmpty
@@ -578,31 +583,37 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case LdStk:
     return PureLoad {
-      AStack { inst.src(0), inst.extra<LdStk>()->offset, 1 }
+      AStack { inst.src(0), inst.extra<LdStk>()->offset.offset, 1 }
     };
 
   case StStk:
     return PureStore {
-      AStack { inst.src(0), inst.extra<StStk>()->offset, 1 },
+      AStack { inst.src(0), inst.extra<StStk>()->offset.offset, 1 },
       inst.src(1)
     };
 
-  case SpillFrame:
+  case SpillFrame: {
+    auto const spOffset = inst.extra<SpillFrame>()->spOffset;
     return PureSpillFrame {
       AStack {
         inst.src(0),
         // SpillFrame's spOffset is to the bottom of where it will store the
         // ActRec, but AliasClass needs an offset to the highest cell it will
         // store.
-        inst.extra<SpillFrame>()->spOffset + int32_t{kNumActRecCells} - 1,
+        spOffset.offset + int32_t{kNumActRecCells} - 1,
         kNumActRecCells
       }
     };
+  }
 
   case GuardStk:
+    return MayLoadStore {
+      AStack { inst.src(0), inst.extra<GuardStk>()->irSpOffset.offset, 1 },
+      AEmpty
+    };
   case CheckStk:
     return MayLoadStore {
-      AStack { inst.src(0), inst.extra<StackOffset>()->offset, 1 },
+      AStack { inst.src(0), inst.extra<CheckStk>()->offset.offset, 1 },
       AEmpty
     };
   case CufIterSpillFrame:
@@ -612,13 +623,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CastStk:
     return MayLoadStore {
       AHeapAny | reentry_extra()
-               | AStack { inst.src(0), inst.extra<CastStk>()->offset, 1 },
+               | AStack { inst.src(0),
+                          inst.extra<CastStk>()->offset.offset, 1 },
       ANonFrame
     };
   case CoerceStk:
     return MayLoadStore {
       AHeapAny | reentry_extra()
-               | AStack { inst.src(0), inst.extra<CoerceStk>()->offset, 1 },
+               | AStack { inst.src(0),
+                          inst.extra<CoerceStk>()->offset.offset, 1 },
       ANonFrame
     };
 
@@ -770,6 +783,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CoerceStrToDbl:
   case CoerceStrToInt:
   case ConvStrToInt:
+  case OrdStr:
   case IncProfCounter:
   case IncStat:
   case IncStatGrouped:

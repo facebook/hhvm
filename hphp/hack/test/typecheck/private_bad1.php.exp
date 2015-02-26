@@ -1,4 +1,4 @@
-File "private_bad1.php", line 13, characters 9-12:
+File "private_bad1.php", line 12, characters 9-12:
 You cannot access this member (Typing[4112])
-File "private_bad1.php", line 5, characters 20-23:
+File "private_bad1.php", line 4, characters 20-23:
 This member is private

@@ -200,9 +200,9 @@ uintptr_t readEncodedPointer(const uint8_t*& data, uint8_t encoding) {
  * landingPad are offsets from the beginning of the function.
  */
 struct EHInfo {
-  uintptr_t start;
-  uintptr_t length;
-  uintptr_t landingPad;
+  TCA start;
+  TCA end;
+  TCA landingPad;
 };
 
 /*
@@ -210,14 +210,18 @@ struct EHInfo {
  * with nonzero landingpads. This function was also adapted from the
  * ExceptionDemo.cpp example in llvm.
  */
-jit::vector<EHInfo> parse_gcc_except_table(const uint8_t* ptr) {
+jit::vector<EHInfo> parse_gcc_except_table(const uint8_t* ptr,
+                                           uint8_t* funcStart,
+                                           uint8_t* coldStart) {
   jit::vector<EHInfo> ret;
 
   FTRACE(2, "Parsing exception table at {}\n", ptr);
   uint8_t lpStartEncoding = *ptr++;
 
+  uint8_t* lpStart = funcStart;
   if (lpStartEncoding != DW_EH_PE_omit) {
-    readEncodedPointer(ptr, lpStartEncoding);
+    lpStart =
+      reinterpret_cast<uint8_t*>(readEncodedPointer(ptr, lpStartEncoding));
   }
 
   uint8_t ttypeEncoding = *ptr++;
@@ -238,13 +242,19 @@ jit::vector<EHInfo> parse_gcc_except_table(const uint8_t* ptr) {
     uintptr_t landingPad = readEncodedPointer(callSitePtr, callSiteEncoding);
 
     uintptr_t actionEntry = readULEB128(callSitePtr);
-    // 0 indicates a cleanup entry, the only kind we generate
-    always_assert(actionEntry == 0);
-    if (landingPad == 0) continue;
+    // 0 or 127 indicate a cleanup entry, the only kinds we generate.
+    always_assert(actionEntry == 0 || actionEntry == 127);
 
+    // With a hot/cold splitting we can get a real landing pad at offset 0.
+    if (landingPad == UINT32_MAX) continue;
+    if (!RuntimeOption::EvalJitLLVMSplitHotCold && landingPad == 0) continue;
+
+    auto rangeBase = (actionEntry == 0) ? funcStart : coldStart;
     FTRACE(2, "Adding entry: [{},{}): landingPad {}\n",
-           start, start + length, landingPad);
-    ret.emplace_back(EHInfo{start, length, landingPad});
+           rangeBase + start, rangeBase + start + length, lpStart + landingPad);
+    ret.emplace_back(EHInfo{rangeBase + start,
+                            rangeBase + start + length,
+                            lpStart + landingPad});
   }
 
   return ret;
@@ -317,19 +327,23 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     uintptr_t Size, unsigned Alignment, unsigned SectionID,
     llvm::StringRef SectionName
   ) override {
-    auto& code = m_areas[static_cast<size_t>(AreaIndex::Main)].code;
+
+    auto areaIndex = SectionName.endswith(".cold") ? AreaIndex::Cold
+                                                   : AreaIndex::Main;
+    auto& code = m_areas[static_cast<size_t>(areaIndex)].code;
+    auto codeSkew = m_codeSkews[static_cast<size_t>(areaIndex)];
 
     // We override/ignore the alignment and use skew value to compensate.
     uint8_t* ret = code.alloc<uint8_t>(1, Size);
     assert(Alignment < x64::kCacheLineSize &&
            "alignment exceeds cache line size");
-    assert(
-      m_codeSkew == (reinterpret_cast<size_t>(ret) & (x64::kCacheLineSize - 1))
-      && "drift in code skew detected");
+    always_assert(
+      codeSkew == (reinterpret_cast<size_t>(ret) & (x64::kCacheLineSize - 1)) &&
+      "drift in code skew detected");
 
     FTRACE(1, "Allocate code section \"{}\" id={} at addr={}, size={},"
            " alignment={}, skew={}\n",
-           SectionName.str(), SectionID, ret, Size, Alignment, m_codeSkew);
+           SectionName.str(), SectionID, ret, Size, Alignment, codeSkew);
     return ret;
   }
 
@@ -411,10 +425,10 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     return m_dataSections.count(name);
   }
 
-  uint32_t computeCodeSkew(unsigned alignment) {
-    auto& code = m_areas[static_cast<size_t>(AreaIndex::Main)].code;
-    m_codeSkew = reinterpret_cast<uint64_t>(code.frontier()) & (alignment - 1);
-    return m_codeSkew;
+  uint32_t computeCodeSkew(unsigned alignment, AreaIndex area) {
+    auto& code = m_areas[static_cast<size_t>(area)].code;
+    return m_codeSkews[static_cast<size_t>(area)] =
+      reinterpret_cast<uint64_t>(code.frontier()) & (alignment - 1);
   }
 
   /*
@@ -431,7 +445,7 @@ private:
 
   std::unordered_map<std::string, SectionInfo> m_dataSections;
 
-  uint32_t m_codeSkew{0};
+  jit::vector<uint32_t> m_codeSkews{0,0,0};
 
   jit::hash_map<std::string, uint64_t> m_symbols;
   uint32_t m_nextSymbolId{0};
@@ -650,6 +664,8 @@ struct LLVMEmitter {
 
     llvm::TargetOptions targetOptions;
     targetOptions.EnableFastISel = RuntimeOption::EvalJitLLVMFastISel;
+    targetOptions.MCOptions.SplitHotCold =
+      RuntimeOption::EvalJitLLVMSplitHotCold;
 
     auto module = m_module.release();
     auto tcMM = m_tcMM.release();
@@ -675,7 +691,16 @@ struct LLVMEmitter {
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
 
     module->addModuleFlag(llvm::Module::Error, "code_skew",
-                          tcMM->computeCodeSkew(x64::kCacheLineSize));
+                          tcMM->computeCodeSkew(x64::kCacheLineSize,
+                                                  AreaIndex::Main));
+    module->addModuleFlag(llvm::Module::Error, "cold_code_skew",
+                          tcMM->computeCodeSkew(x64::kCacheLineSize,
+                                                AreaIndex::Cold));
+
+    // Record start of cold block. Alas there's no better way to find where
+    // LLVM-generated cold code goes.
+    auto coldStart =
+      m_areas[static_cast<size_t>(AreaIndex::Cold)].code.frontier();
 
     auto fpm = folly::make_unique<llvm::FunctionPassManager>(module);
     fpm->add(new llvm::DataLayoutPass(module));
@@ -730,8 +755,9 @@ struct LLVMEmitter {
     }
 
     if (auto secGEH = tcMM->getDataSection(".gcc_except_table")) {
-      auto const ehInfos = parse_gcc_except_table(secGEH->data.get());
-      processEHInfos(ehInfos, funcStart);
+      auto const ehInfos = parse_gcc_except_table(secGEH->data.get(), funcStart,
+                                                  coldStart);
+      processEHInfos(ehInfos);
     }
   }
 
@@ -841,21 +867,17 @@ struct LLVMEmitter {
    * For each entry in infos, find all call instructions in the region and
    * register the landing pad as a catch block for each one.
    */
-  void processEHInfos(const jit::vector<EHInfo>& infos, uint8_t* funcStart) {
+  void processEHInfos(const jit::vector<EHInfo>& infos) {
     for (auto& info : infos) {
-      auto ip = funcStart + info.start;
-      auto const end = ip + info.length;
-      auto const landingPad = funcStart + info.landingPad;
-
       FTRACE(2, "Looking for calls for landingPad {}, in EH region [{},{})\n",
-             landingPad, ip, end);
+             info.landingPad, info.start, info.end);
       auto found = false;
-      while (ip < end) {
+      for(auto ip = info.start; ip < info.end; ) {
         DecodedInstruction di(ip);
         ip += di.size();
         if (di.isCall()) {
           FTRACE(2, "  afterCall: {}\n", ip);
-          mcg->registerCatchBlock(ip, landingPad);
+          mcg->registerCatchBlock(ip, info.landingPad);
           found = true;
         }
       }
@@ -932,10 +954,14 @@ struct LLVMEmitter {
    */
   llvm::BasicBlock* block(Vlabel l) {
     if (m_blocks[l] == nullptr) {
+      auto& b = m_unit.blocks[l];
+      auto name = folly::to<std::string>('B', size_t(l));
+      if (b.area == AreaIndex::Cold || b.area == AreaIndex::Frozen) {
+        name += ".cold";
+      };
+
       return m_blocks[l] =
-        llvm::BasicBlock::Create(m_context,
-                                 folly::to<std::string>('B', size_t(l)),
-                                 m_function);
+        llvm::BasicBlock::Create(m_context, name, m_function);
     }
 
     return m_blocks[l];

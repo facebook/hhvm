@@ -744,6 +744,7 @@ public:
                              ExpressionListPtr params,
                              bool coerce_params = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
+  void emitDeprecationWarning(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
   void emitMemoizeProp(Emitter& e, MethodStatementPtr meth, Id localID,
                        const std::vector<Id>& paramIDs, uint numParams);

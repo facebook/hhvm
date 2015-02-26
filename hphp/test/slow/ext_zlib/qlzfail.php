@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 function main() {
   $x = "the quick brown fox compressed the lazy dog with qlz\n";

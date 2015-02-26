@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
@@ -83,10 +84,10 @@ String stringForEachFast(const String& str, Op action) {
   }
 
   if (str.get()->hasExactlyOneRef()) {
-    return stringForEach<true>(str.size(), str.get(), action);
+    return stringForEach<true>(str.size(), str, action);
   }
 
-  return stringForEach<false>(str.size(), str.get(), action);
+  return stringForEach<false>(str.size(), str, action);
 }
 
 String HHVM_FUNCTION(addcslashes,
@@ -1442,8 +1443,7 @@ Array HHVM_FUNCTION(str_getcsv,
   char enclosure_char = check_arg(enclosure, '"');
   char escape_char = check_arg(escape, '\\');
 
-  auto dummy = newres<PlainFile>();
-  auto wrapper = Resource(dummy);
+  auto dummy = makeSmartPtr<PlainFile>();
   return dummy->readCSV(0, delimiter_char, enclosure_char, escape_char, &str);
 }
 

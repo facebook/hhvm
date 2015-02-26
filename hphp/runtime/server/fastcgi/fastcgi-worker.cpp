@@ -22,24 +22,11 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Transport* FastCGIJob::getTransport() {
-  return m_transport.get();
-}
-
 void FastCGIJob::getRequestStart(struct timespec *outReqStart) {
   *outReqStart = reqStart;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-FastCGITransportTraits::FastCGITransportTraits(
-    std::shared_ptr<FastCGIJob> job,
-    void* context,
-    int id)
-  : m_server((FastCGIServer*) context),
-    m_transport(job->m_transport) {}
-
-FastCGITransportTraits::~FastCGITransportTraits() {}
 
 Server* FastCGITransportTraits::getServer() const {
   return m_server;

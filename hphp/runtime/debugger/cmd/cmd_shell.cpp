@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_shell.h"
+
+#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {

@@ -139,13 +139,9 @@ typedef CondBlock <TVOFF(m_type),
  * in reverse order to what you see here.
  */
 static inline void
-locToRegDisp(const Location& l, PhysReg *outbase, int *outdisp,
-             const Func* f = nullptr) {
-  assert_not_implemented((l.space == Location::Stack ||
-                          l.space == Location::Local ||
-                          l.space == Location::Iter));
-  *outdisp = cellsToBytes(locPhysicalOffset(l, f));
-  *outbase = l.space == Location::Stack ? x64::rVmSp : x64::rVmFp;
+locToRegDisp(int32_t localIndex, PhysReg *outbase, int *outdisp) {
+  *outdisp = cellsToBytes(locPhysicalOffset(localIndex));
+  *outbase = x64::rVmFp;
 }
 
 // Common code emission patterns.

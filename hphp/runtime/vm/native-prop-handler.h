@@ -190,9 +190,10 @@ struct BasePropHandler {
   }
 };
 
-#define CHECK_ACCESSOR(accesor)                                                \
+#define CHECK_ACCESSOR(accesor, opstr, classname, propname)                    \
   if (!accesor) {                                                              \
-    return Native::prop_not_handled();                                         \
+    raise_error("Cannot directly %s the property %s::$%s",                     \
+                 opstr, classname->data(), propname->data());                  \
   }
 
 /**
@@ -204,7 +205,7 @@ struct MapPropHandler : BasePropHandler {
 
   static Variant getProp(ObjectData* this_, const StringData* name) {
     auto get = Derived::map.get(name);
-    CHECK_ACCESSOR(get)
+    CHECK_ACCESSOR(get, "get", this_->getVMClass()->name(), name)
     return get(this_);
   }
 
@@ -212,7 +213,7 @@ struct MapPropHandler : BasePropHandler {
                          const StringData* name,
                          Variant& value) {
     auto set = Derived::map.set(name);
-    CHECK_ACCESSOR(set)
+    CHECK_ACCESSOR(set, "set", this_->getVMClass()->name(), name);
     set(this_, value);
     return true;
   }
@@ -225,13 +226,13 @@ struct MapPropHandler : BasePropHandler {
     }
     // Otherwise, fallback to `null` check of the result from `get`.
     auto get = Derived::map.get(name);
-    CHECK_ACCESSOR(get)
+    CHECK_ACCESSOR(get, "get", this_->getVMClass()->name(), name)
     return !get(this_).isNull();
   }
 
   static Variant unsetProp(ObjectData* this_, const StringData* name) {
     auto unset = Derived::map.unset(name);
-    CHECK_ACCESSOR(unset)
+    CHECK_ACCESSOR(unset, "unset", this_->getVMClass()->name(), name);
     unset(this_);
     return true;
   }

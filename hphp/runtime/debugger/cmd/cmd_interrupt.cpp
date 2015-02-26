@@ -19,9 +19,10 @@
 
 #include <folly/Conv.h>
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
-#include "hphp/runtime/base/array-init.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

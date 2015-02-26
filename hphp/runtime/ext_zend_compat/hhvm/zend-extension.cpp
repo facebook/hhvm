@@ -75,7 +75,7 @@ void ZendExtension::moduleInit() {
   const zend_function_entry * fe = module->functions;
   while (fe->fname) {
     assert(fe->handler);
-    Native::registerBuiltinFunction(fe->fname, fe->handler);
+    Native::registerBuiltinZendFunction(fe->fname, fe->handler);
     fe++;
   }
   // Call MINIT

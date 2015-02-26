@@ -24,7 +24,7 @@ namespace HPHP { namespace jit {
 
 std::string NewStructData::show() const {
   std::ostringstream os;
-  os << offset << ',';
+  os << offset.offset << ',';
   auto delim = "";
   for (uint32_t i = 0; i < numKeys; i++) {
     os << delim << "\"" <<

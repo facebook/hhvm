@@ -36,8 +36,7 @@ class c_AwaitAllWaitHandle final : public c_BlockableWaitHandle {
   DECLARE_CLASS_NO_SWEEP(AwaitAllWaitHandle)
 
   explicit c_AwaitAllWaitHandle(Class* cls = c_AwaitAllWaitHandle::classof())
-    : c_BlockableWaitHandle(cls)
-  {}
+    : c_BlockableWaitHandle(cls) {}
   ~c_AwaitAllWaitHandle() {}
 
   static void ti_setoncreatecallback(const Variant& callback);

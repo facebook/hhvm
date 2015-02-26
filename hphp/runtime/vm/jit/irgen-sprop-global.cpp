@@ -91,7 +91,7 @@ SSATmp* ldClsPropAddr(HTS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCGetS(HTS& env) {
-  auto const ssaPropName = topC(env, 1);
+  auto const ssaPropName = topC(env, BCSPOffset{1});
 
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(CGetS-PropNameNotString);
@@ -107,7 +107,7 @@ void emitCGetS(HTS& env) {
 }
 
 void emitSetS(HTS& env) {
-  auto const ssaPropName = topC(env, 2);
+  auto const ssaPropName = topC(env, BCSPOffset{2});
 
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(SetS-PropNameNotString);
@@ -123,7 +123,7 @@ void emitSetS(HTS& env) {
 }
 
 void emitVGetS(HTS& env) {
-  auto const ssaPropName = topC(env, 1);
+  auto const ssaPropName = topC(env, BCSPOffset{1});
 
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(VGetS-PropNameNotString);
@@ -143,7 +143,7 @@ void emitVGetS(HTS& env) {
 }
 
 void emitBindS(HTS& env) {
-  auto const ssaPropName = topC(env, 2);
+  auto const ssaPropName = topC(env, BCSPOffset{2});
 
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(BindS-PropNameNotString);
@@ -158,7 +158,7 @@ void emitBindS(HTS& env) {
 }
 
 void emitIssetS(HTS& env) {
-  auto const ssaPropName = topC(env, 1);
+  auto const ssaPropName = topC(env, BCSPOffset{1});
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(IssetS-PropNameNotString);
   }
@@ -184,7 +184,7 @@ void emitIssetS(HTS& env) {
 }
 
 void emitEmptyS(HTS& env) {
-  auto const ssaPropName = topC(env, 1);
+  auto const ssaPropName = topC(env, BCSPOffset{1});
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(EmptyS-PropNameNotString);
   }
@@ -236,7 +236,7 @@ void emitVGetG(HTS& env) {
 }
 
 void emitBindG(HTS& env) {
-  auto const name = topC(env, 1);
+  auto const name = topC(env, BCSPOffset{1});
   if (!name->isA(Type::Str)) PUNT(BindG-NameNotStr);
   auto const box = popV(env);
   auto const ptr = gen(env, LdGblAddrDef, name);
@@ -245,7 +245,7 @@ void emitBindG(HTS& env) {
 }
 
 void emitSetG(HTS& env) {
-  auto const name = topC(env, 1);
+  auto const name = topC(env, BCSPOffset{1});
   if (!name->isA(Type::Str)) PUNT(SetG-NameNotStr);
   auto const value   = popC(env, DataTypeCountness);
   auto const unboxed = gen(env, UnboxPtr, gen(env, LdGblAddrDef, name));
@@ -254,7 +254,7 @@ void emitSetG(HTS& env) {
 }
 
 void emitIssetG(HTS& env) {
-  auto const name = topC(env, 0);
+  auto const name = topC(env, BCSPOffset{0});
   if (!name->isA(Type::Str)) PUNT(IssetG-NameNotStr);
 
   auto const ret = cond(

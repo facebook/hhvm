@@ -16,6 +16,8 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -46,10 +48,10 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto val = isReturnType ? topR(env)
                           : ldLoc(env, id, ldPMExit, DataTypeSpecific);
-  assert(val->type().isBoxed() || val->type().notBoxed());
+  assert(val->type() <= Type::Cell || val->type() <= Type::BoxedCell);
 
   auto const valType = [&]() -> Type {
-    if (!val->type().isBoxed()) return val->type();
+    if (val->type() <= Type::Cell) return val->type();
     if (isReturnType) PUNT(VerifyReturnTypeBoxed);
     auto const pred = env.irb->predictedInnerType(id);
     gen(env, CheckRefInner, pred, makeExit(env), val);
@@ -523,7 +525,7 @@ void emitAssertRATL(HTS& env, int32_t loc, RepoAuthType rat) {
 
 void emitAssertRATStk(HTS& env, int32_t offset, RepoAuthType rat) {
   if (auto const t = ratToAssertType(env, rat)) {
-    assertTypeStack(env, offset, *t);
+    assertTypeStack(env, BCSPOffset{offset}, *t);
   }
 }
 

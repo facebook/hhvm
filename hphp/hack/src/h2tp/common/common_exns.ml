@@ -49,7 +49,7 @@ exception CompoundError of exn list
 
 let invariant cond error_part =
   if not cond then
-    Errors.make_error [error_part] |>
+    Errors.make_error 0 [error_part] |>
     Errors.to_absolute |>
     Errors.to_string |>
     fun s -> raise (AssertionError s)
@@ -58,7 +58,7 @@ let rec flatten_error = function
   | InputError m -> [("Input Error", m)]
   | InternalError m | CmdError (_, m) -> [("Internal Error", m)]
   | ConversionError (p, m) ->
-      let e = Errors.to_absolute (Errors.make_error [(p, m)]) in
+      let e = Errors.to_absolute (Errors.make_error 0 [(p, m)]) in
       [("Conversion Error", Errors.to_string e)]
   | CompoundError exns ->
       compose (List.concatMap flatten_error) List.rev exns

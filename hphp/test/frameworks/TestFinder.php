@@ -1,5 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
 require_once __DIR__.'/../../../hphp/tools/command_line_lib.php';
 require_once __DIR__.'/SortedIterator.php';
 require_once __DIR__.'/utils.php';

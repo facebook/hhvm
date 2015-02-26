@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_STREAM_USER_FILTERS_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/smart-containers.h"
 
 namespace HPHP {
 

@@ -1,0 +1,1 @@
+Fatal error: To use strict hack, place // strict after the open tag. If it's already there, remove this line. Hack is strict already. in %s/test/slow/parser/use-strict-hack.php on line 3

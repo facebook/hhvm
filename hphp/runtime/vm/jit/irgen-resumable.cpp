@@ -88,7 +88,7 @@ void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const stack = gen(env, RetAdjustStk, fp(env));
   auto const frame = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(0, false), stack, frame, retAddr);
+  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame, retAddr);
 }
 
 void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
@@ -117,7 +117,7 @@ void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
   auto const stack    = sp(env);
   auto const retAddr  = gen(env, LdRetAddr, fp(env));
   auto const frame    = gen(env, FreeActRec, fp(env));
-  auto const spAdjust = offsetFromSP(env, 0);
+  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
   gen(env, RetCtrl, RetCtrlData(spAdjust, true), stack, frame, retAddr);
 }
 
@@ -129,7 +129,7 @@ void yieldReturnControl(HTS& env) {
   auto const stack    = sp(env);
   auto const retAddr  = gen(env, LdRetAddr, fp(env));
   auto const frame    = gen(env, FreeActRec, fp(env));
-  auto const spAdjust = offsetFromSP(env, 0);
+  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
   gen(env, RetCtrl, RetCtrlData { spAdjust, true }, stack, frame, retAddr);
 }
 
@@ -232,7 +232,7 @@ void emitCreateCont(HTS& env) {
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const stack = gen(env, RetAdjustStk, fp(env));
   auto const frame = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(0, false), stack, frame, retAddr);
+  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame, retAddr);
 }
 
 void emitContEnter(HTS& env) {
@@ -259,7 +259,7 @@ void emitContEnter(HTS& env) {
   gen(
     env,
     ContEnter,
-    ContEnterData { offsetFromSP(env, 0), returnBcOffset },
+    ContEnterData { offsetFromIRSP(env, BCSPOffset{0}), returnBcOffset },
     sp(env),
     fp(env),
     genFp,

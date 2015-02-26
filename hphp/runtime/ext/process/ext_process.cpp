@@ -672,7 +672,7 @@ public:
     // explicitly pclose()'ed, it seems that Zend is implicitly closing the
     // pipes when proc_close() is called.
     for (ArrayIter iter(pipes); iter; ++iter) {
-      iter.second().toResource().getTyped<PlainFile>()->close();
+      cast<PlainFile>(iter.second())->close();
     }
     pipes.clear();
 
@@ -727,7 +727,7 @@ public:
                            // same time, before FD_CLOEXEC is set on the fds.
                            // NOTE: no need to lock with light processes.
 
-  bool readFile(File *file) {
+  bool readFile(const SmartPtr<File>& file) {
     mode = DESC_FILE;
     childend = dup(file->fd());
     if (childend < 0) {
@@ -768,7 +768,7 @@ public:
                       zfile.data(), zmode.data());
       return false;
     } else {
-      File *file = vfile.toResource().getTyped<File>();
+      auto file = cast<File>(vfile);
       file->flush();
       childend = dup(file->fd());
       if (childend < 0) {
@@ -801,7 +801,7 @@ public:
       /* mark the descriptor close-on-exec, so that it won't be inherited
          by potential other children */
       fcntl(parentend, F_SETFD, FD_CLOEXEC);
-      return Resource(newres<PlainFile>(parentend, true));
+      return Resource(makeSmartPtr<PlainFile>(parentend, true));
     }
 
     return Resource();
@@ -834,7 +834,7 @@ static bool pre_proc_open(const Array& descriptorspec,
 
     Variant descitem = iter.second();
     if (descitem.isResource()) {
-      File *file = descitem.toResource().getTyped<File>();
+      auto file = cast<File>(descitem);
       if (!item.readFile(file)) break;
     } else if (!descitem.is(KindOfArray)) {
       raise_warning("Descriptor must be either an array or a File-Handle");
@@ -891,7 +891,7 @@ static Variant post_proc_open(const String& cmd, Variant &pipes,
   }
 
   /* we forked/spawned and this is the parent */
-  ChildProcess *proc = newres<ChildProcess>();
+  auto proc = makeSmartPtr<ChildProcess>();
   proc->command = cmd;
   proc->child = child;
   proc->env = env;
@@ -907,7 +907,7 @@ static Variant post_proc_open(const String& cmd, Variant &pipes,
       pipes.toArrRef().set(items[i].index, f);
     }
   }
-  return Resource(proc);
+  return Variant(std::move(proc));
 }
 
 Variant HHVM_FUNCTION(proc_open,
@@ -1024,13 +1024,12 @@ Variant HHVM_FUNCTION(proc_open,
 bool HHVM_FUNCTION(proc_terminate,
                    const Resource& process,
                    int signal /* = SIGTERM */) {
-  ChildProcess *proc = process.getTyped<ChildProcess>();
-  return kill(proc->child, signal) == 0;
+  return kill(cast<ChildProcess>(process)->child, signal) == 0;
 }
 
 int64_t HHVM_FUNCTION(proc_close,
                       const Resource& process) {
-  return process.getTyped<ChildProcess>()->close();
+  return cast<ChildProcess>(process)->close();
 }
 
 const StaticString
@@ -1045,7 +1044,7 @@ const StaticString
 
 Array HHVM_FUNCTION(proc_get_status,
                     const Resource& process) {
-  ChildProcess *proc = process.getTyped<ChildProcess>();
+  auto proc = cast<ChildProcess>(process);
 
   errno = 0;
   int wstatus;

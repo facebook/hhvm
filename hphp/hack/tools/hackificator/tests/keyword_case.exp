@@ -1,0 +1,14 @@
+<?hh
+
+const BAZ = 0;
+
+class Foo {
+  const BAR = 1;
+  public $x = 2;
+}
+
+function f($x) {
+  foreach ($x as $k => $v) {
+    if ($v instanceof Foo) {}
+  }
+}

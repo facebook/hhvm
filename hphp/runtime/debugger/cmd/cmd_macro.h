@@ -22,16 +22,15 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdMacro : public DebuggerCommand {
-public:
+struct CmdMacro : DebuggerCommand {
   CmdMacro() : DebuggerCommand(KindOfMacro) {}
 
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
-  virtual void onClient(DebuggerClient &client);
+  void list(DebuggerClient&) override;
+  void help(DebuggerClient&) override;
+  void onClient(DebuggerClient&) override;
 
 private:
-  void processList(DebuggerClient &client);
+  void processList(DebuggerClient&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

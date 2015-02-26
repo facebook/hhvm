@@ -170,7 +170,7 @@ Object c_Closure::ti_bind(const Variant& closure, const Variant& newthis,
     return nullptr;
   }
 
-  return closureObject.getTyped<c_Closure>()->t_bindto(newthis, scope);
+  return unsafe_cast<c_Closure>(closureObject)->t_bindto(newthis, scope);
 }
 
 Object c_Closure::t_bindto(const Variant& newthis, const Variant& scope) {

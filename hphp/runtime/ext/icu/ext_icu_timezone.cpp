@@ -361,7 +361,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getRegion,
 // ICU >= 4.9
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 49
-static Variant HHVM_STATIC_METHOD(IntlTimeZone, getUnknown) {
+static Object HHVM_STATIC_METHOD(IntlTimeZone, getUnknown) {
   return IntlTimeZone::newInstance(
     const_cast<icu::TimeZone*>(&icu::TimeZone::getUnknown()), false);
 }

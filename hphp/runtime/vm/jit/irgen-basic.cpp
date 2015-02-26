@@ -110,9 +110,9 @@ void emitCGetL2(HTS& env, int32_t id) {
 void emitVGetL(HTS& env, int32_t id) {
   auto value = ldLoc(env, id, makeExit(env), DataTypeCountnessInit);
   auto const t = value->type();
-  always_assert(t.isBoxed() || t.notBoxed());
+  always_assert(t <= Type::Cell || t <= Type::BoxedCell);
 
-  if (t.notBoxed()) {
+  if (t <= Type::Cell) {
     if (value->isA(Type::Uninit)) {
       value = cns(env, Type::InitNull);
     }

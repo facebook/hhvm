@@ -33,6 +33,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_system_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
 #include <sys/time.h>
@@ -772,7 +773,7 @@ class TraceProfiler : public Profiler {
       m_successful = false;
     } else {
       m_maxTraceBuffer = RuntimeOption::ProfilerMaxTraceBuffer;
-      Extension* ext = Extension::GetExtension(s_hotprofiler);
+      Extension* ext = ExtensionRegistry::get(s_hotprofiler);
       assert(ext);
       IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                        "profiler.max_trace_buffer",
@@ -854,10 +855,9 @@ class TraceProfiler : public Profiler {
                    m_traceBuffer[m_nextTraceEntry++]);
     }
     {
-      DECLARE_THREAD_INFO
-      MemoryManager::MaskAlloc masker(*info->m_mm);
-      TraceEntry *r = (TraceEntry*)realloc((void *)m_traceBuffer,
-                                           new_array_size * sizeof(TraceEntry));
+      MemoryManager::MaskAlloc masker(MM());
+      auto r = (TraceEntry*)realloc((void*)m_traceBuffer,
+                                    new_array_size * sizeof(TraceEntry));
 
       if (!r) {
         m_traceBufferFilled = true;

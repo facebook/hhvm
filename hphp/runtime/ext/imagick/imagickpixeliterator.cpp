@@ -22,8 +22,8 @@ namespace HPHP {
 #define IMAGICKPIXELITERATOR_THROW imagickThrow<ImagickPixelIteratorException>
 
 
-static void initPixelIterator(ObjectData* this_, const Object& magick) {
-  auto wand = getMagickWandResource(magick.get());
+static void initPixelIterator(const Object& this_, const Object& magick) {
+  auto wand = getMagickWandResource(magick);
   auto it = NewPixelIterator(wand->getWand());
   if (it == nullptr) {
     IMAGICKPIXELITERATOR_THROW("Can not allocate ImagickPixelIterator");
@@ -32,9 +32,9 @@ static void initPixelIterator(ObjectData* this_, const Object& magick) {
   }
 }
 
-static void initPixelRegionIterator(ObjectData* this_, const Object& magick,
+static void initPixelRegionIterator(const Object& this_, const Object& magick,
     int64_t x, int64_t y, int64_t columns, int64_t rows) {
-  auto wand = getMagickWandResource(magick.get());
+  auto wand = getMagickWandResource(magick);
   auto it = NewPixelRegionIterator(wand->getWand(), x, y, columns, rows);
   if (it == nullptr) {
     IMAGICKPIXELITERATOR_THROW("Can not allocate ImagickPixelIterator");
@@ -47,14 +47,14 @@ static void initPixelRegionIterator(ObjectData* this_, const Object& magick,
 // ImagickPixel Helper
 Object createPixelIterator(const Object& magick) {
   Object ret = ImagickPixelIterator::allocObject();
-  initPixelIterator(ret.get(), magick.get());
+  initPixelIterator(ret, magick);
   return ret;
 }
 
 Object createPixelRegionIterator(const Object& magick,
     int64_t x, int64_t y, int64_t columns, int64_t rows) {
   Object ret = ImagickPixelIterator::allocObject();
-  initPixelRegionIterator(ret.get(), magick, x, y, columns, rows);
+  initPixelRegionIterator(ret, magick, x, y, columns, rows);
   return ret;
 }
 

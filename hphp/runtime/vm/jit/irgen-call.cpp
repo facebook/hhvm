@@ -15,8 +15,10 @@
 */
 #include "hphp/runtime/vm/jit/irgen-call.h"
 
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
@@ -137,7 +139,9 @@ void fpushObjMethodUnknown(HTS& env,
 
   gen(env,
       LdObjMethod,
-      LdObjMethodData { offsetFromSP(env, 0), methodName, shouldFatal },
+      LdObjMethodData {
+        offsetFromIRSP(env, BCSPOffset{0}), methodName, shouldFatal
+      },
       objCls,
       sp(env));
 }
@@ -270,8 +274,8 @@ void fpushFuncArr(HTS& env, int32_t numParams) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  gen(env, LdArrFuncCtx, StackOffset { offsetFromSP(env, 0) }, arr, sp(env),
-    thisAR);
+  gen(env, LdArrFuncCtx, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    arr, sp(env), thisAR);
   gen(env, DecRef, arr);
 }
 
@@ -309,8 +313,8 @@ void fpushCufUnknown(HTS& env, Op op, int32_t numParams) {
 
   auto const opcode = callable->isA(Type::Arr) ? LdArrFPushCuf
                                                : LdStrFPushCuf;
-  gen(env, opcode, StackOffset { offsetFromSP(env, 0) }, callable, sp(env),
-    fp(env));
+  gen(env, opcode, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    callable, sp(env), fp(env));
   gen(env, DecRef, callable);
 }
 
@@ -351,7 +355,7 @@ SSATmp* clsMethodCtx(HTS& env, const Func* callee, const Class* cls) {
 void implFPushCufOp(HTS& env, Op op, int32_t numArgs) {
   const bool safe = op == OpFPushCufSafe;
   bool forward = op == OpFPushCufF;
-  SSATmp* callable = topC(env, safe ? 1 : 0);
+  SSATmp* callable = topC(env, BCSPOffset{safe ? 1 : 0});
 
   const Class* cls = nullptr;
   StringData* invName = nullptr;
@@ -451,7 +455,7 @@ void fpushActRec(HTS& env,
   auto const returnSPOff = env.irb->syncedSpLevel();
 
   ActRecInfo info;
-  info.spOffset = offsetFromSP(env, -int32_t{kNumActRecCells});
+  info.spOffset = offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}});
   info.numArgs = numArgs;
   info.invName = invName;
   gen(
@@ -479,7 +483,7 @@ void emitFPushCufIter(HTS& env, int32_t numParams, int32_t itId) {
     env,
     CufIterSpillFrame,
     FPushCufData {
-      offsetFromSP(env, -int32_t{kNumActRecCells}),
+      offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}}),
       static_cast<uint32_t>(numParams),
       itId
     },
@@ -701,8 +705,9 @@ void emitFPushClsMethod(HTS& env, int32_t numParams) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  gen(env, LookupClsMethod, StackOffset { offsetFromSP(env, 0) }, clsVal,
-    methVal, sp(env), fp(env));
+  gen(env, LookupClsMethod,
+    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    clsVal, methVal, sp(env), fp(env));
   gen(env, DecRef, methVal);
 }
 
@@ -710,7 +715,7 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
   auto const exitBlock = makeExitSlow(env);
 
   auto classTmp = top(env, Type::Cls);
-  auto methodTmp = topC(env, 1, DataTypeGeneric);
+  auto methodTmp = topC(env, BCSPOffset{1}, DataTypeGeneric);
   assert(classTmp->isA(Type::Cls));
   if (!classTmp->isConst() || !methodTmp->isConst(Type::Str)) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
@@ -843,7 +848,7 @@ void emitFPassCW(HTS& env, int32_t argNum) {
 void emitFCallArray(HTS& env) {
   spillStack(env);
   auto const data = CallArrayData {
-    offsetFromSP(env, 0),
+    offsetFromIRSP(env, BCSPOffset{0}),
     bcOff(env),
     nextBcOff(env),
     callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
@@ -871,7 +876,7 @@ void emitFCall(HTS& env, int32_t numParams) {
     env,
     Call,
     CallData {
-      offsetFromSP(env, 0),
+      offsetFromIRSP(env, BCSPOffset{0}),
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,

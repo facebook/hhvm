@@ -8,7 +8,7 @@ This is the expression dependent type <static>::T
 File "constructor_error.php", line 16, characters 14-27:
   where '<static>' is a reference to this expression
 File "constructor_error.php", line 4, characters 14-14:
-  resulting from expanding the type constant this::T as follows:
-    X::T
+  resulting from expanding a type constant as follows:
+    <static>::T -> this::T -> X::T
 File "constructor_error.php", line 16, characters 25-26:
 It is incompatible with a string

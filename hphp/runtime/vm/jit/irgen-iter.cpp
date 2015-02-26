@@ -42,7 +42,8 @@ void implMIterInit(HTS& env, Offset relOffset, Lambda genFunc) {
   auto const exit  = makeExit(env);
   spillStack(env);
   env.irb->exceptionStackBoundary();
-  auto const pred  = env.irb->stackInnerTypePrediction(offsetFromSP(env, 0));
+  auto const pred  = env.irb->stackInnerTypePrediction(
+    offsetFromIRSP(env, BCSPOffset{0}));
   auto const src   = topV(env);
 
   if (!pred.subtypeOfAny(Type::Arr, Type::Obj)) {

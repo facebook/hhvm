@@ -47,6 +47,7 @@
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/wddx/ext_wddx.h"
@@ -101,7 +102,7 @@ struct Session {
   int64_t  gc_maxlifetime{0};
   int64_t  cache_expire{0};
 
-  ObjectData* ps_session_handler{nullptr};
+  Object ps_session_handler;
   SessionSerializer* serializer{nullptr};
 
   bool auto_start{false};
@@ -150,10 +151,7 @@ void SessionRequestData::requestShutdownImpl() {
       mod->close();
     } catch (...) {}
   }
-  if (ObjectData* obj = ps_session_handler) {
-    ps_session_handler = nullptr;
-    decRefObj(obj);
-  }
+  ps_session_handler = nullptr;
   id.reset();
 }
 
@@ -347,8 +345,8 @@ void SystemlibSessionModule::lookupClass() {
   m_cls = cls;
 }
 
-ObjectData* SystemlibSessionModule::getObject() {
-  if (auto o = s_obj->getObject()) {
+const Object& SystemlibSessionModule::getObject() {
+  if (const auto& o = s_obj->getObject()) {
     return o;
   }
 
@@ -359,22 +357,21 @@ ObjectData* SystemlibSessionModule::getObject() {
     lookupClass();
   }
   s_obj->setObject(ObjectData::newInstance(m_cls));
-  ObjectData *obj = s_obj->getObject();
-  g_context->invokeFuncFew(ret.asTypedValue(), m_ctor, obj);
-
+  const auto& obj = s_obj->getObject();
+  g_context->invokeFuncFew(ret.asTypedValue(), m_ctor, obj.get());
   return obj;
 }
 
 bool SystemlibSessionModule::open(const char *save_path,
                                   const char *session_name) {
-  ObjectData *obj = getObject();
+  const auto& obj = getObject();
 
   Variant savePath = String(save_path, CopyString);
   Variant sessionName = String(session_name, CopyString);
   Variant ret;
   TypedValue args[2] = { *savePath.asCell(), *sessionName.asCell() };
-  g_context->invokeFuncFew(ret.asTypedValue(), m_open, obj,
-                             nullptr, 2, args);
+  g_context->invokeFuncFew(ret.asTypedValue(), m_open, obj.get(),
+                           nullptr, 2, args);
 
   if (ret.isBoolean() && ret.toBoolean()) {
     s_session->mod_data = true;
@@ -386,7 +383,7 @@ bool SystemlibSessionModule::open(const char *save_path,
 }
 
 bool SystemlibSessionModule::close() {
-  auto obj = s_obj->getObject();
+  const auto& obj = s_obj->getObject();
   if (!obj) {
     // close() can be called twice in some circumstances
     s_session->mod_data = false;
@@ -394,7 +391,7 @@ bool SystemlibSessionModule::close() {
   }
 
   Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), m_close, obj);
+  g_context->invokeFuncFew(ret.asTypedValue(), m_close, obj.get());
   s_obj->destroy();
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -406,11 +403,11 @@ bool SystemlibSessionModule::close() {
 }
 
 bool SystemlibSessionModule::read(const char *key, String &value) {
-  ObjectData *obj = getObject();
+  const auto& obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
   Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), m_read, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_read, obj.get(),
                              nullptr, 1, sessionKey.asCell());
 
   if (ret.isString()) {
@@ -423,13 +420,13 @@ bool SystemlibSessionModule::read(const char *key, String &value) {
 }
 
 bool SystemlibSessionModule::write(const char *key, const String& value) {
-  ObjectData *obj = getObject();
+  const auto& obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
   Variant sessionVal = value;
   Variant ret;
   TypedValue args[2] = { *sessionKey.asCell(), *sessionVal.asCell() };
-  g_context->invokeFuncFew(ret.asTypedValue(), m_write, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_write, obj.get(),
                              nullptr, 2, args);
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -441,11 +438,11 @@ bool SystemlibSessionModule::write(const char *key, const String& value) {
 }
 
 bool SystemlibSessionModule::destroy(const char *key) {
-  ObjectData *obj = getObject();
+  const auto& obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
   Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), m_destroy, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_destroy, obj.get(),
                              nullptr, 1, sessionKey.asCell());
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -457,11 +454,11 @@ bool SystemlibSessionModule::destroy(const char *key) {
 }
 
 bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
-  ObjectData *obj = getObject();
+  const auto& obj = getObject();
 
   Variant maxLifeTime = maxlifetime;
   Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), m_gc, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_gc, obj.get(),
                              nullptr, 1, maxLifeTime.asCell());
 
   if (ret.isInteger()) {
@@ -868,8 +865,7 @@ class UserSessionModule : public SessionModule {
   UserSessionModule() : SessionModule("user") {}
 
   bool open(const char *save_path, const char *session_name) override {
-    auto func = make_packed_array(Object(s_session->ps_session_handler),
-                                  s_open);
+    auto func = make_packed_array(s_session->ps_session_handler, s_open);
     auto args = make_packed_array(String(save_path), String(session_name));
 
     auto res = vm_call_user_func(func, args);
@@ -878,8 +874,7 @@ class UserSessionModule : public SessionModule {
   }
 
   bool close() override {
-    auto func = make_packed_array(Object(s_session->ps_session_handler),
-                                  s_close);
+    auto func = make_packed_array(s_session->ps_session_handler, s_close);
     auto args = Array::Create();
 
     auto res = vm_call_user_func(func, args);
@@ -889,7 +884,7 @@ class UserSessionModule : public SessionModule {
 
   bool read(const char *key, String &value) override {
     Variant ret = vm_call_user_func(
-       make_packed_array(Object(s_session->ps_session_handler), s_read),
+       make_packed_array(s_session->ps_session_handler, s_read),
        make_packed_array(String(key))
     );
     if (ret.isString()) {
@@ -901,21 +896,21 @@ class UserSessionModule : public SessionModule {
 
   bool write(const char *key, const String& value) override {
     return handleReturnValue(vm_call_user_func(
-       make_packed_array(Object(s_session->ps_session_handler), s_write),
+       make_packed_array(s_session->ps_session_handler, s_write),
        make_packed_array(String(key, CopyString), value)
     ));
   }
 
   bool destroy(const char *key) override {
     return handleReturnValue(vm_call_user_func(
-       make_packed_array(Object(s_session->ps_session_handler), s_destroy),
+       make_packed_array(s_session->ps_session_handler, s_destroy),
        make_packed_array(String(key))
     ));
   }
 
   bool gc(int maxlifetime, int *nrdels) override {
     return handleReturnValue(vm_call_user_func(
-       make_packed_array(Object(s_session->ps_session_handler), s_gc),
+       make_packed_array(s_session->ps_session_handler, s_gc),
        make_packed_array((int64_t)maxlifetime)
     ));
   }
@@ -1121,8 +1116,8 @@ public:
   WddxSessionSerializer() : SessionSerializer("wddx") {}
 
   virtual String encode() {
-    WddxPacket* wddxPacket = newres<WddxPacket>(empty_string_variant_ref,
-                                                true, true);
+    auto wddxPacket = makeSmartPtr<WddxPacket>(empty_string_variant_ref,
+                                               true, true);
     for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
@@ -1581,12 +1576,7 @@ static bool HHVM_FUNCTION(session_set_save_handler,
     s_session->default_mod = s_session->mod;
   }
 
-  if (ObjectData* obj = s_session->ps_session_handler) {
-    s_session->ps_session_handler = nullptr;
-    decRefObj(obj);
-  }
-  s_session->ps_session_handler = sessionhandler.get();
-  s_session->ps_session_handler->incRefCount();
+  s_session->ps_session_handler = sessionhandler;
 
   // remove previous shutdown function
   g_context->removeShutdownFunction(s_session_write_close,
@@ -1916,7 +1906,7 @@ static class SessionExtension final : public Extension {
     // this is called for every request.
     if (s_session) return;
     s_session = new SessionRequestData;
-    Extension* ext = Extension::GetExtension(s_session_ext_name);
+    Extension* ext = ExtensionRegistry::get(s_session_ext_name);
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.save_path",               "",

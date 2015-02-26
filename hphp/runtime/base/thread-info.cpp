@@ -137,7 +137,7 @@ void ThreadInfo::onSessionExit() {
 
 //////////////////////////////////////////////////////////////////////
 
-void throw_infinite_recursion_exception() {
+void raise_infinite_recursion_error() {
   if (!RuntimeOption::NoInfiniteRecursionDetection) {
     // Reset profiler otherwise it might recurse further causing segfault
     auto info = ThreadInfo::s_threadInfo.getNoCheck();

@@ -124,14 +124,14 @@ void retypeLoad(IRInstruction* load, Type newType) {
 void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
   switch (inst->op()) {
     case LdLoc: {
-      auto const id = inst->extra<LocalId>()->locId;
+      auto const id = inst->extra<LdLoc>()->locId;
       auto const newType = state.localType(id);
       retypeLoad(inst, newType);
       break;
     }
 
     case LdStk: {
-      auto idx = inst->extra<StackOffset>()->offset;
+      auto idx = inst->extra<LdStk>()->offset;
       auto newType = state.stackType(idx);
       // We know from hhbc invariants that stack slots are always either Cls or
       // Gen flavors---there's no need to relax beyond that.
@@ -149,18 +149,18 @@ void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
 }
 
 Type relaxCell(Type t, TypeConstraint tc) {
-  assert(t.notBoxed());
+  assert(t <= Type::Cell);
 
   switch (tc.category) {
     case DataTypeGeneric:
       return Type::Gen;
 
     case DataTypeCountness:
-      return t.notCounted() ? Type::Uncounted : t.unspecialize();
+      return !t.maybe(Type::Counted) ? Type::Uncounted : t.unspecialize();
 
     case DataTypeCountnessInit:
       if (t <= Type::Uninit) return Type::Uninit;
-      return (t.notCounted() && !t.maybe(Type::Uninit))
+      return (!t.maybe(Type::Counted) && !t.maybe(Type::Uninit))
         ? Type::UncountedInit : t.unspecialize();
 
     case DataTypeSpecific:
@@ -277,10 +277,9 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
     case HintStkInner:
     case GuardStk:
       {
-        uint32_t offsetFromSp =
-          safe_cast<uint32_t>(inst.extra<StackOffset>()->offset);
-        uint32_t offsetFromFp = inst.marker().spOff() - offsetFromSp;
-        func(L::Stack{offsetFromSp, offsetFromFp}, inst.typeParam());
+        auto bcSpOffset = inst.extra<RelOffsetData>()->bcSpOffset;
+        auto offsetFromFp = inst.marker().spOff() - bcSpOffset;
+        func(L::Stack{offsetFromFp}, inst.typeParam());
       }
       break;
     default: break;
@@ -289,8 +288,6 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
 }
 
 bool typeFitsConstraint(Type t, TypeConstraint tc) {
-  always_assert(t != Type::Bottom);
-
   switch (tc.category) {
     case DataTypeGeneric:
       return true;
@@ -299,7 +296,7 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       // Consumers using this constraint expect the type to be relaxed to
       // Uncounted or left alone, so something like Arr|Obj isn't specific
       // enough.
-      return t.notCounted() ||
+      return !t.maybe(Type::Counted) ||
              t.subtypeOfAny(Type::Str, Type::Arr, Type::Obj,
                             Type::Res, Type::BoxedCell);
 
@@ -345,7 +342,7 @@ Type relaxType(Type t, TypeConstraint tc) {
   auto const relaxed =
     (t & Type::Cell) <= Type::Bottom ? Type::Bottom
                                      : relaxCell(t & Type::Cell, tc);
-  return t.notBoxed() ? relaxed : relaxed | Type::BoxedInitCell;
+  return t <= Type::Cell ? relaxed : relaxed | Type::BoxedInitCell;
 }
 
 static void incCategory(DataTypeCategory& c) {
@@ -376,7 +373,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
          origTc, knownType, toRelax);
   Trace::Indent _i;
 
-  auto const dstType = refineType(knownType, toRelax);
+  auto const dstType = knownType & toRelax;
   always_assert_flog(typeFitsConstraint(dstType, origTc),
                      "refine({}, {}) doesn't fit {}",
                      knownType, toRelax, origTc);
@@ -395,7 +392,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
     }
 
     auto const relaxed = relaxType(toRelax, newTc);
-    auto const newDstType = refineType(relaxed, knownType);
+    auto const newDstType = relaxed & knownType;
     if (typeFitsConstraint(newDstType, origTc)) break;
 
     ITRACE(5, "newDstType = {}, newTc = {}; incrementing constraint\n",

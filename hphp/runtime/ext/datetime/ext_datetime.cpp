@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 
+#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -120,8 +121,8 @@ void HHVM_METHOD(DateTime, __construct,
                              ? null_object
                              : timezone.toObject();
   DateTimeData* data = Native::data<DateTimeData>(this_);
-  data->m_dt = newres<DateTime>(TimeStamp::Current(),
-                                DateTimeZoneData::unwrap(obj_timezone));
+  data->m_dt = makeSmartPtr<DateTime>(TimeStamp::Current(),
+                                      DateTimeZoneData::unwrap(obj_timezone));
   if (!time.empty()) {
     data->m_dt->fromString(time, DateTimeZoneData::unwrap(obj_timezone));
   } else if (!timezone.isNull()) {
@@ -141,7 +142,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
   ObjectData* obj = ObjectData::newInstance(DateTimeData::getClass());
   DateTimeData* data = Native::data<DateTimeData>(obj);
   const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
-  data->m_dt = newres<DateTime>(curr, false);
+  data->m_dt = makeSmartPtr<DateTime>(curr, false);
   if (!data->m_dt->fromString(time, DateTimeZoneData::unwrap(obj_timezone),
                               format.data(), false)) {
     return false;
@@ -358,7 +359,7 @@ const StaticString DateTimeZoneData::s_className("DateTimeZone");
 void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone) {
   DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
-  data->m_tz = newres<TimeZone>(timezone);
+  data->m_tz = makeSmartPtr<TimeZone>(timezone);
   if (!data->m_tz->isValid()) {
     std::string msg = "DateTimeZone::__construct(): Unknown or bad timezone (";
     msg += timezone.data();
@@ -453,7 +454,7 @@ const StaticString DateIntervalData::s_className("DateInterval");
 void HHVM_METHOD(DateInterval, __construct,
                  const String& interval_spec) {
   DateIntervalData* data = Native::data<DateIntervalData>(this_);
-  data->m_di = newres<DateInterval>(interval_spec);
+  data->m_di = makeSmartPtr<DateInterval>(interval_spec);
   if (!data->m_di->isValid()) {
     std::string msg = "DateInterval::__construct: Invalid interval (";
     msg += interval_spec.data();
@@ -656,7 +657,8 @@ static Variant idateImpl(const String& format, int64_t timestamp) {
     throw_invalid_argument("format: %s", format.data());
     return false;
   }
-  int64_t ret = DateTime(timestamp, false).toInteger(*format.data());
+  auto dt = makeSmartPtr<DateTime>(timestamp, false);
+  int64_t ret = dt->toInteger(*format.data());
   if (ret == -1) return false;
   return ret;
 }
@@ -676,7 +678,8 @@ TypedValue* HHVM_FN(idate)(ActRec* ar) {
 
 static Variant dateImpl(const String& format, int64_t timestamp) {
   if (format.empty()) return empty_string_variant();
-  String ret = DateTime(timestamp, false).toString(format, false);
+  auto dt = makeSmartPtr<DateTime>(timestamp, false);
+  String ret = dt->toString(format, false);
   if (ret.isNull()) return false;
   return ret;
 }
@@ -686,7 +689,8 @@ TypedValue* HHVM_FN(date)(ActRec* ar) {
 }
 
 static Variant gmdateImpl(const String& format, int64_t timestamp) {
-  String ret = DateTime(timestamp, true).toString(format, false);
+  auto dt = makeSmartPtr<DateTime>(timestamp, true);
+  String ret = dt->toString(format, false);
   if (ret.isNull()) return false;
   return ret;
 }
@@ -696,7 +700,8 @@ TypedValue* HHVM_FN(gmdate)(ActRec* ar) {
 }
 
 static Variant strftimeImpl(const String& format, int64_t timestamp) {
-  String ret = DateTime(timestamp, false).toString(format, true);
+  auto dt = makeSmartPtr<DateTime>(timestamp, false);
+  String ret = dt->toString(format, true);
   if (ret.isNull()) return false;
   return ret;
 }
@@ -706,7 +711,8 @@ TypedValue* HHVM_FN(strftime)(ActRec* ar) {
 }
 
 static String gmstrftimeImpl(const String& format, int64_t timestamp) {
-  String ret = DateTime(timestamp, true).toString(format, true);
+  auto dt = makeSmartPtr<DateTime>(timestamp, true);
+  String ret = dt->toString(format, true);
   if (ret.isNull()) return false;
   return ret;
 }
@@ -719,13 +725,12 @@ static Variant strtotimeImpl(const String& input, int64_t timestamp) {
   if (input.empty()) {
     return false;
   }
-
-  DateTime dt(timestamp);
-  if (!dt.fromString(input, SmartPtr<TimeZone>(), nullptr, false)) {
+  auto dt = makeSmartPtr<DateTime>(timestamp);
+  if (!dt->fromString(input, SmartPtr<TimeZone>(), nullptr, false)) {
     return false;
   }
   bool error;
-  return dt.toTimeStamp(error);
+  return dt->toTimeStamp(error);
 }
 
 TypedValue* HHVM_FN(strtotime)(ActRec* ar) {
@@ -735,7 +740,8 @@ TypedValue* HHVM_FN(strtotime)(ActRec* ar) {
 #undef GET_ARGS_AND_CALL
 
 static Array getdateImpl(int64_t timestamp) {
-  return DateTime(timestamp, false).toArray(DateTime::ArrayFormat::TimeMap);
+  auto dt = makeSmartPtr<DateTime>(timestamp, false);
+  return dt->toArray(DateTime::ArrayFormat::TimeMap);
 }
 
 TypedValue* HHVM_FN(getdate)(ActRec* ar) {
@@ -751,7 +757,8 @@ static Array localtimeImpl(int64_t timestamp, bool is_associative) {
   DateTime::ArrayFormat format =
     is_associative ? DateTime::ArrayFormat::TmMap :
                      DateTime::ArrayFormat::TmVector;
-  return DateTime(timestamp, false).toArray(format);
+
+  return makeSmartPtr<DateTime>(timestamp, false)->toArray(format);
 }
 
 TypedValue* HHVM_FN(localtime)(ActRec* ar) {
@@ -886,10 +893,11 @@ double get_date_default_gmt_offset() {
 }
 
 Array HHVM_FUNCTION(date_sun_info,
-                    int64_t ts,
+                    int64_t timestamp,
                     double latitude,
                     double longitude) {
-  return DateTime(ts, false).getSunInfo(latitude, longitude);
+  auto dt = makeSmartPtr<DateTime>(timestamp, false);
+  return dt->getSunInfo(latitude, longitude);
 }
 
 #define GET_ARGS_AND_CALL(ar, func)                                            \
@@ -907,7 +915,7 @@ Array HHVM_FUNCTION(date_sun_info,
 
 Variant date_sunriseImpl(int64_t timestamp, int format, double latitude,
                          double longitude, double zenith, double gmt_offset) {
-  return DateTime(timestamp, false).getSunInfo
+  return makeSmartPtr<DateTime>(timestamp, false)->getSunInfo
     (static_cast<DateTime::SunInfoFormat>(format), latitude, longitude,
      zenith, gmt_offset, false);
 }
@@ -918,7 +926,7 @@ TypedValue* HHVM_FN(date_sunrise)(ActRec* ar) {
 
 Variant date_sunsetImpl(int64_t timestamp, int format, double latitude,
                         double longitude, double zenith, double gmt_offset) {
-  return DateTime(timestamp, false).getSunInfo
+  return makeSmartPtr<DateTime>(timestamp, false)->getSunInfo
     (static_cast<DateTime::SunInfoFormat>(format), latitude, longitude,
      zenith, gmt_offset, true);
 }

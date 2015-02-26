@@ -20,11 +20,8 @@
 
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/version.h"
-#include "hphp/util/exception.h"
 #include "hphp/util/hdf.h"
 
 #include <set>
@@ -59,23 +56,9 @@ namespace HPHP {
 
 class Extension : public IDebuggable {
 public:
-  static bool IsLoaded(const String& name);
   static bool IsSystemlibPath(const std::string& path);
-  static Array GetLoadedExtensions();
-  static Extension *GetExtension(const String& name);
 
-  // called by RuntimeOption to initialize all configurations of extension
-  static void LoadModules(const IniSetting::Map& ini, Hdf hdf);
-
-  // called by hphp_process_init/exit
-  static void InitModules();
   static void MergeSystemlib();
-  static void ShutdownModules();
-  static bool ModulesInitialised();
-  static void ThreadInitModules();
-  static void ThreadShutdownModules();
-  static void RequestInitModules();
-  static void RequestShutdownModules();
 
   // Look for "ext.{namehash}" in the binary and compile/merge it
   void loadSystemlib(const std::string& name = "");
@@ -119,186 +102,38 @@ public:
   }
 
 private:
-  static void SortDependencies();
-
-  // Indicates which version of the HHVM Extension API
-  // this module was built against.
-  int64_t m_hhvmAPIVersion;
-
   std::string m_name;
   std::string m_version;
   std::string m_dsoName;
 };
 
-#define HHVM_API_VERSION 20150112L
+struct ExtensionBuildInfo {
+  uint64_t dso_version;
+  uint64_t branch_id;
+};
+
+
+// Versioned ID for Extension class, do not use for feature selection
+#define HHVM_DSO_VERSION 20150223L
 
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \
-extern "C" Extension *getModule() { \
+static ExtensionBuildInfo s_##name##_extension_build_info = { \
+  HHVM_DSO_VERSION, \
+  HHVM_VERISON_BRANCH, \
+}; \
+extern "C" ExtensionBuildInfo* getModuleBuildInfo() { \
+  return &s_##name##_extension_build_info; \
+} \
+extern "C" Extension* getModule() { \
   return &s_##name##_extension; \
 }
 #else
 #define HHVM_GET_MODULE(name)
 #endif
 
-/////////////////////////////////////////////////////////////////////////////
-// Extension argument API
-
-/**
- * Get numbererd arg (zero based) as a TypedValue*
- */
-inline
-TypedValue* getArg(ActRec *ar, unsigned arg) {
-  if (arg >= ar->numArgs()) {
-    return nullptr;
-  }
-  unsigned funcParams = ar->func()->numParams();
-  if (arg < funcParams) {
-    auto args = reinterpret_cast<TypedValue*>(ar);
-    return args - (arg + 1);
-  }
-  return ar->getExtraArg(arg - funcParams);
-}
-
-/**
- * Get numbered arg (zero based) as a Variant
- */
-inline Variant getArgVariant(ActRec *ar, unsigned arg,
-                             Variant def = uninit_null()) {
-  auto tv = getArg(ar, arg);
-  return tv ? tvAsVariant(tv) : def;
-}
-
-/**
- * Get a reference value from the stack
- */
-template <DataType DType>
-typename std::enable_if<DType == KindOfRef, VRefParam>::type
-getArg(ActRec *ar, unsigned arg) {
-  auto tv = getArg(ar, arg);
-  if (!tv) {
-    raise_warning("Required parameter %d not passed", (int)arg);
-    return directRef(Variant());
-  }
-  if (tv->m_type != KindOfRef) {
-    raise_warning("Argument %d not passed as reference", (int)arg);
-  }
-  return directRef(tvAsVariant(tv));
-}
-
-/**
- * Get numbered arg (zero based) and return data (coerce if needed)
- *
- * e.g.: double dval = getArg<KindOfDouble>(ar, 0);
- *
- * Throws warning and returns 0/nullptr if arg not passed
- */
-template <DataType DType>
-typename std::enable_if<DType != KindOfRef,
-  typename DataTypeCPPType<DType>::type>::type
-getArg(ActRec *ar, unsigned arg) {
-  auto tv = getArg(ar, arg);
-  if (!tv) {
-    raise_warning("Required parameter %d not passed", (int)arg);
-    return 0L;
-  }
-  if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
-                             arg + 1, DType, tv->m_type);
-    tvCastInPlace(tv, DType);
-  }
-  return unpack_tv<DType>(tv);
-}
-
-/**
- * Get numbered arg (zero based) and return data (coerce if needed)
- *
- * e.g. int64_t lval = getArg<KindOfInt64>(ar, 1, 42);
- *
- * Returns default value (42 in example) if arg not passed
- */
-template <DataType DType>
-typename DataTypeCPPType<DType>::type
-getArg(ActRec *ar, unsigned arg,
-       typename DataTypeCPPType<DType>::type def) {
-  TypedValue *tv = getArg(ar, arg);
-  if (!tv) {
-    return def;
-  }
-  if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
-                             arg + 1, DType, tv->m_type);
-    tvCastInPlace(tv, DType);
-  }
-  return unpack_tv<DType>(tv);
-}
-
-struct IncoercibleArgumentException : Exception {};
-
-/**
- * Get numbered arg (zero based) and return data (coerce if needed)
- *
- * e.g.: double dval = getArg<KindOfDouble>(ar, 0);
- *
- * Raise warning and throw IncoercibleArgumentException if argument
- * is not provided/not coercible
- */
-template <DataType DType>
-typename std::enable_if<DType != KindOfRef,
-  typename DataTypeCPPType<DType>::type>::type
-getArgStrict(ActRec *ar, unsigned arg) {
-  auto tv = getArg(ar, arg);
-  if (!tv) {
-    raise_warning("Required parameter %d not passed", (int)arg);
-    throw IncoercibleArgumentException();
-  }
-  if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
-                             arg + 1, DType, tv->m_type);
-    throw IncoercibleArgumentException();
-  }
-  return unpack_tv<DType>(tv);
-}
-
-/**
- * Get numbered arg (zero based) and return data (coerce if needed)
- *
- * e.g. int64_t lval = getArg<KindOfInt64>(ar, 1, 42);
- *
- * Raise warning and throw IncoercibleArgumentException if argument
- * is not coercible
- *
- * Returns default value (42 in example) if arg not passed
- */
-template <DataType DType>
-typename DataTypeCPPType<DType>::type
-getArgStrict(ActRec *ar, unsigned arg,
-       typename DataTypeCPPType<DType>::type def) {
-  TypedValue *tv = getArg(ar, arg);
-  if (!tv) {
-    return def;
-  }
-  if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
-                             arg + 1, DType, tv->m_type);
-    throw IncoercibleArgumentException();
-  }
-  return unpack_tv<DType>(tv);
-}
-
-/**
- * Parse typed values from the function call
- * based on an expect format.
- *
- * e.g.:
- *   int64_t lval;
- *   double dval;
- *   TypedValye *tv = nullptr;
- *   if (!parseArgs(ar, "ld|v", &lval, &dval, &tv)) {
- *     return false;
- *   }
- */
-bool parseArgs(ActRec *ar, const char *format, ...);
+// Deprecated: Use HHVM_VERSION_BRANCH for source compat checks
+#define HHVM_API_VERSION 20150212L
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

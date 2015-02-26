@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_down.h"
+
+#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/cmd/cmd_up.h"
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
 

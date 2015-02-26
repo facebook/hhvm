@@ -90,7 +90,7 @@ class IntlDateFormatter {
   <<__Native>>
   public static function FormatObject(object $obj,
                                       mixed $format = NULL,
-                                      string $locale = NULL): string;
+                                      ?string $locale = NULL): string;
 
   /**
    * Get the calendar type used for the IntlDateFormatter

@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 function foo(bool $x, int $n, string $y) {
   if ($x) {

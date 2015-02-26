@@ -56,13 +56,16 @@ void profiledGuard(HTS& env,
     case ProfGuard::GuardStk:
       {
         // Adjust 'id' to get an offset from the current m_irb->sp().
-        auto const adjOff = offsetFromSP(env, id);
+        auto const adjOff = offsetFromIRSP(env, BCSPOffset{id});
         if (auto failBlock = env.irb->guardFailBlock()) {
-          gen(env, CheckStk, type, StackOffset { adjOff }, failBlock, sp(env));
+          gen(env, CheckStk,
+            type, IRSPOffsetData { adjOff }, failBlock, sp(env));
         } else if (kind == ProfGuard::CheckStk) {
-          gen(env, CheckStk, type, StackOffset { adjOff }, checkExit, sp(env));
+          gen(env, CheckStk,
+            type, IRSPOffsetData { adjOff }, checkExit, sp(env));
         } else {
-          gen(env, GuardStk, type, StackOffset { adjOff }, sp(env), fp(env));
+          gen(env, GuardStk, type,
+            RelOffsetData { BCSPOffset{id}, adjOff }, sp(env), fp(env));
         }
         return;
       }
@@ -76,7 +79,7 @@ void profiledGuard(HTS& env,
       return ldLocAddr(env, id);
     case ProfGuard::CheckStk:
     case ProfGuard::GuardStk:
-      return ldStkAddr(env, id);
+      return ldStkAddr(env, BCSPOffset{id});
     }
     not_reached();
   };
@@ -127,37 +130,48 @@ void profiledGuard(HTS& env,
   doGuard(Type::Str);
 }
 
-void guardTypeStack(HTS& env, uint32_t stackIndex, Type type, bool outerOnly) {
-  assert(type <= Type::Gen);
-  // This should only be called at the beginning of a trace, with a
-  // clean stack
+void guardTypeStack(
+  HTS& env,
+  BCSPOffset stackIndex,
+  Type type,
+  bool outerOnly
+) {
+  assert(type <= Type::Cell || type <= Type::BoxedCell);
+
+  // This should only be called at the beginning of a trace, with a clean
+  // stack.
   assert(env.irb->evalStack().size() == 0);
   assert(env.irb->stackDeficit() == 0);
-  auto const stackOff = StackOffset { offsetFromSP(env, stackIndex) };
-  assert(type.isBoxed() || type.notBoxed());
+  auto const stackOff = RelOffsetData {
+    stackIndex,
+    offsetFromIRSP(env, stackIndex)
+  };
 
-  if (!type.isBoxed()) {
-    profiledGuard(env, type, ProfGuard::GuardStk, stackIndex, nullptr);
+  if (type <= Type::Cell) {
+    profiledGuard(env, type, ProfGuard::GuardStk, stackIndex.offset, nullptr);
     return;
   }
 
-  profiledGuard(env, Type::BoxedInitCell, ProfGuard::GuardStk, stackIndex,
-    nullptr);
-  env.irb->constrainStack(stackOff.offset, DataTypeSpecific);
+  profiledGuard(env, Type::BoxedInitCell, ProfGuard::GuardStk,
+    stackIndex.offset, nullptr);
+  env.irb->constrainStack(stackOff.irSpOffset, DataTypeSpecific);
   gen(env, HintStkInner, type & Type::BoxedInitCell, stackOff, sp(env));
 
-  if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
-    auto stk = gen(env, LdStk, Type::BoxedInitCell, stackOff, sp(env));
+  if (!outerOnly && type <= Type::BoxedCell && type.inner() < Type::Cell) {
+    auto stk = gen(env, LdStk, Type::BoxedInitCell,
+      IRSPOffsetData{stackOff.irSpOffset}, sp(env));
     gen(env,
         CheckRefInner,
-        env.irb->stackInnerTypePrediction(stackOff.offset),
+        env.irb->stackInnerTypePrediction(stackOff.irSpOffset),
         makeExit(env),
         stk);
   }
 }
 
 void guardTypeLocal(HTS& env, uint32_t locId, Type type, bool outerOnly) {
-  if (!type.isBoxed()) {
+  assert(type <= Type::Cell || type <= Type::BoxedCell);
+
+  if (type <= Type::Cell) {
     profiledGuard(env, type, ProfGuard::GuardLoc, locId, nullptr);
     return;
   }
@@ -169,7 +183,7 @@ void guardTypeLocal(HTS& env, uint32_t locId, Type type, bool outerOnly) {
       LocalId { locId },
       fp(env));
 
-  if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
+  if (!outerOnly && type <= Type::BoxedCell && type.inner() < Type::Cell) {
     auto const ldrefExit = makeExit(env);
     auto const ldPMExit = makePseudoMainExit(env);
     auto const val = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
@@ -182,7 +196,9 @@ void guardTypeLocal(HTS& env, uint32_t locId, Type type, bool outerOnly) {
 }
 
 void checkTypeLocal(HTS& env, uint32_t locId, Type type, Offset dest) {
-  if (!type.isBoxed()) {
+  assert(type <= Type::Cell || type <= Type::BoxedCell);
+
+  if (type <= Type::Cell) {
     profiledGuard(env, type, ProfGuard::CheckLoc, locId, makeExit(env, dest));
     return;
   }
@@ -214,11 +230,11 @@ void refCheckHelper(HTS& env,
                     const std::vector<bool>& mask,
                     const std::vector<bool>& vals,
                     Offset dest) {
-  int32_t const actRecOff = entryArDelta + offsetFromSP(env, 0);
+  auto const actRecOff = entryArDelta + offsetFromIRSP(env, BCSPOffset{0});
   auto const funcPtr = gen(
     env,
     LdARFuncPtr,
-    StackOffset { actRecOff },
+    StackOffset { actRecOff.offset },
     sp(env)
   );
   SSATmp* nParams = nullptr;
@@ -248,7 +264,7 @@ void refCheckHelper(HTS& env,
           cns(env, mask64),
           cns(env, vals64));
     } else if (dest == -1) {
-      assert(offsetFromSP(env, 0) == 0);
+      assert(offsetFromIRSP(env, BCSPOffset{0}) == 0);
       gen(env,
           GuardRefs,
           funcPtr,
@@ -279,30 +295,31 @@ void assertTypeLocal(HTS& env, uint32_t locId, Type type) {
   gen(env, AssertLoc, type, LocalId(locId), fp(env));
 }
 
-void assertTypeStack(HTS& env, uint32_t idx, Type type) {
-  if (idx < env.irb->evalStack().size()) {
+void assertTypeStack(HTS& env, BCSPOffset idx, Type type) {
+  if (idx.offset < env.irb->evalStack().size()) {
     // We're asserting a new type so we don't care about the previous type.
     auto const tmp = top(env, Type::StkElem, idx, DataTypeGeneric);
     assert(tmp);
-    env.irb->evalStack().replace(idx, gen(env, AssertType, type, tmp));
+    env.irb->evalStack().replace(idx.offset, gen(env, AssertType, type, tmp));
   } else {
     gen(env,
         AssertStk,
         type,
-        StackOffset { offsetFromSP(env, idx) },
+        IRSPOffsetData { offsetFromIRSP(env, idx) },
         sp(env));
   }
 }
 
-void checkTypeStack(HTS& env, uint32_t idx, Type type, Offset dest) {
+void checkTypeStack(HTS& env, BCSPOffset idx, Type type, Offset dest) {
   assert(type <= Type::Gen);
 
-  if (type.isBoxed()) {
+  if (type <= Type::BoxedCell) {
     spillStack(env); // don't bother with the case that it's not spilled.
     auto const exit = makeExit(env, dest);
-    auto const soff = StackOffset { offsetFromSP(env, idx) };
-    profiledGuard(env, Type::BoxedInitCell, ProfGuard::CheckStk, idx, exit);
-    env.irb->constrainStack(soff.offset, DataTypeSpecific);
+    auto const soff = RelOffsetData { idx, offsetFromIRSP(env, idx) };
+    profiledGuard(env, Type::BoxedInitCell,
+      ProfGuard::CheckStk, idx.offset, exit);
+    env.irb->constrainStack(soff.irSpOffset, DataTypeSpecific);
     gen(env, HintStkInner, type & Type::BoxedInitCell, soff, sp(env));
     return;
   }
@@ -310,20 +327,21 @@ void checkTypeStack(HTS& env, uint32_t idx, Type type, Offset dest) {
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
 
-  if (idx < env.irb->evalStack().size()) {
+  if (idx.offset < env.irb->evalStack().size()) {
     FTRACE(1, "checkTypeStack({}): generating CheckType for {}\n",
-           idx, type.toString());
+           idx.offset, type.toString());
     // CheckType only cares about its input type if the simplifier does
     // something with it and that's handled if and when it happens.
     auto const tmp = top(env, Type::StkElem, idx, DataTypeGeneric);
     assert(tmp);
-    env.irb->evalStack().replace(idx, gen(env, CheckType, type, exit, tmp));
+    env.irb->evalStack().replace(idx.offset,
+      gen(env, CheckType, type, exit, tmp));
     return;
   }
-  FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
+  FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx.offset, type.toString());
   // Just like CheckType, CheckStk only cares about its input type if the
   // simplifier does something with it.
-  profiledGuard(env, type, ProfGuard::CheckStk, idx, exit);
+  profiledGuard(env, type, ProfGuard::CheckStk, idx.offset, exit);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -332,8 +350,12 @@ void assertTypeLocation(HTS& env, const RegionDesc::Location& loc, Type type) {
   assert(type <= Type::StkElem);
   using T = RegionDesc::Location::Tag;
   switch (loc.tag()) {
-  case T::Stack: assertTypeStack(env, loc.stackOffset(), type); break;
-  case T::Local: assertTypeLocal(env, loc.localId(), type);     break;
+  case T::Stack:
+    assertTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type);
+    break;
+  case T::Local:
+    assertTypeLocal(env, loc.localId(), type);
+    break;
   }
 }
 
@@ -344,8 +366,12 @@ void checkTypeLocation(HTS& env,
   assert(type <= Type::Gen);
   using T = RegionDesc::Location::Tag;
   switch (loc.tag()) {
-  case T::Stack: checkTypeStack(env, loc.stackOffset(), type, dest); break;
-  case T::Local: checkTypeLocal(env, loc.localId(), type, dest);     break;
+  case T::Stack:
+    checkTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type, dest);
+    break;
+  case T::Local:
+    checkTypeLocal(env, loc.localId(), type, dest);
+    break;
   }
 }
 
@@ -356,8 +382,12 @@ void guardTypeLocation(HTS& env,
   assert(type <= Type::Gen);
   using T = RegionDesc::Location::Tag;
   switch (l.tag()) {
-  case T::Stack: guardTypeStack(env, l.stackOffset(), type, outerOnly); break;
-  case T::Local: guardTypeLocal(env, l.localId(),     type, outerOnly); break;
+  case T::Stack:
+    guardTypeStack(env, offsetFromBCSP(env, l.offsetFromFP()), type, outerOnly);
+    break;
+  case T::Local:
+    guardTypeLocal(env, l.localId(), type, outerOnly);
+    break;
   }
 }
 

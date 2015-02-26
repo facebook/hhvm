@@ -58,10 +58,27 @@ if (LIBICONV_CONST)
   add_definitions("-DICONV_CONST=const")
 endif()
 
-# mysql checks
-find_package(MySQL REQUIRED)
-include_directories(${MYSQL_INCLUDE_DIR})
-link_directories(${MYSQL_LIB_DIR})
+# mysql checks - if we're using async mysql, we use webscalesqlclient from
+# third-party/ instead
+if (ENABLE_ASYNC_MYSQL)
+  include_directories(
+    ${TP_DIR}/re2/src/
+    ${TP_DIR}/squangle/src/
+    ${TP_DIR}/webscalesqlclient/src/include/
+  )
+  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
+  # Unlike the .so, the static library intentionally does not link against
+  # yassl, despite building it :/
+  set(MYSQL_CLIENT_LIBS
+    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
+    ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/libyassl.a
+    ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/taocrypt/libtaocrypt.a
+  )
+else()
+  find_package(MySQL REQUIRED)
+  link_directories(${MYSQL_LIB_DIR})
+  include_directories(${MYSQL_INCLUDE_DIR})
+endif()
 MYSQL_SOCKET_SEARCH()
 if (MYSQL_UNIX_SOCK_ADDR)
   add_definitions(-DPHP_MYSQL_UNIX_SOCK_ADDR="${MYSQL_UNIX_SOCK_ADDR}")
@@ -436,6 +453,9 @@ macro(hphp_link target)
 
   target_link_libraries(${target} ${Boost_LIBRARIES})
   target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
+  if (ENABLE_ASYNC_MYSQL)
+    target_link_libraries(${target} squangle)
+  endif()
   target_link_libraries(${target} ${PCRE_LIBRARY})
   target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${LIBEVENT_LIB})
@@ -547,6 +567,10 @@ macro(hphp_link target)
 
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
+
+  if (ENABLE_MCROUTER)
+    target_link_libraries(${target} mcrouter)
+  endif()
 
   target_link_libraries(${target} afdt)
   target_link_libraries(${target} mbfl)

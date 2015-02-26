@@ -293,7 +293,7 @@ function ereg_replace(string $pattern,
  *   error occurred.   If the optional parameter regs was not passed or the
  *   length of the matched string is 0, this function returns 1.
  */
-<<__Native>>
+<<__Native, __Deprecated('As of PHP 5.3.0, preg_match is suggested instead')>>
 function ereg(string $pattern,
               string $string,
               ?array &$regs = null): mixed;

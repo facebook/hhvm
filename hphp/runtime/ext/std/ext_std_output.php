@@ -287,7 +287,7 @@ function hphp_get_hardware_counters(): mixed;
  * @return bool - returns TRUE on success and FALSE on failure
  */
 <<__HipHopSpecific, __Native("NoInjection")>>
-function hphp_set_hardware_events(string $events = null): bool;
+function hphp_set_hardware_events(?string $events = null): bool;
 
 <<__HipHopSpecific, __Native("NoInjection")>>
 function hphp_clear_hardware_events(): void;

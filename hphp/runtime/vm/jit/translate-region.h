@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/types.h"  // TransFlags
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/prof-src-key.h"
 
 namespace HPHP { namespace jit {
 

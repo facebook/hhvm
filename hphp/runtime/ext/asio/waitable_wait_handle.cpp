@@ -36,24 +36,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind)
-    : c_WaitHandle(cb, kind) {
-  setContextIdx(AsioSession::Get()->getCurrentContextIdx());
-  m_parentChain.init();
-}
-
-c_WaitableWaitHandle::~c_WaitableWaitHandle() {
-  switch (getState()) {
-    case STATE_SUCCEEDED:
-      tvRefcountedDecRef(&m_resultOrException);
-      break;
-
-    case STATE_FAILED:
-      tvDecRefObj(&m_resultOrException);
-      break;
-  }
-}
-
 int c_WaitableWaitHandle::t_getcontextidx() {
   return getContextIdx();
 }

@@ -17,8 +17,9 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H_
 
-#include "hphp/runtime/debugger/debugger_command.h"
 #include <map>
+
+#include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,30 +27,28 @@ namespace HPHP { namespace Eval {
 // we want to use std::map for sorted commands
 using ExtendedCommandMap = std::map<std::string, std::string>;
 
-class CmdExtended : public DebuggerCommand {
-public:
-  static const ExtendedCommandMap &GetExtendedCommandMap();
-  static DebuggerCommandPtr CreateExtendedCommand(const std::string &cls);
+struct CmdExtended : DebuggerCommand {
+  static const ExtendedCommandMap& GetExtendedCommandMap();
+  static DebuggerCommandPtr CreateExtendedCommand(const std::string& cls);
 
-public:
   CmdExtended() : DebuggerCommand(KindOfExtended) {}
 
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
+  void list(DebuggerClient&) override;
+  void help(DebuggerClient&) override;
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
 private:
-  const ExtendedCommandMap &getCommandMap();
-  void invokeList(DebuggerClient &client, const std::string &cls);
-  bool invokeHelp(DebuggerClient &client, const std::string &cls);
-  bool invokeClient(DebuggerClient &client, const std::string &cls);
+  const ExtendedCommandMap& getCommandMap();
+  void invokeList(DebuggerClient& client, const std::string& cls);
+  bool invokeHelp(DebuggerClient& client, const std::string& cls);
+  bool invokeClient(DebuggerClient& client, const std::string& cls);
 
-  void helpImpl(DebuggerClient &client, const char *name);
+  void helpImpl(DebuggerClient& client, const char* name);
 
-  ExtendedCommandMap match(DebuggerClient &client, int argIndex);
-  void helpCommands(DebuggerClient &client, const ExtendedCommandMap &matches);
+  ExtendedCommandMap match(DebuggerClient& client, int argIndex);
+  void helpCommands(DebuggerClient& client, const ExtendedCommandMap& matches);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

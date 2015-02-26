@@ -6243,8 +6243,11 @@ determine_type_constraint_from_annot(const TypeAnnotationPtr annot,
     //
     // For everything else, we return {}. We also return {} for annotations
     // we don't know how to handle.
-    if (annot->isFunction() || annot->isMixed() || annot->isTypeAccess()) {
+    if (annot->isFunction() || annot->isMixed()) {
       return {};
+    }
+    if (annot->isTypeAccess()) {
+      flags = flags | TypeConstraint::TypeConstant;
     }
     if (annot->isTypeVar()) {
       flags = flags | TypeConstraint::TypeVar;
@@ -6432,6 +6435,10 @@ void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
   }
 }
 
+const StaticString s_Void("HH\\void");
+const char* attr_Deprecated = "__Deprecated";
+const StaticString s_attr_Deprecated(attr_Deprecated);
+
 void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
                                     FuncEmitter *fe) {
   if (SystemLib::s_inited &&
@@ -6489,8 +6496,9 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   FunctionScopePtr funcScope = meth->getFunctionScope();
   const char *funcname  = funcScope->getName().c_str();
   const char *classname = pce ? pce->name()->data() : nullptr;
-  BuiltinFunction nif = Native::GetBuiltinFunction(funcname, classname,
-                                                   modifiers->isStatic());
+  auto const& info = Native::GetBuiltinFunction(funcname, classname,
+                                                modifiers->isStatic());
+  BuiltinFunction nif = info.ptr;
   BuiltinFunction bif;
   if (!nif) {
     bif = Native::unimplementedWrapper;
@@ -6499,6 +6507,15 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     if (nativeAttrs & Native::AttrZendCompat) {
       bif = zend_wrap_func;
     } else {
+      if (retType) {
+        fe->retTypeConstraint = determine_type_constraint_from_annot(retType,
+                                                                     true);
+      } else {
+        fe->retTypeConstraint = TypeConstraint {
+          s_Void.get(),
+          TypeConstraint::ExtendedHint | TypeConstraint::HHType
+        };
+      }
       if (nativeAttrs & Native::AttrActRec) {
         // Call this native function with a raw ActRec*
         // rather than pulling out args for normal func calling
@@ -6531,6 +6548,11 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   Label topOfBody(e);
 
   Offset base = m_ue.bcPos();
+
+  if (meth->getFunctionScope()->userAttributes().count(attr_Deprecated)) {
+    emitDeprecationWarning(e, meth);
+  }
+
   fe->setBuiltinFunc(bif, nif, attributes, base);
   fillFuncEmitterParams(fe, meth->getParams(), true);
   e.NativeImpl();
@@ -6724,6 +6746,49 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   }
 }
 
+const StaticString
+  s_trigger_error("trigger_error"),
+  s_is_deprecated("deprecated function");
+
+void EmitterVisitor::emitDeprecationWarning(Emitter& e,
+                                            MethodStatementPtr meth) {
+  auto funcScope = meth->getFunctionScope();
+
+  auto userAttributes DEBUG_ONLY = funcScope->userAttributes();
+  assert(userAttributes.find(attr_Deprecated) != userAttributes.end());
+
+  // Include the message from <<__Deprecated('<message>')>> in the warning
+  auto deprArgs = funcScope->getUserAttributeStringParams(attr_Deprecated);
+  auto deprMessage = deprArgs.empty()
+    ? s_is_deprecated.data()
+    : deprArgs.front();
+
+  { // preface the message with the name of the offending function
+    auto funcName = funcScope->getOriginalName();
+    BlockScopeRawPtr b = funcScope->getOuterScope();
+    if (b && b->is(BlockScope::ClassScope)) {
+      ClassScopePtr clsScope = dynamic_pointer_cast<ClassScope>(b);
+      if (clsScope->isTrait()) {
+        e.Self();
+        e.NameA();
+        e.String(makeStaticString("::" + funcName + ": " + deprMessage));
+        e.Concat();
+      } else {
+        e.String(makeStaticString(
+                   clsScope->getOriginalName() + "::" + funcName
+                   + ": " + deprMessage));
+      }
+    } else {
+      e.String(makeStaticString(funcName + ": " + deprMessage));
+    }
+  }
+
+  e.Int((funcScope->isSystem() || funcScope->isNative())
+        ? k_E_DEPRECATED : k_E_USER_DEPRECATED);
+  e.FCallBuiltin(2, 2, s_trigger_error.get());
+  emitPop(e);
+}
+
 void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   auto region = createRegion(meth, Region::Kind::FuncBody);
   enterRegion(region);
@@ -6732,6 +6797,10 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
+
+  if (meth->getFunctionScope()->userAttributes().count(attr_Deprecated)) {
+    emitDeprecationWarning(e, meth);
+  }
 
   // emit code to create generator object
   if (m_curFunc->isGenerator) {
@@ -7378,7 +7447,9 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       f->isMethod() ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
       (numParams > f->numParams()) ||
-      f->hasVariadicCaptureParam()) return nullptr;
+      f->hasVariadicCaptureParam() ||
+      (f->userAttributes().count(
+        LowStringPtr(s_attr_Deprecated.get())))) return nullptr;
 
   if ((f->returnType() == KindOfDouble) &&
        !Native::allowFCallBuiltinDoubles()) return nullptr;
@@ -7532,6 +7603,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       bool byRef = fcallBuiltin->byRef(i);
       emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
+
     if (fcallBuiltin->methInfo()) {
       // IDL style
       for (; i < fcallBuiltin->numParams(); i++) {

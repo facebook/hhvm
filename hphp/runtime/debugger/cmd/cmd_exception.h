@@ -22,15 +22,14 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdException : public CmdBreak {
-public:
+struct CmdException : CmdBreak {
   CmdException() {
     m_type = KindOfException;
   }
 
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
-  virtual void onClient(DebuggerClient &client);
+  void list(DebuggerClient&) override;
+  void help(DebuggerClient&) override;
+  void onClient(DebuggerClient&) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

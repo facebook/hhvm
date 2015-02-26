@@ -101,44 +101,52 @@ public:
   }
 
   int64_t read() {
-    if (!useCounters()) return 0;
+    uint64_t values[3];
+    if (readRaw(values)) {
+      if (!values[2]) return 0;
+      return (double)values[0] * values[1] / values[2];
+    }
+    return 0;
+  }
+
+  bool readRaw(uint64_t* values) {
+    if (m_err || !useCounters()) return false;
     init_if_not();
 
-    int64_t count = 0;
-
     if (m_fd > 0) {
-      int64_t values[3];
-      int ret;
-
       /*
        * read the count + scaling values
        *
        * It is not necessary to stop an event to read its value
        */
-      ret = ::read(m_fd, values, sizeof(values));
-      if (ret == sizeof(values)) {
-        /*
-         * scale count
-         *
-         * values[0] = raw count
-         * values[1] = TIME_ENABLED
-         * values[2] = TIME_RUNNING
-         */
-        if (values[2]) {
-          count = (int64_t) ((double) values[0] * values[1] / values[2]);
-        }
+      auto ret = ::read(m_fd, values, sizeof(*values) * 3);
+      if (ret == sizeof(*values) * 3) {
+        values[0] -= reset_values[0];
+        values[1] -= reset_values[1];
+        values[2] -= reset_values[2];
+        return true;
       }
     }
-    return count;
+    return false;
   }
 
   void reset() {
-    if (!useCounters()) return;
+    if (m_err || !useCounters()) return;
     init_if_not();
-    if (m_fd > 0 && ioctl (m_fd, PERF_EVENT_IOC_RESET, 0) < 0) {
-      Logger::Warning("perf_event failed to reset with: %s",
-          folly::errnoStr(errno).c_str());
-      m_err = -1;
+    if (m_fd > 0) {
+      if (ioctl (m_fd, PERF_EVENT_IOC_RESET, 0) < 0) {
+        Logger::Warning("perf_event failed to reset with: %s",
+                        folly::errnoStr(errno).c_str());
+        m_err = -1;
+        return;
+      }
+      auto ret = ::read(m_fd, reset_values, sizeof(reset_values));
+      if (ret != sizeof(reset_values)) {
+        Logger::Warning("perf_event failed to reset with: %s",
+                        folly::errnoStr(errno).c_str());
+        m_err = -1;
+        return;
+      }
     }
   }
 
@@ -149,6 +157,7 @@ private:
   int m_fd;
   struct perf_event_attr pe;
   bool inited;
+  uint64_t reset_values[3];
 
   void close() {
     if (m_fd > 0) {
@@ -328,15 +337,20 @@ bool HardwareCounter::addPerfEvent(const String& event) {
                         sizeof(perfTable)/sizeof(struct PerfTable),
                         &match_len))
        != -1) {
-    found = true;
-    type = perfTable[i].type;
+    if (!found) {
+      found = true;
+      type = perfTable[i].type;
+    } else if (type != perfTable[i].type) {
+      Logger::Warning("failed to find perf event: %s", event.data());
+      return false;
+    }
     config |= perfTable[i].config;
     ev = &ev[match_len];
   }
 
   checkLLCHack(event.data(), type, config);
 
-  if (!found) {
+  if (!found || *ev) {
     Logger::Warning("failed to find perf event: %s", event.data());
     return false;
   }

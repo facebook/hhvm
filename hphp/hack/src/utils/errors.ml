@@ -487,10 +487,12 @@ let duplicate_user_attribute (pos, name) existing_attr_pos =
     existing_attr_pos, name^" was already used here";
   ]
 
-let unbound_user_attribute_name pos name =
-  add Naming.unbound_name pos
-    ("Unrecognized user attribute: "^name
-     ^" is neither a standard attribute nor listed in .hhconfig")
+let unbound_attribute_name pos name =
+  let reason = if (str_starts_with name "__")
+    then "starts with __ but is not a standard attribute"
+    else "is not listed in .hhconfig"
+  in add Naming.unbound_name pos
+    ("Unrecognized user attribute: "^name^" "^reason)
 
 let this_no_argument pos =
   add Naming.this_no_argument pos "\"this\" expects no arguments"

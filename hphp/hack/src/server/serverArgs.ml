@@ -91,9 +91,8 @@ let config_user_attributes config =
   match SMap.get "user_attributes" config with
     | None -> None
     | Some s ->
-      let builtin_attrs = Naming_special_names.UserAttributes.as_set in
       let custom_attrs = Str.split config_list_regexp s in
-      Some (List.fold_right SSet.add custom_attrs builtin_attrs)
+      Some (List.fold_right SSet.add custom_attrs SSet.empty)
 
 (*****************************************************************************)
 (* The main entry point *)

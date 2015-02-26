@@ -36,6 +36,8 @@
 #include "hphp/parser/parser.h"
 #include "hphp/system/systemlib.h"
 
+#include "hphp/runtime/vm/native-prop-handler.h"
+
 #include <functional>
 
 namespace HPHP {
@@ -44,6 +46,7 @@ namespace HPHP {
 
 const StaticString
   s_name("name"),
+  s___name("__name"),
   s_version("version"),
   s_info("info"),
   s_ini("ini"),
@@ -100,7 +103,8 @@ const StaticString
   s_return_type("return_type"),
   s_type_hint("type_hint"),
   s_accessible("accessible"),
-  s_reflectionexception("ReflectionException");
+  s_reflectionexception("ReflectionException"),
+  s_reflectionextension("ReflectionExtension");
 
 Class* get_cls(const Variant& class_or_object) {
   Class* cls = nullptr;
@@ -1401,6 +1405,28 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
     obj->o_set(s_name, result);
 }
 
+static Variant reflection_extension_name_get(ObjectData* this_) {
+  auto name = this_->o_realProp(s___name.get(), ObjectData::RealPropUnchecked,
+                                s_reflectionextension.get());
+  return name->toString();
+}
+
+static Native::PropAccessor reflection_extension_Accessors[] = {
+  {"name",              reflection_extension_name_get,
+                        nullptr, nullptr, nullptr}, // name is read only
+  {nullptr, nullptr, nullptr, nullptr, nullptr}
+};
+
+static Native::PropAccessorMap reflection_extension_accessorsMap
+((Native::PropAccessor*)reflection_extension_Accessors);
+
+struct reflection_extension_PropHandler :
+  Native::MapPropHandler<reflection_extension_PropHandler> {
+
+  static constexpr Native::PropAccessorMap& map =
+    reflection_extension_accessorsMap;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class ReflectionExtension final : public Extension {
@@ -1493,6 +1519,9 @@ class ReflectionExtension final : public Extension {
       s_ReflectionFuncHandle.get());
     Native::registerNativeDataInfo<ReflectionClassHandle>(
       s_ReflectionClassHandle.get());
+
+    Native::registerNativeGuardedPropHandler
+      <reflection_extension_PropHandler>(s_reflectionextension.get());
 
     loadSystemlib();
     loadSystemlib("reflection-classes");

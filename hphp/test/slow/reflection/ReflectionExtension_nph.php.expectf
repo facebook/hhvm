@@ -1,0 +1,4 @@
+string(6) "mysqli"
+string(6) "mysqli"
+
+Fatal error: Cannot directly set the property ReflectionExtension::$name in %s

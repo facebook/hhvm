@@ -612,6 +612,13 @@ private:
 struct MIterTable {
   struct Ent { ArrayData* array; MArrayIter* iter; };
 
+  void clear() {
+    ents.fill({nullptr, nullptr});
+    if (!extras.empty()) {
+      extras.release_if([] (const MIterTable::Ent& e) { return true; });
+    }
+  }
+
   std::array<Ent,7> ents;
   // Slow path: we expect this `extras' list to rarely be allocated.
   TlsPodBag<Ent,smart::Allocator<Ent>> extras;

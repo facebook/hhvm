@@ -7633,6 +7633,7 @@ void ExecutionContext::requestExit() {
   profileRequestEnd();
   EventHook::Disable();
   EnvConstants::requestExit();
+  tl_miter_table.clear();
 
   if (m_globalVarEnv) {
     smart_delete(m_globalVarEnv);

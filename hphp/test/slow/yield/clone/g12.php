@@ -24,6 +24,7 @@ $a2 = 2;
 $x->rewind();
 $y1 = clone $x;
 $y2 = clone $x;
+$y1->next();
 foreach ($y1 as $v) {
   $v1 = (int)($v / 10000);
   $v2 = $v % 10000;
@@ -33,6 +34,7 @@ foreach ($y1 as $v) {
 echo "--------\n";
 var_dump($a1, $a2);
 echo "========\n";
+$y2->next();
 foreach ($y2 as $v) {
   $v1 = (int)($v / 10000);
   $v2 = $v % 10000;
@@ -42,6 +44,7 @@ foreach ($y2 as $v) {
 echo "--------\n";
 var_dump($a1, $a2);
 echo "========\n";
+$x->next();
 foreach ($x as $v) {
   $v1 = (int)($v / 10000);
   $v2 = $v % 10000;

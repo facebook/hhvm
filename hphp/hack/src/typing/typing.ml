@@ -3431,9 +3431,9 @@ and get_self_from_c env c =
   ret
 
 and class_def_ env_up c tc =
-  Typing_variance.class_ (snd c.c_name) tc;
   let env = Env.set_self_id env_up (snd c.c_name) in
   let env = Env.set_mode env c.c_mode in
+  if not (Env.is_decl env) then Typing_variance.class_ (snd c.c_name) tc;
   let env = Env.set_root env (Dep.Class (snd c.c_name)) in
   let pc, _ = c.c_name in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in

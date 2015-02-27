@@ -1,4 +1,3 @@
-
 calling f1
 
 calling f2
@@ -490,20 +489,20 @@ Caught exception: Value returned from function f21() must be of type noreturn, s
 Caught exception: Value returned from function f21() must be of type noreturn, array given
 
 calling f21_soft
-Caught exception: Value returned from function f21_soft() must be of type noreturn, null given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, int given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, string given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, bool given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, float given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, gd given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, array given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, Closure given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, Shapes given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, Square given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, Fractal given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, xhp_div given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, string given
-Caught exception: Value returned from function f21_soft() must be of type noreturn, array given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, null given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, int given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, string given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, bool given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, float given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, gd given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, array given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, Closure given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, Shapes given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, Square given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, Fractal given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, xhp_div given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, string given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, array given
 
 calling f21
 

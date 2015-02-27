@@ -1,6 +1,5 @@
 <?hh
 
-
 error_reporting(-1);
 function handler($errno, $errmsg) {
   $pos = strpos($errmsg, ", Closure");
@@ -61,7 +60,7 @@ function f19_soft($p): @(function(int): int) { return $p; }
 function f20($p): callable { return $p; }
 function f20_soft($p): @callable { return $p; }
 function f21($p): noreturn { return $p; }
-function f21_soft($p): noreturn { return $p; }
+function f21_soft($p): @noreturn { return $p; }
 
 class Shapes {}
 class Square extends Shapes {}

@@ -7216,6 +7216,12 @@ OPTBLD_INLINE void iopContValid(IOP_ARGS) {
     this_generator(vmfp())->getState() != BaseGenerator::State::Done);
 }
 
+OPTBLD_INLINE void iopContStarted(IOP_ARGS) {
+  pc++;
+  vmStack().pushBool(
+    this_generator(vmfp())->getState() != BaseGenerator::State::Created);
+}
+
 OPTBLD_INLINE void iopContKey(IOP_ARGS) {
   pc++;
   c_Generator* cont = this_generator(vmfp());

@@ -65,11 +65,7 @@ void c_Generator::t_raise(const Variant& v) { always_assert(false); }
 bool c_Generator::t_valid() { always_assert(false); }
 Variant c_Generator::t_current() { always_assert(false); }
 Variant c_Generator::t_key() { always_assert(false); }
-
-const StaticString s_next("next");
-void c_Generator::t_rewind() {
-  this->o_invoke_few_args(s_next, 0);
-}
+void c_Generator::t_rewind() { always_assert(false); }
 
 const StaticString s__closure_("{closure}");
 String c_Generator::t_getorigfuncname() {

@@ -338,6 +338,12 @@ void emitContValid(HTS& env) {
   push(env, gen(env, ContValid, cont));
 }
 
+void emitContStarted(HTS& env) {
+  assert(curClass(env));
+  auto const cont = ldThis(env);
+  push(env, gen(env, ContStarted, cont));
+}
+
 void emitContKey(HTS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);

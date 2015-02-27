@@ -4803,6 +4803,18 @@ void CodeGenerator::cgContValid(IRInstruction* inst) {
   v << setcc{CC_NE, sf, dstReg};
 }
 
+void CodeGenerator::cgContStarted(IRInstruction* inst) {
+  auto contReg  = srcLoc(inst, 0).reg();
+  auto dstReg   = dstLoc(inst, 0).reg();
+  auto stateOff = BaseGenerator::stateOff();
+  auto& v = vmain();
+
+  // Return 1 if generator state is not in the Created state.
+  auto const sf = v.makeReg();
+  v << cmpbim{int8_t(BaseGenerator::State::Created), contReg[stateOff], sf};
+  v << setcc{CC_NE, sf, dstReg};
+}
+
 void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
   auto& v = vmain();

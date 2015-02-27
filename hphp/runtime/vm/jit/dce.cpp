@@ -368,6 +368,7 @@ bool canDCE(IRInstruction* inst) {
   case ContPreNext:
   case ContStartedCheck:
   case ContValid:
+  case ContStarted:
   case ContArIncKey:
   case ContArIncIdx:
   case ContArUpdateIdx:

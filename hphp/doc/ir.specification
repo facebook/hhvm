@@ -1770,6 +1770,11 @@ To string conversions:
 
   Return true if a generator is not done, false otherwise.
 
+| ContStarted, D(Bool), S(Obj), NF
+
+  Return true if a generator is has been run at least once, i.e. is not in the
+  Created state, false otherwise.
+
 | ContArIncKey, ND, S(FramePtr), NF
 
   Special-case key update for generator, ActRec of which is S0, which

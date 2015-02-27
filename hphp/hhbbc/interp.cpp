@@ -2100,6 +2100,7 @@ void in(ISS& env, const bc::YieldK&) {
 
 void in(ISS& env, const bc::ContCheck&)   {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
+void in(ISS& env, const bc::ContStarted&) { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 

@@ -162,7 +162,7 @@ bool HHVM_FUNCTION(msg_queue_exists,
 
 bool HHVM_FUNCTION(msg_remove_queue,
                    const Resource& queue) {
-  MessageQueue *q = queue.getTyped<MessageQueue>();
+  auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
     return false;
@@ -186,7 +186,7 @@ const StaticString
 bool HHVM_FUNCTION(msg_set_queue,
                    const Resource& queue,
                    const Array& data) {
-  MessageQueue *q = queue.getTyped<MessageQueue>();
+  auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
     return false;
@@ -212,7 +212,7 @@ bool HHVM_FUNCTION(msg_set_queue,
 
 Array HHVM_FUNCTION(msg_stat_queue,
                     const Resource& queue) {
-  MessageQueue *q = queue.getTyped<MessageQueue>();
+  auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
     return Array();
@@ -244,7 +244,7 @@ bool HHVM_FUNCTION(msg_send,
                    bool serialize /* = true */,
                    bool blocking /* = true */,
                    VRefParam errorcode /* = null */) {
-  MessageQueue *q = queue.getTyped<MessageQueue>();
+  auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
     return false;
@@ -282,7 +282,7 @@ bool HHVM_FUNCTION(msg_receive,
                    bool unserialize /* = true */,
                    int64_t flags /* = 0 */,
                    VRefParam errorcode /* = null */) {
-  MessageQueue *q = queue.getTyped<MessageQueue>();
+  auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
     return false;
@@ -432,12 +432,12 @@ IMPLEMENT_RESOURCE_ALLOCATION(Semaphore)
 
 bool HHVM_FUNCTION(sem_acquire,
                    const Resource& sem_identifier) {
-  return sem_identifier.getTyped<Semaphore>()->op(true);
+  return cast<Semaphore>(sem_identifier)->op(true);
 }
 
 bool HHVM_FUNCTION(sem_release,
                    const Resource& sem_identifier) {
-  return sem_identifier.getTyped<Semaphore>()->op(false);
+  return cast<Semaphore>(sem_identifier)->op(false);
 }
 
 /**
@@ -537,7 +537,7 @@ Variant HHVM_FUNCTION(sem_get,
  */
 bool HHVM_FUNCTION(sem_remove,
                    const Resource& sem_identifier) {
-  Semaphore *sem_ptr = sem_identifier.getTyped<Semaphore>();
+  auto sem_ptr = cast<Semaphore>(sem_identifier);
 
   union semun un;
   struct semid_ds buf;
@@ -594,8 +594,7 @@ public:
 class shm_set : public std::set<sysvshm_shm*> {
 public:
   ~shm_set() {
-    for (std::set<sysvshm_shm*>::iterator iter = begin(); iter != end();
-         ++iter) {
+    for (auto iter = begin(); iter != end(); ++iter) {
       delete *iter;
     }
   }
@@ -727,8 +726,7 @@ Variant HHVM_FUNCTION(shm_attach,
 bool HHVM_FUNCTION(shm_detach,
                    int64_t shm_identifier) {
   Lock lock(g_shm_mutex);
-  std::set<sysvshm_shm*>::iterator iter =
-    g_shms.find((sysvshm_shm*)shm_identifier);
+  auto iter = g_shms.find((sysvshm_shm*)shm_identifier);
   if (iter == g_shms.end()) {
     raise_warning("%" PRId64 " is not a SysV shared memory index",
                   shm_identifier);
@@ -742,8 +740,7 @@ bool HHVM_FUNCTION(shm_detach,
 bool HHVM_FUNCTION(shm_remove,
                    int64_t shm_identifier) {
   Lock lock(g_shm_mutex);
-  std::set<sysvshm_shm*>::iterator iter =
-    g_shms.find((sysvshm_shm*)shm_identifier);
+  auto iter = g_shms.find((sysvshm_shm*)shm_identifier);
   if (iter == g_shms.end()) {
     raise_warning("%" PRId64 " is not a SysV shared memory index", shm_identifier);
     return false;
@@ -769,8 +766,7 @@ Variant HHVM_FUNCTION(shm_get_var,
                       int64_t shm_identifier,
                       int64_t variable_key) {
   Lock lock(g_shm_mutex);
-  std::set<sysvshm_shm*>::iterator iter =
-    g_shms.find((sysvshm_shm*)shm_identifier);
+  auto iter = g_shms.find((sysvshm_shm*)shm_identifier);
   if (iter == g_shms.end()) {
     raise_warning("%" PRId64 " is not a SysV shared memory index",
                   shm_identifier);
@@ -792,8 +788,7 @@ bool HHVM_FUNCTION(shm_has_var,
                    int64_t shm_identifier,
                    int64_t variable_key) {
   Lock lock(g_shm_mutex);
-  std::set<sysvshm_shm*>::iterator iter =
-    g_shms.find((sysvshm_shm*)shm_identifier);
+  auto iter = g_shms.find((sysvshm_shm*)shm_identifier);
   if (iter == g_shms.end()) {
     raise_warning("%" PRId64 " is not a SysV shared memory index",
                   shm_identifier);
@@ -813,8 +808,7 @@ bool HHVM_FUNCTION(shm_put_var,
   String serialized = HHVM_FN(serialize)(variable);
 
   Lock lock(g_shm_mutex);
-  std::set<sysvshm_shm*>::iterator iter =
-    g_shms.find((sysvshm_shm*)shm_identifier);
+  auto iter = g_shms.find((sysvshm_shm*)shm_identifier);
   if (iter == g_shms.end()) {
     raise_warning("%" PRId64 " is not a SysV shared memory index",
                   shm_identifier);
@@ -836,8 +830,7 @@ bool HHVM_FUNCTION(shm_remove_var,
                    int64_t shm_identifier,
                    int64_t variable_key) {
   Lock lock(g_shm_mutex);
-  std::set<sysvshm_shm*>::iterator iter =
-    g_shms.find((sysvshm_shm*)shm_identifier);
+  auto iter = g_shms.find((sysvshm_shm*)shm_identifier);
   if (iter == g_shms.end()) {
     raise_warning("%" PRId64 " is not a SysV shared memory index", shm_identifier);
     return false;

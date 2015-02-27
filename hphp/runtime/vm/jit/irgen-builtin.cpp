@@ -1042,10 +1042,16 @@ void emitIdx(HTS& env) {
     if (baseType < Type::Obj && baseType.clsSpec()) {
       auto const cls = baseType.clsSpec().cls();
 
-      // We must require either constant keys or known integer keys for Map,
-      // because integer-like strings behave differently.
-      auto const okMap = cls == c_Map::classof() &&
-                         (keyType.isConst() || keyType <= Type::Int);
+      // We must require either constant non-int keys or known integer keys for
+      // Map, because integer-like strings behave differently.
+      auto const okMap = [&]() {
+        if (cls != c_Map::classof()) return false;
+        if (keyType <= Type::Int) return true;
+        if (!keyType.isConst()) return false;
+        int64_t dummy;
+        if (keyType.strVal()->isStrictlyInteger(dummy)) return false;
+        return true;
+      }();
       // Similarly, Vector is only usable with int keys, so we can only do this
       // for Vector if it's an Int.
       auto const okVector = cls == c_Vector::classof() &&

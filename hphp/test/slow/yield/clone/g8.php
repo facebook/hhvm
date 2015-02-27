@@ -9,7 +9,7 @@ function foo() {
   yield $x;
 }
 $x = foo();
-$x->next();
+$x->rewind();
 $y1 = clone $x;
 $y2 = clone $x;
 foreach ($x as $v) {

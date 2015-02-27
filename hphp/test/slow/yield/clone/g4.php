@@ -14,7 +14,7 @@ $a1 = 1;
 $a2 = -999999999;
 $x = $foo($a1, $a2);
 $a2 = 2;
-$x->next();
+$x->rewind();
 $y1 = clone $x;
 $y2 = clone $x;
 foreach ($y1 as $v) {

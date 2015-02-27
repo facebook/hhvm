@@ -85,7 +85,6 @@ function main() {
   }
 
   $g = manylocals();
-  $g->next();
   var_dump($g->current());
   $g->send(new stdclass);
   var_dump($g->current());

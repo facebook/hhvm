@@ -14,7 +14,7 @@ $foo = function () use ($a1, &$a2) {
 };
 $x = $foo();
 $a2 = 2;
-$x->next();
+$x->rewind();
 $y1 = clone $x;
 $y2 = clone $x;
 foreach ($y1 as $v) {

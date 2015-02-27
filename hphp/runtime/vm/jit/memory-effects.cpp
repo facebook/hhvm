@@ -887,7 +887,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IncStatGrouped:
   case CountBytecode:
   case ContPreNext:
-  case ContStartedCheck:
   case ConvArrToBool:
   case ConvArrToDbl:
   case ConvArrToInt:

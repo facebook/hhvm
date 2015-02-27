@@ -1761,11 +1761,6 @@ To string conversions:
   and the S1 check-started flag is set, the branch B is taken. Otherwise,
   the generator is marked as running.
 
-| ContStartedCheck, ND, S(Obj), B
-
-  Checks if the Generator object S0 has started, and if not branches to
-  block B.
-
 | ContValid, D(Bool), S(Obj), NF
 
   Return true if a generator is not done, false otherwise.

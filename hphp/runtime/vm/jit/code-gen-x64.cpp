@@ -4778,19 +4778,6 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   v << storebi{int8_t(BaseGenerator::State::Running), contReg[stateOff]};
 }
 
-void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
-  auto contReg  = srcLoc(inst, 0).reg();
-  auto stateOff = BaseGenerator::stateOff();
-  auto& v = vmain();
-
-  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
-
-  // Take exit if state == 0.
-  auto const sf = v.makeReg();
-  v << testbim{int8_t(0xff), contReg[stateOff], sf};
-  v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
-}
-
 void CodeGenerator::cgContValid(IRInstruction* inst) {
   auto contReg  = srcLoc(inst, 0).reg();
   auto dstReg   = dstLoc(inst, 0).reg();

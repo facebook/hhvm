@@ -7225,14 +7225,12 @@ OPTBLD_INLINE void iopContStarted(IOP_ARGS) {
 OPTBLD_INLINE void iopContKey(IOP_ARGS) {
   pc++;
   c_Generator* cont = this_generator(vmfp());
-  cont->startedCheck();
   cellDup(cont->m_key, *vmStack().allocC());
 }
 
 OPTBLD_INLINE void iopContCurrent(IOP_ARGS) {
   pc++;
   c_Generator* cont = this_generator(vmfp());
-  cont->startedCheck();
   cellDup(cont->m_value, *vmStack().allocC());
 }
 

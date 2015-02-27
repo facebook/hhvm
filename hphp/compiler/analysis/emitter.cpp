@@ -8813,30 +8813,33 @@ typedef hphp_hash_map<const StringData*, GeneratorMethod,
 
 static int32_t emitGeneratorMethod(UnitEmitter& ue,
                                    FuncEmitter* fe,
-                                   GeneratorMethod m) {
+                                   GeneratorMethod m,
+                                   bool isAsync) {
   static const StringData* valStr = makeStaticString("value");
 
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
   fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
 
-  // Create a dummy Emitter, so it's possible to emit jump instructions
-  EmitterVisitor ev(ue);
-  Emitter e(ConstructPtr(), ue, ev);
-  LocationPtr dummyLoc(new Location());
-  e.setTempLocation(dummyLoc);
+  if (!isAsync) {
+    // Create a dummy Emitter, so it's possible to emit jump instructions
+    EmitterVisitor ev(ue);
+    Emitter e(ConstructPtr(), ue, ev);
+    LocationPtr dummyLoc(new Location());
+    e.setTempLocation(dummyLoc);
 
-  // Check if the generator has started yet
-  Label started;
-  e.ContStarted();
-  e.JmpNZ(started);
+    // Check if the generator has started yet
+    Label started;
+    e.ContStarted();
+    e.JmpNZ(started);
 
-  // If it hasn't started, perform one "next" operation before
-  // the actual operation (auto-priming)
-  e.ContCheck(false);
-  e.Null();
-  e.ContEnter();
-  e.PopC();
-  started.set(e);
+    // If it hasn't started, perform one "next" operation before
+    // the actual operation (auto-priming)
+    e.ContCheck(false);
+    e.Null();
+    e.ContEnter();
+    e.PopC();
+    started.set(e);
+  }
 
   switch (m) {
     case METH_SEND:
@@ -9025,11 +9028,11 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       if (e.name->isame(asyncGenCls) &&
           (cmeth = folly::get_ptr(asyncGenMethods, methName))) {
         auto methCpy = *cmeth;
-        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
+        stackPad = emitGeneratorMethod(*ue, fe, methCpy, true);
       } else if (e.name->isame(generatorCls) &&
           (cmeth = folly::get_ptr(genMethods, methName))) {
         auto methCpy = *cmeth;
-        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
+        stackPad = emitGeneratorMethod(*ue, fe, methCpy, false);
       } else if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
         stackPad = emitGetWaitHandleMethod(*ue, fe);
       } else {

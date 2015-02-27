@@ -5467,40 +5467,6 @@ void CodeGenerator::cgConjure(IRInstruction* inst) {
   vmain() << ud2();
 }
 
-void CodeGenerator::cgProfileStr(IRInstruction* inst) {
-  auto& v = vmain();
-  TargetProfile<StrProfile> profile(m_state.unit.context(), inst->marker(),
-                                    inst->extra<ProfileStrData>()->key);
-  assert(profile.profiling());
-  auto const ch = profile.handle();
-
-  auto ptrReg = srcLoc(inst, 0).reg();
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfStaticString, ptrReg[TVOFF(m_type)]);
-  ifThenElse(
-    v, CC_E, sf,
-    [&](Vout& v) { // m_type == KindOfStaticString
-      v << inclm{rVmTl[ch + offsetof(StrProfile, staticStr)], v.makeReg()};
-    },
-    [&](Vout& v) { // m_type == KindOfString
-      auto ptr = v.makeReg();
-      auto const sf = v.makeReg();
-      v << load{ptrReg[TVOFF(m_data)], ptr};
-      v << cmplim{StaticValue, ptr[FAST_REFCOUNT_OFFSET], sf};
-
-      ifThenElse(
-        v, CC_E, sf,
-        [&](Vout& v) { // _count == StaticValue
-          v << inclm{rVmTl[ch + offsetof(StrProfile, strStatic)], v.makeReg()};
-        },
-        [&](Vout& v) {
-          v << inclm{rVmTl[ch + offsetof(StrProfile, str)], v.makeReg()};
-        }
-      );
-    }
-  );
-}
-
 void CodeGenerator::cgCountArray(IRInstruction* inst) {
   auto const baseReg = srcLoc(inst, 0).reg();
   auto const dstReg  = dstLoc(inst, 0).reg();

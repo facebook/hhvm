@@ -2310,11 +2310,6 @@ fields of that struct for holding intermediate values.
   Profile type of array S0 (i.e. whether it is a StructArray or some other kind
   and if it is a StructArray what Shapes it saw).
 
-| ProfileStr<key>, ND, S(PtrToGen), NF
-
-  Profile exact type of the value pointed to by S0, which must be known to
-  point to a string at the time this instruction runs.
-
 | LdStructArrayElem, DArrElem, AK(Struct) S(StaticStr), NF
 
   Loads the element of the struct array in S0 at offset S1. This instruction

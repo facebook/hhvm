@@ -472,7 +472,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IsTypeMem:
   case CheckTypeMem:
   case DbgAssertPtr:
-  case ProfileStr:
     return may_load_store(pointee(inst.src(0)), AEmpty);
 
   case CheckInitMem:

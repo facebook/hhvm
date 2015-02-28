@@ -225,10 +225,10 @@ void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {
 
 void emitAssertRefCount(Vout& v, Vreg base) {
   auto const sf = v.makeReg();
-  v << cmplim{HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
+  v << cmplim{StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
   ifThen(v, CC_NLE, sf, [&](Vout& v) {
     auto const sf = v.makeReg();
-    v << cmplim{HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
+    v << cmplim{RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
     ifThen(v, CC_NBE, sf, [&](Vout& v) { v << ud2{}; });
   });
 }

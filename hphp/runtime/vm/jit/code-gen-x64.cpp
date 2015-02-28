@@ -5373,7 +5373,21 @@ void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
-  emitAssertRefCount(vmain(), srcLoc(inst, 0).reg());
+  auto const src = inst->src(0);
+  auto const ty  = src->type();
+  auto& v        = vmain();
+  if (!ty.maybe(Type::Counted)) return;
+  if (ty.isKnownDataType()) {
+    if (IS_REFCOUNTED_TYPE(ty.toDataType())) {
+      emitAssertRefCount(v, srcLoc(inst, 0).reg());
+    }
+    return;
+  }
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfRefCountThreshold, srcLoc(inst, 0).reg(1));
+  ifThen(v, CC_NLE, sf, [&] (Vout& v) {
+    emitAssertRefCount(v, srcLoc(inst, 0).reg());
+  });
 }
 
 void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {

@@ -1916,11 +1916,10 @@ To string conversions:
 
   Increment the profiling counter associated with translation TransID.
 
-| DbgAssertRefCount, ND, S(Counted,StaticStr,StaticArr), NF
+| DbgAssertRefCount, ND, S(Gen), NF
 
-  Assert that S0 has a valid refcount. S0 must be a type with a valid (counted
-  or static) _count field. If S0's count is implausible then execute a hardware
-  trap instruction (int3 on x64).
+  Assert that S0 has a valid refcount. If S0 has a reference counted type and
+  its count is implausible then execute a hardware trap instruction.
 
 | DbgAssertPtr, ND, S(PtrToGen), NF
 

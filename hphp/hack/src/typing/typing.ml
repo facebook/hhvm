@@ -291,39 +291,37 @@ and bind_param env (_, ty1) param =
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
 and fun_def env _ f =
-  if f.f_mode = FileInfo.Mdecl then () else begin
-    NastCheck.fun_ env f (Nast.assert_named_body f.f_body);
-    (* Fresh type environment is actually unnecessary, but I prefer to
-     * have a guarantee that we are using a clean typing environment. *)
-    Env.fresh_tenv env (
-      fun env_up ->
-        let env = { env_up with Env.lenv = Env.empty_local } in
-        let env = Env.set_mode env f.f_mode in
-        let env = Env.set_root env (Dep.Fun (snd f.f_name)) in
-        let env, hret =
-          match f.f_ret with
-            | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
-            | Some ret ->
-              Typing_hint.hint ~ensure_instantiable:true env ret in
-        let f_params = match f.f_variadic with
-          | FVvariadicArg param -> param :: f.f_params
-          | _ -> f.f_params
-        in
-        let env = Typing_hint.check_params_instantiable env f_params in
-        let env = Typing_hint.check_tparams_instantiable env f.f_tparams in
-        let env, params =
-          lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
-        let env = List.fold_left2 bind_param env params f_params in
-        let env = fun_ env f.f_unsafe hret (fst f.f_name) f.f_body f.f_fun_kind in
-        let env = fold_fun_list env env.Env.todo in
-        if Env.is_strict env then begin
-          List.iter2 (check_param env) f_params params;
-          match f.f_ret with
-            | None -> suggest_return env (fst f.f_name) hret
-            | Some _ -> ()
-        end;
-    )
-  end
+  NastCheck.fun_ env f (Nast.assert_named_body f.f_body);
+  (* Fresh type environment is actually unnecessary, but I prefer to
+   * have a guarantee that we are using a clean typing environment. *)
+  Env.fresh_tenv env (
+    fun env_up ->
+      let env = { env_up with Env.lenv = Env.empty_local } in
+      let env = Env.set_mode env f.f_mode in
+      let env = Env.set_root env (Dep.Fun (snd f.f_name)) in
+      let env, hret =
+        match f.f_ret with
+          | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
+          | Some ret ->
+            Typing_hint.hint ~ensure_instantiable:true env ret in
+      let f_params = match f.f_variadic with
+        | FVvariadicArg param -> param :: f.f_params
+        | _ -> f.f_params
+      in
+      let env = Typing_hint.check_params_instantiable env f_params in
+      let env = Typing_hint.check_tparams_instantiable env f.f_tparams in
+      let env, params =
+        lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
+      let env = List.fold_left2 bind_param env params f_params in
+      let env = fun_ env f.f_unsafe hret (fst f.f_name) f.f_body f.f_fun_kind in
+      let env = fold_fun_list env env.Env.todo in
+      if Env.is_strict env then begin
+        List.iter2 (check_param env) f_params params;
+        match f.f_ret with
+          | None -> suggest_return env (fst f.f_name) hret
+          | Some _ -> ()
+      end;
+  )
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -341,6 +339,7 @@ and fun_ ?(abstract=false) env unsafe hret pos b fun_type =
       if Nast_terminality.Terminal.block b ||
         abstract ||
         unsafe ||
+        Env.is_decl env ||
         !auto_complete
       then env
       else fun_implicit_return env pos ret b fun_type in
@@ -3403,24 +3402,20 @@ and check_parent_abstract position parent_type class_type =
   end else ()
 
 and class_def env_up _ c =
-  if c.c_mode = FileInfo.Mdecl
-  then ()
-  else begin
-    if not !auto_complete
-    then begin
-      NastCheck.class_ env_up c;
-      NastInitCheck.class_ env_up c;
-    end;
-    let env_tmp = Env.set_root env_up (Dep.Class (snd c.c_name)) in
-    let tc = Env.get_class env_tmp (snd c.c_name) in
-    match tc with
-    | None ->
-        (* This can happen if there was an error during the declaration
-         * of the class.
-         *)
-        ()
-    | Some tc -> class_def_ env_up c tc
-  end
+  if not !auto_complete
+  then begin
+    NastCheck.class_ env_up c;
+    NastInitCheck.class_ env_up c;
+  end;
+  let env_tmp = Env.set_root env_up (Dep.Class (snd c.c_name)) in
+  let tc = Env.get_class env_tmp (snd c.c_name) in
+  match tc with
+  | None ->
+      (* This can happen if there was an error during the declaration
+       * of the class.
+       *)
+      ()
+  | Some tc -> class_def_ env_up c tc
 
 and get_self_from_c env c =
   let _, tparams = lfold type_param env c.c_tparams in
@@ -3461,16 +3456,18 @@ and class_def_ env_up c tc =
     | Ast.Cenum -> (* the parser won't let enums be final *) assert false
     | Ast.Cnormal -> ()
   end;
-  List.iter (class_implements env c) impl;
-  SMap.iter (fun _ ty -> class_implements_type env c ty) dimpl;
-  List.iter (class_var_def env false c) c.c_vars;
-  List.iter (method_def env) c.c_methods;
-  let const_types = List.map (class_const_def env) c.c_consts in
-  let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
-  class_constr_def env c;
-  let env = Env.set_static env in
-  List.iter (class_var_def env true c) c.c_static_vars;
-  List.iter (method_def env) c.c_static_methods
+  if not (Env.is_decl env) then begin
+    List.iter (class_implements env c) impl;
+    SMap.iter (fun _ ty -> class_implements_type env c ty) dimpl;
+    List.iter (class_var_def env false c) c.c_vars;
+    List.iter (method_def env) c.c_methods;
+    let const_types = List.map (class_const_def env) c.c_consts in
+    let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
+    class_constr_def env c;
+    let env = Env.set_static env in
+    List.iter (class_var_def env true c) c.c_static_vars;
+    List.iter (method_def env) c.c_static_methods
+  end
 
 and check_extend_abstract_meth p smap =
   SMap.iter begin fun x ce ->

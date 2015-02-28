@@ -97,11 +97,13 @@ public:
   static int64_t StringOffsetLimit;
 
   static std::string AccessLogDefaultFormat;
-  static std::vector<AccessLogFileData> AccessLogs;
+  static std::map<std::string, AccessLogFileData> AccessLogs;
 
   static std::string AdminLogFormat;
   static std::string AdminLogFile;
   static std::string AdminLogSymLink;
+
+  static std::map<std::string, AccessLogFileData> RPCLogs;
 
   static std::string Tier;
   static std::string Host;

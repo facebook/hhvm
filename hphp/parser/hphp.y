@@ -1061,7 +1061,7 @@ function_declaration_statement:
 
 enum_declaration_statement:
     T_ENUM
-    ident                              { $2.setText(_p->nsDecl($2.text()));
+    ident                              { $2.setText(_p->nsClassDecl($2.text()));
                                          _p->onClassStart(T_ENUM,$2);}
     ':' hh_type
     hh_opt_constraint
@@ -1069,7 +1069,7 @@ enum_declaration_statement:
 
   | non_empty_user_attributes
     T_ENUM
-    ident                              { $3.setText(_p->nsDecl($3.text()));
+    ident                              { $3.setText(_p->nsClassDecl($3.text()));
                                          _p->onClassStart(T_ENUM,$3);}
     ':' hh_type
     hh_opt_constraint
@@ -1079,7 +1079,7 @@ enum_declaration_statement:
 
 class_declaration_statement:
     class_entry_type
-    class_decl_name                    { $2.setText(_p->nsDecl($2.text()));
+    class_decl_name                    { $2.setText(_p->nsClassDecl($2.text()));
                                          _p->onClassStart($1.num(),$2);}
     extends_from implements_list '{'
     class_statement_list '}'           { Token stmts;
@@ -1097,7 +1097,7 @@ class_declaration_statement:
                                          _p->popTypeScope();}
   | non_empty_user_attributes
     class_entry_type
-    class_decl_name                    { $3.setText(_p->nsDecl($3.text()));
+    class_decl_name                    { $3.setText(_p->nsClassDecl($3.text()));
                                          _p->onClassStart($2.num(),$3);}
     extends_from implements_list '{'
     class_statement_list '}'           { Token stmts;
@@ -1114,7 +1114,7 @@ class_declaration_statement:
                                          _p->popClass();
                                          _p->popTypeScope();}
   | T_INTERFACE
-    interface_decl_name                { $2.setText(_p->nsDecl($2.text()));
+    interface_decl_name                { $2.setText(_p->nsClassDecl($2.text()));
                                          _p->onClassStart(T_INTERFACE,$2);}
     interface_extends_list '{'
     class_statement_list '}'           { _p->onInterface($$,$2,$4,$6,0);
@@ -1122,7 +1122,7 @@ class_declaration_statement:
                                          _p->popTypeScope();}
   | non_empty_user_attributes
     T_INTERFACE
-    interface_decl_name                { $3.setText(_p->nsDecl($3.text()));
+    interface_decl_name                { $3.setText(_p->nsClassDecl($3.text()));
                                          _p->onClassStart(T_INTERFACE,$3);}
     interface_extends_list '{'
     class_statement_list '}'           { _p->onInterface($$,$3,$5,$7,&$1);
@@ -1132,7 +1132,7 @@ class_declaration_statement:
 
 trait_declaration_statement:
     T_TRAIT
-    trait_decl_name                    { $2.setText(_p->nsDecl($2.text()));
+    trait_decl_name                    { $2.setText(_p->nsClassDecl($2.text()));
                                          _p->onClassStart(T_TRAIT, $2);}
     implements_list
     '{' class_statement_list '}'       { Token t_ext;
@@ -1143,7 +1143,7 @@ trait_declaration_statement:
                                          _p->popTypeScope();}
   | non_empty_user_attributes
     T_TRAIT
-    trait_decl_name                    { $3.setText(_p->nsDecl($3.text()));
+    trait_decl_name                    { $3.setText(_p->nsClassDecl($3.text()));
                                          _p->onClassStart(T_TRAIT, $3);}
     implements_list
     '{' class_statement_list '}'       { Token t_ext;
@@ -2908,11 +2908,11 @@ hh_opt_constraint:
 
 hh_type_alias_statement:
     T_TYPE hh_name_with_typevar
-      '=' hh_type ';'                  { $2.setText(_p->nsDecl($2.text()));
+      '=' hh_type ';'                  { $2.setText(_p->nsClassDecl($2.text()));
                                          _p->onTypedef($$, $2, $4);
                                          _p->popTypeScope(); }
   | T_NEWTYPE hh_name_with_typevar
-    hh_opt_constraint '=' hh_type ';'  { $2.setText(_p->nsDecl($2.text()));
+    hh_opt_constraint '=' hh_type ';'  { $2.setText(_p->nsClassDecl($2.text()));
                                          _p->onTypedef($$, $2, $5);
                                          _p->popTypeScope(); }
 ;

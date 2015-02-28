@@ -49,7 +49,7 @@ void cloneToBlock(const BlockList& rpoBlocks,
     assert(!it->isControlFlow());
 
     FTRACE(5, "cloneToBlock({}): {}\n", target->id(), it->toString());
-    auto const newInst = unit.cloneInstruction(&*it);
+    auto const newInst = unit.clone(&*it);
 
     if (auto const numDests = newInst->numDsts()) {
       for (int i = 0; i < numDests; ++i) {

@@ -44,6 +44,7 @@ public:
 
 class AccessLogFileData {
 public:
+  AccessLogFileData() {}
   AccessLogFileData(const std::string &fil,
                     const std::string &lnk,
                     const std::string &fmt) :
@@ -68,6 +69,9 @@ public:
   ~AccessLog();
   void init(const std::string &defaultFormat,
             std::vector<AccessLogFileData> &files,
+            const std::string &username);
+  void init(const std::string &defaultFormat,
+            std::map<std::string, AccessLogFileData> &files,
             const std::string &username);
   void init(const std::string &format, const std::string &symLink,
             const std::string &file, const std::string &username);

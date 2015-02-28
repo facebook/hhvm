@@ -921,7 +921,7 @@ and get_constraint env tparam =
 and hintl ~allow_this env l = List.map (hint ~allow_this env) l
 
 (*****************************************************************************)
-(* All the methods and static methods of an interface are "implicitely"
+(* All the methods and static methods of an interface are "implicitly"
  * declared as abstract
  *)
 (*****************************************************************************)

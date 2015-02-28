@@ -13,15 +13,6 @@ class mysqli {
   <<__Native>>
   private function hh_get_connection(int $state = 0): ?resource;
 
-  <<__Native>>
-  private function hh_field_count(): mixed;
-
-  <<__Native>>
-  private function hh_server_version(): mixed;
-
-  <<__Native>>
-  private function hh_sqlstate(): mixed;
-
   /**
    * Open a new connection to the MySQL server
    *
@@ -902,9 +893,6 @@ class mysqli_result {
   <<__Native>>
   private function get_mysqli_conn_resource(mysqli $connection): ?resource;
 
-  <<__Native>>
-  private function hh_field_tell(): mixed;
-
   public function __construct(mixed $result,
                               int $resulttype = MYSQLI_STORE_RESULT) {
     if (!is_resource($result) && !($result instanceof mysqli)) {
@@ -1189,32 +1177,6 @@ class mysqli_stmt {
   private ?resource $__stmt = null;
   private ?mysqli $__link = null;
 
-  public function __get(string $name): mixed {
-    switch ($name) {
-      case 'affected_rows':
-        return $this->hh_affected_rows();
-      case 'errno':
-        return $this->hh_errno();
-      case 'error_list':
-        return $this->__get_error_list();
-      case 'error':
-        return $this->hh_error();
-      case 'field_count':
-        return $this->hh_field_count();
-      case 'insert_id':
-        return $this->hh_insert_id();
-      case 'num_rows':
-        return $this->hh_num_rows();
-      case 'param_count':
-        return $this->hh_param_count();
-      case 'sqlstate':
-        return $this->hh_sqlstate();
-    }
-
-    trigger_error('Undefined property: mysqli_stmt::$'. $name, E_NOTICE);
-    return null;
-  }
-
   public function __construct(mysqli $link, string $query = null) {
     $this->__link = $link;
     $this->hh_init($link);
@@ -1229,46 +1191,8 @@ class mysqli_stmt {
     );
   }
 
-  // The implementation of the getter for $error_list
-  private function __get_error_list(): array {
-    $result = array();
-    if ($this->errno) {
-      $result[] = array(
-        'errno' => $this->errno,
-        'sqlstate' => $this->sqlstate,
-        'error' => $this->error,
-      );
-    }
-    return $result;
-  }
-
-
-  <<__Native>>
-  private function hh_affected_rows(): mixed;
-
-  <<__Native>>
-  private function hh_errno(): mixed;
-
-  <<__Native>>
-  private function hh_error(): mixed;
-
-  <<__Native>>
-  private function hh_field_count(): mixed;
-
-  <<__Native>>
-  private function hh_insert_id(): mixed;
-
   <<__Native>>
   private function hh_init(mysqli $connection): void;
-
-  <<__Native>>
-  private function hh_num_rows(): mixed;
-
-  <<__Native>>
-  private function hh_param_count(): mixed;
-
-  <<__Native>>
-  private function hh_sqlstate(): mixed;
 
   /**
    * Used to get the current value of a statement attribute

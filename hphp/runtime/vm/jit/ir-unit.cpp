@@ -20,12 +20,14 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(hhir);
+
+///////////////////////////////////////////////////////////////////////////////
 
 IRUnit::IRUnit(TransContext context)
   : m_context(context)
@@ -35,13 +37,13 @@ IRUnit::IRUnit(TransContext context)
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker,
                                 const jit::vector<uint32_t>& producedRefs) {
   IRInstruction inst(DefLabel, marker);
-  IRInstruction* label = cloneInstruction(&inst);
+  IRInstruction* label = clone(&inst);
   always_assert(producedRefs.size() == numDst);
   m_labelRefs[label] = producedRefs;
   if (numDst > 0) {
     SSATmp* dsts = (SSATmp*) m_arena.alloc(numDst * sizeof(SSATmp));
     for (unsigned i = 0; i < numDst; ++i) {
-      new (&dsts[i]) SSATmp(m_nextOpndId++, label);
+      new (&dsts[i]) SSATmp(m_nextTmpId++, label);
     }
     label->setDsts(numDst, dsts);
   }
@@ -55,14 +57,7 @@ Block* IRUnit::defBlock(Block::Hint hint) {
   return block;
 }
 
-IRInstruction* IRUnit::mov(SSATmp* dst, SSATmp* src, BCMarker marker) {
-  IRInstruction* inst = gen(Mov, marker, src);
-  dst->setInstruction(inst);
-  inst->setDst(dst);
-  return inst;
-}
-
-SSATmp* IRUnit::findConst(Type type) {
+SSATmp* IRUnit::cns(Type type) {
   assert(type.isConst());
   IRInstruction inst(DefConst, BCMarker{});
   inst.setTypeParam(type);
@@ -70,13 +65,17 @@ SSATmp* IRUnit::findConst(Type type) {
     assert(tmp->type() == type);
     return tmp;
   }
-  return m_constTable.insert(cloneInstruction(&inst)->dst());
+  return m_constTable.insert(clone(&inst)->dst());
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
 
 /*
  * Whether the block is a part of the main code path.
  */
-static bool isMainBlock(const Block* b) {
+bool isMainBlock(const Block* b) {
   auto const hint = b->hint();
   return hint != Block::Hint::Unlikely && hint != Block::Hint::Unused;
 }
@@ -86,7 +85,7 @@ static bool isMainBlock(const Block* b) {
  * path of a region. This is conservative, so it may return false on
  * all blocks in a region.
  */
-static bool isMainExit(const Block* b) {
+bool isMainExit(const Block* b) {
   if (!isMainBlock(b)) return false;
 
   if (b->next()) return false;
@@ -100,6 +99,10 @@ static bool isMainExit(const Block* b) {
   auto const taken = b->taken();
   return !taken || taken->isCatch();
 }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Intended to be called after all optimizations are finished on a
@@ -186,8 +189,5 @@ void IRUnit::collectPostConditions() {
   }
 }
 
-const PostConditions& IRUnit::postConditions() const {
-  return m_postConds;
-}
-
+///////////////////////////////////////////////////////////////////////////////
 }}

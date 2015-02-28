@@ -99,9 +99,7 @@ private:
       return false;
     }
 
-    auto file = stream.getTyped<File>();
-    assert(file);
-
+    auto file = cast<File>(stream);
     int mode = readwrite.toInt32();
     if (!mode) {
       auto str = file->getMode();
@@ -126,7 +124,7 @@ private:
     SmartPtr<StreamFilter> ret;
     if (mode & k_STREAM_FILTER_READ) {
       auto resource = createInstance(func_name,
-                                     stream,
+                                     file,
                                      filtername,
                                      params);
       if (!resource) {
@@ -141,7 +139,7 @@ private:
     }
     if (mode & k_STREAM_FILTER_WRITE) {
       auto resource = createInstance(func_name,
-                                     stream,
+                                     file,
                                      filtername,
                                      params);
       if (!resource) {
@@ -158,7 +156,7 @@ private:
   }
 
   SmartPtr<StreamFilter> createInstance(const char* php_func,
-                                        const Resource& stream,
+                                        SmartPtr<File> stream,
                                         const String& filter,
                                         const Variant& params) {
     auto class_name = m_registeredFilters.rvalAt(filter).asCStrRef();
@@ -167,7 +165,7 @@ private:
 
     if (LIKELY(class_ != nullptr)) {
       PackedArrayInit ctor_args(3);
-      ctor_args.append(stream);
+      ctor_args.append(Variant(stream));
       ctor_args.append(filter);
       ctor_args.append(params);
       obj = g_context->createObject(class_name.get(), ctor_args.toArray());
@@ -222,12 +220,10 @@ void StreamFilter::invokeOnClose() {
 }
 
 bool StreamFilter::remove() {
-  if (m_stream.isNull()) {
+  if (!m_stream) {
     return false;
   }
-  auto file = m_stream.getTyped<File>();
-  assert(file);
-  auto ret = file->removeFilter(SmartPtr<StreamFilter>(this));
+  auto ret = m_stream->removeFilter(SmartPtr<StreamFilter>(this));
   m_stream.reset();
   return ret;
 }
@@ -307,28 +303,19 @@ Variant HHVM_FUNCTION(stream_filter_prepend,
 }
 
 bool HHVM_FUNCTION(stream_filter_remove, const Resource& resource) {
-  auto filter = resource.getTyped<StreamFilter>();
-  assert(filter);
-  return filter->remove();
+  return cast<StreamFilter>(resource)->remove();
 }
 
 Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bb_res) {
-  auto brigade = bb_res.getTyped<BucketBrigade>();
-  assert(brigade);
-  auto ret = brigade->popFront();
-  return ret;
+  return cast<BucketBrigade>(bb_res)->popFront();
 }
 
 void HHVM_FUNCTION(stream_bucket_append, const Resource& bb_res, const Object& bucket) {
-  auto brigade = bb_res.getTyped<BucketBrigade>();
-  assert(brigade);
-  brigade->appendBucket(bucket);
+  cast<BucketBrigade>(bb_res)->appendBucket(bucket);
 }
 
 void HHVM_FUNCTION(stream_bucket_prepend, const Resource& bb_res, const Object& bucket) {
-  auto brigade = bb_res.getTyped<BucketBrigade>();
-  assert(brigade);
-  brigade->prependBucket(bucket);
+  cast<BucketBrigade>(bb_res)->prependBucket(bucket);
 }
 
 const StaticString

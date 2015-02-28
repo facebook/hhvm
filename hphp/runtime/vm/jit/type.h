@@ -200,7 +200,7 @@ enum class Ptr : uint8_t {
   /* bits 58-62 are pointer kind */
 
 #define IRT_UNIONS                                                      \
-  IRT(Ctx,         kObj|kCctx)                                          \
+  IRT(Ctx,         kObj|kCctx|kNullptr)
 
 /*
  * Gen, Counted, PtrToGen, and PtrToCounted are here instead of IRT_PHP_UNIONS
@@ -234,6 +234,8 @@ enum class Ptr : uint8_t {
   IRTP(PtrToMISInit,       MIS, kInit << kPtrShift)               \
   IRTP(PtrToMemGen,       Memb, kGen << kPtrShift)                \
   IRTP(PtrToMemInit,      Memb, kInit << kPtrShift)               \
+  IRTP(PtrToClsInitGen,ClsInit, kGen << kPtrShift)                \
+  IRTP(PtrToClsCnsGen,  ClsCns, kGen << kPtrShift)                \
                                                                   \
   IRTP(PtrToRFrameGen,  RFrame, kGen << kPtrShift)                \
   IRTP(PtrToRFrameInit, RFrame, kInit << kPtrShift)               \

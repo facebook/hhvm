@@ -50,6 +50,7 @@ constexpr int kVasmCodeGenLevel = 2;
 constexpr int kVasmRegAllocLevel = 3;
 constexpr int kVasmARMFoldLevel = 4;
 constexpr int kVasmJumpsLevel = 4;
+constexpr int kVasmExitsLevel = 4;
 constexpr int kVasmDCELevel = 4;
 constexpr int kVasmLowerLevel = 4;
 

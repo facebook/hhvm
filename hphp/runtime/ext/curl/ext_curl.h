@@ -219,6 +219,9 @@ extern const int64_t k_CURLOPT_READFUNCTION;
 extern const int64_t k_CURLOPT_REFERER;
 extern const int64_t k_CURLOPT_RESUME_FROM;
 extern const int64_t k_CURLOPT_RETURNTRANSFER;
+#ifdef FACEBOOK
+extern const int64_t k_CURLOPT_SERVICE_NAME;
+#endif
 extern const int64_t k_CURLOPT_SSLCERT;
 extern const int64_t k_CURLOPT_SSLCERTPASSWD;
 extern const int64_t k_CURLOPT_SSLCERTTYPE;

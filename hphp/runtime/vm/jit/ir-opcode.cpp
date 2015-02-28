@@ -67,6 +67,7 @@ TRACE_SET_MOD(hhir);
 #define DArrElem       HasDest
 #define DArrPacked     HasDest
 #define DThis          HasDest
+#define DCtx           HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
 #define DPtrToParam    HasDest
@@ -111,6 +112,7 @@ OpInfo g_opInfo[] = {
 #undef DArrPacked
 #undef DAllocObj
 #undef DThis
+#undef DCtx
 #undef DMulti
 #undef DSetElem
 #undef DPtrToParam

@@ -1,0 +1,21 @@
+$mysqli_stmt->affected_rows: int(1)
+$mysqli_stmt->errno: int(0)
+$mysqli_stmt->error: string(0) ""
+$mysqli_stmt->field_count: int(0)
+$mysqli_stmt->insert_id: int(%d)
+$mysqli_stmt->num_rows: int(%d)
+$mysqli_stmt->param_count: int(0)
+$mysqli_stmt->sqlstate: string(%d) "%s"
+$mysqli_stmt->error_list: array(1) {
+  [0]=>
+  array(3) {
+    ["errno"]=>
+    int(1054)
+    ["sqlstate"]=>
+    string(5) "42S22"
+    ["error"]=>
+    string(38) "Unknown column 'test1' in 'field list'"
+  }
+}
+$mysqli_stmt->nonExisting: ExtMySQLiStmt::__get(nonExisting);
+NULL

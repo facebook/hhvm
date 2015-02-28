@@ -16,6 +16,7 @@
 */
 #include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -46,12 +47,35 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(TimerPool, s_timer_pool);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void IntervalTimer::RunCallbacks() {
+namespace {
+
+const StaticString
+  s_IOWait("IOWait"),
+  s_ResumeAwait("ResumeAwait"),
+  s_Enter("Enter"),
+  s_Exit("Exit");
+
+static StaticString sample_type_string(IntervalTimer::SampleType type) {
+  switch (type) {
+    case IntervalTimer::IOWaitSample: return s_IOWait;
+    case IntervalTimer::ResumeAwaitSample: return s_ResumeAwait;
+    case IntervalTimer::EnterSample: return s_Enter;
+    case IntervalTimer::ExitSample: return s_Exit;
+  }
+  not_reached();
+}
+
+}
+
+void IntervalTimer::RunCallbacks(IntervalTimer::SampleType type) {
+  auto& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  data.clearIntervalTimerFlag();
   for (auto timer : s_timer_pool->timers) {
     if (timer->m_signaled.load(std::memory_order_relaxed)) {
       timer->m_signaled.store(false, std::memory_order_relaxed);
       try {
-        vm_call_user_func(timer->m_callback, init_null());
+        Array args = make_packed_array(sample_type_string(type));
+        vm_call_user_func(timer->m_callback, args);
       } catch (Object& ex) {
         raise_error("Uncaught exception escaping IntervalTimer: %s",
                     ex.toString().data());

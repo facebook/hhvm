@@ -4,7 +4,7 @@ class IntervalTimer {
   public function __construct(
     float $interval,
     float $initial,
-    (function (): void) $callback,
+    (function (string): void) $callback,
   );
   public function start();
   public function stop();

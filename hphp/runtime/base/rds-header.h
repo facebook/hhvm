@@ -92,7 +92,4 @@ static_assert(kVmfpOff == 32, "Eager vm-reg save in translator-asm-helpers.S");
 
 } }
 
-/* MInstrState is stored in VMRegs, at a constant offset from rds::header(). */
-#define MISOFF(nm) (rds::kVmMInstrStateOff + offsetof(MInstrState, nm))
-
 #endif

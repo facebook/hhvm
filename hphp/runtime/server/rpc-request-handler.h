@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_RPC_REQUEST_HANDLER_H_
 #define incl_HPHP_RPC_REQUEST_HANDLER_H_
 
+#include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/base/execution-context.h"
 
@@ -29,6 +30,8 @@ class Transport;
 
 class RPCRequestHandler : public RequestHandler {
 public:
+  static AccessLog &GetAccessLog() { return s_accessLog; }
+
   enum class ReturnEncodeType {
     Json      = 1,
     Serialize = 2,
@@ -73,6 +76,13 @@ private:
 
   std::string getSourceFilename(const std::string &path,
                                 SourceRootInfo &sourceRootInfo);
+
+  static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
+  static AccessLog s_accessLog;
+
+  static AccessLog::ThreadData* getAccessLogThreadData() {
+    return s_accessLogThreadData.get();
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

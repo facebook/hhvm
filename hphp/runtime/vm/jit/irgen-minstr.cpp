@@ -216,10 +216,7 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
 // pointer if it's not needed.
 SSATmp* misPtr(MTS& env) {
   assert(env.base.value && "misPtr called before emitBaseOp");
-  if (env.needMIS) {
-    return gen(env, LdMIStateAddr, env.misBase,
-      cns(env, rds::kVmMInstrStateOff));
-  }
+  if (env.needMIS) return env.misBase;
   return cns(env, Type::cns(nullptr, Type::PtrToMISUninit));
 }
 
@@ -466,22 +463,6 @@ SSATmp* getValue(MTS& env) {
   assert(env.mii.valCount() == 1);
   const int kValIdx = 0;
   return getInput(env, kValIdx, DataTypeSpecific);
-}
-
-SSATmp* getValAddr(MTS& env) {
-  assert(env.mii.valCount() == 1);
-  auto const& dl = *env.ni.inputs[0];
-  auto const& l = dl.location;
-  if (l.space == Location::Local) {
-    assert(!env.stackInputs.count(0));
-    return ldLocAddr(env, l.offset);
-  }
-
-  assert(l.space == Location::Stack);
-  assert(env.stackInputs.count(0));
-  spillStack(env);
-  env.irb.exceptionStackBoundary();
-  return ldStkAddr(env, env.stackInputs[0]);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1154,7 +1135,7 @@ void emitRatchetRefs(MTS& env) {
     return;
   }
 
-  auto const misRefAddr = misLea(env, MISOFF(tvRef));
+  auto const misRefAddr = misLea(env, offsetof(MInstrState, tvRef));
 
   setBase(env, cond(
     env,
@@ -1163,7 +1144,7 @@ void emitRatchetRefs(MTS& env) {
       gen(env, CheckInitMem, taken, misRefAddr);
     },
     [&] { // Next: tvRef isn't Uninit. Ratchet the refs
-      auto const misRef2Addr = misLea(env, MISOFF(tvRef2));
+      auto const misRef2Addr = misLea(env, offsetof(MInstrState, tvRef2));
       // Clean up tvRef2 before overwriting it.
       if (ratchetInd(env) > 0) {
         auto const val = gen(env, LdMem, Type::Gen, misRef2Addr);
@@ -1203,8 +1184,8 @@ void emitMPre(MTS& env) {
     env.misBase = gen(env, DefMIStateBase);
     auto const uninit = cns(env, Type::Uninit);
     if (nLogicalRatchets(env) > 0) {
-      gen(env, StMem, misLea(env, MISOFF(tvRef)), uninit);
-      gen(env, StMem, misLea(env, MISOFF(tvRef2)), uninit);
+      gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef)), uninit);
+      gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef2)), uninit);
     }
 
     // If we're using an MInstrState, all the default-created catch blocks for
@@ -1762,14 +1743,8 @@ void emitSetWithRefLProp(MTS& env) { SPUNT(__func__); }
 void emitSetWithRefRProp(MTS& env) { emitSetWithRefLProp(env); }
 
 void emitSetWithRefNewElem(MTS& env) {
-  if (env.base.type.strip() <= Type::Arr &&
-      getValue(env)->type() <= Type::Cell) {
-    constrainBase(env, DataTypeSpecific);
-    emitSetNewElem(env);
-  } else {
-    gen(env, SetWithRefNewElem, env.base.value, getValAddr(env),
-      misPtr(env));
-  }
+  auto const val = getValue(env);
+  gen(env, SetWithRefNewElem, env.base.value, val, misPtr(env));
   env.result = nullptr;
 }
 
@@ -1820,20 +1795,15 @@ void emitSetElem(MTS& env) {
   }
 }
 
-void emitSetWithRefLElem(MTS& env) {
+void emitSetWithRefElem(MTS& env) {
   auto const key = getKey(env);
-  auto const locAddr = getValAddr(env);
-  if (env.base.type.strip() <= Type::Arr &&
-      !locAddr->type().deref().maybe(Type::BoxedCell)) {
-    constrainBase(env, DataTypeSpecific);
-    emitSetElem(env);
-    assert(env.strTestResult == nullptr);
-  } else {
-    gen(env, SetWithRefElem, env.base.value, key, locAddr, misPtr(env));
-  }
+  auto const val = getValue(env);
+  gen(env, SetWithRefElem, env.base.value, key, val, misPtr(env));
   env.result = nullptr;
 }
-void emitSetWithRefRElem(MTS& env) { emitSetWithRefLElem(env); }
+
+void emitSetWithRefLElem(MTS& env) { emitSetWithRefElem(env); }
+void emitSetWithRefRElem(MTS& env) { emitSetWithRefElem(env); }
 
 void emitSetOpElem(MTS& env) {
   auto const op = static_cast<SetOpOp>(env.ni.imm[0].u_OA);
@@ -1947,7 +1917,10 @@ void emitFinalMOp(MTS& env) {
  * weird right?
  */
 void cleanTvRefs(MTS& env) {
-  constexpr ptrdiff_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
+  constexpr ptrdiff_t refOffs[] = {
+    offsetof(MInstrState, tvRef),
+    offsetof(MInstrState, tvRef2)
+  };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
     auto const addr = misLea(env, refOffs[env.failedSetBlock ? 1 - i : i]);
     auto const val  = gen(env, LdMem, Type::Gen, addr);

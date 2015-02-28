@@ -67,6 +67,8 @@ struct FrameStateMgr;
  *                    intersected with an optional type parameter
  *     DThis        single dst has type Obj<ctx>, where ctx is the
  *                    current context class
+ *     DCtx         single dst has type Cctx|Obj<=ctx, where ctx is the
+ *                    current context class
  *     DMulti       multiple dests. type and number depend on instruction
  *     DSetElem     single dst is a subset of CountedStr|Nullptr depending on
  *                    sources

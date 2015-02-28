@@ -171,6 +171,7 @@ public:
   void onObjectMethodCall(Token &out, Token &base, bool nullsafe, Token &prop,
                           Token &params);
 
+  void checkClassDeclName(const std::string& name);
   void checkAllowedInWriteContext(ExpressionPtr e);
 
   void onListAssignment(Token &out, Token &vars, Token *expr,
@@ -306,6 +307,7 @@ public:
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
   void onNamespaceEnd();
   void nns(int token = 0, const std::string& text = std::string());
+  std::string nsClassDecl(const std::string &name);
   std::string nsDecl(const std::string &name);
   std::string resolve(const std::string &ns, bool cls);
 
@@ -427,8 +429,6 @@ private:
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
 
-  bool hasType(Token &type);
-
   void checkAssignThis(string var);
 
   void checkAssignThis(Token &var);
@@ -460,27 +460,28 @@ private:
     };
 
     enum class AliasType {
+      NONE,
       USE,
+      AUTO_USE,
       DEF
     };
 
     AliasTable(const hphp_string_imap<std::string>& autoAliases,
                std::function<bool ()> autoOracle);
 
-    std::string getName(std::string alias);
-    std::string getDefName(std::string alias);
-    std::string getUseName(std::string alias);
+    std::string getName(std::string alias, int line_no);
+    std::string getNameRaw(std::string alias);
+    AliasType getType(std::string alias);
+    int getLine(std::string alias);
     bool isAliased(std::string alias);
-    bool isAutoType(std::string alias);
-    bool isUseType(std::string alias);
-    bool isDefType(std::string alias);
-    void set(std::string alias, std::string name, AliasType type);
+    void set(std::string alias, std::string name, AliasType type, int line_no);
     void clear();
 
   private:
     struct NameEntry {
       std::string name;
       AliasType type;
+      int line_no;
     };
 
     hphp_string_imap<NameEntry> m_aliases;
@@ -489,6 +490,8 @@ private:
     std::function<bool ()> m_autoOracle;
     void setFalseOracle();
   };
+
+  using AliasType = AliasTable::AliasType;
 
   NamespaceState m_nsState;
   bool m_nsFileScope;

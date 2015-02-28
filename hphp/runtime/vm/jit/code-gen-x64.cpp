@@ -3181,7 +3181,8 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto const funcReturnType = callee->returnType();
   auto& v = vmain();
 
-  int returnOffset = MISOFF(tvBuiltinReturn);
+  int returnOffset = rds::kVmMInstrStateOff +
+    offsetof(MInstrState, tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(callee)) {
     auto const rSP       = srcLoc(inst, 1).reg();
@@ -3199,8 +3200,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
       synced_sp
     );
   }
-  // The MInstrState we need to use is at a constant offset from the base of the
-  // RDS header.
+
+  // The MInstrState we need to use is at a constant offset from the base of
+  // the RDS header.
   PhysReg rdsReg(rVmTl);
 
   auto callArgs = argGroup(inst);
@@ -3960,7 +3962,7 @@ void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
-  assert(dstLoc(inst, 0).reg() == rVmTl);
+  vmain() << lea{rVmTl[rds::kVmMInstrStateOff], dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {
@@ -4376,7 +4378,7 @@ void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
     emitGetCtxFwdCallWithThisDyn(destCtxReg, srcCtxReg, make_cache());
     return;
   }
-  assert(t <= Type::Ctx);
+
   // dynamically check if we have a This pointer and call
   // emitGetCtxFwdCallWithThisDyn below
   auto const sf = v.makeReg();

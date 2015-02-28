@@ -106,11 +106,14 @@ TypedValue* zend_wrap_func(ActRec* ar) {
     exceptionStore.rethrow();
   }
 
-  // Take care of freeing the args, tearing down the ActRec,
-  // and moving the return value to the right place
-  frame_free_locals_inl(ar, ar->func()->numLocals(), return_value);
-  memcpy(&ar->m_r, return_value, sizeof(TypedValue));
-  return_value->m_type = KindOfNull;
+  // Take care of freeing the args, tearing down the ActRec, and moving the
+  // return value to the right place.  Note that frame_free_locals expects to
+  // be able to free return_value in the event of an exception, so we have to
+  // take it out of our Variant /before/ calling that.
+  TypedValue return_value_copy = *return_value;
+  return_value->m_type = KindOfNull; // clear the Variant's copy
+  frame_free_locals_inl(ar, ar->func()->numLocals(), &return_value_copy);
+  memcpy(&ar->m_r, &return_value_copy, sizeof(TypedValue));
   if (ar->func()->isReturnRef()) {
     if (!ar->m_r.m_data.pref->isReferenced()) {
       tvUnbox(&ar->m_r);

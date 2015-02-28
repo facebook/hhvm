@@ -662,6 +662,7 @@ IMPLEMENT_GET_CLASS(AsyncMysqlQueryResult)
 void AsyncMysqlQueryResult::sweep() {
   m_op.reset();
   m_query_result.reset();
+  m_field_index.reset();
 }
 
 ObjectData* AsyncMysqlQueryResult::newInstance(
@@ -915,6 +916,7 @@ ObjectData* AsyncMysqlRowBlock::newInstance(am::RowBlock* row_block,
 
 void AsyncMysqlRowBlock::sweep() {
   m_row_block.reset();
+  m_field_index.reset();
 }
 
 size_t AsyncMysqlRowBlock::getIndexFromVariant(const Variant& field) {

@@ -380,8 +380,7 @@ void runAnalysis(IRUnit& unit, BlockList& blocks, ValueNumberTable& vnTable) {
     // iteration of the fixed point. If we change the global ValueNumberTable
     // during the pass, the hash values of the SSATmps will change which is
     // apparently a no-no for unordered_map.
-    ValueNumberTable localUpdates(unit,
-      ValueNumberMetadata { nullptr, nullptr });
+    ValueNumberTable localUpdates(unit, ValueNumberMetadata{});
     {
       CongruenceHasher hash(vnTable);
       CongruenceComparator pred(vnTable);
@@ -402,15 +401,12 @@ void runAnalysis(IRUnit& unit, BlockList& blocks, ValueNumberTable& vnTable) {
 }
 
 bool canReplaceWith(
-  IdomVector& idoms,
-  SSATmp* dst,
-  SSATmp* other
+  const IdomVector& idoms,
+  const SSATmp* dst,
+  const SSATmp* other
 ) {
   assert(other->type() <= dst->type());
-  if (other->inst()->is(DefConst)) return true;
-  auto const definingBlock = findDefiningBlock(other);
-  if (!definingBlock) return false;
-  return dominates(definingBlock, dst->inst()->block(), idoms);
+  return is_tmp_usable(idoms, other, dst->inst()->block());
 }
 
 void tryReplaceInstruction(
@@ -459,7 +455,7 @@ void gvn(IRUnit& unit) {
   auto rpoBlocksWithIds = rpoSortCfgWithIds(unit);
   auto& rpoBlocks = rpoBlocksWithIds.blocks;
   auto dominators = findDominators(unit, rpoBlocksWithIds);
-  ValueNumberTable vnTable(unit, ValueNumberMetadata { nullptr, nullptr });
+  ValueNumberTable vnTable(unit, ValueNumberMetadata{});
 
   // This is an implementation of the RPO version of the global value numbering
   // algorithm presented in the 1996 paper "SCC-based Value Numbering" by

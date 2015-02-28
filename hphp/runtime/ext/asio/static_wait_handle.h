@@ -44,7 +44,7 @@ class c_StaticWaitHandle final : public c_WaitHandle {
   void t___construct();
 
  public:
-  static c_StaticWaitHandle* CreateSucceeded(Cell result);
+  static c_StaticWaitHandle* CreateSucceeded(Cell result); // nothrow
   static c_StaticWaitHandle* CreateFailed(ObjectData* exception);
 
  private:

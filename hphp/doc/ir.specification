@@ -687,10 +687,10 @@ To string conversions:
 
   Suprise flag hook for function returns.
 
-| SuspendHookE, ND, S(FramePtr) S(FramePtr), Er
+| SuspendHookE, ND, S(FramePtr) S(FramePtr) S(Obj), Er
 
   Suprise flag hook for suspending eagerly executing async functions or
-  generators.
+  generators.  Decrefs S2 if it throws an exception.
 
 | SuspendHookR, ND, S(FramePtr) S(Obj|Nullptr), Er
 
@@ -823,7 +823,7 @@ To string conversions:
   inner type of S0 must be a subtype of T (usually ensured with a previous
   CheckRefInner).
 
-| LdCtx, D(Ctx), S(FramePtr), C
+| LdCtx, DCtx, S(FramePtr), C
 
   Loads into D the value of the m_this/m_cls field out of the frame pointer S0,
   which must be a frame for the function in the LdCtx's Marker. The result
@@ -843,7 +843,7 @@ To string conversions:
 
   Loads into D the value of the m_cls field out of the frame pointer S0. The
   compiler should generate this only if it can prove that the frame does not
-  contain a $this pointer.
+  contain a nullptr or $this pointer.
 
 | LdClsCtx, D(Cls), S(Ctx), C
 
@@ -944,8 +944,8 @@ To string conversions:
 
   If S0 is a Cctx, return S0. If S0 is an object, check if clsName::methodName
   is a static method. If it is, return S0's class as a Ctx pointer. If not,
-  return S0. If S0 is a Ctx, dynamically check if it is an object or Cctx at
-  runtime and perform the operations described above.
+  return S0. If S0 is a Ctx, dynamically check if it is a non-null object
+  pointer or Cctx at runtime and perform the operations described above.
 
 | GetCtxFwdCall, D(Ctx), S(Ctx) C(Func), PRc
 
@@ -2230,8 +2230,8 @@ fields of that struct for holding intermediate values.
   InvalidSetMException (see discussion above).
 
 | SetWithRefElem, ND,
-|                    S(PtrToGen) S(Cell) S(PtrToGen) S(PtrToMISGen),
-|                    MElem|Er
+|                 S(PtrToGen) S(Cell) S(Gen) S(PtrToMISGen),
+|                 MElem|Er
 
   Set element with key S1 in S0 to S2.
 
@@ -2359,12 +2359,12 @@ fields of that struct for holding intermediate values.
   Given a vector, check if it has a immutable copy and jump to the taken branch
   if so.
 
-| ColAddNewElemC, D(Obj), S(Obj) S(Cell), Er|CRc|P
+| ColAddNewElemC, DofS(0), S(Obj) S(Cell), Er|CRc|P
 
   Adds item S0 to the end of collection S0. Throws a fatal error if S0 is not a
   collection. Returns S0.
 
-| ColAddElemC, D(Obj), S(Obj) S(Cell) S(Cell), Er|CRc|P
+| ColAddElemC, DofS(0), S(Obj) S(Cell) S(Cell), Er|CRc|P
 
   Adds item to collection. Inserts item S2 into collection S0 at key S1.
   Throws a fatal error if S0 is not a collection. Returns S0.

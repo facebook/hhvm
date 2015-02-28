@@ -788,7 +788,7 @@ bool breaksRegion(Op opc) {
       return true;
 
     default:
-      return RuntimeOption::EvalJitLLVM &&
+      return mcg->useLLVM() &&
         opcodeControlFlowInfo(opc) == ControlFlowInfo::ChangesPC;
   }
 }

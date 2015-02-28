@@ -31,6 +31,17 @@ namespace {
 
 void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
   ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+
+  /*
+   * This is a weird situation for throwing: we've partially torn down the
+   * ActRec (decref'd all the frame's locals), and we've popped the return
+   * value.  If we throw, the unwinder needs to know the return value is not on
+   * the eval stack, so we need to sync the marker after the pop---the return
+   * value will be decref'd by the return hook while unwinding, in this case.
+   */
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
   ifThen(
     env,
     [&] (Block* taken) {

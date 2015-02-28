@@ -565,7 +565,6 @@ int process(const CompilerOptions &po) {
   }
 
   // one time initialization
-  Type::InitTypeHintMap();
   BuiltinSymbols::LoadSuperGlobals();
   ClassInfo::Load();
 

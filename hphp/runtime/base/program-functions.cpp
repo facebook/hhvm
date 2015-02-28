@@ -53,6 +53,7 @@
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/replay-transport.h"
@@ -903,6 +904,9 @@ static int start_server(const std::string &username, int xhprof) {
   AdminRequestHandler::GetAccessLog().init
     (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogSymLink,
      RuntimeOption::AdminLogFile,
+     username);
+  RPCRequestHandler::GetAccessLog().init
+    (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::RPCLogs,
      username);
 
 #if !defined(SKIP_USER_CHANGE)

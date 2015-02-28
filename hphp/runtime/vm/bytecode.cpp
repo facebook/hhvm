@@ -4355,16 +4355,20 @@ OPTBLD_INLINE void iopSSwitch(IOP_ARGS) {
 OPTBLD_INLINE void ret(PC& pc) {
   // Get the return value.
   TypedValue retval = *vmStack().topTV();
-
-  // Free $this and local variables. Calls FunctionReturn hook. The return value
-  // is kept on the stack so that the unwinder would free it if the hook fails.
-  frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retval);
   vmStack().discard();
+
+  // Free $this and local variables. Calls FunctionReturn hook. The return
+  // value must be removed from the stack, or the unwinder would try to free it
+  // if the hook throws---but the event hook routine decrefs the return value
+  // in that case if necessary.
+  frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retval);
 
   // If in an eagerly executed async function, wrap the return value
   // into succeeded StaticWaitHandle.
   if (UNLIKELY(!vmfp()->resumed() && vmfp()->func()->isAsyncFunction())) {
     auto const& retvalCell = *tvAssertCell(&retval);
+    // Heads up that we're assuming CreateSucceeded can't throw, or we won't
+    // decref the return value.  (It can't right now.)
     auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retvalCell);
     cellCopy(make_tv<KindOfObject>(waitHandle), retval);
   }
@@ -7633,6 +7637,7 @@ void ExecutionContext::requestExit() {
   profileRequestEnd();
   EventHook::Disable();
   EnvConstants::requestExit();
+  tl_miter_table.clear();
 
   if (m_globalVarEnv) {
     smart_delete(m_globalVarEnv);

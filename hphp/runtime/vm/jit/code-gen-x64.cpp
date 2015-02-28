@@ -2561,10 +2561,7 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
   if (!type.maybe(Type::Static)) {
     sf = v.makeReg();
     v << declm{dataReg[FAST_REFCOUNT_OFFSET], sf};
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      // Assert that the ref count is not less than zero
-      emitAssertFlagsNonNegative(v, sf);
-    }
+    emitAssertFlagsNonNegative(v, sf);
 
     if (hasDestroy) {
       ifBlock(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
@@ -2581,10 +2578,7 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
     // Decrement _count
     sf = v.makeReg();
     v << declm{dataReg[FAST_REFCOUNT_OFFSET], sf};
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      // Assert that the ref count is not less than zero
-      emitAssertFlagsNonNegative(v, sf);
-    }
+    emitAssertFlagsNonNegative(v, sf);
   };
 
   if (hasDestroy) {

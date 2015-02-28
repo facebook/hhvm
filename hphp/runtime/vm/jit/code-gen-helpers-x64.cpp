@@ -191,10 +191,7 @@ void emitIncRef(Vout& v, Vreg base) {
   // emit incref
   auto const sf = v.makeReg();
   v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that the ref count is greater than zero
-    emitAssertFlagsNonNegative(v, sf);
-  }
+  emitAssertFlagsNonNegative(v, sf);
 }
 
 void emitIncRef(Asm& as, PhysReg base) {
@@ -220,6 +217,7 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
 }
 
 void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {
+  if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
   ifThen(v, CC_NGE, sf, [&](Vout& v) { v << ud2{}; });
 }
 

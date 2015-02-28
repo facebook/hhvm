@@ -184,6 +184,12 @@ void emitTransCounterInc(Asm& a) {
   emitTransCounterInc(Vauto(a.code()).main());
 }
 
+void emitDecRef(Vout& v, Vreg base) {
+  auto const sf = v.makeReg();
+  v << declm{base[FAST_REFCOUNT_OFFSET], sf};
+  emitAssertFlagsNonNegative(v, sf);
+}
+
 void emitIncRef(Vout& v, Vreg base) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitAssertRefCount(v, base);

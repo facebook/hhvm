@@ -206,6 +206,20 @@ void ifRefCountedType(Vout& v, Type ty, Vloc loc, Then then) {
   });
 }
 
+template<class Then>
+void ifRefCountedNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
+  ifRefCountedType(v, ty, loc, [&] (Vout& v) {
+    if (!ty.maybe(Type::Static)) {
+      then(v);
+      return;
+    }
+    auto const sf = v.makeReg();
+    v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
+    static_assert(UncountedValue < 0 && StaticValue < 0, "");
+    ifThen(v, CC_GE, sf, then);
+  });
+}
+
 } // unnamed namespace
 //////////////////////////////////////////////////////////////////////
 
@@ -2381,18 +2395,10 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
-  ifRefCountedType(
+  ifRefCountedNonStatic(
     vmain(), ty, srcLoc(inst, 0),
     [&] (Vout& v) {
-      auto const base = srcLoc(inst, 0).reg();
-      if (!ty.maybe(Type::Static)) {
-        emitIncRef(v, base);
-        return;
-      }
-      auto const sf = v.makeReg();
-      v << cmplim{0, base[FAST_REFCOUNT_OFFSET], sf};
-      static_assert(UncountedValue < 0 && StaticValue < 0, "");
-      ifThen(v, CC_GE, sf, [&] (Vout& v) { emitIncRef(v, base); });
+      emitIncRef(v, srcLoc(inst, 0).reg());
     }
   );
 }
@@ -2706,9 +2712,14 @@ void CodeGenerator::cgDecRef(IRInstruction *inst) {
 }
 
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
-  // DecRefNZ cannot bring the count to zero.
-  // Therefore, we don't generate zero-checking code.
-  cgDecRefWork(inst, false);
+  emitIncStat(vmain(), Stats::TC_DecRef_NZ);
+  auto const ty = inst->src(0)->type();
+  ifRefCountedNonStatic(
+    vmain(), ty, srcLoc(inst, 0),
+    [&] (Vout& v) {
+      emitDecRef(v, srcLoc(inst, 0).reg());
+    }
+  );
 }
 
 void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {

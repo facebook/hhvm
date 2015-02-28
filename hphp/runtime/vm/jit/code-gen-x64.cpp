@@ -118,6 +118,94 @@ const char* getContextName(const Class* ctx) {
   return ctx ? ctx->name()->data() : ":anonymous:";
 }
 
+/*
+ * Generate an if-block that branches around some unlikely code, handling
+ * the cases when a == astubs and a != astubs.  cc is the branch condition
+ * to run the unlikely block.
+ *
+ * Passes the proper assembler to use to the unlikely function.
+ */
+template <class Then>
+void unlikelyIfThen(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
+                    Then then) {
+  auto unlikely = vstub.makeBlock();
+  auto done = vmain.makeBlock();
+  vmain << jcc{cc, sf, {done, unlikely}};
+  vstub = unlikely;
+  then(vstub);
+  if (!vstub.closed()) vstub << jmp{done};
+  vmain = done;
+}
+
+// Generate an if-then-else block
+template <class Then, class Else>
+void ifThenElse(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock,
+                Else elseBlock) {
+  auto thenLabel = v.makeBlock();
+  auto elseLabel = v.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, sf, {elseLabel, thenLabel}};
+  v = thenLabel;
+  thenBlock();
+  if (!v.closed()) v << jmp{done};
+  v = elseLabel;
+  elseBlock();
+  if (!v.closed()) v << jmp{done};
+  v = done;
+}
+
+/*
+ * Same as ifThenElse except the first block is off in astubs
+ */
+template <class Then, class Else>
+void unlikelyIfThenElse(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
+                        Then unlikelyBlock, Else elseBlock) {
+  auto elseLabel = vmain.makeBlock();
+  auto unlikelyLabel = vstub.makeBlock();
+  auto done = vmain.makeBlock();
+  vmain << jcc{cc, sf, {elseLabel, unlikelyLabel}};
+  vmain = elseLabel;
+  elseBlock(vmain);
+  if (!vmain.closed()) vmain << jmp{done};
+  vstub = unlikelyLabel;
+  unlikelyBlock(vstub);
+  if (!vstub.closed()) vstub << jmp{done};
+  vmain = done;
+}
+
+// emit an if-then-else condition where the true case is unlikely.
+template <class T, class F>
+Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg sf, Vreg d, T t,
+                  F f) {
+  auto fblock = v.makeBlock();
+  auto tblock = vc.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, sf, {fblock, tblock}};
+  vc = tblock;
+  auto treg = t(vc);
+  vc << phijmp{done, vc.makeTuple({treg})};
+  v = fblock;
+  auto freg = f(v);
+  v << phijmp{done, v.makeTuple({freg})};
+  v = done;
+  v << phidef{v.makeTuple({d})};
+  return d;
+}
+
+template<class Then>
+void ifRefCountedType(Vout& v, Type ty, Vloc loc, Then then) {
+  if (!ty.maybe(Type::Counted)) return;
+  if (ty.isKnownDataType()) {
+    if (IS_REFCOUNTED_TYPE(ty.toDataType())) then(v);
+    return;
+  }
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
+  ifThen(v, CC_NLE, sf, [&] (Vout& v) {
+    then(v);
+  });
+}
+
 } // unnamed namespace
 //////////////////////////////////////////////////////////////////////
 
@@ -187,80 +275,6 @@ void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
   unlikelyBlock(vcold);
   if (!vcold.closed()) vcold << jmp{done};
   v = done;
-}
-
-// emit an if-then-else condition where the true case is unlikely.
-template <class T, class F>
-Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg sf, Vreg d, T t,
-                  F f) {
-  auto fblock = v.makeBlock();
-  auto tblock = vc.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {fblock, tblock}};
-  vc = tblock;
-  auto treg = t(vc);
-  vc << phijmp{done, vc.makeTuple({treg})};
-  v = fblock;
-  auto freg = f(v);
-  v << phijmp{done, v.makeTuple({freg})};
-  v = done;
-  v << phidef{v.makeTuple({d})};
-  return d;
-}
-
-/*
- * Generate an if-block that branches around some unlikely code, handling
- * the cases when a == astubs and a != astubs.  cc is the branch condition
- * to run the unlikely block.
- *
- * Passes the proper assembler to use to the unlikely function.
- */
-template <class Then>
-void unlikelyIfThen(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
-                    Then then) {
-  auto unlikely = vstub.makeBlock();
-  auto done = vmain.makeBlock();
-  vmain << jcc{cc, sf, {done, unlikely}};
-  vstub = unlikely;
-  then(vstub);
-  if (!vstub.closed()) vstub << jmp{done};
-  vmain = done;
-}
-
-// Generate an if-then-else block
-template <class Then, class Else>
-void ifThenElse(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock,
-                Else elseBlock) {
-  auto thenLabel = v.makeBlock();
-  auto elseLabel = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {elseLabel, thenLabel}};
-  v = thenLabel;
-  thenBlock();
-  if (!v.closed()) v << jmp{done};
-  v = elseLabel;
-  elseBlock();
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
-/*
- * Same as ifThenElse except the first block is off in astubs
- */
-template <class Then, class Else>
-void unlikelyIfThenElse(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
-                        Then unlikelyBlock, Else elseBlock) {
-  auto elseLabel = vmain.makeBlock();
-  auto unlikelyLabel = vstub.makeBlock();
-  auto done = vmain.makeBlock();
-  vmain << jcc{cc, sf, {elseLabel, unlikelyLabel}};
-  vmain = elseLabel;
-  elseBlock(vmain);
-  if (!vmain.closed()) vmain << jmp{done};
-  vstub = unlikelyLabel;
-  unlikelyBlock(vstub);
-  if (!vstub.closed()) vstub << jmp{done};
-  vmain = done;
 }
 
 Vloc CodeGenerator::srcLoc(const IRInstruction* inst, unsigned i) const {
@@ -2365,38 +2379,22 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   v << fallback{destSK, trflags, kCrossTraceRegs};
 }
 
-void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc) {
-  assert(type.maybe(Type::Counted));
-  auto& v = vmain();
-  auto increfMaybeStatic = [&](Vout& v) {
-    auto base = srcLoc.reg(0);
-    if (!type.maybe(Type::Static)) {
-      emitIncRef(v, base);
-    } else {
+void CodeGenerator::cgIncRef(IRInstruction* inst) {
+  auto const ty = inst->src(0)->type();
+  ifRefCountedType(
+    vmain(), ty, srcLoc(inst, 0),
+    [&] (Vout& v) {
+      auto const base = srcLoc(inst, 0).reg();
+      if (!ty.maybe(Type::Static)) {
+        emitIncRef(v, base);
+        return;
+      }
       auto const sf = v.makeReg();
       v << cmplim{0, base[FAST_REFCOUNT_OFFSET], sf};
       static_assert(UncountedValue < 0 && StaticValue < 0, "");
-      ifThen(v, CC_GE, sf, [&](Vout& v) { emitIncRef(v, base); });
+      ifThen(v, CC_GE, sf, [&] (Vout& v) { emitIncRef(v, base); });
     }
-  };
-
-  if (type.isKnownDataType()) {
-    assert(IS_REFCOUNTED_TYPE(type.toDataType()));
-    increfMaybeStatic(v);
-  } else {
-    auto const sf = v.makeReg();
-    emitCmpTVType(v, sf, KindOfRefCountThreshold, srcLoc.reg(1));
-    ifThen(v, CC_NLE, sf, [&](Vout& v) { increfMaybeStatic(v); });
-  }
-}
-
-void CodeGenerator::cgIncRef(IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
-  Type type   = src->type();
-
-  if (!type.maybe(Type::Counted)) return;
-
-  cgIncRefWork(type, src, srcLoc(inst, 0));
+  );
 }
 
 void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
@@ -5373,21 +5371,12 @@ void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
-  auto const src = inst->src(0);
-  auto const ty  = src->type();
-  auto& v        = vmain();
-  if (!ty.maybe(Type::Counted)) return;
-  if (ty.isKnownDataType()) {
-    if (IS_REFCOUNTED_TYPE(ty.toDataType())) {
+  ifRefCountedType(
+    vmain(), inst->src(0)->type(), srcLoc(inst, 0),
+    [&] (Vout& v) {
       emitAssertRefCount(v, srcLoc(inst, 0).reg());
     }
-    return;
-  }
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRefCountThreshold, srcLoc(inst, 0).reg(1));
-  ifThen(v, CC_NLE, sf, [&] (Vout& v) {
-    emitAssertRefCount(v, srcLoc(inst, 0).reg());
-  });
+  );
 }
 
 void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {

@@ -100,7 +100,6 @@ private:
   void emitTypeGuard(const BCMarker& marker, Type type, Loc typeLoc,
                      Loc dataLoc);
 
-  void cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
   template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);

@@ -46,7 +46,12 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
   /**
    * Returns an array containing the values from this ImmSet.
    */
-  public function toValuesArray(): array;
+  public function toKeysArray(): array;
+
+  /**
+   * Returns an array containing the values from this ImmSet.
+   */
+  public function toValuesArray(): array<Tv>;
 
   /**
    * Returns an iterator that points to the beginning of this ImmSet.
@@ -105,7 +110,7 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
   public function items(): Iterable<Tv>;
   public function values(): ImmVector<Tv>;
   public function keys(): ImmVector<mixed>;
-  public function lazy(): Iterable<Tv>;
+  public function lazy(): KeyedIterable<mixed, Tv>;
   public function map<Tu>((function(Tv): Tu) $callback): ImmSet<Tu>;
   public function mapWithKey<Tu>((function(mixed, Tv): Tu) $callback): ImmSet<Tu>;
   public function filter((function(Tv): bool) $callback): ImmSet<Tv>;

@@ -59,7 +59,12 @@ final class Set<Tv> implements MutableSet<Tv> {
   /**
    * Returns an array containing the values from this Set.
    */
-  public function toValuesArray(): array;
+  public function toKeysArray(): array;
+
+  /**
+   * Returns an array containing the values from this Set.
+   */
+  public function toValuesArray(): array<Tv>;
 
   public function toVector(): Vector<Tv>;
   public function toImmVector(): ImmVector<Tv>;
@@ -68,7 +73,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
   public function immutable(): ImmSet<Tv>;
-  public function lazy(): Iterable<Tv>;
+  public function lazy(): KeyedIterable<mixed, Tv>;
   public function values(): Vector<Tv>;
   public function keys(): Vector<mixed>;
   public function map<Tu>((function(Tv): Tu) $callback): Set<Tu>;
@@ -146,7 +151,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   /**
    * Returns an iterator that points to the beginning of this Set.
    */
-  public function getIterator(): Iterator<Tv>;
+  public function getIterator(): SetIterator<Tv>;
 
   /**
    * Returns a Set containing the values from the specified array.

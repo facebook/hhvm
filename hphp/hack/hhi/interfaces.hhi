@@ -124,8 +124,8 @@ interface OuterIterator<Tv> extends Iterator<Tv> {
 interface ArrayAccess<Tk, Tv> {
   public function offsetExists(Tk $key): bool;
   public function offsetGet(Tk $key): Tv;
-  public function offsetSet(Tk $key, Tv $val): this;
-  public function offsetUnset(Tk $key): this;
+  public function offsetSet(Tk $key, Tv $val): void;
+  public function offsetUnset(Tk $key): void;
 }
 
 interface Awaitable<T> {

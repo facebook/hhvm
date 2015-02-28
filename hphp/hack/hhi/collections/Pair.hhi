@@ -97,6 +97,11 @@ final class Pair<Tv1, Tv2> implements ConstVector<mixed> {
   public function count(): int;
 
   /**
+   * Returns an Iterable that produces the values from this Pair.
+   */
+  public function items(): Iterable<mixed>;
+
+  /**
    * Returns the value at the specified key. If the key is not present,
    * an exception is thrown. "$v = $p->at($k)" is semantically equivalent
    * to "$v = $p[$k]".

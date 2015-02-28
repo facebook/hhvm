@@ -2608,9 +2608,7 @@ void CodeGenerator::cgDecRef(IRInstruction *inst) {
     v, ty, srcLoc(inst, 0),
     [&] (Vout& v) {
       cgCheckStaticBitAndDecRef(
-        v, inst, done,
-        // Type::Cell when unknown type is for historical reasons only.
-        ty.isKnownDataType() ? ty : Type::Cell,
+        v, inst, done, ty,
         base,
         [&] (Vout& v) {
           cgCallHelper(

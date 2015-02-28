@@ -57,8 +57,9 @@ namespace HPHP { namespace jit {
 /*
  * Timer is used to track how much CPU time we spend in the different stages of
  * the jit. Typical usage starts and stops timing with construction/destruction
- * of the object, respectively. The end() function may be called to stop timing
- * early, in case it's not reasonable to add a new scope just for timing.
+ * of the object, respectively. The stop() function may be called to stop
+ * timing early, in case it's not reasonable to add a new scope just for
+ * timing.
  *
  * The name given to the constructor may be any string, though by convention
  * any components are separated with underscores. For example, we use Timers
@@ -91,7 +92,7 @@ struct Timer {
   explicit Timer(Name name);
   ~Timer();
 
-  void end();
+  void stop();
 
   typedef std::vector<std::pair<const char*, Counter>> CounterVec;
   static CounterVec Counters();

@@ -15,7 +15,11 @@
 */
 
 #include "hphp/runtime/vm/jit/timer.h"
+
 #include <map>
+#include <algorithm>
+#include <array>
+#include <iterator>
 
 #include <folly/Format.h>
 
@@ -28,15 +32,20 @@ TRACE_SET_MOD(jittime);
 
 namespace HPHP { namespace jit {
 
-static __thread Timer::Counter s_counters[Timer::kNumTimers];
+namespace {
 
-static const struct { const char* str; Timer::Name name; } s_names[] = {
+//////////////////////////////////////////////////////////////////////
+
+__thread Timer::Counter s_counters[Timer::kNumTimers];
+
+struct TimerName { const char* str; Timer::Name name; };
+const TimerName s_names[] = {
 # define TIMER_NAME(name) {#name, Timer::name},
   JIT_TIMERS
 # undef TIMER_NAME
 };
 
-static int64_t getCPUTimeNanos() {
+int64_t getCPUTimeNanos() {
   if (!RuntimeOption::EvalJitTimer) return -1;
 
 #ifdef CLOCK_THREAD_CPUTIME_ID
@@ -52,6 +61,10 @@ static int64_t getCPUTimeNanos() {
 #endif
 }
 
+//////////////////////////////////////////////////////////////////////
+
+}
+
 Timer::Timer(Name name)
   : m_name(name)
   , m_start(getCPUTimeNanos())
@@ -61,10 +74,10 @@ Timer::Timer(Name name)
 
 Timer::~Timer() {
   if (!RuntimeOption::EvalJitTimer || m_finished) return;
-  end();
+  stop();
 }
 
-void Timer::end() {
+void Timer::stop() {
   if (!RuntimeOption::EvalJitTimer) return;
 
   assert(!m_finished);
@@ -106,13 +119,21 @@ std::string Timer::Show() {
   auto const header = "{:<40} | {:>15} {:>15} {:>15}\n";
   auto const row    = "{:<40} | {:>15} {:>13,}us {:>13,}ns\n";
 
+  std::array<TimerName,kNumTimers> names_copy;
+  std::copy(s_names, s_names + kNumTimers, begin(names_copy));
+  std::sort(
+    begin(names_copy), end(names_copy),
+    [&] (const TimerName& a, const TimerName& b) {
+      return s_counters[a.name].total > s_counters[b.name].total;
+    }
+  );
+
   std::string rows;
-  for (auto& pair : s_names) {
-    auto* name = pair.str;
-    auto& counter = s_counters[pair.name];
+  for (auto const& pair : names_copy) {
+    auto const& counter = s_counters[pair.name];
     if (counter.total == 0 && counter.count == 0) continue;
 
-    folly::format(&rows, row, name, counter.count, counter.total / 1000,
+    folly::format(&rows, row, pair.str, counter.count, counter.total / 1000,
                   counter.mean());
   }
 

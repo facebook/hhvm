@@ -638,7 +638,7 @@ TranslateResult irGenRegion(HTS& hts,
     assert(!byRefs.hasNext());
     assert(!knownFuncs.hasNext());
   }
-  irGenTimer.end();
+  irGenTimer.stop();
   return TranslateResult::Success;
 }
 

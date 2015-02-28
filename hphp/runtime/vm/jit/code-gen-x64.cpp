@@ -2425,7 +2425,7 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
     auto const sf = v.makeReg();
     v << testbi{1, rthis, sf};
     ifThen(v, CC_Z, sf, [&](Vout& v) {
-      cgDecRefStaticType(v, inst, Type::Obj, rthis, true /* genZeroCheck */);
+      cgDecRefStaticType(v, inst, Type::Obj, rthis);
     });
   };
 
@@ -2510,17 +2510,6 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
   return true;
 }
 
-namespace {
-template <typename T>
-struct CheckValid {
-  static bool valid(const T& f) { return true; }
-};
-template <>
-struct CheckValid<void(*)(Vout&)> {
-  static bool valid(void (*f)(Vout&)) { return f != nullptr; }
-};
-}
-
 //
 // Using the given dataReg, this method generates code that checks the static
 // bit out of dataReg, and emits a DecRef if needed.
@@ -2540,18 +2529,12 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
                                          Vlabel done, Type type,
                                          Vreg dataReg, F destroyImpl) {
   always_assert(type.maybe(Type::Counted));
-  bool hasDestroy = CheckValid<F>::valid(destroyImpl);
 
   OptDecRefProfile profile;
-  auto const unlikelyDestroy =
-    hasDestroy ? decRefDestroyIsUnlikely(inst, profile, type) : false;
+  auto const unlikelyDestroy = decRefDestroyIsUnlikely(inst, profile, type);
 
-  if (hasDestroy) {
-    emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl :
-                   Stats::TC_DecRef_Likely_Decl);
-  } else {
-    emitIncStat(v, Stats::TC_DecRef_NZ);
-  }
+  emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl
+                                 : Stats::TC_DecRef_Likely_Decl);
 
   Vreg sf;
   auto destroy = [&](Vout& v) {
@@ -2568,10 +2551,7 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
     sf = v.makeReg();
     v << declm{dataReg[FAST_REFCOUNT_OFFSET], sf};
     emitAssertFlagsNonNegative(v, sf);
-
-    if (hasDestroy) {
-      ifBlock(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
-    }
+    ifBlock(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
     return;
   }
 
@@ -2587,48 +2567,10 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
     emitAssertFlagsNonNegative(v, sf);
   };
 
-  if (hasDestroy) {
-    sf = v.makeReg();
-    v << cmplim{1, dataReg[FAST_REFCOUNT_OFFSET], sf};
-    ifThenElse(v, vcold(), CC_E, sf, destroy, static_check_and_decl,
-               unlikelyDestroy);
-    return;
-  }
-
   sf = v.makeReg();
-  v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET], sf};
-  static_check_and_decl(v);
-}
-
-void
-CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
-                                         Vlabel done, Type type, Vreg dataReg) {
-  cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg,
-                            (void (*)(Vout&))nullptr);
-}
-
-//
-// Returns the address to be patched with the address to jump to in case
-// the type is not ref-counted.
-//
-void CodeGenerator::cgCheckRefCountedType(Vreg typeReg, Vlabel done) {
-  auto& v = vmain();
-  auto next = v.makeBlock();
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRefCountThreshold, typeReg);
-  v << jcc{CC_LE, sf, {next, done}};
-  v = next;
-}
-
-void CodeGenerator::cgCheckRefCountedType(Vreg baseReg, int64_t offset,
-                                          Vlabel done) {
-  auto& v = vmain();
-  auto next = v.makeBlock();
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRefCountThreshold,
-                baseReg[offset + TVOFF(m_type)]);
-  v << jcc{CC_LE, sf, {next, done}};
-  v = next;
+  v << cmplim{1, dataReg[FAST_REFCOUNT_OFFSET], sf};
+  ifThenElse(v, vcold(), CC_E, sf, destroy, static_check_and_decl,
+             unlikelyDestroy);
 }
 
 //
@@ -2636,79 +2578,57 @@ void CodeGenerator::cgCheckRefCountedType(Vreg baseReg, int64_t offset,
 //
 void CodeGenerator::cgDecRefStaticType(Vout& v,
                                        const IRInstruction* inst,
-                                       Type type, Vreg dataReg,
-                                       bool genZeroCheck) {
+                                       Type type, Vreg dataReg) {
   assert(type != Type::Cell && type != Type::Gen);
   assert(type.isKnownDataType());
 
   if (!type.maybe(Type::Counted)) return;
 
-  // Check for UncountedValue or StaticValue if needed,
-  // do the actual DecRef, and leave flags set based on the subtract result,
-  // which is tested below
   auto done = v.makeBlock();
-  if (genZeroCheck) {
-    cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg, [&] (Vout& v) {
-        // Emit the call to release in m_acold
-        cgCallHelper(v,
-                     mcg->getDtorCall(type.toDataType()),
-                     kVoidDest,
-                     SyncOptions::kSyncPoint,
-                     argGroup(inst)
-                     .reg(dataReg));
-      });
-  } else {
-    cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg);
-  }
+  cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg, [&] (Vout& v) {
+    cgCallHelper(v,
+                 mcg->getDtorCall(type.toDataType()),
+                 kVoidDest,
+                 SyncOptions::kSyncPoint,
+                 argGroup(inst)
+                 .reg(dataReg));
+  });
   if (!v.closed()) v << jmp{done};
   v = done;
-}
-
-//
-// Generates dec-ref of a typed value with dynamic (statically unknown) type,
-// when the type is stored in typeReg.
-//
-void CodeGenerator::cgDecRefDynamicType(const IRInstruction* inst, Vreg typeReg,
-                                        Vreg dataReg, bool genZeroCheck) {
-  // Emit check for ref-counted type
-  auto& v = vmain();
-  auto done = v.makeBlock();
-  cgCheckRefCountedType(typeReg, done);
-
-  // Emit check for UncountedValue or StaticValue and the actual DecRef
-  if (genZeroCheck) {
-    cgCheckStaticBitAndDecRef(v, inst, done, Type::Cell, dataReg, [&](Vout& v) {
-        // Emit call to release in m_acold
-        cgCallHelper(v, CppCall::destruct(typeReg),
-                     kVoidDest,
-                     SyncOptions::kSyncPoint,
-                     argGroup(inst)
-                     .reg(dataReg));
-      });
-  } else {
-    cgCheckStaticBitAndDecRef(v, inst, done, Type::Cell, dataReg);
-  }
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
-void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
-  auto src = inst->src(0);
-  if (!src->type().maybe(Type::Counted)) return;
-  Type type = src->type();
-  auto ptr_reg = srcLoc(inst, 0).reg(0);
-  if (type.isKnownDataType()) {
-    cgDecRefStaticType(vmain(), inst, type, ptr_reg, genZeroCheck);
-  } else {
-    auto type_reg = srcLoc(inst, 0).reg(1);
-    cgDecRefDynamicType(inst, type_reg, ptr_reg, genZeroCheck);
-  }
 }
 
 void CodeGenerator::cgDecRef(IRInstruction *inst) {
-  // DecRef may bring the count to zero, and run the destructor.
-  // Generate code for this.
-  cgDecRefWork(inst, true);
+  auto const ty   = inst->src(0)->type();
+  auto const base = srcLoc(inst, 0).reg(0);
+
+  auto& v = vmain();
+  auto const done = v.makeBlock();
+
+  ifRefCountedType(
+    v, ty, srcLoc(inst, 0),
+    [&] (Vout& v) {
+      cgCheckStaticBitAndDecRef(
+        v, inst, done,
+        // Type::Cell when unknown type is for historical reasons only.
+        ty.isKnownDataType() ? ty : Type::Cell,
+        base,
+        [&] (Vout& v) {
+          cgCallHelper(
+            v,
+            ty.isKnownDataType()
+              ? mcg->getDtorCall(ty.toDataType())
+              : CppCall::destruct(srcLoc(inst, 0).reg(1)),
+            kVoidDest,
+            SyncOptions::kSyncPoint,
+            argGroup(inst)
+              .reg(base)
+          );
+        }
+      );
+    }
+  );
+  if (!v.closed()) v << jmp{done};
+  v = done;
 }
 
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {

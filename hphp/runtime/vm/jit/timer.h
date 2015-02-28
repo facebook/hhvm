@@ -83,6 +83,7 @@ struct Timer {
   struct Counter {
     int64_t total; // total CPU time, in nanoseconds
     int64_t count; // number of entries for this counter
+    int64_t max;   // longest CPU time, in nanoseconds
 
     int64_t mean() const {
       return total / count;

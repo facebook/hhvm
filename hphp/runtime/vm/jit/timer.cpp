@@ -87,6 +87,7 @@ void Timer::stop() {
   auto& counter = s_counters[m_name];
   counter.total += elapsed;
   ++counter.count;
+  counter.max = std::max(counter.max, elapsed);
   m_finished = true;
 }
 
@@ -116,8 +117,8 @@ void Timer::Dump() {
 }
 
 std::string Timer::Show() {
-  auto const header = "{:<40} | {:>15} {:>15} {:>15}\n";
-  auto const row    = "{:<40} | {:>15} {:>13,}us {:>13,}ns\n";
+  auto const header = "{:<30} | {:>15} {:>15} {:>15} {:>15}\n";
+  auto const row    = "{:<30} | {:>15} {:>13,}us {:>13,}ns {:>13,}ns\n";
 
   std::array<TimerName,kNumTimers> names_copy;
   std::copy(s_names, s_names + kNumTimers, begin(names_copy));
@@ -133,8 +134,15 @@ std::string Timer::Show() {
     auto const& counter = s_counters[pair.name];
     if (counter.total == 0 && counter.count == 0) continue;
 
-    folly::format(&rows, row, pair.str, counter.count, counter.total / 1000,
-                  counter.mean());
+    folly::format(
+      &rows,
+      row,
+      pair.str,
+      counter.count,
+      counter.total / 1000,
+      counter.mean(),
+      counter.max
+    );
   }
 
   if (rows.empty()) return rows;
@@ -142,8 +150,8 @@ std::string Timer::Show() {
   std::string ret;
   auto const url = g_context->getRequestUrl(75);
   folly::format(&ret, "\nJIT timers for {}\n", url);
-  folly::format(&ret, header, "name", "count", "total time", "average time");
-  folly::format(&ret, "{:-^40}-+{:-^48}\n{}\n", "", "", rows);
+  folly::format(&ret, header, "name", "count", "total", "average", "max");
+  folly::format(&ret, "{:-^30}-+{:-^64}\n{}\n", "", "", rows);
   return ret;
 }
 

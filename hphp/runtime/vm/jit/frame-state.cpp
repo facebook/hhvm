@@ -855,17 +855,7 @@ void FrameStateMgr::setStackType(IRSPOffset offset, Type type) {
 
 void FrameStateMgr::setBoxedStkPrediction(IRSPOffset offset, Type type) {
   auto& state = stackState(offset);
-  always_assert_flog(
-    state.type.maybe(Type::BoxedCell),
-    "HintStkInner {} with base type {}",
-    offset.offset,
-    state.type
-  );
-  if (state.type <= Type::BoxedCell) {
-    state.predictedType = type;
-  } else {
-    state.predictedType = state.type;
-  }
+  state.predictedType = state.type & type;
 }
 
 void FrameStateMgr::spillFrameStack(IRSPOffset offset) {
@@ -985,17 +975,8 @@ void FrameStateMgr::setLocalType(uint32_t id, Type type) {
 void FrameStateMgr::setBoxedLocalPrediction(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
   always_assert(type <= Type::BoxedCell);
-  always_assert_flog(
-    cur().locals[id].type.maybe(Type::BoxedCell),
-    "HintLocInner {} with base type {}",
-    id,
-    cur().locals[id].type
-  );
-  if (cur().locals[id].type <= Type::BoxedCell) {
-    cur().locals[id].predictedType = type;
-  } else {
-    cur().locals[id].predictedType = cur().locals[id].type;
-  }
+
+  cur().locals[id].predictedType = cur().locals[id].type & type;
 }
 
 /*

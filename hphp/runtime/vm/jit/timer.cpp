@@ -77,8 +77,8 @@ Timer::~Timer() {
   stop();
 }
 
-void Timer::stop() {
-  if (!RuntimeOption::EvalJitTimer) return;
+int64_t Timer::stop() {
+  if (!RuntimeOption::EvalJitTimer) return 0;
 
   assert(!m_finished);
   auto const finish = getCPUTimeNanos();
@@ -89,6 +89,7 @@ void Timer::stop() {
   ++counter.count;
   counter.max = std::max(counter.max, elapsed);
   m_finished = true;
+  return elapsed;
 }
 
 Timer::CounterVec Timer::Counters() {

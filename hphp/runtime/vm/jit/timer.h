@@ -93,7 +93,10 @@ struct Timer {
   explicit Timer(Name name);
   ~Timer();
 
-  void stop();
+  /*
+   * Stop the timer, and return the elapsed time in nanoseconds.
+   */
+  int64_t stop();
 
   typedef std::vector<std::pair<const char*, Counter>> CounterVec;
   static CounterVec Counters();

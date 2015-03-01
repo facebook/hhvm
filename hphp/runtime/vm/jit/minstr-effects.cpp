@@ -24,6 +24,8 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+template<typename T> T bad_value() { not_reached(); }
+
 Opcode canonicalOp(Opcode op) {
   if (op == ElemUX || op == UnsetElem) {
     return UnsetElem;

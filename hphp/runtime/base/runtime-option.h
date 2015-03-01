@@ -111,8 +111,8 @@ public:
   static std::string ServerType;
   static std::string ServerIP;
   static std::string ServerFileSocket;
-  static std::string ServerPrimaryIPv4;
-  static std::string ServerPrimaryIPv6;
+  static std::string GetServerPrimaryIPv4();
+  static std::string GetServerPrimaryIPv6();
   static int ServerPort;
   static int ServerPortFd;
   static int ServerBacklog;

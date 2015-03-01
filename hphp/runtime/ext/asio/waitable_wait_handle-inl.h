@@ -24,7 +24,6 @@ namespace HPHP {
 
 inline c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind)
     : c_WaitHandle(cb, kind) {
-  setContextIdx(AsioSession::Get()->getCurrentContextIdx());
   m_parentChain.init();
 }
 

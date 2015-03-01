@@ -52,6 +52,8 @@ Object c_SleepWaitHandle::ti_create(int64_t usecs) {
 }
 
 void c_SleepWaitHandle::initialize(int64_t usecs) {
+  auto const session = AsioSession::Get();
+  setContextIdx(session->getCurrentContextIdx());
   setState(STATE_WAITING);
   m_waketime =
     AsioSession::TimePoint::clock::now() +
@@ -59,7 +61,6 @@ void c_SleepWaitHandle::initialize(int64_t usecs) {
 
   incRefCount();
 
-  auto session = AsioSession::Get();
   session->getSleepEventQueue().push(this);
 
   if (isInContext()) {

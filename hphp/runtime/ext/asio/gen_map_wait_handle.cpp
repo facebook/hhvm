@@ -109,22 +109,11 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
 }
 
 void c_GenMapWaitHandle::initialize(const Object& exception, c_Map* deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
-
-  if (isInContext()) {
-    try {
-      child->enterContext(getContextIdx());
-    } catch (const Object& cycle_exception) {
-      putException(m_exception, cycle_exception.get());
-      m_iterPos = m_deps->iter_next(m_iterPos);
-      incRefCount();
-      onUnblocked();
-      return;
-    }
-  }
 
   blockOn(child);
   incRefCount();

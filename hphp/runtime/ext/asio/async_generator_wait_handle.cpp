@@ -32,13 +32,6 @@ namespace HPHP {
 
 namespace {
   const StaticString s_asyncGenerator("<async-generator>");
-
-  void checkCreateErrors(c_WaitableWaitHandle* child) {
-    AsioSession* session = AsioSession::Get();
-    if (session->isInContext()) {
-      child->enterContext(session->getCurrentContextIdx());
-    }
-  }
 }
 
 c_AsyncGeneratorWaitHandle::~c_AsyncGeneratorWaitHandle() {
@@ -63,7 +56,6 @@ c_AsyncGeneratorWaitHandle::Create(c_AsyncGenerator* gen,
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
   assert(!child->isFinished());
 
-  checkCreateErrors(child);
   auto const waitHandle = newobj<c_AsyncGeneratorWaitHandle>();
   waitHandle->incRefCount();
   waitHandle->initialize(gen, child);
@@ -72,6 +64,7 @@ c_AsyncGeneratorWaitHandle::Create(c_AsyncGenerator* gen,
 
 void c_AsyncGeneratorWaitHandle::initialize(c_AsyncGenerator* gen,
                                             c_WaitableWaitHandle* child) {
+  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
   m_generator = gen;
   m_generator->incRefCount();

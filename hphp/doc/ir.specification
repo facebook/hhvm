@@ -1741,7 +1741,7 @@ To string conversions:
 
 | CreateAFWH, D(Obj),
 |             S(FramePtr) C(Int) S(TCA,Nullptr) C(Int) S(Obj),
-|             Er|CRc|PRc
+|             CRc|PRc
 
   Create an AsyncFunctionWaitHandle object and suspend the ActRec provided by
   S0 into its embedded ActRec, allocating S1 slots for locals/iterators.  Set

@@ -56,7 +56,7 @@ class c_AwaitAllWaitHandle final : public c_BlockableWaitHandle {
   static Object FromMap(const BaseMap* dependencies);
   static Object FromVector(const BaseVector* dependencies);
   static c_AwaitAllWaitHandle* Alloc(int32_t cnt);
-  void initialize();
+  void initialize(context_idx_t ctx_idx);
   template<bool checkCycle> void blockOnCurrent();
   void markAsFailed(const Object& exception);
 

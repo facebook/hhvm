@@ -84,6 +84,8 @@ void c_ExternalThreadEventWaitHandle::initialize(
   AsioExternalThreadEvent* event,
   ObjectData* priv_data
 ) {
+  auto const session = AsioSession::Get();
+  setContextIdx(session->getCurrentContextIdx());
   setState(STATE_WAITING);
   m_event = event;
   m_privData = priv_data;
@@ -95,7 +97,6 @@ void c_ExternalThreadEventWaitHandle::initialize(
     registerToContext();
   }
 
-  auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnExternalThreadEventCreateCallback())) {
     session->onExternalThreadEventCreate(this);
   }

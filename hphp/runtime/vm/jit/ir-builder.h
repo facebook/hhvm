@@ -153,6 +153,9 @@ struct IRBuilder {
   }
   bool frameMaySpanCall() const { return m_state.frameMaySpanCall(); }
   Type stackInnerTypePrediction(IRSPOffset) const;
+  const PostConditions& postConds(Block* b) const {
+    return m_state.postConds(b);
+  }
 
   /*
    * Support for guard relaxation.

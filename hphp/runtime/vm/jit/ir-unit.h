@@ -211,10 +211,6 @@ struct IRUnit {
   // Optimization pass information.
 
   const LabelRefs& labelRefs() const;
-  const PostConditions& postConditions() const;
-
-  void collectPostConditions();
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -239,8 +235,11 @@ private:
 
   // Information collected for optimization passes.
   LabelRefs m_labelRefs;
-  PostConditions m_postConds;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk);
 
 //////////////////////////////////////////////////////////////////////
 

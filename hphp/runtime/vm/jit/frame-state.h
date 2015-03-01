@@ -297,6 +297,11 @@ struct FrameStateMgr final : private LocalStateHook {
    */
   void loadBlock(Block*);
 
+  /*
+   * Returns the post-conditions associated with the given exit block.
+   */
+  const PostConditions& postConds(Block*) const;
+
   const Func* func() const { return cur().curFunc; }
   FPAbsOffset spOffset() const { return cur().spOffset; }
   SSATmp* sp() const { return cur().spValue; }
@@ -383,6 +388,7 @@ private:
   void loopHeaderClear(BCMarker);
   StackState& stackState(IRSPOffset offset);
   const StackState& stackState(IRSPOffset offset) const;
+  void collectPostConds(Block* exitBlock);
 
 private:
   FrameState& cur() {
@@ -428,6 +434,11 @@ private:
    * Saved snapshots of the incoming and outgoing state of blocks.
    */
   jit::hash_map<Block*,BlockState> m_states;
+
+  /*
+   * Post-conditions for exit blocks.
+   */
+  jit::hash_map<Block*,PostConditions> m_exitPostConds;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -50,36 +50,6 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool isMainExit(const Block* block, SrcKey lastSk) {
-  if (!block->isExit()) return false;
-
-  auto& lastInst = block->back();
-
-  // This captures cases where we end the region with a terminal
-  // instruction, e.g. RetCtrl, RaiseError, InterpOneCF.
-  if (lastInst.isTerminal() && lastInst.marker().sk() == lastSk) return true;
-
-  // Otherwise, the region must contain a ReqBindJmp to a bytecode
-  // offset than will follow the execution of lastSk.
-  if (lastInst.op() != ReqBindJmp) return false;
-
-  auto succOffsets = lastSk.succOffsets();
-
-  FTRACE(6, "isMainExit: instrSuccOffsets({}): {}\n",
-         show(lastSk), folly::join(", ", succOffsets));
-
-  return succOffsets.count(lastInst.marker().bcOff());
-}
-
-Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
-  for (auto block : rpoSortCfg(unit)) {
-    if (isMainExit(block, lastSk)) return block;
-  }
-  return nullptr;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 struct RegionFormer {
   RegionFormer(const RegionContext& ctx,
                InterpSet& interp,

@@ -51,7 +51,8 @@ using RegionBlacklist = ProfSrcKeySet;
 TranslateResult translateRegion(HTS&,
                                 const RegionDesc&,
                                 RegionBlacklist& toInterp,
-                                TransFlags trflags);
+                                TransFlags trflags,
+                                PostConditions& pconds);
 
 //////////////////////////////////////////////////////////////////////
 

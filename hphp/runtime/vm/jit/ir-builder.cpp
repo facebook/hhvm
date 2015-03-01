@@ -170,6 +170,8 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
   m_state.update(inst);
   cseUpdate(*inst);
+
+  if (inst->isTerminal()) m_state.finishBlock(m_curBlock);
 }
 
 void IRBuilder::appendBlock(Block* block) {

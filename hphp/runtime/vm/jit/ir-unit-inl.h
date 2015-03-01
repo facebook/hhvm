@@ -272,9 +272,5 @@ inline const LabelRefs& IRUnit::labelRefs() const {
   return m_labelRefs;
 }
 
-inline const PostConditions& IRUnit::postConditions() const {
-  return m_postConds;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }}

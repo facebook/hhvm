@@ -686,12 +686,28 @@ TranslateResult mcGenRegion(HTS& hts,
 TranslateResult translateRegion(HTS& hts,
                                 const RegionDesc& region,
                                 RegionBlacklist& toInterp,
-                                TransFlags trflags) {
+                                TransFlags trflags,
+                                PostConditions& pConds) {
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
   SCOPE_ASSERT_DETAIL("IRUnit") { return hts.unit.toString(); };
 
   auto irGenResult = irGenRegion(hts, region, toInterp, trflags);
   if (irGenResult != TranslateResult::Success) return irGenResult;
+
+  // For profiling translations, grab the postconditions to be used
+  // for region selection whenever we decide to retranslate.
+  pConds.clear();
+  if (mcg->tx().mode() == TransKind::Profile &&
+      RuntimeOption::EvalJitPGOUsePostConditions) {
+    auto& unit = hts.irb->unit();
+    auto  lastSrcKey = region.lastSrcKey();
+    Block* mainExit = findMainExitBlock(unit, lastSrcKey);
+    FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
+           mainExit->id(), unit);
+    assert(mainExit);
+    pConds = hts.irb->postConds(mainExit);
+  }
+
   return mcGenRegion(hts, region, toInterp);
 }
 

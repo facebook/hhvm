@@ -525,6 +525,49 @@ void FrameStateMgr::forEachLocalValue(
   }
 }
 
+/*
+ * Collects the post-conditions associated with the current state,
+ * which is essentially a list of local/stack locations and their
+ * known types at the end of `block'.
+ */
+void FrameStateMgr::collectPostConds(Block* block) {
+  assert(block->isExit());
+  PostConditions& pConds = m_exitPostConds[block];
+
+  const IRInstruction& lastInst = block->back();
+  const bool resumed = lastInst.marker().resumed();
+
+  if (sp() != nullptr) {
+    auto const physSPOff = spOffset();
+    auto const bcSpOffset = lastInst.marker().spOff();
+    auto const skipCells = resumed ? 0 : func()->numSlotsInFrame();
+    for (int32_t i = 0; i < skipCells; ++i) {
+      auto const instRelative  = BCSPOffset{i};
+      auto const fpRelative    = bcSpOffset - instRelative;
+      auto const spRelative    = IRSPOffset{physSPOff - fpRelative};
+      auto const t = stackType(spRelative);
+      if (t != Type::StkElem) {
+        FTRACE(1, "Stack({}, {}): {}\n", instRelative.offset,
+          fpRelative.offset, t);
+        pConds.push_back({
+          RegionDesc::Location::Stack{fpRelative},
+          t
+        });
+      }
+    }
+  }
+
+  if (fp() != nullptr) {
+    for (unsigned i = 0; i < func()->numLocals(); i++) {
+      auto t = localType(i);
+      if (t != Type::Gen) {
+        FTRACE(1, "Local {}: {}\n", i, t.toString());
+        pConds.push_back({ RegionDesc::Location::Local{i}, t });
+      }
+    }
+  }
+}
+
 ///// Methods for managing and merge block state /////
 
 bool FrameStateMgr::hasStateFor(Block* block) const {
@@ -576,6 +619,13 @@ void FrameStateMgr::startBlock(Block* block,
 
 bool FrameStateMgr::finishBlock(Block* block) {
   assert(block->back().isTerminal() == !block->next());
+
+  if (block->isExit()) {
+    collectPostConds(block);
+    FTRACE(2, "PostConditions for exit Block {}:\n{}\n",
+           block->id(), show(m_exitPostConds[block]));
+  }
+
   auto changed = false;
   if (!block->back().isTerminal()) changed |= save(block->next());
   return changed;
@@ -784,6 +834,13 @@ void FrameStateMgr::loadBlock(Block* block) {
   assert(it != m_states.end());
   m_stack = it->second.in;
   assert(!m_stack.empty());
+}
+
+const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
+  assert(exitBlock->isExit());
+  auto it = m_exitPostConds.find(exitBlock);
+  assert(it != m_exitPostConds.end());
+  return it->second;
 }
 
 void FrameStateMgr::syncEvalStack() {

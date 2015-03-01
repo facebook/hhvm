@@ -1569,16 +1569,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
       try {
         assertCleanState();
-        result = translateRegion(hhbcTrans, *region, regionInterps, args.flags);
-
-        // If we're profiling, grab the postconditions so we can
-        // use them in region selection whenever we decide to retranslate.
-        if (m_tx.mode() == TransKind::Profile &&
-            result == TranslateResult::Success &&
-            RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = hhbcTrans.unit.postConditions();
-        }
-
+        result = translateRegion(hhbcTrans, *region, regionInterps, args.flags,
+                                 pconds);
         FTRACE(2, "translateRegion finished with result {}\n", show(result));
       } catch (const std::exception& e) {
         FTRACE(1, "translateRegion failed with '{}'\n", e.what());
@@ -1718,11 +1710,6 @@ void MCGenerator::traceCodeGen(HTS& hts) {
 
   optimize(unit, *hts.irb, m_tx.mode());
   finishPass(" after optimizing ", kOptLevel);
-
-  if (m_tx.mode() == TransKind::Profile &&
-      RuntimeOption::EvalJitPGOUsePostConditions) {
-    unit.collectPostConditions();
-  }
 
   always_assert(this == mcg);
   genCode(unit);

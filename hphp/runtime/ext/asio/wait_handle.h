@@ -116,6 +116,11 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
         cell->m_data.pobj->getAttribute(ObjectData::IsWaitHandle)
       ) ? static_cast<c_WaitHandle*>(cell->m_data.pobj) : nullptr;
   }
+  static c_WaitHandle* fromCellAssert(const Cell* cell) {
+    assert(cell->m_type == KindOfObject);
+    assert(cell->m_data.pobj->getAttribute(ObjectData::IsWaitHandle));
+    return static_cast<c_WaitHandle*>(cell->m_data.pobj);
+  }
   bool isFinished() const { return getState() <= STATE_FAILED; }
   bool isSucceeded() const { return getState() == STATE_SUCCEEDED; }
   bool isFailed() const { return getState() == STATE_FAILED; }

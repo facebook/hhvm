@@ -45,26 +45,47 @@ namespace {
   NEVER_INLINE __attribute__((__noreturn__))
   void failArray() {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected dependencies to be an array of WaitHandle instances"));
+      "Expected dependencies to be an array"));
     throw e;
   }
 
   NEVER_INLINE __attribute__((__noreturn__))
   void failMap() {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected dependencies to be a Map of WaitHandle instances"));
+      "Expected dependencies to be a Map"));
     throw e;
   }
 
   NEVER_INLINE __attribute__((__noreturn__))
   void failVector() {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected dependencies to be a Vector of WaitHandle instances"));
+      "Expected dependencies to be a Vector"));
+    throw e;
+  }
+
+  NEVER_INLINE __attribute__((__noreturn__))
+  void failWaitHandle() {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Expected dependencies to be a collection of WaitHandle instances"));
     throw e;
   }
 
   c_StaticWaitHandle* returnEmpty() {
     return c_StaticWaitHandle::CreateSucceeded(make_tv<KindOfNull>());
+  }
+
+  void prepareChild(const Cell* src, int32_t& cnt) {
+    auto const waitHandle = c_WaitHandle::fromCell(src);
+    if (UNLIKELY(!waitHandle)) failWaitHandle();
+    if (waitHandle->isFinished()) return;
+    ++cnt;
+  }
+
+  void addChild(const Cell* src, c_WaitableWaitHandle**& dst) {
+    auto const waitHandle = c_WaitHandle::fromCellAssert(src);
+    if (waitHandle->isFinished()) return;
+    waitHandle->incRefCount();
+    *(--dst) = static_cast<c_WaitableWaitHandle*>(waitHandle);
   }
 }
 
@@ -141,10 +162,7 @@ Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
   int32_t cnt = 0;
 
   for (auto iter = start; iter < stop; ++iter) {
-    auto const current = tvToCell(iter);
-    auto const child = c_WaitHandle::fromCell(current);
-    if (UNLIKELY(!child)) failArray();
-    cnt += !child->isFinished();
+    prepareChild(tvToCell(iter), cnt);
   }
 
   if (!cnt) return returnEmpty();
@@ -153,11 +171,7 @@ Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
-    auto const current = tvToCell(iter);
-    auto const child = c_WaitHandle::fromCell(current);
-    if (child->isFinished()) continue;
-    child->incRefCount();
-    *(--next) = static_cast<c_WaitableWaitHandle*>(child);
+    addChild(tvToCell(iter), next);
   }
 
   assert(next == &result->m_children[0]);
@@ -172,10 +186,7 @@ Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
 
   for (auto iter = start; iter < stop; ++iter) {
     if (MixedArray::isTombstone(iter->data.m_type)) continue;
-    auto const current = tvToCell(&iter->data);
-    auto const child = c_WaitHandle::fromCell(current);
-    if (UNLIKELY(!child)) failArray();
-    cnt += !child->isFinished();
+    prepareChild(tvToCell(&iter->data), cnt);
   }
 
   if (!cnt) return returnEmpty();
@@ -185,11 +196,7 @@ Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
 
   for (auto iter = start; iter < stop; ++iter) {
     if (MixedArray::isTombstone(iter->data.m_type)) continue;
-    auto const current = tvToCell(&iter->data);
-    auto const child = c_WaitHandle::fromCell(current);
-    if (child->isFinished()) continue;
-    child->incRefCount();
-    *(--next) = static_cast<c_WaitableWaitHandle*>(child);
+    addChild(tvToCell(&iter->data), next);
   }
 
   assert(next == &result->m_children[0]);
@@ -203,10 +210,7 @@ Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
   int32_t cnt = 0;
 
   for (auto iter = start; iter != stop; iter = BaseMap::nextElm(iter, stop)) {
-    auto const current = tvAssertCell(&iter->data);
-    auto const child = c_WaitHandle::fromCell(current);
-    if (UNLIKELY(!child)) failMap();
-    cnt += !child->isFinished();
+    prepareChild(tvAssertCell(&iter->data), cnt);
   }
 
   if (!cnt) return returnEmpty();
@@ -215,11 +219,7 @@ Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter != stop; iter = BaseMap::nextElm(iter, stop)) {
-    auto const current = tvAssertCell(&iter->data);
-    auto const child = c_WaitHandle::fromCell(current);
-    if (child->isFinished()) continue;
-    child->incRefCount();
-    *(--next) = static_cast<c_WaitableWaitHandle*>(child);
+    addChild(tvAssertCell(&iter->data), next);
   }
 
   assert(next == &result->m_children[0]);
@@ -233,10 +233,7 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
   int32_t cnt = 0;
 
   for (auto iter = start; iter < stop; ++iter) {
-    auto const current = tvAssertCell(iter);
-    auto const child = c_WaitHandle::fromCell(current);
-    if (UNLIKELY(!child)) failVector();
-    cnt += !child->isFinished();
+    prepareChild(tvAssertCell(iter), cnt);
   }
 
   if (!cnt) return returnEmpty();
@@ -245,11 +242,7 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
-    auto const current = tvAssertCell(iter);
-    auto const child = c_WaitHandle::fromCell(current);
-    if (child->isFinished()) continue;
-    child->incRefCount();
-    *(--next) = static_cast<c_WaitableWaitHandle*>(child);
+    addChild(tvAssertCell(iter), next);
   }
 
   assert(next == &result->m_children[0]);

@@ -2403,10 +2403,6 @@ fields of that struct for holding intermediate values.
 
   Loads the value contained by the current unwinder exception.
 
-| DeleteUnwinderException, ND, NA, NF
-
-  Deletes the current unwinder exception.
-
 /* Local Variables: */
 /* fill-column: 79 */
 /* End: */

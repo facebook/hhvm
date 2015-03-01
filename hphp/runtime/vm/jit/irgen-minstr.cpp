@@ -2018,7 +2018,6 @@ Block* makeCatchSet(MTS& env) {
     auto const val = gen(env, LdUnwinderValue, Type::Cell);
     push(env, val);
   }
-  gen(env, DeleteUnwinderException);
   gen(env, Jmp, makeExit(env, nextBcOff(env)));
   return env.failedSetBlock;
 }

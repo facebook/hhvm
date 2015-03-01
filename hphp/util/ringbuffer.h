@@ -37,7 +37,8 @@ namespace Trace {
   RBTYPE(FuncEntry) \
   RBTYPE(FuncExit) \
   RBTYPE(FuncPrologue) \
-  RBTYPE(BytecodeStart)
+  RBTYPE(BytecodeStart) \
+  RBTYPE(ServiceReq)
 
 enum RingBufferType : uint8_t {
 #define RBTYPE(x) RBType ## x,
@@ -60,6 +61,8 @@ struct RingBufferEntry {
     struct {
       const char* m_msg;
       uint32_t m_len;
+      uint32_t m_truncatedRip; // Bottom 32 bits of rip from the caller, which
+                               // is usually enough in practice.
     };
   };
 
@@ -84,6 +87,7 @@ void vtraceRingbuffer(const char* fmt, va_list ap) ATTRIBUTE_PRINTF(1,0);
 void ringbufferMsg(const char* msg, size_t msgLen,
                    RingBufferType t = RBTypeMsg);
 void ringbufferEntry(RingBufferType t, uint64_t sk, uint64_t data);
+void ringbufferEntryRip(RingBufferType t, uint64_t sk);
 
 }
 }

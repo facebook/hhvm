@@ -913,7 +913,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvStrToArr:   // decrefs src, but src is a string
   case ConvStrToBool:
   case ConvStrToDbl:
-  case DeleteUnwinderException:
   case DerefClsRDSHandle:
   case EagerSyncVMRegs:
   case ExtendsClass:

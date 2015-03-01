@@ -109,9 +109,7 @@ private:
   void emit(ldimmq& i);
   void emit(ldimml& i);
   void emit(ldimmb& i);
-  void emit(ldpoint& i);
   void emit(load& i);
-  void emit(point& i) { points[i.p] = a->frontier(); }
   void emit(store& i);
   void emit(syncpoint& i);
 
@@ -456,11 +454,6 @@ void Vgen::emit(ldimmb& i) {
     Vreg8 d = i.d;
     a->Mov(W(d), i.s.b());
   }
-}
-
-void Vgen::emit(ldpoint& i) {
-  ldpoints.push_back({a->frontier(), i.s, i.d});
-  a->Mov(X(i.d), a->frontier()); // write a placeholder address
 }
 
 void Vgen::emit(load& i) {

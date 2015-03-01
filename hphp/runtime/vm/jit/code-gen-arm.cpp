@@ -286,7 +286,6 @@ PUNT_OPCODE(CastStk)
 PUNT_OPCODE(CoerceStk)
 PUNT_OPCODE(UnwindCheckSideExit)
 PUNT_OPCODE(LdUnwinderValue)
-PUNT_OPCODE(DeleteUnwinderException)
 PUNT_OPCODE(AddDbl)
 PUNT_OPCODE(SubDbl)
 PUNT_OPCODE(MulDbl)
@@ -1339,7 +1338,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   PhysReg rds(rVmTl), fp(rVmFp), sp(rVmSp);
   v << load{rds[rds::kVmfpOff], fp};
   v << load{rds[rds::kVmspOff], sp};
-  emitServiceReq(v, nullptr, REQ_RESUME, {});
+  v << jmpi{mcg->tx().uniqueStubs.resumeHelper};
 }
 
 void CodeGenerator::cgLdClsName(IRInstruction* inst) {

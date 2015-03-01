@@ -170,6 +170,16 @@ ActRec::skipFrame() const {
   return m_func && m_func->isSkipFrame();
 }
 
+bool isVMFrame(const ActRec* ar) {
+  assert(ar);
+  // Determine whether the frame pointer is outside the native stack, cleverly
+  // using a single unsigned comparison to do both halves of the bounds check.
+  bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
+  assert(!ret || isValidVMStackAddress(ar) ||
+         (ar->m_func->validate(), ar->resumed()));
+  return ret;
+}
+
 template <>
 Class* arGetContextClassImpl<false>(const ActRec* ar) {
   if (ar == nullptr) {
@@ -1920,7 +1930,7 @@ static void enterVMAtAsyncFunc(ActRec* enterFnAr, Resumable* resumable,
     throw e;
   }
 
-  bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
+  const bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
   if (LIKELY(useJit && resumable->resumeAddr())) {
     Stats::inc(Stats::VMEnter);
     mcg->enterTCAfterPrologue(resumable->resumeAddr());
@@ -1934,8 +1944,8 @@ static void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   assert(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
 
-  bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
-  bool useJitPrologue = useJit && vmfp()
+  const bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
+  const bool useJitPrologue = useJit && vmfp()
     && !enterFnAr->m_varEnv
     && (stk != StackArgsState::Trimmed);
   // The jit prologues only know how to do limited amounts of work; cannot
@@ -1998,6 +2008,7 @@ static void enterVM(ActRec* ar, StackArgsState stk,
   SCOPE_EXIT { assert(ec->m_faults.size() == faultDepth); };
 
   vmFirstAR() = ar;
+  vmJitCalledFrame() = nullptr;
 
   /*
    * When an exception is propagating, each nesting of the VM is
@@ -2836,10 +2847,11 @@ void ExecutionContext::preventReturnsToTC() {
 // Bash the return address for the given actrec into the appropriate
 // RetFromInterpreted*Frame helper.
 void ExecutionContext::preventReturnToTC(ActRec* ar) {
-  assert(isDebuggerAttached());
-  if (!RuntimeOption::EvalJit) {
-    return;
-  }
+  if (!RuntimeOption::EvalJit) return;
+
+  always_assert_flog(mcg->isValidCodeAddress((jit::TCA)ar->m_savedRip),
+                     "preventReturnToTC({}): {} isn't in TC",
+                     ar, ar->m_savedRip);
 
   if (!isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)) &&
       (mcg->isValidCodeAddress((jit::TCA)ar->m_savedRip))) {
@@ -4352,7 +4364,97 @@ OPTBLD_INLINE void iopSSwitch(IOP_ARGS) {
   vmStack().popC();
 }
 
+/*
+ * jitReturnPre and jitReturnPost are used by RetC/V, CreateCont, NativeImpl,
+ * Yield, and YieldK to perform a few tasks related to interpreting out of a
+ * frame:
+ *
+ * - If the current frame was entered in the TC and the jit is now off, we
+ *   throw a VMSwitchMode at the beginning of the bytecode to execute the
+ *   call's catch block (if present) before performing the return.
+ * - If the current frame was entered in the TC and the jit is still on,
+ *   we wait until the end of the bytecode and throw a VMResumeTC, to return to
+ *   our translated caller rather than interpreting back into it.
+ * - If the current frame was entered by the interpreter but was active when
+ *   the jit called MCGenerator::handleResume() (meaning it's the saved value
+ *   of %rbp in handleResume()'s stack frame), throw a VMResumeTC to reenter
+ *   handleResume(). This is necessary to update the value of %rbp in the TC
+ *   frame, so the unwinder doesn't read from a dead VM frame if something
+ *   throws from the interpreter later on.
+ */
+namespace {
+struct JitReturn {
+  uint64_t savedRip;
+  ActRec* fp;
+  ActRec* sfp;
+};
+
+OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
+  auto savedRip = fp->m_savedRip;
+  if (isReturnHelper(reinterpret_cast<void*>(savedRip))) {
+    // This frame wasn't called from the TC, so it's ok to return using the
+    // interpreter.
+    savedRip = 0;
+  } else if (!ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+    // We entered this frame in the TC but the jit is now disabled, probably
+    // because a debugger is attached. If we leave this frame in the
+    // interpreter, we might be skipping a catch block that our caller expects
+    // to be run. Switch to the interpreter before even beginning the
+    // instruction.
+    throw VMSwitchMode();
+  }
+
+  return {savedRip, fp, fp->sfp()};
+}
+
+OPTBLD_INLINE void jitReturnPost(JitReturn retInfo, PC pc) {
+  if (retInfo.savedRip) {
+    // This frame was called by translated code so we can't interpret out of
+    // it. Resume in the TC right after our caller. This situation most
+    // commonly happens when we interpOne a RetC due to having a VarEnv or some
+    // other weird case.
+    throw VMResumeTC(retInfo.savedRip);
+  }
+
+  if (!retInfo.sfp) {
+    // If we don't have an sfp, we're returning from the first frame in this VM
+    // nesting level. The vmJitCalledFrame() check below is only important if
+    // we might throw before returning to the TC, which is guaranteed to not
+    // happen in this situation.
+    assert(vmfp() == nullptr);
+    return;
+  }
+
+
+  // Consider a situation with a PHP function f() that calls another function
+  // g(). If the call is interpreted, then we spend some time in the TC inside
+  // g(), then eventually end in dispatchBB() (called by
+  // MCGenerator::handleResume()) for g()'s RetC, the logic here kicks in.
+  //
+  // g()'s VM frame was in %rbp when the TC called handleResume(), so it's
+  // saved somewhere in handleResume()'s stack frame. If we return out of that
+  // frame and keep going in the interpreter, that saved %rbp will be pointing
+  // to a garbage VM frame. This is a problem if something needs to throw an
+  // exception up through handleResume() and the TC frames above it, since the
+  // C++ unwinder will attempt to treat parts of the popped VM frame as
+  // pointers and segfault.
+  //
+  // To avoid running with this dangling saved %rbp a few frames up, we
+  // immediately throw an exception that is "caught" by the TC frame that
+  // called handleResume(). We resume execution in the TC which reloads the new
+  // vmfp() into %rbp, then handleResume() is called again, this time with a
+  // live VM frame in %rbp.
+  if (vmJitCalledFrame() == retInfo.fp) {
+    FTRACE(1, "Returning from frame {}; resuming", vmJitCalledFrame());
+    vmpc() = pc;
+    throw VMResumeTC(uint64_t(mcg->tx().uniqueStubs.resumeHelper));
+  }
+}
+}
+
 OPTBLD_INLINE void ret(PC& pc) {
+  auto const jitReturn = jitReturnPre(vmfp());
+
   // Get the return value.
   TypedValue retval = *vmStack().topTV();
   vmStack().discard();
@@ -4418,6 +4520,8 @@ OPTBLD_INLINE void ret(PC& pc) {
   // Return control to the caller.
   vmfp() = sfp;
   pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+
+  jitReturnPost(jitReturn, pc);
 }
 
 OPTBLD_INLINE void iopRetC(IOP_ARGS) {
@@ -6817,6 +6921,8 @@ OPTBLD_INLINE void iopVerifyRetTypeV(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void iopNativeImpl(IOP_ARGS) {
+  auto const jitReturn = jitReturnPre(vmfp());
+
   pc++;
   BuiltinFunction func = vmfp()->func()->builtinFuncPtr();
   assert(func);
@@ -6837,6 +6943,8 @@ OPTBLD_INLINE void iopNativeImpl(IOP_ARGS) {
   // Return control to the caller.
   vmfp() = sfp;
   pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+
+  jitReturnPost(jitReturn, pc);
 }
 
 OPTBLD_INLINE void iopSelf(IOP_ARGS) {
@@ -6875,6 +6983,8 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
 const StaticString s_this("this");
 
 OPTBLD_INLINE void iopCreateCont(IOP_ARGS) {
+  auto const jitReturn = jitReturnPre(vmfp());
+
   pc++;
   auto const fp = vmfp();
   auto const func = fp->func();
@@ -6906,6 +7016,8 @@ OPTBLD_INLINE void iopCreateCont(IOP_ARGS) {
   // Return control to the caller.
   vmfp() = sfp;
   pc = LIKELY(sfp != nullptr) ? sfp->func()->getEntry() + soff : nullptr;
+
+  jitReturnPost(jitReturn, pc);
 }
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {
@@ -6953,6 +7065,8 @@ OPTBLD_INLINE void iopContRaise(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void yield(PC& pc, const Cell* key, const Cell value) {
+  auto const jitReturn = jitReturnPre(vmfp());
+
   auto const fp = vmfp();
   auto const func = fp->func();
   auto const resumeOffset = func->unit()->offsetOf(pc);
@@ -6989,6 +7103,8 @@ OPTBLD_INLINE void yield(PC& pc, const Cell* key, const Cell value) {
   // Return control to the next()/send()/raise() caller.
   vmfp() = sfp;
   pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
+
+  jitReturnPost(jitReturn, pc);
 }
 
 OPTBLD_INLINE void iopYield(IOP_ARGS) {
@@ -7134,6 +7250,8 @@ OPTBLD_INLINE void iopAwait(IOP_ARGS) {
     throw Object(wh->getException());
   }
 
+  auto const jitReturn = jitReturnPre(vmfp());
+
   if (vmfp()->resumed()) {
     // suspend resumed execution
     asyncSuspendR(pc);
@@ -7141,6 +7259,8 @@ OPTBLD_INLINE void iopAwait(IOP_ARGS) {
     // suspend eager execution
     asyncSuspendE(pc, iters);
   }
+
+  jitReturnPost(jitReturn, pc);
 }
 
 OPTBLD_INLINE void iopCheckProp(IOP_ARGS) {
@@ -7508,6 +7628,7 @@ void ExecutionContext::pushVMState(Cell* savedSP) {
   savedVM.firstAR = vmFirstAR();
   savedVM.sp = savedSP;
   savedVM.mInstrState = vmMInstrState();
+  savedVM.jitCalledFrame = vmJitCalledFrame();
   m_nesting++;
 
   if (debug && savedVM.fp &&
@@ -7542,6 +7663,7 @@ void ExecutionContext::popVMState() {
   vmFirstAR() = savedVM.firstAR;
   vmStack().top() = savedVM.sp;
   vmMInstrState() = savedVM.mInstrState;
+  vmJitCalledFrame() = savedVM.jitCalledFrame;
 
   if (debug) {
     if (savedVM.fp &&

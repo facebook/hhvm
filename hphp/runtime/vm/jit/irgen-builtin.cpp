@@ -533,7 +533,6 @@ struct CatchMaker {
     if (m_params.thiz) gen(env, DecRef, m_params.thiz);
 
     auto const val = gen(env, LdUnwinderValue, Type::Cell);
-    gen(env, DeleteUnwinderException);
     push(env, val);
     gen(env, Jmp, makeExit(env, nextBcOff(env)));
 

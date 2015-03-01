@@ -1121,17 +1121,16 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
   assert_native_stack_aligned();
   tl_regState = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
 
-  auto callToExit = [&] {
-    tl_regState = VMRegState::DIRTY;
-    return m_tx.uniqueStubs.callToExit;
-  };
+  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+    Trace::ringbufferEntry(
+      RBTypeServiceReq, (uint64_t)info.req, (uint64_t)info.args[0].tca
+    );
+  }
 
   TCA start = nullptr;
   SrcKey sk;
   auto smashed = false;
 
-  // If start is still nullptr at the end of this switch, we will enter the
-  // interpreter at sk.
   switch (info.req) {
     case REQ_BIND_CALL: {
       auto calleeFrame = info.stashedAR;
@@ -1179,11 +1178,6 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
       break;
     }
 
-    case REQ_INTERPRET:
-      // Leave start as nullptr and let the dispatchBB() happen down below.
-      sk = SrcKey{liveFunc(), info.args[0].offset, liveResumed()};
-      break;
-
     case REQ_POST_INTERP_RET: {
       // This is only responsible for the control-flow aspect of the Ret:
       // getting to the destination's translation, if any.
@@ -1198,13 +1192,6 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
             ar->m_func->fullName()->data(),
             caller->m_func->fullName()->data());
-      break;
-    }
-
-    case REQ_RESUME: {
-      if (UNLIKELY(vmpc() == 0)) return callToExit();
-      sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
-      start = getTranslation(TranslArgs{sk, true});
       break;
     }
 
@@ -1238,14 +1225,39 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
     Treadmill::enqueue(FreeRequestStubTrigger(info.stub));
   }
 
-  // If we don't have a starting address, interpret basic blocks until we end
-  // up somewhere with a translation (which we may have created, if the lease
-  // holder dropped it).
-  while (!start) {
+  if (start == nullptr) {
     vmpc() = sk.unit()->at(sk.offset());
+    start = m_tx.uniqueStubs.interpHelperSyncedPC;
+  }
+
+  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+    auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
+    Trace::ringbufferEntry(RBTypeResumeTC, skData, (uint64_t)start);
+  }
+
+  tl_regState = VMRegState::DIRTY;
+  return start;
+}
+
+TCA MCGenerator::handleResume(bool interpFirst) {
+  if (!vmRegsUnsafe().pc) return m_tx.uniqueStubs.callToExit;
+
+  tl_regState = VMRegState::CLEAN;
+  auto sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
+  TCA start = interpFirst ? nullptr : getTranslation(TranslArgs(sk, true));
+
+  vmJitCalledFrame() = vmfp();
+  SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
+  // If we can't get a translation at the current SrcKey, interpret basic
+  // blocks until we end up somewhere with a translation (which we may have
+  // created, if the lease holder dropped it).
+  while (!start) {
     INC_TPC(interp_bb);
     HPHP::dispatchBB();
-    if (!vmpc()) return callToExit();
+    if (!vmpc()) {
+      start = m_tx.uniqueStubs.callToExit;
+      break;
+    }
     sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
     start = getTranslation(TranslArgs{sk, true});
   }
@@ -1739,7 +1751,7 @@ MCGenerator::MCGenerator()
     Trace::traceRelease("TRACE=printir is set but the jit isn't on. "
                         "Did you mean to run with -vEval.Jit=1?\n");
   }
-  if (Trace::moduleEnabledRelease(Trace::llvm, 1) ||
+  if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {
     g_bytecodesVasm.bind();
     g_bytecodesLLVM.bind();
@@ -1780,6 +1792,9 @@ void MCGenerator::requestInit() {
 }
 
 void MCGenerator::requestExit() {
+  assert(!std::uncaught_exception() &&
+         "Uncaught exception live at request shutdown. "
+         "Probably an unwind-x64.cpp bug.");
   always_assert(!Translator::WriteLease().amOwner());
   TRACE_MOD(txlease, 2, "%" PRIx64 " write lease stats: %15" PRId64
             " kept, %15" PRId64 " grabbed\n",
@@ -1799,7 +1814,7 @@ void MCGenerator::requestExit() {
     Trace::traceRelease("\n");
   }
 
-  if (Trace::moduleEnabledRelease(Trace::llvm, 1)) {
+  if (Trace::moduleEnabledRelease(Trace::llvm_count, 1)) {
     auto llvm = *g_bytecodesLLVM;
     auto total = llvm + *g_bytecodesVasm;
     Trace::ftraceRelease(

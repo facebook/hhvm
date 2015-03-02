@@ -590,10 +590,14 @@ class Status {
   private static $killed = false;
   public static $key;
 
+  private static $overall_start_time = 0;
+  private static $overall_end_time = 0;
+
   const MODE_NORMAL = 0;
   const MODE_VERBOSE = 1;
   const MODE_FBMAKE = 2;
 
+  const MSG_STARTED = 7;
   const MSG_FINISHED = 1;
   const MSG_TEST_PASS = 2;
   const MSG_TEST_FAIL = 4;
@@ -603,6 +607,7 @@ class Status {
   const RED = 31;
   const GREEN = 32;
   const YELLOW = 33;
+  const BLUE = 34;
 
   const PASS_SERVER = 0;
   const SKIP_SERVER = 1;
@@ -620,7 +625,21 @@ class Status {
     return self::$mode;
   }
 
+  public static function getOverallStartTime() {
+    return self::$overall_start_time;
+  }
+
+   public static function getOverallEndTime() {
+    return self::$overall_end_time;
+  }
+
+  public static function started() {
+    self::send(self::MSG_STARTED, null);
+    self::$overall_start_time = microtime(true);
+  }
+
   public static function finished() {
+    self::$overall_end_time = microtime(true);
     self::send(self::MSG_FINISHED, null);
   }
 
@@ -1389,6 +1408,9 @@ function msg_loop($num_tests, $queue) {
     }
 
     switch ($type) {
+      case Status::MSG_STARTED:
+        break;
+
       case Status::MSG_FINISHED:
         break 2;
 
@@ -1897,6 +1919,7 @@ function main($argv) {
   $queue = Status::getQueue();
   drain_queue($queue);
 
+  Status::started();
   // Spawn off worker threads
   $children = array();
   // A poor man's shared memory
@@ -1988,14 +2011,18 @@ function main($argv) {
 
   if (isset($options['fbmake'])) {
     Status::say(array('op' => 'all_done', 'results' => $results));
-    return $return_value;
+  } else if (!$return_value) {
+    print_success($tests, $results, $options);
+  } else {
+    print_failure($argv, $results, $options);
   }
 
-  if (!$return_value) {
-    print_success($tests, $results, $options);
-    return $return_value;
-  }
-  print_failure($argv, $results, $options);
+  Status::sayColor("\nTotal time for all executed tests: ",
+                   Status::BLUE,
+                   sprintf("%.2fs\n",
+                   Status::getOverallEndTime() -
+                   Status::getOverallStartTime()));
+
   return $return_value;
 }
 

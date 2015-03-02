@@ -1,3 +1,0 @@
-string(15) "From class test"
-string(15) "From class test"
-SplFileInfo::setInfoClass() expects parameter 1 to be a class name derived from SplFileInfo, 'stdclass' given

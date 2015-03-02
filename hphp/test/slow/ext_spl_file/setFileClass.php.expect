@@ -1,2 +1,0 @@
-string(15) "From class test"
-SplFileInfo::setFileClass() expects parameter 1 to be a class name derived from SplFileObject, 'stdclass' given

@@ -2,4 +2,4 @@
 
 class A {}
 $cb = meth_caller('B', 'c');
-$cb(new A);
+$cb(new A());

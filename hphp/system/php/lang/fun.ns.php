@@ -10,9 +10,11 @@ namespace __SystemLib {
       $this->method = $method;
     }
     public function __invoke($x) {
-      invariant($x instanceof $this->class,
-                'object must be an instance of ('.$this->class.
-                ') instead it is ('.get_class($x).')');
+      invariant(
+        $x instanceof $this->class,
+        'object must be an instance of ('.$this->class.'), instead it is ('.
+        (\is_object($x) ? \get_class($x) : \gettype($x)).')'
+      );
       return $x->{$this->method}();
     }
   };
@@ -34,7 +36,7 @@ function fun(string $s) /* interpreted by the type checker as
 /**
  * Like fun, but with the purpose of calling methods. With fun you'd pass in
  * something like 'count' and it'd call count($x) on whatever you pass in.
- * This, rather, will call ->count($x) on whatever _object_ you pass in,
+ * This, rather, will call $x->count() for whatever _object_ $x you pass in,
  * which must be of type $class.
  *
  * For example:

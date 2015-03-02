@@ -367,19 +367,6 @@ std::vector<std::string> RuntimeOption::Extensions;
 std::vector<std::string> RuntimeOption::DynamicExtensions;
 std::string RuntimeOption::DynamicExtensionPath = ".";
 
-std::vector<void(*)(const IniSettingMap&, const Hdf&)>*
-  RuntimeOption::OptionHooks = nullptr;
-
-void RuntimeOption::AddOptionHook(
-  void(*optionHook)(const IniSettingMap&, const Hdf&)) {
-  // assuming no concurrent call to this function
-  if (RuntimeOption::OptionHooks == nullptr) {
-    RuntimeOption::OptionHooks =
-      new std::vector<void(*)(const IniSettingMap&, const Hdf&)>();
-  }
-  RuntimeOption::OptionHooks->push_back(optionHook);
-}
-
 HackStrictOption
   RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
   RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF,
@@ -1531,12 +1518,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
 
   Config::Get(ini, config["CustomSettings"], CustomSettings);
-
-  if (RuntimeOption::OptionHooks != nullptr) {
-    for (auto hookFunc : *RuntimeOption::OptionHooks) {
-      hookFunc(ini, config);
-    }
-  }
 
   refineStaticStringTableSize();
 

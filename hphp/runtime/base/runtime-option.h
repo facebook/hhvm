@@ -632,9 +632,6 @@ public:
   static double XenonPeriodSeconds;
   static bool XenonForceAlwaysOn;
 
-  static std::vector<void(*)(const IniSettingMap&, const Hdf&)>* OptionHooks;
-  static void AddOptionHook(void(*)(const IniSettingMap& ini, const Hdf&));
-
   // Convenience switch to turn on/off code alternatives via command-line
   // Do not commit code guarded by this flag, for evaluation only.
   static int EnableAlternative;

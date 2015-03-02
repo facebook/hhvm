@@ -71,6 +71,14 @@ set(HHVM_LINK_LIBRARIES
 if(ENABLE_FASTCGI)
   LIST(APPEND HHVM_LINK_LIBRARIES hphp_thrift)
   LIST(APPEND HHVM_LINK_LIBRARIES hphp_proxygen)
+  include(CheckCXXSourceCompiles)
+  CHECK_CXX_SOURCE_COMPILES("#include <pthread.h>
+  int main() {
+    return pthread_mutex_timedlock();
+  }" PTHREAD_TIMEDLOCK)
+  if (NOT PTHREAD_TIMEDLOCK)
+    add_definitions(-DTHRIFT_MUTEX_EMULATE_PTHREAD_TIMEDLOCK)
+  endif()
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)

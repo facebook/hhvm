@@ -120,7 +120,7 @@ struct ExtensionBuildInfo {
 #define HHVM_GET_MODULE(name) \
 static ExtensionBuildInfo s_##name##_extension_build_info = { \
   HHVM_DSO_VERSION, \
-  HHVM_VERISON_BRANCH, \
+  HHVM_VERSION_BRANCH, \
 }; \
 extern "C" ExtensionBuildInfo* getModuleBuildInfo() { \
   return &s_##name##_extension_build_info; \

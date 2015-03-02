@@ -241,8 +241,8 @@ void implIsScalarC(HTS& env) {
 }
 
 /*
- * Note: this is currently separate from convertToType(RepoAuthType) for now,
- * just because we don't want to enable every single type for assertions yet.
+ * Note: this is currently separate from typeFromRAT for now, just because we
+ * don't want to enable every single type for assertions yet.
  *
  * (Some of them currently regress performance, presumably because the IR
  * doesn't always handle the additional type information very well.  It is
@@ -250,78 +250,61 @@ void implIsScalarC(HTS& env) {
  */
 folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
   using T = RepoAuthType::Tag;
+
   switch (rat.tag()) {
-  case T::Uninit:     return Type::Uninit;
-  case T::InitNull:   return Type::InitNull;
-  case T::Int:        return Type::Int;
-  case T::Dbl:        return Type::Dbl;
-  case T::Res:        return Type::Res;
-  case T::Null:       return Type::Null;
-  case T::Bool:       return Type::Bool;
-  case T::Str:        return Type::Str;
-  case T::Obj:        return Type::Obj;
-  case T::SStr:       return Type::StaticStr;
+    case T::Uninit:
+    case T::InitNull:
+    case T::Null:
+    case T::Bool:
+    case T::Int:
+    case T::Dbl:
+    case T::Res:
+    case T::SStr:
+    case T::Str:
+    case T::Obj:
+    case T::SArr:
+    case T::Arr:
+    case T::Cell:
+    case T::Ref:
+    case T::InitUnc:
+    case T::Unc:
+      return typeFromRAT(rat);
 
-  // These aren't enabled yet:
-  case T::OptInt:
-  case T::OptObj:
-  case T::OptDbl:
-  case T::OptBool:
-  case T::OptSStr:
-  case T::OptStr:
-  case T::OptRes:
-    return folly::none;
-
-  case T::OptSArr:
-  case T::OptArr:
-    // TODO(#4205897): optional array types.
-    return folly::none;
-
-  case T::SArr:
-    if (auto const arr = rat.array()) {
-      return Type::StaticArray(arr);
-    }
-    return Type::StaticArr;
-  case T::Arr:
-    if (auto const arr = rat.array()) {
-      return Type::Array(arr);
-    }
-    return Type::Arr;
-
-  case T::OptExactObj:
-  case T::OptSubObj:
-  case T::ExactObj:
-  case T::SubObj:
-    {
-      auto ty = Type::Obj;
+    case T::OptExactObj:
+    case T::OptSubObj:
+    case T::ExactObj:
+    case T::SubObj: {
+      auto ty = typeFromRAT(rat);
       auto const cls = Unit::lookupClassOrUniqueClass(rat.clsName());
-      if (classIsUniqueOrCtxParent(env, cls)) {
-        if (rat.tag() == T::OptExactObj || rat.tag() == T::ExactObj) {
-          ty = Type::ExactObj(cls);
-        } else {
-          ty = Type::SubObj(cls);
-        }
-      }
-      if (rat.tag() == T::OptExactObj || rat.tag() == T::OptSubObj) {
-        ty |= Type::InitNull;
+
+      if (!classIsUniqueOrCtxParent(env, cls)) {
+        ty |= Type::Obj; // Kill specialization.
       }
       return ty;
     }
 
-  case T::Cell:       return Type::Cell;
-  case T::Ref:        return Type::BoxedInitCell;
+    // Type assertions can't currently handle Init-ness.
+    case T::InitCell:
+      return Type::Cell;
+    case T::InitGen:
+      return folly::none;
 
-  case T::InitGen:
-    // Should ideally be able to remove Uninit here.
-    return folly::none;
-  case T::Gen:
-    return folly::none;
+    case T::Gen:
+      return folly::none;
 
-  case T::InitUnc:    return Type::UncountedInit;
-  case T::Unc:        return Type::Uncounted;
-  // The JIT can't currently handle the exact information in this type
-  // assertion in some cases:
-  case T::InitCell:   return Type::Cell; // - Type::Uninit
+    case T::OptInt:
+    case T::OptObj:
+    case T::OptDbl:
+    case T::OptBool:
+    case T::OptSStr:
+    case T::OptStr:
+    case T::OptRes:
+      return folly::none;
+
+    case T::OptSArr:
+    case T::OptArr:
+      // TODO(#4205897): optional array types.
+      return folly::none;
   }
   not_reached();
 }

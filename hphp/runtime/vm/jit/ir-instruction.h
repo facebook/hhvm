@@ -342,6 +342,17 @@ typedef boost::intrusive::member_hook<IRInstruction,
 typedef boost::intrusive::list<IRInstruction, IRInstructionHookOption>
         InstructionList;
 
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Return the output type from a given IRInstruction.
+ *
+ * The destination type is always predictable from the types of the inputs, any
+ * type parameters to the instruction, and the id of the dest.
+ */
+Type outputType(const IRInstruction*, int dstId = 0);
+
+///////////////////////////////////////////////////////////////////////////////
 }}
 
 #endif

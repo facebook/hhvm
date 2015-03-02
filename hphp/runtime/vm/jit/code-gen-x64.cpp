@@ -2364,7 +2364,7 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc) {
   auto& v = vmain();
   auto increfMaybeStatic = [&](Vout& v) {
     auto base = srcLoc.reg(0);
-    if (!type.needsStaticBitCheck()) {
+    if (!type.maybe(Type::Static)) {
       emitIncRef(v, base);
     } else {
       auto const sf = v.makeReg();
@@ -2554,7 +2554,7 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
     destroyImpl(v);
   };
 
-  if (!type.needsStaticBitCheck()) {
+  if (!type.maybe(Type::Static)) {
     sf = v.makeReg();
     v << declm{dataReg[FAST_REFCOUNT_OFFSET], sf};
     if (RuntimeOption::EvalHHIRGenerateAsserts) {

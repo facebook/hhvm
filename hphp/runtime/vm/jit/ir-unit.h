@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"

@@ -378,7 +378,7 @@ static void populateLiveContext(RegionContext& ctx) {
 
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
-      { L::Local{i}, liveTVType(frame_local(fp, i)) }
+      { L::Local{i}, typeFromTV(frame_local(fp, i)) }
     );
   }
 
@@ -403,7 +403,7 @@ static void populateLiveContext(RegionContext& ctx) {
     },
     [&](const TypedValue* tv) {
       ctx.liveTypes.push_back(
-        { L::Stack{ctx.spOffset - stackOff}, liveTVType(tv) }
+        { L::Stack{ctx.spOffset - stackOff}, typeFromTV(tv) }
       );
       stackOff++;
       FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));

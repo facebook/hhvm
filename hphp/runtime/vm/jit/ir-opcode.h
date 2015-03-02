@@ -213,19 +213,6 @@ using DstRange = folly::Range<SSATmp*>;
  */
 const StringData* findClassName(SSATmp* cls);
 
-/*
- * Return the output type from a given IRInstruction.
- *
- * The destination type is always predictable from the types of the inputs, any
- * type parameters to the instruction, and the id of the dest.
- */
-Type outputType(const IRInstruction*, int dstId = 0);
-
-/*
- * Check that an instruction has operands of allowed types.
- */
-bool checkOperandTypes(const IRInstruction*, const IRUnit* unit = nullptr);
-
 using TcaRange = folly::Range<TCA>;
 
 } // namespace jit

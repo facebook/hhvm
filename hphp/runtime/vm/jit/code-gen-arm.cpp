@@ -647,7 +647,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
     auto base = loc.reg(0);
     auto rCount = v.makeReg();
     v << loadl{base[FAST_REFCOUNT_OFFSET], rCount};
-    if (!type.needsStaticBitCheck()) {
+    if (!type.maybe(Type::Static)) {
       auto count1 = v.makeReg();
       v << addli{1, rCount, count1, v.makeReg()};
       v << storel{count1, base[FAST_REFCOUNT_OFFSET]};

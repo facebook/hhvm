@@ -16,19 +16,25 @@
 
 #include "hphp/runtime/vm/jit/check.h"
 
-#include <bitset>
-#include <iostream>
-#include <unordered_set>
-
-#include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/id-set.h"
-#include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/type.h"
+
+#include <folly/Format.h>
+
+#include <bitset>
+#include <iostream>
+#include <string>
+#include <unordered_set>
 
 namespace HPHP { namespace jit {
 
@@ -38,7 +44,9 @@ namespace {
 
 TRACE_SET_MOD(hhir);
 
-// Return the number of parameters required for this block
+/*
+ * Return the number of parameters required for this block.
+ */
 DEBUG_ONLY static int numBlockParams(Block* b) {
   return b->empty() || b->front().op() != DefLabel ? 0 :
          b->front().numDsts();
@@ -113,6 +121,7 @@ bool checkBlock(Block* b) {
 
   return true;
 }
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -236,4 +245,232 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
   return isValid;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// checkOperandTypes().
+
+namespace {
+
+/*
+ * Return a union type containing all the types in the argument list.
+ */
+Type buildUnion() {
+  return Type::Bottom;
+}
+
+template<class... Args>
+Type buildUnion(Type t, Args... ts) {
+  return t | buildUnion(ts...);
+}
+
+}
+
+/*
+ * Runtime typechecking for IRInstruction operands.
+ *
+ * This is generated using the table in ir-opcode.h.  We instantiate
+ * IR_OPCODES after defining all the various source forms to do type
+ * assertions according to their form (see ir-opcode.h for documentation on
+ * the notation).  The checkers appear in argument order, so each one
+ * increments curSrc, and at the end we can check that the argument
+ * count was also correct.
+ */
+bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
+  int curSrc = 0;
+
+  auto bail = [&] (const std::string& msg) {
+    FTRACE(1, "{}", msg);
+    fprintf(stderr, "%s\n", msg.c_str());
+
+    always_assert_log(false, [&] { return msg; });
+  };
+
+  if (opHasExtraData(inst->op()) != (bool)inst->rawExtra()) {
+    bail(folly::format("opcode {} should{} have an ExtraData struct "
+                       "but instruction {} does{}",
+                       inst->op(),
+                       opHasExtraData(inst->op()) ? "" : "n't",
+                       *inst,
+                       inst->rawExtra() ? "" : "n't").str());
+  }
+
+  auto src = [&]() -> SSATmp* {
+    if (curSrc < inst->numSrcs()) {
+      return inst->src(curSrc);
+    }
+
+    bail(folly::format(
+      "Error: instruction had too few operands\n"
+      "   instruction: {}\n",
+        inst->toString()
+      ).str()
+    );
+    not_reached();
+  };
+
+  // If expected is not nullptr, it will be used. Otherwise, t.toString() will
+  // be used as the expected string.
+  auto check = [&] (bool cond, const Type t, const char* expected) {
+    if (cond) return true;
+
+    std::string expectStr = expected ? expected : t.toString();
+
+    bail(folly::format(
+      "Error: failed type check on operand {}\n"
+      "   instruction: {}\n"
+      "   was expecting: {}\n"
+      "   received: {}\n",
+        curSrc,
+        inst->toString(),
+        expectStr,
+        inst->src(curSrc)->type().toString()
+      ).str()
+    );
+    return true;
+  };
+
+  auto checkNoArgs = [&]{
+    if (inst->numSrcs() == 0) return true;
+    bail(folly::format(
+      "Error: instruction expected no operands\n"
+      "   instruction: {}\n",
+        inst->toString()
+      ).str()
+    );
+    return true;
+  };
+
+  auto countCheck = [&]{
+    if (inst->numSrcs() == curSrc) return true;
+    bail(folly::format(
+      "Error: instruction had too many operands\n"
+      "   instruction: {}\n"
+      "   expected {} arguments\n",
+        inst->toString(),
+        curSrc
+      ).str()
+    );
+    return true;
+  };
+
+  auto checkDst = [&] (bool cond, const std::string& errorMessage) {
+    if (cond) return true;
+
+    bail(folly::format("Error: failed type check on dest operand\n"
+                       "   instruction: {}\n"
+                       "   message: {}\n",
+                       inst->toString(),
+                       errorMessage).str());
+    return true;
+  };
+
+  auto requireTypeParam = [&] {
+    checkDst(inst->hasTypeParam() || inst->is(DefConst),
+             "Missing paramType for DParam instruction");
+  };
+
+  auto requireTypeParamPtr = [&] (Ptr kind) {
+    checkDst(inst->hasTypeParam(),
+      "Missing paramType for DParamPtr instruction");
+    if (inst->hasTypeParam()) {
+      checkDst(inst->typeParam() <= Type::Gen.ptr(kind),
+               "Invalid paramType for DParamPtr instruction");
+    }
+  };
+
+  auto checkVariadic = [&] (Type super) {
+    for (; curSrc < inst->numSrcs(); ++curSrc) {
+      auto const valid = (inst->src(curSrc)->type() <= super);
+      check(valid, Type(), nullptr);
+    }
+  };
+
+#define IRT(name, ...) UNUSED static const Type name = Type::name;
+#define IRTP(name, ...) IRT(name)
+  IR_TYPES
+#undef IRT
+#undef IRTP
+
+#define NA            return checkNoArgs();
+#define S(...)        {                                   \
+                        Type t = buildUnion(__VA_ARGS__); \
+                        check(src()->isA(t), t, nullptr); \
+                        ++curSrc;                         \
+                      }
+#define AK(kind)      {                                                 \
+                        Type t = Type::Array(ArrayData::k##kind##Kind); \
+                        check(src()->isA(t), t, nullptr);               \
+                        ++curSrc;                                       \
+                      }
+#define C(type)       check(src()->isConst() && \
+                            src()->isA(type),   \
+                            Type(),             \
+                            "constant " #type); \
+                      ++curSrc;
+#define CStr          C(StaticStr)
+#define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));
+#define ND
+#define DMulti
+#define DSetElem
+#define D(...)
+#define DBuiltin
+#define DSubtract(src, t)checkDst(src < inst->numSrcs(),  \
+                             "invalid src num");
+#define DofS(src)   checkDst(src < inst->numSrcs(),  \
+                             "invalid src num");
+#define DRefineS(src) checkDst(src < inst->numSrcs(),  \
+                               "invalid src num");     \
+                      requireTypeParam();
+#define DParamMayRelax requireTypeParam();
+#define DParam         requireTypeParam();
+#define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
+#define DUnboxPtr
+#define DBoxPtr
+#define DAllocObj
+#define DArrElem
+#define DArrPacked
+#define DThis
+#define DCtx
+#define DCns
+
+#define O(opcode, dstinfo, srcinfo, flags) \
+  case opcode: dstinfo srcinfo countCheck(); return true;
+
+  switch (inst->op()) {
+    IR_OPCODES
+  default: always_assert(false);
+  }
+
+#undef O
+
+#undef NA
+#undef S
+#undef AK
+#undef C
+#undef CStr
+#undef SVar
+
+#undef ND
+#undef D
+#undef DBuiltin
+#undef DSubtract
+#undef DMulti
+#undef DSetElem
+#undef DofS
+#undef DRefineS
+#undef DParamMayRelax
+#undef DParam
+#undef DParamPtr
+#undef DUnboxPtr
+#undef DBoxPtr
+#undef DAllocObj
+#undef DArrElem
+#undef DArrPacked
+#undef DThis
+#undef DCtx
+#undef DCns
+
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }}

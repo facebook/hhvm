@@ -113,6 +113,11 @@ enum class Ptr : uint8_t {
   Ref     = 0x10,
 };
 
+constexpr auto kPtrRefBit = static_cast<uint32_t>(Ptr::Ref);
+
+Ptr add_ref(Ptr);
+Ptr remove_ref(Ptr);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define IRT_BOXES_AND_PTRS(name, bits)                        \
@@ -178,6 +183,7 @@ enum class Ptr : uint8_t {
   c(Str,           kStaticStr|kCountedStr)                              \
   c(Arr,           kStaticArr|kCountedArr)                              \
   c(NullableObj,   kObj|kInitNull|kUninit)                              \
+  c(Static,        kStaticStr|kStaticArr)                               \
   c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStaticStr|kStaticArr)     \
   c(Uncounted,     kUncountedInit|kUninit)                              \
   c(InitCell,      kUncountedInit|kStr|kArr|kObj|kRes)                  \
@@ -344,12 +350,6 @@ public:
   Type();
 
   /*
-   * Regular constructors.
-   */
-  explicit Type(DataType outer, DataType inner = KindOfUninit);
-  explicit Type(DataType outer, KindOfAny);
-
-  /*
    * Assignment.
    */
   Type& operator=(Type b);
@@ -367,6 +367,31 @@ public:
   std::string toString() const;
   std::string constValString() const;
   static std::string debugString(Type t);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // DataType.
+
+  /*
+   * Construct from a DataType.
+   */
+  explicit Type(DataType outer, DataType inner = KindOfUninit);
+  explicit Type(DataType outer, KindOfAny);
+
+  /*
+   * Return true iff there exists a DataType in the range [KindOfUninit,
+   * KindOfRef] that represents a non-strict supertype of this type.
+   *
+   * @requires: *this <= StkElem
+   */
+  bool isKnownDataType() const;
+
+  /*
+   * Return the most specific DataType that is a supertype of this Type.
+   *
+   * @requires: isKnownDataType()
+   */
+  DataType toDataType() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -401,6 +426,7 @@ public:
    * Return true if this has nontrivial intersection with `t2'.
    */
   bool maybe(Type t2) const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Combinators.
@@ -437,24 +463,10 @@ public:
   bool isUnion() const;
 
   /*
-   * Return true iff there exists a DataType in the range [KindOfUninit,
-   * KindOfRef] that represents a non-strict supertype of this type.
-   *
-   * @requires: *this <= StkElem
-   */
-  bool isKnownDataType() const;
-
-  /*
    * Does this require a register to hold a DataType or value at runtime?
    */
   bool needsReg() const;
   bool needsValueReg() const;
-
-  /*
-   * Might this be a type that has a static variant (i.e., StaticStr,
-   * StaticArr)?
-   */
-  bool needsStaticBitCheck() const;
 
   /*
    * Return true if this corresponds to a type that is passed by (value/
@@ -675,22 +687,6 @@ public:
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Other methods.                                                     [const]
-
-  /*
-   * Return the most specific DataType that is a supertype of this Type.
-   *
-   * @requires: isKnownDataType()
-   */
-  DataType toDataType() const;
-
-  /*
-   * Relax the Type to one that we can check in codegen.
-   */
-  Type relaxToGuardable() const;
-
-
-  /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
 
 private:
@@ -765,24 +761,23 @@ static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),
               "jit::Type should fit in (2 * sizeof(uint64_t))");
 
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
 /*
- * Return the most refined type that can be used to represent the type in a
- * live TypedValue.
+ * Return the most refined Type that can be used to represent the type of a
+ * live TypedValue or a RepoAuthType.
  */
-Type liveTVType(const TypedValue* tv);
+Type typeFromTV(const TypedValue* tv);
+Type typeFromRAT(RepoAuthType ty);
+
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Return the boxed version of the input type, taking into account PHP
  * semantics and subtle implementation details.
  */
 Type boxType(Type);
-
-/*
- * Create a Type from a RepoAuthType.
- */
-Type convertToType(RepoAuthType ty);
 
 /*
  * Return the dest type for a LdRef with the given typeParam.

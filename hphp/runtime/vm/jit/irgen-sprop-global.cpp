@@ -53,7 +53,7 @@ SSATmp* ldClsPropAddrKnown(HTS& env,
     !RuntimeOption::RepoAuthoritative
       ? RepoAuthType{}
       : cls->staticPropRepoAuthType(slot);
-  auto const ptrTy = convertToType(repoTy).ptr(Ptr::SProp);
+  auto const ptrTy = typeFromRAT(repoTy).ptr(Ptr::SProp);
   return gen(env, LdRDSAddr, RDSHandleData { handle }, ptrTy);
 }
 

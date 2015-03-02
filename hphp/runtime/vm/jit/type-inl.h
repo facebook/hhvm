@@ -80,6 +80,29 @@ inline Type for_const(TCA)           { return Type::TCA; }
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Ptr.
+
+inline Ptr add_ref(Ptr p) {
+  if (p == Ptr::Unk || p == Ptr::ClsInit || p == Ptr::ClsCns) {
+    return p;
+  }
+  return static_cast<Ptr>(static_cast<uint32_t>(p) | kPtrRefBit);
+}
+
+inline Ptr remove_ref(Ptr p) {
+  // If p is unknown, or Ptr::Ref, we'll get back unknown.
+  return static_cast<Ptr>(static_cast<uint32_t>(p) & ~kPtrRefBit);
+}
+
+/*
+ * For use in this file.
+ */
+bool ptr_subtype(Ptr, Ptr);
+
+///////////////////////////////////////////////////////////////////////////////
+// Type.
+
 inline Type::Type()
   : m_bits(kBottom)
   , m_ptrKind(0)
@@ -116,8 +139,6 @@ inline size_t Type::hash() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison.
-
-bool ptr_subtype(Ptr, Ptr);
 
 inline bool Type::operator==(Type rhs) const {
   return m_bits == rhs.m_bits &&
@@ -205,10 +226,6 @@ inline bool Type::needsReg() const {
 
 inline bool Type::needsValueReg() const {
   return !subtypeOfAny(Null, Nullptr);
-}
-
-inline bool Type::needsStaticBitCheck() const {
-  return maybe(StaticStr | StaticArr);
 }
 
 inline bool Type::isSimpleType() const {

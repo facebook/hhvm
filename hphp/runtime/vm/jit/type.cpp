@@ -85,23 +85,9 @@ namespace {
  *
  */
 
-constexpr auto kPtrRefBit = static_cast<uint32_t>(Ptr::Ref);
-
 bool has_ref(Ptr p) {
   assert(p != Ptr::Unk);
   return static_cast<uint32_t>(p) & kPtrRefBit;
-}
-
-Ptr add_ref(Ptr p) {
-  if (p == Ptr::Unk || p == Ptr::ClsInit || p == Ptr::ClsCns) {
-    return p;
-  }
-  return static_cast<Ptr>(static_cast<uint32_t>(p) | kPtrRefBit);
-}
-
-Ptr remove_ref(Ptr p) {
-  // If p is unknown, or Ptr::Ref, we'll get back unknown.
-  return static_cast<Ptr>(static_cast<uint32_t>(p) & ~kPtrRefBit);
 }
 
 Ptr ptr_union(Ptr a, Ptr b) {
@@ -370,28 +356,6 @@ bool Type::checkValid() const {
   return true;
 }
 
-DataType Type::toDataType() const {
-  assert(!maybe(PtrToGen) || m_bits == kBottom);
-  assert(isKnownDataType());
-
-  // Order is important here: types must progress from more specific
-  // to less specific to return the most specific DataType.
-  if (*this <= Uninit)      return KindOfUninit;
-  if (*this <= InitNull)    return KindOfNull;
-  if (*this <= Bool)        return KindOfBoolean;
-  if (*this <= Int)         return KindOfInt64;
-  if (*this <= Dbl)         return KindOfDouble;
-  if (*this <= StaticStr)   return KindOfStaticString;
-  if (*this <= Str)         return KindOfString;
-  if (*this <= Arr)         return KindOfArray;
-  if (*this <= Obj)         return KindOfObject;
-  if (*this <= Res)         return KindOfResource;
-  if (*this <= BoxedCell)   return KindOfRef;
-  if (*this <= Cls)         return KindOfClass;
-  always_assert_flog(false,
-                     "Bad Type {} in Type::toDataType()", *this);
-}
-
 Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
   assert(inner != KindOfRef);
   assert(inner == KindOfUninit || outer == KindOfRef);
@@ -413,6 +377,28 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
       return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
   }
   not_reached();
+}
+
+DataType Type::toDataType() const {
+  assert(!maybe(PtrToGen) || m_bits == kBottom);
+  assert(isKnownDataType());
+
+  // Order is important here: types must progress from more specific
+  // to less specific to return the most specific DataType.
+  if (*this <= Uninit)      return KindOfUninit;
+  if (*this <= InitNull)    return KindOfNull;
+  if (*this <= Bool)        return KindOfBoolean;
+  if (*this <= Int)         return KindOfInt64;
+  if (*this <= Dbl)         return KindOfDouble;
+  if (*this <= StaticStr)   return KindOfStaticString;
+  if (*this <= Str)         return KindOfString;
+  if (*this <= Arr)         return KindOfArray;
+  if (*this <= Obj)         return KindOfObject;
+  if (*this <= Res)         return KindOfResource;
+  if (*this <= BoxedCell)   return KindOfRef;
+  if (*this <= Cls)         return KindOfClass;
+  always_assert_flog(false,
+                     "Bad Type {} in Type::toDataType()", *this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -543,21 +529,23 @@ Type Type::operator-(Type rhs) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Conversions.
 
-Type liveTVType(const TypedValue* tv) {
+Type typeFromTV(const TypedValue* tv) {
   assert(tv->m_type == KindOfClass || tvIsPlausible(*tv));
 
   if (tv->m_type == KindOfObject) {
-    Class* cls = tv->m_data.pobj->getVMClass();
+    auto const cls = tv->m_data.pobj->getVMClass();
 
-    // We only allow specialization on classes that can't be
-    // overridden for now. If this changes, then this will need to
-    // specialize on sub object types instead.
+    // We only allow specialization on classes that can't be overridden for
+    // now.  If this changes, then this will need to specialize on sub object
+    // types instead.
     if (!cls || !(cls->attrs() & AttrNoOverride)) return Type::Obj;
     return Type::ExactObj(cls);
   }
+
   if (tv->m_type == KindOfArray) {
-    ArrayData* ar = tv->m_data.parr;
+    auto const ar = tv->m_data.parr;
     if (ar->kind() == ArrayData::kStructKind) {
       return Type::Array(StructArray::asStructArray(ar)->shape());
     }
@@ -575,124 +563,70 @@ Type liveTVType(const TypedValue* tv) {
   return Type(outer, inner);
 }
 
-Type Type::relaxToGuardable() const {
-  auto const ty = unspecialize();
+Type typeFromRAT(RepoAuthType ty) {
+  using T = RepoAuthType::Tag;
+  switch (ty.tag()) {
+    case T::OptBool:        return Type::Bool      | Type::InitNull;
+    case T::OptInt:         return Type::Int       | Type::InitNull;
+    case T::OptSStr:        return Type::StaticStr | Type::InitNull;
+    case T::OptStr:         return Type::Str       | Type::InitNull;
+    case T::OptDbl:         return Type::Dbl       | Type::InitNull;
+    case T::OptRes:         return Type::Res       | Type::InitNull;
+    case T::OptObj:         return Type::Obj       | Type::InitNull;
 
-  if (ty.isKnownDataType()) return ty;
+    case T::Uninit:         return Type::Uninit;
+    case T::InitNull:       return Type::InitNull;
+    case T::Null:           return Type::Null;
+    case T::Bool:           return Type::Bool;
+    case T::Int:            return Type::Int;
+    case T::Dbl:            return Type::Dbl;
+    case T::Res:            return Type::Res;
+    case T::SStr:           return Type::StaticStr;
+    case T::Str:            return Type::Str;
+    case T::Obj:            return Type::Obj;
 
-  if (ty <= UncountedInit)  return Type::UncountedInit;
-  if (ty <= Uncounted)      return Type::Uncounted;
-  if (ty <= Cell)           return Type::Cell;
-  if (ty <= BoxedCell)      return Type::BoxedCell;
-  if (ty <= Gen)            return Type::Gen;
+    case T::Cell:           return Type::Cell;
+    case T::Ref:            return Type::BoxedInitCell;
+    case T::InitUnc:        return Type::UncountedInit;
+    case T::Unc:            return Type::Uncounted;
+    case T::InitCell:       return Type::InitCell;
+    case T::InitGen:        return Type::Init;
+    case T::Gen:            return Type::Gen;
+
+    // TODO(#4205897): option specialized array types
+    case T::OptArr:         return Type::Arr       | Type::InitNull;
+    case T::OptSArr:        return Type::StaticArr | Type::InitNull;
+
+    case T::SArr:
+      if (auto const ar = ty.array()) return Type::StaticArray(ar);
+      return Type::StaticArr;
+    case T::Arr:
+      if (auto const ar = ty.array()) return Type::Array(ar);
+      return Type::Arr;
+
+    case T::SubObj:
+    case T::ExactObj:
+    case T::OptSubObj:
+    case T::OptExactObj: {
+      auto base = Type::Obj;
+
+      if (auto const cls = Unit::lookupClassOrUniqueClass(ty.clsName())) {
+        if (ty.tag() == T::ExactObj || ty.tag() == T::OptExactObj) {
+          base = Type::ExactObj(cls);
+        } else {
+          base = Type::SubObj(cls);
+        }
+      }
+      if (ty.tag() == T::OptSubObj || ty.tag() == T::OptExactObj) {
+        base |= Type::InitNull;
+      }
+      return base;
+    }
+  }
   not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////
-
-namespace {
-
-Type setElemReturn(const IRInstruction* inst) {
-  assert(inst->op() == SetElem);
-  auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
-
-  // If the base is a Str, the result will always be a CountedStr (or
-  // an exception). If the base might be a str, the result wil be
-  // CountedStr or Nullptr. Otherwise, the result is always Nullptr.
-  if (baseType <= Type::Str) {
-    return Type::CountedStr;
-  } else if (baseType.maybe(Type::Str)) {
-    return Type::CountedStr | Type::Nullptr;
-  }
-  return Type::Nullptr;
-}
-
-Type builtinReturn(const IRInstruction* inst) {
-  assert(inst->op() == CallBuiltin);
-
-  Type t = inst->typeParam();
-  if (t.isSimpleType() || t == Type::Cell) {
-    return t;
-  }
-  if (t.isReferenceType() || t == Type::BoxedCell) {
-    return t | Type::InitNull;
-  }
-  not_reached();
-}
-
-Type thisReturn(const IRInstruction* inst) {
-  auto const func = inst->marker().func();
-
-  // If the function is a cloned closure which may have a re-bound $this which
-  // is not a subclass of the context return an unspecialized type.
-  if (func->hasForeignThis()) return Type::Obj;
-
-  if (auto const cls = func->cls()) {
-    return Type::SubObj(cls);
-  }
-  return Type::Obj;
-}
-
-Type ctxReturn(const IRInstruction* inst) {
-  return thisReturn(inst) | Type::Cctx;
-}
-
-Type allocObjReturn(const IRInstruction* inst) {
-  switch (inst->op()) {
-    case ConstructInstance:
-      return Type::SubObj(inst->extra<ConstructInstance>()->cls);
-
-    case NewInstanceRaw:
-      return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
-
-    case AllocObj:
-      return inst->src(0)->isConst()
-        ? Type::ExactObj(inst->src(0)->clsVal())
-        : Type::Obj;
-
-    default:
-      always_assert(false && "Invalid opcode returning AllocObj");
-  }
-}
-
-Type arrElemReturn(const IRInstruction* inst) {
-  assert(inst->op() == LdPackedArrayElem || inst->op() == LdStructArrayElem);
-  auto const tyParam = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
-  assert(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
-
-  auto const arrTy = inst->src(0)->type().arrSpec().type();
-  if (!arrTy) return tyParam;
-
-  using T = RepoAuthType::Array::Tag;
-  switch (arrTy->tag()) {
-  case T::Packed:
-    {
-      auto const idx = inst->src(1);
-      if (!idx->isConst()) return Type::Gen;
-      if (idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
-        return convertToType(arrTy->packedElem(idx->intVal())) & tyParam;
-      }
-    }
-    return Type::Gen;
-  case T::PackedN:
-    return convertToType(arrTy->elemType()) & tyParam;
-  }
-
-  return tyParam;
-}
-
-Type unboxPtr(Type t) {
-  t = t - Type::PtrToBoxedCell;
-  return t.deref().ptr(add_ref(t.ptrKind()));
-}
-
-Type boxPtr(Type t) {
-  auto const rawBoxed = t.deref().unbox().box();
-  auto const noNull = rawBoxed - Type::BoxedUninit;
-  return noNull.ptr(remove_ref(t.ptrKind()));
-}
-
-}
 
 Type ldRefReturn(Type typeParam) {
   assert(typeParam <= Type::Cell);
@@ -728,358 +662,6 @@ Type boxType(Type t) {
   }
   // Everything else is just a pure type-system boxing operation.
   return t.box();
-}
-
-Type convertToType(RepoAuthType ty) {
-  using T = RepoAuthType::Tag;
-  switch (ty.tag()) {
-  case T::OptBool:        return Type::Bool      | Type::InitNull;
-  case T::OptInt:         return Type::Int       | Type::InitNull;
-  case T::OptSStr:        return Type::StaticStr | Type::InitNull;
-  case T::OptStr:         return Type::Str       | Type::InitNull;
-  case T::OptDbl:         return Type::Dbl       | Type::InitNull;
-  case T::OptRes:         return Type::Res       | Type::InitNull;
-  case T::OptObj:         return Type::Obj       | Type::InitNull;
-
-  case T::Uninit:         return Type::Uninit;
-  case T::InitNull:       return Type::InitNull;
-  case T::Null:           return Type::Null;
-  case T::Bool:           return Type::Bool;
-  case T::Int:            return Type::Int;
-  case T::Dbl:            return Type::Dbl;
-  case T::Res:            return Type::Res;
-  case T::SStr:           return Type::StaticStr;
-  case T::Str:            return Type::Str;
-  case T::Obj:            return Type::Obj;
-
-  case T::Cell:           return Type::Cell;
-  case T::Ref:            return Type::BoxedInitCell;
-  case T::InitUnc:        return Type::UncountedInit;
-  case T::Unc:            return Type::Uncounted;
-  case T::InitCell:       return Type::InitCell;
-  case T::InitGen:        return Type::Init;
-  case T::Gen:            return Type::Gen;
-
-  // TODO(#4205897): option specialized array types
-  case T::OptArr:         return Type::Arr       | Type::InitNull;
-  case T::OptSArr:        return Type::StaticArr | Type::InitNull;
-
-  case T::SArr:
-    if (auto const ar = ty.array()) return Type::StaticArray(ar);
-    return Type::StaticArr;
-  case T::Arr:
-    if (auto const ar = ty.array()) return Type::Array(ar);
-    return Type::Arr;
-
-  case T::SubObj:
-  case T::ExactObj:
-  case T::OptSubObj:
-  case T::OptExactObj: {
-    auto base = Type::Obj;
-
-    if (auto const cls = Unit::lookupClassOrUniqueClass(ty.clsName())) {
-      if (ty.tag() == T::ExactObj || ty.tag() == T::OptExactObj) {
-        base = Type::ExactObj(cls);
-      } else {
-        base = Type::SubObj(cls);
-      }
-    }
-    if (ty.tag() == T::OptSubObj || ty.tag() == T::OptExactObj) {
-      base |= Type::InitNull;
-    }
-    return base;
-  }
-  }
-  not_reached();
-}
-
-namespace TypeNames {
-#define IRT(name, ...) UNUSED const Type name = Type::name;
-#define IRTP(name, ...) IRT(name)
-  IR_TYPES
-#undef IRT
-#undef IRTP
-};
-
-Type outputType(const IRInstruction* inst, int dstId) {
-  using namespace TypeNames;
-  using TypeNames::TCA;
-#define D(type)         return type;
-#define DofS(n)         return inst->src(n)->type();
-#define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
-#define DParamMayRelax  return inst->typeParam();
-#define DParam          return inst->typeParam();
-#define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
-                        return inst->typeParam();
-#define DUnboxPtr       return unboxPtr(inst->src(0)->type());
-#define DBoxPtr         return boxPtr(inst->src(0)->type());
-#define DAllocObj       return allocObjReturn(inst);
-#define DArrElem        return arrElemReturn(inst);
-#define DArrPacked      return Type::Array(ArrayData::kPackedKind);
-#define DThis           return thisReturn(inst);
-#define DCtx            return ctxReturn(inst);
-#define DMulti          return Type::Bottom;
-#define DSetElem        return setElemReturn(inst);
-#define ND              assert(0 && "outputType requires HasDest or NaryDest");
-#define DBuiltin        return builtinReturn(inst);
-#define DSubtract(n, t) return inst->src(n)->type() - t;
-#define DCns            return Type::Uninit | Type::InitNull | Type::Bool | \
-                               Type::Int | Type::Dbl | Type::Str | Type::Res;
-
-#define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
-
-  switch (inst->op()) {
-  IR_OPCODES
-  default: not_reached();
-  }
-
-#undef O
-
-#undef D
-#undef DofS
-#undef DRefineS
-#undef DParamMayRelax
-#undef DParam
-#undef DParamPtr
-#undef DUnboxPtr
-#undef DBoxPtr
-#undef DAllocObj
-#undef DArrElem
-#undef DArrPacked
-#undef DThis
-#undef DCtx
-#undef DMulti
-#undef DSetElem
-#undef ND
-#undef DBuiltin
-#undef DSubtract
-#undef DCns
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
-namespace {
-
-// Returns a union type containing all the types in the
-// variable-length argument list
-Type buildUnion() {
-  return Type::Bottom;
-}
-
-template<class... Args>
-Type buildUnion(Type t, Args... ts) {
-  return t | buildUnion(ts...);
-}
-
-}
-
-/*
- * Runtime typechecking for IRInstruction operands.
- *
- * This is generated using the table in ir-opcode.h.  We instantiate
- * IR_OPCODES after defining all the various source forms to do type
- * assertions according to their form (see ir-opcode.h for documentation on
- * the notation).  The checkers appear in argument order, so each one
- * increments curSrc, and at the end we can check that the argument
- * count was also correct.
- */
-bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
-  int curSrc = 0;
-
-  auto bail = [&] (const std::string& msg) {
-    FTRACE(1, "{}", msg);
-    fprintf(stderr, "%s\n", msg.c_str());
-
-    always_assert_log(false, [&] { return msg; });
-  };
-
-  if (opHasExtraData(inst->op()) != (bool)inst->rawExtra()) {
-    bail(folly::format("opcode {} should{} have an ExtraData struct "
-                       "but instruction {} does{}",
-                       inst->op(),
-                       opHasExtraData(inst->op()) ? "" : "n't",
-                       *inst,
-                       inst->rawExtra() ? "" : "n't").str());
-  }
-
-  auto src = [&]() -> SSATmp* {
-    if (curSrc < inst->numSrcs()) {
-      return inst->src(curSrc);
-    }
-
-    bail(folly::format(
-      "Error: instruction had too few operands\n"
-      "   instruction: {}\n",
-        inst->toString()
-      ).str()
-    );
-    not_reached();
-  };
-
-  // If expected is not nullptr, it will be used. Otherwise, t.toString() will
-  // be used as the expected string.
-  auto check = [&] (bool cond, const Type t, const char* expected) {
-    if (cond) return true;
-
-    std::string expectStr = expected ? expected : t.toString();
-
-    bail(folly::format(
-      "Error: failed type check on operand {}\n"
-      "   instruction: {}\n"
-      "   was expecting: {}\n"
-      "   received: {}\n",
-        curSrc,
-        inst->toString(),
-        expectStr,
-        inst->src(curSrc)->type().toString()
-      ).str()
-    );
-    return true;
-  };
-
-  auto checkNoArgs = [&]{
-    if (inst->numSrcs() == 0) return true;
-    bail(folly::format(
-      "Error: instruction expected no operands\n"
-      "   instruction: {}\n",
-        inst->toString()
-      ).str()
-    );
-    return true;
-  };
-
-  auto countCheck = [&]{
-    if (inst->numSrcs() == curSrc) return true;
-    bail(folly::format(
-      "Error: instruction had too many operands\n"
-      "   instruction: {}\n"
-      "   expected {} arguments\n",
-        inst->toString(),
-        curSrc
-      ).str()
-    );
-    return true;
-  };
-
-  auto checkDst = [&] (bool cond, const std::string& errorMessage) {
-    if (cond) return true;
-
-    bail(folly::format("Error: failed type check on dest operand\n"
-                       "   instruction: {}\n"
-                       "   message: {}\n",
-                       inst->toString(),
-                       errorMessage).str());
-    return true;
-  };
-
-  auto requireTypeParam = [&] {
-    checkDst(inst->hasTypeParam() || inst->is(DefConst),
-             "Missing paramType for DParam instruction");
-  };
-
-  auto requireTypeParamPtr = [&] (Ptr kind) {
-    checkDst(inst->hasTypeParam(),
-      "Missing paramType for DParamPtr instruction");
-    if (inst->hasTypeParam()) {
-      checkDst(inst->typeParam() <= Type::Gen.ptr(kind),
-               "Invalid paramType for DParamPtr instruction");
-    }
-  };
-
-  auto checkVariadic = [&] (Type super) {
-    for (; curSrc < inst->numSrcs(); ++curSrc) {
-      auto const valid = (inst->src(curSrc)->type() <= super);
-      check(valid, Type(), nullptr);
-    }
-  };
-
-#define IRT(name, ...) UNUSED static const Type name = Type::name;
-#define IRTP(name, ...) IRT(name)
-  IR_TYPES
-#undef IRT
-#undef IRTP
-
-#define NA            return checkNoArgs();
-#define S(...)        {                                   \
-                        Type t = buildUnion(__VA_ARGS__); \
-                        check(src()->isA(t), t, nullptr); \
-                        ++curSrc;                         \
-                      }
-#define AK(kind)      {                                                 \
-                        Type t = Type::Array(ArrayData::k##kind##Kind); \
-                        check(src()->isA(t), t, nullptr);               \
-                        ++curSrc;                                       \
-                      }
-#define C(type)       check(src()->isConst() && \
-                            src()->isA(type),   \
-                            Type(),             \
-                            "constant " #type); \
-                      ++curSrc;
-#define CStr          C(StaticStr)
-#define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));
-#define ND
-#define DMulti
-#define DSetElem
-#define D(...)
-#define DBuiltin
-#define DSubtract(src, t)checkDst(src < inst->numSrcs(),  \
-                             "invalid src num");
-#define DofS(src)   checkDst(src < inst->numSrcs(),  \
-                             "invalid src num");
-#define DRefineS(src) checkDst(src < inst->numSrcs(),  \
-                               "invalid src num");     \
-                      requireTypeParam();
-#define DParamMayRelax requireTypeParam();
-#define DParam         requireTypeParam();
-#define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
-#define DUnboxPtr
-#define DBoxPtr
-#define DAllocObj
-#define DArrElem
-#define DArrPacked
-#define DThis
-#define DCtx
-#define DCns
-
-#define O(opcode, dstinfo, srcinfo, flags) \
-  case opcode: dstinfo srcinfo countCheck(); return true;
-
-  switch (inst->op()) {
-    IR_OPCODES
-  default: always_assert(false);
-  }
-
-#undef O
-
-#undef NA
-#undef S
-#undef AK
-#undef C
-#undef CStr
-#undef SVar
-
-#undef ND
-#undef D
-#undef DBuiltin
-#undef DSubtract
-#undef DMulti
-#undef DSetElem
-#undef DofS
-#undef DRefineS
-#undef DParamMayRelax
-#undef DParam
-#undef DParamPtr
-#undef DUnboxPtr
-#undef DBoxPtr
-#undef DAllocObj
-#undef DArrElem
-#undef DArrPacked
-#undef DThis
-#undef DCtx
-#undef DCns
-
-  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -485,6 +485,23 @@ inline SSATmp* unbox(HTS& env, SSATmp* val, Block* exit) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Type helpers
+
+inline Type relaxToGuardable(Type ty) {
+  assert(ty <= Type::Gen);
+  ty = ty.unspecialize();
+
+  if (ty.isKnownDataType()) return ty;
+
+  if (ty <= Type::UncountedInit)  return Type::UncountedInit;
+  if (ty <= Type::Uncounted)      return Type::Uncounted;
+  if (ty <= Type::Cell)           return Type::Cell;
+  if (ty <= Type::BoxedCell)      return Type::BoxedCell;
+  if (ty <= Type::Gen)            return Type::Gen;
+  not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
 // Other common helpers
 
 inline bool classIsUnique(const Class* cls) {
@@ -539,7 +556,7 @@ inline SSATmp* ldLoc(HTS& env,
   env.irb->constrainLocal(locId, tc, opStr);
 
   if (curFunc(env)->isPseudoMain()) {
-    auto const type = env.irb->predictedLocalType(locId).relaxToGuardable();
+    auto const type = relaxToGuardable(env.irb->predictedLocalType(locId));
     assert(!type.isSpecialized());
     assert(type == type.dropConstVal());
 

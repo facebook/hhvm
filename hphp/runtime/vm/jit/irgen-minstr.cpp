@@ -242,7 +242,7 @@ SSATmp* ptrToUninit(HTS& env) {
 
 bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
                               PropInfo propInfo) {
-  if (!convertToType(propInfo.repoAuthType).maybe(Type::Uninit)) {
+  if (!typeFromRAT(propInfo.repoAuthType).maybe(Type::Uninit)) {
     return false;
   }
   if (!cls) return true;
@@ -837,7 +837,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
       env,
       LdPropAddr,
       PropOffset { propInfo.offset },
-      convertToType(propInfo.repoAuthType).ptr(Ptr::Prop),
+      typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
       env.base.value
     );
     setBase(
@@ -875,7 +875,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
         env,
         LdPropAddr,
         PropOffset { propInfo.offset },
-        convertToType(propInfo.repoAuthType).ptr(Ptr::Prop),
+        typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
         obj
       );
       return checkInitProp(env, obj, propAddr, doWarn, doDefine);

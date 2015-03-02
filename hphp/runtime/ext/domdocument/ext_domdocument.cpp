@@ -1549,42 +1549,24 @@ struct cmpdpa {
  * by derived DOM classes with the similar handling.
  */
 template <class Derived>
-struct DOMPropHandler {
+struct DOMPropHandler: Native::BasePropHandler {
   static Variant getProp(ObjectData* this_, const StringData* name) {
-    return guardedPropertyResult(name, [&]() {
-      return Derived::map.getter(VarNR(name))(this_);
-    });
+    return Derived::map.getter(VarNR(name))(this_);
   }
 
   static Variant setProp(ObjectData* this_,
                          const StringData* name,
                          Variant& value) {
-    return guardedPropertyResult(name, [&]() {
-      Derived::map.setter(VarNR(name))(this_, value);
-      return true;
-    });
+    Derived::map.setter(VarNR(name))(this_, value);
+    return true;
   }
 
   static Variant issetProp(ObjectData* this_, const StringData* name) {
-    return guardedPropertyResult(name, [&]() {
-      return Derived::map.isset(this_, StrNR(name));
-    });
+    return Derived::map.isset(this_, StrNR(name));
   }
 
-  static Variant unsetProp(ObjectData* this_, const StringData* name) {
-    return Native::prop_not_handled();
-  }
-
-private:
-  // If the property is not supported, returns sigil
-  // Native::prop_not_handled(), otherwise - the result from accessor.
-  static Variant guardedPropertyResult(const StringData* name,
-                                       std::function<Variant()> onHandle) {
-    if (Derived::map.isPropertySupported(VarNR(name))) {
-      return onHandle();
-    }
-
-    return Native::prop_not_handled();
+  static bool isPropSupported(const StringData* name, const StringData* op) {
+    return Derived::map.isPropertySupported(VarNR(name));
   }
 };
 

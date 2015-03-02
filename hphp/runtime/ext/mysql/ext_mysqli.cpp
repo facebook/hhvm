@@ -1175,18 +1175,18 @@ public:
     //HHVM_ME(mysqli, set_local_infile_handler);
     HHVM_ME(mysqli, ssl_set);
 
-    Native::registerNativeGuardedPropHandler
+    Native::registerNativePropHandler
       <mysqli_PropHandler>(s_mysqli.get());
 
     // mysqli_driver
-    Native::registerNativeGuardedPropHandler
+    Native::registerNativePropHandler
       <mysqli_driver_PropHandler>(s_mysqli_driver.get());
 
     // mysqli_result
     HHVM_ME(mysqli_result, get_mysqli_conn_resource);
     HHVM_ME(mysqli_result, fetch_field);
 
-    Native::registerNativeGuardedPropHandler
+    Native::registerNativePropHandler
       <mysqli_result_PropHandler>(s_mysqli_result.get());
 
     // mysqli_stmt
@@ -1207,7 +1207,7 @@ public:
     HHVM_ME(mysqli_stmt, result_metadata);
     HHVM_ME(mysqli_stmt, send_long_data);
 
-    Native::registerNativeGuardedPropHandler
+    Native::registerNativePropHandler
       <mysqli_stmt_PropHandler>(s_mysqli_stmt.get());
 
     HHVM_FE(mysqli_get_client_info);

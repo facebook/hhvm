@@ -1520,7 +1520,7 @@ class ReflectionExtension final : public Extension {
     Native::registerNativeDataInfo<ReflectionClassHandle>(
       s_ReflectionClassHandle.get());
 
-    Native::registerNativeGuardedPropHandler
+    Native::registerNativePropHandler
       <reflection_extension_PropHandler>(s_reflectionextension.get());
 
     loadSystemlib();

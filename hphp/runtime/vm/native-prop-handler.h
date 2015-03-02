@@ -58,11 +58,8 @@ void registerNativePropHandler(const StringData* className,
 /**
  * Default implementations of the accessor hooks. A property handler
  * class is supposed to implement `getProp`, `setProp`, `issetProp`,
- * and `unsetProp`. If a method cannot handle property, it should
- * return sigil `Native::prop_not_handled` value.
- *
- * If the guarded version of the handler is used, it's also supposed to
- * implement `isPropSupported` method.
+ * `unsetProp`, and  `isPropSupported`. If a method cannot handle property,
+ * it should return sigil `Native::prop_not_handled` value.
  *
  * Example:
  *
@@ -86,10 +83,6 @@ void registerNativePropHandler(const StringData* className,
 
 template<class T>
 Variant nativePropHandlerGet(ObjectData* obj, const StringData* name) {
-  return T::getProp(obj, name);
-}
-template<class T>
-Variant nativeGuardedPropHandlerGet(ObjectData* obj, const StringData* name) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "get")
   return T::getProp(obj, name);
 }
@@ -98,12 +91,6 @@ Variant nativeGuardedPropHandlerGet(ObjectData* obj, const StringData* name) {
 
 template<class T>
 Variant nativePropHandlerSet(ObjectData* obj,
-                             const StringData* name,
-                             Variant& value) {
-  return T::setProp(obj, name, value);
-}
-template<class T>
-Variant nativeGuardedPropHandlerSet(ObjectData* obj,
                                     const StringData* name,
                                     Variant& value) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "set")
@@ -114,10 +101,6 @@ Variant nativeGuardedPropHandlerSet(ObjectData* obj,
 
 template<class T>
 Variant nativePropHandlerIsset(ObjectData* obj, const StringData* name) {
-  return T::issetProp(obj, name);
-}
-template<class T>
-Variant nativeGuardedPropHandlerIsset(ObjectData* obj, const StringData* name) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "isset")
   return T::issetProp(obj, name);
 }
@@ -126,10 +109,6 @@ Variant nativeGuardedPropHandlerIsset(ObjectData* obj, const StringData* name) {
 
 template<class T>
 Variant nativePropHandlerUnset(ObjectData* obj, const StringData* name) {
-  return T::unsetProp(obj, name);
-}
-template<class T>
-Variant nativeGuardedPropHandlerUnset(ObjectData* obj, const StringData* name) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "unset")
   return T::unsetProp(obj, name);
 }
@@ -146,22 +125,6 @@ void registerNativePropHandler(const StringData* className) {
     &nativePropHandlerSet<T>,
     &nativePropHandlerIsset<T>,
     &nativePropHandlerUnset<T>
-  );
-}
-
-/**
- * The same as registerNativePropHandler<HandlerClassName>(className),
- * but does explicit check whether a property is supported by a handler
- * before actual handle call.
- */
-template<class T>
-void registerNativeGuardedPropHandler(const StringData* className) {
-  registerNativePropHandler(
-    className,
-    &nativeGuardedPropHandlerGet<T>,
-    &nativeGuardedPropHandlerSet<T>,
-    &nativeGuardedPropHandlerIsset<T>,
-    &nativeGuardedPropHandlerUnset<T>
   );
 }
 

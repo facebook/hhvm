@@ -133,8 +133,7 @@ Resource UserFile::invokeCast(int castas) {
   if (ret.toBoolean() == false) {
     return Resource();
   }
-  Resource handle = ret.toResource();
-  File *f = handle.getTyped<File>(true, true);
+  auto f = dyn_cast_or_null<File>(ret);
   if (!f) {
     raise_warning(
       "%s::stream_cast must return a stream resource",
@@ -150,7 +149,7 @@ Resource UserFile::invokeCast(int castas) {
     return Resource();
   }
 
-  return handle;
+  return Resource(std::move(f));
 }
 
 int UserFile::fd() const {
@@ -159,8 +158,7 @@ int UserFile::fd() const {
   if (handle.isNull()) {
     return -1;
   }
-  File *f = handle.getTyped<File>();
-  return f->fd();
+  return cast<File>(handle)->fd();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -80,11 +80,15 @@ String HHVM_FUNCTION(spl_object_hash, const Object& obj) {
   }
 
   char buf[33];
+  // Using the object address here would interfere with a moving GC algorithm.
+  // See t6299529.
   snprintf(buf, sizeof(buf), "%032" PRIx64,
            s_hash_mask_handle ^ (int64_t)obj.get());
   return String(buf, CopyString);
 }
 
+// Using the object address here could interfere with a moving GC algorithm.
+// See t6299529.
 int64_t HHVM_FUNCTION(hphp_object_pointer, const Object& obj) {
   return (int64_t)obj.get();
 }
@@ -323,17 +327,16 @@ String HHVM_FUNCTION(spl_autoload_extensions,
 ///////////////////////////////////////////////////////////////////////////////
 
 template <class T>
-static T* getDir(const Object& dir_iter) {
+static SmartPtr<T> getDir(const Object& dir_iter) {
   static_assert(std::is_base_of<Directory, T>::value,
                 "Only cast to directories");
-  auto dir = dir_iter->o_realProp("dir", 0, s_directory_iterator);
-  return dir->asCResRef().getTyped<T>();
+  return cast<T>(*dir_iter->o_realProp("dir", 0, s_directory_iterator));
 }
 
 static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
   auto dir = getDir<Directory>(ObjNR(this_).asObject());
 
-  if (auto array_dir = dynamic_cast<ArrayDirectory*>(dir)) {
+  if (auto array_dir = dyn_cast<ArrayDirectory>(dir)) {
     auto prop = this_->o_realProp("dirName", 0, s_directory_iterator);
     *prop = array_dir->path();
   }

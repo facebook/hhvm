@@ -8,7 +8,7 @@ class Foo {
 }
 
 function f($x) {
-  foreach ($x AS $k => $v) {
+  FOREACH ($x AS $k => $v) {
     if ($v instanceOf Foo) {}
   }
 }

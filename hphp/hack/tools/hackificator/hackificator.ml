@@ -166,7 +166,8 @@ let visit ast =
 
     V.kstmt = (fun (k, _) x ->
       (match x with
-      | Foreach (_, _, _, _, ii, _, _, _) ->
+      | Foreach (foreach, _, _, _, ii, _, _, _) ->
+        foreach.PI.transfo <- PI.Replace (PI.AddStr "foreach");
         ii.PI.transfo <- PI.Replace (PI.AddStr "as");
       | _ -> ()
       );

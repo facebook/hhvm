@@ -1094,7 +1094,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(PspTimeoutSeconds, ini, server["PspTimeoutSeconds"], 0);
     Config::Bind(PspCpuTimeoutSeconds, ini, server["PspCpuTimeoutSeconds"], 0);
     Config::Bind(ServerMemoryHeadRoom, ini, server["MemoryHeadRoom"], 0);
-    Config::Bind(RequestMemoryMaxBytes, ini, server["RequestMemoryMaxBytes"], 17179869184);
+    Config::Bind(RequestMemoryMaxBytes, ini, server["RequestMemoryMaxBytes"], (16l << 30)); // 16GiB
     Config::Bind(ResponseQueueCount, ini, server["ResponseQueueCount"], 0);
     if (ResponseQueueCount <= 0) {
       ResponseQueueCount = ServerThreadCount / 10;

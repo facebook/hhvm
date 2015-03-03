@@ -19,12 +19,13 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/simplify.h"
-#include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
+#include "hphp/runtime/vm/jit/simplify.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/stack-offsets-def.h"
 
 TRACE_SET_MOD(hhir);
 
@@ -533,26 +534,23 @@ void FrameStateMgr::forEachLocalValue(
 void FrameStateMgr::collectPostConds(Block* block) {
   assert(block->isExit());
   PostConditions& pConds = m_exitPostConds[block];
-
-  const IRInstruction& lastInst = block->back();
-  const bool resumed = lastInst.marker().resumed();
+  pConds.clear();
 
   if (sp() != nullptr) {
-    auto const physSPOff = spOffset();
-    auto const bcSpOffset = lastInst.marker().spOff();
-    auto const skipCells = resumed ? 0 : func()->numSlotsInFrame();
-    for (int32_t i = 0; i < skipCells; ++i) {
-      auto const instRelative  = BCSPOffset{i};
-      auto const fpRelative    = bcSpOffset - instRelative;
-      auto const spRelative    = IRSPOffset{physSPOff - fpRelative};
-      auto const t = stackType(spRelative);
-      if (t != Type::StkElem) {
-        FTRACE(1, "Stack({}, {}): {}\n", instRelative.offset,
-          fpRelative.offset, t);
-        pConds.push_back({
-          RegionDesc::Location::Stack{fpRelative},
-          t
-        });
+    const auto& lastInst = block->back();
+    const FPAbsOffset bcSpOff = lastInst.marker().spOff();
+    const FPAbsOffset irSpOff = spOffset();
+    const bool resumed = lastInst.marker().resumed();
+    const auto skipCells = FPAbsOffset{resumed ? 0 : func()->numSlotsInFrame()};
+    const auto evalStkCells = bcSpOff - skipCells;
+    for (int32_t i = 0; i < evalStkCells; i++) {
+      const auto bcSpRel = BCSPOffset{i};
+      const auto fpRel   = bcSpOff - bcSpRel;
+      const auto irSpRel = toIRSPOffset(bcSpRel, bcSpOff, irSpOff);
+      const auto type    = stackType(irSpRel);
+      if (type < Type::Gen) {
+        FTRACE(1, "Stack({}, {}): {}\n", bcSpRel.offset, fpRel.offset, type);
+        pConds.push_back({RegionDesc::Location::Stack{fpRel}, type});
       }
     }
   }

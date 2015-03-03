@@ -246,6 +246,8 @@ void emitPredictionGuards(HTS& hts,
         // Don't do this for ARM, because it can lead to interpOne on the
         // first SrcKey in a translation, which isn't allowed.
         break;
+      case Arch::PPC64:
+        break;
     }
   }
 

@@ -60,6 +60,9 @@
 #elif defined(__x86_64__) || defined(__alpha__) || defined(__hppa__)
 #define BF_ASM        0
 #define BF_SCALE      1
+#elif defined(__powerpc64__)
+#define BF_ASM        0
+#define BF_SCALE      0
 #else
 #define BF_ASM        0
 #define BF_SCALE      0

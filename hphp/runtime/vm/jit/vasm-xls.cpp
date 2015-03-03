@@ -156,6 +156,8 @@ struct Vxls {
         m_tmp = vixl::x17; // also used as tmp1 by MacroAssembler
         m_srkill = RegSet(arm::rAsm);//m_abi.all();
         break;
+      case Arch::PPC64:
+        break;
     }
     m_abi.simdUnreserved.remove(m_tmp);
     m_abi.simdReserved.add(m_tmp);
@@ -746,6 +748,7 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
       switch (arch()) {
         case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
         case Arch::X64: break;
+        case Arch::PPC64: break;
       }
       break;
     case Vinstr::callstub:

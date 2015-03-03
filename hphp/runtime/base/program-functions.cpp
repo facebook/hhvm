@@ -619,6 +619,10 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     case Arch::ARM:
       envArr.set(s_HHVM_ARCH, "arm");
       break;
+    case Arch::PPC64:
+      envArr.set(s_HHVM_ARCH, "ppc64");
+      break;
+
     }
     php_global_set(s__ENV, envArr);
   }

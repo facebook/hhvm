@@ -44,6 +44,23 @@ inline bool ffs64(I64 input, I64 &out) {
     :
     "cc"
   );
+#elif defined(__powerpc64__)
+  // In PowerPC 64, bit 0 is the most significant
+  asm volatile (
+    "nor    23, %2, %2\n\t" // negate each bit of input
+    "addi   23, 23, 1\n\t"
+    "and    23, %2, 23\n\t"
+    "cntlzd %1, 23\n\t" // count leading zeros (starting from index 0)
+    "cmpdi  %1, 64\n\t"
+    "beq    0f\n\t"     // zero retval if input == 0
+    "addi   23, 0, 63\n\t"
+    "sub    %1, 23, %1\n\t"
+    "addi   %0, 0, 1\n\t"
+    "0:\n\t":
+    "=r"(retval), "=r"(out):
+    "r"(input):
+    "r23", "cr0"
+  );
 #endif
   return retval;
 }
@@ -70,6 +87,23 @@ inline bool fls64(I64 input, I64 &out) {
     "=r"(retval), "=r"(out):
     "r"(input):
     "cc"
+  );
+#elif defined(__powerpc64__)
+  // In PowerPC 64, bit 0 is the most significant
+  asm volatile (
+    "nor    23, %2, %2\n\t" // negate each bit of input
+    "addi   23, 23, 1\n\t"
+    "and    23, %2, 23\n\t"
+    "cntlzd %1, 23\n\t" // count leading zeros (starting from index 0)
+    "cmpdi  %1, 64\n\t"
+    "beq    0f\n\t"     // zero retval if input == 0
+    "addi   23, 0, 63\n\t"
+    "sub    %1, 23, %1\n\t"
+    "addi   %0, 0, 1\n\t"
+    "0:\n\t":
+    "=r"(retval), "=r"(out):
+    "r"(input):
+    "r23", "cr0"
   );
 #endif
   return retval;

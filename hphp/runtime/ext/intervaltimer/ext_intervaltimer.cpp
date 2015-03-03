@@ -70,7 +70,13 @@ static StaticString sample_type_string(IntervalTimer::SampleType type) {
 void IntervalTimer::RunCallbacks(IntervalTimer::SampleType type) {
   auto& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
   data.clearIntervalTimerFlag();
-  for (auto timer : s_timer_pool->timers) {
+
+  auto const timers = s_timer_pool->timers;
+  for (auto timer : timers) {
+    if (!s_timer_pool->timers.count(timer)) {
+      // This timer has been removed from the pool by one of the callbacks.
+      continue;
+    }
     if (timer->m_signaled.load(std::memory_order_relaxed)) {
       timer->m_signaled.store(false, std::memory_order_relaxed);
       try {

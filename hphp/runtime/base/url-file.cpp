@@ -60,6 +60,15 @@ void UrlFile::sweep() {
 const StaticString
   s_remove_user_pass_pattern("#://[^@]+@#"),
   s_remove_user_pass_replace("://");
+
+void UrlFile::setProxy(const String& proxy_host, int proxy_port,
+                       const String& proxy_user, const String& proxy_pass) {
+  m_proxyHost = proxy_host.c_str();
+  m_proxyPort = proxy_port;
+  m_proxyUsername = proxy_user.c_str();
+  m_proxyPassword = proxy_pass.c_str();
+}
+
 bool UrlFile::open(const String& input_url, const String& mode) {
   String url = input_url;
   const char* modestr = mode.c_str();
@@ -71,6 +80,10 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   }
   HttpClient http(m_timeout, m_maxRedirect);
   m_response.clear();
+
+  if (!m_proxyHost.empty()) {
+    http.proxy(m_proxyHost, m_proxyPort, m_proxyUsername, m_proxyPassword);
+  }
 
   HeaderMap *pHeaders = nullptr;
   HeaderMap requestHeaders;

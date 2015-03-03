@@ -524,6 +524,35 @@ bool RegionFormer::tryInline(uint32_t& instrSize) {
   return true;
 }
 
+bool isLiteral(Op op) {
+  switch (op) {
+    case OpNull:
+    case OpNullUninit:
+    case OpTrue:
+    case OpFalse:
+    case OpInt:
+    case OpDouble:
+    case OpString:
+    case OpArray:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+bool isThisSelfOrParent(Op op) {
+  switch (op) {
+    case OpThis:
+    case OpSelf:
+    case OpParent:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 void RegionFormer::truncateLiterals() {
   if (!m_region || m_region->empty() ||
       m_region->blocks().back()->empty()) return;

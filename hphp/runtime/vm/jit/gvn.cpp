@@ -60,7 +60,7 @@ struct CongruenceHasher {
     if (inst->hasExtra()) {
       result = folly::hash::hash_128_to_64(
         result,
-        cseHashExtra(inst->op(), inst->rawExtra())
+        hashExtra(inst->op(), inst->rawExtra())
       );
     }
 
@@ -101,7 +101,7 @@ struct CongruenceComparator {
 
     if (instA->hasExtra()) {
       assert(instB->hasExtra());
-      if (!cseEqualsExtra(instA->op(), instA->rawExtra(), instB->rawExtra())) {
+      if (!equalsExtra(instA->op(), instA->rawExtra(), instB->rawExtra())) {
         return false;
       }
     }

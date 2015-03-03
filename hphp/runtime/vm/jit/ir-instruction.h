@@ -251,12 +251,6 @@ struct IRInstruction {
   bool isBlockEnd() const { return taken() || isTerminal(); }
   bool isRawLoad() const;
 
-  /*
-   * Comparison and hashing.
-   */
-  bool cseEquals(IRInstruction* inst) const;
-  size_t cseHash() const;
-
   void setMarker(BCMarker marker) {
     assert(marker.valid());
     m_marker = marker;

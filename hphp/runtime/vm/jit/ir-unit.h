@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/cse.h"
+#include "hphp/runtime/vm/jit/ir-instr-table.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -154,10 +154,10 @@ struct IRUnit {
   /*
    * Basic getters.
    */
-  Arena&   arena();
-  CSEHash& constTable();
+  Arena&              arena();
   const TransContext& context() const;
-  Block* entry() const; // TODO(#3538578): This should return `const Block*'.
+  Block*              entry() const;
+  // TODO(#3538578): The above should return `const Block*'.
 
   /*
    * Starting positions, from the TransContext.
@@ -221,7 +221,7 @@ private:
   Arena m_arena;
 
   // DefConsts for each unique constant in this IR.
-  CSEHash m_constTable;
+  IRInstrTable m_constTable;
 
   // Translation context for which this IRUnit was created.
   TransContext const m_context;

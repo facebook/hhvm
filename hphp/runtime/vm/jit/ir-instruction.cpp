@@ -20,9 +20,9 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/ir-instr-table.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -283,48 +283,6 @@ SSATmp* IRInstruction::src(uint32_t i) const {
 void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
   always_assert(i < numSrcs());
   m_srcs[i] = newSrc;
-}
-
-bool IRInstruction::cseEquals(IRInstruction* inst) const {
-  if (m_op != inst->m_op ||
-      m_typeParam != inst->m_typeParam ||
-      m_numSrcs != inst->m_numSrcs) {
-    return false;
-  }
-  for (uint32_t i = 0; i < numSrcs(); i++) {
-    if (src(i) != inst->src(i)) {
-      return false;
-    }
-  }
-  if (hasExtra() && !cseEqualsExtra(op(), m_extra, inst->m_extra)) {
-    return false;
-  }
-  /*
-   * Don't CSE on the edges--it's ok to use the destination of some earlier
-   * branching instruction even though the instruction we may have generated
-   * here would've exited to a different block.
-   *
-   * This is currently only used for CSE'ing some instructions that can take a
-   * branch deterministically, based on thier inputs, like DivDbl. If we CSE
-   * the result, it's safe because the place we would have had second one is
-   * dominated by the first one, so it can't exit.
-   */
-  return true;
-}
-
-size_t IRInstruction::cseHash() const {
-  size_t srcHash = 0;
-  for (unsigned i = 0; i < numSrcs(); ++i) {
-    srcHash = CSEHash::hashCombine(srcHash, src(i));
-  }
-  if (hasExtra()) {
-    srcHash = CSEHash::hashCombine(srcHash,
-      cseHashExtra(op(), m_extra));
-  }
-  if (hasTypeParam()) {
-    srcHash = CSEHash::hashCombine(srcHash, m_typeParam.value());
-  }
-  return CSEHash::hashCombine(srcHash, m_op);
 }
 
 std::string IRInstruction::toString() const {

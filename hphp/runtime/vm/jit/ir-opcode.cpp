@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"

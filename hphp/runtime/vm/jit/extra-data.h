@@ -34,29 +34,29 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Some IRInstructions with compile-time-only constants may carry
- * along extra data in the form of one of these structures.
+ * Some IRInstructions with compile-time-only constants may carry along extra
+ * data in the form of one of these structures.
  *
- * Note that this isn't really appropriate for compile-time constants
- * that are actually representing user values (we want them to be
- * visible to optimization passes, allocatable to registers, etc),
- * just compile-time metadata.
+ * Note that this isn't really appropriate for compile-time constants that are
+ * actually representing user values (we want them to be visible to
+ * optimization passes, allocatable to registers, etc), just compile-time
+ * metadata.
  *
  * These types must:
  *
- *   - Derive from IRExtraData (for overloading purposes)
- *   - Be arena-allocatable (no non-trivial destructors)
- *   - Either CopyConstructible, or implement a clone member
- *     function that takes an arena to clone to
+ *   - Derive from IRExtraData (for overloading purposes).
+ *   - Be arena-allocatable (no non-trivial destructors).
+ *   - Either CopyConstructible, or implement a clone member function that
+ *     takes an arena to clone to.
  *
- * In addition, for extra data used with a cse-able instruction:
+ * In addition, extra data belonging to IRInstructions that may be hashed in
+ * IRInstrTables must:
  *
- *   - Implement an cseEquals() member that indicates equality for CSE
- *     purposes.
- *   - Implement a cseHash() method.
+ *   - Implement an equals() member that indicates equality.
+ *   - Implement a hash() method.
  *
- * Finally, optionally they may implement a show() method for use in
- * debug printouts.
+ * Finally, optionally they may implement a show() method for use in debug
+ * printouts.
  */
 
 /*
@@ -129,8 +129,8 @@ struct LocalId : IRExtraData {
     : locId(id)
   {}
 
-  bool cseEquals(LocalId o) const { return locId == o.locId; }
-  size_t cseHash() const { return std::hash<uint32_t>()(locId); }
+  bool equals(LocalId o) const { return locId == o.locId; }
+  size_t hash() const { return std::hash<uint32_t>()(locId); }
   std::string show() const { return folly::to<std::string>(locId); }
 
   uint32_t locId;
@@ -141,8 +141,8 @@ struct IterId : IRExtraData {
     : iterId(id)
   {}
 
-  bool cseEquals(IterId o) const { return iterId == o.iterId; }
-  size_t cseHash() const { return std::hash<uint32_t>()(iterId); }
+  bool equals(IterId o) const { return iterId == o.iterId; }
+  size_t hash() const { return std::hash<uint32_t>()(iterId); }
   std::string show() const { return folly::to<std::string>(iterId); }
 
   uint32_t iterId;
@@ -168,8 +168,8 @@ struct RDSHandleData : IRExtraData {
     : handle(handle)
   {}
 
-  bool cseEquals(RDSHandleData o) const { return handle == o.handle; }
-  size_t cseHash() const { return std::hash<uint32_t>()(handle); }
+  bool equals(RDSHandleData o) const { return handle == o.handle; }
+  size_t hash() const { return std::hash<uint32_t>()(handle); }
   std::string show() const {
     return folly::to<std::string>(handle);
   }
@@ -188,8 +188,8 @@ struct ClassData : IRExtraData {
 struct FuncData : IRExtraData {
   explicit FuncData(const Func* func) : func(func) {}
 
-  bool cseEquals(FuncData o) const { return func == o.func; }
-  size_t cseHash() const { return std::hash<const Func*>()(func); }
+  bool equals(FuncData o) const { return func == o.func; }
+  size_t hash() const { return std::hash<const Func*>()(func); }
   std::string show() const {
     return folly::to<std::string>(func->fullName()->data());
   }
@@ -209,11 +209,11 @@ struct ClsMethodData : IRExtraData {
     return folly::format("{}::{}", *clsName, *methodName).str();
   }
 
-  bool cseEquals(const ClsMethodData& b) const {
+  bool equals(const ClsMethodData& b) const {
     // Strings are static so we can use pointer equality
     return clsName == b.clsName && methodName == b.methodName;
   }
-  size_t cseHash() const {
+  size_t hash() const {
     return hash_int64_pair((uintptr_t)clsName, (uintptr_t)methodName);
   }
 
@@ -229,10 +229,10 @@ struct FPushCufData : IRExtraData {
     , iterId(id)
   {}
 
-  bool cseEquals(FPushCufData o) const {
+  bool equals(FPushCufData o) const {
     return iterId == o.iterId && args == o.args;
   }
-  size_t cseHash() const {
+  size_t hash() const {
     return std::hash<uint32_t>()(iterId) ^ std::hash<uint32_t>()(args);
   }
   std::string show() const {
@@ -308,8 +308,8 @@ struct StackOffset : IRExtraData {
 
   std::string show() const { return folly::to<std::string>(offset); }
 
-  bool cseEquals(StackOffset o) const { return offset == o.offset; }
-  size_t cseHash() const { return std::hash<int32_t>()(offset); }
+  bool equals(StackOffset o) const { return offset == o.offset; }
+  size_t hash() const { return std::hash<int32_t>()(offset); }
 
   int32_t offset;
 };
@@ -335,10 +335,10 @@ struct RelOffsetData : IRExtraData {
     );
   }
 
-  bool cseEquals(RelOffsetData o) const {
+  bool equals(RelOffsetData o) const {
     return bcSpOffset == o.bcSpOffset && irSpOffset == o.irSpOffset;
   }
-  size_t cseHash() const {
+  size_t hash() const {
     return hash_int64_pair(
       std::hash<int32_t>()(bcSpOffset.offset),
       std::hash<int32_t>()(irSpOffset.offset)
@@ -356,8 +356,8 @@ struct IRSPOffsetData : IRExtraData {
     return folly::to<std::string>("IrSpOff ", offset.offset);
   }
 
-  bool cseEquals(IRSPOffsetData o) const { return offset == o.offset; }
-  size_t cseHash() const { return std::hash<int32_t>()(offset.offset); }
+  bool equals(IRSPOffsetData o) const { return offset == o.offset; }
+  size_t hash() const { return std::hash<int32_t>()(offset.offset); }
 
   IRSPOffset offset;
 };
@@ -366,8 +366,8 @@ struct PropOffset : IRExtraData {
   explicit PropOffset(int32_t offset) : offsetBytes(offset) {}
 
   std::string show() const { return folly::to<std::string>(offsetBytes); }
-  bool cseEquals(PropOffset o) const { return offsetBytes == o.offsetBytes; }
-  size_t cseHash() const { return std::hash<int32_t>()(offsetBytes); }
+  bool equals(PropOffset o) const { return offsetBytes == o.offsetBytes; }
+  size_t hash() const { return std::hash<int32_t>()(offsetBytes); }
 
   int32_t offsetBytes;
 };
@@ -579,8 +579,8 @@ struct LdFuncCachedData : IRExtraData {
     return folly::to<std::string>(name->data());
   }
 
-  size_t cseHash() const { return name->hash(); }
-  bool cseEquals(const LdFuncCachedData& o) const {
+  size_t hash() const { return name->hash(); }
+  bool equals(const LdFuncCachedData& o) const {
     return name == o.name;
   }
 
@@ -617,10 +617,10 @@ struct LdFuncCachedUData : IRExtraData {
     return folly::to<std::string>(name->data(), ',', fallback->data());
   }
 
-  size_t cseHash() const {
+  size_t hash() const {
     return hash_int64_pair(name->hash(), fallback->hash());
   }
-  bool cseEquals(const LdFuncCachedUData& o) const {
+  bool equals(const LdFuncCachedUData& o) const {
     return name == o.name && fallback == o.fallback;
   }
 
@@ -838,8 +838,8 @@ struct ClsNeqData : IRExtraData {
     return testClass->name()->data();
   }
 
-  bool cseEquals(ClsNeqData o) const { return testClass == o.testClass; }
-  size_t cseHash() const { return std::hash<Class*>()(testClass); }
+  bool equals(ClsNeqData o) const { return testClass == o.testClass; }
+  size_t hash() const { return std::hash<Class*>()(testClass); }
 
   Class* testClass; // class we're checking equality with
 };
@@ -1075,8 +1075,8 @@ template<class T> void assert_opcode_extra_same(Opcode opc) {
 #undef O
 }
 
-size_t cseHashExtra(Opcode opc, const IRExtraData* data);
-bool cseEqualsExtra(Opcode opc, const IRExtraData* a, const IRExtraData* b);
+size_t hashExtra(Opcode opc, const IRExtraData* data);
+bool equalsExtra(Opcode opc, const IRExtraData* a, const IRExtraData* b);
 IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a);
 std::string showExtra(Opcode opc, const IRExtraData* data);
 

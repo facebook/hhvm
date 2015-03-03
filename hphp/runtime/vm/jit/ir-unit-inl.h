@@ -217,10 +217,6 @@ inline Arena& IRUnit::arena() {
   return m_arena;
 }
 
-inline CSEHash& IRUnit::constTable() {
-  return m_constTable;
-}
-
 inline const TransContext& IRUnit::context() const {
   return m_context;
 }

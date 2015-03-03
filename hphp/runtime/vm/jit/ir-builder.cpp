@@ -71,7 +71,6 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
 {
   m_state.setBuilding();
   if (RuntimeOption::EvalHHIRGenOpts) {
-    m_enableCse = false; // CSE is disabled at gen time.
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
 }
@@ -169,7 +168,6 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   }
 
   m_state.update(inst);
-  cseUpdate(*inst);
 
   if (inst->isTerminal()) m_state.finishBlock(m_curBlock);
 }
@@ -440,7 +438,7 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
   /*
    * If $this is available, convert to an instruction sequence that doesn't
-   * need to test $this is available.  (Hopefully we CSE the load, too.)
+   * need to test $this is available.  (Hopefully we GVN the load, too.)
    */
   if (thisAvailable()) {
     auto const ctx   = gen(LdCtx, m_state.fp());
@@ -605,10 +603,10 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Performs simplification and CSE on the input instruction. If the input
- * instruction has a dest, this will return an SSATmp that represents the same
- * value as dst(0) of the input instruction. If the input instruction has no
- * dest, this will return nullptr.
+ * Perform preoptimization and simplification on the input instruction.  If the
+ * input instruction has a dest, this will return an SSATmp that represents the
+ * same value as dst(0) of the input instruction.  If the input instruction has
+ * no dest, this will return nullptr.
  *
  * The caller never needs to clone or append; all this has been done.
  */
@@ -623,30 +621,8 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
 
   FTRACE(1, "optimize: {}\n", inst->toString());
 
-  auto doCse = [&] (IRInstruction* cseInput) -> SSATmp* {
-    if (m_enableCse && cseInput->canCSE()) {
-      if (auto const cseResult = cseLookup(*cseInput, srcBlock, idoms)) {
-        // Found a dominating instruction that can be used instead of input
-        FTRACE(1, "  {}cse found: {}\n",
-               indent(), cseResult->inst()->toString());
-
-        assert(!cseInput->consumesReferences());
-        if (cseInput->producesReference(0)) {
-          // Replace with an IncRef
-          FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
-          gen(IncRef, cseResult);
-        }
-        return cseResult;
-      }
-    }
-    return nullptr;
-  };
-
   auto cloneAndAppendOriginal = [&] () -> SSATmp* {
     if (inst->op() == Nop) return nullptr;
-    if (auto cseResult = doCse(inst)) {
-      return cseResult;
-    }
     if (doClone == CloneFlag::Yes) {
       inst = m_unit.clone(inst);
     }
@@ -682,26 +658,18 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   //
   // ([], nullptr): no optimization possible. Use original inst.
   //
-  // ([], non-nullptr): passing through a src. Don't CSE.
+  // ([], non-nullptr): passing through a src.
   //
-  // ([X, ...], Y): throw away input instruction, append 'X, ...' (CSEing
-  //                as we go), return Y.
+  // ([X, ...], Y): throw away input instruction, append 'X, ...',
+  //                return Y.
 
   if (!simpResult.instrs.empty()) {
     // New instructions were generated. Append the new ones, filtering out Nops.
     for (auto* newInst : simpResult.instrs) {
       assert(!newInst->isTransient());
       if (newInst->op() == Nop) continue;
-
-      auto cseResult = doCse(newInst);
-      if (cseResult) {
-        appendInstruction(m_unit.gen(newInst->dst(), Mov,
-                                     newInst->marker(), cseResult));
-      } else {
-        appendInstruction(newInst);
-      }
+      appendInstruction(newInst);
     }
-
     return simpResult.dst;
   }
 
@@ -709,8 +677,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   // anything, or we're using some other instruction's dst instead of our own.
 
   if (simpResult.dst) {
-    // We're using some other instruction's output. Don't append anything, and
-    // don't do any CSE.
+    // We're using some other instruction's output.  Don't append anything.
     assert(simpResult.dst->inst() != inst);
     return simpResult.dst;
   }
@@ -758,11 +725,10 @@ void IRBuilder::exceptionStackBoundary() {
  *   compute immediate dominators.
  *   for each block in trace order:
  *     if we have a snapshot state for this block:
- *       clear cse entries that don't dominate this block.
  *       use snapshot state.
  *     move all instructions to a temporary list.
  *     for each instruction:
- *       optimizeWork - do CSE and simplify again
+ *       optimizeWork - simplify again
  *       if not simplified:
  *         append existing instruction and update state.
  *       else:
@@ -782,10 +748,8 @@ void IRBuilder::reoptimize() {
   }
 
   m_state = FrameStateMgr{m_initialMarker};
-  m_cseHash.clear();
-  m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
-  if (!m_enableCse && !m_enableSimplification) return;
+  if (!m_enableSimplification) return;
   setConstrainGuards(false);
 
   // We need to use fixed-point for loops, otherwise legacy reoptimize will not
@@ -1240,54 +1204,6 @@ void IRBuilder::popBlock() {
   m_curMarker = top.marker;
   m_exnStack = top.exnStack;
   m_savedBlocks.pop_back();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-CSEHash& IRBuilder::cseHashTable(const IRInstruction& inst) {
-  return inst.is(DefConst) ? m_unit.constTable() : m_cseHash;
-}
-
-const CSEHash& IRBuilder::cseHashTable(const IRInstruction& inst) const {
-  return const_cast<IRBuilder*>(this)->cseHashTable(inst);
-}
-
-SSATmp* IRBuilder::cseLookup(const IRInstruction& inst,
-                             const Block* srcBlock,
-                             const folly::Optional<IdomVector>& idoms) const {
-  auto tmp = cseHashTable(inst).lookup(const_cast<IRInstruction*>(&inst));
-  if (tmp && idoms) {
-    // During a reoptimize pass, we need to make sure that any values we want
-    // to reuse for CSE are only reused in blocks dominated by the block that
-    // defines it.
-    if (tmp->inst()->is(DefConst)) return tmp;
-    auto const dom = findDefiningBlock(tmp);
-    if (!dom || !dominates(dom, srcBlock, *idoms)) return nullptr;
-  }
-  return tmp;
-}
-
-void IRBuilder::cseUpdate(const IRInstruction& inst) {
-  switch (inst.op()) {
-  case Call:
-  case CallArray:
-  case ContEnter:
-    m_cseHash.clear();
-    break;
-  default:
-    break;
-  }
-
-  if (m_enableCse && inst.canCSE()) {
-    cseHashTable(inst).insert(inst.dst());
-  }
-  if (inst.killsSources()) {
-    for (auto i = uint32_t{0}; i < inst.numSrcs(); ++i) {
-      if (inst.killsSource(i) && inst.src(i)->inst()->canCSE()) {
-        cseHashTable(inst).erase(inst.src(i));
-      }
-    }
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

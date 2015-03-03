@@ -252,9 +252,7 @@ struct IRInstruction {
   bool isRawLoad() const;
 
   /*
-   * Comparison and hashing for the purposes of CSE-equality.
-   *
-   * Pre: canCSE()
+   * Comparison and hashing.
    */
   bool cseEquals(IRInstruction* inst) const;
   size_t cseHash() const;
@@ -277,7 +275,6 @@ struct IRInstruction {
    * these when you have an actual IRInstruction instead of just an
    * Opcode enum value.
    */
-  bool canCSE() const;
   bool hasDst() const;
   bool naryDst() const;
   bool consumesReferences() const;

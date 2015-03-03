@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -62,14 +61,6 @@ struct ExnStackState {
  *      internally runs preOptimize() on it, which can do some
  *      tracelet-state related modifications to the instruction.  For
  *      example, it can eliminate redundant guards.
- *
- *   - value numbering
- *
- *      After preOptimize, instructions that support it are hashed and
- *      looked up in the CSEHash for this trace.  If we find an
- *      available expression for the same value, instead of linking a
- *      new instruction into the trace we will just add a use to the
- *      previous SSATmp.
  *
  *   - simplification pass
  *
@@ -316,13 +307,6 @@ private:
 
 private:
   void appendInstruction(IRInstruction* inst);
-  SSATmp* cseLookup(const IRInstruction&,
-                    const Block*,
-                    const folly::Optional<IdomVector>&) const;
-  void clearCse();
-  const CSEHash& cseHashTable(const IRInstruction& inst) const;
-  CSEHash& cseHashTable(const IRInstruction& inst);
-  void cseUpdate(const IRInstruction& inst);
   bool constrainSlot(int32_t idOrOffset,
                      TypeSource typeSrc,
                      TypeConstraint tc,
@@ -333,8 +317,6 @@ private:
   BCMarker m_initialMarker;
   BCMarker m_curMarker;
   FrameStateMgr m_state;
-  CSEHash m_cseHash;
-  bool m_enableCse{false};
 
   /*
    * m_savedBlocks will be nonempty iff we're emitting code to a block other

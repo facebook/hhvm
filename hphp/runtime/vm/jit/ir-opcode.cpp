@@ -38,7 +38,6 @@ namespace HPHP { namespace jit {
 TRACE_SET_MOD(hhir);
 
 #define NF     0
-#define C      CanCSE
 #define Er     MayRaiseError
 #define PRc    ProducesRC
 #define CRc    ConsumesRC

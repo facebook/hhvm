@@ -101,7 +101,6 @@ struct FrameStateMgr;
  *   The following abbreviations are used in this table:
  *
  *      NF    no flags
- *      C     canCSE
  *      Er    mayRaiseError
  *      PRc   producesRC
  *      CRc   consumesRC
@@ -187,18 +186,17 @@ bool opHasExtraData(Opcode op);
 enum OpcodeFlag : uint64_t {
   NoFlags          = 0,
   HasDest          = 1ULL <<  0,
-  CanCSE           = 1ULL <<  1,
-  Branch           = 1ULL <<  2,
-  ConsumesRC       = 1ULL <<  3,
-  ProducesRC       = 1ULL <<  4,
-  MInstrProp       = 1ULL <<  5,
-  MInstrElem       = 1ULL <<  6,
-  MayRaiseError    = 1ULL <<  7,
-  Terminal         = 1ULL <<  8, // has no next instruction
-  NaryDest         = 1ULL <<  9, // has 0 or more destinations
-  HasExtra         = 1ULL << 10,
-  Passthrough      = 1ULL << 11,
-  KillsSources     = 1ULL << 12,
+  Branch           = 1ULL <<  1,
+  ConsumesRC       = 1ULL <<  2,
+  ProducesRC       = 1ULL <<  3,
+  MInstrProp       = 1ULL <<  4,
+  MInstrElem       = 1ULL <<  5,
+  MayRaiseError    = 1ULL <<  6,
+  Terminal         = 1ULL <<  7, // has no next instruction
+  NaryDest         = 1ULL <<  8, // has 0 or more destinations
+  HasExtra         = 1ULL <<  9,
+  Passthrough      = 1ULL << 10,
+  KillsSources     = 1ULL << 11,
 };
 
 bool hasEdges(Opcode opc);

@@ -135,7 +135,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   };
 
   auto const doReoptimize = RuntimeOption::EvalHHIRExtraOptPass &&
-    (RuntimeOption::EvalHHIRCse || RuntimeOption::EvalHHIRSimplification);
+                            RuntimeOption::EvalHHIRSimplification;
 
   auto const hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(unit);
 

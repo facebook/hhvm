@@ -80,14 +80,6 @@ bool IRInstruction::producesReference(int dstNo) const {
   return opcodeHasFlags(op(), ProducesRC);
 }
 
-bool IRInstruction::canCSE() const {
-  auto canCSE = opcodeHasFlags(op(), CanCSE);
-  // Make sure that instructions that are CSE'able can't consume reference
-  // counts.
-  assert(!canCSE || !consumesReferences());
-  return canCSE;
-}
-
 bool IRInstruction::consumesReferences() const {
   return opcodeHasFlags(op(), ConsumesRC);
 }
@@ -294,8 +286,6 @@ void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
 }
 
 bool IRInstruction::cseEquals(IRInstruction* inst) const {
-  assert(canCSE());
-
   if (m_op != inst->m_op ||
       m_typeParam != inst->m_typeParam ||
       m_numSrcs != inst->m_numSrcs) {
@@ -323,8 +313,6 @@ bool IRInstruction::cseEquals(IRInstruction* inst) const {
 }
 
 size_t IRInstruction::cseHash() const {
-  assert(canCSE());
-
   size_t srcHash = 0;
   for (unsigned i = 0; i < numSrcs(); ++i) {
     srcHash = CSEHash::hashCombine(srcHash, src(i));

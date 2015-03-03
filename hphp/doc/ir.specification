@@ -203,7 +203,7 @@ about to be loaded, using a separate CheckRefInner instruction.
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
 
-| AssertType, DRefineS(0), S(Gen,Cls), C|P
+| AssertType, DRefineS(0), S(Gen,Cls), P
 
   Assert that the type of S0 is T, copying it to D.
 
@@ -362,43 +362,43 @@ exceptions depending on how coercion is implemented.
 2. Arithmetic
 
 
-| AbsDbl, D(Dbl), S(Dbl), C
+| AbsDbl, D(Dbl), S(Dbl), NF
 
-| AddInt, D(Int), S(Int) S(Int), C
+| AddInt, D(Int), S(Int) S(Int), NF
 
-| SubInt, D(Int), S(Int) S(Int), C
+| SubInt, D(Int), S(Int) S(Int), NF
 
-| MulInt, D(Int), S(Int) S(Int), C
+| MulInt, D(Int), S(Int) S(Int), NF
 
-| AndInt, D(Int), S(Int) S(Int), C
+| AndInt, D(Int), S(Int) S(Int), NF
 
-| AddDbl, D(Dbl), S(Dbl) S(Dbl), C
+| AddDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
-| SubDbl, D(Dbl), S(Dbl) S(Dbl), C
+| SubDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
-| MulDbl, D(Dbl), S(Dbl) S(Dbl), C
+| MulDbl, D(Dbl), S(Dbl) S(Dbl), NF
 
-| DivDbl, D(Dbl), S(Dbl) S(Dbl), B|C
+| DivDbl, D(Dbl), S(Dbl) S(Dbl), B
 
-| Sqrt, D(Dbl), S(Dbl), C
+| Sqrt, D(Dbl), S(Dbl), NF
 
-| OrInt, D(Int), S(Int) S(Int), C
+| OrInt, D(Int), S(Int) S(Int), NF
 
-| XorInt, D(Int), S(Int) S(Int), C
+| XorInt, D(Int), S(Int) S(Int), NF
 
-| Shl, D(Int), S(Int) S(Int), C
+| Shl, D(Int), S(Int) S(Int), NF
 
-| Shr, D(Int), S(Int) S(Int), C
+| Shr, D(Int), S(Int) S(Int), NF
 
-| Floor, D(Dbl), S(Dbl), C
+| Floor, D(Dbl), S(Dbl), NF
 
-| Ceil, D(Dbl), S(Dbl), C
+| Ceil, D(Dbl), S(Dbl), NF
 
-| AddIntO, D(Int), S(Int) S(Int), B|C
+| AddIntO, D(Int), S(Int) S(Int), B
 
-| SubIntO, D(Int), S(Int) S(Int), B|C
+| SubIntO, D(Int), S(Int) S(Int), B
 
-| MulIntO, D(Int), S(Int) S(Int), B|C
+| MulIntO, D(Int), S(Int) S(Int), B
 
   Double arithmetic, integer arithmetic, and integer bitwise operations.
   Performs the operation described by the opcode name on S0 and S1, and puts
@@ -423,13 +423,13 @@ exceptions depending on how coercion is implemented.
   AddIntO, SubIntO, MulIntO perform integer arithmetic on S0 and S1, but will
   branch to block B on integer overflow.
 
-| XorBool, D(Bool), S(Bool) S(Bool), C
+| XorBool, D(Bool), S(Bool) S(Bool), NF
 
   Logical XOR of the two sources. (Note that && and || do not have
   corresponding opcodes because they're handled at the bytecode level, to
   implement short-circuiting.)
 
-| Mod, D(Int), S(Int) S(Int), C
+| Mod, D(Int), S(Int) S(Int), NF
 
   Compute S0 mod S1. If S1 is -1 or 0 the results are undefined.
 
@@ -438,11 +438,11 @@ exceptions depending on how coercion is implemented.
 
 To array conversions:
 
-| ConvBoolToArr,                D(Arr), S(Bool),                       C|PRc
+| ConvBoolToArr,                D(Arr), S(Bool),                         PRc
 
-| ConvDblToArr,                 D(Arr), S(Dbl),                        C|PRc
+| ConvDblToArr,                 D(Arr), S(Dbl),                          PRc
 
-| ConvIntToArr,                 D(Arr), S(Int),                        C|PRc
+| ConvIntToArr,                 D(Arr), S(Int),                          PRc
 
 | ConvObjToArr,                 D(Arr), S(Obj),                 Er|PRc|CRc|K
 
@@ -455,9 +455,9 @@ To bool conversions:
 
 | ConvArrToBool,               D(Bool), S(Arr),                           NF
 
-| ConvDblToBool,               D(Bool), S(Dbl),                            C
+| ConvDblToBool,               D(Bool), S(Dbl),                           NF
 
-| ConvIntToBool,               D(Bool), S(Int),                            C
+| ConvIntToBool,               D(Bool), S(Int),                           NF
 
 | ConvStrToBool,               D(Bool), S(Str),                           NF
 
@@ -470,9 +470,9 @@ To double conversions:
 
 | ConvArrToDbl,                 D(Dbl), S(Arr),                           NF
 
-| ConvBoolToDbl,                D(Dbl), S(Bool),                           C
+| ConvBoolToDbl,                D(Dbl), S(Bool),                          NF
 
-| ConvIntToDbl,                 D(Dbl), S(Int),                            C
+| ConvIntToDbl,                 D(Dbl), S(Int),                           NF
 
 | ConvObjToDbl,                 D(Dbl), S(Obj),                           Er
 
@@ -485,9 +485,9 @@ To int conversions:
 
 | ConvArrToInt,                 D(Int), S(Arr),                           NF
 
-| ConvBoolToInt,                D(Int), S(Bool),                           C
+| ConvBoolToInt,                D(Int), S(Bool),                          NF
 
-| ConvDblToInt,                 D(Int), S(Dbl),                            C
+| ConvDblToInt,                 D(Int), S(Dbl),                           NF
 
 | ConvObjToInt,                 D(Int), S(Obj),                           Er
 
@@ -503,7 +503,7 @@ To object conversions:
 
 To string conversions:
 
-| ConvBoolToStr,          D(StaticStr), S(Bool),                           C
+| ConvBoolToStr,          D(StaticStr), S(Bool),                          NF
 
 | ConvDblToStr,                 D(Str), S(Dbl),                          PRc
 
@@ -519,7 +519,7 @@ To string conversions:
   All the above opcodes convert S0 from its current type to the destination
   type, according to the PHP semantics of such a conversion.
 
-| ConvClsToCctx, D(Cctx), S(Cls), C
+| ConvClsToCctx, D(Cctx), S(Cls), NF
 
   Convert a class to a class context (i.e. the class with a 1 or'd into the low
   bit).
@@ -531,33 +531,33 @@ To string conversions:
 
 4. Boolean predicates
 
-| Gt,                          D(Bool), S(Gen) S(Gen), C
+| Gt,                          D(Bool), S(Gen) S(Gen), NF
 
-| GtX,                         D(Bool), S(Gen) S(Gen), Er|C
+| GtX,                         D(Bool), S(Gen) S(Gen), Er
 
-| Gte,                         D(Bool), S(Gen) S(Gen), C
+| Gte,                         D(Bool), S(Gen) S(Gen), NF
 
-| GteX,                        D(Bool), S(Gen) S(Gen), Er|C
+| GteX,                        D(Bool), S(Gen) S(Gen), Er
 
-| Lt,                          D(Bool), S(Gen) S(Gen), C
+| Lt,                          D(Bool), S(Gen) S(Gen), NF
 
-| LtX,                         D(Bool), S(Gen) S(Gen), Er|C
+| LtX,                         D(Bool), S(Gen) S(Gen), Er
 
-| Lte,                         D(Bool), S(Gen) S(Gen), C
+| Lte,                         D(Bool), S(Gen) S(Gen), NF
 
-| LteX,                        D(Bool), S(Gen) S(Gen), Er|C
+| LteX,                        D(Bool), S(Gen) S(Gen), Er
 
-| Eq,                          D(Bool), S(Gen) S(Gen), C
+| Eq,                          D(Bool), S(Gen) S(Gen), NF
 
-| EqX,                         D(Bool), S(Gen) S(Gen), Er|C
+| EqX,                         D(Bool), S(Gen) S(Gen), Er
 
-| Neq,                         D(Bool), S(Gen) S(Gen), C
+| Neq,                         D(Bool), S(Gen) S(Gen), NF
 
-| NeqX,                        D(Bool), S(Gen) S(Gen), Er|C
+| NeqX,                        D(Bool), S(Gen) S(Gen), Er
 
-| Same,                        D(Bool), S(Gen) S(Gen), C
+| Same,                        D(Bool), S(Gen) S(Gen), NF
 
-| NSame,                       D(Bool), S(Gen) S(Gen), C
+| NSame,                       D(Bool), S(Gen) S(Gen), NF
 
   Perform comparisons with PHP semantics on S0 and S1, and put the result in D.
   The -X versions may re-enter the VM when comparing an Object with a string,
@@ -565,77 +565,77 @@ To string conversions:
   (Object,String) pairs, and do not throw. Note that Same and NSame never
   re-enter or throw, for any types.
 
-| GtInt,                       D(Bool), S(Int) S(Int),                     C
+| GtInt,                       D(Bool), S(Int) S(Int),                    NF
 
-| GteInt,                      D(Bool), S(Int) S(Int),                     C
+| GteInt,                      D(Bool), S(Int) S(Int),                    NF
 
-| LtInt,                       D(Bool), S(Int) S(Int),                     C
+| LtInt,                       D(Bool), S(Int) S(Int),                    NF
 
-| LteInt,                      D(Bool), S(Int) S(Int),                     C
+| LteInt,                      D(Bool), S(Int) S(Int),                    NF
 
-| EqInt,                       D(Bool), S(Int) S(Int),                     C
+| EqInt,                       D(Bool), S(Int) S(Int),                    NF
 
-| NeqInt,                      D(Bool), S(Int) S(Int),                     C
+| NeqInt,                      D(Bool), S(Int) S(Int),                    NF
 
 
   Perform 64-bit integer comparisons.
 
-| GtDbl,                       D(Bool), S(Dbl) S(Dbl),                     C
+| GtDbl,                       D(Bool), S(Dbl) S(Dbl),                    NF
 
-| GteDbl,                      D(Bool), S(Dbl) S(Dbl),                     C
+| GteDbl,                      D(Bool), S(Dbl) S(Dbl),                    NF
 
-| LtDbl,                       D(Bool), S(Dbl) S(Dbl),                     C
+| LtDbl,                       D(Bool), S(Dbl) S(Dbl),                    NF
 
-| LteDbl,                      D(Bool), S(Dbl) S(Dbl),                     C
+| LteDbl,                      D(Bool), S(Dbl) S(Dbl),                    NF
 
-| EqDbl,                       D(Bool), S(Dbl) S(Dbl),                     C
+| EqDbl,                       D(Bool), S(Dbl) S(Dbl),                    NF
 
-| NeqDbl,                      D(Bool), S(Dbl) S(Dbl),                     C
+| NeqDbl,                      D(Bool), S(Dbl) S(Dbl),                    NF
 
   Perform comparisons of doubles. Comparisons that are unordered according to
   IEEE 754 (such as when at least one operand is NaN) result in false.
 
-| InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), C
+| InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait
   in S1. (Note that this is always false for a trait). S1 may be null at
   runtime if the class is not defined.
 
-| InstanceOfIface, D(Bool), S(Cls) CStr, C
+| InstanceOfIface, D(Bool), S(Cls) CStr, NF
 
   Fast path for interface checks. Sets D based on whether S0 implements S1, but
   S1 must be a unique interface. This should only be used in repo-authoritative
   mode.
 
-| ExtendsClass, D(Bool), S(Cls) C(Cls), C
+| ExtendsClass, D(Bool), S(Cls) C(Cls), NF
 
   A fast-path for instanceof checks. Sets D based on whether S0 is a descendant
   of the class in S1, where S1 must be a unique class that is not an interface
   or a trait.
 
-| InstanceOfBitmask,           D(Bool), S(Cls) CStr,                       C
+| InstanceOfBitmask,           D(Bool), S(Cls) CStr,                      NF
 
-| NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                       C
+| NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                      NF
 
   A fast-path for instanceof checks. Sets D based on whether S0 is a descendant
   of the class named by S1, where S1 must have a bit allocated for it in the
   fast instance check bitvector (see class.h).
 
-| InterfaceSupportsArr,        D(Bool), S(Str), C
+| InterfaceSupportsArr,        D(Bool), S(Str), NF
 
-| InterfaceSupportsStr,        D(Bool), S(Str), C
+| InterfaceSupportsStr,        D(Bool), S(Str), NF
 
-| InterfaceSupportsInt,        D(Bool), S(Str), C
+| InterfaceSupportsInt,        D(Bool), S(Str), NF
 
-| InterfaceSupportsDbl,        D(Bool), S(Str), C
+| InterfaceSupportsDbl,        D(Bool), S(Str), NF
 
   Returns whether t instanceof S0 returns true when t is of the given type.
 
-| IsType<T>, D(Bool), S(Cell), C
+| IsType<T>, D(Bool), S(Cell), NF
 
   Sets D to true iff S0 holds a value that is of type T.
 
-| IsNType<T>, D(Bool), S(Cell), C
+| IsNType<T>, D(Bool), S(Cell), NF
 
   Sets D to true iff S0 holds a value that is not of type T.
 
@@ -650,11 +650,11 @@ To string conversions:
 
   Sets D to true iff the value referenced by S0 is not of type T.
 
-| IsScalarType, D(Bool), S(Cell), C
+| IsScalarType, D(Bool), S(Cell), NF
 
   Returns true if S0 is of type Int, Bool, Dbl or Str. Returns false otherwise.
 
-| IsWaitHandle, D(Bool), S(Obj), C
+| IsWaitHandle, D(Bool), S(Obj), NF
 
   Sets D to true iff S0 is a subclass of WaitHandle.
 
@@ -716,7 +716,7 @@ To string conversions:
   instruction with the same number of sources. Ordinary branch instructions may
   not pass values to a DefLabel.
 
-| ClsNeq<class>, D(Bool), S(Cls), C
+| ClsNeq<class>, D(Bool), S(Cls), NF
 
     Compare S0 to the class `class', returning true if it is not the same.
 
@@ -767,17 +767,17 @@ To string conversions:
   instruction is used for loading locals in pseudo-mains, where they can alias
   globals.
 
-| LdStkAddr<T,offset>, DParamPtr(Stk), S(StkPtr), C
+| LdStkAddr<T,offset>, DParamPtr(Stk), S(StkPtr), NF
 
   Loads the address of the stack slot given by the pointer in S0 at the offset
   (in cells). T must be a subtype of PtrToStkGen.
 
-| LdLocAddr<T,localId>, DParamPtr(Frame), S(FramePtr), C
+| LdLocAddr<T,localId>, DParamPtr(Frame), S(FramePtr), NF
 
   Loads the address of the local slot localId from the frame S0 into D. T must
   be a subtype of PtrToFrameGen.
 
-| LdRDSAddr<T,RDSHandle>, DParam, NA, C
+| LdRDSAddr<T,RDSHandle>, DParam, NA, NF
 
   Load the address of a Gen that lives at the specified RDS handle. The type
   param must be a subtype of PtrToGen.
@@ -823,7 +823,7 @@ To string conversions:
   inner type of S0 must be a subtype of T (usually ensured with a previous
   CheckRefInner).
 
-| LdCtx, DCtx, S(FramePtr), C
+| LdCtx, DCtx, S(FramePtr), NF
 
   Loads into D the value of the m_this/m_cls field out of the frame pointer S0,
   which must be a frame for the function in the LdCtx's Marker. The result
@@ -834,33 +834,33 @@ To string conversions:
   Check that the context (m_this or m_cls) in S0 is a non-null $this
   pointer. If not, branch to B.
 
-| CastCtxThis, DThis, S(Ctx), C
+| CastCtxThis, DThis, S(Ctx), NF
 
   Convert a Ctx known to contain a $this pointer to a specific object type,
   based on the marker func for this instruction.
 
-| LdCctx, D(Cctx), S(FramePtr), C
+| LdCctx, D(Cctx), S(FramePtr), NF
 
   Loads into D the value of the m_cls field out of the frame pointer S0. The
   compiler should generate this only if it can prove that the frame does not
   contain a nullptr or $this pointer.
 
-| LdClsCtx, D(Cls), S(Ctx), C
+| LdClsCtx, D(Cls), S(Ctx), NF
 
   Loads into D the class representing the current context. Extracts the class
   from S0, which can be either the this pointer or the context class.
 
-| LdClsCctx, D(Cls), S(Cctx), C
+| LdClsCctx, D(Cls), S(Cctx), NF
 
   Loads into D the class representing the current context. Extracts the class
   from the S0, which is a context class.
 
-| LdClsCtor, D(Func), S(Cls), C|Er
+| LdClsCtor, D(Func), S(Cls), Er
 
   Loads into D the constructor of class S0. If the constructor cannot be called
   from the current context, raise an error.
 
-| DefConst<T>, DParam, NA, C
+| DefConst<T>, DParam, NA, NF
 
   Define a constant value of type T. D is presumed to be globally available and
   the DefConst instruction will not actually appear in the IR instruction
@@ -871,7 +871,7 @@ To string conversions:
   Define a value of type T. This instruction aborts at runtime; it is meant to
   be used in tests or code that is known to be unreachable.
 
-| LdCls, D(Cls), S(Str) C(Cls), C|Er
+| LdCls, D(Cls), S(Str) C(Cls), Er
 
   Loads the class named S0 in the context of the class S1. Invokes autoload and
   may raise an error if the class is not defined. The explicit context
@@ -879,7 +879,7 @@ To string conversions:
   some cases. If S0 is constant, this instruction may be simplified to a
   LdClsCached.
 
-| LdClsCached, D(Cls), CStr, C|Er
+| LdClsCached, D(Cls), CStr, Er
 
   Loads the class named S0 via the RDS. Invokes autoload and may raise an error
   if the class is not defined.
@@ -889,11 +889,11 @@ To string conversions:
   Loads the class whose name is S0 out of the RDS. If the class is not defined,
   returns a null pointer.
 
-| LdClsInitData, D(PtrToClsInitCell), S(Cls), C
+| LdClsInitData, D(PtrToClsInitCell), S(Cls), NF
 
   Loads the pointer to the property initializer array for class S0.
 
-| LookupClsRDSHandle, D(RDSHandle), S(Str), C
+| LookupClsRDSHandle, D(RDSHandle), S(Str), NF
 
   Look up the cached-class RDS handle for a given class name.
 
@@ -975,7 +975,7 @@ To string conversions:
   required lookup paths, indicating that a more complete lookup path should be
   taken. May throw if the method does not exist.
 
-| LdClsMethod, D(Func), S(Cls) C(Int), C
+| LdClsMethod, D(Func), S(Cls) C(Int), NF
 
   Load a Func* off of the class method table for S0, at offset S1 (in method
   slots).
@@ -987,7 +987,7 @@ To string conversions:
   record to modify at `offset', and S3 is a pointer to the current frame (used
   to get the context). May throw or fatal if method is not accessible.
 
-| LdPropAddr<T,offset>, DParamPtr(Prop), S(Obj), C
+| LdPropAddr<T,offset>, DParamPtr(Prop), S(Obj), NF
 
   Load the address of the object property for S0 + `offset' (in bytes).  T must
   be a subtype of PtrToPropGen.
@@ -1004,14 +1004,14 @@ To string conversions:
 
 | LdClsPropAddrOrNull, D(PtrToSPropGen|Nullptr),
 |                      S(Cls) S(Str) C(Cls),
-|                      C|Er
+|                      Er
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, then nullptr is returned.
 
-| LdClsPropAddrOrRaise, D(PtrToSPropGen), S(Cls) S(Str) C(Cls), C|Er
+| LdClsPropAddrOrRaise, D(PtrToSPropGen), S(Cls) S(Str) C(Cls), Er
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
@@ -1047,11 +1047,11 @@ To string conversions:
   respectively. These instructions mutate a partially created ActRec pointed to
   by S1 + `offset' (in cells).
 
-| LdObjClass, D(Cls), S(Obj), C
+| LdObjClass, D(Cls), S(Obj), NF
 
   Load the class out of the object in S0 and put it in D.
 
-| LdClsName, D(StaticStr), S(Cls), C
+| LdClsName, D(StaticStr), S(Cls), NF
 
   Load the name of the Class* in S0.
 
@@ -1076,7 +1076,7 @@ To string conversions:
   load a Func named fallbackName. If that also isn't defined, invoke autoload.
   If this still doesn't result in a Func, raise a fatal error.
 
-| LdARFuncPtr<offset>, D(Func), S(StkPtr), C
+| LdARFuncPtr<offset>, D(Func), S(StkPtr), NF
 
   Loads the m_func member of an ActRec. S0 is the base address, with `offset'
   cells to the ActRec.
@@ -1410,7 +1410,7 @@ To string conversions:
 12. Refcounting and copies
 
 
-| Mov, DofS(0), S(Top), C|P
+| Mov, DofS(0), S(Top), P
 
   Defines D as S0. May imply register-to-register moves at code generation
   time. Does not imply an incref or any other manipulation of S0.
@@ -1653,7 +1653,7 @@ To string conversions:
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
   S2 is returned.
 
-| GetMemoKey, D(Cell), S(Cell), Er|C|PRc
+| GetMemoKey, D(Cell), S(Cell), Er|PRc
 
   Given a cell, produces a cell that can be used as a cache key. Valid values
   for the input include all basic types, arrays and collections, and objects
@@ -1804,7 +1804,7 @@ To string conversions:
   Updates the internal index of generator with S1 if necessary, i.e. if S1
   is larger than the index. S0 is the pointer to the embedded ActRec.
 
-| LdContActRec, D(FramePtr), S(Obj), C
+| LdContActRec, D(FramePtr), S(Obj), NF
 
   Loads the Generator object's ActRec, given a pointer to the generator
   object in S0.
@@ -1880,12 +1880,12 @@ To string conversions:
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
 
-| LdAFWHActRec, D(FramePtr), S(Obj), C
+| LdAFWHActRec, D(FramePtr), S(Obj), NF
 
   Loads the AsyncFunctionWaitHandle object's ActRec, given a pointer to the
   AsyncFunctionWaitHandle object in S0.
 
-| LdResumableArObj, D(Obj), S(FramePtr), C
+| LdResumableArObj, D(Obj), S(FramePtr), NF
 
   Loads the Resumable object, given a Resumable's frame pointer in S0.
 
@@ -2053,7 +2053,7 @@ To string conversions:
 
   Declares a base register for MInstrState. Currently this is always %rsp.
 
-| LdMIStateAddr, DofS(0), S(PtrToMISGen) C(Int), C
+| LdMIStateAddr, DofS(0), S(PtrToMISGen) C(Int), NF
 
   Load an MInstrState address. Returns a pointer to (S0 + S1) with the same
   type as S0. S0 must be the output of a DefMIStateBase.

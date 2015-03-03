@@ -53,7 +53,7 @@
   cakephp3:
     url: https://github.com/cakephp/cakephp.git
     branch: "3.0"
-    commit: 8fab489705b3b74f43955b555378e62c55349ae9
+    commit: 5b6afa31109bb5e08474205afdd9796683e6e6f6
     install_root: cakephp3
     test_root: cakephp3
   codeigniter:

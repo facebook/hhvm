@@ -1,8 +1,7 @@
-
 * reflect_func: variadic_only_no_vv
 bool(true)
 string(1) "v"
-  optional: false
+  optional: true
   variadic: true
   hasDefaultAvail: false
 
@@ -13,14 +12,14 @@ string(1) "x"
   variadic: false
   hasDefaultAvail: false
 string(1) "v"
-  optional: false
+  optional: true
   variadic: true
   hasDefaultAvail: false
 
 * reflect_meth: C::variadic_only
 bool(true)
 string(1) "v"
-  optional: false
+  optional: true
   variadic: true
   hasDefaultAvail: false
 
@@ -31,18 +30,18 @@ string(1) "x"
   variadic: false
   hasDefaultAvail: false
 string(1) "v"
-  optional: false
+  optional: true
   variadic: true
   hasDefaultAvail: false
 
 * reflect func (direct construction)
 string(1) "v"
-  optional: false
+  optional: true
   variadic: true
   hasDefaultAvail: false
 
 * reflect meth (direct construction)
 string(1) "v"
-  optional: false
+  optional: true
   variadic: true
   hasDefaultAvail: false

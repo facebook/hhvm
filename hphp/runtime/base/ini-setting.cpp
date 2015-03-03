@@ -31,6 +31,8 @@
 
 #include "hphp/util/lock.h"
 
+#include <glob.h>
+
 #define __STDC_LIMIT_MACROS
 #include <cstdint>
 #include <boost/range/join.hpp>
@@ -1004,6 +1006,30 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
   }
   return r;
+}
+
+void add_default_config_files_globbed(
+  const char *default_config_file,
+  std::function<void (const char *filename)> cb
+) {
+  glob_t globbuf;
+  memset(&globbuf, 0, sizeof(glob_t));
+  int flags = 0;  // Use default glob semantics
+  int nret = glob(default_config_file, flags, nullptr, &globbuf);
+  if (nret == GLOB_NOMATCH ||
+      globbuf.gl_pathc == 0 ||
+      globbuf.gl_pathv == 0 ||
+      nret != 0) {
+    globfree(&globbuf);
+    return;
+  }
+
+  for (int n = 0; n < (int)globbuf.gl_pathc; n++) {
+    if (access(globbuf.gl_pathv[n], R_OK) != -1) {
+      cb(globbuf.gl_pathv[n]);
+    }
+  }
+  globfree(&globbuf);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

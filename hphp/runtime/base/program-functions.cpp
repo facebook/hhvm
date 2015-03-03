@@ -1339,16 +1339,12 @@ static int execute_program_impl(int argc, char** argv) {
         return -1;
       }
       if (po.config.empty() && !vm.count("no-config")) {
-        auto default_config_file = "/etc/hhvm/php.ini";
-        if (access(default_config_file, R_OK) != -1) {
-          Logger::Verbose("Using default config file: %s", default_config_file);
-          po.config.push_back(default_config_file);
-        }
-        default_config_file = "/etc/hhvm/config.hdf";
-        if (access(default_config_file, R_OK) != -1) {
-          Logger::Verbose("Using default config file: %s", default_config_file);
-          po.config.push_back(default_config_file);
-        }
+        auto file_callback = [&po] (const char *filename) {
+          Logger::Verbose("Using default config file: %s", filename);
+          po.config.push_back(filename);
+        };
+        add_default_config_files_globbed("/etc/hhvm/php*.ini", file_callback);
+        add_default_config_files_globbed("/etc/hhvm/config*.hdf", file_callback);
       }
 // When we upgrade boost, we can remove this and also get rid of the parent
 // try statement and move opts back into the original try block

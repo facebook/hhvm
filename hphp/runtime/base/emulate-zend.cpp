@@ -14,12 +14,13 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/emulate-zend.h"
+#include "hphp/runtime/base/ini-setting.h"
 
-#include <stdlib.h>
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <assert.h>
 
 #include <vector>
 #include <string>
@@ -229,16 +230,12 @@ int emulate_zend(int argc, char** argv) {
 
     // If the -c option is specified without a -n, php behavior is to
     // load the default ini/hdf
-    auto default_config_file = "/etc/hhvm/php.ini";
-    if (access(default_config_file, R_OK) != -1) {
+    auto cb = [&newargv] (const char *filename) {
       newargv.push_back("-c");
-      newargv.push_back(default_config_file);
-    }
-    default_config_file = "/etc/hhvm/config.hdf";
-    if (access(default_config_file, R_OK) != -1) {
-      newargv.push_back("-c");
-      newargv.push_back(default_config_file);
-    }
+      newargv.push_back(filename);
+    };
+    add_default_config_files_globbed("/etc/hhvm/php*.ini", cb);
+    add_default_config_files_globbed("/etc/hhvm/config*.hdf", cb);
   }
 
   if (cnt < argc && strcmp(argv[cnt], "--") == 0) cnt++;

@@ -1269,15 +1269,18 @@ Vreg getDataPtrEnregistered(Vout& v, Vptr dataSrc) {
 template<class Loc1, class Loc2, class JmpFn>
 void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
                                  Vreg sf, JmpFn doJcc) {
-  assert(!(type <= Type::Cls));
+  // Note: if you add new supported type tests, you should update
+  // negativeCheckType() to indicate whether it is precise or not.
+  always_assert(!(type <= Type::Cls));
+  always_assert(!type.isConst() || type <= Type::Null);
   auto& v = vmain();
   ConditionCode cc;
   if (type <= Type::StaticStr) {
     emitCmpTVType(v, sf, KindOfStaticString, typeSrc);
     cc = CC_E;
   } else if (type <= Type::Str) {
-    assert(type != Type::CountedStr &&
-           "We don't support guarding on CountedStr");
+    always_assert(type != Type::CountedStr &&
+                  "We don't support guarding on CountedStr");
     emitTestTVType(v, sf, KindOfStringBit, typeSrc);
     cc = CC_NZ;
   } else if (type == Type::Null) {
@@ -1297,6 +1300,7 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     return;
   } else {
     always_assert(type.isKnownDataType());
+    always_assert(!(type < Type::BoxedInitCell));
     DataType dataType = type.toDataType();
     assert(dataType == KindOfRef ||
            (dataType >= KindOfUninit && dataType <= KindOfResource));
@@ -1331,6 +1335,7 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
     doJcc(CC_E, sf);
   } else {
     assert(type < Type::Arr && type.arrSpec() && type.arrSpec().kind());
+    assert(type.arrSpec().type() == nullptr);
 
     auto arrSpec = type.arrSpec();
     auto reg = getDataPtrEnregistered(v, dataSrc);
@@ -3962,10 +3967,12 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const rType = srcLoc(inst, 0).reg(1);
   auto& v = vmain();
   auto const sf = v.makeReg();
-  auto doJcc = [&](ConditionCode cc, Vreg sfTaken) {
+
+  auto doJcc = [&] (ConditionCode cc, Vreg sfTaken) {
     emitFwdJcc(v, ccNegate(cc), sfTaken, inst->taken());
   };
-  auto doMov = [&]() {
+
+  auto doMov = [&] () {
     auto const valDst = dstLoc(inst, 0).reg(0);
     auto const typeDst = dstLoc(inst, 0).reg(1);
     if (dst->isA(Type::Bool) && !src->isA(Type::Bool)) {
@@ -3973,68 +3980,85 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     } else {
       v << copy{rData, valDst};
     }
-    if (typeDst != InvalidReg) {
-      if (rType != InvalidReg) v << copy{rType, typeDst};
-      else v << ldimmq{src->type().toDataType(), typeDst};
+    if (typeDst == InvalidReg) return;
+    if (rType != InvalidReg) {
+      v << copy{rType, typeDst};
+    } else {
+      v << ldimmq{src->type().toDataType(), typeDst};
     }
   };
 
-  Type typeParam = inst->typeParam();
-  // CheckTypes that are known to succeed or fail may be kept around
-  // by the simplifier in case the guard can be relaxed.
+  // Note: if you make changes to the behavior here you may need to update
+  // negativeCheckType().
+  auto const typeParam = inst->typeParam();
+  auto const srcType = src->type();
+
   if (src->isA(typeParam)) {
-    // src is the target type or better. do nothing.
+    // src is the target type or better.  Just define our dst.
     doMov();
     return;
-  } else if (!src->type().maybe(typeParam)) {
-    // src is definitely not the target type. always jump.
+  }
+  if (!srcType.maybe(typeParam)) {
+    // src is definitely not the target type.  Always jump.
     v << jmp{label(inst->taken())};
     return;
   }
 
   if (rType != InvalidReg) {
     emitTypeTest(typeParam, rType, rData, sf, doJcc);
-  } else {
-    Type srcType = src->type();
-    if (srcType <= Type::BoxedCell && typeParam <= Type::BoxedCell) {
-      // Nothing to do here, since we check the inner type at the uses
-    } else if (typeParam.isSpecialized()) {
-      // We're just checking the array kind or object class of a value with a
-      // mostly-known type.
-      emitSpecializedTypeTest(typeParam, rData, sf, doJcc);
-    } else if (typeParam <= Type::Uncounted &&
-               ((srcType <= Type::Str && typeParam.maybe(Type::StaticStr)) ||
-                (srcType <= Type::Arr && typeParam.maybe(Type::StaticArr)))) {
-      // We carry Str and Arr operands around without a type register,
-      // even though they're union types.  The static and non-static
-      // subtypes are distinguised by the refcount field.
-      v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
-      doJcc(CC_L, sf);
-    } else {
-      // We should only get here if this CheckType should've been simplified
-      // away but wasn't for some reason, so do a simple version of what it
-      // would've. Widen inner types first since CheckType ignores them.
-      if (srcType.maybe(Type::BoxedCell)) srcType |= Type::BoxedCell;
-      if (typeParam.maybe(Type::BoxedCell)) typeParam |= Type::BoxedCell;
-
-      if (srcType <= typeParam) {
-        // This will always succeed. Do nothing.
-      } else if (!srcType.maybe(typeParam)) {
-        // This will always fail. Emit an unconditional jmp.
-        v << jmp{label(inst->taken())};
-        return;
-      } else {
-        always_assert_log(
-          false,
-          [&] {
-            return folly::format("Bad src: {} and dst: {} types in '{}'",
-                                 srcType, typeParam, *inst).str();
-          });
-      }
-    }
+    doMov();
+    return;
   }
 
-  doMov();
+  if (srcType <= Type::BoxedCell && typeParam <= Type::BoxedCell) {
+    always_assert(!(typeParam < Type::BoxedInitCell));
+    doMov();
+    return;
+  }
+
+  /*
+   * See if we're just checking the array kind or object class of a value
+   * with a mostly-known type.
+   *
+   * Important: we don't support typeParam being something like
+   * StaticArr=kPackedKind unless the srcType also already knows its
+   * staticness.  We do allow things like CheckType<Arr=Packed> t1:StaticArr,
+   * though.  This is why we have to check that the unspecialized type is at
+   * least as big as the srcType.
+   */
+  if (typeParam.isSpecialized() && typeParam.unspecialize() >= srcType) {
+    emitSpecializedTypeTest(typeParam, rData, sf, doJcc);
+    doMov();
+    return;
+  }
+
+  /*
+   * Since not all of our unions carry a type register, there are some
+   * situations with strings and arrays that are neither constantly-foldable
+   * nor in the emitTypeTest code path.
+   *
+   * We currently actually check their static bit here.  Note (importantly)
+   * that this is why toDataType can't return KindOfStaticString for
+   * Type::StaticStr---this code will let an apc string through.  Also note
+   * that CheckType<Uncounted> t1:{Null|Str} doesn't get this treatment
+   * currently---in the emitTypeTest path above it will only check the type
+   * register.
+   */
+  if (!typeParam.isSpecialized() &&
+      typeParam <= Type::Uncounted &&
+      srcType.subtypeOfAny(Type::Str, Type::Arr) &&
+      srcType.maybe(typeParam)) {
+    assert(srcType.maybe(Type::Static));
+    v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
+    doJcc(CC_L, sf);
+    doMov();
+    return;
+  }
+
+  always_assert_flog(
+    false,
+    "Bad src: {} and dst: {} types in '{}'", srcType, typeParam, *inst
+  );
 }
 
 void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {

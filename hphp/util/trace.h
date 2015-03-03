@@ -117,6 +117,7 @@ namespace Trace {
       TM(hhir_store)    \
       TM(hhir_alias)    \
       TM(hhir_load)     \
+      TM(hhir_refineTmps) \
       TM(llvm)          \
       TM(llvm_count)    \
       TM(hhir_refcount) \

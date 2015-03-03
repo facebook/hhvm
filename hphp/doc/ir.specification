@@ -191,8 +191,16 @@ about to be loaded, using a separate CheckRefInner instruction.
 
 | CheckType<T>, DRefineS(0), S(Gen), B|P
 
-  Check that the type of the src S0 is T, and if so copy it to D. If S0 is not
-  type T, branch to block B.
+  Check that the type of the src S0 is T, and if so copy it to D, and
+  fallthrough. If S0 cannot be proven to be T, branch to block B. Note that
+  this means S0 still /may/ be a subtype of T in block B in some circumstances.
+
+  Specifically, subtypes of Type::Static may not be checked precisely,
+  depending on the type of the source.  This means the instruction may take the
+  branch in some circumstances even when S0 is a subtype of T, if T has a
+  non-empty intersection with Type::Static.
+
+  Also note that many types are not supported as the typeParam right now.
 
 | CheckNullptr, ND, S(CountedStr,Nullptr), B|CRc
 

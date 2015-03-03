@@ -665,6 +665,20 @@ Type ldRefReturn(Type typeParam) {
   return Type::InitCell;
 }
 
+Type negativeCheckType(Type srcType, Type typeParam) {
+  if (srcType <= typeParam)      return Type::Bottom;
+  if (!srcType.maybe(typeParam)) return srcType;
+  // Checks relating to StaticStr and StaticArr are not, in general, precise.
+  // They may reject some Statics in some situations, where we only guard using
+  // the type tag and not by loading the count field.
+  auto tmp = srcType - typeParam;
+  if (typeParam.maybe(Type::Static)) {
+    if (tmp.maybe(Type::CountedStr)) tmp |= Type::Str;
+    if (tmp.maybe(Type::CountedArr)) tmp |= Type::Arr;
+  }
+  return tmp;
+}
+
 Type boxType(Type t) {
   // If t contains Uninit, replace it with InitNull.
   t = t.maybe(Type::Uninit) ? (t - Type::Uninit) | Type::InitNull : t;

@@ -238,7 +238,7 @@ void FastCGITransport::onHeadersComplete() {
 
   [&] { // do a check for mod_proxy_fcgi and remove the extra portions of
         // the string
-    if (!strncmp(m_scriptName.c_str(), "proxy:", sizeof("proxy:"))) {
+    if (!strncmp(m_scriptName.c_str(), "proxy:", sizeof("proxy:") - 1)) {
       folly::StringPiece newName {m_scriptName};
 
       // remove the proxy:type + :// from the start.

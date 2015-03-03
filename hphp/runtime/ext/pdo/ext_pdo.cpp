@@ -677,25 +677,24 @@ static bool pdo_stmt_describe_columns(sp_PDOStatement stmt) {
       return false;
     }
 
-    String &name = stmt->columns[col].toResource().getTyped<PDOColumn>()->name;
+    auto column = cast<PDOColumn>(stmt->columns[col]);
 
     /* if we are applying case conversions on column names, do so now */
     if (stmt->dbh->conn()->native_case != stmt->dbh->conn()->desired_case &&
         stmt->dbh->conn()->desired_case != PDO_CASE_NATURAL) {
       switch (stmt->dbh->conn()->desired_case) {
       case PDO_CASE_UPPER:
-        name = HHVM_FN(strtoupper)(name);
+        column->name = HHVM_FN(strtoupper)(column->name);
         break;
       case PDO_CASE_LOWER:
-        name = HHVM_FN(strtolower)(name);
+        column->name = HHVM_FN(strtolower)(column->name);
         break;
       default:;
       }
     }
 
-    if (stmt->bound_columns.exists(name)) {
-      PDOBoundParam *param =
-        stmt->bound_columns[name].toResource().getTyped<PDOBoundParam>();
+    if (stmt->bound_columns.exists(column->name)) {
+      auto param = cast<PDOBoundParam>(stmt->bound_columns[column->name]);
       param->paramno = col;
     }
   }
@@ -1039,7 +1038,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
       /* let's see if we have one cached.... */
       if (s_connections.count(shashkey)) {
         auto const conn = s_connections[shashkey];
-        data->m_dbh = newres<PDOResource>(conn);
+        data->m_dbh = makeSmartPtr<PDOResource>(conn);
         data->m_dbh->persistentRestore();
 
         /* is the connection still alive ? */
@@ -1055,13 +1054,13 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
         }
       }
 
-      if (data->m_dbh.get()) {
+      if (data->m_dbh) {
         call_factory = false;
       } else {
         /* need a brand new pdbh */
         data->m_dbh = driver->createResource(colon + 1, username,
                                              password, options);
-        if (data->m_dbh.get() == nullptr) {
+        if (!data->m_dbh) {
           throw_pdo_exception(uninit_null(), uninit_null(),
                               "unable to create a connection");
         }
@@ -1069,10 +1068,10 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
       }
     }
   }
-  if (!data->m_dbh.get()) {
+  if (!data->m_dbh) {
     data->m_dbh = driver->createResource(colon + 1, username,
                                          password, options);
-    if (data->m_dbh.get() == nullptr) {
+    if (!data->m_dbh) {
       throw_pdo_exception(uninit_null(), uninit_null(),
                           "unable to create a connection");
     }
@@ -1091,7 +1090,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
       HHVM_MN(PDO, setattribute)(this_, iter.first().toInt64(),
                                       iter.second());
     }
-  } else if (data->m_dbh.get()) {
+  } else if (data->m_dbh) {
     if (is_persistent) {
       assert(!shashkey.empty());
       s_connections[shashkey] = data->m_dbh->conn();
@@ -1496,7 +1495,6 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
        "failed to instantiate user supplied statement class");
     return init_null();
   }
-  // PDOStatementData *pdostmt = ret.getTyped<PDOStatementData>();
   PDOStatementData *pdostmt = Native::data<PDOStatementData>(ret.get());
 
   if (data->m_dbh->conn()->preparer(sql, &pdostmt->m_stmt, Array())) {
@@ -1605,7 +1603,7 @@ static Array HHVM_STATIC_METHOD(PDO, getAvailableDrivers) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static inline bool rewrite_name_to_position(sp_PDOStatement stmt,
-                                            PDOBoundParam *param) {
+                                            sp_PDOBoundParam param) {
   if (!stmt->bound_param_map.empty()) {
     /* rewriting :name to ? style.
      * We need to fixup the parameter numbers on the parameters.
@@ -1658,14 +1656,14 @@ static bool dispatch_param_event(sp_PDOStatement stmt,
     return true;
   }
   for (ArrayIter iter(stmt->bound_params); iter; ++iter) {
-    PDOBoundParam *param = iter.second().toResource().getTyped<PDOBoundParam>();
-    if (!stmt->paramHook(param, event_type)) {
+    auto param = cast<PDOBoundParam>(iter.second());
+    if (!stmt->paramHook(param.get(), event_type)) {
       return false;
     }
   }
   for (ArrayIter iter(stmt->bound_columns); iter; ++iter) {
-    PDOBoundParam *param = iter.second().toResource().getTyped<PDOBoundParam>();
-    if (!stmt->paramHook(param, event_type)) {
+    auto param = cast<PDOBoundParam>(iter.second());
+    if (!stmt->paramHook(param.get(), event_type)) {
       return false;
     }
   }
@@ -1679,8 +1677,9 @@ static void get_lazy_object(sp_PDOStatement stmt, Variant &ret) {
   ret = stmt->lazy_object_ref;
 }
 
-static bool really_register_bound_param(PDOBoundParam *param,
-                                        sp_PDOStatement stmt, bool is_param) {
+static bool really_register_bound_param(sp_PDOBoundParam param,
+                                        sp_PDOStatement stmt,
+                                        bool is_param) {
   Array &hash = is_param ? stmt->bound_params : stmt->bound_columns;
 
   if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR &&
@@ -1699,8 +1698,7 @@ static bool really_register_bound_param(PDOBoundParam *param,
   if (!is_param && !param->name.empty() && !stmt->columns.empty()) {
     /* try to map the name to the column */
     for (int i = 0; i < stmt->column_count; i++) {
-      if (stmt->columns[i].toResource().getTyped<PDOColumn>()->name ==
-          param->name) {
+      if (cast<PDOColumn>(stmt->columns[i])->name == param->name) {
         param->paramno = i;
         break;
       }
@@ -1728,7 +1726,7 @@ static bool really_register_bound_param(PDOBoundParam *param,
    * a reference to param, as it resides in transient storage only
    * at this time. */
   if (stmt->support(PDOStatement::MethodParamHook)) {
-    if (!stmt->paramHook(param, PDO_PARAM_EVT_NORMALIZE)) {
+    if (!stmt->paramHook(param.get(), PDO_PARAM_EVT_NORMALIZE)) {
       param->name.reset();
       return false;
     }
@@ -1743,14 +1741,14 @@ static bool really_register_bound_param(PDOBoundParam *param,
 
   /* allocate storage for the parameter, keyed by its "canonical" name */
   if (!param->name.empty()) {
-    hash.set(param->name, param);
+    hash.set(param->name, Variant(param));
   } else {
-    hash.set(param->paramno, param);
+    hash.set(param->paramno, Variant(param));
   }
 
   /* tell the driver we just created a parameter */
   if (stmt->support(PDOStatement::MethodParamHook)) {
-    if (!stmt->paramHook(param, PDO_PARAM_EVT_ALLOC)) {
+    if (!stmt->paramHook(param.get(), PDO_PARAM_EVT_ALLOC)) {
       /* undo storage allocation; the hash will free the parameter
        * name if required */
       if (!param->name.empty()) {
@@ -1770,7 +1768,7 @@ static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
   if (colno < 0 || colno >= stmt->column_count) {
     return;
   }
-  PDOColumn *col = stmt->columns[colno].toResource().getTyped<PDOColumn>();
+  auto col = cast<PDOColumn>(stmt->columns[colno]);
   int type = PDO_PARAM_TYPE(col->param_type);
   int new_type = type_override ? PDO_PARAM_TYPE(*type_override) : type;
 
@@ -1814,8 +1812,7 @@ static bool do_fetch_common(sp_PDOStatement stmt, PDOFetchOrientation ori,
   if (do_bind && !stmt->bound_columns.empty()) {
     /* update those bound column variables now */
     for (ArrayIter iter(stmt->bound_columns); iter; ++iter) {
-      PDOBoundParam *param =
-        iter.second().toResource().getTyped<PDOBoundParam>();
+      auto param = cast<PDOBoundParam>(iter.second());
       if (param->paramno >= 0) {
         param->parameter.setNull();
         /* set new value */
@@ -1954,9 +1951,9 @@ static bool do_fetch(sp_PDOStatement stmt,
       }
       if (!stmt->fetch.constructor.empty() &&
           (flags & PDO_FETCH_PROPS_LATE)) {
-        ret.asCObjRef().get()->o_invoke(stmt->fetch.constructor,
-                                        stmt->fetch.ctor_args.toArray());
-        ret.asCObjRef().get()->clearNoDestruct();
+        ret.asCObjRef()->o_invoke(stmt->fetch.constructor,
+                                  stmt->fetch.ctor_args.toArray());
+        ret.asCObjRef()->clearNoDestruct();
       }
     }
     break;
@@ -2008,7 +2005,7 @@ static bool do_fetch(sp_PDOStatement stmt,
   }
 
   for (int idx = 0; i < stmt->column_count; i++, idx++) {
-    String name = stmt->columns[i].toResource().getTyped<PDOColumn>()->name;
+    const String& name = cast<PDOColumn>(stmt->columns[i])->name;
     Variant val;
     fetch_value(stmt, val, i, NULL);
 
@@ -2153,7 +2150,7 @@ static int register_bound_param(const Variant& paramno, VRefParam param,
     return false;
   }
 
-  if (!really_register_bound_param(p.get(), stmt, is_param)) {
+  if (!really_register_bound_param(p, stmt, is_param)) {
     p->parameter.unset();
     return false;
   }
@@ -2451,7 +2448,7 @@ struct placeholder {
   struct placeholder *next;
 };
 
-int pdo_parse_params(PDOStatement *stmt, const String& in, String &out) {
+int pdo_parse_params(sp_PDOStatement stmt, const String& in, String &out) {
   Scanner s;
   const char *ptr;
   char *newbuffer;
@@ -2460,7 +2457,7 @@ int pdo_parse_params(PDOStatement *stmt, const String& in, String &out) {
   int ret = 0;
   int newbuffer_len;
   Array params;
-  PDOBoundParam *param;
+  SmartPtr<PDOBoundParam> param;
   int query_type = PDO_PLACEHOLDER_NONE;
   struct placeholder *placeholders = NULL, *placetail = NULL, *plc = NULL;
 
@@ -2580,7 +2577,7 @@ safe:
                              "parameter was not defined");
         goto clean_up;
       }
-      param = vparam.toResource().getTyped<PDOBoundParam>();
+      param = cast<PDOBoundParam>(vparam);
       if (stmt->dbh->conn()->support(PDOConnection::MethodQuoter)) {
         if (param->param_type == PDO_PARAM_LOB &&
             param->parameter.isResource()) {
@@ -2748,11 +2745,7 @@ const StaticString s_PDOStatement("PDOStatement");
 PDOStatementData::PDOStatementData() : m_rowIndex(-1) {
 }
 
-PDOStatementData::~PDOStatementData() {
-  if (m_stmt.get() != nullptr) {
-    m_stmt.reset();
-  }
-}
+PDOStatementData::~PDOStatementData() { }
 
 static Variant HHVM_METHOD(PDOStatement, execute,
                            const Variant& paramsV /* = null_array */) {
@@ -2761,7 +2754,7 @@ static Variant HHVM_METHOD(PDOStatement, execute,
 
   SYNC_VM_REGS_SCOPED();
 
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return init_null_variant;
   }
 
@@ -2789,7 +2782,7 @@ static Variant HHVM_METHOD(PDOStatement, execute,
         param->paramno = num_index;
       }
 
-      if (!really_register_bound_param(param.get(), data->m_stmt, true)) {
+      if (!really_register_bound_param(param, data->m_stmt, true)) {
         return false;
       }
     }
@@ -2799,7 +2792,7 @@ static Variant HHVM_METHOD(PDOStatement, execute,
   if (PDO_PLACEHOLDER_NONE == data->m_stmt->supports_placeholders) {
     /* handle the emulated parameter binding, m_stmt->active_query_string
        holds the query with binds expanded and quoted. */
-    ret = pdo_parse_params(data->m_stmt.get(), data->m_stmt->query_string,
+    ret = pdo_parse_params(data->m_stmt, data->m_stmt->query_string,
                            data->m_stmt->active_query_string);
     if (ret == 0) { /* no changes were made */
       data->m_stmt->active_query_string = data->m_stmt->query_string;
@@ -2846,7 +2839,7 @@ static Variant HHVM_METHOD(PDOStatement, fetch, int64_t how  = 0,
 
   SYNC_VM_REGS_SCOPED();
 
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -2868,7 +2861,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
                            const String& class_name /* = null_string */,
                            const Variant& ctor_args /* = null */) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -2917,7 +2910,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
 static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
                            int64_t column_numner /* = 0 */) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -2935,7 +2928,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
                            const Variant& class_name /* = null */,
                            const Variant& ctor_args /* = null */) {
   auto self = Native::data<PDOStatementData>(this_);
-  if (self->m_stmt.get() == nullptr) {
+  if (self->m_stmt == nullptr) {
     return false;
   }
 
@@ -3065,7 +3058,7 @@ static bool HHVM_METHOD(PDOStatement, bindvalue, const Variant& paramno,
                         const Variant& param,
                         int64_t type /* = q_PDO$$PARAM_STR */) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -3078,7 +3071,7 @@ static bool HHVM_METHOD(PDOStatement, bindparam, const Variant& paramno,
                         int64_t max_value_len /* = 0 */,
                         const Variant& driver_params /*= null */) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -3091,7 +3084,7 @@ static bool HHVM_METHOD(PDOStatement, bindcolumn, const Variant& paramno,
                         int64_t max_value_len /* = 0 */,
                         const Variant& driver_params /* = null */) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -3101,7 +3094,7 @@ static bool HHVM_METHOD(PDOStatement, bindcolumn, const Variant& paramno,
 
 static int64_t HHVM_METHOD(PDOStatement, rowcount) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return 0;
   }
 
@@ -3110,7 +3103,7 @@ static int64_t HHVM_METHOD(PDOStatement, rowcount) {
 
 static Variant HHVM_METHOD(PDOStatement, errorcode) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
   if (data->m_stmt->error_code[0] == '\0') {
@@ -3121,7 +3114,7 @@ static Variant HHVM_METHOD(PDOStatement, errorcode) {
 
 static Array HHVM_METHOD(PDOStatement, errorinfo) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return null_array;
   }
 
@@ -3146,7 +3139,7 @@ static Array HHVM_METHOD(PDOStatement, errorinfo) {
 static Variant HHVM_METHOD(PDOStatement, setattribute, int64_t attribute,
                            const Variant& value) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -3166,7 +3159,7 @@ static Variant HHVM_METHOD(PDOStatement, setattribute, int64_t attribute,
 
 static Variant HHVM_METHOD(PDOStatement, getattribute, int64_t attribute) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -3201,7 +3194,7 @@ static Variant HHVM_METHOD(PDOStatement, getattribute, int64_t attribute) {
 
 static int64_t HHVM_METHOD(PDOStatement, columncount) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return 0;
   }
 
@@ -3216,7 +3209,7 @@ const StaticString
 
 static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -3240,8 +3233,7 @@ static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
   }
 
   /* add stock items */
-  PDOColumn *col =
-    data->m_stmt->columns[column].toResource().getTyped<PDOColumn>();
+  auto col = cast<PDOColumn>(data->m_stmt->columns[column]);
   ret.set(s_name, col->name);
   ret.set(s_len, (int64_t)col->maxlen); /* FIXME: unsigned ? */
   ret.set(s_precision, (int64_t)col->precision);
@@ -3255,7 +3247,7 @@ static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
 static bool HHVM_METHOD(PDOStatement, setfetchmode,
                         int64_t mode, const Array& _argv /* = null_array */) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
   int argc = _argv.size() + 1;
@@ -3265,7 +3257,7 @@ static bool HHVM_METHOD(PDOStatement, setfetchmode,
 
 static bool HHVM_METHOD(PDOStatement, nextrowset) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -3294,7 +3286,7 @@ static bool HHVM_METHOD(PDOStatement, nextrowset) {
 
 static bool HHVM_METHOD(PDOStatement, closecursor) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -3322,7 +3314,7 @@ static bool HHVM_METHOD(PDOStatement, closecursor) {
 
 static Variant HHVM_METHOD(PDOStatement, debugdumpparams) {
   auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt.get() == nullptr) {
+  if (data->m_stmt == nullptr) {
     return false;
   }
 
@@ -3349,7 +3341,7 @@ static Variant HHVM_METHOD(PDOStatement, debugdumpparams) {
                 make_packed_array(iter.first().toInt64()));
     }
 
-    PDOBoundParam *param = iter.second().toResource().getTyped<PDOBoundParam>();
+    auto param = cast<PDOBoundParam>(iter.second());
     params.clear();
     params.append(param->paramno);
     params.append(param->name.size());

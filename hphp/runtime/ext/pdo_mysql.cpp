@@ -69,7 +69,7 @@ struct PDOMySqlConnection : PDOConnection {
   bool rollback() override;
   bool setAttribute(int64_t attr, const Variant& value) override;
   String lastId(const char *name) override;
-  bool fetchErr(PDOStatement *stmt, Array &info) override;
+  bool fetchErr(PDOStatement* stmt, Array &info) override;
   int getAttribute(int64_t attr, Variant &value) override;
   bool checkLiveness() override;
 
@@ -103,7 +103,7 @@ struct PDOMySqlResource : PDOResource {
 struct PDOMySqlStatement : PDOStatement {
   DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement);
 
-  PDOMySqlStatement(PDOMySqlResource* conn, MYSQL* server);
+  PDOMySqlStatement(SmartPtr<PDOMySqlResource>&& conn, MYSQL* server);
   virtual ~PDOMySqlStatement();
 
   bool create(const String& sql, const Array& options);
@@ -113,7 +113,7 @@ struct PDOMySqlStatement : PDOStatement {
   virtual bool fetcher(PDOFetchOrientation ori, long offset);
   virtual bool describer(int colno);
   virtual bool getColumn(int colno, Variant &value);
-  virtual bool paramHook(PDOBoundParam *param, PDOParamEvent event_type);
+  virtual bool paramHook(PDOBoundParam* param, PDOParamEvent event_type);
   virtual bool getColumnMeta(int64_t colno, Array &return_value);
   virtual bool nextRowset();
   virtual bool cursorCloser();
@@ -447,7 +447,7 @@ bool PDOMySqlConnection::closer() {
 }
 
 int PDOMySqlConnection::handleError(const char *file, int line,
-                                    PDOMySqlStatement *stmt) {
+                                    PDOMySqlStatement* stmt) {
   PDOErrorType *pdo_err;
   PDOMySqlError *einfo = &m_einfo;
 
@@ -514,9 +514,9 @@ int PDOMySqlConnection::handleError(const char *file, int line,
 
 bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                   const Variant& options) {
-  auto rsrc = newres<PDOMySqlResource>(
+  auto rsrc = makeSmartPtr<PDOMySqlResource>(
       std::dynamic_pointer_cast<PDOMySqlConnection>(shared_from_this()));
-  auto s = newres<PDOMySqlStatement>(rsrc, m_server);
+  auto s = makeSmartPtr<PDOMySqlStatement>(std::move(rsrc), m_server);
 
   *stmt = s;
 
@@ -837,7 +837,8 @@ static const char *type_to_name_native(int type) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PDOMySqlStatement::PDOMySqlStatement(PDOMySqlResource* conn, MYSQL* server)
+PDOMySqlStatement::PDOMySqlStatement(SmartPtr<PDOMySqlResource>&& conn,
+                                     MYSQL* server)
   : m_conn(conn->conn())
   , m_server(server)
   , m_result(nullptr)
@@ -855,7 +856,7 @@ PDOMySqlStatement::PDOMySqlStatement(PDOMySqlResource* conn, MYSQL* server)
   , m_params_given(0)
   , m_max_length(0)
 {
-  this->dbh = dynamic_cast<PDOResource*>(conn);
+  this->dbh = std::move(conn);
 }
 
 PDOMySqlStatement::~PDOMySqlStatement() {
@@ -915,7 +916,7 @@ bool PDOMySqlStatement::create(const String& sql, const Array& options) {
   supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 
   String nsql;
-  int ret = pdo_parse_params(this, sql, nsql);
+  int ret = pdo_parse_params(sp_PDOStatement(this), sql, nsql);
   if (ret == 1) {
     /* query was rewritten */
   } else if (ret == -1) {
@@ -1056,17 +1057,17 @@ bool PDOMySqlStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Resource(newres<PDOColumn>()));
+      columns.set(i, Variant(makeSmartPtr<PDOColumn>()));
     }
   }
 
   // fetch all on demand, this seems easiest if we've been here before bail out
-  PDOColumn *col = columns[0].toResource().getTyped<PDOColumn>();
+  auto col = cast<PDOColumn>(columns[0]);
   if (!col->name.empty()) {
     return true;
   }
   for (int i = 0; i < column_count; i++) {
-    col = columns[i].toResource().getTyped<PDOColumn>();
+    col = cast<PDOColumn>(columns[i]);
 
     if (m_conn->fetch_table_names()) {
       col->name = String(m_fields[i].table) + "." +
@@ -1121,7 +1122,7 @@ bool PDOMySqlStatement::getColumn(int colno, Variant &value) {
   return true;
 }
 
-bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
+bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
                                   PDOParamEvent event_type) {
   MYSQL_BIND *b;
   if (m_stmt && param->is_param) {
@@ -1330,8 +1331,8 @@ bool PDOMySqlStatement::cursorCloser() {
 
 PDOMySql::PDOMySql() : PDODriver("mysql") {}
 
-PDOResource* PDOMySql::createResourceImpl() {
-  return newres<PDOMySqlResource>(std::make_shared<PDOMySqlConnection>());
+SmartPtr<PDOResource> PDOMySql::createResourceImpl() {
+  return makeSmartPtr<PDOMySqlResource>(std::make_shared<PDOMySqlConnection>());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

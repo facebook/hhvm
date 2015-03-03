@@ -136,8 +136,15 @@ typedef struct _zend_fcall_info_cache {
 
 #ifdef HHVM
 #define ZEND_GET_MODULE(module_name) \
+  static HPHP::ExtensionBuildInfo s_##module_name##_extension_build_info = { \
+    HHVM_DSO_VERSION, \
+    HHVM_VERSION_BRANCH, \
+  }; \
   extern "C" HPHP::Extension * getModule() { \
     return &module_name##_module_entry.name; \
+  } \
+  extern "C" HPHP::ExtensionBuildInfo * getModuleBuildInfo() { \
+    return &s_##module_name##_extension_build_info; \
   }
 #else
 #define ZEND_GET_MODULE(name) \

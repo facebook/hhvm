@@ -93,6 +93,7 @@ let rec string_of_hint_type x =
     "(" ^ (String.concat ", " elts) ^ ")"
   | HintCallback _ -> "callback"
   | HintShape _ -> failwith "I don't think shapes can appear here?"
+  | HintTypeConst _ -> failwith "I don't think type consts can appear here?"
 
 (*****************************************************************************)
 (* Visitor *)

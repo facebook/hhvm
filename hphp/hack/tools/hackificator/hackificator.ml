@@ -159,6 +159,10 @@ let visit ast =
         (* PHP allows $a{1}, Hack insists on $a[1] *)
         open_b.PI.transfo <- PI.Replace (PI.AddStr "[");
         close_b.PI.transfo <- PI.Replace (PI.AddStr "]");
+      (* we need to qualify Exit explicitly because OCaml's Pervasives also
+       * defines an Exit *)
+      | Ast_php.Exit (exit, None) ->
+        exit.PI.transfo <- PI.AddAfter (PI.AddStr "(0)");
       | _ -> ()
       );
       k x
@@ -364,7 +368,7 @@ let hackify ~upgrade header file =
          (* Remove a "<?hh // mode" mode comment *)
          let munge_mode spopt mode = begin
            let s = PI.str_of_info mode in
-           if s =$= "// decl" || s=$= "//decl" || s =$= "// strict" then begin
+           if s =$= "// decl" || s =$= "//decl" || s =$= "// strict" then begin
              mode.PI.transfo <- PI.Remove;
              (* Remove spaces only if we removed a mode *)
              (match spopt with

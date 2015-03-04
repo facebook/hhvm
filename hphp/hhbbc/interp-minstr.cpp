@@ -831,19 +831,18 @@ void miProp(MIS& env) {
   }
 
   /*
-   * Otherwise, intermediate props with define can promote a null,
-   * false, or "" to stdClass.  Those cases, and others, if it's not
-   * MIA_define, will set the base to a null value in tvScratch.
-   * The base may also legitimately be an object and our next base
-   * is in an object property.
+   * Otherwise, intermediate props with define can promote a null, false, or ""
+   * to stdClass.  Those cases, and others, if it's not MIA_define, will set
+   * the base to a null value in tvScratch.  The base may also legitimately be
+   * an object and our next base is in an object property.
    *
-   * If we know for sure we're promoting to stdClass, we can put the
-   * locType pointing at that.  Otherwise we conservatively treat
-   * all these cases as "possibly" being inside of an object
-   * property with "PostProp" with locType TTop.
+   * If we know for sure we're promoting to stdClass, we can put the locType
+   * pointing at that.  Otherwise we conservatively treat all these cases as
+   * "possibly" being inside of an object property with "PostProp" with locType
+   * TTop.
    */
   auto const newBaseLocTy =
-    propMustPromoteToObj(env.base.type)
+    isDefine && propMustPromoteToObj(env.base.type)
       ? objExact(env.index.builtin_class(s_stdClass.get()))
       : TTop;
 

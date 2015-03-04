@@ -126,7 +126,7 @@ void IntervalTimer::stop() {
 
 void IntervalTimer::run() {
   auto waitTime = m_initial;
-  while (true) {
+  do {
     std::unique_lock<std::mutex> lock(m_mutex);
     auto status = m_cv.wait_for(lock,
                                 std::chrono::duration<double>(waitTime),
@@ -135,7 +135,7 @@ void IntervalTimer::run() {
     m_signaled.store(true, std::memory_order_relaxed);
     m_data->setIntervalTimerFlag();
     waitTime = m_interval;
-  }
+  } while (waitTime != 0.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

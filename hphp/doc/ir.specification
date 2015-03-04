@@ -1295,12 +1295,14 @@ To string conversions:
 
   Loads the VarEnv slot off the ActRec pointed to by S0. If it is null, does
   nothing. If it is an ExtraArgs, deallocates the ExtraArgs structure.
-  Otherwise jumps to block B.
+  Otherwise jumps to block B. This instruction may not occur in an inlined
+  call.
 
 | GenericRetDecRefs, ND, S(FramePtr), NF
 
   Does decrefs of all the current function's locals, where S0 is a pointer to
-  the relevant activation record.
+  the relevant activation record. This instruction may not occur in an inlined
+  call.
 
 
 10. Stores
@@ -1841,7 +1843,8 @@ To string conversions:
 
 | ABCUnblock, ND, S(ABC), NF
 
-  Calls AsioBlockableChain::Unblock.
+  Calls AsioBlockableChain::Unblock. This instruction may not occur in an
+  inlined function.
 
 | LdWHState, D(Int), S(Obj), NF
 

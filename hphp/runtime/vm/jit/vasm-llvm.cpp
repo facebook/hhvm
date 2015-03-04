@@ -527,6 +527,10 @@ struct LLVMEmitter {
       m_function->addFnAttr(llvm::Attribute::OptimizeForSize);
     }
 
+    if (RuntimeOption::EvalJitLLVMMinSize) {
+      m_function->addFnAttr(llvm::Attribute::MinSize);
+    }
+
     m_irb.SetInsertPoint(
       llvm::BasicBlock::Create(m_context,
                                folly::to<std::string>('B', size_t(unit.entry)),
@@ -577,14 +581,18 @@ struct LLVMEmitter {
     m_int32FSPtr = llvm::Type::getInt32PtrTy(m_context, kFSAddressSpace);
     m_int64FSPtr = llvm::Type::getInt64PtrTy(m_context, kFSAddressSpace);
 
-    m_int8Zero  = m_irb.getInt8(0);
-    m_int8One   = m_irb.getInt8(1);
-    m_int16Zero = m_irb.getInt16(0);
-    m_int16One  = m_irb.getInt16(1);
-    m_int32Zero = m_irb.getInt32(0);
-    m_int32One  = m_irb.getInt32(1);
-    m_int64Zero = m_irb.getInt64(0);
-    m_int64One  = m_irb.getInt64(1);
+    m_int8Zero    = m_irb.getInt8(0);
+    m_int8NegOne  = m_irb.getInt8(-1);
+    m_int8One     = m_irb.getInt8(1);
+    m_int16Zero   = m_irb.getInt16(0);
+    m_int16NegOne = m_irb.getInt16(-1);
+    m_int16One    = m_irb.getInt16(1);
+    m_int32Zero   = m_irb.getInt32(0);
+    m_int32NegOne = m_irb.getInt32(-1);
+    m_int32One    = m_irb.getInt32(1);
+    m_int64Zero   = m_irb.getInt64(0);
+    m_int64NegOne = m_irb.getInt64(-1);
+    m_int64One    = m_irb.getInt64(1);
 
     m_int64Undef  = llvm::UndefValue::get(m_int64);
 
@@ -622,6 +630,10 @@ struct LLVMEmitter {
 
       if (RuntimeOption::EvalJitLLVMCondTail) {
         pseudoCL.push_back("-cond-tail-dup");
+      }
+
+      if (RuntimeOption::EvalJitLLVMPrintAfterAll ) {
+        pseudoCL.push_back("-print-after-all");
       }
 
       auto const numArgs = pseudoCL.size();
@@ -670,7 +682,7 @@ struct LLVMEmitter {
     targetOptions.MCOptions.SplitHotCold =
       RuntimeOption::EvalJitLLVMSplitHotCold;
 
-    auto module = m_module.release();
+    auto module = m_module.get();
     auto tcMM = m_tcMM.release();
     auto cpu = RuntimeOption::EvalJitCPU;
     if (cpu == "native") cpu = llvm::sys::getHostCPUName();
@@ -739,6 +751,8 @@ struct LLVMEmitter {
       ee->setProcessAllSections(true);
       ee->finalizeObject();
     }
+
+    m_module.release();
 
     if (RuntimeOption::EvalJitLLVMDiscard) return;
 
@@ -1245,12 +1259,16 @@ VASM_OPCODES
 
   // Commonly used constants. No const either.
   llvm::ConstantInt* m_int8Zero;
+  llvm::ConstantInt* m_int8NegOne;
   llvm::ConstantInt* m_int8One;
   llvm::ConstantInt* m_int16Zero;
+  llvm::ConstantInt* m_int16NegOne;
   llvm::ConstantInt* m_int16One;
   llvm::ConstantInt* m_int32Zero;
+  llvm::ConstantInt* m_int32NegOne;
   llvm::ConstantInt* m_int32One;
   llvm::ConstantInt* m_int64Zero;
+  llvm::ConstantInt* m_int64NegOne;
   llvm::ConstantInt* m_int64One;
 
   llvm::UndefValue*  m_int64Undef;
@@ -1962,25 +1980,29 @@ void LLVMEmitter::emit(const debugtrap& inst) {
 }
 
 void LLVMEmitter::emit(const decl& inst) {
-  defineValue(inst.d, m_irb.CreateSub(value(inst.s), m_int32One));
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int32NegOne, "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const declm& inst) {
   auto ptr = emitPtr(inst.m, 32);
   auto load = m_irb.CreateLoad(ptr);
-  auto sub = m_irb.CreateSub(load, m_int32One);
+  auto sub = m_irb.CreateAdd(load, m_int32NegOne, "",
+                             /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, sub);
   m_irb.CreateStore(sub, ptr);
 }
 
 void LLVMEmitter::emit(const decq& inst) {
-  defineValue(inst.d, m_irb.CreateSub(value(inst.s), m_int64One));
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int64NegOne, "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const decqm& inst) {
   auto ptr = emitPtr(inst.m, 64);
   auto oldVal = m_irb.CreateLoad(ptr);
-  auto newVal = m_irb.CreateSub(oldVal, m_int64One);
+  auto newVal = m_irb.CreateAdd(oldVal, m_int64NegOne, "",
+                                /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, newVal);
   m_irb.CreateStore(newVal, ptr);
 }
@@ -2034,31 +2056,36 @@ void LLVMEmitter::emit(const fallbackcc& inst) {
 void LLVMEmitter::emit(const incwm& inst) {
   auto ptr = emitPtr(inst.m, 16);
   auto oldVal = m_irb.CreateLoad(ptr);
-  auto newVal = m_irb.CreateAdd(oldVal, m_int16One);
+  auto newVal = m_irb.CreateAdd(oldVal, m_int16One, "",
+                                /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, newVal);
   m_irb.CreateStore(newVal, ptr);
 }
 
 void LLVMEmitter::emit(const incl& inst) {
-  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int32One));
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int32One, "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const inclm& inst) {
   auto ptr = emitPtr(inst.m, 32);
   auto load = m_irb.CreateLoad(ptr);
-  auto add = m_irb.CreateAdd(load, m_int32One);
+  auto add = m_irb.CreateAdd(load, m_int32One, "",
+                             /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, add);
   m_irb.CreateStore(add, ptr);
 }
 
 void LLVMEmitter::emit(const incq& inst) {
-  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int64One));
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int64One, "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const incqm& inst) {
   auto ptr = emitPtr(inst.m, 64);
   auto load = m_irb.CreateLoad(ptr);
-  auto add = m_irb.CreateAdd(load, m_int64One);
+  auto add = m_irb.CreateAdd(load, m_int64One, "",
+                             /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, add);
   m_irb.CreateStore(add, ptr);
 }

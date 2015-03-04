@@ -940,7 +940,6 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assert(check(vunit));
 
-    vasm.optimizeX64();
     if (useLLVM) {
       try {
         genCodeLLVM(vunit, vasm.areas(), sortBlocks(vunit));
@@ -948,9 +947,11 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
         FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
                e.what());
         mcg->setUseLLVM(false);
+        vasm.optimizeX64();
         vasm.finishX64(vasm_abi, state.asmInfo);
       }
     } else {
+      vasm.optimizeX64();
       vasm.finishX64(vasm_abi, state.asmInfo);
     }
   }

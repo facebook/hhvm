@@ -422,7 +422,8 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
-MySQLResult *php_mysql_extract_result(const Resource& result);
+SmartPtr<MySQLResult> php_mysql_extract_result(const Resource& result);
+SmartPtr<MySQLResult> php_mysql_extract_result(const Variant& result);
 
 
 enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };

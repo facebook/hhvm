@@ -85,8 +85,8 @@ std::shared_ptr<MySQL> MySQL::Get(const Variant& link_identifier) {
   if (link_identifier.isNull()) {
     return GetDefaultConn();
   }
-  auto const rsrc = link_identifier.toResource();
-  return rsrc.getTyped<MySQLResource>(true, true)->mysql();
+  auto res = dyn_cast_or_null<MySQLResource>(link_identifier);
+  return res ? res->mysql() : nullptr;
 }
 
 MYSQL* MySQL::GetConn(const Variant& link_identifier,
@@ -370,13 +370,26 @@ IMPLEMENT_RESOURCE_ALLOCATION(MySQLResource)
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-MySQLResult *php_mysql_extract_result(const Resource& result) {
-  auto const res = result.getTyped<MySQLResult>(true, true);
+namespace {
+
+template <typename T>
+SmartPtr<MySQLResult> php_mysql_extract_result_helper(const T& result) {
+  auto const res = dyn_cast_or_null<MySQLResult>(result);
   if (res == nullptr || res->isInvalid()) {
     raise_warning("supplied argument is not a valid MySQL result resource");
     return nullptr;
   }
   return res;
+}
+
+}
+
+SmartPtr<MySQLResult> php_mysql_extract_result(const Resource& result) {
+  return php_mysql_extract_result_helper(result);
+}
+
+SmartPtr<MySQLResult> php_mysql_extract_result(const Variant& result) {
+  return php_mysql_extract_result_helper(result);
 }
 
 const char *php_mysql_get_field_name(int field_type) {
@@ -427,8 +440,8 @@ const char *php_mysql_get_field_name(int field_type) {
 
 Variant php_mysql_field_info(const Resource& result, int field,
                              int entry_type) {
-  MySQLResult *res = php_mysql_extract_result(result);
-  if (res == NULL) return false;
+  auto res = php_mysql_extract_result(result);
+  if (!res) return false;
 
   if (!res->seekField(field)) return false;
 
@@ -634,7 +647,7 @@ Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
     MySQL::SetCurrentNumPersistent(MySQL::GetCurrentNumPersistent() + 1);
   }
   MySQL::SetDefaultConn(mySQL);
-  return Resource(newres<MySQLResource>(mySQL));
+  return Variant(makeSmartPtr<MySQLResource>(mySQL));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1180,10 +1193,8 @@ Variant MySQLStmt::result_metadata() {
     return false;
   }
 
-  Resource res(newres<MySQLResult>(mysql_result));
-
   Array args;
-  args.append(res);
+  args.append(Variant(makeSmartPtr<MySQLResult>(mysql_result)));
 
   auto cls = Unit::lookupClass(s_mysqli_result.get());
   Object obj = ObjectData::newInstance(cls);
@@ -1261,7 +1272,7 @@ static bool php_mysql_read_rows(MYSQL *mysql, const Variant& result) {
   unsigned char *cp;
   unsigned int fields = mysql->field_count;
   NET *net = &mysql->net;
-  MySQLResult *res = php_mysql_extract_result(result.toResource());
+  auto res = php_mysql_extract_result(result);
 
   if ((pkt_len = cli_safe_read(mysql)) == packet_error) {
     return false;
@@ -1310,7 +1321,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
     return true;
   }
   mysql->status = MYSQL_STATUS_READY;
-  Variant result = Resource(newres<MySQLResult>(nullptr, true));
+  Variant result(makeSmartPtr<MySQLResult>(nullptr, true));
   if (!php_mysql_read_rows(mysql, result)) {
     return false;
   }
@@ -1408,6 +1419,11 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
 
   // disable explicitly
   auto mySQL = MySQL::Get(link_id);
+  if (!mySQL) {
+    raise_warning("supplied argument is not a valid MySQL-Link resource");
+    return MySQLQueryReturn::FAIL;
+  }
+
   if (mySQL->m_multi_query && !mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_OFF)) {
     mySQL->m_multi_query = false;
   }
@@ -1498,8 +1514,7 @@ Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
     return true;
   }
 
-  MySQLResult *r = newres<MySQLResult>(mysql_result);
-  Resource ret(r);
+  auto r = makeSmartPtr<MySQLResult>(mysql_result);
 
   if (RuntimeOption::MaxSQLRowCount > 0 &&
       (s_mysql_data->totalRowCount += r->getRowCount())
@@ -1511,7 +1526,7 @@ Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
     s_mysql_data->totalRowCount = 0; // so no repetitive logging
   }
 
-  return ret;
+  return Variant(std::move(r));
 }
 
 Variant php_mysql_do_query_and_get_result(const String& query, const Variant& link_id,
@@ -1539,8 +1554,8 @@ Variant php_mysql_fetch_hash(const Resource& result, int result_type) {
     return false;
   }
 
-  MySQLResult *res = php_mysql_extract_result(result);
-  if (res == NULL) return false;
+  auto res = php_mysql_extract_result(result);
+  if (!res) return false;
 
   Array ret;
   if (res->isLocalized()) {

@@ -83,7 +83,7 @@ static Resource get_connection_resource(ObjectData* obj) {
   auto res = obj->o_realProp(
     s_connection,
     ObjectData::RealPropUnchecked,
-    s_mysqli.get()
+    s_mysqli
   );
   if (!res || !res->isResource()) {
     return Resource();
@@ -94,34 +94,31 @@ static Resource get_connection_resource(ObjectData* obj) {
 
 static std::shared_ptr<MySQL> get_connection(ObjectData* obj) {
   auto res = get_connection_resource(obj);
-  return res.getTyped<MySQLResource>(true, false)->mysql();
+  return isa<MySQLResource>(res) ? unsafe_cast<MySQLResource>(res)->mysql()
+                                 : nullptr;
 }
 
-static MySQLStmt *getStmt(ObjectData* obj) {
+static SmartPtr<MySQLStmt> getStmt(ObjectData* obj) {
   auto res = obj->o_realProp(
     s_stmt,
     ObjectData::RealPropUnchecked,
-    s_mysqli_stmt.get()
+    s_mysqli_stmt
   );
   assert(res->isResource());
-
-  auto stmt = res->asResRef().getTyped<MySQLStmt>(false, false);
-  assert(stmt);
-
-  return stmt;
+  return cast<MySQLStmt>(*res);
 }
 
-static MySQLResult *getResult(ObjectData* obj) {
+static SmartPtr<MySQLResult> getResult(ObjectData* obj) {
   auto res = obj->o_realProp(
     s_result,
     ObjectData::RealPropUnchecked,
-    s_mysqli_result.get()
+    s_mysqli_result
   );
   if (!res || !res->isResource()) {
     return nullptr;
   }
 
-  return res->toResource().getTyped<MySQLResult>(true, false);
+  return cast_or_null<MySQLResult>(*res);
 }
 
 Variant mysqli_stmt_param_count_get(ObjectData* this_);
@@ -206,7 +203,7 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
 // we have to check if the resource data is null before we try to get a
 // connection.
 #define VALIDATE_RESOURCE(res, state)                                     \
-  auto rdata = res.getTyped<MySQLResource>(true, false);                  \
+  auto rdata = cast_or_null<MySQLResource>(res);                          \
   std::shared_ptr<MySQL> conn = nullptr;                                  \
   if (rdata) {                                                            \
     conn = rdata->mysql();                                                \
@@ -276,7 +273,7 @@ static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store) {
 static void HHVM_METHOD(mysqli, hh_init) {
   auto data = std::make_shared<MySQL>(nullptr, 0, nullptr, nullptr, nullptr);
   auto rsrc = makeSmartPtr<MySQLResource>(std::move(data));
-  this_->o_set(s_connection, Variant(std::move(rsrc)), s_mysqli.get());
+  this_->o_set(s_connection, Variant(std::move(rsrc)), s_mysqli);
 }
 
 static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
@@ -296,7 +293,7 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
                   -1, -1);
   if (ret.toBoolean()) {
     // replace the connection incase we get a different one back (persistent)
-    this_->o_set(s_connection, ret, s_mysqli.get());
+    this_->o_set(s_connection, ret, s_mysqli);
     return true;
   } else {
     return false;
@@ -818,13 +815,13 @@ Variant mysqli_result_current_field_get(ObjectData* this_) {
 Variant mysqli_result_field_count_get(ObjectData* this_) {
   auto res = getResult(this_);
   VALIDATE_RESULT(res)
-  return HHVM_FN(mysql_num_fields)(res);
+  return HHVM_FN(mysql_num_fields)(Resource(std::move(res)));
 }
 
 Variant mysqli_result_lengths_get(ObjectData* this_) {
   auto res = getResult(this_);
   VALIDATE_RESULT(res)
-  auto lengths = HHVM_FN(mysql_fetch_lengths)(res);
+  auto lengths = HHVM_FN(mysql_fetch_lengths)(Resource(std::move(res)));
   if (!lengths.toBoolean()) {
     return init_null_variant;
   }
@@ -847,7 +844,7 @@ Variant mysqli_result_num_rows_get(ObjectData* this_) {
     return VarNR(0);
   }
 
-  return HHVM_FN(mysql_num_rows)(res);
+  return HHVM_FN(mysql_num_rows)(Resource(std::move(res)));
 }
 
 static Native::PropAccessor mysqli_result_Accessors[] = {
@@ -925,8 +922,12 @@ static void HHVM_METHOD(mysqli_stmt, free_result) {
 //}
 
 static void HHVM_METHOD(mysqli_stmt, hh_init, Object connection) {
-  auto data = makeSmartPtr<MySQLStmt>(get_connection(connection.get())->get());
-  this_->o_set(s_stmt, Variant(std::move(data)), s_mysqli_stmt.get());
+  auto conn = get_connection(connection.get());
+  if (conn) {
+    auto data = makeSmartPtr<MySQLStmt>(conn->get());
+    this_->o_set(s_stmt, Variant(std::move(data)), s_mysqli_stmt);
+  }
+  raise_warning("invalid object or resource mysqli");
 }
 
 static Variant HHVM_METHOD(mysqli_stmt, hh_store_result) {

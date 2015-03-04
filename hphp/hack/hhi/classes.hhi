@@ -88,7 +88,7 @@ final class AwaitAllWaitHandle extends BlockableWaitHandle<void> {
     ConstVector<WaitHandle<T>> $deps
   ): WaitHandle<void>;
   public static function setOnCreateCallback(
-    ?(function(AwaitAllWaitHandle<void>, Vector<mixed>): void) $callback
+    ?(function(AwaitAllWaitHandle, Vector<mixed>): void) $callback
   ): void {}
 }
 

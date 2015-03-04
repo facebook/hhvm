@@ -10,7 +10,7 @@
  */
 
 class Test {
-  public function test() {
+  public function f() {
     return <<<END
       public function testFunctionWithReturnTypeHavingAngleBrackets(): array<int> {
         return array();

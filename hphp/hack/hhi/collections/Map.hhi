@@ -80,6 +80,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function lazy(): KeyedIterable<Tk, Tv>;
   public function values(): Vector<Tv>;
   public function keys(): Vector<Tk>;
+  /* HH_FIXME[3007]: This is intentional; not a constructor */
   public function map<Tu>((function(Tv): Tu) $callback): Map<Tk, Tu>;
   public function mapWithKey<Tu>((function(Tk, Tv): Tu) $callback): Map<Tk, Tu>;
   public function filter((function(Tv): bool) $callback): Map<Tk, Tv>;

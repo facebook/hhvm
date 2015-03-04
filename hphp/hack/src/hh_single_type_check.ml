@@ -61,6 +61,7 @@ let builtins = "<?hh // decl\n"^
   "}\n"^
   "final class ImmVector<Tv> implements ConstVector<Tv> {}\n"^
   "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {"^
+  "  /* HH_FIXME[3007]: This is intentional; not a constructor */"^
   "  public function map<Tu>((function(Tv): Tu) $callback): Map<Tk, Tu>;"^
   "  public function contains(Tk $k): bool;"^
   "}\n"^

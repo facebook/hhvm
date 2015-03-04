@@ -1513,19 +1513,19 @@ static xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant dummy_getter(ObjectData*) {
+Variant dummy_getter(const Object&) {
   raise_notice("Cannot read property");
   return init_null();
 }
 
-void dummy_setter(ObjectData*, const Variant&) {
+void dummy_setter(const Object&, const Variant&) {
   raise_error("Cannot write property");
 }
 
 struct DOMPropertyAccessor {
   const char * name;
-  Variant (*getter)(ObjectData* this_);
-  void (*setter)(ObjectData* this_, const Variant&);
+  Variant (*getter)(const Object&);
+  void (*setter)(const Object&, const Variant&);
 };
 
 const StaticString s_object_value_omitted("(object value omitted)");
@@ -1597,7 +1597,7 @@ public:
     return false;
   }
 
-  Variant (*getter(const Variant& name))(ObjectData*) {
+  Variant (*getter(const Variant& name))(const Object&) {
     if (name.isString()) {
       auto dpa = DOMPropertyAccessor {
         name.toString().data(), nullptr, nullptr
@@ -1614,7 +1614,7 @@ public:
     return dummy_getter;
   }
 
-  void (*setter(const Variant& name))(ObjectData*, const Variant&) {
+  void (*setter(const Variant& name))(const Object&, const Variant&) {
     if (name.isString()) {
       auto dpa = DOMPropertyAccessor {
         name.toString().data(), nullptr, nullptr
@@ -1676,7 +1676,7 @@ Object DOMNode::newInstance(Class* subclass, Object doc, xmlNodePtr attrp) {
 }
 
 #define CHECK_NODE(nodep)                                                      \
-  DOMNode *domnode = toDOMNode(this_);                                         \
+  DOMNode *domnode = toDOMNode(obj.get());                                     \
   xmlNodePtr nodep = domnode->m_node;                                          \
   if (nodep == nullptr) {                                                      \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
@@ -1684,14 +1684,14 @@ Object DOMNode::newInstance(Class* subclass, Object doc, xmlNodePtr attrp) {
   }                                                                            \
 
 #define CHECK_WRITE_NODE(nodep)                                                \
-  DOMNode *domnode = toDOMNode(this_);                                         \
+  DOMNode *domnode = toDOMNode(obj.get());                                     \
   xmlNodePtr nodep = domnode->m_node;                                          \
   if (nodep == nullptr) {                                                      \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
     return;                                                                    \
   }                                                                            \
 
-static Variant domnode_nodename_read(ObjectData* this_) {
+static Variant domnode_nodename_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlNsPtr ns;
   char *str = nullptr;
@@ -1745,7 +1745,7 @@ static Variant domnode_nodename_read(ObjectData* this_) {
   return retval;
 }
 
-static Variant domnode_nodevalue_read(ObjectData* this_) {
+static Variant domnode_nodevalue_read(const Object& obj) {
   CHECK_NODE(nodep);
   char *str = nullptr;
   /* Access to Element node is implemented as a convience method */
@@ -1774,7 +1774,7 @@ static Variant domnode_nodevalue_read(ObjectData* this_) {
   }
 }
 
-static void domnode_nodevalue_write(ObjectData* this_, const Variant& value) {
+static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_NODE(nodep);
   /* Access to Element node is implemented as a convience method */
   switch (nodep->type) {
@@ -1799,7 +1799,7 @@ static void domnode_nodevalue_write(ObjectData* this_, const Variant& value) {
   }
 }
 
-static Variant domnode_nodetype_read(ObjectData* this_) {
+static Variant domnode_nodetype_read(const Object& obj) {
   CHECK_NODE(nodep);
   Variant retval;
   /* Specs dictate that they are both type XML_DOCUMENT_TYPE_NODE */
@@ -1811,20 +1811,20 @@ static Variant domnode_nodetype_read(ObjectData* this_) {
   return retval;
 }
 
-static Variant domnode_parentnode_read(ObjectData* this_) {
+static Variant domnode_parentnode_read(const Object& obj) {
   CHECK_NODE(nodep);
   return create_node_object(nodep->parent, domnode->doc());
 }
 
-static Variant domnode_childnodes_read(ObjectData* this_) {
+static Variant domnode_childnodes_read(const Object& obj) {
   CHECK_NODE(nodep);
   if (!dom_node_children_valid(nodep)) {
     return init_null();
   }
-  return DOMNodeList::newInstance(domnode->doc(), this_, XML_ELEMENT_NODE);
+  return DOMNodeList::newInstance(domnode->doc(), obj, XML_ELEMENT_NODE);
 }
 
-static Variant domnode_firstchild_read(ObjectData* this_) {
+static Variant domnode_firstchild_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlNode *first = nullptr;
   if (dom_node_children_valid(nodep)) {
@@ -1833,7 +1833,7 @@ static Variant domnode_firstchild_read(ObjectData* this_) {
   return create_node_object(first, domnode->doc());
 }
 
-static Variant domnode_lastchild_read(ObjectData* this_) {
+static Variant domnode_lastchild_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlNode *last = nullptr;
   if (dom_node_children_valid(nodep)) {
@@ -1842,26 +1842,26 @@ static Variant domnode_lastchild_read(ObjectData* this_) {
   return create_node_object(last, domnode->doc());
 }
 
-static Variant domnode_previoussibling_read(ObjectData* this_) {
+static Variant domnode_previoussibling_read(const Object& obj) {
   CHECK_NODE(nodep);
   return create_node_object(nodep->prev, domnode->doc());
 }
 
-static Variant domnode_nextsibling_read(ObjectData* this_) {
+static Variant domnode_nextsibling_read(const Object& obj) {
   CHECK_NODE(nodep);
   return create_node_object(nodep->next, domnode->doc());
 }
 
-static Variant domnode_attributes_read(ObjectData* this_) {
+static Variant domnode_attributes_read(const Object& obj) {
   CHECK_NODE(nodep);
   if (nodep->type == XML_ELEMENT_NODE) {
-    return DOMNamedNodeMap::newInstance(domnode->doc(), this_,
+    return DOMNamedNodeMap::newInstance(domnode->doc(), obj,
                                             XML_ATTRIBUTE_NODE);
   }
   return init_null();
 }
 
-static Variant domnode_ownerdocument_read(ObjectData* this_) {
+static Variant domnode_ownerdocument_read(const Object& obj) {
   CHECK_NODE(nodep);
   if (nodep->type == XML_DOCUMENT_NODE ||
       nodep->type == XML_HTML_DOCUMENT_NODE) {
@@ -1879,7 +1879,7 @@ static Variant domnode_ownerdocument_read(ObjectData* this_) {
   }
 }
 
-static Variant domnode_namespaceuri_read(ObjectData* this_) {
+static Variant domnode_namespaceuri_read(const Object& obj) {
   CHECK_NODE(nodep);
   const char *str = nullptr;
   switch (nodep->type) {
@@ -1899,7 +1899,7 @@ static Variant domnode_namespaceuri_read(ObjectData* this_) {
   return init_null();
 }
 
-static Variant domnode_prefix_read(ObjectData* this_) {
+static Variant domnode_prefix_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlNsPtr ns;
   char *str = nullptr;
@@ -1922,7 +1922,7 @@ static Variant domnode_prefix_read(ObjectData* this_) {
   return empty_string_variant();
 }
 
-static void domnode_prefix_write(ObjectData* this_, const Variant& value) {
+static void domnode_prefix_write(const Object& obj, const Variant& value) {
   String svalue;
   xmlNode *nsnode = nullptr;
   xmlNsPtr ns = nullptr, curns;
@@ -1982,7 +1982,7 @@ static void domnode_prefix_write(ObjectData* this_, const Variant& value) {
   }
 }
 
-static Variant domnode_localname_read(ObjectData* this_) {
+static Variant domnode_localname_read(const Object& obj) {
   CHECK_NODE(nodep);
   if (nodep->type == XML_ELEMENT_NODE ||
       nodep->type == XML_ATTRIBUTE_NODE ||
@@ -1992,7 +1992,7 @@ static Variant domnode_localname_read(ObjectData* this_) {
   return init_null();
 }
 
-static Variant domnode_baseuri_read(ObjectData* this_) {
+static Variant domnode_baseuri_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlChar *baseuri = xmlNodeGetBase(nodep->doc, nodep);
   if (baseuri) {
@@ -2003,7 +2003,7 @@ static Variant domnode_baseuri_read(ObjectData* this_) {
   return init_null();
 }
 
-static Variant domnode_textcontent_read(ObjectData* this_) {
+static Variant domnode_textcontent_read(const Object& obj) {
   CHECK_NODE(nodep);
   char *str = (char *)xmlNodeGetContent(nodep);
   if (str) {
@@ -2014,7 +2014,7 @@ static Variant domnode_textcontent_read(ObjectData* this_) {
   return empty_string_variant();
 }
 
-static void domnode_textcontent_write(ObjectData* this_, const Variant& value) {
+static void domnode_textcontent_write(const Object& obj, const Variant& value) {
   // do nothing
 }
 
@@ -2569,7 +2569,7 @@ Class* DOMAttr::c_Class = nullptr;
 const StaticString DOMAttr::c_ClassName("DOMAttr");
 
 #define CHECK_ATTR(attrp)                                                      \
-  DOMAttr *domattr = Native::data<DOMAttr>(this_);                             \
+  DOMAttr *domattr = Native::data<DOMAttr>(obj.get());                         \
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;                              \
   if (attrp == nullptr) {                                                      \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
@@ -2577,24 +2577,24 @@ const StaticString DOMAttr::c_ClassName("DOMAttr");
   }                                                                            \
 
 #define CHECK_WRITE_ATTR(attrp)                                                \
-  DOMAttr *domattr = Native::data<DOMAttr>(this_);                             \
+  DOMAttr *domattr = Native::data<DOMAttr>(obj.get());                         \
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;                              \
   if (attrp == nullptr) {                                                      \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
     return;                                                                    \
   }                                                                            \
 
-static Variant domattr_name_read(ObjectData* this_) {
+static Variant domattr_name_read(const Object& obj) {
   CHECK_ATTR(attrp);
   return String((char *)(attrp->name), CopyString);
 }
 
-static Variant domattr_specified_read(ObjectData* this_) {
+static Variant domattr_specified_read(const Object& obj) {
   /* T O D O */
   return true;
 }
 
-static Variant domattr_value_read(ObjectData* this_) {
+static Variant domattr_value_read(const Object& obj) {
   CHECK_ATTR(attrp);
   xmlChar *content = xmlNodeGetContent((xmlNodePtr) attrp);
   if (content) {
@@ -2605,7 +2605,7 @@ static Variant domattr_value_read(ObjectData* this_) {
   return empty_string_variant();
 }
 
-static void domattr_value_write(ObjectData* this_, const Variant& value) {
+static void domattr_value_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_ATTR(attrp);
   if (attrp->children) {
     node_list_unlink(attrp->children);
@@ -2615,12 +2615,12 @@ static void domattr_value_write(ObjectData* this_, const Variant& value) {
                        svalue.size() + 1);
 }
 
-static Variant domattr_ownerelement_read(ObjectData* this_) {
+static Variant domattr_ownerelement_read(const Object& obj) {
   CHECK_NODE(nodep);
   return create_node_object(nodep->parent, domnode->doc());
 }
 
-static Variant domattr_schematypeinfo_read(ObjectData* this_) {
+static Variant domattr_schematypeinfo_read(const Object& obj) {
   raise_warning("Not yet implemented");
   return init_null();
 }
@@ -2678,7 +2678,7 @@ bool HHVM_METHOD(DOMAttr, isId) {
 Class* DOMCharacterData::c_Class = nullptr;
 const StaticString DOMCharacterData::c_ClassName("DOMCharacterData");
 
-static Variant dom_characterdata_data_read(ObjectData* this_) {
+static Variant dom_characterdata_data_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlChar *content = xmlNodeGetContent(nodep);
   if (content) {
@@ -2689,14 +2689,13 @@ static Variant dom_characterdata_data_read(ObjectData* this_) {
   return empty_string_variant();
 }
 
-static void dom_characterdata_data_write(ObjectData* this_,
-                                         const Variant& value) {
+static void dom_characterdata_data_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_NODE(nodep);
   String svalue = value.toString();
   xmlNodeSetContentLen(nodep, (xmlChar*)svalue.data(), svalue.size() + 1);
 }
 
-static Variant dom_characterdata_length_read(ObjectData* this_) {
+static Variant dom_characterdata_length_read(const Object& obj) {
   CHECK_NODE(nodep);
   int64_t length = 0;
   xmlChar *content = xmlNodeGetContent(nodep);
@@ -2898,7 +2897,7 @@ void HHVM_METHOD(DOMComment, __construct,
 Class* DOMText::c_Class = nullptr;
 const StaticString DOMText::c_ClassName("DOMText");
 
-static Variant dom_text_whole_text_read(ObjectData* this_) {
+static Variant dom_text_whole_text_read(const Object& obj) {
   CHECK_NODE(node);
 
   /* Find starting text node */
@@ -3029,7 +3028,7 @@ Class* DOMDocument::c_Class = nullptr;
 const StaticString DOMDocument::c_ClassName("DOMDocument");
 
 #define CHECK_DOC(docp)                                                        \
-  DOMDocument *domdoc = Native::data<DOMDocument>(this_);                      \
+  DOMDocument *domdoc = Native::data<DOMDocument>(obj.get());                  \
   xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;                                  \
   if (docp == nullptr) {                                                       \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
@@ -3037,32 +3036,32 @@ const StaticString DOMDocument::c_ClassName("DOMDocument");
   }                                                                            \
 
 #define CHECK_WRITE_DOC(docp)                                                  \
-  DOMDocument *domdoc = Native::data<DOMDocument>(this_);                      \
+  DOMDocument *domdoc = Native::data<DOMDocument>(obj.get());                  \
   xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;                                  \
   if (docp == nullptr) {                                                       \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
     return;                                                                    \
   }                                                                            \
 
-static Variant dom_document_doctype_read(ObjectData* this_) {
+static Variant dom_document_doctype_read(const Object& obj) {
   CHECK_DOC(docp);
   auto const& dtd = (xmlNodePtr)xmlGetIntSubset(docp);
   if (dtd == nullptr) {
     return init_null();
   }
-  return create_node_object(dtd, this_);
+  return create_node_object(dtd, obj);
 }
 
-static Variant dom_document_implementation_read(ObjectData* this_) {
+static Variant dom_document_implementation_read(const Object& obj) {
   return ObjectData::newInstance(DOMImplementation::getClass());
 }
 
-static Variant dom_document_document_element_read(ObjectData* this_) {
+static Variant dom_document_document_element_read(const Object& obj) {
   CHECK_DOC(docp);
-  return create_node_object(xmlDocGetRootElement(docp), this_);
+  return create_node_object(xmlDocGetRootElement(docp), obj);
 }
 
-static Variant dom_document_encoding_read(ObjectData* this_) {
+static Variant dom_document_encoding_read(const Object& obj) {
   CHECK_DOC(docp);
   char *encoding = (char *) docp->encoding;
   if (encoding) {
@@ -3071,7 +3070,7 @@ static Variant dom_document_encoding_read(ObjectData* this_) {
   return init_null();
 }
 
-static void dom_document_encoding_write(ObjectData* this_,
+static void dom_document_encoding_write(const Object& obj,
                                         const Variant& value) {
   CHECK_WRITE_DOC(docp);
 
@@ -3090,12 +3089,12 @@ static void dom_document_encoding_write(ObjectData* this_,
   }
 }
 
-static Variant dom_document_standalone_read(ObjectData* this_) {
+static Variant dom_document_standalone_read(const Object& obj) {
   CHECK_DOC(docp);
   return (bool)docp->standalone;
 }
 
-static void dom_document_standalone_write(ObjectData* this_,
+static void dom_document_standalone_write(const Object& obj,
                                           const Variant& value) {
   CHECK_WRITE_DOC(docp);
   int64_t standalone = value.toInt64();
@@ -3108,7 +3107,7 @@ static void dom_document_standalone_write(ObjectData* this_,
   }
 }
 
-static Variant dom_document_version_read(ObjectData* this_) {
+static Variant dom_document_version_read(const Object& obj) {
   CHECK_DOC(docp);
   char *version = (char *) docp->version;
   if (version) {
@@ -3117,7 +3116,7 @@ static Variant dom_document_version_read(ObjectData* this_) {
   return init_null();
 }
 
-static void dom_document_version_write(ObjectData* this_,
+static void dom_document_version_write(const Object& obj,
                                        const Variant& value) {
   CHECK_WRITE_DOC(docp);
   if (docp->version != nullptr) {
@@ -3128,13 +3127,13 @@ static void dom_document_version_write(ObjectData* this_,
 }
 
 #define DOCPROP_READ_WRITE(member, name)                                       \
-  static Variant dom_document_ ##name## _read(ObjectData* this_) {       \
-    DOMDocument *domdoc = Native::data<DOMDocument>(this_);                    \
+  static Variant dom_document_ ##name## _read(const Object& obj) {             \
+    DOMDocument *domdoc = Native::data<DOMDocument>(obj.get());                \
     return domdoc->m_ ## member;                                               \
   }                                                                            \
-  static void dom_document_ ##name## _write(ObjectData* this_,           \
+  static void dom_document_ ##name## _write(const Object& obj,                 \
                                             const Variant& value) {            \
-    DOMDocument *domdoc = Native::data<DOMDocument>(this_);                    \
+    DOMDocument *domdoc = Native::data<DOMDocument>(obj.get());                \
     domdoc->m_ ## member = value.toBoolean();                                  \
   }                                                                            \
 
@@ -3146,7 +3145,7 @@ DOCPROP_READ_WRITE(preservewhitespace, preserve_whitespace   );
 DOCPROP_READ_WRITE(recover,            recover               );
 DOCPROP_READ_WRITE(substituteentities, substitue_entities    );
 
-static Variant dom_document_document_uri_read(ObjectData* this_) {
+static Variant dom_document_document_uri_read(const Object& obj) {
   CHECK_DOC(docp);
   char *url = (char *)docp->URL;
   if (url) {
@@ -3155,7 +3154,7 @@ static Variant dom_document_document_uri_read(ObjectData* this_) {
   return init_null();
 }
 
-static void dom_document_document_uri_write(ObjectData* this_,
+static void dom_document_document_uri_write(const Object& obj,
                                             const Variant& value) {
   CHECK_WRITE_DOC(docp);
   if (docp->URL != nullptr) {
@@ -3165,7 +3164,7 @@ static void dom_document_document_uri_write(ObjectData* this_,
   docp->URL = xmlStrdup((const xmlChar *)svalue.data());
 }
 
-static Variant dom_document_config_read(ObjectData* this_) {
+static Variant dom_document_config_read(const Object& obj) {
   return init_null();
 }
 
@@ -3901,33 +3900,33 @@ Class* DOMDocumentType::c_Class = nullptr;
 const StaticString DOMDocumentType::c_ClassName("DOMDocumentType");
 
 #define CHECK_DOCTYPE(dtdptr)                                                  \
-  auto *domdoctype = Native::data<DOMDocumentType>(this_);                     \
+  auto *domdoctype = Native::data<DOMDocumentType>(obj.get());                 \
   xmlDtdPtr dtdptr = (xmlDtdPtr)domdoctype->m_node;                            \
   if (dtdptr == nullptr) {                                                     \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
     return init_null();                                                        \
   }                                                                            \
 
-static Variant dom_documenttype_name_read(ObjectData* this_) {
+static Variant dom_documenttype_name_read(const Object& obj) {
   CHECK_DOCTYPE(dtdptr);
   return String((char *)(dtdptr->name), CopyString);
 }
 
-static Variant dom_documenttype_entities_read(ObjectData* this_) {
+static Variant dom_documenttype_entities_read(const Object& obj) {
   CHECK_DOCTYPE(doctypep);
-  return DOMNamedNodeMap::newInstance(domdoctype->doc(), this_,
+  return DOMNamedNodeMap::newInstance(domdoctype->doc(), obj,
                                       XML_ENTITY_NODE,
                                       (xmlHashTable*) doctypep->entities);
 }
 
-static Variant dom_documenttype_notations_read(ObjectData* this_) {
+static Variant dom_documenttype_notations_read(const Object& obj) {
   CHECK_DOCTYPE(doctypep);
-  return DOMNamedNodeMap::newInstance(domdoctype->doc(), this_,
+  return DOMNamedNodeMap::newInstance(domdoctype->doc(), obj,
                                       XML_NOTATION_NODE,
                                       (xmlHashTable*) doctypep->notations);
 }
 
-static Variant dom_documenttype_public_id_read(ObjectData* this_) {
+static Variant dom_documenttype_public_id_read(const Object& obj) {
   CHECK_DOCTYPE(dtdptr);
   if (dtdptr->ExternalID) {
     return String((char *)(dtdptr->ExternalID), CopyString);
@@ -3935,7 +3934,7 @@ static Variant dom_documenttype_public_id_read(ObjectData* this_) {
   return empty_string_variant();
 }
 
-static Variant dom_documenttype_system_id_read(ObjectData* this_) {
+static Variant dom_documenttype_system_id_read(const Object& obj) {
   CHECK_DOCTYPE(dtdptr);
   if (dtdptr->SystemID) {
     return String((char *)(dtdptr->SystemID), CopyString);
@@ -3943,7 +3942,7 @@ static Variant dom_documenttype_system_id_read(ObjectData* this_) {
   return empty_string_variant();
 }
 
-static Variant dom_documenttype_internal_subset_read(ObjectData* this_) {
+static Variant dom_documenttype_internal_subset_read(const Object& obj) {
   CHECK_DOCTYPE(dtdptr);
 
   xmlDtd *intsubset;
@@ -3996,7 +3995,7 @@ Array HHVM_METHOD(DOMDocumentType, __debuginfo) {
 Class* DOMElement::c_Class = nullptr;
 const StaticString DOMElement::c_ClassName("DOMElement");
 
-static Variant dom_element_tag_name_read(ObjectData* this_) {
+static Variant dom_element_tag_name_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlChar *qname;
   xmlNsPtr ns = nodep->ns;
@@ -4011,7 +4010,7 @@ static Variant dom_element_tag_name_read(ObjectData* this_) {
   return String((char *)nodep->name, CopyString);
 }
 
-static Variant dom_element_schema_type_info_read(ObjectData* this_) {
+static Variant dom_element_schema_type_info_read(const Object& obj) {
   return init_null();
 }
 
@@ -4631,14 +4630,14 @@ Class* DOMEntity::c_Class = nullptr;
 const StaticString DOMEntity::c_ClassName("DOMEntity");
 
 #define CHECK_ENTITY(nodep)                                                    \
-  DOMEntity *domentity = Native::data<DOMEntity>(this_);                       \
+  DOMEntity *domentity = Native::data<DOMEntity>(obj.get());                   \
   xmlEntity *nodep = (xmlEntity*)domentity->m_node;                            \
   if (nodep == nullptr) {                                                      \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
     return init_null();                                                        \
   }                                                                            \
 
-static Variant dom_entity_public_id_read(ObjectData* this_) {
+static Variant dom_entity_public_id_read(const Object& obj) {
   CHECK_ENTITY(nodep);
   if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
     return init_null();
@@ -4646,7 +4645,7 @@ static Variant dom_entity_public_id_read(ObjectData* this_) {
   return String((char *)(nodep->ExternalID), CopyString);
 }
 
-static Variant dom_entity_system_id_read(ObjectData* this_) {
+static Variant dom_entity_system_id_read(const Object& obj) {
   CHECK_ENTITY(nodep);
   if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
     return init_null();
@@ -4654,7 +4653,7 @@ static Variant dom_entity_system_id_read(ObjectData* this_) {
   return String((char *)(nodep->SystemID), CopyString);
 }
 
-static Variant dom_entity_notation_name_read(ObjectData* this_) {
+static Variant dom_entity_notation_name_read(const Object& obj) {
   CHECK_ENTITY(nodep);
   if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
     return init_null();
@@ -4665,28 +4664,27 @@ static Variant dom_entity_notation_name_read(ObjectData* this_) {
   return ret;
 }
 
-static Variant dom_entity_actual_encoding_read(ObjectData* this_) {
+static Variant dom_entity_actual_encoding_read(const Object& obj) {
   return init_null();
 }
 
-static void dom_entity_actual_encoding_write(ObjectData* this_,
-                                             const Variant& value) {
+static void dom_entity_actual_encoding_write(const Object& obj, const Variant& value) {
   // do nothing
 }
 
-static Variant dom_entity_encoding_read(ObjectData* this_) {
+static Variant dom_entity_encoding_read(const Object& obj) {
   return init_null();
 }
 
-static void dom_entity_encoding_write(ObjectData* this_, const Variant& value) {
+static void dom_entity_encoding_write(const Object& obj, const Variant& value) {
   // do nothing
 }
 
-static Variant dom_entity_version_read(ObjectData* this_) {
+static Variant dom_entity_version_read(const Object& obj) {
   return init_null();
 }
 
-static void dom_entity_version_write(ObjectData* this_, const Variant& value) {
+static void dom_entity_version_write(const Object& obj, const Variant& value) {
   // do nothing
 }
 
@@ -4745,14 +4743,14 @@ Class* DOMNotation::c_Class = nullptr;
 const StaticString DOMNotation::c_ClassName("DOMNotation");
 
 #define CHECK_NOTATION(nodep)                                                  \
-  DOMNotation *domnotation = Native::data<DOMNotation>(this_);                 \
+  DOMNotation *domnotation = Native::data<DOMNotation>(obj.get());             \
   xmlEntity *nodep = (xmlEntity*)domnotation->m_node;                          \
   if (nodep == nullptr) {                                                      \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
     return init_null();                                                        \
   }                                                                            \
 
-static Variant dom_notation_public_id_read(ObjectData* this_) {
+static Variant dom_notation_public_id_read(const Object& obj) {
   CHECK_NOTATION(nodep);
   if (nodep->ExternalID) {
     return String((char *)(nodep->ExternalID), CopyString);
@@ -4760,7 +4758,7 @@ static Variant dom_notation_public_id_read(ObjectData* this_) {
   return empty_string_variant();
 }
 
-static Variant dom_notation_system_id_read(ObjectData* this_) {
+static Variant dom_notation_system_id_read(const Object& obj) {
   CHECK_NOTATION(nodep);
   if (nodep->SystemID) {
     return String((char *)(nodep->SystemID), CopyString);
@@ -4799,12 +4797,12 @@ Class* DOMProcessingInstruction::c_Class = nullptr;
 const StaticString DOMProcessingInstruction::c_ClassName(
     "DOMProcessingInstruction");
 
-static Variant dom_processinginstruction_target_read(ObjectData* this_) {
+static Variant dom_processinginstruction_target_read(const Object& obj) {
   CHECK_NODE(nodep);
   return String((char *)(nodep->name), CopyString);
 }
 
-static Variant dom_processinginstruction_data_read(ObjectData* this_) {
+static Variant dom_processinginstruction_data_read(const Object& obj) {
   CHECK_NODE(nodep);
   xmlChar *content = xmlNodeGetContent(nodep);
   if (content) {
@@ -4815,7 +4813,7 @@ static Variant dom_processinginstruction_data_read(ObjectData* this_) {
   return empty_string_variant();
 }
 
-static void dom_processinginstruction_data_write(ObjectData* this_,
+static void dom_processinginstruction_data_write(const Object& obj,
                                                  const Variant& value) {
   CHECK_WRITE_NODE(nodep);
   String svalue = value.toString();
@@ -4870,8 +4868,8 @@ Array HHVM_METHOD(DOMProcessingInstruction, __debuginfo) {
 Class* DOMNamedNodeMap::c_Class = nullptr;
 const StaticString DOMNamedNodeMap::c_ClassName("DOMNamedNodeMap");
 
-static Variant dom_namednodemap_length_read(ObjectData* this_) {
-  DOMNamedNodeMap *objmap = Native::data<DOMNamedNodeMap>(this_);
+static Variant dom_namednodemap_length_read(const Object& obj) {
+  DOMNamedNodeMap *objmap = Native::data<DOMNamedNodeMap>(obj.get());
 
   int count = 0;
   if (objmap->m_nodetype == XML_NOTATION_NODE ||
@@ -5061,8 +5059,8 @@ Variant HHVM_METHOD(DOMNamedNodeMap, getIterator) {
 Class* DOMNodeList::c_Class = nullptr;
 const StaticString DOMNodeList::c_ClassName("DOMNodeList");
 
-static Variant dom_nodelist_length_read(ObjectData* this_) {
-  DOMNodeList *objmap = Native::data<DOMNodeList>(this_);
+static Variant dom_nodelist_length_read(const Object& obj) {
+  DOMNodeList *objmap = Native::data<DOMNodeList>(obj.get());
 
   int count = 0;
   if (objmap->m_ht) {
@@ -5351,9 +5349,9 @@ bool HHVM_METHOD(DOMImplementation, hasFeature,
 Class* DOMXPath::c_Class = nullptr;
 const StaticString DOMXPath::c_ClassName("DOMXPath");
 
-static Variant dom_xpath_document_read(ObjectData* this_) {
+static Variant dom_xpath_document_read(const Object& obj) {
   xmlDoc *docp = nullptr;
-  DOMXPath* xpath = Native::data<DOMXPath>(this_);
+  DOMXPath* xpath = Native::data<DOMXPath>(obj.get());
   xmlXPathContextPtr ctx = (xmlXPathContextPtr)xpath->m_node;
   if (ctx) {
     docp = (xmlDocPtr)ctx->doc;

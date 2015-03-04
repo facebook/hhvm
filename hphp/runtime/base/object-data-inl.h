@@ -31,7 +31,7 @@ inline ObjectData::ObjectData(Class* cls)
   : m_cls(cls)
   , m_attr_kind_count(HeaderKind::Object << 24)
 {
-  assert(!o_attribute && m_kind == HeaderKind::Object && !m_count);
+  assert(!o_attribute && kind() == HeaderKind::Object && !m_count);
   if (cls->needInitialization()) {
     // Needs to happen before we assign this object an o_id.
     cls->initialize();
@@ -46,7 +46,7 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags,
   , m_attr_kind_count(flags | kind << 24)
 {
   assert(o_attribute == flags && !m_count);
-  assert(m_kind == HeaderKind::Object || m_kind == HeaderKind::ResumableObj);
+  assert(this->kind() == HeaderKind::Object || this->kind() == HeaderKind::ResumableObj);
   if (cls->needInitialization()) {
     // Needs to happen before we assign this object an o_id.
     cls->initialize();
@@ -59,7 +59,7 @@ inline ObjectData::ObjectData(Class* cls, NoInit)
   : m_cls(cls)
   , m_attr_kind_count(HeaderKind::Object << 24)
 {
-  assert(!o_attribute && m_kind == HeaderKind::Object && !m_count);
+  assert(!o_attribute && kind() == HeaderKind::Object && !m_count);
   o_id = ++os_max_id;
 }
 

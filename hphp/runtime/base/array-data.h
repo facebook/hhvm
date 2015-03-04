@@ -82,7 +82,10 @@ protected:
 
 public:
   IMPLEMENT_COUNTABLE_METHODS
-  void setRefCount(RefCount n) { m_count = n; }
+  void setRefCount(RefCount n) {
+    m_count = n;
+    if (m_count > 1) m_kind = (ArrayKind) set_one_bit_ref(m_kind);
+  }
 
   /**
    * Create a new ArrayData with specified array element(s).
@@ -111,7 +114,8 @@ public:
    * return the array kind for fast typechecks
    */
   ArrayKind kind() const {
-    return m_kind;
+    //mask out bitref
+    return ArrayKind (m_kind & ~(1 << 7));
   }
 
   /**
@@ -145,13 +149,13 @@ public:
    */
   bool noCopyOnWrite() const;
 
-  bool isPacked() const { return m_kind == kPackedKind; }
-  bool isStruct() const { return m_kind == kStructKind; }
-  bool isMixed() const { return m_kind == kMixedKind; }
-  bool isApcArray() const { return m_kind == kApcKind; }
-  bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
-  bool isProxyArray() const { return m_kind == kProxyKind; }
-  bool isEmptyArray() const { return m_kind == kEmptyKind; }
+  bool isPacked() const { return kind() == kPackedKind; }
+  bool isStruct() const { return kind() == kStructKind; }
+  bool isMixed() const { return kind() == kMixedKind; }
+  bool isApcArray() const { return kind() == kApcKind; }
+  bool isGlobalsArray() const { return kind() == kGlobalsKind; }
+  bool isProxyArray() const { return kind() == kProxyKind; }
+  bool isEmptyArray() const { return kind() == kEmptyKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -437,7 +441,7 @@ protected:
         struct {
           UNUSED uint16_t m_unused1;
           UNUSED uint8_t m_unused0;
-          ArrayKind m_kind;
+          mutable ArrayKind m_kind;
         };
         // Packed arrays overlay their encoded capacity with the kind field.
         // kPackedKind is zero, and aliases the top byte of m_packedCapCode,

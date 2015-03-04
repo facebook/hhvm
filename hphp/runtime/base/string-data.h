@@ -472,6 +472,11 @@ private:
   void setStatic() const;
   void setUncounted() const;
 
+  HeaderKind kind() const {
+    //mask out bitref
+    return HeaderKind (static_cast<uint8_t>(m_kind) & ~(1 << 7));
+  }
+
 private:
   char* m_data;
 
@@ -481,7 +486,7 @@ private:
   union {
     struct {
       union {
-        struct { char m_pad[3]; HeaderKind m_kind; };
+        struct { char m_pad[3]; mutable HeaderKind m_kind; };
         uint32_t m_capCode;
       };
       mutable RefCount m_count;

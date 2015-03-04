@@ -80,7 +80,7 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
 
-  if (other->m_kind == kPackedKind) {
+  if (other->kind() == kPackedKind) {
     return MixedArray::MakeReserve(capacity);
   } else {
     return MixedArray::MakeReserveMixed(capacity);
@@ -231,7 +231,8 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     : mallocArray(cap, mask);
 
   ad->m_sizeAndPos      = other.m_sizeAndPos;
-  ad->m_kindAndCount    = other.m_packedCapCode; // copy kind; count=0
+  // copy kind, masking out the bitref; count=0
+  ad->m_kindAndCount    = other.m_packedCapCode & ~(1 << 7); 
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
   ad->m_tableMask       = mask;
   ad->m_nextKI          = other.m_nextKI;

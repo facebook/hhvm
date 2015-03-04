@@ -214,7 +214,7 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
     );
     assert(cap == packedCodeToCap(cap));
     ad->m_sizeAndPos = old->m_sizeAndPos;
-    ad->m_kindAndCount = cap | uint64_t{old->m_kind} << 24; // count=0
+    ad->m_kindAndCount = cap | uint64_t{old->kind()} << 24; // count=0
     assert(ad->isPacked());
     assert(ad->m_size == old->m_size);
     assert(packedCodeToCap(ad->m_packedCapCode) == cap);
@@ -259,7 +259,7 @@ ArrayData* PackedArray::GrowHelper(ArrayData* old) {
   if (UNLIKELY(ad == nullptr)) return nullptr;
   // ad->m_packedCapCode is already set correctly in MakeReserveSlow
   ad->m_sizeAndPos = old->m_sizeAndPos;
-  ad->m_kind = old->m_kind;
+  ad->m_kind = old->kind();
   assert(ad->isPacked());
   assert(ad->m_size == old->m_size);
   assert(packedCodeToCap(ad->m_packedCapCode) == cap);
@@ -331,7 +331,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   auto const size = adIn->m_size;
   auto const capCode = (adIn->m_packedCapCode & 0xFFFFFFul);
   ad->m_sizeAndPos = adIn->m_sizeAndPos;
-  ad->m_kindAndCount = uint64_t{adIn->m_kind} << 24 | capCode; // count=0
+  ad->m_kindAndCount = uint64_t{adIn->kind()} << 24 | capCode; // count=0
 
   auto const srcData = packedData(adIn);
   auto const stop    = srcData + size;

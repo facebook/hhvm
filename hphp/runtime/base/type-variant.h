@@ -1292,7 +1292,7 @@ inline Variant &concat_assign(Variant &v1, const String& s2) {
 
 // Defined here for include order reasons.
 inline RefData::~RefData() {
-  assert(m_kind == HeaderKind::Ref);
+  assert(kind() == HeaderKind::Ref);
   tvAsVariant(&m_tv).~Variant();
 }
 

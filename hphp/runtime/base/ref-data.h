@@ -109,11 +109,11 @@ struct RefData {
    * Note, despite the name, this can never return a non-Cell.
    */
   const Cell* tv() const {
-    assert(m_kind == HeaderKind::Ref);
+    assert(kind() == HeaderKind::Ref);
     return &m_tv;
   }
   Cell* tv() {
-    assert(m_kind == HeaderKind::Ref);
+    assert(kind() == HeaderKind::Ref);
     return &m_tv;
   }
 
@@ -123,7 +123,7 @@ struct RefData {
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
 
   void assertValid() const {
-    assert(m_kind == HeaderKind::Ref);
+    assert(kind() == HeaderKind::Ref);
   }
 
   int32_t getRealCount() const {
@@ -251,7 +251,13 @@ private:
     static_assert(sizeof(DataType) == 1, "required for m_cow/z packing");
   }
 
+  HeaderKind kind() const {
+    //mask out bitref
+    return HeaderKind (static_cast<uint8_t>(m_kind) & ~(1 << 7));
+  }
+
 private:
+  
   // count and kind overlap TypedValue.m_aux
   union {
     TypedValue m_tv;
@@ -260,7 +266,7 @@ private:
       DataType shadow_type;
       mutable uint8_t m_cow;
       mutable uint8_t m_z;
-      HeaderKind m_kind;
+      mutable HeaderKind m_kind;
       mutable RefCount m_count; // refcount field
     };
   };

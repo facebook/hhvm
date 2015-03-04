@@ -274,7 +274,8 @@ inline BCMarker makeMarker(HTS& env, Offset bcOff) {
   return BCMarker {
     SrcKey { curFunc(env), bcOff, resumed(env) },
     stackOff,
-    env.profTransID
+    env.profTransID,
+    env.irb->fp()
   };
 }
 

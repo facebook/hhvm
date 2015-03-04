@@ -102,7 +102,7 @@ class ResourceData {
   // ResourceData fields
   uint16_t m_size;
   UNUSED char m_pad;
-  UNUSED HeaderKind m_kind;
+  mutable HeaderKind m_kind;
   mutable RefCount m_count;
 
  protected:

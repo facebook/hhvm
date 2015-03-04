@@ -379,7 +379,8 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   );
   auto const data = shared->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->m_capAndCount = data->m_capCode; // count=0, kind=data->kind
+  // count=0, kind=data->kind with bitref masked out
+  sd->m_capAndCount = data->m_capCode & ~(1 << 7); 
   sd->m_lenAndHash = data->m_lenAndHash;
   sd->sharedPayload()->shared = shared;
   sd->enlist();

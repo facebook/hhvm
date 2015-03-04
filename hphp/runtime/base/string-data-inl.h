@@ -69,7 +69,10 @@ inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline void StringData::setRefCount(RefCount n) { m_count = n; }
+inline void StringData::setRefCount(RefCount n) {
+  m_count = n;
+  if (m_count > 1) m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind)));
+}
 inline bool StringData::isStatic() const {
   return m_count == StaticValue;
 }
@@ -121,8 +124,8 @@ inline char* StringData::mutableData() const {
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  assert(m_kind == HeaderKind::String);
-  return packedCodeToCap(m_capCode - (HeaderKind::String << 24));
+  assert(kind() == HeaderKind::String);
+  return packedCodeToCap(m_capCode - (kind() << 24));
 }
 
 inline size_t StringData::heapSize() const {

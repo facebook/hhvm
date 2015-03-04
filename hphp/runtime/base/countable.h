@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <cstddef>
 #include "hphp/util/assertions.h"
+#include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,6 +90,14 @@ inline bool check_refcount_ns_nz(int32_t count) {
   return check_refcount_ns(count - 1);
 }
 
+inline bool check_one_bit_ref(uint8_t kind) {
+  return (kind & (1 << 7)) > 0;
+}
+
+inline uint8_t set_one_bit_ref(uint8_t kind) {
+  return kind | (1 << 7);
+}
+
 /**
  * Ref-counted types have a m_count field at FAST_REFCOUNT_OFFSET
  * and define counting methods with these macros.
@@ -106,6 +115,7 @@ inline bool check_refcount_ns_nz(int32_t count) {
                                                                         \
   bool hasMultipleRefs() const {                                        \
     assert(check_refcount(m_count));                                    \
+    if (m_count > 1) assert(check_one_bit_ref(static_cast<uint8_t>(m_kind))); \
     return (uint32_t)m_count > 1;                                       \
   }                                                                     \
                                                                         \
@@ -118,6 +128,54 @@ inline bool check_refcount_ns_nz(int32_t count) {
     assert(!MemoryManager::sweeping());                                 \
     assert(check_refcount(m_count));                                    \
     if (isRefCounted()) { ++m_count; }                                  \
+    if (m_count > 1) {                                                  \
+      m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind))); \
+    }                                                                   \
+  }                                                                     \
+                                                                        \
+  RefCount decRefCount() const {                                        \
+    assert(!MemoryManager::sweeping());                                 \
+    assert(check_refcount_nz(m_count));                                 \
+    return isRefCounted() ? --m_count : m_count;                        \
+  }                                                                     \
+  ALWAYS_INLINE bool decReleaseCheck() {                                \
+    assert(!MemoryManager::sweeping());                                 \
+    assert(check_refcount_nz(m_count));                                 \
+    if (m_count == 1) return true;                                      \
+    if (m_count > 1) --m_count;                                         \
+    return false;                                                       \
+  }                                                                     \
+  ALWAYS_INLINE void decRefAndRelease() {                               \
+    if (decReleaseCheck()) release();                                   \
+  }
+
+#define IMPLEMENT_COUNTABLE_METHODS_ARRAY_NO_STATIC                     \
+  RefCount getCount() const {                                           \
+    assert(check_refcount(m_count));                                    \
+    return m_count;                                                     \
+  }                                                                     \
+                                                                        \
+  bool isRefCounted() const {                                           \
+    assert(check_refcount(m_count));                                    \
+    return m_count >= 0;                                                \
+  }                                                                     \
+                                                                        \
+  bool hasMultipleRefs() const {                                        \
+    assert(check_refcount(m_count));                                    \
+    if (m_count > 1) assert(check_one_bit_ref(m_kind));                 \
+    return (uint32_t)m_count > 1;                                       \
+  }                                                                     \
+                                                                        \
+  bool hasExactlyOneRef() const {                                       \
+    assert(check_refcount(m_count));                                    \
+    return (uint32_t)m_count == 1;                                      \
+  }                                                                     \
+                                                                        \
+  void incRefCount() const {                                            \
+    assert(!MemoryManager::sweeping());                                 \
+    assert(check_refcount(m_count));                                    \
+    if (isRefCounted()) { ++m_count; }                                  \
+    if (m_count > 1) m_kind = (ArrayKind) set_one_bit_ref(m_kind);      \
   }                                                                     \
                                                                         \
   RefCount decRefCount() const {                                        \
@@ -151,7 +209,7 @@ inline bool check_refcount_ns_nz(int32_t count) {
   bool isUncounted() const {                    \
     return m_count == UncountedValue;           \
   }                                             \
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLE_METHODS_ARRAY_NO_STATIC
 
 #define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC         \
   RefCount getCount() const {                           \

@@ -240,12 +240,14 @@ std::string Type::constValString() const {
 }
 
 std::string Type::toString() const {
-  // Try to find an exact match to a predefined type
-# define IRT(name, ...) if (*this == name) return #name;
-# define IRTP(name, ...) IRT(name)
-  IR_TYPES
-# undef IRT
-# undef IRTP
+#define IRTP(...)
+#define IRT(x, ...) if (*this == x) return #x;
+  IRT_PHP(IRT)
+  IRT_PHP_UNIONS(IRT)
+  IRT_RUNTIME
+  IRT_SPECIAL
+#undef IRT
+#undef IRTP
 
   if (maybe(Nullptr)) {
     return folly::to<std::string>(
@@ -257,6 +259,7 @@ std::string Type::toString() const {
   if (*this <= BoxedCell) {
     return folly::to<std::string>("Boxed", inner().toString());
   }
+
   if (*this <= PtrToGen) {
     std::string ret = "PtrTo";
     switch (ptrKind()) {

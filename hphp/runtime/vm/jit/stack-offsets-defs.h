@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_STACK_OFFSETS_INL_H_
-#define incl_HPHP_JIT_STACK_OFFSETS_INL_H_
+#ifndef incl_HPHP_JIT_STACK_OFFSETS_DEFS_H_
+#define incl_HPHP_JIT_STACK_OFFSETS_DEFS_H_
 
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
@@ -44,4 +44,4 @@ inline BCSPOffset toBCSPOffset(FPAbsOffset offsetFromFP, FPAbsOffset curSPTop) {
 
 } } // HPHP::jit
 
-#endif // incl_HPHP_JIT_STACK_OFFSETS_INL_H_
+#endif

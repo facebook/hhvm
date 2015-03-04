@@ -728,11 +728,11 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "3.3.5-dev"
+            "value": "3.3.5"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "3.3.5-dev"
+            "value": "3.3.5"
         },
         {
             "name": "HTML_ENTITIES",

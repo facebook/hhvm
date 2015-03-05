@@ -30,10 +30,6 @@ if (ENABLE_ZEND_COMPAT)
   list(APPEND HHVM_WHOLE_ARCHIVE_LIBRARIES hphp_ext_zend_compat)
 endif()
 
-if (ENABLE_THREAD_SAFE_SETLOCALE)
-  add_definitions("-DENABLE_THREAD_SAFE_SETLOCALE=1")
-endif()
-
 if (APPLE)
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS

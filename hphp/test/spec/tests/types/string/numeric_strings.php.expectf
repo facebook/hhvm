@@ -1,4 +1,4 @@
-string(%d) "%S"
+string(%d) "%s"
 bool(false)
 bool(false)
 bool(false)

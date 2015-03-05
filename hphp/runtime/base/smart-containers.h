@@ -132,6 +132,14 @@ unique_ptr<T> make_unique(Args&&... args) {
   );
 }
 
+template<class T, class... Args>
+std::shared_ptr<T> make_shared(Args&&... args) {
+  return std::allocate_shared<T>(
+    Allocator<T>(),
+    std::forward<Args>(args)...
+  );
+}
+
 #ifndef __APPLE__ // XXX: this affects codegen quality but not correctness
 static_assert(
   sizeof(unique_ptr<int>) == sizeof(std::unique_ptr<int>),

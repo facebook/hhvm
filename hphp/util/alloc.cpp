@@ -429,7 +429,7 @@ static void low_malloc_hugify(void* ptr) {
 }
 
 void* low_malloc_impl(size_t size) {
-  void* ptr = mallocx(size, MALLOCX_ARENA(low_arena));
+  void* ptr = mallocx(size, low_mallocx_flags());
   low_malloc_hugify((char*)ptr + size - 1);
   return ptr;
 }

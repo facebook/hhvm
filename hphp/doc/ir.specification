@@ -123,10 +123,6 @@ NaryDest
   one of the input variables. (For example, AddElem returns the array it took
   as an input.)
 
-CanCSE
-
-  The instruction is safe to elide through common subexpression elimination.
-
 CallsNative
 
   Indicates that the instruction will call a native helper.

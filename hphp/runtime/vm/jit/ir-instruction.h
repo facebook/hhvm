@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,147 +14,80 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_IRINSTRUCTION_H_
-#define incl_HPHP_VM_IRINSTRUCTION_H_
+#ifndef incl_HPHP_IR_INSTRUCTION_H_
+#define incl_HPHP_IR_INSTRUCTION_H_
 
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/type.h"
+
+#include <boost/intrusive/list.hpp>
+#include <folly/Optional.h>
+#include <folly/Range.h>
+
+#include <cstdint>
+#include <string>
 
 namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
-class SSATmp;
+struct Block;
+struct Edge;
+struct IRUnit;
+struct SSATmp;
+
+//////////////////////////////////////////////////////////////////////
 
 /*
- * IRInstructions must be arena-allocatable.
- * (Destructors are not called when they come from IRUnit.)
+ * An HHIR instruction.
+ *
+ * IRInstructions must be arena-allocatable.  (Destructors are not called when
+ * they come from IRUnit.)
  */
 struct IRInstruction {
   enum Id { kTransient = 0xffffffff };
 
+  /////////////////////////////////////////////////////////////////////////////
+
   /*
    * Create an IRInstruction for the opcode `op'.
    *
-   * IRInstruction creation is usually done through IRUnit or
-   * IRBuilder rather than directly.
+   * IRInstruction creation is usually done through IRUnit or IRBuilder rather
+   * than directly via the constructor.
    */
   explicit IRInstruction(Opcode op,
                          BCMarker marker,
                          Edge* edges = nullptr,
                          uint32_t numSrcs = 0,
-                         SSATmp** srcs = nullptr)
-    : m_typeParam(folly::none)
-    , m_op(op)
-    , m_numSrcs(numSrcs)
-    , m_numDsts(0)
-    , m_marker(marker)
-    , m_id(kTransient)
-    , m_srcs(srcs)
-    , m_dst(nullptr)
-    , m_block(nullptr)
-    , m_edges(edges)
-    , m_extra(nullptr)
-  {
-    if (op != DefConst) {
-      // DefConst is the only opcode that's allowed to not have a marker, since
-      // it's not part of the instruction stream.
-      assert(m_marker.valid());
-    }
-  }
-
-  IRInstruction(const IRInstruction&) = delete;
-  IRInstruction& operator=(const IRInstruction&) = delete;
+                         SSATmp** srcs = nullptr);
 
   /*
-   * Construct an IRInstruction as a deep copy of `inst', using
-   * arena to allocate memory for its srcs/dests.
+   * Construct an IRInstruction as a deep copy of `inst', using `arena' to
+   * allocate memory for its srcs/dsts.
    */
   explicit IRInstruction(Arena& arena, const IRInstruction* inst, Id id);
 
   /*
-   * Initialize the source list for this IRInstruction.  We must not
-   * have already had our sources initialized before this function is
-   * called.
+   * Stringify the instruction.
+   */
+  std::string toString() const;
+
+  IRInstruction(const IRInstruction&) = delete;
+  IRInstruction& operator=(const IRInstruction&) = delete;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Replacement.
+
+  /*
+   * Turn this instruction into the target instruction, without changing
+   * stable fields (id, current block, list fields).
    *
-   * Memory for `srcs' is owned outside of this class and must outlive
-   * it.
-   */
-  void initializeSrcs(uint32_t numSrcs, SSATmp** srcs) {
-    assert(!m_srcs && !m_numSrcs);
-    m_numSrcs = numSrcs;
-    m_srcs = srcs;
-  }
-
-  /*
-   * Return access to extra-data on this instruction, for the
-   * specified opcode type.
-   *
-   * Pre: op() == opc
-   */
-  template<Opcode opc>
-  const typename IRExtraDataType<opc>::type* extra() const {
-    assert(opc == op() && "ExtraData type error");
-    assert(m_extra != nullptr);
-    return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
-  }
-
-  template<Opcode opc>
-  typename IRExtraDataType<opc>::type* extra() {
-    assert(opc == op() && "ExtraData type error");
-    return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
-  }
-
-  /*
-   * Return access to extra-data of type T.  Requires that
-   * IRExtraDataType<opc>::type is T for this instruction's opcode.
-   *
-   * It's normally preferable to use the version of this function that
-   * takes the opcode instead of this one.  This is for writing code
-   * that is supposed to be able to handle multiple opcode types that
-   * share the same kind of extra data.
-   */
-  template<class T> const T* extra() const {
-    if (debug) assert_opcode_extra<T>(op());
-    return static_cast<const T*>(m_extra);
-  }
-
-  /*
-   * Returns whether or not this instruction has an extra data struct.
-   */
-  bool hasExtra() const;
-
-  /*
-   * Set the extra-data for this IRInstruction to the given pointer.
-   * Lifetime is must outlast this IRInstruction (and any of its
-   * clones).
-   */
-  void setExtra(IRExtraData* data) { assert(!m_extra); m_extra = data; }
-
-  /*
-   * Return the raw extradata pointer, for pretty-printing.
-   */
-  const IRExtraData* rawExtra() const { return m_extra; }
-
-  /*
-   * Clear the extra data pointer in a IRInstruction.  Used during IRUnit::gen
-   * to avoid having dangling IRExtraData*'s into stack memory.
-   */
-  void clearExtra() { m_extra = nullptr; }
-
-  /*
-   * Replace an instruction in place with a Nop.  This is less general than the
-   * become() function below, but it is fairly common, and doesn't require
-   * access to an IRUnit so it might be more convenient in some cases.
-   */
-  void convertToNop();
-
-  /*
-   * Turns this instruction into the target instruction, without changing
-   * stable fields (id, current block, list fields).  The existing destination
-   * SSATmp(s) will continue to think they came from this instruction, and the
-   * instruction's marker will not change.
+   * The existing destination SSATmp(s) will continue to think they came from
+   * this instruction, and the instruction's marker will not change.
    *
    * The target instruction may be transient---we'll clone anything we need to
    * keep, using IRUnit for any needed memory.
@@ -163,175 +96,280 @@ struct IRInstruction {
    */
   void become(IRUnit&, IRInstruction* other);
 
-  bool       is() const { return false; }
-  template<typename... Args>
-  bool       is(Opcode op, Args&&... args) const {
-    return m_op == op || is(std::forward<Args>(args)...);
-  }
-
-  Opcode     op()   const       { return m_op; }
-  void       setOpcode(Opcode newOpc);
-  bool       hasTypeParam() const      { return m_typeParam.hasValue(); }
-  Type       typeParam() const         { return m_typeParam.value(); }
-  folly::Optional<Type> maybeTypeParam() const { return m_typeParam; }
-  void       setTypeParam(Type t) {
-    m_typeParam.assign(t);
-  }
-  uint32_t   numSrcs()  const          { return m_numSrcs; }
-  SSATmp*    src(uint32_t i) const;
-  void       setSrc(uint32_t i, SSATmp* newSrc);
-  SrcRange   srcs() const {
-    return SrcRange(m_srcs, m_numSrcs);
-  }
-  unsigned   numDsts() const { return m_numDsts; }
-  SSATmp*    dst() const {
-    assert(!naryDst());
-    return m_dst;
-  }
-  void       setDst(SSATmp* newDst) {
-    assert(hasDst());
-    m_dst = newDst;
-    m_numDsts = newDst ? 1 : 0;
-  }
-
   /*
-   * Returns the ith dest of this instruction. i == 0 is treated specially: if
-   * the instruction has no dests, dst(0) will return nullptr, and if the
-   * instruction is not naryDest, dst(0) will return the single dest.
+   * Replace the instruction in-place with a Nop.
+   *
+   * This is less general than become(), but it is fairly common, and doesn't
+   * require access to an IRUnit.
    */
-  SSATmp*    dst(unsigned i) const;
-  DstRange   dsts();
-  folly::Range<const SSATmp*> dsts() const;
-  void       setDsts(unsigned numDsts, SSATmp* newDsts) {
-    assert(naryDst());
-    m_numDsts = numDsts;
-    m_dst = newDsts;
-  }
+  void convertToNop();
 
-  /*
-   * Instruction id is stable and useful as an array index.
-   */
-  uint32_t id() const {
-    assert(m_id != kTransient);
-    return m_id;
-  }
 
-  /*
-   * Returns true if the instruction is in a transient state.  That
-   * is, it's allocated on the stack and we haven't yet committed to
-   * inserting it in any blocks.
-   */
-  bool       isTransient() const       { return m_id == kTransient; }
-
-  /*
-   * block() and setBlock() keep track of the block that contains this
-   * instruction, as well as where the taken edge is coming from, if there
-   * is a taken edge.
-   */
-  Block* block() const { return m_block; }
-  void setBlock(Block* b) { m_block = b; }
-
-  /*
-   * Optional control flow edge.  If present, this instruction must
-   * be the last one in the block.
-   */
-  Block* taken() const { return succ(1); }
-  Edge* takenEdge() { return succEdge(1); }
-  void setTaken(Block* b) { return setSucc(1, b); }
-
-  /*
-   * Optional fall-through edge.  If present, this instruction must
-   * also have a taken edge.
-   */
-  Block* next() const { return succ(0); }
-  Edge* nextEdge() { return succEdge(0); }
-  void setNext(Block* b) { return setSucc(0, b); }
-
-  bool isControlFlow() const { return bool(taken()); }
-  bool isBlockEnd() const { return taken() || isTerminal(); }
-  bool isRawLoad() const;
-
-  void setMarker(BCMarker marker) {
-    assert(marker.valid());
-    m_marker = marker;
-  }
-  const BCMarker& marker() const { return m_marker; }
-  BCMarker& marker()             { return m_marker; }
-  Offset bcOffset()        const { return marker().bcOff(); }
-
-  std::string toString() const;
+  /////////////////////////////////////////////////////////////////////////////
+  // OpcodeFlag helpers.                                                [const]
 
   /*
    * Helper accessors for the OpcodeFlag bits for this instruction.
-   *
-   * Note that these wrappers have additional logic beyond just
-   * checking the corresponding flags bit---you should generally use
-   * these when you have an actual IRInstruction instead of just an
-   * Opcode enum value.
    */
   bool hasDst() const;
   bool naryDst() const;
   bool consumesReferences() const;
-  bool consumesReference(int srcNo) const;
-  bool producesReference(int dstNo) const;
+  bool killsSources() const;
   bool mayRaiseError() const;
   bool isTerminal() const;
-  bool hasEdges() const { return jit::hasEdges(op()); }
+  bool hasEdges() const;
   bool isPassthrough() const;
-  static SSATmp* frameCommonRoot(SSATmp* fp1, SSATmp* fp2);
-  SSATmp* getPassthroughValue() const;
-  bool killsSources() const;
-  bool killsSource(int srcNo) const;
 
-  // hasMainDst provides raw access to the HasDest flag, for instructions with
-  // ModifiesStack set.
-  bool hasMainDst() const;
+  /*
+   * Whether the src/dst numbered `srcNo'/`dstNo' consumes a reference, kills a
+   * source, or produces a reference.
+   */
+  bool consumesReference(int srcNo) const;
+  bool killsSource(int srcNo) const;
+  bool producesReference(int dstNo) const;
+
+  /*
+   * Get the src that is passed through.
+   *
+   * Currently, this is always src(0).
+   */
+  SSATmp* getPassthroughValue() const;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Opcode, marker, and type.
+
+  /*
+   * The ID assigned by the owning IRUnit.
+   *
+   * The instruction ID is stable and useful as an array index.  If the
+   * Instruction is not arena-allocated by an IRUnit, the `m_id' field will be
+   * kTransient (in which case this function should not be called).
+   */
+  uint32_t id() const;
+
+  /*
+   * Return true if the instruction is in a transient state.
+   *
+   * "Transient" means that the instruction is allocated on the stack and we
+   * haven't yet committed to including it in the IRUnit's CFG.
+   */
+  bool isTransient() const;
+
+  /*
+   * Whether the instruction has one among a variadic list of opcodes.
+   */
+  template<typename... Args>
+  bool is(Opcode op, Args&&... args) const;
+  bool is() const;
+
+  /*
+   * Get or set the opcode of the instruction.
+   */
+  Opcode op() const;
+  void setOpcode(Opcode);
+
+  /*
+   * Get or set the BCMarker of the instruction.
+   */
+  const BCMarker& marker() const;
+        BCMarker& marker();
+  void setMarker(BCMarker);
+
+  /*
+   * Check for, get, or set the instruction's optional type parameter.
+   */
+  bool hasTypeParam() const;
+  Type typeParam() const;
+  folly::Optional<Type> maybeTypeParam() const;
+  void setTypeParam(Type);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Srcs and dsts.
+
+  /*
+   * Initialize the source list for this IRInstruction.  We must not have
+   * already had our sources initialized before this function is called.
+   *
+   * Memory for `srcs' is owned outside of this class and must outlive it.
+   */
+  void initializeSrcs(uint32_t numSrcs, SSATmp** srcs);
+
+  /*
+   * Number of srcs/dsts.
+   */
+  uint32_t numSrcs() const;
+  uint32_t numDsts() const;
+
+  /*
+   * Return the ith src of this instruction.
+   */
+  SSATmp* src(uint32_t i) const;
+
+  /*
+   * Return the singular dst for this instruction.
+   *
+   * @requires: !naryDst()
+   */
+  SSATmp* dst() const;
+
+  /*
+   * Returns the ith dst of this instruction.
+   *
+   * If the instruction has no dsts, dst(0) will return nullptr, and if the
+   * instruction is not NaryDst, dst(0) will return the single dst.  Otherwise,
+   * it returns the first variadic dst.
+   */
+  SSATmp* dst(uint32_t i) const;
+
+  /*
+   * Get the srcs/dsts as a folly::Range.
+   */
+  folly::Range<SSATmp**> srcs() const;
+  folly::Range<SSATmp*> dsts();
+  folly::Range<const SSATmp*> dsts() const;
+
+  /*
+   * Set the ith src.
+   */
+  void setSrc(uint32_t i, SSATmp* newSrc);
+
+  /*
+   * Set the dsts, either as a single dst, or as `numDsts' dsts (if the
+   * instruction has NaryDst).
+   */
+  void setDst(SSATmp* newDst);
+  void setDsts(uint32_t numDsts, SSATmp* newDsts);
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // ExtraData.
+
+  /*
+   * Whether or not this instruction has an ExtraData.
+   */
+  bool hasExtra() const;
+
+  /*
+   * Return access to the ExtraData on this instruction, for the specified
+   * opcode type.
+   *
+   * Pre: op() == opc
+   */
+  template<Opcode opc> const typename IRExtraDataType<opc>::type* extra() const;
+  template<Opcode opc>       typename IRExtraDataType<opc>::type* extra();
+
+  /*
+   * Return access to ExtraData of type T.  Requires that
+   * IRExtraDataType<opc>::type is T for this instruction's opcode.
+   *
+   * It's normally preferable to use the version of this function that takes
+   * the opcode instead of this one.  This is for writing code that is supposed
+   * to be able to handle multiple opcode types that share the same kind of
+   * extra data.
+   */
+  template<class T> const T* extra() const;
+
+  /*
+   * Return the raw ExtraData pointer, for pretty-printing.
+   */
+  const IRExtraData* rawExtra() const;
+
+  /*
+   * Set the ExtraData for this instruction.
+   *
+   * The lifetime of the ExtraData must outlast this IRInstruction (and any of
+   * its clones).
+   */
+  void setExtra(IRExtraData*);
+
+  /*
+   * Clear the extra data pointer in a IRInstruction.
+   *
+   * Used during IRUnit::gen to avoid having dangling IRExtraData*'s into stack
+   * memory.
+   */
+  void clearExtra();
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Blocks and edges.
+
+  /*
+   * Get/set the block containing this instruction.
+   *
+   * The block is also where the taken edge is coming from, if this instruction
+   * has a taken edge.
+   */
+  Block* block() const;
+  void setBlock(Block* b);
+
+  /*
+   * Optional fall-through edge.
+   *
+   * If present, this instruction must also have a taken edge.
+   */
+  Block* next() const;
+  Edge* nextEdge();
+  void setNext(Block* b);
+
+  /*
+   * Optional control flow edge.
+   *
+   * If present, this instruction must be the last one in the block.
+   */
+  Block* taken() const;
+  Edge* takenEdge();
+  void setTaken(Block* b);
+
+  /*
+   * Whether this instruction is a control flow instruction, or ends a block.
+   */
+  bool isControlFlow() const;
+  bool isBlockEnd() const;
+  bool isRawLoad() const;
 
 private:
-  Block* succ(int i) const {
-    assert(!m_edges || hasEdges());
-    return m_edges ? m_edges[i].to() : nullptr;
-  }
-  Edge* succEdge(int i) {
-    assert(!m_edges || hasEdges());
-    return m_edges && m_edges[i].to() ? &m_edges[i] : nullptr;
-  }
-  void setSucc(int i, Block* b) {
-    if (hasEdges()) {
-      if (isTransient()) m_edges[i].setTransientTo(b);
-      else m_edges[i].setTo(b);
-    } else {
-      assert(!b && !m_edges);
-    }
-  }
-  void clearEdges() {
-    setSucc(0, nullptr);
-    setSucc(1, nullptr);
-    m_edges = nullptr;
-  }
+  /*
+   * Block/edge implementations.
+   */
+  Block* succ(int i) const;
+  Edge* succEdge(int i);
+  void setSucc(int i, Block* b);
+  void clearEdges();
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Data members.
 
 private:
   folly::Optional<Type> m_typeParam;
-  Opcode            m_op;
-  uint16_t          m_numSrcs;
-  uint16_t          m_numDsts;
-  BCMarker          m_marker;
-  const Id          m_id;
-  SSATmp**          m_srcs;
-  SSATmp*           m_dst;     // if HasDest or NaryDest
-  Block*            m_block;   // what block owns this instruction
-  Edge*             m_edges;   // outgoing edges, if this is a block-end.
-  IRExtraData*      m_extra;
+  Opcode m_op;
+  uint16_t m_numSrcs;
+  uint16_t m_numDsts;
+  BCMarker m_marker;
+  const Id m_id;
+  SSATmp** m_srcs;
+  SSATmp* m_dst;    // if HasDest or NaryDest
+  Block* m_block;   // what block owns this instruction
+  Edge* m_edges;    // outgoing edges, if this is a block-end
+  IRExtraData* m_extra;
+
 public:
   boost::intrusive::list_member_hook<> m_listNode; // for InstructionList
 };
 
-typedef boost::intrusive::member_hook<IRInstruction,
-                                      boost::intrusive::list_member_hook<>,
-                                      &IRInstruction::m_listNode>
-        IRInstructionHookOption;
-typedef boost::intrusive::list<IRInstruction, IRInstructionHookOption>
-        InstructionList;
+///////////////////////////////////////////////////////////////////////////////
+
+using IRInstructionHookOption = boost::intrusive::member_hook<
+  IRInstruction,
+  boost::intrusive::list_member_hook<>,
+  &IRInstruction::m_listNode
+>;
+
+using InstructionList = boost::intrusive::list<IRInstruction,
+                                               IRInstructionHookOption>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -339,11 +377,13 @@ typedef boost::intrusive::list<IRInstruction, IRInstructionHookOption>
  * Return the output type from a given IRInstruction.
  *
  * The destination type is always predictable from the types of the inputs, any
- * type parameters to the instruction, and the id of the dest.
+ * type parameters to the instruction, and the id of the dst.
  */
 Type outputType(const IRInstruction*, int dstId = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
+
+#include "hphp/runtime/vm/jit/ir-instruction-inl.h"
 
 #endif

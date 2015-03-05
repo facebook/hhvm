@@ -37,6 +37,7 @@
 #include <sstream>
 
 namespace HPHP { namespace jit {
+//////////////////////////////////////////////////////////////////////
 
 IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   : m_typeParam(inst->m_typeParam)
@@ -64,25 +65,50 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   }
 }
 
-bool IRInstruction::hasExtra() const {
-  return m_extra;
+std::string IRInstruction::toString() const {
+  std::ostringstream str;
+  print(str, this);
+  return str.str();
 }
 
-bool IRInstruction::hasDst() const {
-  return opcodeHasFlags(op(), HasDest);
+///////////////////////////////////////////////////////////////////////////////
+
+void IRInstruction::convertToNop() {
+  if (hasEdges()) clearEdges();
+  IRInstruction nop(Nop, marker());
+  m_op        = nop.m_op;
+  m_typeParam = nop.m_typeParam;
+  m_numSrcs   = nop.m_numSrcs;
+  m_srcs      = nop.m_srcs;
+  m_numDsts   = nop.m_numDsts;
+  m_dst       = nop.m_dst;
+  m_extra     = nullptr;
 }
 
-bool IRInstruction::naryDst() const {
-  return opcodeHasFlags(op(), NaryDest);
+void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
+  assert(other->isTransient() || m_numDsts == other->m_numDsts);
+  auto& arena = unit.arena();
+
+  if (hasEdges()) clearEdges();
+
+  m_op = other->m_op;
+  m_typeParam = other->m_typeParam;
+  m_numSrcs = other->m_numSrcs;
+  m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
+  m_srcs = new (arena) SSATmp*[m_numSrcs];
+  std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
+
+  if (hasEdges()) {
+    assert(other->hasEdges());  // m_op is from other now
+    m_edges = new (arena) Edge[2];
+    m_edges[0].setInst(this);
+    m_edges[1].setInst(this);
+    setNext(other->next());
+    setTaken(other->taken());
+  }
 }
 
-bool IRInstruction::producesReference(int dstNo) const {
-  return opcodeHasFlags(op(), ProducesRC);
-}
-
-bool IRInstruction::consumesReferences() const {
-  return opcodeHasFlags(op(), ConsumesRC);
-}
+///////////////////////////////////////////////////////////////////////////////
 
 bool IRInstruction::consumesReference(int srcNo) const {
   if (!consumesReferences()) {
@@ -148,53 +174,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
   }
 }
 
-bool IRInstruction::mayRaiseError() const {
-  return opcodeHasFlags(op(), MayRaiseError);
-}
-
-bool IRInstruction::isTerminal() const {
-  return opcodeHasFlags(op(), Terminal);
-}
-
-bool IRInstruction::isPassthrough() const {
-  return opcodeHasFlags(op(), Passthrough);
-}
-
-/*
- * Returns true if the instruction does nothing but load a PHP value from
- * memory, possibly with some straightforward computation beforehand to decide
- * where the load should come from. This specifically excludes opcodes such as
- * CGetProp and ArrayGet that incref their return value.
- */
-bool IRInstruction::isRawLoad() const {
-  switch (m_op) {
-    case LdMem:
-    case LdRef:
-    case LdStk:
-    case LdElem:
-    case LdContField:
-    case LdPackedArrayElem:
-    case LdLocPseudoMain:
-      return true;
-
-    default:
-      return false;
-  }
-}
-
-SSATmp* IRInstruction::getPassthroughValue() const {
-  assert(isPassthrough());
-  assert(is(IncRef,
-            CheckType, AssertType, AssertNonNull,
-            ColAddElemC, ColAddNewElemC,
-            Mov));
-  return src(0);
-}
-
-bool IRInstruction::killsSources() const {
-  return opcodeHasFlags(op(), KillsSources);
-}
-
 bool IRInstruction::killsSource(int idx) const {
   if (!killsSources()) return false;
   switch (m_op) {
@@ -213,59 +192,7 @@ bool IRInstruction::killsSource(int idx) const {
   }
 }
 
-bool IRInstruction::hasMainDst() const {
-  return opcodeHasFlags(op(), HasDest);
-}
-
-SSATmp* IRInstruction::dst(unsigned i) const {
-  if (i == 0 && m_numDsts == 0) return nullptr;
-  assert(i < m_numDsts);
-  assert(naryDst() || i == 0);
-  return hasDst() ? dst() : &m_dst[i];
-}
-
-DstRange IRInstruction::dsts() {
-  return DstRange(m_dst, m_numDsts);
-}
-
-folly::Range<const SSATmp*> IRInstruction::dsts() const {
-  return folly::Range<const SSATmp*>(m_dst, m_numDsts);
-}
-
-void IRInstruction::convertToNop() {
-  if (hasEdges()) clearEdges();
-  IRInstruction nop(Nop, marker());
-  m_op        = nop.m_op;
-  m_typeParam = nop.m_typeParam;
-  m_numSrcs   = nop.m_numSrcs;
-  m_srcs      = nop.m_srcs;
-  m_numDsts   = nop.m_numDsts;
-  m_dst       = nop.m_dst;
-  m_extra     = nullptr;
-}
-
-void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
-  assert(other->isTransient() || m_numDsts == other->m_numDsts);
-  auto& arena = unit.arena();
-
-  if (hasEdges()) clearEdges();
-
-  m_op = other->m_op;
-  m_typeParam = other->m_typeParam;
-  m_numSrcs = other->m_numSrcs;
-  m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
-  m_srcs = new (arena) SSATmp*[m_numSrcs];
-  std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
-
-  if (hasEdges()) {
-    assert(other->hasEdges());  // m_op is from other now
-    m_edges = new (arena) Edge[2];
-    m_edges[0].setInst(this);
-    m_edges[1].setInst(this);
-    setNext(other->next());
-    setTaken(other->taken());
-  }
-}
+///////////////////////////////////////////////////////////////////////////////
 
 void IRInstruction::setOpcode(Opcode newOpc) {
   assert(hasEdges() || !jit::hasEdges(newOpc)); // cannot allocate new edges
@@ -275,20 +202,11 @@ void IRInstruction::setOpcode(Opcode newOpc) {
   m_op = newOpc;
 }
 
-SSATmp* IRInstruction::src(uint32_t i) const {
-  always_assert(i < numSrcs());
-  return m_srcs[i];
-}
-
-void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
-  always_assert(i < numSrcs());
-  m_srcs[i] = newSrc;
-}
-
-std::string IRInstruction::toString() const {
-  std::ostringstream str;
-  print(str, this);
-  return str.str();
+SSATmp* IRInstruction::dst(unsigned i) const {
+  if (i == 0 && m_numDsts == 0) return nullptr;
+  assert(i < m_numDsts);
+  assert(naryDst() || i == 0);
+  return hasDst() ? dst() : &m_dst[i];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

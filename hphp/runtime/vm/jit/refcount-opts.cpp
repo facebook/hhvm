@@ -492,6 +492,28 @@ Point idForEdge(const Block* from, const Block* to, const IdMap& ids) {
   }
 }
 
+/*
+ * Returns true if the instruction does nothing but load a PHP value from
+ * memory, possibly with some straightforward computation beforehand to decide
+ * where the load should come from. This specifically excludes opcodes such as
+ * CGetProp and ArrayGet that incref their return value.
+ */
+bool isRawLoad(const IRInstruction* inst) {
+  switch (inst->op()) {
+    case LdMem:
+    case LdRef:
+    case LdStk:
+    case LdElem:
+    case LdContField:
+    case LdPackedArrayElem:
+    case LdLocPseudoMain:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 const StaticString s_get_defined_vars("get_defined_vars"),
   s_get_defined_vars_SystemLib("__SystemLib\\get_defined_vars");
 
@@ -1513,14 +1535,14 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
       if (!dst->type().maybe(Type::Counted)) continue;
 
-      if (m_inst->producesReference(i) || m_inst->isRawLoad()) {
+      if (m_inst->producesReference(i) || isRawLoad(m_inst)) {
         assert(!m_state.values.count(dst));
         ITRACE(3, "defining value {}\n", *m_inst);
         Indent _i;
 
         auto& state = m_state.values[dst];
         if (m_inst->producesReference(i)) state.realCount = 1;
-        if (m_inst->isRawLoad()) state.fromLoad = true;
+        if (isRawLoad(m_inst)) state.fromLoad = true;
 
         ITRACE(3, "{}\n", show(state));
       }

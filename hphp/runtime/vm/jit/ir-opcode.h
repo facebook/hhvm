@@ -202,9 +202,6 @@ enum OpcodeFlag : uint64_t {
 bool hasEdges(Opcode opc);
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
 
-using SrcRange = folly::Range<SSATmp**>;
-using DstRange = folly::Range<SSATmp*>;
-
 /*
  * Given an SSATmp of type Cls, try to find the name of the class.
  * Returns nullptr if can't find it.

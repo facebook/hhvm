@@ -1343,8 +1343,10 @@ static int execute_program_impl(int argc, char** argv) {
           Logger::Verbose("Using default config file: %s", filename);
           po.config.push_back(filename);
         };
-        add_default_config_files_globbed("/etc/hhvm/php*.ini", file_callback);
-        add_default_config_files_globbed("/etc/hhvm/config*.hdf", file_callback);
+        add_default_config_files_globbed("/etc/hhvm/php*.ini",
+                                         file_callback);
+        add_default_config_files_globbed("/etc/hhvm/config*.hdf",
+                                         file_callback);
       }
 // When we upgrade boost, we can remove this and also get rid of the parent
 // try statement and move opts back into the original try block

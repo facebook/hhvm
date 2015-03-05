@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <unordered_set>
+
 #include <gtest/gtest.h>
 
 #include <folly/ScopeGuard.h>
@@ -32,10 +34,8 @@ namespace HPHP { namespace jit {
 
 namespace {
 
-typedef hphp_hash_set<Type> TypeSet;
-
-TypeSet allTypes() {
-  TypeSet r;
+std::unordered_set<Type> allTypes() {
+  std::unordered_set<Type> r;
 # define IRT(name, ...) r.insert(Type::name);
 # define IRTP(name, ...) IRT(name)
   IR_TYPES
@@ -54,7 +54,7 @@ TEST(Type, Null) {
   EXPECT_TRUE(Type::Uninit <= Type::Null);
   EXPECT_TRUE(Type::InitNull <= Type::Null);
   EXPECT_FALSE(Type::Bool <= Type::Null);
-  EXPECT_FALSE(Type::Null.subtypeOf(Type::InitNull));
+  EXPECT_FALSE(Type::Null <= Type::InitNull);
   EXPECT_NE(Type::Null, Type::Uninit);
   EXPECT_NE(Type::Null, Type::InitNull);
 
@@ -102,8 +102,8 @@ TEST(Type, ToString) {
   EXPECT_EQ("BoxedDbl", Type::BoxedDbl.toString());
 
 
-  auto const sub = Type::Obj.specialize(SystemLib::s_IteratorClass);
-  auto const exact = Type::Obj.specializeExact(SystemLib::s_IteratorClass);
+  auto const sub = Type::SubObj(SystemLib::s_IteratorClass);
+  auto const exact = Type::ExactObj(SystemLib::s_IteratorClass);
 
   EXPECT_EQ("Obj<=Iterator", sub.toString());
   EXPECT_EQ("Obj=Iterator", exact.toString());
@@ -111,9 +111,9 @@ TEST(Type, ToString) {
 
 TEST(Type, Boxes) {
   EXPECT_EQ(Type::BoxedDbl, Type::Dbl.box());
-  EXPECT_TRUE(Type::BoxedDbl.isBoxed());
+  EXPECT_TRUE(Type::BoxedDbl <= Type::BoxedCell);
   EXPECT_EQ(Type::Dbl, Type::BoxedDbl.unbox());
-  EXPECT_FALSE(Type::Dbl.isBoxed());
+  EXPECT_FALSE(Type::Dbl <= Type::BoxedCell);
   EXPECT_EQ(Type::Cell, Type::Gen.unbox());
   EXPECT_EQ((Type::BoxedCell - Type::BoxedUninit),
             (Type::Cell - Type::Uninit).box());
@@ -124,10 +124,10 @@ TEST(Type, Boxes) {
 }
 
 TEST(Type, Ptr) {
-  EXPECT_TRUE(Type::PtrToInt.isPtr());
-  EXPECT_TRUE(Type::PtrToBoxedInt.isPtr());
-  EXPECT_TRUE(Type::PtrToBoxedCell.isPtr());
-  EXPECT_TRUE(Type::PtrToInt.subtypeOf(Type::PtrToCell));
+  EXPECT_TRUE(Type::PtrToInt <= Type::PtrToGen);
+  EXPECT_TRUE(Type::PtrToBoxedInt <= Type::PtrToGen);
+  EXPECT_TRUE(Type::PtrToBoxedCell <= Type::PtrToGen);
+  EXPECT_TRUE(Type::PtrToInt <= Type::PtrToCell);
 
   EXPECT_EQ(Type::PtrToInt, Type::Int.ptr(Ptr::Unk));
   EXPECT_EQ(Type::PtrToCell, Type::Cell.ptr(Ptr::Unk));
@@ -138,63 +138,23 @@ TEST(Type, Ptr) {
 TEST(Type, Subtypes) {
   Type numbers = Type::Dbl | Type::Int;
   EXPECT_EQ("{Int|Dbl}", numbers.toString());
-  EXPECT_TRUE(Type::Dbl.subtypeOf(numbers));
-  EXPECT_TRUE(Type::Int.subtypeOf(numbers));
-  EXPECT_FALSE(Type::Bool.subtypeOf(numbers));
+  EXPECT_TRUE(Type::Dbl <= numbers);
+  EXPECT_TRUE(Type::Int <= numbers);
+  EXPECT_FALSE(Type::Bool <= numbers);
 
-  EXPECT_FALSE(Type::Func.subtypeOf(Type::Cell));
-  EXPECT_FALSE(Type::TCA.subtypeOf(Type::Gen));
+  EXPECT_FALSE(Type::Func <= Type::Cell);
+  EXPECT_FALSE(Type::TCA <= Type::Gen);
 
-  EXPECT_TRUE(Type::PtrToCell.strictSubtypeOf(Type::PtrToGen));
-}
-
-TEST(Type, CanRunDtor) {
-  TypeSet types = allTypes();
-  auto expectTrue = [&](Type t) {
-    EXPECT_TRUE(t.canRunDtor()) << t.toString() << ".canRunDtor() == true";
-    types.erase(t);
-  };
-  expectTrue(Type::Arr);
-  expectTrue(Type::CountedArr);
-  expectTrue(Type::Obj);
-  expectTrue(Type::NullableObj);
-  expectTrue(Type::Res);
-  expectTrue(Type::Counted);
-  expectTrue(Type::BoxedArr);
-  expectTrue(Type::BoxedCountedArr);
-  expectTrue(Type::BoxedObj);
-  expectTrue(Type::BoxedNullableObj);
-  expectTrue(Type::BoxedRes);
-  expectTrue(Type::BoxedInitCell);
-  expectTrue(Type::BoxedCell);
-  expectTrue(Type::InitCell);
-  expectTrue(Type::Cell);
-  expectTrue(Type::Gen);
-  expectTrue(Type::Ctx);
-  expectTrue(Type::Obj | Type::Func);
-  expectTrue(Type::Init);
-  expectTrue(Type::Top);
-  expectTrue(Type::StkElem);
-  expectTrue(Type::AnyObj);
-  expectTrue(Type::AnyNullableObj);
-  expectTrue(Type::AnyRes);
-  expectTrue(Type::AnyArr);
-  expectTrue(Type::AnyCountedArr);
-  expectTrue(Type::AnyInitCell);
-  expectTrue(Type::AnyCell);
-
-  for (Type t : types) {
-    EXPECT_FALSE(t.canRunDtor()) << t.toString() << ".canRunDtor == false";
-  }
+  EXPECT_TRUE(Type::PtrToCell < Type::PtrToGen);
 }
 
 TEST(Type, Top) {
   for (auto t : allTypes()) {
-    EXPECT_TRUE(t.subtypeOf(Type::Top));
+    EXPECT_TRUE(t <= Type::Top);
   }
   for (auto t : allTypes()) {
-    if (t.equals(Type::Top)) continue;
-    EXPECT_FALSE(Type::Top.subtypeOf(t));
+    if (t == Type::Top) continue;
+    EXPECT_FALSE(Type::Top <= t);
   }
 }
 
@@ -219,7 +179,7 @@ TEST(Type, TypeConstraints) {
 
   EXPECT_FALSE(fits(Type::Arr,
                     TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
-  EXPECT_TRUE(fits(Type::Arr.specialize(ArrayData::kPackedKind),
+  EXPECT_TRUE(fits(Type::Array(ArrayData::kPackedKind),
                    TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
 }
 
@@ -233,7 +193,7 @@ TEST(Type, RelaxType) {
   auto tc = TypeConstraint{DataTypeSpecialized};
   tc.setDesiredClass(SystemLib::s_IteratorClass);
   tc.category = DataTypeSpecialized;
-  auto type = Type::Obj.specialize(SystemLib::s_IteratorClass);
+  auto type = Type::SubObj(SystemLib::s_IteratorClass);
   EXPECT_EQ("Obj<=Iterator", type.toString());
   EXPECT_EQ(type, relaxType(type, tc));
 
@@ -256,7 +216,7 @@ TEST(Type, RelaxConstraint) {
 }
 
 TEST(Type, Specialized) {
-  auto packed = Type::Arr.specialize(ArrayData::kPackedKind);
+  auto packed = Type::Array(ArrayData::kPackedKind);
   EXPECT_LE(packed, Type::Arr);
   EXPECT_LT(packed, Type::Arr);
   EXPECT_FALSE(Type::Arr <= packed);
@@ -267,7 +227,10 @@ TEST(Type, Specialized) {
 
   EXPECT_TRUE(Type::Int <= (packed | Type::Int));
 
+  EXPECT_EQ(Type::Bottom, packed & Type::Array(ArrayData::kMixedKind));
   EXPECT_EQ(Type::Bottom, packed - Type::Arr);
+
+  EXPECT_EQ(Type::PtrToSPropCell, Type::PtrToSPropGen - Type::PtrToBoxedCell);
 
   auto const array = make_packed_array(1, 2, 3, 4);
   auto const mixed = make_map_array(1, 1, 2, 2);
@@ -275,10 +238,9 @@ TEST(Type, Specialized) {
   auto const arrDataMixed = ArrayData::GetScalarArray(mixed.get());
   auto constArray = Type::cns(arrData);
   auto constArrayMixed = Type::cns(arrDataMixed);
-  auto const spacked = Type::StaticArr.specialize(ArrayData::kPackedKind);
+  auto const spacked = Type::StaticArray(ArrayData::kPackedKind);
   EXPECT_EQ(spacked, spacked - constArray); // conservative
-  EXPECT_EQ(constArray, constArray - spacked); // conservative (could be
-                                               // bottom if we did better)
+  EXPECT_EQ(Type::Bottom, constArray - spacked);
 
   // Implemented conservatively right now, but the following better not return
   // bottom:
@@ -286,7 +248,7 @@ TEST(Type, Specialized) {
 
   // Checking specialization dropping.
   EXPECT_EQ(Type::Arr | Type::BoxedInitCell, packed | Type::BoxedInitCell);
-  auto specializedObj = Type::Obj.specialize(SystemLib::s_IteratorClass);
+  auto specializedObj = Type::SubObj(SystemLib::s_IteratorClass);
   EXPECT_EQ(Type::Arr | Type::Obj, packed | specializedObj);
 }
 
@@ -296,16 +258,16 @@ TEST(Type, SpecializedObjects) {
   EXPECT_TRUE(A->classof(B));
 
   auto const obj = Type::Obj;
-  auto const exactA = obj.specializeExact(A);
-  auto const exactB = obj.specializeExact(B);
-  auto const subA = obj.specialize(A);
-  auto const subB = obj.specialize(B);
+  auto const exactA = Type::ExactObj(A);
+  auto const exactB = Type::ExactObj(B);
+  auto const subA = Type::SubObj(A);
+  auto const subB = Type::SubObj(B);
 
-  EXPECT_EQ(exactA.getClass(), A);
-  EXPECT_EQ(subA.getClass(), A);
+  EXPECT_EQ(exactA.clsSpec().cls(), A);
+  EXPECT_EQ(subA.clsSpec().cls(), A);
 
-  EXPECT_EQ(exactA.getExactClass(), A);
-  EXPECT_EQ(subA.getExactClass(), nullptr);
+  EXPECT_EQ(exactA.clsSpec().exactCls(), A);
+  EXPECT_EQ(subA.clsSpec().exactCls(), nullptr);
 
   EXPECT_LE(exactA, exactA);
   EXPECT_LE(subA, subA);
@@ -358,7 +320,7 @@ TEST(Type, Const) {
   EXPECT_EQ(Type::PtrToGen,
             (Type::PtrToGen|Type::Nullptr) - Type::Nullptr);
   EXPECT_EQ(Type::Int, five.dropConstVal());
-  EXPECT_TRUE(five.not(Type::cns(2)));
+  EXPECT_TRUE(!five.maybe(Type::cns(2)));
 
   auto True = Type::cns(true);
   EXPECT_EQ("Bool<true>", True.toString());
@@ -370,7 +332,7 @@ TEST(Type, Const) {
   EXPECT_FALSE(five <= True);
   EXPECT_FALSE(five > True);
 
-  EXPECT_TRUE(five.not(True));
+  EXPECT_TRUE(!five.maybe(True));
   EXPECT_EQ(Type::Int | Type::Bool, five | True);
   EXPECT_EQ(Type::Bottom, five & True);
 
@@ -383,8 +345,8 @@ TEST(Type, Const) {
   auto array = make_packed_array(1, 2, 3, 4);
   auto arrData = ArrayData::GetScalarArray(array.get());
   auto constArray = Type::cns(arrData);
-  auto packedArray = Type::Arr.specialize(ArrayData::kPackedKind);
-  auto mixedArray = Type::Arr.specialize(ArrayData::kMixedKind);
+  auto packedArray = Type::Array(ArrayData::kPackedKind);
+  auto mixedArray = Type::Array(ArrayData::kMixedKind);
 
   EXPECT_TRUE(constArray <= packedArray);
   EXPECT_TRUE(constArray < packedArray);
@@ -398,10 +360,10 @@ TEST(Type, Const) {
   ArrayTypeTable::Builder ratBuilder;
   auto rat1 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
                                  RepoAuthType(RepoAuthType::Tag::Str));
-  auto ratArray1 = Type::Arr.specialize(rat1);
+  auto ratArray1 = Type::Array(rat1);
   auto rat2 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
                                  RepoAuthType(RepoAuthType::Tag::Int));
-  auto ratArray2 = Type::Arr.specialize(rat2);
+  auto ratArray2 = Type::Array(rat2);
   EXPECT_EQ(Type::Arr, ratArray1 & ratArray2);
   EXPECT_TRUE(ratArray1 < Type::Arr);
   EXPECT_TRUE(ratArray1 <= ratArray1);
@@ -437,16 +399,16 @@ TEST(Type, PtrKinds) {
 
   EXPECT_EQ(Ptr::Frame, (frameUninit|frameBool).ptrKind());
 
-  EXPECT_TRUE(frameBool.subtypeOf(unknownBool));
-  EXPECT_TRUE(frameBool.subtypeOf(frameGen));
-  EXPECT_TRUE(!frameBool.subtypeOf(frameUninit));
+  EXPECT_TRUE(frameBool <= unknownBool);
+  EXPECT_TRUE(frameBool <= frameGen);
+  EXPECT_FALSE(frameBool <= frameUninit);
   EXPECT_TRUE(frameBool.maybe(frameGen));
   EXPECT_TRUE(frameBool.maybe(unknownBool));
   EXPECT_TRUE(!frameUninit.maybe(frameBool));
   EXPECT_TRUE(frameUninit.maybe(frameGen));
   EXPECT_TRUE(!frameUninit.maybe(unknownBool));
   EXPECT_TRUE(!Type::PtrToUninit.maybe(Type::PtrToBool));
-  EXPECT_TRUE(!unknownBool.subtypeOf(frameBool));
+  EXPECT_FALSE(unknownBool <= frameBool);
   EXPECT_EQ(unknownBool, frameBool | unknownBool);
 
   EXPECT_EQ(unknownGen, frameGen | unknownBool);

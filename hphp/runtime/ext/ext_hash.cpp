@@ -136,7 +136,7 @@ struct HashContext : SweepableResourceData {
     : ops(ops_), context(context_), options(options_), key(nullptr) {
   }
 
-  explicit HashContext(const HashContext* ctx) {
+  explicit HashContext(SmartPtr<HashContext>&& ctx) {
     assert(ctx->ops);
     assert(ctx->ops->context_size >= 0);
     ops = ctx->ops;
@@ -313,15 +313,15 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
   void *context = malloc(ops->context_size);
   ops->hash_init(context);
 
-  const auto hash = newres<HashContext>(ops, context, options);
+  const auto hash = makeSmartPtr<HashContext>(ops, context, options);
   if (options & k_HASH_HMAC) {
     hash->key = prepare_hmac_key(ops, context, key);
   }
-  return Resource(hash);
+  return Variant(std::move(hash));
 }
 
 bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
-  HashContext *hash = context.getTyped<HashContext>();
+  auto hash = dyn_cast<HashContext>(context);
   hash->ops->hash_update(hash->context, (unsigned char *)data.data(),
                          data.size());
   return true;
@@ -329,7 +329,7 @@ bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
 
 Variant HHVM_FUNCTION(hash_final, const Resource& context,
                                  bool raw_output /* = false */) {
-  HashContext *hash = context.getTyped<HashContext>();
+  auto hash = dyn_cast<HashContext>(context);
 
   if (hash->context == nullptr) {
     raise_warning(
@@ -356,9 +356,8 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
 }
 
 Resource HHVM_FUNCTION(hash_copy, const Resource& context) {
-  HashContext *oldhash = context.getTyped<HashContext>();
-  auto const hash = newres<HashContext>(oldhash);
-  return Resource(hash);
+  auto oldhash = dyn_cast<HashContext>(context);
+  return Resource(makeSmartPtr<HashContext>(std::move(oldhash)));
 }
 
 /**

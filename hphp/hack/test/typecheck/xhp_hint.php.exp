@@ -1,0 +1,6 @@
+File "xhp_hint.php", line 6, characters 10-10:
+Invalid return type (Typing[4110])
+File "xhp_hint.php", line 5, characters 15-18:
+This is an object of type :foo
+File "xhp_hint.php", line 6, characters 10-10:
+It is incompatible with an int

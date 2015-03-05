@@ -33,13 +33,12 @@
 namespace HPHP {
 
 template<class T>
-static T* safe_get_typed(const Resource& res)
-{
-  if (!res.is<T>() || (res.get() == nullptr)) {
+static SmartPtr<T> safe_cast(const Resource& res) {
+  auto ptr = dyn_cast_or_null<T>(res);
+  if (!ptr) {
     raise_warning("supplied argument is not a valid ODBC resource");
-    return nullptr;
   }
-  return res.getTyped<T>();
+  return ptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -362,7 +361,7 @@ bool ODBCCursor::prepare_query(const String& query)
 
   // store information about data types the db is expecting
   for (int i=1; i <= params_size_; i++) {
-    params_.append(Resource(newres<ODBCParam>(hdl_stmt_, i)));
+    params_.append(Variant(makeSmartPtr<ODBCParam>(hdl_stmt_, i)));
   }
   assert(params_.size() == params_size_);
   return true;
@@ -373,12 +372,11 @@ bool ODBCCursor::exec_prepared_query(const Array params)
   SYNC_VM_REGS_SCOPED();
 
   SQLCHAR* input[params_size_];
-  ODBCParam *param;
   int64_t num_rows;
 
   for (int i=0; i < params_size_; i++) {
     const Array &cur_array = params[i].toArray();
-    param = params_[i].asCResRef().getTyped<ODBCParam>();
+    auto param = cast<ODBCParam>(params_[i]);
     num_rows = cur_array.size();
 
     // allocate buffer we'll pass to odbc
@@ -425,14 +423,13 @@ bool ODBCCursor::exec_prepared_query(const Array params)
 
 bool ODBCCursor::bind_buffer()
 {
-  ODBCColumn *column;
   SQLLEN row_size = 0;
 
   // retrieve info about columns
   for (int i_col=1; i_col <= columns_count_; i_col++) {
-    column = newres<ODBCColumn>(hdl_stmt_, i_col);
+    auto column = makeSmartPtr<ODBCColumn>(hdl_stmt_, i_col);
     row_size += column->total_column_size();
-    columns_.append(Resource(column));
+    columns_.append(Variant(std::move(column)));
   }
   buffer_ = (SQLPOINTER)smart_malloc(row_size * per_fetch_rows);
 
@@ -458,7 +455,7 @@ bool ODBCCursor::bind_buffer()
   SQLPOINTER cursor = buffer_;
   SQLLEN buffer_len;
   for (int i=0; i < columns_count_; i++) {
-    column = columns_[i].asCResRef().getTyped<ODBCColumn>();
+    auto column = cast<ODBCColumn>(columns_[i]);
     buffer_len = column->total_data_size();
 
     // TODO - we should not get every data type as a SQL_C_CHAR, but
@@ -523,12 +520,11 @@ Variant ODBCCursor::fetch()
   }
 
   Array ret_data;
-  ODBCColumn *column;
   SQLLEN status;
 
   // create an entry for each column of the resultset
   for (int i=0; i != columns_count_; i++) {
-    column = columns_[i].asCResRef().getTyped<ODBCColumn>();
+    auto column = cast<ODBCColumn>(columns_[i]);
     status = *((char*)buffer_cursor_ + column->total_data_size());
 
     // status holds the string size, or SQL_NULL_DATA
@@ -683,8 +679,7 @@ void ODBCLink::close()
 
 Variant ODBCLink::exec(const String& query)
 {
-  ODBCCursor *cursor = newres<ODBCCursor>(hdl_dbconn_);
-  Resource ret(cursor);
+  auto cursor = makeSmartPtr<ODBCCursor>(hdl_dbconn_);
 
   if (!cursor->exec_query(query)) {
     raise_warning("SQL error: [%s] %s",
@@ -692,18 +687,17 @@ Variant ODBCLink::exec(const String& query)
       (char*)ODBCContext::get_last_error_msg());
     return false;
   }
-  return ret;
+  return Variant(std::move(cursor));
 }
 
 Variant ODBCLink::prepare(const String& query)
 {
-  ODBCCursor *cursor = newres<ODBCCursor>(hdl_dbconn_);
-  Resource ret(cursor);
+  auto cursor = makeSmartPtr<ODBCCursor>(hdl_dbconn_);
 
   if (!cursor->prepare_query(query)) {
     return false;
   }
-  return ret;
+  return Variant(std::move(cursor));
 }
 
 bool ODBCLink::set_autocommit(const bool on_off)
@@ -769,7 +763,7 @@ bool ODBCLink::end_transaction(const bool is_commit)
 
 bool HHVM_FUNCTION(odbc_set_autocommit, const Resource& link, bool on_off)
 {
-  ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
+  auto odbc_link = safe_cast<ODBCLink>(link);
   if (odbc_link == nullptr)
     return false;
   return odbc_link->set_autocommit(on_off);
@@ -777,7 +771,7 @@ bool HHVM_FUNCTION(odbc_set_autocommit, const Resource& link, bool on_off)
 
 bool HHVM_FUNCTION(odbc_get_autocommit, const Resource& link)
 {
-  ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
+  auto odbc_link = safe_cast<ODBCLink>(link);
   if (odbc_link == nullptr)
     return false;
   return odbc_link->get_autocommit();
@@ -785,60 +779,61 @@ bool HHVM_FUNCTION(odbc_get_autocommit, const Resource& link)
 
 bool HHVM_FUNCTION(odbc_commit, const Resource& link)
 {
-  ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
+  auto odbc_link = safe_cast<ODBCLink>(link);
   if (odbc_link == nullptr)
     return false;
   return odbc_link->commit();
 }
 
 Variant HHVM_FUNCTION(odbc_connect, const String& dsn, const String& username,
-    const String& password)
+    const String& password, const Variant& cursor_type /* = 0 */)
 {
-  ODBCLink *odbc_link = newres<ODBCLink>();
-  Resource ret(odbc_link);
+  auto odbc_link = makeSmartPtr<ODBCLink>();
 
   if (!odbc_link->connect(dsn, username, password)) {
     return false;
   }
-  return ret;
+  return Variant(std::move(odbc_link));
 }
 
 void HHVM_FUNCTION(odbc_close, const Resource& link)
 {
-  ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
+  auto odbc_link = safe_cast<ODBCLink>(link);
   if (odbc_link != nullptr)
     odbc_link->close();
 }
 
-const String HHVM_FUNCTION(odbc_error, const Resource& link)
+const String HHVM_FUNCTION(odbc_error, const Variant& link)
 {
   return String::FromCStr((char*)ODBCContext::get_last_error_code());
 }
 
-const String HHVM_FUNCTION(odbc_errormsg, const Resource& link)
+const String HHVM_FUNCTION(odbc_errormsg, const Variant& link)
 {
   return String::FromCStr((char*)ODBCContext::get_last_error_msg());
 }
 
-Variant HHVM_FUNCTION(odbc_exec, const Resource& link, const String& query)
+Variant HHVM_FUNCTION(odbc_exec, const Resource& link, const String& query,
+                      const Variant& flags /* = 0 */)
 {
-  ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
+  auto odbc_link = safe_cast<ODBCLink>(link);
   if (odbc_link == nullptr)
     return false;
   return odbc_link->exec(query);
 }
 
-bool HHVM_FUNCTION(odbc_execute, const Resource& result, const Array& params)
+bool HHVM_FUNCTION(odbc_execute, const Resource& result, const Variant& params)
 {
-  ODBCCursor *odbc_result = safe_get_typed<ODBCCursor>(result);
+  auto odbc_result = safe_cast<ODBCCursor>(result);
   if (odbc_result == nullptr)
     return false;
-  return odbc_result->exec_prepared_query(params);
+  return odbc_result->exec_prepared_query(params.toArray());
 }
 
-Variant HHVM_FUNCTION(odbc_fetch_array, const Resource& cursor)
+Variant HHVM_FUNCTION(odbc_fetch_array, const Resource& cursor,
+                      const Variant& rownumber /* = 0 */)
 {
-  ODBCCursor *odbc_cursor = safe_get_typed<ODBCCursor>(cursor);
+  auto odbc_cursor = safe_cast<ODBCCursor>(cursor);
   if (odbc_cursor == nullptr)
     return false;
   return odbc_cursor->fetch();
@@ -846,7 +841,7 @@ Variant HHVM_FUNCTION(odbc_fetch_array, const Resource& cursor)
 
 int64_t HHVM_FUNCTION(odbc_num_rows, const Resource& cursor)
 {
-  ODBCCursor *odbc_cursor = safe_get_typed<ODBCCursor>(cursor);
+  auto odbc_cursor = safe_cast<ODBCCursor>(cursor);
   if (odbc_cursor == nullptr)
     return -1;
   return odbc_cursor->num_rows();
@@ -854,7 +849,7 @@ int64_t HHVM_FUNCTION(odbc_num_rows, const Resource& cursor)
 
 Variant HHVM_FUNCTION(odbc_prepare, const Resource& link, const String& query)
 {
-  ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
+  auto odbc_link = safe_cast<ODBCLink>(link);
   if (odbc_link == nullptr)
     return init_null();
   return odbc_link->prepare(query);
@@ -862,7 +857,7 @@ Variant HHVM_FUNCTION(odbc_prepare, const Resource& link, const String& query)
 
 bool HHVM_FUNCTION(odbc_rollback, const Resource& link)
 {
-  ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
+  auto odbc_link = safe_cast<ODBCLink>(link);
   if (odbc_link == nullptr)
     return false;
   return odbc_link->rollback();

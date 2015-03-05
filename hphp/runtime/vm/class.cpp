@@ -1125,9 +1125,16 @@ void checkDeclarationCompat(const PreClass* preClass,
       if (p.isVariadic()) { raiseIncompat(preClass, imeth); }
       auto const& ip = iparams[i];
       if (!relaxedCheck) {
+        // If the interface parameter is a type constant we require the
+        // implementer to specify a type
+        if (!p.userType && ip.typeConstraint.isTypeConstant()) {
+          raiseIncompat(preClass, imeth);
+        }
+
         if (!checkTypeConstraint(preClass, imeth->cls(),
                                  p.typeConstraint, ip.typeConstraint)) {
-          if (!ip.typeConstraint.isTypeVar()) {
+          if (!ip.typeConstraint.isTypeVar() &&
+              !ip.typeConstraint.isTypeConstant()) {
             raiseIncompat(preClass, imeth);
           }
         }
@@ -1436,7 +1443,8 @@ void Class::setConstants() {
       auto const iConst = iface->m_constants[slot];
 
       // If you're inheriting a constant with the same name as an existing
-      // one, they must originate from the same place.
+      // one, they must originate from the same place, unless the constant
+      // was defined as abstract.
       auto const existing = builder.find(iConst.m_name);
 
       if (existing == builder.end()) {
@@ -1448,7 +1456,14 @@ void Class::setConstants() {
         continue;
       }
 
-      if (builder[existing->second].m_class != iConst.m_class) {
+      auto& existingConst = builder[existing->second];
+      if (existingConst.m_val.isAbstractConst()) {
+        existingConst.m_class = iConst.m_class;
+        existingConst.m_val = iConst.m_val;
+        continue;
+      }
+
+      if (existingConst.m_class != iConst.m_class) {
         raise_error("Cannot inherit previously-inherited constant %s",
                     iConst.m_name->data());
       }

@@ -326,8 +326,8 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
   if (maxlength == 0) return 0;
   if (maxlength == PHP_STREAM_COPY_ALL) maxlength = 0;
 
-  File *srcFile = source.getTyped<File>();
-  File *destFile = dest.getTyped<File>();
+  auto srcFile = cast<File>(source);
+  auto destFile = cast<File>(dest);
   if (maxlength < 0) {
     throw_invalid_argument("maxlength: %d", maxlength);
     return false;
@@ -364,8 +364,7 @@ Variant HHVM_FUNCTION(stream_get_contents,
     return init_null();
   }
 
-  File *file = handle.getTyped<File>(false /* nullOkay */,
-                                     true /* badTypeOkay */);
+  auto file = dyn_cast<File>(handle);
   if (!file) {
     throw_invalid_argument(
       "stream_get_contents() expects parameter 1 to be a resource");
@@ -394,16 +393,15 @@ Variant HHVM_FUNCTION(stream_get_line,
                       int length /* = 0 */,
                       const Variant& ending /* = null_variant */) {
   const String& strEnding = ending.isNull() ? null_string : ending.toString();
-  File *file = handle.getTyped<File>();
-  return file->readRecord(strEnding, length);
+  return cast<File>(handle)->readRecord(strEnding, length);
 }
 
 Variant HHVM_FUNCTION(stream_get_meta_data,
                       const Resource& stream) {
-  File *f = stream.getTyped<File>(true, true);
-  if (f) return f->getMetaData();
-  Directory *d = stream.getTyped<Directory>(true, true);
-  if (d) {
+  if (auto f = dyn_cast_or_null<File>(stream)) {
+    return f->getMetaData();
+  }
+  if (auto d = dyn_cast_or_null<Directory>(stream)) {
     return d->getMetaData();
   }
   return false;
@@ -436,16 +434,15 @@ Variant HHVM_FUNCTION(stream_select,
 
 Object HHVM_FUNCTION(stream_await,
                      const Resource& stream,
-                     uint16_t events,
+                     int64_t events,
                      double timeout /*= 0.0 */) {
-  auto f = stream.getTyped<File>();
-  return f->await(events, timeout);
+  return cast<File>(stream)->await((uint16_t)events, timeout);
 }
 
 bool HHVM_FUNCTION(stream_set_blocking,
                    const Resource& stream,
                    int mode) {
-  File *file = stream.getTyped<File>();
+  auto file = cast<File>(stream);
   int flags = fcntl(file->fd(), F_GETFL, 0);
   if (mode) {
     flags &= ~O_NONBLOCK;
@@ -463,7 +460,7 @@ bool HHVM_FUNCTION(stream_set_timeout,
                    const Resource& stream,
                    int seconds,
                    int microseconds /* = 0 */) {
-  if (stream.getTyped<Socket>(false, true)) {
+  if (isa<Socket>(stream)) {
     return HHVM_FN(socket_set_option)
       (stream, SOL_SOCKET, SO_RCVTIMEO,
        make_map_array(s_sec, seconds, s_usec, microseconds));
@@ -474,7 +471,7 @@ bool HHVM_FUNCTION(stream_set_timeout,
 int64_t HHVM_FUNCTION(stream_set_write_buffer,
                       const Resource& stream,
                       int buffer) {
-  PlainFile *plain_file = stream.getTyped<PlainFile>(false, true);
+  auto plain_file = dyn_cast<PlainFile>(stream);
   if (!plain_file) {
     return -1;
   }
@@ -515,7 +512,7 @@ bool HHVM_FUNCTION(stream_is_local,
     return wrapper ? wrapper->m_isLocal : false;
 
   } else if (stream_or_url.isResource()) {
-    File* file = dynamic_cast<File*>(stream_or_url.asCResRef().get());
+    auto file = dyn_cast_or_null<File>(stream_or_url);
     if (!file) {
       raise_warning("supplied resource is not a valid stream resource");
       return false;
@@ -571,7 +568,7 @@ static SmartPtr<Socket> socket_accept_impl(
   struct sockaddr *addr,
   socklen_t *addrlen
 ) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
   auto new_sock = makeSmartPtr<Socket>(
     accept(sock->fd(), addr, addrlen), sock->getType());
   if (!new_sock->valid()) {
@@ -640,7 +637,7 @@ Variant HHVM_FUNCTION(stream_socket_accept,
                       const Resource& server_socket,
                       double timeout /* = -1.0 */,
                       VRefParam peername /* = null */) {
-  Socket *sock = server_socket.getTyped<Socket>();
+  auto sock = cast<Socket>(server_socket);
   pollfd p;
   int n;
 
@@ -724,7 +721,7 @@ Variant HHVM_FUNCTION(stream_socket_recvfrom,
   Variant retval = HHVM_FN(socket_recvfrom)(socket, ref(ret), length, flags,
                                             ref(host), ref(port));
   if (!same(retval, false) && retval.toInt64() >= 0) {
-    Socket *sock = socket.getTyped<Socket>();
+    auto sock = cast<Socket>(socket);
     if (sock->getType() == AF_INET6) {
       address = "[" + host.toString() + "]:" + port.toInt32();
     } else {
@@ -746,7 +743,7 @@ Variant HHVM_FUNCTION(stream_socket_sendto,
                            : address.toString();
 
   if (strAddress == null_string) {
-    Socket *sock = socket.getTyped<Socket>();
+    auto sock = cast<Socket>(socket);
     host = sock->getAddress();
     port = sock->getPort();
   } else {

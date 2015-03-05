@@ -104,7 +104,7 @@ def hash_string(s):
     if tail_sz == 0:
         return crc >> 1
 
-    shift = -((tail_sz - 8) << 3) & 0b11111
+    shift = -((tail_sz - 8) << 3) & 0b111111
     tail = _unpack(s[size:].ljust(8, '\0'))
 
     crc = _crc32q(crc, tail << shift)

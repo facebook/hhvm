@@ -37,11 +37,10 @@ PDODriver::PDODriver(const char *name) : m_name(name) {
   s_drivers[name] = this;
 }
 
-PDOResource* PDODriver::createResource(const String& datasource,
-                                       const String& username,
-                                       const String& password,
-                                       const Array& options) {
-  // This is a bare ResourceData*, so it needs to be freed on error.
+SmartPtr<PDOResource> PDODriver::createResource(const String& datasource,
+                                                const String& username,
+                                                const String& password,
+                                                const Array& options) {
   auto const rsrc = createResourceImpl();
   auto const& conn = rsrc->conn();
 
@@ -124,7 +123,7 @@ String PDOConnection::lastId(const char *name) {
   return String();
 }
 
-bool PDOConnection::fetchErr(PDOStatement *stmt, Array &info) {
+bool PDOConnection::fetchErr(PDOStatement* stmt, Array &info) {
   throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
@@ -202,7 +201,7 @@ PDOStatement::PDOStatement()
 }
 
 PDOStatement::~PDOStatement() {
-  if (dbh.get() && dbh->query_stmt == this) {
+  if (dbh && dbh->query_stmt == this) {
     dbh->query_stmt = NULL;
   }
 }
@@ -235,7 +234,7 @@ bool PDOStatement::getColumn(int colno, Variant &value) {
   return false;
 }
 
-bool PDOStatement::paramHook(PDOBoundParam *param, PDOParamEvent event_type) {
+bool PDOStatement::paramHook(PDOBoundParam* param, PDOParamEvent event_type) {
   throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }

@@ -55,34 +55,23 @@ VcallArgsId Vunit::makeVcallArgs(VcallArgs&& args) {
   return i;
 }
 
-Vreg Vunit::makeConst(bool b) {
-  auto it = constants.find(b);
-  if (it != constants.end()) return it->second;
-  return constants[b] = makeReg();
+// helper for making constants, where T maps to the correct overloaded
+// Vconst constructor.
+template<class T> Vreg make_const(Vunit& unit, T c) {
+  auto it = unit.constants.find(c);
+  if (it != unit.constants.end()) return it->second;
+  return unit.constants[c] = unit.makeReg();
 }
 
-Vreg Vunit::makeConst(uint32_t v) {
-  auto it = constants.find(v);
-  if (it != constants.end()) return it->second;
-  return constants[v] = makeReg();
-}
-
-Vreg Vunit::makeConst(uint64_t v) {
-  auto it = constants.find(v);
-  if (it != constants.end()) return it->second;
-  return constants[v] = makeReg();
-}
+Vreg Vunit::makeConst(bool v)     { return make_const(*this, v); }
+Vreg Vunit::makeConst(uint32_t v) { return make_const(*this, v); }
+Vreg Vunit::makeConst(uint64_t v) { return make_const(*this, v); }
+Vreg Vunit::makeConst(Vptr v)     { return make_const(*this, v); }
 
 Vreg Vunit::makeConst(double d) {
   union { double d; uint64_t i; } u;
   u.d = d;
-  return makeConst(u.i);
-}
-
-Vreg Vunit::makeConst(Vptr p) {
-  auto it = constants.find(p);
-  if (it != constants.end()) return it->second;
-  return constants[p] = makeReg();
+  return make_const(*this, u.i);
 }
 
 bool Vunit::needsRegAlloc() const {

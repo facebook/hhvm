@@ -41,7 +41,7 @@ TRACE_SET_MOD(runtime);
 const StaticString s___invoke("__invoke");
 
 void TypeConstraint::init() {
-  if (m_typeName == nullptr || isTypeVar()) {
+  if (m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
     m_type = Type::Mixed;
     return;
   }
@@ -92,6 +92,7 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
         case 6: strip = !strcasecmp(stripped, "string"); break;
         case 8:
           strip = (!strcasecmp(stripped, "resource") ||
+                   !strcasecmp(stripped, "noreturn") ||
                    !strcasecmp(stripped, "arraykey"));
           break;
         default:
@@ -200,7 +201,9 @@ std::pair<const TypeAliasReq*, Class*> getTypeAliasOrClassWithAutoload(
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   assert(!isSelf() && !isParent() && !isCallable());
-  assert(IMPLIES(!hasConstraint() || isTypeVar(), isMixed()));
+  assert(IMPLIES(
+    !hasConstraint() || isTypeVar() || isTypeConstant(),
+    isMixed()));
 
   if (!isPrecise()) return folly::none;
 
@@ -307,7 +310,7 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
 }
 
 bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
-  assert(hasConstraint() && !isTypeVar() && !isMixed());
+  assert(hasConstraint() && !isTypeVar() && !isMixed() && !isTypeConstant());
 
   // This is part of the interpreter runtime; perf matters.
   if (tv->m_type == KindOfRef) {
@@ -424,7 +427,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
       raise_return_typehint_error(msg);
     } else {
-      raise_debugging(msg);
+      raise_warning_unsampled(msg);
     }
     return;
   }
@@ -452,7 +455,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
   if (isExtended() && isSoft()) {
     // Soft extended type hints raise warnings instead of recoverable
     // errors, to ease migration.
-    raise_debugging(
+    raise_warning_unsampled(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
         id + 1, func->fullName()->data(), name, givenType

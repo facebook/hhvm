@@ -1,0 +1,21 @@
+<?hh
+
+function f($a, $b, $c) {
+  // no need for parens
+  if ($a || $b || $c) {};
+  if ($a && $b && $c) {};
+  if ($a && $b || $c) {};
+  if ($a && $b + $c) {};
+  if ($a || $b && $c) {}
+  if ($a && $b xor $c) {}
+  // this doesn't need parens since `&&` is associative
+  if ($a && $b && $c) {}
+
+  // these need parens
+  if ($a && ($b ?: $c)) {}
+  if (($a = $b) && $c) {}
+  if ($a && ($b || $c)) {}
+  if ($a || ($b xor $c)) {}
+
+  return $a != $b;
+}

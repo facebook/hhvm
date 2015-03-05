@@ -33,6 +33,10 @@ inline uintptr_t tlsBase() {
   // mrs == "move register <-- system"
   // tpidr_el0 == "thread process id register for exception level 0"
   asm ("mrs %0, tpidr_el0" : "=r" (retval));
+#elif defined (__powerpc64__)
+  asm ("xor %0,%0,%0\n\t"
+       "or  %0,%0,13\n\t"
+      : "=r" (retval));
 #else
 # error How do you access thread-local storage on this machine?
 #endif

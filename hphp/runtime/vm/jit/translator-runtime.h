@@ -230,8 +230,8 @@ StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
 void bindElemC(TypedValue*, TypedValue, RefData*, MInstrState*);
-void setWithRefElemC(TypedValue*, TypedValue, TypedValue*, MInstrState*);
-void setWithRefNewElem(TypedValue*, TypedValue*, MInstrState*);
+void setWithRefElemC(TypedValue*, TypedValue, TypedValue, MInstrState*);
+void setWithRefNewElem(TypedValue*, TypedValue, MInstrState*);
 }
 
 /*

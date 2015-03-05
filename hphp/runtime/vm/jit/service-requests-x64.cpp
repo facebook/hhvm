@@ -46,21 +46,39 @@ static constexpr int kMovSize = 0xa;
  * is emitted.
  *
  * Most notably, we must check if the CodeBlock for the jmp and for the stub
- * are aliased.  If so, we reserve space for the jmp which we'll emit properly
- * after the service request stub is emitted.
+ * are aliased.  If so, we reserve space for the jmp(s) which we'll emit
+ * properly after the service request stub is emitted.  If the service request
+ * is being jumped to conditionally, we'll also need an unconditional jump that
+ * jumps over it (`secondary' in SmashInfo---nullptr if this isn't needed).
  */
+struct SmashInfo { TCA primary; TCA secondary; };
 ALWAYS_INLINE
-TCA emitBindJPre(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc) {
-  mcg->backEnd().prepareForSmash(cb, cc == jit::CC_None ? kJmpLen : kJmpccLen);
+SmashInfo emitBindJPre(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc) {
+  mcg->backEnd().prepareForSmash(cb, cc == CC_None ? kJmpLen : kJmpccLen);
 
   TCA toSmash = cb.frontier();
+  TCA jmpSmash = nullptr;
   if (cb.base() == frozen.base()) {
     mcg->backEnd().emitSmashableJump(cb, toSmash, cc);
+
+    /*
+     * If we're emitting a conditional jump to the service request, the
+     * fallthrough (jcc is not taken) will need a jump over the service request
+     * code.  We could try to invert the jcc to generate better code, but this
+     * only happens if we're emitting code in frozen anyway, so hopefully it
+     * isn't hot.  To do that would require inverting the information we pass
+     * everywhere about how to smash the jump, also.
+     */
+    if (cc != CC_None) {
+      jmpSmash = cb.frontier();
+      Asm a { cb };
+      a.jmp(jmpSmash);
+    }
   }
 
   mcg->setJmpTransID(toSmash);
 
-  return toSmash;
+  return { toSmash, jmpSmash };
 }
 
 /*
@@ -68,14 +86,24 @@ TCA emitBindJPre(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc) {
  * stub is emitted.
  */
 ALWAYS_INLINE
-void emitBindJPost(CodeBlock& cb, CodeBlock& frozen,
-                   ConditionCode cc, TCA toSmash, TCA sr) {
+void emitBindJPost(CodeBlock& cb,
+                   CodeBlock& frozen,
+                   ConditionCode cc,
+                   SmashInfo smashInfo,
+                   TCA sr) {
   if (cb.base() == frozen.base()) {
-    CodeCursor cursor(cb, toSmash);
+    if (smashInfo.secondary) {
+      auto const fallthrough = cb.frontier();
+      CodeCursor cursor(cb, smashInfo.secondary);
+      Asm a { cb };
+      a.jmp(fallthrough);
+    }
+    CodeCursor cursor(cb, smashInfo.primary);
     mcg->backEnd().emitSmashableJump(cb, sr, cc);
-  } else {
-    mcg->backEnd().emitSmashableJump(cb, sr, cc);
+    return;
   }
+
+  mcg->backEnd().emitSmashableJump(cb, sr, cc);
 }
 
 const int kExtraRegs = 2; // we also set rdi and r10
@@ -177,15 +205,16 @@ emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
 
 void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
                SrcKey dest, TransFlags trflags) {
-  auto toSmash = emitBindJPre(cb, frozen, cc);
-  TCA sr = emitEphemeralServiceReq(frozen,
-                                   mcg->getFreeStub(frozen,
-                                                    &mcg->cgFixups()),
-                                   REQ_BIND_JMP,
-                                   RipRelative(toSmash),
-                                   dest.toAtomicInt(),
-                                   trflags.packed);
-  emitBindJPost(cb, frozen, cc, toSmash, sr);
+  auto const smashInfo = emitBindJPre(cb, frozen, cc);
+  auto const sr = emitEphemeralServiceReq(
+    frozen,
+    mcg->getFreeStub(frozen, &mcg->cgFixups()),
+    REQ_BIND_JMP,
+    RipRelative(smashInfo.primary),
+    dest.toAtomicInt(),
+    trflags.packed
+  );
+  emitBindJPost(cb, frozen, cc, smashInfo, sr);
 }
 
 TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
@@ -195,7 +224,7 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                           dest.offset(), trflags.packed);
   emitBindJPost(cb, frozen, cc, toSmash, sr);
 
-  return toSmash;
+  return toSmash.primary;
 }
 
 }}}

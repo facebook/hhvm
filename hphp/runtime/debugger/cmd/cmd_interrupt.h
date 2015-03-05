@@ -19,52 +19,63 @@
 
 #include <vector>
 
+#include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdInterrupt : public DebuggerCommand {
-public:
-  CmdInterrupt()
-      : DebuggerCommand(KindOfInterrupt),
-        m_interrupt(-1), m_threadId(0), m_site(nullptr) {}
+struct CmdInterrupt : DebuggerCommand {
+  CmdInterrupt() : DebuggerCommand(KindOfInterrupt) {}
 
   CmdInterrupt(InterruptType interrupt, const char *program,
                InterruptSite *site, const char *error)
-      : DebuggerCommand(KindOfInterrupt),
-        m_interrupt(interrupt), m_program(program ? program : ""),
-        m_site(site) {
+      : DebuggerCommand(KindOfInterrupt)
+      , m_interrupt(interrupt)
+      , m_program(program ? program : "")
+      , m_site(site)
+  {
     m_threadId = (int64_t)Process::GetThreadId();
     if (error) m_errorMsg = error;
   }
 
-  int64_t getThreadId() const { return m_threadId;}
-  InterruptType getInterruptType() const { return (InterruptType)m_interrupt;}
-  std::string desc() const;
-  std::string error() const { return m_errorMsg;}
+  int64_t getThreadId() const {
+    return m_threadId;
+  }
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  InterruptType getInterruptType() const {
+    return (InterruptType)m_interrupt;
+  }
+
+  std::string desc() const;
+
+  const std::string& error() const {
+    return m_errorMsg;
+  }
+
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
   bool shouldBreak(DebuggerProxy &proxy,
                    const std::vector<BreakPointInfoPtr> &bps,
                    int stackDepth);
   std::string getFileLine() const;
 
-  InterruptSite *getSite() { return m_site;}
+  InterruptSite* getSite() {
+    return m_site;
+  }
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
-  int16_t m_interrupt;
+  int16_t m_interrupt{-1};
   std::string m_program;   // informational only
   std::string m_errorMsg;  // informational only
-  int64_t m_threadId;
-  InterruptSite *m_site;   // server side
+  int64_t m_threadId{0};
+  InterruptSite* m_site{nullptr};   // server side
   BreakPointInfoPtr m_bpi; // client side
   std::vector<BreakPointInfoPtr> m_matched;
 };

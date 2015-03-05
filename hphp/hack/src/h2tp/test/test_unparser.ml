@@ -14,7 +14,7 @@ module List = List_ext
 module CE = Common_exns
 module Parser_hack = Parser_hack_ext
 
-let output_file_type = ref Ast.HhFile
+let output_file_type = ref FileInfo.HhFile
 
 let parse_options () =
   let src = ref None
@@ -37,8 +37,8 @@ let parse_options () =
   end in
 
   let output_type = function
-  | "php" -> output_file_type := Ast.PhpFile
-  | "hack" -> output_file_type := Ast.HhFile
+  | "php" -> output_file_type := FileInfo.PhpFile
+  | "hack" -> output_file_type := FileInfo.HhFile
   | _ -> fail_with_usage "output_type must be php or hack" in
 
   let is_valid_src f =
@@ -84,7 +84,7 @@ let _ =
       of a constructor. So we strip it out here. The correct solution would be to
       modify the parser, but for now this is an acceptable workaround.
     *)
-    let ast = if !output_file_type = Ast.PhpFile
+    let ast = if !output_file_type = FileInfo.PhpFile
               then Erase_types.map ast
               else ast in
 

@@ -32,7 +32,7 @@ namespace HPHP {
 // This struct contains all the runtime information about a given breakpoint.
 // Each breakpoint is tagged with its type.
 struct XDebugBreakpoint {
-  enum class Type {
+  enum class Type : int8_t {
     LINE,
     CALL,
     RETURN,
@@ -41,7 +41,7 @@ struct XDebugBreakpoint {
 
   // The hit value will be compared against the hit count using one of these
   // operators
-  enum class HitCondition {
+  enum class HitCondition : int8_t {
     GREATER_OR_EQUAL,
     EQUAL,
     MULTIPLE
@@ -50,9 +50,9 @@ struct XDebugBreakpoint {
   Type type; // The breakpoint type. This must be provided.
   bool enabled = true; // Whether or not this breakpoint is enabled
   bool temporary = false; // If true, removed after being hit
+  HitCondition hitCondition = HitCondition::GREATER_OR_EQUAL;
   int hitValue = 0; // Value to compare hitCount against
   int hitCount = 0; // # of times this breakpoint has been hit
-  HitCondition hitCondition = HitCondition::GREATER_OR_EQUAL;
 
   // A line breakpoint requires a filename and a line number. It has an
   // optional condition represented by the given unit where the pseud-main is

@@ -33,8 +33,6 @@ void SSATmp::setInstruction(IRInstruction* inst, int dstId) {
 
 namespace {
 int typeNeededWords(Type t) {
-  assert(!t.equals(Type::Bottom));
-
   if (t.subtypeOfAny(Type::Uninit,
                      Type::InitNull,
                      Type::RetAddr,
@@ -49,7 +47,7 @@ int typeNeededWords(Type t) {
   if (t.maybe(Type::Nullptr)) {
     return typeNeededWords(t - Type::Nullptr);
   }
-  if (t <= Type::Ctx || t.isPtr()) {
+  if (t <= Type::Ctx || t <= Type::PtrToGen) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }

@@ -15,8 +15,10 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_frame.h"
+
 #include "hphp/runtime/debugger/cmd/cmd_up.h"
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
+#include "hphp/runtime/debugger/debugger_client.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

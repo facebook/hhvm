@@ -37,6 +37,32 @@ struct SSATmp;
  * locations we care about).  We don't subdivide very much yet, so many things
  * should end up there.  AEmpty is the bottom.  The various special location
  * types AFoo all have an AFooAny, which is the superset of all AFoos.
+ *
+ * Part of the lattice currently looks like this:
+ *
+ *                 Unknown                    ANonFrame := ~AFrameAny
+ *                    |                       ANonStack := ~AStackAny
+ *                    |
+ *      +---------+---+---------------+----------------------+
+ *      |         |                   |                      |
+ *      |         |                   |                      |
+ *      |         |                   |                      |
+ *      |         |                   |                      |
+ *      |         |                AHeapAny*                 |
+ *      |         |                   |                      |
+ *      |         |            +------+-------+              |
+ *      |         |            |              |              |
+ *   FrameAny  StackAny     ElemAny        PropAny       MIStateAny
+ *      |         |          /    \           |              |
+ *     ...       ...   ElemIAny  ElemSAny    ...            ...
+ *                        |         |
+ *                       ...       ...
+ *
+ *   (*) AHeapAny contains some things other than ElemAny and PropAny that
+ *       don't have explicit nodes in the lattice yet.  (Like the values inside
+ *       of php references, the lvalBlackhole, etc.)  It's hard for this to
+ *       matter to client code for now because we don't expose an intersection
+ *       or difference operation.
  */
 struct AliasClass;
 
@@ -109,6 +135,11 @@ struct AElemS { SSATmp* arr; const StringData* key; };
  */
 struct AStack { SSATmp* base; int32_t offset; int32_t size; };
 
+/*
+ * One of the MInstrState TypedValues, at a particular offset in bytes.
+ */
+struct AMIState { int32_t offset; };
+
 //////////////////////////////////////////////////////////////////////
 
 struct AliasClass {
@@ -120,10 +151,10 @@ struct AliasClass {
     BElemI   = 1 << 2,
     BElemS   = 1 << 3,
     BStack   = 1 << 4,
+    BMIState = 1 << 5,
 
     BElem    = BElemI | BElemS,
-
-    BHeap    = ~(BFrame|BStack),
+    BHeap    = BElem | BProp,
 
     BNonFrame = ~BFrame,
     BNonStack = ~BStack,
@@ -151,6 +182,7 @@ struct AliasClass {
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
   /* implicit */ AliasClass(AStack);
+  /* implicit */ AliasClass(AMIState);
 
   /*
    * Exact equality.
@@ -181,11 +213,12 @@ struct AliasClass {
    *
    * Returns folly::none if this alias class has no specialization in that way.
    */
-  folly::Optional<AFrame> frame() const;
-  folly::Optional<AProp>  prop() const;
-  folly::Optional<AElemI> elemI() const;
-  folly::Optional<AElemS> elemS() const;
-  folly::Optional<AStack> stack() const;
+  folly::Optional<AFrame>   frame() const;
+  folly::Optional<AProp>    prop() const;
+  folly::Optional<AElemI>   elemI() const;
+  folly::Optional<AElemS>   elemS() const;
+  folly::Optional<AStack>   stack() const;
+  folly::Optional<AMIState> mis() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -195,11 +228,12 @@ struct AliasClass {
    *
    *   cls <= AFooAny ? cls.foo() : folly::none
    */
-  folly::Optional<AFrame> is_frame() const;
-  folly::Optional<AProp>  is_prop() const;
-  folly::Optional<AElemI> is_elemI() const;
-  folly::Optional<AElemS> is_elemS() const;
-  folly::Optional<AStack> is_stack() const;
+  folly::Optional<AFrame>   is_frame() const;
+  folly::Optional<AProp>    is_prop() const;
+  folly::Optional<AElemI>   is_elemI() const;
+  folly::Optional<AElemS>   is_elemS() const;
+  folly::Optional<AStack>   is_stack() const;
+  folly::Optional<AMIState> is_mis() const;
 
 private:
   enum class STag {
@@ -209,6 +243,7 @@ private:
     ElemI,
     ElemS,
     Stack,
+    MIState,
   };
 
 private:
@@ -230,22 +265,24 @@ private:
     AElemI   m_elemI;
     AElemS   m_elemS;
     AStack   m_stack;
+    AMIState m_mis;
   };
 };
 
 //////////////////////////////////////////////////////////////////////
 
-auto const AEmpty    = AliasClass{AliasClass::BEmpty};
-auto const AFrameAny = AliasClass{AliasClass::BFrame};
-auto const APropAny  = AliasClass{AliasClass::BProp};
-auto const AHeapAny  = AliasClass{AliasClass::BHeap};
-auto const ANonFrame = AliasClass{AliasClass::BNonFrame};
-auto const ANonStack = AliasClass{AliasClass::BNonStack};
-auto const AStackAny = AliasClass{AliasClass::BStack};
-auto const AElemIAny = AliasClass{AliasClass::BElemI};
-auto const AElemSAny = AliasClass{AliasClass::BElemS};
-auto const AElemAny  = AliasClass{AliasClass::BElem};
-auto const AUnknown  = AliasClass{AliasClass::BUnknown};
+auto const AEmpty      = AliasClass{AliasClass::BEmpty};
+auto const AFrameAny   = AliasClass{AliasClass::BFrame};
+auto const APropAny    = AliasClass{AliasClass::BProp};
+auto const AHeapAny    = AliasClass{AliasClass::BHeap};
+auto const ANonFrame   = AliasClass{AliasClass::BNonFrame};
+auto const ANonStack   = AliasClass{AliasClass::BNonStack};
+auto const AStackAny   = AliasClass{AliasClass::BStack};
+auto const AElemIAny   = AliasClass{AliasClass::BElemI};
+auto const AElemSAny   = AliasClass{AliasClass::BElemS};
+auto const AElemAny    = AliasClass{AliasClass::BElem};
+auto const AMIStateAny = AliasClass{AliasClass::BMIState};
+auto const AUnknown    = AliasClass{AliasClass::BUnknown};
 
 //////////////////////////////////////////////////////////////////////
 

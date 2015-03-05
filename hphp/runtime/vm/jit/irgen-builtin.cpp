@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
@@ -69,7 +71,7 @@ SSATmp* opt_is_a(HTS& env, uint32_t numArgs) {
   // The last param of is_a has a default argument of false, which makes it
   // behave the same as instanceof (which doesn't allow a string as the tested
   // object). Don't do the conversion if we're not sure this arg is false.
-  auto const allowStringType = topType(env, 0);
+  auto const allowStringType = topType(env, BCSPOffset{0});
   if (!(allowStringType <= Type::Bool)
       || !allowStringType.isConst()
       || allowStringType.boolVal()) {
@@ -79,18 +81,18 @@ SSATmp* opt_is_a(HTS& env, uint32_t numArgs) {
   // Unlike InstanceOfD, is_a doesn't support interfaces like Stringish, so e.g.
   // "is_a('x', 'Stringish')" is false even though "'x' instanceof Stringish" is
   // true. So if the first arg is not an object, the return is always false.
-  auto const objType = topType(env, 2);
+  auto const objType = topType(env, BCSPOffset{2});
   if (!objType.maybe(Type::Obj)) {
     return cns(env, false);
   }
 
   if (objType <= Type::Obj) {
-    auto const classnameType = topType(env, 1);
+    auto const classnameType = topType(env, BCSPOffset{1});
     if (classnameType <= Type::StaticStr && classnameType.isConst()) {
       return implInstanceOfD(
         env,
-        topC(env, 2),
-        top(env, Type::Str, 1)->strVal()
+        topC(env, BCSPOffset{2}),
+        top(env, Type::Str, BCSPOffset{1})->strVal()
       );
     }
   }
@@ -102,8 +104,8 @@ SSATmp* opt_is_a(HTS& env, uint32_t numArgs) {
 SSATmp* opt_count(HTS& env, uint32_t numArgs) {
   if (numArgs != 2) return nullptr;
 
-  auto const mode = topC(env, 0);
-  auto const val = topC(env, 1);
+  auto const mode = topC(env, BCSPOffset{0});
+  auto const val = topC(env, BCSPOffset{1});
 
   // Bail if we're trying to do a recursive count()
   if (!mode->isConst(0)) return nullptr;
@@ -114,12 +116,27 @@ SSATmp* opt_count(HTS& env, uint32_t numArgs) {
 SSATmp* opt_ord(HTS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
 
-  auto const arg = topC(env, 0);
-  // a static string is passed in, resolve with a constant.
-  if (arg->type().isConst(Type::Str)) {
-    unsigned char first = arg->strVal()->data()[0];
-    return cns(env, int64_t(first));
+  auto const arg = topC(env, BCSPOffset{0});
+  auto const arg_type = arg->type();
+  if (arg_type <= Type::Str) {
+    return gen(env, OrdStr, arg);
   }
+
+  // intercept constant, non-string ord() here instead of OrdStr simplify stage.
+  // OrdStr depends on a string as input for its vasm implementation.
+  if (arg->isConst(Type::Bool)) {
+    // ord((string)true)===ord("1"), ord((string)false)===ord("")
+    return cns(env, int64_t{arg_type.boolVal() ? '1' : 0});
+  } else if (arg_type <= Type::Null) {
+    return cns(env, int64_t{0});
+  } else if (arg->isConst(Type::Int)) {
+    const auto conv = folly::to<std::string>(arg_type.intVal());
+    return cns(env, int64_t{conv[0]});
+  } else if (arg->isConst(Type::Dbl)) {
+    const auto conv = folly::to<std::string>(arg_type.dblVal());
+    return cns(env, int64_t{conv[0]});
+  }
+
   return nullptr;
 }
 
@@ -129,14 +146,16 @@ SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
   // Only generate the optimized version if the argument passed in is a
   // static string with a constant literal value so we can get the string value
   // at JIT time.
-  auto const argType = topType(env, 0);
+  auto const argType = topType(env, BCSPOffset{0});
   if (!(argType <= Type::StaticStr) || !argType.isConst()) {
     return nullptr;
   }
 
   // We can only optimize settings that are system wide since user level
   // settings can be overridden during the execution of a request.
-  auto const settingName = top(env, Type::Str, 0)->strVal()->toCppString();
+  auto const settingName = top(env,
+                               Type::Str,
+                               BCSPOffset{0})->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
   if (!IniSetting::GetMode(settingName, mode)) {
     return nullptr;
@@ -169,11 +188,11 @@ SSATmp* opt_in_array(HTS& env, uint32_t numArgs) {
   // We will restrict this optimization to needles that are strings, and
   // haystacks that have only non-numeric string keys. This avoids a bunch of
   // complication around numeric-string array-index semantics.
-  if (!(topType(env, 2) <= Type::Str)) {
+  if (!(topType(env, BCSPOffset{2}) <= Type::Str)) {
     return nullptr;
   }
 
-  auto const haystackType = topType(env, 1);
+  auto const haystackType = topType(env, BCSPOffset{1});
   if (!(haystackType <= Type::StaticArr) || !haystackType.isConst()) {
     // Haystack isn't statically known
     return nullptr;
@@ -205,7 +224,7 @@ SSATmp* opt_in_array(HTS& env, uint32_t numArgs) {
     flipped.set(key.asCStrRef(), init_null_variant);
   }
 
-  auto const needle = topC(env, 2);
+  auto const needle = topC(env, BCSPOffset{2});
   auto const array = flipped.toArray();
   return gen(
     env,
@@ -223,7 +242,7 @@ SSATmp* opt_get_class(HTS& env, uint32_t numArgs) {
   if (numArgs == 0) return curName();
   if (numArgs != 1) return nullptr;
 
-  auto const val = topC(env, 0);
+  auto const val = topC(env, BCSPOffset{0});
   auto const ty  = val->type();
   if (ty <= Type::Null) return curName();
   if (ty <= Type::Obj) {
@@ -478,7 +497,8 @@ struct CatchMaker {
     gen(env, BeginCatch);
     decRefForUnwind();
     prepareForCatch();
-    gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env), sp(env));
+    gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+      fp(env), sp(env));
     return exit;
   }
 
@@ -499,8 +519,9 @@ struct CatchMaker {
         hint(env, Block::Hint::Unused);
         decRefForUnwind();
         prepareForCatch();
-        gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env),
-          sp(env));
+        gen(env, EndCatch,
+          IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+          fp(env), sp(env));
       }
     );
 
@@ -512,7 +533,6 @@ struct CatchMaker {
     if (m_params.thiz) gen(env, DecRef, m_params.thiz);
 
     auto const val = gen(env, LdUnwinderValue, Type::Cell);
-    gen(env, DeleteUnwinderException);
     push(env, val);
     gen(env, Jmp, makeExit(env, nextBcOff(env)));
 
@@ -546,7 +566,8 @@ private:
      * which is trying to detect failure to do this properly.
      */
     spillStack(env);
-    gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+    gen(env, AdjustSP,
+      IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) }, sp(env));
     gen(env, EagerSyncVMRegs, fp(env), sp(env));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
   }
@@ -577,20 +598,21 @@ private:
   // Same work as above, but opposite order.
   void decRefForSideExit() const {
     spillStack(env);
-    auto stackIdx = m_params.numThroughStack;
+    int32_t stackIdx = safe_cast<int32_t>(m_params.numThroughStack);
 
     // Make sure we have loads for all of the stack elements.  We need to do
     // this in forward order before we decref in backward order because
     // extendStack will end up with values that are of type StkElem
     // TODO(#6156498).
     for (auto i = 0; i < stackIdx; ++i) {
-      top(env, Type::Gen, i, DataTypeGeneric);
+      top(env, Type::Gen, BCSPOffset{i}, DataTypeGeneric);
     }
 
     for (auto i = m_params.size(); i-- > 0;) {
       if (m_params[i].throughStack) {
         --stackIdx;
-        auto const val = top(env, Type::Gen, stackIdx, DataTypeGeneric);
+        auto const val = top(env, Type::Gen, BCSPOffset{stackIdx},
+          DataTypeGeneric);
         gen(env, DecRef, val);
       } else {
         gen(env, DecRef, m_params[i].value);
@@ -614,7 +636,6 @@ SSATmp* coerce_value(HTS& env,
                      uint32_t paramIdx,
                      const CatchMaker& maker) {
   auto const targetTy = param_coerce_type(callee, paramIdx);
-  always_assert(targetTy != Type::Bottom);
   if (!callee->isParamCoerceMode()) {
     if (targetTy <= Type::Int) {
       return gen(env, ConvCellToInt, maker.makeUnusualCatch(), oldVal);
@@ -653,7 +674,7 @@ SSATmp* coerce_value(HTS& env,
 void coerce_stack(HTS& env,
                   const Func* callee,
                   uint32_t paramIdx,
-                  uint32_t offset,
+                  BCSPOffset offset,
                   const CatchMaker& maker) {
   auto const mi = callee->methInfo();
   auto const targetTy = [&]() -> Type {
@@ -663,20 +684,19 @@ void coerce_stack(HTS& env,
     }
     return param_coerce_type(callee, paramIdx);
   }();
-  always_assert(targetTy != Type::Bottom);
 
   if (callee->isParamCoerceMode()) {
     gen(env,
         CoerceStk,
         targetTy,
-        CoerceStkData { offsetFromSP(env, offset), callee, paramIdx + 1 },
+        CoerceStkData { offsetFromIRSP(env, offset), callee, paramIdx + 1 },
         maker.makeParamCoerceCatch(),
         sp(env));
   } else {
     gen(env,
         CastStk,
         targetTy,
-        StackOffset { offsetFromSP(env, offset) },
+        IRSPOffsetData { offsetFromIRSP(env, offset) },
         maker.makeUnusualCatch(),
         sp(env));
   }
@@ -728,7 +748,8 @@ jit::vector<SSATmp*> realize_params(HTS& env,
       continue;
     }
 
-    auto const offset = params.numThroughStack - stackIdx - 1;
+    auto const offset = BCSPOffset{safe_cast<int32_t>(
+      params.numThroughStack - stackIdx - 1)};
     if (params[paramIdx].needsConversion) {
       coerce_stack(env, callee, paramIdx, offset, maker);
     }
@@ -799,7 +820,7 @@ void builtinCall(HTS& env,
     CallBuiltin,
     retType,
     CallBuiltinData {
-      offsetFromSP(env, 0),
+      offsetFromIRSP(env, BCSPOffset{0}),
       callee,
       builtinFuncDestroysLocals(callee)
     },
@@ -885,8 +906,8 @@ void nativeImplInlined(HTS& env) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
-  if (src->isA(Type::Obj) && src->type().isSpecialized()) {
-    auto const cls = src->type().getClass();
+  if (src->isA(Type::Obj) && src->type().clsSpec()) {
+    auto const cls = src->type().clsSpec().cls();
     if (!env.irb->constrainValue(src, TypeConstraint(cls).setWeak())) {
       // If we know the class without having to specialize a guard
       // any further, use it.
@@ -894,7 +915,7 @@ SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
     }
   }
 
-  if (src->type().not(Type::Obj)) {
+  if (!src->type().maybe(Type::Obj)) {
     return cns(env, false);
   }
 
@@ -957,7 +978,7 @@ void emitNativeImpl(HTS& env) {
   auto const stack   = gen(env, RetAdjustStk, fp(env));
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const frame   = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(0, false), stack, frame, retAddr);
+  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame, retAddr);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -970,7 +991,7 @@ void implArrayIdx(HTS& env, SSATmp* loaded_collection_array) {
   // These types are just used to decide what to do; once we know what we're
   // actually doing we constrain the values with the popC()s later on in this
   // function.
-  auto const keyType = topC(env, 1, DataTypeGeneric)->type();
+  auto const keyType = topC(env, BCSPOffset{1}, DataTypeGeneric)->type();
 
   if (keyType <= Type::Null) {
     auto const def = popC(env, DataTypeGeneric);
@@ -1014,7 +1035,7 @@ void implGenericIdx(HTS& env) {
 }
 
 void emitArrayIdx(HTS& env) {
-  auto const arrType = topC(env, 2, DataTypeGeneric)->type();
+  auto const arrType = topC(env, BCSPOffset{2}, DataTypeGeneric)->type();
   if (!(arrType <= Type::Arr)) {
     // raise fatal
     interpOne(env, Type::Cell, 3);
@@ -1025,8 +1046,8 @@ void emitArrayIdx(HTS& env) {
 }
 
 void emitIdx(HTS& env) {
-  auto const key      = topC(env, 1, DataTypeGeneric);
-  auto const base     = topC(env, 2, DataTypeGeneric);
+  auto const key      = topC(env, BCSPOffset{1}, DataTypeGeneric);
+  auto const base     = topC(env, BCSPOffset{2}, DataTypeGeneric);
   auto const keyType  = key->type();
   auto const baseType = base->type();
 
@@ -1039,22 +1060,27 @@ void emitIdx(HTS& env) {
       return;
     }
 
-    if (baseType < Type::Obj && baseType.isSpecialized()) {
-      // We must require either constant keys or known integer keys for Map,
-      // because integer-like strings behave differently.
-      auto const okMap = baseType.getClass() == c_Map::classof() &&
-                           (keyType.isConst() || keyType <= Type::Int);
+    if (baseType < Type::Obj && baseType.clsSpec()) {
+      auto const cls = baseType.clsSpec().cls();
+
+      // We must require either constant non-int keys or known integer keys for
+      // Map, because integer-like strings behave differently.
+      auto const okMap = [&]() {
+        if (cls != c_Map::classof()) return false;
+        if (keyType <= Type::Int) return true;
+        if (!keyType.isConst()) return false;
+        int64_t dummy;
+        if (keyType.strVal()->isStrictlyInteger(dummy)) return false;
+        return true;
+      }();
       // Similarly, Vector is only usable with int keys, so we can only do this
       // for Vector if it's an Int.
-      auto const okVector = baseType.getClass() == c_Vector::classof() &&
-                              keyType <= Type::Int;
+      auto const okVector = cls == c_Vector::classof() &&
+                            keyType <= Type::Int;
 
       auto const optimizableCollection = okMap || okVector;
       if (optimizableCollection) {
-        env.irb->constrainValue(
-          base,
-          TypeConstraint(baseType.getClass())
-        );
+        env.irb->constrainValue(base, TypeConstraint(cls));
         env.irb->constrainValue(key, DataTypeSpecific);
         auto const arr = gen(env, LdColArray, base);
         implArrayIdx(env, arr);

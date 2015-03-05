@@ -29,7 +29,7 @@ using PixelSetFunction = void (*)(PixelWand*, const double);
 
 Object createImagickPixel(PixelWand* wand, bool owner) {
   Object ret = ImagickPixel::allocObject();
-  setWandResource(s_ImagickPixel, ret.get(), wand, owner);
+  setWandResource(s_ImagickPixel, ret, wand, owner);
   return ret;
 }
 
@@ -53,7 +53,7 @@ SmartPtr<WandResource<PixelWand>> getPixelWand(const Variant& obj) {
     IMAGICKPIXEL_THROW(
       "The parameter must be an instance of ImagickPixel or a string");
   } else {
-    auto wand = getPixelWandResource(obj.toCObjRef().get());
+    auto wand = getPixelWandResource(obj.toCObjRef());
     return makeSmartPtr<WandResource<PixelWand>>(wand->getWand(), false);
   }
 }

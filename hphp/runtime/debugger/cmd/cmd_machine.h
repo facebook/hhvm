@@ -17,32 +17,31 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_MACHINE_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_MACHINE_H_
 
-#include "hphp/runtime/debugger/debugger_command.h"
 #include <vector>
+
+#include "hphp/runtime/debugger/debugger_base.h"
+#include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdMachine : public DebuggerCommand {
-public:
+struct CmdMachine : DebuggerCommand {
   static bool AttachSandbox(DebuggerClient &client, const char *user = nullptr,
                             const char *name = nullptr, bool force = false);
   static void UpdateIntercept(DebuggerClient &client,
                               const std::string &host, int port);
 
-public:
-  CmdMachine() : DebuggerCommand(KindOfMachine),
-                 m_force(false), m_succeed(false) {}
+  CmdMachine() : DebuggerCommand(KindOfMachine) {}
 
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
+  void list(DebuggerClient&) override;
+  void help(DebuggerClient&) override;
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
   static bool AttachSandbox(DebuggerClient &client,
@@ -51,8 +50,8 @@ private:
 
   std::vector<DSandboxInfoPtr> m_sandboxes;
   Array m_rpcConfig;
-  bool m_force;
-  bool m_succeed;
+  bool m_force{false};
+  bool m_succeed{false};
 
   bool processList(DebuggerClient &client, bool output = true);
 };

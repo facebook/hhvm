@@ -2,5 +2,5 @@ File "enum_6.php--use.php", line 5, characters 23-25:
 Enums must be int or string, not a bool (Typing[4024])
 File "enum_6.php--def.php", line 7, characters 9-11:
 Typedef definition comes from here
-File "enum_6.php--newtype.php", line 5, characters 9-11:
+File "enum_6.php--newtype.php", line 4, characters 9-11:
 Typedef definition comes from here

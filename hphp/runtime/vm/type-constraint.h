@@ -75,6 +75,16 @@ struct TypeConstraint {
      * E.g. "@int"
      */
     Soft = 0x10,
+
+    /*
+     * Indicates a type constraint is a type constant, which is similar to a
+     * type alias defined inside a class. For instance, the constraint on $x
+     * is a TypeConstant
+     * class Foo {
+     *   const type T = int;
+     *   public function bar(Foo::T $x) { ... }
+     */
+     TypeConstant = 0x20,
   };
 
   /*
@@ -141,7 +151,9 @@ struct TypeConstraint {
    */
   MaybeDataType underlyingDataType() const {
     auto const dt = getAnnotDataType(m_type);
-    return dt != KindOfUninit ? MaybeDataType(dt) : folly::none;
+    return (dt != KindOfUninit || isPrecise())
+      ? MaybeDataType(dt)
+      : folly::none;
   }
 
   /*
@@ -158,6 +170,7 @@ struct TypeConstraint {
   bool isHHType()   const { return m_flags & HHType; }
   bool isExtended() const { return m_flags & ExtendedHint; }
   bool isTypeVar()  const { return m_flags & TypeVar; }
+  bool isTypeConstant() const { return m_flags & TypeConstant; }
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
   bool isMixed()    const { return m_type == Type::Mixed; }

@@ -16,6 +16,8 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -46,10 +48,10 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto val = isReturnType ? topR(env)
                           : ldLoc(env, id, ldPMExit, DataTypeSpecific);
-  assert(val->type().isBoxed() || val->type().notBoxed());
+  assert(val->type() <= Type::Cell || val->type() <= Type::BoxedCell);
 
   auto const valType = [&]() -> Type {
-    if (!val->type().isBoxed()) return val->type();
+    if (val->type() <= Type::Cell) return val->type();
     if (isReturnType) PUNT(VerifyReturnTypeBoxed);
     auto const pred = env.irb->predictedInnerType(id);
     gen(env, CheckRefInner, pred, makeExit(env), val);
@@ -74,7 +76,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     return;
   }
 
-  if (tc.isNullable() && valType.subtypeOf(Type::InitNull)) return;
+  if (tc.isNullable() && valType <= Type::InitNull) return;
 
   if (!isReturnType && tc.isArray() && !tc.isSoft() && !func->mustBeRef(id) &&
       valType <= Type::Obj) {
@@ -167,8 +169,8 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
    * would pass. If we don't know, we still have to emit them because valType
    * might be a subtype of its specialized object type.
    */
-  if (valType < Type::Obj) {
-    auto const cls = valType.getClass();
+  if (valType < Type::Obj && valType.clsSpec()) {
+    auto const cls = valType.clsSpec().cls();
     if (!env.irb->constrainValue(val, TypeConstraint(cls).setWeak()) &&
         ((knownConstraint && cls->classof(knownConstraint)) ||
          cls->name()->isame(clsName))) {
@@ -239,8 +241,8 @@ void implIsScalarC(HTS& env) {
 }
 
 /*
- * Note: this is currently separate from convertToType(RepoAuthType) for now,
- * just because we don't want to enable every single type for assertions yet.
+ * Note: this is currently separate from typeFromRAT for now, just because we
+ * don't want to enable every single type for assertions yet.
  *
  * (Some of them currently regress performance, presumably because the IR
  * doesn't always handle the additional type information very well.  It is
@@ -248,78 +250,61 @@ void implIsScalarC(HTS& env) {
  */
 folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
   using T = RepoAuthType::Tag;
+
   switch (rat.tag()) {
-  case T::Uninit:     return Type::Uninit;
-  case T::InitNull:   return Type::InitNull;
-  case T::Int:        return Type::Int;
-  case T::Dbl:        return Type::Dbl;
-  case T::Res:        return Type::Res;
-  case T::Null:       return Type::Null;
-  case T::Bool:       return Type::Bool;
-  case T::Str:        return Type::Str;
-  case T::Obj:        return Type::Obj;
-  case T::SStr:       return Type::StaticStr;
+    case T::Uninit:
+    case T::InitNull:
+    case T::Null:
+    case T::Bool:
+    case T::Int:
+    case T::Dbl:
+    case T::Res:
+    case T::SStr:
+    case T::Str:
+    case T::Obj:
+    case T::SArr:
+    case T::Arr:
+    case T::Cell:
+    case T::Ref:
+    case T::InitUnc:
+    case T::Unc:
+      return typeFromRAT(rat);
 
-  // These aren't enabled yet:
-  case T::OptInt:
-  case T::OptObj:
-  case T::OptDbl:
-  case T::OptBool:
-  case T::OptSStr:
-  case T::OptStr:
-  case T::OptRes:
-    return folly::none;
-
-  case T::OptSArr:
-  case T::OptArr:
-    // TODO(#4205897): optional array types.
-    return folly::none;
-
-  case T::SArr:
-    if (auto const arr = rat.array()) {
-      return Type::StaticArr.specialize(arr);
-    }
-    return Type::StaticArr;
-  case T::Arr:
-    if (auto const arr = rat.array()) {
-      return Type::Arr.specialize(arr);
-    }
-    return Type::Arr;
-
-  case T::OptExactObj:
-  case T::OptSubObj:
-  case T::ExactObj:
-  case T::SubObj:
-    {
-      auto ty = Type::Obj;
+    case T::OptExactObj:
+    case T::OptSubObj:
+    case T::ExactObj:
+    case T::SubObj: {
+      auto ty = typeFromRAT(rat);
       auto const cls = Unit::lookupClassOrUniqueClass(rat.clsName());
-      if (classIsUniqueOrCtxParent(env, cls)) {
-        if (rat.tag() == T::OptExactObj || rat.tag() == T::ExactObj) {
-          ty = ty.specializeExact(cls);
-        } else {
-          ty = ty.specialize(cls);
-        }
-      }
-      if (rat.tag() == T::OptExactObj || rat.tag() == T::OptSubObj) {
-        ty = ty | Type::InitNull;
+
+      if (!classIsUniqueOrCtxParent(env, cls)) {
+        ty |= Type::Obj; // Kill specialization.
       }
       return ty;
     }
 
-  case T::Cell:       return Type::Cell;
-  case T::Ref:        return Type::BoxedInitCell;
+    // Type assertions can't currently handle Init-ness.
+    case T::InitCell:
+      return Type::Cell;
+    case T::InitGen:
+      return folly::none;
 
-  case T::InitGen:
-    // Should ideally be able to remove Uninit here.
-    return folly::none;
-  case T::Gen:
-    return folly::none;
+    case T::Gen:
+      return folly::none;
 
-  case T::InitUnc:    return Type::UncountedInit;
-  case T::Unc:        return Type::Uncounted;
-  // The JIT can't currently handle the exact information in this type
-  // assertion in some cases:
-  case T::InitCell:   return Type::Cell; // - Type::Uninit
+    case T::OptInt:
+    case T::OptObj:
+    case T::OptDbl:
+    case T::OptBool:
+    case T::OptSStr:
+    case T::OptStr:
+    case T::OptRes:
+      return folly::none;
+
+    case T::OptSArr:
+    case T::OptArr:
+      // TODO(#4205897): optional array types.
+      return folly::none;
   }
   not_reached();
 }
@@ -338,7 +323,7 @@ SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className) {
    * types, but if it's Gen/Cell we're going to PUNT because it's
    * natural to translate that case with control flow TODO(#2020251)
    */
-  if (Type::Obj.strictSubtypeOf(src->type())) {
+  if (Type::Obj < src->type()) {
     PUNT(InstanceOfD_MaybeObj);
   }
   if (!src->isA(Type::Obj)) {
@@ -523,7 +508,7 @@ void emitAssertRATL(HTS& env, int32_t loc, RepoAuthType rat) {
 
 void emitAssertRATStk(HTS& env, int32_t offset, RepoAuthType rat) {
   if (auto const t = ratToAssertType(env, rat)) {
-    assertTypeStack(env, offset, *t);
+    assertTypeStack(env, BCSPOffset{offset}, *t);
   }
 }
 

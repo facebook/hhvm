@@ -44,6 +44,7 @@ enum class AnnotMetaType : uint8_t {
 
 enum class AnnotType : uint16_t {
   Uninit   = (uint8_t)KindOfUninit   | (uint16_t)AnnotMetaType::Precise << 8,
+  Null     = (uint8_t)KindOfNull     | (uint16_t)AnnotMetaType::Precise << 8,
   Bool     = (uint8_t)KindOfBoolean  | (uint16_t)AnnotMetaType::Precise << 8,
   Int      = (uint8_t)KindOfInt64    | (uint16_t)AnnotMetaType::Precise << 8,
   Float    = (uint8_t)KindOfDouble   | (uint16_t)AnnotMetaType::Precise << 8,
@@ -77,7 +78,9 @@ inline AnnotType dataTypeToAnnotType(DataType dt) {
 }
 
 const AnnotType* nameToAnnotType(const StringData* typeName);
+const AnnotType* nameToAnnotType(const std::string& typeName);
 MaybeDataType nameToMaybeDataType(const StringData* typeName);
+MaybeDataType nameToMaybeDataType(const std::string& typeName);
 
 /*
  * Returns true if the interface with the specified name
@@ -160,10 +163,11 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
 
   assert(metatype == AnnotMetaType::Precise);
   if (at != AnnotType::Object) {
-    // If `at' is "bool", "int", "float", "string", "array", or
-    // "resource", then equivDataTypes() can definitively tell us
-    // whether or not `dt' is compatible
-    return equivDataTypes(getAnnotDataType(at), dt)
+    // If `at' is "bool", "int", "float", "string", "array", or "resource",
+    // then equivDataTypes() can definitively tell us whether or not `dt'
+    // is compatible. Uninit, to which 'HH\noreturn' maps, is special-cased
+    // because uninit and null are equivalent due to IS_NULL_TYPE.
+    return equivDataTypes(getAnnotDataType(at), dt) && (at != AnnotType::Uninit)
       ? AnnotAction::Pass : AnnotAction::Fail;
   }
 

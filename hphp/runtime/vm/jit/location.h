@@ -41,26 +41,44 @@ struct Location {
 
   explicit Location(Space spc)
     : space(spc)
-    , offset(0)
   {
     assert(spc == This);
+    offset = 0;
   }
 
   Location(Space spc, int64_t off)
     : space(spc)
-    , offset(off)
-  {}
+  {
+    assert(spc != Stack);
+    offset = off;
+  }
 
-  Location() : space(Invalid), offset(-1) {}
+  explicit Location(BCSPOffset offset)
+    : space(Stack)
+  {
+    bcRelOffset = offset;
+  }
+
+  Location()
+    : space(Invalid)
+  {
+    offset = -1;
+  }
 
   int cmp(const Location &r) const {
 #define CMP(field) do { \
   if (field > r.field)      { return 1; } \
   else if (field < r.field) { return -1; } } while(0)
     CMP(space);
-    CMP(offset);
+    switch (space) {
+    case Stack:
+      CMP(bcRelOffset);
+      return 0;
+    default:
+      CMP(offset);
+      return 0;
+    }
 #undef CMP
-    return 0;
   }
 
   bool operator==(const Location& r) const {
@@ -77,7 +95,12 @@ struct Location {
 
   // Hash function.
   size_t operator()(const Location& l) const {
-    return HPHP::hash_int64_pair(l.space, l.offset);
+    switch (space) {
+    case Stack:
+      return HPHP::hash_int64_pair(l.space, l.bcRelOffset.offset);
+    default:
+      return HPHP::hash_int64_pair(l.space, l.offset);
+    }
   }
 
   const char *spaceName() const {
@@ -94,7 +117,13 @@ struct Location {
   }
 
   std::string pretty() const {
-    return folly::format("(Location {} {})", spaceName(), offset).str();
+    switch (space) {
+    case Stack:
+      return folly::format("(Location {} {})",
+        spaceName(), bcRelOffset.offset).str();
+    default:
+      return folly::format("(Location {} {})", spaceName(), offset).str();
+    }
   }
 
   bool isStack() const {
@@ -125,21 +154,12 @@ struct Location {
     return space == Iter;
   }
 
-  jit::RegionDesc::Location toLocation(Offset spOffsetFromFp) const {
-    typedef jit::RegionDesc::Location L;
-    switch (space) {
-      case Stack: {
-        auto offsetFromSp = safe_cast<uint32_t>(offset);
-        return L::Stack{offsetFromSp, spOffsetFromFp - offsetFromSp};
-      }
-      case Local: return L::Local{safe_cast<uint32_t>(offset)};
-      default:    not_reached();
-    }
-  }
-
 public:
   Space space;
-  int64_t offset;
+  union {
+    BCSPOffset bcRelOffset;
+    int64_t offset;
+  };
 };
 
 // A DynLocation is a Location-in-execution: a location, along with

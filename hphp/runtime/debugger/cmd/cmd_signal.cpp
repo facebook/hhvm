@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
 
+#include "hphp/runtime/debugger/debugger_client.h"
+
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

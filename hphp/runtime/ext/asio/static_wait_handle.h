@@ -35,8 +35,7 @@ class c_StaticWaitHandle final : public c_WaitHandle {
   DECLARE_CLASS_NO_SWEEP(StaticWaitHandle)
 
   explicit c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof())
-    : c_WaitHandle(cls)
-  {}
+    : c_WaitHandle(cls) {}
   ~c_StaticWaitHandle() {
     assert(isFinished());
     tvRefcountedDecRef(&m_resultOrException);
@@ -45,7 +44,7 @@ class c_StaticWaitHandle final : public c_WaitHandle {
   void t___construct();
 
  public:
-  static c_StaticWaitHandle* CreateSucceeded(Cell result);
+  static c_StaticWaitHandle* CreateSucceeded(Cell result); // nothrow
   static c_StaticWaitHandle* CreateFailed(ObjectData* exception);
 
  private:

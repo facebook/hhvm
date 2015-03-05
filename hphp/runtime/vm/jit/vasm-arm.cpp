@@ -107,10 +107,9 @@ private:
   void emit(hcunwind& i);
   void emit(hostcall& i);
   void emit(ldimmq& i);
+  void emit(ldimml& i);
   void emit(ldimmb& i);
-  void emit(ldpoint& i);
   void emit(load& i);
-  void emit(point& i) { points[i.p] = a->frontier(); }
   void emit(store& i);
   void emit(syncpoint& i);
 
@@ -430,14 +429,31 @@ void Vgen::emit(ldimmq& i) {
   }
 }
 
-void Vgen::emit(ldimmb& i) {
-  assert_not_implemented(i.d.isGP());
-  a->Mov(W(i.d), i.s.b());
+static void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
+  if (val == 0) {
+    a->Fmov(D(d), vixl::xzr);
+  } else {
+    a->Mov(rAsm, val); // XXX avoid scratch register somehow.
+    a->Fmov(D(d), rAsm);
+  }
 }
 
-void Vgen::emit(ldpoint& i) {
-  ldpoints.push_back({a->frontier(), i.s, i.d});
-  a->Mov(X(i.d), a->frontier()); // write a placeholder address
+void Vgen::emit(ldimml& i) {
+  if (i.d.isSIMD()) {
+    emitSimdImmInt(a, i.s.q(), i.d);
+  } else {
+    Vreg32 d = i.d;
+    a->Mov(W(d), i.s.l());
+  }
+}
+
+void Vgen::emit(ldimmb& i) {
+  if (i.d.isSIMD()) {
+    emitSimdImmInt(a, i.s.q(), i.d);
+  } else {
+    Vreg8 d = i.d;
+    a->Mov(W(d), i.s.b());
+  }
 }
 
 void Vgen::emit(load& i) {

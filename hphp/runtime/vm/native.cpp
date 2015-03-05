@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/func-emitter.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -466,6 +467,163 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
     frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
   }
   return &ar->m_r;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
+  using T = NativeSig::Type;
+
+  if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
+      tc.isArrayKey() || tc.isNumber()) {
+    return ty == T::Mixed;
+  }
+
+  if (!tc.underlyingDataType()) {
+    return false;
+  }
+
+  switch (*tc.underlyingDataType()) {
+    case KindOfDouble:       return ty == T::Double;
+    case KindOfBoolean:      return ty == T::Bool;
+    case KindOfObject:       return ty == T::Object;
+    case KindOfStaticString:
+    case KindOfString:       return ty == T::String;
+    case KindOfArray:        return ty == T::Array;
+    case KindOfResource:     return ty == T::Resource;
+    case KindOfUninit:
+    case KindOfNull:         return ty == T::Void;
+    case KindOfRef:          return ty == T::Mixed;
+    case KindOfInt64:        return ty == T::Int64 || ty == T::Int32;
+    case KindOfClass:        break;
+  }
+  not_reached();
+}
+
+const char* kInvalidReturnTypeMessage = "Invalid return type detected";
+const char* kInvalidArgTypeMessage = "Invalid argument type detected";
+const char* kInvalidArgCountMessage = "Invalid argument count detected";
+const char* kNeedStaticContextMessage =
+  "Static class functions must take a Class* as their first argument";
+const char* kNeedObjectContextMessage =
+  "Instance methods must take an ObjectData* as their first argument";
+const char* kInvalidZendFuncMessage =
+  "PHP5 compatibility layer functions must be registered using "
+  "registerBuiltinZendFunction";
+const char* kInvalidActRecFuncMessage =
+  "Functions declared as ActRec must return a TypedValue* and take an ActRec* "
+  "as their sole argument";
+
+const char* checkTypeFunc(const NativeSig& sig,
+                          const TypeConstraint& retType,
+                          const Func* func) {
+  using T = NativeSig::Type;
+
+  if (sig.ret == T::Zend) {
+    return sig.args.empty()
+      ? nullptr
+      : kInvalidZendFuncMessage;
+  }
+
+  if (!func->nativeFuncPtr()) {
+    return
+      sig.ret == T::ARReturn &&
+      sig.args.size() == 1 &&
+      sig.args[0] == T::VarArgs
+        ? nullptr
+        : kInvalidActRecFuncMessage;
+  }
+
+  if (!tcCheckNative(retType, sig.ret)) return kInvalidReturnTypeMessage;
+
+  auto argIt = sig.args.begin();
+  auto endIt = sig.args.end();
+  if (func->preClass()) { // called from the verifier so m_cls is not set yet
+    if (argIt == endIt) return kInvalidArgCountMessage;
+    auto const ctxTy = *argIt++;
+    if (func->attrs() & HPHP::AttrStatic) {
+      if (ctxTy != T::Class) return kNeedStaticContextMessage;
+    } else {
+      if (ctxTy != T::This) return kNeedObjectContextMessage;
+    }
+  }
+
+  int index = 0;
+  for (auto const& pInfo : func->params()) {
+    if (argIt == endIt) return kInvalidArgCountMessage;
+
+    auto const argTy = *argIt++;
+
+    if (func->byRef(index++)) {
+      if (argTy != T::MixedRef) return kInvalidArgTypeMessage;
+      continue;
+    }
+
+    if (pInfo.variadic) {
+      if (argTy != T::Array) return kInvalidArgTypeMessage;
+      continue;
+    }
+
+    if (!tcCheckNative(pInfo.typeConstraint, argTy)) {
+      return kInvalidArgTypeMessage;
+    }
+  }
+
+  return argIt == endIt ? nullptr : kInvalidArgCountMessage;
+}
+
+static std::string nativeTypeString(NativeSig::Type ty) {
+  using T = NativeSig::Type;
+  switch (ty) {
+  case T::Int32:
+  case T::Int64:     return "int";
+  case T::Double:    return "double";
+  case T::Bool:      return "bool";
+  case T::Object:    return "object";
+  case T::String:    return "string";
+  case T::Array:     return "array";
+  case T::Resource:  return "resource";
+  case T::Mixed:     return "mixed";
+  case T::ARReturn:  return "[TypedValue*]";
+  case T::MixedRef:  return "mixed&";
+  case T::VarArgs:   return "...";
+  case T::This:      return "this";
+  case T::Class:     return "class";
+  case T::Void:      return "void";
+  case T::Zend:      return "[zend]";
+  }
+  not_reached();
+}
+
+std::string NativeSig::toString(const char* classname,
+                                const char* fname) const {
+  using T = NativeSig::Type;
+
+  auto str   = folly::to<std::string>(nativeTypeString(ret), " ");
+  auto argIt = args.begin();
+  auto endIt = args.end();
+
+  if (argIt != endIt) {
+    if (classname) str += classname;
+    if (*argIt == T::This) {
+      str += "->";
+      ++argIt;
+    } else if (*argIt == T::Class) {
+      str += "::";
+      ++argIt;
+    }
+  }
+  str += folly::to<std::string>(fname,
+                                "(",
+                                argIt != endIt ? nativeTypeString(*argIt++)
+                                               : "void");
+
+  for (;argIt != endIt; ++argIt) {
+    str += folly::to<std::string>(", ", nativeTypeString(*argIt));
+  }
+  str += ")";
+
+  return str;
 }
 
 //////////////////////////////////////////////////////////////////////////////

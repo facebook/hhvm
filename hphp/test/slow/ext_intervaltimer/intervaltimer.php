@@ -1,5 +1,7 @@
 <?hh
 
+function busy() {}
+
 $x1 = null;
 $t1 = new IntervalTimer(
   0.1, 0.1,
@@ -19,6 +21,7 @@ $t2->start();
 $now = microtime(true);
 while (microtime(true) < $now + 1) {
   // busy wait
+  busy();
 }
 $t2->stop();
 $t1->stop();

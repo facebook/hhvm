@@ -404,7 +404,7 @@ class SplFileInfo {
    * @return     mixed   No value is returned.
    */
   public function setFileClass($class_name = "SplFileObject") {
-    if (!in_array("SplFileObject", class_parents($class_name))) {
+    if (!is_a($class_name, "SplFileObject", true)) {
       throw new UnexpectedValueException(
         "SplFileInfo::setFileClass() expects parameter 1 to be a class name ".
         "derived from SplFileObject, '$class_name' given"
@@ -426,7 +426,7 @@ class SplFileInfo {
    * @return     mixed   No value is returned.
    */
   public function setInfoClass($class_name = "SplFileInfo") {
-    if (!in_array("SplFileInfo", class_parents($class_name))) {
+    if (!is_a($class_name, "SplFileInfo", true)) {
       throw new UnexpectedValueException(
         "SplFileInfo::setInfoClass() expects parameter 1 to be a class name ".
         "derived from SplFileInfo, '$class_name' given"

@@ -1,5 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 /* While the parameters are of type mixed, going to assume
    they are SplFileInfos for now. This will sort based on

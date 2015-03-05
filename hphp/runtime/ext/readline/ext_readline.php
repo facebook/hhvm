@@ -37,8 +37,8 @@ function readline_completion_function(mixed $function): bool;
  * @return mixed -
  */
 <<__Native>>
-function readline_info(string $varname = null,
-                       string $newvalue = null): mixed;
+function readline_info(?string $varname = null,
+                       ?string $newvalue = null): mixed;
 
 /**
  * Reads the history
@@ -49,7 +49,7 @@ function readline_info(string $varname = null,
  * @return bool -
  */
 <<__Native>>
-function readline_read_history(string $filename = null): bool;
+function readline_read_history(?string $filename = null): bool;
 
 /**
  * Writes the history
@@ -59,7 +59,7 @@ function readline_read_history(string $filename = null): bool;
  * @return bool -
  */
 <<__Native>>
-function readline_write_history(string $filename = null): bool;
+function readline_write_history(?string $filename = null): bool;
 
 /**
  * Reads a line
@@ -71,4 +71,4 @@ function readline_write_history(string $filename = null): bool;
  *   returned has the ending newline removed.
  */
 <<__Native>>
-function readline(string $prompt): string;
+function readline(string $prompt): mixed;

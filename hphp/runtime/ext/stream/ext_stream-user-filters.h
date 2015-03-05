@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_STREAM_USER_FILTERS_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/smart-containers.h"
 
 namespace HPHP {
 
@@ -28,6 +29,8 @@ const int64_t k_STREAM_FILTER_ALL   = k_STREAM_FILTER_READ |
                                       k_STREAM_FILTER_WRITE;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+class File;
 
 class BucketBrigade : public ResourceData {
 public:
@@ -57,7 +60,7 @@ public:
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  explicit StreamFilter(const Object& filter, const Resource& stream):
+  explicit StreamFilter(const Object& filter, const SmartPtr<File>& stream):
       m_filter(filter), m_stream(stream) { }
 
   int64_t invokeFilter(const SmartPtr<BucketBrigade>& in,
@@ -67,7 +70,7 @@ public:
   bool remove();
 private:
   Object m_filter;
-  Resource m_stream;
+  SmartPtr<File> m_stream;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

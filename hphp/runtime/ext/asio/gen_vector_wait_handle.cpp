@@ -103,22 +103,11 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
 }
 
 void c_GenVectorWaitHandle::initialize(const Object& exception, c_Vector* deps, int64_t iter_pos, c_WaitableWaitHandle* child) {
+  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
-
-  if (isInContext()) {
-    try {
-      child->enterContext(getContextIdx());
-    } catch (const Object& cycle_exception) {
-      putException(m_exception, cycle_exception.get());
-      ++m_iterPos;
-      incRefCount();
-      onUnblocked();
-      return;
-    }
-  }
 
   blockOn(child);
   incRefCount();
@@ -144,9 +133,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {
-        if (isInContext()) {
-          child_wh->enterContext(getContextIdx());
-        }
+        child_wh->enterContext(getContextIdx());
         detectCycle(child_wh);
         blockOn(child_wh);
         return;

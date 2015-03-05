@@ -25,8 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class c_BlockableWaitHandle;
-class c_ConditionWaitHandle;
+class c_WaitableWaitHandle;
 
 class AsioBlockable final {
   public:
@@ -47,8 +46,7 @@ class AsioBlockable final {
       return static_cast<Kind>(m_bits & 7);
     }
 
-    c_BlockableWaitHandle* getBlockableWaitHandle() const;
-    c_ConditionWaitHandle* getConditionWaitHandle() const;
+    c_WaitableWaitHandle* getWaitHandle() const;
 
     void setNextParent(AsioBlockable* parent, Kind kind) {
       assert(!(reinterpret_cast<intptr_t>(parent) & 7));
@@ -81,7 +79,7 @@ class AsioBlockableChain final {
     void unblock();
     void exitContext(context_idx_t ctx_idx);
     Array toArray();
-    c_BlockableWaitHandle* firstInContext(context_idx_t ctx_idx);
+    c_WaitableWaitHandle* firstInContext(context_idx_t ctx_idx);
 
   private:
     AsioBlockable* m_firstParent;

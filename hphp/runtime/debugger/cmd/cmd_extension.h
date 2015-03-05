@@ -17,30 +17,30 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EXTENSION_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_EXTENSION_H_
 
-#include "hphp/runtime/debugger/cmd/cmd_extended.h"
 #include <vector>
+
+#include "hphp/runtime/debugger/cmd/cmd_extended.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdExtension : public CmdExtended {
-public:
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
+struct CmdExtension : CmdExtended {
+  void list(DebuggerClient&) override;
+  void help(DebuggerClient&) override;
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
   std::vector<std::string> m_args;
   String m_out;
   String m_err;
 
-  bool processList(DebuggerProxy &proxy);
+  bool processList(DebuggerProxy&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

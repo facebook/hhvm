@@ -81,6 +81,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
                     (expireDiff > 0 && m_owner != pthread_self()))) {
     return false;
   }
+
   checkRank(RankWriteLease);
   if (0 == (blocking ?
             pthread_mutex_lock(&m_lock) :

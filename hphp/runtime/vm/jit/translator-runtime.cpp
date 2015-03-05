@@ -1273,21 +1273,20 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val,
   }
 }
 
-void setWithRefElemC(TypedValue* base, TypedValue key, TypedValue* val,
+void setWithRefElemC(TypedValue* base, TypedValue key, TypedValue val,
                      MInstrState* mis) {
   base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, key);
   if (base != &mis->tvScratch) {
-    tvDup(*val, *base);
+    tvDup(val, *base);
   } else {
     assert(base->m_type == KindOfUninit);
   }
 }
 
-void setWithRefNewElem(TypedValue* base, TypedValue* val,
-                       MInstrState* mis) {
+void setWithRefNewElem(TypedValue* base, TypedValue val, MInstrState* mis) {
   base = NewElem<false>(mis->tvScratch, mis->tvRef, base);
   if (base != &mis->tvScratch) {
-    tvDup(*val, *base);
+    tvDup(val, *base);
   } else {
     assert(base->m_type == KindOfUninit);
   }

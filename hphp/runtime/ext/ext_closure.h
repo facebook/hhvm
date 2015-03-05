@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/bytecode.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

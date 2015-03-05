@@ -185,6 +185,7 @@ bool canDCE(IRInstruction* inst) {
   case ColIsNEmpty:
   case LdUnwinderValue:
   case LdColArray:
+  case OrdStr:
     assert(!inst->isControlFlow());
     return true;
 
@@ -467,7 +468,6 @@ bool canDCE(IRInstruction* inst) {
   case BeginCatch:
   case EndCatch:
   case UnwindCheckSideExit:
-  case DeleteUnwinderException:
   case CountBytecode:
   case DbgTrashStk:
   case DbgTrashFrame:
@@ -719,7 +719,7 @@ void performActRecFixups(const BlockList& blocks,
       case DecRef:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
-          inst.marker().setSpOff(safeDepth);
+          inst.marker().setSpOff(FPAbsOffset{safeDepth});
         }
         break;
 

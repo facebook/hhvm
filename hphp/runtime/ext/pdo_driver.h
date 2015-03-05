@@ -219,10 +219,10 @@ struct PDODriver {
 
   const char *getName() const { return m_name;}
 
-  PDOResource* createResource(const String& datasource,
-                              const String& username,
-                              const String& password,
-                              const Array& options);
+  SmartPtr<PDOResource> createResource(const String& datasource,
+                                       const String& username,
+                                       const String& password,
+                                       const Array& options);
 
   static const PDODriverMap& GetDrivers() { return s_drivers; }
 
@@ -232,7 +232,7 @@ private:
   const char *m_name;
 
   // Methods a driver needs to implement.
-  virtual PDOResource* createResourceImpl() = 0;
+  virtual SmartPtr<PDOResource> createResourceImpl() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -506,6 +506,8 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+using sp_PDOBoundParam = SmartPtr<PDOBoundParam>;
+
 class c_pdo;
 using sp_pdo = SmartPtr<c_pdo>;
 
@@ -559,7 +561,7 @@ public:
    */
   virtual bool getColumn(int colno, Variant &value);
 
-  virtual bool paramHook(PDOBoundParam *param, PDOParamEvent event_type);
+  virtual bool paramHook(PDOBoundParam* param, PDOParamEvent event_type);
 
   /* setting of attributes */
   virtual bool setAttribute(int64_t attr, const Variant& value);
@@ -678,7 +680,7 @@ public:
   const char *named_rewrite_template;
 };
 
-int pdo_parse_params(PDOStatement *stmt, const String& in, String &out);
+int pdo_parse_params(sp_PDOStatement stmt, const String& in, String &out);
 void pdo_raise_impl_error(sp_PDOResource rsrc, sp_PDOStatement stmt,
                           const char *sqlstate, const char *supp);
 void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,

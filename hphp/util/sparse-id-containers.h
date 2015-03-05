@@ -451,7 +451,7 @@ struct sparse_id_map {
     auto initialize = [&] {
       for (; idx < m_next; ++idx) {
         new (&dense()[idx]) value_type(o.dense()[idx]);
-        sparse()[idx] = o.dense()[idx].first;
+        sparse()[o.dense()[idx].first] = idx;
       }
     };
     if (std::is_trivially_destructible<V>::value ||

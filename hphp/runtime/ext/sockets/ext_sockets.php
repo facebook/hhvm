@@ -616,7 +616,7 @@ function socket_strerror(int $errnum): string;
  *
  */
 <<__Native>>
-function socket_last_error(resource $socket = null): int;
+function socket_last_error(?resource $socket = null): int;
 
 /**
  * This function clears the error code on the given socket or the global last
@@ -630,7 +630,7 @@ function socket_last_error(resource $socket = null): int;
  *
  */
 <<__Native>>
-function socket_clear_error(resource $socket = null): void;
+function socket_clear_error(?resource $socket = null): void;
 
 <<__Native>>
 function getaddrinfo(string $host,

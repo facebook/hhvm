@@ -22,20 +22,18 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdHelp : public DebuggerCommand {
-public:
-  static void HelpAll(DebuggerClient &client);
-  static void HelpStarted(DebuggerClient &client);
+struct CmdHelp : DebuggerCommand {
+  static void HelpAll(DebuggerClient&);
+  static void HelpStarted(DebuggerClient&);
 
-public:
   CmdHelp() : DebuggerCommand(KindOfHelp) {}
 
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
-  virtual void onClient(DebuggerClient &client);
+  void list(DebuggerClient&) override;
+  void help(DebuggerClient&) override;
+  void onClient(DebuggerClient&) override;
 
 private:
-  bool processTutorial(DebuggerClient &client);
+  bool processTutorial(DebuggerClient&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

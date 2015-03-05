@@ -31,7 +31,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
@@ -137,7 +136,7 @@ void ThreadInfo::onSessionExit() {
 
 //////////////////////////////////////////////////////////////////////
 
-void throw_infinite_recursion_exception() {
+void raise_infinite_recursion_error() {
   if (!RuntimeOption::NoInfiniteRecursionDetection) {
     // Reset profiler otherwise it might recurse further causing segfault
     auto info = ThreadInfo::s_threadInfo.getNoCheck();
@@ -192,7 +191,6 @@ ssize_t check_request_surprise(ThreadInfo* info) {
     !p.getDebuggerAttached();
   bool do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
   bool do_signaled = (flags & RequestInjectionData::SignaledFlag);
-  bool do_intervalTimer = (flags & RequestInjectionData::IntervalTimerFlag);
 
   // Start with any pending exception that might be on the thread.
   auto pendingException = info->m_pendingException;
@@ -225,9 +223,6 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   if (do_signaled) {
     extern bool HHVM_FN(pcntl_signal_dispatch)();
     HHVM_FN(pcntl_signal_dispatch)();
-  }
-  if (do_intervalTimer) {
-    IntervalTimer::RunCallbacks();
   }
 
   if (pendingException) {

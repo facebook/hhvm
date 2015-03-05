@@ -23,17 +23,12 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdNext : public CmdFlowControl {
-public:
-  CmdNext() :
-      CmdFlowControl(KindOfNext)
-      , m_stepResumableId(nullptr)
-      , m_skippingAwait(false)
-    {}
+struct CmdNext : CmdFlowControl {
+  CmdNext(): CmdFlowControl(KindOfNext) {}
 
-  virtual void help(DebuggerClient& client);
-  virtual void onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt);
-  virtual void onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt);
+  void help(DebuggerClient&) override;
+  void onSetup(DebuggerProxy&, CmdInterrupt&) override;
+  void onBeginInterrupt(DebuggerProxy&, CmdInterrupt&) override;
 
 private:
   void stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc);
@@ -45,8 +40,11 @@ private:
   void* getResumableId(ActRec* fp);
 
   StepDestination m_stepResumable;
-  ActRec* m_stepResumableId;  // Unique id for the resumable we're stepping
-  bool m_skippingAwait;
+
+  // Unique id for the resumable we're stepping.
+  ActRec* m_stepResumableId{nullptr};
+
+  bool m_skippingAwait{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

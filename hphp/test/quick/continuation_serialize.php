@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 async function static_result_create($result) {
   return $result;

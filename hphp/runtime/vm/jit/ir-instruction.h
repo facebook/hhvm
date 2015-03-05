@@ -175,7 +175,6 @@ struct IRInstruction {
   Type       typeParam() const         { return m_typeParam.value(); }
   folly::Optional<Type> maybeTypeParam() const { return m_typeParam; }
   void       setTypeParam(Type t) {
-    always_assert(t != Type::Bottom);
     m_typeParam.assign(t);
   }
   uint32_t   numSrcs()  const          { return m_numSrcs; }
@@ -252,14 +251,6 @@ struct IRInstruction {
   bool isBlockEnd() const { return taken() || isTerminal(); }
   bool isRawLoad() const;
 
-  /*
-   * Comparison and hashing for the purposes of CSE-equality.
-   *
-   * Pre: canCSE()
-   */
-  bool cseEquals(IRInstruction* inst) const;
-  size_t cseHash() const;
-
   void setMarker(BCMarker marker) {
     assert(marker.valid());
     m_marker = marker;
@@ -278,7 +269,6 @@ struct IRInstruction {
    * these when you have an actual IRInstruction instead of just an
    * Opcode enum value.
    */
-  bool canCSE() const;
   bool hasDst() const;
   bool naryDst() const;
   bool consumesReferences() const;
@@ -343,6 +333,17 @@ typedef boost::intrusive::member_hook<IRInstruction,
 typedef boost::intrusive::list<IRInstruction, IRInstructionHookOption>
         InstructionList;
 
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Return the output type from a given IRInstruction.
+ *
+ * The destination type is always predictable from the types of the inputs, any
+ * type parameters to the instruction, and the id of the dest.
+ */
+Type outputType(const IRInstruction*, int dstId = 0);
+
+///////////////////////////////////////////////////////////////////////////////
 }}
 
 #endif

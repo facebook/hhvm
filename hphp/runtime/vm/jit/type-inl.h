@@ -18,41 +18,90 @@
 #error "type-inl.h should only be included by type.h"
 #endif
 
-#include <type_traits>
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/class.h"
 
 #include "hphp/util/hash.h"
 
+#include <cstring>
+
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
-// Tags.
 
-inline Type::ClassInfo::ClassInfo(const Class* cls, Type::ClassTag tag)
-  : m_bits(reinterpret_cast<uintptr_t>(cls))
-{
-  assert((m_bits & 1) == 0);
-  switch (tag) {
-    case ClassTag::Sub:
-      break;
-    case ClassTag::Exact:
-      m_bits |= 1;
-      break;
-  }
+namespace type_detail {
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Widen a constant value if needed.
+ */
+template<class T>
+using needs_promotion = std::integral_constant<
+  bool,
+  (std::is_integral<T>::value ||
+   std::is_same<T,bool>::value ||
+   std::is_enum<T>::value)
+>;
+
+template<class T>
+typename std::enable_if<needs_promotion<T>::value,uint64_t>::type
+promote_cns_if_needed(T t) { return static_cast<uint64_t>(t); }
+
+template<class T>
+typename std::enable_if<!needs_promotion<T>::value,T>::type
+promote_cns_if_needed(T t) { return t; }
+
+/*
+ * Return the Type to use for a given C++ value.
+ *
+ * The only interesting case is int/bool disambiguation.  Enums are treated as
+ * ints.
+ */
+template<class T>
+typename std::enable_if<
+  std::is_integral<T>::value || std::is_enum<T>::value,
+  Type
+>::type for_const(T) {
+  return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
 }
-
-inline const Class* Type::ClassInfo::get() const {
-  return reinterpret_cast<const Class*>(m_bits & ~1);
+inline Type for_const(const StringData* sd) {
+  assert(sd->isStatic());
+  return Type::StaticStr;
 }
-
-inline bool Type::ClassInfo::isExact() const {
-  return m_bits & 1;
+inline Type for_const(const ArrayData* ad) {
+  assert(ad->isStatic());
+  return Type::StaticArray(ad->kind());
 }
+inline Type for_const(double)        { return Type::Dbl; }
+inline Type for_const(const Func*)   { return Type::Func; }
+inline Type for_const(const Class*)  { return Type::Cls; }
+inline Type for_const(ConstCctx)     { return Type::Cctx; }
+inline Type for_const(TCA)           { return Type::TCA; }
 
-inline bool Type::ClassInfo::operator==(const Type::ClassInfo& rhs) const {
-  return m_bits == rhs.m_bits;
+///////////////////////////////////////////////////////////////////////////////
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Creation.
+// Ptr.
+
+inline Ptr add_ref(Ptr p) {
+  if (p == Ptr::Unk || p == Ptr::ClsInit || p == Ptr::ClsCns) {
+    return p;
+  }
+  return static_cast<Ptr>(static_cast<uint32_t>(p) | kPtrRefBit);
+}
+
+inline Ptr remove_ref(Ptr p) {
+  // If p is unknown, or Ptr::Ref, we'll get back unknown.
+  return static_cast<Ptr>(static_cast<uint32_t>(p) & ~kPtrRefBit);
+}
+
+/*
+ * For use in this file.
+ */
+bool ptr_subtype(Ptr, Ptr);
+
+///////////////////////////////////////////////////////////////////////////////
+// Type.
 
 inline Type::Type()
   : m_bits(kBottom)
@@ -91,111 +140,73 @@ inline size_t Type::hash() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison.
 
-bool ptr_subtype(Ptr, Ptr);
+inline bool Type::operator==(Type rhs) const {
+  return m_bits == rhs.m_bits &&
+         m_ptrKind == rhs.m_ptrKind &&
+         m_hasConstVal == rhs.m_hasConstVal &&
+         m_extra == rhs.m_extra;
+}
 
-inline bool Type::subtypeOf(Type t2) const {
-  // First, check for any members in m_bits that aren't in t2.m_bits.
-  if ((m_bits & t2.m_bits) != m_bits) {
+inline bool Type::operator!=(Type rhs) const {
+  return !operator==(rhs);
+}
+
+inline bool Type::operator<=(Type rhs) const {
+  auto lhs = *this;
+
+  // Check for any members in lhs.m_bits that aren't in rhs.m_bits.
+  if ((lhs.m_bits & rhs.m_bits) != lhs.m_bits) {
     return false;
   }
-  // The rest of the checks want to avoid constantly checking bottom on the
-  // left side.
-  if (m_bits == kBottom) return true;
-  // If t2 is a constant, we must be the same constant (or Bottom, checked
-  // above).
-  if (t2.m_hasConstVal) {
-    assert(!t2.isUnion());
-    return m_hasConstVal && m_extra == t2.m_extra;
+
+  // Check for Bottom; all the remaining cases assume `lhs' is not Bottom.
+  if (lhs.m_bits == kBottom) return true;
+
+  // If `rhs' is a constant, we must be the same constant.
+  if (rhs.m_hasConstVal) {
+    assert(!rhs.isUnion());
+    return lhs.m_hasConstVal && lhs.m_extra == rhs.m_extra;
   }
-  // If t2 could be a pointer, we must have a subtype relation in pointer kinds
-  // or it's not a subtype.  (If t1 can't be a pointer also we found out above
-  // when we intersected the bits.)  If neither can be a pointer, it's an
-  // invariant that m_ptrKind will be Ptr::Unk so this will pass.
-  if (rawPtrKind() != t2.rawPtrKind() &&
-      !ptr_subtype(rawPtrKind(), t2.rawPtrKind())) {
+
+  // If `rhs' could be a pointer, we must have a subtype relation in pointer
+  // kinds or we're not a subtype.  (If `lhs' can't be a pointer, we found out
+  // above when we intersected the bits.)  If neither can be a pointer, it's an
+  // invariant that `m_ptrKind' will be Ptr::Unk so this will pass.
+  if (lhs.ptrKind() != rhs.ptrKind() &&
+      !ptr_subtype(lhs.ptrKind(), rhs.ptrKind())) {
     return false;
   }
-  if (!t2.isSpecialized()) {
-    return true;
-  }
-  return subtypeOfSpecialized(t2);
+
+  // Compare specializations only if `rhs' is specialized.
+  return !rhs.isSpecialized() || lhs.spec() <= rhs.spec();
+}
+
+inline bool Type::operator>=(Type rhs) const {
+  return rhs <= *this;
+}
+
+inline bool Type::operator<(Type rhs) const {
+  return *this != rhs && *this <= rhs;
+}
+
+inline bool Type::operator>(Type rhs) const {
+  return rhs < *this;
 }
 
 template<typename... Types>
 bool Type::subtypeOfAny(Type t2, Types... ts) const {
-  return subtypeOf(t2) || subtypeOfAny(ts...);
+  return *this <= t2 || subtypeOfAny(ts...);
 }
-
 inline bool Type::subtypeOfAny() const {
   return false;
-}
-
-inline bool Type::strictSubtypeOf(Type t2) const {
-  return *this != t2 && subtypeOf(t2);
 }
 
 inline bool Type::maybe(Type t2) const {
   return (*this & t2) != Bottom;
 }
 
-inline bool Type::not(Type t2) const {
-  return !maybe(t2);
-}
-
-inline bool Type::equals(Type t2) const {
-  return m_bits == t2.m_bits &&
-         m_ptrKind == t2.m_ptrKind &&
-         m_hasConstVal == t2.m_hasConstVal &&
-         m_extra == t2.m_extra;
-}
-
-inline bool Type::operator==(Type t2) const {
-  return equals(t2);
-}
-
-inline bool Type::operator!=(Type t2) const {
-  return !operator==(t2);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Is-a methods.
-
-inline bool Type::isZeroValType() const {
-  return subtypeOfAny(Uninit, InitNull, Nullptr);
-}
-
-inline bool Type::isBoxed() const {
-  return subtypeOf(BoxedCell);
-}
-
-inline bool Type::maybeBoxed() const {
-  return maybe(BoxedCell);
-}
-
-inline bool Type::notBoxed() const {
-  assert(subtypeOf(Gen));
-  return subtypeOf(Cell);
-}
-
-inline bool Type::isPtr() const {
-  return subtypeOf(PtrToGen);
-}
-
-inline bool Type::notPtr() const {
-  return not(PtrToGen);
-}
-
-inline bool Type::isCounted() const {
-  return subtypeOf(Counted);
-}
-
-inline bool Type::maybeCounted() const {
-  return maybe(Counted);
-}
-
-inline bool Type::notCounted() const {
-  return not(Counted);
-}
 
 inline bool Type::isUnion() const {
   // This will return true iff more than 1 bit is set in m_bits.
@@ -203,31 +214,18 @@ inline bool Type::isUnion() const {
 }
 
 inline bool Type::isKnownDataType() const {
-  assert(subtypeOf(StkElem));
+  assert(*this <= StkElem);
 
   // Some unions correspond to single KindOfs.
   return subtypeOfAny(Str, Arr, BoxedCell) || !isUnion();
 }
 
-inline bool Type::isKnownUnboxedDataType() const {
-  return isKnownDataType() && notBoxed();
-}
-
 inline bool Type::needsReg() const {
-  return subtypeOf(StkElem) && !isKnownDataType();
+  return *this <= StkElem && !isKnownDataType();
 }
 
 inline bool Type::needsValueReg() const {
   return !subtypeOfAny(Null, Nullptr);
-}
-
-inline bool Type::needsStaticBitCheck() const {
-  return maybe(StaticStr | StaticArr);
-}
-
-inline bool Type::canRunDtor() const {
-  return maybe(CountedArr | BoxedCountedArr | Obj | BoxedObj |
-               Res | BoxedRes);
 }
 
 inline bool Type::isSimpleType() const {
@@ -239,95 +237,7 @@ inline bool Type::isReferenceType() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Constant types.
-
-inline Type Type::forConst(const StringData* sd) {
-  assert(sd->isStatic());
-  return StaticStr;
-}
-
-inline Type Type::forConst(const ArrayData* ad) {
-  assert(ad->isStatic());
-  return StaticArr.specialize(ad->kind());
-}
-
-inline bool Type::isConst() const {
-  return m_hasConstVal || isZeroValType();
-}
-
-inline bool Type::isConst(Type t) const {
-  return isConst() && subtypeOf(t);
-}
-
-template<typename T>
-bool Type::isConst(T val) const {
-  return subtypeOf(cns(val));
-}
-
-inline uint64_t Type::rawVal() const {
-  assert(isConst());
-  return isZeroValType() ? 0 : m_intVal;
-}
-
-inline bool Type::boolVal() const {
-  assert(subtypeOf(Bool) && m_hasConstVal);
-  return m_boolVal;
-}
-
-inline int64_t Type::intVal() const {
-  assert(subtypeOf(Int) && m_hasConstVal);
-  return m_intVal;
-}
-
-inline double Type::dblVal() const {
-  assert(subtypeOf(Dbl) && m_hasConstVal);
-  return m_dblVal;
-}
-
-inline const StringData* Type::strVal() const {
-  assert(subtypeOf(StaticStr) && m_hasConstVal);
-  return m_strVal;
-}
-
-inline const ArrayData* Type::arrVal() const {
-  assert(subtypeOf(StaticArr) && m_hasConstVal);
-  return m_arrVal;
-}
-
-inline const HPHP::Func* Type::funcVal() const {
-  assert(subtypeOf(Func) && m_hasConstVal);
-  return m_funcVal;
-}
-
-inline const Class* Type::clsVal() const {
-  assert(subtypeOf(Cls) && m_hasConstVal);
-  return m_clsVal;
-}
-
-inline ConstCctx Type::cctxVal() const {
-  assert(subtypeOf(Cctx) && m_hasConstVal);
-  return m_cctxVal;
-}
-
-inline rds::Handle Type::rdsHandleVal() const {
-  assert(subtypeOf(RDSHandle) && m_hasConstVal);
-  return m_rdsHandleVal;
-}
-
-inline jit::TCA Type::tcaVal() const {
-  assert(subtypeOf(TCA) && m_hasConstVal);
-  return m_tcaVal;
-}
-
-inline Type Type::dropConstVal() const {
-  if (!m_hasConstVal) return *this;
-  assert(!isUnion());
-
-  if (subtypeOf(StaticArr)) {
-    return Type::StaticArr.specialize(arrVal()->kind());
-  }
-  return Type(m_bits, rawPtrKind());
-}
+// Constant type creation.
 
 template<typename T>
 Type Type::cns(T val, Type ret) {
@@ -339,7 +249,7 @@ Type Type::cns(T val, Type ret) {
   static_assert(std::is_pod<T>::value,
                 "Constant data wasn't a pod");
 
-  const auto toCopy = constToBits_detail::promoteIfNeeded(val);
+  const auto toCopy = type_detail::promote_cns_if_needed(val);
   static_assert(sizeof(toCopy) == 8,
                 "Unexpected size for toCopy");
 
@@ -349,7 +259,7 @@ Type Type::cns(T val, Type ret) {
 
 template<typename T>
 Type Type::cns(T val) {
-  return cns(val, forConst(val));
+  return cns(val, type_detail::for_const(val));
 }
 
 inline Type Type::cns(std::nullptr_t) {
@@ -374,10 +284,10 @@ inline Type Type::cns(const TypedValue& tv) {
         return Type(tv.m_type);
 
       case KindOfString:
-        return forConst(tv.m_data.pstr);
+        return type_detail::for_const(tv.m_data.pstr);
 
       case KindOfArray:
-        return forConst(tv.m_data.parr);
+        return type_detail::for_const(tv.m_data.parr);
 
       case KindOfObject:
       case KindOfResource:
@@ -391,162 +301,194 @@ inline Type Type::cns(const TypedValue& tv) {
   return ret;
 }
 
+inline Type Type::dropConstVal() const {
+  if (!m_hasConstVal) return *this;
+  assert(!isUnion());
+
+  if (*this <= StaticArr) {
+    return Type::StaticArray(arrVal()->kind());
+  }
+  return Type(m_bits, ptrKind());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
-// Specialized types.
+// Constant introspection.
 
-inline bool Type::canSpecializeClass() const {
-  return (m_bits & kAnyObj) && !(m_bits & kAnyArr);
+inline bool Type::isConst() const {
+  return m_hasConstVal || subtypeOfAny(Uninit, InitNull, Nullptr);
 }
 
-inline bool Type::canSpecializeArray() const {
-  return (m_bits & kAnyArr) && !(m_bits & kAnyObj);
+inline bool Type::isConst(Type t) const {
+  return isConst() && *this <= t;
 }
 
-inline bool Type::canSpecializeAny() const {
-  return canSpecializeClass() || canSpecializeArray();
+template<typename T>
+bool Type::isConst(T val) const {
+  return *this <= cns(val);
 }
 
-inline Type Type::specialize(const Class* klass) const {
-  assert(klass != nullptr);
-  assert(canSpecializeClass() && getClass() == nullptr);
-  if (klass->attrs() & AttrNoOverride) return specializeExact(klass);
-  return Type(m_bits, rawPtrKind(), ClassInfo(klass, ClassTag::Sub));
+inline uint64_t Type::rawVal() const {
+  assert(isConst());
+  return m_extra;
 }
 
-inline Type Type::specializeExact(const Class* klass) const {
-  assert(klass != nullptr);
-  assert(canSpecializeClass() && getClass() == nullptr);
-  return Type(m_bits, rawPtrKind(), ClassInfo(klass, ClassTag::Exact));
+#define IMPLEMENT_CNS_VAL(TypeName, name, valtype)  \
+  inline valtype Type::name##Val() const {          \
+    assert(*this <= TypeName && m_hasConstVal);     \
+    return m_##name##Val;                           \
+  }
+
+IMPLEMENT_CNS_VAL(Bool,       bool, bool)
+IMPLEMENT_CNS_VAL(Int,        int,  int64_t)
+IMPLEMENT_CNS_VAL(Dbl,        dbl,  double)
+IMPLEMENT_CNS_VAL(StaticStr,  str,  const StringData*)
+IMPLEMENT_CNS_VAL(StaticArr,  arr,  const ArrayData*)
+IMPLEMENT_CNS_VAL(Func,       func, const HPHP::Func*)
+IMPLEMENT_CNS_VAL(Cls,        cls,  const Class*)
+IMPLEMENT_CNS_VAL(Cctx,       cctx, ConstCctx)
+IMPLEMENT_CNS_VAL(TCA,        tca,  jit::TCA)
+IMPLEMENT_CNS_VAL(RDSHandle,  rdsHandle,  rds::Handle)
+
+#undef IMPLEMENT_CNS_VAL
+
+///////////////////////////////////////////////////////////////////////////////
+// Specialized type creation.
+
+inline Type Type::Array(ArrayData::ArrayKind kind) {
+  return Type(Type::Arr, ArraySpec(kind));
 }
 
-inline Type Type::specialize(ArrayData::ArrayKind arrayKind) const {
-  assert(canSpecializeArray());
-  return Type(m_bits, rawPtrKind(), makeArrayInfo(arrayKind, nullptr));
+inline Type Type::Array(const RepoAuthType::Array* rat) {
+  return Type(Type::Arr, ArraySpec(rat));
 }
 
-inline Type Type::specialize(const RepoAuthType::Array* array) const {
-  assert(canSpecializeArray());
-  return Type(m_bits, rawPtrKind(), makeArrayInfo(folly::none, array));
+inline Type Type::Array(const Shape* shape) {
+  return Type(Type::Arr, ArraySpec(shape));
 }
 
-inline Type Type::specialize(const Shape* shape) const {
-  assert(canSpecializeArray());
-  return Type(m_bits, rawPtrKind(), makeArrayInfo(shape));
+inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
+  return Type(Type::StaticArr, ArraySpec(kind));
+}
+
+inline Type Type::StaticArray(const RepoAuthType::Array* rat) {
+  return Type(Type::StaticArr, ArraySpec(rat));
+}
+
+inline Type Type::StaticArray(const Shape* shape) {
+  return Type(Type::StaticArr, ArraySpec(shape));
+}
+
+inline Type Type::SubObj(const Class* cls) {
+  if (cls->attrs() & AttrNoOverride) return ExactObj(cls);
+  return Type(Type::Obj, ClassSpec(cls, ClassSpec::SubTag{}));
+}
+
+inline Type Type::ExactObj(const Class* cls) {
+  return Type(Type::Obj, ClassSpec(cls, ClassSpec::ExactTag{}));
 }
 
 inline Type Type::unspecialize() const {
-  return Type(m_bits, rawPtrKind());
+  return Type(m_bits, ptrKind());
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Specialization introspection.
 
 inline bool Type::isSpecialized() const {
-  return (canSpecializeClass() && getClass()) ||
-         (canSpecializeArray() && (hasArrayKind() || getArrayType()));
+  return clsSpec() || arrSpec();
 }
 
-inline const Class* Type::getClass() const {
-  assert(canSpecializeClass());
-  return m_class.get();
-}
-
-inline const Class* Type::getExactClass() const {
-  assert(canSpecializeClass() || subtypeOf(Type::Cls));
-  return (m_hasConstVal || m_class.isExact()) ? getClass() : nullptr;
-}
-
-inline bool Type::hasArrayKind() const {
-  assert(canSpecializeArray());
-  return m_hasConstVal || arrayKindValid(m_arrayInfo);
-}
-
-inline ArrayData::ArrayKind Type::getArrayKind() const {
-  assert(hasArrayKind());
-  return m_hasConstVal ? m_arrVal->kind() : arrayKind(m_arrayInfo);
-}
-
-inline folly::Optional<ArrayData::ArrayKind> Type::getOptArrayKind() const {
-  if (hasArrayKind()) return getArrayKind();
-  return folly::none;
-}
-
-inline const RepoAuthType::Array* Type::getArrayType() const {
-  assert(canSpecializeArray());
-  if (m_hasConstVal) return nullptr;
-  if (!arrayKindValid(m_arrayInfo)) return arrayType(m_arrayInfo);
-  if (arrayKind(m_arrayInfo) == ArrayData::kStructKind) return nullptr;
-  return arrayType(m_arrayInfo);
-}
-
-inline const Shape* Type::getArrayShape() const {
-  assert(canSpecializeArray());
-  if (m_hasConstVal) return nullptr;
-  if (!arrayKindValid(m_arrayInfo)) return nullptr;
-  if (arrayKind(m_arrayInfo) != ArrayData::kStructKind) return nullptr;
-  return arrayShape(m_arrayInfo);
-}
-
-inline Type Type::specializedType() const {
-  assert(isSpecialized());
-  if (canSpecializeClass()) return *this & AnyObj;
-  if (canSpecializeArray()) return *this & AnyArr;
+inline bool Type::supports(SpecKind kind) const {
+  switch (kind) {
+    case SpecKind::None:
+      return true;
+    case SpecKind::Array:
+      return m_bits & kAnyArr;
+    case SpecKind::Class:
+      return m_bits & kAnyObj;
+  }
   not_reached();
+}
+
+inline ArraySpec Type::arrSpec() const {
+  if (!supports(SpecKind::Array)) return ArraySpec::Bottom;
+
+  // Currently, a Type which supports multiple specializations is trivial along
+  // all of them.
+  if (supports(SpecKind::Class)) return ArraySpec::Top;
+
+  if (m_hasConstVal) {
+    return ArraySpec(arrVal()->kind());
+  }
+  assert(m_arrSpec != ArraySpec::Bottom);
+  return m_arrSpec;
+}
+
+inline ClassSpec Type::clsSpec() const {
+  if (!supports(SpecKind::Class)) return ClassSpec::Bottom;
+
+  // Currently, a Type which supports multiple specializations is trivial along
+  // all of them.
+  if (supports(SpecKind::Array)) return ClassSpec::Top;
+
+  if (m_hasConstVal) {
+    return ClassSpec(clsVal(), ClassSpec::ExactTag{});
+  }
+  assert(m_clsSpec != ClassSpec::Bottom);
+  return m_clsSpec;
+}
+
+inline TypeSpec Type::spec() const {
+  return TypeSpec(arrSpec(), clsSpec());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Inner types.
 
 inline Type Type::box() const {
-  assert(subtypeOf(Cell));
+  assert(*this <= Cell);
   // Boxing Uninit returns InitNull but that logic doesn't belong here.
-  assert(not(Uninit) || equals(Cell));
+  assert(!maybe(Uninit) || *this == Cell);
   return Type(m_bits << kBoxShift,
-              rawPtrKind(),
+              ptrKind(),
               isSpecialized() && !m_hasConstVal ? m_extra : 0);
 }
 
+inline Type Type::inner() const {
+  assert(*this <= BoxedCell);
+  return Type(m_bits >> kBoxShift, Ptr::Unk, m_extra);
+}
+
 inline Type Type::unbox() const {
-  assert(subtypeOf(Gen));
-  return (*this & Cell) | (*this & BoxedCell).innerType();
+  assert(*this <= Gen);
+  return (*this & Cell) | (*this & BoxedCell).inner();
 }
 
 inline Type Type::ptr(Ptr kind) const {
-  assert(!isPtr());
-  assert(subtypeOf(Gen));
+  assert(*this <= Gen);
   return Type(m_bits << kPtrShift,
               kind,
               isSpecialized() && !m_hasConstVal ? m_extra : 0);
 }
 
 inline Type Type::deref() const {
-  assert(isPtr());
+  assert(*this <= PtrToGen);
   return Type(m_bits >> kPtrShift,
               Ptr::Unk /* no longer a pointer */,
               isSpecialized() ? m_extra : 0);
 }
 
 inline Type Type::derefIfPtr() const {
-  assert(subtypeOf(Gen | PtrToGen));
-  return isPtr() ? deref() : *this;
+  assert(*this <= (Gen | PtrToGen));
+  return *this <= PtrToGen ? deref() : *this;
 }
 
-// Returns the "stripped" version of this: dereferenced and unboxed,
-// if applicable.
 inline Type Type::strip() const {
   return derefIfPtr().unbox();
 }
 
 inline Ptr Type::ptrKind() const {
-  assert(maybe(PtrToGen));
-  return rawPtrKind();
-}
-
-inline Ptr Type::rawPtrKind() const {
   return static_cast<Ptr>(m_ptrKind);
-}
-
-inline Type Type::innerType() const {
-  assert(isBoxed());
-  assert(*this == Bottom || !isPtr());
-  return Type(m_bits >> kBoxShift, Ptr::Unk, m_extra);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -561,150 +503,24 @@ inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra /* = 0 */)
   assert(checkValid());
 }
 
-inline Type::Type(bits_t bits, Ptr kind, ClassInfo classInfo)
-  : m_bits(bits)
-  , m_ptrKind(static_cast<std::underlying_type<Ptr>::type>(kind))
+inline Type::Type(Type t, ArraySpec arraySpec)
+  : m_bits(t.m_bits)
+  , m_ptrKind(t.m_ptrKind)
   , m_hasConstVal(false)
-  , m_class(classInfo)
+  , m_arrSpec(arraySpec)
 {
   assert(checkValid());
+  assert(m_arrSpec != ArraySpec::Bottom);
 }
 
-inline Type::Type(bits_t bits, Ptr kind, ArrayInfo arrayInfo)
-  : m_bits(bits)
-  , m_ptrKind(static_cast<std::underlying_type<Ptr>::type>(kind))
+inline Type::Type(Type t, ClassSpec classSpec)
+  : m_bits(t.m_bits)
+  , m_ptrKind(t.m_ptrKind)
   , m_hasConstVal(false)
-  , m_arrayInfo(arrayInfo)
+  , m_clsSpec(classSpec)
 {
   assert(checkValid());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// ArrayInfo helpers.
-
-inline
-Type::ArrayInfo Type::makeArrayInfo(folly::Optional<ArrayData::ArrayKind> kind,
-                                    const RepoAuthType::Array* arrTy) {
-  auto ret = reinterpret_cast<uintptr_t>(arrTy);
-  if (kind.hasValue()) {
-    ret |= 0x1;
-    ret |= uintptr_t{*kind} << 48;
-  }
-  return static_cast<ArrayInfo>(ret);
-}
-
-inline
-Type::ArrayInfo Type::makeArrayInfo(const Shape* shape) {
-  auto ret = reinterpret_cast<uintptr_t>(shape);
-  ret |= 0x1;
-  ret |= uintptr_t{ArrayData::kStructKind} << 48;
-  return static_cast<ArrayInfo>(ret);
-}
-
-inline bool Type::arrayKindValid(Type::ArrayInfo info) {
-  return static_cast<uintptr_t>(info) & 0x1;
-}
-
-inline ArrayData::ArrayKind Type::arrayKind(Type::ArrayInfo info) {
-  assert(arrayKindValid(info));
-  return static_cast<ArrayData::ArrayKind>(
-    static_cast<uintptr_t>(info) >> 48
-  );
-}
-
-inline const RepoAuthType::Array* Type::arrayType(Type::ArrayInfo info) {
-  return reinterpret_cast<const RepoAuthType::Array*>(
-    static_cast<uintptr_t>(info) & (-1ull >> 16) & ~0x1
-  );
-}
-
-inline const Shape* Type::arrayShape(Type::ArrayInfo info) {
-  return reinterpret_cast<const Shape*>(
-    static_cast<uintptr_t>(info) & (-1ull >> 16) & ~0x1
-  );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// TypeConstraint.
-
-inline
-TypeConstraint::TypeConstraint(DataTypeCategory cat /* = DataTypeGeneric */)
-  : category(cat)
-  , weak(false)
-  , m_specialized(0)
-{}
-
-inline TypeConstraint::TypeConstraint(const Class* cls)
-  : TypeConstraint(DataTypeSpecialized)
-{
-  setDesiredClass(cls);
-}
-
-inline TypeConstraint& TypeConstraint::setWeak(bool w /* = true */) {
-  weak = w;
-  return *this;
-}
-
-inline bool TypeConstraint::empty() const {
-  return category == DataTypeGeneric && !weak;
-}
-
-inline bool TypeConstraint::operator==(TypeConstraint tc2) const {
-  return category == tc2.category &&
-         weak == tc2.weak &&
-         m_specialized == tc2.m_specialized;
-}
-
-inline bool TypeConstraint::operator!=(TypeConstraint tc2) const {
-  return !(*this == tc2);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// TypeConstraint specialization.
-
-inline bool TypeConstraint::isSpecialized() const {
-  return category == DataTypeSpecialized;
-}
-
-inline TypeConstraint& TypeConstraint::setWantArrayKind() {
-  assert(!wantClass());
-  assert(isSpecialized());
-  m_specialized |= kWantArrayKind;
-  return *this;
-}
-
-inline bool TypeConstraint::wantArrayKind() const {
-  return m_specialized & kWantArrayKind;
-}
-
-inline TypeConstraint& TypeConstraint::setWantArrayShape() {
-  assert(!wantClass());
-  assert(isSpecialized());
-  setWantArrayKind();
-  m_specialized |= kWantArrayShape;
-  return *this;
-}
-
-inline bool TypeConstraint::wantArrayShape() const {
-  return m_specialized & kWantArrayShape;
-}
-
-inline TypeConstraint& TypeConstraint::setDesiredClass(const Class* cls) {
-  assert(m_specialized == 0 ||
-         desiredClass()->classof(cls) || cls->classof(desiredClass()));
-  assert(isSpecialized());
-  m_specialized = reinterpret_cast<uintptr_t>(cls);
-  assert(wantClass());
-  return *this;
-}
-
-inline bool TypeConstraint::wantClass() const {
-  return m_specialized && !wantArrayKind();
-}
-
-inline const Class* TypeConstraint::desiredClass() const {
-  assert(wantClass());
-  return reinterpret_cast<const Class*>(m_specialized);
+  assert(m_clsSpec != ClassSpec::Bottom);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

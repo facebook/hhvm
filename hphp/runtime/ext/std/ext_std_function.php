@@ -104,12 +104,13 @@ function func_get_arg(int $arg_num): mixed;
 /**
  * Returns an array comprising a function's argument list
  *
- * @return array - Returns an array in which each element is a copy of
+ * @return mixed - Returns an array in which each element is a copy of
  *   the corresponding member of the current user-defined function's
- *   argument list.
+ *   argument list. Returns false and raises warning when called
+ *   from global scope.
  */
 <<__Native>>
-function func_get_args(): array;
+function func_get_args(): mixed;
 
 /**
  * Returns the number of arguments passed to the function

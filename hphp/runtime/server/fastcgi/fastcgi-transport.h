@@ -18,146 +18,303 @@
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_TRANSPORT_H_
 
 #include "hphp/runtime/server/transport.h"
+#include "hphp/util/synchronizable.h"
+
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
-#include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
-#include "thrift/lib/cpp/async/TAsyncTimeout.h" // @nolint
-#include <folly/SocketAddress.h> // @nolint
-#include "thrift/lib/cpp/concurrency/Monitor.h" // @nolint
 
-#include <map>
-#include <vector>
+#include <type_traits>
+#include <unordered_map>
 
 namespace HPHP {
 
-class FastCGITransport;
-
 ////////////////////////////////////////////////////////////////////////////////
 
-class FastCGIConnection;
+/*
+ * The FastCGI protocol transmits HTTP headers as key-value pairs in a stream
+ * using the FCGI_PARAMS record. The keys represent mangled HTTP header strings
+ * where _ replaces - and all characters are uppercased. Some of this header
+ * information is directly queried by the VM through accessors on the transport
+ * class. The table below contains the types and mappings for these keys and
+ * is used to instantiate the getters on the transport class.
+ */
+#define FCGI_PROTOCOL_HEADERS                       \
+  /* Request URI */                                 \
+  O(REQUEST_URI,     RAW_STRING, getUrl)            \
+  O(REMOTE_HOST,     RAW_STRING, getRemoteHost)     \
+  O(REMOTE_ADDR,     RAW_STRING, getRemoteAddr)     \
+  O(REMOTE_PORT,     UINT16,     getRemotePort)     \
+  O(PATH_INFO,       STD_STRING, getPathInfo)       \
+  /* Server headers */                              \
+  O(SERVER_NAME,     RAW_STRING, getServerName)     \
+  /* Protocol information */                        \
+  O(REQUEST_METHOD,  RAW_STRING, getExtendedMethod) \
+/**/
+
+class FastCGISession;
 
 /*
- * FastCGITransport is used to communicate between a PHP thread running a
- * FastCGI request and the FastCGITransaction representing the connection to
+ * FastCGITransport is used to communicate between a PHP (VM) thread running a
+ * FastCGI request and the FastCGISession representing the connection to
  * the client.
+ *
+ * The transport is at times accessed from the event-loop reading FastCGI
+ * records, and the runloop executing the PHP virtual machine. As a result
+ * it's important to understand the life-cycle of a transaction and the
+ * concurrency contract that it has with both the VM and the session.
+ *
+ * ===== Transport life cycle =====
+ *
+ * The transport exists in the heap and is always wrapped in a shared pointer.
+ * In general the transport is around for as long as any of the session, the
+ * vm, or the server require access to it.
+ *
+ * Once the server calls onHeadersComplete() it guarantees that it will remain
+ * live until the transport calls onComplete() and that it will only access the
+ * transport via onBody() and onBodyComplete(). Once the transport calls
+ * onComplete() the session may destroy itself and the transport will no longer
+ * attempt to call any session callbacks.
+ *
+ * Once the session calls onBodyComplete() it will not make any further calls
+ * to the transport, though it will remain available to receive calls to
+ * onStdOut() and onComplete().
+ *
+ * ===== Transport concurrency =====
+ *
+ * While requests are executing it is important that the transport data remain
+ * synchronized across calls from both the vm and the application server. When
+ * no request is active the session is free to call reset() which will clear all
+ * state data. During an active request the session will only write POST data
+ * and will do so using the onBody() callback which will perform thread safe
+ * writes to an internal buffer. Once onBodyComplete() is called the session
+ * will not attempt to write further POST data until the request completes.
+ *
+ * The session callback onStdOut() is used to write data from the request out
+ * to the webserver. It is always called from the VM event base; the session
+ * is responsible for ensuring that the data is written in a thread-safe
+ * fashion (generally by moving the data into the socket event base). The only
+ * other session callback sent from the VM event base is onComplete() and it
+ * do is handled appropriately in the session.
+ *
+ * Once the VM calls onSendEndImpl() it will cease transmit data to the remote
+ * client. The transport may call onComplete() on the session and will stop
+ * any remaining contact with the session.
+ *
+ * Transport CB           Session CB          Session Acc          VM Acc
+ * [Constructor]          None                R/W                  None
+ * onHeadersComplete()    None                W POST data          R/W
+ * onBodyComplete()       None                None (remains live)  R/W
+ * onSendEndImpl()        onComplete()        None (may destroy)   R/W
  */
-class FastCGITransport
-  : public Transport {
-
-public:
-  class Callback {
-  public:
-    virtual ~Callback() {}
-    virtual void onStdOut(std::unique_ptr<folly::IOBuf> chain) = 0;
-    virtual void onStdErr(std::unique_ptr<folly::IOBuf> chain) = 0;
-    virtual void onComplete() = 0;
-  };
-
-  explicit FastCGITransport(FastCGIConnection *connection, int id);
+struct FastCGITransport : public Transport, private Synchronizable {
+  explicit FastCGITransport(FastCGISession* session) : m_session(session) {}
   virtual ~FastCGITransport() {}
 
-  virtual const char *getUrl() override;
-  virtual const char *getRemoteHost() override;
-  virtual const char *getRemoteAddr() override;
-  virtual uint16_t getRemotePort() override;
-  virtual const std::string getScriptFilename() override;
-  virtual const std::string getPathTranslated() override;
-  virtual const std::string getPathInfo() override;
-  virtual bool isPathInfoSet() override;
-  virtual const std::string getDocumentRoot() override;
-  virtual const char *getServerName() override;
-  virtual const char *getServerAddr() override;
-  virtual uint16_t getServerPort() override;
-  virtual const char* getServerSoftware() override;
+  ///////////////////////////////////////////////////////////////////////////
+  // FastCGISession callbacks
+  //
+  // The session uses these callbacks to populate the transport with request
+  // data and inform the transport of the state of execution.
+  //
+  // onHeader() is always called when only the session thread is present which
+  //            obviates the need for any sort of locking
+  //
+  // onHeadersComplete() is called when the final header is received but before
+  //                     the request thread is started; it is the final chance
+  //                     to populate internal structures from the session thread
+  //
+  // onBody() is called when the request is already in-flight as new POST data
+  //          becomes available, any use of internal structures must be locked;
+  //          only the POST data buffer can be written and no data can be read
+  //
+  // onBodyComplete() is called when no further ingress will occur; the vm may
+  //                  be informed that the POST data is complete the next time
+  //                  it queries for it; we will not be called from the session
+  //                  thread again until we have called onComplete() on the
+  //                  session, we may-however continue to call onStdOut to
+  //                  write response data
 
-  virtual const void *getPostData(int &size) override;
-  virtual bool hasMorePostData() override;
-  virtual const void *getMorePostData(int &size) override;
+  // Callbacks for new POST data (body == POST data)- appends data to a queue
+  // to be processed by the executing script.
+  void onBody(std::unique_ptr<folly::IOBuf> chain);
+  void onBodyComplete();
 
-  virtual Method getMethod() override;
-  virtual const char *getExtendedMethod() override;
+  // Similar callbacks for receiving request headers
+  void onHeader(std::unique_ptr<folly::IOBuf> key_chain,
+                std::unique_ptr<folly::IOBuf> value_chain);
+  void onHeadersComplete();
 
-  virtual std::string getHTTPVersion() const override;
+  ///////////////////////////////////////////////////////////////////////////
+  // Transport implementation
+  //
+  // These are callbacks used by the VM to access information about the request;
+  // they won't be called until onHeadersComplete() has returned, until such
+  // time, the data they access need not be available. Once onSendEndImpl has
+  // been called the VM will stop accessing data until onHeadersComplete() is
+  // called again.
 
-  virtual int getRequestSize() const override;
-
-  virtual const char *getServerObject() override;
-
-  virtual std::string getHeader(const char *name) override;
-  virtual void getHeaders(HeaderMap &headers) override;
-  virtual void getTransportParams(HeaderMap &serverParams) override;
-
-  virtual void addHeaderImpl(const char *name, const char *value) override;
-  virtual void removeHeaderImpl(const char *name) override;
-
-  virtual void sendImpl(const void *data,
-                        int size,
-                        int code,
-                        bool chunked,
-                        bool eom) override;
+  void addHeaderImpl(const char *name, const char *value) override;
+  void removeHeaderImpl(const char *name) override;
   void sendResponseHeaders(folly::IOBufQueue& queue, int code);
-  virtual void onSendEndImpl() override;
 
-  virtual void onBody(std::unique_ptr<folly::IOBuf> chain);
-  virtual void onBodyComplete();
-  virtual void onHeader(std::unique_ptr<folly::IOBuf> key_chain,
-                       std::unique_ptr<folly::IOBuf> value_chain);
-  virtual void onHeadersComplete();
+  void sendImpl(const void *data,
+                int size,
+                int code,
+                bool chunked,
+                bool eom) override;
+  void onSendEndImpl() override;
 
-  void setCallback(Callback* callback) {
-    m_callback = callback;
+  // POST request data
+  const void* getPostData(int& size) override;
+  const void* getMorePostData(int& size) override;
+  bool hasMorePostData() override;
+
+  // HEADER data
+  std::string getHeader(const char* name) override;          // unmangled name
+  void getHeaders(HeaderMap& headers) override;              // HTTP headers
+  void getTransportParams(HeaderMap& serverParams) override; // FCGI parameters
+
+  // Modified properties
+  // These paramaters are also passed as FCGI_PARAMS but require modifications
+  // which cause them to differ from their original parameters
+  const std::string getDocumentRoot()   override { return m_docRoot; }
+  const std::string getScriptFilename() override { return m_scriptName; }
+  const std::string getPathTranslated() override { return m_pathTrans; }
+
+  // Derived properties
+  // These parameters were not part of the original FCGI_PARAMS record but are
+  // derived from values therein
+  Method getMethod()            override { return m_method; }
+  const char* getServerObject() override { return m_serverObject.c_str(); }
+  bool isPathInfoSet() override { return m_requestParams.count("PATH_INFO"); }
+
+  // Properties with default values
+  // These parameters are overrides of the values on transport if present
+  const char* getServerAddr() override {
+    auto str = getParamTyped<const char*>("SERVER_ADDR");
+    return *str ? str : Transport::getServerAddr();
   }
 
+  uint16_t getServerPort() override {
+    auto port = getParamTyped<uint16_t>("SERVER_PORT");
+    return port ?: Transport::getServerPort();
+  }
+
+  const char* getServerSoftware() override {
+    auto str = getParamTyped<const char*>("SERVER_SOFTWARE");
+    return *str ? str : Transport::getServerSoftware();
+  }
+
+  std::string getHTTPVersion() const override {
+    auto str = getParamTyped<std::string>("HTTP_VERSION");
+    return !str.empty() ? str : Transport::getHTTPVersion();
+  }
+
+  // Request parameter getters
+  // These properties can be extracted directly from the request parameters
+  int getRequestSize() const override {
+    return getParamTyped<int>("CONTENT_LENGTH");
+  }
+
+#define RAW_STRING const char*
+#define STD_STRING const std::string
+#define UINT16 uint16_t
+#define O(param, type, method)          \
+  type method() override {              \
+    return getParamTyped<type>(#param); \
+  }
+  FCGI_PROTOCOL_HEADERS
+#undef RAW_STRING
+#undef STD_STRING
+#undef O
+#undef FCGI_PROTOCOL_HEADERS
+
 private:
-  using ResponseHeaders =
-    std::unordered_map<std::string, std::vector<std::string>>;
+  ///////////////////////////////////////////////////////////////////////////
+  // Header manipulation and lookup
+  //
+  // Headers come from FastCGI webservers via the FCGI_PARAMS record in mangled
+  // form and need to be transfomred into their more familiar HTTP header form
+  // before passing them into the VM.
+  //
+  // (mangled) HTTP_IF_UNMODIFIED_SINCE <-> If-Unmodified-Since (normal)
 
-  std::string getRawHeader(const std::string& name);
-  std::string* getRawHeaderPtr(const std::string& name);
-  int getIntHeader(const std::string& name);
+  std::string unmangleHeader(const std::string& name) const;
 
-  /*
-   * HTTP_IF_MODIFIED_SINCE -> If-Unmodified-Since
-   */
-  std::string unmangleHeader(const std::string& name);
-  /*
-   * If-Unmodified-Since -> HTTP_IF_MODIFIED_SINCE
-   */
-  std::string mangleHeader(const std::string& name);
+  ///////////////////////////////////////////////////////////////////////////
+  // Request/response state
+  //
+  // The transport is basically a bag of data and state. Everything here is
+  // either request data or response state. Once the request is sent and the
+  // onSendEndImpl() callback is triggered we are free to reset ourselves for
+  // another request.
 
-  const void *getPostDataImpl(int &size, bool progress);
+  // Session for communicating with the webserver
+  FastCGISession* m_session;
 
-  FastCGIConnection* m_connection;
-  int m_id;
-  folly::IOBufQueue m_bodyQueue;
-  std::unique_ptr<folly::IOBuf> m_currBody;
-  std::unordered_map<std::string, std::string> m_requestHeaders;
-  std::string m_scriptFilename;
-  std::string m_pathTranslated;
-  bool m_pathInfoSet = false;
-  std::string m_requestURI;
-  std::string m_documentRoot;
-  std::string m_remoteHost;
-  std::string m_remoteAddr;
-  uint16_t m_remotePort;
-  std::string m_serverName;
-  std::string m_serverAddr;
-  std::string m_serverSoftware;
-  uint16_t m_serverPort;
-  Method m_method;
-  std::string m_extendedMethod;
-  std::string m_httpVersion;
+  // POST request data
+  // NB: m_bodyQueue is the only field session can write while the request is
+  //     being processed
+  folly::IOBufQueue m_bodyQueue;            // unprocessed POST data
+  std::unique_ptr<folly::IOBuf> m_currBody; // POST data last returned to VM
+  bool m_firstBody{false};
+  bool m_bodyComplete{false};
+
+  // Response headers
+  HeaderMap m_responseHeaders;
+  bool m_headersSent{false}; // set once headers have been transmitted and may
+                             // no longer be changed
+  bool m_sendEnded{false};   // onComplete has been sent already
+
+  // Request parameters
+  std::string m_docRoot;
+  std::string m_scriptName;
+  std::string m_pathTrans;
   std::string m_serverObject;
-  size_t m_requestSize;
-  ResponseHeaders m_responseHeaders;
-  bool m_headersSent;
-  bool m_readMore;
-  std::string m_pathInfo;
+  Method m_method{Method::Unknown};
+  std::unordered_map<std::string, std::string> m_requestParams;
 
-  apache::thrift::concurrency::Monitor m_monitor;
-  int m_waiting;
-  bool m_readComplete;
-  Callback* m_callback;
+  folly::IOBufQueue m_txBuf; // buffer for sending messages
+
+  /*
+   * Convenient templates for extracting typed header information.
+   */
+  template<typename T>
+  typename std::enable_if<std::is_integral<T>::value, T>
+  ::type getParamTyped(const char* key) const {
+    auto pos = m_requestParams.find(key);
+    if (pos == m_requestParams.end()) return 0;
+
+    try {
+      return folly::to<T>(pos->second);
+    } catch (std::range_error&) {
+      return 0;
+    }
+  }
+
+  template<typename T>
+  typename std::enable_if<
+    std::is_same<typename std::remove_cv<T>::type, std::string>::value,
+    std::string
+  >::type getParamTyped(const char* key) const {
+    auto pos = m_requestParams.find(key);
+    if (pos == m_requestParams.end()) return "";
+
+    return pos->second;
+  }
+
+  template<typename T>
+  typename std::enable_if<
+    std::is_same<typename std::remove_cv<T>::type, const char*>::value,
+    const char*
+  >::type getParamTyped(const char* key) const {
+    auto pos = m_requestParams.find(key);
+    if (pos == m_requestParams.end()) return "";
+
+    // This is safe because unordered_map only invalidates pointers that have
+    // been erased.
+    return pos->second.c_str();
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

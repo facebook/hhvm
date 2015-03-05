@@ -22,9 +22,26 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+inline c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind)
+    : c_WaitHandle(cb, kind) {
+  m_parentChain.init();
+}
+
+inline c_WaitableWaitHandle::~c_WaitableWaitHandle() {
+  switch (getState()) {
+    case STATE_SUCCEEDED:
+      tvRefcountedDecRef(&m_resultOrException);
+      break;
+
+    case STATE_FAILED:
+      tvDecRefObj(&m_resultOrException);
+      break;
+  }
+}
+
 inline void
 c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
+  assert(ctx_idx <= AsioSession::Get()->getCurrentContextIdx());
 
   // Already in a more specific context?
   if (LIKELY(getContextIdx() >= ctx_idx)) {

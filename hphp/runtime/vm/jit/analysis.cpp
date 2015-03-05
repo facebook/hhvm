@@ -69,6 +69,17 @@ Block* findDefiningBlock(const SSATmp* t) {
 
 //////////////////////////////////////////////////////////////////////
 
+bool is_tmp_usable(const IdomVector& idoms,
+                   const SSATmp* tmp,
+                   const Block* where) {
+  if (tmp->inst()->is(DefConst)) return true;
+  auto const definingBlock = findDefiningBlock(tmp);
+  if (!definingBlock) return false;
+  return dominates(definingBlock, where, idoms);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
   if (s1 == s2) return s1;
   if (s1 == nullptr || s2 == nullptr) return nullptr;

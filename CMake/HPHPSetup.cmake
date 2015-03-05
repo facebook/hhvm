@@ -3,10 +3,22 @@ include(Options)
 # Do this until cmake has a define for ARMv8
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("
+#ifndef __x86_64__
+#error Not x64
+#endif
+int main() { return 0; }" IS_X64)
+
+CHECK_CXX_SOURCE_COMPILES("
 #ifndef __AARCH64EL__
 #error Not ARMv8
 #endif
 int main() { return 0; }" IS_AARCH64)
+
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __powerpc64__
+#error Not PPC64
+#endif
+int main() { return 0; }" IS_PPC64)
 
 set(HHVM_WHOLE_ARCHIVE_LIBRARIES
     hphp_runtime_static
@@ -16,6 +28,10 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
 if (ENABLE_ZEND_COMPAT)
   add_definitions("-DENABLE_ZEND_COMPAT=1")
   list(APPEND HHVM_WHOLE_ARCHIVE_LIBRARIES hphp_ext_zend_compat)
+endif()
+
+if (ENABLE_THREAD_SAFE_SETLOCALE)
+  add_definitions("-DENABLE_THREAD_SAFE_SETLOCALE=1")
 endif()
 
 if (APPLE)
@@ -59,6 +75,14 @@ set(HHVM_LINK_LIBRARIES
 if(ENABLE_FASTCGI)
   LIST(APPEND HHVM_LINK_LIBRARIES hphp_thrift)
   LIST(APPEND HHVM_LINK_LIBRARIES hphp_proxygen)
+  include(CheckCXXSourceCompiles)
+  CHECK_CXX_SOURCE_COMPILES("#include <pthread.h>
+  int main() {
+    return pthread_mutex_timedlock();
+  }" PTHREAD_TIMEDLOCK)
+  if (NOT PTHREAD_TIMEDLOCK)
+    add_definitions(-DTHRIFT_MUTEX_EMULATE_PTHREAD_TIMEDLOCK)
+  endif()
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -235,6 +259,10 @@ include_directories("${TP_DIR}/libafdt/src")
 include_directories("${TP_DIR}/libmbfl")
 include_directories("${TP_DIR}/libmbfl/mbfl")
 include_directories("${TP_DIR}/libmbfl/filter")
+if (ENABLE_MCROUTER)
+  include_directories("${TP_DIR}/mcrouter")
+endif()
+
 add_definitions(-DNO_LIB_GFLAGS)
 include_directories("${TP_DIR}/folly")
 include_directories("${TP_DIR}/thrift")

@@ -1970,7 +1970,8 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * on.
    */
   auto const constraint = env.ctx.func->params[op.loc1->id].typeConstraint;
-  if (constraint.hasConstraint() && !constraint.isTypeVar()) {
+  if (constraint.hasConstraint() && !constraint.isTypeVar() &&
+      !constraint.isTypeConstant()) {
     FTRACE(2, "     {}\n", constraint.fullName());
     setLoc(env, op.loc1, env.index.lookup_constraint(env.ctx, constraint));
   }

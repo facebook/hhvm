@@ -122,7 +122,7 @@ private:
     SmartPtr<MimePart> lastpart;
   } m_parsedata;
 
-  int extractImpl(int decode, File *src);
+  int extractImpl(int decode, SmartPtr<File> src);
   SmartPtr<MimePart> createChild(int startpos, bool inherit);
   bool processHeader();
   const SmartPtr<MimePart>& getParent() { return m_parent; }

@@ -16,34 +16,27 @@
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 
-#include <algorithm>
-#include <cstring>
-#include <forward_list>
-#include <sstream>
-#include <type_traits>
-
-#include <folly/Format.h>
-#include <folly/Traits.h>
-
-#include "hphp/util/trace.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/jit/cse.h"
+#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/runtime.h"
+
+#include "hphp/util/trace.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"
 
 namespace HPHP { namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(hhir);
 
 #define NF     0
-#define C      CanCSE
 #define Er     MayRaiseError
 #define PRc    ProducesRC
 #define CRc    ConsumesRC
@@ -67,6 +60,7 @@ TRACE_SET_MOD(hhir);
 #define DArrElem       HasDest
 #define DArrPacked     HasDest
 #define DThis          HasDest
+#define DCtx           HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
 #define DPtrToParam    HasDest
@@ -111,6 +105,7 @@ OpInfo g_opInfo[] = {
 #undef DArrPacked
 #undef DAllocObj
 #undef DThis
+#undef DCtx
 #undef DMulti
 #undef DSetElem
 #undef DPtrToParam
@@ -118,7 +113,7 @@ OpInfo g_opInfo[] = {
 #undef DSubtract
 #undef DCns
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 const StringData* findClassName(SSATmp* cls) {
   assert(cls->isA(Type::Cls));
@@ -324,4 +319,5 @@ Opcode queryToDblQueryOp(Opcode opc) {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }}

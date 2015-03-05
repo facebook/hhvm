@@ -90,6 +90,7 @@ function determine_flags(OptionMap $opts): string {
       '-v Eval.JitEnableRenameFunction=0 '.
       '-v Eval.GdbSyncChunks=1 '.
       '-v Eval.AllowHhas=true '.
+      '-v Eval.CheckReturnTypeHints=2 '.
       '';
   }
 

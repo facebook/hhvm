@@ -235,10 +235,10 @@ class IntlChar {
   /**
    * Gets the Unicode version information.
    *
-   * @return array<int,int> - Current Unicode database version
+   * @return array - Current Unicode database version
    */
   <<__Native,__IsFoldable>> static
-  public function getUnicodeVersion(): array<int,int>;
+  public function getUnicodeVersion(): array;
 
   /**
    * Get the FC_NFKC_Closure property string for a character.

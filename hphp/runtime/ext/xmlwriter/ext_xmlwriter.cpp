@@ -711,7 +711,7 @@ static Variant HHVM_FUNCTION(xmlwriter_set_indent_string,
   CHECK_RESOURCE(resource);
 
   if (!indentString.isString()) {
-    return (bool*) nullptr;
+    return false;
   }
   return resource->m_writer.setIndentString(indentString.toString());
 }

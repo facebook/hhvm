@@ -119,7 +119,7 @@ static bool HHVM_METHOD(ImagickDraw, composite,
                         const Object compositeWand) {
   auto wand = getDrawingWandResource(this_);
   Object compositeWandObj(compositeWand);
-  auto magick = getMagickWandResource(compositeWandObj.get());
+  auto magick = getMagickWandResource(compositeWandObj);
   auto status = DrawComposite(wand->getWand(), (CompositeOperator)compose,
                               x, y, width, height, magick->getWand());
   if (status == MagickFalse) {

@@ -27,6 +27,7 @@
 
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/extension-registry.h"
 
 #include "hphp/util/lock.h"
 
@@ -914,7 +915,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     if (ext_name == s_core) {
       ext = IniSetting::CORE;
     } else {
-      ext = Extension::GetExtension(ext_name);
+      ext = ExtensionRegistry::get(ext_name);
       if (!ext) {
         raise_warning("Unable to find extension '%s'",
                       ext_name.toCppString().c_str());

@@ -41,7 +41,7 @@ public:
   virtual bool fetcher(PDOFetchOrientation ori, long offset);
   virtual bool describer(int colno);
   virtual bool getColumn(int colno, Variant &value);
-  virtual bool paramHook(PDOBoundParam *param, PDOParamEvent event_type);
+  virtual bool paramHook(PDOBoundParam* param, PDOParamEvent event_type);
   virtual bool getColumnMeta(int64_t colno, Array &return_value);
   virtual bool cursorCloser();
 
@@ -182,8 +182,7 @@ bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
   if (sqlite3_prepare(m_db, sql.data(), sql.size(), &rawstmt, &tail)
       == SQLITE_OK) {
 
-    PDOSqliteStatement *s = newres<PDOSqliteStatement>(m_db, rawstmt);
-    *stmt = s;
+    *stmt = makeSmartPtr<PDOSqliteStatement>(m_db, rawstmt);
     return true;
   }
 
@@ -359,7 +358,7 @@ bool PDOSqliteStatement::support(SupportedMethod method) {
 }
 
 int PDOSqliteStatement::handleError(const char *file, int line) {
-  auto rsrc = dynamic_cast<PDOSqliteResource*>(dbh.get());
+  auto rsrc = unsafe_cast<PDOSqliteResource>(dbh);
   assert(rsrc);
   auto conn = rsrc->conn();
   assert(conn);
@@ -433,11 +432,11 @@ bool PDOSqliteStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Resource(newres<PDOColumn>()));
+      columns.set(i, Variant(makeSmartPtr<PDOColumn>()));
     }
   }
 
-  PDOColumn *col = columns[colno].toResource().getTyped<PDOColumn>();
+  auto col = cast<PDOColumn>(columns[colno]);
   col->name = String(sqlite3_column_name(m_stmt, colno), CopyString);
   col->maxlen = 0xffffffff;
   col->precision = 0;
@@ -488,7 +487,7 @@ bool PDOSqliteStatement::getColumn(int colno, Variant &value) {
   return true;
 }
 
-bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
+bool PDOSqliteStatement::paramHook(PDOBoundParam* param,
                                    PDOParamEvent event_type) {
   switch (event_type) {
   case PDO_PARAM_EVT_EXEC_PRE:
@@ -640,8 +639,9 @@ bool PDOSqliteStatement::cursorCloser() {
 
 PDOSqlite::PDOSqlite() : PDODriver("sqlite") {}
 
-PDOResource* PDOSqlite::createResourceImpl() {
-  return newres<PDOSqliteResource>(std::make_shared<PDOSqliteConnection>());
+SmartPtr<PDOResource> PDOSqlite::createResourceImpl() {
+  return makeSmartPtr<PDOSqliteResource>(
+    std::make_shared<PDOSqliteConnection>());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

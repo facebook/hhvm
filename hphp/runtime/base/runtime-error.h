@@ -91,8 +91,8 @@ void raise_notice_without_first_frame(const std::string &msg);
 void raise_deprecated(const std::string &msg);
 void raise_deprecated(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_deprecated_without_first_frame(const std::string &msg);
-void raise_debugging(const std::string &msg);
-void raise_debugging(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_warning_unsampled(const std::string &msg);
+void raise_warning_unsampled(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_message(ErrorConstants::ErrorModes mode,
                    const char *fmt,
                    va_list ap);

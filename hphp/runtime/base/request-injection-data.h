@@ -87,6 +87,7 @@ struct RequestInjectionData {
                                      RequestInjectionData::EventHookFlag |
                                      RequestInjectionData::InterceptFlag |
                                      RequestInjectionData::XenonSignalFlag |
+                                     RequestInjectionData::IntervalTimerFlag |
                                      RequestInjectionData::ResourceFlags;
 
   RequestInjectionData()
@@ -314,6 +315,7 @@ private:
   void clearXenonSignalFlag();
   void setDebuggerSignalFlag();
   void setIntervalTimerFlag();
+  void clearIntervalTimerFlag();
   ssize_t fetchAndClearFlags();
 
   inline bool checkXenonSignalFlag() {

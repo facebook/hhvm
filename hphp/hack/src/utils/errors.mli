@@ -16,7 +16,7 @@ val is_hh_fixme : (Pos.t -> int -> bool) ref
 val to_list : 'a error_ -> ('a * string) list
 val get_code : 'a error_ -> int
 val get_pos : error -> Pos.t
-val make_error : (Pos.t * string) list -> error
+val make_error : int -> (Pos.t * string) list -> error
 
 val error_code_to_string : int -> string
 
@@ -75,7 +75,6 @@ val assert_arity : Pos.t -> unit
 val gena_arity : Pos.t -> unit
 val genva_arity : Pos.t -> unit
 val gen_array_rec_arity : Pos.t -> unit
-val gen_array_va_rec_arity : Pos.t -> unit
 val dynamic_class : Pos.t -> unit
 val uninstantiable_class : Pos.t -> Pos.t -> string -> unit
 val abstract_const_usage: Pos.t -> Pos.t -> string -> unit
@@ -252,6 +251,7 @@ val typeconst_depends_on_external_tparam : Pos.t -> Pos.t -> string -> unit
 val typeconst_assigned_tparam : Pos.t -> string -> unit
 val invalid_type_access_root : (Pos.t * string) -> unit
 val duplicate_user_attribute : (Pos.t * string) -> Pos.t -> unit
+val unbound_attribute_name : Pos.t -> string -> unit
 val attribute_arity : Pos.t -> string -> int -> unit
 val attribute_param_type : Pos.t -> string -> unit
 val deprecated_use : Pos.t -> Pos.t -> string -> unit
@@ -271,5 +271,4 @@ val ignore_ : (unit -> 'a) -> 'a
 val try_when :
   (unit -> unit) -> when_:(unit -> bool) -> do_:(error -> unit) -> unit
 val has_no_errors : (unit -> 'a) -> bool
-
 val to_absolute : error -> Pos.absolute error_

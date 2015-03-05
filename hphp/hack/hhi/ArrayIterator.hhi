@@ -15,32 +15,32 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-class ArrayIterator<T> implements KeyedIterator<int, T>,
-                                  KeyedTraversable<int, T>,
-                                  ArrayAccess<int, T>,
+class ArrayIterator<T> implements KeyedIterator<arraykey, T>,
+                                  KeyedTraversable<arraykey, T>,
+                                  ArrayAccess<arraykey, T>,
                                   SeekableIterator<T>,
-                                  Countable,
-                                  Serializable {
+                                  Countable
+                                  /* Serializable - not implemented */ {
   public function __construct (mixed $array);
   public function append(mixed $value): void;
   public function asort(): void;
   public function count(): int;
-  public function current(): mixed;
+  public function current(): T;
   public function getArrayCopy(): array;
   public function getFlags(): void;
-  public function key(): mixed;
+  public function key(): arraykey;
   public function ksort(): void;
   public function natcasesort(): void;
   public function natsort(): void;
   public function next(): void;
-  public function offsetExists(string $index): void;
-  public function offsetGet(string $index): mixed;
-  public function offsetUnset(string $index): void;
+  public function offsetExists(arraykey $index): bool;
+  public function offsetGet(arraykey $index): T;
+  public function offsetSet(arraykey $index, T $newval): void;
+  public function offsetUnset(arraykey $index): void;
   public function rewind(): void;
-  public function serialize(): string;
+  public function seek(int $position): void;
   public function setFlags(string $flags): void;
   public function uasort(string $cmp_function): void;
   public function uksort(string $cmp_function): void;
-  public function unserialize(string $serialized): string;
   public function valid(): bool;
 }

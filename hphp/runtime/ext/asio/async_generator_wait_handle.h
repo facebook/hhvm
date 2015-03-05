@@ -40,8 +40,7 @@ class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
 
   explicit c_AsyncGeneratorWaitHandle(Class* cls =
       c_AsyncGeneratorWaitHandle::classof())
-    : c_ResumableWaitHandle(cls)
-  {}
+    : c_ResumableWaitHandle(cls) {}
   ~c_AsyncGeneratorWaitHandle();
 
   void t___construct();

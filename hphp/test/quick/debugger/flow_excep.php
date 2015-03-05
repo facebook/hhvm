@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 // Test flow control around exceptions. Stepping into/over/out of throws,
 // catches, stepping over calls that have throw/catch within, etc.

@@ -256,7 +256,7 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
     /* Async function support helpers */
-    {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create, DSSA, SSync,
+    {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
     {CreateSSWH,         &c_StaticWaitHandle::CreateSucceeded, DSSA, SNone,
                            {{TV, 0}}},
@@ -284,9 +284,9 @@ static CallMap s_callMap {
     {BindElem, MInstrHelpers::bindElemC, DNone, SSync,
                  {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
     {SetWithRefElem, MInstrHelpers::setWithRefElemC, DNone, SSync,
-                 {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
+                 {{SSA, 0}, {TV, 1}, {TV, 2}, {SSA, 3}}},
     {SetWithRefNewElem, MInstrHelpers::setWithRefNewElem, DNone, SSync,
-                 {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+                 {{SSA, 0}, {TV, 1}, {SSA, 2}}},
 
     /* instanceof checks */
     {InstanceOf, &Class::classof, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},

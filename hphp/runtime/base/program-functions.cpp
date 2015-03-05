@@ -39,12 +39,13 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/thread-safe-setlocale.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -53,6 +54,7 @@
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/replay-transport.h"
@@ -575,7 +577,7 @@ void handle_destructor_exception(const char* situation) {
   // If there is a user error handler it will be invoked, otherwise
   // the default error handler will be invoked.
   try {
-    raise_debugging("%s", errorMsg.c_str());
+    raise_warning_unsampled("%s", errorMsg.c_str());
   } catch (...) {
     handle_resource_exceeded_exception();
 
@@ -680,7 +682,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     Xenon::getInstance().surpriseAll();
   }
 
-  Extension::RequestInitModules();
+  ExtensionRegistry::requestInit();
   // If extension constants were used in the ini files, they would have come
   // out as 0 in the previous pass. We will re-import only the constants that
   // have been later bound. All other non-constant configs should remain as they
@@ -903,6 +905,9 @@ static int start_server(const std::string &username, int xhprof) {
   AdminRequestHandler::GetAccessLog().init
     (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogSymLink,
      RuntimeOption::AdminLogFile,
+     username);
+  RPCRequestHandler::GetAccessLog().init
+    (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::RPCLogs,
      username);
 
 #if !defined(SKIP_USER_CHANGE)
@@ -1784,7 +1789,7 @@ void hphp_process_init() {
   PageletServer::Restart();
   XboxServer::Restart();
   Stream::RegisterCoreWrappers();
-  Extension::InitModules();
+  ExtensionRegistry::moduleInit();
   for (InitFiniNode *in = extra_process_init; in; in = in->next) {
     in->func();
   }
@@ -1858,6 +1863,11 @@ void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
   MM().resetExternalStats();
+
+#ifdef ENABLE_THREAD_SAFE_SETLOCALE
+  g_thread_safe_locale_handler->reset();
+#endif
+
   Treadmill::startRequest();
 
 #ifdef ENABLE_SIMPLE_COUNTER
@@ -1950,6 +1960,10 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
 
 void hphp_context_shutdown() {
   // Run shutdown handlers. This may cause user code to run.
+#ifdef ENABLE_THREAD_SAFE_SETLOCALE
+  g_thread_safe_locale_handler->reset();
+#endif
+
   auto const context = g_context.getNoCheck();
   context->destructObjects();
   context->onRequestShutdown();
@@ -1958,7 +1972,7 @@ void hphp_context_shutdown() {
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestShutdownHook());
 
   // Extensions could have shutdown handlers
-  Extension::RequestShutdownModules();
+  ExtensionRegistry::requestShutdown();
 
   // Extension shutdown could have re-initialized some
   // request locals
@@ -2038,7 +2052,7 @@ void hphp_process_exit() {
   g_context.getCheck();
   Eval::Debugger::Stop();
   g_context.destroy();
-  Extension::ShutdownModules();
+  ExtensionRegistry::moduleShutdown();
   LightProcess::Close();
   for (InitFiniNode *in = extra_process_exit; in; in = in->next) {
     in->func();

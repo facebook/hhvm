@@ -52,16 +52,7 @@ void c_AsyncFunctionWaitHandle::t___construct() {
 }
 
 namespace {
-
-const StaticString s__closure_("{closure}");
-
-void checkCreateErrors(c_WaitableWaitHandle* child) {
-  AsioSession* session = AsioSession::Get();
-  if (session->isInContext()) {
-    child->enterContext(session->getCurrentContextIdx());
-  }
-}
-
+  const StaticString s__closure_("{closure}");
 }
 
 c_AsyncFunctionWaitHandle*
@@ -76,8 +67,6 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   assert(child);
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
   assert(!child->isFinished());
-
-  checkCreateErrors(child);
 
   void* obj = Resumable::Create<false>(fp, numSlots, resumeAddr, resumeOffset,
                                        sizeof(c_AsyncFunctionWaitHandle));
@@ -95,6 +84,7 @@ void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
 }
 
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
+  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
   m_child = child;
 

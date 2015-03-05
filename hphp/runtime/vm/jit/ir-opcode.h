@@ -67,6 +67,8 @@ struct FrameStateMgr;
  *                    intersected with an optional type parameter
  *     DThis        single dst has type Obj<ctx>, where ctx is the
  *                    current context class
+ *     DCtx         single dst has type Cctx|Obj<=ctx, where ctx is the
+ *                    current context class
  *     DMulti       multiple dests. type and number depend on instruction
  *     DSetElem     single dst is a subset of CountedStr|Nullptr depending on
  *                    sources
@@ -99,7 +101,6 @@ struct FrameStateMgr;
  *   The following abbreviations are used in this table:
  *
  *      NF    no flags
- *      C     canCSE
  *      Er    mayRaiseError
  *      PRc   producesRC
  *      CRc   consumesRC
@@ -185,18 +186,17 @@ bool opHasExtraData(Opcode op);
 enum OpcodeFlag : uint64_t {
   NoFlags          = 0,
   HasDest          = 1ULL <<  0,
-  CanCSE           = 1ULL <<  1,
-  Branch           = 1ULL <<  2,
-  ConsumesRC       = 1ULL <<  3,
-  ProducesRC       = 1ULL <<  4,
-  MInstrProp       = 1ULL <<  5,
-  MInstrElem       = 1ULL <<  6,
-  MayRaiseError    = 1ULL <<  7,
-  Terminal         = 1ULL <<  8, // has no next instruction
-  NaryDest         = 1ULL <<  9, // has 0 or more destinations
-  HasExtra         = 1ULL << 10,
-  Passthrough      = 1ULL << 11,
-  KillsSources     = 1ULL << 12,
+  Branch           = 1ULL <<  1,
+  ConsumesRC       = 1ULL <<  2,
+  ProducesRC       = 1ULL <<  3,
+  MInstrProp       = 1ULL <<  4,
+  MInstrElem       = 1ULL <<  5,
+  MayRaiseError    = 1ULL <<  6,
+  Terminal         = 1ULL <<  7, // has no next instruction
+  NaryDest         = 1ULL <<  8, // has 0 or more destinations
+  HasExtra         = 1ULL <<  9,
+  Passthrough      = 1ULL << 10,
+  KillsSources     = 1ULL << 11,
 };
 
 bool hasEdges(Opcode opc);
@@ -210,19 +210,6 @@ using DstRange = folly::Range<SSATmp*>;
  * Returns nullptr if can't find it.
  */
 const StringData* findClassName(SSATmp* cls);
-
-/*
- * Return the output type from a given IRInstruction.
- *
- * The destination type is always predictable from the types of the inputs, any
- * type parameters to the instruction, and the id of the dest.
- */
-Type outputType(const IRInstruction*, int dstId = 0);
-
-/*
- * Check that an instruction has operands of allowed types.
- */
-bool checkOperandTypes(const IRInstruction*, const IRUnit* unit = nullptr);
 
 using TcaRange = folly::Range<TCA>;
 

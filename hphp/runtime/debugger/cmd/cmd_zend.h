@@ -22,12 +22,11 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdZend : public DebuggerCommand {
-public:
+struct CmdZend : DebuggerCommand {
   CmdZend() : DebuggerCommand(KindOfZend) {}
 
-  virtual void help(DebuggerClient &client);
-  virtual void onClient(DebuggerClient &client);
+  void help(DebuggerClient&) override;
+  void onClient(DebuggerClient&) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -50,7 +50,8 @@ Block* implMakeExit(HTS& env, TransFlags trflags, Offset targetBcOff) {
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
   spillStack(env);
-  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env, AdjustSP,
+    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) }, sp(env));
   exitRequest(env, trflags, SrcKey{curSrcKey(env), targetBcOff});
   return exit;
 }
@@ -90,7 +91,8 @@ Block* makeExitOpt(HTS& env, TransID transId) {
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);
   spillStack(env);
-  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env, AdjustSP,
+    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) }, sp(env));
   gen(env,
       ReqRetranslateOpt,
       ReqRetransOptData{transId, SrcKey{curSrcKey(env), targetBcOff}},

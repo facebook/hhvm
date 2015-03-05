@@ -182,7 +182,8 @@ void emitSwitch(HTS& env,
   data.targets     = &targets[0];
 
   spillStack(env);
-  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    sp(env));
   gen(env, JmpSwitchDest, data, index, sp(env));
 }
 
@@ -225,7 +226,8 @@ void emitSSwitch(HTS& env, const ImmVector& iv) {
                         data,
                         testVal);
   gen(env, DecRef, testVal);
-  gen(env, AdjustSP, StackOffset { offsetFromSP(env, 0) }, sp(env));
+  gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    sp(env));
   gen(env, JmpSSwitchDest, dest, sp(env));
 }
 

@@ -14,26 +14,25 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_EVAL_DEBUGGER_CMD_MACHINE_H__
-#define __HPHP_EVAL_DEBUGGER_CMD_MACHINE_H__
+#ifndef __HPHP_EVAL_DEBUGGER_CMD_TEMPLATE_H__
+#define __HPHP_EVAL_DEBUGGER_CMD_TEMPLATE_H__
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include <runtime/debugger/debugger_command.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdMachine : public DebuggerCommand {
-public:
+struct CmdMachine : DebuggerCommand {
   CmdMachine() : DebuggerCommand(KindOfMachine) {}
 
-  virtual void list(DebuggerClient &client);
-  virtual bool help(DebuggerClient &client);
-  virtual bool onServer(DebuggerProxy &proxy);
+  void list(DebuggerClient&) override;
+  bool help(DebuggerClient&) override;
+  bool onServer(DebuggerProxy&) override;
 
 protected:
-  virtual void onClientImpl(DebuggerClient &client);
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void onClientImpl(DebuggerClient&) override;
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
 };
@@ -41,4 +40,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_EVAL_DEBUGGER_CMD_MACHINE_H__
+#endif

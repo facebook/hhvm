@@ -5,6 +5,7 @@ string(10) "@HH\string"
 bool(false)
 string(11) "?:xhp:hello"
 bool(false)
+string(11) "HH\noreturn"
 string(6) "HH\int"
 string(9) "HH\string"
 string(23) "HH\Vector<:xhp:element>"

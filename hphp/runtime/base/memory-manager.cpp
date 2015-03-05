@@ -638,6 +638,8 @@ void MemoryManager::checkHeap() {
   size_t bytes=0;
   std::vector<Header*> hdrs;
   std::unordered_set<FreeNode*> free_blocks;
+  std::unordered_set<APCLocalArray*> apc_arrays;
+  std::unordered_set<StringData*> apc_strings;
   size_t counts[NumHeaderKinds];
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
   for (auto h = begin(), lim = end(); h != lim; ++h) {
@@ -645,20 +647,47 @@ void MemoryManager::checkHeap() {
     TRACE(2, "checkHeap: hdr %p\n", hdrs[hdrs.size()-1]);
     bytes += h->size();
     counts[(int)h->kind_]++;
-    if (h->kind_ == HeaderKind::Debug) {
-      // the next block's parsed size should agree with DebugHeader
-      auto h2 = h; ++h2;
-      if (h2 != lim) {
-        assert(h2->kind_ != HeaderKind::Debug);
-        assert(h->debug_.returnedCap ==
-               MemoryManager::smartSizeClass(h2->size()));
+    switch (h->kind_) {
+      case HeaderKind::Debug: {
+        // the next block's parsed size should agree with DebugHeader
+        auto h2 = h; ++h2;
+        if (h2 != lim) {
+          assert(h2->kind_ != HeaderKind::Debug);
+          assert(h->debug_.returnedCap ==
+                 MemoryManager::smartSizeClass(h2->size()));
+        }
+        break;
       }
-    } else if (h->kind_ == HeaderKind::Free) {
-      free_blocks.insert(&h->free_);
+      case HeaderKind::Free:
+        free_blocks.insert(&h->free_);
+        break;
+      case HeaderKind::Apc:
+        apc_arrays.insert(&h->apc_);
+        break;
+      case HeaderKind::String:
+        if (h->str_.isShared()) apc_strings.insert(&h->str_);
+        break;
+      case HeaderKind::Packed:
+      case HeaderKind::Struct:
+      case HeaderKind::Mixed:
+      case HeaderKind::Empty:
+      case HeaderKind::Globals:
+      case HeaderKind::Proxy:
+      case HeaderKind::Object:
+      case HeaderKind::ResumableObj:
+      case HeaderKind::Resource:
+      case HeaderKind::Ref:
+      case HeaderKind::Resumable:
+      case HeaderKind::Native:
+      case HeaderKind::SmallMalloc:
+      case HeaderKind::BigMalloc:
+      case HeaderKind::BigObj:
+      case HeaderKind::Hole:
+        break;
     }
   }
 
-  // make sure everything in a free list was scanned exactly once.
+  // check the free lists
   for (size_t i = 0; i < kNumSmartSizes; i++) {
     for (auto n = m_freelists[i].head; n; n = n->next) {
       assert(free_blocks.find(n) != free_blocks.end());
@@ -666,6 +695,23 @@ void MemoryManager::checkHeap() {
     }
   }
   assert(free_blocks.empty());
+
+  // check the apc array list
+  for (auto a : m_apc_arrays) {
+    assert(apc_arrays.find(a) != apc_arrays.end());
+    apc_arrays.erase(a);
+  }
+  assert(apc_arrays.empty());
+
+  // check the apc string list
+  for (StringDataNode *next, *n = m_strings.next; n != &m_strings; n = next) {
+    next = n->next;
+    auto const s = StringData::node2str(n);
+    assert(s->isShared());
+    assert(apc_strings.find(s) != apc_strings.end());
+    apc_strings.erase(s);
+  }
+  assert(apc_strings.empty());
 
   TRACE(1, "checkHeap: %lu objects %lu bytes\n", hdrs.size(), bytes);
   TRACE(1, "checkHeap-types: ");

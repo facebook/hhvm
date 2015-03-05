@@ -1,6 +1,5 @@
 #!/usr/local/bin/php -j
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 # If $func looks like a mangled C++ symbol, attempt to demangle it, stripping
 # off any trailing junk first.

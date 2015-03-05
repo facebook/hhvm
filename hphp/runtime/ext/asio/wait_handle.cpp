@@ -54,11 +54,9 @@ void c_WaitHandle::t_import() {
     return;
   }
 
-  context_idx_t ctx_idx = AsioSession::Get()->getCurrentContextIdx();
-  if (ctx_idx) {
-    assert(instanceof(c_WaitableWaitHandle::classof()));
-    static_cast<c_WaitableWaitHandle*>(this)->enterContext(ctx_idx);
-  }
+  assert(instanceof(c_WaitableWaitHandle::classof()));
+  auto const ctx_idx = AsioSession::Get()->getCurrentContextIdx();
+  static_cast<c_WaitableWaitHandle*>(this)->enterContext(ctx_idx);
 }
 
 Variant c_WaitHandle::t_join() {

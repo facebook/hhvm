@@ -56,7 +56,7 @@ public:
   static void ClearPerfEvents();
 
   static DECLARE_THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
-  bool m_countersSet;
+  bool m_countersSet{false};
 private:
   void reset();
   int64_t getInstructionCount();
@@ -68,9 +68,9 @@ private:
   void getPerfEvents(Array& ret);
   void clearPerfEvents();
 
-  InstructionCounter* m_instructionCounter;
-  LoadCounter* m_loadCounter;
-  StoreCounter* m_storeCounter;
+  InstructionCounter* m_instructionCounter{nullptr};
+  LoadCounter* m_loadCounter{nullptr};
+  StoreCounter* m_storeCounter{nullptr};
   std::vector<HardwareCounterImpl*> m_counters;
 };
 

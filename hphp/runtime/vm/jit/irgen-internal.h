@@ -24,11 +24,15 @@
 
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simplify.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/stack-offsets-def.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -261,11 +265,11 @@ void ifElse(HTS& env, Branch branch, Next next) {
 //////////////////////////////////////////////////////////////////////
 
 inline BCMarker makeMarker(HTS& env, Offset bcOff) {
-  int32_t stackOff = env.irb->syncedSpLevel() +
+  auto stackOff = env.irb->syncedSpLevel() +
     env.irb->evalStack().size() - env.irb->stackDeficit();
 
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
-         bcOff, stackOff, curFunc(env)->fullName()->data());
+         bcOff, stackOff.offset, curFunc(env)->fullName()->data());
 
   return BCMarker {
     SrcKey { curFunc(env), bcOff, resumed(env) },
@@ -281,26 +285,26 @@ inline void updateMarker(HTS& env) {
 //////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
-// Convert stack offsets that are relative to the current HHBC instruction
-// (positive is higher on the stack) to offsets that are relative to the
-// currently defined StkPtr.
-inline int32_t offsetFromSP(const HTS& env, int32_t offsetFromInstr) {
+inline IRSPOffset offsetFromIRSP(const HTS& env, BCSPOffset offsetFromInstr) {
   int32_t const virtDelta = env.irb->evalStack().size() -
     env.irb->stackDeficit();
   auto const curSPTop = env.irb->syncedSpLevel() + virtDelta;
-  auto const absSPOff = curSPTop - offsetFromInstr;
-  auto const ret = -static_cast<int32_t>(absSPOff - env.irb->spOffset());
+  auto const ret = toIRSPOffset(offsetFromInstr, curSPTop, env.irb->spOffset());
   FTRACE(1,
-    "offsetFromSP({}) --> spOff: {}, virtDelta: {}, curTop: {}, abs: {}, "
-      "ret: {}\n",
-    offsetFromInstr,
-    env.irb->spOffset(),
+    "offsetFromIRSP({}) --> spOff: {}, virtDelta: {}, curTop: {}, ret: {}\n",
+    offsetFromInstr.offset,
+    env.irb->spOffset().offset,
     virtDelta,
-    curSPTop,
-    absSPOff,
-    ret
+    curSPTop.offset,
+    ret.offset
   );
   return ret;
+}
+
+inline BCSPOffset offsetFromBCSP(const HTS& env, FPAbsOffset offsetFromFP) {
+  auto const curSPTop = env.irb->syncedSpLevel() +
+    env.irb->evalStack().size() - env.irb->stackDeficit();
+  return toBCSPOffset(offsetFromFP, curSPTop);
 }
 
 inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
@@ -308,12 +312,12 @@ inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
   env.irb->constrainValue(opnd, tc);
 
   if (opnd == nullptr) {
-    env.irb->constrainStack(offsetFromSP(env, 0), tc);
+    env.irb->constrainStack(offsetFromIRSP(env, BCSPOffset{0}), tc);
     auto value = gen(
       env,
       LdStk,
       type,
-      StackOffset { offsetFromSP(env, 0) },
+      IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
       sp(env)
     );
     env.irb->incStackDeficit();
@@ -377,12 +381,12 @@ inline void extendStack(HTS& env, uint32_t index, Type type) {
 
 inline SSATmp* top(HTS& env,
                    Type type,
-                   uint32_t index = 0,
+                   BCSPOffset index = BCSPOffset{0},
                    TypeConstraint tc = DataTypeSpecific) {
-  auto tmp = env.irb->evalStack().top(index);
+  auto tmp = env.irb->evalStack().top(index.offset);
   if (!tmp) {
-    extendStack(env, index, type);
-    tmp = env.irb->evalStack().top(index);
+    extendStack(env, index.offset, type);
+    tmp = env.irb->evalStack().top(index.offset);
   }
   assert(tmp);
   env.irb->constrainValue(tmp, tc);
@@ -390,35 +394,35 @@ inline SSATmp* top(HTS& env,
 }
 
 inline SSATmp* topC(HTS& env,
-                    uint32_t i = 0,
+                    BCSPOffset i = BCSPOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
   return top(env, Type::Cell, i, tc);
 }
 
 inline SSATmp* topF(HTS& env,
-                    uint32_t i = 0,
+                    BCSPOffset i = BCSPOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
   return top(env, Type::Gen, i, tc);
 }
 
-inline SSATmp* topV(HTS& env, uint32_t i = 0) {
+inline SSATmp* topV(HTS& env, BCSPOffset i = BCSPOffset{0}) {
   return top(env, Type::BoxedInitCell, i);
 }
 
-inline SSATmp* topR(HTS& env, uint32_t i = 0) {
+inline SSATmp* topR(HTS& env, BCSPOffset i = BCSPOffset{0}) {
   return top(env, Type::Gen, i);
 }
 
 inline Type topType(HTS& env,
-                    uint32_t idx,
+                    BCSPOffset idx,
                     TypeConstraint constraint = DataTypeSpecific) {
-  FTRACE(5, "Asking for type of stack elem {}\n", idx);
-  if (idx < env.irb->evalStack().size()) {
-    auto const tmp = env.irb->evalStack().top(idx);
+  FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);
+  if (idx.offset < env.irb->evalStack().size()) {
+    auto const tmp = env.irb->evalStack().top(idx.offset);
     env.irb->constrainValue(tmp, constraint);
     return tmp->type();
   }
-  return env.irb->stackType(offsetFromSP(env, idx), constraint);
+  return env.irb->stackType(offsetFromIRSP(env, idx), constraint);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -429,7 +433,7 @@ inline void spillStack(HTS& env) {
   for (auto idx = toSpill.size(); idx-- > 0;) {
     gen(env,
         StStk,
-        StackOffset { offsetFromSP(env, idx) },
+        IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{idx}) },
         sp(env),
         toSpill.top(idx));
   }
@@ -452,15 +456,15 @@ inline SSATmp* ldCtx(HTS& env) {
 inline SSATmp* unbox(HTS& env, SSATmp* val, Block* exit) {
   auto const type = val->type();
   // If we don't have an exit the LdRef can't be a guard.
-  auto const inner = exit ? (type & Type::BoxedCell).innerType() : Type::Cell;
+  auto const inner = exit ? (type & Type::BoxedCell).inner() : Type::Cell;
 
-  if (type.isBoxed() || type.notBoxed()) {
+  if (type <= Type::Cell) {
     env.irb->constrainValue(val, DataTypeCountness);
-    if (type.isBoxed()) {
-      gen(env, CheckRefInner, inner, exit, val);
-      return gen(env, LdRef, inner, val);
-    }
     return val;
+  }
+  if (type <= Type::BoxedCell) {
+    gen(env, CheckRefInner, inner, exit, val);
+    return gen(env, LdRef, inner, val);
   }
 
   return cond(
@@ -478,6 +482,23 @@ inline SSATmp* unbox(HTS& env, SSATmp* val, Block* exit) {
       return gen(env, AssertType, Type::Cell, val);
     }
   );
+}
+
+//////////////////////////////////////////////////////////////////////
+// Type helpers
+
+inline Type relaxToGuardable(Type ty) {
+  assert(ty <= Type::Gen);
+  ty = ty.unspecialize();
+
+  if (ty.isKnownDataType()) return ty;
+
+  if (ty <= Type::UncountedInit)  return Type::UncountedInit;
+  if (ty <= Type::Uncounted)      return Type::Uncounted;
+  if (ty <= Type::Cell)           return Type::Cell;
+  if (ty <= Type::BoxedCell)      return Type::BoxedCell;
+  if (ty <= Type::Gen)            return Type::Gen;
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -535,7 +556,7 @@ inline SSATmp* ldLoc(HTS& env,
   env.irb->constrainLocal(locId, tc, opStr);
 
   if (curFunc(env)->isPseudoMain()) {
-    auto const type = env.irb->predictedLocalType(locId).relaxToGuardable();
+    auto const type = relaxToGuardable(env.irb->predictedLocalType(locId));
     assert(!type.isSpecialized());
     assert(type == type.dropConstVal());
 
@@ -565,14 +586,14 @@ inline SSATmp* ldLocInner(HTS& env,
   // gets us that.
   auto const loc = ldLoc(env, locId, ldPMExit, DataTypeCountness);
 
-  if (loc->type().notBoxed()) {
+  if (loc->type() <= Type::Cell) {
     env.irb->constrainValue(loc, constraint);
     return loc;
   }
 
-  // Handle the isBoxed() case manually outside of unbox() so we can use the
+  // Handle the Boxed case manually outside of unbox() so we can use the
   // local's predicted type.
-  if (loc->type().isBoxed()) {
+  if (loc->type() <= Type::BoxedCell) {
     auto const predTy = env.irb->predictedInnerType(locId);
     gen(env, CheckRefInner, predTy, ldrefExit, loc);
     return gen(env, LdRef, predTy, loc);
@@ -605,7 +626,7 @@ inline SSATmp* ldLocInnerWarn(HTS& env,
   env.irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
 
   if (locVal->type() <= Type::Uninit) return warnUninit();
-  if (locVal->type().not(Type::Uninit)) return locVal;
+  if (!locVal->type().maybe(Type::Uninit)) return locVal;
 
   // The local might be Uninit so we have to check at runtime.
   return cond(
@@ -646,7 +667,7 @@ inline SSATmp* stLocRaw(HTS& env, uint32_t id, SSATmp* fp, SSATmp* newVal) {
  * stack, it should set 'incRefNew' so that 'newVal' will have its ref-count
  * incremented.
  *
- * Pre: !newVal->type().isBoxed() && !newVal->type().maybeBoxed()
+ * Pre: !newVal->type().maybe(Type::BoxedCell)
  * Pre: exit != nullptr if the local may be boxed
  */
 inline SSATmp* stLocImpl(HTS& env,
@@ -656,38 +677,50 @@ inline SSATmp* stLocImpl(HTS& env,
                          SSATmp* newVal,
                          bool decRefOld,
                          bool incRefNew) {
-  assert(!newVal->type().maybeBoxed());
+  assert(!newVal->type().maybe(Type::BoxedCell));
 
   auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
   auto const oldLoc = ldLoc(env, id, ldPMExit, cat);
-  assert(oldLoc->type().isBoxed() || oldLoc->type().notBoxed());
 
-  if (oldLoc->type().notBoxed()) {
+  auto unboxed_case = [&] {
     stLocRaw(env, id, fp(env), newVal);
     if (incRefNew) gen(env, IncRef, newVal);
     if (decRefOld) gen(env, DecRef, oldLoc);
     return newVal;
-  }
+  };
 
-  // It's important that the IncRef happens after the guard on the inner type
-  // of the ref, since it may side-exit.
-  auto const predTy = env.irb->predictedInnerType(id);
+  auto boxed_case = [&] (SSATmp* box) {
+    // It's important that the IncRef happens after the guard on the inner type
+    // of the ref, since it may side-exit.
+    auto const predTy = env.irb->predictedInnerType(id);
 
-  // We may not have a ldrefExit, but if so we better not be loading the inner
-  // ref.
-  if (ldrefExit == nullptr) always_assert(!decRefOld);
-  if (ldrefExit != nullptr) {
-    gen(env, CheckRefInner, predTy, ldrefExit, oldLoc);
-  }
-  auto const innerCell = decRefOld ? gen(env, LdRef, predTy, oldLoc) : nullptr;
-  gen(env, StRef, oldLoc, newVal);
-  if (incRefNew) gen(env, IncRef, newVal);
-  if (decRefOld) {
-    gen(env, DecRef, innerCell);
-    env.irb->constrainValue(oldLoc, DataTypeCountness);
-  }
+    // We may not have a ldrefExit, but if so we better not be loading the inner
+    // ref.
+    if (ldrefExit == nullptr) always_assert(!decRefOld);
+    if (ldrefExit != nullptr) gen(env, CheckRefInner, predTy, ldrefExit, box);
 
-  return newVal;
+    auto const innerCell = decRefOld ? gen(env, LdRef, predTy, box) : nullptr;
+    gen(env, StRef, box, newVal);
+    if (incRefNew) gen(env, IncRef, newVal);
+    if (decRefOld) {
+      gen(env, DecRef, innerCell);
+      env.irb->constrainValue(box, DataTypeCountness);
+    }
+    return newVal;
+  };
+
+  if (oldLoc->type() <= Type::Cell) return unboxed_case();
+  if (oldLoc->type() <= Type::BoxedCell) return boxed_case(oldLoc);
+
+  return cond(
+    env,
+    0,
+    [&] (Block* taken) {
+      return gen(env, CheckType, Type::BoxedCell, taken, oldLoc);
+    },
+    boxed_case,
+    unboxed_case
+  );
 }
 
 inline SSATmp* stLoc(HTS& env,
@@ -736,17 +769,17 @@ inline SSATmp* ldLocAddr(HTS& env, uint32_t locId) {
   return gen(env, LdLocAddr, Type::PtrToFrameGen, LocalId(locId), fp(env));
 }
 
-inline SSATmp* ldStkAddr(HTS& env, int32_t relOffset) {
+inline SSATmp* ldStkAddr(HTS& env, BCSPOffset relOffset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in irb->evalStack().
   assert(relOffset >= static_cast<int32_t>(env.irb->evalStack().size()));
-  auto const offset = offsetFromSP(env, relOffset);
+  auto const offset = offsetFromIRSP(env, relOffset);
   env.irb->constrainStack(offset, DataTypeSpecific);
   return gen(
     env,
     LdStkAddr,
     Type::PtrToStkGen,
-    StackOffset { offset },
+    IRSPOffsetData { offset },
     sp(env)
   );
 }

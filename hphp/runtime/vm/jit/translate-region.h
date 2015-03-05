@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/types.h"  // TransFlags
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/prof-src-key.h"
 
 namespace HPHP { namespace jit {
 
@@ -50,7 +51,8 @@ using RegionBlacklist = ProfSrcKeySet;
 TranslateResult translateRegion(HTS&,
                                 const RegionDesc&,
                                 RegionBlacklist& toInterp,
-                                TransFlags trflags);
+                                TransFlags trflags,
+                                PostConditions& pconds);
 
 //////////////////////////////////////////////////////////////////////
 

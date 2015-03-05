@@ -64,12 +64,6 @@ Object c_ConditionWaitHandle::ti_create(const Variant& child) {
   assert(child_wh->instanceof(c_WaitableWaitHandle::classof()));
   auto const child_wwh = static_cast<c_WaitableWaitHandle*>(child_wh);
 
-  // Import child into the current context, detect cross-context cycles.
-  auto const session = AsioSession::Get();
-  if (session->isInContext()) {
-    child_wwh->enterContext(session->getCurrentContextIdx());
-  }
-
   c_ConditionWaitHandle* wh = newobj<c_ConditionWaitHandle>();
   wh->initialize(child_wwh);
   return wh;
@@ -112,6 +106,7 @@ void c_ConditionWaitHandle::t_fail(const Variant& exception) {
 void c_ConditionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   assert(!child->isFinished());
 
+  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
   m_child = child;
   m_child->incRefCount();

@@ -22,8 +22,6 @@
 #include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/util/logger.h"
 
-#define POLLING_SECONDS 1
-
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 TRACE_SET_MOD(debugger);
@@ -31,7 +29,7 @@ TRACE_SET_MOD(debugger);
 // Resets the buffer, serializes this command into the buffer and then
 // flushes the buffer.
 // Returns false if an exception occurs during these steps.
-bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
+bool DebuggerCommand::send(DebuggerThriftBuffer& thrift) {
   TRACE(5, "DebuggerCommand::send cmd of type %d\n", m_type);
   try {
     thrift.reset(false);
@@ -44,7 +42,7 @@ bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
   return true;
 }
 
-bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
+bool DebuggerCommand::recv(DebuggerThriftBuffer& thrift) {
   TRACE(5, "DebuggerCommand::recv\n");
   try {
     recvImpl(thrift);
@@ -57,7 +55,7 @@ bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
 
 // Always called from send and must implement the subclass specific
 // logic for serializing a command to send via Thrift.
-void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
+void DebuggerCommand::sendImpl(DebuggerThriftBuffer& thrift) {
   TRACE(5, "DebuggerCommand::sendImpl\n");
   thrift.write((int32_t)m_type);
   thrift.write(m_class);
@@ -67,7 +65,7 @@ void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
 
 // Always called from recv and must implement the subclass specific
 // logic for deserializing a command received via Thrift.
-void DebuggerCommand::recvImpl(DebuggerThriftBuffer &thrift) {
+void DebuggerCommand::recvImpl(DebuggerThriftBuffer& thrift) {
   TRACE(5, "DebuggerCommand::recvImpl\n");
   thrift.read(m_body);
   thrift.read(m_version);
@@ -75,21 +73,26 @@ void DebuggerCommand::recvImpl(DebuggerThriftBuffer &thrift) {
 
 // Returns false on timeout, true when data has been read even if that data
 // didn't form a usable command. Is there is no usable command, cmd is null.
-bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
-                              DebuggerCommandPtr &cmd, const char *caller) {
+bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
+                              DebuggerCommandPtr& cmd, const char* caller) {
   TRACE(5, "DebuggerCommand::Receive\n");
   cmd.reset();
 
+  constexpr auto POLLING_SECONDS = 1;
   struct pollfd fds[1];
   fds[0].fd = thrift.getSocket()->fd();
   fds[0].events = POLLIN|POLLERR|POLLHUP;
-  int ret = poll(fds, 1, POLLING_SECONDS * 1000);
-  if (ret == 0) return false; // Timeout
+  auto const ret = poll(fds, 1, POLLING_SECONDS * 1000);
+
+  // Timeout.
+  if (ret == 0) return false;
+
   if (ret == -1) {
-    auto errorNumber = errno; // Just in case TRACE_RB changes errno
+    auto const errorNumber = errno; // Just in case TRACE_RB changes errno
     TRACE_RB(1, "DebuggerCommand::Receive: error %d\n", errorNumber);
     return errorNumber != EINTR; // Treat signals as timeouts
   }
+
   // If we don't have any data to read (POLLIN) then we're done. If we
   // do have data we'll attempt to read and decode it below, even if
   // there are other error bits set.
@@ -114,7 +117,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
 
   TRACE(1, "DebuggerCommand::Receive: got cmd of type %d\n", type);
 
-  // not all commands are here, as not all commands need to be sent over wire
+  // Not all commands are here, as not all commands need to be sent over wire.
   switch (type) {
     case KindOfBreak    :  cmd = DebuggerCommandPtr(new CmdBreak    ()); break;
     case KindOfContinue :  cmd = DebuggerCommandPtr(new CmdContinue ()); break;
@@ -175,21 +178,21 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
 // Informs the client of all argument strings that may follow this command
 // name. Used for auto completion. The client uses the prefix of the argument
 // following the command name to narrow down the list displayed to the user.
-void DebuggerCommand::list(DebuggerClient &client) {
+void DebuggerCommand::list(DebuggerClient& client) {
   TRACE(2, "DebuggerCommand::list\n");
 }
 
 // The text to display when the debugger client
 // processes "help <this command name>".
-void DebuggerCommand::help(DebuggerClient &client) {
+void DebuggerCommand::help(DebuggerClient& client) {
   TRACE(2, "DebuggerCommand::help\n");
-  assert(false);
+  not_reached();
 }
 
 // If the first argument of the command is "help" or "?"
 // this displays help text for the command and returns true.
 // Otherwise it returns false.
-bool DebuggerCommand::displayedHelp(DebuggerClient &client) {
+bool DebuggerCommand::displayedHelp(DebuggerClient& client) {
   TRACE(2, "DebuggerCommand::displayedHelp\n");
   if (client.arg(1, "help") || client.arg(1, "?")) {
     help(client);
@@ -200,7 +203,7 @@ bool DebuggerCommand::displayedHelp(DebuggerClient &client) {
 
 // Server-side work for a command. Returning false indicates a failure to
 // communicate with the client (for commands that do so).
-bool DebuggerCommand::onServer(DebuggerProxy &proxy) {
+bool DebuggerCommand::onServer(DebuggerProxy& proxy) {
   TRACE(2, "DebuggerCommand::onServer\n");
   assert(false);
   Logger::Error("DebuggerCommand::onServer(): bad cmd type: %d", m_type);

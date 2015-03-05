@@ -22,25 +22,23 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdSignal : public DebuggerCommand {
-public:
+struct CmdSignal : DebuggerCommand {
   enum Signal {
     SignalNone,
     SignalBreak,
   };
 
-public:
   explicit CmdSignal(Signal sig = SignalNone)
       : DebuggerCommand(KindOfSignal), m_signum(sig) {}
 
   Signal getSignal() const { return (Signal)m_signum;}
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
   int32_t m_signum;

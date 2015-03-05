@@ -757,7 +757,7 @@ static Variant HHVM_FUNCTION(imap_body, const Resource& imap_stream,
     return false;
   }
 
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
 
   int msgindex;
   if (options & FT_UID) {
@@ -785,7 +785,7 @@ static Variant HHVM_FUNCTION(imap_body, const Resource& imap_stream,
 
 static Variant HHVM_FUNCTION(imap_bodystruct, const Resource& imap_stream,
                              int64_t msg_number, const String& section) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (!obj->checkMsgNumber(msg_number)) {
     return false;
   }
@@ -802,7 +802,7 @@ static Variant HHVM_FUNCTION(imap_bodystruct, const Resource& imap_stream,
 }
 
 static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (mail_ping(obj->m_stream) == NIL) {
     return false;
   }
@@ -823,7 +823,7 @@ static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
 static bool HHVM_FUNCTION(imap_clearflag_full, const Resource& imap_stream,
                           const String& sequence, const String& flag,
                           int64_t options /* = 0 */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   mail_clearflag_full(obj->m_stream, (char *)sequence.data(),
                       (char *)flag.data(), (options ? options : NIL));
   return true;
@@ -831,7 +831,7 @@ static bool HHVM_FUNCTION(imap_clearflag_full, const Resource& imap_stream,
 
 static bool HHVM_FUNCTION(imap_close, const Resource& imap_stream,
                           int64_t flag /* = 0 */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (flag) {
     if (flag != PHP_EXPUNGE) {
       Logger::Warning("invalid value for the flags parameter");
@@ -846,7 +846,7 @@ static bool HHVM_FUNCTION(imap_close, const Resource& imap_stream,
 
 static bool HHVM_FUNCTION(imap_createmailbox, const Resource& imap_stream,
                           const String& mailbox) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (mail_create(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
   } else {
@@ -856,7 +856,7 @@ static bool HHVM_FUNCTION(imap_createmailbox, const Resource& imap_stream,
 
 static bool HHVM_FUNCTION(imap_delete, const Resource& imap_stream,
                           const String& msg_number, int64_t options /* = 0 */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   mail_setflag_full(obj->m_stream, (char *)msg_number.data(),
                     "\\DELETED",
                     (options ? options : NIL));
@@ -865,7 +865,7 @@ static bool HHVM_FUNCTION(imap_delete, const Resource& imap_stream,
 
 static bool HHVM_FUNCTION(imap_deletemailbox, const Resource& imap_stream,
                           const String& mailbox) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (mail_delete(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
   } else {
@@ -889,7 +889,7 @@ static Variant HHVM_FUNCTION(imap_errors, ) {
 }
 
 static bool HHVM_FUNCTION(imap_expunge, const Resource& imap_stream) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   mail_expunge(obj->m_stream);
   return true;
 }
@@ -902,7 +902,7 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
     return false;
   }
 
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
 
   Array ret(Array::Create());
 
@@ -966,7 +966,7 @@ static Variant HHVM_FUNCTION(imap_fetchbody, const Resource& imap_stream,
     return false;
   }
 
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
 
   if (!options || !(options & FT_UID)) {
     if (!obj->checkMsgNumber(msg_number)) {
@@ -994,7 +994,7 @@ static Variant HHVM_FUNCTION(imap_fetchheader, const Resource& imap_stream,
     return false;
   }
 
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   int msgindex;
   if (options & FT_UID) {
     /* This should be cached; if it causes an extra RTT to the
@@ -1024,7 +1024,7 @@ static Variant HHVM_FUNCTION(imap_fetchstructure, const Resource& imap_stream,
     return false;
   }
 
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   int msgindex;
   if (options & FT_UID) {
     /* This should be cached; if it causes an extra RTT to the
@@ -1062,7 +1062,7 @@ static bool HHVM_FUNCTION(imap_gc, const Resource& imap_stream,
     return false;
   }
 
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   mail_gc(obj->m_stream, caches);
   return true;
 }
@@ -1071,7 +1071,7 @@ static Variant HHVM_FUNCTION(imap_headerinfo, const Resource& imap_stream,
                              int64_t msg_number, int64_t fromlength /* = 0 */,
                              int64_t subjectlength /* = 0 */,
                              const String& defaulthost /* = "" */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (fromlength < 0 || fromlength > MAILTMPLEN) {
     Logger::Warning("From length has to be between 0 and %d", MAILTMPLEN);
     return false;
@@ -1152,7 +1152,7 @@ static Variant HHVM_FUNCTION(imap_last_error, ) {
 
 static Variant HHVM_FUNCTION(imap_list, const Resource& imap_stream,
                              const String& ref, const String& pattern) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
 
   /* set flag for normal, old mailbox list */
   IMAPG(folderlist_style) = FLIST_ARRAY;
@@ -1180,7 +1180,7 @@ static Variant HHVM_FUNCTION(imap_listmailbox, const Resource& imap_stream,
 static bool HHVM_FUNCTION(imap_mail_copy, const Resource& imap_stream,
                           const String& msglist, const String& mailbox,
                           int64_t options /* = 0 */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (mail_copy_full(obj->m_stream, (char *)msglist.data(),
                     (char *)mailbox.data(), (options ? options : NIL)) == T) {
     return true;
@@ -1192,7 +1192,7 @@ static bool HHVM_FUNCTION(imap_mail_copy, const Resource& imap_stream,
 static bool HHVM_FUNCTION(imap_mail_move, const Resource& imap_stream,
                           const String& msglist, const String& mailbox,
                           int64_t options /* = 0 */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (mail_copy_full(obj->m_stream, (char *)msglist.data(),
                      (char *)mailbox.data(),
                      (options ? (options | CP_MOVE) : CP_MOVE)) == T) {
@@ -1255,7 +1255,7 @@ static bool HHVM_FUNCTION(imap_mail, const String& to, const String& subject,
 }
 
 static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   Object ret(SystemLib::AllocStdClassObject());
 
   int64_t unreadmsg = 0, deletedmsg = 0, msize = 0;
@@ -1291,16 +1291,16 @@ static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
 
 static Variant HHVM_FUNCTION(imap_msgno, const Resource& imap_stream,
                              int64_t uid) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   return (int64_t)mail_msgno(obj->m_stream, uid);
 }
 
 static Variant HHVM_FUNCTION(imap_num_msg, const Resource& imap_stream) {
-  return (int64_t)imap_stream.getTyped<ImapStream>()->m_stream->nmsgs;
+  return (int64_t)cast<ImapStream>(imap_stream)->m_stream->nmsgs;
 }
 
 static Variant HHVM_FUNCTION(imap_num_recent, const Resource& imap_stream) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   return (int64_t)obj->m_stream->recent;
 }
 
@@ -1338,7 +1338,7 @@ static Variant HHVM_FUNCTION(imap_open, const String& mailbox,
 }
 
 static bool HHVM_FUNCTION(imap_ping, const Resource& imap_stream) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   return mail_ping(obj->m_stream);
 }
 
@@ -1358,7 +1358,7 @@ static Variant HHVM_FUNCTION(imap_qprint, const String& str) {
 
 static bool HHVM_FUNCTION(imap_renamemailbox, const Resource& imap_stream,
                           const String& old_mbox, const String& new_mbox) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (mail_rename(obj->m_stream, (char *)old_mbox.data(),
                   (char *)new_mbox.data()) == T) {
     return true;
@@ -1370,7 +1370,7 @@ static bool HHVM_FUNCTION(imap_renamemailbox, const Resource& imap_stream,
 static bool HHVM_FUNCTION(imap_reopen, const Resource& imap_stream,
                           const String& mailbox, int64_t options /* = 0 */,
                           int64_t retries /* = 0 */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   long flags = NIL;
   long cl_flags = NIL;
   if (options) {
@@ -1398,7 +1398,7 @@ static bool HHVM_FUNCTION(imap_reopen, const Resource& imap_stream,
 static Variant HHVM_FUNCTION(imap_search, const Resource& imap_stream,
                              const String& criteria, int64_t options /* = 0 */,
                              const String& charset /* = "" */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
 
   char *search_criteria = (char*)criteria.data();
   IMAPG(messages) = IMAPG(messages_tail) = NIL;
@@ -1432,7 +1432,7 @@ static Variant HHVM_FUNCTION(imap_search, const Resource& imap_stream,
 static bool HHVM_FUNCTION(imap_setflag_full, const Resource& imap_stream,
                           const String& sequence, const String& flag,
                          int64_t options /* = 0 */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   mail_setflag_full(obj->m_stream, (char*)sequence.data(), (char*)flag.data(),
                     (options ? options : NIL));
   return true;
@@ -1440,7 +1440,7 @@ static bool HHVM_FUNCTION(imap_setflag_full, const Resource& imap_stream,
 
 static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
                              const String& mailbox, int64_t options /* = 0 */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   Object ret(SystemLib::AllocStdClassObject());
 
   if (mail_status(obj->m_stream, (char *)mailbox.data(), options)) {
@@ -1469,7 +1469,7 @@ static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
 
 static bool HHVM_FUNCTION(imap_subscribe, const Resource& imap_stream,
                           const String& mailbox) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (mail_subscribe(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
   } else {
@@ -1525,7 +1525,7 @@ static Variant HHVM_FUNCTION(imap_timeout, int64_t timeout_type,
 
 static Variant HHVM_FUNCTION(imap_uid, const Resource& imap_stream,
                              int64_t msg_number) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (!obj->checkMsgNumber(msg_number)) {
     return false;
   }
@@ -1534,7 +1534,7 @@ static Variant HHVM_FUNCTION(imap_uid, const Resource& imap_stream,
 
 static bool HHVM_FUNCTION(imap_undelete, const Resource& imap_stream,
                           const String& msg_number, int64_t flags /* = 0 */) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   mail_clearflag_full(obj->m_stream, (char *)msg_number.data(),
                       "\\DELETED", (flags ? flags : NIL));
   return true;
@@ -1542,7 +1542,7 @@ static bool HHVM_FUNCTION(imap_undelete, const Resource& imap_stream,
 
 static bool HHVM_FUNCTION(imap_unsubscribe, const Resource& imap_stream,
                           const String& mailbox) {
-  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  auto obj = cast<ImapStream>(imap_stream);
   if (mail_unsubscribe(obj->m_stream, (char *)mailbox.data()) == T) {
     return true;
   } else {

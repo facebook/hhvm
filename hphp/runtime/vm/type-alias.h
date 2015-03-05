@@ -85,7 +85,7 @@ struct TypeAliasReq {
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
-  // The alised type.
+  // The aliased type.
   AnnotType type{AnnotType::Uninit};
   // Overrides `type' if the alias is invalid (e.g., for a nonexistent class).
   bool invalid{false};

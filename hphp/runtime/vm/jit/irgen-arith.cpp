@@ -125,8 +125,8 @@ Opcode promoteBinaryDoubles(HTS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
 }
 
 void binaryBitOp(HTS& env, Op op) {
-  auto const type2 = topC(env, 0)->type();
-  auto const type1 = topC(env, 1)->type();
+  auto const type2 = topC(env, BCSPOffset{0})->type();
+  auto const type1 = topC(env, BCSPOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
     PUNT(BunaryBitOp-Unsupported);
     return;
@@ -138,8 +138,8 @@ void binaryBitOp(HTS& env, Op op) {
 }
 
 void binaryArith(HTS& env, Op op) {
-  auto const type2 = topC(env, 0)->type();
-  auto const type1 = topC(env, 1)->type();
+  auto const type2 = topC(env, BCSPOffset{0})->type();
+  auto const type1 = topC(env, BCSPOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
     // either an int or a dbl, but can't tell
     PUNT(BinaryArith-Unsupported);
@@ -197,7 +197,7 @@ SSATmp* implIncDec(HTS& env, bool pre, bool inc, bool over, SSATmp* src) {
  * 3. Array comparisons can throw if recursion is detected.
  */
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
-  assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
+  assert(t0 != Type::Gen && t1 != Type::Gen);
   auto const badObjConvs = Type::Int | Type::Dbl | Type::Str;
   return (t0.maybe(Type::Obj) && t1.maybe(badObjConvs)) ||
          (t0.maybe(badObjConvs) && t1.maybe(Type::Obj)) ||
@@ -221,8 +221,8 @@ void implCmp(HTS& env, Opcode opc) {
   // The following if-block is historical behavior from ir-translator: this
   // should be re-evaluated.
   if (opc == Lt || opc == Lte || opc == Gt || opc == Gte) {
-    auto leftType = topC(env, 1)->type();
-    auto rightType = topC(env, 0)->type();
+    auto leftType = topC(env, BCSPOffset{1})->type();
+    auto rightType = topC(env, BCSPOffset{0})->type();
     if (!leftType.isKnownDataType() || !rightType.isKnownDataType()) {
       PUNT(LtGtOp-UnknownInput);
     }
@@ -238,8 +238,8 @@ void implCmp(HTS& env, Opcode opc) {
   // if the comparison operator could re-enter, convert it to the re-entrant
   // form and add the required catch block.
   // TODO #3446092 un-overload these opcodes.
-  if (cmpOpTypesMayReenter(topC(env, 0)->type(),
-                           topC(env, 1)->type()) &&
+  if (cmpOpTypesMayReenter(topC(env, BCSPOffset{0})->type(),
+                           topC(env, BCSPOffset{1})->type()) &&
       opc2 != opc) {
     opc = opc2;
   }
@@ -252,7 +252,8 @@ void implCmp(HTS& env, Opcode opc) {
 }
 
 void implAdd(HTS& env, Op op) {
-  if (topC(env, 0)->type() <= Type::Arr && topC(env, 1)->type() <= Type::Arr) {
+  if (topC(env, BCSPOffset{0})->type() <= Type::Arr &&
+      topC(env, BCSPOffset{1})->type() <= Type::Arr) {
     auto const tr = popC(env);
     auto const tl = popC(env);
     // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
@@ -512,8 +513,8 @@ void emitNot(HTS& env) {
 }
 
 void emitDiv(HTS& env) {
-  auto const divisorType  = topC(env, 0)->type();
-  auto const dividendType = topC(env, 1)->type();
+  auto const divisorType  = topC(env, BCSPOffset{0})->type();
+  auto const dividendType = topC(env, BCSPOffset{1})->type();
 
   auto isNumeric = [&] (Type type) {
     return type.subtypeOfAny(Type::Int, Type::Dbl, Type::Bool);
@@ -525,8 +526,8 @@ void emitDiv(HTS& env) {
     return;
   }
 
-  auto divisor  = topC(env, 0);
-  auto dividend = topC(env, 1);
+  auto divisor  = topC(env, BCSPOffset{0});
+  auto dividend = topC(env, BCSPOffset{1});
 
   // we can't codegen this but we may be able to special case it away
   if (!divisor->isA(Type::Dbl) && !dividend->isA(Type::Dbl)) {

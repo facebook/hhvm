@@ -53,37 +53,6 @@ TypePtr Type::AutoObject  (new Type(Type::KindOfAutoObject  ));
 TypePtr Type::Any         (new Type(Type::KindOfAny         ));
 TypePtr Type::Some        (new Type(Type::KindOfSome        ));
 
-Type::TypePtrMap Type::s_TypeHintTypes;
-Type::TypePtrMap Type::s_HHTypeHintTypes;
-
-void Type::InitTypeHintMap() {
-  assert(s_TypeHintTypes.empty());
-  assert(s_HHTypeHintTypes.empty());
-
-  s_TypeHintTypes["array"] = Type::Array;
-  s_TypeHintTypes["callable"] = Type::Variant;
-
-  s_HHTypeHintTypes["array"] = Type::Array;
-  s_HHTypeHintTypes["HH\\bool"]    = Type::Boolean;
-  s_HHTypeHintTypes["HH\\int"]     = Type::Int64;
-  s_HHTypeHintTypes["HH\\float"]   = Type::Double;
-  s_HHTypeHintTypes["HH\\string"]  = Type::String;
-  // Type::Numeric doesn't include numeric strings; this is intentional
-  s_HHTypeHintTypes["HH\\num"]      = Type::Numeric;
-  s_HHTypeHintTypes["HH\\resource"] = Type::Resource;
-  s_HHTypeHintTypes["HH\\arraykey"] = Type::ArrayKey;
-  s_HHTypeHintTypes["callable"] = Type::Variant;
-}
-
-const Type::TypePtrMap &Type::GetTypeHintTypes(bool hhType) {
-  return hhType ? s_HHTypeHintTypes : s_TypeHintTypes;
-}
-
-void Type::ResetTypeHintTypes() {
-  s_TypeHintTypes.clear();
-  s_HHTypeHintTypes.clear();
-}
-
 TypePtr Type::CreateObjectType(const std::string &clsname) {
   // For interfaces that support primitive types, we're pessimistic and
   // we treat it as a Variant

@@ -25,7 +25,7 @@ namespace HPHP { namespace jit {
 
 // A TransContext for use in tests.
 const auto test_context =
-  TransContext { kInvalidTransID, 0, 0, false, 0, nullptr };
+  TransContext { kInvalidTransID, 0, FPAbsOffset{0}, false, 0, nullptr };
 
 //////////////////////////////////////////////////////////////////////
 

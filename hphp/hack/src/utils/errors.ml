@@ -51,10 +51,15 @@ let add_list code pos_msg_l =
   if !is_hh_fixme pos code then () else
   add_error (code, pos_msg_l)
 
+(*****************************************************************************)
+(* Accessors. *)
+(*****************************************************************************)
+
 let get_code (error: 'a error_) = ((fst error): error_code)
 let get_pos (error : error) = fst (List.hd (snd error))
 let to_list (error : 'a error_) = snd error
-let make_error (x: (Pos.t * string) list) = ((0, x): error)
+
+let make_error code (x: (Pos.t * string) list) = ((code, x): error)
 
 (*****************************************************************************)
 (* Error code printing. *)
@@ -66,6 +71,7 @@ let error_kind error_code =
   | 2 -> "Naming"
   | 3 -> "NastCheck"
   | 4 -> "Typing"
+  | 5 -> "Lint"
   | _ -> "Other"
 
 let error_code_to_string error_code =
@@ -110,7 +116,7 @@ module Naming                               = struct
   let expected_variable                     = 2014 (* DONT MODIFY!!!! *)
   let fd_name_already_bound                 = 2015 (* DONT MODIFY!!!! *)
   let gen_array_rec_arity                   = 2016 (* DONT MODIFY!!!! *)
-  let gen_array_va_rec_arity                = 2017 (* DONT MODIFY!!!! *)
+  (* let gen_array_va_rec_arity             = 2017 *)
   let gena_arity                            = 2018 (* DONT MODIFY!!!! *)
   let generic_class_var                     = 2019 (* DONT MODIFY!!!! *)
   let genva_arity                           = 2020 (* DONT MODIFY!!!! *)
@@ -481,6 +487,13 @@ let duplicate_user_attribute (pos, name) existing_attr_pos =
     existing_attr_pos, name^" was already used here";
   ]
 
+let unbound_attribute_name pos name =
+  let reason = if (str_starts_with name "__")
+    then "starts with __ but is not a standard attribute"
+    else "is not listed in .hhconfig"
+  in add Naming.unbound_name pos
+    ("Unrecognized user attribute: "^name^" "^reason)
+
 let this_no_argument pos =
   add Naming.this_no_argument pos "\"this\" expects no arguments"
 
@@ -606,10 +619,6 @@ let genva_arity pos =
 let gen_array_rec_arity pos =
   add Naming.gen_array_rec_arity pos
     "gen_array_rec() expects exactly 1 argument"
-
-let gen_array_va_rec_arity pos =
-  add Naming.gen_array_va_rec_arity pos
-    "gen_array_va_rec_DEPRECATED() expects at least 1 argument"
 
 let dynamic_class pos =
   add Typing.dynamic_class pos

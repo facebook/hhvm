@@ -1,0 +1,1 @@
+Fatal error: Declaration of Incompat::foo() must be compatible with that of I::foo() in %stest/slow/class_type_constant/type_constant8.php on line 9

@@ -22,10 +22,9 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdWhere : public DebuggerCommand {
-public:
-  CmdWhere() : DebuggerCommand(KindOfWhere), m_stackArgs(true) {}
-  explicit CmdWhere(Type type) : DebuggerCommand(type), m_stackArgs(true) {}
+struct CmdWhere : DebuggerCommand {
+  CmdWhere() : DebuggerCommand(KindOfWhere) {}
+  explicit CmdWhere(Type type) : DebuggerCommand(type) {}
 
   virtual void help(DebuggerClient &client);
 
@@ -40,7 +39,7 @@ protected:
 
 private:
   Array m_stacktrace;
-  bool m_stackArgs;
+  bool m_stackArgs{true};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

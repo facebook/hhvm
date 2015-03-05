@@ -107,9 +107,6 @@ public:
   static TypePtr Any;
   static TypePtr Some;
 
-  typedef hphp_string_imap<TypePtr> TypePtrMap;
-  static const TypePtrMap &GetTypeHintTypes(bool hhType);
-
   /**
    * Uncertain types: types that are ambiguous yet.
    */
@@ -282,20 +279,7 @@ public:
    */
   void count(std::map<std::string, int> &counts);
 
-  /**
-   * Must not be invoked concurrently
-   */
-  static void InitTypeHintMap();
 private:
-
-  /**
-   * Must not be invoked concurrently
-   */
-  static void ResetTypeHintTypes();
-
-  static TypePtrMap s_TypeHintTypes;
-  static TypePtrMap s_HHTypeHintTypes;
-
   const KindOf m_kindOf;
   const std::string m_name;
 };

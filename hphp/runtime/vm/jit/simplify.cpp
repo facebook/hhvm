@@ -21,6 +21,7 @@
 #include <type_traits>
 
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -88,7 +89,7 @@ SSATmp* gen(State& env, Opcode op, BCMarker marker, Args&&... args) {
         return newDest;
       } else {
         assert(inst->isTransient());
-        inst = env.unit.cloneInstruction(inst);
+        inst = env.unit.clone(inst);
         env.newInsts.push_back(inst);
 
         return inst->dst(0);
@@ -116,10 +117,10 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
  * complicated analysis than belongs in the simplifier right now.
  */
 DEBUG_ONLY bool validate(const State& env,
-              SSATmp* newDst,
-              const IRInstruction* origInst) {
+                         SSATmp* newDst,
+                         const IRInstruction* origInst) {
   auto known_available = [&] (SSATmp* src) -> bool {
-    if (!src->type().maybeCounted()) return true;
+    if (!src->type().maybe(Type::Counted)) return true;
     for (auto& oldSrc : origInst->srcs()) {
       if (oldSrc == src) return true;
     }
@@ -207,7 +208,7 @@ SSATmp* simplifyLdObjClass(State& env, const IRInstruction* inst) {
 
   if (mightRelax(env, inst->src(0)) || !(ty < Type::Obj)) return nullptr;
 
-  if (auto const exact = ty.getExactClass()) return cns(env, exact);
+  if (auto const exact = ty.clsSpec().exactCls()) return cns(env, exact);
   return nullptr;
 }
 
@@ -680,10 +681,10 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
     // have below).
     auto const unsafeTypes = Type::Dbl|Type::Arr;
     auto const safeToFold =
-      s0->type().not(unsafeTypes) && s1->type().not(unsafeTypes) &&
+      !s0->type().maybe(unsafeTypes) && !s1->type().maybe(unsafeTypes) &&
       // We can't add new uses to reference counted types without a more
       // advanced availability analysis.
-      !s0->type().maybeCounted() && !s1->type().maybeCounted();
+      !s0->type().maybe(Type::Counted) && !s1->type().maybe(Type::Counted);
     if (safeToFold) {
       return gen(env, negateQueryOp(op), s0, s1);
     }
@@ -693,8 +694,8 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
     // This is safe because instanceofs don't take reference counted arguments.
-    assert(!inst->src(0)->type().maybeCounted() &&
-           !inst->src(1)->type().maybeCounted());
+    assert(!inst->src(0)->type().maybe(Type::Counted) &&
+           !inst->src(1)->type().maybe(Type::Counted));
     return gen(
       env,
       negateQueryOp(op),
@@ -796,14 +797,17 @@ SSATmp* cmpImpl(State& env,
   auto const type2 = src2->type();
 
   // Identity optimization
-  if (src1 == src2 && type1.not(Type::Dbl)) {
+  if (src1 == src2 && !type1.maybe(Type::Dbl)) {
     // (val1 == val1) does not simplify to true when val1 is a NaN
     return cns(env, bool(cmpOp(opName, 0, 0)));
   }
 
+  assert(type1 <= Type::Gen && type2 <= Type::Gen);
+
   // Need both types to be unboxed to simplify, and the code below assumes the
   // types are known DataTypes.
-  if (!type1.isKnownUnboxedDataType() || !type2.isKnownUnboxedDataType()) {
+  if (!type1.isKnownDataType() || type1.maybe(Type::BoxedCell) ||
+      !type2.isKnownDataType() || type2.maybe(Type::BoxedCell)) {
     return nullptr;
   }
 
@@ -1063,7 +1067,7 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   assert(IMPLIES(type <= Type::Arr, type == Type::Arr));
 
   // The types are disjoint; the result must be false.
-  if (srcType.not(type)) {
+  if (!srcType.maybe(type)) {
     return cns(env, !trueSense);
   }
 
@@ -1349,7 +1353,7 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
   if (srcType <= Type::Int)  return gen(env, ConvIntToBool, src);
   if (srcType <= Type::Str)  return gen(env, ConvStrToBool, src);
   if (srcType <= Type::Obj) {
-    if (auto cls = srcType.getClass()) {
+    if (auto cls = srcType.clsSpec().cls()) {
       // We need to exclude interfaces like ConstSet.  For now, just
       // skip anything that's an interface.
       if (!(cls->attrs() & AttrInterface)) {
@@ -1429,8 +1433,8 @@ SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
 
   if (!typeMightRelax(inst->src(0)) &&
       ty < Type::Obj &&
-      ty.getClass() &&
-      ty.getClass()->isCollectionClass()) {
+      ty.clsSpec().cls() &&
+      ty.clsSpec().cls()->isCollectionClass()) {
     return gen(env, ColIsNEmpty, inst->src(0));
   }
   return nullptr;
@@ -1532,15 +1536,36 @@ SSATmp* simplifyBoxPtr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
-  assert(srcType.notPtr());
+  assert(!srcType.maybe(Type::PtrToGen));
   assert(inst->taken());
-  if (srcType.not(Type::Uninit)) return gen(env, Nop);
+  if (!srcType.maybe(Type::Uninit)) return gen(env, Nop);
+  return nullptr;
+}
+
+SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
+  auto const typeParam = inst->typeParam();
+  auto const srcType = inst->src(0)->type();
+
+  if (!srcType.maybe(typeParam)) {
+    /* This check will always fail. Convert the check into a Jmp. The rest of
+     * the block will be unreachable. */
+    gen(env, Jmp, inst->taken());
+    return inst->src(0);
+  }
+
+  auto const newType = srcType & typeParam;
+  if (srcType <= newType) {
+    /* The type of the src is the same or more refined than type, so the guard
+     * is unnecessary. */
+    return inst->src(0);
+  }
+
   return nullptr;
 }
 
 SSATmp* decRefImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!mightRelax(env, src) && !src->type().maybeCounted()) {
+  if (!mightRelax(env, src) && !src->type().maybe(Type::Counted)) {
     return gen(env, Nop);
   }
   return nullptr;
@@ -1556,7 +1581,7 @@ SSATmp* simplifyDecRefNZ(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyIncRef(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!mightRelax(env, src) && !src->type().maybeCounted()) {
+  if (!mightRelax(env, src) && !src->type().maybe(Type::Counted)) {
     return gen(env, Nop);
   }
   return nullptr;
@@ -1566,7 +1591,7 @@ SSATmp* simplifyIncRefCtx(State& env, const IRInstruction* inst) {
   auto const ctx = inst->src(0);
   if (ctx->isA(Type::Obj)) {
     return gen(env, IncRef, ctx);
-  } else if (!mightRelax(env, ctx) && ctx->type().notCounted()) {
+  } else if (!mightRelax(env, ctx) && !ctx->type().maybe(Type::Counted)) {
     return gen(env, Nop);
   }
 
@@ -1598,7 +1623,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
 
   // Pull negations into the jump.
   if (srcOpcode == XorBool && srcInst->src(1)->isConst(true)) {
-    if (!srcInst->src(0)->type().maybeCounted()) {
+    if (!srcInst->src(0)->type().maybe(Type::Counted)) {
       return gen(
         env,
         inst->op() == JmpZero ? JmpNZero : JmpZero,
@@ -1614,7 +1639,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
    * may have dec refs between the src instruction and the jump.
    */
   for (auto& src : srcInst->srcs()) {
-    if (src->type().maybeCounted()) return nullptr;
+    if (src->type().maybe(Type::Counted)) return nullptr;
   }
 
   // If the source is conversion of an int or pointer to boolean, we
@@ -1645,7 +1670,7 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
 }
 
 SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->type().notCounted() &&
+  if (!inst->src(0)->type().maybe(Type::Counted) &&
       !mightRelax(env, inst->src(0))) {
     return gen(env, Nop);
   }
@@ -1654,7 +1679,7 @@ SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->type().not(Type::Nullptr)) {
+  if (!inst->src(0)->type().maybe(Type::Nullptr)) {
     return inst->src(0);
   }
   return nullptr;
@@ -1733,11 +1758,10 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   if (ty <= Type::Arr) return gen(env, CountArray, val);
 
   if (ty < Type::Obj) {
-    auto const cls = ty.getClass();
+    auto const cls = ty.clsSpec().cls();
     if (!mightRelax(env, val) && cls != nullptr && cls->isCollectionClass()) {
       return gen(env, CountCollection, val);
     }
-    return nullptr;
   }
   return nullptr;
 }
@@ -1748,9 +1772,11 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
   if (src->isConst()) return cns(env, src->arrVal()->size());
 
-  if (!ty.hasArrayKind() || mightRelax(env, src)) return nullptr;
+  auto const kind = ty.arrSpec().kind();
 
-  switch (ty.getArrayKind()) {
+  if (!kind || mightRelax(env, src)) return nullptr;
+
+  switch (*kind) {
     case ArrayData::kPackedKind:
     case ArrayData::kStructKind:
     case ArrayData::kMixedKind:
@@ -1771,10 +1797,11 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
   auto const callee = inst->extra<CallBuiltin>()->callee;
   auto const args = inst->srcs();
 
+  auto const cls = args[0]->type().clsSpec().cls();
   bool const arg0Collection = args.size() >= 1 &&
                               args[0]->type() < Type::Obj &&
-                              args[0]->type().getClass() &&
-                              args[0]->type().getClass()->isCollectionClass();
+                              cls != nullptr &&
+                              cls->isCollectionClass();
 
   switch (args.size()) {
   case 1:
@@ -1791,7 +1818,7 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
   if (inst->src(0)->type() < Type::Obj) {
-    auto const cls = inst->src(0)->type().getClass();
+    auto const cls = inst->src(0)->type().clsSpec().cls();
     if (cls && cls->classof(c_WaitHandle::classof())) {
       return cns(env, true);
     }
@@ -1801,6 +1828,16 @@ SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyAdjustSP(State& env, const IRInstruction* inst) {
   if (inst->extra<AdjustSP>()->offset == 0) return inst->src(0);
+  return nullptr;
+}
+
+SSATmp* simplifyOrdStr(State& env, const IRInstruction *inst) {
+  const auto src = inst->src(0);
+  if (src->isConst(Type::Str)) {
+    // a static string is passed in, resolve with a constant.
+    unsigned char first = src->strVal()->data()[0];
+    return cns(env, int64_t{first});
+  }
   return nullptr;
 }
 
@@ -1823,6 +1860,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CallBuiltin)
   X(Ceil)
   X(CheckInit)
+  X(CheckType)
   X(CheckPackedArrayBounds)
   X(CoerceCellToBool)
   X(CoerceCellToDbl)
@@ -1913,6 +1951,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NSame)
   X(ArrayGet)
   X(AdjustSP)
+  X(OrdStr)
   default: break;
   }
 #undef X
@@ -1952,7 +1991,7 @@ void copyProp(IRInstruction* inst) {
 }
 
 bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t idxVal) {
-  auto const at = arrayType.getArrayType();
+  auto const at = arrayType.arrSpec().type();
   if (!at) return false;
   using A = RepoAuthType::Array;
   switch (at->tag()) {

@@ -26,6 +26,8 @@
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/stack-offsets-def.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
@@ -284,7 +286,6 @@ PUNT_OPCODE(CastStk)
 PUNT_OPCODE(CoerceStk)
 PUNT_OPCODE(UnwindCheckSideExit)
 PUNT_OPCODE(LdUnwinderValue)
-PUNT_OPCODE(DeleteUnwinderException)
 PUNT_OPCODE(AddDbl)
 PUNT_OPCODE(SubDbl)
 PUNT_OPCODE(MulDbl)
@@ -516,6 +517,7 @@ PUNT_OPCODE(LdContResumeAddr)
 PUNT_OPCODE(ContArIncIdx)
 PUNT_OPCODE(StContArState)
 PUNT_OPCODE(CheckTypePackedArrayElem)
+PUNT_OPCODE(OrdStr)
 
 #undef PUNT_OPCODE
 
@@ -600,7 +602,7 @@ Vlabel CodeGenerator::label(Block* b) {
 void CodeGenerator::recordHostCallSyncPoint(Vout& v, Vpoint p) {
   auto stackOff = m_curInst->marker().spOff();
   auto pcOff = m_curInst->marker().bcOff() - m_curInst->marker().func()->base();
-  v << hcsync{Fixup{pcOff, stackOff}, p};
+  v << hcsync{Fixup{pcOff, stackOff.offset}, p};
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -639,13 +641,13 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   auto loc = srcLoc(0);
   Type type = src->type();
-  if (type.notCounted()) return;
+  if (!type.maybe(Type::Counted)) return;
 
   auto increfMaybeStatic = [&](Vout& v) {
     auto base = loc.reg(0);
     auto rCount = v.makeReg();
     v << loadl{base[FAST_REFCOUNT_OFFSET], rCount};
-    if (!type.needsStaticBitCheck()) {
+    if (!type.maybe(Type::Static)) {
       auto count1 = v.makeReg();
       v << addli{1, rCount, count1, v.makeReg()};
       v << storel{count1, base[FAST_REFCOUNT_OFFSET]};
@@ -835,8 +837,8 @@ void CodeGenerator::cgCallHelper(Vout& v,
   }
   always_assert_flog(
     args.numStackArgs() == 0,
-    "Stack arguments not yet supported on ARM: `{}'\n\n{}",
-    *m_curInst, m_state.unit
+    "Stack arguments not yet supported on ARM: `{}'",
+    *m_curInst
   );
   shuffleArgs(v, args, call);
 
@@ -1027,7 +1029,7 @@ void CodeGenerator::cgCheckRefs(IRInstruction* inst) {
 
 void CodeGenerator::cgStStk(IRInstruction* inst) {
   auto const spReg = srcLoc(0).reg();
-  auto const offset = cellsToBytes(inst->extra<StStk>()->offset);
+  auto const offset = cellsToBytes(inst->extra<StStk>()->offset.offset);
   emitStore(vmain(), spReg, offset, inst->src(1), srcLoc(1));
 }
 
@@ -1035,7 +1037,7 @@ void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
   auto const rsrc = srcLoc(0).reg();
   auto const rdst = dstLoc(0).reg();
   auto const off  = inst->extra<AdjustSP>()->offset;
-  vmain() << lea{rsrc[cellsToBytes(off)], rdst};
+  vmain() << lea{rsrc[cellsToBytes(off.offset)], rdst};
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
@@ -1056,8 +1058,10 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto const func           = inst->extra<CallBuiltinData>()->callee;
   auto const numArgs        = func->numParams();
   auto const funcReturnType = func->returnType();
-  int returnOffset          = MISOFF(tvBuiltinReturn);
   auto& v = vmain();
+
+  int returnOffset = rds::kVmMInstrStateOff +
+    offsetof(MInstrState, tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers
@@ -1251,7 +1255,7 @@ void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
 void CodeGenerator::cgLdStk(IRInstruction* inst) {
   assert(inst->taken() == nullptr);
   auto src = srcLoc(0).reg();
-  auto offset = cellsToBytes(inst->extra<LdStk>()->offset);
+  auto offset = cellsToBytes(inst->extra<LdStk>()->offset.offset);
   emitLoad(vmain(), inst->dst()->type(), dstLoc(0), src, offset);
 }
 
@@ -1301,7 +1305,7 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
 void CodeGenerator::cgLdStkAddr(IRInstruction* inst) {
   auto const dst     = dstLoc(0).reg();
   auto const base    = srcLoc(0).reg();
-  auto const offset  = cellsToBytes(inst->extra<LdStkAddr>()->offset);
+  auto const offset  = cellsToBytes(inst->extra<LdStkAddr>()->offset.offset);
   vmain() << lea{base[offset], dst};
 }
 
@@ -1319,7 +1323,7 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
     SyncOptions::kSyncPoint,
     argGroup()
       .ssa(1/*fp*/)
-      .addr(srcLoc(0).reg()/*sp*/, cellsToBytes(spOff))
+      .addr(srcLoc(0).reg()/*sp*/, cellsToBytes(spOff.offset))
       .imm(pcOff)
   );
 }
@@ -1334,7 +1338,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   PhysReg rds(rVmTl), fp(rVmFp), sp(rVmSp);
   v << load{rds[rds::kVmfpOff], fp};
   v << load{rds[rds::kVmspOff], sp};
-  emitServiceReq(v, nullptr, REQ_RESUME, {});
+  v << jmpi{mcg->tx().uniqueStubs.resumeHelper};
 }
 
 void CodeGenerator::cgLdClsName(IRInstruction* inst) {

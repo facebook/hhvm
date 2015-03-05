@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include "hphp/runtime/base/mem-file.h"
+#include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/server/static-content-cache.h"
 
 using std::string;
@@ -50,57 +51,57 @@ bool makeTempFile(const string& contents, string* fn) {
 
 TEST(TestMemFile, DataConstructor) {
   const char* test_data = "some test data";
-  MemFile mf(test_data, strlen(test_data));
+  auto mf = makeSmartPtr<MemFile>(test_data, strlen(test_data));
 
-  ASSERT_EQ(mf.getc(), 's');
-  ASSERT_EQ(mf.getc(), 'o');
-  ASSERT_EQ(mf.getc(), 'm');
-  ASSERT_EQ(mf.getc(), 'e');
-  ASSERT_EQ(mf.getc(), ' ');
-  ASSERT_EQ(mf.getc(), 't');
-  ASSERT_EQ(mf.getc(), 'e');
-  ASSERT_EQ(mf.getc(), 's');
-  ASSERT_EQ(mf.getc(), 't');
-  ASSERT_EQ(mf.getc(), ' ');
-  ASSERT_EQ(mf.getc(), 'd');
-  ASSERT_EQ(mf.getc(), 'a');
-  ASSERT_EQ(mf.getc(), 't');
-  ASSERT_EQ(mf.getc(), 'a');
-  ASSERT_EQ(mf.getc(), EOF);
+  ASSERT_EQ(mf->getc(), 's');
+  ASSERT_EQ(mf->getc(), 'o');
+  ASSERT_EQ(mf->getc(), 'm');
+  ASSERT_EQ(mf->getc(), 'e');
+  ASSERT_EQ(mf->getc(), ' ');
+  ASSERT_EQ(mf->getc(), 't');
+  ASSERT_EQ(mf->getc(), 'e');
+  ASSERT_EQ(mf->getc(), 's');
+  ASSERT_EQ(mf->getc(), 't');
+  ASSERT_EQ(mf->getc(), ' ');
+  ASSERT_EQ(mf->getc(), 'd');
+  ASSERT_EQ(mf->getc(), 'a');
+  ASSERT_EQ(mf->getc(), 't');
+  ASSERT_EQ(mf->getc(), 'a');
+  ASSERT_EQ(mf->getc(), EOF);
 }
 
 TEST(TestMemFile, BadReadFromCache) {
   StaticContentCache::TheFileCache = std::make_shared<FileCache>();
 
-  MemFile mf;
-  ASSERT_FALSE(mf.open("/some/random/file", "r"));
+  auto mf = makeSmartPtr<MemFile>();
+  ASSERT_FALSE(mf->open("/some/random/file", "r"));
 }
 
 TEST(TestMemFile, BadOpenModes) {
-  MemFile mf;
-  ASSERT_FALSE(mf.open("/some/file1", "+"));
-  ASSERT_FALSE(mf.open("/some/file2", "a"));
-  ASSERT_FALSE(mf.open("/some/file3", "w"));
+  auto mf = makeSmartPtr<MemFile>();
+  ASSERT_FALSE(mf->open("/some/file1", "+"));
+  ASSERT_FALSE(mf->open("/some/file2", "a"));
+  ASSERT_FALSE(mf->open("/some/file3", "w"));
 }
 
 TEST(TestMemFile, EmptyFileInCache) {
   StaticContentCache::TheFileCache = std::make_shared<FileCache>();
   StaticContentCache::TheFileCache->write("/no/content/entry");
 
-  MemFile mf;
+  auto mf = makeSmartPtr<MemFile>();
 
   // The file itself...
-  ASSERT_FALSE(mf.open("/no/content/entry", "r"));
+  ASSERT_FALSE(mf->open("/no/content/entry", "r"));
 
   // ... and one of the automatically-created "directory" entries.
-  ASSERT_FALSE(mf.open("/no/content", "r"));
+  ASSERT_FALSE(mf->open("/no/content", "r"));
 }
 
 TEST(TestMemFile, NotInCache) {
   StaticContentCache::TheFileCache = std::make_shared<FileCache>();
 
-  MemFile mf;
-  ASSERT_FALSE(mf.open("/not/even/there", "r"));
+  auto mf = makeSmartPtr<MemFile>();
+  ASSERT_FALSE(mf->open("/not/even/there", "r"));
 }
 
 TEST(TestMemFile, RealFileInCache) {
@@ -110,19 +111,19 @@ TEST(TestMemFile, RealFileInCache) {
   StaticContentCache::TheFileCache = std::make_shared<FileCache>();
   StaticContentCache::TheFileCache->write("/content", temp_fn.c_str());
 
-  MemFile mf;
-  ASSERT_TRUE(mf.open("/content", "r"));
+  auto mf = makeSmartPtr<MemFile>();
+  ASSERT_TRUE(mf->open("/content", "r"));
 
-  ASSERT_EQ(mf.getc(), '1');
-  ASSERT_EQ(mf.getc(), '2');
-  ASSERT_EQ(mf.getc(), '3');
-  ASSERT_EQ(mf.getc(), 'a');
-  ASSERT_EQ(mf.getc(), 'b');
-  ASSERT_EQ(mf.getc(), 'c');
+  ASSERT_EQ(mf->getc(), '1');
+  ASSERT_EQ(mf->getc(), '2');
+  ASSERT_EQ(mf->getc(), '3');
+  ASSERT_EQ(mf->getc(), 'a');
+  ASSERT_EQ(mf->getc(), 'b');
+  ASSERT_EQ(mf->getc(), 'c');
 
-  ASSERT_EQ(mf.getc(), EOF);
+  ASSERT_EQ(mf->getc(), EOF);
 
-  ASSERT_TRUE(mf.close());
+  ASSERT_TRUE(mf->close());
 
   ASSERT_EQ(unlink(temp_fn.c_str()), 0);
 }

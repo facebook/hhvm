@@ -38,6 +38,7 @@
 .text._ZNK4HPHP11NamedEntity14getCachedClassEv
 .text._ZN4HPHP16ExecutionContext15getContextClassEv
 .text._ZN4HPHP10MixedArray6resizeEv
+.text.memset
 .text._ZN4HPHP9ArrayData6CreateERKNS_7VariantES3_
 .text._ZN4HPHP9ArrayInitC1EmNS0_3MapE
 .text._ZN4HPHP9ArrayInitC2EmNS0_3MapE

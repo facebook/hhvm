@@ -45,8 +45,8 @@ class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Counta
 
   public function offsetExists(/*int*/ $key): bool;
   public function offsetGet(/*int*/ $key): T;
-  public function offsetSet(/*int*/ $key, T $val): this;
-  public function offsetUnset(/*int*/ $key): this;
+  public function offsetSet(/*int*/ $key, T $val): void;
+  public function offsetUnset(/*int*/ $key): void;
 
   public function count(): int;
 }
@@ -65,7 +65,7 @@ class SplFileInfo {
   public function getBasename(string $suffix = ''): string;
   public function getCTime(): int;
   public function getExtension(): string;
-  public function getFileInfo(string $class_name = null): this;
+  public function getFileInfo(?string $class_name = null): this;
   public function getFilename(): string;
   public function getGroup(): int;
   public function getInode(): int;
@@ -73,7 +73,7 @@ class SplFileInfo {
   public function getMTime(): int;
   public function getOwner(): int;
   public function getPath(): string;
-  public function getPathInfo(string $class_name = null): this;
+  public function getPathInfo(?string $class_name = null): this;
   public function getPathname(): string;
   public function getPerms(): int;
   public function getRealPath(): string;
@@ -88,7 +88,7 @@ class SplFileInfo {
   public function openFile(
     string $open_mode = "r",
     bool $use_include_path = false,
-    resource $context = NULL,
+    ?resource $context = null,
   ): SplFileObject;
   public function setFileClass(string $class_name = "SplFileObject"): void;
   public function setInfoClass(string $class_name = "SplFileInfo"): void;
@@ -96,7 +96,7 @@ class SplFileInfo {
 
 class SplFileObject extends SplFileInfo
   implements
-    SeekableIterator<SplFileObject>,
+    SeekableIterator<string>,
     RecursiveIterator<SplFileObject> {
 
   // Constants
@@ -110,8 +110,10 @@ class SplFileObject extends SplFileInfo
     string $filename,
     string $open_mode = "r",
     bool $use_include_path = false,
-    resource $context,
+    ?resource $context = null,
   );
+  /* returns string|array ... violates Iterator interface */
+  public function current();
   public function eof(): bool;
   public function fflush(): bool;
   public function fgetc(): string;
@@ -121,7 +123,7 @@ class SplFileObject extends SplFileInfo
     string $escape = "\\",
   ): array;
   public function fgets(): string;
-  public function fgetss(string $allowable_tags = null): string;
+  public function fgetss(?string $allowable_tags = null): string;
   public function flock(int $operation, mixed &$wouldblock = false): bool;
   public function fpassthru(): int;
   public function fputcsv(
@@ -144,13 +146,20 @@ class SplFileObject extends SplFileInfo
     string $enclosure = "\"",
     string $escape = "\\",
   ): void;
+  /* (always) returns null -- violates RecursiveIterator interface */
+  public function getChildren();
+  public function hasChildren(): bool;
+  public function next(): void;
+  public function rewind(): void;
+  public function seek(int $line_pos): void;
   public function setFlags(int $flags): void;
   public function setMaxLineLen(int $max_len): void;
+  public function valid(): bool;
 }
 
 class SplTempFileObject extends SplFileObject
   implements
-    SeekableIterator<SplTempFileObject>,
+    SeekableIterator<string>,
     RecursiveIterator<SplTempFileObject> {
 
   // Methods
@@ -162,5 +171,10 @@ class DirectoryIterator extends SplFileInfo
 
   // Methods
   public function __construct(string $path);
+  public function current(): DirectoryIterator;
   public function isDot(): bool;
+  public function next(): void;
+  public function rewind(): void;
+  public function seek(int $position): void;
+  public function valid(): bool;
 }

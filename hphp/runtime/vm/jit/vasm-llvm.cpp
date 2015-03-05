@@ -200,9 +200,9 @@ uintptr_t readEncodedPointer(const uint8_t*& data, uint8_t encoding) {
  * landingPad are offsets from the beginning of the function.
  */
 struct EHInfo {
-  uintptr_t start;
-  uintptr_t length;
-  uintptr_t landingPad;
+  TCA start;
+  TCA end;
+  TCA landingPad;
 };
 
 /*
@@ -210,14 +210,18 @@ struct EHInfo {
  * with nonzero landingpads. This function was also adapted from the
  * ExceptionDemo.cpp example in llvm.
  */
-jit::vector<EHInfo> parse_gcc_except_table(const uint8_t* ptr) {
+jit::vector<EHInfo> parse_gcc_except_table(const uint8_t* ptr,
+                                           uint8_t* funcStart,
+                                           uint8_t* coldStart) {
   jit::vector<EHInfo> ret;
 
   FTRACE(2, "Parsing exception table at {}\n", ptr);
   uint8_t lpStartEncoding = *ptr++;
 
+  uint8_t* lpStart = funcStart;
   if (lpStartEncoding != DW_EH_PE_omit) {
-    readEncodedPointer(ptr, lpStartEncoding);
+    lpStart =
+      reinterpret_cast<uint8_t*>(readEncodedPointer(ptr, lpStartEncoding));
   }
 
   uint8_t ttypeEncoding = *ptr++;
@@ -238,13 +242,19 @@ jit::vector<EHInfo> parse_gcc_except_table(const uint8_t* ptr) {
     uintptr_t landingPad = readEncodedPointer(callSitePtr, callSiteEncoding);
 
     uintptr_t actionEntry = readULEB128(callSitePtr);
-    // 0 indicates a cleanup entry, the only kind we generate
-    always_assert(actionEntry == 0);
-    if (landingPad == 0) continue;
+    // 0 or 127 indicate a cleanup entry, the only kinds we generate.
+    always_assert(actionEntry == 0 || actionEntry == 127);
 
+    // With a hot/cold splitting we can get a real landing pad at offset 0.
+    if (landingPad == UINT32_MAX) continue;
+    if (!RuntimeOption::EvalJitLLVMSplitHotCold && landingPad == 0) continue;
+
+    auto rangeBase = (actionEntry == 0) ? funcStart : coldStart;
     FTRACE(2, "Adding entry: [{},{}): landingPad {}\n",
-           start, start + length, landingPad);
-    ret.emplace_back(EHInfo{start, length, landingPad});
+           rangeBase + start, rangeBase + start + length, lpStart + landingPad);
+    ret.emplace_back(EHInfo{rangeBase + start,
+                            rangeBase + start + length,
+                            lpStart + landingPad});
   }
 
   return ret;
@@ -317,19 +327,23 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     uintptr_t Size, unsigned Alignment, unsigned SectionID,
     llvm::StringRef SectionName
   ) override {
-    auto& code = m_areas[static_cast<size_t>(AreaIndex::Main)].code;
+
+    auto areaIndex = SectionName.endswith(".cold") ? AreaIndex::Cold
+                                                   : AreaIndex::Main;
+    auto& code = m_areas[static_cast<size_t>(areaIndex)].code;
+    auto codeSkew = m_codeSkews[static_cast<size_t>(areaIndex)];
 
     // We override/ignore the alignment and use skew value to compensate.
     uint8_t* ret = code.alloc<uint8_t>(1, Size);
     assert(Alignment < x64::kCacheLineSize &&
            "alignment exceeds cache line size");
-    assert(
-      m_codeSkew == (reinterpret_cast<size_t>(ret) & (x64::kCacheLineSize - 1))
-      && "drift in code skew detected");
+    always_assert(
+      codeSkew == (reinterpret_cast<size_t>(ret) & (x64::kCacheLineSize - 1)) &&
+      "drift in code skew detected");
 
     FTRACE(1, "Allocate code section \"{}\" id={} at addr={}, size={},"
            " alignment={}, skew={}\n",
-           SectionName.str(), SectionID, ret, Size, Alignment, m_codeSkew);
+           SectionName.str(), SectionID, ret, Size, Alignment, codeSkew);
     return ret;
   }
 
@@ -411,10 +425,10 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     return m_dataSections.count(name);
   }
 
-  uint32_t computeCodeSkew(unsigned alignment) {
-    auto& code = m_areas[static_cast<size_t>(AreaIndex::Main)].code;
-    m_codeSkew = reinterpret_cast<uint64_t>(code.frontier()) & (alignment - 1);
-    return m_codeSkew;
+  uint32_t computeCodeSkew(unsigned alignment, AreaIndex area) {
+    auto& code = m_areas[static_cast<size_t>(area)].code;
+    return m_codeSkews[static_cast<size_t>(area)] =
+      reinterpret_cast<uint64_t>(code.frontier()) & (alignment - 1);
   }
 
   /*
@@ -431,7 +445,7 @@ private:
 
   std::unordered_map<std::string, SectionInfo> m_dataSections;
 
-  uint32_t m_codeSkew{0};
+  jit::vector<uint32_t> m_codeSkews{0,0,0};
 
   jit::hash_map<std::string, uint64_t> m_symbols;
   uint32_t m_nextSymbolId{0};
@@ -513,6 +527,10 @@ struct LLVMEmitter {
       m_function->addFnAttr(llvm::Attribute::OptimizeForSize);
     }
 
+    if (RuntimeOption::EvalJitLLVMMinSize) {
+      m_function->addFnAttr(llvm::Attribute::MinSize);
+    }
+
     m_irb.SetInsertPoint(
       llvm::BasicBlock::Create(m_context,
                                folly::to<std::string>('B', size_t(unit.entry)),
@@ -546,6 +564,8 @@ struct LLVMEmitter {
     defineValue(x64::rVmFp, args++);
 
     // Commonly used types and values.
+    m_void = m_irb.getVoidTy();
+
     m_int8  = m_irb.getInt8Ty();
     m_int16 = m_irb.getInt16Ty();
     m_int32 = m_irb.getInt32Ty();
@@ -561,14 +581,18 @@ struct LLVMEmitter {
     m_int32FSPtr = llvm::Type::getInt32PtrTy(m_context, kFSAddressSpace);
     m_int64FSPtr = llvm::Type::getInt64PtrTy(m_context, kFSAddressSpace);
 
-    m_int8Zero  = m_irb.getInt8(0);
-    m_int8One   = m_irb.getInt8(1);
-    m_int16Zero = m_irb.getInt16(0);
-    m_int16One  = m_irb.getInt16(1);
-    m_int32Zero = m_irb.getInt32(0);
-    m_int32One  = m_irb.getInt32(1);
-    m_int64Zero = m_irb.getInt64(0);
-    m_int64One  = m_irb.getInt64(1);
+    m_int8Zero    = m_irb.getInt8(0);
+    m_int8NegOne  = m_irb.getInt8(-1);
+    m_int8One     = m_irb.getInt8(1);
+    m_int16Zero   = m_irb.getInt16(0);
+    m_int16NegOne = m_irb.getInt16(-1);
+    m_int16One    = m_irb.getInt16(1);
+    m_int32Zero   = m_irb.getInt32(0);
+    m_int32NegOne = m_irb.getInt32(-1);
+    m_int32One    = m_irb.getInt32(1);
+    m_int64Zero   = m_irb.getInt64(0);
+    m_int64NegOne = m_irb.getInt64(-1);
+    m_int64One    = m_irb.getInt64(1);
 
     m_int64Undef  = llvm::UndefValue::get(m_int64);
 
@@ -584,7 +608,7 @@ struct LLVMEmitter {
     m_tcMM->registerSymbolAddress("personality0", 0xbadbad);
 
     m_traceletFnTy = llvm::FunctionType::get(
-      m_irb.getVoidTy(),
+      m_void,
       std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
       false
     );
@@ -608,6 +632,10 @@ struct LLVMEmitter {
         pseudoCL.push_back("-cond-tail-dup");
       }
 
+      if (RuntimeOption::EvalJitLLVMPrintAfterAll ) {
+        pseudoCL.push_back("-print-after-all");
+      }
+
       auto const numArgs = pseudoCL.size();
       std::unique_ptr<const char*[]> pseudoCLArray(new const char*[numArgs]);
       for(size_t i = 0; i < pseudoCL.size(); ++i) {
@@ -622,12 +650,12 @@ struct LLVMEmitter {
   ~LLVMEmitter() {
   }
 
-  std::string showModule() const {
+  std::string showModule(llvm::Module* module) const {
     std::string s;
     llvm::raw_string_ostream stream(s);
     VasmAnnotationWriter vw(m_instStrs);
-    m_module->print(stream,
-                    HPHP::Trace::moduleEnabled(Trace::llvm, 5) ? &vw : nullptr);
+    module->print(stream,
+                  HPHP::Trace::moduleEnabled(Trace::llvm, 5) ? &vw : nullptr);
     return stream.str();
   }
 
@@ -637,7 +665,7 @@ struct LLVMEmitter {
     always_assert_flog(!llvm::verifyModule(*m_module, &stream),
                        "LLVM verifier failed:\n{}\n{:-^80}\n{}\n{:-^80}\n{}",
                        stream.str(), " vasm unit ", show(m_unit),
-                       " llvm module ", showModule());
+                       " llvm module ", showModule(m_module.get()));
   }
 
   /*
@@ -645,13 +673,16 @@ struct LLVMEmitter {
    * m_module.
    */
   void finalize() {
-    FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ", showModule());
+    FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ",
+           showModule(m_module.get()));
     verifyModule();
 
     llvm::TargetOptions targetOptions;
     targetOptions.EnableFastISel = RuntimeOption::EvalJitLLVMFastISel;
+    targetOptions.MCOptions.SplitHotCold =
+      RuntimeOption::EvalJitLLVMSplitHotCold;
 
-    auto module = m_module.release();
+    auto module = m_module.get();
     auto tcMM = m_tcMM.release();
     auto cpu = RuntimeOption::EvalJitCPU;
     if (cpu == "native") cpu = llvm::sys::getHostCPUName();
@@ -675,7 +706,16 @@ struct LLVMEmitter {
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
 
     module->addModuleFlag(llvm::Module::Error, "code_skew",
-                          tcMM->computeCodeSkew(x64::kCacheLineSize));
+                          tcMM->computeCodeSkew(x64::kCacheLineSize,
+                                                  AreaIndex::Main));
+    module->addModuleFlag(llvm::Module::Error, "cold_code_skew",
+                          tcMM->computeCodeSkew(x64::kCacheLineSize,
+                                                AreaIndex::Cold));
+
+    // Record start of cold block. Alas there's no better way to find where
+    // LLVM-generated cold code goes.
+    auto coldStart =
+      m_areas[static_cast<size_t>(AreaIndex::Cold)].code.frontier();
 
     auto fpm = folly::make_unique<llvm::FunctionPassManager>(module);
     fpm->add(new llvm::DataLayoutPass(module));
@@ -703,13 +743,16 @@ struct LLVMEmitter {
       }
       fpm->doFinalization();
     }
-    FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ", showModule());
+    FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ",
+           showModule(module));
 
     {
       Timer _t(Timer::llvm_codegen);
       ee->setProcessAllSections(true);
       ee->finalizeObject();
     }
+
+    m_module.release();
 
     if (RuntimeOption::EvalJitLLVMDiscard) return;
 
@@ -730,8 +773,9 @@ struct LLVMEmitter {
     }
 
     if (auto secGEH = tcMM->getDataSection(".gcc_except_table")) {
-      auto const ehInfos = parse_gcc_except_table(secGEH->data.get());
-      processEHInfos(ehInfos, funcStart);
+      auto const ehInfos = parse_gcc_except_table(secGEH->data.get(), funcStart,
+                                                  coldStart);
+      processEHInfos(ehInfos);
     }
   }
 
@@ -841,21 +885,17 @@ struct LLVMEmitter {
    * For each entry in infos, find all call instructions in the region and
    * register the landing pad as a catch block for each one.
    */
-  void processEHInfos(const jit::vector<EHInfo>& infos, uint8_t* funcStart) {
+  void processEHInfos(const jit::vector<EHInfo>& infos) {
     for (auto& info : infos) {
-      auto ip = funcStart + info.start;
-      auto const end = ip + info.length;
-      auto const landingPad = funcStart + info.landingPad;
-
       FTRACE(2, "Looking for calls for landingPad {}, in EH region [{},{})\n",
-             landingPad, ip, end);
+             info.landingPad, info.start, info.end);
       auto found = false;
-      while (ip < end) {
+      for(auto ip = info.start; ip < info.end; ) {
         DecodedInstruction di(ip);
         ip += di.size();
         if (di.isCall()) {
           FTRACE(2, "  afterCall: {}\n", ip);
-          mcg->registerCatchBlock(ip, landingPad);
+          mcg->registerCatchBlock(ip, info.landingPad);
           found = true;
         }
       }
@@ -932,10 +972,14 @@ struct LLVMEmitter {
    */
   llvm::BasicBlock* block(Vlabel l) {
     if (m_blocks[l] == nullptr) {
+      auto& b = m_unit.blocks[l];
+      auto name = folly::to<std::string>('B', size_t(l));
+      if (b.area == AreaIndex::Cold || b.area == AreaIndex::Frozen) {
+        name += ".cold";
+      };
+
       return m_blocks[l] =
-        llvm::BasicBlock::Create(m_context,
-                                 folly::to<std::string>('B', size_t(l)),
-                                 m_function);
+        llvm::BasicBlock::Create(m_context, name, m_function);
     }
 
     return m_blocks[l];
@@ -1196,6 +1240,8 @@ VASM_OPCODES
   llvm::Function* m_fabs{nullptr};
 
   // Commonly used types. Some LLVM APIs require non-consts.
+  llvm::Type* m_void;
+
   llvm::IntegerType* m_int8;
   llvm::IntegerType* m_int16;
   llvm::IntegerType* m_int32;
@@ -1213,12 +1259,16 @@ VASM_OPCODES
 
   // Commonly used constants. No const either.
   llvm::ConstantInt* m_int8Zero;
+  llvm::ConstantInt* m_int8NegOne;
   llvm::ConstantInt* m_int8One;
   llvm::ConstantInt* m_int16Zero;
+  llvm::ConstantInt* m_int16NegOne;
   llvm::ConstantInt* m_int16One;
   llvm::ConstantInt* m_int32Zero;
+  llvm::ConstantInt* m_int32NegOne;
   llvm::ConstantInt* m_int32One;
   llvm::ConstantInt* m_int64Zero;
+  llvm::ConstantInt* m_int64NegOne;
   llvm::ConstantInt* m_int64One;
 
   llvm::UndefValue*  m_int64Undef;
@@ -1437,10 +1487,8 @@ O(countbytecode)
       case Vinstr::callstub:
       case Vinstr::contenter:
       case Vinstr::kpcall:
-      case Vinstr::ldpoint:
       case Vinstr::mccall:
       case Vinstr::mcprep:
-      case Vinstr::point:
       case Vinstr::cmpsd:
       case Vinstr::ucomisd:
       case Vinstr::unpcklpd:
@@ -1703,7 +1751,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   llvm::Type* returnType = nullptr;
   switch (destType) {
   case DestType::None:
-    returnType = m_irb.getVoidTy();
+    returnType = m_void;
     break;
   case DestType::SSA:
     returnType = m_int64;
@@ -1932,25 +1980,29 @@ void LLVMEmitter::emit(const debugtrap& inst) {
 }
 
 void LLVMEmitter::emit(const decl& inst) {
-  defineValue(inst.d, m_irb.CreateSub(value(inst.s), m_int32One));
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int32NegOne, "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const declm& inst) {
   auto ptr = emitPtr(inst.m, 32);
   auto load = m_irb.CreateLoad(ptr);
-  auto sub = m_irb.CreateSub(load, m_int32One);
+  auto sub = m_irb.CreateAdd(load, m_int32NegOne, "",
+                             /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, sub);
   m_irb.CreateStore(sub, ptr);
 }
 
 void LLVMEmitter::emit(const decq& inst) {
-  defineValue(inst.d, m_irb.CreateSub(value(inst.s), m_int64One));
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int64NegOne, "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const decqm& inst) {
   auto ptr = emitPtr(inst.m, 64);
   auto oldVal = m_irb.CreateLoad(ptr);
-  auto newVal = m_irb.CreateSub(oldVal, m_int64One);
+  auto newVal = m_irb.CreateAdd(oldVal, m_int64NegOne, "",
+                                /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, newVal);
   m_irb.CreateStore(newVal, ptr);
 }
@@ -2004,31 +2056,36 @@ void LLVMEmitter::emit(const fallbackcc& inst) {
 void LLVMEmitter::emit(const incwm& inst) {
   auto ptr = emitPtr(inst.m, 16);
   auto oldVal = m_irb.CreateLoad(ptr);
-  auto newVal = m_irb.CreateAdd(oldVal, m_int16One);
+  auto newVal = m_irb.CreateAdd(oldVal, m_int16One, "",
+                                /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, newVal);
   m_irb.CreateStore(newVal, ptr);
 }
 
 void LLVMEmitter::emit(const incl& inst) {
-  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int32One));
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int32One, "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const inclm& inst) {
   auto ptr = emitPtr(inst.m, 32);
   auto load = m_irb.CreateLoad(ptr);
-  auto add = m_irb.CreateAdd(load, m_int32One);
+  auto add = m_irb.CreateAdd(load, m_int32One, "",
+                             /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, add);
   m_irb.CreateStore(add, ptr);
 }
 
 void LLVMEmitter::emit(const incq& inst) {
-  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int64One));
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int64One, "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const incqm& inst) {
   auto ptr = emitPtr(inst.m, 64);
   auto load = m_irb.CreateLoad(ptr);
-  auto add = m_irb.CreateAdd(load, m_int64One);
+  auto add = m_irb.CreateAdd(load, m_int64One, "",
+                             /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, add);
   m_irb.CreateStore(add, ptr);
 }
@@ -2191,10 +2248,24 @@ void LLVMEmitter::emit(const jmpm& inst) {
 }
 
 void LLVMEmitter::emit(const jmpi& inst) {
-  auto func = emitFuncPtr(folly::sformat("jmpi_{}", inst.target),
-                          m_traceletFnTy,
-                          reinterpret_cast<uint64_t>(inst.target));
-  emitTraceletTailCall(func);
+  // These are the only two stubs we expect to call using jmpi. They don't care
+  // about rVmFp or rVmSp but we always have to preserve rVmTl.
+  assert_not_implemented(inst.target == mcg->tx().uniqueStubs.resumeHelper ||
+                         inst.target == mcg->tx().uniqueStubs.endCatchHelper);
+
+  std::vector<llvm::Value*> args{
+    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp)
+  };
+  std::vector<llvm::Type*> argTypes{m_int64, m_int64, m_int64};
+  auto func = emitFuncPtr(
+    folly::sformat("jmpi_{}", inst.target),
+    llvm::FunctionType::get(m_void, argTypes, false),
+    reinterpret_cast<uint64_t>(inst.target)
+  );
+  auto call = m_irb.CreateCall(func, args);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
+  call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  m_irb.CreateRetVoid();
 }
 
 void LLVMEmitter::emit(const ldimmb& inst) {
@@ -2403,7 +2474,7 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
                                  const std::string& asmConstraints,
                                  bool hasSideEffects) {
   auto const funcType =
-    llvm::FunctionType::get(m_irb.getVoidTy(), false);
+    llvm::FunctionType::get(m_void, false);
   auto const iasm = llvm::InlineAsm::get(funcType, asmStatement, asmConstraints,
                                          hasSideEffects);
   auto call = m_irb.CreateCall(iasm, "");
@@ -2592,7 +2663,7 @@ void LLVMEmitter::emit(const svcreq& inst) {
   }
 
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
-  auto funcType = llvm::FunctionType::get(m_irb.getVoidTy(), argTypes, false);
+  auto funcType = llvm::FunctionType::get(m_void, argTypes, false);
   auto func = emitFuncPtr(folly::to<std::string>("handleSRHelper_",
                                                  argTypes.size()),
                           funcType,

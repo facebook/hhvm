@@ -97,11 +97,13 @@ public:
   static int64_t StringOffsetLimit;
 
   static std::string AccessLogDefaultFormat;
-  static std::vector<AccessLogFileData> AccessLogs;
+  static std::map<std::string, AccessLogFileData> AccessLogs;
 
   static std::string AdminLogFormat;
   static std::string AdminLogFile;
   static std::string AdminLogSymLink;
+
+  static std::map<std::string, AccessLogFileData> RPCLogs;
 
   static std::string Tier;
   static std::string Host;
@@ -109,8 +111,8 @@ public:
   static std::string ServerType;
   static std::string ServerIP;
   static std::string ServerFileSocket;
-  static std::string ServerPrimaryIPv4;
-  static std::string ServerPrimaryIPv6;
+  static std::string GetServerPrimaryIPv4();
+  static std::string GetServerPrimaryIPv6();
   static int ServerPort;
   static int ServerPortFd;
   static int ServerBacklog;
@@ -126,6 +128,7 @@ public:
   static bool ServerHttpSafeMode;
   static bool ServerStatCache;
   static bool ServerFixPathInfo;
+  static bool ServerAddVaryEncoding;
   static std::vector<std::string> ServerWarmupRequests;
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
   static bool ServerExitOnBindFail;
@@ -400,7 +403,10 @@ public:
   F(bool,     JitLLVMFastISel,         false)                           \
   F(uint32_t, JitLLVMOptLevel,         2)                               \
   F(bool,     JitLLVMOptSize,          true)                            \
+  F(bool,     JitLLVMMinSize,          true)                            \
+  F(bool,     JitLLVMPrintAfterAll,    false)                           \
   F(uint32_t, JitLLVMSizeLevel,        0)                               \
+  F(uint32_t, JitLLVMSplitHotCold,     1)                               \
   F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             ahotDefault())                   \
@@ -468,7 +474,6 @@ public:
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitPseudomain,               jitPseudomainDefault())          \
   F(bool, HHIRBytecodeControlFlow,     controlFlowDefault())            \
-  F(bool, HHIRCse,                     false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            refcountOptsDefault())           \
@@ -627,9 +632,6 @@ public:
   // Xenon options
   static double XenonPeriodSeconds;
   static bool XenonForceAlwaysOn;
-
-  static std::vector<void(*)(const IniSettingMap&, const Hdf&)>* OptionHooks;
-  static void AddOptionHook(void(*)(const IniSettingMap& ini, const Hdf&));
 
   // Convenience switch to turn on/off code alternatives via command-line
   // Do not commit code guarded by this flag, for evaluation only.

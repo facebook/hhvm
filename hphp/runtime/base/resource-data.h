@@ -60,6 +60,7 @@ class ResourceData {
   virtual ~ResourceData(); // all PHP resources need vtables
 
   void operator delete(void* p) {
+    always_assert(false);
     ::operator delete(p);
   }
   size_t heapSize() const {

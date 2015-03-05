@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/pipe.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -69,7 +70,7 @@
                                                value.get())                    \
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
-  File *f = handle.getTyped<File>(true, true);          \
+  auto f = dyn_cast_or_null<File>(handle);              \
   if (f == nullptr || f->isClosed()) {                  \
     raise_warning("Not a valid stream resource");       \
     return (ret);                                       \
@@ -601,7 +602,7 @@ Variant HHVM_FUNCTION(file_put_contents,
 
   if (flags & LOCK_EX) {
     // Check to make sure we are dealing with a regular file
-    if (!dynamic_cast<PlainFile*>(file.get())) {
+    if (!isa<PlainFile>(file)) {
       raise_warning(
         "%s(): Exclusive locks may only be set for regular files",
         __FUNCTION__ + 2);
@@ -617,7 +618,7 @@ Variant HHVM_FUNCTION(file_put_contents,
 
   switch (data.getType()) {
     case KindOfResource: {
-      File *fsrc = data.toResource().getTyped<File>(true, true);
+      auto fsrc = dyn_cast_or_null<File>(data);
       if (!fsrc) {
         raise_warning("Not a valid stream resource");
         return false;
@@ -1825,37 +1826,50 @@ bool HHVM_FUNCTION(chroot,
 /**
  * A stack maintains the states of nested structures.
  */
-struct directory_data {
-  Resource defaultDirectory;
-  ~directory_data() {
-    defaultDirectory.detach();
+
+namespace {
+struct DirectoryData final : RequestEventHandler {
+  void requestInit() override {
+    assert(!defaultDirectory);
   }
+  void requestShutdown() override {
+    defaultDirectory = nullptr;
+  }
+  SmartPtr<Directory> defaultDirectory;
 };
-IMPLEMENT_THREAD_LOCAL(directory_data, s_directory_data);
-InitFiniNode file_init([]() {
-  s_directory_data->defaultDirectory.detach();
-}, InitFiniNode::When::ThreadInit);
+
+IMPLEMENT_STATIC_REQUEST_LOCAL(DirectoryData, s_directory_data);
 
 const StaticString
   s_handle("handle"),
   s_path("path");
 
-static Directory *get_dir(const Resource& dir_handle) {
+SmartPtr<Directory> get_dir(const Resource& dir_handle) {
   if (dir_handle.isNull()) {
     auto defaultDir = s_directory_data->defaultDirectory;
-    if (defaultDir.isNull()) {
+    if (!defaultDir) {
       raise_warning("no Directory resource supplied");
       return nullptr;
     }
-    return get_dir(defaultDir);
+    return defaultDir;
   }
 
-  Directory *d = dir_handle.getTyped<Directory>(true, true);
+  auto d = dyn_cast_or_null<Directory>(dir_handle);
   if (!d) {
     raise_warning("Not a valid directory resource");
     return nullptr;
   }
   return d;
+}
+
+bool StringDescending(const String& s1, const String& s2) {
+  return s1.more(s2);
+}
+
+bool StringAscending(const String& s1, const String& s2) {
+  return s1.less(s2);
+}
+
 }
 
 Variant HHVM_FUNCTION(dir,
@@ -1888,7 +1902,7 @@ Variant HHVM_FUNCTION(readdir,
   const Resource& res_dir_handle = dir_handle.isNull()
                                  ? null_resource
                                  : dir_handle.toResource();
-  Directory *dir = get_dir(res_dir_handle);
+  auto dir = get_dir(res_dir_handle);
   if (!dir) {
     return false;
   }
@@ -1900,19 +1914,11 @@ void HHVM_FUNCTION(rewinddir,
   const Resource& res_dir_handle = dir_handle.isNull()
                                  ? null_resource
                                  : dir_handle.toResource();
-  Directory *dir = get_dir(res_dir_handle);
+  auto dir = get_dir(res_dir_handle);
   if (!dir) {
     return;
   }
   dir->rewind();
-}
-
-static bool StringDescending(const String& s1, const String& s2) {
-  return s1.more(s2);
-}
-
-static bool StringAscending(const String& s1, const String& s2) {
-  return s1.less(s2);
 }
 
 Variant HHVM_FUNCTION(scandir,
@@ -1960,11 +1966,11 @@ void HHVM_FUNCTION(closedir,
   const Resource& res_dir_handle = dir_handle.isNull()
                                  ? null_resource
                                  : dir_handle.toResource();
-  Directory *d = get_dir(res_dir_handle);
+  auto d = get_dir(res_dir_handle);
   if (!d) {
     return;
   }
-  if (same(s_directory_data->defaultDirectory, d)) {
+  if (s_directory_data->defaultDirectory == d) {
     s_directory_data->defaultDirectory = nullptr;
   }
   d->close();

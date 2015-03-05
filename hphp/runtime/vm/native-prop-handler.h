@@ -58,11 +58,8 @@ void registerNativePropHandler(const StringData* className,
 /**
  * Default implementations of the accessor hooks. A property handler
  * class is supposed to implement `getProp`, `setProp`, `issetProp`,
- * and `unsetProp`. If a method cannot handle property, it should
- * return sigil `Native::prop_not_handled` value.
- *
- * If the guarded version of the handler is used, it's also supposed to
- * implement `isPropSupported` method.
+ * `unsetProp`, and  `isPropSupported`. If a method cannot handle property,
+ * it should return sigil `Native::prop_not_handled` value.
  *
  * Example:
  *
@@ -86,10 +83,6 @@ void registerNativePropHandler(const StringData* className,
 
 template<class T>
 Variant nativePropHandlerGet(ObjectData* obj, const StringData* name) {
-  return T::getProp(obj, name);
-}
-template<class T>
-Variant nativeGuardedPropHandlerGet(ObjectData* obj, const StringData* name) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "get")
   return T::getProp(obj, name);
 }
@@ -98,12 +91,6 @@ Variant nativeGuardedPropHandlerGet(ObjectData* obj, const StringData* name) {
 
 template<class T>
 Variant nativePropHandlerSet(ObjectData* obj,
-                             const StringData* name,
-                             Variant& value) {
-  return T::setProp(obj, name, value);
-}
-template<class T>
-Variant nativeGuardedPropHandlerSet(ObjectData* obj,
                                     const StringData* name,
                                     Variant& value) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "set")
@@ -114,10 +101,6 @@ Variant nativeGuardedPropHandlerSet(ObjectData* obj,
 
 template<class T>
 Variant nativePropHandlerIsset(ObjectData* obj, const StringData* name) {
-  return T::issetProp(obj, name);
-}
-template<class T>
-Variant nativeGuardedPropHandlerIsset(ObjectData* obj, const StringData* name) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "isset")
   return T::issetProp(obj, name);
 }
@@ -126,10 +109,6 @@ Variant nativeGuardedPropHandlerIsset(ObjectData* obj, const StringData* name) {
 
 template<class T>
 Variant nativePropHandlerUnset(ObjectData* obj, const StringData* name) {
-  return T::unsetProp(obj, name);
-}
-template<class T>
-Variant nativeGuardedPropHandlerUnset(ObjectData* obj, const StringData* name) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "unset")
   return T::unsetProp(obj, name);
 }
@@ -146,22 +125,6 @@ void registerNativePropHandler(const StringData* className) {
     &nativePropHandlerSet<T>,
     &nativePropHandlerIsset<T>,
     &nativePropHandlerUnset<T>
-  );
-}
-
-/**
- * The same as registerNativePropHandler<HandlerClassName>(className),
- * but does explicit check whether a property is supported by a handler
- * before actual handle call.
- */
-template<class T>
-void registerNativeGuardedPropHandler(const StringData* className) {
-  registerNativePropHandler(
-    className,
-    &nativeGuardedPropHandlerGet<T>,
-    &nativeGuardedPropHandlerSet<T>,
-    &nativeGuardedPropHandlerIsset<T>,
-    &nativeGuardedPropHandlerUnset<T>
   );
 }
 
@@ -190,9 +153,10 @@ struct BasePropHandler {
   }
 };
 
-#define CHECK_ACCESSOR(accesor)                                                \
+#define CHECK_ACCESSOR(accesor, opstr, classname, propname)                    \
   if (!accesor) {                                                              \
-    return Native::prop_not_handled();                                         \
+    raise_error("Cannot directly %s the property %s::$%s",                     \
+                 opstr, classname->data(), propname->data());                  \
   }
 
 /**
@@ -204,7 +168,7 @@ struct MapPropHandler : BasePropHandler {
 
   static Variant getProp(ObjectData* this_, const StringData* name) {
     auto get = Derived::map.get(name);
-    CHECK_ACCESSOR(get)
+    CHECK_ACCESSOR(get, "get", this_->getVMClass()->name(), name)
     return get(this_);
   }
 
@@ -212,7 +176,7 @@ struct MapPropHandler : BasePropHandler {
                          const StringData* name,
                          Variant& value) {
     auto set = Derived::map.set(name);
-    CHECK_ACCESSOR(set)
+    CHECK_ACCESSOR(set, "set", this_->getVMClass()->name(), name);
     set(this_, value);
     return true;
   }
@@ -225,13 +189,13 @@ struct MapPropHandler : BasePropHandler {
     }
     // Otherwise, fallback to `null` check of the result from `get`.
     auto get = Derived::map.get(name);
-    CHECK_ACCESSOR(get)
+    CHECK_ACCESSOR(get, "get", this_->getVMClass()->name(), name)
     return !get(this_).isNull();
   }
 
   static Variant unsetProp(ObjectData* this_, const StringData* name) {
     auto unset = Derived::map.unset(name);
-    CHECK_ACCESSOR(unset)
+    CHECK_ACCESSOR(unset, "unset", this_->getVMClass()->name(), name);
     unset(this_);
     return true;
   }

@@ -122,8 +122,9 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
   return false;
 }
 
-static bool php_set_inet6_addr(struct sockaddr_in6 *sin6, const char *address,
-                               Socket *sock) {
+static bool php_set_inet6_addr(struct sockaddr_in6 *sin6,
+                               const char *address,
+                               SmartPtr<Socket> sock) {
   struct in6_addr tmp;
   struct addrinfo hints;
   struct addrinfo *addrinfo = NULL;
@@ -157,8 +158,9 @@ static bool php_set_inet6_addr(struct sockaddr_in6 *sin6, const char *address,
   return true;
 }
 
-static bool php_set_inet_addr(struct sockaddr_in *sin, const char *address,
-                              Socket *sock) {
+static bool php_set_inet_addr(struct sockaddr_in *sin,
+                              const char *address,
+                              SmartPtr<Socket> sock) {
   struct in_addr tmp;
 
   if (inet_aton(address, &tmp)) {
@@ -182,7 +184,7 @@ static bool php_set_inet_addr(struct sockaddr_in *sin, const char *address,
   return true;
 }
 
-static bool set_sockaddr(sockaddr_storage &sa_storage, Socket *sock,
+static bool set_sockaddr(sockaddr_storage &sa_storage, SmartPtr<Socket> sock,
                          const char *addr, int port,
                          struct sockaddr *&sa_ptr, size_t &sa_size) {
   struct sockaddr *sock_type = (struct sockaddr*) &sa_storage;
@@ -235,7 +237,7 @@ static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
                                  short flag) {
   assert(fds);
   for (ArrayIter iter(sockets); iter; ++iter) {
-    File *sock = iter.second().toResource().getTyped<File>();
+    auto sock = cast<File>(iter.second());
     int intfd = sock->fd();
     if (intfd < 0) {
       raise_warning(
@@ -256,8 +258,8 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
   Array sock_array = sockets.toArray();
   Array ret = Array::Create();
   for (ArrayIter iter(sock_array); iter; ++iter) {
-    pollfd &fd = fds[nfds++];
-    assert(fd.fd == iter.second().toResource().getTyped<File>()->fd());
+    const pollfd &fd = fds[nfds++];
+    assert(fd.fd == cast<File>(iter.second())->fd());
     if (fd.revents & flag) {
       ret.set(iter.first(), iter.second());
       count++;
@@ -266,7 +268,7 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
   sockets = ret;
 }
 
-static int php_read(Socket *sock, void *buf, int maxlen, int flags) {
+static int php_read(SmartPtr<Socket> sock, void *buf, int maxlen, int flags) {
   int m = fcntl(sock->fd(), F_GETFL);
   if (m < 0) {
     return m;
@@ -428,7 +430,7 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
     sock = makeSmartPtr<Socket>(
       fd, domain, hosturl.getHost().c_str(), hosturl.getPort());
 
-    if (!set_sockaddr(sa_storage, sock.get(), hosturl.getHost().c_str(),
+    if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
                       hosturl.getPort(), sa_ptr, sa_size)) {
       // set_sockaddr raises its own warning on failure
       return false;
@@ -496,7 +498,7 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
     return false;
   }
 
-  return Resource(std::move(sock));
+  return Variant(std::move(sock));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -508,11 +510,12 @@ Variant HHVM_FUNCTION(socket_create,
   check_socket_parameters(domain, type);
   int socketId = socket(domain, type, protocol);
   if (socketId == -1) {
-    Socket dummySock; // for setting last socket error
-    SOCKET_ERROR((&dummySock), "Unable to create socket", errno);
+    SOCKET_ERROR(makeSmartPtr<Socket>(),
+                 "Unable to create socket",
+                 errno);
     return false;
   }
-  return Resource(makeSmartPtr<Socket>(socketId, domain));
+  return Variant(makeSmartPtr<Socket>(socketId, domain));
 }
 
 Variant HHVM_FUNCTION(socket_create_listen,
@@ -547,7 +550,7 @@ Variant HHVM_FUNCTION(socket_create_listen,
     return false;
   }
 
-  return Resource(std::move(sock));
+  return Variant(std::move(sock));
 }
 
 const StaticString
@@ -562,16 +565,17 @@ bool HHVM_FUNCTION(socket_create_pair,
 
   int fds_array[2];
   if (socketpair(domain, type, protocol, fds_array) != 0) {
-    Socket dummySock; // for setting last socket error
-    SOCKET_ERROR((&dummySock), "unable to create socket pair", errno);
+    SOCKET_ERROR(makeSmartPtr<Socket>(),
+                 "unable to create socket pair",
+                 errno);
     return false;
   }
 
   fd = make_packed_array(
-    Resource(makeSmartPtr<Socket>(fds_array[0], domain, nullptr, 0, 0.0,
-                                  s_socktype_generic)),
-    Resource(makeSmartPtr<Socket>(fds_array[1], domain, nullptr, 0, 0.0,
-                                  s_socktype_generic))
+    Variant(makeSmartPtr<Socket>(fds_array[0], domain, nullptr, 0, 0.0,
+                                 s_socktype_generic)),
+    Variant(makeSmartPtr<Socket>(fds_array[1], domain, nullptr, 0, 0.0,
+                                 s_socktype_generic))
   );
   return true;
 }
@@ -586,7 +590,7 @@ Variant HHVM_FUNCTION(socket_get_option,
                       const Resource& socket,
                       int level,
                       int optname) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
   socklen_t optlen;
 
   switch (optname) {
@@ -641,7 +645,7 @@ bool HHVM_FUNCTION(socket_getpeername,
                    const Resource& socket,
                    VRefParam address,
                    VRefParam port /* = null */) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
 
   sockaddr_storage sa_storage;
   socklen_t salen = sizeof(sockaddr_storage);
@@ -657,7 +661,7 @@ bool HHVM_FUNCTION(socket_getsockname,
                    const Resource& socket,
                    VRefParam address,
                    VRefParam port /* = null */) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
 
   sockaddr_storage sa_storage;
   socklen_t salen = sizeof(sockaddr_storage);
@@ -671,14 +675,12 @@ bool HHVM_FUNCTION(socket_getsockname,
 
 bool HHVM_FUNCTION(socket_set_block,
                    const Resource& socket) {
-  Socket *sock = socket.getTyped<Socket>();
-  return sock->setBlocking(true);
+  return cast<Socket>(socket)->setBlocking(true);
 }
 
 bool HHVM_FUNCTION(socket_set_nonblock,
                    const Resource& socket) {
-  Socket *sock = socket.getTyped<Socket>();
-  return sock->setBlocking(false);
+  return cast<Socket>(socket)->setBlocking(false);
 }
 
 bool HHVM_FUNCTION(socket_set_option,
@@ -686,7 +688,7 @@ bool HHVM_FUNCTION(socket_set_option,
                    int level,
                    int optname,
                    const Variant& optval) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
 
   struct linger lv;
   struct timeval tv;
@@ -761,7 +763,7 @@ bool HHVM_FUNCTION(socket_connect,
                    const Resource& socket,
                    const String& address,
                    int port /* = 0 */) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
 
   switch (sock->getType()) {
   case AF_INET6:
@@ -801,7 +803,7 @@ bool HHVM_FUNCTION(socket_bind,
                    const Resource& socket,
                    const String& address,
                    int port /* = 0 */) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
 
   const char *addr = address.data();
   sockaddr_storage sa_storage;
@@ -827,7 +829,7 @@ bool HHVM_FUNCTION(socket_bind,
 bool HHVM_FUNCTION(socket_listen,
                    const Resource& socket,
                    int backlog /* = 0 */) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
   if (listen(sock->fd(), backlog) != 0) {
     SOCKET_ERROR(sock, "unable to listen on socket", errno);
     return false;
@@ -884,7 +886,7 @@ Variant HHVM_FUNCTION(socket_select,
   if (!read.isNull()) {
     auto hasData = Array::Create();
     for (ArrayIter iter(read.toArray()); iter; ++iter) {
-      File *file = iter.second().toResource().getTyped<File>();
+      auto file = cast<File>(iter.second());
       if (file->bufferedLen() > 0) {
         hasData.append(iter.second());
       }
@@ -952,7 +954,7 @@ Variant socket_server_impl(
   sockaddr_storage sa_storage;
   struct sockaddr *sa_ptr;
   size_t sa_size;
-  if (!set_sockaddr(sa_storage, sock.get(), hosturl.getHost().c_str(),
+  if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
                     hosturl.getPort(), sa_ptr, sa_size)) {
     return false;
   }
@@ -968,12 +970,12 @@ Variant socket_server_impl(
     return false;
   }
 
-  return Resource(std::move(sock));
+  return Variant(std::move(sock));
 }
 
 Variant HHVM_FUNCTION(socket_accept,
                       const Resource& socket) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
   struct sockaddr sa;
   socklen_t salen = sizeof(sa);
   auto new_sock = makeSmartPtr<Socket>(
@@ -982,7 +984,7 @@ Variant HHVM_FUNCTION(socket_accept,
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);
     return false;
   }
-  return Resource(std::move(new_sock));
+  return Variant(std::move(new_sock));
 }
 
 Variant HHVM_FUNCTION(socket_read,
@@ -992,7 +994,7 @@ Variant HHVM_FUNCTION(socket_read,
   if (length <= 0) {
     return false;
   }
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
 
   char *tmpbuf = (char *)malloc(length + 1);
   int retval;
@@ -1023,7 +1025,7 @@ Variant HHVM_FUNCTION(socket_write,
                       const Resource& socket,
                       const String& buffer,
                       int length /* = 0 */) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
   if (length == 0 || length > buffer.size()) {
     length = buffer.size();
   }
@@ -1040,7 +1042,7 @@ Variant HHVM_FUNCTION(socket_send,
                       const String& buf,
                       int len,
                       int flags) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
   if (len > buf.size()) {
     len = buf.size();
   }
@@ -1059,7 +1061,7 @@ Variant HHVM_FUNCTION(socket_sendto,
                       int flags,
                       const String& addr,
                       int port /* = -1 */) {
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
   if (len > buf.size()) {
     len = buf.size();
   }
@@ -1136,7 +1138,7 @@ Variant HHVM_FUNCTION(socket_recv,
   if (len <= 0) {
     return false;
   }
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
 
   char *recv_buf = (char *)malloc(len + 1);
   int retval;
@@ -1166,7 +1168,7 @@ Variant HHVM_FUNCTION(socket_recvfrom,
     return false;
   }
 
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
 
   char *recv_buf = (char *)malloc(len + 2);
   socklen_t slen;
@@ -1280,7 +1282,7 @@ bool HHVM_FUNCTION(socket_shutdown,
   if (socket.is<MemFile>()) {
     return true;
   }
-  Socket *sock = socket.getTyped<Socket>();
+  auto sock = cast<Socket>(socket);
   if (shutdown(sock->fd(), how) != 0) {
     SOCKET_ERROR(sock, "unable to shutdown socket", errno);
     return false;
@@ -1290,8 +1292,7 @@ bool HHVM_FUNCTION(socket_shutdown,
 
 void HHVM_FUNCTION(socket_close,
                    const Resource& socket) {
-  Socket *sock = socket.getTyped<Socket>();
-  sock->close();
+  cast<Socket>(socket)->close();
 }
 
 String HHVM_FUNCTION(socket_strerror,
@@ -1313,19 +1314,17 @@ String HHVM_FUNCTION(socket_strerror,
 }
 
 int64_t HHVM_FUNCTION(socket_last_error,
-                      const Resource& socket /* = null_object */) {
+                      const Variant& socket /* = null */) {
   if (!socket.isNull()) {
-    Socket *sock = socket.getTyped<Socket>();
-    return sock->getError();
+    return cast<Socket>(socket)->getError();
   }
   return Socket::getLastError();
 }
 
 void HHVM_FUNCTION(socket_clear_error,
-                   const Resource& socket /* = null_object */) {
+                   const Variant& socket /* = null */) {
   if (!socket.isNull()) {
-    Socket *sock = socket.getTyped<Socket>();
-    sock->setError(0);
+    cast<Socket>(socket)->setError(0);
   }
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -1373,15 +1372,13 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
     return false;
   }
 
-  Resource ret = socket.toResource();
-
   if (persistent) {
     assert(!key.empty());
-    s_sockets[key] = ret.getTyped<Socket>()->getData();
+    s_sockets[key] = cast<Socket>(socket)->getData();
     assert(s_sockets[key]);
   }
 
-  return ret;
+  return socket;
 }
 
 Variant HHVM_FUNCTION(fsockopen,

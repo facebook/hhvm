@@ -257,22 +257,18 @@ struct MySQLRequestData final : RequestEventHandler {
 
 class MySQLFieldInfo {
 public:
-  MySQLFieldInfo()
-    : max_length(0), length(0), type(0), flags(0), decimals(0), charsetnr(0)
-  {}
-
   String name;
   String org_name;
   String table;
   String org_table;
   String def;
   String db;
-  int64_t max_length;
-  int64_t length;
-  int type;
-  unsigned int flags;
-  unsigned int decimals;
-  unsigned int charsetnr;
+  int64_t max_length{0};
+  int64_t length{0};
+  int type{0};
+  unsigned int flags{0};
+  unsigned int decimals{0};
+  unsigned int charsetnr{0};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -348,12 +344,11 @@ protected:
   MYSQL_RES *m_res;
   MYSQL_ROW m_current_async_row;
   bool m_localized; // whether all the rows have been localized
-  MySQLFieldInfo *m_fields;
+  smart::vector<MySQLFieldInfo> m_fields;
   folly::Optional<smart::list<smart::vector<Variant>>> m_rows;
   smart::list<smart::vector<Variant>>::const_iterator m_current_row;
   int64_t m_current_field;
   bool m_row_ready; // set to false after seekRow, true after fetchRow
-  int64_t m_field_count;
   int64_t m_row_count;
   std::shared_ptr<MySQL> m_conn;  // only set for async for
                                   // refcounting underlying buffers
@@ -427,7 +422,8 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
-MySQLResult *php_mysql_extract_result(const Resource& result);
+SmartPtr<MySQLResult> php_mysql_extract_result(const Resource& result);
+SmartPtr<MySQLResult> php_mysql_extract_result(const Variant& result);
 
 
 enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };

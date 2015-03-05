@@ -231,6 +231,32 @@ void store(Local& env, AliasClass acls, SSATmp* value) {
   FTRACE(5, "       av: {}\n", show(env.state.avail));
 }
 
+void handle_general_effects(Local& env,
+                            const IRInstruction& inst,
+                            GeneralEffects m,
+                            Flags& flags) {
+  store(env, m.stores, nullptr);
+
+  switch (inst.op()) {
+  /*
+   * We could handle CheckLoc, but right now ir-builder does all that, so
+   * it's not here yet.
+   */
+  case CheckTypeMem:
+  case CheckTypePackedArrayElem:
+    if (auto const tloc = find_tracked(env, inst, m.loads)) {
+      if (tloc->knownType <= inst.typeParam()) {
+        flags.convertToJmp = true;
+        return;
+      }
+      tloc->knownType &= inst.typeParam();
+    }
+    break;
+  default:
+    break;
+  }
+}
+
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
   for (auto i = uint32_t{0}; i < kMaxTrackedALocs; ++i) {
     if (!env.state.avail[i]) continue;
@@ -258,7 +284,6 @@ Flags analyze_inst(Local& env,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { clear_everything(env); },
     [&] (InterpOneEffects)  { clear_everything(env); },
-    [&] (KillFrameLocals l) {},
     [&] (ReturnEffects l)   {},
     [&] (CallEffects l)     { // Note: shouldn't need to give up types for some
                               // locations (e.g. locals), but CallEffects needs
@@ -276,28 +301,7 @@ Flags analyze_inst(Local& env,
       std::tie(flags.replaceable, flags.knownType) = load(env, inst, m.src);
     },
 
-    [&] (MayLoadStore m) {
-      store(env, m.stores, nullptr);
-
-      switch (inst.op()) {
-      /*
-       * We could handle CheckLoc, but right now ir-builder does all that, so
-       * it's not here yet.
-       */
-      case CheckTypeMem:
-      case CheckTypePackedArrayElem:
-        if (auto const tloc = find_tracked(env, inst, m.loads)) {
-          if (tloc->knownType <= inst.typeParam()) {
-            flags.convertToJmp = true;
-            return;
-          }
-          tloc->knownType &= inst.typeParam();
-        }
-        break;
-      default:
-        break;
-      }
-    }
+    [&] (GeneralEffects m) { handle_general_effects(env, inst, m, flags); }
   );
 
   switch (inst.op()) {
@@ -339,11 +343,7 @@ void optimize_block(Local& env, Block* blk) {
         FTRACE(2, "      knownType wasn't substitutable; not right now\n");
         return false;
       }
-
-      if (what->inst()->is(DefConst)) return true;
-      auto const defBlock = findDefiningBlock(what);
-      if (!defBlock) return false;
-      return dominates(defBlock, inst.block(), env.global.idoms);
+      return is_tmp_usable(env.global.idoms, what, inst.block());
     };
 
     if (flags.replaceable && can_replace(flags.replaceable, flags.knownType)) {

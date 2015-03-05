@@ -16,12 +16,25 @@
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 
-#include <algorithm>
-
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/cse.h"
+#include "hphp/runtime/vm/jit/edge.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/ir-instr-table.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/type.h"
+
+#include "hphp/util/arena.h"
+
+#include <folly/Range.h>
+
+#include <algorithm>
+#include <sstream>
 
 namespace HPHP { namespace jit {
 
@@ -65,14 +78,6 @@ bool IRInstruction::naryDst() const {
 
 bool IRInstruction::producesReference(int dstNo) const {
   return opcodeHasFlags(op(), ProducesRC);
-}
-
-bool IRInstruction::canCSE() const {
-  auto canCSE = opcodeHasFlags(op(), CanCSE);
-  // Make sure that instructions that are CSE'able can't consume reference
-  // counts.
-  assert(!canCSE || !consumesReferences());
-  return canCSE;
 }
 
 bool IRInstruction::consumesReferences() const {
@@ -280,56 +285,182 @@ void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
   m_srcs[i] = newSrc;
 }
 
-bool IRInstruction::cseEquals(IRInstruction* inst) const {
-  assert(canCSE());
-
-  if (m_op != inst->m_op ||
-      m_typeParam != inst->m_typeParam ||
-      m_numSrcs != inst->m_numSrcs) {
-    return false;
-  }
-  for (uint32_t i = 0; i < numSrcs(); i++) {
-    if (src(i) != inst->src(i)) {
-      return false;
-    }
-  }
-  if (hasExtra() && !cseEqualsExtra(op(), m_extra, inst->m_extra)) {
-    return false;
-  }
-  /*
-   * Don't CSE on the edges--it's ok to use the destination of some earlier
-   * branching instruction even though the instruction we may have generated
-   * here would've exited to a different block.
-   *
-   * This is currently only used for CSE'ing some instructions that can take a
-   * branch deterministically, based on thier inputs, like DivDbl. If we CSE
-   * the result, it's safe because the place we would have had second one is
-   * dominated by the first one, so it can't exit.
-   */
-  return true;
-}
-
-size_t IRInstruction::cseHash() const {
-  assert(canCSE());
-
-  size_t srcHash = 0;
-  for (unsigned i = 0; i < numSrcs(); ++i) {
-    srcHash = CSEHash::hashCombine(srcHash, src(i));
-  }
-  if (hasExtra()) {
-    srcHash = CSEHash::hashCombine(srcHash,
-      cseHashExtra(op(), m_extra));
-  }
-  if (hasTypeParam()) {
-    srcHash = CSEHash::hashCombine(srcHash, m_typeParam.value());
-  }
-  return CSEHash::hashCombine(srcHash, m_op);
-}
-
 std::string IRInstruction::toString() const {
   std::ostringstream str;
   print(str, this);
   return str.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// outputType().
+
+namespace {
+
+Type unboxPtr(Type t) {
+  t = t - Type::PtrToBoxedCell;
+  return t.deref().ptr(add_ref(t.ptrKind()));
+}
+
+Type boxPtr(Type t) {
+  auto const rawBoxed = t.deref().unbox().box();
+  auto const noNull = rawBoxed - Type::BoxedUninit;
+  return noNull.ptr(remove_ref(t.ptrKind()));
+}
+
+Type allocObjReturn(const IRInstruction* inst) {
+  switch (inst->op()) {
+    case ConstructInstance:
+      return Type::SubObj(inst->extra<ConstructInstance>()->cls);
+
+    case NewInstanceRaw:
+      return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
+
+    case AllocObj:
+      return inst->src(0)->isConst()
+        ? Type::ExactObj(inst->src(0)->clsVal())
+        : Type::Obj;
+
+    default:
+      always_assert(false && "Invalid opcode returning AllocObj");
+  }
+}
+
+Type arrElemReturn(const IRInstruction* inst) {
+  assert(inst->op() == LdPackedArrayElem || inst->op() == LdStructArrayElem);
+  assert(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
+  auto const tyParam = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
+
+  auto const arrTy = inst->src(0)->type().arrSpec().type();
+  if (!arrTy) return tyParam;
+
+  using T = RepoAuthType::Array::Tag;
+
+  switch (arrTy->tag()) {
+    case T::Packed:
+      {
+        auto const idx = inst->src(1);
+        if (!idx->isConst()) return Type::Gen;
+        if (idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
+          return typeFromRAT(arrTy->packedElem(idx->intVal())) & tyParam;
+        }
+      }
+      return Type::Gen;
+    case T::PackedN:
+      return typeFromRAT(arrTy->elemType()) & tyParam;
+  }
+
+  return tyParam;
+}
+
+Type thisReturn(const IRInstruction* inst) {
+  auto const func = inst->marker().func();
+
+  // If the function is a cloned closure which may have a re-bound $this which
+  // is not a subclass of the context return an unspecialized type.
+  if (func->hasForeignThis()) return Type::Obj;
+
+  if (auto const cls = func->cls()) {
+    return Type::SubObj(cls);
+  }
+  return Type::Obj;
+}
+
+Type ctxReturn(const IRInstruction* inst) {
+  return thisReturn(inst) | Type::Cctx;
+}
+
+Type setElemReturn(const IRInstruction* inst) {
+  assert(inst->op() == SetElem);
+  auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
+
+  // If the base is a Str, the result will always be a CountedStr (or
+  // an exception). If the base might be a str, the result wil be
+  // CountedStr or Nullptr. Otherwise, the result is always Nullptr.
+  if (baseType <= Type::Str) {
+    return Type::CountedStr;
+  } else if (baseType.maybe(Type::Str)) {
+    return Type::CountedStr | Type::Nullptr;
+  }
+  return Type::Nullptr;
+}
+
+Type builtinReturn(const IRInstruction* inst) {
+  assert(inst->op() == CallBuiltin);
+
+  Type t = inst->typeParam();
+  if (t.isSimpleType() || t == Type::Cell) {
+    return t;
+  }
+  if (t.isReferenceType() || t == Type::BoxedCell) {
+    return t | Type::InitNull;
+  }
+  not_reached();
+}
+
+} // namespace
+
+namespace TypeNames {
+#define IRT(name, ...) UNUSED const Type name = Type::name;
+#define IRTP(name, ...) IRT(name)
+  IR_TYPES
+#undef IRT
+#undef IRTP
+};
+
+Type outputType(const IRInstruction* inst, int dstId) {
+  using namespace TypeNames;
+  using TypeNames::TCA;
+#define ND              assert(0 && "outputType requires HasDest or NaryDest");
+#define D(type)         return type;
+#define DofS(n)         return inst->src(n)->type();
+#define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
+#define DParamMayRelax  return inst->typeParam();
+#define DParam          return inst->typeParam();
+#define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
+                        return inst->typeParam();
+#define DUnboxPtr       return unboxPtr(inst->src(0)->type());
+#define DBoxPtr         return boxPtr(inst->src(0)->type());
+#define DAllocObj       return allocObjReturn(inst);
+#define DArrElem        return arrElemReturn(inst);
+#define DArrPacked      return Type::Array(ArrayData::kPackedKind);
+#define DThis           return thisReturn(inst);
+#define DCtx            return ctxReturn(inst);
+#define DMulti          return Type::Bottom;
+#define DSetElem        return setElemReturn(inst);
+#define DBuiltin        return builtinReturn(inst);
+#define DSubtract(n, t) return inst->src(n)->type() - t;
+#define DCns            return Type::Uninit | Type::InitNull | Type::Bool | \
+                               Type::Int | Type::Dbl | Type::Str | Type::Res;
+
+#define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
+
+  switch (inst->op()) {
+    IR_OPCODES
+    default: not_reached();
+  }
+
+#undef O
+
+#undef ND
+#undef D
+#undef DofS
+#undef DRefineS
+#undef DParamMayRelax
+#undef DParam
+#undef DParamPtr
+#undef DUnboxPtr
+#undef DBoxPtr
+#undef DAllocObj
+#undef DArrElem
+#undef DArrPacked
+#undef DThis
+#undef DCtx
+#undef DMulti
+#undef DSetElem
+#undef DBuiltin
+#undef DSubtract
+#undef DCns
+
 }
 
 }}

@@ -23,6 +23,8 @@
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -91,7 +93,7 @@ struct MTS {
   IRUnit& unit;
   MInstrInfo mii;
 
-  hphp_hash_map<unsigned,unsigned> stackInputs;
+  hphp_hash_map<unsigned,BCSPOffset> stackInputs;
 
   unsigned mInd;
   unsigned iInd;
@@ -157,7 +159,7 @@ void constrainBase(MTS& env, TypeConstraint tc) {
   // Member operations only care about the inner type of the base if it's
   // boxed, so this handles the logic of using the inner constraint when
   // appropriate.
-  if (env.base.type.maybeBoxed()) {
+  if (env.base.type.maybe(Type::BoxedCell)) {
     tc.category = DataTypeCountness;
   }
   env.irb.constrainValue(env.base.value, tc);
@@ -192,8 +194,8 @@ bool constrainCollectionOpBase(MTS& env) {
     case SimpleOp::Map:
     case SimpleOp::Pair:
       always_assert(env.base.type < Type::Obj &&
-                    env.base.type.isSpecialized());
-      constrainBase(env, TypeConstraint(env.base.type.getClass()));
+                    env.base.type.clsSpec());
+      constrainBase(env, TypeConstraint(env.base.type.clsSpec().cls()));
       return true;
   }
 
@@ -203,9 +205,9 @@ bool constrainCollectionOpBase(MTS& env) {
 
 void specializeBaseIfPossible(MTS& env, Type baseType) {
   if (constrainCollectionOpBase(env)) return;
-  if (baseType >= Type::Obj) return;
-  if (!baseType.isSpecialized()) return;
-  constrainBase(env, TypeConstraint(baseType.getClass()));
+  if (baseType < Type::Obj && baseType.clsSpec()) {
+    constrainBase(env, TypeConstraint(baseType.clsSpec().cls()));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -214,10 +216,7 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
 // pointer if it's not needed.
 SSATmp* misPtr(MTS& env) {
   assert(env.base.value && "misPtr called before emitBaseOp");
-  if (env.needMIS) {
-    return gen(env, LdMIStateAddr, env.misBase,
-      cns(env, rds::kVmMInstrStateOff));
-  }
+  if (env.needMIS) return env.misBase;
   return cns(env, Type::cns(nullptr, Type::PtrToMISUninit));
 }
 
@@ -243,7 +242,7 @@ SSATmp* ptrToUninit(HTS& env) {
 
 bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
                               PropInfo propInfo) {
-  if (convertToType(propInfo.repoAuthType).not(Type::Uninit)) {
+  if (!typeFromRAT(propInfo.repoAuthType).maybe(Type::Uninit)) {
     return false;
   }
   if (!cls) return true;
@@ -311,11 +310,12 @@ void checkMIState(MTS& env) {
   const bool isSingle       = env.immVecM.size() == 1;
   const bool unknownOffsets = mInstrHasUnknownOffsets(env);
 
-  if (baseType.maybeBoxed() && !baseType.isBoxed()) {
+  if (baseType.maybe(Type::Cell) &&
+      baseType.maybe(Type::BoxedCell)) {
     // We don't need to bother with weird base types.
     return;
   }
-  if (baseType.isBoxed()) {
+  if (baseType <= Type::BoxedCell) {
     baseType = ldRefReturn(baseType.unbox());
   }
 
@@ -332,8 +332,9 @@ void checkMIState(MTS& env) {
   const bool simpleArrayIsset = isIssetM && singleElem && baseArr;
 
   // IssetM with one vector array element and a collection type
-  const bool simpleCollectionIsset = isIssetM && singleElem &&
-    baseType < Type::Obj && isOptimizableCollectionClass(baseType.getClass());
+  const bool simpleCollectionIsset =
+    isIssetM && singleElem && baseType < Type::Obj &&
+    isOptimizableCollectionClass(baseType.clsSpec().cls());
 
   // UnsetM on an array with one vector element
   const bool simpleArrayUnset = isUnsetM && singleElem &&
@@ -342,9 +343,10 @@ void checkMIState(MTS& env) {
   // CGetM on an array with a base that won't use MInstrState. Str
   // will use tvScratch and Obj will fatal or use tvRef.
   const bool simpleArrayGet = isCGetM && singleElem &&
-    baseType.not(Type::Str | Type::Obj);
-  const bool simpleCollectionGet = isCGetM && singleElem &&
-    baseType < Type::Obj && isOptimizableCollectionClass(baseType.getClass());
+    !baseType.maybe(Type::Str | Type::Obj);
+  const bool simpleCollectionGet =
+    isCGetM && singleElem && baseType < Type::Obj &&
+    isOptimizableCollectionClass(baseType.clsSpec().cls());
   const bool simpleStringOp = (isCGetM || isIssetM) && isSingle &&
     isSimpleBase(env) && mcodeMaybeArrayIntKey(env.immVecM[0]) &&
     baseType <= Type::Str;
@@ -355,7 +357,7 @@ void checkMIState(MTS& env) {
       simpleArrayIsset || simpleStringOp) {
     env.needMIS = false;
     if (simpleCollectionGet || simpleCollectionIsset) {
-      constrainBase(env, TypeConstraint(baseType.getClass()));
+      constrainBase(env, TypeConstraint(baseType.clsSpec().cls()));
     } else {
       constrainBase(env, DataTypeSpecific);
     }
@@ -449,8 +451,8 @@ SSATmp* getKey(MTS& env) {
   auto key = getInput(env, env.iInd, DataTypeSpecific);
   auto const keyType = key->type();
 
-  assert(keyType.isBoxed() || keyType.notBoxed());
-  if (keyType.isBoxed()) {
+  assert(keyType <= Type::Cell || keyType <= Type::BoxedCell);
+  if (keyType <= Type::BoxedCell) {
     key = gen(env, LdRef, Type::InitCell, key);
   }
   return key;
@@ -463,22 +465,6 @@ SSATmp* getValue(MTS& env) {
   return getInput(env, kValIdx, DataTypeSpecific);
 }
 
-SSATmp* getValAddr(MTS& env) {
-  assert(env.mii.valCount() == 1);
-  auto const& dl = *env.ni.inputs[0];
-  auto const& l = dl.location;
-  if (l.space == Location::Local) {
-    assert(!env.stackInputs.count(0));
-    return ldLocAddr(env, l.offset);
-  }
-
-  assert(l.space == Location::Stack);
-  assert(env.stackInputs.count(0));
-  spillStack(env);
-  env.irb.exceptionStackBoundary();
-  return ldStkAddr(env, env.stackInputs[0]);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 // Compute whether the current instruction a 1-element simple collection
@@ -488,7 +474,8 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
   // end up not caring about the type. Consumers of the return value must
   // constrain the base as appropriate.
   auto const base = getBase(env, DataTypeGeneric); // XXX: gens unneeded instrs
-  if (!base->type().isBoxed() && base->type().maybeBoxed()) {
+  if (base->type().maybe(Type::Cell) &&
+      base->type().maybe(Type::BoxedCell)) {
     // We might be doing a Base NL or something similar.  Either way we can't
     // do a simple op if we have a mixed boxed/unboxed type.
     return SimpleOp::None;
@@ -499,7 +486,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
     // Before we do any simpleCollectionOp on a local base, we will always emit
     // the appropriate CheckRefInner guard to allow us to use a predicted inner
     // type.  So when calculating the SimpleOp assume that type.
-    if (base->type().maybeBoxed() && baseDL.location.isLocal()) {
+    if (base->type().maybe(Type::BoxedCell) && baseDL.location.isLocal()) {
       return env.irb.predictedInnerType(baseDL.location.offset);
     }
     return base->type();
@@ -511,10 +498,10 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
     if (baseType <= Type::Arr) {
       auto isPacked = false;
       auto isStruct = false;
-      if (baseType.isSpecialized() && baseType.hasArrayKind()) {
-        isPacked = baseType.getArrayKind() == ArrayData::kPackedKind;
-        isStruct = baseType.getArrayKind() == ArrayData::kStructKind
-          && !!baseType.getArrayShape();
+      if (auto arrSpec = baseType.arrSpec()) {
+        isPacked = arrSpec.kind() == ArrayData::kPackedKind;
+        isStruct = arrSpec.kind() == ArrayData::kStructKind &&
+                   arrSpec.shape() != nullptr;
       }
       if (mcodeIsElem(env.immVecM[0])) {
         SSATmp* key = getInput(env, env.mii.valCount() + 1, DataTypeGeneric);
@@ -524,7 +511,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
               return isPacked ? SimpleOp::PackedArray
                               : SimpleOp::ProfiledPackedArray;
             } else if (key->isConst(Type::StaticStr)) {
-              if (!isStruct || !baseType.getArrayShape()) {
+              if (!isStruct || !baseType.arrSpec().shape()) {
                 return SimpleOp::ProfiledStructArray;
               }
               return SimpleOp::StructArray;
@@ -543,11 +530,11 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
           return SimpleOp::String;
         }
       }
-    } else if (baseType.strictSubtypeOf(Type::Obj)) {
-      const Class* klass = baseType.getClass();
-      auto const isVector    = klass == c_Vector::classof();
-      auto const isPair      = klass == c_Pair::classof();
-      auto const isMap       = klass == c_Map::classof();
+    } else if (baseType < Type::Obj) {
+      const Class* klass = baseType.clsSpec().cls();
+      auto const isVector = klass == c_Vector::classof();
+      auto const isPair   = klass == c_Pair::classof();
+      auto const isMap    = klass == c_Map::classof();
 
       if (isVector || isPair) {
         if (mcodeMaybeVectorKey(env.immVecM[0])) {
@@ -585,7 +572,11 @@ void emitBaseLCR(MTS& env) {
   // we do, it's constrained further.
   auto base = getBase(env, DataTypeGeneric);
   auto baseType = base->type();
-  if (!(baseType.isBoxed() || baseType.notBoxed())) PUNT(MInstr-GenBase);
+
+  if (!(baseType <= Type::Cell ||
+        baseType <= Type::BoxedCell)) {
+    PUNT(MInstr-GenBase);
+  }
 
   if (baseDL.location.isLocal()) {
     // Check for Uninit and warn/promote to InitNull as appropriate
@@ -621,8 +612,8 @@ void emitBaseLCR(MTS& env) {
    * type.  This is the first code emitted for the minstr so it's ok to
    * side-exit here.
    */
-  Block* failedRef = baseType.isBoxed() ? makeExit(env) : nullptr;
-  if (baseType.isBoxed() && baseDL.location.isLocal()) {
+  Block* failedRef = baseType <= Type::BoxedCell ? makeExit(env) : nullptr;
+  if (baseType <= Type::BoxedCell && baseDL.location.isLocal()) {
     auto const predTy = env.irb.predictedInnerType(baseDL.location.offset);
     gen(env, CheckRefInner, predTy, failedRef, base);
     base = gen(env, LdRef, predTy, base);
@@ -661,17 +652,17 @@ void emitBaseLCR(MTS& env) {
     spillStack(env);
     env.irb.exceptionStackBoundary();
     assert(env.stackInputs.count(env.iInd));
-    auto const stkType =
-      env.irb.stackType(offsetFromSP(env, env.stackInputs[env.iInd]),
-                        DataTypeGeneric);
+    auto const stkType = env.irb.stackType(
+      offsetFromIRSP(env, env.stackInputs[env.iInd]),
+      DataTypeGeneric);
     setBase(
       env,
       ldStkAddr(env, env.stackInputs[env.iInd]),
       stkType.ptr(Ptr::Stk)
     );
   }
-  assert(env.base.value->type().isPtr());
-  assert(env.base.type.isPtr());
+  assert(env.base.value->type() <= Type::PtrToGen);
+  assert(env.base.type <= Type::PtrToGen);
 
   // TODO(t2598894): We do this for consistency with the old guard relaxation
   // code, but may change it in the future.
@@ -729,8 +720,8 @@ void emitBaseOp(MTS& env) {
 PropInfo getCurrentPropertyOffset(MTS& env, const Class*& knownCls) {
   auto const baseType = env.base.type.derefIfPtr();
   if (!knownCls) {
-    if (baseType < (Type::Obj|Type::InitNull) && baseType.isSpecialized()) {
-      knownCls = baseType.getClass();
+    if (baseType < (Type::Obj|Type::InitNull) && baseType.clsSpec()) {
+      knownCls = baseType.clsSpec().cls();
     }
   }
 
@@ -746,7 +737,7 @@ PropInfo getCurrentPropertyOffset(MTS& env, const Class*& knownCls) {
                                       env.mii, env.mInd, env.iInd);
   if (info.offset == -1) return info;
 
-  auto const baseCls = baseType.getClass();
+  auto const baseCls = baseType.clsSpec().cls();
 
   /*
    * baseCls and knownCls may differ due to a number of factors but they must
@@ -787,7 +778,7 @@ SSATmp* checkInitProp(MTS& env,
   auto const key = getKey(env);
   assert(key->isA(Type::StaticStr));
   assert(baseAsObj->isA(Type::Obj));
-  assert(propAddr->type().isPtr());
+  assert(propAddr->type() <= Type::PtrToGen);
 
   auto const needsCheck =
     Type::Uninit <= propAddr->type().deref() &&
@@ -832,7 +823,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
   SCOPE_EXIT {
     // After this function, m_base is either a pointer to init_null_variant or
     // a property in the object that we've verified isn't uninit.
-    assert(env.base.type.isPtr());
+    assert(env.base.type <= Type::PtrToGen);
   };
 
   /*
@@ -846,7 +837,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
       env,
       LdPropAddr,
       PropOffset { propInfo.offset },
-      convertToType(propInfo.repoAuthType).ptr(Ptr::Prop),
+      typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
       env.base.value
     );
     setBase(
@@ -884,7 +875,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
         env,
         LdPropAddr,
         PropOffset { propInfo.offset },
-        convertToType(propInfo.repoAuthType).ptr(Ptr::Prop),
+        typeFromRAT(propInfo.repoAuthType).ptr(Ptr::Prop),
         obj
       );
       return checkInitProp(env, obj, propAddr, doWarn, doDefine);
@@ -931,7 +922,7 @@ void emitPropGeneric(MTS& env) {
   auto const mCode = env.immVecM[env.mInd];
   auto const mia = MInstrAttr(env.mii.getAttr(mCode) & MIA_intermediate_prop);
 
-  if ((mia & MIA_unset) && env.base.type.strip().not(Type::Obj)) {
+  if ((mia & MIA_unset) && !env.base.type.strip().maybe(Type::Obj)) {
     constrainBase(env, DataTypeSpecific);
     setBase(env, ptrToInitNull(env));
     return;
@@ -1009,7 +1000,7 @@ void emitElem(MTS& env) {
       setBase(env, uninit);
       return;
     }
-    if (baseType.not(Type::Arr | Type::Obj)) {
+    if (!baseType.maybe(Type::Arr | Type::Obj)) {
       setBase(env, uninit);
       return;
     }
@@ -1068,8 +1059,8 @@ bool needFirstRatchet(const MTS& env) {
     if (mcodeIsElem(env.immVecM[0])) return false;
     return true;
   }
-  if (firstTy < Type::Obj && firstTy.isSpecialized()) {
-    auto const klass = firstTy.getClass();
+  if (firstTy < Type::Obj && firstTy.clsSpec()) {
+    auto const klass = firstTy.clsSpec().cls();
     auto const no_overrides = AttrNoOverrideMagicGet|
                               AttrNoOverrideMagicSet|
                               AttrNoOverrideMagicIsset|
@@ -1144,7 +1135,7 @@ void emitRatchetRefs(MTS& env) {
     return;
   }
 
-  auto const misRefAddr = misLea(env, MISOFF(tvRef));
+  auto const misRefAddr = misLea(env, offsetof(MInstrState, tvRef));
 
   setBase(env, cond(
     env,
@@ -1153,7 +1144,7 @@ void emitRatchetRefs(MTS& env) {
       gen(env, CheckInitMem, taken, misRefAddr);
     },
     [&] { // Next: tvRef isn't Uninit. Ratchet the refs
-      auto const misRef2Addr = misLea(env, MISOFF(tvRef2));
+      auto const misRef2Addr = misLea(env, offsetof(MInstrState, tvRef2));
       // Clean up tvRef2 before overwriting it.
       if (ratchetInd(env) > 0) {
         auto const val = gen(env, LdMem, Type::Gen, misRef2Addr);
@@ -1166,7 +1157,7 @@ void emitRatchetRefs(MTS& env) {
       gen(env, StMem, misRefAddr, cns(env, Type::Uninit));
 
       // Adjust base pointer.
-      assert(env.base.type.isPtr());
+      assert(env.base.type <= Type::PtrToGen);
       return misRef2Addr;
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
@@ -1193,8 +1184,8 @@ void emitMPre(MTS& env) {
     env.misBase = gen(env, DefMIStateBase);
     auto const uninit = cns(env, Type::Uninit);
     if (nLogicalRatchets(env) > 0) {
-      gen(env, StMem, misLea(env, MISOFF(tvRef)), uninit);
-      gen(env, StMem, misLea(env, MISOFF(tvRef2)), uninit);
+      gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef)), uninit);
+      gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef2)), uninit);
     }
 
     // If we're using an MInstrState, all the default-created catch blocks for
@@ -1237,7 +1228,7 @@ void numberStackInputs(MTS& env) {
     switch (l.space) {
       case Location::Stack:
         assert(stackIdx >= 0);
-        env.stackInputs[i] = stackIdx--;
+        env.stackInputs[i] = BCSPOffset{stackIdx--};
         break;
 
       default:
@@ -1250,7 +1241,7 @@ void numberStackInputs(MTS& env) {
     // If this instruction does have an RHS, it will be input 0 at
     // stack offset 0.
     assert(env.mii.valCount() == 1);
-    env.stackInputs[0] = 0;
+    env.stackInputs[0] = BCSPOffset{0};
   }
 }
 
@@ -1259,7 +1250,7 @@ void numberStackInputs(MTS& env) {
 
 SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
   assert(base->isA(Type::Arr) &&
-         base->type().getArrayKind() == ArrayData::kPackedKind);
+         base->type().arrSpec().kind() == ArrayData::kPackedKind);
 
   auto doLdElem = [&] {
     auto res = gen(env, LdPackedArrayElem, base, key);
@@ -1292,13 +1283,13 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
 
 SSATmp* emitStructArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
   assert(base->isA(Type::Arr));
-  assert(base->type().getArrayKind() == ArrayData::kStructKind);
-  assert(base->type().getArrayShape());
+  assert(base->type().arrSpec().kind() == ArrayData::kStructKind);
+  assert(base->type().arrSpec().shape());
   assert(key->isConst(Type::Str));
   assert(key->strVal()->isStatic());
 
   const auto keyStr = key->strVal();
-  const auto shape = base->type().getArrayShape();
+  const auto shape = base->type().arrSpec().shape();
   auto offset = shape->offsetFor(keyStr);
 
   if (offset == PropertyTable::kInvalidOffset) {
@@ -1332,7 +1323,7 @@ void emitProfiledPackedArrayGet(MTS& env, SSATmp* key) {
     auto const data = prof.data(NonPackedArrayProfile::reduce);
     // NonPackedArrayProfile data counts how many times a non-packed array was
     // observed.  Zero means it was monomorphic (or never executed).
-    auto const typePackedArr = Type::Arr.specialize(ArrayData::kPackedKind);
+    auto const typePackedArr = Type::Array(ArrayData::kPackedKind);
     if (env.base.type.maybe(typePackedArr) &&
         (data.count == 0 || RuntimeOption::EvalJitPGOArrayGetStress)) {
       // It's safe to side-exit still because we only do these profiled array
@@ -1382,16 +1373,15 @@ void emitProfiledStructArrayGet(MTS& env, SSATmp* key) {
     // monomorphic, we'll emit a check for that specific Shape. If we're
     // polymorphic, we'll also fall back to generic get. Eventually we'd like
     // to emit an inline cache, which should be faster than calling out of line.
-    auto typeStructArr = Type::Arr.specialize(ArrayData::kStructKind);
-    if (env.base.type.maybe(typeStructArr)) {
+    if (env.base.type.maybe(Type::Array(ArrayData::kStructKind))) {
       if (data.nonStructCount == 0 && data.isMonomorphic()) {
-        typeStructArr = Type::Arr.specialize(data.getShape());
         // It's safe to side-exit still because we only do these profiled array
         // gets on the first element, with simple bases and single-element dims.
         // See computeSimpleCollectionOp.
         auto const exit = makeExit(env);
-        setBase(env,
-          gen(env, CheckType, typeStructArr, exit, env.base.value));
+        auto const ssa = gen(
+          env, CheckType, Type::Array(data.getShape()), exit, env.base.value);
+        setBase(env, ssa);
         env.irb.constrainValue(
           env.base.value,
           TypeConstraint(DataTypeSpecialized).setWantArrayShape()
@@ -1449,7 +1439,7 @@ void emitPairGet(MTS& env, SSATmp* key) {
 }
 
 void emitPackedArrayIsset(MTS& env) {
-  assert(env.base.type.getArrayKind() == ArrayData::kPackedKind);
+  assert(env.base.type.arrSpec().kind() == ArrayData::kPackedKind);
   auto const key = getKey(env);
   env.result = cond(
     env,
@@ -1469,11 +1459,11 @@ void emitPackedArrayIsset(MTS& env) {
 void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
   assert(env.iInd == env.mii.valCount() + 1);
   const int baseStkIdx = env.mii.valCount();
-  assert(key->type().notBoxed());
-  assert(value->type().notBoxed());
+  assert(key->type() <= Type::Cell);
+  assert(value->type() <= Type::Cell);
 
   auto const& base = *env.ni.inputs[env.mii.valCount()];
-  bool const setRef = base.rtt.isBoxed();
+  bool const setRef = base.rtt <= Type::BoxedCell;
 
   // No catch trace below because the helper can't throw. It may reenter to
   // call destructors so it has a sync point in nativecalls.cpp, but exceptions
@@ -1560,9 +1550,11 @@ void emitCGetProp(MTS& env) {
       return;
     }
 
-    auto const ty      = env.base.type.deref();
-    auto const cellPtr = ty.maybeBoxed() ? gen(env, UnboxPtr, env.base.value)
-                                         : env.base.value;
+    auto const ty = env.base.type.deref();
+    auto const cellPtr = ty.maybe(Type::BoxedCell)
+      ? gen(env, UnboxPtr, env.base.value)
+      : env.base.value;
+
     env.result = gen(env, LdMem, ty.unbox(), cellPtr);
     gen(env, IncRef, env.result);
     return;
@@ -1604,10 +1596,13 @@ void emitSetProp(MTS& env) {
       !mightCallMagicPropMethod(MIA_define, knownCls, propInfo)) {
     emitPropSpecialized(env, MIA_define, propInfo);
 
-    auto const propTy  = env.base.type.deref();
-    auto const cellTy  = propTy.maybeBoxed() ? propTy.unbox() : propTy;
-    auto const cellPtr = propTy.maybeBoxed() ? gen(env, UnboxPtr, env.base.value)
-                                             : env.base.value;
+    auto cellTy = env.base.type.deref();
+    auto cellPtr = env.base.value;
+
+    if (cellTy.maybe(Type::BoxedCell)) {
+      cellTy = cellTy.unbox();
+      cellPtr = gen(env, UnboxPtr, cellPtr);
+    }
     auto const oldVal  = gen(env, LdMem, cellTy, cellPtr);
 
     gen(env, IncRef, value);
@@ -1646,7 +1641,7 @@ void emitBindProp(MTS& env) {
 
 void emitUnsetProp(MTS& env) {
   auto const key = getKey(env);
-  if (env.base.type.strip().not(Type::Obj)) {
+  if (!env.base.type.strip().maybe(Type::Obj)) {
     // Noop
     constrainBase(env, DataTypeSpecific);
     return;
@@ -1748,13 +1743,8 @@ void emitSetWithRefLProp(MTS& env) { SPUNT(__func__); }
 void emitSetWithRefRProp(MTS& env) { emitSetWithRefLProp(env); }
 
 void emitSetWithRefNewElem(MTS& env) {
-  if (env.base.type.strip() <= Type::Arr && getValue(env)->type().notBoxed()) {
-    constrainBase(env, DataTypeSpecific);
-    emitSetNewElem(env);
-  } else {
-    gen(env, SetWithRefNewElem, env.base.value, getValAddr(env),
-      misPtr(env));
-  }
+  auto const val = getValue(env);
+  gen(env, SetWithRefNewElem, env.base.value, val, misPtr(env));
   env.result = nullptr;
 }
 
@@ -1795,7 +1785,7 @@ void emitSetElem(MTS& env) {
       env.result = result;
       gen(env, DecRef, value);
     } else {
-      assert(t.equals(Type::CountedStr | Type::Nullptr));
+      assert(t == (Type::CountedStr | Type::Nullptr));
       // Base might be a string. Assume the result is value, then inform
       // emitMPost that it needs to test the actual result.
       env.result = value;
@@ -1805,20 +1795,15 @@ void emitSetElem(MTS& env) {
   }
 }
 
-void emitSetWithRefLElem(MTS& env) {
+void emitSetWithRefElem(MTS& env) {
   auto const key = getKey(env);
-  auto const locAddr = getValAddr(env);
-  if (env.base.type.strip() <= Type::Arr &&
-      !locAddr->type().deref().maybeBoxed()) {
-    constrainBase(env, DataTypeSpecific);
-    emitSetElem(env);
-    assert(env.strTestResult == nullptr);
-  } else {
-    gen(env, SetWithRefElem, env.base.value, key, locAddr, misPtr(env));
-  }
+  auto const val = getValue(env);
+  gen(env, SetWithRefElem, env.base.value, key, val, misPtr(env));
   env.result = nullptr;
 }
-void emitSetWithRefRElem(MTS& env) { emitSetWithRefLElem(env); }
+
+void emitSetWithRefLElem(MTS& env) { emitSetWithRefElem(env); }
+void emitSetWithRefRElem(MTS& env) { emitSetWithRefElem(env); }
 
 void emitSetOpElem(MTS& env) {
   auto const op = static_cast<SetOpOp>(env.ni.imm[0].u_OA);
@@ -1851,7 +1836,7 @@ void emitUnsetElem(MTS& env) {
         cns(env, makeStaticString(Strings::CANT_UNSET_STRING)));
     return;
   }
-  if (baseType.not(Type::Arr | Type::Obj)) {
+  if (!baseType.maybe(Type::Arr | Type::Obj)) {
     // Noop
     return;
   }
@@ -1932,7 +1917,10 @@ void emitFinalMOp(MTS& env) {
  * weird right?
  */
 void cleanTvRefs(MTS& env) {
-  constexpr ptrdiff_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
+  constexpr ptrdiff_t refOffs[] = {
+    offsetof(MInstrState, tvRef),
+    offsetof(MInstrState, tvRef2)
+  };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
     auto const addr = misLea(env, refOffs[env.failedSetBlock ? 1 - i : i]);
     auto const val  = gen(env, LdMem, Type::Gen, addr);
@@ -1942,8 +1930,8 @@ void cleanTvRefs(MTS& env) {
 
 enum class DecRefStyle { FromCatch, FromMain };
 uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
-  uint32_t const startOff =
-    env.op == Op::SetM || env.op == Op::BindM ? 1 : 0;
+  auto const startOff = BCSPOffset{
+    env.op == Op::SetM || env.op == Op::BindM ? 1 : 0};
   auto const stackCnt = env.stackInputs.size();
   for (auto i = startOff; i < stackCnt; ++i) {
     auto const type = topType(env, i, DataTypeGeneric);
@@ -1984,7 +1972,8 @@ Block* makeMISCatch(MTS& env) {
   gen(env, BeginCatch);
   cleanTvRefs(env);
   spillStack(env);
-  gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env), sp(env));
+  gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    fp(env), sp(env));
   return exit;
 }
 
@@ -2006,8 +1995,8 @@ Block* makeCatchSet(MTS& env) {
     [&] {
       hint(env, Block::Hint::Unused);
       cleanTvRefs(env);
-      gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env),
-        sp(env));
+      gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+        fp(env), sp(env));
     }
   );
   hint(env, Block::Hint::Unused);
@@ -2019,7 +2008,7 @@ Block* makeCatchSet(MTS& env) {
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
   if (!isSetWithRef) {
-    auto const val = top(env, Type::Cell, 0, DataTypeGeneric);
+    auto const val = top(env, Type::Cell, BCSPOffset{0}, DataTypeGeneric);
     gen(env, DecRef, val);
   }
   auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromCatch);
@@ -2029,7 +2018,6 @@ Block* makeCatchSet(MTS& env) {
     auto const val = gen(env, LdUnwinderValue, Type::Cell);
     push(env, val);
   }
-  gen(env, DeleteUnwinderException);
   gen(env, Jmp, makeExit(env, nextBcOff(env)));
   return env.failedSetBlock;
 }

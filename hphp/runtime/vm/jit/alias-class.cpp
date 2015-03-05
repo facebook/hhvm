@@ -37,7 +37,7 @@ namespace {
 
 struct StkPtrInfo {
   SSATmp* fp;
-  int32_t offset;
+  FPRelOffset offset;
 };
 
 /*
@@ -51,20 +51,23 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
   auto const inst = sp->inst();
   switch (inst->op()) {
   case DefSP:
-    return StkPtrInfo { inst->src(0), -inst->extra<DefSP>()->offset };
+    return StkPtrInfo { inst->src(0),
+      FPRelOffset{-inst->extra<DefSP>()->offset} };
   case ResetSP:
-    return StkPtrInfo { inst->src(0), -inst->extra<ResetSP>()->offset };
+    return StkPtrInfo { inst->src(0),
+      FPRelOffset{-inst->extra<ResetSP>()->offset} };
   case ReDefSP:
-    return StkPtrInfo { inst->src(0), -inst->extra<ReDefSP>()->offset };
+    return StkPtrInfo { inst->src(0),
+      FPRelOffset{-inst->extra<ReDefSP>()->offset} };
   case RetAdjustStk:
-    return StkPtrInfo { inst->src(0), 2 };
+    return StkPtrInfo { inst->src(0), FPRelOffset{2} };
 
   case AdjustSP:
     {
       auto const prev = canonicalize_stkptr(inst->src(0));
       return StkPtrInfo {
         prev.fp,
-        prev.offset + inst->extra<AdjustSP>()->offset
+        prev.offset + inst->extra<AdjustSP>()->offset.offset
       };
     }
 
@@ -74,7 +77,7 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
       auto const extra = inst->extra<Call>();
       return StkPtrInfo {
         prev.fp,
-        prev.offset + extra->spOffset +
+        prev.offset + extra->spOffset.offset +
           safe_cast<int32_t>(extra->numParams) +
           int32_t{kNumActRecCells} - 1
       };
@@ -86,7 +89,7 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
       auto const extra = inst->extra<CallArray>();
       return StkPtrInfo {
         prev.fp,
-        prev.offset + extra->spOffset + int32_t{kNumActRecCells} + 1 - 1
+        prev.offset + extra->spOffset.offset + int32_t{kNumActRecCells} + 1 - 1
       };
     }
 
@@ -96,7 +99,7 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
       auto const extra = inst->extra<ContEnter>();
       return StkPtrInfo {
         prev.fp,
-        prev.offset + extra->spOffset + 1 - 1
+        prev.offset + extra->spOffset.offset + 1 - 1
       };
     }
 
@@ -108,7 +111,7 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
 AStack canonicalize_stk(AStack stk) {
   if (stk.base->type() <= Type::FramePtr) return stk;
   auto const info = canonicalize_stkptr(stk.base);
-  return AStack { info.fp, stk.offset + info.offset, stk.size };
+  return AStack { info.fp, stk.offset + info.offset.offset, stk.size };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -138,6 +141,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BElemI:    break;
   case A::BElemS:    break;
   case A::BStack:    break;
+  case A::BMIState:  break;
   }
 
   auto ret = std::string{};
@@ -153,11 +157,12 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BUnknown:
     case A::BElem:
       always_assert(0);
-    case A::BFrame:  ret += "Fr"; break;
-    case A::BProp:   ret += "Pr"; break;
-    case A::BElemI:  ret += "Ei"; break;
-    case A::BElemS:  ret += "Es"; break;
-    case A::BStack:  ret += "St"; break;
+    case A::BFrame:   ret += "Fr"; break;
+    case A::BProp:    ret += "Pr"; break;
+    case A::BElemI:   ret += "Ei"; break;
+    case A::BElemS:   ret += "Es"; break;
+    case A::BStack:   ret += "St"; break;
+    case A::BMIState: ret += "Mis"; break;
     }
   }
   return ret;
@@ -197,6 +202,8 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
                                      acls.m_stack.base,
                                      acls.m_stack.offset,
                                      acls.m_stack.size);
+  case STag::MIState:
+    return folly::hash::hash_combine(hash, acls.m_mis.offset);
   }
   not_reached();
 }
@@ -227,6 +234,7 @@ X(Prop, prop)
 X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
+X(MIState, mis)
 
 #undef X
 
@@ -238,6 +246,7 @@ AliasClass::rep AliasClass::stagBit(STag tag) {
   case STag::ElemI:   return BElemI;
   case STag::ElemS:   return BElemS;
   case STag::Stack:   return BStack;
+  case STag::MIState: return BMIState;
   }
   always_assert(0);
 }
@@ -256,6 +265,8 @@ bool AliasClass::checkInvariants() const {
     break;
   case STag::ElemS:
     assert(m_elemS.key->isStatic());
+    break;
+  case STag::MIState:
     break;
   }
 
@@ -279,6 +290,7 @@ bool AliasClass::equivData(AliasClass o) const {
   case STag::Stack:   return m_stack.base == o.m_stack.base &&
                              m_stack.offset == o.m_stack.offset &&
                              m_stack.size == o.m_stack.size;
+  case STag::MIState: return m_mis.offset == o.m_mis.offset;
   }
   not_reached();
 }
@@ -298,6 +310,7 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
+  case STag::MIState:
     assert(!a.equivData(b));
     break;
 
@@ -354,11 +367,12 @@ AliasClass AliasClass::operator|(AliasClass o) const {
   switch (stag1) {
   case STag::None:
     break;
-  case STag::Frame:  new (&ret.m_frame) AFrame(m_frame); break;
-  case STag::Prop:   new (&ret.m_prop) AProp(m_prop); break;
-  case STag::ElemI:  new (&ret.m_elemI) AElemI(m_elemI); break;
-  case STag::ElemS:  new (&ret.m_elemS) AElemS(m_elemS); break;
-  case STag::Stack:  new (&ret.m_stack) AStack(m_stack); break;
+  case STag::Frame:   new (&ret.m_frame) AFrame(m_frame); break;
+  case STag::Prop:    new (&ret.m_prop) AProp(m_prop); break;
+  case STag::ElemI:   new (&ret.m_elemI) AElemI(m_elemI); break;
+  case STag::ElemS:   new (&ret.m_elemS) AElemS(m_elemS); break;
+  case STag::Stack:   new (&ret.m_stack) AStack(m_stack); break;
+  case STag::MIState: new (&ret.m_mis) AMIState(m_mis); break;
   }
   ret.m_stag = stag1;
   return ret;
@@ -371,6 +385,7 @@ bool AliasClass::subclassData(AliasClass o) const {
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
+  case STag::MIState:
     return equivData(o);
   case STag::Stack:
     if (m_stack.base != o.m_stack.base) return false;
@@ -464,6 +479,9 @@ bool AliasClass::maybeData(AliasClass o) const {
       );
       return lowest_upper > highest_lower;
     }
+
+  case STag::MIState:
+    return m_mis.offset == o.m_mis.offset;
   }
   not_reached();
 }
@@ -523,12 +541,13 @@ bool AliasClass::maybe(AliasClass o) const {
 AliasClass canonicalize(AliasClass a) {
   using T = AliasClass::STag;
   switch (a.m_stag) {
-  case T::None:  return a;
-  case T::Frame: return a;
-  case T::Prop:  a.m_prop.obj = canonical(a.m_prop.obj);   return a;
-  case T::ElemI: a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
-  case T::ElemS: a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
-  case T::Stack: a.m_stack = canonicalize_stk(a.m_stack);  return a;
+  case T::None:    return a;
+  case T::Frame:   return a;
+  case T::MIState: return a;
+  case T::Prop:    a.m_prop.obj = canonical(a.m_prop.obj);   return a;
+  case T::ElemI:   a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
+  case T::ElemS:   a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
+  case T::Stack:   a.m_stack = canonicalize_stk(a.m_stack);  return a;
   }
   always_assert(0);
 }
@@ -567,6 +586,9 @@ std::string show(AliasClass acls) {
         ? "<"
         : folly::sformat(";{}", acls.m_stack.size)
     );
+    break;
+  case A::STag::MIState:
+    folly::format(&ret, "Mis {}", acls.m_mis.offset);
     break;
   }
 

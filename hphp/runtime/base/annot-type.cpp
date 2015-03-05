@@ -21,13 +21,16 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef hphp_hash_map<const StringData*, AnnotType, string_data_hash,
-  string_data_isame> AnnotTypeMap;
+  string_data_isame> HhvmStrToTypeMap;
+
+typedef hphp_string_imap<AnnotType> StdStrToTypeMap;
 
 const StaticString
   s_HH_Traversable("HH\\Traversable"),
@@ -43,37 +46,58 @@ MaybeDataType nameToMaybeDataType(const StringData* typeName) {
   return type ? MaybeDataType(getAnnotDataType(*type)) : folly::none;
 }
 
-static const AnnotTypeMap& getAnnotTypeMap() {
-  static const AnnotTypeMap atMap = []() {
-    AnnotTypeMap atMap;
+MaybeDataType nameToMaybeDataType(const std::string& typeName) {
+  auto const* type = nameToAnnotType(typeName);
+  return type ? MaybeDataType(getAnnotDataType(*type)) : folly::none;
+}
+
+/**
+ * This is the authoritative map that determines which typehints require
+ * special handling. Any typehint not on this list is assumed to be normal
+ * "class-name" typehint.
+ */
+static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
+  static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mapPair = []() {
+    std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mapPair;
     const struct Pair {
-      const StringData* name;
+      const char* name;
       AnnotType type;
     } pairs[] = {
-      { makeStaticString("HH\\bool"),     AnnotType::Bool },
-      { makeStaticString("HH\\int"),      AnnotType::Int },
-      { makeStaticString("HH\\float"),    AnnotType::Float },
-      { makeStaticString("HH\\string"),   AnnotType::String },
-      { makeStaticString("array"),        AnnotType::Array },
-      { makeStaticString("HH\\resource"), AnnotType::Resource },
-      { makeStaticString("HH\\num"),      AnnotType::Number },
-      { makeStaticString("HH\\arraykey"), AnnotType::ArrayKey },
-      { makeStaticString("self"),         AnnotType::Self },
-      { makeStaticString("parent"),       AnnotType::Parent },
-      { makeStaticString("callable"),     AnnotType::Callable },
+      { "HH\\noreturn", AnnotType::Uninit },
+      { "HH\\void",     AnnotType::Null },
+      { "HH\\bool",     AnnotType::Bool },
+      { "HH\\int",      AnnotType::Int },
+      { "HH\\float",    AnnotType::Float },
+      { "HH\\string",   AnnotType::String },
+      { "array",        AnnotType::Array },
+      { "HH\\resource", AnnotType::Resource },
+      { "HH\\mixed",    AnnotType::Mixed },
+      { "HH\\num",      AnnotType::Number },
+      { "HH\\arraykey", AnnotType::ArrayKey },
+      { "self",         AnnotType::Self },
+      { "parent",       AnnotType::Parent },
+      { "callable",     AnnotType::Callable },
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
-      atMap[pairs[i].name] = pairs[i].type;
+      mapPair.first[makeStaticString(pairs[i].name)] = pairs[i].type;
+      mapPair.second[pairs[i].name] = pairs[i].type;
     }
-    return atMap;
+    return mapPair;
   }();
-  return atMap;
+  return mapPair;
 }
 
 const AnnotType* nameToAnnotType(const StringData* typeName) {
   assert(typeName);
-  const AnnotTypeMap& atMap = getAnnotTypeMap();
-  return folly::get_ptr(atMap, typeName);
+  auto const& mapPair = getAnnotTypeMaps();
+  return folly::get_ptr(mapPair.first, typeName);
+}
+
+const AnnotType* nameToAnnotType(const std::string& typeName) {
+  auto const& mapPair = getAnnotTypeMaps();
+  auto const* at = folly::get_ptr(mapPair.second, typeName);
+  assert(!at || *at != AnnotType::Object);
+  return at;
 }
 
 bool interface_supports_non_objects(const StringData* s) {

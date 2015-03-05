@@ -59,6 +59,7 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/ext/extension-registry.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -117,12 +118,13 @@ int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 int64_t RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
 
 std::string RuntimeOption::AccessLogDefaultFormat = "%h %l %u %t \"%r\" %>s %b";
-std::vector<AccessLogFileData> RuntimeOption::AccessLogs;
+std::map<std::string, AccessLogFileData> RuntimeOption::AccessLogs;
 
 std::string RuntimeOption::AdminLogFormat = "%h %t %s %U";
 std::string RuntimeOption::AdminLogFile;
 std::string RuntimeOption::AdminLogSymLink;
 
+std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
 
 std::string RuntimeOption::Tier;
 std::string RuntimeOption::Host;
@@ -130,8 +132,6 @@ std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerFileSocket;
-std::string RuntimeOption::ServerPrimaryIPv4;
-std::string RuntimeOption::ServerPrimaryIPv6;
 int RuntimeOption::ServerPort = 80;
 int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
@@ -147,6 +147,7 @@ bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFixPathInfo = false;
+bool RuntimeOption::ServerAddVaryEncoding = true;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
@@ -364,19 +365,6 @@ std::vector<std::string> RuntimeOption::Extensions;
 std::vector<std::string> RuntimeOption::DynamicExtensions;
 std::string RuntimeOption::DynamicExtensionPath = ".";
 
-std::vector<void(*)(const IniSettingMap&, const Hdf&)>*
-  RuntimeOption::OptionHooks = nullptr;
-
-void RuntimeOption::AddOptionHook(
-  void(*optionHook)(const IniSettingMap&, const Hdf&)) {
-  // assuming no concurrent call to this function
-  if (RuntimeOption::OptionHooks == nullptr) {
-    RuntimeOption::OptionHooks =
-      new std::vector<void(*)(const IniSettingMap&, const Hdf&)>();
-  }
-  RuntimeOption::OptionHooks->push_back(optionHook);
-}
-
 HackStrictOption
   RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
   RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF,
@@ -391,6 +379,16 @@ int RuntimeOption::GetScannerType() {
   if (EnableXHP) type |= Scanner::AllowXHPSyntax;
   if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
+}
+
+std::string RuntimeOption::GetServerPrimaryIPv4() {
+   static std::string serverPrimaryIPv4 = GetPrimaryIPv4();
+   return serverPrimaryIPv4;
+}
+
+std::string RuntimeOption::GetServerPrimaryIPv6() {
+   static std::string serverPrimaryIPv6 = GetPrimaryIPv6();
+   return serverPrimaryIPv6;
 }
 
 static inline std::string regionSelectorDefault() {
@@ -811,19 +809,25 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(AccessLogDefaultFormat, ini, logger["AccessLogDefaultFormat"],
                  "%h %l %u %t \"%r\" %>s %b");
 
-    {
-      Hdf access = logger["Access"];
-      for (Hdf hdf = access.firstChild(); hdf.exists();
-           hdf = hdf.next()) {
+    auto parseLogs = [](Hdf root, IniSetting::Map& ini,
+                        std::map<std::string, AccessLogFileData>& logs) {
+      for (Hdf hdf = root.firstChild(); hdf.exists(); hdf = hdf.next()) {
+        string logName = hdf.getName();
         string fname = Config::GetString(ini, hdf["File"]);
         if (fname.empty()) {
           continue;
         }
         string symLink = Config::GetString(ini, hdf["SymLink"]);
-        AccessLogs.push_back(AccessLogFileData(fname, symLink,
-          Config::GetString(ini, hdf["Format"], AccessLogDefaultFormat)));
+        string format = Config::GetString(ini, hdf["Format"],
+          AccessLogDefaultFormat);
+
+        logs[logName] = AccessLogFileData(fname, symLink, format);
       }
-    }
+    };
+
+    parseLogs(logger["Access"], ini, AccessLogs);
+    RPCLogs = AccessLogs;
+    parseLogs(logger["RPC"], ini, RPCLogs);
 
     Config::Bind(AdminLogFormat, ini, logger["AdminLog.Format"], "%h %t %s %U");
     Config::Bind(AdminLogFile, ini, logger["AdminLog.File"]);
@@ -1051,10 +1055,10 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ServerType, ini, server["Type"], ServerType);
     Config::Bind(ServerIP, ini, server["IP"]);
     Config::Bind(ServerFileSocket, ini, server["FileSocket"]);
-    ServerPrimaryIPv4 = GetPrimaryIPv4();
-    ServerPrimaryIPv6 = GetPrimaryIPv6();
+
 #ifdef FACEBOOK
-    if (ServerPrimaryIPv4.empty() && ServerPrimaryIPv6.empty()) {
+    //Do not cause slowness on startup -- except for Facebook
+    if (GetServerPrimaryIPv4().empty() && GetServerPrimaryIPv6().empty()) {
       throw std::runtime_error("Unable to resolve the server's "
           "IPv4 or IPv6 address");
     }
@@ -1084,6 +1088,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ServerHttpSafeMode, ini, server["HttpSafeMode"]);
     Config::Bind(ServerStatCache, ini, server["StatCache"], false);
     Config::Bind(ServerFixPathInfo, ini, server["FixPathInfo"], false);
+    Config::Bind(ServerAddVaryEncoding, ini, server["AddVaryEncoding"],
+                 ServerAddVaryEncoding);
     Config::Get(ini, server["WarmupRequests"], ServerWarmupRequests);
     Config::Get(ini, server["HighPriorityEndPoints"],
                 ServerHighPriorityEndPoints);
@@ -1095,8 +1101,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(PspTimeoutSeconds, ini, server["PspTimeoutSeconds"], 0);
     Config::Bind(PspCpuTimeoutSeconds, ini, server["PspCpuTimeoutSeconds"], 0);
     Config::Bind(ServerMemoryHeadRoom, ini, server["MemoryHeadRoom"], 0);
-    Config::Bind(RequestMemoryMaxBytes, ini, server["RequestMemoryMaxBytes"],
-                       std::numeric_limits<int64_t>::max());
+    Config::Bind(RequestMemoryMaxBytes, ini, server["RequestMemoryMaxBytes"], (16l << 30)); // 16GiB
     Config::Bind(ResponseQueueCount, ini, server["ResponseQueueCount"], 0);
     if (ResponseQueueCount <= 0) {
       ResponseQueueCount = ServerThreadCount / 10;
@@ -1521,12 +1526,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
   Config::Get(ini, config["CustomSettings"], CustomSettings);
 
-  if (RuntimeOption::OptionHooks != nullptr) {
-    for (auto hookFunc : *RuntimeOption::OptionHooks) {
-      hookFunc(ini, config);
-    }
-  }
-
   refineStaticStringTableSize();
 
   // Language and Misc Configuration Options
@@ -1636,7 +1635,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
               RuntimeOption::DynamicExtensions);
 
 
-  Extension::LoadModules(ini, config);
+  ExtensionRegistry::moduleLoad(ini, config);
   extern void initialize_apc();
   initialize_apc();
 }

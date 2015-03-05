@@ -66,11 +66,15 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(GNUCC_OPT "${GNUCC_OPT} -pie -fPIC --param=ssp-buffer-size=4")
   endif()
 
-  # ARM64
+  # X64
   set(GNUCC_PLAT_OPT "")
-  if(NOT IS_AARCH64)
-    # TODO: This should really only be set on X86/X64
+  if(IS_X64)
     set(GNUCC_PLAT_OPT "-mcrc32")
+  endif()
+
+  # PPC64
+  if(NOT IS_PPC64)
+    set(CMAKE_CXX_OMIT_LEAF_FRAME_POINTER "-momit-leaf-frame-pointer")
   endif()
 
   # No optimizations for debug builds.
@@ -81,7 +85,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
   set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
   set(CMAKE_C_FLAGS_RELEASE          "-O3 -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG -fno-gcse -momit-leaf-frame-pointer --param max-inline-insns-auto=100 --param early-inlining-insns=200 --param max-early-inliner-iterations=50")
+  set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG -fno-gcse ${CMAKE_CXX_OMIT_LEAF_FRAME_POINTER} --param max-inline-insns-auto=100 --param early-inlining-insns=200 --param max-early-inliner-iterations=50")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
   set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} ${GNUCC_OPT} -w")

@@ -22,13 +22,12 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdContinue : public CmdFlowControl {
-public:
+struct CmdContinue : CmdFlowControl {
   CmdContinue() : CmdFlowControl(KindOfContinue) {}
 
-  virtual void help(DebuggerClient &client);
-  virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt);
-  virtual void onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt);
+  void help(DebuggerClient&) override;
+  void onSetup(DebuggerProxy&, CmdInterrupt&) override;
+  void onBeginInterrupt(DebuggerProxy&, CmdInterrupt&) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

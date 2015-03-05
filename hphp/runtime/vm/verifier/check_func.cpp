@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/verifier/check.h"
 
 #include "hphp/runtime/base/struct-array.h"
+#include "hphp/runtime/vm/native.h"
 
 #include "hphp/runtime/vm/verifier/cfg.h"
 #include "hphp/runtime/vm/verifier/util.h"
@@ -127,6 +128,36 @@ class FuncChecker {
   bool m_verbose;
   FlavorDesc* m_tmp_sig;
 };
+
+bool checkNativeFunc(const Func* func, bool verbose) {
+  auto const funcname = func->name();
+  auto const pc = func->preClass();
+  auto const clsname = pc ? pc->name() : nullptr;
+  auto const& info = Native::GetBuiltinFunction(funcname, clsname,
+                                                func->isStatic());
+
+  if (func->builtinFuncPtr() == Native::unimplementedWrapper) return true;
+
+  auto const& tc = func->returnTypeConstraint();
+  auto const message = Native::checkTypeFunc(info.sig, tc, func);
+
+  if (message) {
+    auto const tstr = info.sig.toString(clsname ? clsname->data() : nullptr,
+                                        funcname->data());
+    verify_error(func->unit(), func,
+      "<<__Native>> function %s%s%s does not match C++ function "
+      "signature (%s): %s\n",
+      clsname ? clsname->data() : "",
+      clsname ? "::" : "",
+      funcname->data(),
+      tstr.c_str(),
+      message
+    );
+    return false;
+  }
+
+  return true;
+}
 
 bool checkFunc(const Func* func, bool verbose) {
   if (verbose) {

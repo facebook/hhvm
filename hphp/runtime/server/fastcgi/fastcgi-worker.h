@@ -34,33 +34,32 @@ class FastCGITransportTraits;
  * the thread executing the request to read headers and POST data, as well as
  * send data back to the FastCGI client.
  */
-class FastCGIJob : public ServerJob {
-  friend class FastCGITransportTraits;
-public:
+struct FastCGIJob : public ServerJob {
   explicit FastCGIJob(std::shared_ptr<FastCGITransport> transport)
-    : m_transport(transport) {}
-  ~FastCGIJob() {}
+    : m_transport(transport)
+  {}
 
-  Transport* getTransport();
-
+  std::shared_ptr<FastCGITransport> getTransport() { return m_transport; }
   void getRequestStart(struct timespec *outReqStart);
 
 private:
-  std::shared_ptr<FastCGITransport> m_transport;
   struct timespec reqStart;
+  std::shared_ptr<FastCGITransport> m_transport;
 };
 
-class FastCGITransportTraits {
-public:
+struct FastCGITransportTraits {
   FastCGITransportTraits(std::shared_ptr<FastCGIJob> job,
-    void* context, int id);
-  ~FastCGITransportTraits();
+                         void* context,
+                         int id)
+    : m_server(reinterpret_cast<FastCGIServer*>(context))
+    , m_transport(job->getTransport())
+  {}
 
-  Server *getServer() const;
-  Transport *getTransport() const;
+  Server* getServer() const;
+  Transport* getTransport() const;
 
 private:
-  FastCGIServer *m_server;
+  FastCGIServer* m_server;
   std::shared_ptr<FastCGITransport> m_transport;
 };
 

@@ -22,16 +22,13 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdUp : public DebuggerCommand {
-public:
-  static int ParseNumber(DebuggerClient &client);
+struct CmdUp : DebuggerCommand {
+  static int ParseNumber(DebuggerClient&);
 
-public:
   CmdUp() : DebuggerCommand(KindOfUp) {}
 
-  virtual void help(DebuggerClient &client);
-  virtual void onClient(DebuggerClient &client);
-
+  void help(DebuggerClient&) override;
+  void onClient(DebuggerClient&) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

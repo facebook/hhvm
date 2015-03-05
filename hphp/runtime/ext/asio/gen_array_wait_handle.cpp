@@ -135,22 +135,11 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
 }
 
 void c_GenArrayWaitHandle::initialize(const Object& exception, const Array& deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
-
-  if (isInContext()) {
-    try {
-      child->enterContext(getContextIdx());
-    } catch (const Object& cycle_exception) {
-      putException(m_exception, cycle_exception.get());
-      m_iterPos = m_deps->iter_advance(m_iterPos);
-      incRefCount();
-      onUnblocked();
-      return;
-    }
-  }
 
   blockOn(child);
   incRefCount();
@@ -179,9 +168,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
 
       try {
         m_iterPos = arrIter.currentPos();
-        if (isInContext()) {
-          child_wh->enterContext(getContextIdx());
-        }
+        child_wh->enterContext(getContextIdx());
         detectCycle(child_wh);
         blockOn(child_wh);
         return;

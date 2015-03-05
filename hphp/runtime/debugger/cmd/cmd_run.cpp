@@ -15,8 +15,11 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_run.h"
+
 #include <memory>
 #include <vector>
+
+#include "hphp/runtime/debugger/debugger_client.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

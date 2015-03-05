@@ -122,9 +122,9 @@ void HHVM_FUNCTION(socket_close,
 String HHVM_FUNCTION(socket_strerror,
                      int errnum);
 int64_t HHVM_FUNCTION(socket_last_error,
-                      const Resource& socket = null_resource);
+                      const Variant& socket = null_variant);
 void HHVM_FUNCTION(socket_clear_error,
-                   const Resource& socket = null_resource);
+                   const Variant& socket = null_variant);
 Variant HHVM_FUNCTION(getaddrinfo,
                       const String& host,
                       const String& port,

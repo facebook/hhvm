@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 $arr = [];
 $ao = new ArrayObject($arr, ArrayObject::STD_PROP_LIST);

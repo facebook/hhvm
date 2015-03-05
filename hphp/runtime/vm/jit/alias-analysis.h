@@ -36,7 +36,7 @@ struct IRUnit;
  *
  * Right now we have a static maximum number of tracked locations---passes
  * using information from this module must be conservative about locations that
- * aren't assigned an id.  (E.g. via may_alias in AliasAnalysis.)
+ * aren't assigned an id.  (E.g. via calls to may_alias in AliasAnalysis.)
  */
 constexpr uint32_t kMaxTrackedALocs = 128;
 using ALocBits = std::bitset<kMaxTrackedALocs>;
@@ -91,6 +91,7 @@ struct AliasAnalysis {
   ALocBits all_elemIs;
   ALocBits all_frame;
   ALocBits all_stack;
+  ALocBits all_mistate;
 
   /*
    * Sets of alias classes that are used by must_alias.
@@ -98,25 +99,13 @@ struct AliasAnalysis {
    * Note: right now this is only populated for stack locations.  You will have
    * to add more to collect_aliases if you have a new use case.
    */
-  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> must_alias_map;
+  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stk_must_alias_map;
 
   /*
-   * Return a set of locations that we've assigned ids to that may be affected
-   * by a memory operation.  This function is used to get information about
-   * possible effects from an operation on a location that we aren't tracking.
-   * This is often needed for instructions that affect very large alias classes
-   * like ANonFrame.
-   *
-   * Also, note that because of the kMaxTrackedALocs limit, this location could
-   * be very 'concrete' (a prop on a known object for example).  But even in
-   * those cases, since it's not tracked, we have to use things like all_props
-   * to determine what it may alias.
-   *
-   * The precondition is just because you should generally be using the
-   * conflict set in ALocMeta if we have one for `acls'---it'll be much less
-   * conservative.
-   *
-   * Pre: find(acls) == folly::none
+   * Return a set of locations that we've assigned ids to that may alias a
+   * given AliasClass.  Note that (as usual) memory locations we haven't
+   * assigned bits to may still be affected, but this module only reports
+   * effects on locations assigned bits.
    */
   ALocBits may_alias(AliasClass acls) const;
 
@@ -124,6 +113,11 @@ struct AliasAnalysis {
    * Return a set of locations that we've assigned ids to that must be
    * contained in `acls'.  This function will conservatively return an empty
    * set.
+   *
+   * Right now, this function will work for specific AliasClasses we've
+   * assigned ids---for larger classes, it only supports stack ranges observed
+   * during alias collection, AFrameAny, and some cases of unions of those---if
+   * you need more, it will need some additions.
    */
   ALocBits must_alias(AliasClass acls) const;
 

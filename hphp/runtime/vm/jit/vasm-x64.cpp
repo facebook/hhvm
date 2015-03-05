@@ -83,12 +83,10 @@ private:
   void emit(fallback& i);
   void emit(fallbackcc i);
   void emit(kpcall& i);
-  void emit(ldpoint& i);
   void emit(load& i);
   void emit(mccall& i);
   void emit(mcprep& i);
   void emit(nothrow& i);
-  void emit(point& i) { points[i.p] = a->frontier(); }
   void emit(store& i);
   void emit(syncpoint i);
   void emit(unwind& i);
@@ -189,7 +187,7 @@ private:
   void emit(sqrtsd& i) { a->sqrtsd(i.s, i.d); }
   void emit(storedqu& i) { a->movdqu(i.s, i.m); }
   void emit(storeb& i) { a->storeb(i.s, i.m); }
-  void emit(storebi& i) { a->storeb(i.s, i.m); }
+  void emit(storebi& i);
   void emit(storel& i) { a->storel(i.s, i.m); }
   void emit(storeli& i) { a->storel(i.s, i.m); }
   void emit(storeqi& i) { a->storeq(i.s, i.m); }
@@ -453,23 +451,42 @@ void Vgen::emit(kpcall& i) {
   a->call(i.target);
 }
 
-void Vgen::emit(ldimmb& i) {
-  auto val = i.s.b();
-  assert_not_implemented(i.d.isGP());
-  if (val == 0 && !i.saveflags) {
-    a->xorb(i.d, i.d);
+static void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {
+  if (val == 0) {
+    a->pxor(d, d); // does not modify flags
   } else {
-    a->movb(val, i.d);
+    auto addr = mcg->allocLiteral(val);
+    a->movsd(rip[(intptr_t)addr], d);
+  }
+}
+
+void Vgen::emit(ldimmb& i) {
+  // ldimmb is for Vconst::Byte, which is treated as unsigned uint8_t
+  auto val = i.s.b();
+  if (i.d.isGP()) {
+    Vreg8 d = i.d;
+    if (val == 0 && !i.saveflags) {
+      a->xorb(d, d);
+    } else {
+      a->movb(val, d);
+    }
+  } else {
+    emitSimdImm(a, uint8_t(val), i.d);
   }
 }
 
 void Vgen::emit(ldimml& i) {
+  // ldimml is for Vconst::Long, which is treated as unsigned uint32_t
   auto val = i.s.l();
-  assert_not_implemented(i.d.isGP());
-  if (val == 0 && !i.saveflags) {
-    a->xorl(i.d, i.d);
+  if (i.d.isGP()) {
+    Vreg32 d = i.d;
+    if (val == 0 && !i.saveflags) {
+      a->xorl(d, d);
+    } else {
+      a->movl(val, d);
+    }
   } else {
-    a->movl(val, i.d);
+    emitSimdImm(a, uint32_t(val), i.d);
   }
 }
 
@@ -486,17 +503,9 @@ void Vgen::emit(ldimmq& i) {
     } else {
       a->emitImmReg(i.s, i.d);
     }
-  } else if (i.s.q() == 0) {
-    a->pxor(i.d, i.d); // does not modify flags
   } else {
-    auto addr = mcg->allocLiteral(i.s.q());
-    a->movsd(rip[(intptr_t)addr], i.d);
+    emitSimdImm(a, val, i.d);
   }
-}
-
-void Vgen::emit(ldpoint& i) {
-  ldpoints.push_back({a->frontier(), i.s});
-  a->lea(rip[0], i.d);
 }
 
 void Vgen::emit(load& i) {
@@ -533,6 +542,11 @@ void Vgen::emit(mcprep& i) {
   after[-1] = (movAddrUInt << 1) | 1;
   mcg->cgFixups().m_addressImmediates.insert(
     reinterpret_cast<TCA>(~movAddrUInt));
+}
+
+void Vgen::emit(storebi& i) {
+  if (i.m.seg == Vptr::FS) a->fs();
+  a->storeb(i.s, i.m.mr());
 }
 
 void Vgen::emit(store& i) {

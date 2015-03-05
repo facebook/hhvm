@@ -165,29 +165,29 @@ void raise_hack_strict(HackStrictOption option, const char *ini_setting,
 }
 
 /**
- * Warnings are currently sampled. raise_debugging can help when
+ * Warnings are currently sampled. raise_warning_unsampled can help when
  * migrating warnings to errors.
  *
  * In general, RaiseDebuggingFrequency should be kept at 1.
  */
-static int64_t g_raise_debugging_counter = 0;
+static int64_t g_raise_warning_unsampled_counter = 0;
 
-void raise_debugging(const std::string &msg) {
+void raise_warning_unsampled(const std::string &msg) {
   if (RuntimeOption::RaiseDebuggingFrequency <= 0 ||
-      (g_raise_debugging_counter++) %
+      (g_raise_warning_unsampled_counter++) %
       RuntimeOption::RaiseDebuggingFrequency != 0) {
     return;
   }
   raise_message(ErrorConstants::ErrorModes::WARNING, false, msg);
 }
 
-void raise_debugging(const char *fmt, ...) {
+void raise_warning_unsampled(const char *fmt, ...) {
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-  raise_debugging(msg);
+  raise_warning_unsampled(msg);
 }
 
 void raise_notice(const std::string &msg) {

@@ -66,7 +66,7 @@ Variant HHVM_FUNCTION(hphp_get_timers, bool get_as_float = true);
 Variant HHVM_FUNCTION(hphp_output_global_state, bool serialize = true);
 int64_t HHVM_FUNCTION(hphp_instruction_counter, void);
 Variant HHVM_FUNCTION(hphp_get_hardware_counters, void);
-bool HHVM_FUNCTION(hphp_set_hardware_events, const String& events);
+bool HHVM_FUNCTION(hphp_set_hardware_events, const Variant& events);
 void HHVM_FUNCTION(hphp_clear_hardware_events, void);
 
 ///////////////////////////////////////////////////////////////////////////////

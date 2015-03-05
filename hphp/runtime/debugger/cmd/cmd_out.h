@@ -22,15 +22,16 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdOut : public CmdFlowControl {
-public:
+struct CmdOut : CmdFlowControl {
   CmdOut() : CmdFlowControl(KindOfOut) {}
 
-  virtual void help(DebuggerClient &client);
-  virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt);
-  virtual void onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt);
+  void help(DebuggerClient&) override;
+  void onSetup(DebuggerProxy&, CmdInterrupt&) override;
+
+  void onBeginInterrupt(DebuggerProxy&, CmdInterrupt&) override;
+
 private:
-  bool m_skippingOverPopR = false;
+  bool m_skippingOverPopR{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

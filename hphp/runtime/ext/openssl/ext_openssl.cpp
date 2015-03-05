@@ -143,8 +143,9 @@ public:
       snprintf(default_ssl_conf_filename, sizeof(default_ssl_conf_filename),
                "%s/%s", X509_get_default_cert_area(), "openssl.cnf");
     } else {
-      strncpy(default_ssl_conf_filename, config_filename,
-              sizeof(default_ssl_conf_filename));
+      always_assert(
+        strlen(config_filename) < sizeof(default_ssl_conf_filename));
+      strcpy(default_ssl_conf_filename, config_filename);
     }
   }
 
@@ -250,9 +251,8 @@ public:
     EVP_PKEY *key = NULL;
 
     if (var.isResource()) {
-      auto cert = SmartPtr<Certificate>(
-        var.toResource().getTyped<Certificate>(true, true));
-      auto key = SmartPtr<Key>(var.toResource().getTyped<Key>(true, true));
+      auto cert = dyn_cast_or_null<Certificate>(var);
+      auto key = dyn_cast_or_null<Key>(var);
       if (!cert && !key) return nullptr;
       if (key) {
         bool is_priv = key->isPrivate();
@@ -315,6 +315,8 @@ public:
     assert(m_csr);
   }
 
+  X509_REQ *csr() { return m_csr; }
+
   ~CSRequest() {
     // X509_REQ_free(nullptr) is a no-op
     X509_REQ_free(m_csr);
@@ -326,31 +328,31 @@ public:
 
   DECLARE_RESOURCE_ALLOCATION(CSRequest)
 
-  static X509_REQ *Get(const Variant& var, Resource &ocsr) {
-    ocsr = Get(var);
-    CSRequest *csr = ocsr.getTyped<CSRequest>(true);
-    if (csr == NULL || csr->m_csr == NULL) {
+  static SmartPtr<CSRequest> Get(const Variant& var) {
+    auto csr = cast_or_null<CSRequest>(GetRequest(var));
+    if (!csr || !csr->m_csr) {
       raise_warning("cannot get CSR");
       return NULL;
     }
-    return csr->m_csr;
+    return csr;
   }
 
-  static Resource Get(const Variant& var) {
+private:
+  static SmartPtr<CSRequest> GetRequest(const Variant& var) {
     if (var.isResource()) {
-      return var.toResource();
+      return dyn_cast_or_null<CSRequest>(var);
     }
     if (var.isString() || var.isObject()) {
       BIO *in = Certificate::ReadData(var);
-      if (in == nullptr) return Resource();
+      if (in == nullptr) return nullptr;
 
       X509_REQ *csr = PEM_read_bio_X509_REQ(in, NULL,NULL,NULL);
       BIO_free(in);
       if (csr) {
-        return Resource(newres<CSRequest>(csr));
+        return makeSmartPtr<CSRequest>(csr);
       }
     }
-    return Resource();
+    return nullptr;
   }
 };
 
@@ -950,9 +952,8 @@ static bool php_openssl_make_REQ(struct php_x509_request *req, X509_REQ *csr,
 bool HHVM_FUNCTION(openssl_csr_export_to_file, const Variant& csr,
                                                const String& outfilename,
                                                bool notext /* = true */) {
-  Resource ocsr;
-  X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
-  if (pcsr == NULL) return false;
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) return false;
 
   BIO *bio_out = BIO_new_file((char*)outfilename.data(), "w");
   if (bio_out == NULL) {
@@ -961,25 +962,24 @@ bool HHVM_FUNCTION(openssl_csr_export_to_file, const Variant& csr,
   }
 
   if (!notext) {
-    X509_REQ_print(bio_out, pcsr);
+    X509_REQ_print(bio_out, pcsr->csr());
   }
-  PEM_write_bio_X509_REQ(bio_out, pcsr);
+  PEM_write_bio_X509_REQ(bio_out, pcsr->csr());
   BIO_free(bio_out);
   return true;
 }
 
 bool HHVM_FUNCTION(openssl_csr_export, const Variant& csr, VRefParam out,
                                        bool notext /* = true */) {
-  Resource ocsr;
-  X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
-  if (pcsr == NULL) return false;
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) return false;
 
   BIO *bio_out = BIO_new(BIO_s_mem());
   if (!notext) {
-    X509_REQ_print(bio_out, pcsr);
+    X509_REQ_print(bio_out, pcsr->csr());
   }
 
-  if (PEM_write_bio_X509_REQ(bio_out, pcsr)) {
+  if (PEM_write_bio_X509_REQ(bio_out, pcsr->csr())) {
     BUF_MEM *bio_buf;
     BIO_get_mem_ptr(bio_out, &bio_buf);
     out = String((char*)bio_buf->data, bio_buf->length, CopyString);
@@ -992,20 +992,18 @@ bool HHVM_FUNCTION(openssl_csr_export, const Variant& csr, VRefParam out,
 }
 
 Variant HHVM_FUNCTION(openssl_csr_get_public_key, const Variant& csr) {
-  Resource ocsr;
-  X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
-  if (pcsr == NULL) return false;
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) return false;
 
-  return Resource(newres<Key>(X509_REQ_get_pubkey(pcsr)));
+  return Variant(makeSmartPtr<Key>(X509_REQ_get_pubkey(pcsr->csr())));
 }
 
 Variant HHVM_FUNCTION(openssl_csr_get_subject, const Variant& csr,
                       bool use_shortnames /* = true */) {
-  Resource ocsr;
-  X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
-  if (pcsr == NULL) return false;
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) return false;
 
-  X509_NAME *subject = X509_REQ_get_subject_name(pcsr);
+  X509_NAME *subject = X509_REQ_get_subject_name(pcsr->csr());
   Array ret = Array::Create();
   add_assoc_name_entry(ret, NULL, subject, use_shortnames);
   return ret;
@@ -1055,7 +1053,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
         } else {
           ret = true;
           if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
-            ret = Resource(newres<CSRequest>(csr));
+            ret = makeSmartPtr<CSRequest>(csr);
             csr = NULL;
           } else {
             raise_warning("Error signing request");
@@ -1078,9 +1076,8 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
                                         const Variant& priv_key, int days,
                                         const Variant& configargs /* = null */,
                                         int serial /* = 0 */) {
-  Resource ocsr;
-  X509_REQ *pcsr = CSRequest::Get(csr, ocsr);
-  if (pcsr == NULL) return false;
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) return false;
 
   SmartPtr<Certificate> ocert;
   if (!cacert.isNull()) {
@@ -1116,13 +1113,13 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
 
   /* Check that the request matches the signature */
   EVP_PKEY *key;
-  key = X509_REQ_get_pubkey(pcsr);
+  key = X509_REQ_get_pubkey(pcsr->csr());
   if (key == NULL) {
     raise_warning("error unpacking public key");
     goto cleanup;
   }
   int i;
-  i = X509_REQ_verify(pcsr, key);
+  i = X509_REQ_verify(pcsr->csr(), key);
   if (i < 0) {
     raise_warning("Signature verification problems");
     goto cleanup;
@@ -1145,7 +1142,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
     goto cleanup;
   }
   ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
-  X509_set_subject_name(new_cert, X509_REQ_get_subject_name(pcsr));
+  X509_set_subject_name(new_cert, X509_REQ_get_subject_name(pcsr->csr()));
 
   if (cert == NULL) {
     cert = new_cert;
@@ -1161,7 +1158,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
   }
   if (req.extensions_section) {
     X509V3_CTX ctx;
-    X509V3_set_ctx(&ctx, cert, new_cert, pcsr, NULL, 0);
+    X509V3_set_ctx(&ctx, cert, new_cert, pcsr->csr(), nullptr, 0);
     X509V3_set_conf_lhash(&ctx, req.req_config);
     if (!X509V3_EXT_add_conf(req.req_config, &ctx, (char*)req.extensions_section,
                              new_cert)) {
@@ -1822,7 +1819,7 @@ static void add_bignum_as_string(Array &arr,
 }
 
 Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
-  EVP_PKEY *pkey = key.getTyped<Key>()->m_key;
+  EVP_PKEY *pkey = cast<Key>(key)->m_key;
   BIO *out = BIO_new(BIO_s_mem());
   PEM_write_bio_PUBKEY(out, pkey);
   char *pbio;
@@ -1901,7 +1898,7 @@ Resource HHVM_FUNCTION(openssl_pkey_new,
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings) &&
       req.generatePrivateKey()) {
-    ret = Resource(newres<Key>(req.priv_key));
+    ret = Resource(makeSmartPtr<Key>(req.priv_key));
   }
 
   php_openssl_dispose_config(&req);

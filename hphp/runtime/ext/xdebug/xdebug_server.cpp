@@ -36,7 +36,7 @@ namespace HPHP {
 // Helpers
 
 // Globals
-const static StaticString
+const StaticString
   s_SERVER("_SERVER"),
   s_GET("_GET"),
   s_COOKIE("_COOKIE");
@@ -132,7 +132,7 @@ const char* getXDebugReasonString(XDebugServer::Reason reason) {
 // Construction/Destruction
 
 // Properties of $_SERVER to grab the client addr from
-const static StaticString
+const StaticString
   s_HTTP_X_FORWARDED_FOR("HTTP_X_FORWARDED_FOR"),
   s_REMOTE_ADDR("REMOTE_ADDR");
 
@@ -313,7 +313,7 @@ void XDebugServer::closeLog() {
 // Statics
 
 // Server session properties
-static const StaticString
+const StaticString
   s_SESSION_START("XDEBUG_SESSION_START"),
   s_SESSION_STOP("XDEBUG_SESSION_STOP"),
   s_SESSION("XDEBUG_SESSION");
@@ -405,7 +405,7 @@ void XDebugServer::detach() {
 // Header for sent messages
 #define XML_MSG_HEADER "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n"
 
-static const StaticString
+const StaticString
   s_SCRIPT_FILENAME("SCRIPT_FILENAME"), // Needed $_SERVER variable
   s_DBGP_COOKIE("DBGP_COOKIE"); // Needed $_ENV variable
 
@@ -580,7 +580,7 @@ void XDebugServer::sendMessage(xdebug_xml_node& xml) {
 // Commands
 
 // elements in ExecutionContext::getCallerInfo
-const static StaticString
+const StaticString
   s_FILE("file"),
   s_LINE("line");
 
@@ -591,7 +591,7 @@ bool XDebugServer::breakpoint(const Variant& filename,
   setStatus(Status::BREAK, Reason::OK);
 
   // Initialize the response node
-  xdebug_xml_node* response = xdebug_xml_node_init("response");
+  auto response = xdebug_xml_node_init("response");
   addXmlns(*response);
   addStatus(*response);
   if (m_lastCommand != nullptr) {
@@ -599,20 +599,27 @@ bool XDebugServer::breakpoint(const Variant& filename,
   }
 
   // Grab the c strings
-  char* filename_str = filename.isNull() ?
-    nullptr : filename.toString().get()->mutableData();
-  char* exception_str = exception.isNull() ?
-    nullptr : exception.toString().get()->mutableData();
-  char* message_str = message.isNull() ?
-    nullptr : message.toString().get()->mutableData();
-  char* line_str = xdebug_sprintf("%d", line);
+  auto to_c_str = [] (const Variant& var) {
+    return !var.isString() ? nullptr : var.toString().data();
+  };
+
+  auto filename_str = to_c_str(filename);
+  auto exception_str = to_c_str(exception);
+  auto message_str = to_c_str(message);
+  auto line_str = xdebug_sprintf("%d", line);
 
   // Create the message node
-  xdebug_xml_node* msg = xdebug_xml_node_init("xdebug:message");
+  auto msg = xdebug_xml_node_init("xdebug:message");
   xdebug_xml_add_attribute_ex(msg, "lineno", line_str, 0, 1);
   if (filename_str != nullptr) {
     filename_str = XDebugUtils::pathToUrl(filename_str); // output file format
-    xdebug_xml_add_attribute_ex(msg, "filename", filename_str, 0, 1);
+    xdebug_xml_add_attribute_ex(
+      msg,
+      "filename",
+      filename_str,
+      0 /* freeAttr */,
+      1 /* freeVal */
+    );
   }
   if (exception_str != nullptr) {
     xdebug_xml_add_attribute(msg, "exception", exception_str);

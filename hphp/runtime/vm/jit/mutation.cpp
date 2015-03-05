@@ -49,7 +49,7 @@ void cloneToBlock(const BlockList& rpoBlocks,
     assert(!it->isControlFlow());
 
     FTRACE(5, "cloneToBlock({}): {}\n", target->id(), it->toString());
-    auto const newInst = unit.cloneInstruction(&*it);
+    auto const newInst = unit.clone(&*it);
 
     if (auto const numDests = newInst->numDsts()) {
       for (int i = 0; i < numDests; ++i) {
@@ -116,18 +116,8 @@ void retypeDst(IRInstruction* inst, int num) {
     return;
   }
 
-  // TODO: Task #6058731: remove this check and make things work with Bottom.
-  //
-  // Update the type of the SSATmp.  However, avoid generating type Bottom,
-  // which can happen when refining type of CheckType and AssertType.  In
-  // such cases, the code will be unreachable anyway.
   auto newType = outputType(inst, num);
-  if (newType != Type::Bottom) {
-    ssa->setType(newType);
-  } else {
-    always_assert(inst->op() == CheckType || inst->op() == AssertType ||
-                  inst->op() == AssertNonNull);
-  }
+  ssa->setType(newType);
 }
 }
 
@@ -136,7 +126,7 @@ void retypeDests(IRInstruction* inst, const IRUnit* unit) {
     auto const ssa = inst->dst(i);
     auto const oldType = ssa->type();
     retypeDst(inst, i);
-    if (!ssa->type().equals(oldType)) {
+    if (ssa->type() != oldType) {
       ITRACE(5, "reflowTypes: retyped {} in {}\n", oldType.toString(),
              inst->toString());
     }

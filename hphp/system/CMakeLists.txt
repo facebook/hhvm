@@ -15,6 +15,9 @@ set(CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/class_map.cpp"
                 "systemlib.cpp")
 
 add_library(hphp_system STATIC ${CXX_SOURCES})
+if (ENABLE_ASYNC_MYSQL)
+  add_dependencies(hphp_system webscalesqlclient)
+endif ()
 
 auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
 HHVM_PUBLIC_HEADERS(system ${files})

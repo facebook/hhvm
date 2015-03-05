@@ -808,8 +808,11 @@ static void unserializeProp(VariableUnserializer* uns,
     t = &tvAsVariant(lookup.prop);
   }
 
-  t->unserialize(uns);
+  if (UNLIKELY(IS_REFCOUNTED_TYPE(t->getRawType()))) {
+    uns->putInOverwrittenList(*t);
+  }
 
+  t->unserialize(uns);
   if (!RuntimeOption::RepoAuthoritative) return;
   if (!Repo::get().global().HardPrivatePropInference) return;
 
@@ -989,10 +992,10 @@ void Variant::unserialize(VariableUnserializer *uns,
     break;
   case 'a':
     {
-      // check stack depth to avoid overflow
-      check_native_recursion();
+      // Check stack depth to avoid overflow.
+      check_recursion_throw();
 
-      Array v = Array::Create();
+      auto v = Array::Create();
       v.unserialize(uns);
       operator=(v);
       return; // array has '}' terminating
@@ -1090,8 +1093,8 @@ void Variant::unserialize(VariableUnserializer *uns,
       operator=(obj);
 
       if (size > 0) {
-        // check stack depth to avoid overflow
-        check_native_recursion();
+        // Check stack depth to avoid overflow.
+        check_recursion_throw();
 
         if (type == 'O') {
           // Collections are not allowed

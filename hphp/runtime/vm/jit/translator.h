@@ -114,7 +114,7 @@ struct TransContext {
 
   TransID transID;  // May be kInvalidTransID if not for a real translation.
   Offset initBcOffset;
-  Offset initSpOffset;
+  FPAbsOffset initSpOffset;
   bool resumed;
   const Func* func;
 
@@ -632,13 +632,9 @@ inline bool isNativeImplCall(const Func* funcd, int numArgs) {
 }
 
 /*
- * The offset, in cells, of this location from its base pointer.
- *
- * The Func* is needed to see how many locals to skip for iterators.  If the
- * current frame pointer is not the context you're looking for, be sure to pass
- * in a non-default `f'.
+ * The offset, in cells, of this location from the frame pointer.
  */
-int locPhysicalOffset(Location l, const Func* f = nullptr);
+int locPhysicalOffset(int32_t localIndex);
 
 /*
  * Take a NormalizedInstruction and turn it into a call to the appropriate ht

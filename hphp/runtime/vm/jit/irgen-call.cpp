@@ -15,8 +15,10 @@
 */
 #include "hphp/runtime/vm/jit/irgen-call.h"
 
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
@@ -137,7 +139,9 @@ void fpushObjMethodUnknown(HTS& env,
 
   gen(env,
       LdObjMethod,
-      LdObjMethodData { offsetFromSP(env, 0), methodName, shouldFatal },
+      LdObjMethodData {
+        offsetFromIRSP(env, BCSPOffset{0}), methodName, shouldFatal
+      },
       objCls,
       sp(env));
 }
@@ -149,8 +153,7 @@ void fpushObjMethodCommon(HTS& env,
                           bool shouldFatal) {
   SSATmp* objOrCls = obj;
   const Class* baseClass = nullptr;
-  if (obj->type().isSpecialized()) {
-    auto cls = obj->type().getClass();
+  if (auto cls = obj->type().clsSpec().cls()) {
     if (!env.irb->constrainValue(obj, TypeConstraint(cls).setWeak())) {
       // If we know the class without having to specialize a guard any further,
       // use it.
@@ -271,8 +274,8 @@ void fpushFuncArr(HTS& env, int32_t numParams) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  gen(env, LdArrFuncCtx, StackOffset { offsetFromSP(env, 0) }, arr, sp(env),
-    thisAR);
+  gen(env, LdArrFuncCtx, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    arr, sp(env), thisAR);
   gen(env, DecRef, arr);
 }
 
@@ -310,8 +313,8 @@ void fpushCufUnknown(HTS& env, Op op, int32_t numParams) {
 
   auto const opcode = callable->isA(Type::Arr) ? LdArrFPushCuf
                                                : LdStrFPushCuf;
-  gen(env, opcode, StackOffset { offsetFromSP(env, 0) }, callable, sp(env),
-    fp(env));
+  gen(env, opcode, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    callable, sp(env), fp(env));
   gen(env, DecRef, callable);
 }
 
@@ -352,7 +355,7 @@ SSATmp* clsMethodCtx(HTS& env, const Func* callee, const Class* cls) {
 void implFPushCufOp(HTS& env, Op op, int32_t numArgs) {
   const bool safe = op == OpFPushCufSafe;
   bool forward = op == OpFPushCufF;
-  SSATmp* callable = topC(env, safe ? 1 : 0);
+  SSATmp* callable = topC(env, BCSPOffset{safe ? 1 : 0});
 
   const Class* cls = nullptr;
   StringData* invName = nullptr;
@@ -452,7 +455,7 @@ void fpushActRec(HTS& env,
   auto const returnSPOff = env.irb->syncedSpLevel();
 
   ActRecInfo info;
-  info.spOffset = offsetFromSP(env, -int32_t{kNumActRecCells});
+  info.spOffset = offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}});
   info.numArgs = numArgs;
   info.invName = invName;
   gen(
@@ -480,7 +483,7 @@ void emitFPushCufIter(HTS& env, int32_t numParams, int32_t itId) {
     env,
     CufIterSpillFrame,
     FPushCufData {
-      offsetFromSP(env, -int32_t{kNumActRecCells}),
+      offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}}),
       static_cast<uint32_t>(numParams),
       itId
     },
@@ -702,8 +705,9 @@ void emitFPushClsMethod(HTS& env, int32_t numParams) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  gen(env, LookupClsMethod, StackOffset { offsetFromSP(env, 0) }, clsVal,
-    methVal, sp(env), fp(env));
+  gen(env, LookupClsMethod,
+    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    clsVal, methVal, sp(env), fp(env));
   gen(env, DecRef, methVal);
 }
 
@@ -711,7 +715,7 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
   auto const exitBlock = makeExitSlow(env);
 
   auto classTmp = top(env, Type::Cls);
-  auto methodTmp = topC(env, 1, DataTypeGeneric);
+  auto methodTmp = topC(env, BCSPOffset{1}, DataTypeGeneric);
   assert(classTmp->isA(Type::Cls));
   if (!classTmp->isConst() || !methodTmp->isConst(Type::Str)) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
@@ -772,12 +776,26 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * All fpass instructions spill the stack after they execute, because we are
+ * sure to need that value in memory, regardless of whether we side-exit or
+ * throw.  At the level of HHBC semantics, it's illegal to pop them from the
+ * stack until we've left the FPI region, and we will be spilling the whole
+ * stack when we get to the FCall{D,} at the end of the region.  This should
+ * also potentially reduce the number of live registers during call sequences.
+ *
+ * Note: there is a general problem with the spillStack mechanism, in that it
+ * may sink stores that are not profitable to sink, but in this case we can
+ * work around it easily.
+ */
+
 void emitFPassL(HTS& env, int32_t argNum, int32_t id) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     emitVGetL(env, id);
   } else {
     emitCGetL(env, id);
   }
+  spillStack(env);
 }
 
 void emitFPassS(HTS& env, int32_t argNum) {
@@ -786,6 +804,7 @@ void emitFPassS(HTS& env, int32_t argNum) {
   } else {
     emitCGetS(env);
   }
+  spillStack(env);
 }
 
 void emitFPassG(HTS& env, int32_t argNum) {
@@ -794,6 +813,7 @@ void emitFPassG(HTS& env, int32_t argNum) {
   } else {
     emitCGetG(env);
   }
+  spillStack(env);
 }
 
 void emitFPassR(HTS& env, int32_t argNum) {
@@ -802,6 +822,7 @@ void emitFPassR(HTS& env, int32_t argNum) {
   }
 
   implUnboxR(env);
+  spillStack(env);
 }
 
 void emitFPassM(HTS& env, int32_t, int x) {
@@ -810,6 +831,7 @@ void emitFPassM(HTS& env, int32_t, int x) {
   } else {
     emitCGetM(env, x);
   }
+  spillStack(env);
 }
 
 void emitUnboxR(HTS& env) { implUnboxR(env); }
@@ -823,6 +845,7 @@ void emitFPassV(HTS& env, int32_t argNum) {
   auto const tmp = popV(env);
   pushIncRef(env, gen(env, LdRef, Type::InitCell, tmp));
   gen(env, DecRef, tmp);
+  spillStack(env);
 }
 
 void emitFPassCE(HTS& env, int32_t argNum) {
@@ -830,6 +853,7 @@ void emitFPassCE(HTS& env, int32_t argNum) {
     // Need to raise an error
     PUNT(FPassCE-byRef);
   }
+  spillStack(env);
 }
 
 void emitFPassCW(HTS& env, int32_t argNum) {
@@ -837,6 +861,7 @@ void emitFPassCW(HTS& env, int32_t argNum) {
     // Need to raise a warning
     PUNT(FPassCW-byRef);
   }
+  spillStack(env);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -844,7 +869,7 @@ void emitFPassCW(HTS& env, int32_t argNum) {
 void emitFCallArray(HTS& env) {
   spillStack(env);
   auto const data = CallArrayData {
-    offsetFromSP(env, 0),
+    offsetFromIRSP(env, BCSPOffset{0}),
     bcOff(env),
     nextBcOff(env),
     callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
@@ -872,7 +897,7 @@ void emitFCall(HTS& env, int32_t numParams) {
     env,
     Call,
     CallData {
-      offsetFromSP(env, 0),
+      offsetFromIRSP(env, BCSPOffset{0}),
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,

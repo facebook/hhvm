@@ -60,6 +60,7 @@ struct VMState {
   ActRec* firstAR;
   TypedValue* sp;
   MInstrState mInstrState;
+  ActRec* jitCalledFrame;
 };
 
 enum class CallType {

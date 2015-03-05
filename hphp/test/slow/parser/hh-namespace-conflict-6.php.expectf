@@ -1,0 +1,1 @@
+Fatal error: Cannot use Baz\string as string because the name was implicitly used on line 3; implicit use of names from the HH namespace can be suppressed by adding an explicit `use' statement earlier in the current namespace block: (Line: 4, Char: 17) in %s on line 4

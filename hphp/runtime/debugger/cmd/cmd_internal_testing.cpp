@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_internal_testing.h"
 
+#include "hphp/runtime/debugger/debugger_client.h"
+
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 

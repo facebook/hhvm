@@ -1384,8 +1384,7 @@ static void HHVM_METHOD(GMP, unserialize,
 }
 
 
-static Array HHVM_METHOD(GMP, __debugInfo,
-                         const Variant& data) {
+static Array HHVM_METHOD(GMP, __debugInfo) {
   auto gmpObjectData = Native::data<GMPData>(this_);
   Array ret = this_->toArray(true);
 

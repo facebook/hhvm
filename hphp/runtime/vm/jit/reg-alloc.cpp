@@ -32,6 +32,8 @@ using NativeCalls::CallMap;
 TRACE_SET_MOD(hhir);
 
 PhysReg forceAlloc(const SSATmp& tmp) {
+  if (tmp.type() <= Type::Bottom) return InvalidReg;
+
   auto inst = tmp.inst();
   auto opc = inst->op();
 
@@ -40,7 +42,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   // measurably impact performance, so keep forcing things into rVmSp for
   // now. We should be able to remove this completely once the necessary
   // improvements are made to vxls.
-  auto const forceStkPtrs = arch() != Arch::X64 || !RuntimeOption::EvalJitLLVM;
+  auto const forceStkPtrs = arch() != Arch::X64 || !mcg->useLLVM();
 
   if (forceStkPtrs && tmp.isA(Type::StkPtr)) {
     assert_flog(
@@ -65,10 +67,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
     return mcg->backEnd().rVmFp();
   }
 
-  if (opc == DefMIStateBase) {
-    assert(tmp.isA(Type::PtrToGen));
-    return mcg->backEnd().rVmTl();
-  }
   return InvalidReg;
 }
 

@@ -47,6 +47,7 @@ TRACE_SET_MOD(region);
 typedef hphp_hash_set<SrcKey, SrcKey::Hasher> InterpSet;
 
 namespace {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct RegionFormer {
@@ -72,13 +73,17 @@ private:
   uint32_t m_numJmps;
   uint32_t m_numBCInstrs{0};
   uint32_t m_pendingInlinedInstrs{0};
+  // This map memoizes reachability of IR blocks during tracelet
+  // formation.  A block won't have it's reachability stored in this
+  // map until it's been computed.
+  jit::hash_map<unsigned,bool> m_irReachableBlocks;
 
   InliningDecider& m_inl;
   const bool m_profiling;
 
   const Func* curFunc() const;
   const Unit* curUnit() const;
-  Offset curSpOffset() const;
+  FPAbsOffset curSpOffset() const;
   bool resumed() const;
 
   bool prepareInstruction();
@@ -88,6 +93,7 @@ private:
   bool tryInline(uint32_t& instrSize);
   void recordDependencies();
   void truncateLiterals();
+  bool irBlockReachable(Block* block);
 };
 
 RegionFormer::RegionFormer(const RegionContext& ctx,
@@ -123,7 +129,7 @@ const Unit* RegionFormer::curUnit() const {
   return irgen::curUnit(m_hts);
 }
 
-Offset RegionFormer::curSpOffset() const {
+FPAbsOffset RegionFormer::curSpOffset() const {
   return irgen::logicalStackDepth(m_hts);
 }
 
@@ -131,7 +137,27 @@ bool RegionFormer::resumed() const {
   return irgen::resumed(m_hts);
 }
 
+bool RegionFormer::irBlockReachable(Block* block) {
+  auto const blockId = block->id();
+  auto it = m_irReachableBlocks.find(blockId);
+  if (it != m_irReachableBlocks.end()) return it->second;
+  bool result = block == m_hts.irb->unit().entry();
+  for (auto& pred : block->preds()) {
+    if (irBlockReachable(pred.from())) {
+      result = true;
+      break;
+    }
+  }
+  m_irReachableBlocks[blockId] = result;
+  return result;
+}
+
 RegionDescPtr RegionFormer::go() {
+  SCOPE_ASSERT_DETAIL("Tracelet Selector") {
+    return folly::sformat("Region:\n{}\n\nUnit:\n{}\n",
+                          *m_region, m_hts.irb->unit());
+  };
+
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
     if (t <= Type::Cls) {
@@ -217,6 +243,24 @@ RegionDescPtr RegionFormer::go() {
       assert(m_sk.func() == curFunc());
     }
 
+    auto const curIRBlock = m_hts.irb->curBlock();
+    if (!irBlockReachable(curIRBlock)) {
+      FTRACE(1,
+        "selectTracelet: tracelet broken due to unreachable code (block {})\n",
+        curIRBlock->id());
+      break;
+    }
+
+    if (!curIRBlock->empty()) {
+      auto& lastInst = curIRBlock->back();
+      if (lastInst.isTerminal() &&
+          (lastInst.taken() == nullptr || lastInst.taken()->isCatch())) {
+        FTRACE(1, "selectTracelet: tracelet broken due to terminal/non-jumpy "
+               "IR instruction: {}\n", lastInst.toString());
+        break;
+      }
+    }
+
     if (isFCallStar(m_inst.op())) m_arStates.back().pop();
   }
 
@@ -244,6 +288,17 @@ RegionDescPtr RegionFormer::go() {
     );
 
     recordDependencies();
+
+    // Make sure that the IR unit contains a main exit corresponding
+    // to the last bytecode instruction in the region.  Note that this
+    // check has to happen before the call to truncateLiterals()
+    // because that updates the region but not the IR unit.
+    if (!m_region->blocks().back()->empty()) {
+      auto lastSk = m_region->lastSrcKey();
+      always_assert_flog(findMainExitBlock(m_hts.irb->unit(), lastSk),
+                         "No main exits found!");
+    }
+
     truncateLiterals();
   }
 
@@ -304,8 +359,8 @@ bool RegionFormer::prepareInstruction() {
       (irgen::logicalStackDepth(m_hts) - m_ctx.spOffset);
     FTRACE(5, "entryArDelta info: {} {} {}\n",
       instrSpToArDelta((Op*)m_inst.pc()),
-      irgen::logicalStackDepth(m_hts),
-      m_ctx.spOffset);
+      irgen::logicalStackDepth(m_hts).offset,
+      m_ctx.spOffset.offset);
     try {
       m_inst.preppedByRef = m_arStates.back().checkByRef(argNum, entryArDelta,
                                                          &m_refDeps);
@@ -357,7 +412,7 @@ bool RegionFormer::traceThroughJmp() {
   // inputs while inlining.
   if (!isUnconditionalJmp(m_inst.op()) &&
       !(inlining && isConditionalJmp(m_inst.op()) &&
-        irgen::publicTopType(m_hts, 0).isConst())) {
+        irgen::publicTopType(m_hts, BCSPOffset{0}).isConst())) {
     return false;
   }
 
@@ -436,10 +491,10 @@ bool RegionFormer::tryInline(uint32_t& instrSize) {
   RegionContext ctx;
   ctx.func = callee;
   ctx.bcOffset = callee->getEntryForNumArgs(numArgs);
-  ctx.spOffset = callee->numSlotsInFrame();
+  ctx.spOffset = FPAbsOffset{safe_cast<int32_t>(callee->numSlotsInFrame())};
   ctx.resumed = false;
   for (int i = 0; i < numArgs; ++i) {
-    auto type = irgen::publicTopType(m_hts, i);
+    auto type = irgen::publicTopType(m_hts, BCSPOffset{i});
     uint32_t paramIdx = numArgs - 1 - i;
     ctx.liveTypes.push_back({RegionDesc::Location::Local{paramIdx}, type});
   }
@@ -499,7 +554,7 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
   auto& rtt = m_inst.inputs[i]->rtt;
   if (ii.dontGuard) return true;
 
-  if (m_profiling && rtt.isBoxed() &&
+  if (m_profiling && rtt <= Type::BoxedCell &&
       (m_region->blocks().size() > 1 || !m_region->entry()->empty())) {
     // We don't want side exits when profiling, so only allow instructions that
     // consume refs at the beginning of the region.
@@ -513,11 +568,13 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
     return false;
   }
 
-  if (!rtt.isBoxed() || m_inst.ignoreInnerType || ii.dontGuardInner) {
+  if (!(rtt <= Type::BoxedCell) ||
+      m_inst.ignoreInnerType ||
+      ii.dontGuardInner) {
     return true;
   }
 
-  if (!rtt.innerType().isKnownDataType()) {
+  if (!rtt.inner().isKnownDataType()) {
     // Trying to consume a boxed value without a guess for the inner type.
     FTRACE(1, "selectTracelet: {} tried to consume ref {}\n",
            m_inst.toString(), m_inst.inputs[i]->pretty());

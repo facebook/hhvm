@@ -20,6 +20,7 @@
 #include <string>
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit {
@@ -34,7 +35,7 @@ namespace HPHP { namespace jit {
  */
 struct BCMarker {
   SrcKey  m_sk;
-  int32_t m_spOff{0};
+  FPAbsOffset m_spOff{0};
   TransID m_profTransID{kInvalidTransID};
 
   /*
@@ -42,14 +43,18 @@ struct BCMarker {
    * deriving them from an actual bytecode region. It is always valid().
    */
   static BCMarker Dummy() {
-    return BCMarker{SrcKey(DummyFuncId, 0, false), 0, kInvalidTransID};
+    return BCMarker{
+      SrcKey(DummyFuncId, 0, false),
+      FPAbsOffset{0},
+      kInvalidTransID
+    };
   }
 
   explicit BCMarker() = default;
 
-  explicit BCMarker(SrcKey sk, int32_t sp, TransID tid)
+  explicit BCMarker(SrcKey sk, FPAbsOffset sp, TransID tid)
     : m_sk(sk)
-    , m_spOff{sp}
+    , m_spOff(sp)
     , m_profTransID{tid}
   {
     assert(valid());
@@ -72,10 +77,10 @@ struct BCMarker {
   const Func* func()        const { assert(hasFunc()); return m_sk.func();    }
   Offset      bcOff()       const { assert(valid());   return m_sk.offset();  }
   bool        resumed()     const { assert(valid());   return m_sk.resumed(); }
-  int32_t     spOff()       const { assert(valid());   return m_spOff;        }
+  FPAbsOffset spOff()       const { assert(valid());   return m_spOff;        }
   TransID     profTransId() const { assert(valid());   return m_profTransID;  }
 
-  void setSpOff(int32_t sp) { assert(valid()); m_spOff = sp; }
+  void setSpOff(FPAbsOffset sp) { assert(valid()); m_spOff = sp; }
 };
 
 }}

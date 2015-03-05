@@ -189,7 +189,7 @@ static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
 
 static Variant mcrypt_generic(const Resource& td, const String& data,
                               bool dencrypt) {
-  MCrypt *pm = td.getTyped<MCrypt>();
+  auto pm = cast<MCrypt>(td);
   if (!pm->m_init) {
     raise_warning("Operation disallowed prior to mcrypt_generic_init().");
     return false;
@@ -249,7 +249,7 @@ Variant HHVM_FUNCTION(mcrypt_module_open, const String& algorithm,
 }
 
 bool HHVM_FUNCTION(mcrypt_module_close, const Resource& td) {
-  td.getTyped<MCrypt>()->close();
+  cast<MCrypt>(td)->close();
   return true;
 }
 
@@ -508,26 +508,26 @@ Variant HHVM_FUNCTION(mcrypt_get_key_size, const String& cipher,
 }
 
 String HHVM_FUNCTION(mcrypt_enc_get_algorithms_name, const Resource& td) {
-  char *name = mcrypt_enc_get_algorithms_name(td.getTyped<MCrypt>()->m_td);
+  char *name = mcrypt_enc_get_algorithms_name(cast<MCrypt>(td)->m_td);
   String ret(name, CopyString);
   mcrypt_free(name);
   return ret;
 }
 
 int64_t HHVM_FUNCTION(mcrypt_enc_get_block_size, const Resource& td) {
-  return mcrypt_enc_get_block_size(td.getTyped<MCrypt>()->m_td);
+  return mcrypt_enc_get_block_size(cast<MCrypt>(td)->m_td);
 }
 
 int64_t HHVM_FUNCTION(mcrypt_enc_get_iv_size, const Resource& td) {
-  return mcrypt_enc_get_iv_size(td.getTyped<MCrypt>()->m_td);
+  return mcrypt_enc_get_iv_size(cast<MCrypt>(td)->m_td);
 }
 
 int64_t HHVM_FUNCTION(mcrypt_enc_get_key_size, const Resource& td) {
-  return mcrypt_enc_get_key_size(td.getTyped<MCrypt>()->m_td);
+  return mcrypt_enc_get_key_size(cast<MCrypt>(td)->m_td);
 }
 
 String HHVM_FUNCTION(mcrypt_enc_get_modes_name, const Resource& td) {
-  char *name = mcrypt_enc_get_modes_name(td.getTyped<MCrypt>()->m_td);
+  char *name = mcrypt_enc_get_modes_name(cast<MCrypt>(td)->m_td);
   String ret(name, CopyString);
   mcrypt_free(name);
   return ret;
@@ -536,7 +536,7 @@ String HHVM_FUNCTION(mcrypt_enc_get_modes_name, const Resource& td) {
 Array HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const Resource& td) {
   int count = 0;
   int *key_sizes =
-    mcrypt_enc_get_supported_key_sizes(td.getTyped<MCrypt>()->m_td, &count);
+    mcrypt_enc_get_supported_key_sizes(cast<MCrypt>(td)->m_td, &count);
 
   Array ret = Array::Create();
   for (int i = 0; i < count; i++) {
@@ -547,25 +547,25 @@ Array HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const Resource& td) {
 }
 
 bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm_mode, const Resource& td) {
-  return mcrypt_enc_is_block_algorithm_mode(td.getTyped<MCrypt>()->m_td) == 1;
+  return mcrypt_enc_is_block_algorithm_mode(cast<MCrypt>(td)->m_td) == 1;
 }
 
 bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm, const Resource& td) {
-  return mcrypt_enc_is_block_algorithm(td.getTyped<MCrypt>()->m_td) == 1;
+  return mcrypt_enc_is_block_algorithm(cast<MCrypt>(td)->m_td) == 1;
 }
 
 bool HHVM_FUNCTION(mcrypt_enc_is_block_mode, const Resource& td) {
-  return mcrypt_enc_is_block_mode(td.getTyped<MCrypt>()->m_td) == 1;
+  return mcrypt_enc_is_block_mode(cast<MCrypt>(td)->m_td) == 1;
 }
 
 int64_t HHVM_FUNCTION(mcrypt_enc_self_test, const Resource& td) {
-  return mcrypt_enc_self_test(td.getTyped<MCrypt>()->m_td);
+  return mcrypt_enc_self_test(cast<MCrypt>(td)->m_td);
 }
 
 int64_t HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
                                            const String& key,
                                            const String& iv) {
-  MCrypt *pm = td.getTyped<MCrypt>();
+  auto pm = cast<MCrypt>(td);
   int max_key_size = mcrypt_enc_get_key_size(pm->m_td);
   int iv_size = mcrypt_enc_get_iv_size(pm->m_td);
 
@@ -633,7 +633,7 @@ Variant HHVM_FUNCTION(mdecrypt_generic, const Resource& td,
 }
 
 bool HHVM_FUNCTION(mcrypt_generic_deinit, const Resource& td) {
-  MCrypt *pm = td.getTyped<MCrypt>();
+  auto pm = cast<MCrypt>(td);
   if (mcrypt_generic_deinit(pm->m_td) < 0) {
     raise_warning("Could not terminate encryption specifier");
     return false;

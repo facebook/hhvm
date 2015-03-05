@@ -41,7 +41,8 @@ HTS::HTS(TransContext context)
 {
   irgen::updateMarker(*this);
   auto const frame = irgen::gen(*this, DefFP);
-  irgen::gen(*this, DefSP, StackOffset { context.initSpOffset }, frame);
+  irgen::gen(*this, DefSP,
+    StackOffset { safe_cast<int32_t>(context.initSpOffset.offset) }, frame);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -55,9 +56,9 @@ std::string show(const HTS& hts) {
   const int32_t frameCells = irgen::resumed(hts)
     ? 0
     : irgen::curFunc(hts)->numSlotsInFrame();
-  const int32_t stackDepth =
-    hts.irb->syncedSpLevel() + hts.irb->evalStack().size() -
-      hts.irb->stackDeficit() - frameCells;
+  auto const stackDepth = hts.irb->syncedSpLevel().offset +
+      safe_cast<int32_t>(hts.irb->evalStack().size()) -
+      safe_cast<int32_t>(hts.irb->stackDeficit()) - frameCells;
   assert(stackDepth >= 0);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
@@ -96,15 +97,15 @@ std::string show(const HTS& hts) {
 
   header(folly::format(" {} stack element(s); m_evalStack: ",
                        stackDepth).str());
-  for (unsigned i = 0; i < hts.irb->evalStack().size(); ++i) {
+  for (auto i = 0; i < hts.irb->evalStack().size(); ++i) {
     while (checkFpi());
     auto const value = irgen::top(const_cast<HTS&>(hts),
-      Type::StkElem, i, DataTypeGeneric);
+      Type::StkElem, BCSPOffset{i}, DataTypeGeneric);
     elem(value->inst()->toString());
   }
 
   header(" in-memory ");
-  for (unsigned i = hts.irb->evalStack().size(); spOffset > 0; ) {
+  for (auto i = hts.irb->evalStack().size(); spOffset > 0; ) {
     assert(i < irgen::curFunc(hts)->maxStackCells());
     if (checkFpi()) {
       i += kNumActRecCells;
@@ -112,11 +113,11 @@ std::string show(const HTS& hts) {
     }
 
     auto const stkTy = hts.irb->stackType(
-      irgen::offsetFromSP(hts, i),
+      irgen::offsetFromIRSP(hts, BCSPOffset{i}),
       DataTypeGeneric
     );
     auto const stkVal = hts.irb->stackValue(
-      irgen::offsetFromSP(hts, i),
+      irgen::offsetFromIRSP(hts, BCSPOffset{i}),
       DataTypeGeneric
     );
 
@@ -141,9 +142,9 @@ std::string show(const HTS& hts) {
                                     : hts.irb->localType(i, DataTypeGeneric);
     auto str = localValue ? localValue->inst()->toString()
                           : localTy.toString();
-    if (localTy.isBoxed()) {
+    if (localTy <= Type::BoxedCell) {
       auto const pred = hts.irb->predictedInnerType(i);
-      if (!pred.subtypeOf(Type::Bottom)) {
+      if (pred != Type::Bottom) {
         str += folly::sformat(" (predict inner: {})", pred.toString());
       }
     }

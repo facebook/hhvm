@@ -30,10 +30,17 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct IntervalTimer final {
+  enum SampleType {
+    IOWaitSample,
+    ResumeAwaitSample,
+    EnterSample,
+    ExitSample,
+  };
+
   static Class* c_Class;
   static const StaticString c_ClassName;
 
-  static void RunCallbacks();
+  static void RunCallbacks(SampleType);
 
   IntervalTimer() {}
   ~IntervalTimer();

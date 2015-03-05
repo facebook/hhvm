@@ -1,6 +1,5 @@
 //// newtype.php
 <?hh // strict
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 newtype bar = bool;
 const bar truthy_foo = true;

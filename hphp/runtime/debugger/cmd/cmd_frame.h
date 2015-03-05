@@ -22,12 +22,11 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdFrame : public DebuggerCommand {
-public:
+struct CmdFrame : DebuggerCommand {
   CmdFrame() : DebuggerCommand(KindOfFrame) {}
 
-  virtual void help(DebuggerClient &client);
-  virtual void onClient(DebuggerClient &client);
+  void help(DebuggerClient&) override;
+  void onClient(DebuggerClient&) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

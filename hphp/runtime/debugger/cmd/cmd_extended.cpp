@@ -28,12 +28,11 @@ TRACE_SET_MOD(debugger);
 void CmdExtended::list(DebuggerClient &client) {
   if (client.argCount() == 0) {
     const ExtendedCommandMap &cmds = getCommandMap();
-    for (ExtendedCommandMap::const_iterator iter = cmds.begin();
-         iter != cmds.end(); ++iter) {
-      client.addCompletion(iter->first.c_str());
+    for (auto& pair : cmds) {
+      client.addCompletion(pair.first.c_str());
     }
   } else {
-    ExtendedCommandMap matches = match(client, 1);
+    auto matches = match(client, 1);
     if (matches.size() == 1) {
       invokeList(client, matches.begin()->second);
     }
@@ -43,7 +42,7 @@ void CmdExtended::list(DebuggerClient &client) {
 static std::string format_unique_prefix(const std::string &cmd,
                                         const std::string &prev,
                                         const std::string &next) {
-  for (unsigned int i = 1; i < cmd.size(); i++) {
+  for (size_t i = 1; i < cmd.size(); i++) {
     if (strncasecmp(cmd.c_str(), prev.c_str(), i) &&
         strncasecmp(cmd.c_str(), next.c_str(), i)) {
       return "[" + cmd.substr(0, i) + "]" + cmd.substr(i);
@@ -59,33 +58,32 @@ void CmdExtended::helpImpl(DebuggerClient &client, const char *name) {
                    (std::string(name) + cmd).c_str(), help,
                    nullptr);
 
-  const ExtendedCommandMap &cmds = getCommandMap();
-  if (!cmds.empty()) {
-    client.help("%s", "");
-    client.help("where {cmd} can be:");
-    client.help("%s", "");
-    std::vector<std::string> vcmds;
-    for (ExtendedCommandMap::const_iterator iter = cmds.begin();
-         iter != cmds.end(); ++iter) {
-      vcmds.push_back(iter->first);
-    }
-    for (unsigned int i = 0; i < vcmds.size(); i++) {
-      client.help("\t%s", format_unique_prefix
-                   (vcmds[i], i ? vcmds[i-1] : "",
-                    i < vcmds.size() - 1 ? vcmds[i+1] : "").c_str());
-    }
-    client.help("%s", "");
-    client.help("Type '%s [h]elp|? {cmd} to read their usages.", name);
+  auto const& cmds = getCommandMap();
+
+  if (cmds.empty()) return;
+
+  client.help("%s", "");
+  client.help("where {cmd} can be:");
+  client.help("%s", "");
+  std::vector<std::string> vcmds;
+  for (auto& pair : cmds) {
+    vcmds.push_back(pair.first);
   }
+  for (size_t i = 0; i < vcmds.size(); i++) {
+    client.help("\t%s", format_unique_prefix
+                (vcmds[i], i ? vcmds[i-1] : "",
+                 i < vcmds.size() - 1 ? vcmds[i+1] : "").c_str());
+  }
+  client.help("%s", "");
+  client.help("Type '%s [h]elp|? {cmd} to read their usages.", name);
 }
 
 ExtendedCommandMap CmdExtended::match(DebuggerClient &client, int argIndex) {
   ExtendedCommandMap matches;
-  const ExtendedCommandMap &cmds = getCommandMap();
-  for (ExtendedCommandMap::const_iterator iter = cmds.begin();
-       iter != cmds.end(); ++iter) {
-    if (client.arg(argIndex, iter->first.c_str())) {
-      matches[iter->first] = iter->second;
+  auto const& cmds = getCommandMap();
+  for (auto& pair : cmds) {
+    if (client.arg(argIndex, pair.first.c_str())) {
+      matches[pair.first] = pair.second;
     }
   }
   if (matches.empty()) {
@@ -95,11 +93,10 @@ ExtendedCommandMap CmdExtended::match(DebuggerClient &client, int argIndex) {
   return matches;
 }
 
-void CmdExtended::helpCommands(DebuggerClient &client,
-                               const ExtendedCommandMap &matches) {
-  for (ExtendedCommandMap::const_iterator iter = matches.begin();
-       iter != matches.end(); ++iter) {
-    invokeHelp(client, iter->second);
+void CmdExtended::helpCommands(DebuggerClient& client,
+                               const ExtendedCommandMap& matches) {
+  for (auto& pair : matches) {
+    invokeHelp(client, pair.second);
   }
 }
 
@@ -109,7 +106,7 @@ void CmdExtended::onClient(DebuggerClient &client) {
       help(client);
       return;
     }
-    ExtendedCommandMap matches = match(client, 2);
+    auto matches = match(client, 2);
     if (matches.empty()) {
       help(client);
     } else {
@@ -118,14 +115,13 @@ void CmdExtended::onClient(DebuggerClient &client) {
     return;
   }
 
-  ExtendedCommandMap matches = match(client, 1);
+  auto matches = match(client, 1);
   if (matches.empty()) {
     help(client);
   } else if (matches.size() > 1) {
     client.error("Need more letters to tell which one of these:");
-    for (ExtendedCommandMap::const_iterator iter = matches.begin();
-         iter != matches.end(); ++iter) {
-      client.error("\t%s", iter->first.c_str());
+    for (auto& pair : matches) {
+      client.error("\t%s", pair.first.c_str());
     }
   } else if (!invokeClient(client, matches.begin()->second)) {
     if (client.arg(2, "help") || client.arg(2, "?")) {
@@ -146,14 +142,14 @@ const ExtendedCommandMap &CmdExtended::getCommandMap() {
 }
 
 void CmdExtended::invokeList(DebuggerClient &client, const std::string &cls) {
-  DebuggerCommandPtr cmd = CreateExtendedCommand(cls);
+  auto cmd = CreateExtendedCommand(cls);
   if (cmd) {
     cmd->list(client);
   }
 }
 
 bool CmdExtended::invokeHelp(DebuggerClient &client, const std::string &cls) {
-  DebuggerCommandPtr cmd = CreateExtendedCommand(cls);
+  auto cmd = CreateExtendedCommand(cls);
   if (cmd) {
     cmd->help(client);
     return true;
@@ -163,7 +159,7 @@ bool CmdExtended::invokeHelp(DebuggerClient &client, const std::string &cls) {
 
 bool CmdExtended::invokeClient(DebuggerClient &client, const std::string &cls) {
   client.usageLogCommand("extended", cls);
-  DebuggerCommandPtr cmd = CreateExtendedCommand(cls);
+  auto cmd = CreateExtendedCommand(cls);
   if (cmd) {
     cmd->onClient(client);
     return true;

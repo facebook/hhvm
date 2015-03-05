@@ -96,7 +96,7 @@ void removeDead(Local& env, IRInstruction& inst) {
       env.global.unit.replace(
         &inst,
         DbgTrashStk,
-        StackOffset { inst.extra<StStk>()->offset },
+        IRSPOffsetData { inst.extra<StStk>()->offset },
         inst.src(0)
       );
       return;
@@ -104,7 +104,7 @@ void removeDead(Local& env, IRInstruction& inst) {
       env.global.unit.replace(
         &inst,
         DbgTrashFrame,
-        StackOffset { inst.extra<SpillFrame>()->spOffset },
+        IRSPOffsetData { inst.extra<SpillFrame>()->spOffset },
         inst.src(0)
       );
       return;
@@ -117,14 +117,6 @@ void removeDead(Local& env, IRInstruction& inst) {
   }
 
   inst.block()->erase(&inst);
-}
-
-void addGen(Local& env, folly::Optional<uint32_t> bit) {
-  if (!bit) return;
-  FTRACE(4, "      gen:  {}\n", *bit);
-  env.gen[*bit]  = 1;
-  env.kill[*bit] = 0;
-  env.live[*bit] = 1;
 }
 
 void addGenSet(Local& env, const ALocBits& bits) {
@@ -158,24 +150,11 @@ void addKillSet(Local& env, const ALocBits& bits) {
 //////////////////////////////////////////////////////////////////////
 
 void load(Local& env, AliasClass acls) {
-  acls = canonicalize(acls);
-  if (auto const meta = env.global.ainfo.find(acls)) {
-    addGen(env, meta->index);
-    addGenSet(env, meta->conflicts);
-    return;
-  }
-
-  addGenSet(env, env.global.ainfo.may_alias(acls));
+  addGenSet(env, env.global.ainfo.may_alias(canonicalize(acls)));
 }
 
 void kill(Local& env, AliasClass acls) {
   addKillSet(env, env.global.ainfo.must_alias(canonicalize(acls)));
-}
-
-void killFrame(Local& env, SSATmp* fp) {
-  auto const killSet = env.global.ainfo.per_frame_bits[fp];
-  addKillSet(env, killSet);
-  kill(env, AStack { fp, 2, std::numeric_limits<int32_t>::max() });
 }
 
 folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
@@ -193,25 +172,37 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { addAllGen(env); },
     [&] (PureLoad l)        { load(env, l.src); },
-    [&] (KillFrameLocals l) { killFrame(env, l.fp); },
-    [&] (MayLoadStore l)    { load(env, l.loads); },
+    [&] (GeneralEffects l)  { load(env, l.loads);
+                              kill(env, l.kills); },
 
     [&] (InterpOneEffects m) {
       addAllGen(env);
-      kill(env, m.killed);
+      kill(env, m.kills);
     },
 
     [&] (ReturnEffects l) {
-      // Locations other than the frame and stack (e.g. object properties and
-      // whatnot) are live on a function return.
+      if (inst.is(InlineReturn)) {
+        // Returning from an inlined function.  This adds nothing to gen, but
+        // kills frame and stack locations for the callee.
+        auto const fp = inst.src(0);
+        auto const killSet = env.global.ainfo.per_frame_bits[fp];
+        addKillSet(env, killSet);
+        kill(env, l.kills);
+        return;
+      }
+
+      // Return from the main function.  Locations other than the frame and
+      // stack (e.g. object properties and whatnot) are always live on a
+      // function return---so add everything to gen before we start killing
+      // things.
       addAllGen(env);
       addKillSet(env, env.global.ainfo.all_frame);
-      kill(env, l.killed);
+      kill(env, l.kills);
     },
 
     [&] (ExitEffects l) {
       load(env, l.live);
-      kill(env, l.kill);
+      kill(env, l.kills);
     },
 
     /*
@@ -225,7 +216,7 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, AFrameAny);  // Not necessary for some builtin calls, but it
                              // depends which builtin...
       load(env, l.stack);
-      kill(env, l.killed);
+      kill(env, l.kills);
     },
 
     [&] (IterEffects l) {
@@ -234,7 +225,7 @@ void visit(Local& env, IRInstruction& inst) {
       }
       load(env, AFrame { l.fp, l.id });
       load(env, AHeapAny);
-      kill(env, l.killed);
+      kill(env, l.kills);
     },
     [&] (IterEffects2 l) {
       if (RuntimeOption::EnableArgsInBacktraces) {
@@ -243,7 +234,7 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, AFrame { l.fp, l.id1 });
       load(env, AFrame { l.fp, l.id2 });
       load(env, AHeapAny);
-      kill(env, l.killed);
+      kill(env, l.kills);
     },
 
     [&] (PureStore l) {

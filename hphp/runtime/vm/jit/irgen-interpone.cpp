@@ -104,9 +104,9 @@ folly::Optional<Type> interpOutputType(HTS& env,
   };
 
   auto boxed = [&] (Type t) -> Type {
-    if (t.equals(Type::Gen)) return Type::BoxedInitCell;
-    assert(t.isBoxed() || t.notBoxed());
-    checkTypeType = t.isBoxed() ? t : boxType(t); // inner type is predicted
+    if (t == Type::Gen) return Type::BoxedInitCell;
+    assert(t <= Type::Cell || t <= Type::BoxedCell);
+    checkTypeType = t <= Type::BoxedCell ? t : boxType(t);
     return Type::BoxedInitCell;
   };
 
@@ -140,39 +140,41 @@ folly::Optional<Type> interpOutputType(HTS& env,
     case OutCns:         return Type::Cell;
     case OutVUnknown:    return Type::BoxedInitCell;
 
-    case OutSameAsInput: return topType(env, 0);
-    case OutVInput:      return boxed(topType(env, 0));
+    case OutSameAsInput: return topType(env, BCSPOffset{0});
+    case OutVInput:      return boxed(topType(env, BCSPOffset{0}));
     case OutVInputL:     return boxed(localType());
     case OutFInputL:
     case OutFInputR:     not_reached();
 
-    case OutArith:       return arithOpResult(topType(env, 0),
-                                              topType(env, 1));
-    case OutArithO:      return arithOpOverResult(topType(env, 0),
-                                                  topType(env, 1));
+    case OutArith:       return arithOpResult(topType(env, BCSPOffset{0}),
+                                              topType(env, BCSPOffset{1}));
+    case OutArithO:      return arithOpOverResult(topType(env, BCSPOffset{0}),
+                                                  topType(env, BCSPOffset{1}));
     case OutBitOp:
-      return bitOpResult(topType(env, 0),
-                         inst.op() == HPHP::OpBitNot ? Type::Bottom
-                                                     : topType(env, 1));
-    case OutSetOp:      return setOpResult(localType(), topType(env, 0),
-                                           SetOpOp(inst.imm[1].u_OA));
+      return bitOpResult(topType(env, BCSPOffset{0}),
+                         inst.op() == HPHP::OpBitNot ?
+                            Type::Bottom : topType(env, BCSPOffset{1}));
+    case OutSetOp:      return setOpResult(localType(),
+                          topType(env, BCSPOffset{0}),
+                          SetOpOp(inst.imm[1].u_OA));
     case OutIncDec: {
       auto ty = localType().unbox();
       return ty <= Type::Dbl ? ty : Type::Cell;
     }
     case OutStrlen:
-      return topType(env, 0) <= Type::Str ? Type::Int : Type::UncountedInit;
+      return topType(env, BCSPOffset{0}) <= Type::Str ?
+        Type::Int : Type::UncountedInit;
     case OutClassRef:   return Type::Cls;
     case OutFPushCufSafe: return folly::none;
 
     case OutNone:       return folly::none;
 
     case OutCInput: {
-      auto ttype = topType(env, 0);
-      if (ttype.notBoxed()) return ttype;
+      auto ttype = topType(env, BCSPOffset{0});
+      if (ttype <= Type::Cell) return ttype;
       // All instructions that are OutCInput or OutCInputL cannot push uninit or
       // a ref, so only specific inner types need to be checked.
-      if (ttype.unbox().strictSubtypeOf(Type::InitCell)) {
+      if (ttype.unbox() < Type::InitCell) {
         checkTypeType = ttype.unbox();
       }
       return Type::Cell;
@@ -180,8 +182,8 @@ folly::Optional<Type> interpOutputType(HTS& env,
 
     case OutCInputL: {
       auto ltype = localType();
-      if (ltype.notBoxed()) return ltype;
-      if (ltype.unbox().strictSubtypeOf(Type::InitCell)) {
+      if (ltype <= Type::Cell) return ltype;
+      if (ltype.unbox() < Type::InitCell) {
         checkTypeType = ltype.unbox();
       }
       return Type::Cell;
@@ -203,7 +205,7 @@ interpOutputLocals(HTS& env,
     // Relax the type to something guardable.  For InterpOne we don't bother to
     // keep track of specialized types or inner-ref types.  (And note that for
     // psuedomains we may in fact have to guard on the local type after this.)
-    locals.emplace_back(id, t.relaxToGuardable());
+    locals.emplace_back(id, relaxToGuardable(t));
   };
   auto setImmLocType = [&](uint32_t id, Type t) {
     setLocType(inst.imm[id].u_LA, t);
@@ -211,8 +213,8 @@ interpOutputLocals(HTS& env,
   auto const func = curFunc(env);
 
   auto handleBoxiness = [&] (Type testTy, Type useTy) {
-    return testTy.isBoxed() ? Type::BoxedInitCell :
-           testTy.maybeBoxed() ? Type::Gen :
+    return testTy <= Type::BoxedCell ? Type::BoxedInitCell :
+           testTy.maybe(Type::BoxedCell) ? Type::Gen :
            useTy;
   };
 
@@ -262,7 +264,7 @@ interpOutputLocals(HTS& env,
 
     case OpSetL: {
       auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
-      auto stackType = topType(env, 0);
+      auto stackType = topType(env, BCSPOffset{0});
       // SetL preserves reffiness of a local.
       setImmLocType(0, handleBoxiness(locType, stackType));
       break;
@@ -270,7 +272,7 @@ interpOutputLocals(HTS& env,
     case OpVGetL:
     case OpBindL: {
       assert(pushedType.hasValue());
-      assert(pushedType->isBoxed());
+      assert(*pushedType <= Type::BoxedCell);
       setImmLocType(0, pushedType.value());
       break;
     }
@@ -311,8 +313,8 @@ interpOutputLocals(HTS& env,
           MInstrEffects effects(op, baseType);
           if (effects.baseValChanged) {
             auto const ty = effects.baseType.deref();
-            assert((ty.isBoxed() ||
-                    ty.notBoxed()) ||
+            assert((ty <= Type::Cell ||
+                    ty <= Type::BoxedCell) ||
                     curFunc(env)->isPseudoMain());
             setLocType(base.offset, handleBoxiness(ty, ty));
           }
@@ -356,7 +358,7 @@ interpOutputLocals(HTS& env,
       auto const& tc = func->params()[paramId].typeConstraint;
       auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
       if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
-          (locType <= Type::Obj || locType.maybeBoxed())) {
+          (locType <= Type::Obj || locType.maybe(Type::BoxedCell))) {
         setImmLocType(0, handleBoxiness(locType, Type::Cell));
       }
       break;
@@ -389,7 +391,7 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
          stackType.hasValue() ? stackType->toString() : "<none>",
          popped, pushed);
 
-  InterpOneData idata { offsetFromSP(env, 0) };
+  InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   auto locals = interpOutputLocals(env, inst, idata.smashesAllLocals,
     stackType);
   idata.nChangedLocals = locals.size();
@@ -398,20 +400,20 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
   interpOne(env, stackType, popped, pushed, idata);
   if (checkTypeType) {
     auto const out = getInstrInfo(inst.op()).out;
-    auto const checkIdx = (out & InstrFlags::StackIns2) ? 2
+    auto const checkIdx = BCSPOffset{(out & InstrFlags::StackIns2) ? 2
                         : (out & InstrFlags::StackIns1) ? 1
-                        : 0;
+                        : 0};
     checkTypeStack(env, checkIdx, *checkTypeType, inst.nextSk().offset());
   }
 }
 
 void interpOne(HTS& env, int popped) {
-  InterpOneData idata { offsetFromSP(env, 0) };
+  InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   interpOne(env, folly::none, popped, 0, idata);
 }
 
 void interpOne(HTS& env, Type outType, int popped) {
-  InterpOneData idata { offsetFromSP(env, 0) };
+  InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   interpOne(env, outType, popped, 1, idata);
 }
 

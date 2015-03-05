@@ -1,0 +1,9 @@
+<?hh
+
+function f() {
+  exit(0);
+}
+
+function g() {
+  die(0);
+}

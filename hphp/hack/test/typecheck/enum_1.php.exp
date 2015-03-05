@@ -1,6 +1,6 @@
-File "enum_1.php", line 9, characters 16-18:
+File "enum_1.php", line 8, characters 16-18:
 Constant does not match the type of the enum it is in (Typing[4110])
-File "enum_1.php", line 8, characters 24-26:
+File "enum_1.php", line 7, characters 24-26:
 This is an int
-File "enum_1.php", line 9, characters 22-26:
+File "enum_1.php", line 8, characters 22-26:
 It is incompatible with a string

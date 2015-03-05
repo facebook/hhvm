@@ -1,5 +1,5 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
+
 
 namespace Bar {
   trait TN {

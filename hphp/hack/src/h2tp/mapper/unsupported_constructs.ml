@@ -22,7 +22,7 @@ let map program =
     () in
 
   let detect_invalid_attributes p attributes =
-    if Attributes.mem "__Memoize" attributes
+    if List.exists (fun { ua_name; _ } -> "__Memoize" = snd ua_name) attributes
     then unsupported (p, "__Memoize is currently not supported.")
     else () in
 

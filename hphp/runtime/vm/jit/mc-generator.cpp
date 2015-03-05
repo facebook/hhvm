@@ -378,34 +378,32 @@ static void populateLiveContext(RegionContext& ctx) {
 
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
-      { L::Local{i}, liveTVType(frame_local(fp, i)) }
+      { L::Local{i}, typeFromTV(frame_local(fp, i)) }
     );
   }
 
-  uint32_t stackOff = 0;
+  int32_t stackOff = 0;
   visitStackElems(
     fp, sp, ctx.bcOffset,
     [&](const ActRec* ar) {
       // TODO(#2466980): when it's a Cls, we should pass the Class* in
       // the Type.
       auto const objOrCls =
-        ar->hasThis()  ? Type::Obj.specialize(ar->getThis()->getVMClass()) :
+        ar->hasThis()  ? Type::SubObj(ar->getThis()->getVMClass()) :
         ar->hasClass() ? Type::Cls
                        : Type::Nullptr;
 
-      ctx.preLiveARs.push_back(
-        { stackOff,
-          ar->m_func,
-          objOrCls
-        }
-      );
+      ctx.preLiveARs.push_back({
+        stackOff,
+        ar->m_func,
+        objOrCls
+      });
       FTRACE(2, "added prelive ActRec {}\n", show(ctx.preLiveARs.back()));
-
       stackOff += kNumActRecCells;
     },
     [&](const TypedValue* tv) {
       ctx.liveTypes.push_back(
-        { L::Stack{stackOff, ctx.spOffset - stackOff}, liveTVType(tv) }
+        { L::Stack{ctx.spOffset - stackOff}, typeFromTV(tv) }
       );
       stackOff++;
       FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
@@ -1123,17 +1121,16 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
   assert_native_stack_aligned();
   tl_regState = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
 
-  auto callToExit = [&] {
-    tl_regState = VMRegState::DIRTY;
-    return m_tx.uniqueStubs.callToExit;
-  };
+  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+    Trace::ringbufferEntry(
+      RBTypeServiceReq, (uint64_t)info.req, (uint64_t)info.args[0].tca
+    );
+  }
 
   TCA start = nullptr;
   SrcKey sk;
   auto smashed = false;
 
-  // If start is still nullptr at the end of this switch, we will enter the
-  // interpreter at sk.
   switch (info.req) {
     case REQ_BIND_CALL: {
       auto calleeFrame = info.stashedAR;
@@ -1181,11 +1178,6 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
       break;
     }
 
-    case REQ_INTERPRET:
-      // Leave start as nullptr and let the dispatchBB() happen down below.
-      sk = SrcKey{liveFunc(), info.args[0].offset, liveResumed()};
-      break;
-
     case REQ_POST_INTERP_RET: {
       // This is only responsible for the control-flow aspect of the Ret:
       // getting to the destination's translation, if any.
@@ -1200,13 +1192,6 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
             ar->m_func->fullName()->data(),
             caller->m_func->fullName()->data());
-      break;
-    }
-
-    case REQ_RESUME: {
-      if (UNLIKELY(vmpc() == 0)) return callToExit();
-      sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
-      start = getTranslation(TranslArgs{sk, true});
       break;
     }
 
@@ -1240,14 +1225,39 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
     Treadmill::enqueue(FreeRequestStubTrigger(info.stub));
   }
 
-  // If we don't have a starting address, interpret basic blocks until we end
-  // up somewhere with a translation (which we may have created, if the lease
-  // holder dropped it).
-  while (!start) {
+  if (start == nullptr) {
     vmpc() = sk.unit()->at(sk.offset());
+    start = m_tx.uniqueStubs.interpHelperSyncedPC;
+  }
+
+  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+    auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
+    Trace::ringbufferEntry(RBTypeResumeTC, skData, (uint64_t)start);
+  }
+
+  tl_regState = VMRegState::DIRTY;
+  return start;
+}
+
+TCA MCGenerator::handleResume(bool interpFirst) {
+  if (!vmRegsUnsafe().pc) return m_tx.uniqueStubs.callToExit;
+
+  tl_regState = VMRegState::CLEAN;
+  auto sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
+  TCA start = interpFirst ? nullptr : getTranslation(TranslArgs(sk, true));
+
+  vmJitCalledFrame() = vmfp();
+  SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
+  // If we can't get a translation at the current SrcKey, interpret basic
+  // blocks until we end up somewhere with a translation (which we may have
+  // created, if the lease holder dropped it).
+  while (!start) {
     INC_TPC(interp_bb);
     HPHP::dispatchBB();
-    if (!vmpc()) return callToExit();
+    if (!vmpc()) {
+      start = m_tx.uniqueStubs.callToExit;
+      break;
+    }
     sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
     start = getTranslation(TranslArgs{sk, true});
   }
@@ -1548,7 +1558,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
     auto result = TranslateResult::Retry;
     auto regionInterps = RegionBlacklist{};
-    Offset const initSpOffset = region ? region->entry()->initialSpOffset()
+    auto const initSpOffset = region ? region->entry()->initialSpOffset()
                                        : liveSpOff();
 
     while (region && result == TranslateResult::Retry) {
@@ -1571,16 +1581,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
       try {
         assertCleanState();
-        result = translateRegion(hhbcTrans, *region, regionInterps, args.flags);
-
-        // If we're profiling, grab the postconditions so we can
-        // use them in region selection whenever we decide to retranslate.
-        if (m_tx.mode() == TransKind::Profile &&
-            result == TranslateResult::Success &&
-            RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = hhbcTrans.unit.postConditions();
-        }
-
+        result = translateRegion(hhbcTrans, *region, regionInterps, args.flags,
+                                 pconds);
         FTRACE(2, "translateRegion finished with result {}\n", show(result));
       } catch (const std::exception& e) {
         FTRACE(1, "translateRegion failed with '{}'\n", e.what());
@@ -1715,16 +1717,11 @@ void MCGenerator::traceCodeGen(HTS& hts) {
 
   always_assert_flog(
     IMPLIES(cfgHasLoop(unit), RuntimeOption::EvalJitLoops),
-    "IRUnit has loop but Eval.JitLoops=0:\n{}\n", unit
+    "IRUnit has loop but Eval.JitLoops=0"
   );
 
   optimize(unit, *hts.irb, m_tx.mode());
   finishPass(" after optimizing ", kOptLevel);
-
-  if (m_tx.mode() == TransKind::Profile &&
-      RuntimeOption::EvalJitPGOUsePostConditions) {
-    unit.collectPostConditions();
-  }
 
   always_assert(this == mcg);
   genCode(unit);
@@ -1754,7 +1751,7 @@ MCGenerator::MCGenerator()
     Trace::traceRelease("TRACE=printir is set but the jit isn't on. "
                         "Did you mean to run with -vEval.Jit=1?\n");
   }
-  if (Trace::moduleEnabledRelease(Trace::llvm, 1) ||
+  if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {
     g_bytecodesVasm.bind();
     g_bytecodesLLVM.bind();
@@ -1795,6 +1792,9 @@ void MCGenerator::requestInit() {
 }
 
 void MCGenerator::requestExit() {
+  assert(!std::uncaught_exception() &&
+         "Uncaught exception live at request shutdown. "
+         "Probably an unwind-x64.cpp bug.");
   always_assert(!Translator::WriteLease().amOwner());
   TRACE_MOD(txlease, 2, "%" PRIx64 " write lease stats: %15" PRId64
             " kept, %15" PRId64 " grabbed\n",
@@ -1814,7 +1814,7 @@ void MCGenerator::requestExit() {
     Trace::traceRelease("\n");
   }
 
-  if (Trace::moduleEnabledRelease(Trace::llvm, 1)) {
+  if (Trace::moduleEnabledRelease(Trace::llvm_count, 1)) {
     auto llvm = *g_bytecodesLLVM;
     auto total = llvm + *g_bytecodesVasm;
     Trace::ftraceRelease(

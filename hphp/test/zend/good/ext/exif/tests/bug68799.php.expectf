@@ -1,0 +1,23 @@
+Array
+(
+    [FileName] => bug68799.jpg
+    [FileDateTime] => %d
+    [FileSize] => 735
+    [FileType] => 2
+    [MimeType] => image/jpeg
+    [SectionsFound] => ANY_TAG, IFD0, WINXP
+    [COMPUTED] => Array
+        (
+            [html] => width="1" height="1"
+            [Height] => 1
+            [Width] => 1
+            [IsColor] => 1
+            [ByteOrderMotorola] => 1
+        )
+
+    [XResolution] => 96/1
+    [YResolution] => 96/1
+    [ResolutionUnit] => 2
+    [Author] => 
+)
+

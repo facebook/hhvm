@@ -39,8 +39,7 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
 
   explicit c_AsyncFunctionWaitHandle(Class* cls =
       c_AsyncFunctionWaitHandle::classof())
-    : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj)
-  {}
+    : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj) {}
   ~c_AsyncFunctionWaitHandle();
   void t___construct();
 
@@ -58,11 +57,13 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
   static constexpr ptrdiff_t childOff() {
     return offsetof(c_AsyncFunctionWaitHandle, m_child);
   }
-  static c_AsyncFunctionWaitHandle* Create(const ActRec* origFp,
-                                           size_t numSlots,
-                                           jit::TCA resumeAddr,
-                                           Offset resumeOffset,
-                                           c_WaitableWaitHandle* child);
+  static c_AsyncFunctionWaitHandle* Create(
+    const ActRec* origFp,
+    size_t numSlots,
+    jit::TCA resumeAddr,
+    Offset resumeOffset,
+    c_WaitableWaitHandle* child
+  ); // nothrow
   static void PrepareChild(const ActRec* fp, c_WaitableWaitHandle* child);
   void resume();
   void onUnblocked();

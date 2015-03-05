@@ -122,11 +122,12 @@ static bool HHVM_FUNCTION(
 }
 
 static bool HHVM_FUNCTION(readline_read_history,
-                          const String& filename /* = null */) {
+                          const Variant& filename /* = null */) {
   if (filename.isNull()) {
     return read_history(nullptr) == 0;
   } else {
-    return read_history(filename.data()) == 0;
+    auto const filenameString = filename.toString();
+    return read_history(filenameString.data()) == 0;
   }
 }
 
@@ -156,9 +157,9 @@ static char* _rl_readline_name = nullptr;
 static char* _rl_line_buffer = nullptr;
 static Mutex info_lock;
 
-Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
-                                     const String& newvalue /* = null */) {
-  if (varname.isNull()) {
+Variant HHVM_FUNCTION(readline_info, const Variant& varnameMixed /* = null */,
+                      const Variant& newvalueMixed /* = null */) {
+  if (varnameMixed.isNull()) {
     ArrayInit ret(12, ArrayInit::Map{});
     ret.add(s_line_buffer, convert_null_to_empty(rl_line_buffer));
     ret.add(s_point, rl_point);
@@ -178,16 +179,19 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
     ret.add(s_attempted_completion_over, rl_attempted_completion_over);
     return ret.toArray();
   } else {
+    auto const varname = varnameMixed.toString();
     Variant oldval;
     if (varname == s_line_buffer) {
       oldval = String(convert_null_to_empty(rl_line_buffer));
-      if (!newvalue.isNull() && oldval.toString() != newvalue) {
+      if (!newvalueMixed.isNull() &&
+          oldval.toString() != newvalueMixed.toString()) {
         Lock lock(info_lock);
         raise_warning(
           "This probably isn't doing what you expect it to do, " \
           "this buffer is set for EVERY request."
         );
         free(_rl_line_buffer);
+        auto const newvalue = newvalueMixed.toString();
         _rl_line_buffer = strdup(newvalue.data());
         rl_line_buffer = _rl_line_buffer;
       }
@@ -201,14 +205,14 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
       return rl_mark;
     } else if (varname == s_done) {
       oldval = rl_done;
-      if (!newvalue.isNull()) {
-        rl_done = newvalue.toInt64();
+      if (!newvalueMixed.isNull()) {
+        rl_done = newvalueMixed.toInt64();
       }
       return oldval;
     } else if (varname == s_pending_input) {
       oldval = rl_pending_input;
-      if (!newvalue.isNull()) {
-        rl_pending_input = newvalue.toInt64();
+      if (!newvalueMixed.isNull()) {
+        rl_pending_input = newvalueMixed.toInt64();
       }
       return oldval;
     } else if (varname == s_prompt) {
@@ -217,8 +221,8 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
 #if HAVE_ERASE_EMPTY_LINE
     } else if (varname == s_erase_empty_line) {
       oldval = rl_erase_empty_line;
-      if (!newvalue.isNull()) {
-        rl_erase_empty_line = newvalue.toInt64();
+      if (!newvalueMixed.isNull()) {
+        rl_erase_empty_line = newvalueMixed.toInt64();
       }
       return oldval;
 #endif
@@ -226,21 +230,23 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
       return convert_null_to_empty(rl_library_version);
     } else if (varname == s_readline_name) {
       oldval = String(convert_null_to_empty(rl_readline_name));
-      if (!newvalue.isNull() && oldval.toString() != newvalue) {
+      if (!newvalueMixed.isNull() &&
+          oldval.toString() != newvalueMixed.toString()) {
         Lock lock(info_lock);
         raise_warning(
           "This probably isn't doing what you expect it to do, " \
           "this name is set for EVERY request."
         );
         free(_rl_readline_name);
+        auto const newvalue = newvalueMixed.toString();
         _rl_readline_name = strdup(newvalue.data());
         rl_readline_name = _rl_readline_name;
       }
       return oldval;
     } else if (varname == s_attempted_completion_over) {
       oldval = rl_attempted_completion_over;
-      if (!newvalue.isNull()) {
-        rl_attempted_completion_over = newvalue.toInt64();
+      if (!newvalueMixed.isNull()) {
+        rl_attempted_completion_over = newvalueMixed.toInt64();
       }
       return oldval;
     }
@@ -250,11 +256,12 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
 
 
 static bool HHVM_FUNCTION(readline_write_history,
-                          const String& filename /* = null */) {
+                          const Variant& filename /* = null */) {
   if (filename.isNull()) {
     return write_history(nullptr) == 0;
   } else {
-    return write_history(filename.data()) == 0;
+    auto const filenameString = filename.toString();
+    return write_history(filenameString.data()) == 0;
   }
 }
 

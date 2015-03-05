@@ -443,7 +443,7 @@ bool HHVM_FUNCTION(posix_initgroups,
 static int php_posix_get_fd(const Variant& fd) {
   int nfd;
   if (fd.isResource()) {
-    File *f = fd.toResource().getTyped<File>();
+    auto f = cast<File>(fd);
     if (!f) {
       return false;
     }

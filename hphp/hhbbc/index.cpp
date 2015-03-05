@@ -1753,7 +1753,9 @@ Index::resolve_func_fallback(Context ctx,
 }
 
 Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
-  assert(IMPLIES(!tc.hasConstraint() || tc.isTypeVar(), tc.isMixed()));
+  assert(IMPLIES(
+    !tc.hasConstraint() || tc.isTypeVar() || tc.isTypeConstant(),
+    tc.isMixed()));
 
   /*
    * Soft hints (@Foo) are not checked.
@@ -1764,9 +1766,11 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
     case AnnotMetaType::Precise: {
       auto const mainType = [&]() -> const Type {
         auto const dt = tc.underlyingDataType();
-        assert(dt);
+        assert(dt.hasValue());
 
         switch (*dt) {
+        case KindOfUninit:       return TCell;
+        case KindOfNull:         return TNull;
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
@@ -1793,7 +1797,8 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
               : subObj(*rcls);
           }
           return TInitCell;
-        default:
+        case KindOfClass:
+        case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");
           break;
         }
@@ -1831,14 +1836,18 @@ bool Index::satisfies_constraint(Context ctx, const Type t,
 
 Type Index::satisfies_constraint_helper(Context ctx,
                                         const TypeConstraint& tc) const {
-  assert(IMPLIES(!tc.hasConstraint() || tc.isTypeVar(), tc.isMixed()));
+  assert(IMPLIES(
+    !tc.hasConstraint() || tc.isTypeVar() || tc.isTypeConstant(),
+    tc.isMixed()));
 
   switch (tc.metaType()) {
     case AnnotMetaType::Precise: {
       auto const mainType = [&]() -> const Type {
         auto const dt = tc.underlyingDataType();
-        assert(dt);
+        assert(dt.hasValue());
         switch (*dt) {
+        case KindOfUninit:       return TBottom;
+        case KindOfNull:         return TNull;
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
         case KindOfDouble:       return TDbl;
@@ -1857,7 +1866,8 @@ Type Index::satisfies_constraint_helper(Context ctx,
             return subObj(*rcls);
           }
           return TBottom;
-        default:
+        case KindOfClass:
+        case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");
           break;
         }

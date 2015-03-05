@@ -64,7 +64,7 @@ void emitResumeHelpers(UniqueStubs& us) {
   a.   Ldr   (rVmFp, rVmTl[rds::kVmfpOff]);
   a.   Ldr   (rVmSp, rVmTl[rds::kVmspOff]);
 
-  emitServiceReq(mcg->code.main(), REQ_RESUME);
+  not_implemented();
 
   us.add("resumeHelper", us.resumeHelper);
   us.add("resumeHelperRet", us.resumeHelperRet);

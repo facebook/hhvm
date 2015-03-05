@@ -72,11 +72,13 @@ void ZendExtension::moduleInit() {
         (ts_allocate_dtor) module->globals_dtor);
   }
   // Register global functions
-  const zend_function_entry * fe = module->functions;
-  while (fe->fname) {
-    assert(fe->handler);
-    Native::registerBuiltinFunction(fe->fname, fe->handler);
-    fe++;
+  if (module->functions) {
+    const zend_function_entry * fe = module->functions;
+    while (fe->fname) {
+      assert(fe->handler);
+      Native::registerBuiltinZendFunction(fe->fname, fe->handler);
+      fe++;
+    }
   }
   // Call MINIT
   if (module->module_startup_func) {

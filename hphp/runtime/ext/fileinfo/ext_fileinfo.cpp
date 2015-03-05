@@ -72,16 +72,12 @@ static Variant HHVM_FUNCTION(finfo_open,
 }
 
 static bool HHVM_FUNCTION(finfo_close, const Resource& finfo) {
-  auto res = finfo.getTyped<FileinfoResource>();
-  if (!res) {
-    return false;
-  }
-  res->close();
+  cast<FileinfoResource>(finfo)->close();
   return true;
 }
 
 static bool HHVM_FUNCTION(finfo_set_flags, const Resource& finfo, int64_t options) {
-  auto magic = finfo.getTyped<FileinfoResource>()->getMagic();
+  auto magic = cast<FileinfoResource>(finfo)->getMagic();
   if (magic_setflags(magic, options) == -1) {
     raise_warning(
       "Failed to set option '%" PRId64 "' %d:%s",
@@ -122,9 +118,9 @@ static Variant php_finfo_get_type(
       raise_warning("Failed to load magic database.");
       goto common;
     }
-  } else if (object.get()) {
+  } else if (object) {
     buffer = what.toString();
-    magic = object.getTyped<FileinfoResource>()->getMagic();
+    magic = cast<FileinfoResource>(object)->getMagic();
   } else {
     // if we want to support finfo as a resource as well, do it here
     not_reached();
@@ -144,7 +140,7 @@ static Variant php_finfo_get_type(
 
     case FILEINFO_MODE_STREAM:
     {
-      auto stream = what.toResource().getTyped<File>();
+      auto stream = cast<File>(what);
       if (!stream) {
         goto common;
       }
@@ -152,7 +148,7 @@ static Variant php_finfo_get_type(
       auto streampos = stream->tell(); // remember stream position
       stream->seek(0, SEEK_SET);
 
-      ret_val = magic_stream(magic, stream);
+      ret_val = magic_stream(magic, stream.get());
 
       stream->seek(streampos, SEEK_SET);
       break;

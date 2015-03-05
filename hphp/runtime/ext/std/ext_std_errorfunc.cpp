@@ -161,8 +161,8 @@ Array HHVM_FUNCTION(error_get_last) {
 }
 
 bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
-                              const String& destination /* = null_string */,
-                              const String& extra_headers /* = null_string */) {
+                              const Variant& destination /* = null */,
+                              const Variant& extra_headers /* = null */) {
   // error_log() should not invoke the user error handler,
   // so we use Logger::Error() instead of raise_warning() or raise_error()
   switch (message_type) {
@@ -176,7 +176,8 @@ bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
   }
   case 3:
   {
-    Variant outfile = HHVM_FN(fopen)(destination, "a"); // open for append only
+    // open for append only
+    auto outfile = HHVM_FN(fopen)(destination.toString(), "a");
     if (outfile.isNull()) {
       Logger::Error("can't open error_log file!\n");
       return false;

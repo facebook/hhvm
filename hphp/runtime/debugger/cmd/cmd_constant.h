@@ -17,23 +17,23 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_CONSTANT_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_CONSTANT_H_
 
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CmdConstant : public DebuggerCommand {
-public:
+struct CmdConstant : DebuggerCommand {
   CmdConstant() : DebuggerCommand(KindOfConstant) {}
 
-  virtual void help(DebuggerClient &client);
+  void help(DebuggerClient&) override;
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
 
 private:
   Array m_constants;

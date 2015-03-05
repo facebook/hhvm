@@ -118,6 +118,7 @@ namespace Trace {
       TM(hhir_alias)    \
       TM(hhir_load)     \
       TM(llvm)          \
+      TM(llvm_count)    \
       TM(hhir_refcount) \
       TM(inlining)      \
       TM(instancebits)  \
@@ -228,10 +229,9 @@ void ftraceRelease(Args&&... args) {
   traceRelease("%s", folly::format(std::forward<Args>(args)...).str().c_str());
 }
 
-// Trace to the global ring buffer in all builds, and also trace normally
-// via the standard TRACE(n, ...) macro.
-#define TRACE_RB(n, ...)                            \
-  HPHP::Trace::traceRingBufferRelease(__VA_ARGS__); \
+// Trace to the global ring buffer and the normal TRACE destination.
+#define TRACE_RB(n, ...)                                        \
+  ONTRACE(n, HPHP::Trace::traceRingBufferRelease(__VA_ARGS__)); \
   TRACE(n, __VA_ARGS__);
 void traceRingBufferRelease(const char* fmt, ...) ATTRIBUTE_PRINTF(1,2);
 

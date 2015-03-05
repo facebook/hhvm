@@ -24,8 +24,7 @@ namespace HPHP {
 
 // Base class of all commands
 // An instance of an xdebug command is alive until the next command is received.
-class XDebugCommand {
-public:
+struct XDebugCommand {
   // Given an xdebug server, a command string, and command arguments, constructs
   // and returns a new XDebugCommand corresponding to the given string. This is
   // how commands should be created

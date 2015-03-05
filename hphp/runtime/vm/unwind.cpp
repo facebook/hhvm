@@ -573,35 +573,47 @@ UnwindAction exception_handler() noexcept {
   }
 
   catch (const Object& o) {
+    ITRACE(1, "unwind: Object of class {}\n", o->getVMClass()->name()->data());
     pushFault(o);
     return enterUnwinder();
   }
 
   catch (VMSwitchMode&) {
+    ITRACE(1, "unwind: VMSwitchMode\n");
     return UnwindAction::ResumeVM;
   }
 
   catch (VMSwitchModeBuiltin&) {
+    ITRACE(1, "unwind: VMSwitchModeBuiltin from {}\n",
+           vmfp()->m_func->fullName()->data());
     unwindBuiltinFrame();
     return UnwindAction::ResumeVM;
   }
 
+  catch (VMResumeTC&) {
+    always_assert(false && "VMResumeTC exception escaped the TC");
+  }
+
   catch (VMReenterStackOverflow&) {
+    ITRACE(1, "unwind: VMReenterStackOverflow\n");
     pushFault(new FatalErrorException("Stack overflow"));
     return UnwindAction::Propagate;
   }
 
   catch (Exception& e) {
+    ITRACE(1, "unwind: Exception: {}\n", e.what());
     pushFault(e.clone());;
     return enterUnwinder();
   }
 
   catch (std::exception& e) {
+    ITRACE(1, "unwind: std::exception: {}\n", e.what());
     pushFault(new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
     return enterUnwinder();
   }
 
   catch (...) {
+    ITRACE(1, "unwind: unknown\n");
     pushFault(new Exception("unknown exception"));
     return enterUnwinder();
   }

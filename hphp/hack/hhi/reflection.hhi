@@ -143,6 +143,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
   public $name = '';
 
   public function __construct($name);
+  public function __toString();
   public static function export($name, $return = null);
   public function isDisabled();
   public function invoke(...);
@@ -164,6 +165,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
 
   public static function export($class, $name, $return = false);
   public function __construct($class, $name = null);
+  public function __toString();
   public function isPublic();
   public function isPrivate();
   public function isProtected();

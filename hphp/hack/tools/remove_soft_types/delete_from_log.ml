@@ -146,7 +146,7 @@ let remove_member_function_visitor toks class_ parsed_line =
 
 (* it's ~20% faster to compute the regexp only once *)
 let re1 = Str.regexp ".*Argument \\([0-9]+\\) \\(passed \\)?to \\(.+::\\)?\\(.+\\)() must be of type [@?].+, .+ given (?in \\([^ ]+\\) on line [0-9]+)?"
-let re2 = Str.regexp ".*Value returned from \\(.+::\\)?\\(.+\\)() must be of type @.+, .+ given (?in \\(.+\\) on line [0-9]+)?"
+let re2 = Str.regexp ".*Value returned from\\( async\\)? \\(function\\|method\\) \\(.+::\\)?\\(.+\\)() must be of type @.+, .+ given (?in \\(.+\\) on line [0-9]+)?"
 
 (**
  * Parses both, argument and return type failures.
@@ -167,9 +167,9 @@ let parse_logline tbl line =
   else if Str.string_match re2 line 0
   then begin
     let fn, func, class_opt =
-      Str.matched_group 3 line,
-      Str.matched_group 2 line,
-      (try Some (Str.matched_group 1 line) with Not_found -> None)
+      Str.matched_group 5 line,
+      Str.matched_group 4 line,
+      (try Some (Str.matched_group 3 line) with Not_found -> None)
     in
     Some {file_name=fn; func=func; cl=class_opt; arg=Return}
   end

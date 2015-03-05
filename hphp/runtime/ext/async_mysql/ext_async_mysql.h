@@ -178,8 +178,12 @@ class FieldIndex {
   String getFieldString(size_t field_index) const;
 
  private:
-  std::vector<String> field_names_;
-  StringMap<size_t> field_name_map_;
+  smart::vector<String> field_names_;
+  smart::hash_map<
+    String,
+    size_t,
+    hphp_string_hash,
+    hphp_string_same> field_name_map_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

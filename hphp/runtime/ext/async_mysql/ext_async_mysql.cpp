@@ -662,7 +662,6 @@ IMPLEMENT_GET_CLASS(AsyncMysqlQueryResult)
 void AsyncMysqlQueryResult::sweep() {
   m_op.reset();
   m_query_result.reset();
-  m_field_index.reset();
 }
 
 ObjectData* AsyncMysqlQueryResult::newInstance(
@@ -678,7 +677,7 @@ void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
   m_query_result =
       folly::make_unique<am::QueryResult>(std::move(query_result));
   m_field_index =
-      std::make_shared<FieldIndex>(m_query_result->getRowFields());
+      smart::make_shared<FieldIndex>(m_query_result->getRowFields());
 }
 
 am::Operation* AsyncMysqlQueryResult::op() {
@@ -916,7 +915,6 @@ ObjectData* AsyncMysqlRowBlock::newInstance(am::RowBlock* row_block,
 
 void AsyncMysqlRowBlock::sweep() {
   m_row_block.reset();
-  m_field_index.reset();
 }
 
 size_t AsyncMysqlRowBlock::getIndexFromVariant(const Variant& field) {

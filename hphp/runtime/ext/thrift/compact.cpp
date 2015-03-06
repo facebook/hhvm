@@ -849,7 +849,7 @@ class CompactReader {
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
           Variant value = readField(valueSpec, valueType);
-          ainit.set(key, value);
+          ainit.setKeyUnconverted(key, value);
         }
         ret = ainit.toArray();
       }

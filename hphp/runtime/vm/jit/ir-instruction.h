@@ -173,8 +173,7 @@ struct IRInstruction {
    * Get or set the BCMarker of the instruction.
    */
   const BCMarker& marker() const;
-        BCMarker& marker();
-  void setMarker(BCMarker);
+  BCMarker& marker();
 
   /*
    * Check for, get, or set the instruction's optional type parameter.

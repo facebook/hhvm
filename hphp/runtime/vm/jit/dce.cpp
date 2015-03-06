@@ -719,7 +719,7 @@ void performActRecFixups(const BlockList& blocks,
       case DecRef:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
-          inst.marker().setSpOff(FPAbsOffset{safeDepth});
+          inst.marker() = inst.marker().adjustSp({safeDepth});
         }
         break;
 

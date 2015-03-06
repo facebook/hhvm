@@ -52,7 +52,7 @@ struct BCMarker {
 
   explicit BCMarker() = default;
 
-  explicit BCMarker(SrcKey sk, FPAbsOffset sp, TransID tid)
+  BCMarker(SrcKey sk, FPAbsOffset sp, TransID tid)
     : m_sk(sk)
     , m_spOff(sp)
     , m_profTransID{tid}
@@ -80,7 +80,10 @@ struct BCMarker {
   FPAbsOffset spOff()       const { assert(valid());   return m_spOff;        }
   TransID     profTransId() const { assert(valid());   return m_profTransID;  }
 
-  void setSpOff(FPAbsOffset sp) { assert(valid()); m_spOff = sp; }
+  // Return a copy of this marker with an updated sp
+  BCMarker adjustSp(FPAbsOffset sp) const {
+    return {m_sk, sp, m_profTransID};
+  }
 };
 
 }}

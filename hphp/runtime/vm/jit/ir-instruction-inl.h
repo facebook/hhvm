@@ -124,11 +124,6 @@ inline BCMarker& IRInstruction::marker() {
   return m_marker;
 }
 
-inline void IRInstruction::setMarker(BCMarker marker) {
-  assert(marker.valid());
-  m_marker = marker;
-}
-
 inline bool IRInstruction::hasTypeParam() const {
   return m_typeParam.hasValue();
 }

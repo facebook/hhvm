@@ -64,9 +64,9 @@ struct DFS {
       return;
     }
 
-    if (m_visited.count(tid)) return;
-    m_visited.insert(tid);
+    if (!m_visited.insert(tid).second) return;
     m_visiting.insert(tid);
+    m_numBCInstrs += tidInstrs;
 
     if (!breaksRegion(*(m_profData->transLastInstr(tid)))) {
 
@@ -84,9 +84,15 @@ struct DFS {
         if (m_profData->optimized(dstSK)) continue;
 
         auto dstBlockId = m_profData->transRegion(dst)->entry()->id();
-        m_arcs.push_back({srcBlockId, dstBlockId});
 
         visit(dst);
+
+        // Record the arc if dstBlockId was included in the region.
+        // (Note that it may not be included in the region due to
+        // the EvalJitMaxRegionInstrs limit.)
+        if (m_visited.count(dstBlockId)) {
+          m_arcs.push_back({srcBlockId, dstBlockId});
+        }
       }
     }
 
@@ -96,7 +102,6 @@ struct DFS {
     m_region->prepend(*tidRegion);
     m_selectedSet.insert(tid);
     if (m_selectedVec) m_selectedVec->push_back(tid);
-    m_numBCInstrs += tidRegion->instrSize();
     always_assert(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
 
     m_visiting.erase(tid);

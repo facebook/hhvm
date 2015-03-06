@@ -94,7 +94,7 @@ let unbound_name env (pos, name)=
   );
   env, (Reason.Rnone, Tany)
 
-let is_builtin_hhi path = Relative_path.prefix path = Relative_path.Hhi
+let is_hhi path = str_ends_with (Relative_path.suffix path) ".hhi"
 
 (*****************************************************************************)
 (* Global constants typing *)
@@ -3458,7 +3458,7 @@ and class_def_ env_up c tc =
     | Ast.Cenum -> (* the parser won't let enums be final *) assert false
     | Ast.Cnormal -> ()
   end;
-  if not (Env.is_decl env) || is_builtin_hhi (Pos.filename (fst c.c_name))
+  if not (Env.is_decl env) || is_hhi (Pos.filename (fst c.c_name))
   then begin
     List.iter (class_implements env c) impl;
     SMap.iter (fun _ ty -> class_implements_type env c ty) dimpl;

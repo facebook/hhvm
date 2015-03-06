@@ -59,14 +59,23 @@ let builtins = "<?hh // decl\n"^
   "  public function add(Tv $value): Vector<Tv>;"^
   "  public function addAll(?Traversable<Tv> $it): Vector<Tv>;"^
   "}\n"^
-  "final class ImmVector<Tv> implements ConstVector<Tv> {}\n"^
+  "final class ImmVector<Tv> implements ConstVector<Tv> {"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): ImmVector<Tu>;"^
+  "}\n"^
   "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {"^
   "  /* HH_FIXME[3007]: This is intentional; not a constructor */"^
   "  public function map<Tu>((function(Tv): Tu) $callback): Map<Tk, Tu>;"^
+  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): Map<Tk, Tu>;"^
   "  public function contains(Tk $k): bool;"^
   "}\n"^
-  "final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>{}\n"^
-  "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {}\n"^
+  "final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>{"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): ImmMap<Tk, Tu>;"^
+  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): ImmMap<Tk, Tu>;"^
+  "}\n"^
+  "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): StableMap<Tk, Tu>;"^
+  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): StableMap<Tk, Tu>;"^
+  "}\n"^
   "final class Set<Tv> implements ConstSet<Tv> {}\n"^
   "final class ImmSet<Tv> implements ConstSet<Tv> {}\n"^
   "class Exception { public function __construct(string $x) {} }\n"^

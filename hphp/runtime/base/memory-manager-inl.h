@@ -426,6 +426,18 @@ inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 //////////////////////////////////////////////////////////////////////
 
+inline bool MemoryManager::contains(void *p) const {
+  return m_heap.contains(p);
+}
+
+inline bool MemoryManager::checkContains(void* p) const {
+  // Be conservative if the smart allocator is disabled.
+  assert(RuntimeOption::DisableSmartAllocator || contains(p));
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif

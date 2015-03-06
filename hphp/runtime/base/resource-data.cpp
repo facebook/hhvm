@@ -35,12 +35,7 @@ ResourceData::ResourceData()
   int& pmax = os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;
-
-#ifndef FOLLY_SANITIZE_ADDRESS
-  // All ResourceDatas should be slab-allocated, except for when we're forcing
-  // them into big allocations because we have ASAN enabled.
-  assert(MM().contains(this));
-#endif
+  assert(MM().checkContains(this));
 }
 
 void ResourceData::o_setId(int id) {

@@ -575,9 +575,11 @@ struct MemoryManager {
   bool empty() const { return m_heap.empty(); }
 
   /*
-   * Whether `p' points into memory owned by `m_heap'.
+   * Whether `p' points into memory owned by `m_heap'.  checkContains() will
+   * assert that it does.
    */
-  bool contains(void* p) const { return m_heap.contains(p); }
+  bool contains(void* p) const;
+  bool checkContains(void* p) const;
 
   /*
    * Release all the request-local allocations.  Zeros all the free

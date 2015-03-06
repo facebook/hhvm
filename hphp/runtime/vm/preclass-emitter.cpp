@@ -286,11 +286,14 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     TypedValueAux tvaux;
     if (const_.isAbstract()) {
       tvWriteUninit(&tvaux);
-      tvaux.isAbstractConst() = true;
+      tvaux.constModifiers().m_isAbstract = true;
     } else {
       tvCopy(const_.val(), tvaux);
-      tvaux.isAbstractConst() = false;
+      tvaux.constModifiers().m_isAbstract = false;
     }
+    // TODO(#6414420) - set this flag if it is a type constant
+    tvaux.constModifiers().m_isType = false;
+
     constBuild.add(const_.name(), PreClass::Const(const_.name(),
                                                   tvaux,
                                                   const_.phpCode()));
@@ -299,7 +302,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     for (auto cnsMap : *nativeConsts) {
       TypedValueAux tvaux;
       tvCopy(cnsMap.second, tvaux);
-      tvaux.isAbstractConst() = false;
+      tvaux.constModifiers() = { false, false };
       constBuild.add(cnsMap.first, PreClass::Const(cnsMap.first,
                                                    tvaux,
                                                    staticEmptyString()));

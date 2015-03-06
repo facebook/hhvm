@@ -128,7 +128,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
   for (size_t i = 0; i < numConstants; i++) {
     // Note: hphpc doesn't include inherited constants in
     // get_class_constants(), so mimic that behavior
-    if (consts[i].m_class == cls && !consts[i].m_val.isAbstractConst()) {
+    if (consts[i].m_class == cls && !consts[i].isAbstract()) {
       auto const name  = const_cast<StringData*>(consts[i].m_name.get());
       Cell value = consts[i].m_val;
       // Handle dynamically set constants

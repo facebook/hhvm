@@ -830,7 +830,7 @@ const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
   if (clsCnsInd == kInvalidSlot) {
     return nullptr;
   }
-  if (m_constants[clsCnsInd].m_val.isAbstractConst()) {
+  if (m_constants[clsCnsInd].isAbstract()) {
     return nullptr;
   }
   auto const ret = const_cast<TypedValueAux*>(&m_constants[clsCnsInd].m_val);
@@ -1452,12 +1452,12 @@ void Class::setConstants() {
         continue;
       }
 
-      if (iConst.m_val.isAbstractConst()) {
+      if (iConst.isAbstract()) {
         continue;
       }
 
       auto& existingConst = builder[existing->second];
-      if (existingConst.m_val.isAbstractConst()) {
+      if (existingConst.isAbstract()) {
         existingConst.m_class = iConst.m_class;
         existingConst.m_val = iConst.m_val;
         continue;
@@ -1492,7 +1492,7 @@ void Class::setConstants() {
       }
 
       if (preConst->isAbstract() &&
-          !builder[it2->second].m_val.isAbstractConst()) {
+          !builder[it2->second].isAbstract()) {
         raise_error("Cannot re-declare as abstract previously defined "
                     "constant %s::%s in %s",
                     builder[it2->second].m_class->name()->data(),
@@ -1516,7 +1516,7 @@ void Class::setConstants() {
   if (!(attrs() & (AttrTrait | AttrInterface | AttrAbstract))) {
     for (Slot i = 0; i < builder.size(); i++) {
       const Const& constant = builder[i];
-      if (constant.m_val.isAbstractConst()) {
+      if (constant.isAbstract()) {
         raise_error("Class %s contains abstract constant (%s) and "
                     "must therefore be declared abstract or define "
                     "the remaining constants",
@@ -1531,7 +1531,7 @@ void Class::setConstants() {
     (attrs() & (AttrAbstract | AttrFinal)) == (AttrAbstract | AttrFinal)) {
     for (Slot i = 0; i < builder.size(); i++) {
       const Const& constant = builder[i];
-      if (constant.m_val.isAbstractConst()) {
+      if (constant.isAbstract()) {
         raise_error(
           "Class %s contains abstract constant (%s) and "
           "therefore cannot be declared 'abstract final'",

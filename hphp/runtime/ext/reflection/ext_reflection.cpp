@@ -1200,7 +1200,7 @@ void addClassConstantNames(const Class* cls,
 
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].m_class == cls && !consts[i].m_val.isAbstractConst()) {
+    if (consts[i].m_class == cls && !consts[i].isAbstract()) {
       st->add(const_cast<StringData*>(consts[i].m_name.get()));
     }
   }
@@ -1254,7 +1254,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
 
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].m_val.isAbstractConst()) {
+    if (consts[i].isAbstract()) {
       st->add(const_cast<StringData*>(consts[i].m_name.get()));
     }
   }

@@ -71,7 +71,7 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
   Array names;
   auto const consts = klass->constants();
   for (size_t i = 0; i < numConstants; i++) {
-    if (consts[i].m_val.isAbstractConst()) {
+    if (consts[i].isAbstract()) {
       continue;
     }
     if (consts[i].m_class == klass) foundOnClass++;

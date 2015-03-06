@@ -145,6 +145,9 @@ struct Class : AtomicCountable {
     LowClassPtr m_class;
     LowStringPtr m_name;
     TypedValueAux m_val;
+
+    bool isAbstract()      const { return m_val.constModifiers().m_isAbstract; }
+    bool isType()          const { return m_val.constModifiers().m_isType; }
   };
 
   /*

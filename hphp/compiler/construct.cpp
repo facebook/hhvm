@@ -381,8 +381,9 @@ void Construct::dumpNode(int spc) {
   std::cout << type_info << nkid << scontext << sef
     << localtered << refstr << objstr << noremoved;
   if (m_loc) {
-    std::cout << " " << m_loc->file << ":" <<
-      m_loc->line1 << "@" << m_loc->char1;
+    std::cout << " " << m_loc->file << ":"
+      << "[" << m_loc->line0 << "@" << m_loc->char0 << ", "
+      << m_loc->line1 << "@" << m_loc->char1 << "]";
   }
   std::cout << "\n";
 }

@@ -749,7 +749,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    * Duplicate class constants override parent class constants, but
    * for interfaces it's an error to have a duplicate constant, unless
    * it just happens from implementing the same interface more than
-   * once.
+   * once, or the constant is abstract.
    *
    * Note: hphpc doesn't actually check for this case, but since with
    * HardConstProp we're potentially doing propagation of these
@@ -760,7 +760,10 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
   for (auto& c : rparent->cls->constants) {
     auto& cptr = rleaf->clsConstants[c.name];
     if (isIface && cptr) {
-      if (cptr->cls != rparent->cls) return false;
+      if (cptr->val.hasValue() && c.val.hasValue() &&
+          cptr->cls != rparent->cls) {
+        return false;
+      }
     }
     cptr = &c;
   }

@@ -26,10 +26,11 @@ inline IRInstruction::IRInstruction(Opcode op,
                                     Edge* edges,
                                     uint32_t numSrcs,
                                     SSATmp** srcs)
-  : m_typeParam(folly::none)
+  : m_typeParam{}
   , m_op(op)
   , m_numSrcs(numSrcs)
   , m_numDsts(0)
+  , m_hasTypeParam{false}
   , m_marker(marker)
   , m_id(kTransient)
   , m_srcs(srcs)
@@ -124,20 +125,16 @@ inline BCMarker& IRInstruction::marker() {
   return m_marker;
 }
 
-inline bool IRInstruction::hasTypeParam() const {
-  return m_typeParam.hasValue();
-}
+inline bool IRInstruction::hasTypeParam() const { return m_hasTypeParam; }
 
 inline Type IRInstruction::typeParam() const {
-  return m_typeParam.value();
-}
-
-inline folly::Optional<Type> IRInstruction::maybeTypeParam() const {
+  assert(m_hasTypeParam);
   return m_typeParam;
 }
 
 inline void IRInstruction::setTypeParam(Type t) {
-  m_typeParam.assign(t);
+  m_hasTypeParam = true;
+  m_typeParam = t;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

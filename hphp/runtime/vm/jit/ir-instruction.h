@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include <boost/intrusive/list.hpp>
-#include <folly/Optional.h>
 #include <folly/Range.h>
 
 #include <cstdint>
@@ -180,7 +179,6 @@ struct IRInstruction {
    */
   bool hasTypeParam() const;
   Type typeParam() const;
-  folly::Optional<Type> maybeTypeParam() const;
   void setTypeParam(Type);
 
 
@@ -343,10 +341,12 @@ private:
   // Data members.
 
 private:
-  folly::Optional<Type> m_typeParam;
+  Type m_typeParam;  // garbage unless m_hasTypeParam is true
   Opcode m_op;
   uint16_t m_numSrcs;
-  uint16_t m_numDsts;
+  uint16_t m_numDsts : 15;
+  bool m_hasTypeParam : 1;
+  // <2 byte hole>
   BCMarker m_marker;
   const Id m_id;
   SSATmp** m_srcs;

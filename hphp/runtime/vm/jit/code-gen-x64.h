@@ -72,7 +72,7 @@ private:
 
   // Main call helper:
   void cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
-                    SyncOptions sync, ArgGroup& args);
+                    SyncOptions sync, const ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
   enum class Width { Value, Full };

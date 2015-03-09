@@ -106,8 +106,6 @@ struct BackEnd : public jit::BackEnd {
                 x64::rVmTl == r12 &&
                 x64::rStashedAR == r15,
                 "__enterTCHelper needs to be modified to use the correct ABI");
-  static_assert(REQ_BIND_CALL == 0x0,
-                "Update assembly test for REQ_BIND_CALL in handleSRHelper");
 
   void enterTCHelper(TCA start, ActRec* stashedAR) override {
     // We have to force C++ to spill anything that might be in a callee-saved

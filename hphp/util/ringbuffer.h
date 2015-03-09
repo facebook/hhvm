@@ -38,7 +38,9 @@ namespace Trace {
   RBTYPE(FuncExit) \
   RBTYPE(FuncPrologue) \
   RBTYPE(BytecodeStart) \
-  RBTYPE(ServiceReq)
+  RBTYPE(ServiceReq) \
+  RBTYPE(DispatchBB) \
+  RBTYPE(InterpOne)
 
 enum RingBufferType : uint8_t {
 #define RBTYPE(x) RBType ## x,

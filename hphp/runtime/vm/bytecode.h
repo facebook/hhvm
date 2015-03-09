@@ -1040,7 +1040,7 @@ visitStackElems(const ActRec* const fp,
 void resetCoverageCounters();
 
 // The interpOne*() methods implement individual opcode handlers.
-using InterpOneFunc = void (*) (ActRec* ar, Cell* sp, Offset pcOff);
+using InterpOneFunc = void (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
 bool doFCallArrayTC(PC pc);

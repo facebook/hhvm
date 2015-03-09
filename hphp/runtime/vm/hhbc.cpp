@@ -418,7 +418,6 @@ OffsetSet instrSuccOffsets(Op* opc, const Unit* unit) {
  * implicit exception paths.
  */
 int numSuccs(const Op* instr) {
-  if (!instrIsControlFlow(*instr)) return 1;
   if ((instrFlags(*instr) & TF) != 0) {
     if (isSwitch(*instr)) {
       return *(int*)(instr + 1);
@@ -426,6 +425,7 @@ int numSuccs(const Op* instr) {
     if (isUnconditionalJmp(*instr) || *instr == OpIterBreak) return 1;
     return 0;
   }
+  if (!instrIsControlFlow(*instr)) return 1;
   if (instrJumpOffset(const_cast<Op*>(instr))) return 2;
   return 1;
 }
@@ -1199,6 +1199,9 @@ bool instrIsNonCallControlFlow(Op opcode) {
   if (!instrIsControlFlow(opcode) || isFCallStar(opcode)) return false;
 
   switch (opcode) {
+    case OpAwait:
+    case OpYield:
+    case OpYieldK:
     case OpContEnter:
     case OpContRaise:
     case OpFCallBuiltin:

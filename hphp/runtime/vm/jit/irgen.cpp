@@ -132,7 +132,7 @@ void checkCold(HTS& env, TransID transId) {
 }
 
 void ringbuffer(HTS& env, Trace::RingBufferType t, SrcKey sk, int level) {
-  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, level)) return;
+  if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
   gen(env, RBTrace, RBTraceData(t, sk));
 }
 

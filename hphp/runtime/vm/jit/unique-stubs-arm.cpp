@@ -82,7 +82,7 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
 
   emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
+  not_implemented();
 
   us.add("stackOverflowHelper", us.stackOverflowHelper);
 }
@@ -257,7 +257,7 @@ void emitBindCallStubs(UniqueStubs& uniqueStubs) {
     vf << store{PhysReg{rLinkReg}, PhysReg{rStashedAR}[AROFF(m_savedRip)]};
     ServiceReqArgVec argv;
     packServiceReqArgs(argv, (int64_t)i);
-    emitServiceReq(vf, nullptr, jit::REQ_BIND_CALL, argv);
+    not_implemented();
   }
   uniqueStubs.add("bindCallStub", uniqueStubs.bindCallStub);
   uniqueStubs.add("immutableBindCallStub", uniqueStubs.immutableBindCallStub);

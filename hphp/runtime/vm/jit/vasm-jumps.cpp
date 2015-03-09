@@ -88,7 +88,7 @@ bool match_bindjcc1st(const Vunit& unit, Vlabel t0, Vlabel t1) {
 /*
  * optimizeExits does two conversions to eliminate common branch-to-exit flows.
  *
- * 1. If we see a jcc that leads to two "idential" blocks ending with
+ * 1. If we see a jcc that leads to two "identical" blocks ending with
  * bindjmp, then copy the identical part of the targets before the jcc,
  * and replace the jcc with a bindjcc1st instruction using the bytecode
  * destinations from the two original bindjmps. For the sake of this pass,

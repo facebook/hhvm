@@ -1120,7 +1120,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   State& state = m_info[t->id].state_in;
   if (!state.stk) {
     copyState(&state, &cur);
-    return false;
+    return true;
   }
   // Check stack.
   if (state.stklen != cur.stklen) {

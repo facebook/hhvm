@@ -661,14 +661,20 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
 
   const bool isSystemLib = u->filepath()->empty() ||
-    boost::ends_with(u->filepath()->data(), "systemlib.php");
+    boost::contains(u->filepath()->data(), "systemlib");
   const bool doVerify =
     kVerify || boost::ends_with(u->filepath()->data(), "hhas");
   if (doVerify) {
-    Verifier::checkUnit(
-      u.get(),
-      isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose
-    );
+    auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
+    auto const ok = Verifier::checkUnit(u.get(), verbose);
+
+    if (!ok && !verbose) {
+      std::cerr << folly::format(
+        "Verification failed for unit {}. Re-run with HHVM_VERIFY_VERBOSE{}=1 "
+        "to see more details.\n",
+        u->filepath()->data(), isSystemLib ? "_SYSTEM" : ""
+      );
+    }
   }
 
   return u;

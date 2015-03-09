@@ -7464,12 +7464,12 @@ condStackTraceSep(Op opcode) {
           Trace::trace("%s\n", stack.c_str());)
 
 /**
- * The interpOne methods save m_pc, m_fp, and m_sp ExecutionContext,
- * then call the iop<opcode> function.
+ * The interpOne functions are fat wrappers around the iop* functions, mostly
+ * adding a bunch of debug-only logging and stats tracking.
  */
-#define O(opcode, imm, push, pop, flags) \
-void interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {            \
-  interp_set_regs(ar, sp, pcOff);                                       \
+#define O(opcode, imm, push, pop, flags)                                \
+  void interpOne##opcode(ActRec* fp, TypedValue* sp, Offset pcOff) {    \
+  interp_set_regs(fp, sp, pcOff);                                       \
   SKTRACE(5, SrcKey(liveFunc(), vmpc(), liveResumed()), "%40s %p %p\n", \
           "interpOne" #opcode " before (fp,sp)", vmfp(), vmsp());       \
   assert(*reinterpret_cast<const Op*>(vmpc()) == Op::opcode);           \
@@ -7478,6 +7478,10 @@ void interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {            \
     static const StringData* cat = makeStaticString("interpOne");       \
     static const StringData* name = makeStaticString(#opcode);          \
     Stats::incStatGrouped(cat, name, 1);                                \
+  }                                                                     \
+  if (Trace::moduleEnabled(Trace::ringbuffer)) {                        \
+    auto sk = SrcKey{vmfp()->func(), vmpc(), vmfp()->resumed()}.toAtomicInt(); \
+    Trace::ringbufferEntry(Trace::RBTypeInterpOne, sk, 0);              \
   }                                                                     \
   INC_TPC(interp_one)                                                   \
   /* Correct for over-counting in TC-stats. */                          \
@@ -7609,6 +7613,10 @@ void dispatchBB() {
     auto name = makeStaticString(show(SrcKey(vmfp()->func(), vmpc(),
                                              vmfp()->resumed())));
     Stats::incStatGrouped(cat, name, 1);
+  }
+  if (Trace::moduleEnabled(Trace::ringbuffer)) {
+    auto sk = SrcKey{vmfp()->func(), vmpc(), vmfp()->resumed()}.toAtomicInt();
+    Trace::ringbufferEntry(Trace::RBTypeDispatchBB, sk, 0);
   }
   dispatchImpl<true>();
   switchModeForDebugger();

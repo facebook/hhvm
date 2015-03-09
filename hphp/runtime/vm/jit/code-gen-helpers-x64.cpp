@@ -339,8 +339,9 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   if (imm.fits(sz::dword)) {
     v << storeqi{imm.l(), ref};
   } else {
-    v << storeli{int32_t(imm.q()), ref};
-    v << storeli{int32_t(imm.q() >> 32), ref + 4};
+    // An alternative is two 32-bit immediate stores, but that's little-endian
+    // specific and generates larger code on x64 (24 bytes vs. 18 bytes).
+    v << store{v.cns(imm.q()), ref};
   }
 }
 
@@ -354,7 +355,7 @@ void emitImmStoreq(Asm& a, Immed64 imm, MemoryRef ref) {
 }
 
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
-  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+  if (!Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     return;
   }
   v << vcall{CppCall::direct(Trace::ringbufferMsg),

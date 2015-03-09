@@ -27,12 +27,10 @@ namespace HPHP { namespace jit {
 
 #define SERVICE_REQUESTS \
   /*
-   * BIND_* all are requests for the first time a call, jump, or
-   * whatever is needed.  This generally involves translating new code
-   * and then patching an address supplied as a service request
-   * argument.
+   * BIND_* all are requests for the first time a jump is needed.  This
+   * generally involves translating new code and then patching an address
+   * supplied as a service request argument.
    */ \
-  REQ(BIND_CALL)         \
   REQ(BIND_JMP)          \
   REQ(BIND_ADDR)         \
   REQ(BIND_JMPCC_FIRST)  \
@@ -57,12 +55,7 @@ namespace HPHP { namespace jit {
    * This request is raised in the case that translated machine code
    * executes the RetC for a frame that was pushed by the interpreter.
    */ \
-  REQ(POST_INTERP_RET) \
-  \
-  /*
-   * Raised when the execution stack overflowed.
-   */ \
-  REQ(STACK_OVERFLOW)
+  REQ(POST_INTERP_RET)
 
 enum ServiceRequest {
 #define REQ(nm) REQ_##nm,
@@ -149,9 +142,10 @@ union ServiceReqArg {
 struct ServiceReqInfo {
   ServiceRequest req;
   TCA stub;
-  ActRec* stashedAR;
   ServiceReqArg args[4];
 };
+static_assert(sizeof(ServiceReqInfo) == 0x30,
+              "rsp adjustments in handleSRHelper");
 
 /*
  * Assembly stub called by translated code to pack argument registers into a

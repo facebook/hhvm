@@ -56,7 +56,7 @@ void GraphBuilder::createBlocks() {
   // ordinary basic block boundaries
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
     PC pc = i.popFront();
-    if (isCF(pc) && !i.empty()) createBlock(i.front());
+    if ((isCF(pc) || isTF(pc)) && !i.empty()) createBlock(i.front());
     if (isSwitch(*reinterpret_cast<const Op*>(pc))) {
       foreachSwitchTarget(reinterpret_cast<const Op*>(pc), [&](Offset& o) {
         createBlock(pc + o);

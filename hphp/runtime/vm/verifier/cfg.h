@@ -34,17 +34,16 @@ namespace Verifier {
  * blocks should be stored elsewhere and indexed by one of these ids,
  * or in a Map<Block*> if you're a sadist.
  */
-class Block {
-public:
+struct Block {
   explicit Block(PC start) :
       start(start), last(0), end(0) , id(-1), rpo_id(-1), next_linear(0),
       next_rpo(0), succs(0), exns(0) {
   }
-private:
+
   // Never copy Blocks.
-  explicit Block(const Block&);
-  Block& operator=(const Block&);
-public:
+  explicit Block(const Block&) = delete;
+  Block& operator=(const Block&) = delete;
+
   PC start;           // first instruction
   PC last;            // last instruction (inclusive)
   PC end;             // points past last instruction (exclusive)

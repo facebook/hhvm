@@ -327,8 +327,16 @@ public:
    * The forced symbol name is so we can call this from
    * translator-asm-helpers.S without hardcoding a fragile mangled name.
    */
-  TCA handleServiceRequest(ServiceReqInfo& info)
+  TCA handleServiceRequest(ServiceReqInfo& info) noexcept
     asm("MCGenerator_handleServiceRequest");
+
+  /*
+   * Smash the PHP call at address toSmash to point to the appropriate prologue
+   * for calleeFrame, returning the address of said prologue. If a prologue
+   * doesn't exist and this function can't get the write lease it may return
+   * fcallHelperThunk, which uses C++ helpers to act like a prologue.
+   */
+  TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable);
 
   /*
    * Look up (or create) and return the address of a translation for the
@@ -341,6 +349,11 @@ public:
    */
   TCA handleResume(bool interpFirst);
 
+  /*
+   * Handle a VM stack overflow condition by throwing an appropriate exception.
+   */
+  void handleStackOverflow(ActRec* stashedAR);
+
 private:
   /*
    * Service request handlers.
@@ -351,8 +364,6 @@ private:
                      SrcKey skTrue, SrcKey skFalse,
                      bool toTake,
                      bool& smashed);
-  TCA bindCall(ActRec* calleeFrame, bool isImmutable,
-               SrcKey& sk, ServiceRequest& ret);
 
   bool shouldTranslate(const Func*) const;
   bool shouldTranslateNoSizeLimit(const Func*) const;

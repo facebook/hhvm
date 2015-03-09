@@ -566,8 +566,9 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
   auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 1).reg()};
-  v << jmpi{mcg->tx().uniqueStubs.endCatchHelper, kCrossTraceRegs};
+  // endCatchHelper doesn't care about vmsp since it's just going to continue
+  // unwinding.
+  v << jmpi{mcg->tx().uniqueStubs.endCatchHelper, rVmTl | rVmFp};
 }
 
 void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
@@ -697,7 +698,7 @@ static void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
 
 void
 CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
-                            SyncOptions sync, ArgGroup& args) {
+                            SyncOptions sync, const ArgGroup& args) {
   auto const inst = args.inst();
   jit::vector<Vreg> vargs, vSimdArgs, vStkArgs;
   for (size_t i = 0; i < args.numGpArgs(); ++i) {
@@ -723,7 +724,7 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
   auto const do_catch = taken && taken->isCatch();
   if (do_catch) {
     always_assert_flog(
-      sync != SyncOptions::kNoSyncPoint,
+      inst->is(InterpOne) || sync != SyncOptions::kNoSyncPoint,
       "cgCallHelper called with kNoSyncPoint but inst has a catch block: {}\n",
       *inst
     );
@@ -4747,22 +4748,18 @@ void CodeGenerator::cgConcatCellCell(IRInstruction* inst) {
   CG_PUNT(inst->marker(), cgConcatCellCell);
 }
 
-void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
-  auto const extra = inst->extra<InterpOneData>();
+void CodeGenerator::cgInterpOne(IRInstruction* inst) {
+  auto const extra = inst->extra<InterpOne>();
   auto const pcOff = extra->bcOff;
   auto const spOff = extra->spOffset;
-  auto const opc = *(getUnit(inst->marker())->at(pcOff));
-  auto const interpOneHelper = interpOneEntryPoints[opc];
+  auto const op    = extra->opcode;
+  auto const interpOneHelper = interpOneEntryPoints[size_t(op)];
 
-  if (inst->src(1)->isConst()) {
-    assert(0 && "const fp bug in interp one");
-    PUNT(InterpOneCommon_const_fp);
-  }
   cgCallHelper(
     vmain(),
     CppCall::direct(reinterpret_cast<void (*)()>(interpOneHelper)),
     kVoidDest,
-    SyncOptions::kSyncPoint,
+    SyncOptions::kNoSyncPoint, // interpOne syncs regs manually
     argGroup(inst)
       .ssa(1/*fp*/)
       .addr(srcLoc(inst, 0).reg(), cellsToBytes(spOff.offset))
@@ -4770,19 +4767,20 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgInterpOne(IRInstruction* inst) {
-  cgInterpOneCommon(inst);
-}
-
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
-  cgInterpOneCommon(inst);
+  auto const extra = inst->extra<InterpOneCF>();
+  auto const op    = extra->opcode;
+  auto const spOff = extra->spOffset;
+  auto const pcOff = extra->bcOff;
+
   auto& v = vmain();
-  auto fp = rVmFp;
-  auto sync_sp = v.makeReg();
-  v << load{rVmTl[rds::kVmfpOff], fp};
-  v << load{rVmTl[rds::kVmspOff], sync_sp};
-  v << syncvmsp{sync_sp};
-  v << jmpi{mcg->tx().uniqueStubs.resumeHelper, kCrossTraceRegs};
+  auto const adjustedSp = v.makeReg();
+  v << lea{srcLoc(inst, 0).reg()[cellsToBytes(spOff.offset)], adjustedSp};
+  v << syncvmsp{adjustedSp};
+  v << ldimml{pcOff, r32(rAsm)};
+  assert(mcg->tx().uniqueStubs.interpOneCFHelpers.count(op));
+  v << jmpi{mcg->tx().uniqueStubs.interpOneCFHelpers[op],
+            kCrossTraceRegs | rAsm};
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {

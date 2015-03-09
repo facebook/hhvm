@@ -139,11 +139,14 @@ struct ArgGroup {
     assert(i < m_gpArgs.size());
     return m_gpArgs[i];
   }
-  ArgDesc& simdArg(size_t i) {
+  const ArgDesc& gpArg(size_t i) const {
+    return const_cast<ArgGroup*>(this)->gpArg(i);
+  }
+  const ArgDesc& simdArg(size_t i) const {
     assert(i < m_simdArgs.size());
     return m_simdArgs[i];
   }
-  ArgDesc& stkArg(size_t i) {
+  const ArgDesc& stkArg(size_t i) const {
     assert(i < m_stkArgs.size());
     return m_stkArgs[i];
   }

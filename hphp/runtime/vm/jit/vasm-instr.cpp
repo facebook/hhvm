@@ -33,7 +33,7 @@ const char* vinst_names[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool isBlockEnd(Vinstr& inst) {
+bool isBlockEnd(const Vinstr& inst) {
   switch (inst.op) {
     // service request-y things
     case Vinstr::bindjcc1st:

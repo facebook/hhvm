@@ -29,9 +29,9 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
-  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+const StaticString s_returnHook("SurpriseReturnHook");
 
+void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
   /*
    * This is a weird situation for throwing: we've partially torn down the
    * ActRec (decref'd all the frame's locals), and we've popped the return
@@ -49,9 +49,11 @@ void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
+      ringbuffer(env, Trace::RBTypeMsg, s_returnHook.get());
       gen(env, ReturnHook, frame, retVal);
     }
   );
+  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
 }
 
 void freeLocalsAndThis(HTS& env) {

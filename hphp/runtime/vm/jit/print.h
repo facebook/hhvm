@@ -71,8 +71,8 @@ static inline bool dumpIREnabled(int level = 1) {
   return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level);
 }
 
-constexpr int kIRLevel = 1;
-constexpr int kCodeGenLevel = 2;
+constexpr int kCodeGenLevel = 1;
+constexpr int kIRLevel = 2;
 constexpr int kOptLevel = 3;
 constexpr int kTraceletLevel = 4;
 constexpr int kRegAllocLevel = 4;

@@ -354,7 +354,8 @@ AliasClass AliasClass::operator|(AliasClass o) const {
   // Note: union operations are guaranteed to be commutative, so if there are
   // two non-None stags, we have to consistently choose between them.  For now
   // we throw both away in any case where they differ, and try to merge them
-  // with unionData if they are the same.
+  // with unionData if they are the same.  If only one had an stag, we can keep
+  // it only if the other didn't have that bit set.
   auto const stag1 = m_stag;
   auto const stag2 = o.m_stag;
   if (stag1 == stag2) return unionData(unioned, *this, o);
@@ -362,6 +363,9 @@ AliasClass AliasClass::operator|(AliasClass o) const {
     return AliasClass{unioned};
   }
   if (stag2 != STag::None) return o | *this;
+  if (o.m_bits & stagBit(stag1)) {
+    return AliasClass{unioned};
+  }
 
   auto ret = AliasClass{unioned};
   switch (stag1) {

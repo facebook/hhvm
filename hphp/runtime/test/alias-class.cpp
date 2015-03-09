@@ -238,6 +238,20 @@ TEST(AliasClass, SpecializedUnions) {
   EXPECT_TRUE(rel_stk_and_frame.maybe(stk_and_prop));
   EXPECT_TRUE(stk_and_prop.maybe(rel_stk_and_frame));
   EXPECT_FALSE(rel_stk_and_frame <= stk_and_prop);
+
+  AliasClass const some_mis = AMIState { 0x10 };
+  {
+    AliasClass const some_heap = AElemIAny;
+    auto const u1 = some_heap | some_mis;
+    auto const u2 = AFrameAny | u1;
+    EXPECT_TRUE((AHeapAny | some_heap) == AHeapAny);
+    EXPECT_TRUE(AHeapAny <= (AHeapAny | u1));
+    EXPECT_TRUE(AHeapAny <= (AHeapAny | u2));
+  }
+
+  auto const mis_stk = some_mis | stk;
+  auto const mis_stk_any = AStackAny | mis_stk;
+  EXPECT_TRUE(mis_stk_any == (AStackAny | AMIStateAny));
 }
 
 TEST(AliasClass, StackUnions) {

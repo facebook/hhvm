@@ -435,11 +435,6 @@ static inline bool controlFlowDefault() {
 #endif
 }
 
-static bool refcountOptsDefault() {
-  // TODO(#5216936)
-  return !RuntimeOption::EvalHHIRBytecodeControlFlow;
-}
-
 static inline bool evalJitDefault() {
 #if defined(__APPLE__) || defined(__CYGWIN__)
   return false;

@@ -77,15 +77,9 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     }
   }
 
-  if (RuntimeOption::EvalHHIRRefcountOpts) {
-    if (!RuntimeOption::EvalHHIRRefcountOpts2) {
-      optimizeRefcounts(unit, FrameStateMgr{unit.entry()->front().marker()});
-      finishPass("refcount opts");
-    }
-  }
-  if (RuntimeOption::EvalHHIRRefcountOpts2) {
-    eliminateTakes(unit);
-  }
+  // This is vestigial (it removes some instructions needed by the old refcount
+  // opts pass), and will be removed soon.
+  eliminateTakes(unit);
 
   dce("initial");
 
@@ -123,7 +117,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     dce("storeelim");
   }
 
-  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts2) {
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
     doPass(optimizeRefcounts2);
     dce("refcount");
   }

@@ -477,8 +477,7 @@ public:
   F(bool, HHIRBytecodeControlFlow,     controlFlowDefault())            \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
-  F(bool, HHIRRefcountOpts,            refcountOptsDefault())           \
-  F(bool, HHIRRefcountOpts2,           false)                           \
+  F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \
   F(uint32_t, HHIRNumFreeRegs,         64)                              \

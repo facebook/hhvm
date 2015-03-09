@@ -7,7 +7,9 @@ echo "\n*** Testing basic functions of ezc_realpath() with files ***\n";
 
 /* creating directories and files */
 $file_path = dirname(__FILE__);
-mkdir("$file_path/realpath_basic/home/test/", 0777, true);
+$dir_path = "$file_path/realpath_basic/home/test/";
+system("rm -rf ".escapeshellarg($dir_path));
+mkdir($dir_path, 0777, true);
 
 $file_handle1 = fopen("$file_path/realpath_basic/home/test/realpath_basic.tmp", "w");
 $file_handle2 = fopen("$file_path/realpath_basic/home/realpath_basic.tmp", "w");

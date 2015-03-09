@@ -17,10 +17,12 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/vasm-instr.h"
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -37,12 +39,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   auto inst = tmp.inst();
   auto opc = inst->op();
 
-  // TODO(t5485866) Our manipulations to vmsp must be SSA to play nice with
-  // LLVM. In the X64 backend, this causes enough extra reg-reg copies to
-  // measurably impact performance, so keep forcing things into rVmSp for
-  // now. We should be able to remove this completely once the necessary
-  // improvements are made to vxls.
-  auto const forceStkPtrs = arch() != Arch::X64 || !mcg->useLLVM();
+  auto const forceStkPtrs = arch() != Arch::X64;
 
   if (forceStkPtrs && tmp.isA(Type::StkPtr)) {
     assert_flog(
@@ -133,6 +130,51 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
         FTRACE(kRegAllocLevel, "def t{} in %{}\n", tmp->id(), size_t(data));
       }
     }
+  }
+}
+
+void getEffects(const Abi& abi, const Vinstr& i,
+                RegSet& uses, RegSet& across, RegSet& defs) {
+  uses = defs = across = RegSet();
+  switch (i.op) {
+    case Vinstr::mccall:
+    case Vinstr::call:
+    case Vinstr::callm:
+    case Vinstr::callr:
+      defs = abi.all() - abi.calleeSaved;
+      switch (arch()) {
+        case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
+        case Arch::X64: break;
+      }
+      break;
+    case Vinstr::callstub:
+      defs = i.callstub_.kills;
+      break;
+    case Vinstr::bindcall:
+    case Vinstr::contenter:
+      defs = abi.all();
+      break;
+    case Vinstr::cqo:
+      uses = RegSet(reg::rax);
+      defs = reg::rax | reg::rdx;
+      break;
+    case Vinstr::idiv:
+      uses = defs = reg::rax | reg::rdx;
+      break;
+    case Vinstr::shlq:
+    case Vinstr::sarq:
+      across = RegSet(reg::rcx);
+      break;
+    // arm instrs
+    case Vinstr::hostcall:
+      defs = (abi.all() - abi.calleeSaved) |
+             RegSet(PhysReg(arm::rHostCallReg));
+      break;
+    case Vinstr::vcall:
+    case Vinstr::vinvoke:
+      always_assert(false && "Unsupported instruction in vxls");
+    default:
+      break;
   }
 }
 

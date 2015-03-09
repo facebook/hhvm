@@ -32,6 +32,7 @@ namespace HPHP { namespace jit {
 
 class IRUnit;
 struct Vunit;
+struct Vinstr;
 struct CodegenState;
 class BackEnd;
 
@@ -77,6 +78,10 @@ PhysReg forceAlloc(const SSATmp& tmp);
 // Assign virtual registers to all SSATmps used or defined in reachable blocks.
 void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
                 const BlockList& blocks, BackEnd*);
+
+// Return the set of physical registers implicitly accessed (used or defined)
+void getEffects(const Abi& abi, const Vinstr& i,
+                RegSet& uses, RegSet& across, RegSet& defs);
 
 }}
 

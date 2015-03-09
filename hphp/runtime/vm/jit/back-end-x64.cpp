@@ -912,6 +912,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     auto const blocks = rpoSortCfg(unit);
     Vasm vasm;
     auto& vunit = vasm.unit();
+    SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
     // create the initial set of vasm numbered the same as hhir blocks.
     for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);

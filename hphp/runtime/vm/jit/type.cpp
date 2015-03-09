@@ -173,6 +173,14 @@ IR_TYPES
 #undef IRT
 #undef IRTP
 
+namespace TypeNames {
+#define IRT(name, ...) const Type name = Type::name;
+#define IRTP(name, ...) IRT(name)
+IR_TYPES
+#undef IRT
+#undef IRTP
+}
+
 std::string Type::constValString() const {
   assert(isConst());
 

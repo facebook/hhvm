@@ -317,14 +317,6 @@ Type builtinReturn(const IRInstruction* inst) {
 
 } // namespace
 
-namespace TypeNames {
-#define IRT(name, ...) UNUSED const Type name = Type::name;
-#define IRTP(name, ...) IRT(name)
-  IR_TYPES
-#undef IRT
-#undef IRTP
-};
-
 Type outputType(const IRInstruction* inst, int dstId) {
   using namespace TypeNames;
   using TypeNames::TCA;

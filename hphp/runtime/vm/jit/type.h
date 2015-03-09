@@ -787,6 +787,21 @@ Type boxType(Type);
 Type ldRefReturn(Type typeParam);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Abbreviated namespace for predefined types.
+ *
+ * Used for macro codegen for types declared in ir.specification.
+ */
+namespace TypeNames {
+#define IRT(name, ...) UNUSED extern const Type name;
+#define IRTP(name, ...) IRT(name)
+  IR_TYPES
+#undef IRT
+#undef IRTP
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }}
 
 #define incl_HPHP_JIT_TYPE_INL_H_

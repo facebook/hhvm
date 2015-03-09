@@ -5,8 +5,8 @@
 
 #define HHVM_VERSION_MAJOR 3
 #define HHVM_VERSION_MINOR 6
-#define HHVM_VERSION_PATCH 0
-#define HHVM_VERSION_SUFFIX ""
+#define HHVM_VERSION_PATCH 1
+#define HHVM_VERSION_SUFFIX "-dev"
 
 /* HHVM_VERSION_ID minus the patch number
  * APIs should remain stable while this number is constant

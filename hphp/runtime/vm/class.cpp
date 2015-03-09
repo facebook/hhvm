@@ -2348,7 +2348,7 @@ bool Class::hasNativePropHandler() {
 
 Native::NativePropHandler* Class::getNativePropHandler() {
   for (auto cls = this; cls; cls = cls->parent()) {
-    auto propHandler = Native::getNativePropHandler(cls->name());
+    auto propHandler = Native::getNativePropHandler(StrNR(cls->name()));
     if (propHandler != nullptr) {
       return propHandler;
     }

@@ -1406,7 +1406,7 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
     obj->o_set(s_name, result);
 }
 
-static Variant reflection_extension_name_get(ObjectData* this_) {
+static Variant reflection_extension_name_get(const Object& this_) {
   auto name = this_->o_realProp(s___name.get(), ObjectData::RealPropUnchecked,
                                 s_reflectionextension.get());
   return name->toString();
@@ -1522,7 +1522,7 @@ class ReflectionExtension final : public Extension {
       s_ReflectionClassHandle.get());
 
     Native::registerNativePropHandler
-      <reflection_extension_PropHandler>(s_reflectionextension.get());
+      <reflection_extension_PropHandler>(s_reflectionextension);
 
     loadSystemlib();
     loadSystemlib("reflection-classes");

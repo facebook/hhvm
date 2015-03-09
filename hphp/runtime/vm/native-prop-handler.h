@@ -25,11 +25,11 @@ namespace HPHP { namespace Native {
 // Class NativePropHandler
 
 struct NativePropHandler {
-  typedef Variant (*GetFunc)(ObjectData *obj, const StringData* name);
-  typedef Variant (*SetFunc)(ObjectData *obj, const StringData* name,
+  typedef Variant (*GetFunc)(const Object& obj, const String& name);
+  typedef Variant (*SetFunc)(const Object& obj, const String& name,
                              Variant& value);
-  typedef Variant (*IssetFunc)(ObjectData *obj, const StringData* name);
-  typedef Variant (*UnsetFunc)(ObjectData *obj, const StringData* name);
+  typedef Variant (*IssetFunc)(const Object& obj, const String& name);
+  typedef Variant (*UnsetFunc)(const Object& obj, const String& name);
 
   GetFunc get;      // native magic prop get (analogue of user's `__get`)
   SetFunc set;      // native magic set (user's `__set`)
@@ -44,12 +44,12 @@ ALWAYS_INLINE Variant prop_not_handled() {
   return uninit_null();
 }
 
-NativePropHandler* getNativePropHandler(const StringData* className);
+NativePropHandler* getNativePropHandler(const String& className);
 
 /**
  * Handler for a class with custom handling functions.
  */
-void registerNativePropHandler(const StringData* className,
+void registerNativePropHandler(const String& className,
                                NativePropHandler::GetFunc get,
                                NativePropHandler::SetFunc set,
                                NativePropHandler::IssetFunc isset,
@@ -64,7 +64,7 @@ void registerNativePropHandler(const StringData* className,
  * Example:
  *
  * class ElementPropHandler {
- *   static Variant getProp(ObjectData* this_, const StringData* name) {
+ *   static Variant getProp(const Object& this_, const String& name) {
  *     // get `name` prop
  *   }
  *   ...
@@ -75,14 +75,14 @@ void registerNativePropHandler(const StringData* className,
 // for this operation, and we should go to the user-level magic hooks.
 
 #define CHECK_NATIVE_PROP_SUPPORTED(name, op)                                  \
-  if (!T::isPropSupported(name, StringData::Make(op))) {                       \
+  if (!T::isPropSupported(name, op)) {                                         \
     return Native::prop_not_handled();                                         \
   }
 
 // Default getProp.
 
 template<class T>
-Variant nativePropHandlerGet(ObjectData* obj, const StringData* name) {
+Variant nativePropHandlerGet(const Object& obj, const String& name) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "get")
   return T::getProp(obj, name);
 }
@@ -90,9 +90,9 @@ Variant nativePropHandlerGet(ObjectData* obj, const StringData* name) {
 // Default setProp.
 
 template<class T>
-Variant nativePropHandlerSet(ObjectData* obj,
-                                    const StringData* name,
-                                    Variant& value) {
+Variant nativePropHandlerSet(const Object& obj,
+                             const String& name,
+                             Variant& value) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "set")
   return T::setProp(obj, name, value);
 }
@@ -100,7 +100,7 @@ Variant nativePropHandlerSet(ObjectData* obj,
 // Default issetProp.
 
 template<class T>
-Variant nativePropHandlerIsset(ObjectData* obj, const StringData* name) {
+Variant nativePropHandlerIsset(const Object& obj, const String& name) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "isset")
   return T::issetProp(obj, name);
 }
@@ -108,7 +108,7 @@ Variant nativePropHandlerIsset(ObjectData* obj, const StringData* name) {
 // Default unsetProp.
 
 template<class T>
-Variant nativePropHandlerUnset(ObjectData* obj, const StringData* name) {
+Variant nativePropHandlerUnset(const Object& obj, const String& name) {
   CHECK_NATIVE_PROP_SUPPORTED(name, "unset")
   return T::unsetProp(obj, name);
 }
@@ -118,7 +118,7 @@ Variant nativePropHandlerUnset(ObjectData* obj, const StringData* name) {
  * Example: Native::registerNativePropHandler<HandlerClassName>(className);
  */
 template<class T>
-void registerNativePropHandler(const StringData* className) {
+void registerNativePropHandler(const String& className) {
   registerNativePropHandler(
     className,
     &nativePropHandlerGet<T>,
@@ -134,21 +134,21 @@ void registerNativePropHandler(const StringData* className) {
  * child classes.
  */
 struct BasePropHandler {
-  static Variant getProp(ObjectData* this_, const StringData* name) {
+  static Variant getProp(const Object& this_, const String& name) {
     return Native::prop_not_handled();
   }
-  static Variant setProp(ObjectData* this_,
-                         const StringData* name,
+  static Variant setProp(const Object& this_,
+                         const String& name,
                          Variant& value) {
     return Native::prop_not_handled();
   }
-  static Variant issetProp(ObjectData* this_, const StringData* name) {
+  static Variant issetProp(const Object& this_, const String& name) {
     return Native::prop_not_handled();
   }
-  static Variant unsetProp(ObjectData* this_, const StringData* name) {
+  static Variant unsetProp(const Object& this_, const String& name) {
     return Native::prop_not_handled();
   }
-  static bool isPropSupported(const StringData* name, const StringData* op) {
+  static bool isPropSupported(const String& name, const String& op) {
     return false;
   }
 };
@@ -156,7 +156,7 @@ struct BasePropHandler {
 #define CHECK_ACCESSOR(accesor, opstr, classname, propname)                    \
   if (!accesor) {                                                              \
     raise_error("Cannot directly %s the property %s::$%s",                     \
-                 opstr, classname->data(), propname->data());                  \
+                 opstr, classname->data(), propname.data());                   \
   }
 
 /**
@@ -166,14 +166,14 @@ struct BasePropHandler {
 template <class Derived>
 struct MapPropHandler : BasePropHandler {
 
-  static Variant getProp(ObjectData* this_, const StringData* name) {
+  static Variant getProp(const Object& this_, const String& name) {
     auto get = Derived::map.get(name);
     CHECK_ACCESSOR(get, "get", this_->getVMClass()->name(), name)
     return get(this_);
   }
 
-  static Variant setProp(ObjectData* this_,
-                         const StringData* name,
+  static Variant setProp(const Object& this_,
+                         const String& name,
                          Variant& value) {
     auto set = Derived::map.set(name);
     CHECK_ACCESSOR(set, "set", this_->getVMClass()->name(), name);
@@ -181,7 +181,7 @@ struct MapPropHandler : BasePropHandler {
     return true;
   }
 
-  static Variant issetProp(ObjectData* this_, const StringData* name) {
+  static Variant issetProp(const Object& this_, const String& name) {
     auto isset = Derived::map.isset(name);
     // If there is special `isset`, call it.
     if (isset) {
@@ -193,14 +193,14 @@ struct MapPropHandler : BasePropHandler {
     return !get(this_).isNull();
   }
 
-  static Variant unsetProp(ObjectData* this_, const StringData* name) {
+  static Variant unsetProp(const Object& this_, const String& name) {
     auto unset = Derived::map.unset(name);
     CHECK_ACCESSOR(unset, "unset", this_->getVMClass()->name(), name);
     unset(this_);
     return true;
   }
 
-  static bool isPropSupported(const StringData* name, const StringData* op) {
+  static bool isPropSupported(const String& name, const String& op) {
     return Derived::map.isPropSupported(name);
   }
 };
@@ -210,10 +210,10 @@ struct MapPropHandler : BasePropHandler {
  */
 struct PropAccessor {
   const char* name;
-  Variant (*get)(ObjectData* this_);
-  void    (*set)(ObjectData* this_, Variant& value);
-  bool    (*isset)(ObjectData* this_);
-  void    (*unset)(ObjectData* this_);
+  Variant (*get)(const Object& this_);
+  void    (*set)(const Object& this_, Variant& value);
+  bool    (*isset)(const Object& this_);
+  void    (*unset)(const Object& this_);
 };
 
 struct hashNPA {
@@ -245,28 +245,28 @@ struct PropAccessorMap :
   explicit PropAccessorMap(PropAccessor* props,
                            PropAccessorMap *base = nullptr);
 
-  bool isPropSupported(const StringData* name);
+  bool isPropSupported(const String& name);
 
-  Variant (*get(const StringData* name))(ObjectData* this_);
+  Variant (*get(const String& name))(const Object& this_);
 
-  void    (*set(const StringData* name))(ObjectData* this_,
-                                         Variant& value);
+  void    (*set(const String& name))(const Object& this_,
+                                     Variant& value);
 
-  bool    (*isset(const StringData* name))(ObjectData* this_);
-  void    (*unset(const StringData* name))(ObjectData* this_);
+  bool    (*isset(const String& name))(const Object& this_);
+  void    (*unset(const String& name))(const Object& this_);
 
 private:
-  const_iterator lookupProp(const StringData* name);
+  const_iterator lookupProp(const String& name);
 };
 
 /**
  * API methods to call at property resolution (from `object-data`).
  * Example: Native::getProp(this, propName);
  */
-Variant getProp(ObjectData* obj, const StringData* name);
-Variant setProp(ObjectData* obj, const StringData* name, Variant& value);
-Variant issetProp(ObjectData* obj, const StringData* name);
-Variant unsetProp(ObjectData* obj, const StringData* name);
+Variant getProp(const Object& obj, const String& name);
+Variant setProp(const Object& obj, const String& name, Variant& value);
+Variant issetProp(const Object& obj, const String& name);
+Variant unsetProp(const Object& obj, const String& name);
 
 inline bool isPropHandled(Variant& propResult) {
   return propResult.isInitialized();

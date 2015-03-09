@@ -142,4 +142,17 @@ enterTCHelper:
 enterTCServiceReq:
   brk 0
 
+#elif defined(__powerpc64__)
+  .globl enterTCHelper
+enterTCHelper:
+  .globl enterTCExit
+enterTCExit:
+  .globl handleSRResumeTC
+handleSRResumeTC:
+  .globl handleSRHelper
+handleSRHelper:
+  .globl enterTCServiceReq
+enterTCServiceReq:
+  blr
+
 #endif

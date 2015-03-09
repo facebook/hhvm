@@ -440,7 +440,7 @@ static bool refcountOptsDefault() {
 }
 
 static inline bool evalJitDefault() {
-#if defined(__APPLE__) || defined(__CYGWIN__)
+#if defined(__APPLE__) || defined(__CYGWIN__) || defined(__powerpc64__)
   return false;
 #else
   return true;

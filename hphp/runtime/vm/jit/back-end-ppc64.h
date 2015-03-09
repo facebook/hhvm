@@ -13,28 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ARCH_H
-#define incl_HPHP_ARCH_H
+#ifndef incl_HPHP_JIT_BACK_END_PPC64_H
+#define incl_HPHP_JIT_BACK_END_PPC64_H
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/jit/back-end.h"
 
-namespace HPHP {
+namespace HPHP { namespace jit { namespace ppc64 {
 
-enum class Arch {
-  X64,
-  ARM,
-  PPC64,
-};
+std::unique_ptr<BackEnd> newBackEnd();
 
-inline Arch arch() {
-#if defined(__powerpc64__)
-       return Arch::PPC64;
-#else
-    if (RuntimeOption::EvalSimulateARM) return Arch::ARM;
-      return Arch::X64;
-#endif
-}
-
-}
+}}}
 
 #endif
+

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/back-end-arm.h"
+#include "hphp/runtime/vm/jit/back-end-ppc64.h"
 
 namespace HPHP { namespace jit {
 
@@ -28,6 +29,8 @@ std::unique_ptr<BackEnd> newBackEnd() {
     return x64::newBackEnd();
   case Arch::ARM:
     return arm::newBackEnd();
+  case Arch::PPC64:
+    return ppc64::newBackEnd();
   }
   not_reached();
 }

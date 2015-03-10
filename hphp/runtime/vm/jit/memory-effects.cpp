@@ -17,6 +17,7 @@
 
 #include "hphp/util/match.h"
 #include "hphp/util/safe-cast.h"
+#include "hphp/util/assertions.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -649,13 +650,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * COW and behave as if they only affect collection memory locations.  We
    * don't track those, so it's returning AEmpty for now.
    */
-  case MapGet:
   case MapIsset:
-  case MapSet:
   case PairIsset:
   case VectorDoCow:
   case VectorIsset:
     return may_load_store(AHeapAny, AEmpty /* Note */);
+  case MapGet:
+  case MapSet:
+    return may_reenter(inst, may_load_store(AHeapAny, AEmpty /* Note */));
+
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that allocate new objects, without reading any other memory
@@ -855,17 +858,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StContArKey:
   case StContArValue:
   case StRetVal:
-  case ConcatIntStr:
-  case ConcatStr3:
-  case ConcatStr4:
-  case ConcatStrInt:
-  case ConcatStrStr:
-  case CoerceStrToDbl:
-  case CoerceStrToInt:
   case ConvStrToInt:
   case OrdStr:
   case CreateSSWH:
-  case ConvResToStr:
   case NewLikeArray:
   case CheckRefs:
   case LdClsCctx:
@@ -897,7 +892,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvArrToBool:
   case ConvArrToDbl:
   case ConvArrToInt:
-  case CoerceCellToBool:
   case ConvBoolToStr:
   case CountArray:
   case CountArrayFast:
@@ -925,16 +919,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Neq:
   case IncTransCounter:
   case LdBindAddr:
-  case LdClsCtor:
   case LdAsyncArParentChain:
   case LdSSwitchDestFast:
-  case LdSSwitchDestSlow:
   case RBTrace:
-  case ConvCellToInt:
   case ConvIntToBool:
   case ConvIntToDbl:
-  case ConvCellToDbl:
-  case ConvObjToDbl:
   case ConvStrToArr:   // decrefs src, but src is a string
   case ConvStrToBool:
   case ConvStrToDbl:
@@ -948,9 +937,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsName:
   case LdAFWHActRec:
   case LdClsCtx:
-  case PrintBool:
-  case PrintInt:
-  case PrintStr:
   case LdContActRec:
   case LdContArKey:
   case LdContArValue:
@@ -980,22 +966,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHResult:
   case LdWHState:
   case LookupClsRDSHandle:
-  case CoerceCellToDbl:
-  case CoerceCellToInt:
   case GetCtxFwdCallDyn:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
   case CheckStaticLocInit:
   case StaticLocInitCached:
-  case ColAddElemC:
-  case ColAddNewElemC:
   case ColIsEmpty:
   case ColIsNEmpty:
-  case CheckBounds:
   case ConvCellToBool:
   case ConvObjToBool:
-  case ConvObjToInt:
   case CountCollection:
   case LdVectorSize:
   case VectorHasImmCopy:
@@ -1091,6 +1071,29 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArraySet:       // kVPackedKind warnings
   case ArraySetRef:    // kVPackedKind warnings
   case GetMemoKey:  // re-enters to call getInstanceKey() in some cases
+  case LdClsCtor:
+  case ConcatStrStr:
+  case PrintStr:
+  case PrintBool:
+  case PrintInt:
+  case ConcatIntStr:
+  case ConcatStrInt:
+  case LdSSwitchDestSlow:
+  case ConvObjToDbl:
+  case ConvObjToInt:
+  case ColAddElemC:
+  case ColAddNewElemC:
+  case CoerceStrToInt:
+  case CoerceStrToDbl:
+  case CoerceCellToDbl:
+  case CoerceCellToInt:
+  case CoerceCellToBool:
+  case CheckBounds:
+  case ConvCellToInt:
+  case ConvResToStr:
+  case ConcatStr3:
+  case ConcatStr4:
+  case ConvCellToDbl:
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
   // These two instructions don't touch memory we track, except that they may
@@ -1120,23 +1123,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 //////////////////////////////////////////////////////////////////////
 
 DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
+  SCOPE_ASSERT_DETAIL("Memory Effects") {
+    return folly::sformat("  inst: {}\n  effects: {}\n", inst, show(me));
+  };
+
   auto check_fp = [&] (SSATmp* fp) {
     always_assert_flog(
       fp->type() <= Type::FramePtr,
-      "Non frame pointer in memory effects:\n  inst: {}\n  effects: {}",
-      inst.toString(),
-      show(me)
+      "Non frame pointer in memory effects"
     );
   };
 
   auto check_obj = [&] (SSATmp* obj) {
     always_assert_flog(
-      // Maybe we should actually just give up on this (or check it /before/
-      // doing canonicalize?).
       obj->type() <= Type::Obj,
-      "Non obj pointer in memory effects:\n  inst: {}\n  effects: {}",
-      inst.toString(),
-      show(me)
+      "Non obj pointer in memory effects"
     );
   };
 
@@ -1145,21 +1146,42 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 
-  // In debug let's do some type checking in case people move instruction
-  // argument numbers.
   match<void>(
     me,
-    [&] (GeneralEffects x)   { check(x.loads);
-                               check(x.stores);
-                               check(x.moves);
-                               assert(x.moves <= x.loads);
-                               check(x.kills); },
+    [&] (GeneralEffects x) {
+      check(x.loads);
+      check(x.stores);
+      check(x.moves);
+      check(x.kills);
+
+      // Locations may-moved always should also count as may-loads.
+      always_assert(x.moves <= x.loads);
+
+      if (inst.mayRaiseError()) {
+        // Any instruction that can raise an error can run a user error handler
+        // and have arbitrary effects on the heap.
+        always_assert(AHeapAny <= x.loads);
+        always_assert(AHeapAny <= x.stores);
+        /*
+         * They also ought to kill /something/ on the stack, because of
+         * possible re-entry.  It's not incorrect to leave things out of the
+         * kills set, but this assertion is here because we shouldn't do it on
+         * purpose, so this is here until we have a reason not to assert it.
+         *
+         * The mayRaiseError instructions should all be going through
+         * may_reenter right now, which will kill the stack below the re-entry
+         * depth.
+         */
+        always_assert(AStackAny.maybe(x.kills));
+      }
+    },
     [&] (PureLoad x)         { check(x.src); },
-    [&] (PureStore x)        { check(x.dst); },
-    [&] (PureStoreNT x)      { check(x.dst); },
-    [&] (PureSpillFrame x)   { check(x.dst);
-                               check(x.ctx);
-                               assert(x.ctx <= x.dst); },
+    [&] (PureStore x)        { check(x.dst);
+                               always_assert(x.value != nullptr); },
+    [&] (PureStoreNT x)      { check(x.dst);
+                               always_assert(x.value != nullptr); },
+    [&] (PureSpillFrame x)   { check(x.dst); check(x.ctx);
+                               always_assert(x.ctx <= x.dst); },
     [&] (IterEffects x)      { check_fp(x.fp); check(x.kills); },
     [&] (IterEffects2 x)     { check_fp(x.fp); check(x.kills); },
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },

@@ -445,7 +445,7 @@ private:
     struct {
       mutable uint16_t o_attribute;
       uint8_t o_subclass_u8; // for subclasses
-      HeaderKind m_kind;
+      mutable HeaderKind m_kind;
       mutable RefCount m_count;
     };
     uint64_t m_attr_kind_count;

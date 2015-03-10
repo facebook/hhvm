@@ -716,7 +716,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           /*<fb>*/
           if (collections) {
             // stable_maps is meaningless
-            top = newobj<c_Map>();
+            top = makeSmartPtr<c_Map>();
           } else {
           /*</fb>*/
             if (!assoc) {
@@ -787,7 +787,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           }
           /*<fb>*/
           if (collections) {
-            top = newobj<c_Vector>();
+            top = makeSmartPtr<c_Vector>();
           } else {
             top = Array::Create();
           }

@@ -376,6 +376,27 @@ folly::dynamic ini_get(std::vector<std::string>& p) {
   return ret;
 }
 
+const folly::dynamic* ini_iterate(const folly::dynamic &ini,
+                            const std::string &name) {
+  std::vector<std::string> dot_parts;
+  folly::split('.', name, dot_parts);
+
+  // No dots, then just get the pointer to the name
+  if (dot_parts.empty()) {
+    return ini.get_ptr(name);
+  }
+
+  auto* value = ini.get_ptr(dot_parts[0]);
+  // Loop through the dot parts, getting a pointer to each
+  // Get to the last dot part and get its value.
+  for (int i = 1; i < dot_parts.size(); i++) {
+    if (value && !value->isString()) {
+      value = value->get_ptr(dot_parts[i]);
+    }
+  }
+  return value;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // callbacks for creating arrays out of ini
 

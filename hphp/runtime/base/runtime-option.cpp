@@ -203,7 +203,7 @@ std::string RuntimeOption::Rfc1867Name = "video_ptoken";
 bool RuntimeOption::LibEventSyncSend = true;
 bool RuntimeOption::ExpiresActive = true;
 int RuntimeOption::ExpiresDefault = 2592000;
-std::string RuntimeOption::DefaultCharsetName = "utf-8";
+std::string RuntimeOption::DefaultCharsetName = "";
 bool RuntimeOption::ForceServerNameToHeader = false;
 bool RuntimeOption::EnableCufAsync = false;
 bool RuntimeOption::PathDebug = false;
@@ -1153,7 +1153,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ExpiresDefault, ini, server["ExpiresDefault"], 2592000);
     if (ExpiresDefault < 0) ExpiresDefault = 2592000;
     Config::Bind(DefaultCharsetName, ini, server["DefaultCharsetName"],
-                 "utf-8");
+                 "");
 
     Config::Bind(RequestBodyReadLimit, ini, server["RequestBodyReadLimit"], -1);
 

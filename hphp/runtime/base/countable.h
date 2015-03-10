@@ -21,8 +21,10 @@
 #include <cstddef>
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -115,21 +117,28 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
                                                                         \
   bool hasMultipleRefs() const {                                        \
     assert(check_refcount(m_count));                                    \
-    if (m_count > 1) assert(check_one_bit_ref(static_cast<uint8_t>(m_kind))); \
+    TRACE_SET_MOD(countable);                                           \
+    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
+        m_count, check_one_bit_ref(static_cast<uint8_t>(m_kind))); }    \
     return (uint32_t)m_count > 1;                                       \
   }                                                                     \
                                                                         \
   bool hasExactlyOneRef() const {                                       \
     assert(check_refcount(m_count));                                    \
+    TRACE_SET_MOD(countable);                                           \
+    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
+        m_count, check_one_bit_ref(static_cast<uint8_t>(m_kind))); }    \
     return (uint32_t)m_count == 1;                                      \
   }                                                                     \
                                                                         \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     assert(check_refcount(m_count));                                    \
+    TRACE_SET_MOD(countable);                                           \
     if (isRefCounted()) { ++m_count; }                                  \
     if (m_count > 1) {                                                  \
       m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind))); \
+      FTRACE(1, "incRefCount1 : m_count = {}\n", m_count);              \
     }                                                                   \
   }                                                                     \
                                                                         \
@@ -162,12 +171,17 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
                                                                         \
   bool hasMultipleRefs() const {                                        \
     assert(check_refcount(m_count));                                    \
-    if (m_count > 1) assert(check_one_bit_ref(m_kind));                 \
+    TRACE_SET_MOD(countable);                                           \
+    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
+        m_count, check_one_bit_ref(m_kind)); }                          \
     return (uint32_t)m_count > 1;                                       \
   }                                                                     \
                                                                         \
   bool hasExactlyOneRef() const {                                       \
     assert(check_refcount(m_count));                                    \
+    TRACE_SET_MOD(countable);                                           \
+    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
+        m_count, check_one_bit_ref(m_kind)); }                          \
     return (uint32_t)m_count == 1;                                      \
   }                                                                     \
                                                                         \
@@ -175,7 +189,12 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     assert(!MemoryManager::sweeping());                                 \
     assert(check_refcount(m_count));                                    \
     if (isRefCounted()) { ++m_count; }                                  \
-    if (m_count > 1) m_kind = (ArrayKind) set_one_bit_ref(m_kind);      \
+    TRACE_SET_MOD(countable);                                           \
+    if (m_count > 1) {                                                  \
+      m_kind = (ArrayKind) set_one_bit_ref(m_kind);                     \
+      assert(check_one_bit_ref(m_kind));                                \
+      FTRACE(1, "incRefCount2 : m_count = {}\n", m_count);              \
+    }                                                                   \
   }                                                                     \
                                                                         \
   RefCount decRefCount() const {                                        \
@@ -221,11 +240,17 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
                                                         \
   bool hasMultipleRefs() const {                        \
     assert(check_refcount_ns(m_count));                 \
+    TRACE_SET_MOD(countable);                           \
+    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",      \
+        m_count, check_one_bit_ref(static_cast<uint8_t>(m_kind))); } \
     return m_count > 1;                                 \
   }                                                     \
                                                         \
   bool hasExactlyOneRef() const {                       \
     assert(check_refcount(m_count));                    \
+    TRACE_SET_MOD(countable);                           \
+    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",      \
+        m_count, check_one_bit_ref(static_cast<uint8_t>(m_kind))); } \
     return m_count == 1;                                \
   }                                                     \
                                                         \
@@ -233,6 +258,11 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     assert(!MemoryManager::sweeping());                 \
     assert(check_refcount_ns(m_count));                 \
     ++m_count;                                          \
+    TRACE_SET_MOD(countable);                           \
+    if (m_count > 1) {                                  \
+      m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind))); \
+      FTRACE(1, "incRefCount3 : m_count = {}\n", m_count); \
+    }                                                   \
   }                                                     \
                                                         \
   RefCount decRefCount() const {                        \

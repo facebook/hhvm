@@ -24,21 +24,32 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+bool branchesToItself(SrcKey sk) {
+  auto const branchOffsetPtr = instrJumpOffset((Op*)sk.pc());
+  return branchOffsetPtr != nullptr && *branchOffsetPtr == 0;
+}
+
 /*
  * Helper to emit the appropriate service request to exit with a given target
  * bytecode offset.
  *
- * Note that if we're inlining, then targetBcOff is in the inlined func, while
- * context.initBcOffset is in the outer func, so bindJmp will always work (and
- * there's no guarantee that there is an anchor translation, so we must not use
- * ReqRetranslate).  In the non-inlined situation, however, we want to use
- * ReqRetranslate if and only if the target bc offset is the initial bc offset.
+ * A ReqRetranslate is generated if we're still generating IR for the
+ * first bytecode instruction in the region and the `target' offset
+ * matches the current offset.  Note that this condition here always
+ * implies that the exit corresponds to a guard failure (i.e., without
+ * advancing state), because instructions that branch back to
+ * themselves are handled separately in implMakeExit and never call
+ * into this function.
+ *
+ * In all other cases, a ReqBindJmp is generated.
+ *
  */
 void exitRequest(HTS& env, TransFlags flags, SrcKey target) {
   auto const curBcOff = bcOff(env);
-  if (!isInlining(env) &&
-      curBcOff == env.context.initBcOffset &&
-      target.offset() == curBcOff) {
+  if (env.firstBcInst && target.offset() == curBcOff) {
+    // The case where the instruction may branch back to itself is
+    // handled in implMakeExit.
+    assert(!branchesToItself(env.context.srcKey()));
     gen(env, ReqRetranslate, ReqRetranslateData { flags }, sp(env));
   } else {
     gen(env, ReqBindJmp, ReqBindJmpData { target, flags }, sp(env));
@@ -46,7 +57,19 @@ void exitRequest(HTS& env, TransFlags flags, SrcKey target) {
 }
 
 Block* implMakeExit(HTS& env, TransFlags trflags, Offset targetBcOff) {
-  if (targetBcOff == -1) targetBcOff = bcOff(env);
+  auto const curBcOff = bcOff(env);
+  if (targetBcOff == -1) targetBcOff = curBcOff;
+
+  // If the targetBcOff is to the same instruction, and the
+  // instruction can also branch back to itself (e.g. IterNext w/
+  // offset=0), then we can't distinguish whether the exit is due to a
+  // guard failure (i.e., no state advanced) or an actual control-flow
+  // transfer (i.e., advancing state).  These are rare situations, and
+  // so we just do an InterpOneCF (via makeExitSlow).
+  if (targetBcOff == curBcOff && branchesToItself(env.context.srcKey())) {
+    return makeExitSlow(env);
+  }
+
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
   spillStack(env);

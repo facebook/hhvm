@@ -221,6 +221,8 @@ RegionDescPtr RegionFormer::go() {
       break;
     }
 
+    irgen::finishHHBC(m_hts);
+
     // If we just translated a return from an inlined call, grab the updated
     // SrcKey from m_ht and clean up.
     if (inlineReturn) {

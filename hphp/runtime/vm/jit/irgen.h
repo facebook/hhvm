@@ -134,17 +134,24 @@ void interpOne(HTS&, const NormalizedInstruction&);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * After each bytecode that is translated/processed, the driver of the ht
- * module calls this function to move to the next bytecode offset (`newOff') to
- * translate.
+ * Before translating/processing each bytecode instruction, the driver
+ * of the irgen module calls this function to move to the next
+ * bytecode offset (`newOff') to translate.
  *
- * The flag `lastBcOff' should be set if this is the last bytecode in a region
- * that's being translated.
+ * The flag `lastBcInst' should be set if this is the last bytecode in
+ * a region that's being translated.
  */
 void prepareForNextHHBC(HTS&,
                         const NormalizedInstruction*,
                         Offset newOff,
-                        bool lastBcOff);
+                        bool lastBcInst);
+
+/*
+ * After translating each bytecode instruction, the driver of the
+ * irgen module calls this function to signal that it has finished
+ * processing the HHBC instruction.
+ */
+void finishHHBC(HTS&);
 
 /*
  * This is called before emitting instructions that can jump to a

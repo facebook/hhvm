@@ -305,7 +305,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         ok = false;
       }
       if (!isTF(pc)) {
-        error("Last instruction in %s is not teriminal %d:%s\n",
+        error("Last instruction in %s is not terminal %d:%s\n",
                name, offset(pc), instrToString((Op*)pc, unit()).c_str());
         ok = false;
       } else {
@@ -334,6 +334,10 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     } else {
       Offset target = instrJumpTarget((Op*)bc, offset(branch));
       ok &= checkOffset("branch target", target, name, base, past);
+      if (*(Op*)branch == Op::JmpNS && target == offset(branch)) {
+        error("JmpNS may not have zero offset in %s\n", name);
+        ok = false;
+      }
     }
   }
   return ok;

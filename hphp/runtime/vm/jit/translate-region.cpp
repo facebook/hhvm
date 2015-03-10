@@ -610,6 +610,8 @@ TranslateResult irGenRegion(HTS& hts,
         return TranslateResult::Retry;
       }
 
+      irgen::finishHHBC(hts);
+
       skipTrans = false;
 
       // If this is the last instruction, handle block transitions.

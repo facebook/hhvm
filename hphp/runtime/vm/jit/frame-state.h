@@ -139,10 +139,22 @@ struct FrameState {
   SSATmp* fpValue{nullptr};
 
   /*
+   * Tracking of in-memory state of the evaluation stack.
+   */
+  SSATmp* spValue{nullptr};
+  FPAbsOffset spOffset;   // delta from vmfp to spvalue
+
+  /*
    * m_thisAvailable tracks whether the current frame is known to have a
    * non-null $this pointer.
    */
   bool thisAvailable{false};
+
+  /*
+   * frameMaySpan is true iff a Call instruction has been seen on any path
+   * since the definition of the current frame pointer.
+   */
+  bool frameMaySpanCall{false};
 
   /*
    * Tracking of the not-in-memory state of the virtual execution stack:
@@ -163,14 +175,8 @@ struct FrameState {
    * being used in LegacyReoptimize mode.
    */
   uint32_t stackDeficit{0};
-  EvalStack evalStack;
   FPAbsOffset syncedSpLevel{0};
-
-  /*
-   * Tracking of in-memory state of the evaluation stack.
-   */
-  SSATmp* spValue{nullptr};
-  FPAbsOffset spOffset;   // delta from vmfp to spvalue
+  EvalStack evalStack;
 
   /*
    * The values in the eval stack that are already in memory, either above or
@@ -184,12 +190,6 @@ struct FrameState {
    * (if the state is initialized).
    */
   jit::vector<LocalState> locals;
-
-  /*
-   * frameMaySpan is true iff a Call instruction has been seen on any path
-   * since the definition of the current frame pointer.
-   */
-  bool frameMaySpanCall{false};
 };
 
 //////////////////////////////////////////////////////////////////////

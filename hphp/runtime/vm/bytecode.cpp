@@ -3235,15 +3235,24 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
     case MPC:
     case MPT:
       result = Prop<warn,define,unset>(
-          mstate.scratch, *mstate.ref.asTypedValue(), ctx, mstate.base,
-          *mstate.curMember
+        mstate.scratch, *mstate.ref.asTypedValue(), ctx, mstate.base,
+        *mstate.curMember
+      );
+      break;
+    case MQT:
+      if (define) {
+        raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
+      }
+      result = nullSafeProp(
+        mstate.scratch, *mstate.ref.asTypedValue(), ctx, mstate.base,
+        mstate.curMember->m_data.pstr
       );
       break;
     case MW:
       if (setMember) {
         assert(define);
         result = NewElem<reffy>(
-            mstate.scratch, *mstate.ref.asTypedValue(), mstate.base
+          mstate.scratch, *mstate.ref.asTypedValue(), mstate.base
         );
       } else {
         raise_error("Cannot use [] for reading");
@@ -4865,7 +4874,8 @@ OPTBLD_INLINE void isSetEmptyM(PC& pc) {
     }
     case MPL:
     case MPC:
-    case MPT: {
+    case MPT:
+    case MQT: {
       Class* ctx = arGetContextClass(vmfp());
       isSetEmptyResult = IssetEmptyProp<isEmpty>(
         ctx,
@@ -5176,6 +5186,8 @@ OPTBLD_INLINE void iopSetM(IOP_ARGS) {
         SetProp<true>(ctx, mstate.base, *mstate.curMember, c1);
         break;
       }
+      case MQT:
+        /* fallthrough */
       case InvalidMemberCode:
         assert(false);
         break;
@@ -5287,7 +5299,7 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
   MemberState mstate;
   if (!setHelperPre<MoreWarnings, true, false, false, 1,
       VectorLeaveCode::LeaveLast>(pc, mstate)) {
-    TypedValue* result;
+    TypedValue* result = nullptr;
     Cell* rhs = vmStack().topC();
 
     switch (mstate.mcode) {
@@ -5310,7 +5322,8 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
                            ctx, op, mstate.base, *mstate.curMember, rhs);
         break;
       }
-
+      case MQT:
+        /* fallthrough */
       case InvalidMemberCode:
         assert(false);
         result = nullptr; // Silence compiler warning.
@@ -5404,6 +5417,8 @@ OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
         IncDecProp<true>(ctx, op, mstate.base, *mstate.curMember, to);
         break;
       }
+      case MQT:
+        /* fallthrough */
       case InvalidMemberCode:
         assert(false);
         break;
@@ -5536,6 +5551,8 @@ OPTBLD_INLINE void iopUnsetM(IOP_ARGS) {
         UnsetProp(ctx, mstate.base, *mstate.curMember);
         break;
       }
+      case MQT:
+        /* fallthrough */
       case MW:
       case InvalidMemberCode:
         assert(false);

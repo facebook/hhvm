@@ -77,7 +77,8 @@ struct MElem {
     case MEL:  /* fallthrough */
     case MPL:  return immLoc == o.immLoc;
     case MET:  /* fallthrough */
-    case MPT:  return immStr == o.immStr;
+    case MPT:  /* fallthrough */
+    case MQT:  return immStr == o.immStr;
     case MEI:  return immInt == o.immInt;
     case MW:   return true;
     case InvalidMemberCode:

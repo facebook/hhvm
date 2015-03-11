@@ -166,7 +166,7 @@ ObjectPropertyExpressionPtr getResultColumn(
   );
   ObjectPropertyExpressionPtr result(
     new ObjectPropertyExpression(expr->getScope(),
-        expr->getLocation(), obj, propName)
+        expr->getLocation(), obj, propName, PropAccessType::Normal)
   );
   return result;
 }

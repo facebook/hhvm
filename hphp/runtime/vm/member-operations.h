@@ -1826,6 +1826,34 @@ inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
   unknownBaseType(base);
 }
 
+inline TypedValue* nullSafeProp(TypedValue& tvScratch, TypedValue& tvRef,
+                                Class* ctx, TypedValue* base,
+                                StringData* key) {
+  base = tvToCell(base);
+  switch (base->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      tvWriteNull(&tvScratch);
+      return &tvScratch;
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfResource:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+      tvWriteNull(&tvScratch);
+      raise_notice("Cannot access property on non-object");
+      return &tvScratch;
+    case KindOfObject:
+      return base->m_data.pobj->prop(&tvScratch, &tvRef, ctx, key);
+    case KindOfRef:
+    case KindOfClass:
+      always_assert(false);
+  }
+  not_reached();
+}
+
 /*
  * Generic property access (PropX and PropDX end up here).
  *

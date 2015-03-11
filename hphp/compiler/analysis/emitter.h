@@ -24,6 +24,8 @@
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/parser/parser.h"
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
@@ -717,7 +719,7 @@ public:
 
   void markElem(Emitter& e);
   void markNewElem(Emitter& e);
-  void markProp(Emitter& e);
+  void markProp(Emitter& e, PropAccessType propAccessType);
   void markSProp(Emitter& e);
   void markName(Emitter& e);
   void markNameSecond(Emitter& e);

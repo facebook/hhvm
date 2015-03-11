@@ -23,7 +23,6 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/util/hash.h"
 #include "hphp/parser/hphp.tab.hpp"
@@ -35,7 +34,7 @@ using namespace HPHP;
 
 ObjectPropertyExpression::ObjectPropertyExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionPtr object, ExpressionPtr property)
+ ExpressionPtr object, ExpressionPtr property, PropAccessType propAccessType)
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ObjectPropertyExpression)),
     LocalEffectsContainer(AccessorEffect),
@@ -44,6 +43,7 @@ ObjectPropertyExpression::ObjectPropertyExpression
   m_propSymValid = false;
   m_object->setContext(Expression::ObjectContext);
   m_object->setContext(Expression::AccessContext);
+  m_nullsafe = (propAccessType == PropAccessType::NullSafe);
 }
 
 ExpressionPtr ObjectPropertyExpression::clone() {

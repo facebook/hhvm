@@ -909,6 +909,10 @@ descriptors:
   PC       - consume a cell from the evaluation stack as a property
   PL:<id>  - consume a local given by an immediate id as a property
   PT:<id>  - consume a litstr given by an immediate id as a property
+  QT:<id>  - a nullsafe version of PT:<id>. The null-base doesn't issue
+             a warning, and no stdClass promotion in write context for the
+             base happens. Consume a litstr given by an immediate id
+             as a property
   W        - synthesize a new element (no corresponding local variable or
              evaluation stack slot)
 

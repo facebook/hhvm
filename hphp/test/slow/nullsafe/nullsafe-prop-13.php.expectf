@@ -1,0 +1,2 @@
+
+Fatal error: ?-> is not allowed in write context in %stest/slow/nullsafe/nullsafe-prop-13.php on line 7

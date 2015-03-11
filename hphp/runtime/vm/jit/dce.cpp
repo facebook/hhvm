@@ -412,8 +412,10 @@ bool canDCE(IRInstruction* inst) {
   case CIterFree:
   case BaseG:
   case PropX:
+  case PropQ:
   case PropDX:
   case CGetProp:
+  case CGetPropQ:
   case VGetProp:
   case BindProp:
   case SetProp:

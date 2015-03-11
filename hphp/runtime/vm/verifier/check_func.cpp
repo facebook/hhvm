@@ -463,6 +463,24 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
           } else if (vr.frontString() != -1) {
             ok &= checkString(pc, vr.frontString());
           }
+          if (member == MQT) {
+            switch (*instr) {
+              case Op::CGetM:
+              case Op::IssetM:
+              case Op::EmptyM:
+                break;
+              case Op::VGetM:
+              case Op::FPassM:
+                break;
+              default:
+                error(
+                  "Illegal QT member code at %d: %s\n",
+                  offset((PC)instr),
+                  instrToString(instr).c_str()
+                );
+                ok = false;
+            }
+          }
         }
       }
       break;

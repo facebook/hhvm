@@ -2111,6 +2111,10 @@ fields of that struct for holding intermediate values.
 
   Lookup intermediate property in S0, with key S1.
 
+| PropQ, D(PtrToMemGen), S(Obj,PtrToGen) S(StaticStr) S(PtrToMISGen), Er
+
+  A nullsafe version of PropX, returns null if the base S0 is null.
+
 | PropDX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), MProp|Er
 
   Like PropX, but used for intermediate element lookups that may modify the
@@ -2119,6 +2123,10 @@ fields of that struct for holding intermediate values.
 | CGetProp, D(Cell), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), PRc|Er
 
   Get property with key S1 from S0.
+
+| CGetPropQ, D(Cell), S(Obj,PtrToGen) S(StaticStr) S(PtrToMISGen), PRc|Er
+
+  A nullsafe version of CGetProp, returns null if the base S0 is null.
 
 | VGetProp, D(BoxedCell),
 |           S(Obj,PtrToGen) S(Cell) S(PtrToMISGen),

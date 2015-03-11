@@ -1,2 +1,0 @@
-File "nullsafe-prop-not-allowed.php", line 6, characters 15-15:
-The ?-> operator is not supported for property access (Naming[2057])

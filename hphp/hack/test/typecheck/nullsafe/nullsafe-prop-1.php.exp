@@ -1,0 +1,6 @@
+File "nullsafe-prop-1.php", line 8, characters 10-15:
+Invalid return type (Typing[4110])
+File "nullsafe-prop-1.php", line 7, characters 23-25:
+This is an int
+File "nullsafe-prop-1.php", line 8, characters 10-15:
+It is incompatible with a nullable type (use of ?-> operator)

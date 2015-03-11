@@ -298,7 +298,7 @@ void FastCGITransport::onHeadersComplete() {
   }
 
   // IIS sets this value but sets it to off when SSL is off.
-  if (m_requestParams.count("HTTPS") &&
+  if (m_requestParams.count("HTTPS") && !m_requestParams["HTTPS"].empty() &&
       strcasecmp(m_requestParams["HTTPS"].c_str(), "OFF")) {
     setSSL();
   }

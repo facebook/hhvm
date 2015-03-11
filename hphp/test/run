@@ -593,6 +593,8 @@ class Status {
   private static $overall_start_time = 0;
   private static $overall_end_time = 0;
 
+  private static $tempdir = "";
+
   const MODE_NORMAL = 0;
   const MODE_VERBOSE = 1;
   const MODE_FBMAKE = 2;
@@ -613,6 +615,36 @@ class Status {
   const SKIP_SERVER = 1;
   const PASS_CLI = 2;
 
+  private static function getTempDir() {
+    self::$tempdir = sys_get_temp_dir();
+    // Apparently some systems might not put the trailing slash
+    if (substr(self::$tempdir, -1) !== "/") {
+      self::$tempdir .= "/";
+    }
+    self::$tempdir .= substr( md5(rand()), 0, 8);
+    mkdir(self::$tempdir);
+  }
+
+  // Since we run the tests in forked processes, state is not shared
+  // So we cannot keep a static variable adding individual test times.
+  // But we can put the times files and add the values later
+  public static function setTestTime($time) {
+    file_put_contents(tempnam(self::$tempdir, "trun"), $time);
+  }
+
+  // The total time running the tests if they were run serially.
+  public static function addTestTimesSerial() {
+    $time = 0;
+    $files = scandir(self::$tempdir);
+    foreach ($files as $file) {
+      if (strpos($file, 'trun') === 0) {
+        $time += floatval(file_get_contents(self::$tempdir . "/" . $file));
+        unlink(self::$tempdir . "/" . $file);
+      }
+    }
+    return $time;
+  }
+
   public static function setMode($mode) {
     self::$mode = $mode;
   }
@@ -629,11 +661,12 @@ class Status {
     return self::$overall_start_time;
   }
 
-   public static function getOverallEndTime() {
+  public static function getOverallEndTime() {
     return self::$overall_end_time;
   }
 
   public static function started() {
+    self::getTempDir();
     self::send(self::MSG_STARTED, null);
     self::$overall_start_time = microtime(true);
   }
@@ -872,6 +905,7 @@ function run($options, $tests, $bad_test_file) {
     $status = run_and_lock_test($options, $test);
     $time = microtime(true) - $time;
     $etime = time();
+    Status::setTestTime($time);
     if ($status === 'skip') {
       Status::skip($test, null, $time, $stime, $etime);
       clean_intermediate_files($test, $options);
@@ -2017,11 +2051,16 @@ function main($argv) {
     print_failure($argv, $results, $options);
   }
 
-  Status::sayColor("\nTotal time for all executed tests: ",
+
+  Status::sayColor("\nTotal time for all executed tests as run: ",
                    Status::BLUE,
                    sprintf("%.2fs\n",
                    Status::getOverallEndTime() -
                    Status::getOverallStartTime()));
+  Status::sayColor("Total time for all executed tests if run serially: ",
+                   Status::BLUE,
+                   sprintf("%.2fs\n",
+                   Status::addTestTimesSerial()));
 
   return $return_value;
 }

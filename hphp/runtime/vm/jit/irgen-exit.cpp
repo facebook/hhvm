@@ -25,7 +25,10 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 bool branchesToItself(SrcKey sk) {
-  auto const branchOffsetPtr = instrJumpOffset((Op*)sk.pc());
+  auto op = (Op*)sk.pc();
+  if (!instrIsControlFlow(*op)) return false;
+  if (isSwitch(*op)) return false;
+  auto const branchOffsetPtr = instrJumpOffset(op);
   return branchOffsetPtr != nullptr && *branchOffsetPtr == 0;
 }
 
@@ -49,7 +52,7 @@ void exitRequest(HTS& env, TransFlags flags, SrcKey target) {
   if (env.firstBcInst && target.offset() == curBcOff) {
     // The case where the instruction may branch back to itself is
     // handled in implMakeExit.
-    assert(!branchesToItself(env.context.srcKey()));
+    assert(!branchesToItself(curSrcKey(env)));
     gen(env, ReqRetranslate, ReqRetranslateData { flags }, sp(env));
   } else {
     gen(env, ReqBindJmp, ReqBindJmpData { target, flags }, sp(env));
@@ -65,9 +68,9 @@ Block* implMakeExit(HTS& env, TransFlags trflags, Offset targetBcOff) {
   // offset=0), then we can't distinguish whether the exit is due to a
   // guard failure (i.e., no state advanced) or an actual control-flow
   // transfer (i.e., advancing state).  These are rare situations, and
-  // so we just do an InterpOneCF (via makeExitSlow).
-  if (targetBcOff == curBcOff && branchesToItself(env.context.srcKey())) {
-    return makeExitSlow(env);
+  // so we just punt to the interpreter.
+  if (targetBcOff == curBcOff && branchesToItself(curSrcKey(env))) {
+    PUNT(MakeExitAtBranchToItself);
   }
 
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);

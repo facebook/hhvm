@@ -367,7 +367,7 @@ void Parser::onClassTypeConstant(Token &out, Token &var, Token &value) {
     onClassConstant(typeConst, nullptr, var, typeConstValue);
   }
 
-  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract);
+  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract, true);
 }
 
 void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
@@ -1583,7 +1583,8 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
 }
 
 void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                                  Token *type, bool abstract /* = false */) {
+                                  Token *type, bool abstract /* = false */,
+                                  bool typeconst /* = false */) {
   if (modifiers) {
     ModifierExpressionPtr exp = modifiers->exp ?
       dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
@@ -1598,7 +1599,8 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
       ClassConstant,
       (type) ? type->typeAnnotationName() : "",
       dynamic_pointer_cast<ExpressionList>(decl->exp),
-      abstract);
+      abstract,
+      typeconst);
   }
 }
 

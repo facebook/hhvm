@@ -1907,8 +1907,8 @@ Type Index::lookup_class_constant(Context ctx,
 
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
-    if (!it->second->val.hasValue()) {
-      // This is an abstract class constant.
+    if (!it->second->val.hasValue() || it->second->isTypeconst) {
+      // This is an abstract class constant or typeconstant
       return TInitCell;
     }
     if (it->second->val.value().m_type == KindOfUninit) {

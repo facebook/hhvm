@@ -170,6 +170,9 @@ PreClass::Const::Const(const StringData* name,
 
 void PreClass::Const::prettyPrint(std::ostream& out,
                                   const PreClass* preClass) const {
+  if (isType()) {
+    out << "Type ";
+  }
   if (isAbstract()) {
     out << "Constant (abstract) "
         << preClass->name()->data() << "::" << m_name->data()

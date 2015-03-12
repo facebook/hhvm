@@ -7963,7 +7963,8 @@ void EmitterVisitor::emitClass(Emitter& e,
               static_pointer_cast<ConstantExpression>((*el)[ii]));
             StringData* constName = makeStaticString(con->getName());
             bool added UNUSED =
-              pce->addAbstractConstant(constName, typeConstraint);
+              pce->addAbstractConstant(constName, typeConstraint,
+                                       cc->isTypeconst());
             assert(added);
           }
         } else {
@@ -7998,7 +7999,8 @@ void EmitterVisitor::emitClass(Emitter& e,
             vNode->outputPHP(cg, ar);
             bool added UNUSED = pce->addConstant(
               constName, typeConstraint, &tvVal,
-              makeStaticString(os.str()));
+              makeStaticString(os.str()),
+              cc->isTypeconst());
             assert(added);
           }
         }
@@ -9044,11 +9046,14 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         } catch (Exception& e) {
           assert(false);
         }
+        // We are not supporting type constants for native classes
+        // AFAIK emitHHBCNativeClassUnit is only used for legacy idl files
         pce->addConstant(
           cnsInfo->name.get(),
           nullptr,
           (TypedValue*)(&val),
-          staticEmptyString());
+          staticEmptyString(),
+          /* typeconst = */ false);
       }
     }
     {

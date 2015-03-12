@@ -830,7 +830,7 @@ const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
   if (clsCnsInd == kInvalidSlot) {
     return nullptr;
   }
-  if (m_constants[clsCnsInd].isAbstract()) {
+  if (m_constants[clsCnsInd].isAbstract() || m_constants[clsCnsInd].isType()) {
     return nullptr;
   }
   auto const ret = const_cast<TypedValueAux*>(&m_constants[clsCnsInd].m_val);

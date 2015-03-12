@@ -67,10 +67,6 @@ void c_ExternalThreadEventWaitHandle::sweep() {
   }
 }
 
-void c_ExternalThreadEventWaitHandle::Sweep(ObjectData* p) {
-  static_cast<c_ExternalThreadEventWaitHandle*>(p)->sweep();
-}
-
 c_ExternalThreadEventWaitHandle* c_ExternalThreadEventWaitHandle::Create(
   AsioExternalThreadEvent* event,
   ObjectData* priv_data
@@ -107,8 +103,8 @@ void c_ExternalThreadEventWaitHandle::destroyEvent(bool sweeping /*= false */) {
   m_event->release();
   m_event = nullptr;
 
-  // unregister SweepableObj
-  unregister();
+  // unregister Sweepable
+  m_sweepable.unregister();
 
   if (LIKELY(!sweeping)) {
     m_privData = nullptr;

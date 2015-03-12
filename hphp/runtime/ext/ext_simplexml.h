@@ -55,9 +55,8 @@ using SimpleXMLElementBase = ExtObjectDataFlags<
   ObjectData::HasPropEmpty
 >;
 
-struct c_SimpleXMLElement : SweepableObj<SimpleXMLElementBase> {
+struct c_SimpleXMLElement : SimpleXMLElementBase {
   DECLARE_CLASS_NO_SWEEP(SimpleXMLElement)
-  static void Sweep(ObjectData*);
   void sweep();
 
   explicit c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::classof());
@@ -111,6 +110,10 @@ struct c_SimpleXMLElement : SweepableObj<SimpleXMLElementBase> {
     SXE_ITER type;
     Object   data;
   } iter;
+
+ private:
+  SweepableMember<c_SimpleXMLElement> m_sweepable;
+  friend struct SweepableMember<c_SimpleXMLElement>;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

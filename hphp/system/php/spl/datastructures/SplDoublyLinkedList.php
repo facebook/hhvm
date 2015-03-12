@@ -403,7 +403,7 @@ class SplDoublyLinkedList
       $this->push($newval);
       return;
     }
-    if ($index > $this->count) {
+    if ($index < 0 || $index >= $this->count) {
       throw new OutOfRangeException("Offset invalid or out of range");
     }
     if ($this->isEmpty()) {

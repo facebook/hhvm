@@ -20,11 +20,11 @@ function test(SplDoublyLinkedList $l) {
   $l[2] = "two";
   var_dump($l[2]);
   try {
-    $l[5] = "five";
-    var_dump($l[5]);
+    $l[3] = "five"; // 3 would be the next element
   } catch (OutOfRangeException $e) {
     echo "OutOfRangeException caught", PHP_EOL;
   }
+
   echo PHP_EOL;
 
   echo "ArrayAccess Exists:", PHP_EOL;

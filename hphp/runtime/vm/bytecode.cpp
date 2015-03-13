@@ -51,7 +51,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/mixed-array.h"

@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-util.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"

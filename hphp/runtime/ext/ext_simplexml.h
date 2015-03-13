@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_SIMPLEXML_H_
 #define incl_HPHP_EXT_SIMPLEXML_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_simplexml_include.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

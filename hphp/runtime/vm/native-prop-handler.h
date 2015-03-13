@@ -17,7 +17,7 @@
 #define _incl_HPHP_RUNTIME_VM_NATIVE_PROP_HANDLER_H
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP { namespace Native {

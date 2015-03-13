@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_ICU_H
 #define incl_HPHP_ICU_H
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
 #include <unicode/utypes.h>
 #include <unicode/ucnv.h>

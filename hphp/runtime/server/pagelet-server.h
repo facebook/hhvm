@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/server-task-event.h"
+#include "hphp/util/synchronizable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

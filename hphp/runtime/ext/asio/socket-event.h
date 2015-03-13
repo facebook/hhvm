@@ -1,7 +1,7 @@
 #ifndef incl_HPHP_ASIO_SOCKET_EVENT_H
 #define incl_HPHP_ASIO_SOCKET_EVENT_H
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/EventHandler.h>
 #include <folly/io/async/AsyncTimeout.h>

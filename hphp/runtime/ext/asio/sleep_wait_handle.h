@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_ASIO_SLEEP_WAIT_HANDLE_H_
 #define incl_HPHP_EXT_ASIO_SLEEP_WAIT_HANDLE_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 

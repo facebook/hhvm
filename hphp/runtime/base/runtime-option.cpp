@@ -836,9 +836,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   {
     Hdf error = config["ErrorHandling"];
 
-    /* Remove this, once its removed from production configs */
-    (void)Config::GetBool(ini, error["NoInfiniteLoopDetection"]);
-
     Config::Bind(ErrorUpgradeLevel, ini, error["UpgradeLevel"], 0);
     Config::Bind(MaxSerializedStringSize, ini,
                  error["MaxSerializedStringSize"], 64 * 1024 * 1024);

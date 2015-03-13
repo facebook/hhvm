@@ -31,7 +31,7 @@ namespace HPHP {
 TRACE_SET_MOD(debuggerflow);
 using jit::mcg;
 
-typedef RequestInjectionData::StepOutState StepOutState;
+using StepOutState = RequestInjectionData::StepOutState;
 
 //////////////////////////////////////////////////////////////////////////
 // DebugHookHandler implementation
@@ -59,7 +59,7 @@ void DebugHookHandler::detach(ThreadInfo* ti /* = nullptr */) {
   }
 
   // Disble function entry/exit events
-  ti->m_reqInjectionData.clearDebuggerHookFlag();
+  ti->m_reqInjectionData.clearFlag(DebuggerHookFlag);
 
   // If there are no more handlers attached, clear the blacklist
   Lock lock(s_lock);

@@ -798,14 +798,13 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else {
-    auto includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
+    auto const& includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
       m_reqInjectionData.getIncludePaths();
-    unsigned int path_count = includePaths.size();
 
-    for (int i = 0; i < (int)path_count; i++) {
+    for (auto const& includePath : includePaths) {
       String path("");
-      String includePath(includePaths[i]);
-      bool is_stream_wrapper = (includePath.find("://") > 0);
+      auto const is_stream_wrapper =
+        includePath.find("://") != std::string::npos;
 
       if (!is_stream_wrapper && includePath[0] != '/') {
         path += (g_context->getCwd() + "/");

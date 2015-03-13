@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stack-logger.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/server/http-server.h"
@@ -294,8 +295,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 }
 
 void MemoryManager::refreshStatsHelperExceeded() {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  info->m_reqInjectionData.setMemExceededFlag();
+  setSurpriseFlag(MemExceededFlag);
   m_couldOOM = false;
   if (RuntimeOption::LogNativeStackOnOOM) {
     log_native_stack("Exceeded memory limit");
@@ -968,8 +968,7 @@ void MemoryManager::logDeallocation(void* p) {
 }
 
 void MemoryManager::resetCouldOOM(bool state) {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  info->m_reqInjectionData.clearMemExceededFlag();
+  clearSurpriseFlag(MemExceededFlag);
   m_couldOOM = state;
 }
 
@@ -1352,8 +1351,7 @@ void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {
     // Throw exception when t4840214 is fixed
     // throw FatalErrorException("Request heap out of memory");
   } else if (UNLIKELY(m_used > m_OOMMarker)) {
-    ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-    info->m_reqInjectionData.setMemExceededFlag();
+    setSurpriseFlag(MemExceededFlag);
   }
   return ptr;
 }

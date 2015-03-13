@@ -38,6 +38,7 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/string-util.h"
@@ -347,9 +348,7 @@ static bool signalHandlersInited() {
 static void pcntl_signal_handler(int signo) {
   if (signo > 0 && signo < _NSIG && signalHandlersInited()) {
     s_signal_handlers->signaled[signo] = 1;
-    RequestInjectionData &data = ThreadInfo::s_threadInfo.getNoCheck()->
-                                   m_reqInjectionData;
-    data.setSignaledFlag();
+    setSurpriseFlag(SignaledFlag);
   }
 }
 

@@ -435,13 +435,13 @@ void Debugger::requestInterrupt(DebuggerProxyPtr proxy) {
   const StringData* sid = makeStaticString(proxy->getSandboxId());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
     ti->m_reqInjectionData.setDebuggerIntr(true);
-    ti->m_reqInjectionData.setDebuggerSignalFlag();
+    ti->m_reqInjectionData.setFlag(DebuggerSignalFlag);
   FOREACH_SANDBOX_THREAD_END()
 
   sid = makeStaticString(proxy->getDummyInfo().id());
   FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)
     ti->m_reqInjectionData.setDebuggerIntr(true);
-    ti->m_reqInjectionData.setDebuggerSignalFlag();
+    ti->m_reqInjectionData.setFlag(DebuggerSignalFlag);
   FOREACH_SANDBOX_THREAD_END()
 }
 

@@ -136,16 +136,16 @@ void emitRegRegMove(vixl::MacroAssembler& a, const vixl::CPURegister& dst,
 
 void emitTestSurpriseFlags(vixl::MacroAssembler& a, PhysReg rds) {
   // Keep this in sync with vasm version below
-  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
-                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
+                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   a.  Ldr   (rAsm.W(), vixl::Register(rds)[rds::kConditionFlagsOff]);
   a.  Tst   (rAsm.W(), rAsm.W());
 }
 
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
   // Keep this in sync with arm version above
-  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
-                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
+                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   auto flags = v.makeReg();
   auto sf = v.makeReg();
   v << loadl{rds[rds::kConditionFlagsOff], flags};

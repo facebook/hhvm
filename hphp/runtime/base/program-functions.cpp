@@ -35,6 +35,7 @@
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/types.h"
@@ -414,13 +415,12 @@ static void handle_exception_helper(bool& ret,
                                     bool& error,
                                     bool richErrorMsg) {
   // Clear oom/timeout while handling exception and restore them afterwards.
-  auto& data = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
-  auto flags = data.getConditionFlags();
-  auto origFlags = flags->load() & RequestInjectionData::ResourceFlags;
-  flags->fetch_and(~RequestInjectionData::ResourceFlags);
+  auto& flags = surpriseFlags();
+  auto const origFlags = flags.load() & ResourceFlags;
+  flags.fetch_and(~ResourceFlags);
 
   SCOPE_EXIT {
-    flags->fetch_or(origFlags);
+    flags.fetch_or(origFlags);
   };
 
   try {
@@ -536,11 +536,11 @@ static void handle_resource_exceeded_exception() {
   try {
     throw;
   } catch (RequestTimeoutException&) {
-    ThreadInfo::s_threadInfo->m_reqInjectionData.setTimedOutFlag();
+    setSurpriseFlag(TimedOutFlag);
   } catch (RequestCPUTimeoutException&) {
-    ThreadInfo::s_threadInfo->m_reqInjectionData.setCPUTimedOutFlag();
+    setSurpriseFlag(CPUTimedOutFlag);
   } catch (RequestMemoryExceededException&) {
-    ThreadInfo::s_threadInfo->m_reqInjectionData.setMemExceededFlag();
+    setSurpriseFlag(MemExceededFlag);
   } catch (...) {}
 }
 

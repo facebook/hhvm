@@ -480,6 +480,7 @@ void Class::initProps() const {
     // Undo the allocation of propVec
     smart_delete_array(propVec->begin(), propVec->size());
     smart_delete(propVec);
+    *m_propDataCache = nullptr;
     throw;
   }
 

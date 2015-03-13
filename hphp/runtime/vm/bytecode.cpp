@@ -961,14 +961,25 @@ ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
 Cell ExecutionContext::lookupClsCns(const NamedEntity* ne,
                                       const StringData* cls,
                                       const StringData* cns) {
-  Class* class_ = Unit::loadClass(ne, cls);
+  Class* class_ = nullptr;
+  try {
+    class_ = Unit::loadClass(ne, cls);
+  } catch (Object& ex) {
+    // For compatibility with php, throwing through a constant lookup has
+    // different behavior inside a property initializer (86pinit/86sinit).
+    auto ar = getStackFrame();
+    if (ar && ar->func() && Func::isSpecial(ar->func()->name())) {
+      raise_warning("Uncaught %s", ex.toString().data());
+      raise_error("Couldn't find constant %s::%s", cls->data(), cns->data());
+    }
+    throw;
+  }
   if (class_ == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, cls->data());
   }
   Cell clsCns = class_->clsCnsGet(cns);
   if (clsCns.m_type == KindOfUninit) {
-    raise_error("Couldn't find constant %s::%s",
-                cls->data(), cns->data());
+    raise_error("Couldn't find constant %s::%s", cls->data(), cns->data());
   }
   return clsCns;
 }

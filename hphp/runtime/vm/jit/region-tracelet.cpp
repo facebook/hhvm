@@ -253,14 +253,10 @@ RegionDescPtr RegionFormer::go() {
       break;
     }
 
-    if (!curIRBlock->empty()) {
-      auto& lastInst = curIRBlock->back();
-      if (lastInst.isTerminal() &&
-          (lastInst.taken() == nullptr || lastInst.taken()->isCatch())) {
-        FTRACE(1, "selectTracelet: tracelet broken due to terminal/non-jumpy "
-               "IR instruction: {}\n", lastInst.toString());
-        break;
-      }
+    if (curIRBlock->isExitNoThrow()) {
+      FTRACE(1, "selectTracelet: tracelet broken due to exiting IR instruction:"
+             "{}\n", curIRBlock->back());
+      break;
     }
 
     if (isFCallStar(m_inst.op())) m_arStates.back().pop();

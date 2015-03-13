@@ -72,6 +72,13 @@ const int64_t k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE =
 const int64_t k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
   FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
 
+const bool k_HHVM_FACEBOOK =
+#ifdef FACEBOOK
+  true;
+#else
+  false;
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 

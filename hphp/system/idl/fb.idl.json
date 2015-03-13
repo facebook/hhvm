@@ -2,6 +2,10 @@
     "preamble": "",
     "consts": [
         {
+            "name": "HHVM_FACEBOOK",
+            "type": "Boolean"
+        },
+        {
             "name": "FB_UNSERIALIZE_NONSTRING_VALUE",
             "type": "Int64"
         },

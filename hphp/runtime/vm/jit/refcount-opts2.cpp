@@ -161,17 +161,16 @@ the reasons that a must-alias-set's lower bounds can be increased:
    o Instructions that "produce references" (generally instructions that
      allocate new objects).
 
-   o Some situations with loads from memory (described in the next section).
+   o Some situations with loads from memory (described later).
 
 A must-alias-set's lower bound can be decreased in many situations, including:
 
    o An explicit DecRef or DecRefNZ of an SSATmp that maps to this
      must-alias-set.
 
-   o Executing an instruction that could decref pointers that live in memory,
-     for example by re-entering and running arbitrary php code, in some
-     situations where we are tracking an in-memory pointer for the set.
-     (Memory is discussed more shortly; this concept is called "memory
+   o In some situations, executing an instruction that could decref pointers
+     that live in memory, for example by re-entering and running arbitrary php
+     code.  (Memory is discussed more shortly; this concept is called "memory
      support".)
 
    o An SSATmp in this must-alias-set is passed as an argument to an IR
@@ -190,7 +189,7 @@ some reason in the IR to increment the lower bound in an alias set A, we can
 be used to increase the lower bound of other asets.  If we could theoretically
 use the same information to increase the lower bound of a different set B, we
 can't do that at the same time---we have to choose one to apply it to.  (This
-situation comes up with loads and is discussed further in the next section.)
+situation comes up with loads and is discussed further in "About Loads".)
 
 This exclusivity principle provides the following rule for dealing with
 instructions that may decrease reference counts because of May-Alias
@@ -206,7 +205,68 @@ bound on a must-alias-set S that currently has a lower bound of zero.  Then all
 the other sets that May-Alias S must have their lower bound reduced as well.
 
 
--- About Loads ("Memory Support") --
+-- Memory Support --
+
+This section is going to introduce the "memory support" concept, but details
+will be fleshed out further in following sections.
+
+The key idea behind this concept is that we can keep lower bounds higher than
+we would otherwise be able to by tracking at least some of the pointers to the
+object that may be in memory.  An alternative, conservative approach to stores,
+for example, might be to eagerly attempt to reduce the lower bound on the must
+alias set for value being stored at the location of the store itself.  By
+instead keeping track of the fact that that memory location may contain a
+pointer to that must-alias-set until it may be decref'd later, we can keep the
+lower bound higher for longer.
+
+The state of memory support for each must-alias-set is a bitvector of the
+memory locations AliasAnalysis has identified in the program.  If a bit is set,
+it indicates that that memory location may contain a pointer to that must alias
+set.  When a must-alias-set has any memory support bits set, it is going to be
+analyzed more conservatively than if it doesn't.  And importantly, the memory
+support bits are may-information: just because a bit is set, doesn't mean that
+we know for sure that memory location contains a pointer to this object.  It
+just means that it might, and that our lower bound may have been "kept higher
+for longer" using that knowledge at some point.
+
+The primary thing we need to do more conservatively with must-alias-sets that
+have memory support is reduce their lower bound if they could be decref'd
+through that pointer in memory.  Since this effect on the analysis just reduces
+lower bounds, it would never be incorrect to leave the memory support bit set
+forever in this situation, which is also conceptually necessary for this to
+work as may-information.
+
+However, if we see an instruction that could DecRef one of these objects
+through a pointer in memory and its lower_bound is currently non-zero, we can
+be sure we've accounted for that may-DecRef by balancing it with a IncRef of
+some sort that we've already observed.  In this situation, we can remove the
+memory support bit to avoid futher reductions in the lower bound of that set
+via that memory location.
+
+Since this is may-information that makes analysis more conservative, the memory
+support bits should conceptually be or'd at merge points.  It is fine to think
+of it that way for general understanding of the analysis here, but in this
+implementation we don't actually treat it that way when merging.  Because we
+want to be able to quickly find memory-supported must-alias-sets from a given
+memory location when analyzing memory effects of IR instructions (i.e. without
+iterating every tracked alias set), we restrict the state to require that at
+most one must-alias-set is supported by a given memory location during the
+analysis.  If we reach situations that would break that restriction, we must
+handle it conservatively (using a `pessimized' state, which is discussed some
+later, as a last resort).  The merge_memory_support function elaborates on the
+details of how this is done.
+
+Another thing to note about memory support is that we may have more bits set
+than the current lower bound for an object.  This situation can arise due to
+conservatively reducing the lower bound, or due to pure stores happening before
+IncRef instructions that raise the lower bound for that new pointer.
+
+Most of the complexity in this analysis is related to instructions that load or
+store from memory, and therefore interacts with memory support.  There are
+enough details to discuss it futher in next several sections of this doc.
+
+
+-- About Loads --
 
 On entry to a region, it is assumed that normal VM reference count invariants
 hold for all memory---specificaly, each reference count on each object in the
@@ -241,27 +301,31 @@ associated with the stored value to know that it has a reference).
 
 Using the results of this analysis, we can add to the lower bound of some
 must-alias-sets when we see loads from locations that are known to be balanced
-at that program point.  We call this situation "memory support" of the lower
-bound, and we need to track which memory locations are supporting which sets at
-any given time.  Then, whenever we see complex instructions that may store to
-memory with the normal VM semantics of decrefing old values, if they could
-overwrite locations that are currently "supporting" the lower bound of one of
-our alias sets, we need to remove one from the alias set's lower bound in case
-it decided to overwrite (and decref) the pointer that was in memory.
+at that program point.  When we do this, we must also track that the object has
+a pointer in memory, which could cause a reduction in the lower bound later if
+someone could decref it through that pointer, so the location must be added to
+the memory support bitvector for that must-alias-set.  Whenever we see complex
+instructions that may store to memory with the normal VM semantics of decrefing
+old values, if they could overwrite locations that are currently "supporting"
+one of our alias sets, we need to remove one from the alias set's lower bound
+in case it decided to overwrite (and decref) the pointer that was in memory.
 
-The "exclusivity" guarantee of our lower bounds requires that support from a
-given memory location is applied to at most one must-alias-set at a time.  This
-means if we see a load from a location that is known to contain a balanced
-pointer, but we were already using that location to support the lower bound of
-a different set, we either need to remove one from the lower bound of the other
-set before adding one to the new set, or leave everything alone.  This commonly
-happens across php calls right now, where values must be reloaded from memory
-because SSATmps can't span calls, so we always take the first choice (since the
-previously supported aset will probably not be used again).
+The "exclusivity" guarantee of our lower bounds requires that if we want to
+raise the lower bound of an object because it was loaded from a memory location
+known to be "balanced", then we only raise the lower bound for this reason on
+at most one must-alias-set at a time.  This means if we see a load from a
+location that is known to contain a balanced pointer, but we were already using
+that location as memory support on a different set, we either need to remove
+one from the lower bound of the other set before adding one to the new set, or
+leave everything alone.  This commonly happens across php calls right now,
+where values must be reloaded from memory because SSATmps can't span calls.
 
-Multiple memory locations may be providing memory support on the same aset.
-This comes about because of the effects of "pure store" instructions on memory
-support, which we will discuss now.
+The way this pass currently handles this is the following: if we can reduce the
+lower bound on the other set (because it has a non-zero lower bound), we'll
+take the first choice, since the previously supported aset will probably not be
+used again if we're spanning a call.  On the other hand, if the old set has a
+lower bound of zero, so we can't compensate for removing it, we leave
+everything alone.
 
 
 -- Effects of Pure Stores on Memory Support --
@@ -272,15 +336,20 @@ compilation unit, and don't imply reference count manipulation, and there are
 stores that happen with "hhbc semantics" outside of the visibility of this
 compilation unit, which imply decreffing the value that used to live in a
 memory location as it's replaced with a new one.  This module needs some
-understanding of both types, and both of these types of stores affect "memory
-support" we've added to lower bounds from PureLoad instructions, but in
-different ways.
+understanding of both types, and both of these types of stores affect memory
+support, but in different ways.
 
 For any instruction that may do non-lowered stores outside of our unit ("stores
 with hhbc semantics"), if the location(s) it may be storing to could be
-supporting the lower bound in any must-alias-set, we must remove the support
+supporting the lower bound in any must-alias-set, we should remove the support
 and decrement the lower bound, because it could DecRef the value in order to
-replace it with something else.
+replace it with something else.  If we can't actually reduce the lower bound
+(because it's already zero), we must leave the memory support flag alone,
+because we haven't really accounted for the reference that lived in that memory
+location, and it might not have actually been DecRef'd at that program point,
+and could be DecRef'd later after we've seen another IncRef.  If we didn't
+leave the bit alone in this situation, the lower bound could end up too high
+after a later IncRef.
 
 On the other hand, for a PureStore with a known destination, we don't need to
 reduce the lower bound of any set that was supported by that location, since it
@@ -336,11 +405,12 @@ example, where t1 has a lower bound of zero:
    DecRef t1
    ...
 
-If we simply ignored the fact that the lower bound would be going negative at
-the store, that means it would be two after the two IncRefs.  Then when we see
-the RaiseWarning, we won't know we need to reduce the lower bound, since we
-didn't account for the store, and now we'll think we can change the DecRef to
-DecRefNZ, but this is not actually a sound transformation.
+If we simply ignored the fact that a new pointer has been created at the store,
+that means the lower bound would be two after the two IncRefs, with no memory
+support flags.  Then when we see the RaiseWarning, we won't know we need to
+reduce the lower bound, since we didn't account for the store, and now we'll
+think we can change the DecRef to DecRefNZ, but this is not actually a sound
+transformation.
 
 If the input program is not malformed, it will in fact be doing a 'balancing'
 IncRef for any new pointers it creates, before anything could access it---in
@@ -348,27 +418,25 @@ fact it may have done that before the store, but our analysis in general
 could've lost that information in the tracked lower bound because of a
 May-Alias decref, or because it was done through an SSATmp that is mapped to a
 different must-alias-set that actually is the same object (although we don't
-know).  It's not trivial to design a scheme that can just wait to see the
-IncRef before accounting for it either, because the program we take as input
-may have been "smarter" about which instructions could care about that IncRef
-than our own analysis is.
+know).
 
 With this in mind, we'll discuss all four cases:
 
   Unknown target, Zero LB:
 
-     We flag the must-alias-set for the value being stored, along with any
-     other must-alias-set that May-Alias this set as "pessimized".  This
-     inserts a Halt node in the RC flowgraph that stops optimizations along
-     that control flow path: it prevents us from doing anything else with these
-     sets in any successor blocks.
+     We flag all must-alias-sets as "pessimized".  This state inserts a Halt
+     node in each of the RC flowgraphs, and stops all optimizations along that
+     control flow path: it prevents us from doing anything else in any
+     successor blocks.
 
   Known target, Zero LB:
 
      Unlike the above, this case is not that uncommon.  Since we know where it
-     is going, there are things we could do to track this better, but in the
-     current version of this code, this case is handled exactly the same as the
-     first case.
+     is going, we don't have to give up on everything.  Instead, we leave the
+     lower bound at zero, but set a memory support bit for the new location.
+     Recall that we can in general have more memory support locations for one
+     aset than the tracked lower bound---this is one situation that can cause
+     that.
 
   Unknown target, Non-Zero LB:
 
@@ -381,25 +449,25 @@ With this in mind, we'll discuss all four cases:
 
   Known target, Non-Zero LB:
 
-     This is the best case.  Since we know where the new pointer will be, we
-     don't need to reduce the lower bound yet---we can wait until we see an
+     Since we know where the new pointer will be, similar to the second case,
+     we don't need to reduce the lower bound yet---we can wait until we see an
      instruction that might decref our object through that pointer.  In this
-     case, we can just mark the target location as memory_support for the
+     case, we can just mark the target location as memory support for the
      must-alias-set for the stored value, and leave its lower bound alone.
 
 
 -- More about Memory --
 
 Another consideration about memory in this module arises from the fact that our
-analysis passes make no attempt to track which values may be escaped.  For that
-matter, much of the optimization we currently do here is removing redundant
-reference counting of locals and eval stack slots, which arises from lowering
-the HHBC stack machine semantics to HHIR---generally speaking these values
-could be accessible through the heap as far as we know.  This is important
-because it means that we can make no transformations to the program that would
-affect the behavior of increfs or decrefs in memory locations we aren't
-tracking, on the off chance they happen to contain a pointer to one of our
-tracked objects.
+analysis passes make no attempt to track which object pointers may be escaped.
+For that matter, much of the optimization we currently do here is removing
+redundant reference counting of locals and eval stack slots, which arises from
+lowering the HHBC stack machine semantics to HHIR---generally speaking these
+values could be accessible through the heap as far as we know.  This is
+important because it means that we can make no transformations to the program
+that would affect the behavior of increfs or decrefs in memory locations we
+aren't tracking, on the off chance they happen to contain a pointer to one of
+our tracked objects.
 
 The way we maintain correctness here is to never move or eliminate reference
 counting operations unless we know about at least /two/ references to the
@@ -619,8 +687,13 @@ struct ASetInfo {
 
   /*
    * Sometimes we lose too much track of what's going on to do anything useful.
-   * In this situation, a set gets flagged as `pessimized', we don't do
-   * anything to it anymore, and a Halt node is added to its graph.
+   * In this situation, all the sets get flagged as `pessimized', we don't do
+   * anything to them anymore, and a Halt node is added to all graphs.
+   *
+   * Note: right now this state is per-ASetInfo, but we must pessimize
+   * everything at once if we pessimize anything, because of how the analyzer
+   * will lose track of aliasing effects.  (We will probably either change it to
+   * be per-RCState later or fix the alias handling.)
    */
   bool pessimized{false};
 };
@@ -808,7 +881,6 @@ void mrinfo_step_impl(Env& env,
   match<void>(
     effects,
     [&] (IrrelevantEffects) {},
-    [&] (PureLoad)         {},
     [&] (ExitEffects)      {},
     [&] (ReturnEffects)    {},
     [&] (InterpOneEffects) {},
@@ -818,6 +890,22 @@ void mrinfo_step_impl(Env& env,
     [&] (UnknownEffects)   { kill(ALocBits{}.set()); },
     [&] (PureStore x)      { do_store(x.dst, x.value); },
     [&] (PureStoreNT x)    { do_store(x.dst, x.value); },
+
+    /*
+     * Note that loads do not kill a location.  In fact, it's possible that the
+     * IR program itself could cause a location to not be `balanced' using only
+     * PureLoads.  (For example, it could load a local to decref it as part of
+     * a return sequence.)
+     *
+     * It's safe not to add it to the kill set, though, because if the IR
+     * program is destroying a memory location, it is already malformed if it
+     * loads the location again and then uses it in a way that relies on the
+     * pointer still being dereferenceable.  Moreover, in these situations,
+     * even though the avail bit from mrinfo will be set on the second load, we
+     * won't be able to remove support from the previous aset, and won't raise
+     * the lower bound on the new loaded value.
+     */
+    [&] (PureLoad) {},
 
     /*
      * Since there's no semantically correct way to do PureLoads from the
@@ -1350,9 +1438,6 @@ bool check_state(const RCState& state) {
     // All reference count bounds are non-negative.
     always_assert(set.lower_bound >= 0);
 
-    // The lower bound is always at least as large as the must support memory.
-    always_assert(set.lower_bound >= set.memory_support.count());
-
     // If this set has support bits, then the reverse map in the state is
     // consistent with it.
     if (set.memory_support.any()) {
@@ -1395,6 +1480,14 @@ RCState entry_rc_state(Env& env) {
   return ret;
 }
 
+bool pessimize_for_merge(ASetInfo& aset) {
+  if (aset.pessimized) return false;
+  aset.pessimized = true;
+  aset.lower_bound = 0;
+  aset.memory_support.reset();
+  return true;
+}
+
 bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   auto changed = false;
 
@@ -1402,27 +1495,6 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   // function.
   assert(src.lower_bound >= 0);
   assert(dst.lower_bound >= 0);
-  assert(src.lower_bound >= src.memory_support.count());
-  assert(dst.lower_bound >= dst.memory_support.count());
-
-  // Merge memory support by keeping the intersection of supporting locations,
-  // and dropping the lower bound for the other ones.  Note that this can
-  // reduce the lower bound as part of the merge, so we must do it before
-  // merging the lower bounds below.
-  auto const new_memory_support = dst.memory_support & src.memory_support;
-  if (dst.memory_support != new_memory_support) {
-    auto const old_count = dst.memory_support.count();
-    auto const new_count = new_memory_support.count();
-    auto const delta     = old_count - new_count;
-    assert(delta > 0);
-
-    dst.lower_bound -= delta;
-    dst.memory_support = new_memory_support;
-    changed = true;
-
-    assert(dst.lower_bound >= 0);
-    assert(dst.lower_bound >= dst.memory_support.count());
-  }
 
   auto const new_lower_bound = std::min(dst.lower_bound, src.lower_bound);
   if (dst.lower_bound != new_lower_bound) {
@@ -1433,16 +1505,69 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   auto const new_pessimized = dst.pessimized || src.pessimized;
   if (dst.pessimized != new_pessimized) {
     assert(new_pessimized);
-    dst.pessimized = new_pessimized;
-    dst.lower_bound = 0;
-    dst.memory_support.reset();
+    DEBUG_ONLY auto pess_changed = pessimize_for_merge(dst);
+    assert(pess_changed);
     changed = true;
   }
 
   return changed;
 }
 
-bool merge_into(RCState& dst, const RCState& src) {
+bool merge_memory_support(RCState& dstState, const RCState& srcState) {
+  auto changed = false;
+  for (auto asetID = uint32_t{0}; asetID < dstState.asets.size(); ++asetID) {
+    auto& dst = dstState.asets[asetID];
+    auto& src = srcState.asets[asetID];
+    /*
+     * If both the src and dst sets have enough memory support for their lower
+     * bound, merge memory support by keeping the intersection of support
+     * locations, and dropping the lower bound to compensate for the other ones
+     * (i.e. we're acting like it might have been decref'd right here through
+     * any memory locations that aren't in the intersection).  Since they both
+     * have enough lower bound for their support, we know we can account for
+     * everything here.
+     *
+     * On the other hand, if one or both of them has more memory support bits
+     * than lower bound, we just pessimize everything.
+     *
+     * We do all of this conservative merging to simplify things during each
+     * block's analysis.  If we weren't merging this way, we would have to
+     * union the incoming memory bits, which easily leads to situations where
+     * more than one must alias set is supported by the same memory location.
+     * But we want our state structures to have support_map pointing to at most
+     * one must-alias-set for each location.
+     */
+    if (dst.lower_bound >= dst.memory_support.count() &&
+        src.lower_bound >= src.memory_support.count()) {
+      auto const new_memory_support = dst.memory_support & src.memory_support;
+      if (dst.memory_support != new_memory_support) {
+        auto const old_count = dst.memory_support.count();
+        auto const new_count = new_memory_support.count();
+        auto const delta     = old_count - new_count;
+        assert(delta > 0);
+
+        dst.lower_bound -= delta;
+        dst.memory_support = new_memory_support;
+        changed = true;
+
+        assert(dst.lower_bound >= 0);
+        assert(dst.lower_bound >= dst.memory_support.count());
+      }
+      continue;
+    }
+
+    FTRACE(5, "     {} pessimizing during merge\n", asetID);
+    for (auto other = uint32_t{0}; other < dstState.asets.size(); ++other) {
+      if (pessimize_for_merge(dstState.asets[other])) {
+        changed = true;
+      }
+    }
+  }
+
+  return changed;
+}
+
+bool merge_into(Env& env, RCState& dst, const RCState& src) {
   if (!dst.initialized) {
     dst = src;
     return true;
@@ -1450,12 +1575,20 @@ bool merge_into(RCState& dst, const RCState& src) {
 
   always_assert(dst.asets.size() == src.asets.size());
 
-  // We'll reconstruct the support_map vector while iterating each aset.
+  // We'll reconstruct the support_map vector after merging each aset.
   dst.support_map.fill(-1);
 
   auto changed = false;
+
+  // First merge memory support information.  This is a separate step, because
+  // this merge can cause changes to other may-alias sets at each stage (it may
+  // pessimize all the sets in some situations).
+  if (merge_memory_support(dst, src)) changed = true;
+
   for (auto asetID = uint32_t{0}; asetID < dst.asets.size(); ++asetID) {
-    changed = merge_into(dst.asets[asetID], src.asets[asetID]) || changed;
+    if (merge_into(dst.asets[asetID], src.asets[asetID])) {
+      changed = true;
+    }
 
     auto const& mem = dst.asets[asetID].memory_support;
     if (mem.none()) continue;
@@ -1493,35 +1626,6 @@ void reduce_lower_bound(Env& env, RCState& state, uint32_t asetID) {
   FTRACE(5, "      reduce_lower_bound {}\n", asetID);
   auto& aset = state.asets[asetID];
   aset.lower_bound = std::max(aset.lower_bound - 1, 0);
-
-  /*
-   * If we reduced the lower bound to below the memory supported level, this
-   * means one of two things are happening:
-   *
-   *   o Something is being conservative about a may-DecRef, and this object is
-   *     not really being affected, it's still in memory and everything is
-   *     fine.  We can't know this is going on, though.
-   *
-   *   o One of the formerly supporting memory locations is being "inbalanced"
-   *     deliberately by the IR program.  For example, we might be doing a RetC
-   *     and freeing values that used to be in locals.
-   *
-   * In either case, we can't keep any of the memory support, because we don't
-   * know which location(s) will still be holding live pointers that imply a
-   * lower bound.  We don't have a notion of "may support" for memory right
-   * now, so we have to give up all of it.  This sounds worse than it is:
-   * without memory support, we wouldn't have had these lower bounds in the
-   * first place.
-   */
-  auto& mem = aset.memory_support;
-  if (aset.lower_bound < mem.count()) {
-    for (auto loc = uint32_t{0}; loc < mem.size(); ++loc) {
-      if (!mem[loc]) continue;
-      state.support_map[loc] = -1;
-    }
-    mem.reset();
-    aset.lower_bound = 0;
-  }
 }
 
 template<class NAdder>
@@ -1539,20 +1643,6 @@ void pessimize_one(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   }
   aset.pessimized = true;
   add_node(asetID, NHalt{});
-}
-
-template<class NAdder>
-void pessimize_may_alias(Env& env,
-                         RCState& state,
-                         ASetID asetID,
-                         NAdder add_node) {
-  FTRACE(2, "    {} pessimizing any may_alias\n", asetID);
-  always_assert(state.asets[asetID].lower_bound == 0);
-  always_assert(state.asets[asetID].memory_support.none());
-  pessimize_one(env, state, asetID, add_node);
-  for (auto may_id : env.asets[asetID].may_alias) {
-    pessimize_one(env, state, may_id, add_node);
-  }
 }
 
 template<class NAdder>
@@ -1610,44 +1700,72 @@ void may_decref(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   }
 }
 
+// Returns true if we actually reduced the lower_bound (i.e. it wasn't
+// previously zero).
 template<class NAdder>
-void reduce_support_bit(Env& env,
+bool reduce_support_bit(Env& env,
                         RCState& state,
                         uint32_t locID,
                         NAdder add_node) {
   auto const current_set = state.support_map[locID];
-  if (current_set == -1) return;
+  if (current_set == -1) return true;
   FTRACE(3, "      {} removing support\n", current_set);
-  auto& cur_mem = state.asets[current_set].memory_support;
-  cur_mem.reset(locID);
+  auto& aset = state.asets[current_set];
+  if (aset.lower_bound == 0) {
+    /*
+     * We can't remove the support bit, and we have no way to account for the
+     * reduction in lower bound.  There're two cases to consider:
+     *
+     *   o If the event we're processing actually DecRef'd this must-alias-set
+     *     through this memory location, the lower bound is still zero, and
+     *     leaving the bit set conservatively is not incorrect.
+     *
+     *   o If the event we're processing did not actually DecRef this object
+     *     through this memory location, then we must not remove the bit,
+     *     because something in the future (after we've seen other IncRefs)
+     *     still may decref it through this location.
+     *
+     * So in this case we leave the lower bound alone, and also must not remove
+     * the bit.
+     */
+    return false;
+  }
+  aset.memory_support.reset(locID);
   state.support_map[locID] = -1;
-  assert(state.asets[current_set].lower_bound >= cur_mem.count() + 1);
   reduce_lower_bound(env, state, current_set);
   // Because our old lower bound is non-zero (from the memory support), we
   // don't need to deal with the possibility of may-alias observes or may-alias
   // decrefs here.
   add_node(current_set, NReq{1});
+  return true;
 }
 
+// Returns true if a lower bound reduction succeeded on every support bit.
 template<class NAdder>
-void reduce_support_bits(Env& env,
+bool reduce_support_bits(Env& env,
                          RCState& state,
                          ALocBits set,
                          NAdder add_node) {
   FTRACE(2, "    remove: {}\n", show(set));
+  auto ret = true;
   for_each_bit(set, [&] (uint32_t locID) {
-    reduce_support_bit(env, state, locID, add_node);
+    if (!reduce_support_bit(env, state, locID, add_node)) ret = false;
   });
+  return ret;
 }
 
+// Returns true if we completely accounted for removing the support by reducing
+// non-zero lower bounds.  If it returns false, the support bits may still be
+// marked on some must-alias-sets.  (See pure_load.)
 template<class NAdder>
-void reduce_support(Env& env,
+bool reduce_support(Env& env,
                     RCState& state,
                     AliasClass aclass,
                     NAdder add_node) {
-  if (aclass == AEmpty) return;
+  if (aclass == AEmpty) return true;
   FTRACE(3, "    reduce support {}\n", show(aclass));
-  reduce_support_bits(env, state, env.ainfo.may_alias(aclass), add_node);
+  auto const alias = env.ainfo.may_alias(aclass);
+  return reduce_support_bits(env, state, alias, add_node);
 }
 
 void drop_support_bit(Env& env, RCState& state, uint32_t bit) {
@@ -1674,13 +1792,15 @@ void create_store_support(Env& env,
                           NAdder add_node) {
   for_aset(env, state, tmp, [&] (ASetID asetID) {
     auto& aset = state.asets[asetID];
-    if (aset.lower_bound == 0) {
-      pessimize_may_alias(env, state, asetID, add_node);
+
+    auto const meta = env.ainfo.find(dst);
+    if (!meta && aset.lower_bound == 0) {
+      FTRACE(3, "    {} causing pessimize\n", asetID);
+      pessimize_all(env, state, add_node);
       return;
     }
 
-    auto const meta = env.ainfo.find(dst);
-    if (meta && aset.lower_bound > aset.memory_support.count()) {
+    if (meta) {
       FTRACE(3, "    {} adding support in {}\n", asetID, show(dst));
 
       /*
@@ -1691,14 +1811,15 @@ void create_store_support(Env& env,
        * bits from meta->conflicts are supporting something, even if one of
        * them is actually supporting this same set.  The reason to consider
        * whether it would matter is that we have to make sure we don't violate
-       * the exclusivity rule of lower bounds: but this won't happen because
-       * we're converting an excess in our lower bound (that we got from
-       * "elsewhere") into this memory support---basically if we assume the
-       * lower bound "exclusivity" property is holding before this store
-       * operation, it will still hold after it.  We'll still clear all the
-       * support if we do another load or store from anything inside this
-       * conflict set, and memory operations that could decref any one of them
-       * will reduce the support for all of them.
+       * the exclusivity rule of lower bounds: this won't happen because we're
+       * not increasing our lower bound here, and we're only changing which
+       * memory locations should cause reductions in the lower bound later.
+       *
+       * Basically if we assume the lower bound "exclusivity" property is
+       * holding before this store operation, it will still hold after it:
+       * we'll still clear the support if we do another load or store from
+       * anything inside this conflict set, and memory operations that could
+       * decref any one of them will reduce the support for all of them.
        */
       assert(state.support_map[meta->index] == -1);
 
@@ -1746,9 +1867,18 @@ void pure_load(Env& env,
   if (!meta) return;
   if (!state.avail.test(meta->index)) return;
 
-  // If currently supporting a different ASet, clear any support there first.
+  /*
+   * If currently supporting a different ASet, try to clear any support there
+   * first.  It is possible we won't successfully clear the support if it was
+   * supporting a set that currently has a lower bound of zero---in that
+   * situation we can't raise the lower bound or support the new loaded set,
+   * because it could violate the exclusivity rule.
+   */
   FTRACE(2, "    load: {}\n", show(src));
-  reduce_support(env, state, src, add_node);
+  if (!reduce_support(env, state, src, add_node)) {
+    FTRACE(2, "    couldn't remove all pre-existing support\n");
+    return;
+  }
 
   for_aset(env, state, dst, [&] (ASetID asetID) {
     FTRACE(2, "    {} adding support: {}\n", asetID, show(src));
@@ -1817,6 +1947,7 @@ void analyze_mem_effects(Env& env,
                          RCState& state,
                          NAdder add_node) {
   auto const effects = canonicalize(memory_effects(inst));
+  FTRACE(4, "    mem: {}\n", show(effects));
   match<void>(
     effects,
     [&] (IrrelevantEffects) {},
@@ -1930,12 +2061,15 @@ void rc_analyze_inst(Env& env,
     return;
   case DecRef:
   case DecRefNZ:
-    for_aset(env, state, inst.src(0), [&] (ASetID asetID) {
-      add_node(asetID, NDec{&inst});
-      auto const old_lb = state.asets[asetID].lower_bound;
-      may_decref(env, state, asetID, add_node);
+    {
+      auto old_lb = int32_t{0};
+      for_aset(env, state, inst.src(0), [&] (ASetID asetID) {
+        add_node(asetID, NDec{&inst});
+        old_lb = state.asets[asetID].lower_bound;
+        may_decref(env, state, asetID, add_node);
+      });
       if (old_lb <= 1) analyze_mem_effects(env, inst, state, add_node);
-    });
+    }
     return;
   case DefInlineFP:
     // We're converting a pre-live actrec to a live actrec, which effectively
@@ -2105,7 +2239,7 @@ RCAnalysis rc_analyze(Env& env) {
     auto propagate = [&] (Block* target) {
       FTRACE(2, "   -> {}\n", target->id());
       auto& tinfo = ret.info[target];
-      auto const changed = merge_into(tinfo.state_in, state);
+      auto const changed = merge_into(env, tinfo.state_in, state);
       if (changed) incompleteQ.push(tinfo.rpoId);
     };
 

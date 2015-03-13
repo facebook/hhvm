@@ -225,6 +225,11 @@ void registerLiveObj(ObjectData* obj);
  */
 void unwindResumeHelper();
 
+/*
+ * Throw a VMSwitchMode exception.
+ */
+void throwSwitchMode() ATTRIBUTE_NORETURN;
+
 namespace MInstrHelpers {
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);

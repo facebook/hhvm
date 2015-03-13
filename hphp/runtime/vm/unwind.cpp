@@ -590,10 +590,6 @@ UnwindAction exception_handler() noexcept {
     return UnwindAction::ResumeVM;
   }
 
-  catch (VMResumeTC&) {
-    always_assert(false && "VMResumeTC exception escaped the TC");
-  }
-
   catch (VMReenterStackOverflow&) {
     ITRACE(1, "unwind: VMReenterStackOverflow\n");
     pushFault(new FatalErrorException("Stack overflow"));

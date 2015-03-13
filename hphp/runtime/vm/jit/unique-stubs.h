@@ -85,16 +85,18 @@ struct UniqueStubs {
   std::unordered_map<Op, TCA> interpOneCFHelpers;
 
   /*
+   * Throw a VMSwitchMode exception. Used in
+   * bytecode.cpp:switchModeForDebugger().
+   */
+  TCA throwSwitchMode;
+
+  /*
    * Catch blocks jump to endCatchHelper when they've finished executing. If
    * the unwinder has set state indicating a return address to jump to, this
    * stub will load vmfp and vmsp and jump there. Otherwise, it calls
    * unwindResumeHelper.
-   *
-   * endCatchHelperResumeTC is a shortcut to the part of endCatchHelper that
-   * loads VM regs and jumps to the indicated return address.
    */
   TCA endCatchHelper;
-  TCA endCatchHelperResumeTC;
 
   /*
    * Helper stubs for doing generic decrefs on a function return.  The

@@ -78,6 +78,12 @@ static String HHVM_FUNCTION(server_warmup_status) {
     return "PGO profiling translations are still enabled.";
   }
 
+  auto tpc_diff = jit::s_perfCounters[jit::tpc_interp_bb] -
+    jit::s_perfCounters[jit::tpc_interp_bb_force];
+  if (tpc_diff) {
+    return folly::sformat("Interpreted {} non-forced basic blocks.", tpc_diff);
+  }
+
   return empty_string();
 }
 

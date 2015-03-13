@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
+#include "hphp/runtime/vm/unwind.h"
 
 namespace HPHP {
 
@@ -1241,6 +1242,13 @@ void registerLiveObj(ObjectData* obj) {
 void unwindResumeHelper() {
   tl_regState = VMRegState::CLEAN;
   _Unwind_Resume(unwindRdsInfo->exn);
+}
+
+void throwSwitchMode() {
+  // This is only called right after dispatchBB, so the VM regs really are
+  // clean.
+  tl_regState = VMRegState::CLEAN;
+  throw VMSwitchMode();
 }
 
 namespace MInstrHelpers {

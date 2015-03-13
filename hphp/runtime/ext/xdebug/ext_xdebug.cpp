@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -30,6 +31,7 @@
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 
 // TODO(#3704) Remove when xdebug fully implemented
@@ -771,6 +773,11 @@ void XDebugExtension::moduleInit() {
   if (!Enable) {
     return;
   }
+
+  // Stacktraces are always on when XDebug is enabled
+  Logger::SetTheLogger(new ExtendedLogger());
+  ExtendedLogger::EnabledByDefault = true;
+
   Native::registerConstant<KindOfInt64>(
     s_XDEBUG_CC_UNUSED.get(), k_XDEBUG_CC_UNUSED
   );

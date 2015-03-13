@@ -50,19 +50,20 @@ struct Walker {
   }
 
 private:
-  void visit_closure(ClosureExpressionPtr ce) {
+  bool visit_closure(ClosureExpressionPtr ce) {
     auto const cfunc = ce->getClosureFunction();
 
+    auto useImplicitThis = false;
     with_scope(
       cfunc->getScope()->getVariables(),
       [&] {
-        walk_ast(cfunc->getStmts(), /*inClosureScope*/ true);
+        useImplicitThis = walk_ast(cfunc->getStmts());
       }
     );
 
-    if (ce->type() != ClosureType::Short) return;
+    if (ce->type() != ClosureType::Short) return useImplicitThis;
     if (ce->captureState() == ClosureExpression::CaptureState::Known) {
-      return;
+      return useImplicitThis;
     }
 
     auto const paramNames = ce->collectParamNames();
@@ -85,43 +86,40 @@ private:
       }
     }
 
-    if (cfunc->getFunctionScope()->containsThis() || m_useImplicitThis) {
+    if (cfunc->getFunctionScope()->containsThis() || useImplicitThis) {
       toCapture.insert("this");
     }
 
     ce->setCaptureList(m_ar, toCapture);
+
+    return useImplicitThis;
   }
 
-  void walk_ast(ConstructPtr node, bool inClosureScope) {
-    if (!node) return;
+  // Returns: whether or not $this is implicitly used in this part of the AST,
+  // e.g. via a call using parent::.
+  bool walk_ast(ConstructPtr node) {
+    if (!node) return false;
 
     if (dynamic_pointer_cast<MethodStatement>(node)) {
       // Don't descend into nested non-closure functions, or functions
       // in the pseudo-main.
-      return;
+      return false;
     }
 
     if (auto ce = dynamic_pointer_cast<ClosureExpression>(node)) {
-      // If some inner closure capture $this implicitly,
-      // the outer closure should do the same.
-      auto prevImplicitThis = m_useImplicitThis;
-      m_useImplicitThis = false;
-      visit_closure(ce);
-      // Inner closure should not capture $this, even
-      // if the outer closure already captured it.
-      if (!m_useImplicitThis) {
-        m_useImplicitThis = prevImplicitThis;
-      }
-      return;
-    } else if (auto fc = dynamic_pointer_cast<FunctionCall>(node)) {
-      if (inClosureScope && fc->isParent()) {
-        m_useImplicitThis = true;
-      }
+      return visit_closure(ce);
+    }
+
+    auto ret = false;
+    if (auto fc = dynamic_pointer_cast<FunctionCall>(node)) {
+      if (fc->isParent()) ret = true;
     }
 
     for (int i = 0; i < node->getKidCount(); ++i) {
-      walk_ast(node->getNthKid(i), inClosureScope);
+      if (walk_ast(node->getNthKid(i))) ret = true;
     }
+
+    return ret;
   }
 
   void walk_function(const FunctionScopePtr& fscope) {
@@ -132,7 +130,7 @@ private:
     with_scope(
       fscope->getVariables(),
       [&] {
-        walk_ast(node, /*inClosureScope*/ false);
+        walk_ast(node);
       }
     );
   }
@@ -148,7 +146,6 @@ private:
 private:
   NameScope* m_curScope;
   AnalysisResultPtr m_ar;
-  bool m_useImplicitThis = false;
 };
 
 }

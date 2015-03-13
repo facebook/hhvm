@@ -217,8 +217,6 @@ DELEGATE_OPCODE(AssertNonNull)
 DELEGATE_OPCODE(AssertStk)
 DELEGATE_OPCODE(AssertType)
 
-DELEGATE_OPCODE(GuardLoc)
-DELEGATE_OPCODE(GuardStk)
 DELEGATE_OPCODE(CheckStk)
 DELEGATE_OPCODE(CheckType)
 
@@ -989,16 +987,6 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
       });
     }
   }
-}
-
-void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitReffinessTest(inst, sf,
-    [&](ConditionCode cc, Vreg sfTaken) {
-      auto const destSK = SrcKey(curFunc(), inst->marker().bcOff(), resumed());
-      v << fallbackcc{cc, sfTaken, destSK};
-    });
 }
 
 void CodeGenerator::cgCheckRefs(IRInstruction* inst) {

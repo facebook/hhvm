@@ -1419,20 +1419,6 @@ void CodeGenerator::emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc,
     });
 }
 
-template<class Loc>
-void CodeGenerator::emitTypeGuard(const BCMarker& marker, Type type,
-                                  Loc typeSrc, Loc dataSrc) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitTypeTest(type, typeSrc, dataSrc, sf,
-    [&](ConditionCode cc, Vreg sfTaken) {
-      auto dest = SrcKey(getFunc(marker), m_state.unit.bcOff(),
-                         resumed(marker));
-      vmain() << fallbackcc{ccNegate(cc), sfTaken, dest, TransFlags(),
-                            kCrossTraceRegs};
-    });
-}
-
 void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc, Vreg sf) {
   vmain() << setcc{cc, sf, dstLoc(inst, 0).reg()};
 }
@@ -3843,31 +3829,11 @@ void CodeGenerator::cgLdStk(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgGuardStk(IRInstruction* inst) {
-  auto const rSP = srcLoc(inst, 0).reg();
-  auto const baseOff = cellsToBytes(inst->extra<GuardStk>()->irSpOffset.offset);
-  auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 0).reg()};
-  emitTypeGuard(inst->marker(), inst->typeParam(),
-                rSP[baseOff + TVOFF(m_type)],
-                rSP[baseOff + TVOFF(m_data)]);
-}
-
 void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   auto const rbase = srcLoc(inst, 0).reg();
-  auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset.offset);
+  auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->irSpOffset.offset);
   emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
                 rbase[baseOff + TVOFF(m_data)], inst->taken());
-}
-
-void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
-  auto const rFP = srcLoc(inst, 0).reg();
-  auto const baseOff = localOffset(inst->extra<GuardLoc>()->locId);
-  auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 1).reg()};
-  emitTypeGuard(inst->marker(), inst->typeParam(),
-                rFP[baseOff + TVOFF(m_type)],
-                rFP[baseOff + TVOFF(m_data)]);
 }
 
 void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
@@ -4087,18 +4053,6 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
         });
     }
   }
-}
-
-void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitReffinessTest(inst, sf,
-    [&](Vout& v, ConditionCode cc, Vreg sfTaken) {
-      auto& marker = inst->marker();
-      auto dest = SrcKey(getFunc(marker), marker.bcOff(), resumed(marker));
-      v << syncvmsp{srcLoc(inst, 6 /* sp */).reg()};
-      v << fallbackcc{cc, sfTaken, dest, TransFlags(), kCrossTraceRegs};
-    });
 }
 
 void CodeGenerator::cgCheckRefs(IRInstruction* inst)  {

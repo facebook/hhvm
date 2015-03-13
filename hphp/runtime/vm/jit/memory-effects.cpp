@@ -419,7 +419,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AFrame { inst.src(0), inst.extra<LocalId>()->locId } };
 
   case CheckLoc:
-  case GuardLoc:
   case LdLocPseudoMain:
     // Note: LdLocPseudoMain is both a guard and a load, so it must not be a
     // PureLoad.
@@ -683,14 +682,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
-  case GuardStk:
-    return may_load_store(
-      AStack { inst.src(0), inst.extra<GuardStk>()->irSpOffset.offset, 1 },
-      AEmpty
-    );
   case CheckStk:
     return may_load_store(
-      AStack { inst.src(0), inst.extra<CheckStk>()->offset.offset, 1 },
+      AStack { inst.src(0), inst.extra<CheckStk>()->irSpOffset.offset, 1 },
       AEmpty
     );
   case CufIterSpillFrame:
@@ -712,12 +706,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       };
       return may_reenter(may_load_store(stk, stk));
     }
-
-  case GuardRefs:
-    // We're not bothering with being exact about where on the stack this
-    // instruction can load, because it's always before anything else in a
-    // region.
-    return may_load_store(AStackAny, AEmpty);
 
   case LdARFuncPtr:
     // This instruction is essentially a PureLoad, but we don't handle non-TV's

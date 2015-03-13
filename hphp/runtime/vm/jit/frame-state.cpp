@@ -376,14 +376,13 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     refineStackValues(inst->src(0), inst->dst());
     break;
 
-  case GuardStk:
-    refineStackType(inst->extra<GuardStk>()->irSpOffset,
+  case CheckStk:
+    refineStackType(inst->extra<RelOffsetData>()->irSpOffset,
                     inst->typeParam(),
                     TypeSource::makeGuard(inst));
     break;
 
   case AssertStk:
-  case CheckStk:
     refineStackType(inst->extra<IRSPOffsetData>()->offset,
                     inst->typeParam(),
                     TypeSource::makeGuard(inst));

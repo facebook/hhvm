@@ -97,10 +97,15 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
         m_constraints.prevTypes[inst] = localType(locId, DataTypeGeneric);
       }
     }
-    if (inst->is(AssertStk, CheckStk, LdStk)) {
+    if (inst->is(CheckStk)) {
+      auto const offset = inst->extra<RelOffsetData>()->irSpOffset;
+      m_constraints.typeSrcs[inst] = stackTypeSources(offset);
+      m_constraints.prevTypes[inst] = stackType(offset, DataTypeGeneric);
+    }
+    if (inst->is(AssertStk, LdStk)) {
       auto const offset = inst->extra<IRSPOffsetData>()->offset;
       m_constraints.typeSrcs[inst] = stackTypeSources(offset);
-      if (inst->is(AssertStk, CheckStk)) {
+      if (inst->is(AssertStk)) {
         m_constraints.prevTypes[inst] = stackType(offset, DataTypeGeneric);
       }
     }
@@ -114,8 +119,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     // In psuedomains we have to pre-constrain local guards, because we don't
     // ever actually generate code that will constrain them otherwise.
     // (Because of the LdLocPseudoMain stuff.)
-    if (inst->marker().func()->isPseudoMain() &&
-        inst->is(GuardLoc, CheckLoc)) {
+    if (inst->marker().func()->isPseudoMain() && inst->is(CheckLoc)) {
       constrainGuard(inst, DataTypeSpecific);
     }
   }
@@ -223,7 +227,7 @@ SSATmp* IRBuilder::preOptimizeCheckType(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
-  auto const offset = inst->extra<CheckStk>()->offset;
+  auto const offset = inst->extra<CheckStk>()->irSpOffset;
 
   if (auto const prevValue = stackValue(offset, DataTypeGeneric)) {
     gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
@@ -856,7 +860,7 @@ bool IRBuilder::constrainGuard(const IRInstruction* inst, TypeConstraint tc) {
   Indent _i;
 
   auto const changed = guard != newTc;
-  if (!tc.weak) guard = newTc;
+  if (changed && !tc.weak) guard = newTc;
 
   return changed;
 }
@@ -1014,11 +1018,6 @@ bool IRBuilder::constrainSlot(int32_t idOrOffset,
 
   assert(typeSrc.isGuard());
   auto const guard = typeSrc.guard;
-
-  if (guard->is(GuardLoc, GuardStk)) {
-    ITRACE(2, "found guard to constrain\n");
-    return constrainGuard(guard, tc);
-  }
 
   always_assert(guard->is(AssertLoc, CheckLoc, AssertStk, CheckStk));
 

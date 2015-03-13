@@ -148,9 +148,7 @@ bool isCallOp(Opcode opc) {
 
 bool isGuardOp(Opcode opc) {
   switch (opc) {
-    case GuardLoc:
     case CheckLoc:
-    case GuardStk:
     case CheckStk:
     case CheckType:
       return true;

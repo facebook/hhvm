@@ -215,15 +215,6 @@ about to be loaded, using a separate CheckRefInner instruction.
 
   If the value pointed to by S0 is not type T, branch to the block B.
 
-| GuardLoc<T,localId>, ND, S(FramePtr) S(StkPtr), NF
-
-  Guard that type of the given localId on the frame S0 is a subtype of the type
-  T; if not, make a fallback jump. (A jump to a service request that chains to
-  a retranslation for this tracelet.)
-
-  Returns a new frame pointer representing the same frame as S0 but with the
-  knowledge that the guarded local has type T.
-
 | HintLocInner<T,localId>, ND, S(FramePtr), NF
 
   Hint that the inner type of a BoxedCell in localId is likely type T, where T
@@ -241,18 +232,12 @@ about to be loaded, using a separate CheckRefInner instruction.
 | AssertLoc<T,localId>, ND, S(FramePtr), NF
 
   Asserts that type of the supplied local on the frame S0 is T. This is used
-  for local type information, and is similar to GuardLoc except it doesn't
+  for local type information, and is similar to CheckLoc except it doesn't
   imply a runtime check (the assertion must've already been proven to be true)
   and cannot cause control flow.
 
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the asserted local has type T.
-
-| GuardStk<T,offset>, ND, S(StkPtr) S(FramePtr), NF
-
-  Guard that the type of the cell on the stack pointed to by S0 at offset (in
-  cells) is T. If not, make a fallback jump. (A jump to a service request that
-  chains to a retranslation for this tracelet.)
 
 | HintStkInner<T,offset>, ND, S(StkPtr), NF
 
@@ -268,7 +253,7 @@ about to be loaded, using a separate CheckRefInner instruction.
 | AssertStk<T,offset>, ND, S(StkPtr), NF
 
   Assert that stack element at `offset' (in cells) from S0 has type T. This is
-  similar to a GuardStk except that it does not imply a runtime check and
+  similar to a CheckStk except that it does not imply a runtime check and
   cannot cause control flow.
 
 | CastStk<T,offset>, ND, S(StkPtr), Er
@@ -315,21 +300,6 @@ exceptions depending on how coercion is implemented.
   Check if the counter associated with translation TransID is cold (i.e. within
   a fixed threshold). If it's not (i.e. such translation has reached the
   "hotness threshold"), then branch to block B.
-
-| GuardRefs, ND, S(Func) S(Int) C(Int) S(Int) S(Int) S(FramePtr) S(StkPtr), NF
-
-  Perform reffiness guard checks. Operands:
-
-    S0 - function pointer for the frame
-    S1 - num params expected in the func
-    S2 - first bit to check, must be a multiple of 64
-    S3 - mask to check (RefDeps::Record::m_mask entries)
-    S4 - values to check (RefDeps::Record::m_vals entries)
-    S5 - Pointer to the current frame
-    S6 - Pointer to the current VM stack
-
-  If any of the checks fail, make a fallback jump. (Jump to a service request
-  that will chain to a retranslation of this tracelet.)
 
 | CheckRefs, ND, S(Func) S(Int) C(Int) S(Int) S(Int), B
 

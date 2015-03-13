@@ -407,7 +407,8 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
     auto const checkIdx = BCSPOffset{(out & InstrFlags::StackIns2) ? 2
                         : (out & InstrFlags::StackIns1) ? 1
                         : 0};
-    checkTypeStack(env, checkIdx, *checkTypeType, inst.nextSk().offset());
+    checkTypeStack(env, checkIdx, *checkTypeType, inst.nextSk().offset(),
+                   true /* outerOnly */);
   }
 }
 
@@ -510,4 +511,3 @@ void emitHighInvalid(HTS& env)               { std::abort(); }
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

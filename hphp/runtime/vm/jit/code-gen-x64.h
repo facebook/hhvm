@@ -96,9 +96,6 @@ private:
   template<class Loc>
   void emitTypeCheck(Type type, Loc typeSrc,
                      Loc dataSrc, Block* taken);
-  template<class Loc>
-  void emitTypeGuard(const BCMarker& marker, Type type, Loc typeLoc,
-                     Loc dataLoc);
 
   template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);
   template<class Op, class Opi> void cgShiftCommon(IRInstruction*);

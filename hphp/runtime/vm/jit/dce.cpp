@@ -198,11 +198,9 @@ bool canDCE(IRInstruction* inst) {
   case CheckNullptr:
   case AssertType:
   case CheckTypeMem:
-  case GuardLoc:
   case HintLocInner:
   case CheckLoc:
   case AssertLoc:
-  case GuardStk:
   case HintStkInner:
   case CheckStk:
   case AssertStk:
@@ -216,7 +214,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckInit:
   case CheckInitMem:
   case CheckCold:
-  case GuardRefs:
   case CheckRefs:
   case EndGuards:
   case CheckNonNull:

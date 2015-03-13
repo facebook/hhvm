@@ -68,10 +68,8 @@ void ThreadInfo::init() {
   m_reqInjectionData.threadInit();
   rds::threadInit();
   onSessionInit();
-
   Lock lock(s_thread_info_mutex);
   s_thread_infos.insert(this);
-  Sweepable::InitList();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {

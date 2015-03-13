@@ -173,7 +173,6 @@ ObjectData* nativeDataInstanceCtor(Class* cls);
 void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src);
 void nativeDataInstanceDtor(ObjectData* obj, const Class* cls);
 
-void sweepNativeData(std::vector<NativeNode*>&);
 Variant nativeDataSleep(const ObjectData* obj);
 void nativeDataWakeup(ObjectData* obj, const Variant& data);
 

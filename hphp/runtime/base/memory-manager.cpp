@@ -436,14 +436,36 @@ void MemoryManager::sweep() {
   if (debug) checkHeap();
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
-  DEBUG_ONLY auto sweepable = Sweepable::SweepAll();
-  DEBUG_ONLY auto native = m_natives.size();
-  Native::sweepNativeData(m_natives);
-  TRACE(1, "sweep: sweepable %u native %lu\n", sweepable, native);
+  DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;
+
+  // iterate until both sweep lists are empty. Entries can be added or
+  // removed from either list during sweeping.
+  do {
+    while (!m_sweepables.empty()) {
+      num_sweepables++;
+      auto obj = m_sweepables.next();
+      obj->unregister();
+      obj->sweep();
+    }
+    while (!m_natives.empty()) {
+      num_natives++;
+      assert(m_natives.back()->sweep_index == m_natives.size() - 1);
+      auto node = m_natives.back();
+      m_natives.pop_back();
+      auto obj = Native::obj(node);
+      auto ndi = obj->getVMClass()->getNativeDataInfo();
+      ndi->sweep(obj);
+      // trash the native data but leave the header and object parsable
+      assert(memset(node+1, kSmartFreeFill, node->obj_offset - sizeof(*node)));
+    }
+  } while (!m_sweepables.empty());
+
+  TRACE(1, "sweep: sweepable %lu native %lu\n", num_sweepables, num_natives);
   if (debug) checkHeap();
 }
 
 void MemoryManager::resetAllocator() {
+  assert(m_natives.empty() && m_sweepables.empty());
   // decref apc strings and arrays referenced by this request
   DEBUG_ONLY auto napcs = m_apc_arrays.size();
   while (!m_apc_arrays.empty()) {
@@ -910,6 +932,15 @@ void MemoryManager::removeApcArray(APCLocalArray* a) {
   m_apc_arrays[index] = last;
   m_apc_arrays.pop_back();
   last->m_sweep_index = index;
+}
+
+void MemoryManager::addSweepable(Sweepable* obj) {
+  obj->enlist(&m_sweepables);
+}
+
+// defined here because memory-manager.h includes sweepable.h
+Sweepable::Sweepable() {
+  MM().addSweepable(this);
 }
 
 //////////////////////////////////////////////////////////////////////

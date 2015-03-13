@@ -24,6 +24,7 @@
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/function_call.h"
 
 namespace HPHP {
 
@@ -55,7 +56,7 @@ private:
     with_scope(
       cfunc->getScope()->getVariables(),
       [&] {
-        walk_ast(cfunc->getStmts());
+        walk_ast(cfunc->getStmts(), /*inClosureScope*/ true);
       }
     );
 
@@ -84,14 +85,14 @@ private:
       }
     }
 
-    if (cfunc->getFunctionScope()->containsThis()) {
+    if (cfunc->getFunctionScope()->containsThis() || m_useImplicitThis) {
       toCapture.insert("this");
     }
 
     ce->setCaptureList(m_ar, toCapture);
   }
 
-  void walk_ast(ConstructPtr node) {
+  void walk_ast(ConstructPtr node, bool inClosureScope) {
     if (!node) return;
 
     if (dynamic_pointer_cast<MethodStatement>(node)) {
@@ -101,12 +102,25 @@ private:
     }
 
     if (auto ce = dynamic_pointer_cast<ClosureExpression>(node)) {
+      // If some inner closure capture $this implicitly,
+      // the outer closure should do the same.
+      auto prevImplicitThis = m_useImplicitThis;
+      m_useImplicitThis = false;
       visit_closure(ce);
+      // Inner closure should not capture $this, even
+      // if the outer closure already captured it.
+      if (!m_useImplicitThis) {
+        m_useImplicitThis = prevImplicitThis;
+      }
       return;
+    } else if (auto fc = dynamic_pointer_cast<FunctionCall>(node)) {
+      if (inClosureScope && fc->isParent()) {
+        m_useImplicitThis = true;
+      }
     }
 
     for (int i = 0; i < node->getKidCount(); ++i) {
-      walk_ast(node->getNthKid(i));
+      walk_ast(node->getNthKid(i), inClosureScope);
     }
   }
 
@@ -118,7 +132,7 @@ private:
     with_scope(
       fscope->getVariables(),
       [&] {
-        walk_ast(node);
+        walk_ast(node, /*inClosureScope*/ false);
       }
     );
   }
@@ -134,6 +148,7 @@ private:
 private:
   NameScope* m_curScope;
   AnalysisResultPtr m_ar;
+  bool m_useImplicitThis = false;
 };
 
 }

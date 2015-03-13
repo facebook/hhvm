@@ -119,8 +119,10 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const pc = reinterpret_cast<const Op*>(bc + offset);
     auto const nextOff = offset + instrLen(pc);
     auto const atLast = nextOff == fe.past;
+    auto const breaksBB = instrIsNonCallControlFlow(*pc) ||
+      instrFlags(*pc) & TF;
 
-    if (instrIsNonCallControlFlow(*pc) && !atLast) {
+    if (breaksBB && !atLast) {
       markBlock(nextOff);
     }
 
@@ -835,7 +837,8 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         borrow(ret),
         cconst.valOption(),
         cconst.phpCode(),
-        cconst.typeConstraint()
+        cconst.typeConstraint(),
+        cconst.isTypeconst()
       }
     );
   }

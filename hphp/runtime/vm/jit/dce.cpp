@@ -412,8 +412,10 @@ bool canDCE(IRInstruction* inst) {
   case CIterFree:
   case BaseG:
   case PropX:
+  case PropQ:
   case PropDX:
   case CGetProp:
+  case CGetPropQ:
   case VGetProp:
   case BindProp:
   case SetProp:
@@ -454,7 +456,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckBounds:
   case ProfilePackedArray:
   case ProfileStructArray:
-  case ProfileStr:
   case CheckPackedArrayBounds:
   case CheckTypePackedArrayElem:
   case IsPackedArrayElemNull:
@@ -665,17 +666,19 @@ bool findWeakActRecUses(const BlockList& blocks,
 }
 
 /*
- * The first time through, we've counted up weak uses of the frame and
- * then finally marked it dead.  The instructions in between that were
- * weak uses may need modifications now that their frame is going
- * away.
+ * The first time through, we've counted up weak uses of the frame and then
+ * finally marked it dead.  The instructions in between that were weak uses may
+ * need modifications now that their frame is going away.
  *
- * Also, if we eliminated some frames, DecRef instructions (which can
- * re-enter the VM without requiring a materialized frame) need to
- * have stack depths in their markers adjusted so they can't stomp on
- * parts of the outer function.  We handle this conservatively by just
- * pushing all DecRef markers where the DecRef is from a function
- * other than the outer function down to a safe re-entry depth.
+ * Also, if we eliminated some frames, DecRef instructions (which can re-enter
+ * the VM without requiring a materialized frame) need to have stack depths in
+ * their markers adjusted so they can't stomp on parts of the outer function.
+ * We handle this conservatively by just pushing all DecRef markers where the
+ * DecRef is from a function other than the outer function down to a safe
+ * re-entry depth.
+ *
+ * Finally, any removed frame pointers in BCMarkers must be rewritten to point
+ * to the outer frame of that frame.
  */
 void performActRecFixups(const BlockList& blocks,
                          DceState& state,
@@ -695,6 +698,15 @@ void performActRecFixups(const BlockList& blocks,
 
     for (auto& inst : *block) {
       ITRACE(5, "{}\n", inst.toString());
+
+      if (auto const fp = inst.marker().m_fp) {
+        if (state[fp->inst()].isDead()) {
+          always_assert(fp->inst()->is(DefInlineFP));
+          auto const prev = fp->inst()->src(2);
+          inst.marker().m_fp = prev;
+          assert(!state[prev->inst()].isDead());
+        }
+      }
 
       switch (inst.op()) {
       case DefInlineFP:
@@ -719,7 +731,7 @@ void performActRecFixups(const BlockList& blocks,
       case DecRef:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
-          inst.marker().setSpOff(FPAbsOffset{safeDepth});
+          inst.marker() = inst.marker().adjustSp({safeDepth});
         }
         break;
 
@@ -762,8 +774,6 @@ void optimizeActRecs(const BlockList& blocks,
 //////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
-
-// Publicly exported functions:
 
 void eliminateDeadCode(IRUnit& unit) {
   Timer dceTimer(Timer::optimize_dce);

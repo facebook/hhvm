@@ -188,7 +188,7 @@ inline const Variant& variant(const Variant& v) {
 }
 
 /**
- * ref() can be used to cause strong binding
+ * ref() can be used to cause strong binding.
  *
  *   a = ref(b); // strong binding: now both a and b point to the same data
  *   a = b;      // weak binding: a will copy or copy-on-write

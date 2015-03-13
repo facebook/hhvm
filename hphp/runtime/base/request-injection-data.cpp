@@ -417,29 +417,27 @@ int RequestInjectionData::getRemainingCPUTime() const {
  * If seconds  > 0, set the timeout to seconds.
  */
 void RequestInjectionData::resetTimer(int seconds /* = 0 */) {
-  auto data = &ThreadInfo::s_threadInfo->m_reqInjectionData;
   if (seconds == 0) {
-    seconds = data->getTimeout();
+    seconds = getTimeout();
   } else if (seconds < 0) {
-    if (!data->getTimeout()) return;
+    if (!getTimeout()) return;
     seconds = -seconds;
-    if (seconds < data->getRemainingTime()) return;
+    if (seconds < getRemainingTime()) return;
   }
-  data->setTimeout(seconds);
-  data->clearTimedOutFlag();
+  setTimeout(seconds);
+  clearTimedOutFlag();
 }
 
 void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
-  auto data = &ThreadInfo::s_threadInfo->m_reqInjectionData;
   if (seconds == 0) {
-    seconds = data->getCPUTimeout();
+    seconds = getCPUTimeout();
   } else if (seconds < 0) {
-    if (!data->getCPUTimeout()) return;
+    if (!getCPUTimeout()) return;
     seconds = -seconds;
-    if (seconds < data->getRemainingCPUTime()) return;
+    if (seconds < getRemainingCPUTime()) return;
   }
-  data->setCPUTimeout(seconds);
-  data->clearCPUTimedOutFlag();
+  setCPUTimeout(seconds);
+  clearCPUTimedOutFlag();
 }
 
 void RequestInjectionData::reset() {

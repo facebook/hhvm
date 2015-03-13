@@ -1550,23 +1550,23 @@ struct cmpdpa {
  */
 template <class Derived>
 struct DOMPropHandler: Native::BasePropHandler {
-  static Variant getProp(ObjectData* this_, const StringData* name) {
-    return Derived::map.getter(VarNR(name))(this_);
+  static Variant getProp(const Object& this_, const String& name) {
+    return Derived::map.getter(name)(this_);
   }
 
-  static Variant setProp(ObjectData* this_,
-                         const StringData* name,
+  static Variant setProp(const Object& this_,
+                         const String& name,
                          Variant& value) {
-    Derived::map.setter(VarNR(name))(this_, value);
+    Derived::map.setter(name)(this_, value);
     return true;
   }
 
-  static Variant issetProp(ObjectData* this_, const StringData* name) {
-    return Derived::map.isset(this_, StrNR(name));
+  static Variant issetProp(const Object& this_, const String& name) {
+    return Derived::map.isset(this_, name);
   }
 
-  static bool isPropSupported(const StringData* name, const StringData* op) {
-    return Derived::map.isPropertySupported(VarNR(name));
+  static bool isPropSupported(const String& name, const String& op) {
+    return Derived::map.isPropertySupported(name);
   }
 };
 
@@ -1586,52 +1586,45 @@ public:
     }
   }
 
-  bool isPropertySupported(const Variant& name) {
-    if (name.isString()) {
-      auto dpa = DOMPropertyAccessor {
-        name.toString().data(), nullptr, nullptr
-      };
-      const_iterator iter = find(&dpa);
-      return iter != end();
-    }
-    return false;
+  bool isPropertySupported(const String& name) {
+    auto dpa = DOMPropertyAccessor {
+      name.data(), nullptr, nullptr
+    };
+    const_iterator iter = find(&dpa);
+    return iter != end();
   }
 
-  Variant (*getter(const Variant& name))(const Object&) {
-    if (name.isString()) {
-      auto dpa = DOMPropertyAccessor {
-        name.toString().data(), nullptr, nullptr
-      };
-      const_iterator iter = find(&dpa);
-      if (iter != end() && (*iter)->getter) {
-        if (strcmp(dpa.name, (*iter)->name)) {
-          raise_warning("Accessing DOMNode derived property '%s' with the "
-                        "incorrect casing", dpa.name);
-        }
-        return (*iter)->getter;
+  Variant (*getter(const String& name))(const Object&) {
+    auto dpa = DOMPropertyAccessor {
+      name.data(), nullptr, nullptr
+    };
+    const_iterator iter = find(&dpa);
+    if (iter != end() && (*iter)->getter) {
+      if (strcmp(dpa.name, (*iter)->name)) {
+        raise_warning("Accessing DOMNode derived property '%s' with the "
+                      "incorrect casing", dpa.name);
       }
+      return (*iter)->getter;
     }
     return dummy_getter;
   }
 
-  void (*setter(const Variant& name))(const Object&, const Variant&) {
-    if (name.isString()) {
-      auto dpa = DOMPropertyAccessor {
-        name.toString().data(), nullptr, nullptr
-      };
-      const_iterator iter = find(&dpa);
-      if (iter != end() && (*iter)->setter) {
-        if (strcmp(dpa.name, (*iter)->name)) {
-          raise_warning("Setting DOMNode derived property '%s' with the "
-                        "incorrect casing", dpa.name);
-        }
-        return (*iter)->setter;
+  void (*setter(const String& name))(const Object&, const Variant&) {
+    auto dpa = DOMPropertyAccessor {
+      name.data(), nullptr, nullptr
+    };
+    const_iterator iter = find(&dpa);
+    if (iter != end() && (*iter)->setter) {
+      if (strcmp(dpa.name, (*iter)->name)) {
+        raise_warning("Setting DOMNode derived property '%s' with the "
+                      "incorrect casing", dpa.name);
       }
+      return (*iter)->setter;
     }
     return dummy_setter;
   }
 
-  bool isset(ObjectData *obj, const String& name) {
+  bool isset(const Object& obj, const String& name) {
     auto dpa = DOMPropertyAccessor {
       name.data(), nullptr, nullptr
     };
@@ -1646,7 +1639,7 @@ public:
     return false;
   }
 
-  Array debugInfo(ObjectData* obj) {
+  Array debugInfo(const Object& obj) {
     auto ret = obj->toArray();
     for (auto it : m_props) {
       auto value = it->getter(obj);
@@ -5807,7 +5800,7 @@ public:
     Native::registerNativeDataInfo<DOMNode>(DOMNode::c_ClassName.get(),
                                             Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMNodePropHandler>(
-      DOMNode::c_ClassName.get());
+      DOMNode::c_ClassName);
 
     HHVM_ME(DOMAttr, __construct);
     HHVM_ME(DOMAttr, isId);
@@ -5815,7 +5808,7 @@ public:
     Native::registerNativeDataInfo<DOMAttr>(DOMAttr::c_ClassName.get(),
                                             Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMAttrPropHandler>(
-      DOMAttr::c_ClassName.get());
+      DOMAttr::c_ClassName);
 
     HHVM_ME(DOMCharacterData, appendData);
     HHVM_ME(DOMCharacterData, deleteData);
@@ -5826,7 +5819,7 @@ public:
     Native::registerNativeDataInfo<DOMCharacterData>(
         DOMCharacterData::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMCharacterDataPropHandler>(
-      DOMCharacterData::c_ClassName.get());
+      DOMCharacterData::c_ClassName);
 
     HHVM_ME(DOMComment, __construct);
     Native::registerNativeDataInfo<DOMComment>(
@@ -5840,7 +5833,7 @@ public:
     Native::registerNativeDataInfo<DOMText>(DOMText::c_ClassName.get(),
                                             Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMTextPropHandler>(
-      DOMText::c_ClassName.get());
+      DOMText::c_ClassName);
 
     HHVM_ME(DOMCdataSection, __construct);
     Native::registerNativeDataInfo<DOMCdataSection>(
@@ -5880,7 +5873,7 @@ public:
     HHVM_ME(DOMDocument, __debuginfo);
     Native::registerNativeDataInfo<DOMDocument>(DOMDocument::c_ClassName.get());
     Native::registerNativePropHandler<DOMDocumentPropHandler>(
-      DOMDocument::c_ClassName.get());
+      DOMDocument::c_ClassName);
 
 
     HHVM_ME(DOMDocumentFragment, __construct);
@@ -5893,7 +5886,7 @@ public:
     Native::registerNativeDataInfo<DOMDocumentType>(
         DOMDocumentType::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMDocumentTypePropHandler>(
-      DOMDocumentType::c_ClassName.get());
+      DOMDocumentType::c_ClassName);
 
     HHVM_ME(DOMElement, __construct);
     HHVM_ME(DOMElement, getAttribute);
@@ -5918,13 +5911,13 @@ public:
     Native::registerNativeDataInfo<DOMElement>(
         DOMElement::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMElementPropHandler>(
-      DOMElement::c_ClassName.get());
+      DOMElement::c_ClassName);
 
     HHVM_ME(DOMEntity, __debuginfo);
     Native::registerNativeDataInfo<DOMEntity>(
         DOMEntity::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMEntityPropHandler>(
-      DOMEntity::c_ClassName.get());
+      DOMEntity::c_ClassName);
 
     HHVM_ME(DOMEntityReference, __construct);
     Native::registerNativeDataInfo<DOMEntityReference>(
@@ -5934,7 +5927,7 @@ public:
     Native::registerNativeDataInfo<DOMNotation>(
         DOMNotation::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMNotationPropHandler>(
-      DOMNotation::c_ClassName.get());
+      DOMNotation::c_ClassName);
 
     HHVM_ME(DOMProcessingInstruction, __construct);
     HHVM_ME(DOMProcessingInstruction, __debuginfo);
@@ -5942,7 +5935,7 @@ public:
         DOMProcessingInstruction::c_ClassName.get(),
         Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMProcessingInstructionPropHandler>(
-      DOMProcessingInstruction::c_ClassName.get());
+      DOMProcessingInstruction::c_ClassName);
 
     Native::registerNativeDataInfo<DOMNameSpaceNode>(
         DOMNameSpaceNode::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
@@ -5962,7 +5955,7 @@ public:
     Native::registerNativeDataInfo<DOMNamedNodeMap>(
         DOMNamedNodeMap::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMNamedNodeMapPropHandler>(
-      DOMNamedNodeMap::c_ClassName.get());
+      DOMNamedNodeMap::c_ClassName);
 
     HHVM_ME(DOMNodeList, item);
     HHVM_ME(DOMNodeList, getIterator);
@@ -5970,7 +5963,7 @@ public:
     Native::registerNativeDataInfo<DOMNodeList>(
         DOMNodeList::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMNodeListPropHandler>(
-      DOMNodeList::c_ClassName.get());
+      DOMNodeList::c_ClassName);
 
     HHVM_ME(DOMImplementation, createDocument);
     HHVM_ME(DOMImplementation, createDocumentType);
@@ -5987,7 +5980,7 @@ public:
     Native::registerNativeDataInfo<DOMXPath>(
         DOMXPath::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
     Native::registerNativePropHandler<DOMXPathPropHandler>(
-      DOMXPath::c_ClassName.get());
+      DOMXPath::c_ClassName);
 
     HHVM_FE(dom_import_simplexml);
 

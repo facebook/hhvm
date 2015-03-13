@@ -1,0 +1,2 @@
+File "nullsafe-prop-5.php", line 8, characters 9-14:
+?-> syntax not supported here, this function effectively does a write (Typing[4132])

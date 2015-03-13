@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/stack-offsets-def.h"
+#include "hphp/runtime/vm/jit/stack-offsets-defs.h"
 
 TRACE_SET_MOD(hhir);
 
@@ -532,7 +532,7 @@ void FrameStateMgr::forEachLocalValue(
  * known types at the end of `block'.
  */
 void FrameStateMgr::collectPostConds(Block* block) {
-  assert(block->isExit());
+  assert(block->isExitNoThrow());
   PostConditions& pConds = m_exitPostConds[block];
   pConds.clear();
 
@@ -618,7 +618,7 @@ void FrameStateMgr::startBlock(Block* block,
 bool FrameStateMgr::finishBlock(Block* block) {
   assert(block->back().isTerminal() == !block->next());
 
-  if (block->isExit()) {
+  if (block->isExitNoThrow()) {
     collectPostConds(block);
     FTRACE(2, "PostConditions for exit Block {}:\n{}\n",
            block->id(), show(m_exitPostConds[block]));
@@ -835,7 +835,7 @@ void FrameStateMgr::loadBlock(Block* block) {
 }
 
 const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
-  assert(exitBlock->isExit());
+  assert(exitBlock->isExitNoThrow());
   auto it = m_exitPostConds.find(exitBlock);
   assert(it != m_exitPostConds.end());
   return it->second;

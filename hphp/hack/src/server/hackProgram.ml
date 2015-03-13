@@ -18,6 +18,18 @@ module Program : Server.SERVER_PROGRAM = struct
 
   let name = "hh_server"
 
+  let config_filename =
+    Relative_path.concat Relative_path.Root ".hhconfig"
+
+  let load_config () = ServerConfig.load config_filename
+
+  let validate_config genv =
+    let new_config = load_config () in
+    (* This comparison can eventually be made more complex; we may not always
+     * need to restart hh_server, e.g. changing the path to the load script
+     * is immaterial*)
+    genv.config = new_config
+
   let get_errors env = env.errorl
 
   let infer = ServerInferType.go

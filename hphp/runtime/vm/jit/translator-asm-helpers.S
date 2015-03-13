@@ -96,32 +96,22 @@ ETCH_NAME(handleSRHelper):
   mov %rbp, 0x20(%r12)
 
   // Push a ServiceReqInfo struct onto the stack and call handleServiceRequest.
-  push %rax // padding
   push %r8
   push %rcx
   push %rdx
   push %rsi
-  push %r15
   push %r10
   push %rdi
-  CFI2(adjust_cfa_offset, 0x40)
+  CFI2(adjust_cfa_offset, 0x30)
 
   // call mcg->handleServiceRequest(%rsp)
   mov mcg(%rip), %rdi
   mov %rsp, %rsi
   call MCGenerator_handleServiceRequest
 
-  // Load the service request we were processing from the ServiceReqInfo,
-  // then pop it off the stack.
-  mov (%rsp), %edi
-  add $0x40, %rsp
-  CFI2(adjust_cfa_offset, -0x40)
-
-  // If we're coming back from a REQ_BIND_CALL, we have to push m_savedRip
-  // from rStashedAR for the func prologue we're about to jump to.
-  cmpl $0, %edi
-  jne ETCH_NAME(handleSRResumeTC)
-  push 0x8(%r15)
+  // Pop the ServiceReqInfo off the stack.
+  add $0x30, %rsp
+  CFI2(adjust_cfa_offset, -0x30)
 
   .globl ETCH_NAME(handleSRResumeTC)
 ETCH_NAME(handleSRResumeTC):

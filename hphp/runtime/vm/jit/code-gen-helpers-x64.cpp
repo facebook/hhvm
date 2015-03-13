@@ -184,6 +184,12 @@ void emitTransCounterInc(Asm& a) {
   emitTransCounterInc(Vauto(a.code()).main());
 }
 
+void emitDecRef(Vout& v, Vreg base) {
+  auto const sf = v.makeReg();
+  v << declm{base[FAST_REFCOUNT_OFFSET], sf};
+  emitAssertFlagsNonNegative(v, sf);
+}
+
 void emitIncRef(Vout& v, Vreg base) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitAssertRefCount(v, base);
@@ -191,10 +197,7 @@ void emitIncRef(Vout& v, Vreg base) {
   // emit incref
   auto const sf = v.makeReg();
   v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that the ref count is greater than zero
-    emitAssertFlagsNonNegative(v, sf);
-  }
+  emitAssertFlagsNonNegative(v, sf);
 }
 
 void emitIncRef(Asm& as, PhysReg base) {
@@ -220,15 +223,16 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
 }
 
 void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {
+  if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
   ifThen(v, CC_NGE, sf, [&](Vout& v) { v << ud2{}; });
 }
 
 void emitAssertRefCount(Vout& v, Vreg base) {
   auto const sf = v.makeReg();
-  v << cmplim{HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
+  v << cmplim{StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
   ifThen(v, CC_NLE, sf, [&](Vout& v) {
     auto const sf = v.makeReg();
-    v << cmplim{HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
+    v << cmplim{RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
     ifThen(v, CC_NBE, sf, [&](Vout& v) { v << ud2{}; });
   });
 }
@@ -339,8 +343,9 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   if (imm.fits(sz::dword)) {
     v << storeqi{imm.l(), ref};
   } else {
-    v << storeli{int32_t(imm.q()), ref};
-    v << storeli{int32_t(imm.q() >> 32), ref + 4};
+    // An alternative is two 32-bit immediate stores, but that's little-endian
+    // specific and generates larger code on x64 (24 bytes vs. 18 bytes).
+    v << store{v.cns(imm.q()), ref};
   }
 }
 
@@ -354,7 +359,7 @@ void emitImmStoreq(Asm& a, Immed64 imm, MemoryRef ref) {
 }
 
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
-  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+  if (!Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     return;
   }
   v << vcall{CppCall::direct(Trace::ringbufferMsg),

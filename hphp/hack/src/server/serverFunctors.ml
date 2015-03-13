@@ -33,6 +33,9 @@ module type SERVER_PROGRAM = sig
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
   val name: string
+  val config_filename : Relative_path.t
+  val load_config : unit -> ServerConfig.t
+  val validate_config : genv -> bool
   val get_errors: ServerEnv.env -> Errors.t
   val handle_connection : genv -> env -> Unix.file_descr -> unit
   (* This is a hack for us to save / restore the global state that is not
@@ -117,7 +120,16 @@ end = struct
       let has_client = sleep_and_check socket in
       let updates = ServerDfind.get_updates root in
       let updates = Relative_path.relativize_set Relative_path.Root updates in
-      let updates = Relative_path.Set.filter (Program.filter_update genv !env) updates in
+      if Relative_path.Set.mem Program.config_filename updates &&
+        not (Program.validate_config genv) then begin
+        Printf.fprintf stderr
+          "%s changed in an incompatible way; please restart %s.\n"
+          (Relative_path.suffix Program.config_filename)
+          Program.name;
+        exit 4;
+      end;
+      let updates =
+        Relative_path.Set.filter (Program.filter_update genv !env) updates in
       env := Program.recheck genv !env updates;
       if has_client then Program.handle_connection genv !env socket;
     done
@@ -185,25 +197,24 @@ end = struct
         env
 
   let create_program_init genv env = fun () ->
-    match ServerArgs.load_save_opt genv.options with
+    match ServerConfig.load_script genv.config with
     | None ->
         let env = Program.init genv env in
         Program.EventLogger.init_done "fresh";
         env
-    | Some (ServerArgs.Save fn) ->
-        let chan = open_out_no_fail fn in
-        let env = Program.init genv env in
-        Marshal.to_channel chan env [];
-        Program.marshal chan;
-        close_out_no_fail fn chan;
-        (* We cannot save the shared memory to `chan` because the OCaml runtime
-         * does not expose the underlying file descriptor to C code; so we use
-         * a separate ".sharedmem" file. *)
-        SharedMem.save (fn^".sharedmem");
-        Program.EventLogger.init_done "save";
-        env
-    | Some (ServerArgs.Load load_script) ->
+    | Some load_script ->
         run_load_script genv env load_script
+
+  let save _genv env fn =
+    let chan = open_out_no_fail fn in
+    Marshal.to_channel chan env [];
+    Program.marshal chan;
+    close_out_no_fail fn chan;
+    (* We cannot save the shared memory to `chan` because the OCaml runtime
+     * does not expose the underlying file descriptor to C code; so we use
+     * a separate ".sharedmem" file. *)
+    SharedMem.save (fn^".sharedmem");
+    Program.EventLogger.init_done "save"
 
   (* The main entry point of the daemon
   * the only trick to understand here, is that env.modified is the set
@@ -211,7 +222,7 @@ end = struct
   * type-checker succeeded. So to know if there is some work to be done,
   * we look if env.modified changed.
   *)
-  let main options =
+  let main options config =
     let root = ServerArgs.root options in
     Program.EventLogger.init root (Unix.time ());
     Program.preinit ();
@@ -222,13 +233,13 @@ end = struct
     Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
     PidLog.init root;
     PidLog.log ~reason:"main" (Unix.getpid());
-    let genv = ServerEnvBuild.make_genv ~multicore:true options in
-    let env = ServerEnvBuild.make_env options in
+    let genv = ServerEnvBuild.make_genv ~multicore:true options config in
+    let env = ServerEnvBuild.make_env options config in
     let program_init = create_program_init genv env in
     let is_check_mode = ServerArgs.check_mode genv.options in
-    if is_check_mode
-    then
+    if is_check_mode then
       let env = program_init () in
+      Option.iter (ServerArgs.save_filename genv.options) (save genv env);
       Program.run_once_and_exit genv env
     else
       let env = MainInit.go root program_init in
@@ -260,7 +271,6 @@ end = struct
       (* child process is ready *)
     end else begin
       (* let original parent exit *)
-
       Printf.fprintf stderr "Spawned %s (child pid=%d)\n" (Program.name) pid;
       Printf.fprintf stderr
         "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
@@ -269,11 +279,14 @@ end = struct
     end
 
   let start () =
-    let options = Program.parse_options() in
+    let options = Program.parse_options () in
+    let root = Path.string_of_path (ServerArgs.root options) in
+    Relative_path.set_path_prefix Relative_path.Root root;
+    let config = Program.load_config () in
     try
       if ServerArgs.should_detach options
       then daemonize options;
-      main options
+      main options config
     with Exit ->
       ()
 end

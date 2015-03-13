@@ -29,15 +29,7 @@ namespace HPHP {
  * every request, Sweepable::SweepAll is called so the objects may
  * clear out request-local allocations that are not smart-allocated.
  */
-class Sweepable {
-  /*
-   * Sweepable objects are not supposed to be copied or assigned
-   * naively.
-   */
-  Sweepable(const Sweepable&) = delete;
-  Sweepable& operator=(const Sweepable&) = delete;
-
-public:
+struct Sweepable: private boost::noncopyable {
   struct Node {
     Node *next, *prev;
     void enlist(Node& head);
@@ -46,7 +38,6 @@ public:
   };
   static unsigned SweepAll();
   static void InitList();
-  static void FlushList();
 
   /*
    * There is no default behavior. Make sure this function frees all
@@ -62,30 +53,26 @@ public:
 
 protected:
   Sweepable();
-  ~Sweepable();
+  virtual ~Sweepable();
 
 private:
   Node m_sweepNode;
 };
 
-using Sweeper = void (*)(ObjectData*);
-void registerSweepableObj(ObjectData* obj, Sweeper);
-void unregisterSweepableObj(ObjectData* obj);
-
 /*
- * Nonvirtual sweepable mixin for use with ObjectData. State is managed
- * completely in a thread-local hashtable.
+ * SweepableMember is a Sweepable used as a member of an otherwise nonvirtual
+ * class. The member must be named m_sweepable. If T is a derived class, it
+ * should only have one m_sweepable member. Anything fancier than that voids
+ * your warranty.
  */
-template<class Base> struct SweepableObj: Base {
-protected:
-  template<class... Args>
-  explicit SweepableObj(Sweeper f, Args&&... args)
-    : Base(std::forward<Args>(args)...) {
-    registerSweepableObj(this, f);
-    static_assert(sizeof(*this) == sizeof(Base), "");
-  }
-  ~SweepableObj() { unregister(); }
-  void unregister() { unregisterSweepableObj(this); }
+template<class T>
+struct SweepableMember: Sweepable {
+  void sweep() {
+    auto obj = reinterpret_cast<T*>(
+      uintptr_t(this) - offsetof(T, m_sweepable)
+    );
+    obj->sweep();
+  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////

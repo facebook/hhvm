@@ -58,7 +58,6 @@
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option-guard.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
@@ -566,7 +565,7 @@ MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
  *     fcall
  * b2: fcall
  *
- * The fcallc labelled "b2" above is not statically bindable in our
+ * The fcall labelled "b2" above may not be statically bindable in our
  * execution model.
  *
  * We decouple the call work into a per-callsite portion, responsible
@@ -973,77 +972,6 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   return tDest;
 }
 
-TCA MCGenerator::bindCall(ActRec* calleeFrame,
-                          bool isImmutable,
-                          SrcKey& sk,
-                          ServiceRequest& req) {
-  TCA toSmash = backEnd().smashableCallFromReturn((TCA)calleeFrame->m_savedRip);
-  Func *func = const_cast<Func*>(calleeFrame->m_func);
-  int nArgs = calleeFrame->numArgs();
-  TRACE(2, "bindCall %s, ActRec %p\n",
-        func->fullName()->data(), calleeFrame);
-  TCA start = getFuncPrologue(func, nArgs);
-  TRACE(2, "bindCall -> %p\n", start);
-  if (!isImmutable) {
-    // We dont know we're calling the right function, so adjust start to point
-    // to the dynamic check of ar->m_func.
-    start = backEnd().funcPrologueToGuard(start, func);
-  } else {
-    TRACE(2, "bindCall immutably %s -> %p\n",
-          func->fullName()->data(), start);
-  }
-  if (start) {
-    LeaseHolder writer(Translator::WriteLease());
-    if (writer) {
-      // Someone else may have changed the func prologue while we waited for
-      // the write lease, so read it again.
-      start = getFuncPrologue(func, nArgs);
-      if (!isImmutable) start = backEnd().funcPrologueToGuard(start, func);
-
-      if (start && backEnd().callTarget(toSmash) != start) {
-        assert(backEnd().callTarget(toSmash));
-        TRACE(2, "bindCall smash %p -> %p\n",
-              toSmash, start);
-        backEnd().smashCall(toSmash, start);
-        // For functions to be PGO'ed, if their current prologues are still
-        // profiling ones (living in code.prof()), then save toSmash as a
-        // caller to the prologue, so that it can later be smashed to call a
-        // new prologue when it's generated.
-        int calleeNumParams = func->numNonVariadicParams();
-        int calledPrologNumArgs = (nArgs <= calleeNumParams ?
-                                   nArgs :  calleeNumParams + 1);
-        if (code.prof().contains(start)) {
-          if (isImmutable) {
-            m_tx.profData()->addPrologueMainCaller(
-              func, calledPrologNumArgs, toSmash);
-          } else {
-            m_tx.profData()->addPrologueGuardCaller(
-              func, calledPrologNumArgs, toSmash);
-          }
-        }
-      }
-    }
-    // sk: stale, but doesn't matter since we have a valid start TCA.
-  } else {
-    // We need translator help; we're not at the callee yet, so roll back. The
-    // prelude has done some work already, but it should be safe to redo.
-    TRACE(2, "bindCall rollback smash %p -> %p\n",
-          toSmash, start);
-
-    const FPIEnt* fe = liveFunc()->findPrecedingFPI(
-      liveFunc()->base() + calleeFrame->m_soff);
-
-    sk = SrcKey{liveFunc(), fe->m_fcallOff, vmfp()->resumed()};
-
-    // We're going to have to interpret the FCall, so make sure handleSRHelper
-    // doesn't think we're coming back from a REQ_BIND_CALL when we finally
-    // make it back to the TC.
-    req = REQ_BIND_JMP;
-  }
-
-  return start;
-}
-
 namespace {
 class FreeRequestStubTrigger {
   TCA m_stub;
@@ -1095,7 +1023,7 @@ MCGenerator::enterTC(TCA start, ActRec* stashedAR) {
   assert(!Translator::WriteLease().amOwner());
 
   INC_TPC(enter_tc);
-  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+  if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     auto skData = SrcKey{liveFunc(), vmpc(), liveResumed()}.toAtomicInt();
     Trace::ringbufferEntry(RBTypeEnterTC, skData, (uint64_t)start);
   }
@@ -1117,11 +1045,11 @@ MCGenerator::enterTC(TCA start, ActRec* stashedAR) {
   vmfp() = nullptr;
 }
 
-TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
+TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) noexcept {
   assert_native_stack_aligned();
   tl_regState = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
 
-  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+  if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     Trace::ringbufferEntry(
       RBTypeServiceReq, (uint64_t)info.req, (uint64_t)info.args[0].tca
     );
@@ -1132,13 +1060,6 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
   auto smashed = false;
 
   switch (info.req) {
-    case REQ_BIND_CALL: {
-      auto calleeFrame = info.stashedAR;
-      auto isImmutable = info.args[0].boolVal;
-      start = bindCall(calleeFrame, isImmutable, sk, info.req);
-      break;
-    }
-
     case REQ_BIND_JMP:
     case REQ_BIND_ADDR: {
       auto const toSmash = info.args[0].tca;
@@ -1194,31 +1115,6 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
             caller->m_func->fullName()->data());
       break;
     }
-
-    case REQ_STACK_OVERFLOW: {
-      if (info.stashedAR->m_sfp == vmfp()) {
-        /*
-         * The normal case - we were called via FCall, or FCallArray.  We need
-         * to construct the pc of the fcall from the return address (which will
-         * be after the fcall). Because fcall is a variable length instruction,
-         * and because we sometimes delete instructions from the instruction
-         * stream, we need to use fpi regions to find the fcall.
-         */
-        const FPIEnt* fe = liveFunc()->findPrecedingFPI(
-          liveUnit()->offsetOf(vmpc()));
-        vmpc() = liveUnit()->at(fe->m_fcallOff);
-        assert(isFCallStar(*reinterpret_cast<const Op*>(vmpc())));
-        raise_error("Stack overflow");
-      } else {
-        /*
-         * We were called via re-entry.  Leak the params and the actrec, and
-         * tell the unwinder that there's nothing left to do in this "entry".
-         */
-        vmsp() = reinterpret_cast<Cell*>(info.stashedAR + 1);
-        throw VMReenterStackOverflow();
-      }
-      not_reached();
-    }
   }
 
   if (smashed && info.stub) {
@@ -1230,12 +1126,68 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) {
     start = m_tx.uniqueStubs.interpHelperSyncedPC;
   }
 
-  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+  if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
     Trace::ringbufferEntry(RBTypeResumeTC, skData, (uint64_t)start);
   }
 
   tl_regState = VMRegState::DIRTY;
+  return start;
+}
+
+TCA MCGenerator::handleBindCall(TCA toSmash,
+                                ActRec* calleeFrame,
+                                bool isImmutable) {
+  Func* func = const_cast<Func*>(calleeFrame->m_func);
+  int nArgs = calleeFrame->numArgs();
+  TRACE(2, "bindCall %s, ActRec %p\n", func->fullName()->data(), calleeFrame);
+  TCA start = getFuncPrologue(func, nArgs);
+  TRACE(2, "bindCall -> %p\n", start);
+  if (!isImmutable) {
+    // We dont know we're calling the right function, so adjust start to point
+    // to the dynamic check of ar->m_func.
+    start = backEnd().funcPrologueToGuard(start, func);
+  } else {
+    TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
+  }
+
+  if (start) {
+    LeaseHolder writer(Translator::WriteLease());
+    if (writer) {
+      // Someone else may have changed the func prologue while we waited for
+      // the write lease, so read it again.
+      start = getFuncPrologue(func, nArgs);
+      if (!isImmutable) start = backEnd().funcPrologueToGuard(start, func);
+
+      if (start && backEnd().callTarget(toSmash) != start) {
+        assert(backEnd().callTarget(toSmash));
+        TRACE(2, "bindCall smash %p -> %p\n", toSmash, start);
+        backEnd().smashCall(toSmash, start);
+        // For functions to be PGO'ed, if their current prologues are still
+        // profiling ones (living in code.prof()), then save toSmash as a
+        // caller to the prologue, so that it can later be smashed to call a
+        // new prologue when it's generated.
+        int calleeNumParams = func->numNonVariadicParams();
+        int calledPrologNumArgs = (nArgs <= calleeNumParams ?
+                                   nArgs :  calleeNumParams + 1);
+        if (code.prof().contains(start)) {
+          if (isImmutable) {
+            m_tx.profData()->addPrologueMainCaller(
+              func, calledPrologNumArgs, toSmash);
+          } else {
+            m_tx.profData()->addPrologueGuardCaller(
+              func, calledPrologNumArgs, toSmash);
+          }
+        }
+      }
+    }
+  } else {
+    // We couldn't get a prologue address. Return a stub that will finish
+    // entering the callee frame in C++, then call handleResume at the callee's
+    // entry point.
+    start = m_tx.uniqueStubs.fcallHelperThunk;
+  }
+
   return start;
 }
 
@@ -1262,13 +1214,40 @@ TCA MCGenerator::handleResume(bool interpFirst) {
     start = getTranslation(TranslArgs{sk, true});
   }
 
-  if (Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+  if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     auto skData = sk.valid() ? sk.toAtomicInt() : uint64_t(-1LL);
     Trace::ringbufferEntry(RBTypeResumeTC, skData, (uint64_t)start);
   }
 
   tl_regState = VMRegState::DIRTY;
   return start;
+}
+
+void MCGenerator::handleStackOverflow(ActRec* stashedAR) {
+  tl_regState = VMRegState::CLEAN; // regs were synced in stackOverflowHelper
+
+  if (stashedAR->m_sfp == vmfp()) {
+    /*
+     * The normal case - we were called via FCall, or FCallArray.  We need to
+     * construct the pc of the fcall from the return address (which will be
+     * after the fcall). Because fcall is a variable length instruction, and
+     * because we sometimes delete instructions from the instruction stream, we
+     * need to use fpi regions to find the fcall.
+     */
+    const FPIEnt* fe = liveFunc()->findPrecedingFPI(
+      liveUnit()->offsetOf(vmpc()));
+    vmpc() = liveUnit()->at(fe->m_fcallOff);
+    assert(isFCallStar(*reinterpret_cast<const Op*>(vmpc())));
+    raise_error("Stack overflow");
+  } else {
+    /*
+     * We were called via re-entry.  Leak the params and the actrec, and tell
+     * the unwinder that there's nothing left to do in this "entry".
+     */
+    vmsp() = reinterpret_cast<Cell*>(stashedAR + 1);
+    throw VMReenterStackOverflow();
+  }
+  not_reached();
 }
 
 /*

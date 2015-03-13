@@ -1125,17 +1125,21 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   if (!m_unit.constants.empty()) {
     foldImms<x64::ImmFolder>(m_unit);
   }
+  {
+    Timer timer(Timer::vasm_copy);
+    optimizeCopies(m_unit, abi);
+  }
   if (m_unit.needsRegAlloc()) {
-    Timer _t(Timer::vasm_xls);
+    Timer timer(Timer::vasm_xls);
     removeDeadCode(m_unit);
     allocateRegisters(m_unit, abi);
   }
   if (m_unit.blocks.size() > 1) {
-    Timer _t(Timer::vasm_jumps);
+    Timer timer(Timer::vasm_jumps);
     optimizeJmps(m_unit);
   }
 
-  Timer _t(Timer::vasm_gen);
+  Timer timer(Timer::vasm_gen);
   auto blocks = layoutBlocks(m_unit);
   Vgen(m_unit, m_areas, asmInfo).emit(blocks);
 }

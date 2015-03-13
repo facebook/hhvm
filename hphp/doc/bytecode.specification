@@ -909,6 +909,10 @@ descriptors:
   PC       - consume a cell from the evaluation stack as a property
   PL:<id>  - consume a local given by an immediate id as a property
   PT:<id>  - consume a litstr given by an immediate id as a property
+  QT:<id>  - a nullsafe version of PT:<id>. The null-base doesn't issue
+             a warning, and no stdClass promotion in write context for the
+             base happens. Consume a litstr given by an immediate id
+             as a property
   W        - synthesize a new element (no corresponding local variable or
              evaluation stack slot)
 
@@ -1434,9 +1438,11 @@ Jmp <rel offset>    []  ->  []
 
 JmpNS <rel offset>   []  ->  []
 
-  Jump, with no surprise flag checks. This behaves identically to the Jmp
-  instruction, except that internal VM checks for things like OOM do not need
-  to be performed even if the offset is negative. NS means "no surprise".
+  Jump, with no surprise flag checks (NS means "no surprise"). This behaves
+  identically to the Jmp instruction, except that internal VM checks for things
+  like OOM and timeouts do not need to be performed even if the offset is
+  negative.  This instruction cannot have a zero offset (i.e. it cannot jump to
+  itself).
 
 JmpZ <rel offset>    [C]  ->  []
 
@@ -3839,7 +3845,7 @@ IterBreak <iter-vec> <rel offset>   []  ->  []
   control to the location specified by %2. Surprise checks are performed before
   iterators are freed so that in the event of an exception iterators are not
   double freed. Note that as with normal jumps surprise checks will only be
-  performed if %2 is negative.
+  performed if %2 is non-positive.
 
 
 12. Include, eval, and define instructions

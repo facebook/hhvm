@@ -67,6 +67,11 @@ enum class ClosureType {
   Long,
 };
 
+enum class PropAccessType {
+  Normal,
+  NullSafe,
+};
+
 enum ObjPropType {
   ObjPropNormal,
   ObjPropXhpAttr

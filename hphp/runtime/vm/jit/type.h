@@ -786,6 +786,28 @@ Type boxType(Type);
  */
 Type ldRefReturn(Type typeParam);
 
+/*
+ * Returns the type that a value may have if it had type `srcType' and failed a
+ * CheckType with `typeParam'.  Not all typeParams for CheckTypes are precise,
+ * so the return value may even be `srcType' itself in some situations.
+ */
+Type negativeCheckType(Type typeParam, Type srcType);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Abbreviated namespace for predefined types.
+ *
+ * Used for macro codegen for types declared in ir.specification.
+ */
+namespace TypeNames {
+#define IRT(name, ...) UNUSED extern const Type name;
+#define IRTP(name, ...) IRT(name)
+  IR_TYPES
+#undef IRT
+#undef IRTP
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

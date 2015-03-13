@@ -63,7 +63,7 @@ void visit(const Vunit& unit, RegSet regs, F f) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Use>
-void visitUses(const Vunit& unit, Vinstr& inst, Use use) {
+void visitUses(const Vunit& unit, const Vinstr& inst, Use use) {
   switch (inst.op) {
 #define O(name, imms, uses, defs) \
     case Vinstr::name: { \

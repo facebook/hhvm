@@ -30,6 +30,7 @@ void dumpEntry(const RingBufferEntry* e) {
   std::cerr <<
     folly::format("{:#x} {:10} {:20}",
                   e->m_threadId, e->m_seq, ringbufferName(e->m_type));
+  auto const msgFormat = "{:50} {:#16x}\n";
 
   switch (e->m_type) {
     case RBTypeUninit: return;
@@ -42,7 +43,7 @@ void dumpEntry(const RingBufferEntry* e) {
       // We append our own newline so ignore any newlines in the msg.
       while (len > 0 && e->m_msg[len - 1] == '\n') --len;
       std::cerr <<
-        folly::format("{:50} {:#16x}\n",
+        folly::format(msgFormat,
                       folly::StringPiece(e->m_msg, e->m_msg + len),
                       e->m_truncatedRip);
       break;
@@ -63,20 +64,22 @@ void dumpEntry(const RingBufferEntry* e) {
       // entries and exits can get confused.
       indentDepth -= e->m_type == RBTypeFuncExit;
       if (indentDepth < 0) indentDepth = 0;
-      std::cerr << folly::format("{}{}\n",
-                                 std::string(indentDepth * 4, ' '), e->m_msg);
+      auto const indentedName =
+        folly::sformat("{}{}", std::string(indentDepth * 4, ' '), e->m_msg);
+      std::cerr << folly::format(msgFormat,
+                                 indentedName, e->m_truncatedRip);
       indentDepth += e->m_type == RBTypeFuncEntry;
       break;
     }
     case RBTypeServiceReq: {
       auto req = static_cast<jit::ServiceRequest>(e->m_sk);
-      std::cerr << folly::format("{:50} {:#16x}\n",
+      std::cerr << folly::format(msgFormat,
                                  jit::serviceReqName(req), e->m_data);
       break;
     }
     default: {
       std::cerr <<
-        folly::format("{:50} {:#16x}\n",
+        folly::format(msgFormat,
                       showShort(SrcKey::fromAtomicInt(e->m_sk)),
                       e->m_data);
       break;

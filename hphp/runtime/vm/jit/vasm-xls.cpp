@@ -150,11 +150,9 @@ struct Vxls {
     switch (arch()) {
       case Arch::X64:
         m_tmp = reg::xmm15; // reserve xmm15 to break shuffle cycles
-        m_srkill = RegSet(x64::rAsm);
         break;
       case Arch::ARM:
         m_tmp = vixl::x17; // also used as tmp1 by MacroAssembler
-        m_srkill = RegSet(arm::rAsm);//m_abi.all();
         break;
     }
     m_abi.simdUnreserved.remove(m_tmp);
@@ -201,7 +199,6 @@ struct Vxls {
   void printInstr(std::ostringstream& out, Vinstr* instr, unsigned pos, Vlabel);
   void dumpIntervals();
   int spEffect(Vinstr& inst) const;
-  void getEffects(const Vinstr& i, RegSet& uses, RegSet& across, RegSet& defs);
 
 public:
   /*
@@ -224,8 +221,6 @@ public:
   PhysReg m_sp;
   // Temp register only for breaking cycles.
   PhysReg m_tmp;
-  // Registers killed by service requests.
-  RegSet m_srkill;
 
   // Sorted blocks.
   jit::vector<Vlabel> blocks;
@@ -680,6 +675,7 @@ struct UseVisitor {
   template<class F> void imm(const F&){} // skip immediates
   template<class R> void def(R){} // skip defs
   template<class D, class H> void defHint(D, H){} // skip defs
+
   void use(Vptr m) {
     if (m.base.isValid()) use(m.base);
     if (m.index.isValid()) use(m.index);
@@ -731,62 +727,8 @@ private:
   const LiveRange m_range;
 };
 
-// Return the set of physical registers implicitly accessed (used or defined)
-// TODO: t4779515: replace this, and other switches, with logic using
-// attributes, instead of hardcoded opcode names.
-void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
-                      RegSet& defs) {
-  uses = defs = across = RegSet();
-  switch (i.op) {
-    case Vinstr::mccall:
-    case Vinstr::call:
-    case Vinstr::callm:
-    case Vinstr::callr:
-      defs = m_abi.all() - m_abi.calleeSaved;
-      switch (arch()) {
-        case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
-        case Arch::X64: break;
-      }
-      break;
-    case Vinstr::callstub:
-      defs = i.callstub_.kills;
-      break;
-    case Vinstr::bindcall:
-    case Vinstr::contenter:
-      defs = m_abi.all();
-      break;
-    case Vinstr::cqo:
-      uses = RegSet(reg::rax);
-      defs = RegSet().add(reg::rax).add(reg::rdx);
-      break;
-    case Vinstr::idiv:
-      uses = defs = RegSet(reg::rax).add(reg::rdx);
-      break;
-    case Vinstr::shlq:
-    case Vinstr::sarq:
-      across = RegSet(reg::rcx);
-      break;
-    case Vinstr::bindaddr:
-    case Vinstr::bindjcc1st:
-    case Vinstr::bindjcc:
-    case Vinstr::bindjmp:
-      defs = m_srkill;
-      break;
-    // arm instrs
-    case Vinstr::hostcall:
-      defs = (m_abi.all() - m_abi.calleeSaved) |
-             RegSet(PhysReg(arm::rHostCallReg));
-      break;
-    case Vinstr::vcall:
-    case Vinstr::vinvoke:
-      always_assert(false && "Unsupported instruction in vxls");
-    default:
-      break;
-  }
-}
-
 // Compute lifetime intervals and use positions of all intervals by walking
-// the code bottom-up once. Loops aren't handled yet.
+// the code bottom-up once.
 void Vxls::buildIntervals() {
   ONTRACE(kRegAllocLevel, printCfg(unit, blocks));
   livein.resize(unit.blocks.size());
@@ -796,39 +738,47 @@ void Vxls::buildIntervals() {
   for (auto blockIt = blocks.end(); blockIt != blocks.begin();) {
     auto b = *--blockIt;
     auto& block = unit.blocks[b];
+
     // initial live set is the union of successor live sets.
     LiveSet live(unit.next_vr);
     for (auto s : succs(block)) {
       if (!livein[s].empty()) {
         live |= livein[s];
       } else {
+        // livein[s].empty() implies we haven't processed s yet
         loops = true;
       }
     }
+
     // add a range covering the whole block to every live interval
     auto& block_range = block_ranges[b];
     forEach(live, [&](Vreg r) {
       intervals[r]->add(block_range);
     });
+
     // visit instructions bottom-up, adding uses & ranges
     auto pos = block_range.end;
     for (auto i = block.code.end(); i != block.code.begin();) {
       auto& inst = *--i;
       pos -= 2;
-      DefVisitor dv(live, *this, pos);
-      UseVisitor uv(live, *this, {block_range.start, pos});
-      visitOperands(inst, dv);
       RegSet implicit_uses, implicit_across, implicit_defs;
-      getEffects(inst, implicit_uses, implicit_across, implicit_defs);
+      getEffects(m_abi, inst, implicit_uses, implicit_across, implicit_defs);
+
+      DefVisitor dv(live, *this, pos);
+      visitOperands(inst, dv);
       dv.def(implicit_defs);
+
+      UseVisitor uv(live, *this, {block_range.start, pos});
       visitOperands(inst, uv);
       uv.use(implicit_uses);
       uv.across(implicit_across);
     }
+
     // save live set so it can propagate to predecessors
     livein[b] = live;
+
     // add a loop-covering range to each interval live into a loop.
-    for (auto p: preds[b]) {
+    for (auto p : preds[b]) {
       auto pred_end = block_ranges[p].end;
       if (pred_end > block_range.start) {
         forEach(live, [&](Vreg r) {
@@ -838,6 +788,7 @@ void Vxls::buildIntervals() {
       }
     }
   }
+
   // finish processing live ranges for constants
   for (auto& c : unit.constants) {
     if (auto ivl = intervals[c.second]) {
@@ -846,6 +797,7 @@ void Vxls::buildIntervals() {
       ivl->val = c.first;
     }
   }
+
   // Ranges and uses were generated in reverse order. Unreverse them now.
   for (auto ivl : intervals) {
     if (!ivl) continue;
@@ -857,6 +809,7 @@ void Vxls::buildIntervals() {
     if (loops) HPHP::Trace::traceRelease("vasm-loops\n");
     print("after building intervals");
   );
+
   // only constants and physical registers can be live-into the entry block.
   if (debug) {
     forEach(livein[unit.entry], [&](Vreg r) {
@@ -990,6 +943,7 @@ PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
                        RegSet allow) {
   if (!RuntimeOption::EvalHHIREnablePreColoring &&
       !RuntimeOption::EvalHHIREnableCoalescing) return InvalidReg;
+
   // search ivl for the register assigned to a sub-interval that ends at pos.
   auto search = [&](Interval* ivl, unsigned pos) -> PhysReg {
     for (; ivl; ivl = ivl->next) {
@@ -1032,6 +986,7 @@ void Vxls::allocate(Interval* current) {
     auto until = nextIntersect(current, ivl);
     free_until[r] = std::min(until, free_until[r]);
   }
+
   // Try to get a hinted register
   auto hint = findHint(current, free_until, allow);
   if (hint != InvalidReg) {
@@ -1595,7 +1550,7 @@ const char* draw(Interval* parent, unsigned pos, Mode m, Pred covers) {
   };
 
   auto s = f(pos);
-  auto d = pos%2 == 1 ? s : f(pos+1);
+  auto d = pos % 2 == 1 ? s : f(pos + 1);
   return ( s && !d) ? top[m] :
          ( s &&  d) ? both[m] :
          (!s &&  d) ? bottom[m] :
@@ -1652,8 +1607,8 @@ void Vxls::dumpIntervals() {
   }
 }
 
-auto const ignore_reserved = true;
-auto const collapse_fixed = true;
+auto const ignore_reserved = !getenv("XLS_SHOW_RESERVED");
+auto const collapse_fixed = !getenv("XLS_SHOW_FIXED");
 
 void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
                       Vlabel b) {

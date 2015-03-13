@@ -95,11 +95,25 @@ enum FlavorDesc {
 };
 
 enum InstrFlags {
-  NF = 0x0, // No flags
-  TF = 0x1, // Next instruction is not reachable via fall through or the
-            //   callee returning control
-  CF = 0x2, // Control flow instruction (branch, call, return, throw, etc)
-  FF = 0x4, // Instruction uses current FPI
+  /* No flags. */
+  NF = 0x0,
+
+  /* Terminal: next instruction is not reachable via fall through or the callee
+   * returning control. This includes instructions like Throw and Unwind that
+   * always throw exceptions. */
+  TF = 0x1,
+
+  /* Control flow: If this instruction finishes executing (doesn't throw an
+   * exception), vmpc() is not guaranteed to point to the next instruction in
+   * the bytecode stream. This does not take VM reentry into account, as that
+   * operation is part of the instruction that performed the reentry, and does
+   * not affect what vmpc() is set to after the instruction completes. */
+  CF = 0x2,
+
+  /* Instruction uses current FPI. */
+  FF = 0x4,
+
+  /* Shorthand for common combinations. */
   CF_TF = (CF | TF),
   CF_FF = (CF | FF)
 };
@@ -171,6 +185,12 @@ const char* locationCodeString(LocationCode lc);
 // is more junk after the first two bytes.
 LocationCode parseLocationCode(const char* s);
 
+
+/**
+ * E - an element, $x['y']
+ * P - a property, $x->y
+ * Q - a NullSafe version of P, $x?->y
+ */
 enum MemberCode {
   // Element and property, consuming a cell from the stack.
   MEC,
@@ -183,6 +203,7 @@ enum MemberCode {
   // Element and property, using a string immediate
   MET,
   MPT,
+  MQT,
 
   // Element, using an int64 immediate
   MEI,
@@ -291,7 +312,8 @@ struct MInstrInfo {
 };
 
 inline bool memberCodeHasImm(MemberCode mc) {
-  return mc == MEL || mc == MPL || mc == MET || mc == MPT || mc == MEI;
+  return mc == MEL || mc == MPL || mc == MET ||
+    mc == MPT || mc == MEI || mc == MQT;
 }
 
 inline bool memberCodeImmIsLoc(MemberCode mc) {
@@ -299,7 +321,7 @@ inline bool memberCodeImmIsLoc(MemberCode mc) {
 }
 
 inline bool memberCodeImmIsString(MemberCode mc) {
-  return mc == MET || mc == MPT;
+  return mc == MET || mc == MPT || mc == MQT;
 }
 
 inline bool memberCodeImmIsInt(MemberCode mc) {
@@ -557,7 +579,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(Print,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Exit,            NA,               ONE(CV),         ONE(CV),    NF) \
-  O(Fatal,           ONE(OA(FatalOp)), ONE(CV),         NOV,        CF_TF) \
+  O(Fatal,           ONE(OA(FatalOp)), ONE(CV),         NOV,        TF) \
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpNS,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
@@ -567,8 +589,8 @@ constexpr int32_t kMaxConcatN = 4;
   O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
   O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
-  O(Unwind,          NA,               NOV,             NOV,        CF_TF) \
-  O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \
+  O(Unwind,          NA,               NOV,             NOV,        TF) \
+  O(Throw,           NA,               ONE(CV),         NOV,        TF) \
   O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetL2,          ONE(LA),          NOV,             INS_1(CV),  NF) \
   O(CGetL3,          ONE(LA),          NOV,             INS_2(CV),  NF) \
@@ -663,7 +685,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
   O(FCallUnpack,     ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
-  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    CF) \
+  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
@@ -715,13 +737,13 @@ constexpr int32_t kMaxConcatN = 4;
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \
-  O(Yield,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(Yield,           NA,               ONE(CV),         ONE(CV),    CF) \
+  O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    CF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
-  O(Await,           ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
+  O(Await,           ONE(IVA),         ONE(CV),         ONE(CV),    CF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
@@ -995,7 +1017,22 @@ struct StackTransInfo {
   int pos;       // only for InsertMid
 };
 
+/*
+ * Some CF instructions can be treated as non-CF instructions for most analysis
+ * purposes, such as bytecode verification and HHBBC. These instructions change
+ * vmpc() to point somewhere in a different function, but the runtime
+ * guarantees that if excution ever returns to the original frame, it will be
+ * at the location immediately following the instruction in question. This
+ * creates the illusion that the instruction fell through normally to the
+ * instruction after it, within the context of its execution frame.
+ *
+ * The canonical example of this behavior is the FCall instruction, so we use
+ * "non-call control flow" to describe the set of CF instruction that do not
+ * exhibit this behavior. This function returns true if `opcode' is a non-call
+ * control flow instruction.
+ */
 bool instrIsNonCallControlFlow(Op opcode);
+
 bool instrHasConditionalBranch(Op opcode);
 bool instrAllowsFallThru(Op opcode);
 bool instrReadsCurrentFpi(Op opcode);
@@ -1160,11 +1197,11 @@ StackTransInfo instrStackTransInfo(const Op* opcode);
 int instrSpToArDelta(const Op* opcode);
 
 inline bool mcodeIsLiteral(MemberCode mcode) {
-  return mcode == MET || mcode == MEI || mcode == MPT;
+  return mcode == MET || mcode == MEI || mcode == MPT || mcode == MQT;
 }
 
 inline bool mcodeIsProp(MemberCode mcode) {
-  return mcode == MPC || mcode == MPL || mcode == MPT;
+  return mcode == MPC || mcode == MPL || mcode == MPT || mcode == MQT;
 }
 
 inline bool mcodeIsElem(MemberCode mcode) {

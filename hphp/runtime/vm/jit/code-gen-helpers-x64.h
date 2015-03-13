@@ -62,6 +62,7 @@ void emitGetGContext(Vout& as, Vreg dest);
 void emitTransCounterInc(Asm& a);
 void emitTransCounterInc(Vout&);
 
+void emitDecRef(Vout& v, Vreg base);
 void emitIncRef(Asm& as, PhysReg base);
 void emitIncRef(Vout& v, Vreg base);
 void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype);

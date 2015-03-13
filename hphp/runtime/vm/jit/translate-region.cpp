@@ -522,7 +522,7 @@ TranslateResult irGenRegion(HTS& hts,
     Block* irBlock = blockIdToIRBlock[blockId];
     bool isLoopHeader = blockIsLoopHeader(region, blockId, processedBlocks);
     always_assert(IMPLIES(isLoopHeader, RuntimeOption::EvalJitLoops));
-    BCMarker marker(sk, block->initialSpOffset(), profTransId);
+    BCMarker marker(sk, block->initialSpOffset(), profTransId, irb.fp());
     if (!irb.startBlock(irBlock, marker, isLoopHeader)) {
       FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
              blockId);
@@ -610,6 +610,8 @@ TranslateResult irGenRegion(HTS& hts,
         return TranslateResult::Retry;
       }
 
+      irgen::finishHHBC(hts);
+
       skipTrans = false;
 
       // If this is the last instruction, handle block transitions.
@@ -638,7 +640,7 @@ TranslateResult irGenRegion(HTS& hts,
     assert(!byRefs.hasNext());
     assert(!knownFuncs.hasNext());
   }
-  irGenTimer.end();
+  irGenTimer.stop();
   return TranslateResult::Success;
 }
 

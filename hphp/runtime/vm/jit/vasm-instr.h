@@ -561,7 +561,7 @@ extern const char* vinst_names[];
 /*
  * Whether `inst' is a block-terminating instruction.
  */
-bool isBlockEnd(Vinstr& inst);
+bool isBlockEnd(const Vinstr& inst);
 
 ///////////////////////////////////////////////////////////////////////////////
 

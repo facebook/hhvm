@@ -305,7 +305,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         ok = false;
       }
       if (!isTF(pc)) {
-        error("Last instruction in %s is not teriminal %d:%s\n",
+        error("Last instruction in %s is not terminal %d:%s\n",
                name, offset(pc), instrToString((Op*)pc, unit()).c_str());
         ok = false;
       } else {
@@ -334,6 +334,10 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     } else {
       Offset target = instrJumpTarget((Op*)bc, offset(branch));
       ok &= checkOffset("branch target", target, name, base, past);
+      if (*(Op*)branch == Op::JmpNS && target == offset(branch)) {
+        error("JmpNS may not have zero offset in %s\n", name);
+        ok = false;
+      }
     }
   }
   return ok;
@@ -458,6 +462,24 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
             ok &= checkLocal(pc, vr.frontLocal());
           } else if (vr.frontString() != -1) {
             ok &= checkString(pc, vr.frontString());
+          }
+          if (member == MQT) {
+            switch (*instr) {
+              case Op::CGetM:
+              case Op::IssetM:
+              case Op::EmptyM:
+                break;
+              case Op::VGetM:
+              case Op::FPassM:
+                break;
+              default:
+                error(
+                  "Illegal QT member code at %d: %s\n",
+                  offset((PC)instr),
+                  instrToString(instr).c_str()
+                );
+                ok = false;
+            }
           }
         }
       }
@@ -1120,7 +1142,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   State& state = m_info[t->id].state_in;
   if (!state.stk) {
     copyState(&state, &cur);
-    return false;
+    return true;
   }
   // Check stack.
   if (state.stklen != cur.stklen) {

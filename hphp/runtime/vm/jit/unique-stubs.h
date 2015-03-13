@@ -16,8 +16,9 @@
 #ifndef incl_HPHP_JIT_UNIQUE_STUBS_H_
 #define incl_HPHP_JIT_UNIQUE_STUBS_H_
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace jit {
 
@@ -74,6 +75,14 @@ struct UniqueStubs {
    */
   TCA interpHelper;
   TCA interpHelperSyncedPC;
+
+  /*
+   * For every bytecode with the CF flag, a stub will exist here to interpOne
+   * that bytecode, followed by a call to resumeHelper. The stubs expect rVmFp
+   * and rVmSp to be live, and rAsm must contain the offset to the bytecode to
+   * interpret.
+   */
+  std::unordered_map<Op, TCA> interpOneCFHelpers;
 
   /*
    * Catch blocks jump to endCatchHelper when they've finished executing. If
@@ -148,6 +157,29 @@ struct UniqueStubs {
    */
   TCA add(const char* name, TCA start);
 
+  /*
+   * If the given address is within one of the registered stubs, return a
+   * string indicating which stub and how far in it is:
+   * "fcallArrayHelper+0xfa". Otherwise, return a string representation of the
+   * raw address: "0xabcdef".
+   */
+  std::string describe(TCA addr);
+
+ private:
+  struct StubRange {
+    std::string name;
+    TCA start, end;
+
+    bool operator<(const StubRange& other) const {
+      return start < other.start;
+    }
+
+    bool contains(TCA address) const {
+      return start <= address && address < end;
+    }
+  };
+
+  std::vector<StubRange> m_ranges;
 };
 
 //////////////////////////////////////////////////////////////////////

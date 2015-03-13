@@ -21,12 +21,15 @@
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/disasm.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP { namespace jit { namespace x64 {
@@ -71,6 +74,8 @@ TCA emitRetFromInterpretedGeneratorFrame() {
 
 //////////////////////////////////////////////////////////////////////
 
+extern "C" void enterTCExit();
+
 void emitCallToExit(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.main() };
 
@@ -79,6 +84,18 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   // as the start address.
   a.emitNop(1);
   auto const stub = a.frontier();
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    Label ok;
+    a.emitImmReg(uintptr_t(enterTCExit), rax);
+    a.cmpq(rax, *rsp);
+    a.je8 (ok);
+    a.ud2();
+  asm_label(a, ok);
+  }
+
+  // Emulate a ret without actually doing one to avoid unbalancing the return
+  // stack buffer. The call from enterTCHelper() that got us into the TC was
+  // popped off the RSB by the ret that got us to this stub.
   a.pop(rax);
   a.jmp(rax);
 
@@ -123,6 +140,39 @@ asm_label(a, resumeHelper);
   a.    jmp   (rax);
 
   uniqueStubs.add("resumeInterpHelpers", uniqueStubs.interpHelper);
+
+  auto emitInterpOneStub = [&](const Op op) {
+    Asm a{mcg->code.cold()};
+    moveToAlign(mcg->code.cold());
+    auto const start = a.frontier();
+
+    a.  movq(rVmFp, argNumToRegName[0]);
+    a.  movq(rVmSp, argNumToRegName[1]);
+    a.  movl(r32(rAsm), r32(argNumToRegName[2]));
+    a.  call(TCA(interpOneEntryPoints[size_t(op)]));
+    a.  jmp(uniqueStubs.resumeHelper);
+
+    uniqueStubs.interpOneCFHelpers[op] = start;
+    uniqueStubs.add(
+      folly::sformat("interpOneCFHelper-{}", opcodeToName(op)).c_str(),
+      start
+    );
+  };
+
+# define O(name, imm, in, out, flags)                       \
+  if (bool((flags) & CF) || bool((flags) & TF)) {           \
+    emitInterpOneStub(Op::name);                            \
+  }
+  OPCODES
+# undef O
+  // Exit is a very special snowflake: because it can appear in PHP
+  // expressions, the emitter pretends that it pushed a value on the eval stack
+  // (and iopExit actually does push Null right before throwing). Marking it as
+  // TF would mess up any bytecodes that want to consume its output value, so
+  // we can't do that. But we also don't want to extend tracelets past it, so
+  // the JIT treats it as terminal and uses InterpOneCF to execute it. So,
+  // manually make sure we have an interpOneExit stub.
+  emitInterpOneStub(Op::Exit);
 }
 
 void emitCatchHelper(UniqueStubs& uniqueStubs) {
@@ -159,7 +209,14 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   a.    loadl  (rax[Func::sharedBaseOff()], eax);
   a.    addl   (eax, edi);
   emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
+  // The stack overflow is logically thrown from the caller so rStashedAR
+  // hasn't yet been copied to rVmFp. But there might be a catch trace attached
+  // to the call that got us here, so we need to link rStashedAR into the frame
+  // chain before throwing.
+  a.    movq   (rStashedAR, rbp);
+  a.    loadq  (rip[intptr_t(&mcg)], argNumToRegName[0]);
+  a.    movq   (rStashedAR, argNumToRegName[1]);
+  a.    call   (TCA(getMethodPtr(&MCGenerator::handleStackOverflow)));
 
   uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
 }
@@ -372,10 +429,9 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
 
   Label popAndXchg, skip;
 
-  // fcallHelper is used for prologues, and (in the case of
-  // closures) for dispatch to the function body. In the first
-  // case, there's a call, in the second, there's a jmp.
-  // We can differentiate by comparing r15 and rVmFp
+  // fcallHelper is used for prologues, and (in the case of closures) for
+  // dispatch to the function body. In the first case, there's a call, in the
+  // second, there's a jmp.  We can differentiate by comparing r15 and rVmFp
   a.    movq   (rStashedAR, argNumToRegName[0]);
   a.    movq   (rVmSp, argNumToRegName[1]);
   a.    cmpq   (rStashedAR, rVmFp);
@@ -475,22 +531,25 @@ asm_label(a, skip);
 }
 
 void emitBindCallStubs(UniqueStubs& uniqueStubs) {
-  for (int i = 0; i < 2; i++) {
+  auto emitStub = [](bool immutable) {
     auto& cb = mcg->code.cold();
-    if (!i) {
-      uniqueStubs.bindCallStub = cb.frontier();
-    } else {
-      uniqueStubs.immutableBindCallStub = cb.frontier();
-    }
-    Vauto vasm(cb);
-    auto& vf = vasm.main();
-    // Pop the return address into the actrec in rStashedAR.
-    vf << popm{rStashedAR[AROFF(m_savedRip)]};
-    ServiceReqArgVec argv;
-    packServiceReqArgs(argv, (int64_t)i);
-    emitServiceReq(vf, nullptr, jit::REQ_BIND_CALL, argv);
-  }
+    auto const start = cb.frontier();
+    Asm a{cb};
+    a.  loadq(rip[intptr_t(&mcg)], argNumToRegName[0]);
+    a.  loadq(*rsp, argNumToRegName[1]); // reconstruct toSmash from savedRip
+    a.  subq (kCallLen, argNumToRegName[1]);
+    a.  movq (rStashedAR, argNumToRegName[2]);
+    a.  movb (immutable, rbyte(argNumToRegName[3]));
+    a.  subq (8, rsp); // align stack
+    a.  call (TCA(getMethodPtr(&MCGenerator::handleBindCall)));
+    a.  addq (8, rsp);
+    a.  jmp  (rax);
+    return start;
+  };
+
+  uniqueStubs.bindCallStub = emitStub(false);
   uniqueStubs.add("bindCallStub", uniqueStubs.bindCallStub);
+  uniqueStubs.immutableBindCallStub = emitStub(true);
   uniqueStubs.add("immutableBindCallStub", uniqueStubs.immutableBindCallStub);
 }
 

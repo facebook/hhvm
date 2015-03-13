@@ -101,6 +101,18 @@ inline TypedValue* nm(Class* ctx, TypedValue* base, TypedValue key,     \
 PROP_HELPER_TABLE(X)
 #undef X
 
+// NullSafe prop.
+inline TypedValue* propCQ(Class* ctx, TypedValue* base, StringData* key,
+                          MInstrState* mis) {
+  return nullSafeProp(mis->tvScratch, mis->tvRef, ctx, base, key);
+}
+
+// NullSafe prop with object base.
+inline TypedValue* propCOQ(Class* ctx, ObjectData* base, StringData* key,
+                           MInstrState* mis) {
+  return base->prop(&mis->tvScratch, &mis->tvRef, ctx, key);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template <KeyType keyType, bool isObj>
@@ -131,6 +143,26 @@ inline TypedValue nm(Class* ctx, TypedValue* base, key_type<kt> key, \
 }
 CGETPROP_HELPER_TABLE(X)
 #undef X
+
+//////////////////////////////////////////////////////////////////////
+
+// NullSafe prop.
+inline TypedValue cGetPropSQ(Class* ctx, TypedValue* base,
+                             StringData* key, MInstrState* mis) {
+  TypedValue scratch;
+  auto const result = nullSafeProp(scratch, mis->tvRef, ctx, base, key);
+  tvRefcountedIncRef(result);
+  return *result;
+}
+
+// NullSafe prop with object base.
+inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base,
+                             StringData* key, MInstrState* mis) {
+  TypedValue scratch;
+  auto const result = base->prop(&scratch, &mis->tvRef, ctx, key);
+  tvRefcountedIncRef(result);
+  return *result;
+}
 
 //////////////////////////////////////////////////////////////////////
 

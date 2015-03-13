@@ -469,7 +469,6 @@ void MemoryManager::flush() {
   m_heap.flush();
   m_apc_arrays = std::vector<APCLocalArray*>();
   m_natives = std::vector<NativeNode*>();
-  Sweepable::FlushList();
 }
 
 /*

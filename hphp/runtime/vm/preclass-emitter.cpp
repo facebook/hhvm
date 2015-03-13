@@ -131,12 +131,13 @@ PreClassEmitter::lookupProp(const StringData* propName) const {
 }
 
 bool PreClassEmitter::addAbstractConstant(const StringData* n,
-                                          const StringData* typeConstraint) {
+                                          const StringData* typeConstraint,
+                                          const bool typeconst) {
   auto it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const const_(n, typeConstraint, nullptr, nullptr);
+  PreClassEmitter::Const const_(n, typeConstraint, nullptr, nullptr, typeconst);
   m_constMap.add(const_.name(), const_);
   return true;
 }
@@ -144,12 +145,13 @@ bool PreClassEmitter::addAbstractConstant(const StringData* n,
 bool PreClassEmitter::addConstant(const StringData* n,
                                   const StringData* typeConstraint,
                                   const TypedValue* val,
-                                  const StringData* phpCode) {
+                                  const StringData* phpCode,
+                                  const bool typeconst) {
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const const_(n, typeConstraint, val, phpCode);
+  PreClassEmitter::Const const_(n, typeConstraint, val, phpCode, typeconst);
   m_constMap.add(const_.name(), const_);
   return true;
 }
@@ -291,8 +293,8 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       tvCopy(const_.val(), tvaux);
       tvaux.constModifiers().m_isAbstract = false;
     }
-    // TODO(#6414420) - set this flag if it is a type constant
-    tvaux.constModifiers().m_isType = false;
+
+    tvaux.constModifiers().m_isType = const_.isTypeconst();
 
     constBuild.add(const_.name(), PreClass::Const(const_.name(),
                                                   tvaux,

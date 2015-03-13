@@ -749,7 +749,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    * Duplicate class constants override parent class constants, but
    * for interfaces it's an error to have a duplicate constant, unless
    * it just happens from implementing the same interface more than
-   * once.
+   * once, or the constant is abstract.
    *
    * Note: hphpc doesn't actually check for this case, but since with
    * HardConstProp we're potentially doing propagation of these
@@ -760,7 +760,10 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
   for (auto& c : rparent->cls->constants) {
     auto& cptr = rleaf->clsConstants[c.name];
     if (isIface && cptr) {
-      if (cptr->cls != rparent->cls) return false;
+      if (cptr->val.hasValue() && c.val.hasValue() &&
+          cptr->cls != rparent->cls) {
+        return false;
+      }
     }
     cptr = &c;
   }
@@ -1904,8 +1907,8 @@ Type Index::lookup_class_constant(Context ctx,
 
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
-    if (!it->second->val.hasValue()) {
-      // This is an abstract class constant.
+    if (!it->second->val.hasValue() || it->second->isTypeconst) {
+      // This is an abstract class constant or typeconstant
       return TInitCell;
     }
     if (it->second->val.value().m_type == KindOfUninit) {

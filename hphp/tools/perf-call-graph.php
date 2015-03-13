@@ -123,6 +123,7 @@ EOT;
 }
 
 function main($argv) {
+  ini_set('memory_limit', '64G');
   if (posix_isatty(STDIN)) {
     usage($argv[0]);
     return 1;

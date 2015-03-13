@@ -644,6 +644,7 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrFinal)     { out << " final"; }
   if (attrs & AttrPhpLeafFn) { out << " (leaf)"; }
   if (attrs & AttrHot)       { out << " (hot)"; }
+  if (attrs & AttrNoOverride){ out << " (nooverride)"; }
   if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
 }

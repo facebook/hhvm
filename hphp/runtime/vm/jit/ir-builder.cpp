@@ -1140,7 +1140,11 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_curBlock = block;
 
   m_state.startBlock(m_curBlock, marker, isLoopHeader);
-  if (sp() == nullptr) gen(DefSP, StackOffset{spOffset().offset}, fp());
+  if (sp() == nullptr) {
+    always_assert(RuntimeOption::EvalHHIRBytecodeControlFlow);
+    // XXX(t2288359): This can go away once we don't redefine StkPtrs mid-trace.
+    TRACE_PUNT("Control flow merge with different StkPtrs");
+  }
   always_assert(fp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),

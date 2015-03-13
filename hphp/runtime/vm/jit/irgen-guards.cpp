@@ -40,94 +40,35 @@ void profiledGuard(HTS& env,
                    ProfGuard kind,
                    int32_t id, // locId or stackOff
                    Block* checkExit) {
-  auto doGuard = [&] (Type type) {
-    switch (kind) {
-    case ProfGuard::CheckLoc:
-    case ProfGuard::GuardLoc:
+  switch (kind) {
+  case ProfGuard::CheckLoc:
+  case ProfGuard::GuardLoc:
+    if (auto failBlock = env.irb->guardFailBlock()) {
+      gen(env, CheckLoc, type, LocalId(id), failBlock, fp(env));
+    } else if (kind == ProfGuard::CheckLoc) {
+      gen(env, CheckLoc, type, LocalId(id), checkExit, fp(env));
+    } else {
+      gen(env, GuardLoc, type, LocalId(id), fp(env), sp(env));
+    }
+    return;
+  case ProfGuard::CheckStk:
+  case ProfGuard::GuardStk:
+    {
+      // Adjust 'id' to get an offset from the current m_irb->sp().
+      auto const adjOff = offsetFromIRSP(env, BCSPOffset{id});
       if (auto failBlock = env.irb->guardFailBlock()) {
-        gen(env, CheckLoc, type, LocalId(id), failBlock, fp(env));
-      } else if (kind == ProfGuard::CheckLoc) {
-        gen(env, CheckLoc, type, LocalId(id), checkExit, fp(env));
+        gen(env, CheckStk,
+          type, IRSPOffsetData { adjOff }, failBlock, sp(env));
+      } else if (kind == ProfGuard::CheckStk) {
+        gen(env, CheckStk,
+          type, IRSPOffsetData { adjOff }, checkExit, sp(env));
       } else {
-        gen(env, GuardLoc, type, LocalId(id), fp(env), sp(env));
+        gen(env, GuardStk, type,
+          RelOffsetData { BCSPOffset{id}, adjOff }, sp(env), fp(env));
       }
       return;
-    case ProfGuard::CheckStk:
-    case ProfGuard::GuardStk:
-      {
-        // Adjust 'id' to get an offset from the current m_irb->sp().
-        auto const adjOff = offsetFromIRSP(env, BCSPOffset{id});
-        if (auto failBlock = env.irb->guardFailBlock()) {
-          gen(env, CheckStk,
-            type, IRSPOffsetData { adjOff }, failBlock, sp(env));
-        } else if (kind == ProfGuard::CheckStk) {
-          gen(env, CheckStk,
-            type, IRSPOffsetData { adjOff }, checkExit, sp(env));
-        } else {
-          gen(env, GuardStk, type,
-            RelOffsetData { BCSPOffset{id}, adjOff }, sp(env), fp(env));
-        }
-        return;
-      }
     }
-  };
-
-  auto loadAddr = [&]() -> SSATmp* {
-    switch (kind) {
-    case ProfGuard::CheckLoc:
-    case ProfGuard::GuardLoc:
-      return ldLocAddr(env, id);
-    case ProfGuard::CheckStk:
-    case ProfGuard::GuardStk:
-      return ldStkAddr(env, BCSPOffset{id});
-    }
-    not_reached();
-  };
-
-  // We really do want to check for exact type equality here: if type
-  // is StaticStr there's nothing for us to do, and we don't support
-  // guarding on CountedStr.
-  if (!RuntimeOption::EvalJitPGOStringSpec ||
-      type != Type::Str ||
-      (mcg->tx().mode() != TransKind::Profile &&
-       mcg->tx().mode() != TransKind::Optimize)) {
-    return doGuard(type);
   }
-
-  auto const profileKey = [&] {
-    switch (kind) {
-    case ProfGuard::CheckLoc:
-    case ProfGuard::GuardLoc:
-      return makeStaticString(folly::to<std::string>("Loc", id));
-    case ProfGuard::CheckStk:
-    case ProfGuard::GuardStk:
-      // Note that for stacks we are using a profiling key on the unadjusted
-      // index (index from top of virtual stack).
-      return makeStaticString(folly::to<std::string>("Stk", id));
-    }
-    not_reached();
-  }();
-  TargetProfile<StrProfile> profile(env.context,
-                                    env.irb->curMarker(),
-                                    profileKey);
-
-  if (profile.profiling()) {
-    doGuard(Type::Str);
-    gen(env, ProfileStr, ProfileStrData { profileKey }, loadAddr());
-    return;
-  }
-
-  if (profile.optimizing()) {
-    auto const data = profile.data(StrProfile::reduce);
-    auto const total = data.total();
-
-    if (data.staticStr == total) doGuard(Type::StaticStr);
-    else                         doGuard(Type::Str);
-    return;
-  }
-
-  // TransLive: just do a normal guard.
-  doGuard(Type::Str);
 }
 
 void guardTypeStack(

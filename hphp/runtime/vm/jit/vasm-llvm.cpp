@@ -761,7 +761,7 @@ struct LLVMEmitter {
     uint8_t* funcStart =
       static_cast<uint8_t*>(ee->getPointerToFunction(m_function));
     FTRACE(2, "LLVM function address: {}\n", funcStart);
-    FTRACE(3, "\n{:-^80}\n{}\n",
+    FTRACE(1, "\n{:-^80}\n{}\n",
            " x64 after LLVM codegen ", showNewCode(m_areas));
 
     if (auto secLocRecs = tcMM->getDataSection(".llvm_locrecs")) {
@@ -1136,7 +1136,7 @@ private:
       m_phis[phiInd]->addIncoming(e.value(useInfo.uses[phiInd]),
                                   useInfo.fromLabel);
       auto typeStr = llshow(e.value(useInfo.uses[phiInd])->getType());
-      FTRACE(1,
+      FTRACE(2,
              "phidef --> phiInd:{}, type:{}, incoming:{}, use:%{}, "
              "block:{}, def:%{}\n", phiInd, typeStr,
              useInfo.fromLabel->getName().str(),
@@ -1275,7 +1275,7 @@ VASM_OPCODES
 };
 
 void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
-  Timer _t(Timer::llvm_irGeneration);
+  Timer timer(Timer::llvm_irGeneration);
 
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
@@ -1528,7 +1528,7 @@ O(countbytecode)
     defineValue(x64::rStashedAR, nullptr);
   }
 
-  _t.end();
+  timer.stop();
   finalize();
 
   if (RuntimeOption::EvalJitLLVMDiscard) {
@@ -2248,22 +2248,31 @@ void LLVMEmitter::emit(const jmpm& inst) {
 }
 
 void LLVMEmitter::emit(const jmpi& inst) {
-  // These are the only two stubs we expect to call using jmpi. They don't care
-  // about rVmFp or rVmSp but we always have to preserve rVmTl.
-  assert_not_implemented(inst.target == mcg->tx().uniqueStubs.resumeHelper ||
-                         inst.target == mcg->tx().uniqueStubs.endCatchHelper);
+  std::vector<llvm::Value*> args;
+  std::vector<llvm::Type*> argTypes;
 
-  std::vector<llvm::Value*> args{
-    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp)
-  };
-  std::vector<llvm::Type*> argTypes{m_int64, m_int64, m_int64};
+  if (inst.target == mcg->tx().uniqueStubs.endCatchHelper) {
+    assert_not_implemented(inst.args == (x64::rVmTl | x64::rVmFp));
+    args.insert(args.end(), {
+        m_int64Undef, value(x64::rVmTl), value(x64::rVmFp)
+    });
+    argTypes.insert(argTypes.end(), 3, m_int64);
+  } else {
+    assert_not_implemented(inst.args == (x64::kCrossTraceRegs | x64::rAsm));
+    args.insert(args.end(), {
+      value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp),
+      zext(value(x64::rAsm), 64)
+    });
+    argTypes.insert(argTypes.end(), 4, m_int64);
+  }
+
   auto func = emitFuncPtr(
     folly::sformat("jmpi_{}", inst.target),
     llvm::FunctionType::get(m_void, argTypes, false),
     reinterpret_cast<uint64_t>(inst.target)
   );
   auto call = m_irb.CreateCall(func, args);
-  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_SR);
   call->setTailCallKind(llvm::CallInst::TCK_Tail);
   m_irb.CreateRetVoid();
 }

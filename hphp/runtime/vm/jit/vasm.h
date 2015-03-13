@@ -48,7 +48,7 @@ extern rds::Link<uint64_t> g_bytecodesVasm;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DECLARE_VNUM(Vnum, check)                         \
+#define DECLARE_VNUM(Vnum, check, prefix)                 \
 struct Vnum {                                             \
   Vnum() {}                                               \
   explicit Vnum(size_t n) : n(safe_cast<unsigned>(n)) {}  \
@@ -58,6 +58,11 @@ struct Vnum {                                             \
     return n;                                             \
   }                                                       \
                                                           \
+  std::string toString() const {                          \
+    if (n == 0xffffffff) return prefix "?";               \
+    return folly::to<std::string>(prefix, n);             \
+  }                                                       \
+                                                          \
 private:                                                  \
   unsigned n{0xffffffff};                                 \
 }
@@ -65,22 +70,22 @@ private:                                                  \
 /*
  * Vlabel wraps a block number.
  */
-DECLARE_VNUM(Vlabel, true);
+DECLARE_VNUM(Vlabel, true, "B");
 
 /*
  * Vpoint is a handle to record or retreive a code address.
  */
-DECLARE_VNUM(Vpoint, false);
+DECLARE_VNUM(Vpoint, false, "P");
 
 /*
  * Vtuple is an index to a tuple in Vunit::tuples.
  */
-DECLARE_VNUM(Vtuple, true);
+DECLARE_VNUM(Vtuple, true, "T");
 
 /*
  * VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs.
  */
-DECLARE_VNUM(VcallArgsId, true);
+DECLARE_VNUM(VcallArgsId, true, "V");
 
 #undef DECLARE_VNUM
 
@@ -108,6 +113,7 @@ void allocateRegisters(Vunit&, const Abi&);
 void fuseBranches(Vunit&);
 void optimizeExits(Vunit&);
 void optimizeJmps(Vunit&);
+void optimizeCopies(Vunit&, const Abi&);
 void removeDeadCode(Vunit&);
 void removeTrivialNops(Vunit&);
 template<typename Folder> void foldImms(Vunit&);

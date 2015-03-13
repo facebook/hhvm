@@ -23,7 +23,7 @@
 namespace HPHP { namespace jit { namespace irgen {
 
 void surpriseCheck(HTS& env, Offset relOffset) {
-  if (relOffset < 0) {
+  if (relOffset <= 0) {
     auto const exit = makeExitSlow(env);
     gen(env, CheckSurpriseFlags, exit);
   }

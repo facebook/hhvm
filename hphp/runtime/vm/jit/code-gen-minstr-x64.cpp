@@ -62,6 +62,36 @@ void CodeGenerator::cgPropImpl(IRInstruction* inst) {
 void CodeGenerator::cgPropX(IRInstruction* i)     { cgPropImpl(i); }
 void CodeGenerator::cgPropDX(IRInstruction* i)    { cgPropImpl(i); }
 
+void CodeGenerator::cgPropQ(IRInstruction* inst) {
+  using namespace MInstrHelpers;
+  auto args =
+    argGroup(inst)
+      .immPtr(getClass(inst->marker()))
+      .ssa(0)
+      .ssa(1)
+      .ssa(2);
+
+  if (inst->src(0)->isA(Type::Obj)) {
+    cgCallHelper(
+      vmain(),
+      CppCall::direct(propCOQ),
+      callDest(inst),
+      SyncOptions::kSyncPoint,
+      args
+    );
+    return;
+  }
+
+  cgCallHelper(
+    vmain(),
+    CppCall::direct(propCQ),
+    callDest(inst),
+    SyncOptions::kSyncPoint,
+    args
+  );
+}
+
+
 void CodeGenerator::cgCGetProp(IRInstruction* inst) {
   using namespace MInstrHelpers;
   auto const base    = inst->src(0);
@@ -78,6 +108,35 @@ void CodeGenerator::cgCGetProp(IRInstruction* inst) {
       .ssa(0)
       .memberKeyS(1)
       .ssa(2)
+  );
+}
+
+void CodeGenerator::cgCGetPropQ(IRInstruction* inst) {
+  using namespace MInstrHelpers;
+  auto args =
+    argGroup(inst)
+      .immPtr(getClass(inst->marker()))
+      .ssa(0)
+      .ssa(1)
+      .ssa(2);
+
+  if (inst->src(0)->isA(Type::Obj)) {
+    cgCallHelper(
+      vmain(),
+      CppCall::direct(cGetPropSOQ),
+      callDestTV(inst),
+      SyncOptions::kSyncPoint,
+      args
+    );
+    return;
+  }
+
+  cgCallHelper(
+    vmain(),
+    CppCall::direct(cGetPropSQ),
+    callDestTV(inst),
+    SyncOptions::kSyncPoint,
+    args
   );
 }
 

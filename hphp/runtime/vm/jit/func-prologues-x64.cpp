@@ -375,7 +375,7 @@ SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
   Asm a { mcg->code.main() };
 
   start = emitFuncGuard(a, func);
-  if (Trace::moduleEnabledRelease(Trace::ringbuffer)) {
+  if (Trace::moduleEnabled(Trace::ringbuffer)) {
     auto arg = 0;
     auto name = func->fullName()->data();
     a.  movq   (reinterpret_cast<uintptr_t>(name), argNumToRegName[arg++]);

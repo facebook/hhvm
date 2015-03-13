@@ -1316,7 +1316,7 @@ static bool guardedNativePropResult(TypedValue* retval, Variant result) {
 
 bool ObjectData::invokeNativeGetProp(TypedValue* retval,
                                      const StringData* key) {
-  return guardedNativePropResult(retval, Native::getProp(this, key));
+  return guardedNativePropResult(retval, Native::getProp(this, StrNR(key)));
 }
 
 bool ObjectData::invokeNativeSetProp(TypedValue* retval,
@@ -1324,18 +1324,18 @@ bool ObjectData::invokeNativeSetProp(TypedValue* retval,
                                      TypedValue* val) {
   return guardedNativePropResult(
     retval,
-    Native::setProp(this, key, tvAsVariant(val))
+    Native::setProp(this, StrNR(key), tvAsVariant(val))
   );
 }
 
 bool ObjectData::invokeNativeIssetProp(TypedValue* retval,
                                        const StringData* key) {
-  return guardedNativePropResult(retval, Native::issetProp(this, key));
+  return guardedNativePropResult(retval, Native::issetProp(this, StrNR(key)));
 }
 
 bool ObjectData::invokeNativeUnsetProp(TypedValue* retval,
                                        const StringData* key) {
-  return guardedNativePropResult(retval, Native::unsetProp(this, key));
+  return guardedNativePropResult(retval, Native::unsetProp(this, StrNR(key)));
 }
 
 //////////////////////////////////////////////////////////////////////

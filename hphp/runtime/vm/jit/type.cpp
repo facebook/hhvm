@@ -173,6 +173,14 @@ IR_TYPES
 #undef IRT
 #undef IRTP
 
+namespace TypeNames {
+#define IRT(name, ...) const Type name = Type::name;
+#define IRTP(name, ...) IRT(name)
+IR_TYPES
+#undef IRT
+#undef IRTP
+}
+
 std::string Type::constValString() const {
   assert(isConst());
 
@@ -393,7 +401,19 @@ DataType Type::toDataType() const {
   if (*this <= Bool)        return KindOfBoolean;
   if (*this <= Int)         return KindOfInt64;
   if (*this <= Dbl)         return KindOfDouble;
-  if (*this <= StaticStr)   return KindOfStaticString;
+  if (*this <= StaticStr) {
+    /*
+     * TODO(#6272363): we'd love to return KindOfStaticString here, but we
+     * can't because of APC's uncounted strings.  Right now they are subtypes
+     * of Type::StaticStr, because they aren't Type::CountedStr (because they
+     * need static bit checks in IncRef and the like), and there are no other
+     * subtypes of Type::Str that they can be part of.
+     *
+     * KindOfStaticString, however, implies m_data.pstr->isStatic(), which is
+     * false for these strings.
+     */
+    return KindOfString;
+  }
   if (*this <= Str)         return KindOfString;
   if (*this <= Arr)         return KindOfArray;
   if (*this <= Obj)         return KindOfObject;
@@ -643,6 +663,20 @@ Type ldRefReturn(Type typeParam) {
   if (type <= Type::Uncounted)     return Type::Uncounted;
   always_assert(type <= Type::Cell);
   return Type::InitCell;
+}
+
+Type negativeCheckType(Type srcType, Type typeParam) {
+  if (srcType <= typeParam)      return Type::Bottom;
+  if (!srcType.maybe(typeParam)) return srcType;
+  // Checks relating to StaticStr and StaticArr are not, in general, precise.
+  // They may reject some Statics in some situations, where we only guard using
+  // the type tag and not by loading the count field.
+  auto tmp = srcType - typeParam;
+  if (typeParam.maybe(Type::Static)) {
+    if (tmp.maybe(Type::CountedStr)) tmp |= Type::Str;
+    if (tmp.maybe(Type::CountedArr)) tmp |= Type::Arr;
+  }
+  return tmp;
 }
 
 Type boxType(Type t) {

@@ -472,7 +472,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IsTypeMem:
   case CheckTypeMem:
   case DbgAssertPtr:
-  case ProfileStr:
     return may_load_store(pointee(inst.src(0)), AEmpty);
 
   case CheckInitMem:
@@ -597,9 +596,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * well.
    */
   case CGetProp:
+  case CGetPropQ:
   case EmptyProp:
   case IssetProp:
   case PropX:
+  case PropQ:
   case UnsetProp:
   case BindProp:
   case IncDecProp:
@@ -626,14 +627,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AHeapAny, AEmpty /* Note */);
 
   //////////////////////////////////////////////////////////////////////
-  // Instructions that allocate new objects, so any effects they have on some
-  // types of memory locations we track are isolated from anything else we care
-  // about.
+  // Instructions that allocate new objects, without reading any other memory
+  // at all, so any effects they have on some types of memory locations we
+  // track are isolated from anything else we care about.
 
   case NewArray:
   case NewCol:
   case NewInstanceRaw:
-  case NewLikeArray:
   case NewMixedArray:
   case AllocPackedArray:
   case ConvBoolToArr:
@@ -641,8 +641,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDblToArr:
   case ConvIntToArr:
   case ConvIntToStr:
-  case ConvResToStr:
-  case CreateSSWH:
   case Box:  // conditional allocation
     return IrrelevantEffects {};
 
@@ -787,7 +785,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Ceil:
   case Floor:
   case DefLabel:
-  case DecRefNZ:
   case CheckInit:
   case Nop:
   case ClsNeq:
@@ -823,37 +820,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that technically do some things w/ memory, but not in any way
-  // we currently care about.
+  // we currently care about.  They however don't return IrrelevantEffects
+  // because we assume (in refcount-opts) that IrrelevantEffects instructions
+  // can't even inspect Countable reference count fields, and several of these
+  // can.  All GeneralEffects instructions are assumed to possibly do so.
 
-  case CheckRefs:
+  case DecRefNZ:
   case AFWHBlockOn:
-  case LdClsCctx:
-  case BeginCatch:
-  case CheckSurpriseFlags:
-  case CheckType:
-  case FreeActRec:
   case IncRef:
   case IncRefCtx:
-  case LdRetAddr:
-  case RegisterLiveObj:
-  case RetAdjustStk:
   case StClosureArg:
   case StClosureCtx:
-  case StClosureFunc:
   case StContArKey:
-  case StContArResume:
-  case StContArState:
   case StContArValue:
   case StRetVal:
-  case ZeroErrorLevel:
-  case RestoreErrorLevel:
-  case CheckCold:
-  case CheckInitProps:
-  case CheckInitSProps:
-  case ContArIncIdx:
-  case ContArIncKey:
-  case ContArUpdateIdx:
-  case ContValid:
   case ConcatIntStr:
   case ConcatStr3:
   case ConcatStr4:
@@ -863,6 +843,30 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CoerceStrToInt:
   case ConvStrToInt:
   case OrdStr:
+  case CreateSSWH:
+  case ConvResToStr:
+  case NewLikeArray:
+  case CheckRefs:
+  case LdClsCctx:
+  case BeginCatch:
+  case CheckSurpriseFlags:
+  case CheckType:
+  case FreeActRec:
+  case LdRetAddr:
+  case RegisterLiveObj:
+  case RetAdjustStk:
+  case StClosureFunc:
+  case StContArResume:
+  case StContArState:
+  case ZeroErrorLevel:
+  case RestoreErrorLevel:
+  case CheckCold:
+  case CheckInitProps:
+  case CheckInitSProps:
+  case ContArIncIdx:
+  case ContArIncKey:
+  case ContArUpdateIdx:
+  case ContValid:
   case IncProfCounter:
   case IncStat:
   case IncStatGrouped:
@@ -957,7 +961,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupClsRDSHandle:
   case CoerceCellToDbl:
   case CoerceCellToInt:
-    return IrrelevantEffects {};
+    return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
   case CheckStaticLocInit:
@@ -975,7 +979,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VectorHasImmCopy:
   case CheckPackedArrayBounds:
   case LdColArray:
-    return IrrelevantEffects {};
+    return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that can re-enter the VM and touch most heap things.  They
@@ -989,7 +993,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       // Could re-enter to run a destructor.
       return may_reenter(may_load_store(AEmpty, AEmpty));
     }
-    return IrrelevantEffects {};
+    return may_load_store(AEmpty, AEmpty);
 
   case LdArrFPushCuf:  // autoloads
   case LdArrFuncCtx:   // autoloads

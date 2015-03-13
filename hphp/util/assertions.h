@@ -57,12 +57,8 @@
   }                                              \
 } while(0)
 
-template<typename T>
-T bad_value() {
-  not_reached();
-}
-
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -91,40 +87,57 @@ void register_assert_fail_logger(AssertFailLogger);
  * Stack-allocated detailed assertion logger.
  */
 struct AssertDetailImpl {
-  explicit AssertDetailImpl(const char* name) : m_name(name) {
-    m_next = s_head;
-    s_head = this;
-  }
-  AssertDetailImpl(const AssertDetailImpl&) = delete;
-
-  virtual std::string run() = 0;
-
-  friend void assert_log_failure(const char* title, const std::string& msg);
-  friend void assert_log_detail(AssertDetailImpl*);
+  /*
+   * Prints the results of all registered detailers to stderr.
+   */
+  static void log();
 
 protected:
-  ~AssertDetailImpl() { s_head = m_next; }
+  explicit AssertDetailImpl(const char* name)
+    : m_name(name)
+    , m_next(s_head)
+  {
+#ifndef NDEBUG
+    if (m_name == nullptr) std::abort();
+#endif
+    s_head = this;
+  }
+  ~AssertDetailImpl() { if (m_name) s_head = m_next; }
 
   AssertDetailImpl(AssertDetailImpl&& other) noexcept {
-    assert(this == s_head);
+#ifndef NDEBUG
+    if (s_head != &other) std::abort();
+#endif
+    m_name = other.m_name;
     m_next = other.m_next;
+    s_head = this;
+    other.m_name = nullptr; // prevents ~other from messing it up
   }
 
+  AssertDetailImpl(const AssertDetailImpl&) = delete;
+  AssertDetailImpl& operator=(const AssertDetailImpl&) = delete;
+
 private:
+  static void log_impl(const AssertDetailImpl*);
+  virtual std::string run() const = 0;
+
+private:
+  static __thread AssertDetailImpl* s_head;
+
   const char* m_name;
   AssertDetailImpl* m_next{nullptr};
-
-  static __thread AssertDetailImpl* s_head;
 };
 
 template<class F>
 struct AssertDetailT final : AssertDetailImpl {
-  AssertDetailT(const char* name_, F&& f)
-    : AssertDetailImpl(name_)
+  AssertDetailT(const char* name, F&& f)
+    : AssertDetailImpl(name)
     , m_f(std::move(f))
   {}
   AssertDetailT(AssertDetailT&&) = default;
-  std::string run() override { return m_f(); }
+
+private:
+  std::string run() const override { return m_f(); }
 
 private:
   F m_f;
@@ -192,7 +205,6 @@ struct FailedAssertion : std::exception {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 
 #define assert_impl(cond, fail) \
   ((cond) ? static_cast<void>(0) : ((fail), static_cast<void>(0)))
@@ -237,5 +249,7 @@ const bool do_assert =
   ;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+}
 
 #endif

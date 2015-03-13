@@ -106,8 +106,6 @@ struct BackEnd : public jit::BackEnd {
                 x64::rVmTl == r12 &&
                 x64::rStashedAR == r15,
                 "__enterTCHelper needs to be modified to use the correct ABI");
-  static_assert(REQ_BIND_CALL == 0x0,
-                "Update assembly test for REQ_BIND_CALL in handleSRHelper");
 
   void enterTCHelper(TCA start, ActRec* stashedAR) override {
     // We have to force C++ to spill anything that might be in a callee-saved
@@ -912,6 +910,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     auto const blocks = rpoSortCfg(unit);
     Vasm vasm;
     auto& vunit = vasm.unit();
+    SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
     // create the initial set of vasm numbered the same as hhir blocks.
     for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);

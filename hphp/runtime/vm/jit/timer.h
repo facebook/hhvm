@@ -46,6 +46,7 @@
   TIMER_NAME(vasm_jumps)                        \
   TIMER_NAME(vasm_gen)                          \
   TIMER_NAME(vasm_lower)                        \
+  TIMER_NAME(vasm_copy)                         \
   TIMER_NAME(llvm)                              \
   TIMER_NAME(llvm_irGeneration)                 \
   TIMER_NAME(llvm_optimize)                     \
@@ -56,8 +57,9 @@ namespace HPHP { namespace jit {
 /*
  * Timer is used to track how much CPU time we spend in the different stages of
  * the jit. Typical usage starts and stops timing with construction/destruction
- * of the object, respectively. The end() function may be called to stop timing
- * early, in case it's not reasonable to add a new scope just for timing.
+ * of the object, respectively. The stop() function may be called to stop
+ * timing early, in case it's not reasonable to add a new scope just for
+ * timing.
  *
  * The name given to the constructor may be any string, though by convention
  * any components are separated with underscores. For example, we use Timers
@@ -81,6 +83,7 @@ struct Timer {
   struct Counter {
     int64_t total; // total CPU time, in nanoseconds
     int64_t count; // number of entries for this counter
+    int64_t max;   // longest CPU time, in nanoseconds
 
     int64_t mean() const {
       return total / count;
@@ -90,7 +93,10 @@ struct Timer {
   explicit Timer(Name name);
   ~Timer();
 
-  void end();
+  /*
+   * Stop the timer, and return the elapsed time in nanoseconds.
+   */
+  int64_t stop();
 
   typedef std::vector<std::pair<const char*, Counter>> CounterVec;
   static CounterVec Counters();

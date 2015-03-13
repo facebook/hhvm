@@ -55,13 +55,12 @@ TCA fcallHelper(ActRec* ar, void* sp) {
     if (tca) {
       return tca;
     }
+    /*
+     * If the func is a cloned closure, then the original closure has already
+     * run the prologue, and the prologues array is just being used as entry
+     * points for the dv funclets. Don't run the prologue again.
+     */
     if (!ar->m_func->isClonedClosure()) {
-      /*
-       * If the func is a cloned closure, then the original
-       * closure has already run the prologue, and the prologues
-       * array is just being used as entry points for the
-       * dv funclets. Dont run the prologue again.
-       */
       VMRegAnchor _(ar);
       if (doFCall(ar, vmpc())) {
         return mcg->tx().uniqueStubs.resumeHelperRet;

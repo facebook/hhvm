@@ -31,9 +31,10 @@ using namespace HPHP;
 
 ClassConstant::ClassConstant
 (STATEMENT_CONSTRUCTOR_PARAMETERS, std::string typeConstraint,
- ExpressionListPtr exp, bool abstract)
+ ExpressionListPtr exp, bool abstract, bool typeconst)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassConstant)),
-    m_typeConstraint(typeConstraint), m_exp(exp), m_abstract(abstract) {
+    m_typeConstraint(typeConstraint), m_exp(exp), m_abstract(abstract),
+    m_typeconst(typeconst) {
 }
 
 StatementPtr ClassConstant::clone() {
@@ -87,6 +88,15 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
                                    scope->getOriginalName().c_str(),
                                    name.c_str());
       } else {
+        if (isTypeconst()) {
+          // We do not want type constants to be available at run time.
+          // To ensure this we do not want them to be added to the constants
+          // table. The constants table is used to inline values for expressions
+          // See ClassConstantExpression::preOptimize.
+          // AssignmentExpression::onParseRecur essentially adds constants to
+          // the constant table so we skip it.
+          continue;
+        }
         assignment->onParseRecur(ar, scope);
       }
     }
@@ -127,7 +137,7 @@ void ClassConstant::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
-  if (!isAbstract()) {
+  if (!isAbstract() && !isTypeconst()) {
     for (int i = 0; i < m_exp->getCount(); i++) {
       AssignmentExpressionPtr assignment =
         dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
@@ -176,6 +186,9 @@ void ClassConstant::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("abstract ");
   }
   cg_printf("const ");
+  if (isTypeconst()) {
+    cg_printf("type ");
+  }
   m_exp->outputPHP(cg, ar);
   cg_printf(";\n");
 }

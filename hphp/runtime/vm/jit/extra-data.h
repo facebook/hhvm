@@ -372,16 +372,6 @@ struct PropOffset : IRExtraData {
   int32_t offsetBytes;
 };
 
-struct ProfileStrData : IRExtraData {
-  explicit ProfileStrData(const StringData* key)
-    : key(key)
-  {}
-
-  std::string show() const { return key->data(); }
-
-  const StringData* key;
-};
-
 /*
  * Translation IDs.
  */
@@ -996,7 +986,6 @@ X(InitPackedArrayLoop,          InitPackedArrayLoopData);
 X(InitPackedArray,              IndexData);
 X(ProfilePackedArray,           RDSHandleData);
 X(ProfileStructArray,           RDSHandleData);
-X(ProfileStr,                   ProfileStrData);
 X(LdRDSAddr,                    RDSHandleData);
 X(ClsNeq,                       ClsNeqData);
 X(BaseG,                        MInstrAttrData);

@@ -20,6 +20,8 @@
 #include "hphp/util/bitops.h"
 #include "hphp/vixl/a64/assembler-a64.h"
 
+#include <folly/Optional.h>
+
 namespace HPHP { namespace jit {
 struct Vreg;
 struct Vout;
@@ -159,6 +161,14 @@ struct PhysReg {
       assert(r.n != -1);
       return m_elms[r.n];
     }
+
+    bool operator==(const Map& other) const {
+      for (auto reg : *this) {
+        if ((*this)[reg] != other[reg]) return false;
+      }
+      return true;
+    }
+    bool operator!=(const Map& other) const { return !operator==(other); }
 
     struct iterator {
       PhysReg operator*() const {
@@ -326,6 +336,14 @@ struct RegSet {
     reg = PhysReg(out);
     assert(!retval || (reg.n >= 0 && reg.n < 64));
     return retval;
+  }
+
+  PhysReg findFirst() const {
+    uint64_t out;
+    if (ffs64(m_bits, out)) {
+      return PhysReg(out);
+    }
+    return InvalidReg;
   }
 
   bool findLast(PhysReg& reg) {

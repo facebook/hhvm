@@ -44,6 +44,7 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   , m_op(inst->m_op)
   , m_numSrcs(inst->m_numSrcs)
   , m_numDsts(inst->m_numDsts)
+  , m_hasTypeParam{inst->m_hasTypeParam}
   , m_marker(inst->m_marker)
   , m_id(id)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
@@ -76,13 +77,14 @@ std::string IRInstruction::toString() const {
 void IRInstruction::convertToNop() {
   if (hasEdges()) clearEdges();
   IRInstruction nop(Nop, marker());
-  m_op        = nop.m_op;
-  m_typeParam = nop.m_typeParam;
-  m_numSrcs   = nop.m_numSrcs;
-  m_srcs      = nop.m_srcs;
-  m_numDsts   = nop.m_numDsts;
-  m_dst       = nop.m_dst;
-  m_extra     = nullptr;
+  m_op           = nop.m_op;
+  m_typeParam    = nop.m_typeParam;
+  m_numSrcs      = nop.m_numSrcs;
+  m_srcs         = nop.m_srcs;
+  m_numDsts      = nop.m_numDsts;
+  m_hasTypeParam = nop.m_hasTypeParam;
+  m_dst          = nop.m_dst;
+  m_extra        = nullptr;
 }
 
 void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
@@ -93,6 +95,7 @@ void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
 
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
+  m_hasTypeParam = other->m_hasTypeParam;
   m_numSrcs = other->m_numSrcs;
   m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
   m_srcs = new (arena) SSATmp*[m_numSrcs];
@@ -316,14 +319,6 @@ Type builtinReturn(const IRInstruction* inst) {
 }
 
 } // namespace
-
-namespace TypeNames {
-#define IRT(name, ...) UNUSED const Type name = Type::name;
-#define IRTP(name, ...) IRT(name)
-  IR_TYPES
-#undef IRT
-#undef IRTP
-};
 
 Type outputType(const IRInstruction* inst, int dstId) {
   using namespace TypeNames;

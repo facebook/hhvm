@@ -23,13 +23,13 @@ typedef std::unordered_map
 
 static NativePropHandlerMap s_nativePropHandlerMap;
 
-void registerNativePropHandler(const StringData* className,
+void registerNativePropHandler(const String& className,
                                NativePropHandler::GetFunc get,
                                NativePropHandler::SetFunc set,
                                NativePropHandler::IssetFunc isset,
                                NativePropHandler::UnsetFunc unset) {
 
-  assert(s_nativePropHandlerMap.find(className) ==
+  assert(s_nativePropHandlerMap.find(className.get()) ==
     s_nativePropHandlerMap.end());
 
   NativePropHandler propHandler;
@@ -38,11 +38,11 @@ void registerNativePropHandler(const StringData* className,
   propHandler.isset = isset;
   propHandler.unset = unset;
 
-  s_nativePropHandlerMap[className] = propHandler;
+  s_nativePropHandlerMap[className.get()] = propHandler;
 }
 
-NativePropHandler* getNativePropHandler(const StringData* className) {
-  auto it = s_nativePropHandlerMap.find(className);
+NativePropHandler* getNativePropHandler(const String& className) {
+  auto it = s_nativePropHandlerMap.find(className.get());
   if (it == s_nativePropHandlerMap.end()) {
     return nullptr;
   }
@@ -62,31 +62,31 @@ PropAccessorMap::PropAccessorMap(PropAccessor* props,
   }
 }
 
-bool PropAccessorMap::isPropSupported(const StringData* name) {
+bool PropAccessorMap::isPropSupported(const String& name) {
   return lookupProp(name) != end();
 }
 
-Variant (*PropAccessorMap::get(const StringData* name))(ObjectData* this_) {
+Variant (*PropAccessorMap::get(const String& name))(const Object& this_) {
   return (*lookupProp(name))->get;
 }
 
-void (*PropAccessorMap::set(const StringData* name))
-     (ObjectData* this_, Variant& value) {
+void (*PropAccessorMap::set(const String& name))
+     (const Object& this_, Variant& value) {
   return (*lookupProp(name))->set;
 }
 
-bool (*PropAccessorMap::isset(const StringData* name))(ObjectData* this_) {
+bool (*PropAccessorMap::isset(const String& name))(const Object& this_) {
   return (*lookupProp(name))->isset;
 }
 
-void (*PropAccessorMap::unset(const StringData* name))(ObjectData* this_) {
+void (*PropAccessorMap::unset(const String& name))(const Object& this_) {
   return (*lookupProp(name))->unset;
 }
 
 PropAccessorMap::const_iterator PropAccessorMap::lookupProp(
-  const StringData* name) {
+  const String& name) {
   auto pa = PropAccessor {
-    name->data(), nullptr, nullptr, nullptr, nullptr
+    name.data(), nullptr, nullptr, nullptr, nullptr
   };
   return find(&pa);
 }
@@ -94,28 +94,28 @@ PropAccessorMap::const_iterator PropAccessorMap::lookupProp(
 ////////////////////////////////////////////////////////////////////////////////
 // API to call from object-data at property resolution.
 
-Variant getProp(ObjectData* obj, const StringData* name) {
+Variant getProp(const Object& obj, const String& name) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assert(nph);
   assert(nph->get);
   return nph->get(obj, name);
 }
 
-Variant setProp(ObjectData* obj, const StringData* name, Variant& value) {
+Variant setProp(const Object& obj, const String& name, Variant& value) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assert(nph);
   assert(nph->set);
   return nph->set(obj, name, value);
 }
 
-Variant issetProp(ObjectData* obj, const StringData* name) {
+Variant issetProp(const Object& obj, const String& name) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assert(nph);
   assert(nph->isset);
   return nph->isset(obj, name);
 }
 
-Variant unsetProp(ObjectData* obj, const StringData* name) {
+Variant unsetProp(const Object& obj, const String& name) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assert(nph);
   assert(nph->unset);

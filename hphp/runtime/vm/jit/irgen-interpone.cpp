@@ -309,6 +309,10 @@ interpOutputLocals(HTS& env,
           auto const isProp = mcodeIsProp(inst.immVecM[0]);
 
           if (isUnset && isProp) break;
+
+          // NullSafe (Q) props don't change the types of locals.
+          if (inst.immVecM[0] == MQT) break;
+
           auto op = isProp ? SetProp : isUnset ? UnsetElem : SetWithRefElem;
           MInstrEffects effects(op, baseType);
           if (effects.baseValChanged) {

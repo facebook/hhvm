@@ -91,11 +91,15 @@ struct dataflow_worklist {
     return t;
   }
 
-  void push(T t) {
+  /*
+   * Enqueue t. Returns true iff the item was newly inserted.
+   */
+  bool push(T t) {
     assert(t < m_set.size());
-    if (m_set[t]) return;
+    if (m_set[t]) return false;
     m_q.push(t);
     m_set.set(t);
+    return true;
   }
 
 private:

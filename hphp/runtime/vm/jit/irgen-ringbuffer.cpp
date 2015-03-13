@@ -25,7 +25,7 @@ void ringbuffer(HTS& env,
                 Trace::RingBufferType t,
                 const StringData* msg,
                 int level) {
-  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, level)) return;
+  if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
   gen(env, RBTrace, RBTraceData(t, msg));
 }
 

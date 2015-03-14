@@ -2674,6 +2674,7 @@ and static_class_id p env = function
     )
   | CIvar e ->
       let env, ty = expr env e in
+      let env, ty = TUtils.fold_unresolved env ty in
       let _, ty = Env.expand_type env ty in
       let ty =
         match ty with

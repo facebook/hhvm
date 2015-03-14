@@ -1285,22 +1285,29 @@ bool PDOMySqlStatement::nextRowset() {
     return false;
   }
 
-  my_ulonglong row_count;
+  my_ulonglong affected_count;
   if (!m_conn->buffered()) {
     m_result = mysql_use_result(m_server);
-    row_count = 0;
+    affected_count = 0;
   } else {
     m_result = mysql_store_result(m_server);
-    if ((my_ulonglong)-1 == (row_count = mysql_affected_rows(m_server))) {
+    if ((my_ulonglong)-1 == (affected_count = mysql_affected_rows(m_server))) {
       handleError(__FILE__, __LINE__);
       return false;
     }
   }
-
+  row_count = affected_count;
+  
   if (!m_result) {
-    return false;
+    if (mysql_errno(m_server)) {
+      handleError(__FILE__, __LINE__);
+      return false;
+    } else {
+      /* DML queries */
+      return true;
+    }
   }
-
+  
   column_count = (int)mysql_num_fields(m_result);
   m_fields = mysql_fetch_fields(m_result);
   return true;

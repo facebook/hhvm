@@ -31,30 +31,27 @@ struct SSATmp;
 
 /*
  * Module that handles state-independent optimizations, or queries IR for
- * state-independent properties.
- *
- * The optimizations in this module should be those that we can do based only
- * on chasing the use-def chain.  Functions like getStackValue are in here
- * because they are similarly restricted.
+ * state-independent properties.  The optimizations in this module should be
+ * those that we can do based only on chasing the use-def chain.
  *
  * The line of separation between this and other modules is essentially about
  * who needs to know about position-specific state in the IR.  If an
  * optimization is completely stateless (e.g. strength reduction, constant
- * folding, etc) it goes in here, otherwise it goes in IRBuilder or some other
+ * folding, etc) it goes in here; otherwise it goes in IRBuilder or some other
  * pass.
  */
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Simplify performs a number of state-independent optimizations, primarily
+ * simplify() performs a number of state-independent optimizations, primarily
  * forms of copy propagation, constant folding, or removing opcodes that have
  * no effects.
  *
- * The Simplifier recursively invokes itself, so that all instructions returned
+ * simplify() recursively invokes itself, so that all instructions returned
  * from simplify() have been fully simplified themselves.
  *
- * In general, the simplifier transforms one instruction into zero or more
+ * In general, simplify() transforms one instruction into zero or more
  * instructions.  The pair represents the zero or more instructions to replace
  * the input with, plus the SSATmp* to use instead of the input instruction's
  * dst (if any).
@@ -65,11 +62,19 @@ struct SimplifyResult {
 };
 SimplifyResult simplify(IRUnit&, const IRInstruction*, bool typesMightRelax);
 
+/*
+ * Instruction stream modifying simplification routine.
+ *
+ * This version of simplify() expects an instruction in the IRUnit's CFG as
+ * input, and replaces it with the simplified instruction stream, preserving
+ * the integrity of the containing Block's forward iterators.
+ */
+void simplify(IRUnit&, IRInstruction*);
+
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Propagate very simple copies on the given instruction.
- * Specifically, Movs.
+ * Propagate very simple copies through Mov instructions.
  *
  * More complicated copy-propagation is performed in the Simplifier.
  */

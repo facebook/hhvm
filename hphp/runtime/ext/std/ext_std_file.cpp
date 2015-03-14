@@ -1676,19 +1676,23 @@ Variant HHVM_FUNCTION(glob,
                   nullptr,
                   &globbuf);
   if (nret == GLOB_NOMATCH) {
+    globfree(&globbuf);
     return empty_array();
   }
 
   if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
     if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
       if (!HHVM_FN(is_dir)(work_pattern)) {
+        globfree(&globbuf);
         return false;
       }
     }
+    globfree(&globbuf);
     return empty_array();
   }
 
   if (nret) {
+    globfree(&globbuf);
     return false;
   }
 

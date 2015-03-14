@@ -627,8 +627,10 @@ const int UserTokenId_T_ONUMBER = 431;
 const int UserTokenId_T_POW = 432;
 const int UserTokenId_T_POW_EQUAL = 433;
 const int UserTokenId_T_NULLSAFE_OBJECT_OPERATOR = 434;
-const int UserTokenId_T_HASHBANG = 435;
-const int MaxUserTokenId = 436; // Marker, not a real user token ID
+// Map T_HASHBANG to T_INLINE_HTML for Zend compatibility
+const int UserTokenId_T_HASHBANG = UserTokenId_T_INLINE_HTML;
+// Marker, not a real user token ID
+const int MaxUserTokenId = 436;
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

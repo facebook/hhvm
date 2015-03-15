@@ -573,7 +573,7 @@ bool FrameStateMgr::hasStateFor(Block* block) const {
 
 void FrameStateMgr::startBlock(Block* block,
                                BCMarker marker,
-                               bool isLoopHeader /* = false */) {
+                               bool hasUnprocessedPred /* = false */) {
   ITRACE(3, "FrameStateMgr::startBlock: {}\n", block->id());
   assert(m_status != Status::None);
   auto const it = m_states.find(block);
@@ -606,11 +606,11 @@ void FrameStateMgr::startBlock(Block* block,
   // fixed-point.
   if (m_status == Status::RunningFixedPoint) return;
 
-  // Reset state if the block is the target of a back edge.
-  if (isLoopHeader) {
+  // Reset state if the block has any predecessor that we haven't processed yet.
+  if (hasUnprocessedPred) {
     Indent _;
     ITRACE(4, "B{} is a loop header; resetting state\n", block->id());
-    loopHeaderClear(marker);
+    clearForUnprocessedPred(marker);
   }
 }
 
@@ -728,8 +728,8 @@ bool FrameStateMgr::checkInvariants() const {
  * We do not support unprocessed predecessors from different frames.  fpValue
  * must be the same, so it is not cleared.
  */
-void FrameStateMgr::loopHeaderClear(BCMarker marker) {
-  FTRACE(1, "loopHeaderClear\n");
+void FrameStateMgr::clearForUnprocessedPred(BCMarker marker) {
+  FTRACE(1, "clearForUnprocessedPred\n");
 
   /*
    * Important note: we're setting our tracked spOffset to the marker spOffset.
@@ -740,16 +740,18 @@ void FrameStateMgr::loopHeaderClear(BCMarker marker) {
    * now.  The distinction between the kinds of spOffsets will go away after we
    * stop threading stack pointers.
    */
+  assert(cur().fpValue == marker.fp());
   cur().spOffset       = marker.spOff();
   cur().spValue        = nullptr;
   cur().curFunc        = marker.func();
   cur().stackDeficit   = 0;
   cur().evalStack      = EvalStack();
 
-  // In HHBC, stacks should always be empty when we are at a loop header, which
-  // is the only situation we currently create loops.  We might as well clear
-  // the stack state though, since it's logically the thing to do.
+  // Forget any information about stack values in memory. Note that
+  // the stack must be fully sync'ed to memory at merge points.
   for (auto& state : m_stack) {
+    assert(state.evalStack.empty());
+    assert(state.stackDeficit == 0);
     for (auto& stk : state.memoryStack) {
       stk = StackState{};
     }

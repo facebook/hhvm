@@ -248,14 +248,13 @@ struct FrameStateMgr final : private LocalStateHook {
   bool hasStateFor(Block*) const;
 
   /*
-   * Starts tracking state for a block and reloads any previously saved
-   * state. Can set local values to null if hitting a block with an
-   * unprocessed predecessor, so we pass in an optional LocalStateHook. The
-   * isLoopHeader parameter is used during initial IR generation to indicate
-   * that the given block has a predecessor in the region that might not yet
-   * be linked into the IR cfg.
+   * Starts tracking state for a block and reloads any previously
+   * saved state.  The `hasUnprocessedPred' argument is used during
+   * initial IR generation to indicate that the given block has a
+   * predecessor in the region that might not yet be linked into the
+   * IR CFG.
    */
-  void startBlock(Block* b, BCMarker marker, bool isLoopHeader = false);
+  void startBlock(Block* b, BCMarker marker, bool hasUnprocessedPred = false);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -385,7 +384,7 @@ private:
   jit::vector<LocalState>& locals(unsigned inlineIdx);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
-  void loopHeaderClear(BCMarker);
+  void clearForUnprocessedPred(BCMarker);
   StackState& stackState(IRSPOffset offset);
   const StackState& stackState(IRSPOffset offset) const;
   void collectPostConds(Block* exitBlock);

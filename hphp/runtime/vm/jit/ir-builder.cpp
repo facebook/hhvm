@@ -1116,16 +1116,20 @@ void IRBuilder::setCurMarker(BCMarker newMarker) {
   m_curMarker = newMarker;
 }
 
+bool IRBuilder::canStartBlock(Block* block) const {
+  return m_state.hasStateFor(block);
+}
+
 bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
-                           bool isLoopHeader) {
+                           bool hasUnprocessedPred) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
   if (block == m_curBlock) return true;
 
-  // Return false if we don't have a state for block. This can happen
-  // when trying to start a region block that turned out to be unreachable.
-  if (!m_state.hasStateFor(block)) return false;
+  // Return false if we don't have a FrameState saved for `block' yet
+  // -- meaning it isn't reachable from the entry block yet.
+  if (!canStartBlock(block)) return false;
 
   // There's no reason for us to be starting on the entry block when it's not
   // our current block.
@@ -1138,7 +1142,7 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_state.finishBlock(m_curBlock);
   m_curBlock = block;
 
-  m_state.startBlock(m_curBlock, marker, isLoopHeader);
+  m_state.startBlock(m_curBlock, marker, hasUnprocessedPred);
   if (sp() == nullptr) {
     always_assert(RuntimeOption::EvalHHIRBytecodeControlFlow);
     // XXX(t2288359): This can go away once we don't redefine StkPtrs mid-trace.

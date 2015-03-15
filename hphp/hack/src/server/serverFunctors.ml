@@ -27,13 +27,17 @@ module type SERVER_PROGRAM = sig
   val preinit : unit -> unit
   val init : genv -> env -> env
   val run_once_and_exit : genv -> env -> unit
+  (* filter a single updated file path *)
   val filter_update : genv -> env -> Relative_path.t -> bool
+  (* filter and relativize updated file paths *)
+  val process_updates : genv -> env -> SSet.t -> Relative_path.Set.t
   val recheck: genv -> env -> Relative_path.Set.t -> env
   val infer: env -> (ServerMsg.file_input * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
+  val get_watch_paths: ServerArgs.options -> Path.path list
   val name: string
-  val config_filename : Relative_path.t
+  val config_filename : unit -> Relative_path.t
   val load_config : unit -> ServerConfig.t
   val validate_config : genv -> bool
   val get_errors: ServerEnv.env -> Errors.t
@@ -49,7 +53,11 @@ end
 (*****************************************************************************)
 
 module MainInit : sig
-  val go: Path.path -> (unit -> env) -> env
+  val go:
+    Path.path ->        (* server root - one server at a time per root *)
+    Path.path list ->   (* other watched paths *)
+    (unit -> env) ->    (* init function to run while we have init lock *)
+    env
 end = struct
 
   let other_server_running() =
@@ -76,13 +84,15 @@ end = struct
     ()
 
   (* This code is only executed when the options --check is NOT present *)
-  let go root init_fun =
+  let go root watch_paths init_fun =
     let t = Unix.gettimeofday () in
     grab_lock root;
     init_message();
     grab_init_lock root;
+    (* note: we only run periodical tasks on the root, not extras *)
     ServerPeriodical.init root;
-    ServerDfind.dfind_init root;
+    (* watch root and extra paths *)
+    ServerDfind.dfind_init (root :: watch_paths);
     let env = init_fun () in
     release_init_lock root;
     ready_message ();
@@ -118,18 +128,17 @@ end = struct
       ServerHealth.check();
       ServerPeriodical.call_before_sleeping();
       let has_client = sleep_and_check socket in
-      let updates = ServerDfind.get_updates root in
-      let updates = Relative_path.relativize_set Relative_path.Root updates in
-      if Relative_path.Set.mem Program.config_filename updates &&
+      let updates = ServerDfind.get_updates () in
+      let updates = Program.process_updates genv !env updates in
+      let config = Program.config_filename () in
+      if Relative_path.Set.mem config updates &&
         not (Program.validate_config genv) then begin
         Printf.fprintf stderr
           "%s changed in an incompatible way; please restart %s.\n"
-          (Relative_path.suffix Program.config_filename)
+          (Relative_path.suffix config)
           Program.name;
         exit 4;
       end;
-      let updates =
-        Relative_path.Set.filter (Program.filter_update genv !env) updates in
       env := Program.recheck genv !env updates;
       if has_client then Program.handle_connection genv !env socket;
     done
@@ -242,7 +251,8 @@ end = struct
       Option.iter (ServerArgs.save_filename genv.options) (save genv env);
       Program.run_once_and_exit genv env
     else
-      let env = MainInit.go root program_init in
+      let watch_paths = Program.get_watch_paths options in
+      let env = MainInit.go root watch_paths program_init in
       let socket = Socket.init_unix_socket root in
       serve genv env socket
 

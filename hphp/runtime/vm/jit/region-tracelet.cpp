@@ -164,9 +164,11 @@ RegionDescPtr RegionFormer::go() {
       irgen::assertTypeLocation(m_hts, lt.location, t);
       m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
     } else {
-      irgen::guardTypeLocation(m_hts, lt.location, t, true /* outerOnly */);
+      irgen::checkTypeLocation(m_hts, lt.location, t, m_ctx.bcOffset,
+                               true /* outerOnly */);
     }
   }
+  irgen::gen(m_hts, EndGuards);
 
   while (true) {
     assert(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
@@ -580,6 +582,38 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
   }
 
   return true;
+}
+
+
+typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
+/*
+ * For every instruction in trace representing a tracelet guard, call func with
+ * its location and type.
+ */
+void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
+  using L = RegionDesc::Location;
+  auto blocks = rpoSortCfg(unit);
+  for (auto* block : blocks) {
+    for (auto const& inst : *block) {
+      switch (inst.op()) {
+        case EndGuards:
+          return;
+        case HintLocInner:
+        case CheckLoc:
+          func(L::Local{inst.extra<LocalId>()->locId}, inst.typeParam());
+          break;
+        case HintStkInner:
+        case CheckStk:
+        {
+          auto bcSpOffset = inst.extra<RelOffsetData>()->bcSpOffset;
+          auto offsetFromFp = inst.marker().spOff() - bcSpOffset;
+          func(L::Stack{offsetFromFp}, inst.typeParam());
+          break;
+        }
+        default: break;
+      }
+    }
+  }
 }
 
 /*

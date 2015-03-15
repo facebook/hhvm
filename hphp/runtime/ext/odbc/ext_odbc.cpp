@@ -17,7 +17,7 @@
 
 #ifdef HAVE_UODBC
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include <sql.h>
 #include <sqlext.h>

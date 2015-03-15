@@ -44,6 +44,12 @@ void optimizeStores(IRUnit&);
 void eliminateDeadCode(IRUnit&);
 
 /*
+ * For debugging, we can run this pass, which inserts various sanity checking
+ * assertion instructions.
+ */
+void insertAsserts(IRUnit&);
+
+/*
  * Run all the optimization passes.
  */
 void optimize(IRUnit& unit, IRBuilder& builder, TransKind kind);

@@ -24,12 +24,23 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include <algorithm>
+#include <cstdint>
 
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 
 namespace {
+
+jit::vector<uint32_t> count_predecessors(Vunit& unit) {
+  auto ret = jit::vector<uint32_t>(unit.blocks.size(), 0);
+  PostorderWalker{unit}.dfs([&] (Vlabel b) {
+    for (auto& s : succs(unit.blocks[b])) {
+      ++ret[s];
+    }
+  });
+  return ret;
+}
 
 /*
  * Return true if block b matches one of these patterns:
@@ -103,17 +114,21 @@ bool match_bindjcc1st(const Vunit& unit, Vlabel t0, Vlabel t1) {
  * and the original bindjmp's dest.
  */
 void optimizeExits(Vunit& unit) {
+  auto const pred_counts = count_predecessors(unit);
+
   PostorderWalker{unit}.dfs([&](Vlabel b) {
     auto& code = unit.blocks[b].code;
     assert(!code.empty());
     if (code.back().op != Vinstr::jcc) return;
 
-    auto ijcc = code.back().jcc_;
-    auto t0 = ijcc.targets[0], t1 = ijcc.targets[1];
+    auto const ijcc = code.back().jcc_;
+    auto const t0 = ijcc.targets[0];
+    auto const t1 = ijcc.targets[1];
     if (t0 == t1) {
       code.back() = jmp{t0};
       return;
     }
+    if (pred_counts[t0] != 1 || pred_counts[t1] != 1) return;
 
     // copy all but the last instruction in blocks[t] to just before
     // the last instruction in code.
@@ -165,7 +180,7 @@ void optimizeJmps(Vunit& unit) {
   jit::vector<int> npreds(unit.blocks.size(), 0);
   do {
     if (changed) {
-      fill(npreds.begin(), npreds.end(), 0);
+      std::fill(begin(npreds), end(npreds), 0);
     }
     changed = false;
     PostorderWalker{unit}.dfs([&](Vlabel b) {

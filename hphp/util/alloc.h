@@ -108,6 +108,27 @@ struct OutOfMemoryException : Exception {
 #ifdef USE_JEMALLOC
 extern unsigned low_arena;
 extern std::atomic<int> low_huge_pages;
+
+inline int low_mallocx_flags() {
+  // Allocate from low_arena, and bypass the implicit tcache to assure that the
+  // result actually comes from low_arena.
+#ifdef MALLOCX_TCACHE_NONE
+  return MALLOCX_ARENA(low_arena)|MALLOCX_TCACHE_NONE;
+#else
+  return MALLOCX_ARENA(low_arena);
+#endif
+}
+
+inline int low_dallocx_flags() {
+#ifdef MALLOCX_TCACHE_NONE
+  // Bypass the implicit tcache for this deallocation.
+  return MALLOCX_TCACHE_NONE;
+#else
+  // Prior to the introduction of MALLOCX_TCACHE_NONE, explicitly specifying
+  // MALLOCX_ARENA(a) caused jemalloc to bypass tcache.
+  return MALLOCX_ARENA(low_arena);
+#endif
+}
 #endif
 
 inline void* low_malloc(size_t size) {
@@ -123,7 +144,7 @@ inline void low_free(void* ptr) {
 #ifndef USE_JEMALLOC
   free(ptr);
 #else
-  dallocx(ptr, MALLOCX_ARENA(low_arena));
+  dallocx(ptr, low_dallocx_flags());
 #endif
 }
 

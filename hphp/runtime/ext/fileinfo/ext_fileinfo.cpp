@@ -18,7 +18,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 

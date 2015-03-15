@@ -35,7 +35,7 @@
 
 namespace HPHP { namespace jit {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(simplify);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -127,34 +127,113 @@ DEBUG_ONLY bool validate(const State& env,
     return false;
   };
 
+  // Return early for the no-simplification case.
+  if (env.newInsts.empty() && !newDst) {
+    return true;
+  }
+
+  const IRInstruction* last = nullptr;
+
   if (!env.newInsts.empty()) {
-    for (auto& newInst : env.newInsts) {
+    for (size_t i = 0, n = env.newInsts.size(); i < n; ++i) {
+      auto newInst = env.newInsts[i];
+
       for (auto& src : newInst->srcs()) {
         always_assert_flog(
           known_available(src),
           "A simplification rule produced an instruction that used a value "
           "that wasn't known to be available:\n"
           "  original inst: {}\n"
-          "  new inst     : {}\n"
-          "  src          : {}\n",
+          "  new inst:      {}\n"
+          "  src:           {}\n",
           origInst->toString(),
           newInst->toString(),
           src->toString()
         );
       }
+
+      if (i == n - 1) {
+        last = newInst;
+        continue;
+      }
+
+      always_assert_flog(
+        !newInst->isBlockEnd(),
+        "Block-ending instruction produced in the middle of a simplified "
+        "instruction stream:\n"
+        "  original inst: {}\n"
+        "  new inst:      {}\n",
+        origInst->toString(),
+        newInst->toString()
+      );
     }
-    return true;
   }
 
   if (newDst) {
+    const bool available = known_available(newDst) ||
+      std::any_of(env.newInsts.begin(), env.newInsts.end(),
+                  [&] (IRInstruction* inst) { return newDst == inst->dst(); });
+
     always_assert_flog(
-      known_available(newDst),
-      "simplifier produced a new destination that wasn't known to be "
+      available,
+      "Simplifier produced a new destination that wasn't known to be "
       "available:\n"
       "  original inst: {}\n"
       "  new dst:       {}\n",
       origInst->toString(),
       newDst->toString()
+    );
+  }
+
+  if (!last) return true;
+
+  auto assert_last = [&] (bool cond, const char* msg) {
+    always_assert_flog(
+      cond,
+      "{}:\n"
+      "  original inst: {}\n"
+      "  last new inst: {}\n",
+      msg,
+      origInst->toString(),
+      last->toString()
+    );
+  };
+
+  assert_last(
+    !origInst->naryDst(),
+    "Nontrivial simplification returned for instruction with NaryDest"
+  );
+
+  assert_last(
+    origInst->hasDst() == (bool)newDst,
+    "HasDest mismatch between input and output"
+  );
+
+  assert_last(
+    IMPLIES(last->isBlockEnd(), origInst->isBlockEnd()),
+    "Block-end instruction produced for simplification of non-block-end "
+    "instruction"
+  );
+
+  if (last->hasEdges()) {
+    assert_last(
+      origInst->hasEdges(),
+      "Instruction with edges produced for simplification of edge-free "
+      "instruction"
+    );
+
+    assert_last(
+      IMPLIES(last->next(), last->next() == origInst->next() ||
+                            last->next() == origInst->taken()),
+      "Last instruction of simplified stream has next edge not reachable from "
+      "the input instruction"
+    );
+
+    assert_last(
+      IMPLIES(last->taken(), last->taken() == origInst->next() ||
+                             last->taken() == origInst->taken()),
+      "Last instruction of simplified stream has taken edge not reachable "
+      "from the input instruction"
     );
   }
 
@@ -1969,8 +2048,97 @@ SimplifyResult simplify(IRUnit& unit,
                         bool typesMightRelax) {
   auto env = State { unit, typesMightRelax };
   auto const newDst = simplifyWork(env, origInst);
+
   assert(validate(env, newDst, origInst));
+
   return SimplifyResult { std::move(env.newInsts), newDst };
+}
+
+void simplify(IRUnit& unit, IRInstruction* origInst) {
+  assert(!origInst->isTransient());
+
+  copyProp(origInst);
+  auto res = simplify(unit, origInst, false);
+
+  // No simplification occurred; nothing to do.
+  if (res.instrs.empty() && !res.dst) return;
+
+  FTRACE(1, "simplifying: {}\n", origInst->toString());
+
+  if (origInst->isBlockEnd()) {
+    auto const next = origInst->block()->next();
+
+    if (res.instrs.empty() || !res.instrs.back()->isBlockEnd()) {
+      // Our block-end instruction was eliminated (most likely a Jmp* converted
+      // to a Nop).  Replace it with a Jmp to the next block.
+      res.instrs.push_back(unit.gen(Jmp, origInst->marker(), next));
+    }
+
+    auto last = res.instrs.back();
+    assert(last->isBlockEnd());
+
+    if (!last->isTerminal() && !last->next()) {
+      // We converted the block-end instruction to a different one.  Set its
+      // next block appropriately.
+      last->setNext(next);
+    }
+  }
+
+  size_t out_size = 0;
+  bool need_mov = res.dst;
+  IRInstruction* last = nullptr;
+
+  for (auto inst : res.instrs) {
+    if (inst->is(Nop)) continue;
+
+    ++out_size;
+    last = inst;
+
+    if (res.dst && res.dst == inst->dst()) {
+      // One of the new instructions produced the new dst.  Since we're going
+      // to drop `origInst', just use origInst->dst() instead.
+      inst->setDst(origInst->dst());
+      inst->dst()->setInstruction(inst);
+      need_mov = false;
+    }
+  }
+
+  auto const block = origInst->block();
+  auto const pos = ++block->iteratorTo(origInst);
+
+  if (need_mov) {
+    unit.replace(origInst, Mov, res.dst);
+
+    // Force the existing dst type to match that of `res.dst'.
+    origInst->dst()->setType(res.dst->type());
+  } else {
+    if (out_size == 1) {
+      assert(origInst->dst() == last->dst());
+      FTRACE(1, "    {}\n", last->toString());
+
+      // We only have a single instruction, so just become it.
+      origInst->become(unit, last);
+
+      // Make sure to reset our dst's inst pointer, if we have one.  (It may
+      // have been set to `last'.
+      if (origInst->dst()) {
+        origInst->dst()->setInstruction(origInst);
+      }
+
+      // And we also need to kill `last', to update preds.
+      last->convertToNop();
+      return;
+    }
+    origInst->convertToNop();
+  }
+
+  FTRACE(1, "    {}\n", origInst->toString());
+
+  for (auto const inst : res.instrs) {
+    if (inst->is(Nop)) continue;
+    block->insert(pos, inst);
+    FTRACE(1, "    {}\n", inst->toString());
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

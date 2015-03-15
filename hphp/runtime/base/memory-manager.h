@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/sweepable.h"
 
 // used for mmapping contiguous heap space
 // If used, anonymous pages are not cleared when mapped with mmap. It is not
@@ -434,7 +435,6 @@ struct ContiguousHeap : BigHeap {
   void  createRequestHeap();
 };
 
-
 struct MemoryManager {
   /*
    * Lifetime managed with a ThreadLocalSingleton.  Use MM() to access
@@ -664,12 +664,13 @@ struct MemoryManager {
 
   /*
    * Methods for maintaining dedicated sweep lists of sweepable NativeData
-   * objects, and APCLocalArray instances.
+   * objects, APCLocalArray instances, and Sweepables.
    */
   void addNativeObject(NativeNode*);
   void removeNativeObject(NativeNode*);
   void addApcArray(APCLocalArray*);
   void removeApcArray(APCLocalArray*);
+  void addSweepable(Sweepable*);
 
   /*
    * Iterating the memory manager tracked objects.
@@ -774,6 +775,12 @@ private:
   BigHeap::iterator end();
 
 private:
+  struct SweepableList: Sweepable {
+    SweepableList() : Sweepable(Init{}) {}
+    void sweep() {}
+  };
+
+private:
   TRACE_SET_MOD(smartalloc);
 
   void* m_front;
@@ -788,6 +795,7 @@ private:
   BigHeap m_heap;
 #endif
   std::vector<NativeNode*> m_natives;
+  SweepableList m_sweepables;
 
   bool m_sweeping;
   bool m_statsIntervalActive;

@@ -48,6 +48,11 @@ TEST(IniSetting, ini_iterate) {
   value = value->get_ptr("1");
   value = ini_iterate(*value, "ip.allow.2");
   EXPECT_EQ(nullptr, value);
+  value = ini_iterate(nullptr, "hhvm.ip_block_map");
+  EXPECT_EQ(nullptr, value);
+  value = ini_iterate(ini, "hhvm.ip_block_map");
+  EXPECT_EQ(true, value->isObject());
+  EXPECT_EQ(2, value->size());
 
   // Check some runtime options
   EXPECT_EQ(22222222, RuntimeOption::EvalJitAColdSize);

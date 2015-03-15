@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_ASIO_ASYNC_FUNCTION_WAIT_HANDLE_H_
 #define incl_HPHP_EXT_ASIO_ASYNC_FUNCTION_WAIT_HANDLE_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/resumable.h"

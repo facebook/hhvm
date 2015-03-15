@@ -83,22 +83,18 @@ SSATmp* cns(HTS& env, Args&&... args) {
  * RegionDesc::Location::Stack needs some fixes first.
  */
 void assertTypeStack(HTS&, BCSPOffset, Type);
-void checkTypeStack(HTS&, BCSPOffset, Type, Offset dest);
+void checkTypeStack(HTS&, BCSPOffset, Type, Offset dest, bool outerOnly);
 void assertTypeLocation(HTS&, const RegionDesc::Location&, Type);
-void checkTypeLocation(HTS&, const RegionDesc::Location&, Type, Offset dest);
-void guardTypeLocation(HTS&, const RegionDesc::Location& loc, Type,
-  bool outerOnly);
+void checkTypeLocation(HTS&, const RegionDesc::Location&, Type, Offset dest,
+                       bool outerOnly);
 
 /*
- * Special type of guards for param-passing reffiness.  These guards/checks are
- * needed when an FPush* instruction is in a different region from its FCall,
- * and we don't know statically whether the callee will want arguments by
- * reference.
+ * Special type of guards for param-passing reffiness. These checks are needed
+ * when an FPush* instruction is in a different region from its FCall, and we
+ * don't know statically whether the callee will want arguments by reference.
  */
-void guardRefs(HTS&, int64_t entryArDelta, const std::vector<bool>& mask,
-  const std::vector<bool>& vals);
 void checkRefs(HTS&, int64_t entryArDelta, const std::vector<bool>& mask,
-  const std::vector<bool>& vals, Offset);
+               const std::vector<bool>& vals, Offset);
 
 /*
  * After all initial guards instructions have been emitted, the client of this

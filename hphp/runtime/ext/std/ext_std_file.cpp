@@ -814,12 +814,11 @@ static String resolve_parse_ini_filename(const String& filename) {
   }
 
   // Next, see if include path was set in the ini settings.
-  auto const includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.getIncludePaths();
+  auto const& includePaths =
+    ThreadInfo::s_threadInfo->m_reqInjectionData.getIncludePaths();
 
-  unsigned int pathCount = includePaths.size();
-  for (int i = 0; i < (int)pathCount; i++) {
-    resolved = includePaths[i] + '/' + filename;
+  for (auto const& path : includePaths) {
+    resolved = path + '/' + filename;
     if (HHVM_FN(file_exists)(resolved)) {
       return resolved;
     }
@@ -1677,19 +1676,23 @@ Variant HHVM_FUNCTION(glob,
                   nullptr,
                   &globbuf);
   if (nret == GLOB_NOMATCH) {
+    globfree(&globbuf);
     return empty_array();
   }
 
   if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
     if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
       if (!HHVM_FN(is_dir)(work_pattern)) {
+        globfree(&globbuf);
         return false;
       }
     }
+    globfree(&globbuf);
     return empty_array();
   }
 
   if (nret) {
+    globfree(&globbuf);
     return false;
   }
 

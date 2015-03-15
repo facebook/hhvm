@@ -18,7 +18,7 @@
 #ifndef incl_EXT_FILTER_H_
 #define incl_EXT_FILTER_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

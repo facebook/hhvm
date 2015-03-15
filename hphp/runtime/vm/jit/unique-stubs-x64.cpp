@@ -118,6 +118,7 @@ void emitResumeInterpHelpers(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.main() };
   moveToAlign(mcg->code.main());
   Label resumeHelper;
+  Label resumeRaw;
 
   uniqueStubs.interpHelper = a.frontier();
   a.    storeq (argNumToRegName[0], rVmTl[rds::kVmpcOff]);
@@ -135,6 +136,7 @@ asm_label(a, resumeHelper);
   a.    loadq (rVmTl[rds::kVmfpOff], rVmFp);
   a.    loadq (rip[intptr_t(&mcg)], argNumToRegName[0]);
   a.    call  (TCA(getMethodPtr(&MCGenerator::handleResume)));
+asm_label(a, resumeRaw);
   a.    loadq (rVmTl[rds::kVmspOff], rVmSp);
   a.    loadq (rVmTl[rds::kVmfpOff], rVmFp);
   a.    jmp   (rax);
@@ -150,6 +152,8 @@ asm_label(a, resumeHelper);
     a.  movq(rVmSp, argNumToRegName[1]);
     a.  movl(r32(rAsm), r32(argNumToRegName[2]));
     a.  call(TCA(interpOneEntryPoints[size_t(op)]));
+    a.  testq(rax, rax);
+    a.  jnz(resumeRaw);
     a.  jmp(uniqueStubs.resumeHelper);
 
     uniqueStubs.interpOneCFHelpers[op] = start;
@@ -175,20 +179,22 @@ asm_label(a, resumeHelper);
   emitInterpOneStub(Op::Exit);
 }
 
+void emitThrowSwitchMode(UniqueStubs& uniqueStubs) {
+  Asm a{mcg->code.frozen()};
+  moveToAlign(a.code());
+
+  uniqueStubs.throwSwitchMode = a.frontier();
+  a.    call(TCA(throwSwitchMode));
+  a.    ud2();
+
+  uniqueStubs.add("throwSwitchMode", uniqueStubs.throwSwitchMode);
+}
+
 void emitCatchHelper(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.frozen() };
   moveToAlign(mcg->code.frozen());
-  Label callUnwindResume;
 
   uniqueStubs.endCatchHelper = a.frontier();
-  a.    cmpq (0, rVmTl[unwinderReturnRipOff()]);
-  a.    je8  (callUnwindResume);
-  uniqueStubs.endCatchHelperResumeTC = a.frontier();
-  a.    loadq(rVmTl[rds::kVmspOff], rVmSp);
-  a.    loadq(rVmTl[rds::kVmfpOff], rVmFp);
-  a.    jmp  (rVmTl[unwinderReturnRipOff()]);
-
-asm_label(a, callUnwindResume);
   a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);
   a.    call(TCA(unwindResumeHelper));
 
@@ -563,6 +569,7 @@ UniqueStubs emitUniqueStubs() {
     emitCallToExit,
     emitReturnHelpers,
     emitResumeInterpHelpers,
+    emitThrowSwitchMode,
     emitCatchHelper,
     emitStackOverflowHelper,
     emitFreeLocalsHelpers,

@@ -992,7 +992,7 @@ BoxR    [R:<T>]  ->  [V:<T>]
   If $1 is a cell at run time, this instruction creates a new ref, sets the new
   ref to point at a copy of cell $1, and pushes the ref onto the stack.
 
-BoxRNop   [R:<T>]  ->  [C:<T>]
+BoxRNop   [R:<T>]  ->  [V:<T>]
 
   Box, no op. $1 must be statically known to be boxed.
 
@@ -1228,7 +1228,7 @@ SubO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
 
   Same behavior as Sub, except for when both inputs have type Int and the
   result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$1 - (double)$2.
+  (double)$2 - (double)$1.
 
 MulO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
        [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
@@ -1979,7 +1979,7 @@ FPushObjMethodD <num params> <litstr id>    [C]  ->  []
   method named y. If it does, this instruction pushes a new entry on the FPI
   stack, initializing it with the number of parameters being passed (given by
   %1) and a reference to the FPI structure for the method named y from object
-  %x.
+  x.
 
   If object x does not have an accessible method named y, this instruction
   checks if object x has a __call method. If a __call method is found, this
@@ -2008,11 +2008,10 @@ FPushClsMethodD <num params> <litstr id> <litstr id>    []  ->  []
   the AGetC instruction to convert the name given by %3 into a classref.
 
   If y is not a string, this instruction throws a fatal error. Next, this
-  instruction checks if class x has an accessible method named y. If class x
-  has a method named y. If it does, this instruction pushes a new entry on the
-  FPI stack, initializing it with the number of parameters being passed (given
-  by %1) and a reference to the FPI structure for the method named y from class
-  x.
+  instruction checks if class x has an accessible method named y. If it does, 
+  this instruction pushes a new entry on the FPI stack, initializing it with 
+  the number of parameters being passed (given by %1) and a reference to the 
+  FPI structure for the method named y from class x.
 
   If class x does not have an accessible method named y, this instruction
   checks if the current function's $this is non-null, if the class of $this is
@@ -2752,8 +2751,8 @@ IssetElemL <local variable id>    [B]  ->  [C:Bool]
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
 
-  If y is a string, this operation computes x = (int)x and then it pushes (x >=
-  0 && x < strlen(y)) onto the stack.
+  If y is a string, this operation computes z = (int)x and then it pushes (z >=
+  0 && z < strlen(y)) onto the stack.
 
   If y is a not a string, array, or object, this operation pushes false onto
   the stack.
@@ -3689,7 +3688,8 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
   is initialized in %1:
 
     If the iterator specified by %1 is a non-mutable array iterator or an
-    extension class iterator, these instructions of the current value in %3.
+    extension class iterator, these instructions store a copy of the current 
+    value in %3.
 
     If the iterator specified by %1 is a user class iterator for object $x,
     these instructions store the return value of $x->current() in %3.
@@ -3730,7 +3730,7 @@ MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
 
   If $1 is an object that does not match any of the three cases above, these
   instructions create a mutable default class iterator, rewind it to point to
-  the first accessible property, and store the it in the iterator variable %1.
+  the first accessible property, and store it in the iterator variable %1.
   Then these instructions check if the iterator is at the end, and if it is
   these instructions free the iterator and transfer control to the location
   specified by %2.

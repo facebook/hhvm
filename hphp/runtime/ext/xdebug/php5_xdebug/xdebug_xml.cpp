@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/zend-string.h"
 

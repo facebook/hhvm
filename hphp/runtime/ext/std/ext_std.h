@@ -1,7 +1,7 @@
 #ifndef HPHP_EXT_STD_H
 #define HPHP_EXT_STD_H
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////

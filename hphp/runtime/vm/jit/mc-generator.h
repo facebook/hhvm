@@ -447,6 +447,7 @@ bool shouldPGOFunc(const Func& func);
   TPC(translate) \
   TPC(retranslate) \
   TPC(interp_bb) \
+  TPC(interp_bb_force) \
   TPC(interp_instr) \
   TPC(interp_one) \
   TPC(max_trans) \

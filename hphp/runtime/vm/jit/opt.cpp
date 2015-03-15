@@ -28,85 +28,6 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-// insert inst after definer
-void insertAfter(IRInstruction* definer, IRInstruction* inst) {
-  assert(!definer->isBlockEnd());
-  Block* block = definer->block();
-  auto pos = block->iteratorTo(definer);
-  block->insert(++pos, inst);
-}
-
-/*
- * Insert a DbgAssertRefCount instruction after each place we produce
- * a refcounted value.  The value must be something we can safely dereference
- * to check the _count field.
- */
-void insertRefCountAsserts(IRInstruction& inst, IRUnit& unit) {
-  for (SSATmp& dst : inst.dsts()) {
-    auto const t = dst.type();
-    if (t <= (Type::Counted | Type::StaticStr | Type::StaticArr)) {
-      insertAfter(&inst, unit.gen(DbgAssertRefCount, inst.marker(), &dst));
-    }
-  }
-}
-
-void insertStStkAssert(IRInstruction& inst, IRUnit& unit) {
-  if (!(inst.src(1)->type() <= Type::Gen)) return;
-  auto const addr = unit.gen(
-    LdStkAddr,
-    inst.marker(),
-    Type::PtrToStkGen,
-    IRSPOffsetData { inst.extra<StStk>()->offset },
-    inst.src(0)
-  );
-  auto const block = inst.block();
-  auto pos = block->iteratorTo(&inst);
-  ++pos;
-  block->insert(pos, addr);
-  auto const check = unit.gen(DbgAssertPtr, inst.marker(), addr->dst());
-  block->insert(pos, check);
-}
-
-void insertCallAssert(IRInstruction& inst, IRUnit& unit) {
-  auto const sp = inst.dst();
-  auto const addr = unit.gen(
-    LdStkAddr,
-    inst.marker(),
-    Type::PtrToStkGen,
-    IRSPOffsetData { IRSPOffset{0} },
-    sp
-  );
-  insertAfter(&inst, addr);
-  auto const check = unit.gen(DbgAssertPtr, inst.marker(), addr->dst());
-  insertAfter(addr, check);
-}
-
-void insertAsserts(IRUnit& unit) {
-  postorderWalk(unit, [&](Block* block) {
-    for (auto it = block->begin(); it != block->end();) {
-      auto& inst = *it;
-      ++it;
-      if (inst.op() == StStk) {
-        insertStStkAssert(inst, unit);
-        continue;
-      }
-      if (inst.op() == Call) {
-        insertCallAssert(inst, unit);
-        continue;
-      }
-      if (!inst.isBlockEnd()) {
-        insertRefCountAsserts(inst, unit);
-      }
-    }
-  });
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   Timer _t(Timer::optimize);
 
@@ -198,7 +119,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    doPass(insertAsserts, "RefCnt asserts");
+    doPass(insertAsserts);
   }
 }
 

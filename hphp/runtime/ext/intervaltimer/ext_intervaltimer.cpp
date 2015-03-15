@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/native-data.h"
 
@@ -68,8 +69,7 @@ static StaticString sample_type_string(IntervalTimer::SampleType type) {
 }
 
 void IntervalTimer::RunCallbacks(IntervalTimer::SampleType type) {
-  auto& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
-  data.clearIntervalTimerFlag();
+  clearSurpriseFlag(IntervalTimerFlag);
 
   auto const timers = s_timer_pool->timers;
   for (auto timer : timers) {
@@ -133,7 +133,7 @@ void IntervalTimer::run() {
                                 [this]{ return m_done; });
     if (status) break;
     m_signaled.store(true, std::memory_order_relaxed);
-    m_data->setIntervalTimerFlag();
+    m_data->setFlag(IntervalTimerFlag);
     waitTime = m_interval;
   } while (waitTime != 0.0);
 }

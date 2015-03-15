@@ -106,16 +106,6 @@ using namespace reg;
 using namespace Trace;
 using std::max;
 
-#define TRANS_PERF_COUNTERS \
-  TPC(translate) \
-  TPC(retranslate) \
-  TPC(interp_bb) \
-  TPC(interp_instr) \
-  TPC(interp_one) \
-  TPC(max_trans) \
-  TPC(enter_tc) \
-  TPC(service_req)
-
 #define TPC(n) "jit_" #n,
 static const char* const kPerfCounterNames[] = {
   TRANS_PERF_COUNTERS
@@ -1196,20 +1186,28 @@ TCA MCGenerator::handleResume(bool interpFirst) {
 
   tl_regState = VMRegState::CLEAN;
   auto sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
-  TCA start = interpFirst ? nullptr : getTranslation(TranslArgs(sk, true));
+  TCA start;
+  if (interpFirst) {
+    start = nullptr;
+    INC_TPC(interp_bb_force);
+  } else {
+    start = getTranslation(TranslArgs(sk, true));
+  }
 
   vmJitCalledFrame() = vmfp();
   SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
+
   // If we can't get a translation at the current SrcKey, interpret basic
   // blocks until we end up somewhere with a translation (which we may have
   // created, if the lease holder dropped it).
   while (!start) {
     INC_TPC(interp_bb);
-    HPHP::dispatchBB();
-    if (!vmpc()) {
-      start = m_tx.uniqueStubs.callToExit;
+    if (auto retAddr = HPHP::dispatchBB()) {
+      start = retAddr;
       break;
     }
+
+    assert(vmpc());
     sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
     start = getTranslation(TranslArgs{sk, true});
   }

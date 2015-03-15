@@ -17,13 +17,15 @@
 
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
-#include "hphp/runtime/ext/std/ext_std_function.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <signal.h>
@@ -206,10 +208,9 @@ void Xenon::stop() {
 // If the sample is Enter, then do not record this function name because it
 // hasn't done anything.  The sample belongs to the previous function.
 void Xenon::log(SampleType t) const {
-  RequestInjectionData *rid = &ThreadInfo::s_threadInfo->m_reqInjectionData;
-  if (rid->checkXenonSignalFlag()) {
+  if (getSurpriseFlag(XenonSignalFlag)) {
     if (!RuntimeOption::XenonForceAlwaysOn) {
-      rid->clearXenonSignalFlag();
+      clearSurpriseFlag(XenonSignalFlag);
     }
     TRACE(1, "Xenon::log %s\n", (t == IOWaitSample) ? "IOWait" : "Normal");
     s_xenonData->log(t);
@@ -226,7 +227,8 @@ void Xenon::onTimer() {
 void Xenon::surpriseAll() {
   TRACE(1, "Xenon::surpriseAll\n");
   ThreadInfo::ExecutePerThread(
-    [](ThreadInfo *t) {t->m_reqInjectionData.setXenonSignalFlag();} );
+    [] (ThreadInfo* t) { t->m_reqInjectionData.setFlag(XenonSignalFlag); }
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -276,17 +278,17 @@ void XenonRequestLocalData::requestInit() {
   TRACE(1, "XenonRequestLocalData::requestInit\n");
   m_stackSnapshots = Array::Create();
   if (RuntimeOption::XenonForceAlwaysOn) {
-    ThreadInfo::s_threadInfo->m_reqInjectionData.setXenonSignalFlag();
+    setSurpriseFlag(XenonSignalFlag);
   } else {
-    // clear any Xenon flags that might still be on in this thread so
-    // that we do not have a bias towards the first function
-    ThreadInfo::s_threadInfo->m_reqInjectionData.clearXenonSignalFlag();
+    // Clear any Xenon flags that might still be on in this thread so that we do
+    // not have a bias towards the first function.
+    clearSurpriseFlag(XenonSignalFlag);
   }
 }
 
 void XenonRequestLocalData::requestShutdown() {
   TRACE(1, "XenonRequestLocalData::requestShutdown\n");
-  ThreadInfo::s_threadInfo->m_reqInjectionData.clearXenonSignalFlag();
+  clearSurpriseFlag(XenonSignalFlag);
   m_stackSnapshots.detach();
 }
 

@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/ext/asio/asio_session.h"
@@ -36,12 +37,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_args("args");
-const StaticString s_enter("enter");
-const StaticString s_exit("exit");
-const StaticString s_exception("exception");
-const StaticString s_name("name");
-const StaticString s_return("return");
+const StaticString
+  s_args("args"),
+  s_enter("enter"),
+  s_exit("exit"),
+  s_exception("exception"),
+  s_name("name"),
+  s_return("return");
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p,
@@ -51,48 +53,46 @@ extern void end_profiler_frame(Profiler *p,
                                const char *symbol);
 
 void EventHook::Enable() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.setEventHookFlag();
+  setSurpriseFlag(EventHookFlag);
 }
 
 void EventHook::Disable() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.clearEventHookFlag();
+  clearSurpriseFlag(EventHookFlag);
 }
 
 void EventHook::EnableAsync() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.setAsyncEventHookFlag();
+  setSurpriseFlag(AsyncEventHookFlag);
 }
 
 void EventHook::DisableAsync() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.clearAsyncEventHookFlag();
+  clearSurpriseFlag(AsyncEventHookFlag);
 }
 
 void EventHook::EnableDebug() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerHookFlag();
+  setSurpriseFlag(DebuggerHookFlag);
 }
 
 void EventHook::DisableDebug() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.clearDebuggerHookFlag();
+  clearSurpriseFlag(DebuggerHookFlag);
 }
 
 void EventHook::EnableIntercept() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.setInterceptFlag();
+  setSurpriseFlag(InterceptFlag);
 }
 
 void EventHook::DisableIntercept() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.clearInterceptFlag();
+  clearSurpriseFlag(InterceptFlag);
 }
 
 ssize_t EventHook::CheckSurprise() {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  return check_request_surprise(info);
+  return check_request_surprise();
 }
 
 ssize_t EventHook::GetConditionFlags() {
-  return rds::header()->conditionFlags.load();
+  return surpriseFlags().load();
 }
 
-class ExecutingSetprofileCallbackGuard {
-public:
+struct ExecutingSetprofileCallbackGuard {
   ExecutingSetprofileCallbackGuard() {
     g_context->m_executingSetprofileCallback = true;
   }
@@ -288,11 +288,11 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
 
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
   // User profiler
-  if (flags & RequestInjectionData::EventHookFlag) {
+  if (flags & EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
       runUserProfilerOnFunctionEnter(ar);
     }
-    Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
+    auto profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr &&
         !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
       begin_profiler_frame(profiler,
@@ -301,7 +301,7 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
   }
 
   // Debugger hook
-  if (flags & RequestInjectionData::DebuggerHookFlag) {
+  if (flags & DebuggerHookFlag) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncEntryHook(ar));
   }
 }
@@ -309,13 +309,13 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
                                const Fault* fault, ssize_t flags) {
   // Xenon
-  if (flags & RequestInjectionData::XenonSignalFlag) {
+  if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ExitSample);
   }
 
   // Run IntervalTimer callbacks only if it's safe to do so, i.e., not when
   // there's a pending exception or we're unwinding from a C++ exception.
-  if (flags & RequestInjectionData::IntervalTimerFlag
+  if (flags & IntervalTimerFlag
       && ThreadInfo::s_threadInfo->m_pendingException == nullptr
       && (!fault || fault->m_faultType == Fault::Type::UserException)) {
     IntervalTimer::RunCallbacks(IntervalTimer::ExitSample);
@@ -330,8 +330,8 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   }
 
   // User profiler
-  if (flags & RequestInjectionData::EventHookFlag) {
-    Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
+  if (flags & EventHookFlag) {
+    auto profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr &&
         !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
       // NB: we don't have a function type flag to match what we got in
@@ -357,24 +357,24 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   }
 
   // Debugger hook
-  if (flags & RequestInjectionData::DebuggerHookFlag) {
+  if (flags & DebuggerHookFlag) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncExitHook(ar));
   }
 }
 
 bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
   ssize_t flags = CheckSurprise();
-  if (flags & RequestInjectionData::InterceptFlag &&
+  if (flags & InterceptFlag &&
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {
     return false;
   }
 
   // Xenon
-  if (flags & RequestInjectionData::XenonSignalFlag) {
+  if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::EnterSample);
   }
 
-  if (flags & RequestInjectionData::IntervalTimerFlag) {
+  if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
   }
 
@@ -386,11 +386,11 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
   ssize_t flags = CheckSurprise();
 
   // Xenon
-  if (flags & RequestInjectionData::XenonSignalFlag) {
+  if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ResumeAwaitSample);
   }
 
-  if (flags & RequestInjectionData::IntervalTimerFlag) {
+  if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::ResumeAwaitSample);
   }
 
@@ -401,11 +401,11 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
   ssize_t flags = CheckSurprise();
 
   // Xenon
-  if (flags & RequestInjectionData::XenonSignalFlag) {
+  if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::EnterSample);
   }
 
-  if (flags & RequestInjectionData::IntervalTimerFlag) {
+  if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
   }
 
@@ -418,7 +418,7 @@ void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
   ssize_t flags = CheckSurprise();
   onFunctionExit(suspending, nullptr, nullptr, flags);
 
-  if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+  if ((flags & AsyncEventHookFlag) &&
       suspending->func()->isAsyncFunction()) {
     assert(child != nullptr);  // This isn't a generator
     assert(child->instanceof(c_WaitableWaitHandle::classof()));
@@ -448,7 +448,7 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
     ssize_t flags = CheckSurprise();
     onFunctionExit(resumableAR, nullptr, nullptr, flags);
 
-    if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+    if ((flags & AsyncEventHookFlag) &&
         resumableAR->func()->isAsyncFunction()) {
       assert(resumableAR->resumed());
       auto const afwh = frame_afwh(resumableAR);
@@ -486,7 +486,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
     onFunctionExit(ar, &retval, nullptr, flags);
 
     // Async profiler
-    if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+    if ((flags & AsyncEventHookFlag) &&
         ar->func()->isAsyncFunction() && ar->resumed()) {
       auto session = AsioSession::Get();
       // Return @ resumed execution => AsyncFunctionWaitHandle succeeded.

@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_ASIO_ASYNC_GENERATOR_H_
 #define incl_HPHP_EXT_ASIO_ASYNC_GENERATOR_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"

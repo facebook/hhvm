@@ -26,7 +26,7 @@
 
 #include "hphp/runtime/ext/asio/asio_external_thread_event.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 
 #include <folly/Format.h>
 

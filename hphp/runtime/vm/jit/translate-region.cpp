@@ -174,7 +174,7 @@ static bool hasMergeSucc(const RegionDesc&   region,
 void emitPredictionGuards(HTS& hts,
                           const RegionDesc& region,
                           const RegionDesc::BlockPtr block,
-                          bool useGuards) {
+                          bool isEntry) {
   auto sk = block->start();
   auto bcOff = sk.offset();
   auto typePreds = makeMapWalker(block->typePreds());
@@ -189,7 +189,7 @@ void emitPredictionGuards(HTS& hts,
     }
   }
 
-  if (useGuards) irgen::ringbuffer(hts, Trace::RBTypeTraceletGuards, sk);
+  if (isEntry) irgen::ringbuffer(hts, Trace::RBTypeTraceletGuards, sk);
 
   // Emit type guards.
   while (typePreds.hasNext(sk)) {
@@ -200,26 +200,23 @@ void emitPredictionGuards(HTS& hts,
       // Do not generate guards for class; instead assert the type.
       assert(loc.tag() == RegionDesc::Location::Tag::Stack);
       irgen::assertTypeLocation(hts, loc, type);
-    } else if (useGuards) {
-      bool checkOuterTypeOnly = mcg->tx().mode() != TransKind::Profile;
-      irgen::guardTypeLocation(hts, loc, type, checkOuterTypeOnly);
     } else {
-      irgen::checkTypeLocation(hts, loc, type, bcOff);
+      // Check inner type eagerly if it is the first block during profiling.
+      // Otherwise only check for BoxedInitCell.
+      bool checkOuterTypeOnly =
+        !isEntry || mcg->tx().mode() != TransKind::Profile;
+      irgen::checkTypeLocation(hts, loc, type, bcOff, checkOuterTypeOnly);
     }
   }
 
   // Emit reffiness guards.
   while (refPreds.hasNext(sk)) {
     auto const& pred = refPreds.next();
-    if (useGuards) {
-      irgen::guardRefs(hts, pred.arSpOffset, pred.mask, pred.vals);
-    } else {
-      irgen::checkRefs(hts, pred.arSpOffset, pred.mask, pred.vals, bcOff);
-    }
+    irgen::checkRefs(hts, pred.arSpOffset, pred.mask, pred.vals, bcOff);
   }
 
   // Finish emitting guards, and emit profiling counters.
-  if (useGuards) {
+  if (isEntry) {
     irgen::gen(hts, EndGuards);
     if (RuntimeOption::EvalJitTransCounters) {
       irgen::incTransCounter(hts);
@@ -236,7 +233,7 @@ void emitPredictionGuards(HTS& hts,
   }
 
   // In the entry block, hhbc-translator gets a chance to emit some code
-  // immediately after the initial guards/checks on the first instruction.
+  // immediately after the initial checks on the first instruction.
   if (block == region.entry()) {
     switch (arch()) {
       case Arch::X64:
@@ -531,13 +528,12 @@ TranslateResult irGenRegion(HTS& hts,
     }
     setSuccIRBlocks(hts, region, blockId, blockIdToIRBlock);
 
-    // Emit the type and reffiness predictions for this region block.
-    // If this is the first instruction in the region, and the
-    // region's entry block is not a loop header, the guards will go
-    // to a retranslate request.  Otherwise, they'll go to a side
-    // exit.
-    auto const useGuards = block == region.entry() && !isLoopHeader;
-    emitPredictionGuards(hts, region, block, useGuards);
+    // Emit the type and reffiness predictions for this region block. If this is
+    // the first instruction in the region, we check inner type eagerly, insert
+    // `EndGuards` after the checks, and generate profiling code in profiling
+    // translations.
+    auto const isEntry = block == region.entry();
+    emitPredictionGuards(hts, region, block, isEntry);
     irb.resetGuardFailBlock();
 
     // Generate IR for each bytecode instruction in this block.

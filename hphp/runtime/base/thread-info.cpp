@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/lock.h"
@@ -67,10 +68,8 @@ void ThreadInfo::init() {
   m_reqInjectionData.threadInit();
   rds::threadInit();
   onSessionInit();
-
   Lock lock(s_thread_info_mutex);
   s_thread_infos.insert(this);
-  Sweepable::InitList();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {
@@ -113,13 +112,14 @@ void ThreadInfo::onSessionInit() {
 }
 
 void ThreadInfo::clearPendingException() {
-  m_reqInjectionData.clearPendingExceptionFlag();
+  m_reqInjectionData.clearFlag(PendingExceptionFlag);
+
   if (m_pendingException != nullptr) delete m_pendingException;
   m_pendingException = nullptr;
 }
 
 void ThreadInfo::setPendingException(Exception* e) {
-  m_reqInjectionData.setPendingExceptionFlag();
+  m_reqInjectionData.setFlag(PendingExceptionFlag);
   if (m_pendingException != nullptr) delete m_pendingException;
   m_pendingException = e;
 }
@@ -146,8 +146,7 @@ void raise_infinite_recursion_error() {
 }
 
 static Exception* generate_request_timeout_exception() {
-  auto info = ThreadInfo::s_threadInfo.getNoCheck();
-  auto& data = info->m_reqInjectionData;
+  auto& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
 
   auto exceptionMsg = folly::sformat(
     RuntimeOption::ClientExecutionMode()
@@ -161,8 +160,7 @@ static Exception* generate_request_timeout_exception() {
 }
 
 static Exception* generate_request_cpu_timeout_exception() {
-  auto info = ThreadInfo::s_threadInfo.getNoCheck();
-  auto& data = info->m_reqInjectionData;
+  auto& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
 
   auto exceptionMsg =
     folly::sformat("Maximum CPU time of {} seconds exceeded",
@@ -181,16 +179,16 @@ static Exception* generate_memory_exceeded_exception() {
     "request has exceeded memory limit", exceptionStack);
 }
 
-ssize_t check_request_surprise(ThreadInfo* info) {
+ssize_t check_request_surprise() {
+  auto info = ThreadInfo::s_threadInfo;
   auto& p = info->m_reqInjectionData;
 
-  auto const flags = p.fetchAndClearFlags();
-  bool do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
-    !p.getDebuggerAttached();
-  bool do_cpuTimedOut = (flags & RequestInjectionData::CPUTimedOutFlag) &&
-    !p.getDebuggerAttached();
-  bool do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
-  bool do_signaled = (flags & RequestInjectionData::SignaledFlag);
+  auto const flags = fetchAndClearSurpriseFlags();
+  auto const do_timedout = (flags & TimedOutFlag) && !p.getDebuggerAttached();
+  auto const do_memExceeded = flags & MemExceededFlag;
+  auto const do_signaled = flags & SignaledFlag;
+  auto const do_cpuTimedOut =
+    (flags & CPUTimedOutFlag) && !p.getDebuggerAttached();
 
   // Start with any pending exception that might be on the thread.
   auto pendingException = info->m_pendingException;
@@ -199,7 +197,7 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   if (do_timedout) {
     p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.
     if (pendingException) {
-      p.setTimedOutFlag();
+      setSurpriseFlag(TimedOutFlag);
     } else {
       pendingException = generate_request_timeout_exception();
     }
@@ -208,14 +206,14 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   if (do_cpuTimedOut && !do_timedout) {
     p.setTimeout(0);  // Stop wall timer so we won't time out twice.
     if (pendingException) {
-      p.setCPUTimedOutFlag();
+      setSurpriseFlag(CPUTimedOutFlag);
     } else {
       pendingException = generate_request_cpu_timeout_exception();
     }
   }
   if (do_memExceeded) {
     if (pendingException) {
-      p.setMemExceededFlag();
+      setSurpriseFlag(MemExceededFlag);
     } else {
       pendingException = generate_memory_exceeded_exception();
     }
@@ -232,11 +230,10 @@ ssize_t check_request_surprise(ThreadInfo* info) {
 }
 
 ssize_t check_request_surprise_unlikely() {
-  auto info = ThreadInfo::s_threadInfo.getNoCheck();
-  auto flags = info->m_reqInjectionData.getConditionFlags()->load();
+  auto const flags = surpriseFlags().load();
 
   if (UNLIKELY(flags)) {
-    check_request_surprise(info);
+    check_request_surprise();
   }
   return flags;
 }

@@ -68,7 +68,6 @@ void local_effects(const FrameStateMgr& frameState,
       break;
 
     case AssertLoc:
-    case GuardLoc:
     case CheckLoc: {
       auto id = inst->extra<LocalId>()->locId;
       if (inst->marker().func()->isPseudoMain()) {
@@ -148,4 +147,3 @@ void local_effects(const FrameStateMgr& frameState,
 //////////////////////////////////////////////////////////////////////
 
 }}
-

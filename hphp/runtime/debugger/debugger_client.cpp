@@ -616,7 +616,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
 
   /* try possible families (v4, v6) until we get a connection */
   struct addrinfo *cur;
-  for (cur = ai; cur; cur = ai->ai_next) {
+  for (cur = ai; cur; cur = cur->ai_next) {
     auto sock = makeSmartPtr<Socket>(
       socket(cur->ai_family, cur->ai_socktype, 0),
       cur->ai_family,

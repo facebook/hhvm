@@ -18,7 +18,6 @@
 #define incl_HPHP_SWEEPABLE_H_
 
 #include "hphp/util/portability.h"
-#include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,18 +25,11 @@ namespace HPHP {
 /*
  * Objects that need to do special clean up at the end of the request
  * may register themselves for this by deriving from Sweepable.  After
- * every request, Sweepable::SweepAll is called so the objects may
- * clear out request-local allocations that are not smart-allocated.
+ * every request, MemoryManager::sweep() called each Sweepable::sweep()
+ * method, allowing objects to clear out request-local allocations that
+ * are not smart-allocated, do cleanup, etc.
  */
 struct Sweepable: private boost::noncopyable {
-  struct Node {
-    Node *next, *prev;
-    void enlist(Node& head);
-    void delist();
-    void init();
-  };
-  static unsigned SweepAll();
-  static void InitList();
 
   /*
    * There is no default behavior. Make sure this function frees all
@@ -49,14 +41,42 @@ struct Sweepable: private boost::noncopyable {
    * Remove this object from the sweepable list, so it won't have
    * sweep() called at the next SweepAll.
    */
-  void unregister();
+  void unregister() {
+    delist();
+    init(); // in case destructor runs later.
+  }
+
+  /*
+   * List manipulation methods; mainly for use by MemoryManager.
+   */
+  bool empty() const {
+    assert((this == m_prev) == (this == m_next)); // both==this or both!=this
+    return this == m_next;
+  }
+  void init() { m_prev = m_next = this; }
+  Sweepable* next() const { return m_next; }
+
+  void delist() {
+    auto n = m_next, p = m_prev;
+    n->m_prev = p;
+    p->m_next = n;
+  }
+
+  void enlist(Sweepable* head) {
+    auto next = head->m_next;
+    m_next = next;
+    m_prev = head;
+    head->m_next = next->m_prev = this;
+  }
 
 protected:
   Sweepable();
-  virtual ~Sweepable();
+  enum class Init {};
+  explicit Sweepable(Init) { init(); }
+  virtual ~Sweepable() { delist(); }
 
 private:
-  Node m_sweepNode;
+  Sweepable *m_next, *m_prev;
 };
 
 /*

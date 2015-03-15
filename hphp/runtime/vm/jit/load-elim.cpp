@@ -16,22 +16,23 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include <cstdint>
-#include <utility>
 #include <tuple>
+#include <utility>
 
 #include <folly/ScopeGuard.h>
 
+#include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/dataflow-worklist.h"
-#include "hphp/runtime/vm/jit/pass-tracer.h"
-#include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/memory-effects.h"
-#include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/analysis.h"
+
 #include "hphp/runtime/vm/jit/alias-analysis.h"
+#include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/pass-tracer.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace jit {
 

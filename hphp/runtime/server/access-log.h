@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_ACCESS_LOG_H_
 #define incl_HPHP_ACCESS_LOG_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/logger.h"

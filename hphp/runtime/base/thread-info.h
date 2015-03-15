@@ -127,7 +127,7 @@ inline void check_recursion_throw() {
   throw Exception("Maximum stack size reached");
 }
 
-ssize_t check_request_surprise(ThreadInfo*);
+ssize_t check_request_surprise();
 ssize_t check_request_surprise_unlikely();
 
 //////////////////////////////////////////////////////////////////////

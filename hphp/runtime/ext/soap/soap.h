@@ -18,7 +18,7 @@
 #ifndef PHP_SOAP_H
 #define PHP_SOAP_H
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include <map>
 #include <memory>
 #include <vector>

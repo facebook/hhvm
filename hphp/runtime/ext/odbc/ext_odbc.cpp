@@ -311,6 +311,17 @@ ODBCCursor::ODBCCursor(SQLHDBC hdl_dbconn)
   if (!SQL_SUCCEEDED(
         SQLAllocHandle(SQL_HANDLE_STMT, hdl_dbconn, &hdl_stmt_))) {
     ODBCContext::extract_error(SQL_HANDLE_DBC, hdl_dbconn);
+  } else {
+    intptr_t timeout = ThreadInfo::s_threadInfo->
+      m_reqInjectionData.getRemainingTime();
+    if (timeout) {
+      if (!SQL_SUCCEEDED(
+            SQLSetStmtAttr(hdl_stmt_,
+                           SQL_ATTR_QUERY_TIMEOUT, (SQLPOINTER)timeout,
+                           0))) {
+        ODBCContext::extract_error(SQL_HANDLE_DBC, hdl_stmt_);
+      }
+    }
   }
 }
 

@@ -286,15 +286,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefInlineFP:
     return may_load_store(
       AFrameAny | inline_fp_frame(&inst),
-     /*
-      * Note that although DefInlineFP is going to store some things into the
-      * memory for the new frame (m_soff, etc), it's as part of converting it
-      * from a pre-live frame to a live frame.  We don't need to report those
-      * effects on memory because they are logically to a 'different location
-      * class' (i.e. an activation record for the callee) than the AStack
-      * locations that represented the pre-live ActRec, even though they are at
-      * the same physical addresses in memory.
-      */
+      /*
+       * Note that although DefInlineFP is going to store some things into the
+       * memory for the new frame (m_soff, etc), it's as part of converting it
+       * from a pre-live frame to a live frame.  We don't need to report those
+       * effects on memory because they are logically to a 'different location
+       * class' (i.e. an activation record for the callee) than the AStack
+       * locations that represented the pre-live ActRec, even though they are at
+       * the same physical addresses in memory.
+       */
       AEmpty
     );
 
@@ -354,29 +354,23 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       };
     }
 
-  /*
-   * CallBuiltin takes args either as php values (subtypes of Gen) or as
-   * PtrToStkGen args that it writes/reads.  The `stack' set for its call
-   * effects need only contain those portions of the stack.  See DefInlineFP
-   * for discussion of how live ActRecs for inlined calls fit into that.
-   */
   case CallBuiltin:
     {
       auto const extra = inst.extra<CallBuiltin>();
-      AliasClass stk = AEmpty;
-      for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
-        if (inst.src(i)->type() <= Type::PtrToGen) {
-          auto const cls = pointee(inst.src(i));
-          if (cls.maybe(AStackAny)) {
-            stk = stk | cls;
+      auto const stk = [&] () -> AliasClass {
+        AliasClass ret = AEmpty;
+        for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
+          if (inst.src(i)->type() <= Type::PtrToGen) {
+            auto const cls = pointee(inst.src(i));
+            if (cls.maybe(AStackAny)) {
+              ret = ret | cls;
+            }
           }
         }
-      }
-      return CallEffects {
-        extra->destroyLocals,
-        stack_below(inst.src(1), extra->spOffset.offset - 1),
-        stk
-      };
+        return ret;
+      }();
+      auto const locs = extra->destroyLocals ? AFrameAny : AEmpty;
+      return may_reenter(inst, may_load_store(stk | AHeapAny | locs, locs));
     }
 
   // Resumable suspension takes everything from the frame and moves it into the

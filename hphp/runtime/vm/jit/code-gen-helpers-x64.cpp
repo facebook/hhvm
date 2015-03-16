@@ -198,6 +198,10 @@ void emitIncRef(Vout& v, Vreg base) {
   auto const sf = v.makeReg();
   v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
   emitAssertFlagsNonNegative(v, sf);
+
+  //v << orwim{1 << 7, base[HeaderKindOffset], v.makeReg()};
+  TRACE_SET_MOD(countable);
+  TRACE(1, "emitIncRef\n");
 }
 
 void emitIncRef(Asm& as, PhysReg base) {

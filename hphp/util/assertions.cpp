@@ -33,9 +33,9 @@ __thread AssertDetailImpl* AssertDetailImpl::s_head = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void assert_log_detail(AssertDetailImpl* adi) {
+void AssertDetailImpl::log_impl(const AssertDetailImpl* adi) {
   if (!adi) return;
-  assert_log_detail(adi->m_next);
+  log_impl(adi->m_next);
 
   auto const title = folly::format("{:-^80}\n", adi->m_name).str();
   auto const msg = adi->run();
@@ -43,6 +43,10 @@ void assert_log_detail(AssertDetailImpl* adi) {
   fprintf(stderr, "\n%s%s\n", title.c_str(), msg.c_str());
   if (s_logger) s_logger(title.c_str(), msg);
 }
+
+void AssertDetailImpl::log() { log_impl(s_head); }
+
+//////////////////////////////////////////////////////////////////////
 
 void assert_log_failure(const char* e, const std::string& msg) {
   fprintf(stderr, "\nAssertion failure: %s\n%s\n", e, msg.c_str());
@@ -53,7 +57,7 @@ void assert_log_failure(const char* e, const std::string& msg) {
       s_logger("Assertion Message", msg);
     }
   }
-  assert_log_detail(AssertDetailImpl::s_head);
+  AssertDetailImpl::log();
   fprintf(stderr, "\n");
 }
 

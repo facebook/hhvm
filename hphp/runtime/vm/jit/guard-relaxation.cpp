@@ -264,30 +264,6 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   return true;
 }
 
-/*
- * For every instruction in trace representing a tracelet guard, call func with
- * its location and type.
- */
-void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
-  using L = RegionDesc::Location;
-  for (auto const& inst : *unit.entry()) {
-    switch (inst.op()) {
-    case HintLocInner:
-    case GuardLoc:
-      func(L::Local{inst.extra<LocalId>()->locId}, inst.typeParam());
-      break;
-    case HintStkInner:
-    case GuardStk:
-      {
-        auto bcSpOffset = inst.extra<RelOffsetData>()->bcSpOffset;
-        auto offsetFromFp = inst.marker().spOff() - bcSpOffset;
-        func(L::Stack{offsetFromFp}, inst.typeParam());
-      }
-      break;
-    default: break;
-    }
-  }
-}
 
 bool typeFitsConstraint(Type t, TypeConstraint tc) {
   switch (tc.category) {

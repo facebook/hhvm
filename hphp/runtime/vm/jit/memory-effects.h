@@ -66,21 +66,8 @@ struct IRInstruction;
  * instruction executes (before any of its other effects), it becomes
  * semantically illegal for any part of the program to read from those
  * locations again (without writing to them first).  This is used for the
- * ReturnHook to prevent uses of the stack and frame, and eventually should
- * have a use for killing stack slots below the re-entry depth for potentially
- * re-entering instructions (but is not used this way at the time of this
- * writing).
- *
- * A final note about instructions that can re-enter the VM:
- *
- *   If an instruction can re-enter, it can generally both read and write to
- *   the eval stack below some depth.  However, it can only legally read those
- *   slots if it writes them first, so we only need to include them in the
- *   may-store set, not the may-load set.  This is sufficient to ensure those
- *   stack locations don't have upward-exposed uses through a potentially
- *   re-entering instruction, and also to ensure we don't consider those
- *   locations available for load elimination after the instruction.
- *
+ * ReturnHook to prevent uses of the stack and frame, and for killing stack
+ * slots below the re-entry depth for potentially re-entering instructions.
  */
 struct GeneralEffects   { AliasClass loads;
                           AliasClass stores;

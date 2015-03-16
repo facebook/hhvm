@@ -796,7 +796,7 @@ static const char *type_to_name_native(int type) {
   switch (type) {
         PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
         PDO_MYSQL_NATIVE_TYPE_NAME(VAR_STRING)
-#ifdef MYSQL_HAS_TINY
+#ifdef FIELD_TYPE_TINY
         PDO_MYSQL_NATIVE_TYPE_NAME(TINY)
 #endif
         PDO_MYSQL_NATIVE_TYPE_NAME(SHORT)
@@ -1285,20 +1285,27 @@ bool PDOMySqlStatement::nextRowset() {
     return false;
   }
 
-  my_ulonglong row_count;
+  my_ulonglong affected_count;
   if (!m_conn->buffered()) {
     m_result = mysql_use_result(m_server);
-    row_count = 0;
+    affected_count = 0;
   } else {
     m_result = mysql_store_result(m_server);
-    if ((my_ulonglong)-1 == (row_count = mysql_affected_rows(m_server))) {
+    if ((my_ulonglong)-1 == (affected_count = mysql_affected_rows(m_server))) {
       handleError(__FILE__, __LINE__);
       return false;
     }
   }
+  row_count = affected_count;
 
   if (!m_result) {
-    return false;
+    if (mysql_errno(m_server)) {
+      handleError(__FILE__, __LINE__);
+      return false;
+    } else {
+      /* DML queries */
+      return true;
+    }
   }
 
   column_count = (int)mysql_num_fields(m_result);

@@ -49,7 +49,6 @@
 #include "hphp/compiler/expression/modifier_expression.h"
 #include "hphp/compiler/expression/new_object_expression.h"
 #include "hphp/compiler/expression/object_method_expression.h"
-#include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/qop_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
@@ -156,6 +155,7 @@ namespace StackSym {
   static const char S = 0x60; // Static property marker
   static const char M = 0x70; // Non elem/prop/W part of M-vector
   static const char K = 0x80; // Marker for information about a class base
+  static const char Q = 0x90; // NullSafe Property marker
 
   static const char CN = C | N;
   static const char CG = C | G;
@@ -189,6 +189,7 @@ namespace StackSym {
       case StackSym::E: res += "E"; break;
       case StackSym::W: res += "W"; break;
       case StackSym::P: res += "P"; break;
+      case StackSym::Q: res += "Q"; break;
       case StackSym::S: res += "S"; break;
       case StackSym::K: res += "K"; break;
       default: break;
@@ -1983,7 +1984,8 @@ void EmitterVisitor::popEvalStackMMany() {
     char sym = m_evalStack.top();
     char symFlavor = StackSym::GetSymFlavor(sym);
     char marker = StackSym::GetMarker(sym);
-    if (marker == StackSym::E || marker == StackSym::P) {
+    if (marker == StackSym::E || marker == StackSym::P ||
+        marker == StackSym::Q) {
       if (symFlavor != StackSym::C && symFlavor != StackSym::L &&
           symFlavor != StackSym::T && symFlavor != StackSym::I) {
         InvariantViolation(
@@ -4370,6 +4372,16 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       case Expression::KindOfObjectPropertyExpression: {
         ObjectPropertyExpressionPtr op(
           static_pointer_cast<ObjectPropertyExpression>(node));
+        if (op->isNullSafe() &&
+            op->hasAnyContext(
+                Expression::RefValue
+              | Expression::LValue
+              | Expression::DeepReference
+            ) && !op->hasContext(Expression::InvokeArgument)
+        ) {
+          throw IncludeTimeFatalException(op,
+            Strings::NULLSAFE_PROP_WRITE_ERROR);
+        }
         ExpressionPtr obj = op->getObject();
         SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(obj);
         if (sv && sv->isThis() && sv->hasContext(Expression::ObjectContext)) {
@@ -4387,7 +4399,12 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                                Expression::ObjectContext)) {
           m_tempLoc = op->getLocation();
         }
-        markProp(e);
+        markProp(
+          e,
+          op->isNullSafe()
+            ? PropAccessType::NullSafe
+            : PropAccessType::Normal
+        );
         return true;
       }
 
@@ -4872,7 +4889,8 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
   for (int i = iLast; i >= 0; --i) {
     char marker = StackSym::GetMarker(m_evalStack.get(i));
     if (marker != StackSym::E && marker != StackSym::W &&
-        marker != StackSym::P && marker != StackSym::M) {
+        marker != StackSym::P && marker != StackSym::M &&
+        marker != StackSym::Q) {
       return i;
     }
   }
@@ -4997,6 +5015,10 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
         } else {
           vectorImm.push_back(MPC);
         }
+      } break;
+      case StackSym::Q: {
+        assert(symFlavor == StackSym::T);
+        vectorImm.push_back(MQT);
       } break;
       case StackSym::S: {
         assert(false);
@@ -5981,7 +6003,7 @@ void EmitterVisitor::markNewElem(Emitter& e) {
   m_evalStack.push(StackSym::W);
 }
 
-void EmitterVisitor::markProp(Emitter& e) {
+void EmitterVisitor::markProp(Emitter& e, PropAccessType propAccessType) {
   if (m_evalStack.empty()) {
     InvariantViolation(
       "Emitter encountered an empty evaluation stack inside "
@@ -5991,7 +6013,13 @@ void EmitterVisitor::markProp(Emitter& e) {
   }
   char sym = m_evalStack.top();
   if (sym == StackSym::C || sym == StackSym::L || sym == StackSym::T) {
-    m_evalStack.set(m_evalStack.size()-1, (sym | StackSym::P));
+    m_evalStack.set(
+      m_evalStack.size()-1,
+      (sym | (propAccessType == PropAccessType::NullSafe
+        ? StackSym::Q
+        : StackSym::P
+      ))
+    );
   } else {
     InvariantViolation(
       "Emitter encountered an unsupported StackSym \"%s\" on "
@@ -6928,7 +6956,7 @@ void EmitterVisitor::emitMemoizeProp(Emitter& e,
     m_evalStack.setKnownCls(m_curFunc->pce()->name(), false);
     m_evalStack.push(StackSym::T);
     m_evalStack.setString(m_curFunc->memoizePropName);
-    markProp(e);
+    markProp(e, PropAccessType::Normal);
   }
 
   assert(numParams <= paramIDs.size());
@@ -7935,7 +7963,8 @@ void EmitterVisitor::emitClass(Emitter& e,
               static_pointer_cast<ConstantExpression>((*el)[ii]));
             StringData* constName = makeStaticString(con->getName());
             bool added UNUSED =
-              pce->addAbstractConstant(constName, typeConstraint);
+              pce->addAbstractConstant(constName, typeConstraint,
+                                       cc->isTypeconst());
             assert(added);
           }
         } else {
@@ -7970,7 +7999,8 @@ void EmitterVisitor::emitClass(Emitter& e,
             vNode->outputPHP(cg, ar);
             bool added UNUSED = pce->addConstant(
               constName, typeConstraint, &tvVal,
-              makeStaticString(os.str()));
+              makeStaticString(os.str()),
+              cc->isTypeconst());
             assert(added);
           }
         }
@@ -9016,11 +9046,14 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         } catch (Exception& e) {
           assert(false);
         }
+        // We are not supporting type constants for native classes
+        // AFAIK emitHHBCNativeClassUnit is only used for legacy idl files
         pce->addConstant(
           cnsInfo->name.get(),
           nullptr,
           (TypedValue*)(&val),
-          staticEmptyString());
+          staticEmptyString(),
+          /* typeconst = */ false);
       }
     }
     {

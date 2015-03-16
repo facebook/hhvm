@@ -25,6 +25,8 @@
 
 namespace HPHP { namespace jit {
 
+struct SSATmp;
+
 /*
  * BCMarker holds the location of a specific bytecode instruction,
  * along with the offset from vmfp to vmsp at the beginning of the
@@ -37,25 +39,28 @@ struct BCMarker {
   SrcKey  m_sk;
   FPAbsOffset m_spOff{0};
   TransID m_profTransID{kInvalidTransID};
+  SSATmp* m_fp{nullptr};
 
   /*
    * This is for use by test code that needs to provide BCMarkers but is not
    * deriving them from an actual bytecode region. It is always valid().
    */
   static BCMarker Dummy() {
-    return BCMarker{
+    return BCMarker {
       SrcKey(DummyFuncId, 0, false),
       FPAbsOffset{0},
-      kInvalidTransID
+      kInvalidTransID,
+      nullptr
     };
   }
 
   explicit BCMarker() = default;
 
-  explicit BCMarker(SrcKey sk, FPAbsOffset sp, TransID tid)
+  BCMarker(SrcKey sk, FPAbsOffset sp, TransID tid, SSATmp* fp)
     : m_sk(sk)
     , m_spOff(sp)
     , m_profTransID{tid}
+    , m_fp{fp}
   {
     assert(valid());
   }
@@ -63,7 +68,8 @@ struct BCMarker {
   bool operator==(const BCMarker& b) const {
     return b.m_sk == m_sk &&
            b.m_spOff == m_spOff &&
-           b.m_profTransID == m_profTransID;
+           b.m_profTransID == m_profTransID &&
+           b.m_fp == m_fp;
   }
   bool operator!=(const BCMarker& b) const { return !operator==(b); }
 
@@ -79,8 +85,12 @@ struct BCMarker {
   bool        resumed()     const { assert(valid());   return m_sk.resumed(); }
   FPAbsOffset spOff()       const { assert(valid());   return m_spOff;        }
   TransID     profTransId() const { assert(valid());   return m_profTransID;  }
+  SSATmp*     fp()          const { assert(valid());   return m_fp;           }
 
-  void setSpOff(FPAbsOffset sp) { assert(valid()); m_spOff = sp; }
+  // Return a copy of this marker with an updated sp
+  BCMarker adjustSp(FPAbsOffset sp) const {
+    return {m_sk, sp, m_profTransID, m_fp};
+  }
 };
 
 }}

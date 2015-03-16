@@ -143,6 +143,15 @@ const char* Config::Get(const IniSetting::Map &ini, const Hdf& config,
   return config.configGet(defValue);
 }
 
+const char* Config::Get(const IniSetting::Map &ini, const std::string &name,
+                        const char *defValue /* = nullptr */) {
+  auto* value = ini_iterate(ini, name);
+  if (value && value->isString()) {
+    return value->data();
+  }
+  return defValue;
+}
+
 template<class T> static T variant_init(T v) {
     return v;
 }
@@ -167,6 +176,17 @@ T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
   } \
   return config.configGet##METHOD(defValue); \
 } \
+T Config::Get##METHOD(const IniSettingMap &ini, const std::string &name, \
+                      const T defValue /* = 0ish */) { \
+  T loc; \
+  auto* value = ini_iterate(ini, name); \
+  if (value && value->isString()) { \
+    ini_on_update(value->data(), loc); \
+  } else { \
+    loc = defValue; \
+  } \
+  return loc; \
+} \
 void Config::Bind(T& loc, const IniSetting::Map &ini, const Hdf& config, \
                   const T defValue /* = 0ish */) { \
   loc = Get##METHOD(ini, config, defValue); \
@@ -175,12 +195,7 @@ void Config::Bind(T& loc, const IniSetting::Map &ini, const Hdf& config, \
 } \
 void Config::Bind(T& loc, const IniSetting::Map &ini, std::string name, \
                   const T defValue /* = 0ish */) { \
-  auto* value = ini.get_ptr(name); \
-  if (value && value->isString()) { \
-    ini_on_update(value->data(), loc); \
-  } else { \
-    loc = defValue; \
-  } \
+  loc = Get##METHOD(ini, name, defValue); \
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
                    name, &loc); \
 }
@@ -264,19 +279,35 @@ void Config::Bind(std::map<std::string, std::string>& loc,
 // Hdf takes precedence, as usual. No `ini` binding yet.
 void Config::Iterate(const IniSettingMap &ini, const Hdf &hdf,
                      std::function<void (const IniSettingMap&,
-                                         const Hdf&)> cb) {
-    if (hdf.exists()) {
-      for (Hdf c = hdf.firstChild(); c.exists(); c = c.next()) {
-        cb(ini, c);
-      }
-    } else {
-      auto ini_name = IniName(hdf);
-      auto* ini_value = ini.get_ptr(ini_name);
-      if (ini_value && ini_value->isObject()) {
-        for (auto& val : ini_value->values()) {
-          cb(val, hdf);
-        }
+                                         const Hdf&,
+                                         const std::string& name)> cb) {
+  if (hdf.exists()) {
+    for (Hdf c = hdf.firstChild(); c.exists(); c = c.next()) {
+      cb(ini, c, "");
+    }
+  } else {
+    auto ini_name = IniName(hdf);
+    auto* ini_value = ini.get_ptr(ini_name);
+    if (ini_value && ini_value->isObject()) {
+      for (auto& pair : ini_value->items()) {
+        cb(pair.second, hdf, pair.first.data());
       }
     }
   }
+}
+
+// No `ini` binding yet. Use this for all ini only settings or callers
+// that are ini-based. The other Iterate will be removed when we get rid
+// of Hdf
+void Config::Iterate(const IniSettingMap &ini, const std::string &name,
+                     std::function<void (const IniSettingMap&,
+                                         const std::string& name)> cb) {
+  auto* ini_value = ini_iterate(ini, name);
+  if (ini_value && ini_value->isObject()) {
+    for (auto& pair : ini_value->items()) {
+      cb(pair.second, pair.first.data());
+    }
+  }
+}
+
 }

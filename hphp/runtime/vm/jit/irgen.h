@@ -83,22 +83,18 @@ SSATmp* cns(HTS& env, Args&&... args) {
  * RegionDesc::Location::Stack needs some fixes first.
  */
 void assertTypeStack(HTS&, BCSPOffset, Type);
-void checkTypeStack(HTS&, BCSPOffset, Type, Offset dest);
+void checkTypeStack(HTS&, BCSPOffset, Type, Offset dest, bool outerOnly);
 void assertTypeLocation(HTS&, const RegionDesc::Location&, Type);
-void checkTypeLocation(HTS&, const RegionDesc::Location&, Type, Offset dest);
-void guardTypeLocation(HTS&, const RegionDesc::Location& loc, Type,
-  bool outerOnly);
+void checkTypeLocation(HTS&, const RegionDesc::Location&, Type, Offset dest,
+                       bool outerOnly);
 
 /*
- * Special type of guards for param-passing reffiness.  These guards/checks are
- * needed when an FPush* instruction is in a different region from its FCall,
- * and we don't know statically whether the callee will want arguments by
- * reference.
+ * Special type of guards for param-passing reffiness. These checks are needed
+ * when an FPush* instruction is in a different region from its FCall, and we
+ * don't know statically whether the callee will want arguments by reference.
  */
-void guardRefs(HTS&, int64_t entryArDelta, const std::vector<bool>& mask,
-  const std::vector<bool>& vals);
 void checkRefs(HTS&, int64_t entryArDelta, const std::vector<bool>& mask,
-  const std::vector<bool>& vals, Offset);
+               const std::vector<bool>& vals, Offset);
 
 /*
  * After all initial guards instructions have been emitted, the client of this
@@ -134,17 +130,24 @@ void interpOne(HTS&, const NormalizedInstruction&);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * After each bytecode that is translated/processed, the driver of the ht
- * module calls this function to move to the next bytecode offset (`newOff') to
- * translate.
+ * Before translating/processing each bytecode instruction, the driver
+ * of the irgen module calls this function to move to the next
+ * bytecode offset (`newOff') to translate.
  *
- * The flag `lastBcOff' should be set if this is the last bytecode in a region
- * that's being translated.
+ * The flag `lastBcInst' should be set if this is the last bytecode in
+ * a region that's being translated.
  */
 void prepareForNextHHBC(HTS&,
                         const NormalizedInstruction*,
                         Offset newOff,
-                        bool lastBcOff);
+                        bool lastBcInst);
+
+/*
+ * After translating each bytecode instruction, the driver of the
+ * irgen module calls this function to signal that it has finished
+ * processing the HHBC instruction.
+ */
+void finishHHBC(HTS&);
 
 /*
  * This is called before emitting instructions that can jump to a

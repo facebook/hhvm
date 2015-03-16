@@ -317,7 +317,7 @@ struct StackOffset : IRExtraData {
 /*
  * This particular ExtraData exists because we need both the BCSPOffset and
  * the IRSPOffset for a particular stack entry. The BCSPOffset is used in
- * visitGuards in guard-relaxation.cpp at which point it would be difficult to
+ * visitGuards in region-tracelet.cpp at which point it would be difficult to
  * derive the BCSPOffset from the IRSPOffset. The IRSPOffset is used during
  * code gen. Thus, we pass both using this struct.
  */
@@ -370,16 +370,6 @@ struct PropOffset : IRExtraData {
   size_t hash() const { return std::hash<int32_t>()(offsetBytes); }
 
   int32_t offsetBytes;
-};
-
-struct ProfileStrData : IRExtraData {
-  explicit ProfileStrData(const StringData* key)
-    : key(key)
-  {}
-
-  std::string show() const { return key->data(); }
-
-  const StringData* key;
 };
 
 /*
@@ -906,7 +896,6 @@ X(LdBindAddr,                   LdBindAddrData);
 X(JmpSwitchDest,                JmpSwitchData);
 X(LdSSwitchDestFast,            LdSSwitchData);
 X(LdSSwitchDestSlow,            LdSSwitchData);
-X(GuardLoc,                     LocalId);
 X(HintLocInner,                 LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
@@ -941,9 +930,8 @@ X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
 X(CufIterSpillFrame,            FPushCufData);
 X(SpillFrame,                   ActRecInfo);
-X(GuardStk,                     RelOffsetData);
+X(CheckStk,                     RelOffsetData);
 X(HintStkInner,                 RelOffsetData);
-X(CheckStk,                     IRSPOffsetData);
 X(CastStk,                      IRSPOffsetData);
 X(StStk,                        IRSPOffsetData);
 X(CoerceStk,                    CoerceStkData);
@@ -996,7 +984,6 @@ X(InitPackedArrayLoop,          InitPackedArrayLoopData);
 X(InitPackedArray,              IndexData);
 X(ProfilePackedArray,           RDSHandleData);
 X(ProfileStructArray,           RDSHandleData);
-X(ProfileStr,                   ProfileStrData);
 X(LdRDSAddr,                    RDSHandleData);
 X(ClsNeq,                       ClsNeqData);
 X(BaseG,                        MInstrAttrData);

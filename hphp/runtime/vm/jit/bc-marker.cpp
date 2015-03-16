@@ -17,17 +17,22 @@
 #include "hphp/runtime/vm/jit/bc-marker.h"
 
 #include <folly/Format.h>
+#include <folly/Conv.h>
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP { namespace jit {
+
+//////////////////////////////////////////////////////////////////////
 
 std::string BCMarker::show() const {
   assert(valid());
   return folly::format(
-    "--- bc {}{}, spOff {} ({}){}",
+    "--- bc {}{}, fp {}, spOff {} ({}){}",
     m_sk.offset(),
     m_sk.resumed() ? "r" : "",
+    m_fp ? folly::to<std::string>(m_fp->id()) : "_",
     m_spOff.offset,
     m_sk.func()->fullName()->data(),
     m_profTransID != kInvalidTransID
@@ -48,5 +53,7 @@ bool BCMarker::valid() const {
      m_spOff.offset <= m_sk.func()->numSlotsInFrame() +
         m_sk.func()->maxStackCells());
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }}

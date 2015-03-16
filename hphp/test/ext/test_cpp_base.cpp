@@ -15,7 +15,7 @@
 */
 
 #include "hphp/test/ext/test_cpp_base.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/builtin-functions.h"

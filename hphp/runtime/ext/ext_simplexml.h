@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_SIMPLEXML_H_
 #define incl_HPHP_EXT_SIMPLEXML_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_simplexml_include.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,9 +55,8 @@ using SimpleXMLElementBase = ExtObjectDataFlags<
   ObjectData::HasPropEmpty
 >;
 
-struct c_SimpleXMLElement : SweepableObj<SimpleXMLElementBase> {
+struct c_SimpleXMLElement : SimpleXMLElementBase {
   DECLARE_CLASS_NO_SWEEP(SimpleXMLElement)
-  static void Sweep(ObjectData*);
   void sweep();
 
   explicit c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::classof());
@@ -111,6 +110,10 @@ struct c_SimpleXMLElement : SweepableObj<SimpleXMLElementBase> {
     SXE_ITER type;
     Object   data;
   } iter;
+
+ private:
+  SweepableMember<c_SimpleXMLElement> m_sweepable;
+  friend struct SweepableMember<c_SimpleXMLElement>;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -309,6 +309,10 @@ interpOutputLocals(HTS& env,
           auto const isProp = mcodeIsProp(inst.immVecM[0]);
 
           if (isUnset && isProp) break;
+
+          // NullSafe (Q) props don't change the types of locals.
+          if (inst.immVecM[0] == MQT) break;
+
           auto op = isProp ? SetProp : isUnset ? UnsetElem : SetWithRefElem;
           MInstrEffects effects(op, baseType);
           if (effects.baseValChanged) {
@@ -403,7 +407,8 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
     auto const checkIdx = BCSPOffset{(out & InstrFlags::StackIns2) ? 2
                         : (out & InstrFlags::StackIns1) ? 1
                         : 0};
-    checkTypeStack(env, checkIdx, *checkTypeType, inst.nextSk().offset());
+    checkTypeStack(env, checkIdx, *checkTypeType, inst.nextSk().offset(),
+                   true /* outerOnly */);
   }
 }
 
@@ -506,4 +511,3 @@ void emitHighInvalid(HTS& env)               { std::abort(); }
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

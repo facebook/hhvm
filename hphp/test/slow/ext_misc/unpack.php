@@ -57,4 +57,9 @@ function test_unpack() {
   VUNPACK("S", $le16_FF, 0xFF);
 }
 
+function test_unpack_empty() {
+  var_dump(unpack("n*", ''));
+}
+
 test_unpack();
+test_unpack_empty();

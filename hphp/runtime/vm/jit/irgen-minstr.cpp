@@ -847,6 +847,8 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
     return;
   }
 
+  auto const nullsafe = (env.immVecM[env.mInd] == MQT);
+
   /*
    * We also support nullable objects for the base.  This is a frequent result
    * of static analysis on multi-dim property accesses ($foo->bar->baz), since
@@ -882,7 +884,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
     },
     [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
       hint(env, Block::Hint::Unlikely);
-      if (doWarn) {
+      if (!nullsafe && doWarn) {
         gen(env, WarnNonObjProp);
       }
       if (doDefine) {
@@ -921,6 +923,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
 void emitPropGeneric(MTS& env) {
   auto const mCode = env.immVecM[env.mInd];
   auto const mia = MInstrAttr(env.mii.getAttr(mCode) & MIA_intermediate_prop);
+  auto const nullsafe = (mCode == MQT);
 
   if ((mia & MIA_unset) && !env.base.type.strip().maybe(Type::Obj)) {
     constrainBase(env, DataTypeSpecific);
@@ -929,25 +932,47 @@ void emitPropGeneric(MTS& env) {
   }
 
   auto const key = getKey(env);
+
   if (mia & MIA_define) {
+    if (nullsafe) {
+      gen(
+        env,
+        RaiseError,
+        cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR))
+      );
+      setBase(env, ptrToInitNull(env));
+      return;
+    }
     setBase(
       env,
-      gen(env,
-          PropDX,
-          MInstrAttrData { mia },
-          env.base.value,
-          key,
-          misPtr(env))
+      gen(
+        env,
+        PropDX,
+        MInstrAttrData { mia },
+        env.base.value,
+        key,
+        misPtr(env)
+      )
     );
   } else {
     setBase(
       env,
-      gen(env,
-          PropX,
-          MInstrAttrData { mia },
-          env.base.value,
-          key,
-          misPtr(env))
+      nullsafe
+        ? gen(
+            env,
+            PropQ,
+            env.base.value,
+            key,
+            misPtr(env)
+          )
+        : gen(
+            env,
+            PropX,
+            MInstrAttrData { mia },
+            env.base.value,
+            key,
+            misPtr(env)
+          )
     );
   }
 }
@@ -1038,6 +1063,7 @@ void emitIntermediateOp(MTS& env) {
       ++env.iInd;
       break;
     }
+    case MQT:
     case MPC: case MPL: case MPT:
       emitProp(env);
       ++env.iInd;
@@ -1560,10 +1586,12 @@ void emitCGetProp(MTS& env) {
     return;
   }
 
+  auto const nullsafe = (env.immVecM[env.mInd] == MQT);
   auto const key = getKey(env);
+
   env.result = gen(
     env,
-    CGetProp,
+    nullsafe ? CGetPropQ : CGetProp,
     env.base.value,
     key,
     misPtr(env)
@@ -1572,6 +1600,13 @@ void emitCGetProp(MTS& env) {
 
 void emitVGetProp(MTS& env) {
   auto const key = getKey(env);
+  if (env.immVecM[env.mInd] == MQT) {
+    gen(
+      env,
+      RaiseError,
+      cns(env, makeStaticString(Strings::NULLSAFE_PROP_WRITE_ERROR))
+    );
+  }
   env.result = gen(env, VGetProp, env.base.value, key, misPtr(env));
 }
 
@@ -1879,6 +1914,7 @@ void emitFinalMOp(MTS& env) {
     elemOps[env.mii.instr()](env);
     break;
 
+  case MQT:
   case MPC: case MPL: case MPT:
     static MemFun propOps[] = {
 #   define MII(instr, ...) &emit##instr##Prop,

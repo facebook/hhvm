@@ -69,21 +69,6 @@ inline NativeNode* getSweepNode(ObjectData *obj, const NativeDataInfo* ndi) {
   );
 }
 
-void sweepNativeData(std::vector<NativeNode*>& natives) {
-  while (!natives.empty()) {
-    assert(natives.back()->sweep_index == natives.size() - 1);
-    auto node = natives.back();
-    natives.pop_back();
-    auto obj = Native::obj(node);
-    auto ndi = obj->getVMClass()->getNativeDataInfo();
-    assert(ndi->sweep);
-    assert(node->obj_offset == ndsize(ndi));
-    ndi->sweep(obj);
-    // trash the payload but leave the header and object parsable
-    assert(memset(node + 1, kSmartFreeFill, node->obj_offset - sizeof(*node)));
-  }
-}
-
 /* Classes with NativeData structs allocate extra memory prior
  * to the ObjectData.
  *

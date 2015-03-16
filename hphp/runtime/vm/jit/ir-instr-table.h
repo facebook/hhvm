@@ -53,11 +53,14 @@ private:
   struct EqualsOp {
     bool operator()(const IRInstruction* i1,
                     const IRInstruction* i2) const {
-      if (i1->op()             != i2->op() ||
-          i1->maybeTypeParam() != i2->maybeTypeParam() ||
-          i1->numSrcs()        != i2->numSrcs() ||
-          i1->hasExtra()       != i2->hasExtra()) {
+      if (i1->op()           != i2->op() ||
+          i1->hasTypeParam() != i2->hasTypeParam() ||
+          i1->numSrcs()      != i2->numSrcs() ||
+          i1->hasExtra()     != i2->hasExtra()) {
         return false;
+      }
+      if (i1->hasTypeParam()) {
+        if (i1->typeParam() != i2->typeParam()) return false;
       }
       for (uint32_t i = 0; i < i1->numSrcs(); ++i) {
         if (i1->src(i) != i2->src(i)) {

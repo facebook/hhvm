@@ -22,6 +22,7 @@ namespace Strings {
 
 const char* const FATAL_NULL_THIS = "$this is null";
 const char* const WARN_NULL_THIS = "Undefined variable: this";
+const char* const ASSIGN_THIS_ERROR = "Cannot re-assign $this";
 const char* const FUNCTION_ALREADY_DEFINED = "Function already defined: %s";
 const char* const CONSTANT_ALREADY_DEFINED = "Constant %s already defined";
 const char* const CONSTANTS_MUST_BE_SCALAR =
@@ -48,6 +49,9 @@ const char* const CANNOT_USE_SCALAR_AS_ARRAY =
   "Cannot use a scalar value as an array";
 const char* const CREATING_DEFAULT_OBJECT =
   "Creating default object from empty value";
+const char* const NULLSAFE_PROP_WRITE_ERROR =
+  "?-> is not allowed in write context";
+const char* const NULLSAFE_THIS_BASE_ERROR = "?-> is not allowed with $this";
 const char* const FUNCTION_NAME_MUST_BE_STRING =
   "Function name must be a string";
 const char* const METHOD_NAME_MUST_BE_STRING =

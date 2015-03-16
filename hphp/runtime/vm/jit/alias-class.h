@@ -125,13 +125,6 @@ struct AElemS { SSATmp* arr; const StringData* key; };
  *     different from knowing that a physical portion of the heap may be
  *     treated as both an AElemI or AProp, but not at the same time based on
  *     HHBC-level semantics.)
- *
- *   o IR instructions that may re-enter can generally potentially write to the
- *     evaluation stack below some logical depth.  Right now that depth is
- *     available in the BCMarker for each instruction, but there is no way to
- *     find which frame or stack pointer it is relative to.  In memory_effects
- *     right now this means we generally must include AStackAny in the
- *     may-store set for any instruction that can re-enter.
  */
 struct AStack { SSATmp* base; int32_t offset; int32_t size; };
 

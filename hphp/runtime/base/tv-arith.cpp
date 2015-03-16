@@ -349,7 +349,7 @@ void stringIncDecOp(Op op, Cell& cell) {
 
   int64_t ival;
   double dval;
-  auto const dt = sd->isNumericWithVal(ival, dval, true /* allow_errors */);
+  auto const dt = sd->isNumericWithVal(ival, dval, false /* allow_errors */);
 
   if (dt == KindOfInt64) {
     decRefStr(sd);

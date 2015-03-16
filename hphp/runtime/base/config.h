@@ -24,6 +24,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef folly::dynamic IniSettingMap;
+// forward declaration
+const folly::dynamic* ini_iterate(const IniSettingMap& ini,
+                                  const std::string& name);
 
 /**
  * Parts of the language can individually be made stricter, warning or
@@ -151,19 +154,65 @@ struct Config {
                           const double defValue = 0);
 
   /**
-   * Use this for iterating over options that are stored as objects in
-   * runtime options (e.g. FilesMatch). This function iterates over the
-   * settings passed as ini/hdf, calls back to, generally, the constructor of
-   * the object in question.
+   * INI specific GetXXX methods. Will be used exclusively once we move
+   * off of HDF.
+   */
+  static bool GetBool(const IniSettingMap &ini, const std::string &name,
+                      const bool defValue = false);
+  static const char *Get(const IniSettingMap &ini, const std::string &name,
+                         const char *defValue = nullptr);
+  static std::string GetString(const IniSettingMap &ini,
+                               const std::string &name,
+                               const std::string defValue = "");
+  static char GetByte(const IniSettingMap &ini, const std::string &name,
+                      const char defValue = 0);
+  static unsigned char GetUByte(const IniSettingMap &ini,
+                                const std::string &name,
+                                const unsigned char defValue = 0);
+  static int16_t GetInt16(const IniSettingMap &ini, const std::string &name,
+                          const int16_t defValue = 0);
+  static uint16_t GetUInt16(const IniSettingMap &ini, const std::string &name,
+                            const uint16_t defValue = 0);
+  static int32_t GetInt32(const IniSettingMap &ini, const std::string &name,
+                          const int32_t defValue = 0);
+  static uint32_t GetUInt32(const IniSettingMap &ini, const std::string &name,
+                            const uint32_t defValue = 0);
+  static int64_t GetInt64(const IniSettingMap &ini, const std::string &name,
+                          const int64_t defValue = 0);
+  static uint64_t GetUInt64(const IniSettingMap &ini, const std::string &name,
+                            const uint64_t defValue = 0);
+  static double GetDouble(const IniSettingMap &ini, const std::string &name,
+                          const double defValue = 0);
+
+  /**
+   * Use these Iterate methods for iterating over options that are stored as
+   * objects in runtime options (e.g. FilesMatch). This function iterates over
+   * the settings passed as ini/hdf, calls back to, generally, the constructor
+   * of the object in question.
    *
    * Note: For now, we are not `ini_get()` enabling these type of options as
    * it is not trivial to come up with a non-hacky and workable way to store
    * the data correctly. Also, as usual, Hdf takes priority.
    */
+
+  // Only use if an Hdf setting is a possibility from the caller.
   static void Iterate(const IniSettingMap &ini, const Hdf &hdf,
                       std::function<void (const IniSettingMap&,
-                                          const Hdf&)> cb);
+                                          const Hdf&,
+                                          const std::string&)> cb);
 
+  // This only supports directly named ini settings. This will become the
+  // default iterate function when we get rid of Hdf
+  static void Iterate(const IniSettingMap &ini, const std::string &name,
+                      std::function<void (const IniSettingMap&,
+                                          const std::string&)> cb);
+
+
+  /**
+   * Generic get methods, particularly used for objects like arrays or vectors
+   **/
+
+  // This will go away when we move from Hdf
   template<class T>
   static void Get(const IniSettingMap &ini, const Hdf& config, T &data) {
     config.configGet(data);
@@ -179,6 +228,21 @@ struct Config {
       for (auto &pair : value->items()) {
         StringInsert(data, pair.first.asString().toStdString(),
                            pair.second.asString().toStdString());
+      }
+    }
+  }
+
+  template<class T>
+  static void Get(const IniSettingMap &ini, const std::string &name, T &data) {
+    const folly::dynamic* value = nullptr;
+    value = ini_iterate(ini, name);
+    if (!value) {
+      return;
+    }
+    if (value->isArray() || value->isObject()) {
+      for (auto &pair : value->items()) {
+        StringInsert(data, pair.first.asString().toStdString(),
+                     pair.second.asString().toStdString());
       }
     }
   }

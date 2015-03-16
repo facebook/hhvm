@@ -19,7 +19,7 @@
 #define incl_EXT_ASIO_EXTERNAL_THREAD_EVENT_H_
 
 #include <atomic>
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
 
 namespace HPHP {

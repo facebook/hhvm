@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/bcmath/bcmath.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include <folly/ScopeGuard.h>

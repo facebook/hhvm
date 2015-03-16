@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_ZEND_CUSTOM_ELEMENT_H_
 #define incl_HPHP_ZEND_CUSTOM_ELEMENT_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 
 namespace HPHP {
 

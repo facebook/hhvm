@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stack-logger.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/server/http-server.h"
@@ -294,8 +295,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 }
 
 void MemoryManager::refreshStatsHelperExceeded() {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  info->m_reqInjectionData.setMemExceededFlag();
+  setSurpriseFlag(MemExceededFlag);
   m_couldOOM = false;
   if (RuntimeOption::LogNativeStackOnOOM) {
     log_native_stack("Exceeded memory limit");
@@ -436,14 +436,36 @@ void MemoryManager::sweep() {
   if (debug) checkHeap();
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
-  DEBUG_ONLY auto sweepable = Sweepable::SweepAll();
-  DEBUG_ONLY auto native = m_natives.size();
-  Native::sweepNativeData(m_natives);
-  TRACE(1, "sweep: sweepable %u native %lu\n", sweepable, native);
+  DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;
+
+  // iterate until both sweep lists are empty. Entries can be added or
+  // removed from either list during sweeping.
+  do {
+    while (!m_sweepables.empty()) {
+      num_sweepables++;
+      auto obj = m_sweepables.next();
+      obj->unregister();
+      obj->sweep();
+    }
+    while (!m_natives.empty()) {
+      num_natives++;
+      assert(m_natives.back()->sweep_index == m_natives.size() - 1);
+      auto node = m_natives.back();
+      m_natives.pop_back();
+      auto obj = Native::obj(node);
+      auto ndi = obj->getVMClass()->getNativeDataInfo();
+      ndi->sweep(obj);
+      // trash the native data but leave the header and object parsable
+      assert(memset(node+1, kSmartFreeFill, node->obj_offset - sizeof(*node)));
+    }
+  } while (!m_sweepables.empty());
+
+  TRACE(1, "sweep: sweepable %lu native %lu\n", num_sweepables, num_natives);
   if (debug) checkHeap();
 }
 
 void MemoryManager::resetAllocator() {
+  assert(m_natives.empty() && m_sweepables.empty());
   // decref apc strings and arrays referenced by this request
   DEBUG_ONLY auto napcs = m_apc_arrays.size();
   while (!m_apc_arrays.empty()) {
@@ -469,7 +491,6 @@ void MemoryManager::flush() {
   m_heap.flush();
   m_apc_arrays = std::vector<APCLocalArray*>();
   m_natives = std::vector<NativeNode*>();
-  Sweepable::FlushList();
 }
 
 /*
@@ -913,6 +934,15 @@ void MemoryManager::removeApcArray(APCLocalArray* a) {
   last->m_sweep_index = index;
 }
 
+void MemoryManager::addSweepable(Sweepable* obj) {
+  obj->enlist(&m_sweepables);
+}
+
+// defined here because memory-manager.h includes sweepable.h
+Sweepable::Sweepable() {
+  MM().addSweepable(this);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 #ifdef DEBUG
@@ -969,8 +999,7 @@ void MemoryManager::logDeallocation(void* p) {
 }
 
 void MemoryManager::resetCouldOOM(bool state) {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  info->m_reqInjectionData.clearMemExceededFlag();
+  clearSurpriseFlag(MemExceededFlag);
   m_couldOOM = state;
 }
 
@@ -1353,8 +1382,7 @@ void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {
     // Throw exception when t4840214 is fixed
     // throw FatalErrorException("Request heap out of memory");
   } else if (UNLIKELY(m_used > m_OOMMarker)) {
-    ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-    info->m_reqInjectionData.setMemExceededFlag();
+    setSurpriseFlag(MemExceededFlag);
   }
   return ptr;
 }

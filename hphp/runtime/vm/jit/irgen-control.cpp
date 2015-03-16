@@ -23,7 +23,7 @@
 namespace HPHP { namespace jit { namespace irgen {
 
 void surpriseCheck(HTS& env, Offset relOffset) {
-  if (relOffset < 0) {
+  if (relOffset <= 0) {
     auto const exit = makeExitSlow(env);
     gen(env, CheckSurpriseFlags, exit);
   }
@@ -119,7 +119,7 @@ void emitSwitch(HTS& env,
 
   SSATmp* const switchVal = popC(env);
   Type type = switchVal->type();
-  assert(IMPLIES(!(type <= Type::Int), bounded));
+  assert(IMPLIES(!(type <= (Type::Int | Type::Null)), bounded));
   assert(IMPLIES(bounded, iv.size() > 2));
   SSATmp* index;
   SSATmp* ssabase = cns(env, base);

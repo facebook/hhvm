@@ -70,32 +70,70 @@ SSATmp* IRUnit::cns(Type type) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool isMainExit(const Block* block, SrcKey lastSk) {
-  if (!block->isExit()) return false;
+/*
+ * Returns true iff `block' ends the IR unit after finishing execution
+ * of the bytecode instruction at `sk'.
+ */
+static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
+  if (!block->isExitNoThrow()) return false;
 
-  auto& lastInst = block->back();
+  const auto& inst = block->back();
+  const auto  instSk = inst.marker().sk();
 
-  // This captures cases where we end the region with a terminal
-  // instruction, e.g. RetCtrl, RaiseError, InterpOneCF.
-  if (lastInst.isTerminal() && lastInst.marker().sk() == lastSk) return true;
+  switch (inst.op()) {
+    // These instructions end a unit after executing the bytecode
+    // instruction they correspond to.
+    case InterpOneCF:
+    case JmpSSwitchDest:
+    case JmpSwitchDest:
+    case RaiseError:
+      return instSk == sk;;
 
-  // Otherwise, the region must contain a ReqBindJmp to a bytecode
-  // offset than will follow the execution of lastSk.
-  if (lastInst.op() != ReqBindJmp) return false;
+    // The RetCtrl is generally ending a bytecode instruction, with
+    // the exception being in an Await bytecode instruction, where we
+    // consider the end of the bytecode instruction to be the
+    // non-suspending path.
+    case RetCtrl:
+      return inst.marker().sk().op() != Op::Await;
 
-  auto succOffsets = lastSk.succOffsets();
+    // A ReqBindJmp ends a unit and its marker corresponds to the next
+    // instruction to execute.
+    case ReqBindJmp:
+      return sk.succOffsets().count(instSk.offset());
 
-  FTRACE(6, "isMainExit: instrSuccOffsets({}): {}\n",
-         show(lastSk), folly::join(", ", succOffsets));
-
-  return succOffsets.count(lastInst.marker().bcOff());
+    default:
+      return false;
+  }
 }
 
 Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
+  Block* mainExit = nullptr;
+
+  FTRACE(5, "findMainExitBlock: starting on unit:\n{}\n", unit);
+
   for (auto block : rpoSortCfg(unit)) {
-    if (isMainExit(block, lastSk)) return block;
+    if (endsUnitAtSrcKey(block, lastSk)) {
+      if (mainExit == nullptr) {
+        mainExit = block;
+        continue;
+      }
+
+      always_assert_flog(
+        mainExit->hint() == Block::Hint::Unlikely ||
+        block->hint() == Block::Hint::Unlikely,
+        "findMainExit: 2 likely exits found: B{} and B{}\nlastSk = {}",
+        mainExit->id(), block->id(), showShort(lastSk));
+
+      if (mainExit->hint() == Block::Hint::Unlikely) mainExit = block;
+    }
   }
-  return nullptr;
+
+  always_assert_flog(mainExit, "findMainExit: no exit found for lastSk = {}",
+                     showShort(lastSk));
+
+  FTRACE(5, "findMainExitBlock: mainExit = B{}\n", mainExit->id());
+
+  return mainExit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

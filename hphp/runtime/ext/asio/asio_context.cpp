@@ -70,11 +70,11 @@ namespace {
     // the time currently remaining in the request (see
     // AsioSession::getLatestWakeTime).
     if (UNLIKELY(checkConditionFlags())) {
-      ssize_t flags = EventHook::CheckSurprise();
-      if (flags & RequestInjectionData::XenonSignalFlag) {
+      auto const flags = EventHook::CheckSurprise();
+      if (flags & XenonSignalFlag) {
         Xenon::getInstance().log(Xenon::IOWaitSample);
       }
-      if (flags & RequestInjectionData::IntervalTimerFlag) {
+      if (flags & IntervalTimerFlag) {
         IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample);
       }
     }

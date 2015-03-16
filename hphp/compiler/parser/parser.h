@@ -29,6 +29,7 @@
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/statement_list.h"
+#include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/util/logger.h"
 #include "hphp/parser/parse-time-fatal-exception.h"
 
@@ -56,6 +57,12 @@ DECLARE_BOOST_TYPES(BlockScope);
 DECLARE_BOOST_TYPES(TypeAnnotation);
 
 namespace Compiler {
+
+enum class ThisContextError {
+  Assign,
+  NullSafeBase
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // scanner
 
@@ -107,6 +114,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(Parser);
+
 class Parser : public ParserBase {
 public:
   static StatementListPtr ParseString(const String& input, AnalysisResultPtr ar,
@@ -141,7 +149,8 @@ public:
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassVariableModifer(Token &mod) {}
   void onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                            Token *type, bool abstract = false);
+                            Token *type, bool abstract = false,
+                            bool typeconst = false);
   void onClassVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassConstant(Token &out, Token *exprs, Token &var, Token &value);
   void onClassAbstractConstant(Token &out, Token *exprs, Token &var);
@@ -160,14 +169,16 @@ public:
   void onEncapsList(Token &out, int type, Token &list);
   void addEncap(Token &out, Token *list, Token &expr, int type);
   void encapRefDim(Token &out, Token &var, Token &offset);
-  void encapObjProp(Token &out, Token &var, bool nullsafe, Token &name);
+  void encapObjProp(Token &out, Token &var,
+                    PropAccessType propAccessType, Token &name);
   void encapArray(Token &out, Token &var, Token &expr);
   void onConst(Token &out, Token &name, Token &value);
   void onConstantValue(Token &out, Token &constant);
   void onScalar(Token &out, int type, Token &scalar);
   void onExprListElem(Token &out, Token *exprs, Token &expr);
 
-  void onObjectProperty(Token &out, Token &base, bool nullsafe, Token &prop);
+  void onObjectProperty(Token &out, Token &base,
+                        PropAccessType propAccessType, Token &prop);
   void onObjectMethodCall(Token &out, Token &base, bool nullsafe, Token &prop,
                           Token &params);
 
@@ -429,13 +440,10 @@ private:
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
 
-  void checkAssignThis(string var);
-
-  void checkAssignThis(Token &var);
-
-  void checkAssignThis(ExpressionPtr e);
-
-  void checkAssignThis(ExpressionListPtr params);
+  void checkThisContext(string var, ThisContextError error);
+  void checkThisContext(Token &var, ThisContextError error);
+  void checkThisContext(ExpressionPtr e, ThisContextError error);
+  void checkThisContext(ExpressionListPtr params, ThisContextError error);
 
   void addStatement(StatementPtr stmt, StatementPtr new_stmt);
 

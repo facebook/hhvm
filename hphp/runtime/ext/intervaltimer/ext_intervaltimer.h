@@ -22,7 +22,7 @@
 #include <mutex>
 #include <thread>
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/resource-data.h"
 

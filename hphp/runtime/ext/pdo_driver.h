@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_PDO_DRIVER_H_
 #define incl_HPHP_PDO_DRIVER_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/smart-ptr.h"
 
 namespace HPHP {

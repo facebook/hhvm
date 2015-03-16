@@ -556,9 +556,11 @@ void ExecutionContext::onRequestShutdown() {
 
 void ExecutionContext::executeFunctions(ShutdownType type) {
   ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer(
-    RuntimeOption::PspTimeoutSeconds);
+    RuntimeOption::PspTimeoutSeconds
+  );
   ThreadInfo::s_threadInfo->m_reqInjectionData.resetCPUTimer(
-    RuntimeOption::PspCpuTimeoutSeconds);
+    RuntimeOption::PspCpuTimeoutSeconds
+  );
 
   if (!m_shutdowns.isNull() && m_shutdowns.exists(type)) {
     SCOPE_EXIT {

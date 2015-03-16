@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_FB_H_
 #define incl_HPHP_EXT_FB_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,6 +71,7 @@ extern const int64_t k_XHPROF_FLAGS_TRACE;
 extern const int64_t k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
 extern const int64_t k_XHPROF_FLAGS_MALLOC;
 extern const int64_t k_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY;
+extern const bool k_HHVM_FACEBOOK;
 
 ///////////////////////////////////////////////////////////////////////////////
 

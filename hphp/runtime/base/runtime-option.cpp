@@ -203,7 +203,7 @@ std::string RuntimeOption::Rfc1867Name = "video_ptoken";
 bool RuntimeOption::LibEventSyncSend = true;
 bool RuntimeOption::ExpiresActive = true;
 int RuntimeOption::ExpiresDefault = 2592000;
-std::string RuntimeOption::DefaultCharsetName = "utf-8";
+std::string RuntimeOption::DefaultCharsetName = "";
 bool RuntimeOption::ForceServerNameToHeader = false;
 bool RuntimeOption::EnableCufAsync = false;
 bool RuntimeOption::PathDebug = false;
@@ -836,9 +836,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   {
     Hdf error = config["ErrorHandling"];
 
-    /* Remove this, once its removed from production configs */
-    (void)Config::GetBool(ini, error["NoInfiniteLoopDetection"]);
-
     Config::Bind(ErrorUpgradeLevel, ini, error["UpgradeLevel"], 0);
     Config::Bind(MaxSerializedStringSize, ini,
                  error["MaxSerializedStringSize"], 64 * 1024 * 1024);
@@ -1153,7 +1150,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ExpiresDefault, ini, server["ExpiresDefault"], 2592000);
     if (ExpiresDefault < 0) ExpiresDefault = 2592000;
     Config::Bind(DefaultCharsetName, ini, server["DefaultCharsetName"],
-                 "utf-8");
+                 "");
 
     Config::Bind(RequestBodyReadLimit, ini, server["RequestBodyReadLimit"], -1);
 
@@ -1350,7 +1347,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Get(ini, content["Generators"], StaticFileGenerators);
 
     Hdf matches = content["FilesMatch"];
-    auto matches_callback = [] (const IniSettingMap &ini_m, const Hdf &hdf_m) {
+    auto matches_callback = [] (const IniSettingMap &ini_m, const Hdf &hdf_m,
+                                const std::string &ini_m_key) {
       FilesMatches.push_back(std::make_shared<FilesMatch>(ini_m, hdf_m));
     };
     Config::Iterate(ini, matches, matches_callback);

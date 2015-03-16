@@ -786,6 +786,13 @@ Type boxType(Type);
  */
 Type ldRefReturn(Type typeParam);
 
+/*
+ * Returns the type that a value may have if it had type `srcType' and failed a
+ * CheckType with `typeParam'.  Not all typeParams for CheckTypes are precise,
+ * so the return value may even be `srcType' itself in some situations.
+ */
+Type negativeCheckType(Type typeParam, Type srcType);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

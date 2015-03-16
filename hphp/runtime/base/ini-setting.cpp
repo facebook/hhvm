@@ -31,6 +31,8 @@
 
 #include "hphp/util/lock.h"
 
+#include <glob.h>
+
 #define __STDC_LIMIT_MACROS
 #include <cstdint>
 #include <boost/range/join.hpp>
@@ -374,6 +376,64 @@ folly::dynamic ini_get(std::vector<std::string>& p) {
     ret.insert(idx++, s);
   }
   return ret;
+}
+
+const folly::dynamic* ini_iterate(const folly::dynamic &ini,
+                                  const std::string &name) {
+  // This should never happen, but handle it anyway.
+  if (ini == nullptr) {
+    return nullptr;
+  }
+
+  // If for some reason we are passed a string (i.e., a leaf value),
+  // just return it back
+  if (ini.isString()) {
+    return &ini;
+  }
+
+  // If we just passed in a name that already has a value like:
+  //   hhvm.server.apc.ttl_limit
+  //   max_execution_time
+  // then we just return the value now.
+  // i.e., a value that didn't look like
+  //   hhvm.a.b[c][d], where name = hhvm.a.b.c.d
+  //   c[d] (where ini is already hhvm.a.b), where name = c.d
+  auto* value = ini.get_ptr(name);
+  if (value) {
+    return value;
+  }
+
+  // Otherwise, we split on the dots (if any) to see if we can get a real value
+  std::vector<std::string> dot_parts;
+  folly::split('.', name, dot_parts);
+
+  int dot_loc = 0;
+  int dot_parts_size = dot_parts.size();
+  std::string part = dot_parts[0];
+  // If this is null, then all the loops below will be skipped and
+  // we will return it as null.
+  value = ini.get_ptr(part);
+  // Loop through the dot parts, getting a pointer to each
+  // We may need to concatenate dots to be able to get a real value
+  // e.g., if someone passed in hhvm.a.b.c.d, which in ini was equal
+  // to hhvm.a.b[c][d], then we would start with hhvm and get null,
+  // then hhvm.a and get null, then hhvm.a.b and actually get an object
+  // to point to.
+  while (!value && dot_loc < dot_parts_size - 1) {
+    dot_loc++;
+    part = part + "." + dot_parts[dot_loc];
+    value = ini.get_ptr(part);
+  }
+  // Get to the last dot part and get its value, if it exists
+  for (int i = dot_loc + 1; i < dot_parts_size; i++) {
+    if (value) {
+      part = dot_parts[i];
+      value = value->get_ptr(part);
+    } else { // If we reach a bad point, just return null
+      return nullptr;
+    }
+  }
+  return value;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -954,6 +1014,30 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
   }
   return r;
+}
+
+void add_default_config_files_globbed(
+  const char *default_config_file,
+  std::function<void (const char *filename)> cb
+) {
+  glob_t globbuf;
+  memset(&globbuf, 0, sizeof(glob_t));
+  int flags = 0;  // Use default glob semantics
+  int nret = glob(default_config_file, flags, nullptr, &globbuf);
+  if (nret == GLOB_NOMATCH ||
+      globbuf.gl_pathc == 0 ||
+      globbuf.gl_pathv == 0 ||
+      nret != 0) {
+    globfree(&globbuf);
+    return;
+  }
+
+  for (int n = 0; n < (int)globbuf.gl_pathc; n++) {
+    if (access(globbuf.gl_pathv[n], R_OK) != -1) {
+      cb(globbuf.gl_pathv[n]);
+    }
+  }
+  globfree(&globbuf);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

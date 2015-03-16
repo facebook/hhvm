@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_ASIO_EXTERNAL_THREAD_EVENT_WAIT_HANDLE_H_
 #define incl_HPHP_EXT_ASIO_EXTERNAL_THREAD_EVENT_WAIT_HANDLE_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
@@ -31,15 +31,13 @@ namespace HPHP {
  * See asio_external_thread_event.h for more details.
  */
 class AsioExternalThreadEvent;
-struct c_ExternalThreadEventWaitHandle final
-  : SweepableObj<c_WaitableWaitHandle> {
+struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   DECLARE_CLASS_NO_SWEEP(ExternalThreadEventWaitHandle)
-  static void Sweep(ObjectData*);
   void sweep();
 
   explicit c_ExternalThreadEventWaitHandle(Class* cls =
       c_ExternalThreadEventWaitHandle::classof())
-    : SweepableObj<c_WaitableWaitHandle>(Sweep, cls) {}
+    : c_WaitableWaitHandle(cls) {}
   ~c_ExternalThreadEventWaitHandle() {}
 
   static void ti_setoncreatecallback(const Variant& callback);
@@ -73,11 +71,14 @@ struct c_ExternalThreadEventWaitHandle final
   void registerToContext();
   void unregisterFromContext();
 
+ private:
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
   AsioExternalThreadEvent* m_event;
   Object m_privData;
+  SweepableMember<c_ExternalThreadEventWaitHandle> m_sweepable;
 
   static const uint8_t STATE_WAITING = 2;
+  friend struct SweepableMember<c_ExternalThreadEventWaitHandle>;
 };
 
 inline c_ExternalThreadEventWaitHandle* c_WaitHandle::asExternalThreadEvent() {

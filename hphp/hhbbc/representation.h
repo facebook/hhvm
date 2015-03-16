@@ -433,6 +433,8 @@ struct Const {
    */
   SString phpCode;
   SString typeConstraint;
+
+  bool isTypeconst;
 };
 
 /*

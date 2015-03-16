@@ -184,6 +184,12 @@ void emitTransCounterInc(Asm& a) {
   emitTransCounterInc(Vauto(a.code()).main());
 }
 
+void emitDecRef(Vout& v, Vreg base) {
+  auto const sf = v.makeReg();
+  v << declm{base[FAST_REFCOUNT_OFFSET], sf};
+  emitAssertFlagsNonNegative(v, sf);
+}
+
 void emitIncRef(Vout& v, Vreg base) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitAssertRefCount(v, base);
@@ -191,10 +197,7 @@ void emitIncRef(Vout& v, Vreg base) {
   // emit incref
   auto const sf = v.makeReg();
   v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that the ref count is greater than zero
-    emitAssertFlagsNonNegative(v, sf);
-  }
+  emitAssertFlagsNonNegative(v, sf);
 }
 
 void emitIncRef(Asm& as, PhysReg base) {
@@ -220,15 +223,16 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
 }
 
 void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {
+  if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
   ifThen(v, CC_NGE, sf, [&](Vout& v) { v << ud2{}; });
 }
 
 void emitAssertRefCount(Vout& v, Vreg base) {
   auto const sf = v.makeReg();
-  v << cmplim{HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
+  v << cmplim{StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
   ifThen(v, CC_NLE, sf, [&](Vout& v) {
     auto const sf = v.makeReg();
-    v << cmplim{HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
+    v << cmplim{RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
     ifThen(v, CC_NBE, sf, [&](Vout& v) { v << ud2{}; });
   });
 }
@@ -376,14 +380,14 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff) {
 }
 
 void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
-  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
-                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
+                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   a.testl(-1, rds[rds::kConditionFlagsOff]);
 }
 
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
-  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
-                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
+                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   auto const sf = v.makeReg();
   v << testlim{-1, rds[rds::kConditionFlagsOff], sf};
   return sf;

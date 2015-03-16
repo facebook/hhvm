@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
-#include "hphp/runtime/vm/jit/stack-offsets-def.h"
+#include "hphp/runtime/vm/jit/stack-offsets-defs.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
@@ -217,8 +217,6 @@ DELEGATE_OPCODE(AssertNonNull)
 DELEGATE_OPCODE(AssertStk)
 DELEGATE_OPCODE(AssertType)
 
-DELEGATE_OPCODE(GuardLoc)
-DELEGATE_OPCODE(GuardStk)
 DELEGATE_OPCODE(CheckStk)
 DELEGATE_OPCODE(CheckType)
 
@@ -261,10 +259,10 @@ PUNT_OPCODE(ArrayIdx)
 PUNT_OPCODE(CountArray)
 PUNT_OPCODE(LdColArray)
 
+PUNT_OPCODE(DbgAssertRefCount)
 PUNT_OPCODE(DbgTrashStk)
 PUNT_OPCODE(DbgTrashFrame)
 PUNT_OPCODE(DbgTrashMem)
-PUNT_OPCODE(ProfileStr)
 PUNT_OPCODE(ConvArrToBool)
 PUNT_OPCODE(ConvDblToBool)
 PUNT_OPCODE(ConvIntToBool)
@@ -469,8 +467,10 @@ PUNT_OPCODE(CIterFree)
 PUNT_OPCODE(DefMIStateBase)
 PUNT_OPCODE(BaseG)
 PUNT_OPCODE(PropX)
+PUNT_OPCODE(PropQ)
 PUNT_OPCODE(PropDX)
 PUNT_OPCODE(CGetProp)
+PUNT_OPCODE(CGetPropQ)
 PUNT_OPCODE(VGetProp)
 PUNT_OPCODE(BindProp)
 PUNT_OPCODE(SetProp)
@@ -620,21 +620,6 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
 void CodeGenerator::cgJmp(IRInstruction* inst) {
   auto& v = vmain();
   v << jmp{label(inst->taken())};
-}
-
-void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
-  // maybe reuse emitAssertRefCount
-  auto base = srcLoc(0).reg();
-  auto& v = vmain();
-  auto rCount = v.makeReg();
-  v << loadl{base[FAST_REFCOUNT_OFFSET], rCount};
-  ifZero(v, UncountedBitPos, rCount, [&](Vout& v) {
-    auto const sf = v.makeReg();
-    v << cmpli{RefCountMaxRealistic, rCount, sf};
-    ifThen(v, CC_A, sf, [&](Vout& v) {
-      v << brk{0};
-    });
-  });
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
@@ -1002,16 +987,6 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
       });
     }
   }
-}
-
-void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitReffinessTest(inst, sf,
-    [&](ConditionCode cc, Vreg sfTaken) {
-      auto const destSK = SrcKey(curFunc(), inst->marker().bcOff(), resumed());
-      v << fallbackcc{cc, sfTaken, destSK};
-    });
 }
 
 void CodeGenerator::cgCheckRefs(IRInstruction* inst) {

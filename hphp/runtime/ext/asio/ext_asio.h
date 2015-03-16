@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_ASIO_H_
 #define incl_HPHP_EXT_ASIO_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator.h"
 #include "hphp/runtime/ext/asio/async_generator_wait_handle.h"

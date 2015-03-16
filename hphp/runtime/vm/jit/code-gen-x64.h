@@ -96,12 +96,6 @@ private:
   template<class Loc>
   void emitTypeCheck(Type type, Loc typeSrc,
                      Loc dataSrc, Block* taken);
-  template<class Loc>
-  void emitTypeGuard(const BCMarker& marker, Type type, Loc typeLoc,
-                     Loc dataLoc);
-
-  void cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc);
-  void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
   template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);
   template<class Op, class Opi> void cgShiftCommon(IRInstruction*);
@@ -151,19 +145,8 @@ private:
   void cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
                                  Vlabel done, Type type,
                                  Vreg dataReg, F destroyImpl);
-  void cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
-                                 Vlabel done, Type type,
-                                 Vreg dataReg);
-  void cgCheckRefCountedType(Vreg typeReg, Vlabel done);
-  void cgCheckRefCountedType(Vreg baseReg, int64_t offset, Vlabel done);
   void cgDecRefStaticType(Vout&, const IRInstruction* inst, Type type,
-                          Vreg dataReg, bool genZeroCheck);
-  void cgDecRefDynamicType(const IRInstruction* inst, Vreg typeReg,
-                           Vreg dataReg, bool genZeroCheck);
-  void cgDecRefDynamicTypeMem(const IRInstruction* inst, Vreg baseReg,
-                              int64_t offset);
-  void cgDecRefMem(const IRInstruction* inst, Type type, Vreg baseReg,
-                   int64_t offset);
+                          Vreg dataReg);
 
   void cgIterNextCommon(IRInstruction* inst);
   void cgIterInitCommon(IRInstruction* inst);

@@ -26,7 +26,7 @@ namespace HPHP { namespace jit {
 namespace {
 
 BCMarker initial_marker(TransContext ctx) {
-  return BCMarker { ctx.srcKey(), ctx.initSpOffset, ctx.transID };
+  return BCMarker { ctx.srcKey(), ctx.initSpOffset, ctx.transID, nullptr };
 }
 
 }

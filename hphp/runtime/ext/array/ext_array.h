@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_ARRAY_H_
 #define incl_HPHP_EXT_ARRAY_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/zend-collator.h"
 

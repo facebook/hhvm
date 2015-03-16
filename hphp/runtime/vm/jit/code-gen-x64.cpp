@@ -60,7 +60,7 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
-#include "hphp/runtime/vm/jit/stack-offsets-def.h"
+#include "hphp/runtime/vm/jit/stack-offsets-defs.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -116,6 +116,108 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
 
 const char* getContextName(const Class* ctx) {
   return ctx ? ctx->name()->data() : ":anonymous:";
+}
+
+/*
+ * Generate an if-block that branches around some unlikely code, handling
+ * the cases when a == astubs and a != astubs.  cc is the branch condition
+ * to run the unlikely block.
+ *
+ * Passes the proper assembler to use to the unlikely function.
+ */
+template <class Then>
+void unlikelyIfThen(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
+                    Then then) {
+  auto unlikely = vstub.makeBlock();
+  auto done = vmain.makeBlock();
+  vmain << jcc{cc, sf, {done, unlikely}};
+  vstub = unlikely;
+  then(vstub);
+  if (!vstub.closed()) vstub << jmp{done};
+  vmain = done;
+}
+
+// Generate an if-then-else block
+template <class Then, class Else>
+void ifThenElse(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock,
+                Else elseBlock) {
+  auto thenLabel = v.makeBlock();
+  auto elseLabel = v.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, sf, {elseLabel, thenLabel}};
+  v = thenLabel;
+  thenBlock();
+  if (!v.closed()) v << jmp{done};
+  v = elseLabel;
+  elseBlock();
+  if (!v.closed()) v << jmp{done};
+  v = done;
+}
+
+/*
+ * Same as ifThenElse except the first block is off in astubs
+ */
+template <class Then, class Else>
+void unlikelyIfThenElse(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
+                        Then unlikelyBlock, Else elseBlock) {
+  auto elseLabel = vmain.makeBlock();
+  auto unlikelyLabel = vstub.makeBlock();
+  auto done = vmain.makeBlock();
+  vmain << jcc{cc, sf, {elseLabel, unlikelyLabel}};
+  vmain = elseLabel;
+  elseBlock(vmain);
+  if (!vmain.closed()) vmain << jmp{done};
+  vstub = unlikelyLabel;
+  unlikelyBlock(vstub);
+  if (!vstub.closed()) vstub << jmp{done};
+  vmain = done;
+}
+
+// emit an if-then-else condition where the true case is unlikely.
+template <class T, class F>
+Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg sf, Vreg d, T t,
+                  F f) {
+  auto fblock = v.makeBlock();
+  auto tblock = vc.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, sf, {fblock, tblock}};
+  vc = tblock;
+  auto treg = t(vc);
+  vc << phijmp{done, vc.makeTuple({treg})};
+  v = fblock;
+  auto freg = f(v);
+  v << phijmp{done, v.makeTuple({freg})};
+  v = done;
+  v << phidef{v.makeTuple({d})};
+  return d;
+}
+
+template<class Then>
+void ifRefCountedType(Vout& v, Type ty, Vloc loc, Then then) {
+  if (!ty.maybe(Type::Counted)) return;
+  if (ty.isKnownDataType()) {
+    if (IS_REFCOUNTED_TYPE(ty.toDataType())) then(v);
+    return;
+  }
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
+  ifThen(v, CC_NLE, sf, [&] (Vout& v) {
+    then(v);
+  });
+}
+
+template<class Then>
+void ifRefCountedNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
+  ifRefCountedType(v, ty, loc, [&] (Vout& v) {
+    if (!ty.maybe(Type::Static)) {
+      then(v);
+      return;
+    }
+    auto const sf = v.makeReg();
+    v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
+    static_assert(UncountedValue < 0 && StaticValue < 0, "");
+    ifThen(v, CC_GE, sf, then);
+  });
 }
 
 } // unnamed namespace
@@ -187,80 +289,6 @@ void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
   unlikelyBlock(vcold);
   if (!vcold.closed()) vcold << jmp{done};
   v = done;
-}
-
-// emit an if-then-else condition where the true case is unlikely.
-template <class T, class F>
-Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg sf, Vreg d, T t,
-                  F f) {
-  auto fblock = v.makeBlock();
-  auto tblock = vc.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {fblock, tblock}};
-  vc = tblock;
-  auto treg = t(vc);
-  vc << phijmp{done, vc.makeTuple({treg})};
-  v = fblock;
-  auto freg = f(v);
-  v << phijmp{done, v.makeTuple({freg})};
-  v = done;
-  v << phidef{v.makeTuple({d})};
-  return d;
-}
-
-/*
- * Generate an if-block that branches around some unlikely code, handling
- * the cases when a == astubs and a != astubs.  cc is the branch condition
- * to run the unlikely block.
- *
- * Passes the proper assembler to use to the unlikely function.
- */
-template <class Then>
-void unlikelyIfThen(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
-                    Then then) {
-  auto unlikely = vstub.makeBlock();
-  auto done = vmain.makeBlock();
-  vmain << jcc{cc, sf, {done, unlikely}};
-  vstub = unlikely;
-  then(vstub);
-  if (!vstub.closed()) vstub << jmp{done};
-  vmain = done;
-}
-
-// Generate an if-then-else block
-template <class Then, class Else>
-void ifThenElse(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock,
-                Else elseBlock) {
-  auto thenLabel = v.makeBlock();
-  auto elseLabel = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {elseLabel, thenLabel}};
-  v = thenLabel;
-  thenBlock();
-  if (!v.closed()) v << jmp{done};
-  v = elseLabel;
-  elseBlock();
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
-/*
- * Same as ifThenElse except the first block is off in astubs
- */
-template <class Then, class Else>
-void unlikelyIfThenElse(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
-                        Then unlikelyBlock, Else elseBlock) {
-  auto elseLabel = vmain.makeBlock();
-  auto unlikelyLabel = vstub.makeBlock();
-  auto done = vmain.makeBlock();
-  vmain << jcc{cc, sf, {elseLabel, unlikelyLabel}};
-  vmain = elseLabel;
-  elseBlock(vmain);
-  if (!vmain.closed()) vmain << jmp{done};
-  vstub = unlikelyLabel;
-  unlikelyBlock(vstub);
-  if (!vstub.closed()) vstub << jmp{done};
-  vmain = done;
 }
 
 Vloc CodeGenerator::srcLoc(const IRInstruction* inst, unsigned i) const {
@@ -1269,15 +1297,18 @@ Vreg getDataPtrEnregistered(Vout& v, Vptr dataSrc) {
 template<class Loc1, class Loc2, class JmpFn>
 void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
                                  Vreg sf, JmpFn doJcc) {
-  assert(!(type <= Type::Cls));
+  // Note: if you add new supported type tests, you should update
+  // negativeCheckType() to indicate whether it is precise or not.
+  always_assert(!(type <= Type::Cls));
+  always_assert(!type.isConst() || type <= Type::Null);
   auto& v = vmain();
   ConditionCode cc;
   if (type <= Type::StaticStr) {
     emitCmpTVType(v, sf, KindOfStaticString, typeSrc);
     cc = CC_E;
   } else if (type <= Type::Str) {
-    assert(type != Type::CountedStr &&
-           "We don't support guarding on CountedStr");
+    always_assert(type != Type::CountedStr &&
+                  "We don't support guarding on CountedStr");
     emitTestTVType(v, sf, KindOfStringBit, typeSrc);
     cc = CC_NZ;
   } else if (type == Type::Null) {
@@ -1297,6 +1328,7 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     return;
   } else {
     always_assert(type.isKnownDataType());
+    always_assert(!(type < Type::BoxedInitCell));
     DataType dataType = type.toDataType();
     assert(dataType == KindOfRef ||
            (dataType >= KindOfUninit && dataType <= KindOfResource));
@@ -1331,6 +1363,7 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
     doJcc(CC_E, sf);
   } else {
     assert(type < Type::Arr && type.arrSpec() && type.arrSpec().kind());
+    assert(type.arrSpec().type() == nullptr);
 
     auto arrSpec = type.arrSpec();
     auto reg = getDataPtrEnregistered(v, dataSrc);
@@ -1383,20 +1416,6 @@ void CodeGenerator::emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc,
   emitTypeTest(type, typeSrc, dataSrc, sf,
     [&](ConditionCode cc, Vreg sfTaken) {
       emitFwdJcc(v, ccNegate(cc), sfTaken, taken);
-    });
-}
-
-template<class Loc>
-void CodeGenerator::emitTypeGuard(const BCMarker& marker, Type type,
-                                  Loc typeSrc, Loc dataSrc) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitTypeTest(type, typeSrc, dataSrc, sf,
-    [&](ConditionCode cc, Vreg sfTaken) {
-      auto dest = SrcKey(getFunc(marker), m_state.unit.bcOff(),
-                         resumed(marker));
-      vmain() << fallbackcc{ccNegate(cc), sfTaken, dest, TransFlags(),
-                            kCrossTraceRegs};
     });
 }
 
@@ -2360,38 +2379,14 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   v << fallback{destSK, trflags, kCrossTraceRegs};
 }
 
-void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc) {
-  assert(type.maybe(Type::Counted));
-  auto& v = vmain();
-  auto increfMaybeStatic = [&](Vout& v) {
-    auto base = srcLoc.reg(0);
-    if (!type.maybe(Type::Static)) {
-      emitIncRef(v, base);
-    } else {
-      auto const sf = v.makeReg();
-      v << cmplim{0, base[FAST_REFCOUNT_OFFSET], sf};
-      static_assert(UncountedValue < 0 && StaticValue < 0, "");
-      ifThen(v, CC_GE, sf, [&](Vout& v) { emitIncRef(v, base); });
-    }
-  };
-
-  if (type.isKnownDataType()) {
-    assert(IS_REFCOUNTED_TYPE(type.toDataType()));
-    increfMaybeStatic(v);
-  } else {
-    auto const sf = v.makeReg();
-    emitCmpTVType(v, sf, KindOfRefCountThreshold, srcLoc.reg(1));
-    ifThen(v, CC_NLE, sf, [&](Vout& v) { increfMaybeStatic(v); });
-  }
-}
-
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
-  Type type   = src->type();
-
-  if (!type.maybe(Type::Counted)) return;
-
-  cgIncRefWork(type, src, srcLoc(inst, 0));
+  auto const ty = inst->src(0)->type();
+  ifRefCountedNonStatic(
+    vmain(), ty, srcLoc(inst, 0),
+    [&] (Vout& v) {
+      emitIncRef(v, srcLoc(inst, 0).reg());
+    }
+  );
 }
 
 void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
@@ -2416,7 +2411,7 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
     auto const sf = v.makeReg();
     v << testbi{1, rthis, sf};
     ifThen(v, CC_Z, sf, [&](Vout& v) {
-      cgDecRefStaticType(v, inst, Type::Obj, rthis, true /* genZeroCheck */);
+      cgDecRefStaticType(v, inst, Type::Obj, rthis);
     });
   };
 
@@ -2501,17 +2496,6 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
   return true;
 }
 
-namespace {
-template <typename T>
-struct CheckValid {
-  static bool valid(const T& f) { return true; }
-};
-template <>
-struct CheckValid<void(*)(Vout&)> {
-  static bool valid(void (*f)(Vout&)) { return f != nullptr; }
-};
-}
-
 //
 // Using the given dataReg, this method generates code that checks the static
 // bit out of dataReg, and emits a DecRef if needed.
@@ -2531,18 +2515,12 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
                                          Vlabel done, Type type,
                                          Vreg dataReg, F destroyImpl) {
   always_assert(type.maybe(Type::Counted));
-  bool hasDestroy = CheckValid<F>::valid(destroyImpl);
 
   OptDecRefProfile profile;
-  auto const unlikelyDestroy =
-    hasDestroy ? decRefDestroyIsUnlikely(inst, profile, type) : false;
+  auto const unlikelyDestroy = decRefDestroyIsUnlikely(inst, profile, type);
 
-  if (hasDestroy) {
-    emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl :
-                   Stats::TC_DecRef_Likely_Decl);
-  } else {
-    emitIncStat(v, Stats::TC_DecRef_NZ);
-  }
+  emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl
+                                 : Stats::TC_DecRef_Likely_Decl);
 
   Vreg sf;
   auto destroy = [&](Vout& v) {
@@ -2558,14 +2536,8 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
   if (!type.maybe(Type::Static)) {
     sf = v.makeReg();
     v << declm{dataReg[FAST_REFCOUNT_OFFSET], sf};
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      // Assert that the ref count is not less than zero
-      emitAssertFlagsNonNegative(v, sf);
-    }
-
-    if (hasDestroy) {
-      ifBlock(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
-    }
+    emitAssertFlagsNonNegative(v, sf);
+    ifBlock(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
     return;
   }
 
@@ -2578,54 +2550,13 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
     // Decrement _count
     sf = v.makeReg();
     v << declm{dataReg[FAST_REFCOUNT_OFFSET], sf};
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      // Assert that the ref count is not less than zero
-      emitAssertFlagsNonNegative(v, sf);
-    }
+    emitAssertFlagsNonNegative(v, sf);
   };
 
-  if (hasDestroy) {
-    sf = v.makeReg();
-    v << cmplim{1, dataReg[FAST_REFCOUNT_OFFSET], sf};
-    ifThenElse(v, vcold(), CC_E, sf, destroy, static_check_and_decl,
-               unlikelyDestroy);
-    return;
-  }
-
   sf = v.makeReg();
-  v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET], sf};
-  static_check_and_decl(v);
-}
-
-void
-CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
-                                         Vlabel done, Type type, Vreg dataReg) {
-  cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg,
-                            (void (*)(Vout&))nullptr);
-}
-
-//
-// Returns the address to be patched with the address to jump to in case
-// the type is not ref-counted.
-//
-void CodeGenerator::cgCheckRefCountedType(Vreg typeReg, Vlabel done) {
-  auto& v = vmain();
-  auto next = v.makeBlock();
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRefCountThreshold, typeReg);
-  v << jcc{CC_LE, sf, {next, done}};
-  v = next;
-}
-
-void CodeGenerator::cgCheckRefCountedType(Vreg baseReg, int64_t offset,
-                                          Vlabel done) {
-  auto& v = vmain();
-  auto next = v.makeBlock();
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRefCountThreshold,
-                baseReg[offset + TVOFF(m_type)]);
-  v << jcc{CC_LE, sf, {next, done}};
-  v = next;
+  v << cmplim{1, dataReg[FAST_REFCOUNT_OFFSET], sf};
+  ifThenElse(v, vcold(), CC_E, sf, destroy, static_check_and_decl,
+             unlikelyDestroy);
 }
 
 //
@@ -2633,85 +2564,66 @@ void CodeGenerator::cgCheckRefCountedType(Vreg baseReg, int64_t offset,
 //
 void CodeGenerator::cgDecRefStaticType(Vout& v,
                                        const IRInstruction* inst,
-                                       Type type, Vreg dataReg,
-                                       bool genZeroCheck) {
+                                       Type type, Vreg dataReg) {
   assert(type != Type::Cell && type != Type::Gen);
   assert(type.isKnownDataType());
 
   if (!type.maybe(Type::Counted)) return;
 
-  // Check for UncountedValue or StaticValue if needed,
-  // do the actual DecRef, and leave flags set based on the subtract result,
-  // which is tested below
   auto done = v.makeBlock();
-  if (genZeroCheck) {
-    cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg, [&] (Vout& v) {
-        // Emit the call to release in m_acold
-        cgCallHelper(v,
-                     mcg->getDtorCall(type.toDataType()),
-                     kVoidDest,
-                     SyncOptions::kSyncPoint,
-                     argGroup(inst)
-                     .reg(dataReg));
-      });
-  } else {
-    cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg);
-  }
+  cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg, [&] (Vout& v) {
+    cgCallHelper(v,
+                 mcg->getDtorCall(type.toDataType()),
+                 kVoidDest,
+                 SyncOptions::kSyncPoint,
+                 argGroup(inst)
+                 .reg(dataReg));
+  });
   if (!v.closed()) v << jmp{done};
   v = done;
-}
-
-//
-// Generates dec-ref of a typed value with dynamic (statically unknown) type,
-// when the type is stored in typeReg.
-//
-void CodeGenerator::cgDecRefDynamicType(const IRInstruction* inst, Vreg typeReg,
-                                        Vreg dataReg, bool genZeroCheck) {
-  // Emit check for ref-counted type
-  auto& v = vmain();
-  auto done = v.makeBlock();
-  cgCheckRefCountedType(typeReg, done);
-
-  // Emit check for UncountedValue or StaticValue and the actual DecRef
-  if (genZeroCheck) {
-    cgCheckStaticBitAndDecRef(v, inst, done, Type::Cell, dataReg, [&](Vout& v) {
-        // Emit call to release in m_acold
-        cgCallHelper(v, CppCall::destruct(typeReg),
-                     kVoidDest,
-                     SyncOptions::kSyncPoint,
-                     argGroup(inst)
-                     .reg(dataReg));
-      });
-  } else {
-    cgCheckStaticBitAndDecRef(v, inst, done, Type::Cell, dataReg);
-  }
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
-void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
-  auto src = inst->src(0);
-  if (!src->type().maybe(Type::Counted)) return;
-  Type type = src->type();
-  auto ptr_reg = srcLoc(inst, 0).reg(0);
-  if (type.isKnownDataType()) {
-    cgDecRefStaticType(vmain(), inst, type, ptr_reg, genZeroCheck);
-  } else {
-    auto type_reg = srcLoc(inst, 0).reg(1);
-    cgDecRefDynamicType(inst, type_reg, ptr_reg, genZeroCheck);
-  }
 }
 
 void CodeGenerator::cgDecRef(IRInstruction *inst) {
-  // DecRef may bring the count to zero, and run the destructor.
-  // Generate code for this.
-  cgDecRefWork(inst, true);
+  auto const ty   = inst->src(0)->type();
+  auto const base = srcLoc(inst, 0).reg(0);
+
+  auto& v = vmain();
+  auto const done = v.makeBlock();
+
+  ifRefCountedType(
+    v, ty, srcLoc(inst, 0),
+    [&] (Vout& v) {
+      cgCheckStaticBitAndDecRef(
+        v, inst, done, ty,
+        base,
+        [&] (Vout& v) {
+          cgCallHelper(
+            v,
+            ty.isKnownDataType()
+              ? mcg->getDtorCall(ty.toDataType())
+              : CppCall::destruct(srcLoc(inst, 0).reg(1)),
+            kVoidDest,
+            SyncOptions::kSyncPoint,
+            argGroup(inst)
+              .reg(base)
+          );
+        }
+      );
+    }
+  );
+  if (!v.closed()) v << jmp{done};
+  v = done;
 }
 
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
-  // DecRefNZ cannot bring the count to zero.
-  // Therefore, we don't generate zero-checking code.
-  cgDecRefWork(inst, false);
+  emitIncStat(vmain(), Stats::TC_DecRef_NZ);
+  auto const ty = inst->src(0)->type();
+  ifRefCountedNonStatic(
+    vmain(), ty, srcLoc(inst, 0),
+    [&] (Vout& v) {
+      emitDecRef(v, srcLoc(inst, 0).reg());
+    }
+  );
 }
 
 void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
@@ -3917,31 +3829,11 @@ void CodeGenerator::cgLdStk(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgGuardStk(IRInstruction* inst) {
-  auto const rSP = srcLoc(inst, 0).reg();
-  auto const baseOff = cellsToBytes(inst->extra<GuardStk>()->irSpOffset.offset);
-  auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 0).reg()};
-  emitTypeGuard(inst->marker(), inst->typeParam(),
-                rSP[baseOff + TVOFF(m_type)],
-                rSP[baseOff + TVOFF(m_data)]);
-}
-
 void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   auto const rbase = srcLoc(inst, 0).reg();
-  auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset.offset);
+  auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->irSpOffset.offset);
   emitTypeCheck(inst->typeParam(), rbase[baseOff + TVOFF(m_type)],
                 rbase[baseOff + TVOFF(m_data)], inst->taken());
-}
-
-void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
-  auto const rFP = srcLoc(inst, 0).reg();
-  auto const baseOff = localOffset(inst->extra<GuardLoc>()->locId);
-  auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 1).reg()};
-  emitTypeGuard(inst->marker(), inst->typeParam(),
-                rFP[baseOff + TVOFF(m_type)],
-                rFP[baseOff + TVOFF(m_data)]);
 }
 
 void CodeGenerator::cgCheckLoc(IRInstruction* inst) {
@@ -3962,10 +3854,12 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const rType = srcLoc(inst, 0).reg(1);
   auto& v = vmain();
   auto const sf = v.makeReg();
-  auto doJcc = [&](ConditionCode cc, Vreg sfTaken) {
+
+  auto doJcc = [&] (ConditionCode cc, Vreg sfTaken) {
     emitFwdJcc(v, ccNegate(cc), sfTaken, inst->taken());
   };
-  auto doMov = [&]() {
+
+  auto doMov = [&] () {
     auto const valDst = dstLoc(inst, 0).reg(0);
     auto const typeDst = dstLoc(inst, 0).reg(1);
     if (dst->isA(Type::Bool) && !src->isA(Type::Bool)) {
@@ -3973,68 +3867,85 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     } else {
       v << copy{rData, valDst};
     }
-    if (typeDst != InvalidReg) {
-      if (rType != InvalidReg) v << copy{rType, typeDst};
-      else v << ldimmq{src->type().toDataType(), typeDst};
+    if (typeDst == InvalidReg) return;
+    if (rType != InvalidReg) {
+      v << copy{rType, typeDst};
+    } else {
+      v << ldimmq{src->type().toDataType(), typeDst};
     }
   };
 
-  Type typeParam = inst->typeParam();
-  // CheckTypes that are known to succeed or fail may be kept around
-  // by the simplifier in case the guard can be relaxed.
+  // Note: if you make changes to the behavior here you may need to update
+  // negativeCheckType().
+  auto const typeParam = inst->typeParam();
+  auto const srcType = src->type();
+
   if (src->isA(typeParam)) {
-    // src is the target type or better. do nothing.
+    // src is the target type or better.  Just define our dst.
     doMov();
     return;
-  } else if (!src->type().maybe(typeParam)) {
-    // src is definitely not the target type. always jump.
+  }
+  if (!srcType.maybe(typeParam)) {
+    // src is definitely not the target type.  Always jump.
     v << jmp{label(inst->taken())};
     return;
   }
 
   if (rType != InvalidReg) {
     emitTypeTest(typeParam, rType, rData, sf, doJcc);
-  } else {
-    Type srcType = src->type();
-    if (srcType <= Type::BoxedCell && typeParam <= Type::BoxedCell) {
-      // Nothing to do here, since we check the inner type at the uses
-    } else if (typeParam.isSpecialized()) {
-      // We're just checking the array kind or object class of a value with a
-      // mostly-known type.
-      emitSpecializedTypeTest(typeParam, rData, sf, doJcc);
-    } else if (typeParam <= Type::Uncounted &&
-               ((srcType <= Type::Str && typeParam.maybe(Type::StaticStr)) ||
-                (srcType <= Type::Arr && typeParam.maybe(Type::StaticArr)))) {
-      // We carry Str and Arr operands around without a type register,
-      // even though they're union types.  The static and non-static
-      // subtypes are distinguised by the refcount field.
-      v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
-      doJcc(CC_L, sf);
-    } else {
-      // We should only get here if this CheckType should've been simplified
-      // away but wasn't for some reason, so do a simple version of what it
-      // would've. Widen inner types first since CheckType ignores them.
-      if (srcType.maybe(Type::BoxedCell)) srcType |= Type::BoxedCell;
-      if (typeParam.maybe(Type::BoxedCell)) typeParam |= Type::BoxedCell;
-
-      if (srcType <= typeParam) {
-        // This will always succeed. Do nothing.
-      } else if (!srcType.maybe(typeParam)) {
-        // This will always fail. Emit an unconditional jmp.
-        v << jmp{label(inst->taken())};
-        return;
-      } else {
-        always_assert_log(
-          false,
-          [&] {
-            return folly::format("Bad src: {} and dst: {} types in '{}'",
-                                 srcType, typeParam, *inst).str();
-          });
-      }
-    }
+    doMov();
+    return;
   }
 
-  doMov();
+  if (srcType <= Type::BoxedCell && typeParam <= Type::BoxedCell) {
+    always_assert(!(typeParam < Type::BoxedInitCell));
+    doMov();
+    return;
+  }
+
+  /*
+   * See if we're just checking the array kind or object class of a value
+   * with a mostly-known type.
+   *
+   * Important: we don't support typeParam being something like
+   * StaticArr=kPackedKind unless the srcType also already knows its
+   * staticness.  We do allow things like CheckType<Arr=Packed> t1:StaticArr,
+   * though.  This is why we have to check that the unspecialized type is at
+   * least as big as the srcType.
+   */
+  if (typeParam.isSpecialized() && typeParam.unspecialize() >= srcType) {
+    emitSpecializedTypeTest(typeParam, rData, sf, doJcc);
+    doMov();
+    return;
+  }
+
+  /*
+   * Since not all of our unions carry a type register, there are some
+   * situations with strings and arrays that are neither constantly-foldable
+   * nor in the emitTypeTest code path.
+   *
+   * We currently actually check their static bit here.  Note (importantly)
+   * that this is why toDataType can't return KindOfStaticString for
+   * Type::StaticStr---this code will let an apc string through.  Also note
+   * that CheckType<Uncounted> t1:{Null|Str} doesn't get this treatment
+   * currently---in the emitTypeTest path above it will only check the type
+   * register.
+   */
+  if (!typeParam.isSpecialized() &&
+      typeParam <= Type::Uncounted &&
+      srcType.subtypeOfAny(Type::Str, Type::Arr) &&
+      srcType.maybe(typeParam)) {
+    assert(srcType.maybe(Type::Static));
+    v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
+    doJcc(CC_L, sf);
+    doMov();
+    return;
+  }
+
+  always_assert_flog(
+    false,
+    "Bad src: {} and dst: {} types in '{}'", srcType, typeParam, *inst
+  );
 }
 
 void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
@@ -4142,18 +4053,6 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
         });
     }
   }
-}
-
-void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitReffinessTest(inst, sf,
-    [&](Vout& v, ConditionCode cc, Vreg sfTaken) {
-      auto& marker = inst->marker();
-      auto dest = SrcKey(getFunc(marker), marker.bcOff(), resumed(marker));
-      v << syncvmsp{srcLoc(inst, 6 /* sp */).reg()};
-      v << fallbackcc{cc, sfTaken, dest, TransFlags(), kCrossTraceRegs};
-    });
 }
 
 void CodeGenerator::cgCheckRefs(IRInstruction* inst)  {
@@ -5349,7 +5248,12 @@ void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
-  emitAssertRefCount(vmain(), srcLoc(inst, 0).reg());
+  ifRefCountedType(
+    vmain(), inst->src(0)->type(), srcLoc(inst, 0),
+    [&] (Vout& v) {
+      emitAssertRefCount(v, srcLoc(inst, 0).reg());
+    }
+  );
 }
 
 void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
@@ -5465,40 +5369,6 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
 
 void CodeGenerator::cgConjure(IRInstruction* inst) {
   vmain() << ud2();
-}
-
-void CodeGenerator::cgProfileStr(IRInstruction* inst) {
-  auto& v = vmain();
-  TargetProfile<StrProfile> profile(m_state.unit.context(), inst->marker(),
-                                    inst->extra<ProfileStrData>()->key);
-  assert(profile.profiling());
-  auto const ch = profile.handle();
-
-  auto ptrReg = srcLoc(inst, 0).reg();
-  auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfStaticString, ptrReg[TVOFF(m_type)]);
-  ifThenElse(
-    v, CC_E, sf,
-    [&](Vout& v) { // m_type == KindOfStaticString
-      v << inclm{rVmTl[ch + offsetof(StrProfile, staticStr)], v.makeReg()};
-    },
-    [&](Vout& v) { // m_type == KindOfString
-      auto ptr = v.makeReg();
-      auto const sf = v.makeReg();
-      v << load{ptrReg[TVOFF(m_data)], ptr};
-      v << cmplim{StaticValue, ptr[FAST_REFCOUNT_OFFSET], sf};
-
-      ifThenElse(
-        v, CC_E, sf,
-        [&](Vout& v) { // _count == StaticValue
-          v << inclm{rVmTl[ch + offsetof(StrProfile, strStatic)], v.makeReg()};
-        },
-        [&](Vout& v) {
-          v << inclm{rVmTl[ch + offsetof(StrProfile, str)], v.makeReg()};
-        }
-      );
-    }
-  );
 }
 
 void CodeGenerator::cgCountArray(IRInstruction* inst) {

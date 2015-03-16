@@ -118,6 +118,7 @@ namespace Trace {
       TM(hhir_store)    \
       TM(hhir_alias)    \
       TM(hhir_load)     \
+      TM(hhir_refineTmps) \
       TM(llvm)          \
       TM(llvm_count)    \
       TM(hhir_refcount) \
@@ -139,6 +140,7 @@ namespace Trace {
       TM(ringbuffer)    \
       TM(runtime)       \
       TM(servicereq)    \
+      TM(simplify)      \
       TM(smartalloc)    \
       TM(stat)          \
       TM(statgroups)    \

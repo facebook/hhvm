@@ -1275,7 +1275,7 @@ VASM_OPCODES
 };
 
 void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
-  Timer _t(Timer::llvm_irGeneration);
+  Timer timer(Timer::llvm_irGeneration);
 
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
@@ -1528,7 +1528,7 @@ O(countbytecode)
     defineValue(x64::rStashedAR, nullptr);
   }
 
-  _t.end();
+  timer.stop();
   finalize();
 
   if (RuntimeOption::EvalJitLLVMDiscard) {

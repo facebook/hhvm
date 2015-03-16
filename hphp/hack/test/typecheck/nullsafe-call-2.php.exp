@@ -1,6 +1,0 @@
-File "nullsafe-call-2.php", line 9, characters 10-19:
-Invalid return type (Typing[4110])
-File "nullsafe-call-2.php", line 8, characters 23-23:
-This is an object of type D
-File "nullsafe-call-2.php", line 9, characters 10-19:
-It is incompatible with a nullable type

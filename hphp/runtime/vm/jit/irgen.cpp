@@ -233,20 +233,29 @@ void endBlock(HTS& env, Offset next, bool nextIsMerge) {
 void prepareForNextHHBC(HTS& env,
                         const NormalizedInstruction* ni,
                         Offset newOff,
-                        bool lastBcOff) {
+                        bool lastBcInst) {
   FTRACE(1, "------------------- prepareForNextHHBC ------------------\n");
   env.currentNormalizedInstruction = ni;
 
   always_assert_flog(
-    IMPLIES(isInlining(env), !env.lastBcOff),
+    IMPLIES(isInlining(env), !env.lastBcInst),
     "Tried to end trace while inlining."
+  );
+
+  always_assert_flog(
+    IMPLIES(isInlining(env), !env.firstBcInst),
+    "Inlining while still at the first region instruction."
   );
 
   env.bcStateStack.back().setOffset(newOff);
   updateMarker(env);
-  env.lastBcOff = lastBcOff;
+  env.lastBcInst = lastBcInst;
   env.catchCreator = nullptr;
   env.irb->prepareForNextHHBC();
+}
+
+void finishHHBC(HTS& env) {
+  env.firstBcInst = false;
 }
 
 void prepareForHHBCMergePoint(HTS& env) {

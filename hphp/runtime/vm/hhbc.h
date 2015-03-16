@@ -185,6 +185,12 @@ const char* locationCodeString(LocationCode lc);
 // is more junk after the first two bytes.
 LocationCode parseLocationCode(const char* s);
 
+
+/**
+ * E - an element, $x['y']
+ * P - a property, $x->y
+ * Q - a NullSafe version of P, $x?->y
+ */
 enum MemberCode {
   // Element and property, consuming a cell from the stack.
   MEC,
@@ -197,6 +203,7 @@ enum MemberCode {
   // Element and property, using a string immediate
   MET,
   MPT,
+  MQT,
 
   // Element, using an int64 immediate
   MEI,
@@ -305,7 +312,8 @@ struct MInstrInfo {
 };
 
 inline bool memberCodeHasImm(MemberCode mc) {
-  return mc == MEL || mc == MPL || mc == MET || mc == MPT || mc == MEI;
+  return mc == MEL || mc == MPL || mc == MET ||
+    mc == MPT || mc == MEI || mc == MQT;
 }
 
 inline bool memberCodeImmIsLoc(MemberCode mc) {
@@ -313,7 +321,7 @@ inline bool memberCodeImmIsLoc(MemberCode mc) {
 }
 
 inline bool memberCodeImmIsString(MemberCode mc) {
-  return mc == MET || mc == MPT;
+  return mc == MET || mc == MPT || mc == MQT;
 }
 
 inline bool memberCodeImmIsInt(MemberCode mc) {
@@ -1189,11 +1197,11 @@ StackTransInfo instrStackTransInfo(const Op* opcode);
 int instrSpToArDelta(const Op* opcode);
 
 inline bool mcodeIsLiteral(MemberCode mcode) {
-  return mcode == MET || mcode == MEI || mcode == MPT;
+  return mcode == MET || mcode == MEI || mcode == MPT || mcode == MQT;
 }
 
 inline bool mcodeIsProp(MemberCode mcode) {
-  return mcode == MPC || mcode == MPL || mcode == MPT;
+  return mcode == MPC || mcode == MPL || mcode == MPT || mcode == MQT;
 }
 
 inline bool mcodeIsElem(MemberCode mcode) {

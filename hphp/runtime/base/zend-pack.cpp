@@ -552,7 +552,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
   int inputlen = data.size();
   int inputpos = 0;
 
-  Array ret;
+  Array ret = Array::Create();
   while (formatlen-- > 0) {
     char type = *(format++);
     char c;

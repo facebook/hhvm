@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/smart-ptr.h"
-
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/thread-local.h"
 
 namespace HPHP {

@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_DOMDOCUMENT_H_
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 
 #include <memory>
 

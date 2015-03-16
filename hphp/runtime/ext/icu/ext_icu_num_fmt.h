@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_ICU_NUMFMT_H
 #define incl_HPHP_ICU_NUMFMT_H
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
 
 #include <unicode/unum.h>

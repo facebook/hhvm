@@ -19,11 +19,12 @@
 
 #include <functional>
 
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/unit.h"  // OffsetRangeVec
-#include "hphp/runtime/base/thread-info.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // This is a set of functions which are primarily called from the VM to notify
@@ -95,7 +96,7 @@ public:
     // just disable the breakpoint until we leave the site because some opcode
     // in the site could recurse to the site. So a disable must be attached to
     // a stack depth. This will be disabled on call to detach().
-    ti->m_reqInjectionData.setDebuggerHookFlag();
+    ti->m_reqInjectionData.setFlag(DebuggerHookFlag);
 
     return true;
   }

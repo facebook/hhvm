@@ -84,6 +84,15 @@ struct Block : boost::noncopyable {
 
   // Returns whether this block starts with BeginCatch
   bool isCatch() const;
+
+  // Returns true if this block is an exit, assuming that the last
+  // instruction won't throw an exception.  In other words, the block
+  // doesn't have a next edge, and it either has no taken edge or its
+  // taken edge goes to a catch block.
+  bool isExitNoThrow() const {
+    return !empty() && back().isTerminal() && (!taken() || taken()->isCatch());
+  }
+
   // If its a catch block, the BeginCatch's marker
   BCMarker catchMarker() const;
 

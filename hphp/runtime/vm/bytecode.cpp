@@ -51,7 +51,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -121,6 +121,7 @@ const bool skipCufOnInvalidParams = false;
 bool RuntimeOption::RepoAuthoritative = false;
 
 using jit::mcg;
+using jit::TCA;
 
 #define IOP_ARGS        PC& pc
 #if DEBUG
@@ -960,14 +961,25 @@ ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
 Cell ExecutionContext::lookupClsCns(const NamedEntity* ne,
                                       const StringData* cls,
                                       const StringData* cns) {
-  Class* class_ = Unit::loadClass(ne, cls);
+  Class* class_ = nullptr;
+  try {
+    class_ = Unit::loadClass(ne, cls);
+  } catch (Object& ex) {
+    // For compatibility with php, throwing through a constant lookup has
+    // different behavior inside a property initializer (86pinit/86sinit).
+    auto ar = getStackFrame();
+    if (ar && ar->func() && Func::isSpecial(ar->func()->name())) {
+      raise_warning("Uncaught %s", ex.toString().data());
+      raise_error("Couldn't find constant %s::%s", cls->data(), cns->data());
+    }
+    throw;
+  }
   if (class_ == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, cls->data());
   }
   Cell clsCns = class_->clsCnsGet(cns);
   if (clsCns.m_type == KindOfUninit) {
-    raise_error("Couldn't find constant %s::%s",
-                cls->data(), cns->data());
+    raise_error("Couldn't find constant %s::%s", cls->data(), cns->data());
   }
   return clsCns;
 }
@@ -3235,15 +3247,24 @@ OPTBLD_INLINE bool memberHelperPre(PC& pc, MemberState& mstate) {
     case MPC:
     case MPT:
       result = Prop<warn,define,unset>(
-          mstate.scratch, *mstate.ref.asTypedValue(), ctx, mstate.base,
-          *mstate.curMember
+        mstate.scratch, *mstate.ref.asTypedValue(), ctx, mstate.base,
+        *mstate.curMember
+      );
+      break;
+    case MQT:
+      if (define) {
+        raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
+      }
+      result = nullSafeProp(
+        mstate.scratch, *mstate.ref.asTypedValue(), ctx, mstate.base,
+        mstate.curMember->m_data.pstr
       );
       break;
     case MW:
       if (setMember) {
         assert(define);
         result = NewElem<reffy>(
-            mstate.scratch, *mstate.ref.asTypedValue(), mstate.base
+          mstate.scratch, *mstate.ref.asTypedValue(), mstate.base
         );
       } else {
         raise_error("Cannot use [] for reading");
@@ -3393,10 +3414,16 @@ OPTBLD_INLINE void setHelperPost(unsigned ndiscard) {
   vmStack().ndiscard(ndiscard);
 }
 
-// forward-declare iop functions.
-#define O(name, imm, push, pop, flags) void iop##name(PC& pc);
-OPCODES
-#undef O
+/*
+ * One iop* function exists for every bytecode. They all take a single PC&
+ * argument, which should be left pointing to the next bytecode to execute when
+ * the instruction is complete. Most return void, though a few return a
+ * jit::TCA. The ones that return a TCA return a non-nullptr value to indicate
+ * that the caller must resume execution in the TC at the returned
+ * address. This is used to maintain certain invariants about how we get into
+ * and out of VM frames in jitted code; see comments on jitReturnPre() for more
+ * details.
+ */
 
 OPTBLD_INLINE void iopLowInvalid(IOP_ARGS) {
   fprintf(stderr, "invalid bytecode executed\n");
@@ -4393,8 +4420,12 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
   auto savedRip = fp->m_savedRip;
   if (isReturnHelper(reinterpret_cast<void*>(savedRip))) {
     // This frame wasn't called from the TC, so it's ok to return using the
-    // interpreter.
-    savedRip = 0;
+    // interpreter. callToExit is special: it's a return helper but we don't
+    // treat it like one in here in order to simplify some things higher up in
+    // the pipeline.
+    if (reinterpret_cast<TCA>(savedRip) != mcg->tx().uniqueStubs.callToExit) {
+      savedRip = 0;
+    }
   } else if (!ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
     // We entered this frame in the TC but the jit is now disabled, probably
     // because a debugger is attached. If we leave this frame in the
@@ -4407,13 +4438,13 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
   return {savedRip, fp, fp->sfp()};
 }
 
-OPTBLD_INLINE void jitReturnPost(JitReturn retInfo, PC pc) {
+OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
   if (retInfo.savedRip) {
     // This frame was called by translated code so we can't interpret out of
     // it. Resume in the TC right after our caller. This situation most
     // commonly happens when we interpOne a RetC due to having a VarEnv or some
     // other weird case.
-    throw VMResumeTC(retInfo.savedRip);
+    return TCA(retInfo.savedRip);
   }
 
   if (!retInfo.sfp) {
@@ -4422,7 +4453,7 @@ OPTBLD_INLINE void jitReturnPost(JitReturn retInfo, PC pc) {
     // we might throw before returning to the TC, which is guaranteed to not
     // happen in this situation.
     assert(vmfp() == nullptr);
-    return;
+    return nullptr;
   }
 
 
@@ -4446,13 +4477,15 @@ OPTBLD_INLINE void jitReturnPost(JitReturn retInfo, PC pc) {
   // live VM frame in %rbp.
   if (vmJitCalledFrame() == retInfo.fp) {
     FTRACE(1, "Returning from frame {}; resuming", vmJitCalledFrame());
-    vmpc() = pc;
-    throw VMResumeTC(uint64_t(mcg->tx().uniqueStubs.resumeHelper));
+    return mcg->tx().uniqueStubs.resumeHelper;
   }
-}
+
+  return nullptr;
 }
 
-OPTBLD_INLINE void ret(PC& pc) {
+}
+
+OPTBLD_INLINE TCA ret(PC& pc) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   // Get the return value.
@@ -4521,19 +4554,19 @@ OPTBLD_INLINE void ret(PC& pc) {
   vmfp() = sfp;
   pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
 
-  jitReturnPost(jitReturn, pc);
+  return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void iopRetC(IOP_ARGS) {
+OPTBLD_INLINE TCA iopRetC(IOP_ARGS) {
   pc++;
-  ret(pc);
+  return ret(pc);
 }
 
-OPTBLD_INLINE void iopRetV(IOP_ARGS) {
+OPTBLD_INLINE TCA iopRetV(IOP_ARGS) {
   pc++;
   assert(!vmfp()->resumed());
   assert(!vmfp()->func()->isResumable());
-  ret(pc);
+  return ret(pc);
 }
 
 OPTBLD_INLINE void iopUnwind(IOP_ARGS) {
@@ -4865,7 +4898,8 @@ OPTBLD_INLINE void isSetEmptyM(PC& pc) {
     }
     case MPL:
     case MPC:
-    case MPT: {
+    case MPT:
+    case MQT: {
       Class* ctx = arGetContextClass(vmfp());
       isSetEmptyResult = IssetEmptyProp<isEmpty>(
         ctx,
@@ -5176,6 +5210,8 @@ OPTBLD_INLINE void iopSetM(IOP_ARGS) {
         SetProp<true>(ctx, mstate.base, *mstate.curMember, c1);
         break;
       }
+      case MQT:
+        /* fallthrough */
       case InvalidMemberCode:
         assert(false);
         break;
@@ -5287,7 +5323,7 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
   MemberState mstate;
   if (!setHelperPre<MoreWarnings, true, false, false, 1,
       VectorLeaveCode::LeaveLast>(pc, mstate)) {
-    TypedValue* result;
+    TypedValue* result = nullptr;
     Cell* rhs = vmStack().topC();
 
     switch (mstate.mcode) {
@@ -5310,7 +5346,8 @@ OPTBLD_INLINE void iopSetOpM(IOP_ARGS) {
                            ctx, op, mstate.base, *mstate.curMember, rhs);
         break;
       }
-
+      case MQT:
+        /* fallthrough */
       case InvalidMemberCode:
         assert(false);
         result = nullptr; // Silence compiler warning.
@@ -5404,6 +5441,8 @@ OPTBLD_INLINE void iopIncDecM(IOP_ARGS) {
         IncDecProp<true>(ctx, op, mstate.base, *mstate.curMember, to);
         break;
       }
+      case MQT:
+        /* fallthrough */
       case InvalidMemberCode:
         assert(false);
         break;
@@ -5536,6 +5575,8 @@ OPTBLD_INLINE void iopUnsetM(IOP_ARGS) {
         UnsetProp(ctx, mstate.base, *mstate.curMember);
         break;
       }
+      case MQT:
+        /* fallthrough */
       case MW:
       case InvalidMemberCode:
         assert(false);
@@ -6920,7 +6961,7 @@ OPTBLD_INLINE void iopVerifyRetTypeV(IOP_ARGS) {
   implVerifyRetType(pc);
 }
 
-OPTBLD_INLINE void iopNativeImpl(IOP_ARGS) {
+OPTBLD_INLINE TCA iopNativeImpl(IOP_ARGS) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   pc++;
@@ -6944,7 +6985,7 @@ OPTBLD_INLINE void iopNativeImpl(IOP_ARGS) {
   vmfp() = sfp;
   pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
 
-  jitReturnPost(jitReturn, pc);
+  return jitReturnPost(jitReturn);
 }
 
 OPTBLD_INLINE void iopSelf(IOP_ARGS) {
@@ -6982,7 +7023,7 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
 
 const StaticString s_this("this");
 
-OPTBLD_INLINE void iopCreateCont(IOP_ARGS) {
+OPTBLD_INLINE TCA iopCreateCont(IOP_ARGS) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   pc++;
@@ -7017,7 +7058,7 @@ OPTBLD_INLINE void iopCreateCont(IOP_ARGS) {
   vmfp() = sfp;
   pc = LIKELY(sfp != nullptr) ? sfp->func()->getEntry() + soff : nullptr;
 
-  jitReturnPost(jitReturn, pc);
+  return jitReturnPost(jitReturn);
 }
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {
@@ -7064,7 +7105,7 @@ OPTBLD_INLINE void iopContRaise(IOP_ARGS) {
   iopThrow(pc);
 }
 
-OPTBLD_INLINE void yield(PC& pc, const Cell* key, const Cell value) {
+OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   auto const fp = vmfp();
@@ -7104,22 +7145,22 @@ OPTBLD_INLINE void yield(PC& pc, const Cell* key, const Cell value) {
   vmfp() = sfp;
   pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 
-  jitReturnPost(jitReturn, pc);
+  return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void iopYield(IOP_ARGS) {
+OPTBLD_INLINE TCA iopYield(IOP_ARGS) {
   pc++;
   auto const value = *vmStack().topC();
   vmStack().discard();
-  yield(pc, nullptr, value);
+  return yield(pc, nullptr, value);
 }
 
-OPTBLD_INLINE void iopYieldK(IOP_ARGS) {
+OPTBLD_INLINE TCA iopYieldK(IOP_ARGS) {
   pc++;
   auto const key = *vmStack().indC(1);
   auto const value = *vmStack().topC();
   vmStack().ndiscard(2);
-  yield(pc, &key, value);
+  return yield(pc, &key, value);
 }
 
 OPTBLD_INLINE void iopContCheck(IOP_ARGS) {
@@ -7235,7 +7276,7 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
   pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 }
 
-OPTBLD_INLINE void iopAwait(IOP_ARGS) {
+OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
   pc++;
   auto iters = decode_iva(pc);
 
@@ -7245,7 +7286,7 @@ OPTBLD_INLINE void iopAwait(IOP_ARGS) {
     not_reached();
   } else if (wh->isSucceeded()) {
     cellSet(wh->getResult(), *vmStack().topC());
-    return;
+    return nullptr;
   } else if (UNLIKELY(wh->isFailed())) {
     throw Object(wh->getException());
   }
@@ -7260,7 +7301,7 @@ OPTBLD_INLINE void iopAwait(IOP_ARGS) {
     asyncSuspendE(pc, iters);
   }
 
-  jitReturnPost(jitReturn, pc);
+  return jitReturnPost(jitReturn);
 }
 
 OPTBLD_INLINE void iopCheckProp(IOP_ARGS) {
@@ -7463,12 +7504,25 @@ condStackTraceSep(Op opcode) {
   ONTRACE(3, auto stack = prettyStack(pfx);\
           Trace::trace("%s\n", stack.c_str());)
 
+/*
+ * iopRetWrapper is used to normalize the calling convention for the iop*
+ * functions, since some return void and some return TCA. Any functions that
+ * return void are treated as though they returned nullptr.
+ */
+OPTBLD_INLINE static TCA iopRetWrapper(void(*fn)(PC&), PC& pc) {
+  fn(pc);
+  return nullptr;
+}
+OPTBLD_INLINE static TCA iopRetWrapper(TCA(*fn)(PC& pc), PC& pc) {
+  return fn(pc);
+}
+
 /**
  * The interpOne functions are fat wrappers around the iop* functions, mostly
  * adding a bunch of debug-only logging and stats tracking.
  */
 #define O(opcode, imm, push, pop, flags)                                \
-  void interpOne##opcode(ActRec* fp, TypedValue* sp, Offset pcOff) {    \
+  TCA interpOne##opcode(ActRec* fp, TypedValue* sp, Offset pcOff) {     \
   interp_set_regs(fp, sp, pcOff);                                       \
   SKTRACE(5, SrcKey(liveFunc(), vmpc(), liveResumed()), "%40s %p %p\n", \
           "interpOne" #opcode " before (fp,sp)", vmfp(), vmsp());       \
@@ -7492,7 +7546,7 @@ condStackTraceSep(Op opcode) {
   assert(*reinterpret_cast<const Op*>(pc) == Op##opcode);               \
   ONTRACE(1, auto offset = vmfp()->m_func->unit()->offsetOf(pc);        \
           Trace::trace("op"#opcode" offset: %d\n", offset));            \
-  iop##opcode(pc);                                                      \
+  auto const retAddr = iopRetWrapper(iop##opcode, pc);                  \
   vmpc() = pc;                                                          \
   COND_STACKTRACE("op"#opcode" post: ");                                \
   condStackTraceSep(Op##opcode);                                        \
@@ -7503,6 +7557,7 @@ condStackTraceSep(Op opcode) {
    * fixup map for interpOne calls anyway.
    */ \
   tl_regState = VMRegState::DIRTY;                                      \
+  return retAddr;                                                       \
 }
 OPCODES
 #undef O
@@ -7514,7 +7569,7 @@ OPCODES
 };
 
 template <bool breakOnCtlFlow>
-void dispatchImpl() {
+TCA dispatchImpl() {
   static const void *optabDirect[] = {
 #define O(name, imm, push, pop, flags) \
     &&Label##name,
@@ -7543,13 +7598,14 @@ void dispatchImpl() {
   }
   DEBUGGER_ATTACHED_ONLY(optab = optabDbg);
   bool isCtlFlow = false;
+  TCA retAddr = nullptr;
 
 #define DISPATCH() do {                                                 \
     if (breakOnCtlFlow && isCtlFlow) {                                  \
       ONTRACE(1,                                                        \
-              Trace::trace("dispatch: Halt dispatch(%p)\n", \
-                           vmfp()));                                      \
-      return;                                                           \
+              Trace::trace("dispatch: Halt dispatch(%p)\n",             \
+                           vmfp()));                                    \
+      return retAddr;                                                   \
     }                                                                   \
     Op op = *reinterpret_cast<const Op*>(pc);                           \
     COND_STACKTRACE("dispatch:                    ");                   \
@@ -7572,7 +7628,7 @@ void dispatchImpl() {
       recordCodeCoverage(pc);                                 \
     }                                                         \
   Label##name: {                                              \
-    iop##name(pc);                                            \
+    retAddr = iopRetWrapper(iop##name, pc);                   \
     vmpc() = pc;                                              \
     if (breakOnCtlFlow) {                                     \
       isCtlFlow = instrIsControlFlow(Op::name);               \
@@ -7585,29 +7641,53 @@ void dispatchImpl() {
              op == OpYield || op == OpYieldK ||               \
              op == OpNativeImpl);                             \
       vmfp() = nullptr;                                       \
-      return;                                                 \
+      /* We returned from the top VM frame in this nesting level. This means
+       * m_savedRip in our ActRec must have been callToExit, which should've
+       * been returned by jitReturnPost(), whether or not we were called from
+       * the TC. We only actually return callToExit to our caller if that
+       * caller is dispatchBB(). */                           \
+      assert(retAddr == mcg->tx().uniqueStubs.callToExit);    \
+      return breakOnCtlFlow ? retAddr : nullptr;              \
     }                                                         \
+    assert(isCtlFlow || !retAddr);                            \
     DISPATCH();                                               \
   }
   OPCODES
 #undef O
 #undef DISPATCH
+
+  assert(retAddr == nullptr);
+  return nullptr;
 }
 
 static void dispatch() {
-  dispatchImpl<false>();
+  DEBUG_ONLY auto const retAddr = dispatchImpl<false>();
+  assert(retAddr == nullptr);
 }
 
 // We are about to go back to translated code, check whether we should
 // stick with the interpreter. NB: if we've just executed a return
 // from pseudomain, then there's no PC and no more code to interpret.
-void switchModeForDebugger() {
+OPTBLD_INLINE TCA switchModeForDebugger(TCA retAddr) {
   if (DEBUGGER_FORCE_INTR && (vmpc() != 0)) {
-    throw VMSwitchMode();
+    if (retAddr) {
+      // We just interpreted a bytecode that decided we need to return to an
+      // address in the TC rather than interpreting up into our caller. This
+      // means it might not be safe to throw an exception right now (see
+      // discussion in jitReturnPost). So, resume execution in the TC at a stub
+      // that will throw the execution from a safe place.
+      FTRACE(1, "Want to throw VMSwitchMode but retAddr = {}, "
+             "overriding with throwSwitchMode stub.\n", retAddr);
+      return mcg->tx().uniqueStubs.throwSwitchMode;
+    } else {
+      throw VMSwitchMode();
+    }
   }
+
+  return retAddr;
 }
 
-void dispatchBB() {
+TCA dispatchBB() {
   if (Trace::moduleEnabled(Trace::dispatchBB)) {
     auto cat = makeStaticString("dispatchBB");
     auto name = makeStaticString(show(SrcKey(vmfp()->func(), vmpc(),
@@ -7618,8 +7698,8 @@ void dispatchBB() {
     auto sk = SrcKey{vmfp()->func(), vmpc(), vmfp()->resumed()}.toAtomicInt();
     Trace::ringbufferEntry(Trace::RBTypeDispatchBB, sk, 0);
   }
-  dispatchImpl<true>();
-  switchModeForDebugger();
+  auto retAddr = dispatchImpl<true>();
+  return switchModeForDebugger(retAddr);
 }
 
 void ExecutionContext::pushVMState(Cell* savedSP) {

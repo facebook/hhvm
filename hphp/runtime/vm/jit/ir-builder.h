@@ -174,7 +174,15 @@ public:
    * Start the given block.  Returns whether or not it succeeded.  A failure
    * may occur in case the block turned out to be unreachable.
    */
-  bool startBlock(Block* block, const BCMarker& marker, bool isLoopHeader);
+  bool startBlock(Block* block, const BCMarker& marker, bool hasUnprocPred);
+
+  /*
+   * Returns whether or not `block' will succeed if passed to
+   * startBlock, which implies that we have state saved for `block',
+   * and therefore it's currently reachable from the unit's entry
+   * block.
+   */
+  bool canStartBlock(Block* block) const;
 
   /*
    * Create a new block corresponding to bytecode control flow.

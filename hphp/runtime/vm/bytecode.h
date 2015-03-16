@@ -30,17 +30,14 @@
 #include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "hphp/runtime/vm/jit/types.h"
+
 #include "hphp/util/arena.h"
 
 #include <type_traits>
 
 namespace HPHP {
 struct Resumable;
-
-/**
- * These macros allow us to easily change the arguments to iop*() opcode
- * implementations.
- */
 
 #define EVAL_FILENAME_SUFFIX ") : eval()'d code"
 
@@ -1040,12 +1037,12 @@ visitStackElems(const ActRec* const fp,
 void resetCoverageCounters();
 
 // The interpOne*() methods implement individual opcode handlers.
-using InterpOneFunc = void (*) (ActRec*, TypedValue*, Offset);
+using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
 bool doFCallArrayTC(PC pc);
 bool doFCall(ActRec* ar, PC& pc);
-void dispatchBB();
+jit::TCA dispatchBB();
 void pushLocalsAndIterators(const Func* func, int nparams = 0);
 
 ///////////////////////////////////////////////////////////////////////////////

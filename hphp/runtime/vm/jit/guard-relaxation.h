@@ -47,9 +47,6 @@ bool typeMightRelax(const SSATmp* tmp);
 bool relaxGuards(IRUnit&, const GuardConstraints& guards,
                  RelaxGuardsFlags flags);
 
-typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
-void visitGuards(IRUnit&, const VisitGuardFn& func);
-
 /*
  * Returns true iff `t' is specific enough to fit `cat', meaning a consumer
  * constraining a value with `cat' would be satisfied with `t' as the value's

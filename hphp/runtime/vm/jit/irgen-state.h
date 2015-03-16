@@ -83,10 +83,16 @@ struct HTS {
   const NormalizedInstruction* currentNormalizedInstruction{nullptr};
 
   /*
-   * True if we're on the last HHBC opcode that will be emitted for this
-   * region.
+   * True if we're on the first HHBC instruction that will be emitted
+   * for this region.
    */
-  bool lastBcOff{false};
+  bool firstBcInst{true};
+
+  /*
+   * True if we're on the last HHBC instruction that will be emitted
+   * for this region.
+   */
+  bool lastBcInst{false};
 
   /*
    * The FPI stack is used for inlining---when we start inlining at an FCall,

@@ -139,10 +139,22 @@ struct FrameState {
   SSATmp* fpValue{nullptr};
 
   /*
+   * Tracking of in-memory state of the evaluation stack.
+   */
+  SSATmp* spValue{nullptr};
+  FPAbsOffset spOffset;   // delta from vmfp to spvalue
+
+  /*
    * m_thisAvailable tracks whether the current frame is known to have a
    * non-null $this pointer.
    */
   bool thisAvailable{false};
+
+  /*
+   * frameMaySpan is true iff a Call instruction has been seen on any path
+   * since the definition of the current frame pointer.
+   */
+  bool frameMaySpanCall{false};
 
   /*
    * Tracking of the not-in-memory state of the virtual execution stack:
@@ -163,14 +175,8 @@ struct FrameState {
    * being used in LegacyReoptimize mode.
    */
   uint32_t stackDeficit{0};
-  EvalStack evalStack;
   FPAbsOffset syncedSpLevel{0};
-
-  /*
-   * Tracking of in-memory state of the evaluation stack.
-   */
-  SSATmp* spValue{nullptr};
-  FPAbsOffset spOffset;   // delta from vmfp to spvalue
+  EvalStack evalStack;
 
   /*
    * The values in the eval stack that are already in memory, either above or
@@ -184,12 +190,6 @@ struct FrameState {
    * (if the state is initialized).
    */
   jit::vector<LocalState> locals;
-
-  /*
-   * frameMaySpan is true iff a Call instruction has been seen on any path
-   * since the definition of the current frame pointer.
-   */
-  bool frameMaySpanCall{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -248,14 +248,13 @@ struct FrameStateMgr final : private LocalStateHook {
   bool hasStateFor(Block*) const;
 
   /*
-   * Starts tracking state for a block and reloads any previously saved
-   * state. Can set local values to null if hitting a block with an
-   * unprocessed predecessor, so we pass in an optional LocalStateHook. The
-   * isLoopHeader parameter is used during initial IR generation to indicate
-   * that the given block has a predecessor in the region that might not yet
-   * be linked into the IR cfg.
+   * Starts tracking state for a block and reloads any previously
+   * saved state.  The `hasUnprocessedPred' argument is used during
+   * initial IR generation to indicate that the given block has a
+   * predecessor in the region that might not yet be linked into the
+   * IR CFG.
    */
-  void startBlock(Block* b, BCMarker marker, bool isLoopHeader = false);
+  void startBlock(Block* b, BCMarker marker, bool hasUnprocessedPred = false);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -385,7 +384,7 @@ private:
   jit::vector<LocalState>& locals(unsigned inlineIdx);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
-  void loopHeaderClear(BCMarker);
+  void clearForUnprocessedPred(BCMarker);
   StackState& stackState(IRSPOffset offset);
   const StackState& stackState(IRSPOffset offset) const;
   void collectPostConds(Block* exitBlock);

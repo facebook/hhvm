@@ -91,23 +91,14 @@ void sync_regstate(_Unwind_Context* context) {
 }
 
 bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
-                         bool do_side_exit, TypedValue unwinder_tv,
-                         uint64_t returnRip) {
+                         bool do_side_exit, TypedValue unwinder_tv) {
   auto const rip = (TCA)_Unwind_GetIP(ctx);
   TCA catchTrace;
   if (auto catchTraceOpt = mcg->getCatchTrace(rip)) {
     catchTrace = *catchTraceOpt;
   } else {
-    if (returnRip) {
-      // We tried to interpret a return out of a frame that was entered in the
-      // TC and there's no catch trace for the current rip. Use endCatchHelper
-      // as a catch trace, which will delete the exception and resume at
-      // returnRip.
-      catchTrace = mcg->tx().uniqueStubs.endCatchHelperResumeTC;
-    } else {
-      FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
-      return false;
-    }
+    FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
+    return false;
   }
 
   if (!catchTrace) {
@@ -141,7 +132,7 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // If the catch trace isn't going to finish by calling _Unwind_Resume, we
   // consume the exception here. Otherwise, we leave a pointer to it in RDS so
   // endCatchHelper can pass it to _Unwind_Resume when it's done.
-  if (returnRip || do_side_exit) {
+  if (do_side_exit) {
     unwindRdsInfo->exn = nullptr;
     __cxxabiv1::__cxa_begin_catch(exn);
     __cxxabiv1::__cxa_end_catch();
@@ -156,7 +147,6 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // because it doesn't have to worry about saving its arguments somewhere
   // while executing the exit trace.
   unwindRdsInfo->doSideExit = do_side_exit;
-  unwindRdsInfo->returnRip = returnRip;
   if (do_side_exit) unwindRdsInfo->unwinderTv = unwinder_tv;
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;
@@ -191,13 +181,10 @@ tc_unwind_personality(int version,
   auto const std_exception = exceptionFromUnwindException(exceptionObj);
   InvalidSetMException* ism = nullptr;
   TVCoercionException* tce = nullptr;
-  VMResumeTC* resume_tc = nullptr;
   if (ti == typeid(InvalidSetMException)) {
     ism = static_cast<InvalidSetMException*>(std_exception);
   } else if (ti == typeid(TVCoercionException)) {
     tce = static_cast<TVCoercionException*>(std_exception);
-  } else if (ti == typeid(VMResumeTC)) {
-    resume_tc = static_cast<VMResumeTC*>(std_exception);
   }
 
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
@@ -227,12 +214,6 @@ tc_unwind_personality(int version,
     }
     if (tce) {
       FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND\n");
-      return _URC_HANDLER_FOUND;
-    }
-    if (resume_tc) {
-      FTRACE(1, "VMResumeTC thrown with address {:#x}, "
-             "returning _URC_HANDLER_FOUND\n",
-             resume_tc->where);
       return _URC_HANDLER_FOUND;
     }
   }
@@ -266,10 +247,8 @@ tc_unwind_personality(int version,
       }
     }
 
-    if (install_catch_trace(context, exceptionObj, ism || tce, tv,
-                            resume_tc ? resume_tc->where : 0)) {
-      always_assert((ism || tce || resume_tc) ==
-                    bool(actions & _UA_HANDLER_FRAME));
+    if (install_catch_trace(context, exceptionObj, ism || tce, tv)) {
+      always_assert((ism || tce) == bool(actions & _UA_HANDLER_FRAME));
       return _URC_INSTALL_CONTEXT;
     }
   }

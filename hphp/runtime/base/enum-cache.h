@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_ENUM_CACHE_H_
 #define incl_HPHP_ENUM_CACHE_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/class.h"
 #include <tbb/concurrent_hash_map.h>
 

@@ -19,6 +19,44 @@
  - Don't let odbc hang indefinitely
  - Add support for nullable XHP attribute types
 
+"Earle" 12-Mar-2015
+ - Fix some issues with the perf counters
+ - Conditionally enable pthread_mutex_timedlock emulation
+ - [hack] Run all declaration checks for builtin hhi files
+ - Improve the new refcount optimizer
+ - Improve return types of multiple HHIR opcodes
+ - [hack] Check for unimplemented abstract functions in decl mode
+ - Fix free of uninitialized ptr in GD
+ - Fix segfault in unserialization when referencing invalid array element
+ - Apply libmagic security updates
+ - Fix incorrect use of ArrayIdx on a map with constant int-like string keys
+ - Fix some bugs with reserved name (self, parent) restrictions
+ - Convert MySQLi to NPH
+ - [hack] Allow config whitelisting of <<UserAttributes>>
+ - [hack] Improve hackificator
+ - Avoid forming tracelets that can't have IR fully emitted
+ - Add patch and instructions for building custom version of LLVM
+ - Optimize ord()
+ - Clean up jit::Type methods and improve its behavior
+ - Make "Vary:" header more precise
+ - Match PHP's `use strict;` easter egg and add one of our own
+ - Add PowerPC64 arch-specific code
+ - Add support for noreturn return typehint
+ - Allow Bottom in the IR
+ - Support hot/cold splitting in LLVM-generated code.
+ - [hack] Add hh_client --list-modes
+ - [hack] Add various lint checks and improve lint logic
+ - Make __Deprecated('...') user attribute result in runtime warning
+ - [hack] Avoid timing out when list of errors is very long
+ - Improve interface method compat checks for Type Constants
+ - [hack] Add HHI for SQLFormatter
+ - [hack] Add HHI for mcrouter extension
+ - Support for visiting non-BlockableWaitHandles in debug_backtrace()
+ - Fix Switch-related bug in instrSuccOffsets
+ - Introduce simplifier tool
+ - Convert extensions to use SmartPtr
+ - Fix memory effects for a bunch of HHIR opcodes
+
 "Ditko" 26-Feb-2015
  - Make printf use HH\FormatString instead of FormatString (we're planning to
    un-reserve \FormatString in a future version).

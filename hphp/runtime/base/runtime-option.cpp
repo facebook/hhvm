@@ -1000,6 +1000,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     }
     Config::Bind(DisableSmartAllocator, ini, eval["DisableSmartAllocator"],
                  DisableSmartAllocator);
+    SetArenaSlabAllocBypass(DisableSmartAllocator);
+
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, eval["CodeCoverageOutputFile"]);
     // NB: after we know the value of RepoAuthoritative.

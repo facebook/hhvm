@@ -16,10 +16,10 @@ val debug_print_last_pos:
   'a -> unit
 
 val fun_decl:
-  Nast.fun_ -> unit
+  TypecheckerOptions.t -> Nast.fun_ -> unit
 
 val gconst_decl:
-  Nast.gconst -> unit
+  TypecheckerOptions.t -> Nast.gconst -> unit
 
 val fun_def:
   Typing_env.env -> 'a -> Nast.fun_ -> unit

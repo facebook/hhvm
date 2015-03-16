@@ -353,7 +353,9 @@ let get_results funs classes =
   let results = !autocomplete_results in
   let env = match !ac_env with
     | Some e -> e
-    | None -> Typing_env.empty Relative_path.default
+    | None ->
+      let tcopt = TypecheckerOptions.permissive in
+      Typing_env.empty tcopt Relative_path.default
   in
   let results = List.map begin fun x ->
     let desc_string = match x.desc with

@@ -194,8 +194,8 @@ let predef_tests = List.fold_right SSet.add predef_tests_list SSet.empty
 (* Empty (initial) environments *)
 (*****************************************************************************)
 
-let empty = {
-  itcopt    = TypecheckerOptions.empty;
+let empty tcopt = {
+  itcopt    = tcopt;
   iclasses  = SMap.empty, SMap.empty;
   ifuns     = !predef_funs, !predef_funnames;
   itypedefs = SMap.empty;
@@ -1540,7 +1540,8 @@ and uselist_lambda f =
     to_capture := x :: !to_capture;
     p, Ident.tmp()
   in
-  let genv = Env.make_fun_genv empty SMap.empty f in
+  let tcopt = TypecheckerOptions.permissive in
+  let genv = Env.make_fun_genv (empty tcopt) SMap.empty f in
   let lenv = Env.empty_local () in
   let lenv = { lenv with unbound_mode = UBMFunc handle_unbound } in
   let env = genv, lenv in

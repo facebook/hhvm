@@ -85,6 +85,7 @@ type env = {
 }
 
 and genv = {
+  tcopt   : TypecheckerOptions.t;
   mode    : FileInfo.mode;
   return  : ty         ;
   parent  : ty         ;
@@ -267,7 +268,7 @@ let empty_fake_members = {
 
 let empty_local = empty_fake_members, IMap.empty
 
-let empty file = {
+let empty tcopt file = {
   pos     = Pos.none;
   tenv    = IMap.empty;
   subst   = IMap.empty;
@@ -275,6 +276,7 @@ let empty file = {
   todo    = [];
   in_loop = false;
   genv    = {
+    tcopt   = tcopt;
     mode    = FileInfo.Mstrict;
     return  = fresh_type();
     self_id = "";
@@ -499,6 +501,8 @@ let get_mode env = env.genv.mode
 
 let is_strict env = get_mode env = FileInfo.Mstrict
 let is_decl env = get_mode env = FileInfo.Mdecl
+
+let get_options env = env.genv.tcopt
 
 (*
 let debug_env env =

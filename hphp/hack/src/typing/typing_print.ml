@@ -288,7 +288,7 @@ end
 
 module PrintClass = struct
 
-  let tenv = Typing_env.empty Relative_path.default
+  let tenv = Typing_env.empty TypecheckerOptions.default Relative_path.default
 
   let indent = "    "
   let bool = string_of_bool

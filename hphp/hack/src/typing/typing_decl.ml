@@ -305,7 +305,7 @@ let ifun_decl nenv (f: Ast.fun_) =
   let f = Naming.fun_ nenv f in
   let cid = snd f.f_name in
   Naming_heap.FunHeap.add cid f;
-  Typing.fun_decl f;
+  Typing.fun_decl (Naming.typechecker_options nenv) f;
   ()
 
 (*****************************************************************************)
@@ -395,7 +395,7 @@ and class_is_abstract c =
 and class_decl tcopt c =
   let is_abstract = class_is_abstract c in
   let cls_pos, cls_name = c.c_name in
-  let env = Typing_env.empty (Pos.filename cls_pos) in
+  let env = Typing_env.empty tcopt (Pos.filename cls_pos) in
   let env = Env.set_mode env c.c_mode in
   let class_dep = Dep.Class cls_name in
   let env = Env.set_root env class_dep in
@@ -835,7 +835,8 @@ and type_typedef_naming_and_decl nenv tdef =
   in
   let params, tcstr, concrete_type as decl = Naming.typedef nenv tdef in
   let filename = Pos.filename pos in
-  let env = Typing_env.empty filename in
+  let tcopt = Naming.typechecker_options nenv in
+  let env = Typing_env.empty tcopt filename in
   let env = Typing_env.set_mode env tdef.Ast.t_mode in
   let env = Env.set_root env (Typing_deps.Dep.Class tid) in
   let env, params = lfold Typing.type_param env params in
@@ -865,7 +866,7 @@ let iconst_decl nenv cst =
   let cst = Naming.global_const nenv cst in
   let _cst_pos, cst_name = cst.cst_name in
   Naming_heap.ConstHeap.add cst_name cst;
-  Typing.gconst_decl cst;
+  Typing.gconst_decl (Naming.typechecker_options nenv) cst;
   ()
 
 (*****************************************************************************)

@@ -100,8 +100,8 @@ let is_hhi path = str_ends_with (Relative_path.suffix path) ".hhi"
 (* Global constants typing *)
 (*****************************************************************************)
 
-let gconst_decl cst =
-   let env = Env.empty (Pos.filename (fst cst.cst_name)) in
+let gconst_decl tcopt cst =
+   let env = Env.empty tcopt (Pos.filename (fst cst.cst_name)) in
    let env = Env.set_mode env cst.cst_mode in
    let env = Env.set_root env (Dep.GConst (snd cst.cst_name)) in
    let _, hint_ty =
@@ -126,8 +126,8 @@ let rec wfold_left_default f (env, def1) l1 l2 =
     let env = f env x1 x2 in
     wfold_left_default f (env, def1) rl1 rl2
 
-let rec fun_decl f =
-  let env = Env.empty (Pos.filename (fst f.f_name)) in
+let rec fun_decl (tcopt:TypecheckerOptions.t) f =
+  let env = Env.empty tcopt (Pos.filename (fst f.f_name)) in
   let env = Env.set_mode env f.f_mode in
   let env = Env.set_root env (Dep.Fun (snd f.f_name)) in
   let _, ft = fun_decl_in_env env f in
@@ -1157,24 +1157,54 @@ and expr_ in_cond is_lvalue env (p, e) =
       ignore (anon env ft.ft_params);
       env, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
-      let env, obj = expr env (fst sid, New (CI sid, [], [])) in
-      let env, _attr_tyl = lfold expr env (List.map snd attrl) in
+      let cid = CI sid in
+      let env, obj = expr env (fst sid, New (cid, [], [])) in
+      let env, attr_ptyl = lmap begin fun env attr ->
+        (* Typecheck the expressions - this just checks that the expressions are
+         * valid, not that they match the declared type for the attribute *)
+        let namepstr, valexpr = attr in
+        let valp, _ = valexpr in
+        let env, valty = expr env valexpr in
+        env, (namepstr, (valp, valty))
+      end env attrl in
       let env, _body = lfold expr env el in
-      (* We don't perform any check on XHP body right now, because
-       * it is unclear, what is allowed ...
-       * I keep the code here, because one day, we might want to be
-       * more restrictive.
-       *)
-      (*
-        let env, _ = lfold2 begin fun env e ty ->
-        let p = fst e in
-        let r = Reason.Rxhp p in
-        let xhp_ty = (r, (Toption (r, Tapply ((p, "XHP"), [])))) in
-        let env = Type.sub_type p Reason.URxhp env xhp_ty ty in
-        env, ()
-        end env el body in
-       *)
-      env, obj
+      let env, class_ = class_id p env cid in
+      (match class_ with
+      | None -> env, (Reason.Runknown_class p, Tobject)
+      | Some (_, class_) ->
+        if TypecheckerOptions.unsafe_xhp (Env.get_options env) then
+          env, obj
+        else begin
+          (* Check that the declared type of the XHP attribute matches the
+           * expression type *)
+          let attrdec =
+            SMap.filter (fun _ cvar -> cvar.ce_is_xhp_attr) class_.tc_cvars in
+          let env = List.fold_left begin fun env attr ->
+            let namepstr, valpty = attr in
+            let valp, valty = valpty in
+            (* We pretend that XHP attributes are stored as member variables,
+             * prefixed with a colon.
+             *
+             * This converts the member name to an attribute name. *)
+            let name = ":" ^ (snd namepstr) in
+            let elt_option = SMap.get name attrdec in
+            (match elt_option with
+            | Some elt ->
+              let declty = elt.ce_type in
+              let env = Type.sub_type valp Reason.URxhp env declty valty in
+              env
+            | None when SN.Members.is_special_xhp_attribute name -> env
+              (* Special attributes are valid even if they're not declared - eg
+               * any 'data-' attribute *)
+            | None ->
+              let r = (Reason.Rwitness p) in
+              member_not_found (fst namepstr) ~is_method:false class_ name r;
+              env
+            );
+          end env attr_ptyl in
+          env, obj
+        end
+      )
   | Shape fdm ->
       let env, fdm = ShapeMap.map_env expr env fdm in
       (* allow_inter adds a type-variable *)

@@ -123,9 +123,6 @@ public:
   void setLocalExprAltered() { m_flags.localExprNotAltered = false; }
   void clearLocalExprAltered() { m_flags.localExprNotAltered = true; }
   bool isLocalExprAltered() const { return !m_flags.localExprNotAltered; }
-  void setChainRoot() { m_flags.chainRoot = true; }
-  void clearChainRoot() { m_flags.chainRoot = false; }
-  bool isChainRoot() const { return m_flags.chainRoot; }
 
   void setReferencedValid() { m_flags.referenced_valid = true; }
   void clearReferencedValid() { m_flags.referenced_valid = false; }
@@ -134,10 +131,6 @@ public:
   void setReferenced() { m_flags.referenced = true; }
   void clearReferenced() { m_flags.referenced = false; }
   bool isReferenced() const { return m_flags.referenced; }
-
-  void setNeededValid() { m_flags.needed_valid = true; }
-  void clearNeededValid() { m_flags.needed_valid = false; }
-  bool isNeededValid() const { return m_flags.needed_valid; }
 
   void setNeeded() { m_flags.needed = true; }
   void clearNeeded() { m_flags.needed = false; }
@@ -296,9 +289,6 @@ private:
       unsigned referenced          : 1;
       unsigned referenced_valid    : 1; // is the above flag is valid
       unsigned needed              : 1;
-      unsigned needed_valid        : 1; // is the above flag is valid
-      unsigned chainRoot           : 1; // is this the beginning of a
-                                        // CSE chain
       unsigned noRemove            : 1; // DCE should NOT remove this node
       unsigned guarded             : 1; // previously used
       unsigned killed              : 1;

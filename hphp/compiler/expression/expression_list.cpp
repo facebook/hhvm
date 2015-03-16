@@ -281,27 +281,19 @@ void ExpressionList::stripConcat() {
   }
 }
 
-void ExpressionList::markParam(int p, bool noRefWrapper) {
+void ExpressionList::markParam(int p) {
   ExpressionPtr param = (*this)[p];
   if (param->hasContext(Expression::InvokeArgument)) {
-    if (noRefWrapper) {
-      param->setContext(Expression::NoRefWrapper);
-    } else {
-      param->clearContext(Expression::NoRefWrapper);
-    }
   } else if (!param->hasContext(Expression::RefParameter)) {
     param->setContext(Expression::InvokeArgument);
     param->setContext(Expression::RefValue);
-    if (noRefWrapper) {
-      param->setContext(Expression::NoRefWrapper);
-    }
   }
   param->setArgNum(p);
 }
 
-void ExpressionList::markParams(bool noRefWrapper) {
+void ExpressionList::markParams() {
   for (int i = 0; i < getCount(); i++) {
-    markParam(i, noRefWrapper);
+    markParam(i);
   }
 }
 

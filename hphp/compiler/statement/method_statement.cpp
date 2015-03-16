@@ -495,7 +495,6 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
     }
     // TODO: this may have to expand to a concept of "virtual" functions...
     if (m_method) {
-      funcScope->disableInline();
       if (m_name.length() > 2 && m_name.substr(0,2) == "__") {
         bool magic = true;
         int paramCount = 0;

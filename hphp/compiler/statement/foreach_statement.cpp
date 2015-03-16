@@ -50,7 +50,6 @@ ForEachStatement::ForEachStatement
   if (m_ref) {
     m_array->setContext(Expression::RefValue);
     m_value->setContext(Expression::RefValue);
-    m_value->setContext(Expression::NoRefWrapper);
   }
 }
 

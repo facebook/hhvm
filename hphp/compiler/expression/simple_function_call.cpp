@@ -384,14 +384,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       (m_funcScope->getOptFunction())(0, ar, self, 1);
     }
 
-    if (!m_class && !m_className.empty()) {
-      if (Option::DynamicInvokeFunctions.find(
-            toLower(m_className + "::" + m_name)) !=
-          Option::DynamicInvokeFunctions.end()) {
-        setNoInline();
-      }
-    }
-
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
         (m_type == FunType::Define ||
@@ -522,7 +514,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       ar->forceClassVariants(getOriginalClass(), false);
     }
     if (m_params) {
-      markRefParams(m_funcScope, m_name, canInvokeFewArgs());
+      markRefParams(m_funcScope, m_name);
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (m_type == FunType::Unknown &&
@@ -568,9 +560,6 @@ void SimpleFunctionCall::updateVtFlags() {
   FunctionScopeRawPtr f = getFunctionScope();
   if (f) {
     if (m_funcScope) {
-      if (m_funcScope->getContextSensitive()) {
-        f->setInlineSameContext(true);
-      }
       if ((m_classScope && (isSelf() || isParent()) &&
            m_funcScope->usesLSB()) ||
           isStatic() ||
@@ -858,11 +847,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
     }
   }
 
-  if (m_type != FunType::Unknown || m_safe) {
-    return ExpressionPtr();
-  }
-
-  return inliner(ar, ExpressionPtr(), m_localThis);
+  return ExpressionPtr();
 }
 
 ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {

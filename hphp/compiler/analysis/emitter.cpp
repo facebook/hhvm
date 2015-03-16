@@ -2615,15 +2615,6 @@ static StringData* getClassName(ExpressionPtr e) {
   ClassScopeRawPtr cls;
   if (e->isThis()) {
     cls = e->getOriginalClass();
-    if (TypePtr t = e->getAssertedType()) {
-      if (t->isSpecificObject()) {
-        AnalysisResultConstPtr ar = e->getScope()->getContainingProgram();
-        ClassScopeRawPtr c2 = t->getClass(ar, e->getScope());
-        if (c2 && c2->derivesFrom(ar, cls->getName(), true, false)) {
-          cls = c2;
-        }
-      }
-    }
   } else if (TypePtr t = e->getActualType()) {
     if (t->isSpecificObject()) {
       cls = t->getClass(e->getScope()->getContainingProgram(), e->getScope());
@@ -5231,16 +5222,19 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
     permissiveKind = PassByRefKind::WarnOnCell;
   }
 
-  // this only happens for calls that have been morphed into bytecode
-  // e.g. idx(), abs(), strlen(), etc..
-  // It is to allow the following code to work
-  // function f(&$arg) {...}
-  // f(idx($array, 'key')); <- this fails otherwise
-  if (exp->allowCellByRef()) {
-    return PassByRefKind::AllowCell;
-  }
-
   switch (exp->getKindOf()) {
+    case Expression::KindOfSimpleFunctionCall: {
+      SimpleFunctionCallPtr sfc(
+        static_pointer_cast<SimpleFunctionCall>(exp));
+      // this only happens for calls that have been morphed into bytecode
+      // e.g. idx(), abs(), strlen(), etc..
+      // It is to allow the following code to work
+      // function f(&$arg) {...}
+      // f(idx($array, 'key')); <- this fails otherwise
+      if (sfc->hasBeenChangedToBytecode()) {
+        return PassByRefKind::AllowCell;
+      }
+    } break;
     case Expression::KindOfNewObjectExpression:
     case Expression::KindOfIncludeExpression:
     case Expression::KindOfSimpleVariable:

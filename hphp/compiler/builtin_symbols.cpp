@@ -169,9 +169,6 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   if (attrs & ClassInfo::FunctionIsFoldable) {
     f->setIsFoldable();
   }
-  if (attrs & ClassInfo::ContextSensitive) {
-    f->setContextSensitive(true);
-  }
   if (attrs & ClassInfo::NoFCallBuiltin) {
     f->setNoFCallBuiltin();
   }

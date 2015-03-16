@@ -10,8 +10,7 @@
                 "HipHopSpecific",
                 "VariableArguments",
                 "HasOptFunction",
-                "NoProfile",
-                "ContextSensitive"
+                "NoProfile"
             ],
             "return": {
                 "type": "VariantVec",
@@ -32,8 +31,7 @@
                 "HipHopSpecific",
                 "VariableArguments",
                 "HasOptFunction",
-                "NoProfile",
-                "ContextSensitive"
+                "NoProfile"
             ],
             "return": {
                 "type": "Variant",
@@ -58,8 +56,7 @@
             "flags": [
                 "HipHopSpecific",
                 "HasOptFunction",
-                "NoProfile",
-                "ContextSensitive"
+                "NoProfile"
             ],
             "return": {
                 "type": "VariantVec",

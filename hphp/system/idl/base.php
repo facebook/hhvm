@@ -140,7 +140,6 @@ define('NoInjection',                    1 << 22);
 define('HasOptFunction',                 1 << 23);
 define('AllowIntercept',                 1 << 24);
 define('NoProfile',                      1 << 25);
-define('ContextSensitive',               1 << 26);
 define('NoDefaultSweep',                 1 << 27);
 define('IsSystem',                       1 << 28);
 define('IsTrait',                        1 << 29);
@@ -177,7 +176,6 @@ function get_flag_names($arr, $name, $global_func) {
   if ($flag & HasOptFunction        ) $ret .= ' | HasOptFunction'        ;
   if ($flag & AllowIntercept        ) $ret .= ' | AllowIntercept'        ;
   if ($flag & NoProfile             ) $ret .= ' | NoProfile'             ;
-  if ($flag & ContextSensitive      ) $ret .= ' | ContextSensitive'      ;
   if ($flag & NoDefaultSweep        ) $ret .= ' | NoDefaultSweep'        ;
   if ($flag & IsTrait               ) $ret .= ' | IsTrait'               ;
   if ($flag & NoFCallBuiltin        ) $ret .= ' | NoFCallBuiltin'        ;

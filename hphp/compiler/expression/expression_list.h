@@ -70,8 +70,8 @@ public:
   void getOriginalStrings(std::vector<std::string> &strings);
   void stripConcat();
 
-  void markParam(int p, bool noRefWrapper);
-  void markParams(bool noRefWrapper);
+  void markParam(int p);
+  void markParams();
 
   void setCollectionType(Collection::Type cType);
   void setContainsUnpack() { m_argUnpack = true; };

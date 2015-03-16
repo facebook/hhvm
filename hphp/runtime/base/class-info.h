@@ -74,7 +74,8 @@ public:
     HasOptFunction         = (1 << 23), //                  x
     AllowIntercept         = (1 << 24), //                  x      x
     NoProfile              = (1 << 25), //                  x      x
-    ContextSensitive       = (1 << 26), //                  x
+    // Unused                (1 << 26),
+
     NoDefaultSweep         = (1 << 27), //    x
     IsSystem               = (1 << 28), //    x             x
 

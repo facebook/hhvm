@@ -189,7 +189,7 @@ static void outputConstants(const fbstring &invocation_trace,
 
 #define FUNC_FLAG_MASK (IsProtected|IsPrivate|IsPublic|\
                         IsAbstract|IsStatic|IsFinal|\
-                        AllowIntercept|NoProfile|ContextSensitive|\
+                        AllowIntercept|NoProfile|\
                         HipHopSpecific|VariableArguments|\
                         RefVariableArguments|\
                         NoFCallBuiltin|FunctionIsFoldable|\

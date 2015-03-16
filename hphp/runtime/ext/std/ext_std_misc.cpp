@@ -670,43 +670,54 @@ loop_start: // For after seeing a T_INLINE_HTML, see below
       res.append(String::FromChar((char)tokid));
     } else {
       String value;
-      const int tokVal = get_user_token_id(tokid);
-      if (tokVal == UserTokenId_T_XHP_LABEL) {
-        value = String(":" + tok.text());
-      } else if (tokVal == UserTokenId_T_XHP_CATEGORY_LABEL) {
-        value = String("%" + tok.text());
-      } else if (tokVal == UserTokenId_T_INLINE_HTML) {
-        // Consecutive T_INLINE_HTML tokens should be merged together to
-        // match Zend behaviour.
-        value = String(tok.text());
-        int line = loc.line0;
-        tokid = scanner.getNextToken(tok, loc);
-        while (tokid == T_INLINE_HTML) {
+      int tokVal = get_user_token_id(tokid);
+      switch (tokVal) {
+        case UserTokenId_T_XHP_LABEL:
+          value = String(":" + tok.text());
+          break;
+        case UserTokenId_T_XHP_CATEGORY_LABEL:
+          value = String("%" + tok.text());
+          break;
+        case UserTokenId_T_HASHBANG:
+          // Convert T_HASHBANG to T_INLINE_HTML for Zend compatibility
+          tokVal = UserTokenId_T_INLINE_HTML;
+          // Fall through to merge it with following T_INLINE_HTML tokens
+        case UserTokenId_T_INLINE_HTML:
+        {
+          // Consecutive T_INLINE_HTML tokens should be merged together to
+          // match Zend behaviour.
+          value = String(tok.text());
+          int line = loc.line0;
+          tokid = scanner.getNextToken(tok, loc);
+          while (tokid == T_INLINE_HTML) {
             value += String(tok.text());
             tokid = scanner.getNextToken(tok, loc);
-        }
-        Array p = make_packed_array(
-          tokVal,
-          value,
-          line
-        );
-        res.append(p);
+          }
+          Array p = make_packed_array(
+            tokVal,
+            value,
+            line
+          );
+          res.append(p);
 
-        if (tokid) {
+          if (tokid) {
             // We have a new token to deal with, jump to the beginning
             // of the loop, but don't fetch the next token, hence the
             // goto.
             goto loop_start;
-        } else {
+          } else {
             // Break out otherwise we end up appending an empty token to
             // the end of the array
-            break;
+            return res;
+          }
+          break;
         }
-      } else {
-        value = String(tok.text());
+        default:
+          value = String(tok.text());
+          break;
       }
+
       Array p = make_packed_array(
-        // Convert the internal token ID to a user token ID
         tokVal,
         value,
         loc.line0

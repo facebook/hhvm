@@ -1,0 +1,6 @@
+string(3) "one"
+string(3) "fiz"
+string(3) "foo"
+
+Notice: Undefined property: DOMDocument::$tagName in %s/retain-nodes.php on line 19
+NULL

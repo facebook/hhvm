@@ -24,6 +24,7 @@
 #include <memory>
 
 #include "hphp/runtime/ext/domdocument/ext_domdocument_includes.h"
+#include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 
@@ -33,263 +34,79 @@ namespace HPHP {
 Variant HHVM_FUNCTION(dom_import_simplexml,
                       const Object& node);
 
-Variant php_dom_create_object(xmlNodePtr obj, Object doc, bool owner = false);
+Variant php_dom_create_object(xmlNodePtr obj, SmartPtr<XMLDocumentData> doc);
 
-template <class T>
-T* toDOMNativeData(ObjectData* obj) {
-  if (!obj->instanceof(T::getClass())) {
-    throw_invalid_object_type(obj->getClassName().data());
-  }
-  return Native::data<T>(obj);
-}
+Object newDOMDocument(bool construct = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNode
 
-class DOMDocument;
-
-class DOMNode {
-public:
-  DOMNode() : m_node(nullptr) {}
-  virtual ~DOMNode() {}
-  DOMNode& operator=(const DOMNode& src) {
-    m_doc = src.doc();
-    m_node = src.m_node;
-    return *this;
+struct DOMNode {
+  virtual ~DOMNode() {
+    if (m_node) {
+      assert(m_node->getCache() &&
+             Native::data<DOMNode>(m_node->getCache()) == this);
+      m_node->clearCache();
+    }
   }
-  virtual Object doc() const {
-    return m_doc;
+  SmartPtr<XMLDocumentData> doc() const { return m_node->doc(); }
+  XMLNode node() const { return m_node; }
+  xmlNodePtr nodep() const {
+    return m_node ? m_node->nodep() : nullptr;
   }
-  virtual DOMDocument* doc_data() {
-    ObjectData* data = doc().get();
-    return data == nullptr ? nullptr : Native::data<DOMDocument>(data);
+
+  void setDoc(SmartPtr<XMLDocumentData>&& doc) {
+    assert(m_node);
+    m_node->setDoc(std::move(doc));
   }
-  static Class* getClass();
-  static Object newInstance(Object doc, xmlNodePtr attrp);
 
-  Object m_doc;
-  xmlNodePtr m_node;
+  void setNode(XMLNode n) {
+    if (m_node) {
+      assert(m_node->getCache() &&
+             Native::data<DOMNode>(m_node->getCache()) == this);
+      m_node->clearCache();
+    }
 
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-protected:
-  static Object newInstance(Class* subclass, Object doc, xmlNodePtr attrp);
-};
-
-DOMNode* toDOMNode(ObjectData* obj);
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMAttr
-
-class DOMAttr : public DOMNode {
-public:
-  static Class* getClass();
-  static Object newInstance(Object doc, xmlNodePtr attrp);
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMCharacterData
-
-class DOMCharacterData : public DOMNode {
-public:
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMComment
-
-class DOMComment : public DOMCharacterData {
-public:
-  static Class* getClass();
-  static Object newInstance(Object doc, xmlNodePtr attrp);
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMText
-
-class DOMText : public DOMCharacterData {
-public:
-  static Class* getClass();
-  static Object newInstance(Object doc, xmlNodePtr attrp);
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMCdataSection
-
-class DOMCdataSection : public DOMText {
-public:
-  static Class* getClass();
-  static Object newInstance(Object doc, xmlNodePtr attrp);
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMDocument
-
-typedef hphp_hash_set<xmlNodePtr, pointer_hash<xmlNode>> XmlNodeSet;
-
-class DOMDocument : public DOMNode {
-public:
-  DOMDocument();
-  virtual ~DOMDocument();
-  DOMDocument& operator=(const DOMDocument& src) {
-    DOMNode::operator=(src);
-    return *this;
+    m_node = n;
+    m_node->setCache(toObject());
   }
-  void sweep();
-  virtual Object doc() const {
-    // m_self is null if it is not an owner
-    return m_owner ? Object(m_self) : DOMNode::doc();
+
+  void setNode(xmlNodePtr n) { setNode(libxml_register_node(n)); }
+
+private:
+  ObjectData* toObject() {
+    return reinterpret_cast<ObjectData*>(this + 1);
   }
-  virtual DOMDocument* doc_data() {
-    return this;
-  }
-  Variant save_html_or_xml(bool as_xml, const Object& node = null_object);
-  static Object newInstance();
-  static Class* getClass();
-
-  bool m_formatoutput;
-  bool m_validateonparse;
-  bool m_resolveexternals;
-  bool m_preservewhitespace;
-  bool m_substituteentities;
-  bool m_stricterror;
-  bool m_recover;
-  Array m_classmap;
-  std::unique_ptr<XmlNodeSet> m_orphans;
-  bool m_owner;
-  ObjectData* m_self;
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
+  XMLNode m_node {nullptr};
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// class DOMDocumentFragment
-
-class DOMDocumentFragment : public DOMNode {
-public:
-  static Class* getClass();
-  static Object newInstance(Object doc, xmlNodePtr attrp);
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMDocumentType
-
-class DOMDocumentType : public DOMNode {
-public:
-  static Class* getClass();
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
+Variant save_html_or_xml(DOMNode* obj, bool as_xml,
+                         const Object& node = null_object);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMElement
 
-class DOMElement : public DOMNode {
-public:
+struct DOMElement : DOMNode {
   // Allow serialization, but no native data is actually serialized.
-  Variant sleep() const {
-    return init_null();
-  }
+  Variant sleep() const { return init_null(); }
   void wakeup(const Variant&, ObjectData*) {}
-  static Class* getClass();
-  static Object newInstance(Object doc, xmlNodePtr attrp);
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class DOMEntity
 
-class DOMEntity : public DOMNode {
-public:
-  static Class* getClass();
-  static Object newInstance(Object doc, xmlNodePtr attrp);
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMEntityReference
-
-class DOMEntityReference : public DOMNode {
-public:
-  static Class* getClass();
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMNotation
-
-class DOMNotation : public DOMNode {
-public:
-  static Class* getClass();
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMProcessingInstruction
-
-class DOMProcessingInstruction : public DOMNode {
-public:
-  static Class* getClass();
-  static Object newInstance(Object doc, xmlNodePtr attrp);
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMNameSpaceNode
-
-class DOMNameSpaceNode : public DOMNode {
-public:
-  static Class* getClass();
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-
-// base class of DOMNodeList and DOMNamedNodeMap
-class dom_iterable {
-public:
-  dom_iterable() : m_ht(nullptr) {}
+struct DOMIterable {
   DOMNode* getBaseNodeData() {
-    return toDOMNode(m_baseobj.get());
+    if (!m_baseobj) {
+      throw_null_pointer_exception();
+    }
+
+    return Native::data<DOMNode>(m_baseobj.get());
   }
 
-  Object m_doc;
+  SmartPtr<XMLDocumentData> m_doc {nullptr};
   Object m_baseobj;
   int m_nodetype;
-  xmlHashTable *m_ht;
+  xmlHashTable* m_ht {nullptr};
   String m_local;
   String m_ns;
   Array m_baseobjptr;
@@ -298,88 +115,32 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNodeIterator
 
-class DOMNodeIterator : public Sweepable {
-public:
-  DOMNodeIterator() : m_objmap(nullptr), m_iter(), m_index(-1) {}
-  ~DOMNodeIterator() {
-    sweep();
-  }
-  virtual void sweep() {}
+struct DOMNodeIterator {
   void reset_iterator();
-  void set_iterator(ObjectData* o, dom_iterable *objmap);
-  void setKeyIsNamed() {
-    m_keyIsNamed = true;
-  }
-  static Class* getClass();
+  void set_iterator(ObjectData* o, DOMIterable* objmap);
+  void setKeyIsNamed() { m_keyIsNamed = true; }
 
   Object m_o;
-  dom_iterable *m_objmap;
-  ArrayIter m_iter;
-  int m_index;
-  bool m_keyIsNamed = false;
   Object m_curobj;
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMNamedNodeMap
-
-class DOMNamedNodeMap : public dom_iterable {
-public:
-  static Class* getClass();
-  static Object newInstance(Object doc, Object base, int node_type,
-                            xmlHashTable* ht = nullptr);
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMNodeList
-
-class DOMNodeList : public dom_iterable {
-public:
-  static Class* getClass();
-  static Object newInstance(Object doc, Object base, int node_type,
-                            String local = String(), String ns = String());
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class DOMImplementation
-
-class DOMImplementation {
-public:
-  static Class* getClass();
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
+  DOMIterable* m_objmap {nullptr};
+  ArrayIter m_iter;
+  int m_index {-1};
+  bool m_keyIsNamed {false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMXPath
 
-class DOMXPath : public Sweepable {
-public:
-  DOMXPath() : m_node(nullptr), m_registerPhpFunctions(0) {}
-  ~DOMXPath() {
-    sweep();
-  }
-  virtual void sweep();
-  static Class* getClass();
+struct DOMXPath : Sweepable {
+  ~DOMXPath() { sweep(); }
 
-  xmlNodePtr m_node;
+  void sweep() override;
+
+  xmlXPathContextPtr m_node {nullptr};
   Object m_doc;
   Array m_node_list;
-  int m_registerPhpFunctions;
+  int m_registerPhpFunctions {0};
   Array m_registered_phpfunctions;
-
-  static Class* c_Class;
-  static const StaticString c_ClassName;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,10 +1,9 @@
 DOMImplementation
 object(DOMImplementation)#1 (0) {
 }
-
-Warning: Attempted to serialize unserializable builtin class DOMImplementation in %s/builtin_extensions.inc on line 8
-string(2) "N;"
-NULL
+string(29) "O:17:"DOMImplementation":0:{}"
+object(DOMImplementation)#2 (0) {
+}
 array(4) {
   [0]=>
   string(11) "__construct"
@@ -17,14 +16,15 @@ array(4) {
 }
 ================
 A_DOMImplementation
-object(A_DOMImplementation)#2 (1) {
+object(A_DOMImplementation)#3 (1) {
   ["___x"]=>
   NULL
 }
-
-Warning: Attempted to serialize unserializable builtin class A_DOMImplementation in %s/builtin_extensions.inc on line 26
-string(2) "N;"
-NULL
+string(44) "O:19:"A_DOMImplementation":1:{s:4:"___x";N;}"
+object(A_DOMImplementation)#4 (1) {
+  ["___x"]=>
+  NULL
+}
 array(4) {
   [0]=>
   string(11) "__construct"

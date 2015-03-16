@@ -1,3 +1,24 @@
+"Fry" 27-Mar-2015
+ - Fix Reflection: Variadic parameters not marked as optional
+ - Fix unnecessary dns lookups on startup of hhvm in non-server mode.
+ - Memset with AVX2 support
+ - Perform strict comparison for set() options array
+ - Re-executing a PDOStatement with MySQL doesn't work correctly
+ - Fix #4916 by using is_a() to check if the classname provided is valid
+ - Set the memory limit default to 16GiB
+ - Extend ZEND_GET_MODULE to present getModuleBuildInfo.
+ - Added NULL check on module->functions in ZendExtension::moduleInit().
+ - Fix reading Thrift's accelerated map when using compact protocol
+ - Support null-safe property lookups
+ - `unpack` should return an empty array for empty input
+ - ReflectionClass: resolve default prop values from updated cache
+ - Raise a cmake error if MySQL socket path can't be identified
+ - Fix infinite loop in hphpd's client->server connection logic
+ - [ini] Remove NoInfiniteLoopDetection
+ - Update HHVM to use jemalloc-dev
+ - Don't let odbc hang indefinitely
+ - Add support for nullable XHP attribute types
+
 "Ditko" 26-Feb-2015
  - Make printf use HH\FormatString instead of FormatString (we're planning to
    un-reserve \FormatString in a future version).

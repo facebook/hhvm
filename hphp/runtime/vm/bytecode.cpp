@@ -1376,11 +1376,11 @@ VarEnv* ExecutionContext::getVarEnv(int frame) {
     if (!fp) break;
     fp = getPrevVMState(fp);
   }
-  if (UNLIKELY(!fp)) return NULL;
+  if (UNLIKELY(!fp)) return nullptr;
   if (fp->skipFrame()) {
     fp = getPrevVMState(fp);
   }
-  if (!fp) return nullptr;
+  if (UNLIKELY(!fp || fp->localsDecRefd())) return nullptr;
   assert(!fp->hasInvName());
   if (!fp->hasVarEnv()) {
     fp->setVarEnv(VarEnv::createLocal(fp));

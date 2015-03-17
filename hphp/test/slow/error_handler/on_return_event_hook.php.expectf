@@ -1,0 +1,10 @@
+constructing
+destructing
+string(4) "test"
+int(42)
+int(2)
+string(75) "[asio] Ignoring exception thrown by ResumableWaitHandle::onSuccess callback"
+string(%d) "%son_return_event_hook.php"
+int(34)
+array(0) {
+}

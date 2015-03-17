@@ -454,16 +454,19 @@ void replaceRedundantComputations(
 /////////////////////////////////////////////////////////////////////////
 
 void gvn(IRUnit& unit) {
-  auto const rpoBlocksWithIds = rpoSortCfgWithIds(unit);
-  auto const& rpoBlocks = rpoBlocksWithIds.blocks;
-  auto const dominators = findDominators(unit, rpoBlocksWithIds);
+  auto const rpoBlocks = rpoSortCfg(unit);
+  auto const idoms = findDominators(
+    unit,
+    rpoBlocks,
+    numberBlocks(unit, rpoBlocks)
+  );
   ValueNumberTable vnTable(unit, ValueNumberMetadata{});
 
   // This is an implementation of the RPO version of the global value numbering
   // algorithm presented in the 1996 paper "SCC-based Value Numbering" by
   // Cooper and Simpson.
   runAnalysis(unit, rpoBlocks, vnTable);
-  replaceRedundantComputations(unit, dominators, rpoBlocks, vnTable);
+  replaceRedundantComputations(unit, idoms, rpoBlocks, vnTable);
 }
 
 } } // namespace HPHP::jit

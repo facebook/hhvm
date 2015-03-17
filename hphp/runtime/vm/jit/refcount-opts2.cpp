@@ -735,19 +735,19 @@ struct RCAnalysis {
 //////////////////////////////////////////////////////////////////////
 
 struct Env {
-  explicit Env(IRUnit& unit, BlocksWithIds&& sortedBlocks)
+  explicit Env(IRUnit& unit)
     : unit(unit)
-    , idoms(findDominators(unit, sortedBlocks))
-    , rpoBlocks(std::move(sortedBlocks.blocks))
+    , rpoBlocks(rpoSortCfg(unit))
+    , idoms(findDominators(unit, rpoBlocks, numberBlocks(unit, rpoBlocks)))
     , ainfo(collect_aliases(unit, rpoBlocks))
     , mrinfo(unit)
     , asetMap(unit, -1)
   {}
 
   IRUnit& unit;
+  BlockList rpoBlocks;
   IdomVector idoms;
   Arena arena;
-  BlockList rpoBlocks;
   AliasAnalysis ainfo;
   MemRefAnalysis mrinfo;
 
@@ -3336,7 +3336,7 @@ void optimizeRefcounts2(IRUnit& unit) {
   splitCriticalEdges(unit);
 
   PassTracer tracer{&unit, Trace::hhir_refcount, "optimizeRefcounts"};
-  Env env { unit, rpoSortCfgWithIds(unit) };
+  Env env { unit };
 
   find_alias_sets(env);
   if (env.asets.size() == 0) return;

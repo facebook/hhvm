@@ -139,9 +139,9 @@ bool checkBlock(Block* b) {
  * 7. The entry block starts with a DefFP instruction.
  */
 bool checkCfg(const IRUnit& unit) {
-  auto const blocksIds = rpoSortCfgWithIds(unit);
-  auto const& blocks = blocksIds.blocks;
-  jit::hash_set<const Edge*> edges;
+  auto const blocks = rpoSortCfg(unit);
+  auto const rpoIDs = numberBlocks(unit, blocks);
+  auto edges        = jit::hash_set<const Edge*>{};
 
   // Entry block can't have predecessors.
   always_assert(unit.entry()->numPreds() == 0);
@@ -171,7 +171,7 @@ bool checkCfg(const IRUnit& unit) {
 
   // Visit every instruction and make sure their sources are defined in a block
   // that dominates the block containing the instruction.
-  auto const idoms = findDominators(unit, blocksIds);
+  auto const idoms = findDominators(unit, blocks, rpoIDs);
   forEachInst(blocks, [&] (const IRInstruction* inst) {
     for (auto src : inst->srcs()) {
       if (src->inst()->is(DefConst)) continue;

@@ -90,17 +90,17 @@ struct BlockInfo {
 };
 
 struct Global {
-  explicit Global(IRUnit& unit, BlocksWithIds&& sortedBlocks)
+  explicit Global(IRUnit& unit)
     : unit(unit)
-    , idoms(findDominators(unit, sortedBlocks))
-    , rpoBlocks(std::move(sortedBlocks.blocks))
+    , rpoBlocks(rpoSortCfg(unit))
+    , idoms(findDominators(unit, rpoBlocks, numberBlocks(unit, rpoBlocks)))
     , ainfo(collect_aliases(unit, rpoBlocks))
     , blockInfo(unit, BlockInfo{})
   {}
 
   IRUnit& unit;
-  IdomVector idoms;
   BlockList rpoBlocks;
+  IdomVector idoms;
   AliasAnalysis ainfo;
 
   /*
@@ -489,7 +489,7 @@ void analyze(Global& genv) {
 void optimizeLoads(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_load, "optimizeLoads"};
 
-  auto genv = Global { unit, rpoSortCfgWithIds(unit) };
+  auto genv = Global { unit };
   if (genv.ainfo.locations.size() == 0) {
     FTRACE(1, "no memory accesses to possibly optimize\n");
     return;

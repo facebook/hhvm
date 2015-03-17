@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/type-source.h"
 #include "hphp/runtime/vm/jit/local-effects.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP {
 
@@ -288,7 +289,7 @@ struct FrameStateMgr final : private LocalStateHook {
    * Iterates through a control-flow graph, until a fixed-point is
    * reached. Must be called before this FrameStateMgr has any state.
    */
-  void computeFixedPoint(const BlocksWithIds&);
+  void computeFixedPoint(const BlockList&, const BlockIDs&);
 
   /*
    * Loads the in-state for a block. Requires that the block has already been

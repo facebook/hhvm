@@ -13,9 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/jit/cfg.h"
+
 #include <algorithm>
+#include <limits>
+
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -124,15 +126,10 @@ BlockList rpoSortCfg(const IRUnit& unit) {
   return blocks;
 }
 
-BlocksWithIds rpoSortCfgWithIds(const IRUnit& unit) {
-  auto ret = BlocksWithIds{rpoSortCfg(unit), {unit, 0xffffffff}};
-
-  uint32_t id = 0;
-  for (auto block : ret.blocks) {
-    ret.ids[block] = id++;
-  }
-  assert(id == ret.blocks.size());
-
+BlockIDs numberBlocks(const IRUnit& unit, const BlockList& input) {
+  auto ret = BlockIDs { unit, std::numeric_limits<uint32_t>::max() };
+  auto id = uint32_t{0};
+  for (auto block : input) ret[block] = id++;
   return ret;
 }
 
@@ -226,10 +223,9 @@ bool removeUnreachable(IRUnit& unit) {
  * dominator.  This is the case for the entry block and any blocks not
  * reachable from the entry block.
  */
-IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
-  auto& blocks = blockIds.blocks;
-  auto& rpoIds = blockIds.ids;
-
+IdomVector findDominators(const IRUnit& unit,
+                          const BlockList& blocks,
+                          const BlockIDs& rpoIDs) {
   // Calculate immediate dominators with the iterative two-finger algorithm.
   // When it terminates, idom[post-id] will contain the post-id of the
   // immediate dominator of each block.  idom[start] will be -1.  This is
@@ -256,8 +252,8 @@ IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
         // find earliest common predecessor of p1 and p2
         // (lower RPO ids are earlier in flow and in dom-tree).
         do {
-          while (rpoIds[p1] < rpoIds[p2]) p2 = idom[p2];
-          while (rpoIds[p2] < rpoIds[p1]) p1 = idom[p1];
+          while (rpoIDs[p1] < rpoIDs[p2]) p2 = idom[p2];
+          while (rpoIDs[p2] < rpoIDs[p1]) p1 = idom[p1];
         } while (p1 != p2);
       }
       if (idom[block] != p1) {

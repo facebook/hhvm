@@ -46,14 +46,12 @@ BlockList poSortCfg(const IRUnit&);
 BlockList rpoSortCfg(const IRUnit&);
 
 /*
- * Similar to rpoSortCfg, but also returns a StateVector mapping Blocks to
- * their RPO ids.
+ * Take a BlockList, and compute a reverse map from blocks to its index in the
+ * list.  Blocks that don't appear in the list will all get the number
+ * std::numeric_limits<uint32_t>::max().
  */
-struct BlocksWithIds {
-  BlockList blocks;
-  StateVector<Block, uint32_t> ids;
-};
-BlocksWithIds rpoSortCfgWithIds(const IRUnit&);
+using BlockIDs = StateVector<Block,uint32_t>;
+BlockIDs numberBlocks(const IRUnit&, const BlockList&);
 
 /*
  * Split the edge between "from" and "to", returning the new middle block.
@@ -85,10 +83,13 @@ bool removeUnreachable(IRUnit& unit);
  * Compute the postorder number of each immediate dominator of each
  * block, using a list produced by rpoSortCfg().
  *
- * Pre: blocks is in reverse postorder
+ * Pre: `blocks' is in a reverse postorder, and `ids' are the rpoIDs for that
+ *      order.
  */
 typedef StateVector<Block,Block*> IdomVector;
-IdomVector findDominators(const IRUnit&, const BlocksWithIds& blocks);
+IdomVector findDominators(const IRUnit&,
+                          const BlockList& blocks,
+                          const BlockIDs& ids);
 
 /*
  * return true if b1 == b2 or if b1 dominates b2.

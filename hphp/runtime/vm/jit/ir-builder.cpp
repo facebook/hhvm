@@ -762,18 +762,19 @@ void IRBuilder::reoptimize() {
   // handle the CFG's back-edges correctly.
   auto const use_fixed_point = RuntimeOption::EvalJitLoops;
 
-  auto blocksIds = rpoSortCfgWithIds(m_unit);
-  auto const idoms = findDominators(m_unit, blocksIds);
+  auto const rpoBlocks = rpoSortCfg(m_unit);
+  auto const rpoIDs    = numberBlocks(m_unit, rpoBlocks);
+  auto const idoms     = findDominators(m_unit, rpoBlocks, rpoIDs);
   boost::dynamic_bitset<> reachable(m_unit.numBlocks());
   reachable.set(m_unit.entry()->id());
 
   if (use_fixed_point) {
-    m_state.computeFixedPoint(blocksIds);
+    m_state.computeFixedPoint(rpoBlocks, rpoIDs);
   } else {
     m_state.setLegacyReoptimize();
   }
 
-  for (auto block : blocksIds.blocks) {
+  for (auto block : rpoBlocks) {
     ITRACE(5, "reoptimize entering block: {}\n", block->id());
     Indent _i;
 

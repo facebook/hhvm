@@ -52,10 +52,14 @@ namespace HPHP { namespace jit {
    * this ActRec will be set to a stub that raises POST_INTERP_RET,
    * since it doesn't have a TCA to return to.
    *
-   * This request is raised in the case that translated machine code
-   * executes the RetC for a frame that was pushed by the interpreter.
+   * REQ_POST_INTERP_RET is raised in the case that translated machine code
+   * executes the RetC for a frame that was pushed by the
+   * interpreter. REQ_POST_DEBUGGER_RET is a similar request that is used when
+   * translated code returns from a frame that had its saved return address
+   * smashed by the debugger.
    */ \
-  REQ(POST_INTERP_RET)
+  REQ(POST_INTERP_RET) \
+  REQ(POST_DEBUGGER_RET)
 
 enum ServiceRequest {
 #define REQ(nm) REQ_##nm,

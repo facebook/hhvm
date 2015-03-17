@@ -369,8 +369,6 @@ public:
 
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
-  void preventReturnsToTC();
-  void preventReturnToTC(ActRec* ar);
   void destructObjects();
 
   bool isNested() { return m_nesting != 0; }

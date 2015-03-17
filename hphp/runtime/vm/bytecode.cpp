@@ -143,6 +143,13 @@ static bool isReturnHelper(void* address) {
          tcAddr == u.callToExit;
 }
 
+bool isDebuggerReturnHelper(void* address) {
+  auto tcAddr = reinterpret_cast<jit::TCA>(address);
+  auto& u = mcg->tx().uniqueStubs;
+  return tcAddr == u.debuggerRetHelper ||
+         tcAddr == u.debuggerGenRetHelper;
+}
+
 ActRec* ActRec::sfp() const {
   // Native frame? (used by enterTCHelper)
   if (UNLIKELY(((uintptr_t)m_sfp - s_stackLimit) < s_stackSize)) {
@@ -158,6 +165,12 @@ void ActRec::setReturn(ActRec* fp, PC pc, void* retAddr) {
   m_sfp = fp;
   m_savedRip = reinterpret_cast<uintptr_t>(retAddr);
   m_soff = Offset(pc - fp->func()->getEntry());
+}
+
+void ActRec::setJitReturn(void* addr) {
+  FTRACE(1, "Replace m_savedRip in fp {}, {:#x} -> {}, func {}\n",
+         this, m_savedRip, addr, m_func->fullName()->data());
+  m_savedRip = reinterpret_cast<uintptr_t>(addr);
 }
 
 void ActRec::setReturnVMExit() {
@@ -2847,42 +2860,47 @@ void ExecutionContext::exitDebuggerDummyEnv() {
   vmpc() = nullptr;
 }
 
-// Walk the stack and find any return address to jitted code and bash it to
-// the appropriate RetFromInterpreted*Frame helper. This ensures that we don't
-// return into jitted code and gives the system the proper chance to interpret
-// blacklisted tracelets.
-void ExecutionContext::preventReturnsToTC() {
-  assert(isDebuggerAttached());
-  if (RuntimeOption::EvalJit) {
-    ActRec *ar = vmfp();
-    while (ar) {
-      preventReturnToTC(ar);
-      ar = getPrevVMState(ar);
-    }
-  }
+void unwindPreventReturnToTC(ActRec* ar) {
+  auto const savedRip = reinterpret_cast<jit::TCA>(ar->m_savedRip);
+  always_assert_flog(mcg->isValidCodeAddress(savedRip),
+                     "preventReturnToTC({}): {} isn't in TC",
+                     ar, savedRip);
+
+  if (isReturnHelper(savedRip)) return;
+
+  auto& ustubs = mcg->tx().uniqueStubs;
+  ar->setJitReturn(ar->resumed() ? ustubs.genRetHelper : ustubs.retHelper);
 }
 
-// Bash the return address for the given actrec into the appropriate
-// RetFromInterpreted*Frame helper.
-void ExecutionContext::preventReturnToTC(ActRec* ar) {
+void debuggerPreventReturnToTC(ActRec* ar) {
+  auto const savedRip = reinterpret_cast<jit::TCA>(ar->m_savedRip);
+  always_assert_flog(mcg->isValidCodeAddress(savedRip),
+                     "preventReturnToTC({}): {} isn't in TC",
+                     ar, savedRip);
+
+  if (isReturnHelper(savedRip) || isDebuggerReturnHelper(savedRip)) return;
+
+  // We're going to smash the return address. Before we do, save the catch
+  // block attached to the call in a side table so the return helpers and
+  // unwinder can find it when needed.
+  jit::pushDebuggerCatch(ar);
+
+  auto& ustubs = mcg->tx().uniqueStubs;
+  ar->setJitReturn(ar->resumed() ? ustubs.debuggerGenRetHelper
+                                 : ustubs.debuggerRetHelper);
+}
+
+// Walk the stack and find any return address to jitted code and bash it to the
+// appropriate RetFromInterpreted*Frame helper. This ensures that we don't
+// return into jitted code and gives the system the proper chance to interpret
+// blacklisted tracelets.
+void debuggerPreventReturnsToTC() {
+  assert(isDebuggerAttached());
   if (!RuntimeOption::EvalJit) return;
 
-  always_assert_flog(mcg->isValidCodeAddress((jit::TCA)ar->m_savedRip),
-                     "preventReturnToTC({}): {} isn't in TC",
-                     ar, ar->m_savedRip);
-
-  if (!isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip))) {
-    TRACE_RB(1, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
-             "func %s\n", ar, ar->m_savedRip,
-             ar->m_func->fullName()->data());
-    if (ar->resumed()) {
-      ar->m_savedRip =
-        reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.genRetHelper);
-    } else {
-      ar->m_savedRip =
-        reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.retHelper);
-    }
-    assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
+  auto& ec = *g_context;
+  for (auto ar = vmfp(); ar; ar = ec.getPrevVMState(ar)) {
+    debuggerPreventReturnToTC(ar);
   }
 }
 
@@ -4419,6 +4437,7 @@ struct JitReturn {
   uint64_t savedRip;
   ActRec* fp;
   ActRec* sfp;
+  uint32_t soff;
 };
 
 OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
@@ -4440,11 +4459,20 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
     throw VMSwitchMode();
   }
 
-  return {savedRip, fp, fp->sfp()};
+  return {savedRip, fp, fp->sfp(), fp->m_soff};
 }
 
 OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
   if (retInfo.savedRip) {
+    if (isDebuggerReturnHelper(reinterpret_cast<void*>(retInfo.savedRip))) {
+      // Our return address was smashed by the debugger. Do the work of the
+      // debuggerRetHelper by setting some unwinder RDS info and resuming at
+      // the approprate catch trace.
+      jit::unwindRdsInfo->debuggerReturnSP = vmsp();
+      jit::unwindRdsInfo->debuggerReturnOff = retInfo.soff;
+      return jit::popDebuggerCatch(retInfo.fp);
+    }
+
     // This frame was called by translated code so we can't interpret out of
     // it. Resume in the TC right after our caller. This situation most
     // commonly happens when we interpOne a RetC due to having a VarEnv or some

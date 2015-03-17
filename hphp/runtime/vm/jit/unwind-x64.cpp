@@ -292,9 +292,17 @@ TCA tc_unwind_resume(ActRec*& fp) {
       fp = newFp;
       return nullptr;
     }
-    g_context->preventReturnToTC(fp);
+
+    auto catchTrace = lookup_catch_trace(savedRip, unwindRdsInfo->exn);
+    if (isDebuggerReturnHelper(savedRip)) {
+      // If this frame had its return address smashed by the debugger, the real
+      // catch trace is saved in a side table.
+      assert(catchTrace == nullptr);
+      catchTrace = popDebuggerCatch(fp);
+    }
+    unwindPreventReturnToTC(fp);
     if (fp->m_savedRip != reinterpret_cast<uint64_t>(savedRip)) {
-      ITRACE(1, "Smashed m_savedRip of fp {} from {:} to {:#x}\n",
+      ITRACE(1, "Smashed m_savedRip of fp {} from {} to {:#x}\n",
              fp, savedRip, fp->m_savedRip);
     }
 
@@ -302,7 +310,6 @@ TCA tc_unwind_resume(ActRec*& fp) {
 
     // If there's a catch trace for this block, return it. Otherwise, keep
     // going up the VM stack for this nesting level.
-    auto catchTrace = lookup_catch_trace(savedRip, unwindRdsInfo->exn);
     if (catchTrace) {
       ITRACE(1, "tc_unwind_resume returning catch trace {} with fp: {}\n",
              catchTrace, fp);

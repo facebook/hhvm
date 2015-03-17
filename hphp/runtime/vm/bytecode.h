@@ -248,6 +248,7 @@ struct ActRec {
   ActRec* sfp() const;
 
   void setReturn(ActRec* fp, PC pc, void* retAddr);
+  void setJitReturn(void* addr);
   void setReturnVMExit();
 
   // skip this frame if it is for a builtin function
@@ -463,6 +464,26 @@ static_assert(offsetof(ActRec, m_sfp) == 0,
  * object on the PHP heap.
  */
 bool isVMFrame(const ActRec* ar);
+
+/*
+ * Returns true iff the given address is one of the special debugger return
+ * helpers.
+ */
+bool isDebuggerReturnHelper(void* addr);
+
+/*
+ * If ar->m_savedRip points somewhere in the TC that is not a return helper,
+ * change it to point to an appropriate return helper. The two different
+ * versions are for the different needs of the C++ unwinder and debugger hooks,
+ * respectively.
+ */
+void unwindPreventReturnToTC(ActRec* ar);
+void debuggerPreventReturnToTC(ActRec* ar);
+
+/*
+ * Call debuggerPreventReturnToTC() on all live VM frames in this thread.
+ */
+void debuggerPreventReturnsToTC();
 
 inline int32_t arOffset(const ActRec* ar, const ActRec* other) {
   return (intptr_t(other) - intptr_t(ar)) / sizeof(TypedValue);

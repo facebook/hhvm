@@ -435,8 +435,21 @@ inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
   emitIncStat(cb, &Stats::tl_counters[0], stat, n, force);
 }
 
-extern void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
-                        bool force = false);
+/*
+ * Look up the catch block associated with the return address in ar and save it
+ * in a queue. This is called by debugger helpers right before smashing the
+ * return address to prevent returning directly the to TC.
+ */
+void pushDebuggerCatch(const ActRec* ar);
+
+/*
+ * Pop the oldest entry in the debugger catch block queue, assert that it's
+ * from the given ActRec, and return it.
+ */
+TCA popDebuggerCatch(const ActRec* ar);
+
+void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
+                 bool force = false);
 
 void emitServiceReq(Vout& v, TCA stub_block, ServiceRequest req,
                     const ServiceReqArgVec& argv);

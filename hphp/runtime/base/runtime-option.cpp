@@ -391,12 +391,12 @@ int RuntimeOption::GetScannerType() {
   return type;
 }
 
-std::string RuntimeOption::GetServerPrimaryIPv4() {
+const std::string& RuntimeOption::GetServerPrimaryIPv4() {
    static std::string serverPrimaryIPv4 = GetPrimaryIPv4();
    return serverPrimaryIPv4;
 }
 
-std::string RuntimeOption::GetServerPrimaryIPv6() {
+const std::string& RuntimeOption::GetServerPrimaryIPv6() {
    static std::string serverPrimaryIPv6 = GetPrimaryIPv6();
    return serverPrimaryIPv6;
 }

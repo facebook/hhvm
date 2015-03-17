@@ -202,14 +202,14 @@ void MemoryManager::resetRuntimeOptions() {
     checkHeap();
     // check that every allocation in heap has been freed before reset
     for (auto h = begin(), lim = end(); h != lim; ++h) {
-      if (h->kind_ == HeaderKind::Debug) {
+      if (h->kind() == HeaderKind::Debug) {
         auto h2 = h; ++h2;
         if (h2 != lim) {
-          assert(h2->kind_ == HeaderKind::Free);
+          assert(h2->kind() == HeaderKind::Free);
         }
       } else {
-        assert(h->kind_ == HeaderKind::Free ||
-               h->kind_ == HeaderKind::Hole);
+        assert(h->kind() == HeaderKind::Free ||
+               h->kind() == HeaderKind::Hole);
       }
     }
   }
@@ -667,13 +667,13 @@ void MemoryManager::checkHeap() {
     hdrs.push_back(&*h);
     TRACE(2, "checkHeap: hdr %p\n", hdrs[hdrs.size()-1]);
     bytes += h->size();
-    counts[(int)h->kind_]++;
-    switch (h->kind_) {
+    counts[(int)h->kind()]++;
+    switch (h->kind()) {
       case HeaderKind::Debug: {
         // the next block's parsed size should agree with DebugHeader
         auto h2 = h; ++h2;
         if (h2 != lim) {
-          assert(h2->kind_ != HeaderKind::Debug);
+          assert(h2->kind() != HeaderKind::Debug);
           assert(h->debug_.returnedCap ==
                  MemoryManager::smartSizeClass(h2->size()));
         }

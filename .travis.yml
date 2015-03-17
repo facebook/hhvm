@@ -1,16 +1,19 @@
 language: cpp
 
-# This doesn't work - travis defaults to plain gcc if unknown
-# http://github.com/travis-ci/travis-ci/issues/979
-# http://llvm.org/apt/
+os:
+  - linux
+#  - osx
+#osx_image: xcode61
+
 compiler:
+#  - clang
   - gcc
-#  - gcc-4.8
-#  - clang-3.4
-#  - clang-3.5
 
 cache:
   - apt
+  - ccache
+  - directories
+    - $HOME/.ccache
 
 services:
   - memcached
@@ -19,21 +22,25 @@ services:
 # Commands before installing prerequisites
 before_script:
 # we can't compile with this system version
+  - mkdir $HOME/.ccache
   - time sudo apt-get remove libsqlite3-dev
-  - time TRAVIS=1 ./configure_generic.sh -DENABLE_COTIRE=ON
+  - time sudo apt-get install -yqq ccache; ccache -M 4G
+  - export CCACHE_DIR="$HOME/.ccache" CCACHE_PATH="/usr/bin"; ccache -s
+  - time CC="ccache gcc" CXX="ccache g++" TRAVIS=1 ./configure_generic.sh
 # for some tests
-  - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
+  - time sudo locale-gen de_DE zh_CN.utf8 fr_FR
   - time make -j 6
 # mysql configuration for unit-tests
   - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'
   - export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=hhvm"
-  - export PDO_MYSQL_TEST_USER="travis"
-  - export PDO_MYSQL_TEST_PASS=""
+  - export PDO_MYSQL_TEST_USER="travis" PDO_MYSQL_TEST_PASS=""
 # For PHP5 mysqli tests
-  - export MYSQL_TEST_USER="travis"
-  - export MYSQL_TEST_DB="hhvm"
+  - export MYSQL_TEST_USER="travis" MYSQL_TEST_DB="hhvm"
 # For redis tests
   - export REDIS_TEST_HOST="localhost"
+
+after_script:
+  - ccache -s
 
 # Sadly, travis only gives up 50 minutes to compile and run our tests. The
 # compilation machines usually have a bunch of CPUs but very little RAM so gcc
@@ -44,8 +51,8 @@ before_script:
 # test run. Please check out the attached phabricator to your PR for full unit
 # test coverage.
 env:
-  - TEST_RUN_MODE="-m jit       quick"
-  - TEST_RUN_MODE="-m interp    quick"
+  - TEST_RUN_MODE="-m jit     quick"
+  - TEST_RUN_MODE="-m interp  quick"
 
 # Main test script
 script: time hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
@@ -57,4 +64,12 @@ notifications:
   email: false
 
 matrix:
-  fast_finish: true
+#  exclude:
+#    - os: osx
+#      compiler: clang
+#    - os: linux
+#      compiler: clang
+  allow_failures:
+#    - os: osx
+    - os: linux
+      compiler: clang

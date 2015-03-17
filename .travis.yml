@@ -11,9 +11,6 @@ compiler:
 
 cache:
   - apt
-  - ccache
-  - directories
-    - $HOME/.ccache
 
 services:
   - memcached
@@ -22,11 +19,8 @@ services:
 # Commands before installing prerequisites
 before_script:
 # we can't compile with this system version
-  - mkdir $HOME/.ccache
   - time sudo apt-get remove libsqlite3-dev
-  - time sudo apt-get install -yqq ccache; ccache -M 4G
-  - export CCACHE_DIR="$HOME/.ccache" CCACHE_PATH="/usr/bin"; ccache -s
-  - time CC="ccache gcc" CXX="ccache g++" TRAVIS=1 ./configure_generic.sh
+  - time TRAVIS=1 ./configure_generic.sh
 # for some tests
   - time sudo locale-gen de_DE zh_CN.utf8 fr_FR
   - time make -j 6

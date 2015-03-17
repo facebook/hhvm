@@ -367,7 +367,9 @@ void applyLocalUpdates(ValueNumberTable& global, ValueNumberTable& local) {
   }
 }
 
-void runAnalysis(IRUnit& unit, BlockList& blocks, ValueNumberTable& vnTable) {
+void runAnalysis(const IRUnit& unit,
+                 const BlockList& blocks,
+                 ValueNumberTable& vnTable) {
   for (auto block : blocks) {
     for (auto& inst : *block) {
       initWithInstruction(&inst, vnTable);
@@ -411,7 +413,7 @@ bool canReplaceWith(
 
 void tryReplaceInstruction(
   IRUnit& unit,
-  IdomVector& idoms,
+  const IdomVector& idoms,
   IRInstruction* inst,
   ValueNumberTable& table
 ) {
@@ -436,8 +438,8 @@ void tryReplaceInstruction(
 
 void replaceRedundantComputations(
   IRUnit& unit,
-  IdomVector& idoms,
-  BlockList& blocks,
+  const IdomVector& idoms,
+  const BlockList& blocks,
   ValueNumberTable& table
 ) {
   for (auto block : blocks) {
@@ -452,9 +454,9 @@ void replaceRedundantComputations(
 /////////////////////////////////////////////////////////////////////////
 
 void gvn(IRUnit& unit) {
-  auto rpoBlocksWithIds = rpoSortCfgWithIds(unit);
-  auto& rpoBlocks = rpoBlocksWithIds.blocks;
-  auto dominators = findDominators(unit, rpoBlocksWithIds);
+  auto const rpoBlocksWithIds = rpoSortCfgWithIds(unit);
+  auto const& rpoBlocks = rpoBlocksWithIds.blocks;
+  auto const dominators = findDominators(unit, rpoBlocksWithIds);
   ValueNumberTable vnTable(unit, ValueNumberMetadata{});
 
   // This is an implementation of the RPO version of the global value numbering

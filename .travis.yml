@@ -20,10 +20,10 @@ services:
 before_script:
 # we can't compile with this system version
   - time sudo apt-get remove libsqlite3-dev
-  - time TRAVIS=1 ./configure_generic.sh
+  - time TRAVIS=1 ./configure_generic.sh -DCMAKE_BUILD_TYPE=MinSizeRel
 # for some tests
   - time sudo locale-gen de_DE zh_CN.utf8 fr_FR
-  - time make -j 6
+  - time make -j1
 # mysql configuration for unit-tests
   - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'
   - export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=hhvm"

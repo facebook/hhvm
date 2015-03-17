@@ -28,17 +28,8 @@ inline void ObjectData::resetMaxId() {
 }
 
 inline ObjectData::ObjectData(Class* cls)
-  : m_cls(cls)
-  , m_attr_kind_count(HeaderKind::Object << 24)
-{
-  assert(!o_attribute && m_kind == HeaderKind::Object && !m_count);
-  if (cls->needInitialization()) {
-    // Needs to happen before we assign this object an o_id.
-    cls->initialize();
-  }
-  o_id = ++os_max_id;
-  instanceInit(cls);
-}
+  : ObjectData(cls, 0, HeaderKind::Object)
+{}
 
 inline ObjectData::ObjectData(Class* cls, uint16_t flags,
                               HeaderKind kind)
@@ -47,10 +38,7 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags,
 {
   assert(o_attribute == flags && !m_count);
   assert(m_kind == HeaderKind::Object || m_kind == HeaderKind::ResumableObj);
-  if (cls->needInitialization()) {
-    // Needs to happen before we assign this object an o_id.
-    cls->initialize();
-  }
+  assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
   instanceInit(cls);
 }
@@ -60,6 +48,7 @@ inline ObjectData::ObjectData(Class* cls, NoInit)
   , m_attr_kind_count(HeaderKind::Object << 24)
 {
   assert(!o_attribute && m_kind == HeaderKind::Object && !m_count);
+  assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
 }
 
@@ -85,6 +74,9 @@ inline size_t ObjectData::heapSize() const {
 
 // Call newInstance() to instantiate a PHP object
 inline ObjectData* ObjectData::newInstance(Class* cls) {
+  if (cls->needInitialization()) {
+    cls->initialize();
+  }
   if (auto const ctor = cls->instanceCtor()) {
     return ctor(cls);
   }

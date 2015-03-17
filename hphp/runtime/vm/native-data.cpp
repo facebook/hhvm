@@ -87,6 +87,9 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
                (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
     ObjectData::raiseAbstractClassError(cls);
   }
+  if (cls->needInitialization()) {
+    cls->initialize();
+  }
   auto ndi = cls->getNativeDataInfo();
   size_t nativeDataSize = ndsize(ndi);
   size_t nProps = cls->numDeclProperties();

@@ -25,6 +25,87 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+// If edge is critical, split it by inserting an intermediate block.
+// A critical edge is an edge from a block with multiple successors to
+// a block with multiple predecessors.
+void splitCriticalEdge(IRUnit& unit, Edge* edge) {
+  if (!edge) return;
+
+  auto* to = edge->to();
+  auto* branch = edge->inst();
+  auto* from = branch->block();
+  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
+
+  splitEdge(unit, from, to);
+}
+
+// Visits all back-edges in a CFG.
+template <class Visitor>
+struct BackEdgeVisitor {
+  BackEdgeVisitor(const IRUnit& unit, Visitor& visitor)
+    : m_path(unit.numBlocks())
+    , m_visited(unit.numBlocks())
+    , m_visitor(visitor)
+  {}
+
+  using BitSet = boost::dynamic_bitset<>;
+
+  void walk(Edge* e) {
+    if (e == nullptr) return;
+
+    auto const block = e->to();
+    auto const id = block->id();
+
+    // If we're revisiting a block in our current search, then we've
+    // found a backedge.
+    if (m_path.test(id)) {
+      // The entry block can't be a loop header.
+      assert(!block->isEntry());
+
+      m_visitor(e);
+    }
+
+    // Otherwise if we're getting back to a block that's already been
+    // visited, but it hasn't been visited in this path, then we can
+    // prune this search.
+    if (m_visited.test(id)) return;
+
+    m_visited.set(id);
+    m_path.set(id);
+
+    // Normally blocks cannot be empty, but this is used in printing and we want
+    // to be able to print malformed blocks.
+    if (!block->empty()) {
+      walk(block->takenEdge());
+      walk(block->nextEdge());
+    }
+
+    m_path.set(id, false);
+  }
+
+private:
+  BitSet m_path;
+  BitSet m_visited;
+  Visitor& m_visitor;
+};
+
+template <class Visitor>
+void backEdgeWalk(const IRUnit& unit, Visitor visitor) {
+  BackEdgeVisitor<Visitor> bev(unit, visitor);
+
+  auto const entry = unit.entry();
+  bev.walk(entry->takenEdge());
+  bev.walk(entry->nextEdge());
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
 BlockList poSortCfg(const IRUnit& unit) {
   auto blocks = BlockList{};
   blocks.reserve(unit.numBlocks());
@@ -73,23 +154,6 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
     middle->setHint(unlikely);
   }
   return middle;
-}
-
-namespace {
-
-// If edge is critical, split it by inserting an intermediate block.
-// A critical edge is an edge from a block with multiple successors to
-// a block with multiple predecessors.
-void splitCriticalEdge(IRUnit& unit, Edge* edge) {
-  if (!edge) return;
-
-  auto* to = edge->to();
-  auto* branch = edge->inst();
-  auto* from = branch->block();
-  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
-
-  splitEdge(unit, from, to);
-}
 }
 
 bool splitCriticalEdges(IRUnit& unit) {
@@ -212,69 +276,6 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
     if (b == b1) return true;
   }
   return false;
-}
-
-namespace {
-
-// Visits all back-edges in a CFG.
-template <class Visitor>
-struct BackEdgeVisitor {
-  BackEdgeVisitor(const IRUnit& unit, Visitor& visitor)
-    : m_path(unit.numBlocks())
-    , m_visited(unit.numBlocks())
-    , m_visitor(visitor)
-  {}
-
-  using BitSet = boost::dynamic_bitset<>;
-
-  void walk(Edge* e) {
-    if (e == nullptr) return;
-
-    auto const block = e->to();
-    auto const id = block->id();
-
-    // If we're revisiting a block in our current search, then we've
-    // found a backedge.
-    if (m_path.test(id)) {
-      // The entry block can't be a loop header.
-      assert(!block->isEntry());
-
-      m_visitor(e);
-    }
-
-    // Otherwise if we're getting back to a block that's already been
-    // visited, but it hasn't been visited in this path, then we can
-    // prune this search.
-    if (m_visited.test(id)) return;
-
-    m_visited.set(id);
-    m_path.set(id);
-
-    // Normally blocks cannot be empty, but this is used in printing and we want
-    // to be able to print malformed blocks.
-    if (!block->empty()) {
-      walk(block->takenEdge());
-      walk(block->nextEdge());
-    }
-
-    m_path.set(id, false);
-  }
-
-private:
-  BitSet m_path;
-  BitSet m_visited;
-  Visitor& m_visitor;
-};
-
-template <class Visitor>
-void backEdgeWalk(const IRUnit& unit, Visitor visitor) {
-  BackEdgeVisitor<Visitor> bev(unit, visitor);
-
-  auto const entry = unit.entry();
-  bev.walk(entry->takenEdge());
-  bev.walk(entry->nextEdge());
-}
-
 }
 
 bool insertLoopPreHeaders(IRUnit& unit) {

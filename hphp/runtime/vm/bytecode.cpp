@@ -60,9 +60,10 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/apc-typed-value.h"
+#include "hphp/util/debug.h"
+#include "hphp/util/ringbuffer.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/debug.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -921,6 +922,11 @@ bool Stack::wouldOverflow(int numCells) const {
   intptr_t diff = truncatedTop - numCells -
     sSurprisePageSize / sizeof(TypedValue);
   return diff < 0;
+}
+
+TypedValue* Stack::anyFrameStackBase(const ActRec* fp) {
+  return fp->resumed() ? Stack::resumableStackBase(fp)
+                       : Stack::frameStackBase(fp);
 }
 
 TypedValue* Stack::frameStackBase(const ActRec* fp) {
@@ -2865,9 +2871,8 @@ void ExecutionContext::preventReturnToTC(ActRec* ar) {
                      "preventReturnToTC({}): {} isn't in TC",
                      ar, ar->m_savedRip);
 
-  if (!isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)) &&
-      (mcg->isValidCodeAddress((jit::TCA)ar->m_savedRip))) {
-    TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
+  if (!isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip))) {
+    TRACE_RB(1, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
              "func %s\n", ar, ar->m_savedRip,
              ar->m_func->fullName()->data());
     if (ar->resumed()) {

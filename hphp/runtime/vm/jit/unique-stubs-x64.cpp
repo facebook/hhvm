@@ -193,10 +193,24 @@ void emitThrowSwitchMode(UniqueStubs& uniqueStubs) {
 void emitCatchHelper(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.frozen() };
   moveToAlign(mcg->code.frozen());
+  Label callUnwindResume;
 
   uniqueStubs.endCatchHelper = a.frontier();
+  a.    push (rax); // align stack
+  a.    push (rVmFp);
+  a.    movq (rsp, argNumToRegName[0]);
+  a.    call (TCA(tc_unwind_resume));
+  a.    pop  (rVmFp);
+  a.    pop  (rdx); // un-align stack. rax is live.
+  a.    testq(rax, rax);
+  a.    jz8  (callUnwindResume);
+  a.    jmp  (rax);
+
+asm_label(a, callUnwindResume);
   a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);
   a.    call(TCA(unwindResumeHelper));
+  uniqueStubs.endCatchHelperPast = a.frontier();
+  a.    ud2();
 
   uniqueStubs.add("endCatchHelper", uniqueStubs.endCatchHelper);
 }

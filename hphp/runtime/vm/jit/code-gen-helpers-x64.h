@@ -98,7 +98,7 @@ void emitTestSurpriseFlags(Asm& as, PhysReg rds);
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds);
 
 void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Vreg rds,
-                                 Fixup fixup);
+                                 Fixup fixup, Vlabel catchBlock);
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  PhysReg rds, Fixup fixup);
 

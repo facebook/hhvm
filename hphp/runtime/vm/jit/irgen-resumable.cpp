@@ -264,6 +264,7 @@ void emitContEnter(HTS& env) {
   resumeAddr = gen(env, CheckNonNull, exitSlow, resumeAddr);
 
   spillStack(env);
+  env.irb->exceptionStackBoundary();
   auto returnBcOffset = returnOffset - curFunc(env)->base();
   gen(
     env,

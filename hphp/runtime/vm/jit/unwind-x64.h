@@ -33,7 +33,10 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/assertions.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP {
+struct ActRec;
+
+namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -127,6 +130,8 @@ tc_unwind_personality(int version,
                       uint64_t exceptionClass,
                       _Unwind_Exception* exceptionObj,
                       _Unwind_Context* context);
+
+TCA tc_unwind_resume(ActRec*& fp);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -606,6 +606,7 @@ public:
     return offsetof(Stack, m_top);
   }
 
+  static TypedValue* anyFrameStackBase(const ActRec* fp);
   static TypedValue* frameStackBase(const ActRec* fp);
   static TypedValue* resumableStackBase(const ActRec* fp);
 
@@ -995,9 +996,7 @@ visitStackElems(const ActRec* const fp,
                 Offset const bcOffset,
                 ARFun arFun,
                 TVFun tvFun) {
-  const TypedValue* const base =
-    fp->resumed() ? Stack::resumableStackBase(fp)
-                  : Stack::frameStackBase(fp);
+  const TypedValue* const base = Stack::anyFrameStackBase(fp);
   MaybeConstTVPtr cursor = stackTop;
   assert(cursor <= base);
 

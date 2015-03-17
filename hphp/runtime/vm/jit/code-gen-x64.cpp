@@ -594,8 +594,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
   auto& v = vmain();
-  // endCatchHelper doesn't care about vmsp since it's just going to continue
-  // unwinding.
+  // endCatchHelper only expects rVmTl and rVmFp to be live.
   v << jmpi{mcg->tx().uniqueStubs.endCatchHelper, rVmTl | rVmFp};
 }
 
@@ -769,11 +768,10 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
 
     targets[0] = v.makeBlock();
     targets[1] = m_state.labels[taken];
-  } else if (!inst->is(Call, CallArray, ContEnter)) {
+  } else {
     // The current instruction doesn't have a catch block so it'd better not
     // throw. Register a null catch trace to indicate this to the
-    // unwinder. Call, CallArray, and ContEnter don't have catch blocks because
-    // they smash all live values and optimizations are aware of this.
+    // unwinder.
     nothrow = true;
   }
 
@@ -2900,8 +2898,12 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   v << lea{rSP[cellsToBytes(extra->spOffset.offset)], syncSP};
   v << syncvmsp{syncSP};
   v << copy2{pc, after, argNumToRegName[0], argNumToRegName[1]};
+
+  auto done = v.makeBlock();
   v << callstub{target, argSet(2) | kCrossTraceRegs,
                 x64::abi.all(), makeFixup(inst->marker())};
+  v << unwind{{done, m_state.labels[inst->taken()]}};
+  v = done;
   v << defvmsp{dstLoc(inst, 0).reg()};
 }
 
@@ -2925,6 +2927,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto const sync_sp = v.makeReg();
   v << lea{rSP[cellsToBytes(extra->spOffset.offset)], sync_sp};
 
+  auto catchBlock = m_state.labels[inst->taken()];
   if (isNativeImplCall(callee, argc)) {
     // The assumption here is that for builtins, the generated func contains
     // only a single opcode (NativeImpl), and there are no non-argument locals.
@@ -2935,7 +2938,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     v << store{v.cns(retAddr),
                sync_sp[cellsToBytes(argc) + AROFF(m_savedRip)]};
     v << lea{sync_sp[cellsToBytes(argc)], rVmFp};
-    emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup(0, argc));
+    emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup(0, argc), catchBlock);
     BuiltinFunction builtinFuncPtr = callee->builtinFuncPtr();
     TRACE(2, "calling builtin preClass %p func %p\n", callee->preClass(),
           builtinFuncPtr);
@@ -2948,8 +2951,10 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     // Call the native implementation. This will free the locals for us in the
     // normal case. In the case where an exception is thrown, the VM unwinder
     // will handle it for us.
-    v << vcall{CppCall::direct(builtinFuncPtr), v.makeVcallArgs({{rVmFp}}),
-               v.makeTuple({}), Fixup(0, argc)};
+    auto next = v.makeBlock();
+    v << vinvoke{CppCall::direct(builtinFuncPtr), v.makeVcallArgs({{rVmFp}}),
+                 v.makeTuple({}), {next, catchBlock}, Fixup(0, argc)};
+    v = next;
     // The native implementation already put the return value on the stack for
     // us, and handled cleaning up the arguments.  We have to update the frame
     // pointer and the stack pointer, and load the return value into the return
@@ -2971,7 +2976,9 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     if (debug && RuntimeOption::EvalHHIRGenerateAsserts) {
       emitImmStoreq(v, kUninitializedRIP, rStashedAR[AROFF(m_savedRip)]);
     }
-    v << bindcall{addr, kCrossCallRegs};
+    auto next = v.makeBlock();
+    v << bindcall{addr, kCrossCallRegs, {next, catchBlock}};
+    v = next;
     v << defvmsp{rNewSP};
   }
 }
@@ -3245,10 +3252,11 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
     emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()),
                        rVmTl, fp, sp);
   }
-  v << vcall{
+  v << vinvoke{
     CppCall::direct(builtinFuncPtr),
     v.makeVcallArgs({{fp}}),
     v.makeTuple({}),
+    {m_state.labels[inst->next()], m_state.labels[inst->taken()]},
     makeFixup(inst->marker(), SyncOptions::kSyncPoint)
   };
 }
@@ -4692,13 +4700,17 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   auto const returnOff = extra->returnBCOffset;
   auto& v = vmain();
 
+  auto const catchBlock = m_state.labels[inst->taken()];
+  auto const next = v.makeBlock();
+
   v << store{curFpReg, genFpReg[AROFF(m_sfp)]};
   v << storeli{returnOff, genFpReg[AROFF(m_soff)]};
   v << copy{genFpReg, curFpReg};
   auto const sync_sp = v.makeReg();
   v << lea{curSpReg[cellsToBytes(spOff.offset)], sync_sp};
   v << syncvmsp{sync_sp};
-  v << contenter{curFpReg, addrReg, kCrossTraceRegs};
+  v << contenter{curFpReg, addrReg, kCrossTraceRegs, {next, catchBlock}};
+  v = next;
   // curFpReg->m_savedRip will point here, and the next HHIR opcode must
   // also start here.
   v << defvmsp{dstLoc(inst, 0).reg()};

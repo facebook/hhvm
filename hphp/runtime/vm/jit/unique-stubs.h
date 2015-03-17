@@ -97,6 +97,7 @@ struct UniqueStubs {
    * unwindResumeHelper.
    */
   TCA endCatchHelper;
+  TCA endCatchHelperPast;
 
   /*
    * Helper stubs for doing generic decrefs on a function return.  The

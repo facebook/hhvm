@@ -37,7 +37,7 @@ bool Pipe::open(const String& filename, const String& mode) {
   assert(getFd() == -1);
 
   FILE *f = LightProcess::popen(filename.data(), mode.data(),
-            g_context->getCwd().data());
+                                g_context->getCwd().data());
   if (!f) {
     return false;
   }

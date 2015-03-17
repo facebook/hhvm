@@ -199,7 +199,7 @@ void emitIncRef(Vout& v, Vreg base) {
   v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
   emitAssertFlagsNonNegative(v, sf);
 
-  //v << orwim{1 << 7, base[HeaderKindOffset], v.makeReg()};
+  v << orwim{1 << 7, base[HeaderKindOffset], v.makeReg()};
   TRACE_SET_MOD(countable);
   TRACE(1, "emitIncRef\n");
 }

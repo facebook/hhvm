@@ -1244,6 +1244,9 @@ class ReflectionClass implements Reflector {
       if ($func->isStatic()) continue;
       $ret .= '    ' . str_replace("\n", "\n    ",
                                    rtrim((string)$func, "\n")) . "\n";
+      if ($numMemberFuncs-- != 1) {
+        $ret .= "\n";
+      }
     }
     $ret .= "  }\n";
 
@@ -1256,6 +1259,10 @@ class ReflectionClass implements Reflector {
     throw new BadMethodCallException(
       'Trying to clone an uncloneable object of class ReflectionClass'
     );
+  }
+
+  public function __debuginfo() {
+    return array('name' => $this->name);
   }
 
   /**
@@ -1278,7 +1285,7 @@ class ReflectionClass implements Reflector {
     if ($ret) {
       return $str;
     }
-    print $str;
+    echo $str, "\n";
   }
 
   <<__Native>>

@@ -774,6 +774,10 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     ));
 
     Config::Bind(Logger::LogHeader, ini, logger["Header"]);
+    if (Config::GetBool(ini, logger["AlwaysPrintStackTraces"])) {
+      Logger::SetTheLogger(new ExtendedLogger());
+      ExtendedLogger::EnabledByDefault = true;
+    }
     Config::Bind(Logger::LogNativeStackTrace, ini, logger["NativeStackTrace"],
                  true);
     Config::Bind(Logger::MaxMessagesPerRequest, ini,

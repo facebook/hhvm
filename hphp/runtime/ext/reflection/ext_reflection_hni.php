@@ -1859,7 +1859,7 @@ class ReflectionClass implements Reflector {
     $prop_info = $this->getOrderedPropertyInfos()->get($name);
     if (!$prop_info) {
       $class = $this->getName();
-      throw new ReflectionException("Property $class::$name does not exist");
+      throw new ReflectionException("Property $class::\${$name} does not exist");
     }
     return $this->makeReflectionProperty($name, $prop_info);
   }

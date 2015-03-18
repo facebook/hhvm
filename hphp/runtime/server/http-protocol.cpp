@@ -686,7 +686,8 @@ static void CopyPathInfo(Array& server,
     // fix it so it is settable, so I'll leave this for now
     documentRoot = vhost->getDocumentRoot();
   }
-  if (documentRoot != s_forwardslash &&
+  if (!documentRoot.empty() &&
+      documentRoot != s_forwardslash &&
       documentRoot[documentRoot.length() - 1] == '/') {
     documentRoot = documentRoot.substr(0, documentRoot.length() - 1);
   }

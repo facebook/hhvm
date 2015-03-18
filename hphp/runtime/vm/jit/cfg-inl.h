@@ -28,7 +28,7 @@ namespace HPHP { namespace jit {
 namespace detail {
 
 // PostorderSort encapsulates a depth-first postorder walk.
-template <class Visitor>
+template<class Visitor>
 struct PostorderSort {
   PostorderSort(Visitor& visitor, unsigned num_blocks)
     : m_visited(num_blocks), m_visitor(visitor)
@@ -37,43 +37,14 @@ struct PostorderSort {
   void walk(Block* block) {
     if (m_visited.test(block->id())) return;
     m_visited.set(block->id());
-
-    // Blocks aren't allowed to be empty but this function is used when
-    // printing debug information, so we want to handle invalid Blocks
-    // gracefully.
-    if (!block->empty()) {
-      // If we're not cold but we have two successors and exactly one of them
-      // is cold, we visit the cold one last so it appears as early as
-      // possible in an RPO sort. This causes better memory usage patterns in
-      // traces with lots of exit blocks in certain optimization passes. Note
-      // that these are just heuristics; all possible outcomes are valid
-      // post-order traversals and should not affect correctness.
-
-      auto next = block->next();
-      auto taken = block->taken();
-      if (!cold(block) && next && taken && (cold(next) ^ cold(taken))) {
-        if (cold(next)) {
-          walk(taken);
-          taken = nullptr;
-        } else {
-          walk(next);
-          next = nullptr;
-        }
-      }
-
-      if (taken) walk(taken);
-      if (next) walk(next);
-    }
+    if (auto const t = block->taken()) walk(t);
+    if (auto const n = block->next()) walk(n);
     m_visitor(block);
   }
-private:
-  static bool cold(Block* b) {
-    return b->hint() == Block::Hint::Unlikely ||
-           b->hint() == Block::Hint::Unused;
-  }
+
 private:
   boost::dynamic_bitset<> m_visited;
-  Visitor &m_visitor;
+  Visitor& m_visitor;
 };
 
 }

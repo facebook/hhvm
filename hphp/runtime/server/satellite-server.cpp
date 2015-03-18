@@ -47,6 +47,7 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini, Hdf hdf) {
   m_password = Config::GetString(ini, hdf["Password"], "");
   Config::Get(ini, hdf["Passwords"], m_passwords);
   m_alwaysReset = Config::GetBool(ini, hdf["AlwaysReset"], false);
+  Config::Get(ini, hdf["Functions"], m_functions);
 
   std::string type = Config::GetString(ini, hdf["Type"]);
   if (type == "InternalPageServer") {

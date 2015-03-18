@@ -657,6 +657,59 @@ static int get_user_token_id(int internal_id) {
   return MaxUserTokenId;
 }
 
+/**
+ * We cheat slightly in the lexer by turning
+ * T_ELSE T_WHITESPACE T_IF into T_ELSEIF
+ *
+ * This makes the AST flatter and avoids bugs like
+ * https://github.com/facebook/hhvm/issues/2699
+ */
+static String token_get_all_fix_elseif(Array& res,
+                                       int& tokVal,
+                                       const std::string& tokText,
+                                       Location& loc) {
+  if (!strcasecmp(tokText.c_str(), "elseif")) {
+    // Actual T_ELSEIF, continue on.
+    return String(tokText);
+  }
+
+  // Otherwise, it's a fake elseif made from "else\s+if"
+  auto tokCStr = tokText.c_str();
+  auto tokCEnd = tokCStr + tokText.size();
+
+  const auto DEBUG_ONLY checkWhitespace =
+  [](const char* s, const char* e) {
+    while (s < e) { if (!isspace(*(s++))) return false; }
+    return true;
+  };
+
+  assert(tokText.size() > strlen("elseif"));
+  assert(!strncasecmp(tokCStr, "else", strlen("else")));
+  assert(checkWhitespace(tokCStr + strlen("else"), tokCEnd - strlen("if")));
+  assert(!strcasecmp(tokCEnd - strlen("if"), "if"));
+
+  // Shove in the T_ELSE and T_WHITESPACE, then return the remaining T_IF
+  res.append(make_packed_array(
+    UserTokenId_T_ELSE,
+    String(tokCStr, strlen("else"), CopyString),
+    loc.line0
+  ));
+
+  res.append(make_packed_array(
+    UserTokenId_T_WHITESPACE,
+    String(tokCStr + strlen("else"), tokText.size() - strlen("elseif"),
+           CopyString),
+    loc.line0
+  ));
+
+  tokVal = UserTokenId_T_IF;
+
+  // To account for newlines in the T_WHITESPACE
+  loc.line0 = loc.line1;
+
+  return String(tokCEnd - strlen("if"), CopyString);
+}
+
 Array HHVM_FUNCTION(token_get_all, const String& source) {
   Scanner scanner(source.data(), source.size(),
                   RuntimeOption::GetScannerType() | Scanner::ReturnAllTokens);
@@ -677,6 +730,9 @@ loop_start: // For after seeing a T_INLINE_HTML, see below
           break;
         case UserTokenId_T_XHP_CATEGORY_LABEL:
           value = String("%" + tok.text());
+          break;
+        case UserTokenId_T_ELSEIF:
+          value = token_get_all_fix_elseif(res, tokVal, tok.text(), loc);
           break;
         case UserTokenId_T_HASHBANG:
           // Convert T_HASHBANG to T_INLINE_HTML for Zend compatibility

@@ -37,7 +37,9 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags,
   , m_attr_kind_count(flags | kind << 24)
 {
   assert(o_attribute == flags && !m_count);
-  assert(m_kind == HeaderKind::Object || m_kind == HeaderKind::ResumableObj);
+  assert(m_kind == HeaderKind::Object ||
+         m_kind == HeaderKind::ResumableObj ||
+         m_kind == HeaderKind::AwaitAllWH);
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
   instanceInit(cls);

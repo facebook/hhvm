@@ -120,7 +120,7 @@ enum class HeaderKind : uint8_t {
   // ArrayKind aliases
   Packed, Struct, Mixed, Empty, Apc, Globals, Proxy,
   // Other ordinary refcounted heap objects
-  String, Object, ResumableObj, Resource, Ref,
+  String, Object, ResumableObj, AwaitAllWH, Resource, Ref,
   Resumable, // ResumableNode followed by Frame, Resumable, ObjectData
   Native, // a NativeData header preceding an HNI ObjectData
   SmallMalloc, // small smart_malloc'd block

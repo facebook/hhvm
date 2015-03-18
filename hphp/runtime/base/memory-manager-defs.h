@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/ext/asio/await_all_wait_handle.h"
 
 namespace HPHP {
 
@@ -53,6 +54,7 @@ struct Header {
     ResumableNode resumable_;
     NativeNode native_;
     DebugHeader debug_;
+    c_AwaitAllWaitHandle awaitall_;
   };
 
   Resumable* resumable() const {
@@ -87,6 +89,9 @@ inline size_t Header::size() const {
     case HeaderKind::ResumableObj:
       // [ObjectData][subclass][props]
       return obj_.heapSize();
+    case HeaderKind::AwaitAllWH:
+      // [ObjectData][children...]
+      return awaitall_.heapSize();
     case HeaderKind::Resource:
       // [ResourceData][subclass]
       return res_.heapSize();
@@ -207,6 +212,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
     switch (i->kind()) {
       case HeaderKind::Object:
       case HeaderKind::ResumableObj:
+      case HeaderKind::AwaitAllWH:
         ptrs.push_back(&i->obj_);
         break;
       case HeaderKind::Resumable:

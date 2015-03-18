@@ -119,6 +119,7 @@ struct ObjectData {
   bool isUncounted() const;
 
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
+  template<class F> void scan(F&) const;
 
   size_t heapSize() const;
 

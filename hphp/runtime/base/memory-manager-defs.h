@@ -40,6 +40,7 @@ struct Header {
       uint64_t q;
       uint8_t b[3];
       HeaderKind kind_;
+      RefCount count_;
     };
     StringData str_;
     ArrayData arr_;
@@ -99,10 +100,8 @@ inline size_t Header::size() const {
       return sizeof(RefData);
     case HeaderKind::SmallMalloc:
       return small_.padbytes;
-    case HeaderKind::BigMalloc:
-    case HeaderKind::BigObj:
-      // [BigNode][bytes...] if smartMallocBig, or
-      // [BigNode][Header...] if smartMallocSizeBig
+    case HeaderKind::BigMalloc: // [BigNode][bytes...]
+    case HeaderKind::BigObj:    // [BigNode][Header...]
       return big_.nbytes;
     case HeaderKind::Free:
       return free_.size;
@@ -204,6 +203,13 @@ struct BigHeap::iterator {
   Headiter m_header;
   BigHeap& m_heap;
 };
+
+template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
+  for (auto i = begin(), lim = end(); i != lim;) {
+    auto h = &*i; ++i;
+    fn(h);
+  }
+}
 
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   if (debug) checkHeap();

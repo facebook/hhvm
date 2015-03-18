@@ -31,6 +31,7 @@ namespace HPHP {
 class Array;
 class String;
 class VariableSerializer;
+struct IMarker;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -63,10 +64,14 @@ class ResourceData {
     always_assert(false);
     ::operator delete(p);
   }
+
   size_t heapSize() const {
     assert(m_size != 0);
     return m_size;
   }
+
+  template<class F> void scan(F&) const;
+  virtual void vscan(IMarker& mark) const;
 
   void release() noexcept {
     assert(!hasMultipleRefs());

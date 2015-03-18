@@ -673,9 +673,10 @@ struct MemoryManager {
   void addSweepable(Sweepable*);
 
   /*
-   * Iterating the memory manager tracked objects.
+   * Heap iterator methods.
    */
   template<class Fn> void forEachObject(Fn);
+  template<class Fn> void forEachHeader(Fn);
 
   /*
    * Reset all runtime options for Memory Manager
@@ -708,6 +709,12 @@ struct MemoryManager {
    * Dump a jemalloc heap profiling, then reset the profiler.
    */
   static void requestShutdown();
+
+  /*
+   * Run the experimental heap-tracer. has no effect other than
+   * possibly asserting.
+   */
+  void traceHeap();
 
 private:
   friend void* smart_malloc(size_t nbytes);

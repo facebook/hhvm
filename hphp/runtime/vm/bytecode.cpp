@@ -323,6 +323,12 @@ static Offset pcOff() {
 
 const StaticString s_GLOBALS("GLOBALS");
 
+
+void VarEnv::createGlobal() {
+  assert(!g_context->m_globalVarEnv);
+  g_context->m_globalVarEnv = smart_new<VarEnv>();
+}
+
 VarEnv::VarEnv()
   : m_nvTable()
   , m_extraArgs(nullptr)
@@ -330,8 +336,6 @@ VarEnv::VarEnv()
   , m_global(true)
 {
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
-  assert(!g_context->m_globalVarEnv);
-  g_context->m_globalVarEnv = this;
   auto globals = new (MM().objMalloc(sizeof(GlobalsArray)))
                  GlobalsArray(&m_nvTable);
   auto globalArray = make_tv<KindOfArray>(globals->asArrayData());
@@ -374,10 +378,6 @@ VarEnv::~VarEnv() {
      */
     m_nvTable.leak();
   }
-}
-
-VarEnv* VarEnv::createGlobal() {
-  return smart_new<VarEnv>();
 }
 
 VarEnv* VarEnv::createLocal(ActRec* fp) {

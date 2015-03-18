@@ -142,7 +142,14 @@ class VarEnv {
   NameValueTable m_nvTable;
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
-  bool m_global;
+  const bool m_global;
+
+ public:
+  template<class F> void scan(F& mark) const {
+    mark(m_nvTable);
+    // TODO #6511877 scan ExtraArgs. requires calculating numExtra
+    //mark(m_extraArgs);
+  }
 
  public:
   explicit VarEnv();
@@ -154,7 +161,7 @@ class VarEnv {
   static VarEnv* createLocal(ActRec* fp);
 
   // Allocate a global VarEnv.  Initially not attached to any frame.
-  static VarEnv* createGlobal();
+  static void createGlobal();
 
   VarEnv* clone(ActRec* fp) const;
 
@@ -559,6 +566,11 @@ struct Fault {
       m_raiseFrame(nullptr),
       m_raiseOffset(kInvalidOffset),
       m_handledCount(0) {}
+
+  template<class F> void scan(F& mark) const {
+    if (m_faultType == Type::UserException) mark(m_userException);
+    else mark(m_cppException);
+  }
 
   union {
     ObjectData* m_userException;

@@ -697,6 +697,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
+  if (debug) MM().traceHeap();
   if (RuntimeOption::EvalDumpTC) {
     HPHP::jit::tc_dump();
   }

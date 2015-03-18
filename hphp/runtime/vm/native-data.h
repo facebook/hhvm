@@ -17,6 +17,7 @@
 #define _incl_HPHP_RUNTIME_VM_NATIVE_DATA_H
 
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP { namespace Native {
@@ -175,6 +176,25 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls);
 
 Variant nativeDataSleep(const ObjectData* obj);
 void nativeDataWakeup(ObjectData* obj, const Variant& data);
+
+// return the full native header size, which is also the distance from
+// the allocated pointer to the ObjectData*.
+inline size_t ndsize(const NativeDataInfo* ndi) {
+  return alignTypedValue(ndi->sz + sizeof(NativeNode));
+}
+
+inline NativeNode* getNativeNode(ObjectData *obj, const NativeDataInfo* ndi) {
+  return reinterpret_cast<NativeNode*>(
+    reinterpret_cast<char*>(obj) - ndsize(ndi)
+  );
+}
+
+inline const NativeNode*
+getNativeNode(const ObjectData *obj, const NativeDataInfo* ndi) {
+  return reinterpret_cast<const NativeNode*>(
+    reinterpret_cast<const char*>(obj) - ndsize(ndi)
+  );
+}
 
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native

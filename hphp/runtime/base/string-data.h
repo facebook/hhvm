@@ -472,6 +472,11 @@ private:
   void setStatic() const;
   void setUncounted() const;
 
+public:
+  template<class F> void scan(F& mark) const {
+    if (isShared()) mark(sharedPayload()->shared);
+  }
+
 private:
   char* m_data;
 

@@ -124,6 +124,14 @@ struct FilterRequestData final : RequestEventHandler {
     return empty_array();
   }
 
+  void scanRoots(IMarker& mark) {
+    mark(m_GET);
+    mark(m_POST);
+    mark(m_COOKIE);
+    mark(m_SERVER);
+    mark(m_ENV);
+  }
+
 private:
   Array m_GET;
   Array m_POST;
@@ -211,6 +219,12 @@ public:
   void requestInit() override {
     // warm up the s_filter_request_data
     s_filter_request_data->requestInit();
+  }
+
+  void scanRoots(IMarker& m) override {
+    if (s_filter_request_data.getInited()) {
+      s_filter_request_data->scanRoots(m);
+    }
   }
 } s_filter_extension;
 

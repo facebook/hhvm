@@ -42,6 +42,14 @@ MixedArray::Elm* mixedData(const MixedArray* arr) {
   );
 }
 
+template<class F> void MixedArray::scan(F& mark) const {
+  for (unsigned i = 0, n = m_used; i < n; i++) {
+    auto& e = mixedData(this)[i];
+    if (e.hasStrKey()) mark(e.skey);
+    if (!MixedArray::isTombstone(e.data.m_type)) mark(e.data);
+  }
+}
+
 ALWAYS_INLINE
 MixedArray* getArrayFromMixedData(const MixedArray::Elm* elms) {
   // Note: changes to this scheme will require changes in the JIT for

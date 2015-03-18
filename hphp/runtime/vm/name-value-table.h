@@ -160,6 +160,10 @@ private:
   struct Elm {
     TypedValue        m_tv;
     const StringData* m_name;
+    template<class F> void scan(F& mark) const {
+      mark(m_name);
+      mark(m_tv);
+    }
   };
 
 private:
@@ -171,6 +175,16 @@ private:
   Elm* insert(const StringData* name);
   void rehash(Elm* const oldTab, const size_t oldMask);
   Elm* findElm(const StringData* name) const;
+
+public:
+  template<class F> void scan(F& mark) const {
+    // TODO #6511877 need to access ActRec::scan() here.
+    //m_fp->scan(mark);
+    if (!m_table) return;
+    for (unsigned i = 0, n = m_tabMask+1; i < n; ++i) {
+      m_table[i].scan(mark);
+    }
+  }
 
 private:
   ActRec* m_fp{nullptr};

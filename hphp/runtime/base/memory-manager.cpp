@@ -434,6 +434,7 @@ template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
 void MemoryManager::sweep() {
   assert(!sweeping());
   if (debug) checkHeap();
+  if (debug) traceHeap();
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
   DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;
@@ -753,6 +754,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   }
   initHole(); // enable parsing the leftover space in the old slab
   if (debug && RuntimeOption::EvalCheckHeapOnAlloc) checkHeap();
+  if (debug) traceHeap();
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmartSizeAlignMask) == 0);
   m_stats.borrow(slab.size);

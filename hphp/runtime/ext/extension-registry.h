@@ -41,6 +41,8 @@ void requestShutdown();
 
 bool modulesInitialised();
 
+void scanExtensionRoots(IMarker&);
+
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::ExtensionRegistry
 

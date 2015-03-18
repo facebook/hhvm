@@ -57,18 +57,6 @@ NativeDataInfo* getNativeDataInfo(const StringData* name) {
   return &it->second;
 }
 
-// return the full native header size, which is also the distance from
-// the allocated pointer to the ObjectData*.
-inline size_t ndsize(const NativeDataInfo* ndi) {
-  return alignTypedValue(ndi->sz + sizeof(NativeNode));
-}
-
-inline NativeNode* getSweepNode(ObjectData *obj, const NativeDataInfo* ndi) {
-  return reinterpret_cast<NativeNode*>(
-    reinterpret_cast<char*>(obj) - ndsize(ndi)
-  );
-}
-
 /* Classes with NativeData structs allocate extra memory prior
  * to the ObjectData.
  *
@@ -145,7 +133,7 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
   if (ndi->destroy) {
     ndi->destroy(obj);
   }
-  auto node = getSweepNode(obj, ndi);
+  auto node = getNativeNode(obj, ndi);
   if (ndi->sweep) {
     MM().removeNativeObject(node);
   }

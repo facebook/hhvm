@@ -18,6 +18,8 @@
 #ifndef incl_HPHP_EXT_XDEBUG_H_
 #define incl_HPHP_EXT_XDEBUG_H_
 
+#include <folly/Optional.h>
+
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/timer.h"
@@ -34,6 +36,10 @@ struct XDebugServer;
 #define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2013 by Derick Rethans"
 #define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2013"
 #define XDEBUG_URL "http://hhvm.com/"
+
+#define OUTPUT_NOT_CHECKED -1
+#define OUTPUT_IS_TTY       1
+#define OUTPUT_NOT_TTY      0
 
 // TODO(#3704) Not all of these should be thread local and settable via ini_set
 // Request Local ini config settings
@@ -157,7 +163,8 @@ struct XDebugServer;
 #define XDEBUG_CUSTOM_GLOBALS \
   XDEBUG_OPT(bool, nullptr, ProfilerAttached, false) \
   XDEBUG_OPT(int64_t, nullptr, InitTime, Timer::GetCurrentTimeMicros()) \
-  XDEBUG_OPT(XDebugServer*, nullptr, Server, nullptr)
+  XDEBUG_OPT(XDebugServer*, nullptr, Server, nullptr) \
+  XDEBUG_OPT(folly::Optional<bool>, nullptr, OutputIsTTY, folly::none)
 
 // Retrieves the value of the given xdebug global
 #define XDEBUG_GLOBAL(name) (*XDebugExtension::name)
@@ -175,6 +182,7 @@ constexpr int64_t k_XDEBUG_TRACE_NAKED_FILENAME = 8;
 constexpr int64_t k_XDEBUG_PROFILE_APPEND = 1;
 ///////////////////////////////////////////////////////////////////////////////
 Variant HHVM_FUNCTION(xdebug_get_profiler_filename);
+void HHVM_FUNCTION(xdebug_var_dump, const Variant&, const Array&);
 ///////////////////////////////////////////////////////////////////////////////
 
 struct XDebugExtension final : Extension {

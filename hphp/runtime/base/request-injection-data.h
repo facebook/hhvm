@@ -115,6 +115,7 @@ private:
   /* INI settings. */
   bool m_logErrors;
   bool m_trackErrors;
+  bool m_htmlErrors;
   bool m_safeFileAccess;
 
   /* Pointer to condition flags stored in RDS. */
@@ -264,7 +265,8 @@ private:
     return m_allowedDirectories;
   }
   bool hasSafeFileAccess() const { return m_safeFileAccess; }
-  bool hasTrackErrors() { return m_trackErrors; }
+  bool hasTrackErrors() const { return m_trackErrors; }
+  bool hasHtmlErrors() const { return m_htmlErrors; }
 
   /* CmdInterrupts this thread is handling. */
   std::stack<void*> interrupts;

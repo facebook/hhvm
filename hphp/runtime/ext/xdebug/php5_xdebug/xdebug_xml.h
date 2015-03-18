@@ -25,6 +25,8 @@
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
+struct String;
+
 typedef struct _xdebug_xml_attribute xdebug_xml_attribute;
 typedef struct _xdebug_xml_text_node xdebug_xml_text_node;
 typedef struct _xdebug_xml_node xdebug_xml_node;
@@ -132,6 +134,8 @@ inline void xdebug_xml_add_text_encodel(xdebug_xml_node* xml, char* tag,
                                         int length) {
   xdebug_xml_add_text_ex(xml, tag, length, 1, 1);
 }
+
+String xdebug_xmlize(const char*, size_t);
 
 ////////////////////////////////////////////////////////////////////////////////
 }

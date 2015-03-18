@@ -24,9 +24,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef folly::dynamic IniSettingMap;
-// forward declaration
+// forward declarations
 const folly::dynamic* ini_iterate(const IniSettingMap& ini,
                                   const std::string& name);
+template<class T>
+void ini_bind_core_system(const std::string& name, T *p);
+template<class T>
+bool ini_set_helper(const std::string& name, T& value);
 
 /**
  * Parts of the language can individually be made stricter, warning or
@@ -91,10 +95,6 @@ struct Config {
                    const Hdf& config, const double defValue = 0);
   static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
                    const Hdf& config);
-  static void Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
-                   const Hdf& config);
-  static void Bind(std::map<std::string, std::string>& loc,
-                   const IniSettingMap& ini, const Hdf& config);
 
   /**
    * These Bind()s should be used for ini settings. Specifically, they should
@@ -215,11 +215,14 @@ struct Config {
   // This will go away when we move from Hdf
   template<class T>
   static void Get(const IniSettingMap &ini, const Hdf& config, T &data) {
+    auto key = IniName(config);
     config.configGet(data);
     if (!data.empty()) {
+      // ensure that hdf is set correctly as the winning value over ini
+      ini_set_helper(key, data);
       return;
     }
-    auto key = IniName(config);
+
     auto* value = ini.get_ptr(key);
     if (!value) {
       return;
@@ -230,6 +233,13 @@ struct Config {
                            pair.second.asString().toStdString());
       }
     }
+  }
+
+  // This will be replaced with an ini only version when we remove Hdf
+  template<class T>
+  static void Bind(T &loc, const IniSettingMap &ini, const Hdf &config) {
+    Get(ini, config, loc);
+    ini_bind_core_system(IniName(config), &loc);
   }
 
   template<class T>

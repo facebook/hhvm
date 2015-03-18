@@ -50,6 +50,12 @@ bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p);
 bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p);
 bool ini_on_update(const folly::dynamic& value,
                    std::map<std::string, std::string>& p);
+bool ini_on_update(const folly::dynamic& value,
+                   std::set<std::string, stdltistr>& p);
+bool ini_on_update(const folly::dynamic& value,
+                   boost::container::flat_set<std::string>& p);
+bool ini_on_update(const folly::dynamic& value,
+                   hphp_string_imap<std::string>& p);
 folly::dynamic ini_get(bool& p);
 folly::dynamic ini_get(double& p);
 folly::dynamic ini_get(char& p);
@@ -66,6 +72,9 @@ folly::dynamic ini_get(Array& p);
 folly::dynamic ini_get(std::set<std::string>& p);
 folly::dynamic ini_get(std::vector<std::string>& p);
 folly::dynamic ini_get(std::map<std::string, std::string>& p);
+folly::dynamic ini_get(std::set<std::string, stdltistr>& p);
+folly::dynamic ini_get(boost::container::flat_set<std::string>& p);
+folly::dynamic ini_get(hphp_string_imap<std::string>& p);
 
 /**
  * If given an ini setting like "hhvm.abc[def][ghi]=yyy" and we have
@@ -349,6 +358,18 @@ int64_t convert_bytes_to_long(const std::string& value);
 void add_default_config_files_globbed(
   const char *default_config_file,
   std::function<void (const char *filename)> cb);
+
+// Passthroughs to IniSetting::Bind and IniSetting::Set
+// Used for templated functions inside class like config.h
+template<class T>
+void ini_bind_core_system(const std::string& name, T *p) {
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, name, p);
+}
+template<class T>
+bool ini_set_helper(const std::string& name, T& value) {
+  return IniSetting::Set(name, ini_get(value), IniSetting::FollyDynamic());
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

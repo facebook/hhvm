@@ -236,46 +236,6 @@ void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
   loc = GetHackStrictOption(ini, config);
 }
 
-void Config::Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
-                  const Hdf& config) {
-  std::vector<std::string> ret;
-  auto ini_name = IniName(config);
-  auto* value = ini.get_ptr(ini_name);
-  if (value && value->isObject()) {
-    ini_on_update(*value, ret);
-    loc = ret;
-  }
-  // If there is an HDF setting for the config, then it still wins for
-  // the RuntimeOption value until we obliterate HDFs
-  ret.clear();
-  config.configGet(ret);
-  if (ret.size() > 0) {
-    loc = ret;
-  }
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, ini_name,
-                   &loc);
-}
-
-void Config::Bind(std::map<std::string, std::string>& loc,
-                  const IniSettingMap& ini, const Hdf& config) {
-  std::map<std::string, std::string> ret;
-  auto ini_name = IniName(config);
-  auto* value = ini.get_ptr(ini_name);
-  if (value && value->isObject()) {
-    ini_on_update(*value, ret);
-    loc = ret;
-  }
-  // If there is an HDF setting for the config, then it still wins for
-  // the RuntimeOption value until we obliterate HDFs
-  ret.clear();
-  config.configGet(ret);
-  if (ret.size() > 0) {
-    loc = ret;
-  }
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, ini_name,
-                   &loc);
-}
-
 // Hdf takes precedence, as usual. No `ini` binding yet.
 void Config::Iterate(const IniSettingMap &ini, const Hdf &hdf,
                      std::function<void (const IniSettingMap&,

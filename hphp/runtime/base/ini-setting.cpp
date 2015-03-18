@@ -278,6 +278,23 @@ bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p) {
   return true;
 }
 
+bool ini_on_update(const folly::dynamic& value,
+                   std::set<std::string, stdltistr>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& v : value.values()) {
+    p.insert(v.data());
+  }
+  return true;
+}
+
+bool ini_on_update(const folly::dynamic& value,
+                   boost::container::flat_set<std::string>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& v : value.values()) {
+    p.insert(v.data());
+  }
+  return true;
+}
 
 bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p) {
   INI_ASSERT_ARR(value);
@@ -289,6 +306,15 @@ bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p) {
 
 bool ini_on_update(const folly::dynamic& value,
                    std::map<std::string, std::string>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& pair : value.items()) {
+    p[pair.first.data()] = pair.second.data();
+  }
+  return true;
+}
+
+bool ini_on_update(const folly::dynamic& value,
+                   hphp_string_imap<std::string>& p) {
   INI_ASSERT_ARR(value);
   for (auto& pair : value.items()) {
     p[pair.first.data()] = pair.second.data();
@@ -352,6 +378,14 @@ folly::dynamic ini_get(std::map<std::string, std::string>& p) {
   return ret;
 }
 
+folly::dynamic ini_get(hphp_string_imap<std::string>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  for (auto& pair : p) {
+    ret.insert(pair.first, pair.second);
+  }
+  return ret;
+}
+
 folly::dynamic ini_get(Array& p) {
   folly::dynamic ret = folly::dynamic::object;
   for (ArrayIter iter(p); iter; ++iter) {
@@ -363,8 +397,27 @@ folly::dynamic ini_get(Array& p) {
 
 folly::dynamic ini_get(std::set<std::string>& p) {
   folly::dynamic ret = folly::dynamic::object;
+  auto idx = 0;
   for (auto& s : p) {
-    ret.push_back(s);
+    ret.insert(idx++, s);
+  }
+  return ret;
+}
+
+folly::dynamic ini_get(std::set<std::string, stdltistr>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  auto idx = 0;
+  for (auto& s : p) {
+    ret.insert(idx++, s);
+  }
+  return ret;
+}
+
+folly::dynamic ini_get(boost::container::flat_set<std::string>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  auto idx = 0;
+  for (auto& s : p) {
+    ret.insert(idx++, s);
   }
   return ret;
 }

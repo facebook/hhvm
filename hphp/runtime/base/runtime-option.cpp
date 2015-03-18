@@ -722,7 +722,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
   Config::Bind(PidFile, ini, config["PidFile"], "www.pid");
 
-  Config::Get(ini, config["DynamicInvokeFunctions"], DynamicInvokeFunctions);
+  Config::Bind(DynamicInvokeFunctions, ini, config["DynamicInvokeFunctions"]);
 
   {
     Hdf logger = config["Log"];
@@ -1093,9 +1093,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ServerFixPathInfo, ini, server["FixPathInfo"], false);
     Config::Bind(ServerAddVaryEncoding, ini, server["AddVaryEncoding"],
                  ServerAddVaryEncoding);
-    Config::Get(ini, server["WarmupRequests"], ServerWarmupRequests);
-    Config::Get(ini, server["HighPriorityEndPoints"],
-                ServerHighPriorityEndPoints);
+    Config::Bind(ServerWarmupRequests, ini, server["WarmupRequests"]);
+    Config::Bind(ServerHighPriorityEndPoints, ini,
+                 server["HighPriorityEndPoints"]);
     Config::Bind(ServerExitOnBindFail, ini, server["ExitOnBindFail"], false);
 
     Config::Bind(RequestTimeoutSeconds, ini, server["RequestTimeoutSeconds"],
@@ -1120,7 +1120,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                  0);
     Config::Bind(ServerShutdownListenNoWork, ini,
                  server["ShutdownListenNoWork"], -1);
-    Config::Get(ini, server["SSLNextProtocols"], ServerNextProtocols);
+    Config::Bind(ServerNextProtocols, ini, server["SSLNextProtocols"]);
     if (ServerGracefulShutdownWait < ServerDanglingWait) {
       ServerGracefulShutdownWait = ServerDanglingWait;
     }
@@ -1173,7 +1173,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     if (!srcRoot.empty()) SourceRoot = srcRoot;
     FileCache::SourceRoot = SourceRoot;
 
-    Config::Get(ini, server["IncludeSearchPaths"], IncludeSearchPaths);
+    Config::Bind(IncludeSearchPaths, ini, server["IncludeSearchPaths"]);
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
       IncludeSearchPaths[i] = FileUtil::normalizeDir(IncludeSearchPaths[i]);
     }
@@ -1207,7 +1207,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(RequestInitDocument, ini, server["RequestInitDocument"]);
 
     Config::Bind(SafeFileAccess, ini, server["SafeFileAccess"]);
-    Config::Get(ini, server["AllowedDirectories"], AllowedDirectories);
+    Config::Bind(AllowedDirectories, ini, server["AllowedDirectories"]);
 
     Config::Bind(WhitelistExec, ini, server["WhitelistExec"]);
     Config::Bind(WhitelistExecWarningOnly, ini,
@@ -1218,10 +1218,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(UnserializationWhitelistCheckWarningOnly, ini,
                  server["UnserializationWhitelistCheckWarningOnly"], true);
 
-    Config::Get(ini, server["AllowedFiles"], AllowedFiles);
-
-    Config::Get(ini, server["ForbiddenFileExtensions"],
-                ForbiddenFileExtensions);
+    Config::Bind(AllowedFiles, ini, server["AllowedFiles"]);
+    Config::Bind(ForbiddenFileExtensions, ini,
+                 server["ForbiddenFileExtensions"]);
 
     Config::Bind(LockCodeMemory, ini, server["LockCodeMemory"], false);
     Config::Bind(MaxArrayChain, ini, server["MaxArrayChain"], INT_MAX);
@@ -1349,8 +1348,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
   {
     Hdf content = config["StaticFile"];
-    Config::Get(ini, content["Extensions"], StaticFileExtensions);
-    Config::Get(ini, content["Generators"], StaticFileGenerators);
+    Config::Bind(StaticFileExtensions, ini, content["Extensions"]);
+    Config::Bind(StaticFileGenerators, ini, content["Generators"]);
 
     Hdf matches = content["FilesMatch"];
     auto matches_callback = [] (const IniSettingMap &ini_m, const Hdf &hdf_m,
@@ -1361,14 +1360,14 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
   {
     Hdf phpfile = config["PhpFile"];
-    Config::Get(ini, phpfile["Extensions"], PhpFileExtensions);
+    Config::Bind(PhpFileExtensions, ini, phpfile["Extensions"]);
   }
   {
     Hdf admin = config["AdminServer"];
     Config::Bind(AdminServerPort, ini, admin["Port"], 0);
     Config::Bind(AdminThreadCount, ini, admin["ThreadCount"], 1);
     Config::Bind(AdminPassword, ini, admin["Password"]);
-    Config::Get(ini, admin["Passwords"], AdminPasswords);
+    Config::Bind(AdminPasswords, ini, admin["Passwords"]);
   }
   {
     Hdf proxy = config["Proxy"];
@@ -1376,10 +1375,10 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ProxyPercentageRaw, ini, proxy["Percentage"], 0);
     Config::Bind(ProxyRetry, ini, proxy["Retry"], 3);
     Config::Bind(UseServeURLs, ini, proxy["ServeURLs"]);
-    Config::Get(ini, proxy["ServeURLs"], ServeURLs);
+    Config::Bind(ServeURLs, ini, proxy["ServeURLs"]);
     Config::Bind(UseProxyURLs, ini, proxy["ProxyURLs"]);
-    Config::Get(ini, proxy["ProxyURLs"], ProxyURLs);
-    Config::Get(ini, proxy["ProxyPatterns"], ProxyPatterns);
+    Config::Bind(ProxyURLs, ini, proxy["ProxyURLs"]);
+    Config::Bind(ProxyPatterns, ini, proxy["ProxyPatterns"]);
   }
   {
     Hdf http = config["Http"];
@@ -1471,7 +1470,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(SandboxFromCommonRoot, ini, sandbox["FromCommonRoot"]);
     Config::Bind(SandboxDirectoriesRoot, ini, sandbox["DirectoriesRoot"]);
     Config::Bind(SandboxLogsRoot, ini, sandbox["LogsRoot"]);
-    Config::Get(ini, sandbox["ServerVariables"], SandboxServerVariables);
+    Config::Bind(SandboxServerVariables, ini, sandbox["ServerVariables"]);
   }
   {
     Hdf mail = config["Mail"];
@@ -1528,7 +1527,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(XenonForceAlwaysOn, ini, xenon["ForceAlwaysOn"], false);
   }
 
-  Config::Get(ini, config["CustomSettings"], CustomSettings);
+  Config::Bind(CustomSettings, ini, config["CustomSettings"]);
 
   refineStaticStringTableSize();
 
@@ -1633,10 +1632,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   Config::Bind(RuntimeOption::DynamicExtensionPath, ini,
                config["DynamicExtensionPath"],
                RuntimeOption::DynamicExtensionPath);
-  // there is no way to bind array ini/hdf settings.
-  Config::Get(ini, config["extensions"], RuntimeOption::Extensions);
-  Config::Get(ini, config["DynamicExtensions"],
-              RuntimeOption::DynamicExtensions);
+  Config::Bind(RuntimeOption::Extensions, ini, config["extensions"]);
+  Config::Bind(RuntimeOption::DynamicExtensions, ini,
+               config["DynamicExtensions"]);
 
 
   ExtensionRegistry::moduleLoad(ini, config);

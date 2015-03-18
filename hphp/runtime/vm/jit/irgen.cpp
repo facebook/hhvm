@@ -114,8 +114,7 @@ SSATmp* genInstruction(HTS& env, IRInstruction* inst) {
     assert(inst->taken() && inst->taken()->isCatch());
   }
 
-  return env.irb->optimizeInst(inst, IRBuilder::CloneFlag::Yes, nullptr,
-    folly::none);
+  return env.irb->optimizeInst(inst, IRBuilder::CloneFlag::Yes, nullptr);
 }
 }
 

@@ -20,7 +20,6 @@
 #include <functional>
 
 #include <folly/ScopeGuard.h>
-#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -262,8 +261,7 @@ public:
   enum class CloneFlag { Yes, No };
   SSATmp* optimizeInst(IRInstruction* inst,
                        CloneFlag doClone,
-                       Block* srcBlock,
-                       const folly::Optional<IdomVector>&);
+                       Block* srcBlock);
 
 
 private:
@@ -281,7 +279,7 @@ private:
   SSATmp* gen(Opcode op, Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) {
-        return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
+        return optimizeInst(inst, CloneFlag::Yes, nullptr);
       },
       op,
       m_curMarker,

@@ -618,8 +618,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
  */
 SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
                                 CloneFlag doClone,
-                                Block* srcBlock,
-                                const folly::Optional<IdomVector>& idoms) {
+                                Block* srcBlock) {
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
   SCOPE_EXIT { if (debug) --instNest; };
@@ -763,12 +762,11 @@ void IRBuilder::reoptimize() {
   auto const use_fixed_point = RuntimeOption::EvalJitLoops;
 
   auto const rpoBlocks = rpoSortCfg(m_unit);
-  auto const rpoIDs    = numberBlocks(m_unit, rpoBlocks);
-  auto const idoms     = findDominators(m_unit, rpoBlocks, rpoIDs);
   boost::dynamic_bitset<> reachable(m_unit.numBlocks());
   reachable.set(m_unit.entry()->id());
 
   if (use_fixed_point) {
+    auto const rpoIDs = numberBlocks(m_unit, rpoBlocks);
     m_state.computeFixedPoint(rpoBlocks, rpoIDs);
   } else {
     m_state.setLegacyReoptimize();
@@ -802,7 +800,7 @@ void IRBuilder::reoptimize() {
       assert(inst->marker().valid());
       setCurMarker(inst->marker());
 
-      auto const tmp = optimizeInst(inst, CloneFlag::No, block, idoms);
+      auto const tmp = optimizeInst(inst, CloneFlag::No, block);
       SSATmp* dst = inst->dst(0);
 
       if (dst != tmp) {

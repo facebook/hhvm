@@ -148,7 +148,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
       m_state.finishBlock(oldBlock);
 
-      m_state.startBlock(m_curBlock, inst->marker());
+      m_state.startBlock(m_curBlock);
       where = m_curBlock->begin();
 
       FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
@@ -181,7 +181,7 @@ void IRBuilder::appendBlock(Block* block) {
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
-  m_state.startBlock(block, m_curMarker);
+  m_state.startBlock(block);
   m_curBlock = block;
 }
 
@@ -781,7 +781,7 @@ void IRBuilder::reoptimize() {
     if (use_fixed_point) {
       m_state.loadBlock(block);
     } else {
-      m_state.startBlock(block, block->front().marker());
+      m_state.startBlock(block);
     }
     m_curBlock = block;
 
@@ -1120,8 +1120,7 @@ bool IRBuilder::canStartBlock(Block* block) const {
   return m_state.hasStateFor(block);
 }
 
-bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
-                           bool hasUnprocessedPred) {
+bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
@@ -1142,7 +1141,7 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_state.finishBlock(m_curBlock);
   m_curBlock = block;
 
-  m_state.startBlock(m_curBlock, marker, hasUnprocessedPred);
+  m_state.startBlock(m_curBlock, hasUnprocessedPred);
   if (sp() == nullptr) {
     always_assert(RuntimeOption::EvalHHIRBytecodeControlFlow);
     // XXX(t2288359): This can go away once we don't redefine StkPtrs mid-trace.
@@ -1187,7 +1186,7 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b) {
     BlockState { m_curBlock, m_curMarker, m_exnStack }
   );
   m_state.pauseBlock(m_curBlock);
-  m_state.startBlock(b, marker);
+  m_state.startBlock(b);
   m_curBlock = b;
   m_curMarker = marker;
 

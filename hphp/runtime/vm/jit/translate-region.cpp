@@ -519,7 +519,7 @@ TranslateResult irGenRegion(HTS& hts,
 
   // Prepare to start translation of the first region block.
   auto const entry = irb.unit().entry();
-  irb.startBlock(entry, entry->front().marker(), false /* hasUnprocPred */);
+  irb.startBlock(entry, false /* hasUnprocPred */);
 
   // Make the IR entry block jump to the IR block we mapped the region entry
   // block to (they are not the same!).
@@ -559,8 +559,7 @@ TranslateResult irGenRegion(HTS& hts,
     // Note: a block can have an unprocessed predecessor even if the
     // region is acyclic, e.g. if the IR was able to prove a path was
     // unfeasible due to incompatible types.
-    BCMarker marker(sk, block->initialSpOffset(), profTransId, irb.fp());
-    if (!irb.startBlock(irBlock, marker, hasUnprocPred)) {
+    if (!irb.startBlock(irBlock, hasUnprocPred)) {
       // This can't happen because we picked a reachable block from the workQ.
       always_assert_flog(
         0, "translateRegion: tried to startBlock on unreachable block {}\n",

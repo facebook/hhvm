@@ -254,7 +254,7 @@ struct FrameStateMgr final : private LocalStateHook {
    * predecessor in the region that might not yet be linked into the
    * IR CFG.
    */
-  void startBlock(Block* b, BCMarker marker, bool hasUnprocessedPred = false);
+  void startBlock(Block* b, bool hasUnprocessedPred = false);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -384,7 +384,7 @@ private:
   jit::vector<LocalState>& locals(unsigned inlineIdx);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
-  void clearForUnprocessedPred(BCMarker);
+  void clearForUnprocessedPred();
   StackState& stackState(IRSPOffset offset);
   const StackState& stackState(IRSPOffset offset) const;
   void collectPostConds(Block* exitBlock);

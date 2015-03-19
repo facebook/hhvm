@@ -126,6 +126,7 @@ struct PackedArray {
   static uint32_t getMaxCapInPlaceFast(uint32_t cap);
 
   static size_t heapSize(const ArrayData*);
+  template<class Marker> static void scan(const ArrayData*, Marker&);
 
 private:
   static ArrayData* Grow(ArrayData*);

@@ -36,30 +36,43 @@
 
 namespace HPHP {
 
-// defined here because we need definitions of all ArrayData subclasses.
-template<class F> void ArrayData::scan(F& mark) const {
-  switch (m_kind) {
-    case ArrayData::kProxyKind:
-      return static_cast<const ProxyArray*>(this)->scan(mark);
-    case ArrayData::kEmptyKind:
+template<class F> void scanHeader(const Header* h, F& mark) {
+  switch (h->kind_) {
+    case HeaderKind::Proxy:
+      return h->proxy_.scan(mark);
+    case HeaderKind::Empty:
       return;
-    case ArrayData::kPackedKind:
-      for (unsigned i = 0, n = getSize(); i < n; ++i) {
-        mark(packedData(this)[i]);
-      }
-      return;
-    case ArrayData::kStructKind:
-      return StructArray::asStructArray(this)->scan(mark);
-    case ArrayData::kMixedKind:
-      return MixedArray::asMixed(this)->scan(mark);
-    case ArrayData::kApcKind:
-      return APCLocalArray::asApcArray(this)->scan(mark);
-    case ArrayData::kGlobalsKind:
-      return static_cast<const GlobalsArray*>(this)->scan(mark);
-    case ArrayData::kNumKinds:
-      always_assert(false);
-      return;
-  };
+    case HeaderKind::Packed:
+      return PackedArray::scan(&h->arr_, mark);
+    case HeaderKind::Struct:
+      return h->struct_.scan(mark);
+    case HeaderKind::Mixed:
+      return h->mixed_.scan(mark);
+    case HeaderKind::Apc:
+      return h->apc_.scan(mark);
+    case HeaderKind::Globals:
+      return h->globals_.scan(mark);
+    case HeaderKind::Object:
+    case HeaderKind::ResumableObj:
+    case HeaderKind::AwaitAllWH:
+      return h->obj_.scan(mark);
+    case HeaderKind::Resource:
+      return h->res_.scan(mark);
+    case HeaderKind::Ref:
+      return h->ref_.scan(mark);
+    case HeaderKind::String:
+    case HeaderKind::SmallMalloc:
+    case HeaderKind::BigMalloc:
+    case HeaderKind::BigObj:
+    case HeaderKind::Free:
+    case HeaderKind::Resumable:
+    case HeaderKind::Native:
+    case HeaderKind::Hole:
+    case HeaderKind::Debug:
+      always_assert(false && "unexpected header in worklist");
+      break;
+  }
+  always_assert(false && "corrupt header in worklist");
 }
 
 template<class F> void ObjectData::scan(F& mark) const {

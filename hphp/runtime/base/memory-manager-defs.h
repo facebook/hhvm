@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/ext/asio/await_all_wait_handle.h"
@@ -45,7 +46,10 @@ struct Header {
     StringData str_;
     ArrayData arr_;
     MixedArray mixed_;
+    StructArray struct_;
     APCLocalArray apc_;
+    ProxyArray proxy_;
+    GlobalsArray globals_;
     ObjectData obj_;
     ResourceData res_;
     RefData ref_;
@@ -214,6 +218,14 @@ struct BigHeap::iterator {
 template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
   for (auto i = begin(), lim = end(); i != lim;) {
     auto h = &*i; ++i;
+    if (h->kind_ == HeaderKind::BigObj) {
+      // skip BigNode
+      h = reinterpret_cast<Header*>((&h->big_)+1);
+      if (h->kind_ == HeaderKind::Debug) {
+        // skip DebugHeader
+        h = reinterpret_cast<Header*>((&h->debug_)+1);
+      }
+    }
     fn(h);
   }
 }

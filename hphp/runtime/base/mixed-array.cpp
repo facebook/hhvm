@@ -231,8 +231,10 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     : mallocArray(cap, mask);
 
   ad->m_sizeAndPos      = other.m_sizeAndPos;
-  // copy kind, masking out the bitref; count=0
-  ad->m_kindAndCount    = other.m_packedCapCode & ~(1 << 7); 
+  ad->m_kindAndCount    = other.m_packedCapCode;
+  //explicitly set kind, masking out bitref
+  ad->m_kind            = other.kind();
+
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
   ad->m_tableMask       = mask;
   ad->m_nextKI          = other.m_nextKI;
@@ -265,7 +267,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     ad->compact(false);
   }
 
-  assert(ad->m_kind == other.m_kind);
+  //assert(ad->m_kind == other.m_kind);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(ad->m_count == 0);

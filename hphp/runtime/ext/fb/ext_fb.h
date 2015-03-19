@@ -55,26 +55,6 @@ Variant f_fb_call_user_func_safe_return(
 Array f_fb_call_user_func_array_safe(const Variant& function,
                                      const Array& params);
 
-void f_xhprof_enable(int flags = 0, const Array& args = null_array);
-Variant f_xhprof_disable();
-void f_xhprof_network_enable();
-Variant f_xhprof_network_disable();
-void f_xhprof_frame_begin(const String& name);
-void f_xhprof_frame_end();
-Variant f_xhprof_run_trace(const String& packedTrace, int flags);
-void f_xhprof_sample_enable();
-Variant f_xhprof_sample_disable();
-void f_fb_setprofile(const Variant& callback);
-
-extern const int64_t k_XHPROF_FLAGS_NO_BUILTINS;
-extern const int64_t k_XHPROF_FLAGS_CPU;
-extern const int64_t k_XHPROF_FLAGS_MEMORY;
-extern const int64_t k_XHPROF_FLAGS_VTSC;
-extern const int64_t k_XHPROF_FLAGS_TRACE;
-extern const int64_t k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
-extern const int64_t k_XHPROF_FLAGS_MALLOC;
-extern const int64_t k_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 enum FBCompactSerializeBehavior {

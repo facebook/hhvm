@@ -44,7 +44,7 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/fb/ext_fb.h"
+#include "hphp/runtime/ext/xhprof/ext_xhprof.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
@@ -670,7 +670,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   }
 
   if (xhprof) {
-    f_xhprof_enable(xhprof, uninit_null().toArray());
+    HHVM_FN(xhprof_enable)(xhprof, uninit_null().toArray());
   }
 
   if (RuntimeOption::RequestTimeoutSeconds) {
@@ -704,9 +704,9 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 
   if (xhprof) {
-    Variant profileData = f_xhprof_disable();
+    Variant profileData = HHVM_FN(xhprof_disable)();
     if (!profileData.isNull()) {
-      HHVM_FN(var_dump)(HHVM_FN(json_encode)(f_xhprof_disable()));
+      HHVM_FN(var_dump)(HHVM_FN(json_encode)(HHVM_FN(xhprof_disable)()));
     }
   }
   g_context->onShutdownPostSend();
@@ -927,7 +927,7 @@ static int start_server(const std::string &username, int xhprof) {
   HttpServer::Server = std::make_shared<HttpServer>();
 
   if (xhprof) {
-    f_xhprof_enable(xhprof, uninit_null().toArray());
+    HHVM_FN(xhprof_enable)(xhprof, uninit_null().toArray());
   }
 
   if (RuntimeOption::RepoPreload) {

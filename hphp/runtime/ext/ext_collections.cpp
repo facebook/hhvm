@@ -4908,7 +4908,9 @@ void c_Pair::t___construct(int _argc, const Array& _argv /* = null_array */) {
 }
 
 Array c_Pair::toArrayImpl() const {
-  assert(isFullyConstructed());
+  // Parsing/scanning the heap (e.g., objprof) can cause us to get here before
+  // we've initialized the elms.
+  if (!isFullyConstructed()) return empty_array();
   return make_packed_array(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
 }
 
@@ -5288,7 +5290,6 @@ void c_Pair::throwBadKeyType() {
 
 Array c_Pair::ToArray(const ObjectData* obj) {
   auto pair = static_cast<const c_Pair*>(obj);
-  assert(pair->isFullyConstructed());
   check_collection_cast_to_array();
   return pair->toArrayImpl();
 }

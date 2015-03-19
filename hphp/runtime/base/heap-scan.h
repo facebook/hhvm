@@ -141,11 +141,18 @@ template<class F> void ResourceData::scan(F& mark) const {
 //  * rds threadlocal part: conservative scan until we teach the
 //    jit to tell us where the pointers live.
 //  * rds shared part: should not contain heap pointers!
-template<class F> void scan(F& mark, rds::Header* rds) {
+template<class F> void scanRds(F& mark, rds::Header* rds) {
+  // rds sections
+  auto markSection = [&](folly::Range<const char*> r) {
+    mark(r.begin(), r.size());
+  };
+  markSection(rds::normalSection());
+  markSection(rds::localSection());
+  markSection(rds::persistentSection());
+  // php stack TODO #6509338 exactly scan the php stack.
   auto stack_end = (TypedValue*)rds->vmRegs.stack.getStackHighAddress();
   auto sp = rds->vmRegs.stack.top();
   mark(sp, (stack_end - sp) * sizeof(*sp));
-  return; // TODO #6509338 exactly scan the vm stack.
 }
 
 // Scan request-local roots
@@ -153,7 +160,7 @@ template<class F> void scanRoots(F& mark) {
   // ExecutionContext
   if (!g_context.isNull()) g_context->scan(mark);
   // rds, including php stack
-  if (auto rds = rds::header()) scan(mark, rds);
+  if (auto rds = rds::header()) scanRds(mark, rds);
   // C++ stack
   auto sp = stack_top_ptr();
   mark(sp, s_stackLimit + s_stackSize - uintptr_t(sp));

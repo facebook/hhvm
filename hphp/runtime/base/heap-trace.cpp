@@ -110,7 +110,7 @@ private:
   size_t marked_;       // bytes marked exactly
   size_t ambig_marked_; // bytes marked ambiguously
 
-  folly::Range<char*> rds_; // full mmap'd rds section.
+  folly::Range<const char*> rds_; // full mmap'd rds section.
 };
 
 // mark the object at p, return true if first time.
@@ -230,8 +230,8 @@ void Marker::operator()(const void* start, size_t len) {
 // * ArrayData owned by ArrayInit
 // * Object ctors allocating memory in ctor (while count still==0).
 void Marker::init() {
-  rds_ = folly::Range<char*>((char*)rds::header(),
-                             RuntimeOption::EvalJitTargetCacheSize);
+  rds_ = folly::Range<const char*>((char*)rds::header(),
+                                   RuntimeOption::EvalJitTargetCacheSize);
   total_ = 0;
   MM().forEachHeader([&](Header* h) {
     meta_[h] = Meta{false, false};

@@ -21,6 +21,7 @@
 #include <cinttypes>
 #include <string>
 #include <boost/variant.hpp>
+#include <folly/Range.h>
 
 #include "hphp/runtime/base/types.h"
 
@@ -122,6 +123,10 @@ void flush();
 size_t usedBytes();
 size_t usedLocalBytes();
 size_t usedPersistentBytes();
+
+folly::Range<const char*> normalSection();
+folly::Range<const char*> localSection();
+folly::Range<const char*> persistentSection();
 
 /*
  * The thread-local pointer to the base of RDS.
@@ -319,8 +324,7 @@ void recordRds(Handle h, size_t size,
 void recordRds(Handle h, size_t size, const Symbol& sym);
 
 /*
- * Return a list of all the tl_bases for any threads that are using
- * RDS.
+ * Return a list of all the tl_bases for any threads that are using RDS
  */
 std::vector<void*> allTLBases();
 

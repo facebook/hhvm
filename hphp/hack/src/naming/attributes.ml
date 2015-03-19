@@ -25,12 +25,14 @@ let deprecated ~kind (_, name) attrs =
   match attr with
   | Some { ua_name; ua_params = [msg] } -> begin
       try
-        let _p, msg = Nast_eval.static_string msg in
+        let _p, msg = Nast_eval.static_string_no_consts msg in
         let name = strip_ns name in
         let deprecated_prefix =
           Printf.sprintf "The %s %s is deprecated: " kind name in
         Some (deprecated_prefix ^ msg)
-      with Nast_eval.Eval_error p ->
+      with
+      | Nast_eval.Type_error -> None
+      | Nast_eval.Not_static p ->
         Errors.attribute_param_type p "static string literal";
         None
     end

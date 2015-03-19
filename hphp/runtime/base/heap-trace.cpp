@@ -24,6 +24,7 @@
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
 #include <unordered_map>
+#include <folly/Range.h>
 
 namespace HPHP {
 TRACE_SET_MOD(heaptrace);
@@ -92,6 +93,10 @@ private:
     return p && p->getCount() >= 0;
   }
   bool mark(const void*);
+  bool inRds(const void* vp) {
+    auto p = reinterpret_cast<const char*>(vp);
+    return p >= rds_.begin() && p < rds_.end();
+  }
 
 private:
   // information about heap objects, indexed by valid object starts.
@@ -104,6 +109,8 @@ private:
   size_t total_;        // bytes allocated in heap
   size_t marked_;       // bytes marked exactly
   size_t ambig_marked_; // bytes marked ambiguously
+
+  folly::Range<char*> rds_; // full mmap'd rds section.
 };
 
 // mark the object at p, return true if first time.
@@ -146,6 +153,11 @@ void Marker::operator()(const ArrayData* p) {
 
 // RefData objects contain at most one ptr, scan it eagerly.
 void Marker::operator()(const RefData* p) {
+  if (inRds(p)) {
+    // p is a static local, initialized by RefData::initInRDS().
+    // we already scanned p's body as part of scanning RDS.
+    return;
+  }
   if (mark(p)) p->scan(*this);
 }
 
@@ -218,6 +230,8 @@ void Marker::operator()(const void* start, size_t len) {
 // * ArrayData owned by ArrayInit
 // * Object ctors allocating memory in ctor (while count still==0).
 void Marker::init() {
+  rds_ = folly::Range<char*>((char*)rds::header(),
+                             RuntimeOption::EvalJitTargetCacheSize);
   total_ = 0;
   MM().forEachHeader([&](Header* h) {
     meta_[h] = Meta{false, false};
@@ -226,8 +240,12 @@ void Marker::init() {
       case HK::Globals:
       case HK::Proxy:
       case HK::Resource:
-      case HK::Ref:
         assert(h->count_ > 0);
+        total_ += h->size();
+        break;
+      case HK::Ref:
+        // EZC non-ref refdatas sometimes have count==0
+        assert(h->count_ > 0 || !h->ref_.zIsRef());
         total_ += h->size();
         break;
       case HK::Packed:

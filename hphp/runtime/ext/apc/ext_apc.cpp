@@ -32,7 +32,7 @@
 #include "hphp/util/async-job.h"
 #include "hphp/util/timer.h"
 
-#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -737,9 +737,9 @@ void const_load_impl(struct cache_info *info,
         String key(*p, (int)(int64_t)*(p+1), CopyString);
         String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
+        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
+          throw Exception("bad apc archive, fb_unserialize failed");
         }
         const_load_set(key, v);
       }
@@ -850,9 +850,9 @@ void apc_load_impl(struct cache_info *info,
         item.len = (int)(int64_t)*(p+1);
         String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
+        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
+          throw Exception("bad apc archive, fb_unserialize failed");
         }
         s.constructPrime(v, item);
       }
@@ -990,9 +990,9 @@ void const_load_impl_compressed
         p += thrift_lens[i + i + 2] + 1;
         String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
+        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
+          throw Exception("bad apc archive, fb_unserialize failed");
         }
         const_load_set(key, v);
         p += thrift_lens[i + i + 3] + 1;
@@ -1147,9 +1147,9 @@ void apc_load_impl_compressed
         p += thrift_lens[i + i + 2] + 1; // skip \0
         String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
+        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
+          throw Exception("bad apc archive, fb_unserialize failed");
         }
         s.constructPrime(v, item);
         p += thrift_lens[i + i + 3] + 1; // skip \0

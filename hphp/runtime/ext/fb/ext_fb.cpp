@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/fb/ext_fb.h"
 
 #include <fstream>
 
@@ -54,8 +54,6 @@
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(fb, NO_EXTENSION_VERSION_YET);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
@@ -65,18 +63,10 @@ static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
 #define FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE  0x0003
 #define FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE 0x0004
 
-const int64_t k_FB_UNSERIALIZE_NONSTRING_VALUE = FB_UNSERIALIZE_NONSTRING_VALUE;
-const int64_t k_FB_UNSERIALIZE_UNEXPECTED_END = FB_UNSERIALIZE_UNEXPECTED_END;
-const int64_t k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE =
-  FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
-const int64_t k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
-  FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
-
-const bool k_HHVM_FACEBOOK =
 #ifdef FACEBOOK
-  true;
+# define HHVM_FACEBOOK true
 #else
-  false;
+# define HHVM_FACEBOOK false
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -133,7 +123,7 @@ enum TType {
 /* Return the smallest (supported) unsigned length that can store the value */
 #define LEN_SIZE(x) ((((unsigned)x) == ((uint8_t)x)) ? 1 : 4)
 
-Variant f_fb_serialize(const Variant& thing) {
+Variant HHVM_FUNCTION(fb_serialize, const Variant& thing) {
   try {
     size_t len =
       HPHP::serialize::FBSerializer<VariantController>::serializedSize(thing);
@@ -147,7 +137,7 @@ Variant f_fb_serialize(const Variant& thing) {
   }
 }
 
-Variant f_fb_unserialize(const Variant& thing, VRefParam success) {
+Variant HHVM_FUNCTION(fb_unserialize, const Variant& thing, VRefParam success) {
   if (thing.isString()) {
     String sthing = thing.toString();
 
@@ -544,7 +534,7 @@ String fb_compact_serialize(const Variant& thing,
   return sb.detach();
 }
 
-Variant f_fb_compact_serialize(const Variant& thing) {
+Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing) {
   return fb_compact_serialize(thing, FBCompactSerializeBehavior::Base);
 }
 
@@ -768,8 +758,9 @@ Variant fb_compact_unserialize(const char* str, int len,
   return ret;
 }
 
-Variant f_fb_compact_unserialize(const Variant& thing, VRefParam success,
-                                 VRefParam errcode /* = null_variant */) {
+Variant HHVM_FUNCTION(fb_compact_unserialize,
+                      const Variant& thing, VRefParam success,
+                      VRefParam errcode /* = null_variant */) {
   if (!thing.isString()) {
     success = false;
     errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
@@ -783,7 +774,7 @@ Variant f_fb_compact_unserialize(const Variant& thing, VRefParam success,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_fb_utf8ize(VRefParam input) {
+bool HHVM_FUNCTION(fb_utf8ize, VRefParam input) {
   String s = input.toString();
   const char* const srcBuf = s.data();
   int32_t srcLenBytes = s.size();
@@ -887,19 +878,20 @@ static int fb_utf8_strlen_impl(const String& input, bool deprecated) {
   return num_code_points;
 }
 
-int64_t f_fb_utf8_strlen(const String& input) {
+int64_t HHVM_FUNCTION(fb_utf8_strlen, const String& input) {
   return fb_utf8_strlen_impl(input, /* deprecated */ false);
 }
 
-int64_t f_fb_utf8_strlen_deprecated(const String& input) {
+int64_t HHVM_FUNCTION(fb_utf8_strlen_deprecated, const String& input) {
   return fb_utf8_strlen_impl(input, /* deprecated */ true);
 }
 
 /**
  * Private helper; requires non-negative firstCodePoint and desiredCodePoints.
  */
-static String fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
-                                     int32_t numDesiredCodePoints) {
+static String fb_utf8_substr_simple(const String& str,
+                                    int32_t firstCodePoint,
+                                    int32_t numDesiredCodePoints) {
   const char* const srcBuf = str.data();
   int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
 
@@ -964,13 +956,16 @@ static String fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
   return empty_string();
 }
 
-String f_fb_utf8_substr(const String& str, int start,
-                        int length /* = INT_MAX */) {
+String HHVM_FUNCTION(fb_utf8_substr, const String& str, int64_t start,
+                                     int64_t length /* = INT_MAX */) {
+  if (length > INT_MAX) {
+    length = INT_MAX;
+  }
   // For negative start or length, calculate start and length values
   // based on total code points.
   if (start < 0 || length < 0) {
     // Get number of code points assuming we substitute invalid sequences.
-    Variant utf8StrlenResult = f_fb_utf8_strlen(str);
+    Variant utf8StrlenResult = HHVM_FN(fb_utf8_strlen)(str);
     int32_t sourceNumCodePoints = utf8StrlenResult.toInt32();
 
     if (start < 0) {
@@ -983,7 +978,6 @@ String f_fb_utf8_substr(const String& str, int start,
       length = sourceNumCodePoints - start + length; // adding negative length
     }
   }
-
   if (start < 0 || length <= 0) {
     return empty_string(); // Empty result
   }
@@ -993,8 +987,8 @@ String f_fb_utf8_substr(const String& str, int start,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_fb_intercept(const String& name, const Variant& handler,
-                    const Variant& data /* = null_variant */) {
+bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
+                                 const Variant& data /* = null_variant */) {
   return register_intercept(name, handler, data);
 }
 
@@ -1024,7 +1018,8 @@ bool is_dangerous_varenv_function(const StringData* name) {
     name->isame(s_get_defined_vars_sl.get());
 }
 
-bool f_fb_rename_function(const String& orig_func_name, const String& new_func_name) {
+bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
+                                       const String& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
       orig_func_name.get()->isame(new_func_name.get())) {
     throw_invalid_argument("unable to rename %s", orig_func_name.data());
@@ -1061,6 +1056,7 @@ bool f_fb_rename_function(const String& orig_func_name, const String& new_func_n
 
 ///////////////////////////////////////////////////////////////////////////////
 // call_user_func extensions
+// Linked in via fb.json.idl for now - Need OptFunc solution...
 
 Array f_fb_call_user_func_safe(int _argc, const Variant& function,
                                const Array& _argv /* = null_array */) {
@@ -1085,7 +1081,7 @@ Array f_fb_call_user_func_array_safe(const Variant& function, const Array& param
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_fb_get_code_coverage(bool flush) {
+Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   if (ti->m_reqInjectionData.getCoverage()) {
     Array ret = ti->m_coverage->Report();
@@ -1097,7 +1093,7 @@ Variant f_fb_get_code_coverage(bool flush) {
   return false;
 }
 
-void f_fb_enable_code_coverage() {
+void HHVM_FUNCTION(fb_enable_code_coverage) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_coverage->Reset();
   ti->m_reqInjectionData.setCoverage(true);;
@@ -1108,7 +1104,7 @@ void f_fb_enable_code_coverage() {
   throw VMSwitchModeBuiltin();
 }
 
-Variant f_fb_disable_code_coverage() {
+Variant HHVM_FUNCTION(fb_disable_code_coverage) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_reqInjectionData.setCoverage(false);
   Array ret = ti->m_coverage->Report();
@@ -1118,7 +1114,7 @@ Variant f_fb_disable_code_coverage() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_fb_output_compression(bool new_value) {
+bool HHVM_FUNCTION(fb_output_compression, bool new_value) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     bool rv = transport->isCompressionEnabled();
@@ -1132,7 +1128,7 @@ bool f_fb_output_compression(bool new_value) {
   return false;
 }
 
-void f_fb_set_exit_callback(const Variant& function) {
+void HHVM_FUNCTION(fb_set_exit_callback, const Variant& function) {
   g_context->setExitCallback(function);
 }
 
@@ -1143,7 +1139,7 @@ const StaticString
   s_sent("sent"),
   s_time("time");
 
-int64_t f_fb_get_last_flush_size() {
+int64_t HHVM_FUNCTION(fb_get_last_flush_size) {
   Transport *transport = g_context->getTransport();
   return transport ? transport->getLastChunkSentSize() : 0;
 }
@@ -1161,11 +1157,11 @@ static Variant do_lazy_stat(Function dostat, const String& filename) {
   return stat_impl(&sb);
 }
 
-Variant f_fb_lazy_lstat(const String& filename) {
+Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename) {
   return do_lazy_stat(StatCache::lstat, filename);
 }
 
-String f_fb_lazy_realpath(const String& filename) {
+String HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
   return StatCache::realpath(filename.c_str());
 }
 
@@ -1179,6 +1175,53 @@ EXTERNALLY_VISIBLE
 void const_load() {
   // legacy entry point, no longer used.
 }
+
+/////////////////////////////////////////////////////////////////////////////
+
+const StaticString
+  s_FBUNS_NONSTRING_VALUE("FB_UNSERIALIZE_NONSTRING_VALUE"),
+  s_FBUNS_UNEXPECTED_END("FB_UNSERIALIZE_UNEXPECTED_END"),
+  s_FBUNS_UNRECOGNIZED_OBJECT_TYPE("FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE"),
+  s_FBUNS_UNEXPECTED_ARRAY_KEY_TYPE("FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE"),
+  s_HHVM_FACEBOOK("HHVM_FACEBOOK");
+
+#define FBUNS(cns) Native::registerConstant<KindOfInt64> \
+  (s_FBUNS_##cns.get(), FB_UNSERIALIZE_##cns)
+
+class FBExtension : public Extension {
+ public:
+  FBExtension(): Extension("fb", "1.0.0") {}
+
+  void moduleInit() override {
+    Native::registerConstant<KindOfBoolean>
+      (s_HHVM_FACEBOOK.get(), HHVM_FACEBOOK);
+    FBUNS(NONSTRING_VALUE);
+    FBUNS(UNEXPECTED_END);
+    FBUNS(UNRECOGNIZED_OBJECT_TYPE);
+    FBUNS(UNEXPECTED_ARRAY_KEY_TYPE);
+
+    HHVM_FE(fb_serialize);
+    HHVM_FE(fb_unserialize);
+    HHVM_FE(fb_compact_serialize);
+    HHVM_FE(fb_compact_unserialize);
+    HHVM_FE(fb_utf8ize);
+    HHVM_FE(fb_utf8_strlen);
+    HHVM_FE(fb_utf8_strlen_deprecated);
+    HHVM_FE(fb_utf8_substr);
+    HHVM_FE(fb_intercept);
+    HHVM_FE(fb_rename_function);
+    HHVM_FE(fb_get_code_coverage);
+    HHVM_FE(fb_enable_code_coverage);
+    HHVM_FE(fb_disable_code_coverage);
+    HHVM_FE(fb_output_compression);
+    HHVM_FE(fb_set_exit_callback);
+    HHVM_FE(fb_get_last_flush_size);
+    HHVM_FE(fb_lazy_lstat);
+    HHVM_FE(fb_lazy_realpath);
+
+    loadSystemlib();
+  }
+} s_fb_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/fb/ext_fb.h"
 
 namespace HPHP {
 

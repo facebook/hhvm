@@ -23,27 +23,38 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_fb_serialize(const Variant& thing);
-Variant f_fb_unserialize(const Variant& thing, VRefParam success);
-Variant f_fb_compact_serialize(const Variant& thing);
-Variant f_fb_compact_unserialize(const Variant& thing, VRefParam success,
-                                 VRefParam errcode = null_variant);
-bool f_fb_intercept(const String& name, const Variant& handler,
+Variant HHVM_FUNCTION(fb_serialize, const Variant& thing);
+Variant HHVM_FUNCTION(fb_unserialize, const Variant& thing, VRefParam success);
+Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing);
+Variant HHVM_FUNCTION(fb_compact_unserialize,
+                      const Variant& thing, VRefParam success,
+                      VRefParam errcode = null_variant);
+bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
                     const Variant& data = null_variant);
-bool f_fb_rename_function(const String& orig_func_name,
+bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                           const String& new_func_name);
-bool f_fb_utf8ize(VRefParam input);
-int64_t f_fb_utf8_strlen_deprecated(const String& input);
-int64_t f_fb_utf8_strlen(const String& input);
-String f_fb_utf8_substr(const String& str, int start, int length = INT_MAX);
+bool HHVM_FUNCTION(fb_utf8ize, VRefParam input);
+int64_t HHVM_FUNCTION(fb_utf8_strlen_deprecated, const String& input);
+int64_t HHVM_FUNCTION(fb_utf8_strlen, const String& input);
+String HHVM_FUNCTION(fb_utf8_substr, const String& str,
+                     int64_t start, int64_t length = INT_MAX);
+Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush);
+void HHVM_FUNCTION(fb_enable_code_coverage);
+Variant HHVM_FUNCTION(fb_disable_code_coverage);
+bool HHVM_FUNCTION(fb_output_compression, bool new_value);
+void HHVM_FUNCTION(fb_set_exit_callback, const Variant& function);
+int64_t HHVM_FUNCTION(fb_get_last_flush_size);
+Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename);
+String HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
+
 Array f_fb_call_user_func_safe(int _argc, const Variant& function,
                                const Array& _argv = null_array);
 Variant f_fb_call_user_func_safe_return(
-  int _argc, const Variant& function, const Variant& def, const Array& _argv = null_array);
-Array f_fb_call_user_func_array_safe(const Variant& function, const Array& params);
-Variant f_fb_get_code_coverage(bool flush);
-void f_fb_enable_code_coverage();
-Variant f_fb_disable_code_coverage();
+  int _argc, const Variant& function,
+  const Variant& def, const Array& _argv = null_array);
+Array f_fb_call_user_func_array_safe(const Variant& function,
+                                     const Array& params);
+
 void f_xhprof_enable(int flags = 0, const Array& args = null_array);
 Variant f_xhprof_disable();
 void f_xhprof_network_enable();
@@ -54,15 +65,7 @@ Variant f_xhprof_run_trace(const String& packedTrace, int flags);
 void f_xhprof_sample_enable();
 Variant f_xhprof_sample_disable();
 void f_fb_setprofile(const Variant& callback);
-bool f_fb_output_compression(bool new_value);
-void f_fb_set_exit_callback(const Variant& function);
-int64_t f_fb_get_last_flush_size();
-Variant f_fb_lazy_lstat(const String& filename);
-String f_fb_lazy_realpath(const String& filename);
-extern const int64_t k_FB_UNSERIALIZE_NONSTRING_VALUE;
-extern const int64_t k_FB_UNSERIALIZE_UNEXPECTED_END;
-extern const int64_t k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
-extern const int64_t k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
+
 extern const int64_t k_XHPROF_FLAGS_NO_BUILTINS;
 extern const int64_t k_XHPROF_FLAGS_CPU;
 extern const int64_t k_XHPROF_FLAGS_MEMORY;
@@ -71,7 +74,6 @@ extern const int64_t k_XHPROF_FLAGS_TRACE;
 extern const int64_t k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
 extern const int64_t k_XHPROF_FLAGS_MALLOC;
 extern const int64_t k_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY;
-extern const bool k_HHVM_FACEBOOK;
 
 ///////////////////////////////////////////////////////////////////////////////
 

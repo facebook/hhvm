@@ -68,6 +68,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/constants.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/embedded-data.h"
@@ -1490,6 +1491,7 @@ static int execute_program_impl(int argc, char** argv) {
   });
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
                            RuntimeOption::LightProcessCount,
+                           RuntimeOption::EvalRecordSubprocessTimes,
                            inherited_fds);
 
   if (!ShmCounters::initialize(true, Logger::Error)) {
@@ -2039,6 +2041,7 @@ void hphp_session_exit() {
   assert(MM().empty());
 
   s_sessionInitialized = false;
+  s_extra_request_microseconds = 0;
 }
 
 void hphp_process_exit() {

@@ -382,14 +382,14 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff) {
 void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
-  a.testl(-1, rds[rds::kConditionFlagsOff]);
+  a.testl(-1, rds[rds::kSurpriseFlagsOff]);
 }
 
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   auto const sf = v.makeReg();
-  v << testlim{-1, rds[rds::kConditionFlagsOff], sf};
+  v << testlim{-1, rds[rds::kSurpriseFlagsOff], sf};
   return sf;
 }
 

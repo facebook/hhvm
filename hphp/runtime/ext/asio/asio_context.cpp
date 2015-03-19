@@ -69,7 +69,7 @@ namespace {
     // early to avoid further execution of PHP code.  We limit I/O waiting to
     // the time currently remaining in the request (see
     // AsioSession::getLatestWakeTime).
-    if (UNLIKELY(checkConditionFlags())) {
+    if (UNLIKELY(checkSurpriseFlags())) {
       auto const flags = EventHook::CheckSurprise();
       if (flags & XenonSignalFlag) {
         Xenon::getInstance().log(Xenon::IOWaitSample);

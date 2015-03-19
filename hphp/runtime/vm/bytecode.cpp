@@ -4189,7 +4189,7 @@ OPTBLD_INLINE void iopFatal(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
-  if (offset <= 0 && UNLIKELY(checkConditionFlags())) {
+  if (offset <= 0 && UNLIKELY(checkSurpriseFlags())) {
     EventHook::CheckSurprise();
   }
 }

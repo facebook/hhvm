@@ -118,8 +118,8 @@ private:
   bool m_htmlErrors;
   bool m_safeFileAccess;
 
-  /* Pointer to condition flags stored in RDS. */
-  std::atomic<ssize_t>* m_cflagsPtr{nullptr};
+  /* Pointer to surprise flags stored in RDS. */
+  std::atomic<ssize_t>* m_sflagsPtr{nullptr};
 
   /*
    * When the PC is currently over a line that has been registered for a line
@@ -277,7 +277,7 @@ private:
 
   /*
    * Intended to be used by other threads other than the current thread.  To get
-   * condition flags for the current thread, use rds::surpriseFlags() instead.
+   * surprise flags for the current thread, use rds::surpriseFlags() instead.
    */
   void clearFlag(SurpriseFlag);
   bool getFlag(SurpriseFlag) const;

@@ -659,16 +659,16 @@ To string conversions:
 
 | ReturnHook, ND, S(FramePtr) S(Gen), Er
 
-  Suprise flag hook for function returns.
+  Surprise flag hook for function returns.
 
 | SuspendHookE, ND, S(FramePtr) S(FramePtr) S(Obj), Er
 
-  Suprise flag hook for suspending eagerly executing async functions or
+  Surprise flag hook for suspending eagerly executing async functions or
   generators.  Decrefs S2 if it throws an exception.
 
 | SuspendHookR, ND, S(FramePtr) S(Obj|Nullptr), Er
 
-  Suprise flag hook for suspending resumed async functions or generators.  For
+  Surprise flag hook for suspending resumed async functions or generators.  For
   generators, the second parameter should be Nullptr.
 
 | Halt, ND, NA, T

@@ -206,7 +206,7 @@ IMPLEMENT_THREAD_LOCAL(struct lconv, g_thread_safe_localeconv_data);
 }
 
 extern "C" char* setlocale(int category, const char* locale) {
-  /* The returned char* is exactly what was passed in. */
+  /* The returned char* is exactly what was passed in as long as locale != NULL. */
   return const_cast<char*>(HPHP::g_thread_safe_locale_handler->actuallySetLocale(category, locale));
 }
 

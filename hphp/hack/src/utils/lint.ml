@@ -84,10 +84,9 @@ let use_collection_literal pos coll =
   add Codes.use_collection_literal Warning pos
     (spf "Use `%s {...}` instead of `new %s(...)`" coll coll)
 
-let single_quoted_string pos =
+let static_string pos =
   add Codes.single_quoted_string Warning pos
-    ("This should be a single-quoted string so that lint can analyze it "^
-    "statically")
+    "This should be a static string literal so that lint can analyze it."
 
 let do_ f =
   let list_copy = !lint_list in

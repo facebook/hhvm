@@ -281,7 +281,8 @@ inline bool Class::hasConstant(const StringData* clsCnsName) const {
   // m_constants.contains(clsCnsName) returns abstract constants
   auto clsCnsInd = m_constants.findIndex(clsCnsName);
   return (clsCnsInd != kInvalidSlot) &&
-    !m_constants[clsCnsInd].isAbstract();
+    !m_constants[clsCnsInd].isAbstract() &&
+    !m_constants[clsCnsInd].isType();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

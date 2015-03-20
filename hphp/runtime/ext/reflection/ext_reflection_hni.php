@@ -1508,11 +1508,42 @@ class ReflectionClass implements Reflector {
     return self::$absConstCache[$clsname] = $this->getOrderedAbstractConstants();
   }
 
+  private static $typeConstCache = array();
+
+  private function getTypeConstantNamesWithCaching(): array<string, string> {
+    $clsname = $this->getName();
+    $cached = hphp_array_idx(self::$typeConstCache, $clsname, null);
+    if (null !== $cached) {
+      return $cached;
+    }
+    return self::$typeConstCache[$clsname] = $this->getOrderedTypeConstants();
+  }
+
+  public function getTypeConstant(string $name): ReflectionTypeConstant {
+    return new ReflectionTypeConstant($this->getName(), $name);
+  }
+
+  public function hasTypeConstant($name): bool {
+    return array_key_exists($name, $this->getTypeConstantNamesWithCaching());
+  }
+
+  public function getTypeConstants(): array<ReflectionTypeConstant> {
+    $ret = array();
+    $class = $this->getName();
+    foreach ($this->getTypeConstantNamesWithCaching() as $name) {
+      $ret[] = new ReflectionTypeConstant($class, $name);
+    }
+    return $ret;
+  }
+
   <<__Native>>
   private function getOrderedConstants(): array<string, mixed>;
 
   <<__Native>>
   private function getOrderedAbstractConstants(): array<string, string>;
+
+  <<__Native>>
+  public function getOrderedTypeConstants(): array<string, string>;
 
   /**
    * ( excerpt from
@@ -2177,4 +2208,98 @@ class ReflectionObject extends ReflectionClass {
     }
     print $str;
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// type constant
+
+/**
+ * The ReflectionTypeConstant class reports information about an object.
+ *
+ */
+<<__NativeData('ReflectionConstHandle')>>
+class ReflectionTypeConstant implements Reflector {
+
+  /**
+   * Constructs a new ReflectionTypeConstant.
+   *
+   * @cls        mixed   Classname or object (instance of the class) that
+   *                     contains the type constant.
+   * @name       string  Name of the type constant.
+   */
+  public function __construct(mixed $cls, string $name) {
+    if (!$this->__init($cls, (string) $name)) {
+      $classname = is_object($cls) ? get_class($cls) : $cls;
+      throw new ReflectionException(
+        "Type Constant $classname::$name does not exist");
+    }
+  }
+
+  /**
+   * Get the name of the type constant.
+   *
+   * @return     string   The name of the type constant.
+   */
+  <<__Native>>
+  public function getName(): string;
+
+  /**
+   * Checks if the type constant is abstract
+   *
+   * @return     bool   Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  public function isAbstract(): bool;
+
+  /**
+   * Get the type assigned to this type constant as a string
+   *
+   * @return     NULL | string   The assigned type or null if is abstract
+   */
+  public function getAssignedTypeText(): ?string {
+    return $this->getAssignedTypeHint() ?: null;
+  }
+
+  /**
+   * Gets the declaring class for the reflected type constant.
+   *
+   * @return ReflectionClass   A ReflectionClass object of the class that the
+   *                           reflected type constant is part of.
+   */
+  public function getDeclaringClass() {
+    return new ReflectionClass($this->getDeclaringClassname());
+  }
+
+  public function __toString() {
+    $abstract = $this->isAbstract() ? 'abstract ' : '';
+
+    $val = $this->isAbstract() ? '' : " = {$this->getAssignedTypeText()}";
+
+    return "TypeConstant [ {$abstract}const type {$this->getName()}{$val}]\n";
+  }
+
+  // Prevent cloning
+  final public function __clone() {
+    throw new BadMethodCallException(
+      'Trying to clone an uncloneable object of class ReflectionTypeConstant'
+    );
+  }
+
+  public static function export($cls, $name, $ret=false) {
+    $obj = new self($cls, $name);
+    $str = (string)$obj;
+    if ($ret) {
+      return $str;
+    }
+    print $str;
+  }
+
+  <<__Native>>
+  private function __init(mixed $cls_or_obj, string $const): bool;
+
+  <<__Native>>
+  private function getAssignedTypeHint(): string;
+
+  <<__Native>>
+  private function getDeclaringClassname(): string;
 }

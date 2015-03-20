@@ -126,6 +126,40 @@ class ReflectionClassHandle {
   const Class* m_cls{nullptr};
 };
 
+/* A ReflectionConstHandle is a NativeData object wrapping a Const*
+ * for the purposes of ReflectionTypeConstant. */
+extern const StaticString s_ReflectionConstHandle;
+class ReflectionConstHandle {
+ public:
+  ReflectionConstHandle(): m_const(nullptr) {}
+  explicit ReflectionConstHandle(const Class::Const* cst): m_const(cst) {};
+  ReflectionConstHandle(const ReflectionConstHandle&) = delete;
+  ReflectionConstHandle& operator=(const ReflectionConstHandle& other) {
+    m_const = other.m_const;
+    return *this;
+  }
+  ~ReflectionConstHandle() {}
+
+  static ReflectionConstHandle* Get(ObjectData* obj) {
+    return Native::data<ReflectionConstHandle>(obj);
+  }
+
+  static const Class::Const* GetConstFor(ObjectData* obj) {
+    return Native::data<ReflectionConstHandle>(obj)->getConst();
+  }
+
+  const Class::Const* getConst() { return m_const; }
+
+  void setConst(const Class::Const* cst) {
+    assert(cst != nullptr);
+    assert(m_const == nullptr);
+    m_const = cst;
+  }
+
+ private:
+  const Class::Const* m_const{nullptr};
+};
+
 namespace DebuggerReflection {
 Array get_function_info(const String& name);
 Array get_class_info(const String& name);

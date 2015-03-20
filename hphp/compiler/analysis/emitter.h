@@ -910,8 +910,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar);
 
 
 extern "C" {
-  StringData* hphp_compiler_serialize_code_model_for(String code,
-                                                     String prefix);
   Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
                             const char* filename);
   Unit* hphp_build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,

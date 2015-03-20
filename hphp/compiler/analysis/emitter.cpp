@@ -9320,28 +9320,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
 extern "C" {
 
-StringData* hphp_compiler_serialize_code_model_for(String code, String prefix) {
-  AnalysisResultPtr ar(new AnalysisResult());
-  auto statements = Parser::ParseString(code, ar, nullptr, false);
-  if (statements != nullptr) {
-    LabelScopePtr labelScope(new LabelScope());
-    auto block = BlockStatementPtr(
-      new BlockStatement(
-        BlockScopePtr(), labelScope, statements->getLocation(), statements
-      )
-    );
-    std::ostringstream serialized;
-    CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
-    cg.setAstClassPrefix(prefix.data());
-    block->outputCodeModel(cg);
-    return StringData::Make(serialized.str().c_str(),
-                            serialized.str().length(),
-                            CopyString);
-  } else {
-    return StringData::Make();
-  }
-}
-
 /**
  * This is the entry point from the runtime; i.e. online bytecode generation.
  * The 'filename' parameter may be NULL if there is no file associated with

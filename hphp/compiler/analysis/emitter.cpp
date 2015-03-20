@@ -8188,6 +8188,7 @@ void EmitterVisitor::emitForeach(Emitter& e,
     bIterStart = m_ue.bcPos();
     if (key && !listKey) {
       visit(key);
+      emitClsIfSPropBase(e);
     }
     if (listVal) {
       emitForeachListAssignment(
@@ -8197,6 +8198,7 @@ void EmitterVisitor::emitForeach(Emitter& e,
       );
     } else {
       visit(val);
+      emitClsIfSPropBase(e);
       emitVirtualLocal(valTempLocal);
       if (strong) {
         emitVGet(e);

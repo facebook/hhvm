@@ -565,7 +565,7 @@ void xdebug_var_export_text_ansi(
       ANSI_COLOR_BOLD,
       ANSI_COLOR_BOLD_OFF,
       ANSI_COLOR_BOOL,
-      v.asBooleanVal() ? "true" : "false",
+      v.toBooleanVal() ? "true" : "false",
       ANSI_COLOR_RESET
     );
     break;
@@ -575,7 +575,7 @@ void xdebug_var_export_text_ansi(
       ANSI_COLOR_BOLD,
       ANSI_COLOR_BOLD_OFF,
       ANSI_COLOR_LONG,
-      v.asInt64Val(),
+      v.toInt64Val(),
       ANSI_COLOR_RESET
     );
     break;
@@ -586,7 +586,7 @@ void xdebug_var_export_text_ansi(
       ANSI_COLOR_BOLD,
       ANSI_COLOR_BOLD_OFF,
       ANSI_COLOR_DOUBLE,
-      v.asDoubleVal(),
+      v.toDoubleVal(),
       ANSI_COLOR_RESET
     );
     break;
@@ -825,14 +825,14 @@ void xdebug_var_export_fancy(
     sb.printf(
       "<small>boolean</small> <font color='%s'>%s</font>",
       COLOR_BOOL,
-      v.asBooleanVal() ? "true" : "false"
+      v.toBooleanVal() ? "true" : "false"
     );
     break;
   case KindOfInt64:
     sb.printf(
       "<small>int</small> <font color='%s'>%" PRId64 "</font>",
       COLOR_LONG,
-      v.asInt64Val()
+      v.toInt64Val()
     );
     break;
   case KindOfDouble:
@@ -840,7 +840,7 @@ void xdebug_var_export_fancy(
     sb.printf(
       "<small>float</small> <font color='%s'>%f</font>",
       COLOR_DOUBLE,
-      v.asDoubleVal()
+      v.toDoubleVal()
     );
     break;
   case KindOfStaticString:

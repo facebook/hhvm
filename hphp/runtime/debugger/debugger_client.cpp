@@ -1812,7 +1812,7 @@ bool DebuggerClient::Match(const char *input, const char *cmd) {
   return !strncasecmp(input, cmd, strlen(input));
 }
 
-bool DebuggerClient::arg(int index, const char *s) {
+bool DebuggerClient::arg(int index, const char *s) const {
   TRACE(2, "DebuggerClient::arg\n");
   assert(s && *s);
   assert(index > 0);

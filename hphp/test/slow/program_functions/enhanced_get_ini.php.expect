@@ -1,22 +1,22 @@
 string(2) "11"
 string(1) "2"
 array(2) {
-  [1]=>
-  string(2) "ls"
   [0]=>
   string(2) "cp"
+  [1]=>
+  string(2) "ls"
 }
 array(3) {
-  ["MYSTR"]=>
-  string(13) "Custom String"
-  ["MYINT"]=>
-  string(1) "1"
   ["MYBOOL"]=>
   string(1) "1"
+  ["MYINT"]=>
+  string(1) "1"
+  ["MYSTR"]=>
+  string(13) "Custom String"
 }
 array(2) {
-  [1]=>
-  string(36) "Key will be next available int again"
   [0]=>
   string(30) "Key will be next available int"
+  [1]=>
+  string(36) "Key will be next available int again"
 }

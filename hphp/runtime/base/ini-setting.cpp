@@ -102,12 +102,17 @@ static Variant dynamic_to_variant(const folly::dynamic& v) {
       return v.data();
     case folly::dynamic::Type::ARRAY:
     case folly::dynamic::Type::OBJECT:
-      ArrayInit ret(v.size(), ArrayInit::Mixed{});
+      ArrayInit arr_init(v.size(), ArrayInit::Mixed{});
       for (auto& item : v.items()) {
-        ret.add(dynamic_to_variant(item.first),
+        arr_init.add(dynamic_to_variant(item.first),
                 dynamic_to_variant(item.second));
       }
-      return ret.toArray();
+      Array ret = arr_init.toArray();
+      // Sort the array since folly::dynamic has a tendency to iterate from
+      // back to front. This way a var_dump of the array, for example, looks
+      // ordered.
+      ret.sort(Array::SortNaturalAscending, true, false);
+      return ret;
   }
   not_reached();
 }

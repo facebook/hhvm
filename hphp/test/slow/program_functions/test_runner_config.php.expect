@@ -16,8 +16,8 @@ string(7) "2097152"
 string(1) "0"
 string(9) "134217728"
 array(2) {
-  ["TFBENV"]=>
-  string(8) "16777216"
   ["ALPHA_CONSOLE"]=>
   string(1) "1"
+  ["TFBENV"]=>
+  string(8) "16777216"
 }

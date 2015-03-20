@@ -306,7 +306,7 @@ static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
   return php_mysql_do_query(query, res, false);
 }
 
-static void HHVM_METHOD(mysqli, hh_update_last_error, Object stmt_obj) {
+static void HHVM_METHOD(mysqli, hh_update_last_error, const Object& stmt_obj) {
   auto conn = get_connection(this_);
   assert(conn);
 
@@ -764,7 +764,7 @@ struct mysqli_driver_PropHandler :
   }
 
 static Variant HHVM_METHOD(mysqli_result, get_mysqli_conn_resource,
-                           Object connection) {
+                           const Object& connection) {
   auto res = get_connection_resource(connection);
   VALIDATE_RESOURCE(res, MySQLState::CONNECTED);
   return res;
@@ -921,7 +921,7 @@ static void HHVM_METHOD(mysqli_stmt, free_result) {
 //  throw NotImplementedException("mysqli_stmt::get_result");
 //}
 
-static void HHVM_METHOD(mysqli_stmt, hh_init, Object connection) {
+static void HHVM_METHOD(mysqli_stmt, hh_init, const Object& connection) {
   auto conn = get_connection(connection);
   if (!conn) {
     raise_warning("invalid object or resource mysqli");

@@ -814,12 +814,12 @@ void HHVM_FUNCTION(odbc_close, const Resource& link)
     odbc_link->close();
 }
 
-const String HHVM_FUNCTION(odbc_error, const Variant& link)
+String HHVM_FUNCTION(odbc_error, const Variant& link)
 {
   return String::FromCStr((char*)ODBCContext::get_last_error_code());
 }
 
-const String HHVM_FUNCTION(odbc_errormsg, const Variant& link)
+String HHVM_FUNCTION(odbc_errormsg, const Variant& link)
 {
   return String::FromCStr((char*)ODBCContext::get_last_error_msg());
 }

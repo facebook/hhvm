@@ -63,6 +63,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
+#include "hphp/util/bitref-survey.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -7848,6 +7849,7 @@ void ExecutionContext::requestExit() {
   EventHook::Disable();
   EnvConstants::requestExit();
   tl_miter_table.clear();
+  survey_request_end();
 
   if (m_globalVarEnv) {
     smart_delete(m_globalVarEnv);

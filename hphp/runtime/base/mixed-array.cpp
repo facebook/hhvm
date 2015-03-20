@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -31,6 +32,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/bitref-survey.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
@@ -1787,6 +1789,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
 ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
   auto a = asMixed(ad);
   if (a->hasMultipleRefs()) a = a->copyMixed();
+  cow_check_occurred(a->getCount(), check_one_bit_ref(static_cast<uint8_t>(a->m_kind)));
   auto elms = a->data();
   if (a->m_size) {
     ssize_t pos = IterLast(a);

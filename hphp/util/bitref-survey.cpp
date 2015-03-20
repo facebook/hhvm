@@ -44,10 +44,23 @@ void survey_request_end() {
 
 void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref) {
   check_count++;
+  if (refcount > 1) {
+    assert(bitref);
+    //'necessary' copy
+    refcounting_copy_count++;
+  }
+  if (refcount == 1 && bitref) {
+    //'unnecessary' copy
+    bitref_copy_count++;
+  }
 }
 
 void BitrefSurvey::survey_request_end() {
   FTRACE(1, "final cow checks: {}\n", check_count);
+  FTRACE(1, "necessary copies: {}\n", refcounting_copy_count);
+  FTRACE(1, "unnecessary copies: {}\n", bitref_copy_count);
+  FTRACE(1, "copy avoided: {}\n",
+      check_count - refcounting_copy_count - bitref_copy_count);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

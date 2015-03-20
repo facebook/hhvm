@@ -45,6 +45,7 @@ namespace {
 
 const StaticString s_Array("Array");
 const StaticString s_isEmpty("isEmpty");
+const StaticString s_count("count");
 const StaticString s_1("1");
 const StaticString s_empty("");
 const StaticString s_invoke("__invoke");
@@ -1878,20 +1879,21 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
   auto const callee = inst->extra<CallBuiltin>()->callee;
   auto const args = inst->srcs();
 
-  auto const cls = args[0]->type().clsSpec().cls();
-  bool const arg0Collection = args.size() >= 1 &&
-                              args[0]->type() < Type::Obj &&
+  auto const cls = callee->cls();
+  bool const arg2Collection = args.size() == 3 &&
+                              args[2]->type() < Type::Obj &&
                               cls != nullptr &&
                               cls->isCollectionClass();
 
-  switch (args.size()) {
-  case 1:
-    if (arg0Collection && callee->name()->isame(s_isEmpty.get())) {
-      return gen(env, ColIsEmpty, args[0]);
+  if (arg2Collection) {
+    if (callee->name()->isame(s_isEmpty.get())) {
+      FTRACE(3, "simplifying collection: {}\n", callee->name()->data());
+      return gen(env, ColIsEmpty, args[2]);
     }
-    break;
-  default:
-    break;
+    if (callee->name()->isame(s_count.get())) {
+      FTRACE(3, "simplifying collection: {}\n", callee->name()->data());
+      return gen(env, CountCollection, args[2]);
+    }
   }
 
   return nullptr;

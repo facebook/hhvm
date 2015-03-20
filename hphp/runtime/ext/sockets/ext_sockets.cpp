@@ -899,6 +899,7 @@ Variant HHVM_FUNCTION(socket_select,
         except = empty_array();
       }
       read = hasData;
+      free(fds);
       return hasData.size();
     }
   }

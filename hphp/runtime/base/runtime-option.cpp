@@ -696,6 +696,10 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   const std::vector<std::string>& iniClis /* = std::vector<std::string>() */,
   const std::vector<std::string>& hdfClis /* = std::vector<std::string>() */) {
 
+  // Intialize the memory manager here because various settings and
+  // initializations that we do here need it
+  MemoryManager::TlsWrapper::getCheck();
+
   // Get the ini (-d) and hdf (-v) strings, which may override some
   // of options that were set from config files. We also do these
   // now so we can override Tier.*.[machine | tier | cpu] on the

@@ -1,0 +1,85 @@
+array(5) {
+  ["always_populate_raw_post_data"]=>
+  array(3) {
+    ["global_value"]=>
+    string(0) ""
+    ["local_value"]=>
+    string(0) ""
+    ["access"]=>
+    int(2)
+  }
+  ["auto_append_file"]=>
+  array(3) {
+    ["global_value"]=>
+    string(0) ""
+    ["local_value"]=>
+    string(0) ""
+    ["access"]=>
+    int(2)
+  }
+  ["auto_prepend_file"]=>
+  array(3) {
+    ["global_value"]=>
+    string(0) ""
+    ["local_value"]=>
+    string(0) ""
+    ["access"]=>
+    int(2)
+  }
+  ["post_max_size"]=>
+  array(3) {
+    ["global_value"]=>
+    string(9) "104857600"
+    ["local_value"]=>
+    string(9) "104857600"
+    ["access"]=>
+    int(2)
+  }
+  ["upload_max_filesize"]=>
+  array(3) {
+    ["global_value"]=>
+    string(4) "100M"
+    ["local_value"]=>
+    string(4) "100M"
+    ["access"]=>
+    int(2)
+  }
+}
+array(4) {
+  ["hhvm.log.always_log_unhandled_exceptions"]=>
+  array(3) {
+    ["global_value"]=>
+    string(0) ""
+    ["local_value"]=>
+    string(0) ""
+    ["access"]=>
+    int(4)
+  }
+  ["hhvm.server.type"]=>
+  array(3) {
+    ["global_value"]=>
+    string(7) "fastcgi"
+    ["local_value"]=>
+    string(7) "fastcgi"
+    ["access"]=>
+    int(4)
+  }
+  ["hhvm.repo.local.mode"]=>
+  array(3) {
+    ["global_value"]=>
+    string(2) "r-"
+    ["local_value"]=>
+    string(2) "r-"
+    ["access"]=>
+    int(4)
+  }
+  ["hhvm.repo.commit"]=>
+  array(3) {
+    ["global_value"]=>
+    string(1) "1"
+    ["local_value"]=>
+    string(1) "1"
+    ["access"]=>
+    int(4)
+  }
+}

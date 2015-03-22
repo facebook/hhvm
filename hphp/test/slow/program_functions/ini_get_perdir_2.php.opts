@@ -1,0 +1,5 @@
+-d upload_max_filesize=3333333
+-d post_max_size=4444444
+-d always_populate_raw_post_data=false
+-d auto_prepend_file=/dev///null
+-d auto_append_file=/dev///null

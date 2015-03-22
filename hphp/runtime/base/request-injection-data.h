@@ -275,7 +275,7 @@ private:
    */
   std::stack<int> m_activeLineBreaks;
 
-  /* Things corresponding to user settable INI settings. */
+  /* Things corresponding to user settable PHP_INI_USER settings. */
   std::string m_maxMemory;
   std::string m_argSeparatorOutput;
   std::string m_argSeparatorInput;
@@ -295,6 +295,11 @@ private:
  public:
   /* CmdInterrupts this thread is handling. */
   std::stack<void*> interrupts;
+
+public:
+  /* Things corresponding to user settable PHP_INI_PERDIR settings. */
+  std::string m_autoPrependFileName;
+  std::string m_autoAppendFileName;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -1015,5 +1015,18 @@ void Transport::debuggerInfo(InfoVec &info) {
   }
 }
 
+__thread bool Transport::s_didInitAlwaysPopulateRawPostData = false;
+__thread bool Transport::s_alwaysPopulateRawPostData = false;
+
+bool Transport::getAlwaysPopulateRawPostData() {
+  if (s_didInitAlwaysPopulateRawPostData) {
+    return s_alwaysPopulateRawPostData;
+  }
+  if (RuntimeOption::didInitAlwaysPopulateRawPostData) {
+    return RuntimeOption::AlwaysPopulateRawPostData;
+  }
+  return false; /* TODO: Perhaps */
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -380,9 +380,9 @@ void RequestInjectionData::threadInit() {
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
 
   //
-  // Per directory
+  // PHP_INI_DIR per directory ini settings.
   //
-  RuntimeOption::LoadPerDir();
+  RuntimeOption::BindPHPPerDirectoryIniSettings(this);
 }
 
 std::string RequestInjectionData::getDefaultIncludePath() {

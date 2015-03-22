@@ -1,0 +1,7 @@
+setting name=hhvm.server.type                    type=string     length=7  value=fastcgi
+setting name=hhvm.repo.local.mode                type=string     length=2  value=r-
+setting name=post_max_size                       type=string     length=9  value=104857600
+setting name=auto_prepend_file                   type=string     length=0  value=
+setting name=auto_append_file                    type=string     length=0  value=
+setting name=always_populate_raw_post_data       type=string     length=1  value=0
+setting name=upload_max_filesize                 type=string     length=4  value=100M

@@ -2,9 +2,9 @@ array(5) {
   ["always_populate_raw_post_data"]=>
   array(3) {
     ["global_value"]=>
-    string(0) ""
+    string(1) "0"
     ["local_value"]=>
-    string(0) ""
+    string(1) "0"
     ["access"]=>
     int(2)
   }

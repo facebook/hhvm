@@ -3,6 +3,8 @@
 //
 // This test is ostensibly the same as
 //   ../../../slow/program_functions/ini_get_perdir.php
+// aka
+//   test/slow/program_functions/ini_get_perdir.php
 // It's inconvenient to require_once that file,
 // since we need a wrapper to invoke the test in fcgi mode.
 // The test is small enough that we'll just repeat the guts of it here.

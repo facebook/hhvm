@@ -503,6 +503,14 @@ protected:
 private:
   void prepareHeaders(bool compressed, bool chunked,
     const StringHolder &response, const StringHolder& orig_response);
+
+public:
+  /*
+   * We have to make these members public so we can statically initialize them.
+   */
+  static __thread bool s_didInitAlwaysPopulateRawPostData;
+  static __thread bool s_alwaysPopulateRawPostData;
+  static bool getAlwaysPopulateRawPostData();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

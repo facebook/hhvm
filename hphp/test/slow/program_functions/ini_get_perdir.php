@@ -3,7 +3,7 @@ require_once __DIR__ . '/ini_get_filtered_impl.inc';
 
 run_tests(function($v)  {
   //
-  // alas, PHP_INI_PERDIR isn't exposed as a PHP constant,
+  // Alas, PHP_INI_PERDIR isn't exposed as a PHP constant,
   // even though bitsets built from the various PHP_INI_FOO
   // values are exposed through the "access" slot.
   //

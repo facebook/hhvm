@@ -1908,6 +1908,35 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
                      false /* richErrorMsg */);
 }
 
+/*
+ * Use the thread specific filename, if any, then the default.
+ */
+static const std::string *getPrependFileName() {
+  const std::string *filename;
+  filename = &RID().m_autoPrependFileName;
+  if (filename && !filename->empty() && *filename != "none") {
+    return filename;
+  }
+  filename = &RuntimeOption::AutoPrependFile;
+  if (filename && !filename->empty() && *filename != "none") {
+    return filename;
+  }
+  return nullptr;
+}
+
+static const std::string *getAppendFileName() {
+  const std::string *filename;
+  filename = &RID().m_autoAppendFileName;
+  if (filename && !filename->empty() && *filename != "none") {
+    return filename;
+  }
+  filename = &RuntimeOption::AutoAppendFile;
+  if (filename && !filename->empty() && *filename != "none") {
+    return filename;
+  }
+  return nullptr;
+}
+
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, const Array& funcParams, VRefParam funcRet,
                  const string &reqInitFunc, const string &reqInitDoc,
@@ -1935,22 +1964,24 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   if (!warmupOnly) {
     try {
       ServerStatsHelper ssh("invoke");
-      if (!RuntimeOption::AutoPrependFile.empty() &&
-          RuntimeOption::AutoPrependFile != "none") {
-        require(RuntimeOption::AutoPrependFile, false,
-                context->getCwd().data(), true);
+
+      const std::string *prepend_file_name = getPrependFileName();
+      if (prepend_file_name) {
+        require(*prepend_file_name, false, context->getCwd().data(), true);
       }
+
       if (func) {
         funcRet->assign(invoke(cmd.c_str(), funcParams));
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once);
       }
-      if (!RuntimeOption::AutoAppendFile.empty() &&
-          RuntimeOption::AutoAppendFile != "none") {
-        require(RuntimeOption::AutoAppendFile, false,
-                context->getCwd().data(), true);
+
+      const std::string *append_file_name = getAppendFileName();
+      if (append_file_name) {
+        require(*append_file_name, false, context->getCwd().data(), true);
       }
+
     } catch (...) {
       handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);
     }

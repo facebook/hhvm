@@ -1,0 +1,3 @@
+-v Server.Upload.UploadMaxFileSize=2
+-v Server.MaxPostSize=1
+-v Server.AlwaysPopulateRawPostData=true

@@ -240,7 +240,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   // according to doc if content type is multipart/form-data
   // $HTTP_RAW_POST_DATA should always not available
   bool shouldSetHttpRawPostData = false;
-  if (RuntimeOption::AlwaysPopulateRawPostData) {
+  if (transport->getAlwaysPopulateRawPostData()) {
     std::string dummy;
     if (!IsRfc1867(transport->getHeader("Content-Type"), dummy)) {
       shouldSetHttpRawPostData = true;
@@ -402,7 +402,7 @@ void HttpProtocol::PreparePostVariables(Array& post,
           // iff we're trying to coalesce the entire POST body.  Otherwise,
           // data may be invalid when DecodeRfc1867 returns.  See
           // upload.cpp:read_post.
-          if (RuntimeOption::AlwaysPopulateRawPostData) {
+          if (transport->getAlwaysPopulateRawPostData()) {
             needDelete = true;
             data = buffer_duplicate(data, size);
           } else {
@@ -454,8 +454,8 @@ void HttpProtocol::PreparePostVariables(Array& post,
         String((char*)data, size, AttachString) :
         String((char*)data, size, CopyString);
       g_context->setRawPostData(string_data);
-      if (RuntimeOption::AlwaysPopulateRawPostData || ! needDelete) {
-        // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
+      if (transport->getAlwaysPopulateRawPostData() || ! needDelete) {
+        // For literal we disregard AlwaysPopulateRawPostData
         raw_post = string_data;
       }
     }

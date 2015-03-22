@@ -541,9 +541,14 @@ void RegionFormer::truncateLiterals() {
       endSk = sk;
     }
   }
-  FTRACE(1, "selectTracelet truncating block after offset {}:\n{}\n",
-         endSk.offset(), show(lastBlock));
-  lastBlock.truncateAfter(endSk);
+  // Don't truncate if we've decided we want to truncate the entire block.
+  // That'll mean we'll chop off the trailing N-1 opcodes, then in the next
+  // region we'll select N-1 opcodes and chop off N-2 opcodes, and so forth...
+  if (endSk != lastBlock.start()) {
+    FTRACE(1, "selectTracelet truncating block after offset {}:\n{}\n",
+           endSk.offset(), show(lastBlock));
+    lastBlock.truncateAfter(endSk);
+  }
 }
 
 /*

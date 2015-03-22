@@ -133,10 +133,9 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, Hdf overwrite) {
       ini,
       overwrite["ResourceLimit.SerializationSizeLimit"],
       StringData::MaxSize);
-  Config::Get(
+  m_runtimeOption.allowedDirectories = Config::GetVector(
     ini,
-    overwrite["Server.AllowedDirectories"],
-    m_runtimeOption.allowedDirectories);
+    overwrite["Server.AllowedDirectories"]);
   m_runtimeOption.requestTimeoutSeconds = requestTimeoutSeconds;
   m_runtimeOption.maxPostSize = maxPostSize;
   m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
@@ -258,7 +257,7 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
 
     std::string pattern = Config::GetString(ini, hdf["pattern"], "");
     std::vector<std::string> names;
-    Config::Get(ini, hdf["params"], names);
+    names = Config::GetVector(ini, hdf["params"]);
 
     if (pattern.empty()) {
       for (unsigned int i = 0; i < names.size(); i++) {
@@ -282,7 +281,7 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
     m_queryStringFilters.push_back(filter);
   }
 
-  Config::Get(ini, vh["ServerVariables"], m_serverVars);
+  m_serverVars = Config::GetMap(ini, vh["ServerVariables"]);
   m_serverName = Config::GetString(ini, vh["ServerName"]);
 }
 

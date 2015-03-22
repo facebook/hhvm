@@ -359,18 +359,6 @@ void add_default_config_files_globbed(
   const char *default_config_file,
   std::function<void (const char *filename)> cb);
 
-// Passthroughs to IniSetting::Bind and IniSetting::Set
-// Used for templated functions inside class like config.h
-template<class T>
-void ini_bind_core_system(const std::string& name, T *p) {
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, name, p);
-}
-template<class T>
-bool ini_set_helper(const std::string& name, T& value) {
-  return IniSetting::Set(name, ini_get(value), IniSetting::FollyDynamic());
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

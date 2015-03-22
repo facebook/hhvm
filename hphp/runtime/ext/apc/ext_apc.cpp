@@ -118,7 +118,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ForceConstLoadToAPC, ini, apc["ForceConstLoadToAPC"], true);
   Config::Bind(PrimeLibrary, ini, apc["PrimeLibrary"]);
   Config::Bind(LoadThread, ini, apc["LoadThread"], 2);
-  Config::Get(ini, apc["CompletionKeys"], CompletionKeys);
+  Config::Bind(CompletionKeys, ini, apc["CompletionKeys"]);
   std::string tblType = Config::GetString(ini, apc["TableType"], "concurrent");
   if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
     TableType = TableTypes::ConcurrentTable;
@@ -148,7 +148,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(KeyFrequencyUpdatePeriod, ini, apc["KeyFrequencyUpdatePeriod"],
                1000);
 
-  Config::Get(ini, apc["NoTTLPrefix"], NoTTLPrefix);
+  Config::Bind(NoTTLPrefix, ini, apc["NoTTLPrefix"]);
 
   Config::Bind(UseUncounted, ini, apc["MemModelTreadmill"],
                RuntimeOption::ServerExecutionMode());

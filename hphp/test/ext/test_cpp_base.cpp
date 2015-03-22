@@ -36,6 +36,8 @@ TestCppBase::TestCppBase() {
 bool TestCppBase::RunTests(const std::string &which) {
   bool ret = true;
   RUN_TEST(TestIpBlockMap);
+  RUN_TEST(TestCollectionHdf);
+  RUN_TEST(TestCollectionIni);
   return ret;
 }
 
@@ -148,5 +150,63 @@ bool TestCppBase::TestIpBlockMap() {
   VERIFY(!ibm.isBlocking("test/blah.php",
                          "aaaa:bbbb:cccc:dddd:eee3:4444:3333:2222"));
 
+  return Count(true);
+}
+
+bool TestCppBase::TestCollectionHdf() {
+  IniSetting::Map ini = IniSetting::Map::object;
+  Hdf hdf;
+  hdf.fromString(
+    "  Server {\n"
+    "    AllowedDirectories.* = /var/www\n"
+    "    AllowedDirectories.* = /usr/bin\n"
+    "    HighPriorityEndPoints.* = /end\n"
+    "    HighPriorityEndPoints.* = /point\n"
+    "    HighPriorityEndPoints.* = /power\n"
+    "  }\n"
+  );
+  RuntimeOption::AllowedDirectories.clear();
+
+  Hdf server = hdf["Server"];
+
+  Config::Bind(RuntimeOption::AllowedDirectories, ini,
+               server["AllowedDirectories"]);
+  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  std::vector<std::string> ad =
+    Config::GetVector(ini, server["AllowedDirectories"],
+                      RuntimeOption::AllowedDirectories);
+  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(ad.size() == 2);
+  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini,
+               server["HighPriorityEndPoints"]);
+  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
+  return Count(true);
+}
+
+bool TestCppBase::TestCollectionIni() {
+  std::string inistr =
+    "hhvm.server.allowed_directories[] = /var/www\n"
+    "hhvm.server.allowed_directories[] = /usr/bin\n"
+    "hhvm.server.high_priority_endpoints[] = /end\n"
+    "hhvm.server.high_priority_endpoints[] = /point\n"
+    "hhvm.server.high_priority_endpoints[] = /power\n";
+
+  IniSetting::Map ini = IniSetting::Map::object;
+
+  RuntimeOption::AllowedDirectories.clear();
+  Config::ParseIniString(inistr, ini);
+  Config::Bind(RuntimeOption::AllowedDirectories, ini,
+               "hhvm.server.allowed_directories");
+  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  std::vector<std::string> ad =
+    Config::GetVector(ini, "hhvm.server.allowed_directories",
+                      RuntimeOption::AllowedDirectories);
+  // This should still be 2. In other words, Get shouldn't append
+  // values.
+  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(ad.size() == 2);
+  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini,
+               "hhvm.server.high_priority_endpoints");
+  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
   return Count(true);
 }

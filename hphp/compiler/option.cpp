@@ -181,21 +181,21 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   LoadRootHdf(ini, config["IncludeRoots"], IncludeRoots);
   LoadRootHdf(ini, config["AutoloadRoots"], AutoloadRoots);
 
-  Config::Get(ini, config["PackageFiles"], PackageFiles);
-  Config::Get(ini, config["IncludeSearchPaths"], IncludeSearchPaths);
-  Config::Get(ini, config["PackageDirectories"], PackageDirectories);
-  Config::Get(ini, config["PackageExcludeDirs"], PackageExcludeDirs);
-  Config::Get(ini, config["PackageExcludeFiles"], PackageExcludeFiles);
-  Config::Get(ini, config["PackageExcludePatterns"], PackageExcludePatterns);
-  Config::Get(ini, config["PackageExcludeStaticDirs"],
-              PackageExcludeStaticDirs);
-  Config::Get(ini, config["PackageExcludeStaticFiles"],
-              PackageExcludeStaticFiles);
-  Config::Get(ini, config["PackageExcludeStaticPatterns"],
-              PackageExcludeStaticPatterns);
+  Config::Bind(PackageFiles, ini, config["PackageFiles"], PackageFiles);
+  Config::Bind(IncludeSearchPaths, ini, config["IncludeSearchPaths"]);
+  Config::Bind(PackageDirectories, ini, config["PackageDirectories"]);
+  Config::Bind(PackageExcludeDirs, ini, config["PackageExcludeDirs"]);
+  Config::Bind(PackageExcludeFiles, ini, config["PackageExcludeFiles"]);
+  Config::Bind(PackageExcludePatterns, ini, config["PackageExcludePatterns"]);
+  Config::Bind(PackageExcludeStaticDirs, ini,
+               config["PackageExcludeStaticDirs"]);
+  Config::Bind(PackageExcludeStaticFiles, ini,
+               config["PackageExcludeStaticFiles"]);
+  Config::Bind(PackageExcludeStaticFiles, ini,
+               config["PackageExcludeStaticPatterns"]);
   Config::Bind(CachePHPFile, ini, config["CachePHPFile"]);
 
-  Config::Get(ini, config["ParseOnDemandDirs"], ParseOnDemandDirs);
+  Config::Bind(ParseOnDemandDirs, ini, config["ParseOnDemandDirs"]);
 
   {
     Hdf cg = config["CodeGeneration"];
@@ -211,11 +211,11 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     READ_CG_OPTION(LambdaPrefix);
   }
 
-  Config::Get(ini, config["DynamicFunctionPrefix"], DynamicFunctionPrefixes);
-  Config::Get(ini, config["DynamicFunctionPostfix"], DynamicFunctionPostfixes);
-  Config::Get(ini, config["DynamicMethodPrefix"], DynamicMethodPrefixes);
-  Config::Get(ini, config["DynamicInvokeFunctions"], DynamicInvokeFunctions);
-  Config::Get(ini, config["VolatileClasses"], VolatileClasses);
+  Config::Bind(DynamicFunctionPrefixes, ini, config["DynamicFunctionPrefix"]);
+  Config::Bind(DynamicFunctionPostfixes, ini, config["DynamicFunctionPostfix"]);
+  Config::Bind(DynamicMethodPrefixes, ini, config["DynamicMethodPrefix"]);
+  Config::Bind(DynamicInvokeFunctions, ini, config["DynamicInvokeFunctions"]);
+  Config::Bind(VolatileClasses, ini, config["VolatileClasses"]);
 
   // build map from function names to sections
   for (Hdf hdf = config["FunctionSections"].firstChild(); hdf.exists();
@@ -237,9 +237,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   {
     Hdf autoloadMap = config["AutoloadMap"];
-    Config::Get(ini, autoloadMap["class"], AutoloadClassMap);
-    Config::Get(ini, autoloadMap["function"], AutoloadFuncMap);
-    Config::Get(ini, autoloadMap["constant"], AutoloadConstMap);
+    Config::Bind(AutoloadClassMap, ini, autoloadMap["class"]);
+    Config::Bind(AutoloadFuncMap, ini, autoloadMap["function"]);
+    Config::Bind(AutoloadConstMap, ini, autoloadMap["constant"]);
     Config::Bind(AutoloadRoot, ini, autoloadMap["root"]);
   }
 

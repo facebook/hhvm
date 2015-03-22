@@ -2410,7 +2410,7 @@ void DebuggerClient::loadConfig() {
        [this]() { return getDebuggerClientShortPrintCharCount(); }
   ));
 
-  Config::Get(ini, config["Tutorial"]["Visited"], m_tutorialVisited);
+  Config::Bind(m_tutorialVisited, ini, config["Tutorial"]["Visited"]);
   BIND(tutorial.visited, &m_tutorialVisited);
 
   for (Hdf node = config["Macros"].firstChild(); node.exists();

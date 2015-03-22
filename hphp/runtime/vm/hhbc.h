@@ -1043,27 +1043,27 @@ constexpr InstrFlags instrFlagsData[] = {
 #undef O
 };
 
-constexpr inline InstrFlags instrFlags(Op opcode) {
+constexpr InstrFlags instrFlags(Op opcode) {
   return instrFlagsData[uint8_t(opcode)];
 }
 
-constexpr inline bool instrIsControlFlow(Op opcode) {
+constexpr bool instrIsControlFlow(Op opcode) {
   return (instrFlags(opcode) & CF) != 0;
 }
 
-constexpr inline bool isUnconditionalJmp(Op opcode) {
+constexpr bool isUnconditionalJmp(Op opcode) {
   return opcode == Op::Jmp || opcode == Op::JmpNS;
 }
 
-constexpr inline bool isConditionalJmp(Op opcode) {
+constexpr bool isConditionalJmp(Op opcode) {
   return opcode == Op::JmpZ || opcode == Op::JmpNZ;
 }
 
-constexpr inline bool isJmp(Op opcode) {
+constexpr bool isJmp(Op opcode) {
   return opcode >= Op::Jmp && opcode <= Op::JmpNZ;
 }
 
-inline bool isFPush(Op opcode) {
+constexpr bool isFPush(Op opcode) {
   return opcode >= OpFPushFunc && opcode <= OpFPushCufSafe;
 }
 
@@ -1127,37 +1127,16 @@ inline bool isThisSelfOrParent(Op op) {
   }
 }
 
-inline bool isRet(Op op) {
-  switch (op) {
-    case OpRetC:
-    case OpRetV:
-      return true;
-
-    default:
-      return false;
-  }
+constexpr bool isRet(Op op) {
+  return op == OpRetC || op == OpRetV;
 }
 
-inline bool isSwitch(Op op) {
-  switch (op) {
-    case OpSwitch:
-    case OpSSwitch:
-      return true;
-
-    default:
-      return false;
-  }
+constexpr bool isSwitch(Op op) {
+  return op == OpSwitch || op == OpSSwitch;
 }
 
-inline bool isTypeAssert(Op op) {
-  switch (op) {
-    case OpAssertRATL:
-    case OpAssertRATStk:
-      return true;
-
-    default:
-      return false;
-  }
+constexpr bool isTypeAssert(Op op) {
+  return op == OpAssertRATL || op == OpAssertRATStk;
 }
 
 template<typename Out, typename In>
@@ -1196,27 +1175,27 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx);
 StackTransInfo instrStackTransInfo(const Op* opcode);
 int instrSpToArDelta(const Op* opcode);
 
-inline bool mcodeIsLiteral(MemberCode mcode) {
+constexpr bool mcodeIsLiteral(MemberCode mcode) {
   return mcode == MET || mcode == MEI || mcode == MPT || mcode == MQT;
 }
 
-inline bool mcodeIsProp(MemberCode mcode) {
+constexpr bool mcodeIsProp(MemberCode mcode) {
   return mcode == MPC || mcode == MPL || mcode == MPT || mcode == MQT;
 }
 
-inline bool mcodeIsElem(MemberCode mcode) {
+constexpr bool mcodeIsElem(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MET || mcode == MEI;
 }
 
-inline bool mcodeMaybeArrayStringKey(MemberCode mcode) {
+constexpr bool mcodeMaybeArrayStringKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MET;
 }
 
-inline bool mcodeMaybeArrayIntKey(MemberCode mcode) {
+constexpr bool mcodeMaybeArrayIntKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MEI;
 }
 
-inline bool mcodeMaybeVectorKey(MemberCode mcode) {
+constexpr bool mcodeMaybeVectorKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MEI;
 }
 

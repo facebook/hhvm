@@ -1540,24 +1540,13 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   // Language and Misc Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
                    &RuntimeOption::ExposeHPHP);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "auto_prepend_file", &RuntimeOption::AutoPrependFile);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "auto_append_file", &RuntimeOption::AutoAppendFile);
+    // "auto_prepend_file" called out in LoadPerDir
+    // "auto_append_file"  called out in LoadPerDir
+
 
   // Data Handling
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "post_max_size",
-                   IniSetting::SetAndGet<int64_t>(
-                     nullptr,
-                     []() {
-                       return VirtualHost::GetMaxPostSize();
-                     }
-                   ),
-                   &RuntimeOption::MaxPostSize);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "always_populate_raw_post_data",
-                   &RuntimeOption::AlwaysPopulateRawPostData);
+    // "post_max_size" called out in LoadPerDir
+    // "always_populate_raw_post_data" called out in LoadPerDir
 
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
@@ -1575,19 +1564,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                    &RuntimeOption::EnableFileUploads);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "upload_max_filesize",
-                   IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) {
-                       return ini_on_update(
-                         value, RuntimeOption::UploadMaxFileSize);
-                     },
-                     []() {
-                       int uploadMaxFilesize =
-                         VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-                       return std::to_string(uploadMaxFilesize) + "M";
-                     }
-                   ));
+    // "upload_max_filesize" called out in LoadPerDir
+
   // Filesystem and Streams Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "allow_url_fopen",
@@ -1642,10 +1620,48 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   Config::Bind(RuntimeOption::DynamicExtensions, ini,
                config["DynamicExtensions"]);
 
+  LoadPerDir();
 
   ExtensionRegistry::moduleLoad(ini, config);
   extern void initialize_apc();
   initialize_apc();
+}
+
+void RuntimeOption::LoadPerDir(void) {
+  // File Uploads
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "upload_max_filesize",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) {
+                       return ini_on_update(
+                         value, RuntimeOption::UploadMaxFileSize);
+                     },
+                     []() {
+                       int uploadMaxFilesize =
+                         VirtualHost::GetUploadMaxFileSize() / (1 << 20);
+                       return std::to_string(uploadMaxFilesize) + "M";
+                     }
+                   ));
+
+  // Language and Misc Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "auto_prepend_file", &RuntimeOption::AutoPrependFile);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "auto_append_file", &RuntimeOption::AutoAppendFile);
+
+  // Data Handling
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "post_max_size",
+                   IniSetting::SetAndGet<int64_t>(
+                     nullptr,
+                     []() {
+                       return VirtualHost::GetMaxPostSize();
+                     }
+                   ),
+                   &RuntimeOption::MaxPostSize);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "always_populate_raw_post_data",
+                   &RuntimeOption::AlwaysPopulateRawPostData);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

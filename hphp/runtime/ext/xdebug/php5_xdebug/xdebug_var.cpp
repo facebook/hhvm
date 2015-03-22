@@ -162,6 +162,41 @@ void xdebug_format_file_link(StringBuffer& sb, const char* filename, int line) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * RAII helper for incrementing/decrementing indent levels.
+ */
+struct Indenter {
+  explicit Indenter(XDebugExporter& exp): exp(exp) {
+    exp.level++;
+  }
+
+  ~Indenter() {
+    exp.level--;
+  }
+
+  XDebugExporter& exp;
+};
+
+/*
+ * RAII helper for tracking seen arrays and objects.
+ */
+struct Tracker {
+  explicit Tracker(XDebugExporter& exp, void* ptr): exp(exp), ptr(ptr) {
+    auto const result = exp.seen.insert(ptr);
+    seen = !result.second;
+  }
+
+  ~Tracker() {
+    exp.seen.erase(ptr);
+  }
+
+  XDebugExporter& exp;
+  void* ptr;
+  bool seen;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -360,8 +395,10 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
     xdebug_xml_add_attribute(node, "children",
                              const_cast<char*>(arr.size() > 0 ? "1" : "0"));
 
+    Tracker track(exporter, arr.get());
+
     // If we've already seen this object, return
-    if (exporter.counts[arr.get()]++ > 0) {
+    if (track.seen) {
       xdebug_xml_add_attribute(node, "recursive", "1");
       return node;
     }
@@ -394,7 +431,6 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
 
     // Done at this level
     exporter.level--;
-    exporter.counts[arr.get()]--;
   } else if (var.isObject()) {
     // TODO(#3704) This could be merged into the above array code. For now,
     // it's separate as this was pulled originally from xdebug
@@ -409,8 +445,10 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
     xdebug_xml_add_attribute(node, "children",
                              const_cast<char*>(props.size() ? "1" : "0"));
 
+    Tracker track(exporter, obj);
+
     // If we've already seen this object, return
-    if (exporter.counts[obj]++ > 0) {
+    if (track.seen) {
       xdebug_xml_add_attribute(node, "recursive", "1");
       return node;
     }
@@ -444,7 +482,6 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
 
     // Done at this level
     exporter.level--;
-    exporter.counts[(void*) obj]--;
   } else if (var.isResource()) {
     ResourceData* res = var.toResource().get();
     xdebug_xml_add_attribute(node, "type", "resource");
@@ -494,40 +531,6 @@ const StaticString
   s_ansi_esc("\0"),
   s_text_esc("'\\\0..\37"),
   s_array_str_esc("'\0");
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * RAII helper for incrementing/decrementing indent levels.
- */
-struct Indenter {
-  explicit Indenter(XDebugExporter& exp): exp(exp) {
-    exp.level++;
-  }
-
-  ~Indenter() {
-    exp.level--;
-  }
-
-  XDebugExporter& exp;
-};
-
-/*
- * RAII helper for tracking seen arrays and objects.
- */
-struct Tracker {
-  explicit Tracker(XDebugExporter& exp, void* ptr): exp(exp), ptr(ptr) {
-    seen = exp.counts[ptr]++ > 0;
-  }
-
-  ~Tracker() {
-    exp.counts[ptr]--;
-  }
-
-  XDebugExporter& exp;
-  void* ptr;
-  bool seen;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -782,6 +785,8 @@ String xdebug_get_zval_value_text_ansi(
   bool ansi,
   XDebugExporter& exporter
 ) {
+  exporter.reset(1);
+
   StringBuffer sb;
 
   if (XDEBUG_GLOBAL(OverloadVarDump) > 1) {
@@ -1017,6 +1022,8 @@ String xdebug_get_zval_value_text(const Variant& v, XDebugExporter& exporter) {
 }
 
 String xdebug_get_zval_value_fancy(const Variant& v, XDebugExporter& exporter) {
+  exporter.reset(1);
+
   StringBuffer sb;
 
   sb.append("<pre class='xdebug-var-dump' dir='ltr'>");
@@ -1039,14 +1046,13 @@ String xdebug_get_zval_value_fancy(const Variant& v, XDebugExporter& exporter) {
   return sb.detach();
 }
 
-xdebug_xml_node* xdebug_get_value_xml_node(const char* name,
-                                           const Variant& val,
-                                           XDebugVarType type
-                                            /* = XDebugVarType::Normal */,
-                                           XDebugExporter& exporter) {
-  // Ensure there all state is cleared in the exporter. This allows the same
-  // exporter to be used in multiple exports.
-  exporter.reset();
+xdebug_xml_node* xdebug_get_value_xml_node(
+  const char* name,
+  const Variant& val,
+  XDebugVarType type,
+  XDebugExporter& exporter
+) {
+  exporter.reset(0);
 
   // Compute the short and full name of the passed value
   char* short_name = nullptr;

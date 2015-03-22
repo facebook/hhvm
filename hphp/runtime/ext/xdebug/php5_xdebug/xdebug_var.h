@@ -36,64 +36,73 @@ StaticString xdebug_error_type(int errnum);
 // Variable Exporting
 
 struct XDebugExporter {
-  using SmartPtrCtrMap = smart::hash_map<void*, int, pointer_hash<void>>;
-
-  SmartPtrCtrMap counts; // Map of pointer -> # of times we've seen this object.
-  uint32_t level{1};     // Current level we are at.
-
-  // Resets the state of the exporter.  Called before each export.
-  void reset() {
-    counts.clear();
-    level = 0;
+  /* Resets the state of the exporter.  Called before each export. */
+  void reset(uint32_t new_level) {
+    seen.clear();
+    level = new_level;
   }
 
-  // These must all be provided.
+  /* Set of seen ObjectData and ArrayData pointers. */
+  smart::hash_set<void*, pointer_hash<void>> seen;
+
+  /* Current level we are at. */
+  uint32_t level{0};
+
+  /* These must all be provided. */
   uint32_t max_depth;         // Max depth to print for arrays/objects.
   uint32_t max_children;      // Max children to print for arrays/objects.
   uint32_t max_data;          // Max data to print for strings.
-  // Page to retrieve on the top level.  Object/array members are split into
-  // "pages" of size max_children.  php5 xdebug has a page field for each level,
-  // but it only ever sets the page for the top level.
+
+  /*
+   * Page to retrieve on the top level.  Object/array members are split into
+   * "pages" of size max_children.  php5 xdebug has a page field for each level,
+   * but it only ever sets the page for the top level.
+   */
   uint32_t page;
 
-  // Only set by xdebug_find_name().
+  /* Only set by xdebug_find_name(). */
   bool no_decoration{false};
 
-  // Set by xdebug_debug_zval*
+  /* Set by xdebug_debug_zval* */
   bool debug_zval{false};
 };
 
-// Exports the given variable into the returned node using the
-// given exporter. If given, name, fullName, and facet should be freeable.
+/*
+ * Exports the given variable into the returned node using the given exporter.
+ * If given, name, fullName, and facet should be freeable.
+ */
 xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
                                             const char* fullName,
                                             const char* facet,
                                             const Variant& var,
                                             XDebugExporter& exporter);
 
-// Variable type
 enum class XDebugVarType {
-  Normal = 0x00,
-  Static = 0x01,
-  Constant = 0x02
+  Normal,
+  Static,
+  Constant,
 };
 
 String xdebug_get_zval_value_fancy(const Variant&, XDebugExporter&);
 String xdebug_get_zval_value_ansi(const Variant&, XDebugExporter&);
 String xdebug_get_zval_value_text(const Variant&, XDebugExporter&);
 
-// Given a variable with the given name, returns an xml representation using
-// the given exporter
+/*
+ * Given a variable with the given name, returns an xml representation using the
+ * given exporter.
+ */
 xdebug_xml_node* xdebug_get_value_xml_node(const char* name,
                                            const Variant& val,
                                            XDebugVarType type,
                                            XDebugExporter& exporter);
 
-// Lookup a PHP symbol based on the current frame. Supports a limited parsing
-// of symbol names.
+/*
+ * Lookup a PHP symbol based on the current frame.  Supports a limited parsing
+ * of symbol names.
+ */
 Variant xdebug_get_php_symbol(ActRec* ar, StringData* name);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* incl_XDEBUG_VAR_H */
+#endif

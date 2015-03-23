@@ -314,28 +314,28 @@ inline Type Type::dropConstVal() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Constant introspection.
 
-inline bool Type::isConst() const {
-  return m_hasConstVal || subtypeOfAny(Uninit, InitNull, Nullptr);
+inline bool Type::hasConstVal() const {
+  return m_hasConstVal;
 }
 
-inline bool Type::isConst(Type t) const {
-  return isConst() && *this <= t;
+inline bool Type::hasConstVal(Type t) const {
+  return hasConstVal() && *this <= t;
 }
 
 template<typename T>
-bool Type::isConst(T val) const {
-  return *this <= cns(val);
+bool Type::hasConstVal(T val) const {
+  return hasConstVal(cns(val));
 }
 
 inline uint64_t Type::rawVal() const {
-  assert(isConst());
+  assert(hasConstVal());
   return m_extra;
 }
 
-#define IMPLEMENT_CNS_VAL(TypeName, name, valtype)  \
-  inline valtype Type::name##Val() const {          \
-    assert(*this <= TypeName && m_hasConstVal);     \
-    return m_##name##Val;                           \
+#define IMPLEMENT_CNS_VAL(TypeName, name, valtype)      \
+  inline valtype Type::name##Val() const {              \
+    assert(hasConstVal(TypeName));                      \
+    return m_##name##Val;                               \
   }
 
 IMPLEMENT_CNS_VAL(Bool,       bool, bool)

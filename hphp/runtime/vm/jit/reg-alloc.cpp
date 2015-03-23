@@ -107,8 +107,15 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
       continue;
     }
     if (tmp->inst()->is(DefConst)) {
-      auto c = tmp->isA(Type::Bool) ? vunit.makeConst(tmp->boolVal())
-                                    : vunit.makeConst(tmp->rawVal());
+      auto const type = tmp->type();
+      Vreg c;
+      if (type.subtypeOfAny(Type::Null, Type::Nullptr)) {
+        c = vunit.makeConst(0);
+      } else if (type <= Type::Bool) {
+        c = vunit.makeConst(tmp->boolVal());
+      } else {
+        c = vunit.makeConst(tmp->rawVal());
+      }
       state.locs[tmp] = Vloc{c};
       FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(), size_t(c));
     } else {

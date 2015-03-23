@@ -412,7 +412,7 @@ bool RegionFormer::traceThroughJmp() {
   // inputs while inlining.
   if (!isUnconditionalJmp(m_inst.op()) &&
       !(inlining && isConditionalJmp(m_inst.op()) &&
-        irgen::publicTopType(m_hts, BCSPOffset{0}).isConst())) {
+        irgen::publicTopType(m_hts, BCSPOffset{0}).hasConstVal())) {
     return false;
   }
 

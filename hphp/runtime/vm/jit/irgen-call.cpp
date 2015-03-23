@@ -46,11 +46,9 @@ const Func* findCuf(Op op,
   invName = nullptr;
 
   const StringData* str =
-    callable->isA(Type::Str) && callable->isConst() ? callable->strVal()
-                                                    : nullptr;
+    callable->hasConstVal(Type::Str) ? callable->strVal() : nullptr;
   const ArrayData* arr =
-    callable->isA(Type::Arr) && callable->isConst() ? callable->arrVal()
-                                                    : nullptr;
+    callable->hasConstVal(Type::Arr) ? callable->arrVal() : nullptr;
 
   StringData* sclass = nullptr;
   StringData* sname = nullptr;
@@ -541,7 +539,7 @@ void emitFPushCtorD(HTS& env,
   auto ssaCls = persistentCls
     ? cns(env, cls)
     : gen(env, LdClsCached, cns(env, className));
-  if (!ssaCls->isConst() && uniqueCls) {
+  if (!ssaCls->hasConstVal() && uniqueCls) {
     // If the Class is unique but not persistent, it's safe to use it as a
     // const after the LdClsCached, which will throw if the class can't be
     // defined.
@@ -655,9 +653,9 @@ void emitFPushClsMethod(HTS& env, int32_t numParams) {
     PUNT(FPushClsMethod-unknownType);
   }
 
-  if (methVal->isConst()) {
+  if (methVal->hasConstVal()) {
     const Class* cls = nullptr;
-    if (clsVal->isConst()) {
+    if (clsVal->hasConstVal()) {
       cls = clsVal->clsVal();
     } else if (clsVal->inst()->op() == LdClsCctx) {
       /*
@@ -682,7 +680,7 @@ void emitFPushClsMethod(HTS& env, int32_t numParams) {
                                      cls,
                                      false);
       if (res == LookupResult::MethodFoundNoThis && func->isStatic()) {
-        auto funcTmp = clsVal->isConst()
+        auto funcTmp = clsVal->hasConstVal()
           ? cns(env, func)
           : gen(env, LdClsMethod, clsVal, cns(env, -(func->methodSlot() + 1)));
         fpushActRec(env, funcTmp, clsVal, numParams, nullptr);
@@ -717,7 +715,7 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
   auto classTmp = top(env, Type::Cls);
   auto methodTmp = topC(env, BCSPOffset{1}, DataTypeGeneric);
   assert(classTmp->isA(Type::Cls));
-  if (!classTmp->isConst() || !methodTmp->isConst(Type::Str)) {
+  if (!classTmp->hasConstVal() || !methodTmp->hasConstVal(Type::Str)) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
   }
   env.irb->constrainValue(methodTmp, DataTypeSpecific);
@@ -917,4 +915,3 @@ void emitFCall(HTS& env, int32_t numParams) {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

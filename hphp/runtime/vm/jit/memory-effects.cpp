@@ -534,7 +534,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // TODO(#5575265): use LdMem for this instruction.
   case LdPackedArrayElem:
-    if (inst.src(1)->isConst() && inst.src(1)->intVal() >= 0) {
+    if (inst.src(1)->hasConstVal() && inst.src(1)->intVal() >= 0) {
       return PureLoad {
         AElemI { inst.src(0), safe_cast<uint64_t>(inst.src(1)->intVal()) }
       };
@@ -542,13 +542,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AElemIAny };
 
   case LdStructArrayElem:
-    assert(inst.src(1)->isConst() && inst.src(1)->strVal()->isStatic());
+    assert(inst.src(1)->strVal()->isStatic());
     return PureLoad { AElemS { inst.src(0), inst.src(1)->strVal() } };
 
   // TODO(#5575265): replace this instruction with CheckTypeMem.
   case CheckTypePackedArrayElem:
   case IsPackedArrayElemNull:
-    if (inst.src(1)->isConst() && inst.src(1)->intVal() >= 0) {
+    if (inst.src(1)->hasConstVal() && inst.src(1)->intVal() >= 0) {
       return may_load_store(
         AElemI { inst.src(0), safe_cast<uint64_t>(inst.src(1)->intVal()) },
         AEmpty

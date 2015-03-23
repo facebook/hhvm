@@ -414,7 +414,7 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   if (func->isStatic()) {
     if (fpInst->is(DefInlineFP)) {
       auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
-      if (ctx->isConst(Type::Cls)) {
+      if (ctx->hasConstVal(Type::Cls)) {
         inst->convertToNop();
         return m_unit.cns(ConstCctx::cctx(ctx->clsVal()));
       }
@@ -472,7 +472,8 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;
-  if (inst->typeParam().isConst()) {
+  if (inst->typeParam().hasConstVal() ||
+      inst->typeParam().subtypeOfAny(Type::Uninit, Type::InitNull)) {
     return m_unit.cns(inst->typeParam());
   }
 
@@ -573,7 +574,8 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;
-  if (inst->typeParam().isConst()) {
+  if (inst->typeParam().hasConstVal() ||
+      inst->typeParam().subtypeOfAny(Type::Uninit, Type::InitNull)) {
     return m_unit.cns(inst->typeParam());
   }
 

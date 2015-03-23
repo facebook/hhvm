@@ -182,7 +182,7 @@ IR_TYPES
 }
 
 std::string Type::constValString() const {
-  assert(isConst());
+  assert(hasConstVal() || subtypeOfAny(Uninit, InitNull, Nullptr));
 
   if (*this <= Bool) {
     return m_boolVal ? "true" : "false";
@@ -293,7 +293,7 @@ std::string Type::toString() const {
     case Ptr::Ref:      ret += "Ref"; break;
     }
     ret += deref().toString();
-    if (isConst()) ret += folly::format("({})", m_ptrVal).str();
+    if (m_hasConstVal) ret += folly::format("({})", m_ptrVal).str();
     return ret;
   }
 

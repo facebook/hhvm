@@ -204,6 +204,16 @@ std::pair<SSATmp*,Type> load(Local& env,
     tracked.knownType = inst.dst()->type();
     env.state.avail.set(meta->index);
   }
+  if (tracked.knownType.hasConstVal() ||
+      tracked.knownType.subtypeOfAny(Type::Uninit, Type::InitNull,
+                                     Type::Nullptr)) {
+    tracked.knownValue = env.global.unit.cns(tracked.knownType);
+
+    FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
+    FTRACE(5, "       av: {}\n", show(env.state.avail));
+    return { tracked.knownValue, tracked.knownType };
+  }
+
   tracked.knownValue = inst.dst();
 
   FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
@@ -373,7 +383,7 @@ bool merge_into(TrackedLoc& dst, const TrackedLoc& src) {
       dst.knownValue,
       src.knownValue
     );
-    dst.knownType = dst.knownType | src.knownType;
+    dst.knownType |= src.knownType;
     return true;
   }
   auto const newType = dst.knownType | src.knownType;

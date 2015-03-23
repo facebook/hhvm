@@ -34,7 +34,7 @@ const char* destTypeName(DestType dt) {
 }
 
 ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
-  if (tmp->isConst()) {
+  if (tmp->hasConstVal()) {
     // tmp is a constant
     if (val) {
       m_imm64 = tmp->rawVal();

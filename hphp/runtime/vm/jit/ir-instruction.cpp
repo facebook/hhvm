@@ -237,7 +237,7 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
 
     case AllocObj:
-      return inst->src(0)->isConst()
+      return inst->src(0)->hasConstVal()
         ? Type::ExactObj(inst->src(0)->clsVal())
         : Type::Obj;
 
@@ -260,7 +260,7 @@ Type arrElemReturn(const IRInstruction* inst) {
     case T::Packed:
       {
         auto const idx = inst->src(1);
-        if (!idx->isConst()) return Type::Gen;
+        if (!idx->hasConstVal()) return Type::Gen;
         if (idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
           return typeFromRAT(arrTy->packedElem(idx->intVal())) & tyParam;
         }

@@ -960,7 +960,7 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
 
   auto& v = vmain();
   if (firstBitNum == 0) {
-    assert(nParamsTmp->isConst());
+    assert(nParamsTmp->hasConstVal());
     // This is the first 64 bits. No need to check nParams.
     thenBody(v);
   } else {

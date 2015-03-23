@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+// lol
+
 #include "hphp/runtime/base/program-functions.h"
 #include <vector>
 #include "hphp/runtime/base/emulate-zend.h"

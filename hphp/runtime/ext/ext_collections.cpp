@@ -651,8 +651,8 @@ void BaseVector::reserve(int64_t sz) {
   }
 }
 
-BaseVector::BaseVector(Class* cls)
-    : ExtCollectionObjectData(cls)
+BaseVector::BaseVector(Class* cls, HeaderKind kind)
+    : ExtCollectionObjectData(cls, kind)
     , m_size(0), m_capacity(0), m_data(packedData(staticEmptyArray()))
     , m_version(0) {
 }
@@ -740,8 +740,8 @@ c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
-  subclass_u8() = Collection::VectorType;
+c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */)
+  : BaseVector(cls, HeaderKind::Vector) {
 }
 
 void BaseVector::t___construct(const Variant& iterable /* = null_variant */) {
@@ -1434,8 +1434,8 @@ Object c_ImmVector::t_values() {
 
 // Non PHP methods.
 
-c_ImmVector::c_ImmVector(Class* cls) : BaseVector(cls) {
-  subclass_u8() = Collection::ImmVectorType;
+c_ImmVector::c_ImmVector(Class* cls)
+  : BaseVector(cls, HeaderKind::ImmVector) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1481,8 +1481,8 @@ struct HashCollection::EmptyMixedInitializer {
 HashCollection::EmptyMixedInitializer
 HashCollection::s_empty_mixed_initializer;
 
-HashCollection::HashCollection(Class* cls)
-    : ExtCollectionObjectData(cls)
+HashCollection::HashCollection(Class* cls, HeaderKind kind)
+    : ExtCollectionObjectData(cls, kind)
     , m_size(0), m_version(0), m_data(mixedData(staticEmptyMixedArray())) {
 }
 
@@ -1942,14 +1942,14 @@ HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Map::c_Map(Class* cls) : BaseMap(cls) {
-  subclass_u8() = Collection::MapType;
+c_Map::c_Map(Class* cls) : BaseMap(cls, HeaderKind::Map) {
 }
 
 // Protected (Internal)
 
-BaseMap::BaseMap(Class* cls) : HashCollection(cls) {
-}
+BaseMap::BaseMap(Class* cls, HeaderKind kind)
+  : HashCollection(cls, kind)
+{}
 
 BaseMap::~BaseMap() {
   decRefArr(arrayData());
@@ -3553,9 +3553,8 @@ void c_MapIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_ImmMap::c_ImmMap(Class* cb) : BaseMap(cb) {
-  subclass_u8() = Collection::ImmMapType;
-}
+c_ImmMap::c_ImmMap(Class* cb) : BaseMap(cb, HeaderKind::ImmMap)
+{}
 
 c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_ImmMap>(obj);
@@ -4457,8 +4456,9 @@ BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
 
 // Protected (Internal)
 
-BaseSet::BaseSet(Class* cls) : HashCollection(cls) {
-}
+BaseSet::BaseSet(Class* cls, HeaderKind kind)
+  : HashCollection(cls, kind)
+{}
 
 BaseSet::~BaseSet() {
   decRefArr(arrayData());
@@ -4512,8 +4512,8 @@ void BaseSet::throwBadValueType() {
 ///////////////////////////////////////////////////////////////////////////////
 // Set
 
-c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
-  subclass_u8() = Collection::SetType;
+c_Set::c_Set(Class* cls /* = c_Set::classof() */)
+  : BaseSet(cls, HeaderKind::Set) {
 }
 
 void BaseSet::t___construct(const Variant& iterable /* = null_variant */) {
@@ -4783,8 +4783,7 @@ Object c_ImmSet::ti_fromarrays(int _argc, const Array& _argv) {
   return BaseSet::php_fromArrays<c_ImmSet>(_argc, _argv);
 }
 
-c_ImmSet::c_ImmSet(Class* cls) : BaseSet(cls) {
-  subclass_u8() = Collection::ImmSetType;
+c_ImmSet::c_ImmSet(Class* cls) : BaseSet(cls, HeaderKind::ImmSet) {
 }
 
 void c_ImmSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -4875,19 +4874,17 @@ void c_SetIterator::t_rewind() {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Pair::c_Pair(Class* cb)
-  : ExtObjectDataFlags(cb)
+  : ExtObjectDataFlags(cb, HeaderKind::Pair)
   , m_size(2)
 {
-  subclass_u8() = Collection::PairType;
   tvWriteNull(&elm0);
   tvWriteNull(&elm1);
 }
 
 c_Pair::c_Pair(NoInit, Class* cb)
-  : ExtObjectDataFlags(cb)
+  : ExtObjectDataFlags(cb, HeaderKind::Pair)
   , m_size(0)
 {
-  subclass_u8() = Collection::PairType;
 }
 
 c_Pair::~c_Pair() {
@@ -5984,7 +5981,7 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
 
 bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
   Collection::Type ct = obj1->getCollectionType();
-  assert(!Collection::isInvalidType(ct));
+  assert(Collection::isValidType(ct));
   Collection::Type ct2 = obj2->getCollectionType();
 
   if (Collection::isMapType(ct) && Collection::isMapType(ct2)) {

@@ -292,7 +292,7 @@ class BaseVector : public ExtCollectionObjectData {
 
  protected:
 
-  explicit BaseVector(Class* cls);
+  explicit BaseVector(Class* cls, HeaderKind);
   /*virtual*/ ~BaseVector();
 
   Cell* data() const { return m_data; }
@@ -658,7 +658,7 @@ ALWAYS_INLINE MixedArray* staticEmptyMixedArray() {
 
 class HashCollection : public ExtCollectionObjectData {
  public:
-  explicit HashCollection(Class* cls);
+  explicit HashCollection(Class* cls, HeaderKind);
 
   typedef MixedArray::Elm Elm;
 
@@ -1319,7 +1319,7 @@ class BaseMap : public HashCollection {
   }
 
  protected: // BaseMap is an abstract class
-  explicit BaseMap(Class* cls);
+  explicit BaseMap(Class* cls, HeaderKind);
   ~BaseMap();
 
  public:
@@ -1776,7 +1776,7 @@ class BaseSet : public HashCollection {
 
  protected:
   // BaseSet is an abstract class.
-  explicit BaseSet(Class* cls);
+  explicit BaseSet(Class* cls, HeaderKind);
   /* virtual */ ~BaseSet();
 
  private:

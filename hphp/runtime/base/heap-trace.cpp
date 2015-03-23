@@ -254,6 +254,13 @@ void Marker::init() {
       case HK::Empty:
       case HK::String:
       case HK::Object:
+      case HK::Vector:
+      case HK::Map:
+      case HK::Set:
+      case HK::Pair:
+      case HK::ImmVector:
+      case HK::ImmMap:
+      case HK::ImmSet:
       case HK::ResumableObj:
       case HK::AwaitAllWH:
         // count==0 can be witnessed, see above
@@ -307,6 +314,13 @@ void Marker::sweep() {
       case HK::Proxy:
       case HK::String:
       case HK::Object:
+      case HK::Vector:
+      case HK::Map:
+      case HK::Set:
+      case HK::Pair:
+      case HK::ImmVector:
+      case HK::ImmMap:
+      case HK::ImmSet:
       case HK::ResumableObj:
       case HK::AwaitAllWH:
       case HK::Resource:

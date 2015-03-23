@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/header-kind.h"
 
 // used for mmapping contiguous heap space
 // If used, anonymous pages are not cleared when mapped with mmap. It is not
@@ -115,24 +116,6 @@ template<class T> T* smart_new_array(size_t count);
 template<class T> void smart_delete_array(T* t, size_t count);
 
 //////////////////////////////////////////////////////////////////////
-
-enum class HeaderKind : uint8_t {
-  // ArrayKind aliases
-  Packed, Struct, Mixed, Empty, Apc, Globals, Proxy,
-  // Other ordinary refcounted heap objects
-  String, Object, ResumableObj, AwaitAllWH, Resource, Ref,
-  Resumable, // ResumableNode followed by Frame, Resumable, ObjectData
-  Native, // a NativeData header preceding an HNI ObjectData
-  SmallMalloc, // small smart_malloc'd block
-  BigMalloc, // big smart_malloc'd block
-  BigObj, // big size-tracked object (valid header follows BigNode)
-  Free, // small block in a FreeList
-  Hole, // wasted space not in any freelist
-  Debug // a DebugHeader
-};
-
-const size_t HeaderKindOffset = 11;
-const unsigned NumHeaderKinds = (uint8_t)HeaderKind::Debug+1;
 
 /*
  * Debug mode header.

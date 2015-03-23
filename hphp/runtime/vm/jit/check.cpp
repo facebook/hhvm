@@ -169,22 +169,35 @@ bool checkCfg(const IRUnit& unit) {
     }
   }
 
-  // Visit every instruction and make sure their sources are defined in a block
-  // that dominates the block containing the instruction.
+  /*
+   * Visit every instruction and make sure their sources are either defined in
+   * a block that strictly dominates the block containing the instruction, or
+   * defined earlier in the same block as the instruction.
+   */
+  auto defined_set = jit::sparse_idptr_set<SSATmp>{unit.numTmps()};
   auto const idoms = findDominators(unit, blocks, rpoIDs);
-  forEachInst(blocks, [&] (const IRInstruction* inst) {
-    for (auto src : inst->srcs()) {
-      if (src->inst()->is(DefConst)) continue;
-      auto const dom = findDefiningBlock(src);
-      always_assert_flog(
-        dom && dominates(dom, inst->block(), idoms),
-        "src '{}' in '{}' came from '{}', which is not a "
-        "DefConst and is not defined at this use site",
-        src->toString(), inst->toString(),
-        src->inst()->toString()
-      );
+  for (auto& blk : blocks) {
+    for (auto& inst : blk->instrs()) {
+      for (auto src : inst.srcs()) {
+        if (src->inst()->is(DefConst)) continue;
+        auto const dom = findDefiningBlock(src);
+        auto const locally_defined =
+          src->inst()->block() == inst.block() && defined_set.contains(src);
+        auto const strictly_dominates =
+          src->inst()->block() != inst.block() &&
+          dom && dominates(dom, inst.block(), idoms);
+        always_assert_flog(
+          locally_defined || strictly_dominates,
+          "src '{}' in '{}' came from '{}', which is not a "
+          "DefConst and is not defined at this use site",
+          src->toString(), inst.toString(),
+          src->inst()->toString()
+        );
+      }
+      for (auto& dst : inst.dsts()) defined_set.insert(&dst);
     }
-  });
+    defined_set.clear();
+  }
 
   return true;
 }

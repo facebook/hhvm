@@ -33,7 +33,7 @@ function test(SplDoublyLinkedList $l) {
 
   echo "ArrayAccess Unset:", PHP_EOL;
   unset($l[0]);
-  var_dump($l[0]);
+  var_dump($l->offsetGet(0));
   echo PHP_EOL;
 
   echo "Foreach:", PHP_EOL;

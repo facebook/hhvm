@@ -137,26 +137,7 @@ private:
   static ArrayData* CopyAndResizeIfNeededSlow(const ArrayData*);
   static ArrayData* CopyAndResizeIfNeeded(const ArrayData*);
   static ArrayData* ResizeIfNeeded(ArrayData*);
-
   static SortFlavor preSort(ArrayData*);
-public:
-  enum class Reason : uint8_t {
-    kForeachByRef,
-    kTakeByRef,
-    kSetRef,
-    kAppendRef,
-    kRemoveInt,
-    kRemoveStr,
-    kOutOfOrderIntKey,
-    kGetStr,
-    kSetStr,
-    kNumericString,
-    kPlusNotSupported,
-    kMergeNotSupported,
-    kSortNotSupported
-  };
-  static void downgradeAndWarn(ArrayData* ad, const Reason r);
-  static void warnUsage(const Reason r);
 };
 
 //////////////////////////////////////////////////////////////////////

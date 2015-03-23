@@ -2469,7 +2469,8 @@ and obj_get_ ~is_method ~nullsafe env ty1 cid (p, s as id)
             Typing_hooks.dispatch_cmethod_hook class_ (p, s) env None;
             (match member_ with
               | None when not is_method ->
-                member_not_found p ~is_method class_ s (fst ety1);
+                if not (SN.Members.is_special_xhp_attribute s)
+                then member_not_found p ~is_method class_ s (fst ety1);
                 env, (Reason.Rnone, Tany), None
               | None ->
                 (match Env.get_member is_method env class_ SN.Members.__call with

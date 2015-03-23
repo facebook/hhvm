@@ -98,6 +98,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'xhp_attr_11.php',
         'xhp_attr_12.php',
         'xhp_attr_13.php',
+        'xhp_attr_14.php',
         'xhp_hint.php',
     ],
     "XhpAttr": [

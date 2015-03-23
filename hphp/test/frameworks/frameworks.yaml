@@ -388,8 +388,8 @@
     test_root: jshrink
   mockery:
     url: https://github.com/padraic/mockery.git
-    branch: "0.9.2"
-    commit: 95a4855380dc70176c51807c678fb3bd6198529a
+    branch: "0.9.3"
+    commit: 686f85fa5b3b079cc0157d7cd3e9adb97f0b41e1
     install_root: mockery
     test_root: mockery
   monolog:

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/server/http-protocol.h"
 
@@ -173,6 +174,12 @@ static ALWAYS_INLINE void do_var_dump(VariableSerializer vs,
 
 void HHVM_FUNCTION(var_dump, const Variant& expression,
                              const Array& _argv /*=null_array */) {
+  if (UNLIKELY(XDEBUG_GLOBAL(OverloadVarDump) &&
+               XDEBUG_GLOBAL(DefaultEnable))) {
+    HHVM_FN(xdebug_var_dump)(expression, _argv);
+    return;
+  }
+
   VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
   do_var_dump(vs, expression);
 

@@ -31,7 +31,7 @@ namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
 // Xml encode the passed string
-String xdebug_xmlize(char *string, int len) {
+String xdebug_xmlize(const char* string, size_t len) {
   String str(string, CopyString);
   if (len) {
     str = string_replace(str, "&","&amp;");

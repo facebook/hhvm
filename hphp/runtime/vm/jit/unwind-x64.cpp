@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -71,6 +72,7 @@ void sync_regstate(_Unwind_Context* context) {
 
   uintptr_t frameRbp = _Unwind_GetGR(context, Debug::RBP);
   uintptr_t frameRip = _Unwind_GetGR(context, Debug::RIP);
+  FTRACE(2, "syncing regstate for rbp: {:#x} rip: {:#x}\n", frameRbp, frameRip);
 
   /*
    * fixupWork expects to be looking at the first frame that is out of
@@ -88,30 +90,27 @@ void sync_regstate(_Unwind_Context* context) {
   Stats::inc(Stats::TC_SyncUnwind);
   mcg->fixupMap().fixupWork(g_context.getNoCheck(), &fakeAr);
   tl_regState = VMRegState::CLEAN;
+  FTRACE(2, "synced vmfp: {} vmsp: {} vmpc: {}\n", vmfp(), vmsp(), vmpc());
 }
 
-bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
-                         bool do_side_exit, TypedValue unwinder_tv) {
-  auto const rip = (TCA)_Unwind_GetIP(ctx);
-  TCA catchTrace;
+/*
+ * Lookup a catch trace for the given TCA, returning nullptr if none was
+ * found. Will abort if a nullptr catch trace was registered, meaning this call
+ * isn't allowed to throw.
+ */
+TCA lookup_catch_trace(TCA rip, _Unwind_Exception* exn) {
   if (auto catchTraceOpt = mcg->getCatchTrace(rip)) {
-    catchTrace = *catchTraceOpt;
-  } else {
-    FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
-    return false;
-  }
+    if (auto catchTrace = *catchTraceOpt) return catchTrace;
 
-  if (!catchTrace) {
-    // A few of our optimization passes must be aware of every path out of the
-    // trace, so throwing through jitted code without a catch block is very
-    // bad. This is indicated with a present but nullptr entry in the catch
-    // trace map.
+    // A few of our optimization passes must be aware of every path out of
+    // the trace, so throwing through jitted code without a catch block is
+    // very bad. This is indicated with a present but nullptr entry in the
+    // catch trace map.
     const size_t kCallSize = 5;
     const uint8_t kCallOpcode = 0xe8;
 
     auto callAddr = rip - kCallSize;
     TCA helperAddr = nullptr;
-    std::string helperName;
     if (*callAddr == kCallOpcode) {
       helperAddr = rip + *reinterpret_cast<int32_t*>(callAddr + 1);
     }
@@ -120,8 +119,19 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
                        "Translated call to {} threw '{}' without "
                        "catch block, return address: {}\n",
                        getNativeFunctionName(helperAddr),
-                       exceptionFromUnwindException(exn)->what(),
+                       typeInfoFromUnwindException(exn).name(),
                        rip);
+  }
+
+  return nullptr;
+}
+
+bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
+                         bool do_side_exit, TypedValue unwinder_tv) {
+  auto const rip = (TCA)_Unwind_GetIP(ctx);
+  auto catchTrace = lookup_catch_trace(rip, exn);
+  if (!catchTrace) {
+    FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
     return false;
   }
 
@@ -230,33 +240,85 @@ tc_unwind_personality(int version,
       sync_regstate(context);
     }
 
-    // When we're unwinding through a TC frame (as opposed to stopping at a
-    // handler frame), we need to make sure that if we later return from this
-    // VM frame in translated code, we don't resume after the bindcall that may
-    // be expecting things to still live in its spill space. If the return
-    // address is in functionEnterHelper or callToExit, rVmFp won't contain a
-    // real VM frame, so we skip those.
-    auto const fp  = reinterpret_cast<ActRec*>(_Unwind_GetGR(context,
-                                                             Debug::RBP));
-    if (!(actions & _UA_HANDLER_FRAME) && isVMFrame(fp)) {
-      auto const oldRip = fp->m_savedRip;
-      g_context->preventReturnToTC(fp);
-      if (fp->m_savedRip != oldRip) {
-        FTRACE(1, "Smashed m_savedRip of fp {} from {:#x} to {:#x}\n",
-               fp, oldRip, fp->m_savedRip);
-      }
-    }
-
     if (install_catch_trace(context, exceptionObj, ism || tce, tv)) {
       always_assert((ism || tce) == bool(actions & _UA_HANDLER_FRAME));
       return _URC_INSTALL_CONTEXT;
     }
+
+    always_assert(!(actions & _UA_HANDLER_FRAME));
+
+    auto ip = TCA(_Unwind_GetIP(context));
+    auto& stubs = mcg->tx().uniqueStubs;
+    if (ip == stubs.endCatchHelperPast) {
+      FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
+      return _URC_CONTINUE_UNWIND;
+    }
+    if (ip == stubs.functionEnterHelperReturn) {
+      FTRACE(1, "rip == functionEnterHelperReturn, continuing unwind\n");
+      return _URC_CONTINUE_UNWIND;
+    }
+
+    FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
+    unwindRdsInfo->exn = exceptionObj;
+    _Unwind_SetIP(context, uint64_t(stubs.endCatchHelper));
+    return _URC_INSTALL_CONTEXT;
   }
 
   always_assert(!(actions & _UA_HANDLER_FRAME));
 
   FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");
   return _URC_CONTINUE_UNWIND;
+}
+
+TCA tc_unwind_resume(ActRec*& fp) {
+  while (true) {
+    auto newFp = fp->m_sfp;
+    ITRACE(1, "tc_unwind_resume processing fp: {} savedRip: {:#x} newFp: {}\n",
+           fp, fp->m_savedRip, newFp);
+    Trace::Indent indent;
+    always_assert_flog(isVMFrame(fp),
+                       "Unwinder got non-VM frame {} with saved rip {:#x}\n",
+                       fp, fp->m_savedRip);
+
+    // When we're unwinding through a TC frame (as opposed to stopping at a
+    // handler frame), we need to make sure that if we later return from this
+    // VM frame in translated code, we don't resume after the bindcall that may
+    // be expecting things to still live in its spill space. If the return
+    // address is in functionEnterHelper or callToExit, rVmFp won't contain a
+    // real VM frame, so we skip those.
+    auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
+    if (savedRip == mcg->tx().uniqueStubs.callToExit) {
+      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
+      fp = newFp;
+      return nullptr;
+    }
+
+    auto catchTrace = lookup_catch_trace(savedRip, unwindRdsInfo->exn);
+    if (isDebuggerReturnHelper(savedRip)) {
+      // If this frame had its return address smashed by the debugger, the real
+      // catch trace is saved in a side table.
+      assert(catchTrace == nullptr);
+      catchTrace = popDebuggerCatch(fp);
+    }
+    unwindPreventReturnToTC(fp);
+    if (fp->m_savedRip != reinterpret_cast<uint64_t>(savedRip)) {
+      ITRACE(1, "Smashed m_savedRip of fp {} from {} to {:#x}\n",
+             fp, savedRip, fp->m_savedRip);
+    }
+
+    fp = newFp;
+
+    // If there's a catch trace for this block, return it. Otherwise, keep
+    // going up the VM stack for this nesting level.
+    if (catchTrace) {
+      ITRACE(1, "tc_unwind_resume returning catch trace {} with fp: {}\n",
+             catchTrace, fp);
+      return catchTrace;
+    }
+
+    ITRACE(1, "No catch trace entry for {}; continuing\n",
+           mcg->tx().uniqueStubs.describe(savedRip));
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -359,7 +421,7 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
 
   __register_frame(&buffer[0]);
 
-  return std::shared_ptr<std::vector<char> >(
+  return std::shared_ptr<std::vector<char>>(
     bufferMem.release(),
     deregister_unwind_region
   );

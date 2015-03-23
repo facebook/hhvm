@@ -121,7 +121,7 @@ class PtrPrinter:
     def to_string(self):
         s = self._string()
 
-        out = '(%s) %s'  % (str(self._ptype()), str(self._pointer()))
+        out = '%s' % str(self._pointer())
         return '%s "%s"' % (out, s) if s is not None else out
 
 
@@ -130,9 +130,6 @@ class SmartPtrPrinter(PtrPrinter):
 
     def __init__(self, val):
         self.val = val
-
-    def _ptype(self):
-        return self.val.type
 
     def _pointer(self):
         return self.val['m_px']
@@ -178,9 +175,6 @@ class LowPtrPrinter(PtrPrinter):
 
     def __init__(self, val):
         self.val = val
-
-    def _ptype(self):
-        return self.val.type
 
     def _pointer(self):
         inner = self.val.type.template_argument(0)

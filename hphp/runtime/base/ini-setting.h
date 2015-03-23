@@ -50,6 +50,12 @@ bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p);
 bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p);
 bool ini_on_update(const folly::dynamic& value,
                    std::map<std::string, std::string>& p);
+bool ini_on_update(const folly::dynamic& value,
+                   std::set<std::string, stdltistr>& p);
+bool ini_on_update(const folly::dynamic& value,
+                   boost::container::flat_set<std::string>& p);
+bool ini_on_update(const folly::dynamic& value,
+                   hphp_string_imap<std::string>& p);
 folly::dynamic ini_get(bool& p);
 folly::dynamic ini_get(double& p);
 folly::dynamic ini_get(char& p);
@@ -66,6 +72,9 @@ folly::dynamic ini_get(Array& p);
 folly::dynamic ini_get(std::set<std::string>& p);
 folly::dynamic ini_get(std::vector<std::string>& p);
 folly::dynamic ini_get(std::map<std::string, std::string>& p);
+folly::dynamic ini_get(std::set<std::string, stdltistr>& p);
+folly::dynamic ini_get(boost::container::flat_set<std::string>& p);
+folly::dynamic ini_get(hphp_string_imap<std::string>& p);
 
 /**
  * If given an ini setting like "hhvm.abc[def][ghi]=yyy" and we have

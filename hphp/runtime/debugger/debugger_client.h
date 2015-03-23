@@ -192,21 +192,31 @@ public:
   void tutorial(const char *text);
   void setTutorial(int mode);
 
-  // Returns the source code string that the debugger is currently
-  // evaluating.
-  const std::string &getCode() const { return m_code;}
+  // Returns the source code string that the debugger is currently evaluating.
+  const std::string& getCode() const {
+    return m_code;
+  }
+
   void swapHelp();
 
-  /**
+  const std::string& getCommand() const {
+    return m_command;
+  }
+
+  /*
    * Test if argument matches specified. "index" is 1-based.
    */
-  const std::string &getCommand() const { return m_command;}
-  bool arg(int index, const char *s);
-  int argCount() { return m_args.size();}
+  bool arg(int index, const char *s) const;
+  size_t argCount() {
+    return m_args.size();
+  }
+
   std::string argValue(int index);
   // The entire line after that argument, un-escaped.
   std::string lineRest(int index);
-  std::vector<std::string> *args() { return &m_args;}
+  std::vector<std::string>* args() {
+    return &m_args;
+  }
 
   /**
    * Send the commmand to server's DebuggerProxy and expect same type of command

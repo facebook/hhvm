@@ -31,12 +31,19 @@ namespace HPHP {
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-class c_AwaitAllWaitHandle final : public c_BlockableWaitHandle {
- public:
+struct c_AwaitAllWaitHandle final : c_BlockableWaitHandle {
   DECLARE_CLASS_NO_SWEEP(AwaitAllWaitHandle)
 
   explicit c_AwaitAllWaitHandle(Class* cls = c_AwaitAllWaitHandle::classof())
-    : c_BlockableWaitHandle(cls) {}
+    : c_AwaitAllWaitHandle(0, cls)
+  {}
+
+  explicit c_AwaitAllWaitHandle(unsigned cap,
+                                Class* cls = c_AwaitAllWaitHandle::classof())
+    : c_BlockableWaitHandle(cls, HeaderKind::AwaitAllWH)
+    , m_cap(cap)
+    , m_cur(cap - 1)
+  {}
   ~c_AwaitAllWaitHandle() {}
 
   static void ti_setoncreatecallback(const Variant& callback);
@@ -49,6 +56,10 @@ class c_AwaitAllWaitHandle final : public c_BlockableWaitHandle {
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
   void enterContextImpl(context_idx_t ctx_idx);
+  size_t heapSize() const { return heapSize(m_cap); }
+  static size_t heapSize(unsigned count) {
+    return sizeof(c_AwaitAllWaitHandle) + count * sizeof(c_WaitableWaitHandle*);
+  }
 
  private:
   static Object FromPackedArray(const ArrayData* dependencies);
@@ -59,10 +70,11 @@ class c_AwaitAllWaitHandle final : public c_BlockableWaitHandle {
   void initialize(context_idx_t ctx_idx);
   template<bool checkCycle> void blockOnCurrent();
   void markAsFailed(const Object& exception);
+  void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
 
  private:
-  void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
-  int32_t m_cur;
+  uint32_t const m_cap; // how many children we have room for.
+  int32_t m_cur; // index of last child
   c_WaitableWaitHandle* m_children[0]; // allocated off the end
 };
 

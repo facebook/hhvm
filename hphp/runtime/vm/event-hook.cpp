@@ -88,7 +88,7 @@ ssize_t EventHook::CheckSurprise() {
   return check_request_surprise();
 }
 
-ssize_t EventHook::GetConditionFlags() {
+ssize_t EventHook::GetSurpriseFlags() {
   return surpriseFlags().load();
 }
 
@@ -507,7 +507,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
 
 void EventHook::onFunctionUnwind(const ActRec* ar, const Fault& fault) {
   // TODO(#2329497) can't CheckSurprise() yet, unwinder unable to replace fault
-  ssize_t flags = GetConditionFlags();
+  auto const flags = GetSurpriseFlags();
   onFunctionExit(ar, nullptr, &fault, flags);
 }
 

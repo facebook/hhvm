@@ -466,8 +466,13 @@ void Parser::onCallParam(Token &out, Token *params, Token &expr,
     out->exp = params->exp;
   }
   if (ref) {
+#ifdef FACEBOOK
+    // TODO t#6485898 - Remove uses of call time pass by reference
     expr->exp->setContext(Expression::RefParameter);
     expr->exp->setContext(Expression::RefValue);
+#else
+    PARSE_ERROR("Call-time pass-by-reference has been removed");
+#endif
   }
   if (unpack) {
     (dynamic_pointer_cast<ExpressionList>(out->exp))->setContainsUnpack();

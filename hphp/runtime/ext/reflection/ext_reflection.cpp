@@ -1200,7 +1200,8 @@ void addClassConstantNames(const Class* cls,
 
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].m_class == cls && !consts[i].isAbstract()) {
+    if (consts[i].m_class == cls && !consts[i].isAbstract() &&
+        !consts[i].isType()) {
       st->add(const_cast<StringData*>(consts[i].m_name.get()));
     }
   }
@@ -1254,7 +1255,32 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
 
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].isAbstract()) {
+    if (consts[i].isAbstract() && !consts[i].isType()) {
+      st->add(const_cast<StringData*>(consts[i].m_name.get()));
+    }
+  }
+
+  assert(st->size() <= numConsts);
+  return st->t_toarray();
+}
+
+
+
+// helper for getTypeConstants/hasTypeConstant
+static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+
+  size_t numConsts = cls->numConstants();
+  if (!numConsts) {
+    return Array::Create();
+  }
+
+  auto st = makeSmartPtr<c_Set>();
+  st->reserve(numConsts);
+
+  const Class::Const* consts = cls->constants();
+  for (size_t i = 0; i < numConsts; i++) {
+    if (consts[i].isType()) {
       st->add(const_cast<StringData*>(consts[i].m_name.get()));
     }
   }
@@ -1433,6 +1459,65 @@ struct reflection_extension_PropHandler :
     reflection_extension_accessorsMap;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+// class ReflectionTypeConstant
+
+const StaticString s_ReflectionConstHandle("ReflectionConstHandle");
+
+// helper for __construct
+static bool HHVM_METHOD(ReflectionTypeConstant, __init,
+                        const Variant& cls_or_obj, const String& const_name) {
+  auto const cls = get_cls(cls_or_obj);
+  if (!cls || const_name.isNull()) {
+    // caller raises exception
+    return false;
+  }
+
+  size_t numConsts = cls->numConstants();
+  const Class::Const* consts = cls->constants();
+
+  for (size_t i = 0; i < numConsts; i++) {
+    if (consts[i].m_name == const_name.get() && consts[i].isType()) {
+      ReflectionConstHandle::Get(this_)->setConst(&consts[i]);
+      return true;
+    }
+  }
+
+  // caller raises exception
+  return false;
+}
+
+static String HHVM_METHOD(ReflectionTypeConstant, getName) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+  auto ret = const_cast<StringData*>(cst->m_name.get());
+  return String(ret);
+}
+
+static bool HHVM_METHOD(ReflectionTypeConstant, isAbstract) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+  return cst->isAbstract();
+}
+
+// helper for getAssignedTypeText
+static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+
+  if (cst->m_val.m_type == KindOfStaticString ||
+      cst->m_val.m_type == KindOfString) {
+    return String(cst->m_val.m_data.pstr);
+  }
+
+  return String();
+}
+
+// private helper for getDeclaringClass
+static String HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+  auto cls = cst->m_class;
+  auto ret = const_cast<StringData*>(cls->name());
+  return String(ret);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class ReflectionExtension final : public Extension {
@@ -1485,6 +1570,12 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionFunction, getClosureScopeClassname);
     HHVM_ME(ReflectionFunction, getClosureThisObject);
 
+    HHVM_ME(ReflectionTypeConstant, __init);
+    HHVM_ME(ReflectionTypeConstant, getName);
+    HHVM_ME(ReflectionTypeConstant, isAbstract);
+    HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
+    HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
+
     HHVM_ME(ReflectionClass, __init);
     HHVM_ME(ReflectionClass, getName);
     HHVM_ME(ReflectionClass, getParentName);
@@ -1513,6 +1604,7 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionClass, getConstant);
     HHVM_ME(ReflectionClass, getOrderedConstants);
     HHVM_ME(ReflectionClass, getOrderedAbstractConstants);
+    HHVM_ME(ReflectionClass, getOrderedTypeConstants);
 
     HHVM_ME(ReflectionClass, getAttributes);
     HHVM_ME(ReflectionClass, getAttributesRecursive);
@@ -1525,6 +1617,8 @@ class ReflectionExtension final : public Extension {
       s_ReflectionFuncHandle.get());
     Native::registerNativeDataInfo<ReflectionClassHandle>(
       s_ReflectionClassHandle.get());
+    Native::registerNativeDataInfo<ReflectionConstHandle>(
+      s_ReflectionConstHandle.get());
 
     Native::registerNativePropHandler
       <reflection_extension_PropHandler>(s_reflectionextension);

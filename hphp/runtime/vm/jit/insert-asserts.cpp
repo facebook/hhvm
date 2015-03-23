@@ -28,9 +28,17 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-// Insert `inst' after `definer'.
+// Insert `inst' after `definer'. If `definer' ends its block, it must have a
+// fallthrough block, and `inst' will be inserted at the beginning of that
+// block.
 void insertAfter(IRInstruction* definer, IRInstruction* inst) {
-  assert(!definer->isBlockEnd());
+  assert(!definer->isTerminal());
+  if (definer->isControlFlow()) {
+    assert(definer->next());
+    definer->next()->prepend(inst);
+    return;
+  }
+
   auto const block = definer->block();
   auto const pos = block->iteratorTo(definer);
   block->insert(std::next(pos), inst);

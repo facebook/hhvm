@@ -28,7 +28,6 @@
 
 #include <errno.h>
 #include <string.h>
-#include "hphp/runtime/base/strings.h" // XXX
 #include <unistd.h>
 #include <poll.h>
 #include <netinet/in.h>

@@ -17,12 +17,10 @@
 
 #include "hphp/runtime/ext/ext_hotprofiler.h"
 
-#include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-math.h"
-#include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -54,7 +52,6 @@
 namespace HPHP {
 
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(hotprofiler, NO_VERSION_YET);
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(xhprof, 0.9.4);
 
 using std::vector;
 using std::string;
@@ -1429,111 +1426,6 @@ void f_phprof_enable(int flags /* = 0 */) {
 Variant f_phprof_disable() {
   return s_profiler_factory->stop();
 }
-
-void f_fb_setprofile(const Variant& callback) {
-  if (ThreadInfo::s_threadInfo->m_profiler != nullptr) {
-    // phpprof is enabled, don't let PHP code override it
-    return;
-  }
-  g_context->m_setprofileCallback = callback;
-  if (callback.isNull()) {
-    HPHP::EventHook::Disable();
-  } else {
-    HPHP::EventHook::Enable();
-  }
-}
-
-void f_xhprof_frame_begin(const String& name) {
-  Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
-  if (prof) {
-    s_profiler_factory->cacheString(name);
-    prof->beginFrame(name.data());
-  }
-}
-
-void f_xhprof_frame_end() {
-  Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
-  if (prof) {
-    prof->endFrame(nullptr, nullptr);
-  }
-}
-
-void f_xhprof_enable(int flags/* = 0 */,
-                     const Array& args /* = null_array */) {
-  if (!RuntimeOption::EnableHotProfiler) {
-    raise_warning("The runtime option Stats.EnableHotProfiler must be on to "
-                  "use xhprof.");
-    return;
-  }
-#ifdef CLOCK_THREAD_CPUTIME_ID
-  bool missingClockGetTimeNS =
-    Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
-#else
-  bool missingClockGetTimeNS = true;
-#endif
-  if (missingClockGetTimeNS) {
-    // Both TrackVtsc and TrackCPU mean "do CPU time profiling".
-    //
-    // TrackVtsc means: require clock_gettime, or else no data.
-    // TrackCPU means: prefer clock_gettime, but fall back to getrusage.
-    flags &= ~TrackVtsc;
-  }
-  if (flags & TrackVtsc) {
-    flags |= TrackCPU;
-  }
-
-  if (flags & XhpTrace) {
-    s_profiler_factory->start(ProfilerKind::Trace, flags);
-  } else if (flags & Memo) {
-    flags = 0;  /* flags are not used by MemoProfiler::MemoProfiler */
-    s_profiler_factory->start(ProfilerKind::Memo, flags);
-  } else if (flags & External) {
-    for (ArrayIter iter(args); iter; ++iter) {
-      if (iter.first().toInt32() == 0) {
-         flags = iter.second().toInt32();
-      }
-    }
-    s_profiler_factory->start(ProfilerKind::External, flags);
-  } else {
-    s_profiler_factory->start(ProfilerKind::Hierarchical, flags);
-  }
-}
-
-Variant f_xhprof_disable() {
-  return s_profiler_factory->stop();
-}
-
-void f_xhprof_network_enable() {
-  ServerStats::StartNetworkProfile();
-}
-
-Variant f_xhprof_network_disable() {
-  return ServerStats::EndNetworkProfile();
-}
-
-void f_xhprof_sample_enable() {
-  if (RuntimeOption::EnableHotProfiler) {
-    s_profiler_factory->start(ProfilerKind::Sample, 0);
-  } else {
-    raise_warning("The runtime option Stats.EnableHotProfiler must be on to "
-                  "use xhprof.");
-  }
-}
-
-Variant f_xhprof_sample_disable() {
-  return s_profiler_factory->stop();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// constants
-const int64_t k_XHPROF_FLAGS_NO_BUILTINS = NoTrackBuiltins;
-const int64_t k_XHPROF_FLAGS_CPU = TrackCPU;
-const int64_t k_XHPROF_FLAGS_MEMORY = TrackMemory;
-const int64_t k_XHPROF_FLAGS_VTSC = TrackVtsc;
-const int64_t k_XHPROF_FLAGS_TRACE = XhpTrace;
-const int64_t k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE = MeasureXhprofDisable;
-const int64_t k_XHPROF_FLAGS_MALLOC = TrackMalloc;
-const int64_t k_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY = IHaveInfiniteMemory;
 
 ///////////////////////////////////////////////////////////////////////////////
 // injected code

@@ -373,9 +373,10 @@ bool merge_into(TrackedLoc& dst, const TrackedLoc& src) {
       dst.knownValue,
       src.knownValue
     );
+    dst.knownType = dst.knownType | src.knownType;
     return true;
   }
-  auto const newType = dst.knownType & src.knownType;
+  auto const newType = dst.knownType | src.knownType;
   auto const changed = newType != dst.knownType;
   dst.knownType = newType;
   return changed;

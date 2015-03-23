@@ -52,8 +52,8 @@
   # Stable (2.x) doesn't use phpunit, so targetting the next major release
   cakephp3:
     url: https://github.com/cakephp/cakephp.git
-    branch: "3.0.0-alpha2"
-    commit: 9054d6414a1d767b4742728319447f625b2e31fb
+    branch: "3.0"
+    commit: 5b6afa31109bb5e08474205afdd9796683e6e6f6
     install_root: cakephp3
     test_root: cakephp3
   codeigniter:
@@ -98,7 +98,9 @@
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/XmlDriverTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/YamlDriverTest.php
     flakey:
+      - doctrine2/tests/Doctrine/Tests/ORM/Functional/IdentityMapTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/YamlClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/XmlClassMetadataExporterTest.php
   drupal:
     url: https://github.com/drupal/drupal.git
     branch: 8.0-alpha13
@@ -139,13 +141,6 @@
     commit: 7dc9a43cb856debc22fe158a1144018e16f7a637
     install_root: fastroute
     test_root: fastroute
-  flow:
-    url: https://git.typo3.org/Flow/Distributions/Base.git
-    branch: '3.0'
-    commit: 300f50f02bf41c25677111bd0c8962643b16bff8
-    install_root: flow
-    test_root: flow
-    config_file: flow/Build/BuildEssentials/PhpUnit/UnitTests.xml
   guzzle:
     url: https://github.com/guzzle/guzzle3.git
     branch: v3.9.2
@@ -252,7 +247,7 @@
       - joomla-framework/src/Joomla/Log/Tests/LogEntryTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
-    branch: "3.4-dev"
+    branch: "3.4.1-rc"
     commit: 7689d922ca373989e7328f510e94aa2fc541e272
     install_root: joomla-cms
     test_root: joomla-cms
@@ -393,8 +388,8 @@
     test_root: jshrink
   mockery:
     url: https://github.com/padraic/mockery.git
-    branch: "0.9.2"
-    commit: 95a4855380dc70176c51807c678fb3bd6198529a
+    branch: "0.9.3"
+    commit: 686f85fa5b3b079cc0157d7cd3e9adb97f0b41e1
     install_root: mockery
     test_root: mockery
   monolog:

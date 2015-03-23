@@ -205,6 +205,11 @@ private:
   static ArrayData* innerArr(const ArrayData* ad);
   friend class c_AwaitAllWaitHandle;
 
+public:
+  template<class F> void scan(F& mark) const {
+    mark(m_ref);
+  }
+
 private:
   // The inner array. This is mutable since zend_hash_find() etc. has a
   // const ProxyArray* as a parameter, but we need to modify the inner array

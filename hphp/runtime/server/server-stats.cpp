@@ -37,10 +37,10 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/text-util.h"
-#include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/server/writer.h"
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////

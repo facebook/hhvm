@@ -454,6 +454,16 @@ void Class::initialize() const {
   }
 }
 
+bool Class::initialized() const {
+  if (m_pinitVec.size() > 0 && getPropData() == nullptr) {
+    return false;
+  }
+  if (numStaticProperties() > 0 && needsInitSProps()) {
+    return false;
+  }
+  return true;
+}
+
 void Class::initProps() const {
   assert(m_pinitVec.size() > 0);
   assert(getPropData() == nullptr);

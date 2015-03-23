@@ -1,0 +1,32 @@
+=== get_class_constants ===
+array(0) {
+}
+=== ReflectionClass::getConstants ===
+array(0) {
+}
+=== ReflectionClass::getAbstractConstantsNames ===
+array(0) {
+}
+=== ReflectionClass::hasConstant('T') ===
+bool(false)
+=== ReflectionClass::hasConstant('X') ===
+bool(false)
+=== ReflectionClass::getConstant('T') ===
+bool(false)
+=== ReflectionClass::getConstant('X') ===
+bool(false)
+=== ReflectionClass::getTypeConstants ===
+array(4) {
+  [0]=>
+  string(40) "TypeConstant [ const type TypeI = C::T]
+"
+  [1]=>
+  string(45) "TypeConstant [ abstract const type TypeAbsI]
+"
+  [2]=>
+  string(38) "TypeConstant [ const type T = HH\int]
+"
+  [3]=>
+  string(38) "TypeConstant [ abstract const type X]
+"
+}

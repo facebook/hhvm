@@ -1097,9 +1097,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
   // These two instructions don't touch memory we track, except that they may
-  // re-enter to construct php Exception objects.  During this re-entry
-  // anything can happen (e.g. a suprise flag check could cause a php signal
-  // handler to run arbitrary code).
+  // re-enter to construct php Exception objects.  During this re-entry anything
+  // can happen (e.g. a surprise flag check could cause a php signal handler to
+  // run arbitrary code).
   case ABCUnblock:
   case AFWHPrepareChild:
     return may_reenter(inst, may_load_store(AEmpty, AEmpty));

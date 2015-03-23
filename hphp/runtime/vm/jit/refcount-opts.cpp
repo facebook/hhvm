@@ -574,7 +574,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
       // startBlock will set local values to nullptr if we're entering a loop,
       // so this has to happen after we merge in our incoming states.
-      m_frameState.startBlock(block, block->front().marker());
+      m_frameState.startBlock(block);
       m_inst = nullptr;
 
       for (auto& inst : *block) {

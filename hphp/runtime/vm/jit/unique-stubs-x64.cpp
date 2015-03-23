@@ -72,6 +72,42 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   return ret;
 }
 
+TCA emitDebuggerRetFromInterpretedFrame() {
+  Asm a{mcg->code.cold()};
+  moveToAlign(a.code());
+  auto const ret = a.frontier();
+
+  auto const rCallee = argNumToRegName[0];
+  auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
+  a.  lea   (rVmSp[-arBase], rCallee);
+  a.  loadl (rCallee[AROFF(m_soff)], eax);
+  a.  storel(eax, rVmTl[unwinderDebuggerReturnOffOff()]);
+  a.  storeq(rVmSp, rVmTl[unwinderDebuggerReturnSPOff()]);
+  a.  call  (TCA(popDebuggerCatch));
+  a.  jmp   (rax);
+
+  return ret;
+}
+
+TCA emitDebuggerRetFromInterpretedGenFrame() {
+  Asm a{mcg->code.cold()};
+  moveToAlign(a.code());
+  auto const ret = a.frontier();
+
+  // We have to get the Generator object from the current AR's $this, then
+  // find where its embedded AR is.
+  PhysReg rContAR = argNumToRegName[0];
+  a.  loadq (rVmFp[AROFF(m_this)], rContAR);
+  a.  lea   (rContAR[c_Generator::arOff()], rContAR);
+  a.  loadl (rContAR[AROFF(m_soff)], eax);
+  a.  storel(eax, rVmTl[unwinderDebuggerReturnOffOff()]);
+  a.  storeq(rVmSp, rVmTl[unwinderDebuggerReturnSPOff()]);
+  a.  call  (TCA(popDebuggerCatch));
+  a.  jmp   (rax);
+
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 extern "C" void enterTCExit();
@@ -112,6 +148,10 @@ void emitReturnHelpers(UniqueStubs& us) {
   us.genRetHelper = us.add("genRetHelper",
                            emitRetFromInterpretedGeneratorFrame());
   us.retInlHelper = us.add("retInlHelper", emitRetFromInterpretedFrame());
+  us.debuggerRetHelper =
+    us.add("debuggerRetHelper", emitDebuggerRetFromInterpretedFrame());
+  us.debuggerGenRetHelper =
+    us.add("debuggerGenRetHelper", emitDebuggerRetFromInterpretedGenFrame());
 }
 
 void emitResumeInterpHelpers(UniqueStubs& uniqueStubs) {
@@ -193,10 +233,34 @@ void emitThrowSwitchMode(UniqueStubs& uniqueStubs) {
 void emitCatchHelper(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.frozen() };
   moveToAlign(mcg->code.frozen());
+  Label debuggerReturn;
+  Label resumeCppUnwind;
 
   uniqueStubs.endCatchHelper = a.frontier();
+  a.    cmpq (0, rVmTl[unwinderDebuggerReturnSPOff()]);
+  a.    jne8 (debuggerReturn);
+
+  // Normal endCatch situation: call back to tc_unwind_resume.
+  a.    push (rax); // align stack
+  a.    push (rVmFp);
+  a.    movq (rsp, argNumToRegName[0]);
+  a.    call (TCA(tc_unwind_resume));
+  a.    pop  (rVmFp);
+  a.    pop  (rdx); // un-align stack. rax is live.
+  a.    testq(rax, rax);
+  a.    jz8  (resumeCppUnwind);
+  a.    jmp  (rax);
+
+asm_label(a, resumeCppUnwind);
   a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);
   a.    call(TCA(unwindResumeHelper));
+  uniqueStubs.endCatchHelperPast = a.frontier();
+  a.    ud2();
+
+asm_label(a, debuggerReturn);
+  a.    loadq (rVmTl[unwinderDebuggerReturnSPOff()], rVmSp);
+  a.    storeq(0, rVmTl[unwinderDebuggerReturnSPOff()]);
+  emitServiceReq(a.code(), SRFlags::None, REQ_POST_DEBUGGER_RET);
 
   uniqueStubs.add("endCatchHelper", uniqueStubs.endCatchHelper);
 }

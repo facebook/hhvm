@@ -174,7 +174,7 @@ public:
    * Start the given block.  Returns whether or not it succeeded.  A failure
    * may occur in case the block turned out to be unreachable.
    */
-  bool startBlock(Block* block, const BCMarker& marker, bool hasUnprocPred);
+  bool startBlock(Block* block, bool hasUnprocPred);
 
   /*
    * Returns whether or not `block' will succeed if passed to

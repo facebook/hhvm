@@ -1,0 +1,36 @@
+class TimeStuff#1 (5) {
+  private $timestamp =>
+  int(1092515106)
+  private $user_defined =>
+  bool(true)
+  private $self =>
+      ...
+
+  protected $tm =>
+  array(11) {
+    'seconds' =>
+    int(6)
+    'minutes' =>
+    int(25)
+    'hours' =>
+    int(22)
+    'mday' =>
+    int(14)
+    'wday' =>
+    int(6)
+    'mon' =>
+    int(8)
+    'year' =>
+    int(2004)
+    'yday' =>
+    int(226)
+    'weekday' =>
+    string(8) "Saturday"
+    'month' =>
+    string(6) "August"
+    [0] =>
+    int(1092515106)
+  }
+  public $date =>
+  string(24) "2004-08-14 22:25:06 CEST"
+}

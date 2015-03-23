@@ -874,6 +874,7 @@ void emitFCallArray(HTS& env) {
     nextBcOff(env),
     callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
   };
+  env.irb->exceptionStackBoundary();
   gen(env, CallArray, data, sp(env), fp(env));
 }
 
@@ -893,6 +894,7 @@ void emitFCall(HTS& env, int32_t numParams) {
   );
 
   spillStack(env);
+  env.irb->exceptionStackBoundary();
   gen(
     env,
     Call,

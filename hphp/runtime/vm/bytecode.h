@@ -142,7 +142,14 @@ class VarEnv {
   NameValueTable m_nvTable;
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
-  bool m_global;
+  const bool m_global;
+
+ public:
+  template<class F> void scan(F& mark) const {
+    mark(m_nvTable);
+    // TODO #6511877 scan ExtraArgs. requires calculating numExtra
+    //mark(m_extraArgs);
+  }
 
  public:
   explicit VarEnv();
@@ -154,7 +161,7 @@ class VarEnv {
   static VarEnv* createLocal(ActRec* fp);
 
   // Allocate a global VarEnv.  Initially not attached to any frame.
-  static VarEnv* createGlobal();
+  static void createGlobal();
 
   VarEnv* clone(ActRec* fp) const;
 
@@ -248,6 +255,7 @@ struct ActRec {
   ActRec* sfp() const;
 
   void setReturn(ActRec* fp, PC pc, void* retAddr);
+  void setJitReturn(void* addr);
   void setReturnVMExit();
 
   // skip this frame if it is for a builtin function
@@ -464,6 +472,26 @@ static_assert(offsetof(ActRec, m_sfp) == 0,
  */
 bool isVMFrame(const ActRec* ar);
 
+/*
+ * Returns true iff the given address is one of the special debugger return
+ * helpers.
+ */
+bool isDebuggerReturnHelper(void* addr);
+
+/*
+ * If ar->m_savedRip points somewhere in the TC that is not a return helper,
+ * change it to point to an appropriate return helper. The two different
+ * versions are for the different needs of the C++ unwinder and debugger hooks,
+ * respectively.
+ */
+void unwindPreventReturnToTC(ActRec* ar);
+void debuggerPreventReturnToTC(ActRec* ar);
+
+/*
+ * Call debuggerPreventReturnToTC() on all live VM frames in this thread.
+ */
+void debuggerPreventReturnsToTC();
+
 inline int32_t arOffset(const ActRec* ar, const ActRec* other) {
   return (intptr_t(other) - intptr_t(ar)) / sizeof(TypedValue);
 }
@@ -539,6 +567,11 @@ struct Fault {
       m_raiseOffset(kInvalidOffset),
       m_handledCount(0) {}
 
+  template<class F> void scan(F& mark) const {
+    if (m_faultType == Type::UserException) mark(m_userException);
+    else mark(m_cppException);
+  }
+
   union {
     ObjectData* m_userException;
     Exception* m_cppException;
@@ -606,6 +639,7 @@ public:
     return offsetof(Stack, m_top);
   }
 
+  static TypedValue* anyFrameStackBase(const ActRec* fp);
   static TypedValue* frameStackBase(const ActRec* fp);
   static TypedValue* resumableStackBase(const ActRec* fp);
 
@@ -995,9 +1029,7 @@ visitStackElems(const ActRec* const fp,
                 Offset const bcOffset,
                 ARFun arFun,
                 TVFun tvFun) {
-  const TypedValue* const base =
-    fp->resumed() ? Stack::resumableStackBase(fp)
-                  : Stack::frameStackBase(fp);
+  const TypedValue* const base = Stack::anyFrameStackBase(fp);
   MaybeConstTVPtr cursor = stackTop;
   assert(cursor <= base);
 

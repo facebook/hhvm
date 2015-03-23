@@ -500,6 +500,7 @@ struct ArrayNoDtor {
   }
   ~ArrayNoDtor() {}
   Array& arr() { return m_arr; }
+  const Array& arr() const { return m_arr; }
   void destroy() { m_arr.~Array(); }
 private:
   union { Array m_arr; };

@@ -534,6 +534,11 @@ public:
   void initSProps() const;
 
   /*
+   * Check if class has been initialized.
+   */
+  bool initialized() const;
+
+  /*
    * PropInitVec for this class's declared properties, with default values for
    * scalars only.
    *

@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/ext/asio/await_all_wait_handle.h"
 
 namespace HPHP {
 
@@ -40,6 +41,7 @@ struct Header {
       uint64_t q;
       uint8_t b[3];
       HeaderKind kind_;
+      RefCount count_;
     };
     StringData str_;
     ArrayData arr_;
@@ -54,6 +56,7 @@ struct Header {
     ResumableNode resumable_;
     NativeNode native_;
     DebugHeader debug_;
+    c_AwaitAllWaitHandle awaitall_;
   };
 
   Resumable* resumable() const {
@@ -88,6 +91,9 @@ inline size_t Header::size() const {
     case HeaderKind::ResumableObj:
       // [ObjectData][subclass][props]
       return obj_.heapSize();
+    case HeaderKind::AwaitAllWH:
+      // [ObjectData][children...]
+      return awaitall_.heapSize();
     case HeaderKind::Resource:
       // [ResourceData][subclass]
       return res_.heapSize();
@@ -95,10 +101,8 @@ inline size_t Header::size() const {
       return sizeof(RefData);
     case HeaderKind::SmallMalloc:
       return small_.padbytes;
-    case HeaderKind::BigMalloc:
-    case HeaderKind::BigObj:
-      // [BigNode][bytes...] if smartMallocBig, or
-      // [BigNode][Header...] if smartMallocSizeBig
+    case HeaderKind::BigMalloc: // [BigNode][bytes...]
+    case HeaderKind::BigObj:    // [BigNode][Header...]
       return big_.nbytes;
     case HeaderKind::Free:
       return free_.size;
@@ -201,6 +205,13 @@ struct BigHeap::iterator {
   BigHeap& m_heap;
 };
 
+template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
+  for (auto i = begin(), lim = end(); i != lim;) {
+    auto h = &*i; ++i;
+    fn(h);
+  }
+}
+
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   if (debug) checkHeap();
   std::vector<ObjectData*> ptrs;
@@ -208,6 +219,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
     switch (i->kind()) {
       case HeaderKind::Object:
       case HeaderKind::ResumableObj:
+      case HeaderKind::AwaitAllWH:
         ptrs.push_back(&i->obj_);
         break;
       case HeaderKind::Resumable:

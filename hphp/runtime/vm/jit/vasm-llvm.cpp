@@ -2253,17 +2253,15 @@ void LLVMEmitter::emit(const jmpi& inst) {
 
   if (inst.target == mcg->tx().uniqueStubs.endCatchHelper) {
     assert_not_implemented(inst.args == (x64::rVmTl | x64::rVmFp));
-    args.insert(args.end(), {
-        m_int64Undef, value(x64::rVmTl), value(x64::rVmFp)
-    });
-    argTypes.insert(argTypes.end(), 3, m_int64);
+    args = {m_int64Undef, value(x64::rVmTl), value(x64::rVmFp)};
+    argTypes.resize(3, m_int64);
   } else {
     assert_not_implemented(inst.args == (x64::kCrossTraceRegs | x64::rAsm));
-    args.insert(args.end(), {
+    args = {
       value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp),
       zext(value(x64::rAsm), 64)
-    });
-    argTypes.insert(argTypes.end(), 4, m_int64);
+    };
+    argTypes.resize(4, m_int64);
   }
 
   auto func = emitFuncPtr(

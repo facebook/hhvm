@@ -117,6 +117,23 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   StackTraceNoHeap::ExtraLoggingClearer clearer;
   StackTraceNoHeap::AddExtraLogging("RPC-URL", transport->getUrl());
 
+  // Checking functions whitelist
+  const std::set<std::string> &functions = m_serverInfo->getFunctions();
+  if (!functions.empty()) {
+    auto iter = functions.find(transport->getCommand());
+    if (iter == functions.end()) {
+      transport->sendString("Forbidden", 403);
+      transport->onSendEnd();
+      GetAccessLog().log(transport, nullptr);
+      /*
+       * HPHP logs may need to access data in ServerStats, so we have to
+       * clear the hashtable after writing the log entry.
+       */
+      ServerStats::Reset();
+      return;
+    }
+  }
+
   // authentication
   const std::set<std::string> &passwords = m_serverInfo->getPasswords();
   if (!passwords.empty()) {

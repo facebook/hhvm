@@ -45,14 +45,15 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini, Hdf hdf) {
   m_reqInitFunc = Config::GetString(ini, hdf["RequestInitFunction"], "");
   m_reqInitDoc = Config::GetString(ini, hdf["RequestInitDocument"], "");
   m_password = Config::GetString(ini, hdf["Password"], "");
-  Config::Get(ini, hdf["Passwords"], m_passwords);
+  m_passwords = Config::GetSet(ini, hdf["Passwords"]);
   m_alwaysReset = Config::GetBool(ini, hdf["AlwaysReset"], false);
+  m_functions = Config::GetSet(ini, hdf["Functions"]);
 
   std::string type = Config::GetString(ini, hdf["Type"]);
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;
     std::vector<std::string> urls;
-    Config::Get(ini, hdf["URLs"], urls);
+    urls = Config::GetVector(ini, hdf["URLs"]);
     for (unsigned int i = 0; i < urls.size(); i++) {
       m_urls.insert(format_pattern(urls[i], true));
     }

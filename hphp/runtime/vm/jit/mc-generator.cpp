@@ -1105,6 +1105,18 @@ TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) noexcept {
             caller->m_func->fullName()->data());
       break;
     }
+
+    case REQ_POST_DEBUGGER_RET: {
+      auto fp = vmfp();
+      auto caller = fp->func();
+      vmpc() = caller->unit()->at(caller->base() +
+                                  unwindRdsInfo->debuggerReturnOff);
+      FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
+             vmpc(), fp->func()->fullName()->data());
+      sk = SrcKey{fp->func(), vmpc(), fp->resumed()};
+      start = getTranslation(TranslArgs{sk, true});
+      break;
+    }
   }
 
   if (smashed && info.stub) {
@@ -1760,6 +1772,36 @@ void MCGenerator::codeEmittedThisRequest(size_t& requestEntry,
   now = code.totalUsed();
 }
 
+namespace {
+struct DebuggerCatchInfo {
+  TCA catchBlock;
+  const ActRec* fp;
+};
+
+__thread std::deque<DebuggerCatchInfo>* tl_debuggerCatches{nullptr};
+}
+
+void pushDebuggerCatch(const ActRec* fp) {
+  if (!tl_debuggerCatches) {
+    tl_debuggerCatches = new std::deque<DebuggerCatchInfo>();
+  }
+
+  auto optCatchBlock = mcg->getCatchTrace(TCA(fp->m_savedRip));
+  always_assert(optCatchBlock && *optCatchBlock);
+  auto catchBlock = *optCatchBlock;
+  FTRACE(1, "Pushing debugger catch {} with fp {}\n", catchBlock, fp);
+  tl_debuggerCatches->emplace_back(DebuggerCatchInfo{catchBlock, fp});
+}
+
+TCA popDebuggerCatch(const ActRec* fp) {
+  always_assert(tl_debuggerCatches);
+  auto info = tl_debuggerCatches->front();
+  always_assert(info.fp == fp);
+  tl_debuggerCatches->pop_front();
+  FTRACE(1, "Popped debugger catch {} for fp {}\n", info.catchBlock, info.fp);
+  return info.catchBlock;
+}
+
 void MCGenerator::requestInit() {
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
@@ -1799,16 +1841,9 @@ void MCGenerator::requestExit() {
       llvm, total, llvm * 100.0 / total, g_context->getRequestUrl(50)
     );
   }
-}
 
-bool
-MCGenerator::isPseudoEvent(const char* event) {
-  for (auto name : kPerfCounterNames) {
-    if (!strcmp(event, name)) {
-      return true;
-    }
-  }
-  return false;
+  delete tl_debuggerCatches;
+  tl_debuggerCatches = nullptr;
 }
 
 void

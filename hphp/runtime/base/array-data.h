@@ -86,6 +86,7 @@ public:
     m_count = n;
     if (m_count > 1) m_kind = (ArrayKind) set_one_bit_ref(m_kind);
   }
+  template<class F> void scan(F&) const;
 
   /**
    * Create a new ArrayData with specified array element(s).

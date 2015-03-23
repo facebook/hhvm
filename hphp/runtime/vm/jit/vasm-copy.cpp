@@ -361,7 +361,7 @@ void optimizeCopies(Vunit& unit, const Abi& abi) {
 
   // First, iterate over the CFG until we reach a fixed point. Give the entry
   // block an unknown in state, push it on the worklist, and go.
-  env.inStates[0].setUnknown();
+  env.inStates[unit.entry].setUnknown();
   dataflow_worklist<uint32_t> worklist(unit.blocks.size());
   worklist.push(0);
 

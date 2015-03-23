@@ -1586,25 +1586,10 @@ MCGenerator::translateWork(const TranslArgs& args) {
       }
 
       if (result == TranslateResult::Failure) {
-        // If the region translator failed for an Optimize translation, it's OK
-        // to do a Live translation for the function entry. Otherwise, fall
-        // back to Interp.
-        if (m_tx.mode() == TransKind::Optimize) {
-          if (sk.getFuncId() == liveFunc()->getFuncId() &&
-              liveUnit()->contains(vmpc()) &&
-              sk.offset() == liveUnit()->offsetOf(vmpc()) &&
-              sk.resumed() == liveResumed()) {
-            m_tx.setMode(TransKind::Live);
-            RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
-                sk.resumed() };
-            FTRACE(2, "populating live context for region after failed optimize"
-                   "translation\n");
-            populateLiveContext(rContext);
-            region = selectRegion(rContext, m_tx.mode());
-          } else {
-            region.reset();
-          }
-        }
+        // If the region translator failed, clear `region' to fall
+        // back to the interpreter.
+        FTRACE(1, "translateRegion: failed on region:\n{}\n", show(*region));
+        region.reset();
       }
     }
 

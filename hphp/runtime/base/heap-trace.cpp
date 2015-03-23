@@ -234,13 +234,58 @@ void Marker::operator()(const void* start, size_t len) {
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
   for (; s < e; s++) {
     auto p = *s;
-    if (meta_.find(p) == meta_.end()) continue;
-    // mark p. but we don't know if it's pointing to a real object.
-    // need to scan the heap to find real objects.
-    // maybe truncate low bits of p, e.g. when it's this|class
-    auto& meta = meta_[p];
-    meta.cmark = true;
-    // this should queue the object to be scanned, but how do we know its type?
+    auto it = meta_.find(p);
+    if (it == meta_.end()) continue;
+    // mark p if it's an interesting kind. since we have metadata for it,
+    // it must have a valid header.
+    auto h = reinterpret_cast<const Header*>(p);
+    switch (h->kind_) {
+      case HK::Apc:
+      case HK::Globals:
+      case HK::Proxy:
+      case HK::Ref:
+      case HK::Resource:
+      case HK::Packed:
+      case HK::Struct:
+      case HK::Mixed:
+      case HK::Empty:
+      case HK::Object:
+      case HK::ResumableObj:
+      case HK::AwaitAllWH:
+      case HK::Vector:
+      case HK::Map:
+      case HK::Set:
+      case HK::Pair:
+      case HK::ImmVector:
+      case HK::ImmMap:
+      case HK::ImmSet:
+      case HK::Resumable:
+      case HK::BigObj: // hmm.. what lives inside this?
+        it->second.cmark = true;
+        if (mark(p)) {
+          enqueue(p);
+        }
+        break;
+      case HK::Native:
+        it->second.cmark = true;
+        if (mark(p)) {
+          enqueue(Native::obj(&h->native_));
+        }
+        break;
+      case HK::String:
+        it->second.cmark = true;
+        mark(p);
+        break;
+      case HK::SmallMalloc:
+      case HK::BigMalloc:
+      case HK::Free:
+      case HK::Hole:
+      case HK::Debug:
+        break;
+    }
+    // for ObjectData embedded after NativeNode, ResumableNode, BigObj,
+    // do we want meta entries for them, directly? probably, then we can
+    // deal with pointers to either the ObjectData or the wrapper.
   }
 }
 
@@ -366,7 +411,7 @@ void Marker::sweep() {
         break;
     }
   });
-  TRACE(1, "sweep total %lu marked %lu cmarked %lu\n",
+  TRACE(1, "sweep total %lu marked %lu ambig-marked %lu\n",
         total_, marked_, ambig_marked_);
 }
 }

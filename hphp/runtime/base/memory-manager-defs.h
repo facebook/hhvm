@@ -226,6 +226,11 @@ template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
         h = reinterpret_cast<Header*>((&h->debug_)+1);
       }
     }
+    if (h->kind_ == HeaderKind::Debug ||
+        h->kind_ == HeaderKind::Hole) {
+      // no valid pointer can point here.
+      continue;
+    }
     fn(h);
   }
 }

@@ -36,6 +36,8 @@
 #include "hphp/util/lock.h"
 #include "hphp/zend/html-table.h"
 
+#include "hphp/util/bitref-survey.h"
+
 #include <folly/Unicode.h>
 #include <locale.h>
 
@@ -82,7 +84,8 @@ String stringForEachFast(const String& str, Op action) {
   if (str.empty()) {
     return str;
   }
-
+  cow_check_occurred(str.get()->getCount(),
+      check_one_bit_ref(str.get()->m_kind));
   if (str.get()->hasExactlyOneRef()) {
     return stringForEach<true>(str.size(), str, action);
   }
@@ -358,7 +361,8 @@ String HHVM_FUNCTION(str_shuffle,
   if (str.size() <= 1) {
     return str;
   }
-
+  cow_check_occurred(str.get()->getCount(),
+      check_one_bit_ref(str.get()->m_kind));
   String ret = str.get()->hasExactlyOneRef() ? str : String(str, CopyString);
   char* buf  = ret.get()->mutableData();
   int left   = ret.size();
@@ -377,7 +381,8 @@ String HHVM_FUNCTION(str_shuffle,
 String HHVM_FUNCTION(strrev,
                      const String& str) {
   auto len = str.size();
-
+  cow_check_occurred(str.get()->getCount(),
+      check_one_bit_ref(str.get()->m_kind));
   if (str.get()->hasExactlyOneRef()) {
     char* sdata = str.get()->mutableData();
     for (int i = 0; i < len / 2; ++i) {
@@ -416,7 +421,8 @@ String stringToCaseFirst(const String& str, OpTo tocase, OpIs iscase) {
   if (str.empty() || iscase(str[0])) {
     return str;
   }
-
+  cow_check_occurred(str.get()->getCount(),
+      check_one_bit_ref(str.get()->m_kind));
   if (str.get()->hasExactlyOneRef()) {
     char* sdata = str.get()->mutableData();
     sdata[0] = tocase(sdata[0]);
@@ -472,7 +478,8 @@ String stringTrim(String& str, const String& charlist) {
   if (right) {
     for (; end >= start && flags[(unsigned char)str[end]]; --end) {}
   }
-
+  cow_check_occurred(str.get()->getCount(),
+      check_one_bit_ref(str.get()->m_kind));
   if (str.get()->hasExactlyOneRef()) {
     int slen = end - start + 1;
     if (start) {

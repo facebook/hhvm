@@ -44,6 +44,8 @@ void survey_request_end() {
 
 void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref) {
   check_count++;
+  // TODO counts non-counted objects
+  //FTRACE(1, "rc={}, bitref={}\n", refcount, bitref);
   if (refcount > 1) {
     assert(bitref);
     //'necessary' copy

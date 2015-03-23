@@ -29,6 +29,8 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
 
+#include "hphp/util/bitref-survey.h"
+
 namespace HPHP {
 
 const StaticString s_storage("storage");
@@ -771,6 +773,8 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
   }
 
   // Create and save the result.
+  cow_check_occurred(base->m_data.pstr->getCount(),
+      check_one_bit_ref(base->m_data.pstr->m_kind));
   if (x >= 0 && x < baseLen && !base->m_data.pstr->hasMultipleRefs()) {
     // Modify base in place.  This is safe because the LHS owns the
     // only reference.
@@ -920,6 +924,7 @@ template <bool setResult, KeyType keyType>
 inline void SetElemArray(TypedValue* base, key_type<keyType> key,
                          Cell* value) {
   ArrayData* a = base->m_data.parr;
+  cow_check_occurred(a->getCount(), check_one_bit_ref_array(a->m_kind));
   bool copy = (a->hasMultipleRefs())
     || (value->m_type == KindOfArray && value->m_data.parr == a);
 
@@ -1031,6 +1036,7 @@ inline void SetNewElemString(TypedValue* base, Cell* value) {
  */
 inline void SetNewElemArray(TypedValue* base, Cell* value) {
   ArrayData* a = base->m_data.parr;
+  cow_check_occurred(a->getCount(), check_one_bit_ref_array(a->m_kind));
   bool copy = (a->hasMultipleRefs())
     || (value->m_type == KindOfArray && value->m_data.parr == a);
   ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
@@ -1549,6 +1555,7 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
 template <KeyType keyType>
 inline void UnsetElemArray(TypedValue* base, key_type<keyType> key) {
   ArrayData* a = base->m_data.parr;
+  cow_check_occurred(a->getCount(), check_one_bit_ref_array(a->m_kind));
   bool copy = a->hasMultipleRefs();
   ArrayData* a2 = UnsetElemArrayPre(a, key, copy);
 

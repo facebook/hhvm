@@ -31,6 +31,8 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
+#include "hphp/util/bitref-survey.h"
+
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
@@ -68,6 +70,7 @@ void print_boolean(bool val) {
  * and decref its first argument
  */
 StringData* concat_ss(StringData* v1, StringData* v2) {
+  cow_check_occurred(v1->getCount(), check_one_bit_ref(v1->m_kind));
   if (v1->hasMultipleRefs()) {
     StringData* ret = StringData::Make(v1, v2);
     ret->setRefCount(1);
@@ -106,6 +109,7 @@ StringData* concat_is(int64_t v1, StringData* v2) {
 StringData* concat_si(StringData* v1, int64_t v2) {
   char intbuf[21];
   auto const s2 = conv_10(v2, intbuf + sizeof(intbuf));
+  cow_check_occurred(v1->getCount(), check_one_bit_ref(v1->m_kind));
   if (v1->hasMultipleRefs()) {
     auto const s1 = v1->slice();
     auto const ret = StringData::Make(s1, s2);
@@ -126,6 +130,7 @@ StringData* concat_si(StringData* v1, int64_t v2) {
 }
 
 StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
+  cow_check_occurred(v1->getCount(), check_one_bit_ref(v1->m_kind));
   if (v1->hasMultipleRefs()) {
     StringData* ret = StringData::Make(
         v1->slice(), v2->slice(), v3->slice());
@@ -148,6 +153,7 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
 
 StringData* concat_s4(StringData* v1, StringData* v2,
                       StringData* v3, StringData* v4) {
+  cow_check_occurred(v1->getCount(), check_one_bit_ref(v1->m_kind));
   if (v1->hasMultipleRefs()) {
     StringData* ret = StringData::Make(
         v1->slice(), v2->slice(), v3->slice(), v4->slice());

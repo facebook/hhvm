@@ -27,6 +27,8 @@
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
 
+#include "hphp/util/bitref-survey.h"
+
 #include <algorithm>
 #include <type_traits>
 
@@ -1276,6 +1278,8 @@ inline Variant &concat_assign(Variant &v1, litstr s2) = delete;
 inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {
     auto& str = v1.asStrRef();
+    cow_check_occurred(str.get()->getCount(),
+        check_one_bit_ref(str.get()->m_kind));
     if (str.get()->hasExactlyOneRef()) {
       str += StringSlice{s2.data(), static_cast<uint32_t>(s2.size())};
       return v1;

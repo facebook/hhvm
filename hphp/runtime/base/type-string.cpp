@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 
+#include "hphp/util/bitref-survey.h"
+
 #include <algorithm>
 
 namespace HPHP {
@@ -266,11 +268,14 @@ String &String::operator+=(litstr s) {
   if (s && *s) {
     if (empty()) {
       m_str = StringData::Make(s, CopyString);
-    } else if (m_str->hasExactlyOneRef()) {
-      auto const tmp = m_str->append(StringSlice(s, strlen(s)));
-      if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
     } else {
-      m_str = StringData::Make(m_str.get(), s);
+      cow_check_occurred(m_str->getCount(), check_one_bit_ref(m_str->m_kind));
+      if (m_str->hasExactlyOneRef()) {
+        auto const tmp = m_str->append(StringSlice(s, strlen(s)));
+        if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
+      } else {
+        m_str = StringData::Make(m_str.get(), s);
+      }
     }
   }
   return *this;
@@ -280,11 +285,14 @@ String &String::operator+=(const String& str) {
   if (!str.empty()) {
     if (empty()) {
       m_str = str.m_str;
-    } else if (m_str->hasExactlyOneRef()) {
-      auto tmp = m_str->append(str.slice());
-      if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
     } else {
-      m_str = StringData::Make(m_str.get(), str.slice());
+      cow_check_occurred(m_str->getCount(), check_one_bit_ref(m_str->m_kind));
+      if (m_str->hasExactlyOneRef()) {
+        auto tmp = m_str->append(str.slice());
+        if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
+      } else {
+        m_str = StringData::Make(m_str.get(), str.slice());
+      }
     }
   }
   return *this;
@@ -294,6 +302,7 @@ String& String::operator+=(const StringSlice& slice) {
   if (slice.size() == 0) {
     return *this;
   }
+  cow_check_occurred(m_str->getCount(), check_one_bit_ref(m_str->m_kind));
   if (m_str && m_str->hasExactlyOneRef()) {
     auto const tmp = m_str->append(slice);
     if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);

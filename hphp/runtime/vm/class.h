@@ -58,7 +58,7 @@ struct NativePropHandler;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using ClassPtr = AtomicSmartPtr<Class>;
+using ClassPtr = AtomicSharedPtr<Class>;
 
 /*
  * Class represents the full definition of a user class in a given request

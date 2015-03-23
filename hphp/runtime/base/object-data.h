@@ -450,6 +450,7 @@ private:
 #endif
 };
 
+struct GlobalsArray;
 typedef GlobalsArray GlobalVariables;
 
 struct CountableHelper : private boost::noncopyable {

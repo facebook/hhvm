@@ -92,7 +92,11 @@ inline bool check_refcount_ns_nz(int32_t count) {
   return check_refcount_ns(count - 1);
 }
 
-inline bool check_one_bit_ref(uint8_t kind) {
+inline bool check_one_bit_ref(HeaderKind kind) {
+  return (static_cast<uint8_t>(kind) & (1 << 7)) > 0;
+}
+
+inline bool check_one_bit_ref_array(uint8_t kind) {
   return (kind & (1 << 7)) > 0;
 }
 
@@ -119,8 +123,8 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     assert(check_refcount(m_count));                                    \
     TRACE_SET_MOD(countable);                                           \
     if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
-        m_count, check_one_bit_ref(static_cast<uint8_t>(m_kind)));      \
-      assert(check_one_bit_ref(static_cast<uint8_t>(m_kind))); }        \
+        m_count, check_one_bit_ref(m_kind));                            \
+      assert(check_one_bit_ref(m_kind)); }                              \
     return (uint32_t)m_count > 1;                                       \
   }                                                                     \
                                                                         \
@@ -128,8 +132,8 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     assert(check_refcount(m_count));                                    \
     TRACE_SET_MOD(countable);                                           \
     if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
-        m_count, check_one_bit_ref(static_cast<uint8_t>(m_kind)));      \
-      assert(check_one_bit_ref(static_cast<uint8_t>(m_kind))); }        \
+        m_count, check_one_bit_ref(m_kind));                            \
+      assert(check_one_bit_ref(m_kind)); }                              \
     return (uint32_t)m_count == 1;                                      \
   }                                                                     \
                                                                         \
@@ -175,8 +179,8 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     assert(check_refcount(m_count));                                    \
     TRACE_SET_MOD(countable);                                           \
     if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
-        m_count, check_one_bit_ref(m_kind));                            \
-      assert(check_one_bit_ref(m_kind));                                \
+        m_count, check_one_bit_ref_array(m_kind));                      \
+      assert(check_one_bit_ref_array(m_kind));                          \
     }                                                                   \
     return (uint32_t)m_count > 1;                                       \
   }                                                                     \
@@ -185,8 +189,8 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     assert(check_refcount(m_count));                                    \
     TRACE_SET_MOD(countable);                                           \
     if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
-        m_count, check_one_bit_ref(m_kind));                            \
-      assert(check_one_bit_ref(m_kind)); };                             \
+        m_count, check_one_bit_ref_array(m_kind));                      \
+      assert(check_one_bit_ref_array(m_kind)); };                       \
     return (uint32_t)m_count == 1;                                      \
   }                                                                     \
                                                                         \
@@ -197,7 +201,7 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     TRACE_SET_MOD(countable);                                           \
     if (m_count > 1) {                                                  \
       m_kind = (ArrayKind) set_one_bit_ref(m_kind);                     \
-      assert(check_one_bit_ref(m_kind));                                \
+      assert(check_one_bit_ref_array(m_kind));                          \
       FTRACE(1, "incRefCount2 : m_count = {}\n", m_count);              \
     }                                                                   \
   }                                                                     \
@@ -246,18 +250,21 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
   bool hasMultipleRefs() const {                        \
     assert(check_refcount_ns(m_count));                 \
     TRACE_SET_MOD(countable);                           \
-    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",    \
-        m_count, check_one_bit_ref(static_cast<uint8_t>(m_kind))); \
-      assert(check_one_bit_ref(static_cast<uint8_t>(m_kind))); }   \
+    if (m_count > 1) {                                  \
+      FTRACE(1, "m_count = {}, bitref = {}\n",          \
+          m_count, check_one_bit_ref(m_kind));          \
+      assert(check_one_bit_ref(m_kind));                \
+    }                                                   \
     return m_count > 1;                                 \
   }                                                     \
                                                         \
   bool hasExactlyOneRef() const {                       \
     assert(check_refcount(m_count));                    \
     TRACE_SET_MOD(countable);                           \
-    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",    \
-        m_count, check_one_bit_ref(static_cast<uint8_t>(m_kind))); \
-      assert(check_one_bit_ref(static_cast<uint8_t>(m_kind))); }   \
+    if (m_count > 1) {                                  \
+      FTRACE(1, "m_count = {}, bitref = {}\n",          \
+          m_count, check_one_bit_ref(m_kind));          \
+      assert(check_one_bit_ref(m_kind)); }              \
     return m_count == 1;                                \
   }                                                     \
                                                         \

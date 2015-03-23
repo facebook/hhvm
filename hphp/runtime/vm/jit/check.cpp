@@ -169,12 +169,13 @@ bool checkCfg(const IRUnit& unit) {
     }
   }
 
+  auto defined_set = jit::sparse_idptr_set<SSATmp>{unit.numTmps()};
+
   /*
    * Visit every instruction and make sure their sources are either defined in
    * a block that strictly dominates the block containing the instruction, or
    * defined earlier in the same block as the instruction.
    */
-  auto defined_set = jit::sparse_idptr_set<SSATmp>{unit.numTmps()};
   auto const idoms = findDominators(unit, blocks, rpoIDs);
   for (auto& blk : blocks) {
     for (auto& inst : blk->instrs()) {
@@ -197,6 +198,23 @@ bool checkCfg(const IRUnit& unit) {
       for (auto& dst : inst.dsts()) defined_set.insert(&dst);
     }
     defined_set.clear();
+  }
+
+  /*
+   * Check that each dst is defined only once.
+   */
+  defined_set.clear();
+  for (auto& blk : blocks) {
+    for (auto& inst : blk->instrs()) {
+      for (auto& dst : inst.dsts()) {
+        always_assert_flog(
+          !defined_set.contains(&dst),
+          "SSATmp ({}) was defined multiple times",
+          dst.toString()
+        );
+        defined_set.insert(&dst);
+      }
+    }
   }
 
   return true;

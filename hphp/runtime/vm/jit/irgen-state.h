@@ -70,6 +70,11 @@ struct HTS {
   std::vector<SrcKey> bcStateStack;
 
   /*
+   * The current inlining level.  0 means we're not inlining.
+   */
+  uint16_t inlineLevel{0};
+
+  /*
    * The id of the profiling translation for the code we're currently
    * generating, if there was one, otherwise kInvalidTransID.
    */

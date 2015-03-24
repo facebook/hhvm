@@ -133,12 +133,13 @@ SrcKey RegionDesc::lastSrcKey() const {
 }
 
 
-RegionDesc::Block* RegionDesc::addBlock(SrcKey sk,
-                                        int    length,
-                                        FPAbsOffset spOffset) {
+RegionDesc::Block* RegionDesc::addBlock(SrcKey      sk,
+                                        int         length,
+                                        FPAbsOffset spOffset,
+                                        uint16_t    inlineLevel) {
   m_blocks.push_back(
     std::make_shared<Block>(sk.func(), sk.resumed(), sk.offset(), length,
-                            spOffset));
+                            spOffset, inlineLevel));
   BlockPtr block = m_blocks.back();
   m_data[block->id()] = BlockData(block);
   return block.get();
@@ -482,8 +483,12 @@ bool hasTransId(RegionDesc::BlockId blockId) {
   return blockId >= 0;
 }
 
-RegionDesc::Block::Block(const Func* func, bool resumed, Offset start,
-                         int length, FPAbsOffset initSpOff)
+RegionDesc::Block::Block(const Func* func,
+                         bool        resumed,
+                         Offset      start,
+                         int         length,
+                         FPAbsOffset initSpOff,
+                         uint16_t    inlineLevel)
   : m_id(s_nextId--)
   , m_func(func)
   , m_resumed(resumed)
@@ -492,6 +497,7 @@ RegionDesc::Block::Block(const Func* func, bool resumed, Offset start,
   , m_length(length)
   , m_initialSpOffset(initSpOff)
   , m_inlinedCallee(nullptr)
+  , m_inlineLevel(inlineLevel)
 {
   assert(length >= 0);
   if (length > 0) {
@@ -1045,7 +1051,9 @@ std::string show(const RegionDesc::Block& b) {
                   b.func()->fullName()->data(), '@', b.start().offset(),
                   b.start().resumed() ? "r" : "",
                   " length ", b.length(),
-                  " initSpOff ", b.initialSpOffset().offset, '\n',
+                  " initSpOff ", b.initialSpOffset().offset,
+                  " inlineLevel ", b.inlineLevel(),
+                  '\n',
                   &ret
                  );
 

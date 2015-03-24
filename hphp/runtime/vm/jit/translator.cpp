@@ -1338,7 +1338,7 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
   irgen::prepareForNextHHBC(
     hts,
     &ni,
-    ni.source.offset(),
+    ni.source,
     ni.endsRegion && !irgen::isInlining(hts)
   );
 

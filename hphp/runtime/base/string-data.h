@@ -472,6 +472,7 @@ private:
   void setStatic() const;
   void setUncounted() const;
 
+<<<<<<< HEAD
   HeaderKind kind() const {
     //mask out bitref
     return HeaderKind (static_cast<uint8_t>(m_kind) & ~(1 << 7));
@@ -479,7 +480,7 @@ private:
 public:
   template<class F> void scan(F& mark) const {
     if (isShared()) mark(sharedPayload()->shared);
-  
+  }
 
 private:
   char* m_data;

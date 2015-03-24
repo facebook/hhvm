@@ -342,9 +342,17 @@ let iter_n_acc n f acc =
 let set_of_list list =
   List.fold_right SSet.add list SSet.empty
 
+(* \A\B\C -> A\B\C *)
 let strip_ns s =
   if String.length s == 0 || s.[0] <> '\\' then s
   else String.sub s 1 ((String.length s) - 1)
+
+(* \A\B\C -> C *)
+let strip_all_ns s =
+  try
+    let base_name_start = String.rindex s '\\' + 1 in
+    String.sub s base_name_start ((String.length s) - base_name_start)
+  with Not_found -> s
 
 let str_starts_with long short =
   try

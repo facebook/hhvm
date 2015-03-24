@@ -472,7 +472,6 @@ private:
   void setStatic() const;
   void setUncounted() const;
 
-<<<<<<< HEAD
   HeaderKind kind() const {
     //mask out bitref
     return HeaderKind (static_cast<uint8_t>(m_kind) & ~(1 << 7));

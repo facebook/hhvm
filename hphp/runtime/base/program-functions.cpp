@@ -44,7 +44,7 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/xhprof/ext_xhprof.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
@@ -71,6 +71,7 @@
 #include "hphp/util/capability.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/embedded-data.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/process.h"
 #include "hphp/util/repo-schema.h"
@@ -669,7 +670,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   }
 
   if (xhprof) {
-    f_xhprof_enable(xhprof, uninit_null().toArray());
+    HHVM_FN(xhprof_enable)(xhprof, uninit_null().toArray());
   }
 
   if (RuntimeOption::RequestTimeoutSeconds) {
@@ -697,14 +698,15 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
+  if (debug) MM().traceHeap();
   if (RuntimeOption::EvalDumpTC) {
     HPHP::jit::tc_dump();
   }
 
   if (xhprof) {
-    Variant profileData = f_xhprof_disable();
+    Variant profileData = HHVM_FN(xhprof_disable)();
     if (!profileData.isNull()) {
-      HHVM_FN(var_dump)(HHVM_FN(json_encode)(f_xhprof_disable()));
+      HHVM_FN(var_dump)(HHVM_FN(json_encode)(HHVM_FN(xhprof_disable)()));
     }
   }
   g_context->onShutdownPostSend();
@@ -925,7 +927,7 @@ static int start_server(const std::string &username, int xhprof) {
   HttpServer::Server = std::make_shared<HttpServer>();
 
   if (xhprof) {
-    f_xhprof_enable(xhprof, uninit_null().toArray());
+    HHVM_FN(xhprof_enable)(xhprof, uninit_null().toArray());
   }
 
   if (RuntimeOption::RepoPreload) {
@@ -1424,7 +1426,12 @@ static int execute_program_impl(int argc, char** argv) {
   pcre_init();
 
   MemoryManager::TlsWrapper::getCheck();
-
+  if (RuntimeOption::ServerExecutionMode()) {
+    // Create the hardware counter before reading options,
+    // so that the main thread never has inherit set in server
+    // mode
+    HardwareCounter::s_counter.getCheck();
+  }
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   // Start with .hdf and .ini files
@@ -1543,6 +1550,10 @@ static int execute_program_impl(int argc, char** argv) {
     }
 
     set_execution_mode("run");
+    /* recreate the hardware counters for the main thread now that we know
+     * whether to include subprocess times */
+    HardwareCounter::s_counter.destroy();
+    HardwareCounter::s_counter.getCheck();
 
     int new_argc;
     char **new_argv;

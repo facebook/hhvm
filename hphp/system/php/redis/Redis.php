@@ -947,11 +947,15 @@ class Redis {
   const TYPE_MULTIBULK = '*';
 
   protected function checkConnection($auto_reconnect = true) {
+    if (!$this->connection) {
+        return false;
+    }
+
     // Check if we have hit the stream timeout
     if (stream_get_meta_data($this->connection)['timed_out']) {
       throw new RedisException("read error on connection");
     }
-    if ($this->connection AND !feof($this->connection)) {
+    if (!feof($this->connection)) {
       // Connection seems fine
       return true;
     }

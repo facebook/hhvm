@@ -115,10 +115,11 @@ private:
   /* INI settings. */
   bool m_logErrors;
   bool m_trackErrors;
+  bool m_htmlErrors;
   bool m_safeFileAccess;
 
-  /* Pointer to condition flags stored in RDS. */
-  std::atomic<ssize_t>* m_cflagsPtr{nullptr};
+  /* Pointer to surprise flags stored in RDS. */
+  std::atomic<ssize_t>* m_sflagsPtr{nullptr};
 
   /*
    * When the PC is currently over a line that has been registered for a line
@@ -264,7 +265,8 @@ private:
     return m_allowedDirectories;
   }
   bool hasSafeFileAccess() const { return m_safeFileAccess; }
-  bool hasTrackErrors() { return m_trackErrors; }
+  bool hasTrackErrors() const { return m_trackErrors; }
+  bool hasHtmlErrors() const { return m_htmlErrors; }
 
   /* CmdInterrupts this thread is handling. */
   std::stack<void*> interrupts;
@@ -275,7 +277,7 @@ private:
 
   /*
    * Intended to be used by other threads other than the current thread.  To get
-   * condition flags for the current thread, use rds::surpriseFlags() instead.
+   * surprise flags for the current thread, use rds::surpriseFlags() instead.
    */
   void clearFlag(SurpriseFlag);
   bool getFlag(SurpriseFlag) const;

@@ -89,7 +89,7 @@ private:
   void emit(nothrow& i);
   void emit(store& i);
   void emit(syncpoint i);
-  void emit(unwind& i);
+  void emit(unwind i);
   void emit(landingpad& i) {}
 
   // instructions
@@ -336,6 +336,7 @@ void Vgen::emit(contenter& i) {
   asm_label(*a, End);
   a->call(Stub);
   // m_savedRip will point here.
+  emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
 void Vgen::emit(copy i) {
@@ -396,6 +397,7 @@ void Vgen::emit(bindaddr& i) {
 void Vgen::emit(bindcall& i) {
   mcg->backEnd().prepareForSmash(a->code(), kCallLen);
   a->call(i.stub);
+  emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
 void Vgen::emit(bindjcc1st& i) {
@@ -602,7 +604,7 @@ void Vgen::emit(nothrow& i) {
   mcg->registerCatchBlock(a->frontier(), nullptr);
 }
 
-void Vgen::emit(unwind& i) {
+void Vgen::emit(unwind i) {
   // Unwind instructions terminate blocks with calls that can throw, and have
   // the edges to catch (unwinder) blocks and fall-through blocks.
   catches.push_back({a->frontier(), i.targets[1]});

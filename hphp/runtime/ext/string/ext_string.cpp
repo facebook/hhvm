@@ -83,10 +83,6 @@ String stringForEachFast(const String& str, Op action) {
     return str;
   }
 
-  if (str.get()->hasExactlyOneRef()) {
-    return stringForEach<true>(str.size(), str, action);
-  }
-
   return stringForEach<false>(str.size(), str, action);
 }
 
@@ -359,7 +355,7 @@ String HHVM_FUNCTION(str_shuffle,
     return str;
   }
 
-  String ret = str.get()->hasExactlyOneRef() ? str : String(str, CopyString);
+  String ret(str, CopyString);
   char* buf  = ret.get()->mutableData();
   int left   = ret.size();
 
@@ -378,16 +374,6 @@ String HHVM_FUNCTION(strrev,
                      const String& str) {
   auto len = str.size();
 
-  if (str.get()->hasExactlyOneRef()) {
-    char* sdata = str.get()->mutableData();
-    for (int i = 0; i < len / 2; ++i) {
-      char temp = sdata[i];
-      sdata[i] = sdata[len - i - 1];
-      sdata[len - i - 1] = temp;
-    }
-    return str;
-  }
-
   String ret(len, ReserveString);
 
   const char* data = str.data();
@@ -402,24 +388,18 @@ String HHVM_FUNCTION(strrev,
 }
 
 String HHVM_FUNCTION(strtolower,
-                     String str) {
+                     const String& str) {
   return stringForEachFast(str, tolower);
 }
 
 String HHVM_FUNCTION(strtoupper,
-                     String str) {
+                     const String& str) {
   return stringForEachFast(str, toupper);
 }
 
 template <class OpTo, class OpIs> ALWAYS_INLINE
 String stringToCaseFirst(const String& str, OpTo tocase, OpIs iscase) {
   if (str.empty() || iscase(str[0])) {
-    return str;
-  }
-
-  if (str.get()->hasExactlyOneRef()) {
-    char* sdata = str.get()->mutableData();
-    sdata[0] = tocase(sdata[0]);
     return str;
   }
 
@@ -431,17 +411,17 @@ String stringToCaseFirst(const String& str, OpTo tocase, OpIs iscase) {
 }
 
 String HHVM_FUNCTION(ucfirst,
-                     String str) {
+                     const String& str) {
   return stringToCaseFirst(str, toupper, isupper);
 }
 
 String HHVM_FUNCTION(lcfirst,
-                     String str) {
+                     const String& str) {
   return stringToCaseFirst(str, tolower, islower);
 }
 
 String HHVM_FUNCTION(ucwords,
-                     String str) {
+                     const String& str) {
   char last = ' ';
   return stringForEachFast(str, [&] (char c) {
     char ret = isspace(last) ? toupper(c) : c;
@@ -457,7 +437,7 @@ String HHVM_FUNCTION(strip_tags,
 }
 
 template <bool left, bool right> ALWAYS_INLINE
-String stringTrim(String& str, const String& charlist) {
+String stringTrim(const String& str, const String& charlist) {
   char flags[256];
   string_charmask(charlist.c_str(), charlist.size(), flags);
 
@@ -473,38 +453,29 @@ String stringTrim(String& str, const String& charlist) {
     for (; end >= start && flags[(unsigned char)str[end]]; --end) {}
   }
 
-  if (str.get()->hasExactlyOneRef()) {
-    int slen = end - start + 1;
-    if (start) {
-      char* sdata = str.mutableData();
-      for (int idx = 0; start < len;) sdata[idx++] = sdata[start++];
-    }
-    return String(str.get()->shrink(slen));
-  }
-
   return str.substr(start, end - start + 1);
 }
 
 String HHVM_FUNCTION(trim,
-                     String str,
+                     const String& str,
                      const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,true>(str, charlist);
 }
 
 String HHVM_FUNCTION(ltrim,
-                     String str,
+                     const String& str,
                      const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,false>(str, charlist);
 }
 
 String HHVM_FUNCTION(rtrim,
-                     String str,
+                     const String& str,
                      const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<false,true>(str, charlist);
 }
 
 String HHVM_FUNCTION(chop,
-                      String str,
+                      const String& str,
                       const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<false,true>(str, charlist);
 }

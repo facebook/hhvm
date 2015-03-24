@@ -138,7 +138,7 @@ void emitTestSurpriseFlags(vixl::MacroAssembler& a, PhysReg rds) {
   // Keep this in sync with vasm version below
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
-  a.  Ldr   (rAsm.W(), vixl::Register(rds)[rds::kConditionFlagsOff]);
+  a.  Ldr   (rAsm.W(), vixl::Register(rds)[rds::kSurpriseFlagsOff]);
   a.  Tst   (rAsm.W(), rAsm.W());
 }
 
@@ -148,7 +148,7 @@ Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   auto flags = v.makeReg();
   auto sf = v.makeReg();
-  v << loadl{rds[rds::kConditionFlagsOff], flags};
+  v << loadl{rds[rds::kSurpriseFlagsOff], flags};
   v << testl{flags, flags, sf};
   return sf;
 }

@@ -120,7 +120,7 @@ enum class HeaderKind : uint8_t {
   // ArrayKind aliases
   Packed, Struct, Mixed, Empty, Apc, Globals, Proxy,
   // Other ordinary refcounted heap objects
-  String, Object, ResumableObj, Resource, Ref,
+  String, Object, ResumableObj, AwaitAllWH, Resource, Ref,
   Resumable, // ResumableNode followed by Frame, Resumable, ObjectData
   Native, // a NativeData header preceding an HNI ObjectData
   SmallMalloc, // small smart_malloc'd block
@@ -673,9 +673,10 @@ struct MemoryManager {
   void addSweepable(Sweepable*);
 
   /*
-   * Iterating the memory manager tracked objects.
+   * Heap iterator methods.
    */
   template<class Fn> void forEachObject(Fn);
+  template<class Fn> void forEachHeader(Fn);
 
   /*
    * Reset all runtime options for Memory Manager
@@ -708,6 +709,12 @@ struct MemoryManager {
    * Dump a jemalloc heap profiling, then reset the profiler.
    */
   static void requestShutdown();
+
+  /*
+   * Run the experimental heap-tracer. has no effect other than
+   * possibly asserting.
+   */
+  void traceHeap();
 
 private:
   friend void* smart_malloc(size_t nbytes);

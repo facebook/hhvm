@@ -659,16 +659,16 @@ To string conversions:
 
 | ReturnHook, ND, S(FramePtr) S(Gen), Er
 
-  Suprise flag hook for function returns.
+  Surprise flag hook for function returns.
 
 | SuspendHookE, ND, S(FramePtr) S(FramePtr) S(Obj), Er
 
-  Suprise flag hook for suspending eagerly executing async functions or
+  Surprise flag hook for suspending eagerly executing async functions or
   generators.  Decrefs S2 if it throws an exception.
 
 | SuspendHookR, ND, S(FramePtr) S(Obj|Nullptr), Er
 
-  Suprise flag hook for suspending resumed async functions or generators.  For
+  Surprise flag hook for suspending resumed async functions or generators.  For
   generators, the second parameter should be Nullptr.
 
 | Halt, ND, NA, T
@@ -1222,7 +1222,7 @@ To string conversions:
 
   Unlinks a frame constructed by DefInlineFP.
 
-| CallArray, D(StkPtr), S(StkPtr) S(FramePtr), NF
+| CallArray, D(StkPtr), S(StkPtr) S(FramePtr), Er
 
   Invoke function corresponding to the current FPI with array args. S0 points
   to the stack resulting after the ActRec for the function and the array of its
@@ -1231,14 +1231,14 @@ To string conversions:
 
 | Call<offset,numParams,returnOff,funcd,destroyLocals>, D(StkPtr),
 |                                                       S(StkPtr) S(FramePtr),
-|                                                       NF
+|                                                       Er
 
   Transfer control to a callee, based on the pre-live activation record and set
   of args on the stack pointed to by S0 at `offset'. S1 is the current caller
   frame pointer. The `funcd' in the extra data is a Func* for the callee if we
   know the callee statically.
 
-| NativeImpl<func>, ND, S(FramePtr) S(StkPtr), NF
+| NativeImpl<func>, ND, S(FramePtr) S(StkPtr), Er
 
   Execute a call to the native builtin specified by the current function. S0
   and S1 should be the current vmfp and vmsp, respectively.
@@ -1680,9 +1680,11 @@ To string conversions:
 
 | InterpOneCF<T,bcOff,numPopped,numPushed>, ND,
 |                                           S(StkPtr) S(FramePtr),
-|                                           T|Er
+|                                           T
 
-  Similar to InterpOne, but for instructions that may modify vmpc.
+  Similar to InterpOne, but for instructions that may modify vmpc. This is
+  implemented as a tail call to a stub, so any exceptions thrown will be thrown
+  in the context of the stub, not the InterpOneCF instruction.
 
 | OODeclExists<kind>, D(Bool), S(Str) S(Bool), Er
 
@@ -1740,7 +1742,7 @@ To string conversions:
 
 | ContEnter<spOffset,returnBCOffset>, D(StkPtr),
 |                                     S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
-|                                     NF
+|                                     Er
 
   Enters a generator body. S0 + `spOffset' (in cells) is a pointer to the
   stack, S1 is the current frame pointer, S2 is the generator frame pointer

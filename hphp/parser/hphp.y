@@ -1572,12 +1572,17 @@ xhp_attribute_stmt:
 ;
 
 xhp_attribute_decl:
-    xhp_attribute_decl_type
+    xhp_nullable_attribute_decl_type
     xhp_label_ws
     xhp_attribute_default
     xhp_attribute_is_required          { xhp_attribute(_p,$$,$1,$2,$3,$4);
                                          $$ = 1;}
   | T_XHP_LABEL                        { $$ = $1; $$ = 0;}
+;
+
+xhp_nullable_attribute_decl_type:
+  '?' xhp_attribute_decl_type          { $$ = $2;}
+  | xhp_attribute_decl_type
 ;
 
 xhp_attribute_decl_type:

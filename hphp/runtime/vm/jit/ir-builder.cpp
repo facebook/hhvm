@@ -148,7 +148,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
       m_state.finishBlock(oldBlock);
 
-      m_state.startBlock(m_curBlock, inst->marker());
+      m_state.startBlock(m_curBlock);
       where = m_curBlock->begin();
 
       FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
@@ -181,7 +181,7 @@ void IRBuilder::appendBlock(Block* block) {
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
-  m_state.startBlock(block, m_curMarker);
+  m_state.startBlock(block);
   m_curBlock = block;
 }
 
@@ -414,7 +414,7 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   if (func->isStatic()) {
     if (fpInst->is(DefInlineFP)) {
       auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
-      if (ctx->isConst(Type::Cls)) {
+      if (ctx->hasConstVal(Type::Cls)) {
         inst->convertToNop();
         return m_unit.cns(ConstCctx::cctx(ctx->clsVal()));
       }
@@ -472,7 +472,8 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;
-  if (inst->typeParam().isConst()) {
+  if (inst->typeParam().hasConstVal() ||
+      inst->typeParam().subtypeOfAny(Type::Uninit, Type::InitNull)) {
     return m_unit.cns(inst->typeParam());
   }
 
@@ -573,7 +574,8 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;
-  if (inst->typeParam().isConst()) {
+  if (inst->typeParam().hasConstVal() ||
+      inst->typeParam().subtypeOfAny(Type::Uninit, Type::InitNull)) {
     return m_unit.cns(inst->typeParam());
   }
 
@@ -781,7 +783,7 @@ void IRBuilder::reoptimize() {
     if (use_fixed_point) {
       m_state.loadBlock(block);
     } else {
-      m_state.startBlock(block, block->front().marker());
+      m_state.startBlock(block);
     }
     m_curBlock = block;
 
@@ -1116,16 +1118,19 @@ void IRBuilder::setCurMarker(BCMarker newMarker) {
   m_curMarker = newMarker;
 }
 
-bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
-                           bool isLoopHeader) {
+bool IRBuilder::canStartBlock(Block* block) const {
+  return m_state.hasStateFor(block);
+}
+
+bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
   if (block == m_curBlock) return true;
 
-  // Return false if we don't have a state for block. This can happen
-  // when trying to start a region block that turned out to be unreachable.
-  if (!m_state.hasStateFor(block)) return false;
+  // Return false if we don't have a FrameState saved for `block' yet
+  // -- meaning it isn't reachable from the entry block yet.
+  if (!canStartBlock(block)) return false;
 
   // There's no reason for us to be starting on the entry block when it's not
   // our current block.
@@ -1138,7 +1143,7 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_state.finishBlock(m_curBlock);
   m_curBlock = block;
 
-  m_state.startBlock(m_curBlock, marker, isLoopHeader);
+  m_state.startBlock(m_curBlock, hasUnprocessedPred);
   if (sp() == nullptr) {
     always_assert(RuntimeOption::EvalHHIRBytecodeControlFlow);
     // XXX(t2288359): This can go away once we don't redefine StkPtrs mid-trace.
@@ -1183,7 +1188,7 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b) {
     BlockState { m_curBlock, m_curMarker, m_exnStack }
   );
   m_state.pauseBlock(m_curBlock);
-  m_state.startBlock(b, marker);
+  m_state.startBlock(b);
   m_curBlock = b;
   m_curMarker = marker;
 

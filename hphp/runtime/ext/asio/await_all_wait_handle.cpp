@@ -31,10 +31,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+c_AwaitAllWaitHandle* c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
+  auto size = c_AwaitAllWaitHandle::heapSize(cnt);
+  auto mem = MM().objMallocLogged(size);
+  return new (mem) c_AwaitAllWaitHandle(cnt);
+}
+
 void delete_AwaitAllWaitHandle(ObjectData* od, const Class*) {
   auto const waitHandle = static_cast<c_AwaitAllWaitHandle*>(od);
+  auto bytes = waitHandle->heapSize();
   waitHandle->~c_AwaitAllWaitHandle();
-  smart_free(waitHandle);
+  MM().objFreeLogged(waitHandle, bytes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -254,15 +261,6 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
   assert(next == &result->m_children[0]);
   result->initialize(ctx_idx);
   return Object(std::move(result));
-}
-
-c_AwaitAllWaitHandle* c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
-  auto size = sizeof(c_AwaitAllWaitHandle) +
-              cnt * sizeof(c_WaitableWaitHandle*);
-  auto mem = smart_malloc(size);
-  auto const waitHandle = new (mem) c_AwaitAllWaitHandle();
-  waitHandle->m_cur = cnt - 1;
-  return waitHandle;
 }
 
 void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {

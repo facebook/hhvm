@@ -204,15 +204,6 @@ inline RefResult ref(Variant& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class GlobalsArray;
-class ObjectAllocatorBase;
-class Profiler;
-class CodeCoverage;
-
-using GlobalVariables = GlobalsArray;
-
-///////////////////////////////////////////////////////////////////////////////
-
 struct AccessFlags {
   enum Type {
     None = 0,

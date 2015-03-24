@@ -57,8 +57,10 @@ bool match(const IRInstruction* inst, SSATmp* hd, SSATmps... tl) {
   auto tmpsSame = [] (const SSATmp* expected, const SSATmp* actual) {
     // If a tmp is expected to have a constant value, identity comparison (i.e.
     // by pointer) is too restrictive; compare the constant values.
-    if (expected->isConst()) {
-      return expected->type() == actual->type();
+    auto const type = expected->type();
+    if (type.hasConstVal() ||
+        type.subtypeOfAny(Type::Uninit, Type::InitNull, Type::Nullptr)) {
+      return type == actual->type();
     }
     return expected == actual;
   };

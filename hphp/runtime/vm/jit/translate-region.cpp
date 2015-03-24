@@ -117,7 +117,7 @@ void setSuccIRBlocks(HTS& hts,
   }
 }
 
-bool blockIsLoopHeader(
+bool blockHasUnprocessedPred(
   const RegionDesc&             region,
   RegionDesc::BlockId           blockId,
   const RegionDesc::BlockIdSet& processedBlocks)
@@ -467,6 +467,40 @@ bool tryTranslateSingletonInline(HTS& hts,
   return false;
 }
 
+/*
+ * Returns the id of the next region block in workQ whose
+ * corresponding IR block is currently reachable from the IR unit's
+ * entry, or folly::none if no such block exists.  Furthermore, any
+ * unreachable blocks appearing before the first reachable block are
+ * moved to the end of workQ.
+ */
+folly::Optional<RegionDesc::BlockId> nextReachableBlock(
+  jit::queue<RegionDesc::BlockId>& workQ,
+  const IRBuilder& irb,
+  const BlockIdToIRBlockMap& blockIdToIRBlock
+) {
+  auto const size = workQ.size();
+  for (size_t i = 0; i < size; i++) {
+    auto const regionBlockId = workQ.front();
+    workQ.pop();
+    auto it = blockIdToIRBlock.find(regionBlockId);
+    assert(it != blockIdToIRBlock.end());
+    auto irBlock = it->second;
+    if (irb.canStartBlock(irBlock)) return regionBlockId;
+    // Put the block back at the end of workQ, since it may become
+    // reachable after processing some of the other blocks.
+    workQ.push(regionBlockId);
+  }
+  return folly::none;
+}
+
+RegionDesc::BlockId singleSucc(const RegionDesc& region,
+                               RegionDesc::BlockId bid) {
+  auto const& succs = region.succs(bid);
+  always_assert(succs.size() == 1);
+  return *succs.begin();
+}
+
 TranslateResult irGenRegion(HTS& hts,
                             const RegionDesc& region,
                             RegionBlacklist& toInterp,
@@ -485,7 +519,7 @@ TranslateResult irGenRegion(HTS& hts,
 
   // Prepare to start translation of the first region block.
   auto const entry = irb.unit().entry();
-  irb.startBlock(entry, entry->front().marker(), false /* isLoopHeader */);
+  irb.startBlock(entry, false /* hasUnprocPred */);
 
   // Make the IR entry block jump to the IR block we mapped the region entry
   // block to (they are not the same!).
@@ -498,9 +532,12 @@ TranslateResult irGenRegion(HTS& hts,
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   auto& blocks = region.blocks();
 
-  for (auto b = 0; b < blocks.size(); b++) {
-    auto const& block  = blocks[b];
-    auto const blockId = block->id();
+  jit::queue<RegionDesc::BlockId> workQ;
+  for (auto& block : blocks) workQ.push(block->id());
+
+  while (auto optBlockId = nextReachableBlock(workQ, irb, blockIdToIRBlock)) {
+    auto const blockId = optBlockId.value();
+    auto const& block  = region.block(blockId);
     auto sk            = block->start();
     auto byRefs        = makeMapWalker(block->paramByRefs());
     auto knownFuncs    = makeMapWalker(block->knownFuncs());
@@ -517,14 +554,17 @@ TranslateResult irGenRegion(HTS& hts,
     // region block, and it also sets the map from BC offsets to IR
     // blocks for the successors of this block in the region.
     Block* irBlock = blockIdToIRBlock[blockId];
-    bool isLoopHeader = blockIsLoopHeader(region, blockId, processedBlocks);
-    always_assert(IMPLIES(isLoopHeader, RuntimeOption::EvalJitLoops));
-    BCMarker marker(sk, block->initialSpOffset(), profTransId, irb.fp());
-    if (!irb.startBlock(irBlock, marker, isLoopHeader)) {
-      FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
-             blockId);
-      processedBlocks.insert(blockId);
-      continue;
+    const bool hasUnprocPred = blockHasUnprocessedPred(region, blockId,
+                                                       processedBlocks);
+    // Note: a block can have an unprocessed predecessor even if the
+    // region is acyclic, e.g. if the IR was able to prove a path was
+    // unfeasible due to incompatible types.
+    if (!irb.startBlock(irBlock, hasUnprocPred)) {
+      // This can't happen because we picked a reachable block from the workQ.
+      always_assert_flog(
+        0, "translateRegion: tried to startBlock on unreachable block {}\n",
+        blockId
+      );
     }
     setSuccIRBlocks(hts, region, blockId, blockIdToIRBlock);
 
@@ -572,7 +612,8 @@ TranslateResult irGenRegion(HTS& hts,
         auto returnFuncOff = returnSk.offset() - block->func()->base();
         irgen::beginInlining(hts, inst.imm[0].u_IVA, callee, returnFuncOff);
         // "Fallthrough" into the callee's first block
-        irgen::endBlock(hts, blocks[b + 1]->start().offset(), inst.nextIsMerge);
+        auto const calleeEntry = region.block(singleSucc(region, blockId));
+        irgen::endBlock(hts, calleeEntry->start().offset(), inst.nextIsMerge);
         continue;
       }
 
@@ -626,7 +667,8 @@ TranslateResult irGenRegion(HTS& hts,
           irgen::endBlock(hts, inst.nextSk().offset(), inst.nextIsMerge);
         } else if (isRet(inst.op()) || inst.op() == OpNativeImpl) {
           // "Fallthrough" from inlined return to the next block
-          irgen::endBlock(hts, blocks[b+1]->start().offset(), inst.nextIsMerge);
+          auto const callerBlock = region.block(singleSucc(region, blockId));
+          irgen::endBlock(hts, callerBlock->start().offset(), inst.nextIsMerge);
         }
       }
     }

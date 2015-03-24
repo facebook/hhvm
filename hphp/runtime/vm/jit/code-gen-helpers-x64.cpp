@@ -382,14 +382,14 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff) {
 void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
-  a.testl(-1, rds[rds::kConditionFlagsOff]);
+  a.testl(-1, rds[rds::kSurpriseFlagsOff]);
 }
 
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   auto const sf = v.makeReg();
-  v << testlim{-1, rds[rds::kConditionFlagsOff], sf};
+  v << testlim{-1, rds[rds::kSurpriseFlagsOff], sf};
   return sf;
 }
 
@@ -407,21 +407,22 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   acold.  jmp   (a.frontier());
 }
 
-void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg rds, Fixup fixup) {
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg rds, Fixup fixup,
+                                 Vlabel catchBlock) {
   // warning: keep this in sync with the x64 version above.
   auto cold = vcold.makeBlock();
   auto done = v.makeBlock();
   auto const sf = emitTestSurpriseFlags(v, rds);
   v << jcc{CC_NZ, sf, {done, cold}};
+  v = done;
 
   auto helper = (void(*)())mcg->tx().uniqueStubs.functionEnterHelper;
   vcold = cold;
-  vcold << vcall{CppCall::direct(helper),
+  vcold << vinvoke{CppCall::direct(helper),
                  v.makeVcallArgs({{rVmFp}}),
                  v.makeTuple({}),
+                 {done, catchBlock},
                  Fixup{fixup.pcOffset, fixup.spOffset}};
-  vcold << jmp{done};
-  v = done;
 }
 
 void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {

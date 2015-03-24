@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef _incl_HPHP_RUNTIME_VM_NATIVE_H
-#define _incl_HPHP_RUNTIME_VM_NATIVE_H
+#ifndef incl_HPHP_RUNTIME_VM_NATIVE_H
+#define incl_HPHP_RUNTIME_VM_NATIVE_H
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -229,42 +229,43 @@ BuiltinFunction getWrapper(bool method, bool usesDoubles, bool variadic);
  */
 TypedValue* unimplementedWrapper(ActRec* ar);
 
-#define NATIVE_TYPES \
-  T(Int32,    int32_t) \
-  T(Int64,    int64_t) \
-  T(Double,   double) \
-  T(Bool,     bool) \
-  T(Object,   Object)   \
-  T(String,   String)   \
-  T(Array,    Array)    \
-  T(Resource, Resource) \
-  T(Mixed,    Variant) \
-  T(ARReturn, TypedValue*) \
-  T(MixedRef, VRefParamValue) \
-  T(VarArgs,  ActRec*) \
-  T(This,     ObjectData*) \
-  T(Class,    const Class*) \
-  T(Void,     void) \
-  T(Zend,     ZendFuncType) \
+#define NATIVE_TYPES                                \
+  /* kind     arg type              return type */  \
+  X(Int32,    int32_t,              int32_t)        \
+  X(Int64,    int64_t,              int64_t)        \
+  X(Double,   double,               double)         \
+  X(Bool,     bool,                 bool)           \
+  X(Object,   const Object&,        Object)         \
+  X(String,   const String&,        String)         \
+  X(Array,    const Array&,         Array)          \
+  X(Resource, const Resource&,      Resource)       \
+  X(Mixed,    const Variant&,       Variant)        \
+  X(ARReturn, TypedValue*,          TypedValue*)    \
+  X(MixedRef, const VRefParamValue&,VRefParamValue) \
+  X(VarArgs,  ActRec*,              ActRec*)        \
+  X(This,     ObjectData*,          ObjectData*)    \
+  X(Class,    const Class*,         const Class*)   \
+  X(Void,     void,                 void)           \
+  X(Zend,     ZendFuncType,         ZendFuncType)   \
   /**/
 
 enum class ZendFuncType {};
 
 struct NativeSig {
   enum class Type : uint8_t {
-#define T(name, type) name,
+#define X(name, ...) name,
     NATIVE_TYPES
-#undef T
+#undef X
   };
 
   explicit NativeSig(ZendFuncType) : ret(Type::Zend) {}
   NativeSig() : ret(Type::Void) {}
 
-  template<typename Ret>
-  explicit NativeSig(Ret(*ptr)());
+  template<class Ret>
+  explicit NativeSig(Ret (*ptr)());
 
-  template<typename Ret, typename... Args>
-  explicit NativeSig(Ret(*ptr)(Args...));
+  template<class Ret, class... Args>
+  explicit NativeSig(Ret (*ptr)(Args...));
 
   std::string toString(const char* classname, const char* fname) const;
 
@@ -273,29 +274,59 @@ struct NativeSig {
 };
 
 namespace detail {
-template<typename type> struct native_type {};
-#define T(name, type) \
-  template<> struct native_type<type> \
-    : std::integral_constant<NativeSig::Type, NativeSig::Type::name> {};
-NATIVE_TYPES
-#undef T
 
-template<typename... Args>
+template<class T> struct native_arg_type {};
+template<class T> struct native_ret_type {};
+template<class T> struct known_native_arg : std::false_type {};
+
+#define X(name, argTy, retTy)                                       \
+  template<> struct native_ret_type<retTy>                          \
+    : std::integral_constant<NativeSig::Type,NativeSig::Type::name> \
+  {};                                                               \
+  template<> struct native_arg_type<argTy>                          \
+    : std::integral_constant<NativeSig::Type,NativeSig::Type::name> \
+  {};                                                               \
+  template<> struct known_native_arg<argTy> : std::true_type {};
+
+NATIVE_TYPES
+
+#undef X
+
+template<class... Args> struct all_known_arg_type {};
+template<class A>       struct all_known_arg_type<A> : known_native_arg<A> {};
+
+template<class A, class... Rest>
+struct all_known_arg_type<A,Rest...>
+  : std::integral_constant<
+      bool,
+      known_native_arg<A>::value && all_known_arg_type<Rest...>::value
+    >
+{};
+
+template<class T> struct understandable_sig          : std::false_type {};
+template<class R> struct understandable_sig<R (*)()> : std::true_type {};
+template<class R, class... Args>
+struct understandable_sig<R (*)(Args...)>
+  : all_known_arg_type<Args...>
+{};
+
+template<class... Args>
 std::vector<NativeSig::Type> build_args() {
   return {
-    native_type<typename std::decay<Args>::type>::value...
+    native_arg_type<Args>::value...
   };
 }
+
 }
 
-template<typename Ret>
-NativeSig::NativeSig(Ret(*ptr)())
-  : ret(detail::native_type<typename std::remove_cv<Ret>::type>::value)
+template<class Ret>
+NativeSig::NativeSig(Ret (*ptr)())
+  : ret(detail::native_ret_type<Ret>::value)
 {}
 
-template<typename Ret, typename... Args>
-NativeSig::NativeSig(Ret(*ptr)(Args...))
-  : ret(detail::native_type<typename std::remove_cv<Ret>::type>::value)
+template<class Ret, class... Args>
+NativeSig::NativeSig(Ret (*ptr)(Args...))
+  : ret(detail::native_ret_type<Ret>::value)
   , args(detail::build_args<Args...>())
 {}
 
@@ -332,7 +363,12 @@ inline void registerBuiltinFunction(const char* name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
-    "You can only register pointers to function.");
+    "You can only register pointers to functions."
+  );
+  static_assert(
+    detail::understandable_sig<Fun>::value,
+    "Arguments on builtin function were not understood types"
+  );
   s_builtinFunctions[makeStaticString(name)] = BuiltinFunctionInfo(func);
 }
 
@@ -341,7 +377,12 @@ inline void registerBuiltinFunction(const String& name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
-    "You can only register pointers to function.");
+    "You can only register pointers to functions."
+  );
+  static_assert(
+    detail::understandable_sig<Fun>::value,
+    "Arguments on builtin function were not understood types"
+  );
   s_builtinFunctions[makeStaticString(name)] = BuiltinFunctionInfo(func);
 }
 
@@ -350,7 +391,8 @@ inline void registerBuiltinZendFunction(const char* name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
-    "You can only register pointers to function.");
+    "You can only register pointers to functions."
+  );
   auto bfi = BuiltinFunctionInfo();
   bfi.ptr = (BuiltinFunction)func;
   bfi.sig = NativeSig(ZendFuncType{});
@@ -362,7 +404,8 @@ inline void registerBuiltinZendFunction(const String& name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
-    "You can only register pointers to function.");
+    "You can only register pointers to function."
+  );
   auto bfi = BuiltinFunctionInfo();
   bfi.ptr = (BuiltinFunction)func;
   bfi.sig = NativeSig(ZendFuncType{});
@@ -475,4 +518,4 @@ const ConstantMap* getClassConstants(const StringData* clsName) {
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native
 
-#endif // _incl_HPHP_RUNTIME_VM_NATIVE_H
+#endif

@@ -507,6 +507,7 @@ static struct gfxinfo *php_handle_bmp(const SmartPtr<File>& stream) {
                      (((unsigned int)s[10]) << 16) +
                      (((unsigned int)s[9]) << 8) +
                      ((unsigned int)s[8]);
+    result->height = abs((int32_t)result->height);
     result->bits = (((unsigned int)s[15]) << 8) +
                    ((unsigned int)s[14]);
   } else {

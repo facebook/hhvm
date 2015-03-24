@@ -98,5 +98,10 @@ void ResourceData::compileTimeAssertions() {
   static_assert(offsetof(ResourceData, m_count) == FAST_REFCOUNT_OFFSET, "");
 }
 
+void ResourceData::vscan(IMarker& mark) const {
+  // default implementation scans for ambiguous pointers.
+  mark(this, heapSize());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

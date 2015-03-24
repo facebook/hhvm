@@ -241,14 +241,14 @@ struct Vunit;
 // Service requests.
 
 struct bindaddr { TCA* dest; SrcKey sk; };
-struct bindcall { TCA stub; RegSet args; };
+struct bindcall { TCA stub; RegSet args; Vlabel targets[2]; };
 struct bindjcc1st { ConditionCode cc; VregSF sf; SrcKey targets[2];
                     RegSet args; };
 struct bindjcc { ConditionCode cc; VregSF sf; SrcKey target;
                  TransFlags trflags; RegSet args; };
 struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
 struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
-struct contenter { Vreg64 fp, target; RegSet args; };
+struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // VASM intrinsics.

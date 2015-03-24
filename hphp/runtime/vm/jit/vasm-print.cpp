@@ -305,16 +305,20 @@ std::string show(const Vunit& unit) {
   }
 
   // Print unreachable blocks last.
-  bool printedMsg{false};
-  for (size_t b = 0; b < unit.blocks.size(); b++) {
-    if (!reachableSet.test(b)) {
-      if (!printedMsg) {
-        out << "\nUnreachable blocks:\n";
-        printedMsg = true;
-      }
-      printBlock(out, unit, preds, Vlabel{b});
+  auto const numUnreachable = reachableSet.size() - reachableSet.count();
+  if (numUnreachable == 0) return out.str();
+
+  if (Trace::moduleEnabledRelease(Trace::vasm, kVasmUnreachableLevel)) {
+    out << "\nUnreachable blocks:\n";
+    for (size_t b = 0; b < unit.blocks.size(); b++) {
+      if (!reachableSet.test(b)) printBlock(out, unit, preds, Vlabel{b});
     }
+  } else {
+    out << folly::format("\n{} unreachable blocks not shown. "
+                         "Set TRACE=vasm:{} or greater to print them.\n",
+                         numUnreachable, kVasmUnreachableLevel);
   }
+
   return out.str();
 }
 

@@ -13,4 +13,12 @@ $f = popen("cat $tempfile", 'r');
 var_dump(fread($f, 20));
 pclose($f);
 
+$old_dir_path = getcwd();
+$filename = str_replace('/tmp/', '', $tempfile);
+chdir('/tmp');
+$f = popen("cat $filename", 'r');
+var_dump(fread($f, 20));
+pclose($f);
+chdir($old_dir_path);
+
 unlink($tempfile);

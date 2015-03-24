@@ -137,11 +137,9 @@ public:
   virtual const char *getServerName() {
     return "";
   };
-  virtual const char *getServerAddr() {
-    std::string ipv4 =  RuntimeOption::GetServerPrimaryIPv4();
-    return ipv4.empty() ?
-       RuntimeOption::GetServerPrimaryIPv6().c_str() :
-       ipv4.c_str();
+  virtual const std::string& getServerAddr() {
+    auto const& ipv4 = RuntimeOption::GetServerPrimaryIPv4();
+    return ipv4.empty() ? RuntimeOption::GetServerPrimaryIPv6() : ipv4;
   };
   virtual uint16_t getServerPort() {
     return RuntimeOption::ServerPort;

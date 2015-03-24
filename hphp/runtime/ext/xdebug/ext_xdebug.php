@@ -274,8 +274,8 @@ function xdebug_stop_trace(): mixed;
 <<__Native>>
 function xdebug_time_index(): float;
 
-<<__Native("ActRec")>>
-function xdebug_var_dump(mixed $var, ...): void;
+<<__Native>>
+function xdebug_var_dump(mixed $var, ...$argv): void;
 
 /**
  * Should only be needed when request parameters are being manipulated, such

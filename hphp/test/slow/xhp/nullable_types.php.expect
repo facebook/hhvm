@@ -1,0 +1,68 @@
+array(6) {
+  ["mystring"]=>
+  array(4) {
+    [0]=>
+    int(1)
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    int(1)
+  }
+  ["mynullablestring"]=>
+  array(4) {
+    [0]=>
+    int(1)
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    int(0)
+  }
+  ["myobject"]=>
+  array(4) {
+    [0]=>
+    int(5)
+    [1]=>
+    string(7) "MyClass"
+    [2]=>
+    NULL
+    [3]=>
+    int(1)
+  }
+  ["mynullableobject"]=>
+  array(4) {
+    [0]=>
+    int(5)
+    [1]=>
+    string(7) "MyClass"
+    [2]=>
+    NULL
+    [3]=>
+    int(0)
+  }
+  ["myint"]=>
+  array(4) {
+    [0]=>
+    int(3)
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    int(1)
+  }
+  ["mynullableint"]=>
+  array(4) {
+    [0]=>
+    int(3)
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    int(1)
+  }
+}

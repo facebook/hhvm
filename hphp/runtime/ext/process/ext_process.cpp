@@ -456,9 +456,8 @@ invalid_argument:
 int64_t HHVM_FUNCTION(pcntl_wait,
                       VRefParam status,
                       int options /* = 0 */) {
-  int child_id;
-  int nstatus = 0;
-  child_id = LightProcess::pcntl_waitpid(-1, &nstatus, options);
+  int nstatus = status;
+  auto const child_id = LightProcess::pcntl_waitpid(-1, &nstatus, options);
 /*  if (options) {
     child_id = wait3(&nstatus, options, NULL);
   } else {
@@ -473,7 +472,11 @@ int64_t HHVM_FUNCTION(pcntl_waitpid,
                       VRefParam status,
                       int options /* = 0 */) {
   int nstatus = status;
-  pid_t child_id = LightProcess::pcntl_waitpid((pid_t)pid, &nstatus, options);
+  auto const child_id = LightProcess::pcntl_waitpid(
+    (pid_t)pid,
+    &nstatus,
+    options
+  );
   status = nstatus;
   return child_id;
 }

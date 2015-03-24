@@ -285,6 +285,13 @@ void requestShutdown() {
 
 bool modulesInitialised() { return s_initialized; }
 
+void scanExtensionRoots(IMarker& m) {
+  assert(s_sorted);
+  for (auto& ext : s_ordered) {
+    ext->scanRoots(m);
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 static

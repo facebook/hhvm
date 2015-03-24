@@ -2410,7 +2410,7 @@ SoapClient::SoapClient() :
     m_connection_timeout(0),
     m_max_redirect(HttpClient::defaultMaxRedirect),
     m_use11(true),
-    m_compression(false),
+    m_compression(0),
     m_exceptions(true),
     m_trace(false) {
 }
@@ -2475,7 +2475,7 @@ void HHVM_METHOD(SoapClient, __construct,
       data->m_exceptions = options[s_exceptions].toBoolean();
     }
     if (options.exists(s_compression)) {
-      data->m_compression = options[s_compression].toBoolean();
+      data->m_compression = options[s_compression].toInt32();
     }
 
     String encoding = options[s_encoding].toString();
@@ -2701,8 +2701,8 @@ Variant HHVM_METHOD(SoapClient, __soapcall,
 }
 
 Variant HHVM_METHOD(SoapClient, __call,
-                    Variant name,
-                    Variant args) {
+                    const Variant& name,
+                    const Variant& args) {
   return HHVM_MN(SoapClient, __soapcall)(this_, name.toString(),
                                          args.toArray());
 }

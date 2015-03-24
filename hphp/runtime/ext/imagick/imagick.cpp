@@ -2496,7 +2496,7 @@ static bool HHVM_METHOD(Imagick, readImageFile,
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, readImages, const Array&& files) {
+static bool HHVM_METHOD(Imagick, readImages, const Array& files) {
   auto wand = getMagickWandResource(this_);
   for (ArrayIter it(files); it; ++it) {
     String file = it.secondRefPlus().toString();

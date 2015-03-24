@@ -106,12 +106,21 @@ struct Resumable {
 
   template<class T> static void Destroy(T* obj) {
     auto const size = obj->resumable()->m_size;
-    auto const base = (char*)(obj + 1) - size;
+    auto const base = reinterpret_cast<char*>(obj + 1) - size;
     obj->~T();
     MM().objFree(base, size);
   }
 
+  static Resumable* FromObj(ObjectData* obj) {
+    return reinterpret_cast<Resumable*>(obj) - 1;
+  }
+
+  static const Resumable* FromObj(const ObjectData* obj) {
+    return reinterpret_cast<const Resumable*>(obj) - 1;
+  }
+
   ActRec* actRec() { return &m_actRec; }
+  const ActRec* actRec() const { return &m_actRec; }
   jit::TCA resumeAddr() const { return m_resumeAddr; }
   Offset resumeOffset() const {
     assert(m_actRec.func()->contains(m_resumeOffset));

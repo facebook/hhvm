@@ -37,7 +37,7 @@ public:
   virtual const char *getUrl();
   virtual const char *getRemoteHost();
   virtual uint16_t getRemotePort();
-  virtual const char *getServerAddr();
+  virtual const std::string& getServerAddr();
   virtual const void *getPostData(int &size);
   virtual bool hasMorePostData();
   virtual const void *getMorePostData(int &size);

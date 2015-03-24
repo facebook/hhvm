@@ -54,6 +54,7 @@ constexpr int kVasmJumpsLevel = 4;
 constexpr int kVasmExitsLevel = 4;
 constexpr int kVasmDCELevel = 4;
 constexpr int kVasmLowerLevel = 4;
+constexpr int kVasmUnreachableLevel = 6;
 
 // Print the cfg digraph followed by a vasm code listing, if the trace level is
 // above `level'.

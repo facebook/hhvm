@@ -152,7 +152,7 @@ inline ArrayKeyInfo checkStrictlyInteger(SSATmp* key) {
   }
   assert(key->isA(Type::Str));
   ret.type = KeyType::Str;
-  if (key->isConst()) {
+  if (key->hasConstVal()) {
     int64_t i;
     if (key->strVal()->isStrictlyInteger(i)) {
       ret.converted    = true;

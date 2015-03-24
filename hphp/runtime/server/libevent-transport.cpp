@@ -95,10 +95,10 @@ uint16_t LibEventTransport::getRemotePort() {
   return m_remote_port;
 }
 
-const char *LibEventTransport::getServerAddr() {
+const std::string& LibEventTransport::getServerAddr() {
   return m_remote_ip.isV6() ?
-    RuntimeOption::GetServerPrimaryIPv6().c_str() :
-    RuntimeOption::GetServerPrimaryIPv4().c_str();
+    RuntimeOption::GetServerPrimaryIPv6() :
+    RuntimeOption::GetServerPrimaryIPv4();
 }
 
 const void *LibEventTransport::getPostData(int &size) {

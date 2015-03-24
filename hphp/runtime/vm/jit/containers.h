@@ -81,6 +81,9 @@ using vector = std::vector<T>;
 template<class T, class Container = std::deque<T>>
 using stack = std::stack<T,Container>;
 
+template<class T, class Container = std::deque<T>>
+using queue = std::queue<T,Container>;
+
 template<class T, class Compare = std::less<T>>
 using priority_queue = std::priority_queue<T,vector<T>,Compare>;
 

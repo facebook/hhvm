@@ -160,6 +160,7 @@ struct RefData {
       m_cow = m_z = 0;
     } else {
       assert(!m_cow);
+      m_cow = 0;
       m_z = 1;
     }
   }
@@ -172,7 +173,7 @@ struct RefData {
       m_z = 0;
     } else {
       assert(!m_cow);
-      m_z = 0;
+      m_cow = m_z = 0;
     }
   }
 
@@ -231,6 +232,11 @@ struct RefData {
     m_tv.m_data.num = 0;
   }
 
+public:
+  template<class F> void scan(F& mark) const {
+    mark(m_tv);
+  }
+
 private:
   RefData(DataType t, int64_t datum) : m_kind(HeaderKind::Ref) {
     // Initialize this value by laundering uninitNull -> Null.
@@ -258,8 +264,12 @@ private:
     struct {
       void* shadow_data;
       DataType shadow_type;
-      mutable uint8_t m_cow;
-      mutable uint8_t m_z;
+      // only need 1 bit each for m_cow and m_z, but filling out the bitfield
+      // and assigning all field members at the same time causes causes
+      // gcc and clang to coalesce mutations into byte-sized ops.
+      mutable uint8_t m_cow:1;
+      mutable uint8_t m_z:7;
+      uint8_t m_pad;
       HeaderKind m_kind;
       mutable RefCount m_count; // refcount field
     };

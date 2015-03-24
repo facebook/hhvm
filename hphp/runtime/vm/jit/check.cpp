@@ -401,10 +401,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
                         check(src()->isA(t), t, nullptr);               \
                         ++curSrc;                                       \
                       }
-#define C(type)       check(src()->isConst() && \
-                            src()->isA(type),   \
-                            Type(),             \
-                            "constant " #type); \
+#define C(T)          check(src()->hasConstVal(T) ||     \
+                            src()->isA(Type::Bottom),    \
+                            Type(),                      \
+                            "constant " #T);             \
                       ++curSrc;
 #define CStr          C(StaticStr)
 #define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));

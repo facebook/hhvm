@@ -111,8 +111,8 @@ public:
   static std::string ServerType;
   static std::string ServerIP;
   static std::string ServerFileSocket;
-  static std::string GetServerPrimaryIPv4();
-  static std::string GetServerPrimaryIPv6();
+  static const std::string& GetServerPrimaryIPv4();
+  static const std::string& GetServerPrimaryIPv6();
   static int ServerPort;
   static int ServerPortFd;
   static int ServerBacklog;
@@ -418,6 +418,7 @@ public:
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
+  F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.
@@ -527,6 +528,7 @@ public:
   F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, CheckHeapOnAlloc,            false)                           \
+  F(bool, TraceHeap,                   false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \

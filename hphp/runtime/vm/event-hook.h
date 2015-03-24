@@ -28,8 +28,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline bool checkConditionFlags() {
-  return rds::header()->conditionFlags.load(std::memory_order_acquire);
+inline bool checkSurpriseFlags() {
+  return rds::header()->surpriseFlags.load(std::memory_order_acquire);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -60,43 +60,43 @@ class EventHook {
   static void EnableIntercept();
   static void DisableIntercept();
   static ssize_t CheckSurprise();
-  static ssize_t GetConditionFlags();
+  static ssize_t GetSurpriseFlags();
 
   /**
    * Event hooks -- interpreter entry points.
    */
   static inline bool FunctionCall(const ActRec* ar, int funcType) {
     ringbufferEnter(ar);
-    return UNLIKELY(checkConditionFlags())
+    return UNLIKELY(checkSurpriseFlags())
       ? onFunctionCall(ar, funcType) : true;
   }
   static inline void FunctionResumeAwait(const ActRec* ar) {
     ringbufferEnter(ar);
-    if (UNLIKELY(checkConditionFlags())) { onFunctionResumeAwait(ar); }
+    if (UNLIKELY(checkSurpriseFlags())) { onFunctionResumeAwait(ar); }
   }
   static inline void FunctionResumeYield(const ActRec* ar) {
     ringbufferEnter(ar);
-    if (UNLIKELY(checkConditionFlags())) { onFunctionResumeYield(ar); }
+    if (UNLIKELY(checkSurpriseFlags())) { onFunctionResumeYield(ar); }
   }
   static void FunctionSuspendE(ActRec* suspending, const ActRec* resumableAR) {
     ringbufferExit(resumableAR);
-    if (UNLIKELY(checkConditionFlags())) {
+    if (UNLIKELY(checkSurpriseFlags())) {
       onFunctionSuspendE(suspending, resumableAR);
     }
   }
   static void FunctionSuspendR(ActRec* suspending, ObjectData* child) {
     ringbufferExit(suspending);
-    if (UNLIKELY(checkConditionFlags())) {
+    if (UNLIKELY(checkSurpriseFlags())) {
       onFunctionSuspendR(suspending, child);
     }
   }
   static inline void FunctionReturn(ActRec* ar, TypedValue retval) {
     ringbufferExit(ar);
-    if (UNLIKELY(checkConditionFlags())) { onFunctionReturn(ar, retval); }
+    if (UNLIKELY(checkSurpriseFlags())) { onFunctionReturn(ar, retval); }
   }
   static inline void FunctionUnwind(const ActRec* ar, const Fault& fault) {
     ringbufferExit(ar);
-    if (UNLIKELY(checkConditionFlags())) { onFunctionUnwind(ar, fault); }
+    if (UNLIKELY(checkSurpriseFlags())) { onFunctionUnwind(ar, fault); }
   }
 
   /**

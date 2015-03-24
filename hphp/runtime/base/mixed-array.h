@@ -544,6 +544,9 @@ private:
   bool isZombie() const { return m_used + 1 == 0; }
   void setZombie() { m_used = -uint32_t{1}; }
 
+public:
+  template<class F> void scan(F&) const; // in mixed-array-defs.h
+
 private:
   // Some of these are packed into qword-sized unions so we can
   // combine stores during initialization.  (gcc won't do it on its

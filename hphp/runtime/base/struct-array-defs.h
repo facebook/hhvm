@@ -63,6 +63,12 @@ inline size_t StructArray::heapSize(const ArrayData* ad) {
   return bytesForCapacity(asStructArray(ad)->capacity());
 }
 
+template<class F> void StructArray::scan(F& mark) const {
+  //mark(m_shape); not in php heap
+  for (unsigned i = 0, n = size(); i < n; ++i) {
+    mark(data()[i]);
+  }
+}
 }
 
 #endif

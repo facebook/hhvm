@@ -52,6 +52,15 @@ struct UniqueStubs {
   TCA genRetHelper;  // version for generators
 
   /*
+   * Returning from a function when the ActRec was called from jitted code but
+   * had its m_savedRip smashed by the debugger. These stubs call a helper that
+   * looks up the original catch trace from the call, executes it, then executes
+   * a REQ_POST_DEBUGGER_RET.
+   */
+  TCA debuggerRetHelper;
+  TCA debuggerGenRetHelper;
+
+  /*
    * Returning from a function where the ActRec was pushed by an
    * inlined call.  This is the same as retHelper but separated just
    * for debugability.
@@ -97,6 +106,7 @@ struct UniqueStubs {
    * unwindResumeHelper.
    */
   TCA endCatchHelper;
+  TCA endCatchHelperPast;
 
   /*
    * Helper stubs for doing generic decrefs on a function return.  The

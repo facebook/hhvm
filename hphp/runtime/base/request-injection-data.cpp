@@ -311,6 +311,20 @@ void RequestInjectionData::threadInit() {
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "track_errors", "0",
                    &m_trackErrors);
+  IniSetting::Bind(
+    IniSetting::CORE,
+    IniSetting::PHP_INI_ALL,
+    "html_errors",
+    IniSetting::SetAndGet<bool>(
+      [&] (const bool& on) {
+        m_htmlErrors = on;
+        return true;
+      },
+      [&] () { return m_htmlErrors; }
+    ),
+    &m_htmlErrors
+  );
+
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "log_errors",
                    IniSetting::SetAndGet<bool>(
@@ -377,7 +391,7 @@ std::string RequestInjectionData::getDefaultIncludePath() {
 
 void RequestInjectionData::onSessionInit() {
   rds::requestInit();
-  m_cflagsPtr = &rds::header()->conditionFlags;
+  m_sflagsPtr = &rds::header()->surpriseFlags;
   reset();
 }
 
@@ -440,7 +454,7 @@ void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
 }
 
 void RequestInjectionData::reset() {
-  m_cflagsPtr->store(0);
+  m_sflagsPtr->store(0);
   m_coverage = RuntimeOption::RecordCodeCoverage;
   m_debuggerAttached = false;
   m_debuggerIntr = false;
@@ -468,15 +482,15 @@ void RequestInjectionData::updateJit() {
 }
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {
-  m_cflagsPtr->fetch_and(~flag);
+  m_sflagsPtr->fetch_and(~flag);
 }
 
 bool RequestInjectionData::getFlag(SurpriseFlag flag) const {
-  return m_cflagsPtr->load() & flag;
+  return m_sflagsPtr->load() & flag;
 }
 
 void RequestInjectionData::setFlag(SurpriseFlag flag) {
-  m_cflagsPtr->fetch_or(flag);
+  m_sflagsPtr->fetch_or(flag);
 }
 
 }

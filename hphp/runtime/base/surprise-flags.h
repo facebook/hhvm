@@ -61,7 +61,7 @@ enum SurpriseFlag : ssize_t {
 //////////////////////////////////////////////////////////////////////
 
 inline std::atomic<ssize_t>& surpriseFlags() {
-  return rds::header()->conditionFlags;
+  return rds::header()->surpriseFlags;
 }
 
 inline void setSurpriseFlag(SurpriseFlag flag) {

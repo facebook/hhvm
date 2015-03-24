@@ -135,7 +135,7 @@ void Config::SetParsedIni(IniSetting::Map &ini, const std::string confStr,
 }
 
 const char* Config::Get(const IniSetting::Map &ini, const Hdf& config,
-                         const char *defValue /* = nullptr */) {
+                        const char *defValue /* = nullptr */) {
   auto* value = ini.get_ptr(IniName(config));
   if (value && value->isString()) {
     return value->data();
@@ -212,6 +212,64 @@ CONFIG_BODY(uint64_t, UInt64)
 CONFIG_BODY(double, Double)
 CONFIG_BODY(std::string, String)
 
+#define CONTAINER_CONFIG_BODY(T, METHOD) \
+T Config::Get##METHOD(const IniSetting::Map& ini, \
+                      const std::string& name, \
+                      const Hdf& config, \
+                      const T& defValue /* = T() */) { \
+  T ini_ret, hdf_ret; \
+  const folly::dynamic* value = ini_iterate(ini, name); \
+  if (value && (value->isArray() || value->isObject())) { \
+    ini_on_update(*value, ini_ret); \
+    /** Make sure that even if we have an ini value, that if we also **/ \
+    /** have an hdf value, that it maintains its edge as beating out **/ \
+    /** ini                                                          **/ \
+    if (config.exists()) { \
+      config.configGet(hdf_ret); \
+      if (hdf_ret != ini_ret) { \
+        ini_ret = hdf_ret; \
+        IniSetting::Set(name, ini_get(ini_ret), IniSetting::FollyDynamic()); \
+      } \
+    } \
+    return ini_ret; \
+  } \
+  if (config.exists()) { \
+    config.configGet(hdf_ret); \
+    return hdf_ret; \
+  } \
+  return defValue; \
+} \
+T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
+                      const T& defValue /* = T() */) { \
+  std::string name = IniName(config); \
+  return Get##METHOD(ini, name, config, defValue); \
+} \
+T Config::Get##METHOD(const IniSetting::Map& ini, \
+                      const std::string& name, \
+                      const T& defValue /* = T() */) { \
+  Hdf empty; \
+  return Get##METHOD(ini, name, empty["bogus"], defValue); \
+} \
+void Config::Bind(T& loc, const IniSetting::Map& ini, const Hdf& config, \
+                  const T& defValue /* = T() */) { \
+  loc = Get##METHOD(ini, config, defValue); \
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
+                   IniName(config), &loc); \
+} \
+void Config::Bind(T& loc, const IniSetting::Map& ini, const std::string& name, \
+                  const T& defValue /* = T() */) { \
+  loc = Get##METHOD(ini, name, defValue); \
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
+                   name, &loc); \
+}
+
+CONTAINER_CONFIG_BODY(ConfigVector, Vector)
+CONTAINER_CONFIG_BODY(ConfigMap, Map)
+CONTAINER_CONFIG_BODY(ConfigSet, Set)
+CONTAINER_CONFIG_BODY(ConfigSetC, SetC)
+CONTAINER_CONFIG_BODY(ConfigFlatSet, FlatSet)
+CONTAINER_CONFIG_BODY(ConfigIMap, IMap)
+
 static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
                                             const Hdf& config) {
   auto val = Config::GetString(ini, config);
@@ -234,46 +292,6 @@ void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
   // Currently this doens't bind to ini_get since it is hard to thread through
   // an enum
   loc = GetHackStrictOption(ini, config);
-}
-
-void Config::Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
-                  const Hdf& config) {
-  std::vector<std::string> ret;
-  auto ini_name = IniName(config);
-  auto* value = ini.get_ptr(ini_name);
-  if (value && value->isObject()) {
-    ini_on_update(*value, ret);
-    loc = ret;
-  }
-  // If there is an HDF setting for the config, then it still wins for
-  // the RuntimeOption value until we obliterate HDFs
-  ret.clear();
-  config.configGet(ret);
-  if (ret.size() > 0) {
-    loc = ret;
-  }
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, ini_name,
-                   &loc);
-}
-
-void Config::Bind(std::map<std::string, std::string>& loc,
-                  const IniSettingMap& ini, const Hdf& config) {
-  std::map<std::string, std::string> ret;
-  auto ini_name = IniName(config);
-  auto* value = ini.get_ptr(ini_name);
-  if (value && value->isObject()) {
-    ini_on_update(*value, ret);
-    loc = ret;
-  }
-  // If there is an HDF setting for the config, then it still wins for
-  // the RuntimeOption value until we obliterate HDFs
-  ret.clear();
-  config.configGet(ret);
-  if (ret.size() > 0) {
-    loc = ret;
-  }
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, ini_name,
-                   &loc);
 }
 
 // Hdf takes precedence, as usual. No `ini` binding yet.

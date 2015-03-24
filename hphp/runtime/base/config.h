@@ -24,9 +24,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef folly::dynamic IniSettingMap;
-// forward declaration
-const folly::dynamic* ini_iterate(const IniSettingMap& ini,
-                                  const std::string& name);
+typedef std::vector<std::string> ConfigVector;
+typedef std::map<std::string, std::string> ConfigMap;
+typedef std::set<std::string> ConfigSet;
+// with comparer
+typedef std::set<std::string, stdltistr> ConfigSetC;
+typedef boost::container::flat_set<std::string> ConfigFlatSet;
+typedef hphp_string_imap<std::string> ConfigIMap;
 
 /**
  * Parts of the language can individually be made stricter, warning or
@@ -91,11 +95,20 @@ struct Config {
                    const Hdf& config, const double defValue = 0);
   static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
                    const Hdf& config);
-  static void Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
-                   const Hdf& config);
-  static void Bind(std::map<std::string, std::string>& loc,
-                   const IniSettingMap& ini, const Hdf& config);
-
+  static void Bind(ConfigVector& loc, const IniSettingMap& ini,
+                   const Hdf& config,
+                   const ConfigVector& defValue = ConfigVector());
+  static void Bind(ConfigMap& loc, const IniSettingMap& ini, const Hdf& config,
+                   const ConfigMap& defValue = ConfigMap());
+  static void Bind(ConfigSet& loc, const IniSettingMap& ini, const Hdf& config,
+                   const ConfigSet& defValue = ConfigSet());
+  static void Bind(ConfigSetC& loc, const IniSettingMap& ini, const Hdf& config,
+                   const ConfigSetC& defValue = ConfigSetC());
+  static void Bind(ConfigIMap& loc, const IniSettingMap& ini, const Hdf& config,
+                   const ConfigIMap& defValue = ConfigIMap());
+  static void Bind(ConfigFlatSet& loc, const IniSettingMap& ini,
+                   const Hdf& config,
+                   const ConfigFlatSet& defValue = ConfigFlatSet());
   /**
    * These Bind()s should be used for ini settings. Specifically, they should
    * be used when the bound setting is needed before the main ini processing
@@ -126,8 +139,47 @@ struct Config {
                    const std::string name, const uint64_t defValue = 0);
   static void Bind(double& loc, const IniSettingMap &ini,
                    const std::string name, const double defValue = 0);
+  static void Bind(ConfigVector& loc, const IniSettingMap& ini,
+                   const std::string& name,
+                   const ConfigVector& defValue = ConfigVector());
+  static void Bind(ConfigMap& loc, const IniSettingMap& ini,
+                   const std::string& name,
+                   const ConfigMap& defValue = ConfigMap());
+  static void Bind(ConfigSet& loc, const IniSettingMap& ini,
+                   const std::string& name,
+                   const ConfigSet& defValue = ConfigSet());
+  static void Bind(ConfigSetC& loc, const IniSettingMap& ini,
+                   const std::string& name,
+                   const ConfigSetC& defValue = ConfigSetC());
+  static void Bind(ConfigIMap& loc, const IniSettingMap& ini,
+                   const std::string& name,
+                   const ConfigIMap& defValue = ConfigIMap());
+  static void Bind(ConfigFlatSet& loc, const IniSettingMap& ini,
+                   const std::string& name,
+                   const ConfigFlatSet& defValue = ConfigFlatSet());
 
-
+  /* Master Get Methods */
+  static ConfigVector GetVector(const IniSettingMap& ini,
+                                const std::string& name, const Hdf& config,
+                                const ConfigVector& defValue = ConfigVector());
+  static ConfigMap GetMap(const IniSettingMap& ini, const std::string& name,
+                          const Hdf& config,
+                          const ConfigMap& defValue = ConfigMap());
+  static ConfigSet GetSet(const IniSettingMap& ini, const std::string& name,
+                          const Hdf& config,
+                          const ConfigSet& defValue = ConfigSet());
+  static ConfigSetC GetSetC(const IniSettingMap& ini, const std::string& name,
+                            const Hdf& config,
+                            const ConfigSetC& defValue = ConfigSetC());
+  static ConfigIMap GetIMap(const IniSettingMap& ini, const std::string& name,
+                            const Hdf& config,
+                            const ConfigIMap& defValue = ConfigIMap());
+  static ConfigFlatSet GetFlatSet(const IniSettingMap& ini,
+                                  const std::string& name,
+                                  const Hdf& config,
+                                  const ConfigFlatSet& defValue
+                                    = ConfigFlatSet());
+  /* Hdf-aware Get Methods */
   static bool GetBool(const IniSettingMap &ini, const Hdf& config,
                       const bool defValue = false);
   static const char *Get(const IniSettingMap &ini, const Hdf& config,
@@ -152,11 +204,20 @@ struct Config {
                             const uint64_t defValue = 0);
   static double GetDouble(const IniSettingMap &ini, const Hdf& config,
                           const double defValue = 0);
-
-  /**
-   * INI specific GetXXX methods. Will be used exclusively once we move
-   * off of HDF.
-   */
+  static ConfigVector GetVector(const IniSettingMap& ini, const Hdf& config,
+                                const ConfigVector& defValue = ConfigVector());
+  static ConfigMap GetMap(const IniSettingMap& ini, const Hdf& config,
+                          const ConfigMap& defValue = ConfigMap());
+  static ConfigSet GetSet(const IniSettingMap& ini, const Hdf& config,
+                          const ConfigSet& defValue = ConfigSet());
+  static ConfigSetC GetSetC(const IniSettingMap& ini, const Hdf& config,
+                            const ConfigSetC& defValue = ConfigSetC());
+  static ConfigIMap GetIMap(const IniSettingMap& ini, const Hdf& config,
+                            const ConfigIMap& defValue = ConfigIMap());
+  static ConfigFlatSet GetFlatSet(const IniSettingMap& ini, const Hdf& config,
+                                  const ConfigFlatSet& defValue
+                                    = ConfigFlatSet());
+  /* INI-only Get Methods */
   static bool GetBool(const IniSettingMap &ini, const std::string &name,
                       const bool defValue = false);
   static const char *Get(const IniSettingMap &ini, const std::string &name,
@@ -183,7 +244,21 @@ struct Config {
                             const uint64_t defValue = 0);
   static double GetDouble(const IniSettingMap &ini, const std::string &name,
                           const double defValue = 0);
-
+  static ConfigVector GetVector(const IniSettingMap& ini,
+                                const std::string& name,
+                                const ConfigVector& defValue = ConfigVector());
+  static ConfigMap GetMap(const IniSettingMap& ini, const std::string& name,
+                          const ConfigMap& defValue = ConfigMap());
+  static ConfigSet GetSet(const IniSettingMap& ini, const std::string& name,
+                          const ConfigSet& defValue = ConfigSet());
+  static ConfigSetC GetSetC(const IniSettingMap& ini, const std::string& name,
+                            const ConfigSetC& defValue = ConfigSetC());
+  static ConfigIMap GetIMap(const IniSettingMap& ini, const std::string& name,
+                            const ConfigIMap& defValue = ConfigIMap());
+  static ConfigFlatSet GetFlatSet(const IniSettingMap& ini,
+                                  const std::string& name,
+                                  const ConfigFlatSet& defValue
+                                    = ConfigFlatSet());
   /**
    * Use these Iterate methods for iterating over options that are stored as
    * objects in runtime options (e.g. FilesMatch). This function iterates over
@@ -209,43 +284,10 @@ struct Config {
 
 
   /**
-   * Generic get methods, particularly used for objects like arrays or vectors
+   * Generic get methods for containers, like arrays and objects
+   * Follows the naming convention of GetXXX, where XXX is the type,
+   * but in this case the name is more broad as a container.
    **/
-
-  // This will go away when we move from Hdf
-  template<class T>
-  static void Get(const IniSettingMap &ini, const Hdf& config, T &data) {
-    config.configGet(data);
-    if (!data.empty()) {
-      return;
-    }
-    auto key = IniName(config);
-    auto* value = ini.get_ptr(key);
-    if (!value) {
-      return;
-    }
-    if (value->isArray() || value->isObject()) {
-      for (auto &pair : value->items()) {
-        StringInsert(data, pair.first.asString().toStdString(),
-                           pair.second.asString().toStdString());
-      }
-    }
-  }
-
-  template<class T>
-  static void Get(const IniSettingMap &ini, const std::string &name, T &data) {
-    const folly::dynamic* value = nullptr;
-    value = ini_iterate(ini, name);
-    if (!value) {
-      return;
-    }
-    if (value->isArray() || value->isObject()) {
-      for (auto &pair : value->items()) {
-        StringInsert(data, pair.first.asString().toStdString(),
-                     pair.second.asString().toStdString());
-      }
-    }
-  }
 
   private:
 

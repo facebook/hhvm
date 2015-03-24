@@ -367,6 +367,18 @@ size_t usedPersistentBytes() {
   return s_persistent_frontier - s_persistent_base;
 }
 
+folly::Range<const char*> normalSection() {
+  return {(const char*)tl_base, usedBytes()};
+}
+
+folly::Range<const char*> localSection() {
+  return {(const char*)s_local_frontier, usedLocalBytes()};
+}
+
+folly::Range<const char*> persistentSection() {
+  return {(const char*)s_persistent_base, usedPersistentBytes()};
+}
+
 Array& s_constants() {
   void* vp = &s_constantsStorage;
   return *static_cast<Array*>(vp);

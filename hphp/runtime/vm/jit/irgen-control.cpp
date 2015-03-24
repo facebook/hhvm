@@ -119,7 +119,7 @@ void emitSwitch(HTS& env,
 
   SSATmp* const switchVal = popC(env);
   Type type = switchVal->type();
-  assert(IMPLIES(!(type <= Type::Int), bounded));
+  assert(IMPLIES(!(type <= (Type::Int | Type::Null)), bounded));
   assert(IMPLIES(bounded, iv.size() > 2));
   SSATmp* index;
   SSATmp* ssabase = cns(env, base);

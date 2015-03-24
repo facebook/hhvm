@@ -190,9 +190,9 @@ struct FastCGITransport : public Transport, private Synchronizable {
 
   // Properties with default values
   // These parameters are overrides of the values on transport if present
-  const char* getServerAddr() override {
-    auto str = getParamTyped<const char*>("SERVER_ADDR");
-    return *str ? str : Transport::getServerAddr();
+  const std::string& getServerAddr() override {
+    auto const str = getParamTyped<const std::string*>("SERVER_ADDR");
+    return str ? *str : Transport::getServerAddr();
   }
 
   uint16_t getServerPort() override {
@@ -301,6 +301,17 @@ private:
     if (pos == m_requestParams.end()) return "";
 
     return pos->second;
+  }
+
+  template<typename T>
+  typename std::enable_if<
+    std::is_same<T, const std::string*>::value,
+    const std::string*
+  >::type getParamTyped(const char* key) const {
+    auto pos = m_requestParams.find(key);
+    if (pos == m_requestParams.end()) return nullptr;
+
+    return &pos->second;
   }
 
   template<typename T>

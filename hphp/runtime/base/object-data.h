@@ -119,6 +119,7 @@ struct ObjectData {
   bool isUncounted() const;
 
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
+  template<class F> void scan(F&) const;
 
   size_t heapSize() const;
 
@@ -449,6 +450,7 @@ private:
 #endif
 };
 
+struct GlobalsArray;
 typedef GlobalsArray GlobalVariables;
 
 struct CountableHelper : private boost::noncopyable {
@@ -519,7 +521,8 @@ typename std::enable_if<
   std::is_convertible<T*, ObjectData*>::value,
   SmartPtr<T>
 >::type makeSmartPtr(Args&&... args) {
-  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...));
+  using NonNull = typename SmartPtr<T>::NonNull;
+  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...), NonNull{});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -35,17 +35,17 @@ public:
   void              setType(Type t) { m_type = t; }
   std::string       toString() const;
 
-  // Convenience wrapper for type().isConst(...). See type.h for details.
+  // Convenience wrapper for type().hasConstVal(...). See type.h for details.
   template<typename... Args>
-  bool isConst(Args&&... args) const {
-    return type().isConst(std::forward<Args>(args)...);
+  bool hasConstVal(Args&&... args) const {
+    return type().hasConstVal(std::forward<Args>(args)...);
   }
 
   /*
    * For SSATmps with a compile-time constant value, the following
    * functions allow accessing it.
    *
-   * Pre: inst() && isConst()
+   * Pre: inst() && hasConstVal()
    */
   bool               boolVal() const      { return type().boolVal(); }
   int64_t            intVal() const       { return type().intVal(); }

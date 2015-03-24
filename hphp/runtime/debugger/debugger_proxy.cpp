@@ -248,10 +248,11 @@ void DebuggerProxy::notifyDummySandbox() {
 }
 
 void DebuggerProxy::setBreakPoints(
-    std::vector<BreakPointInfoPtr> &breakpoints) {
+  std::vector<BreakPointInfoPtr>& breakpoints
+) {
   TRACE(2, "DebuggerProxy::setBreakPoints\n");
-  // Hold the break mutex while we update the proxy's state. There's no need
-  // to hold it over the longer operation to set breakpoints in each file later.
+  // Hold the break mutex while we update the proxy's state. There's no need to
+  // hold it over the longer operation to set breakpoints in each file later.
   {
     WriteLock lock(m_breakMutex);
     // breakpoints holds a list of fresh new BreakPointInfo objects that

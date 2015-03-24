@@ -52,7 +52,7 @@ namespace HPHP {
  * to outlast the lifetime of the GlobalsArray.  (The wrapper is
  * refcounted, as required by ArrayData, but the table pointed to is not.)
  */
-struct GlobalsArray : private ArrayData {
+struct GlobalsArray : ArrayData {
   explicit GlobalsArray(NameValueTable* tab);
   ~GlobalsArray() {}
 
@@ -131,6 +131,11 @@ public:
 private:
   static GlobalsArray* asGlobals(ArrayData* ad);
   static const GlobalsArray* asGlobals(const ArrayData* ad);
+
+public:
+  template<class F> void scan(F& mark) const {
+    mark(m_tab);
+  }
 
 private:
   NameValueTable* const m_tab;

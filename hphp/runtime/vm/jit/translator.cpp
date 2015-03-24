@@ -89,7 +89,7 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
   if (!baseClass) return PropInfo();
 
   auto keyType = ni.inputs[iInd]->rtt;
-  if (!keyType.isConst(Type::Str)) return PropInfo();
+  if (!keyType.hasConstVal(Type::Str)) return PropInfo();
   auto const name = keyType.strVal();
 
   // If we are not in repo-authoriative mode, we need to check that

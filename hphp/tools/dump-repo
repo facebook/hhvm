@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [[ $# -lt 1 ]]; then
+   echo "Usage: $0 repo [pattern]"
+   echo "  repo: path to the repo to dump"
+   echo "  pattern: optional, specifies an sql 'like' pattern to match paths"
+   exit 1
+fi
+
+repo=$1
+pattern=$2
+
+table=$(sqlite3 $repo ".tables 'FileMd5%'")
+where=
+if [[ -n $pattern ]] ; then
+   where="WHERE path like '$pattern'"
+fi
+sqlite3 $repo "select path from $table $where" | \
+   grep -v "^/:" | \
+   xargs -I% sh -c \
+        "echo ==== Dumping % ======; \
+         hhvm -vRepo.Authoritative=true -vRepo.Commit=false -vRepo.{Central,Local}.Path=$repo -vEval.DumpBytecode=1 --lint=% 2>&1 | \
+         grep -v '^No syntax errors detected in'; \
+         echo"

@@ -33,7 +33,10 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/assertions.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP {
+struct ActRec;
+
+namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -44,8 +47,25 @@ typedef TreadHashMap<CTCA, TCA, ctca_identity_hash> CatchTraceMap;
  * it.  Used to pass values between unwinder code and catch traces.
  */
 struct UnwindRDS {
+  /* When a cleanup (non-side-exiting) catch trace is executing, this will
+   * point to the currently propagating exception, to be passed to
+   * _Unwind_Resume at the end of cleanup. */
   _Unwind_Exception* exn;
+
+  /* Some helpers need to signal an error along with a TypedValue to be pushed
+   * on the eval stack. When present, that value lives here. */
   TypedValue unwinderTv;
+
+  /* When returning from a frame that had its m_savedRip smashed by the
+   * debugger, the return stub stashes values here to be used after running the
+   * appropriate catch trace. In addition, a non-nullptr debuggerReturnSP is
+   * used as the flag to endCatchHelper that it should perform a
+   * REQ_POST_DEBUGGER_RET rather than resuming the unwind process. */
+  TypedValue* debuggerReturnSP;
+  Offset debuggerReturnOff;
+
+  /* This will be true iff the currently executing catch trace should side exit
+   * to somewhere else in the TC, rather than resuming the unwind process. */
   bool doSideExit;
 };
 extern rds::Link<UnwindRDS> unwindRdsInfo;
@@ -60,6 +80,14 @@ inline ptrdiff_t unwinderSideExitOff() {
 
 inline ptrdiff_t unwinderTvOff() {
   return unwindRdsInfo.handle() + offsetof(UnwindRDS, unwinderTv);
+}
+
+inline ptrdiff_t unwinderDebuggerReturnOffOff() {
+  return unwindRdsInfo.handle() + offsetof(UnwindRDS, debuggerReturnOff);
+}
+
+inline ptrdiff_t unwinderDebuggerReturnSPOff() {
+  return unwindRdsInfo.handle() + offsetof(UnwindRDS, debuggerReturnSP);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -127,6 +155,8 @@ tc_unwind_personality(int version,
                       uint64_t exceptionClass,
                       _Unwind_Exception* exceptionObj,
                       _Unwind_Context* context);
+
+TCA tc_unwind_resume(ActRec*& fp);
 
 //////////////////////////////////////////////////////////////////////
 

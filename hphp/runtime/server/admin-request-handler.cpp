@@ -31,7 +31,6 @@
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-server.h"

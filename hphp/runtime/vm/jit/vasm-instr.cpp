@@ -36,6 +36,8 @@ const char* vinst_names[] = {
 bool isBlockEnd(const Vinstr& inst) {
   switch (inst.op) {
     // service request-y things
+    case Vinstr::bindcall:
+    case Vinstr::contenter:
     case Vinstr::bindjcc1st:
     case Vinstr::bindjmp:
     case Vinstr::fallback:

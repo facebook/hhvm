@@ -58,7 +58,7 @@ struct NativePropHandler;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using ClassPtr = AtomicSmartPtr<Class>;
+using ClassPtr = AtomicSharedPtr<Class>;
 
 /*
  * Class represents the full definition of a user class in a given request
@@ -532,6 +532,11 @@ public:
   void initialize() const;
   void initProps() const;
   void initSProps() const;
+
+  /*
+   * Check if class has been initialized.
+   */
+  bool initialized() const;
 
   /*
    * PropInitVec for this class's declared properties, with default values for

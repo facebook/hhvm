@@ -18,6 +18,10 @@
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
+#include <cstdint>
+
+#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
@@ -25,7 +29,7 @@ namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 // PHP Errors
 
-static const StaticString
+const StaticString
   s_FATAL_ERROR("Fatal error"),
   s_CATCHABLE_FATAL_ERROR("Catchable fatal error"),
   s_WARNING("Warning"),
@@ -38,11 +42,11 @@ static const StaticString
 
 // Errors are generally passed around as errnum ints corresponding to an enum
 // ErrorModes value
-typedef ErrorConstants::ErrorModes ErrType;
+using ErrType = ErrorConstants::ErrorModes;
 
 // String name for the given error type, as defined by php5 xdebug in
 // xdebug_var.c
-const String xdebug_error_type(int errnum) {
+StaticString xdebug_error_type(int errnum) {
   switch (static_cast<ErrType>(errnum)) {
     case ErrType::ERROR:
     case ErrType::CORE_ERROR:
@@ -69,6 +73,130 @@ const String xdebug_error_type(int errnum) {
     default:
       return s_UNKNOWN_ERROR;
   }
+}
+
+namespace {
+///////////////////////////////////////////////////////////////////////////////
+// Property demangling
+
+enum class PropModifier {
+  Public,
+  Protected,
+  Private,
+};
+
+struct PropInfo {
+  PropModifier modifier;
+  String prop_name;
+  String cls_name;
+};
+
+const char* modifier_str(PropModifier mod) {
+  switch (mod) {
+  case PropModifier::Public:    return "public";
+  case PropModifier::Protected: return "protected";
+  case PropModifier::Private:   return "private";
+  }
+  not_reached();
+  return nullptr;
+}
+
+PropInfo demangle_prop(const String& prop_name) {
+  PropInfo info;
+
+  // Needs to be at least 3 chars for private/protected properties.
+  // There's two extra NUL chars, plus either a '*' for protected, or
+  // the classname for private.
+  if (prop_name.size() >= 3 && prop_name[0] == '\0') {
+    if (prop_name[1] == '*') {
+      info.modifier = PropModifier::Protected;
+      info.cls_name = empty_string();
+      info.prop_name = prop_name.substr(3);
+    } else {
+      auto const cls_end = prop_name.find('\0', 1);
+      info.modifier = PropModifier::Private;
+      info.cls_name = prop_name.substr(1, cls_end - 1);
+      info.prop_name = prop_name.substr(cls_end + 1);
+    }
+  } else {
+    info.modifier = PropModifier::Public;
+    info.cls_name = empty_string();
+    info.prop_name = prop_name;
+  }
+  return info;
+}
+
+void xdebug_format_file_link(StringBuffer& sb, const char* filename, int line) {
+  auto& format = XDEBUG_GLOBAL(FileLinkFormat);
+
+  auto const size = format.size();
+
+  for (size_t i = 0; i < size; ++i) {
+    auto const c = format[i];
+
+    if (c != '%') {
+      sb.append(c);
+      continue;
+    }
+
+    ++i;
+
+    if (i >= size) {
+      break;
+    }
+
+    switch (format[i]) {
+    case 'f':
+      sb.append(filename);
+      break;
+    case 'l':
+      sb.append(line);
+      break;
+    case '%':
+      sb.append('%');
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * RAII helper for incrementing/decrementing indent levels.
+ */
+struct Indenter {
+  explicit Indenter(XDebugExporter& exp): exp(exp) {
+    exp.level++;
+  }
+
+  ~Indenter() {
+    exp.level--;
+  }
+
+  XDebugExporter& exp;
+};
+
+/*
+ * RAII helper for tracking seen arrays and objects.
+ */
+struct Tracker {
+  explicit Tracker(XDebugExporter& exp, void* ptr): exp(exp), ptr(ptr) {
+    auto const result = exp.seen.insert(ptr);
+    seen = !result.second;
+  }
+
+  ~Tracker() {
+    exp.seen.erase(ptr);
+  }
+
+  XDebugExporter& exp;
+  void* ptr;
+  bool seen;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -267,8 +395,10 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
     xdebug_xml_add_attribute(node, "children",
                              const_cast<char*>(arr.size() > 0 ? "1" : "0"));
 
+    Tracker track(exporter, arr.get());
+
     // If we've already seen this object, return
-    if (exporter.counts[arr.get()]++ > 0) {
+    if (track.seen) {
       xdebug_xml_add_attribute(node, "recursive", "1");
       return node;
     }
@@ -301,7 +431,6 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
 
     // Done at this level
     exporter.level--;
-    exporter.counts[arr.get()]--;
   } else if (var.isObject()) {
     // TODO(#3704) This could be merged into the above array code. For now,
     // it's separate as this was pulled originally from xdebug
@@ -316,8 +445,10 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
     xdebug_xml_add_attribute(node, "children",
                              const_cast<char*>(props.size() ? "1" : "0"));
 
+    Tracker track(exporter, obj);
+
     // If we've already seen this object, return
-    if (exporter.counts[obj]++ > 0) {
+    if (track.seen) {
       xdebug_xml_add_attribute(node, "recursive", "1");
       return node;
     }
@@ -351,7 +482,6 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
 
     // Done at this level
     exporter.level--;
-    exporter.counts[(void*) obj]--;
   } else if (var.isResource()) {
     ResourceData* res = var.toResource().get();
     xdebug_xml_add_attribute(node, "type", "resource");
@@ -365,14 +495,564 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
   return node;
 }
 
-xdebug_xml_node* xdebug_get_value_xml_node(const char* name,
-                                           const Variant& val,
-                                           XDebugVarType type
-                                            /* = XDebugVarType::Normal */,
-                                           XDebugExporter& exporter) {
-  // Ensure there all state is cleared in the exporter. This allows the same
-  // exporter to be used in multiple exports.
-  exporter.reset();
+namespace {
+///////////////////////////////////////////////////////////////////////////////
+
+/* For ansi printing. */
+
+#define ANSI_COLOR_POINTER       (ansi ? "\x1b[0m" : "")
+#define ANSI_COLOR_BOOL          (ansi ? "\x1b[35m" : "")
+#define ANSI_COLOR_LONG          (ansi ? "\x1b[32m" : "")
+#define ANSI_COLOR_NULL          (ansi ? "\x1b[34m" : "")
+#define ANSI_COLOR_DOUBLE        (ansi ? "\x1b[33m" : "")
+#define ANSI_COLOR_STRING        (ansi ? "\x1b[31m" : "")
+#define ANSI_COLOR_EMPTY         (ansi ? "\x1b[30m" : "")
+#define ANSI_COLOR_ARRAY         (ansi ? "\x1b[33m" : "")
+#define ANSI_COLOR_OBJECT        (ansi ? "\x1b[31m" : "")
+#define ANSI_COLOR_RESOURCE      (ansi ? "\x1b[36m" : "")
+#define ANSI_COLOR_MODIFIER      (ansi ? "\x1b[32m" : "")
+#define ANSI_COLOR_RESET         (ansi ? "\x1b[0m" : "")
+#define ANSI_COLOR_BOLD          (ansi ? "\x1b[1m" : "")
+#define ANSI_COLOR_BOLD_OFF      (ansi ? "\x1b[22m" : "")
+
+/* For fancy printing. */
+#define COLOR_POINTER   "#888a85"
+#define COLOR_BOOL      "#75507b"
+#define COLOR_LONG      "#4e9a06"
+#define COLOR_NULL      "#3465a4"
+#define COLOR_DOUBLE    "#f57900"
+#define COLOR_STRING    "#cc0000"
+#define COLOR_EMPTY     "#888a85"
+#define COLOR_ARRAY     "#ce5c00"
+#define COLOR_OBJECT    "#8f5902"
+#define COLOR_RESOURCE  "#2e3436"
+
+const StaticString
+  s_ansi_esc("\0"),
+  s_text_esc("'\\\0..\37"),
+  s_array_str_esc("'\0");
+
+///////////////////////////////////////////////////////////////////////////////
+
+void xdebug_var_export_text_ansi(
+  StringBuffer& sb,
+  const Variant& v,
+  bool ansi,
+  XDebugExporter& exporter
+) {
+  sb.printf("%*s", (exporter.level * 2) - 2, "");
+
+  if (exporter.debug_zval) {
+    sb.printf(
+      "(refcount=%d, is_ref=%d)=",
+      v.getRefCount(),
+      v.getType() == KindOfRef
+    );
+  }
+
+  switch (v.getType()) {
+  case KindOfUninit:
+    /* fallthrough */
+  case KindOfNull:
+    sb.printf(
+      "%s%sNULL%s%s",
+      ANSI_COLOR_BOLD,
+      ANSI_COLOR_NULL,
+      ANSI_COLOR_BOLD_OFF,
+      ANSI_COLOR_RESET
+    );
+    break;
+  case KindOfBoolean:
+    sb.printf(
+      "%sbool%s(%s%s%s)",
+      ANSI_COLOR_BOLD,
+      ANSI_COLOR_BOLD_OFF,
+      ANSI_COLOR_BOOL,
+      v.toBooleanVal() ? "true" : "false",
+      ANSI_COLOR_RESET
+    );
+    break;
+  case KindOfInt64:
+    sb.printf(
+      "%sint%s(%s%ld%s)",
+      ANSI_COLOR_BOLD,
+      ANSI_COLOR_BOLD_OFF,
+      ANSI_COLOR_LONG,
+      v.toInt64Val(),
+      ANSI_COLOR_RESET
+    );
+    break;
+  case KindOfDouble:
+    // XXX: This should respect ini_get("precision").
+    sb.printf(
+      "%sdouble%s(%s%f%s)",
+      ANSI_COLOR_BOLD,
+      ANSI_COLOR_BOLD_OFF,
+      ANSI_COLOR_DOUBLE,
+      v.toDoubleVal(),
+      ANSI_COLOR_RESET
+    );
+    break;
+  case KindOfStaticString:
+    /* fallthrough */
+  case KindOfString: {
+    auto const charlist = ansi ? s_ansi_esc : s_text_esc;
+    auto const& str = v.toCStrRef();
+    auto const esc_str = HHVM_FN(addcslashes)(str, charlist);
+
+    if (exporter.no_decoration) {
+      sb.append(esc_str);
+      break;
+    }
+
+    sb.printf(
+      "%sstring%s(%s%d%s) \"%s",
+      ANSI_COLOR_BOLD,
+      ANSI_COLOR_BOLD_OFF,
+      ANSI_COLOR_LONG,
+      str.size(),
+      ANSI_COLOR_RESET,
+      ANSI_COLOR_STRING
+    );
+
+    if (str.size() <= exporter.max_data) {
+      sb.append(esc_str);
+    } else {
+      sb.append(esc_str.substr(0, exporter.max_data));
+    }
+
+    sb.append(ANSI_COLOR_RESET);
+    sb.append('"');
+    if (str.size() > exporter.max_data) {
+      sb.append("...");
+    }
+    break;
+  }
+  case KindOfResource: {
+    auto const& res = v.toCResRef();
+
+    sb.printf(
+      "%sresource%s(%s%" PRId32 "%s) of type (%s)",
+      ANSI_COLOR_BOLD,
+      ANSI_COLOR_BOLD_OFF,
+      ANSI_COLOR_RESOURCE,
+      res->o_getId(),
+      ANSI_COLOR_RESET,
+      res->o_getClassName().c_str()
+    );
+    break;
+  }
+  case KindOfArray: {
+    auto const& arr = v.toCArrRef();
+
+    sb.printf("%sarray%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF);
+
+    Tracker track(exporter, arr.get());
+    if (track.seen) {
+      break;
+    }
+
+    sb.printf("(%s%zd%s) {\n", ANSI_COLOR_LONG, arr.size(), ANSI_COLOR_RESET);
+
+    if (exporter.level <= exporter.max_depth) {
+      uint32_t elem_count = 0;
+
+      for (ArrayIter iter(arr); iter; ++iter) {
+        if (elem_count == exporter.max_children) {
+          sb.printf("\n%*s(more elements)...\n", (exporter.level * 2), "");
+          break;
+        }
+        ++elem_count;
+        sb.printf("%*s", exporter.level * 2, "");
+
+        auto first = *iter.first().asTypedValue();
+        switch (first.m_type) {
+        case KindOfInt64:
+          sb.printf(
+            "[%ld] %s=>%s\n",
+            first.m_data.num,
+            ANSI_COLOR_POINTER,
+            ANSI_COLOR_RESET
+          );
+          break;
+        case KindOfStaticString:
+        case KindOfString: {
+          auto const key_str = String{first.m_data.pstr};
+          auto const esc_str = HHVM_FN(addcslashes)(
+            key_str,
+            s_array_str_esc
+          );
+
+          // Matches the php5 extension in that this case doesn't use ANSI
+          // color codes...
+          sb.printf("'%s' =>\n", esc_str.c_str());
+          break;
+        }
+        default:
+          not_reached();
+        }
+
+        Indenter ind(exporter);
+        xdebug_var_export_text_ansi(sb, iter.secondRef(), ansi, exporter);
+      }
+    } else {
+      sb.printf("%*s...\n", exporter.level * 2, "");
+    }
+
+    sb.printf("%*s}", (exporter.level * 2) - 2, "");
+    break;
+  }
+  case KindOfObject: {
+    auto const& obj = v.toCObjRef();
+
+    // XXX: This changes the refcounts of the object's properties.  Matters if
+    // exporter.debug_zval is set.
+    auto const obj_arr = obj.toArray();
+
+    Tracker track(exporter, obj.get());
+    if (track.seen) {
+      sb.printf("%*s...\n", exporter.level * 2, "");
+      break;
+    }
+
+    sb.printf(
+      "%sclass%s %s%s%s#%d (%s%zd%s) {\n",
+      ANSI_COLOR_BOLD,
+      ANSI_COLOR_BOLD_OFF,
+      ANSI_COLOR_OBJECT,
+      obj->getClassName().c_str(),
+      ANSI_COLOR_RESET,
+      obj->getId(),
+      ANSI_COLOR_LONG,
+      obj_arr.size(),
+      ANSI_COLOR_RESET
+    );
+
+    if (exporter.level > exporter.max_depth) {
+      sb.printf("%*s...\n", exporter.level * 2, "");
+      break;
+    }
+
+    uint32_t elem_count = 0;
+    for (ArrayIter iter(obj_arr); iter; ++iter) {
+      if (elem_count == exporter.max_children) {
+        sb.printf("\n%*s(more elements)...\n", exporter.level * 2, "");
+        break;
+      }
+
+      ++elem_count;
+      sb.printf("%*s", exporter.level * 2, "");
+
+      auto first = *iter.first().asTypedValue();
+
+      auto prop_name = IS_STRING_TYPE(first.m_type)
+        ? String{first.m_data.pstr}
+        : String{first.m_data.num};
+
+      auto info = demangle_prop(prop_name);
+
+      sb.printf(
+        "%s%s%s%s%s $",
+        ANSI_COLOR_MODIFIER,
+        ANSI_COLOR_BOLD,
+        modifier_str(info.modifier),
+        ANSI_COLOR_BOLD_OFF,
+        ANSI_COLOR_RESET
+      );
+
+      if (first.m_type == KindOfInt64) {
+        sb.printf("{%" PRId64 "}", first.m_data.num);
+      } else {
+        sb.append(info.prop_name);
+      }
+      sb.printf(" %s=>%s\n", ANSI_COLOR_POINTER, ANSI_COLOR_RESET);
+
+      Indenter ind(exporter);
+      xdebug_var_export_text_ansi(sb, iter.secondRef(), ansi, exporter);
+    }
+    sb.printf("%*s}", (exporter.level * 2) - 2, "");
+    break;
+  }
+  default:
+    not_reached();
+  }
+
+  sb.append('\n');
+}
+
+String xdebug_get_zval_value_text_ansi(
+  const Variant& v,
+  bool ansi,
+  XDebugExporter& exporter
+) {
+  exporter.reset(1);
+
+  StringBuffer sb;
+
+  if (XDEBUG_GLOBAL(OverloadVarDump) > 1) {
+    sb.printf(
+      "%s%s%s:%s%d%s:\n",
+      ANSI_COLOR_BOLD,
+      g_context->getContainingFileName()->data(),
+      ANSI_COLOR_BOLD_OFF,
+      ANSI_COLOR_BOLD,
+      g_context->getLine(),
+      ANSI_COLOR_BOLD_OFF
+    );
+  }
+
+  xdebug_var_export_text_ansi(sb, v, ansi, exporter);
+  return sb.detach();
+}
+
+void xdebug_var_export_fancy(
+  StringBuffer& sb,
+  const Variant& v,
+  XDebugExporter& exporter
+) {
+  if (exporter.debug_zval) {
+    sb.printf(
+      "<i>(refcount=%d, is_ref=%d)</i>,",
+      v.getRefCount(),
+      v.getType() == KindOfRef
+    );
+  } else if (v.getType() == KindOfRef) {
+    sb.append("&amp;");
+  }
+
+  switch (v.getType()) {
+  case KindOfUninit:
+    /* fallthrough */
+  case KindOfNull:
+    sb.printf("<font color='%s'>null</font>", COLOR_NULL);
+    break;
+  case KindOfBoolean:
+    sb.printf(
+      "<small>boolean</small> <font color='%s'>%s</font>",
+      COLOR_BOOL,
+      v.toBooleanVal() ? "true" : "false"
+    );
+    break;
+  case KindOfInt64:
+    sb.printf(
+      "<small>int</small> <font color='%s'>%" PRId64 "</font>",
+      COLOR_LONG,
+      v.toInt64Val()
+    );
+    break;
+  case KindOfDouble:
+    // XXX: Should respect ini_get("precision").
+    sb.printf(
+      "<small>float</small> <font color='%s'>%f</font>",
+      COLOR_DOUBLE,
+      v.toDoubleVal()
+    );
+    break;
+  case KindOfStaticString:
+    /* fallthrough */
+  case KindOfString: {
+    auto const& str = v.toCStrRef();
+
+    sb.printf("<small>string</small> <font color='%s'>'", COLOR_STRING);
+
+    auto const xml_str = xdebug_xmlize(str.data(), str.size());
+    if (str.size() <= exporter.max_data) {
+      sb.append(xml_str);
+      sb.append("'</font>");
+    } else {
+      sb.append(xml_str.substr(0, exporter.max_data));
+      sb.append("'...</font>");
+    }
+    sb.printf(" <i>(length=%d)</i>", str.size());
+    break;
+  }
+  case KindOfArray: {
+    auto const& arr = v.toCArrRef();
+
+    sb.printf("\n%*s", (exporter.level - 1) * 4, "");
+
+    Tracker track(exporter, arr.get());
+    if (track.seen) {
+      sb.append("<i>&</i><b>array</b>\n");
+      break;
+    }
+
+    sb.printf("<b>array</b> <i>(size=%zd)</i>\n", arr.size());
+
+    if (exporter.level > exporter.max_depth) {
+      sb.printf("%*s...\n", (exporter.level * 4) - 2, "");
+      break;
+    }
+
+    if (arr.empty()) {
+      sb.printf("%*s", (exporter.level * 4) - 2, "");
+      sb.printf("<i><font color='%s'>empty</font></i>\n", COLOR_EMPTY);
+      break;
+    }
+
+    uint32_t elem_count = 0;
+    for (ArrayIter iter(arr); iter; ++iter) {
+      if (elem_count == exporter.max_children) {
+        sb.printf("%*s", (exporter.level * 4) - 2, "");
+        sb.append("<i>more elements...</i>\n");
+        break;
+      }
+
+      ++elem_count;
+      sb.printf("%*s", (exporter.level * 4) - 2, "");
+
+      auto first = *iter.first().asTypedValue();
+
+      switch (first.m_type) {
+      case KindOfInt64:
+        sb.append(first.m_data.num);
+        break;
+      case KindOfStaticString:
+      case KindOfString: {
+        auto const str = first.m_data.pstr;
+        sb.append('\'');
+        sb.append(xdebug_xmlize(str->data(), str->size()));
+        sb.append('\'');
+        break;
+      }
+      default:
+        not_reached();
+      }
+
+      sb.printf(" <font color='%s'>=&gt;</font> ", COLOR_POINTER);
+
+      Indenter ind(exporter);
+      xdebug_var_export_fancy(sb, iter.secondRef(), exporter);
+    }
+    break;
+  }
+  case KindOfObject: {
+    auto const& obj = v.toCObjRef();
+
+    sb.printf("\n%*s", (exporter.level - 1) * 4, "");
+
+    Tracker track(exporter, obj.get());
+    if (track.seen) {
+      sb.append("<i>&</i>");
+    }
+
+    sb.printf(
+      "<b>object</b>(<i>%s</i>)[<i>%d</i>]\n",
+      obj->getClassName().c_str(),
+      obj->getId()
+    );
+
+    if (track.seen) {
+      break;
+    }
+
+    if (exporter.level > exporter.max_depth) {
+      sb.printf("%*s...\n", (exporter.level * 4) - 2, "");
+      break;
+    }
+
+    uint32_t elem_count = 0;
+    // XXX: This changes the refcounts of the object's properties.  Matters if
+    // exporter.debug_zval is set.
+    for (ArrayIter iter(obj.toArray()); iter; ++iter) {
+      if (elem_count == exporter.max_children) {
+        sb.printf("%*s", (exporter.level * 4) - 2, "");
+        sb.append("<i>more elements...</i>\n");
+        break;
+      }
+
+      ++elem_count;
+      sb.printf("%*s", (exporter.level * 4) - 2, "");
+
+      auto first = *iter.first().asTypedValue();
+
+      if (first.m_type == KindOfInt64) {
+        sb.printf(
+          "<i>public</i> %" PRId64 " <font =color='%s'>=&gt;</font> ",
+          first.m_data.num,
+          COLOR_POINTER
+        );
+        xdebug_var_export_fancy(sb, iter.secondRef(), exporter);
+        continue;
+      }
+
+      auto prop_name = IS_STRING_TYPE(first.m_type)
+        ? String{first.m_data.pstr}
+      : empty_string();
+
+      auto info = demangle_prop(prop_name);
+
+      sb.printf(
+        "<i>%s</i> '%s' ",
+        modifier_str(info.modifier),
+        info.prop_name.c_str()
+      );
+
+      // Only print the class if the property is private and declared in a
+      // parent class.
+      if (info.modifier == PropModifier::Private &&
+          !info.cls_name.same(obj->getClassName())) {
+        sb.printf("<small>(%s)</small> ", info.cls_name.c_str());
+      }
+
+      sb.printf("<font color='%s'>=&gt;</font> ", COLOR_POINTER);
+      Indenter ind(exporter);
+      xdebug_var_export_fancy(sb, iter.secondRef(), exporter);
+    }
+    break;
+  }
+  default:
+    not_reached();
+  }
+
+  if (v.getType() != KindOfArray && v.getType() != KindOfObject) {
+    sb.append('\n');
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
+String xdebug_get_zval_value_ansi(const Variant& v, XDebugExporter& exporter) {
+  return xdebug_get_zval_value_text_ansi(v, true, exporter);
+}
+
+String xdebug_get_zval_value_text(const Variant& v, XDebugExporter& exporter) {
+  return xdebug_get_zval_value_text_ansi(v, false, exporter);
+}
+
+String xdebug_get_zval_value_fancy(const Variant& v, XDebugExporter& exporter) {
+  exporter.reset(1);
+
+  StringBuffer sb;
+
+  sb.append("<pre class='xdebug-var-dump' dir='ltr'>");
+
+  if (XDEBUG_GLOBAL(OverloadVarDump) > 1) {
+    auto filename = g_context->getContainingFileName()->data();
+    auto line = g_context->getLine();
+
+    if (!XDEBUG_GLOBAL(FileLinkFormat).empty()) {
+      xdebug_format_file_link(sb, filename, line);
+    } else {
+      sb.printf("\n<small>%s:%d:</small>", filename, line);
+    }
+  }
+
+  xdebug_var_export_fancy(sb, v, exporter);
+
+  sb.append("</pre>");
+
+  return sb.detach();
+}
+
+xdebug_xml_node* xdebug_get_value_xml_node(
+  const char* name,
+  const Variant& val,
+  XDebugVarType type,
+  XDebugExporter& exporter
+) {
+  exporter.reset(0);
 
   // Compute the short and full name of the passed value
   char* short_name = nullptr;

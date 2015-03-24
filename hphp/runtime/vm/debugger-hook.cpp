@@ -92,7 +92,7 @@ static void blacklistRangesInJit(const Unit* unit,
   // In this case, we may be setting a breakpoint in a tracelet which could
   // already be jitted, and present on the stack. Make sure we don't return
   // to it so we have a chance to honor breakpoints.
-  g_context->preventReturnsToTC();
+  debuggerPreventReturnsToTC();
 }
 
 // Ensure we interpret an entire function when the debugger is attached.
@@ -441,7 +441,7 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
       // In this case, we may be setting a breakpoint in a tracelet which could
       // already be jitted, and present on the stack. Make sure we don't return
       // to it so we have a chance to honor breakpoints.
-      g_context->preventReturnsToTC();
+      debuggerPreventReturnsToTC();
     }
   }
 }

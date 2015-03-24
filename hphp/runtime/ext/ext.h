@@ -34,7 +34,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_simplexml.h"

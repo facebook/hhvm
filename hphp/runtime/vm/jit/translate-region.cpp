@@ -189,7 +189,7 @@ void emitPredictionGuards(HTS& hts,
     }
   }
 
-  if (isEntry) irgen::ringbuffer(hts, Trace::RBTypeTraceletGuards, sk);
+  if (isEntry) irgen::ringbufferEntry(hts, Trace::RBTypeTraceletGuards, sk);
 
   // Emit type guards.
   while (typePreds.hasNext(sk)) {
@@ -229,7 +229,7 @@ void emitPredictionGuards(HTS& hts,
         irgen::incProfCounter(hts, mcg->tx().profData()->curTransID());
       }
     }
-    irgen::ringbuffer(hts, Trace::RBTypeTraceletBody, sk);
+    irgen::ringbufferEntry(hts, Trace::RBTypeTraceletBody, sk);
   }
 
   // In the entry block, hhbc-translator gets a chance to emit some code

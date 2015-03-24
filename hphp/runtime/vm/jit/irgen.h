@@ -114,9 +114,12 @@ void incProfCounter(HTS&, TransID);
 void checkCold(HTS&, TransID);
 
 /*
- * Generate a ringbuffer update for executing a particular SrcKey.
+ * If ringbuffer tracing is enabled, generate a ringbuffer entry associated
+ * with a SrcKey or string.
  */
-void ringbuffer(HTS&, Trace::RingBufferType t, SrcKey sk, int level = 1);
+void ringbufferEntry(HTS&, Trace::RingBufferType, SrcKey, int level = 1);
+void ringbufferMsg(HTS&, Trace::RingBufferType, const StringData*,
+                   int level = 1);
 
 //////////////////////////////////////////////////////////////////////
 

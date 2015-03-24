@@ -1356,7 +1356,7 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
                                          ni.offset(), ni.toString(),
                                          show(hts)));
 
-  irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
+  irgen::ringbufferEntry(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(hts, Stats::Instr_TC, 1);
   if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {

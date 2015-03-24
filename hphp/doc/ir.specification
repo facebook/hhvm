@@ -1913,7 +1913,9 @@ To string conversions:
   Assert that the current hardware return address is the expected value. If the
   assertion fails, execution is aborted via a hardware exception.
 
-| RBTrace, ND, NA, NF
+| RBTraceEntry, ND, NA, NF
+
+| RBTraceMsg, ND, NA, NF
 
   Ring buffer tracing.
 

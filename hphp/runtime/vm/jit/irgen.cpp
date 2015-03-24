@@ -131,9 +131,17 @@ void checkCold(HTS& env, TransID transId) {
   gen(env, CheckCold, makeExitOpt(env, transId), TransIDData(transId));
 }
 
-void ringbuffer(HTS& env, Trace::RingBufferType t, SrcKey sk, int level) {
+void ringbufferEntry(HTS& env, Trace::RingBufferType t, SrcKey sk, int level) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
-  gen(env, RBTrace, RBTraceData(t, sk));
+  gen(env, RBTraceEntry, RBEntryData(t, sk));
+}
+
+void ringbufferMsg(HTS& env,
+                   Trace::RingBufferType t,
+                   const StringData* msg,
+                   int level) {
+  if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
+  gen(env, RBTraceMsg, RBMsgData(t, msg));
 }
 
 void prepareEntry(HTS& env) {

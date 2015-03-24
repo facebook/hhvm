@@ -747,28 +747,33 @@ struct CoerceData : IRExtraData {
   int64_t argNum;
 };
 
-struct RBTraceData : IRExtraData {
-  RBTraceData(Trace::RingBufferType t, SrcKey sk)
+struct RBEntryData : IRExtraData {
+  RBEntryData(Trace::RingBufferType t, SrcKey sk)
     : type(t)
     , sk(sk)
-    , msg(nullptr)
   {}
 
-  RBTraceData(Trace::RingBufferType t, const StringData* msg)
+  std::string show() const {
+    return folly::sformat("{}: {}", ringbufferName(type), showShort(sk));
+  }
+
+  Trace::RingBufferType type;
+  SrcKey sk;
+};
+
+struct RBMsgData : IRExtraData {
+  RBMsgData(Trace::RingBufferType t, const StringData* msg)
     : type(t)
-    , sk()
     , msg(msg)
   {
     assert(msg->isStatic());
   }
 
   std::string show() const {
-    auto const data = msg ? msg->data() : showShort(sk);
-    return folly::format("{}: {}", ringbufferName(type), data).str();
+    return folly::sformat("{}: {}", ringbufferName(type), msg->data());
   }
 
   Trace::RingBufferType type;
-  SrcKey sk;
   const StringData* msg;
 };
 
@@ -976,7 +981,8 @@ X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
-X(RBTrace,                      RBTraceData);
+X(RBTraceEntry,                 RBEntryData);
+X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
 X(AllocPackedArray,             PackedArrayData);

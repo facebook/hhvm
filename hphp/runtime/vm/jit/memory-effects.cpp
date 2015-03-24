@@ -921,7 +921,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdBindAddr:
   case LdAsyncArParentChain:
   case LdSSwitchDestFast:
-  case RBTrace:
+  case RBTraceEntry:
+  case RBTraceMsg:
   case ConvIntToBool:
   case ConvIntToDbl:
   case ConvStrToArr:   // decrefs src, but src is a string

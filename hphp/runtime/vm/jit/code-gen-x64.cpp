@@ -5335,29 +5335,31 @@ void CodeGenerator::cgVerifyRetCls(IRInstruction* inst) {
   emitVerifyCls(inst);
 }
 
-void CodeGenerator::cgRBTrace(IRInstruction* inst) {
-  auto const& extra = *inst->extra<RBTrace>();
+void CodeGenerator::cgRBTraceEntry(IRInstruction* inst) {
+  auto const& extra = *inst->extra<RBTraceEntry>();
   auto& v = vmain();
-  if (auto const msg = extra.msg) {
-    assert(msg->isStatic());
-    cgCallHelper(v,
-                 CppCall::direct(Trace::ringbufferMsg),
-                 kVoidDest,
-                 SyncOptions::kNoSyncPoint,
-                 argGroup(inst)
-                   .immPtr(msg->data())
-                   .imm(msg->size())
-                   .imm(extra.type));
-  } else {
-    auto args = argGroup(inst);
-    cgCallHelper(v,
-                 CppCall::direct(Trace::ringbufferEntryRip),
-                 kVoidDest,
-                 SyncOptions::kNoSyncPoint,
-                 argGroup(inst)
-                   .imm(extra.type)
-                   .imm(extra.sk.toAtomicInt()));
-  }
+  auto args = argGroup(inst);
+  cgCallHelper(v,
+               CppCall::direct(Trace::ringbufferEntryRip),
+               kVoidDest,
+               SyncOptions::kNoSyncPoint,
+               argGroup(inst)
+                 .imm(extra.type)
+                 .imm(extra.sk.toAtomicInt()));
+}
+
+void CodeGenerator::cgRBTraceMsg(IRInstruction* inst) {
+  auto const& extra = *inst->extra<RBTraceMsg>();
+  auto& v = vmain();
+  assert(extra.msg->isStatic());
+  cgCallHelper(v,
+               CppCall::direct(Trace::ringbufferMsg),
+               kVoidDest,
+               SyncOptions::kNoSyncPoint,
+               argGroup(inst)
+                 .immPtr(extra.msg->data())
+                 .imm(extra.msg->size())
+                 .imm(extra.type));
 }
 
 void CodeGenerator::cgCountBytecode(IRInstruction* inst) {

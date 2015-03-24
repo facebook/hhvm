@@ -702,8 +702,8 @@ void ExecutionContext::handleError(const std::string& msg,
 
   // Potentially upgrade the error to E_USER_ERROR
   if (errnum & RuntimeOption::ErrorUpgradeLevel &
-      static_cast<int>(ErrorConstants::ErrorModes::UPGRADEABLE_ERROR)) {
-    errnum = static_cast<int>(ErrorConstants::ErrorModes::USER_ERROR);
+      static_cast<int>(ErrorMode::UPGRADEABLE_ERROR)) {
+    errnum = static_cast<int>(ErrorMode::USER_ERROR);
     mode = ErrorThrowMode::IfUnhandled;
   }
 
@@ -728,7 +728,7 @@ void ExecutionContext::handleError(const std::string& msg,
       (mode == ErrorThrowMode::IfUnhandled && !handled)) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee, errnum, msg));
     bool isRecoverable =
-      errnum == static_cast<int>(ErrorConstants::ErrorModes::RECOVERABLE_ERROR);
+      errnum == static_cast<int>(ErrorMode::RECOVERABLE_ERROR);
     auto exn = FatalErrorException(msg, ee.getBacktrace(), isRecoverable);
     exn.setSilent(!errorNeedsLogging(errnum));
     throw exn;
@@ -807,11 +807,11 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.resetTimer();
 
   auto prefix = "\nFatal error: ";
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
+  auto errnum = static_cast<int>(ErrorMode::FATAL_ERROR);
   auto const fatal = dynamic_cast<const FatalErrorException*>(&e);
   if (fatal && fatal->isRecoverable()) {
      prefix = "\nCatchable fatal error: ";
-     errnum = static_cast<int>(ErrorConstants::ErrorModes::RECOVERABLE_ERROR);
+     errnum = static_cast<int>(ErrorMode::RECOVERABLE_ERROR);
   }
 
   recordLastError(e, errnum);

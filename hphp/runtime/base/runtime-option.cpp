@@ -100,7 +100,7 @@ bool RuntimeOption::CallUserHandlerOnFatals = false;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 bool RuntimeOption::LogNativeStackOnOOM = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
-  static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL);
+  static_cast<int>(ErrorMode::HPHP_ALL);
 int RuntimeOption::ForceErrorReportingLevel = 0;
 
 std::string RuntimeOption::ServerUser;
@@ -812,7 +812,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(NoSilencer, ini, logger["NoSilencer"]);
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  logger["RuntimeErrorReportingLevel"],
-                 static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));
+                 static_cast<int>(ErrorMode::HPHP_ALL));
     Config::Bind(ForceErrorReportingLevel, ini,
                  logger["ForceErrorReportingLevel"], 0);
     Config::Bind(AccessLogDefaultFormat, ini, logger["AccessLogDefaultFormat"],

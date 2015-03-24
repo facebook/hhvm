@@ -584,7 +584,7 @@ private:
 
 #define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
 
-String getDataTypeString(DataType t);
+StaticString getDataTypeString(DataType t);
 
 //////////////////////////////////////////////////////////////////////
 

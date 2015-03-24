@@ -6791,7 +6791,7 @@ OPTBLD_INLINE void iopEval(IOP_ARGS) {
 
   vmStack().popC();
   if (unit->parseFatal(msg, line)) {
-    int errnum = static_cast<int>(ErrorConstants::ErrorModes::WARNING);
+    auto const errnum = static_cast<int>(ErrorMode::WARNING);
     if (vm->errorNeedsLogging(errnum)) {
       // manual call to Logger instead of logError as we need to use
       // evalFileName and line as the exception doesn't track the eval()

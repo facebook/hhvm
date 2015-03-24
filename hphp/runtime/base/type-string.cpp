@@ -565,7 +565,7 @@ const StaticString
   s_resource("resource"),
   s_ref("reference");
 
-String getDataTypeString(DataType t) {
+StaticString getDataTypeString(DataType t) {
   switch (t) {
     case KindOfUninit:
     case KindOfNull:       return s_NULL;

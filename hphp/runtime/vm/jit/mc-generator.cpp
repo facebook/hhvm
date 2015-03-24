@@ -1568,7 +1568,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     auto result = TranslateResult::Retry;
     auto regionInterps = RegionBlacklist{};
     auto const initSpOffset = region ? region->entry()->initialSpOffset()
-                                       : liveSpOff();
+                                     : liveSpOff();
 
     while (region && result == TranslateResult::Retry) {
       auto const transContext = TransContext {

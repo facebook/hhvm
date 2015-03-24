@@ -164,7 +164,7 @@ bool canDCE(IRInstruction* inst) {
   case CountArrayFast:
   case CountCollection:
   case Nop:
-  case AKExists:
+  case AKExistsArr:
   case LdBindAddr:
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
@@ -189,6 +189,7 @@ bool canDCE(IRInstruction* inst) {
     assert(!inst->isControlFlow());
     return true;
 
+  case AKExistsObj:
   case AdjustSP:
   case ResetSP:
   case StStk:

@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
@@ -2446,11 +2447,14 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
     ? mcg->tx().uniqueStubs.freeManyLocalsHelper
     : mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
-  auto args = RegSet(r14) | RegSet(rVmFp);
-  auto kills = (abi.all() - abi.calleeSaved) | RegSet(r14) | RegSet(r15);
+  auto const args = RegSet(r14) | RegSet(rVmFp);
+  auto const kills = (abi.all() - abi.calleeSaved) | RegSet(r14) | RegSet(r15);
 
   auto& marker = inst->marker();
-  auto fix = Fixup{marker.bcOff()-marker.func()->base(), marker.spOff().offset};
+  auto const fix = Fixup {
+    marker.bcOff() - marker.func()->base(),
+    marker.spOff().offset
+  };
 
   v << lea{rFp[-numLocals * sizeof(TypedValue)], r14};
   v << callstub{target, args, kills, fix};
@@ -4424,38 +4428,65 @@ void CodeGenerator::cgLookupCnsU(IRInstruction* inst) {
                args);
 }
 
-void CodeGenerator::cgAKExists(IRInstruction* inst) {
-  SSATmp* arr = inst->src(0);
-  SSATmp* key = inst->src(1);
-
-  bool (*obj_int_helper)(ObjectData*, int64_t) = &ak_exist_int_obj;
-  bool (*obj_str_helper)(ObjectData*, StringData*) = &ak_exist_string_obj;
-  bool (*arr_str_helper)(ArrayData*, StringData*) = &ak_exist_string;
+void CodeGenerator::cgAKExistsArr(IRInstruction* inst) {
+  auto const keyTy = inst->src(1)->type();
   auto& v = vmain();
-  if (key->type() <= Type::Null) {
-    if (arr->isA(Type::Arr)) {
-      cgCallHelper(v, CppCall::direct(arr_str_helper),
-                   callDest(inst),
-                   SyncOptions::kNoSyncPoint,
-                   argGroup(inst).ssa(0/*arr*/).immPtr(staticEmptyString()));
-    } else {
-      v << ldimmq{0, dstLoc(inst, 0).reg()};
-    }
+
+  if (keyTy <= Type::InitNull) {
+    cgCallHelper(
+      v,
+      arrayCallIfLowMem(inst, &g_array_funcs.existsStr),
+      callDest(inst),
+      SyncOptions::kNoSyncPoint,
+      argGroup(inst)
+        .ssa(0)
+        .immPtr(staticEmptyString())
+    );
     return;
   }
 
-  auto helper_func = arr->isA(Type::Obj)
-    ? (key->isA(Type::Int)
-       ? CppCall::direct(obj_int_helper)
-       : CppCall::direct(obj_str_helper))
-    : (key->isA(Type::Int)
-       ? arrayCallIfLowMem(inst, &g_array_funcs.existsInt)
-       : CppCall::direct(arr_str_helper));
+  auto const keyInfo = checkStrictlyInteger(keyTy);
+  auto const target =
+    keyInfo.checkForInt ? CppCall::direct(ak_exist_string) :
+    keyInfo.type == KeyType::Int ?
+      arrayCallIfLowMem(inst, &g_array_funcs.existsInt) :
+    arrayCallIfLowMem(inst, &g_array_funcs.existsStr);
+  auto args = argGroup(inst).ssa(0);
+  if (keyInfo.converted) {
+    args.imm(keyInfo.convertedInt);
+  } else {
+    args.ssa(1);
+  }
 
-  cgCallHelper(v, helper_func,
-               callDest(inst),
-               SyncOptions::kNoSyncPoint,
-               argGroup(inst).ssa(0/*arr*/).ssa(1/*key*/));
+  cgCallHelper(
+    v,
+    target,
+    callDest(inst),
+    SyncOptions::kNoSyncPoint,
+    args
+  );
+}
+
+void CodeGenerator::cgAKExistsObj(IRInstruction* inst) {
+  auto const keyTy = inst->src(1)->type();
+  auto& v = vmain();
+
+  if (keyTy <= Type::InitNull) {
+    v << ldimmq{0, dstLoc(inst, 0).reg()};
+    return;
+  }
+
+  cgCallHelper(
+    v,
+    keyTy <= Type::Int
+      ? CppCall::direct(ak_exist_int_obj)
+      : CppCall::direct(ak_exist_string_obj),
+    callDest(inst),
+    SyncOptions::kSyncPoint,
+    argGroup(inst)
+      .ssa(0)
+      .ssa(1)
+  );
 }
 
 void CodeGenerator::cgLdGblAddr(IRInstruction* inst) {

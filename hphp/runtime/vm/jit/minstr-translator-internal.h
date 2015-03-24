@@ -126,46 +126,6 @@ TypedValue* keyPtr(TypedValue& key) {
   return reinterpret_cast<TypedValue*>(key.m_data.num);
 }
 
-/*
- * Information about an array key (this represents however much we know about
- * whether the key is going to behave like an integer or a string).
- */
-struct ArrayKeyInfo {
-  int64_t convertedInt{0};
-  KeyType type{KeyType::Any};
-
-  // If true, the string could dynamically contain an integer-like string,
-  // which needs to be checked.
-  bool checkForInt{false};
-
-  // If true, useKey is an integer constant we've materialized, by converting a
-  // string `key' that was strictly an integer.
-  bool converted{false};
-};
-
-inline ArrayKeyInfo checkStrictlyInteger(SSATmp* key) {
-  auto ret = ArrayKeyInfo{};
-
-  if (key->isA(Type::Int)) {
-    ret.type = KeyType::Int;
-    return ret;
-  }
-  assert(key->isA(Type::Str));
-  ret.type = KeyType::Str;
-  if (key->hasConstVal()) {
-    int64_t i;
-    if (key->strVal()->isStrictlyInteger(i)) {
-      ret.converted    = true;
-      ret.type         = KeyType::Int;
-      ret.convertedInt = i;
-    }
-  } else {
-    ret.checkForInt = true;
-  }
-
-  return ret;
-}
-
 }}}
 
 #endif

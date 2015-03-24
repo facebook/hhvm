@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_VM_CODEGENHELPERS_H_
 #define incl_HPHP_VM_CODEGENHELPERS_H_
 
+#include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -25,7 +27,8 @@
 #include "hphp/util/abi-cxx.h"
 
 namespace HPHP { namespace jit {
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * SaveFP uses rVmFp, as usual. SavePC requires the caller to have
@@ -64,7 +67,50 @@ Vreg cond(Vout& v, ConditionCode cc, Vreg sf, Vreg dst, T t, F f) {
   return dst;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Information about an array key (this represents however much we know about
+ * whether the key is going to behave like an integer or a string).
+ */
+struct ArrayKeyInfo {
+  int64_t convertedInt{0};
+  KeyType type{KeyType::Any};
+
+  // If true, the string could dynamically contain an integer-like string,
+  // which needs to be checked.
+  bool checkForInt{false};
+
+  // If true, useKey is an integer constant we've materialized, by converting a
+  // string `key' that was strictly an integer.
+  bool converted{false};
+};
+
+inline ArrayKeyInfo checkStrictlyInteger(Type key) {
+  auto ret = ArrayKeyInfo{};
+
+  if (key <= Type::Int) {
+    ret.type = KeyType::Int;
+    return ret;
+  }
+  assert(key <= Type::Str);
+  ret.type = KeyType::Str;
+  if (key.hasConstVal()) {
+    int64_t i;
+    if (key.strVal()->isStrictlyInteger(i)) {
+      ret.converted    = true;
+      ret.type         = KeyType::Int;
+      ret.convertedInt = i;
+    }
+  } else {
+    ret.checkForInt = true;
+  }
+
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}
 
 #endif

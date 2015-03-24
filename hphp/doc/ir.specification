@@ -1619,10 +1619,14 @@ To string conversions:
 
   Has the effects of the php + operator on the two source arrays.
 
-| AKExists, D(Bool), S(Cell) S(Cell), NF
+| AKExistsArr, D(Bool), S(Arr) S(InitNull,Int,Str), NF
 
-  Has the effects of array_key_exists(S0, S1). Note that S0 does not need to be
-  an array---if it is an Obj the ArrayAccess API will be used, etc.
+  Has the effects of array_key_exists(S0, S1).
+
+| AKExistsObj, D(Bool), S(Obj) S(InitNull,Int,Str), Er
+
+  Has the effects of array_key_exists(S0, S1) on an object S0. This either does
+  collection accesses, or uses the ArrayAccess API.
 
 | ArrayIdx, D(Cell), S(Arr) S(Int,Str) S(Cell), PRc
 

@@ -575,8 +575,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case ArrayIdx:
-  case AKExists:
     return may_load_store(AHeapAny, AHeapAny);
+
+  case AKExistsArr:
+    return may_load_store(AHeapAny, AHeapAny);
+  case AKExistsObj:
+    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
   //////////////////////////////////////////////////////////////////////
   // Member instructions

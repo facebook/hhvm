@@ -177,8 +177,8 @@ SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
 }
 
 /*
- * Transforms in_array with a static haystack argument into an AKExists with the
- * haystack flipped.
+ * Transforms in_array with a static haystack argument into an AKExistsArr with
+ * the haystack flipped.
  */
 SSATmp* opt_in_array(HTS& env, uint32_t numArgs) {
   if (numArgs != 3) return nullptr;
@@ -226,7 +226,7 @@ SSATmp* opt_in_array(HTS& env, uint32_t numArgs) {
   auto const array = flipped.toArray();
   return gen(
     env,
-    AKExists,
+    AKExistsArr,
     cns(env, ArrayData::GetScalarArray(array.get())),
     needle
   );
@@ -1097,11 +1097,14 @@ void emitAKExists(HTS& env) {
   if (!arr->isA(Type::Arr) && !arr->isA(Type::Obj)) {
     PUNT(AKExists_badArray);
   }
-  if (!key->isA(Type::Str) && !key->isA(Type::Int) && !key->isA(Type::Null)) {
+  if (!key->isA(Type::Str) && !key->isA(Type::Int) &&
+      !key->isA(Type::InitNull)) {
     PUNT(AKExists_badKey);
   }
 
-  push(env, gen(env, AKExists, arr, key));
+  auto const val =
+    gen(env, arr->isA(Type::Arr) ? AKExistsArr : AKExistsObj, arr, key);
+  push(env, val);
   gen(env, DecRef, arr);
   gen(env, DecRef, key);
 }

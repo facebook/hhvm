@@ -66,7 +66,7 @@ let check_status connect (args:client_check_env) =
       };
     raise Server_missing
   end;
-  let response = ServerMsg.with_timeout 6
+  let response = ServerUtils.with_timeout 6
     ~on_timeout:(fun _ -> raise Server_busy)
     ~do_:(fun () ->
       let ic, oc = connect args in

@@ -10,6 +10,7 @@
 
 open Utils
 open ServerEnv
+open ServerUtils
 
 exception State_not_found
 
@@ -17,6 +18,7 @@ module type SERVER_PROGRAM = sig
   module EventLogger : sig
     val init: Path.path -> float -> unit
     val init_done: string -> unit
+    val load_script_done: unit -> unit
     val load_read_end: string -> unit
     val load_recheck_end: unit -> unit
     val load_failed: string -> unit
@@ -171,21 +173,28 @@ end = struct
         (Filename.quote (Path.string_of_path (ServerArgs.root genv.options)))
         (Filename.quote Build_id.build_id_ohai) in
       Printf.fprintf stderr "Running load script: %s\n%!" cmd;
-      let ic = Unix.open_process_in cmd in
-      let state_fn = begin
-        try input_line ic
-        with End_of_file -> raise State_not_found
-      end in
-      let to_recheck = ref [] in
-      begin
-        try while true do to_recheck := input_line ic :: !to_recheck done
-        with End_of_file -> ()
-      end;
-      assert (Unix.close_process_in ic = Unix.WEXITED 0);
+      let state_fn, to_recheck =
+        with_timeout (ServerConfig.load_script_timeout genv.config)
+        ~on_timeout:(fun _ -> failwith "Load script timed out")
+        ~do_:begin fun () ->
+          let ic = Unix.open_process_in cmd in
+          let state_fn = begin
+            try input_line ic
+            with End_of_file -> raise State_not_found
+          end in
+          let to_recheck = ref [] in
+          begin
+            try while true do to_recheck := input_line ic :: !to_recheck done
+            with End_of_file -> ()
+          end;
+          assert (Unix.close_process_in ic = Unix.WEXITED 0);
+          state_fn, !to_recheck
+        end in
       Printf.fprintf stderr
         "Load state found at %s. %d files to recheck\n%!"
-        state_fn (List.length !to_recheck);
-      let env = load genv state_fn !to_recheck in
+        state_fn (List.length to_recheck);
+      Program.EventLogger.load_script_done ();
+      let env = load genv state_fn to_recheck in
       Program.EventLogger.init_done "load";
       env
     with

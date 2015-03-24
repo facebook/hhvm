@@ -8,6 +8,7 @@
  *
  *)
 
+open ServerUtils
 
 (**
  * Commands and responses hh_server deals with
@@ -127,18 +128,6 @@ let response_to_string = function
   | ERRORS _ -> "Some Errors"
   | SERVER_DYING -> "Server Dying"
   | PONG -> "Pong"
-
-let with_timeout timeout ~on_timeout ~do_ =
-  let old_handler = ref Sys.Signal_default in
-  let old_timeout = ref 0 in
-  Utils.with_context
-    ~enter:(fun () ->
-      old_handler := Sys.signal Sys.sigalrm (Sys.Signal_handle on_timeout);
-      old_timeout := Unix.alarm timeout)
-    ~exit:(fun () ->
-      ignore (Unix.alarm !old_timeout);
-      Sys.set_signal Sys.sigalrm !old_handler)
-    ~do_
 
 let response_to_channel (oc:out_channel) (cmd:response): unit =
   (* flush immediately so that the client knows we're not hung; see

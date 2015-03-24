@@ -56,7 +56,7 @@ let should_start env =
   then begin
     try
       (* Let's ping the server to make sure it's up and not out of date *)
-      let response = ServerMsg.with_timeout 6
+      let response = ServerUtils.with_timeout 6
         ~on_timeout:(fun _ -> raise Server_busy)
         ~do_:(fun () ->
           let ic, oc = ClientUtils.connect env.root in

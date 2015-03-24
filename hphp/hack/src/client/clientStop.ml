@@ -35,7 +35,7 @@ module StopCommand (Config : STOP_CONFIG) : STOP_COMMAND = struct
     let root = env.root in
     Printf.fprintf stderr "Attempting to nicely kill server for %s\n%!"
       (Path.string_of_path root);
-    let response = ServerMsg.with_timeout 6
+    let response = ServerUtils.with_timeout 6
       ~on_timeout: (fun _ -> raise ClientExceptions.Server_busy)
       ~do_:(fun () ->
         try

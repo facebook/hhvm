@@ -75,7 +75,7 @@ let rec connect env retries =
 
 let rec wait_for_response ic =
   try
-    ServerMsg.with_timeout 1
+    ServerUtils.with_timeout 1
       ~on_timeout:(fun _ -> raise ClientExceptions.Server_busy)
       ~do_:(fun () ->
         let response = ServerMsg.response_from_channel ic in

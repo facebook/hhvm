@@ -11,7 +11,11 @@ interface T {
   abstract const type me as this;
 }
 
-final class C implements I {
+abstract class P {
+  const type Z as arraykey = arraykey;
+}
+
+final class C extends P implements I {
   const type Y<+Tk, -Tv> = ConstMap<Tk, Tv>;
   const type Z = string;
   const type me = C;

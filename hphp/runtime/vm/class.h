@@ -654,6 +654,11 @@ public:
   bool hasConstant(const StringData* clsCnsName) const;
 
   /*
+   * Whether this class has a type constant named `typeCnsName'.
+   */
+  bool hasTypeConstant(const StringData* typeCnsName) const;
+
+  /*
    * Look up the actual value of a class constant.  Perform dynamic
    * initialization if necessary.
    *

@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
@@ -431,11 +432,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       auto time = transport->getIntParam("time");
       bool random = randomParam == "true" || randomParam == "1";
       if (allParam == "true" || allParam == "1") {
-        jit::mcg->liveRelocate(-2);
+        jit::liveRelocate(-2);
       } else if (random || time == 0) {
-        jit::mcg->liveRelocate(random);
+        jit::liveRelocate(random);
       } else {
-        jit::mcg->liveRelocate(time);
+        jit::liveRelocate(time);
       }
       transport->sendString("OK\n");
       break;

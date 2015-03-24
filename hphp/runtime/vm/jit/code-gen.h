@@ -57,7 +57,7 @@ struct CodegenState {
 
   // Each catch block needs to know the number of bytes pushed at the
   // callsite so it can fix rsp before executing the catch block.
-  StateVector<Block, Offset> catch_offsets;
+  StateVector<Block,Offset> catch_offsets;
 
   // Have we progressed past the guards? Used to suppress TransBCMappings until
   // we're translating code that can properly be attributed to specific

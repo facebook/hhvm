@@ -116,50 +116,12 @@ struct CodeGenFixups {
   void clear();
 };
 
-struct RelocationInfo {
-  RelocationInfo() {}
-
-  void recordRange(TCA start, TCA end,
-                   TCA destStart, TCA destEnd);
-  void recordAddress(TCA src, TCA dest, int range);
-  TCA adjustedAddressAfter(TCA addr) const;
-  TCA adjustedAddressBefore(TCA addr) const;
-  CTCA adjustedAddressAfter(CTCA addr) const {
-    return adjustedAddressAfter(const_cast<TCA>(addr));
-  }
-  CTCA adjustedAddressBefore(CTCA addr) const {
-    return adjustedAddressBefore(const_cast<TCA>(addr));
-  }
-  void rewind(TCA start, TCA end);
-  void markAddressImmediates(const std::set<TCA>& ai) {
-    m_addressImmediates.insert(ai.begin(), ai.end());
-  }
-  bool isAddressImmediate(TCA ip) {
-    return m_addressImmediates.count(ip);
-  }
-  typedef std::vector<std::pair<TCA,TCA>> RangeVec;
-  const RangeVec& srcRanges() { return m_srcRanges; }
-  const RangeVec& dstRanges() { return m_dstRanges; }
- private:
-  RangeVec m_srcRanges;
-  RangeVec m_dstRanges;
-  /*
-   * maps from src address, to range of destination address
-   * This is because we could insert nops before the instruction
-   * corresponding to src. Most things want the address of the
-   * instruction corresponding to the src instruction; but eg
-   * the fixup map would want the address of the nop.
-   */
-  std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
-  std::set<TCA> m_addressImmediates;
-};
-
 struct UsageInfo {
   std::string m_name;
   size_t m_used;
   size_t m_capacity;
   bool m_global;
-} ;
+};
 
 struct TransRelocInfo;
 
@@ -193,6 +155,7 @@ public:
   Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
   CodeGenFixups& cgFixups() { return m_fixups; }
+  FreeStubList& freeStubList() { return m_freeStubs; }
   LiteralMap& literals() { return m_literals; }
   void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
 
@@ -357,32 +320,6 @@ public:
    */
   void handleStackOverflow(ActRec* stashedAR);
 
-  /*
-    relocate using data from perf.
-    If time is non-negative, its used as the time to run perf record.
-    If time is -1, we pick a random subset of translations, and relocate them
-    in a random order.
-    If time is -2, we relocate all of the translations.
-
-    Currently we don't ever relocate anything from frozen (or prof). We also
-    don't relocate the cold portion of translations; but we still need to know
-    where those are in order to relocate back-references to the code that was
-    relocated.
-  */
-  void liveRelocate(int time);
-  void liveRelocate(bool random) { return liveRelocate(random ? -1 : 20); }
-  void recordPerfRelocMap(
-    TCA start, TCA end,
-    TCA coldStart, TCA coldEnd,
-    SrcKey sk, int argNum,
-    const GrowableVector<IncomingBranch> &incomingBranches,
-    CodeGenFixups& fixups);
-  String perfRelocMapInfo(
-    TCA start, TCA end,
-    TCA coldStart, TCA coldEnd,
-    SrcKey sk, int argNum,
-    const GrowableVector<IncomingBranch> &incomingBranches,
-    CodeGenFixups& fixups);
 private:
   /*
    * Service request handlers.
@@ -416,13 +353,6 @@ private:
 
   void invalidateSrcKey(SrcKey sk);
   void invalidateFuncProfSrcKeys(const Func* func);
-
-  void readRelocations(
-    FILE* relocFile,
-    std::set<TCA>* liveStubs,
-    void (*callback)(TransRelocInfo&& tri, void* data),
-    void* data);
-  void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot);
 
   void recordGdbTranslation(SrcKey sk, const Func* f,
                             const CodeBlock& cb,

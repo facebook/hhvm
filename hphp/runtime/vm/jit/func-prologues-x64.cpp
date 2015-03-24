@@ -27,11 +27,11 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 
 namespace HPHP { namespace jit { namespace x64 {
 
 //////////////////////////////////////////////////////////////////////
-
 
 TRACE_SET_MOD(mcg);
 
@@ -369,11 +369,11 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> incomingBranches;
     SrcKey sk = SrcKey(func, dvs[0].second, false);
-    mcg->recordPerfRelocMap(start, mainCode.frontier(),
-                            frozenCode.frontier(), frozenCode.frontier(),
-                            sk, 0,
-                            incomingBranches,
-                            mcg->cgFixups());
+    recordPerfRelocMap(start, mainCode.frontier(),
+                       frozenCode.frontier(), frozenCode.frontier(),
+                       sk, 0,
+                       incomingBranches,
+                       mcg->cgFixups());
   }
 
   mcg->cgFixups().process(nullptr);

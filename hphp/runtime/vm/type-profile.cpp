@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/util/atomic-vector.h"
 
 namespace HPHP {
@@ -199,7 +200,7 @@ void profileRequestStart() {
   }
 
   if (standardRequest && relocateRequests > 0 && !--relocateRequests) {
-    jit::mcg->liveRelocate(true);
+    jit::liveRelocate(true);
   }
 }
 

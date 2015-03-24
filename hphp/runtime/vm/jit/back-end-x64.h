@@ -20,13 +20,26 @@
 
 namespace HPHP { namespace jit { namespace x64 {
 
+//////////////////////////////////////////////////////////////////////
+
+std::unique_ptr<BackEnd> newBackEnd();
+
+//////////////////////////////////////////////////////////////////////
+
 constexpr int kJmpLen = 5;
 constexpr int kCallLen = 5;
 constexpr int kJmpccLen = 6;
 constexpr int kJmpImmBytes = 4;
 constexpr int kRipLeaLen = 7;
 
-std::unique_ptr<BackEnd> newBackEnd();
+//////////////////////////////////////////////////////////////////////
+
+bool isSmashable(Address frontier, int nBytes, int offset = 0);
+void prepareForSmashImpl(CodeBlock& cb, int nBytes, int offset);
+void smashJmp(TCA jmpAddr, TCA newDest);
+void smashCall(TCA callAddr, TCA newDest);
+
+//////////////////////////////////////////////////////////////////////
 
 }}}
 

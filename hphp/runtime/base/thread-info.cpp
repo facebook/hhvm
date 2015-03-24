@@ -16,34 +16,41 @@
 
 #include "hphp/runtime/base/thread-info.h"
 
-#include <sys/time.h>
-#include <sys/mman.h>
-#include <sys/resource.h>
-#include <signal.h>
-#include <limits>
 #include <map>
 #include <set>
 
 #include <folly/Format.h>
 
+#include "hphp/util/alloc.h"
+#include "hphp/util/lock.h"
+
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
-#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/alloc.h"
-#include "hphp/util/logger.h"
+#include "hphp/runtime/ext/process/ext_process.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static Mutex s_thread_info_mutex;
-static std::set<ThreadInfo*> s_thread_infos;
+namespace {
+///////////////////////////////////////////////////////////////////////////////
 
-__thread char* ThreadInfo::t_stackbase = 0;
+/*
+ * Set of all ThreadInfos for the running process.
+ */
+std::set<ThreadInfo*> s_thread_infos;
+Mutex s_thread_info_mutex;
+
+/*
+ * Either null, or populated by initialization of ThreadInfo as an approximation
+ * of the highest address of the current thread's stack.
+ */
+__thread char* t_stackbase = nullptr;
+
+///////////////////////////////////////////////////////////////////////////////
+}
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
@@ -51,12 +58,12 @@ ThreadInfo::ThreadInfo() {
   assert(!t_stackbase);
   t_stackbase = static_cast<char*>(stack_top_ptr());
 
-  m_mm = &MM();
   m_coverage = new CodeCoverage();
 }
 
 ThreadInfo::~ThreadInfo() {
-  t_stackbase = 0;
+  assert(t_stackbase);
+  t_stackbase = nullptr;
 
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
@@ -93,22 +100,6 @@ void ThreadInfo::ExecutePerThread(std::function<void(ThreadInfo*)> f) {
 
 void ThreadInfo::onSessionInit() {
   m_reqInjectionData.onSessionInit();
-
-  // Take the address of the cached per-thread stackLimit, and use this to allow
-  // some slack for (a) stack usage above the caller of reset() and (b) stack
-  // usage after the position gets checked.
-  // If we're not in a threaded environment, then s_stackSize will be
-  // zero. Use getrlimit to figure out what the size of the stack is to
-  // calculate an approximation of where the bottom of the stack should be.
-  if (s_stackSize == 0) {
-    struct rlimit rl;
-
-    getrlimit(RLIMIT_STACK, &rl);
-    m_stacklimit = t_stackbase - (rl.rlim_cur - StackSlack);
-  } else {
-    m_stacklimit = (char *)s_stackLimit + StackSlack;
-    assert(uintptr_t(m_stacklimit) < s_stackLimit + s_stackSize);
-  }
 }
 
 void ThreadInfo::clearPendingException() {
@@ -120,13 +111,14 @@ void ThreadInfo::clearPendingException() {
 
 void ThreadInfo::setPendingException(Exception* e) {
   m_reqInjectionData.setFlag(PendingExceptionFlag);
+
   if (m_pendingException != nullptr) delete m_pendingException;
   m_pendingException = e;
 }
 
 void ThreadInfo::onSessionExit() {
   // Clear any timeout handlers to they don't fire when the request has already
-  // been destroyed
+  // been destroyed.
   m_reqInjectionData.setTimeout(0);
   m_reqInjectionData.setCPUTimeout(0);
 
@@ -138,9 +130,8 @@ void ThreadInfo::onSessionExit() {
 
 void raise_infinite_recursion_error() {
   if (!RuntimeOption::NoInfiniteRecursionDetection) {
-    // Reset profiler otherwise it might recurse further causing segfault
-    auto info = ThreadInfo::s_threadInfo.getNoCheck();
-    info->m_profiler = nullptr;
+    // Reset profiler otherwise it might recurse further causing segfault.
+    ThreadInfo::s_threadInfo->m_profiler = nullptr;
     raise_error("infinite recursion detected");
   }
 }
@@ -162,9 +153,11 @@ static Exception* generate_request_timeout_exception() {
 static Exception* generate_request_cpu_timeout_exception() {
   auto& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
 
-  auto exceptionMsg =
-    folly::sformat("Maximum CPU time of {} seconds exceeded",
-                   data.getCPUTimeout());
+  auto exceptionMsg = folly::sformat(
+    "Maximum CPU time of {} seconds exceeded",
+    data.getCPUTimeout()
+  );
+
   auto exceptionStack = createBacktrace(BacktraceArgs()
                                         .withSelf()
                                         .withThis());
@@ -219,7 +212,6 @@ ssize_t check_request_surprise() {
     }
   }
   if (do_signaled) {
-    extern bool HHVM_FN(pcntl_signal_dispatch)();
     HHVM_FN(pcntl_signal_dispatch)();
   }
 

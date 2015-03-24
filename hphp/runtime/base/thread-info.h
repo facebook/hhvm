@@ -45,52 +45,50 @@ struct ThreadInfo {
   static void ExecutePerThread(std::function<void(ThreadInfo*)> f);
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
-  RequestInjectionData m_reqInjectionData;
-
-  // For infinite recursion detection.  m_stacklimit is the lowest
-  // address the stack can grow to.
-  char* m_stacklimit{nullptr};
-
-  // Either null, or populated by initialization of ThreadInfo as an
-  // approximation of the highest address of the current thread's
-  // stack.
-  static __thread char* t_stackbase;
-
-  // This is the amount of "slack" in stack usage checks - if the
-  // stack pointer gets within this distance from the end (minus
-  // overhead), throw an infinite recursion exception.
+  /*
+   * This is the amount of "slack" in stack usage checks - if the stack pointer
+   * gets within this distance from the end (minus overhead), throw an infinite
+   * recursion exception.
+   */
   static constexpr int StackSlack = 1024 * 1024;
 
-  MemoryManager* m_mm;
-
-  // This pointer is set by ProfilerFactory
-  Profiler* m_profiler{nullptr};
-
-  CodeCoverage* m_coverage{nullptr};
-
-  // Set by DebugHookHandler::attach().
-  DebugHookHandler* m_debugHookHandler{nullptr};
-
-  Executing m_executing{Idling};
-
-  // A C++ exception which will be thrown by the next surprise check.
-  Exception* m_pendingException{nullptr};
-
-  ThreadInfo();
-  ~ThreadInfo();
-
-  /**
+  /*
    * Since this is often used as a static global, we want to do anything that
    * might try to access ThreadInfo::s_threadInfo here instead of in the
-   * constructor */
+   * constructor.
+   */
   void init();
 
   void onSessionInit();
   void onSessionExit();
-  void setPendingException(Exception* e);
+
+  /*
+   * Setting and clearing the pending exception.
+   */
+  void setPendingException(Exception*);
   void clearPendingException();
 
-  static bool valid(ThreadInfo* info);
+  static bool valid(ThreadInfo*);
+
+  ThreadInfo();
+  ~ThreadInfo();
+
+  ////////////////////////////////////////////////////////////////////
+
+  RequestInjectionData m_reqInjectionData;
+
+  /* This pointer is set by ProfilerFactory. */
+  Profiler* m_profiler{nullptr};
+
+  CodeCoverage* m_coverage{nullptr};
+
+  /* Set by DebugHookHandler::attach(). */
+  DebugHookHandler* m_debugHookHandler{nullptr};
+
+  /* A C++ exception which will be thrown by the next surprise check. */
+  Exception* m_pendingException{nullptr};
+
+  Executing m_executing{Idling};
 };
 
 //////////////////////////////////////////////////////////////////////

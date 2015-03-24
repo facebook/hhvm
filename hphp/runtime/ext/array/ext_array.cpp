@@ -2627,6 +2627,10 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
 #define REGISTER_CONSTANT(name)                                                \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
 
+#define REGISTER_CONSTANT_VALUE(option, value)                                 \
+  Native::registerConstant<KindOfInt64>(makeStaticString("ARRAY_" #option),    \
+                                       (value));
+
 class ArrayExtension final : public Extension {
 public:
   ArrayExtension() : Extension("array") {}
@@ -2652,6 +2656,9 @@ public:
     REGISTER_CONSTANT(UCOL_STRENGTH);
     REGISTER_CONSTANT(UCOL_HIRAGANA_QUATERNARY_MODE);
     REGISTER_CONSTANT(UCOL_NUMERIC_COLLATION);
+
+    REGISTER_CONSTANT_VALUE(FILTER_USE_BOTH, 1);
+    REGISTER_CONSTANT_VALUE(FILTER_USE_KEY,  2);
 
     HHVM_FE(array_change_key_case);
     HHVM_FE(array_chunk);

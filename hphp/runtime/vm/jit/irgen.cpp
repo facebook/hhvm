@@ -280,7 +280,7 @@ void prepareForHHBCMergePoint(HTS& env) {
   // redefine StkPtrs, but calls still need to do that for now, so we
   // need this hack.
   auto spOff = IRSPOffset{-(env.irb->syncedSpLevel() - env.irb->spOffset())};
-  gen(env, AdjustSP, IRSPOffsetData{ spOff }, sp(env));
+  gen(env, AdjustSP, IRSPOffsetData { spOff }, sp(env));
 }
 
 FPAbsOffset logicalStackDepth(const HTS& env) {

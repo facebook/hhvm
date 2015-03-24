@@ -27,20 +27,16 @@ namespace HPHP { namespace jit {
 
 struct SSATmp;
 
+//////////////////////////////////////////////////////////////////////
+
 /*
- * BCMarker holds the location of a specific bytecode instruction,
- * along with the offset from vmfp to vmsp at the beginning of the
- * instruction.  Every IRInstruction has a marker to keep track of
- * which bytecode instruction it came from.  If we're doing an
- * optimized translation, it also holds the TransID for the profiling
- * translation associated with this piece of code.
+ * BCMarker holds the location of a specific bytecode instruction, along with
+ * the offset from vmfp to vmsp at the beginning of the instruction.  Every
+ * IRInstruction has a marker to keep track of which bytecode instruction it
+ * came from.  If we're doing an optimized translation, it also holds the
+ * TransID for the profiling translation associated with this piece of code.
  */
 struct BCMarker {
-  SrcKey  m_sk;
-  FPAbsOffset m_spOff{0};
-  TransID m_profTransID{kInvalidTransID};
-  SSATmp* m_fp{nullptr};
-
   /*
    * This is for use by test code that needs to provide BCMarkers but is not
    * deriving them from an actual bytecode region. It is always valid().
@@ -84,14 +80,25 @@ struct BCMarker {
   Offset      bcOff()       const { assert(valid());   return m_sk.offset();  }
   bool        resumed()     const { assert(valid());   return m_sk.resumed(); }
   FPAbsOffset spOff()       const { assert(valid());   return m_spOff;        }
-  TransID     profTransId() const { assert(valid());   return m_profTransID;  }
+  TransID     profTransID() const { assert(valid());   return m_profTransID;  }
   SSATmp*     fp()          const { assert(valid());   return m_fp;           }
 
-  // Return a copy of this marker with an updated sp
-  BCMarker adjustSp(FPAbsOffset sp) const {
-    return {m_sk, sp, m_profTransID, m_fp};
+  // Return a copy of this marker with an updated sp or fp.
+  BCMarker adjustSP(FPAbsOffset sp) const {
+    return BCMarker { m_sk, sp, m_profTransID, m_fp };
   }
+  BCMarker adjustFP(SSATmp* fp) const {
+    return BCMarker { m_sk, m_spOff, m_profTransID, fp };
+  }
+
+private:
+  SrcKey m_sk;
+  FPAbsOffset m_spOff{0};
+  TransID m_profTransID{kInvalidTransID};
+  SSATmp* m_fp{nullptr};
 };
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

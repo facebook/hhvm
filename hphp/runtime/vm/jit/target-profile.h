@@ -131,10 +131,10 @@ private:
       );
 
     case TransKind::Optimize:
-      if (isValidTransID(marker.m_profTransID)) {
+      if (isValidTransID(marker.profTransID())) {
         return rds::attach<T>(
           rds::Profile {
-            marker.m_profTransID, // transId from profiling translation
+            marker.profTransID(), // transID from profiling translation
             marker.bcOff(),
             name
           }

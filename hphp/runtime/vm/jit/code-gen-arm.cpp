@@ -247,12 +247,12 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
 #define PUNT_OPCODE(name)                                               \
   void CodeGenerator::cg##name(IRInstruction* inst) {                   \
     cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),      \
-           curFunc(), resumed(), m_curInst->marker().profTransId());    \
+           curFunc(), resumed(), m_curInst->marker().profTransID());    \
   }
 
 #define CG_PUNT(instr)                                              \
     cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
-           curFunc(), resumed(), m_curInst->marker().profTransId())
+           curFunc(), resumed(), m_curInst->marker().profTransID())
 
 //////////////////////////////////////////////////////////////////////
 PUNT_OPCODE(ArrayIdx)

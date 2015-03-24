@@ -94,6 +94,9 @@ let go genv fnl oc =
         ~next:(Bucket.make fnl)
     else
       lint [] fnl in
+  let errs = List.sort begin fun x y ->
+    Pos.compare (Lint.get_pos x) (Lint.get_pos y)
+  end errs in
   let errs = rev_rev_map Lint.to_absolute errs in
   Marshal.to_channel oc (errs : result) [];
   flush oc

@@ -276,6 +276,9 @@ let handle_mode mode files_info errors lint_errors =
         end files_info lint_errors in
       if lint_errors <> []
       then begin
+        let lint_errors = List.sort begin fun x y ->
+          Pos.compare (Lint.get_pos x) (Lint.get_pos y)
+        end lint_errors in
         let lint_errors = List.map Lint.to_absolute lint_errors in
         ServerLint.output_text stdout lint_errors;
         exit 2

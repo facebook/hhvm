@@ -37,6 +37,40 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Default dirty page purging threshold.  This setting is especially relevant to
+// arena 0, which all the service requests use.  Arena 1, the low_malloc arena,
+// also uses this setting, but that arena is not tuning-sensitive.
+#define LG_DIRTY_MULT_DEFAULT 5
+// Dirty page purging thresholds for the per NUMA node arenas used by request
+// threads.  These arenas tend to have proportionally large memory usage
+// fluctuations because requests clean up nearly all allocated memory at request
+// end.  Depending on number of request threads, current load, etc., this can
+// easily result in excessive dirty page purging.  Therefore, apply loose
+// constraints on unused dirty page accumulation under normal operation, but
+// momentarily toggle the threshold when a thread idles so that the accumulated
+// dirty pages aren't excessive compared to the likely memory usage needs of the
+// remaining active threads.
+#define LG_DIRTY_MULT_REQUEST_ACTIVE -1
+#define LG_DIRTY_MULT_REQUEST_IDLE 3
+
+#ifdef USE_JEMALLOC
+static void numa_purge_arena();
+
+static void set_lg_dirty_mult(unsigned arena, ssize_t lg_dirty_mult) {
+  size_t miblen = 3;
+  size_t mib[miblen];
+  if (mallctlnametomib("arena.0.lg_dirty_mult", mib, &miblen) == 0) {
+    mib[1] = arena;
+    int err = mallctlbymib(mib, miblen, nullptr, nullptr, &lg_dirty_mult,
+                           sizeof(lg_dirty_mult));
+    if (err != 0) {
+      Logger::Warning("mallctl arena.%u.lg_dirty_mult failed with error %d",
+                      arena, err);
+    }
+  }
+}
+#endif
+
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   if (mallctl) {
@@ -44,12 +78,9 @@ void flush_thread_caches() {
     if (UNLIKELY(err != 0)) {
       Logger::Warning("mallctl thread.tcache.flush failed with error %d", err);
     }
-
-    // hhvm uses only 1 jemalloc arena per numa node, instead of the
-    // jemalloc default of 4 per cpu, avoiding arena thrashing by pinning
-    // threads.  This means purging the arena assigned to the thread is
-    // unnecessary (and probably actively harmful).  Compare this code to
-    // folly::detail::MemoryIdler
+#ifdef HAVE_NUMA
+    numa_purge_arena();
+#endif
   }
 #endif
 #ifdef USE_TCMALLOC
@@ -213,6 +244,22 @@ static void initNuma() {
   numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
 }
 
+static void numa_purge_arena() {
+  // Only purge if the thread's assigned arena is one of those created for use
+  // by request threads.
+  if (!threads_bind_local) return;
+  unsigned arena;
+  size_t sz = sizeof(arena);
+  int DEBUG_ONLY err = mallctl("thread.arena", &arena, &sz, nullptr, 0);
+  assert(err == 0);
+  if (arena >= base_arena && arena < base_arena + numa_num_nodes) {
+    // Threads may race through the following calls, but the last call made by
+    // any idling thread will correctly restore lg_dirty_mult.
+    set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_IDLE);
+    set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
+  }
+}
+
 void enable_numa(bool local) {
   if (!numa_node_mask) return;
 
@@ -238,6 +285,8 @@ void enable_numa(bool local) {
         return;
       }
       arenas++;
+      // Tune dirty page purging for new arena.
+      set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
     }
   }
 
@@ -301,7 +350,7 @@ void set_numa_binding(int node) {
   }
 
   char buf[32];
-  sprintf(buf, "hhvm.node.%d", node);
+  snprintf(buf, sizeof(buf), "hhvm.node.%d", node);
   prctl(PR_SET_NAME, buf);
 }
 
@@ -327,6 +376,7 @@ void numa_bind_to(void* start, size_t size, int node) {
 
 #else
 static void initNuma() {}
+static void numa_purge_arena() {}
 #endif
 
 struct JEMallocInitializer {
@@ -485,6 +535,10 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+#define STRINGIFY_HELPER(x) #x
+#define STRINGIFY(x) STRINGIFY_HELPER(x)
+
 extern "C" {
-  const char* malloc_conf = "narenas:1,lg_tcache_max:16";
+  const char* malloc_conf = "narenas:1,lg_tcache_max:16,"
+    "lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT);
 }

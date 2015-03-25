@@ -21,11 +21,12 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/pass-tracer.h"
 #include <unordered_map>
 
 namespace HPHP { namespace jit {
 
-TRACE_SET_MOD(gvn);
+TRACE_SET_MOD(hhir_gvn);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -298,8 +299,8 @@ bool visitDefLabel(
 
     assert(vnTable[dst].value);
     if (canForwardDst && vnTable[dst].value != forwardedDst) {
-      TRACE(2, "gvn: forwarded through DefLabel: %p (old) -> %p (new)\n",
-        dst, forwardedDst);
+      FTRACE(1, "forwarded through DefLabel: {} (old) -> {} (new)\n",
+        *dst, *forwardedDst);
       updates[dst] = ValueNumberMetadata { dst, forwardedDst };
       changed = true;
     }
@@ -340,9 +341,12 @@ bool visitInstruction(
   assert(vnTable[dst].value);
   if (temp != vnTable[dst].value) {
     updates[dst] = ValueNumberMetadata { dst, temp };
-    TRACE(2, "\ngvn: instruction %s\n", inst->toString().c_str());
-    TRACE(2, "gvn: updated value number for dst to dst of %s\n",
-      temp->inst()->toString().c_str());
+    FTRACE(1,
+      "instruction {}\n"
+      "updated value number for dst to dst of {}\n",
+      *inst,
+      *temp->inst()
+    );
     return true;
   }
   return false;
@@ -424,9 +428,13 @@ void tryReplaceInstruction(
     if (valueNumber == s) continue;
     if (!valueNumber) continue;
     if (!canReplaceWith(idoms, s, valueNumber)) continue;
-    TRACE(2, "\ngvn: instruction %s\n", inst->toString().c_str());
-    TRACE(2, "gvn: replacing src %d with dst of %s\n",
-      i, valueNumber->inst()->toString().c_str());
+    FTRACE(1,
+      "instruction {}\n"
+      "replacing src {} with dst of {}\n",
+      *inst,
+      i,
+      *valueNumber->inst()
+    );
     inst->setSrc(i, valueNumber);
     if (valueNumber->inst()->producesReference(0)) {
       auto prevInst = valueNumber->inst();
@@ -455,6 +463,8 @@ void replaceRedundantComputations(
 /////////////////////////////////////////////////////////////////////////
 
 void gvn(IRUnit& unit) {
+  PassTracer tracer{&unit, Trace::hhir_gvn, "gvn"};
+
   auto const rpoBlocks = rpoSortCfg(unit);
   auto const idoms = findDominators(
     unit,
@@ -470,4 +480,4 @@ void gvn(IRUnit& unit) {
   replaceRedundantComputations(unit, idoms, rpoBlocks, vnTable);
 }
 
-} } // namespace HPHP::jit
+}}

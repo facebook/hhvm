@@ -100,7 +100,6 @@ namespace Trace {
       TM(fixup)         \
       TM(fr)            \
       TM(gc)            \
-      TM(gvn)           \
       TM(heap)          \
       TM(hhas)          \
       TM(hhbbc)         \
@@ -118,6 +117,7 @@ namespace Trace {
       TM(hhir_alias)    \
       TM(hhir_load)     \
       TM(hhir_refineTmps) \
+      TM(hhir_gvn)      \
       TM(llvm)          \
       TM(llvm_count)    \
       TM(hhir_refcount) \

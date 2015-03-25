@@ -138,10 +138,18 @@ private:
   std::string m_dsoName;
 };
 
+struct ExtensionBuildInfo {
+  uint64_t dso_version;
+  uint64_t branch_id;
+};
+
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \
 extern "C" Extension *getModule() { \
   return &s_##name##_extension; \
+} \
+extern "C" ExtensionBuildInfo* getModuleBuildInfo() { \
+  return NULL; \
 }
 #else
 #define HHVM_GET_MODULE(name)

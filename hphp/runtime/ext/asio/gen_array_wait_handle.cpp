@@ -141,7 +141,8 @@ void c_GenArrayWaitHandle::initialize(const Object& exception, const Array& deps
   m_deps = deps;
   m_iterPos = iter_pos;
 
-  blockOn(child);
+  child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::GenArrayWaitHandle);
   incRefCount();
 }
 
@@ -170,7 +171,8 @@ void c_GenArrayWaitHandle::onUnblocked() {
         m_iterPos = arrIter.currentPos();
         child_wh->enterContext(getContextIdx());
         detectCycle(child_wh);
-        blockOn(child_wh);
+        child_wh->getParentChain()
+          .addParent(m_blockable, AsioBlockable::Kind::GenArrayWaitHandle);
         return;
       } catch (const Object& cycle_exception) {
         putException(m_exception, cycle_exception.get());

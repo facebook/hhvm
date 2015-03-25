@@ -110,9 +110,8 @@ void c_ConditionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   setState(STATE_BLOCKED);
   m_child = child;
   m_child->incRefCount();
-
-  auto& parentChain = child->getParentChain();
-  parentChain.addParent(m_blockable, AsioBlockable::Kind::ConditionWaitHandle);
+  m_child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::ConditionWaitHandle);
   incRefCount();
 
   auto const session = AsioSession::Get();
@@ -152,27 +151,6 @@ void c_ConditionWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
 
   m_child->enterContext(ctx_idx);
   setContextIdx(ctx_idx);
-}
-
-void c_ConditionWaitHandle::exitContextBlocked(context_idx_t ctx_idx) {
-  if (isFinished()) {
-    return;
-  }
-
-  assert(getState() == STATE_BLOCKED);
-  assert(AsioSession::Get()->getContext(ctx_idx));
-
-  // Not in a context being exited.
-  assert(getContextIdx() <= ctx_idx);
-  if (getContextIdx() != ctx_idx) {
-    return;
-  }
-
-  // Move us to the parent context.
-  setContextIdx(getContextIdx() - 1);
-
-  // Recursively move all wait handles blocked by us.
-  getParentChain().exitContext(ctx_idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

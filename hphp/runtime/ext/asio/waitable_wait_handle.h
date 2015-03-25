@@ -53,6 +53,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   }
 
   context_idx_t getContextIdx() { return m_context_idx; }
+  void setContextIdx(context_idx_t ctx_idx) { m_context_idx = ctx_idx; }
   AsioContext* getContext() {
     assert(isInContext());
     return AsioSession::Get()->getContext(getContextIdx());
@@ -65,8 +66,6 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   String getName();
 
  protected:
-  void setContextIdx(context_idx_t ctx_idx) { m_context_idx = ctx_idx; }
-
   bool isInContext() { return getContextIdx(); }
 
   c_WaitableWaitHandle* getChild();

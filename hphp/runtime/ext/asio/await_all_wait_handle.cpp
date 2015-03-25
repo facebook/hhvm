@@ -321,7 +321,8 @@ void c_AwaitAllWaitHandle::blockOnCurrent() {
     }
   }
 
-  blockOn(child);
+  child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::AwaitAllWaitHandle);
 }
 
 void c_AwaitAllWaitHandle::markAsFailed(const Object& exception) {

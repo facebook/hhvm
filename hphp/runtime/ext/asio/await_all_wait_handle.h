@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ namespace HPHP {
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-struct c_AwaitAllWaitHandle final : c_BlockableWaitHandle {
+struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   DECLARE_CLASS_NO_SWEEP(AwaitAllWaitHandle)
 
   explicit c_AwaitAllWaitHandle(Class* cls = c_AwaitAllWaitHandle::classof())
@@ -40,7 +40,7 @@ struct c_AwaitAllWaitHandle final : c_BlockableWaitHandle {
 
   explicit c_AwaitAllWaitHandle(unsigned cap,
                                 Class* cls = c_AwaitAllWaitHandle::classof())
-    : c_BlockableWaitHandle(cls, HeaderKind::AwaitAllWH)
+    : c_WaitableWaitHandle(cls, HeaderKind::AwaitAllWH)
     , m_cap(cap)
     , m_cur(cap - 1)
   {}
@@ -52,6 +52,10 @@ struct c_AwaitAllWaitHandle final : c_BlockableWaitHandle {
   static Object ti_fromvector(const Variant& dependencies);
 
  public:
+  static constexpr ptrdiff_t blockableOff() {
+    return offsetof(c_AwaitAllWaitHandle, m_blockable);
+  }
+
   String getName();
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
@@ -75,7 +79,10 @@ struct c_AwaitAllWaitHandle final : c_BlockableWaitHandle {
  private:
   uint32_t const m_cap; // how many children we have room for.
   int32_t m_cur; // index of last child
+  AsioBlockable m_blockable;
   c_WaitableWaitHandle* m_children[0]; // allocated off the end
+
+  static const int8_t STATE_BLOCKED = 2;
 };
 
 inline c_AwaitAllWaitHandle* c_WaitHandle::asAwaitAll() {

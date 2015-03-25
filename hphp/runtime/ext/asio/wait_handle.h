@@ -33,19 +33,20 @@ namespace HPHP {
  * WaitHandle                      - abstract wait handle
  *  StaticWaitHandle               - statically finished wait handle
  *  WaitableWaitHandle             - wait handle that can be waited for
- *   BlockableWaitHandle           - wait handle that can be blocked by other WH
- *    ResumableWaitHandle          - wait handle that can resume PHP execution
- *     AsyncFunctionWaitHandle     - async function-based async execution
- *     AsyncGeneratorWaitHandle    - async generator-based async execution
- *    AwaitAllWaitHandle           - wait handle representing a collection of
+ *   ResumableWaitHandle           - wait handle that can resume PHP execution
+ *    AsyncFunctionWaitHandle      - async function-based async execution
+ *    AsyncGeneratorWaitHandle     - async generator-based async execution
+ *   AwaitAllWaitHandle            - wait handle representing a collection of
  *                                     WHs, does not propagate results
- *    GenArrayWaitHandle           - wait handle representing an array of WHs
- *    GenMapWaitHandle             - wait handle representing an Map of WHs
- *    GenVectorWaitHandle          - wait handle representing an Vector of WHs
  *   ConditionWaitHandle           - wait handle implementing condition variable
  *   RescheduleWaitHandle          - wait handle that reschedules execution
  *   SleepWaitHandle               - wait handle that finishes after a timeout
  *   ExternalThreadEventWaitHandle - thread-powered asynchronous execution
+ *
+ *   // DEPRECATED
+ *   GenArrayWaitHandle            - wait handle representing an array of WHs
+ *   GenMapWaitHandle              - wait handle representing an Map of WHs
+ *   GenVectorWaitHandle           - wait handle representing an Vector of WHs
  *
  * A wait handle can be either synchronously joined (waited for the operation
  * to finish) or passed in various contexts as a dependency and waited for
@@ -173,9 +174,6 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
       AsioBlockableChain m_parentChain;
 
       union {
-        // BlockableWaitHandle: STATE_BLOCKED
-        AsioBlockable m_blockable;
-
         // ExternalThreadEventWaitHandle: STATE_WAITING
         // SleepWaitHandle: STATE_WAITING
         uint32_t m_ctxVecIndex;

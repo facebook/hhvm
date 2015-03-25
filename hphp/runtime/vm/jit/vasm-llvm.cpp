@@ -1872,12 +1872,14 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     defineValue(dests[0], callInst);
     break;
   case DestType::TV: {
-    assert(dests.size() == 2);
     static_assert(offsetof(TypedValue, m_data) == 0, "");
     static_assert(offsetof(TypedValue, m_type) == 8, "");
+    assert(dests.size() <= 2 && dests.size() >= 1);
     defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
-    auto type = m_irb.CreateExtractValue(callInst, 1);
-    defineValue(dests[1], zext(type, 64)); // m_type
+    if (dests.size() == 2) {
+      auto type = m_irb.CreateExtractValue(callInst, 1);
+      defineValue(dests[1], zext(type, 64)); // m_type
+    }
     break;
   }
   case DestType::SIMD: {

@@ -973,8 +973,16 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
       // the lower bits, so shift the type result register.
       static_assert(offsetof(TypedValue, m_data) == 0, "");
       static_assert(offsetof(TypedValue, m_type) == 8, "");
-      assert(dests.size() == 2);
-      v << copy2{reg::rax, reg::rdx, dests[0], dests[1]};
+      if (dests.size() == 2) {
+        v << copy2{reg::rax, reg::rdx, dests[0], dests[1]};
+      } else {
+        // We have cases where we statically know the type but need the value
+        // from native call. Even if the type does not really need a register
+        // (e.g., InitNull), a Vreg is still allocated in assignRegs(), so the
+        // following assertion holds.
+        assert(dests.size() == 1);
+        v << copy{reg::rax, dests[0]};
+      }
       break;
     }
     case DestType::SIMD: {

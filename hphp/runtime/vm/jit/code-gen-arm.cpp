@@ -1094,11 +1094,13 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     // this should use some kind of cmov
     assert(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
-    condZero(v, dst, dstType, [&](Vout& v) {
-      return v.cns(KindOfNull);
-    }, [&](Vout& v) {
-      return v.cns(returnType.toDataType());
-    });
+    if (dstType.isValid()) {
+      condZero(v, dst, dstType, [&](Vout& v) {
+          return v.cns(KindOfNull);
+        }, [&](Vout& v) {
+          return v.cns(returnType.toDataType());
+        });
+    }
     return;
   }
 
@@ -1108,12 +1110,14 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     assert(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
     auto tmp_dst_type = v.makeReg();
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
-    v << loadzbl{mis[returnOffset + TVOFF(m_type)], tmp_dst_type};
-    condZero(v, tmp_dst_type, dstType, [&](Vout& v) {
-      return v.cns(KindOfNull);
-    }, [&](Vout& v) {
-      return tmp_dst_type;
-    });
+    if (dstType.isValid()) {
+      v << loadzbl{mis[returnOffset + TVOFF(m_type)], tmp_dst_type};
+      condZero(v, tmp_dst_type, dstType, [&](Vout& v) {
+          return v.cns(KindOfNull);
+        }, [&](Vout& v) {
+          return tmp_dst_type;
+        });
+    }
     return;
   }
 

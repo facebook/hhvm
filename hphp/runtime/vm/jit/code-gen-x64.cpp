@@ -666,8 +666,12 @@ CallDest CodeGenerator::callDestTV(const IRInstruction* inst) const {
     assert(loc.numAllocated() == 1);
     return { DestType::SIMD, loc.reg(0) };
   }
-  assert(loc.numAllocated() == 2);
-  return { DestType::TV, loc.reg(0), loc.reg(1) };
+  if (loc.numAllocated() == 2) {
+    return { DestType::TV, loc.reg(0), loc.reg(1) };
+  }
+  assert(loc.numAllocated() == 1);
+  // Sometimes we statically know the type and only need the value.
+  return { DestType::TV, loc.reg(0), InvalidReg };
 }
 
 CallDest CodeGenerator::callDestDbl(const IRInstruction* inst) const {
@@ -3181,9 +3185,11 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     auto rtype = v.cns(returnType.toDataType());
     auto nulltype = v.cns(KindOfNull);
     v << load{rdsReg[returnOffset], dstReg};
-    auto const sf = v.makeReg();
-    v << testq{dstReg, dstReg, sf};
-    v << cmovq{CC_Z, sf, rtype, nulltype, dstType};
+    if (dstType.isValid()) {
+      auto const sf = v.makeReg();
+      v << testq{dstReg, dstReg, sf};
+      v << cmovq{CC_Z, sf, rtype, nulltype, dstType};
+    }
     return;
   }
   if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
@@ -3194,9 +3200,11 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     emitLoadTVType(v, rdsReg[returnOffset + TVOFF(m_type)], tmp_type);
     v << load{rdsReg[returnOffset + TVOFF(m_data)], dstReg};
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
-    auto const sf = v.makeReg();
-    v << testb{tmp_type, tmp_type, sf};
-    v << cmovq{CC_Z, sf, tmp_type, nulltype, dstType};
+    if (dstType.isValid()) {
+      auto const sf = v.makeReg();
+      v << testb{tmp_type, tmp_type, sf};
+      v << cmovq{CC_Z, sf, tmp_type, nulltype, dstType};
+    }
     return;
   }
   not_reached();
@@ -3380,6 +3388,7 @@ void CodeGenerator::emitStoreTypedValue(Vptr dst, SSATmp* src, Vloc loc) {
   if (src->type().needsValueReg()) {
     v << store{srcReg0, refTVData(dst)};
   }
+  assert(srcReg1.isValid());            // a precondition for this call
   emitStoreTVType(v, srcReg1, refTVType(dst));
 }
 
@@ -3433,7 +3442,9 @@ void CodeGenerator::emitLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref) {
     return;
   }
   auto const typeDstReg = dstLoc.reg(1);
-  emitLoadTVType(v, refTVType(ref), typeDstReg);
+  if (typeDstReg.isValid()) {
+    emitLoadTVType(v, refTVType(ref), typeDstReg);
+  }
   v << load{refTVData(ref), valueDstReg};
 }
 

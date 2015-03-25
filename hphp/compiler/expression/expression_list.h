@@ -92,7 +92,7 @@ private:
 
   ExpressionPtrVec m_exps;
   bool m_arrayElements;
-  int m_collectionType;
+  Collection::Type m_collectionType;
   bool m_argUnpack;
   ListKind m_kind;
 };

@@ -549,6 +549,7 @@ TranslateResult irGenRegion(HTS& hts,
     TransID profTransId = getTransId(blockId);
     hts.profTransID = profTransId;
     hts.inlineLevel = block->inlineLevel();
+    irgen::prepareForNextHHBC(hts, nullptr, sk, false);
 
     // Prepare to start translating this region block.  This loads the
     // FrameState for the IR block corresponding to the start of this

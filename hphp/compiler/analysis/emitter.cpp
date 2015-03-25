@@ -124,8 +124,6 @@ namespace HPHP {
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(emitter)
-
 using uchar = unsigned char;
 
 namespace StackSym {
@@ -223,12 +221,10 @@ class FuncFinisher {
 
  public:
   FuncFinisher(EmitterVisitor* ev, Emitter& e, FuncEmitter* fe)
-    : m_ev(ev), m_e(e), m_fe(fe) {
-      TRACE(2, "FuncFinisher constructed: %s\n", m_fe->name->data());
-    }
+    : m_ev(ev), m_e(e), m_fe(fe)
+  {}
 
   ~FuncFinisher() {
-    TRACE(2, "Finishing func: %s\n", m_fe->name->data());
     m_ev->finishFunc(m_e, m_fe);
   }
 };

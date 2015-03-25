@@ -1719,8 +1719,9 @@ void may_decref(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   }
 }
 
-// Returns true if we actually reduced the lower_bound (i.e. it wasn't
-// previously zero).
+// Returns true if we actually removed the support (i.e. we accounted for it by
+// reducing a lower bound, or the location wasn't actually supporting anything
+// right now).
 template<class NAdder>
 bool reduce_support_bit(Env& env,
                         RCState& state,
@@ -1759,7 +1760,8 @@ bool reduce_support_bit(Env& env,
   return true;
 }
 
-// Returns true if a lower bound reduction succeeded on every support bit.
+// Returns true if reduce_support_bit succeeded on every support bit in the
+// set.
 template<class NAdder>
 bool reduce_support_bits(Env& env,
                          RCState& state,
@@ -1773,9 +1775,9 @@ bool reduce_support_bits(Env& env,
   return ret;
 }
 
-// Returns true if we completely accounted for removing the support by reducing
-// non-zero lower bounds.  If it returns false, the support bits may still be
-// marked on some must-alias-sets.  (See pure_load.)
+// Returns true if we completely accounted for removing the support.  If it
+// returns false, the support bits may still be marked on some must-alias-sets.
+// (See pure_load.)
 template<class NAdder>
 bool reduce_support(Env& env,
                     RCState& state,
